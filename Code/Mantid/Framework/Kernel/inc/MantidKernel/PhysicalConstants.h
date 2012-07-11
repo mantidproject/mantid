@@ -78,7 +78,7 @@ namespace PhysicalConstants
   /** Boltzmann Constant in meV/K
    * Taken from <http://physics.nist.gov/cuu/Constants> on 10/07/2012
    */
-  static const double BoltzmannConstant = 8.6173324e-05;
+  static const double BoltzmannConstant = 8.6173324e-02;
 
 } // namespace PhysicalConstants
 } // namespace Mantid
