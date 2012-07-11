@@ -149,6 +149,7 @@ set ( SRC_FILES
 	src/Rebin2D.cpp
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
+	src/RecordPythonScript.cpp
 	src/Regroup.cpp
 	src/RemoveBins.cpp
 	src/RemoveLowResTOF.cpp
@@ -344,6 +345,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Rebin2D.h
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
+	inc/MantidAlgorithms/RecordPythonScript.h
 	inc/MantidAlgorithms/Regroup.h
 	inc/MantidAlgorithms/RemoveBins.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h

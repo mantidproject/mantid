@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include <boost/shared_ptr.hpp>
 #include <Poco/ActiveMethod.h>
@@ -52,6 +53,7 @@ public:
     /// Default constructor. Notification hanlders are not connected to any algorithm
     AlgorithmObserver()
         :m_progressObserver(*this,&AlgorithmObserver::_progressHandle),
+        m_startingObserver(*this,&AlgorithmObserver::_startingHandle),
         m_startObserver(*this,&AlgorithmObserver::_startHandle),
         m_finishObserver(*this,&AlgorithmObserver::_finishHandle),
         m_errorObserver(*this,&AlgorithmObserver::_errorHandle)
@@ -62,6 +64,7 @@ public:
       */
     AlgorithmObserver(IAlgorithm_const_sptr alg)
         :m_progressObserver(*this,&AlgorithmObserver::_progressHandle),
+        m_startingObserver(*this,&AlgorithmObserver::_startingHandle),
         m_startObserver(*this,&AlgorithmObserver::_startHandle),
         m_finishObserver(*this,&AlgorithmObserver::_finishHandle),
         m_errorObserver(*this,&AlgorithmObserver::_errorHandle)
@@ -89,6 +92,14 @@ public:
     void observeProgress(IAlgorithm_const_sptr alg)
     {
         alg->addObserver(m_progressObserver);
+    }
+
+    /**   Connect to AlgorithmManager and observe its starting notifications
+          @param alg :: Algorithm to be observed
+    */
+    void observeStarting()
+    {
+        AlgorithmManager::Instance().notificationCenter.addObserver(m_startingObserver);
     }
 
     /**   Connect to algorithm alg and observe its start notification
@@ -144,6 +155,14 @@ public:
       (void)msg;
     }
 
+    /** Handler of the start notifications. Must be overriden in inherited classes.
+        The default handler is provided (doing nothing).
+        @param alg :: Shared Pointer to the algorithm sending the notification. 
+    */
+    virtual void startingHandle(IAlgorithm_sptr alg)
+    {
+      (void)alg;
+    }
     /** Handler of the start notifications. Must be overriden in inherited classes.
         The default handler is provided (doing nothing).
         @param alg :: Pointer to the algorithm sending the notification. Note that this can
@@ -221,6 +240,16 @@ private:
     }
     /// Poco::NObserver for Algorithm::ErrorNotification.
     Poco::NObserver<AlgorithmObserver, Algorithm::ErrorNotification> m_errorObserver;
+
+    /** Poco notification handler for API::AlgorithmStartingNotification.
+        @param pNf :: An pointer to the notification.
+    */
+    void _startingHandle(const Poco::AutoPtr<Mantid::API::AlgorithmStartingNotification>& pNf)
+    {
+      this->startingHandle(pNf->getAlgorithm());
+    }
+    /// Poco::NObserver for API::AlgorithmStartingNotification
+    Poco::NObserver<AlgorithmObserver, Mantid::API::AlgorithmStartingNotification> m_startingObserver;
 
 };
 

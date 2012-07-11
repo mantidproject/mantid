@@ -1,15 +1,16 @@
-#ifndef MANTID_ALGORITHMS_GENERATEPYTHONSCRIPT_H_
-#define MANTID_ALGORITHMS_GENERATEPYTHONSCRIPT_H_
+#ifndef MANTID_ALGORITHMS_RECORDPYTHONSCRIPT_H_
+#define MANTID_ALGORITHMS_RECORDPYTHONSCRIPT_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/GeneratePythonScript.h"
+#include "MantidAPI/AlgorithmObserver.h"
 
 namespace Mantid
 {
 namespace Algorithms
 {
 
-/** GeneratePythonScript : TODO: DESCRIPTION
+/** RecordPythonScript : TODO: DESCRIPTION
 
   An Algorithm to generate a Python script file to reproduce the history of a workspace.
 
@@ -18,9 +19,6 @@ namespace Algorithms
   <li>Filename - the name of the file to write to. </li>
   <li>InputWorkspace - the workspace name who's history is to be saved.</li>
   </ul>
-
-  @author Peter G Parker, ISIS, RAL
-  @date 2011-09-13
 
   Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -42,36 +40,36 @@ namespace Algorithms
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport GeneratePythonScript : public API::Algorithm
+class DLLExport RecordPythonScript : public Algorithms::GeneratePythonScript, public API::AlgorithmObserver
 {
 public:
-  GeneratePythonScript() : Mantid::API::Algorithm() {}
-  virtual ~GeneratePythonScript() {}
+  RecordPythonScript();
+  virtual ~RecordPythonScript() {}
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "GeneratePythonScript";};
+  virtual const std::string name() const { return "RecordPythonScript";};
   /// Algorithm's version for identification
   virtual int version() const { return 1;};
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Utility;PythonAlgorithms";}
 
-protected:
+private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   /// Initialise the properties
   void init();
   /// Run the algorithm
   void exec();
-  /// Generate the line of script corresponding to the given AlgorithmHistory
-  std::string genAlgString(const API::AlgorithmHistory&);
-  /// Generate the parameter string (of format "[name]='[value]'") for the given PropertyHistory.
-  std::string genParamString(const Kernel::PropertyHistory&, const API::IAlgorithm_sptr, const std::string algHistName);
-  // "Sanitize" property name.
-  std::string sanitizePropertyName(const std::string&);
+  /** Handler of the start notifications. Must be overriden in inherited classes.
+  @param alg :: Shared Pointer to the algorithm sending the notification. 
+  */
+  void startingHandle(API::IAlgorithm_sptr alg);
+  /// buffer for the script
+  std::string m_generatedScript;
 };
 
 
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_GENERATEPYTHONSCRIPT_H_ */
+#endif /* MANTID_ALGORITHMS_RECORDPYTHONSCRIPT_H_ */
