@@ -7,11 +7,18 @@ parameters and generating calls to other workflow or standard algorithms.
 *WIKI*/
 
 #include "MantidWorkflowAlgorithms/DgsReduction.h"
+#include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
+
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/RebinParamsValidator.h"
+#include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 using namespace Mantid::Kernel;
@@ -25,8 +32,6 @@ namespace WorkflowAlgorithms
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(DgsReduction)
   
-
-
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
@@ -65,9 +70,11 @@ namespace WorkflowAlgorithms
    */
   void DgsReduction::init()
   {
-    //declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
-    //declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
-    declareProperty("SampleData", "", "Run numbers, files or workspaces of the data sets to be reduced");
+    declareProperty(new FileProperty("SampleData", "", FileProperty::OptionalLoad, "_event.nxs"),
+        "File containing the data to reduce");
+    declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
+        "Workspace to be reduced");
+    //declareProperty("SampleData", "", "Run numbers, files or workspaces of the data sets to be reduced");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
     declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
@@ -240,15 +247,73 @@ namespace WorkflowAlgorithms
         new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
   }
 
+  /**
+   * Create a workspace by either loading a file or using an existing
+   * workspace.
+   */
+  Workspace_sptr DgsReduction::loadInputData()
+  {
+    const std::string facility = ConfigService::Instance().getFacility().name();
+    if ("SNS" == facility)
+      {
+        setLoadAlg("LoadEventNexus");
+      }
+    else
+      {
+        setLoadAlg("LoadRaw");
+      }
+    Workspace_sptr inputWS;
+
+    std::string inputData = getPropertyValue("Filename");
+    const std::string inputWSName = getPropertyValue("InputWorkspace");
+    if (!inputWSName.empty() && !inputData.empty())
+      {
+        throw std::runtime_error("DgsReduction: Either the Filename property or InputWorkspace property must be provided, NOT BOTH");
+      }
+    else if (!inputWSName.empty())
+      {
+        inputWS = load(inputWSName);
+      }
+    else if (!inputData.empty())
+      {
+        inputWS = load(inputData);
+      }
+    else
+      {
+        throw std::runtime_error("DgsReduction: Either the Filename property or InputWorkspace property must be provided");
+      }
+
+    return inputWS;
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
   void DgsReduction::exec()
   {
-    // TODO Auto-generated execute stub
+    /*
+    // Reduction property manager
+    const std::string reductionManagerName = getProperty("ReductionProperties");
+    if (!reductionManagerName.empty())
+    {
+      g_log.error() << "ERROR: Reduction Property Manager name is empty" << std::endl;
+      return;
+    }
+    boost::shared_ptr<PropertyManager> reductionManager = boost::make_shared<PropertyManager>();
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
+    */
+
+    Workspace_sptr inputWS = this->loadInputData();
+
+    // Setup for the convert to energy transfer workflow algorithm
+    const double initial_energy = getProperty("IncidentEnergy");
+    const bool fixed_ei = getProperty("FixedIncidentEnergy");
+
+    IAlgorithm_sptr et_conv = createSubAlgorithm("DgsConvertToEnergyTransfer");
+    et_conv->setProperty("InputWorkspace", inputWS);
+    et_conv->setProperty("IncidentEnergy", initial_energy);
+    et_conv->setProperty("FixedIncidentEnergy", fixed_ei);
   }
-
-
 
 } // namespace Mantid
 } // namespace WorkflowAlgorithms
