@@ -11,6 +11,7 @@
 #include "MantidMDEvents/ConvertToReflectometryQ.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 
 using namespace Mantid;
@@ -141,6 +142,63 @@ public:
      auto ws = boost::shared_dynamic_cast<Mantid::API::IMDEventWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
      TS_ASSERT(ws != NULL);
      //Other tests required here!
+  }
+};
+
+/* Peformance testing */
+class ConvertToReflectometryQTestPerformance : public CxxTest::TestSuite
+{
+private:
+
+  WorkspaceGroup_sptr ws;
+
+public:
+
+  void setUp()
+  {
+    // Load some data
+    IAlgorithm* loadalg = FrameworkManager::Instance().createAlgorithm("Load");
+    loadalg->setRethrows(true);
+    loadalg->initialize();
+    loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
+    loadalg->setPropertyValue("OutputWorkspace", "testws");
+    loadalg->execute();
+    
+    // Convert units to wavelength
+    IAlgorithm* unitsalg = FrameworkManager::Instance().createAlgorithm("ConvertUnits");
+    unitsalg->initialize();
+    unitsalg->setPropertyValue("InputWorkspace", "testws");
+    unitsalg->setPropertyValue("OutputWorkspace", "testws");
+    unitsalg->setPropertyValue("Target", "Wavelength");
+    unitsalg->execute();
+
+    // Convert the specturm axis ot signed_theta
+    IAlgorithm* specaxisalg = FrameworkManager::Instance().createAlgorithm("ConvertSpectrumAxis");
+    specaxisalg->initialize();
+    specaxisalg->setPropertyValue("InputWorkspace", "testws");
+    specaxisalg->setPropertyValue("OutputWorkspace", "testws");
+    specaxisalg->setPropertyValue("Target", "signed_theta");
+    specaxisalg->execute();
+    
+    ws = API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("testws");
+
+  }
+
+  void testPerformance()
+  {
+    TS_ASSERT(true);
+    ConvertToReflectometryQ alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws->getItem(0));
+    alg.setProperty("OutputDimensions", "Q (lab frame)");
+    alg.setPropertyValue("OutputWorkspace", "OutputTransformedWorkspace");
+    alg.setProperty("OverrideIncidentTheta", true);
+    alg.setProperty("IncidentTheta", 0.5);
+    TS_ASSERT(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    IMDWorkspace_sptr out = API::AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("OutputTransformedWorkspace");
+    TS_ASSERT(out != NULL);
+    TS_ASSERT(out->getNumDims(), 2);
   }
 };
 
