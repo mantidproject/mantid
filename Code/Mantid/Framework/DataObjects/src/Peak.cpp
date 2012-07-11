@@ -23,7 +23,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
+    m_RunNumber(0),m_MonitorCount(0),orig_H(0),orig_K(0),orig_L(0)
   {
   }
 
@@ -41,7 +41,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
+    m_RunNumber(0),m_MonitorCount(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setQLabFrame(QLabFrame, detectorDistance);
@@ -65,7 +65,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
     m_InverseGoniometerMatrix(goniometer),
-    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
+    m_RunNumber(0),m_MonitorCount(0),orig_H(0),orig_K(0),orig_L(0)
   {
     if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     this->setInstrument(m_inst);
@@ -87,7 +87,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
+    m_RunNumber(0),m_MonitorCount(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setDetectorID(m_DetectorID);
@@ -109,7 +109,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
+    m_RunNumber(0),m_MonitorCount(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setDetectorID(m_DetectorID);
@@ -131,7 +131,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(goniometer),
     m_InverseGoniometerMatrix(goniometer),
-    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
+    m_RunNumber(0),m_MonitorCount(0),orig_H(0),orig_K(0),orig_L(0)
   {
     if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     this->setInstrument(m_inst);
@@ -151,7 +151,7 @@ namespace DataObjects
     m_Intensity(0), m_SigmaIntensity(0), m_BinCount(0),
     m_GoniometerMatrix(3,3,true),
     m_InverseGoniometerMatrix(3,3,true),
-    m_RunNumber(0),orig_H(0),orig_K(0),orig_L(0)
+    m_RunNumber(0),m_MonitorCount(0),orig_H(0),orig_K(0),orig_L(0)
   {
     this->setInstrument(m_inst);
     this->setWavelength(m_Wavelength);
@@ -182,6 +182,7 @@ namespace DataObjects
     m_GoniometerMatrix(peak.m_GoniometerMatrix),
     m_InverseGoniometerMatrix(peak.m_InverseGoniometerMatrix),
     m_RunNumber(peak.m_RunNumber),
+    m_MonitorCount(peak.m_MonitorCount),
     m_Row(peak.m_Row),
     m_Col(peak.m_Col),
     sourcePos(peak.sourcePos),
@@ -210,7 +211,8 @@ namespace DataObjects
   m_FinalEnergy(ipeak.getFinalEnergy()),
   m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
   m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
-  m_RunNumber(ipeak.getRunNumber())
+  m_RunNumber(ipeak.getRunNumber()),
+  m_MonitorCount(ipeak.getMonitorCount())
   {
     if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     setInstrument(ipeak.getInstrument());
@@ -548,6 +550,16 @@ namespace DataObjects
    * @param m_RunNumber :: the run number   */
   void Peak::setRunNumber(int m_RunNumber)
   {    this->m_RunNumber = m_RunNumber;  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Return the monitor count stored in this peak. */
+  double Peak::getMonitorCount() const
+  {    return m_MonitorCount;  }
+
+  /** Set the monitor count for this peak 
+   * @param m_MonitorCount :: the monitor count */
+  void Peak::setMonitorCount(double m_MonitorCount)
+  {    this->m_MonitorCount = m_MonitorCount;  }
 
   //----------------------------------------------------------------------------------------------
   /** Get the ID of the detector at the center of the peak  */

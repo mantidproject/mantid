@@ -33,6 +33,9 @@ namespace API
     virtual int getRunNumber() const = 0;
     virtual void setRunNumber(int m_RunNumber) = 0;
 
+    virtual double getMonitorCount() const = 0;
+    virtual void setMonitorCount(double m_MonitorCount) = 0;
+
     virtual double getH() const = 0;
     virtual double getK() const = 0;
     virtual double getL() const = 0;

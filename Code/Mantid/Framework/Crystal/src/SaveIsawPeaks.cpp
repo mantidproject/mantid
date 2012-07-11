@@ -256,7 +256,12 @@ namespace Crystal
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  chi << " ";
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  phi << " ";
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  omega << " ";
-          out  <<  std::setw( 7 ) <<  (int)( 1 ) <<  std::endl;
+
+          // Get the monitor count from the first peak (should all be the same for one run)
+          size_t first_peak_index = ids[0];
+          Peak & first_peak = peaks[ first_peak_index ];
+          double monct = first_peak.getMonitorCount();
+          out  <<  std::setw( 7 ) <<  (int)( monct ) <<  std::endl;
 
           out << header << std::endl;
 
