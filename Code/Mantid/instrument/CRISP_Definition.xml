@@ -3,7 +3,7 @@
      see http://www.mantidproject.org/IDF -->
 <instrument name="CRISP" valid-from   ="1900-01-31 23:59:59"
                          valid-to     ="2100-01-31 23:59:59"
-		         last-modified="2011-02-01 00:00:00">
+		         last-modified="2012-02-01 00:00:00">
 
   <defaults>
     <length unit="meter" />
@@ -87,18 +87,7 @@
   </type>  
   
   <component name="pointdetector" type="point-detector" idlist="point-detector">
-  
-    <location x="12.113" />
-    
-    <!-- Link to log file that stores the z position. This angle can be used to
-    calculate the z position since the distance along the x-axis between
-    the sample and this detector is known (12.113-10.25=1.863). Also theta in the logfile is
-    assumed to in degrees, hence the reason for the pi/180=0.0174533 transformation
-    to radians factor in the eq attribute. -->
-    <parameter name="z">
-      <logfile id="theta" eq="1.863*sin(value*0.0174533)" />
-    </parameter>
-    
+    <location x="12.113" />    
   </component>   
 
   <type name="point-detector" is="detector">
