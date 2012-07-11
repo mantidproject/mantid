@@ -46,6 +46,7 @@ namespace Mantid
 
     using API::MatrixWorkspace_sptr;
     using API::MatrixWorkspace_const_sptr;
+    using DataObjects::MaskWorkspace_sptr;
 
     //----------------------------------------------------------------------
     // Public methods
@@ -165,7 +166,7 @@ namespace Mantid
       g_log.information() << "Found " << numTubes << " tubes.\n";
       int numSpectraMasked(0), numTubesMasked(0);
       // Create a mask workspace for output
-      MatrixWorkspace_sptr outputWorkspace = this->generateEmptyMask(inputWorkspace);
+      MaskWorkspace_sptr outputWorkspace = this->generateEmptyMask(inputWorkspace);
 
       PARALLEL_FOR2(inputWorkspace, outputWorkspace)
       for(int i = 0; i < numTubes; ++i )

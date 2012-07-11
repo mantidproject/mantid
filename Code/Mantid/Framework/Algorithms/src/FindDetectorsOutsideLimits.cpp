@@ -123,7 +123,7 @@ namespace Mantid
         throw std::runtime_error("Error! Integration output is not a Workspace2D.");
 
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
-      MatrixWorkspace_sptr outputWS = this->generateEmptyMask(inputWS);
+      MaskWorkspace_sptr outputWS = this->generateEmptyMask(inputWS);
 
       const double deadValue(1.0); // delete the data
 
