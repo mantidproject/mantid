@@ -198,7 +198,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     IMDWorkspace_sptr out = API::AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("OutputTransformedWorkspace");
     TS_ASSERT(out != NULL);
-    TS_ASSERT(out->getNumDims(), 2);
+    TS_ASSERT_EQUALS(out->getNumDims(), 2);
   }
 };
 
