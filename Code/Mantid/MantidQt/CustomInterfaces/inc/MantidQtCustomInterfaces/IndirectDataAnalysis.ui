@@ -175,6 +175,9 @@
          </item>
          <item>
           <widget class="QCheckBox" name="msd_ckPlot" >
+           <property name="checked" >
+            <bool>true</bool>
+           </property>
            <property name="text" >
             <string>Plot Result</string>
            </property>

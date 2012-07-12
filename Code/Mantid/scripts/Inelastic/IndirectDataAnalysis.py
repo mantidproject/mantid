@@ -456,10 +456,8 @@ def msdfitPlotFits(lniWS, fitWS, n):
     mfit_plot = mp.plotSpectrum(lniWS,n,True)
     mp.mergePlots(mfit_plot,mp.plotSpectrum(fitWS+'_line',n,False))
 
-def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
+def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
     StartTime('msdFit')
-    Verbose = 'True'
-    Plot = 'True'
     workdir = config['defaultsave.directory']
     log_type = 'sample'
     runs = sorted(inputs)
