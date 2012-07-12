@@ -106,6 +106,8 @@ namespace WorkflowAlgorithms
     const std::string inWsName = inputWS->getName();
     std::string outWsName = inWsName + "_et";
 
+    bool preserveEvents = false;
+
     // Calculate the initial energy and time zero
     const std::string facility = ConfigService::Instance().getFacility().name();
     g_log.notice() << "Processing for " << facility << std::endl;
@@ -113,6 +115,8 @@ namespace WorkflowAlgorithms
     double initial_energy = 0.0;
     if ("SNS" == facility)
       {
+        // SNS wants to preserve events until the last
+        preserveEvents = true;
         const std::string instName = inputWS->getInstrument()->getName();
         double t0 = 0.0;
         if ("CNCS" == instName || "HYSPEC" == instName)
@@ -171,7 +175,7 @@ namespace WorkflowAlgorithms
         rebin->setProperty("InputWorkspace", outWsName);
         rebin->setProperty("OutputWorkspace", outWsName);
         rebin->setProperty("Params", et_binning);
-        rebin->setProperty("PreserveEvents", false);
+        rebin->setProperty("PreserveEvents", preserveEvents);
         rebin->execute();
       }
 
@@ -216,6 +220,18 @@ namespace WorkflowAlgorithms
     kikf->setProperty("OutputWorkspace", outWsName);
     kikf->setProperty("EMode", "Direct");
     kikf->execute();
+
+    // Rebin to ensure consistency
+    if (!et_binning.empty())
+      {
+        g_log.notice() << "Rebinning data" << std::endl;
+        IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+        rebin->setAlwaysStoreInADS(true);
+        rebin->setProperty("InputWorkspace", outWsName);
+        rebin->setProperty("OutputWorkspace", outWsName);
+        rebin->setProperty("Params", et_binning);
+        rebin->execute();
+      }
 
     MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     this->setProperty("OutputWorkspace", outputWS);
