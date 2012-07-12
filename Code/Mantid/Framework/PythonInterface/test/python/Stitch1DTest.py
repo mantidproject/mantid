@@ -135,11 +135,53 @@ class Stitch1DTest(unittest.TestCase):
         finally:
             mtd.remove(a)
             mtd.remove(b)
-            self.assertTrue(passed) 
+            self.assertTrue(passed)
             
+    def __do_test_permitted_dimensionalities(self, a, b):
+        passed = True
+        try:
+            run_algorithm("Stitch1D", Workspace1=a, Workspace2=b,OutputWorkspace='converted',StartOverlap=0,EndOverlap=0.3, child=True) 
+        except RuntimeError:
+            passed = False
+        finally:
+            self.assertTrue(passed)   
+            
+    def test_can_have_single_1d_input_workspaces(self):
+        # Create a one-d input workspace with 3 bins
+        alg_A = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3,4,5,6,7,8,9,10',ErrorInput='1,1,1,1,1,1,1,1,1,1',Dimensionality='1',Extents='-1,1',NumberOfBins='10',Names='A',Units='U1',OutputWorkspace='Stitch1D_test_workspace_A')
+        # Create a two-d input workspace with 3 * 1 bins.
+        alg_B = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3,4,5,6,7,8,9,10',ErrorInput='1,1,1,1,1,1,1,1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='10,1',Names='A,B',Units='U1,U2',OutputWorkspace='Stitch1D_test_workspace_B')
+        
+        a = alg_A.getPropertyValue("OutputWorkspace")
+        b = alg_B.getPropertyValue("OutputWorkspace")
+        
+        # Test with RHS as one dimensional and LHS as two dimensional
+        self.__do_test_permitted_dimensionalities(a, b)
+        
+        #Test with RHS as two dimensional and RHS as one dimensional
+        self.__do_test_permitted_dimensionalities(b, a)
+        
+        mtd.remove(a)
+        mtd.remove(b)
+        
+    def test_can_have_both_input_workspaces_as_1d(self):
+        # Create a one-d input workspace with 3 bins
+        alg_A = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3,4,5,6,7,8,9,10',ErrorInput='1,1,1,1,1,1,1,1,1,1',Dimensionality='1',Extents='-1,1',NumberOfBins='10',Names='A',Units='U1',OutputWorkspace='Stitch1D_test_workspace_A')
+        # Create a two-d input workspace with 3 * 1 bins.
+        alg_B = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3,4,5,6,7,8,9,10',ErrorInput='1,1,1,1,1,1,1,1,1,1',Dimensionality='1',Extents='-1,1',NumberOfBins='10',Names='A',Units='U1',OutputWorkspace='Stitch1D_test_workspace_B')
+        
+        a = alg_A.getPropertyValue("OutputWorkspace")
+        b = alg_B.getPropertyValue("OutputWorkspace")
+        
+        # Test with RHS and LHS as one dimensional
+        self.__do_test_permitted_dimensionalities(a, b)
+        
+        mtd.remove(a)
+        mtd.remove(b)
+        
     def __do_test_ws1_and_ws2_have_different_dimension_names_throws(self, ws1_dim_names, ws2_dim_names):
         # Create Workspace with dim names in ws1_dim_names
-        alg_A = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2',ErrorInput='1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='2,1',Names=ws1_dim_names,Units='U1,U2',OutputWorkspace='Stitch1D_test_workspace_C')
+        alg_A = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,1',ErrorInput='1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='2,1',Names=ws1_dim_names,Units='U1,U2',OutputWorkspace='Stitch1D_test_workspace_C')
         # Create Workspace with dim names in ws2_dim_names
         alg_B = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2',ErrorInput='1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='2,1',Names=ws2_dim_names,Units='U1,U2',OutputWorkspace='Stitch1D_test_workspace_D')
         
@@ -156,6 +198,7 @@ class Stitch1DTest(unittest.TestCase):
             mtd.remove(a)
             mtd.remove(b)
             self.assertTrue(passed) 
+
     
     def test_ws1_and_ws2_dim1_have_different_dimension_names_throws(self):
         self.__do_test_ws1_and_ws2_have_different_dimension_names_throws(['A1','B1'], ['A2', 'B1'])
@@ -220,10 +263,10 @@ class Stitch1DTest(unittest.TestCase):
         b_use_manual_scaling = alg.getProperty("UseManualScaleFactor").value
         self.assertEqual(False, b_use_manual_scaling)
         
-        scale_factor = float(alg.getPropertyValue("AppliedScaleFactor"))
+        scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
         
-        # 1 * ((2 + 3)/( 1 + 1)) = 2.5
-        self.assertEqual(2.5, scale_factor)
+         # 1 * (( 1 + 1) / (2 + 3)) = 0.4
+        self.assertEqual(0.4, scale_factor)
         
     def test_calculates_scaling_factor_correctly_inverted(self):
         # Signal = 1, 1, 1, but only the middle to the end of the range is marked as overlap, so only 1, 1 used.
@@ -231,20 +274,59 @@ class Stitch1DTest(unittest.TestCase):
         # Signal = 1, 2, 3, but only the middle to the end of the range is marked as overlap, so only 2, 3 used.
         alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput='1,2,3',ErrorInput='1,1,1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='rising_signal')
    
-        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,ScaleWorkspace1=False,rethrow=True) 
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,ScaleWorkspace2=False,rethrow=True) 
         self.assertTrue(alg.isExecuted())
-        scale_factor = float(alg.getPropertyValue("AppliedScaleFactor"))
+        scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
         
-        # 1 * (( 1 + 1) / (2 + 3)) = 0.4
-        self.assertEqual(0.4, scale_factor)
+        # 1 * ((2 + 3)/( 1 + 1)) = 2.5
+        self.assertEqual(2.5, scale_factor)
+       
         
+    def test_manual_scaling_factor(self):
+        alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput='1',ErrorInput='1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal')
+        alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput='1',ErrorInput='1',Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,1',Names='A,B',Units='U1,U2',OutputWorkspace='rising_signal')
         
-            
-    #def test_does_something(self):
-        # Algorithm isn't complete at this point, but we need to have one success case to verify that all the previous failure cases are genuine failures (i.e. there is a way to get the algorithm to run properly) 
-        #alg = run_algorithm("Stitch1D", Workspace1=self.__good_workspace_name, Workspace2=self.__good_workspace_name,OutputWorkspace='converted',StartOverlap=0,EndOverlap=0.5,rethrow=True) 
-        #self.assertTrue(alg.isExecuted())
-        #scale_factor = alg.getPropertyValue("AppliedScaleFactor")
+        expected_manual_scale_factor = 2.2
         
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal', Workspace2='rising_signal',OutputWorkspace='converted',StartOverlap=0.5,EndOverlap=1,ScaleWorkspace2=True,UseManualScaleFactor=True,ManualScaleFactor=expected_manual_scale_factor,rethrow=True) 
+        self.assertTrue(alg.isExecuted())
+        scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
+        
+        self.assertEqual(expected_manual_scale_factor, scale_factor)
+        
+    def test_overlap_in_center(self):
+        errors = range(0,10)
+        s1 = [0,0,0,3,3,3,3,3,3,3] # Signal values for ws1
+        s2 = [2,2,2,2,2,2,2,0,0,0] # Signal values for ws2
+        expected_output_signal =[3,3,3,3,3,3,3,3,3,3]
+        alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput=s1,ErrorInput=errors,Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins=[len(errors),1],Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal_a',rethrow=True)
+        alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput=s2,ErrorInput=errors,Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins=[len(errors),1],Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal_b',rethrow=True)
+        # Specify that overlap goes from start to half way along workspace
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal_a', Workspace2='flat_signal_b',OutputWorkspace='converted',StartOverlap=0.3,EndOverlap=0.7,rethrow=True)    
+        # Verify the calculated output values.
+        ws = mtd.retrieve(alg.getPropertyValue("OutputWorkspace"))
+        for i in range(0, len(s1)):
+            self.assertEqual(round(expected_output_signal[i], 5), round(ws.signalAt(i),5) )    
+
+    def test_flat_offsetting_schenario_with_manual_scaling(self):
+        errors = range(0,10)
+        s1 = [1,1,1,1,1,1,0,0,0,0]  # Signal values for ws1
+        s2 = [0,0,0,0,3,3,3,3,3,3] # Signal values for ws2
+        expected_output_signal =[1,1,1,1,2,2,6,6,6,6]
+        alg_a = run_algorithm("CreateMDHistoWorkspace",SignalInput=s1,ErrorInput=errors,Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins=[len(errors),1],Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal_a',rethrow=True)
+        alg_b = run_algorithm("CreateMDHistoWorkspace",SignalInput=s2,ErrorInput=errors,Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins=[len(errors),1],Names='A,B',Units='U1,U2',OutputWorkspace='flat_signal_b',rethrow=True)
+        # Supply a manual scale factor, this will mean that Workspace 1 is scaled by this amount.
+        manual_scale_factor = 2
+        # Specify that overlap goes from start to half way along workspace
+        alg = run_algorithm("Stitch1D", Workspace1='flat_signal_a', Workspace2='flat_signal_b',OutputWorkspace='converted',StartOverlap=0.4,EndOverlap=0.6,UseManualScaleFactor=True,ManualScaleFactor=manual_scale_factor,rethrow=True)    
+        # Verify the calculated output values.
+        ws = mtd.retrieve(alg.getPropertyValue("OutputWorkspace"))
+        for i in range(0, len(errors)):
+            self.assertEqual(round(expected_output_signal[i], 5), round(ws.signalAt(i), 5))
+        # Sanity check that the applied scale factor is also the same as the value instructed.
+        scale_factor = float(alg.getPropertyValue("OutScaleFactor"))
+        self.assertEqual(manual_scale_factor, scale_factor)
+        
+
 if __name__ == '__main__':
     unittest.main()

@@ -27,6 +27,18 @@ def CalcErange(inWS,ns,er,nbin):
 	array_len = 4096                           # length of array in Fortran
 	N,X,Y,E = GetXYE(inWS,ns,array_len)        # get data
 	nout,bnorm,Xdat=Er.erange(N,X,Y,E,er,nbin,rscl)    # calculate energy range
+	if nout[0] == 0:
+		error = 'Erange - calculated points is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if nout[1] == 0:
+		error = 'Erange - calculated Imin is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if nout[2] == 0:
+		error = 'Erange - calculated Imax is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	return nout,bnorm,Xdat,X,Y,E
 
 def GetXYE(inWS,n,array_len):
@@ -57,12 +69,20 @@ def ReadNormFile(o_res,nsam,Verbose):            # get norm & scale values
 	if o_res == 1:                     # use ResNorm file option=o_res
 		Xin = mtd['ResNorm_1'].readX(0)
 		nrm = len(Xin)						# no. points from length of x array
+		if nrm == 0:				
+			error = 'ResNorm file has no dtnorm points'			
+			logger.notice('ERROR *** ' + error)
+			sys.exit(error)
+		Xin = mtd['ResNorm_2'].readX(0)					# no. points from length of x array
+		if len(Xin) == 0:				
+			error = 'ResNorm file has no xscale points'			
+			logger.notice('ERROR *** ' + error)
+			sys.exit(error)
 		if nrm != nsam:				# check that no. groups are the same
 			error = 'ResNorm groups (' +str(nrm) + ') not = Sample (' +str(nsam) +')'			
-			exit(error)
+			logger.notice('ERROR *** ' + error)
+			sys.exit(error)
 		else:
-			if Verbose:
-				logger.notice('ResNorm is ')
 			dtn,xsc = GetResNorm(0)
 	if o_res == 0:                     # do not use ResNorm file option=o_res
 		dtn,xsc = GetResNorm(nsam)
@@ -81,9 +101,13 @@ def ReadWidthFile(op_w1,wfile,ngrp,Verbose):                       # reads width
 			asc.append(line)
 		handle.close()
 		lasc = len(asc)
+		if lasc == 0:
+			error = 'No groups in width file'	
+			logger.notice('ERROR *** ' + error)
+			sys.exit(error)
 		if lasc != ngrp:				# check that no. groups are the same
 			error = 'Width groups (' +str(lasc) + ') not = Sample (' +str(ngrp) +')'	
-			logger.notice(error)
+			logger.notice('ERROR *** ' + error)
 			sys.exit(error)
 	else:                                           # constant values
 		Wy = []
@@ -95,20 +119,59 @@ def ReadWidthFile(op_w1,wfile,ngrp,Verbose):                       # reads width
 	We=PadArray(We,51)
 	return Wy,We
 
+def CheckErange(erange,nbins):
+	if math.fabs(float(erange[0])) < 1e-5:
+		error = 'Erange - input emin ('+erange[0]+') is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if math.fabs(float(erange[1])) < 1e-5:
+		error = 'Erange - input emax ('+erange[1]+') is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if float(erange[1]) < float(erange[0]):
+		error = 'Erange - input emax ('+erange[1]+') < emin ('+erange[0]+')'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	nbin = nbins[0]
+	if nbin == '0':
+		error = 'Sample binning is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if len(nbins) == 2:
+		nrbin = nbins[1]
+		if nrbin == '0':
+			error = 'Resolution binning is Zero'			
+			logger.notice('ERROR *** ' + error)
+			sys.exit(error)
+	else:
+		nrbin = 1
+	return nbin,nrbin
+
 # QLines programs
 	
-def QLStart(program,sam,res,rtype,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save):
+def QLStart(program,inType,sam,rinType,res,rtype,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save):
 	if rtype == 'Res':
 		rext = 'res'
 	if rtype == 'Data':
 		rext = 'red'
 	workdir = config['defaultsave.directory']
 	sname = sam + '_red'
-	spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
-	LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+	if inType == 'File':
+		spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
+		LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+		Smessage = 'Sample from File : '+spath
+	else:
+		Smessage = 'Sample from Workspace : '+sname
 	rname = res + '_' + rext
-	rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
-	LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+	if rinType == 'File':
+		rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
+		LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+		Rmessage = 'Resolution from File : '+rpath
+	else:
+		Rmessage = 'Resolution from Workspace : '+rname
+	if Verbose:
+		logger.notice(Smessage)
+		logger.notice(Rmessage)
 	if fitOp[3] == 1:
 		path = os.path.join(workdir, rsname+'_ResNorm_Paras.nxs')	# path name for resnnrm nxs file
 		LoadNexusProcessed(Filename=path, OutputWorkspace='ResNorm')
@@ -118,15 +181,28 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save)
 	StartTime(program)
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
+	nbin,nrbin = CheckErange(erange,nbins)
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
 		logger.notice('Resolution is ' + resWS)
-	efix = getEfixed(samWS)
+	nsam = mtd[samWS].getNumberHistograms()                      # no. of hist/groups in sam
+	if nsam == 0:
+		error = 'No histograms in sample file'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	Xin = mtd[samWS].readX(0)
 	ntc = len(Xin)-1						# no. points from length of x array
-	nsam = mtd[samWS].getNumberHistograms()                      # no. of hist/groups in sam
-	nres = mtd[resWS].getNumberHistograms()       # no. of hist/groups in res
+	if ntc == 0:
+		error = 'No points in sample file'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	efix = getEfixed(samWS)
 	theta,Q = GetThetaQ(samWS)
+	nres = mtd[resWS].getNumberHistograms()       # no. of hist/groups in res
+	if nres == 0:
+		error = 'No histograms in resolution file'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	if program == 'QL':
 		if nres == 1:
 			prog = 'QLr'                        # res file
@@ -134,16 +210,19 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save)
 			prog = 'QLd'                        # data file
 			if nres != nsam:				# check that no. groups are the same
 				error = 'Resolution histograms (' +str(nres) + ') not = Sample (' +str(nsam) +')'			
-				exit(error)
+				logger.notice('ERROR *** ' + error)
+				sys.exit(error)
 	if program == 'QSe':
 		if nres == 1:
 			prog = 'QSe'                        # res file
 		else:
 			error = 'Stretched Exp ONLY works with RES file'			
-			exit(error)
+			logger.notice('ERROR *** ' + error)
+			sys.exit(error)
 	if Verbose:
 		logger.notice('Version is ' +prog)
 		logger.notice(' Number of spectra = '+str(nsam))
+		logger.notice(' Erange : '+erange[0]+' to '+erange[1])
 	Wy,We = ReadWidthFile(fitOp[2],wfile,nsam,Verbose)
 	dtn,xsc = ReadNormFile(fitOp[3],nsam,Verbose)
 	fname = samWS[:-4] + '_'+ prog
@@ -172,8 +251,6 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save)
 		prob0 = []
 		prob1 = []
 		prob2 = []
-	nbin = nbins[0]
-	nrbin = nbins[1]
 	xQ = np.array([Q[0]])
 	for m in range(1,nsam):
 		xQ = np.append(xQ,Q[m])
@@ -550,37 +627,85 @@ def QLPlotQSe(inputWS,Plot):
 
 # Quest programs
 
-def QuestStart(sam,res,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
+def CheckBetSig(nbs):
+	Nsig = int(nbs[1])
+	if Nsig == 0:
+		error = 'Number of sigma points is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if Nsig > 200:
+		error = 'Max number of sigma points is 200'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	Nbet = int(nbs[0])
+	if Nbet == 0:
+		error = 'Number of beta points is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if Nbet > 200:
+		error = 'Max number of beta points is 200'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	return Nbet,Nsig
+
+def QuestStart(inType,sam,rinType,res,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
 	StartTime('Quest')
 	workdir = config['defaultsave.directory']
 	sname = sam + '_red'
-	spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
-	LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+	if inType == 'File':
+		spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
+		LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+		Smessage = 'Sample from File : '+spath
+	else:
+		Smessage = 'Sample from Workspace : '+sname
 	nsam = mtd[sname].getNumberHistograms()                      # no. of hist/groups in sam
 	rname = res + '_res'
-	rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
-	LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+	if rinType == 'File':
+		rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
+		LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+		Rmessage = 'Resolution from File : '+rpath
+	else:
+		Rmessage = 'Resolution from Workspace : '+rname
+	if Verbose:
+		logger.notice(Smessage)
+		logger.notice(Rmessage)
 	QuestRun(sname,rname,nbs,erange,nbins,fitOp,Verbose,Plot,Save)
 
 def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
 	StartTime('Quest')
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
-	nsam = mtd[samWS].getNumberHistograms()                      # no. of hist/groups in sam
+	nbin,nrbin = CheckErange(erange,nbins)
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
 		logger.notice('Resolution is ' + resWS)
-		logger.notice(' Number of spectra = '+str(nsam))
-	efix = getEfixed(samWS)
+	nsam = mtd[samWS].getNumberHistograms()                      # no. of hist/groups in sam
+	if nsam == 0:
+		error = 'No histograms in sample file'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	Xin = mtd[samWS].readX(0)
 	ntc = len(Xin)-1						# no. points from length of x array
-	nsam = mtd[samWS].getNumberHistograms()       # no. of hist/groups in sample
+	if ntc == 0:
+		error = 'No points in sample file'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	efix = getEfixed(samWS)
+	theta,Q = GetThetaQ(samWS)
 	nres = mtd[resWS].getNumberHistograms()       # no. of hist/groups in res
+	if nres == 0:
+		error = 'No histograms in resolution file'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	if nres == 1:
 		prog = 'Qst'                        # res file
 	else:
 		error = 'Stretched Exp ONLY works with RES file'			
-		exit(error)
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if Verbose:
+		logger.notice(' Number of spectra = '+str(nsam))
+		logger.notice(' Erange : '+erange[0]+' to '+erange[1])
 	dtn,xsc = ReadNormFile(fitOp[3],nsam,Verbose)
 	fname = samWS[:-4] + '_'+ prog
 	wrks=workdir + samWS[:-4]
@@ -591,13 +716,8 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
 	wrkr=resWS
 	wrkr.ljust(140,' ')
 	wrk = [wrks, wrkr]
-#
-	nbin = nbins[0]
-	nrbin = nbins[1]
-	theta,Q = GetThetaQ(samWS)
-	Nbet = nbs[0]
+	Nbet,Nsig = CheckBetSig(nbs)
 	eBet0 = np.zeros(Nbet)                  # set errors to zero
-	Nsig = nbs[1]
 	eSig0 = np.zeros(Nsig)                  # set errors to zero
 	rscl = 1.0
 	Qaxis = ''
@@ -677,27 +797,48 @@ def QuestPlot(inputWS,Plot):
 
 # ResNorm programs
 
-def ResNormStart(van,res,erange,nbin,Verbose,Plot,Save):
+def ResNormStart(inType,van,rinType,res,erange,nbins,Verbose,Plot,Save):
 	workdir = config['defaultsave.directory']
 	vname = van + '_red'
-	vpath = os.path.join(workdir, vname+'.nxs')		           # path name for van nxs file
-	LoadNexusProcessed(Filename=vpath, OutputWorkspace=vname)
+	if inType == 'File':
+		vpath = os.path.join(workdir, vname+'.nxs')		           # path name for van nxs file
+		LoadNexusProcessed(Filename=vpath, OutputWorkspace=vname)
+		Vmessage = 'Vanadium from File : '+vpath
+	else:
+		Vmessage = 'Vanadium from Workspace : '+vname
 	rname = res + '_res'
-	rpath = os.path.join(workdir, rname+'.nxs')                # path name for res nxs file
-	LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-	ResNormRun(vname,rname,erange,nbin,Verbose,Plot,Save)
+	if rinType == 'File':
+		rpath = os.path.join(workdir, rname+'.nxs')                # path name for res nxs file
+		LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+		Rmessage = 'Resolution from File : '+rpath
+	else:
+		Rmessage = 'Resolution from Workspace : '+rname
+	if Verbose:
+		logger.notice(Vmessage)
+		logger.notice(Rmessage)
+	ResNormRun(vname,rname,erange,nbins,Verbose,Plot,Save)
 
-def ResNormRun(vname,rname,erange,nbin,Verbose,Plot,Save):
+def ResNormRun(vname,rname,erange,nbins,Verbose,Plot,Save):
 	StartTime('ResNorm')
 	workdir = config['defaultsave.directory']
 	array_len = 4096                                    # length of Fortran array
+	nbin,nrbin = CheckErange(erange,nbins)
+#	nbin = nbins[0]
 	if Verbose:
 		logger.notice('Vanadium is ' + vname)
 		logger.notice('Resolution is ' + rname)
 	nvan = mtd[vname].getNumberHistograms()                      # no. of hist/groups in van
-	nres = mtd[rname].getNumberHistograms()                      # no. of hist/groups in res
+	if nvan == 0:
+		error = 'No histograms in vanadium file'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	theta,Q = GetThetaQ(vname)
 	efix = getEfixed(vname)
+	nres = mtd[rname].getNumberHistograms()                      # no. of hist/groups in res
+	if nres == 0:
+		error = 'No histograms in resolution file'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(vname,0,erange,nbin)
 	Ndat = nout[0]
 	Imin = nout[1]
@@ -712,7 +853,6 @@ def ResNormRun(vname,rname,erange,nbin,Verbose,Plot,Save):
 	wrkr.ljust(140,' ')
 	Nb,Xb,Yb,Eb = GetXYE(rname,0,array_len)
 	rscl = 1.0
-	theta,Q = GetThetaQ(vname)
 	xPar = np.array([theta[0]])
 	for m in range(1,nvan):
 		xPar = np.append(xPar,theta[m])
@@ -780,10 +920,16 @@ def ResNormPlot(inputWS,Plot):
 
 # Jump programs
 
-def JumpStart(sname,jump,prog,fw,Verbose,Plot,Save):
+def JumpStart(inType,sname,jump,prog,fw,Verbose,Plot,Save):
 	workdir = config['defaultsave.directory']
-	path = os.path.join(workdir, sname+'_Parameters.nxs')					# path name for nxs file
-	LoadNexusProcessed(Filename=path, OutputWorkspace=sname+'_Parameters')
+	if inType == 'File':
+		path = os.path.join(workdir, sname+'_Parameters.nxs')					# path name for nxs file
+		LoadNexusProcessed(Filename=path, OutputWorkspace=sname+'_Parameters')
+		message = 'Input from File : '+path
+	else:
+		message = 'Input from Workspace : '+sname
+	if Verbose:
+		logger.notice(message)
 	JumpRun(sname,jump,prog,fw,Verbose,Plot,Save)
 
 def JumpRun(sname,jump,prog,fw,Verbose,Plot,Save):
@@ -801,6 +947,10 @@ def JumpRun(sname,jump,prog,fw,Verbose,Plot,Save):
 		logger.notice('Parameters in ' + pname + ' ; number ' +fwn)
 	samWS = pname +'_'+ fwn
 	nd,X,Y,E = GetXYE(samWS,0,array_len)
+	if nd == 0:
+		error = 'No points in parameter file'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	ftWS = sname +'_'+ jump + 'fit_' +fw
 	wrk = workdir + ftWS
 	lwrk = len(wrk)

@@ -73,7 +73,7 @@ public:  // for the time being
     std::vector<double>      getDimMax()const{return dimMax;}
     std::vector<size_t>      getNBins()const{return nBins;}
     std::vector<coord_t>     getAddCoord()const{return AddCoord;}
-    ConvertToMD::EModes      getEMode()const{return emode;}
+    CnvrtToMD::EModes      getEMode()const{return emode;}
 
     void getMinMax(std::vector<double> &min,std::vector<double> &max)const;
     std::vector<double> getTransfMatrix()const{return this->rotMatrix;}
@@ -131,7 +131,7 @@ private:
    // pointer to the array of detector's directions in the reciprocal space
     ConvToMDPreprocDet const * pDetLocations;
     /// energy transfer analysis mode 
-    ConvertToMD::EModes emode;
+    CnvrtToMD::EModes emode;
     /// the vector of MD coordinates, which are obtained from workspace properties.
     std::vector<coord_t> AddCoord;
     /// the names for the target workspace dimensions and properties of input MD workspace

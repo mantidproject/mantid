@@ -48,7 +48,7 @@ public:
     ParameterMap& paramMap = output1->instrumentParameters();
 
     // check that parameter have been read into the instrument parameter map
-    std::vector<V3D> ret1 = paramMap.getV3D("point-detector", "pos");
+    std::vector<V3D> ret1 = paramMap.getV3D("pointdetector", "pos");
     TS_ASSERT_EQUALS( static_cast<int>(ret1.size()), 1 );
     TS_ASSERT_DELTA( ret1[0].X(), 12.113, 0.0001);
     TS_ASSERT_DELTA( ret1[0].Y(), 0.0, 0.0001);

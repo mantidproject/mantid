@@ -1,5 +1,6 @@
 from mantid.simpleapi import *
-import mantidplot as mp
+from IndirectImport import import_mantidplot
+mp = import_mantidplot()
 from IndirectCommon import *
 from mantid import config, logger
 import math, re, os.path
@@ -509,6 +510,7 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=False):
             xlabel = 'Temp'
         if (np == 0):
             first = root[0:8]
+            last = root[0:8]
             run_list = lnWS
         else:
             last = root[0:8]
@@ -673,6 +675,7 @@ def abscorFeeder(sample, container, geom, useCor):
     applyCorrections routine.'''
     StartTime('ApplyCorrections')
     Verbose = True
+    Save = True
     PlotResult = 'Both'
     PlotContrib = 'Spectrum'
     workdir = config['defaultsave.directory']
@@ -704,10 +707,11 @@ def abscorFeeder(sample, container, geom, useCor):
             logger.notice('Correction file :'+abs_path)
         LoadNexus(Filename=abs_path, OutputWorkspace='corrections')
         cor_result = applyCorrections(sample, container, 'corrections', Verbose)
-        cor_path = os.path.join(workdir,cor_result+'.nxs')
-        SaveNexusProcessed(InputWorkspace=cor_result,Filename=cor_path)
-        if Verbose:
-            logger.notice('Output file created : '+cor_path)
+        if Save:
+            cor_path = os.path.join(workdir,cor_result+'.nxs')
+            SaveNexusProcessed(InputWorkspace=cor_result,Filename=cor_path)
+            if Verbose:
+                logger.notice('Output file created : '+cor_path)
         plot_list = [cor_result,sample]
         if ( container != '' ):
             plot_list.append(container)
@@ -719,13 +723,15 @@ def abscorFeeder(sample, container, geom, useCor):
         if ( container == '' ):
             sys.exit('ERROR *** Invalid options - nothing to do!')
         else:
-            sub_result = sample[0:8] +'_Subtract_'+ container[3:8]
-            Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
-            sub_path = os.path.join(workdir,sub_result+'.nxs')
-            SaveNexusProcessed(InputWorkspace=sub_result,Filename=sub_path)
+            sub_result = sample[:-3] +'Subtract_'+ container[3:8]
             if Verbose:
 	            logger.notice('Subtracting '+container+' from '+sample)
-	            logger.notice('Output file created : '+sub_path)
+            Minus(LHSWorkspace=sample,RHSWorkspace=container,OutputWorkspace=sub_result)
+            if Save:
+                sub_path = os.path.join(workdir,sub_result+'.nxs')
+                SaveNexusProcessed(InputWorkspace=sub_result,Filename=sub_path)
+                if Verbose:
+	                logger.notice('Output file created : '+sub_path)
             plot_list = [sub_result,sample]
             if (PlotResult != 'None'):
                 plotCorrResult(sub_result,PlotResult)

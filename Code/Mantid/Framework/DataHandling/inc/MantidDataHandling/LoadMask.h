@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 
 
 namespace Mantid
@@ -90,7 +91,7 @@ namespace DataHandling
     void parseISISStringToVector(std::string ins, std::vector<int>& rangestartvec, std::vector<int>& rangeendvec);
 
     /// Mask Workspace
-    API::MatrixWorkspace_sptr mMaskWS;
+    DataObjects::MaskWorkspace_sptr mMaskWS;
     /// Instrument name
     std::string mInstrumentName;
     /// XML document loaded

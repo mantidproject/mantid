@@ -137,7 +137,7 @@ namespace MDAlgorithms
 
   //----------------------------------------------------------------------------------------------
   /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
-  void WeightedMeanMD::execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out, Mantid::DataObjects::WorkspaceSingleValue_const_sptr)
+  void WeightedMeanMD::execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr, Mantid::DataObjects::WorkspaceSingleValue_const_sptr)
   {
     throw std::runtime_error(this->name() + " can only be run with two MDHistoWorkspaces as inputs");
   }

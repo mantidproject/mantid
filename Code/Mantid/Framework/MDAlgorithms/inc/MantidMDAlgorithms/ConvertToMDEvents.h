@@ -4,7 +4,8 @@
 
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDEvents/ConvToMDEventsBase.h"
+#include "MantidMDEvents/ConvToMDBase.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 //
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
 
@@ -14,7 +15,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-/** ConvertToMDEvents :
+/** ConvertToMD :
    *  Transfrom a workspace into MD workspace with components defined by user. 
    *
    * Gateway for number of subalgorithms, some are very important, some are questionable 
@@ -45,7 +46,7 @@ namespace MDAlgorithms
  
  
 /// Convert to MD Events class itself:
-  class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm
+  class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm, public API::DeprecatedAlgorithm
   {
   public:
     ConvertToMDEvents();
@@ -70,20 +71,14 @@ namespace MDAlgorithms
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
    static MDEvents::ConvToMDPreprocDet det_loc;  
-  /// progress reporter
+   /// progress reporter
    std::auto_ptr<API::Progress > pProg;
-    /// logger -> to provide logging, for MD dataset file operations
+   /// logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& convert_log;
    /// pointer to the class, which does the particular conversion
-   boost::shared_ptr<MDEvents::ConvToMDEventsBase> pConvertor;
-  
-   /// the class which knows about existing subalgorithms and generates alforithm ID as function of input parameters of this algorithm. 
-    ///ConvertToMD::ConvertToMDEventsParams ParamParser;   
-    /// The class which keeps map of all existing subalgorithms converting to MDEventWorkspace.
-    /// It returns the pointer to the subalgorithm receiving alogID from ParamParser. Shoud be re-implemented through a singleton if used not only here. 
-    //ConvertToMDEventsSubalgFactory  subAlgFactory;
-  //------------------------------------------------------------------------------------------------------------------------------------------
-    protected: //for testing
+   boost::shared_ptr<MDEvents::ConvToMDBase> pConvertor; 
+   //------------------------------------------------------------------------------------------------------------------------------------------
+   protected: //for testing
         static Mantid::Kernel::Logger & getLogger();
 
  };

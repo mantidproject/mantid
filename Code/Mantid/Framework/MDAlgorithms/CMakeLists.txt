@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMDEvents.cpp
+	src/ConvertToMD.cpp	
 	src/DampedHisenbergFMSW.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
@@ -54,6 +55,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMDEvents.h
+	inc/MantidMDAlgorithms/ConvertToMD.h	
 	inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/EqualToMD.h
@@ -99,10 +101,10 @@ set ( TEST_FILES
 	test/BooleanBinaryOperationMDTest.h
 	test/CobaltSWDTest.h
 	test/CompareMDWorkspacesTest.h
-	test/ConvertEventsToMDEventsTest.h
+	test/ConvertEventsToMDTest.h
 	test/ConvertToDetectorFaceMDTest.h
-	test/ConvertToMDEventsTest.h
-	test/ConvertToMDEventsTestPerformance.h
+	test/ConvertToMDTest.h
+	test/ConvertToMDTestPerformance.h
 	test/ConvertToQ3DdETest.h
 	test/DampedHisenbergFMSWTest.h
 	test/DivideMDTest.h

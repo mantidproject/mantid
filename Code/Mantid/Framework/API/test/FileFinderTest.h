@@ -368,6 +368,20 @@ public:
     TS_ASSERT_THROWS_NOTHING( files = FileFinder::Instance().findRuns(range.str().c_str()) );
     TS_ASSERT( files.size() == m_filesToFind );
   }
+
+  void test_manyMissingFilesWithLargeDirectory()
+  {
+    // This test essentially covers the case where a user types an erroneous range of runs into an MWRunFiles widget.
+    // If they have accidentally typed in an extremely large range (most of which dont exist) then it is important
+    // that this fact is realised as early as possible, and the user is not punished by either having to wait or just
+    // restart Mantid.  Here, we guard against any change in FileFinder that could reintroduce this problem.
+    std::vector<std::string> files;
+    std::stringstream range;
+    std::string startOfRange = boost::lexical_cast<std::string>(m_filesInDir - 10);
+    std::string accidentalEndOfRange = "99999";
+    range << startOfRange << "-" << accidentalEndOfRange;
+    TS_ASSERT_THROWS( files = FileFinder::Instance().findRuns(range.str().c_str()), Mantid::Kernel::Exception::NotFoundError );
+  }
   
 private:
 

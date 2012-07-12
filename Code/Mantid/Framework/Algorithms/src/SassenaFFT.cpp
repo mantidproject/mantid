@@ -8,6 +8,7 @@ The SassenaFFT algorithm performs the discrete Fourier transform on the intermed
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SassenaFFT.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -48,6 +49,10 @@ bool SassenaFFT::processGroups()
 void SassenaFFT::init()
 {
   this->declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("InputWorkspace","",Kernel::Direction::InOut), "The name of the input group workspace");
+  // properties for the detailed balance condition
+  this->declareProperty(new Kernel::PropertyWithValue<bool>("DetailedBalance", false, Kernel::Direction::Input),"Do we apply detailed balance condition (optional, default False)?");
+  this->declareProperty("Temp",300.0,"Multiply structure factor by exp(E/(2*kT)");
+  this->setPropertySettings("Temp", new Kernel::VisibleWhenProperty("Detailed Balance", Kernel::IS_EQUAL_TO, "1"));
 }
 
 /// Execute the algorithm
@@ -81,8 +86,23 @@ void SassenaFFT::exec()
   fft->executeAsSubAlg();
   API::MatrixWorkspace_sptr sqw0 = fft->getProperty("OutputWorkspace");
   DataObjects::Workspace2D_sptr sqw = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( sqw0 );
-  // Add to group workspace
   API::AnalysisDataService::Instance().add( sqwName, sqw );
+
+  //Do we apply the detailed balance condition exp(E/(2*kT)) ?
+  if( this->getProperty("DetailedBalance") )
+  {
+    double kT = this->getProperty("Temp");
+    kT /= 11.604;  // units of meV
+    API::IAlgorithm_sptr ec = this->createSubAlgorithm("ExponentialCorrection");
+    ec->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", sqw);
+    ec->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
+    ec->setProperty("C0",1.0);
+    ec->setProperty("C1",-1.0/(2.0*kT));
+    ec->setProperty("Operation","multiply");
+    ec->executeAsSubAlg();
+  }
+
+  // Add to group workspace
   gws->add( sqwName );
 }
 

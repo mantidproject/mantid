@@ -725,6 +725,7 @@ namespace Mantid
                 {
                   LogParser parser(logv);
                   ws->mutableRun().addLogData(parser.createPeriodLog(static_cast<int>(period)));
+                  ws->mutableRun().addLogData(parser.createCurrentPeriodLog(static_cast<int>(period)));
                   ws->mutableRun().addLogData(parser.createAllPeriodsLog());
                   ws->mutableRun().addLogData(parser.createRunningLog());
                 }

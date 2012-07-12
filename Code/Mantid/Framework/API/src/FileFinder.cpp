@@ -497,6 +497,7 @@ namespace Mantid
      *  Only the beginning of a range can contain an instrument name.
      * @return A vector of full paths or empty vector
      * @throw std::invalid_argument if the argument is malformed
+     * @throw Exception::NotFoundError if a file could not be found
      */
     std::vector<std::string> FileFinderImpl::findRuns(const std::string& hint) const
     {
@@ -565,8 +566,11 @@ namespace Mantid
             {
               res.push_back(path);
             }
+            else
+            {
+              throw Kernel::Exception::NotFoundError("Unable to find file:", run);
+            }
           }
-
         }
         else
         {
@@ -574,6 +578,10 @@ namespace Mantid
           if (!path.empty())
           {
             res.push_back(path);
+          }
+          else
+          {
+            throw Kernel::Exception::NotFoundError("Unable to find file:", *h);
           }
         }
       }

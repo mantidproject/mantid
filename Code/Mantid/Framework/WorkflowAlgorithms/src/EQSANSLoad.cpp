@@ -509,8 +509,8 @@ void EQSANSLoad::exec()
     loadAlg->setProperty("Filename", fileName);
     if (skipTOFCorrection)
     {
-      if (!isEmpty(m_low_TOF_cut)) loadAlg->setProperty("FilterByTofMin", m_low_TOF_cut);
-      if (!isEmpty(m_high_TOF_cut)) loadAlg->setProperty("FilterByTofMax", m_high_TOF_cut);
+      if (m_low_TOF_cut>0.0) loadAlg->setProperty("FilterByTofMin", m_low_TOF_cut);
+      if (m_high_TOF_cut>0.0) loadAlg->setProperty("FilterByTofMax", m_high_TOF_cut);
     }
     loadAlg->execute();
     IEventWorkspace_sptr dataWS_asWks = loadAlg->getProperty("OutputWorkspace");
@@ -547,6 +547,12 @@ void EQSANSLoad::exec()
   {
     sdd = sample_det_dist;
   } else {
+    if (!dataWS->run().hasProperty("detectorZ"))
+    {
+      g_log.error() << "Could not determine Z position: the SampleDetectorDistance property was not set "
+          "and the run logs do not contain the detectorZ property" << std::endl;
+      throw std::invalid_argument("Could not determine Z position: stopping execution");
+    }
     Mantid::Kernel::Property* prop = dataWS->run().getProperty("detectorZ");
     Mantid::Kernel::TimeSeriesProperty<double>* dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>* >(prop);
     sdd = dp->getStatistics().mean;
@@ -710,6 +716,8 @@ void EQSANSLoad::exec()
   if (skipTOFCorrection)
   {
     DataObjects::EventWorkspace_sptr dataWS_evt = boost::dynamic_pointer_cast<EventWorkspace>(dataWS);
+    if (dataWS_evt->getNumberEvents()==0)
+      throw std::invalid_argument("No event to process: check your TOF cuts");
     wl_min = dataWS_evt->getTofMin()*conversion_factor;
     wl_max = dataWS_evt->getTofMax()*conversion_factor;
     wl_combined_max = wl_max;

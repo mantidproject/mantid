@@ -99,10 +99,12 @@ DECLARE_ALGORITHM(StripVanadiumPeaks2)
     // 2. Call StripPeaks
     std::string peakpositions;
     std::string unit = inputWS->getAxis(0)->unit()->unitID();
-    if (unit == "dSpacing"){
+    if (unit == "dSpacing")
+    {
       peakpositions = "0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401";
-
-    } else if (unit == "MomentumTransfer"){
+    }
+    else if (unit == "MomentumTransfer")
+    {
       g_log.error() << "Unit MomentumTransfer (Q-space) is NOT supported by StripVanadiumPeaks now.\n";
       throw std::invalid_argument("Q-space is not supported");
       // Comment out next line as it won't be reached.

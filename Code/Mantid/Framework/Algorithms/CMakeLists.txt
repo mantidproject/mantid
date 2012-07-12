@@ -3,7 +3,6 @@ set ( SRC_FILES
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
 	src/AddSampleLog.cpp
-	src/AlignDetectorInTOF.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
 	src/AnyShapeAbsorption.cpp
@@ -14,7 +13,6 @@ set ( SRC_FILES
 	src/ApplyTransmissionCorrection.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
-	src/BlendSq.cpp
 	src/CalMuonDeadTime.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateTransmission.cpp
@@ -54,7 +52,6 @@ set ( SRC_FILES
 	src/CrossCorrelate.cpp
 	src/CuboidGaugeVolumeAbsorption.cpp
 	src/CylinderAbsorption.cpp
-	src/DampSq.cpp
 	src/DeleteWorkspace.cpp
 	src/DetectorDiagnostic.cpp
 	src/DetectorEfficiencyCor.cpp
@@ -105,7 +102,6 @@ set ( SRC_FILES
 	src/GroupWorkspaces.cpp
 	src/HRPDSlabCanAbsorption.cpp
 	src/He3TubeEfficiency.cpp
-	src/IDLRebin.cpp
 	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
 	src/Integration.cpp
@@ -201,7 +197,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddSampleLog.h
-	inc/MantidAlgorithms/AlignDetectorInTOF.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
@@ -212,7 +207,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
-	inc/MantidAlgorithms/BlendSq.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateTransmission.h
@@ -252,7 +246,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CrossCorrelate.h
 	inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
 	inc/MantidAlgorithms/CylinderAbsorption.h
-	inc/MantidAlgorithms/DampSq.h
 	inc/MantidAlgorithms/DeleteWorkspace.h
 	inc/MantidAlgorithms/DetectorDiagnostic.h
 	inc/MantidAlgorithms/DetectorEfficiencyCor.h
@@ -304,7 +297,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/GroupWorkspaces.h
 	inc/MantidAlgorithms/HRPDSlabCanAbsorption.h
 	inc/MantidAlgorithms/He3TubeEfficiency.h
-	inc/MantidAlgorithms/IDLRebin.h
 	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
 	inc/MantidAlgorithms/Integration.h
@@ -399,7 +391,6 @@ set ( TEST_FILES
 	#	test/CalMuonDeadTimeTest.h
 	test/AddLogDerivativeTest.h
 	test/AddSampleLogTest.h
-	test/AlignDetectorInTOFTest.h
 	test/AlignDetectorsTest.h
 	test/AlphaCalcTest.h
 	test/AnyShapeAbsorptionTest.h
@@ -409,7 +400,6 @@ set ( TEST_FILES
 	test/ApplyTransmissionCorrectionTest.h
 	test/BinaryOperateMasksTest.h
 	test/BinaryOperationTest.h
-	test/BlendSqTest.h
 	test/CalculateEfficiencyTest.h
 	test/CalculateTransmissionBeamSpreaderTest.h
 	test/CalculateTransmissionTest.h
@@ -447,7 +437,6 @@ set ( TEST_FILES
 	test/CropWorkspaceTest.h
 	test/CuboidGaugeVolumeAbsorptionTest.h
 	test/CylinderAbsorptionTest.h
-	test/DampSqTest.h
 	test/DeleteWorkspaceTest.h
 	test/DetectorEfficiencyCorTest.h
 	test/DetectorEfficiencyVariationTest.h
@@ -489,7 +478,6 @@ set ( TEST_FILES
 	test/GroupWorkspacesTest.h
 	test/HRPDSlabCanAbsorptionTest.h
 	test/He3TubeEfficiencyTest.h
-	test/IDLRebinTest.h
 	test/IQTransformTest.h
 	test/IdentifyNoisyDetectorsTest.h
 	test/IntegrationTest.h

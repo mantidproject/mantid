@@ -47,6 +47,7 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
+    using DataObjects::MaskWorkspace_sptr;
     using Geometry::IDetector_const_sptr;
 
     /// Default constructor initialises all data members and runs the base class constructor
@@ -219,7 +220,7 @@ namespace Mantid
       const int progStep = static_cast<int>(std::ceil(numSpec/30.0));
 
       // Create a workspace for the output
-      MatrixWorkspace_sptr maskWS = this->generateEmptyMask(counts1);
+      MaskWorkspace_sptr maskWS = this->generateEmptyMask(counts1);
 
       bool checkForMask = false;
       Geometry::Instrument_const_sptr instrument = counts1->getInstrument();

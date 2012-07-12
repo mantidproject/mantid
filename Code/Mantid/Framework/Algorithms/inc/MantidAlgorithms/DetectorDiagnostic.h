@@ -5,8 +5,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <set>
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IComponent.h"
+
+#include <set>
+
 namespace Mantid
 {
   namespace Algorithms
@@ -67,7 +70,7 @@ namespace Mantid
           const int indexMax, const double lower,
           const double upper, const bool outputWorkspace2D = false);
 
-      API::MatrixWorkspace_sptr generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS);
+      DataObjects::MaskWorkspace_sptr generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS);
 
       /// Calculate the median of the given workspace. This assumes that the input workspace contains 
       /// integrated counts

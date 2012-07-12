@@ -135,7 +135,10 @@ namespace Mantid
 			    timeChannelsVec,int64_t wsIndex,specid_t nspecNum,int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart);
           
       /// creates time series property showing times when when a particular period was active.
-      Kernel::Property* createPeriodLog(int period)const;
+      Kernel::Property* createPeriodLog(int period) const;
+
+      /// creates a current period log value containing the period argument.
+      Kernel::Property* createCurrentPeriodLog(const int& period) const;
 
       /// ISISRAW class instance which does raw file reading. Shared pointer to prevent memory leak when an exception is thrown.
       boost::shared_ptr<ISISRAW2> isisRaw;

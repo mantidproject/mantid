@@ -10,14 +10,14 @@ DECLARE_MD_TRANSFID(MDTransfQ3D,Q3D);
 
 /** method returns number of matrix dimensions calculated by this class
   * as function of energy analysis mode   */
-unsigned int MDTransfQ3D::getNMatrixDimensions(ConvertToMD::EModes mode,API::MatrixWorkspace_const_sptr inWS)const
+unsigned int MDTransfQ3D::getNMatrixDimensions(CnvrtToMD::EModes mode,API::MatrixWorkspace_const_sptr inWS)const
 {
    UNUSED_ARG(inWS);
    switch(mode)
    {
-   case(ConvertToMD::Direct):  return 4;
-   case(ConvertToMD::Indir):   return 4;
-   case(ConvertToMD::Elastic): return 3;
+   case(CnvrtToMD::Direct):  return 4;
+   case(CnvrtToMD::Indir):   return 4;
+   case(CnvrtToMD::Elastic): return 3;
    default: throw(std::invalid_argument("Unknow or unsupported energy conversion mode"));
    }
 }
@@ -25,7 +25,7 @@ unsigned int MDTransfQ3D::getNMatrixDimensions(ConvertToMD::EModes mode,API::Mat
 
 bool MDTransfQ3D::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord)const
 {
-    if(emode == ConvertToMD::Elastic){
+    if(emode == CnvrtToMD::Elastic){
         return calcMatrixCoord3DElastic(x,Coord);
     }else{
         return calcMatrixCoord3DInelastic(x,Coord);
@@ -50,7 +50,7 @@ bool MDTransfQ3D::calcMatrixCoord3DInelastic(const double& E_tr,std::vector<coor
 
       // get module of the wavevector for scattered neutrons
       double k_tr;
-      if(this->emode==ConvertToMD::Direct){
+      if(this->emode==CnvrtToMD::Direct){
           k_tr=sqrt((Ei-E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
       }else{
           k_tr=sqrt((Ei+E_tr)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
@@ -115,13 +115,13 @@ void MDTransfQ3D::initialize(const MDWSDescription &ConvParams)
 //************   specific part of the initialization, dependent on emode:
         emode      = ConvParams.getEMode();
         nMatrixDim = getNMatrixDimensions(emode);
-        if(emode == ConvertToMD::Direct||emode == ConvertToMD::Indir){
+        if(emode == CnvrtToMD::Direct||emode == CnvrtToMD::Indir){
             // energy needed in inelastic case
             Ei  =  ConvParams.getEi();
             // the wave vector of incident neutrons;
             ki=sqrt(Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
         }else{
-            if (emode != ConvertToMD::Elastic){
+            if (emode != CnvrtToMD::Elastic){
                 throw(std::invalid_argument("MDTransfModQ::initialize::Unknown or unsupported energy conversion mode"));
             }
         }
@@ -134,19 +134,19 @@ void MDTransfQ3D::initialize(const MDWSDescription &ConvParams)
  *@returns       -- vector of default dimension ID-s for correspondent energy conversion mode. 
                     The position of each dimID in the vector corresponds to the position of each MD coordinate in the Coord vector
 */
-std::vector<std::string> MDTransfQ3D::getDefaultDimID(ConvertToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
+std::vector<std::string> MDTransfQ3D::getDefaultDimID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
 {
     UNUSED_ARG(inWS);
     std::vector<std::string> default_dim_ID;
     switch(dEmode)
     {
-    case(ConvertToMD::Elastic):
+    case(CnvrtToMD::Elastic):
         {
             default_dim_ID.resize(3);
             break;
         }
-    case(ConvertToMD::Direct):
-    case(ConvertToMD::Indir):
+    case(CnvrtToMD::Direct):
+    case(CnvrtToMD::Indir):
         {
             default_dim_ID.resize(4);
             default_dim_ID[3]= "DeltaE";
@@ -167,13 +167,13 @@ std::vector<std::string> MDTransfQ3D::getDefaultDimID(ConvertToMD::EModes dEmode
  * @param Emode   -- energy conversion mode
  *
  * It is Momentum and DelteE in inelastic modes   */
-std::vector<std::string> MDTransfQ3D::outputUnitID(ConvertToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
+std::vector<std::string> MDTransfQ3D::outputUnitID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const
 {
     UNUSED_ARG(inWS);
     std::vector<std::string> UnitID = this->getDefaultDimID(dEmode,inWS);
     //TODO: is it really momentum transfer, as MomentumTransfer units are seems bound to elastic mode only (at least accorting to Units description on Wiki)?
     std::string kUnits("MomentumTransfer");
-    if(dEmode==ConvertToMD::Elastic){
+    if(dEmode==CnvrtToMD::Elastic){
          kUnits= "Momentum";
     }
 

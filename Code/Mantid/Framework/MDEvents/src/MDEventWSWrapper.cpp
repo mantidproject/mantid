@@ -57,7 +57,7 @@ void  MDEventWSWrapper::addMDData(std::vector<float> &sig_err,std::vector<uint16
   
 
 /** method should be called at the end of the algorithm, to let the workspace manager know that it has whole responsibility for the workspace
-   (As the algorithm is static, it will hold the pointer to the workspace otherwise, not allowing the WS manager to delete WS on request or when it find this usefull)*/
+   (As the algorithm is static, it will hold the pointer to the workspace otherwise, not allowing the WS manager to delete WS on request or when it finds this usefull)*/
 void MDEventWSWrapper::releaseWorkspace()
 {
     // decrease the sp count by one

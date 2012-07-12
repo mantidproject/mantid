@@ -35,7 +35,7 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0), m_file(NULL), m_diskBuffer(), m_useWriteBuffer(true)
+    :nd(nd), m_maxId(0), m_numSplit(1), m_file(NULL), m_diskBuffer(), m_useWriteBuffer(true)
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -241,15 +241,25 @@ namespace API
      * would be a slow-down, but keeping the boxes split at an earlier stage
      * should help scalability for later adding, so there is a balance to get.
      *
-     * @param eventsAdded :: How many events were added since the last split?
-     * @param numMDBoxes :: How many un-split MDBoxes are there (total) in the workspace
+     * @param nEventsInOutput :: How many events are currently in workspace in memory;
+     * @param eventsAdded     :: How many events were added since the last split?
+     * @param numMDBoxes      :: How many un-split MDBoxes are there (total) in the workspace
      * @return true if the boxes should get split.
      */
-    bool shouldSplitBoxes(size_t eventsAdded, size_t numMDBoxes) const
+    bool shouldSplitBoxes(size_t nEventsInOutput,size_t eventsAdded, size_t numMDBoxes) const
     {
       // Avoid divide by zero
       if(numMDBoxes == 0)
         return false;
+     // Performance depends pretty strongly on WHEN you split the boxes.
+      // This is an empirically-determined way to optimize the splitting calls.
+      // Split when adding 1/16^th as many events as are already in the output,
+      //  (because when the workspace gets very large you should split less often)
+      // But no more often than every 10 million events.
+      size_t comparisonPoint = nEventsInOutput/16;
+      if (comparisonPoint < 10000000)
+          comparisonPoint = 10000000;
+      if (eventsAdded > (comparisonPoint))return true;
 
       // Return true if the average # of events per box is big enough to split.
       return ((eventsAdded / numMDBoxes) > m_SplitThreshold);

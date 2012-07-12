@@ -8,10 +8,10 @@ set ( SRC_FILES
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/CentroidPeaksMD.cpp
 	src/CloneMDWorkspace.cpp
-	src/ConvToMDEventsBase.cpp
-	src/ConvToMDEventsEvents.cpp
-	src/ConvToMDEventsHisto.cpp
-	src/ConvToMDEventsSelector.cpp
+	src/ConvToMDBase.cpp
+	src/ConvToMDEventsWS.cpp
+	src/ConvToMDHistoWS.cpp
+	src/ConvToMDSelector.cpp
 	src/ConvToMDPreprocDet.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToReflectometryQ.cpp
@@ -78,10 +78,10 @@ set ( INC_FILES
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/CloneMDWorkspace.h
-	inc/MantidMDEvents/ConvToMDEventsBase.h
-	inc/MantidMDEvents/ConvToMDEventsEvents.h
-	inc/MantidMDEvents/ConvToMDEventsHisto.h
-	inc/MantidMDEvents/ConvToMDEventsSelector.h
+	inc/MantidMDEvents/ConvToMDBase.h
+	inc/MantidMDEvents/ConvToMDEventsWS.h
+	inc/MantidMDEvents/ConvToMDHistoWS.h
+	inc/MantidMDEvents/ConvToMDSelector.h
 	inc/MantidMDEvents/ConvToMDPreprocDet.h
 	inc/MantidMDEvents/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDEvents/ConvertToReflectometryQ.h
@@ -144,10 +144,10 @@ set ( TEST_FILES
 	test/CentroidPeaksMDTest.h
 	test/CloneMDWorkspaceTest.h
 	test/ConvertToDiffractionMDWorkspaceTest.h
-	test/ConvertToMDEventsParamsTest.h
-	test/ConvertToMDEventsSubalgFactoryTest.h
-	test/ConvertToMDEventsUnitsConvTest.h
-	test/ConvertToMDEventsWSTest.h
+	test/ConvertToMDParamsTest.h
+	test/ConvertToMDFactoryTest.h
+	test/ConvertToMDUnitsConvTest.h
+	test/ConvertToMDWSTest.h
 	test/ConvertToReflectometryQTest.h
 	test/CoordTransformAffineParserTest.h
 	test/CoordTransformAffineTest.h

@@ -27,8 +27,7 @@ public:
 
   /// Typedef for a function with no arguments and no return
   typedef void(*voidFunction)();
-
-  //---------------------------------------------------------------------------------------------
+   //---------------------------------------------------------------------------------------------
   /** Constructor for a simple void function.
    *
    * Pro-tip: use boost::bind(f, argument1, argument2) (for example) to turn a function that takes

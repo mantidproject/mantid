@@ -28,7 +28,7 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include <algorithm>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidMDEvents/ConvToMDEventsSelector.h"
+#include "MantidMDEvents/ConvToMDSelector.h"
 #include "MantidMDEvents/MDTransfDEHelper.h"
 
 using namespace Mantid;
@@ -37,7 +37,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::ConvertToMD;
+using namespace Mantid::MDEvents::CnvrtToMD;
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -108,7 +108,7 @@ ConvertToMDEvents::init()
 
      MDEvents::MDWSTransform QScl;
      std::vector<std::string> QScales = QScl.getQScalings();
-     declareProperty("QConversionScales",QScales[ConvertToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
+     declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
         "This property to normalize three momentums obtained in Q3D mode. Possible values are:\n"
         "  No Scaling,        -- momentums in Momentum or MomentumTransfer units  A^-1\n"
         "  Q in lattice units -- single scale, where all momentums are divided by the minimal reciprocal lattice vector 2*Pi/Max(a_latt)\n"
@@ -119,7 +119,7 @@ ConvertToMDEvents::init()
      /// temporary
      MDEvents::MDTransfDEHelper AlldEModes;
      std::vector<std::string> dE_modes = AlldEModes.getEmodes();
-     declareProperty("dEAnalysisMode",dE_modes[ConvertToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
+     declareProperty("dEAnalysisMode",dE_modes[CnvrtToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
         "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
         " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
         """NoDE"" choice corresponds to ""CopyToMD"" analysis mode and is selected automatically if the QDimensions is set to ""CopyToMD""",Direction::InOut);                
@@ -185,11 +185,9 @@ ConvertToMDEvents::init()
 /* Execute the algorithm.   */
 void ConvertToMDEvents::exec()
 {
-    // initiate all availible subalgorithms for further usage (it will do it only once, first time the algorithm is executed);
-   // this->subAlgFactory.init(ParamParser);
-
   // initiate class which would deal with any dimension workspaces, handling 
-  if(!pWSWrapper.get()){
+  if(!pWSWrapper)
+  {
     pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
   }
   // -------- Input workspace
@@ -198,6 +196,7 @@ void ConvertToMDEvents::exec()
   {
     convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
   }
+
   // ------- Is there any output workspace?
   // shared pointer to target workspace
   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
@@ -291,6 +290,7 @@ void ConvertToMDEvents::exec()
             const size_t nHist = inWS2D->getNumberHistograms();
             pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
             det_loc.processDetectorsPositions(inWS2D,convert_log,pProg.get());
+            g_log.information()<<" preprocessing detectors\n";
             if(det_loc.nDetectors()==0){
                 g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
                 throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
@@ -326,7 +326,7 @@ void ConvertToMDEvents::exec()
   //DO THE JOB:
 
   // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
-  ConvToMDEventsSelector AlgoSelector;
+  ConvToMDSelector AlgoSelector;
   pConvertor  = AlgoSelector.convSelector(inWS2D,pConvertor);
 
   // initate conversion and estimate amout of job to dl
@@ -334,6 +334,7 @@ void ConvertToMDEvents::exec()
   // progress reporter
   pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
 
+  g_log.information()<<" conversion started\n";
   pConvertor->runConversion(pProg.get());
   
   //JOB COMPLETED:
@@ -348,7 +349,11 @@ void ConvertToMDEvents::exec()
 
 /** Constructor */
 ConvertToMDEvents::ConvertToMDEvents()
-{}
+{
+  this->useAlgorithm("ConvertToMD");
+  this->deprecatedDate("2012-07-01");
+
+}
 
 
 } // namespace Mantid

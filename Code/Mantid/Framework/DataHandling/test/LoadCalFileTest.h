@@ -82,11 +82,6 @@ public:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
-  
-  void test_Something()
-  {
-  }
-
 
 };
 

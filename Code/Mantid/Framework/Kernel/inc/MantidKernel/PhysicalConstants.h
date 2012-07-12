@@ -75,6 +75,11 @@ namespace PhysicalConstants
    * Taken from <http://physics.nist.gov/cgi-bin/cuu/Value?stdatm|search_for=adopted_in!> on 01/12/2010 **/
   static const double StandardAtmosphere = 101.325;
   
+  /** Boltzmann Constant in meV/K
+   * Taken from <http://physics.nist.gov/cuu/Constants> on 10/07/2012
+   */
+  static const double BoltzmannConstant = 8.6173324e-02;
+
 } // namespace PhysicalConstants
 } // namespace Mantid
 

@@ -360,16 +360,15 @@ namespace Mantid
      *
      * @param inputWS The workspace to initialize from. The instrument is copied from this.
      */
-    MatrixWorkspace_sptr DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS)
+    DataObjects::MaskWorkspace_sptr DetectorDiagnostic::generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS)
     {
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
-      DataObjects::MaskWorkspace* maskWS = new DataObjects::MaskWorkspace();
+      DataObjects::MaskWorkspace_sptr maskWS(new DataObjects::MaskWorkspace());
       maskWS->initialize(inputWS->getNumberHistograms(), 1, 1);
-      MatrixWorkspace_sptr outputWS(maskWS);
-      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
-      outputWS->setTitle(inputWS->getTitle());
+      WorkspaceFactory::Instance().initializeFromParent(inputWS, maskWS, false);
+      maskWS->setTitle(inputWS->getTitle());
 
-      return outputWS;
+      return maskWS;
     }
 
 

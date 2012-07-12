@@ -107,6 +107,20 @@ std::string toString(const std::vector<std::vector<T> >& value)
   return result.str();
 }
 
+/// Specialisation for any type, should be appropriate for properties with a single value.
+template <typename T>
+int findSize(const T&)
+{
+  return 1;
+}
+
+/// Specialisation for properties that are of type vector.
+template <typename T>
+int findSize(const std::vector<T>& value)
+{
+  return static_cast<int>(value.size());
+}
+
 // ------------- Convert strings to values
 template <typename T>
 inline void appendValue(const std::string& strvalue, std::vector<T>& value)
@@ -304,6 +318,13 @@ public:
   virtual std::string value() const
   {
     return toString(m_value);
+  }
+
+  /** Get the size of the property.
+  */
+  virtual int size() const
+  {
+    return findSize(m_value);
   }
 
   /** Get the value the property was initialised with -its default value

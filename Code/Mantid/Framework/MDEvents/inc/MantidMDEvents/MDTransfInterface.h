@@ -10,7 +10,7 @@ namespace Mantid
 {
 namespace MDEvents
 {
-/** Interface to set of sub-classes used by ConvertToMDEvents algorithm and responsible for conversion of input workspace 
+/** Interface to set of sub-classes used by ConvertToMD algorithm and responsible for conversion of input workspace 
   * data into MD events.
 * The inferface provide information for two tasks. 
 * 1) Definition of target MD workspace properties and 
@@ -126,17 +126,17 @@ public:
     /** returns the unit ID for the input units, the particular transformation expects. 
      if one wants the transformation to be meaningful, the X-coordinates of input workspace 
      used by the transformation have to be expressed in the uinits  with ID, returned by this method */
-    virtual const std::string inputUnitID(ConvertToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const=0;
+    virtual const std::string inputUnitID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const=0;
     /** The transformation generates output MD events in particular units. This method returns these Units ID-s */ 
-    virtual std::vector<std::string> outputUnitID(ConvertToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const = 0;
+    virtual std::vector<std::string> outputUnitID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const = 0;
 
       /** when one builds MD workspace, he needs a dimension names/ID-s which can be different for different Q-transformatons and in different E-mode 
        The position of each dimID in the output vector should correspond the position of each coordinate in the Coord vector     */
-    virtual std::vector<std::string> getDefaultDimID(ConvertToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const = 0;
+    virtual std::vector<std::string> getDefaultDimID(CnvrtToMD::EModes dEmode, API::MatrixWorkspace_const_sptr inWS)const = 0;
 
     /** return the number of dimensions, calculated by the transformation from the workspace. This number is usually varies from 1 to 4
       * and depends on emode and possibly on some WS parameters.     */
-    virtual unsigned int getNMatrixDimensions(ConvertToMD::EModes mode,API::MatrixWorkspace_const_sptr inWS)const=0;
+    virtual unsigned int getNMatrixDimensions(CnvrtToMD::EModes mode,API::MatrixWorkspace_const_sptr inWS)const=0;
     
 }; 
 

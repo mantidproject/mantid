@@ -209,8 +209,13 @@ namespace Mantid
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
-          Property* log=createPeriodLog(1);
-          if(log)localWorkspace->mutableRun().addLogData(log);
+          const int period_number = 1;
+          Property* log=createPeriodLog(period_number);
+          if(log)
+          {
+            localWorkspace->mutableRun().addLogData(log);
+            localWorkspace->mutableRun().addLogData(createCurrentPeriodLog(period_number));
+          }
           // Set the total proton charge for this run
           // (not sure how this works for multi_period files)
           localWorkspace->mutableRun().setProtonCharge(iraw.rpb.r_gd_prtn_chrg);
@@ -242,25 +247,35 @@ namespace Mantid
     }
 
     /** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
-     *  @param period :: The data period
-     *  @return the times when requested period was active
-     */
-Kernel::Property*  LoadRaw::createPeriodLog(int period)const
-{
-    Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
-        if(!periods) return 0;
-    std::ostringstream ostr;
-    ostr<<period;
-    Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
-    std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
-    std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
-    if (it->second != period)
+    *  @param period :: The data period
+    *  @return the times when requested period was active
+    */
+    Kernel::Property*  LoadRaw::createPeriodLog(int period)const
+    {
+      Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
+      if(!periods) return 0;
+      std::ostringstream ostr;
+      ostr<<period;
+      Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
+      std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
+      std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
+      if (it->second != period)
         p->addValue(it->first,false);
-    for(;it!=pMap.end();++it)
+      for(;it!=pMap.end();++it)
         p->addValue(it->first, (it->second == period) );
 
-    return p;
-}
+      return p;
+    }
+
+    /**
+    Create a log vale for the current period.
+    @param period: The period number to create the log entry for.
+    */
+    Kernel::Property* LoadRaw::createCurrentPeriodLog(const int& period) const
+    {
+      Kernel::PropertyWithValue<int>* currentPeriodProperty = new Kernel::PropertyWithValue<int>("current_period", period);
+      return currentPeriodProperty;
+    }
 
 
     /**

@@ -523,7 +523,14 @@ namespace Mantid
 
       detid2index_map * map = new detid2index_map();
       //Loop through the workspace index
-      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
+      size_t size = this->getNumberHistograms();
+      if (ax->length() < size)
+      {
+        g_log.information() << "Number in spectra axis (" << ax->length() << ") shorter than number of histograms ("
+                            << size << ")\n";
+        size = ax->length();
+      }
+      for (size_t workspaceIndex=0; workspaceIndex < size; workspaceIndex++)
       {
         //Get the spectrum # from the WS index
         specid_t specNo = ax->spectraNo(workspaceIndex);

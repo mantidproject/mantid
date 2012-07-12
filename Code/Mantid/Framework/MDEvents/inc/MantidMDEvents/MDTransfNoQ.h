@@ -2,8 +2,9 @@
 #define  H_CONVERT_TO_MDEVENTS_NOQ_TRANSF
 //
 #include "MantidMDEvents/MDTransfInterface.h"
-#include "MantidMDEvents/ConvToMDEventsBase.h"
+//#include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidMDEvents/MDTransfFactory.h"
+#include "MantidAPI/NumericAxis.h"
 
 //
 namespace Mantid
@@ -62,12 +63,12 @@ public:
 //***** output WS definition interface:
     /** return the number of dimensions, calculated by the transformation from the workspace.
         Depending on ws axis units, the numebr here is either 1 or 2* and is independent on emode*/
-    unsigned int getNMatrixDimensions(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
+    unsigned int getNMatrixDimensions(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
     /**function returns units ID-s which this transformation prodiuces its ouptut.
        here it is usually input ws units, which are independent on emode */
-    std::vector<std::string> outputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
-    std::vector<std::string> getDefaultDimID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
-    const std::string inputUnitID(ConvertToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
+    std::vector<std::string> outputUnitID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
+    std::vector<std::string> getDefaultDimID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
+    const std::string inputUnitID(CnvrtToMD::EModes mode, API::MatrixWorkspace_const_sptr inWS)const;
 private:
     unsigned int nMatrixDim;
     // the variables used for exchange data between different specific parts of the generic ND algorithm:

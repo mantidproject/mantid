@@ -69,7 +69,9 @@ public:
     // 4. Check output
     for (size_t ih = 0; ih < ws4->getNumberHistograms(); ih ++)
     {
-      detid_t tempdetid = ws4->getDetectorID(ih);
+      std::set<detid_t> tempdetids = ws4->getDetectorIDs(ih);
+      detid_t tempdetid = *(tempdetids.begin());
+      TS_ASSERT_EQUALS(tempdetids.size(), 1);
       TS_ASSERT_DELTA(ws4->getValue(tempdetid), ws1->getValue(tempdetid), 1);
       TS_ASSERT_DELTA(ws4->readY(ih)[0], ws1->readY(ih)[0], 1);
     }

@@ -2012,6 +2012,27 @@ void IndexingUtils::DiscardDuplicates( std::vector<V3D>  & new_list,
 
 
 /**
+  Round all of the components of all vectors to the nearest integer.  This 
+  is useful when the vectors in the list represent Miller indices.  Since
+  the PeaksWorkspace records the Miller indices as sets of three doubles,
+  there is no guarantee that the Miller indices will be integers.
+
+  @param hkl_list   Vector of V3D objects whose components will be rounded. 
+
+ */
+void IndexingUtils::RoundHKLs( std::vector<V3D> & hkl_list )
+{
+  for ( size_t entry = 0; entry < hkl_list.size(); entry++ )
+  {
+    for ( size_t i = 0; i < 3; i++ )
+    {
+      hkl_list[entry][i] = (double)( round(hkl_list[entry][i]) );
+    }
+  }
+}
+
+
+/**
   Check whether or not the components of the specified vector are within
   the specified tolerance of integer values, other than (0,0,0).
 
@@ -2046,6 +2067,94 @@ bool IndexingUtils::ValidIndex( const V3D & hkl, double tolerance )
   }
 
   return valid_index;
+}
+
+/**
+  Find number of valid HKLs and average error for the valid Miller indices,
+  in a list of HKLs.
+
+  @param hkls          List of V3D objects containing hkl values
+  @param tolerance     The maximum acceptable deviation from integer values for
+                       the Miller indices.
+  @param average_error This is set to the average error in the hkl values for
+                       the hkl values that are valid Miller indices.
+*/
+int IndexingUtils::NumberOfValidIndexes( 
+                                      const std::vector<V3D>  & hkls,
+                                            double              tolerance,
+                                            double            & average_error )
+{
+
+  double h_error;
+  double k_error;
+  double l_error;
+  double total_error = 0;
+  int    count       = 0;
+  V3D    hkl;
+  for ( size_t i = 0; i < hkls.size(); i++ )
+  {
+    hkl = hkls[i];
+    if ( ValidIndex( hkl, tolerance ) )
+    {
+      count++;
+      h_error = fabs( round(hkl[0]) - hkl[0] );
+      k_error = fabs( round(hkl[1]) - hkl[1] );
+      l_error = fabs( round(hkl[2]) - hkl[2] );
+      total_error += h_error + k_error + l_error;
+    }
+  }
+
+  if ( count > 0 )
+    average_error = total_error / (3.0 * (double)count);
+  else
+    average_error = 0.0;
+
+  return count;
+}
+
+  /// Find the average indexing error for UB with the specified q's and hkls
+double IndexingUtils::IndexingError( const DblMatrix         & UB,
+                                     const std::vector<V3D>  & hkls,
+                                     const std::vector<V3D>  & q_vectors )
+{
+  DblMatrix UB_inverse( UB );
+  if ( CheckUB( UB ) )
+  {
+    UB_inverse.Invert();
+  }
+  else
+  {
+    throw std::runtime_error( "The UB in IndexingError() is not valid");
+  }
+  if ( hkls.size() != q_vectors.size() )
+  {
+    throw std::runtime_error(
+                      "Different size hkl and q_vectors in IndexingError()");
+  }
+
+  double h_error;
+  double k_error;
+  double l_error;
+  double total_error = 0;
+  V3D    hkl;
+  for ( size_t i = 0; i < hkls.size(); i++ )
+  {
+    hkl = UB_inverse * q_vectors[i] / (2.0 * M_PI);
+/*
+    h_error = fabs( hkl[0] - round(hkls[i][0]) );
+    k_error = fabs( hkl[1] - round(hkls[i][1]) );
+    l_error = fabs( hkl[2] - round(hkls[i][2]) );
+*/
+    h_error = fabs( hkl[0] - round(hkl[0]) );
+    k_error = fabs( hkl[1] - round(hkl[1]) );
+    l_error = fabs( hkl[2] - round(hkl[2]) );
+    total_error += h_error + k_error + l_error;
+  }
+
+  if ( hkls.size() > 0 )
+    return total_error / ( 3.0 * (double)hkls.size() );
+  else
+    return 0; 
 }
 
 

@@ -235,13 +235,12 @@ public slots:
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
   //  *****                            *****  //
   void renameWorkspace(QString = "");
+
 public:
 
   // Return pointer to the fit function property browser
   MantidQt::MantidWidgets::FitPropertyBrowser* fitFunctionBrowser(){return m_fitFunction;}
 
-
-public:
   MultiLayer* mergePlots(MultiLayer* g1, MultiLayer* g2);
   MantidMatrix* getMantidMatrix(const QString& wsName);
   MantidMatrix* newMantidMatrix(const QString& name, int start=-1, int end=-1);
@@ -271,10 +270,6 @@ public:
 
   //This is anoverloaded method toexecute load raw/nexus and  called from Icat interface
   void executeloadAlgorithm(const QString&, const QString&, const QString&);
-
-					      
-public slots:
-  void cancelAllRunningAlgorithms();
 
 signals:
   //A signal to indicate that we want a script to produce a dialog

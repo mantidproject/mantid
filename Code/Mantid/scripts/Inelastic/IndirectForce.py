@@ -3,7 +3,7 @@
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
-import math, os.path as op
+import sys, math, os.path
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
 mp = import_mantidplot()
 
@@ -17,10 +17,11 @@ def Iblock(a,first):                                 #read Ascii block of Intege
 	lines=numb/10
 	last = numb-10*lines
 	if line1.startswith('I'):
-		err = ''
+		error = ''
 	else:
-		err = 'ERROR ** NOT an I block starting at line ' +str(first)
-		exit(err)
+		error = 'NOT an I block starting at line ' +str(first)
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	ival = []
 	for m in range(0, lines):
 		mm = first+2+m
@@ -42,10 +43,11 @@ def Fblock(a,first):                                 #read Ascii block of Floats
 	lines=numb/5
 	last = numb-5*lines
 	if line1.startswith('F'):
-		err= ''
+		error= ''
 	else:
-		err = 'ERROR ** NOT an F block starting at line ' +str(first)
-		exit(err)
+		error = 'NOT an F block starting at line ' +str(first)
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	fval = []
 	for m in range(0, lines): 
 		mm = first+2+m
@@ -70,10 +72,11 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 	n1 = val[0]
 	ngrp = val[2]
 	if line1.startswith('S'):
-		err = ''
+		error = ''
 	else:
-		err = 'ERROR ** NOT an S block starting at line ' +str(first)
-		exit(err)
+		error = 'NOT an S block starting at line ' +str(first)
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	next += 1
 	next,Ival = Iblock(a,next)
 	for m in range(0, len(Ival)): 
@@ -87,10 +90,11 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 def IbackStart(instr,run,rejectZ,useM,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('Iback')
 	workdir = config['defaultsave.directory']
-	idf = instr +'_Definition.xml'
+	idf_dir = config['instrumentDefinition.directory']
+	idf = idf_dir + instr + '_Definition.xml'
 	file = instr +'_'+ run
 	filext = file + '.asc'
-	path = op.join(workdir, filext)
+	path = os.path.join(workdir, filext)
 	if Verbose:
 		logger.notice('Reading file : ' + path)
 	handle = open(path, 'r')
@@ -174,6 +178,7 @@ def IbackStart(instr,run,rejectZ,useM,Verbose,Plot,Save):      #Ascii start rout
 		xMon.append(xe)
 		yOut.append(ym[mm]/100.0)
 		eOut.append(em[mm]/10.0)
+	xMon.append(2*xMon[new-1]-xMon[new-2])
 	monWS = '__Mon'
 	CreateWorkspace(OutputWorkspace=monWS, DataX=xMon, DataY=yOut, DataE=eOut,
 		Nspec=1, UnitX='Energy')
@@ -196,7 +201,7 @@ def IbackStart(instr,run,rejectZ,useM,Verbose,Plot,Save):      #Ascii start rout
 			eDat.append(ed[mm])
 		if n != 0:
 			Qaxis += ','
-		xDat.append(2*xMon[new-1]-xMon[new-2])
+		xDat.append(2*xDat[new-1]-xDat[new-2])
 		Qaxis += str(theta[n])
 	ascWS = file+'_asc'
 	outWS = file+'_red'
@@ -214,7 +219,7 @@ def IbackStart(instr,run,rejectZ,useM,Verbose,Plot,Save):      #Ascii start rout
 	if useM == False and rejectZ == False:
 		CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
 	if Save:
-		opath = op.join(workdir,outWS+'.nxs')
+		opath = os.path.join(workdir,outWS+'.nxs')
 		SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
 		if Verbose:
 			logger.notice('Output file : ' + opath)
@@ -243,10 +248,11 @@ def ReadInxGroup(asc,n,lgrp):                  # read ascii x,y,e
 def InxStart(instr,run,rejectZ,useM,Verbose,Plot,Save):
 	StartTime('Inx')
 	workdir = config['defaultsave.directory']
-	idf = instr +'_Definition.xml'
+	idf_dir = config['instrumentDefinition.directory']
+	idf = idf_dir + instr + '_Definition.xml'
 	file = instr +'_'+ run
 	filext = file + '.inx'
-	path = op.join(workdir, filext)
+	path = os.path.join(workdir, filext)
 	if Verbose:
 		logger.notice('Reading file : ' + path)
 	handle = open(path, 'r')
@@ -265,10 +271,11 @@ def InxStart(instr,run,rejectZ,useM,Verbose,Plot,Save):
 	if Verbose:
 		logger.notice('Number of spectra : ' + str(ngrp))
 	if ltot == lasc:
-		err = ''
+		error = ''
 	else:
-		err = 'ERROR ** file ' +filext+ ' should be ' +str(ltot)+ ' lines'
-		sys.exit(err)
+		error = 'file ' +filext+ ' should be ' +str(ltot)+ ' lines'
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	Qaxis = ''
 	xDat = []
 	yDat = []
@@ -301,7 +308,7 @@ def InxStart(instr,run,rejectZ,useM,Verbose,Plot,Save):
 	if useM == False and rejectZ == False:
 		CloneWorkspace(InputWorkspace=ascWS, OutputWorkspace=outWS)
 	if Save:
-		opath = op.join(workdir,outWS+'.nxs')
+		opath = os.path.join(workdir,outWS+'.nxs')
 		SaveNexusProcessed(InputWorkspace=outWS, Filename=opath)
 		if Verbose:
 			logger.notice('Output file : ' + opath)
@@ -329,7 +336,7 @@ def RejectZero(inWS,tot,Verbose):
 def ReadMap(instr,Verbose):
 	workdir = config['defaultsave.directory']
 	file = instr +'_map.asc'
-	path = op.join(workdir, file)
+	path = os.path.join(workdir, file)
 	handle = open(path, 'r')
 	asc = []
 	for line in handle:
@@ -343,7 +350,8 @@ def ReadMap(instr,Verbose):
 	numb = val[0]
 	if (numb != (lasc-1)):
 		error = 'Number of lines  not equal to number of spectra'
-		exit(error)
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	map = []
 	for n in range(1,lasc):
 		val = ExtractInt(asc[n])
@@ -352,10 +360,8 @@ def ReadMap(instr,Verbose):
 		
 def UseMap(inWS,map,Verbose):
 	nin = mtd[inWS].getNumberHistograms()                      # no. of hist/groups in sam
-	logger.notice('Nin '+str(nin))
 	nout = 0
 	outWS = inWS[:-3]+'red'
-	logger.notice('Nmap '+str(len(map)))
 	for n in range(0, nin):
 		if map[n] == 1:
 			ExtractSingleSpectrum(InputWorkspace=inWS, OutputWorkspace='__tmp',

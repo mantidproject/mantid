@@ -86,7 +86,7 @@ public:
   {
 	LoadRawSpectrum0 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "CSP79590.raw");
+    loader5.setPropertyValue("Filename", "CSP78173.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
      
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
@@ -109,12 +109,12 @@ public:
       period++;
     }
     std::vector<std::string>::const_iterator itr1=wsNamevec.begin();
+    int expectedPeriod = 0;
     for (;itr1!=wsNamevec.end();itr1++)
     {	
       MatrixWorkspace_sptr  outsptr;
       TS_ASSERT_THROWS_NOTHING(outsptr=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*itr1)));
-      TS_ASSERT_EQUALS( outsptr->getNumberHistograms(),1 )
-
+      doTestMultiPeriodWorkspace(outsptr, ++expectedPeriod);
     }
     std::vector<std::string>::const_iterator itr=wsNamevec.begin();
 
@@ -125,15 +125,30 @@ public:
 		
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
 
-    // But the data should be different
-    TS_ASSERT_DIFFERS( outsptr1->dataY(0)[555], outsptr2->dataY(0)[555] )
-
     TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr2->sample()))
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run()))
 	
   }
   
 private:
+
+  /// Helper method to run common set of tests on a workspace in a multi-period group.
+  void doTestMultiPeriodWorkspace(MatrixWorkspace_sptr workspace, int expected_period)
+  {
+    // Check the current period property.
+    const Mantid::API::Run& run = workspace->run();
+    Property* prop = run.getLogData("current_period");
+    PropertyWithValue<int>* current_period_property = dynamic_cast<PropertyWithValue<int>* >(prop); 
+    TS_ASSERT(current_period_property != NULL);
+    int actual_period;
+    Mantid::Kernel::toValue<int>(current_period_property->value(), actual_period);
+    TS_ASSERT_EQUALS(expected_period, actual_period);
+    // Check the period n property.
+    std::stringstream stream;
+    stream << "period " << actual_period;
+    TSM_ASSERT_THROWS_NOTHING("period number series could not be found.", run.getLogData(stream.str()));
+  }
+
   LoadRawSpectrum0 loader;
   std::string inputFile;
   std::string outputSpace;

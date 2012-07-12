@@ -24,6 +24,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <cmath>
+#include <vector>
 #include <sstream>
 #include <cctype>
 #include <functional>
@@ -215,7 +216,7 @@ namespace Mantid
 
       loadSampleData(local_workspace, entry);
       m_progress->report("Loading logs");
-      loadLogs(local_workspace);
+      loadLogs(local_workspace, entry);
 
       // Load first period outside loop
       m_progress->report("Loading data");
@@ -228,16 +229,23 @@ namespace Mantid
       }
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, local_workspace);
+      
+      // Clone the workspace at this point to provide a base object for future workspace generation.
+      DataObjects::Workspace2D_sptr period_free_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+              (WorkspaceFactory::Instance().create(local_workspace));
+
+      loadPeriodLogs(firstentry, local_workspace);
 
       if( m_numberOfPeriods > 1 && m_entrynumber == 0 )
       {
+        
         WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
         wksp_group->setTitle(local_workspace->getTitle());
 
         //This forms the name of the group
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
         const std::string prop_name = "OutputWorkspace_";
-
+        
         for( size_t p = 1; p <= m_numberOfPeriods; ++p )
         {
           std::ostringstream os;
@@ -246,8 +254,11 @@ namespace Mantid
           if( p > 1 )
           {
             local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (WorkspaceFactory::Instance().create(local_workspace));
+              (WorkspaceFactory::Instance().create(period_free_workspace));
             loadPeriodData(p, entry, local_workspace);
+            loadPeriodLogs(p, local_workspace);
+            // Check consistency of logs data for multiperiod workspaces and raise warnings where necessary.
+            validateMultiPeriodLogs(local_workspace);
           }
           declareProperty(new WorkspaceProperty<Workspace>(prop_name + os.str(), base_name + os.str(), Direction::Output));
           wksp_group->addWorkspace(local_workspace);
@@ -286,6 +297,26 @@ namespace Mantid
         int64_t m_max;
       };
 
+    }
+
+    /**
+    Check for a set of synthetic logs associated with multi-period log data. Raise warnings where necessary.
+    */
+    void LoadISISNexus2::validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr ws) 
+    {
+      const Run& run = ws->run();
+      if(!run.hasProperty("current_period"))
+      {
+        g_log.warning("Workspace has no current_period log.");
+      }
+      if(!run.hasProperty("nperiods"))
+      {
+        g_log.warning("Workspace has no nperiods log");
+      }
+      if(!run.hasProperty("proton_charge_by_period"))
+      {
+        g_log.warning("Workspace has not proton_charge_by_period log");
+      }
     }
 
     /**
@@ -493,6 +524,29 @@ namespace Mantid
       catch (std::runtime_error &)
       {
         g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << std::endl;
+      }
+    }
+
+    /**
+    Loads period log data into the workspace
+    @param period :: period number
+    @param local_workspace :: workspace to add period log data to.
+    */
+    void LoadISISNexus2::loadPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace)
+    {
+      // If we loaded an icp_event log then create the necessary period logs 
+      if( local_workspace->run().hasProperty("icp_event") )
+      {
+        Kernel::Property *log = local_workspace->run().getProperty("icp_event");
+        LogParser parser(log);
+        const int period_number = static_cast<int>(period);
+        local_workspace->mutableRun().addProperty(parser.createPeriodLog(period_number));
+        local_workspace->mutableRun().addProperty(parser.createCurrentPeriodLog(period_number));
+        Property* periods = parser.createAllPeriodsLog();
+        if(!local_workspace->mutableRun().hasProperty(periods->name()))
+        {
+          local_workspace->mutableRun().addProperty(periods);
+        }
       }
     }
 
@@ -709,9 +763,9 @@ namespace Mantid
     *   /raw_data_1/runlog group of the file. Call to this method must be done
     *   within /raw_data_1 group.
     *   @param ws :: The workspace to load the logs to.
-    *   @param period :: The period of this workspace
+    *   @param entry :: Nexus entry
     */
-    void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws, int period)
+    void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr ws, NXEntry & entry)
     {
       IAlgorithm_sptr alg = createSubAlgorithm("LoadNexusLogs", 0.0, 0.5);
       alg->setPropertyValue("Filename", this->getProperty("Filename"));
@@ -723,19 +777,27 @@ namespace Mantid
       catch(std::runtime_error&)
       {
         g_log.warning() << "Unable to load run logs. There will be no log "
-                        << "data associated with this workspace\n";
+          << "data associated with this workspace\n";
         return;
       }
-      ws->populateInstrumentParameters();
-      // If we loaded an icp_event log then create the necessary period logs 
-      if( ws->run().hasProperty("icp_event") )
+      // For ISIS Nexus only, fabricate an addtional log containing an array of proton charge information from the periods group.
+      try
       {
-        Kernel::Property *log = ws->run().getProperty("icp_event");
-        LogParser parser(log);
-        ws->mutableRun().addProperty(parser.createPeriodLog(period));
-        ws->mutableRun().addProperty(parser.createAllPeriodsLog());
+        NXClass protonChargeClass = entry.openNXGroup("periods");
+        NXFloat periodsCharge = protonChargeClass.openNXFloat("proton_charge");
+        periodsCharge.load();
+        size_t nperiods = periodsCharge.dim0();
+        std::vector<double> chargesVector(nperiods);
+        std::copy(periodsCharge(), periodsCharge() + nperiods, chargesVector.begin());
+        ArrayProperty<double>* protonLogData = new ArrayProperty<double>("proton_charge_by_period", chargesVector);
+        ws->mutableRun().addProperty(protonLogData);  
       }
-
+      catch(std::runtime_error&)
+      {
+        this->g_log.debug("Cannot read periods information from the nexus file. This group may be absent.");
+      }
+      // Populate the instrument parameters.
+      ws->populateInstrumentParameters();
     }
 
     double LoadISISNexus2::dblSqrt(double in)

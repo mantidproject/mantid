@@ -168,9 +168,24 @@ class MANTID_GEOMETRY_DLL IndexingUtils
                                  double                      len_tol,
                                  double                      ang_tol );
 
+  /// Round all the components of a list of V3D objects, to the nearest integer
+  static void RoundHKLs( std::vector<Kernel::V3D> & hkl_list );
+
   /// Check is hkl is within tolerance of integer (h,k,l) non-zero values
   static bool ValidIndex( const Kernel::V3D  & hkl,
                                 double         tolerance );
+
+  /// Find number of valid HKLs and average error, in list of HKLs
+  static int NumberOfValidIndexes(
+                             const std::vector<Kernel::V3D>  & hkls,
+                             double                            tolerance,
+                             double                          & average_error );
+
+  /// Find the average indexing error for UB with the specified q's and hkls
+  static double IndexingError( const Kernel::DblMatrix         & UB,
+                               const std::vector<Kernel::V3D>  & hkls,
+                               const std::vector<Kernel::V3D>  & q_vectors );
+ 
 
   /// Check that the specified UB is reasonable for an orientation matrix 
   static bool CheckUB( const Kernel::DblMatrix & UB );

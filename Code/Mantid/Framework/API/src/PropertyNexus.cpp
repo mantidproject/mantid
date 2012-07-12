@@ -1,19 +1,28 @@
 #include "MantidAPI/PropertyNexus.h"
-#include "MantidKernel/System.h"
+
 #include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidNexusCPP/NeXusFile.hpp"
+
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/Strings.h"
+
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include "MantidKernel/Strings.h"
+
 #include <napi.h>
 
 using namespace Mantid::Kernel;
 using namespace ::NeXus;
 using boost::algorithm::is_any_of;
 using boost::algorithm::split;
+
+#ifdef _WIN32
+  #pragma warning(push)
+  #pragma warning(disable : 4805)
+#endif
 
 namespace Mantid
 {
@@ -35,11 +44,19 @@ namespace PropertyNexus
   template <typename NumT>
   Property * makeProperty(::NeXus::File * file, const std::string & name,  std::vector<Kernel::DateAndTime> & times)
   {
-
     std::vector<NumT> values;
     file->getData(values);
     if (times.empty())
-      return new PropertyWithValue<NumT>(name, values[0]);
+    {
+      if(values.size() == 1)
+      {
+        return new PropertyWithValue<NumT>(name, values[0]);
+      }
+      else
+      {
+        return new ArrayProperty<NumT>(name, values);
+      }
+    }
     else
     {
       TimeSeriesProperty<NumT> * prop = new TimeSeriesProperty<NumT>(name);
@@ -48,6 +65,27 @@ namespace PropertyNexus
     }
   }
 
+    /** Helper method to create a time series property from a boolean
+   *
+   * @param file :: nexus file handle
+   * @param name :: name of the property being created
+   * @param times :: vector of times, empty = single property with value
+   * @return Property *
+   */
+  Property * makeTimeSeriesBoolProperty(::NeXus::File * file, const std::string & name,  std::vector<Kernel::DateAndTime> & times)
+  {
+    std::vector<uint8_t> savedValues;
+    file->getData(savedValues);
+    const size_t nvals = savedValues.size();
+    std::vector<bool> realValues(nvals);
+    for(size_t i = 0; i < nvals; ++i)
+    {
+      realValues[i] = static_cast<bool>(savedValues[i]);
+    }
+    TimeSeriesProperty<bool> * prop = new TimeSeriesProperty<bool>(name);
+    prop->addValues(times, realValues);
+    return prop;
+  }
 
   /** Make a string/vector\<string\> property */
   Property * makeStringProperty(::NeXus::File * file, const std::string & name,  std::vector<Kernel::DateAndTime> & times)
@@ -107,6 +145,14 @@ namespace PropertyNexus
       file->closeData();
     }
 
+    // Check the type. Boolean stored as UINT8
+    bool typeIsBool(false);
+    // Check for boolean attribute
+    if(file->hasAttr("boolean"))
+    {
+      typeIsBool = true;
+    }
+
     std::vector<Kernel::DateAndTime> times;
     if (!timeSec.empty())
     {
@@ -117,7 +163,9 @@ namespace PropertyNexus
       DateAndTime start(startStr);
       times.reserve(timeSec.size());
       for (size_t i=0; i<timeSec.size(); i++)
+      {
         times.push_back( start + timeSec[i] );
+      }
     }
 
     file->openData("value");
@@ -145,8 +193,11 @@ namespace PropertyNexus
     case ::NeXus::CHAR:
       retVal = makeStringProperty(file, group, times);
       break;
-    case ::NeXus::INT8:
     case ::NeXus::UINT8:
+      if(typeIsBool)
+        retVal = makeTimeSeriesBoolProperty(file, group, times);
+      break;
+    case ::NeXus::INT8:
     case ::NeXus::INT16:
     case ::NeXus::UINT16:
       retVal = NULL;
@@ -170,7 +221,7 @@ namespace PropertyNexus
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Helper function to save a PropertyWithValue<> */
+  /** Helper function to save a PropertyWithValue<std::string> */
   void savePropertyWithValueString(::NeXus::File * file, PropertyWithValue<std::string> * prop)
   {
     file->makeGroup(prop->name(), "NXlog", 1);
@@ -204,6 +255,29 @@ namespace PropertyNexus
     if( value.empty() ) return;
     file->makeGroup(prop->name(), "NXlog", 1);
     file->writeData("value", value );
+    saveTimeVector(file, prop);
+    file->closeGroup();
+  }
+
+  /** 
+   * Helper function to save a TimeSeriesProperty<bool> 
+   * At the time of writing NeXus does not support boolean directly. We will use a UINT8
+   * for the value and add an attribute boolean to inidcate it is actually a bool
+  */
+  template <>
+  void saveTimeSeriesProperty(::NeXus::File * file, TimeSeriesProperty<bool> * prop)
+  {
+    std::vector<bool> value = prop->valuesAsVector();
+    if( value.empty() ) return;
+    const size_t nvalues = value.size();
+    std::vector<uint8_t> asUint(nvalues);
+    for(size_t i = 0; i < nvalues; ++i)
+    {
+      asUint[i] = static_cast<uint8_t>(value[i]);
+    }
+    file->makeGroup(prop->name(), "NXlog", 1);
+    file->writeData("value", asUint );
+    file->putAttr("boolean", "1");
     saveTimeVector(file, prop);
     file->closeGroup();
   }
@@ -242,6 +316,8 @@ namespace PropertyNexus
   //----------------------------------------------------------------------------------------------
   void saveProperty(::NeXus::File * file, Property * prop)
   {
+    if(!prop) return;
+
     { PropertyWithValue<std::string> * p = dynamic_cast<PropertyWithValue<std::string>*>(prop);
       if (p) { savePropertyWithValueString(file, p); return; } }
 
@@ -259,10 +335,16 @@ namespace PropertyNexus
       if (p) { savePropertyWithValue(file, p); return; } }
     { PropertyWithValue<uint64_t> * p = dynamic_cast<PropertyWithValue<uint64_t>*>(prop);
       if (p) { savePropertyWithValue(file, p); return; } }
+    { PropertyWithValue<std::vector<double> > * p = dynamic_cast<PropertyWithValue<std::vector<double> >*>(prop);
+    if (p) { savePropertyWithValue(file, p); return; } }
+    { PropertyWithValue<std::vector<int> > * p = dynamic_cast<PropertyWithValue<std::vector<int> >*>(prop);
+    if (p) { savePropertyWithValue(file, p); return; } }
 
     { TimeSeriesProperty<std::string> * p = dynamic_cast<TimeSeriesProperty<std::string>*>(prop);
       if (p) { saveTimeSeriesPropertyString(file, p); return; } }
 
+    { TimeSeriesProperty<bool> * p = dynamic_cast<TimeSeriesProperty<bool>*>(prop);
+      if (p) { saveTimeSeriesProperty(file, p); return; } }
     { TimeSeriesProperty<float> * p = dynamic_cast<TimeSeriesProperty<float>*>(prop);
       if (p) { saveTimeSeriesProperty(file, p); return; } }
     { TimeSeriesProperty<double> * p = dynamic_cast<TimeSeriesProperty<double>*>(prop);
@@ -278,7 +360,12 @@ namespace PropertyNexus
     { TimeSeriesProperty<uint64_t> * p = dynamic_cast<TimeSeriesProperty<uint64_t>*>(prop);
       if (p) { saveTimeSeriesProperty(file, p); return; } }
 
+    throw std::invalid_argument("PropertyNexus::saveProperty - Cannot save '" + prop->name() + "', unknown property type");
   }
+
+#ifdef _WIN32
+  #pragma warning(pop)
+#endif
 
 }// namespace PropertyNexus
 

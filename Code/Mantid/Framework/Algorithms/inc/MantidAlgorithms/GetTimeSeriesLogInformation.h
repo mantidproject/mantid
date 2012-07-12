@@ -11,7 +11,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** GetTimeSeriesLogInformation : TODO: DESCRIPTION
+  /** GetTimeSeriesLogInformation : Read a TimeSeries log and return some information required by users.
     
     @date 2011-12-22
 

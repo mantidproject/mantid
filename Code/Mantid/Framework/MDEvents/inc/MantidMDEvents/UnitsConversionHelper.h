@@ -38,7 +38,7 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-namespace ConvertToMD
+namespace CnvrtToMD
 {
     // possible situations with unit conversion
     enum ConvertUnits
@@ -58,7 +58,7 @@ class DLLExport UnitsConversionHelper
       Kernel::Unit_sptr pTargetUnit;
 
       // the ID, which specifies what kind of unit conversion should be used. 
-      ConvertToMD::ConvertUnits UnitCnvrsn;
+      CnvrtToMD::ConvertUnits UnitCnvrsn;
 
       //  these variables needed and used in the case of fast units conversion
       double factor, power;
@@ -73,10 +73,11 @@ public:
     void initialize(const MDWSDescription &TWSD,const std::string &units_to);
     void updateConversion(size_t i);
     double convertUnits(double val);
-
+    // copy constructor
+    UnitsConversionHelper(const UnitsConversionHelper &another);
 protected: // for testing
     /// establish and initialize proper units conversion from input to output units;
-    ConvertToMD::ConvertUnits analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo);
+    CnvrtToMD::ConvertUnits analyzeUnitsConversion(const std::string &UnitsFrom,const std::string &UnitsTo);
 
 };
 

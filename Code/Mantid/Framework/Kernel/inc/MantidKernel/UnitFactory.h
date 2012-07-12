@@ -67,8 +67,6 @@ class Logger;
 */
 class MANTID_KERNEL_DLL UnitFactoryImpl : public DynamicFactory<Unit>
 {
-public:
-  virtual boost::shared_ptr<Unit> create(const std::string& className) const;
 
 private:
   friend struct CreateUsingNew<UnitFactoryImpl>;
@@ -81,9 +79,6 @@ private:
   UnitFactoryImpl& operator = (const UnitFactoryImpl&);
   ///Private Destructor
   virtual ~UnitFactoryImpl();
-
-  /// Stores pointers to already created unit instances, with their name as the key
-  mutable std::map< std::string, boost::shared_ptr<Unit> > m_createdUnits;
 
   /// Reference to the logger class
   Kernel::Logger& m_log;

@@ -316,7 +316,7 @@ m_width(10.0),
 m_stored_width(10.0)
 {
   m_inner_shape = m_outer_shape->clone();
-  QRectF inner_rect =  m_inner_shape->getBoundingRect();
+  m_inner_shape->getBoundingRect();
   m_inner_shape->adjustBoundingRect(m_width,m_width,-m_width,-m_width);
   resetBoundingRect();
   m_outer_shape->setFillColor(QColor());

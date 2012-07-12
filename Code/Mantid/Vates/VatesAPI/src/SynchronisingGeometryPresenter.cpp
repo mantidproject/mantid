@@ -209,8 +209,6 @@ namespace Mantid
       }
       //Replace the old dimension with the new/modified one.
       std::replace_if(m_dimensions.begin(), m_dimensions.end(), FindModelId(pDimensionPresenter->getAppliedModel()->getDimensionId()), pDimensionPresenter->getAppliedModel());
-      //Delete the axis mapping for the presenter of this dimension.
-      VecDimPresenter_sptr::iterator location = std::find_if(m_dimPresenters.begin(), m_dimPresenters.end(), FindId(pDimensionPresenter->getAppliedModel()->getDimensionId()));
       //DONOT ERRASE THE MAPPING. 
       shuffleMappedPresenters();
 
@@ -293,7 +291,6 @@ namespace Mantid
 
       VecIMDDimension_sptr vecIntegrated = getIntegratedDimensions();
       VecDimPresenter_sptr::const_iterator its = m_dimPresenters.begin();
-      Mantid::Geometry::VecIMDDimension_sptr::const_iterator it = vecIntegrated.begin();
       for(;its != m_dimPresenters.end(); ++its)
       {
         if((*its)->getAppliedModel()->getIsIntegrated())

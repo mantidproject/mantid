@@ -9545,15 +9545,14 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   if(scriptingWindow && scriptingWindow->isExecuting())
   {
-    if( QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
-    {
-      mantidUI->cancelAllRunningAlgorithms();
-    }
-    else
+    if( ! QMessageBox::question(this, tr("MantidPlot"), "A script is still running, abort and quit application?", tr("Yes"), tr("No")) == 0 )
     {
       ce->ignore();
       return;
-    }	  
+    }
+    // We used to cancel running algorithms here (if 'Yes' to the above question), but now that
+    // happens in MantidUI::shutdown (called below) because we want it regardless of whether a
+    // script is running.
   }
 
   if( !saved )
@@ -9566,7 +9565,8 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
       return;
     }
   }
-  
+
+  mantidUI->shutdown();
 
   if( scriptingWindow )
   {
@@ -9582,14 +9582,13 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
   /// Ensure interface python references are cleaned up before the interpreter shuts down
   delete m_iface_script;
 
-	// Emit a shutting_down() signal that can be caught by
-	// independent QMainWindow objects to know when MantidPlot
-	// is shutting down.
+  // Emit a shutting_down() signal that can be caught by
+  // independent QMainWindow objects to know when MantidPlot
+  // is shutting down.
   emit shutting_down();
 
   //Save the settings and exit
   saveSettings();
-  mantidUI->shutdown();
   m_scriptInterpreter->shutdown();
   scriptingEnv()->finalize();
 

@@ -153,7 +153,12 @@ void ParamFunction::setParameter(const std::string& name, const double& value, b
   if (it == m_parameterNames.end())
   {
     std::ostringstream msg;
-    msg << "ParamFunction parameter ("<<ucName<<") does not exist.";
+    msg << "ParamFunction (set) parameter ("<<ucName<<") does not exist.";
+    msg << "\nAllowed parameters: ";
+    for (size_t ist = 0; ist < m_parameterNames.size(); ++ist)
+    {
+      msg << m_parameterNames[ist] << ", ";
+    }
     throw std::invalid_argument(msg.str());
   }
   setParameter(static_cast<int>(it - m_parameterNames.begin()),value,explicitlySet);

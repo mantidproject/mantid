@@ -68,6 +68,25 @@ public:
     TS_ASSERT( ! lProp->value().compare("-9876543210987654") );
   }
 
+  void testSize()
+  {
+    // Test single value property.
+    TS_ASSERT_EQUALS(1, iProp->size());
+    TS_ASSERT_EQUALS(1, dProp->size());
+    TS_ASSERT_EQUALS(1, sProp->size());
+    TS_ASSERT_EQUALS(1, lProp->size());
+
+    // Test vector value property.
+    std::vector<int> v;
+    v.push_back(1);
+    v.push_back(2);
+    v.push_back(3);
+    PropertyWithValue< std::vector<int> > * pv = new PropertyWithValue< std::vector<int> >("some_array", v);
+    TS_ASSERT_EQUALS(int(v.size()), pv->size());
+
+    delete pv;
+  }
+
   void testSetValue()
   {
     PropertyWithValue<int> i("test", 1);

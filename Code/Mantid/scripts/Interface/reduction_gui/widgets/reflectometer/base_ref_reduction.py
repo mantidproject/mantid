@@ -212,10 +212,12 @@ class BaseRefWidget(BaseWidget):
         """
 #        self._summary.data_run_number_processing.show()
         run_number = self._summary.data_run_number_edit.text()
-        _file = FileFinder.findRuns("REF_L%d"%int(run_number))
-        lambdaRequest = ''
+        
         try:
-            metadata= self.getMetadata(_file[0])
+            _file = FileFinder.findRuns("REF_L%d"%int(run_number))[0]
+            lambdaRequest = ''
+            
+            metadata= self.getMetadata(_file)
             
             tthd_value = metadata[0]
             tthd_value_string = '{0:.2f}'.format(tthd_value)
@@ -284,6 +286,7 @@ class BaseRefWidget(BaseWidget):
                     _y = 0.
                     _e = 0.
                 else:
+
                     _error = 1./_left_e2 + 1./_right_e2
                     _x = (_left_x + _right_x) / 2. 
                     _y = (_left_y/_left_e2 + _right_y/_right_e2) / _error 
@@ -338,6 +341,19 @@ class BaseRefWidget(BaseWidget):
             text = [line1, line2, line3]
         else:
             text = ['#Q(1/Angstrom) R delta_R']
+        
+#        #rebinned using output factors
+#        q_min = float(self._summary.q_min_edit.text())
+#        q_bin = -float(self._summary.q_step_edit.text())
+#
+#        mt = mtd['ref_combined']
+#        x_axis = mt.readX(0)[:]
+#        q_max = float(x_axis[-1]) 
+#        
+#        q_binning = [q_min, q_bin, q_max]
+#        Rebin(InputWorkspace='ref_combined',
+#              OutputWorkspace='ref_combined',
+#              Params=q_binning)
             
         mt = mtd['ref_combined']
         x_axis = mt.readX(0)[:]
@@ -775,12 +791,12 @@ class BaseRefWidget(BaseWidget):
         if not IS_IN_MANTIDPLOT:
             return
         
-        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))
-
-        range_min = int(min_ctrl.text())
-        range_max = int(max_ctrl.text())
-
-        if len(f)>0 and os.path.isfile(f[0]):
+        try:
+            f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]
+            
+            range_min = int(min_ctrl.text())
+            range_max = int(max_ctrl.text())
+            
             def call_back(xmin, xmax):
                 min_ctrl.setText("%-d" % int(xmin))
                 max_ctrl.setText("%-d" % int(xmax))
@@ -790,32 +806,36 @@ class BaseRefWidget(BaseWidget):
             # For REFM it's the other way around
             if self.short_name == "REFM":
                 is_pixel_y = not is_pixel_y
-                
-            min, max = data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y,
+            
+            min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
                                                                       callback=call_back,
                                                                       range_min=range_min,
                                                                       range_max=range_max,
                                                                       high_res=is_high_res,
                                                                       instrument=self.short_name,
                                                                       isPeak=isPeak)
-            return min, max
+            return min, max            
+        except:
+            pass
             
     def _plot_tof(self):
         if not IS_IN_MANTIDPLOT:
             return
-        
-        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
+        try:
+            f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))[0]
             
-        range_min = int(self._summary.data_from_tof.text())
-        range_max = int(self._summary.data_to_tof.text())
-
-        if len(f)>0 and os.path.isfile(f[0]):
+            range_min = int(self._summary.data_from_tof.text())
+            range_max = int(self._summary.data_to_tof.text())
+        
             def call_back(xmin, xmax):
                 self._summary.data_from_tof.setText("%-d" % int(xmin))
                 self._summary.data_to_tof.setText("%-d" % int(xmax))
+                
             data_manipulation.tof_distribution(f[0], call_back,
                                                range_min=range_min,
                                                range_max=range_max)
+        except:
+            pass
 
     def _add_data(self):
         state = self.get_editing_state()

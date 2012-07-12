@@ -71,12 +71,11 @@ class RefLview(PythonAlgorithm):
             ws_name = "refl%d" % _run
             ws_event_data = ws_name+"_evt"  
 
-            _File = FileFinder.findRuns("REF_L%d" %_run)
-            if len(_File)>0 and os.path.isfile(_File[0]): 
-                data_file = _File[0]
+            try:
+                data_file = FileFinder.findRuns("REF_L%d" %_run)[0]
                 if bDebug:
-                    print 'DEBUG: full file name is ' + _File[0]
-            else:
+                    print 'DEBUG: full file name is ' + data_file
+            except RuntimeError:
                 msg = "RefLReduction: could not find run %d\n" % _run
                 msg += "Add your data folder to your User Data Directories in the File menu"
                 if bDebug:

@@ -166,32 +166,34 @@ namespace Crystal
       std::vector<Peak> &peaks = ws->getPeaks();
       size_t n_peaks = ws->getNumberPeaks();
 
+                                       // transform the HKLs and record the new HKL
+                                       // and q-vectors for peaks ORIGINALLY indexed
+      DblMatrix hkl_tran = info.GetHKL_Tran(); 
+      int num_indexed = 0;
       std::vector<V3D> miller_indices;
       std::vector<V3D> q_vectors;
-
-      q_vectors.reserve( n_peaks );
       for ( size_t i = 0; i < n_peaks; i++ )
       {
-        q_vectors.push_back( peaks[i].getQSampleFrame() );
+        V3D hkl( peaks[i].getHKL() );
+        if ( IndexingUtils::ValidIndex(hkl,tolerance ) )
+        {
+          num_indexed++;
+          miller_indices.push_back( hkl_tran * hkl );
+          q_vectors.push_back( peaks[i].getQSampleFrame() );
+          peaks[i].setHKL( hkl_tran * hkl );
+        }
+        else                            // mark as NOT indexed
+          peaks[i].setHKL( V3D(0.0,0.0,0.0) );
       }
- 
-      double average_error;
 
-      int num_indexed = IndexingUtils::CalculateMillerIndices( newUB, 
-                                                               q_vectors,
-                                                               tolerance,
-                                                               miller_indices,
-                                                               average_error );
-      g_log.notice() << "Indexed " << num_indexed 
-                     << " Peaks out of " << n_peaks 
-                     << " with tolerance of " << tolerance << std::endl;
+      double average_error = IndexingUtils::IndexingError( newUB, miller_indices, q_vectors );
 
-      g_log.notice() << "Average error in h,k,l for indexed peaks =  "
-                     << average_error << std::endl;
+      // Tell the user what happened.
+      g_log.notice() << "Transformed Miller indices on previously valid indexed Peaks. " << std::endl;   
+      g_log.notice() << "Set hkl to 0,0,0 on peaks previously indexed out of tolerance. " << std::endl;   
+      g_log.notice() << "Now, " << num_indexed << " are indexed with average error " << average_error << std::endl;
 
-      for ( size_t i = 0; i < n_peaks; i++ )
-        peaks[i].setHKL( miller_indices[i] );
-
+      // Save output properties
       this->setProperty("NumIndexed", num_indexed);
       this->setProperty("AverageError", average_error);
     }

@@ -852,6 +852,7 @@ void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QStri
 {
   //This will only ever be of size zero or one
   QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name,Qt::MatchFixedString);
+  QList<QTreeWidgetItem *> new_name_matches = m_tree->findItems(new_name,Qt::MatchFixedString);
   QTreeWidgetItem *parent_item(NULL);
   if( name_matches.isEmpty() )
   {	 
@@ -873,12 +874,17 @@ void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QStri
         {
           return;
         }
-        //if the workspace  exists as child workspace
+        // find item for the workspace that was renamed
         if(!ws_name.compare(childItem->text(0)))
         {
-          //topItem->takeChild(chIndex);
 		      parent_item = topItem;
           childItem->setText(0, new_name);
+        }
+        // if the workspace with new name exists before renaming
+        // it will be removed
+        else if(!new_name.compare(childItem->text(0)))
+        {
+          topItem->takeChild(chIndex);
         }
       }
     }
@@ -889,12 +895,11 @@ void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QStri
   }
   else
   {
-    //if( m_known_groups.contains(ws_name) )
-    //{
-    //  m_known_groups.remove(ws_name);
-    //}
-    //m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(name_matches[0]));
     name_matches[0]->setText(0, new_name);
+    if ( !new_name_matches.isEmpty() )
+    {
+      m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(new_name_matches[0]));
+    }
   }
 
 }

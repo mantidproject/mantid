@@ -122,7 +122,7 @@ public:
 
   }
   
-  void xtest_Receiving_multiperiod_data()
+  void test_Receiving_multiperiod_data()
   {
 
 #ifdef _WIN32
@@ -136,8 +136,103 @@ public:
     TS_ASSERT( listener->isConnected() );
 
     auto outWS = listener->extractData();
-    //TS_ASSERT_EQUALS( ws->getNumberHistograms(), 100 );
-    //TS_ASSERT_EQUALS( ws->blocksize(), 30 );
+    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>( outWS );
+    TS_ASSERT( group );
+    TS_ASSERT_EQUALS( group->size(), 2 );
+    auto ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(0) );
+    TS_ASSERT( ws1 );
+    auto ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(1) );
+    TS_ASSERT( ws2 );
+
+    TS_ASSERT_EQUALS( ws1->getNumberHistograms(), 100 );
+    TS_ASSERT_EQUALS( ws1->blocksize(), 30 );
+
+    TS_ASSERT_EQUALS( ws2->getNumberHistograms(), 100 );
+    TS_ASSERT_EQUALS( ws2->blocksize(), 30 );
+
+    auto x = ws1->readX( 0 );
+    TS_ASSERT_EQUALS( x.size(), 31 );
+    TS_ASSERT_EQUALS( x[0], 0 );
+    TS_ASSERT_DELTA( x[1], 0.1, 1e-6 );
+    TS_ASSERT_DELTA( x[30], 3.0, 1e-6 );
+
+    x = ws1->readX( 4 );
+    TS_ASSERT_EQUALS( x.size(), 31 );
+    TS_ASSERT_EQUALS( x[0], 0 );
+    TS_ASSERT_DELTA( x[1], 0.1, 1e-6 );
+    TS_ASSERT_DELTA( x[30], 3.0, 1e-6 );
+
+    x = ws2->readX( 0 );
+    TS_ASSERT_EQUALS( x.size(), 31 );
+    TS_ASSERT_EQUALS( x[0], 0 );
+    TS_ASSERT_DELTA( x[1], 0.1, 1e-6 );
+    TS_ASSERT_DELTA( x[30], 3.0, 1e-6 );
+
+    x = ws2->readX( 44 );
+    TS_ASSERT_EQUALS( x.size(), 31 );
+    TS_ASSERT_EQUALS( x[0], 0 );
+    TS_ASSERT_DELTA( x[1], 0.1, 1e-6 );
+    TS_ASSERT_DELTA( x[30], 3.0, 1e-6 );
+
+    auto y = ws1->readY( 2 );
+    TS_ASSERT_EQUALS( y[0], 3 );
+    TS_ASSERT_EQUALS( y[5], 3 );
+    TS_ASSERT_EQUALS( y[29], 3 );
+
+    y = ws1->readY( 44 );
+    TS_ASSERT_EQUALS( y[0], 45 );
+    TS_ASSERT_EQUALS( y[5], 45 );
+    TS_ASSERT_EQUALS( y[29], 45 );
+
+    y = ws1->readY( 77 );
+    TS_ASSERT_EQUALS( y[0], 78 );
+    TS_ASSERT_EQUALS( y[5], 78 );
+    TS_ASSERT_EQUALS( y[29], 78 );
+
+    y = ws2->readY( 2 );
+    TS_ASSERT_EQUALS( y[0], 1003 );
+    TS_ASSERT_EQUALS( y[5], 1003 );
+    TS_ASSERT_EQUALS( y[29], 1003 );
+
+    y = ws2->readY( 44 );
+    TS_ASSERT_EQUALS( y[0], 1045 );
+    TS_ASSERT_EQUALS( y[5], 1045 );
+    TS_ASSERT_EQUALS( y[29], 1045 );
+
+    y = ws2->readY( 77 );
+    TS_ASSERT_EQUALS( y[0], 1078 );
+    TS_ASSERT_EQUALS( y[5], 1078 );
+    TS_ASSERT_EQUALS( y[29], 1078 );
+
+    auto& sm = ws1->spectraMap();
+    TS_ASSERT_EQUALS( sm.nSpectra(), 100 );
+
+    auto d = sm.getDetectors( 1 );
+    TS_ASSERT_EQUALS( d.size(), 1 );
+    TS_ASSERT_EQUALS( d[0], 1001 );
+
+    d = sm.getDetectors( 4 );
+    TS_ASSERT_EQUALS( d.size(), 1 );
+    TS_ASSERT_EQUALS( d[0], 1004 );
+
+    d = sm.getDetectors( 100 );
+    TS_ASSERT_EQUALS( d.size(), 1 );
+    TS_ASSERT_EQUALS( d[0], 1100 );
+
+    auto& sm2 = ws2->spectraMap();
+    TS_ASSERT_EQUALS( sm.nSpectra(), 100 );
+
+    d = sm2.getDetectors( 1 );
+    TS_ASSERT_EQUALS( d.size(), 1 );
+    TS_ASSERT_EQUALS( d[0], 1001 );
+
+    d = sm2.getDetectors( 4 );
+    TS_ASSERT_EQUALS( d.size(), 1 );
+    TS_ASSERT_EQUALS( d[0], 1004 );
+
+    d = sm2.getDetectors( 100 );
+    TS_ASSERT_EQUALS( d.size(), 1 );
+    TS_ASSERT_EQUALS( d[0], 1100 );
 
     dae.cancel();
     res.wait();

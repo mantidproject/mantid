@@ -198,7 +198,7 @@ public:
     double theta_shift=0.4;
     for(size_t i = 0; i < 40; ++i)
     {
-      double theta = 0.02 * i * pi;
+      double theta = 0.02 * double(i) * pi;
       s1.push_back(std::sin(theta));
       e1.push_back(std::sin(theta));
       s2.push_back(std::sin(theta+theta_shift));

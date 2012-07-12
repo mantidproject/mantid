@@ -7,57 +7,57 @@ namespace MDEvents
 {
 
 MDTransfAxisNames::MDTransfAxisNames():
-default_dim_ID(ConvertToMD::nDefaultID)
+default_dim_ID(CnvrtToMD::nDefaultID)
 {
   // this defines default dimension ID-s which are used to indentify dimensions when using the target MD workspace later
      // for ModQ transformation:
-     default_dim_ID[ConvertToMD::ModQ_ID]="|Q|";
+     default_dim_ID[CnvrtToMD::ModQ_ID]="|Q|";
      // for Q3D transformation
-     default_dim_ID[ConvertToMD::Q1_ID]="Q1";
-     default_dim_ID[ConvertToMD::Q2_ID]="Q2";
-     default_dim_ID[ConvertToMD::Q3_ID]="Q3";
-     default_dim_ID[ConvertToMD::dE_ID]="DeltaE";
+     default_dim_ID[CnvrtToMD::Q1_ID]="Q1";
+     default_dim_ID[CnvrtToMD::Q2_ID]="Q2";
+     default_dim_ID[CnvrtToMD::Q3_ID]="Q3";
+     default_dim_ID[CnvrtToMD::dE_ID]="DeltaE";
 }
 
 //
-std::vector<std::string> MDTransfAxisNames::getDefaultDimIDQ3D(ConvertToMD::EModes  dEMode)const
+std::vector<std::string> MDTransfAxisNames::getDefaultDimIDQ3D(CnvrtToMD::EModes  dEMode)const
 {
     std::vector<std::string> rez;
-     if(dEMode==ConvertToMD::Elastic)
+     if(dEMode==CnvrtToMD::Elastic)
      {
           rez.resize(3);
      }else{
-       if (dEMode==ConvertToMD::Direct||dEMode==ConvertToMD::Indir)
+       if (dEMode==CnvrtToMD::Direct||dEMode==CnvrtToMD::Indir)
        {
             rez.resize(4);
-            rez[3]=default_dim_ID[ConvertToMD::dE_ID];
+            rez[3]=default_dim_ID[CnvrtToMD::dE_ID];
        }else{
             throw(std::invalid_argument("Unknown dE mode provided"));
        }
      }
-     rez[0]=default_dim_ID[ConvertToMD::Q1_ID];
-     rez[1]=default_dim_ID[ConvertToMD::Q2_ID];
-     rez[2]=default_dim_ID[ConvertToMD::Q3_ID];
+     rez[0]=default_dim_ID[CnvrtToMD::Q1_ID];
+     rez[1]=default_dim_ID[CnvrtToMD::Q2_ID];
+     rez[2]=default_dim_ID[CnvrtToMD::Q3_ID];
      return rez;
 }
 
 
 
-std::vector<std::string> MDTransfAxisNames::getDefaultDimIDModQ(ConvertToMD::EModes  dEMode)const
+std::vector<std::string> MDTransfAxisNames::getDefaultDimIDModQ(CnvrtToMD::EModes  dEMode)const
 {
      std::vector<std::string> rez;
 
-     if(dEMode==ConvertToMD::Elastic){
+     if(dEMode==CnvrtToMD::Elastic){
           rez.resize(1);
      }else{
-         if (dEMode==ConvertToMD::Direct||dEMode==ConvertToMD::Indir){
+         if (dEMode==CnvrtToMD::Direct||dEMode==CnvrtToMD::Indir){
             rez.resize(2);
-            rez[1]=default_dim_ID[ConvertToMD::dE_ID];
+            rez[1]=default_dim_ID[CnvrtToMD::dE_ID];
          }else{
              throw(std::invalid_argument("Unknown dE mode provided"));
          }
      }
-     rez[0]=default_dim_ID[ConvertToMD::ModQ_ID];
+     rez[0]=default_dim_ID[CnvrtToMD::ModQ_ID];
      return rez;
 }
 

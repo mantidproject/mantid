@@ -96,13 +96,16 @@ namespace Mantid
       /// Load in details about the sample
       void loadSampleData(DataObjects::Workspace2D_sptr, Mantid::NeXus::NXEntry & entry);
       /// Load log data from the nexus file
-      void loadLogs(DataObjects::Workspace2D_sptr, int period = 1);
+      void loadLogs(DataObjects::Workspace2D_sptr ws, Mantid::NeXus::NXEntry & entry);
       // Load a given period into the workspace
       void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace);
       // Load a data block
       void loadBlock(Mantid::NeXus::NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
           int64_t &hist, int64_t& spec_num, DataObjects::Workspace2D_sptr localWorkspace);
-
+      // Load period logs
+      void loadPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace);
+      // Validate multiperiod logs
+      void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
 
       /// The name and path of the input file
       std::string m_filename;

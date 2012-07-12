@@ -5,9 +5,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-
+#include <boost/shared_ptr.hpp>
 namespace Mantid
 {
+namespace API
+{
+  //Forward declare
+  class MatrixWorkspace;
+}
 namespace Algorithms
 {
 /** Normalises a workspace according to the good proton charge figure taken from the
@@ -62,10 +67,10 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  // Extract the charge value from the logs.
+  double extractCharge(boost::shared_ptr<Mantid::API::MatrixWorkspace> inputWs) const;
   /// Progress reporting
   API::Progress* m_progress;
-
-
   
 };
 

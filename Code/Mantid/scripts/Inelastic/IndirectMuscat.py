@@ -1,5 +1,5 @@
 # MUSIC : Version of Minus for MIDAS
-#
+
 from IndirectImport import *
 if is_supported_f2py_platform():
     muscat = import_f2py("muscat")
@@ -56,24 +56,67 @@ def CalcSqw(q0,nw2,nel,dw,w0):
 	CreateWorkspace(OutputWorkspace='S(Q,w)', DataX=xSqw, DataY=ySqw, DataE=eSqw,
 		Nspec=nq, UnitX='DeltaE', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
 
+def CheckCoeff(disp,coeff):
+	if (disp == 'CE') or (disp == 'SS'):
+		if coeff[0] < 1e-8:
+			error = disp + ' coeff 1 is zero'			
+			logger.notice('ERROR *** '+error)
+			sys.exit(error)
+		if coeff[1] < 1e-8:
+			error = disp + ' coeff 2 is zero'			
+			logger.notice('ERROR *** '+error)
+			sys.exit(error)
+	if (disp == 'Poly'):
+		cc = coeff[0]+coeff[1]+coeff[2]+coeff[3]+coeff[4]
+		if cc < 1e-8:
+			error = 'Poly coeffs all zero'			
+			logger.notice('ERROR *** '+error)
+			sys.exit(error)
+
+def CheckQw(grid):
+	nq = int(grid[0])
+	if nq == 0:
+		error = 'Grid : Number of Q values is zero'			
+		logger.notice('ERROR *** '+error)
+		sys.exit(error)
+	nw = int(grid[2])
+	if nw == 0:
+		error = 'Grid : Number of w values is zero'			
+		logger.notice('ERROR *** '+error)
+		sys.exit(error)
+	dq = float(grid[1])
+	if dq < 1e-5:
+		error = 'Grid : Q increment is zero'			
+		logger.notice('ERROR *** '+error)
+		sys.exit(error)
+	dw = float(grid[3])*0.001
+	if dw < 1e-8:
+		error = 'Grid : w increment is zero'			
+		logger.notice('ERROR *** '+error)
+		sys.exit(error)
+	return nq,dq,nw,dw
+
 def CreateSqw(disp,coeff,grid,Verbose):
+	CheckCoeff(disp,coeff)
 	if Verbose:
 		logger.notice('Dispersion is '+disp)
 		logger.notice('Coefficients : '+str(coeff))
-	q0,w0,e0 = CalcW0(int(grid[0]),float(grid[1]),disp,coeff)
-	Q_in = PadArray(q0,500)
+	nq,dq,nw,dw = CheckQw(grid)
+	q0,w0,e0 = CalcW0(nq,dq,disp,coeff)
 	CreateWorkspace(OutputWorkspace=disp, DataX=q0, DataY=w0, DataE=e0,
 		Nspec=1, UnitX='MomentumTransfer')
-	nq = int(grid[0])
-	nw = int(grid[2])
 	nw2 = 2*nw+1
 	nel= nw+1
-	dw = float(grid[3])*0.001
 	CalcSqw(q0,nw2,nel,dw,w0)
 	
 def ReadSqw(sqw,Verbose):
+	logger.notice('Reading S(q,w) from workspace : '+sqw)
 	Sqw_in = []
 	nq = mtd[sqw].getNumberHistograms()       # no. of hist/groups in sample
+	if nq == 0:
+		error = 'Sqw : Number of q histograms is zero'			
+		logger.notice('ERROR *** '+error)
+		sys.exit(error)
 	axis = mtd[sqw].getAxis(1)
 	Q = []
 	for i in range(0,nq):
@@ -85,14 +128,25 @@ def ReadSqw(sqw,Verbose):
 		Ys = PadArray(Ys,1000)          # pad to Fortran energy size 1000
 		Sqw_in.append(Ys)
 	nw = len(Xw)-1   						    # no. points from length of x array
+	if nw == 0:
+		error = 'Sqw : Number of w values is zero'			
+		logger.notice('ERROR *** '+error)
+		sys.exit(error)
 	dw = Xw[2]-Xw[1]
+	if dw < 1e-8:
+		error = 'Sqw : w increment is zero'			
+		logger.notice('ERROR *** '+error)
+		sys.exit(error)
 	nel= nw+1
 	for n in range(0,nw):
 		if (Xw[n] < dw):
 			nel = n
 	dq = Q[1]-Q[0]
+	if dq < 1e-5:
+		error = 'Sqw : Q increment is zero'			
+		logger.notice('ERROR *** '+error)
+		sys.exit(error)
 	if Verbose:
-		logger.notice('Reading S(q,w) from workspace : '+sqw)
 		logger.notice('Q : '+str(nq)+' points from '+str(Q[0])+' to '+str(Q[nq-1])+' at '+str(dq))
 		logger.notice('w : '+str(nw)+' points from '+str(Xw[0])+' to '+str(Xw[nw])+' at '+str(dw)
 			+' ; Elastic energy at : '+str(nel))
@@ -102,11 +156,54 @@ def ReadSqw(sqw,Verbose):
 		Sqw_in.append(X0)
 	return nq,dq,Q_in,nw,dw,nel,Xw,Sqw_in
 
+def CheckNeut(neut):
+#	neut = [NRUN1, NRUN2, JRAND, MRAND, NMST]
+	if neut[0] == '0':
+		error = 'NRUN1 is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if neut[1] == '0':
+		error = 'NRUN2 is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if neut[4] == '0':
+		error = 'Number scatterings is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+
+def CheckBeam(beam):
+#	beam = [THICK, WIDTH, HEIGHT, alfa]
+	if float(beam[0]) <1e-5:
+		error = 'Beam thickness is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if float(beam[1]) <1e-5:
+		error = 'Beam width is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if float(beam[2]) <1e-5:
+		error = 'Beam height is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+
+def CheckSam(sam):
+	if float(sam[1]) <1e-8:
+		error = 'Sample density is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if (float(sam[2])+float(sam[3])) <1e-8:
+		error = 'Sample total scattering cross-section (scat+abs) is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+
 def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
 #	neut = [NRUN1, NRUN2, JRAND, MRAND, NMST]
 #	beam = [THICK, WIDTH, HEIGHT, alfa]
 #   sam = [temp, dens, siga, sigb]
 	workdir = config['defaultsave.directory']
+	CheckNeut(neut)
+	CheckBeam(beam)
+	CheckSam(sam)
 	samWS = sname
 	efixed = getEfixed(samWS)
 	angle,QQ = GetThetaQ(samWS)
@@ -156,8 +253,8 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
 								ijeom,rgeom,sam,ims,dqw,Q_in,Sqw_in)
 		if (kill != 0):
 			error = 'Muscat error code : '+str(kill)			
-			logger.warning(error)
-			exit(error)
+			logger.notice(error)
+			sys.exit(error)
 		else:
 			xEn = energy[:iw]
 			xEn = np.append(xEn,2*energy[iw-1]-energy[iw-2])

@@ -2,7 +2,7 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument name="PEARL" valid-from   ="2011-05-01 23:59:59"
-                       valid-to     ="2100-01-31 23:59:59"
+                       valid-to     ="2012-05-14 23:59:58"
 		       last-modified="2008-09-35 22:00:00">
 <!--<defaults>
   <length unit="meter" />
@@ -149,11 +149,11 @@
 
 <type name="monitors defined by matt">
 <component type="monitor" mark-as="monitor">
-  <location  r="1.75" t="180" p="0" name="upstream_monitor_det1" />
-  <location  r="1.70" t="180" p="0" name="upstream_monitor_det2" />
-  <location  r="0.98" t="180" p="0" name="upstream_monitor_det3" />
-  <location  r="0.65" t="0" p="0" name="down_monitor_det4" />
-  <location  r="510.0" t="0" p="0" name="down_monitor_det5" />
+  <location  r="1.68061" t="180" p="0" name="upstream_monitor_det1" />
+  <location  r="1.62917" t="180" p="0" name="upstream_monitor_det2" />
+  <location  r="0.73141" t="180" p="0" name="upstream_monitor_det3" />
+  <location  r="0.622146" t="0" p="0" name="down_monitor_det4" />
+  <location  r="5.105454" t="0" p="0" name="down_monitor_det5" />
 </component>
 </type>
 <!--              LIST OF COMPONENT TYPES             -->

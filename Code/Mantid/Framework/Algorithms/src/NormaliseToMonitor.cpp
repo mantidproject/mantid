@@ -413,7 +413,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWor
     throw std::runtime_error("The Input and Monitor workspaces must come from the same instrument");
   }
   // Check that they're in the same units
-  if ( monitorWS->getAxis(0)->unit() != inputWorkspace->getAxis(0)->unit() )
+  if ( monitorWS->getAxis(0)->unit()->unitID() != inputWorkspace->getAxis(0)->unit()->unitID() )
   {
     throw std::runtime_error("The Input and Monitor workspaces must have the same unit");
   }

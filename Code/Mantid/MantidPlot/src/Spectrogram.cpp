@@ -899,7 +899,7 @@ QImage Spectrogram::renderImage(
     // Modify the colour table so that the last colour is white and transparent
     // which will indicate no value
     QVector<QRgb> ctable = this->colorMap().colorTable(intensityRange);
-    ctable[255] = qRgba(255,255,255,0);
+    ctable.back() = qRgba(255,255,255,0);
     image.setColorTable(ctable);
 
     image.fill(255);

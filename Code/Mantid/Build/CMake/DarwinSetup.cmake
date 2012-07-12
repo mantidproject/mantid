@@ -20,6 +20,15 @@ include_directories ( ${PYTHON_INCLUDE_PATH} )
 if ( PYTHON_DEBUG_LIBRARIES )
   set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
 endif ()
+# Find the python interpreter to get the version we're using (needed for install commands below)
+find_package ( PythonInterp )
+if ( PYTHON_VERSION_MAJOR )
+  set ( PY_VER "${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}" )
+  message ( STATUS "Python version is " ${PY_VER} )
+else ()
+  # Older versions of CMake don't set these variables so just assume 2.6 as before
+  set ( PY_VER 2.6 )
+endif ()
 
 ###########################################################################
 # Force 64-bit compiler as that's all we support
@@ -50,20 +59,19 @@ set ( PLUGINS_DIR MantidPlot.app/plugins )
 set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
 set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
-
-install ( PROGRAMS /Library/Python/2.6/site-packages/sip.so DESTINATION ${BIN_DIR} )
+install ( PROGRAMS /Library/Python/${PY_VER}/site-packages/sip.so DESTINATION ${BIN_DIR} )
 # Explicitly specify which PyQt libraries we want because just taking the whole
 # directory will swell the install kit unnecessarily.
-install ( FILES /Library/Python/2.6/site-packages/PyQt4/Qt.so
-                /Library/Python/2.6/site-packages/PyQt4/QtCore.so
-                /Library/Python/2.6/site-packages/PyQt4/QtGui.so
-                /Library/Python/2.6/site-packages/PyQt4/QtOpenGL.so
-                /Library/Python/2.6/site-packages/PyQt4/QtSql.so
-                /Library/Python/2.6/site-packages/PyQt4/QtSvg.so
-                /Library/Python/2.6/site-packages/PyQt4/QtXml.so
-                /Library/Python/2.6/site-packages/PyQt4/__init__.py
+install ( FILES /Library/Python/${PY_VER}/site-packages/PyQt4/Qt.so
+                /Library/Python/${PY_VER}/site-packages/PyQt4/QtCore.so
+                /Library/Python/${PY_VER}/site-packages/PyQt4/QtGui.so
+                /Library/Python/${PY_VER}/site-packages/PyQt4/QtOpenGL.so
+                /Library/Python/${PY_VER}/site-packages/PyQt4/QtSql.so
+                /Library/Python/${PY_VER}/site-packages/PyQt4/QtSvg.so
+                /Library/Python/${PY_VER}/site-packages/PyQt4/QtXml.so
+                /Library/Python/${PY_VER}/site-packages/PyQt4/__init__.py
           DESTINATION ${BIN_DIR}/PyQt4 )
-install ( DIRECTORY /Library/Python/2.6/site-packages/PyQt4/uic DESTINATION ${BIN_DIR}/PyQt4 )
+install ( DIRECTORY /Library/Python/${PY_VER}/site-packages/PyQt4/uic DESTINATION ${BIN_DIR}/PyQt4 )
 
 install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 

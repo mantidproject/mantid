@@ -5,24 +5,56 @@ from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
 from IndirectCommon import StartTime, EndTime, GetThetaQ
-import numpy, os.path
+import math, numpy, os.path
 
 mp = import_mantidplot()
 
-def MomentRun(samWS,Verbose,Plot,Save):
+def CheckElimits(erange,Xin):
+    emin = float(erange[0])
+    emax = float(erange[1])
+    nx = len(Xin)-1
+    if math.fabs(emin) < 1e-5:
+        error = 'Elimits - input emin ( '+erange[0]+' ) is Zero'			
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    if emin < Xin[0]:
+        error = 'Elimits - input emin ( '+erange[0]+' ) < data emin ( '+str(Xin[0])+' )'		
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    if math.fabs(emax) < 1e-5:
+        error = 'Elimits - input emax ( '+erange[1]+' ) is Zero'			
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    if emax > Xin[nx]:
+        error = 'Elimits - input emax ( '+erange[1]+' ) > data emax ( '+str(Xin[nx])+' )'			
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    if emax < emin:
+        error = 'Elimits - input emax ( '+erange[1]+' ) < emin ( '+erange[0]+' )'			
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    return emin,emax
+
+def MomentRun(samWS,erange,Verbose,Plot,Save):
     StartTime('Moments')
     workdir = config['defaultsave.directory']
     nq = mtd[samWS].getNumberHistograms()       # no. of hist/groups in sample
+    Xin = mtd[samWS].readX(0)
+    nw = len(Xin)-1
     if Verbose:
-        logger.notice('Sample '+samWS+' has '+str(nq)+' Q values')
+        logger.notice('Sample '+samWS+' has '+str(nq)+' Q values & '+str(nw)+' w values')
     axis = mtd[samWS].getAxis(1)
     Q = []
     e0 = []
     for i in range(0,nq):
         Q.append(float(axis.label(i)))
         e0.append(0.0)
+    emin,emax = CheckElimits(erange,Xin)
+    CropWorkspace(InputWorkspace=samWS, OutputWorkspace=samWS, XMin=emin, XMax=emax)
     Xin = mtd[samWS].readX(0)
     nw = len(Xin)-1
+    if Verbose:
+        logger.notice('Energy range is '+str(Xin[0])+' to '+str(Xin[nw]))
     w = Xin[:nw]
     yM0 = []
     yM1 = []
@@ -69,8 +101,12 @@ def MomentPlot(inputWS,Plot):
     m0_plot=mp.plotSpectrum(inputWS+'_M0',0)
     m2_plot=mp.plotSpectrum([inputWS+'_M2',inputWS+'_M4'],0)
 
-def MomentStart(sname,Verbose,Plot,Save):
+def MomentStart(inType,sname,erange,Verbose,Plot,Save):
     workdir = config['defaultsave.directory']
-    spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
-    LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
-    MomentRun(sname,Verbose,Plot,Save)
+    if inType == 'File':
+        spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
+        logger.notice('Input from File : '+spath)
+        LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+    else:
+        logger.notice('Input from Workspace : '+sname)
+    MomentRun(sname,erange,Verbose,Plot,Save)

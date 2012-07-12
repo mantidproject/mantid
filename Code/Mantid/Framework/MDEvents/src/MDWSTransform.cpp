@@ -9,7 +9,7 @@ namespace MDEvents
 {
 // logger for the algorithm workspaces  
 Kernel::Logger& MDWSTransform::convert_log =Kernel::Logger::get("MD-Algorithms");
-using namespace ConvertToMD;
+using namespace CnvrtToMD;
 
 std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
 {
@@ -60,7 +60,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
 }
 
 
-Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,ConvertToMD::CoordScaling ScaleID)const
+Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling ScaleID)const
 {
     //implements strategy Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs:
     if(!TargWSDescription.hasLattice()){      
@@ -138,7 +138,7 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
 
 }
 
-void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,ConvertToMD::CoordScaling ScaleID)const
+void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling ScaleID)const
 {
         
         std::vector<Kernel::V3D> dim_directions;

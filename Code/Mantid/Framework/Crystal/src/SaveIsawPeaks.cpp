@@ -256,7 +256,7 @@ namespace Crystal
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  chi << " ";
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  phi << " ";
           out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  omega << " ";
-          out  <<  std::setw( 7 ) <<  (int)( 0 ) <<  std::endl;
+          out  <<  std::setw( 7 ) <<  (int)( 1 ) <<  std::endl;
 
           out << header << std::endl;
 

@@ -165,19 +165,21 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 		# Set OSIRIS as default instrument.
 		mtd.settings["default.instrument"] = 'OSIRIS'
 		
-		# Set all algo inputs to local vars.  Some validation/parsing via FileFinder.
+		# Set all algo inputs to local vars.  Some validation/parsing via FileFinder,
+        # which is helpful since this is an algorithm that could be called outside of
+        # of the Indirect Diffraction interface.
 		self._outputWsName = self.getPropertyValue("OutputWorkspace")
 		for sam in re.compile(r',').split(self.getProperty("Sample")):
 			try:
 				val = FileFinder.findRuns(sam)[0]
-			except IndexError:
+			except RuntimeError:
 				mtd.sendErrorMessage("Could not locate sample file: " + sam)
 				sys.exit()
 			self._sams.append(val)
 		for van in re.compile(r',').split(self.getProperty("Vanadium")):
 			try:
 				val = FileFinder.findRuns(van)[0]
-			except IndexError:
+			except RuntimeError:
 				mtd.sendErrorMessage("Could not locate vanadium file: " + van)
 				sys.exit()
 			self._vans.append(val)

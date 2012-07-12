@@ -108,7 +108,7 @@ public:
       }
 
       for (size_t ih = 0; ih < ws4->getNumberHistograms(); ih ++){
-        detid_t tempdetid = ws4->getDetectorID(ih);
+        detid_t tempdetid = *(ws4->getDetectorIDs(ih).begin());
         TS_ASSERT_DELTA(ws4->getValue(tempdetid), ws1->getValue(tempdetid), 1);
         // std::cout << ih << " - " << tempdetid << ": " << ws1->getValue(tempdetid) << " vs. " << ws4->getValue(tempdetid) << std::endl;
       }
@@ -128,7 +128,7 @@ public:
       TS_ASSERT_EQUALS(this->binoperator.execute(),true);
       DataObjects::MaskWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>(ws2name);
       for (size_t ih = 0; ih < ws2->getNumberHistograms(); ih ++){
-        detid_t tempdetid = ws2->getDetectorID(ih);
+        detid_t tempdetid = *(ws2->getDetectorIDs(ih).begin());
         TS_ASSERT_EQUALS(ws2->getValue(tempdetid), 1);
       }
     }

@@ -307,7 +307,7 @@ namespace Mantid
      *  @param period :: The data period
      *  @return the times when requested period was active
      */
-    Kernel::Property*  LoadRawHelper::createPeriodLog(int period)const
+    Kernel::Property*  LoadRawHelper::createPeriodLog(int period) const
     {
       Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
       if(!periods) return 0;
@@ -322,6 +322,16 @@ namespace Mantid
         p->addValue(it->first, (it->second == period) );
 
       return p;
+    }
+
+    /**
+    Create a log vale for the current period.
+    @param period: The period number to create the log entry for.
+    */
+    Kernel::Property* LoadRawHelper::createCurrentPeriodLog(const int& period) const
+    {
+      Kernel::PropertyWithValue<int>* currentPeriodProperty = new Kernel::PropertyWithValue<int>("current_period", period);
+      return currentPeriodProperty;
     }
 
     /** sets the workspace properties

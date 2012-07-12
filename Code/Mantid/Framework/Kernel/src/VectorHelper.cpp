@@ -441,22 +441,26 @@ std::vector<NumT> splitStringIntoVector(std::string listString)
 /** Return the index into a vector of bin boundaries for a particular X value.
  * The index returned is the one left edge of the bin.
  * If beyond the range of the vector, it will return either 0 or bins.size()-2.
+ * @param bins :: A reference to the set of bin boundaries to search. It is assumed that they are
+ * monotonically increasing values and this is NOT checked
+ * @paran value :: The value whose boundaries should be found
  */
-int getBinIndex(std::vector<double>& bins, const double X )
+int getBinIndex(const std::vector<double>& bins, const double value )
 {
-  int index = 0;
+  assert(bins.size() >= 2);
   //If X is below the min value
-  if (X < bins[0])
-    return 0;
+  if(value < bins.front()) return 0;
 
-  int nBins = static_cast<int>(bins.size());
-  for (index = 0; index < nBins-1; index++)
+  int index(0);
+  int nEdges = static_cast<int>(bins.size());
+  for (index = 0; index < nEdges-1; index++)
   {
-    if ((X >= bins[index]) && (X < bins[index+1]))
+    if ((value >= bins[index]) && (value < bins[index+1]))
       return index;
   }
-  //If X is beyond the max value
-  return index;
+  assert(index > 0);
+  //If X is beyond the max value (take off one as the loop would have incremented it past bins.size()-2 to test it)
+  return index - 1;
 }
 
 //-------------------------------------------------------------------------------------------------

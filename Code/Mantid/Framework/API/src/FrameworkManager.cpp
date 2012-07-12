@@ -118,7 +118,6 @@ void FrameworkManagerImpl::clear()
   clearAlgorithms();
   clearInstruments();
   clearData();
-  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**

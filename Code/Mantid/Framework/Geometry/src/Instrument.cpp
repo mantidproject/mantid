@@ -206,6 +206,45 @@ namespace Mantid
       return out;
     }
 
+    /// @return The total number of detector IDs in the instrument */
+    std::size_t Instrument::getNumberDetectors(bool skipMonitors) const
+    {
+      std::size_t numDetIDs(0);
+
+      if (m_isParametrized)
+      {
+        numDetIDs = dynamic_cast<const Instrument*>(m_base)->m_detectorCache.size();
+      }
+      else
+      {
+        numDetIDs = m_detectorCache.size();
+      }
+
+      if (skipMonitors) // this slow, but gets the right answer
+      {
+        std::size_t monitors(0);
+        if (m_isParametrized)
+        {
+          const detid2det_map & in_dets = dynamic_cast<const Instrument*>(m_base)->m_detectorCache;
+          for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
+            if (it->second->isMonitor())
+              monitors += 1;
+        }
+        else
+        {
+          const detid2det_map & in_dets = m_detectorCache;
+          for(detid2det_map::const_iterator it=in_dets.begin();it!=in_dets.end();++it)
+            if (it->second->isMonitor())
+              monitors += 1;
+        }
+        return (numDetIDs - monitors);
+      }
+      else
+      {
+        return numDetIDs;
+      }
+    }
+
     /** Get the minimum and maximum (inclusive) detector IDs
      *
      * @param min :: set to the min detector ID

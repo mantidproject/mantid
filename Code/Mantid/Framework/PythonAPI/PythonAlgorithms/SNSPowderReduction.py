@@ -149,6 +149,10 @@ class SNSPowderReduction(PythonAlgorithm):
         def getInfo(self, frequency, wavelength):
             #print "getInfo(%f, %f)" % (frequency, wavelength)
             if self.filename is not None:
+                if frequency is None:
+                    raise RuntimeError("Unable to determine frequency from data")
+                if wavelength is None:
+                    raise RuntimeError("Unable to determine wavelength from data")
                 frequency = self.__getFrequency(float(frequency))
                 wavelength = self.__getWavelength(frequency, float(wavelength))
         
@@ -415,16 +419,22 @@ class SNSPowderReduction(PythonAlgorithm):
     def _getinfo(self, wksp):
         logs = wksp.getRun()
         # get the frequency
-        if not "SpeedRequest1" in logs.keys():
-            self.log().information("SpeedRequest1 is not specified")
-            return self._config.getInfo(None, None)
-        frequency = logs['SpeedRequest1']
+        frequency = None
+        if "SpeedRequest1" in logs.keys():
+            frequency = logs['SpeedRequest1']
+        else:
+            self.log().information("'SpeedRequest1' is not specified in logs")
+            if "frequency" in logs.keys():
+                frequency = logs['frequency']
+            else:
+                self.log().information("'frequency' is not specified in logs")
+                return self._config.getInfo(None, None)
         if frequency.units != "Hz":
             raise RuntimeError("Only know how to deal with frequency in Hz, not %s" % frequency.units)
         frequency = frequency.getStatistics().mean
 
         if not "LambdaRequest" in logs.keys():
-            self.log().information("LambdaRequest is not in the datafile")
+            self.log().information("'LambdaRequest' is not in the datafile")
             return self._config.getInfo(None, None)
         wavelength = logs['LambdaRequest']
         if wavelength.units != "Angstrom":

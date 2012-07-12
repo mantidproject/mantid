@@ -55,11 +55,6 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
 
   }
-  
-  void test_Something()
-  {
-  }
-
 
 };
 

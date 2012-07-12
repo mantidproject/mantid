@@ -34,10 +34,10 @@ def getWSprefix(workspace):
         return ''
     ws = mtd[workspace]
     facility = config['default.facility']
-    logger.notice('Facility is '+facility)
     ins = ws.getInstrument().getName()
-    if ins == 'IN10' or ins == 'IN16':
-        prefix = ins + '_'
+    if facility == 'ILL':
+        logger.notice('Facility is '+facility)
+        prefix = ins + '_' + workspace[:-3]
     else:		
         ins = config.getFacility().instrument(ins).shortName().lower()
         run = ws.getRun().getLogData('run_number').value
@@ -93,7 +93,7 @@ def createQaxis(inputWS):
             msg += 'Input workspace must have either spectra or numeric axis.'
             logger.notice(msg)
             sys.exit(msg)
-        if ( axis.getUnit().name() != 'MomentumTransfer' ):
+        if ( axis.getUnit().unitID() != 'MomentumTransfer' ):
             msg += 'Input must have axis values of Q'
             logger.notice(msg)
             sys.exit(msg)

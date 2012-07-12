@@ -4,6 +4,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
@@ -13,6 +14,7 @@
 #include <cxxtest/TestSuite.h>
 #include <iostream>
 #include <Poco/File.h>
+#include <boost/lexical_cast.hpp>
 #include "MantidGeometry/IDTypes.h"
 
 using namespace Mantid::Kernel;
@@ -374,6 +376,33 @@ public:
    void test_LoadEventNexus_WEIGHTED_NOTIME()
    {
      dotest_LoadAnEventFile(WEIGHTED_NOTIME);
+   }
+
+   void test_load_saved_workspace_group()
+   {
+     LoadNexusProcessed alg;
+     TS_ASSERT_THROWS_NOTHING(alg.initialize());
+     TS_ASSERT( alg.isInitialized() );
+     alg.setPropertyValue("Filename", "WorkspaceGroup.nxs");
+     alg.setPropertyValue("OutputWorkspace", "group");
+
+     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+     Workspace_sptr workspace;
+     TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve("group") );
+     WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>( workspace );
+     TS_ASSERT( group );
+     int groupSize = group->getNumberOfEntries();
+     TS_ASSERT_EQUALS( groupSize, 12 );
+     for(int i = 0; i < groupSize; ++i)
+     {
+       MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>( group->getItem(i) );
+       TS_ASSERT( ws );
+       TS_ASSERT_EQUALS( ws->getNumberHistograms(), 1 );
+       TS_ASSERT_EQUALS( ws->blocksize(), 10 );
+       TS_ASSERT_EQUALS( ws->name(), "group_" + boost::lexical_cast<std::string>( i + 1 ) );
+     }
+
    }
 
 private:

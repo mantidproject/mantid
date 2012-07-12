@@ -12,14 +12,17 @@ using namespace Mantid::Kernel;
 class UnitFactoryTest : public CxxTest::TestSuite
 {
 public:
-  void testCreate()
+
+  void test_Create_With_Valid_Unit_Gives_Valid_Pointer()
   {
     boost::shared_ptr<Unit> first;
-    TS_ASSERT_THROWS_NOTHING( first = UnitFactory::Instance().create("TOF") )
-    // Test that asking for the same unit again gives the same pointer
-    TS_ASSERT_EQUALS( UnitFactory::Instance().create("TOF"), first )
-    // And that asking for a different unit gives a different pointer
-    TS_ASSERT_DIFFERS( UnitFactory::Instance().create("Wavelength"), first )
+    TS_ASSERT_THROWS_NOTHING( first = UnitFactory::Instance().create("TOF") );
+    TSM_ASSERT("UnitFactory::create did not throw but it returned an empty pointer", first);
+  }
+
+  void test_Create_With_Unknown_Unit_Throws_Exception()
+  {
+    TS_ASSERT_THROWS(UnitFactory::Instance().create("_NOT_A_REAL_UNIT"), Exception::NotFoundError);
   }
 
 };

@@ -189,7 +189,6 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event)
     case QEvent::MouseMove:
       {
         QPoint pnt = ((QMouseEvent*)event)->pos();
-        Qt::KeyboardModifiers mod = ((QMouseEvent*)event)->modifiers();
         if (!isWidthSet())
         {
           double c = centre();

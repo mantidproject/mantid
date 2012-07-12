@@ -262,12 +262,28 @@ void MantidUI::showFitPropertyBrowser(bool on)
 */
 void MantidUI::shutdown()
 {
+  g_log.notice("MantidPlot is shutting down...");
+
+  // First we need to cancel any running algorithms otherwise bad things can happen if they call
+  // the logging framework after it's been shutdown. The cancel calls within cancelAll are not
+  // blocking, hence the loop to make sure they're all done before moving on. (N.B. Tried copying
+  // the wait/exit/wait business from the AlgorithmMonitor dtor, but that gave occasional crashes.)
+  if ( m_algMonitor )
+  {
+    m_algMonitor->cancelAll();
+    while ( m_algMonitor->count() > 0 )
+    {
+      Poco::Thread::sleep(100);
+    }
+  }
+
   Mantid::API::FrameworkManager::Instance().clear();
 }
 
 MantidUI::~MantidUI()
 {
-  if( m_algMonitor ) delete m_algMonitor;
+  delete m_algMonitor;
+
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_groupworkspacesObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_ungroupworkspaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
@@ -2180,11 +2196,6 @@ MantidMatrix* MantidUI::getMantidMatrix(const QString& wsName)
 MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int end)
 {
   return importMatrixWorkspace(wsName, false, false, start, end);
-}
-
-void MantidUI::cancelAllRunningAlgorithms()
-{
-  if( m_algMonitor ) m_algMonitor->cancelAll();
 }
 
 bool MantidUI::createPropertyInputDialog(const QString & alg_name, const QString & preset_values,

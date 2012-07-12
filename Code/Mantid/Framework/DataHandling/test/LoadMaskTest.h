@@ -10,7 +10,7 @@
 #include "Poco/File.h"
 
 #include "MantidDataHandling/LoadMask.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -37,8 +37,8 @@ public:
     try
     {
       TS_ASSERT_EQUALS(loadfile.execute(), true);
-      DataObjects::SpecialWorkspace2D_sptr maskws =
-          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("PG3Mask");
+      DataObjects::MaskWorkspace_sptr maskws =
+          AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("PG3Mask");
     }
     catch(std::runtime_error & e)
     {
@@ -97,8 +97,8 @@ public:
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
     TS_ASSERT_EQUALS(loadfile.execute(),true);
-    DataObjects::SpecialWorkspace2D_sptr maskws =
-          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("VULCAN_Mask_Detectors");
+    DataObjects::MaskWorkspace_sptr maskws =
+          AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("VULCAN_Mask_Detectors");
 
     // 3. Check
     for (size_t iws=0; iws<maskws->getNumberHistograms(); iws++)
@@ -156,8 +156,8 @@ public:
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask_Detectors");
 
     TS_ASSERT_EQUALS(loadfile.execute(),true);
-    DataObjects::SpecialWorkspace2D_sptr maskws =
-          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("VULCAN_Mask_Detectors");
+    DataObjects::MaskWorkspace_sptr maskws =
+          AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("VULCAN_Mask_Detectors");
 
     // 3. Check
     size_t errorcounts = 0;
@@ -226,8 +226,8 @@ public:
     loadfile.setProperty("OutputWorkspace", "VULCAN_Mask1");
 
     TS_ASSERT_EQUALS(loadfile.execute(),true);
-    DataObjects::SpecialWorkspace2D_sptr maskws =
-          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("VULCAN_Mask1");
+    DataObjects::MaskWorkspace_sptr maskws =
+          AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("VULCAN_Mask1");
 
     // 2. Generate Region of Interest Workspace
     LoadMask loadfile2;
@@ -238,13 +238,13 @@ public:
     loadfile2.setProperty("OutputWorkspace", "VULCAN_Mask2");
 
     TS_ASSERT_EQUALS(loadfile2.execute(), true);
-    DataObjects::SpecialWorkspace2D_sptr interestws =
-          AnalysisDataService::Instance().retrieveWS<DataObjects::SpecialWorkspace2D>("VULCAN_Mask2");
+    DataObjects::MaskWorkspace_sptr interestws =
+          AnalysisDataService::Instance().retrieveWS<DataObjects::MaskWorkspace>("VULCAN_Mask2");
 
     // 3. Check
     size_t sizemask = maskws->getNumberHistograms();
     size_t sizeinterest = interestws->getNumberHistograms();
-    TS_ASSERT_EQUALS(sizemask==sizeinterest, true);
+    TS_ASSERT(sizemask==sizeinterest);
 
     if (sizemask == sizeinterest){
       // number1: number of masked detectors of maskws
@@ -252,16 +252,15 @@ public:
       size_t number1 = 0;
       size_t number0 = 0;
       for (size_t ih = 0; ih < maskws->getNumberHistograms(); ih ++){
-        double v1 = maskws->dataY(ih)[0];
-        double v2 = interestws->dataY(ih)[0];
-        if (v1 > 0.5){
+        bool v1 = maskws->isMaskedIndex(ih);
+        bool v2 = interestws->isMaskedIndex(ih);
+        if (v1){
           number0 ++;
         }
-        if (v2 < 0.5){
+        if (!v2){
           number1 ++;
         }
-        TS_ASSERT_EQUALS(v1+v2<1.5, true); // must be 1
-        TS_ASSERT_EQUALS(v1+v2>0.5, true);
+        TS_ASSERT_EQUALS(v1 ^ v2, true); // must be 1
       }
 
       TS_ASSERT_EQUALS(number0 > 0, true);
