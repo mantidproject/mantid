@@ -104,6 +104,7 @@ namespace WorkflowAlgorithms
 
     MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
     const std::string inWsName = inputWS->getName();
+    std::string outWsName = inWsName + "_et";
 
     // Calculate the initial energy and time zero
     const std::string facility = ConfigService::Instance().getFacility().name();
@@ -137,8 +138,9 @@ namespace WorkflowAlgorithms
 
         g_log.notice() << "Adjusting for T0" << std::endl;
         IAlgorithm_sptr alg = this->createSubAlgorithm("ChangeBinOffset");
+        alg->setAlwaysStoreInADS(true);
         alg->setProperty("InputWorkspace", inWsName);
-        alg->setProperty("OutputWorkspace", inWsName);
+        alg->setProperty("OutputWorkspace", outWsName);
         alg->setProperty("Offset", -t0);
         alg->execute();
       }
@@ -151,9 +153,10 @@ namespace WorkflowAlgorithms
     // Convert to energy transfer
     g_log.notice() << "Converting to energy transfer." << std::endl;
     IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
-    cnvun->setProperty("InputWorkspace", inWsName);
-    cnvun->setProperty("OutputWorkspace", inWsName);
-    cnvun->setProperty("Target", "Wavelength");
+    cnvun->setAlwaysStoreInADS(true);
+    cnvun->setProperty("InputWorkspace", outWsName);
+    cnvun->setProperty("OutputWorkspace", outWsName);
+    cnvun->setProperty("Target", "DeltaE");
     cnvun->setProperty("EMode", "Direct");
     cnvun->setProperty("EFixed", initial_energy);
     cnvun->execute();
@@ -164,8 +167,9 @@ namespace WorkflowAlgorithms
       {
         g_log.notice() << "Rebinning data" << std::endl;
         IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
-        rebin->setProperty("InputWorkspace", inWsName);
-        rebin->setProperty("OutputWorkspace", inWsName);
+        rebin->setAlwaysStoreInADS(true);
+        rebin->setProperty("InputWorkspace", outWsName);
+        rebin->setProperty("OutputWorkspace", outWsName);
         rebin->setProperty("Params", et_binning);
         rebin->setProperty("PreserveEvents", false);
         rebin->execute();
@@ -175,16 +179,23 @@ namespace WorkflowAlgorithms
     if ("SNS" == facility)
       {
         // He3TubeEfficiency requires the workspace to be in wavelength
+        cnvun->setAlwaysStoreInADS(true);
+        cnvun->setProperty("InputWorkspace", outWsName);
+        cnvun->setProperty("OutputWorkspace", outWsName);
         cnvun->setProperty("Target", "Wavelength");
         cnvun->execute();
 
         // Do the correction
         IAlgorithm_sptr alg2 = this->createSubAlgorithm("He3TubeEfficiency");
-        alg2->setProperty("InputWorkspace", inWsName);
-        alg2->setProperty("OutputWorkspace", inWsName);
+        alg2->setAlwaysStoreInADS(true);
+        alg2->setProperty("InputWorkspace", outWsName);
+        alg2->setProperty("OutputWorkspace", outWsName);
         alg2->execute();
 
         // Convert back to energy transfer
+        cnvun->setAlwaysStoreInADS(true);
+        cnvun->setProperty("InputWorkspace", outWsName);
+        cnvun->setProperty("OutputWorkspace", outWsName);
         cnvun->setProperty("Target", "DeltaE");
         cnvun->execute();
       }
@@ -192,24 +203,19 @@ namespace WorkflowAlgorithms
     else
       {
         IAlgorithm_sptr alg = this->createSubAlgorithm("DetectorEfficiencyCor");
-        alg->setProperty("InputWorkspace", inWsName);
-        alg->setProperty("OutputWorkspace", inWsName);
+        alg->setAlwaysStoreInADS(true);
+        alg->setProperty("InputWorkspace", outWsName);
+        alg->setProperty("OutputWorkspace", outWsName);
         alg->execute();
       }
 
     // Correct for Ki/Kf
     IAlgorithm_sptr kikf = this->createSubAlgorithm("CorrectKiKf");
-    kikf->setProperty("InputWorkspace", inWsName);
-    kikf->setProperty("OutputWorkspace", inWsName);
+    kikf->setAlwaysStoreInADS(true);
+    kikf->setProperty("InputWorkspace", outWsName);
+    kikf->setProperty("OutputWorkspace", outWsName);
     kikf->setProperty("EMode", "Direct");
     kikf->execute();
-
-    // Should the workspace be cloned at any point?
-    std::string outWsName = inWsName + "_et";
-    IAlgorithm_sptr rename = this->createSubAlgorithm("RenameWorkspace");
-    rename->setProperty("InputWorkspace", inWsName);
-    rename->setProperty("OutputWorkspace", outWsName);
-    rename->execute();
 
     MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     this->setProperty("OutputWorkspace", outputWS);
