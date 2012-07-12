@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
+	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
@@ -146,6 +147,7 @@ set ( INC_FILES
 	inc/MantidKernel/LogFilter.h
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
+	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
@@ -217,6 +219,7 @@ set ( TEST_FILES
 	test/AtomTest.h
 	test/BinFinderTest.h
 	test/BinaryFileTest.h
+	test/BoseEinsteinDistributionTest.h
 	test/BoundedValidatorTest.h
 	test/CPUTimerTest.h
 	test/CacheTest.h
