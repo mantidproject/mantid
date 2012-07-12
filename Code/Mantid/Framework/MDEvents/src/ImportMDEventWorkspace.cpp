@@ -104,6 +104,7 @@ namespace MDEvents
     return m_file_data.end() != std::find(m_file_data.begin(), m_file_data.end(), flag);
   }
 
+  /// Check the file contents against the file format.
   void ImportMDEventWorkspace::quickFileCheck()
   {
     // Does it have the mandatory blocks?
@@ -119,25 +120,67 @@ namespace MDEvents
     }
     // Are the mandatory block in the correct order.
     DataCollectionType::iterator posDimStart = std::find(m_file_data.begin(), m_file_data.end(), DimensionBlockFlag());
-    DataCollectionType::iterator posDimEnd = std::find(m_file_data.begin(), m_file_data.end(), MDEventBlockFlag());
-    int posDiff = static_cast<int>(std::distance(posDimStart, posDimEnd));
-    if(posDiff < 1)
+    DataCollectionType::iterator posMDEventStart = std::find(m_file_data.begin(), m_file_data.end(), MDEventBlockFlag());
+    int posDiffDims = static_cast<int>(std::distance(posDimStart, posMDEventStart));
+    if(posDiffDims < 1)
     {
       std::string message = DimensionBlockFlag() + " must be specified in file before "  + MDEventBlockFlag();
       throw std::invalid_argument(message);
     }
-    if((posDiff - 1) % 4 != 0)
+    // Do we have the expected number of dimension entries.
+    if((posDiffDims - 1) % 4 != 0)
     {
       throw std::invalid_argument("Dimensions in the file should be specified id, name, units, nbins");
     }
+    const size_t nDimensions = (posDiffDims - 1) / 4;
+    // Are the dimension entries all of the correct type.
+    DataCollectionType::iterator dimEntriesIterator = posDimStart;
+    for(size_t i = 0; i < nDimensions; ++i)
+    {
+      std::string id = convert<std::string>(*(++dimEntriesIterator));
+      std::string name = convert<std::string>(*(++dimEntriesIterator));
+      std::string units = convert<std::string>(*(++dimEntriesIterator));
+      int nbins = convert<int>(*(++dimEntriesIterator));
+    }
+    // Do we have the expected number of mdevent entries
+    int posDiffMDEvent = static_cast<int>(std::distance(posMDEventStart, m_file_data.end()));
+    const size_t columnsForFullEvents = nDimensions + 4; // signal, error, run_no, detector_no
+    const size_t columnsForLeanEvents = nDimensions + 2; // signal, error
+    int nActualColumns = 0;
+    if((posDiffMDEvent - 1) % columnsForFullEvents != 0) 
+    {
+      if((posDiffMDEvent - 1) % columnsForLeanEvents != 0)
+      {
+        std::stringstream stream;
+        stream << "With the dimenionality found to be " << nDimensions << ". Should either have " << columnsForLeanEvents << " or " << columnsForFullEvents << " in each row";
+        throw std::invalid_argument(stream.str());
+      }
+      else
+      {
+        nActualColumns = columnsForLeanEvents;
+      }
+    }
+    else
+    {
+      nActualColumns = columnsForFullEvents;
+    }
+    const size_t nMDEvents = posDiffMDEvent / nActualColumns;
 
-    int ie = convert<int>("1");
-
-    // Are the dimensionality entries {string, string, string, number}?
-
-    // Is there at least one MDEvent entry?
-
-    // according to the number of dimensionality entries, there should either be n + 2 or n + 4 columns in the event data section.
+    DataCollectionType::iterator mdEventEntriesIterator = posMDEventStart;
+    for(size_t i = 0; i < nMDEvents; ++i)
+    {
+      double signal = convert<double>(*(++mdEventEntriesIterator));
+      double error = convert<double>(*(++mdEventEntriesIterator));
+      if(nActualColumns == columnsForFullEvents)
+      {
+        int run_no = convert<int>(*(++mdEventEntriesIterator));
+        int detector_no = convert<int>(*(++mdEventEntriesIterator));
+      }
+      for(size_t j = 0; j < nDimensions; ++j)
+      {
+        double coord = convert<double>(*(++mdEventEntriesIterator));
+      }
+    }
   }
 
 

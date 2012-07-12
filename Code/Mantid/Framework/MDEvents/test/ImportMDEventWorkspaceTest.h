@@ -36,7 +36,8 @@ This type is particularly useful when generating corrupt file contents, as it al
     FileContentsBuilder() : 
         m_DimensionBlock(ImportMDEventWorkspace::DimensionBlockFlag()), 
           m_MDEventsBlock(ImportMDEventWorkspace::MDEventBlockFlag()),
-          m_DimensionEntries("a, A, U, 10\nb, B, U, 11")
+          m_DimensionEntries("a A U 10\nb B U 11"),
+          m_MDEventEntries("1 1 1 1")
         {
         }
 
@@ -55,10 +56,15 @@ This type is particularly useful when generating corrupt file contents, as it al
           m_DimensionEntries = value;
         }
 
+        void setMDEventEntries(const std::string& value)
+        {
+          m_MDEventEntries = value;
+        }
+
         std::string create() const
         {
           const std::string newline = "\n";
-          return m_DimensionBlock + newline + m_DimensionEntries + newline + m_MDEventsBlock + newline;
+          return m_DimensionBlock + newline + m_DimensionEntries + newline + m_MDEventsBlock + newline + m_MDEventEntries + newline;
         }
   };
 
@@ -162,16 +168,50 @@ public:
 
   void test_dimension_block_has_corrupted_entries_throws()
   {
-    // Setup the corrupt file. Notice that the DimensionBlockFlag and the MDEventBlockFlag arguments have been swapped over.
+    // Setup the corrupt file. 
     FileContentsBuilder fileContents;
-    std::string dim1 = "a, A, U, 10\n";
-    std::string dim2 = "b, B, U, 11\n";
-    std::string dim3 = "b, B, U\n"; // Ooops, forgot to put in the number of bins for this dimension.
+    std::string dim1 = "a A U 10\n";
+    std::string dim2 = "b B U 11\n";
+    std::string dim3 = "b B U\n"; // Ooops, forgot to put in the number of bins for this dimension.
     fileContents.setDimensionEntries(dim1 + dim2 + dim3);
     MDFileObject infile(fileContents);
     // Run the test.
     do_check_throws_invalid_alg_upon_execution(infile);
   }
+
+  void test_type_of_entries_in_dimension_block_is_wrong()
+  {
+    // Setup the corrupt file. 
+    FileContentsBuilder fileContents;
+    std::string dim1 = "a A U 10\n";
+    std::string dim2 = "b B U 11\n";
+    std::string dim3 = "b B U x\n"; // Ooops, correct number of entries, but nbins set to be x!
+    fileContents.setDimensionEntries(dim1 + dim2 + dim3);
+    MDFileObject infile(fileContents);
+    // Run the test.
+    do_check_throws_invalid_alg_upon_execution(infile);
+  }
+
+  void test_event_type_not_specified_and_mdevent_block_wrong_size_throws()
+  {
+    // Setup the corrupt file. 
+    FileContentsBuilder fileContents;
+    fileContents.setMDEventEntries("1 1 1 1 1"); // Should have 4 or 6 entries, but 5 given.
+    MDFileObject infile(fileContents);
+    // Run the test.
+    do_check_throws_invalid_alg_upon_execution(infile);
+  }
+
+  void test_mdevent_block_contains_wrong_types_throws()
+  {
+    // Setup the corrupt file. 
+    FileContentsBuilder fileContents;
+    fileContents.setMDEventEntries("1.0 1.0 2.1 2.1 1.0 1.0"); // Should all be double
+    MDFileObject infile(fileContents);
+    // Run the test.
+    do_check_throws_invalid_alg_upon_execution(infile);
+  }
+
 
 
 };
