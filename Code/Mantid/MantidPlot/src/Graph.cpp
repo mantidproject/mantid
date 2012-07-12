@@ -1063,11 +1063,6 @@ void Graph::setAutoScale()
   emit modifiedGraph();
 }
 
-//void Graph::setFixedScale(int axis)
-//{
-//  m_fixed_axes.insert(axis);
-//}
-
 void Graph::initScaleLimits()
 {//We call this function the first time we add curves to a plot in order to avoid curves with cut symbols.
   d_plot->replot();
