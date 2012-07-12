@@ -28,15 +28,16 @@ class AbsoluteUnitsScript(BaseScriptElement):
         
     def to_script(self):
         script =  "DoAbsoluteUnits=%s,\n" % self.do_absolute_units
-        script += "AbsUnitsVanadium=\"%s\",\n" % self.absunits_vanadium
-        script += "AbsUnitsGroupingFile=\"%s\",\n" % self.grouping_file
-        script += "AbsUnitsDetectorVanadium=\"%s\",\n" % self.absunits_detector_vanadium
-        script += "AbsUnitsIncidentEnergy=%s,\n" % self.incident_energy
-        script += "AbsUnitsMinimumEnergy=%s,\n" % str(self.emin)
-        script += "AbsUnitsMaximumEnergy=%s,\n" % str(self.emax)
-        script += "VanadiumMass=%s,\n" % str(self.vandium_mass)
-        script += "SampleMass=%s,\n" % str(self.sample_mass)
-        script += "SampleRmm=%s,\n" % str(self.sample_rmm)
+        if self.do_absolute_units:
+            script += "AbsUnitsVanadium=\"%s\",\n" % self.absunits_vanadium
+            script += "AbsUnitsGroupingFile=\"%s\",\n" % self.grouping_file
+            script += "AbsUnitsDetectorVanadium=\"%s\",\n" % self.absunits_detector_vanadium
+            script += "AbsUnitsIncidentEnergy=\"%s\",\n" % self.incident_energy
+            script += "AbsUnitsMinimumEnergy=%s,\n" % str(self.emin)
+            script += "AbsUnitsMaximumEnergy=%s,\n" % str(self.emax)
+            script += "VanadiumMass=%s,\n" % str(self.vandium_mass)
+            script += "SampleMass=%s,\n" % str(self.sample_mass)
+            script += "SampleRmm=%s,\n" % str(self.sample_rmm)
         return script
     
     def to_xml(self):

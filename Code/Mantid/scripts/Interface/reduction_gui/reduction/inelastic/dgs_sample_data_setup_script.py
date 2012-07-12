@@ -11,7 +11,7 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 
 class SampleSetupScript(BaseScriptElement):
     
-    sample_data = ""
+    sample_file = ""
     incident_energy = ""
     fixed_ei = False
     et_range_low = ""
@@ -25,12 +25,17 @@ class SampleSetupScript(BaseScriptElement):
         self.reset()
         
     def to_script(self):
-        script =  "SampleData=\"%s\",\n" % self.sample_data
+        script =  "SampleFile=\"%s\",\n" % self.sample_file
         script += "IncidentEnergy=\"%s\",\n" % self.incident_energy
         script += "FixedIncidentEnergy=%s,\n" % self.fixed_ei
+        if self.et_range_low == SampleSetupScript.et_range_low:
+            self.et_range_low = -10
+            self.et_range_high = self.et_range_low + 1; 
+            self.et_range_width = 1
+            
         script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, 
-                                                        self.et_range_width, 
-                                                        self.et_range_high)
+                                                           self.et_range_width, 
+                                                           self.et_range_high)
         script += "HardMaskFile=\"%s\",\n" % self.hardmask_file
         script += "GroupingFile=\"%s\",\n" % self.grouping_file
         return script
@@ -40,7 +45,7 @@ class SampleSetupScript(BaseScriptElement):
             Create XML from the current data.
         """
         xml = "<SampleSetup>\n"
-        xml += "  <sample_data>%s</sample_data>\n" % self.sample_data
+        xml += "  <sample_file>%s</sample_file>\n" % self.sample_file
         xml += "  <incident_energy>%s</incident_energy>\n" % self.incident_energy
         xml += "  <fixed_ei>%s</fixed_ei>\n" % str(self.fixed_ei)
         xml += "  <et_range>\n"
@@ -62,9 +67,9 @@ class SampleSetupScript(BaseScriptElement):
         element_list = dom.getElementsByTagName("SampleSetup")
         if len(element_list)>0:
             instrument_dom = element_list[0]
-            self.sample_data = BaseScriptElement.getStringElement(instrument_dom, 
-                                                                  "sample_data",
-                                                                  default=SampleSetupScript.sample_data)
+            self.sample_file = BaseScriptElement.getStringElement(instrument_dom, 
+                                                                  "sample_file",
+                                                                  default=SampleSetupScript.sample_file)
             self.incident_energy = BaseScriptElement.getStringElement(instrument_dom,
                                                                      "incident_energy",
                                                                      default=SampleSetupScript.incident_energy)
@@ -92,7 +97,7 @@ class SampleSetupScript(BaseScriptElement):
         """
             Reset state
         """
-        self.sample_data = SampleSetupScript.sample_data
+        self.sample_file = SampleSetupScript.sample_file
         self.incident_energy = SampleSetupScript.incident_energy
         self.fixed_ei = SampleSetupScript.fixed_ei
         self.et_range_low = SampleSetupScript.et_range_low

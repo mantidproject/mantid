@@ -90,7 +90,7 @@ class SampleSetupWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: SampleSetupScript object
         """
-        self._content.sample_edit.setText(state.sample_data)
+        self._content.sample_edit.setText(state.sample_file)
         self._check_and_set_lineedit_content(self._content.ei_edit, 
                                              state.incident_energy)
         self._content.fixed_ei_chkbox.setChecked(state.fixed_ei)
@@ -108,7 +108,7 @@ class SampleSetupWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         s = SampleSetupScript()
-        s.sample_data = self._content.sample_edit.text()
+        s.sample_file = self._content.sample_edit.text()
         s.incident_energy = self._content.ei_edit.text()
         s.fixed_ei = self._content.fixed_ei_chkbox.isChecked()
         s.et_range_low = self._content.etr_low_edit.text()

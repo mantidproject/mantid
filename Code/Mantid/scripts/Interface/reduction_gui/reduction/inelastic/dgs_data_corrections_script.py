@@ -33,16 +33,19 @@ class DataCorrectionsScript(BaseScriptElement):
     def to_script(self):
         script =  "FilterBadPulses=%s,\n" % self.filter_bad_pulses
         script += "IncidentBeamNormalisation=\"%s\",\n" % self.incident_beam_norm
-        script += "MonitorIntRangeLow=%s,\n" % self.monitor_int_low
-        script += "MonitorIntRangeHigh=%s,\n" % self.monitor_int_high
+        if self.incident_beam_norm == "ToMonitor":
+            script += "MonitorIntRangeLow=\"%s\",\n" % self.monitor_int_low
+            script += "MonitorIntRangeHigh=\"%s\",\n" % self.monitor_int_high
         script += "TimeIndepBackgroundSub=%s,\n" % self.tib_subtraction
-        script += "TibTofRangeStart=%s,\n" % self.tib_tof_start
-        script += "TibTofRangeEnd=%s,\n" % self.tib_tof_end
+        if self.tib_subtraction:
+            script += "TibTofRangeStart=\"%s\",\n" % self.tib_tof_start
+            script += "TibTofRangeEnd=\"%s\",\n" % self.tib_tof_end
         script += "DetectorVanadium=\"%s\",\n" % self.detector_vanadium
         script += "UseBoundsForDetVan=%s,\n" % self.det_van_integration
-        script += "DetVanIntRangeLow=%s,\n" % self.det_van_int_range_low
-        script += "DetVanIntRangeHigh=%s,\n" % self.det_van_int_range_high
-        script += "DetVanIntRangeUnits=\"%s\",\n" % self.det_van_int_range_units
+        if self.det_van_integration:
+            script += "DetVanIntRangeLow=\"%s\",\n" % self.det_van_int_range_low
+            script += "DetVanIntRangeHigh=\"%s\",\n" % self.det_van_int_range_high
+            script += "DetVanIntRangeUnits=\"%s\",\n" % self.det_van_int_range_units
         return script
     
     def to_xml(self):
