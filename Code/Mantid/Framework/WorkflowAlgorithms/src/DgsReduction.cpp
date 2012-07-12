@@ -82,7 +82,7 @@ namespace WorkflowAlgorithms
     declareProperty("FixedIncidentEnergy", false,
         "Declare the value of the incident energy to be fixed (will not be calculated).");
     declareProperty(new ArrayProperty<double>("EnergyTransferRange",
-        boost::make_shared<RebinParamsValidator>()),
+        boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary.\n"
       "Negative width value indicates logarithmic binning.");
     declareProperty("HardMaskFile", "", "A file or workspace containing a hard mask.");
@@ -256,27 +256,27 @@ namespace WorkflowAlgorithms
     const std::string facility = ConfigService::Instance().getFacility().name();
     if ("SNS" == facility)
       {
-        setLoadAlg("LoadEventNexus");
+        this->setLoadAlg("LoadEventNexus");
       }
     else
       {
-        setLoadAlg("LoadRaw");
+        this->setLoadAlg("LoadRaw");
       }
     Workspace_sptr inputWS;
 
-    std::string inputData = getPropertyValue("SampleFile");
-    const std::string inputWSName = getPropertyValue("InputWorkspace");
+    std::string inputData = this->getPropertyValue("SampleFile");
+    const std::string inputWSName = this->getPropertyValue("InputWorkspace");
     if (!inputWSName.empty() && !inputData.empty())
       {
         throw std::runtime_error("DgsReduction: Either the Filename property or InputWorkspace property must be provided, NOT BOTH");
       }
     else if (!inputWSName.empty())
       {
-        inputWS = load(inputWSName);
+        inputWS = this->load(inputWSName);
       }
     else if (!inputData.empty())
       {
-        inputWS = load(inputData);
+        inputWS = this->load(inputData);
       }
     else
       {
@@ -306,13 +306,16 @@ namespace WorkflowAlgorithms
     Workspace_sptr inputWS = this->loadInputData();
 
     // Setup for the convert to energy transfer workflow algorithm
-    const double initial_energy = getProperty("IncidentEnergy");
-    const bool fixed_ei = getProperty("FixedIncidentEnergy");
+    const double initial_energy = this->getProperty("IncidentEnergy");
+    const bool fixed_ei = this->getProperty("FixedIncidentEnergy");
+    const std::vector<double> et_binning = this->getProperty("EnergyTransferRange");
 
-    IAlgorithm_sptr et_conv = createSubAlgorithm("DgsConvertToEnergyTransfer");
+    IAlgorithm_sptr et_conv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
     et_conv->setProperty("InputWorkspace", inputWS);
     et_conv->setProperty("IncidentEnergy", initial_energy);
     et_conv->setProperty("FixedIncidentEnergy", fixed_ei);
+    et_conv->setProperty("EnergyTransferRange", et_binning);
+    et_conv->execute();
   }
 
 } // namespace Mantid

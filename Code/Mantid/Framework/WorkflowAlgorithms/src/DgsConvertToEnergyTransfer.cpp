@@ -66,19 +66,21 @@ namespace WorkflowAlgorithms
    */
   void DgsConvertToEnergyTransfer::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+    this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
         "An input workspace.");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
-    declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
+    this->declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
       "Set the value of the incident energy in meV.");
-    declareProperty("FixedIncidentEnergy", false,
+    this->declareProperty("FixedIncidentEnergy", false,
         "Declare the value of the incident energy to be fixed (will not be calculated).");
-    declareProperty(new ArrayProperty<double>("EnergyTransferRange",
-        boost::make_shared<RebinParamsValidator>()),
+    this->declareProperty(new ArrayProperty<double>("EnergyTransferRange",
+        boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary.\n"
       "Negative width value indicates logarithmic binning.");
-    declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
+    this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
+        Direction::Output, PropertyMode::Optional));
+    this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -86,8 +88,9 @@ namespace WorkflowAlgorithms
    */
   void DgsConvertToEnergyTransfer::exec()
   {
+    g_log.notice() << "Starting DgsConvertToEnergyTransfer" << std::endl;
     // Get the reduction property manager
-    const std::string reductionManagerName = getProperty("ReductionProperties");
+    const std::string reductionManagerName = this->getProperty("ReductionProperties");
     boost::shared_ptr<PropertyManager> reductionManager;
     if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
     {
@@ -99,12 +102,13 @@ namespace WorkflowAlgorithms
       PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
     }
 
-    MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+    MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
     const std::string inWsName = inputWS->getName();
 
     // Calculate the initial energy and time zero
     const std::string facility = ConfigService::Instance().getFacility().name();
-    auto ei_guess = getProperty("IncidentEnergy");
+    g_log.notice() << "Processing for " << facility << std::endl;
+    const double ei_guess = this->getProperty("IncidentEnergy");
     double initial_energy = 0.0;
     if ("SNS" == facility)
       {
@@ -131,9 +135,10 @@ namespace WorkflowAlgorithms
 
           }
 
-        IAlgorithm_sptr alg = createSubAlgorithm("ChangeBinOffset");
-        alg->setPropertyValue("InputWorkspace", inWsName);
-        alg->setPropertyValue("OutputWorkspace", inWsName);
+        g_log.notice() << "Adjusting for T0" << std::endl;
+        IAlgorithm_sptr alg = this->createSubAlgorithm("ChangeBinOffset");
+        alg->setProperty("InputWorkspace", inWsName);
+        alg->setProperty("OutputWorkspace", inWsName);
         alg->setProperty("Offset", -t0);
         alg->execute();
       }
@@ -144,13 +149,27 @@ namespace WorkflowAlgorithms
       }
 
     // Convert to energy transfer
-    IAlgorithm_sptr cnvun = createSubAlgorithm("ConvertUnits");
-    cnvun->setPropertyValue("InputWorkspace", inWsName);
-    cnvun->setPropertyValue("OutputWorkspace", inWsName);
+    g_log.notice() << "Converting to energy transfer." << std::endl;
+    IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
+    cnvun->setProperty("InputWorkspace", inWsName);
+    cnvun->setProperty("OutputWorkspace", inWsName);
     cnvun->setProperty("Target", "Wavelength");
     cnvun->setProperty("EMode", "Direct");
     cnvun->setProperty("EFixed", initial_energy);
     cnvun->execute();
+
+    // Rebin if necessary
+    const std::vector<double> et_binning = this->getProperty("EnergyTransferRange");
+    if (!et_binning.empty())
+      {
+        g_log.notice() << "Rebinning data" << std::endl;
+        IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+        rebin->setProperty("InputWorkspace", inWsName);
+        rebin->setProperty("OutputWorkspace", inWsName);
+        rebin->setProperty("Params", et_binning);
+        rebin->setProperty("PreserveEvents", false);
+        rebin->execute();
+      }
 
     // Correct for detector efficiency
     if ("SNS" == facility)
@@ -160,9 +179,9 @@ namespace WorkflowAlgorithms
         cnvun->execute();
 
         // Do the correction
-        IAlgorithm_sptr alg2 = createSubAlgorithm("He3TubeEfficiency");
-        alg2->setPropertyValue("InputWorkspace", inWsName);
-        alg2->setPropertyValue("OutputWorkspace", inWsName);
+        IAlgorithm_sptr alg2 = this->createSubAlgorithm("He3TubeEfficiency");
+        alg2->setProperty("InputWorkspace", inWsName);
+        alg2->setProperty("OutputWorkspace", inWsName);
         alg2->execute();
 
         // Convert back to energy transfer
@@ -172,27 +191,28 @@ namespace WorkflowAlgorithms
     // Do ISIS
     else
       {
-        IAlgorithm_sptr alg = createSubAlgorithm("DetectorEfficiencyCor");
-        alg->setPropertyValue("InputWorkspace", inWsName);
-        alg->setPropertyValue("OutputWorkspace", inWsName);
+        IAlgorithm_sptr alg = this->createSubAlgorithm("DetectorEfficiencyCor");
+        alg->setProperty("InputWorkspace", inWsName);
+        alg->setProperty("OutputWorkspace", inWsName);
         alg->execute();
       }
 
     // Correct for Ki/Kf
-    IAlgorithm_sptr kikf = createSubAlgorithm("CorrectKiKf");
-    kikf->setPropertyValue("InputWorkspace", inWsName);
-    kikf->setPropertyValue("OutputWorkspace", inWsName);
+    IAlgorithm_sptr kikf = this->createSubAlgorithm("CorrectKiKf");
+    kikf->setProperty("InputWorkspace", inWsName);
+    kikf->setProperty("OutputWorkspace", inWsName);
     kikf->setProperty("EMode", "Direct");
     kikf->execute();
 
     // Should the workspace be cloned at any point?
     std::string outWsName = inWsName + "_et";
-    IAlgorithm_sptr rename = createSubAlgorithm("RenameWorkspace");
-    rename->setPropertyValue("InputWorkspace", inWsName);
-    rename->setPropertyValue("OutputWorkspace", outWsName);
+    IAlgorithm_sptr rename = this->createSubAlgorithm("RenameWorkspace");
+    rename->setProperty("InputWorkspace", inWsName);
+    rename->setProperty("OutputWorkspace", outWsName);
     rename->execute();
 
-    setPropertyValue("OutputWorkspace", outWsName);
+    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
+    this->setProperty("OutputWorkspace", outputWS);
   }
 
 } // namespace Mantid
