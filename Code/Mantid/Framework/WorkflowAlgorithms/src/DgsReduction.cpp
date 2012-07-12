@@ -70,7 +70,7 @@ namespace WorkflowAlgorithms
    */
   void DgsReduction::init()
   {
-    declareProperty(new FileProperty("SampleData", "", FileProperty::OptionalLoad, "_event.nxs"),
+    declareProperty(new FileProperty("SampleFile", "", FileProperty::OptionalLoad, "_event.nxs"),
         "File containing the data to reduce");
     declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
         "Workspace to be reduced");
@@ -174,22 +174,22 @@ namespace WorkflowAlgorithms
         "If true, run a background check on detector vanadium.");
     setPropertySettings("BackgroundCheck",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    declareProperty("AcceptanceFactor", 5, mustBePositive,
+    declareProperty("AcceptanceFactor", 5.0, mustBePositive,
         "Mask detectors above this threshold.");
     setPropertySettings("AcceptanceFactor",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    setPropertySettings("AcceptanceFactor",
-        new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
     auto mustBeIntPositive = boost::make_shared<BoundedValidator<size_t> >();
     mustBeIntPositive->setLower(0);
-    declareProperty("BackgroundTofStart", 18000, mustBeIntPositive,
+    size_t tof_start = 18000;
+    declareProperty("BackgroundTofStart", tof_start, mustBeIntPositive,
         "Start TOF for the background check.");
     setPropertySettings("BackgroundTofStart",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    setPropertySettings("BackgroundTofStart",
-        new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
-    declareProperty("BackgroundTofEnd", 19500, mustBeIntPositive,
+    size_t tof_end = 19500;
+    declareProperty("BackgroundTofEnd", tof_end, mustBeIntPositive,
         "End TOF for the background check.");
+    setPropertySettings("BackgroundTofEnd",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     declareProperty("RejectZeroBackground", true,
         "If true, check the background region for anomolies.");
     setPropertySettings("RejectZeroBackground",
@@ -264,7 +264,7 @@ namespace WorkflowAlgorithms
       }
     Workspace_sptr inputWS;
 
-    std::string inputData = getPropertyValue("Filename");
+    std::string inputData = getPropertyValue("SampleFile");
     const std::string inputWSName = getPropertyValue("InputWorkspace");
     if (!inputWSName.empty() && !inputData.empty())
       {
