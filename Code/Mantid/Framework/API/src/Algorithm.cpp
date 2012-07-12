@@ -974,13 +974,15 @@ namespace Mantid
      *    - In this case, algorithms are processed in order
      *  - OR, only one input should be a group, the others being size of 1
      *
-     * Returns true if if processGroups() should be called.
+     * Returns true if processGroups() should be called.
      * It also sets up some other members.
      *
      * Override if it is needed to customize the group checking.
      *
      * @throw std::invalid_argument if the groups sizes are incompatible.
      * @throw std::invalid_argument if a member is not found
+     *
+     * This method (or an override) must NOT THROW any exception if there are no input workspace groups
      */
     bool Algorithm::checkGroups()
     {
