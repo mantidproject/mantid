@@ -541,6 +541,8 @@ namespace Mantid
           Timer timer;
           // Call the concrete algorithm's exec method
           this->exec();
+          // Check for a cancellation request in case the concrete algorithm doesn't
+          interruption_point();			
           // Get how long this algorithm took to run
           const float duration = timer.elapsed();
 
