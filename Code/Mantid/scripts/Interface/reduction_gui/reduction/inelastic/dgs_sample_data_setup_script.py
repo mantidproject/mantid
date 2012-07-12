@@ -14,6 +14,7 @@ class SampleSetupScript(BaseScriptElement):
     sample_file = ""
     incident_energy = ""
     fixed_ei = False
+    rebin_et = False
     et_range_low = ""
     et_range_width = ""
     et_range_high = ""
@@ -28,14 +29,10 @@ class SampleSetupScript(BaseScriptElement):
         script =  "SampleFile=\"%s\",\n" % self.sample_file
         script += "IncidentEnergy=\"%s\",\n" % self.incident_energy
         script += "FixedIncidentEnergy=%s,\n" % self.fixed_ei
-        if self.et_range_low == SampleSetupScript.et_range_low:
-            self.et_range_low = -10
-            self.et_range_high = self.et_range_low + 1; 
-            self.et_range_width = 1
-            
-        script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, 
-                                                           self.et_range_width, 
-                                                           self.et_range_high)
+        if self.rebin_et:
+            script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, 
+                                                               self.et_range_width, 
+                                                               self.et_range_high)
         script += "HardMaskFile=\"%s\",\n" % self.hardmask_file
         script += "GroupingFile=\"%s\",\n" % self.grouping_file
         return script
@@ -82,7 +79,6 @@ class SampleSetupScript(BaseScriptElement):
             self.et_range_width = BaseScriptElement.getStringElement(instrument_dom,
                                                                      "et_range/width",
                                                                      default=SampleSetupScript.et_range_width)
-
             self.et_range_high = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "et_range/high",
                                                                     default=SampleSetupScript.et_range_high)
@@ -100,6 +96,7 @@ class SampleSetupScript(BaseScriptElement):
         self.sample_file = SampleSetupScript.sample_file
         self.incident_energy = SampleSetupScript.incident_energy
         self.fixed_ei = SampleSetupScript.fixed_ei
+        self.rebin_et = SampleSetupScript.rebin_et
         self.et_range_low = SampleSetupScript.et_range_low
         self.et_range_width = SampleSetupScript.et_range_width
         self.et_range_high = SampleSetupScript.et_range_high

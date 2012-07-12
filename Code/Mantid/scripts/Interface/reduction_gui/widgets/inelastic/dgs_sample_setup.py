@@ -94,6 +94,7 @@ class SampleSetupWidget(BaseWidget):
         self._check_and_set_lineedit_content(self._content.ei_edit, 
                                              state.incident_energy)
         self._content.fixed_ei_chkbox.setChecked(state.fixed_ei)
+        self._content.et_range_box.setChecked(state.rebin_et)
         self._check_and_set_lineedit_content(self._content.etr_low_edit, 
                                              state.et_range_low)
         self._check_and_set_lineedit_content(self._content.etr_width_edit, 
@@ -111,6 +112,7 @@ class SampleSetupWidget(BaseWidget):
         s.sample_file = self._content.sample_edit.text()
         s.incident_energy = self._content.ei_edit.text()
         s.fixed_ei = self._content.fixed_ei_chkbox.isChecked()
+        s.rebin_et = self._content.et_range_box.isChecked()
         s.et_range_low = self._content.etr_low_edit.text()
         s.et_range_width = self._content.etr_width_edit.text()
         s.et_range_high = self._content.etr_high_edit.text()

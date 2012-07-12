@@ -140,6 +140,12 @@
        <property name="title">
         <string>Energy Transfer Range (meV)</string>
        </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="checked">
+        <bool>false</bool>
+       </property>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
          <widget class="QLabel" name="etr_low_label">
