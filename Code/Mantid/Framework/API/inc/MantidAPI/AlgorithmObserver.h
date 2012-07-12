@@ -53,10 +53,10 @@ public:
     /// Default constructor. Notification hanlders are not connected to any algorithm
     AlgorithmObserver()
         :m_progressObserver(*this,&AlgorithmObserver::_progressHandle),
-        m_startingObserver(*this,&AlgorithmObserver::_startingHandle),
         m_startObserver(*this,&AlgorithmObserver::_startHandle),
         m_finishObserver(*this,&AlgorithmObserver::_finishHandle),
-        m_errorObserver(*this,&AlgorithmObserver::_errorHandle)
+        m_errorObserver(*this,&AlgorithmObserver::_errorHandle),
+        m_startingObserver(*this,&AlgorithmObserver::_startingHandle)
     {
     }
     /**   Constructs AlgorithmObserver and connects all its handlers to algorithm alg.
@@ -64,10 +64,10 @@ public:
       */
     AlgorithmObserver(IAlgorithm_const_sptr alg)
         :m_progressObserver(*this,&AlgorithmObserver::_progressHandle),
-        m_startingObserver(*this,&AlgorithmObserver::_startingHandle),
         m_startObserver(*this,&AlgorithmObserver::_startHandle),
         m_finishObserver(*this,&AlgorithmObserver::_finishHandle),
-        m_errorObserver(*this,&AlgorithmObserver::_errorHandle)
+        m_errorObserver(*this,&AlgorithmObserver::_errorHandle),
+        m_startingObserver(*this,&AlgorithmObserver::_startingHandle)
     {
         observeAll(alg);
     }
