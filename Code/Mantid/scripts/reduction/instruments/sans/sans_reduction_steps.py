@@ -375,6 +375,8 @@ class DirectBeamTransmission(BaseTransmission):
         sample_mon_ws = "__sample_mon"
         GroupDetectors(InputWorkspace=empty_ws,  OutputWorkspace=empty_mon_ws,  DetectorList=det_list, KeepUngroupedSpectra="1")
         GroupDetectors(InputWorkspace=sample_ws, OutputWorkspace=sample_mon_ws, DetectorList=det_list, KeepUngroupedSpectra="1")
+        ConvertToMatrixWorkspace(InputWorkspace=empty_mon_ws, OutputWorkspace=empty_mon_ws)
+        ConvertToMatrixWorkspace(InputWorkspace=sample_mon_ws, OutputWorkspace=sample_mon_ws)
         
         # Calculate transmission. Use the reduction method's normalization channel (time or beam monitor)
         # as the monitor channel.
