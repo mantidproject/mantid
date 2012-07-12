@@ -85,6 +85,8 @@ void RecordPythonScript::exec()
   file << m_generatedScript;
   file.flush();
   file.close();
+
+  stopObservingManager();
 }
 
 /** Handler of the start notifications. Adds an algorithm call to the script.
@@ -92,15 +94,7 @@ void RecordPythonScript::exec()
  */
 void RecordPythonScript::startingHandle(API::IAlgorithm_sptr alg)
 {
-  std::cerr << "Started " << alg->name() << std::endl;
   auto props= alg->getProperties();
-  for( auto p = props.begin(); p != props.end(); ++p)
-  {
-    std::cerr << (**p).name() << '=' << (**p).value() << std::endl;
-  }
-  // Get the details of this algorithm history.
-  const std::string name = alg->name();
-  const int version = alg->version();
 
   std::string algString;
   for(auto p = props.begin() ; p != props.end(); ++p)
@@ -118,7 +112,7 @@ void RecordPythonScript::startingHandle(API::IAlgorithm_sptr alg)
     }
   }
 
-  m_generatedScript +=  name + "(" + algString + ")\n";
+  m_generatedScript +=  alg->name() + "(" + algString + ")\n";
 }
 
 

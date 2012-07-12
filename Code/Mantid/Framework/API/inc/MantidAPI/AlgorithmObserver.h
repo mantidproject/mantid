@@ -137,6 +137,14 @@ public:
         alg->removeObserver(m_errorObserver);
     }
 
+    /**
+     * Disconnect from the algorithm manager.
+     */
+    void stopObservingManager()
+    {
+        AlgorithmManager::Instance().notificationCenter.removeObserver(m_startingObserver);
+    }
+
 /// @cond Doxygen cannot handle the macro around the argument name
 
     /** Handler of the progress notifications. Must be overriden in inherited classes.
