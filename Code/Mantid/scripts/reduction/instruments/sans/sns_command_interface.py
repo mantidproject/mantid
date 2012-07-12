@@ -22,7 +22,7 @@ from reduction.find_data import find_data
 
 import mantidsimple
 
-def EQSANS(keep_events=True):
+def EQSANS(keep_events=False):
     Clear(EqSansReducer)
     ReductionSingleton().set_instrument(sns_instrument.EQSANS())
     NoSolidAngle()
