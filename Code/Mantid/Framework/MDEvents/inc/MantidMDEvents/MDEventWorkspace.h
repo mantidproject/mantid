@@ -2,10 +2,8 @@
 #define MDEVENTWORKSPACE_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/Peak.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/BoxController.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/MDBoxBase.h"
