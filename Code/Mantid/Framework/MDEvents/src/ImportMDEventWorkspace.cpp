@@ -6,11 +6,13 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include <iostream>
 #include <fstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -92,6 +94,7 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void ImportMDEventWorkspace::addEventData(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+
   }
 
   ImportMDEventWorkspace::MDEventType ImportMDEventWorkspace::readEventFlag()
@@ -146,7 +149,7 @@ namespace MDEvents
     int posDiffMDEvent = static_cast<int>(std::distance(posMDEventStart, m_file_data.end()));
     const size_t columnsForFullEvents = nDimensions + 4; // signal, error, run_no, detector_no
     const size_t columnsForLeanEvents = nDimensions + 2; // signal, error
-    int nActualColumns = 0;
+    size_t nActualColumns = 0;
     if((posDiffMDEvent - 1) % columnsForFullEvents != 0) 
     {
       if((posDiffMDEvent - 1) % columnsForLeanEvents != 0)
@@ -183,7 +186,6 @@ namespace MDEvents
     }
   }
 
-
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -191,9 +193,6 @@ namespace MDEvents
   {
     std::string filename = getProperty("Filename");
 
-    //size_t ndims = 2;
-    //std::string eventType = "MDLeanEvent";
-    //IMDEventWorkspace_sptr ws = MDEventFactory::CreateMDWorkspace(ndims, eventType);
     std::ifstream file;
     try
     {
@@ -204,7 +203,7 @@ namespace MDEvents
       g_log.error() << "Cannot open file: " << filename;
       throw e;
     }
-
+    // Copy the data out of the file.
     std::copy(
       std::istream_iterator <std::string> ( file ),
       std::istream_iterator <std::string> (),
@@ -213,42 +212,70 @@ namespace MDEvents
 
     file.close();
 
+    // Check the file format. 
     quickFileCheck();
 
-    // look for the event_type flag.
-    //MDEventType eventType = readEventFlag();
-    
+    // Extract some well used posisions
+    m_posDimStart = std::find(m_file_data.begin(), m_file_data.end(), DimensionBlockFlag());
+    m_posMDEventStart = std::find(m_file_data.begin(), m_file_data.end(), MDEventBlockFlag());
 
-    // read the raw data.
+    // Calculate the dimensionality
+    int posDiffDims = static_cast<int>(std::distance(m_posDimStart, m_posMDEventStart));
+    const size_t nDimensions = (posDiffDims - 1) / 4;
 
-    // interpret the data w.r.t the event_type flag. Throw if invalid or set the flag.
+    // Calculate the actual number of columns in the MDEvent data.
+    int posDiffMDEvent = static_cast<int>(std::distance(m_posMDEventStart, m_file_data.end()));
+    const size_t columnsForFullEvents = nDimensions + 4; // signal, error, run_no, detector_no
+    const size_t columnsForLeanEvents = nDimensions + 2; // signal, error
+    size_t nActualColumns = 0;
+    if((posDiffMDEvent - 1) % columnsForFullEvents != 0) 
+    {
+      nActualColumns = columnsForLeanEvents;
+    }
+    else
+    {
+      nActualColumns = columnsForFullEvents;
+    }
+    m_IsFullMDEvents = (nActualColumns == columnsForFullEvents);
+    const size_t nMDEvents = posDiffMDEvent / nActualColumns;
 
-    // once the data has some meaning, use the coord columns to determine the min and max in each dimension.
+    // Get the min and max extents in each dimension.
+    DataCollectionType::iterator mdEventEntriesIterator = m_posMDEventStart;
+    std::vector<double> extentMins(nDimensions);
+    std::vector<double> extentMaxs(nDimensions);
+    for(size_t i = 0; i < nMDEvents; ++i)
+    {
+      mdEventEntriesIterator += 2;
+      if(m_IsFullMDEvents)
+      {
+        mdEventEntriesIterator += 2;
+      }
+      for(size_t j = 0; j < nDimensions; ++j)
+      {
+        double coord = convert<double>(*(++mdEventEntriesIterator));
+        extentMins[j] = coord < extentMins[j] ? coord : extentMins[j];
+        extentMaxs[j] = coord > extentMaxs[j] ? coord : extentMaxs[j];
+      }
+    }
 
-    // read the dimensions
-
-    // create the empty workspace
-
-    // Fill the empty workspace
-
-    //std::vector<IMDDimension> dimensions = readDimension();
-
-
-
-    //IMDEventWorkspace_sptr ws = createEmptyOutputWorkspace(dimensions);
-    //std::vector< createEventList();
+    IMDEventWorkspace_sptr out = MDEventFactory::CreateMDWorkspace(nDimensions, m_IsFullMDEvents ? "MDEvent" : "MDLeanEvent");
 
     //CALL_MDEVENT_FUNCTION(this->addEventData, in_ws)
-  
 
-    // Copy each string present in the file stream into a deque.
-    //typedef std::deque<std::string> box_collection;
-    //box_collection box_elements;
-    //std::copy(
-    //  std::istream_iterator <std::string> ( file ),
-    //  std::istream_iterator <std::string> (),
-    //  std::back_inserter( box_elements )
-    //  );
+    //Extract Dimensions
+    DataCollectionType::iterator dimEntriesIterator = m_posDimStart;
+    for(size_t i = 0; i < nDimensions; ++i)
+    {
+      std::string id = convert<std::string>(*(++dimEntriesIterator));
+      std::string name = convert<std::string>(*(++dimEntriesIterator));
+      std::string units = convert<std::string>(*(++dimEntriesIterator));
+      int nbins = convert<int>(*(++dimEntriesIterator));
+
+      out->addDimension(MDHistoDimension_sptr(new MDHistoDimension(id, name, units, static_cast<coord_t>(extentMins[i]), static_cast<coord_t>(extentMaxs[i]), nbins)));
+    }
+
+    // Create output
+    this->setProperty("OutputWorkspace", out);
 
   }
 

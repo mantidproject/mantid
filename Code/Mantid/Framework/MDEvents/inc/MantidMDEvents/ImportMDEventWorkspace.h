@@ -51,12 +51,18 @@ namespace MDEvents
     static const std::string MDEventBlockFlag();
   
   private:
-    /// Possible Event Types
-    enum MDEventType{Lean, Full, NotSpecified};
-
+    /// Typdef for the white-space separated file data type.
     typedef std::deque<std::string> DataCollectionType;
     /// All read-in data.
     DataCollectionType m_file_data;
+    /// Iterator for the dimensionality start position.
+    DataCollectionType::iterator m_posDimStart;
+    /// Iterator for the mdevent data start position.
+    DataCollectionType::iterator m_posMDEventStart;
+    /// Possible Event Types
+    enum MDEventType{Lean, Full, NotSpecified};
+    /// Flag indicating whether full md events for lean events will be generated.
+    bool m_IsFullMDEvents;
 
     /// call back to add event data
     template<typename MDE, size_t nd>
@@ -65,9 +71,9 @@ namespace MDEvents
     MDEventType readEventFlag();
     /// Quick check of the structure, so we can abort if passed junk.
     void quickFileCheck();
-
+    ///  Check that the a flag exists in the file.
     bool fileDoesContain(const std::string& flag);
-
+    /// Initialize documentation
     virtual void initDocs();
     void init();
     void exec();

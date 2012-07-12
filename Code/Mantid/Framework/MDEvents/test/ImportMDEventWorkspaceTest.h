@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/System.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -13,6 +14,7 @@
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 
 class ImportMDEventWorkspaceTest : public CxxTest::TestSuite
@@ -206,10 +208,45 @@ public:
   {
     // Setup the corrupt file. 
     FileContentsBuilder fileContents;
-    fileContents.setMDEventEntries("1.0 1.0 2.1 2.1 1.0 1.0"); // Should all be double
+    fileContents.setMDEventEntries("1.0 1.0 2.1 2.1 1.0 1.0"); // The 3rd and 4th entries relate to run_no and detector_no, these should not be doubles!
     MDFileObject infile(fileContents);
     // Run the test.
     do_check_throws_invalid_alg_upon_execution(infile);
+  }
+
+  void test_loaded_dimensionality()
+  {
+    // Setup the corrupt file. 
+    FileContentsBuilder fileContents; 
+    fileContents.setMDEventEntries("1 1 -1 -2\n1 1 2 3"); // mins -1, -2, maxs 2, 3
+    MDFileObject infile(fileContents);
+    // Run the algorithm.
+    ImportMDEventWorkspace alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", infile.getFileName());
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
+
+    TS_ASSERT_EQUALS(2, outWS->getNumDims());
+    IMDDimension_const_sptr dim1 = outWS->getDimension(0);
+    IMDDimension_const_sptr dim2 = outWS->getDimension(1);
+
+    TS_ASSERT_EQUALS("a", dim1->getName());    
+    TS_ASSERT_EQUALS("A", dim1->getDimensionId());
+    TS_ASSERT_EQUALS("U", dim1->getUnits());
+    TS_ASSERT_EQUALS(-1, dim1->getMinimum());
+    TS_ASSERT_EQUALS(2, dim1->getMaximum());
+
+    TS_ASSERT_EQUALS("b", dim2->getName());   
+    TS_ASSERT_EQUALS("B", dim2->getDimensionId());
+    TS_ASSERT_EQUALS("U", dim2->getUnits());
+    TS_ASSERT_EQUALS(-2, dim2->getMinimum());
+    TS_ASSERT_EQUALS(3, dim2->getMaximum());
+
+    dim1->getMinimum();
   }
 
 
