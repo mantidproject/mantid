@@ -45,8 +45,12 @@ namespace MDEvents
     virtual int version() const;
     virtual const std::string category() const;
 
-  private:    
-    
+    /// Flag used to indicate the dimension block in the file
+    static const std::string DimensionBlockFlag();
+    /// Flag used to indicate the mdevent block in the file
+    static const std::string MDEventBlockFlag();
+  
+  private:
     /// Possible Event Types
     enum MDEventType{Lean, Full, NotSpecified};
 
@@ -67,9 +71,8 @@ namespace MDEvents
     virtual void initDocs();
     void init();
     void exec();
-
-
   };
+
 
 
 } // namespace MDEvents

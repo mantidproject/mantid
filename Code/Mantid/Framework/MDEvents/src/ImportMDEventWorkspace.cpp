@@ -20,7 +20,29 @@ namespace MDEvents
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(ImportMDEventWorkspace)
   
+  template< typename T >
+  T convert(const std::string& str)
+  {
+    std::istringstream iss(str);
+    T obj;
+    iss >> std::ws >> obj >> std::ws;
+    if(!iss.eof())
+    {
+        throw std::invalid_argument("Wrong type destination. Cannot convert " + str);
+    }
+    return obj; 
+   }
 
+  const std::string ImportMDEventWorkspace::DimensionBlockFlag()
+  {
+    return "DIMENSIONS";
+  }
+    
+
+  const std::string ImportMDEventWorkspace::MDEventBlockFlag()
+  {
+    return "MDEVENTS";
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -85,14 +107,31 @@ namespace MDEvents
   void ImportMDEventWorkspace::quickFileCheck()
   {
     // Does it have the mandatory blocks?
-    if(!fileDoesContain("DIMENSIONS"))
+    if(!fileDoesContain(DimensionBlockFlag()))
     {
-      throw std::invalid_argument("No DIMENSIONS block in file");
+      std::string message = DimensionBlockFlag() + " missing from file";
+      throw std::invalid_argument(message);
     }
-    if(!fileDoesContain("MDEVENTS"))
+    if(!fileDoesContain(MDEventBlockFlag()))
     {
-      throw std::invalid_argument("No MDEVENTS block in file");
+      std::string message = MDEventBlockFlag() + " missing from file";
+      throw std::invalid_argument(message);
     }
+    // Are the mandatory block in the correct order.
+    DataCollectionType::iterator posDimStart = std::find(m_file_data.begin(), m_file_data.end(), DimensionBlockFlag());
+    DataCollectionType::iterator posDimEnd = std::find(m_file_data.begin(), m_file_data.end(), MDEventBlockFlag());
+    int posDiff = static_cast<int>(std::distance(posDimStart, posDimEnd));
+    if(posDiff < 1)
+    {
+      std::string message = DimensionBlockFlag() + " must be specified in file before "  + MDEventBlockFlag();
+      throw std::invalid_argument(message);
+    }
+    if((posDiff - 1) % 4 != 0)
+    {
+      throw std::invalid_argument("Dimensions in the file should be specified id, name, units, nbins");
+    }
+
+    int ie = convert<int>("1");
 
     // Are the dimensionality entries {string, string, string, number}?
 

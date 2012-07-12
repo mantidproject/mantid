@@ -14,29 +14,70 @@ using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 
+
 class ImportMDEventWorkspaceTest : public CxxTest::TestSuite
 {
 private:
 
-  /**
+/*
+This builder type provides a convenient way to create and change the contents of a virtual file of the type expected 
+by the ImportMDEventWorkspace algorithm.
+
+This type is particularly useful when generating corrupt file contents, as it allows individual apects of the file contents to be modified independently.
+*/
+  class FileContentsBuilder
+  {
+  private:
+    std::string m_DimensionBlock;
+    std::string m_MDEventsBlock;
+    std::string m_DimensionEntries;
+    std::string m_MDEventEntries;
+  public:
+    FileContentsBuilder() : 
+        m_DimensionBlock(ImportMDEventWorkspace::DimensionBlockFlag()), 
+          m_MDEventsBlock(ImportMDEventWorkspace::MDEventBlockFlag()),
+          m_DimensionEntries("a, A, U, 10\nb, B, U, 11")
+        {
+        }
+
+        void setDimensionBlock(const std::string& value)
+        {
+          m_DimensionBlock = value;
+        }
+
+        void setMDEventBlock(const std::string& value)
+        {
+          m_MDEventsBlock = value;
+        }
+
+        void setDimensionEntries(const std::string& value)
+        {
+          m_DimensionEntries = value;
+        }
+
+        std::string create() const
+        {
+          const std::string newline = "\n";
+          return m_DimensionBlock + newline + m_DimensionEntries + newline + m_MDEventsBlock + newline;
+        }
+  };
+
+
+/**
 Helper type. Creates a test file, and also manages the resource to ensure that the file is closed and removed, no matter what the outcome of the test.
+
+Uses a 
 */
 class MDFileObject
 {
 public:
 
   /// Create a simple input file.
-  MDFileObject(const std::string& filename, const size_t& size, const std::string dimensions_block="DIMENSIONS", const std::string mdevents_block="MDEVENTS") : m_filename(filename)
+  MDFileObject(const FileContentsBuilder& builder = FileContentsBuilder(), std::string filename="test_import_md_event_workspace_file.txt") : m_filename(filename)
   {
     m_file.open (filename.c_str());
-    m_file << dimensions_block << std::endl;
-    m_file << "a, A, U, 10" << std::endl;
-    m_file << "b, B, U, 10" << std::endl;
-    m_file << mdevents_block << std::endl;
-    for(size_t i=1; i<size+1;++i)
-    {
-      m_file << i << "\t" << i+1 << std::endl;
-    }
+    // Invoke the builder to create the contents of the file.
+    m_file << builder.create();
     m_file.close();
   }
 
@@ -61,6 +102,18 @@ private:
   void *operator new[](size_t);
 };
 
+/**
+Helper method runs tests that should throw and invalid argument when the algorithm is executed.
+*/
+void do_check_throws_invalid_alg_upon_execution(const MDFileObject& infile)
+{
+  ImportMDEventWorkspace alg;
+  alg.initialize();
+  alg.setRethrows(true);
+  alg.setPropertyValue("Filename", infile.getFileName());
+  alg.setPropertyValue("OutputWorkspace", "test_out");
+  TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+}
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -76,28 +129,48 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
-  void testMissingDimensions()
+  void test_missing_dimension_block_throws()
   {
-    MDFileObject infile("test_import_mdeventworkspace_test_file.txt", 1, "_");
-
-    ImportMDEventWorkspace alg;
-    alg.initialize();
-    alg.setRethrows(true);
-    alg.setPropertyValue("Filename", infile.getFileName());
-    alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    // Setup the corrupt file
+    FileContentsBuilder fileContents;
+    fileContents.setDimensionBlock("");
+    MDFileObject infile(fileContents);
+    // Run the test.
+    do_check_throws_invalid_alg_upon_execution(infile);
   }
 
-  void testMissingMDEventsBlock()
+  void test_missing_mdevents_block_throws()
   {
-    MDFileObject infile("test_import_mdeventworkspace_test_file.txt", 1, "DIMENSIONS", "_");
+    // Setup the corrupt file 
+    FileContentsBuilder fileContents;
+    fileContents.setMDEventBlock("");
+    MDFileObject infile(fileContents);
+    // Run the test.
+    do_check_throws_invalid_alg_upon_execution(infile);
+  }
 
-    ImportMDEventWorkspace alg;
-    alg.initialize();
-    alg.setRethrows(true);
-    alg.setPropertyValue("Filename", infile.getFileName());
-    alg.setPropertyValue("OutputWorkspace", "test_out");
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+  void test_mdevent_block_declared_before_dimension_block_throws()
+  {
+    // Setup the corrupt file. Notice that the DimensionBlockFlag and the MDEventBlockFlag arguments have been swapped over.
+    FileContentsBuilder fileContents;
+    fileContents.setDimensionBlock(ImportMDEventWorkspace::MDEventBlockFlag());
+    fileContents.setMDEventBlock(ImportMDEventWorkspace::DimensionBlockFlag());
+    MDFileObject infile(fileContents);
+    // Run the test.
+    do_check_throws_invalid_alg_upon_execution(infile);
+  }
+
+  void test_dimension_block_has_corrupted_entries_throws()
+  {
+    // Setup the corrupt file. Notice that the DimensionBlockFlag and the MDEventBlockFlag arguments have been swapped over.
+    FileContentsBuilder fileContents;
+    std::string dim1 = "a, A, U, 10\n";
+    std::string dim2 = "b, B, U, 11\n";
+    std::string dim3 = "b, B, U\n"; // Ooops, forgot to put in the number of bins for this dimension.
+    fileContents.setDimensionEntries(dim1 + dim2 + dim3);
+    MDFileObject infile(fileContents);
+    // Run the test.
+    do_check_throws_invalid_alg_upon_execution(infile);
   }
 
 
