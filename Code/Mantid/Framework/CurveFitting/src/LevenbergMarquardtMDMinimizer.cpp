@@ -33,7 +33,6 @@ m_mu(0),
 m_nu(2.0),
 m_rho(1.0)
 {
-  gsl_set_error_handler_off();
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.

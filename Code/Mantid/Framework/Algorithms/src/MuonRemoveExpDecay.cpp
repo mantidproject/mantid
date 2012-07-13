@@ -52,32 +52,50 @@ void MuonRemoveExpDecay::exec()
 
   //Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-
   int numSpectra = static_cast<int>(inputWS->size() / inputWS->blocksize());
 
   //Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+  //Copy over the X vaules to avoid a race-condition in main the loop
+  PARALLEL_FOR2(inputWS,outputWS)
+  for (int i = 0; i < numSpectra; ++i)
+  {
+    PARALLEL_START_INTERUPT_REGION
+
+    outputWS->dataX(i) = inputWS->readX(i);
+
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   if (spectra.empty())
   {
+
     Progress prog(this, 0.0, 1.0, numSpectra);
     //Do all the spectra	
     PARALLEL_FOR2(inputWS,outputWS)
     for (int i = 0; i < numSpectra; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
-      removeDecayData(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
-      removeDecayError(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i)); 
-      outputWS->dataX(i) = inputWS->readX(i);   
 
+      // Make sure reference to input X vector is obtained after output one because in the case
+      // where the input & output workspaces are the same, it might move if the vectors were shared.
+      const MantidVec& xIn = inputWS->readX(i);
+
+      MantidVec& yOut = outputWS->dataY(i);
+      MantidVec& eOut = outputWS->dataE(i);
+
+      removeDecayData(xIn, inputWS->readY(i), yOut);
+      removeDecayError(xIn, inputWS->readE(i), eOut);
       double normConst = calNormalisationConst(outputWS, i);
 
       // do scaling and substract by minus 1.0
-      for (size_t j = 0; j < outputWS->dataY(i).size(); j++)
+      const size_t nbins = outputWS->dataY(i).size();
+      for (size_t j = 0; j < nbins; j++)
       {
-        outputWS->dataY(i)[j] /= normConst;
-        outputWS->dataY(i)[j] -= 1.0;
-        outputWS->dataE(i)[j] /= normConst;
+        yOut[j] /= normConst;
+        yOut[j] -= 1.0;
+        eOut[j] /= normConst;
       }   
 
       prog.report();
@@ -91,12 +109,11 @@ void MuonRemoveExpDecay::exec()
     if (getPropertyValue("InputWorkspace") != getPropertyValue("OutputWorkspace"))
     {
 
-      //Copy all the X,Y and E data
+      //Copy all the Y and E data
       PARALLEL_FOR2(inputWS,outputWS)
       for (int64_t i = 0; i < int64_t(numSpectra); ++i)
       {
         PARALLEL_START_INTERUPT_REGION
-        outputWS->dataX(i) = inputWS->readX(i);
         outputWS->dataY(i) = inputWS->readY(i);
         outputWS->dataE(i) = inputWS->readE(i);
         prog.report();
@@ -116,19 +133,23 @@ void MuonRemoveExpDecay::exec()
         g_log.error("Spectra size greater than the number of spectra!");
         throw std::invalid_argument("Spectra size greater than the number of spectra!");
       }
+      // Get references to the x data
+      const MantidVec& xIn = inputWS->readX(spectra[i]);
+      MantidVec& yOut = outputWS->dataY(spectra[i]);
+      MantidVec& eOut = outputWS->dataE(spectra[i]);
 
-      removeDecayData(inputWS->readX(spectra[i]), inputWS->readY(spectra[i]), outputWS->dataY(spectra[i]));
-      removeDecayError(inputWS->readX(spectra[i]), inputWS->readE(spectra[i]), outputWS->dataE(spectra[i]));
-      outputWS->dataX(spectra[i]) = inputWS->readX(spectra[i]);
+      removeDecayData(xIn, inputWS->readY(spectra[i]), yOut);
+      removeDecayError(xIn, inputWS->readE(spectra[i]), eOut);
 
       double normConst = calNormalisationConst(outputWS, spectra[i]);
 
       // do scaling and substract by minus 1.0
-      for (size_t j = 0; j < outputWS->dataY(i).size(); j++)
+      const size_t nbins = outputWS->dataY(i).size();
+      for (size_t j = 0; j < nbins; j++)
       {
-        outputWS->dataY(spectra[i])[j] /= normConst;
-        outputWS->dataY(spectra[i])[j] -= 1.0;
-        outputWS->dataE(spectra[i])[j] /= normConst;
+        yOut[j] /= normConst;
+        yOut[j] -= 1.0;
+        eOut[j] /= normConst;
       }   
 
       prog.report();
