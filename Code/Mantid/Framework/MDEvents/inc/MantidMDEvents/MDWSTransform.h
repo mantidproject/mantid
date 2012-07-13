@@ -1,5 +1,5 @@
-#ifndef H_MDWS_SLICEDESCR
-#define H_MDWS_SLICEDESCR
+#ifndef MANTID_MDEVENTS_MDWS_TRANSFORMATION_H
+#define MANTID_MDEVENTS_MDWS_TRANSFORMATION_H
 
 #include "MantidMDEvents/MDTransfAxisNames.h"
 #include "MantidMDEvents/MDWSDescription.h"

@@ -1,5 +1,5 @@
-#ifndef H_MD_UNIT_CONVERSION_HELPER
-#define H_MD_UNIT_CONVERSION_HELPER
+#ifndef MANTID_MDEVENTS_UNIT_CONVERSION_HELPER_H
+#define MANTID_MDEVENTS_UNIT_CONVERSION_HELPER_H
 
 //----------------------------------------------------------------------
 // Includes

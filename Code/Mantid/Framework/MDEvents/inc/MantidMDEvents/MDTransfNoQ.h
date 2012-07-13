@@ -1,5 +1,5 @@
-#ifndef  H_CONVERT_TO_MDEVENTS_NOQ_TRANSF
-#define  H_CONVERT_TO_MDEVENTS_NOQ_TRANSF
+#ifndef  MANTID_MDEVENTS_NOQ_TRANSF_H
+#define  MANTID_MDEVENTS_NOQ_TRANSF_H
 //
 #include "MantidMDEvents/MDTransfInterface.h"
 //#include "MantidMDEvents/ConvToMDBase.h"

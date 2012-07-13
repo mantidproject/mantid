@@ -1,5 +1,5 @@
-#ifndef H_MDTRANSF_AXIS_NAMES
-#define H_MDTRANSF_AXIS_NAMES
+#ifndef MANTID_MDEVENTS_MDTRANSF_AXIS_NAMES_H
+#define MANTID_MDEVENTS_MDTRANSF_AXIS_NAMES_H
 #include "MantidMDEvents/MDTransfDEHelper.h"
 #include "MantidKernel/V3D.h"
 

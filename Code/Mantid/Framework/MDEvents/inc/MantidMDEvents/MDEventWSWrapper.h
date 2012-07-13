@@ -1,5 +1,5 @@
-#ifndef H_MDEVENT_WS_WRAPPER
-#define H_MDEVENT_WS_WRAPPER
+#ifndef MANTID_MDEVENTS_MDEVENT_WS_WRAPPER_H
+#define MANTID_MDEVENTS_MDEVENT_WS_WRAPPER_H
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventWorkspace.h"

@@ -1,5 +1,5 @@
-#ifndef H_CONVERT_TO_MD_EVENTWS
-#define H_CONVERT_TO_MD_EVENTWS
+#ifndef MANTID_MDEVENTS_CONV_TOMD_EVENTSWS_H
+#define MANTID_MDEVENTS_CONV_TOMD_EVENTSWS_H
 //
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"

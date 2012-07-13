@@ -1,5 +1,5 @@
-#ifndef H_MD_TRANSFORMATION_FACTORYIMPL
-#define H_MD_TRANSFORMATION_FACTORYIMPL
+#ifndef MANTID_MDEVENTS_MD_TRANSFORMATION_FACTORYIMPL_H
+#define MANTID_MDEVENTS_MD_TRANSFORMATION_FACTORYIMPL_H
 
 /* Used to register unit classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator

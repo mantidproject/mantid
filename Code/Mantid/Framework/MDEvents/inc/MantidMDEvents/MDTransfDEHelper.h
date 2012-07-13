@@ -1,5 +1,5 @@
-#ifndef H_MDTRANSF_DE_HELPER
-#define H_MDTRANSF_DE_HELPER
+#ifndef MANTID_MDEVENTS_MDTRANSF_DE_HELPER_H
+#define MANTID_MDEVENTS_MDTRANSF_DE_HELPER_H
 
 #include "MantidKernel/DllConfig.h"
 #include <vector>
@@ -48,7 +48,7 @@ namespace CnvrtToMD
           Indir   = 2,  //< emode=2; InDirect inelastic analysis mode
           No_DE,         //< couples with NoNonentum analysis, means just copying existing data (may be doing units conversion), 
                        // it is also the counter for the number of availible modes, used to initiate the mode names
-          Undef        // non-existing (undefined mode). Used to check if emode was defined
+          Undef        //< non-existing (undefined mode). Used to check if emode was defined
     };
 }
 
