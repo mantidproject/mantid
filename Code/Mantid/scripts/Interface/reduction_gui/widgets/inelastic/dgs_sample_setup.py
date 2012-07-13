@@ -101,6 +101,7 @@ class SampleSetupWidget(BaseWidget):
                                              state.et_range_width)
         self._check_and_set_lineedit_content(self._content.etr_high_edit, 
                                              state.et_range_high)
+        self._content.et_is_distribution_cb.setChecked(state.et_is_distribution)
         self._content.hardmask_edit.setText(state.hardmask_file)
         self._content.grouping_edit.setText(state.grouping_file)
     
@@ -116,6 +117,7 @@ class SampleSetupWidget(BaseWidget):
         s.et_range_low = self._content.etr_low_edit.text()
         s.et_range_width = self._content.etr_width_edit.text()
         s.et_range_high = self._content.etr_high_edit.text()
+        s.et_is_distribution = self._content.et_is_distribution_cb.isChecked()
         s.hardmask_file = self._content.hardmask_edit.text()
         s.grouping_file = self._content.grouping_edit.text()    
         return s

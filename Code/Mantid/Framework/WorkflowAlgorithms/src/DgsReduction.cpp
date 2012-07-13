@@ -85,6 +85,8 @@ namespace WorkflowAlgorithms
         boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary.\n"
       "Negative width value indicates logarithmic binning.");
+    declareProperty("SofPhiEIsDistribution", true,
+        "The final S(Phi, E) data is made to be a distribution.");
     declareProperty("HardMaskFile", "", "A file or workspace containing a hard mask.");
     declareProperty("GroupingFile", "", "A file containing grouping (mapping) information.");
     declareProperty("FilterBadPulses", false, "If true, filter bad pulses from data.");
@@ -309,12 +311,14 @@ namespace WorkflowAlgorithms
     const double initial_energy = this->getProperty("IncidentEnergy");
     const bool fixed_ei = this->getProperty("FixedIncidentEnergy");
     const std::vector<double> et_binning = this->getProperty("EnergyTransferRange");
+    const bool sofphie_is_distribution = this->getProperty("SofPhiEIsDistribution");
 
     IAlgorithm_sptr et_conv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
     et_conv->setProperty("InputWorkspace", inputWS);
     et_conv->setProperty("IncidentEnergy", initial_energy);
     et_conv->setProperty("FixedIncidentEnergy", fixed_ei);
     et_conv->setProperty("EnergyTransferRange", et_binning);
+    et_conv->setProperty("SofPhiEIsDistribution", sofphie_is_distribution);
     et_conv->execute();
   }
 

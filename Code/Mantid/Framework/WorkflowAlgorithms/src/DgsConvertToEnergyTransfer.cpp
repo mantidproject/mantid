@@ -78,6 +78,8 @@ namespace WorkflowAlgorithms
         boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary.\n"
       "Negative width value indicates logarithmic binning.");
+    this->declareProperty("SofPhiEIsDistribution", true,
+        "The final S(Phi, E) data is made to be a distribution.");
     this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
         Direction::Output, PropertyMode::Optional));
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
@@ -224,13 +226,27 @@ namespace WorkflowAlgorithms
     // Rebin to ensure consistency
     if (!et_binning.empty())
       {
+        const bool sofphie_is_distribution = this->getProperty("SofPhiEIsDistribution");
+
         g_log.notice() << "Rebinning data" << std::endl;
         IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
         rebin->setAlwaysStoreInADS(true);
         rebin->setProperty("InputWorkspace", outWsName);
         rebin->setProperty("OutputWorkspace", outWsName);
         rebin->setProperty("Params", et_binning);
+        if (sofphie_is_distribution)
+          {
+            rebin->setProperty("PreserveEvents", false);
+          }
         rebin->execute();
+
+        if (sofphie_is_distribution)
+          {
+            g_log.notice() << "Making distribution" << std::endl;
+            IAlgorithm_sptr distrib = this->createSubAlgorithm("ConvertToDistribution");
+            distrib->setProperty("Workspace", outWsName);
+            distrib->execute();
+          }
       }
 
     MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);

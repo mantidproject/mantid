@@ -18,6 +18,7 @@ class SampleSetupScript(BaseScriptElement):
     et_range_low = ""
     et_range_width = ""
     et_range_high = ""
+    et_is_distribution = True
     hardmask_file = ""
     grouping_file = ""
     
@@ -33,6 +34,7 @@ class SampleSetupScript(BaseScriptElement):
             script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, 
                                                                self.et_range_width, 
                                                                self.et_range_high)
+            script += "SofPhiEIsDistribution=%s,\n" % self.et_is_distribution
         script += "HardMaskFile=\"%s\",\n" % self.hardmask_file
         script += "GroupingFile=\"%s\",\n" % self.grouping_file
         return script
@@ -50,6 +52,7 @@ class SampleSetupScript(BaseScriptElement):
         xml += "    <width>%s</width>\n"  % self.et_range_width
         xml += "    <high>%s</high>\n" % self.et_range_high
         xml += "  </et_range>\n"
+        xml += "  <sofphie_is_distribution>%s</sofphie_is_distribution>" % str(self.et_is_distribution)
         xml += "  <hardmask_file>%s</hardmask_file>\n" % self.hardmask_file
         xml += "  <grouping_file>%s</grouping_file>\n" % self.grouping_file
         xml += "</SampleSetup>\n"
@@ -82,6 +85,9 @@ class SampleSetupScript(BaseScriptElement):
             self.et_range_high = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "et_range/high",
                                                                     default=SampleSetupScript.et_range_high)
+            self.et_is_distribution = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                       "sofphie_is_distribution",
+                                                                       default=SampleSetupScript.et_is_distribution)
             self.hardmask_file = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "hardmask_file",
                                                                     default=SampleSetupScript.hardmask_file)
@@ -100,6 +106,7 @@ class SampleSetupScript(BaseScriptElement):
         self.et_range_low = SampleSetupScript.et_range_low
         self.et_range_width = SampleSetupScript.et_range_width
         self.et_range_high = SampleSetupScript.et_range_high
+        self.et_is_distribution = SampleSetupScript.et_is_distribution
         self.hardmask_file = SampleSetupScript.hardmask_file
         self.grouping_file = SampleSetupScript.grouping_file
         
