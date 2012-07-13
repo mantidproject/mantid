@@ -48,7 +48,7 @@ void MuonRemoveExpDecay::init()
  */
 void MuonRemoveExpDecay::exec()
 {
-  std::vector<int> Spectra = getProperty("Spectra");
+  std::vector<int> spectra = getProperty("Spectra");
 
   //Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
@@ -58,14 +58,14 @@ void MuonRemoveExpDecay::exec()
   //Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS);
 
-  if (Spectra.empty())
+  if (spectra.empty())
   {
     Progress prog(this, 0.0, 1.0, numSpectra);
     //Do all the spectra	
     PARALLEL_FOR2(inputWS,outputWS)
     for (int i = 0; i < numSpectra; ++i)
     {
-			PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERUPT_REGION
       removeDecayData(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
       removeDecayError(inputWS->readX(i), inputWS->readE(i), outputWS->dataE(i)); 
       outputWS->dataX(i) = inputWS->readX(i);   
@@ -81,13 +81,13 @@ void MuonRemoveExpDecay::exec()
       }   
 
       prog.report();
-			PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERUPT_REGION
     }
-		PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERUPT_REGION
   }
   else
   {
-    Progress prog(this, 0.0, 1.0, numSpectra + Spectra.size());
+    Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
     if (getPropertyValue("InputWorkspace") != getPropertyValue("OutputWorkspace"))
     {
 
@@ -95,46 +95,46 @@ void MuonRemoveExpDecay::exec()
       PARALLEL_FOR2(inputWS,outputWS)
       for (int64_t i = 0; i < int64_t(numSpectra); ++i)
       {
-				PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERUPT_REGION
         outputWS->dataX(i) = inputWS->readX(i);
         outputWS->dataY(i) = inputWS->readY(i);
         outputWS->dataE(i) = inputWS->readE(i);
         prog.report();
-				PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERUPT_REGION
       }
-			PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERUPT_REGION
     }
 
     //Do the specified spectra only
-    int specLength = static_cast<int>(Spectra.size());
+    int specLength = static_cast<int>(spectra.size());
     PARALLEL_FOR2(inputWS,outputWS)
     for (int i = 0; i < specLength; ++i)
     {
-			PARALLEL_START_INTERUPT_REGION
-      if (Spectra[i] > numSpectra)
+      PARALLEL_START_INTERUPT_REGION
+      if (spectra[i] > numSpectra)
       {
         g_log.error("Spectra size greater than the number of spectra!");
         throw std::invalid_argument("Spectra size greater than the number of spectra!");
       }
 
-      removeDecayData(inputWS->readX(Spectra[i]), inputWS->readY(Spectra[i]), outputWS->dataY(Spectra[i]));
-      removeDecayError(inputWS->readX(Spectra[i]), inputWS->readE(Spectra[i]), outputWS->dataE(Spectra[i]));
-      outputWS->dataX(Spectra[i]) = inputWS->readX(Spectra[i]);
+      removeDecayData(inputWS->readX(spectra[i]), inputWS->readY(spectra[i]), outputWS->dataY(spectra[i]));
+      removeDecayError(inputWS->readX(spectra[i]), inputWS->readE(spectra[i]), outputWS->dataE(spectra[i]));
+      outputWS->dataX(spectra[i]) = inputWS->readX(spectra[i]);
 
-      double normConst = calNormalisationConst(outputWS, Spectra[i]);
+      double normConst = calNormalisationConst(outputWS, spectra[i]);
 
       // do scaling and substract by minus 1.0
       for (size_t j = 0; j < outputWS->dataY(i).size(); j++)
       {
-        outputWS->dataY(Spectra[i])[j] /= normConst;
-        outputWS->dataY(Spectra[i])[j] -= 1.0;
-        outputWS->dataE(Spectra[i])[j] /= normConst;
+        outputWS->dataY(spectra[i])[j] /= normConst;
+        outputWS->dataY(spectra[i])[j] -= 1.0;
+        outputWS->dataE(spectra[i])[j] /= normConst;
       }   
 
       prog.report();
-			PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERUPT_REGION
     }
-		PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 
   setProperty("OutputWorkspace", outputWS);
@@ -224,7 +224,7 @@ double MuonRemoveExpDecay::calNormalisationConst(API::MatrixWorkspace_sptr ws, i
 
     if (!fitStatus.compare("success"))
     {
-      const double A0 = result->getParameter(0);//params[0];
+      const double A0 = result->getParameter(0);
 
       if ( A0 < 0 ) 
       {
