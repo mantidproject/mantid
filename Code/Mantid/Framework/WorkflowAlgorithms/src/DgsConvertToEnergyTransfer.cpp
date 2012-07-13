@@ -7,6 +7,7 @@ energy transfer for direct geometry spectrometers.
 
 #include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -14,6 +15,8 @@ energy transfer for direct geometry spectrometers.
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
+
+#include <boost/algorithm/string.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -104,6 +107,8 @@ namespace WorkflowAlgorithms
       PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
     }
 
+    this->enableHistoryRecordingForChild(true);
+
     MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
     const std::string inWsName = inputWS->getName();
     std::string outWsName = inWsName + "_et";
@@ -114,7 +119,10 @@ namespace WorkflowAlgorithms
     const std::string facility = ConfigService::Instance().getFacility().name();
     g_log.notice() << "Processing for " << facility << std::endl;
     const double ei_guess = this->getProperty("IncidentEnergy");
+    const bool fixed_ei = this->getProperty("FixedIncidentEnergy");
     double initial_energy = 0.0;
+    //const double mon_peak = 0.0;
+
     if ("SNS" == facility)
       {
         // SNS wants to preserve events until the last
@@ -139,12 +147,89 @@ namespace WorkflowAlgorithms
         // Do ARCS and SEQUOIA
         else
           {
+            if (fixed_ei)
+              {
+                initial_energy = ei_guess;
+              }
+            else
+              {
+                std::string runFileName("");
+                const WorkspaceHistory::AlgorithmHistories hists = inputWS->getHistory().getAlgorithmHistories();
+                WorkspaceHistory::AlgorithmHistories::const_iterator iter;
+                for (iter = hists.begin(); iter != hists.end(); ++iter)
+                  {
+                    if (iter->name() == "LoadEventNexus")
+                      {
+                        const std::vector<PropertyHistory> ph = iter->getProperties();
+                        std::vector<PropertyHistory>::const_iterator phiter;
+                        for (phiter = ph.begin(); phiter != ph.end(); ++phiter)
+                          {
+                            if (phiter->name() == "Filename")
+                              {
+                                runFileName = phiter->name();
+                                break;
+                              }
+                          }
+                        break;
+                      }
+                  }
+                // FIXME: This needs to be changed to handle incoming workspaces
+                if (runFileName.empty())
+                  {
+                    throw std::runtime_error("Cannot find run filename, therefore cannot find the initial energy");
+                  }
 
+                std::string monWsName = inWsName + "_monitors";
+                std::string loadAlgName("");
+                if (boost::ends_with(runFileName, "_event.nxs"))
+                  {
+                    g_log.notice() << "Loading NeXus monitors" << std::endl;
+                    loadAlgName = "LoadNexusMonitors";
+                  }
+
+                if (boost::ends_with(runFileName, "_neutron_event.dat"))
+                  {
+                    g_log.notice() << "Loading PreNeXus monitors" << std::endl;
+                    loadAlgName = "LoadPreNexusMonitors";
+                    boost::replace_first(runFileName, "_neutron_event.dat",
+                        "_runinfo.xml");
+                  }
+
+                // Load the monitors
+                IAlgorithm_sptr loadmon = this->createSubAlgorithm(loadAlgName);
+                loadmon->setAlwaysStoreInADS(true);
+                loadmon->setProperty("Filename", runFileName);
+                loadmon->setProperty("OutputWorkspace", monWsName);
+                loadmon->execute();
+
+                // Calculate Ei
+                // Get the monitor spectra indices from the parameters
+                MatrixWorkspace_const_sptr monWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(monWsName);
+
+                IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
+                getei->setProperty("InputWorkspace", monWsName);
+                getei->setProperty("Monitor1Spec", monWS->getSpectrum(0)->getSpectrumNo());
+                getei->setProperty("Monitor2Spec", monWS->getSpectrum(1)->getSpectrumNo());
+                getei->setProperty("EnergyEstimate", ei_guess);
+                try
+                {
+                    getei->execute();
+                    initial_energy = getei->getProperty("IncidentEnergy");
+                    t0 = getei->getProperty("Tzero");
+                }
+                catch (...)
+                {
+                    g_log.error() << "GetEi failed, using guess as initial energy and T0 = 0" << std::endl;
+                    initial_energy = ei_guess;
+                }
+              }
           }
 
         g_log.notice() << "Adjusting for T0" << std::endl;
         IAlgorithm_sptr alg = this->createSubAlgorithm("ChangeBinOffset");
         alg->setAlwaysStoreInADS(true);
+        alg->setChild(true);
+        alg->enableHistoryRecordingForChild(true);
         alg->setProperty("InputWorkspace", inWsName);
         alg->setProperty("OutputWorkspace", outWsName);
         alg->setProperty("Offset", -t0);
