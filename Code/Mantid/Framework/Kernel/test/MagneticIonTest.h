@@ -1,9 +1,12 @@
 #ifndef MAGNETICIONTEST_H_
 #define MAGNETICIONTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <stdexcept>
 #include "MantidKernel/MagneticIon.h"
+#include "MantidKernel/Exception.h"
+
+#include <cxxtest/TestSuite.h>
+
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::PhysicalConstants;
 
@@ -33,6 +36,33 @@ public:
     TS_ASSERT_THROWS(getMagneticIon("Am",12), std::runtime_error);  //no such charge
     TS_ASSERT_THROWS(getJL("Am",12), std::runtime_error);           //no such charge - pass to getJL
     TS_ASSERT_THROWS(getJL("Am",7,3), std::runtime_error);          //no such l 
+  }
+
+  void test_Copied_Object_Has_Same_Attributes()
+  {
+    MagneticIon ion = getMagneticIon("Am", 7);
+    MagneticIon copiedIon(ion);
+
+    TS_ASSERT_EQUALS(ion.symbol, copiedIon.symbol);
+    TS_ASSERT_EQUALS(ion.charge, copiedIon.charge);
+    checkVectorsEqual("Checking j0 values:", ion.j0, copiedIon.j0);
+    checkVectorsEqual("Checking j2 values:", ion.j2, copiedIon.j2);
+    checkVectorsEqual("Checking j4 values:", ion.j4, copiedIon.j4);
+    checkVectorsEqual("Checking j6 values:", ion.j6, copiedIon.j6);
+  }
+
+private:
+
+  void checkVectorsEqual(const std::string & msgPrefix, const std::vector<double> & first, const std::vector<double> & second)
+  {
+    TSM_ASSERT_EQUALS(msgPrefix + " Size match", first.size(), second.size());
+    if(first.size() != second.size()) return;
+
+    for(size_t i = 0; i < first.size(); ++i)
+    {
+      const std::string msg = msgPrefix + " Value mismatch at element " + boost::lexical_cast<std::string>(i);
+      TSM_ASSERT_DELTA(msg, first[i], second[i], 1e-12);
+    }
   }
 };
 

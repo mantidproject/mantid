@@ -16,11 +16,13 @@ namespace PhysicalConstants
    * rare earth, and actinide atoms and ions. Data is taken from International Tables of 
    * Crystalography, volume C, section 4.4.5 http://it.iucr.org/Cb/ch4o4v0001/sec4o4o5/
    */
-  struct MANTID_KERNEL_DLL MagneticIon {
+  struct MANTID_KERNEL_DLL MagneticIon
+  {
+    /// Default constructor
     MagneticIon();
+    /// Construct the Ion with data
     MagneticIon(const std::string symbol, const uint16_t charge,const  double j0[8],
-         const double j2[8],const  double j4[8],const  double j6[8]);
-    MagneticIon(const MagneticIon& other);
+                const double j2[8],const  double j4[8],const  double j6[8]);
 
     /// The atomic symbol. In other words the one or two character abbreviation.
     std::string symbol;
@@ -28,17 +30,19 @@ namespace PhysicalConstants
     /// The charge of the ion, or 0 for neutral atom. Note thet all charges are not negative
     uint16_t charge;
     
-    /// A vector containing A, a, B, b, C, c D, e for each \<j0\>, \<j2\>, \<j4\>, and \<j6\>
+    /// A vector containing A, a, B, b, C, c D, e for each \<j0\>
     std::vector <double> j0;
+    /// A vector containing A, a, B, b, C, c D, e for each \<j2\>
     std::vector <double> j2;
+    /// A vector containing A, a, B, b, C, c D, e for each \<j4\>
     std::vector <double> j4;
+    /// A vector containing A, a, B, b, C, c D, e for each \<j6\>
     std::vector <double> j6;
   };
 
-  static std::map<std::string,MagneticIon> ion_map;
-  int initializeMap();
-
-  MANTID_KERNEL_DLL MagneticIon getMagneticIon(const std::string &symbol,const uint16_t charge);
+  /// Returns the magnetic ion for the given symbol and charge
+  MANTID_KERNEL_DLL const MagneticIon & getMagneticIon(const std::string &symbol,const uint16_t charge);
+  /// Returns the Lth-coefficients for the given ion
   MANTID_KERNEL_DLL std::vector <double> getJL(const std::string &symbol,const uint16_t charge, const uint16_t l = 0);
 
 } // namespace PhysicalConstants
