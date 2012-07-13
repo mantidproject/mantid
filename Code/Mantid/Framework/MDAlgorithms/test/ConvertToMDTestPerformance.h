@@ -70,7 +70,7 @@ void test_EventNoUnitsConv()
     WSD.buildFromMatrixWS(inWsEv,"Q3D","Indirect");
 
     WSD.setDetectors(g_DetLoc);
-    WSD.rotMatrix = Rot;
+    WSD.m_RotMatrix = Rot;
 
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -101,7 +101,7 @@ void test_EventFromTOFConv()
     WSD.buildFromMatrixWS(inWsEv,"Q3D","Indirect");
 
     WSD.setDetectors(g_DetLoc);
-    WSD.rotMatrix = Rot;
+    WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
     pTargWS->createEmptyMDWS(WSD);
@@ -135,7 +135,7 @@ void test_HistoFromTOFConv()
     WSD.buildFromMatrixWS(inWs2D,"Q3D","Indirect");
 
     WSD.setDetectors(g_DetLoc);
-    WSD.rotMatrix = Rot;
+    WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
     pTargWS->createEmptyMDWS(WSD);
@@ -172,7 +172,7 @@ void test_HistoNoUnitsConv()
     WSD.buildFromMatrixWS(inWs2D,"Q3D","Indirect");
 
     WSD.setDetectors(g_DetLoc);
-    WSD.rotMatrix = Rot;
+    WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
     pTargWS->createEmptyMDWS(WSD);
