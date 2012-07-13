@@ -787,6 +787,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
     peak->setDetectorID(m_currentDetID);
     peak->setGoniometerMatrix(ws->run().getGoniometer().getR());
     peak->setBinCount(count);
+    peak->setRunNumber(ws->getRunNumber());
     tw->addPeak(*peak);
     delete peak;
     tw->modified();
