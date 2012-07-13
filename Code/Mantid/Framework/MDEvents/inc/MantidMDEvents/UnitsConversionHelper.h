@@ -53,24 +53,25 @@ class DLLExport UnitsConversionHelper
 {
     // variables for units conversion:
     // pointer to input workpsace units 
-      Kernel::Unit_sptr pSourceWSUnit;
+      Kernel::Unit_sptr m_SourceWSUnit;
       // pointer to target workspace units
-      Kernel::Unit_sptr pTargetUnit;
+      Kernel::Unit_sptr m_TargetUnit;
 
       // the ID, which specifies what kind of unit conversion should be used. 
-      CnvrtToMD::ConvertUnits UnitCnvrsn;
+      CnvrtToMD::ConvertUnits m_UnitCnvrsn;
 
       //  these variables needed and used in the case of fast units conversion
-      double factor, power;
+      double m_Factor, m_Power;
       //  these variables needed and used for conversion through TOF
-      int emode;
-      double L1,efix,twoTheta,L2;
-      std::vector<double>const *pTwoTheta;
-      std::vector<double>const *pL2;
+      int m_Emode;
+
+      double m_L1,m_Efix,m_TwoTheta,m_L2;
+      std::vector<double>const *m_pTwoThetas;
+      std::vector<double>const *m_pL2s;
 
 public:
-    UnitsConversionHelper():pTwoTheta(NULL),pL2(NULL){};
-    void initialize(const MDWSDescription &TWSD,const std::string &units_to);
+    UnitsConversionHelper():m_pTwoThetas(NULL),m_pL2s(NULL){};
+    void initialize(const MDWSDescription &targetWSDescr,const std::string &units_to);
     void updateConversion(size_t i);
     double convertUnits(double val);
     // copy constructor

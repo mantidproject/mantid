@@ -51,7 +51,7 @@ class ConvToMDHistoWS: public ConvToMDBase
 public:
     size_t  initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
 
-    void runConversion(API::Progress *pProg);
+    void runConversion(API::Progress *pProgress);
 private:
    // the number of spectra to process by single computational thread;
    size_t m_spectraChunk;

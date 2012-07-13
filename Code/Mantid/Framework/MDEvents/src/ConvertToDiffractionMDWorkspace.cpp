@@ -367,7 +367,7 @@ namespace MDEvents
 
     // -------- Input workspace -> convert to Event ------------------------------------
     m_inWS = getProperty("InputWorkspace");
-    Workspace2D_sptr inWS2D = boost::dynamic_pointer_cast<Workspace2D>(m_inWS);
+    Workspace2D_sptr m_InWS2D = boost::dynamic_pointer_cast<Workspace2D>(m_inWS);
     if (LorentzCorrection)
     {
       API::Run & run = m_inWS->mutableRun();

@@ -61,7 +61,7 @@ public:
     MDTransfAxisNames();
 private:
    /// the vector describes default dimension names, specified along the axis if no names are explicitly requested;
-   std::vector<std::string> default_dim_ID;
+   std::vector<std::string> m_DefaultDimID;
  
 };
 /** function to build mslice-like axis name from the vector, which describes crystallographic direction along this axis*/

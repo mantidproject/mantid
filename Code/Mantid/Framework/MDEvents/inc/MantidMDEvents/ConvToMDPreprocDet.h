@@ -96,7 +96,7 @@ public:
     size_t  getDetSpectra(size_t i)const{return detIDMap[i];}
     int32_t getDetID(size_t i)const{return det_id[i];}
 
-    //int    getEmode()const{return emode;}
+    //int    getEmode()const{return m_Emode;}
     //double getEfix()const{return efix;}
     double getL1()const{return L1;}
 
@@ -105,7 +105,7 @@ public:
     void setL1(double Dist);
 
    /** function, does preliminary calculations of the detectors positions to convert results into k-dE space */     
-    void processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS, Kernel::Logger& convert_log,API::Progress *pProg);
+    void processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS, Kernel::Logger& g_Log,API::Progress *pProgress);
    /** function builds fake cpectra-detector map and all other detectors position for the case when detector information has been lost */
     void buildFakeDetectorsPositions(const API::MatrixWorkspace_sptr inputWS);
 

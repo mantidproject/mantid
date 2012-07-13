@@ -78,10 +78,10 @@ void test_TwoTransfMethods()
     TS_ASSERT_THROWS_NOTHING(TestWS.setMinMax(dimMin,dimMax));
 
     // define transformation
-    TestWS.rotMatrix.assign(9,0);
-    TestWS.rotMatrix[0]=1;
-    TestWS.rotMatrix[4]=1;
-    TestWS.rotMatrix[8]=1;
+    TestWS.m_RotMatrix.assign(9,0);
+    TestWS.m_RotMatrix[0]=1;
+    TestWS.m_RotMatrix[4]=1;
+    TestWS.m_RotMatrix[8]=1;
 
     // create target md workspace
     pHistoMDWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
