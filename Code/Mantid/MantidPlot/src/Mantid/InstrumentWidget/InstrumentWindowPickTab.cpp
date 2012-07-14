@@ -788,6 +788,10 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
     peak->setGoniometerMatrix(ws->run().getGoniometer().getR());
     peak->setBinCount(count);
     peak->setRunNumber(ws->getRunNumber());
+    const double counts = instrActor->getIntegratedCounts(m_currentDetID);
+    peak->setIntensity(counts);
+    if(counts > 0.) peak->setSigmaIntensity(std::sqrt(counts));
+    
     tw->addPeak(*peak);
     delete peak;
     tw->modified();
