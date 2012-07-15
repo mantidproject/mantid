@@ -301,6 +301,40 @@ public:
 
   }
 
+  void testLoadChangeClearSavesOriginalPropsFile()
+  {
+    // Backup current user settings
+    ConfigServiceImpl & settings = ConfigService::Instance();
+    const std::string userFileBackup = settings.getUserFilename() + ".unittest";
+    try
+    {
+      Poco::File userFile(settings.getUserFilename());
+      userFile.moveTo(userFileBackup);
+    }
+    catch(Poco::Exception&){}
+
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
+      + "MantidTest.properties";
+    settings.updateConfig(propfile);
+    settings.setString("mantid.legs", "15");
+
+    settings.reset();
+
+    const std::string contents = readFile(settings.getUserFilename());
+    // No mention of mantid.legs but not empty
+    TS_ASSERT(!contents.empty());
+    TS_ASSERT(contents.find("mantid.legs") == std::string::npos);
+
+
+    try
+    {
+      Poco::File backup(userFileBackup);
+      backup.moveTo(settings.getUserFilename());
+    }
+    catch(Poco::Exception &) {}
+        
+  }
+
   void testSaveConfigWithPropertyRemoved()
   {
     const std::string filename("user.settings.testSaveConfigWithPropertyRemoved");

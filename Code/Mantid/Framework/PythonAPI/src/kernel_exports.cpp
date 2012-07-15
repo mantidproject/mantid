@@ -379,6 +379,8 @@ namespace PythonAPI
       .def("setDataSearchDirs", (void (ConfigServiceWrapper::*)(const boost::python::list &))&ConfigServiceWrapper::setDataSearchDirs)
       .def("appendDataSearchDir", &ConfigServiceWrapper::appendDataSearchDir)
       .def("getInstrumentDirectory", &ConfigServiceWrapper::getInstrumentDirectory)
+      .def("reset", &ConfigServiceWrapper::reset)
+      .def("getPropertiesDir", &ConfigServiceWrapper::getPropertiesDir)
       .def("getUserFilename", &ConfigServiceWrapper::getUserFilename)
       .def("saveConfig", &ConfigServiceWrapper::saveConfig)
       ;

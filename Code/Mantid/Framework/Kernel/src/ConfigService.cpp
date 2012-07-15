@@ -696,6 +696,29 @@ std::string ConfigServiceImpl::defaultConfig() const
 // Public member functions
 //-------------------------------
 
+/**
+ * Removes the user properties file & loads a fresh configuration
+ */
+void ConfigServiceImpl::reset()
+{
+  // Remove the current user properties file and write a fresh one
+  try
+  {
+    Poco::File userFile(getUserFilename());
+    userFile.remove();
+  }
+  catch(Poco::Exception &)
+  {
+  }
+  createUserPropertiesFile();
+
+  //Now load the original
+  const bool append = false;
+  const bool updateCaches = true;
+  updateConfig(getPropertiesDir() + m_properties_file_name, 
+               append, updateCaches);
+}
+
 /** Updates and existing configuration and restarts the logging
  *  @param filename :: The filename and optionally path of the file to load
  *  @param append ::   If false (default) then any previous configuration is discarded,

@@ -127,12 +127,28 @@ namespace Mantid
       //@}
 
       /** 
+       * Return the properties file directory
+       * @returns A string containing the filename of the user properties file
+       */
+      std::string getPropertiesDir() const
+      {
+	return Mantid::Kernel::ConfigService::Instance().getPropertiesDir();
+      }     
+
+      /** 
        * Return the user properties filename
        * @returns A string containing the filename of the user properties file
        */
       std::string getUserFilename() const
       {
 	return Mantid::Kernel::ConfigService::Instance().getUserFilename();
+      }
+
+      /** Reset to factory defaults
+       */
+      void reset()
+      {
+	Mantid::Kernel::ConfigService::Instance().reset();
       }
 
       /** Saves and properties changed from the default to the given file
