@@ -282,7 +282,7 @@ public:
     Poco::File prop_file(filename);
     if( prop_file.exists() ) prop_file.remove();
     const std::string value("15");
-    std::ofstream writer(filename);
+    std::ofstream writer(filename.c_str());
     writer << "mantid.legs = " << value << "\n";
     writer.close();
 
@@ -566,7 +566,7 @@ private:
 
   std::string readFile(const std::string & filename)
   {
-    std::ifstream reader(filename);
+    std::ifstream reader(filename.c_str());
     return std::string((std::istreambuf_iterator<char>(reader)),
                         std::istreambuf_iterator<char>());
   }
