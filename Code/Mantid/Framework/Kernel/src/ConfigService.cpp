@@ -291,6 +291,7 @@ void ConfigServiceImpl::loadConfig(const std::string& filename, const bool appen
   {
     //remove the previous property string
     m_PropertyString = "";
+    m_changed_keys.clear();
   }
 
   try
@@ -736,16 +737,12 @@ void ConfigServiceImpl::updateConfig(const std::string& filename, const bool app
  */
 void ConfigServiceImpl::saveConfig(const std::string & filename) const
 {
-  if (m_changed_keys.empty())
-    return;
-
   // Open and read the user properties file
   std::string updated_file("");
 
   std::ifstream reader(filename.c_str(), std::ios::in);
   if (reader.bad())
   {
-    g_log.error() << "Error reading current user properties file. Cannot save updated configuration.\n";
     throw std::runtime_error("Error opening user properties file. Cannot save updated configuration.");
   }
 
@@ -803,40 +800,25 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
     std::string::size_type comment = key.find('#');
 
     //Check if it exists in the service using hasProperty and make sure it isn't a comment
-    if( comment != 0 && !hasProperty(key) )
+    if(comment == 0)
     {
-        //Remove the key from the changed key list
-        m_changed_keys.erase(key);
-        continue;
+      updated_file += output;
+    }
+    else if(!hasProperty(key))
+    {
+      //Remove the key from the changed key list
+      m_changed_keys.erase(key);
+      continue;
     }
     else
     {
-    //If it does exist perform the current actions below
-      std::set<std::string>::iterator iend = m_changed_keys.end();
-      std::set<std::string>::iterator itr = m_changed_keys.begin();
-
-      for (; itr != iend; ++itr)
-      {
-        if (output.find(*itr) != std::string::npos)
-        {
-          break;
-        }
-      }
-
-      if (itr == iend)
-      {
-        updated_file += output;
-      }
-      else
-      {
-        std::string key = *itr;
-        std::string value = getString(*itr, false);
-        updated_file += key + "=" + value;
-        //Remove the key from the changed key list
-        m_changed_keys.erase(itr);
-      }
-      updated_file += "\n";
+      // If it does exist make sure the value is current
+      const std::string value = getString(key, false);
+      updated_file += key + "=" + value;
+      //Remove the key from the changed key list
+      m_changed_keys.erase(key);
     }
+    updated_file += "\n";      
   } // End while-loop
 
   // Any remaining keys within the changed key store weren't present in the current user properties so append them
