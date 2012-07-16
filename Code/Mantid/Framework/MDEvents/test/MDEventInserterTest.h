@@ -62,7 +62,7 @@ public:
     typedef MDEventWorkspace<MDLeanEvent<2>, 2> MDEW_LEAN_2D; 
     
     // Check the type deduction used internally in the MDEventInserter template.
-    TS_ASSERT_EQUALS(sizeof(MDEW_LEAN_2D::MDEventType), sizeof(MDEventInserter<typename MDEW_LEAN_2D::sptr>::MDEventType));
+    TS_ASSERT_EQUALS(sizeof(MDEW_LEAN_2D::MDEventType), sizeof(MDEventInserter<MDEW_LEAN_2D::sptr>::MDEventType));
 
     // Create an input workspace
     MDEW_LEAN_2D::sptr ws2d = boost::dynamic_pointer_cast<MDEW_LEAN_2D>(createInputWorkspace("MDLeanEvent"));
@@ -95,7 +95,7 @@ public:
     typedef MDEventWorkspace<MDEvent<2>, 2> MDEW_2D; 
 
     // Check the type deduction used internally in the MDEventInserter template.
-    TS_ASSERT_EQUALS(sizeof(MDEW_2D::MDEventType), sizeof(MDEventInserter<typename MDEW_2D::sptr>::MDEventType));
+    TS_ASSERT_EQUALS(sizeof(MDEW_2D::MDEventType), sizeof(MDEventInserter<MDEW_2D::sptr>::MDEventType));
 
     // Create an input workspace.
     MDEW_2D::sptr ws2d = boost::dynamic_pointer_cast<MDEW_2D>(createInputWorkspace("MDEvent"));
