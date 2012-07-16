@@ -16,17 +16,14 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-
-class ImportMDEventWorkspaceTest : public CxxTest::TestSuite
+namespace
 {
-private:
+  /*
+  This builder type provides a convenient way to create and change the contents of a virtual file of the type expected 
+  by the ImportMDEventWorkspace algorithm.
 
-/*
-This builder type provides a convenient way to create and change the contents of a virtual file of the type expected 
-by the ImportMDEventWorkspace algorithm.
-
-This type is particularly useful when generating corrupt file contents, as it allows individual apects of the file contents to be modified independently.
-*/
+  This type is particularly useful when generating corrupt file contents, as it allows individual apects of the file contents to be modified independently.
+  */
   class FileContentsBuilder
   {
   private:
@@ -71,44 +68,50 @@ This type is particularly useful when generating corrupt file contents, as it al
   };
 
 
-/**
-Helper type. Creates a test file, and also manages the resource to ensure that the file is closed and removed, no matter what the outcome of the test.
+  /**
+  Helper type. Creates a test file, and also manages the resource to ensure that the file is closed and removed, no matter what the outcome of the test.
 
-Uses a 
-*/
-class MDFileObject
+  Uses a 
+  */
+  class MDFileObject
+  {
+  public:
+
+    /// Create a simple input file.
+    MDFileObject(const FileContentsBuilder& builder = FileContentsBuilder(), std::string filename="test_import_md_event_workspace_file.txt") : m_filename(filename)
+    {
+      m_file.open (filename.c_str());
+      // Invoke the builder to create the contents of the file.
+      m_file << builder.create();
+      m_file.close();
+    }
+
+    std::string getFileName() const
+    {
+      return m_filename;
+    }
+
+    /// Free up resources.
+    ~MDFileObject()
+    {
+      m_file.close();
+      if( remove( m_filename.c_str() ) != 0 )
+        throw std::runtime_error("cannot remove " + m_filename);
+    }
+
+  private:
+    std::string m_filename;
+    std::ofstream m_file;
+    // Following methods keeps us from being able to put objects of this type on the heap.
+    void *operator new(size_t);
+    void *operator new[](size_t);
+  };
+}
+
+
+class ImportMDEventWorkspaceTest : public CxxTest::TestSuite
 {
-public:
-
-  /// Create a simple input file.
-  MDFileObject(const FileContentsBuilder& builder = FileContentsBuilder(), std::string filename="test_import_md_event_workspace_file.txt") : m_filename(filename)
-  {
-    m_file.open (filename.c_str());
-    // Invoke the builder to create the contents of the file.
-    m_file << builder.create();
-    m_file.close();
-  }
-
-  std::string getFileName() const
-  {
-    return m_filename;
-  }
-
-  /// Free up resources.
-  ~MDFileObject()
-  {
-    m_file.close();
-    if( remove( m_filename.c_str() ) != 0 )
-      throw std::runtime_error("cannot remove " + m_filename);
-  }
-
 private:
-  std::string m_filename;
-  std::ofstream m_file;
-  // Following methods keeps us from being able to put objects of this type on the heap.
-  void *operator new(size_t);
-  void *operator new[](size_t);
-};
 
 /**
 Helper method runs tests that should throw and invalid argument when the algorithm is executed.
@@ -314,8 +317,50 @@ public:
     TS_ASSERT_EQUALS(1, outWS->getNPoints());
     TS_ASSERT_EQUALS("MDLeanEvent", outWS->getEventTypeName());
   }
+};
 
+class ImportMDEventWorkspaceTestPerformance : public CxxTest::TestSuite
+{
+private:
 
+  const size_t nRows;
+  boost::shared_ptr<MDFileObject> infile;
+
+public:
+
+  ImportMDEventWorkspaceTestPerformance() : nRows(10000)
+  {
+  }
+
+  void setUp()
+  {
+    FileContentsBuilder fileContents;
+    std::string mdData;
+    for(size_t i = 0; i < nRows; ++i)
+    {
+      std::stringstream stream;
+      stream << i << " " << i << " " << i << " " << i << " " << i << " " << i << "\n"; 
+      mdData += stream.str();
+    }
+    fileContents.setMDEventEntries(mdData); 
+    infile = boost::make_shared<MDFileObject>(fileContents);
+  }
+
+  void testRead()
+  {
+    ImportMDEventWorkspace alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", infile->getFileName());
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
+    TS_ASSERT_EQUALS(2, outWS->getNumDims());
+
+    TS_ASSERT_EQUALS(nRows, outWS->getNPoints());
+    TS_ASSERT_EQUALS("MDEvent", outWS->getEventTypeName());
+  }
 };
 
 
