@@ -136,7 +136,7 @@ namespace MDEvents
       float error = convert<float>(*(++mdEventEntriesIterator));
       uint16_t run_no = 0;
       int32_t detector_no = 0;
-      if(m_nActualColumns == m_columnsForFullEvents)
+      if(m_IsFullMDEvents)
       {
         run_no = convert<uint16_t>(*(++mdEventEntriesIterator));
         detector_no = convert<int32_t>(*(++mdEventEntriesIterator));
@@ -267,6 +267,7 @@ namespace MDEvents
       throw e;
     }
 
+    // Extract data from the file, excluding comment lines.
     std::string line;
     std::vector<std::string> myLines;
     while (std::getline(file, line))
@@ -281,8 +282,6 @@ namespace MDEvents
       }
     }
 
-    // Copy the data out of the file.
-    
     file.close();
 
     // Check the file format. 
@@ -298,19 +297,19 @@ namespace MDEvents
 
     // Calculate the actual number of columns in the MDEvent data.
     int posDiffMDEvent = static_cast<int>(std::distance(m_posMDEventStart, m_file_data.end()));
-    m_columnsForFullEvents = m_nDimensions + 4; // signal, error, run_no, detector_no
-    m_columnsForLeanEvents = m_nDimensions + 2; // signal, error
-    m_nActualColumns = 0;
-    if((posDiffMDEvent - 1) % m_columnsForFullEvents != 0) 
+    const size_t columnsForFullEvents = m_nDimensions + 4; // signal, error, run_no, detector_no
+    const size_t columnsForLeanEvents = m_nDimensions + 2; // signal, error
+    size_t nActualColumns = 0;
+    if((posDiffMDEvent - 1) % columnsForFullEvents != 0) 
     {
-      m_nActualColumns = m_columnsForLeanEvents;
+      nActualColumns = columnsForLeanEvents;
     }
     else
     {
-      m_nActualColumns = m_columnsForFullEvents;
+      nActualColumns = columnsForFullEvents;
     }
-    m_IsFullMDEvents = (m_nActualColumns == m_columnsForFullEvents);
-    m_nMDEvents = posDiffMDEvent / m_nActualColumns;
+    m_IsFullMDEvents = (nActualColumns == columnsForFullEvents);
+    m_nMDEvents = posDiffMDEvent / nActualColumns;
 
     // Get the min and max extents in each dimension.
     std::vector<double> extentMins(m_nDimensions);

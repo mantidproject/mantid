@@ -319,6 +319,9 @@ public:
   }
 };
 
+/**
+Performance Tests
+*/
 class ImportMDEventWorkspaceTestPerformance : public CxxTest::TestSuite
 {
 private:
@@ -334,14 +337,17 @@ public:
 
   void setUp()
   {
+    // Create the file contents.
     FileContentsBuilder fileContents;
     std::string mdData;
     for(size_t i = 0; i < nRows; ++i)
     {
+      // Create MDEvents
       std::stringstream stream;
       stream << i << " " << i << " " << i << " " << i << " " << i << " " << i << "\n"; 
       mdData += stream.str();
     }
+    // Create a file from the contents.
     fileContents.setMDEventEntries(mdData); 
     infile = boost::make_shared<MDFileObject>(fileContents);
   }

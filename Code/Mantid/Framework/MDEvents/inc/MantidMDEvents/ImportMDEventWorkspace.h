@@ -66,12 +66,6 @@ namespace MDEvents
     enum MDEventType{Lean, Full, NotSpecified};
     /// Flag indicating whether full md events for lean events will be generated.
     bool m_IsFullMDEvents;
-    /// Actual number of columns in the MDEvent data
-    size_t m_nActualColumns;
-    /// Number of columns to expect if input data is full mdevent data.
-    size_t m_columnsForFullEvents;
-    /// Number of columns to expect if input data is lean mdevent data.
-    size_t m_columnsForLeanEvents;
     /// Actual number of dimensions specified
     size_t m_nDimensions;
     /// Actual number of md events provided.
