@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include <Poco/NObserver.h>
 
 namespace Mantid
@@ -80,9 +82,10 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
-      API::MatrixWorkspace_sptr convertUnitsToDSpacing(const API::MatrixWorkspace_sptr& workspace);
-      void RebinWorkspace(API::MatrixWorkspace_sptr& workspace);
-      void calculateRebinParams(const API::MatrixWorkspace_const_sptr& workspace,double& min,double& max,double& step);
+      void execEvent();
+      API::MatrixWorkspace_sptr m_inputW;
+      API::MatrixWorkspace_sptr m_outputW;
+      DataObjects::EventWorkspace_sptr m_eventW;
 
     };
 
