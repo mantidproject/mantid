@@ -3034,11 +3034,18 @@ MultiLayer* MantidUI::plotSpectraList(const QMultiMap<QString,int>& toPlot, bool
   g->setYAxisTitle(tr(yTitle.c_str()));
   g->setAntialiasing(false);
   g->setAutoScale();
+  /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
+   * data points. However, this has the side-effect suggested by its name: all the axes become
+   * auto-scaling if the data changes. If, in the plot preferences, autoscaling has been disabled
+   * the the next line re-fixes the axes
+   */
+  if ( ! appWindow()->autoscale2DPlots ) g->enableAutoscaling(false);
 
+  // This deals with the case where the X-values are not in order. In general, this shouldn't
+  // happen, but it does apparently with some muon analyses.
   g->checkValuesInAxisRange(mc);
 
   QApplication::restoreOverrideCursor();
-  //setUpSpectrumGraph(ml,firstWorkspace);
   return ml;
 }
 
