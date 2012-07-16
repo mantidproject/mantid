@@ -79,18 +79,23 @@ public:
   void testChanges()
   {
     ManagedRawFileWorkspace2D ws(file);
-
-    MantidVec& y0 = ws.dataY(0);
-    y0[100] = 1234.;
-
-    MantidVec& y1000 = ws.dataY(1000);
-    y1000[200] = 4321.;
-
-    TS_ASSERT_EQUALS( ws.dataY(0)[100], 1234. )
-    TS_ASSERT_EQUALS( ws.dataY(1000)[200], 4321. )
-    TS_ASSERT_EQUALS( ws.readY(0)[100], 1234. )
-    TS_ASSERT_EQUALS( ws.readY(1000)[200], 4321. )
-
+    // Need to ensure that the number of writes is greater than the MRUList size
+    // so that we check the read/write from the file
+    // There is no public API to find the size so this will have to do.
+    const size_t nhist = 400;
+    for(size_t i = 0; i < nhist; ++i)
+    {
+      MantidVec& y0 = ws.dataY(i);
+      y0[0] = 100.0;
+    }
+    
+    // Check that we have actually changed it
+    for(size_t i = 0; i < nhist; ++i)
+    {
+      const MantidVec& y0 = ws.readY(i);
+      const std::string msg = "The first value at index " + boost::lexical_cast<std::string>(i) + " does not have the expected value.";
+      TSM_ASSERT_EQUALS(msg, y0[0], 100.0 );
+    }
   }
 
   // Test is taken from LoadRawTest
