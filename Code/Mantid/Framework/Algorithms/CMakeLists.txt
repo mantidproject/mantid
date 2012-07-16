@@ -3,6 +3,7 @@ set ( SRC_FILES
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
 	src/AddSampleLog.cpp
+	src/AlignAndFocusPowder.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
 	src/AnyShapeAbsorption.cpp
@@ -198,6 +199,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddSampleLog.h
+	inc/MantidAlgorithms/AlignAndFocusPowder.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
