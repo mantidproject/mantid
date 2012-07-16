@@ -1,6 +1,7 @@
 #ifndef MANTID_WORKFLOWALGORITHMS_DGSREDUCTION_H_
 #define MANTID_WORKFLOWALGORITHMS_DGSREDUCTION_H_
 
+#include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 
@@ -48,7 +49,7 @@ namespace WorkflowAlgorithms
     virtual void initDocs();
     void init();
     void exec();
-    API::Workspace_sptr loadInputData();
+    API::Workspace_sptr loadInputData(boost::shared_ptr<Kernel::PropertyManager> manager);
 
   };
 

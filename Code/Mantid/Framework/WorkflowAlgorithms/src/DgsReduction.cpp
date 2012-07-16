@@ -17,6 +17,7 @@ parameters and generating calls to other workflow or standard algorithms.
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
@@ -247,13 +248,15 @@ namespace WorkflowAlgorithms
     declareProperty("SampleRmm", 1.0, "The rmm of sample.");
     setPropertySettings("SampleRmm",
         new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+    declareProperty("ReductionProperties", "__dgs_reduction_properties",
+        Direction::Input);
   }
 
   /**
    * Create a workspace by either loading a file or using an existing
    * workspace.
    */
-  Workspace_sptr DgsReduction::loadInputData()
+  Workspace_sptr DgsReduction::loadInputData(boost::shared_ptr<PropertyManager> manager)
   {
     const std::string facility = ConfigService::Instance().getFacility().name();
     if ("SNS" == facility)
@@ -278,6 +281,7 @@ namespace WorkflowAlgorithms
       }
     else if (!inputData.empty())
       {
+        manager->declareProperty(new PropertyWithValue<std::string>("MonitorFilename", inputData));
         inputWS = this->load(inputData);
       }
     else
@@ -293,19 +297,17 @@ namespace WorkflowAlgorithms
    */
   void DgsReduction::exec()
   {
-    /*
     // Reduction property manager
-    const std::string reductionManagerName = getProperty("ReductionProperties");
-    if (!reductionManagerName.empty())
+    const std::string reductionManagerName = this->getProperty("ReductionProperties");
+    if (reductionManagerName.empty())
     {
       g_log.error() << "ERROR: Reduction Property Manager name is empty" << std::endl;
       return;
     }
     boost::shared_ptr<PropertyManager> reductionManager = boost::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
-    */
 
-    Workspace_sptr inputWS = this->loadInputData();
+    Workspace_sptr inputWS = this->loadInputData(reductionManager);
 
     // Setup for the convert to energy transfer workflow algorithm
     const double initial_energy = this->getProperty("IncidentEnergy");

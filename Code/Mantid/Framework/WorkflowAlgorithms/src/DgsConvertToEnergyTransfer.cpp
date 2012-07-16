@@ -153,30 +153,19 @@ namespace WorkflowAlgorithms
               }
             else
               {
+                g_log.notice() << "Trying to determine file name" << std::endl;
                 std::string runFileName("");
-                const WorkspaceHistory::AlgorithmHistories hists = inputWS->getHistory().getAlgorithmHistories();
-                WorkspaceHistory::AlgorithmHistories::const_iterator iter;
-                for (iter = hists.begin(); iter != hists.end(); ++iter)
+                if (reductionManager->existsProperty("MonitorFilename"))
                   {
-                    if (iter->name() == "LoadEventNexus")
+                    runFileName = reductionManager->getPropertyValue("MonitorFilename");
+                    if (runFileName.empty())
                       {
-                        const std::vector<PropertyHistory> ph = iter->getProperties();
-                        std::vector<PropertyHistory>::const_iterator phiter;
-                        for (phiter = ph.begin(); phiter != ph.end(); ++phiter)
-                          {
-                            if (phiter->name() == "Filename")
-                              {
-                                runFileName = phiter->name();
-                                break;
-                              }
-                          }
-                        break;
+                        throw std::runtime_error("Cannot find run filename, therefore cannot find the initial energy");
                       }
                   }
-                // FIXME: This needs to be changed to handle incoming workspaces
-                if (runFileName.empty())
+                else
                   {
-                    throw std::runtime_error("Cannot find run filename, therefore cannot find the initial energy");
+                    throw std::runtime_error("Input workspaces are not handled, therefore cannot find the initial energy");
                   }
 
                 std::string monWsName = inWsName + "_monitors";
