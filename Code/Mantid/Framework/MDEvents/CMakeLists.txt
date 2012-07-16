@@ -11,8 +11,8 @@ set ( SRC_FILES
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
-	src/ConvToMDSelector.cpp
 	src/ConvToMDPreprocDet.cpp
+	src/ConvToMDSelector.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToReflectometryQ.cpp
 	src/CoordTransformAffine.cpp
@@ -24,6 +24,7 @@ set ( SRC_FILES
 	src/CreateMDWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
+	src/ImportMDEventWorkspace.cpp
 	src/ImportMDHistoWorkspace.cpp
 	src/ImportMDHistoWorkspaceBase.cpp
 	src/IntegratePeaksMD.cpp
@@ -81,8 +82,8 @@ set ( INC_FILES
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h
-	inc/MantidMDEvents/ConvToMDSelector.h
 	inc/MantidMDEvents/ConvToMDPreprocDet.h
+	inc/MantidMDEvents/ConvToMDSelector.h
 	inc/MantidMDEvents/ConvertToDiffractionMDWorkspace.h
 	inc/MantidMDEvents/ConvertToReflectometryQ.h
 	inc/MantidMDEvents/CoordTransformAffine.h
@@ -94,6 +95,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/CreateMDWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/FindPeaksMD.h
+	inc/MantidMDEvents/ImportMDEventWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspaceBase.h
 	inc/MantidMDEvents/IntegratePeaksMD.h
@@ -106,6 +108,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
+	inc/MantidMDEvents/MDEventInserter.h
 	inc/MantidMDEvents/MDEventWSWrapper.h
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDGridBox.h
@@ -144,8 +147,8 @@ set ( TEST_FILES
 	test/CentroidPeaksMDTest.h
 	test/CloneMDWorkspaceTest.h
 	test/ConvertToDiffractionMDWorkspaceTest.h
-	test/ConvertToMDParamsTest.h
 	test/ConvertToMDFactoryTest.h
+	test/ConvertToMDParamsTest.h
 	test/ConvertToMDUnitsConvTest.h
 	test/ConvertToMDWSTest.h
 	test/ConvertToReflectometryQTest.h
@@ -158,6 +161,7 @@ set ( TEST_FILES
 	test/CreateMDWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/FindPeaksMDTest.h
+	test/ImportMDEventWorkspaceTest.h
 	test/ImportMDHistoWorkspaceTest.h
 	test/IntegratePeaksMDTest.h
 	test/LoadMDTest.h
@@ -168,6 +172,7 @@ set ( TEST_FILES
 	test/MDBoxTest.h
 	test/MDDimensionStatsTest.h
 	test/MDEventFactoryTest.h
+	test/MDEventInserterTest.h
 	test/MDEventTest.h
 	test/MDEventWSWrapperTest.h
 	test/MDEventWorkspaceTest.h

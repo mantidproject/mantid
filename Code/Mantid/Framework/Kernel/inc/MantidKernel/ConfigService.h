@@ -112,6 +112,8 @@ namespace Mantid
         std::string m_prev; ///< The previous value for the property
       };
       
+      /// Reset to "factory" settings. Removes current user properties
+      void reset();
       /// Wipe out the current configuration and load a new one
       void updateConfig(const std::string& filename, const bool append=false, const bool update_caches=true);
       /// Save the configuration to the user file

@@ -56,6 +56,9 @@ namespace MDEvents
   public:
     /* Will be keeping functions inline for (possible?) performance improvements */
 
+    // Enum to flag this templated type as NOT a full md event type.
+    enum{is_full_mdevent=false};
+
     //---------------------------------------------------------------------------------------------
     /** Empty constructor */
     MDLeanEvent() :
