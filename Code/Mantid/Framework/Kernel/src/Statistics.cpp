@@ -213,18 +213,19 @@ namespace Mantid
       return getNanStatistics();
     }
 
-    // -------------------------- concrete instantiations
-    template DLLExport Statistics getStatistics<double> (const vector<double> &, const bool);
-    template DLLExport Statistics getStatistics<int32_t> (const vector<int32_t> &, const bool);
-    template DLLExport Statistics getStatistics<int64_t> (const vector<int64_t> &, const bool);
+    // -------------------------- Macro to instantiation concrete types --------------------------------
+#define INSTANTIATE(TYPE) \
+    template MANTID_KERNEL_DLL Statistics getStatistics<TYPE> (const vector<TYPE> &, const bool); \
+    template MANTID_KERNEL_DLL std::vector<double> getZscore<TYPE> (const vector<TYPE> &, const bool); \
+    template MANTID_KERNEL_DLL std::vector<double> getModifiedZscore<TYPE> (const vector<TYPE> &, const bool);
 
-    template DLLExport std::vector<double> getZscore<double> (const vector<double> &, const bool);
-    template DLLExport std::vector<double> getZscore<int32_t> (const vector<int32_t> &, const bool);
-    template DLLExport std::vector<double> getZscore<int64_t> (const vector<int64_t> &, const bool);
-
-    template DLLExport std::vector<double> getModifiedZscore<double> (const vector<double> &, const bool);
-    template DLLExport std::vector<double> getModifiedZscore<int32_t> (const vector<int32_t> &, const bool);
-    template DLLExport std::vector<double> getModifiedZscore<int64_t> (const vector<int64_t> &, const bool);
+    // --------------------------- Concrete instantiations ---------------------------------------------
+    INSTANTIATE(float);
+    INSTANTIATE(double);
+    INSTANTIATE(int32_t);
+    INSTANTIATE(int64_t);
+    INSTANTIATE(unsigned int);
+    INSTANTIATE(unsigned long);
 
   } // namespace Kernel
 } // namespace Mantid
