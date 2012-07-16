@@ -52,8 +52,17 @@ namespace Algorithms
     MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
     DataObjects::TableWorkspace_sptr paramWS = getProperty("MaskingInformation");
 
-    // 1. Check input table workspace
+    // 1. Check input table workspace and column order
     g_log.debug() << "Lines of parameters workspace = " << paramWS->rowCount() << std::endl;
+
+    if (!paramWS)
+    {
+    	throw std::invalid_argument("Input table workspace is not accepted.");
+    }
+    else
+    {
+
+    }
 
     // 2. Loop over all rows
     bool firstloop = true;

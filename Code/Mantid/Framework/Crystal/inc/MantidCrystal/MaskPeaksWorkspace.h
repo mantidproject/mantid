@@ -65,8 +65,8 @@ private:
   int Ymax;        ///< The end of the Y range for fitting
   int Binmin;        ///< The start of the Bin range for fitting
   int Binmax;        ///< The end of the TOF range for fitting
-  int TOFmin;        ///< The start of the TOF range for fitting
-  int TOFmax;        ///< The end of the TOF range for fitting
+  // int TOFmin;        ///< The start of the TOF range for fitting
+  // int TOFmax;        ///< The end of the TOF range for fitting
   int TOFPeak;       ///< The peak in the TOF range for fitting
   int tofISAW;       /// check if bin agrees with peak from ISAW
   
