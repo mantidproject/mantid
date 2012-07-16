@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDEvents/MDEventFactory.h"
 #include <deque>
 
 namespace Mantid
@@ -11,7 +12,7 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /** ImportMDEventWorkspace : TODO: DESCRIPTION
+  /** ImportMDEventWorkspace : Loads a file containing dimensionality and data for an MDEventWorkspace. Handles either full mdevents for mdleanevents as input data types.
     
     @date 2012-07-11
 
@@ -63,12 +64,19 @@ namespace MDEvents
     enum MDEventType{Lean, Full, NotSpecified};
     /// Flag indicating whether full md events for lean events will be generated.
     bool m_IsFullMDEvents;
-
+    /// Actual number of columns in the MDEvent data
+    size_t m_nActualColumns;
+    /// Number of columns to expect if input data is full mdevent data.
+    size_t m_columnsForFullEvents;
+    /// Number of columns to expect if input data is lean mdevent data.
+    size_t m_columnsForLeanEvents;
+    /// Actual number of dimensions specified
+    size_t m_nDimensions;
+    /// Actual number of md events provided.
+    size_t m_nMDEvents;
     /// call back to add event data
     template<typename MDE, size_t nd>
-    void addEventData(typename MDEventWorkspace<MDE, nd>::sptr ws);
-    /// Read the proposed Event Type.
-    MDEventType readEventFlag();
+    void addEventsData(typename MDEventWorkspace<MDE, nd>::sptr ws);
     /// Quick check of the structure, so we can abort if passed junk.
     void quickFileCheck();
     ///  Check that the a flag exists in the file.

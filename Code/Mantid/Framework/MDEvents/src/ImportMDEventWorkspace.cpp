@@ -14,14 +14,14 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-namespace Mantid
+namespace
 {
-namespace MDEvents
-{
-
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(ImportMDEventWorkspace)
-  
+  /**
+  Helper method that takes a string and performs a cast to the specified type.
+  Throws an invalid_argument exception if the argument cannot be cast to the target type.
+  @param str : input string
+  @return strongly typed value typed to the specfied type argument.
+  */
   template< typename T >
   T convert(const std::string& str)
   {
@@ -30,17 +30,113 @@ namespace MDEvents
     iss >> std::ws >> obj >> std::ws;
     if(!iss.eof())
     {
-        throw std::invalid_argument("Wrong type destination. Cannot convert " + str);
+      throw std::invalid_argument("Wrong type destination. Cannot convert " + str);
     }
     return obj; 
-   }
+  }
 
+  /**
+  Helper class that provides a generic interface for adding events to an MDWorkspace without knowing whether the workspace is storing MDLeanEvents or full MDEvents
+
+  Uses LOKI techniques for choosing the overload addition operation based on embedded type arguments in the respective MDLeanEventTypes. This solution is
+  nice because depending upon the workspace type, only one of the private addEvent funtions is instantiated.
+  */
+  template <typename MDEW_SPTR>
+  struct MDEventAdder
+  {
+  private:
+
+    /// Type of MDEvent used by the MDEventWorkspace.
+    typedef typename MDEW_SPTR::element_type::MDEventType MDEventType;
+
+    /// Loki IntToType, used for template overload deduction.
+    template<int I>
+    struct IntToType
+    {
+      enum{value = I};
+    };
+
+  public:
+
+    /**
+    Constructor 
+    @param ws : MDEventWorkspace to add to.
+    */
+    MDEventAdder(MDEW_SPTR ws) : m_ws(ws)
+    {
+    }
+
+    /**
+    Creates an mdevent and adds it to the MDEW. The type of MDEvent generated is determined internally using type information on the MDEventType.
+    @param signal : intensity
+    @param errorSQ : squared value of the error
+    @param runno : run number
+    @param detectno : detector number
+    @param coords : pointer to coordinates array
+    */
+    void addEvent(float signal, float errorSQ, uint16_t runno, int32_t detectno, Mantid::coord_t* coords)
+    {
+      // compile-time overload selection based on nested type information on the MDEventType.
+      addEvent(signal, errorSQ, runno, detectno, coords, IntToType<MDEventType::is_full_mdevent>());
+    }
+
+  private:
+
+    /// shared pointer to MDEW to add to.
+    MDEW_SPTR m_ws;
+
+    /**
+    Creates a LEAN MDEvent and adds it to the MDEW. 
+    @param signal : intensity
+    @param errorSQ : squared value of the error
+    @param runno : run number (not used)
+    @param detectno : detector number (not used)
+    @param coords : pointer to coordinates array
+    @param IntToType<false> : no object specified, only used to provide an overload for this LEAN MDEvent type generation.
+    */
+    void addEvent(float signal, float errorSQ, uint16_t, int32_t, Mantid::coord_t* coords, IntToType<false>)
+    {
+      m_ws->addEvent(MDEventType(signal, errorSQ, coords));
+    }
+
+    
+    /**
+    Creates a FULL MDEvent and adds it to the MDEW. 
+    @param signal : intensity
+    @param errorSQ : squared value of the error
+    @param runno : run number 
+    @param detectno : detector number 
+    @param coords : pointer to coordinates array
+    @param IntToType<true> : no object specified, only used to provide an overload for this FULL MDEvent type generation.
+    */
+    void addEvent(float signal, float errorSQ, uint16_t runno, int32_t detectno, Mantid::coord_t* coords, IntToType<true>)
+    {
+      m_ws->addEvent(MDEventType(signal, errorSQ, runno, detectno, coords));
+    }
+  };
+}
+
+namespace Mantid
+{
+namespace MDEvents
+{
+
+  // Register the algorithm into the AlgorithmFactory
+  DECLARE_ALGORITHM(ImportMDEventWorkspace)
+
+  /**
+  Static method returning the flag for the dimensions block.
+  Allows a single definition for the flag to be used both within and outside of this class.
+  */
   const std::string ImportMDEventWorkspace::DimensionBlockFlag()
   {
     return "DIMENSIONS";
   }
     
-
+  /**
+  Static method returning the flag for the mdevents block.
+  Allows a single definition for the flag to be used both within and outside of this class.
+  */
   const std::string ImportMDEventWorkspace::MDEventBlockFlag()
   {
     return "MDEVENTS";
@@ -91,17 +187,42 @@ namespace MDEvents
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
 
+  /**
+  Extracts mdevent information from the file data and directs the creation of new MDEvents on the workspace.
+  @param ws: Workspace to add the events to.
+  */
   template<typename MDE, size_t nd>
-  void ImportMDEventWorkspace::addEventData(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  void ImportMDEventWorkspace::addEventsData(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-
+    /// Creates a new instance of the MDEventAdder.
+    MDEventAdder<typename MDEventWorkspace<MDE, nd>::sptr> adder(ws);
+    DataCollectionType::iterator mdEventEntriesIterator = m_posMDEventStart;
+    for(size_t i = 0; i < m_nMDEvents; ++i)
+    {
+      float signal = convert<float>(*(++mdEventEntriesIterator));
+      float error = convert<float>(*(++mdEventEntriesIterator));
+      uint16_t run_no = 0;
+      int32_t detector_no = 0;
+      if(m_nActualColumns == m_columnsForFullEvents)
+      {
+        run_no = convert<uint16_t>(*(++mdEventEntriesIterator));
+        detector_no = convert<int32_t>(*(++mdEventEntriesIterator));
+      }
+      Mantid::coord_t centers[nd];
+      for(size_t j = 0; j < m_nDimensions; ++j)
+      {
+        centers[j] = convert<Mantid::coord_t>(*(++mdEventEntriesIterator));
+      }
+      // Actually add the mdevent.
+      adder.addEvent(signal, error*error, run_no, detector_no, centers);
+    }
   }
 
-  ImportMDEventWorkspace::MDEventType ImportMDEventWorkspace::readEventFlag()
-  {
-    return MDEventType::NotSpecified;
-  }
-
+  /**
+  Iterate through the file data looking for the specified flag and returning TRUE if found.
+  @param flag : The flag to look for.
+  @return TRUE if found.
+  */
   bool ImportMDEventWorkspace::fileDoesContain(const std::string& flag)
   {
     return m_file_data.end() != std::find(m_file_data.begin(), m_file_data.end(), flag);
@@ -221,36 +342,36 @@ namespace MDEvents
 
     // Calculate the dimensionality
     int posDiffDims = static_cast<int>(std::distance(m_posDimStart, m_posMDEventStart));
-    const size_t nDimensions = (posDiffDims - 1) / 4;
+    m_nDimensions = (posDiffDims - 1) / 4;
 
     // Calculate the actual number of columns in the MDEvent data.
     int posDiffMDEvent = static_cast<int>(std::distance(m_posMDEventStart, m_file_data.end()));
-    const size_t columnsForFullEvents = nDimensions + 4; // signal, error, run_no, detector_no
-    const size_t columnsForLeanEvents = nDimensions + 2; // signal, error
-    size_t nActualColumns = 0;
-    if((posDiffMDEvent - 1) % columnsForFullEvents != 0) 
+    m_columnsForFullEvents = m_nDimensions + 4; // signal, error, run_no, detector_no
+    m_columnsForLeanEvents = m_nDimensions + 2; // signal, error
+    m_nActualColumns = 0;
+    if((posDiffMDEvent - 1) % m_columnsForFullEvents != 0) 
     {
-      nActualColumns = columnsForLeanEvents;
+      m_nActualColumns = m_columnsForLeanEvents;
     }
     else
     {
-      nActualColumns = columnsForFullEvents;
+      m_nActualColumns = m_columnsForFullEvents;
     }
-    m_IsFullMDEvents = (nActualColumns == columnsForFullEvents);
-    const size_t nMDEvents = posDiffMDEvent / nActualColumns;
+    m_IsFullMDEvents = (m_nActualColumns == m_columnsForFullEvents);
+    m_nMDEvents = posDiffMDEvent / m_nActualColumns;
 
     // Get the min and max extents in each dimension.
+    std::vector<double> extentMins(m_nDimensions);
+    std::vector<double> extentMaxs(m_nDimensions);
     DataCollectionType::iterator mdEventEntriesIterator = m_posMDEventStart;
-    std::vector<double> extentMins(nDimensions);
-    std::vector<double> extentMaxs(nDimensions);
-    for(size_t i = 0; i < nMDEvents; ++i)
+    for(size_t i = 0; i < m_nMDEvents; ++i)
     {
       mdEventEntriesIterator += 2;
       if(m_IsFullMDEvents)
       {
         mdEventEntriesIterator += 2;
       }
-      for(size_t j = 0; j < nDimensions; ++j)
+      for(size_t j = 0; j < m_nDimensions; ++j)
       {
         double coord = convert<double>(*(++mdEventEntriesIterator));
         extentMins[j] = coord < extentMins[j] ? coord : extentMins[j];
@@ -258,24 +379,25 @@ namespace MDEvents
       }
     }
 
-    IMDEventWorkspace_sptr out = MDEventFactory::CreateMDWorkspace(nDimensions, m_IsFullMDEvents ? "MDEvent" : "MDLeanEvent");
+    // Create a target output workspace.
+    IMDEventWorkspace_sptr outWs = MDEventFactory::CreateMDWorkspace(m_nDimensions, m_IsFullMDEvents ? "MDEvent" : "MDLeanEvent");
 
-    //CALL_MDEVENT_FUNCTION(this->addEventData, in_ws)
-
-    //Extract Dimensions
+    // Extract Dimensions and add to the output workspace.
     DataCollectionType::iterator dimEntriesIterator = m_posDimStart;
-    for(size_t i = 0; i < nDimensions; ++i)
+    for(size_t i = 0; i < m_nDimensions; ++i)
     {
       std::string id = convert<std::string>(*(++dimEntriesIterator));
       std::string name = convert<std::string>(*(++dimEntriesIterator));
       std::string units = convert<std::string>(*(++dimEntriesIterator));
       int nbins = convert<int>(*(++dimEntriesIterator));
 
-      out->addDimension(MDHistoDimension_sptr(new MDHistoDimension(id, name, units, static_cast<coord_t>(extentMins[i]), static_cast<coord_t>(extentMaxs[i]), nbins)));
+      outWs->addDimension(MDHistoDimension_sptr(new MDHistoDimension(id, name, units, static_cast<coord_t>(extentMins[i]), static_cast<coord_t>(extentMaxs[i]), nbins)));
     }
 
-    // Create output
-    this->setProperty("OutputWorkspace", out);
+    CALL_MDEVENT_FUNCTION(this->addEventsData, outWs)
+
+    // set output
+    this->setProperty("OutputWorkspace", outWs);
 
   }
 

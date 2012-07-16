@@ -245,10 +245,50 @@ public:
     TS_ASSERT_EQUALS("U", dim2->getUnits());
     TS_ASSERT_EQUALS(-2, dim2->getMinimum());
     TS_ASSERT_EQUALS(3, dim2->getMaximum());
-
-    dim1->getMinimum();
   }
 
+  void test_load_lean_mdevents()
+  {
+    // Setup the corrupt file. 
+    FileContentsBuilder fileContents; 
+    fileContents.setMDEventEntries("1 1 -1 -2\n1 1 2 3"); // mins -1, -2, maxs 2, 3
+    MDFileObject infile(fileContents);
+    // Run the algorithm.
+    ImportMDEventWorkspace alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", infile.getFileName());
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
+
+    TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_EQUALS(2, outWS->getNumDims());
+
+    TS_ASSERT_EQUALS(2, outWS->getNPoints());
+    TS_ASSERT_EQUALS("MDLeanEvent", outWS->getEventTypeName());
+  }
+
+  void test_load_full_mdevents()
+  {
+    // Setup the corrupt file. 
+    FileContentsBuilder fileContents; 
+    fileContents.setMDEventEntries("1 1 1 2 -1 -2\n1 1 2 3 2 3\n1 1 3 4 5 6"); // mins -1, -2, maxs 2, 3
+    MDFileObject infile(fileContents);
+    // Run the algorithm.
+    ImportMDEventWorkspace alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", infile.getFileName());
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+    
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
+    TS_ASSERT_EQUALS(2, outWS->getNumDims());
+
+    TS_ASSERT_EQUALS(3, outWS->getNPoints());
+    TS_ASSERT_EQUALS("MDEvent", outWS->getEventTypeName());
+  }
 
 
 };
