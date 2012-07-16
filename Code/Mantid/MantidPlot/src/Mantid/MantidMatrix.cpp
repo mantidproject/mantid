@@ -1211,8 +1211,6 @@ void MantidMatrix::repaintAll()
       }
     }
     t->notifyChanges();
-    Graph *g = mItr.key()->activeGraph();
-    if (g) g->setAutoScale();
   }
 }
 
