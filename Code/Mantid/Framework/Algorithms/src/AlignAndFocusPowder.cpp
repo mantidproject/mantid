@@ -55,27 +55,32 @@ void AlignAndFocusPowder::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
     "The input workspace" );
-
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The result of diffraction focussing of InputWorkspace" );
-
   declareProperty("Params","","The binning parameters");
-
   declareProperty(new FileProperty("CalFileName", "", FileProperty::OptionalLoad, ".cal"),
 		  "The name of the CalFile with offset, masking, and grouping data" );
-
   declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace","",Direction::Input, PropertyMode::Optional),
     "Optional: An GroupingWorkspace workspace giving the grouping info.");
-
   declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace","",Direction::Input, PropertyMode::Optional),
     "Optional: An OffsetsWorkspace workspace giving the detector calibration values.");
-
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace","",Direction::Input, PropertyMode::Optional),
     "Optional: An Workspace workspace giving which detectors are masked.");
-
   declareProperty("PreserveEvents", true,
     "If the InputWorkspace is an EventWorkspace, this will preserve the full event list (warning: this will use much more memory!).");
+  declareProperty("FilterBadPulses", true,
+    "If the InputWorkspace is an EventWorkspace, filter bad pulses.");
+  declareProperty("RemovePromptPulseWidth", 0.,
+    "Width of events (in microseconds) near the prompt pulse to remove. 0 disables");
+  declareProperty("CompressTolerance", 0.01,
+    "Compress events (in microseconds) within this tolerance. (Default 0.01) ");
+  declareProperty("FilterLogName", "",
+    "Name of log used for filtering. (Default None) ");
+  declareProperty("FilterLogMinimumValue", 0.0,
+    "Events with log larger that this value will be included. (Default 0.0) ");
+  declareProperty("FilterLogMaximumValue", 0.0,
+    "Events with log smaller that this value will be included. (Default 0.0) ");
 }
 
 /** Executes the algorithm
@@ -173,6 +178,12 @@ void AlignAndFocusPowder::execEvent()
   MatrixWorkspace_sptr maskWS = getProperty("MaskWorkspace");
   GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
   std::string params = getProperty("Params");
+  bool filterBadPulses = getProperty("FilterBadPulses");
+  double removePromptPulseWidth = getProperty("RemovePromptPulseWidth");
+  double tolerance = getProperty("CompressTolerance");
+  std::string filterName = getProperty("FilterLogName");
+  double filterMin = getProperty("FilterLogMinimumValue");
+  double filterMax = getProperty("FilterLogMaximumValue");
 
   // Get the input workspace
   if ((!offsetsWS || !maskWS || !groupWS) && !calFileName.empty())
@@ -193,6 +204,42 @@ void AlignAndFocusPowder::execEvent()
     AnalysisDataService::Instance().addOrReplace(instName+"_offsets", offsetsWS);
     AnalysisDataService::Instance().addOrReplace(instName+"_mask", maskWS);
   }
+
+  if (filterBadPulses)
+  {
+    API::IAlgorithm_sptr filterAlg = createSubAlgorithm("FilterBadPulses");
+    filterAlg->setProperty("InputWorkspace", m_eventW);
+    filterAlg->executeAsSubAlg();
+    m_eventW = filterAlg->getProperty("OutputWorkspace");
+  }
+
+  if (removePromptPulseWidth > 0.)
+  {
+    API::IAlgorithm_sptr filterAlg = createSubAlgorithm("RemovePromptPulseWidth");
+    filterAlg->setProperty("InputWorkspace", m_eventW);
+    filterAlg->setProperty("Width", removePromptPulseWidth);
+    filterAlg->executeAsSubAlg();
+    m_eventW = filterAlg->getProperty("OutputWorkspace");
+  }
+
+  if (!filterName.empty())
+  {
+    API::IAlgorithm_sptr filterLogsAlg = createSubAlgorithm("FilterByLogValue");
+    filterLogsAlg->setProperty("InputWorkspace", m_eventW);
+    filterLogsAlg->setProperty("LogName", filterName);
+    filterLogsAlg->setProperty("MinimumValue", filterMin);
+    filterLogsAlg->setProperty("MaximumValue", filterMax);
+    filterLogsAlg->executeAsSubAlg();
+    m_eventW = filterLogsAlg->getProperty("OutputWorkspace");
+  }
+
+  API::IAlgorithm_sptr compressAlg = createSubAlgorithm("CompressEvents");
+  compressAlg->setProperty("InputWorkspace", m_eventW);
+  compressAlg->setProperty("Tolerance",tolerance);
+  compressAlg->executeAsSubAlg();
+  m_eventW = compressAlg->getProperty("OutputWorkspace");
+
+  m_eventW->sortAll(TOF_SORT, NULL);
 
   API::IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors");
   maskAlg->setProperty("Workspace", m_inputW);
