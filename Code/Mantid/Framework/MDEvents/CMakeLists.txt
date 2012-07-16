@@ -108,6 +108,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
+	inc/MantidMDEvents/MDEventInserter.h
 	inc/MantidMDEvents/MDEventWSWrapper.h
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDGridBox.h
@@ -171,6 +172,7 @@ set ( TEST_FILES
 	test/MDBoxTest.h
 	test/MDDimensionStatsTest.h
 	test/MDEventFactoryTest.h
+	test/MDEventInserterTest.h
 	test/MDEventTest.h
 	test/MDEventWSWrapperTest.h
 	test/MDEventWorkspaceTest.h

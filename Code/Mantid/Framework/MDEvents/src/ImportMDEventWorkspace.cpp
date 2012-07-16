@@ -6,6 +6,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDEventInserter.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include <iostream>
 #include <fstream>
@@ -34,86 +35,6 @@ namespace
     }
     return obj; 
   }
-
-  /**
-  Helper class that provides a generic interface for adding events to an MDWorkspace without knowing whether the workspace is storing MDLeanEvents or full MDEvents
-
-  Uses LOKI techniques for choosing the overload addition operation based on embedded type arguments in the respective MDLeanEventTypes. This solution is
-  nice because depending upon the workspace type, only one of the private addEvent funtions is instantiated.
-  */
-  template <typename MDEW_SPTR>
-  struct MDEventAdder
-  {
-  private:
-
-    /// Type of MDEvent used by the MDEventWorkspace.
-    typedef typename MDEW_SPTR::element_type::MDEventType MDEventType;
-
-    /// Loki IntToType, used for template overload deduction.
-    template<int I>
-    struct IntToType
-    {
-      enum{value = I};
-    };
-
-  public:
-
-    /**
-    Constructor 
-    @param ws : MDEventWorkspace to add to.
-    */
-    MDEventAdder(MDEW_SPTR ws) : m_ws(ws)
-    {
-    }
-
-    /**
-    Creates an mdevent and adds it to the MDEW. The type of MDEvent generated is determined internally using type information on the MDEventType.
-    @param signal : intensity
-    @param errorSQ : squared value of the error
-    @param runno : run number
-    @param detectno : detector number
-    @param coords : pointer to coordinates array
-    */
-    void addEvent(float signal, float errorSQ, uint16_t runno, int32_t detectno, Mantid::coord_t* coords)
-    {
-      // compile-time overload selection based on nested type information on the MDEventType.
-      addEvent(signal, errorSQ, runno, detectno, coords, IntToType<MDEventType::is_full_mdevent>());
-    }
-
-  private:
-
-    /// shared pointer to MDEW to add to.
-    MDEW_SPTR m_ws;
-
-    /**
-    Creates a LEAN MDEvent and adds it to the MDEW. 
-    @param signal : intensity
-    @param errorSQ : squared value of the error
-    @param runno : run number (not used)
-    @param detectno : detector number (not used)
-    @param coords : pointer to coordinates array
-    @param IntToType<false> : no object specified, only used to provide an overload for this LEAN MDEvent type generation.
-    */
-    void addEvent(float signal, float errorSQ, uint16_t, int32_t, Mantid::coord_t* coords, IntToType<false>)
-    {
-      m_ws->addEvent(MDEventType(signal, errorSQ, coords));
-    }
-
-    
-    /**
-    Creates a FULL MDEvent and adds it to the MDEW. 
-    @param signal : intensity
-    @param errorSQ : squared value of the error
-    @param runno : run number 
-    @param detectno : detector number 
-    @param coords : pointer to coordinates array
-    @param IntToType<true> : no object specified, only used to provide an overload for this FULL MDEvent type generation.
-    */
-    void addEvent(float signal, float errorSQ, uint16_t runno, int32_t detectno, Mantid::coord_t* coords, IntToType<true>)
-    {
-      m_ws->addEvent(MDEventType(signal, errorSQ, runno, detectno, coords));
-    }
-  };
 }
 
 namespace Mantid
@@ -194,8 +115,8 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void ImportMDEventWorkspace::addEventsData(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    /// Creates a new instance of the MDEventAdder.
-    MDEventAdder<typename MDEventWorkspace<MDE, nd>::sptr> adder(ws);
+    /// Creates a new instance of the MDEventInserter.
+    MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr> inserter(ws);
     DataCollectionType::iterator mdEventEntriesIterator = m_posMDEventStart;
     for(size_t i = 0; i < m_nMDEvents; ++i)
     {
@@ -214,7 +135,7 @@ namespace MDEvents
         centers[j] = convert<Mantid::coord_t>(*(++mdEventEntriesIterator));
       }
       // Actually add the mdevent.
-      adder.addEvent(signal, error*error, run_no, detector_no, centers);
+      inserter.insertMDEvent(signal, error*error, run_no, detector_no, centers);
     }
   }
 
