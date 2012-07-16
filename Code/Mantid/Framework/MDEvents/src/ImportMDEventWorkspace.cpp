@@ -265,6 +265,10 @@ namespace MDEvents
       std::string name = convert<std::string>(*(++dimEntriesIterator));
       std::string units = convert<std::string>(*(++dimEntriesIterator));
       int nbins = convert<int>(*(++dimEntriesIterator));
+      UNUSED_ARG(nbins);
+      UNUSED_ARG(id);
+      UNUSED_ARG(name);
+      UNUSED_ARG(units);
     }
     // Do we have the expected number of mdevent entries
     int posDiffMDEvent = static_cast<int>(std::distance(posMDEventStart, m_file_data.end()));
@@ -299,11 +303,16 @@ namespace MDEvents
       {
         int run_no = convert<int>(*(++mdEventEntriesIterator));
         int detector_no = convert<int>(*(++mdEventEntriesIterator));
+        UNUSED_ARG(run_no);
+        UNUSED_ARG(detector_no);
       }
       for(size_t j = 0; j < nDimensions; ++j)
       {
         double coord = convert<double>(*(++mdEventEntriesIterator));
+        UNUSED_ARG(coord);
       }
+      UNUSED_ARG(signal);
+      UNUSED_ARG(error);
     }
   }
 
