@@ -68,12 +68,12 @@ public:
     MDEW_LEAN_2D::sptr ws2d = boost::dynamic_pointer_cast<MDEW_LEAN_2D>(createInputWorkspace("MDLeanEvent"));
 
     // Create the inserter.
-    MDEventInserter<typename MDEW_LEAN_2D::sptr> inserter(ws2d);
+    MDEventInserter<MDEW_LEAN_2D::sptr> inserter(ws2d);
 
     // Add one md event
     Mantid::coord_t coord1[2] = {-1, -1}; 
-    double expectedSignal = 1;
-    double expectedErrorSq = 2;
+    float expectedSignal = 1;
+    float expectedErrorSq = 2;
     inserter.insertMDEvent(expectedSignal, expectedErrorSq, 1, 1, coord1);
     ws2d->refreshCache();
 
@@ -101,12 +101,12 @@ public:
     MDEW_2D::sptr ws2d = boost::dynamic_pointer_cast<MDEW_2D>(createInputWorkspace("MDEvent"));
 
     // Create the inserter.
-    MDEventInserter<typename MDEW_2D::sptr> inserter(ws2d);
+    MDEventInserter<MDEW_2D::sptr> inserter(ws2d);
 
     // Add one md event
     Mantid::coord_t coord1[2] = {-1, -1}; 
-    double expectedSignal = 1;
-    double expectedErrorSq = 2;
+    float expectedSignal = 1;
+    float expectedErrorSq = 2;
     inserter.insertMDEvent(expectedSignal, expectedErrorSq, 1, 1, coord1);
     ws2d->refreshCache();
 
