@@ -85,10 +85,12 @@ void AlignAndFocusPowder::exec()
 {
   // retrieve the properties
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  std::string instName = inputWS->getInstrument()->getName();
   std::string calFileName=getProperty("CalFileName");
   OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
   MatrixWorkspace_sptr maskWS = getProperty("MaskWorkspace");
   GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
+  std::string params = getProperty("Params");
 
   // Get the input workspace
   if ((!offsetsWS || !maskWS || !groupWS) && !calFileName.empty())
@@ -100,7 +102,6 @@ void AlignAndFocusPowder::exec()
     if(groupWS) alg->setProperty<bool>("MakeGroupingWorkspace", false);
     if(offsetsWS) alg->setProperty<bool>("MakeOffsetsWorkspace", false);
     if(maskWS)alg->setProperty<bool>("MakeMaskWorkspace", false);
-    std::string instName = inputWS->getInstrument()->getName();
     alg->setProperty<std::string>("WorkspaceName", instName);
     alg->executeAsSubAlg();
     groupWS = alg->getProperty("OutputGroupingWorkspace");
@@ -111,13 +112,31 @@ void AlignAndFocusPowder::exec()
     AnalysisDataService::Instance().add(instName+"_mask", maskWS);
   }
 
-  std::string params = getProperty("Params");
+  API::IAlgorithm_sptr alignAlg = createSubAlgorithm("AlignDetectors");
+  alignAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+  alignAlg->setProperty("OffsetsWorkspace", instName+"_offsets");
+  alignAlg->executeAsSubAlg();
+  MatrixWorkspace_sptr outputWS = alignAlg->getProperty("OutputWorkspace");
+
+  API::IAlgorithm_sptr focusAlg = createSubAlgorithm("DiffractionFocussing");
+  focusAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
+  focusAlg->setProperty("GroupingWorkspace", instName+"_group");
+  focusAlg->setProperty("PreserveEvents", true);
+  focusAlg->executeAsSubAlg();
+  outputWS = focusAlg->getProperty("OutputWorkspace");
+
+  API::IAlgorithm_sptr convertAlg = createSubAlgorithm("ConvertUnits");
+  convertAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
+  convertAlg->setProperty("Target","TOF");
+  convertAlg->executeAsSubAlg();
+  outputWS = convertAlg->getProperty("OutputWorkspace");
+
   API::IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin");
-  rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+  rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
   rebinAlg->setProperty("Params",params);
   rebinAlg->setProperty("PreserveEvents", true);
   rebinAlg->executeAsSubAlg();
-  MatrixWorkspace_sptr outputWS = rebinAlg->getProperty("OutputWorkspace");
+  outputWS = rebinAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace",outputWS);
 
 }
