@@ -50,6 +50,8 @@ namespace MDEvents
     static const std::string DimensionBlockFlag();
     /// Flag used to indicate the mdevent block in the file
     static const std::string MDEventBlockFlag();
+    /// Flag used to indicate a comment line.
+    static const std::string CommentLineStartFlag();
   
   private:
     /// Typdef for the white-space separated file data type.

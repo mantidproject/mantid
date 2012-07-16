@@ -290,6 +290,31 @@ public:
     TS_ASSERT_EQUALS("MDEvent", outWS->getEventTypeName());
   }
 
+  void test_ignore_comment_lines()
+  {
+    // Setup the basic file.
+    FileContentsBuilder fileContents; 
+    // Insert a few comment blocks into the file.
+    fileContents.setDimensionBlock("# Some Comment!\n" + ImportMDEventWorkspace::DimensionBlockFlag());
+    fileContents.setMDEventBlock("# Some Comment!\n" + ImportMDEventWorkspace::MDEventBlockFlag());
+
+    MDFileObject infile(fileContents);
+    // Run the algorithm.
+    ImportMDEventWorkspace alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", infile.getFileName());
+    alg.setPropertyValue("OutputWorkspace", "test_out");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    // These comment blocks are not being considered if execution completes without throwing
+    TS_ASSERT(alg.isExecuted());
+    
+    // Sanity check the defaults for the FileContentsBuilder construction.
+    IMDEventWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("test_out");
+    TS_ASSERT_EQUALS(2, outWS->getNumDims());
+    TS_ASSERT_EQUALS(1, outWS->getNPoints());
+    TS_ASSERT_EQUALS("MDLeanEvent", outWS->getEventTypeName());
+  }
+
 
 };
 

@@ -48,6 +48,7 @@ namespace MDEvents
   /**
   Static method returning the flag for the dimensions block.
   Allows a single definition for the flag to be used both within and outside of this class.
+  @return flag.
   */
   const std::string ImportMDEventWorkspace::DimensionBlockFlag()
   {
@@ -57,10 +58,21 @@ namespace MDEvents
   /**
   Static method returning the flag for the mdevents block.
   Allows a single definition for the flag to be used both within and outside of this class.
+  @return flag.
   */
   const std::string ImportMDEventWorkspace::MDEventBlockFlag()
   {
     return "MDEVENTS";
+  }
+
+  /**
+  Static method returning the flag for the comment line.
+  Allows a single definition for the flag to be used both within and outside of this class.
+  @return flag.
+  */
+  const std::string ImportMDEventWorkspace::CommentLineStartFlag()
+  {
+    return "#";
   }
 
   //----------------------------------------------------------------------------------------------
@@ -254,13 +266,23 @@ namespace MDEvents
       g_log.error() << "Cannot open file: " << filename;
       throw e;
     }
-    // Copy the data out of the file.
-    std::copy(
-      std::istream_iterator <std::string> ( file ),
-      std::istream_iterator <std::string> (),
-      std::back_inserter( m_file_data )
-      );
 
+    std::string line;
+    std::vector<std::string> myLines;
+    while (std::getline(file, line))
+    {
+      if(std::string::npos == line.find_first_of(CommentLineStartFlag()))
+      {
+        std::stringstream buffer(line);
+        std::copy
+          ( std::istream_iterator <std::string> ( buffer ),
+          std::istream_iterator <std::string> (),
+          std::back_inserter( m_file_data ) );
+      }
+    }
+
+    // Copy the data out of the file.
+    
     file.close();
 
     // Check the file format. 
