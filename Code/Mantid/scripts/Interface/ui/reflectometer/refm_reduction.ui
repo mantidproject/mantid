@@ -1144,7 +1144,7 @@ p, li { white-space: pre-wrap; }
                        </size>
                       </property>
                       <property name="text">
-                       <string>Low-Res axis range     </string>
+                       <string>Y-axis range     </string>
                       </property>
                      </widget>
                     </item>
@@ -2604,7 +2604,7 @@ p, li { white-space: pre-wrap; }
                        </size>
                       </property>
                       <property name="text">
-                       <string>Low-Res axis range     </string>
+                       <string>Y-axis range     </string>
                       </property>
                      </widget>
                     </item>

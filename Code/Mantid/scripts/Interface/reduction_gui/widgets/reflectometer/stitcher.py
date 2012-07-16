@@ -243,6 +243,15 @@ class StitcherWidget(BaseWidget):
         self._content.max_q_unity_edit.setText("0.01")
         self._content.max_q_unity_edit.setValidator(QtGui.QDoubleValidator(self._content.max_q_unity_edit))
         
+        # Email options
+        self._content.send_email_chk.setChecked(False)
+        self._email_options_changed()
+        self.connect(self._content.send_email_chk, QtCore.SIGNAL("clicked()"), self._email_options_changed)
+        self.connect(self._content.send_btn, QtCore.SIGNAL("clicked()"), self._email_result)
+        import getpass        
+        sender_email = getpass.getuser()+"@ornl.gov"
+        self._content.from_email_edit.setText(sender_email)
+        
         if self._settings.instrument_name == "REFL":
             self._content.ref_pol_label.hide()
             self._content.off_off_radio.hide()
@@ -256,8 +265,18 @@ class StitcherWidget(BaseWidget):
             self.radio_group.addButton(self._content.on_off_radio)
             self.radio_group.addButton(self._content.on_on_radio)
             self.radio_group.setExclusive(True)
-            
-            
+                 
+    def _email_options_changed(self):
+        """
+            Send-email checkbox has changed states
+        """
+        is_checked = self._content.send_email_chk.isChecked()
+        self._content.to_email_label.setEnabled(is_checked)
+        self._content.to_email_edit.setEnabled(is_checked)
+        self._content.from_email_label.setEnabled(is_checked)
+        self._content.from_email_edit.setEnabled(is_checked)
+        self._content.send_btn.setEnabled(is_checked)
+        
     def _add_entry(self, workspace):
         entry = ReflData(workspace, parent_layout=self._content.angle_list_layout)
         self._workspace_list.append(entry)
@@ -410,22 +429,28 @@ class StitcherWidget(BaseWidget):
                 else:
                     l.setTitle("Polarization state: %s" % pol)
                 
+    def _email_result(self):
+        self._save_result(send_email=True)
                 
-                
-    def _save_result(self):
+    def _save_result(self, send_email=False):
         """
             Save the scaled output in one combined I(Q) file
         """
         if self._stitcher is not None:
-            if self._output_dir is None or not os.path.isdir(self._output_dir):
-                self._output_dir = os.path.expanduser("~")
-            fname_qstr = QtGui.QFileDialog.getSaveFileName(self, "Save combined reflectivity",
-                                                           self._output_dir, 
-                                                           "Data Files (*.txt)")
-            fname = str(QtCore.QFileInfo(fname_qstr).filePath())
+            if send_email:
+                fname = os.path.join(os.path.expanduser("~"),"reflectivity.txt")
+            else:
+                if self._output_dir is None or not os.path.isdir(self._output_dir):
+                    self._output_dir = os.path.expanduser("~")
+                fname_qstr = QtGui.QFileDialog.getSaveFileName(self, "Save combined reflectivity",
+                                                               self._output_dir, 
+                                                               "Data Files (*.txt)")
+                fname = str(QtCore.QFileInfo(fname_qstr).filePath())
+            file_list = []
             if len(fname)>0:
                 if self._settings.instrument_name == "REFL":
                     self._stitcher.save_combined(fname, as_canSAS=False)
+                    file_list.append(fname)
                 else:
                     pol_list = ["Off_Off", "On_Off",
                                "Off_On", "On_On"]
@@ -439,11 +464,48 @@ class StitcherWidget(BaseWidget):
                                 file_path = os.path.join(outdir, outname)
                                 SaveAscii(Filename=file_path, 
                                           InputWorkspace="ref_"+pol,
-                                          Separator="Space")
+                                          Separator="Space")             
+                                file_list.append(file_path)                   
                         except:
                             mtd.sendLogMessage("Could not save polarization %s" % pol)
-                            
-    
+            if send_email:
+                self._email_data(file_list)
+                
+    def _email_data(self, file_list):
+        """
+            Send a list of file by email
+            @param file_list: list of files to send
+        """
+        if len(file_list)==0:
+            return
+        
+        import smtplib
+        from email.mime.text import MIMEText
+        from email.mime.multipart import MIMEMultipart
+        sender_email = str(self._content.from_email_edit.text())
+        recv_email = str(self._content.to_email_edit.text())
+        
+        msg = MIMEMultipart()
+        msg["Subject"] = "[Mantid] Reduced data"
+        msg["From"] = sender_email
+        msg["To"] = recv_email
+        msg.preamble = "Reduced data"
+        
+        body = MIMEText("The attached reflectivity files were sent by MantidPlot.")
+        msg.attach(body)
+        
+        for file_path in file_list:
+            output_file = open(file_path, 'r')
+            file_name = os.path.basename(file_path)
+            att = MIMEText(output_file.read())
+            att.add_header('Content-Disposition', 'attachment', filename=file_name)
+            output_file.close()
+            msg.attach(att)
+        
+        s = smtplib.SMTP('localhost')
+        s.sendmail(recv_email, recv_email, msg.as_string())
+        s.quit()
+        
     def set_state(self, state):
         """
             Update the catalog according to the new data path
