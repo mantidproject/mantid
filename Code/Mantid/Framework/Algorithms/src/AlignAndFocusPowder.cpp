@@ -58,7 +58,6 @@ void AlignAndFocusPowder::init()
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The result of diffraction focussing of InputWorkspace" );
-  declareProperty("Params","","The binning parameters");
   declareProperty(new FileProperty("CalFileName", "", FileProperty::OptionalLoad, ".cal"),
 		  "The name of the CalFile with offset, masking, and grouping data" );
   declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace","",Direction::Input, PropertyMode::Optional),
@@ -67,6 +66,7 @@ void AlignAndFocusPowder::init()
     "Optional: An OffsetsWorkspace workspace giving the detector calibration values.");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace","",Direction::Input, PropertyMode::Optional),
     "Optional: An Workspace workspace giving which detectors are masked.");
+  declareProperty("Params","-0.004","The binning parameters: Positive is linear bins, negative is logarithmic (Default:-0.004)");
   declareProperty("PreserveEvents", true,
     "If the InputWorkspace is an EventWorkspace, this will preserve the full event list (warning: this will use much more memory!).");
   declareProperty("FilterBadPulses", true,
