@@ -49,7 +49,6 @@ void UnwrappedCylinder::calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Q
   InstrumentActor::BasisRotation(x,y,z,X,Y,Z,R1);
 
   R =  R1 * udet.detector->getRotation();
-
 }
 
 

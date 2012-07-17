@@ -339,6 +339,13 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 
   glLoadIdentity();
 
+  if ( widget->getLightingState() != 0 )
+  {
+    float lamp_pos[4]={0.0, 0.0, 1.0, 0.0}; // directional light in +z direction (into the screen)
+    if ( isFlippedView() ) lamp_pos[2] = -1.0f;
+    glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
+  }
+
   for(size_t i=0;i<m_unwrappedDetectors.size();++i)
   {
     const UnwrappedDetector& udet = m_unwrappedDetectors[i];
@@ -868,3 +875,62 @@ void UnwrappedSurface::setFlippedView(bool on)
   m_viewRect.setLeft(right);
   m_viewRect.setRight(left);
 }
+
+/**
+ * Draw the surface onto an image without OpenGL
+ * @param image :: Image to draw on.
+ * @param picking :: If true draw a picking image.
+ */
+void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
+{
+  if ( !image ) return;
+
+  QPainter paint(image);
+  int vwidth = image->width();
+  int vheight = image->height();
+
+  const double dw = fabs(m_viewRect.width() / vwidth);
+  const double dh = fabs(m_viewRect.height()/ vheight);
+
+  //std::cerr << m_viewRect.left() << ' ' << m_viewRect.right() << " : " <<  m_viewRect.bottom() << ' ' << m_viewRect.top() << std::endl;
+
+  if (m_startPeakShapes)
+  {
+    createPeakShapes(image->rect());
+  }
+
+  glOrtho(m_viewRect.left(),m_viewRect.right(),
+    m_viewRect.bottom(),m_viewRect.top(),
+    -10,10);
+
+
+
+  for(size_t i=0;i<m_unwrappedDetectors.size();++i)
+  {
+    const UnwrappedDetector& udet = m_unwrappedDetectors[i];
+
+    if (!udet.detector) continue;
+
+    int iw = int(udet.width / dw);
+    int ih = int(udet.height / dh);
+    double w = (iw == 0)?  dw : udet.width/2;
+    double h = (ih == 0)?  dh : udet.height/2;
+
+    if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
+
+    setColor(int(i),picking);
+
+    if (iw < 6 || ih < 6)
+    {
+      glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+      glRectd(udet.u-w,udet.v-h,udet.u+w,udet.v+h);
+      glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+      if (iw > 2 || ih > 2 )
+      {
+        glRectd(udet.u-w,udet.v-h,udet.u+w,udet.v+h);
+      }
+    }
+
+  }
+}
+

@@ -53,7 +53,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_lighting = new QAction("Lighting",this);
   m_lighting->setCheckable(true);
   m_lighting->setChecked(false);
-  //connect(m_lighting,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
+  connect(m_lighting,SIGNAL(toggled(bool)),m_instrWindow->getInstrumentDisplay(),SLOT(enableLighting(bool)));
   m_displayAxes = new QAction("Display Axes",this);
   m_displayAxes->setCheckable(true);
   m_displayAxes->setChecked(true);
@@ -62,12 +62,17 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_wireframe->setCheckable(true);
   m_wireframe->setChecked(false);
   connect(m_wireframe, SIGNAL(toggled(bool)), m_instrWindow, SLOT(setWireframe(bool)));
+  m_GLView = new QAction("Use OpenGL",this);
+  m_GLView->setCheckable(true);
+  m_GLView->setChecked( m_instrWindow->isGLEnabled() );
+  connect(m_GLView, SIGNAL( toggled(bool) ), m_instrWindow, SLOT( enableGL(bool) ));
   displaySettingsMenu->addAction(m_colorMap);
   displaySettingsMenu->addAction(m_backgroundColor);
   displaySettingsMenu->addSeparator();
   displaySettingsMenu->addAction(m_displayAxes);
   displaySettingsMenu->addAction(m_wireframe);
-  //displaySettingsMenu->addAction(m_lighting); // enable for testing
+  displaySettingsMenu->addAction(m_lighting);
+  displaySettingsMenu->addAction(m_GLView);
   displaySettings->setMenu(displaySettingsMenu);
 
   QFrame * axisViewFrame = setupAxisFrame();
@@ -82,6 +87,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_flipCheckBox->setChecked(false);
   m_flipCheckBox->hide();
   connect(m_flipCheckBox,SIGNAL(toggled(bool)),this,SLOT(flipUnwrappedView(bool)));
+
   m_peakOverlaysButton = new QPushButton("Peaks options",this);
   m_peakOverlaysButton->hide();
   m_peakOverlaysButton->setMenu(createPeaksMenu());

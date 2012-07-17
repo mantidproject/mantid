@@ -129,13 +129,13 @@ void MantidGLWidget::setLightingModel(int state)
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
     // Set Light0 Attributes, Ambient, diffuse,specular and position
     // Its a directional light which follows camera position
-    float lamp_ambient[4]={0.0,0.0,0.0,1.0};
-    float lamp_diffuse[4]={1.0,1.0,1.0,1.0};
+    float lamp_ambient[4]={0.30, 0.30, 0.30, 1.0};
+    float lamp_diffuse[4]={1.0, 1.0, 1.0, 1.0};
     float lamp_specular[4]={1.0,1.0,1.0,1.0};
     glLightfv(GL_LIGHT0, GL_AMBIENT,lamp_ambient );
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, lamp_specular);
-    float lamp_pos[4]={0.0,0.0,1.0,0.0};
+    float lamp_pos[4]={0.0, 0.0, 0.0, 1.0}; // spot light at the origin
     glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
     if (state == 2)
     {
@@ -351,7 +351,8 @@ void MantidGLWidget::enableLighting(bool on)
   //{
   //  m_unwrappedSurface->updateView();
   //}
-  update();
+  refreshView();
+  repaint();
 }
 
 void MantidGLWidget::draw()

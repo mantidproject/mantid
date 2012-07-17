@@ -23,6 +23,8 @@ class InstrumentWindowRenderTab;
 class InstrumentWindowPickTab;
 class InstrumentWindowMaskTab;
 class XIntegrationControl;
+class SimpleWidget;
+class ProjectionSurface;
 
 // Qt forward declarations
 class QPushButton;
@@ -38,6 +40,7 @@ class QTextEdit;
 class QShowEvent;
 class QDragEnterEvent;
 class QDropEvent;
+class QStackedLayout;
 
 /**
   \class  InstrumentWindow
@@ -82,6 +85,13 @@ public:
   void updateWindow();
 
   SurfaceType getSurfaceType()const{return m_surfaceType;}
+  /// Get pointer to the projection surface
+  ProjectionSurface* getSurface() const;
+  /// Set newly created projection surface
+  void setSurface(ProjectionSurface* surface);
+
+  /// True if the GL instrument display is currently on
+  bool isGLEnabled() const;
 
   /// Alter data from a script. These just foward calls to the 3D widget
   void setColorMapMinValue(double minValue);
@@ -147,6 +157,8 @@ public slots:
   void clearPeakOverlays();
   void setPeakLabelPrecision(int n);
   void setShowPeakRowFlag(bool on);
+  /// Toggle between the GL and simple instrument display widgets
+  void enableGL( bool on );
 
 signals:
   void plotSpectra(const QString&,const std::set<int>&);
@@ -165,6 +177,18 @@ private:
 
   QString asString(const std::vector<int>& numbers) const;
   QString confirmDetectorOperation(const QString & opName, const QString & inputWS, int ndets);
+  /// Set background color of the instrument display
+  void setBackgroundColor(const QColor& color);
+  /// Get the surface info string
+  QString getSurfaceInfoText() const;
+  /// Return the width of the instrunemt display
+  int getInstrumentDisplayWidth() const;
+  /// Return the height of the instrunemt display
+  int getInstrumentDisplayHeight() const;
+  /// Refresh the instrument display
+  void refreshInstrumentDisplay();
+
+
   QLabel*      mInteractionInfo;
   QTabWidget*  mControlsTab;
   // Actions for the pick menu
@@ -179,8 +203,10 @@ private:
   /// The name of workspace that this window is associated with. The InstrumentActor holds a pointer to the workspace itself.
   const QString m_workspaceName;
   MantidGLWidget* m_InstrumentDisplay;
+  SimpleWidget* m_simpleDisplay;
   InstrumentActor* m_instrumentActor;
   SurfaceType m_surfaceType;       ///< 3D view or unwrapped
+  QStackedLayout* m_instrumentDisplayLayout;
 
   int          mSpectraIDSelected; ///< spectra index id
   int          mDetectorIDSelected; ///< detector id

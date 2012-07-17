@@ -72,6 +72,7 @@ private:
   QAction *m_displayAxes;
   QAction *m_wireframe;
   QAction *m_lighting;
+  QAction *m_GLView; ///< toggle between OpenGL and simple view
   
 };
 

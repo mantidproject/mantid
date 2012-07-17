@@ -49,6 +49,8 @@ public:
   virtual ~ProjectionSurface();
   /// draw the surface onto a GL widget
   virtual void draw(MantidGLWidget* widget)const;
+  /// draw the surface onto a normal widget
+  virtual void drawSimple(QWidget* widget)const;
   /// called when the gl widget gets resized
   virtual void resize(int, int){}
   /// redraw surface without recalulationg of colours, etc
@@ -148,6 +150,8 @@ protected:
   virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const = 0;
   /// Respond to a change of color map in m_instrActor
   virtual void changeColorMap() = 0;
+  /// Draw the surface onto an image without OpenGL
+  virtual void drawSimpleToImage(QImage* image,bool picking = false)const;
 
   virtual void mousePressEventMove(QMouseEvent*){}
   virtual void mouseMoveEventMove(QMouseEvent*){}

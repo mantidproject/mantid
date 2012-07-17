@@ -26,6 +26,7 @@ public:
   void setBackgroundColor(QColor);
   QColor currentBackgroundColor() const;
   void saveToFile(const QString & filename);
+  int getLightingState() const {return m_lightingState;}
 
 signals:
   void mouseOut();
