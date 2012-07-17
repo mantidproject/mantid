@@ -422,6 +422,10 @@ namespace CurveFitting
     {
       doCalcErrors = true;
     }
+    if ( costFunc->nParams() == 0 )
+    {
+      doCalcErrors = false;
+    }
 
     GSLMatrix covar;
     if ( doCalcErrors )

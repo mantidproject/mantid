@@ -127,14 +127,20 @@ namespace Mantid
     // Set all elements to zero
     void zero()
     {
-      gsl_vector_set_zero( m_vector );
+      if ( m_vector )
+      {
+        gsl_vector_set_zero( m_vector );
+      }
     }
 
     /// Add a vector
     /// @param v :: The other vector
     GSLVector& operator+=(const GSLVector& v)
     {
-      gsl_vector_add(m_vector, v.gsl());
+      if ( m_vector )
+      {
+        gsl_vector_add(m_vector, v.gsl());
+      }
       return *this;
     }
 
@@ -142,7 +148,10 @@ namespace Mantid
     /// @param v :: The other vector
     GSLVector& operator-=(const GSLVector& v)
     {
-      gsl_vector_sub(m_vector, v.gsl());
+      if ( m_vector )
+      {
+        gsl_vector_sub(m_vector, v.gsl());
+      }
       return *this;
     }
 
@@ -150,7 +159,10 @@ namespace Mantid
     /// @param d :: The number
     GSLVector& operator*=(const double d)
     {
-      gsl_vector_scale(m_vector, d);
+      if ( m_vector )
+      {
+        gsl_vector_scale(m_vector, d);
+      }
       return *this;
     }
 

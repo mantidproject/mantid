@@ -59,19 +59,20 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   }
   size_t n = m_leastSquares->nParams();
 
-  //if (m_der.size() == 0)
-  //{
-  //  m_der.resize(n);
-  //  m_hessian.resize(n,n);
-  //}
+  if ( n == 0 )
+  {
+    m_errorString = "No parameters to fit";
+    return false;
+  }
+
   // calculate the first and second derivatives of the cost function.
   if (m_mu == 0.0)
   {// first time calculate everything
-    m_F = m_leastSquares->valDerivHessian(/*m_der, m_hessian*/);
+    m_F = m_leastSquares->valDerivHessian();
   }
   else if (m_rho > 0)
   {// last iteration was good: calculate new m_der and m_hessian, dont't recalculate m_F
-    m_leastSquares->valDerivHessian(/*m_der, m_hessian, */false);
+    m_leastSquares->valDerivHessian(false);
   }
   // else if m_rho < 0 last iteration was bad: reuse m_der and m_hessian
 
