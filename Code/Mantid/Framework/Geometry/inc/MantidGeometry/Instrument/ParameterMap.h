@@ -164,7 +164,7 @@ namespace Geometry
     boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name,
                                      const std::string & type = "")const;
     /// Finds the parameter in the map via the parameter type.
-    boost::shared_ptr<Parameter>  ParameterMap::getByType(const IComponent* comp, const std::string& type) const;
+    boost::shared_ptr<Parameter>  getByType(const IComponent* comp, const std::string& type) const;
     /// Use get() recursively to see if can find param in all parents of comp.
     boost::shared_ptr<Parameter> getRecursive(const IComponent* comp, const char * name) const;
     /// Use get() recursively to see if can find param in all parents of comp and given type
