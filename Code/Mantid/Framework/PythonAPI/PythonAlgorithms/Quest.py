@@ -51,11 +51,10 @@ class Quest(PythonAlgorithm):
 		nbet = self.getPropertyValue('NumberBeta')
 		nsig = self.getPropertyValue('NumberSigma')
 		nbs = [nbet, nsig]
-		nbs = [ 30,50]
 
 		sname = prefix+sam+'_'+ana
 		rname = prefix+res+'_'+ana
-		erange = [emin, emax]
+		erange = [float(emin), float(emax)]
 		if elastic:
 			o_el = 1
 		else:

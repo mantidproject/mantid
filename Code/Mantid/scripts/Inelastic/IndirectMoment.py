@@ -4,43 +4,38 @@ from IndirectImport import *
 
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
-from IndirectCommon import StartTime, EndTime, GetThetaQ
+from IndirectCommon import *
 import math, numpy, os.path
 
 mp = import_mantidplot()
 
 def CheckElimits(erange,Xin):
-    emin = float(erange[0])
-    emax = float(erange[1])
     nx = len(Xin)-1
-    if math.fabs(emin) < 1e-5:
-        error = 'Elimits - input emin ( '+erange[0]+' ) is Zero'			
+    if math.fabs(erange[0]) < 1e-5:
+        error = 'Elimits - input emin ( '+str(erange[0])+' ) is Zero'			
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
-    if emin < Xin[0]:
-        error = 'Elimits - input emin ( '+erange[0]+' ) < data emin ( '+str(Xin[0])+' )'		
+    if erange[0] < Xin[0]:
+        error = 'Elimits - input emin ( '+str(erange[0])+' ) < data emin ( '+str(Xin[0])+' )'		
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
-    if math.fabs(emax) < 1e-5:
-        error = 'Elimits - input emax ( '+erange[1]+' ) is Zero'			
+    if math.fabs(erange[1]) < 1e-5:
+        error = 'Elimits - input emax ( '+str(erange[1])+' ) is Zero'			
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
-    if emax > Xin[nx]:
-        error = 'Elimits - input emax ( '+erange[1]+' ) > data emax ( '+str(Xin[nx])+' )'			
+    if erange[1] > Xin[nx]:
+        error = 'Elimits - input emax ( '+str(erange[1])+' ) > data emax ( '+str(Xin[nx])+' )'			
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
-    if emax < emin:
-        error = 'Elimits - input emax ( '+erange[1]+' ) < emin ( '+erange[0]+' )'			
+    if erange[1] < erange[0]:
+        error = 'Elimits - input emax ( '+str(erange[1])+' ) < emin ( '+erange[0]+' )'			
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
-    return emin,emax
 
 def MomentRun(samWS,erange,Verbose,Plot,Save):
     StartTime('Moments')
     workdir = config['defaultsave.directory']
-    nq = mtd[samWS].getNumberHistograms()       # no. of hist/groups in sample
-    Xin = mtd[samWS].readX(0)
-    nw = len(Xin)-1
+    nq,nw = CheckHistZero(samWS)
     if Verbose:
         logger.notice('Sample '+samWS+' has '+str(nq)+' Q values & '+str(nw)+' w values')
     axis = mtd[samWS].getAxis(1)
@@ -49,8 +44,9 @@ def MomentRun(samWS,erange,Verbose,Plot,Save):
     for i in range(0,nq):
         Q.append(float(axis.label(i)))
         e0.append(0.0)
-    emin,emax = CheckElimits(erange,Xin)
-    CropWorkspace(InputWorkspace=samWS, OutputWorkspace=samWS, XMin=emin, XMax=emax)
+    Xin = mtd[samWS].readX(0)
+    CheckElimits(erange,Xin)
+    CropWorkspace(InputWorkspace=samWS, OutputWorkspace=samWS, XMin=erange[0], XMax=erange[1])
     Xin = mtd[samWS].readX(0)
     nw = len(Xin)-1
     if Verbose:

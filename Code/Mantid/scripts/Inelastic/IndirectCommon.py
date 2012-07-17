@@ -152,3 +152,87 @@ def PadArray(inarray,nfixed):                   #pad a list to specified size
 	outarray.extend(inarray)
 	outarray +=[0]*padding
 	return outarray
+
+def CheckAnalysers(in1WS,in2WS,Verbose):
+    ws1 = mtd[in1WS]
+    a1 = ws1.getInstrument().getStringParameter('analyser')[0]
+    r1 = ws1.getInstrument().getStringParameter('reflection')[0]
+    ws2 = mtd[in2WS]
+    a2 = ws2.getInstrument().getStringParameter('analyser')[0]
+    r2 = ws2.getInstrument().getStringParameter('reflection')[0]
+    if a1 != a2:
+        error = 'Workspace '+in1WS+' and '+in2WS+' have different analysers'
+        logger.notice('ERROR *** '+error)
+        sys.exit(error)
+    elif r1 != r2:
+        error = 'Workspace '+in1WS+' and '+in2WS+' have different reflections'
+        logger.notice('ERROR *** '+error)
+        sys.exit(error)
+    else:
+        if Verbose:
+            logger.notice('Analyser is '+a1+r1)
+
+def CheckHistZero(inWS):
+    nhist = mtd[inWS].getNumberHistograms()       # no. of hist/groups in WS
+    if nhist == 0:
+        error = 'Workspace '+inWS+' has NO histograms'			
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    Xin = mtd[inWS].readX(0)
+    ntc = len(Xin)-1						# no. points from length of x array
+    if ntc == 0:
+        error = 'Workspace '+inWS+' has NO points'			
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    return nhist,ntc
+
+def CheckHistSame(in1WS,name1,in2WS,name2):
+    nhist1 = mtd[in1WS].getNumberHistograms()       # no. of hist/groups in WS1
+    X1 = mtd[in1WS].readX(0)
+    xlen1 = len(X1)
+    nhist2 = mtd[in2WS].getNumberHistograms()       # no. of hist/groups in WS2
+    X2 = mtd[in2WS].readX(0)
+    xlen2 = len(X2)
+    if nhist1 != nhist2:				# check that no. groups are the same
+        e1 = name1+' ('+in1WS+') histograms (' +str(nhist1) + ')'
+        e2 = name2+' ('+in2WS+') histograms (' +str(nhist2) + ')'
+        error = e1 + ' not = ' + e2
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    elif xlen1 != xlen2:
+        e1 = name1+' ('+in1WS+') array length (' +str(xlen1) + ')'
+        e2 = name2+' ('+in2WS+') array length (' +str(xlen2) + ')'
+        error = e1 + ' not = ' + e2
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+
+def CheckXrange(xrange,type):
+    if  not ( ( len(xrange) == 2 ) or ( len(xrange) == 4 ) ):
+        error = type + ' - Range must contain either 2 or 4 numbers'
+        logger.notice(error)
+        sys.exit(error)
+    if math.fabs(xrange[0]) < 1e-5:
+        error = type + ' - input minimum ('+str(xrange[0])+') is Zero'			
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    if math.fabs(xrange[1]) < 1e-5:
+        error = type + ' - input maximum ('+str(xrange[1])+') is Zero'			
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    if xrange[1] < xrange[0]:
+        error = type + ' - input max ('+str(xrange[1])+') < min ('+xrange[0]+')'			
+        logger.notice('ERROR *** ' + error)
+        sys.exit(error)
+    if len(xrange) >2:
+        if math.fabs(xrange[2]) < 1e-5:
+            error = type + '2 - input minimum ('+str(xrange[2])+') is Zero'			
+            logger.notice('ERROR *** ' + error)
+            sys.exit(error)
+        if math.fabs(xrange[3]) < 1e-5:
+            error = type + '2 - input maximum ('+str(xrange[3])+') is Zero'			
+            logger.notice('ERROR *** ' + error)
+            sys.exit(error)
+        if xrange[3] < xrange[2]:
+            error = type + '2 - input max ('+str(xrange[3])+') < min ('+xrange[2]+')'			
+            logger.notice('ERROR *** ' + error)
+            sys.exit(error)

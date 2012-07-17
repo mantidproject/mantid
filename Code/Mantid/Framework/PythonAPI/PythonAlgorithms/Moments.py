@@ -32,7 +32,7 @@ class Moments(PythonAlgorithm):
 		sam = prefix+sn+'_'+ana+'_sqw'
 		emin = self.getPropertyValue('EnergyMin')
 		emax = self.getPropertyValue('EnergyMax')
-		erange = [emin, emax]
+		erange = [float(emin), float(emax)]
 
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getProperty('Plot')
