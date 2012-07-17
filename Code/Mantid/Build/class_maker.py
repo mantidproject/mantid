@@ -67,8 +67,6 @@ namespace %s
 
   /** %s : TODO: DESCRIPTION
     
-    @date %s
-
     Copyright &copy; %s ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -177,10 +175,6 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 
     # ------- Now the normal class text ------------------------------    
     s += """#include "Mantid%s/%s%s.h"
-#include "MantidKernel/System.h"
-
-using namespace Mantid::Kernel;
-using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -204,8 +198,8 @@ namespace %s
   
 %s
 
-} // namespace Mantid
-} // namespace %s""" % (
+} // namespace %s
+} // namespace Mantid""" % (
         subproject, args.subfolder, classname, subproject, algorithm_top,
         classname, classname, classname, classname, algorithm_source, subproject)
     f.write(s)
@@ -261,16 +255,10 @@ def write_test(subproject, classname, filename, args):
 #define %s
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
 
 #include "Mantid%s/%s%s.h"
 
-using namespace Mantid;
-using namespace Mantid::%s;
-using namespace Mantid::API;
+using Mantid::%s::%s;
 
 class %sTest : public CxxTest::TestSuite
 {
@@ -292,7 +280,7 @@ public:
 
 #endif /* %s */""" % (
           guard, guard, subproject, args.subfolder, classname,
-          subproject, classname, classname, classname, classname,
+          subproject, classname, classname, classname, classname, classname,
           algorithm_test, guard)
     f.write(s)
     f.close()
