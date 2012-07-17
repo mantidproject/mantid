@@ -25,9 +25,9 @@ namespace
   /// Typedef for data access, i.e. dataX,Y,E members
   typedef Mantid::MantidVec&(MatrixWorkspace::*data_modifier)(const std::size_t);
   /// return_value_policy for read-only numpy array
-  typedef return_value_policy<Policies::VectorToNumpy<Converters::WrapReadOnly> > return_readonly_numpy;
+  typedef return_value_policy<Policies::VectorRefToNumpy<Converters::WrapReadOnly> > return_readonly_numpy;
   /// return_value_policy for read-write numpy array
-  typedef return_value_policy<Policies::VectorToNumpy<Converters::WrapReadWrite> > return_readwrite_numpy;
+  typedef return_value_policy<Policies::VectorRefToNumpy<Converters::WrapReadWrite> > return_readwrite_numpy;
 
   //------------------------------- Overload macros ---------------------------
   // Overloads for binIndexOf function which has 1 optional argument
