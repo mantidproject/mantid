@@ -15,6 +15,7 @@ energy transfer for direct geometry spectrometers.
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -83,6 +84,16 @@ namespace WorkflowAlgorithms
       "Negative width value indicates logarithmic binning.");
     this->declareProperty("SofPhiEIsDistribution", true,
         "The final S(Phi, E) data is made to be a distribution.");
+    this->declareProperty("TimeIndepBackgroundSub", false,
+        "If true, time-independent background will be calculated and removed.");
+    this->declareProperty("TibTofRangeStart", EMPTY_DBL(),
+        "Set the lower TOF bound for time-independent background subtraction.");
+    this->setPropertySettings("TibTofRangeStart",
+        new VisibleWhenProperty("TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
+    this->declareProperty("TibTofRangeEnd", EMPTY_DBL(),
+        "Set the upper TOF bound for time-independent background subtraction.");
+    this->setPropertySettings("TibTofRangeEnd",
+        new VisibleWhenProperty("TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
     this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
         Direction::Output, PropertyMode::Optional));
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
@@ -111,6 +122,7 @@ namespace WorkflowAlgorithms
 
     MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
     const std::string inWsName = inputWS->getName();
+    // Make the result workspace name
     std::string outWsName = inWsName + "_et";
 
     bool preserveEvents = false;
@@ -120,8 +132,10 @@ namespace WorkflowAlgorithms
     g_log.notice() << "Processing for " << facility << std::endl;
     const double ei_guess = this->getProperty("IncidentEnergy");
     const bool fixed_ei = this->getProperty("FixedIncidentEnergy");
+    const std::vector<double> et_binning = this->getProperty("EnergyTransferRange");
+
     double initial_energy = 0.0;
-    //const double mon_peak = 0.0;
+    const double monPeak = 0.0;
 
     if ("SNS" == facility)
       {
@@ -227,7 +241,126 @@ namespace WorkflowAlgorithms
     // Do ISIS
     else
       {
+        // TODO: Add ISIS methodology
+      }
 
+    const double binOffset = -monPeak;
+
+    // Subtract time-independent background if necessary
+    const bool do_tib_sub = this->getProperty("TimeIndepBackgroundSub");
+    if (do_tib_sub)
+      {
+        // Set the binning parameters for the background region
+        double tibTofStart = this->getProperty("TibTofRangeStart");
+        tibTofStart += binOffset;
+        double tibTofEnd = this->getProperty("TibTofRangeEnd");
+        tibTofEnd += binOffset;
+        const double tibTofWidth = tibTofEnd - tibTofStart;
+        std::vector<double> params;
+        params.push_back(tibTofStart);
+        params.push_back(tibTofWidth);
+        params.push_back(tibTofEnd);
+
+        if ("SNS" == facility)
+          {
+            // Create an original background workspace from a portion of the
+            // result workspace.
+            std::string origBkgWsName = "background_origin_ws";
+            IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+            rebin->setAlwaysStoreInADS(true);
+            rebin->setProperty("InputWorkspace", outWsName);
+            rebin->setProperty("OutputWorkspace", origBkgWsName);
+            rebin->setProperty("Params", params);
+            rebin->execute();
+
+            // Convert result workspace to DeltaE since we have Et binning
+            IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
+            cnvun->setAlwaysStoreInADS(true);
+            cnvun->setProperty("InputWorkspace", outWsName);
+            cnvun->setProperty("OutputWorkspace", outWsName);
+            cnvun->setProperty("Target", "DeltaE");
+            cnvun->setProperty("EMode", "Direct");
+            cnvun->setProperty("EFixed", initial_energy);
+            cnvun->execute();
+
+            if (et_binning.empty())
+              {
+                throw std::runtime_error("Need Et rebinning parameters in order to use background subtraction");
+              }
+
+            // Rebin to Et
+            rebin->setProperty("InputWorkspace", outWsName);
+            rebin->setProperty("OutputWorkspace", outWsName);
+            rebin->setProperty("Params", et_binning);
+            rebin->setProperty("PreserveEvents", false);
+            rebin->execute();
+
+            // Convert result workspace to TOF
+            cnvun->setProperty("InputWorkspace", outWsName);
+            cnvun->setProperty("OutputWorkspace", outWsName);
+            cnvun->setProperty("Target", "TOF");
+            cnvun->setProperty("EMode", "Direct");
+            cnvun->setProperty("EFixed", initial_energy);
+            cnvun->execute();
+
+            // Make result workspace a distribution
+            IAlgorithm_sptr cnvToDist = this->createSubAlgorithm("ConvertToDistribution");
+            cnvToDist->setAlwaysStoreInADS(true);
+            cnvToDist->setProperty("Workspace", outWsName);
+            cnvToDist->execute();
+
+            // Calculate the background
+            std::string bkgWsName = "background_ws";
+            IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
+            flatBg->setAlwaysStoreInADS(true);
+            flatBg->setProperty("InputWorkspace", origBkgWsName);
+            flatBg->setProperty("OutputWorkspace", bkgWsName);
+            flatBg->setProperty("StartX", tibTofStart);
+            flatBg->setProperty("EndX", tibTofEnd);
+            flatBg->setProperty("Mode", "Mean");
+            flatBg->setProperty("OutputMode", "Return Background");
+            flatBg->execute();
+
+            // Remove unneeded original background workspace
+            IAlgorithm_sptr delWs = this->createSubAlgorithm("DeleteWorkspace");
+            delWs->setProperty("Workspace", origBkgWsName);
+            delWs->execute();
+
+            // Make background workspace a distribution
+            cnvToDist->setProperty("Workspace", bkgWsName);
+            cnvToDist->execute();
+
+            // Subtrac background from result workspace
+            IAlgorithm_sptr minus = this->createSubAlgorithm("Minus");
+            minus->setAlwaysStoreInADS(true);
+            minus->setProperty("LHSWorkspace", outWsName);
+            minus->setProperty("RHSWorkspace", bkgWsName);
+            minus->setProperty("OutputWorkspace", outWsName);
+            minus->execute();
+
+            // Remove unneeded background workspace
+            delWs->setProperty("Workspace", bkgWsName);
+            delWs->execute();
+          }
+        // Do ISIS
+        else
+          {
+            // TODO: More setup work needs to be done.
+            IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
+            flatBg->setAlwaysStoreInADS(true);
+            flatBg->setProperty("InputWorkspace", outWsName);
+            flatBg->setProperty("OutputWorkspace", outWsName);
+            flatBg->setProperty("StartX", tibTofStart);
+            flatBg->setProperty("EndX", tibTofEnd);
+            flatBg->setProperty("Mode", "Mean");
+            flatBg->execute();
+          }
+
+        // Convert result workspace back to histogram
+        IAlgorithm_sptr cnvFrDist = this->createSubAlgorithm("ConvertFromDistribution");
+        cnvFrDist->setAlwaysStoreInADS(true);
+        cnvFrDist->setProperty("Workspace", outWsName);
+        cnvFrDist->execute();
       }
 
     // Convert to energy transfer
@@ -242,7 +375,6 @@ namespace WorkflowAlgorithms
     cnvun->execute();
 
     // Rebin if necessary
-    const std::vector<double> et_binning = this->getProperty("EnergyTransferRange");
     if (!et_binning.empty())
       {
         g_log.notice() << "Rebinning data" << std::endl;
