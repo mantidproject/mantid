@@ -1742,14 +1742,21 @@ namespace Mantid
 
 
     /// @cond
-    template MANTID_KERNEL_DLL class TimeSeriesProperty<int>;
-    template MANTID_KERNEL_DLL class TimeSeriesProperty<long>;
-    template MANTID_KERNEL_DLL class TimeSeriesProperty<unsigned int>;
-    template MANTID_KERNEL_DLL class TimeSeriesProperty<unsigned long>;
-    template MANTID_KERNEL_DLL class TimeSeriesProperty<float>;
-    template MANTID_KERNEL_DLL class TimeSeriesProperty<double>;
-    template MANTID_KERNEL_DLL class TimeSeriesProperty<std::string>;
-    template MANTID_KERNEL_DLL class TimeSeriesProperty<bool>;
+    // -------------------------- Macro to instantiation concrete types --------------------------------
+#define INSTANTIATE(TYPE) \
+    template MANTID_KERNEL_DLL class TimeSeriesProperty<TYPE>;
+
+    // -------------------------- Concrete instantiation -----------------------------------------------
+    INSTANTIATE(int);
+    INSTANTIATE(long);
+    INSTANTIATE(long long);
+    INSTANTIATE(unsigned int);
+    INSTANTIATE(unsigned long);
+    INSTANTIATE(unsigned long long);
+    INSTANTIATE(float);
+    INSTANTIATE(double);
+    INSTANTIATE(std::string);
+    INSTANTIATE(bool);
 
     /// @endcond
 

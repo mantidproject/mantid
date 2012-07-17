@@ -224,8 +224,10 @@ namespace Mantid
     INSTANTIATE(double);
     INSTANTIATE(int);
     INSTANTIATE(long);
+    INSTANTIATE(long long);
     INSTANTIATE(unsigned int);
     INSTANTIATE(unsigned long);
+    INSTANTIATE(unsigned long long);
 
   } // namespace Kernel
 } // namespace Mantid
