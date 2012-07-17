@@ -27,8 +27,8 @@ namespace Mantid
                                const double l1, const double l2,
                                const double twoTheta, const DeltaEMode::Type emode, const double efixed)
     {
-      Unit_const_sptr srcUnit = UnitFactory::Instance().create(src);
-      Unit_const_sptr destUnit = UnitFactory::Instance().create(dest);
+      Unit_sptr srcUnit = UnitFactory::Instance().create(src);
+      Unit_sptr destUnit = UnitFactory::Instance().create(dest);
       return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, l2, twoTheta, emode, efixed);
     }
 
@@ -44,7 +44,7 @@ namespace Mantid
      * @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
      * @return The value converted to the destination unit
      */
-    double UnitConversion::run(const Unit & srcUnit, const Unit & destUnit,
+    double UnitConversion::run(Unit & srcUnit, Unit & destUnit,
                                const double srcValue,
                                const double l1, const double l2,
                                const double twoTheta, const DeltaEMode::Type emode, const double efixed)
@@ -88,7 +88,7 @@ namespace Mantid
      * @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
      * @return The value converted to the destination unit
      */
-    double UnitConversion::convertViaTOF(const Unit & srcUnit, const Unit & destUnit,
+    double UnitConversion::convertViaTOF(Unit & srcUnit, Unit & destUnit,
                                          const double srcValue,
                                          const double l1, const double l2,
                                          const double twoTheta, const DeltaEMode::Type emode,
@@ -108,11 +108,8 @@ namespace Mantid
       };
 
       const double unused(0.0);
-      // The unit API requires a non-const input unit but it doesn't make sense for this method to accept a non-const value
-      Unit & nonConstSrc = const_cast<Unit&>(srcUnit);
-      const double tof = nonConstSrc.convertSingleToTOF(srcValue, l1, l2, twoTheta, emodeAsInt, efixed, unused);
-      Unit & nonConstDest = const_cast<Unit&>(destUnit);
-      return nonConstDest.convertSingleFromTOF(tof, l1, l2, twoTheta, emodeAsInt, efixed, unused);
+      const double tof = srcUnit.convertSingleToTOF(srcValue, l1, l2, twoTheta, emodeAsInt, efixed, unused);
+      return destUnit.convertSingleFromTOF(tof, l1, l2, twoTheta, emodeAsInt, efixed, unused);
     }
 
 

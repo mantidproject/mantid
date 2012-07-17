@@ -46,7 +46,7 @@ namespace Mantid
                         const double l1, const double l2,
                         const double twoTheta, const DeltaEMode::Type emode, const double efixed);
       /// Convert a single value between the given units
-      static double run(const Unit & srcUnit, const Unit & destUnit,
+      static double run(Unit & srcUnit, Unit & destUnit,
                         const double srcValue,
                         const double l1, const double l2,
                         const double twoTheta, const DeltaEMode::Type emode, const double efixed);
@@ -55,7 +55,7 @@ namespace Mantid
       /// Perform a quick conversion
       static double convertQuickly(const double srcValue, const double factor, const double power);
       /// Convert through TOF
-      static double convertViaTOF(const Unit & srcUnit, const Unit & destUnit,
+      static double convertViaTOF(Unit & srcUnit, Unit & destUnit,
                                   const double srcValue,
                                   const double l1, const double l2,
                                   const double twoTheta, const DeltaEMode::Type emode, const double efixed);
