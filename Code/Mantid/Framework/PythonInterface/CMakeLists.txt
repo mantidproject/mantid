@@ -85,6 +85,7 @@ set ( TEST_PY_FILES
   test/python/CompositeValidatorTest.py
   test/python/ConfigServiceTest.py
   test/python/CreateWorkspaceTest.py
+  test/python/DeltaEModeTest.py
   test/python/ExperimentInfoTest.py
   test/python/FacilityInfoTest.py
   test/python/FilePropertyTest.py
@@ -123,6 +124,7 @@ set ( TEST_PY_FILES
   test/python/QuatTest.py
   test/python/V3DTest.py
   test/python/UnitCellTest.py
+  test/python/UnitConversionTest.py
   test/python/UnitFactoryTest.py
   test/python/WorkspaceFactoryTest.py
   test/python/WorkspaceTest.py

@@ -32,7 +32,9 @@ set ( EXPORT_FILES
   src/Exports/MandatoryValidator.cpp
   src/Exports/CompositeValidator.cpp
   src/Exports/LogFilter.cpp
+  src/Exports/UnitConversion.cpp
   src/Exports/UnitFactory.cpp
+  src/Exports/DeltaEMode.cpp
 )  
 
 set ( SRC_FILES
