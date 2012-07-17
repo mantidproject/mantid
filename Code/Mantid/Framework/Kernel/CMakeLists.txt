@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/FacilityInfo.cpp
 	src/FileValidator.cpp
 	src/FilterChannel.cpp
+	src/FilteredTimeSeriesProperty.cpp
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
 	src/Glob.cpp
@@ -132,6 +133,7 @@ set ( INC_FILES
 	inc/MantidKernel/Fast_Exponential.h
 	inc/MantidKernel/FileValidator.h
 	inc/MantidKernel/FilterChannel.h
+	inc/MantidKernel/FilteredTimeSeriesProperty.h
 	inc/MantidKernel/FloatingPointComparison.h
 	inc/MantidKernel/FreeBlock.h
 	inc/MantidKernel/FunctionTask.h
@@ -239,6 +241,7 @@ set ( TEST_FILES
 	test/FacilitiesTest.h
 	test/FileValidatorTest.h
 	test/FilterChannelTest.h
+	test/FilteredTimeSeriesPropertyTest.h
 	test/FloatingPointComparisonTest.h
 	test/FreeBlockTest.h
 	test/FunctionTaskTest.h

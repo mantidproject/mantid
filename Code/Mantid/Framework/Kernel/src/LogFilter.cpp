@@ -4,58 +4,38 @@
 
 namespace Mantid
 {
-namespace Kernel
-{
+  namespace Kernel
+  {
 
-//-------------------------------------------------------------------------------------------------
-/** Constructor
-    @param tsp :: Pointer to property to be filtered. Its actual type must be TimeSeriesProperty<double>
- */
-LogFilter::LogFilter(const Property* tsp)
-{
-    const TimeSeriesProperty<double>* ind = dynamic_cast<const TimeSeriesProperty<double>*>(tsp);
-    if (ind)
+    /**
+     * Constructor
+     * @param prop :: Pointer to property to be filtered. Its actual type must be TimeSeriesProperty<double>
+     */
+    LogFilter::LogFilter(const Property* prop) : m_prop(), m_filter()
     {
-        m_prop.reset(static_cast<TimeSeriesProperty<double>*>(ind->clone()));
-        return;
+      m_prop.reset(convertToTimeSeriesOfDouble(prop));
     }
 
-    const TimeSeriesProperty<int>* ini = dynamic_cast<const TimeSeriesProperty<int>*>(tsp);
-    if (ini)
+
+    /**
+     * / Constructor from a TimeSeriesProperty<double> object to avoid overhead of casts
+     */
+    LogFilter::LogFilter(const TimeSeriesProperty<double> * timeSeries) : m_prop(), m_filter()
     {
-        TimeSeriesProperty<double>* p = new TimeSeriesProperty<double>("tmp");
-        std::map<DateAndTime, int> pmap = ini->valueAsMap();
-        for(std::map<DateAndTime, int>::iterator it = pmap.begin();it!=pmap.end();++it)
-            p->addValue(it->first,double(it->second));
-        m_prop.reset(p);
-        return;
+      m_prop.reset(timeSeries->clone());
     }
 
-    const TimeSeriesProperty<bool>* inb = dynamic_cast<const TimeSeriesProperty<bool>*>(tsp);
-    if (inb)
+    /**
+     * Filter using a TimeSeriesProperty<bool>. True values mark the allowed time intervals.
+     * The object is cloned
+     * @param filter :: Filtering mask
+     */
+    void LogFilter::addFilter(const TimeSeriesProperty<bool>* filter)
     {
-        TimeSeriesProperty<double>* p = new TimeSeriesProperty<double>("tmp");
-        std::map<DateAndTime, bool> pmap = inb->valueAsMap();
-        for(std::map<DateAndTime, bool>::iterator it = pmap.begin();it!=pmap.end();++it)
-            p->addValue(it->first,double(it->second));
-        m_prop.reset(p);
-        return;
-    }
-
-    throw std::runtime_error("Cannot cast to TimeSeriesProperty<double>");
-}
-
-
-//-------------------------------------------------------------------------------------------------
-/**  Filter using a TimeSeriesProperty<bool>. True values mark the allowed time intervals.
-     @param filter :: Filtering mask
- */
-void LogFilter::addFilter(const TimeSeriesProperty<bool>* filter)
-{
-    if (filter->size() == 0) return;
-    if (!m_filter || m_filter->size() == 0) m_filter.reset(filter->clone());
-    else
-    {
+      if (filter->size() == 0) return;
+      if (!m_filter || m_filter->size() == 0) m_filter.reset(filter->clone());
+      else
+      {
         TimeSeriesProperty<bool>* f = new TimeSeriesProperty<bool>("tmp");
 
         TimeSeriesProperty<bool>* f1 = m_filter.get();
@@ -66,11 +46,11 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool>* filter)
 
         if (t1.begin() < t2.begin())
         {
-            f1->addValue(t2.begin(),true);// should be f1->lastValue, but it doesnt matter for boolean AND
+          f1->addValue(t2.begin(),true);// should be f1->lastValue, but it doesnt matter for boolean AND
         }
         else if  (t2.begin() < t1.begin())
         {
-            f2->addValue(t1.begin(),true);
+          f2->addValue(t1.begin(),true);
         }
 
         int i = 0;
@@ -84,60 +64,124 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool>* filter)
         // value opposite to the one it started with originally.
         if (t1.begin() > t2.begin())
         {
-            f1->addValue(t2.begin(),!f1->nthValue(i));
-            t1 = f1->nthInterval(i);
+          f1->addValue(t2.begin(),!f1->nthValue(i));
+          t1 = f1->nthInterval(i);
         }
         else if  (t2.begin() > t1.begin())
         {
-            f2->addValue(t1.begin(),!f2->nthValue(j));
-            t2 = f2->nthInterval(j);
+          f2->addValue(t1.begin(),!f2->nthValue(j));
+          t2 = f2->nthInterval(j);
         }
 
         for(;;)
         {
-            TimeInterval t;
-            t = t1.intersection(t2);
-            if (t.isValid())
-            {
-                f->addValue(t.begin(),  (f1->nthValue(i) && f2->nthValue(j)) );
-            }
+          TimeInterval t;
+          t = t1.intersection(t2);
+          if (t.isValid())
+          {
+            f->addValue(t.begin(),  (f1->nthValue(i) && f2->nthValue(j)) );
+          }
 
-            if (t1.end() < t2.end())
-            {
-                i++;
-            }
-            else if (t2.end() < t1.end())
-            {
-                j++;
-            }
-            else
-            {
-                i++;
-                j++;
-            }
+          if (t1.end() < t2.end())
+          {
+            i++;
+          }
+          else if (t2.end() < t1.end())
+          {
+            j++;
+          }
+          else
+          {
+            i++;
+            j++;
+          }
 
-            if (i == f1->size() || j == f2->size()) break;
-            t1 = f1->nthInterval(i);
-            t2 = f2->nthInterval(j);
+          if (i == f1->size() || j == f2->size()) break;
+          t1 = f1->nthInterval(i);
+          t2 = f2->nthInterval(j);
         }
 
         delete f2;
         f->clearFilter();
         m_filter.reset(f);
+      }
+      m_prop->clearFilter();
+      m_prop->filterWith(m_filter.get());
     }
-    m_prop->clearFilter();
-    m_prop->filterWith(m_filter.get());
-}
 
 
-//-------------------------------------------------------------------------------------------------
-/// Clears filters
-void LogFilter::clear()
-{
-    m_prop->clearFilter();
-    m_filter.reset();
-}
+    //-------------------------------------------------------------------------------------------------
+    /// Clears filters
+    void LogFilter::clear()
+    {
+      m_prop->clearFilter();
+      m_filter.reset();
+    }
 
-} // namespace Kernel
+    //--------------------------------------------------------------------------------------------------
+    // Private methods
+    //--------------------------------------------------------------------------------------------------
+    namespace
+    {
+      template<typename SrcType>
+      struct ConvertToTimeSeriesDouble
+      {
+        static TimeSeriesProperty<double> * apply(const Property* prop)
+        {
+          auto srcTypeSeries = dynamic_cast<const TimeSeriesProperty<SrcType>*>(prop);
+          if(!srcTypeSeries) return NULL;
+          auto converted = new TimeSeriesProperty<double>(prop->name());
+          auto pmap = srcTypeSeries->valueAsMap();
+          for(auto it = pmap.begin(); it != pmap.end(); ++it)
+          {
+            converted->addValue(it->first,double(it->second));
+          }
+          return converted;
+        }
+      };
+
+      /// Specialization for a double so that it just clones the input
+      template<>
+      struct ConvertToTimeSeriesDouble<double>
+      {
+        static TimeSeriesProperty<double> * apply(const Property* prop)
+        {
+          auto doubleSeries = dynamic_cast<const TimeSeriesProperty<double>*>(prop);
+          if(!doubleSeries) return NULL;
+          return doubleSeries->clone();
+        }
+      };
+
+    }
+
+    /**
+     * Converts the given property to a TimeSeriesProperty<double>, throws if invalid.
+     * @param prop :: A pointer to a property
+     * @return A new TimeSeriesProperty<double> object converted from the input.
+     * Throws std::invalid_argument if not possible
+     */
+    TimeSeriesProperty<double> * LogFilter::convertToTimeSeriesOfDouble(const Property * prop)
+    {
+      if(auto doubleSeries = ConvertToTimeSeriesDouble<double>::apply(prop))
+      {
+        return doubleSeries;
+      }
+      else if(auto doubleSeries = ConvertToTimeSeriesDouble<int>::apply(prop))
+      {
+        return doubleSeries;
+      }
+      else if(auto doubleSeries = ConvertToTimeSeriesDouble<int>::apply(prop))
+      {
+        return doubleSeries;
+      }
+      else
+      {
+        throw std::invalid_argument("LogFilter::convertToTimeSeriesOfDouble - Cannot convert property, \""
+            + prop->name() + "\", to double series.");
+      }
+    }
+
+
+  } // namespace Kernel
 } // namespace Mantid
 
