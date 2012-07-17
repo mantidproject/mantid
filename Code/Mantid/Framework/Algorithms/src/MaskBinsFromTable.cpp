@@ -55,13 +55,45 @@ namespace Algorithms
     // 1. Check input table workspace and column order
     g_log.debug() << "Lines of parameters workspace = " << paramWS->rowCount() << std::endl;
 
+    bool colname_specx = false;
     if (!paramWS)
     {
-    	throw std::invalid_argument("Input table workspace is not accepted.");
+      throw std::invalid_argument("Input table workspace is not accepted.");
     }
     else
     {
-
+      std::vector<std::string> colnames = paramWS->getColumnNames();
+      // check colum name order
+      if (colnames.size() < 3)
+      {
+        g_log.error() << "Input MaskingInformation table workspace has fewer than 3 columns.  " << colnames.size()
+                      << " columns indeed" << std::endl;
+        throw std::invalid_argument("MaskingInformation (TableWorkspace) has too few columns.");
+      }
+      if (colnames[0].compare("XMin") == 0)
+      {
+          // 1. Style XMin, XMax, SpectraList. Check rest
+          if (colnames[1].compare("XMax") != 0 || colnames[2].compare("SpectraList") != 0)
+          {
+              g_log.error() << "INput MaskingInformation table workspace has wrong column order. " << std::endl;
+              throw std::invalid_argument("MaskingInformation (TableWorkspace) has too few columns.");
+          }
+      }
+      else if (colnames[0].compare("SpectraList") == 0)
+      {
+          // 2. Style SpectraList, XMin, XMax
+          colname_specx = true;
+          if (colnames[1].compare("XMin") != 0 || colnames[2].compare("XMax") != 0)
+          {
+              g_log.error() << "INput MaskingInformation table workspace has wrong column order. " << std::endl;
+              throw std::invalid_argument("MaskingInformation (TableWorkspace) has too few columns.");
+          }
+      }
+      else
+      {
+          g_log.error() << "INput MaskingInformation table workspace has wrong column order. " << std::endl;
+          throw std::invalid_argument("MaskingInformation (TableWorkspace) has too few columns.");
+      }
     }
 
     // 2. Loop over all rows
@@ -73,7 +105,14 @@ namespace Algorithms
       API::TableRow therow = paramWS->getRow(ib);
       double xmin, xmax;
       std::string speclist;
-      therow >> xmin >> xmax >> speclist;
+      if (colname_specx)
+      {
+          therow >> speclist >> xmin >> xmax;
+      }
+      else
+      {
+          therow >> xmin >> xmax >> speclist;
+      }
 
       g_log.debug() << "Row " << ib << " XMin = " << xmin << "  XMax = " << xmax << " SpectraList = " << speclist << std::endl;
 
