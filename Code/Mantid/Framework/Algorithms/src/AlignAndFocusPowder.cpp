@@ -116,9 +116,6 @@ void AlignAndFocusPowder::exec()
     IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile");
     alg->setPropertyValue("CalFilename", calFileName);
     alg->setProperty("InputWorkspace", m_inputW);
-    if(groupWS) alg->setProperty<bool>("MakeGroupingWorkspace", false);
-    if(offsetsWS) alg->setProperty<bool>("MakeOffsetsWorkspace", false);
-    if(maskWS)alg->setProperty<bool>("MakeMaskWorkspace", false);
     alg->setProperty<std::string>("WorkspaceName", instName);
     alg->executeAsSubAlg();
     groupWS = alg->getProperty("OutputGroupingWorkspace");
@@ -192,9 +189,6 @@ void AlignAndFocusPowder::execEvent()
     IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile");
     alg->setPropertyValue("CalFilename", calFileName);
     alg->setProperty("InputWorkspace", m_inputW);
-    if(groupWS) alg->setProperty<bool>("MakeGroupingWorkspace", false);
-    if(offsetsWS) alg->setProperty<bool>("MakeOffsetsWorkspace", false);
-    if(maskWS)alg->setProperty<bool>("MakeMaskWorkspace", false);
     alg->setProperty<std::string>("WorkspaceName", instName);
     alg->executeAsSubAlg();
     groupWS = alg->getProperty("OutputGroupingWorkspace");
