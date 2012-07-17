@@ -222,8 +222,8 @@ namespace Mantid
     // --------------------------- Concrete instantiations ---------------------------------------------
     INSTANTIATE(float);
     INSTANTIATE(double);
-    INSTANTIATE(int32_t);
-    INSTANTIATE(int64_t);
+    INSTANTIATE(int);
+    INSTANTIATE(long);
     INSTANTIATE(unsigned int);
     INSTANTIATE(unsigned long);
 

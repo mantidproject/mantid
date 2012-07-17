@@ -975,9 +975,10 @@ namespace Mantid
     {
       TYPE total = 0;
 
-      for (size_t i = 0; i < mP.size(); i ++)
+      for (size_t i = 0; i < mP.size(); ++i)
+      {
         total += mP[i].value();
-
+      }
       return total;
     }
 
