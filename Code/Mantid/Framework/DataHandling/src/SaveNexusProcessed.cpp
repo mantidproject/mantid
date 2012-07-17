@@ -203,11 +203,6 @@ namespace DataHandling
 
     Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
-    // Set amount of time expected to be spent on writing initial part - could in future depend on type of workspace
-    m_timeProgInit = 0.05;
-    // Create progress object for this
-    Progress prog_init(this, 0.0, m_timeProgInit, 5);
-
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("Filename");
     //m_entryname = getPropertyValue("EntryName");
@@ -231,6 +226,18 @@ namespace DataHandling
         (workspaceID.find("RebinnedOutput") == std::string::npos) &&
         !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace)
       throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, EventWorkspace, ITableWorkspace, or OffsetsWorkspace.");
+
+    // Set amount of time expected to be spent on writing initial part - depends on whether events are processed
+    if( PreserveEvents && m_eventWorkspace)
+    {
+       m_timeProgInit = 0.05; // Events processed 0.05 to 1.0
+    }
+    else
+    {
+      m_timeProgInit = 1.0; // All work is done in the init stage
+    }
+    // Create progress object for this
+    Progress prog_init(this, 0.0, m_timeProgInit, 5);
 
 
     // If no title's been given, use the workspace title field
