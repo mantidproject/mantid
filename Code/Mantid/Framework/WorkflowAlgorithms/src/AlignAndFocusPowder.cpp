@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/AlignAndFocusPowder.h"
+#include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -20,17 +20,11 @@ using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
-namespace Algorithms
+namespace WorkflowAlgorithms
 {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(AlignAndFocusPowder)
-
-/// Constructor
-AlignAndFocusPowder::AlignAndFocusPowder() : API::Algorithm(), API::DeprecatedAlgorithm()
-{
-  this->useAlgorithm("AlignAndFocusPowder version 2");
-}
 
 /// Sets documentation strings for this algorithm
 void AlignAndFocusPowder::initDocs()
@@ -269,5 +263,5 @@ void AlignAndFocusPowder::execEvent()
 
 }
 
-} // namespace Algorithm
+} // namespace WorkflowAlgorithm
 } // namespace Mantid

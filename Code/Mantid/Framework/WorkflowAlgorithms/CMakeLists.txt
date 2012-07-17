@@ -1,4 +1,5 @@
 set ( SRC_FILES
+        src/AlignAndFocusPowder.cpp
 	src/ComputeSensitivity.cpp
 	src/DgsConvertToEnergyTransfer.cpp
 	src/DgsReduction.cpp
@@ -24,6 +25,7 @@ set ( SRC_UNITY_IGNORE_FILES
 )
 
 set ( INC_FILES
+        inc/MantidWorkflowAlgorithms/AlignAndFocusPowder.h
 	inc/MantidWorkflowAlgorithms/ComputeSensitivity.h
 	inc/MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h
 	inc/MantidWorkflowAlgorithms/DgsReduction.h

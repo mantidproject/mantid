@@ -5,14 +5,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <Poco/NObserver.h>
 
 namespace Mantid
 {
-  namespace Algorithms
+  namespace WorkflowAlgorithms
   {
     /** 
     This is a parent algorithm that uses several different child algorithms to perform it's task.
@@ -20,23 +18,14 @@ namespace Mantid
     
     The input workspace is 
     1) Converted to d-spacing units
-    2) Rebinnned to a common set of bins
+    2) Rebinned to a common set of bins
     3) The spectra are grouped according to the grouping file.
     
 	Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the 2D Workspace to take as input </LI>
-    <LI> GroupingFileName - The path to a grouping file</LI>
     <LI> OutputWorkspace - The name of the 2D workspace in which to store the result </LI>
     </UL>
-
-    The structure of the grouping file is as follows:
-    # Format: number  UDET offset  select  group
-    0        611  0.0000000  1    0
-    1        612  0.0000000  1    0
-    2        601  0.0000000  0    0
-    3        602  0.0000000  0    0
-    4        621  0.0000000  1    0
 
    
     @author Vickie Lynch, SNS
@@ -62,19 +51,19 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport AlignAndFocusPowder : public API::Algorithm, public API::DeprecatedAlgorithm
+    class DLLExport AlignAndFocusPowder : public API::Algorithm
     {
     public:
-      /// Constructor
-      AlignAndFocusPowder();
+      /// Empty Constructor
+      AlignAndFocusPowder() : API::Algorithm() {}
       /// Destructor
-      virtual ~AlignAndFocusPowder() {};
+      virtual ~AlignAndFocusPowder() {}
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "AlignAndFocusPowder";}
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "Diffraction";}
+      virtual const std::string category() const { return "Workflow\\Diffraction";}
     
     private:
       /// Sets documentation strings for this algorithm
@@ -89,7 +78,7 @@ namespace Mantid
 
     };
 
-  } // namespace Algorithm
+  } // namespace WorkflowAlgorithm
 } // namespace Mantid
 
 #endif /*MANTID_ALGORITHM_AlignAndFocusPowder_H_*/
