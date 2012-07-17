@@ -40,6 +40,7 @@ set ( SRC_FILES
 	src/LoadGSS.cpp
 	src/LoadISISNexus.cpp
 	src/LoadISISNexus2.cpp
+	src/LoadILL.cpp
 	src/LoadInstrument.cpp
 	src/LoadInstrumentFromNexus.cpp
 	src/LoadInstrumentFromRaw.cpp
@@ -170,6 +171,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadGSS.h
 	inc/MantidDataHandling/LoadISISNexus.h
 	inc/MantidDataHandling/LoadISISNexus2.h
+	inc/MantidDataHandling/LoadILL.h
 	inc/MantidDataHandling/LoadInstrument.h
 	inc/MantidDataHandling/LoadInstrumentFromNexus.h
 	inc/MantidDataHandling/LoadInstrumentFromRaw.h
@@ -292,6 +294,7 @@ set ( TEST_FILES
 	test/LoadEventNexusTest.h
 	test/LoadEventPreNexus2Test.h
 	test/LoadEventPreNexusTest.h
+	test/LoadILLTest.h
 	test/LoadISISNexusTest.h
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentTest.h
