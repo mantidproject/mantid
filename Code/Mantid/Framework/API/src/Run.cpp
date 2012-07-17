@@ -460,6 +460,17 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     }
   }
 
+  /**
+   * Get a pointer to a property by name
+   * @param name :: The name of a property, throws an Exception::NotFoundError if it does not exist
+   * @return A pointer to the named property
+   */
+  Kernel::Property * Run::getProperty(const std::string & name) const
+  {
+    Kernel::Property *p = m_manager.getProperty(name);
+    return p;
+  }
+
   //-----------------------------------------------------------------------------------------------
   /** Get the gonimeter rotation matrix, calculated using the
    * previously set Goniometer object as well as the angles

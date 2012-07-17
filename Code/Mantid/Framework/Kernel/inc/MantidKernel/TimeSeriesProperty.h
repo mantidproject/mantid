@@ -126,16 +126,14 @@ namespace Mantid
        Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
     template<typename TYPE>
-    class DLLExport TimeSeriesProperty: public Property
+    class DLLExport TimeSeriesProperty : public Property
     {
     public:
       /// Constructor
       explicit TimeSeriesProperty(const std::string &name);
       /// Virtual destructor
       virtual ~TimeSeriesProperty();
-      /// 'Virtual copy constructor'
-      virtual Property* clone();
-      /// Clones the property const version
+      /// "Virtual" copy constructor
       TimeSeriesProperty<TYPE>* clone() const;
 
       /// Return the memory used by the property, in bytes

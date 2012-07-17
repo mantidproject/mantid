@@ -43,7 +43,7 @@ namespace API
     ~MultipleFileProperty();
 
     /// 'Virtual copy constructor
-    virtual MultipleFileProperty* clone() { return new MultipleFileProperty(*this); }
+    virtual MultipleFileProperty* clone() const { return new MultipleFileProperty(*this); }
 
     /// Overridden setValue method
     virtual std::string setValue(const std::string & propValue);

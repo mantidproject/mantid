@@ -97,17 +97,8 @@ namespace Mantid
       /// Get the value of a property as the given TYPE. Throws if the type is not correct
       template<typename HeldType>
       HeldType getPropertyValueAsType(const std::string & name) const;
-
-      /**
-       * Returns the named property
-       * @param name :: The name of the property
-       * @returns The named property
-       */
-      Kernel::Property * getProperty(const std::string & name) const
-      {
-        Kernel::Property *p = m_manager.getProperty(name);
-        return p;
-      }
+      /// Returns the named property as apointer
+      Kernel::Property * getProperty(const std::string & name) const;
 
       /// Set the proton charge
       void setProtonCharge( const double charge);

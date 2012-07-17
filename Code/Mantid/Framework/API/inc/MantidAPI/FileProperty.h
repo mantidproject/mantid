@@ -55,7 +55,7 @@ public:
                const std::string & ext, unsigned int direction = Kernel::Direction::Input);
 
   /// 'Virtual copy constructor
-  virtual FileProperty* clone() { return new FileProperty(*this); }
+  virtual FileProperty* clone() const { return new FileProperty(*this); }
 
   /// Check if this is a load type property.
   bool isLoadProperty() const;

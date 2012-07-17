@@ -28,26 +28,9 @@ namespace Mantid
      * "Virtual" copy constructor
      */
     template <typename TYPE>
-    Property* TimeSeriesProperty<TYPE>::clone()
-    {
-      return new TimeSeriesProperty<TYPE>(*this);
-    }
-
-    /**
-     * Clone the property (const version)
-     * @returns A new TimeSeriesProperty initialised to the current state
-     */
-    template<typename TYPE>
     TimeSeriesProperty<TYPE>* TimeSeriesProperty<TYPE>::clone() const
     {
-      TimeSeriesProperty<TYPE>* p = new TimeSeriesProperty<TYPE> (name());
-      p->mP = mP;
-      p->m_size = m_size;
-      p->mFilter = mFilter;
-      p->mFilterApplied = mFilterApplied;
-      p->mFilterQuickRef = mFilterQuickRef;
-
-      return p;
+      return new TimeSeriesProperty<TYPE>(*this);
     }
 
     /**

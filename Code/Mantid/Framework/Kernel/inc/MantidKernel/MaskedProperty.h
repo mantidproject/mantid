@@ -64,6 +64,11 @@ namespace Mantid
 
         }
 
+      /**
+       * Virtual copy
+       */
+      MaskedProperty * clone() const { return new MaskedProperty(*this); }
+
       /** This method creates History
        */
       virtual const Kernel::PropertyHistory createHistory() const

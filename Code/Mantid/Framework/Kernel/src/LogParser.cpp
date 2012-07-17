@@ -2,12 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
+
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include <fstream>  // used to get ifstream
-#include <sstream>
+
 #include <algorithm>
+#include <fstream>
 #include <limits>
+#include <sstream>
 
 using std::size_t;
 
@@ -290,7 +292,7 @@ namespace Mantid
      *  @param period :: The data period
      *  @return times requested period was active
      */
-    Kernel::Property* LogParser::createPeriodLog(int period)const
+    Kernel::TimeSeriesProperty<bool> * LogParser::createPeriodLog(int period) const
     {
       Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods.get());
       std::ostringstream ostr;
@@ -328,10 +330,10 @@ namespace Mantid
       return p;
     }
 
-    /// Ctreates a TimeSeriesProperty<bool> with running status
-    Kernel::Property* LogParser::createRunningLog()const
+    /// Creates a TimeSeriesProperty<bool> with running status
+    Kernel::TimeSeriesProperty<bool>* LogParser::createRunningLog() const
     {
-      return dynamic_cast<Kernel::TimeSeriesProperty<bool>*>(m_status.get())->clone();
+      return m_status->clone();
     }
 
 

@@ -106,7 +106,7 @@ public:
   }
 
   /// 'Virtual copy constructor'
-  Property* clone() { return new ArrayProperty<T>(*this); }
+  ArrayProperty<T>* clone() const { return new ArrayProperty<T>(*this); }
 
   /// Virtual destructor
   virtual ~ArrayProperty()
