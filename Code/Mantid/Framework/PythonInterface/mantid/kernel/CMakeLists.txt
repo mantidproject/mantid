@@ -32,6 +32,7 @@ set ( EXPORT_FILES
   src/Exports/MandatoryValidator.cpp
   src/Exports/CompositeValidator.cpp
   src/Exports/LogFilter.cpp
+  src/Exports/UnitFactory.cpp
 )  
 
 set ( SRC_FILES
