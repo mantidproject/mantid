@@ -23,7 +23,7 @@ namespace
   {
   public:
     ConcreteProperty() : Property( "Test", typeid( int ) ) {}
-    Property* clone() { return new ConcreteProperty(*this); }
+    ConcreteProperty* clone() const { return new ConcreteProperty(*this); }
     bool isDefault() const { return true; }
     std::string getDefault() const { return "getDefault() is not implemented in this class"; }
     std::string value() const { return "Nothing"; }
