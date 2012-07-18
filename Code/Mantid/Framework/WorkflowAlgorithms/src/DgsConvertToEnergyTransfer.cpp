@@ -130,11 +130,11 @@ namespace WorkflowAlgorithms
     // Calculate the initial energy and time zero
     const std::string facility = ConfigService::Instance().getFacility().name();
     g_log.notice() << "Processing for " << facility << std::endl;
-    const double ei_guess = this->getProperty("IncidentEnergy");
-    const bool fixed_ei = this->getProperty("FixedIncidentEnergy");
-    const std::vector<double> et_binning = this->getProperty("EnergyTransferRange");
+    const double eiGuess = this->getProperty("IncidentEnergy");
+    const bool fixedEi = this->getProperty("FixedIncidentEnergy");
+    const std::vector<double> etBinning = this->getProperty("EnergyTransferRange");
 
-    double initial_energy = 0.0;
+    double initialEnergy = 0.0;
     const double monPeak = 0.0;
 
     if ("SNS" == facility)
@@ -142,28 +142,28 @@ namespace WorkflowAlgorithms
         // SNS wants to preserve events until the last
         preserveEvents = true;
         const std::string instName = inputWS->getInstrument()->getName();
-        double t0 = 0.0;
+        double tZero = 0.0;
         if ("CNCS" == instName || "HYSPEC" == instName)
           {
-            initial_energy = ei_guess;
+            initialEnergy = eiGuess;
             if ("HYSPEC" == instName)
               {
-                double pow_val = initial_energy / 27.0;
-                t0 = 25.0 + 85.0 / (1.0 + std::pow(pow_val, 4));
+                double powVal = initialEnergy / 27.0;
+                tZero = 25.0 + 85.0 / (1.0 + std::pow(powVal, 4));
               }
             // Do CNCS
             else
               {
-                double pow_val = 1.0 + initial_energy;
-                t0 = (0.1982 * std::pow(pow_val, -0.84098)) * 1000.0;
+                double powVal = 1.0 + initialEnergy;
+                tZero = (0.1982 * std::pow(powVal, -0.84098)) * 1000.0;
               }
           }
         // Do ARCS and SEQUOIA
         else
           {
-            if (fixed_ei)
+            if (fixedEi)
               {
-                initial_energy = ei_guess;
+                initialEnergy = eiGuess;
               }
             else
               {
@@ -213,17 +213,17 @@ namespace WorkflowAlgorithms
                 getei->setProperty("InputWorkspace", monWsName);
                 getei->setProperty("Monitor1Spec", monWS->getSpectrum(0)->getSpectrumNo());
                 getei->setProperty("Monitor2Spec", monWS->getSpectrum(1)->getSpectrumNo());
-                getei->setProperty("EnergyEstimate", ei_guess);
+                getei->setProperty("EnergyEstimate", eiGuess);
                 try
                 {
                     getei->execute();
-                    initial_energy = getei->getProperty("IncidentEnergy");
-                    t0 = getei->getProperty("Tzero");
+                    initialEnergy = getei->getProperty("IncidentEnergy");
+                    tZero = getei->getProperty("Tzero");
                 }
                 catch (...)
                 {
                     g_log.error() << "GetEi failed, using guess as initial energy and T0 = 0" << std::endl;
-                    initial_energy = ei_guess;
+                    initialEnergy = eiGuess;
                 }
               }
           }
@@ -235,7 +235,7 @@ namespace WorkflowAlgorithms
         alg->enableHistoryRecordingForChild(true);
         alg->setProperty("InputWorkspace", inWsName);
         alg->setProperty("OutputWorkspace", outWsName);
-        alg->setProperty("Offset", -t0);
+        alg->setProperty("Offset", -tZero);
         alg->execute();
       }
     // Do ISIS
@@ -247,8 +247,8 @@ namespace WorkflowAlgorithms
     const double binOffset = -monPeak;
 
     // Subtract time-independent background if necessary
-    const bool do_tib_sub = this->getProperty("TimeIndepBackgroundSub");
-    if (do_tib_sub)
+    const bool doTibSub = this->getProperty("TimeIndepBackgroundSub");
+    if (doTibSub)
       {
         // Set the binning parameters for the background region
         double tibTofStart = this->getProperty("TibTofRangeStart");
@@ -280,10 +280,10 @@ namespace WorkflowAlgorithms
             cnvun->setProperty("OutputWorkspace", outWsName);
             cnvun->setProperty("Target", "DeltaE");
             cnvun->setProperty("EMode", "Direct");
-            cnvun->setProperty("EFixed", initial_energy);
+            cnvun->setProperty("EFixed", initialEnergy);
             cnvun->execute();
 
-            if (et_binning.empty())
+            if (etBinning.empty())
               {
                 throw std::runtime_error("Need Et rebinning parameters in order to use background subtraction");
               }
@@ -291,7 +291,7 @@ namespace WorkflowAlgorithms
             // Rebin to Et
             rebin->setProperty("InputWorkspace", outWsName);
             rebin->setProperty("OutputWorkspace", outWsName);
-            rebin->setProperty("Params", et_binning);
+            rebin->setProperty("Params", etBinning);
             rebin->setProperty("PreserveEvents", false);
             rebin->execute();
 
@@ -300,7 +300,7 @@ namespace WorkflowAlgorithms
             cnvun->setProperty("OutputWorkspace", outWsName);
             cnvun->setProperty("Target", "TOF");
             cnvun->setProperty("EMode", "Direct");
-            cnvun->setProperty("EFixed", initial_energy);
+            cnvun->setProperty("EFixed", initialEnergy);
             cnvun->execute();
 
             // Make result workspace a distribution
@@ -371,18 +371,18 @@ namespace WorkflowAlgorithms
     cnvun->setProperty("OutputWorkspace", outWsName);
     cnvun->setProperty("Target", "DeltaE");
     cnvun->setProperty("EMode", "Direct");
-    cnvun->setProperty("EFixed", initial_energy);
+    cnvun->setProperty("EFixed", initialEnergy);
     cnvun->execute();
 
     // Rebin if necessary
-    if (!et_binning.empty())
+    if (!etBinning.empty())
       {
         g_log.notice() << "Rebinning data" << std::endl;
         IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
         rebin->setAlwaysStoreInADS(true);
         rebin->setProperty("InputWorkspace", outWsName);
         rebin->setProperty("OutputWorkspace", outWsName);
-        rebin->setProperty("Params", et_binning);
+        rebin->setProperty("Params", etBinning);
         rebin->setProperty("PreserveEvents", preserveEvents);
         rebin->execute();
       }
@@ -430,23 +430,23 @@ namespace WorkflowAlgorithms
     kikf->execute();
 
     // Rebin to ensure consistency
-    if (!et_binning.empty())
+    if (!etBinning.empty())
       {
-        const bool sofphie_is_distribution = this->getProperty("SofPhiEIsDistribution");
+        const bool sofphieIsDistribution = this->getProperty("SofPhiEIsDistribution");
 
         g_log.notice() << "Rebinning data" << std::endl;
         IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
         rebin->setAlwaysStoreInADS(true);
         rebin->setProperty("InputWorkspace", outWsName);
         rebin->setProperty("OutputWorkspace", outWsName);
-        rebin->setProperty("Params", et_binning);
-        if (sofphie_is_distribution)
+        rebin->setProperty("Params", etBinning);
+        if (sofphieIsDistribution)
           {
             rebin->setProperty("PreserveEvents", false);
           }
         rebin->execute();
 
-        if (sofphie_is_distribution)
+        if (sofphieIsDistribution)
           {
             g_log.notice() << "Making distribution" << std::endl;
             IAlgorithm_sptr distrib = this->createSubAlgorithm("ConvertToDistribution");
