@@ -122,12 +122,15 @@ namespace WorkflowAlgorithms
       PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
     }
 
+    this->enableHistoryRecordingForChild(true);
+
     MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
     // Make output workspace name the same as input workspace
     const std::string outWsName = inputWS->getName();
 
     std::string incidentBeamNorm = this->getProperty("IncidentBeamNormalisation");
-    if (incidentBeamNorm != "None")
+    g_log.notice() << "Incident beam norm method = " << incidentBeamNorm << std::endl;
+    if ("None" != incidentBeamNorm)
       {
         const std::string facility = ConfigService::Instance().getFacility().name();
         // SNS hard-wired to current normalisation
