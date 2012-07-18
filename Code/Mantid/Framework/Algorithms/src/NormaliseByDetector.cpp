@@ -101,12 +101,11 @@ namespace Mantid
       const Geometry::ParameterMap& paramMap = inWS->instrumentParameters();
 
       IAlgorithm_sptr cloneAlg = this->createSubAlgorithm("CloneWorkspace", 0.0, 1.0, true);
-      cloneAlg->setRethrows(true);
       cloneAlg->setProperty("InputWorkspace", inWS);
       cloneAlg->setPropertyValue("OutputWorkspace", "temp");
       cloneAlg->executeAsSubAlg();
       Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+      MatrixWorkspace_sptr denominatorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
       for(size_t wsIndex = 0; wsIndex < inWS->getNumberHistograms(); ++wsIndex)
       {
@@ -162,9 +161,16 @@ namespace Mantid
         {
           outIntensity[i] = values[i];
         }
-        outputWS->dataY(wsIndex) = outIntensity;
+        denominatorWS->dataY(wsIndex) = outIntensity;
       }
 
+      // Perform the normalisation.
+      IAlgorithm_sptr divideAlg = this->createSubAlgorithm("Divide", 0.0, 1.0, true);
+      divideAlg->setRethrows(true);
+      divideAlg->setProperty("LHSWorkspace", inWS);
+      divideAlg->setProperty("RHSWorkspace", denominatorWS);
+      divideAlg->executeAsSubAlg();
+      MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
       setProperty("OutputWorkspace", outputWS); 
     }
 

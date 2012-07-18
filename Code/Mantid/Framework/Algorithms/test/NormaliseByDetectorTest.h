@@ -211,7 +211,7 @@ public:
     TSM_ASSERT_THROWS_NOTHING("Instrument wide, fitting function applied. Should not throw.", alg.execute());
   }
 
-  void test_applies_instrument_function_to_child_detectors_calculates_correctly()
+  void test_workspace_with_instrument_only_fitting_functions()
   {
     const std::string outWSName = "normalised_ws";
     // Linear function 2*x + 1 applied to each x-value. INSTRUMENT LEVEL FIT FUNCTION ONLY.
@@ -237,16 +237,18 @@ public:
       TS_ASSERT_EQUALS(3, eValues.size());
       TS_ASSERT_EQUALS(4, xValues.size());
 
+      const MantidVec& yInputValues = inputWS->readY(wsIndex);
+
       for(size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex)
       {
         const double wavelength = (xValues[binIndex] + xValues[binIndex+1])/2;
-        const double expectedValue = (2*wavelength) + 1; // According to the equation written into the instrument parameter file for the instrument component link.
+        const double expectedValue = yInputValues[binIndex] / ( (2*wavelength) + 1 ); // According to the equation written into the instrument parameter file for the instrument component link.
         TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
       }
     }
   }
 
-  void test_distribute_function_parameters_accross_object_hierachy()
+  void test_workspace_with_detector_level_only_fit_functions()
   {
     const std::string outWSName = "normalised_ws";
     // Linear function 1*x + N applied to each x-value, where N is the workspace index. DETECTOR LEVEL FIT FUNCTIONS ONLY.
@@ -272,10 +274,12 @@ public:
       TS_ASSERT_EQUALS(3, eValues.size());
       TS_ASSERT_EQUALS(4, xValues.size());
 
+      const MantidVec& yInputValues = inputWS->readY(wsIndex);
+
       for(size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex)
       {
         const double wavelength = (xValues[binIndex] + xValues[binIndex+1])/2;
-        const double expectedValue = (1*wavelength) + wsIndex; // According to the equation written into the instrument parameter file for the detector component link.
+        const double expectedValue = yInputValues[binIndex] / ( (1*wavelength) + wsIndex ); // According to the equation written into the instrument parameter file for the detector component link.
         TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
       }
     }
