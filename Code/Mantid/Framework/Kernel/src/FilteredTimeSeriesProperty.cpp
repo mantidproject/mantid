@@ -9,16 +9,23 @@ namespace Mantid
 
     /**
      * Construct with a source time series & a filter property
-     * @param seriesProp :: A pointer to a property to filter. This object takes ownership
+     * @param seriesProp :: A pointer to a property to filter.
      * @param filterProp :: A boolean series property to filter on
+     * @param transferOwnership :: Flag marking whether this object takes
+     * ownership of the time series (default = false). Avoids unnecessary
+     * clones when the original is going to be deleted anyway
      */
     template<typename HeldType>
     FilteredTimeSeriesProperty<HeldType>::
     FilteredTimeSeriesProperty(TimeSeriesProperty<HeldType> * seriesProp,
-                               const TimeSeriesProperty<bool> &filterProp)
-      : TimeSeriesProperty<HeldType>(*seriesProp)
+                               const TimeSeriesProperty<bool> &filterProp,
+                               const bool transferOwnership)
+      : TimeSeriesProperty<HeldType>(*seriesProp),
+        m_unfiltered(NULL), m_deleteUnfiltered(transferOwnership)
     {
-      m_unfiltered = seriesProp;
+      if(transferOwnership) m_unfiltered = seriesProp;
+      else m_unfiltered = seriesProp->clone();
+
       // Now filter us with the filter
       this->filterWith(&filterProp);
     }
@@ -29,7 +36,7 @@ namespace Mantid
     template<typename HeldType>
     FilteredTimeSeriesProperty<HeldType>::~FilteredTimeSeriesProperty()
     {
-      delete m_unfiltered;
+      if(m_deleteUnfiltered) delete m_unfiltered;
     }
 
     /**

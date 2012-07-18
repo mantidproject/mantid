@@ -20,24 +20,24 @@ public:
     const std::string name = "seriesName";
     auto source = createTestSeries(name);
     auto filter = createTestFilter();
+    const bool transferOwnership(true);
 
-    auto filtered = FilteredTimeSeriesProperty<double>(source, *filter);
+    auto filtered = FilteredTimeSeriesProperty<double>(source, *filter, transferOwnership);
     TS_ASSERT_EQUALS(filtered.name(), source->name());
 
     delete filter;
   }
 
-  void test_Construction_Allows_Access_To_Same_Unfiltered_Property()
+  void test_Transferring_Ownership_Makes_Unfiltered_Property_Return_The_Original()
   {
-    auto source = createTestSeries("name");
-    auto filter = createTestFilter();
+    const bool transferOwnership(true);
+    doOwnershipTest(transferOwnership);
+  }
 
-    FilteredTimeSeriesProperty<double> *filtered(NULL);
-    TS_ASSERT_THROWS_NOTHING(filtered = new FilteredTimeSeriesProperty<double>(source, *filter));
-    TS_ASSERT_EQUALS(source, filtered->unfiltered());
-
-    delete filtered;
-    delete filter;
+  void test_Retaining_Ownership_With_Caller_Makes_Unfiltered_Property_A_Clone()
+  {
+    const bool transferOwnership(false);
+    doOwnershipTest(transferOwnership);
   }
 
   void test_Construction_Yields_A_Filtered_Property_When_Accessing_Through_The_Filtered_Object()
@@ -63,6 +63,32 @@ public:
 
 private:
   
+  void doOwnershipTest(const bool transferOwnership)
+  {
+    auto source = createTestSeries("name");
+    auto filter = createTestFilter();
+
+    FilteredTimeSeriesProperty<double> *filtered(NULL);
+    TS_ASSERT_THROWS_NOTHING(filtered = new FilteredTimeSeriesProperty<double>(source, *filter, transferOwnership));
+
+    // Pointer comparison
+    if(transferOwnership)
+    {
+      TS_ASSERT_EQUALS(source, filtered->unfiltered());
+    }
+    else
+    {
+      TS_ASSERT_DIFFERS(source, filtered->unfiltered());
+    }
+
+    // Object equality
+    TS_ASSERT_EQUALS(*source, *(filtered->unfiltered())); // Objects are considered equal
+
+    delete filtered;
+    delete filter;
+    if(!transferOwnership) delete source;
+  }
+
   /// Create the test source property
   Mantid::Kernel::TimeSeriesProperty<double> * createTestSeries(const std::string & name)
   {
