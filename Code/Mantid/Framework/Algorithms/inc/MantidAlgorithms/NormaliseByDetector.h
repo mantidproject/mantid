@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/Detector.h"
 
 namespace Mantid
 {
@@ -44,6 +46,7 @@ namespace Algorithms
     virtual const std::string category() const;
 
   private:
+    const Mantid::Geometry::FitParameter tryParseFunctionParameter(Mantid::Geometry::Parameter_sptr parameter, Geometry::IDetector_const_sptr det);
     virtual void initDocs();
     void init();
     void exec();
