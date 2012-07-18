@@ -50,6 +50,8 @@ private slots:
   void showResetView(int);
   void showFlipControl(int);
   void flipUnwrappedView(bool);
+  /// Called before the display setting menu opens. Filters out menu options.
+  void displaySettingsAboutToshow();
 private:
   void showEvent (QShowEvent *);
   QMenu* createPeaksMenu();

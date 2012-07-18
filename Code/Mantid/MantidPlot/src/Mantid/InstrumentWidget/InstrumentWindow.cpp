@@ -47,12 +47,21 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::API;
 
+/**
+ * A simple widget for drawing unwrapped instrument images.
+ */
 class SimpleWidget : public QWidget
 {
 public:
   /// Constructor
-  SimpleWidget(QWidget* parent=0):QWidget(parent),m_surface(NULL){}
+  SimpleWidget(QWidget* parent=0):QWidget(parent),m_surface(NULL)
+  {
+    // Receive mouse move events
+    setMouseTracking( true );
+  }
+  /// Assign a surface to draw on
   void setSurface(ProjectionSurface* surface){m_surface = surface;}
+  /// Return the surface 
   ProjectionSurface* getSurface(){return m_surface;}
 protected:
   void paintEvent(QPaintEvent*)
@@ -62,7 +71,62 @@ protected:
       m_surface->drawSimple(this);
     }
   }
-  ProjectionSurface* m_surface;
+  /**
+  * Mouse press callback method, It implements mouse button press initialize methods.
+  * @param event :: This is the event variable which has the position and button states
+  */
+  void mousePressEvent(QMouseEvent* event)
+  {
+    if (m_surface)
+    {
+      m_surface->mousePressEvent(event);
+    }
+    update();
+  }
+
+  /**
+  * This is mouse move callback method. It implements the actions to be taken when the mouse is
+  * moved with a particular button is pressed.
+  * @param event :: This is the event variable which has the position and button states
+  */
+  void mouseMoveEvent(QMouseEvent* event)
+  {
+    if (m_surface)
+    {
+      m_surface->mouseMoveEvent(event);
+    }
+    repaint();
+  }
+
+  /**
+  * This is mouse button release callback method. This resets the cursor to pointing hand cursor
+  * @param event :: This is the event variable which has the position and button states
+  */
+  void mouseReleaseEvent(QMouseEvent* event)
+  {
+    if (m_surface)
+    {
+      m_surface->mouseReleaseEvent(event);
+    }
+    repaint();
+  }
+
+  /**
+  * Mouse wheel event to set the zooming in and out
+  * @param event :: This is the event variable which has the status of the wheel
+  */
+  void wheelEvent(QWheelEvent* event)
+  {
+    if (m_surface)
+    {
+      m_surface->wheelEvent(event);
+    }
+    update();
+  }
+  //-------------------------------------
+  //    Class data
+  //-------------------------------------
+  ProjectionSurface* m_surface; ///< The projection surface
 };
 
 /**
@@ -96,6 +160,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
 
   // Create simple display widget
   m_simpleDisplay = new SimpleWidget(this);
+  m_simpleDisplay->installEventFilter(this);
 
   QWidget* aWidget = new QWidget(this);
   m_instrumentDisplayLayout = new QStackedLayout(aWidget);
@@ -1153,8 +1218,9 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
  */
 bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
 {
-  if (dynamic_cast<MantidGLWidget*>(obj) == m_InstrumentDisplay &&
-    ev->type() == QEvent::ContextMenu)
+  if ((dynamic_cast<MantidGLWidget*>(obj) == m_InstrumentDisplay ||
+       dynamic_cast<SimpleWidget*>(obj) == m_simpleDisplay) && 
+       ev->type() == QEvent::ContextMenu)
   {
     // an ugly way of preventing the curve in the pick tab's miniplot disappearing when 
     // cursor enters the context menu

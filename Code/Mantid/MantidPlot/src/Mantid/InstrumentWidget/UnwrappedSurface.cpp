@@ -886,8 +886,11 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
   if ( !image ) return;
 
   QPainter paint(image);
+
   int vwidth = image->width();
   int vheight = image->height();
+
+  paint.fillRect(0, 0, vwidth, vheight, m_backgroundColor);
 
   const double dw = fabs(m_viewRect.width() / vwidth);
   const double dh = fabs(m_viewRect.height()/ vheight);
@@ -899,12 +902,6 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
     createPeakShapes(image->rect());
   }
 
-  glOrtho(m_viewRect.left(),m_viewRect.right(),
-    m_viewRect.bottom(),m_viewRect.top(),
-    -10,10);
-
-
-
   for(size_t i=0;i<m_unwrappedDetectors.size();++i)
   {
     const UnwrappedDetector& udet = m_unwrappedDetectors[i];
@@ -913,23 +910,33 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
 
     int iw = int(udet.width / dw);
     int ih = int(udet.height / dh);
+    if ( iw < 4 ) iw = 4;
+    if ( ih < 4 ) ih = 4;
+    
     double w = (iw == 0)?  dw : udet.width/2;
     double h = (ih == 0)?  dh : udet.height/2;
 
     if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
 
-    setColor(int(i),picking);
+    int u = ( udet.u - m_viewRect.left() ) / dw;
+    int v = vheight - ( udet.v - m_viewRect.bottom() ) / dh;
 
-    if (iw < 6 || ih < 6)
+    QColor color;
+    int index = int( i );
+    if (picking)
     {
-      glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-      glRectd(udet.u-w,udet.v-h,udet.u+w,udet.v+h);
-      glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-      if (iw > 2 || ih > 2 )
-      {
-        glRectd(udet.u-w,udet.v-h,udet.u+w,udet.v+h);
-      }
+      GLColor c = GLActor::makePickColor(index);
+      unsigned char r,g,b;
+      c.get(r,g,b);
+      color = QColor(r,g,b);
     }
+    else
+    {
+      auto c = &m_unwrappedDetectors[index].color[0];
+      color = QColor(c[0],c[1],c[2]);
+    }
+
+    paint.fillRect(u - iw/2, v - ih/2, iw, ih, color);
 
   }
 }

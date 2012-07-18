@@ -29,9 +29,7 @@
 const Qt::CursorShape cursorShape = Qt::ArrowCursor;
 
 MantidGLWidget::MantidGLWidget(QWidget* parent):
-  //QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent),
   QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel),parent),
-  m_bgColor(QColor(0,0,0,1)),
   //m_polygonMode(SOLID),
   m_lightingState(0),
   m_isKeyPressed(false),
@@ -78,7 +76,8 @@ void MantidGLWidget::initializeGL()
   glViewport(0,0,width(),height());
   
   // Clear the memory buffers
-  glClearColor(GLclampf(m_bgColor.red()/255.0),GLclampf(m_bgColor.green()/255.0),GLclampf(m_bgColor.blue()/255.0),1.0);
+  QColor bgColor = currentBackgroundColor();
+  glClearColor(GLclampf(bgColor.red()/255.0),GLclampf(bgColor.green()/255.0),GLclampf(bgColor.blue()/255.0),1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -129,13 +128,13 @@ void MantidGLWidget::setLightingModel(int state)
     glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
     // Set Light0 Attributes, Ambient, diffuse,specular and position
     // Its a directional light which follows camera position
-    float lamp_ambient[4]={0.30, 0.30, 0.30, 1.0};
-    float lamp_diffuse[4]={1.0, 1.0, 1.0, 1.0};
-    float lamp_specular[4]={1.0,1.0,1.0,1.0};
+    float lamp_ambient[4]={0.30f, 0.30f, 0.30f, 1.0f};
+    float lamp_diffuse[4]={1.0f, 1.0f, 1.0f, 1.0f};
+    float lamp_specular[4]={1.0f,1.0f,1.0f,1.0f};
     glLightfv(GL_LIGHT0, GL_AMBIENT,lamp_ambient );
     glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, lamp_specular);
-    float lamp_pos[4]={0.0, 0.0, 0.0, 1.0}; // spot light at the origin
+    float lamp_pos[4]={0.0f, 0.0f, 0.0f, 1.0f}; // spot light at the origin
     glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
     if (state == 2)
     {
@@ -298,12 +297,12 @@ void MantidGLWidget::keyReleaseEvent(QKeyEvent *event)
 void MantidGLWidget::setBackgroundColor(QColor input)
 {
   makeCurrent();
-  m_bgColor = input;
-  glClearColor(GLclampf(m_bgColor.red()/255.0),GLclampf(m_bgColor.green()/255.0),GLclampf(m_bgColor.blue()/255.0),1.0);
+  glClearColor(GLclampf(input.red()/255.0),GLclampf(input.green()/255.0),GLclampf(input.blue()/255.0),1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   OpenGLError::check("MantidGLWidget::setBackgroundColor");
   if (m_surface)
   {
+    m_surface->setBackgroundColor( input );
     m_surface->updateView();
   }
   update();
@@ -311,7 +310,7 @@ void MantidGLWidget::setBackgroundColor(QColor input)
 
 QColor MantidGLWidget::currentBackgroundColor() const
 {
-  return m_bgColor;
+  return m_surface? m_surface->getBackgroundColor() : QColor(Qt::black);
 }
 
 /**

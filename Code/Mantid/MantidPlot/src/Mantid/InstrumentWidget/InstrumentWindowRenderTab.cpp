@@ -46,6 +46,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   // Setup Display Setting menu
   QPushButton* displaySettings = new QPushButton("Display Settings",this);
   QMenu* displaySettingsMenu = new QMenu(this);
+  connect(displaySettingsMenu, SIGNAL(aboutToShow()),this,SLOT(displaySettingsAboutToshow()));
   m_colorMap = new QAction("Color Map",this);
   connect(m_colorMap,SIGNAL(triggered()),this,SLOT(changeColormap()));
   m_backgroundColor = new QAction("Background Color",this);
@@ -334,3 +335,31 @@ QMenu* InstrumentWindowRenderTab::createPeaksMenu()
   menu->addAction(clearPeaks);
   return menu;
 }
+
+/**
+ * Called before the display setting menu opens. Filters out menu options.
+ */
+void InstrumentWindowRenderTab::displaySettingsAboutToshow()
+{
+  if ( m_instrWindow->getSurfaceType() == InstrumentWindow::FULL3D )
+  {
+    // in 3D mode use GL widget only and allow lighting
+    m_GLView->setEnabled( false );
+    m_lighting->setEnabled( true );
+  }
+  else
+  {
+    // in flat view mode allow changing to simple, non-GL viewer
+    m_GLView->setEnabled( true );
+    // allow lighting in GL viewer only
+    if ( !m_GLView->isChecked() )
+    {
+      m_lighting->setEnabled( false );
+    }
+    else
+    {
+      m_lighting->setEnabled( true );
+    }
+  }
+}
+

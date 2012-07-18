@@ -57,7 +57,7 @@ private:
   void setRenderingOptions();
   void setLightingModel(int);
 
-  QColor m_bgColor;                 ///< Background color
+  //QColor m_bgColor;                 ///< Background color
   //PolygonMode m_polygonMode;     ///< SOLID or WIREFRAME
   int m_lightingState;           ///< 0 = light off; 2 = light on
   bool m_isKeyPressed;

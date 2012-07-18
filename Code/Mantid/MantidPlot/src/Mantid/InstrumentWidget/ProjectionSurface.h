@@ -44,9 +44,15 @@ class ProjectionSurface: public QObject
   Q_OBJECT
 public:
   enum InteractionMode {MoveMode = 0, PickMode = 1, DrawMode}; ///< Move around or select things
-
+  /// Constructor
   ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
+  /// Destructor
   virtual ~ProjectionSurface();
+
+  //-----------------------------------
+  //     Public virtual methods
+  //-----------------------------------
+
   /// draw the surface onto a GL widget
   virtual void draw(MantidGLWidget* widget)const;
   /// draw the surface onto a normal widget
@@ -66,11 +72,6 @@ public:
   virtual void wheelEvent(QWheelEvent *);
   virtual void keyPressEvent(QKeyEvent*);
 
-  void setInteractionModeMove();
-  void setInteractionModePick();
-  void setInteractionModeDraw();
-  InteractionMode getInteractionMode()const{return m_interactionMode;}
-
   /// start selection at a point on the screen
   virtual void startSelection(int x,int y);
   /// expand selection upto a point on the screen
@@ -82,7 +83,6 @@ public:
 
   virtual int getDetectorID(int x, int y)const;
   virtual boost::shared_ptr<const Mantid::Geometry::IDetector> getDetector(int x, int y)const;
-  Mantid::Kernel::V3D getDetectorPos(int x, int y) const;
   /// NULL deselects components and selects the whole instrument
   virtual void componentSelected(Mantid::Geometry::ComponentID = NULL) = 0;
   /// fill in a list of detector ids which were selected by the selction tool
@@ -97,8 +97,23 @@ public:
   virtual void zoom();
   /// Unzoom view to the previous zoom area or to full view
   virtual void unzoom();
+  //-----------------------------------
 
-  // --- Shape2D manipulation --- //
+  Mantid::Kernel::V3D getDetectorPos(int x, int y) const;
+  /// Change the interaction mode
+  void setInteractionModeMove();
+  void setInteractionModePick();
+  void setInteractionModeDraw();
+  InteractionMode getInteractionMode()const{return m_interactionMode;}
+
+  /// Set background colour
+  void setBackgroundColor(const QColor& color) {m_backgroundColor = color;}
+  /// Get background colour
+  QColor getBackgroundColor() const {return m_backgroundColor;}
+
+  //-----------------------------------
+  //    Shape2D manipulation
+  //-----------------------------------
 
   QRectF getCurrentBoundingRect()const{return m_maskShapes.getCurrentBoundingRect();}
   void setCurrentBoundingRect(const QRectF& rect){m_maskShapes.setCurrentBoundingRect(rect);}
@@ -146,7 +161,13 @@ protected slots:
   void catchShapeChanged();
 
 protected:
+  
+  //-----------------------------------
+  //     Protected virtual methods
+  //-----------------------------------
+
   virtual void init() = 0;
+  /// Draw the surface onto an OpenGL widget
   virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const = 0;
   /// Respond to a change of color map in m_instrActor
   virtual void changeColorMap() = 0;
@@ -168,6 +189,7 @@ protected:
   virtual void mouseReleaseEventDraw(QMouseEvent*);
   virtual void wheelEventDraw(QWheelEvent*);
   virtual void keyPressEventDraw(QKeyEvent*);
+  //-----------------------------------
 
   void draw(MantidGLWidget* widget,bool picking)const;
   void clear();
@@ -177,24 +199,29 @@ protected:
   int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
   QString getPickInfoText()const;
 
+  //-----------------------------------
+  //     Protected data
+  //-----------------------------------
+
   const InstrumentActor* m_instrActor;
   const Mantid::Kernel::V3D m_pos;   ///< Origin (sample position)
   const Mantid::Kernel::V3D m_zaxis; ///< The z axis of the surface specific coord system
   Mantid::Kernel::V3D m_xaxis;       ///< The x axis
   Mantid::Kernel::V3D m_yaxis;       ///< The y axis
-  mutable QImage* m_viewImage;      ///< storage for view image
-  mutable QImage* m_pickImage;      ///< storage for picking image
-  mutable bool m_viewChanged;       ///< set when the image must be redrawn
-  QRectF m_viewRect;
+  mutable QImage* m_viewImage;       ///< storage for view image
+  mutable QImage* m_pickImage;       ///< storage for picking image
+  mutable bool m_viewChanged;        ///< set when the image must be redrawn
+  QColor m_backgroundColor;          ///< The background colour
+  QRectF m_viewRect;                 ///< Keeps the physical dimensions of the surface
   QRect m_selectRect;
   QStack<QRectF> m_zoomStack;
   InteractionMode m_interactionMode;
   bool m_leftButtonDown;
 
-  Shape2DCollection m_maskShapes;  ///< to draw mask shapes
+  Shape2DCollection m_maskShapes;    ///< to draw mask shapes
   mutable QList<PeakOverlay*> m_peakShapes; ///< to draw peak labels
   mutable int m_peakLabelPrecision;
-  mutable bool m_showPeakRow; ///< flag to show peak row index
+  mutable bool m_showPeakRow;        ///< flag to show peak row index
 
 };
 
