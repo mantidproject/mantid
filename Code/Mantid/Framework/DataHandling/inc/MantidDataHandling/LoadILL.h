@@ -66,7 +66,7 @@ private:
   // Execution code
   void exec();
   // Load the counts
-  void loadData(NeXus::NXData& dataGroup, API::MatrixWorkspace_sptr workspace);
+  void loadData(NeXus::NXData& dataGroup, API::MatrixWorkspace_sptr& workspace);
 
   std::string m_filename; ///< The file to load
 };

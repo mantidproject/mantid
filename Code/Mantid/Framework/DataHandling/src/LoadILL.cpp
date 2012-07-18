@@ -65,6 +65,7 @@ void LoadILL::exec()
   NXRoot root(m_filename);
   // find the first entry
   NXEntry entry = root.openFirstEntry();
+  std::cerr << "Entry " << entry.name() << std::endl;
   // find out the instrument name. If other instruments at ILL have this format
   // I assume their instrument group will have the name of the instrument
   const std::string instrName = "IN5";
@@ -82,7 +83,7 @@ void LoadILL::exec()
  * @param data :: The dataset with the counts (signal=1).
  * @param workspace :: The workspace to write the data in.
  */
-void LoadILL::loadData(NeXus::NXData& dataGroup, API::MatrixWorkspace_sptr workspace)
+void LoadILL::loadData(NeXus::NXData& dataGroup, API::MatrixWorkspace_sptr& workspace)
 {
   NXInt data = dataGroup.openIntData();
   int rank = data.rank();
@@ -119,7 +120,7 @@ void LoadILL::loadData(NeXus::NXData& dataGroup, API::MatrixWorkspace_sptr works
     {
       workspace->dataX(spec) = workspace->readX(0);
     }
-    int* data_p = &data(i,j,0);
+    int* data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
     workspace->dataY(spec).assign( data_p, data_p + nbins );
     ++spec;
   }
