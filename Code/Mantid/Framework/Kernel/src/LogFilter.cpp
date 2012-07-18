@@ -6,6 +6,15 @@ namespace Mantid
 {
   namespace Kernel
   {
+    /**
+     * Constructor taking a reference to a filter. Note that constructing a LogFilter this
+     * way only allows filters to be combined. They will not affect a property
+     * @param filter :: A reference to a TimeSeriesProperty<bool> that will act as a filter
+     */
+    LogFilter::LogFilter(const TimeSeriesProperty<bool> & filter) : m_prop(), m_filter()
+    {
+      addFilter(filter);
+    }
 
     /**
      * Constructor
@@ -30,16 +39,16 @@ namespace Mantid
      * The object is cloned
      * @param filter :: Filtering mask
      */
-    void LogFilter::addFilter(const TimeSeriesProperty<bool>* filter)
+    void LogFilter::addFilter(const TimeSeriesProperty<bool>& filter)
     {
-      if (filter->size() == 0) return;
-      if (!m_filter || m_filter->size() == 0) m_filter.reset(filter->clone());
+      if (filter.size() == 0) return;
+      if (!m_filter || m_filter->size() == 0) m_filter.reset(filter.clone());
       else
       {
         TimeSeriesProperty<bool>* f = new TimeSeriesProperty<bool>("tmp");
 
         TimeSeriesProperty<bool>* f1 = m_filter.get();
-        TimeSeriesProperty<bool>* f2 = filter->clone();
+        TimeSeriesProperty<bool>* f2 = filter.clone();
 
         TimeInterval t1 = f1->nthInterval(f1->size()-1);
         TimeInterval t2 = f2->nthInterval(f2->size()-1);
@@ -105,8 +114,11 @@ namespace Mantid
         f->clearFilter();
         m_filter.reset(f);
       }
-      m_prop->clearFilter();
-      m_prop->filterWith(m_filter.get());
+      if(m_prop)
+      {
+        m_prop->clearFilter();
+        m_prop->filterWith(m_filter.get());
+      }
     }
 
 
@@ -114,7 +126,7 @@ namespace Mantid
     /// Clears filters
     void LogFilter::clear()
     {
-      m_prop->clearFilter();
+      if(m_prop) m_prop->clearFilter();
       m_filter.reset();
     }
 

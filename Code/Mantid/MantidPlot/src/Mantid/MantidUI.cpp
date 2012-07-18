@@ -2404,7 +2404,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
       try
       {
         f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
-        if (f) flt.addFilter(f);
+        if (f) flt.addFilter(*f);
         else
         {
           importNumSeriesLog(wsName,logname,0);
@@ -2427,7 +2427,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
           try
           {
             f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(*it);
-            if (f) flt.addFilter(f);
+            if (f) flt.addFilter(*f);
             else
             {
               importNumSeriesLog(wsName,logname,0);

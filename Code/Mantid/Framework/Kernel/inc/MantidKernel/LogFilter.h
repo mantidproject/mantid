@@ -47,22 +47,23 @@ namespace Mantid
     class MANTID_KERNEL_DLL LogFilter
     {
     public:
+      /// Constructor taking a filter. Allows filters to be combined without being applied to a property
+      LogFilter(const TimeSeriesProperty<bool> & filter);
       /// Constructor taking any property type
       LogFilter(const Property* prop);
       /// Constructor from a TimeSeriesProperty<double> object to avoid overhead of casts
       LogFilter(const TimeSeriesProperty<double> * timeSeries);
 
       /// Adds a filter using boolean AND
-      void addFilter(const TimeSeriesProperty<bool>* filter);
+      void addFilter(const TimeSeriesProperty<bool>& filter);
       ///  Returns reference to the filtered property
       inline TimeSeriesProperty<double> * data() const { return m_prop.get(); }
-      /// Returns the filter
-      inline const TimeSeriesProperty<bool> * filter() const { return m_filter.get(); }
+      /// Returns a reference to the filter
+      inline const TimeSeriesProperty<bool> & filter() const { return *m_filter; }
       /// Clears filters
       void clear();
 
     private:
-
       DISABLE_DEFAULT_CONSTRUCT(LogFilter);
       DISABLE_COPY_AND_ASSIGN(LogFilter);
 
