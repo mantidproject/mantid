@@ -12,6 +12,7 @@ energy transfer for direct geometry spectrometers.
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
@@ -84,6 +85,23 @@ namespace WorkflowAlgorithms
       "Negative width value indicates logarithmic binning.");
     this->declareProperty("SofPhiEIsDistribution", true,
         "The final S(Phi, E) data is made to be a distribution.");
+    std::vector<std::string> incidentBeamNormOptions;
+    incidentBeamNormOptions.push_back("None");
+    incidentBeamNormOptions.push_back("ByCurrent");
+    incidentBeamNormOptions.push_back("ToMonitor");
+    this->declareProperty("IncidentBeamNormalisation", "None",
+        boost::make_shared<StringListValidator>(incidentBeamNormOptions),
+        "Options for incident beam normalisation on data.");
+    this->declareProperty("MonitorIntRangeLow", EMPTY_DBL(),
+        "Set the lower bound for monitor integration.");
+    this->setPropertySettings("MonitorIntRangeLow",
+        new VisibleWhenProperty("IncidentBeamNormalisation", IS_EQUAL_TO,
+            "ToMonitor"));
+    this->declareProperty("MonitorIntRangeHigh", EMPTY_DBL(),
+           "Set the upper bound for monitor integration.");
+    this->setPropertySettings("MonitorIntRangeHigh",
+        new VisibleWhenProperty("IncidentBeamNormalisation", IS_EQUAL_TO,
+            "ToMonitor"));
     this->declareProperty("TimeIndepBackgroundSub", false,
         "If true, time-independent background will be calculated and removed.");
     this->declareProperty("TibTofRangeStart", EMPTY_DBL(),
@@ -124,7 +142,8 @@ namespace WorkflowAlgorithms
     const std::string inWsName = inputWS->getName();
     // Make the result workspace name
     std::string outWsName = inWsName + "_et";
-
+    // Make a monitor workspace name for SNS data
+    std::string monWsName = inWsName + "_monitors";
     bool preserveEvents = false;
 
     // Calculate the initial energy and time zero
@@ -182,7 +201,6 @@ namespace WorkflowAlgorithms
                     throw std::runtime_error("Input workspaces are not handled, therefore cannot find the initial energy");
                   }
 
-                std::string monWsName = inWsName + "_monitors";
                 std::string loadAlgName("");
                 if (boost::ends_with(runFileName, "_event.nxs"))
                   {
@@ -362,6 +380,23 @@ namespace WorkflowAlgorithms
         cnvFrDist->setProperty("Workspace", outWsName);
         cnvFrDist->execute();
       }
+
+    // Normalise result workspace to incident beam parameter
+    const std::string incidentBeamNormType = this->getProperty("IncidentBeamNormalisation");
+    const double monRangeLow = this->getProperty("MonitorIntRangeLow");
+    const double monRangeHigh = this->getProperty("MonitorIntRangeHigh");
+
+    IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
+    norm->setAlwaysStoreInADS(true);
+    norm->setProperty("InputWorkspace", outWsName);
+    norm->setProperty("OutputWorkspace", outWsName);
+    norm->setProperty("IncidentBeamNormalisation", incidentBeamNormType);
+    norm->setProperty("MonitorIntRangeLow", monRangeLow);
+    norm->setProperty("MonitorIntRangeHigh", monRangeHigh);
+    // SNS does current norm for now.
+    //norm->setProperty("MonitorWorkspace", monWsName);
+    norm->setProperty("TofRangeOffset", binOffset);
+    norm->execute();
 
     // Convert to energy transfer
     g_log.notice() << "Converting to energy transfer." << std::endl;
