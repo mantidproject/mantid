@@ -294,7 +294,7 @@ set ( TEST_FILES
 	test/LoadEventNexusTest.h
 	test/LoadEventPreNexus2Test.h
 	test/LoadEventPreNexusTest.h
-	test/LoadILLTest.h
+	#test/LoadILLTest.h
 	test/LoadISISNexusTest.h
 	test/LoadInstrumentFromRawTest.h
 	test/LoadInstrumentTest.h
