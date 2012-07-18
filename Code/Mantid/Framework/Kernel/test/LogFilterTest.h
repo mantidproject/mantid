@@ -152,36 +152,36 @@ public:
     auto mask2 = createTestFilter(3);
     LogFilter filterer(*mask1);
     filterer.addFilter(*mask2);
-    const TimeSeriesProperty<bool> & finalFilter = filterer.filter();
+    const TimeSeriesProperty<bool> * finalFilter = filterer.filter();
 
-    TS_ASSERT_EQUALS(6, finalFilter.size());
+    TSM_ASSERT("Filter is NULL", finalFilter);
+    if(!finalFilter) return;
 
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(0).begin_str(), "2007-Nov-30 16:16:50" );
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(0).end_str(), "2007-Nov-30 16:17:00" );
-    TS_ASSERT_EQUALS( finalFilter.nthValue(0), false );
+    TS_ASSERT_EQUALS(6, finalFilter->size());
 
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(1).begin_str(), "2007-Nov-30 16:17:00" );
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(1).end_str(), "2007-Nov-30 16:17:05" );
-    TS_ASSERT_EQUALS( finalFilter.nthValue(1), true );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(0).begin_str(), "2007-Nov-30 16:16:50" );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(0).end_str(), "2007-Nov-30 16:17:00" );
+    TS_ASSERT_EQUALS( finalFilter->nthValue(0), false );
 
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(2).begin_str(), "2007-Nov-30 16:17:05" );
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(2).end_str(), "2007-Nov-30 16:17:12" );
-    TS_ASSERT_EQUALS( finalFilter.nthValue(2), false );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(1).begin_str(), "2007-Nov-30 16:17:00" );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(1).end_str(), "2007-Nov-30 16:17:05" );
+    TS_ASSERT_EQUALS( finalFilter->nthValue(1), true );
 
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(3).begin_str(), "2007-Nov-30 16:17:12" );
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(3).end_str(), "2007-Nov-30 16:17:25" );
-    TS_ASSERT_EQUALS( finalFilter.nthValue(3), true );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(2).begin_str(), "2007-Nov-30 16:17:05" );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(2).end_str(), "2007-Nov-30 16:17:12" );
+    TS_ASSERT_EQUALS( finalFilter->nthValue(2), false );
 
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(4).begin_str(), "2007-Nov-30 16:17:25" );
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(4).end_str(), "2007-Nov-30 16:17:39" );
-    TS_ASSERT_EQUALS( finalFilter.nthValue(4), false );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(3).begin_str(), "2007-Nov-30 16:17:12" );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(3).end_str(), "2007-Nov-30 16:17:25" );
+    TS_ASSERT_EQUALS( finalFilter->nthValue(3), true );
 
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(5).begin_str(), "2007-Nov-30 16:17:39" );
-    TS_ASSERT_EQUALS( finalFilter.nthInterval(5).end_str(), "2007-Nov-30 16:17:53" );
-    TS_ASSERT_EQUALS( finalFilter.nthValue(5), true );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(4).begin_str(), "2007-Nov-30 16:17:25" );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(4).end_str(), "2007-Nov-30 16:17:39" );
+    TS_ASSERT_EQUALS( finalFilter->nthValue(4), false );
 
-
-
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(5).begin_str(), "2007-Nov-30 16:17:39" );
+    TS_ASSERT_EQUALS( finalFilter->nthInterval(5).end_str(), "2007-Nov-30 16:17:53" );
+    TS_ASSERT_EQUALS( finalFilter->nthValue(5), true );
   }
 
   void testF3()

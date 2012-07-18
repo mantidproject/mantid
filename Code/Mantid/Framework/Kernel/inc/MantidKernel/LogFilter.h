@@ -59,7 +59,7 @@ namespace Mantid
       ///  Returns reference to the filtered property
       inline TimeSeriesProperty<double> * data() const { return m_prop.get(); }
       /// Returns a reference to the filter
-      inline const TimeSeriesProperty<bool> & filter() const { return *m_filter; }
+      inline const TimeSeriesProperty<bool> * filter() const { return m_filter.get(); }
       /// Clears filters
       void clear();
 
