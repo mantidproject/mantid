@@ -6,8 +6,37 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
+
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid::Kernel;
+
+namespace
+{
+  /// Create the test source property
+  Mantid::Kernel::TimeSeriesProperty<double> * createTestSeries(const std::string & name)
+  {
+    auto source = new Mantid::Kernel::TimeSeriesProperty<double>(name);
+    source->addValue("2007-11-30T16:17:00",1);
+    source->addValue("2007-11-30T16:17:10",2);
+    source->addValue("2007-11-30T16:17:20",3);
+    source->addValue("2007-11-30T16:17:30",4);
+    source->addValue("2007-11-30T16:17:40",5);
+    return source;
+  }
+
+  /// Create test filter
+  Mantid::Kernel::TimeSeriesProperty<bool> * createTestFilter()
+  {
+    auto filter = new Mantid::Kernel::TimeSeriesProperty<bool>("filter");
+    filter->addValue("2007-11-30T16:16:50",false);
+    filter->addValue("2007-11-30T16:17:25",true);
+    filter->addValue("2007-11-30T16:17:39",false);
+    return filter;
+  }
+}
 
 class PropertyManagerHelper : public PropertyManager
 {
@@ -41,6 +70,35 @@ public:
     PropertyManagerHelper mgr;
     std::vector<Property*> props = mgr.getProperties();
     TS_ASSERT( props.empty() );
+  }
+
+  void testFilterByLogConvertsTimeSeriesToFilteredTimeSeries()
+  {
+    PropertyManagerHelper manager;
+    manager.declareProperty(createTestSeries("log1"));
+    manager.declareProperty(createTestSeries("log2"));
+    manager.declareProperty(createTestSeries("log3"));
+    
+    auto filter = createTestFilter();
+    manager.filterByProperty(*filter);
+    
+    TS_ASSERT_EQUALS(manager.propertyCount(), 3);
+
+    const std::vector<Property*> & props = manager.getProperties();
+    for(auto iter = props.begin(); iter != props.end(); ++iter)
+    {
+      Property *prop = *iter;
+      std::string msg = "Property " + prop->name()  + " has not been changed to a FilteredTimeSeries";
+      auto filteredProp = dynamic_cast<FilteredTimeSeriesProperty<double>*>(*iter);
+      TSM_ASSERT(msg, filteredProp);
+    }
+
+    // Also check the single getter
+    Property *log2 = manager.getProperty("log2");
+    auto filteredProp = dynamic_cast<FilteredTimeSeriesProperty<double>*>(log2);
+    TSM_ASSERT("getProperty has not returned a FilteredProperty as expected", filteredProp);
+
+    delete filter;
   }
   
   void testCopyConstructor()
@@ -345,6 +403,39 @@ public:
 private:
   PropertyManagerHelper * manager;
 
+};
+
+//-------------------------------------------------------------------------------------------------
+// Performance Test
+//-------------------------------------------------------------------------------------------------
+
+class PropertyManagerTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static PropertyManagerTestPerformance *createSuite() { return new PropertyManagerTestPerformance(); }
+  static void destroySuite( PropertyManagerTestPerformance *suite ) { delete suite; }
+
+  PropertyManagerTestPerformance() : m_manager(), m_filter(createTestFilter())
+  {
+    const size_t nprops = 2000;
+    for(size_t i = 0; i < nprops; ++i)
+    {
+      m_manager.declareProperty(createTestSeries("prop" + boost::lexical_cast<std::string>(i)));
+    }
+  }
+
+  void test_Perf_Of_Filtering_Large_Number_Of_Properties_By_Other_Property()
+  {
+    m_manager.filterByProperty(*m_filter);
+  }
+
+private:
+  /// Test manager
+  PropertyManagerHelper m_manager;
+  /// Test filter
+  boost::scoped_ptr<TimeSeriesProperty<bool>> m_filter;
 };
 
 #endif /*PROPERTYMANAGERTEST_H_*/

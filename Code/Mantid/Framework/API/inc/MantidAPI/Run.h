@@ -64,9 +64,14 @@ namespace Mantid
       /// Return the run end time
       const Kernel::DateAndTime endTime() const;
 
+      /// Filter the logs by time
       void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
+      /// Split the logs based on the given intervals
       void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Run * > outputs) const;
+      /// Filter the run by the given boolean log
+      void filterByLog(const Kernel::TimeSeriesProperty<bool> & filter);
 
+      /// Return an approximate memory size for the object in bytes
       size_t getMemorySize() const;
 
       /// Add data to the object in the form of a property

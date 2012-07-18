@@ -254,6 +254,16 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     }
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Filter the run by the given boolean log. It replaces all time
+   * series properties with filtered time series properties
+   * @param filter :: A boolean time series to filter each log on
+   */
+  void Run::filterByLog(const Kernel::TimeSeriesProperty<bool> & filter)
+  {
+    m_manager.filterByProperty(filter);
+  }
 
 
   //-----------------------------------------------------------------------------------------------

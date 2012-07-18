@@ -18,6 +18,7 @@ namespace Kernel
 // Forward Declaration
 //----------------------------------------------------------------------
 class Logger;
+template<typename T> class TimeSeriesProperty;
 
 /** 
  Property manager helper class.
@@ -62,6 +63,7 @@ public:
 
   void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
   void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< PropertyManager * > outputs) const;
+  void filterByProperty(const TimeSeriesProperty<bool> & filter);
 
   virtual ~PropertyManager();
 
@@ -99,6 +101,9 @@ protected:
   Property* getPointerToPropertyOrNull( const std::string &name ) const;
 	
 private:
+  /// Transform the given string to a key for the property index
+  const std::string createKey(const std::string & text) const;
+
   /// typedef for the map holding the properties
   typedef std::map<std::string, Property*> PropertyMap;
   /// The properties under management
