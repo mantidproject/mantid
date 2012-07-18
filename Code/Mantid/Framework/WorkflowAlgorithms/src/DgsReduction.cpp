@@ -314,6 +314,9 @@ namespace WorkflowAlgorithms
     const bool fixed_ei = this->getProperty("FixedIncidentEnergy");
     const std::vector<double> et_binning = this->getProperty("EnergyTransferRange");
     const bool sofphie_is_distribution = this->getProperty("SofPhiEIsDistribution");
+    const std::string incidentBeamNormType = this->getProperty("IncidentBeamNormalisation");
+    const double monRangeLow = this->getProperty("MonitorIntRangeLow");
+    const double monRangeHigh = this->getProperty("MonitorIntRangeHigh");
     const bool tib_subtraction = this->getProperty("TimeIndepBackgroundSub");
     const double tib_tof_start = this->getProperty("TibTofRangeStart");
     const double tib_tof_end = this->getProperty("TibTofRangeEnd");
@@ -324,6 +327,9 @@ namespace WorkflowAlgorithms
     et_conv->setProperty("FixedIncidentEnergy", fixed_ei);
     et_conv->setProperty("EnergyTransferRange", et_binning);
     et_conv->setProperty("SofPhiEIsDistribution", sofphie_is_distribution);
+    et_conv->setProperty("IncidentBeamNormalisation", incidentBeamNormType);
+    et_conv->setProperty("MonitorIntRangeLow", monRangeLow);
+    et_conv->setProperty("MonitorIntRangeHigh", monRangeHigh);
     et_conv->setProperty("TimeIndepBackgroundSub", tib_subtraction);
     et_conv->setProperty("TibTofRangeStart", tib_tof_start);
     et_conv->setProperty("TibTofRangeEnd", tib_tof_end);
