@@ -99,26 +99,58 @@ private:
    Helper function, applies fit functions from a fabricated, fake instrument parameter file ontop of an existing instrument definition.
    The fit function is set at the instrument level.
   */
-  MatrixWorkspace_sptr create_workspace_with_fitting_functions()
+  MatrixWorkspace_sptr create_workspace_with_fitting_functions(const std::string result_unit="Wavelength")
   {
     // Create a default workspace with no-fitting functions.
     MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
     const std::string instrumentName = ws->getInstrument()->getName();
 
     // Create a parameter file, with a root equation that will apply to all detectors.
-    const std::string parameterFileContents = std::string("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n") +
-    "<parameter-file instrument = \"" + instrumentName + "\" date = \"2012-01-31T00:00:00\">\n" +
-    "<component-link name=\"" + instrumentName + "\">\n" +
-    "<parameter name=\"LinearBackground:A0\" type=\"fitting\">\n" +
-    "  <formula eq=\"1.0\" result-unit=\"Wavelength\"/>\n" +
-    "  <fixed />\n" + 
-    "</parameter>\n" +   
-    "<parameter name=\"LinearBackground:A1\" type=\"fitting\">\n" +
-    "  <formula eq=\"2.0\" result-unit=\"Wavelength\"/>\n" +
-    "  <fixed />\n" + 
-    "</parameter>\n" +
-    "</component-link>\n" +
-    "</parameter-file>\n";
+    const std::string parameterFileContents =  boost::str(boost::format(
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
+       <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
+          <component-link name=\"%1%\">\n\
+           <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
+               <formula eq=\"1\" result-unit=\"%2%\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
+               <formula eq=\"2\" result-unit=\"%2%\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           </component-link>\n\
+        </parameter-file>\n") % instrumentName % result_unit);
+
+    // Create a temporary Instrument Parameter file.
+    FileObject file(parameterFileContents, instrumentName + "_Parameters.xml");
+    
+    // Apply parameter file to workspace.
+    apply_instrument_parameter_file_to_workspace(ws, file);
+
+    return ws;
+  }
+
+    /**
+   Helper function, applies fit functions from a fabricated, fake instrument parameter file ontop of an existing instrument definition.
+   The fit function is set at the instrument level. HOWEVER, this instrument definition is corrupted in that at the instrument level, ONLY ONE OF THE TWO PARAMETERS FOR LINEARFIT (A0) IS PROVIDED.
+  */
+  MatrixWorkspace_sptr create_workspace_with_incomplete_instrument_level_fitting_functions()
+  {
+    // Create a default workspace with no-fitting functions.
+    MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
+    const std::string instrumentName = ws->getInstrument()->getName();
+
+    // Create a parameter file, with a root equation that will apply to all detectors. NOTE THAT A0 IS SPECIFIED, but A1 IS NOT.
+    const std::string parameterFileContents =  boost::str(boost::format(
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
+       <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
+          <component-link name=\"%1%\">\n\
+           <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
+               <formula eq=\"3\" result-unit=\"Wavelength\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           </component-link>\n\
+        </parameter-file>\n") % instrumentName);
 
     // Create a temporary Instrument Parameter file.
     FileObject file(parameterFileContents, instrumentName + "_Parameters.xml");
@@ -174,6 +206,79 @@ private:
     return ws;
   }
 
+   /**
+   Helper function, applies fit functions from a fabricated, fake instrument parameter file ontop of an existing instrument definition.
+   The fit function is different for every detector. HOWEVER, ONLY ONE OF THE TWO PARAMETERS FOR LINEARFIT (A1) IS PROVIDED.
+  */
+  MatrixWorkspace_sptr create_workspace_with_incomplete_detector_level_only_fit_functions(MatrixWorkspace_sptr original = boost::shared_ptr<MatrixWorkspace>())
+  {
+    MatrixWorkspace_sptr ws = original;
+    if(original == NULL)
+    {
+      // Create a default workspace with no-fitting functions.
+      ws = create_workspace_with_no_fitting_functions();
+    }
+    const std::string instrumentName = ws->getInstrument()->getName();
+   
+    std::string componentLinks = "";
+    for(size_t wsIndex = 0; wsIndex < ws->getNumberHistograms(); ++wsIndex)
+    {
+      Geometry::IDetector_const_sptr det = ws->getDetector( wsIndex );
+
+      // A1, will vary with workspace index. NOTE THAT A0 IS MISSING entirely.
+      componentLinks +=  boost::str(boost::format(
+          "<component-link name=\"%1%\">\n\
+           <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
+               <formula eq=\"%2%\" result-unit=\"Wavelength\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           </component-link>\n") % det->getName() % wsIndex);
+    }
+
+    // Create a parameter file, with a root equation that will apply to all detectors.
+    const std::string parameterFileContents = std::string("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n") +
+    "<parameter-file instrument = \"" + instrumentName + "\" date = \"2012-01-31T00:00:00\">\n" +
+    componentLinks +
+    "</parameter-file>\n";
+
+    // Create a temporary Instrument Parameter file.
+    FileObject file(parameterFileContents, instrumentName + "_Parameters.xml");
+    
+    // Apply parameter file to workspace.
+    apply_instrument_parameter_file_to_workspace(ws, file);
+
+    return ws;
+  }
+
+  /**
+  Helper method for running the algorithm and testing for invalid argument on execution.
+  */
+  void do_test_throws_invalid_argument_on_execution(MatrixWorkspace_sptr inputWS)
+  {
+    NormaliseByDetector alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspace", inputWS);
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+  }
+
+  /**
+  Helper method for running the algorithm and simply verifying that it runs without exception producing an output workspace..
+  */
+  MatrixWorkspace_sptr do_test_doesnt_throw_on_execution(MatrixWorkspace_sptr inputWS)
+  {
+    NormaliseByDetector alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspace", inputWS);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS =AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    TS_ASSERT(outWS != NULL);
+    return outWS;
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -191,24 +296,37 @@ public:
   void test_throws_when_no_fit_function_on_detector_tree()
   {
     MatrixWorkspace_sptr inputWS = create_workspace_with_no_fitting_functions();
-    NormaliseByDetector alg;
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setPropertyValue("OutputWorkspace", "out");
-    alg.setProperty("InputWorkspace", inputWS);
-    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
+    do_test_throws_invalid_argument_on_execution(inputWS);
+  }
+
+  void test_throws_when_incomplete_fit_function_on_detector_tree()
+  {
+    MatrixWorkspace_sptr inputWS = create_workspace_with_incomplete_instrument_level_fitting_functions();
+    do_test_throws_invalid_argument_on_execution(inputWS);
+  }  
+  
+  void test_formula_not_in_wavelength_throws()
+  {
+    MatrixWorkspace_sptr inputWS1 = create_workspace_with_fitting_functions("TOF");
+    do_test_throws_invalid_argument_on_execution(inputWS1);
+
+    // Sanity check by explicitly setting to Wavelength.
+    MatrixWorkspace_sptr inputWS2 = create_workspace_with_fitting_functions("Wavelength");
+    do_test_doesnt_throw_on_execution(inputWS2);
+  }
+
+  void test_formula_not_specified_doesnt_throw()
+  {
+    // If we don't specify wavelength, then we assume the forumlas are working in terms of wavelength.
+    MatrixWorkspace_sptr inputWS2 = create_workspace_with_fitting_functions("");
+    do_test_doesnt_throw_on_execution(inputWS2);
   }
 
   void test_applies_instrument_function_to_child_detectors_throws_nothing()
   {
     // Linear function 2*x + 1 applied to each x-value.
     MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
-    NormaliseByDetector alg;
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setPropertyValue("OutputWorkspace", "out");
-    alg.setProperty("InputWorkspace", inputWS);
-    TSM_ASSERT_THROWS_NOTHING("Instrument wide, fitting function applied. Should not throw.", alg.execute());
+    do_test_doesnt_throw_on_execution(inputWS);
   }
 
   void test_workspace_with_instrument_only_fitting_functions()
@@ -216,13 +334,8 @@ public:
     const std::string outWSName = "normalised_ws";
     // Linear function 2*x + 1 applied to each x-value. INSTRUMENT LEVEL FIT FUNCTION ONLY.
     MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
-    NormaliseByDetector alg;
-    alg.initialize();
-    alg.setPropertyValue("OutputWorkspace", outWSName);
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.execute();
     // Extract the output workspace so that we can verify the normalisation.
-    MatrixWorkspace_sptr outWS =AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    MatrixWorkspace_sptr outWS = do_test_doesnt_throw_on_execution(inputWS); //EXECUTES THE ALG.
 
     // Output workspace should have 2 histograms.
     TS_ASSERT_EQUALS(2, outWS->getNumberHistograms());
@@ -253,13 +366,8 @@ public:
     const std::string outWSName = "normalised_ws";
     // Linear function 1*x + N applied to each x-value, where N is the workspace index. DETECTOR LEVEL FIT FUNCTIONS ONLY.
     MatrixWorkspace_sptr inputWS = create_workspace_with_detector_level_only_fit_functions();
-    NormaliseByDetector alg;
-    alg.initialize();
-    alg.setPropertyValue("OutputWorkspace", outWSName);
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.execute();
     // Extract the output workspace so that we can verify the normalisation.
-    MatrixWorkspace_sptr outWS =AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    MatrixWorkspace_sptr outWS = do_test_doesnt_throw_on_execution(inputWS); //EXECUTES THE ALG.
 
     // Output workspace should have 2 histograms.
     TS_ASSERT_EQUALS(2, outWS->getNumberHistograms());
@@ -285,7 +393,45 @@ public:
     }
   }
 
-  
+  void test_construct_complete_function_from_separate_incomplete_parameters()
+  {
+    // With one half - incomplete on the instrument level.
+    MatrixWorkspace_sptr incompleteInstrumentLevel = create_workspace_with_incomplete_instrument_level_fitting_functions();
+    do_test_throws_invalid_argument_on_execution(incompleteInstrumentLevel);
+
+    // With The other half - incomplete on the detector level.
+    MatrixWorkspace_sptr incompleteDetectorLevel = create_workspace_with_incomplete_detector_level_only_fit_functions();
+    do_test_throws_invalid_argument_on_execution(incompleteInstrumentLevel);
+
+    // Now create and use a complete definition MADE FROM THE TWO INCOMPLETE ONES. Should now have A1 on the detector params and A0 on the instrument params.
+    MatrixWorkspace_sptr completeWS = create_workspace_with_incomplete_detector_level_only_fit_functions(incompleteInstrumentLevel);
+    MatrixWorkspace_sptr outWS = do_test_doesnt_throw_on_execution(completeWS);
+
+    // Output workspace should have 2 histograms.
+    TS_ASSERT_EQUALS(2, completeWS->getNumberHistograms());
+
+    // Test the application of the linear function
+    for(size_t wsIndex = 0; wsIndex < completeWS->getNumberHistograms(); ++wsIndex)
+    {
+      const MantidVec& yValues = outWS->readY(wsIndex);
+      const MantidVec& xValues = outWS->readX(wsIndex);
+      const MantidVec& eValues = outWS->readE(wsIndex);
+
+      TS_ASSERT_EQUALS(3, yValues.size());
+      TS_ASSERT_EQUALS(3, eValues.size());
+      TS_ASSERT_EQUALS(4, xValues.size());
+
+      const MantidVec& yInputValues = completeWS->readY(wsIndex);
+
+      for(size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex)
+      {
+        const double wavelength = (xValues[binIndex] + xValues[binIndex+1])/2;
+        const double expectedValue = yInputValues[binIndex] / ( (1*wsIndex*wavelength) + 3.0 ); // According to the equation written into the instrument parameter file for the detector component link.
+        TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
+      }
+    }
+
+  }
 
 };
 
