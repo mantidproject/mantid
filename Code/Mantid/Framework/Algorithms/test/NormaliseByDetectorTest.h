@@ -6,55 +6,50 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidDataHandling/LoadParameterFile.h"
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 
+#include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidAlgorithms/NormaliseByDetector.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
-using namespace Mantid::DataHandling;
 
 class NormaliseByDetectorTest : public CxxTest::TestSuite
 {
 
 private:
 
+  /** Helper function, creates a histogram workspace with an instrument with 2 detectors, and 2 spectra.
+      Y-values are flat accross the x bins. Which makes it easy to calculate the expected value for any fit function applied to the X-data.
+  */
   MatrixWorkspace_sptr create_workspace_with_no_fitting_functions()
   {
-    IAlgorithm* loadalg = FrameworkManager::Instance().createAlgorithm("Load");
-    loadalg->setRethrows(true);
-    loadalg->initialize();
-    loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
-    loadalg->setPropertyValue("OutputWorkspace", "testws");
-    loadalg->execute();
-    
-    // Convert units to wavelength
-    IAlgorithm* unitsalg = FrameworkManager::Instance().createAlgorithm("ConvertUnits");
-    unitsalg->initialize();
-    unitsalg->setPropertyValue("InputWorkspace", "testws");
-    unitsalg->setPropertyValue("OutputWorkspace", "testws");
-    unitsalg->setPropertyValue("Target", "Wavelength");
-    unitsalg->execute();
-
-    // Convert the specturm axis ot signed_theta
-    IAlgorithm* specaxisalg = FrameworkManager::Instance().createAlgorithm("ConvertSpectrumAxis");
-    specaxisalg->initialize();
-    specaxisalg->setPropertyValue("InputWorkspace", "testws");
-    specaxisalg->setPropertyValue("OutputWorkspace", "testws");
-    specaxisalg->setPropertyValue("Target", "signed_theta");
-    specaxisalg->execute();
-    
-    WorkspaceGroup_sptr group = API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("testws");
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    const std::string outWSName="test_ws";
+    IAlgorithm* workspaceAlg = FrameworkManager::Instance().createAlgorithm("CreateWorkspace");
+    workspaceAlg->initialize();
+    workspaceAlg->setPropertyValue("DataX", "1, 2, 3, 4"); // 4 bins.
+    workspaceAlg->setPropertyValue("DataY", "1, 1, 1, 1, 1, 1"); // Each spectrum gets 3 Y values
+    workspaceAlg->setPropertyValue("DataE", "1, 1, 1, 1, 1, 1"); // Each spectrum gets 3 E values
+    workspaceAlg->setPropertyValue("NSpec", "2");
+    workspaceAlg->setPropertyValue("UnitX", "Wavelength");
+    workspaceAlg->setPropertyValue("OutputWorkspace", outWSName);
+    workspaceAlg->execute();
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));
+    return ws;
   }
 
+  /**
+   Helper function, applies fit functions from a fabricated, fake instrument parameter file ontop of an existing instrument definition.
+  */
   MatrixWorkspace_sptr create_workspace_with_fitting_functions()
   {
+    /// File object type. Provides exception save file creation/destruction.
     class FileObject
     {
     public:
@@ -88,10 +83,14 @@ private:
       void *operator new[](size_t);
     };
 
+    // Create a default workspace with no-fitting functions.
+    MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
+    const std::string instrumentName = ws->getInstrument()->getName();
+
     // Create a parameter file, with a root equation that will apply to all detectors.
     const std::string parameterFileContents = std::string("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n") +
-    "<parameter-file instrument = \"POLREF\" date = \"2012-01-31T00:00:00\">\n" +
-    "<component-link name=\"POLREF\">\n" +
+    "<parameter-file instrument = \"" + instrumentName + "\" date = \"2012-01-31T00:00:00\">\n" +
+    "<component-link name=\"" + instrumentName + "\">\n" +
     "<parameter name=\"LinearBackground:A0\" type=\"fitting\">\n" +
     "  <formula eq=\"1.0\" result-unit=\"Wavelength\"/>\n" +
     "  <fixed />\n" + 
@@ -103,9 +102,11 @@ private:
     "</component-link>\n" +
     "</parameter-file>\n";
 
-    FileObject file(parameterFileContents, "POLREF_Parameters.xml");
-    MatrixWorkspace_sptr ws = create_workspace_with_no_fitting_functions();
-
+    // Create a temporary Instrument Parameter file.
+    FileObject file(parameterFileContents, instrumentName + "_Parameters.xml");
+    
+    // Load the Instrument Parameter file over the existing test workspace + instrument.
+    using DataHandling::LoadParameterFile;
     LoadParameterFile loadParameterAlg;
     loadParameterAlg.setRethrows(true);
     loadParameterAlg.initialize();
@@ -131,23 +132,18 @@ public:
 
   void test_throws_when_no_fit_function_on_detector_tree()
   {
-      int i;
-    std::cin >> i;
     MatrixWorkspace_sptr inputWS = create_workspace_with_no_fitting_functions();
-
     NormaliseByDetector alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("OutputWorkspace", "out");
     alg.setProperty("InputWorkspace", inputWS);
-    alg.execute();
+    TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
 
-  void test_applies_instrument_function_to_child_detectors()
+  void test_applies_instrument_function_to_child_detectors_throws_nothing()
   {
-    int i;
-    std::cin >> i;
-    // Fitting function applied to whole instrument, so no detectors should complain.
+    // Linear function 2*x + 1 applied to each x-value.
     MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
     NormaliseByDetector alg;
     alg.setRethrows(true);
@@ -155,6 +151,41 @@ public:
     alg.setPropertyValue("OutputWorkspace", "out");
     alg.setProperty("InputWorkspace", inputWS);
     TSM_ASSERT_THROWS_NOTHING("Instrument wide, fitting function applied. Should not throw.", alg.execute());
+  }
+
+  void test_applies_instrument_function_to_child_detectors_calculates_correctly()
+  {
+    const std::string outWSName = "normalised_ws";
+    // Linear function 2*x + 1 applied to each x-value.
+    MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
+    NormaliseByDetector alg;
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", outWSName);
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.execute();
+    // Extract the output workspace so that we can verify the normalisation.
+    MatrixWorkspace_sptr outWS =AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
+
+    // Output workspace should have 2 histograms.
+    TS_ASSERT_EQUALS(2, outWS->getNumberHistograms());
+    // Test the application of the linear function
+    for(size_t wsIndex = 0; wsIndex < outWS->getNumberHistograms(); ++wsIndex)
+    {
+      const MantidVec& yValues = outWS->readY(wsIndex);
+      const MantidVec& xValues = outWS->readX(wsIndex);
+      const MantidVec& eValues = outWS->readE(wsIndex);
+
+      TS_ASSERT_EQUALS(3, yValues.size());
+      TS_ASSERT_EQUALS(3, eValues.size());
+      TS_ASSERT_EQUALS(4, xValues.size());
+
+      for(size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex)
+      {
+        const double wavelength = (xValues[binIndex] + xValues[binIndex+1])/2;
+        const double expectedValue = (2*wavelength) + 1;
+        TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
+      }
+    }
   }
 
   
