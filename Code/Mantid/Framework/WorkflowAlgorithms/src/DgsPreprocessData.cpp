@@ -12,6 +12,7 @@ parameter. For SNS, monitor workspaces need to be passed.
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
