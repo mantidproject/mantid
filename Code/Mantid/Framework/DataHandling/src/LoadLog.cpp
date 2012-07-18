@@ -334,21 +334,6 @@ void LoadLog::exec()
   //If there are no log files by now, we have nothing else to do
   if( potentialLogFiles.empty() ) return;
 
-  //Do a quick search for the icpevent file
-  std::string icpevent_file_name("");
-  std::set<std::string>::const_iterator icpfile = find_if(potentialLogFiles.begin(), potentialLogFiles.end(), FileMatcher(std::string(".*icpevent.*")));
-  if( icpfile != potentialLogFiles.end() )
-  {
-    icpevent_file_name = *icpfile;
-  }
-
-  Kernel::LogParser parser(icpevent_file_name);
-  // Add mantid-created logs
-  
-  m_periods=parser.getPeriodsProperty();
-  localWorkspace->mutableRun().addLogData(parser.createAllPeriodsLog());
-  localWorkspace->mutableRun().addLogData(parser.createRunningLog());
-
   // Extract the common part of log file names (the workspace name)
   std::string ws_name = Poco::Path(m_filename).getFileName();
   ws_name.erase(ws_name.find_last_of('.'));
@@ -407,7 +392,7 @@ void LoadLog::exec()
           log_name.erase(0, n_common_chars);
         }
 
-        Property* log = parser.createLogProperty(*logs_itr,stringToLower(log_name));
+        Property* log = LogParser::createLogProperty(*logs_itr,stringToLower(log_name));
         if (log)
         {
           localWorkspace->mutableRun().addLogData(log);

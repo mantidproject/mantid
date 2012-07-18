@@ -101,7 +101,6 @@ namespace %s
 
 #endif  /* %s */""" % (guard, guard,
        alg_include, subproject, classname,
-       datetime.datetime.now().date(),
        datetime.datetime.now().date().year, classname, alg_class_declare,
        classname, classname, algorithm_header, subproject, guard)
 

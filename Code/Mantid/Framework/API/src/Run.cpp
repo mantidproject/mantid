@@ -618,13 +618,17 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     }
   }
 
-  /// Concrete instantiations for getTimeSeriesProperty
-  template MANTID_API_DLL Kernel::TimeSeriesProperty<double> * Run::getTimeSeriesProperty(const std::string &) const ;
-  template MANTID_API_DLL Kernel::TimeSeriesProperty<std::string> * Run::getTimeSeriesProperty(const std::string &) const;
-  /// Concrete instantiations for getPropertyValueAsType
-  template MANTID_API_DLL double Run::getPropertyValueAsType(const std::string &) const ;
-  template MANTID_API_DLL int Run::getPropertyValueAsType(const std::string &) const;
-  template MANTID_API_DLL std::string Run::getPropertyValueAsType(const std::string &) const;
+  /// @cond
+  /// Macro to instantiate concrete template members
+#define INSTANTIATE(TYPE) \
+  template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE> * Run::getTimeSeriesProperty(const std::string &) const;\
+  template MANTID_API_DLL TYPE Run::getPropertyValueAsType(const std::string &) const;
+
+  INSTANTIATE(double);
+  INSTANTIATE(int);
+  INSTANTIATE(std::string);
+  INSTANTIATE(bool);
+  /// @endcond
 
 } //API namespace
 

@@ -47,7 +47,7 @@ using namespace API;
 
 /// Constructor
 LoadRawBin0::LoadRawBin0() :
-   m_filename(), m_numberOfSpectra(0), m_numberOfPeriods(0),
+   m_filename(), m_numberOfSpectra(0),
    m_specTimeRegimes(), m_prog(0.0), m_bmspeclist(false)
 {
 }
@@ -128,12 +128,7 @@ void LoadRawBin0::exec()
   {
     runLoadLog(m_filename,localWorkspace);
     const int period_number = 1;
-    Property* log = createPeriodLog(period_number);
-    if (log) 
-    {
-      run.addLogData(log);
-      run.addLogData(createCurrentPeriodLog(period_number));
-    }
+    createPeriodLogs(period_number, localWorkspace);
   }
   // Set the total proton charge for this run
   setProtonCharge(run);
@@ -158,12 +153,7 @@ void LoadRawBin0::exec()
         runObj.removeLogData("current_period");
         //add current period data
         const int period_number = period + 1;
-        Property* log = createPeriodLog(period_number);
-        if (log) 
-        {
-          runObj.addLogData(log);
-          runObj.addLogData(createCurrentPeriodLog(period_number));
-        }
+        createPeriodLogs(period_number, localWorkspace);
       }
 
     }

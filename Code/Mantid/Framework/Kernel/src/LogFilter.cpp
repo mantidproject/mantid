@@ -182,7 +182,7 @@ namespace Mantid
       {
         return doubleSeries;
       }
-      else if(auto doubleSeries = ConvertToTimeSeriesDouble<int>::apply(prop))
+      else if(auto doubleSeries = ConvertToTimeSeriesDouble<bool>::apply(prop))
       {
         return doubleSeries;
       }

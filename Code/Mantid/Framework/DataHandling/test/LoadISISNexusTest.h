@@ -13,6 +13,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/LogFilter.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -52,6 +53,14 @@ private:
     // Check that the logs also contain a current_period property.
     Property* current_period_log = fetchCurrentPeriodLog(workspace);
     TS_ASSERT_EQUALS(expectedPeriodNumber, atoi(current_period_log->value().c_str()));
+
+    // Check time series properties have been filtered by period
+    p = NULL;
+    TSM_ASSERT_THROWS_NOTHING("Cannot retrieve stheta log", p = workspace->run().getLogData("stheta"));
+    auto stheta = dynamic_cast<FilteredTimeSeriesProperty<double>*>(p);
+    TSM_ASSERT("stheta log has not been converted to a FilteredTimeSeries", stheta);
+    TS_ASSERT(42 > stheta->size());
+
   }
 
 public:

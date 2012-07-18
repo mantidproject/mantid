@@ -83,7 +83,7 @@ public:
 
     const API::Run & run = testWS->run();
     const std::vector< Property* >& logs = run.getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 34);
+    TS_ASSERT_EQUALS(logs.size(), 33);
 
     TimeSeriesProperty<std::string>* slog = dynamic_cast<TimeSeriesProperty<std::string>*>(run.getLogData("icp_event"));
     TS_ASSERT(slog);

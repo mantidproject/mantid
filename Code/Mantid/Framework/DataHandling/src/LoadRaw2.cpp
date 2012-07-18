@@ -485,8 +485,6 @@ namespace Mantid
       }
 
       if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
-          LoadLog* plog=dynamic_cast<LoadLog*>(loadLog.get());
-          if(plog) m_perioids=plog->getPeriodsProperty();
     }
 
     double LoadRaw2::dblSqrt(double in)

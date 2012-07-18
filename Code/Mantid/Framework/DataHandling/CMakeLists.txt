@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/GroupDetectors2.cpp
 	src/ISISDataArchive.cpp
 	src/ISISHistoDataListener.cpp
+	src/ISISRunLogs.cpp
 	src/LiveDataAlgorithm.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
@@ -154,6 +155,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/GroupDetectors2.h
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/ISISHistoDataListener.h
+	inc/MantidDataHandling/ISISRunLogs.h
 	inc/MantidDataHandling/LiveDataAlgorithm.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h

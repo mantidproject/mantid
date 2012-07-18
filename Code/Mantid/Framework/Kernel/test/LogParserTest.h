@@ -217,9 +217,9 @@ public:
     {
       mkICPVariant();
       LogParser lp(icp_file.path());
-      const boost::shared_ptr<Property> prop = lp.getPeriodsProperty();
-      const boost::shared_ptr<TimeSeriesProperty<int> > timeseriesprop = boost::dynamic_pointer_cast<TimeSeriesProperty<int> >(prop);
-      TS_ASSERT(timeseriesprop != NULL);
+      const Property * prop = lp.createAllPeriodsLog();
+      const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int>*>(prop);
+      TS_ASSERT(timeseriesprop);
       //Check the size
       TS_ASSERT_EQUALS(4, timeseriesprop->size());
       //Check the exact time stamps
@@ -240,9 +240,9 @@ public:
       
       LogParser logparser(log);
 
-      const boost::shared_ptr<Property> prop = logparser.getPeriodsProperty();
-      const boost::shared_ptr<TimeSeriesProperty<int> > timeseriesprop = boost::dynamic_pointer_cast<TimeSeriesProperty<int> >(prop);
-      TS_ASSERT(timeseriesprop != NULL);
+      const Property * prop = logparser.createAllPeriodsLog();
+      const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int>*>(prop);
+      TS_ASSERT(timeseriesprop);
       //Check the size
       TS_ASSERT_EQUALS(4, timeseriesprop->size());
        //Check the exact time stamps
@@ -265,9 +265,9 @@ public:
       
       LogParser logparser(log);
 
-      const boost::shared_ptr<Property> prop = logparser.getPeriodsProperty();
-      const boost::shared_ptr<TimeSeriesProperty<int> > timeseriesprop = boost::dynamic_pointer_cast<TimeSeriesProperty<int> >(prop);
-      TS_ASSERT(timeseriesprop != NULL);
+      const Property *prop = logparser.createAllPeriodsLog();
+      const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int>*>(prop);
+      TS_ASSERT(timeseriesprop);
       //Check the size
       TS_ASSERT_EQUALS(4, timeseriesprop->size());
        //Check the exact time stamps
@@ -291,9 +291,9 @@ public:
       
       LogParser logparser(log);
 
-      const boost::shared_ptr<Property> prop = logparser.getPeriodsProperty();
-      const boost::shared_ptr<TimeSeriesProperty<int> > timeseriesprop = boost::dynamic_pointer_cast<TimeSeriesProperty<int> >(prop);
-      TS_ASSERT(timeseriesprop != NULL);
+      const Property *prop = logparser.createAllPeriodsLog();
+      const auto *timeseriesprop = dynamic_cast<const TimeSeriesProperty<int>*>(prop);
+      TS_ASSERT(timeseriesprop);
       //Check the size
       TS_ASSERT_EQUALS(3, timeseriesprop->size());
        //Check the exact time stamps
