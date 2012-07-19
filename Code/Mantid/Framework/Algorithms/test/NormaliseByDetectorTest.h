@@ -83,7 +83,7 @@ using namespace Mantid::API;
     /**
   Helper method for running the algorithm and simply verifying that it runs without exception producing an output workspace..
   */
-  MatrixWorkspace_sptr do_test_doesnt_throw_on_execution(MatrixWorkspace_sptr inputWS, bool parallel = false)
+  MatrixWorkspace_sptr do_test_doesnt_throw_on_execution(MatrixWorkspace_sptr inputWS, bool parallel = true)
   {
     NormaliseByDetector alg(parallel);
     alg.setRethrows(true);
@@ -338,13 +338,13 @@ public:
     do_test_doesnt_throw_on_execution(inputWS2);
   }
 
-  //void test_parallel_application_throws_nothing()
-  //{
-  //  // Linear function 2*x + 1 applied to each x-value.
-  //  MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
-  //  const bool parallel = true;
-  //  do_test_doesnt_throw_on_execution(inputWS, parallel);
-  //}
+  void test_parallel_application_throws_nothing()
+  {
+    // Linear function 2*x + 1 applied to each x-value.
+    MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
+    const bool parallel = true;
+    do_test_doesnt_throw_on_execution(inputWS, parallel);
+  }
 
   void test_sequential_application_throws_nothing()
   {
@@ -386,54 +386,54 @@ public:
     }
   }
 
-  //void test_compare_sequential_and_parallel_results()
-  //{
-  //  const std::string outWSName = "normalised_ws";
-  //  // Linear function 2*x + 1 applied to each x-value. INSTRUMENT LEVEL FIT FUNCTION ONLY.
-  //  MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
-  //  // Extract the output workspace so that we can verify the normalisation.
-  //  const bool parallel = true;
-  //  MatrixWorkspace_sptr outWS_parallel = do_test_doesnt_throw_on_execution(inputWS, parallel); //EXECUTES THE ALG IN PARALLEL.
-  //  MatrixWorkspace_sptr outWS_sequential = do_test_doesnt_throw_on_execution(inputWS, !parallel); //EXECUTES THE ALG SEQUENTIALLY.
+  void test_compare_sequential_and_parallel_results()
+  {
+    const std::string outWSName = "normalised_ws";
+    // Linear function 2*x + 1 applied to each x-value. INSTRUMENT LEVEL FIT FUNCTION ONLY.
+    MatrixWorkspace_sptr inputWS = create_workspace_with_fitting_functions();
+    // Extract the output workspace so that we can verify the normalisation.
+    const bool parallel = true;
+    MatrixWorkspace_sptr outWS_parallel = do_test_doesnt_throw_on_execution(inputWS, parallel); //EXECUTES THE ALG IN PARALLEL.
+    MatrixWorkspace_sptr outWS_sequential = do_test_doesnt_throw_on_execution(inputWS, !parallel); //EXECUTES THE ALG SEQUENTIALLY.
 
-  //  // Output workspaces should have same number of histograms.
-  //  TS_ASSERT_EQUALS(2, outWS_parallel->getNumberHistograms());
-  //  TS_ASSERT_EQUALS(outWS_parallel->getNumberHistograms(), outWS_sequential->getNumberHistograms());
+    // Output workspaces should have same number of histograms.
+    TS_ASSERT_EQUALS(2, outWS_parallel->getNumberHistograms());
+    TS_ASSERT_EQUALS(outWS_parallel->getNumberHistograms(), outWS_sequential->getNumberHistograms());
 
-  //  // Test the application of the linear function
-  //  for(size_t wsIndex = 0; wsIndex < inputWS->getNumberHistograms(); ++wsIndex)
-  //  {
-  //    const MantidVec& yValuesParallel = outWS_parallel->readY(wsIndex);
-  //    const MantidVec& xValuesParallel = outWS_parallel->readX(wsIndex);
-  //    const MantidVec& eValuesParallel = outWS_parallel->readE(wsIndex);
+    // Test the application of the linear function
+    for(size_t wsIndex = 0; wsIndex < inputWS->getNumberHistograms(); ++wsIndex)
+    {
+      const MantidVec& yValuesParallel = outWS_parallel->readY(wsIndex);
+      const MantidVec& xValuesParallel = outWS_parallel->readX(wsIndex);
+      const MantidVec& eValuesParallel = outWS_parallel->readE(wsIndex);
 
-  //    const MantidVec& yValuesSequential = outWS_sequential->readY(wsIndex);
-  //    const MantidVec& xValuesSequential = outWS_sequential->readX(wsIndex);
-  //    const MantidVec& eValuesSequential = outWS_sequential->readE(wsIndex);
+      const MantidVec& yValuesSequential = outWS_sequential->readY(wsIndex);
+      const MantidVec& xValuesSequential = outWS_sequential->readX(wsIndex);
+      const MantidVec& eValuesSequential = outWS_sequential->readE(wsIndex);
 
-  //    // Compare against known sizes.
-  //    TS_ASSERT_EQUALS(3, yValuesParallel.size());
-  //    TS_ASSERT_EQUALS(3, eValuesParallel.size());
-  //    TS_ASSERT_EQUALS(4, xValuesParallel.size());
-  //    // Compare results from different execution types.
-  //    TS_ASSERT_EQUALS(yValuesSequential.size(), yValuesParallel.size());
-  //    TS_ASSERT_EQUALS(xValuesSequential.size(), xValuesParallel.size());
-  //    TS_ASSERT_EQUALS(eValuesSequential.size(), eValuesParallel.size());
+      // Compare against known sizes.
+      TS_ASSERT_EQUALS(3, yValuesParallel.size());
+      TS_ASSERT_EQUALS(3, eValuesParallel.size());
+      TS_ASSERT_EQUALS(4, xValuesParallel.size());
+      // Compare results from different execution types.
+      TS_ASSERT_EQUALS(yValuesSequential.size(), yValuesParallel.size());
+      TS_ASSERT_EQUALS(xValuesSequential.size(), xValuesParallel.size());
+      TS_ASSERT_EQUALS(eValuesSequential.size(), eValuesParallel.size());
 
-  //    const MantidVec& yInputValues = inputWS->readY(wsIndex);
-  //    const MantidVec& xInputValues = inputWS->readX(wsIndex);
+      const MantidVec& yInputValues = inputWS->readY(wsIndex);
+      const MantidVec& xInputValues = inputWS->readX(wsIndex);
 
-  //    for(size_t binIndex = 0; binIndex < (xInputValues.size() - 1); ++binIndex)
-  //    {
-  //      const double wavelength = (xInputValues[binIndex] + xInputValues[binIndex+1])/2;
-  //      const double expectedValue = yInputValues[binIndex] / ( (2*wavelength) + 1 ); // According to the equation written into the instrument parameter file for the instrument component link.
-  //      // Compare against the known/calculated value.
-  //      TS_ASSERT_EQUALS(expectedValue, yValuesParallel[binIndex]);
-  //      // Compare results from different execution types.
-  //      TS_ASSERT_EQUALS(yValuesSequential[binIndex], yValuesParallel[binIndex]);
-  //    }
-  //  }
-  //}
+      for(size_t binIndex = 0; binIndex < (xInputValues.size() - 1); ++binIndex)
+      {
+        const double wavelength = (xInputValues[binIndex] + xInputValues[binIndex+1])/2;
+        const double expectedValue = yInputValues[binIndex] / ( (2*wavelength) + 1 ); // According to the equation written into the instrument parameter file for the instrument component link.
+        // Compare against the known/calculated value.
+        TS_ASSERT_EQUALS(expectedValue, yValuesParallel[binIndex]);
+        // Compare results from different execution types.
+        TS_ASSERT_EQUALS(yValuesSequential[binIndex], yValuesParallel[binIndex]);
+      }
+    }
+  }
 
   void test_workspace_with_detector_level_only_fit_functions()
   {
