@@ -681,6 +681,45 @@ std::string toString(const T value)
   return mess.str();
 }
 
+/**
+ * This assumes that the vector is sorted.
+ *
+ * @param value :: templated value (only works for integer types) to convert.
+ * @return A reduced string representation.
+ */
+template<typename T>
+std::string toString(const std::vector<T> &value)
+{
+  std::ostringstream mess;
+  auto it = value.begin();
+  auto last = value.end();
+  T start;
+  T stop;
+  for (; it != last; ++it)
+  {
+    start = *(it);
+    stop = start;
+    for ( ; it != last; ++it)
+    {
+      if ( (stop + static_cast<T>(1)) == *(it+1) )
+        stop = *(it+1);
+      else
+        break;
+    }
+    mess << start;
+    if (start != stop)
+      mess << "-" << stop;
+    if (it+1 != last)
+      mess << ",";
+  }
+  return mess.str();
+}
+
+template<typename T>
+std::string toString(const std::set<T> &value)
+{
+  return toString(std::vector<T>(value.begin(), value.end()));
+}
 
 //------------------------------------------------------------------------------------------------
 /**
@@ -1013,6 +1052,14 @@ template MANTID_KERNEL_DLL std::string toString(const size_t value); // Matches 
   template MANTID_KERNEL_DLL std::string toString(const uint64_t value);
 #endif
 template MANTID_KERNEL_DLL std::string toString(const std::string value);
+
+// this block should generate the vector ones as well
+template MANTID_KERNEL_DLL std::string toString(const std::set<int> &value);
+template MANTID_KERNEL_DLL std::string toString(const std::set<int16_t> &value);
+template MANTID_KERNEL_DLL std::string toString(const std::set<size_t> &value); // Matches uint64_t on Linux 64 & Win 64
+#if defined(__APPLE__) || ( defined(_WIN32) && !defined(_WIN64)) || (defined(__GNUC__) && !defined(__LP64__)) // Mac or 32-bit compiler
+  template MANTID_KERNEL_DLL std::string toString(const std::set<uint64_t> &value);
+#endif
 
 template MANTID_KERNEL_DLL int convPartNum(const std::string&,double&);
 template MANTID_KERNEL_DLL int convPartNum(const std::string&,int&);
