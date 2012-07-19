@@ -5,18 +5,13 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <Poco/NObserver.h>
 
 namespace Mantid
 {
 namespace API
 {
-  //----------------------------------------------------------------------
-  // Forward declarations
-  //----------------------------------------------------------------------
-  class AlgorithmStartingNotification;
-
 /**
  Observes Algorithm notifications: start,progress,finish,error.
  Hides Poco::Notification API from the user. 
