@@ -16,98 +16,94 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-namespace
+/*
+This builder type provides a convenient way to create and change the contents of a virtual file of the type expected 
+by the ImportMDEventWorkspace algorithm.
+
+This type is particularly useful when generating corrupt file contents, as it allows individual apects of the file contents to be modified independently.
+*/
+class FileContentsBuilder
 {
-  /*
-  This builder type provides a convenient way to create and change the contents of a virtual file of the type expected 
-  by the ImportMDEventWorkspace algorithm.
+private:
+  std::string m_DimensionBlock;
+  std::string m_MDEventsBlock;
+  std::string m_DimensionEntries;
+  std::string m_MDEventEntries;
+public:
+  FileContentsBuilder() : 
+      m_DimensionBlock(ImportMDEventWorkspace::DimensionBlockFlag()), 
+        m_MDEventsBlock(ImportMDEventWorkspace::MDEventBlockFlag()),
+        m_DimensionEntries("a A U 10\nb B U 11"),
+        m_MDEventEntries("1 1 1 1")
+      {
+      }
 
-  This type is particularly useful when generating corrupt file contents, as it allows individual apects of the file contents to be modified independently.
-  */
-  class FileContentsBuilder
+      void setDimensionBlock(const std::string& value)
+      {
+        m_DimensionBlock = value;
+      }
+
+      void setMDEventBlock(const std::string& value)
+      {
+        m_MDEventsBlock = value;
+      }
+
+      void setDimensionEntries(const std::string& value)
+      {
+        m_DimensionEntries = value;
+      }
+
+      void setMDEventEntries(const std::string& value)
+      {
+        m_MDEventEntries = value;
+      }
+
+      std::string create() const
+      {
+        const std::string newline = "\n";
+        return m_DimensionBlock + newline + m_DimensionEntries + newline + m_MDEventsBlock + newline + m_MDEventEntries + newline;
+      }
+};
+
+
+/**
+Helper type. Creates a test file, and also manages the resource to ensure that the file is closed and removed, no matter what the outcome of the test.
+
+Uses a 
+*/
+class MDFileObject
+{
+public:
+
+  /// Create a simple input file.
+  MDFileObject(const FileContentsBuilder& builder = FileContentsBuilder(), std::string filename="test_import_md_event_workspace_file.txt") : m_filename(filename)
   {
-  private:
-    std::string m_DimensionBlock;
-    std::string m_MDEventsBlock;
-    std::string m_DimensionEntries;
-    std::string m_MDEventEntries;
-  public:
-    FileContentsBuilder() : 
-        m_DimensionBlock(ImportMDEventWorkspace::DimensionBlockFlag()), 
-          m_MDEventsBlock(ImportMDEventWorkspace::MDEventBlockFlag()),
-          m_DimensionEntries("a A U 10\nb B U 11"),
-          m_MDEventEntries("1 1 1 1")
-        {
-        }
+    m_file.open (filename.c_str());
+    // Invoke the builder to create the contents of the file.
+    m_file << builder.create();
+    m_file.close();
+  }
 
-        void setDimensionBlock(const std::string& value)
-        {
-          m_DimensionBlock = value;
-        }
-
-        void setMDEventBlock(const std::string& value)
-        {
-          m_MDEventsBlock = value;
-        }
-
-        void setDimensionEntries(const std::string& value)
-        {
-          m_DimensionEntries = value;
-        }
-
-        void setMDEventEntries(const std::string& value)
-        {
-          m_MDEventEntries = value;
-        }
-
-        std::string create() const
-        {
-          const std::string newline = "\n";
-          return m_DimensionBlock + newline + m_DimensionEntries + newline + m_MDEventsBlock + newline + m_MDEventEntries + newline;
-        }
-  };
-
-
-  /**
-  Helper type. Creates a test file, and also manages the resource to ensure that the file is closed and removed, no matter what the outcome of the test.
-
-  Uses a 
-  */
-  class MDFileObject
+  std::string getFileName() const
   {
-  public:
+    return m_filename;
+  }
 
-    /// Create a simple input file.
-    MDFileObject(const FileContentsBuilder& builder = FileContentsBuilder(), std::string filename="test_import_md_event_workspace_file.txt") : m_filename(filename)
-    {
-      m_file.open (filename.c_str());
-      // Invoke the builder to create the contents of the file.
-      m_file << builder.create();
-      m_file.close();
-    }
+  /// Free up resources.
+  ~MDFileObject()
+  {
+    m_file.close();
+    if( remove( m_filename.c_str() ) != 0 )
+      throw std::runtime_error("cannot remove " + m_filename);
+  }
 
-    std::string getFileName() const
-    {
-      return m_filename;
-    }
-
-    /// Free up resources.
-    ~MDFileObject()
-    {
-      m_file.close();
-      if( remove( m_filename.c_str() ) != 0 )
-        throw std::runtime_error("cannot remove " + m_filename);
-    }
-
-  private:
-    std::string m_filename;
-    std::ofstream m_file;
-    // Following methods keeps us from being able to put objects of this type on the heap.
-    void *operator new(size_t);
-    void *operator new[](size_t);
-  };
-}
-
+private:
+  std::string m_filename;
+  std::ofstream m_file;
+  // Following methods keeps us from being able to put objects of this type on the heap.
+  void *operator new(size_t);
+  void *operator new[](size_t);
+};
 
 class ImportMDEventWorkspaceTest : public CxxTest::TestSuite
 {
