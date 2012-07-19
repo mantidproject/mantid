@@ -13,6 +13,7 @@
 #include <fstream>
 
 #include "MantidDataHandling/LoadParameterFile.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAlgorithms/NormaliseByDetector.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -20,11 +21,6 @@
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
-
-class NormaliseByDetectorTest : public CxxTest::TestSuite
-{
-
-private:
 
   /// File object type. Provides exception save file creation/destruction.
   class FileObject
@@ -60,6 +56,48 @@ private:
     void *operator new[](size_t);
   };
 
+  /**
+  Helper function. Runs LoadParameterAlg, to get an instrument parameter definition from a file onto a workspace.
+  */
+  void apply_instrument_parameter_file_to_workspace(MatrixWorkspace_sptr ws, const FileObject& file)
+  {
+    // Load the Instrument Parameter file over the existing test workspace + instrument.
+    using DataHandling::LoadParameterFile;
+    LoadParameterFile loadParameterAlg;
+    loadParameterAlg.setRethrows(true);
+    loadParameterAlg.initialize();
+    loadParameterAlg.setPropertyValue("Filename", file.getFileName());
+    loadParameterAlg.setProperty("Workspace", ws);
+    loadParameterAlg.execute();
+  }
+
+    /**
+  Helper method for running the algorithm and simply verifying that it runs without exception producing an output workspace..
+  */
+  MatrixWorkspace_sptr do_test_doesnt_throw_on_execution(MatrixWorkspace_sptr inputWS, bool parallel = true)
+  {
+    NormaliseByDetector alg(parallel);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspace", inputWS);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr outWS =AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    TS_ASSERT(outWS != NULL);
+    return outWS;
+  }
+
+/**
+
+Functionality Tests
+
+*/
+class NormaliseByDetectorTest : public CxxTest::TestSuite
+{
+
+private:
+
+
   /** Helper function, creates a histogram workspace with an instrument with 2 detectors, and 2 spectra.
       Y-values are flat accross the x bins. Which makes it easy to calculate the expected value for any fit function applied to the X-data.
   */
@@ -78,21 +116,6 @@ private:
     MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName);
     ws->setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));
     return ws;
-  }
-
-  /**
-  Helper function. Runs LoadParameterAlg, to get an instrument parameter definition from a file onto a workspace.
-  */
-  void apply_instrument_parameter_file_to_workspace(MatrixWorkspace_sptr ws, const FileObject& file)
-  {
-    // Load the Instrument Parameter file over the existing test workspace + instrument.
-    using DataHandling::LoadParameterFile;
-    LoadParameterFile loadParameterAlg;
-    loadParameterAlg.setRethrows(true);
-    loadParameterAlg.initialize();
-    loadParameterAlg.setPropertyValue("Filename", file.getFileName());
-    loadParameterAlg.setProperty("Workspace", ws);
-    loadParameterAlg.execute();
   }
 
   /**
@@ -261,22 +284,6 @@ private:
     alg.setPropertyValue("OutputWorkspace", "out");
     alg.setProperty("InputWorkspace", inputWS);
     TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
-  }
-
-  /**
-  Helper method for running the algorithm and simply verifying that it runs without exception producing an output workspace..
-  */
-  MatrixWorkspace_sptr do_test_doesnt_throw_on_execution(MatrixWorkspace_sptr inputWS, bool parallel = true)
-  {
-    NormaliseByDetector alg(parallel);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setPropertyValue("OutputWorkspace", "out");
-    alg.setProperty("InputWorkspace", inputWS);
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    MatrixWorkspace_sptr outWS =AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
-    TS_ASSERT(outWS != NULL);
-    return outWS;
   }
 
 public:
@@ -491,6 +498,100 @@ public:
 
   }
 
+};
+
+/**
+
+Performance Tests
+
+*/
+class NormaliseByDetectorTestPerformance : public CxxTest::TestSuite
+{
+private:
+
+  MatrixWorkspace_sptr ws;
+
+  /// Helper method to run common sanity checks.
+  void do_basic_checks(MatrixWorkspace_sptr normalisedWS)
+  {
+    TS_ASSERT(normalisedWS != NULL);
+    TS_ASSERT(ws->getNumberHistograms() == normalisedWS->getNumberHistograms());
+    TS_ASSERT(ws->readX(0).size() == normalisedWS->readX(0).size());
+    TS_ASSERT(ws->readY(0).size() == normalisedWS->readY(0).size());
+    TS_ASSERT(ws->readE(0).size() == normalisedWS->readE(0).size());
+  }
+
+public:
+
+  NormaliseByDetectorTestPerformance()
+  {
+    // Load some data
+    IAlgorithm* loadalg = FrameworkManager::Instance().createAlgorithm("Load");
+    loadalg->setRethrows(true);
+    loadalg->initialize();
+    loadalg->setPropertyValue("Filename", "POLREF00004699.nxs");
+    loadalg->setPropertyValue("OutputWorkspace", "testws");
+    loadalg->execute();
+    
+    // Convert units to wavelength
+    IAlgorithm* unitsalg = FrameworkManager::Instance().createAlgorithm("ConvertUnits");
+    unitsalg->initialize();
+    unitsalg->setPropertyValue("InputWorkspace", "testws");
+    unitsalg->setPropertyValue("OutputWorkspace", "testws");
+    unitsalg->setPropertyValue("Target", "Wavelength");
+    unitsalg->execute();
+
+    // Convert the specturm axis ot signed_theta
+    IAlgorithm* specaxisalg = FrameworkManager::Instance().createAlgorithm("ConvertSpectrumAxis");
+    specaxisalg->initialize();
+    specaxisalg->setPropertyValue("InputWorkspace", "testws");
+    specaxisalg->setPropertyValue("OutputWorkspace", "testws");
+    specaxisalg->setPropertyValue("Target", "signed_theta");
+    specaxisalg->execute();
+    
+    WorkspaceGroup_sptr wsGroup = API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("testws");
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsGroup->getItem(0));
+
+    const std::string instrumentName = ws->getInstrument()->getName();
+
+    // Create a parameter file, with a root equation that will apply to all detectors.
+    const std::string parameterFileContents =  boost::str(boost::format(
+      "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
+       <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
+          <component-link name=\"%1%\">\n\
+           <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
+               <formula eq=\"1\" result-unit=\"Wavelength\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
+               <formula eq=\"2\" result-unit=\"Wavelength\"/>\n\
+               <fixed />\n\
+           </parameter>\n\
+           </component-link>\n\
+        </parameter-file>\n") % instrumentName);
+
+    // Create a temporary Instrument Parameter file.
+    FileObject file(parameterFileContents, instrumentName + "_Parameters.xml");
+    
+    // Apply parameter file to workspace.
+    apply_instrument_parameter_file_to_workspace(ws, file);
+  }
+
+  void testSequential()
+  {
+    bool parallel = false;
+    MatrixWorkspace_sptr normalisedWS = do_test_doesnt_throw_on_execution(ws, parallel);
+    // Run some basic sanity checks
+    do_basic_checks(normalisedWS);
+  }
+
+  void testParallel()
+  {
+    bool parallel = true;
+    MatrixWorkspace_sptr normalisedWS = do_test_doesnt_throw_on_execution(ws, parallel);
+    // Run some basic sanity checks
+    do_basic_checks(normalisedWS);
+  }
 };
 
 
