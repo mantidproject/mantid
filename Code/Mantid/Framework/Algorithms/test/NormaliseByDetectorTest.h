@@ -387,7 +387,7 @@ public:
       for(size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex)
       {
         const double wavelength = (xValues[binIndex] + xValues[binIndex+1])/2;
-        const double expectedValue = yInputValues[binIndex] / ( (1*wavelength) + wsIndex ); // According to the equation written into the instrument parameter file for the detector component link.
+        const double expectedValue = yInputValues[binIndex] / ( (1*wavelength) + static_cast<double>(wsIndex) ); // According to the equation written into the instrument parameter file for the detector component link.
         TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
       }
     }
@@ -426,7 +426,7 @@ public:
       for(size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex)
       {
         const double wavelength = (xValues[binIndex] + xValues[binIndex+1])/2;
-        const double expectedValue = yInputValues[binIndex] / ( (1*wsIndex*wavelength) + 3.0 ); // According to the equation written into the instrument parameter file for the detector component link.
+        const double expectedValue = yInputValues[binIndex] / ( (1*static_cast<double>(wsIndex)*wavelength) + 3.0 ); // According to the equation written into the instrument parameter file for the detector component link.
         TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
       }
     }
