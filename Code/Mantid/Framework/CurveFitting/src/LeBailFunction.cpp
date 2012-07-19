@@ -3,7 +3,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <gsl/gsl_sf_erf.h>
 
-#define DEFAULTPEAKWIDTHFACTOR 8.0
+#define PEAKRADIUS 8.0
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -225,10 +225,7 @@ namespace CurveFitting
       mPeaks[id]->setParameter("Gamma", gamma);
 
       // c) Calculate individual peak range
-      double fwhm = mPeaks[id]->fwhm();
-      double tof_low = tof_h - DEFAULTPEAKWIDTHFACTOR*fwhm;
-      double tof_upper = tof_h + DEFAULTPEAKWIDTHFACTOR*fwhm;
-      mPeaks[id]->setCalculationRange(tof_low, tof_upper);
+      mPeaks[id]->setPeakRadius(PEAKRADIUS);
 
       // d) Calculate peak
       mPeaks[id]->function1D(tempout, xValues, nData);
