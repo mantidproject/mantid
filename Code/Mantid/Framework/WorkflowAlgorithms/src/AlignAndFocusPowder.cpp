@@ -11,6 +11,8 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
 
 using Mantid::Geometry::Instrument_const_sptr;
@@ -59,7 +61,10 @@ void AlignAndFocusPowder::init()
     "Optional: An OffsetsWorkspace workspace giving the detector calibration values.");
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace","",Direction::Input, PropertyMode::Optional),
     "Optional: An Workspace workspace giving which detectors are masked.");
-  declareProperty("Params","-0.004","The binning parameters: Positive is linear bins, negative is logarithmic (Default:-0.004)");
+  declareProperty(new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
+        "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
+        "this can be followed by a comma and more widths and last boundary pairs.\n"
+        "Negative width values indicate logarithmic binning.");
   declareProperty("Dspacing", true,"Bin in Dspace. (Default true)");
   declareProperty("CropMin", 0.0, "Minimum for Cropping TOF or dspace axis. (Default 0.) ");
   declareProperty("CropMax", 0.0, "Maximum for Croping TOF or dspace axis. (Default 0.) ");
@@ -96,7 +101,7 @@ void AlignAndFocusPowder::exec()
   // retrieve the properties
   m_inputW = getProperty("InputWorkspace");
   m_eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputW );
-  if (m_eventW != NULL)
+  if ((m_eventW != NULL))
   {
     if (getProperty("PreserveEvents"))
     {
@@ -110,7 +115,7 @@ void AlignAndFocusPowder::exec()
   OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
   MatrixWorkspace_sptr maskWS = getProperty("MaskWorkspace");
   GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
-  std::string params = getProperty("Params");
+  std::vector<double> params=getProperty("Params");
   bool dspace = getProperty("DSpacing");
   double xmin = getProperty("CropMin");
   double xmax = getProperty("CropMax");
@@ -119,7 +124,6 @@ void AlignAndFocusPowder::exec()
   double minwl = getProperty("CropWavelengthMin");
   double tmin = getProperty("TMin");
   double tmax = getProperty("TMax");
-
 
   // Get the input workspace
   if ((!offsetsWS || !maskWS || !groupWS) && !calFileName.empty())
@@ -137,19 +141,25 @@ void AlignAndFocusPowder::exec()
     AnalysisDataService::Instance().addOrReplace(instName+"_offsets", offsetsWS);
     AnalysisDataService::Instance().addOrReplace(instName+"_mask", maskWS);
   }
+  // Now create the output workspace
+  m_outputW = getProperty("OutputWorkspace");
+  if ( m_outputW != m_inputW )
+  {
+     m_outputW = WorkspaceFactory::Instance().create(m_inputW);
+  }
 
   if (xmin > 0. || xmax > 0.)
   {
 	  API::IAlgorithm_sptr cropAlg = createSubAlgorithm("CropWorkspace");
-	  cropAlg->setProperty("InputWorkspace", m_inputW);
+	  cropAlg->setProperty("InputWorkspace", m_outputW);
 	  if (xmin > 0.)cropAlg->setProperty("Xmin", xmin);
 	  if (xmax > 0.)cropAlg->setProperty("Xmax", xmax);
 	  cropAlg->executeAsSubAlg();
-	  m_inputW = cropAlg->getProperty("OutputWorkspace");
+	  m_outputW = cropAlg->getProperty("OutputWorkspace");
   }
 
   API::IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors");
-  maskAlg->setProperty("Workspace", m_inputW);
+  maskAlg->setProperty("Workspace", m_outputW);
   maskAlg->setProperty("MaskedWorkspace", instName+"_mask");
   maskAlg->executeAsSubAlg();
   m_outputW = maskAlg->getProperty("Workspace");
@@ -161,7 +171,6 @@ void AlignAndFocusPowder::exec()
 	  rebinAlg->setProperty("Params",params);
 	  rebinAlg->executeAsSubAlg();
 	  m_outputW = rebinAlg->getProperty("OutputWorkspace");
-	  setProperty("OutputWorkspace",m_outputW);
   }
 
   API::IAlgorithm_sptr alignAlg = createSubAlgorithm("AlignDetectors");
@@ -172,23 +181,22 @@ void AlignAndFocusPowder::exec()
 
   if(LRef > 0. || minwl > 0. || DIFCref > 0.)
   {
-          API::IAlgorithm_sptr convertAlg = createSubAlgorithm("ConvertUnits");
-          convertAlg->setProperty("InputWorkspace", m_outputW);
-          convertAlg->setProperty("Target","TOF");
-          convertAlg->executeAsSubAlg();
-          m_outputW = convertAlg->getProperty("OutputWorkspace");
+	  API::IAlgorithm_sptr convertAlg = createSubAlgorithm("ConvertUnits");
+	  convertAlg->setProperty("InputWorkspace", m_outputW);
+	  convertAlg->setProperty("Target","TOF");
+	  convertAlg->executeAsSubAlg();
+	  m_outputW = convertAlg->getProperty("OutputWorkspace");
   }
 
   if(LRef > 0.)
   {
-	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("RemoveLowResTOF");
+	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("UnwrapSNS");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("LRef",LRef);
 	  removeAlg->setProperty("Tmin",tmin);
 	  removeAlg->setProperty("Tmax",tmax);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
-	  setProperty("OutputWorkspace",m_outputW);
   }
 
   if(minwl > 0.)
@@ -199,7 +207,6 @@ void AlignAndFocusPowder::exec()
 	  removeAlg->setProperty("Tmin",tmin);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
-	  setProperty("OutputWorkspace",m_outputW);
   }
   else if(DIFCref > 0.)
   {
@@ -210,16 +217,15 @@ void AlignAndFocusPowder::exec()
 	  removeAlg->setProperty("Tmin",tmin);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
-	  setProperty("OutputWorkspace",m_outputW);
   }
 
   if(LRef > 0. || minwl > 0. || DIFCref > 0.)
   {
-          API::IAlgorithm_sptr convertAlg = createSubAlgorithm("ConvertUnits");
-          convertAlg->setProperty("InputWorkspace", m_outputW);
-          convertAlg->setProperty("Target","dSpacing");
-          convertAlg->executeAsSubAlg();
-          m_outputW = convertAlg->getProperty("OutputWorkspace");
+	  API::IAlgorithm_sptr convertAlg = createSubAlgorithm("ConvertUnits");
+	  convertAlg->setProperty("InputWorkspace", m_outputW);
+	  convertAlg->setProperty("Target","dSpacing");
+	  convertAlg->executeAsSubAlg();
+	  m_outputW = convertAlg->getProperty("OutputWorkspace");
   }
 
   if(dspace)
@@ -229,7 +235,6 @@ void AlignAndFocusPowder::exec()
 	  rebinAlg->setProperty("Params",params);
 	  rebinAlg->executeAsSubAlg();
 	  m_outputW = rebinAlg->getProperty("OutputWorkspace");
-	  setProperty("OutputWorkspace",m_outputW);
   }
 
   API::IAlgorithm_sptr focusAlg = createSubAlgorithm("DiffractionFocussing");
@@ -245,6 +250,8 @@ void AlignAndFocusPowder::exec()
   convertAlg->executeAsSubAlg();
   m_outputW = convertAlg->getProperty("OutputWorkspace");
 
+  params.erase(params.begin());
+  params.pop_back();
   API::IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin");
   rebinAlg->setProperty("InputWorkspace", m_outputW);
   rebinAlg->setProperty("Params",params);
@@ -267,7 +274,7 @@ void AlignAndFocusPowder::execEvent()
   OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
   MatrixWorkspace_sptr maskWS = getProperty("MaskWorkspace");
   GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
-  std::string params = getProperty("Params");
+  std::vector<double> params=getProperty("Params");
   bool dspace = getProperty("DSpacing");
   double xmin = getProperty("CropMin");
   double xmax = getProperty("CropMax");
@@ -299,47 +306,67 @@ void AlignAndFocusPowder::execEvent()
     AnalysisDataService::Instance().addOrReplace(instName+"_offsets", offsetsWS);
     AnalysisDataService::Instance().addOrReplace(instName+"_mask", maskWS);
   }
+  Progress progress(this,0.0,1.0,m_eventW->getNumberHistograms());
+
+  // generate the output workspace pointer
+  m_outputW = this->getProperty("OutputWorkspace");
+  EventWorkspace_sptr m_outputEventW;
+  if (m_outputW == m_inputW)
+    m_outputEventW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+  else
+  {
+    //Make a brand new EventWorkspace
+    m_outputEventW = boost::dynamic_pointer_cast<EventWorkspace>(
+    WorkspaceFactory::Instance().create("EventWorkspace", m_eventW->getNumberHistograms(), 2, 1));
+    //Copy geometry over.
+    WorkspaceFactory::Instance().initializeFromParent(m_eventW, m_outputEventW, false);
+    //You need to copy over the data as well.
+    m_outputEventW->copyDataFrom( (*m_eventW) );
+
+    //Cast to the matrixOutputWS and save it
+    m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEventW);
+  }
 
   if (filterBadPulses)
   {
     API::IAlgorithm_sptr filterAlg = createSubAlgorithm("FilterBadPulses");
-    filterAlg->setProperty("InputWorkspace", m_eventW);
+    filterAlg->setProperty("InputWorkspace", m_outputEventW);
     filterAlg->executeAsSubAlg();
-    m_eventW = filterAlg->getProperty("OutputWorkspace");
+    m_outputEventW = filterAlg->getProperty("OutputWorkspace");
   }
 
   if (removePromptPulseWidth > 0.)
   {
     API::IAlgorithm_sptr filterAlg = createSubAlgorithm("RemovePromptPulse");
-    filterAlg->setProperty("InputWorkspace", m_eventW);
+    filterAlg->setProperty("InputWorkspace", m_outputEventW);
     filterAlg->setProperty("Width", removePromptPulseWidth);
     filterAlg->executeAsSubAlg();
-    m_eventW = filterAlg->getProperty("OutputWorkspace");
+    m_outputEventW = filterAlg->getProperty("OutputWorkspace");
   }
 
   if (!filterName.empty())
   {
     API::IAlgorithm_sptr filterLogsAlg = createSubAlgorithm("FilterByLogValue");
-    filterLogsAlg->setProperty("InputWorkspace", m_eventW);
+    filterLogsAlg->setProperty("InputWorkspace", m_outputEventW);
     filterLogsAlg->setProperty("LogName", filterName);
     filterLogsAlg->setProperty("MinimumValue", filterMin);
     filterLogsAlg->setProperty("MaximumValue", filterMax);
     filterLogsAlg->executeAsSubAlg();
-    m_eventW = filterLogsAlg->getProperty("OutputWorkspace");
+    m_outputEventW = filterLogsAlg->getProperty("OutputWorkspace");
   }
 
   API::IAlgorithm_sptr compressAlg = createSubAlgorithm("CompressEvents");
-  compressAlg->setProperty("InputWorkspace", m_eventW);
+  compressAlg->setProperty("InputWorkspace", m_outputEventW);
   compressAlg->setProperty("Tolerance",tolerance);
   compressAlg->executeAsSubAlg();
-  m_eventW = compressAlg->getProperty("OutputWorkspace");
+  m_outputEventW = compressAlg->getProperty("OutputWorkspace");
 
-  m_eventW->sortAll(TOF_SORT, NULL);
+  m_outputEventW->sortAll(TOF_SORT, NULL);
 
   if (xmin > 0. || xmax > 0.)
   {
 	  API::IAlgorithm_sptr cropAlg = createSubAlgorithm("CropWorkspace");
-	  cropAlg->setProperty("InputWorkspace", m_inputW);
+	  cropAlg->setProperty("InputWorkspace", m_outputW);
 	  if (xmin > 0.)cropAlg->setProperty("Xmin", xmin);
 	  if (xmax > 0.)cropAlg->setProperty("Xmax", xmax);
 	  cropAlg->executeAsSubAlg();
@@ -347,7 +374,7 @@ void AlignAndFocusPowder::execEvent()
   }
 
   API::IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors");
-  maskAlg->setProperty("Workspace", m_inputW);
+  maskAlg->setProperty("Workspace", m_outputW);
   maskAlg->setProperty("MaskedWorkspace", instName+"_mask");
   maskAlg->executeAsSubAlg();
   m_outputW = maskAlg->getProperty("Workspace");
@@ -359,7 +386,6 @@ void AlignAndFocusPowder::execEvent()
 	  rebinAlg->setProperty("Params",params);
 	  rebinAlg->executeAsSubAlg();
 	  m_outputW = rebinAlg->getProperty("OutputWorkspace");
-	  setProperty("OutputWorkspace",m_outputW);
   }
 
   API::IAlgorithm_sptr alignAlg = createSubAlgorithm("AlignDetectors");
@@ -370,23 +396,22 @@ void AlignAndFocusPowder::execEvent()
 
   if(LRef > 0. || minwl > 0. || DIFCref > 0.)
   {
-          API::IAlgorithm_sptr convertAlg = createSubAlgorithm("ConvertUnits");
-          convertAlg->setProperty("InputWorkspace", m_outputW);
-          convertAlg->setProperty("Target","TOF");
-          convertAlg->executeAsSubAlg();
-          m_outputW = convertAlg->getProperty("OutputWorkspace");
+	  API::IAlgorithm_sptr convertAlg = createSubAlgorithm("ConvertUnits");
+	  convertAlg->setProperty("InputWorkspace", m_outputW);
+	  convertAlg->setProperty("Target","TOF");
+	  convertAlg->executeAsSubAlg();
+	  m_outputW = convertAlg->getProperty("OutputWorkspace");
   }
 
   if(LRef > 0.)
   {
-	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("RemoveLowResTOF");
+	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("UnwrapSNS");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("LRef",LRef);
 	  removeAlg->setProperty("Tmin",tmin);
 	  removeAlg->setProperty("Tmax",tmax);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
-	  setProperty("OutputWorkspace",m_outputW);
   }
 
   if(minwl > 0.)
@@ -397,7 +422,6 @@ void AlignAndFocusPowder::execEvent()
 	  removeAlg->setProperty("Tmin",tmin);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
-	  setProperty("OutputWorkspace",m_outputW);
   }
   else if(DIFCref > 0.)
   {
@@ -408,16 +432,15 @@ void AlignAndFocusPowder::execEvent()
 	  removeAlg->setProperty("Tmin",tmin);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
-	  setProperty("OutputWorkspace",m_outputW);
   }
 
   if(LRef > 0. || minwl > 0. || DIFCref > 0.)
   {
-          API::IAlgorithm_sptr convertAlg = createSubAlgorithm("ConvertUnits");
-          convertAlg->setProperty("InputWorkspace", m_outputW);
-          convertAlg->setProperty("Target","dSpacing");
-          convertAlg->executeAsSubAlg();
-          m_outputW = convertAlg->getProperty("OutputWorkspace");
+	  API::IAlgorithm_sptr convertAlg = createSubAlgorithm("ConvertUnits");
+	  convertAlg->setProperty("InputWorkspace", m_outputW);
+	  convertAlg->setProperty("Target","dSpacing");
+	  convertAlg->executeAsSubAlg();
+	  m_outputW = convertAlg->getProperty("OutputWorkspace");
   }
 
   if(dspace)
@@ -427,10 +450,9 @@ void AlignAndFocusPowder::execEvent()
 	  rebinAlg->setProperty("Params",params);
 	  rebinAlg->executeAsSubAlg();
 	  m_outputW = rebinAlg->getProperty("OutputWorkspace");
-	  setProperty("OutputWorkspace",m_outputW);
   }
 
-  m_eventW->sortAll(TOF_SORT, NULL);
+  m_outputEventW->sortAll(TOF_SORT, NULL);
 
   API::IAlgorithm_sptr focusAlg = createSubAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", m_outputW);
@@ -439,7 +461,7 @@ void AlignAndFocusPowder::execEvent()
   focusAlg->executeAsSubAlg();
   m_outputW = focusAlg->getProperty("OutputWorkspace");
 
-  m_eventW->sortAll(TOF_SORT, NULL);
+  m_outputEventW->sortAll(TOF_SORT, NULL);
 
   API::IAlgorithm_sptr convertAlg = createSubAlgorithm("ConvertUnits");
   convertAlg->setProperty("InputWorkspace", m_outputW);
@@ -447,6 +469,8 @@ void AlignAndFocusPowder::execEvent()
   convertAlg->executeAsSubAlg();
   m_outputW = convertAlg->getProperty("OutputWorkspace");
 
+  params.erase(params.begin());
+  params.pop_back();
   API::IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin");
   rebinAlg->setProperty("InputWorkspace", m_outputW);
   rebinAlg->setProperty("Params",params);
