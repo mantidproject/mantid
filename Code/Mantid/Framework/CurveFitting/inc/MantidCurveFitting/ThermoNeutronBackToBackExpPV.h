@@ -57,7 +57,7 @@ namespace CurveFitting
     virtual const std::string category() const { return "Peak";}
 
     /// Set up the range of peak calculation for higher efficiency
-    void setCalculationRange(double tof_low, double tof_upper);
+    // void setCalculationRange(double tof_low, double tof_upper);
     /// Calculate peak
     void geneatePeak(double* out, const double* xValues, const size_t nData);
     ///

@@ -24,8 +24,7 @@ namespace CurveFitting
    */
   ThermoNeutronBackToBackExpPV::ThermoNeutronBackToBackExpPV() : mFWHM(0.0)
   {
-    mLowTOF = 0.0;
-    mUpperTOF = 1.0E20;
+
   }
 
   ThermoNeutronBackToBackExpPV::~ThermoNeutronBackToBackExpPV()
@@ -71,15 +70,9 @@ namespace CurveFitting
     return height;
   };
 
-  /*
-   * Calculate FWHM
-   * It will be calculated each time when it is called because
-   * there is no record whether any peak parameter is changed since last caculation
-   * of FWHM.
-   */
   double ThermoNeutronBackToBackExpPV::fwhm() const
   {
-    if (mFWHM < 1.0E-8)
+    if (fabs(mFWHM) < 1.0E-8)
     {
       double sigma2 = this->getParameter("Sigma2");
       double gamma = this->getParameter("Gamma");
@@ -120,24 +113,17 @@ namespace CurveFitting
     double H, eta;
     calHandEta(sigma2, gamma, H, eta);
 
-    g_log.debug() << "DB1140: TOF_h = " << tof_h << " h = " << height << ", I = " << this->getParameter("I") << " alpha = "
-        << alpha << " beta = " << beta << " H = " << H << " eta = " << eta << "  Peak Range = " << mLowTOF << ", "
-        << mUpperTOF << std::endl;
+    // g_log.debug() << "DB1140: TOF_h = " << tof_h << " h = " << height << ", I = " << this->getParameter("I") << " alpha = "
+    // << alpha << " beta = " << beta << " H = " << H << " eta = " << eta << std::endl;
 
     // 2. Do calculation
-    g_log.debug() << "DB1143:  nData = " << nData << "  From " << xValues[0] << " To " << xValues[nData-1] << std::endl;
+    std::cout << "DB1143:  nData = " << nData << "  From " << xValues[0] << " To " << xValues[nData-1] << std::endl;
     for (size_t id = 0; id < nData; ++id)
     {
-      if (xValues[id] >= mLowTOF &&  xValues[id] <= mUpperTOF)
-      {
-        double dT = xValues[id]-tof_h;
-        double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
-        out[id] = height*omega;
-      }
-      else
-      {
-        out[id] = 0.0;
-      }
+      double dT = xValues[id]-tof_h;
+      double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
+      out[id] = height*omega;
+      // std::cout << "DB1143  " << xValues[id] << "   " << out[id] << "   " << omega << std::endl;
     }
 
     return;
@@ -223,22 +209,6 @@ namespace CurveFitting
     }
 
     return;
-  }
-
-  /*
-   * Set the range for a peak to be calculated
-   */
-  void ThermoNeutronBackToBackExpPV::setCalculationRange(double tof_low, double tof_upper)
-  {
-    mLowTOF = tof_low;
-    mUpperTOF = tof_upper;
-
-    return;
-  }
-
-  void ThermoNeutronBackToBackExpPV::resetFWHM()
-  {
-    mFWHM = 0.0;
   }
 
 } // namespace Mantid
