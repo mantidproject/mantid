@@ -84,7 +84,7 @@ namespace Mantid
         std::stringstream stream;
         stream << det->getName() << " and all of it's parent components, have no fitting type parameters. This algorithm cannot be run without fitting parameters.";
         this->g_log.warning(stream.str());
-        throw std::invalid_argument(stream.str());
+        throw std::runtime_error(stream.str());
       }
       return parameter->value<Geometry::FitParameter>();
     }
@@ -120,14 +120,14 @@ namespace Mantid
 
         if ( fitParam.getFormula().compare("") == 0 )
         {
-          throw std::invalid_argument("A Forumla has not been provided for a fit function");
+          throw std::runtime_error("A Forumla has not been provided for a fit function");
         }
         else
         {
           std::string resultUnitStr = fitParam.getResultUnit();
           if ( !resultUnitStr.empty() && resultUnitStr.compare("Wavelength") != 0)
           {
-            throw std::invalid_argument("Units for function parameters must be in Wavelength");
+            throw std::runtime_error("Units for function parameters must be in Wavelength");
           }  
         } 
         mu::Parser p;
