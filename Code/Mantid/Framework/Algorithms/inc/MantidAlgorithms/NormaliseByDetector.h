@@ -5,13 +5,19 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
+namespace API
+{
+  class MatrixWorkspace;
+}
 namespace Algorithms
 {
 
-  /** NormaliseByDetector : TODO: DESCRIPTION
+  /** NormaliseByDetector : Normalises a workspace with respect to the detector efficiency function stored against components in the instrument parameters. See wiki for more details.
+    Detector efficiency functions are calculated using the wavelengths in the input workspace.
     
     @date 2012-07-17
 
@@ -46,7 +52,10 @@ namespace Algorithms
     virtual const std::string category() const;
 
   private:
+    /// Try to parse a function parameter and extract the correctly typed parameter.
     const Mantid::Geometry::FitParameter tryParseFunctionParameter(Mantid::Geometry::Parameter_sptr parameter, Geometry::IDetector_const_sptr det);
+    /// Block to process histograms.
+    void processHistograms(boost::shared_ptr<Mantid::API::MatrixWorkspace> denominatorWS, boost::shared_ptr<const Mantid::API::MatrixWorkspace> inWS);
     virtual void initDocs();
     void init();
     void exec();
