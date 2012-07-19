@@ -8,6 +8,7 @@
 //Kernel
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
@@ -235,6 +236,22 @@ namespace PythonAPI
       .def("nthValue", &TimeSeriesProperty<int64_t>::nthValue)
       .def("nthTime", &TimeSeriesProperty<int64_t>::nthTime)
     ;
+
+    //----------------------------- Filtered time series ------------------------------------------------
+    /// Macro to reduce copy-and-paste
+    #define EXPORT_FILTEREDTIMESERIES_PROP(TYPE, suffix)\
+      register_ptr_to_python<FilteredTimeSeriesProperty<TYPE>*>();\
+      register_ptr_to_python<const FilteredTimeSeriesProperty<TYPE>*>();\
+      implicitly_convertible<FilteredTimeSeriesProperty<TYPE>*,const FilteredTimeSeriesProperty<TYPE>*>();\
+      \
+      class_<FilteredTimeSeriesProperty<TYPE>, bases<TimeSeriesProperty<TYPE> >, boost::noncopyable>("FilteredTimeSeriesProperty_"#suffix, no_init)\
+        .def("unfiltered", &FilteredTimeSeriesProperty<TYPE>::unfiltered, return_value_policy<return_by_value>(),\
+             "Returns a time series containing the unfiltered data") \
+        ;
+
+    EXPORT_FILTEREDTIMESERIES_PROP(double, dbl);
+    EXPORT_FILTEREDTIMESERIES_PROP(int32_t, int32_t)
+    EXPORT_FILTEREDTIMESERIES_PROP(int64_t, int64_t)
 
     class_<time_duration>("time_duration", no_init)
     .def("hours", &time_duration::hours, "Returns the normalized number of hours")

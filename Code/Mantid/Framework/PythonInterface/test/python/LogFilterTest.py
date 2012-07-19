@@ -12,10 +12,10 @@ class LogFilterTest(unittest.TestCase):
             alg = testhelpers.run_algorithm("LoadRaw", Filename="CSP78173.raw", OutputWorkspace='test', child=True)
             self.__class__._test_ws = alg.getProperty("OutputWorkspace_7").value
 
-    def test_filter_by_period(self):
+    def test_filter_by_period_does_nothing_to_filtered_data(self):
         run_info = self._test_ws.getRun()
         height_log = run_info.getLogData("height")
-        self.assertEquals(height_log.size(), 26)
+        self.assertEquals(height_log.size(), 6)
         period_log = run_info.getLogData("period 7")
         self.assertTrue(isinstance(period_log, BoolTimeSeriesProperty))
 
