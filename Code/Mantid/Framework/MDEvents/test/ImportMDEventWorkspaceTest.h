@@ -8,8 +8,10 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-
 #include "MantidMDEvents/ImportMDEventWorkspace.h"
+#include "MantidKernel/ConfigService.h"
+#include <Poco/Path.h>
+
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -76,9 +78,12 @@ class MDFileObject
 public:
 
   /// Create a simple input file.
-  MDFileObject(const FileContentsBuilder& builder = FileContentsBuilder(), std::string filename="test_import_md_event_workspace_file.txt") : m_filename(filename)
+  MDFileObject(const FileContentsBuilder& builder = FileContentsBuilder(), std::string filename="test_import_md_event_workspace_file.txt") 
   {
-    m_file.open (filename.c_str());
+    Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
+    path.append(filename);
+    m_filename = path.toString();
+    m_file.open (m_filename.c_str(), std::ios_base::out);
     // Invoke the builder to create the contents of the file.
     m_file << builder.create();
     m_file.close();
