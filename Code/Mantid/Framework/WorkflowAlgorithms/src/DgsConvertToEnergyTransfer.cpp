@@ -531,6 +531,24 @@ namespace WorkflowAlgorithms
           }
       }
 
+    if ("ISIS" == facility)
+      {
+        double scaleFactor = inputWS->getInstrument()->getNumberParameter("scale-factor")[0];
+        const std::string scaleFactorName = "ScaleFactor";
+        IAlgorithm_sptr csvw = this->createSubAlgorithm("CreateSingleValuedWorkspace");
+        csvw->setAlwaysStoreInADS(true);
+        csvw->setProperty("OutputWorkspace", scaleFactorName);
+        csvw->setProperty("DataValue", scaleFactor);
+        csvw->execute();
+
+        IAlgorithm_sptr mult = this->createSubAlgorithm("Multiply");
+        mult->setAlwaysStoreInADS(true);
+        mult->setProperty("LHSWorkspace", outWsName);
+        mult->setProperty("RHSWorkspace", scaleFactorName);
+        mult->setProperty("OutputWorkspace", outWsName);
+        mult->execute();
+      }
+
     MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     this->setProperty("OutputWorkspace", outputWS);
   }
