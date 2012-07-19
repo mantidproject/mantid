@@ -546,7 +546,7 @@
              <item>
               <widget class="QLabel" name="furyfit_lbSpectra" >
                <property name="text" >
-                <string>Spectra:</string>
+                <string>Spectrum:</string>
                </property>
               </widget>
              </item>

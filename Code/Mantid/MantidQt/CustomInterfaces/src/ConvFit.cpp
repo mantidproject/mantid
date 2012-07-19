@@ -141,30 +141,11 @@ namespace IDA
     Mantid::API::CompositeFunction_sptr function = createFunction();
 
     // get output name
-    QString ftype = "";
-    switch ( uiForm().confit_cbFitType->currentIndex() )
-    {
-    case 0:
-      ftype += "Delta"; break;
-    case 1:
-      ftype += "1L"; break;
-    case 2:
-      ftype += "2L"; break;
-    default:
-      break;
-    }
-    switch ( uiForm().confit_cbBackground->currentIndex() )
-    {
-    case 0:
-      ftype += "FixF_s"; break;
-    case 1:
-      ftype += "FitF_s"; break;
-    case 2:
-      ftype += "FitL_s"; break;
-    }
+    QString ftype = fitTypeString();
+    QString bg = backgroundString();
 
     QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + QString::fromStdString(m_cfInputWSName) + QString("')\n")).trimmed();
-    outputNm += QString("conv_") + ftype + uiForm().confit_leSpecNo->text();  
+    outputNm += QString("conv_") + ftype + bg + uiForm().confit_leSpecNo->text();  
     std::string output = outputNm.toStdString();
 
     Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
@@ -518,6 +499,67 @@ namespace IDA
     }
   }
 
+  /**
+   * Generate a string to describe the fit type selected by the user.
+   * Used when naming the resultant workspaces.
+   *
+   * Assertions used to guard against any future changes that dont take
+   * workspace naming into account.
+   *
+   * @returns the generated QString.
+   */
+  QString ConvFit::fitTypeString() const
+  {
+    QString fitType("");
+
+    if( m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
+      fitType += "Delta";
+
+    switch ( uiForm().confit_cbFitType->currentIndex() )
+    {
+    case 0:
+      break;
+    case 1:
+      fitType += "1L"; break;
+    case 2:
+      fitType += "2L"; break;
+    default:
+      assert( false ); // Should never happen.
+    }
+
+    // We should never get to a stage where the user is allowed to
+    // continue having not selected at least one fit - be it 
+    // Lorentzian, delta, or both.
+    assert( ! fitType.isEmpty() );
+
+    return fitType;
+  }
+  
+  /**
+   * Generate a string to describe the background selected by the user.
+   * Used when naming the resultant workspaces.
+   *
+   * Assertions used to guard against any future changes that dont take
+   * workspace naming into account.
+   *
+   * @returns the generated QString.
+   */
+  QString ConvFit::backgroundString() const
+  {
+    switch ( uiForm().confit_cbBackground->currentIndex() )
+    {
+    case 0:
+      return "FixF_s";
+    case 1:
+      return "FitF_s";
+    case 2:
+      return "FitL_s";
+    default: 
+      assert( false ); // Should never happen.
+      return "";
+    }
+  }
+
   void ConvFit::typeSelection(int index)
   {
     m_cfTree->removeProperty(m_cfProp["Lorentzian1"]);
@@ -714,19 +756,8 @@ namespace IDA
       return;
     }
 
-    QString bg = uiForm().confit_cbBackground->currentText();
-    if ( bg == "Fixed Flat" )
-    {
-      bg = "FixF";
-    }
-    else if ( bg == "Fit Flat" )
-    {
-      bg = "FitF";
-    }
-    else if ( bg == "Fit Linear" )
-    {
-      bg = "FitL";
-    }
+    QString ftype = fitTypeString();
+    QString bg = backgroundString();
 
     Mantid::API::CompositeFunction_sptr func = createFunction();
     std::string function = std::string(func->asString());
@@ -748,7 +779,8 @@ namespace IDA
   
     pyInput +=    
       "bg = '" + bg + "'\n"
-      "confitSeq(input, func, startx, endx, save, plot, bg, specMin, specMax)\n";
+      "ftype = '" + ftype + "'\n"
+      "confitSeq(input, func, startx, endx, save, plot, ftype, bg, specMin, specMax)\n";
 
     QString pyOutput = runPythonCode(pyInput);
   }

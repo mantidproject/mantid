@@ -56,7 +56,9 @@ namespace IDA
     boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tie=false);
     QtProperty* createLorentzian(const QString &);
     void populateFunction(boost::shared_ptr<Mantid::API::IFunction>, boost::shared_ptr<Mantid::API::IFunction>, QtProperty*, const std::string & pref, const bool tie=false);
-      
+    QString fitTypeString() const;
+    QString backgroundString() const;
+
     QIntValidator * m_intVal;
     QtStringPropertyManager* m_stringManager;
     QtTreePropertyBrowser* m_cfTree;

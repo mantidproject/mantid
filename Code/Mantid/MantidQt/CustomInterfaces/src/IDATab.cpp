@@ -172,6 +172,14 @@ namespace IDA
   {
     return m_parent->m_uiForm;
   }
+  
+  /**
+   * @returns a const handle to the UI form object stored in the IndirectDataAnalysis class.
+   */
+  const Ui::IndirectDataAnalysis & IDATab::uiForm() const
+  {
+    return m_parent->m_uiForm;
+  }
 
   /**
    * @returns a handle to the DoubleEditorFactory object stored in the IndirectDataAnalysis class.

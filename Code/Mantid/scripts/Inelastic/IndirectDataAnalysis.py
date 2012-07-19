@@ -5,6 +5,10 @@ from IndirectCommon import *
 from mantid import config, logger
 import math, re, os.path
 
+##############################################################################
+# Misc. Helper Functions
+##############################################################################
+
 def concatWSs(workspaces, unit, name):
     dataX = []
     dataY = []
@@ -43,6 +47,10 @@ def trimData(nSpec, vals, min, max):
             result.append(val)
     return result
 
+##############################################################################
+# ConvFit
+##############################################################################
+
 def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
@@ -70,8 +78,7 @@ def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
                 dataE.append(ws.cell(row,eCol))
         else:
             nSpec -= 1
-    suffix = str(nSpec / 2) + 'L' + BackG
-    outNm = Table + suffix
+    outNm = Table + "_Workspace"
     xAxisTrimmed = trimData(nSpec, xAxisVals, specMin, specMax)
     CreateWorkspace(OutputWorkspace=outNm, DataX=xAxisTrimmed, DataY=dataY, DataE=dataE, 
         Nspec=nSpec, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
@@ -94,26 +101,31 @@ def confitPlotSeq(inputWS, plot):
             plotSpecs.append(i)
     mp.plotSpectrum(inputWS, plotSpecs, True)
 
-def confitSeq(inputWS, func, startX, endX, save, plot, bg, specMin, specMax):
+def confitSeq(inputWS, func, startX, endX, save, plot, ftype, bg, specMin, specMax, Verbose=True):
     StartTime('ConvFit')
-    Verbose = True
     workdir = config['defaultsave.directory']
     input = inputWS+',i' + str(specMin)
     if (specMax == -1):
         specMax = mtd[inputWS].getNumberHistograms() - 1
     for i in range(specMin + 1, specMax + 1):
         input += ';'+inputWS+',i'+str(i)
-    outNm = getWSprefix(inputWS) + 'conv_'
+    outNm = getWSprefix(inputWS) + 'conv_' + ftype + bg + "_s" + str(specMin) + "_to_" + str(specMax)
     if Verbose:
         logger.notice(func)  
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
 	    StartX=startX, EndX=endX, FitType='Sequential')
     wsname = confitParsToWS(outNm, inputWS, bg, specMin, specMax)
+    RenameWorkspace(InputWorkspace=outNm,
+                    OutputWorkspace=outNm + "_Parameters")
     if save:
         SaveNexusProcessed(InputWorkspace=wsname, Filename=wsname+'.nxs')
     if plot != 'None':
         confitPlotSeq(wsname, plot)
     EndTime('ConvFit')
+
+##############################################################################
+# Elwin
+##############################################################################
 
 def elwin(inputFiles, eRange, Save=False, Verbose=True, Plot=False):
     StartTime('ElWin')
@@ -174,6 +186,15 @@ def elwinPlot(eq1,eq2):
     graph2 = mp.plotSpectrum(eq2, 0)
     layer = graph2.activeLayer()
     layer.setScale(mp.Layer.Bottom, 0.0, lastXeq2)
+
+##############################################################################
+# Fury
+##############################################################################
+
+def furyPlot(inWS, spec):
+    graph = mp.plotSpectrum(inWS, spec)
+    layer = graph.activeLayer()
+    layer.setScale(mp.Layer.Left, 0, 1.0)
 
 def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         Plot=False):
@@ -250,11 +271,10 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         furyPlot(outWSlist, specrange)
     EndTime('Fury')
     return outWSlist
-	
-def furyPlot(inWS, spec):
-    graph = mp.plotSpectrum(inWS, spec)
-    layer = graph.activeLayer()
-    layer.setScale(mp.Layer.Left, 0, 1.0)
+
+##############################################################################
+# FuryFit
+##############################################################################
 
 def furyfitParsToWS(Table, Data):
     dataX = createQaxis(Data)
@@ -291,13 +311,7 @@ def furyfitParsToWS(Table, Data):
                 stretched += 1                # are stretched exponentials
         else:
             nSpec -= 1
-    suffix = ''
-    nE = ( nSpec / 2 ) - stretched
-    if ( nE > 0 ):
-        suffix += str(nE) + 'E'
-    if ( stretched > 0 ):
-        suffix += str(stretched) + 'S'
-    wsname = Table + suffix
+    wsname = Table + "_Workspace"
     CreateWorkspace(OutputWorkspace=wsname, DataX=xAxisVals, DataY=dataY, DataE=dataE, 
         Nspec=nSpec, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
         VerticalAxisValues=names)
@@ -321,20 +335,20 @@ def furyfitPlotSeq(inputWS, Plot):
             plotSpecs.append(i)
     mp.plotSpectrum(inputWS, plotSpecs, True)
 
-def furyfitSeq(inputWS, func, startx, endx, Save, Plot):
+def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose = True):
     StartTime('FuryFit')
-    Verbose = True
     workdir = config['defaultsave.directory']
     input = inputWS+',i0'
     nHist = mtd[inputWS].getNumberHistograms()
     for i in range(1,nHist):
         input += ';'+inputWS+',i'+str(i)
-    outNm = getWSprefix(inputWS) + 'fury_'
+    outNm = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
     if Verbose:
         logger.notice(func)  
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
         StartX=startx, EndX=endx, FitType='Sequential')
     wsname = furyfitParsToWS(outNm, inputWS)
+    RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm+"_Parameters")
     if Save:
         opath = os.path.join(workdir, wsname+'.nxs')					# path name for nxs file
         SaveNexusProcessed(InputWorkspace=wsname, Filename=opath)
@@ -437,6 +451,10 @@ def furyfitMult(inputWS, func, startx, endx, Save, Plot):
     if ( Plot != 'None' ):
         furyfitPlotMult(wsname, Plot)
     EndTime('FuryFit')
+
+##############################################################################
+# MSDFit
+##############################################################################
 
 def msdfitParsToWS(Table, xData):
     dataX = xData
@@ -594,9 +612,9 @@ def plotInput(inputfiles,spectra=[]):
         graph = mp.plotSpectrum(workspaces,0)
         layer = graph.activeLayer().setTitle(", ".join(workspaces))
         
-###############################################################################
-## abscor #####################################################################
-###############################################################################
+##############################################################################
+# AppCorr
+##############################################################################
 
 def CubicFit(inputWS, spec, Verbose=False):
     '''Uses the Mantid Fit Algorithm to fit a quadratic to the inputWS
