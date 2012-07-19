@@ -295,7 +295,6 @@ namespace MDEvents
     int posDiffMDEvent = static_cast<int>(std::distance(posMDEventStart, m_file_data.end()));
     const size_t columnsForFullEvents = nDimensions + 4; // signal, error, run_no, detector_no
     const size_t columnsForLeanEvents = nDimensions + 2; // signal, error
-    size_t nActualColumns = 0;
     if((posDiffMDEvent - 1) % columnsForFullEvents != 0) 
     {
       if((posDiffMDEvent - 1) % columnsForLeanEvents != 0)
