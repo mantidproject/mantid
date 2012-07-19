@@ -3,13 +3,13 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/Cache.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <vector>
-
 
 namespace Mantid
 {
@@ -85,24 +85,23 @@ namespace Mantid
                        bool overwrite = false);
 
       /// Does the property exist on the object
-      bool hasProperty(const std::string & name) const { return m_manager.existsProperty(name); }
-      // Expose some of the PropertyManager publicly
-      /**
-       * Remove a named property
-       */
-      void removeProperty(const std::string &name, bool delproperty=true) { m_manager.removeProperty(name, delproperty); }
+      bool hasProperty(const std::string & name) const;
+      /// Remove a named property
+      void removeProperty(const std::string &name, bool delproperty=true);
       /**
        * Return all of the current properties
        * @returns A vector of the current list of properties
        */
-      const std::vector<Kernel::Property*>& getProperties() const { return m_manager.getProperties(); }
+      inline const std::vector<Kernel::Property*>& getProperties() const { return m_manager.getProperties(); }
       /// Returns a property as a time series property. It will throw if it is not valid
       template<typename T>
       Kernel::TimeSeriesProperty<T> * getTimeSeriesProperty(const std::string & name) const;
       /// Get the value of a property as the given TYPE. Throws if the type is not correct
       template<typename HeldType>
       HeldType getPropertyValueAsType(const std::string & name) const;
-      /// Returns the named property as apointer
+      /// Returns any property as a single double value
+      double getPropertyAsSingleValue(const std::string & name) const;
+      /// Returns the named property as a pointer
       Kernel::Property * getProperty(const std::string & name) const;
 
       /// Set the proton charge
@@ -133,14 +132,12 @@ namespace Mantid
        * @param p :: A pointer to the property containing the log entry
        */
       void addLogData( Kernel::Property *p ) { addProperty(p); }
-
       /**
        * Access a single log entry
        * @param name :: The name of the log entry to retrieve
        * @returns A pointer to a property containing the log entry
        */ 
       Kernel::Property* getLogData(const std::string &name) const { return getProperty(name); }
-
       /**
        * Access all log entries
        * @returns A list of all of the log entries
@@ -158,6 +155,9 @@ namespace Mantid
       void loadNexus(::NeXus::File * file, const std::string & group);
 
     private:
+      /// Adds all the time series in from one property manager into another
+      void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd);
+
       /// The number of properties that are summed when two workspaces are summed
       static const int ADDABLES;
       /// The names of the properties to sum when two workspaces are summed
@@ -166,19 +166,15 @@ namespace Mantid
       static const char *PROTON_CHARGE_LOG_NAME;
       /// The name of the histogram bins property
       static const char *HISTOGRAM_BINS_LOG_NAME;
-
-      /// A pointer to a property manager
-      Kernel::PropertyManager m_manager;
-      
-      /// Goniometer for this run
-      Mantid::Geometry::Goniometer m_goniometer;
-
-      /// Adds all the time series in from one property manager into another
-      void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd);
-
       /// Static reference to the logger class
       static Kernel::Logger &g_log;
 
+      /// A pointer to a property manager
+      Kernel::PropertyManager m_manager;
+      /// Goniometer for this run
+      Mantid::Geometry::Goniometer m_goniometer;
+      /// Cache for the retrieved single values
+      mutable Kernel::Cache<std::string,double> m_singleValueCache;
     };
 
     /**

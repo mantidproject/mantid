@@ -42,7 +42,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   /**
    * Default constructor
    */
-  Run::Run() : m_manager(), m_goniometer()
+  Run::Run() : m_manager(), m_goniometer(), m_singleValueCache()
   {
   }
 
@@ -58,7 +58,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * @param copy :: The object to initialize the copy from
    */
   Run::Run(const Run& copy) : m_manager(copy.m_manager),
-    m_goniometer(copy.m_goniometer)
+    m_goniometer(copy.m_goniometer), m_singleValueCache(copy.m_singleValueCache)
   {
   }
 
@@ -184,12 +184,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
         //now get pointers to the same properties on the left-handside
         Property * lhs_prop(sum.getProperty(rhs_name));
         lhs_prop->merge(*it);
-        
-/*        TimeSeriesProperty * timeS = dynamic_cast< TimeSeriesProperty * >(lhs_prop);
-        if (timeS)
-        {
-          (*lhs_prop) += (*it);
-        }*/
       }
       catch (Exception::NotFoundError &)
       {
@@ -262,6 +256,8 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    */
   void Run::filterByLog(const Kernel::TimeSeriesProperty<bool> & filter)
   {
+    // This will invalidate the cache
+    m_singleValueCache.clear();
     m_manager.filterByProperty(filter);
   }
 
@@ -283,6 +279,31 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       removeProperty(name);
     }
     m_manager.declareProperty(prop, "");
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Returns true if the named property exists
+   * @param name :: The name of the property
+   * @return True if the property exists, false otherwise
+   */
+  bool Run::hasProperty(const std::string & name) const
+  {
+    return m_manager.existsProperty(name);
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Remove a named property
+   * @param name :: The name of the property
+   * @param delProperty :: If true the property is deleted (default=true)
+   * @return True if the property exists, false otherwise
+   */
+
+  void Run::removeProperty(const std::string &name, bool delProperty)
+  {
+    m_singleValueCache.removeCache(name);
+    m_manager.removeProperty(name, delProperty);
   }
 
 
@@ -452,9 +473,9 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   }
 
   /**
-   * Get the value of a property as a double. Throws if the type is not correct
+   * Get the value of a property as the requested type. Throws if the type is not correct
    * @param name :: The name of the property
-   * @return The value of as a double, the most common type in logs
+   * @return The value of as the requested type
    */
   template<typename HeldType>
   HeldType Run::getPropertyValueAsType(const std::string & name) const
@@ -469,6 +490,39 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       throw std::invalid_argument("Run::getPropertyValueAsType - '" + name + "' is not of the requested type");
     }
   }
+
+  /**
+   * Returns a property as a single double value. Currently only translates
+   * TimeSeriesProperty<double> and PropertyWithValue<double>. Throws if the property is not of this type
+   * For a time series the mean is taken
+   * Note: The value is cached for quick future lookups
+   * @param name :: The name of the property
+   * @return A single double value
+   */
+  double Run::getPropertyAsSingleValue(const std::string & name) const
+  {
+    double singleValue(0.0);
+    if(!m_singleValueCache.getCache(name, singleValue))
+    {
+      Kernel::Property *log = getProperty(name);
+      if(auto singleDouble = dynamic_cast<PropertyWithValue<double>*>(log))
+      {
+        singleValue  = (*singleDouble)();
+      }
+      else if(auto seriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(log))
+      {
+        singleValue  = seriesDouble->getStatistics().mean;
+      }
+      else
+      {
+        throw std::invalid_argument("Run::getPropertyAsSingleValue - Property \"" + name + "\" is not a single double or time series double.");
+      }
+      // Put it in the cache
+      m_singleValueCache.setCache(name, singleValue);
+    }
+    return singleValue;
+  }
+
 
   /**
    * Get a pointer to a property by name

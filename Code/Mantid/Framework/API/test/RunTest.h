@@ -172,6 +172,44 @@ public:
     TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<int>("double_prop"), std::invalid_argument);
   }
 
+  void test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Double_Or_TimeSeries_Double()
+  {
+    Run runInfo;
+    const std::string name = "int_prop";
+    runInfo.addProperty(name, 1); // Adds an int property
+
+    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name), std::invalid_argument);
+  }
+
+  void test_GetPropertyAsSingleValue_Returns_Expected_Single_Value_On_Successive_Calls()
+  {
+    Run run;
+    const std::string name = "double_prop";
+    double value(11.1);
+    run.addProperty(name, value);
+
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name), value);
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name), value);
+  }
+
+
+  void test_GetPropertyAsSingleValue_Returns_Correct_Value_On_Second_Call_When_Log_Has_Been_Replaced()
+  {
+    Run runInfo;
+    const std::string name = "double";
+    double value(5.1);
+    runInfo.addProperty(name, value);
+
+    TS_ASSERT_EQUALS(runInfo.getPropertyAsSingleValue(name), value);
+
+    // Replace the log with a different value
+    value = 10.3;
+    runInfo.addProperty(name, value, /*overwrite*/true);
+
+    TS_ASSERT_EQUALS(runInfo.getPropertyAsSingleValue(name), value);
+  }
+
+
   void test_storeHistogramBinBoundaries_Throws_If_Fewer_Than_Two_Values_Are_Given()
   {
     Run runInfo;
@@ -405,9 +443,48 @@ public:
 private:
   /// Testing bins
   std::vector<double> m_test_energy_bins;
-
 };
 
+//---------------------------------------------------------------------------------------
+// Performance test
+//---------------------------------------------------------------------------------------
+
+class RunTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RunTestPerformance *createSuite() { return new RunTestPerformance(); }
+  static void destroySuite( RunTestPerformance *suite ) { delete suite; }
+
+  RunTestPerformance()
+  {
+    m_propName = "test";
+    auto timeSeries = new TimeSeriesProperty<double>(m_propName);
+    timeSeries->addValue("2012-07-19T16:17:00",1);
+    timeSeries->addValue("2012-07-19T16:17:10",2);
+    timeSeries->addValue("2012-07-19T16:17:20",3);
+    timeSeries->addValue("2012-07-19T16:17:30",4);
+    timeSeries->addValue("2012-07-19T16:17:40",5);
+    timeSeries->addValue("2012-07-19T16:17:50",6);
+    timeSeries->addValue("2012-07-19T16:18:00",7);
+    timeSeries->addValue("2012-07-19T16:18:10",8);
+    timeSeries->addValue("2012-07-19T16:18:20",9);
+    m_testRun.addProperty(timeSeries);
+  }
+
+  void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times()
+  {
+    double value(0.0);
+    for(size_t i = 0; i < 20000; ++i)
+    {
+      value = m_testRun.getPropertyAsSingleValue(m_propName);
+    }
+  }
+
+  Run m_testRun;
+  std::string m_propName;
+};
 
 
 #endif
