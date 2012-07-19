@@ -36,6 +36,7 @@ set ( SRC_FILES
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
+	src/MagneticFormFactorTable.cpp
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
@@ -152,6 +153,7 @@ set ( INC_FILES
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
 	inc/MantidKernel/MRUList.h
+	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
@@ -256,6 +258,7 @@ set ( TEST_FILES
 	test/LogParserTest.h
 	test/LoggerTest.h
 	test/MRUListTest.h
+	test/MagneticFormFactorTableTest.h
 	test/MagneticIonTest.h
 	test/MandatoryValidatorTest.h
 	test/MaskedPropertyTest.h

@@ -51,6 +51,15 @@ public:
     checkVectorsEqual("Checking j6 values:", ion.j6, copiedIon.j6);
   }
 
+  void test_formFactor_Has_Expected_Value_For_Simplest_J0_L0_Case()
+  {
+    MagneticIon ion = getMagneticIon("Mn", 3);
+    double qsqr = 6.48;
+    uint16_t j = 0;
+    uint16_t l = 0;
+    TS_ASSERT_DELTA( ion.analyticalFormFactor(qsqr, j, l), 0.691958098, 1e-8);
+  }
+
 private:
 
   void checkVectorsEqual(const std::string & msgPrefix, const std::vector<double> & first, const std::vector<double> & second)

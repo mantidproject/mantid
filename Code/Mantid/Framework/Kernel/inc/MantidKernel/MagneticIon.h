@@ -24,6 +24,11 @@ namespace PhysicalConstants
     MagneticIon(const std::string symbol, const uint16_t charge,const  double j0[8],
                 const double j2[8],const  double j4[8],const  double j6[8]);
 
+    /// Returns the value of the form factor for the given J/L
+    double analyticalFormFactor(const double qsqr, const uint16_t j, const uint16_t l=0) const;
+    /// Returns the cutoff value for the given form factor approximation
+    static double formFactorCutOff(const uint16_t j, const uint16_t l);
+
     /// The atomic symbol. In other words the one or two character abbreviation.
     std::string symbol;
 

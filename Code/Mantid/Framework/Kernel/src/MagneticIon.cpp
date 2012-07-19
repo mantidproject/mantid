@@ -27,6 +27,55 @@ namespace Mantid
     {
     }
 
+    /**
+     * Returns the value of the form factor for the given \f$Q^2\f$ in \f$\AA^-2\f$ taking into account the
+     * number of terms given by the value of j & l
+     * @param qsqr :: The square of the momentum transfer in \f$\AA^-2\f$
+     * @param j :: The total angular momentum
+     * @param l :: The orbital angular momentum
+     * @return
+     */
+    double MagneticIon::analyticalFormFactor(const double qsqr, const uint16_t j, const uint16_t l) const
+    {
+      if(j != 0 || l != 0)
+      {
+        throw Kernel::Exception::NotImplementedError("MagneticIon::analyticalFormFactor - Only j=0 & l=0 terms have been implemented." );
+      }
+      if(qsqr < MagneticIon::formFactorCutOff(j,l)) // Simplest approximation taking only j0 terms for low Q
+      {
+        static double fourPiSq = 16.0*M_PI*M_PI;
+        const double A = j0[0];
+        const double alpha = j0[1]/fourPiSq;
+        const double B = j0[2];
+        const double beta = j0[3]/fourPiSq;
+        const double C = j0[4];
+        const double gamma = j0[5]/fourPiSq;
+        const double D = j0[6];
+        return A*std::exp(-alpha*qsqr) + B*std::exp(-beta*qsqr) + C*std::exp(-gamma*qsqr) + D;
+      }
+      else return 0.0; // Outside simple model range
+    }
+
+    /**
+     * Returns the cutoff value for the given form factor approximation
+     * @param j :: The total angular momentum
+     * @param l :: The orbital angular momentum (default=0)
+     * @return
+     */
+    double MagneticIon::formFactorCutOff(const uint16_t j, const uint16_t l)
+    {
+      UNUSED_ARG(l);
+      if(j == 0)
+      {
+        static double cutoff(36.0*M_PI*M_PI);
+        return cutoff;
+      }
+      else
+      {
+        throw Kernel::Exception::NotImplementedError("MagneticIon::formFactorCutOff - Only j=0 & l=0 cutoff have been implemented." );
+      }
+    }
+
     namespace
     {
       // Windows will not accept array initializer syntax within a constructor so put the various j_i definitions here
