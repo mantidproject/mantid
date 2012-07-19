@@ -1102,24 +1102,32 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   if (m_previousFilenames.size() > 1)
     plusRangeWorkspaces();
 
-  // Get dead times from data.
-  if ((m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS") && (m_uiForm.deadTimeType->currentIndex() == 1) )
+  if (m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS")
   {
-    getDeadTimeFromData(deadTimes);
-  }
-  // Get dead times from file.
-  else if ((m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS") && (m_uiForm.deadTimeType->currentIndex() == 2) )
-  {
-    QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
+    // Get dead times from data.
+    if (m_uiForm.deadTimeType->currentIndex() == 1)
+    {
+      getDeadTimeFromData(deadTimes);
+    }
+    // Get dead times from file.
+    else if (m_uiForm.deadTimeType->currentIndex() == 2)
+    {
+      QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
 
-    try
-    {
-      getDeadTimeFromFile(deadTimeFile);
+      try
+      {
+        getDeadTimeFromFile(deadTimeFile);
+      }
+      catch (std::exception&)
+      {
+        QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
+      }
     }
-    catch (std::exception&)
-    {
-      QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
-    }
+  }
+  else if (m_uiForm.deadTimeType->currentIndex() != 0)
+  {
+    QMessageBox::information(this, "Mantid - Muon Analysis", "Dead times are currently not implemented in ARGUS files."
+                          + QString("\nAs a result, no dead times will be applied.") );
   }
 
   // Make the options available
