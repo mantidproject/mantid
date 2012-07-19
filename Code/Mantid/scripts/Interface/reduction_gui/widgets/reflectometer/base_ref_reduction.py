@@ -325,7 +325,7 @@ class BaseRefWidget(BaseWidget):
 #            return
         
         #retrieve name of the output file
-        file_name = QtGui.QFileDialog.getOpenFileName(self, "Select or define a ASCII file name", "", "(*.txt)")
+        file_name = QtGui.QFileDialog.getSaveFileName(self, "Select or define a ASCII file name", "", "(*.txt)")
         if (str(file_name).strip() == ''):
             return
         
