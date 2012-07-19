@@ -1,12 +1,10 @@
 # Transmission main
 #
 from IndirectImport import *
-
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
 from IndirectCommon import *
 import math, numpy, os.path
-
 mp = import_mantidplot()
 
 def CheckElimits(erange,Xin):
@@ -32,7 +30,7 @@ def CheckElimits(erange,Xin):
         logger.notice('ERROR *** ' + error)
         sys.exit(error)
 
-def MomentRun(samWS,erange,Verbose,Plot,Save):
+def MomentRun(samWS,erange,factor,Verbose,Plot,Save):
     StartTime('Moments')
     workdir = config['defaultsave.directory']
     nq,nw = CheckHistZero(samWS)
@@ -51,6 +49,10 @@ def MomentRun(samWS,erange,Verbose,Plot,Save):
     nw = len(Xin)-1
     if Verbose:
         logger.notice('Energy range is '+str(Xin[0])+' to '+str(Xin[nw]))
+    if factor > 0.0:
+        Scale(InputWorkspace=samWS, OutputWorkspace=samWS, Factor=factor, Operation='Multiply')
+        if Verbose:
+            logger.notice('S(q,w) scaled by '+str(factor))
     w = Xin[:nw]
     yM0 = []
     yM1 = []
@@ -97,7 +99,7 @@ def MomentPlot(inputWS,Plot):
     m0_plot=mp.plotSpectrum(inputWS+'_M0',0)
     m2_plot=mp.plotSpectrum([inputWS+'_M2',inputWS+'_M4'],0)
 
-def MomentStart(inType,sname,erange,Verbose,Plot,Save):
+def MomentStart(inType,sname,erange,factor,Verbose,Plot,Save):
     workdir = config['defaultsave.directory']
     if inType == 'File':
         spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
@@ -105,4 +107,4 @@ def MomentStart(inType,sname,erange,Verbose,Plot,Save):
         LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
     else:
         logger.notice('Input from Workspace : '+sname)
-    MomentRun(sname,erange,Verbose,Plot,Save)
+    MomentRun(sname,erange,factor,Verbose,Plot,Save)

@@ -14,6 +14,7 @@ class Moments(PythonAlgorithm):
 		self.declareProperty(Name='SamNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
 		self.declareProperty(Name='EnergyMin', DefaultValue=-0.5,Description = 'Minimum energy for fit. Default=-0.5')
 		self.declareProperty(Name='EnergyMax', DefaultValue=0.5,Description = 'Maximum energy for fit. Default=0.5')
+		self.declareProperty(Name='MultiplyBy', DefaultValue=1.0,Description = 'Scale factor to multiply S(Q,w). Default=1.0')
 		self.declareProperty('Verbose',DefaultValue=True,Description = 'Switch Verbose Off/On')
 		self.declareProperty('Plot',DefaultValue=True,Description = 'Switch Plot Off/On')
 		self.declareProperty('Save',DefaultValue=False,Description = 'Switch Save result to nxs file Off/On')
@@ -33,10 +34,12 @@ class Moments(PythonAlgorithm):
 		emin = self.getPropertyValue('EnergyMin')
 		emax = self.getPropertyValue('EnergyMax')
 		erange = [float(emin), float(emax)]
+		factor = self.getPropertyValue('MultiplyBy')
+		factor = float(factor)
 
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getProperty('Plot')
 		saveOp = self.getProperty('Save')
-		Main.MomentStart(inType,sam,erange,verbOp,plotOp,saveOp)
+		Main.MomentStart(inType,sam,erange,factor,verbOp,plotOp,saveOp)
 
 mantid.registerPyAlgorithm(Moments())         # Register algorithm with Mantid

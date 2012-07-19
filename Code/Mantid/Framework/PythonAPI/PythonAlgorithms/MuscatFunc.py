@@ -60,7 +60,7 @@ class MuscatFunc(PythonAlgorithm):
 		NMST = self.getPropertyValue('Nms')
 		JRAND = 12345
 		MRAND = 67890
-		neut = [NRUN1, NRUN2, JRAND, MRAND, NMST]
+		neut = [int(NRUN1), int(NRUN2), int(JRAND), int(MRAND), int(NMST)]
 
 		HEIGHT = 3.0
 		alfa = self.getPropertyValue('DetAngle')
@@ -68,21 +68,21 @@ class MuscatFunc(PythonAlgorithm):
 		WIDTH = self.getPropertyValue('Width')
 		HEIGHT = self.getPropertyValue('Height')
 		if geom == 'Flat':
-			beam = [THICK, WIDTH, HEIGHT, float(alfa)]
+			beam = [float(THICK), float(WIDTH), float(HEIGHT), float(alfa)]
 		if geom == 'Cyl':
-			beam = [THICK, WIDTH, HEIGHT, 0.0]        #beam = [WIDTH, WIDTH2, HEIGHT, 0.0]
+			beam = [float(THICK), float(WIDTH), float(HEIGHT), 0.0]        #beam = [WIDTH, WIDTH2, HEIGHT, 0.0]
 		dens = self.getPropertyValue('Density')
 		sigb = self.getPropertyValue('SigScat')
 		siga = self.getPropertyValue('SigAbs')
 		sigss=sigb
 		temp = self.getPropertyValue('Temperature')
-		sam = [temp, dens, siga, sigb]
+		sam = [float(temp), float(dens), float(siga), float(sigb)]
 
 		NQ = self.getPropertyValue('NQ')
 		dQ = self.getPropertyValue('dQ')
 		Nw = self.getPropertyValue('NW')
 		dw = self.getPropertyValue('dW')           #in microeV
-		grid = [NQ, dQ, Nw, dw]
+		grid = [int(NQ), float(dQ), int(Nw), float(dw)]
 		c1 = self.getPropertyValue('Coeff1')
 		c2 = self.getPropertyValue('Coeff2')
 		c3 = self.getPropertyValue('Coeff3')

@@ -613,7 +613,7 @@ def plotInput(inputfiles,spectra=[]):
         layer = graph.activeLayer().setTitle(", ".join(workspaces))
         
 ##############################################################################
-# AppCorr
+# Corrections
 ##############################################################################
 
 def CubicFit(inputWS, spec, Verbose=False):

@@ -74,22 +74,22 @@ def CheckCoeff(disp,coeff):
 			sys.exit(error)
 
 def CheckQw(grid):
-	nq = int(grid[0])
+	nq = grid[0]
 	if nq == 0:
 		error = 'Grid : Number of Q values is zero'			
 		logger.notice('ERROR *** '+error)
 		sys.exit(error)
-	nw = int(grid[2])
+	nw = grid[2]
 	if nw == 0:
 		error = 'Grid : Number of w values is zero'			
 		logger.notice('ERROR *** '+error)
 		sys.exit(error)
-	dq = float(grid[1])
+	dq = grid[1]
 	if dq < 1e-5:
 		error = 'Grid : Q increment is zero'			
 		logger.notice('ERROR *** '+error)
 		sys.exit(error)
-	dw = float(grid[3])*0.001
+	dw = grid[3]*0.001
 	if dw < 1e-8:
 		error = 'Grid : w increment is zero'			
 		logger.notice('ERROR *** '+error)
@@ -111,27 +111,18 @@ def CreateSqw(disp,coeff,grid,Verbose):
 	
 def ReadSqw(sqw,Verbose):
 	logger.notice('Reading S(q,w) from workspace : '+sqw)
-	Sqw_in = []
-	nq = mtd[sqw].getNumberHistograms()       # no. of hist/groups in sample
-	if nq == 0:
-		error = 'Sqw : Number of q histograms is zero'			
-		logger.notice('ERROR *** '+error)
-		sys.exit(error)
+	nq,nw = CheckHistZero(sqw)
 	axis = mtd[sqw].getAxis(1)
 	Q = []
 	for i in range(0,nq):
 		Q.append(float(axis.label(i)))
 	Q_in = PadArray(Q,500)
+	Sqw_in = []
 	for n in range(0,nq):
 		Xw = mtd[sqw].readX(n)             # energy array
 		Ys = mtd[sqw].readY(n)             # S(q,w) values
 		Ys = PadArray(Ys,1000)          # pad to Fortran energy size 1000
 		Sqw_in.append(Ys)
-	nw = len(Xw)-1   						    # no. points from length of x array
-	if nw == 0:
-		error = 'Sqw : Number of w values is zero'			
-		logger.notice('ERROR *** '+error)
-		sys.exit(error)
 	dw = Xw[2]-Xw[1]
 	if dw < 1e-8:
 		error = 'Sqw : w increment is zero'			
@@ -158,40 +149,40 @@ def ReadSqw(sqw,Verbose):
 
 def CheckNeut(neut):
 #	neut = [NRUN1, NRUN2, JRAND, MRAND, NMST]
-	if neut[0] == '0':
+	if neut[0] == 0:
 		error = 'NRUN1 is Zero'			
 		logger.notice('ERROR *** ' + error)
 		sys.exit(error)
-	if neut[1] == '0':
+	if neut[1] == 0:
 		error = 'NRUN2 is Zero'			
 		logger.notice('ERROR *** ' + error)
 		sys.exit(error)
-	if neut[4] == '0':
+	if neut[4] == 0:
 		error = 'Number scatterings is Zero'			
 		logger.notice('ERROR *** ' + error)
 		sys.exit(error)
 
 def CheckBeam(beam):
 #	beam = [THICK, WIDTH, HEIGHT, alfa]
-	if float(beam[0]) <1e-5:
+	if beam[0] <1e-5:
 		error = 'Beam thickness is Zero'			
 		logger.notice('ERROR *** ' + error)
 		sys.exit(error)
-	if float(beam[1]) <1e-5:
+	if beam[1] <1e-5:
 		error = 'Beam width is Zero'			
 		logger.notice('ERROR *** ' + error)
 		sys.exit(error)
-	if float(beam[2]) <1e-5:
+	if beam[2] <1e-5:
 		error = 'Beam height is Zero'			
 		logger.notice('ERROR *** ' + error)
 		sys.exit(error)
 
 def CheckSam(sam):
-	if float(sam[1]) <1e-8:
+	if sam[1] <1e-8:
 		error = 'Sample density is Zero'			
 		logger.notice('ERROR *** ' + error)
 		sys.exit(error)
-	if (float(sam[2])+float(sam[3])) <1e-8:
+	if (sam[2]+sam[3]) <1e-8:
 		error = 'Sample total scattering cross-section (scat+abs) is Zero'			
 		logger.notice('ERROR *** ' + error)
 		sys.exit(error)
@@ -201,6 +192,7 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
 #	beam = [THICK, WIDTH, HEIGHT, alfa]
 #   sam = [temp, dens, siga, sigb]
 	workdir = config['defaultsave.directory']
+	hist,npt = CheckHistZero(sname)
 	CheckNeut(neut)
 	CheckBeam(beam)
 	CheckSam(sam)
@@ -233,9 +225,9 @@ def MuscatRun(sname,geom,neut,beam,sam,sqw,kr1,Verbose,Plot,Save):
 	lsqw = len(sqw)
 	nq,dq,Q_in,nw,dw,nel,Xw,Sqw_in = ReadSqw(sqw,Verbose)
 #   ims = [NMST, NQ, NW, Nel, KR1]
-	nmst = int(neut[4])
+	nmst = neut[4]
 	ims = [neut[4], nq, nw, nel, 1]
-	nw2 = 2*int(ims[2])+1
+	nw2 = 2*ims[2]+1
 #   dqw = [DQ, DW]
 	dqw = [dq, dw]
 	sname = sname[:-4]
