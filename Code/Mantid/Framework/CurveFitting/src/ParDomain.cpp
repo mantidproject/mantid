@@ -62,7 +62,7 @@ void ParDomain::leastSquaresVal(const CostFuncLeastSquares& leastSquares)
 void ParDomain::leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSquares, bool evalFunction, bool evalDeriv, bool evalHessian)
 {
   const int n = static_cast<int>( getNDomains() );
-  omp_set_dynamic(0);
+  PARALLEL_SET_DYNAMIC(0);
   std::vector<API::IFunction_sptr> funs;
   //funs.push_back( leastSquares.getFittingFunction()->clone() );
   PARALLEL_FOR_NO_WSP_CHECK()
