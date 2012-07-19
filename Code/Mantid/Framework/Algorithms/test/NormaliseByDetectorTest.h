@@ -17,6 +17,8 @@
 #include "MantidAlgorithms/NormaliseByDetector.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidKernel/ConfigService.h"
+#include <Poco/Path.h>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
@@ -28,9 +30,16 @@ using namespace Mantid::API;
   public:
 
     /// Create a simple input file.
-    FileObject(const std::string& fileContents, const std::string& filename) : m_filename(filename)
+    FileObject(const std::string& fileContents, const std::string& filename) 
     {
-      m_file.open (filename.c_str());
+      Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
+      path.append(filename);
+      m_filename = path.toString();
+      m_file.open (m_filename.c_str(), std::ios_base::out);
+      if(!m_file.is_open())
+      {
+        throw std::runtime_error("Cannot open " + m_filename);
+      }
       m_file << fileContents;
       m_file.close();
     }
@@ -49,7 +58,7 @@ using namespace Mantid::API;
     }
 
   private:
-    const std::string m_filename;
+    std::string m_filename;
     std::ofstream m_file;
     // Following methods keeps us from being able to put objects of this type on the heap.
     void *operator new(size_t);
