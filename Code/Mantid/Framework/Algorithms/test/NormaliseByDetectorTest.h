@@ -376,12 +376,15 @@ public:
       TS_ASSERT_EQUALS(4, xValues.size());
 
       const MantidVec& yInputValues = inputWS->readY(wsIndex);
+      const MantidVec& eInputValues = inputWS->readE(wsIndex);
 
       for(size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex)
       {
         const double wavelength = (xValues[binIndex] + xValues[binIndex+1])/2;
         const double expectedValue = yInputValues[binIndex] / ( (2*wavelength) + 1 ); // According to the equation written into the instrument parameter file for the instrument component link.
         TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
+        const double expectedError = (eInputValues[binIndex] * expectedValue) / yInputValues[binIndex]; // e = Ein/Ydenom so, since Yout = Yin/Ydenom, e = Ein * Yout / Yin
+        TS_ASSERT_EQUALS(expectedError, eValues[binIndex]);
       }
     }
   }
@@ -422,6 +425,7 @@ public:
 
       const MantidVec& yInputValues = inputWS->readY(wsIndex);
       const MantidVec& xInputValues = inputWS->readX(wsIndex);
+      const MantidVec& eInputValues = inputWS->readE(wsIndex);
 
       for(size_t binIndex = 0; binIndex < (xInputValues.size() - 1); ++binIndex)
       {
@@ -431,6 +435,10 @@ public:
         TS_ASSERT_EQUALS(expectedValue, yValuesParallel[binIndex]);
         // Compare results from different execution types.
         TS_ASSERT_EQUALS(yValuesSequential[binIndex], yValuesParallel[binIndex]);
+        // Compare the errors calculated.
+        const double expectedError = (eInputValues[binIndex] * expectedValue) / yInputValues[binIndex]; // e = Ein/Ydenom so, since Yout = Yin/Ydenom, e = Ein * Yout / Yin
+        TS_ASSERT_EQUALS(expectedError, eValuesParallel[binIndex]);
+        TS_ASSERT_EQUALS(expectedError, eValuesSequential[binIndex]);
       }
     }
   }
@@ -457,12 +465,15 @@ public:
       TS_ASSERT_EQUALS(4, xValues.size());
 
       const MantidVec& yInputValues = inputWS->readY(wsIndex);
+      const MantidVec& eInputValues = inputWS->readE(wsIndex);
 
       for(size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex)
       {
         const double wavelength = (xValues[binIndex] + xValues[binIndex+1])/2;
         const double expectedValue = yInputValues[binIndex] / ( (1*wavelength) + static_cast<double>(wsIndex) ); // According to the equation written into the instrument parameter file for the detector component link.
+        const double expectedError = (eInputValues[binIndex] * expectedValue) / yInputValues[binIndex]; // e = Ein/Ydenom so, since Yout = Yin/Ydenom, e = Ein * Yout / Yin
         TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
+        TS_ASSERT_EQUALS(expectedError, eValues[binIndex]);
       }
     }
   }
@@ -496,12 +507,15 @@ public:
       TS_ASSERT_EQUALS(4, xValues.size());
 
       const MantidVec& yInputValues = completeWS->readY(wsIndex);
+      const MantidVec& eInputValues = completeWS->readE(wsIndex);
 
       for(size_t binIndex = 0; binIndex < (xValues.size() - 1); ++binIndex)
       {
         const double wavelength = (xValues[binIndex] + xValues[binIndex+1])/2;
         const double expectedValue = yInputValues[binIndex] / ( (1*static_cast<double>(wsIndex)*wavelength) + 3.0 ); // According to the equation written into the instrument parameter file for the detector component link.
+        const double expectedError = (eInputValues[binIndex] * expectedValue) / yInputValues[binIndex]; // e = Ein/Ydenom so, since Yout = Yin/Ydenom, e = Ein * Yout / Yin
         TS_ASSERT_EQUALS(expectedValue, yValues[binIndex]);
+        TS_ASSERT_EQUALS(expectedError, eValues[binIndex]);
       }
     }
 

@@ -153,6 +153,7 @@ namespace Mantid
         outIntensity[i] = values[i];
       }
       denominatorWS->dataY(wsIndex) = outIntensity;
+      denominatorWS->dataE(wsIndex) = MantidVec(nInputBins, 0);
     }
 
     /**
@@ -174,7 +175,7 @@ namespace Mantid
       const size_t nHistograms = inWS->getNumberHistograms();
       if(m_parallelExecution == true)
       {
-        PARALLEL_FOR2(inWS, denominatorWS)
+          PARALLEL_FOR2(inWS, denominatorWS)
           for(int wsIndex = 0; wsIndex < nHistograms; ++wsIndex)
           {
             PARALLEL_START_INTERUPT_REGION
