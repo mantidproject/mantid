@@ -8,6 +8,7 @@ energy transfer for direct geometry spectrometers.
 #include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
@@ -22,6 +23,7 @@ energy transfer for direct geometry spectrometers.
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -154,7 +156,9 @@ namespace WorkflowAlgorithms
     const std::vector<double> etBinning = this->getProperty("EnergyTransferRange");
 
     double initialEnergy = 0.0;
-    const double monPeak = 0.0;
+    double monPeak = 0.0;
+    specid_t eiMon1Spec = 0;
+    specid_t eiMon2Spec = 0;
 
     if ("SNS" == facility)
       {
@@ -226,11 +230,13 @@ namespace WorkflowAlgorithms
                 // Calculate Ei
                 // Get the monitor spectra indices from the parameters
                 MatrixWorkspace_const_sptr monWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(monWsName);
+                eiMon1Spec = static_cast<specid_t>(monWS->getInstrument()->getNumberParameter("ei-mon1-spec")[0]);
+                eiMon2Spec = static_cast<specid_t>(monWS->getInstrument()->getNumberParameter("ei-mon2-spec")[0]);
 
                 IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
                 getei->setProperty("InputWorkspace", monWsName);
-                getei->setProperty("Monitor1Spec", monWS->getSpectrum(0)->getSpectrumNo());
-                getei->setProperty("Monitor2Spec", monWS->getSpectrum(1)->getSpectrumNo());
+                getei->setProperty("Monitor1Spec", eiMon1Spec);
+                getei->setProperty("Monitor2Spec", eiMon2Spec);
                 getei->setProperty("EnergyEstimate", eiGuess);
                 try
                 {
@@ -259,7 +265,42 @@ namespace WorkflowAlgorithms
     // Do ISIS
     else
       {
-        // TODO: Add ISIS methodology
+        eiMon1Spec = static_cast<specid_t>(inputWS->getInstrument()->getNumberParameter("ei-mon1-spec")[0]);
+        eiMon2Spec = static_cast<specid_t>(inputWS->getInstrument()->getNumberParameter("ei-mon2-spec")[0]);
+        IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
+        getei->setAlwaysStoreInADS(true);
+        getei->setProperty("InputWorkspace", inWsName);
+        getei->setProperty("Monitor1Spec", eiMon1Spec);
+        getei->setProperty("Monitor2Spec", eiMon2Spec);
+        getei->setProperty("EnergyEstimate", eiGuess);
+        getei->execute();
+
+        monPeak = getei->getProperty("FirstMonitorPeak");
+        const specid_t monIndex = getei->getProperty("FirstMonitorIndex");
+        // Why did the old way get it from the log?
+        initialEnergy = getei->getProperty("IncidentEnergy");
+
+        IAlgorithm_sptr cbo = this->createSubAlgorithm("ChangeBinOffset");
+        cbo->setAlwaysStoreInADS(true);
+        cbo->enableHistoryRecordingForChild(true);
+        cbo->setProperty("InputWorkspace", inWsName);
+        cbo->setProperty("OutputWorkspace", outWsName);
+        cbo->setProperty("Offset", -monPeak);
+        cbo->execute();
+
+        IDetector_const_sptr monDet = inputWS->getDetector(monIndex);
+        V3D monPos = monDet->getPos();
+        std::string srcName = inputWS->getInstrument()->getSource()->getName();
+
+        IAlgorithm_sptr moveInstComp = this->createSubAlgorithm("MoveInstrumentComponent");
+        moveInstComp->setAlwaysStoreInADS(true);
+        moveInstComp->setProperty("Workspace", outWsName);
+        moveInstComp->setProperty("ComponentName", srcName);
+        moveInstComp->setProperty("X", monPos.X());
+        moveInstComp->setProperty("Y", monPos.Y());
+        moveInstComp->setProperty("Z", monPos.Z());
+        moveInstComp->setProperty("RelativePosition", false);
+        moveInstComp->execute();
       }
 
     const double binOffset = -monPeak;
