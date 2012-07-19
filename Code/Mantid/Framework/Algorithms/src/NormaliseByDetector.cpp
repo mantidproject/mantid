@@ -29,12 +29,10 @@ namespace Mantid
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(NormaliseByDetector)
 
-
-
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    NormaliseByDetector::NormaliseByDetector()
+    NormaliseByDetector::NormaliseByDetector(bool parallelExecution) : m_parallelExecution(parallelExecution)
     {
     }
 
@@ -91,75 +89,109 @@ namespace Mantid
       return parameter->value<Geometry::FitParameter>();
     }
 
+
     /**
     Process each histogram of the input workspace, extracting the detector/component and looking up the efficiency function.
     Efficiency functions are then executed against the X data of the input workspace to generate new Y and E outputs for the denominatorWS.
+    @param wsIndex: The index of the histogram in the input workspace to process.
     @param denominatorWS : Workspace that will become the denominator in the normalisation routine.
     @param inputWorkspace: Workspace input. Contains instrument to use as well as X data to use.
     */
-    void NormaliseByDetector::processHistograms(MatrixWorkspace_sptr denominatorWS, MatrixWorkspace_const_sptr inWS)
+    void NormaliseByDetector::processHistogram(size_t wsIndex, MatrixWorkspace_sptr denominatorWS, MatrixWorkspace_const_sptr inWS)
     {
       const Geometry::ParameterMap& paramMap = inWS->instrumentParameters();
-      PARALLEL_FOR2(inWS, denominatorWS)
-        for(int wsIndex = 0; wsIndex < inWS->getNumberHistograms(); ++wsIndex)
+      Geometry::IDetector_const_sptr det = inWS->getDetector( wsIndex );
+      const std::string type = "fitting";
+      Geometry::Parameter_sptr foundParam = paramMap.getRecursiveByType(&(*det), type);
+
+      const Geometry::FitParameter& foundFittingParam = tryParseFunctionParameter(foundParam, det);
+
+      std::string fitFunctionName = foundFittingParam.getFunction();
+      IFunction_sptr function = FunctionFactory::Instance().createFunction(fitFunctionName);
+      typedef std::vector<std::string> ParamNames;
+      ParamNames allParamNames = function->getParameterNames();
+
+      // Lookup each parameter name.
+      for(ParamNames::iterator it = allParamNames.begin(); it !=  allParamNames.end(); ++it)
+      {
+        Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), (*it), type);
+
+        const Geometry::FitParameter& fitParam = tryParseFunctionParameter(param, det);
+
+        if ( fitParam.getFormula().compare("") == 0 )
         {
-          PARALLEL_START_INTERUPT_REGION
-            Geometry::IDetector_const_sptr det = inWS->getDetector( wsIndex );
-          const std::string type = "fitting";
-          Geometry::Parameter_sptr foundParam = paramMap.getRecursiveByType(&(*det), type);
-
-          const Geometry::FitParameter& foundFittingParam = tryParseFunctionParameter(foundParam, det);
-
-          std::string fitFunctionName = foundFittingParam.getFunction();
-          IFunction_sptr function = FunctionFactory::Instance().createFunction(fitFunctionName);
-          typedef std::vector<std::string> ParamNames;
-          ParamNames allParamNames = function->getParameterNames();
-
-          // Lookup each parameter name.
-          for(ParamNames::iterator it = allParamNames.begin(); it !=  allParamNames.end(); ++it)
-          {
-            Geometry::Parameter_sptr param = paramMap.getRecursive(&(*det), (*it), type);
-
-            const Geometry::FitParameter& fitParam = tryParseFunctionParameter(param, det);
-
-            if ( fitParam.getFormula().compare("") == 0 )
-            {
-              throw std::invalid_argument("A Forumla has not been provided for a fit function");
-            }
-            else
-            {
-              std::string resultUnitStr = fitParam.getResultUnit();
-              if ( !resultUnitStr.empty() && resultUnitStr.compare("Wavelength") != 0)
-              {
-                throw std::invalid_argument("Units for function parameters must be in Wavelength");
-              }  
-            } 
-            mu::Parser p;
-            p.SetExpr(fitParam.getFormula());
-            double paramValue = p.Eval();
-            //Set the function coeffiecents.
-            function->setParameter(fitParam.getName(), paramValue);
-          }
-
-          auto wavelengths = inWS->readX(wsIndex);
-          const size_t nInputBins =  wavelengths.size() -1;
-          std::vector<double> centerPointWavelength(nInputBins);
-          std::vector<double> outIntensity(nInputBins);
-          for(size_t binIndex = 0; binIndex < nInputBins; ++binIndex)
-          {
-            centerPointWavelength[binIndex] = 0.5*(wavelengths[binIndex] + wavelengths[binIndex+1]);
-          }
-          FunctionDomain1DVector domain(centerPointWavelength);
-          FunctionValues values(domain);
-          function->function(domain,values);
-          for(size_t i = 0; i < domain.size(); ++i)
-          {
-            outIntensity[i] = values[i];
-          }
-          denominatorWS->dataY(wsIndex) = outIntensity;
-          PARALLEL_END_INTERUPT_REGION
+          throw std::invalid_argument("A Forumla has not been provided for a fit function");
         }
-        PARALLEL_CHECK_INTERUPT_REGION
+        else
+        {
+          std::string resultUnitStr = fitParam.getResultUnit();
+          if ( !resultUnitStr.empty() && resultUnitStr.compare("Wavelength") != 0)
+          {
+            throw std::invalid_argument("Units for function parameters must be in Wavelength");
+          }  
+        } 
+        mu::Parser p;
+        p.SetExpr(fitParam.getFormula());
+        double paramValue = p.Eval();
+        //Set the function coeffiecents.
+        function->setParameter(fitParam.getName(), paramValue);
+      }
+
+      auto wavelengths = inWS->readX(wsIndex);
+      const size_t nInputBins =  wavelengths.size() -1;
+      std::vector<double> centerPointWavelength(nInputBins);
+      std::vector<double> outIntensity(nInputBins);
+      for(size_t binIndex = 0; binIndex < nInputBins; ++binIndex)
+      {
+        centerPointWavelength[binIndex] = 0.5*(wavelengths[binIndex] + wavelengths[binIndex+1]);
+      }
+      FunctionDomain1DVector domain(centerPointWavelength);
+      FunctionValues values(domain);
+      function->function(domain,values);
+      for(size_t i = 0; i < domain.size(); ++i)
+      {
+        outIntensity[i] = values[i];
+      }
+      denominatorWS->dataY(wsIndex) = outIntensity;
+    }
+
+    /**
+    Controlling function. Processes the histograms either in parallel or sequentially.
+    @param denominatorWS : Workspace that will become the denominator in the normalisation routine.
+    @param inputWorkspace: Workspace input. Contains instrument to use as well as X data to use.
+    */
+    MatrixWorkspace_sptr NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS)
+    {
+      // Clone the input workspace to create a template for the denominator workspace.
+      IAlgorithm_sptr cloneAlg = this->createSubAlgorithm("CloneWorkspace", 0.0, 1.0, true);
+      cloneAlg->setProperty("InputWorkspace", inWS);
+      cloneAlg->setPropertyValue("OutputWorkspace", "temp");
+      cloneAlg->executeAsSubAlg();
+      Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr denominatorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+
+      // Choose between parallel execution and sequential execution then, process histograms accordingly.
+      const size_t nHistograms = inWS->getNumberHistograms();
+      if(m_parallelExecution == true)
+      {
+        PARALLEL_FOR2(inWS, denominatorWS)
+          for(int wsIndex = 0; wsIndex < nHistograms; ++wsIndex)
+          {
+            PARALLEL_START_INTERUPT_REGION
+              this->processHistogram(wsIndex, denominatorWS, inWS);
+            PARALLEL_END_INTERUPT_REGION
+          }
+          PARALLEL_CHECK_INTERUPT_REGION
+      }
+      else
+      {
+        for(size_t wsIndex = 0; wsIndex < nHistograms; ++wsIndex)
+        {
+          this->processHistogram(wsIndex, denominatorWS, inWS);
+        }
+      }
+
+      return denominatorWS;
     };
 
     //----------------------------------------------------------------------------------------------
@@ -169,14 +201,8 @@ namespace Mantid
     {
       MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
 
-      IAlgorithm_sptr cloneAlg = this->createSubAlgorithm("CloneWorkspace", 0.0, 1.0, true);
-      cloneAlg->setProperty("InputWorkspace", inWS);
-      cloneAlg->setPropertyValue("OutputWorkspace", "temp");
-      cloneAlg->executeAsSubAlg();
-      Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
-      MatrixWorkspace_sptr denominatorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
-      
-      processHistograms(denominatorWS, inWS);
+      // Do the work of extracting functions and applying them to each bin on each histogram. The denominator workspace is mutable.
+      MatrixWorkspace_sptr denominatorWS = processHistograms(inWS);
 
       // Perform the normalisation.
       IAlgorithm_sptr divideAlg = this->createSubAlgorithm("Divide", 0.0, 1.0, true);

@@ -9,13 +9,14 @@
 
 namespace Mantid
 {
+
 namespace API
 {
+  /// Forward declaration for MatrixWorkspace.
   class MatrixWorkspace;
 }
 namespace Algorithms
 {
-
   /** NormaliseByDetector : Normalises a workspace with respect to the detector efficiency function stored against components in the instrument parameters. See wiki for more details.
     Detector efficiency functions are calculated using the wavelengths in the input workspace.
     
@@ -44,7 +45,7 @@ namespace Algorithms
   class DLLExport NormaliseByDetector  : public API::Algorithm
   {
   public:
-    NormaliseByDetector();
+    NormaliseByDetector(bool parallelExecution = true);
     virtual ~NormaliseByDetector();
     
     virtual const std::string name() const;
@@ -52,10 +53,14 @@ namespace Algorithms
     virtual const std::string category() const;
 
   private:
+    /// Flag to indicate that the histograms should be processed in parallel.
+    const bool m_parallelExecution;
     /// Try to parse a function parameter and extract the correctly typed parameter.
     const Mantid::Geometry::FitParameter tryParseFunctionParameter(Mantid::Geometry::Parameter_sptr parameter, Geometry::IDetector_const_sptr det);
     /// Block to process histograms.
-    void processHistograms(boost::shared_ptr<Mantid::API::MatrixWorkspace> denominatorWS, boost::shared_ptr<const Mantid::API::MatrixWorkspace> inWS);
+    boost::shared_ptr<Mantid::API::MatrixWorkspace>  processHistograms(boost::shared_ptr<Mantid::API::MatrixWorkspace> inWS);
+    /// Process indivdual histogram.
+    void processHistogram(size_t wsIndex, boost::shared_ptr<Mantid::API::MatrixWorkspace> denominatorWS, boost::shared_ptr<const Mantid::API::MatrixWorkspace> inWS);
     virtual void initDocs();
     void init();
     void exec();
