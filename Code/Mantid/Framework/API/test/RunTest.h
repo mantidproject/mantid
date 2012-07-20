@@ -13,7 +13,6 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid;
 using Mantid::Kernel::NexusTestHelper;
 
 // Helper class
@@ -32,6 +31,22 @@ namespace
     std::string setDataItem(const boost::shared_ptr<DataItem>) { return ""; } 
     Property& operator+=( Property const * ) { return *this; }
   };
+
+  void addTestTimeSeries(Run & run, const std::string & name)
+  {
+    auto timeSeries = new TimeSeriesProperty<double>(name);
+    timeSeries->addValue("2012-07-19T16:17:00",2);
+    timeSeries->addValue("2012-07-19T16:17:10",3);
+    timeSeries->addValue("2012-07-19T16:17:20",4);
+    timeSeries->addValue("2012-07-19T16:17:30",5);
+    timeSeries->addValue("2012-07-19T16:17:40",6);
+    timeSeries->addValue("2012-07-19T16:17:50",20);
+    timeSeries->addValue("2012-07-19T16:18:00",21);
+    timeSeries->addValue("2012-07-19T16:18:10",22);
+    timeSeries->addValue("2012-07-19T16:19:20",23);
+    timeSeries->addValue("2012-07-19T16:19:20",24);
+    run.addProperty(timeSeries);
+  }
 }
 
 
@@ -181,15 +196,50 @@ public:
     TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name), std::invalid_argument);
   }
 
-  void test_GetPropertyAsSingleValue_Returns_Expected_Single_Value_On_Successive_Calls()
+  void test_GetPropertyAsSingleValue_Throws_If_StatisticType_Is_Unknown_And_Type_Is_TimeSeries()
+  {
+    Run runInfo;
+    const std::string name = "series";
+    addTestTimeSeries(runInfo, name);
+
+    const unsigned int statistic(100);
+    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name, (Math::StatisticType)statistic), std::invalid_argument);
+  }
+
+  void test_GetPropertyAsSingleValue_Returns_Simple_Mean_By_Default_For_Time_Series()
+  {
+    Run runInfo;
+    const std::string name = "series";
+    addTestTimeSeries(runInfo, name);
+
+    const double expectedValue(13.0);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name), expectedValue, 1e-12);
+  }
+
+  void test_GetPropertyAsSingleValue_Returns_Correct_SingleValue_For_Each_StatisticType()
+  {
+    Run runInfo;
+    const std::string name = "series";
+    addTestTimeSeries(runInfo, name);
+    
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Mean), 13.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Minimum), 2.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Maximum), 24.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::FirstValue), 2.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::LastValue), 24.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Median), 13.0, 1e-12);
+  }
+
+  void test_GetPropertyAsSingleValue_Returns_Expected_Single_Value_On_Successive_Calls_With_Different_Stat_Types()
   {
     Run run;
-    const std::string name = "double_prop";
-    double value(11.1);
-    run.addProperty(name, value);
+    const std::string name = "series";
+    addTestTimeSeries(run, name);
 
-    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name), value);
-    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name), value);
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name,Math::Mean), 13.0);
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name,Math::Mean), 13.0);
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name,Math::Minimum), 2.0);
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name,Math::Minimum), 2.0);
   }
 
 
@@ -457,20 +507,9 @@ public:
   static RunTestPerformance *createSuite() { return new RunTestPerformance(); }
   static void destroySuite( RunTestPerformance *suite ) { delete suite; }
 
-  RunTestPerformance()
+  RunTestPerformance() : m_testRun(), m_propName("test")
   {
-    m_propName = "test";
-    auto timeSeries = new TimeSeriesProperty<double>(m_propName);
-    timeSeries->addValue("2012-07-19T16:17:00",1);
-    timeSeries->addValue("2012-07-19T16:17:10",2);
-    timeSeries->addValue("2012-07-19T16:17:20",3);
-    timeSeries->addValue("2012-07-19T16:17:30",4);
-    timeSeries->addValue("2012-07-19T16:17:40",5);
-    timeSeries->addValue("2012-07-19T16:17:50",6);
-    timeSeries->addValue("2012-07-19T16:18:00",7);
-    timeSeries->addValue("2012-07-19T16:18:10",8);
-    timeSeries->addValue("2012-07-19T16:18:20",9);
-    m_testRun.addProperty(timeSeries);
+    addTestTimeSeries(m_testRun, m_propName);
   }
 
   void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times()

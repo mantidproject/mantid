@@ -302,7 +302,11 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
 
   void Run::removeProperty(const std::string &name, bool delProperty)
   {
-    m_singleValueCache.removeCache(name);
+    // Remove any cached entries for this log. Need to make this more general
+    for(unsigned int stat = 0; stat < 7; ++stat)
+    {
+      m_singleValueCache.removeCache(std::make_pair(name,(Math::StatisticType)stat));
+    }
     m_manager.removeProperty(name, delProperty);
   }
 
@@ -494,15 +498,17 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   /**
    * Returns a property as a single double value. Currently only translates
    * TimeSeriesProperty<double> and PropertyWithValue<double>. Throws if the property is not of this type
-   * For a time series the mean is taken
+   * For a time series the the given statistic type is used to compute the value
    * Note: The value is cached for quick future lookups
    * @param name :: The name of the property
+   * @param statistic :: The statistic to use to calculate the single value (default=Mean) @see StatisticType
    * @return A single double value
    */
-  double Run::getPropertyAsSingleValue(const std::string & name) const
+  double Run::getPropertyAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic) const
   {
     double singleValue(0.0);
-    if(!m_singleValueCache.getCache(name, singleValue))
+    const auto key = std::make_pair(name,statistic);
+    if(!m_singleValueCache.getCache(key, singleValue))
     {
       Kernel::Property *log = getProperty(name);
       if(auto singleDouble = dynamic_cast<PropertyWithValue<double>*>(log))
@@ -511,14 +517,31 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       }
       else if(auto seriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(log))
       {
-        singleValue  = seriesDouble->getStatistics().mean;
+        using namespace Mantid::Kernel::Math;
+        switch(statistic)
+        {
+        case FirstValue: singleValue = seriesDouble->nthValue(0);
+          break;
+        case LastValue: singleValue = seriesDouble->nthValue(seriesDouble->size() - 1);
+          break;
+        case Minimum: singleValue = seriesDouble->getStatistics().minimum;
+          break;
+        case Maximum: singleValue = seriesDouble->getStatistics().maximum;
+          break;
+        case Mean: singleValue = seriesDouble->getStatistics().mean;
+          break;
+        case Median: singleValue = seriesDouble->getStatistics().median;
+          break;
+        default: throw std::invalid_argument("Run::getPropertyAsSingleValue - Unknown statistic type: " + boost::lexical_cast<std::string>(statistic));
+        };
+        
       }
       else
       {
         throw std::invalid_argument("Run::getPropertyAsSingleValue - Property \"" + name + "\" is not a single double or time series double.");
       }
       // Put it in the cache
-      m_singleValueCache.setCache(name, singleValue);
+      m_singleValueCache.setCache(key, singleValue);
     }
     return singleValue;
   }

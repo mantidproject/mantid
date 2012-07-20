@@ -100,7 +100,7 @@ namespace Mantid
       template<typename HeldType>
       HeldType getPropertyValueAsType(const std::string & name) const;
       /// Returns any property as a single double value
-      double getPropertyAsSingleValue(const std::string & name) const;
+      double getPropertyAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const;
       /// Returns the named property as a pointer
       Kernel::Property * getProperty(const std::string & name) const;
 
@@ -149,6 +149,13 @@ namespace Mantid
        * @param delproperty :: If true, delete the log entry
        */
       void removeLogData(const std::string &name, const bool delproperty=true) { return removeProperty(name, delproperty); }
+      /**
+       * @param name :: The name of the property
+       * @param statistic :: Defines how to calculate the single value from series (default=Mean)
+       * @return A log as a single value using the given statistic type
+       */
+      double getLogAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const;
+      
       /// Save the run to a NeXus file with a given group name
       void saveNexus(::NeXus::File * file, const std::string & group) const;
       /// Load the run from a NeXus file with a given group name
@@ -173,8 +180,11 @@ namespace Mantid
       Kernel::PropertyManager m_manager;
       /// Goniometer for this run
       Mantid::Geometry::Goniometer m_goniometer;
+
+      /// Cache type for single value logs
+      typedef Kernel::Cache<std::pair<std::string,Kernel::Math::StatisticType>, double> SingleValueCache;
       /// Cache for the retrieved single values
-      mutable Kernel::Cache<std::string,double> m_singleValueCache;
+      mutable SingleValueCache m_singleValueCache;
     };
 
     /**

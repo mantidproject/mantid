@@ -8,6 +8,14 @@ namespace Mantid
 {
   namespace Kernel
   {
+    namespace Math
+    {
+      /**
+       * Maps a "statistic" to a number
+       */
+      enum StatisticType { FirstValue, LastValue, Minimum, Maximum, Mean, TimeAveragedMean, Median };
+    }
+
     /**
        Simple struct to store statistics.
        
