@@ -47,9 +47,8 @@ class DRangeToWsMap(object):
 		try:
 			dRange = timeRegimeToDRange[timeRegime]
 		except KeyError:
-			mtd.sendErrorMessage("Unable to identify the DRange of " + ws.getName() + 
+			raise RuntimeError("Unable to identify the DRange of " + ws.getName() + 
 				", which has a time regime of " + str(timeRegime))
-			sys.exit()
 		
 		# Add the workspace to the map, alongside its DRange.
 		if dRange in self._map:
@@ -166,22 +165,20 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 		mtd.settings["default.instrument"] = 'OSIRIS'
 		
 		# Set all algo inputs to local vars.  Some validation/parsing via FileFinder,
-        # which is helpful since this is an algorithm that could be called outside of
-        # of the Indirect Diffraction interface.
+		# which is helpful since this is an algorithm that could be called outside of
+		# of the Indirect Diffraction interface.
 		self._outputWsName = self.getPropertyValue("OutputWorkspace")
 		for sam in re.compile(r',').split(self.getProperty("Sample")):
 			try:
 				val = FileFinder.findRuns(sam)[0]
-			except RuntimeError:
-				mtd.sendErrorMessage("Could not locate sample file: " + sam)
-				sys.exit()
+			except IndexError:
+				raise RuntimeError("Could not locate sample file: " + sam)
 			self._sams.append(val)
 		for van in re.compile(r',').split(self.getProperty("Vanadium")):
 			try:
 				val = FileFinder.findRuns(van)[0]
-			except RuntimeError:
-				mtd.sendErrorMessage("Could not locate vanadium file: " + van)
-				sys.exit()
+			except IndexError:
+				raise RuntimeError("Could not locate vanadium file: " + van)
 			self._vans.append(val)
 		self._cal = self.getProperty("CalFile")
 		
@@ -196,8 +193,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 		# Check to make sure that there are corresponding vanadium files with the same DRange for each sample file.
 		for dRange in self._samMap.getMap().iterkeys():
 			if dRange not in self._vanMap.getMap():
-				mtd.sendErrorMessage("There is no van file that covers the " + str(dRange) + " DRange.")
-				sys.exit()
+				raise RuntimeError("There is no van file that covers the " + str(dRange) + " DRange.")
 		
 		# Average together any sample workspaces with the same DRange.  This will mean our map of DRanges
 		# to list of workspaces becomes a map of DRanges, each to a *single* workspace.
@@ -231,8 +227,12 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 		for sam in self._samMap.getMap().itervalues():
 			samWsNamesList.append(sam.getName())
 		
-		# Merge the sample files into one.
-		MergeRuns(','.join(samWsNamesList), self._outputWsName)
+		if len(samWsNamesList) > 1:
+			# Merge the sample files into one.
+			MergeRuns(','.join(samWsNamesList), self._outputWsName)
+		else:
+			CloneWorkspace(InputWorkspace=samWsNamesList[0],
+						   OutputWorkspace=self._outputWsName)
 		result = mtd[self._outputWsName]
 		
 		# Create scalar data to cope with where merge has combined overlapping data.
