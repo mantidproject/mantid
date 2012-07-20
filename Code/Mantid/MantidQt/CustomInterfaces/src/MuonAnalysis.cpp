@@ -25,6 +25,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/cow_ptr.h"
@@ -3431,6 +3432,17 @@ void MuonAnalysis::closeEvent(QCloseEvent *e)
 */
 void MuonAnalysis::showEvent(QShowEvent *e)
 {
+  const std::string facility = ConfigService::Instance().getFacility().name();
+  if (facility != "ISIS")
+  {
+    QMessageBox::critical(this, "Unsupported facility", QString("Only the ISIS facility is supported by this interface.\n")
+                         + "Select ISIS as your default facility in View->Preferences...->Mantid to continue.");
+    m_uiForm.loadCurrent->setDisabled(true);
+  }
+  else
+  {
+    m_uiForm.loadCurrent->setDisabled(false);
+  }
   // Hide the toolbar
   if (m_uiForm.hideToolbars->isChecked() )
     emit hideToolbars();
