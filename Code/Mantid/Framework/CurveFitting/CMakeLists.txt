@@ -52,6 +52,7 @@ set ( SRC_FILES
 	src/ParDomain.cpp
 	src/PlotPeakByLogValue.cpp
 	src/ProductFunction.cpp
+	src/ProductLinearExp.cpp
 	src/Quadratic.cpp
 	src/QuadraticBackground.cpp
 	src/Resolution.cpp
@@ -131,6 +132,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/ProductFunction.h
+	inc/MantidCurveFitting/ProductLinearExp.h
 	inc/MantidCurveFitting/Quadratic.h
 	inc/MantidCurveFitting/QuadraticBackground.h
 	inc/MantidCurveFitting/Resolution.h
@@ -193,6 +195,7 @@ set ( TEST_FILES
 	test/PRConjugateGradientTest.h
 	test/PlotPeakByLogValueTest.h
 	test/ProductFunctionTest.h
+	test/ProductLinearExpTest.h
 	test/QuadraticBackgroundTest.h
 	test/QuadraticTest.h
 	test/ResolutionTest.h
