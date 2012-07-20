@@ -273,9 +273,9 @@ namespace CurveFitting
     dvalues.push_back(dh);
     heights.push_back(height);
 
-    // API::IPeakFunction* tpeak = new CurveFitting::ThermoNeutronBackToBackExpPV();
-    CurveFitting::ThermoNeutronBackToBackExpPV* peakptr = new CurveFitting::ThermoNeutronBackToBackExpPV();
-    CurveFitting::ThermoNeutronBackToBackExpPV_sptr tpeak(peakptr);
+    // API::IPeakFunction* tpeak = new CurveFitting::Bk2BkExpConvPV();
+    CurveFitting::Bk2BkExpConvPV* peakptr = new CurveFitting::Bk2BkExpConvPV();
+    CurveFitting::Bk2BkExpConvPV_sptr tpeak(peakptr);
     tpeak->setPeakRadius(8);
 
     tpeak->initialize();
@@ -337,7 +337,7 @@ namespace CurveFitting
   }
 
 
-  CurveFitting::ThermoNeutronBackToBackExpPV_sptr LeBailFunction::getPeak(size_t peakindex)
+  CurveFitting::Bk2BkExpConvPV_sptr LeBailFunction::getPeak(size_t peakindex)
   {
     if (peakindex >= mPeaks.size())
     {
@@ -345,7 +345,7 @@ namespace CurveFitting
       throw std::invalid_argument("getPeak() out of boundary");
     }
 
-    CurveFitting::ThermoNeutronBackToBackExpPV_sptr rpeak = mPeaks[peakindex];
+    CurveFitting::Bk2BkExpConvPV_sptr rpeak = mPeaks[peakindex];
 
     return rpeak;
   }
@@ -384,7 +384,7 @@ namespace CurveFitting
       throw std::runtime_error("Index out of range");
     }
 
-    CurveFitting::ThermoNeutronBackToBackExpPV_sptr peak = mPeaks[index];
+    CurveFitting::Bk2BkExpConvPV_sptr peak = mPeaks[index];
 
     double value = peak->getParameter(parname);
 

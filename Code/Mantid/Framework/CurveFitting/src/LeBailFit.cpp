@@ -445,7 +445,7 @@ namespace CurveFitting
 
     for (size_t i = 0; i < peaks.size(); ++i)
     {
-      CurveFitting::ThermoNeutronBackToBackExpPV_sptr ipeak = mLeBail->getPeak(peaks[i]);
+      CurveFitting::Bk2BkExpConvPV_sptr ipeak = mLeBail->getPeak(peaks[i]);
       ipeak->function1D(tempout, xvalues, ndata);
       for (size_t j = 0; j < ndata; ++j)
       {
@@ -457,7 +457,7 @@ namespace CurveFitting
     for (size_t i = 0; i < peaks.size(); ++i)
     {
       double intensity = 0.0;
-      CurveFitting::ThermoNeutronBackToBackExpPV_sptr ipeak = mLeBail->getPeak(peaks[i]);
+      CurveFitting::Bk2BkExpConvPV_sptr ipeak = mLeBail->getPeak(peaks[i]);
       ipeak->function1D(tempout, xvalues, ndata);
       for (size_t j = 0; j < ndata; ++j)
       {

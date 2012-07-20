@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_THERMONEUTRONBACKTOBACKEXPPVTEST_H_
-#define MANTID_CURVEFITTING_THERMONEUTRONBACKTOBACKEXPPVTEST_H_
+#ifndef MANTID_CURVEFITTING_Bk2BkExpConvPVTEST_H_
+#define MANTID_CURVEFITTING_Bk2BkExpConvPVTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <fstream>
 
-#include "MantidCurveFitting/ThermoNeutronBackToBackExpPV.h"
+#include "MantidCurveFitting/Bk2BkExpConvPV.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -17,13 +17,13 @@ using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 
-class ThermoNeutronBackToBackExpPVTest : public CxxTest::TestSuite
+class Bk2BkExpConvPVTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static ThermoNeutronBackToBackExpPVTest *createSuite() { return new ThermoNeutronBackToBackExpPVTest(); }
-  static void destroySuite( ThermoNeutronBackToBackExpPVTest *suite ) { delete suite; }
+  static Bk2BkExpConvPVTest *createSuite() { return new Bk2BkExpConvPVTest(); }
+  static void destroySuite( Bk2BkExpConvPVTest *suite ) { delete suite; }
 
   /*
    * Experiment data for HKL = (2, 1, 0)
@@ -78,7 +78,7 @@ public:
   void test_functionCalculator()
   {
     // 1. Set peak
-    ThermoNeutronBackToBackExpPV peak;
+    Bk2BkExpConvPV peak;
     peak.initialize();
 
     peak.setParameter("I", 1.0);
@@ -170,4 +170,4 @@ public:
 };
 
 
-#endif /* MANTID_CURVEFITTING_THERMONEUTRONBACKTOBACKEXPPVTEST_H_ */
+#endif /* MANTID_CURVEFITTING_Bk2BkExpConvPVTEST_H_ */

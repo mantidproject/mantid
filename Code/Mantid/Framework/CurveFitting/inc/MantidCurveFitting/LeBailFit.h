@@ -6,7 +6,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidCurveFitting/LeBailFunction.h"
-#include "MantidCurveFitting/ThermoNeutronBackToBackExpPV.h"
+#include "MantidCurveFitting/Bk2BkExpConvPV.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid

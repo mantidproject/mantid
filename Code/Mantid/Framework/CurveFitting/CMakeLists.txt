@@ -6,8 +6,10 @@ set ( SRC_FILES
 	src/BackToBackExponential.cpp
 	src/BackgroundFunction.cpp
 	src/BivariateNormal.cpp
+	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
 	src/Chebyshev.cpp
+	src/ChebyshevPolynomialBackground.cpp
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
@@ -31,6 +33,7 @@ set ( SRC_FILES
 	src/Gaussian.cpp
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
+	src/HighOrderPolynomialBackground.cpp
 	src/IDomainCreator.cpp
 	src/IFuncMinimizer.cpp
 	src/IkedaCarpenterPV.cpp
@@ -60,7 +63,6 @@ set ( SRC_FILES
 	src/SteepestDescentMinimizer.cpp
 	src/StretchExp.cpp
 	src/StretchExpMuon.cpp
-	src/ThermoNeutronBackToBackExpPV.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
 	src/UserFunctionMD.cpp
@@ -76,8 +78,10 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BackToBackExponential.h
 	inc/MantidCurveFitting/BackgroundFunction.h
 	inc/MantidCurveFitting/BivariateNormal.h
+	inc/MantidCurveFitting/Bk2BkExpConvPV.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/Chebyshev.h
+	inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
@@ -107,6 +111,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/Gaussian1D.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
+	inc/MantidCurveFitting/HighOrderPolynomialBackground.h
 	inc/MantidCurveFitting/IDomainCreator.h
 	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
@@ -137,7 +142,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h
 	inc/MantidCurveFitting/StretchExpMuon.h
-	inc/MantidCurveFitting/ThermoNeutronBackToBackExpPV.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
 	inc/MantidCurveFitting/UserFunctionMD.h
@@ -148,7 +152,9 @@ set ( TEST_FILES
 	test/AbragamTest.h
 	test/BFGSTest.h
 	test/BivariateNormalTest.h
+	test/Bk2BkExpConvPVTest.h
 	test/BoundaryConstraintTest.h
+	test/ChebyshevPolynomialBackgroundTest.h
 	test/ChebyshevTest.h
 	test/CompositeFunctionTest.h
 	test/ConvolutionTest.h
@@ -169,6 +175,7 @@ set ( TEST_FILES
 	test/GausOscTest.h
 	test/Gaussian1DTest.h
 	test/GaussianTest.h
+	test/HighOrderPolynomialBackgroundTest.h
 	test/IkedaCarpenterPVTest.h
 	test/LeBailFitTest.h
 	test/LeBailFunctionTest.h
@@ -195,7 +202,6 @@ set ( TEST_FILES
 	test/StaticKuboToyabeTest.h
 	test/StretchExpMuonTest.h
 	test/StretchExpTest.h
-	test/ThermoNeutronBackToBackExpPVTest.h
 	test/UserFunction1DTest.h
 	test/UserFunctionTest.h
 )
