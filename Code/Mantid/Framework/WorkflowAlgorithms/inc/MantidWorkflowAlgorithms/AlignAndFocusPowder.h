@@ -75,6 +75,7 @@ namespace Mantid
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;
       DataObjects::EventWorkspace_sptr m_eventW;
+      void doSortEvents(Mantid::API::Workspace_sptr ws);
 
     };
 
