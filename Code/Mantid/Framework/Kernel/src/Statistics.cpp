@@ -1,11 +1,12 @@
+// Includes
+#include "MantidKernel/Statistics.h"
+
 #include <algorithm>
 #include <functional>
 #include <limits>
-#include <math.h>
+#include <cmath>
 #include <numeric>
 #include <string>
-#include <iostream>
-#include "MantidKernel/Statistics.h"
 
 namespace Mantid
 {
