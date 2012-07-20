@@ -193,8 +193,8 @@ void AlignAndFocusPowder::exec()
 	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("UnwrapSNS");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("LRef",LRef);
-	  removeAlg->setProperty("Tmin",tmin);
-	  removeAlg->setProperty("Tmax",tmax);
+	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
+	  if(tmax > tmin) removeAlg->setProperty("Tmax",tmax);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
   }
@@ -204,7 +204,7 @@ void AlignAndFocusPowder::exec()
 	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("RemoveLowResTOF");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("MinWavelength",minwl);
-	  removeAlg->setProperty("Tmin",tmin);
+	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
   }
@@ -214,7 +214,7 @@ void AlignAndFocusPowder::exec()
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("ReferenceDIFC",DIFCref);
 	  removeAlg->setProperty("K",3.22);
-	  removeAlg->setProperty("Tmin",tmin);
+	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
   }
@@ -338,10 +338,10 @@ void AlignAndFocusPowder::execEvent()
   if (removePromptPulseWidth > 0.)
   {
     API::IAlgorithm_sptr filterAlg = createSubAlgorithm("RemovePromptPulse");
-    filterAlg->setProperty("InputWorkspace", m_outputEventW);
+    filterAlg->setProperty("InputWorkspace", m_outputW);
     filterAlg->setProperty("Width", removePromptPulseWidth);
     filterAlg->executeAsSubAlg();
-    m_outputEventW = filterAlg->getProperty("OutputWorkspace");
+    m_outputW = filterAlg->getProperty("OutputWorkspace");
   }
 
   if (!filterName.empty())
@@ -408,8 +408,8 @@ void AlignAndFocusPowder::execEvent()
 	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("UnwrapSNS");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("LRef",LRef);
-	  removeAlg->setProperty("Tmin",tmin);
-	  removeAlg->setProperty("Tmax",tmax);
+	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
+	  if(tmax > tmin) removeAlg->setProperty("Tmax",tmax);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
   }
@@ -419,7 +419,7 @@ void AlignAndFocusPowder::execEvent()
 	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("RemoveLowResTOF");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("MinWavelength",minwl);
-	  removeAlg->setProperty("Tmin",tmin);
+	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
   }
@@ -429,7 +429,7 @@ void AlignAndFocusPowder::execEvent()
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("ReferenceDIFC",DIFCref);
 	  removeAlg->setProperty("K",3.22);
-	  removeAlg->setProperty("Tmin",tmin);
+	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
 	  removeAlg->executeAsSubAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
   }
