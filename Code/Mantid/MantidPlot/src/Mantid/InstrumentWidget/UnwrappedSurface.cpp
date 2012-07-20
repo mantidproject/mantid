@@ -918,7 +918,16 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
 
     if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
 
-    int u = ( udet.u - m_viewRect.left() ) / dw;
+    int u = 0;
+    if ( !isFlippedView() )
+    {
+      u = ( udet.u - m_viewRect.left() ) / dw;
+    }
+    else
+    {
+      u = vwidth - ( udet.u - m_viewRect.right() ) / dw;
+    }
+
     int v = vheight - ( udet.v - m_viewRect.bottom() ) / dh;
 
     QColor color;

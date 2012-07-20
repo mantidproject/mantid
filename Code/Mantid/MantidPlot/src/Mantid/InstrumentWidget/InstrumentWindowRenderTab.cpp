@@ -14,6 +14,8 @@
 #include <QSettings>
 #include <QAction>
 #include <QSignalMapper>
+#include <QMessageBox>
+
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
 
@@ -35,9 +37,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   QStringList modeList;
   modeList << "Full 3D" << "Cylindrical X"  << "Cylindrical Y" << "Cylindrical Z" << "Spherical X" << "Spherical Y" << "Spherical Z";
   m_renderMode->insertItems(0,modeList);
-  connect(m_renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow,SLOT(setSurfaceType(int)));
-  connect(m_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showResetView(int)));
-  connect(m_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showFlipControl(int)));
+  connect(m_renderMode,SIGNAL(currentIndexChanged(int)), this, SLOT(setSurfaceType(int)));
 
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
@@ -269,10 +269,10 @@ void InstrumentWindowRenderTab::updateSurfaceTypeControl(int type)
 
 void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
 {
-  UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>(m_InstrumentDisplay->getSurface());
+  UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>(m_instrWindow->getSurface());
   if (!surface) return;
   surface->setFlippedView(on);
-  m_InstrumentDisplay->refreshView();
+  m_instrWindow->updateWindow();
 }
 
 /**
@@ -363,3 +363,23 @@ void InstrumentWindowRenderTab::displaySettingsAboutToshow()
   }
 }
 
+/**
+ * Change the type of the surface.
+ * @param index :: Index selected in the surface type combo box.
+ */
+void InstrumentWindowRenderTab::setSurfaceType(int index)
+{
+  // don't allow the simple viewer with 3D mode
+  if ( index == InstrumentWindow::FULL3D && !m_instrWindow->isGLEnabled() )
+  {
+    m_renderMode->blockSignals( true );
+    m_renderMode->setCurrentIndex( m_instrWindow->getSurfaceType() );
+    m_renderMode->blockSignals( false );
+    QMessageBox::warning(this,"MantidPlot - Warning","OpenGL must be enabled to view the instrument in 3D.\n"
+      "Check \"Use OpenGL\" in Display Settings.");
+    return;
+  }
+  m_instrWindow->setSurfaceType( index );
+  showResetView( index );
+  showFlipControl( index );
+}

@@ -52,6 +52,8 @@ private slots:
   void flipUnwrappedView(bool);
   /// Called before the display setting menu opens. Filters out menu options.
   void displaySettingsAboutToshow();
+  /// Change the type of the surface
+  void setSurfaceType(int);
 private:
   void showEvent (QShowEvent *);
   QMenu* createPeaksMenu();

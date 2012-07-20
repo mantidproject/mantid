@@ -63,6 +63,15 @@ public:
   void setSurface(ProjectionSurface* surface){m_surface = surface;}
   /// Return the surface 
   ProjectionSurface* getSurface(){return m_surface;}
+  /// Refreshes the view
+  void refreshView()
+  {
+    if(m_surface)
+    {
+      m_surface->updateView();
+      update();
+    }
+  }
 protected:
   void paintEvent(QPaintEvent*)
   {
@@ -807,7 +816,13 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
   //Replace current workspace
   if (wsName == m_workspaceName.toStdString())
   {
-    //updateWindow();
+    if (m_instrumentActor)
+    {
+      saveSettings();
+      delete m_instrumentActor;
+    }
+    init();
+    updateWindow();
   }
 }
 
@@ -817,6 +832,17 @@ void InstrumentWindow::clearADSHandle()
   close();
 }
 
+void InstrumentWindow::updateWindow()
+{
+  if ( isGLEnabled() )
+  {
+    m_InstrumentDisplay->refreshView();
+  }
+  else
+  {
+    m_simpleDisplay->refreshView();
+  }
+}
 
 /**
  * This method saves the workspace name associated with the instrument window 

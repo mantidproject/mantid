@@ -55,7 +55,6 @@ protected:
   void leaveEvent (QEvent*);
 private:
   void setRenderingOptions();
-  void setLightingModel(int);
 
   //QColor m_bgColor;                 ///< Background color
   //PolygonMode m_polygonMode;     ///< SOLID or WIREFRAME

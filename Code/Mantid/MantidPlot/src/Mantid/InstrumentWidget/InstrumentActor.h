@@ -9,8 +9,8 @@
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+//#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include <vector>
 #include <map>
@@ -125,7 +125,7 @@ protected:
 
   size_t push_back_detid(Mantid::detid_t)const;
 
-  const boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
+  const boost::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
   MantidColorMap m_colorMap;
   /// integrated spectra
   std::vector<double> m_specIntegrs;

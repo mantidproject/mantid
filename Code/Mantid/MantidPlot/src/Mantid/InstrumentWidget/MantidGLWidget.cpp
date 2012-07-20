@@ -4,6 +4,7 @@
 #include "MantidGLWidget.h"
 #include "OpenGLError.h"
 #include "UnwrappedSurface.h"
+#include "Projection3D.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -98,51 +99,10 @@ void MantidGLWidget::setRenderingOptions()
   //enablewriting into the depth buffer
   glDepthMask(GL_TRUE);
 
-  setLightingModel(1);
+  //setLightingModel(1);
 
   OpenGLError::check("setRenderingOptions");
 }
-
-/**
- * Toggles the use of high resolution lighting
- * @param state :: An integer indicating lighting state.
- * 0 - no light
- * 1 - GL_LIGHT0 is defined but lighting is off. Can be set on for individual actors.
- * 2 - GL_LIGHT0 is always on.
- */
-void MantidGLWidget::setLightingModel(int state)
-{
-  // Basic lighting
-  if( state == 0 )
-  {
-    glShadeModel(GL_FLAT);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_LIGHT0);
-    glDisable(GL_LINE_SMOOTH);
-  }
-  else// High end shading and lighting
-  {
-    glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)
-    glEnable(GL_LIGHT0);               // Enable opengl first light
-    glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
-    // Set Light0 Attributes, Ambient, diffuse,specular and position
-    // Its a directional light which follows camera position
-    float lamp_ambient[4]={0.30f, 0.30f, 0.30f, 1.0f};
-    float lamp_diffuse[4]={1.0f, 1.0f, 1.0f, 1.0f};
-    float lamp_specular[4]={1.0f,1.0f,1.0f,1.0f};
-    glLightfv(GL_LIGHT0, GL_AMBIENT,lamp_ambient );
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, lamp_specular);
-    float lamp_pos[4]={0.0f, 0.0f, 0.0f, 1.0f}; // spot light at the origin
-    glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
-    if (state == 2)
-    {
-      glEnable (GL_LIGHTING);            // Enable light
-    }
-  }
-}
-
 
 /**
  * This is overridden function which is called by Qt when the widget needs to be repainted.
@@ -344,14 +304,14 @@ void MantidGLWidget::resetWidget()
   */
 void MantidGLWidget::enableLighting(bool on)
 {
-  m_lightingState = on? 2 : 0;
-  setLightingModel(m_lightingState);
-  //if (m_unwrappedSurface)
-  //{
-  //  m_unwrappedSurface->updateView();
-  //}
-  refreshView();
-  repaint();
+  auto surface3D = dynamic_cast<Projection3D*>(m_surface);
+
+  if (surface3D)
+  {
+    surface3D->enableLighting( on );
+    refreshView();
+    //repaint();
+  }
 }
 
 void MantidGLWidget::draw()
