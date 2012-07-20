@@ -333,6 +333,7 @@ public:
     it = datamap.find( newName );
     if ( it != datamap.end() )
     {
+      notificationCenter.postNotification(new AfterReplaceNotification(newName,object));
       datamap.erase( it );
     }
 

@@ -137,7 +137,7 @@ protected:
   double m_DataMinScaleValue, m_DataMaxScaleValue;           ///< min and max of the color map scale
   double m_BinMinValue, m_BinMaxValue;
   bool m_autoscaling;
-  boost::shared_ptr<const std::vector<boost::shared_ptr<const Mantid::Geometry::IObjComponent> > > m_plottables;
+  //boost::shared_ptr<const std::vector<boost::shared_ptr<const Mantid::Geometry::IObjComponent> > > m_plottables;
 
   /// Vector where INDEX = (detector id + m_id2wi_offset); VALUE = workspace index.
   std::vector<size_t> m_id2wi_vector;

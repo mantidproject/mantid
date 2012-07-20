@@ -296,15 +296,19 @@ InstrumentWindow::~InstrumentWindow()
 /**
  * Init the geometry and colour map outside constructor to prevent creating a broken MdiSubwindow.
  * Must be called straight after constructor.
+ * @param updateGeometry :: Set true for resetting the view's geometry: the bounding box and rotation. Default is true.
  */
-void InstrumentWindow::init()
+void InstrumentWindow::init(bool resetGeometry)
 {
   // Previously in (now removed) setWorkspaceName method
   m_InstrumentDisplay->makeCurrent(); // ?
   m_instrumentActor = new InstrumentActor(m_workspaceName);
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
-  setSurfaceType(m_surfaceType); // This call must come after the InstrumentActor is created
+  if ( resetGeometry )
+  {
+    setSurfaceType(m_surfaceType); // This call must come after the InstrumentActor is created
+  }
   setupColorMap();
   mInstrumentTree->setInstrumentActor(m_instrumentActor);
   setInfoText( getSurfaceInfoText() );
@@ -811,17 +815,19 @@ void InstrumentWindow::preDeleteHandle(const std::string & ws_name, const boost:
 }
 
 void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
-            const boost::shared_ptr<Workspace>)
+            const boost::shared_ptr<Workspace> workspace)
 {
   //Replace current workspace
   if (wsName == m_workspaceName.toStdString())
   {
+    bool resetGeometry = true;
     if (m_instrumentActor)
     {
-      saveSettings();
+      auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( workspace );
+      resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
       delete m_instrumentActor;
     }
-    init();
+    init( resetGeometry );
     updateWindow();
   }
 }
