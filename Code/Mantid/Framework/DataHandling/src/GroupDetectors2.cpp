@@ -92,7 +92,7 @@ void GroupDetectors2::init()
   declareProperty("Behaviour", "Sum", boost::make_shared<StringListValidator>(groupTypes),
                   "Whether to sum or average the values when grouping detectors.");
   // Are we preserving event workspaces?
-  declareProperty("PreserveEvents", false, "Keep the output workspace as an EventWorkspace, if the input has events.");
+  declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events.");
 }
 
 void GroupDetectors2::exec()
