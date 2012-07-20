@@ -176,7 +176,7 @@ namespace Mantid
       if(m_parallelExecution == true)
       {
           PARALLEL_FOR2(inWS, denominatorWS)
-          for(int wsIndex = 0; wsIndex < nHistograms; ++wsIndex)
+          for(int wsIndex = 0; wsIndex < static_cast<int>(nHistograms); ++wsIndex)
           {
             PARALLEL_START_INTERUPT_REGION
               this->processHistogram(wsIndex, denominatorWS, inWS);
