@@ -496,10 +496,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   }
 
   /**
-   * Returns a property as a single double value. Currently only translates
-   * TimeSeriesProperty<double> and PropertyWithValue<double>. Throws if the property is not of this type
-   * For a time series the the given statistic type is used to compute the value
-   * Note: The value is cached for quick future lookups
+   * Returns a property as a single double value from its name @see getPropertyAsSingleValue
    * @param name :: The name of the property
    * @param statistic :: The statistic to use to calculate the single value (default=Mean) @see StatisticType
    * @return A single double value
@@ -507,15 +504,15 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   double Run::getPropertyAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic) const
   {
     double singleValue(0.0);
-    const auto key = std::make_pair(name,statistic);
+    const auto key = std::make_pair(name, statistic);
     if(!m_singleValueCache.getCache(key, singleValue))
     {
-      Kernel::Property *log = getProperty(name);
-      if(auto singleDouble = dynamic_cast<PropertyWithValue<double>*>(log))
+      const Property *log = getProperty(name);
+      if(auto singleDouble = dynamic_cast<const PropertyWithValue<double>*>(log))
       {
         singleValue  = (*singleDouble)();
       }
-      else if(auto seriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(log))
+      else if(auto seriesDouble = dynamic_cast<const TimeSeriesProperty<double>*>(log))
       {
         using namespace Mantid::Kernel::Math;
         switch(statistic)
@@ -534,7 +531,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
           break;
         default: throw std::invalid_argument("Run::getPropertyAsSingleValue - Unknown statistic type: " + boost::lexical_cast<std::string>(statistic));
         };
-        
       }
       else
       {
@@ -545,7 +541,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     }
     return singleValue;
   }
-
 
   /**
    * Get a pointer to a property by name

@@ -99,7 +99,7 @@ namespace Mantid
       /// Get the value of a property as the given TYPE. Throws if the type is not correct
       template<typename HeldType>
       HeldType getPropertyValueAsType(const std::string & name) const;
-      /// Returns any property as a single double value
+      /// Returns a property as a single double value from its name
       double getPropertyAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const;
       /// Returns the named property as a pointer
       Kernel::Property * getProperty(const std::string & name) const;

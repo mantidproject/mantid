@@ -24,19 +24,24 @@ namespace API
   class DLLExport ExperimentInfo 
   {
   public:
+    /// Default constructor
     ExperimentInfo();
-    ~ExperimentInfo();
+    /// Virtual destructor
+    virtual ~ExperimentInfo();
     
+    /// Copy everything from the given experiment object
     void copyExperimentInfoFrom(const ExperimentInfo * other);
-
+    /// Clone us
     ExperimentInfo * cloneExperimentInfo()const;
 
     /// Instrument accessors
     void setInstrument(const Geometry::Instrument_const_sptr&);
+    /// Returns the parameterized instrument
     Geometry::Instrument_const_sptr getInstrument() const;
 
-    /// Returns the set of parameters modifying the base instrument
+    /// Returns the set of parameters modifying the base instrument (const-version)
     const Geometry::ParameterMap& instrumentParameters() const;
+    /// Returns a modifiable set of instrument parameters
     Geometry::ParameterMap& instrumentParameters();
     /// Const version
     const Geometry::ParameterMap& constInstrumentParameters() const;
@@ -52,17 +57,25 @@ namespace API
     const Run & run() const;
     /// Writable version of the run object
     Run& mutableRun();
+    /// Access a log for this experiment.
+    Kernel::Property * getLog(const std::string & log) const;
+    /// Access a single value from a log for this experiment.
+    double getLogAsSingleValue(const std::string & log) const;
 
     /// Utility method to get the run number
     int getRunNumber() const;
 
+    /// Saves this experiment description to the open NeXus file
     void saveExperimentInfoNexus(::NeXus::File * file) const;
+    /// Loads an experiment description from the open NeXus file
     void loadExperimentInfoNexus(::NeXus::File * file, std::string & parameterStr);
-
+    /// Populate the parameter map given a string
     void readParameterMap(const std::string & parameterStr);
 
-    // Helper methods (made public for tests)
+    /// Returns the start date for this experiment
     std::string getWorkspaceStartDate();
+
+    /// Utility to retrieve the validity dates for the given IDF
     static void getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom, std::string& outValidTo);
     /// Get the IDF using the instrument name and date
     static std::string getInstrumentFilename(const std::string& instrumentName, const std::string& date);
