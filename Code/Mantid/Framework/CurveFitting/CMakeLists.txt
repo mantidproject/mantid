@@ -9,7 +9,7 @@ set ( SRC_FILES
 	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
 	src/Chebyshev.cpp
-	src/ChebyshevPolynomialBackground.cpp
+	# src/ChebyshevPolynomialBackground.cpp
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
@@ -81,7 +81,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/Chebyshev.h
-	inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
+	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
@@ -154,7 +154,7 @@ set ( TEST_FILES
 	test/BivariateNormalTest.h
 	test/Bk2BkExpConvPVTest.h
 	test/BoundaryConstraintTest.h
-	test/ChebyshevPolynomialBackgroundTest.h
+	# test/ChebyshevPolynomialBackgroundTest.h
 	test/ChebyshevTest.h
 	test/CompositeFunctionTest.h
 	test/ConvolutionTest.h
