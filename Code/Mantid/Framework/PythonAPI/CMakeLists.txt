@@ -251,6 +251,12 @@ if (MAIN_TARGET AND GEN_TEST_MAIN)
   add_executable(main EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp )
   target_link_libraries ( main ${MANTIDLIBS} Algorithms DataHandling )
 
+  # add required include directories from Framework
+  include_directories ( ../Kernel/inc )
+  include_directories ( ../Geometry/inc )
+  include_directories ( ../API/inc )
+  include_directories ( ../DataObjects/inc )
+
   # run the executable
   add_custom_target ( cleanmain
                       DEPENDS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/main 
