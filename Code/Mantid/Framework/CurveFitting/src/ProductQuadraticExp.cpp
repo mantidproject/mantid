@@ -23,6 +23,12 @@ namespace Mantid
     {
     }
 
+    /**
+    Calculate the 1D function derivatives.
+    @param out : Jacobian to set derivates on.
+    @param xValues : Domain x-values.
+    @param nData : Number of elements.
+    */
     void ProductQuadraticExp::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
     {
       const double A0 = getParameter("A0");
@@ -45,6 +51,12 @@ namespace Mantid
       }
     }
 
+    /**
+    Evaluate the 1D function
+    @param out : Out values.
+    @param xValues : Domain x-values.
+    @param nData : Number of elements.
+    */
     void ProductQuadraticExp::function1D(double* out, const double* xValues, const size_t nData) const
     {
       const double A0 = getParameter("A0");
