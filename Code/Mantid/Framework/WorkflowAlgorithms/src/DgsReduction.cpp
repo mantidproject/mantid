@@ -258,15 +258,7 @@ namespace WorkflowAlgorithms
    */
   Workspace_sptr DgsReduction::loadInputData(boost::shared_ptr<PropertyManager> manager)
   {
-    const std::string facility = ConfigService::Instance().getFacility().name();
-    if ("SNS" == facility)
-      {
-        this->setLoadAlg("LoadEventNexus");
-      }
-    else
-      {
-        this->setLoadAlg("LoadRaw");
-      }
+
     Workspace_sptr inputWS;
 
     std::string inputData = this->getPropertyValue("SampleFile");
@@ -281,7 +273,27 @@ namespace WorkflowAlgorithms
       }
     else if (!inputData.empty())
       {
-        manager->declareProperty(new PropertyWithValue<std::string>("MonitorFilename", inputData));
+        const std::string facility = ConfigService::Instance().getFacility().name();
+        if ("SNS" == facility)
+          {
+            if (boost::ends_with(inputData, "_event.nxs"))
+              {
+                this->setLoadAlg("LoadEventNexus");
+              }
+            if (boost::ends_with(inputData, "_neutron_event.dat"))
+              {
+                this->setLoadAlg("LoadEventPreNexus");
+                this->setLoadAlgFileProp("EventFilename");
+              }
+            manager->declareProperty(new PropertyWithValue<std::string>("MonitorFilename", inputData));
+          }
+        // Do ISIS
+        else
+          {
+            this->setLoadAlg("LoadRaw");
+            manager->declareProperty(new PropertyWithValue<std::string>("DetCalFilename", inputData));
+          }
+
         inputWS = this->load(inputData);
       }
     else
