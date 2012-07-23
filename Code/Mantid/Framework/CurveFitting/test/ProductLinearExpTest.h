@@ -11,6 +11,7 @@
 #include "MantidAPI/FunctionValues.h" 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
