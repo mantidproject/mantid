@@ -51,7 +51,7 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     virtual void setHeight(const double h);
 
     /// overwrite IFunction base class methods
-    std::string name()const{return "Bk2BkExpConvPV";}
+    std::string name()const{return "ThermalNeutronBk2BkExpConvPV";}
     virtual const std::string category() const { return "Peak";}
 
     /// Set up the range of peak calculation for higher efficiency
@@ -106,6 +106,8 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     
 };
 
+/// Shared pointer to ThermalNeutronBk2BkExpConvPV peak/function
+typedef boost::shared_ptr<ThermalNeutronBk2BkExpConvPV> ThermalNeutronBk2BkExpConvPV_sptr;
 
 } // namespace CurveFitting
 } // namespace Mantid
