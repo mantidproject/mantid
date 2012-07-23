@@ -1,5 +1,5 @@
-#ifndef H_MDWS_SLICEDESCR
-#define H_MDWS_SLICEDESCR
+#ifndef MANTID_MDEVENTS_MDWS_TRANSFORMATION_H
+#define MANTID_MDEVENTS_MDWS_TRANSFORMATION_H
 
 #include "MantidMDEvents/MDTransfAxisNames.h"
 #include "MantidMDEvents/MDWSDescription.h"
@@ -71,19 +71,21 @@ public:
    /// construct meaningful dimension names for ModQ case and different transformation types defined by the class;
    void setModQDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
   /// return the list of possible scalings for momentums
-   std::vector<std::string> getQScalings()const{return QScalingID;}
+   std::vector<std::string> getQScalings()const{return m_QScalingID;}
    CnvrtToMD::CoordScaling getQScaling(const std::string &ScID)const;
 private:
-    bool is_uv_default;
+    bool m_isUVdefault;
     /** vectors, which describe the projection plain the target ws is based on (notional or cryst cartezian coordinate system). The transformation matrix below 
       * should bring the momentums from lab coordinate system into orthogonal, related to u,v vectors, coordinate system */
-    mutable Kernel::V3D uProj,vProj,wProj;
+    mutable Kernel::V3D m_UProj,m_VProj,m_WProj;
 
   /// logger -> to provide logging, for MD dataset file operations
-   static Mantid::Kernel::Logger& convert_log;
+   static Mantid::Kernel::Logger& g_Log;
 
    /// string representation of QScaling ID, which would be known to user
-   std::vector<std::string> QScalingID;
+   std::vector<std::string> m_QScalingID;
+   //
+   bool v3DIsDefault(const std::vector<double> &vect,const std::string &message)const;
 protected: // for testing
   /// function generates "Kind of" W transformation matrix for different Q-conversion modes;
    Kernel::DblMatrix buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling scaling)const;

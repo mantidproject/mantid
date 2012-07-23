@@ -238,7 +238,7 @@ public:
 
   void testSaveConfigCleanFile()
   {
-    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
+     const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
       + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
 
@@ -246,16 +246,18 @@ public:
   
     // save any previous changed settings to make sure we're on a clean slate
     ConfigService::Instance().saveConfig(filename);
-    
+
     Poco::File prop_file(filename);
     // Start with a clean state
     if( prop_file.exists() ) prop_file.remove();
 
     ConfigServiceImpl& settings = ConfigService::Instance();
     TS_ASSERT_THROWS_NOTHING(settings.saveConfig(filename));
-    
-    // No changes yet, so no file
-    TS_ASSERT_EQUALS(prop_file.exists(), false);
+
+    // No changes yet, file exists but is blank
+    TS_ASSERT_EQUALS(prop_file.exists(), true);
+    std::string contents = readFile(filename);
+    TS_ASSERT(contents.empty());
 
     runSaveTest(filename,"11");
   }
@@ -274,6 +276,65 @@ public:
     runSaveTest(filename,"13");
   }
 
+  void testLoadChangeLoadSavesOriginalValueIfSettingExists()
+  {
+    const std::string filename("user.settingsLoadChangeLoad");
+    Poco::File prop_file(filename);
+    if( prop_file.exists() ) prop_file.remove();
+    const std::string value("15");
+    std::ofstream writer(filename.c_str());
+    writer << "mantid.legs = " << value << "\n";
+    writer.close();
+
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
+      + "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile);
+    ConfigService::Instance().setString("mantid.legs", value);
+    ConfigService::Instance().updateConfig(propfile, false, false);
+
+    ConfigService::Instance().saveConfig(filename);
+
+    const std::string contents = readFile(filename);
+    TS_ASSERT_EQUALS(contents, "mantid.legs=6\n");
+
+    prop_file.remove();
+
+  }
+
+  void testLoadChangeClearSavesOriginalPropsFile()
+  {
+    // Backup current user settings
+    ConfigServiceImpl & settings = ConfigService::Instance();
+    const std::string userFileBackup = settings.getUserFilename() + ".unittest";
+    try
+    {
+      Poco::File userFile(settings.getUserFilename());
+      userFile.moveTo(userFileBackup);
+    }
+    catch(Poco::Exception&){}
+
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 
+      + "MantidTest.properties";
+    settings.updateConfig(propfile);
+    settings.setString("mantid.legs", "15");
+
+    settings.reset();
+
+    const std::string contents = readFile(settings.getUserFilename());
+    // No mention of mantid.legs but not empty
+    TS_ASSERT(!contents.empty());
+    TS_ASSERT(contents.find("mantid.legs") == std::string::npos);
+
+
+    try
+    {
+      Poco::File backup(userFileBackup);
+      backup.moveTo(settings.getUserFilename());
+    }
+    catch(Poco::Exception &) {}
+        
+  }
+
   void testSaveConfigWithPropertyRemoved()
   {
     const std::string filename("user.settings.testSaveConfigWithPropertyRemoved");
@@ -289,7 +350,7 @@ public:
     writer << "key.withnovalue";
     writer.close();
 
-    ConfigService::Instance().updateConfig(filename, true, false);
+    ConfigService::Instance().updateConfig(filename, false, false);
 
     std::string rootName = "mantid.thorax";
     ConfigService::Instance().remove(rootName);
@@ -317,7 +378,7 @@ public:
     reader.close();
 
     TS_ASSERT_EQUALS(prop_lines.size(), 4);
-    TS_ASSERT_EQUALS(prop_lines[0], "mantid.legs = 6");
+    TS_ASSERT_EQUALS(prop_lines[0], "mantid.legs=6");
     TS_ASSERT_EQUALS(prop_lines[1], "");
     TS_ASSERT_EQUALS(prop_lines[2], "# This comment line");
     TS_ASSERT_EQUALS(prop_lines[3], "key.withnospace=5");
@@ -332,7 +393,7 @@ public:
       + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);*/
 
-    const std::string filename("user.settings");
+    const std::string filename("user.settingsLineContinuation");
     Poco::File prop_file(filename);
     if( prop_file.exists() ) prop_file.remove();
 
@@ -370,15 +431,13 @@ public:
     }
     reader.close();
 
-    TS_ASSERT_EQUALS(prop_lines.size(), 5);
+    TS_ASSERT_EQUALS(prop_lines.size(), 3);
     TS_ASSERT_EQUALS(prop_lines[0], "mantid.legs=15");
     TS_ASSERT_EQUALS(prop_lines[1], "");
-    TS_ASSERT_EQUALS(prop_lines[2], "search.directories=/test1;\\");
-    TS_ASSERT_EQUALS(prop_lines[3], "/test2;/test3;\\");
-    TS_ASSERT_EQUALS(prop_lines[4], "/test4");
+    TS_ASSERT_EQUALS(prop_lines[2], "search.directories=/test1;/test2;/test3;/test4");
 
     // Clean up
-    prop_file.remove();
+    //prop_file.remove();
   }
 
   // Test that the ValueChanged notification is sent
@@ -503,6 +562,13 @@ private:
     // Clean up
     prop_file.remove();
 
+  }
+
+  std::string readFile(const std::string & filename)
+  {
+    std::ifstream reader(filename.c_str());
+    return std::string((std::istreambuf_iterator<char>(reader)),
+                        std::istreambuf_iterator<char>());
   }
   
 };

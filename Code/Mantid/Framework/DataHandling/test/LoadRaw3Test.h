@@ -311,7 +311,7 @@ public:
   {
     LoadRaw3 loader5;
     loader5.initialize();
-    loader5.setPropertyValue("Filename", "CSP79590.raw");
+    loader5.setPropertyValue("Filename", "CSP78173.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
     // loader5.setPropertyValue("SpectrumList", "0,1,2,3");
     
@@ -353,7 +353,7 @@ public:
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
 
     // But the data should be different
-    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[555], outsptr2->dataY(1)[555] )
+    TS_ASSERT_DIFFERS( outsptr1->dataY(1)[8], outsptr2->dataY(1)[8] )
 
     TS_ASSERT_EQUALS( outsptr1->getInstrument()->baseInstrument(), outsptr2->getInstrument()->baseInstrument() )
     TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr2->sample()) )

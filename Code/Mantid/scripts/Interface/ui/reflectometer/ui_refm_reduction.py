@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/reflectometer/refm_reduction.ui'
 #
-# Created: Tue Apr 10 13:22:26 2012
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Mon Jul 16 11:31:19 2012
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -1236,7 +1236,7 @@ class Ui_Frame(object):
         self.data_background_to_pixel1_label.setText(QtGui.QApplication.translate("Frame", "to pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.data_background_to_pixel1.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.plot_count_vs_y_bck_btn.setText(QtGui.QApplication.translate("Frame", "Counts vs Pixel", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_low_res_range_switch.setText(QtGui.QApplication.translate("Frame", "Low-Res axis range     ", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_low_res_range_switch.setText(QtGui.QApplication.translate("Frame", "Y-axis range     ", None, QtGui.QApplication.UnicodeUTF8))
         self.data_low_res_from_label.setText(QtGui.QApplication.translate("Frame", "from pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.x_min_edit.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.data_low_res_to_label.setText(QtGui.QApplication.translate("Frame", "to pixel", None, QtGui.QApplication.UnicodeUTF8))
@@ -1275,7 +1275,7 @@ class Ui_Frame(object):
         self.norm_background_to_pixel1_label.setText(QtGui.QApplication.translate("Frame", "to pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_background_to_pixel1.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_count_vs_y_bck_btn.setText(QtGui.QApplication.translate("Frame", "Counts vs Pixel", None, QtGui.QApplication.UnicodeUTF8))
-        self.norm_low_res_range_switch.setText(QtGui.QApplication.translate("Frame", "Low-Res axis range     ", None, QtGui.QApplication.UnicodeUTF8))
+        self.norm_low_res_range_switch.setText(QtGui.QApplication.translate("Frame", "Y-axis range     ", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_low_res_from_label.setText(QtGui.QApplication.translate("Frame", "from pixel", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_x_min_edit.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
         self.norm_low_res_to_label.setText(QtGui.QApplication.translate("Frame", "to pixel", None, QtGui.QApplication.UnicodeUTF8))

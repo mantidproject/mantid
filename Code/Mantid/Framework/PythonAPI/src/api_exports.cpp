@@ -494,6 +494,8 @@ using namespace boost::python;
           .def("setDetectorID", &IPeak::setDetectorID)
           .def("getRunNumber", &IPeak::getRunNumber)
           .def("setRunNumber", &IPeak::setRunNumber)
+          .def("getMonitorCount", &IPeak::getMonitorCount)
+          .def("setMonitorCount", &IPeak::setMonitorCount)
           .def("getH", &IPeak::getH)
           .def("getK", &IPeak::getK)
           .def("getL", &IPeak::getL)

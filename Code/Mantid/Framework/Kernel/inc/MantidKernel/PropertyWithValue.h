@@ -305,7 +305,7 @@ public:
   {
   }
   /// 'Virtual copy constructor'
-  Property* clone() { return new PropertyWithValue<TYPE>(*this); }
+  PropertyWithValue<TYPE>* clone() const { return new PropertyWithValue<TYPE>(*this); }
 
   /// Virtual destructor
   virtual ~PropertyWithValue()

@@ -13,7 +13,6 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid;
 using Mantid::Kernel::NexusTestHelper;
 
 // Helper class
@@ -23,7 +22,7 @@ namespace
   {
   public:
     ConcreteProperty() : Property( "Test", typeid( int ) ) {}
-    Property* clone() { return new ConcreteProperty(*this); }
+    ConcreteProperty* clone() const { return new ConcreteProperty(*this); }
     bool isDefault() const { return true; }
     std::string getDefault() const { return "getDefault() is not implemented in this class"; }
     std::string value() const { return "Nothing"; }
@@ -32,6 +31,22 @@ namespace
     std::string setDataItem(const boost::shared_ptr<DataItem>) { return ""; } 
     Property& operator+=( Property const * ) { return *this; }
   };
+
+  void addTestTimeSeries(Run & run, const std::string & name)
+  {
+    auto timeSeries = new TimeSeriesProperty<double>(name);
+    timeSeries->addValue("2012-07-19T16:17:00",2);
+    timeSeries->addValue("2012-07-19T16:17:10",3);
+    timeSeries->addValue("2012-07-19T16:17:20",4);
+    timeSeries->addValue("2012-07-19T16:17:30",5);
+    timeSeries->addValue("2012-07-19T16:17:40",6);
+    timeSeries->addValue("2012-07-19T16:17:50",20);
+    timeSeries->addValue("2012-07-19T16:18:00",21);
+    timeSeries->addValue("2012-07-19T16:18:10",22);
+    timeSeries->addValue("2012-07-19T16:19:20",23);
+    timeSeries->addValue("2012-07-19T16:19:20",24);
+    run.addProperty(timeSeries);
+  }
 }
 
 
@@ -171,6 +186,79 @@ public:
 
     TS_ASSERT_THROWS(runInfo.getPropertyValueAsType<int>("double_prop"), std::invalid_argument);
   }
+
+  void test_GetPropertyAsSingleValue_Throws_If_Type_Is_Not_Double_Or_TimeSeries_Double()
+  {
+    Run runInfo;
+    const std::string name = "int_prop";
+    runInfo.addProperty(name, 1); // Adds an int property
+
+    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name), std::invalid_argument);
+  }
+
+  void test_GetPropertyAsSingleValue_Throws_If_StatisticType_Is_Unknown_And_Type_Is_TimeSeries()
+  {
+    Run runInfo;
+    const std::string name = "series";
+    addTestTimeSeries(runInfo, name);
+
+    const unsigned int statistic(100);
+    TS_ASSERT_THROWS(runInfo.getPropertyAsSingleValue(name, (Math::StatisticType)statistic), std::invalid_argument);
+  }
+
+  void test_GetPropertyAsSingleValue_Returns_Simple_Mean_By_Default_For_Time_Series()
+  {
+    Run runInfo;
+    const std::string name = "series";
+    addTestTimeSeries(runInfo, name);
+
+    const double expectedValue(13.0);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name), expectedValue, 1e-12);
+  }
+
+  void test_GetPropertyAsSingleValue_Returns_Correct_SingleValue_For_Each_StatisticType()
+  {
+    Run runInfo;
+    const std::string name = "series";
+    addTestTimeSeries(runInfo, name);
+    
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Mean), 13.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Minimum), 2.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Maximum), 24.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::FirstValue), 2.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::LastValue), 24.0, 1e-12);
+    TS_ASSERT_DELTA(runInfo.getPropertyAsSingleValue(name, Math::Median), 13.0, 1e-12);
+  }
+
+  void test_GetPropertyAsSingleValue_Returns_Expected_Single_Value_On_Successive_Calls_With_Different_Stat_Types()
+  {
+    Run run;
+    const std::string name = "series";
+    addTestTimeSeries(run, name);
+
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name,Math::Mean), 13.0);
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name,Math::Mean), 13.0);
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name,Math::Minimum), 2.0);
+    TS_ASSERT_EQUALS(run.getPropertyAsSingleValue(name,Math::Minimum), 2.0);
+  }
+
+
+  void test_GetPropertyAsSingleValue_Returns_Correct_Value_On_Second_Call_When_Log_Has_Been_Replaced()
+  {
+    Run runInfo;
+    const std::string name = "double";
+    double value(5.1);
+    runInfo.addProperty(name, value);
+
+    TS_ASSERT_EQUALS(runInfo.getPropertyAsSingleValue(name), value);
+
+    // Replace the log with a different value
+    value = 10.3;
+    runInfo.addProperty(name, value, /*overwrite*/true);
+
+    TS_ASSERT_EQUALS(runInfo.getPropertyAsSingleValue(name), value);
+  }
+
 
   void test_storeHistogramBinBoundaries_Throws_If_Fewer_Than_Two_Values_Are_Given()
   {
@@ -405,9 +493,37 @@ public:
 private:
   /// Testing bins
   std::vector<double> m_test_energy_bins;
-
 };
 
+//---------------------------------------------------------------------------------------
+// Performance test
+//---------------------------------------------------------------------------------------
+
+class RunTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RunTestPerformance *createSuite() { return new RunTestPerformance(); }
+  static void destroySuite( RunTestPerformance *suite ) { delete suite; }
+
+  RunTestPerformance() : m_testRun(), m_propName("test")
+  {
+    addTestTimeSeries(m_testRun, m_propName);
+  }
+
+  void test_Accessing_Single_Value_From_Times_Series_A_Large_Number_Of_Times()
+  {
+    double value(0.0);
+    for(size_t i = 0; i < 20000; ++i)
+    {
+      value = m_testRun.getPropertyAsSingleValue(m_propName);
+    }
+  }
+
+  Run m_testRun;
+  std::string m_propName;
+};
 
 
 #endif

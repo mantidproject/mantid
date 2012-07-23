@@ -1,5 +1,5 @@
-#ifndef H_IMD_TRANSFORMATION
-#define H_IMD_TRANSFORMATION
+#ifndef MANTID_MDEVENTS_IMD_TRANSFORMATION_H
+#define MANTID_MDEVENTS_IMD_TRANSFORMATION_H
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidMDEvents/MDTransfDEHelper.h"

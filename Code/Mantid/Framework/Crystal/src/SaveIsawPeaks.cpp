@@ -241,7 +241,7 @@ namespace Crystal
         if (!ids.empty())
         {
           // Write the bank header
-          out << "0  NRUN DETNUM    CHI      PHI    OMEGA   MONCNT" << std::endl;
+          out << "0  NRUN DETNUM     CHI      PHI    OMEGA       MONCNT" << std::endl;
           out <<  "1 " <<  std::setw( 5 ) <<  run <<  std::setw( 7 ) <<
               std::right <<  bank;
 
@@ -253,10 +253,15 @@ namespace Crystal
           double chi = angles[1];
           double omega = angles[0];
 
-          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  chi << " ";
-          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  phi << " ";
-          out  <<  std::setw( 7 ) <<  std::fixed <<  std::setprecision( 2 )  <<  omega << " ";
-          out  <<  std::setw( 7 ) <<  (int)( 1 ) <<  std::endl;
+          out  <<  std::setw( 8 ) <<  std::fixed <<  std::setprecision( 2 )  <<  chi << " ";
+          out  <<  std::setw( 8 ) <<  std::fixed <<  std::setprecision( 2 )  <<  phi << " ";
+          out  <<  std::setw( 8 ) <<  std::fixed <<  std::setprecision( 2 )  <<  omega << " ";
+
+          // Get the monitor count from the first peak (should all be the same for one run)
+          size_t first_peak_index = ids[0];
+          Peak & first_peak = peaks[ first_peak_index ];
+          double monct = first_peak.getMonitorCount();
+          out  <<  std::setw( 12 ) <<  (int)( monct ) <<  std::endl;
 
           out << header << std::endl;
 

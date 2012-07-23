@@ -53,7 +53,8 @@ namespace IDA
     boost::shared_ptr<Mantid::API::IFunction> createUserFunction(const QString & name, bool tie=false);
     QtProperty* createExponential(const QString &);
     QtProperty* createStretchedExp(const QString &);
-      
+    QString fitTypeString() const;
+    
     QIntValidator * m_intVal;
     QtStringPropertyManager* m_stringManager;
     QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser

@@ -44,7 +44,7 @@ class ResNorm(PythonAlgorithm):
 
 		vname = prefix+van+'_'+ana
 		rname = prefix+res+'_'+ana
-		erange = [emin, emax]
+		erange = [float(emin), float(emax)]
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getPropertyValue('Plot')
 		saveOp = self.getProperty('Save')

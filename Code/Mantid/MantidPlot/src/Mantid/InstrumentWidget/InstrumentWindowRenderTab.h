@@ -50,6 +50,10 @@ private slots:
   void showResetView(int);
   void showFlipControl(int);
   void flipUnwrappedView(bool);
+  /// Called before the display setting menu opens. Filters out menu options.
+  void displaySettingsAboutToshow();
+  /// Change the type of the surface
+  void setSurfaceType(int);
 private:
   void showEvent (QShowEvent *);
   QMenu* createPeaksMenu();
@@ -72,6 +76,7 @@ private:
   QAction *m_displayAxes;
   QAction *m_wireframe;
   QAction *m_lighting;
+  QAction *m_GLView; ///< toggle between OpenGL and simple view
   
 };
 

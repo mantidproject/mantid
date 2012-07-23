@@ -85,8 +85,6 @@ namespace Mantid
 
       /// The number of spectra in the raw file
       specid_t m_numberOfSpectra;
-      /// The number of periods in the raw file
-      int64_t m_numberOfPeriods;
 
 	   /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;

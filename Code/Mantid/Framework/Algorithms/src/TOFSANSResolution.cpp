@@ -153,7 +153,14 @@ void TOFSANSResolution::exec()
 
     const MantidVec& XIn = reducedWS->readX(i);
     const MantidVec& YIn = reducedWS->readY(i);
-    for ( int j = 0; j < xLength-1; j++)
+    const int wlLength = static_cast<int>(XIn.size());
+
+    std::vector<double> _dx(xLength-1, 0.0);
+    std::vector<double> _norm(xLength-1, 0.0);
+    std::vector<double> _tofy(xLength-1, 0.0);
+    std::vector<double> _thetay(xLength-1, 0.0);
+
+    for ( int j = 0; j < wlLength-1; j++)
     {
       const double wl = (XIn[j+1]+XIn[j])/2.0;
       if ( !isEmpty(min_wl) && wl < min_wl ) continue;
@@ -162,6 +169,7 @@ void TOFSANSResolution::exec()
       int iq = 0;
 
       // Bin assignment depends on whether we have log or linear bins
+      //TODO: change this so that we don't have to pass in the binning parameters
       if(binParams[1]>0.0)
       {
         iq = (int)floor( (q-binParams[0])/ binParams[1] );
@@ -177,16 +185,24 @@ void TOFSANSResolution::exec()
       const double dwl_over_wl = 3.9560*getTOFResolution(wl)/(1000.0*(L1+L2)*wl);
       const double dq_over_q = std::sqrt(dTheta2/(theta*theta)+dwl_over_wl*dwl_over_wl);
 
-      PARALLEL_CRITICAL(iq)    /* Write to shared memory - must protect */
       // By using only events with a positive weight, we use only the data distribution and
       // leave out the background events
       if (iq>=0 && iq < xLength-1 && !boost::math::isnan(dq_over_q) && dq_over_q>0 && YIn[j]>0)
       {
-        DxOut[iq] += q*dq_over_q*YIn[j];
-        XNorm[iq] += YIn[j];
-        TOFY[iq] += q*std::fabs(dwl_over_wl)*YIn[j];
-        ThetaY[iq] += q*std::sqrt(dTheta2)/theta*YIn[j];
+        _dx[iq] += q*dq_over_q*YIn[j];
+        _norm[iq] += YIn[j];
+        _tofy[iq] += q*std::fabs(dwl_over_wl)*YIn[j];
+        _thetay[iq] += q*std::sqrt(dTheta2)/theta*YIn[j];
       }
+    }
+
+    // Move over the distributions for that pixel
+    PARALLEL_CRITICAL(iq)    /* Write to shared memory - must protect */
+    for (int iq = 0; iq < xLength-1; iq++){
+      DxOut[iq] += _dx[iq];
+      XNorm[iq] += _norm[iq];
+      TOFY[iq] += _tofy[iq];
+      ThetaY[iq] += _thetay[iq];
     }
 
     progress.report("Computing Q resolution");

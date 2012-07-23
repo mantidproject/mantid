@@ -81,6 +81,7 @@ public:
 
 protected:
   virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const;
+  virtual void drawSimpleToImage(QImage* image,bool picking = false)const;
   virtual void changeColorMap();
 
   virtual void mousePressEventMove(QMouseEvent*);

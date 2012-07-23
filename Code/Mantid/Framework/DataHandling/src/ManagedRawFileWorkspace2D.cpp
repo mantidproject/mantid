@@ -307,9 +307,11 @@ namespace Mantid
     void ManagedRawFileWorkspace2D::writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite) const
     {
       Poco::ScopedLock<Poco::FastMutex> mutex(m_mutex);
+      // ManagedWorkspace2D resets the hasChanges flag but we need to make sure we keep track of it here as well
+      const bool blockHasChanged = toWrite->hasChanges();
       ManagedWorkspace2D::writeDataBlock(toWrite);
       int blockIndex = static_cast<int>(toWrite->minIndex() / m_vectorsPerBlock);
-      m_changedBlock[blockIndex] = toWrite->hasChanges();
+      m_changedBlock[blockIndex] = blockHasChanged;
     }
 
     /**

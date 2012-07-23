@@ -1,5 +1,5 @@
-#ifndef H_CONVERT_TO_MDEVENTS_INTERFACE
-#define H_CONVERT_TO_MDEVENTS_INTERFACE
+#ifndef MANTID_MDEVENTS_CONVERTMD_BASE_H
+#define MANTID_MDEVENTS_CONVERTMD_BASE_H
 
 #include "MantidKernel/Logger.h"
 
@@ -66,24 +66,24 @@ namespace MDEvents
  
   protected:
    // pointer to input matrix workspace;
-   API::MatrixWorkspace_const_sptr inWS2D;
+   API::MatrixWorkspace_const_sptr m_InWS2D;
    // common variables used by all workspace-related methods are specified here
    // pointer to class, which describes preprocessed detectors location
-   ConvToMDPreprocDet const * pDetLoc;
+   ConvToMDPreprocDet const * m_DetLoc;
    // pointer to the class, which keeps target workspace and provides functions adding additional MD events to it. 
-   boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
+   boost::shared_ptr<MDEvents::MDEventWSWrapper> m_OutWSWrapper;
     // shared pointer to the converter, which convertd WS coordinates to MD coordinates
-   MDTransf_sptr      pQConverter;
+   MDTransf_sptr      m_QConverter;
    /// number of target ws dimesnions
-   size_t n_dims;
+   size_t m_NDims;
    // index of current run(workspace). Used for MD WS combining
-   uint16_t runIndex;
+   uint16_t m_RunIndex;
    // logger -> to provide logging, for MD dataset file operations
-   static Mantid::Kernel::Logger& convert_log;
+   static Mantid::Kernel::Logger& g_Log;
    // vector to keep MD coordinates of single event 
-   std::vector<coord_t> Coord;
+   std::vector<coord_t> m_Coord;
    // class responsible for converting units if necessary;
-   UnitsConversionHelper UnitConversion;
+   UnitsConversionHelper m_UnitConversion;
  private:
     /** internal function which do one peace of work, which should be performed by one thread 
       *

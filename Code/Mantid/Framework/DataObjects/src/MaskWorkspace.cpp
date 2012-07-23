@@ -6,6 +6,8 @@ namespace Mantid
 {
 namespace DataObjects
 {
+    using std::set;
+    using std::size_t;
 
     //Register the workspace
     DECLARE_WORKSPACE(MaskWorkspace)
@@ -85,24 +87,68 @@ namespace DataObjects
     /**
      * @return The total number of masked spectra.
      */
-    std::size_t MaskWorkspace::getNumberMasked() const
+    size_t MaskWorkspace::getNumberMasked() const
     {
-      std::size_t numMasked(0);
-      const std::size_t numWksp(this->getNumberHistograms());
-      for (std::size_t i = 0; i < numWksp; i++)
+      size_t numMasked(0);
+      const size_t numWksp(this->getNumberHistograms());
+      for (size_t i = 0; i < numWksp; i++)
       {
-        if (this->dataY(i)[0] != 0.) // quick check the value
+        if (this->isMaskedIndex(i)) // quick check the value
         {
           numMasked++;
         }
         else if (m_hasInstrument)
         {
-          const std::set<detid_t> ids = this->getDetectorIDs(i);
+          const set<detid_t> ids = this->getDetectorIDs(i);
           if (this->isMasked(ids)) // slow and correct check with the real method
               numMasked += ids.size();
         }
       }
       return numMasked;
+    }
+
+    /**
+     * @brief MaskWorkspace::getMaskedDetectors
+     * @return Which detector ids are masked.
+     */
+    set<detid_t> MaskWorkspace::getMaskedDetectors() const
+    {
+      set<detid_t> detIDs;
+
+      if (m_hasInstrument)
+      {
+        size_t numHist(this->getNumberHistograms());
+        for (size_t i = 0; i < numHist; i++)
+        {
+          if (this->isMaskedIndex(i))
+          {
+            set<detid_t> temp = this->getDetectorIDs(i);
+            detIDs.insert(temp.begin(), temp.end());
+          }
+        }
+      }
+
+      return detIDs;
+    }
+
+    /**
+     * @brief MaskWorkspace::getMaskedWkspIndices
+     * @return Which workspace indices are masked.
+     */
+    set<size_t> MaskWorkspace::getMaskedWkspIndices() const
+    {
+      set<size_t> indices;
+
+      size_t numHist(this->getNumberHistograms());
+      for (size_t i = 0; i < numHist; i++)
+      {
+        if (this->isMaskedIndex(i))
+        {
+          indices.insert(i);
+        }
+      }
+
+      return indices;
     }
 
     /**
@@ -118,7 +164,7 @@ namespace DataObjects
       }
 
       // return true if the value isn't zero
-      if (this->getValue(detectorID, 0.) != LIVE_VALUE)
+      if (this->getValue(detectorID, LIVE_VALUE) != LIVE_VALUE)
       {
         return true;
       }

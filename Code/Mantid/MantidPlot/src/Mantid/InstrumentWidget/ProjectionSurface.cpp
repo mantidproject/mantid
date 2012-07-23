@@ -167,6 +167,70 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
   }
 }
 
+/**
+ * Draw the surface onto a normal widget without OpenGL
+ * @param widget :: A widget to draw on.
+ */
+void ProjectionSurface::drawSimple(QWidget* widget)const
+{
+  if (m_viewChanged)
+  {
+    if ( !m_viewImage || m_viewImage->width() != widget->width() || m_viewImage->height() != widget->height())
+    {
+      if ( m_viewImage ) delete m_viewImage;
+      m_viewImage = new QImage(widget->width(), widget->height(),QImage::Format_RGB32);
+    }
+
+    if (getInteractionMode() == MoveMode)
+    {
+      drawSimpleToImage(m_viewImage,false);
+      if (m_pickImage)
+      {
+        delete m_pickImage;
+        m_pickImage = NULL;
+      }
+    }
+    else
+    {
+      if (m_pickImage) delete m_pickImage;
+      m_pickImage = new QImage(widget->width(), widget->height(),QImage::Format_RGB32);
+      drawSimpleToImage(m_pickImage,true);
+      drawSimpleToImage(m_viewImage,false);
+    }
+  }
+
+  QPainter painter(widget);
+  painter.drawImage(0,0,*m_viewImage);
+
+  QRectF windowRect = getSurfaceBounds();
+  m_maskShapes.setWindow(windowRect,painter.viewport());
+  m_maskShapes.draw(painter);
+
+  for(int i=0;i < m_peakShapes.size(); ++i)
+  {
+    m_peakShapes[i]->setWindow(windowRect,painter.viewport());
+    m_peakShapes[i]->draw(painter);
+  }
+
+  // draw the selection rectangle
+  if (!m_selectRect.isNull())
+  {
+    painter.setPen(Qt::blue);
+    //painter.setCompositionMode(QPainter::CompositionMode_Xor);
+    painter.drawRect(m_selectRect);
+  }
+  painter.end();
+}
+
+/**
+ * Draw the surface onto an image without OpenGL
+ * @param image :: Image to draw on.
+ * @param picking :: If true draw a picking image.
+ */
+void ProjectionSurface::drawSimpleToImage(QImage* image,bool picking)const
+{
+}
+
 void ProjectionSurface::mousePressEvent(QMouseEvent* e)
 {
   switch(m_interactionMode)

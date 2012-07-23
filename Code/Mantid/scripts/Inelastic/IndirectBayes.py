@@ -119,19 +119,7 @@ def ReadWidthFile(op_w1,wfile,ngrp,Verbose):                       # reads width
 	We=PadArray(We,51)
 	return Wy,We
 
-def CheckErange(erange,nbins):
-	if math.fabs(float(erange[0])) < 1e-5:
-		error = 'Erange - input emin ('+erange[0]+') is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	if math.fabs(float(erange[1])) < 1e-5:
-		error = 'Erange - input emax ('+erange[1]+') is Zero'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	if float(erange[1]) < float(erange[0]):
-		error = 'Erange - input emax ('+erange[1]+') < emin ('+erange[0]+')'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+def CheckBinning(nbins):
 	nbin = nbins[0]
 	if nbin == '0':
 		error = 'Sample binning is Zero'			
@@ -181,37 +169,22 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save)
 	StartTime(program)
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
-	nbin,nrbin = CheckErange(erange,nbins)
+	CheckXrange(erange,'Energy')
+	nbin,nrbin = CheckBinning(nbins)
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
 		logger.notice('Resolution is ' + resWS)
-	nsam = mtd[samWS].getNumberHistograms()                      # no. of hist/groups in sam
-	if nsam == 0:
-		error = 'No histograms in sample file'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	Xin = mtd[samWS].readX(0)
-	ntc = len(Xin)-1						# no. points from length of x array
-	if ntc == 0:
-		error = 'No points in sample file'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+	CheckAnalysers(samWS,resWS,Verbose)
+	nsam,ntc = CheckHistZero(samWS)
 	efix = getEfixed(samWS)
 	theta,Q = GetThetaQ(samWS)
-	nres = mtd[resWS].getNumberHistograms()       # no. of hist/groups in res
-	if nres == 0:
-		error = 'No histograms in resolution file'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+	nres,ntr = CheckHistZero(resWS)
 	if program == 'QL':
 		if nres == 1:
 			prog = 'QLr'                        # res file
 		else:
 			prog = 'QLd'                        # data file
-			if nres != nsam:				# check that no. groups are the same
-				error = 'Resolution histograms (' +str(nres) + ') not = Sample (' +str(nsam) +')'			
-				logger.notice('ERROR *** ' + error)
-				sys.exit(error)
+			CheckHistSame(samWS,'Sample',resWS,'Resolution')
 	if program == 'QSe':
 		if nres == 1:
 			prog = 'QSe'                        # res file
@@ -222,7 +195,7 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save)
 	if Verbose:
 		logger.notice('Version is ' +prog)
 		logger.notice(' Number of spectra = '+str(nsam))
-		logger.notice(' Erange : '+erange[0]+' to '+erange[1])
+		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 	Wy,We = ReadWidthFile(fitOp[2],wfile,nsam,Verbose)
 	dtn,xsc = ReadNormFile(fitOp[3],nsam,Verbose)
 	fname = samWS[:-4] + '_'+ prog
@@ -675,28 +648,16 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
 	StartTime('Quest')
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
-	nbin,nrbin = CheckErange(erange,nbins)
+	CheckXrange(erange,'Energy')
+	nbin,nrbin = CheckBinning(nbins)
 	if Verbose:
 		logger.notice('Sample is ' + samWS)
 		logger.notice('Resolution is ' + resWS)
-	nsam = mtd[samWS].getNumberHistograms()                      # no. of hist/groups in sam
-	if nsam == 0:
-		error = 'No histograms in sample file'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
-	Xin = mtd[samWS].readX(0)
-	ntc = len(Xin)-1						# no. points from length of x array
-	if ntc == 0:
-		error = 'No points in sample file'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+	CheckAnalysers(samWS,resWS,Verbose)
+	nsam,ntc = CheckHistZero(samWS)
 	efix = getEfixed(samWS)
 	theta,Q = GetThetaQ(samWS)
-	nres = mtd[resWS].getNumberHistograms()       # no. of hist/groups in res
-	if nres == 0:
-		error = 'No histograms in resolution file'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+	nres,ntr = CheckHistZero(resWS)
 	if nres == 1:
 		prog = 'Qst'                        # res file
 	else:
@@ -705,7 +666,7 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
 		sys.exit(error)
 	if Verbose:
 		logger.notice(' Number of spectra = '+str(nsam))
-		logger.notice(' Erange : '+erange[0]+' to '+erange[1])
+		logger.notice(' Erange : '+str(erange[0])+' to '+str(erange[1]))
 	dtn,xsc = ReadNormFile(fitOp[3],nsam,Verbose)
 	fname = samWS[:-4] + '_'+ prog
 	wrks=workdir + samWS[:-4]
@@ -822,23 +783,17 @@ def ResNormRun(vname,rname,erange,nbins,Verbose,Plot,Save):
 	StartTime('ResNorm')
 	workdir = config['defaultsave.directory']
 	array_len = 4096                                    # length of Fortran array
-	nbin,nrbin = CheckErange(erange,nbins)
+	CheckXrange(erange,'Energy')
+	nbin,nrbin = CheckBinning(nbins)
 #	nbin = nbins[0]
 	if Verbose:
 		logger.notice('Vanadium is ' + vname)
 		logger.notice('Resolution is ' + rname)
-	nvan = mtd[vname].getNumberHistograms()                      # no. of hist/groups in van
-	if nvan == 0:
-		error = 'No histograms in vanadium file'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+	CheckAnalysers(vname,rname,Verbose)
+	nvan,ntc = CheckHistZero(vname)
 	theta,Q = GetThetaQ(vname)
 	efix = getEfixed(vname)
-	nres = mtd[rname].getNumberHistograms()                      # no. of hist/groups in res
-	if nres == 0:
-		error = 'No histograms in resolution file'			
-		logger.notice('ERROR *** ' + error)
-		sys.exit(error)
+	nres,ntr = CheckHistZero(rname)
 	nout,bnorm,Xdat,Xv,Yv,Ev = CalcErange(vname,0,erange,nbin)
 	Ndat = nout[0]
 	Imin = nout[1]

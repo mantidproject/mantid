@@ -2,19 +2,22 @@
 #define MANTID_API_EXPERIMENTINFOTEST_H_
 
 #include "MantidAPI/ExperimentInfo.h"
+
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusTestHelper.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include <boost/regex.hpp>
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
-#include <Poco/DirectoryIterator.h>
-#include <set>
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
+#include <cxxtest/TestSuite.h>
+#include <boost/regex.hpp>
+#include <Poco/DirectoryIterator.h>
+
+#include <iomanip>
+#include <iostream>
+#include <set>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -67,6 +70,93 @@ public:
     TS_ASSERT_DELTA( ws.run().getProtonCharge(), 1.234, 0.001);
   }
 
+  void test_GetLog_Throws_If_No_Log_Or_Instrument_Parameter_Exists()
+  {
+    ExperimentInfo expt;
+
+    TS_ASSERT_THROWS(expt.getLog("__NOTALOG__"), std::invalid_argument);
+  }
+
+  void test_GetLog_Throws_If_Instrument_Contains_LogName_Parameter_But_Log_Does_Not_Exist()
+  {
+    ExperimentInfo expt;
+    const std::string instPar = "temperature_log";
+    const std::string actualLogName = "SAMPLE_TEMP";
+    addInstrumentWithParameter(expt, instPar, actualLogName);
+
+    TS_ASSERT_THROWS(expt.getLog(instPar), Exception::NotFoundError);
+  }
+
+  void test_GetLog_Returns_Value_Of_Log_Named_In_Instrument_Parameter_If_It_Exists_And_Actual_Log_Entry_Exists()
+  {
+    ExperimentInfo expt;
+    const std::string instPar = "temperature_log";
+    const std::string actualLogName = "SAMPLE_TEMP";
+    const double logValue(7.4);
+    addRunWithLog(expt, actualLogName, logValue);
+    addInstrumentWithParameter(expt, instPar, actualLogName);
+
+    Property *log(NULL);
+    TS_ASSERT_THROWS_NOTHING(log = expt.getLog(instPar));
+    TS_ASSERT_EQUALS(log->name(), actualLogName);
+  }
+
+  void test_GetLog_Picks_Run_Log_Over_Instrument_Parameter_Of_Same_Name()
+  {
+    ExperimentInfo expt;
+    const std::string actualLogName = "SAMPLE_TEMP";
+    const double logValue(7.4);
+    addRunWithLog(expt, actualLogName, logValue);
+    addInstrumentWithParameter(expt, actualLogName, "some  value");
+
+    Property *log(NULL);
+    TS_ASSERT_THROWS_NOTHING(log = expt.getLog(actualLogName));
+    TS_ASSERT_EQUALS(log->name(), actualLogName);
+  }
+
+  void test_GetLogAsSingleValue_Throws_If_No_Log_Or_Instrument_Parameter_Exists()
+  {
+    ExperimentInfo expt;
+
+    TS_ASSERT_THROWS(expt.getLogAsSingleValue("__NOTALOG__"), std::invalid_argument);
+  }
+
+  void test_GetLogAsSingleValue_Throws_If_Instrument_Contains_LogName_Parameter_But_Log_Does_Not_Exist()
+  {
+    ExperimentInfo expt;
+    const std::string instPar = "temperature_log";
+    const std::string actualLogName = "SAMPLE_TEMP";
+    addInstrumentWithParameter(expt, instPar, actualLogName);
+
+    TS_ASSERT_THROWS(expt.getLogAsSingleValue(instPar), Exception::NotFoundError);
+  }
+
+  void test_GetLogAsSingleValue_Returns_Value_Of_Log_Named_In_Instrument_Parameter_If_It_Exists_And_Actual_Log_Entry_Exists()
+  {
+    ExperimentInfo expt;
+    const std::string instPar = "temperature_log";
+    const std::string actualLogName = "SAMPLE_TEMP";
+    const double logValue(9.10);
+    addRunWithLog(expt, actualLogName, logValue);
+    addInstrumentWithParameter(expt, instPar, actualLogName);
+
+    double value(-1.0);
+    TS_ASSERT_THROWS_NOTHING(value = expt.getLogAsSingleValue(instPar));
+    TS_ASSERT_DELTA(value, logValue, 1e-12);
+  }
+
+  void test_GetLogAsSingleValue_Picks_Run_Log_Over_Instrument_Parameter_Of_Same_Name()
+  {
+    ExperimentInfo expt;
+    const std::string actualLogName = "SAMPLE_TEMP";
+    const double logValue(11.5);
+    addInstrumentWithParameter(expt, actualLogName, "some  value");
+    addRunWithLog(expt, actualLogName, logValue);
+
+    double value(-1.0);
+    TS_ASSERT_THROWS_NOTHING(value = expt.getLogAsSingleValue(actualLogName));
+    TS_ASSERT_DELTA(value, logValue, 1e-12);
+  }
 
 
   void do_compare_ExperimentInfo(ExperimentInfo & ws, ExperimentInfo & ws2)
@@ -296,6 +386,19 @@ public:
     TS_ASSERT_EQUALS( parameterStr, "" );
   }
 
+private:
+
+  void addInstrumentWithParameter(ExperimentInfo & expt, const std::string & name, const std::string & value)
+  {
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(1);
+    expt.setInstrument(inst);
+    expt.instrumentParameters().addString(inst.get(), name, value);
+  }
+
+  void addRunWithLog(ExperimentInfo & expt, const std::string & name, const double value)
+  {
+    expt.mutableRun().addProperty(name, value);
+  }
 
 };
 

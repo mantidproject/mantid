@@ -25,6 +25,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/cow_ptr.h"
@@ -1102,24 +1103,32 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   if (m_previousFilenames.size() > 1)
     plusRangeWorkspaces();
 
-  // Get dead times from data.
-  if ((m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS") && (m_uiForm.deadTimeType->currentIndex() == 1) )
+  if (m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS")
   {
-    getDeadTimeFromData(deadTimes);
-  }
-  // Get dead times from file.
-  else if ((m_uiForm.instrSelector->currentText().toUpper().toStdString() != "ARGUS") && (m_uiForm.deadTimeType->currentIndex() == 2) )
-  {
-    QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
+    // Get dead times from data.
+    if (m_uiForm.deadTimeType->currentIndex() == 1)
+    {
+      getDeadTimeFromData(deadTimes);
+    }
+    // Get dead times from file.
+    else if (m_uiForm.deadTimeType->currentIndex() == 2)
+    {
+      QString deadTimeFile(m_uiForm.mwRunDeadTimeFile->getFirstFilename() );
 
-    try
-    {
-      getDeadTimeFromFile(deadTimeFile);
+      try
+      {
+        getDeadTimeFromFile(deadTimeFile);
+      }
+      catch (std::exception&)
+      {
+        QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
+      }
     }
-    catch (std::exception&)
-    {
-      QMessageBox::information(this, "Mantid - MuonAnalysis", "A problem occurred while applying dead times.");
-    }
+  }
+  else if (m_uiForm.deadTimeType->currentIndex() != 0)
+  {
+    QMessageBox::information(this, "Mantid - Muon Analysis", "Dead times are currently not implemented in ARGUS files."
+                          + QString("\nAs a result, no dead times will be applied.") );
   }
 
   // Make the options available
@@ -3423,6 +3432,17 @@ void MuonAnalysis::closeEvent(QCloseEvent *e)
 */
 void MuonAnalysis::showEvent(QShowEvent *e)
 {
+  const std::string facility = ConfigService::Instance().getFacility().name();
+  if (facility != "ISIS")
+  {
+    QMessageBox::critical(this, "Unsupported facility", QString("Only the ISIS facility is supported by this interface.\n")
+                         + "Select ISIS as your default facility in View->Preferences...->Mantid to continue.");
+    m_uiForm.loadCurrent->setDisabled(true);
+  }
+  else
+  {
+    m_uiForm.loadCurrent->setDisabled(false);
+  }
   // Hide the toolbar
   if (m_uiForm.hideToolbars->isChecked() )
     emit hideToolbars();

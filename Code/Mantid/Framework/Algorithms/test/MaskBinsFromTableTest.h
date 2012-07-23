@@ -221,6 +221,54 @@ public:
     return;
   }
 
+  /*
+   * In-place single mask test.
+   * Same as the test in MaskBins()
+   * With TableWorkspace of column in different order
+   */
+  void test_MaskBinWithSingleLine2()
+  {
+    // 1. Create a dummy workspace
+    const std::string workspaceName("raggedMask");
+    int nBins = 10;
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(5, nBins, 0.0);
+    AnalysisDataService::Instance().add(workspaceName,WS);
+
+    // 2. Generate a TableWorskpace
+    DataObjects::TableWorkspace_sptr tablews = boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
+    tablews->addColumn("str", "SpectraList");
+    tablews->addColumn("double", "XMin");
+    tablews->addColumn("double", "XMax");
+
+    API::TableRow row0 = tablews->appendRow();
+    row0 << "1-3" << 3.0 << 6.0;
+
+    // 3. Execute
+    MaskBinsFromTable maskalg;
+    TS_ASSERT_THROWS_NOTHING(maskalg.initialize());
+    maskalg.setPropertyValue("InputWorkspace", workspaceName);
+    maskalg.setPropertyValue("OutputWorkspace",workspaceName);
+    maskalg.setProperty("MaskingInformation", tablews);
+    TS_ASSERT_THROWS_NOTHING(maskalg.execute());
+    TS_ASSERT(maskalg.isExecuted());
+
+    // 4. Check
+    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(AnalysisDataService::Instance().retrieve(workspaceName));
+    TS_ASSERT(WS);
+    for (int wi=1; wi<=3; wi++)
+    {
+      for (int bin=3; bin<6;bin++)
+      {
+        TS_ASSERT_EQUALS( WS->dataY(wi)[bin], 0.0 );
+      }
+    }
+
+    // 5. Clean
+    AnalysisDataService::Instance().remove(workspaceName);
+
+    return;
+  }
+
 };
 
 

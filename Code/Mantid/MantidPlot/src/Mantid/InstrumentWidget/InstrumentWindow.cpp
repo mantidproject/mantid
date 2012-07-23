@@ -37,6 +37,7 @@
 #include <QApplication>
 #include <QDragEnterEvent>
 #include <QDropEvent>
+#include <QStackedLayout>
 
 #include <numeric>
 #include <fstream>
@@ -45,6 +46,97 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace MantidQt::API;
+
+/**
+ * A simple widget for drawing unwrapped instrument images.
+ */
+class SimpleWidget : public QWidget
+{
+public:
+  /// Constructor
+  SimpleWidget(QWidget* parent=0):QWidget(parent),m_surface(NULL)
+  {
+    // Receive mouse move events
+    setMouseTracking( true );
+  }
+  /// Assign a surface to draw on
+  void setSurface(ProjectionSurface* surface){m_surface = surface;}
+  /// Return the surface 
+  ProjectionSurface* getSurface(){return m_surface;}
+  /// Refreshes the view
+  void refreshView()
+  {
+    if(m_surface)
+    {
+      m_surface->updateView();
+      update();
+    }
+  }
+protected:
+  void paintEvent(QPaintEvent*)
+  {
+    if(m_surface)
+    {
+      m_surface->drawSimple(this);
+    }
+  }
+  /**
+  * Mouse press callback method, It implements mouse button press initialize methods.
+  * @param event :: This is the event variable which has the position and button states
+  */
+  void mousePressEvent(QMouseEvent* event)
+  {
+    if (m_surface)
+    {
+      m_surface->mousePressEvent(event);
+    }
+    update();
+  }
+
+  /**
+  * This is mouse move callback method. It implements the actions to be taken when the mouse is
+  * moved with a particular button is pressed.
+  * @param event :: This is the event variable which has the position and button states
+  */
+  void mouseMoveEvent(QMouseEvent* event)
+  {
+    if (m_surface)
+    {
+      m_surface->mouseMoveEvent(event);
+    }
+    repaint();
+  }
+
+  /**
+  * This is mouse button release callback method. This resets the cursor to pointing hand cursor
+  * @param event :: This is the event variable which has the position and button states
+  */
+  void mouseReleaseEvent(QMouseEvent* event)
+  {
+    if (m_surface)
+    {
+      m_surface->mouseReleaseEvent(event);
+    }
+    repaint();
+  }
+
+  /**
+  * Mouse wheel event to set the zooming in and out
+  * @param event :: This is the event variable which has the status of the wheel
+  */
+  void wheelEvent(QWheelEvent* event)
+  {
+    if (m_surface)
+    {
+      m_surface->wheelEvent(event);
+    }
+    update();
+  }
+  //-------------------------------------
+  //    Class data
+  //-------------------------------------
+  ProjectionSurface* m_surface; ///< The projection surface
+};
 
 /**
  * Constructor.
@@ -72,10 +164,21 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
 
   // Create the display widget
   m_InstrumentDisplay = new MantidGLWidget(this);
-  controlPanelLayout->addWidget(m_InstrumentDisplay);
-  mainLayout->addWidget(controlPanelLayout);
   m_InstrumentDisplay->installEventFilter(this);
   connect(m_InstrumentDisplay,SIGNAL(mouseOut()),this,SLOT(mouseLeftInstrumentDisplay()));
+
+  // Create simple display widget
+  m_simpleDisplay = new SimpleWidget(this);
+  m_simpleDisplay->installEventFilter(this);
+
+  QWidget* aWidget = new QWidget(this);
+  m_instrumentDisplayLayout = new QStackedLayout(aWidget);
+  m_instrumentDisplayLayout->addWidget(m_InstrumentDisplay);
+  m_instrumentDisplayLayout->addWidget(m_simpleDisplay);
+
+  controlPanelLayout->addWidget(aWidget);
+
+  mainLayout->addWidget(controlPanelLayout);
 
   m_xIntegration = new XIntegrationControl(this);
   mainLayout->addWidget(m_xIntegration);
@@ -89,7 +192,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   settings.beginGroup("Mantid/InstrumentWindow");
   
   // Background colour
-  m_InstrumentDisplay->setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
+  setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
   
   //Render Controls
   m_renderTab = new InstrumentWindowRenderTab(this);
@@ -115,10 +218,6 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   mControlsTab->addTab( instrumentTree, QString("Instrument Tree"));
 
   connect(mControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
-
-  //Set the main frame to the window
-  //frame->setLayout(mainLayout);
-  //setWidget(frame);
 
   // Init actions
   mInfoAction = new QAction(tr("&Details"), this);
@@ -197,18 +296,22 @@ InstrumentWindow::~InstrumentWindow()
 /**
  * Init the geometry and colour map outside constructor to prevent creating a broken MdiSubwindow.
  * Must be called straight after constructor.
+ * @param updateGeometry :: Set true for resetting the view's geometry: the bounding box and rotation. Default is true.
  */
-void InstrumentWindow::init()
+void InstrumentWindow::init(bool resetGeometry)
 {
   // Previously in (now removed) setWorkspaceName method
-  m_InstrumentDisplay->makeCurrent();
+  m_InstrumentDisplay->makeCurrent(); // ?
   m_instrumentActor = new InstrumentActor(m_workspaceName);
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
-  setSurfaceType(m_surfaceType); // This call must come after the InstrumentActor is created
+  if ( resetGeometry )
+  {
+    setSurfaceType(m_surfaceType); // This call must come after the InstrumentActor is created
+  }
   setupColorMap();
   mInstrumentTree->setInstrumentActor(m_instrumentActor);
-  setInfoText(m_InstrumentDisplay->getSurface()->getInfoText());
+  setInfoText( getSurfaceInfoText() );
 }
 
 /**
@@ -251,7 +354,7 @@ void InstrumentWindow::setSurfaceType(int type)
       axis = Mantid::Kernel::V3D(1,0,0);
     }
 
-    ProjectionSurface* surface = m_InstrumentDisplay->getSurface();
+    ProjectionSurface* surface = getSurface();
     int peakLabelPrecision = 6;
     bool showPeakRow = true;
     if ( surface )
@@ -268,7 +371,7 @@ void InstrumentWindow::setSurfaceType(int type)
 
     if (m_surfaceType == FULL3D)
     {
-      Projection3D* p3d = new Projection3D(m_instrumentActor,m_InstrumentDisplay->width(),m_InstrumentDisplay->height());
+      Projection3D* p3d = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
       p3d->set3DAxesState(m_renderTab->areAxesOn());
       surface = p3d;
     }
@@ -282,8 +385,7 @@ void InstrumentWindow::setSurfaceType(int type)
     }
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowFlag(showPeakRow);
-    m_InstrumentDisplay->setSurface(surface);
-    m_InstrumentDisplay->update();
+    setSurface(surface);
     m_renderTab->init();
     m_pickTab->init();
     m_maskTab->init();
@@ -315,7 +417,7 @@ void InstrumentWindow::setupColorMap()
   */
 void InstrumentWindow::tabChanged(int i)
 {
-  ProjectionSurface* surface = m_InstrumentDisplay->getSurface();
+  ProjectionSurface* surface = getSurface();
   QString text;
   if(i != 1) // no picking
   {
@@ -331,7 +433,7 @@ void InstrumentWindow::tabChanged(int i)
   if (surface)
   {
     setInfoText(surface->getInfoText());
-    m_InstrumentDisplay->refreshView();
+    refreshInstrumentDisplay();
   }
 }
 
@@ -360,7 +462,7 @@ void InstrumentWindow::changeColormap(const QString &filename)
   if( this->isVisible() )
   {
     setupColorMap();
-    m_InstrumentDisplay->refreshView();
+    refreshInstrumentDisplay();
   }
 }
 
@@ -578,13 +680,14 @@ void InstrumentWindow::setColorMapMaxValue(double maxValue)
  */
 void InstrumentWindow::setViewDirection(const QString& input)
 {
-  Projection3D* p3d = dynamic_cast<Projection3D*>(m_InstrumentDisplay->getSurface());
+  Projection3D* p3d = dynamic_cast<Projection3D*>( getSurface() );
   if (p3d)
   {
     p3d->setViewDirection(input);
   }
-  mViewChanged = true;
-  m_InstrumentDisplay->repaint();
+  //mViewChanged = true;
+  //m_InstrumentDisplay->repaint();
+  refreshInstrumentDisplay();
   repaint();
 }
 
@@ -622,7 +725,7 @@ void InstrumentWindow::setScaleType(GraphOptions::ScaleType type)
 void InstrumentWindow::pickBackgroundColor()
 {
 	QColor color = QColorDialog::getColor(Qt::green,this);
-	m_InstrumentDisplay->setBackgroundColor(color);
+	setBackgroundColor(color);
 }
 
 void InstrumentWindow::saveImage()
@@ -684,8 +787,8 @@ void InstrumentWindow::saveSettings()
   settings.beginGroup("Mantid/InstrumentWindow");
   settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
   settings.setValue("TubeXUnits",m_pickTab->getTubeXUnits());
-  settings.setValue("PeakLabelPrecision",m_InstrumentDisplay->getSurface()->getPeakLabelPrecision());
-  settings.setValue("ShowPeakRows",m_InstrumentDisplay->getSurface()->getShowPeakRowFlag());
+  settings.setValue("PeakLabelPrecision",getSurface()->getPeakLabelPrecision());
+  settings.setValue("ShowPeakRows",getSurface()->getShowPeakRowFlag());
   settings.endGroup();
 }
 
@@ -705,19 +808,27 @@ void InstrumentWindow::preDeleteHandle(const std::string & ws_name, const boost:
   Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(workspace_ptr);
   if (pws)
   {
-    m_InstrumentDisplay->getSurface()->peaksWorkspaceDeleted(pws);
+    getSurface()->peaksWorkspaceDeleted(pws);
     m_InstrumentDisplay->repaint();
     return;
   }
 }
 
 void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
-            const boost::shared_ptr<Workspace>)
+            const boost::shared_ptr<Workspace> workspace)
 {
   //Replace current workspace
   if (wsName == m_workspaceName.toStdString())
   {
-    //updateWindow();
+    bool resetGeometry = true;
+    if (m_instrumentActor)
+    {
+      auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( workspace );
+      resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
+      delete m_instrumentActor;
+    }
+    init( resetGeometry );
+    updateWindow();
   }
 }
 
@@ -727,6 +838,17 @@ void InstrumentWindow::clearADSHandle()
   close();
 }
 
+void InstrumentWindow::updateWindow()
+{
+  if ( isGLEnabled() )
+  {
+    m_InstrumentDisplay->refreshView();
+  }
+  else
+  {
+    m_simpleDisplay->refreshView();
+  }
+}
 
 /**
  * This method saves the workspace name associated with the instrument window 
@@ -778,12 +900,11 @@ void InstrumentWindow::unblock()
 
 void InstrumentWindow::set3DAxesState(bool on)
 {
-  Projection3D* p3d = dynamic_cast<Projection3D*>(m_InstrumentDisplay->getSurface());
+  Projection3D* p3d = dynamic_cast<Projection3D*>( getSurface() );
   if (p3d)
   {
     p3d->set3DAxesState(on);
-    m_InstrumentDisplay->refreshView();
-    m_InstrumentDisplay->repaint();
+    refreshInstrumentDisplay();
   }
 }
 
@@ -799,7 +920,7 @@ void InstrumentWindow::changeScaleType(int type)
 {
   m_instrumentActor->changeScaleType(type);
   setupColorMap();
-  m_InstrumentDisplay->refreshView();
+  refreshInstrumentDisplay();
 }
 
 void InstrumentWindow::changeColorMapMinValue(double minValue)
@@ -807,7 +928,7 @@ void InstrumentWindow::changeColorMapMinValue(double minValue)
   m_instrumentActor->setAutoscaling(false);
   m_instrumentActor->setMinValue(minValue);
   setupColorMap();
-  m_InstrumentDisplay->refreshView();
+  refreshInstrumentDisplay();
 }
 
 /// Set the maximumu value of the colour map
@@ -816,25 +937,24 @@ void InstrumentWindow::changeColorMapMaxValue(double maxValue)
   m_instrumentActor->setAutoscaling(false);
   m_instrumentActor->setMaxValue(maxValue);
   setupColorMap();
-  m_InstrumentDisplay->refreshView();
+  refreshInstrumentDisplay();
 }
 
 void InstrumentWindow::changeColorMapRange(double minValue, double maxValue)
 {
   m_instrumentActor->setMinMaxRange(minValue,maxValue);
   setupColorMap();
-  m_InstrumentDisplay->refreshView();
+  refreshInstrumentDisplay();
 }
 
 void InstrumentWindow::setWireframe(bool on)
 {
-  Projection3D* p3d = dynamic_cast<Projection3D*>(m_InstrumentDisplay->getSurface());
+  Projection3D* p3d = dynamic_cast<Projection3D*>( getSurface() );
   if (p3d)
   {
     p3d->setWireframe(on);
   }
-  m_InstrumentDisplay->refreshView();
-  m_InstrumentDisplay->repaint();
+  refreshInstrumentDisplay();
 }
 
 /**
@@ -844,8 +964,7 @@ void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
 {
   m_instrumentActor->setIntegrationRange(xmin,xmax);
   setupColorMap();
-  m_InstrumentDisplay->refreshView();
-  m_InstrumentDisplay->repaint();
+  refreshInstrumentDisplay();
   if (getTab() == PICK)
   {
     m_pickTab->changedIntegrationRange(xmin,xmax);
@@ -1108,11 +1227,11 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
     QStringList wsName = text.split("::");
     Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName[1].toStdString()));
-    UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>(m_InstrumentDisplay->getSurface());
+    UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>( getSurface() );
     if (pws && surface)
     {
       surface->setPeaksWorkspace(pws);
-      m_InstrumentDisplay->refreshView();
+      refreshInstrumentDisplay();
       e->accept();
       return;
     }
@@ -1131,8 +1250,9 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
  */
 bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
 {
-  if (dynamic_cast<MantidGLWidget*>(obj) == m_InstrumentDisplay &&
-    ev->type() == QEvent::ContextMenu)
+  if ((dynamic_cast<MantidGLWidget*>(obj) == m_InstrumentDisplay ||
+       dynamic_cast<SimpleWidget*>(obj) == m_simpleDisplay) && 
+       ev->type() == QEvent::ContextMenu)
   {
     // an ugly way of preventing the curve in the pick tab's miniplot disappearing when 
     // cursor enters the context menu
@@ -1142,7 +1262,7 @@ bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
     switch(getTab())
     {
     case PICK:  m_pickTab->setInstrumentDisplayContextMenu(context); 
-                if (m_InstrumentDisplay->getSurface()->hasPeakOverlays())
+                if ( getSurface()->hasPeakOverlays() )
                 {
                   context.addSeparator();
                   context.addAction(m_clearPeakOverlays);
@@ -1169,8 +1289,7 @@ void InstrumentWindow::setColorMapAutoscaling(bool on)
 {
   m_instrumentActor->setAutoscaling(on);
   setupColorMap();
-  m_InstrumentDisplay->refreshView();
-  m_InstrumentDisplay->repaint();
+  refreshInstrumentDisplay();
 }
 
 /**
@@ -1190,7 +1309,7 @@ void InstrumentWindow::mouseLeftInstrumentDisplay()
  */
 void InstrumentWindow::clearPeakOverlays()
 {
-  m_InstrumentDisplay->getSurface()->clearPeakOverlays();
+  getSurface()->clearPeakOverlays();
   m_InstrumentDisplay->repaint();
 }
 
@@ -1200,7 +1319,7 @@ void InstrumentWindow::clearPeakOverlays()
  */
 void InstrumentWindow::setPeakLabelPrecision(int n)
 {
-  m_InstrumentDisplay->getSurface()->setPeakLabelPrecision(n);
+  getSurface()->setPeakLabelPrecision(n);
   m_InstrumentDisplay->repaint();
 }
 
@@ -1209,6 +1328,81 @@ void InstrumentWindow::setPeakLabelPrecision(int n)
  */
 void InstrumentWindow::setShowPeakRowFlag(bool on)
 {
-  m_InstrumentDisplay->getSurface()->setShowPeakRowFlag(on);
+  getSurface()->setShowPeakRowFlag(on);
   m_InstrumentDisplay->repaint();
+}
+
+/**
+ * Set background color of the instrument display
+ * @param color :: New background colour.
+ */
+void InstrumentWindow::setBackgroundColor(const QColor& color)
+{
+  m_InstrumentDisplay->setBackgroundColor(color);
+}
+
+/**
+ * Get the surface info string
+ */
+QString InstrumentWindow::getSurfaceInfoText() const
+{
+  return m_InstrumentDisplay->getSurface()->getInfoText();
+}
+
+/**
+ * Get pointer to the projection surface
+ */
+ProjectionSurface* InstrumentWindow::getSurface() const
+{
+  return m_InstrumentDisplay->getSurface();
+}
+
+/**
+ * Set newly created projection surface
+ * @param surface :: Pointer to the new surace.
+ */
+void InstrumentWindow::setSurface(ProjectionSurface* surface)
+{
+  m_InstrumentDisplay->setSurface(surface);
+  m_InstrumentDisplay->update();
+  m_simpleDisplay->setSurface(surface);
+  m_simpleDisplay->update();
+}
+
+/// Return the width of the instrunemt display
+int InstrumentWindow::getInstrumentDisplayWidth() const
+{
+  return m_InstrumentDisplay->width();
+}
+
+/// Return the height of the instrunemt display
+int InstrumentWindow::getInstrumentDisplayHeight() const
+{
+  return m_InstrumentDisplay->height();
+}
+
+/// Refresh the instrument display
+void InstrumentWindow::refreshInstrumentDisplay()
+{
+  m_InstrumentDisplay->refreshView();
+}
+
+/// Toggle between the GL and simple instrument display widgets
+void InstrumentWindow::enableGL( bool on )
+{
+  if ( on )
+  {
+    m_instrumentDisplayLayout->setCurrentIndex( 0 );
+  }
+  else
+  {
+    m_instrumentDisplayLayout->setCurrentIndex( 1 );
+  }
+  getSurface()->updateView();
+}
+
+/// True if the GL instrument display is currently on
+bool InstrumentWindow::isGLEnabled() const
+{
+  return m_instrumentDisplayLayout->currentIndex() == 0;
 }

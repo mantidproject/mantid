@@ -36,7 +36,7 @@ namespace WorkspaceCreationHelper
   Kernel::Logger& MockAlgorithm::a_log =Logger::get("test-Algorithms");
   MockAlgorithm::MockAlgorithm(size_t nSteps)
   {
-      pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0,1,nSteps));
+      m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0,1,nSteps));
   }
 
 

@@ -72,6 +72,8 @@ namespace IDA
 
     /// Returns a handle to the UI form object stored in the IndirectDataAnalysis class.
     Ui::IndirectDataAnalysis & uiForm();
+    /// Returns a const handle to the UI form object stored in the IndirectDataAnalysis class.
+    const Ui::IndirectDataAnalysis & uiForm() const;
     /// Returns a handle to the DoubleEditorFactory object stored in the IndirectDataAnalysis class.
     DoubleEditorFactory * doubleEditorFactory();
     /// Returns a handle to the QtCheckBoxFactory object stored in the IndirectDataAnalysis class.

@@ -24,7 +24,7 @@ using namespace boost::python;
 namespace
 {
   /// return_value_policy for cloned numpy array
-  typedef return_value_policy<Policies::VectorToNumpy<Converters::Clone> > return_cloned_numpy;
+  typedef return_value_policy<Policies::VectorRefToNumpy<Converters::Clone> > return_cloned_numpy;
 
   #define EXPORT_ARRAY_PROP(type, prefix) \
       class_<ArrayProperty<type>, \

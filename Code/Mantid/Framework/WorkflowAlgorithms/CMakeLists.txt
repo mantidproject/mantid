@@ -1,6 +1,8 @@
 set ( SRC_FILES
+        src/AlignAndFocusPowder.cpp
 	src/ComputeSensitivity.cpp
 	src/DgsConvertToEnergyTransfer.cpp
+	src/DgsPreprocessData.cpp
 	src/DgsReduction.cpp
 	src/EQSANSDarkCurrentSubtraction.cpp
 	src/EQSANSInstrument.cpp
@@ -24,8 +26,10 @@ set ( SRC_UNITY_IGNORE_FILES
 )
 
 set ( INC_FILES
+        inc/MantidWorkflowAlgorithms/AlignAndFocusPowder.h
 	inc/MantidWorkflowAlgorithms/ComputeSensitivity.h
 	inc/MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h
+	inc/MantidWorkflowAlgorithms/DgsPreprocessData.h
 	inc/MantidWorkflowAlgorithms/DgsReduction.h
 	inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
 	inc/MantidWorkflowAlgorithms/EQSANSInstrument.h

@@ -48,7 +48,7 @@ using namespace API;
 
 /// Constructor
 LoadRaw3::LoadRaw3() :
-  m_filename(), m_numberOfPeriods(0), m_noTimeRegimes(0),m_prog(0.0),
+  m_filename(), m_noTimeRegimes(0),m_prog(0.0),
   m_lengthIn(0), m_timeChannelsVec(),m_total_specs(0)
 {
 }
@@ -148,12 +148,7 @@ void LoadRaw3::exec()
   {
     runLoadLog(m_filename,localWorkspace);
     const int period_number = 1;
-    Property* log = createPeriodLog(period_number);
-    if (log)
-    {
-      run.addLogData(log);
-      run.addLogData(createCurrentPeriodLog(period_number));
-    }
+    createPeriodLogs(period_number, localWorkspace);
   }
   // Set the total proton charge for this run
   setProtonCharge(run);
@@ -240,13 +235,7 @@ void LoadRaw3::exec()
           runObj.removeLogData(prevPeriod.str());
           runObj.removeLogData("current_period");
           //add current period data
-          
-          Property* log = createPeriodLog(period_number);
-          if (log)
-          { 
-           runObj.addLogData(log);
-           runObj.addLogData(createCurrentPeriodLog(period_number));
-          }
+          createPeriodLogs(period_number, localWorkspace);
         }
         if(monitorWorkspace)
         {
@@ -254,12 +243,7 @@ void LoadRaw3::exec()
           runObj.removeLogData(prevPeriod.str());
           runObj.removeLogData("current_period");
           //add current period data
-          Property* log = createPeriodLog(period_number);
-          if (log)
-          {
-            runObj.addLogData(log);
-            runObj.addLogData(createCurrentPeriodLog(period_number));
-          }
+          createPeriodLogs(period_number, monitorWorkspace);
         }
       }//end of if loop for loadlogfiles
       if (bseparateMonitors)
@@ -593,12 +577,7 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
   {
     runLoadLog(fileName,localWorkspace);
     const int current_period = 1;
-    Property* log=createPeriodLog(current_period);
-    if(log)
-    {
-      localWorkspace->mutableRun().addLogData(log);
-      localWorkspace->mutableRun().addLogData(createCurrentPeriodLog(current_period));
-    }
+    createPeriodLogs(current_period,localWorkspace);
   }
   setProtonCharge(localWorkspace->mutableRun());
 

@@ -11,10 +11,11 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Glob.h"
 
-#include <boost/regex.hpp>
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <Poco/StringTokenizer.h>
+#include <Poco/Exception.h>
+#include <boost/regex.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <cctype>
@@ -356,13 +357,14 @@ namespace Mantid
         std::string path = getFullPath(hint);
         if (!path.empty())
         {
-          if (Poco::File(path).exists() )
+          try
           {
-            g_log.information() << "found path = " << path << '\n';
-            return path;
-          }
-          else
-            return "";
+            if (Poco::File(path).exists() )
+            {
+              g_log.information() << "found path = " << path << '\n';
+              return path;
+            }
+          } catch (Poco::Exception &) { }
         } 
         else 
         {
@@ -647,10 +649,14 @@ namespace Mantid
         {
           for(auto searchPath = searchPaths.begin(); searchPath != searchPaths.end(); ++searchPath)
           {
-            Poco::Path path(*searchPath, *filename + *ext);
-            Poco::File file(path);
-            if (file.exists())
-              return path.toString();
+            try
+            {
+              Poco::Path path(*searchPath, *filename + *ext);
+              Poco::File file(path);
+              if (file.exists())
+                return path.toString();
+
+            } catch (Poco::Exception &) { /* File does not exist, just carry on. */ }
           }
         }
       }

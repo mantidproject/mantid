@@ -17,6 +17,7 @@ parameters and generating calls to other workflow or standard algorithms.
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
@@ -70,7 +71,7 @@ namespace WorkflowAlgorithms
    */
   void DgsReduction::init()
   {
-    declareProperty(new FileProperty("SampleData", "", FileProperty::OptionalLoad, "_event.nxs"),
+    declareProperty(new FileProperty("SampleFile", "", FileProperty::OptionalLoad, "_event.nxs"),
         "File containing the data to reduce");
     declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, PropertyMode::Optional),
         "Workspace to be reduced");
@@ -82,9 +83,11 @@ namespace WorkflowAlgorithms
     declareProperty("FixedIncidentEnergy", false,
         "Declare the value of the incident energy to be fixed (will not be calculated).");
     declareProperty(new ArrayProperty<double>("EnergyTransferRange",
-        boost::make_shared<RebinParamsValidator>()),
+        boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary.\n"
       "Negative width value indicates logarithmic binning.");
+    declareProperty("SofPhiEIsDistribution", true,
+        "The final S(Phi, E) data is made to be a distribution.");
     declareProperty("HardMaskFile", "", "A file or workspace containing a hard mask.");
     declareProperty("GroupingFile", "", "A file containing grouping (mapping) information.");
     declareProperty("FilterBadPulses", false, "If true, filter bad pulses from data.");
@@ -174,22 +177,22 @@ namespace WorkflowAlgorithms
         "If true, run a background check on detector vanadium.");
     setPropertySettings("BackgroundCheck",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    declareProperty("AcceptanceFactor", 5, mustBePositive,
+    declareProperty("AcceptanceFactor", 5.0, mustBePositive,
         "Mask detectors above this threshold.");
     setPropertySettings("AcceptanceFactor",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    setPropertySettings("AcceptanceFactor",
-        new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
     auto mustBeIntPositive = boost::make_shared<BoundedValidator<size_t> >();
     mustBeIntPositive->setLower(0);
-    declareProperty("BackgroundTofStart", 18000, mustBeIntPositive,
+    size_t tof_start = 18000;
+    declareProperty("BackgroundTofStart", tof_start, mustBeIntPositive,
         "Start TOF for the background check.");
     setPropertySettings("BackgroundTofStart",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    setPropertySettings("BackgroundTofStart",
-        new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
-    declareProperty("BackgroundTofEnd", 19500, mustBeIntPositive,
+    size_t tof_end = 19500;
+    declareProperty("BackgroundTofEnd", tof_end, mustBeIntPositive,
         "End TOF for the background check.");
+    setPropertySettings("BackgroundTofEnd",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     declareProperty("RejectZeroBackground", true,
         "If true, check the background region for anomolies.");
     setPropertySettings("RejectZeroBackground",
@@ -245,38 +248,41 @@ namespace WorkflowAlgorithms
     declareProperty("SampleRmm", 1.0, "The rmm of sample.");
     setPropertySettings("SampleRmm",
         new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+    declareProperty("ReductionProperties", "__dgs_reduction_properties",
+        Direction::Input);
   }
 
   /**
    * Create a workspace by either loading a file or using an existing
    * workspace.
    */
-  Workspace_sptr DgsReduction::loadInputData()
+  Workspace_sptr DgsReduction::loadInputData(boost::shared_ptr<PropertyManager> manager)
   {
     const std::string facility = ConfigService::Instance().getFacility().name();
     if ("SNS" == facility)
       {
-        setLoadAlg("LoadEventNexus");
+        this->setLoadAlg("LoadEventNexus");
       }
     else
       {
-        setLoadAlg("LoadRaw");
+        this->setLoadAlg("LoadRaw");
       }
     Workspace_sptr inputWS;
 
-    std::string inputData = getPropertyValue("Filename");
-    const std::string inputWSName = getPropertyValue("InputWorkspace");
+    std::string inputData = this->getPropertyValue("SampleFile");
+    const std::string inputWSName = this->getPropertyValue("InputWorkspace");
     if (!inputWSName.empty() && !inputData.empty())
       {
         throw std::runtime_error("DgsReduction: Either the Filename property or InputWorkspace property must be provided, NOT BOTH");
       }
     else if (!inputWSName.empty())
       {
-        inputWS = load(inputWSName);
+        inputWS = this->load(inputWSName);
       }
     else if (!inputData.empty())
       {
-        inputWS = load(inputData);
+        manager->declareProperty(new PropertyWithValue<std::string>("MonitorFilename", inputData));
+        inputWS = this->load(inputData);
       }
     else
       {
@@ -291,28 +297,43 @@ namespace WorkflowAlgorithms
    */
   void DgsReduction::exec()
   {
-    /*
     // Reduction property manager
-    const std::string reductionManagerName = getProperty("ReductionProperties");
-    if (!reductionManagerName.empty())
+    const std::string reductionManagerName = this->getProperty("ReductionProperties");
+    if (reductionManagerName.empty())
     {
       g_log.error() << "ERROR: Reduction Property Manager name is empty" << std::endl;
       return;
     }
     boost::shared_ptr<PropertyManager> reductionManager = boost::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
-    */
 
-    Workspace_sptr inputWS = this->loadInputData();
+    Workspace_sptr inputWS = this->loadInputData(reductionManager);
 
     // Setup for the convert to energy transfer workflow algorithm
-    const double initial_energy = getProperty("IncidentEnergy");
-    const bool fixed_ei = getProperty("FixedIncidentEnergy");
+    const double incidentEnergy = this->getProperty("IncidentEnergy");
+    const bool fixedEi = this->getProperty("FixedIncidentEnergy");
+    const std::vector<double> etBinning = this->getProperty("EnergyTransferRange");
+    const bool sofphieIsDistribution = this->getProperty("SofPhiEIsDistribution");
+    const std::string incidentBeamNormType = this->getProperty("IncidentBeamNormalisation");
+    const double monRangeLow = this->getProperty("MonitorIntRangeLow");
+    const double monRangeHigh = this->getProperty("MonitorIntRangeHigh");
+    const bool tibSubtraction = this->getProperty("TimeIndepBackgroundSub");
+    const double tibTofStart = this->getProperty("TibTofRangeStart");
+    const double tibTofEnd = this->getProperty("TibTofRangeEnd");
 
-    IAlgorithm_sptr et_conv = createSubAlgorithm("DgsConvertToEnergyTransfer");
-    et_conv->setProperty("InputWorkspace", inputWS);
-    et_conv->setProperty("IncidentEnergy", initial_energy);
-    et_conv->setProperty("FixedIncidentEnergy", fixed_ei);
+    IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
+    etConv->setProperty("InputWorkspace", inputWS);
+    etConv->setProperty("IncidentEnergy", incidentEnergy);
+    etConv->setProperty("FixedIncidentEnergy", fixedEi);
+    etConv->setProperty("EnergyTransferRange", etBinning);
+    etConv->setProperty("SofPhiEIsDistribution", sofphieIsDistribution);
+    etConv->setProperty("IncidentBeamNormalisation", incidentBeamNormType);
+    etConv->setProperty("MonitorIntRangeLow", monRangeLow);
+    etConv->setProperty("MonitorIntRangeHigh", monRangeHigh);
+    etConv->setProperty("TimeIndepBackgroundSub", tibSubtraction);
+    etConv->setProperty("TibTofRangeStart", tibTofStart);
+    etConv->setProperty("TibTofRangeEnd", tibTofEnd);
+    etConv->execute();
   }
 
 } // namespace Mantid

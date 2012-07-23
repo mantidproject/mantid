@@ -13,15 +13,14 @@
 
 #include <Poco/NotificationCenter.h>
 #include <Poco/Notification.h>
+#include <Poco/ScopedLock.h>
+#include <Poco/Mutex.h>
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MultiThreaded.h"
-#include <Poco/ScopedLock.h>
-#include <Poco/Mutex.h>
 
 namespace Mantid
 {
@@ -334,6 +333,7 @@ public:
     it = datamap.find( newName );
     if ( it != datamap.end() )
     {
+      notificationCenter.postNotification(new AfterReplaceNotification(newName,object));
       datamap.erase( it );
     }
 

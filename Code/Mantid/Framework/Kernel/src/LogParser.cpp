@@ -2,12 +2,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/LogParser.h"
+
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include <fstream>  // used to get ifstream
-#include <sstream>
+
 #include <algorithm>
+#include <fstream>
 #include <limits>
+#include <sstream>
 
 using std::size_t;
 
@@ -17,6 +19,108 @@ namespace Mantid
   {
 
     Kernel::Logger& LogParser::g_log = Mantid::Kernel::Logger::get("LogParser");
+
+    /// @returns the name of the log created that defines the status during a run
+    const std::string & LogParser::statusLogName()
+    {
+      static std::string logname("running");
+      return logname;
+    }
+
+    /// @returns the name of the log that contains all of the periods
+    const std::string & LogParser::periodsLogName()
+    {
+      static std::string logname("periods");
+      return logname;
+    }
+
+    /**  Reads in log data from a log file and stores them in a TimeSeriesProperty.
+    @param logFName :: The name of the log file
+    @param name :: The name of the property
+    @return A pointer to the created property.
+    */
+    Kernel::Property* LogParser::createLogProperty(const std::string& logFName, const std::string& name)
+    {
+      std::ifstream file(logFName.c_str());
+      if (!file)
+      {
+        g_log.warning()<<"Cannot open log file "<<logFName<<"\n";
+        return 0;
+      }
+
+      // Change times and new values read from file
+      std::map<std::string,std::string> change_times;
+
+      // Read in the data and determin if it is numeric
+      std::string str,old_data;
+      bool isNumeric(false);
+      std::string stime,sdata;
+      // MG 22/09/09: If the log file was written on a Windows machine and then read on a Linux machine, std::getline will
+      // leave CR at the end of the string and this causes problems when reading out the log values. Mantid::extractTOEOL
+      // extracts all EOL characters
+      while(Mantid::Kernel::extractToEOL(file,str))
+      {
+        if( str.empty() || str[0]=='#') {continue;}
+
+        if (!Kernel::TimeSeriesProperty<double>::isTimeString(str))
+        {
+          //if the line doesn't start with a time treat it as a continuation of the previous data
+          if (change_times.empty() || isNumeric)
+          {// if there are no previous data
+            std::string mess = "Cannot parse log file "+logFName+". Line:"+str;
+            g_log.error(mess);
+            throw std::logic_error(mess);
+          }
+          change_times[stime] += std::string(" ") + str;
+          continue;
+        }
+        stime = str.substr(0,19);
+        sdata = str.substr(19);
+
+        if (sdata == old_data) continue;// looking for a change in the data
+
+        //check if the data is numeric
+        std::istringstream istr(sdata);
+        double tmp;
+        istr >> tmp;
+        isNumeric = !istr.fail();
+        old_data = sdata;
+
+        //if time is repeated and the data aren't numeric append the new string to the old one
+        if (!isNumeric && change_times[stime].size() > 0)
+          change_times[stime] += std::string(" ") + sdata;
+        else
+          change_times[stime] = sdata;
+      }
+
+      if (change_times.empty()) return 0;
+
+      if (isNumeric)
+      {
+        Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(name);
+        std::map<std::string,std::string>::iterator it = change_times.begin();
+        for(;it!=change_times.end();++it)
+        {
+          std::istringstream istr(it->second);
+          double d;
+          istr >> d;
+          logv->addValue(it->first,d);
+        }
+        return logv;
+      }
+      else
+      {
+        Kernel::TimeSeriesProperty<std::string>* logv = new Kernel::TimeSeriesProperty<std::string>(name);
+        std::map<std::string,std::string>::iterator it = change_times.begin();
+        for(;it!=change_times.end();++it)
+        {
+          logv->addValue(it->first,it->second);
+        }
+        return logv;
+      }
+      return 0;
+    }
+
 
     /**
      * Destructor
@@ -94,8 +198,8 @@ namespace Mantid
     LogParser::LogParser(const std::string& eventFName)
       :m_nOfPeriods(1)
     {
-      Kernel::TimeSeriesProperty<int>* periods = new Kernel::TimeSeriesProperty<int> ("periods");
-      Kernel::TimeSeriesProperty<bool>* status = new Kernel::TimeSeriesProperty<bool> ("running");
+      Kernel::TimeSeriesProperty<int>* periods = new Kernel::TimeSeriesProperty<int> (periodsLogName());
+      Kernel::TimeSeriesProperty<bool>* status = new Kernel::TimeSeriesProperty<bool> (statusLogName());
       m_periods.reset( periods );
       m_status.reset( status );
 
@@ -150,8 +254,8 @@ namespace Mantid
     LogParser::LogParser(const Kernel::Property* log)
       :m_nOfPeriods(1)
     {
-      Kernel::TimeSeriesProperty<int>* periods = new Kernel::TimeSeriesProperty<int> ("periods");
-      Kernel::TimeSeriesProperty<bool>* status = new Kernel::TimeSeriesProperty<bool> ("running");
+      Kernel::TimeSeriesProperty<int>* periods = new Kernel::TimeSeriesProperty<int> (periodsLogName());
+      Kernel::TimeSeriesProperty<bool>* status = new Kernel::TimeSeriesProperty<bool> (statusLogName());
       m_periods.reset( periods );
       m_status.reset( status );
 
@@ -197,105 +301,18 @@ namespace Mantid
     }
 
 
-    /**  Reads in log data from a log file and stores them in a TimeSeriesProperty.
-    @param logFName :: The name of the log file
-    @param name :: The name of the property
-    @return A pointer to the created property.
-    */
-    Kernel::Property* LogParser::createLogProperty(const std::string& logFName, const std::string& name)const
-    {
-      std::ifstream file(logFName.c_str());
-      if (!file)
-      {
-        g_log.warning()<<"Cannot open log file "<<logFName<<"\n";
-        return 0;
-      }
 
-      // Change times and new values read from file
-      std::map<std::string,std::string> change_times;
-
-      // Read in the data and determin if it is numeric
-      std::string str,old_data;
-      bool isNumeric(false);
-      std::string stime,sdata;
-      // MG 22/09/09: If the log file was written on a Windows machine and then read on a Linux machine, std::getline will
-      // leave CR at the end of the string and this causes problems when reading out the log values. Mantid::extractTOEOL
-      // extracts all EOL characters
-      while(Mantid::Kernel::extractToEOL(file,str))
-      {
-        if( str.empty() || str[0]=='#') {continue;}
-
-        if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) 
-        {
-          //if the line doesn't start with a time treat it as a continuation of the previous data
-          if (change_times.empty() || isNumeric)
-          {// if there are no previous data
-            std::string mess = "Cannot parse log file "+logFName+". Line:"+str;
-            g_log.error(mess);
-            throw std::logic_error(mess);
-          }
-          change_times[stime] += std::string(" ") + str;
-          continue;
-        }
-        stime = str.substr(0,19);
-        sdata = str.substr(19);
-
-        if (sdata == old_data) continue;// looking for a change in the data
-
-        //check if the data is numeric
-        std::istringstream istr(sdata);
-        double tmp;
-        istr >> tmp;
-        isNumeric = !istr.fail();
-        old_data = sdata;
-
-        //if time is repeated and the data aren't numeric append the new string to the old one
-        if (!isNumeric && change_times[stime].size() > 0)
-          change_times[stime] += std::string(" ") + sdata;
-        else
-          change_times[stime] = sdata;
-      }
-
-      if (change_times.empty()) return 0;
-
-      if (isNumeric)
-      {
-        Kernel::TimeSeriesProperty<double>* logv = new Kernel::TimeSeriesProperty<double>(name);
-        std::map<std::string,std::string>::iterator it = change_times.begin();
-        for(;it!=change_times.end();++it)
-        {
-          std::istringstream istr(it->second);
-          double d;
-          istr >> d;
-          logv->addValue(it->first,d);
-        }
-        return logv;
-      }
-      else
-      {
-        Kernel::TimeSeriesProperty<std::string>* logv = new Kernel::TimeSeriesProperty<std::string>(name);
-        std::map<std::string,std::string>::iterator it = change_times.begin();
-        for(;it!=change_times.end();++it)
-        {
-          logv->addValue(it->first,it->second);
-        }
-        return logv;
-      }
-
-
-      return 0;
-    }
 
     /** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
      *  @param period :: The data period
      *  @return times requested period was active
      */
-    Kernel::Property* LogParser::createPeriodLog(int period)const
+    Kernel::TimeSeriesProperty<bool> * LogParser::createPeriodLog(int period) const
     {
       Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods.get());
       std::ostringstream ostr;
       ostr<<period;
-      Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
+      Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period " + ostr.str());
       std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
       std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
       if (it->second != period)
@@ -319,19 +336,13 @@ namespace Mantid
     /// Ctreates a TimeSeriesProperty<int> with all data periods
     Kernel::Property* LogParser::createAllPeriodsLog()const
     {
-      Kernel::TimeSeriesProperty<int>* p = new Kernel::TimeSeriesProperty<int> ("periods");
-      Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_periods.get());
-      std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
-      std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
-      for(;it!=pMap.end();++it)
-        p->addValue(it->first, it->second);
-      return p;
+      return m_periods->clone();
     }
 
-    /// Ctreates a TimeSeriesProperty<bool> with running status
-    Kernel::Property* LogParser::createRunningLog()const
+    /// Creates a TimeSeriesProperty<bool> with running status
+    Kernel::TimeSeriesProperty<bool>* LogParser::createRunningLog() const
     {
-      return dynamic_cast<Kernel::TimeSeriesProperty<bool>*>(m_status.get())->clone();
+      return m_status->clone();
     }
 
 

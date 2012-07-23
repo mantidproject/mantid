@@ -159,7 +159,7 @@ namespace Mantid
       }
 
       /// 'Virtual copy constructor'
-      Kernel::Property* clone() { return new WorkspaceProperty<TYPE>(*this); }
+      WorkspaceProperty<TYPE>* clone() const { return new WorkspaceProperty<TYPE>(*this); }
 
       /// Virtual destructor
       virtual ~WorkspaceProperty()

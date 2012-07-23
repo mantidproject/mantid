@@ -12,7 +12,7 @@ class PropertyHelper : public Property
 {
 public:
   PropertyHelper() : Property( "Test", typeid( int ) ) {}
-  Property* clone() { return new PropertyHelper(*this); }
+  PropertyHelper* clone() const { return new PropertyHelper(*this); }
   std::string value() const { return "Nothing"; }
   std::string setValue( const std::string&) { return ""; }
   std::string setValueFromProperty( const Property& ) { return ""; }

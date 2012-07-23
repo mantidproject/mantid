@@ -6,7 +6,7 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidCurveFitting/ThermoNeutronBackToBackExpPV.h"
+#include "MantidCurveFitting/Bk2BkExpConvPV.h"
 
 namespace Mantid
 {
@@ -52,7 +52,7 @@ namespace CurveFitting
     // Functions to input parameters
     void addPeaks(std::vector<std::vector<int> > peakhkls, std::vector<double> peakheights);
     void setPeakHeights(std::vector<double> inheights);
-    CurveFitting::ThermoNeutronBackToBackExpPV_sptr getPeak(size_t peakindex);
+    CurveFitting::Bk2BkExpConvPV_sptr getPeak(size_t peakindex);
 
     void calPeaksParameters();
 
@@ -93,7 +93,7 @@ namespace CurveFitting
     std::vector<std::vector<int> > mPeakHKLs;
 
     //std::vector<API::IPeakFunction* > mPeaks;
-    std::vector<ThermoNeutronBackToBackExpPV_sptr> mPeaks;
+    std::vector<Bk2BkExpConvPV_sptr> mPeaks;
 
     mutable std::vector<std::map<std::string, double> > mPeakParameters; // It is in strict order with dvalues;
 

@@ -14,193 +14,191 @@ namespace MDEvents
 
 /// Template to check if a variable equal to NaN
 template <class T>
-inline bool isNaN(T val){
-    volatile T buf=val;
-    return (val!=buf);
+inline bool isNaN(T val)
+{
+  volatile T buf=val;
+  return (val!=buf);
 }
 /** set specific (non-default) dimension name 
- * @param nDim   -- number of dimension;
- * @param Name   -- the name to assighn into diemnsion names vector;
- */
+* @param nDim   -- number of dimension;
+* @param Name   -- the name to assighn into diemnsion names vector;
+*/
 void MDWSDescription::setDimName(unsigned int nDim,const std::string &Name)
 {
-    if(nDim>=nDims){
-        std::string ERR = "setDimName::Dimension index: "+boost::lexical_cast<std::string>(nDim)+" out of total dimensions range: "+boost::lexical_cast<std::string>(nDims);
-        throw(std::invalid_argument(ERR));
-    }
-    dimNames[nDim] = Name;
+  if(nDim>=m_NDims)
+  {
+    std::string ERR = "setDimName::Dimension index: "+boost::lexical_cast<std::string>(nDim)+" out of total dimensions range: "+boost::lexical_cast<std::string>(m_NDims);
+    throw(std::invalid_argument(ERR));
+  }
+  m_DimNames[nDim] = Name;
 }
 /** this is rather misleading function, as MD workspace does not currently have dimension units. 
-  *It actually sets the units dimension names, which will be displayed along axis and have nothinbg in common with units, defined by unit factory */
+*It actually sets the units dimension names, which will be displayed along axis and have nothinbg in common with units, defined by unit factory */
 void MDWSDescription::setDimUnit(unsigned int nDim,const std::string &Unit)
 {
-    if(nDim>=nDims){
-        std::string ERR = "setDimUnit::Dimension index: "+boost::lexical_cast<std::string>(nDim)+" out of total dimensions range: "+boost::lexical_cast<std::string>(nDims);
-        throw(std::invalid_argument(ERR));
-    }
-    dimUnits[nDim] = Unit;
+  if(nDim>=m_NDims)
+  {
+    std::string ERR = "setDimUnit::Dimension index: "+boost::lexical_cast<std::string>(nDim)+" out of total dimensions range: "+boost::lexical_cast<std::string>(m_NDims);
+    throw(std::invalid_argument(ERR));
+  }
+  m_DimUnits[nDim] = Unit;
 }
 
 /** method sets up the pointer to the class which contains detectors parameters
-  * @param   -- det_loc the class which contaits the preprocessed detectors parameters
-  *
-  * Throws if the parameters were not defined
+* @param   -- DetLoc the class which contaits the preprocessed detectors parameters
+*
+* Throws if the parameters were not defined
 */
-void MDWSDescription::setDetectors(const ConvToMDPreprocDet &det_loc)
+void MDWSDescription::setDetectors(const ConvToMDPreprocDet &DetLoc)
 {
-    pDetLocations = &det_loc;
-    if(pDetLocations->nDetectors()==0) {
-        throw(std::invalid_argument( " Preprocessed detectors positions are either empty or undefined. Nothing to do"));
-    }
+  m_DetLoc = &DetLoc;
+  if(m_DetLoc->nDetectors()==0) throw(std::invalid_argument( " Preprocessed detectors positions are either empty or undefined. Nothing to do"));
 
 }
 /** the method builds the MD ws description from existing matrix workspace and the requested transformation parameters. 
- *@param  pWS    -- input matrix workspace to be converted into MD workpsace
- *@param  QMode  -- momentum conversion mode. Any mode supported by Q conversion factory. Class just carries up the name of Q-mode, 
- *                  to the place where factory call to the solver is made , so no code modification is needed when new modes are added 
- *                  to the factory
- *@param  dEMode  -- energy analysis mode (string representation). Should correspond to energy analysis modes, supported by selected Q-mode
- *@param  dimPropertyNames -- the vector of names for additional ws properties, which will be used as dimensions.
+*@param  pWS    -- input matrix workspace to be converted into MD workpsace
+*@param  QMode  -- momentum conversion mode. Any mode supported by Q conversion factory. Class just carries up the name of Q-mode, 
+*                  to the place where factory call to the solver is made , so no code modification is needed when new modes are added 
+*                  to the factory
+*@param  dEMode  -- energy analysis mode (string representation). Should correspond to energy analysis modes, supported by selected Q-mode
+*@param  dimPropertyNames -- the vector of names for additional ws properties, which will be used as dimensions.
 
 */
 void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &pWS,const std::string &QMode,const std::string dEMode,
-                                        const std::vector<std::string> &dimProperyNames)
+  const std::vector<std::string> &dimProperyNames)
 {
-    inWS = pWS;
-    // fill additional dimensions values, defined by workspace properties;
-    this->fillAddProperties(inWS,dimProperyNames,AddCoord);
+  m_InWS = pWS;
+  // fill additional dimensions values, defined by workspace properties;
+  this->fillAddProperties(m_InWS,dimProperyNames,m_AddCoord);
 
-    this->AlgID = QMode;
+  this->AlgID = QMode;
 
-    // check and get energy conversion mode;
-    MDTransfDEHelper dEChecker;
-    emode = dEChecker.getEmode(dEMode);
+  // check and get energy conversion mode;
+  MDTransfDEHelper dEChecker;
+  m_Emode = dEChecker.getEmode(dEMode);
 
-    // get raw pointer to Q-transformation (do not delete this pointer!)
-    MDTransfInterface* pQtransf =  MDTransfFactory::Instance().create(QMode).get();
+  // get raw pointer to Q-transformation (do not delete this pointer!)
+  MDTransfInterface* pQtransf =  MDTransfFactory::Instance().create(QMode).get();
 
-    // get number of dimensions this Q transformation generates from the workspace. 
-    unsigned int nMatrixDim = pQtransf->getNMatrixDimensions(emode,inWS);
+  // get number of dimensions this Q transformation generates from the workspace. 
+  unsigned int nMatrixDim = pQtransf->getNMatrixDimensions(m_Emode,m_InWS);
 
-    // number of MD ws dimensions is the sum of n-matrix dimensions and dimensions coming from additional coordinates
-    nDims  = nMatrixDim + (unsigned int)AddCoord.size();
-    this->resizeDimDescriptions(nDims);
-    // check if all MD dimensions descriptors are set properly
-    if(nDims!=dimNames.size()||nDims!=dimMin.size())
-        throw(std::invalid_argument(" dimension limits vectors and dimension description vectors inconsistent as have different length"));
+  // number of MD ws dimensions is the sum of n-matrix dimensions and dimensions coming from additional coordinates
+  m_NDims  = nMatrixDim + (unsigned int)m_AddCoord.size();
+  this->resizeDimDescriptions(m_NDims);
+  // check if all MD dimensions descriptors are set properly
+  if(m_NDims!=m_DimNames.size()||m_NDims!=m_DimMin.size())
+    throw(std::invalid_argument(" dimension limits vectors and dimension description vectors inconsistent as have different length"));
 
 
-    //*********** fill in dimension id-s, dimension units and dimension names
-    // get default dim ID-s. TODO: it should be possibility to owerride it later;
-    std::vector<std::string> MatrDimID   = pQtransf->getDefaultDimID(emode,inWS);
-    std::vector<std::string> MatrUnitID  = pQtransf->outputUnitID(emode,inWS);
-    for(unsigned int i=0;i<nDims;i++)
+  //*********** fill in dimension id-s, dimension units and dimension names
+  // get default dim ID-s. TODO: it should be possibility to owerride it later;
+  std::vector<std::string> MatrDimID   = pQtransf->getDefaultDimID(m_Emode,m_InWS);
+  std::vector<std::string> MatrUnitID  = pQtransf->outputUnitID(m_Emode,m_InWS);
+  for(unsigned int i=0;i<m_NDims;i++)
+  {
+    if(i<nMatrixDim)
     {
-        if(i<nMatrixDim){
-            dimIDs[i]  = MatrDimID[i];
-            dimNames[i]= MatrDimID[i];
-            dimUnits[i]= MatrUnitID[i];
-        }else{
-            dimIDs[i]  = dimProperyNames[i-nMatrixDim];
-            dimNames[i]= dimProperyNames[i-nMatrixDim];
-            dimUnits[i]= dimProperyNames[i-nMatrixDim];
-        }
+      m_DimIDs[i]  = MatrDimID[i];
+      m_DimNames[i]= MatrDimID[i];
+      m_DimUnits[i]= MatrUnitID[i];
     }
-
-
-    // in direct or indirect mode input ws has to have input energy
-    if(emode==CnvrtToMD::Direct||emode==CnvrtToMD::Indir){
-        if(isNaN(getEi(inWS)))throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
+    else
+    {
+      m_DimIDs[i]  = dimProperyNames[i-nMatrixDim];
+      m_DimNames[i]= dimProperyNames[i-nMatrixDim];
+      m_DimUnits[i]= dimProperyNames[i-nMatrixDim];
     }
-    
+  }
 
-    //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
-    this->GoniomMatr = inWS->run().getGoniometer().getR();
-    
+
+  // in direct or indirect mode input ws has to have input energy
+  if(m_Emode==CnvrtToMD::Direct||m_Emode==CnvrtToMD::Indir)
+    if(isNaN(getEi(m_InWS)))throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
+
+
+
+  //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
+  m_GoniomMatr = m_InWS->run().getGoniometer().getR();
+
 } 
 
 /** the function builds MD event WS description from existing workspace. 
-  * Primary used to obtain existing ws parameters 
-  *@param pWS -- shared pointer to existing MD workspace 
+* Primary used to obtain existing ws parameters 
+*@param pWS -- shared pointer to existing MD workspace 
 */
 void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS)
 {
-    this->nDims = (unsigned int)pWS->getNumDims();
-    // prepare all arrays:
-    this->dimMin.resize(nDims);
-    this->dimMax.resize(nDims);
-    this->dimNames.resize(nDims);
-    this->dimIDs.resize(nDims);
-    this->dimUnits.resize(nDims);   
-    this->nBins.resize(nDims);
-    for(size_t i=0;i<nDims;i++)
-    {
-        const Geometry::IMDDimension *pDim = pWS->getDimension(i).get();
-        dimMin[i]  = pDim->getMinimum();
-        dimMax[i]  = pDim->getMaximum();
-        dimNames[i]= pDim->getName();
-        dimIDs[i]  = pDim->getDimensionId();
-        dimUnits[i]= pDim->getUnits();   
-        nBins[i]   = pDim->getNBins();
-    }
-    this->Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
-    // unnecessary?
-    //uint16_t num_experiments = pWS->getNumExperimentInfo();   
-    //// target ws does not have experiment info, so this can be only powder. W-transf currently can be only unit matix
-    //if (num_experiments==0)
-    //{
-    //    return;
-    //}else{
+  m_NDims = (unsigned int)pWS->getNumDims();
+  // prepare all arrays:
+  m_DimNames.resize(m_NDims);
+  m_DimIDs.resize(m_NDims);
+  m_DimUnits.resize(m_NDims);   
 
-    //}
+  m_NBins.resize(m_NDims);
+  m_DimMin.resize(m_NDims);
+  m_DimMax.resize(m_NDims);
+  for(size_t i=0;i<m_NDims;i++)
+  {
+    const Geometry::IMDDimension *pDim = pWS->getDimension(i).get();
+    m_DimNames[i]= pDim->getName();
+    m_DimIDs[i]  = pDim->getDimensionId();
+    m_DimUnits[i]= pDim->getUnits();   
+
+    m_NBins[i]   = pDim->getNBins();
+    m_DimMin[i]  = pDim->getMinimum();
+    m_DimMax[i]  = pDim->getMaximum();
+
+  }
+  m_Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
 
 }
 /** When the workspace has been build from existing MDWrokspace, some target worskpace parameters can not be defined,
-  * as these parameters are defined by the algorithm and input matrix workspace.
-  *  examples are emode or input energy, which is actually source workspace parameters, or some other parameters 
-  *  defined by the transformation algorithm
-  * 
-  * This method used to define such parameters from MDWS description, build from workspace and the transformation algorithm parameters
-  *
-  *@param SourceMartWS -- the MDWS description obtained from input matrix workspace and the algorithm parameters
+* as these parameters are defined by the algorithm and input matrix workspace.
+*  examples are emode or input energy, which is actually source workspace parameters, or some other parameters 
+*  defined by the transformation algorithm
+* 
+* This method used to define such parameters from MDWS description, build from workspace and the transformation algorithm parameters
+*
+*@param SourceMartWS -- the MDWS description obtained from input matrix workspace and the algorithm parameters
 */
 void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &SourceMatrWS)
 {
-    this->inWS  = SourceMatrWS.inWS;
-    this->emode = SourceMatrWS.emode;
-    this->AlgID = SourceMatrWS.AlgID;
+  m_InWS  = SourceMatrWS.m_InWS;
+  m_Emode = SourceMatrWS.m_Emode;
+  this->AlgID = SourceMatrWS.AlgID;
 
-    this->AddCoord.assign(SourceMatrWS.AddCoord.begin(),SourceMatrWS.AddCoord.end());
+  m_AddCoord.assign(SourceMatrWS.m_AddCoord.begin(),SourceMatrWS.m_AddCoord.end());
 
-    this->GoniomMatr = SourceMatrWS.GoniomMatr;
+  m_GoniomMatr = SourceMatrWS.m_GoniomMatr;
 
 }
 
 
 /**function compares old workspace description with the new workspace description, defined by the algorithm properties and 
- * selects/changes the properties which can be changed through input parameters given that target MD workspace exist   
- *
- * This situation occurs if the base description has been obtained from MD workspace, and one is building a description from 
- * other matrix workspace to add new data to the existing workspace. The workspaces have to be comparable.
- *
- * @param NewMDWorkspaceD -- MD workspace description, obtained from algorithm parameters
- *
- * @returns NewMDWorkspaceD -- modified md workspace description, which is compartible with existing MD workspace
- *
+* selects/changes the properties which can be changed through input parameters given that target MD workspace exist   
+*
+* This situation occurs if the base description has been obtained from MD workspace, and one is building a description from 
+* other matrix workspace to add new data to the existing workspace. The workspaces have to be comparable.
+*
+* @param NewMDWorkspaceD -- MD workspace description, obtained from algorithm parameters
+*
+* @returns NewMDWorkspaceD -- modified md workspace description, which is compartible with existing MD workspace
+*
 */
 void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &NewMDWorkspaceD)
 {
-    if(this->nDims != NewMDWorkspaceD.nDims)
-    {
-        std::string ERR = "Dimension numebrs are inconsistent: this workspace has "+boost::lexical_cast<std::string>(this->nDims)+" dimensions and target one: "+
-                           boost::lexical_cast<std::string>(NewMDWorkspaceD.nDims);
-         throw(std::invalid_argument(ERR)); 
-    }
-    if(this->emode==CnvrtToMD::Undef)
-    {
-        throw(std::invalid_argument("Workspace description has not been correctly defined, as emode has not been defined")); 
-    }
-    //TODO: More thorough checks may be nesessary to prevent adding different kind of workspaces e.g 4D |Q|-dE-T-P workspace to Q3d+dE ws
+  if(m_NDims != NewMDWorkspaceD.m_NDims)
+  {
+    std::string ERR = "Dimension numebrs are inconsistent: this workspace has "+boost::lexical_cast<std::string>(m_NDims)+" dimensions and target one: "+
+                       boost::lexical_cast<std::string>(NewMDWorkspaceD.m_NDims);
+    throw(std::invalid_argument(ERR)); 
+  }
+
+  if(m_Emode==CnvrtToMD::Undef)
+    throw(std::invalid_argument("Workspace description has not been correctly defined, as emode has not been defined")); 
+
+  //TODO: More thorough checks may be nesessary to prevent adding different kind of workspaces e.g 4D |Q|-dE-T-P workspace to Q3d+dE ws
 }
 
 
@@ -208,152 +206,164 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
 
 /// empty constructor
 MDWSDescription::MDWSDescription(unsigned int nDimensions):
-Wtransf(3,3,true),
-GoniomMatr(3,3,true),
-rotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
-emode(CnvrtToMD::Undef)
+  m_Wtransf(3,3,true),
+  m_GoniomMatr(3,3,true),
+  m_RotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
+  m_Emode(CnvrtToMD::Undef)
 {
 
-    this->resizeDimDescriptions(nDimensions);
-    this->dimMin.assign(nDims,std::numeric_limits<double>::quiet_NaN());
-    this->dimMax.assign(nDims,std::numeric_limits<double>::quiet_NaN());
+  this->resizeDimDescriptions(nDimensions);
+  m_DimMin.assign(m_NDims,std::numeric_limits<double>::quiet_NaN());
+  m_DimMax.assign(m_NDims,std::numeric_limits<double>::quiet_NaN());
 
 }
 void MDWSDescription::resizeDimDescriptions(unsigned int nDimensions, size_t nBins)
 {
-    this->nDims = nDimensions;
+  m_NDims = nDimensions;
 
-    this->dimNames.assign(nDims,"mdn");
-    this->dimIDs.assign(nDims,"mdn_");
-    this->dimUnits.assign(nDims,"Momentum");
-    this->nBins.assign(nDims,nBins);
+  m_DimNames.assign(m_NDims,"mdn");
+  m_DimIDs.assign(m_NDims,"mdn_");
+  m_DimUnits.assign(m_NDims,"Momentum");
+  m_NBins.assign(m_NDims,nBins);
 
-    for(size_t i=0;i<nDims;i++)
-    {
-        dimIDs[i]  = dimIDs[i]+boost::lexical_cast<std::string>(i);
-        dimNames[i]= dimNames[i]+boost::lexical_cast<std::string>(i);
-    }
+  for(size_t i=0;i<m_NDims;i++)
+  {
+    m_DimIDs[i]  = m_DimIDs[i]+boost::lexical_cast<std::string>(i);
+    m_DimNames[i]= m_DimNames[i]+boost::lexical_cast<std::string>(i);
+  }
 
 }
 /**function sets up min-max values to the dimensions, described by the class
- *@param minVal  -- vector of minimal dimension's values
- *@param maxVal  -- vector of maximal dimension's values
- * 
+*@param minVal  -- vector of minimal dimension's values
+*@param maxVal  -- vector of maximal dimension's values
+* 
 */
 void MDWSDescription::setMinMax(const std::vector<double> &minVal,const std::vector<double> &maxVal)
 {
-    dimMin.assign(minVal.begin(),minVal.end());
-    dimMax.assign(maxVal.begin(),maxVal.end());
+  m_DimMin.assign(minVal.begin(),minVal.end());
+  m_DimMax.assign(maxVal.begin(),maxVal.end());
 
-    this->checkMinMaxNdimConsistent(dimMin,dimMax);
+  this->checkMinMaxNdimConsistent(m_DimMin,m_DimMax);
 }
 
 /**get vector of minimal and maximal values from the class */
 void MDWSDescription::getMinMax(std::vector<double> &min,std::vector<double> &max)const
 {
-     min.assign(this->dimMin.begin(),this->dimMin.end());
-     max.assign(this->dimMax.begin(),this->dimMax.end());
+  min.assign(m_DimMin.begin(),m_DimMin.end());
+  max.assign(m_DimMax.begin(),m_DimMax.end());
 }
 //******************************************************************************************************************************************
 //*************   STATIC HELPER FUNCTIONS
 //******************************************************************************************************************************************
 /** Helper function to obtain the energy of incident neutrons from the input workspaec
-  *
-  *@param pHost the pointer to the algorithm to work with
-  *
-  *@returns the incident energy of the neutrons or quet NaN if can not retrieve one 
+*
+*@param pHost the pointer to the algorithm to work with
+*
+*@returns the incident energy of the neutrons or quet NaN if can not retrieve one 
 */
 double MDWSDescription::getEi(API::MatrixWorkspace_const_sptr inWS2D)
 {
-    if(!inWS2D.get()){
-        throw(std::invalid_argument(" getEi: invoked on empty input workspace "));
-    }
-    Kernel::PropertyWithValue<double>  *pProp(NULL);
-    try{
-       pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(inWS2D->run().getProperty("Ei"));
-    }catch(...){
-    }
-    if(!pProp){
-        return std::numeric_limits<double>::quiet_NaN();
-    }
-    return (*pProp); 
+  if(!inWS2D)throw(std::invalid_argument(" getEi: invoked on empty input workspace "));
+
+  Kernel::PropertyWithValue<double>  *pProp(NULL);
+  try
+  {
+    pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(inWS2D->run().getProperty("Ei"));
+  }
+  catch(...)
+  {}
+  // this can be preferable name for indirect conversion
+  try
+  {
+    pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(inWS2D->run().getProperty("eFixed"));
+  }
+  catch(...)
+  {}
+
+
+  if(!pProp) return std::numeric_limits<double>::quiet_NaN();
+
+  return (*pProp); 
 }
 /** function extracts the coordinates from additional workspace porperties and places them to proper position within 
-  *  the vector of MD coodinates for the particular workspace.
-  *
-  *  @param dimProperyNames  -- names of properties which should be treated as dimensions
-  *
-  *  @returns AddCoord       -- vector of additional coordinates (derived from WS properties) for current multidimensional event
- */
+*  the vector of MD coodinates for the particular workspace.
+*
+*  @param dimProperyNames  -- names of properties which should be treated as dimensions
+*
+*  @returns AddCoord       -- vector of additional coordinates (derived from WS properties) for current multidimensional event
+*/
 void MDWSDescription::fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimProperyNames,std::vector<coord_t> &AddCoord)
 {
-     size_t nDimPropNames = dimProperyNames.size();
-     if(AddCoord.size()!=nDimPropNames)AddCoord.resize(nDimPropNames);
+  size_t nDimPropNames = dimProperyNames.size();
+  if(AddCoord.size()!=nDimPropNames)AddCoord.resize(nDimPropNames);
 
-     for(size_t i=0;i<nDimPropNames;i++){
-         //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
-         Kernel::Property *pProperty = (inWS2D->run().getProperty(dimProperyNames[i]));
-         Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
-         if(run_property){
-                AddCoord[i]=coord_t(run_property->firstValue());
-         }else{
-              // e.g Ei can be a property and dimenson
-              Kernel::PropertyWithValue<double> *proc_property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
-              if(!proc_property){
-                std::string ERR = " Can not interpret property, used as dimension.\n Property: "+dimProperyNames[i]+
-                                  " is neither a time series (run) property nor a property with value<double>";
-                 throw(std::invalid_argument(ERR));
-              }
-              AddCoord[i]  = coord_t(*(proc_property));
-         }
-     }
+  for(size_t i=0;i<nDimPropNames;i++)
+  {
+    //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
+    Kernel::Property *pProperty = (inWS2D->run().getProperty(dimProperyNames[i]));
+    Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
+    if(run_property)
+    {
+      AddCoord[i]=coord_t(run_property->firstValue());
+    }
+    else
+    {
+      // e.g Ei can be a property and dimenson
+      Kernel::PropertyWithValue<double> *proc_property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
+      if(!proc_property)
+      {
+        std::string ERR = " Can not interpret property, used as dimension.\n Property: "+dimProperyNames[i]+
+          " is neither a time series (run) property nor a property with value<double>";
+        throw(std::invalid_argument(ERR));
+      }
+      AddCoord[i]  = coord_t(*(proc_property));
+    }
+  }
 }
 
 /** function verifies the consistency of the min and max dimsnsions values  checking if all necessary 
- * values vere defined and min values are smaller then mav values */
+* values vere defined and min values are smaller then mav values */
 void MDWSDescription::checkMinMaxNdimConsistent(const std::vector<double> &minVal,const std::vector<double> &maxVal)
 {
   if(minVal.size()!=maxVal.size())
   {
-      std::string ERR = " number of specified min dimension values: "+boost::lexical_cast<std::string>(minVal.size())+
-                        " and number of max values: "+boost::lexical_cast<std::string>(maxVal.size())+
-                        " are not consistent\n";
-      throw(std::invalid_argument(ERR));
+    std::string ERR = " number of specified min dimension values: "+boost::lexical_cast<std::string>(minVal.size())+
+                      " and number of max values: "+boost::lexical_cast<std::string>(maxVal.size())+
+                      " are not consistent\n";
+    throw(std::invalid_argument(ERR));
   }
-    
+
   for(size_t i=0; i<minVal.size();i++)
   {
     if(maxVal[i]<=minVal[i])
     {
       std::string ERR = " min value "+boost::lexical_cast<std::string>(minVal[i])+
                         " not less then max value"+boost::lexical_cast<std::string>(maxVal[i])+" in direction: "+
-                         boost::lexical_cast<std::string>(i)+"\n";
+                        boost::lexical_cast<std::string>(i)+"\n";
       throw(std::invalid_argument(ERR));
     }
   }
 }
 
-/// function checks if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
+ /// function checks if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
 bool MDWSDescription::isDetInfoLost(Mantid::API::MatrixWorkspace_const_sptr inWS2D)
 {
-    API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
-    if(pYAxis){
-        // if this is numeric axis, then the detector's information has been lost:
-        return true;
-    }          
-    return false;
+  API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
+     // if this is numeric axis, then the detector's information has been lost:
+  if(pYAxis)     return true; 
+  return false;
 }
-/** function retrieves copy of the oriented lattice from the workspace */
+ /** function retrieves copy of the oriented lattice from the workspace */
 boost::shared_ptr<Geometry::OrientedLattice> MDWSDescription::getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D)
 {
-    // try to get the WS oriented lattice
-    boost::shared_ptr<Geometry::OrientedLattice> orl;
-    if(inWS2D->sample().hasOrientedLattice()){        
-        orl = boost::shared_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(inWS2D->sample().getOrientedLattice()));      
-    }
-    return orl;
+  // try to get the WS oriented lattice
+  boost::shared_ptr<Geometry::OrientedLattice> orl;
+  if(inWS2D->sample().hasOrientedLattice())
+    orl = boost::shared_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(inWS2D->sample().getOrientedLattice()));      
+  
+  return orl;
 
 }
 
-}
-}
+} //end namespace MDEvents 
+} //end namespace Mantid

@@ -47,6 +47,7 @@ public:
   void setViewDirection(const QString& vd);
   void set3DAxesState(bool on);
   void setWireframe(bool on);
+  void enableLighting(bool on);
 
   virtual void componentSelected(Mantid::Geometry::ComponentID = NULL);
   virtual void getSelectedDetectors(QList<int>& dets);
@@ -63,6 +64,7 @@ protected:
   virtual void wheelEventMove(QWheelEvent *);
 
   void drawAxes(double axis_length = 100.0)const;
+  void setLightingModel(bool picking)const;
 
   //const InstrumentActor& m_instrActor;
   GLTrackball* m_trackball;       ///< Trackball for user interaction
@@ -70,6 +72,7 @@ protected:
   bool m_drawAxes;
   bool m_wireframe;
   bool m_isKeyPressed;
+  bool m_isLightingOn;            ///< Lighting on/off flag
 
 };
 

@@ -203,11 +203,6 @@ namespace DataHandling
 
     Workspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
-    // Set amount of time expected to be spent on writing initial part - could in future depend on type of workspace
-    m_timeProgInit = 0.05;
-    // Create progress object for this
-    Progress prog_init(this, 0.0, m_timeProgInit, 5);
-
     // Retrieve the filename from the properties
     m_filename = getPropertyValue("Filename");
     //m_entryname = getPropertyValue("EntryName");
@@ -217,21 +212,31 @@ namespace DataHandling
 
     MatrixWorkspace_const_sptr matrixWorkspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(inputWorkspace);
     ITableWorkspace_const_sptr tableWorkspace = boost::dynamic_pointer_cast<const ITableWorkspace>(inputWorkspace);
-	PeaksWorkspace_const_sptr peaksWorkspace = boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
+    PeaksWorkspace_const_sptr peaksWorkspace = boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
     OffsetsWorkspace_const_sptr offsetsWorkspace = boost::dynamic_pointer_cast<const OffsetsWorkspace>(inputWorkspace);
-	if(peaksWorkspace) g_log.debug("We have a peaks workspace");
+    if(peaksWorkspace) g_log.debug("We have a peaks workspace");
     // check if inputWorkspace is something we know how to save
     if (!matrixWorkspace && !tableWorkspace) {
-		g_log.debug() << "Workspace "  << m_title << " not saved because it is not of a type we can presently save.\n";
-        return;
-	}
+      g_log.debug() << "Workspace "  << m_title << " not saved because it is not of a type we can presently save.\n";
+      return;
+    }
     m_eventWorkspace = boost::dynamic_pointer_cast<const EventWorkspace>(matrixWorkspace);
-	const std::string workspaceID = inputWorkspace->id();
+    const std::string workspaceID = inputWorkspace->id();
     if ((workspaceID.find("Workspace2D") == std::string::npos) &&
-        (workspaceID.find("RebinnedOutput") == std::string::npos) &&
-        !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace)
+      (workspaceID.find("RebinnedOutput") == std::string::npos) &&
+      !m_eventWorkspace && !tableWorkspace && !offsetsWorkspace)
       throw Exception::NotImplementedError("SaveNexusProcessed passed invalid workspaces. Must be Workspace2D, EventWorkspace, ITableWorkspace, or OffsetsWorkspace.");
 
+    // Create progress object for initial part - depends on whether events are processed
+    if( PreserveEvents && m_eventWorkspace)
+    {
+       m_timeProgInit = 0.07; // Events processed 0.05 to 1.0
+    }
+    else
+    {
+      m_timeProgInit = 1.0; // All work is done in the initial part
+    }
+    Progress prog_init(this, 0.0, m_timeProgInit, 7);
 
     // If no title's been given, use the workspace title field
     if (m_title.empty()) 
@@ -246,7 +251,7 @@ namespace DataHandling
         file.remove();
     }
 	// Then immediately open the file
-    Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO();
+    Mantid::NeXus::NexusFileIO *nexusFile= new Mantid::NeXus::NexusFileIO( &prog_init );
 
     if( nexusFile->openNexusWrite( m_filename ) != 0 )
       throw Exception::FileError("Failed to open file", m_filename);
@@ -274,6 +279,7 @@ namespace DataHandling
       std::vector<int> spec;
       this->getSpectrumList(spec, matrixWorkspace);
 
+      prog_init.reportIncrement(1, "Writing data");
       // Write out the data (2D or event)
       if (m_eventWorkspace && PreserveEvents)
       {
@@ -302,29 +308,29 @@ namespace DataHandling
 
 
     if (peaksWorkspace) 
-	{
+    {
       // Save the instrument names, ParameterMap, sample, run
       peaksWorkspace->saveExperimentInfoNexus(cppFile);
       prog_init.reportIncrement(1, "Writing sample and instrument");
-	}
+    }
 
 
-	// peaks workspace specifics
-	if (peaksWorkspace)
-	{
-	//	g_log.information("Peaks Workspace saving to Nexus would be done");
-	//	int pNum = peaksWorkspace->getNumberPeaks();
-		peaksWorkspace->saveNexus( cppFile );
+    // peaks workspace specifics
+    if (peaksWorkspace)
+    {
+      //	g_log.information("Peaks Workspace saving to Nexus would be done");
+      //	int pNum = peaksWorkspace->getNumberPeaks();
+      peaksWorkspace->saveNexus( cppFile );
 
 
-		
-	} // finish peaks workspace specifics
+
+    } // finish peaks workspace specifics
     else if (tableWorkspace) // Table workspace specifics 
     {
-        nexusFile->writeNexusTableWorkspace(tableWorkspace,"table_workspace");
+      nexusFile->writeNexusTableWorkspace(tableWorkspace,"table_workspace");
     }  // finish table workspace specifics
- 
-	  // Switch to the Cpp API for the algorithm history
+
+    // Switch to the Cpp API for the algorithm history
 	  inputWorkspace->getHistory().saveNexus(cppFile);
 
     nexusFile->closeNexusFile();

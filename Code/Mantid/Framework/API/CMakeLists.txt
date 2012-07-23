@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/AlgorithmHasProperty.cpp
 	src/AlgorithmHistory.cpp
 	src/AlgorithmManager.cpp
+	src/AlgorithmObserver.cpp
 	src/AlgorithmProperty.cpp
 	src/AlgorithmProxy.cpp
 	src/AnalysisDataService.cpp
@@ -309,6 +310,8 @@ target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} )
 
 if ( CXXTEST_FOUND )
   include_directories ( ../TestHelpers/inc )
+  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp )
+  
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
     target_link_libraries( APITest API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  )

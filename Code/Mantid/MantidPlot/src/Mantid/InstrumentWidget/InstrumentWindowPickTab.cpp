@@ -746,6 +746,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
     double l2 = det->getDistance(*sample);
 
     double tof = x;
+    double count = y;
     if (unit->unitID() != "TOF")
     {
       if (m_emode < 0)
@@ -773,6 +774,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       std::vector<double> ydata;
       unit->toTOF(xdata, ydata, l1, l2, theta2, m_emode, m_efixed, m_delta);
       tof = xdata[0];
+      count = ydata[0];
     }
 
     double knorm=NeutronMass*(l1 + l2)/(h_bar*tof*1e-6)/1e10;
@@ -784,6 +786,12 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
     Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
     peak->setDetectorID(m_currentDetID);
     peak->setGoniometerMatrix(ws->run().getGoniometer().getR());
+    peak->setBinCount(count);
+    peak->setRunNumber(ws->getRunNumber());
+    const double counts = instrActor->getIntegratedCounts(m_currentDetID);
+    peak->setIntensity(counts);
+    if(counts > 0.) peak->setSigmaIntensity(std::sqrt(counts));
+    
     tw->addPeak(*peak);
     delete peak;
     tw->modified();

@@ -22,6 +22,7 @@ set ( EXPORT_FILES
   src/Exports/Unit.cpp
   src/Exports/BoundedValidator.cpp
   src/Exports/TimeSeriesProperty.cpp
+  src/Exports/FilteredTimeSeriesProperty.cpp
   src/Exports/DateAndTime.cpp
   src/Exports/InstrumentInfo.cpp
   src/Exports/FacilityInfo.cpp
@@ -32,6 +33,9 @@ set ( EXPORT_FILES
   src/Exports/MandatoryValidator.cpp
   src/Exports/CompositeValidator.cpp
   src/Exports/LogFilter.cpp
+  src/Exports/UnitConversion.cpp
+  src/Exports/UnitFactory.cpp
+  src/Exports/DeltaEMode.cpp
 )  
 
 set ( SRC_FILES

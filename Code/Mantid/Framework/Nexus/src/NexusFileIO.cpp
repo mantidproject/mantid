@@ -45,11 +45,19 @@ using namespace DataObjects;
   /// Empty default constructor
   NexusFileIO::NexusFileIO() :
           m_nexusformat(NXACC_CREATE5),
-          m_nexuscompression(NX_COMP_LZW)
-          //m_nexuscompression(NX_COMP_SZIP) // Experimental SZIP compression (not in the real Nexus)
-
+          m_nexuscompression(NX_COMP_LZW),
+          m_progress(0)
   {
   }
+
+  /// Constructor that supplies a progress object
+  NexusFileIO::NexusFileIO( Progress *prog ) :
+          m_nexusformat(NXACC_CREATE5),
+          m_nexuscompression(NX_COMP_LZW),
+          m_progress(prog)
+  {
+  }
+
 
   //
   // Write out the data in a worksvn space in Nexus "Processed" format.
@@ -321,6 +329,7 @@ using namespace DataObjects;
         status=NXputslab(fileID, reinterpret_cast<void*>(const_cast<double*>(&(localworkspace->readY(s)[0]))),start,asize);
         start[0]++;
       }
+      if(m_progress != 0) m_progress->reportIncrement(1, "Writing data");
       int signal=1;
       status=NXputattr (fileID, "signal", &signal, 1, NX_INT32);
       // More properties
@@ -343,6 +352,7 @@ using namespace DataObjects;
         status=NXputslab(fileID, reinterpret_cast<void*>(const_cast<double*>(&(localworkspace->readE(s)[0]))),start,asize);
         start[0]++;
       }
+      if(m_progress != 0) m_progress->reportIncrement(1, "Writing data");
 
       // Fractional area for RebinnedOutput
       if (localworkspace->id() == "RebinnedOutput")
@@ -360,6 +370,7 @@ using namespace DataObjects;
                            start, asize);
           start[0]++;
         }
+        if(m_progress != 0) m_progress->reportIncrement(1, "Writing data");
       }
 
       status=NXclosedata(fileID);

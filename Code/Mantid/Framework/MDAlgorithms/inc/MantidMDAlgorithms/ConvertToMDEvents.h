@@ -1,5 +1,5 @@
-#ifndef MANTID_MD_CONVERT2_MDEVENTS
-#define MANTID_MD_CONVERT2_MDEVENTS
+#ifndef MANTID_MDALGORITHMS_CONVERT2_MDEVENTS_H
+#define MANTID_MDALGORITHMS_CONVERT2_MDEVENTS_H
 
 
 #include "MantidMDEvents/MDWSDescription.h"
@@ -66,17 +66,17 @@ namespace MDAlgorithms
    /// Sets documentation strings for this algorithm
     virtual void initDocs();
    /// pointer to the input workspace;
-   Mantid::API::MatrixWorkspace_sptr inWS2D;
+   Mantid::API::MatrixWorkspace_sptr m_InWS2D;
    /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
-   boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
+   boost::shared_ptr<MDEvents::MDEventWSWrapper> m_OutWSWrapper;
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
-   static MDEvents::ConvToMDPreprocDet det_loc;  
+   static MDEvents::ConvToMDPreprocDet g_DetLoc;  
    /// progress reporter
-   std::auto_ptr<API::Progress > pProg;
+   std::auto_ptr<API::Progress > m_Progress;
    /// logger -> to provide logging, for MD dataset file operations
-   static Mantid::Kernel::Logger& convert_log;
+   static Mantid::Kernel::Logger& g_Log;
    /// pointer to the class, which does the particular conversion
-   boost::shared_ptr<MDEvents::ConvToMDBase> pConvertor; 
+   boost::shared_ptr<MDEvents::ConvToMDBase> m_Convertor; 
    //------------------------------------------------------------------------------------------------------------------------------------------
    protected: //for testing
         static Mantid::Kernel::Logger & getLogger();

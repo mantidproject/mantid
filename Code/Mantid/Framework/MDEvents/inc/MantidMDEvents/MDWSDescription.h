@@ -1,5 +1,5 @@
-#ifndef H_MDEVENT_WS_DESCRIPTION
-#define H_MDEVENT_WS_DESCRIPTION
+#ifndef MANTID_MDEVENTS_WS_DESCRIPTION_H
+#define MANTID_MDEVENTS_WS_DESCRIPTION_H
 
 
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -56,40 +56,40 @@ public:  // for the time being
     /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
     std::string AlgID; 
     // the matrix which describes target coordiante system of the workpsace and connected with convert_to_factor;
-    Kernel::DblMatrix Wtransf; 
+    Kernel::DblMatrix m_Wtransf; 
     // UB matrix components:
     // Goniometer is always present in a workspace but can be a unit matrix
-    Kernel::DblMatrix GoniomMatr;
+    Kernel::DblMatrix m_GoniomMatr;
     // the vector which represent linear form of momentun transformation 
-    std::vector<double> rotMatrix;
+    std::vector<double> m_RotMatrix;
    //=======================
 /*---> accessors: */
-    unsigned int         nDimensions()const{return nDims;}
+    unsigned int         nDimensions()const{return m_NDims;}
 
-    std::vector<std::string> getDimNames()const{return dimNames;}
-    std::vector<std::string> getDimIDs()const{return dimIDs;}
-    std::vector<std::string> getDimUnits()const{return dimUnits;}
-    std::vector<double>      getDimMin()const{return dimMin;}
-    std::vector<double>      getDimMax()const{return dimMax;}
-    std::vector<size_t>      getNBins()const{return nBins;}
-    std::vector<coord_t>     getAddCoord()const{return AddCoord;}
-    CnvrtToMD::EModes      getEMode()const{return emode;}
+    std::vector<std::string> getDimNames()const{return m_DimNames;}
+    std::vector<std::string> getDimIDs()const{return m_DimIDs;}
+    std::vector<std::string> getDimUnits()const{return m_DimUnits;}
+    std::vector<double>      getDimMin()const{return m_DimMin;}
+    std::vector<double>      getDimMax()const{return m_DimMax;}
+    std::vector<size_t>      getNBins()const{return m_NBins;}
+    std::vector<coord_t>     getAddCoord()const{return m_AddCoord;}
+    CnvrtToMD::EModes        getEMode()const{return m_Emode;}
 
     void getMinMax(std::vector<double> &min,std::vector<double> &max)const;
-    std::vector<double> getTransfMatrix()const{return this->rotMatrix;}
+    std::vector<double> getTransfMatrix()const{return m_RotMatrix;}
     
-    ConvToMDPreprocDet const * getDetectors(){return pDetLocations;}
-    ConvToMDPreprocDet const * getDetectors()const{return pDetLocations;}
+    ConvToMDPreprocDet const * getDetectors(){return m_DetLoc;}
+    ConvToMDPreprocDet const * getDetectors()const{return m_DetLoc;}
 
 
-    API::MatrixWorkspace_const_sptr getInWS()const               {return inWS;}
+    API::MatrixWorkspace_const_sptr getInWS()               const{return m_InWS;}
 
-    std::string getWSName()const                                  {return inWS->name();}
-    bool isPowder()const                                          {return !inWS->sample().hasOrientedLattice();}
-    bool hasLattice()const                                        {return inWS->sample().hasOrientedLattice();}
-    bool isDetInfoLost()const                                     {return isDetInfoLost(inWS);}
-    double getEi()const                                           {return getEi(inWS);}
-    boost::shared_ptr<Geometry::OrientedLattice> getLattice()const{return getOrientedLattice(inWS);}
+    std::string getWSName()                                  const{return m_InWS->name();}
+    bool isPowder()                                          const{return !m_InWS->sample().hasOrientedLattice();}
+    bool hasLattice()                                        const{return m_InWS->sample().hasOrientedLattice();}
+    bool isDetInfoLost()                                     const{return isDetInfoLost(m_InWS);}
+    double getEi()                                           const{return getEi(m_InWS);}
+    boost::shared_ptr<Geometry::OrientedLattice> getLattice()const{return getOrientedLattice(m_InWS);}
 
   /// constructor
   MDWSDescription(unsigned int nDimensions=0);
@@ -110,7 +110,7 @@ public:  // for the time being
    void setDimName(unsigned int nDim,const std::string &Name);
    // this is rather misleading function, as MD workspace do not have dimension units
    void setDimUnit(unsigned int nDim,const std::string &Unit);
-   void setDetectors(const ConvToMDPreprocDet &det_loc);
+   void setDetectors(const ConvToMDPreprocDet &g_DetLoc);
 // static helper functions:
     /// helper function checks if min values are less them max values and are consistent between each other 
     static void checkMinMaxNdimConsistent(const std::vector<double> &minVal,const std::vector<double> &maxVal);
@@ -125,25 +125,25 @@ public:  // for the time being
 private:
     /// the variable which describes the number of the dimensions, in the target workspace. 
     /// Calculated from number of input properties and the operations, performed on input workspace;
-    unsigned int nDims;
+    unsigned int m_NDims;
     // shared pointer to the source matrix workspace
-    API::MatrixWorkspace_const_sptr inWS;
+    API::MatrixWorkspace_const_sptr m_InWS;
    // pointer to the array of detector's directions in the reciprocal space
-    ConvToMDPreprocDet const * pDetLocations;
+    ConvToMDPreprocDet const * m_DetLoc;
     /// energy transfer analysis mode 
-    CnvrtToMD::EModes emode;
+    CnvrtToMD::EModes m_Emode;
     /// the vector of MD coordinates, which are obtained from workspace properties.
-    std::vector<coord_t> AddCoord;
+    std::vector<coord_t> m_AddCoord;
     /// the names for the target workspace dimensions and properties of input MD workspace
-    std::vector<std::string> dimNames;
+    std::vector<std::string> m_DimNames;
     /// the ID-s for the target workspace, which allow to identify the dimensions according to their ID
-    std::vector<std::string> dimIDs;
+    std::vector<std::string> m_DimIDs;
     /// the units of target workspace dimensions and properties of input MD workspace dimensions
-    std::vector<std::string> dimUnits;
+    std::vector<std::string> m_DimUnits;
     /// if defined, specifies number of bins split in each dimension
-    std::vector<size_t> nBins;
+    std::vector<size_t> m_NBins;
     /// minimal and maximal values for the workspace dimensions. Usually obtained from WS parameters;
-    std::vector<double>      dimMin,dimMax;
+    std::vector<double>      m_DimMin,m_DimMax;
 //********************* internal helpers
      /// helper function to resize all vectors, responsible for MD dimensions in one go
      void resizeDimDescriptions(unsigned int Dims,size_t nBins=10);

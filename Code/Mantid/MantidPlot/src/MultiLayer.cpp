@@ -1419,7 +1419,7 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve,
     for( ; setIt != it.value().end(); ++setIt)
     {
       try {
-        new MantidMatrixCurve(it.key(),g,(*setIt),errorBars);
+        new MantidMatrixCurve(it.key(),g,(*setIt),errorBars); // The graph takes ownership
       } catch (Mantid::Kernel::Exception::NotFoundError &) {
         // Get here if workspace name is invalid - shouldn't be possible, but just in case
       } catch (std::invalid_argument&) {
@@ -1427,8 +1427,8 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve,
       }
     }
   }
-  // Update the axes
-  g->setAutoScale();
+  // Update the plot
+  g->replot();
 
   if (d_is_waterfall_plot) updateWaterfalls();
 }

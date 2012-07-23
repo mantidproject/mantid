@@ -136,6 +136,97 @@ public:
     TS_ASSERT_EQUALS(pmap.size(), 0);
   }
 
+    void test_lookup_via_type_returns_null_if_fails()
+  {
+    // Add a parameter for the first component of the instrument
+    IComponent_sptr comp = m_testInstrument->getChild(0);
+    // Create the parameter map with a single boolean type.
+    ParameterMap pmap;
+    TS_ASSERT_EQUALS(pmap.size(), 0);
+    pmap.addBool(comp.get(), "A", true);
+    TS_ASSERT_EQUALS(pmap.size(), 1);
+    // Try to find double type parameters, of which there should be none.
+    Parameter_sptr fetchedValue = pmap.getByType(comp.get(), "double");
+    TSM_ASSERT("Should not be able to find a double type parameter", fetchedValue == NULL);
+  }
+
+  void test_lookup_via_type()
+  {
+    // Add a parameter for the first component of the instrument
+    IComponent_sptr comp = m_testInstrument->getChild(0);
+    // Create the parameter map and add some new parameters.
+    ParameterMap pmap;
+    TS_ASSERT_EQUALS(pmap.size(), 0);
+    pmap.addDouble(comp.get(), "A", 1.2);
+    pmap.addBool(comp.get(), "B", true);
+    TS_ASSERT_EQUALS(pmap.size(), 2);
+   
+    // Test the ability to correctly fetch the double argument by type.
+    Parameter_sptr fetchedValue1 = pmap.getByType(comp.get(), "double");
+    TS_ASSERT(fetchedValue1);
+    TS_ASSERT_EQUALS("A", fetchedValue1->name());
+    TS_ASSERT_DELTA(1.2, fetchedValue1->value<double>(), DBL_EPSILON);
+
+    // Test the ability to correctly fetch the bool argument by type.
+    Parameter_sptr fetchedValue2 = pmap.getByType(comp.get(), "bool");
+    TS_ASSERT(fetchedValue2);
+    TS_ASSERT_EQUALS("B", fetchedValue2->name());
+    TS_ASSERT_EQUALS(true, fetchedValue2->value<bool>());
+  }
+
+    void test_lookup_recursive_by_type_finds_on_current()
+  {
+    IComponent_sptr component = m_testInstrument;
+
+    //Add something to the parent component ONLY.
+    ParameterMap pmap;
+    pmap.addBool(component.get(), "A", true);
+
+    //Find it via the component
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(component.get(), "bool");
+    TS_ASSERT(fetchedValue != NULL);
+    TS_ASSERT_EQUALS("A", fetchedValue->name());
+    TS_ASSERT_EQUALS("bool", fetchedValue->type());
+    TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
+  }
+
+  void test_lookup_recursive_by_type_finds_on_parent_if_not_on_current()
+  {
+    IComponent_sptr childComponent = m_testInstrument->getChild(0);
+    IComponent_sptr parentComponent = m_testInstrument;
+
+    //Add something to the parent component ONLY.
+    ParameterMap pmap;
+    pmap.addBool(parentComponent.get(), "A", true);
+
+    //Find it via the child 
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), "bool");
+    TS_ASSERT(fetchedValue != NULL);
+    TS_ASSERT_EQUALS("A", fetchedValue->name());
+    TS_ASSERT_EQUALS("bool", fetchedValue->type());
+    TS_ASSERT_EQUALS(true, fetchedValue->value<bool>());
+  }
+
+  void test_lookup_recursive_by_type_finds_on_current_in_preference_to_parent()
+  {
+    IComponent_sptr childComponent = m_testInstrument->getChild(0);
+    IComponent_sptr parentComponent = m_testInstrument;
+
+    //Add something to the child component.
+    ParameterMap pmap;
+    pmap.addBool(childComponent.get(), "A", false);
+
+    //Add something with the SAME TYPE TO THE PARENT TOO.
+    pmap.addBool(parentComponent.get(), "B", true);
+
+    //Find it via the child 
+    Parameter_sptr fetchedValue = pmap.getRecursiveByType(childComponent.get(), "bool");
+    TS_ASSERT(fetchedValue != NULL);
+    TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority", "A", fetchedValue->name());
+    TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority","bool", fetchedValue->type());
+    TSM_ASSERT_EQUALS("Has not searched through parameters with the correct priority",false, fetchedValue->value<bool>());
+  }
+
 private:
   Instrument_sptr m_testInstrument;
 };

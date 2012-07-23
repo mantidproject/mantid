@@ -2859,6 +2859,12 @@ MultiLayer* ApplicationWindow::multilayerPlot(Table* w, const QStringList& colLi
   ag->newLegend();
 
   ag->setAutoScale();//Mantid
+  /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
+   * data points. However, this has the side-effect suggested by its name: all the axes become
+   * auto-scaling if the data changes. If, in the plot preferences, autoscaling has been disabled
+   * the the next line re-fixes the axes
+   */
+  if ( ! autoscale2DPlots ) ag->enableAutoscaling(false);
 
   QApplication::restoreOverrideCursor();
   return g;

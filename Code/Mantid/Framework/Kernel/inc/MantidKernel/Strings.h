@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <vector>
 #include <iterator>
@@ -110,6 +111,11 @@ template<typename T> int convert(const char* A,T& out);
 /// Convert a number to a string
 template<typename T> std::string toString(const T value);
 
+/// Convert a vector to a string
+template<typename T> std::string toString(const std::vector<T> &value);
+
+/// Convert a set to a string
+template<typename T> std::string toString(const std::set<T> &value);
 
 template<typename T> 
 int setValues(const std::string& Line,const std::vector<int>& Index,std::vector<T>& Out);

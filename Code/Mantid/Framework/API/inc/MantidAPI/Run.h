@@ -3,13 +3,13 @@
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidKernel/Cache.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <vector>
-
 
 namespace Mantid
 {
@@ -64,9 +64,14 @@ namespace Mantid
       /// Return the run end time
       const Kernel::DateAndTime endTime() const;
 
+      /// Filter the logs by time
       void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
+      /// Split the logs based on the given intervals
       void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Run * > outputs) const;
+      /// Filter the run by the given boolean log
+      void filterByLog(const Kernel::TimeSeriesProperty<bool> & filter);
 
+      /// Return an approximate memory size for the object in bytes
       size_t getMemorySize() const;
 
       /// Add data to the object in the form of a property
@@ -80,34 +85,24 @@ namespace Mantid
                        bool overwrite = false);
 
       /// Does the property exist on the object
-      bool hasProperty(const std::string & name) const { return m_manager.existsProperty(name); }
-      // Expose some of the PropertyManager publicly
-      /**
-       * Remove a named property
-       */
-      void removeProperty(const std::string &name, bool delproperty=true) { m_manager.removeProperty(name, delproperty); }
+      bool hasProperty(const std::string & name) const;
+      /// Remove a named property
+      void removeProperty(const std::string &name, bool delproperty=true);
       /**
        * Return all of the current properties
        * @returns A vector of the current list of properties
        */
-      const std::vector<Kernel::Property*>& getProperties() const { return m_manager.getProperties(); }
+      inline const std::vector<Kernel::Property*>& getProperties() const { return m_manager.getProperties(); }
       /// Returns a property as a time series property. It will throw if it is not valid
       template<typename T>
       Kernel::TimeSeriesProperty<T> * getTimeSeriesProperty(const std::string & name) const;
       /// Get the value of a property as the given TYPE. Throws if the type is not correct
       template<typename HeldType>
       HeldType getPropertyValueAsType(const std::string & name) const;
-
-      /**
-       * Returns the named property
-       * @param name :: The name of the property
-       * @returns The named property
-       */
-      Kernel::Property * getProperty(const std::string & name) const
-      {
-        Kernel::Property *p = m_manager.getProperty(name);
-        return p;
-      }
+      /// Returns a property as a single double value from its name
+      double getPropertyAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const;
+      /// Returns the named property as a pointer
+      Kernel::Property * getProperty(const std::string & name) const;
 
       /// Set the proton charge
       void setProtonCharge( const double charge);
@@ -137,14 +132,12 @@ namespace Mantid
        * @param p :: A pointer to the property containing the log entry
        */
       void addLogData( Kernel::Property *p ) { addProperty(p); }
-
       /**
        * Access a single log entry
        * @param name :: The name of the log entry to retrieve
        * @returns A pointer to a property containing the log entry
        */ 
       Kernel::Property* getLogData(const std::string &name) const { return getProperty(name); }
-
       /**
        * Access all log entries
        * @returns A list of all of the log entries
@@ -156,12 +149,22 @@ namespace Mantid
        * @param delproperty :: If true, delete the log entry
        */
       void removeLogData(const std::string &name, const bool delproperty=true) { return removeProperty(name, delproperty); }
+      /**
+       * @param name :: The name of the property
+       * @param statistic :: Defines how to calculate the single value from series (default=Mean)
+       * @return A log as a single value using the given statistic type
+       */
+      double getLogAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const;
+      
       /// Save the run to a NeXus file with a given group name
       void saveNexus(::NeXus::File * file, const std::string & group) const;
       /// Load the run from a NeXus file with a given group name
       void loadNexus(::NeXus::File * file, const std::string & group);
 
     private:
+      /// Adds all the time series in from one property manager into another
+      void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd);
+
       /// The number of properties that are summed when two workspaces are summed
       static const int ADDABLES;
       /// The names of the properties to sum when two workspaces are summed
@@ -170,19 +173,18 @@ namespace Mantid
       static const char *PROTON_CHARGE_LOG_NAME;
       /// The name of the histogram bins property
       static const char *HISTOGRAM_BINS_LOG_NAME;
-
-      /// A pointer to a property manager
-      Kernel::PropertyManager m_manager;
-      
-      /// Goniometer for this run
-      Mantid::Geometry::Goniometer m_goniometer;
-
-      /// Adds all the time series in from one property manager into another
-      void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd);
-
       /// Static reference to the logger class
       static Kernel::Logger &g_log;
 
+      /// A pointer to a property manager
+      Kernel::PropertyManager m_manager;
+      /// Goniometer for this run
+      Mantid::Geometry::Goniometer m_goniometer;
+
+      /// Cache type for single value logs
+      typedef Kernel::Cache<std::pair<std::string,Kernel::Math::StatisticType>, double> SingleValueCache;
+      /// Cache for the retrieved single values
+      mutable SingleValueCache m_singleValueCache;
     };
 
     /**

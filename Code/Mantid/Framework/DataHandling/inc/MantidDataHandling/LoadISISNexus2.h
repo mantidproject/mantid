@@ -5,10 +5,15 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/IDataFileChecker.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidNexus/NexusClasses.h"
+
+#include <boost/scoped_ptr.hpp>
+
 #include <climits>
+
 
 
 //----------------------------------------------------------------------
@@ -102,8 +107,9 @@ namespace Mantid
       // Load a data block
       void loadBlock(Mantid::NeXus::NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
           int64_t &hist, int64_t& spec_num, DataObjects::Workspace2D_sptr localWorkspace);
-      // Load period logs
-      void loadPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace);
+
+      // Create period logs
+      void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace);
       // Validate multiperiod logs
       void validateMultiPeriodLogs(Mantid::API::MatrixWorkspace_sptr);
 
@@ -119,9 +125,9 @@ namespace Mantid
       /// The number of spectra in the raw file
       std::size_t m_numberOfSpectraInFile;
       /// The number of periods
-      std::size_t m_numberOfPeriods;
+      int m_numberOfPeriods;
       /// The number of periods in the raw file
-      std::size_t m_numberOfPeriodsInFile;
+      int m_numberOfPeriodsInFile;
       /// The nuber of time chanels per spectrum
       std::size_t m_numberOfChannels;
       /// The nuber of time chanels per spectrum in the raw file
@@ -150,6 +156,9 @@ namespace Mantid
       const int * m_spec_end;
       /// Monitors
       std::map<int64_t,std::string> m_monitors;
+
+      /// A pointer to the ISISRunLogs creater
+      boost::scoped_ptr<ISISRunLogs> m_logCreator;
 
       ///Progress reporting object
       boost::shared_ptr<API::Progress> m_progress;

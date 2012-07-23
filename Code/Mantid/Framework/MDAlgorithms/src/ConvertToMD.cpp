@@ -44,12 +44,12 @@ namespace MDAlgorithms
 {
 
 // logger for the algorithm workspaces  
-Kernel::Logger& ConvertToMD::convert_log =Kernel::Logger::get("MD-Algorithms");
+Kernel::Logger& ConvertToMD::g_Log =Kernel::Logger::get("MD-Algorithms");
 // the variable describes the locations of the preprocessed detectors, which can be stored and reused if the algorithm runs more then once;
-MDEvents::ConvToMDPreprocDet ConvertToMD::det_loc;
+MDEvents::ConvToMDPreprocDet ConvertToMD::g_DetLoc;
 //
 Mantid::Kernel::Logger & 
-ConvertToMD::getLogger(){return convert_log;}
+ConvertToMD::getLogger(){return g_Log;}
 //
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMD)
@@ -68,7 +68,7 @@ void ConvertToMD::initDocs()
 ConvertToMD::~ConvertToMD()
 {
     // if the algorithm has gone, then the preprocessed detectors should probably too
-    det_loc.clearAll();
+    g_DetLoc.clearAll();
 }
 //
 //const double rad2deg = 180.0 / M_PI;
@@ -186,15 +186,15 @@ ConvertToMD::init()
 void ConvertToMD::exec()
 {
   // initiate class which would deal with any dimension workspaces, handling 
-  if(!pWSWrapper)
+  if(!m_OutWSWrapper)
   {
-    pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+    m_OutWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
   }
   // -------- Input workspace
-  this->inWS2D = getProperty("InputWorkspace");
-  if(!inWS2D)
+   m_InWS2D = getProperty("InputWorkspace");
+  if(!m_InWS2D)
   {
-    convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
+    g_Log.error()<<" can not obtain input matrix workspace from analysis data service\n";
   }
 
   // ------- Is there any output workspace?
@@ -225,13 +225,13 @@ void ConvertToMD::exec()
     std::string convert_to_                  = getProperty("QConversionScales");
 
 // Build the target ws description as function of the input ws and the parameters, supplied to the algorithm 
-    MDEvents::MDWSDescription TWSD;
+    MDEvents::MDWSDescription targWSDescr;
    // set the min and max values for the dimensions from the input porperties
     std::vector<double> dimMin = getProperty("MinValues");
     std::vector<double> dimMax = getProperty("MaxValues");
     // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
-    TWSD.setMinMax(dimMin,dimMax);   
-    TWSD.buildFromMatrixWS(inWS2D,Q_mod_req,dE_mod_req,other_dim_names);
+    targWSDescr.setMinMax(dimMin,dimMax);   
+    targWSDescr.buildFromMatrixWS(m_InWS2D,Q_mod_req,dE_mod_req,other_dim_names);
 
 
   // instanciate class, responsible for defining Mslice-type projection
@@ -255,61 +255,61 @@ void ConvertToMD::exec()
 
         // check if we are working in powder mode
         // set up target coordinate system and identify/set the (multi) dimension's names to use
-         TWSD.rotMatrix = MsliceProj.getTransfMatrix(TWSD,convert_to_);     
+         targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convert_to_);     
       
     }
     else // user input is mainly ignored and everything is in old workspac
     {  
 
         // dimensions are already build, so build MDWS description from existing workspace
-        MDEvents::MDWSDescription OLDWSD;
-        OLDWSD.buildFromMDWS(spws);
+        MDEvents::MDWSDescription oldWSDescr;
+        oldWSDescr.buildFromMDWS(spws);
 
         // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace 
         // and derived from input parameters. 
-        OLDWSD.setUpMissingParameters(TWSD);      
+        oldWSDescr.setUpMissingParameters(targWSDescr);      
         // check inconsistencies
-        OLDWSD.checkWSCorresponsMDWorkspace(TWSD);
+        oldWSDescr.checkWSCorresponsMDWorkspace(targWSDescr);
         // reset new ws description name
-        TWSD =OLDWSD;
+        targWSDescr =oldWSDescr;
        // set up target coordinate system
-        TWSD.rotMatrix = MsliceProj.getTransfMatrix(TWSD,convert_to_);
+        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convert_to_);
     
     }
 
     // Check what to do with detectors:  
-    if(TWSD.isDetInfoLost())
+    if(targWSDescr.isDetInfoLost())
     { // in NoQ mode one may not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
-         det_loc.buildFakeDetectorsPositions(inWS2D);
+         g_DetLoc.buildFakeDetectorsPositions(m_InWS2D);
     }
     else  // preprocess or not the detectors positions
     {
           bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
-          if(!(reuse_preprocecced_detectors&&det_loc.isDefined(inWS2D))){
+          if(!(reuse_preprocecced_detectors&&g_DetLoc.isDefined(m_InWS2D))){
             // amount of work:
-            const size_t nHist = inWS2D->getNumberHistograms();
-            pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
-            det_loc.processDetectorsPositions(inWS2D,convert_log,pProg.get());
+            const size_t nHist = m_InWS2D->getNumberHistograms();
+            m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
+            g_DetLoc.processDetectorsPositions(m_InWS2D,g_Log,m_Progress.get());
             g_log.information()<<" preprocessing detectors\n";
-            if(det_loc.nDetectors()==0){
+            if(g_DetLoc.nDetectors()==0){
                 g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
                 throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
             }
           }
     }
-    TWSD.setDetectors(det_loc);
+    targWSDescr.setDetectors(g_DetLoc);
 
  // create and initate new workspace
   if(create_new_ws)  
   {
-    spws = pWSWrapper->createEmptyMDWS(TWSD);
+    spws = m_OutWSWrapper->createEmptyMDWS(targWSDescr);
     if(!spws)
     {
-        g_log.error()<<"can not create target event workspace with :"<<TWSD.nDimensions()<<" dimensions\n";
+        g_log.error()<<"can not create target event workspace with :"<<targWSDescr.nDimensions()<<" dimensions\n";
         throw(std::invalid_argument("can not create target workspace"));
     }
     // Build up the box controller
-    Mantid::API::BoxController_sptr bc = pWSWrapper->pWorkspace()->getBoxController();
+    Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
     // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
     this->setBoxController(bc);
     // split boxes;
@@ -320,30 +320,30 @@ void ConvertToMD::exec()
     if (minDepth>maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth ");
     spws->setMinRecursionDepth(size_t(minDepth));  
   }else{
-      pWSWrapper->setMDWS(spws);
+      m_OutWSWrapper->setMDWS(spws);
   }
 
   //DO THE JOB:
 
   // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
   ConvToMDSelector AlgoSelector;
-  pConvertor  = AlgoSelector.convSelector(inWS2D,pConvertor);
+  m_Convertor  = AlgoSelector.convSelector(m_InWS2D,m_Convertor);
 
   // initate conversion and estimate amout of job to dl
-  size_t n_steps = pConvertor->initialize(TWSD,pWSWrapper);
+  size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper);
   // progress reporter
-  pProg = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
+  m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
 
   g_log.information()<<" conversion started\n";
-  pConvertor->runConversion(pProg.get());
+  m_Convertor->runConversion(m_Progress.get());
   
   //JOB COMPLETED:
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
 
   // free the algorithm from the responsibility for the target workspace to allow it to be deleted if necessary
-  pWSWrapper->releaseWorkspace();
+  m_OutWSWrapper->releaseWorkspace();
   // free up the sp to the input workspace, which would be deleted if nobody needs it any more;
-  inWS2D.reset();
+  m_InWS2D.reset();
   return;
 }
 

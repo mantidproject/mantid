@@ -7,7 +7,7 @@
 #include <fstream>
 
 #define PEAKRANGECONSTANT 5
-#define WIDTH_FACTOR 7.5
+#define WIDTH_FACTOR 3
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -68,6 +68,7 @@ namespace CurveFitting
     std::vector<std::string> functions;
     functions.push_back("LeBailFit");
     functions.push_back("Calculation");
+    functions.push_back("AutoSelectBackgroundPoints");
     auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
     this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
@@ -93,14 +94,16 @@ namespace CurveFitting
 
     // Function
     std::string function = this->getProperty("Function");
-    bool dofit;
-    if (function.compare("LeBailFit") == 0)
+    int functionmode = 0; // calculation
+    if (function.compare("Calculation") == 0)
     {
-      dofit = true;
+      // peak calculation
+      functionmode = 1;
     }
-    else
+    else if (function.compare("AutoSelectBackgroundPoints") == 0)
     {
-      dofit = false;
+      // automatic background points selection
+      functionmode = 2;
     }
 
     // 2. Check and/or process inputs
@@ -121,23 +124,32 @@ namespace CurveFitting
     this->initLeBailPeakParameters(mLeBail);
 
     // 4. LeBail Fit or calculation
-    if (dofit)
+    bool converged = false;
+    switch (functionmode)
     {
-      // LeBail Fit
-      g_log.notice() << "Do LeBail Fit." << std::endl;
-      bool converged = false;
-      while (!converged)
-      {
-        converged = iterateFit(size_t(workspaceindex));
-      }
-    }
-    else
-    {
-      // Calculation
-      g_log.notice() << "Pattern Calculation. " << std::endl;
+    case 0:
+        // LeBail Fit
+        g_log.notice() << "Do LeBail Fit." << std::endl;
+        while (!converged)
+        {
+          converged = iterateFit(size_t(workspaceindex));
+        }
+        break;
 
-      // a. Background
-      this->getBackground(workspaceindex);
+    case 1:
+        // Calculation
+        g_log.notice() << "Pattern Calculation. It is not FINISHED yet. " << std::endl;
+        break;
+
+    case 2:
+        // Background
+        this->getBackground(workspaceindex);
+        break;
+
+    default:
+        // Impossible
+        g_log.warning() << "FunctionMode = " << functionmode <<".  It is not possible" << std::endl;
+        break;
     }
 
     // 5. Release
@@ -433,7 +445,7 @@ namespace CurveFitting
 
     for (size_t i = 0; i < peaks.size(); ++i)
     {
-      CurveFitting::ThermoNeutronBackToBackExpPV_sptr ipeak = mLeBail->getPeak(peaks[i]);
+      CurveFitting::Bk2BkExpConvPV_sptr ipeak = mLeBail->getPeak(peaks[i]);
       ipeak->function1D(tempout, xvalues, ndata);
       for (size_t j = 0; j < ndata; ++j)
       {
@@ -445,7 +457,7 @@ namespace CurveFitting
     for (size_t i = 0; i < peaks.size(); ++i)
     {
       double intensity = 0.0;
-      CurveFitting::ThermoNeutronBackToBackExpPV_sptr ipeak = mLeBail->getPeak(peaks[i]);
+      CurveFitting::Bk2BkExpConvPV_sptr ipeak = mLeBail->getPeak(peaks[i]);
       ipeak->function1D(tempout, xvalues, ndata);
       for (size_t j = 0; j < ndata; ++j)
       {
@@ -777,6 +789,19 @@ namespace CurveFitting
 
     // 3. Locate background points
     std::vector<size_t> ibackgroundpts;
+    std::vector<double>::const_iterator cit;
+    const MantidVec& vecX = dataWS->readX(wsindex);
+
+    // a) From zero to first peak
+    double tofright = mobservedpeaks[0].peakPosition - WIDTH_FACTOR*mobservedpeaks[0].leftFWHM;
+    cit = std::lower_bound(vecX.begin(), vecX.end(), tofright);
+    size_t iright = size_t(cit-vecX.begin());
+    for (size_t ipt = 0; ipt < iright; ++ipt)
+    {
+        ibackgroundpts.push_back(ipt);
+    }
+
+    // b) between 2 peaks
     for (size_t ipk = 1; ipk < mobservedpeaks.size(); ++ipk)
     {
       // size_t peak_left = mpeaks[ipk - 1].second;
@@ -787,19 +812,42 @@ namespace CurveFitting
       double tof_rightbound = mobservedpeaks[peak_right].peakPosition - WIDTH_FACTOR * mobservedpeaks[peak_right].leftFWHM;
       if (tof_leftbound < tof_rightbound)
       {
-        size_t imin = findMinValue(dataWS->readX(wsindex), dataWS->readY(wsindex), tof_leftbound,
+          /*
+          size_t imin = findMinValue(dataWS->readX(wsindex), dataWS->readY(wsindex), tof_leftbound,
             tof_rightbound);
-        ibackgroundpts.push_back(imin);
+          ibackgroundpts.push_back(imin);
+          */
+          cit = std::lower_bound(vecX.begin(), vecX.end(), tof_leftbound);
+          size_t ileft = size_t(cit-vecX.begin());
+          cit = std::lower_bound(vecX.begin(), vecX.end(), tof_rightbound);
+          size_t iright = size_t(cit-vecX.begin());
+          g_log.information() << "Between peak @ " <<  mobservedpeaks[peak_left].peakPosition << " and peak @ "
+                              << mobservedpeaks[peak_right].peakPosition << ".   "
+                              << (iright-ileft+1) << " background points selected. " << std::endl;
+          for (size_t ipt = ileft; ipt <= iright; ++ipt)
+          {
+              ibackgroundpts.push_back(ipt);
+          }
       }
       else
       {
-        g_log.information() << "Left Peak FWHM = " << mobservedpeaks[peak_left].rightFWHM <<
-            "; Right Peak FWHM = " << mobservedpeaks[peak_right].leftFWHM <<
-            "; Factor = " << WIDTH_FACTOR  << std::endl;
-        g_log.information() << "Peak @ " << mobservedpeaks[peak_left].peakPosition << " and @ "
-            << mobservedpeaks[peak_right].peakPosition << " are overlapped. " << std::endl;
+          g_log.information() << "Peak @ " << mobservedpeaks[peak_left].peakPosition << " and @ "
+              << mobservedpeaks[peak_right].peakPosition << " are overlapped. "
+              << "Left Peak FWHM = " << mobservedpeaks[peak_left].rightFWHM
+              << "; Right Peak FWHM = " << mobservedpeaks[peak_right].leftFWHM
+              << "; Factor = " << WIDTH_FACTOR  << std::endl;
       }
+    } // ENDFOR
+
+    // c) From last peak to end
+    double tofleft = mobservedpeaks.back().peakPosition + WIDTH_FACTOR*mobservedpeaks.back().rightFWHM;
+    cit = std::find(vecX.begin(), vecX.end(), tofleft);
+    size_t ileft = size_t(cit-vecX.begin());
+    for (size_t ipt = ileft; ipt < vecX.size(); ++ipt)
+    {
+        ibackgroundpts.push_back(ipt);
     }
+
     g_log.information() << "Number of background points = " << ibackgroundpts.size() << std::endl;
 
     // 4. Set background workspace for fit;
@@ -812,6 +860,7 @@ namespace CurveFitting
       bkgdws->dataX(0)[i] = dataWS->readX(wsindex)[ibackgroundpts[i]];
       bkgdws->dataY(0)[i] = dataWS->readY(wsindex)[ibackgroundpts[i]];
     }
+    bkgdws->getAxis(0)->setUnit("TOF");
 
     this->setProperty("OutputBackgroundWorkspace", bkgdws);
 

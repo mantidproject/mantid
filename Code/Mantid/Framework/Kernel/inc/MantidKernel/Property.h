@@ -89,7 +89,7 @@ class MANTID_KERNEL_DLL Property
 {
 public:
   /// 'Virtual copy constructor'
-  virtual Property* clone() = 0;
+  virtual Property* clone() const = 0;
   /// Virtual destructor
   virtual ~Property();
 

@@ -42,7 +42,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   /**
    * Default constructor
    */
-  Run::Run() : m_manager(), m_goniometer()
+  Run::Run() : m_manager(), m_goniometer(), m_singleValueCache()
   {
   }
 
@@ -58,7 +58,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * @param copy :: The object to initialize the copy from
    */
   Run::Run(const Run& copy) : m_manager(copy.m_manager),
-    m_goniometer(copy.m_goniometer)
+    m_goniometer(copy.m_goniometer), m_singleValueCache(copy.m_singleValueCache)
   {
   }
 
@@ -184,12 +184,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
         //now get pointers to the same properties on the left-handside
         Property * lhs_prop(sum.getProperty(rhs_name));
         lhs_prop->merge(*it);
-        
-/*        TimeSeriesProperty * timeS = dynamic_cast< TimeSeriesProperty * >(lhs_prop);
-        if (timeS)
-        {
-          (*lhs_prop) += (*it);
-        }*/
       }
       catch (Exception::NotFoundError &)
       {
@@ -254,6 +248,18 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     }
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Filter the run by the given boolean log. It replaces all time
+   * series properties with filtered time series properties
+   * @param filter :: A boolean time series to filter each log on
+   */
+  void Run::filterByLog(const Kernel::TimeSeriesProperty<bool> & filter)
+  {
+    // This will invalidate the cache
+    m_singleValueCache.clear();
+    m_manager.filterByProperty(filter);
+  }
 
 
   //-----------------------------------------------------------------------------------------------
@@ -273,6 +279,35 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       removeProperty(name);
     }
     m_manager.declareProperty(prop, "");
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Returns true if the named property exists
+   * @param name :: The name of the property
+   * @return True if the property exists, false otherwise
+   */
+  bool Run::hasProperty(const std::string & name) const
+  {
+    return m_manager.existsProperty(name);
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /**
+   * Remove a named property
+   * @param name :: The name of the property
+   * @param delProperty :: If true the property is deleted (default=true)
+   * @return True if the property exists, false otherwise
+   */
+
+  void Run::removeProperty(const std::string &name, bool delProperty)
+  {
+    // Remove any cached entries for this log. Need to make this more general
+    for(unsigned int stat = 0; stat < 7; ++stat)
+    {
+      m_singleValueCache.removeCache(std::make_pair(name,(Math::StatisticType)stat));
+    }
+    m_manager.removeProperty(name, delProperty);
   }
 
 
@@ -442,9 +477,9 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   }
 
   /**
-   * Get the value of a property as a double. Throws if the type is not correct
+   * Get the value of a property as the requested type. Throws if the type is not correct
    * @param name :: The name of the property
-   * @return The value of as a double, the most common type in logs
+   * @return The value of as the requested type
    */
   template<typename HeldType>
   HeldType Run::getPropertyValueAsType(const std::string & name) const
@@ -458,6 +493,64 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     {
       throw std::invalid_argument("Run::getPropertyValueAsType - '" + name + "' is not of the requested type");
     }
+  }
+
+  /**
+   * Returns a property as a single double value from its name @see getPropertyAsSingleValue
+   * @param name :: The name of the property
+   * @param statistic :: The statistic to use to calculate the single value (default=Mean) @see StatisticType
+   * @return A single double value
+   */
+  double Run::getPropertyAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic) const
+  {
+    double singleValue(0.0);
+    const auto key = std::make_pair(name, statistic);
+    if(!m_singleValueCache.getCache(key, singleValue))
+    {
+      const Property *log = getProperty(name);
+      if(auto singleDouble = dynamic_cast<const PropertyWithValue<double>*>(log))
+      {
+        singleValue  = (*singleDouble)();
+      }
+      else if(auto seriesDouble = dynamic_cast<const TimeSeriesProperty<double>*>(log))
+      {
+        using namespace Mantid::Kernel::Math;
+        switch(statistic)
+        {
+        case FirstValue: singleValue = seriesDouble->nthValue(0);
+          break;
+        case LastValue: singleValue = seriesDouble->nthValue(seriesDouble->size() - 1);
+          break;
+        case Minimum: singleValue = seriesDouble->getStatistics().minimum;
+          break;
+        case Maximum: singleValue = seriesDouble->getStatistics().maximum;
+          break;
+        case Mean: singleValue = seriesDouble->getStatistics().mean;
+          break;
+        case Median: singleValue = seriesDouble->getStatistics().median;
+          break;
+        default: throw std::invalid_argument("Run::getPropertyAsSingleValue - Unknown statistic type: " + boost::lexical_cast<std::string>(statistic));
+        };
+      }
+      else
+      {
+        throw std::invalid_argument("Run::getPropertyAsSingleValue - Property \"" + name + "\" is not a single double or time series double.");
+      }
+      // Put it in the cache
+      m_singleValueCache.setCache(key, singleValue);
+    }
+    return singleValue;
+  }
+
+  /**
+   * Get a pointer to a property by name
+   * @param name :: The name of a property, throws an Exception::NotFoundError if it does not exist
+   * @return A pointer to the named property
+   */
+  Kernel::Property * Run::getProperty(const std::string & name) const
+  {
+    Kernel::Property *p = m_manager.getProperty(name);
+    return p;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -597,13 +690,17 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     }
   }
 
-  /// Concrete instantiations for getTimeSeriesProperty
-  template MANTID_API_DLL Kernel::TimeSeriesProperty<double> * Run::getTimeSeriesProperty(const std::string &) const ;
-  template MANTID_API_DLL Kernel::TimeSeriesProperty<std::string> * Run::getTimeSeriesProperty(const std::string &) const;
-  /// Concrete instantiations for getPropertyValueAsType
-  template MANTID_API_DLL double Run::getPropertyValueAsType(const std::string &) const ;
-  template MANTID_API_DLL int Run::getPropertyValueAsType(const std::string &) const;
-  template MANTID_API_DLL std::string Run::getPropertyValueAsType(const std::string &) const;
+  /// @cond
+  /// Macro to instantiate concrete template members
+#define INSTANTIATE(TYPE) \
+  template MANTID_API_DLL Kernel::TimeSeriesProperty<TYPE> * Run::getTimeSeriesProperty(const std::string &) const;\
+  template MANTID_API_DLL TYPE Run::getPropertyValueAsType(const std::string &) const;
+
+  INSTANTIATE(double);
+  INSTANTIATE(int);
+  INSTANTIATE(std::string);
+  INSTANTIATE(bool);
+  /// @endcond
 
 } //API namespace
 

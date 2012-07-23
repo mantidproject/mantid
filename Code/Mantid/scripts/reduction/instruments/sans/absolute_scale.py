@@ -133,7 +133,7 @@ class AbsoluteScale(BaseAbsoluteScale):
         det_list = det_finder.getPropertyValue("DetectorList")
         det_count_ws = "__absolute_scale"
         GroupDetectors(InputWorkspace=data_file_ws,  OutputWorkspace=det_count_ws,  DetectorList=det_list, KeepUngroupedSpectra="0")
-        det_count = mtd[det_count_ws].dataY(0)[0]
+        det_count = mtd[det_count_ws].readY(0)[0]
         
         # Pixel size, in mm
         pixel_size_param = mtd[data_file_ws].getInstrument().getNumberParameter("x-pixel-size")

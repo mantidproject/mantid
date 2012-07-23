@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_THERMONEUTRONBACKTOBACKEXPPV_H_
-#define MANTID_CURVEFITTING_THERMONEUTRONBACKTOBACKEXPPV_H_
+#ifndef MANTID_CURVEFITTING_BK2BKEXPCONVPV_H_
+#define MANTID_CURVEFITTING_BK2BKEXPCONVPV_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeakFunction.h"
@@ -12,9 +12,8 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** ThermoNeutronBackToBackExpPV : Peak profile as the convolution of back-to-back exponential with pseudo-Voigt.
-   for thermal neutron.
-   It is peak profile No. 10 in Fullprof.
+  /** Bk2BkExpConvPV : Peak profile as tback-to-back exponential convoluted with pseudo-Voigt.
+    It is peak profile No. 10 in Fullprof.
     
     @date 2012-06-06
 
@@ -38,11 +37,11 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport ThermoNeutronBackToBackExpPV : virtual public API::IPeakFunction, virtual public API::IFunctionMW
+  class DLLExport Bk2BkExpConvPV : virtual public API::IPeakFunction, virtual public API::IFunctionMW
   {
   public:
-    ThermoNeutronBackToBackExpPV();
-    virtual ~ThermoNeutronBackToBackExpPV();
+    Bk2BkExpConvPV();
+    virtual ~Bk2BkExpConvPV();
     
     /// overwrite IPeakFunction base class methods
     virtual double centre()const;
@@ -53,11 +52,11 @@ namespace CurveFitting
     virtual void setFwhm(const double w);
 
     /// overwrite IFunction base class methods
-    std::string name()const{return "ThermoNeutronBackToBackExpPV";}
+    std::string name()const{return "Bk2BkExpConvPV";}
     virtual const std::string category() const { return "Peak";}
 
     /// Set up the range of peak calculation for higher efficiency
-    void setCalculationRange(double tof_low, double tof_upper);
+    // void setCalculationRange(double tof_low, double tof_upper);
     /// Calculate peak
     void geneatePeak(double* out, const double* xValues, const size_t nData);
     ///
@@ -95,10 +94,10 @@ namespace CurveFitting
 
   // typedef boost::shared_ptr<TableWorkspace> TableWorkspace_sptr;
 
-  typedef boost::shared_ptr<ThermoNeutronBackToBackExpPV> ThermoNeutronBackToBackExpPV_sptr;
+  typedef boost::shared_ptr<Bk2BkExpConvPV> Bk2BkExpConvPV_sptr;
 
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_THERMONEUTRONBACKTOBACKEXPPV_H_ */
+#endif  /* MANTID_CURVEFITTING_BK2BKEXPCONVPV_H_ */

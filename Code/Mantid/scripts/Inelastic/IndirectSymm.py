@@ -10,24 +10,43 @@ mp = import_mantidplot()
 def SymmRun(sample,cut,Verbose,Plot,Save):
 	workdir = config['defaultsave.directory']
 	symWS = sample[:-3] + 'sym'
-	hist = mtd[sample].getNumberHistograms()       # no. of hist/groups in sam
+	hist,npt = CheckHistZero(sample)
 	Xin = mtd[sample].readX(0)
-	npt = len(Xin)-1
 	delx = Xin[1]-Xin[0]
+	if math.fabs(cut) < 1e-5:
+		error = 'Cut point is Zero'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	for n in range(0,npt):
 		x = Xin[n]-cut
 		if math.fabs(x) < delx:
 			ineg = n
+	if ineg <= 0:
+		error = 'Negative point('+str(ineg)+') < 0'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if ineg >= npt:
+		error = type + 'Negative point('+str(ineg)+') > '+str(npt)			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	for n in range(0,npt):
 		x = Xin[n]+Xin[ineg]
 		if math.fabs(x) < delx:
 			ipos = n
+	if ipos <= 0:
+		error = 'Positive point('+str(ipos)+') < 0'			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
+	if ipos >= npt:
+		error = type + 'Positive point('+str(ipos)+') > '+str(npt)			
+		logger.notice('ERROR *** ' + error)
+		sys.exit(error)
 	ncut = npt-ipos+1
 	if Verbose:
 		logger.notice('No. points = '+str(npt))
 		logger.notice('Negative : at i ='+str(ineg)+' ; x = '+str(Xin[ineg]))
 		logger.notice('Positive : at i ='+str(ipos)+' ; x = '+str(Xin[ipos]))
-		logger.notice('Cut points = '+str(ncut))
+		logger.notice('Copy points = '+str(ncut))
 	for m in range(0,hist):
 		Xin = mtd[sample].readX(m)
 		Yin = mtd[sample].readY(m)
@@ -59,7 +78,7 @@ def SymmRun(sample,cut,Verbose,Plot,Save):
 		if Verbose:
 			logger.notice('Output file : ' + path)
 	if Plot:
-		plotSymm('','',Plot)
+		plotSymm(symWS,sample)
 
 def SymmStart(inType,sname,cut,Verbose,Plot,Save):
 	StartTime('Symmetrise')
@@ -75,8 +94,5 @@ def SymmStart(inType,sname,cut,Verbose,Plot,Save):
 	SymmRun(sname,cut,Verbose,Plot,Save)
 	EndTime('Symmetrise')
 
-def plotSymm(inWS,spec_list,Plot):
-	if (Plot == 'Totals' or Plot == 'All'):
-		tot_plot=mp.plotSpectrum(inWS+'_Totals',spec_list)
-	if (Plot == 'Scat1' or Plot == 'All'):
-		mp.importMatrixWorkspace(inWS+'_1').plotGraph2D()
+def plotSymm(sym,sample):
+	tot_plot=mp.plotSpectrum([sym,sample],0)

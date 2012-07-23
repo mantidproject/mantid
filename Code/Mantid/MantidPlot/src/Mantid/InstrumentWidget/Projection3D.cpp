@@ -38,28 +38,14 @@ using namespace Mantid::Geometry;
 
 Projection3D::Projection3D(const InstrumentActor* rootActor,int winWidth,int winHeight)
   :ProjectionSurface(rootActor,Mantid::Kernel::V3D(),Mantid::Kernel::V3D(0,0,1)),
-  //m_instrActor(*rootActor),
   m_viewport(new GLViewport),
   m_drawAxes(true),
   m_wireframe(false),
-  m_isKeyPressed(false)
+  m_isKeyPressed(false),
+  m_isLightingOn(false)
 {
 
   Instrument_const_sptr instr = rootActor->getInstrument();
-
-  // Janik Zikovsky Feb 7, 2012: The following lines do nothing and are very slow. Why are they here? Commented them out.
-//  std::vector<IComponent_const_sptr> allComponents;
-//  instr->getChildren(allComponents,true);
-//  std::vector<ComponentID> nonDetectors;
-//  std::vector<IComponent_const_sptr>::const_iterator it = allComponents.begin();
-//  for(; it != allComponents.end(); ++it)
-//  {
-//    IDetector_const_sptr det = boost::dynamic_pointer_cast<const IDetector>(*it);
-//    if (!det)
-//    {
-//      nonDetectors.push_back((*it)->getComponentID());
-//    }
-//  }
 
   m_viewport->resize(winWidth,winHeight);
   V3D minBounds,maxBounds;
@@ -110,6 +96,8 @@ void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
   {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
+
+  setLightingModel(picking);
 
   m_viewport->issueGL();
 
@@ -381,11 +369,6 @@ void Projection3D::getMaskedDetectors(QList<int>& dets)const
     if (pos.Z() < zmin || pos.Z() > zmax) continue;
     if (m_maskShapes.isMasked(pos.X(),pos.Y()))
     {
-      // Note JZ Feb 7, 2012: The following method finds width but does not use it.
-      // I'm not sure what it is for so I'm commenting it out, it presumably does nothing.
-//      BoundingBox bb;
-//      det->getBoundingBox(bb);
-//      V3D width = bb.width();
       dets.push_back(int(id));
     }
   }
@@ -437,21 +420,9 @@ void Projection3D::componentSelected(Mantid::Geometry::ComponentID id)
   rot.rotate(minBounds);
   rot.rotate(maxBounds);
 
-  //std::cerr << minBounds << maxBounds << std::endl;
-
-  // cannot get it right
-//  double znear = minBounds.Z();
-//  double zfar = maxBounds.Z();
-  //if (znear > zfar)
-  //{
-  //  std::swap(znear,zfar);
-  //}
-
   m_viewport->setOrtho(minBounds.X(),maxBounds.X(),
                        minBounds.Y(),maxBounds.Y(),
                        -1000.,1000);
-                       //0,1000.);
-                       //znear,zfar);
 
 
   m_trackball->reset();
@@ -480,3 +451,46 @@ QRectF Projection3D::getSurfaceBounds()const
   m_viewport->getInstantProjection(xmin,xmax,ymin,ymax,zmin,zmax);
   return QRectF(QPointF(xmin,ymin),QPointF(xmax,ymax));
 }
+
+/**
+ * Enable or disable lighting in non-picking mode
+ * @param on :: True for enabling, false for disabling.
+ */
+void Projection3D::enableLighting(bool on)
+{
+  m_isLightingOn = on;
+}
+
+/**
+ * Define lighting of the scene
+ */
+void Projection3D::setLightingModel(bool picking) const
+{
+  // Basic lighting
+  if ( m_isLightingOn && !picking )
+  {
+    glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)
+    glEnable(GL_LIGHT0);               // Enable opengl first light
+    glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
+    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
+    // Set Light0 Attributes, Ambient, diffuse,specular and position
+    // Its a directional light which follows camera position
+    float lamp_ambient[4]={0.30f, 0.30f, 0.30f, 1.0f};
+    float lamp_diffuse[4]={1.0f, 1.0f, 1.0f, 1.0f};
+    float lamp_specular[4]={1.0f,1.0f,1.0f,1.0f};
+    glLightfv(GL_LIGHT0, GL_AMBIENT,lamp_ambient );
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, lamp_specular);
+    float lamp_pos[4]={0.0f, 0.0f, 0.0f, 1.0f}; // spot light at the origin
+    glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
+    glEnable (GL_LIGHTING);            // Enable light
+  }
+  else
+  {
+    glShadeModel(GL_FLAT);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHT0);
+    glDisable(GL_LINE_SMOOTH);
+  }
+}
+

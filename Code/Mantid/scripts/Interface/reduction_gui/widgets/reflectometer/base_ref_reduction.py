@@ -325,7 +325,7 @@ class BaseRefWidget(BaseWidget):
 #            return
         
         #retrieve name of the output file
-        file_name = QtGui.QFileDialog.getOpenFileName(self, "Select or define a ASCII file name", "", "(*.txt)")
+        file_name = QtGui.QFileDialog.getSaveFileName(self, "Select or define a ASCII file name", "", "(*.txt)")
         if (str(file_name).strip() == ''):
             return
         
@@ -823,6 +823,7 @@ class BaseRefWidget(BaseWidget):
             return
         try:
             f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))[0]
+            print FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
             
             range_min = int(self._summary.data_from_tof.text())
             range_max = int(self._summary.data_to_tof.text())
@@ -831,7 +832,7 @@ class BaseRefWidget(BaseWidget):
                 self._summary.data_from_tof.setText("%-d" % int(xmin))
                 self._summary.data_to_tof.setText("%-d" % int(xmax))
                 
-            data_manipulation.tof_distribution(f[0], call_back,
+            data_manipulation.tof_distribution(f, call_back,
                                                range_min=range_min,
                                                range_max=range_max)
         except:

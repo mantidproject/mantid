@@ -360,6 +360,64 @@ namespace API
   {
     return m_run.access();
   }
+
+  /**
+   * Get an experimental log either by log name or by type, e.g.
+   *   - temperature_log
+   *   - chopper_speed_log
+   * The logs are first checked for one matching the given string and if that
+   * fails then the instrument is checked for a parameter of the same name
+   * and if this exists then its value is assume to be the actual log required
+   * @param log :: A string giving either a specific log name or instrument parameter whose
+   * value is to be retrieved
+   * @return A pointer to the property
+   */
+  Kernel::Property * ExperimentInfo::getLog(const std::string & log) const
+  {
+    try
+    {
+      return run().getProperty(log);
+    }
+    catch(Kernel::Exception::NotFoundError&)
+    {
+      // No log with that name
+    }
+    // If the instrument has a parameter with that name then take the value as a log name
+    const std::string logName = instrumentParameters().getString(sptr_instrument.get(), log);
+    if(logName.empty())
+    {
+      throw std::invalid_argument("ExperimentInfo::getLog - No instrument parameter named \""
+         + log + "\". Cannot access full log name");
+    }
+    return run().getProperty(logName);
+  }
+
+  /**
+   * Get an experimental log as a single value either by log name or by type. @see getLog
+   * @param log :: A string giving either a specific log name or instrument parameter whose
+   * value is to be retrieved
+   * @return A pointer to the property
+   */
+  double ExperimentInfo::getLogAsSingleValue(const std::string & log) const
+  {
+    try
+    {
+      return run().getPropertyAsSingleValue(log);
+    }
+    catch(Kernel::Exception::NotFoundError&)
+    {
+      // No log with that name
+    }
+    // If the instrument has a parameter with that name then take the value as a log name
+    const std::string logName = instrumentParameters().getString(sptr_instrument.get(), log);
+    if(logName.empty())
+    {
+      throw std::invalid_argument("ExperimentInfo::getLog - No instrument parameter named \""
+         + log + "\". Cannot access full log name");
+    }
+    return run().getPropertyAsSingleValue(logName);
+  }
+
   //---------------------------------------------------------------------------------------
   /** Utility method to get the run number
    *

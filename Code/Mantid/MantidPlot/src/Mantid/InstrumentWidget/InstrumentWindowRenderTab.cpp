@@ -14,6 +14,8 @@
 #include <QSettings>
 #include <QAction>
 #include <QSignalMapper>
+#include <QMessageBox>
+
 #include <qwt_scale_widget.h>
 #include <qwt_scale_engine.h>
 
@@ -35,9 +37,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   QStringList modeList;
   modeList << "Full 3D" << "Cylindrical X"  << "Cylindrical Y" << "Cylindrical Z" << "Spherical X" << "Spherical Y" << "Spherical Z";
   m_renderMode->insertItems(0,modeList);
-  connect(m_renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow,SLOT(setSurfaceType(int)));
-  connect(m_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showResetView(int)));
-  connect(m_renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showFlipControl(int)));
+  connect(m_renderMode,SIGNAL(currentIndexChanged(int)), this, SLOT(setSurfaceType(int)));
 
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
@@ -46,6 +46,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   // Setup Display Setting menu
   QPushButton* displaySettings = new QPushButton("Display Settings",this);
   QMenu* displaySettingsMenu = new QMenu(this);
+  connect(displaySettingsMenu, SIGNAL(aboutToShow()),this,SLOT(displaySettingsAboutToshow()));
   m_colorMap = new QAction("Color Map",this);
   connect(m_colorMap,SIGNAL(triggered()),this,SLOT(changeColormap()));
   m_backgroundColor = new QAction("Background Color",this);
@@ -53,7 +54,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_lighting = new QAction("Lighting",this);
   m_lighting->setCheckable(true);
   m_lighting->setChecked(false);
-  //connect(m_lighting,SIGNAL(toggled(bool)),mInstrumentDisplay,SLOT(enableLighting(bool)));
+  connect(m_lighting,SIGNAL(toggled(bool)),m_instrWindow->getInstrumentDisplay(),SLOT(enableLighting(bool)));
   m_displayAxes = new QAction("Display Axes",this);
   m_displayAxes->setCheckable(true);
   m_displayAxes->setChecked(true);
@@ -62,12 +63,17 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_wireframe->setCheckable(true);
   m_wireframe->setChecked(false);
   connect(m_wireframe, SIGNAL(toggled(bool)), m_instrWindow, SLOT(setWireframe(bool)));
+  m_GLView = new QAction("Use OpenGL",this);
+  m_GLView->setCheckable(true);
+  m_GLView->setChecked( m_instrWindow->isGLEnabled() );
+  connect(m_GLView, SIGNAL( toggled(bool) ), m_instrWindow, SLOT( enableGL(bool) ));
   displaySettingsMenu->addAction(m_colorMap);
   displaySettingsMenu->addAction(m_backgroundColor);
   displaySettingsMenu->addSeparator();
   displaySettingsMenu->addAction(m_displayAxes);
   displaySettingsMenu->addAction(m_wireframe);
-  //displaySettingsMenu->addAction(m_lighting); // enable for testing
+  displaySettingsMenu->addAction(m_lighting);
+  displaySettingsMenu->addAction(m_GLView);
   displaySettings->setMenu(displaySettingsMenu);
 
   QFrame * axisViewFrame = setupAxisFrame();
@@ -82,6 +88,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_flipCheckBox->setChecked(false);
   m_flipCheckBox->hide();
   connect(m_flipCheckBox,SIGNAL(toggled(bool)),this,SLOT(flipUnwrappedView(bool)));
+
   m_peakOverlaysButton = new QPushButton("Peaks options",this);
   m_peakOverlaysButton->hide();
   m_peakOverlaysButton->setMenu(createPeaksMenu());
@@ -262,10 +269,10 @@ void InstrumentWindowRenderTab::updateSurfaceTypeControl(int type)
 
 void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
 {
-  UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>(m_InstrumentDisplay->getSurface());
+  UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>(m_instrWindow->getSurface());
   if (!surface) return;
   surface->setFlippedView(on);
-  m_InstrumentDisplay->refreshView();
+  m_instrWindow->updateWindow();
 }
 
 /**
@@ -327,4 +334,52 @@ QMenu* InstrumentWindowRenderTab::createPeaksMenu()
   connect(clearPeaks,SIGNAL(triggered()),m_instrWindow, SLOT(clearPeakOverlays()));
   menu->addAction(clearPeaks);
   return menu;
+}
+
+/**
+ * Called before the display setting menu opens. Filters out menu options.
+ */
+void InstrumentWindowRenderTab::displaySettingsAboutToshow()
+{
+  if ( m_instrWindow->getSurfaceType() == InstrumentWindow::FULL3D )
+  {
+    // in 3D mode use GL widget only and allow lighting
+    m_GLView->setEnabled( false );
+    m_lighting->setEnabled( true );
+  }
+  else
+  {
+    // in flat view mode allow changing to simple, non-GL viewer
+    m_GLView->setEnabled( true );
+    // allow lighting in GL viewer only
+    if ( !m_GLView->isChecked() )
+    {
+      m_lighting->setEnabled( false );
+    }
+    else
+    {
+      m_lighting->setEnabled( true );
+    }
+  }
+}
+
+/**
+ * Change the type of the surface.
+ * @param index :: Index selected in the surface type combo box.
+ */
+void InstrumentWindowRenderTab::setSurfaceType(int index)
+{
+  // don't allow the simple viewer with 3D mode
+  if ( index == InstrumentWindow::FULL3D && !m_instrWindow->isGLEnabled() )
+  {
+    m_renderMode->blockSignals( true );
+    m_renderMode->setCurrentIndex( m_instrWindow->getSurfaceType() );
+    m_renderMode->blockSignals( false );
+    QMessageBox::warning(this,"MantidPlot - Warning","OpenGL must be enabled to view the instrument in 3D.\n"
+      "Check \"Use OpenGL\" in Display Settings.");
+    return;
+  }
+  m_instrWindow->setSurfaceType( index );
+  showResetView( index );
+  showFlipControl( index );
 }

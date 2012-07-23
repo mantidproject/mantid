@@ -392,7 +392,7 @@ void DiffractionFocussing2::execEvent()
     // Special case of a single group - parallelize differently
     EventList & groupEL = out->getOrAddEventList(0);
     const int group = m_validGroups[0];
-    std::vector<size_t> indices = this->m_wsIndices[group];
+    const std::vector<size_t> & indices = this->m_wsIndices[group];
 
     int chunkSize = 200;
 
@@ -451,7 +451,7 @@ void DiffractionFocussing2::execEvent()
     {
       PARALLEL_START_INTERUPT_REGION
       const int group = this->m_validGroups[iGroup];
-      std::vector<size_t> indices = this->m_wsIndices[group];
+      const std::vector<size_t> & indices = this->m_wsIndices[group];
       for (size_t i=0; i<indices.size(); i++)
       {
         size_t wi = indices[i];

@@ -64,7 +64,7 @@ class QLines(PythonAlgorithm):
 		sname = prefix+sam+'_'+ana
 		rname = prefix+res+'_'+ana
 		rsname = prefix+resn+'_'+ana
-		erange = [emin, emax]
+		erange = [float(emin), float(emax)]
 		if elastic:
 			o_el = 1
 		else:

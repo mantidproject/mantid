@@ -4,6 +4,7 @@
 #include "MantidGLWidget.h"
 #include "OpenGLError.h"
 #include "UnwrappedSurface.h"
+#include "Projection3D.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -29,9 +30,7 @@
 const Qt::CursorShape cursorShape = Qt::ArrowCursor;
 
 MantidGLWidget::MantidGLWidget(QWidget* parent):
-  //QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel|QGL::SampleBuffers),parent),
   QGLWidget(QGLFormat(QGL::DepthBuffer|QGL::NoAlphaChannel),parent),
-  m_bgColor(QColor(0,0,0,1)),
   //m_polygonMode(SOLID),
   m_lightingState(0),
   m_isKeyPressed(false),
@@ -78,7 +77,8 @@ void MantidGLWidget::initializeGL()
   glViewport(0,0,width(),height());
   
   // Clear the memory buffers
-  glClearColor(GLclampf(m_bgColor.red()/255.0),GLclampf(m_bgColor.green()/255.0),GLclampf(m_bgColor.blue()/255.0),1.0);
+  QColor bgColor = currentBackgroundColor();
+  glClearColor(GLclampf(bgColor.red()/255.0),GLclampf(bgColor.green()/255.0),GLclampf(bgColor.blue()/255.0),1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -99,51 +99,10 @@ void MantidGLWidget::setRenderingOptions()
   //enablewriting into the depth buffer
   glDepthMask(GL_TRUE);
 
-  setLightingModel(1);
+  //setLightingModel(1);
 
   OpenGLError::check("setRenderingOptions");
 }
-
-/**
- * Toggles the use of high resolution lighting
- * @param state :: An integer indicating lighting state.
- * 0 - no light
- * 1 - GL_LIGHT0 is defined but lighting is off. Can be set on for individual actors.
- * 2 - GL_LIGHT0 is always on.
- */
-void MantidGLWidget::setLightingModel(int state)
-{
-  // Basic lighting
-  if( state == 0 )
-  {
-    glShadeModel(GL_FLAT);
-    glDisable(GL_LIGHTING);
-    glDisable(GL_LIGHT0);
-    glDisable(GL_LINE_SMOOTH);
-  }
-  else// High end shading and lighting
-  {
-    glShadeModel(GL_SMOOTH);           // Shade model is smooth (expensive but looks pleasing)
-    glEnable(GL_LIGHT0);               // Enable opengl first light
-    glEnable(GL_LINE_SMOOTH);          // Set line should be drawn smoothly
-    glLightModeli(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);  // This model lits both sides of the triangle
-    // Set Light0 Attributes, Ambient, diffuse,specular and position
-    // Its a directional light which follows camera position
-    float lamp_ambient[4]={0.0,0.0,0.0,1.0};
-    float lamp_diffuse[4]={1.0,1.0,1.0,1.0};
-    float lamp_specular[4]={1.0,1.0,1.0,1.0};
-    glLightfv(GL_LIGHT0, GL_AMBIENT,lamp_ambient );
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, lamp_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, lamp_specular);
-    float lamp_pos[4]={0.0,0.0,1.0,0.0};
-    glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
-    if (state == 2)
-    {
-      glEnable (GL_LIGHTING);            // Enable light
-    }
-  }
-}
-
 
 /**
  * This is overridden function which is called by Qt when the widget needs to be repainted.
@@ -298,12 +257,12 @@ void MantidGLWidget::keyReleaseEvent(QKeyEvent *event)
 void MantidGLWidget::setBackgroundColor(QColor input)
 {
   makeCurrent();
-  m_bgColor = input;
-  glClearColor(GLclampf(m_bgColor.red()/255.0),GLclampf(m_bgColor.green()/255.0),GLclampf(m_bgColor.blue()/255.0),1.0);
+  glClearColor(GLclampf(input.red()/255.0),GLclampf(input.green()/255.0),GLclampf(input.blue()/255.0),1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   OpenGLError::check("MantidGLWidget::setBackgroundColor");
   if (m_surface)
   {
+    m_surface->setBackgroundColor( input );
     m_surface->updateView();
   }
   update();
@@ -311,7 +270,7 @@ void MantidGLWidget::setBackgroundColor(QColor input)
 
 QColor MantidGLWidget::currentBackgroundColor() const
 {
-  return m_bgColor;
+  return m_surface? m_surface->getBackgroundColor() : QColor(Qt::black);
 }
 
 /**
@@ -345,13 +304,14 @@ void MantidGLWidget::resetWidget()
   */
 void MantidGLWidget::enableLighting(bool on)
 {
-  m_lightingState = on? 2 : 0;
-  setLightingModel(m_lightingState);
-  //if (m_unwrappedSurface)
-  //{
-  //  m_unwrappedSurface->updateView();
-  //}
-  update();
+  auto surface3D = dynamic_cast<Projection3D*>(m_surface);
+
+  if (surface3D)
+  {
+    surface3D->enableLighting( on );
+    refreshView();
+    //repaint();
+  }
 }
 
 void MantidGLWidget::draw()

@@ -12,7 +12,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
     def category(self):
         """
         """
-        return "Algorithms;PythonAlgorithms"
+        return "Diffraction;Utility"
 
     def name(self):
         """

@@ -79,9 +79,6 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Logs";}
 
-      /// this method returns data periods property and useful for loading log data for multi period files
-      const boost::shared_ptr<Kernel::Property> getPeriodsProperty() const {return m_periods;}
-
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();

@@ -429,6 +429,39 @@ namespace Mantid
       return result;
     }
 
+     /** Look for a parameter in the given component by the type of the parameter.
+     * @param comp :: Component to which parameter is related
+     * @param type :: Parameter type
+     * @returns The typed parameter if it exists or a NULL shared pointer if not
+     */
+    Parameter_sptr ParameterMap::getByType(const IComponent* comp, const std::string& type) const
+    {
+      Parameter_sptr result = Parameter_sptr();
+      PARALLEL_CRITICAL(ParameterMap_get)
+      {
+        if( !m_map.empty() )
+        {
+          const ComponentID id = comp->getComponentID();
+          pmap_cit it_found = m_map.find(id);
+          if( it_found->first && it_found != m_map.end() )
+          {
+            pmap_cit itr = m_map.lower_bound(id);
+            pmap_cit itr_end = m_map.upper_bound(id);
+            for( ; itr != itr_end; ++itr )
+            {
+              Parameter_sptr param = itr->second;
+              if( boost::iequals(param->type(), type) )
+              {
+                result = param;
+                break;
+              }
+            }
+          }
+        }
+      }
+      return result;
+    }
+
     /** FASTER LOOKUP in multithreaded loops. Find a parameter by name, recursively going up
      * the component tree to higher parents.
      * @param comp :: The component to start the search with
@@ -450,6 +483,28 @@ namespace Mantid
       //Nothing was found!
       return Parameter_sptr();
     }
+
+     /** Looks recursively upwards in the component tree for the first instance of a component with a matching type.
+     * @param comp :: The component to start the search with
+     * @param type :: Parameter type
+     * @returns the first matching parameter.
+     */
+    Parameter_sptr ParameterMap::getRecursiveByType(const IComponent* comp, const std::string& type) const
+    {
+      boost::shared_ptr<const IComponent> compInFocus(comp,NoDeleting());
+      while( compInFocus != NULL )
+      {
+        Parameter_sptr param = getByType(compInFocus.get(), type);
+        if (param)
+        {
+          return param;
+        }
+        compInFocus = compInFocus->getParent();
+      }
+      //Nothing was found!
+      return Parameter_sptr();
+    }
+
 
     /** 
      * Find a parameter by name, recursively going up the component tree
@@ -483,7 +538,7 @@ namespace Mantid
      * @param name :: Parameter name
      * @return string representation of the parameter
      */
-    std::string ParameterMap::getString(const IComponent* comp, const std::string& name)
+    std::string ParameterMap::getString(const IComponent* comp, const std::string& name) const
     {
       Parameter_sptr param = get(comp,name);
       if (!param) return "";

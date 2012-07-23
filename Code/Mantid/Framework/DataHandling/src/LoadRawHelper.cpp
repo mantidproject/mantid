@@ -38,7 +38,7 @@ namespace Mantid
     LoadRawHelper::LoadRawHelper() :
     isisRaw(new ISISRAW2),
       m_list(false),m_spec_list(),m_spec_min(0),
-      m_spec_max(EMPTY_INT()),m_specTimeRegimes(),m_prog(0),m_bmspeclist(false)
+      m_spec_max(EMPTY_INT()), m_numberOfPeriods(0), m_specTimeRegimes(),m_prog(0),m_bmspeclist(false)
     {      
     }
 
@@ -176,7 +176,7 @@ namespace Mantid
      * @param lengthIn :: size of workspace vectors
      * @param noTimeRegimes :: number of time regime.
      */
-    void LoadRawHelper::readworkspaceParameters(specid_t& numberOfSpectra,int64_t& numberOfPeriods,int64_t& lengthIn,int64_t & noTimeRegimes )
+    void LoadRawHelper::readworkspaceParameters(specid_t& numberOfSpectra,int& numberOfPeriods,int64_t& lengthIn,int64_t & noTimeRegimes )
     {
       // Read in the number of spectra in the RAW file
       m_numberOfSpectra=numberOfSpectra = static_cast<specid_t>(isisRaw->t_nsp1);
@@ -300,38 +300,6 @@ namespace Mantid
     */
     void LoadRawHelper::exec()
     {
-    }
-
-
-    /** Creates a TimeSeriesProperty<bool> showing times when a particular period was active.
-     *  @param period :: The data period
-     *  @return the times when requested period was active
-     */
-    Kernel::Property*  LoadRawHelper::createPeriodLog(int period) const
-    {
-      Kernel::TimeSeriesProperty<int>* periods = dynamic_cast< Kernel::TimeSeriesProperty<int>* >(m_perioids.get());
-      if(!periods) return 0;
-      std::ostringstream ostr;
-      ostr<<period;
-      Kernel::TimeSeriesProperty<bool>* p = new Kernel::TimeSeriesProperty<bool> ("period "+ostr.str());
-      std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
-      std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
-      if (it->second != period)
-        p->addValue(it->first,false);
-      for(;it!=pMap.end();++it)
-        p->addValue(it->first, (it->second == period) );
-
-      return p;
-    }
-
-    /**
-    Create a log vale for the current period.
-    @param period: The period number to create the log entry for.
-    */
-    Kernel::Property* LoadRawHelper::createCurrentPeriodLog(const int& period) const
-    {
-      Kernel::PropertyWithValue<int>* currentPeriodProperty = new Kernel::PropertyWithValue<int>("current_period", period);
-      return currentPeriodProperty;
     }
 
     /** sets the workspace properties
@@ -693,10 +661,8 @@ namespace Mantid
     /// Run the LoadLog sub-algorithm
     /// @param fileName :: the raw file filename
     /// @param localWorkspace :: The workspace to load the logs for
-    /// @param period :: The period number that the workspace holds
-    void LoadRawHelper::runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace, int period)
+    void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace)
     {
-      (void) period; // Avoid compiler warning
 
       g_log.debug("Loading the log files...");
       progress(m_prog, "Reading log files...");
@@ -719,9 +685,22 @@ namespace Mantid
       {
         g_log.error("Unable to successfully run LoadLog sub-algorithm");
       }
-      LoadLog* plog=dynamic_cast<LoadLog*>(loadLog.get());
-      if(plog) m_perioids=plog->getPeriodsProperty();
+
+      // Make log creator object and add the run status log if we have the appropriate ICP log
+      m_logCreator.reset(new ISISRunLogs(localWorkspace->run(), m_numberOfPeriods));
+      m_logCreator->addStatusLog(localWorkspace->mutableRun());
     }
+
+    /**
+     * Creates period log data in the workspace
+     * @param period :: period number
+     * @param local_workspace :: workspace to add period log data to.
+    */
+    void LoadRawHelper::createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace)
+    {
+      m_logCreator->addPeriodLogs(static_cast<int>(period), local_workspace->mutableRun());
+    }
+
 
     /**
     * Pulls the run parameters from the ISIS Raw RPB structure and stores them as log entries on the 

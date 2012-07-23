@@ -38,6 +38,9 @@ namespace
 void export_ConfigService()
 {
   class_<ConfigServiceImpl, boost::noncopyable>("ConfigServiceImpl", no_init)
+    .def("reset", &ConfigServiceImpl::reset,
+         "Clears all user settings and removes the user properties file")
+
     .def("getLocalFilename", &ConfigServiceImpl::getLocalFilename, "Returns the path to the system wide properties file.")
 
     .def("getUserFilename", &ConfigServiceImpl::getUserFilename, "Returns the path to the user properties file")

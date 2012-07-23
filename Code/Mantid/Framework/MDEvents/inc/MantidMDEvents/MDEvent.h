@@ -47,6 +47,9 @@ namespace MDEvents
 
   public:
 
+    // Enum to flag this templated type as a full md event type.
+    enum{is_full_mdevent=true};
+
     //---------------------------------------------------------------------------------------------
     /** Empty constructor */
     MDEvent()

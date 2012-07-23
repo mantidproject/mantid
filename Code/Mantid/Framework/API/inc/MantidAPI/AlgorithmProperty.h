@@ -67,7 +67,7 @@ namespace Mantid
       /// Copy-Assignment operator
       AlgorithmProperty& operator=(const AlgorithmProperty & rhs);
       /// 'Virtual copy constructor'
-      inline Kernel::Property* clone() { return new AlgorithmProperty(*this); }
+      inline AlgorithmProperty* clone() const { return new AlgorithmProperty(*this); }
       /// Destructor
       ~AlgorithmProperty();
 

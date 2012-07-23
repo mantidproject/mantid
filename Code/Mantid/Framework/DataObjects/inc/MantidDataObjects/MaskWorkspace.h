@@ -28,6 +28,8 @@ namespace DataObjects
         void setMasked(const std::set<detid_t> &detectorIDs, const bool mask=true);
         void setMaskedIndex(const std::size_t wkspIndex, const bool mask=true);
         std::size_t getNumberMasked() const;
+        std::set<detid_t> getMaskedDetectors() const;
+        std::set<std::size_t> getMaskedWkspIndices() const;
         virtual const std::string id() const;
 
     private:

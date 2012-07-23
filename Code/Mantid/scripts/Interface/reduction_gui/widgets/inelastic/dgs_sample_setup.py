@@ -90,16 +90,18 @@ class SampleSetupWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: SampleSetupScript object
         """
-        self._content.sample_edit.setText(state.sample_data)
+        self._content.sample_edit.setText(state.sample_file)
         self._check_and_set_lineedit_content(self._content.ei_edit, 
                                              state.incident_energy)
         self._content.fixed_ei_chkbox.setChecked(state.fixed_ei)
+        self._content.et_range_box.setChecked(state.rebin_et)
         self._check_and_set_lineedit_content(self._content.etr_low_edit, 
                                              state.et_range_low)
         self._check_and_set_lineedit_content(self._content.etr_width_edit, 
                                              state.et_range_width)
         self._check_and_set_lineedit_content(self._content.etr_high_edit, 
                                              state.et_range_high)
+        self._content.et_is_distribution_cb.setChecked(state.et_is_distribution)
         self._content.hardmask_edit.setText(state.hardmask_file)
         self._content.grouping_edit.setText(state.grouping_file)
     
@@ -108,12 +110,14 @@ class SampleSetupWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         s = SampleSetupScript()
-        s.sample_data = self._content.sample_edit.text()
+        s.sample_file = self._content.sample_edit.text()
         s.incident_energy = self._content.ei_edit.text()
         s.fixed_ei = self._content.fixed_ei_chkbox.isChecked()
+        s.rebin_et = self._content.et_range_box.isChecked()
         s.et_range_low = self._content.etr_low_edit.text()
         s.et_range_width = self._content.etr_width_edit.text()
         s.et_range_high = self._content.etr_high_edit.text()
+        s.et_is_distribution = self._content.et_is_distribution_cb.isChecked()
         s.hardmask_file = self._content.hardmask_edit.text()
         s.grouping_file = self._content.grouping_edit.text()    
         return s

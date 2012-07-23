@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/IDataFileChecker.h"
 #include <climits>
@@ -77,7 +78,7 @@ namespace Mantid
       /// Reads title from the isisraw class
       void readTitle(FILE* file,std::string & title);
       /// reads workspace parameters like number of histograms,size of vectors etc
-      void readworkspaceParameters(specid_t &numberOfSpectra,int64_t & numberOfPeriods,int64_t& lengthIn,int64_t& noTimeRegimes );
+      void readworkspaceParameters(specid_t &numberOfSpectra,int & numberOfPeriods,int64_t& lengthIn,int64_t& noTimeRegimes );
       
       /// skips histrogram data from raw file.
       void skipData(FILE* file,int hist);
@@ -109,16 +110,15 @@ namespace Mantid
                                                                  const int64_t& lengthIn);
       /// loadinstrument sub algorithm
       void runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr);
-
       /// loadinstrumentfromraw algorithm
       void runLoadInstrumentFromRaw(const std::string& fileName,DataObjects::Workspace2D_sptr);
-
       /// loadinstrumentfromraw sub algorithm
       void runLoadMappingTable(const std::string& fileName,DataObjects::Workspace2D_sptr);
-
       /// load log algorithm
-      void runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr,int period=1);
+      void runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr);
 
+      /// Create the period specific logs
+      void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace);
 
       ///gets the monitor spectrum list from the workspace
       void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<specid_t>& monitorSpecList);
@@ -134,11 +134,6 @@ namespace Mantid
       void setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace,const std::vector<boost::shared_ptr<MantidVec> >& 
 			    timeChannelsVec,int64_t wsIndex,specid_t nspecNum,int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart);
           
-      /// creates time series property showing times when when a particular period was active.
-      Kernel::Property* createPeriodLog(int period) const;
-
-      /// creates a current period log value containing the period argument.
-      Kernel::Property* createCurrentPeriodLog(const int& period) const;
 
       /// ISISRAW class instance which does raw file reading. Shared pointer to prevent memory leak when an exception is thrown.
       boost::shared_ptr<ISISRAW2> isisRaw;
@@ -179,6 +174,8 @@ namespace Mantid
       specid_t m_spec_min;
       /// The value of the spectrum_max property
       specid_t m_spec_max;
+      /// The number of periods in the raw file
+      int m_numberOfPeriods;
 
     private:
      
@@ -186,6 +183,8 @@ namespace Mantid
       void exec();
       /// Check if the buffer looks like a RAW file header
       bool isRawFileHeader(const int nread, const unsigned char* buffer) const;
+      /// convert month label to int string
+      std::string convertMonthLabelToIntStr(std::string month) const;
                 
       /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
@@ -201,8 +200,7 @@ namespace Mantid
       /// a vector holding the indexes of monitors
       std::vector<specid_t> m_monitordetectorList;
       
-      /// TimeSeriesProperty<int> containing data periods.
-      boost::shared_ptr<Kernel::Property> m_perioids;
+
 
       /// boolean for list spectra options
       bool m_bmspeclist;
@@ -210,8 +208,8 @@ namespace Mantid
       ///the total nuumber of spectra
       specid_t m_total_specs;
       
-      /// convert month label to int string
-      std::string convertMonthLabelToIntStr(std::string month) const;
+      /// A ptr to the log creator
+      boost::scoped_ptr<ISISRunLogs> m_logCreator;
     };
 
   } // namespace DataHandling

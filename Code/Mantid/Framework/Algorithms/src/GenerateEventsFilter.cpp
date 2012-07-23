@@ -343,7 +343,7 @@ namespace Algorithms
     }
 
     // a) Clear duplicate value
-    mLog->detectEliminateDuplicates();
+    mLog->eliminateDuplicates();
 
     double minValue = this->getProperty("MinimumLogValue");
     double maxValue = this->getProperty("MaximumLogValue");

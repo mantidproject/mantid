@@ -39,15 +39,16 @@ m_maskedColor(100,100,100),
 m_failedColor(200,200,200),
 m_sampleActor(NULL)
 {
-  if (!m_workspace)
+  auto shared_workspace = m_workspace.lock();
+  if (!shared_workspace)
     throw std::logic_error("InstrumentActor passed a workspace that isn't a MatrixWorkspace");
 
-  const size_t nHist = m_workspace->getNumberHistograms();
+  const size_t nHist = shared_workspace->getNumberHistograms();
   m_WkspBinMin = DBL_MAX;
   m_WkspBinMax = -DBL_MAX;
   for (size_t i = 0; i < nHist; ++i)
   {
-    const Mantid::MantidVec & values = m_workspace->readX(i);
+    const Mantid::MantidVec & values = shared_workspace->readX(i);
     double xtest = values.front();
     if( xtest != std::numeric_limits<double>::infinity() )
     {
@@ -85,7 +86,7 @@ m_sampleActor(NULL)
   blockSignals(false);
 
   /// Cache a map (actually a vector) to workspace indexes.
-  m_workspace->getDetectorIDToWorkspaceIndexVector(m_id2wi_vector, m_id2wi_offset, false);
+  shared_workspace->getDetectorIDToWorkspaceIndexVector(m_id2wi_vector, m_id2wi_offset, false);
 
   // If the instrument is empty, maybe only having the sample and source
   if (getInstrument()->nelements() < 3)
@@ -100,7 +101,7 @@ m_sampleActor(NULL)
   accept(findVisitor);
   const ObjComponentActor* samplePosActor = dynamic_cast<const ObjComponentActor*>(findVisitor.getActor());
 
-  m_sampleActor = new SampleActor(*this,m_workspace->sample(),samplePosActor);
+  m_sampleActor = new SampleActor(*this,shared_workspace->sample(),samplePosActor);
   m_scene.addActor(m_sampleActor);
 }
 
@@ -136,7 +137,14 @@ bool InstrumentActor::accept(const GLActorVisitor& visitor)
  */
 MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const
 {
-  return m_workspace;
+  auto shared_workspace = m_workspace.lock();
+
+  if ( !shared_workspace )
+  {
+    throw std::runtime_error("Instrument view: workspace doesn't exist");
+  }
+
+  return shared_workspace;
 }
 
 Instrument_const_sptr InstrumentActor::getInstrument() const
@@ -147,20 +155,22 @@ Instrument_const_sptr InstrumentActor::getInstrument() const
     // to define our 'default' view
     std::string view = Mantid::Kernel::ConfigService::Instance().getString("instrument.view.geometry");
 
+    auto shared_workspace = getWorkspace();
+
     if ( boost::iequals("Default", view) || boost::iequals("Physical", view))
     {      
         // First see if there is a 'physical' instrument available. Use it if there is.
-        retval = m_workspace->getInstrument()->getPhysicalInstrument();
+        retval = shared_workspace->getInstrument()->getPhysicalInstrument();
     }
     else if (boost::iequals("Neutronic", view))
     {
-        retval = m_workspace->getInstrument();
+        retval = shared_workspace->getInstrument();
     }
 
     if ( ! retval )
     {
         // Otherwise get hold of the 'main' instrument and use that
-        retval = m_workspace->getInstrument();
+        retval = shared_workspace->getInstrument();
     }
 
     return retval;
@@ -272,7 +282,9 @@ void InstrumentActor::resetColors()
   QwtDoubleInterval qwtInterval(m_DataMinScaleValue,m_DataMaxScaleValue);
   m_colors.resize(m_specIntegrs.size());
 
-  Instrument_const_sptr inst = m_workspace->getInstrument();
+  auto shared_workspace = getWorkspace();
+
+  Instrument_const_sptr inst = shared_workspace->getInstrument();
 
   //PARALLEL_FOR1(m_workspace)
   for (int iwi=0; iwi < int(m_specIntegrs.size()); iwi++)
@@ -282,7 +294,7 @@ void InstrumentActor::resetColors()
     try
     {
       // Find if the detector is masked
-      const std::set<detid_t>& dets = m_workspace->getSpectrum(wi)->getDetectorIDs();
+      const std::set<detid_t>& dets = shared_workspace->getSpectrum(wi)->getDetectorIDs();
       bool masked = inst->isDetectorMasked(dets);
 
       if (masked)

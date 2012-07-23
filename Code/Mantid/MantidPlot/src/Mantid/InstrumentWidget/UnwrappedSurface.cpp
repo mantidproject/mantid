@@ -339,6 +339,13 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 
   glLoadIdentity();
 
+  if ( widget->getLightingState() != 0 )
+  {
+    float lamp_pos[4]={0.0, 0.0, 1.0, 0.0}; // directional light in +z direction (into the screen)
+    if ( isFlippedView() ) lamp_pos[2] = -1.0f;
+    glLightfv(GL_LIGHT0, GL_POSITION, lamp_pos);
+  }
+
   for(size_t i=0;i<m_unwrappedDetectors.size();++i)
   {
     const UnwrappedDetector& udet = m_unwrappedDetectors[i];
@@ -868,3 +875,78 @@ void UnwrappedSurface::setFlippedView(bool on)
   m_viewRect.setLeft(right);
   m_viewRect.setRight(left);
 }
+
+/**
+ * Draw the surface onto an image without OpenGL
+ * @param image :: Image to draw on.
+ * @param picking :: If true draw a picking image.
+ */
+void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
+{
+  if ( !image ) return;
+
+  QPainter paint(image);
+
+  int vwidth = image->width();
+  int vheight = image->height();
+
+  paint.fillRect(0, 0, vwidth, vheight, m_backgroundColor);
+
+  const double dw = fabs(m_viewRect.width() / vwidth);
+  const double dh = fabs(m_viewRect.height()/ vheight);
+
+  //std::cerr << m_viewRect.left() << ' ' << m_viewRect.right() << " : " <<  m_viewRect.bottom() << ' ' << m_viewRect.top() << std::endl;
+
+  if (m_startPeakShapes)
+  {
+    createPeakShapes(image->rect());
+  }
+
+  for(size_t i=0;i<m_unwrappedDetectors.size();++i)
+  {
+    const UnwrappedDetector& udet = m_unwrappedDetectors[i];
+
+    if (!udet.detector) continue;
+
+    int iw = int(udet.width / dw);
+    int ih = int(udet.height / dh);
+    if ( iw < 4 ) iw = 4;
+    if ( ih < 4 ) ih = 4;
+    
+    double w = (iw == 0)?  dw : udet.width/2;
+    double h = (ih == 0)?  dh : udet.height/2;
+
+    if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
+
+    int u = 0;
+    if ( !isFlippedView() )
+    {
+      u = ( udet.u - m_viewRect.left() ) / dw;
+    }
+    else
+    {
+      u = vwidth - ( udet.u - m_viewRect.right() ) / dw;
+    }
+
+    int v = vheight - ( udet.v - m_viewRect.bottom() ) / dh;
+
+    QColor color;
+    int index = int( i );
+    if (picking)
+    {
+      GLColor c = GLActor::makePickColor(index);
+      unsigned char r,g,b;
+      c.get(r,g,b);
+      color = QColor(r,g,b);
+    }
+    else
+    {
+      auto c = &m_unwrappedDetectors[index].color[0];
+      color = QColor(c[0],c[1],c[2]);
+    }
+
+    paint.fillRect(u - iw/2, v - ih/2, iw, ih, color);
+
+  }
+}
+

@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/FacilityInfo.cpp
 	src/FileValidator.cpp
 	src/FilterChannel.cpp
+	src/FilteredTimeSeriesProperty.cpp
 	src/FloatingPointComparison.cpp
 	src/FreeBlock.cpp
 	src/Glob.cpp
@@ -35,18 +36,20 @@ set ( SRC_FILES
 	src/LogFilter.cpp
 	src/LogParser.cpp
 	src/Logger.cpp
+	src/MagneticFormFactorTable.cpp
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
 	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
+	src/Math/Distributions/BoseEinsteinDistribution.cpp
 	src/Matrix.cpp
 	src/MatrixProperty.cpp
 	src/Memory.cpp
 	src/MersenneTwister.cpp
 	src/MultiFileNameParser.cpp
 	src/MultiFileValidator.cpp
-	src/NDRandomNumberGenerator.cpp
 	src/NDPseudoRandomNumberGenerator.cpp
+	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusTestHelper.cpp
 	src/ProgressBase.cpp
@@ -74,6 +77,7 @@ set ( SRC_FILES
 	src/TimeSplitter.cpp
 	src/Timer.cpp
 	src/Unit.cpp
+	src/UnitConversion.cpp
 	src/UnitFactory.cpp
 	src/UserStringParser.cpp
 	src/Utils.cpp
@@ -130,8 +134,10 @@ set ( INC_FILES
 	inc/MantidKernel/Fast_Exponential.h
 	inc/MantidKernel/FileValidator.h
 	inc/MantidKernel/FilterChannel.h
+	inc/MantidKernel/FilteredTimeSeriesProperty.h
 	inc/MantidKernel/FloatingPointComparison.h
 	inc/MantidKernel/FreeBlock.h
+	inc/MantidKernel/FunctionTask.h
 	inc/MantidKernel/Glob.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
@@ -147,19 +153,21 @@ set ( INC_FILES
 	inc/MantidKernel/LogParser.h
 	inc/MantidKernel/Logger.h
 	inc/MantidKernel/MRUList.h
+	inc/MantidKernel/MagneticFormFactorTable.h
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
+	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
 	inc/MantidKernel/Matrix.h
 	inc/MantidKernel/MatrixProperty.h
 	inc/MantidKernel/Memory.h
 	inc/MantidKernel/MersenneTwister.h
 	inc/MantidKernel/MultiFileNameParser.h
-	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/MultiFileValidator.h
-	inc/MantidKernel/NDRandomNumberGenerator.h
+	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/NDPseudoRandomNumberGenerator.h
+	inc/MantidKernel/NDRandomNumberGenerator.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
@@ -172,8 +180,8 @@ set ( INC_FILES
 	inc/MantidKernel/PropertyManagerOwner.h
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/PseudoRandomNumberGenerator.h
-	inc/MantidKernel/Quat.h
 	inc/MantidKernel/QuasiRandomNumberSequence.h
+	inc/MantidKernel/Quat.h
 	inc/MantidKernel/ReadLock.h
 	inc/MantidKernel/RebinParamsValidator.h
 	inc/MantidKernel/RegexStrings.h
@@ -184,20 +192,20 @@ set ( INC_FILES
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
+	inc/MantidKernel/Task.h
 	inc/MantidKernel/TestChannel.h
-	inc/MantidKernel/ThreadPool.h	
+	inc/MantidKernel/ThreadPool.h
 	inc/MantidKernel/ThreadPoolRunnable.h
 	inc/MantidKernel/ThreadSafeLogStream.h
 	inc/MantidKernel/ThreadScheduler.h
 	inc/MantidKernel/ThreadSchedulerMutexes.h
-	inc/MantidKernel/Task.h 
-	inc/MantidKernel/FunctionTask.h 
 	inc/MantidKernel/TimeSeriesProperty.h
 	inc/MantidKernel/TimeSplitter.h
 	inc/MantidKernel/Timer.h
 	inc/MantidKernel/Tolerance.h
 	inc/MantidKernel/TypedValidator.h
 	inc/MantidKernel/Unit.h
+	inc/MantidKernel/UnitConversion.h
 	inc/MantidKernel/UnitFactory.h
 	inc/MantidKernel/UserStringParser.h
 	inc/MantidKernel/Utils.h
@@ -217,6 +225,7 @@ set ( TEST_FILES
 	test/AtomTest.h
 	test/BinFinderTest.h
 	test/BinaryFileTest.h
+	test/BoseEinsteinDistributionTest.h
 	test/BoundedValidatorTest.h
 	test/CPUTimerTest.h
 	test/CacheTest.h
@@ -234,20 +243,22 @@ set ( TEST_FILES
 	test/FacilitiesTest.h
 	test/FileValidatorTest.h
 	test/FilterChannelTest.h
+	test/FilteredTimeSeriesPropertyTest.h
 	test/FloatingPointComparisonTest.h
 	test/FreeBlockTest.h
 	test/FunctionTaskTest.h
 	test/GlobTest.h
 	test/IPropertySettingsTest.h
 	test/ISaveableTest.h
+	test/IValidatorTest.h
 	test/InstrumentInfoTest.h
 	test/InterpolationTest.h
-	test/IValidatorTest.h
 	test/ListValidatorTest.h
 	test/LogFilterTest.h
 	test/LogParserTest.h
 	test/LoggerTest.h
 	test/MRUListTest.h
+	test/MagneticFormFactorTableTest.h
 	test/MagneticIonTest.h
 	test/MandatoryValidatorTest.h
 	test/MaskedPropertyTest.h
@@ -258,9 +269,9 @@ set ( TEST_FILES
 	test/MultiFileNameParserTest.h
 	test/MultiFileValidatorTest.h
 	test/MutexTest.h
-	test/NeutronAtomTest.h
-	test/NDRandomNumberGeneratorTest.h
 	test/NDPseudoRandomNumberGeneratorTest.h
+	test/NDRandomNumberGeneratorTest.h
+	test/NeutronAtomTest.h
 	test/NullValidatorTest.h
 	test/ProgressBaseTest.h
 	test/ProgressTextTest.h
@@ -286,6 +297,7 @@ set ( TEST_FILES
 	test/TimeSplitterTest.h
 	test/TimerTest.h
 	test/TypedValidatorTest.h
+	test/UnitConversionTest.h
 	test/UnitFactoryTest.h
 	test/UnitTest.h
 	test/UserStringParserTest.h

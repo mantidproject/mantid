@@ -11,12 +11,14 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 
 class SampleSetupScript(BaseScriptElement):
     
-    sample_data = ""
+    sample_file = ""
     incident_energy = ""
     fixed_ei = False
+    rebin_et = False
     et_range_low = ""
     et_range_width = ""
     et_range_high = ""
+    et_is_distribution = True
     hardmask_file = ""
     grouping_file = ""
     
@@ -25,12 +27,14 @@ class SampleSetupScript(BaseScriptElement):
         self.reset()
         
     def to_script(self):
-        script =  "SampleData=\"%s\",\n" % self.sample_data
+        script =  "SampleFile=\"%s\",\n" % self.sample_file
         script += "IncidentEnergy=\"%s\",\n" % self.incident_energy
         script += "FixedIncidentEnergy=%s,\n" % self.fixed_ei
-        script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, 
-                                                        self.et_range_width, 
-                                                        self.et_range_high)
+        if self.rebin_et:
+            script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, 
+                                                               self.et_range_width, 
+                                                               self.et_range_high)
+            script += "SofPhiEIsDistribution=%s,\n" % self.et_is_distribution
         script += "HardMaskFile=\"%s\",\n" % self.hardmask_file
         script += "GroupingFile=\"%s\",\n" % self.grouping_file
         return script
@@ -40,7 +44,7 @@ class SampleSetupScript(BaseScriptElement):
             Create XML from the current data.
         """
         xml = "<SampleSetup>\n"
-        xml += "  <sample_data>%s</sample_data>\n" % self.sample_data
+        xml += "  <sample_file>%s</sample_file>\n" % self.sample_file
         xml += "  <incident_energy>%s</incident_energy>\n" % self.incident_energy
         xml += "  <fixed_ei>%s</fixed_ei>\n" % str(self.fixed_ei)
         xml += "  <et_range>\n"
@@ -48,6 +52,7 @@ class SampleSetupScript(BaseScriptElement):
         xml += "    <width>%s</width>\n"  % self.et_range_width
         xml += "    <high>%s</high>\n" % self.et_range_high
         xml += "  </et_range>\n"
+        xml += "  <sofphie_is_distribution>%s</sofphie_is_distribution>" % str(self.et_is_distribution)
         xml += "  <hardmask_file>%s</hardmask_file>\n" % self.hardmask_file
         xml += "  <grouping_file>%s</grouping_file>\n" % self.grouping_file
         xml += "</SampleSetup>\n"
@@ -62,9 +67,9 @@ class SampleSetupScript(BaseScriptElement):
         element_list = dom.getElementsByTagName("SampleSetup")
         if len(element_list)>0:
             instrument_dom = element_list[0]
-            self.sample_data = BaseScriptElement.getStringElement(instrument_dom, 
-                                                                  "sample_data",
-                                                                  default=SampleSetupScript.sample_data)
+            self.sample_file = BaseScriptElement.getStringElement(instrument_dom, 
+                                                                  "sample_file",
+                                                                  default=SampleSetupScript.sample_file)
             self.incident_energy = BaseScriptElement.getStringElement(instrument_dom,
                                                                      "incident_energy",
                                                                      default=SampleSetupScript.incident_energy)
@@ -77,10 +82,12 @@ class SampleSetupScript(BaseScriptElement):
             self.et_range_width = BaseScriptElement.getStringElement(instrument_dom,
                                                                      "et_range/width",
                                                                      default=SampleSetupScript.et_range_width)
-
             self.et_range_high = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "et_range/high",
                                                                     default=SampleSetupScript.et_range_high)
+            self.et_is_distribution = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                       "sofphie_is_distribution",
+                                                                       default=SampleSetupScript.et_is_distribution)
             self.hardmask_file = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "hardmask_file",
                                                                     default=SampleSetupScript.hardmask_file)
@@ -92,12 +99,14 @@ class SampleSetupScript(BaseScriptElement):
         """
             Reset state
         """
-        self.sample_data = SampleSetupScript.sample_data
+        self.sample_file = SampleSetupScript.sample_file
         self.incident_energy = SampleSetupScript.incident_energy
         self.fixed_ei = SampleSetupScript.fixed_ei
+        self.rebin_et = SampleSetupScript.rebin_et
         self.et_range_low = SampleSetupScript.et_range_low
         self.et_range_width = SampleSetupScript.et_range_width
         self.et_range_high = SampleSetupScript.et_range_high
+        self.et_is_distribution = SampleSetupScript.et_is_distribution
         self.hardmask_file = SampleSetupScript.hardmask_file
         self.grouping_file = SampleSetupScript.grouping_file
         

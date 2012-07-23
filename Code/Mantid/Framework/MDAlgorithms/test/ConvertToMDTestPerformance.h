@@ -43,7 +43,7 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite
    WorkspaceCreationHelper::MockAlgorithm reporter;
 
    boost::shared_ptr<ConvToMDBase> pConvMethods;
-   ConvToMDPreprocDet det_loc;
+   ConvToMDPreprocDet g_DetLoc;
    // pointer to mock algorithm to work with progress bar
    std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
 
@@ -69,8 +69,8 @@ void test_EventNoUnitsConv()
 
     WSD.buildFromMatrixWS(inWsEv,"Q3D","Indirect");
 
-    WSD.setDetectors(det_loc);
-    WSD.rotMatrix = Rot;
+    WSD.setDetectors(g_DetLoc);
+    WSD.m_RotMatrix = Rot;
 
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -100,8 +100,8 @@ void test_EventFromTOFConv()
     WSD.setMinMax(min,max);
     WSD.buildFromMatrixWS(inWsEv,"Q3D","Indirect");
 
-    WSD.setDetectors(det_loc);
-    WSD.rotMatrix = Rot;
+    WSD.setDetectors(g_DetLoc);
+    WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
     pTargWS->createEmptyMDWS(WSD);
@@ -134,8 +134,8 @@ void test_HistoFromTOFConv()
 
     WSD.buildFromMatrixWS(inWs2D,"Q3D","Indirect");
 
-    WSD.setDetectors(det_loc);
-    WSD.rotMatrix = Rot;
+    WSD.setDetectors(g_DetLoc);
+    WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
     pTargWS->createEmptyMDWS(WSD);
@@ -171,8 +171,8 @@ void test_HistoNoUnitsConv()
 
     WSD.buildFromMatrixWS(inWs2D,"Q3D","Indirect");
 
-    WSD.setDetectors(det_loc);
-    WSD.rotMatrix = Rot;
+    WSD.setDetectors(g_DetLoc);
+    WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
     pTargWS->createEmptyMDWS(WSD);
@@ -210,7 +210,7 @@ Rot(3,3)
 
 
    pMockAlgorithm = std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm>(new WorkspaceCreationHelper::MockAlgorithm(numHist));
-   det_loc.processDetectorsPositions(inWs2D,pMockAlgorithm->getLogger(),pMockAlgorithm->getProgress());
+   g_DetLoc.processDetectorsPositions(inWs2D,pMockAlgorithm->getLogger(),pMockAlgorithm->getProgress());
 
    pTargWS = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
 

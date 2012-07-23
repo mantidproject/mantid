@@ -103,7 +103,7 @@ namespace IDA
     auto function = createFunction();
 
     uiForm().furyfit_ckPlotGuess->setChecked(false);
-  
+    
     const int fitType = uiForm().furyfit_cbFitType->currentIndex();
 
     if ( uiForm().furyfit_ckConstrainIntensities->isChecked() )
@@ -122,20 +122,7 @@ namespace IDA
         break;
       }
     }
-    QString ftype;
-    switch ( fitType )
-    {
-    case 0:
-      ftype = "1E_s"; break;
-    case 1:
-      ftype = "2E_s"; break;
-    case 2:
-      ftype = "1S_s"; break;
-    case 3:
-      ftype = "1E1S_s"; break;
-    default:
-      ftype = "s"; break;
-    }
+    QString ftype = fitTypeString();
 
     plotInput();
     if ( m_ffInputWS == NULL )
@@ -324,6 +311,23 @@ namespace IDA
     return prop;
   }
 
+  QString FuryFit::fitTypeString() const
+  {
+    switch ( uiForm().furyfit_cbFitType->currentIndex() )
+    {
+    case 0:
+      return "1E_s";
+    case 1:
+      return "2E_s";
+    case 2:
+      return "1S_s";
+    case 3:
+      return "1E1S_s";
+    default:
+      return "s";
+    };
+  }
+
   void FuryFit::typeSelection(int index)
   {
     m_ffTree->clear();
@@ -485,12 +489,13 @@ namespace IDA
     QString pyInput = "from IndirectDataAnalysis import furyfitSeq\n"
       "input = '" + QString::fromStdString(m_ffInputWSName) + "'\n"
       "func = r'" + QString::fromStdString(function) + "'\n"
+      "ftype = '" + fitTypeString() + "'\n"
       "startx = " + m_ffProp["StartX"]->valueText() + "\n"
       "endx = " + m_ffProp["EndX"]->valueText() + "\n"
       "plot = '" + uiForm().furyfit_cbPlotOutput->currentText() + "'\n"
       "save = ";
     pyInput += uiForm().furyfit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
-    pyInput += "furyfitSeq(input, func, startx, endx, save, plot)\n";
+    pyInput += "furyfitSeq(input, func, ftype, startx, endx, save, plot)\n";
   
     QString pyOutput = runPythonCode(pyInput);
   }

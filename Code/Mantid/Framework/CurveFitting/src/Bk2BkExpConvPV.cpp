@@ -1,4 +1,4 @@
-#include "MantidCurveFitting/ThermoNeutronBackToBackExpPV.h"
+#include "MantidCurveFitting/Bk2BkExpConvPV.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
 #include <gsl/gsl_sf_erf.h>
@@ -13,22 +13,21 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  DECLARE_FUNCTION(ThermoNeutronBackToBackExpPV)
+  DECLARE_FUNCTION(Bk2BkExpConvPV)
 
   // Get a reference to the logger
-  Mantid::Kernel::Logger& ThermoNeutronBackToBackExpPV::g_log = Kernel::Logger::get("ThermoNeutronBackToBackExpPV");
+  Mantid::Kernel::Logger& Bk2BkExpConvPV::g_log = Kernel::Logger::get("Bk2BkExpConvPV");
 
   // ----------------------------
   /*
    * Constructor and Desctructor
    */
-  ThermoNeutronBackToBackExpPV::ThermoNeutronBackToBackExpPV() : mFWHM(0.0)
+  Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0)
   {
-    mLowTOF = 0.0;
-    mUpperTOF = 1.0E20;
+
   }
 
-  ThermoNeutronBackToBackExpPV::~ThermoNeutronBackToBackExpPV()
+  Bk2BkExpConvPV::~Bk2BkExpConvPV()
   {
 
   }
@@ -36,7 +35,7 @@ namespace CurveFitting
   /*
    * Initialize:  declare paraemters
    */
-  void ThermoNeutronBackToBackExpPV::init()
+  void Bk2BkExpConvPV::init()
   {
     declareParameter("I", 1.0);
     declareParameter("TOF_h", -0.0);
@@ -49,7 +48,7 @@ namespace CurveFitting
     return;
   }
 
-  double ThermoNeutronBackToBackExpPV::centre()const
+  double Bk2BkExpConvPV::centre()const
   {
     double tofh = getParameter("TOF_h");
 
@@ -58,28 +57,22 @@ namespace CurveFitting
   }
 
 
-  void ThermoNeutronBackToBackExpPV::setHeight(const double h)
+  void Bk2BkExpConvPV::setHeight(const double h)
   {
     setParameter("height", h);
 
     return;
   };
 
-  double ThermoNeutronBackToBackExpPV::height() const
+  double Bk2BkExpConvPV::height() const
   {
     double height = this->getParameter("height");
     return height;
   };
 
-  /*
-   * Calculate FWHM
-   * It will be calculated each time when it is called because
-   * there is no record whether any peak parameter is changed since last caculation
-   * of FWHM.
-   */
-  double ThermoNeutronBackToBackExpPV::fwhm() const
+  double Bk2BkExpConvPV::fwhm() const
   {
-    if (mFWHM < 1.0E-8)
+    if (fabs(mFWHM) < 1.0E-8)
     {
       double sigma2 = this->getParameter("Sigma2");
       double gamma = this->getParameter("Gamma");
@@ -90,13 +83,13 @@ namespace CurveFitting
     return mFWHM;
   };
 
-  void ThermoNeutronBackToBackExpPV::setFwhm(const double w)
+  void Bk2BkExpConvPV::setFwhm(const double w)
   {
     UNUSED_ARG(w);
     throw std::invalid_argument("Unable to set FWHM");
   };
 
-  void ThermoNeutronBackToBackExpPV::setCentre(const double c)
+  void Bk2BkExpConvPV::setCentre(const double c)
   {
     setParameter("TOF_h",c);
   };
@@ -104,7 +97,7 @@ namespace CurveFitting
   /*
    * Implement the peak calculating formula
    */
-  void ThermoNeutronBackToBackExpPV::functionLocal(double* out, const double* xValues, const size_t nData) const
+  void Bk2BkExpConvPV::functionLocal(double* out, const double* xValues, const size_t nData) const
   {
     // 1. Prepare constants
     const double alpha = this->getParameter("Alpha");
@@ -120,35 +113,28 @@ namespace CurveFitting
     double H, eta;
     calHandEta(sigma2, gamma, H, eta);
 
-    g_log.debug() << "DB1140: TOF_h = " << tof_h << " h = " << height << ", I = " << this->getParameter("I") << " alpha = "
-        << alpha << " beta = " << beta << " H = " << H << " eta = " << eta << "  Peak Range = " << mLowTOF << ", "
-        << mUpperTOF << std::endl;
+    // g_log.debug() << "DB1140: TOF_h = " << tof_h << " h = " << height << ", I = " << this->getParameter("I") << " alpha = "
+    // << alpha << " beta = " << beta << " H = " << H << " eta = " << eta << std::endl;
 
     // 2. Do calculation
-    g_log.debug() << "DB1143:  nData = " << nData << "  From " << xValues[0] << " To " << xValues[nData-1] << std::endl;
+    std::cout << "DB1143:  nData = " << nData << "  From " << xValues[0] << " To " << xValues[nData-1] << std::endl;
     for (size_t id = 0; id < nData; ++id)
     {
-      if (xValues[id] >= mLowTOF &&  xValues[id] <= mUpperTOF)
-      {
-        double dT = xValues[id]-tof_h;
-        double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
-        out[id] = height*omega;
-      }
-      else
-      {
-        out[id] = 0.0;
-      }
+      double dT = xValues[id]-tof_h;
+      double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
+      out[id] = height*omega;
+      // std::cout << "DB1143  " << xValues[id] << "   " << out[id] << "   " << omega << std::endl;
     }
 
     return;
   }
 
-  void ThermoNeutronBackToBackExpPV::functionDerivLocal(API::Jacobian* , const double* , const size_t )
+  void Bk2BkExpConvPV::functionDerivLocal(API::Jacobian* , const double* , const size_t )
   {
     throw Mantid::Kernel::Exception::NotImplementedError("functionDerivLocal is not implemented for IkedaCarpenterPV.");
   }
 
-  void ThermoNeutronBackToBackExpPV::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
+  void Bk2BkExpConvPV::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
   {
     calNumericalDeriv(domain, jacobian);
   }
@@ -156,7 +142,7 @@ namespace CurveFitting
   /*
    * Calculate Omega(x) = ... ...
    */
-  double ThermoNeutronBackToBackExpPV::calOmega(double x, double eta, double N, double alpha, double beta, double H,
+  double Bk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, double beta, double H,
       double sigma2, double invert_sqrt2sigma) const
   {
     // 1. Prepare
@@ -188,19 +174,19 @@ namespace CurveFitting
   /*
    * Implementation of complex integral E_1
    */
-  std::complex<double> ThermoNeutronBackToBackExpPV::E1(std::complex<double> z) const
+  std::complex<double> Bk2BkExpConvPV::E1(std::complex<double> z) const
   {
     return z;
   }
 
-  void ThermoNeutronBackToBackExpPV::geneatePeak(double* out, const double* xValues, const size_t nData)
+  void Bk2BkExpConvPV::geneatePeak(double* out, const double* xValues, const size_t nData)
   {
     this->functionLocal(out, xValues, nData);
 
     return;
   }
 
-  void ThermoNeutronBackToBackExpPV::calHandEta(double sigma2, double gamma, double& H, double& eta) const
+  void Bk2BkExpConvPV::calHandEta(double sigma2, double gamma, double& H, double& eta) const
   {
     // 1. Calculate H
     double H_G = sqrt(8.0 * sigma2 * log(2.0));
@@ -223,22 +209,6 @@ namespace CurveFitting
     }
 
     return;
-  }
-
-  /*
-   * Set the range for a peak to be calculated
-   */
-  void ThermoNeutronBackToBackExpPV::setCalculationRange(double tof_low, double tof_upper)
-  {
-    mLowTOF = tof_low;
-    mUpperTOF = tof_upper;
-
-    return;
-  }
-
-  void ThermoNeutronBackToBackExpPV::resetFWHM()
-  {
-    mFWHM = 0.0;
   }
 
 } // namespace Mantid

@@ -163,11 +163,15 @@ namespace Geometry
     /// Get a parameter with a given name and optional type
     boost::shared_ptr<Parameter> get(const IComponent* comp,const std::string& name,
                                      const std::string & type = "")const;
+    /// Finds the parameter in the map via the parameter type.
+    boost::shared_ptr<Parameter>  getByType(const IComponent* comp, const std::string& type) const;
     /// Use get() recursively to see if can find param in all parents of comp.
     boost::shared_ptr<Parameter> getRecursive(const IComponent* comp, const char * name) const;
     /// Use get() recursively to see if can find param in all parents of comp and given type
     boost::shared_ptr<Parameter> getRecursive(const IComponent* comp,const std::string& name, 
                                               const std::string & type = "")const;
+    /// Looks recursively upwards in the component tree for the first instance of a parameter with a specified type.
+    boost::shared_ptr<Parameter> getRecursiveByType(const IComponent* comp, const std::string& type) const;
 
     /** Get the values of a given parameter of all the components that have the name: compName
      *  @tparam The parameter type
@@ -194,7 +198,7 @@ namespace Geometry
     }
 
     /// Return the value of a parameter as a string
-    std::string getString(const IComponent* comp,const std::string& name);
+    std::string getString(const IComponent* comp,const std::string& name) const;
     /// Returns a string parameter as vector's first element if exists and an empty vector if it doesn't
     std::vector<std::string> getString(const std::string& compName,const std::string& name) const 
     {

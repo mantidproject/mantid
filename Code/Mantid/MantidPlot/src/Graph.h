@@ -398,8 +398,6 @@ public slots:
 
   void setAutoScale();
   void updateScale();
-  // Set axis that will not be autoscaled
-  void setFixedScale(int axis);
 
   //! \name Saving to File
   //@{
@@ -695,7 +693,7 @@ public slots:
   void notifyChanges();
 
   void updateSecondaryAxis(int axis);
-  void enableAutoscaling(bool yes){d_auto_scale = yes;};
+  void enableAutoscaling(bool yes);
 
   bool autoscaleFonts(){return autoScaleFonts;};
   void setAutoscaleFonts(bool yes){autoScaleFonts = yes;};
@@ -848,8 +846,8 @@ private:
   LegendWidget *d_selected_text;
   //! Pointer to the current legend
   LegendWidget *d_legend;
-  //! Flag indicating if the axes limits should be changed in order to show all data each time a curva data change occurs
-  bool d_auto_scale;
+  // Flag indicating if the axes limits should be changed in order to show all data each time a curva data change occurs
+  // Qtiplot variable that we don't use (use qwtplot axis behaviour directly): bool d_auto_scale;
   static Mantid::Kernel::Logger &g_log;
   QString mCurrentColorMap;
   QwtPlotMagnifier *d_magnifier;
@@ -866,8 +864,6 @@ private:
   QMultiMap<QString,int> m_wsspectrumMap;
   // to save error flag to project file for 1 PD plot
   bool m_errors;
-  // to keep fixed axes
-  QSet<int> m_fixed_axes;
 
   int d_waterfall_offset_x, d_waterfall_offset_y;
 

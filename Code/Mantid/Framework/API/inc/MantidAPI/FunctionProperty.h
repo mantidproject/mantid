@@ -64,7 +64,7 @@ namespace Mantid
       virtual FunctionProperty& operator+=( Kernel::Property const * );
 
       /// 'Virtual copy constructor'
-      Kernel::Property* clone() { return new FunctionProperty(*this); }
+      FunctionProperty* clone() const { return new FunctionProperty(*this); }
 
       /// Virtual destructor
       virtual ~FunctionProperty();

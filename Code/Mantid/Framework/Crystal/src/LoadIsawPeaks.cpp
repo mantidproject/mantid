@@ -499,6 +499,7 @@ namespace Crystal
 
         peak.setGoniometerMatrix(gonMat);
         peak.setRunNumber(run);
+        peak.setMonitorCount( monCount );
 
         double tof = peak.getTOF()+T0;
         Kernel::Units::Wavelength wl;

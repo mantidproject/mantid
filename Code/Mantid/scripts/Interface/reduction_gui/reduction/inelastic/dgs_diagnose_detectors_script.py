@@ -36,23 +36,26 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         
     def to_script(self):
         script =  "FindBadDetectors=%s,\n" % self.find_bad_detectors
-        script += "OutputMaskFile=\"%s\",\n" % self.output_mask_file
-        script += "ErrorBarCriterion=%s,\n" % str(self.errorbar_criterion)
-        script += "DetectorVanadium1=\"%s\",\n" % self.det_van1
-        script += "HighCounts=%s,\n" % str(self.high_counts)
-        script += "LowCounts=%s,\n" % str(self.low_counts)
-        script += "MedianTestHigh=%s,\n" % str(self.median_test_high)
-        script += "MedianTestLow=%s,\n" % str(self.median_test_low)
-        script += "DetectorVanadium2=\"%s\",\n" % self.det_van2
-        script += "ProptionalChangeCriterion=%s,\n" % str(self.prop_change_criterion)
-        script += "BackgroundCheck=%s,\n" % self.background_check
-        script += "AcceptanceFactor=%s,\n" % str(self.acceptance_factor)
-        script += "BackgroundTofStart=%s,\n" % str(self.tof_start)
-        script += "BackgroundTofEnd=%s,\n" % str(self.tof_end)
-        script += "RejectZeroBackground=%s,\n" % self.reject_zero_bkg
-        script += "PsdBleed=%s,\n" % self.psd_bleed
-        script += "MaxFramerate=\"%s\",\n" % self.max_framerate
-        script += "IgnoredPixels=\"%s\",\n" % self.ignored_pixels 
+        if self.find_bad_detectors:
+            script += "OutputMaskFile=\"%s\",\n" % self.output_mask_file
+            script += "ErrorBarCriterion=%s,\n" % str(self.errorbar_criterion)
+            script += "DetectorVanadium1=\"%s\",\n" % self.det_van1
+            script += "HighCounts=%s,\n" % str(self.high_counts)
+            script += "LowCounts=%s,\n" % str(self.low_counts)
+            script += "MedianTestHigh=%s,\n" % str(self.median_test_high)
+            script += "MedianTestLow=%s,\n" % str(self.median_test_low)
+            script += "DetectorVanadium2=\"%s\",\n" % self.det_van2
+            script += "ProptionalChangeCriterion=%s,\n" % str(self.prop_change_criterion)
+            script += "BackgroundCheck=%s,\n" % self.background_check
+            if self.background_check:
+                script += "AcceptanceFactor=%s,\n" % str(self.acceptance_factor)
+                script += "BackgroundTofStart=%s,\n" % str(self.tof_start)
+                script += "BackgroundTofEnd=%s,\n" % str(self.tof_end)
+                script += "RejectZeroBackground=%s,\n" % self.reject_zero_bkg
+            script += "PsdBleed=%s,\n" % self.psd_bleed
+            if self.psd_bleed:
+                script += "MaxFramerate=\"%s\",\n" % self.max_framerate
+                script += "IgnoredPixels=\"%s\",\n" % self.ignored_pixels 
         return script
     
     def to_xml(self):

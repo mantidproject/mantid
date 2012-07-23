@@ -42,10 +42,10 @@ namespace WorkspaceCreationHelper
 
     Mantid::Kernel::Logger & getLogger(){return a_log;}
     
-    Mantid::API::Progress *getProgress(){return pProg.get();}
+    Mantid::API::Progress *getProgress(){return m_Progress.get();}
     void resetProgress(size_t nSteps)
     {
-        pProg = std::auto_ptr<Mantid::API::Progress >(new Mantid::API::Progress(this,0,1,nSteps));
+        m_Progress = std::auto_ptr<Mantid::API::Progress >(new Mantid::API::Progress(this,0,1,nSteps));
     }
   private:
       void init(){};
@@ -53,7 +53,7 @@ namespace WorkspaceCreationHelper
    /// Sets documentation strings for this algorithm
       virtual void initDocs(){};
 
-      std::auto_ptr<Mantid::API::Progress > pProg;
+      std::auto_ptr<Mantid::API::Progress > m_Progress;
       /// logger -> to provide logging, for MD dataset file operations
       static Mantid::Kernel::Logger  &a_log;
 

@@ -50,6 +50,9 @@ namespace DataObjects
     int getRunNumber() const;
     void setRunNumber(int m_RunNumber);
 
+    double getMonitorCount() const;
+    void setMonitorCount( double m_MonitorCount );
+
     double getH() const;
     double getK() const;
     double getL() const;
@@ -146,6 +149,9 @@ namespace DataObjects
 
     /// Originating run number for this peak
     int m_RunNumber;
+
+    /// Integrated monitor count over TOF range for this run
+    double m_MonitorCount;
 
     /// Cached row in the detector
     int m_Row;

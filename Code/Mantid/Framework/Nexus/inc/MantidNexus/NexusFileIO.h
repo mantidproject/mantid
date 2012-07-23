@@ -3,6 +3,7 @@
 #include <napi.h>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -50,6 +51,9 @@ namespace Mantid
     public:
       /// Default constructor
       NexusFileIO();
+
+      /// Contructor with Progress suplied
+      NexusFileIO( API::Progress* prog );
 
       /// Destructor
       ~NexusFileIO() {}
@@ -102,6 +106,8 @@ namespace Mantid
       NXaccess m_nexusformat;
       /// Nexus compression method
       int m_nexuscompression;
+      /// Allow an externally supplied progress object to be used
+      API::Progress *m_progress;
       /// Write a simple value plus possible attributes
       template<class TYPE>
       bool writeNxValue(const std::string& name, const TYPE& value, const int nxType, 

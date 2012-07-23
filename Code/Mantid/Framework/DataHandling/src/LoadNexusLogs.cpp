@@ -257,16 +257,6 @@ namespace Mantid
 
       // Close the file
       file.close();
-
-      // Filter logs
-      // If we loaded an icp_event log then create the running log to
-      // allow filtering 
-      if( workspace->run().hasProperty("icp_event") )
-      {
-        Kernel::Property *log = workspace->run().getProperty("icp_event");
-        LogParser parser(log);
-        workspace->mutableRun().addProperty(parser.createRunningLog());
-      }
     }
 
 

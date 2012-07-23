@@ -3,6 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/FilteredTimeSeriesProperty.h"
+
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <algorithm>
@@ -35,8 +38,7 @@ namespace Mantid
       {
         Property * p = other.m_orderedProperties[i]->clone();
         this->m_orderedProperties[i] = p;
-        std::string key = p->name();
-        std::transform(key.begin(), key.end(), key.begin(), toupper);
+        const std::string key = createKey(p->name());
         this->m_properties[key] = p;
       }
     }
@@ -60,8 +62,7 @@ namespace Mantid
         {
           Property * p = other.m_orderedProperties[i]->clone();
           this->m_orderedProperties[i] = p;
-          std::string key = p->name();
-          std::transform(key.begin(), key.end(), key.begin(), toupper);
+          const std::string key = createKey(p->name());
           this->m_properties[key] = p;
         }
       }
@@ -171,6 +172,29 @@ namespace Mantid
 
     }
 
+    //-----------------------------------------------------------------------------------------------
+    /**
+     * Filter the managed properties by the given boolean property mask. It replaces all time
+     * series properties with filtered time series properties
+     * @param filter :: A boolean time series to filter each property on
+     */
+    void PropertyManager::filterByProperty(const Kernel::TimeSeriesProperty<bool> & filter)
+    {
+      const bool transferOwnership(true); // Make the new FilteredProperty own the original time series
+      for(auto iter = m_orderedProperties.begin(); iter != m_orderedProperties.end(); ++iter)
+      {
+        Property *currentProp = *iter;
+        if(auto doubleSeries = dynamic_cast<TimeSeriesProperty<double>*>(currentProp))
+        {
+          auto filtered = new FilteredTimeSeriesProperty<double>(doubleSeries, filter, transferOwnership);
+          // Replace the property in the ordered properties list
+          (*iter) = filtered;
+          // Now replace in the map
+          const std::string key = createKey(currentProp->name());
+          this->m_properties[key] = filtered;
+        }
+      }
+    }
 
     //-----------------------------------------------------------------------------------------------
     /** Add a property to the list of managed properties
@@ -181,15 +205,13 @@ namespace Mantid
      */
     void PropertyManager::declareProperty( Property *p, const std::string &doc )
     {
-      // Get the name of the property and don't permit empty names
-      std::string key = p->name();
-      if (key.empty())
+      if (p->name().empty())
       {
         delete p;
         throw std::invalid_argument("An empty property name is not permitted");
       }
 
-      std::transform(key.begin(), key.end(), key.begin(), toupper);
+      const std::string key = createKey(p->name());
       if ( m_properties.insert(PropertyMap::value_type(key, p)).second)
       {
         m_orderedProperties.push_back(p);
@@ -308,9 +330,8 @@ namespace Mantid
      */
     bool PropertyManager::existsProperty( const std::string& name ) const
     {
-      std::string ucName = name;
-      std::transform(ucName.begin(), ucName.end(), ucName.begin(), toupper);
-      auto it = m_properties.find(ucName);
+      const std::string key = createKey(name);
+      auto it = m_properties.find(key);
       return (it != m_properties.end());
     }
 
@@ -393,9 +414,8 @@ namespace Mantid
      */
     Property* PropertyManager::getPointerToProperty( const std::string &name ) const
     {
-      std::string ucName = name;
-      std::transform(ucName.begin(), ucName.end(), ucName.begin(), toupper);
-      PropertyMap::const_iterator it = m_properties.find(ucName);
+      const std::string key = createKey(name);
+      PropertyMap::const_iterator it = m_properties.find(key);
       if (it != m_properties.end())
       {
         return it->second;
@@ -410,9 +430,8 @@ namespace Mantid
      */
     Property* PropertyManager::getPointerToPropertyOrNull( const std::string &name ) const
     {
-      std::string ucName = name;
-      std::transform(ucName.begin(), ucName.end(), ucName.begin(), toupper);
-      PropertyMap::const_iterator it = m_properties.find(ucName);
+      const std::string key = createKey(name);
+      PropertyMap::const_iterator it = m_properties.find(key);
       if (it != m_properties.end())
       {
         return it->second;
@@ -475,14 +494,14 @@ namespace Mantid
       if(existsProperty(name))
       {
         //remove it
-        Property* prop=getPointerToProperty(name);
-        std::string key = name;
-        std::transform(key.begin(), key.end(), key.begin(), toupper);
+        Property* prop = getPointerToProperty(name);
+        const std::string key = createKey(name);
         m_properties.erase(key);
         std::vector<Property*>::iterator itr;
         itr=find(m_orderedProperties.begin(),m_orderedProperties.end(),prop);
         m_orderedProperties.erase(itr);
-        if (delproperty){
+        if (delproperty)
+        {
           delete prop;
         }
       }
@@ -501,6 +520,22 @@ namespace Mantid
       }
       m_properties.clear();
     }
+
+    //----------------------------------------------------------------------------------------------
+    // Private methods
+    //----------------------------------------------------------------------------------------------
+    /**
+     * Transform the given string to a key for the property index
+     * @param text [InOut] :: Transforms the text given into an appropriate key for the property map
+     * @return
+     */
+    const std::string PropertyManager::createKey(const std::string & text) const
+    {
+      std::string key = text;
+      std::transform(key.begin(), key.end(), key.begin(), toupper);
+      return key;
+    }
+
 
   } // namespace Kernel
 } // namespace Mantid

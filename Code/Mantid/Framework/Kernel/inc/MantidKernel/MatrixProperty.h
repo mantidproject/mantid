@@ -49,7 +49,7 @@ namespace Mantid
       // Unhide base class members (at minimum, avoids Intel compiler warning)
       using PropertyWithValue<HeldType>::operator=;
       /// 'Virtual copy constructor'
-      inline Kernel::Property* clone() { return new MatrixProperty(*this); }
+      inline MatrixProperty* clone() const { return new MatrixProperty(*this); }
       /// Destructor
       ~MatrixProperty();
 

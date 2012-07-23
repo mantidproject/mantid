@@ -55,7 +55,7 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Utility;PythonAlgorithms";}
 
-private:
+protected:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   /// Initialise the properties
