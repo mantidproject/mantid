@@ -44,16 +44,6 @@ void Convolution::init()
 {
 }
 
-//void Convolution::function(const FunctionDomain& domain, FunctionValues& values)const
-//{
-//  const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
-//  if (!d1d)
-//  {
-//    throw std::invalid_argument("Unexpected domain in Convolution");
-//  }
-//  function1D(values.getPointerToCalculated(0),d1d->getPointerAt(0),d1d->size());
-//}
-
 void Convolution::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
   calNumericalDeriv(domain,jacobian);
@@ -64,7 +54,6 @@ void Convolution::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian
  * Calculates convolution of the two member functions. 
  */
 void Convolution::function(const FunctionDomain& domain, FunctionValues& values)const
-//void Convolution::function1D(double* out, const double* xValues, const size_t nData)const
 {
   const FunctionDomain1D* d1d = dynamic_cast<const FunctionDomain1D*>(&domain);
   if (!d1d)
@@ -74,7 +63,6 @@ void Convolution::function(const FunctionDomain& domain, FunctionValues& values)
 
   if (nFunctions() == 0)
   {
-    //std::fill_n(out,nData,0.0);
     values.zeroCalculated();
     return;
   }
