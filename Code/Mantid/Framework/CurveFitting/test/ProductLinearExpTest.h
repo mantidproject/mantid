@@ -84,10 +84,10 @@ private:
       double x = xValues[i];
       // Mimic workings of ProductLinearExp function to product comparison output.
       double expected = ((A1 * x) + A0)* Height * std::exp(-x/Lifetime); 
-      TS_ASSERT_EQUALS(expected, valuesLinExpDecay[i]);
+      TS_ASSERT_DELTA(expected, valuesLinExpDecay[i], 0.0001);
 
       // As a complete check, verify that the output is also the same for the Linear algorithm.
-      TS_ASSERT_EQUALS(valuesLinear[i], valuesLinExpDecay[i]);
+      TS_ASSERT_DELTA(valuesLinear[i], valuesLinExpDecay[i], 0.0001);
     }
   }
 
@@ -162,9 +162,9 @@ public:
       double x = xValues[i];
       // Mimic workings of ProductLinearExp function to product comparison output.
       double expected = ((A1 * x) + A0)* Height * std::exp(-x/Lifetime); 
-      TS_ASSERT_EQUALS(expected, valuesLinExpDecay[i]);
+      TS_ASSERT_DELTA(expected, valuesLinExpDecay[i], 0.0001);
       // As a complete check, verify that the output is also the same for the ExpDecay algorithm.
-      TS_ASSERT_EQUALS(valuesExpDecay[i], valuesLinExpDecay[i]);
+      TS_ASSERT_DELTA(valuesExpDecay[i], valuesLinExpDecay[i], 0.0001);
     }
   }
 
