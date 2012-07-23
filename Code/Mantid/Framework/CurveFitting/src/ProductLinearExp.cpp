@@ -34,15 +34,30 @@ namespace Mantid
 
     void ProductLinearExp::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
     {
-      throw std::runtime_error("Not Implemented");
+      const double A0 = getParameter("A0");
+      const double A1 = getParameter("A1");
+      const double Height = getParameter("Height");
+      const double Lifetime = getParameter("Lifetime");
+
+      for (size_t i = 0; i < nData; i++)
+      {
+        double x = xValues[i];
+        double expComponent = Height*std::exp(-x/Lifetime);
+        double linearComponent = (A1 * x) + A0;
+
+        out->set(i, 0, A1 * x * expComponent );
+        out->set(i, 1, (x + A0) * expComponent);
+        out->set(i, 2, linearComponent * expComponent / Height);
+        out->set(i, 3, linearComponent * expComponent * x / (Lifetime * Lifetime));
+      }
     }
 
     void ProductLinearExp::function1D(double* out, const double* xValues, const size_t nData) const
     {
-      double A0 = getParameter("A0");
-      double A1 = getParameter("A1");
-      double Height = getParameter("Height");
-      double Lifetime = getParameter("Lifetime");
+      const double A0 = getParameter("A0");
+      const double A1 = getParameter("A1");
+      const double Height = getParameter("Height");
+      const double Lifetime = getParameter("Lifetime");
 
       for(size_t i = 0; i < nData; ++i)
       {

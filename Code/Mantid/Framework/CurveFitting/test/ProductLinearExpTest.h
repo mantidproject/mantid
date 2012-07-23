@@ -7,13 +7,12 @@
 #include "MantidCurveFitting/ExpDecay.h"
 #include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/ProductFunction.h"
-#include "MantidAPI/Jacobian.h"
+#include "MantidCurveFitting/Jacobian.h"
 #include "MantidAPI/FunctionDomain1D.h" 
 #include "MantidAPI/FunctionValues.h" 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
-#include <gmock/gmock.h>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
@@ -21,17 +20,6 @@ using namespace Mantid::API;
 class ProductLinearExpTest : public CxxTest::TestSuite
 {
 private:
-  
-  /// Mock helper type.
-  class MockJacobian : public Mantid::API::Jacobian
-  {
-  public:
-    MOCK_METHOD3(set, void(size_t, size_t, double));
-    MOCK_METHOD2(get, double(size_t, size_t));
-    ~MockJacobian()
-    {
-    }
-  };
 
   /// Helper type to generate number for a std::generate call.
   class LinearIncrementingAssignment
@@ -84,13 +72,19 @@ private:
     const size_t nResults = 10;
     typedef std::vector<double> VecDouble;
     VecDouble xValues(nResults);
-    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.1));
+    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.0001));
  
     FunctionDomain1DVector domain(xValues);
-    FunctionValues valuesLinear(domain);
+    FunctionValues valuesBenchmark(domain);
     FunctionValues valuesLinExpDecay(domain);
-    benchmark.function(domain,valuesLinear);
+    Mantid::CurveFitting::Jacobian jacobianNumerical(nResults, 4);
+    Mantid::CurveFitting::Jacobian jacobianLinExpDecay(nResults, 4);
+    // Peform function evaluations.
+    benchmark.function(domain, valuesBenchmark);
     func.function(domain, valuesLinExpDecay);
+    // Perform function derivative evaluations.
+    func.functionDeriv(domain, jacobianLinExpDecay);
+    func.calNumericalDeriv(domain, jacobianNumerical);
 
     for(size_t i = 0; i < nResults; ++i)
     {
@@ -99,8 +93,12 @@ private:
       double expected = ((A1 * x) + A0)* Height * std::exp(-x/Lifetime); 
       TS_ASSERT_DELTA(expected, valuesLinExpDecay[i], 0.0001);
 
-      // As a complete check, verify that the output is also the same for the Linear algorithm.
-      TS_ASSERT_DELTA(valuesLinear[i], valuesLinExpDecay[i], 0.0001);
+      // Verify that the output is also the same for the Linear algorithm.
+      TS_ASSERT_DELTA(valuesBenchmark[i], valuesLinExpDecay[i], 0.0001);
+
+      // Verify that the derivates calculated are also the same.
+      TS_ASSERT_DELTA(jacobianLinExpDecay.get(i, 2), jacobianNumerical.get(i, 2), 0.1); // w.r.t Height 
+      TS_ASSERT_DELTA(jacobianLinExpDecay.get(i, 3), jacobianNumerical.get(i, 3), 0.1); // w.r.t Lifetime
     }
   }
 
@@ -181,25 +179,27 @@ public:
     }
   }
 
-  void test_calculate_derivative_throws()
+  void test_calculate_derivative_throws_nothing()
   {
-    // NOT implemented. Characterise with test.
+    const size_t nResults = 10;
+    typedef std::vector<double> VecDouble;
+    VecDouble xValues(nResults);
+    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.1));
+    FunctionDomain1DVector domain(xValues);
+
+    Mantid::CurveFitting::Jacobian jacobian(nResults, 4);
+
     ProductLinearExp func;
-
-    FunctionDomain1DVector domain(0);
-
-    MockJacobian jacobian;
-
-    TS_ASSERT_THROWS(func.functionDeriv(domain, jacobian), std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(func.functionDeriv(domain, jacobian));
   }
 
   void test_with_low_contribution_from_expdecay()
   {
     // Setup the test to for low contribution from exponential component.
-    const double A0 = 2;
-    const double A1 = 1;
+    const double A0 = 0.2;
+    const double A1 = 0.1;
     const double Height = 1;
-    const double Lifetime = 1000000;
+    const double Lifetime = 100;
    
     do_test_function_calculation(A0, A1, Height, Lifetime);
   }
@@ -207,15 +207,13 @@ public:
   void test_with_high_contribution_from_expdecay()
   {
     // Setup the test to for high contribution from exponential component.
-    const double A0 = 2;
-    const double A1 = 1;
+    const double A0 = 0.2;;
+    const double A1 = 0.1;
     const double Height = 1;
-    const double Lifetime = 0.000001;
+    const double Lifetime = 0.01;
    
     do_test_function_calculation(A0, A1, Height, Lifetime);
   }
-
-
 
 };
 
