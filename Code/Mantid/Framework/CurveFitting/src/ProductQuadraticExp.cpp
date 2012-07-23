@@ -1,4 +1,5 @@
 #include "MantidCurveFitting/ProductQuadraticExp.h"
+#include <math.h>
 
 namespace Mantid
 {
@@ -43,9 +44,9 @@ namespace Mantid
         double expComponent = Height*std::exp(-x/Lifetime);
         double linearComponent = (A1 * x) + A0;
 
-        out->set(i, 0, A1 * x * expComponent );
-        out->set(i, 1, (x + A0) * expComponent);
-        out->set(i, 2, ((x*x) + A1*x + A0) * expComponent);
+        out->set(i, 0, ((A2 * x * x) + (A1 * x)) * expComponent );
+        out->set(i, 1, ((A2 * x * x) + x + A0) * expComponent);
+        out->set(i, 2, ((x*x) + (A1*x) + A0) * expComponent);
         out->set(i, 3, linearComponent * expComponent / Height);
         out->set(i, 4, linearComponent * expComponent * x / (Lifetime * Lifetime));
       }
