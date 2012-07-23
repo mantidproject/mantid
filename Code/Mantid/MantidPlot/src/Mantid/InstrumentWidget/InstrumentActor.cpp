@@ -30,11 +30,15 @@ double InstrumentActor::m_tolerance = 0.00001;
 
 /**
  * Constructor
- * @param wsName :: Workspace
+ * @param wsName :: Workspace name
+ * @param autoscaling :: True to start with autoscaling option on. If on the min and max of
+ *   the colormap scale are defined by the min and max of the data.
+ * @param scaleMin :: Minimum value of the colormap scale. Used to assign detector colours. Ignored if autoscaling == true.
+ * @param scaleMax :: Maximum value of the colormap scale. Used to assign detector colours. Ignored if autoscaling == true.
  */
-InstrumentActor::InstrumentActor(const QString &wsName):
+InstrumentActor::InstrumentActor(const QString &wsName, bool autoscaling, double scaleMin, double scaleMax):
 m_workspace(AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString())),
-m_autoscaling(true),
+m_autoscaling(autoscaling),
 m_maskedColor(100,100,100),
 m_failedColor(200,200,200),
 m_sampleActor(NULL)
@@ -80,6 +84,13 @@ m_sampleActor(NULL)
   }
   m_WkspDataPositiveMin = DBL_MAX;
   loadSettings();
+
+  if ( !m_autoscaling )
+  {
+    m_DataMinValue = -DBL_MAX;
+    m_DataMaxValue =  DBL_MAX;
+    setMinMaxRange( scaleMin, scaleMax );
+  }
 
   blockSignals(true);
   setIntegrationRange(m_WkspBinMin,m_WkspBinMax);
@@ -446,10 +457,6 @@ void InstrumentActor::setMaxValue(double vmax)
 {
   if (m_autoscaling) return;
   if (vmax < m_DataMinValue) return;
-  if (vmax > m_DataMaxValue)
-  {
-    vmax = m_DataMaxValue;
-  }
   m_DataMaxScaleValue = vmax;
   resetColors();
 }
@@ -460,10 +467,6 @@ void InstrumentActor::setMinMaxRange(double vmin, double vmax)
   if (vmin < m_DataMinValue)
   {
     vmin = m_DataMinValue;
-  }
-  if (vmax > m_DataMaxValue)
-  {
-    vmax = m_DataMaxValue;
   }
   if (vmin >= vmax) return;
   m_DataMinScaleValue = vmin;

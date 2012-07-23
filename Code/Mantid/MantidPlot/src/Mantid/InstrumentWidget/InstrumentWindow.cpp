@@ -296,20 +296,23 @@ InstrumentWindow::~InstrumentWindow()
 /**
  * Init the geometry and colour map outside constructor to prevent creating a broken MdiSubwindow.
  * Must be called straight after constructor.
- * @param updateGeometry :: Set true for resetting the view's geometry: the bounding box and rotation. Default is true.
+ * @param resetGeometry :: Set true for resetting the view's geometry: the bounding box and rotation. Default is true.
+ * @param autoscaling :: True to start with autoscaling option on.
+ * @param scaleMin :: Minimum value of the colormap scale. Ignored if autoscaling == true.
+ * @param scaleMax :: Maximum value of the colormap scale. Ignored if autoscaling == true.
  */
-void InstrumentWindow::init(bool resetGeometry)
+void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax)
 {
   // Previously in (now removed) setWorkspaceName method
   m_InstrumentDisplay->makeCurrent(); // ?
-  m_instrumentActor = new InstrumentActor(m_workspaceName);
+  m_instrumentActor = new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax);
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
   if ( resetGeometry )
   {
     setSurfaceType(m_surfaceType); // This call must come after the InstrumentActor is created
+    setupColorMap();
   }
-  setupColorMap();
   mInstrumentTree->setInstrumentActor(m_instrumentActor);
   setInfoText( getSurfaceInfoText() );
 }
@@ -821,13 +824,26 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
   if (wsName == m_workspaceName.toStdString())
   {
     bool resetGeometry = true;
+    bool autoscaling = true;
+    double scaleMin = 0.0;
+    double scaleMax = 0.0;
     if (m_instrumentActor)
     {
+      // try to detect if the instrument changes with the workspace
       auto matrixWS = boost::dynamic_pointer_cast<const MatrixWorkspace>( workspace );
       resetGeometry = matrixWS->getInstrument()->getNumberDetectors() != m_instrumentActor->ndetectors();
+
+      // if instrument doesn't change keep the scaling
+      if ( !resetGeometry )
+      {
+        autoscaling = m_instrumentActor->autoscaling();
+        scaleMin = m_instrumentActor->minValue();
+        scaleMax = m_instrumentActor->maxValue();
+      }
+
       delete m_instrumentActor;
     }
-    init( resetGeometry );
+    init( resetGeometry, autoscaling, scaleMin, scaleMax );
     updateWindow();
   }
 }
