@@ -7,11 +7,13 @@
 #include "MantidCurveFitting/ExpDecay.h"
 #include "MantidCurveFitting/LinearBackground.h"
 #include "MantidCurveFitting/ProductFunction.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/FunctionDomain1D.h" 
 #include "MantidAPI/FunctionValues.h" 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
+#include <gmock/gmock.h>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
@@ -19,6 +21,17 @@ using namespace Mantid::API;
 class ProductLinearExpTest : public CxxTest::TestSuite
 {
 private:
+  
+  /// Mock helper type.
+  class MockJacobian : public Mantid::API::Jacobian
+  {
+  public:
+    MOCK_METHOD3(set, void(size_t, size_t, double));
+    MOCK_METHOD2(get, double(size_t, size_t));
+    ~MockJacobian()
+    {
+    }
+  };
 
   /// Helper type to generate number for a std::generate call.
   class LinearIncrementingAssignment
@@ -166,6 +179,18 @@ public:
       // As a complete check, verify that the output is also the same for the ExpDecay algorithm.
       TS_ASSERT_DELTA(valuesExpDecay[i], valuesLinExpDecay[i], 0.0001);
     }
+  }
+
+  void test_calculate_derivative_throws()
+  {
+    // NOT implemented. Characterise with test.
+    ProductLinearExp func;
+
+    FunctionDomain1DVector domain(0);
+
+    MockJacobian jacobian;
+
+    TS_ASSERT_THROWS(func.functionDeriv(domain, jacobian), std::runtime_error);
   }
 
   void test_with_low_contribution_from_expdecay()

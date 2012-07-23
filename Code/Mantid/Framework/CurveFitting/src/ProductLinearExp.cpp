@@ -34,7 +34,7 @@ namespace Mantid
 
     void ProductLinearExp::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
     {
-      
+      throw std::runtime_error("Not Implemented");
     }
 
     void ProductLinearExp::function1D(double* out, const double* xValues, const size_t nData) const
