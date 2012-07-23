@@ -12,8 +12,8 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class SampleSetupScript(BaseScriptElement):
     
     sample_file = ""
-    incident_energy = ""
-    fixed_ei = False
+    incident_energy_guess = ""
+    use_ei_guess = False
     rebin_et = False
     et_range_low = ""
     et_range_width = ""
@@ -28,8 +28,8 @@ class SampleSetupScript(BaseScriptElement):
         
     def to_script(self):
         script =  "SampleFile=\"%s\",\n" % self.sample_file
-        script += "IncidentEnergy=\"%s\",\n" % self.incident_energy
-        script += "FixedIncidentEnergy=%s,\n" % self.fixed_ei
+        script += "IncidentEnergyGuess=\"%s\",\n" % self.incident_energy_guess
+        script += "UseIncidentEnergyGuess=%s,\n" % self.use_ei_guess
         if self.rebin_et:
             script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, 
                                                                self.et_range_width, 
@@ -45,8 +45,8 @@ class SampleSetupScript(BaseScriptElement):
         """
         xml = "<SampleSetup>\n"
         xml += "  <sample_file>%s</sample_file>\n" % self.sample_file
-        xml += "  <incident_energy>%s</incident_energy>\n" % self.incident_energy
-        xml += "  <fixed_ei>%s</fixed_ei>\n" % str(self.fixed_ei)
+        xml += "  <incident_energy_guess>%s</incident_energy_guess>\n" % self.incident_energy_guess
+        xml += "  <use_ei_guess>%s</use_ei_guess>\n" % str(self.use_ei_guess)
         xml += "  <et_range>\n"
         xml += "    <low>%s</low>\n" % self.et_range_low
         xml += "    <width>%s</width>\n"  % self.et_range_width
@@ -70,12 +70,12 @@ class SampleSetupScript(BaseScriptElement):
             self.sample_file = BaseScriptElement.getStringElement(instrument_dom, 
                                                                   "sample_file",
                                                                   default=SampleSetupScript.sample_file)
-            self.incident_energy = BaseScriptElement.getStringElement(instrument_dom,
-                                                                     "incident_energy",
-                                                                     default=SampleSetupScript.incident_energy)
-            self.fixed_ei = BaseScriptElement.getBoolElement(instrument_dom,
-                                                             "fixed_ei",
-                                                             default=SampleSetupScript.fixed_ei)
+            self.incident_energy_guess = BaseScriptElement.getStringElement(instrument_dom,
+                                                                            "incident_energy_guess",
+                                                                            default=SampleSetupScript.incident_energy_guess)
+            self.use_ei_guess = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                 "use_ei_guess",
+                                                                 default=SampleSetupScript.use_ei_guess)
             self.et_range_low = BaseScriptElement.getStringElement(instrument_dom,
                                                                    "et_range/low",
                                                                    default=SampleSetupScript.et_range_low)
@@ -100,8 +100,8 @@ class SampleSetupScript(BaseScriptElement):
             Reset state
         """
         self.sample_file = SampleSetupScript.sample_file
-        self.incident_energy = SampleSetupScript.incident_energy
-        self.fixed_ei = SampleSetupScript.fixed_ei
+        self.incident_energy_guess = SampleSetupScript.incident_energy_guess
+        self.use_ei_guess = SampleSetupScript.use_ei_guess
         self.rebin_et = SampleSetupScript.rebin_et
         self.et_range_low = SampleSetupScript.et_range_low
         self.et_range_width = SampleSetupScript.et_range_width

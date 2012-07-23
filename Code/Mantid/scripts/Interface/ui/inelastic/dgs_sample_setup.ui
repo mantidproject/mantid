@@ -66,7 +66,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="ei_label">
+      <widget class="QLabel" name="ei_guess_label">
        <property name="minimumSize">
         <size>
          <width>110</width>
@@ -74,12 +74,12 @@
         </size>
        </property>
        <property name="text">
-        <string>Incident Energy</string>
+        <string>Incident Energy Guess</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="ei_edit">
+      <widget class="QLineEdit" name="ei_guess_edit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -112,9 +112,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QCheckBox" name="fixed_ei_chkbox">
+      <widget class="QCheckBox" name="use_ei_guess_chkbox">
        <property name="text">
-        <string>Fixed Ei</string>
+        <string>Use Guess (No Calculation)</string>
        </property>
       </widget>
      </item>
