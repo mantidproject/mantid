@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	#	src/CostFuncIgnorePosPeaks.cpp
 	#	src/SCDPanelErrors.cpp
+	# src/ChebyshevPolynomialBackground.cpp
 	src/Abragam.cpp
 	src/BFGS_Minimizer.cpp
 	src/BackToBackExponential.cpp
@@ -9,7 +10,6 @@ set ( SRC_FILES
 	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
 	src/Chebyshev.cpp
-	# src/ChebyshevPolynomialBackground.cpp
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
@@ -53,6 +53,7 @@ set ( SRC_FILES
 	src/PlotPeakByLogValue.cpp
 	src/ProductFunction.cpp
 	src/ProductLinearExp.cpp
+	src/ProductQuadraticExp.cpp
 	src/Quadratic.cpp
 	src/QuadraticBackground.cpp
 	src/Resolution.cpp
@@ -74,6 +75,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 set ( INC_FILES
 	#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
+	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	inc/MantidCurveFitting/Abragam.h
 	inc/MantidCurveFitting/BFGS_Minimizer.h
 	inc/MantidCurveFitting/BackToBackExponential.h
@@ -82,7 +84,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
 	inc/MantidCurveFitting/Chebyshev.h
-	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
 	inc/MantidCurveFitting/CompositeValues.h
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
@@ -133,6 +134,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/ProductFunction.h
 	inc/MantidCurveFitting/ProductLinearExp.h
+	inc/MantidCurveFitting/ProductQuadraticExp.h
 	inc/MantidCurveFitting/Quadratic.h
 	inc/MantidCurveFitting/QuadraticBackground.h
 	inc/MantidCurveFitting/Resolution.h
@@ -150,13 +152,13 @@ set ( INC_FILES
 )
               
 set ( TEST_FILES
+	# test/ChebyshevPolynomialBackgroundTest.h
 	#test/SCDPanelErrorsTest.h
 	test/AbragamTest.h
 	test/BFGSTest.h
 	test/BivariateNormalTest.h
 	test/Bk2BkExpConvPVTest.h
 	test/BoundaryConstraintTest.h
-	# test/ChebyshevPolynomialBackgroundTest.h
 	test/ChebyshevTest.h
 	test/CompositeFunctionTest.h
 	test/ConvolutionTest.h
@@ -196,6 +198,7 @@ set ( TEST_FILES
 	test/PlotPeakByLogValueTest.h
 	test/ProductFunctionTest.h
 	test/ProductLinearExpTest.h
+	test/ProductQuadraticExpTest.h
 	test/QuadraticBackgroundTest.h
 	test/QuadraticTest.h
 	test/ResolutionTest.h
