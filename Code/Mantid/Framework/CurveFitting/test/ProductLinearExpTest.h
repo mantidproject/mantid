@@ -36,6 +36,59 @@ private:
     }
   };
 
+    /** Helper method
+  With the input arguments
+  1) Creates the target ProductLinearFunction.
+  2) Creates and equavalent Product function using other Fit function framework types.
+  3) Manually calculates the expected output given that the underlying equation is so simple.
+  4) For each point on the domain, compares the outputs of (1) (2) and (3) above to check that the results are equal.
+  */
+  void do_test_function_calculation(const double& A0, const double& A1, const double& Height, const double& Lifetime)
+  {
+    // Create the Product linear exponential function
+    ProductLinearExp func;
+    func.setParameter("A0", A0);
+    func.setParameter("A1", A1);
+    func.setParameter("Height", Height);
+    func.setParameter("Lifetime", Lifetime);
+
+    // Create the equivalent Product Function
+    IFunction_sptr linearFunction = boost::make_shared<LinearBackground>();
+    linearFunction->initialize();
+    linearFunction->setParameter("A0", A0);
+    linearFunction->setParameter("A1", A1);
+    IFunction_sptr expFunction =  boost::make_shared<ExpDecay>();
+    expFunction->initialize();
+    expFunction->setParameter("Height", Height);
+    expFunction->setParameter("Lifetime", Lifetime);
+    ProductFunction benchmark;
+    benchmark.initialize();
+    benchmark.addFunction(linearFunction);
+    benchmark.addFunction(expFunction);
+
+    const size_t nResults = 10;
+    typedef std::vector<double> VecDouble;
+    VecDouble xValues(nResults);
+    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.1));
+ 
+    FunctionDomain1DVector domain(xValues);
+    FunctionValues valuesLinear(domain);
+    FunctionValues valuesLinExpDecay(domain);
+    benchmark.function(domain,valuesLinear);
+    func.function(domain, valuesLinExpDecay);
+
+    for(size_t i = 0; i < nResults; ++i)
+    {
+      double x = xValues[i];
+      // Mimic workings of ProductLinearExp function to product comparison output.
+      double expected = ((A1 * x) + A0)* Height * std::exp(-x/Lifetime); 
+      TS_ASSERT_EQUALS(expected, valuesLinExpDecay[i]);
+
+      // As a complete check, verify that the output is also the same for the Linear algorithm.
+      TS_ASSERT_EQUALS(valuesLinear[i], valuesLinExpDecay[i]);
+    }
+  }
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -113,55 +166,26 @@ public:
     }
   }
 
-  void test_execution_with_equivalent_composite()
+  void test_with_low_contribution_from_expdecay()
   {
-    
+    // Setup the test to for low contribution from exponential component.
     const double A0 = 2;
     const double A1 = 1;
     const double Height = 1;
-    const double Lifetime = 0;
-    
-    // Create the Product linear exponential function
-    ProductLinearExp func;
-    func.setParameter("A0", A0);
-    func.setParameter("A1", A1);
-    func.setParameter("Height", Height);
-    func.setParameter("Lifetime", Lifetime);
+    const double Lifetime = 1000000;
+   
+    do_test_function_calculation(A0, A1, Height, Lifetime);
+  }
 
-    // Create the equivalent Product Function
-    IFunction_sptr linearFunction = boost::make_shared<LinearBackground>();
-    linearFunction->initialize();
-    linearFunction->setParameter("A0", A0);
-    linearFunction->setParameter("A1", A1);
-    IFunction_sptr expFunction =  boost::make_shared<ExpDecay>();
-    expFunction->initialize();
-    expFunction->setParameter("Height", Height);
-    expFunction->setParameter("Lifetime", Lifetime);
-    ProductFunction benchmark;
-    benchmark.initialize();
-    benchmark.addFunction(linearFunction);
-    benchmark.addFunction(expFunction);
-
-    const size_t nResults = 10;
-    typedef std::vector<double> VecDouble;
-    VecDouble xValues(nResults);
-    std::generate(xValues.begin(), xValues.end(), LinearIncrementingAssignment(0, 0.1));
- 
-    FunctionDomain1DVector domain(xValues);
-    FunctionValues valuesLinear(domain);
-    FunctionValues valuesLinExpDecay(domain);
-    benchmark.function(domain,valuesLinear);
-    func.function(domain, valuesLinExpDecay);
-
-    for(size_t i = 0; i < nResults; ++i)
-    {
-      double x = xValues[i];
-      // Mimic workings of ProductLinearExp function to product comparison output.
-      double expected = ((A1 * x) + A0)* Height * std::exp(-x/Lifetime); 
-      TS_ASSERT_EQUALS(expected, valuesLinExpDecay[i]);
-      // As a complete check, verify that the output is also the same for the Linear algorithm.
-      //TS_ASSERT_EQUALS(valuesLinear[i], valuesLinExpDecay[i]);
-    }
+  void test_with_high_contribution_from_expdecay()
+  {
+    // Setup the test to for high contribution from exponential component.
+    const double A0 = 2;
+    const double A1 = 1;
+    const double Height = 1;
+    const double Lifetime = 0.000001;
+   
+    do_test_function_calculation(A0, A1, Height, Lifetime);
   }
 
 
