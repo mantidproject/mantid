@@ -1,10 +1,16 @@
 #include "MantidCurveFitting/ProductQuadraticExp.h"
-#include <math.h>
+#include "MantidCurveFitting/ExpDecay.h"
+#include "MantidCurveFitting/QuadraticBackground.h"
+#include "MantidCurveFitting/ProductFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 
 namespace Mantid
 {
   namespace CurveFitting
   {
+
+    DECLARE_FUNCTION(ProductQuadraticExp)
+
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
