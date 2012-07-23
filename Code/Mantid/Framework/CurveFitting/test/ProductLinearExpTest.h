@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionDomain1D.h" 
 #include "MantidAPI/FunctionValues.h" 
 #include <algorithm>
+#include <boost/shared_ptr.hpp>
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
@@ -22,8 +23,8 @@ private:
   class LinearIncrementingAssignment
   {
   private:
-    const double m_step;
     double m_current;
+    const double m_step;
   public:
     LinearIncrementingAssignment(double min, double step) : m_current(min), m_step(step)
     {
