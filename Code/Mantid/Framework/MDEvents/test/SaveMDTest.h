@@ -160,8 +160,8 @@ public:
 
     filename = alg.getPropertyValue("Filename");
     TSM_ASSERT( "File was indeed created", Poco::File(filename).exists());
-//    if (Poco::File(filename).exists())
-//      Poco::File(filename).remove();
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
   }
 
   void test_histo2()

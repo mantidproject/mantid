@@ -87,6 +87,19 @@ public:
       if (deleteFile)
         ws->getBoxController()->closeFile(true);
     }
+    //cleanup
+    if ((inPlace==1)&&rhs->isFileBacked())
+    {
+        rhs->getBoxController()->closeFile(true);
+    }
+    if ((inPlace==2)&&lhs->isFileBacked())
+    {
+        lhs->getBoxController()->closeFile(true);
+    }
+    if (ws->isFileBacked())
+    {
+        ws->getBoxController()->closeFile(true);
+    }
   }
   
   void test_mem_plus_mem()

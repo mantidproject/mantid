@@ -169,7 +169,7 @@ public:
 
     AnalysisDataService::Instance().add( input_ws, pw );
 
-    const std::string filename = "PeaksWorksapceTest_test_saveNexus.nxs";
+    const std::string filename = "PeaksWorkspaceTest_test_saveNexus.nxs";
     IAlgorithm_sptr saver = AlgorithmManager::Instance().createUnmanaged("SaveNexusProcessed");
     saver->initialize();
 
@@ -177,6 +177,7 @@ public:
     saver->setPropertyValue("Filename", filename);
     TS_ASSERT_THROWS_NOTHING(saver->execute());
 
+    std::string absFilename=saver->getPropertyValue("Filename");//absolute path
 
     // Load the nexus file
     IAlgorithm_sptr loader = AlgorithmManager::Instance().createUnmanaged("LoadNexusProcessed"); 
@@ -205,8 +206,8 @@ public:
     TS_ASSERT_DELTA(  lpw->getPeak(3).getWavelength(), 3.0, 1e-5);
 
     //Remove file
-    remove( filename.c_str() );
-
+    if (Poco::File(absFilename).exists())
+      Poco::File(absFilename).remove();
   }
 
 
