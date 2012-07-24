@@ -77,10 +77,10 @@ namespace WorkflowAlgorithms
         "An input workspace.");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
-    this->declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
-      "Set the value of the incident energy in meV.");
-    this->declareProperty("FixedIncidentEnergy", false,
-        "Declare the value of the incident energy to be fixed (will not be calculated).");
+    this->declareProperty("IncidentEnergyGuess", EMPTY_DBL(), mustBePositive,
+      "Set the value of the incident energy guess in meV.");
+    this->declareProperty("UseIncidentEnergyGuess", false,
+        "Use the incident energy guess as the actual value (will not be calculated).");
     this->declareProperty(new ArrayProperty<double>("EnergyTransferRange",
         boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary.\n"
@@ -151,11 +151,11 @@ namespace WorkflowAlgorithms
     // Calculate the initial energy and time zero
     const std::string facility = ConfigService::Instance().getFacility().name();
     g_log.notice() << "Processing for " << facility << std::endl;
-    const double eiGuess = this->getProperty("IncidentEnergy");
-    const bool fixedEi = this->getProperty("FixedIncidentEnergy");
+    const double eiGuess = this->getProperty("IncidentEnergyGuess");
+    const bool useEiGuess = this->getProperty("UseIncidentEnergyGuess");
     const std::vector<double> etBinning = this->getProperty("EnergyTransferRange");
 
-    double initialEnergy = 0.0;
+    double incidentEnergy = 0.0;
     double monPeak = 0.0;
     specid_t eiMon1Spec = 0;
     specid_t eiMon2Spec = 0;
@@ -168,25 +168,25 @@ namespace WorkflowAlgorithms
         double tZero = 0.0;
         if ("CNCS" == instName || "HYSPEC" == instName)
           {
-            initialEnergy = eiGuess;
+            incidentEnergy = eiGuess;
             if ("HYSPEC" == instName)
               {
-                double powVal = initialEnergy / 27.0;
+                double powVal = incidentEnergy / 27.0;
                 tZero = 25.0 + 85.0 / (1.0 + std::pow(powVal, 4));
               }
             // Do CNCS
             else
               {
-                double powVal = 1.0 + initialEnergy;
+                double powVal = 1.0 + incidentEnergy;
                 tZero = (0.1982 * std::pow(powVal, -0.84098)) * 1000.0;
               }
           }
         // Do ARCS and SEQUOIA
         else
           {
-            if (fixedEi)
+            if (useEiGuess)
               {
-                initialEnergy = eiGuess;
+                incidentEnergy = eiGuess;
               }
             else
               {
@@ -241,13 +241,13 @@ namespace WorkflowAlgorithms
                 try
                 {
                     getei->execute();
-                    initialEnergy = getei->getProperty("IncidentEnergy");
+                    incidentEnergy = getei->getProperty("IncidentEnergy");
                     tZero = getei->getProperty("Tzero");
                 }
                 catch (...)
                 {
                     g_log.error() << "GetEi failed, using guess as initial energy and T0 = 0" << std::endl;
-                    initialEnergy = eiGuess;
+                    incidentEnergy = eiGuess;
                 }
               }
           }
@@ -278,7 +278,7 @@ namespace WorkflowAlgorithms
         monPeak = getei->getProperty("FirstMonitorPeak");
         const specid_t monIndex = getei->getProperty("FirstMonitorIndex");
         // Why did the old way get it from the log?
-        initialEnergy = getei->getProperty("IncidentEnergy");
+        incidentEnergy = getei->getProperty("IncidentEnergy");
 
         IAlgorithm_sptr cbo = this->createSubAlgorithm("ChangeBinOffset");
         cbo->setAlwaysStoreInADS(true);
@@ -339,7 +339,7 @@ namespace WorkflowAlgorithms
             cnvun->setProperty("OutputWorkspace", outWsName);
             cnvun->setProperty("Target", "DeltaE");
             cnvun->setProperty("EMode", "Direct");
-            cnvun->setProperty("EFixed", initialEnergy);
+            cnvun->setProperty("EFixed", incidentEnergy);
             cnvun->execute();
 
             if (etBinning.empty())
@@ -359,7 +359,7 @@ namespace WorkflowAlgorithms
             cnvun->setProperty("OutputWorkspace", outWsName);
             cnvun->setProperty("Target", "TOF");
             cnvun->setProperty("EMode", "Direct");
-            cnvun->setProperty("EFixed", initialEnergy);
+            cnvun->setProperty("EFixed", incidentEnergy);
             cnvun->execute();
 
             // Make result workspace a distribution
@@ -447,7 +447,7 @@ namespace WorkflowAlgorithms
     cnvun->setProperty("OutputWorkspace", outWsName);
     cnvun->setProperty("Target", "DeltaE");
     cnvun->setProperty("EMode", "Direct");
-    cnvun->setProperty("EFixed", initialEnergy);
+    cnvun->setProperty("EFixed", incidentEnergy);
     cnvun->execute();
 
     // Rebin if necessary

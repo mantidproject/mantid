@@ -921,14 +921,14 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
     int u = 0;
     if ( !isFlippedView() )
     {
-      u = ( udet.u - m_viewRect.left() ) / dw;
+      u = static_cast<int>( ( udet.u - m_viewRect.left() ) / dw );
     }
     else
     {
-      u = vwidth - ( udet.u - m_viewRect.right() ) / dw;
+      u =  static_cast<int>( vwidth - ( udet.u - m_viewRect.right() ) / dw );
     }
 
-    int v = vheight - ( udet.v - m_viewRect.bottom() ) / dh;
+    int v = vheight - static_cast<int>(( udet.v - m_viewRect.bottom() ) / dh );
 
     QColor color;
     int index = int( i );

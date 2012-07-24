@@ -3,33 +3,24 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidCurveFitting/ProductFunction.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/Gaussian.h"
+#include "MantidCurveFitting/Jacobian.h"
+
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/TableWorkspace.h"
+
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 
-using namespace Mantid;
-using namespace Mantid::API;
-using namespace Mantid::DataObjects;
-using namespace Mantid::CurveFitting;
-
 typedef Mantid::DataObjects::Workspace2D_sptr WS_type;
-typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
 
-class ProductFunctionMWTest_Gauss: public IPeakFunction
+class ProductFunctionMWTest_Gauss: public Mantid::API::IPeakFunction
 {
 public:
   ProductFunctionMWTest_Gauss()
@@ -52,7 +43,7 @@ public:
       out[i] = h*exp(-x*x*w);
     }
   }
-  void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDerivLocal(Mantid::API::Jacobian* out, const double* xValues, const size_t nData)
   {
     double c = getParameter("c");
     double h = getParameter("h");
@@ -99,7 +90,7 @@ public:
 };
 
 
-class ProductFunctionMWTest_Linear: public ParamFunction, public IFunction1D
+class ProductFunctionMWTest_Linear: public Mantid::API::ParamFunction, public Mantid::API::IFunction1D
 {
 public:
   ProductFunctionMWTest_Linear()
@@ -119,7 +110,7 @@ public:
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv1D(Jacobian* out, const double* xValues, const size_t nData)
+  void functionDeriv1D(Mantid::API::Jacobian* out, const double* xValues, const size_t nData)
   {
     for(size_t i=0;i<nData;i++)
     {
@@ -139,21 +130,21 @@ public:
 
   void testFunction()
   {
-    ProductFunction prodF;
+    Mantid::CurveFitting::ProductFunction prodF;
 
-    IFunction_sptr gauss1( new ProductFunctionMWTest_Gauss );
+    Mantid::API::IFunction_sptr gauss1( new ProductFunctionMWTest_Gauss );
     gauss1->setParameter(0,1.1);
     gauss1->setParameter(1,1.2);
     gauss1->setParameter(2,1.3);
-    IFunction_sptr gauss2( new ProductFunctionMWTest_Gauss );
+    Mantid::API::IFunction_sptr gauss2( new ProductFunctionMWTest_Gauss );
     gauss2->setParameter(0,2.1);
     gauss2->setParameter(1,2.2);
     gauss2->setParameter(2,2.3);
-    IFunction_sptr gauss3( new ProductFunctionMWTest_Gauss );
+    Mantid::API::IFunction_sptr gauss3( new ProductFunctionMWTest_Gauss );
     gauss3->setParameter(0,3.1);
     gauss3->setParameter(1,3.2);
     gauss3->setParameter(2,3.3);
-    IFunction_sptr linear( new ProductFunctionMWTest_Linear );
+    Mantid::API::IFunction_sptr linear( new ProductFunctionMWTest_Linear );
     linear->setParameter(0,0.1);
     linear->setParameter(1,0.2);
 
@@ -170,7 +161,7 @@ public:
     TS_ASSERT_EQUALS(prodF.nFunctions(),4);
     TS_ASSERT_EQUALS(prodF.name(),"ProductFunction");
 
-    CompositeFunction* cf = &prodF;
+    Mantid::API::CompositeFunction* cf = &prodF;
     TS_ASSERT(cf);
     TS_ASSERT_EQUALS(prodF.nParams(),11);
     TS_ASSERT_EQUALS(prodF.parameterName(0),"f0.a");
@@ -189,16 +180,16 @@ public:
 
     TS_ASSERT_EQUALS(prodF.parameterLocalName(0),"a");
 
-    IFunction_sptr fun = FunctionFactory::Instance().createInitialized(prodF.asString());
+    Mantid::API::IFunction_sptr fun = Mantid::API::FunctionFactory::Instance().createInitialized(prodF.asString());
     TS_ASSERT(fun);
 
-    ProductFunction* prodF1 = dynamic_cast<ProductFunction*>(fun.get());
+    Mantid::CurveFitting::ProductFunction* prodF1 = dynamic_cast<Mantid::CurveFitting::ProductFunction*>(fun.get());
     TS_ASSERT(prodF1);
 
     TS_ASSERT_EQUALS(prodF1->nFunctions(),4);
     TS_ASSERT_EQUALS(prodF1->name(),"ProductFunction");
 
-    CompositeFunction* cf1 = prodF1;
+    Mantid::API::CompositeFunction* cf1 = prodF1;
     TS_ASSERT(cf1);
     TS_ASSERT_EQUALS(prodF1->nParams(),11);
     TS_ASSERT_EQUALS(prodF1->parameterName(0),"f0.a");
@@ -221,12 +212,12 @@ public:
 
   void testProductFunction()
   {
-    ProductFunction prodF;
+    Mantid::CurveFitting::ProductFunction prodF;
 
     double c1 = 1.0;
     double h1 = 3.0;
     double s1 = 0.5;
-    IFunction_sptr f0( new Gaussian );
+    Mantid::API::IFunction_sptr f0( new Mantid::CurveFitting::Gaussian );
     f0->initialize();
     f0->setParameter("PeakCentre",c1);
     f0->setParameter("Height",h1);
@@ -248,7 +239,7 @@ public:
     double c2 = 2;
     double h2 = 10.0;
     double s2 = 0.5;
-    IFunction_sptr f1( new Gaussian );
+    Mantid::API::IFunction_sptr f1( new Mantid::CurveFitting::Gaussian );
     f1->initialize();
     f1->setParameter("PeakCentre",c2);
     f1->setParameter("Height",h2);
@@ -270,8 +261,8 @@ public:
     std::string wsName = "ProductFunctionMWTest_workspace";
     int histogramNumber = 1;
     int timechannels = 30;
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Mantid::API::Workspace_sptr ws = Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",histogramNumber,timechannels,timechannels);
+    Mantid::DataObjects::Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
     Mantid::MantidVec& xx = ws2D->dataX(0);
     Mantid::MantidVec& yy = ws2D->dataY(0); 
     Mantid::MantidVec& ee = ws2D->dataE(0); 
@@ -283,9 +274,9 @@ public:
       ee[i] = 0.1;
     }
 
-    AnalysisDataService::Instance().add(wsName,ws);
+    Mantid::API::AnalysisDataService::Instance().add(wsName,ws);
 
-    Fit fit;
+    Mantid::CurveFitting::Fit fit;
     fit.initialize();
 
     f0->tie("PeakCentre","1.0");
@@ -309,7 +300,7 @@ public:
     double dummy = fit.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.01);
 
-    IFunction_sptr outF = fit.getProperty("Function"); 
+    Mantid::API::IFunction_sptr outF = fit.getProperty("Function"); 
 
     TS_ASSERT_DELTA( outF->getParameter("f0.PeakCentre"), 1.0 ,0.001);
     TS_ASSERT_DELTA( outF->getParameter("f0.Height"), 3.0 ,0.001);
@@ -318,15 +309,47 @@ public:
     TS_ASSERT_DELTA( outF->getParameter("f1.Height"), 10.0 ,0.01);
     TS_ASSERT_DELTA( outF->getParameter("f1.Sigma"), 0.5 ,0.001);
 
-    AnalysisDataService::Instance().remove(wsName);
+    Mantid::API::AnalysisDataService::Instance().remove(wsName);
   }
  
   void testForCategories()
   {
-    ProductFunction forCat;
+    Mantid::CurveFitting::ProductFunction forCat;
     const std::vector<std::string> categories = forCat.categories();
     TS_ASSERT( categories.size() == 1 );
     TS_ASSERT( categories[0] == "General" );
+  }
+
+  void testDerivatives()
+  {
+    Mantid::CurveFitting::ProductFunction prodF;
+
+    Mantid::API::IFunction_sptr linear1( new ProductFunctionMWTest_Linear );
+    linear1->setParameter(0, 1.0);
+    linear1->setParameter(1, 2.0);
+
+    Mantid::API::IFunction_sptr linear2( new ProductFunctionMWTest_Linear );
+    linear2->setParameter(0, 3.0);
+    linear2->setParameter(1, 4.0);
+
+    prodF.addFunction( linear1 );
+    prodF.addFunction( linear2 );
+
+    Mantid::API::FunctionDomain1DVector domain(3.0);
+    Mantid::API::FunctionValues out(domain);
+
+    prodF.function( domain, out );
+
+    TS_ASSERT_EQUALS( out.getCalculated(0), 105.0);
+
+    Mantid::CurveFitting::Jacobian jacobian(1,4);
+    prodF.functionDeriv( domain, jacobian );
+
+    TS_ASSERT_DELTA( jacobian.get(0,0), 15, 1e-9 );
+    TS_ASSERT_DELTA( jacobian.get(0,1), 45, 1e-9 );
+    TS_ASSERT_DELTA( jacobian.get(0,2), 7, 1e-9 );
+    TS_ASSERT_DELTA( jacobian.get(0,3), 21, 1e-9 );
+
   }
 
 private:

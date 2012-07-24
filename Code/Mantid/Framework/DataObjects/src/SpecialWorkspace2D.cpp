@@ -118,7 +118,16 @@ namespace DataObjects
       return defaultValue;
     else
     {
-      return this->dataY(it->second)[0];
+      if (it->second < m_noVectors) // don't let it generate an exception
+      {
+        return this->dataY(it->second)[0];
+      }
+      else
+      {
+        g_log.debug() << "getValue(" << detectorID << "->" << (it->second) << ", "
+                            << defaultValue << ") index out of range\n";
+        return defaultValue;
+      }
     }
   }
 

@@ -26,5 +26,16 @@ void ProductFunction::function(const API::FunctionDomain& domain, API::FunctionV
   }
 }
 
+/**
+ * Calculate the derivatives numerically.
+ * @param domain :: Function domein.
+ * @param jacobian :: Jacobian - stores the calculated derivatives
+ */
+void ProductFunction::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
+{
+  calNumericalDeriv(domain,jacobian);
+}
+
+
 } // namespace CurveFitting
 } // namespace Mantid

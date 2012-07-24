@@ -109,6 +109,7 @@ A1 coefficient is provided for each detector. In this way the Algorithm sees a c
 #include "MantidAPI/FunctionDomain1D.h" 
 #include "MantidAPI/FunctionValues.h" 
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
@@ -194,8 +195,9 @@ namespace Mantid
     @param wsIndex: The index of the histogram in the input workspace to process.
     @param denominatorWS : Workspace that will become the denominator in the normalisation routine.
     @param inputWorkspace: Workspace input. Contains instrument to use as well as X data to use.
+    @param prog: progress reporting object.
     */
-    void NormaliseByDetector::processHistogram(size_t wsIndex, MatrixWorkspace_sptr denominatorWS, MatrixWorkspace_const_sptr inWS)
+    void NormaliseByDetector::processHistogram(size_t wsIndex, MatrixWorkspace_sptr denominatorWS, MatrixWorkspace_const_sptr inWS, Progress& prog)
     {
       const Geometry::ParameterMap& paramMap = inWS->instrumentParameters();
       Geometry::IDetector_const_sptr det = inWS->getDetector( wsIndex );
@@ -252,6 +254,7 @@ namespace Mantid
       }
       denominatorWS->dataY(wsIndex) = outIntensity;
       denominatorWS->dataE(wsIndex) = MantidVec(nInputBins, 0);
+      prog.report();
     }
 
     /**
@@ -261,8 +264,11 @@ namespace Mantid
     */
     MatrixWorkspace_sptr NormaliseByDetector::processHistograms(MatrixWorkspace_sptr inWS)
     {
+      const size_t nHistograms = inWS->getNumberHistograms();
+      const size_t progress_items = nHistograms * 1.2;
+      Progress prog(this,0.0,1.0, progress_items);
       // Clone the input workspace to create a template for the denominator workspace.
-      IAlgorithm_sptr cloneAlg = this->createSubAlgorithm("CloneWorkspace", 0.0, 1.0, true);
+      IAlgorithm_sptr cloneAlg = this->createSubAlgorithm("CloneWorkspace", 0.0, 0.1, true);
       cloneAlg->setProperty("InputWorkspace", inWS);
       cloneAlg->setPropertyValue("OutputWorkspace", "temp");
       cloneAlg->executeAsSubAlg();
@@ -270,14 +276,13 @@ namespace Mantid
       MatrixWorkspace_sptr denominatorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
       // Choose between parallel execution and sequential execution then, process histograms accordingly.
-      const size_t nHistograms = inWS->getNumberHistograms();
       if(m_parallelExecution == true)
       {
           PARALLEL_FOR2(inWS, denominatorWS)
           for(int wsIndex = 0; wsIndex < static_cast<int>(nHistograms); ++wsIndex)
           {
             PARALLEL_START_INTERUPT_REGION
-              this->processHistogram(wsIndex, denominatorWS, inWS);
+              this->processHistogram(wsIndex, denominatorWS, inWS, prog);
             PARALLEL_END_INTERUPT_REGION
           }
           PARALLEL_CHECK_INTERUPT_REGION
@@ -286,7 +291,7 @@ namespace Mantid
       {
         for(size_t wsIndex = 0; wsIndex < nHistograms; ++wsIndex)
         {
-          this->processHistogram(wsIndex, denominatorWS, inWS);
+          this->processHistogram(wsIndex, denominatorWS, inWS, prog);
         }
       }
 
@@ -304,7 +309,7 @@ namespace Mantid
       MatrixWorkspace_sptr denominatorWS = processHistograms(inWS);
 
       // Perform the normalisation.
-      IAlgorithm_sptr divideAlg = this->createSubAlgorithm("Divide", 0.0, 1.0, true);
+      IAlgorithm_sptr divideAlg = this->createSubAlgorithm("Divide", 0.9, 1.0, true);
       divideAlg->setRethrows(true);
       divideAlg->setProperty("LHSWorkspace", inWS);
       divideAlg->setProperty("RHSWorkspace", denominatorWS);

@@ -52,6 +52,8 @@ namespace Mantid
       /// Function you want to fit to. 
       /// @param domain :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
       virtual void function(const API::FunctionDomain& domain, API::FunctionValues& values)const;
+      /// Calculate the derivatives
+      void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
 
     protected:
       /// overwrite IFunction base class method, which declare function parameters

@@ -78,10 +78,10 @@ namespace WorkflowAlgorithms
     //declareProperty("SampleData", "", "Run numbers, files or workspaces of the data sets to be reduced");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
     mustBePositive->setLower(0.0);
-    declareProperty("IncidentEnergy", EMPTY_DBL(), mustBePositive,
-      "Set the value of the incident energy in meV.");
-    declareProperty("FixedIncidentEnergy", false,
-        "Declare the value of the incident energy to be fixed (will not be calculated).");
+    declareProperty("IncidentEnergyGuess", EMPTY_DBL(), mustBePositive,
+      "Set the value of the incident energy guess in meV.");
+    declareProperty("UseIncidentEnergyGuess", false,
+        "Use the incident energy guess as the actual value (will not be calculated).");
     declareProperty(new ArrayProperty<double>("EnergyTransferRange",
         boost::make_shared<RebinParamsValidator>(true)),
       "A comma separated list of first bin boundary, width, last bin boundary.\n"
@@ -258,15 +258,7 @@ namespace WorkflowAlgorithms
    */
   Workspace_sptr DgsReduction::loadInputData(boost::shared_ptr<PropertyManager> manager)
   {
-    const std::string facility = ConfigService::Instance().getFacility().name();
-    if ("SNS" == facility)
-      {
-        this->setLoadAlg("LoadEventNexus");
-      }
-    else
-      {
-        this->setLoadAlg("LoadRaw");
-      }
+
     Workspace_sptr inputWS;
 
     std::string inputData = this->getPropertyValue("SampleFile");
@@ -281,7 +273,27 @@ namespace WorkflowAlgorithms
       }
     else if (!inputData.empty())
       {
-        manager->declareProperty(new PropertyWithValue<std::string>("MonitorFilename", inputData));
+        const std::string facility = ConfigService::Instance().getFacility().name();
+        if ("SNS" == facility)
+          {
+            if (boost::ends_with(inputData, "_event.nxs"))
+              {
+                this->setLoadAlg("LoadEventNexus");
+              }
+            if (boost::ends_with(inputData, "_neutron_event.dat"))
+              {
+                this->setLoadAlg("LoadEventPreNexus");
+                this->setLoadAlgFileProp("EventFilename");
+              }
+            manager->declareProperty(new PropertyWithValue<std::string>("MonitorFilename", inputData));
+          }
+        // Do ISIS
+        else
+          {
+            this->setLoadAlg("LoadRaw");
+            manager->declareProperty(new PropertyWithValue<std::string>("DetCalFilename", inputData));
+          }
+
         inputWS = this->load(inputData);
       }
     else
@@ -310,8 +322,8 @@ namespace WorkflowAlgorithms
     Workspace_sptr inputWS = this->loadInputData(reductionManager);
 
     // Setup for the convert to energy transfer workflow algorithm
-    const double incidentEnergy = this->getProperty("IncidentEnergy");
-    const bool fixedEi = this->getProperty("FixedIncidentEnergy");
+    const double incidentEnergyGuess = this->getProperty("IncidentEnergyGuess");
+    const bool useEiGuess = this->getProperty("UseIncidentEnergyGuess");
     const std::vector<double> etBinning = this->getProperty("EnergyTransferRange");
     const bool sofphieIsDistribution = this->getProperty("SofPhiEIsDistribution");
     const std::string incidentBeamNormType = this->getProperty("IncidentBeamNormalisation");
@@ -323,8 +335,8 @@ namespace WorkflowAlgorithms
 
     IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
     etConv->setProperty("InputWorkspace", inputWS);
-    etConv->setProperty("IncidentEnergy", incidentEnergy);
-    etConv->setProperty("FixedIncidentEnergy", fixedEi);
+    etConv->setProperty("IncidentEnergyGuess", incidentEnergyGuess);
+    etConv->setProperty("UseIncidentEnergyGuess", useEiGuess);
     etConv->setProperty("EnergyTransferRange", etBinning);
     etConv->setProperty("SofPhiEIsDistribution", sofphieIsDistribution);
     etConv->setProperty("IncidentBeamNormalisation", incidentBeamNormType);

@@ -31,10 +31,10 @@ class SampleSetupWidget(BaseWidget):
         
     def initialize_content(self):
         # Constraints
-        dv = QtGui.QDoubleValidator(self._content.ei_edit)
+        dv = QtGui.QDoubleValidator(self._content.ei_guess_edit)
         dv.setBottom(0.0)
-        self._content.ei_edit.setValidator(dv)
-        util.set_valid(self._content.ei_edit, False)
+        self._content.ei_guess_edit.setValidator(dv)
+        util.set_valid(self._content.ei_guess_edit, False)
         self._content.etr_low_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_low_edit))
         util.set_valid(self._content.etr_low_edit, False)
         self._content.etr_width_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_width_edit))
@@ -50,7 +50,7 @@ class SampleSetupWidget(BaseWidget):
         self.connect(self._content.grouping_browse, QtCore.SIGNAL("clicked()"), 
                      self._grouping_browse)
         # Validated widgets
-        self._connect_validated_lineedit(self._content.ei_edit)
+        self._connect_validated_lineedit(self._content.ei_guess_edit)
         self._connect_validated_lineedit(self._content.etr_low_edit)
         self._connect_validated_lineedit(self._content.etr_width_edit)
         self._connect_validated_lineedit(self._content.etr_high_edit)
@@ -91,9 +91,9 @@ class SampleSetupWidget(BaseWidget):
             @param state: SampleSetupScript object
         """
         self._content.sample_edit.setText(state.sample_file)
-        self._check_and_set_lineedit_content(self._content.ei_edit, 
-                                             state.incident_energy)
-        self._content.fixed_ei_chkbox.setChecked(state.fixed_ei)
+        self._check_and_set_lineedit_content(self._content.ei_guess_edit, 
+                                             state.incident_energy_guess)
+        self._content.use_ei_guess_chkbox.setChecked(state.use_ei_guess)
         self._content.et_range_box.setChecked(state.rebin_et)
         self._check_and_set_lineedit_content(self._content.etr_low_edit, 
                                              state.et_range_low)
@@ -111,8 +111,8 @@ class SampleSetupWidget(BaseWidget):
         """
         s = SampleSetupScript()
         s.sample_file = self._content.sample_edit.text()
-        s.incident_energy = self._content.ei_edit.text()
-        s.fixed_ei = self._content.fixed_ei_chkbox.isChecked()
+        s.incident_energy_guess = self._content.ei_guess_edit.text()
+        s.use_ei_guess = self._content.use_ei_guess_chkbox.isChecked()
         s.rebin_et = self._content.et_range_box.isChecked()
         s.et_range_low = self._content.etr_low_edit.text()
         s.et_range_width = self._content.etr_width_edit.text()

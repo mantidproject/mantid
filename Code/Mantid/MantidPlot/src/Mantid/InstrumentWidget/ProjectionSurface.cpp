@@ -227,7 +227,7 @@ void ProjectionSurface::drawSimple(QWidget* widget)const
  * @param image :: Image to draw on.
  * @param picking :: If true draw a picking image.
  */
-void ProjectionSurface::drawSimpleToImage(QImage* image,bool picking)const
+void ProjectionSurface::drawSimpleToImage(QImage*,bool)const
 {
 }
 

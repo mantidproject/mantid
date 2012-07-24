@@ -92,6 +92,20 @@ public:
     }
 
     TSM_ASSERT("If the workspace is file-backed, then it needs updating.", ws->fileNeedsUpdating() );
+    //cleanup
+    if ((inPlace==1)&&rhs->isFileBacked())
+    {
+        rhs->getBoxController()->closeFile(true);
+    }
+    if ((inPlace==2)&&lhs->isFileBacked())
+    {
+        lhs->getBoxController()->closeFile(true);
+    }
+    if (ws->isFileBacked())
+    {
+        ws->getBoxController()->closeFile(true);
+    }
+    AnalysisDataService::Instance().remove(outWSName);
   }
 
   void test_mem_minus_mem()

@@ -29,6 +29,7 @@ namespace API
   {
     m_loadAlg = "Load";
     m_accumulateAlg = "Plus";
+    m_loadAlgFileProp = "Filename";
     m_useMPI = false;
   }
     
@@ -45,6 +46,15 @@ namespace API
     if (alg.empty())
       throw std::invalid_argument("Cannot set load algorithm to empty string");
     m_loadAlg = alg;
+  }
+
+  void DataProcessorAlgorithm::setLoadAlgFileProp(const std::string &filePropName)
+  {
+    if (filePropName.empty())
+      {
+        throw std::invalid_argument("Cannot set the load algorithm file property name");
+      }
+    m_loadAlgFileProp = filePropName;
   }
 
   void DataProcessorAlgorithm::setAccumAlg(const std::string &alg)
@@ -164,7 +174,7 @@ namespace API
         const std::string outputWSName = p.getBaseName();
 
         IAlgorithm_sptr loadAlg = createSubAlgorithm(m_loadAlg);
-        loadAlg->setProperty("Filename", foundFile);
+        loadAlg->setProperty(m_loadAlgFileProp, foundFile);
         loadAlg->setAlwaysStoreInADS(true);
 
         // Set up MPI if available

@@ -554,24 +554,10 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
     FunctionValues plusStep(domain);
     std::vector<double> params(nParam);
 
-    // allocate memory if not already done
-    //if (m_minusStep.size() != domain.size())
-    //{
-    //  m_minusStep.reset(domain);
-    //  m_plusStep.reset(domain);
-    //}
-
     //PARALLEL_CRITICAL(numeric_deriv)
     {
       applyTies(); // just in case
       function(domain,minusStep);
-      //for (size_t iP = 0; iP < nParam; iP++)
-      //{
-      //  if ( isActive(iP) )
-      //  {
-      //    params[iP] = activeParameter(iP);
-      //  }
-      //}
     }
 
     for (size_t iP = 0; iP < nParam; iP++)
@@ -579,7 +565,6 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
       if ( isActive(iP) )
       {
         const double& val = activeParameter(iP);
-        //const double& val = params[iP];
         if (fabs(val) < cutoff)
         {
           step = epsilon;

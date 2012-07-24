@@ -38,6 +38,7 @@ set ( SRC_FILES
 	src/IFuncMinimizer.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LeBailFit.cpp
+	src/LeBailFit2.cpp
 	src/LeBailFunction.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
 	src/LevenbergMarquardtMinimizer.cpp
@@ -65,6 +66,7 @@ set ( SRC_FILES
 	src/SteepestDescentMinimizer.cpp
 	src/StretchExp.cpp
 	src/StretchExpMuon.cpp
+	src/ThermalNeutronBk2BkExpConvPV.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
 	src/UserFunctionMD.cpp
@@ -119,6 +121,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LeBailFit.h
+	inc/MantidCurveFitting/LeBailFit2.h
 	inc/MantidCurveFitting/LeBailFunction.h
 	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
@@ -146,6 +149,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h
 	inc/MantidCurveFitting/StretchExpMuon.h
+	inc/MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
 	inc/MantidCurveFitting/UserFunctionMD.h
@@ -181,6 +185,7 @@ set ( TEST_FILES
 	test/GaussianTest.h
 	test/HighOrderPolynomialBackgroundTest.h
 	test/IkedaCarpenterPVTest.h
+	test/LeBailFit2Test.h
 	test/LeBailFitTest.h
 	test/LeBailFunctionTest.h
 	test/LeastSquaresTest.h
@@ -208,6 +213,7 @@ set ( TEST_FILES
 	test/StaticKuboToyabeTest.h
 	test/StretchExpMuonTest.h
 	test/StretchExpTest.h
+	test/ThermalNeutronBk2BkExpConvPVTest.h
 	test/UserFunction1DTest.h
 	test/UserFunctionTest.h
 )

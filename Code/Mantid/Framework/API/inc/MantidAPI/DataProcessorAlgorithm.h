@@ -47,6 +47,7 @@ public:
 
 protected:
   void setLoadAlg(const std::string & alg);
+  void setLoadAlgFileProp(const std::string & filePropName);
   void setAccumAlg(const std::string & alg);
   ITableWorkspace_sptr determineChunk();
   void loadChunk();
@@ -66,6 +67,8 @@ private:
   std::string m_loadAlg;
   /// The name of the algorithm to invoke when accumulating data chunks
   std::string m_accumulateAlg;
+  /// An alternate filename property for the load algorithm
+  std::string m_loadAlgFileProp;
 };
 
 } // namespace API
