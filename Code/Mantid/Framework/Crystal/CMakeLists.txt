@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
 	src/CombinePeaksWorkspaces.cpp
+	src/DiffPeaksWorkspaces.cpp
 	src/FindSXPeaks.cpp
 	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
@@ -43,6 +44,7 @@ set ( INC_FILES
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
 	inc/MantidCrystal/CombinePeaksWorkspaces.h
+	inc/MantidCrystal/DiffPeaksWorkspaces.h
 	inc/MantidCrystal/FindSXPeaks.h
 	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
@@ -82,6 +84,7 @@ set ( TEST_FILES
 	test/CalculateUMatrixTest.h
 	test/CentroidPeaksTest.h
 	test/CombinePeaksWorkspacesTest.h
+	test/DiffPeaksWorkspacesTest.h
 	test/FindSXPeaksTest.h
 	test/FindUBUsingFFTTest.h
 	test/FindUBUsingIndexedPeaksTest.h
