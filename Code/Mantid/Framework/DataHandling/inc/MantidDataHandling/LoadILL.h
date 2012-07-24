@@ -68,7 +68,7 @@ private:
   /// Load the counts
   void loadData(NeXus::NXData& dataGroup, API::MatrixWorkspace_sptr& workspace);
   /// Load the instrument form the IDF
-  void LoadILL::runLoadInstrument(API::MatrixWorkspace_sptr workspace);
+  void runLoadInstrument(API::MatrixWorkspace_sptr workspace);
 
   std::string m_filename;       ///< The file to load
   std::string m_instrumentName; ///< Name of the instrumen

@@ -89,8 +89,6 @@ void LoadILL::exec()
 void LoadILL::loadData(NeXus::NXData& dataGroup, API::MatrixWorkspace_sptr& workspace)
 {
   NXInt data = dataGroup.openIntData();
-  int rank = data.rank();
-  //std::cerr << "Data: " << rank << ' ' << data.dim0() << ' ' << data.dim1() << ' ' << data.dim2() << std::endl;
 
   size_t dim0 = static_cast<size_t>( data.dim0() );
   size_t dim1 = static_cast<size_t>( data.dim1() );
