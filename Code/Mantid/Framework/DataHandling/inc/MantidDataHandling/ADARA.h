@@ -97,8 +97,8 @@ namespace VariableSeverity {
 }
 
 struct Event {
-	uint32_t pixel;
 	uint32_t tof;
+	uint32_t pixel;
 };
 
 typedef uint32_t EventBank;
