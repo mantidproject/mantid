@@ -1,7 +1,6 @@
 /*WIKI* 
 
-Loads the file given into a [[Workspace2D]] with the given name. The file should be in the SPE format, which is described [[Media:Spe_file_format.pdf|here]].
-The workspace will have X units of [[Unit_Factory|Energy transfer]]. The other axis will be binned and have units of either [[Unit_Factory|Momentum transfer / Q]] or degrees, depending on the label in the input file. The workspace will be flagged as a distribution.
+Loads an ILL nexus file into a [[Workspace2D]] with the given name. 
 
 
 *WIKI*/
@@ -10,7 +9,7 @@ The workspace will have X units of [[Unit_Factory|Energy transfer]]. The other a
 //---------------------------------------------------
 #include "MantidDataHandling/LoadILL.h"
 #include "MantidAPI/FileProperty.h"
-//#include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/UnitFactory.h"
 //#include "MantidAPI/NumericAxis.h"
 //#include "MantidDataObjects/Histogram1D.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
@@ -68,11 +67,15 @@ void LoadILL::exec()
   std::cerr << "Entry " << entry.name() << std::endl;
   // find out the instrument name. If other instruments at ILL have this format
   // I assume their instrument group will have the name of the instrument
-  const std::string instrName = "IN5";
+  m_instrumentName = "IN5";
 
+  // read in the data
   NXData dataGroup = entry.openNXData("data");
   MatrixWorkspace_sptr workspace;
   loadData( dataGroup, workspace );
+
+  // load the instrument from the IDF if it exists
+  runLoadInstrument( workspace );
 
   // Set the output workspace property
   setProperty("OutputWorkspace", workspace);
@@ -87,7 +90,7 @@ void LoadILL::loadData(NeXus::NXData& dataGroup, API::MatrixWorkspace_sptr& work
 {
   NXInt data = dataGroup.openIntData();
   int rank = data.rank();
-  std::cerr << "Data: " << rank << ' ' << data.dim0() << ' ' << data.dim1() << ' ' << data.dim2() << std::endl;
+  //std::cerr << "Data: " << rank << ' ' << data.dim0() << ' ' << data.dim1() << ' ' << data.dim2() << std::endl;
 
   size_t dim0 = static_cast<size_t>( data.dim0() );
   size_t dim1 = static_cast<size_t>( data.dim1() );
@@ -98,7 +101,7 @@ void LoadILL::loadData(NeXus::NXData& dataGroup, API::MatrixWorkspace_sptr& work
 
   // Now create the output workspace
   workspace = WorkspaceFactory::Instance().create("Workspace2D",nhist,nbins+1,nbins);
-  //workspace->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
+  workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   workspace->setYUnitLabel("Counts");
 
   // put the time of flight data into the x vector
@@ -170,6 +173,27 @@ int LoadILL::fileCheck(const std::string& filePath)
   return 0;
 }
 
+/**
+ * Run the sub-algorithm LoadInstrument.
+ * @param workspace :: The workspace to assign the loaded instrument to.
+ */
+void LoadILL::runLoadInstrument(API::MatrixWorkspace_sptr workspace)
+{
+
+  IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+
+  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  try
+  {
+    loadInst->setPropertyValue("InstrumentName", m_instrumentName);
+    loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", workspace);
+    loadInst->execute();
+  }
+  catch( ... )
+  {
+    g_log.information("Cannot load the instrument definition.");
+  }
+}
 
 } // namespace DataHandling
 } // namespace Mantid
