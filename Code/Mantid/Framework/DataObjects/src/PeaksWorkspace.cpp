@@ -231,12 +231,23 @@ namespace DataObjects
   }
 
   //---------------------------------------------------------------------------------------------
-  /** Create an instance of a Peak
+  /** Return a const reference to the Peak
+   * @param peakNum :: index of the peak to get.
+   * @return a reference to a Peak object.
+   */
+  const API::IPeak & PeaksWorkspace::getPeak(const int peakNum) const
+  {
+    if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 ) throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
+    return peaks[peakNum];
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /** Creates an instance of a Peak BUT DOES NOT ADD IT TO THE WORKSPACE
    * @param QLabFrame :: Q of the center of the peak, in reciprocal space
    * @param detectorDistance :: distance between the sample and the detector.
    * @return a pointer to a new Peak object.
    */
-  API::IPeak* PeaksWorkspace::createPeak(Kernel::V3D QLabFrame, double detectorDistance)
+  API::IPeak* PeaksWorkspace::createPeak(Kernel::V3D QLabFrame, double detectorDistance) const
   {
     return new Peak(this->getInstrument(), QLabFrame, detectorDistance);
   }
@@ -248,7 +259,11 @@ namespace DataObjects
     return peaks;
   }
 
-
+  /** Return a const reference to the Peaks vector */
+  const std::vector<Peak> & PeaksWorkspace::getPeaks() const
+  {
+    return peaks;
+  }
 
   //---------------------------------------------------------------------------------------------
   /// Return the memory used in bytes

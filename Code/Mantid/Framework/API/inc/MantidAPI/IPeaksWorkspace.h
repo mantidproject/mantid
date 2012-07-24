@@ -86,6 +86,13 @@ namespace API
     virtual IPeak & getPeak(int peakNum) = 0;
 
     //---------------------------------------------------------------------------------------------
+    /** Return a reference to the Peak (const version)
+     * @param peakNum :: index of the peak to get.
+     * @return a reference to a Peak object.
+     */
+    virtual const IPeak & getPeak(int peakNum) const = 0;
+
+    //---------------------------------------------------------------------------------------------
     /** Return a pointer to the Peak
      * @param peakNum :: index of the peak to get.
      * @return a pointer to a Peak object.
@@ -99,7 +106,7 @@ namespace API
      * @param detectorDistance :: distance between the sample and the detector.
      * @return a pointer to a new Peak object.
      */
-    virtual IPeak* createPeak(Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0) = 0;
+    virtual IPeak* createPeak(Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0) const = 0;
 
   };
 

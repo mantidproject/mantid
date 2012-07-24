@@ -91,8 +91,10 @@ namespace DataObjects
     void removePeak(int peakNum);
     void addPeak(const API::IPeak& ipeak);
     API::IPeak & getPeak(int peakNum);
-    API::IPeak* createPeak(Kernel::V3D QLabFrame, double detectorDistance=1.0);
+    const API::IPeak & getPeak(int peakNum) const;
+    API::IPeak* createPeak(Kernel::V3D QLabFrame, double detectorDistance=1.0) const;
     std::vector<Peak> & getPeaks();
+    const std::vector<Peak> & getPeaks() const;
 
     virtual size_t getMemorySize() const;
 

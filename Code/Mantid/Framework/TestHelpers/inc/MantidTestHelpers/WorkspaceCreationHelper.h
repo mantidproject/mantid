@@ -13,6 +13,15 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/Algorithm.h"
 
+namespace Mantid
+{
+  namespace DataObjects
+  {
+    class PeaksWorkspace;
+  }
+}
+
+
 namespace WorkspaceCreationHelper
 {
   /// Create a fibonacci series
@@ -152,6 +161,8 @@ namespace WorkspaceCreationHelper
   /// Function to create a fixed RebinnedOutput workspace
   Mantid::DataObjects::RebinnedOutput_sptr CreateRebinnedOutputWorkspace();
 
+  /// Create a simple peaks workspace containing the given number of peaks
+  boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace> createPeaksWorkspace(const int numPeaks = 2);
 }
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

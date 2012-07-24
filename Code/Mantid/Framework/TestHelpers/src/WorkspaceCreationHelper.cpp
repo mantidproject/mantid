@@ -20,6 +20,7 @@
 
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace WorkspaceCreationHelper
 {
@@ -1025,5 +1026,20 @@ namespace WorkspaceCreationHelper
 
      return outputWS;
    }
+
+  Mantid::DataObjects::PeaksWorkspace_sptr createPeaksWorkspace(const int numPeaks)
+  {
+    PeaksWorkspace_sptr peaksWS(new PeaksWorkspace());
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+    peaksWS->setInstrument(inst);
+
+    for (int i = 0; i < numPeaks; ++i)
+    {
+      Peak peak(inst, i, i+0.5);
+      peaksWS->addPeak(peak);
+    }
+
+    return peaksWS;
+  }
 
 }

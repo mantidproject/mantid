@@ -3,20 +3,17 @@ set ( SRC_FILES
 	src/AnvredCorrection.cpp
 	src/CalculateUMatrix.cpp
 	src/CentroidPeaks.cpp
+	src/CombinePeaksWorkspaces.cpp
 	src/FindSXPeaks.cpp
 	src/FindUBUsingFFT.cpp
 	src/FindUBUsingIndexedPeaks.cpp
 	src/FindUBUsingLatticeParameters.cpp
 	src/FindUBUsingMinMaxD.cpp
 	src/IndexPeaks.cpp
-	src/TransformHKL.cpp
-        src/ShowPossibleCells.cpp
-        src/SelectCellOfType.cpp
-        src/SelectCellWithForm.cpp
+	src/IndexSXPeaks.cpp
 	src/IntegratePeakTimeSlices.cpp
 	src/LoadHKL.cpp
 	src/LoadIsawPeaks.cpp
-    src/IndexSXPeaks.cpp
 	src/LoadIsawUB.cpp
 	src/MaskPeaksWorkspace.cpp
 	src/NormaliseVanadium.cpp
@@ -24,16 +21,20 @@ set ( SRC_FILES
 	src/PeakIntegration.cpp
 	src/PeakIntensityVsRadius.cpp
 	src/PredictPeaks.cpp
+	src/SCDCalibratePanels.cpp
+	src/SCDPanelErrors.cpp
 	src/SaveHKL.cpp
 	src/SaveIsawPeaks.cpp
 	src/SaveIsawUB.cpp
 	src/SavePeaksFile.cpp
-	src/SCDPanelErrors.cpp
-	src/SCDCalibratePanels.cpp
+	src/SelectCellOfType.cpp
+	src/SelectCellWithForm.cpp
 	src/SetGoniometer.cpp
 	src/SetUB.cpp
+	src/ShowPossibleCells.cpp
 	src/SortHKL.cpp
 	src/TOFExtinction.cpp
+	src/TransformHKL.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -41,18 +42,15 @@ set ( INC_FILES
 	inc/MantidCrystal/AnvredCorrection.h
 	inc/MantidCrystal/CalculateUMatrix.h
 	inc/MantidCrystal/CentroidPeaks.h
+	inc/MantidCrystal/CombinePeaksWorkspaces.h
 	inc/MantidCrystal/FindSXPeaks.h
 	inc/MantidCrystal/FindUBUsingFFT.h
 	inc/MantidCrystal/FindUBUsingIndexedPeaks.h
 	inc/MantidCrystal/FindUBUsingLatticeParameters.h
 	inc/MantidCrystal/FindUBUsingMinMaxD.h
+	inc/MantidCrystal/GSLFunctions.h
 	inc/MantidCrystal/IndexPeaks.h
-	inc/MantidCrystal/TransformHKL.h
-	inc/MantidCrystal/ShowPossibleCells.h
-        inc/MantidCrystal/SelectCellOfType.h
-        inc/MantidCrystal/SelectCellWithForm.h
-    inc/MantidCrystal/IndexSXPeaks.h
-        inc/MantidCrystal/GSLFunctions.h
+	inc/MantidCrystal/IndexSXPeaks.h
 	inc/MantidCrystal/IntegratePeakTimeSlices.h
 	inc/MantidCrystal/LoadHKL.h
 	inc/MantidCrystal/LoadIsawPeaks.h
@@ -63,34 +61,35 @@ set ( INC_FILES
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PeakIntensityVsRadius.h
 	inc/MantidCrystal/PredictPeaks.h
+	inc/MantidCrystal/SCDCalibratePanels.h
+	inc/MantidCrystal/SCDPanelErrors.h
 	inc/MantidCrystal/SaveHKL.h
 	inc/MantidCrystal/SaveIsawPeaks.h
 	inc/MantidCrystal/SaveIsawUB.h
 	inc/MantidCrystal/SavePeaksFile.h
-	inc/MantidCrystal/SCDPanelErrors.h
-	inc/MantidCrystal/SCDCalibratePanels.h
+	inc/MantidCrystal/SelectCellOfType.h
+	inc/MantidCrystal/SelectCellWithForm.h
 	inc/MantidCrystal/SetGoniometer.h
 	inc/MantidCrystal/SetUB.h
+	inc/MantidCrystal/ShowPossibleCells.h
 	inc/MantidCrystal/SortHKL.h
 	inc/MantidCrystal/TOFExtinction.h
+	inc/MantidCrystal/TransformHKL.h
 )
 
 set ( TEST_FILES
 	test/AnvredCorrectionTest.h
 	test/CalculateUMatrixTest.h
 	test/CentroidPeaksTest.h
+	test/CombinePeaksWorkspacesTest.h
 	test/FindSXPeaksTest.h
 	test/FindUBUsingFFTTest.h
 	test/FindUBUsingIndexedPeaksTest.h
 	test/FindUBUsingLatticeParametersTest.h
 	test/FindUBUsingMinMaxDTest.h
 	test/IndexPeaksTest.h
-	test/TransformHKLTest.h
-        test/ShowPossibleCellsTest.h
-        test/SelectCellOfTypeTest.h
-        test/SelectCellWithFormTest.h
-    test/IndexSXPeaksTest.h
- 	test/IntegratePeakTimeSlicesTest.h
+	test/IndexSXPeaksTest.h
+	test/IntegratePeakTimeSlicesTest.h
 	test/LoadHKLTest.h
 	test/LoadIsawPeaksTest.h
 	test/LoadIsawUBTest.h
@@ -99,15 +98,19 @@ set ( TEST_FILES
 	test/PeakIntegrationTest.h
 	test/PeakIntensityVsRadiusTest.h
 	test/PredictPeaksTest.h
+	test/SCDCalibratePanelsTest.h
+	test/SCDPanelErrorsTest.h
 	test/SaveHKLTest.h
 	test/SaveIsawPeaksTest.h
 	test/SaveIsawUBTest.h
 	test/SavePeaksFileTest.h
-	test/SCDPanelErrorsTest.h
-	test/SCDCalibratePanelsTest.h
+	test/SelectCellOfTypeTest.h
+	test/SelectCellWithFormTest.h
 	test/SetGoniometerTest.h
 	test/SetUBTest.h
+	test/ShowPossibleCellsTest.h
 	test/SortHKLTest.h
+	test/TransformHKLTest.h
 )
 
 if(UNITY_BUILD)
