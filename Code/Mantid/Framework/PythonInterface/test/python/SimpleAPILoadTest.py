@@ -3,7 +3,7 @@
 """
 import unittest
 from mantid.simpleapi import Load, LoadDialog
-from mantid import mtd
+from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
 
 class SimpleAPILoadTest(unittest.TestCase):
     
@@ -11,11 +11,35 @@ class SimpleAPILoadTest(unittest.TestCase):
         """Clear up after each test"""
         mtd.clear()
     
+    def test_Load_uses_lhs_var_as_workspace_name_for_single_item_return(self):
+        data = Load('IRS21360.raw')
+        self._do_name_check(data, 'data')
+    
     def test_Load_returns_correct_args_when_extra_output_props_are_added_at_execute_time(self):
         try:
             data, monitors = Load('IRS21360.raw', LoadMonitors='Separate')
         except Exception, exc:
             self.fail("An error occurred when returning outputs declared at algorithm execution: '%s'" % str(exc))
+        
+        self.assertTrue(isinstance(data, MatrixWorkspace))
+        self._do_name_check(data, 'data')
+         
+        self.assertTrue(isinstance(monitors, MatrixWorkspace))
+        self._do_name_check(monitors, 'data_Monitors')
+    
+    def test_Load_returns_just_the_WorkspaceGroup_when_final_output_is_a_group(self):
+        data = Load('CSP78173.raw')
+        self.assertTrue(isinstance(data, WorkspaceGroup))
+
+    def test_Load_returns_only_the_WorkspaceGroups_when_final_output_is_a_group_and_monitors_are_separated(self):
+        outputs = Load('CSP78173.raw', LoadMonitors='Separate')
+        self.assertTrue(isinstance(outputs, tuple))
+        self.assertEquals(len(outputs), 2)
+        
+        self.assertTrue(isinstance(outputs[0], WorkspaceGroup))
+        self._do_name_check(outputs[0], 'outputs')
+        self.assertTrue(isinstance(outputs[1], WorkspaceGroup))
+        self._do_name_check(outputs[1], 'outputs_Monitors')
     
     def test_Load_call_with_just_filename_executes_correctly(self):
         try:
@@ -56,6 +80,9 @@ class SimpleAPILoadTest(unittest.TestCase):
             if msg != "Can only display properties dialog in gui mode":
                 self.fail("Dialog function raised the correct exception type but the message was wrong")
 
-
+    def _do_name_check(self, wkspace, expected_name):
+        self.assertEqual(wkspace.getName(), expected_name)
+        self.assertTrue(expected_name in mtd)
+        
 if __name__ == '__main__':
     unittest.main()

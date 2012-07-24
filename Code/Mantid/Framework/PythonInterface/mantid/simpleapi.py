@@ -105,8 +105,9 @@ def Load(*args, **kwargs):
     _set_properties(algm, **final_keywords)
     algm.execute()
         
-    # If a WorkspaceGroup was loaded then there will be OutputWorkspace_ properties about, don't include them
-    return gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','OutputWorkspace_.*'])
+    # If a WorkspaceGroup was loaded then there will be a set of properties that have an underscore in the name
+    # and users will simply expect the groups to be returned NOT the groups + workspaces.
+    return gather_returns('Load', lhs, algm, ignore_regex=['LoaderName','.*_.*'])
 
 # Have a better load signature for autocomplete
 _signature = "\bFilename"
@@ -361,6 +362,7 @@ def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
                variables
         @param algm_obj :: An executed algorithm object
         @param ignore_regex :: A list of strings containing regex expressions to match against property names
+                               that will be ignored & not returned
     """
     import re
     def ignore_property(name, ignore_regex):
