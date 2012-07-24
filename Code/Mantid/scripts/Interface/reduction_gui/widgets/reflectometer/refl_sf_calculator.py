@@ -235,8 +235,8 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             # For REFM it's the other way around
             if self.short_name == "REFM":
                 is_pixel_y = not is_pixel_y
-                
-            min, max = data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y,
+            
+            min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
                                                                       callback=call_back,
                                                                       range_min=range_min,
                                                                       range_max=range_max,
