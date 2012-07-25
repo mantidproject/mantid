@@ -114,7 +114,17 @@ public:
     TS_ASSERT( !alg.isExecuted() )
   }
 
+  void test_name()
+  {
+    ConvertToDetectorFaceMD alg;
+    TS_ASSERT_EQUALS("ConvertToDetectorFaceMD", alg.name())
+  }
 
+  void test_categories()
+  {
+    ConvertToDetectorFaceMD alg;
+    TS_ASSERT_EQUALS("MDAlgorithms", alg.category());
+  }
 
   //----------------------------------------------------------------------------
   void test_oneBank()
