@@ -154,7 +154,7 @@ namespace Mantid
        * @param statistic :: Defines how to calculate the single value from series (default=Mean)
        * @return A log as a single value using the given statistic type
        */
-      double getLogAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const;
+      double getLogAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const { return getPropertyAsSingleValue(name, statistic); }
       
       /// Save the run to a NeXus file with a given group name
       void saveNexus(::NeXus::File * file, const std::string & group) const;
