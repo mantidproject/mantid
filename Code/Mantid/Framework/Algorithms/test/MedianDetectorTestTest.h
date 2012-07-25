@@ -133,6 +133,43 @@ public:
     TS_ASSERT_EQUALS(numFailed, 0);
   }
 
+  void testLevelsUp()
+  {
+      //load ARCS instrument, with all detectors 1
+      //With the solid angle correction turned on, and SignificanceTest = 0.01 should mask the short banks
+      //With the solid angle corection on, and LevelsUp=1, should be no failures
+      // Load the empty instrument
+      Mantid::DataHandling::LoadEmptyInstrument loader;
+      loader.initialize();
+      std::string inputFile = "ARCS_Definition.xml";
+      loader.setPropertyValue("Filename", inputFile);
+      loader.setPropertyValue("OutputWorkspace", "SolidAngle");
+      loader.execute();
+
+      MedianDetectorTest alg;
+      TS_ASSERT_THROWS_NOTHING(alg.initialize());
+      TS_ASSERT(alg.isInitialized());
+      // Set the properties
+      alg.setPropertyValue("InputWorkspace", "SolidAngle");
+      alg.setPropertyValue("OutputWorkspace","MedianDetectorTestOutput");
+      // set significance test to small
+      alg.setProperty("StartWorkspaceIndex",2);//no monitors
+      alg.setProperty("SignificanceTest", 0.01);
+      alg.setProperty("CorrectForSolidAngle",true);
+
+
+      TS_ASSERT_THROWS_NOTHING( alg.execute());
+      TS_ASSERT( alg.isExecuted() );
+      int numFailed = alg.getProperty("NumberOfFailures");
+      TS_ASSERT_EQUALS(numFailed, 2048);
+
+      alg.setProperty("LevelsUp","1");
+      TS_ASSERT_THROWS_NOTHING( alg.execute());
+      TS_ASSERT( alg.isExecuted() );
+      numFailed = alg.getProperty("NumberOfFailures");
+      TS_ASSERT_EQUALS(numFailed, 0);
+  }
+
   MedianDetectorTestTest() : m_IWSName("MedianDetectorTestInput")
   {
     using namespace Mantid;
