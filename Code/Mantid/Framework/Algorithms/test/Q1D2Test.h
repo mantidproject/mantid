@@ -80,6 +80,60 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
     
+  void testOutputParts()
+  {
+    Mantid::Algorithms::Q1D2 Q1D2;
+    Q1D2.initialize();
+
+    const std::string outputWS("Q1D2Test_OutputParts");
+    TS_ASSERT_THROWS_NOTHING(
+      Q1D2.setProperty("DetBankWorkspace", m_inputWS);
+    Q1D2.setProperty("WavelengthAdj", m_wavNorm);
+    Q1D2.setPropertyValue("OutputWorkspace",outputWS);
+    Q1D2.setPropertyValue("OutputBinning","0,0.02,0.5");
+    Q1D2.setProperty("OutputParts", true);
+
+    // The property PixelAdj is undefined but that shouldn't cause this to throw
+    Q1D2.execute()
+      )
+
+      TS_ASSERT( Q1D2.isExecuted() )
+
+      Mantid::API::MatrixWorkspace_sptr result;
+    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+      (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) )
+
+      Mantid::API::MatrixWorkspace_sptr sumOfCounts;
+    TS_ASSERT_THROWS_NOTHING( sumOfCounts = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+      (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS+"_sumOfCounts")) )
+
+      Mantid::API::MatrixWorkspace_sptr sumOfNormFactors;
+    TS_ASSERT_THROWS_NOTHING( sumOfNormFactors = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+      (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS+"_sumOfNormFactors")) )
+
+
+    TS_ASSERT_DELTA( result->readY(0)[1], 1131778.3299, 0.01 )
+    TS_ASSERT_DELTA( sumOfCounts->readY(0)[1], 1016.8990, 0.01 )
+    TS_ASSERT_DELTA( sumOfNormFactors->readY(0)[1], 0.00089849, 0.01 )
+
+    TS_ASSERT_DELTA( result->readE(0)[1], 57964.04, 0.01 )
+    TS_ASSERT_DELTA( sumOfCounts->readE(0)[1], 31.888, 0.01 )
+    TS_ASSERT_DELTA( sumOfNormFactors->readE(0)[1], 3.6381851288154988e-005, 0.01 )
+
+    TS_ASSERT_EQUALS( result->getNumberHistograms(), 1 )
+    TS_ASSERT_EQUALS( sumOfCounts->getNumberHistograms(), 1 )
+    TS_ASSERT_EQUALS( sumOfNormFactors->getNumberHistograms(), 1 )
+
+    TS_ASSERT_EQUALS( result->dataY(0).size(), 25 )
+    TS_ASSERT_EQUALS( sumOfCounts->dataY(0).size(), 25 )
+    //TS_ASSERT_EQUALS( sumOfNormFactors->getNumberHistograms(), 1 )
+
+
+      Mantid::API::AnalysisDataService::Instance().remove(outputWS);
+      Mantid::API::AnalysisDataService::Instance().remove(outputWS+"_sumOfCounts");
+      Mantid::API::AnalysisDataService::Instance().remove(outputWS+"_sumOfNormFactors");
+  }
+
   void testPixelAdj()
   {
     Mantid::Algorithms::Q1D2 Q1D;

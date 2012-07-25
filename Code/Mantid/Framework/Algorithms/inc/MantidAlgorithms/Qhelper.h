@@ -44,6 +44,9 @@ public:
 
   size_t waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS, const double RCut, const double WCut, 
                                  const size_t specInd) const;
+
+  void outputParts(API::Algorithm* alg, API::MatrixWorkspace_sptr sumOfCounts, 
+                   API::MatrixWorkspace_sptr sumOfNormFactors);
 private:
   /// the experimental workspace with counts across the detector
 /*  API::MatrixWorkspace_const_sptr m_dataWS;

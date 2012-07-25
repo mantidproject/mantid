@@ -69,6 +69,11 @@ void Q1D2::init()
   declareProperty("WaveCut", 0.0, mustBePositive,
     "To increase resolution by starting to remove some wavelengths below this"
     "freshold (angstrom)");
+  declareProperty("OutputParts", false,
+    "Set to true to output two additional workspaces which will have the names OutputWorkspace_sumOfCounts "
+    "OutputWorkspace_sumOfNormFactors. The division of _sumOfCounts and _sumOfNormFactors equals the workspace"
+    " returned by the property OutputWorkspace "
+    "(default is false)." );
 }
 /**
   @ throw invalid_argument if the workspaces are not mututially compatible
@@ -193,6 +198,27 @@ void Q1D2::exec()
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  bool doOutputParts = getProperty("OutputParts");
+  if (doOutputParts)
+  {
+      MatrixWorkspace_sptr ws_sumOfCounts = WorkspaceFactory::Instance().create(outputWS);
+      for (size_t i = 0; i < ws_sumOfCounts->dataY(0).size(); i++)
+      {
+        ws_sumOfCounts->dataY(0)[i] = outputWS->dataY(0)[i];
+        ws_sumOfCounts->dataE(0)[i] = sqrt(outputWS->dataE(0)[i]);
+      }      
+
+      MatrixWorkspace_sptr ws_sumOfNormFactors = WorkspaceFactory::Instance().create(outputWS);
+      for (size_t i = 0; i < ws_sumOfNormFactors->dataY(0).size(); i++)
+      {
+        ws_sumOfNormFactors->dataY(0)[i] = normSum[i];
+        ws_sumOfNormFactors->dataE(0)[i] = sqrt(normError2[i]);
+      }
+
+      helper.outputParts(this, ws_sumOfCounts, ws_sumOfNormFactors);
+  }
+
 
   progress.report("Normalizing I(Q)");
   //finally divide the number of counts in each output Q bin by its weighting
