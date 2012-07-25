@@ -148,7 +148,8 @@ namespace Mantid
         throw std::runtime_error("No instrument");
       }
 
-      g_log.information() << detectorList.size() << " spectra are masked\n";
+      g_log.information() << maskWS->getNumberMasked() << " spectra are masked\n";
+      g_log.information() << detectorList.size() << " detectors are masked\n";
       setProperty("OutputWorkspace", maskWS);
       setProperty("DetectorList", detectorList);
     }
