@@ -128,9 +128,9 @@ namespace WorkflowAlgorithms
     setPropertySettings("DetVanIntRangeHigh",
         new VisibleWhenProperty("UseBoundsForDetVan", IS_EQUAL_TO, "1"));
     std::vector<std::string> detvanIntRangeUnits;
-    detvanIntRangeUnits.push_back("DeltaE");
+    detvanIntRangeUnits.push_back("Energy");
     detvanIntRangeUnits.push_back("Wavelength");
-    declareProperty("DetVanIntRangeUnits", "DeltaE",
+    declareProperty("DetVanIntRangeUnits", "Energy",
         boost::make_shared<StringListValidator>(detvanIntRangeUnits),
         "Options for the units on the detector vanadium integration.");
     setPropertySettings("DetVanIntRangeUnits",
