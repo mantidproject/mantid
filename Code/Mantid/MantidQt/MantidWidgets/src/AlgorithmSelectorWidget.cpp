@@ -5,6 +5,64 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+namespace {
+  // Customised QCompleter to match anywhere in an algorithm name, not just from the start
+  // Adapted from python code in http://stackoverflow.com/questions/5129211/qcompleter-custom-completion-rules
+  class InlineCompleter : public QCompleter
+  {
+  public:
+    InlineCompleter(QWidget * parent = NULL)
+     : QCompleter(parent), m_local_completion_prefix(), m_source_model(NULL)
+    {
+    }
+
+    void setModel ( QAbstractItemModel * model )
+    {
+      m_source_model = model;
+      QCompleter::setModel(m_source_model);
+    }
+
+    QStringList splitPath ( const QString & path ) const
+    {
+      m_local_completion_prefix = path;
+      updateModel();
+      QStringList sl;
+      sl << "";
+      return sl;
+    }
+
+  private:
+    void updateModel() const
+    {
+      class InnerProxyModel : public QSortFilterProxyModel
+      {
+      public:
+        // This method is called for each algorithm and returns true if the text
+        // entered so far matches anywhere in the algorithm name
+        bool filterAcceptsRow(int source_row, const QModelIndex &source_parent) const
+        {
+          // Only start matching once the 2nd character has been typed
+          if ( local_completion_prefix.size() < 2 ) return false;
+
+          QModelIndex index0 = sourceModel()->index(source_row,0,source_parent);
+          return sourceModel()->data(index0).toString().lower().contains(local_completion_prefix.lower());
+        }
+        QString local_completion_prefix;
+      };
+
+      InnerProxyModel * proxy_model = new InnerProxyModel;
+      proxy_model->local_completion_prefix = m_local_completion_prefix;
+      proxy_model->setSourceModel(m_source_model);
+      // Yes I know this is evil, but it's necessary to call the current method
+      // from the overridden splitPath above.
+      const_cast<InlineCompleter *>(this)->QCompleter::setModel(proxy_model);
+    }
+
+    mutable QString m_local_completion_prefix;
+    QAbstractItemModel * m_source_model;
+  };
+}
+
 namespace MantidQt
 {
 namespace MantidWidgets
@@ -30,11 +88,21 @@ namespace MantidWidgets
 
     m_findAlg = new FindAlgComboBox;
     m_findAlg->setEditable(true);
-    m_findAlg->completer()->setCompletionMode(QCompleter::PopupCompletion);
+    m_findAlg->setInsertPolicy(QComboBox::NoInsert);
+
+    // Must use full InlineCompleter type for pointer as overridden
+    // setModel method called below is NOT virtual.
+    InlineCompleter * completer = new InlineCompleter(m_findAlg);
+    completer->setCompletionMode(QCompleter::PopupCompletion);
+    completer->setModel(m_findAlg->model());
+    m_findAlg->setCompleter(completer);
+
     connect(m_findAlg,SIGNAL(enterPressed()),
         this,SLOT(executeSelected()));
     connect(m_findAlg,SIGNAL(editTextChanged(const QString&)),
         this,SLOT(findAlgTextChanged(const QString&)));
+    connect(completer,SIGNAL(highlighted(const QString&)),
+        m_findAlg,SLOT(setEditText(const QString&)));
 
     m_execButton = new QPushButton("Execute");
     connect(m_execButton,SIGNAL(clicked()),
