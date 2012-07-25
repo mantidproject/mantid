@@ -10,6 +10,7 @@
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidAPI/FunctionDomain1D.h" 
 #include "MantidAPI/FunctionValues.h" 
+#include "MantidAPI/FunctionFactory.h"
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -114,10 +115,18 @@ public:
     TS_ASSERT_EQUALS("ProductLinearExp", func.name());
   }
 
-  void test_catagory()
+  void test_category()
   {
     ProductLinearExp func;
     TS_ASSERT_EQUALS("Calibrate", func.category());
+  }
+
+  void test_registered_with_factory()
+  {
+    IFunction_sptr func = FunctionFactory::Instance().createFunction("ProductLinearExp");
+    TS_ASSERT(func != NULL);
+    TS_ASSERT_EQUALS(func->name(), "ProductLinearExp");
+    TS_ASSERT(boost::dynamic_pointer_cast<ProductLinearExp>(func) != NULL);
   }
 
   void test_set_parameters()
