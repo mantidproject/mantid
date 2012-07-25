@@ -12807,7 +12807,7 @@ void ApplicationWindow::createActions()
   actionShowPlotWizard->setShortcut( tr("Ctrl+Alt+W") );
   connect(actionShowPlotWizard, SIGNAL(activated()), this, SLOT(showPlotWizard()));
 
-  actionShowConfigureDialog = new QAction(tr("&Preferences..."), this);
+  actionShowConfigureDialog = new QAction(QIcon(":/configure.png"), tr("&Preferences..."), this);
   connect(actionShowConfigureDialog, SIGNAL(activated()), this, SLOT(showPreferencesDialog()));
 
   actionShowCurvesDialog = new QAction(QIcon(getQPixmap("curves_xpm")), tr("Add/Remove &Curve..."), this);
