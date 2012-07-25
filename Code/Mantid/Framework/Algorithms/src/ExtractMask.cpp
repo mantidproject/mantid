@@ -81,21 +81,6 @@ namespace Mantid
       // List masked of detector IDs
       std::vector<detid_t> detectorList;
 
-      if (inputMaskWS)
-      {
-        g_log.notice() << "Input workspace is a MaskWorkspace. Cloning input workspace.\n";
-        IAlgorithm_sptr childAlg = createSubAlgorithm("CloneWorkspace", 0.,1.);
-        childAlg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
-        childAlg->executeAsSubAlg();
-
-        Workspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
-        maskWS = boost::dynamic_pointer_cast<DataObjects::MaskWorkspace>(outputWS);
-
-        std::set<detid_t> detectorSet = maskWS->getMaskedDetectors();
-        detectorList.assign(detectorSet.begin(), detectorSet.end());
-      }
-      else
-      {
       if (instr)
       {
         const int nHist = static_cast<int>(inputWS->getNumberHistograms());
@@ -121,6 +106,11 @@ namespace Mantid
           try
           {
             inputDet = inputWS->getDetector(i);
+            if (inputWSIsSpecial) {
+              inputIsMasked = inputMaskWS->isMaskedIndex(i);
+            }
+            // special workspaces can mysteriously have the mask bit set
+            // but only check if we haven't already decided to mask the spectrum
             if( !inputIsMasked && inputDet->isMasked() )
             {
               inputIsMasked = true;
@@ -157,9 +147,8 @@ namespace Mantid
         // TODO should fill this in
         throw std::runtime_error("No instrument");
       }
-      }
-      g_log.information() << maskWS->getNumberMasked() << " spectra are masked\n";
-      g_log.information() << detectorList.size() << " detectors are masked\n";
+
+      g_log.information() << detectorList.size() << " spectra are masked\n";
       setProperty("OutputWorkspace", maskWS);
       setProperty("DetectorList", detectorList);
     }
