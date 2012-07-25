@@ -151,7 +151,7 @@ namespace Mantid
     int NormaliseByDetector::version() const { return 1;};
 
     /// Algorithm's category for identification. @see Algorithm::category
-    const std::string NormaliseByDetector::category() const { return "General";}
+    const std::string NormaliseByDetector::category() const { return "CorrectionFunctions\\NormalisationCorrections";}
 
     //----------------------------------------------------------------------------------------------
     /// Sets documentation strings for this algorithm

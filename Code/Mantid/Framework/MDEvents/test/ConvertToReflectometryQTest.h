@@ -62,6 +62,18 @@ public:
     Mantid::API::FrameworkManager::Instance();
   }
 
+  void test_catagory()
+  {
+    ConvertToReflectometryQ alg;
+    TS_ASSERT_EQUALS("Reflectometry", alg.category());
+  }
+
+  void test_name()
+  {
+    ConvertToReflectometryQ alg;
+    TS_ASSERT_EQUALS("ConvertToReflectometryQ", alg.name());
+  }
+
   void test_Init()
   {
     ConvertToReflectometryQ alg;

@@ -89,6 +89,18 @@ public:
   static ImportMDHistoWorkspaceTest *createSuite() { return new ImportMDHistoWorkspaceTest(); }
   static void destroySuite( ImportMDHistoWorkspaceTest *suite ) { delete suite; }
 
+  void test_catagory()
+  {
+    ImportMDHistoWorkspace alg;
+    TS_ASSERT_EQUALS("MDAlgorithms", alg.category());
+  }
+
+  void test_name()
+  {
+    ImportMDHistoWorkspace alg;
+    TS_ASSERT_EQUALS("ImportMDHistoWorkspace", alg.name());
+  }
+
   void test_Init()
   {
     ImportMDHistoWorkspace alg;

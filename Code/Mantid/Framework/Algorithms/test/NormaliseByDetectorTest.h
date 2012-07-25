@@ -301,6 +301,17 @@ public:
   static NormaliseByDetectorTest *createSuite() { return new NormaliseByDetectorTest(); }
   static void destroySuite( NormaliseByDetectorTest *suite ) { delete suite; }
 
+  void test_catagory()
+  {
+    NormaliseByDetector alg;
+    TS_ASSERT_EQUALS("CorrectionFunctions\\NormalisationCorrections", alg.category());
+  }
+
+  void test_name()
+  {
+    NormaliseByDetector alg;
+    TS_ASSERT_EQUALS("NormaliseByDetector", alg.name());
+  }
 
   void test_Init()
   {

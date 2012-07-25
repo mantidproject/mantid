@@ -89,7 +89,7 @@ namespace MDEvents
   int ImportMDHistoWorkspace::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string ImportMDHistoWorkspace::category() const { return "General";}
+  const std::string ImportMDHistoWorkspace::category() const { return "MDAlgorithms";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm

@@ -43,6 +43,17 @@ public:
   static CreateMDHistoWorkspaceTest *createSuite() { return new CreateMDHistoWorkspaceTest(); }
   static void destroySuite( CreateMDHistoWorkspaceTest *suite ) { delete suite; }
 
+  void test_catagory()
+  {
+    CreateMDHistoWorkspace alg;
+    TS_ASSERT_EQUALS("MDAlgorithms", alg.category());
+  }
+
+  void test_name()
+  {
+    CreateMDHistoWorkspace alg;
+    TS_ASSERT_EQUALS("CreateMDHistoWorkspace", alg.name());
+  }
 
   void test_Init()
   {

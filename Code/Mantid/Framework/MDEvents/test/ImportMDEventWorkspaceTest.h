@@ -133,6 +133,17 @@ public:
   static ImportMDEventWorkspaceTest *createSuite() { return new ImportMDEventWorkspaceTest(); }
   static void destroySuite( ImportMDEventWorkspaceTest *suite ) { delete suite; }
 
+  void test_catagory()
+  {
+    ImportMDEventWorkspace alg;
+    TS_ASSERT_EQUALS("MDAlgorithms", alg.category());
+  }
+
+  void test_name()
+  {
+    ImportMDEventWorkspace alg;
+    TS_ASSERT_EQUALS("ImportMDEventWorkspace", alg.name());
+  }
 
   void test_Init()
   {
