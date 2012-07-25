@@ -54,6 +54,81 @@ public:
     AnalysisDataService::Instance().remove(outputName);
   }
 
+
+  void testParametersOnWorkspace()
+  {
+    Mantid::DataObjects::Workspace2D_sptr testWS = createTestWorkspaceWithMonitors();
+
+    testWS->instrumentParameters().addString(testWS->getInstrument()->getChild(0).get(),"ei-mon1-spec", "1");
+    testWS->instrumentParameters().addString(testWS->getInstrument()->getChild(0).get(),"ei-mon2-spec", "2");
+    Property *incident_energy_guess = new PropertyWithValue<double>("EnergyRequest",15.0,Direction::Input);
+    testWS->mutableRun().addProperty(incident_energy_guess, true);
+
+
+
+    // This algorithm needs a name attached to the workspace
+    const std::string outputName("eiNoParTest");
+    AnalysisDataService::Instance().add(outputName, testWS);
+
+    GetEi2 alg1;
+    alg1.initialize();
+    alg1.setPropertyValue("InputWorkspace", outputName);
+    //alg1.setProperty("Monitor1Spec", 1);
+    alg1.setProperty("Monitor2Spec", 2);
+    alg1.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg1.execute());
+
+    // Test output answers
+    const double expected_ei = 15.00322845;
+    const double ei = alg1.getProperty("IncidentEnergy");
+
+    TS_ASSERT_DELTA(ei, expected_ei, 1e-08);
+    // and verify it has been store on the run object
+    Property *ei_runprop = testWS->run().getProperty("Ei");
+    PropertyWithValue<double> *ei_propvalue = dynamic_cast<PropertyWithValue<double> *>(ei_runprop);
+    TS_ASSERT_DELTA((*ei_propvalue)(), expected_ei, 1e-08);
+
+    // T0 value
+    const double tzero = alg1.getProperty("Tzero");
+    const double expected_tzero = 3.2641273;
+    TS_ASSERT_DELTA(tzero, expected_tzero, 1e-08);
+
+    AnalysisDataService::Instance().remove(outputName);
+  }
+
+  void testThrowsMon1()
+  {
+      Workspace2D_sptr testWS = createTestWorkspaceWithMonitors();
+      // This algorithm needs a name attached to the workspace
+      const std::string outputName("eitest1");
+      AnalysisDataService::Instance().add(outputName, testWS);
+
+      GetEi2 alg;
+      alg.initialize();
+      alg.setPropertyValue("InputWorkspace", outputName);
+      alg.setProperty("Monitor2Spec", 2);
+      alg.setProperty("EnergyEstimate", 15.0);
+      alg.setRethrows(true);
+      TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::invalid_argument &e, std::string(e.what()), "Could not determine spectrum number to use. Try to set it explicitly" );
+      AnalysisDataService::Instance().remove(outputName);
+  }
+  void testThrowsEi()
+  {
+      Workspace2D_sptr testWS = createTestWorkspaceWithMonitors();
+      // This algorithm needs a name attached to the workspace
+      const std::string outputName("eitest2");
+      AnalysisDataService::Instance().add(outputName, testWS);
+
+      GetEi2 alg;
+      alg.initialize();
+      alg.setPropertyValue("InputWorkspace", outputName);
+      alg.setProperty("Monitor1Spec", 1);
+      alg.setProperty("Monitor2Spec", 2);
+      alg.setRethrows(true);
+      TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::invalid_argument &e, std::string(e.what()), "Could not find an energy guess" );
+      AnalysisDataService::Instance().remove(outputName);
+  }
+
 private:
 
   Workspace2D_sptr createTestWorkspaceWithMonitors()

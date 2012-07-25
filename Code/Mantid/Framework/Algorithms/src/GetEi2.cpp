@@ -78,14 +78,13 @@ void GetEi2::init()
     "microseconds");
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
-  specid_t minimum=1<<31;//minimum int32_t
-  declareProperty("Monitor1Spec", minimum,// mustBePositive,
+  declareProperty("Monitor1Spec", EMPTY_INT(), mustBePositive,
     "The spectrum number of the output of the first monitor, e.g. MAPS 41474, MARI 2, MERLIN 69634\n");
-  declareProperty("Monitor2Spec", minimum,// mustBePositive,
+  declareProperty("Monitor2Spec", EMPTY_INT(), mustBePositive,
     "The spectrum number of the output of the second monitor e.g. MAPS 41475, MARI 3, MERLIN 69638\n");
   auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0.0);
-  declareProperty("EnergyEstimate", -1.0 , positiveDouble,
+  declareProperty("EnergyEstimate", EMPTY_DBL() , positiveDouble,
     "An approximate value for the typical incident energy, energy of\n"
     "neutrons leaving the source (meV)");
   declareProperty("FixEi", false, "If true, the incident energy will be set to the value of the \n"
@@ -118,6 +117,18 @@ void GetEi2::exec()
   m_input_ws = getProperty("InputWorkspace");
   m_fixedei = getProperty("FixEi");
   double initial_guess = getProperty("EnergyEstimate");
+  //check if incident energy guess is left empty, and try to find it as EnergyRequest parameter
+  if (initial_guess==EMPTY_DBL())
+  {
+      if (m_input_ws->run().hasProperty("EnergyRequest"))
+      {
+        initial_guess=m_input_ws->getLogAsSingleValue("EnergyRequest");
+      }
+      else
+      {
+          throw std::invalid_argument("Could not find an energy guess");
+      }
+  }
   double incident_energy = calculateEi(initial_guess);
   if( !m_fixedei )
   {
@@ -144,7 +155,7 @@ double GetEi2::calculateEi(const double initial_guess)
   specid_t mon1=monitor1_spec,mon2=monitor2_spec;
 
 
-  if (mon1<0)
+  if (mon1==EMPTY_INT())
   {
       const ParameterMap& pmap = m_input_ws->constInstrumentParameters();
       Instrument_const_sptr instrument=m_input_ws->getInstrument();
@@ -154,7 +165,7 @@ double GetEi2::calculateEi(const double initial_guess)
         mon1=boost::lexical_cast<specid_t>(par->asString());
       }
   }
-  if (mon2<0)
+  if (mon2==EMPTY_INT())
   {
       const ParameterMap& pmap = m_input_ws->constInstrumentParameters();
       Instrument_const_sptr instrument=m_input_ws->getInstrument();
@@ -164,7 +175,7 @@ double GetEi2::calculateEi(const double initial_guess)
         mon2=boost::lexical_cast<specid_t>(par->asString());
       }
   }
-  if ((mon1<0) || (mon2<0))
+  if ((mon1==EMPTY_INT()) || (mon2==EMPTY_INT()))
   {
       throw std::invalid_argument("Could not determine spectrum number to use. Try to set it explicitly");
   }
