@@ -712,6 +712,133 @@ public:
   }
 
 
+   //----------------------------------------------------------------------
+  // Spin Echo Length tests
+  //----------------------------------------------------------------------
+
+  void testSpinEchoLength_unitID()
+  {
+    TS_ASSERT_EQUALS( delta.unitID(), "SpinEchoLength" )
+  }
+
+  void testSpinEchoLength_caption()
+  {
+    TS_ASSERT_EQUALS( delta.caption(), "Spin Echo Length" )
+  }
+
+  void testSpinEchoLength_label()
+  {
+    TS_ASSERT_EQUALS( delta.label(), "nm" )
+  }
+
+  void testSpinEchoLength_cast()
+  {
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&delta) );
+    TS_ASSERT_EQUALS(u->unitID(), "SpinEchoLength");
+  }
+
+  void testSpinEchoLength_toTOF()
+  {
+    std::vector<double> x(1, 4.5), y(1, 1.5);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING( delta.toTOF(x,y,1.0,1.0,1.0,0,2.0,1.0) )
+    TS_ASSERT_DELTA( x[0], 758.3352, 0.0001 ) 
+    TS_ASSERT( yy == y )
+
+    TS_ASSERT_DELTA( delta.convertSingleToTOF(4.5, 1.0,1.0,1.0,0,2.0,1.0),  758.3352, 0.0001 );
+  }
+
+  void testSpinEchoLength_fromTOF()
+  {
+    std::vector<double> x(1, 1000.5), y(1, 1.5);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING( delta.fromTOF(x,y,1.0,1.0,1.0,0,2.0,1.0) )
+    TS_ASSERT_DELTA( x[0], 7.8329, 0.0001 ) 
+    TS_ASSERT( yy == y )
+
+    TS_ASSERT_DELTA( delta.convertSingleFromTOF(1000.5, 1.0,1.0,1.0,0,2.0,1.0), 7.8329, 0.0001);
+  }
+
+  void testSpinEchoLength_invalidfromTOF()
+  {
+    std::vector<double> x(1, 1000.5), y(1, 1.5);
+    //emode must = 0
+    TS_ASSERT_THROWS_ANYTHING( delta.fromTOF(x,y,1.0,1.0,1.0,1,2.0,1.0) )
+  }
+
+  void testSpinEchoLength_quickConversions()
+  {
+    // Test that the quick conversions from wavelength have not leaked through
+    double factor, power;
+    TS_ASSERT( !delta.quickConversion(energy,factor,power) )
+    TS_ASSERT( !delta.quickConversion(energyk,factor,power) )
+  }
+
+  
+   //----------------------------------------------------------------------
+  // Spin Echo Time tests
+  //----------------------------------------------------------------------
+
+  void testSpinEchoTime_unitID()
+  {
+    TS_ASSERT_EQUALS( tau.unitID(), "SpinEchoTime" )
+  }
+
+  void testSpinEchoTime_caption()
+  {
+    TS_ASSERT_EQUALS( tau.caption(), "Spin Echo Time" )
+  }
+
+  void testSpinEchoTime_label()
+  {
+    TS_ASSERT_EQUALS( tau.label(), "ns" )
+  }
+
+  void testSpinEchoTime_cast()
+  {
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&tau) );
+    TS_ASSERT_EQUALS(u->unitID(), "SpinEchoTime");
+  }
+
+  void testSpinEchoTime_toTOF()
+  {
+    std::vector<double> x(1, 4.5), y(1, 1.5);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING( tau.toTOF(x,y,1.0,1.0,1.0,0,2.0,1.0) )
+    TS_ASSERT_DELTA( x[0], 662.4668, 0.0001 ) 
+    TS_ASSERT( yy == y )
+
+    TS_ASSERT_DELTA( tau.convertSingleToTOF(4.5, 1.0,1.0,1.0,0,2.0,1.0),  662.4668, 0.0001 );
+  }
+
+  void testSpinEchoTime_fromTOF()
+  {
+    std::vector<double> x(1, 1000.5), y(1, 1.5);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING( tau.fromTOF(x,y,1.0,1.0,1.0,0,2.0,1.0) )
+    TS_ASSERT_DELTA( x[0], 15.5014, 0.0001 ) 
+    TS_ASSERT( yy == y )
+
+    TS_ASSERT_DELTA( tau.convertSingleFromTOF(1000.5, 1.0,1.0,1.0,0,2.0,1.0), 15.5014, 0.0001);
+  }
+
+  void testSpinEchoTime_invalidfromTOF()
+  {
+    std::vector<double> x(1, 1000.5), y(1, 1.5);
+    //emode must = 0
+    TS_ASSERT_THROWS_ANYTHING( tau.fromTOF(x,y,1.0,1.0,1.0,1,2.0,1.0) )
+  }
+
+  void testSpinEchoTime_quickConversions()
+  {
+    // Test that the quick conversions from wavelength have not leaked through
+    double factor, power;
+    TS_ASSERT( !tau.quickConversion(energy,factor,power) )
+    TS_ASSERT( !tau.quickConversion(energyk,factor,power) )
+  }
+
 private:
   Units::TOF tof;
   Units::Wavelength lambda;
@@ -723,6 +850,8 @@ private:
   Units::DeltaE dE;
   Units::DeltaE_inWavenumber dEk;
   Units::Momentum k_i;
+  Units::SpinEchoLength delta;
+  Units::SpinEchoTime tau;
 };
 
 #endif /*UNITTEST_H_*/

@@ -160,6 +160,9 @@ protected:
   // Add a 'quick conversion' for a unit pair
   void addConversion(std::string to, const double& factor, const double& power = 1.0) const;
 
+  /// Removes all registered 'quick conversions'
+  void clearConversions() const;
+
   /// The unit values have been initialized
   bool initialized;
   /// l1 ::       The source-sample distance (in metres)
@@ -505,6 +508,49 @@ protected:
   double factorFrom; ///< Constant factor for from conversion
   bool   do_sfpFrom; ///< Apply the sfpFrom value
 };
+
+//=================================================================================================
+/// SpinEchoLength in nm
+class MANTID_KERNEL_DLL SpinEchoLength : public Wavelength
+{
+public:
+  const std::string unitID() const; ///< "SpinEchoLength"
+  const std::string caption() const { return "Spin Echo Length"; }
+  const std::string label() const {return "nm"; }
+  
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
+
+  /// Constructor
+  SpinEchoLength();
+  /// Destructor
+  ~SpinEchoLength() {}
+
+};
+
+//=================================================================================================
+/// SpinEchoTime in ns
+class MANTID_KERNEL_DLL SpinEchoTime : public Wavelength
+{
+public:
+  const std::string unitID() const; ///< "SpinEchoTime"
+  const std::string caption() const { return "Spin Echo Time"; }
+  const std::string label() const {return "ns"; }
+  
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
+
+  /// Constructor
+  SpinEchoTime();
+  /// Destructor
+  ~SpinEchoTime() {}
+
+};
+
 
 } // namespace Units
 

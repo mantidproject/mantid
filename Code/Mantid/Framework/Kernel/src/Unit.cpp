@@ -88,6 +88,14 @@ void Unit::addConversion(std::string to, const double& factor, const double& pow
 }
 
 //---------------------------------------------------------------------------------------
+/** Removes all registered 'quick conversions' from the unit class on which this method is called.
+ */
+void Unit::clearConversions() const
+{
+  s_conversionFactors.clear();
+}
+
+//---------------------------------------------------------------------------------------
 /** Initialize the unit to perform conversion using singleToTof() and singleFromTof()
  *
  *  @param _l1 ::       The source-sample distance (in metres)
@@ -869,6 +877,93 @@ Unit * Momentum::clone() const
   return new Momentum(*this);
 }
 
+
+
+// ============================================================================================
+/* SpinEchoLength
+ * ===================================================================================================
+ *
+ * Delta = (constant)*(wavelength)^2
+ */
+DECLARE_UNIT(SpinEchoLength)
+
+SpinEchoLength::SpinEchoLength() : Wavelength()
+{
+  clearConversions();
+}
+
+void SpinEchoLength::init()
+{
+  // Efixed must be set to something
+  if (efixed == 0.0) throw std::invalid_argument("efixed must be set for spin echo length calculation");
+  if (emode > 0)
+  {
+     throw std::invalid_argument("emode must be equal to 0 for spin echo length calculation");
+  }
+  Wavelength::init();
+}
+
+double SpinEchoLength::singleToTOF(const double x) const
+{
+  double wavelength = sqrt(x/efixed);
+  double tof = Wavelength::singleToTOF(wavelength);
+  return tof;
+}
+
+double SpinEchoLength::singleFromTOF(const double tof) const
+{
+  double wavelength = Wavelength::singleFromTOF(tof);
+  double x = efixed * wavelength * wavelength;
+  return x;
+}
+
+Unit * SpinEchoLength::clone() const
+{
+  return new SpinEchoLength(*this);
+}
+
+// ============================================================================================
+/* SpinEchoTime
+ * ===================================================================================================
+ *
+ * Tau = (constant)*(wavelength)^3
+ */
+DECLARE_UNIT(SpinEchoTime)
+
+SpinEchoTime::SpinEchoTime() : Wavelength()
+{
+  clearConversions();
+}
+
+void SpinEchoTime::init()
+{
+  // Efixed must be set to something
+  if (efixed == 0.0) throw std::invalid_argument("efixed must be set for spin echo time calculation");
+  if (emode > 0)
+  {
+     throw std::invalid_argument("emode must be equal to 0 for spin echo time calculation");
+  }
+  Wavelength::init();
+}
+
+double SpinEchoTime::singleToTOF(const double x) const
+{
+  double wavelength = pow(x/efixed,1.0/3.0);
+  double tof = Wavelength::singleToTOF(wavelength);
+  return tof;
+}
+
+double SpinEchoTime::singleFromTOF(const double tof) const
+{
+  double wavelength = Wavelength::singleFromTOF(tof);
+  double x = efixed * wavelength * wavelength * wavelength;
+  return x;
+}
+
+Unit * SpinEchoTime::clone() const
+{
+  return new SpinEchoTime(*this);
+}
 
 } // namespace Units
 
