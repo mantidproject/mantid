@@ -64,7 +64,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("OutputWorkspace",outputWS) )
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("MaxQxy","0.1") )
     TS_ASSERT_THROWS_NOTHING( qxy.setPropertyValue("DeltaQ","0.002") )
-
+    TS_ASSERT_THROWS_NOTHING( qxy.setProperty("OutputParts", true) )
     TS_ASSERT_THROWS_NOTHING( qxy.execute() )
     TS_ASSERT( qxy.isExecuted() )
     
@@ -94,6 +94,26 @@ public:
     TS_ASSERT_DELTA( result->readE(27)[70], 114778.1004, 1 )
     TS_ASSERT_DELTA( result->readE(18)[80], 344640, 1 )
     
+    Mantid::API::MatrixWorkspace_sptr sumOfCounts;
+    TS_ASSERT_THROWS_NOTHING( sumOfCounts = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+      (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS+"_sumOfCounts")) )
+
+    Mantid::API::MatrixWorkspace_sptr sumOfNormFactors;
+    TS_ASSERT_THROWS_NOTHING( sumOfNormFactors = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
+      (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS+"_sumOfNormFactors")) )
+
+    TS_ASSERT_DELTA( sumOfCounts->readY(28)[71], 2.0000, 0.01 )
+    TS_ASSERT_DELTA( sumOfNormFactors->readY(28)[71], 8.6988767154375003e-006, 0.00000001 )
+
+    TS_ASSERT_DELTA( sumOfCounts->readE(28)[71], 1.4142135623730951, 0.01 ) 
+    TS_ASSERT_DELTA( sumOfNormFactors->readE(28)[71], 0.0, 0.00000001 )
+
+    TS_ASSERT_EQUALS( sumOfCounts->getNumberHistograms(), 100 )
+    TS_ASSERT_EQUALS( sumOfCounts->blocksize(), 100 )
+    TS_ASSERT_EQUALS( sumOfNormFactors->getNumberHistograms(), 100 )
+    TS_ASSERT_EQUALS( sumOfNormFactors->blocksize(), 100 )
+
+
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
 

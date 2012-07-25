@@ -126,7 +126,6 @@ public:
 
     TS_ASSERT_EQUALS( result->dataY(0).size(), 25 )
     TS_ASSERT_EQUALS( sumOfCounts->dataY(0).size(), 25 )
-    //TS_ASSERT_EQUALS( sumOfNormFactors->getNumberHistograms(), 1 )
 
 
       Mantid::API::AnalysisDataService::Instance().remove(outputWS);

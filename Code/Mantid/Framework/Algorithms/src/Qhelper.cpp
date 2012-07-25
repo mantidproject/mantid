@@ -133,6 +133,13 @@ size_t Qhelper::waveLengthCutOff(API::MatrixWorkspace_const_sptr dataWS, const d
 }
 
 
+/** This method performs the common work between Qxy and Q1D2 if algorihtm parameter OutputParts=True.
+    It simply outputs two workspaces as output parameters. sumOfCounts/sumOfNormFactors equals the
+    main output of Qxy or Q1D2
+*  @param alg algoritm
+*  @param sumOfCounts sum of counts
+*  @param sumOfNormFactors sum of normalisation factors
+*/
 void Qhelper::outputParts(API::Algorithm* alg, API::MatrixWorkspace_sptr sumOfCounts, 
   API::MatrixWorkspace_sptr sumOfNormFactors)
 {

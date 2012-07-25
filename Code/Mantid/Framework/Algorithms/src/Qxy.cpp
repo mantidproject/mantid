@@ -72,6 +72,11 @@ void Qxy::init()
   declareProperty("WaveCut", 0.0, mustBePositive2,
     "To increase resolution by starting to remove some wavelengths below this"
     "freshold (angstrom)");
+  declareProperty("OutputParts", false,
+    "Set to true to output two additional workspaces which will have the names OutputWorkspace_sumOfCounts "
+    "OutputWorkspace_sumOfNormFactors. The division of _sumOfCounts and _sumOfNormFactors equals the workspace"
+    " returned by the property OutputWorkspace "
+    "(default is false)." );
 }
 
 void Qxy::exec()
@@ -281,6 +286,23 @@ void Qxy::exec()
     {
       weights->dataE(i)[j] = sqrt(weights->dataE(i)[j]);
     } 
+  }
+
+  bool doOutputParts = getProperty("OutputParts");
+  if (doOutputParts)
+  {
+    // copy outputworkspace before it gets further modified
+    MatrixWorkspace_sptr ws_sumOfCounts = WorkspaceFactory::Instance().create(outputWorkspace);
+    for (size_t i = 0; i < ws_sumOfCounts->getNumberHistograms(); i++)
+    {
+      for ( size_t j = 0; j < ws_sumOfCounts->dataY(i).size(); j++ )
+      {
+        ws_sumOfCounts->dataY(i)[j] = outputWorkspace->dataY(i)[j];
+        ws_sumOfCounts->dataE(i)[j] = outputWorkspace->dataE(i)[j];
+      }
+    }  
+
+    helper.outputParts(this, ws_sumOfCounts, weights);
   }
 
   // Divide the output data by the solid angles
