@@ -182,6 +182,63 @@ public:
     TS_ASSERT_EQUALS(X,9.0);
   }
 
+  void test_SplitToKeyValuePairs_Returns_Empty_Map_For_Empty_String()
+  {
+    auto keyValues = splitToKeyValues("");
+
+    TS_ASSERT(keyValues.empty());
+  }
+
+  void test_SplitToKeyValuePairs_Returns_Empty_Map_For_String_With_No_Values()
+  {
+    auto keyValues = splitToKeyValues("key,key,key");
+
+    TS_ASSERT(keyValues.empty());
+  }
+
+  void test_SplitToKeyValuePairs_Uses_Equals_And_Comma_As_Separators_By_Default()
+  {
+    auto keyValues = splitToKeyValues("key1=value1, key2=value2");
+
+    TS_ASSERT_EQUALS(keyValues.size(), 2);
+    TS_ASSERT_EQUALS(keyValues.at("key1"), "value1");
+    TS_ASSERT_EQUALS(keyValues.at("key2"), "value2");
+  }
+
+  void test_SplitToKeyValuePairs_Uses_KeyValueSep_If_Given()
+  {
+    auto keyValues = splitToKeyValues("key1@value1, key2@value2", "@");
+
+    TS_ASSERT_EQUALS(keyValues.size(), 2);
+    TS_ASSERT_EQUALS(keyValues.at("key1"), "value1");
+    TS_ASSERT_EQUALS(keyValues.at("key2"), "value2");
+  }
+
+  void test_SplitToKeyValuePairs_Uses_KeyValueSep_And_ListSep_If_Given()
+  {
+    auto keyValues = splitToKeyValues("key1@value1: key2@value2", "@", ":");
+
+    TS_ASSERT_EQUALS(keyValues.size(), 2);
+    TS_ASSERT_EQUALS(keyValues.at("key1"), "value1");
+    TS_ASSERT_EQUALS(keyValues.at("key2"), "value2");
+  }
+
+  void test_SplitToKeyValuePairs_Does_Not_Ignore_Spaces_Within_Key_Or_Value()
+  {
+    auto keyValues = splitToKeyValues("key 1@value1: key2@value 2", "@", ":");
+
+    TS_ASSERT_EQUALS(keyValues.size(), 2);
+    TS_ASSERT_EQUALS(keyValues.at("key 1"), "value1");
+    TS_ASSERT_EQUALS(keyValues.at("key2"), "value 2");
+  }
+
+  void test_SplitToKeyValuePairs_Ignores_Items_Without_A_Key_Or_Value()
+  {
+    auto keyValues = splitToKeyValues("key1=,key2=value2,=value3");
+
+    TS_ASSERT_EQUALS(keyValues.size(), 1);
+    TS_ASSERT_EQUALS(keyValues.at("key2"), "value2");
+  }
 
   void test_join()
   {

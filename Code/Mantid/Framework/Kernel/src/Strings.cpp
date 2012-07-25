@@ -1,14 +1,17 @@
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/Exception.h"
+
+#include <Poco/StringTokenizer.h>
+#include <Poco/Path.h>
+
 #include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iosfwd>
 #include <iostream>
 #include <list>
-#include <Poco/Path.h>
 #include <sstream>
-#include <string.h>
+#include <cstring>
 #include <vector>
 
 using std::size_t;
@@ -432,13 +435,38 @@ namespace Mantid
        *  @return vector of components
        */
       std::vector<std::string> StrParts(std::string Ln)
-    {
+      {
         std::vector<std::string> Out;
         std::string Part;
         while(section(Ln,Part))
           Out.push_back(Part);
         return Out;
-    }
+      }
+
+      /**
+       * Splits a string into key value pairs and returns them as a map. Whitespace between separators is ignored
+       * @param input :: The string containing the key/values
+       * @param keyValSep :: The separator that splits a key and value [default: "="]
+       * @param listSep :: The separator that splits elements of the list [default: ","]
+       * @returns A map of keys->values
+       */
+      std::map<std::string,std::string>
+      splitToKeyValues(const std::string & input, const std::string & keyValSep, const std::string & listSep)
+      {
+        std::map<std::string,std::string> keyValues;
+        const int splitOptions = Poco::StringTokenizer::TOK_IGNORE_EMPTY + Poco::StringTokenizer::TOK_TRIM;
+        Poco::StringTokenizer listSplitter(input, listSep);
+        for(auto iter = listSplitter.begin(); iter != listSplitter.end(); ++iter)
+        {
+          Poco::StringTokenizer keyValSplitter(*iter, keyValSep, splitOptions);
+          if(keyValSplitter.count() == 2)
+          {
+            keyValues[keyValSplitter[0]] = keyValSplitter[1];
+          }
+        }
+
+        return keyValues;
+      }
 
 
       //------------------------------------------------------------------------------------------------

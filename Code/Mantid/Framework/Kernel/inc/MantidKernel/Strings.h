@@ -9,6 +9,7 @@
 #include <set>
 #include <sstream>
 #include <vector>
+#include <map>
 #include <iterator>
 
 namespace Mantid
@@ -134,6 +135,10 @@ namespace Mantid
 
       /// Split tring into spc deliminated components
       MANTID_KERNEL_DLL std::vector<std::string> StrParts(std::string Ln);
+
+      /// Splits a string into key value pairs
+      MANTID_KERNEL_DLL std::map<std::string,std::string>
+      splitToKeyValues(const std::string & input, const std::string & keyValSep = "=", const std::string & listSep=",");
 
       /// Write a set of containers to a file
       template<template<typename T,typename A> class V,typename T,typename A>
