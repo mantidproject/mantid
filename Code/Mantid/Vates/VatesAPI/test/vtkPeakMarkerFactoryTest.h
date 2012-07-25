@@ -35,7 +35,8 @@ public:
   MOCK_METHOD1(removePeak, void (int peakNum) );
   MOCK_METHOD1(addPeak, void (const IPeak& ipeak));
   MOCK_METHOD1(getPeak, Mantid::API::IPeak & (int peakNum));
-  MOCK_METHOD2(createPeak, Mantid::API::IPeak* (Mantid::Kernel::V3D QLabFrame, double detectorDistance));
+  MOCK_CONST_METHOD1(getPeak, Mantid::API::IPeak & (int peakNum));
+  MOCK_CONST_METHOD2(createPeak, Mantid::API::IPeak* (Mantid::Kernel::V3D QLabFrame, double detectorDistance));
 };
 
 //=====================================================================================
