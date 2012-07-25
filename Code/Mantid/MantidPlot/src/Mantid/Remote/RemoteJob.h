@@ -8,6 +8,7 @@
  * managers (MWS vs. Condor, for example) but I don't think so.
  */
 
+#include "MantidKernel/DateAndTime.h"
 
 #include <string>
 class RemoteJobManager;
@@ -16,13 +17,25 @@ class RemoteJob
 {
 public:
 
-    enum JobStatus { JOB_COMPLETE, JOB_RUNNING, JOB_QUEUED, JOB_ABORTED, JOB_STATUS_UNKNOWN };
+    enum JobStatus { JOB_COMPLETE, JOB_RUNNING, JOB_QUEUED, JOB_ABORTED, JOB_REMOVED, JOB_STATUS_UNKNOWN };
 
-    RemoteJob( const std::string & jobId, RemoteJobManager * manager, JobStatus status, const std::string &name)
+    RemoteJob( const std::string & jobId, RemoteJobManager * manager, JobStatus status, const std::string &name,
+               Mantid::Kernel::DateAndTime submitTime = Mantid::Kernel::DateAndTime())
         : m_jobId( jobId),
           m_manager( manager),
           m_status( status),
-          m_algName( name)  { }
+          m_algName( name)
+    {
+      if (submitTime != Mantid::Kernel::DateAndTime())
+      {
+        m_submitTime = submitTime;
+      }
+      else
+      {
+        // default to current time
+        m_submitTime = Mantid::Kernel::DateAndTime::getCurrentTime();
+      }
+    }
     // At this point, the default copy constructor and assignment operator are valid and
     // useful.  If that changes, we'll either need to explicitly implement them or else
     // declare them private.
@@ -31,6 +44,7 @@ public:
     RemoteJobManager *m_manager;    // Pointer to the job manager that was used to submit the job in the first place
     JobStatus m_status;             // Job is running, held, aborted, etc...
     std::string m_algName;          // A meaningful name that can be displayed in the GUI ("Hello World", "NOMAD Reduce", etc..)
+    Mantid::Kernel::DateAndTime m_submitTime;   // Time when the job was submitted
 
     /************************
     // Not sure if I need these....

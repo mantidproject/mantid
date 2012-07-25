@@ -6,6 +6,7 @@
 
 #include "RemoteJob.h"
 #include <string>
+#include <vector>
 
 class RemoteJobManager;         // Top-level abstract class
 class HttpRemoteJobManager;     // Mid-level abstract class. (Not sure we really need this.)
@@ -34,6 +35,7 @@ public:
     virtual bool jobStatus( const std::string &jobId,
                             RemoteJob::JobStatus &retStatus,
                             std::string &errMsg) = 0;
+    virtual bool jobStatusAll( std::vector<RemoteJob> &jobList, std::string &errMsg) = 0;
 /************
     TODO: Uncomment these when we're ready to implement
     virtual int abortJob( std::string jobId) = 0;
@@ -93,10 +95,7 @@ class MwsRemoteJobManager : public HttpRemoteJobManager
 {
 public:
     MwsRemoteJobManager( std::string displayName, std::string configFileUrl,
-                         std::string serviceBaseUrl, std::string userName) :
-        HttpRemoteJobManager( displayName, configFileUrl),
-        m_serviceBaseUrl( serviceBaseUrl),
-        m_userName( userName) { }
+                         std::string serviceBaseUrl, std::string userName);
     ~MwsRemoteJobManager() { }
 
     // Returns the type of job manager it actually is (MWS, Globus, etc..)
@@ -106,6 +105,8 @@ public:
     virtual bool jobStatus( const std::string &jobId,
                             RemoteJob::JobStatus &retStatus,
                             std::string &errMsg);
+    virtual bool jobStatusAll( std::vector<RemoteJob> &jobList, std::string &errMsg);
+
 /*******
     TODO: IMPLEMENT THESE FUNCTIONS FOR REAL!
     virtual int abortJob( std::string jobId) { return 0; }
@@ -129,6 +130,14 @@ protected:
 
     std::string m_serviceBaseUrl;
     std::string m_userName;
+
+private:
+    bool convertToISO8601( std::string &time);
+    static Mantid::Kernel::Logger& g_log;   ///< reference to the logger class
+
+    std::map<std::string, std::string> m_tzOffset;  // Maps timezone abbreviations to their offsets
+                                                    // (See the comments in the constructor and in
+                                                    // convertToISO8601()
 
 };
 

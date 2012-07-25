@@ -59,22 +59,22 @@
       </widget>
      </item>
      <item>
-      <widget class="QSlider" name="daysSlider">
+      <widget class="QSpinBox" name="spinBox">
        <property name="minimum">
         <number>1</number>
        </property>
        <property name="maximum">
         <number>30</number>
        </property>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+       <property name="value">
+        <number>30</number>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QLabel" name="daysLabel">
        <property name="text">
-        <string>XX Days</string>
+        <string>Days</string>
        </property>
       </widget>
      </item>
@@ -90,7 +90,7 @@
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="standardButtons">
-        <set>QDialogButtonBox::Ok</set>
+        <set>QDialogButtonBox::Close</set>
        </property>
       </widget>
      </item>
@@ -102,7 +102,7 @@
  <connections>
   <connection>
    <sender>buttonBox</sender>
-   <signal>accepted()</signal>
+   <signal>rejected()</signal>
    <receiver>JobStatusDialog</receiver>
    <slot>accept()</slot>
    <hints>
@@ -117,13 +117,13 @@
    </hints>
   </connection>
   <connection>
-   <sender>daysSlider</sender>
+   <sender>spinBox</sender>
    <signal>valueChanged(int)</signal>
    <receiver>JobStatusDialog</receiver>
-   <slot>updateIgnoreVal(int)</slot>
+   <slot>updateDisplay()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>287</x>
+     <x>234</x>
      <y>385</y>
     </hint>
     <hint type="destinationlabel">
@@ -134,6 +134,6 @@
   </connection>
  </connections>
  <slots>
-  <slot>updateIgnoreVal(int)</slot>
+  <slot>updateDisplay()</slot>
  </slots>
 </ui>

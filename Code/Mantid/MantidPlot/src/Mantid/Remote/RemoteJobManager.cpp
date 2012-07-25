@@ -1,6 +1,7 @@
 #include "RemoteJobManager.h"
 #include "RemoteTask.h"
 #include "MantidKernel/ConfigService.h"
+#include "SimpleJSON.h"
 
 #include <Poco/Base64Encoder.h>
 #include <Poco/Net/HTTPClientSession.h>
@@ -12,6 +13,9 @@
 #include <sstream>
 using namespace std;
 
+
+// Get a reference to the logger
+Mantid::Kernel::Logger& MwsRemoteJobManager::g_log = Mantid::Kernel::Logger::get("MwsRemoteJobManager");
 
 
 void RemoteJobManager::saveProperties( int itemNum)
@@ -26,6 +30,32 @@ void RemoteJobManager::saveProperties( int itemNum)
     config.setString( prefix + string( "ConfigFileUrl"), m_configFileUrl);
 }
 
+
+MwsRemoteJobManager::MwsRemoteJobManager( std::string displayName, std::string configFileUrl,
+                                          std::string serviceBaseUrl, std::string userName) :
+    HttpRemoteJobManager( displayName, configFileUrl),
+    m_serviceBaseUrl( serviceBaseUrl),
+    m_userName( userName)
+{
+
+  // MWS rather annoyingly uses its own format for date/time strings.  One of the main
+  // differences between MWS strings and ISO 8601 is the use of a timzezone abbreviation
+  // instead of an offset from UTC.
+  // It turns out there there doesn't seem to be a standardized, cross-platform way
+  // to map these abbreviations to their offsets, so I'm just going to build an STL
+  // map right here.  Feel free to add more abbreviations as necessary.
+  // This map gets used down in convertToISO8601().
+  m_tzOffset["EDT"] = "-4";
+  m_tzOffset["EST"] = "-5";
+  m_tzOffset["CDT"] = "-5";
+  m_tzOffset["CST"] = "-6";
+  m_tzOffset["MDT"] = "-6";
+  m_tzOffset["MST"] = "-7";
+  m_tzOffset["PDT"] = "-7";
+  m_tzOffset["PST"] = "-8";
+  m_tzOffset["PDT"] = "-9";
+  m_tzOffset["UTC"] = "+0";
+}
 
 void MwsRemoteJobManager::saveProperties( int itemNum)
 {
@@ -264,6 +294,11 @@ bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
           retStatus = RemoteJob::JOB_COMPLETE;
           retVal = true;
       }
+      else if (statusString == "REMOVED")
+      {
+          retStatus = RemoteJob::JOB_REMOVED;
+          retVal = true;
+      }
       /* else if what else??? */
       else
       {
@@ -274,6 +309,170 @@ bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
 
   return retVal;
 }
+
+
+// Queries MWS for the details of every job the user has submitted.
+// If the query is successfully submitted, it writes the status value to retStatus and
+// returns true.  If there was a problem submitting the query (network is down, for example)
+// it writes an error message to errMsg and returns false;
+bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
+                                        string &errMsg)
+{
+
+  /*****************
+    NOTE: There's a lot of redundancy between this function, jobStatus() &
+    submitJob(). Ought to try to clean it up!
+   ********************************/
+
+
+  bool retVal = true;  // assume success
+
+  // Open an HTTP connection to the cluster
+  Poco::URI uri(m_serviceBaseUrl);
+  Poco::Net::HTTPClientSession session( uri.getHost(), uri.getPort());
+
+  std::ostringstream path;
+  path << uri.getPathAndQuery();
+  // Path should be something like "/mws/rest", append "/jobs" to it.
+  path << "/jobs";
+
+  Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, path.str(), Poco::Net::HTTPRequest::HTTP_1_1);
+  req.setContentType( "application/json");
+
+  // Set the Authorization header (base64 encoded)
+  ostringstream encodedAuth;
+  Poco::Base64Encoder encoder( encodedAuth);
+
+  if (m_password.empty())
+  {
+    getPassword();
+  }
+
+  encoder << m_userName << ":" << m_password;
+  encoder.close();
+
+  req.setCredentials( "Basic", encodedAuth.str());
+
+  session.sendRequest( req);
+
+  Poco::Net::HTTPResponse response;
+  std::istream &responseStream = session.receiveResponse( response);
+
+  if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_OK)
+  {
+    // D'oh!  The MWS server didn't like our request.
+    retVal = false;
+    std::ostringstream respStatus;
+    respStatus << "Status: " << response.getStatus() << "\nReason: " << response.getReasonForStatus( response.getStatus());
+    respStatus << "\n\nReply text:\n";
+    respStatus << responseStream.rdbuf();
+    errMsg = respStatus.str();
+
+    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
+    {
+      // Probably some kind of username/password mismatch.  Clear the password so that
+      // the user can enter it again
+      m_password.clear();
+    }
+  }
+  else
+  {
+    // Parse the response body for the state
+    // (Info for each job is stored in an array of JSON objects - 1 object per job)
+    JSONObject jobs;
+    initFromStream( jobs, responseStream);
+    JSONObject::const_iterator itResults = jobs.find( "results");
+    JSONArray resultsArray;
+    (*itResults).second.getValue(resultsArray);
+    JSONArray::const_iterator it = resultsArray.begin();
+    while (it != resultsArray.end())
+    {
+      JSONObject oneJob;
+      it->getValue( oneJob);
+
+      // Fields passed to the constructor for RemoteJob
+      string jobId;
+      RemoteJob::JobStatus status;
+      string algName;
+
+      (*oneJob.find("id")).second.getValue( jobId);
+      (*oneJob.find( "name")).second.getValue( algName);
+      string submitTimeString;
+      (*oneJob.find( "submitDate")).second.getValue( submitTimeString);
+      // Unfortunately, the string that MWS returns is not quite in ISO 8601 format
+      convertToISO8601( submitTimeString);
+
+      string statusString;
+      (*oneJob.find( "expectedState")).second.getValue( statusString);
+
+      // Convert the string into a JobStatus
+      if (statusString == "RUNNING")
+      {
+        status = RemoteJob::JOB_RUNNING;
+      }
+      else if (statusString == "QUEUED")
+      {
+        status = RemoteJob::JOB_QUEUED;
+      }
+      else if (statusString == "COMPLETED")
+      {
+        status = RemoteJob::JOB_COMPLETE;
+      }
+      else if (statusString == "REMOVED")
+      {
+        status = RemoteJob::JOB_REMOVED;
+      }
+      /* else if what else??? */
+      else
+      {
+        status = RemoteJob::JOB_STATUS_UNKNOWN;
+        errMsg = "Unknown job state: " + statusString;
+        retVal = false;
+      }
+
+      jobList.push_back(RemoteJob(jobId, this, status, algName, Mantid::Kernel::DateAndTime( submitTimeString)));
+      it++;
+    }
+  }
+
+  return retVal;
+}
+
+// Helper function used by jobStatusAll.  Converts a time string
+// returned by MWS into a properly formatted ISO 8601 string.
+// Note:  Only reason it's a member of MwsRemoteJobManager is so that it
+// can access the logger.
+bool MwsRemoteJobManager::convertToISO8601( string &time)
+{
+  // First the easy bit: insert a 'T' between the date and time fields
+  size_t pos = time.find( ' ');
+  if (pos == string::npos)
+    return false;  // Give up.  String wasn't formatted the way we expected it to be.
+
+  time[pos]='T';
+
+  // Now the hard part: extract the time zone abbreviation and replace it with
+  // the appropriate offset value.  Amazingly, there does not seem to be an easy
+  // way to convert a timezone abbreviation into an offset, so I've had to make
+  // my own map.
+  string zone = time.substr(time.rfind(' ')+1);
+  time.resize(time.rfind(' '));
+  map<string, string>::const_iterator it = m_tzOffset.find(zone);
+  if (it == m_tzOffset.end())
+  {
+    // Didn't recognize the timezone abbreviation.  Log a warning, but otherwise
+    // ignore it and continue on...
+    g_log.warning() << "Unrecognized timezone abbreviation \"" << zone
+                    << "\".  Ignoring it and treating the time as UTC." << endl;
+  }
+  else
+  {
+    time.append((*it).second);
+  }
+
+  return true;
+}
+
 
 // puts a \ char in front of any " chars it finds (needed for the JSON stuff)
 std::string MwsRemoteJobManager::escapeQuoteChars( const std::string & str)

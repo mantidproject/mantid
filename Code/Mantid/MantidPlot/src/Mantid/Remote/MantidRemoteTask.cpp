@@ -239,17 +239,7 @@ void RemoteTaskDockWidget::clusterChoiceChanged(int index)
 // Someone clicked the "Show Jobs" button.  Pop up the dialog.
 void RemoteTaskDockWidget::showJobs()
 {
-    JobStatusDialog *d = new JobStatusDialog;
-    QList<RemoteJob>::iterator it = m_jobList.begin();
-    while (it != m_jobList.end())
-    {
-        d->addRow( *it);
-        it++;
-    }
-
-
-
-    d->exec();
+  JobStatusDialog( m_jobList, m_clusterList[ m_clusterCombo->currentIndex()]).exec();
 }
 
 // Someone clicked the "Submit Job" button.  Pop up a dialog to grab any needed inputs

@@ -6,9 +6,14 @@
 #include <QLabel>
 #include <QPushButton>
 
-JobStatusDialog::JobStatusDialog(QWidget *parent) :
+#include <vector>
+using namespace std;
+
+JobStatusDialog::JobStatusDialog(const QList <RemoteJob> &jobList, RemoteJobManager *manager, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::JobStatusDialog)
+    ui(new Ui::JobStatusDialog),
+    m_jobList( jobList),
+    m_manager( manager)
 {
     ui->setupUi(this);
     ui->tableWidget->horizontalHeader()->setResizeMode( QHeaderView::Stretch);
@@ -29,8 +34,7 @@ JobStatusDialog::JobStatusDialog(QWidget *parent) :
     //ui->tableWidget->setCellWidget(1, 4, new QPushButton("Download",this));
     *****************************/
 
-    m_ignoreDays = ui->daysSlider->value();
-
+    updateDisplay();
 }
 
 JobStatusDialog::~JobStatusDialog()
@@ -38,14 +42,38 @@ JobStatusDialog::~JobStatusDialog()
     delete ui;
 }
 
+void JobStatusDialog::updateDisplay()
+{
+  ui->tableWidget->setRowCount( 0);
+
+  vector <RemoteJob> jobList;
+  string errMsg;
+
+  if (m_manager->jobStatusAll( jobList, errMsg))
+  {
+    vector <RemoteJob>::iterator it = jobList.begin();
+    while (it != jobList.end())
+    {
+        Mantid::Kernel::time_duration sinceSubmitted = Mantid::Kernel::DateAndTime::getCurrentTime() - (*it).m_submitTime;
+        if (sinceSubmitted.hours() < (ui->spinBox->value()*24))
+        {
+          addRow( *it);
+        }
+        it++;
+    }
+
+  }
+}
 
 void JobStatusDialog::addRow( RemoteJob &job)
 {
     QTableWidget *table = ui->tableWidget;
     table->setRowCount( table->rowCount() + 1);
-    table->setCellWidget(0, 0, new QLabel( QString::fromStdString(job.m_jobId)));
-    table->setCellWidget(0, 1, new QLabel( QString::fromStdString(job.m_manager->getDisplayName())));
-    table->setCellWidget(0, 2, new QLabel( QString::fromStdString(job.m_algName)));
+
+    int curRow = table->rowCount() - 1;  // calculate here so we can pass it in to all the calls to setCellWidget()
+    table->setCellWidget( curRow, 0, new QLabel( QString::fromStdString(job.m_jobId)));
+    table->setCellWidget( curRow, 1, new QLabel( QString::fromStdString(job.m_manager->getDisplayName())));
+    table->setCellWidget( curRow, 2, new QLabel( QString::fromStdString(job.m_algName)));
 
     std::string errMsg;
     RemoteJob::JobStatus status;
@@ -75,6 +103,10 @@ void JobStatusDialog::addRow( RemoteJob &job)
         statusString = "Queued";
         break;
 
+    case RemoteJob::JOB_REMOVED:
+        statusString = "Removed";
+        break;
+
     case RemoteJob::JOB_STATUS_UNKNOWN:
     default:
         statusString = "Unknown";
@@ -82,16 +114,19 @@ void JobStatusDialog::addRow( RemoteJob &job)
     }
 
 
-    table->setCellWidget(0, 3, new QLabel( statusString));
+    table->setCellWidget( curRow, 3, new QLabel( statusString));
 
     if (status == RemoteJob::JOB_COMPLETE)
     {
-        table->setCellWidget(0, 4, new QPushButton("Download",this));
+        table->setCellWidget( curRow, 4, new QPushButton("Download",this));
         // TODO: Hook up the button to a download function!
     }
 
 }
 
+/***************************************************
+  this isn't needed anymore (was useful when we were using a
+  slider instead of a spinbox
 void JobStatusDialog::updateIgnoreVal( int ignoreDays)
 {
   m_ignoreDays = ignoreDays;
@@ -100,4 +135,6 @@ void JobStatusDialog::updateIgnoreVal( int ignoreDays)
   else
     ui->daysLabel->setText( QString("%1 ").arg( m_ignoreDays, 2, 10, QChar('0')) + QString(QObject::tr("Days")));
 
+  updateDisplay();  // Refresh the display
 }
+*****************************/
