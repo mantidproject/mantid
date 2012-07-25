@@ -95,9 +95,44 @@ namespace WorkflowAlgorithms
     //norm->setProperty("MonitorWorkspace", monWsName);
     norm->execute();
 
+    double detVanIntRangeLow = this->getProperty("DetVanIntRangeLow");
+    if (EMPTY_DBL() == detVanIntRangeLow)
+      {
+        detVanIntRangeLow = inputWS->getInstrument()->getNumberParameter("wb-integr-min")[0];
+      }
+    double detVanIntRangeHigh = this->getProperty("DetVanIntRangeHigh");
+    if (EMPTY_DBL() == detVanIntRangeHigh)
+      {
+        detVanIntRangeHigh = inputWS->getInstrument()->getNumberParameter("wb-integr-max")[0];
+      }
+    const std::string detVanIntRangeUnits = this->getProperty("DetVanInRangeUnits");
+
+    // Convert the data to the appropriate units
+    IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
+    cnvun->setAlwaysStoreInADS(true);
+    cnvun->setProperty("InputWorkspace", outWsName);
+    cnvun->setProperty("OutputWorkspace", outWsName);
+    cnvun->setProperty("Target", detVanIntRangeUnits);
+    cnvun->setProperty("EMode", "Elastic");
+    cnvun->execute();
+
+    // Rebin the data (not Integration !?!?!?)
+    std::vector<double> binning;
+    binning.push_back(detVanIntRangeLow);
+    binning.push_back(detVanIntRangeHigh - detVanIntRangeLow);
+    binning.push_back(detVanIntRangeHigh);
+
+    IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+    rebin->setAlwaysStoreInADS(true);
+    rebin->setProperty("InputWorkspace", outWsName);
+    rebin->setProperty("OutputWorkspace", outWsName);
+    rebin->setProperty("Params", binning);
+    rebin->execute();
+
     const std::string facility = ConfigService::Instance().getFacility().name();
     if ("ISIS" == facility)
       {
+        // Scale results by a constant
         double wbScaleFactor = inputWS->getInstrument()->getNumberParameter("wb-scale-factor")[0];
         const std::string scaleFactorName = "WbScaleFactor";
         IAlgorithm_sptr csvw = this->createSubAlgorithm("CreateSingleValuedWorkspace");
