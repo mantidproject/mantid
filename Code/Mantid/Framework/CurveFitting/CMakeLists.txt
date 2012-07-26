@@ -37,7 +37,6 @@ set ( SRC_FILES
 	src/IDomainCreator.cpp
 	src/IFuncMinimizer.cpp
 	src/IkedaCarpenterPV.cpp
-	src/LeBailFit.cpp
 	src/LeBailFit2.cpp
 	src/LeBailFunction.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
@@ -120,7 +119,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
-	inc/MantidCurveFitting/LeBailFit.h
 	inc/MantidCurveFitting/LeBailFit2.h
 	inc/MantidCurveFitting/LeBailFunction.h
 	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
@@ -186,7 +184,6 @@ set ( TEST_FILES
 	test/HighOrderPolynomialBackgroundTest.h
 	test/IkedaCarpenterPVTest.h
 	test/LeBailFit2Test.h
-	test/LeBailFitTest.h
 	test/LeBailFunctionTest.h
 	test/LeastSquaresTest.h
 	test/LevenbergMarquardtMDTest.h
