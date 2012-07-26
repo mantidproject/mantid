@@ -186,7 +186,7 @@ typedef Poco::FastMutex Mutex;
 #define PARALLEL_ATOMIC
 #define PARALLEL_THREAD_NUMBER 0
 #define PARALLEL_SET_NUM_THREADS(MaxCores)
-#define PARALLEL_SET_DYNAMIC(val) omp_set_dynamic(val);
+#define PARALLEL_SET_DYNAMIC(val)
 #define PARALLEL_NUMBER_OF_THREADS 1
 #define PARALLEL_GET_MAX_THREADS 1
 #define PARALLEL
