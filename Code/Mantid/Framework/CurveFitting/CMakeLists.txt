@@ -33,7 +33,6 @@ set ( SRC_FILES
 	src/Gaussian.cpp
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
-	src/HighOrderPolynomialBackground.cpp
 	src/IDomainCreator.cpp
 	src/IFuncMinimizer.cpp
 	src/IkedaCarpenterPV.cpp
@@ -51,6 +50,7 @@ set ( SRC_FILES
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
 	src/PlotPeakByLogValue.cpp
+	src/Polynomial.cpp
 	src/ProductFunction.cpp
 	src/ProductLinearExp.cpp
 	src/ProductQuadraticExp.cpp
@@ -114,7 +114,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/Gaussian1D.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
-	inc/MantidCurveFitting/HighOrderPolynomialBackground.h
 	inc/MantidCurveFitting/IDomainCreator.h
 	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
@@ -133,6 +132,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
+	inc/MantidCurveFitting/Polynomial.h
 	inc/MantidCurveFitting/ProductFunction.h
 	inc/MantidCurveFitting/ProductLinearExp.h
 	inc/MantidCurveFitting/ProductQuadraticExp.h
@@ -181,7 +181,6 @@ set ( TEST_FILES
 	test/GausOscTest.h
 	test/Gaussian1DTest.h
 	test/GaussianTest.h
-	test/HighOrderPolynomialBackgroundTest.h
 	test/IkedaCarpenterPVTest.h
 	test/LeBailFitTest.h
 	test/LeBailFunctionTest.h
@@ -198,6 +197,7 @@ set ( TEST_FILES
 	test/MuonFInteractionTest.h
 	test/PRConjugateGradientTest.h
 	test/PlotPeakByLogValueTest.h
+	test/PolynomialTest.h
 	test/ProductFunctionTest.h
 	test/ProductLinearExpTest.h
 	test/ProductQuadraticExpTest.h
