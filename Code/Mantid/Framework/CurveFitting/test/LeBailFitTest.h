@@ -33,7 +33,7 @@ public:
    * Fundamental test to calcualte 2 peak w/o background.
    * It is migrated from LeBailFunctionTest.test_CalculatePeakParameters
    */
-  void test_cal2Peaks()
+  void Ptest_cal2Peaks()
   {
       // 1. Create input workspace
       API::MatrixWorkspace_sptr dataws;
@@ -148,6 +148,7 @@ public:
       lbfit.setProperty("Function", "Calculation");
       lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
       lbfit.setProperty("UseInputPeakHeights", false);
+      lbfit.setProperty("PeaksWorkspace", "PeaksParameters");
 
       TS_ASSERT_THROWS_NOTHING(lbfit.execute());
       TS_ASSERT(lbfit.isExecuted());
@@ -164,7 +165,7 @@ public:
 
       TS_ASSERT_EQUALS(outputws->getNumberHistograms(), 3);
 
-      /*
+      /* Output
       for (size_t ih = 0; ih < outputws->getNumberHistograms(); ++ih)
       {
           std::stringstream namestream;
@@ -189,44 +190,38 @@ public:
       }
       */
 
-
-      /*
-      std::cout << "Calculate Peak Heights. " << std::endl;
-      std::vector<std::pair<int, double> > peakheights;
-      lbfit.calcualtePeakHeights(peakheights, 0);
-
-
-      std::cout << "Calculate Pattern. " << std::endl;
-      int xp932[] = {9, 3, 2};
-      std::vector<int> p932(xp932, xp932+sizeof(xp932)/sizeof(int));
-      int xp852[] = {8, 5, 2};
-      std::vector<int> p852(xp852, xp852+sizeof(xp852)/sizeof(int));
-      std::vector<std::vector<int> > hkls;
-      hkls.push_back(p932);
-      hkls.push_back(p852);
-
-      std::sort(peakheights.begin(), peakheights.end());
-      std::vector<double> pkheights;
-      for (size_t i = peakheights.size()-1; i >= 0; --i)
-      {
-          pkheights.push_back(peakheights[i].second);
-      }
-      hklws = createReflectionWorkspace(hkls, pkheights);
-      */
-
       // 3. Do the calcualtion ...
 
       // 4. Check
-      // a) peak position (very small deviation)
-
       // b) peak height (can be some percent off)
+      size_t ipeak1 = 6;
+      size_t ipeak2 = 12;
+      TS_ASSERT_DELTA(outputws->dataY(0)[ipeak1], dataws->dataY(0)[ipeak1], 5.0);
+      TS_ASSERT_DELTA(outputws->dataY(0)[ipeak2], dataws->dataY(0)[ipeak2], 10.0);
 
-      // c) integrated value
+      // c) Table Workspace
+      DataObjects::TableWorkspace_sptr peaksws =
+              boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
+              (AnalysisDataService::Instance().retrieve("PeaksParameters"));
+      TS_ASSERT(peaksws);
+      if (peaksws)
+      {
+          size_t numrows = peaksws->rowCount();
+          for (size_t ir = 0; ir < numrows; ++ir)
+          {
+              int h, k, l;
+              double tof_h, height;
+              API::TableRow row = peaksws->getRow(ir);
+              row >> h >> k >> l >> height >> tof_h;
+              std::cout << "Peak (" << h << ", " << k << ", " << l << ") @ " << tof_h << " w/ Height = " << height << std::endl;
+          }
+      }
 
       // -1. Clean
       AnalysisDataService::Instance().remove("Data");
       AnalysisDataService::Instance().remove("PeakParameters");
       AnalysisDataService::Instance().remove("Reflections");
+      AnalysisDataService::Instance().remove("CalculatedPeaks");
 
       return;
   }

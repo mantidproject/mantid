@@ -63,11 +63,15 @@ void LeBailFit::init()
 
   this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace", "", Direction::Output),
                         "Output workspace containing calculated pattern or calculated background. ");
+  this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("PeaksWorkspace", "", Direction::Output),
+                        "Output workspace containing the information for all peaks. ");
 
   // TODO Add another output (TableWorkspace) as each peak's height.
 
   this->declareProperty("UseInputPeakHeights", true,
                         "For function Calculation, use peak heights specified in ReflectionWorkspace.  Otherwise, calcualte peaks' heights. ");
+
+  this->declareProperty("FullPeakRange", 5.0, "Range (multiplier relative to FWHM) for a full peak. ");
 
   return;
 }
@@ -179,32 +183,11 @@ void LeBailFit::exec()
         break;
     }
 
+    // 7. Output peak (table) workspace
+    createPeaksWorkspace();
+
     return;
 }
-
-/*
- * Calculate peaks' intensities
-void LeBailFit::calculatePeaksHeights(size_t workspaceindex)
-{
-    // 1. Set parameters to each peak (no tie)
-    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator pit;
-    for (pit = mPeaks.begin(); pit != mPeaks.end(); ++pit)
-    {
-        int hkl2 = pit->first;
-        double peakheight = mPeakHeights[hkl2];
-        setPeakParameters(mPeaks[hkl2], peakheight);
-    }
-
-    std::vector<std::pair<int, double> > peakheights;
-    this->calPeaksIntensities(peakheights, workspaceindex);
-
-    for (size_t ipk = 0; ipk < peakheights.size(); ++ipk)
-    {
-        size_t hkl2 = peakheights[ipk].first;
-        std::cout << "Peak w/ HKL^2 = " << hkl2 << "  Intensity = " << peakheights[ipk].second << std::endl;
-    }
-}
-*/
 
 
 /*
@@ -349,7 +332,7 @@ void LeBailFit::calPeaksIntensities(std::vector<std::pair<int, double> >& peakhe
     std::vector<std::set<size_t> > peakgroups; // index is for peak groups.  Inside, are indices for mPeakHKL2
     std::set<size_t> peakindices;
     // FIXME: This should be a more flexible number
-    double boundaryconst = 4.0;
+    double boundaryconst = this->getProperty("FullPeakRange");
 
     for (size_t ix = 0; ix < peakcenters.size(); ++ix)
     {
@@ -423,6 +406,8 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> pea
     // 1. Determine range of the peak group
     std::cout << "DB252 Group Size = " << peakindices.size() << " Including peak indexed " << std::endl;
 
+    peakintensities.clear();
+
     std::vector<size_t> peaks; // index for mPeakHKL2
     std::set<size_t>::iterator pit;
     for (pit = peakindices.begin(); pit != peakindices.end(); ++pit)
@@ -446,6 +431,16 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> pea
 
     std::cout << "DB1204 Left bound = " << leftbound << " (" << iLeftPeak << "), Right bound = " << rightbound << "(" << iRightPeak << ")."
                  << std::endl;
+
+    // 1.5 Return if the complete peaks' range is out side of all data (boundary)
+    if (leftbound < dataWS->readX(wsindex)[0] || rightbound > dataWS->readX(wsindex).back())
+    {
+        for (size_t i = 0; i < peaks.size(); ++i)
+        {
+            peakintensities.push_back(std::make_pair(peaks[i], 0.0));
+        }
+        return;
+    }
 
     // 2. Obtain access of dataWS to calculate from
     const MantidVec& datax = dataWS->readX(wsindex);
@@ -659,6 +654,45 @@ bool LeBailFit::observePeakRange(size_t workspaceindex, double center, double fw
   g_log.information() << "DB502 Estimate Peak Range:  Center = " << tof_center << ";  Left = " << tof_left << ", Right = " << tof_right << std::endl;
 
   return (!cannotfindL && !cannotfindR);
+}
+
+
+/*
+ * Create and set up an output TableWorkspace for all the peaks.
+ */
+void LeBailFit::createPeaksWorkspace()
+{
+    // 1. Create peaks workspace
+    DataObjects::TableWorkspace tbws;
+    DataObjects::TableWorkspace_sptr peakWS = boost::make_shared<DataObjects::TableWorkspace>(tbws);
+
+    // 2. Set up peak workspace
+    peakWS->addColumn("int", "H");
+    peakWS->addColumn("int", "K");
+    peakWS->addColumn("int", "L");
+    peakWS->addColumn("double", "height");
+    peakWS->addColumn("double", "TOF_h");
+
+    // 3. Construct a list
+    std::sort(mPeakHKL2.begin(), mPeakHKL2.end(), compDescending);
+
+    for (size_t ipk = 0; ipk < mPeakHKL2.size(); ++ipk)
+    {
+        int hkl2 = mPeakHKL2[ipk];
+        CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr tpeak = mPeaks[hkl2];
+        int h, k, l;
+        tpeak->getMillerIndex(h, k, l);
+        double tof_h = tpeak->centre();
+        double height = tpeak->height();
+
+        API::TableRow newrow = peakWS->appendRow();
+        newrow << h << k << l << height << tof_h;
+    }
+
+    // 4. Set
+    this->setProperty("PeaksWorkspace", peakWS);
+
+    return;
 }
 
 

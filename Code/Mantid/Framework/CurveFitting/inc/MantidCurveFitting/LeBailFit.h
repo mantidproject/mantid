@@ -74,6 +74,9 @@ namespace CurveFitting
     /// Create a list of peaks
     void generatePeaksFromInput();
 
+    /// Create and set up output table workspace for peaks
+    void createPeaksWorkspace();
+
     /// Set parameters to each peak
     void setPeakParameters(CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak, double peakheight);
 
