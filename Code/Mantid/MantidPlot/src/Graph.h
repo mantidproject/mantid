@@ -165,6 +165,9 @@ public:
                  Spline, HorizontalSteps, Histogram, HorizontalBars, VectXYXY, ErrorBars,
                  Box, VectXYAM, VerticalSteps, ColorMap, GrayScale, ColorMapContour, Contour, Function, ImagePlot,User};
 
+  bool hasSynchronizedScaleDivisions(){return d_synchronize_scales;};
+  void setSynchronizedScaleDivisions(bool on){d_synchronize_scales = on;};
+
 public slots:
   //! Returns a pointer to the parent MultiLayer object.
   MultiLayer *multiLayer();
@@ -524,6 +527,9 @@ public slots:
   int axisTitleAlignment (int axis);
   void setAxisTitleAlignment(int axis, int align);
 
+  int axisTitleDistance(int axis);
+  void setAxisTitleDistance(int axis, int dist);
+
   QColor axisColor(int axis);
   void setAxisColor(int axis, const QColor& color);
 
@@ -865,6 +871,7 @@ private:
   // to save error flag to project file for 1 PD plot
   bool m_errors;
 
+  bool d_synchronize_scales;
   int d_waterfall_offset_x, d_waterfall_offset_y;
 
   // True if MantidCurves are plotted as distributions

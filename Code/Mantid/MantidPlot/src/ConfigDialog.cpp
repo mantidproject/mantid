@@ -254,9 +254,9 @@ void ConfigDialog::initPlotsPage()
   initOptionsPage();
 
   initAxesPage();
+  plotsTabWidget->addTab( axesPage, QString() );
 
   initCurvesPage();
-
   plotsTabWidget->addTab( curves, QString() );
 
   plotTicks = new QWidget();
@@ -1339,79 +1339,107 @@ void ConfigDialog::initOptionsPage()
 void ConfigDialog::initAxesPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app)
+    return;
 
-  plotAxes = new QWidget();
+  axesPage = new QWidget();
 
-  plotsTabWidget->addTab( plotAxes, QString() );
+  QGroupBox * axisOptions = new QGroupBox();
+  QGridLayout * axisOptionsLayout = new QGridLayout( axisOptions );
 
-  QGroupBox * axesGroupBox = new QGroupBox();
-  QGridLayout * axisBoxLayout = new QGridLayout( axesGroupBox );
+  boxBackbones = new QCheckBox();
+  boxBackbones->setChecked(app->drawBackbones);
+  axisOptionsLayout->addWidget(boxBackbones, 0, 0);
 
-  lblXLogLin = new QLabel();
-  axisBoxLayout->addWidget( lblXLogLin, 0, 0 );
-
-  cbXLog = new QComboBox();
-  cbXLog->addItem(tr("linear"));
-  cbXLog->addItem("log");
-  if ( app->xaxisScale == "log" )
-  {
-    cbXLog->setCurrentIndex(1);
-  }
-  else
-  {
-    cbXLog->setCurrentIndex(0);
-  }
-  axisBoxLayout->addWidget(cbXLog, 0, 1);
-
-  lblYLogLin = new QLabel();
-  axisBoxLayout->addWidget( lblYLogLin, 1, 0 );
-
-  cbYLog = new QComboBox();
-  cbYLog->addItem(tr("linear"));
-  cbYLog->addItem("log");
-  if ( app->yaxisScale == "log" )
-  {
-    cbYLog->setCurrentIndex(1);
-  }
-  else
-  {
-    cbYLog->setCurrentIndex(0);
-  }
-  axisBoxLayout->addWidget(cbYLog, 1, 1);
-
-  lblZLogLin = new QLabel();
-  axisBoxLayout->addWidget( lblZLogLin, 2, 0 );
-
-  cbZLog = new QComboBox();
-  cbZLog->addItem(tr("linear"));
-  cbZLog->addItem("log");
-  if ( app->zaxisScale == "log" )
-  {
-    cbZLog->setCurrentIndex(1);
-  }
-  else
-  {
-    cbZLog->setCurrentIndex(0);
-  }
-  axisBoxLayout->addWidget(cbZLog, 2, 1);
+  boxSynchronizeScales = new QCheckBox();
+  boxSynchronizeScales->setChecked(app->d_synchronize_graph_scales);
+  axisOptionsLayout->addWidget(boxSynchronizeScales, 0, 1);
 
   lblAxesLineWidth = new QLabel();
-  axisBoxLayout->addWidget( lblAxesLineWidth, 3, 0 );
+  axisOptionsLayout->addWidget(lblAxesLineWidth, 1, 0);
   boxLineWidth= new QSpinBox();
   boxLineWidth->setRange(0, 100);
   boxLineWidth->setValue(app->axesLineWidth);
-  axisBoxLayout->addWidget( boxLineWidth, 3, 1 );
+  axisOptionsLayout->addWidget(boxLineWidth, 1, 1);
 
-  boxAllAxes = new QCheckBox();
-  boxAllAxes->setChecked (app->allAxesOn);
-  axisBoxLayout->addWidget( boxAllAxes, 4, 0 );
+  labelGraphAxesLabelsDist = new QLabel();
+  axisOptionsLayout->addWidget(labelGraphAxesLabelsDist, 2, 0);
+  boxAxesLabelsDist = new QSpinBox();
+  boxAxesLabelsDist->setRange(0, 1000);
+  boxAxesLabelsDist->setValue(app->d_graph_axes_labels_dist);
+  axisOptionsLayout->addWidget(boxAxesLabelsDist, 2, 1);
 
-  boxBackbones= new QCheckBox();
-  boxBackbones->setChecked(app->drawBackbones);
-  axisBoxLayout->addWidget( boxBackbones, 4, 1 );
+  labelTickLabelsDist = new QLabel();
+  axisOptionsLayout->addWidget(labelTickLabelsDist, 3, 0);
+  boxTickLabelsDist = new QSpinBox();
+  boxTickLabelsDist->setRange(0, 1000);
+  boxTickLabelsDist->setValue(app->d_graph_tick_labels_dist);
+  axisOptionsLayout->addWidget(boxTickLabelsDist, 3, 1);
+  axisOptionsLayout->setRowStretch(4, 1);
 
-  QHBoxLayout *axesPageLayout = new QHBoxLayout( plotAxes );
-  axesPageLayout->addWidget( axesGroupBox );
+  enabledAxesGroupBox = new QGroupBox();
+  enabledAxesGrid = new QGridLayout( enabledAxesGroupBox );
+
+  enableAxisLabel = new QLabel();
+  enabledAxesGrid->addWidget(enableAxisLabel, 0, 2);
+  showNumbersLabel = new QLabel();
+  enabledAxesGrid->addWidget(showNumbersLabel, 0, 3);
+  scaleLabel = new QLabel();
+  enabledAxesGrid->addWidget(scaleLabel, 0, 4);
+
+  QLabel *pixLabel = new QLabel();
+  pixLabel->setPixmap (QPixmap (":/left_axis.png"));
+  enabledAxesGrid->addWidget(pixLabel, 1, 0);
+  yLeftLabel = new QLabel();
+  enabledAxesGrid->addWidget(yLeftLabel, 1, 1);
+
+  pixLabel = new QLabel();
+  pixLabel->setPixmap (QPixmap (":/right_axis.png"));
+  enabledAxesGrid->addWidget(pixLabel, 2, 0);
+  yRightLabel = new QLabel();
+  enabledAxesGrid->addWidget(yRightLabel, 2, 1);
+
+  pixLabel = new QLabel();
+  pixLabel->setPixmap (QPixmap (":/bottom_axis.png"));
+  enabledAxesGrid->addWidget(pixLabel, 3, 0);
+  xBottomLabel = new QLabel();
+  enabledAxesGrid->addWidget(xBottomLabel, 3, 1);
+
+  pixLabel = new QLabel();
+  pixLabel->setPixmap (QPixmap (":/top_axis.png"));
+  enabledAxesGrid->addWidget(pixLabel, 4, 0);
+  xTopLabel = new QLabel();
+  enabledAxesGrid->addWidget(xTopLabel, 4, 1);
+
+  for (int i = 0; i < QwtPlot::axisCnt; i++){
+    QCheckBox *box1 = new QCheckBox();
+    int row = i + 1;
+
+    enabledAxesGrid->addWidget(box1, row, 2);
+    bool enabledAxis = app->d_show_axes[i];
+    box1->setChecked(enabledAxis);
+
+    QCheckBox *box2 = new QCheckBox();
+    enabledAxesGrid->addWidget(box2, row, 3);
+    box2->setChecked(app->d_show_axes_labels[i]);
+    box2->setEnabled(enabledAxis);
+
+    connect(box1, SIGNAL(toggled(bool)), box2, SLOT(setEnabled(bool)));
+
+    QComboBox *box3 = new QComboBox();
+    enabledAxesGrid->addWidget(box3, row, 4);
+    box3->addItem(tr("linear"));
+    box3->addItem("log");
+    if ( app->d_axes_scales[i] == "log" ) box3->setCurrentIndex(1);
+  }
+  enabledAxesGrid->setColumnStretch (0, 0);
+  enabledAxesGrid->setColumnStretch (1, 1);
+  enabledAxesGrid->setColumnStretch (2, 1);
+  enabledAxesGrid->setColumnStretch (3, 1);
+
+  QVBoxLayout * axesPageLayout = new QVBoxLayout( axesPage );
+  axesPageLayout->addWidget(axisOptions);
+  axesPageLayout->addWidget(enabledAxesGroupBox);
 }
 
 void ConfigDialog::initCurvesPage()
@@ -1662,7 +1690,7 @@ void ConfigDialog::languageChange()
 
   //plots 2D page
   plotsTabWidget->setTabText(plotsTabWidget->indexOf(plotOptions), tr("Options"));
-  plotsTabWidget->setTabText(plotsTabWidget->indexOf(plotAxes), tr("Axes"));
+  plotsTabWidget->setTabText(plotsTabWidget->indexOf(axesPage), tr("Axes"));
   plotsTabWidget->setTabText(plotsTabWidget->indexOf(curves), tr("Curves"));
   plotsTabWidget->setTabText(plotsTabWidget->indexOf(plotTicks), tr("Ticks"));
   plotsTabWidget->setTabText(plotsTabWidget->indexOf(plotFonts), tr("Fonts"));
@@ -1671,26 +1699,38 @@ void ConfigDialog::languageChange()
   boxLabelsEditing->setText(tr("&Disable in-place editing"));
   lblMinTicksLength->setText(tr("Length"));
 
-  lblXLogLin->setText(tr("Default X scale"));
-  lblYLogLin->setText(tr("Default Y scale"));
-  lblZLogLin->setText(tr("Default color scale"));
-
-  lblAxesLineWidth->setText(tr("Axes linewidth" ));
   lblMajTicksLength->setText(tr("Length" ));
   lblMajTicks->setText(tr("Major Ticks" ));
   lblMinTicks->setText(tr("Minor Ticks" ));
 
   lblMargin->setText(tr("Margin" ));
+  labelGraphAxesLabelsDist->setText(tr("Axes title space" ));
+  labelTickLabelsDist->setText(tr("Ticks - Labels space" ));
+  boxAxesLabelsDist->setSuffix(" " + tr("pixels"));
+  boxTickLabelsDist->setSuffix(" " + tr("pixels"));
   labelFrameWidth->setText(tr("Frame width" ));
 
-  boxBackbones->setText(tr("Axes &backbones"));
   boxFrame->setText(tr("Canvas Fra&me"));
-  boxAllAxes->setText(tr("Sho&w all axes"));
   boxTitle->setText(tr("Show &Title"));
   boxScaleFonts->setText(tr("Scale &Fonts"));
   boxAutoscaling->setText(tr("Auto&scaling"));
   boxAntialiasing->setText(tr("Antia&liasing"));
   boxAspectRatio->setText(tr("Fixed aspect ratio on window resize"));
+
+  // axes page
+  boxBackbones->setText(tr("Axes &backbones"));
+  boxSynchronizeScales->setText(tr("Synchronize scale &divisions"));
+  lblAxesLineWidth->setText(tr("Axes linewidth" ));
+
+  yLeftLabel->setText(tr("Left"));
+  yRightLabel->setText(tr("Right / color map"));
+  xBottomLabel->setText(tr("Bottom"));
+  xTopLabel->setText(tr("Top"));
+
+  enabledAxesGroupBox->setTitle(tr("Enabled axes" ));
+  enableAxisLabel->setText(tr( "Show" ));
+  showNumbersLabel->setText(tr( "Labels" ));
+  scaleLabel->setText("Scale");
 
   boxMajTicks->clear();
   boxMajTicks->addItem(tr("None"));
@@ -1923,23 +1963,44 @@ void ConfigDialog::apply()
   // 2D plots page: options tab
   app->d_in_place_editing = !boxLabelsEditing->isChecked();
   app->titleOn=boxTitle->isChecked();
-  app->allAxesOn = boxAllAxes->isChecked();
 
   if (boxFrame->isChecked())
     app->canvasFrameWidth = boxFrameWidth->value();
   else
     app->canvasFrameWidth = 0;
 
-  app->drawBackbones = boxBackbones->isChecked();
-
-  app->xaxisScale = cbXLog->currentText();
-  app->yaxisScale = cbYLog->currentText();
-  app->zaxisScale = cbZLog->currentText();
-
-  app->axesLineWidth = boxLineWidth->value();
   app->defaultPlotMargin = boxMargin->value();
+  app->d_graph_axes_labels_dist = boxAxesLabelsDist->value();
+  app->d_graph_tick_labels_dist = boxTickLabelsDist->value();
   app->setGraphDefaultSettings(boxAutoscaling->isChecked(),boxScaleFonts->isChecked(),
     boxResize->isChecked(), boxAntialiasing->isChecked(), boxAspectRatio->isChecked());
+
+  // 2D plots page: axes tab
+  if (generalDialog->currentWidget() == plotsTabWidget &&
+        plotsTabWidget->currentWidget() == axesPage )
+  {
+    app->drawBackbones = boxBackbones->isChecked();
+    app->axesLineWidth = boxLineWidth->value();
+    app->d_synchronize_graph_scales = boxSynchronizeScales->isChecked();
+
+    for (int i = 0; i < QwtPlot::axisCnt; i++){
+      int row = i + 1;
+      QLayoutItem *item = enabledAxesGrid->itemAtPosition(row, 2);
+      QCheckBox *box = qobject_cast<QCheckBox *>(item->widget());
+      app->d_show_axes[i] = box->isChecked();
+
+      item = enabledAxesGrid->itemAtPosition(row, 3);
+      box = qobject_cast<QCheckBox *>(item->widget());
+      app->d_show_axes_labels[i] = box->isChecked();
+
+      item = enabledAxesGrid->itemAtPosition(row, 4);
+      QComboBox *combo = qobject_cast<QComboBox *>(item->widget());
+      app->d_axes_scales[i] = combo->currentText();
+    }
+  }
+
+
+
   // 2D plots page: curves tab
   app->defaultCurveStyle = curveStyle();
   app->defaultCurveLineWidth = boxCurveLineWidth->value();

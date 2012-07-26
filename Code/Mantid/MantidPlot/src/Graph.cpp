@@ -142,6 +142,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
   d_antialiasing = false;
   d_scale_on_print = true;
   d_print_cropmarks = false;
+  d_synchronize_scales = false;
 
   d_user_step = QVector<double>(QwtPlot::axisCnt);
   for (int i=0; i<QwtPlot::axisCnt; i++)
@@ -674,7 +675,7 @@ void Graph::showAxis(int axis, int type, const QString& formatInfo, Table *table
   setAxisTicksLength(axis, majTicksType, minTicksType,
       d_plot->minorTickLength(), d_plot->majorTickLength());
 
-  if (axisOn && (axis == QwtPlot::xTop || axis == QwtPlot::yRight))
+  if (d_synchronize_scales && axisOn && (axis == QwtPlot::xTop || axis == QwtPlot::yRight))
   {
     updateSecondaryAxis(axis);//synchronize scale divisions
   }
@@ -958,6 +959,25 @@ void Graph::setAxisTitleAlignment(int axis, int align)
   t.setRenderFlags(align);
   d_plot->setAxisTitle (axis, t);
 }
+
+int Graph::axisTitleDistance(int axis)
+{
+  if (!d_plot->axisEnabled(axis))
+    return 0;
+
+  return d_plot->axisWidget(axis)->spacing();
+}
+
+void Graph::setAxisTitleDistance(int axis, int dist)
+{
+  if (!d_plot->axisEnabled(axis))
+    return;
+
+  QwtScaleWidget *scale = d_plot->axisWidget(axis);
+  if (scale)
+    scale->setSpacing(dist);
+}
+
 
 void Graph::setScaleTitle(int axis, const QString& text)
 {
@@ -1277,10 +1297,12 @@ void Graph::setScale(int axis, double start, double end, double step,
 
   // 	d_user_step[axis] = step;
 
-  // 	if (axis == QwtPlot::xBottom || axis == QwtPlot::yLeft){
-  //   		updateSecondaryAxis(QwtPlot::xTop);
-  //   	    updateSecondaryAxis(QwtPlot::yRight);
-  //   	}
+  //    if (d_synchronize_scales){
+  //      if (axis == QwtPlot::xBottom)
+  //        updateSecondaryAxis(QwtPlot::xTop);
+  //      else if (axis == QwtPlot::yLeft)
+  //        updateSecondaryAxis(QwtPlot::yRight);
+  //    }
 
   // 	d_plot->replot();
   // 	//keep markers on canvas area
@@ -3478,8 +3500,13 @@ void Graph::updateScale()
 {
   d_plot->replot();
   updateMarkersBoundingRect();
-  updateSecondaryAxis(QwtPlot::xTop);
-  updateSecondaryAxis(QwtPlot::yRight);
+
+  if (d_synchronize_scales)
+  {
+    updateSecondaryAxis(QwtPlot::xTop);
+    updateSecondaryAxis(QwtPlot::yRight);
+  }
+
   d_plot->replot();//TODO: avoid 2nd replot!
   d_zoomer[0]->setZoomBase();
   //	d_zoomer[1]->setZoomBase();
@@ -3782,8 +3809,11 @@ void Graph::zoomOut()
   d_zoomer[0]->zoom(-1);
   //d_zoomer[1]->zoom(-1);
 
-  updateSecondaryAxis(QwtPlot::xTop);
-  updateSecondaryAxis(QwtPlot::yRight);
+  if (d_synchronize_scales)
+  {
+    updateSecondaryAxis(QwtPlot::xTop);
+    updateSecondaryAxis(QwtPlot::yRight);
+  }
 }
 
 void Graph::drawText(bool on)
@@ -4107,6 +4137,7 @@ QString Graph::saveToString(bool saveAsTemplate)
   //s+="SpectrumList\t"+getSpectrumIndex()+"\n";
   //s+="Errors\t"+QString::number(getError())+"\n";
   s+="<Antialiasing>" + QString::number(d_antialiasing) + "</Antialiasing>\n";
+  s+="<SyncScales>" + QString::number(d_synchronize_scales) + "</SyncScales>\n";
   s+="Background\t" + d_plot->paletteBackgroundColor().name() + "\t";
   s+=QString::number(d_plot->paletteBackgroundColor().alpha()) + "\n";
   s+="Margin\t"+QString::number(d_plot->margin())+"\n";
@@ -4743,6 +4774,7 @@ void Graph::copy(Graph* g)
       addArrow(lmrk);
   }
   setAntialiasing(g->antialiasing(), true);
+  d_synchronize_scales = g->hasSynchronizedScaleDivisions();
   d_plot->replot();
 }
 

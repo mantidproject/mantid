@@ -725,6 +725,9 @@ void ApplicationWindow::initGlobalConstants()
   plot3DColors << "#000000";
   plot3DColors << "#ffffff";
 
+  d_graph_tick_labels_dist = 4;
+  d_graph_axes_labels_dist = 2;
+
   autoSave = false;
   autoSaveTime = 15;
   d_backup_files = true;
@@ -759,15 +762,17 @@ void ApplicationWindow::initGlobalConstants()
   d_show_table_comments = false;
 
   titleOn = true;
-  allAxesOn = false;
+  d_show_axes = QVector<bool> (QwtPlot::axisCnt, true);
+  // 'Factory' default is to not show top & right axes
+  d_show_axes[1] = false;
+  d_show_axes[3] = false;
+  d_show_axes_labels = QVector<bool> (QwtPlot::axisCnt, true);
   canvasFrameWidth = 0;
   defaultPlotMargin = 0;
   drawBackbones = true;
 
   //these settings are overridden, but the default axes scales are linear
-  xaxisScale = "linear";
-  yaxisScale = "linear";
-  zaxisScale = "linear";
+  d_axes_scales = QVector<QString> (QwtPlot::axisCnt, "linear");
 
   axesLineWidth = 1;
   autoscale2DPlots = true;
@@ -777,6 +782,7 @@ void ApplicationWindow::initGlobalConstants()
   fixedAspectRatio2DPlots = false; //Mantid
   d_scale_plots_on_print = false;
   d_print_cropmarks = false;
+  d_synchronize_graph_scales = true;
 
   defaultCurveStyle = static_cast<int>(Graph::Line);
   defaultCurveLineWidth = 1;
@@ -3029,19 +3035,32 @@ void ApplicationWindow::customTable(Table* w)
 
 void ApplicationWindow::setPreferences(Graph* g)
 {
-  if (!g->isPiePlot()){
-    if (allAxesOn){
-      for (int i=0; i<4; i++)
-        g->enableAxis(i);
-      g->updateSecondaryAxis(QwtPlot::xTop);
-      g->updateSecondaryAxis(QwtPlot::yRight);
-    }
+  if (!g)
+    return;
 
+  if (!g->isPiePlot())
+  {
+    for (int i = 0; i < QwtPlot::axisCnt; i++)
+    {
+      bool show = d_show_axes[i];
+      g->enableAxis(i, show);
+      if (show)
+      {
+        ScaleDraw *sd = (ScaleDraw *)g->plotWidget()->axisScaleDraw (i);
+        sd->enableComponent(QwtAbstractScaleDraw::Labels, d_show_axes_labels[i]);
+        sd->setSpacing(d_graph_tick_labels_dist);
+        if (i == QwtPlot::yRight && !d_show_axes_labels[i])
+          g->setAxisTitle(i, tr(" "));
+      }
+    }
     //set the scale type i.e. log or linear
-    g->setScale(QwtPlot::xBottom, xaxisScale);
-    g->setScale(QwtPlot::yLeft, yaxisScale);
-    // yRight is the color bar, representing a third (z) dimension
-    g->setScale(QwtPlot::yRight, zaxisScale);
+    g->setScale(QwtPlot::yLeft, d_axes_scales[0]);
+    g->setScale(QwtPlot::yRight, d_axes_scales[1]);
+    g->setScale(QwtPlot::xBottom, d_axes_scales[2]);
+    g->setScale(QwtPlot::xTop, d_axes_scales[3]);
+
+    g->updateSecondaryAxis(QwtPlot::xTop);
+    g->updateSecondaryAxis(QwtPlot::yRight);
 
     QList<int> ticksList;
     ticksList<<majTicksStyle<<majTicksStyle<<majTicksStyle<<majTicksStyle;
@@ -3053,9 +3072,12 @@ void ApplicationWindow::setPreferences(Graph* g)
     g->setTicksLength (minTicksLength, majTicksLength);
     g->setAxesLinewidth(axesLineWidth);
     g->drawAxesBackbones(drawBackbones);
+    for (int i = 0; i < QwtPlot::axisCnt; i++)
+      g->setAxisTitleDistance(i, d_graph_axes_labels_dist);
     //    need to call the plot functions for log/linear, errorbars and distribution stuff
   }
 
+  g->setSynchronizedScaleDivisions(d_synchronize_graph_scales);
   g->initFonts(plotAxesFont, plotNumbersFont);
   g->initTitle(titleOn, plotTitleFont);
   g->setCanvasFrame(canvasFrameWidth);
@@ -5218,13 +5240,13 @@ void ApplicationWindow::readSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
-  allAxesOn = settings.value("/AllAxes", false).toBool();
+  //allAxesOn = settings.value("/AllAxes", false).toBool();
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();
   drawBackbones = settings.value("/AxesBackbones", true).toBool();
-  xaxisScale = settings.value("/AxisXScale", "linear").toString();
-  yaxisScale = settings.value("/AxisYScale", "linear").toString();
-  zaxisScale = settings.value("/AxisZScale", "linear").toString();
+  //xaxisScale = settings.value("/AxisXScale", "linear").toString();
+  //yaxisScale = settings.value("/AxisYScale", "linear").toString();
+  //zaxisScale = settings.value("/AxisZScale", "linear").toString();
   axesLineWidth = settings.value("/AxesLineWidth", 1).toInt();
   autoscale2DPlots = settings.value("/Autoscale", true).toBool();
   autoScaleFonts = settings.value("/AutoScaleFonts", true).toBool();
@@ -5242,6 +5264,16 @@ void ApplicationWindow::readSettings()
     plotTitleFont=QFont (graphFonts[12],graphFonts[13].toInt(),graphFonts[14].toInt(),graphFonts[15].toInt());
   }
   d_in_place_editing = settings.value("/InPlaceEditing", true).toBool();
+  d_graph_axes_labels_dist = settings.value("/LabelsAxesDist", d_graph_axes_labels_dist).toInt();
+  d_graph_tick_labels_dist = settings.value("/TickLabelsDist", d_graph_tick_labels_dist).toInt();
+  int size = settings.beginReadArray("EnabledAxes");
+  for (int i = 0; i < size; ++i) {
+    settings.setArrayIndex(i);
+    d_show_axes[i] = settings.value("enabled", true).toBool();
+    d_show_axes_labels[i] = settings.value("labels", true).toBool();
+  }
+  settings.endArray();
+  d_synchronize_graph_scales = settings.value("/SynchronizeScales", d_synchronize_graph_scales).toBool();
   settings.endGroup(); // General
 
   settings.beginGroup("/Curves");
@@ -5563,13 +5595,13 @@ void ApplicationWindow::saveSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   settings.setValue("/Title", titleOn);
-  settings.setValue("/AllAxes", allAxesOn);
+  //settings.setValue("/AllAxes", allAxesOn);
   settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
   settings.setValue("/Margin", defaultPlotMargin);
   settings.setValue("/AxesBackbones", drawBackbones);
-  settings.setValue("/AxisXScale", xaxisScale);
-  settings.setValue("/AxisYScale", yaxisScale);
-  settings.setValue("/AxisZScale", zaxisScale);
+  settings.setValue("/AxisXScale", "linear");//xaxisScale);
+  settings.setValue("/AxisYScale", "linear");//yaxisScale);
+  settings.setValue("/AxisZScale", "linear");//zaxisScale);
   settings.setValue("/AxesLineWidth", axesLineWidth);
   settings.setValue("/Autoscale", autoscale2DPlots);
   settings.setValue("/AutoScaleFonts", autoScaleFonts);
@@ -5601,6 +5633,17 @@ void ApplicationWindow::saveSettings()
 
 
   settings.setValue("/InPlaceEditing", d_in_place_editing);
+  settings.setValue("/LabelsAxesDist", d_graph_axes_labels_dist);
+  settings.setValue("/TickLabelsDist", d_graph_tick_labels_dist);
+  //settings.beginWriteArray("EnabledAxes");
+  //for (int i = 0; i < QwtPlot::axisCnt; ++i) {
+  //  settings.setArrayIndex(i);
+  //  settings.setValue("axis", i);
+  //  settings.setValue("enabled", d_show_axes[i]);
+  //  settings.setValue("labels", d_show_axes_labels[i]);
+  //}
+  //settings.endArray();
+  settings.setValue("/SynchronizeScales", d_synchronize_graph_scales);
   settings.endGroup(); // General
 
   settings.beginGroup("/Curves");
@@ -11607,6 +11650,10 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       bool antialiasing = s.remove("<Antialiasing>").remove("</Antialiasing>").toInt();
       ag->setAntialiasing(antialiasing);
     }
+    else if (s.startsWith ("<Autoscaling>") && s.endsWith ("</Autoscaling>"))
+      ag->enableAutoscaling(s.remove("<Autoscaling>").remove("</Autoscaling>").toInt());
+    else if (s.startsWith ("<SyncScales>") && s.endsWith ("</SyncScales>"))
+      ag->setSynchronizedScaleDivisions(s.remove("<SyncScales>").remove("</SyncScales>").toInt());
     else if (s.contains ("PieCurve")){
       QStringList curve=s.split("\t");
       if (!app->renamedTables.isEmpty()){

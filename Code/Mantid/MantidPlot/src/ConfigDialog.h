@@ -35,6 +35,7 @@ Description          : Preferences dialog
 
 class QLineEdit;
 class QGroupBox;
+class QGridLayout;
 class QPushButton;
 class QTabWidget;
 class QStackedWidget;
@@ -172,8 +173,8 @@ private:
   QPushButton *buttonOk, *buttonCancel, *buttonApply;
   QPushButton* buttonTextFont, *buttonHeaderFont;
   QStackedWidget * generalDialog;
-  QWidget *appColors, *tables, *plotOptions, *plotAxes, *plotTicks, *plotFonts, *confirm, *plotPrint;
-  QWidget *application, *curves, *plots3D, *fitPage, *numericFormatPage, *floatingWindowsPage;
+  QWidget *appColors, *tables, *plotOptions, *plotTicks, *plotFonts, *confirm, *plotPrint;
+  QWidget *application, *curves, *axesPage, *plots3D, *fitPage, *numericFormatPage, *floatingWindowsPage;
   //Mantid
   QWidget *instrumentPage;
   QComboBox *facility;
@@ -208,9 +209,6 @@ private:
   QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
   QCheckBox *boxTitle, *boxFrame, *boxPlots3D, *boxPlots2D, *boxTables, *boxNotes, *boxFolders,*boxInstrWindow;
   QCheckBox *boxSave, *boxBackbones, *boxShowLegend, *boxSmoothMesh;
-  QCheckBox *boxAllAxes;
-  QLabel *lblXLogLin, *lblYLogLin, *lblZLogLin;
-  QComboBox *cbXLog,  *cbYLog, *cbZLog;
   QCheckBox *boxAutoscaling, *boxShowProjection, *boxMatrices, *boxScaleFonts, *boxResize, *boxAspectRatio;
   QComboBox *boxMajTicks, *boxMinTicks, *boxStyle, *boxCurveStyle, *boxSeparator, *boxLanguage, *boxDecimalSeparator;
   QCheckBox *boxFloatingGraph, *boxFloatingTable, *boxFloatingInstrumentWindow, *boxFloatingMantidMatrix, *boxFloatingNote, *boxFloatingMatrix;
@@ -244,6 +242,13 @@ private:
   QCheckBox* cbApplyToMantid;
   QCheckBox* cbEnableQtiPlotFitting;
 
+  QLabel *labelGraphAxesLabelsDist, *labelTickLabelsDist;
+  QSpinBox *boxAxesLabelsDist, *boxTickLabelsDist;
+  QLabel *xBottomLabel, *xTopLabel, *yLeftLabel, *yRightLabel, *enableAxisLabel, *showNumbersLabel, *scaleLabel;
+  QCheckBox *boxEnableAxis, *boxShowAxisLabels;
+  QGroupBox * enabledAxesGroupBox;
+  QGridLayout *enabledAxesGrid;
+  QCheckBox *boxSynchronizeScales;
 
 
 #ifdef SCRIPTING_PYTHON

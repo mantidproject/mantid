@@ -1290,10 +1290,27 @@ public:
   bool smooth3DMesh, autoScaleFonts, autoResizeLayers, askForSupport, autoSearchUpdates;
   bool confirmCloseTable, confirmCloseMatrix, confirmClosePlot2D, confirmClosePlot3D,confirmCloseInstrWindow;
   bool confirmCloseFolder, confirmCloseNotes;
-  bool titleOn, autoSave, drawBackbones, allAxesOn, autoscale2DPlots, antialiasing2DPlots, fixedAspectRatio2DPlots;
-  QString xaxisScale, yaxisScale, zaxisScale;
+  bool titleOn, autoSave, autoscale2DPlots, antialiasing2DPlots, fixedAspectRatio2DPlots;
+  //! \name User preferences for axes in new 2D plot layers
+  //@{
+  //! Axes to be shown
+  QVector<bool> d_show_axes;
+  //! Axes with labels enabled
+  QVector<bool> d_show_axes_labels;
+  //! Log or linear axes by default
+  QVector<QString> d_axes_scales;
+  //! Draw axes backbones
+  bool drawBackbones;
+  //! Default distance between the ticks and the tick labels
+  int d_graph_tick_labels_dist;
+  //! Distance between the axes title and the backbone
+  int d_graph_axes_labels_dist;
+  //! Default axes linewidth
+  int axesLineWidth;
+  //@}
+  bool d_synchronize_graph_scales;
 
-  int majTicksStyle, minTicksStyle, legendFrameStyle, autoSaveTime, axesLineWidth, canvasFrameWidth;
+  int majTicksStyle, minTicksStyle, legendFrameStyle, autoSaveTime, canvasFrameWidth;
   QColor legendBackground, legendTextColor, defaultArrowColor;
   int defaultArrowHeadLength, defaultArrowHeadAngle;
   double defaultArrowLineWidth, defaultCurveLineWidth;
