@@ -1,6 +1,6 @@
-#include "MantidCurveFitting/HighOrderPolynomialBackground.h"
+#include "MantidCurveFitting/Polynomial.h"
 #include "MantidAPI/FunctionFactory.h"
-
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -10,65 +10,120 @@ namespace Mantid
 namespace CurveFitting
 {
 
-DECLARE_FUNCTION(HighOrderPolynomialBackground)
+DECLARE_FUNCTION(Polynomial)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  HighOrderPolynomialBackground::HighOrderPolynomialBackground()
-  {
-  }
+Polynomial::Polynomial():m_n(0)
+{
+}
     
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  HighOrderPolynomialBackground::~HighOrderPolynomialBackground()
-  {
-  }
+//----------------------------------------------------------------------------------------------
+/*
+ * Destructor
+ */
+Polynomial::~Polynomial()
+{
+}
   
-  void HighOrderPolynomialBackground::init()
-  {
-    declareParameter("A0", 0.0);
-    declareParameter("A1", 0.0);
-    declareParameter("A2", 0.0);
-    declareParameter("A3", 0.0);
-    declareParameter("A4", 0.0);
-  }
+/*
+ * Function to calcualte polynomial
+ */
+void Polynomial::function1D(double* out, const double* xValues, const size_t nData)const
+{
+    for (size_t i = 0; i < nData; ++i)
+    {
+        double x = xValues[i];
+        double temp = getParameter(0);
+        double nx = x;
+        for (int j = 1; j <= m_n; ++j)
+        {
+            temp += getParameter(j)*nx;
+            nx *= x;
+        }
+        out[i] = temp;
+    }
 
+    return;
+}
 
-  /*
-   *
-   */
-  void HighOrderPolynomialBackground::function1D(double* out, const double* xValues, const size_t nData)const
-  {
-      const double& a0 = getParameter("A0");
-      const double& a1 = getParameter("A1");
-      const double& a2 = getParameter("A2");
-      const double& a3 = getParameter("A3");
-      const double& a4 = getParameter("A4");
-
-      for (size_t i = 0; i < nData; i++)
-      {
-          out[i] = a0+a1*xValues[i]+a2*xValues[i]*xValues[i]+a3*xValues[i]*xValues[i]*xValues[i]+
-                  a4*xValues[i]*xValues[i]*xValues[i]*xValues[i];
+/*
+ * Function to calculate derivative analytically
+ */
+void Polynomial::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
+{
+    for (size_t i = 0; i < nData; i++)
+    {
+        double x = xValues[i];
+        double nx = 1;
+        for (int j = 0; j <= m_n; ++j)
+        {
+            out->set(i, j, nx);
+            nx *= x;
+        }
       }
 
-      return;
-  }
+    return;
+}
 
-  void HighOrderPolynomialBackground::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
+
+/**
+ * @return A list of attribute names (identical to Polynomial)
+ */
+std::vector<std::string> Polynomial::getAttributeNames()const
+{
+  std::vector<std::string> res;
+  res.push_back("n");
+  return res;
+}
+
+/**
+ * @param attName :: Attribute name. If it is not "n" exception is thrown.
+ * @return a value of attribute attName
+ * (identical to Polynomial)
+ */
+API::IFunction::Attribute Polynomial::getAttribute(const std::string& attName)const
+{
+  if (attName == "n")
   {
-      for (size_t i = 0; i < nData; i++)
-      {
-          out->set(i, 0, 1);
-          out->set(i, 1, xValues[i]);
-          out->set(i, 2, xValues[i]*xValues[i]);
-          out->set(i, 3, xValues[i]*xValues[i]*xValues[i]);
-          out->set(i, 4, xValues[i]*xValues[i]*xValues[i]*xValues[i]);
-      }
+    return Attribute(m_n);
   }
 
+  throw std::invalid_argument("Polynomial: Unknown attribute " + attName);
+}
 
+/**
+ * @param attName :: The attribute name. If it is not "n" exception is thrown.
+ * @param att :: An int attribute containing the new value. The value cannot be negative.
+ * (identical to Polynomial)
+ */
+void Polynomial::setAttribute(const std::string& attName,const API::IFunction::Attribute& att)
+{
+  if (attName == "n")
+  {// set the polynomial order
+    if (m_n >= 0)
+    {
+      clearAllParameters();
+    }
+    m_n = att.asInt();
+    if (m_n < 0)
+    {
+      throw std::invalid_argument("Polynomial: polynomial order cannot be negative.");
+    }
+    for(int i=0;i<=m_n;++i)
+    {
+      std::string parName = "A" + boost::lexical_cast<std::string>(i);
+      declareParameter(parName);
+    }
+  }
+}
+
+/// Check if attribute attName exists
+bool Polynomial::hasAttribute(const std::string& attName)const
+{
+  return attName == "n";
+}
 
 } // namespace CurveFitting
 } // namespace Mantid

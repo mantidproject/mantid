@@ -1,35 +1,35 @@
-#ifndef MANTID_CURVEFITTING_HIGHORDERPOLYNOMIALBACKGROUNDTEST_H_
-#define MANTID_CURVEFITTING_HIGHORDERPOLYNOMIALBACKGROUNDTEST_H_
+#ifndef MANTID_CURVEFITTING_PolynomialTEST_H_
+#define MANTID_CURVEFITTING_PolynomialTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidCurveFitting/HighOrderPolynomialBackground.h"
+#include "MantidCurveFitting/Polynomial.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Fit.h"
 
-using Mantid::CurveFitting::HighOrderPolynomialBackground;
+using Mantid::CurveFitting::Polynomial;
 using namespace Mantid;
 using namespace API;
 using namespace Kernel;
 
-class HighOrderPolynomialBackgroundTest : public CxxTest::TestSuite
+class PolynomialTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static HighOrderPolynomialBackgroundTest *createSuite() { return new HighOrderPolynomialBackgroundTest(); }
-  static void destroySuite( HighOrderPolynomialBackgroundTest *suite ) { delete suite; }
+  static PolynomialTest *createSuite() { return new PolynomialTest(); }
+  static void destroySuite( PolynomialTest *suite ) { delete suite; }
 
   void testForCategories()
   {
-    HighOrderPolynomialBackground forCat;
+    Polynomial forCat;
     const std::vector<std::string> categories = forCat.categories();
     TS_ASSERT( categories.size() == 1 );
     TS_ASSERT( categories[0] == "Background" );
   }
 
-  void test_HighOrderPolynomialBackground()
+  void test_Polynomial()
   {
     // create mock data to test against
     std::string wsName = "QuadraticBackgroundTest";
@@ -53,13 +53,12 @@ public:
     TS_ASSERT( alg2.isInitialized() );
 
     // set up fitting function
-    IFunction_sptr quadB(new HighOrderPolynomialBackground());
+    IFunction_sptr quadB(new Polynomial());
+    quadB->setAttributeValue("n", 2);
     quadB->initialize();
 
     quadB->setParameter("A0", 0.0);
     quadB->setParameter("A1", 1.0);
-    quadB->setParameter("A2", 0.0);
-    quadB->setParameter("A3", 0.0);
 
     //alg2.setFunction(linB);
     alg2.setProperty("Function", quadB);
@@ -93,4 +92,4 @@ public:
 };
 
 
-#endif /* MANTID_CURVEFITTING_HIGHORDERPOLYNOMIALBACKGROUNDTEST_H_ */
+#endif /* MANTID_CURVEFITTING_PolynomialTEST_H_ */

@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_HIGHORDERPOLYNOMIALBACKGROUND_H_
-#define MANTID_CURVEFITTING_HIGHORDERPOLYNOMIALBACKGROUND_H_
+#ifndef MANTID_CURVEFITTING_POLYNOMIAL_H_
+#define MANTID_CURVEFITTING_POLYNOMIAL_H_
 
 #include "MantidKernel/System.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
@@ -11,7 +11,7 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** HighOrderPolynomialBackground : TODO: DESCRIPTION
+  /** Polynomial : N-th polynomial background function.
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -33,23 +33,50 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport HighOrderPolynomialBackground : public BackgroundFunction
+  class DLLExport Polynomial : public BackgroundFunction
   {
   public:
-    HighOrderPolynomialBackground();
-    virtual ~HighOrderPolynomialBackground();
+    Polynomial();
+    virtual ~Polynomial();
 
-    std::string name()const{return "HighOrderPolynomialBackground";}
+    /// Overwrite IFunction base class
+    std::string name()const{return "Polynomial";}
+
+    virtual const std::string category() const { return "Background";}
+
     virtual void function1D(double* out, const double* xValues, const size_t nData)const;
+
     virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
 
+    /// Returns the number of attributes associated with the function (polynomial order n)
+    size_t nAttributes()const{return 1;}
+
+    /// Returns a list of attribute names
+    std::vector<std::string> getAttributeNames()const;
+
+    /// Return a value of attribute attName
+    Attribute getAttribute(const std::string& attName)const;
+
+    /// Set a value to attribute attName
+    void setAttribute(const std::string& attName,const Attribute& );
+
+    /// Check if attribute attName exists
+    bool hasAttribute(const std::string& attName)const;
+
   private:
-    void init();
-    
+
+    /// Polynomial order
+    int m_n;
+
+    /// Lower x boundary.
+    double m_StartX;
+
+    /// Upper x boundary
+    double m_EndX;
   };
 
 
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_HIGHORDERPOLYNOMIALBACKGROUND_H_ */
+#endif  /* MANTID_CURVEFITTING_POLYNOMIAL_H_ */
