@@ -95,6 +95,9 @@ private:
   void intersectionParams(const MantidVec& X1, int64_t& i, const MantidVec& X2, std::vector<double>& params) const;
   void inclusionParams(const MantidVec& X1, int64_t& i, const MantidVec& X2, std::vector<double>& params) const;
   API::MatrixWorkspace_sptr rebinInput(const API::MatrixWorkspace_sptr& workspace, const std::vector<double>& params);
+  std::string createFormattedInputWorkspaceNames(const size_t& periodIndex) const;
+  void validateMultiPeriodGroupInputs(const size_t& nInputWorkspaces) const;
+  bool isMultiPeriodGroup(boost::shared_ptr<const Mantid::API::WorkspaceGroup> inputGroup) const;
   /// Progress reporting
   API::Progress* m_progress;
 

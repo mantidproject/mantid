@@ -27,16 +27,20 @@ class MergeRunsTest : public CxxTest::TestSuite
 private:
 
   /// Helper method to add an 'nperiods' log value to each workspace in a group.
-  void add_nperiods_log(WorkspaceGroup_sptr ws, bool calculateNPeriods = true, int nperiods = -1)
+  void add_periods_logs(WorkspaceGroup_sptr ws, bool calculateNPeriods = true, int nperiods = -1)
   {
     if(calculateNPeriods)
     {
-      nperiods = ws->size();
+      nperiods = static_cast<int>(ws->size());
     }
     for(size_t i = 0; i < ws->size(); ++i)
     { 
+      MatrixWorkspace_sptr currentWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
+
       PropertyWithValue<int>* nperiodsProp = new PropertyWithValue<int>("nperiods", nperiods);
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i))->mutableRun().addLogData(nperiodsProp);
+      currentWS->mutableRun().addLogData(nperiodsProp);
+      PropertyWithValue<int>* currentPeriodsProp = new PropertyWithValue<int>("current_period", static_cast<int>(i+1));
+      currentWS->mutableRun().addLogData(currentPeriodsProp);
     }
   }
 
@@ -45,10 +49,10 @@ private:
   {
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
-    a->setName("a");
-    b->setName("b");
+    a->setName("a1");
+    b->setName("b1");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->setName("group");
+    group->setName("group1");
     group->addWorkspace(a);
     group->addWorkspace(b); // No multiperiod logs added.
     AnalysisDataService::Instance().addOrReplace(a->name(), a);
@@ -62,15 +66,35 @@ private:
   {
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
-    a->setName("a");
-    b->setName("b");
+    a->setName("a2");
+    b->setName("b2");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->setName("group");
+    group->setName("group2");
     group->addWorkspace(a);
     group->addWorkspace(b); // No multiperiod logs added.
     const bool calculateNPeriods = false;
     const int nPeriods = 0;
-    add_nperiods_log(group, calculateNPeriods, nPeriods);
+    add_periods_logs(group, calculateNPeriods, nPeriods);
+    AnalysisDataService::Instance().addOrReplace(a->name(), a);
+    AnalysisDataService::Instance().addOrReplace(a->name(), b);
+    AnalysisDataService::Instance().addOrReplace(group->name(), group);
+    return group;
+  }
+
+   /// Helper to fabricate a workspace group with two workspaces, but nperiods = 5
+  WorkspaceGroup_sptr create_corrupted_multiperiod_workspace_group()
+  {
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+    MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+    a->setName("a4");
+    b->setName("b4");
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->setName("group4");
+    group->addWorkspace(a);
+    group->addWorkspace(b); // No multiperiod logs added.
+    const bool calculateNPeriods = false;
+    const int nPeriods = 5;
+    add_periods_logs(group, calculateNPeriods, nPeriods);
     AnalysisDataService::Instance().addOrReplace(a->name(), a);
     AnalysisDataService::Instance().addOrReplace(a->name(), b);
     AnalysisDataService::Instance().addOrReplace(group->name(), group);
@@ -82,35 +106,47 @@ private:
   {
     MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
-    a->setName("a");
-    b->setName("b");
+    a->setName("a3");
+    b->setName("b3");
     WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->setName("group");
+    group->setName("group3");
     group->addWorkspace(a);
     group->addWorkspace(b);
-    add_nperiods_log(group);
+    add_periods_logs(group);
     AnalysisDataService::Instance().addOrReplace(a->name(), a);
     AnalysisDataService::Instance().addOrReplace(b->name(), b);
     AnalysisDataService::Instance().addOrReplace(group->name(), group);
     return group;
   }
 
-  /// Helper to fabricate a workspace group consisting of unequal sized matrix workspaces.
-  WorkspaceGroup_sptr create_bad_multiperiod_workspace_group()
+  void do_test_treat_as_non_period_groups(WorkspaceGroup_sptr input)
   {
-    MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(2,5,1); //Two histograms and 5 bins!
-    MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1); //3 histograms and 10 bins!
-    a->setName("a");
-    b->setName("b");
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
-    group->setName("group");
-    group->addWorkspace(a);
-    group->addWorkspace(b);
-    add_nperiods_log(group);
-    AnalysisDataService::Instance().addOrReplace(a->name(), a);
-    AnalysisDataService::Instance().addOrReplace(b->name(), b);
-    AnalysisDataService::Instance().addOrReplace(group->name(), group);
-    return group;
+    MatrixWorkspace_sptr sampleInputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
+    const double uniformSignal = sampleInputWorkspace->readY(0)[0];
+    const double uniformError = sampleInputWorkspace->readE(0)[0];
+    const size_t nXValues = sampleInputWorkspace->readX(0).size();
+
+    MergeRuns alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspaces", input->name() + "," + input->name()) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","out") );
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    MatrixWorkspace_sptr wsOut = Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("out");
+    TS_ASSERT(wsOut != NULL);
+    for(size_t j = 0; j < wsOut->getNumberHistograms(); ++j)
+    {
+      using Mantid::MantidVec;
+      MantidVec xValues = wsOut->readX(j);
+      MantidVec yValues = wsOut->readY(j);
+      MantidVec eValues = wsOut->readE(j);
+      TS_ASSERT_EQUALS(nXValues, xValues.size());
+      // Loop through each y-value in the histogram
+      for(size_t k = 0; k < yValues.size(); ++k)
+      {
+        TS_ASSERT_EQUALS(4*uniformSignal, yValues[k]);
+        TS_ASSERT_DELTA(std::sqrt(4*uniformError*uniformError), eValues[k], 0.0001);
+      }
+    }
   }
 
 public:
@@ -642,10 +678,46 @@ public:
     AnalysisDataService::Instance().remove("outer");
   }
 
-  void test_with_multiperiod_data()
+  void do_test_validation_throws(WorkspaceGroup_sptr a, WorkspaceGroup_sptr b)
   {
-    // Creates a workspace group containing two identical matrix workspaces with uniform signal and error.
-    WorkspaceGroup_sptr input = create_good_multiperiod_workspace_group();
+    MergeRuns alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspaces", a->name() + "," + b->name());
+    alg.setPropertyValue("OutputWorkspace","out");
+    TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+  }
+
+  void test_mixed_multiperiod_group_and_non_multiperiod_group_inputs_throws()
+  {
+    WorkspaceGroup_sptr a = create_good_workspace_group();
+    WorkspaceGroup_sptr b = create_good_multiperiod_workspace_group();
+    do_test_validation_throws(a, b);
+  }
+
+  void test_throws_if_multiperiod_input_nperiods_corrupted()
+  {
+    WorkspaceGroup_sptr a = create_corrupted_multiperiod_workspace_group();
+    WorkspaceGroup_sptr b = create_good_multiperiod_workspace_group();
+    do_test_validation_throws(a, b);
+  }
+
+  void test_throws_if_workspace_ordering_in_group_corrupted()
+  {
+    WorkspaceGroup_sptr a = create_good_multiperiod_workspace_group();
+    MatrixWorkspace_sptr first = boost::dynamic_pointer_cast<MatrixWorkspace>(a->getItem(0)); // Has current_period = 1
+    MatrixWorkspace_sptr second = boost::dynamic_pointer_cast<MatrixWorkspace>(a->getItem(1)); // Has current_period = 2
+    WorkspaceGroup_sptr aCorrupted = boost::make_shared<WorkspaceGroup>();
+    aCorrupted->addWorkspace(second);
+    aCorrupted->addWorkspace(first);
+    aCorrupted->setName("aCorrupted");
+    Mantid::API::AnalysisDataService::Instance().addOrReplace(aCorrupted->getName(), aCorrupted);
+
+    do_test_validation_throws(aCorrupted, a);
+  }
+
+  void test_with_multiperiod_data(WorkspaceGroup_sptr input)
+  {
     // Extract some internal information from the nested workspaces in order to run test asserts later.
     const size_t expectedNumHistograms = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0))->getNumberHistograms();
     MatrixWorkspace_sptr sampleNestedInputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
@@ -654,7 +726,6 @@ public:
     const size_t nXValues = sampleNestedInputWorkspace->readX(0).size();
 
     MergeRuns alg;
-    alg.setRethrows(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspaces", input->name() + "," + input->name()) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","outer") );
@@ -680,9 +751,24 @@ public:
         for(size_t k = 0; k < yValues.size(); ++k)
         {
           TS_ASSERT_EQUALS(2*uniformSignal, yValues[k]);
+          TS_ASSERT_DELTA(std::sqrt(2*uniformError*uniformError), eValues[k], 0.0001);
         }
       }
     }
+  }
+
+  void test_with_zerod_nperiods_logs()
+  {
+    // Creates a NON-MULIPERIOD workspace group containing two identical matrix workspaces with uniform signal and error, and zerod n_period logs on all workspaces.
+    WorkspaceGroup_sptr input = create_good_zerod_multiperiod_workspace_group();
+    do_test_treat_as_non_period_groups(input);
+  }
+
+  void test_with_missing_nperiods_logs()
+  {
+    // Creates a NON-MULIPERIOD workspace group containing two identical matrix workspaces with uniform signal and error, and No n_period logs on all workspaces.
+    WorkspaceGroup_sptr input = create_good_workspace_group();
+    do_test_treat_as_non_period_groups(input);
   }
 
 private:
