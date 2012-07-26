@@ -5119,6 +5119,8 @@ Spectrogram* Graph::plotSpectrogram(Spectrogram *d_spectrogram, CurveType type)
   if(!rightAxis) return 0;
   rightAxis->setColorBarEnabled(type != Contour);
   d_plot->enableAxis(QwtPlot::yRight, type != Contour);
+  // Ensure that labels are shown on color scale axis
+  enableAxisLabels(QwtPlot::yRight);
 
   //d_spectrogram->setDefaultColorMap();
   if(type == GrayScale) rightAxis->setColorBarEnabled(false); //rightAxis->setColorMap(d_spectrogram->data().range(),d_spectrogram->colorMap());

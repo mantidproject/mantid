@@ -3059,8 +3059,10 @@ void ApplicationWindow::setPreferences(Graph* g)
     g->setScale(QwtPlot::xBottom, d_axes_scales[2]);
     g->setScale(QwtPlot::xTop, d_axes_scales[3]);
 
-    g->updateSecondaryAxis(QwtPlot::xTop);
-    g->updateSecondaryAxis(QwtPlot::yRight);
+    // QtiPlot makes these calls here (as of 26/6/12), but they spoil color fill plots for us.
+    //   Losing them seems to have no detrimental effect. Perhaps we need to update our updateSecondaryAxis code to match QtiPlot's.
+    //g->updateSecondaryAxis(QwtPlot::xTop);
+    //g->updateSecondaryAxis(QwtPlot::yRight);
 
     QList<int> ticksList;
     ticksList<<majTicksStyle<<majTicksStyle<<majTicksStyle<<majTicksStyle;
