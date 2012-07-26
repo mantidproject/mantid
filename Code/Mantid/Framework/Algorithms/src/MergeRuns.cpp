@@ -778,7 +778,7 @@ bool MergeRuns::checkGroups()
 {
   typedef std::vector<std::string> WorkspaceNameType;
 
-  m_multiPeriodGroups.swap(VecWSGroupType(0));
+  m_multiPeriodGroups.clear();
   WorkspaceNameType workspaces = this->getProperty("InputWorkspaces");
   WorkspaceNameType::iterator it = workspaces.begin();
 
