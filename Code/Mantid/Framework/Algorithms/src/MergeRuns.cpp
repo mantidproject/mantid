@@ -722,7 +722,7 @@ void MergeRuns::validateMultiPeriodGroupInputs(const size_t& nInputWorkspaces) c
           throw std::runtime_error("Missmatch between nperiods log and the number of workspaces in the input group: " + m_multiPeriodGroups[i]->name());
         }
         Property* currentPeriodProperty = currentNestedWS->run().getLogData("current_period");
-        size_t currentPeriod = atoi(nPeriodsProperty->value().c_str());
+        size_t currentPeriod = atoi(currentPeriodProperty->value().c_str());
         if(currentPeriod != (j+1))
         {
           throw std::runtime_error("Multiperiod group workspaces must be ordered by current_period. Correct: " + currentNestedWS->name());
@@ -869,7 +869,8 @@ bool MergeRuns::processGroups()
   const std::string outName = outputWorkspaceProperty->value();
 
   size_t nPeriods = m_multiPeriodGroups[0]->size();
-  WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>();
+  const bool doObserveADSNotifications = true;
+  WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>(!doObserveADSNotifications);
   // Loop through all the periods.
   for(size_t i = 0; i < nPeriods; ++i)
   {
@@ -895,6 +896,7 @@ bool MergeRuns::processGroups()
     }
     outputWS->add(outName_i);
   }
+  outputWS->observeADSNotifications(doObserveADSNotifications);
   this->setProperty("OutputWorkspace", outputWS);
   this->setExecuted(true);
   AnalysisDataService::Instance().addOrReplace(outName, outputWS);
