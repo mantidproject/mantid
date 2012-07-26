@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_LEBAILFIT2_H_
-#define MANTID_CURVEFITTING_LEBAILFIT2_H_
+#ifndef MANTID_CURVEFITTING_LEBAILFIT_H_
+#define MANTID_CURVEFITTING_LEBAILFIT_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -18,7 +18,7 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  /** LeBailFit2 : Algorithm to do Le Bail Fit.
+  /** LeBailFit : Algorithm to do Le Bail Fit.
     The workflow and architecture of this algorithm is different from LeBailFit,
     though they hold the same interface to users.
     
@@ -42,11 +42,11 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LeBailFit2 : public API::Algorithm
+  class DLLExport LeBailFit : public API::Algorithm
   {
   public:
-    LeBailFit2();
-    virtual ~LeBailFit2();
+    LeBailFit();
+    virtual ~LeBailFit();
 
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "LeBailFit";}
@@ -120,4 +120,4 @@ namespace CurveFitting
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_CURVEFITTING_LEBAILFIT2_H_ */
+#endif  /* MANTID_CURVEFITTING_LEBAILFIT_H_ */

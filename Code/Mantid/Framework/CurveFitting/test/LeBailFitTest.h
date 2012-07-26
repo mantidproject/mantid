@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_LEBAILFIT2TEST_H_
-#define MANTID_CURVEFITTING_LEBAILFIT2TEST_H_
+#ifndef MANTID_CURVEFITTING_LEBAILFITTEST_H_
+#define MANTID_CURVEFITTING_LEBAILFITTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
@@ -12,22 +12,22 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include "MantidCurveFitting/LeBailFit2.h"
+#include "MantidCurveFitting/LeBailFit.h"
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 using namespace WorkspaceCreationHelper;
 
-using Mantid::CurveFitting::LeBailFit2;
+using Mantid::CurveFitting::LeBailFit;
 
-class LeBailFit2Test : public CxxTest::TestSuite
+class LeBailFitTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static LeBailFit2Test *createSuite() { return new LeBailFit2Test(); }
-  static void destroySuite( LeBailFit2Test *suite ) { delete suite; }
+  static LeBailFitTest *createSuite() { return new LeBailFitTest(); }
+  static void destroySuite( LeBailFitTest *suite ) { delete suite; }
 
   /*
    * Fundamental test to calcualte 2 peak w/o background.
@@ -61,7 +61,7 @@ public:
       AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
 
       // 2. Initialize the algorithm
-      LeBailFit2 lbfit;
+      LeBailFit lbfit;
 
       TS_ASSERT_THROWS_NOTHING(lbfit.initialize());
       TS_ASSERT(lbfit.isInitialized());
@@ -136,7 +136,7 @@ public:
       AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
 
       // 2. Create LeBailFit and do the calculation
-      LeBailFit2 lbfit;
+      LeBailFit lbfit;
       lbfit.initialize();
 
       // 3. Computation
@@ -263,7 +263,7 @@ public:
       AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
 
       // 2. Create LeBailFit and do the calculation
-      LeBailFit2 lbfit;
+      LeBailFit lbfit;
       lbfit.initialize();
 
       // 3. Computation
@@ -722,4 +722,4 @@ public:
 };
 
 
-#endif /* MANTID_CURVEFITTING_LEBAILFIT2TEST_H_ */
+#endif /* MANTID_CURVEFITTING_LEBAILFITTEST_H_ */

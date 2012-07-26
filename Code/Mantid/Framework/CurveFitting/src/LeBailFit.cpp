@@ -1,4 +1,4 @@
-#include "MantidCurveFitting/LeBailFit2.h"
+#include "MantidCurveFitting/LeBailFit.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -16,26 +16,26 @@ bool compDescending(int a, int b)
     return (a >= b);
 }
 
-DECLARE_ALGORITHM(LeBailFit2)
+DECLARE_ALGORITHM(LeBailFit)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LeBailFit2::LeBailFit2()
+LeBailFit::LeBailFit()
 {
 }
     
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
-LeBailFit2::~LeBailFit2()
+LeBailFit::~LeBailFit()
 {
 }
   
 /*
  * Sets documentation strings for this algorithm
  */
-void LeBailFit2::initDocs()
+void LeBailFit::initDocs()
 {
     this->setWikiSummary("Do LeBail Fit to a spectrum of powder diffraction data.. ");
     this->setOptionalMessage("Do LeBail Fit to a spectrum of powder diffraction data. ");
@@ -44,7 +44,7 @@ void LeBailFit2::initDocs()
 /*
  * Define the input properties for this algorithm
  */
-void LeBailFit2::init()
+void LeBailFit::init()
 {
   this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::Input),
       "Input workspace containing the data to fit by LeBail algorithm.");
@@ -75,7 +75,7 @@ void LeBailFit2::init()
 /*
  * Implement abstract Algorithm methods
  */
-void LeBailFit2::exec()
+void LeBailFit::exec()
 {
     // 1. Get input
     dataWS = this->getProperty("InputWorkspace");
@@ -184,7 +184,7 @@ void LeBailFit2::exec()
 
 /*
  * Calculate peaks' intensities
-void LeBailFit2::calculatePeaksHeights(size_t workspaceindex)
+void LeBailFit::calculatePeaksHeights(size_t workspaceindex)
 {
     // 1. Set parameters to each peak (no tie)
     std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator pit;
@@ -210,7 +210,7 @@ void LeBailFit2::calculatePeaksHeights(size_t workspaceindex)
 /*
  * LeBail Fitting
  */
-void LeBailFit2::doLeBailFit(size_t workspaceindex)
+void LeBailFit::doLeBailFit(size_t workspaceindex)
 {
     throw std::runtime_error("doLeBailFit has not been implemented yet.");
 
@@ -220,7 +220,7 @@ void LeBailFit2::doLeBailFit(size_t workspaceindex)
 /*
  * Calcualte LeBail diffraction pattern
  */
-void LeBailFit2::calculatePattern(size_t workspaceindex)
+void LeBailFit::calculatePattern(size_t workspaceindex)
 {
     // 1. Generate domain and value
     const std::vector<double> x = dataWS->readX(0);
@@ -302,7 +302,7 @@ void LeBailFit2::calculatePattern(size_t workspaceindex)
  * (a) Assign peaks into groups; each group contains either (1) one peak or (2) peaks overlapped
  * (b) Calculate peak intensities for every peak per group
  */
-void LeBailFit2::calPeaksIntensities(std::vector<std::pair<int, double> >& peakheights, size_t workspaceindex)
+void LeBailFit::calPeaksIntensities(std::vector<std::pair<int, double> >& peakheights, size_t workspaceindex)
 {
     std::cout << "--------- Calculate (ALL) Peaks' Heights" << std::endl;
 
@@ -415,7 +415,7 @@ void LeBailFit2::calPeaksIntensities(std::vector<std::pair<int, double> >& peakh
  *        (4) Peaks' boundaries
  * Output: Peak intensities (index is peaks' indicies in mPeakHKL2)
  */
-void LeBailFit2::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> peakindices, std::vector<double> peakcenters,
+void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> peakindices, std::vector<double> peakcenters,
                                    std::vector<std::pair<double, double> > peakboundaries, std::vector<std::pair<size_t, double> >& peakintensities)
 {
     std::cout << "----------- calPerGroupPeakIntensity() ----------" << std::endl;
@@ -548,7 +548,7 @@ void LeBailFit2::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> pe
  * WARNING: This algorithm fails if the peak only has the width of very few pixels.
  *          because it heavily replies on observation data.
  */
-bool LeBailFit2::observePeakRange(size_t workspaceindex, double center, double fwhm,
+bool LeBailFit::observePeakRange(size_t workspaceindex, double center, double fwhm,
     double& tof_center, double& tof_left, double& tof_right)
 {
     // 0. Get access to data
@@ -665,7 +665,7 @@ bool LeBailFit2::observePeakRange(size_t workspaceindex, double center, double f
 /*
  * From table/map to set parameters to an individual peak
  */
-void LeBailFit2::setPeakParameters(CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak, double peakheight)
+void LeBailFit::setPeakParameters(CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak, double peakheight)
 {
     // 1. Set parameters ...
     std::map<std::string, std::pair<double, char> >::iterator pit;
@@ -719,7 +719,7 @@ void LeBailFit2::setPeakParameters(CurveFitting::ThermalNeutronBk2BkExpConvPV_sp
 /*
  * Generate a list of peaks from input
  */
-void LeBailFit2::generatePeaksFromInput()
+void LeBailFit::generatePeaksFromInput()
 {
     // There is no need to consider peak's order now due to map
     for (size_t ipk = 0; ipk < mPeakHKLs.size(); ++ipk)
@@ -742,7 +742,7 @@ void LeBailFit2::generatePeaksFromInput()
 /*
  * Parse the input TableWorkspace to some maps for easy access
  */
-void LeBailFit2::importParametersTable()
+void LeBailFit::importParametersTable()
 {
   // 1. Check column orders
   std::vector<std::string> colnames = parameterWS->getColumnNames();
@@ -790,7 +790,7 @@ void LeBailFit2::importParametersTable()
 /*
  * Parse the reflections workspace to a list of reflections;
  */
-void LeBailFit2::importReflections()
+void LeBailFit::importReflections()
 {
     // 1. Check column orders
     std::vector<std::string> colnames = reflectionWS->getColumnNames();
