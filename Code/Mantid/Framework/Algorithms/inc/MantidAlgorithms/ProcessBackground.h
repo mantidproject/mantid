@@ -45,7 +45,7 @@ class DLLExport ProcessBackground : public API::Algorithm
 
     virtual void exec();
 
-    virtual const std::string category() const {return "Diffraction/Utility";}
+    virtual const std::string category() const {return "Diffraction\Utility";}
 
     virtual const std::string name() const {return "ProcessBackground";}
 
