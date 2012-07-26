@@ -142,14 +142,15 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress)
 
 
   // Create the thread pool that will run all of these.
-  Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
+  //Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
   // initiate thread pool with number of machine's cores (0 in tp constructor)
-  //Kernel::ThreadScheduler * ts = NULL;       
+  Kernel::ThreadScheduler * ts = NULL;       
   pProgress->resetNumSteps(nValidSpectra,0,1);
-  Kernel::ThreadPool tp(ts, 0, new API::Progress(*pProgress));
+  //Kernel::ThreadPool tp(ts, 0, new API::Progress(*pProgress));
   // estimate the size of data conversion a single thread should perform
 
-  size_t nThreads = tp.getNumPhysicalCores();
+  //size_t nThreads = tp.getNumPhysicalCores();
+  size_t nThreads = 1;
   this->estimateThreadWork(nThreads,specSize);
 
   //External loop over the spectra:
@@ -159,21 +160,22 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress)
     n_added_events+=n_thread_ev;
     nEventsInWS   +=n_thread_ev;
 
-    if (bc->shouldSplitBoxes(nEventsInWS,n_added_events, lastNumBoxes))
+    if (m_OutWSWrapper->ifNeedsSplitting())
     {
       // Do all the adding tasks
-      tp.joinAll();    
+      //tp.joinAll();    
       // Now do all the splitting tasks
-      m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
-      if (ts->size() > 0)       tp.joinAll();
+      //m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
+      m_OutWSWrapper->splitList(ts);
+      //if (ts->size() > 0)       tp.joinAll();
       // Count the new # of boxes.
       lastNumBoxes = m_OutWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
     }
     pProgress->report(i);
   } // end detectors loop;
 
-
-  m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts); 
+   m_OutWSWrapper->splitList(ts);
+  // m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts); 
   m_OutWSWrapper->pWorkspace()->refreshCache();
   m_OutWSWrapper->refreshCentroid();
   pProgress->report();          

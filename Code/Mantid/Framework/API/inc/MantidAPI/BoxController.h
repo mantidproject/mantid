@@ -14,7 +14,13 @@ namespace Mantid
 namespace API
 {
 
-
+  struct splitBoxList
+  {
+    void  *boxPointer;
+    size_t boxIndex;
+    splitBoxList(void *bp,size_t bi):boxPointer(bp),boxIndex(bi){}
+    splitBoxList():boxPointer(NULL),boxIndex(0){}
+  };
 
   /** This class is used by MDBox and MDGridBox in order to intelligently
    * determine optimal behavior. It informs:
@@ -35,7 +41,8 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0), m_numSplit(1), m_file(NULL), m_diskBuffer(), m_useWriteBuffer(true)
+    :nd(nd), m_maxId(0), m_numSplit(1), m_file(NULL), m_diskBuffer(), m_useWriteBuffer(true),
+     m_SplitThreshold(124)
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
@@ -406,37 +413,37 @@ namespace API
       m_bytesPerEvent = bytesPerEvent;
     }
 
-//    //-----------------------------------------------------------------------------------
-//    /** Add a MDBox pointer to the list of boxes to split.
-//     * Thread-safe for adding.
-//     * No duplicate checking is done!
-//     *
-//     * @param ptr :: void ptr that casts to a particular MDBox<> * type.
-//     */
-//    void addBoxToSplit(void * ptr)
-//    {
-//      m_boxesToSplitMutex.lock();
-//      m_boxesToSplit.push_back(ptr);
-//      m_boxesToSplitMutex.unlock();
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    /** Get a reference to the vector of boxes that must be split.
-//     * Not thread safe!
-//     */
-//    std::vector<void *> & getBoxesToSplit()
-//    {
-//      return m_boxesToSplit;
-//    }
-//
-//    //-----------------------------------------------------------------------------------
-//    /** Clears the list of boxes that are big enough to split */
-//    void clearBoxesToSplit()
-//    {
-//      m_boxesToSplitMutex.lock();
-//      m_boxesToSplit.clear();
-//      m_boxesToSplitMutex.unlock();
-//    }
+    //-----------------------------------------------------------------------------------
+    /** Add a MDBox pointer to the list of boxes to split.
+     * Thread-safe for adding.
+     * No duplicate checking is done!
+     *
+     * @param ptr :: void ptr that casts to a particular MDBox<> * type.
+     */
+    void addBoxToSplit(const splitBoxList &theBox)
+    {
+      m_boxesToSplitMutex.lock();
+      m_boxesToSplit.push_back(theBox);
+      m_boxesToSplitMutex.unlock();
+    }
+
+    //-----------------------------------------------------------------------------------
+    /** Get a reference to the vector of boxes that must be split.
+     * Not thread safe!
+     */
+    std::vector<splitBoxList> & getBoxesToSplit()
+    {
+      return m_boxesToSplit;
+    }
+
+    //-----------------------------------------------------------------------------------
+    /** Clears the list of boxes that are big enough to split */
+    void clearBoxesToSplit()
+    {
+      m_boxesToSplitMutex.lock();
+      m_boxesToSplit.clear();
+      m_boxesToSplitMutex.unlock();
+    }
 
     //-----------------------------------------------------------------------------------
   private:
@@ -517,11 +524,11 @@ namespace API
     /// Do we use the DiskBuffer at all?
     bool m_useWriteBuffer;
 
-//    /// Vector of pointers to MDBoxes that have grown large enough to split them
-//    std::vector<void *> m_boxesToSplit;
+    /// Vector of pointers to MDBoxes that have grown large enough to split them
+     std::vector<splitBoxList> m_boxesToSplit;
 //
-//    /// Mutex for modifying the m_boxesToSplit member
-//    Mantid::Kernel::Mutex m_boxesToSplitMutex;
+    /// Mutex for modifying the m_boxesToSplit member
+    Mantid::Kernel::Mutex m_boxesToSplitMutex;
 
   private:
     /// Number of bytes in a single MDLeanEvent<> of the workspace.

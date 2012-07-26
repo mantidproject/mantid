@@ -65,7 +65,7 @@ namespace Mantid
       API::IMDEventWorkspace_sptr createEmptyMDWS(const MDWSDescription &WSD);
       /// add the data to the internal workspace. The workspace has to exist and be initiated 
       void  addMDData(std::vector<float> &sig_err,std::vector<uint16_t> &run_index,std::vector<uint32_t> &det_id,std::vector<coord_t> &Coord,size_t data_size)const;
-      /// releases the function pointer of the workspace, stored by the class and makes the class instance undefined; 
+      /// releases the shared pointer to the workspace, stored by the class and makes the class instance undefined; 
       void releaseWorkspace();
       /// get access to the internal workspace
       API::IMDEventWorkspace_sptr pWorkspace(){return m_Workspace;}
@@ -73,6 +73,11 @@ namespace Mantid
       void refreshCentroid(){ (this->*(mdCalCentroid[m_NDimensions]))();   };
       /** initiate the class with pointer to existing MD workspace */
       void setMDWS(API::IMDEventWorkspace_sptr spWS);
+
+      /// the accessor verify if there are boxes in box-splitter cash which need splitting;
+      bool ifNeedsSplitting()const{return m_needSplitting;}
+      /// method splits list of boxes
+      void splitList(Kernel::ThreadScheduler * ts){(this->*(mdBoxListSplitter[m_NDimensions]))();}
     private:
       /// maximal nuber of dimensions, currently supported by the class;
       enum{ MAX_N_DIM=8};
@@ -88,20 +93,30 @@ namespace Mantid
       std::vector<fpAddData> mdEvSummator;
       /// vector holding function pointers to the code, which refreshes centroid (could it be moved to IMD?)
       std::vector<fpVoidMethod> mdCalCentroid;
+       /// vector holding function pointers to the code, which split list of boxes need splitting
+      std::vector<fpVoidMethod> mdBoxListSplitter;
+
 
       // helper class to generate methaloop on MD workspaces dimensions:
       template< size_t i>
       friend class LOOP;
       // internal function tempates to generate as function of dimensions and assightn to function pointers
       template<size_t nd>
-      void add_MDData(float *sig_err,uint16_t *run_index,uint32_t* det_id,coord_t* Coord,size_t data_size)const;
+      void addMDDataND(float *sig_err,uint16_t *run_index,uint32_t* det_id,coord_t* Coord,size_t data_size)const;
 
       template<size_t nd>   
-      void  calc_Centroid(void);
+      void  calcCentroidND(void);
 
       template<size_t nd>
       void  createEmptyEventWS(const Strings &targ_dim_names,const Strings &targ_dim_ID,const Strings &targ_dim_units,
         const std::vector<double> &dimMin, const std::vector<double> &dimMax,const std::vector<size_t> &numBins);
+
+      template<size_t nd>
+      void splitBoxList(void); // for the time being
+      //void splitBoxList(Kernel::ThreadScheduler * ts);
+
+      // the variable, which informs the user of MD Event WS wrapper that there are boxes to split; Very simple for the time being
+      mutable bool m_needSplitting;
 
     };
 

@@ -9,6 +9,7 @@
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDDimensionStats.h"
 #include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidKernel/ThreadScheduler.h"
 
 #undef MDBOX_TRACK_SIGNAL_WHEN_ADDING
 
@@ -168,6 +169,7 @@ namespace MDEvents
     std::vector< MDE > * getEventsCopy();
 
     void addEvent(const MDE & point);
+    void addAndTraceEvent(const MDE & point,size_t index);
 
     void addEventUnsafe(const MDE & point);
 
@@ -207,6 +209,7 @@ namespace MDEvents
     ///Setter for unmasking the box
     void unmask();
 
+    static bool splitAllIfNeeded(API::splitBoxList &theCell,Kernel::ThreadScheduler * ts);
   protected:
 
     inline void loadEvents() const;

@@ -103,6 +103,8 @@ namespace MDEvents
 
  
     void addEvent(const MDE & event);
+    void addAndTraceEvent(const MDE & point);
+
 
     size_t addEvents(const std::vector<MDE> & events);
 

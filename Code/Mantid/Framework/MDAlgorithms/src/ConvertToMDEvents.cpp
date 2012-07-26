@@ -322,6 +322,8 @@ void ConvertToMDEvents::exec()
   }else{
       m_OutWSWrapper->setMDWS(spws);
   }
+  // convert original box into mdGridBox
+  spws->splitBox();
 
   //DO THE JOB:
 

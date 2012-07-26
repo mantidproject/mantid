@@ -788,6 +788,10 @@ namespace MDEvents
       MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
       if (box)
       {
+        if(box->getNPoints()>0)
+        {
+          continue;
+        }
         // Plain MD-Box. Does it need to split?
         if (this->m_BoxController->willSplit(box->getNPoints(), box->getDepth() ))
         {
@@ -886,7 +890,42 @@ namespace MDEvents
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
       boxes[index]->addEvent(event);
   }
+  /** Add a single MDLeanEvent to the grid box. If the boxes
+   * contained within are also gridded, this will recursively push the event
+   * down to the deepest level.
+   * Warning! No bounds checking is done (for performance). It must
+   * be known that the event is within the bounds of the grid box before adding.
+   *
+   * Note! nPoints, signal and error must be re-calculated using refreshCache()
+   * after all events have been added.
+   *
+   * @param point ::       reference to a MDEvent to add.
+   *
+   * @returns boxToSplit:: pointer to the MDBox which has more events then it suppose to keep and should be split or NULL if 
+   *                       this does not happens
+    * */
 
+  TMDE(
+  inline void MDGridBox)::addAndTraceEvent(const MDE & point,size_t ind)
+  {
+    UNUSED_ARG(ind);
+
+    size_t index = 0;
+    for (size_t d=0; d<nd; d++)
+    {
+      coord_t x = point.getCenter(d);
+      int i = int((x - this->extents[d].min) / boxSize[d]);
+
+      // Accumulate the index
+      index += (i * splitCumul[d]);
+    }
+
+    // Add it to the contained box
+    if (index < numBoxes) // avoid segfaults for floating point round-off errors.
+      boxes[index]->addAndTraceEvent(point,index);
+  
+
+  }
   //-----------------------------------------------------------------------------------------------
   /** Add a single MDLeanEvent to the grid box. If the boxes
    * contained within are also gridded, this will recursively push the event

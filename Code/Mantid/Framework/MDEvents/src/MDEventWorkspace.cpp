@@ -68,7 +68,7 @@ namespace MDEvents
   MDEventWorkspace)::~MDEventWorkspace()
   {
     delete data;
-	m_BoxController->closeFile();
+  m_BoxController->closeFile();
   }
 
 
@@ -500,6 +500,18 @@ namespace MDEvents
     data->addEvent(event);
   }
 
+   //-----------------------------------------------------------------------------------------------
+  /** Add a single event to this workspace and remebers the MDBox, which needs splitting in the internal 
+   *  BC cache
+   *
+   * @param point :: MD Event to add.
+   * 
+   */
+  TMDE(
+  void MDEventWorkspace)::addAndTraceEvent(const MDE & point)
+  {
+    data->addAndTraceEvent(point);
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Add a vector of MDEvents to the workspace.
