@@ -5242,13 +5242,13 @@ void ApplicationWindow::readSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
-  //allAxesOn = settings.value("/AllAxes", false).toBool();
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();
   drawBackbones = settings.value("/AxesBackbones", true).toBool();
-  //xaxisScale = settings.value("/AxisXScale", "linear").toString();
-  //yaxisScale = settings.value("/AxisYScale", "linear").toString();
-  //zaxisScale = settings.value("/AxisZScale", "linear").toString();
+  d_axes_scales[0] = settings.value("/AxisYScale", "linear").toString();
+  d_axes_scales[1] = settings.value("/AxisZScale", "linear").toString();
+  d_axes_scales[2] = settings.value("/AxisXScale", "linear").toString();
+  d_axes_scales[3] = settings.value("/AxisTScale", "linear").toString();
   axesLineWidth = settings.value("/AxesLineWidth", 1).toInt();
   autoscale2DPlots = settings.value("/Autoscale", true).toBool();
   autoScaleFonts = settings.value("/AutoScaleFonts", true).toBool();
@@ -5268,13 +5268,25 @@ void ApplicationWindow::readSettings()
   d_in_place_editing = settings.value("/InPlaceEditing", true).toBool();
   d_graph_axes_labels_dist = settings.value("/LabelsAxesDist", d_graph_axes_labels_dist).toInt();
   d_graph_tick_labels_dist = settings.value("/TickLabelsDist", d_graph_tick_labels_dist).toInt();
-  int size = settings.beginReadArray("EnabledAxes");
-  for (int i = 0; i < size; ++i) {
-    settings.setArrayIndex(i);
-    d_show_axes[i] = settings.value("enabled", true).toBool();
-    d_show_axes_labels[i] = settings.value("labels", true).toBool();
+  // Transform from the old setting for controlling visible axes. Will only happen once, after which it's deleted.
+  if ( settings.contains("/AllAxes") )
+  {
+    if ( settings.value("/AllAxes").toBool() )
+    {
+      d_show_axes = QVector<bool> (QwtPlot::axisCnt, true);
+    }
+    settings.remove("/AllAxes");
   }
-  settings.endArray();
+  else
+  {
+    int size = settings.beginReadArray("EnabledAxes");
+    for (int i = 0; i < size; ++i) {
+      settings.setArrayIndex(i);
+      d_show_axes[i] = settings.value("enabled", true).toBool();
+      d_show_axes_labels[i] = settings.value("labels", true).toBool();
+    }
+    settings.endArray();
+  }
   d_synchronize_graph_scales = settings.value("/SynchronizeScales", d_synchronize_graph_scales).toBool();
   settings.endGroup(); // General
 
@@ -5597,13 +5609,13 @@ void ApplicationWindow::saveSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   settings.setValue("/Title", titleOn);
-  //settings.setValue("/AllAxes", allAxesOn);
   settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
   settings.setValue("/Margin", defaultPlotMargin);
   settings.setValue("/AxesBackbones", drawBackbones);
-  settings.setValue("/AxisXScale", "linear");//xaxisScale);
-  settings.setValue("/AxisYScale", "linear");//yaxisScale);
-  settings.setValue("/AxisZScale", "linear");//zaxisScale);
+  settings.setValue("/AxisYScale", d_axes_scales[0]);
+  settings.setValue("/AxisZScale", d_axes_scales[1]);
+  settings.setValue("/AxisXScale", d_axes_scales[2]);
+  settings.setValue("/AxisTScale", d_axes_scales[3]);
   settings.setValue("/AxesLineWidth", axesLineWidth);
   settings.setValue("/Autoscale", autoscale2DPlots);
   settings.setValue("/AutoScaleFonts", autoScaleFonts);
@@ -5637,14 +5649,14 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/InPlaceEditing", d_in_place_editing);
   settings.setValue("/LabelsAxesDist", d_graph_axes_labels_dist);
   settings.setValue("/TickLabelsDist", d_graph_tick_labels_dist);
-  //settings.beginWriteArray("EnabledAxes");
-  //for (int i = 0; i < QwtPlot::axisCnt; ++i) {
-  //  settings.setArrayIndex(i);
-  //  settings.setValue("axis", i);
-  //  settings.setValue("enabled", d_show_axes[i]);
-  //  settings.setValue("labels", d_show_axes_labels[i]);
-  //}
-  //settings.endArray();
+  settings.beginWriteArray("EnabledAxes");
+  for (int i = 0; i < QwtPlot::axisCnt; ++i) {
+    settings.setArrayIndex(i);
+    settings.setValue("axis", i);
+    settings.setValue("enabled", d_show_axes[i]);
+    settings.setValue("labels", d_show_axes_labels[i]);
+  }
+  settings.endArray();
   settings.setValue("/SynchronizeScales", d_synchronize_graph_scales);
   settings.endGroup(); // General
 
