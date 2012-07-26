@@ -23,6 +23,8 @@ The [[Rebin]] algorithm is used, if neccessary, to put all the input workspaces 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -48,7 +50,7 @@ using namespace API;
 using namespace DataObjects;
 
 /// Default constructor
-MergeRuns::MergeRuns() : Algorithm(),m_progress(NULL) {}
+MergeRuns::MergeRuns() : Algorithm(),m_progress(NULL),m_useDefaultGroupingBehaviour(true) {}
 
 /// Destructor
 MergeRuns::~MergeRuns()
@@ -64,7 +66,7 @@ void MergeRuns::init()
   declareProperty(
     new ArrayProperty<std::string>("InputWorkspaces", boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
     "The names of the input workspaces as a comma-separated list" );
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Name of the output workspace" );
 }
 
@@ -675,6 +677,148 @@ API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr&
   rebin->setProperty("Params",params);
   rebin->executeAsSubAlg();
   return rebin->getProperty("OutputWorkspace");
+}
+
+//=============================================================================================
+//================================== WorkspaceGroup-related ===================================
+//=============================================================================================
+
+/** Check the input workspace properties for groups.
+*
+* If there are more than one input workspace properties, then:
+*  - All inputs should be groups of the same size
+*    - In this case, algorithms are processed in order
+*  - OR, only one input should be a group, the others being size of 1
+*
+* Returns true if processGroups() should be called.
+* It also sets up some other members.
+*
+* Override if it is needed to customize the group checking.
+*
+* @throw std::invalid_argument if the groups sizes are incompatible.
+* @throw std::invalid_argument if a member is not found
+*
+* This method (or an override) must NOT THROW any exception if there are no input workspace groups
+*/
+bool MergeRuns::checkGroups()
+{
+  typedef std::vector<std::string> WorkspaceNameType;
+
+  m_multiPeriodGroups.swap(VecWSGroupType(0));
+  WorkspaceNameType workspaces = this->getProperty("InputWorkspaces");
+  WorkspaceNameType::iterator it = workspaces.begin();
+  while(it != workspaces.end())
+  {
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(*it);
+    if(!ws)
+    {
+      throw Kernel::Exception::NotFoundError("Workspace", *it);
+    }
+    WorkspaceGroup_sptr inputGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    if(inputGroup)
+    {
+      auto firstItem = boost::dynamic_pointer_cast<MatrixWorkspace>(inputGroup->getItem(0));
+      try
+      {
+        Property* nPeriodsProperty = firstItem->run().getLogData("nperiods");
+        int nPeriods = atoi(nPeriodsProperty->value().c_str());
+        if(nPeriods > 1)
+        {
+          m_multiPeriodGroups.push_back(inputGroup);
+        }
+      }
+      catch(Exception::NotFoundError &)
+      {
+      }
+    }
+    ++it;
+  }
+  const size_t multiPeriodGroupsSize = m_multiPeriodGroups.size();
+  if(multiPeriodGroupsSize != 0 && multiPeriodGroupsSize != workspaces.size())
+  {
+    std::string msg = "MergeRuns can either process complete array of MatrixWorkspaces or Multi-period-groups, but mixing of types is not permitted.";
+    g_log.error(msg);
+  }
+
+  if(multiPeriodGroupsSize > 0)
+  { 
+    const size_t benchMarkGroupSize = m_multiPeriodGroups[0]->size();
+    for(size_t i = 1; i < multiPeriodGroupsSize; ++i)
+    {
+      if(m_multiPeriodGroups[i]->size() != benchMarkGroupSize)
+      {
+        g_log.error("Not all the input Multi-period-group input workspaces are the same size.");
+      }
+    }
+  }
+
+  if(multiPeriodGroupsSize == 0)
+  {
+    m_useDefaultGroupingBehaviour = true;
+    return Algorithm::checkGroups();
+  }
+  m_useDefaultGroupingBehaviour = false;
+  return !m_useDefaultGroupingBehaviour;
+}
+
+
+
+//--------------------------------------------------------------------------------------------
+/** Process WorkspaceGroup inputs.
+*
+* This should be called after checkGroups(), which sets up required members.
+* It goes through each member of the group(s), creates and sets an algorithm
+* for each and executes them one by one.
+*
+* If there are several group input workspaces, then the member of each group
+* is executed pair-wise.
+*
+* @return true - if all the workspace members are executed.
+*/
+bool MergeRuns::processGroups()
+{
+  if(m_useDefaultGroupingBehaviour)
+  {
+    return Algorithm::processGroups();
+  }
+
+  Property* outputWorkspaceProperty = this->getProperty("OutputWorkspace");
+  const std::string outName = outputWorkspaceProperty->value();
+
+  size_t nPeriods = m_multiPeriodGroups[0]->size();
+  WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>();
+  for(size_t i = 0; i < nPeriods; ++i)
+  {
+    std::string prefix = "";
+    std::string inputWorkspaces = "";
+    for(size_t j = 0; j < m_multiPeriodGroups.size(); ++j)
+    {
+      inputWorkspaces += prefix + m_multiPeriodGroups[j]->getItem(i)->name();
+      prefix = ",";
+    }
+    Algorithm_sptr alg_sptr = API::AlgorithmManager::Instance().createUnmanaged(this->name(), this->version());
+    IAlgorithm* alg = alg_sptr.get();
+    if(!alg)
+    {
+      g_log.error()<<"CreateAlgorithm failed for "<<this->name()<<"("<<this->version()<<")"<<std::endl;
+      throw std::runtime_error("Algorithm creation failed.");
+    }
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspaces", inputWorkspaces);
+    const std::string outName_i = outName + "_" + Strings::toString(i+1);
+    alg->setPropertyValue("OutputWorkspace", outName_i);
+
+    if (!alg->execute())
+    {
+      throw std::runtime_error("Execution of " + this->name() + " for group entry " + Strings::toString(i+1) + " failed.");
+    }
+    outputWS->add(outName_i);
+  }
+  this->setProperty("OutputWorkspace", outputWS);
+  this->setExecuted(true);
+  AnalysisDataService::Instance().addOrReplace(outName, outputWS);
+  return true;
 }
 
 } // namespace Algorithm

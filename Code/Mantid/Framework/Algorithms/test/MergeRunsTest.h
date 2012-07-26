@@ -5,11 +5,15 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <stdarg.h>
 
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/MergeRuns.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidDataHandling/LoadEventPreNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -19,6 +23,96 @@ using Mantid::DataHandling::LoadEventPreNexus;
 
 class MergeRunsTest : public CxxTest::TestSuite
 {
+
+private:
+
+  /// Helper method to add an 'nperiods' log value to each workspace in a group.
+  void add_nperiods_log(WorkspaceGroup_sptr ws, bool calculateNPeriods = true, int nperiods = -1)
+  {
+    if(calculateNPeriods)
+    {
+      nperiods = ws->size();
+    }
+    for(size_t i = 0; i < ws->size(); ++i)
+    { 
+      PropertyWithValue<int>* nperiodsProp = new PropertyWithValue<int>("nperiods", nperiods);
+      boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i))->mutableRun().addLogData(nperiodsProp);
+    }
+  }
+
+  /// Helper to fabricate a workspace group consisting of equal sized matrixworkspaces. BUT WITHOUT MULTIPERIOD LOGS.
+  WorkspaceGroup_sptr create_good_workspace_group()
+  {
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+    MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+    a->setName("a");
+    b->setName("b");
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->setName("group");
+    group->addWorkspace(a);
+    group->addWorkspace(b); // No multiperiod logs added.
+    AnalysisDataService::Instance().addOrReplace(a->name(), a);
+    AnalysisDataService::Instance().addOrReplace(b->name(), b);
+    AnalysisDataService::Instance().addOrReplace(group->name(), group);
+    return group;
+  }
+
+ /// Helper to fabricate a workspace group consisting of equal sized matrixworkspaces. BUT WITHOUT MULTIPERIOD LOGS AT ZERO.
+  WorkspaceGroup_sptr create_good_zerod_multiperiod_workspace_group()
+  {
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+    MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+    a->setName("a");
+    b->setName("b");
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->setName("group");
+    group->addWorkspace(a);
+    group->addWorkspace(b); // No multiperiod logs added.
+    const bool calculateNPeriods = false;
+    const int nPeriods = 0;
+    add_nperiods_log(group, calculateNPeriods, nPeriods);
+    AnalysisDataService::Instance().addOrReplace(a->name(), a);
+    AnalysisDataService::Instance().addOrReplace(a->name(), b);
+    AnalysisDataService::Instance().addOrReplace(group->name(), group);
+    return group;
+  }
+
+  /// Helper to fabricate a workspace group consisting of equal sized matrixworkspaces.
+  WorkspaceGroup_sptr create_good_multiperiod_workspace_group()
+  {
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+    MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
+    a->setName("a");
+    b->setName("b");
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->setName("group");
+    group->addWorkspace(a);
+    group->addWorkspace(b);
+    add_nperiods_log(group);
+    AnalysisDataService::Instance().addOrReplace(a->name(), a);
+    AnalysisDataService::Instance().addOrReplace(b->name(), b);
+    AnalysisDataService::Instance().addOrReplace(group->name(), group);
+    return group;
+  }
+
+  /// Helper to fabricate a workspace group consisting of unequal sized matrix workspaces.
+  WorkspaceGroup_sptr create_bad_multiperiod_workspace_group()
+  {
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::Create2DWorkspace123(2,5,1); //Two histograms and 5 bins!
+    MatrixWorkspace_sptr b = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1); //3 histograms and 10 bins!
+    a->setName("a");
+    b->setName("b");
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->setName("group");
+    group->addWorkspace(a);
+    group->addWorkspace(b);
+    add_nperiods_log(group);
+    AnalysisDataService::Instance().addOrReplace(a->name(), a);
+    AnalysisDataService::Instance().addOrReplace(b->name(), b);
+    AnalysisDataService::Instance().addOrReplace(group->name(), group);
+    return group;
+  }
+
 public:
   static MergeRunsTest *createSuite() { return new MergeRunsTest(); }
   static void destroySuite(MergeRunsTest *suite) { delete suite; }
@@ -546,6 +640,49 @@ public:
     }
 
     AnalysisDataService::Instance().remove("outer");
+  }
+
+  void test_with_multiperiod_data()
+  {
+    // Creates a workspace group containing two identical matrix workspaces with uniform signal and error.
+    WorkspaceGroup_sptr input = create_good_multiperiod_workspace_group();
+    // Extract some internal information from the nested workspaces in order to run test asserts later.
+    const size_t expectedNumHistograms = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0))->getNumberHistograms();
+    MatrixWorkspace_sptr sampleNestedInputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0));
+    const double uniformSignal = sampleNestedInputWorkspace->readY(0)[0];
+    const double uniformError = sampleNestedInputWorkspace->readE(0)[0];
+    const size_t nXValues = sampleNestedInputWorkspace->readX(0).size();
+
+    MergeRuns alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspaces", input->name() + "," + input->name()) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","outer") );
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    WorkspaceGroup_sptr wsgroup = Mantid::API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outer");
+    TS_ASSERT(wsgroup != NULL);
+    TS_ASSERT_EQUALS(input->size(), wsgroup->size());
+    // Loop through each workspace in the group
+    for(size_t i = 0; i < wsgroup->size(); ++i)
+    {
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(wsgroup->getItem(i));
+      TS_ASSERT(ws != NULL);
+      TS_ASSERT_EQUALS(expectedNumHistograms, ws->getNumberHistograms());
+      // Loop through each histogram in each workspace
+      for(size_t j = 0; j < ws->getNumberHistograms(); ++j)
+      {
+        using Mantid::MantidVec;
+        MantidVec xValues = ws->readX(j);
+        MantidVec yValues = ws->readY(j);
+        MantidVec eValues = ws->readE(j);
+        TS_ASSERT_EQUALS(nXValues, xValues.size());
+        // Loop through each y-value in the histogram
+        for(size_t k = 0; k < yValues.size(); ++k)
+        {
+          TS_ASSERT_EQUALS(2*uniformSignal, yValues[k]);
+        }
+      }
+    }
   }
 
 private:
