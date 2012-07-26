@@ -342,9 +342,8 @@ void Ntest_functionCalculator()
     peak.function1D(out, xvalues, ndata);
 
    return;
- }
+}
 
 };
-
 
 #endif /* MANTID_CURVEFITTING_THERMALNEUTRONBK2BKEXPCONVPVTEST_H_ */

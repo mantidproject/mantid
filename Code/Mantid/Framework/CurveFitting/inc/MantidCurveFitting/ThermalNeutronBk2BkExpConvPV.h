@@ -62,6 +62,9 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     /// Set Miller Indicies
     void setMillerIndex(int h, int k, int l);
 
+    /// Get Miller Index from this peak
+    void getMillerIndex(int& h, int &k, int &l);
+
   protected:
 
     virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;

@@ -101,6 +101,18 @@ void ThermalNeutronBk2BkExpConvPV::setMillerIndex(int h, int k, int l)
 }
 
 /*
+ * Get Miller Index from this peak
+ */
+void ThermalNeutronBk2BkExpConvPV::getMillerIndex(int& h, int &k, int &l)
+{
+    h = mH;
+    k = mK;
+    l = mL;
+
+    return;
+}
+
+/*
  * Override function1D
  */
 void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xValues, size_t nData) const
