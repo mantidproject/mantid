@@ -50,8 +50,10 @@ namespace CurveFitting
 
     /// Algorithm's name for identification overriding a virtual method
     virtual const std::string name() const { return "LeBailFit";}
+
     /// Algorithm's version for identification overriding a virtual method
     virtual int version() const { return 2;}
+
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Diffraction";}
 
@@ -65,24 +67,53 @@ namespace CurveFitting
 
     /// Import peak parameters
     void importParametersTable();
+
     /// Import Miller Indices (HKL)
     void importReflections();
 
     /// Create a list of peaks
     void generatePeaksFromInput();
 
+    /// Set parameters to each peak
+    void setPeakParameters(CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak, double peakheight);
 
+    /// Calcualte peak heights from model to data
+    void calPeaksIntensities(std::vector<std::pair<int, double> >& peakheights, size_t workspaceindex);
+
+    /// Calcualte peak intensities for single or overlapped peaks
+    void calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> peakindices, std::vector<double> peakcenters,
+                           std::vector<std::pair<double, double> > peakboundaries, std::vector<std::pair<size_t, double> >& peakintensities);
+
+    /// Calculate LeBail pattern
+    void calculatePattern(size_t workspaceindex);
+
+    /// LeBailFit
+    void doLeBailFit(size_t workspaceindex);
+
+    /// Calculate Peaks' Intensities
+    void calculatePeaksHeights(size_t workspaceindex);
+
+    /// Estimate the range of a peak from observation
+    bool observePeakRange(size_t workspaceindex, double center, double fwhm, double& tof_center, double& tof_left, double& tof_right);
+
+    /// Numerically estimate the range of peak
+    //  void estimatePeakRange(size_t workspaceindex, double center, double fwhm, double& tof_center, double& tof_left, double& tof_right);
+
+    /// Instance data
     API::MatrixWorkspace_sptr dataWS;
+    DataObjects::Workspace2D_sptr outputWS;
     DataObjects::TableWorkspace_sptr parameterWS;
     DataObjects::TableWorkspace_sptr reflectionWS;
 
+    /// Peaks about input and etc.
+    std::vector<int> mPeakHKL2; // Peak's h^2+k^2+l^2: seaving as key for mPeakHeights adn mPeaks
     std::vector<std::vector<int> > mPeakHKLs;
-    API::CompositeFunction_sptr mLeBailFunction;
+    std::map<int, double> mPeakHeights;
+    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr> mPeaks;
 
+    API::CompositeFunction_sptr mLeBailFunction;
     std::map<std::string, std::pair<double, char> > mFuncParameters; // char = f: fit... = t: tie to value
 
-    std::vector<CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr> mPeaks;
-    
   };
 
 
