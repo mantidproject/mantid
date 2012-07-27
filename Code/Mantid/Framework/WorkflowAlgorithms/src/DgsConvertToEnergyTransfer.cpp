@@ -229,6 +229,7 @@ namespace WorkflowAlgorithms
 
                 // Calculate Ei
                 // Get the monitor spectra indices from the parameters
+                // TODO: Get these from algorithm properties. No longer need to read them from parameter file.
                 MatrixWorkspace_const_sptr monWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(monWsName);
                 eiMon1Spec = static_cast<specid_t>(monWS->getInstrument()->getNumberParameter("ei-mon1-spec")[0]);
                 eiMon2Spec = static_cast<specid_t>(monWS->getInstrument()->getNumberParameter("ei-mon2-spec")[0]);
