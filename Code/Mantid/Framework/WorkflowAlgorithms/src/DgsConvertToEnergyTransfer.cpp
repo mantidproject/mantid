@@ -74,46 +74,7 @@ namespace WorkflowAlgorithms
   void DgsConvertToEnergyTransfer::init()
   {
     this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-        "An input workspace.");
-    auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
-    mustBePositive->setLower(0.0);
-    this->declareProperty("IncidentEnergyGuess", EMPTY_DBL(), mustBePositive,
-      "Set the value of the incident energy guess in meV.");
-    this->declareProperty("UseIncidentEnergyGuess", false,
-        "Use the incident energy guess as the actual value (will not be calculated).");
-    this->declareProperty(new ArrayProperty<double>("EnergyTransferRange",
-        boost::make_shared<RebinParamsValidator>(true)),
-      "A comma separated list of first bin boundary, width, last bin boundary.\n"
-      "Negative width value indicates logarithmic binning.");
-    this->declareProperty("SofPhiEIsDistribution", true,
-        "The final S(Phi, E) data is made to be a distribution.");
-    std::vector<std::string> incidentBeamNormOptions;
-    incidentBeamNormOptions.push_back("None");
-    incidentBeamNormOptions.push_back("ByCurrent");
-    incidentBeamNormOptions.push_back("ToMonitor");
-    this->declareProperty("IncidentBeamNormalisation", "None",
-        boost::make_shared<StringListValidator>(incidentBeamNormOptions),
-        "Options for incident beam normalisation on data.");
-    this->declareProperty("MonitorIntRangeLow", EMPTY_DBL(),
-        "Set the lower bound for monitor integration.");
-    this->setPropertySettings("MonitorIntRangeLow",
-        new VisibleWhenProperty("IncidentBeamNormalisation", IS_EQUAL_TO,
-            "ToMonitor"));
-    this->declareProperty("MonitorIntRangeHigh", EMPTY_DBL(),
-           "Set the upper bound for monitor integration.");
-    this->setPropertySettings("MonitorIntRangeHigh",
-        new VisibleWhenProperty("IncidentBeamNormalisation", IS_EQUAL_TO,
-            "ToMonitor"));
-    this->declareProperty("TimeIndepBackgroundSub", false,
-        "If true, time-independent background will be calculated and removed.");
-    this->declareProperty("TibTofRangeStart", EMPTY_DBL(),
-        "Set the lower TOF bound for time-independent background subtraction.");
-    this->setPropertySettings("TibTofRangeStart",
-        new VisibleWhenProperty("TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
-    this->declareProperty("TibTofRangeEnd", EMPTY_DBL(),
-        "Set the upper TOF bound for time-independent background subtraction.");
-    this->setPropertySettings("TibTofRangeEnd",
-        new VisibleWhenProperty("TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
+        "A sample data workspace.");
     this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
         Direction::Output, PropertyMode::Optional));
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
@@ -129,14 +90,13 @@ namespace WorkflowAlgorithms
     const std::string reductionManagerName = this->getProperty("ReductionProperties");
     boost::shared_ptr<PropertyManager> reductionManager;
     if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
-    {
-      reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
-    }
+      {
+        reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+      }
     else
-    {
-      reductionManager = boost::make_shared<PropertyManager>();
-      PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
-    }
+      {
+        throw std::runtime_error("DgsConvertToEnergyTransfer cannot run without a reduction PropertyManager.");
+      }
 
     this->enableHistoryRecordingForChild(true);
 
@@ -151,9 +111,9 @@ namespace WorkflowAlgorithms
     // Calculate the initial energy and time zero
     const std::string facility = ConfigService::Instance().getFacility().name();
     g_log.notice() << "Processing for " << facility << std::endl;
-    const double eiGuess = this->getProperty("IncidentEnergyGuess");
-    const bool useEiGuess = this->getProperty("UseIncidentEnergyGuess");
-    const std::vector<double> etBinning = this->getProperty("EnergyTransferRange");
+    const double eiGuess = reductionManager->getProperty("IncidentEnergyGuess");
+    const bool useEiGuess = reductionManager->getProperty("UseIncidentEnergyGuess");
+    const std::vector<double> etBinning = reductionManager->getProperty("EnergyTransferRange");
 
     double incidentEnergy = 0.0;
     double monPeak = 0.0;
@@ -226,6 +186,8 @@ namespace WorkflowAlgorithms
                 loadmon->setProperty("Filename", runFileName);
                 loadmon->setProperty("OutputWorkspace", monWsName);
                 loadmon->execute();
+
+                reductionManager->declareProperty(new PropertyWithValue<std::string>("MonitorWorkspace", monWsName));
 
                 // Calculate Ei
                 // Get the monitor spectra indices from the parameters
@@ -305,15 +267,16 @@ namespace WorkflowAlgorithms
       }
 
     const double binOffset = -monPeak;
+    reductionManager->declareProperty(new PropertyWithValue<double>("TofRangeOffset", binOffset));
 
     // Subtract time-independent background if necessary
-    const bool doTibSub = this->getProperty("TimeIndepBackgroundSub");
+    const bool doTibSub = reductionManager->getProperty("TimeIndepBackgroundSub");
     if (doTibSub)
       {
         // Set the binning parameters for the background region
-        double tibTofStart = this->getProperty("TibTofRangeStart");
+        double tibTofStart = reductionManager->getProperty("TibTofRangeStart");
         tibTofStart += binOffset;
-        double tibTofEnd = this->getProperty("TibTofRangeEnd");
+        double tibTofEnd = reductionManager->getProperty("TibTofRangeEnd");
         tibTofEnd += binOffset;
         const double tibTofWidth = tibTofEnd - tibTofStart;
         std::vector<double> params;
@@ -424,20 +387,10 @@ namespace WorkflowAlgorithms
       }
 
     // Normalise result workspace to incident beam parameter
-    const std::string incidentBeamNormType = this->getProperty("IncidentBeamNormalisation");
-    const double monRangeLow = this->getProperty("MonitorIntRangeLow");
-    const double monRangeHigh = this->getProperty("MonitorIntRangeHigh");
-
     IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
     norm->setAlwaysStoreInADS(true);
     norm->setProperty("InputWorkspace", outWsName);
     norm->setProperty("OutputWorkspace", outWsName);
-    norm->setProperty("IncidentBeamNormalisation", incidentBeamNormType);
-    norm->setProperty("MonitorIntRangeLow", monRangeLow);
-    norm->setProperty("MonitorIntRangeHigh", monRangeHigh);
-    // SNS does current norm for now.
-    //norm->setProperty("MonitorWorkspace", monWsName);
-    norm->setProperty("TofRangeOffset", binOffset);
     norm->execute();
 
     // Convert to energy transfer
@@ -509,7 +462,7 @@ namespace WorkflowAlgorithms
     // Rebin to ensure consistency
     if (!etBinning.empty())
       {
-        const bool sofphieIsDistribution = this->getProperty("SofPhiEIsDistribution");
+        const bool sofphieIsDistribution = reductionManager->getProperty("SofPhiEIsDistribution");
 
         g_log.notice() << "Rebinning data" << std::endl;
         IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");

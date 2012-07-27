@@ -72,31 +72,6 @@ namespace WorkflowAlgorithms
   {
     this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
         Direction::Input), "An input workspace.");
-    this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace", "",
-        Direction::Input, PropertyMode::Optional),
-        "A monitor workspace for integration");
-    std::vector<std::string> incidentBeamNormOptions;
-    incidentBeamNormOptions.push_back("None");
-    incidentBeamNormOptions.push_back("ByCurrent");
-    incidentBeamNormOptions.push_back("ToMonitor");
-    this->declareProperty("IncidentBeamNormalisation", "None",
-        boost::make_shared<StringListValidator>(incidentBeamNormOptions),
-        "Options for incident beam normalisation on data.");
-    this->declareProperty("MonitorIntRangeLow", EMPTY_DBL(),
-        "Set the lower bound for monitor integration.");
-    this->setPropertySettings("MonitorIntRangeLow",
-        new VisibleWhenProperty("IncidentBeamNormalisation", IS_EQUAL_TO,
-            "ToMonitor"));
-    this->declareProperty("MonitorIntRangeHigh", EMPTY_DBL(),
-           "Set the upper bound for monitor integration.");
-    this->setPropertySettings("MonitorIntRangeHigh",
-        new VisibleWhenProperty("IncidentBeamNormalisation", IS_EQUAL_TO,
-            "ToMonitor"));
-    this->declareProperty("TofRangeOffset", 0.0,
-        "Provide an offset for the TOF range.");
-    this->setPropertySettings("TofRangeOffset",
-        new VisibleWhenProperty("IncidentBeamNormalisation", IS_EQUAL_TO,
-            "ToMonitor"));
     this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
         Direction::Output, PropertyMode::Optional), "An output workspace.");
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
@@ -113,14 +88,13 @@ namespace WorkflowAlgorithms
     const std::string reductionManagerName = this->getProperty("ReductionProperties");
     boost::shared_ptr<PropertyManager> reductionManager;
     if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
-    {
-      reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
-    }
+      {
+        reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+      }
     else
-    {
-      reductionManager = boost::make_shared<PropertyManager>();
-      PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
-    }
+      {
+        throw std::runtime_error("DgsPreprocessData cannot run without a reduction PropertyManager.");
+      }
 
     this->enableHistoryRecordingForChild(true);
 
@@ -128,7 +102,7 @@ namespace WorkflowAlgorithms
     // Make output workspace name the same as input workspace
     const std::string outWsName = inputWS->getName();
 
-    std::string incidentBeamNorm = this->getProperty("IncidentBeamNormalisation");
+    std::string incidentBeamNorm = reductionManager->getProperty("IncidentBeamNormalisation");
     g_log.notice() << "Incident beam norm method = " << incidentBeamNorm << std::endl;
     if ("None" != incidentBeamNorm)
       {
@@ -146,14 +120,14 @@ namespace WorkflowAlgorithms
         if ("ToMonitor" == incidentBeamNorm)
           {
             // Perform extra setup for monitor normalisation
-            const double rangeOffset = this->getProperty("TofRangeOffset");
-            double rangeMin = this->getProperty("MonitorIntRangeLow");
+            const double rangeOffset = reductionManager->getProperty("TofRangeOffset");
+            double rangeMin = reductionManager->getProperty("MonitorIntRangeLow");
             if (EMPTY_DBL() == rangeMin)
               {
                 rangeMin = inputWS->getInstrument()->getNumberParameter("norm-mon1-min")[0];
               }
             rangeMin += rangeOffset;
-            double rangeMax = this->getProperty("MonitorIntRangeHigh");
+            double rangeMax = reductionManager->getProperty("MonitorIntRangeHigh");
             if (EMPTY_DBL() == rangeMin)
               {
                 rangeMax = inputWS->getInstrument()->getNumberParameter("norm-mon1-max")[0];
@@ -167,7 +141,7 @@ namespace WorkflowAlgorithms
             // Do SNS
             else
               {
-                MatrixWorkspace_const_sptr monitorWS = this->getProperty("MonitorWorkspace");
+                MatrixWorkspace_const_sptr monitorWS = reductionManager->getProperty("MonitorWorkspace");
                 if (!monitorWS)
                   {
                     throw std::runtime_error("SNS instruments require monitor workspaces for monitor normalisation.");

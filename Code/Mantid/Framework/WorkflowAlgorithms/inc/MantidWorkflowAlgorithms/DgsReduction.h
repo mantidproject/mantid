@@ -49,8 +49,10 @@ namespace WorkflowAlgorithms
     virtual void initDocs();
     void init();
     void exec();
-    API::Workspace_sptr loadInputData(boost::shared_ptr<Kernel::PropertyManager> manager);
+    API::Workspace_sptr loadInputData(const std::string prop,
+        const bool mustLoad=true);
 
+    boost::shared_ptr<Kernel::PropertyManager> reductionManager;
   };
 
 

@@ -22,6 +22,8 @@ parameters and generating calls to other workflow or standard algorithms.
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#include <strstream>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -73,10 +75,10 @@ namespace WorkflowAlgorithms
   {
     // Sample setup options
     std::string sampleSetup = "Sample Setup";
-    this->declareProperty(new FileProperty("SampleFile", "",
+    this->declareProperty(new FileProperty("SampleInputFile", "",
         FileProperty::OptionalLoad, "_event.nxs"),
-        "File containing the data to reduce");
-    this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
+        "File containing the sample data to reduce");
+    this->declareProperty(new WorkspaceProperty<>("SampleInputWorkspace", "",
         Direction::Input, PropertyMode::Optional),
         "Workspace to be reduced");
     auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
@@ -94,8 +96,8 @@ namespace WorkflowAlgorithms
     this->declareProperty("HardMaskFile", "", "A file or workspace containing a hard mask.");
     this->declareProperty("GroupingFile", "", "A file containing grouping (mapping) information.");
 
-    this->setPropertyGroup("SampleFile", sampleSetup);
-    this->setPropertyGroup("InputWorkspace", sampleSetup);
+    this->setPropertyGroup("SampleInputFile", sampleSetup);
+    this->setPropertyGroup("SampleInputWorkspace", sampleSetup);
     this->setPropertyGroup("IncidentEnergyGuess", sampleSetup);
     this->setPropertyGroup("UseIncidentEnergyGuess", sampleSetup);
     this->setPropertyGroup("EnergyTransferRange", sampleSetup);
@@ -321,16 +323,30 @@ namespace WorkflowAlgorithms
    * Create a workspace by either loading a file or using an existing
    * workspace.
    */
-  Workspace_sptr DgsReduction::loadInputData(boost::shared_ptr<PropertyManager> manager)
+  Workspace_sptr DgsReduction::loadInputData(const std::string prop,
+      const bool mustLoad)
   {
 
     Workspace_sptr inputWS;
 
-    std::string inputData = this->getPropertyValue("SampleFile");
-    const std::string inputWSName = this->getPropertyValue("InputWorkspace");
+    const std::string inFileProp = prop + "InputFile";
+    const std::string inWsProp = prop + "InputWorkspace";
+
+    std::string inputData = this->getPropertyValue(inFileProp);
+    const std::string inputWSName = this->getPropertyValue(inWsProp);
     if (!inputWSName.empty() && !inputData.empty())
       {
-        throw std::runtime_error("DgsReduction: Either the Filename property or InputWorkspace property must be provided, NOT BOTH");
+        if (mustLoad)
+          {
+            std::ostringstream mess;
+            mess << "DgsReduction: Either the " << inFileProp << " property or ";
+            mess << inWsProp << " property must be provided, NOT BOTH!";
+            throw std::runtime_error(mess.str());
+          }
+        else
+          {
+            return boost::shared_ptr<Workspace>();
+          }
       }
     else if (!inputWSName.empty())
       {
@@ -350,13 +366,13 @@ namespace WorkflowAlgorithms
                 this->setLoadAlg("LoadEventPreNexus");
                 this->setLoadAlgFileProp("EventFilename");
               }
-            manager->declareProperty(new PropertyWithValue<std::string>("MonitorFilename", inputData));
+            this->reductionManager->declareProperty(new PropertyWithValue<std::string>("MonitorFilename", inputData));
           }
         // Do ISIS
         else
           {
             this->setLoadAlg("LoadRaw");
-            manager->declareProperty(new PropertyWithValue<std::string>("DetCalFilename", inputData));
+            this->reductionManager->declareProperty(new PropertyWithValue<std::string>("DetCalFilename", inputData));
           }
 
         inputWS = this->load(inputData);
@@ -381,35 +397,25 @@ namespace WorkflowAlgorithms
       g_log.error() << "ERROR: Reduction Property Manager name is empty" << std::endl;
       return;
     }
-    boost::shared_ptr<PropertyManager> reductionManager = boost::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
+    this->reductionManager = boost::make_shared<PropertyManager>();
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, this->reductionManager);
 
-    Workspace_sptr inputWS = this->loadInputData(reductionManager);
+    // Put all properties except input files/workspaces into property manager.
+    const std::vector<Property *> props = this->getProperties();
+    std::vector<Property *>::const_iterator iter = props.begin();
+    for (; iter != props.end(); ++iter)
+      {
+        if (!boost::contains((*iter)->name(), "Input"))
+          {
+            this->reductionManager->declareProperty(*iter);
+          }
+      }
 
-    // Setup for the convert to energy transfer workflow algorithm
-    const double incidentEnergyGuess = this->getProperty("IncidentEnergyGuess");
-    const bool useEiGuess = this->getProperty("UseIncidentEnergyGuess");
-    const std::vector<double> etBinning = this->getProperty("EnergyTransferRange");
-    const bool sofphieIsDistribution = this->getProperty("SofPhiEIsDistribution");
-    const std::string incidentBeamNormType = this->getProperty("IncidentBeamNormalisation");
-    const double monRangeLow = this->getProperty("MonitorIntRangeLow");
-    const double monRangeHigh = this->getProperty("MonitorIntRangeHigh");
-    const bool tibSubtraction = this->getProperty("TimeIndepBackgroundSub");
-    const double tibTofStart = this->getProperty("TibTofRangeStart");
-    const double tibTofEnd = this->getProperty("TibTofRangeEnd");
+    Workspace_sptr sampleWS = this->loadInputData("Sample");
 
     IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
-    etConv->setProperty("InputWorkspace", inputWS);
-    etConv->setProperty("IncidentEnergyGuess", incidentEnergyGuess);
-    etConv->setProperty("UseIncidentEnergyGuess", useEiGuess);
-    etConv->setProperty("EnergyTransferRange", etBinning);
-    etConv->setProperty("SofPhiEIsDistribution", sofphieIsDistribution);
-    etConv->setProperty("IncidentBeamNormalisation", incidentBeamNormType);
-    etConv->setProperty("MonitorIntRangeLow", monRangeLow);
-    etConv->setProperty("MonitorIntRangeHigh", monRangeHigh);
-    etConv->setProperty("TimeIndepBackgroundSub", tibSubtraction);
-    etConv->setProperty("TibTofRangeStart", tibTofStart);
-    etConv->setProperty("TibTofRangeEnd", tibTofEnd);
+    etConv->setProperty("InputWorkspace", sampleWS);
+    etConv->setProperty("ReductionProperties", reductionManagerName);
     etConv->execute();
   }
 
