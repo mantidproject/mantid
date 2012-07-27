@@ -27,7 +27,7 @@ class SampleSetupScript(BaseScriptElement):
         self.reset()
         
     def to_script(self):
-        script =  "SampleFile=\"%s\",\n" % self.sample_file
+        script =  "SampleInputFile=\"%s\",\n" % self.sample_file
         script += "IncidentEnergyGuess=\"%s\",\n" % self.incident_energy_guess
         script += "UseIncidentEnergyGuess=%s,\n" % self.use_ei_guess
         if self.rebin_et:
@@ -44,7 +44,7 @@ class SampleSetupScript(BaseScriptElement):
             Create XML from the current data.
         """
         xml = "<SampleSetup>\n"
-        xml += "  <sample_file>%s</sample_file>\n" % self.sample_file
+        xml += "  <sample_input_file>%s</sample_input_file>\n" % self.sample_file
         xml += "  <incident_energy_guess>%s</incident_energy_guess>\n" % self.incident_energy_guess
         xml += "  <use_ei_guess>%s</use_ei_guess>\n" % str(self.use_ei_guess)
         xml += "  <et_range>\n"
@@ -68,7 +68,7 @@ class SampleSetupScript(BaseScriptElement):
         if len(element_list)>0:
             instrument_dom = element_list[0]
             self.sample_file = BaseScriptElement.getStringElement(instrument_dom, 
-                                                                  "sample_file",
+                                                                  "sample_input_file",
                                                                   default=SampleSetupScript.sample_file)
             self.incident_energy_guess = BaseScriptElement.getStringElement(instrument_dom,
                                                                             "incident_energy_guess",
