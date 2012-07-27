@@ -508,9 +508,9 @@ namespace MDEvents
    * 
    */
   TMDE(
-  void MDEventWorkspace)::addAndTraceEvent(const MDE & point)
+  void MDEventWorkspace)::addAndTraceEvent(const MDE & point,size_t index)
   {
-    data->addAndTraceEvent(point);
+    data->addAndTraceEvent(point,index);
   }
 
   //-----------------------------------------------------------------------------------------------

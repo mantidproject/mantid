@@ -325,7 +325,7 @@ void ConvertToMD::exec()
   ConvToMDSelector AlgoSelector;
   m_Convertor  = AlgoSelector.convSelector(m_InWS2D,m_Convertor);
 
-  // initate conversion and estimate amout of job to dl
+  // initate conversion and estimate amout of job to do
   size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper);
   // progress reporter
   m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 

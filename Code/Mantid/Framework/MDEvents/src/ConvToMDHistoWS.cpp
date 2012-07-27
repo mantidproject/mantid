@@ -206,7 +206,8 @@ void ConvToMDHistoWS::estimateThreadWork(size_t nThreads,size_t specSize)
   //if(nSpectras/m_spectraChunk<nThreads)m_spectraChunk=nSpectras/nThreads;
 
   if(m_spectraChunk<1)m_spectraChunk=1;
-
+  // TMP
+  m_spectraChunk = 10;
 
 }
 
