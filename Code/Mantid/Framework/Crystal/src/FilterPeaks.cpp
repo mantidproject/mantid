@@ -8,7 +8,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace {
-  double HKL(const Mantid::DataObjects::Peak & p)
+  double HKLSum(const Mantid::DataObjects::Peak & p)
   {
     return p.getH() + p.getK() + p.getL();
   }
@@ -110,7 +110,7 @@ namespace Crystal
     const std::string FilterVariable = getProperty("FilterVariable");
     double (*variable)(const Mantid::DataObjects::Peak &);
     if ( FilterVariable == "H+K+L" )
-      variable = &HKL;
+      variable = &HKLSum;
     else if ( FilterVariable == "H2+K2+L2" )
       variable = &HKL2;
     else if ( FilterVariable == "Intensity" )
