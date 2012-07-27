@@ -108,7 +108,7 @@ namespace Crystal
     // TODO: Refactor to avoid all the else-ifs and multiple edits required on adding new variables
 
     const std::string FilterVariable = getProperty("FilterVariable");
-    double (*variable)(const Mantid::DataObjects::Peak &);
+    double (*variable)(const Mantid::DataObjects::Peak &) = 0;
     if ( FilterVariable == "H+K+L" )
       variable = &HKLSum;
     else if ( FilterVariable == "H2+K2+L2" )
@@ -123,7 +123,7 @@ namespace Crystal
 
     for ( int i = 0; i < inputWS->getNumberPeaks(); ++i )
     {
-      bool pass;
+      bool pass(false);
       const Peak& currentPeak = inputWS->getPeak(i);
       const double currentValue = variable(currentPeak);
 
