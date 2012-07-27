@@ -56,6 +56,15 @@ namespace Kernel
     }
 
     /**
+     * Comparator for set that holds instrument names in Parser.
+     */
+    class MANTID_KERNEL_DLL ReverseCaselessCompare
+    {
+    public:
+      bool operator()(const std::string & a, const std::string & b);
+    };
+
+    /**
       This class takes a string representing multiple files and parses it into
       a vector of vectors of file names.  Filenames to be added are placed in the
       same sub vectors.
@@ -63,10 +72,13 @@ namespace Kernel
       The string to parse should be of the format [dir][inst][under][runs][ext], where:
 
       [dir]   (Optional) = The OS-specific file directory, e.g. "c:\data\"
-      [inst]  (Required) = The instrument name, e.g. "IRS" or "PG3"
+      [inst]  (Optional) = The instrument name, e.g. "IRS" or "PG3".  If none provided then use default.
       [under] (Optional) = An underscore.
       [runs]  (Required) = The run numbers, e.g. "0102, 0110-0115, 0120, 0130:0140:2"
       [ext]   (Optional) = The file extension, e.g. ".raw"
+
+      NOTE: This parser does not parse strings of the form:
+            [dir][inst][under][runs][ext],[dir][inst][under][runs][ext]
     */
     class MANTID_KERNEL_DLL Parser
     {
@@ -110,6 +122,8 @@ namespace Kernel
       std::string m_dirString, m_instString, m_underscoreString, m_runString, m_extString;
       /// The instrument-specific run zero padding value.
       int m_zeroPadding;
+      /// All the valid instrument names.
+      std::set<std::string, ReverseCaselessCompare> m_validInstNames;
     };
 
     /**

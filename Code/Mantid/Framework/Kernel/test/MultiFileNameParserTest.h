@@ -185,31 +185,32 @@ public:
 
   void test_errorThrownWhenPassedUnexpectedChar()
   {
+    std::string message = "Non-numeric or otherwise unaccetable character(s) detected.";
     TS_ASSERT_THROWS_EQUALS(parseMultiRunString("#"),
       const std::runtime_error & re,
       std::string(re.what()),
-      "Non-numeric or otherwise unaccetable character(s) detected.");
+      message);
     TS_ASSERT_THROWS_EQUALS(parseMultiRunString("a"),
       const std::runtime_error & re,
       std::string(re.what()),
-      "Non-numeric or otherwise unaccetable character(s) detected.");
+      message);
     TS_ASSERT_THROWS_EQUALS(parseMultiRunString("Z"),
       const std::runtime_error & re,
       std::string(re.what()),
-      "Non-numeric or otherwise unaccetable character(s) detected.");
+      message);
     TS_ASSERT_THROWS_EQUALS(parseMultiRunString("("),
       const std::runtime_error & re,
       std::string(re.what()),
-      "Non-numeric or otherwise unaccetable character(s) detected.");
+      message);
     TS_ASSERT_THROWS_EQUALS(parseMultiRunString(">"),
       const std::runtime_error & re,
       std::string(re.what()),
-      "Non-numeric or otherwise unaccetable character(s) detected.");
+      message);
     
     TS_ASSERT_THROWS_EQUALS(parseMultiRunString("1012-n1059:5"),
       const std::runtime_error & re,
       std::string(re.what()),
-      "Non-numeric or otherwise unaccetable character(s) detected.");
+      message);
   }
 
   void test_errorThrownOnEmptyToken()

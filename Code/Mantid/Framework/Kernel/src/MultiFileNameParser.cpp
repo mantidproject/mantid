@@ -4,6 +4,7 @@
 #include "MantidKernel/MultiFileNameParser.h"
 
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Exception.h"
 
@@ -67,7 +68,7 @@ namespace Kernel
       std::vector<std::vector<unsigned int> > generateRange(unsigned int from, unsigned int to, unsigned int stepSize, bool addRuns);
       void validateToken(const std::string & token);
       bool matchesFully(const std::string & stringToMatch, const std::string & regexString);
-      std::string getMatchingString(const std::string & regexString, const std::string & toParse);
+      std::string getMatchingString(const std::string & regexString, const std::string & toParse, bool caseless = false);
       std::string pad(std::string run, unsigned int padLength);
 
       std::set< std::pair<unsigned int, unsigned int> > & mergeAdjacentRanges(
@@ -160,6 +161,26 @@ namespace Kernel
       // Return the suggested ws name.
       return parser.instString() + parser.underscoreString() + toString(runs);
     }
+    
+    /////////////////////////////////////////////////////////////////////////////
+    // Comparator class.
+    /////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Comparator for the set that holds instrument names in Parser.  This is reversed
+     * since we want to come across the longer instrument names first.  It is caseless
+     * so we don't get "inst" coming before "INSTRUMENT" - though this is probably overkill.
+     */
+    bool ReverseCaselessCompare::operator()(const std::string & a, const std::string & b)
+    {
+      std::string lowerA(a);
+      std::string lowerB(b);
+
+      std::transform(lowerA.begin(), lowerA.end(), lowerA.begin(), tolower);
+      std::transform(lowerB.begin(), lowerB.end(), lowerB.begin(), tolower);
+
+      return lowerA > lowerB;
+    }
 
     /////////////////////////////////////////////////////////////////////////////
     // Public member functions of Parser class.
@@ -168,8 +189,25 @@ namespace Kernel
     /// Constructor.
     Parser::Parser() :
       m_runs(), m_fileNames(), m_multiFileName(), m_dirString(), m_instString(), 
-      m_underscoreString(), m_runString(), m_extString(), m_zeroPadding()
-    {}
+      m_underscoreString(), m_runString(), m_extString(), m_zeroPadding(), m_validInstNames()
+    {
+      ConfigServiceImpl & config = ConfigService::Instance();
+
+      std::vector<std::string> allFacilityNames;
+      boost::split(
+        allFacilityNames,
+        config.getString("supported.facilities"),
+        boost::is_any_of(";"));
+
+      for( auto facilityName = allFacilityNames.begin(); facilityName != allFacilityNames.end(); ++facilityName )
+      {
+        const FacilityInfo & facility = config.getFacility(*facilityName);
+        const std::vector<InstrumentInfo> instruments = facility.instruments();
+
+        for( auto instrument = instruments.begin(); instrument != instruments.end(); ++instrument )
+          m_validInstNames.insert(instrument->shortName());
+      }
+    }
     
     /// Destructor.
     Parser::~Parser()
@@ -261,42 +299,48 @@ namespace Kernel
       std::string base = m_multiFileName.substr(
         m_dirString.size(), m_multiFileName.size() - (m_dirString.size() + m_extString.size()));
 
-      // Get the instrument name using a regex.
-      m_instString = getMatchingString("^" + Regexs::INST, base);
+      if( base.empty() )
+        throw std::runtime_error("There does not appear to be any runs present.");
 
-      if(m_instString.empty())
+      // If there is only a list of runs, then we need to use the default instrument.
+      if( matchesFully(base, Regexs::LIST) )
       {
-        // Use default instrument name if one is not found.
+        m_runString = base;
         m_instString = ConfigService::Instance().getString("default.instrument");
 
-        // The run string is now what's left.  Throw if nothing found since runs are required.
-        m_runString = base;
-        if(m_runString.empty())
-          throw std::runtime_error("There does not appear to be any runs present.");
+        // Do the files of the default instrument have an underscore?
+        InstrumentInfo instInfo = ConfigService::Instance().getInstrument(m_instString);
+        m_underscoreString = instInfo.delimiter();
       }
       else
       {
+        // At this point, if we have a valid and parsable run string, then what remains must be
+        // one of the available instrument names followed by a possible underscore and a list of runs.
+        for( auto instName = m_validInstNames.begin(); instName != m_validInstNames.end(); ++instName )
+        {
+          if(matchesFully(base, *instName + ".*"))
+          {
+            m_instString = getMatchingString("^" + *instName, base, true); // Caseless.
+            break;
+          }
+        }
+
+        if( m_instString.empty() )
+          throw std::runtime_error("There does not appear to be a valid instrument name present.");
+
         // Check for an underscore after the instrument name.
-        size_t underscore = base.find_first_of("_");
+        size_t underscore = base.find_last_of("_");
         if(underscore == m_instString.size())
           m_underscoreString = "_";
 
-        // We can now deduce the run string.  Throw if not found since this runs are required.
+        // We can now deduce the run string.  Throw if not found since runs are required.
         m_runString = base.substr(m_underscoreString.size() + m_instString.size());
-        if(m_instString.empty())
+        if(m_runString.empty())
           throw std::runtime_error("There does not appear to be any runs present.");
       }
-      
-      // Get zero padding of instrument. If throws then instrument does not exist.
-      try
-      {
-        InstrumentInfo instInfo = ConfigService::Instance().getInstrument(m_instString);
-        m_zeroPadding = instInfo.zeroPadding();
-      }
-      catch (const Exception::NotFoundError &)
-      {
-        throw std::runtime_error("There does not appear to be a valid instrument name present.");
-      }
+
+      InstrumentInfo instInfo = ConfigService::Instance().getInstrument(m_instString);
+      m_zeroPadding = instInfo.zeroPadding();
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -640,12 +684,22 @@ namespace Kernel
        *
        * @returns the part (if any) of the given string that matches the given regex
        */
-      std::string getMatchingString(const std::string & regexString, const std::string & toParse)
+      std::string getMatchingString(const std::string & regexString, const std::string & toParse, bool caseless)
       {
+        boost::regex regex;
+        if( caseless )
+        {
+          regex = boost::regex(regexString, boost::regex::icase);
+        }
+        else
+        {
+          regex = boost::regex(regexString);
+        }
+
         boost::sregex_iterator it(
-          toParse.begin(), toParse.end(), 
-          boost::regex(regexString)
-        );
+            toParse.begin(), toParse.end(), 
+            regex
+            );
 
         if(it == boost::sregex_iterator())
           return "";
