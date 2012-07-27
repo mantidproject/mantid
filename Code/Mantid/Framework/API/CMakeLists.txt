@@ -44,6 +44,7 @@ set ( SRC_FILES
 	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
 	src/IMDWorkspace.cpp
+	src/ImmutableCompositeFunction.cpp
 	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
@@ -160,6 +161,7 @@ set ( INC_FILES
 	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDIterator.h
 	inc/MantidAPI/IMDWorkspace.h
+	inc/MantidAPI/ImmutableCompositeFunction.h
 	inc/MantidAPI/IPeak.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
@@ -250,6 +252,7 @@ set ( TEST_FILES
 	test/IFunctionMDTest.h
 	test/ILiveListenerTest.h
 	test/IMDWorkspaceTest.h
+	test/ImmutableCompositeFunctionTest.h
 	test/ISpectrumTest.h
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
