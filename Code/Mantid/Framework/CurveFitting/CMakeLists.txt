@@ -55,7 +55,6 @@ set ( SRC_FILES
 	src/ProductLinearExp.cpp
 	src/ProductQuadraticExp.cpp
 	src/Quadratic.cpp
-	src/QuadraticBackground.cpp
 	src/Resolution.cpp
 	src/SeqDomain.cpp
 	src/SimplexMinimizer.cpp
@@ -137,7 +136,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ProductLinearExp.h
 	inc/MantidCurveFitting/ProductQuadraticExp.h
 	inc/MantidCurveFitting/Quadratic.h
-	inc/MantidCurveFitting/QuadraticBackground.h
 	inc/MantidCurveFitting/Resolution.h
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
@@ -201,7 +199,6 @@ set ( TEST_FILES
 	test/ProductFunctionTest.h
 	test/ProductLinearExpTest.h
 	test/ProductQuadraticExpTest.h
-	test/QuadraticBackgroundTest.h
 	test/QuadraticTest.h
 	test/ResolutionTest.h
 	test/SimplexTest.h

@@ -1,6 +1,6 @@
 #include "MantidCurveFitting/ProductQuadraticExp.h"
 #include "MantidCurveFitting/ExpDecay.h"
-#include "MantidCurveFitting/QuadraticBackground.h"
+#include "MantidCurveFitting/Quadratic.h"
 #include "MantidCurveFitting/ProductFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 

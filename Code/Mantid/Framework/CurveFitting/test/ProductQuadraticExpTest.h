@@ -5,7 +5,7 @@
 
 #include "MantidCurveFitting/ProductQuadraticExp.h"
 #include "MantidCurveFitting/ExpDecay.h"
-#include "MantidCurveFitting/QuadraticBackground.h"
+#include "MantidCurveFitting/Quadratic.h"
 #include "MantidCurveFitting/ProductFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidAPI/FunctionDomain1D.h" 
@@ -59,7 +59,7 @@ private:
     func.setParameter("Lifetime", Lifetime);
 
     // Create the equivalent Product Function
-    IFunction_sptr quadraticFunction = boost::make_shared<QuadraticBackground>();
+    IFunction_sptr quadraticFunction = boost::make_shared<Quadratic>();
     quadraticFunction->initialize();
     quadraticFunction->setParameter("A0", A0);
     quadraticFunction->setParameter("A1", A1);

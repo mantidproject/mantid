@@ -291,7 +291,7 @@ namespace Algorithms
 
     // create the background
     auto backFunc =
-        API::FunctionFactory::Instance().createFunction("QuadraticBackground");
+        API::FunctionFactory::Instance().createFunction("Quadratic");
     if (isRaw)
     {
       std::string paramName;
