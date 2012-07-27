@@ -255,9 +255,9 @@ void SaveFocusedXYE::writeMAUDHeaders(std::ostream& os,Mantid::API::MatrixWorksp
 {
   os << "#C  " << workspace->getTitle() << std::endl;
   os << "#C  " << workspace->getInstrument()->getName() << workspace->getRunNumber() << std::endl;
-  os << "#A  OMEGA       0.00" << std::endl;
+  os << "#A  OMEGA      90.00" << std::endl;
   os << "#A  CHI         0.00" << std::endl;
-  os << "#A  PHI         0.00" << std::endl;
+  os << "#A  PHI       -90.00" << std::endl;
   os << "#A  ETA         0.00" << std::endl;
 }
 

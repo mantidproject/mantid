@@ -90,6 +90,8 @@ public:
   /// This method returns true if the group is empty (no member workspace)
   bool isEmpty() const;
   bool areNamesSimilar() const;
+  /// Posts a notification informing the ADS observers that group was modified
+  void updated() const;
  
 
 private:
@@ -102,7 +104,6 @@ private:
   /// Observer for workspace delete notfications
   Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
   /// The list of workspace pointers in the group
-  //std::vector<std::string> m_wsNames;
   std::vector<Workspace_sptr> m_workspaces;
   /// Flag as to whether the observers have been added to the ADS
   bool m_observingADS;

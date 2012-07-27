@@ -71,6 +71,7 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
   if ( it == m_workspaces.end() )
   {
     m_workspaces.push_back( workspace );
+    updated();
   }
   else
   {
@@ -156,6 +157,7 @@ void WorkspaceGroup::remove(const std::string& wsName)
       break;
     }
   }
+  updated();
 }
 
 /// Removes all members of the group from the group AND from the AnalysisDataService
@@ -240,6 +242,25 @@ bool WorkspaceGroup::areNamesSimilar() const
   return true;
 }
 
+//------------------------------------------------------------------------------
+/**
+ * If the group observes the ADS it will send the GroupUpdatedNotification.
+ */
+void WorkspaceGroup::updated() const
+{
+  if ( m_observingADS )
+  {
+    try
+    {
+      AnalysisDataService::Instance().notificationCenter.postNotification(
+        new GroupUpdatedNotification( name() ));
+    }
+    catch( ... )
+    {
+      // if this workspace is not in the ADS do nothing
+    }
+  }
+}
 
 } // namespace API
 } // namespace Mantid

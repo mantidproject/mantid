@@ -17,6 +17,12 @@ namespace Mantid
 namespace API
 {
 
+//----------------------------------------------------------------------
+// Forward declaration
+//----------------------------------------------------------------------
+
+class WorkspaceGroup;
+
 /** The Analysis data service stores instances of the Workspace objects and
     anything that derives from template class DynamicFactory<Mantid::Kernel::IAlgorithm>.
     This is the primary data service that
@@ -78,6 +84,19 @@ class DLLExport AnalysisDataServiceImpl : public Kernel::DataService<API::Worksp
       UnGroupingWorkspaceNotification(const std::string& name,const boost::shared_ptr<Workspace> &obj) : 
         DataServiceNotification(name,obj) {}
     };
+
+    /// GroupWorkspaces notification is send when a group is updated by adding or removing members.
+    /// Disable observing the ADS by a group (WorkspaceGroup::observeADSNotifications(false)) 
+    /// to prevent sending this notification.
+    class GroupUpdatedNotification: public DataServiceNotification
+    {
+    public:
+      /// Constructor
+      GroupUpdatedNotification(const std::string& name);
+      /// Returns the workspace pointer cast to WorkspaceGroup
+      boost::shared_ptr<const WorkspaceGroup> getWorkspaceGroup() const;
+    };
+
     //@}
 
  public:
@@ -161,6 +180,9 @@ typedef const Poco::AutoPtr<AnalysisDataServiceImpl::GroupWorkspacesNotification
 
 typedef AnalysisDataServiceImpl::UnGroupingWorkspaceNotification WorkspaceUnGroupingNotification;
 typedef const Poco::AutoPtr<AnalysisDataServiceImpl::UnGroupingWorkspaceNotification>& WorkspaceUnGroupingNotification_ptr;
+
+typedef AnalysisDataServiceImpl::GroupUpdatedNotification GroupUpdatedNotification;
+typedef const Poco::AutoPtr<AnalysisDataServiceImpl::GroupUpdatedNotification>& GroupUpdatedNotification_ptr;
 
 
 } // Namespace API

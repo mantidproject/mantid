@@ -101,8 +101,11 @@ void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
 
   m_viewport->issueGL();
 
-  //glClearColor(GLclampf(bgColor.red()/255.0),GLclampf(bgColor.green()/255.0),GLclampf(bgColor.blue()/255.0),1.0);
+  // fill the buffer with background colour
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  // if actor is undefined leave it with clear screen
+  if ( !m_instrActor ) return;
 
   // Reset the rendering options just in case
   glMatrixMode(GL_MODELVIEW);
@@ -111,12 +114,10 @@ void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
   // Issue the rotation, translation and zooming of the trackball to the object
   m_trackball->IssueRotation();
   
-  //glPushMatrix();
   QApplication::setOverrideCursor(Qt::WaitCursor);
 
   if (m_viewChanged)
   {
-    //m_actor3D.update();
     m_viewChanged = false;
   }
   m_instrActor->draw(picking);
@@ -135,7 +136,7 @@ void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
   }
 
   QApplication::restoreOverrideCursor();
-  //glPopMatrix();
+
   OpenGLError::check("GL3DWidget::draw3D()");
 }
 

@@ -4,15 +4,35 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidTestHelpers/FakeObjects.h"
+
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
-#include "MantidAPI/WorkspaceGroup.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
+
+class WorkspaceGroupTest_WorkspaceGroupObserver
+{
+  Poco::NObserver<WorkspaceGroupTest_WorkspaceGroupObserver, Mantid::API::GroupUpdatedNotification> m_workspaceGroupUpdateObserver;
+public:
+  bool received;
+  WorkspaceGroupTest_WorkspaceGroupObserver():
+    m_workspaceGroupUpdateObserver(*this,&WorkspaceGroupTest_WorkspaceGroupObserver::handleWorkspaceGroupUpdate),
+    received(false)
+  {
+    AnalysisDataService::Instance().notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
+  }
+  //handles notification send by a WorkspaceGroup instance
+  void handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr pNf)
+  {
+    received = true;
+  }
+};
 
 class WorkspaceGroupTest : public CxxTest::TestSuite
 {
@@ -138,6 +158,46 @@ public:
     group->add("different_name");
     TS_ASSERT( !group->areNamesSimilar() );
     
+    AnalysisDataService::Instance().clear();
+  }
+
+  void testUpdated()
+  {
+    WorkspaceGroupTest_WorkspaceGroupObserver observer;
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    AnalysisDataService::Instance().add( "group", group );
+    TS_ASSERT( !observer.received );
+
+    boost::shared_ptr<WorkspaceTester> ws(new WorkspaceTester());
+    ws->initialize(2,3,4);
+    AnalysisDataService::Instance().addOrReplace("name_0", ws);
+
+    ws.reset(new WorkspaceTester());
+    ws->initialize(2,3,4);
+    AnalysisDataService::Instance().addOrReplace("name_12", ws);
+
+    group->add( "name_0" );
+    TS_ASSERT( observer.received );
+    observer.received = false;
+
+    group->observeADSNotifications( false );
+
+    group->add( "name_12" );
+    TS_ASSERT( !observer.received );
+    observer.received = false;
+
+    group->observeADSNotifications( true );
+
+    group->remove( "name_12" );
+    TS_ASSERT( observer.received );
+    observer.received = false;
+
+    group->observeADSNotifications( false );
+
+    group->remove( "name_0" );
+    TS_ASSERT( !observer.received );
+    observer.received = false;
+
     AnalysisDataService::Instance().clear();
   }
 

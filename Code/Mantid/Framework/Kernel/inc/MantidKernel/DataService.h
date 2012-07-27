@@ -419,6 +419,21 @@ public:
     return names;
   }
 
+  /// Get a vector of the pointers to the data objects stored by the service
+  std::vector< boost::shared_ptr<T> > getObjects() const
+  {
+    // Make DataService access thread-safe
+    Poco::Mutex::ScopedLock _lock(m_mutex);
+
+    std::vector< boost::shared_ptr<T> > objects;
+    objects.reserve( size() );
+    for(auto it = datamap.begin(); it != datamap.end(); ++it)
+    {
+      objects.push_back( it->second );
+    }
+    return objects;
+  }
+
   /// returns true if the InvisibleWorkspaces option set
   bool isInvisbleWorkspaceOptionsSet()
   {

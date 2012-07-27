@@ -83,6 +83,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
   m_renameObserver(*this,&MantidUI::handleRenameWorkspace),
   m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
   m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
+  m_workspaceGroupUpdateObserver(*this,&MantidUI::handleWorkspaceGroupUpdate),
   m_appWindow(aw), m_vatesSubWindow(NULL),
   g_log(Mantid::Kernel::Logger::get("MantidUI"))
 {
@@ -172,6 +173,7 @@ void MantidUI::init()
   AnalysisDataService::Instance().notificationCenter.addObserver(m_renameObserver);
   AnalysisDataService::Instance().notificationCenter.addObserver(m_groupworkspacesObserver);
   AnalysisDataService::Instance().notificationCenter.addObserver(m_ungroupworkspaceObserver);
+  AnalysisDataService::Instance().notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
 
   // Now that the framework is initialized we need to populate the algorithm tree
   m_exploreAlgorithms->update();
@@ -286,6 +288,7 @@ MantidUI::~MantidUI()
 
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_groupworkspacesObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_ungroupworkspaceObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_workspaceGroupUpdateObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
@@ -1798,6 +1801,12 @@ void MantidUI::handleGroupWorkspaces(Mantid::API::WorkspacesGroupedNotification_
 void MantidUI::handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf)
 {
   emit workspace_ungrouped(QString::fromStdString(pNf->object_name()), pNf->object());
+}
+
+void MantidUI::handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr pNf)
+{
+  QString name = QString::fromStdString(pNf->object_name());
+  emit workspace_group_updated( name );
 }
 
 void MantidUI::logMessage(const Poco::Message& msg)

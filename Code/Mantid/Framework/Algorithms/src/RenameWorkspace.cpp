@@ -78,6 +78,8 @@ bool RenameWorkspace::processGroups()
   // Basically we rename if the members ALL follow the pattern GroupName_1, _2, _3 etc.
   const bool renameMembers = inputGroup->areNamesSimilar();
 
+  AnalysisDataService::Instance().rename(inputwsName, outputwsName);
+
   // If necessary, go through group members calling the algorithm on each one
   if ( renameMembers )
   {
@@ -105,8 +107,6 @@ bool RenameWorkspace::processGroups()
       }
     }
   }
-
-  AnalysisDataService::Instance().rename(inputwsName, outputwsName);
 
   // We finished successfully.
   setExecuted(true);

@@ -68,6 +68,7 @@ private slots:
   void unrollWorkspaceGroup(const QString &,Mantid::API::Workspace_sptr);
   void removeWorkspaceEntry(const QString &);
   void renameWorkspaceEntry(const QString &, const QString&);
+  void updateWorkspaceGroup(const QString &);
   void treeSelectionChanged();
   void groupingButtonClick();
   void plotSpectra();
@@ -101,6 +102,7 @@ private:
   bool isInvisibleWorkspaceOptionSet();
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
+  void findAbandonedWorkspaces();
   
 protected:
   MantidTreeWidget * m_tree;

@@ -1,7 +1,11 @@
 #include "MantidDock.h"
 #include "MantidUI.h"
+#include "MantidMatrix.h"
 #include "../ApplicationWindow.h"
 #include "../pixmaps.h"
+#include "MantidWSIndexDialog.h"
+#include "FlowLayout.h"
+
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/MemoryManager.h>
 #include <MantidAPI/IEventWorkspace.h>
@@ -10,9 +14,14 @@
 #include <MantidAPI/IMDWorkspace.h>
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include <MantidAPI/FileProperty.h>
+#include "MantidAPI/ExperimentInfo.h"
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
+#include <MantidGeometry/Crystal/OrientedLattice.h>
 #include <MantidQtAPI/InterfaceManager.h>
-#include "MantidMatrix.h"
+
+#include <Poco/Path.h>
+#include <boost/algorithm/string.hpp>
+
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QTextEdit>
@@ -28,19 +37,13 @@
 #include <QSignalMapper>
 #include <QtGui>
 
-#include "MantidWSIndexDialog.h"
-#include "FlowLayout.h"
-
 #include <map>
 #include <vector>
 #include <iostream>
 #include <sstream>
-#include <MantidGeometry/Crystal/OrientedLattice.h>
-#include "MantidAPI/ExperimentInfo.h"
 #include <iomanip>
 #include <cstdio>
-#include <Poco/Path.h>
-#include <boost/algorithm/string.hpp>
+#include <algorithm>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -154,6 +157,9 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
 
   connect(m_mantidUI, SIGNAL(workspace_renamed(const QString &,const QString &)),
     this, SLOT(renameWorkspaceEntry(const QString &,const QString &)),Qt::QueuedConnection);
+
+  connect(m_mantidUI, SIGNAL(workspace_group_updated(const QString&)),
+    this, SLOT(updateWorkspaceGroup(const QString&)),Qt::QueuedConnection);
 
   connect(m_mantidUI, SIGNAL(workspaces_cleared()), m_tree, SLOT(clear()),Qt::QueuedConnection);
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
@@ -850,61 +856,106 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
  */
 void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QString& new_name)
 {
-  //This will only ever be of size zero or one
-  QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name,Qt::MatchFixedString);
-  QList<QTreeWidgetItem *> new_name_matches = m_tree->findItems(new_name,Qt::MatchFixedString);
-  QTreeWidgetItem *parent_item(NULL);
-  if( name_matches.isEmpty() )
-  {	 
-    //   if there are  no toplevel items in three matching the workspace name ,loop through
-    //  all child elements 
-    int topitemCounts = m_tree->topLevelItemCount();
-    for (int index = 0; index < topitemCounts; ++index)
-    {
-      QTreeWidgetItem* topItem = m_tree->topLevelItem(index);
-      if(!topItem)
-      {
-        return;
-      }
-      int childCounts=topItem->childCount();
-      for(int chIndex=0;chIndex<childCounts;++chIndex)
-      {
-        QTreeWidgetItem* childItem= topItem->child(chIndex);
-        if(!childItem)
-        {
-          return;
-        }
-        // find item for the workspace that was renamed
-        if(!ws_name.compare(childItem->text(0)))
-        {
-		      parent_item = topItem;
-          childItem->setText(0, new_name);
-        }
-        // if the workspace with new name exists before renaming
-        // it will be removed
-        else if(!new_name.compare(childItem->text(0)))
-        {
-          topItem->takeChild(chIndex);
-        }
-      }
-    }
-    if( parent_item && parent_item->isExpanded() )
-    {
-      populateChildData(parent_item);
-    }
-  }
-  else
+  removeWorkspaceEntry( ws_name );
+  try
   {
-    name_matches[0]->setText(0, new_name);
-    if ( !new_name_matches.isEmpty() )
-    {
-      m_tree->takeTopLevelItem(m_tree->indexOfTopLevelItem(new_name_matches[0]));
-    }
+    auto workspace = Mantid::API::AnalysisDataService::Instance().retrieve(new_name.toStdString());
+    addTreeEntry( new_name, workspace );
   }
-
+  catch( ... )
+  {
+  }
 }
 
+/**
+ * Update the widget following an update of a workspace group.
+ * @param group_name :: The name of the updated workspace group.
+ */
+void MantidDockWidget::updateWorkspaceGroup(const QString & group_name)
+{
+  auto group_item = m_tree->findItems( group_name, Qt::MatchFixedString );
+  auto group = Mantid::API::WorkspaceGroup_sptr();
+  if ( Mantid::API::AnalysisDataService::Instance().doesExist( group_name.toStdString() ) )
+  {
+    group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
+      Mantid::API::AnalysisDataService::Instance().retrieve(group_name.toStdString()));
+  }
+  if ( !group_item.isEmpty() )
+  {
+    auto item = group_item[0];
+    if ( !group )
+    {
+      // group isn't in the ADS, remove its item from the widget
+      m_tree->takeTopLevelItem( m_tree->indexOfTopLevelItem( item ) );
+    }
+    else
+    {
+      // remove and re-insert the group item
+      removeWorkspaceEntry( group_name );
+      addTreeEntry( group_name, group );
+    }
+  }
+  else if ( group )
+  {
+    // we missed it
+    addTreeEntry( group_name, group );
+  }
+  // clean up
+  findAbandonedWorkspaces();
+}
 
+/**
+ * Finds mismatches between the ADS and the contents of the widget and fixes them.
+ */
+void MantidDockWidget::findAbandonedWorkspaces()
+{
+  // find all top-level item names in the widget
+  QStringList topItems;
+  int n = m_tree->topLevelItemCount();
+  for( int i = 0; i < n; ++i )
+  {
+    topItems.append( m_tree->topLevelItem(i)->text(0) );
+  }
+  // list of all workspaces in the ADS
+  auto workspaces = Mantid::API::AnalysisDataService::Instance().getObjects();
+  // find all groups, remove their members from workspaces
+  for( auto ws = workspaces.begin(); ws != workspaces.end(); ++ws )
+  {
+    if ( !(*ws) ) continue;
+    if ( auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>( *ws ) )
+    {
+      size_t n = static_cast<size_t>( group->getNumberOfEntries() );
+      for(size_t i = 0; i < n; ++i)
+      {
+        auto it = std::find(workspaces.begin(), workspaces.end(), group->getItem( i ));
+        if ( it != workspaces.end() )
+        {
+          it->reset();
+        }
+      }
+    }
+  }
+  // now workspaces contains only top-level items
+  for( auto ws = workspaces.begin(); ws != workspaces.end(); ++ws )
+  {
+    if ( !(*ws) ) continue;
+    QString qName = QString::fromStdString( (**ws).name() );
+    auto item = m_tree->findItems( qName, Qt::MatchFixedString );
+    if ( item.isEmpty() )
+    {
+      addTreeEntry( qName, *ws );
+    }
+    else
+    {
+      topItems.remove( qName );
+    }
+  }
+  // if there are some names left in topItems - remove them
+  foreach( QString qName, topItems )
+  {
+    removeWorkspaceEntry( qName );
+  }
+}
 
 /**
  * Add the actions that are appropriate for a MatrixWorkspace

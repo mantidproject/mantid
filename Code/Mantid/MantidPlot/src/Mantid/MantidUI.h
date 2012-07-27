@@ -301,6 +301,7 @@ signals:
   void workspace_renamed(const QString &, const QString &);
   void workspaces_grouped(const QStringList&);
   void workspace_ungrouped(const QString&, Mantid::API::Workspace_sptr);
+  void workspace_group_updated(const QString&);
 
   void needToCreateLoadDAEMantidMatrix(const QString&);
 
@@ -469,6 +470,10 @@ private:
   //handles notification send by UnGroupworkspaces algorithm 
   void handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf);
   Poco::NObserver<MantidUI, Mantid::API::WorkspaceUnGroupingNotification> m_ungroupworkspaceObserver;
+
+  //handles notification send by a WorkspaceGroup instance
+  void handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr pNf);
+  Poco::NObserver<MantidUI, Mantid::API::GroupUpdatedNotification> m_workspaceGroupUpdateObserver;
 
   //#678
   //for savenexus algorithm

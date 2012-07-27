@@ -304,7 +304,6 @@ InstrumentWindow::~InstrumentWindow()
 void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax)
 {
   // Previously in (now removed) setWorkspaceName method
-  m_InstrumentDisplay->makeCurrent(); // ?
   m_instrumentActor = new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax);
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
@@ -842,6 +841,7 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
       }
 
       delete m_instrumentActor;
+      m_instrumentActor = NULL;
     }
     init( resetGeometry, autoscaling, scaleMin, scaleMax );
     updateWindow();

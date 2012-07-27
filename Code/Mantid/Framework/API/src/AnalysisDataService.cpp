@@ -8,6 +8,25 @@ namespace Mantid
   {
 
     //-------------------------------------------------------------------------
+    // Nested class methods
+    //-------------------------------------------------------------------------
+    /**
+     * Constructor.
+     * @param name :: The name of a workspace group.
+     */
+    AnalysisDataServiceImpl::GroupUpdatedNotification::GroupUpdatedNotification(const std::string& name) : 
+      DataServiceNotification( name, AnalysisDataService::Instance().retrieve( name ) )
+    {
+    }
+    /**
+     * Returns the workspace pointer cast to WorkspaceGroup
+     */
+    boost::shared_ptr<const WorkspaceGroup> AnalysisDataServiceImpl::GroupUpdatedNotification::getWorkspaceGroup() const
+    {
+      return boost::dynamic_pointer_cast<const WorkspaceGroup>( this->object() );
+    }
+
+    //-------------------------------------------------------------------------
     // Public methods
     //-------------------------------------------------------------------------
     /**

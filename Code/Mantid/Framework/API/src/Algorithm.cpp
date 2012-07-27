@@ -1194,6 +1194,7 @@ namespace Mantid
       {
         // Go back to observing ADS in each group.
         outGroups[i]->observeADSNotifications(true);
+        outGroups[i]->updated();
       }
 
       // We finished successfully.
