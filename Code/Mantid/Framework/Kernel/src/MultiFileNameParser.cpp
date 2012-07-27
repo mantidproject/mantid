@@ -193,10 +193,12 @@ namespace Kernel
     {
       ConfigServiceImpl & config = ConfigService::Instance();
 
+      std::string supportedFacilities = config.getString("supported.facilities");
+
       std::vector<std::string> allFacilityNames;
       boost::split(
         allFacilityNames,
-        config.getString("supported.facilities"),
+        supportedFacilities,
         boost::is_any_of(";"));
 
       for( auto facilityName = allFacilityNames.begin(); facilityName != allFacilityNames.end(); ++facilityName )
