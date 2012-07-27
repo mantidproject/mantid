@@ -16,27 +16,10 @@ using namespace Mantid::API;
 
 class MultipleFilePropertyTest : public CxxTest::TestSuite
 {
-private:
-  std::string m_multiFileLoading;
-public: 
-
-  void setUp()
-  {
-    // Make sure that multi file loading is enabled for each test.
-    m_multiFileLoading = Kernel::ConfigService::Instance().getString("loading.multifile");
-    Kernel::ConfigService::Instance().setString("loading.multifile", "On");
-  }
-
-  void tearDown()
-  {
-    // Replace user's preference after the test has run.
-    Kernel::ConfigService::Instance().setString("loading.multifile", m_multiFileLoading);
-  }
-
+public:    
   void test_setValue()
   {
     MultipleFileProperty p("Filename");
-    // REF_L example is important since the instrument has no zero padding value.
     p.setValue("REF_L_32035.nxs, CSP78173.raw");
     std::vector<std::vector<std::string> > filenames = p();
     TS_ASSERT_EQUALS( filenames.size(), 2);
@@ -62,44 +45,13 @@ public:
     TS_ASSERT_EQUALS(fileNames[3].size(), 1);
   }
 
-  void test_failsOnComplexAddition()
-  {
-    MultipleFileProperty p("Filename");
-    p.setValue("MUSR15189:15190+MUSR15189");
-    std::vector<std::vector<std::string>> fileNames = p();
-    TS_ASSERT_EQUALS(fileNames.size(), 0);
-  }
-
-  void test_failsOnBadlyFormedFilename()
-  {
-    MultipleFileProperty p("Filename");
-    p.setValue("MUSR15189,,MUSR15189");
-    std::vector<std::vector<std::string>> fileNames = p();
-    TS_ASSERT_EQUALS(fileNames.size(), 0);
-  }
-
-  void test_multiFileSwitchedOff()
-  {
-    Kernel::ConfigService::Instance().setString("loading.multifile", "Off");
-
-    std::string filename = "_MultipleFilePropertyTest_tempFileWithA+AndA,InTheName.txt";
-
-    Poco::File temp(filename);
-    temp.createFile();
-
-    MultipleFileProperty p("Filename");
-    p.setValue(filename);
-    std::vector<std::vector<std::string>> fileNames = p();
-    TS_ASSERT_EQUALS(fileNames.size(), 1);
-  }
-
   void test_folderWithWhitespace()
   {
     std::string dirPath = "_MultipleFilePropertyTestDummyFolder WithWhiteSpace";
     std::string filename = "TSC99999.raw";
     std::string oldDataSearchDirectories = "";
        
-    // Create a dummy folder with whitespace to use.
+       // Create a dummy folder with whitespace to use.
     Poco::File dir(dirPath);
     dir.createDirectories();
     

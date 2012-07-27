@@ -32,7 +32,7 @@ namespace MantidQt
 
     /// Default constructor
     LoadDialog:: LoadDialog(QWidget *parent) 
-      : API::AlgorithmDialog(parent), m_form(), m_currentFiles(), m_initialHeight(0)
+      : API::AlgorithmDialog(parent), m_form(), m_currentFile(), m_initialHeight(0)
     {
     }
 
@@ -96,7 +96,7 @@ namespace MantidQt
       std::string errMess = getAlgorithm()->getPointerToProperty("Filename")->isValid();
       if ( !errMess.empty() )
       {
-        m_currentFiles = "";
+        m_currentFile = "";
         createDynamicWidgets();
         return;
       }
@@ -135,7 +135,7 @@ namespace MantidQt
       AlgorithmDialog::saveInput();
       //Ensure the filename is store as the full file
       API::AlgorithmInputHistory::Instance().storeNewValue("Load", 
-							   QPair<QString, QString>("Filename", m_currentFiles));
+							   QPair<QString, QString>("Filename", m_currentFile));
     }
 
     /**
@@ -199,13 +199,13 @@ namespace MantidQt
       if( !m_form.fileWidget->isValid() ) return;
       // First step is the get the specific loader that is responsible
       IAlgorithm *loadAlg = getAlgorithm();
-      const QString filenames = m_form.fileWidget->getText();
-      if( filenames == m_currentFiles ) return;
-      m_currentFiles = filenames;
+      const QString filename = m_form.fileWidget->getFirstFilename();
+      if( filename == m_currentFile ) return;
+      m_currentFile = filename;
       removeOldInputWidgets(m_form.propertyLayout); // The new file might be invalid
       try
       {
-        loadAlg->setPropertyValue("Filename", filenames.toStdString());
+        loadAlg->setPropertyValue("Filename", filename.toStdString());
       }
       catch(std::exception & exc)
       {

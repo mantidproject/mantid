@@ -72,7 +72,7 @@ std::string toString(const boost::shared_ptr<T>& value)
 
 /// Specialisation for a property of type std::vector.
 template <typename T>
-std::string toString(const std::vector<T>& value, const std::string & delimiter = ",")
+std::string toString(const std::vector<T>& value)
 {
   std::stringstream result;
   std::size_t vsize = value.size();
@@ -80,15 +80,14 @@ std::string toString(const std::vector<T>& value, const std::string & delimiter 
   {
     result << value[i];
     if (i + 1 != vsize)
-      result << delimiter;
+      result << ",";
   }
   return result.str();
 }
 
 /// Specialisation for a property of type std::vector<std::vector>.
 template <typename T>
-std::string toString(const std::vector<std::vector<T> >& value, const std::string & outerDelimiter = ",", 
-                     const std::string & innerDelimiter = "+")
+std::string toString(const std::vector<std::vector<T> >& value)
 {
   std::stringstream result;
   std::size_t vsize = value.size();
@@ -99,11 +98,11 @@ std::string toString(const std::vector<std::vector<T> >& value, const std::strin
     {
       result << value[i][j];
       if (j + 1 != innervsize)
-        result << innerDelimiter;
+        result << "+";
     }
 
     if (i + 1 != vsize)
-      result << outerDelimiter;
+      result << ",";
   }
   return result.str();
 }
@@ -175,18 +174,18 @@ void toValue(const std::string& strvalue, std::vector<T>& value)
 }
 
 template <typename T>
-void toValue(const std::string& strvalue, std::vector<std::vector<T> >& value, const std::string & outerDelimiter = ",", 
-                     const std::string & innerDelimiter = "+")
+void toValue(const std::string& strvalue, std::vector<std::vector<T> >& value)
 {
+  // Split up comma-separated properties
   typedef Poco::StringTokenizer tokenizer;
-  tokenizer tokens(strvalue, outerDelimiter, tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+  tokenizer tokens(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
 
   value.clear();
   value.reserve(tokens.count());
 
   for (tokenizer::Iterator oIt = tokens.begin(); oIt != tokens.end(); ++oIt)
   {
-    tokenizer values(*oIt, innerDelimiter, tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+    tokenizer values(*oIt, "+", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
     std::vector<T> vect;
 
     for (tokenizer::Iterator iIt = values.begin(); iIt != values.end(); ++iIt)

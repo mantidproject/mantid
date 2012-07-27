@@ -99,7 +99,7 @@ namespace MantidQt
       /// Form
       Ui::LoadDialog m_form;
       /// The current file
-      QString m_currentFiles;
+      QString m_currentFile;
       /// The initial height
       int m_initialHeight;
     };

@@ -93,12 +93,16 @@ namespace Mantid
 					     const API::IDataFileChecker_sptr loader) const;
 
       /// Load a file to into a hidden workspace.
-      API::Workspace_sptr loadFileToWs(const std::string & fileName, const std::string & wsName);
+      API::Workspace_sptr loadFileToHiddenWs(const std::string & fileName, const std::string & wsName);
       /// Plus two workspaces together, "in place".
       API::Workspace_sptr plusWs(API::Workspace_sptr ws1, API::Workspace_sptr ws2);
-      /// Manually group workspaces.
-      API::WorkspaceGroup_sptr groupWsList(std::vector<API::Workspace_sptr> wsList);
-
+      /// Delete a workspace with the given name.
+      void deleteWs(const std::string & wsName);
+      /// Rename a workspace with the given name.
+      void renameWs(const std::string & oldName, const std::string & newName);
+      /// Unhide the given workspace, if it is hidden.
+      void unhideWs(const std::string & wsName);
+      
     private:
       /// The base properties
       std::set<std::string> m_baseProps;
