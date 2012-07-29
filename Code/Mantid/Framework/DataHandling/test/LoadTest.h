@@ -31,7 +31,7 @@ class LoadTest : public CxxTest::TestSuite
 {
 public:
 
-  void xtestViaProxy()
+  void testViaProxy()
   {
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
@@ -50,7 +50,7 @@ public:
     TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), false);
   }
 
-  void xtestPropertyValuesViaProxy()
+  void testPropertyValuesViaProxy()
   {
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
@@ -67,7 +67,7 @@ public:
     TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMax"),"100");
   }
 
-  void xtestSwitchingLoaderViaProxy()
+  void testSwitchingLoaderViaProxy()
   {    
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
@@ -96,7 +96,7 @@ public:
 
   }
 
-  void xtestFindLoader()
+  void testFindLoader()
   {
     Load loader;
     loader.initialize();
@@ -119,7 +119,7 @@ public:
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadRaw");
   }
 
-  void xtestRaw()
+  void testRaw()
   {
     Load loader;
     loader.initialize();
@@ -132,7 +132,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void xtestRawWithOneSpectrum()
+  void testRawWithOneSpectrum()
   {
     Load loader;
     loader.initialize();
@@ -155,7 +155,7 @@ public:
     AnalysisDataService::Instance().remove(outputName);
   }
 
-  void xtestRaw1()
+  void testRaw1()
   {
     Load loader;
     loader.initialize();
@@ -167,7 +167,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void xtestRawGroup()
+  void testRawGroup()
   {
     Load loader;
     loader.initialize();
@@ -184,7 +184,7 @@ public:
 
   }
   
-  void xtestHDF4Nexus()
+  void testHDF4Nexus()
   {
     Load loader;
     loader.initialize();
@@ -196,7 +196,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void x_ARGUS_NXS()
+  void _ARGUS_NXS()
   {
     Load loader;
     loader.initialize();
@@ -205,7 +205,7 @@ public:
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadMuonNexus");
   }
 
-  void xtestHDF4NexusGroup()
+  void testHDF4NexusGroup()
   {
     // Note that there are no 64-bit HDF4 libraries for Windows.
     Load loader;
@@ -221,7 +221,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output_1");
     AnalysisDataService::Instance().remove("LoadTest_Output_2");
   }
-   void xtestISISNexus()
+   void testISISNexus()
   {
     Load loader;
     loader.initialize();
@@ -233,14 +233,14 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void xtestUnknownExt()
+  void testUnknownExt()
   {
     Load loader;
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename","hrpd_new_072_01.cal"));
   }
 
-  void xtestSPE()
+  void testSPE()
   {
     Load loader;
     loader.initialize();
@@ -252,7 +252,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
   
-  void xtestAscii()
+  void testAscii()
   {
     Load loader;
     loader.initialize();
@@ -264,7 +264,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void xtestSpice2D()
+  void testSpice2D()
   {
     Load loader;
     loader.initialize();
@@ -275,7 +275,7 @@ public:
     TS_ASSERT(ws);
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
-  void xtestSNSSpec()
+  void testSNSSpec()
   {
      Load loader;
     loader.initialize();
@@ -287,7 +287,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void xtestGSS()
+  void testGSS()
   {
     Load loader;
     loader.initialize();
@@ -299,7 +299,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-   void xtestRKH()
+   void testRKH()
   {
     Load loader;
     loader.initialize();
@@ -311,7 +311,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void xtest_EventPreNeXus_WithNoExecute()
+  void test_EventPreNeXus_WithNoExecute()
   {
     Load loader;
     loader.initialize();
@@ -320,7 +320,7 @@ public:
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventPreNexus");
   }
 
-  void xtest_SNSEventNeXus_WithNoExecute()
+  void test_SNSEventNeXus_WithNoExecute()
   {
     Load loader;
     loader.initialize();
@@ -329,7 +329,7 @@ public:
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventNexus");
   }
 
-  void xtestDaveGrp()
+  void testDaveGrp()
   {
     Load loader;
     loader.initialize();
@@ -341,7 +341,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void xtestArgusFileLoadingWithIncorrectZeroPadding()
+  void testArgusFileLoadingWithIncorrectZeroPadding()
   {
     Load loader;
     loader.initialize();
@@ -355,7 +355,7 @@ public:
 
   
 
-  void xtestList()
+  void testList()
   {
     Load loader;
     loader.initialize();
@@ -380,7 +380,7 @@ public:
     removeGroupFromADS(output);
   }
 
-  void xtestPlus()
+  void testPlus()
   {
     Load loader;
     loader.initialize();
