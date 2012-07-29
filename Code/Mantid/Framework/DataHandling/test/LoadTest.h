@@ -390,7 +390,7 @@ public:
 
     MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(output);
-    removeGroupFromADS(output);
+    AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
   void testPlusGroupWorkspaces()
