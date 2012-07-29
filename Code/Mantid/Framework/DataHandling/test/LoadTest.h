@@ -390,9 +390,6 @@ public:
 
     WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
     TS_ASSERT(output);
-    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IRS38633_IRS38633_1");
-    TS_ASSERT(ws1);
-    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IRS38633_IRS38633_2");
     removeGroupFromADS(output);
   }
 
@@ -403,8 +400,6 @@ public:
     loader.setPropertyValue("Filename", "MUSR15189+15190.nxs");
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
-
-    std::set<std::string> adsContents = AnalysisDataService::Instance().getObjectNames();
 
     WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
     TS_ASSERT(output);
