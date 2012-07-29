@@ -31,7 +31,7 @@ class LoadTest : public CxxTest::TestSuite
 {
 public:
 
-  void testViaProxy()
+  void xtestViaProxy()
   {
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
@@ -50,7 +50,7 @@ public:
     TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), false);
   }
 
-  void testPropertyValuesViaProxy()
+  void xtestPropertyValuesViaProxy()
   {
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
@@ -67,7 +67,7 @@ public:
     TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMax"),"100");
   }
 
-  void testSwitchingLoaderViaProxy()
+  void xtestSwitchingLoaderViaProxy()
   {    
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
@@ -96,7 +96,7 @@ public:
 
   }
 
-  void testFindLoader()
+  void xtestFindLoader()
   {
     Load loader;
     loader.initialize();
@@ -119,7 +119,7 @@ public:
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadRaw");
   }
 
-  void testRaw()
+  void xtestRaw()
   {
     Load loader;
     loader.initialize();
@@ -132,7 +132,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void testRawWithOneSpectrum()
+  void xtestRawWithOneSpectrum()
   {
     Load loader;
     loader.initialize();
@@ -155,7 +155,7 @@ public:
     AnalysisDataService::Instance().remove(outputName);
   }
 
-  void testRaw1()
+  void xtestRaw1()
   {
     Load loader;
     loader.initialize();
@@ -167,7 +167,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void testRawGroup()
+  void xtestRawGroup()
   {
     Load loader;
     loader.initialize();
@@ -184,7 +184,7 @@ public:
 
   }
   
-  void testHDF4Nexus()
+  void xtestHDF4Nexus()
   {
     Load loader;
     loader.initialize();
@@ -196,7 +196,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void _ARGUS_NXS()
+  void x_ARGUS_NXS()
   {
     Load loader;
     loader.initialize();
@@ -221,7 +221,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output_1");
     AnalysisDataService::Instance().remove("LoadTest_Output_2");
   }
-   void testISISNexus()
+   void xtestISISNexus()
   {
     Load loader;
     loader.initialize();
@@ -233,14 +233,14 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void testUnknownExt()
+  void xtestUnknownExt()
   {
     Load loader;
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename","hrpd_new_072_01.cal"));
   }
 
-  void testSPE()
+  void xtestSPE()
   {
     Load loader;
     loader.initialize();
@@ -252,7 +252,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
   
-  void testAscii()
+  void xtestAscii()
   {
     Load loader;
     loader.initialize();
@@ -264,7 +264,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void testSpice2D()
+  void xtestSpice2D()
   {
     Load loader;
     loader.initialize();
@@ -275,7 +275,7 @@ public:
     TS_ASSERT(ws);
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
-  void testSNSSpec()
+  void xtestSNSSpec()
   {
      Load loader;
     loader.initialize();
@@ -287,7 +287,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void testGSS()
+  void xtestGSS()
   {
     Load loader;
     loader.initialize();
@@ -299,7 +299,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-   void testRKH()
+   void xtestRKH()
   {
     Load loader;
     loader.initialize();
@@ -311,7 +311,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void test_EventPreNeXus_WithNoExecute()
+  void xtest_EventPreNeXus_WithNoExecute()
   {
     Load loader;
     loader.initialize();
@@ -320,7 +320,7 @@ public:
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventPreNexus");
   }
 
-  void test_SNSEventNeXus_WithNoExecute()
+  void xtest_SNSEventNeXus_WithNoExecute()
   {
     Load loader;
     loader.initialize();
@@ -329,7 +329,7 @@ public:
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventNexus");
   }
 
-  void testDaveGrp()
+  void xtestDaveGrp()
   {
     Load loader;
     loader.initialize();
@@ -341,7 +341,7 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void testArgusFileLoadingWithIncorrectZeroPadding()
+  void xtestArgusFileLoadingWithIncorrectZeroPadding()
   {
     Load loader;
     loader.initialize();
@@ -355,7 +355,7 @@ public:
 
   
 
-  void testList()
+  void xtestList()
   {
     Load loader;
     loader.initialize();
@@ -365,22 +365,38 @@ public:
     WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->getNumberOfEntries(),6);
-    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15189_1");
+    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_1");
     TS_ASSERT(ws1);
-    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15189_2");
+    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_2");
     TS_ASSERT(ws2);
-    MatrixWorkspace_sptr ws3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15190_1");
+    MatrixWorkspace_sptr ws3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015190_1");
     TS_ASSERT(ws3);
-    MatrixWorkspace_sptr ws4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15190_2");
+    MatrixWorkspace_sptr ws4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015190_2");
     TS_ASSERT(ws4);
-    MatrixWorkspace_sptr ws5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15191_1");
+    MatrixWorkspace_sptr ws5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015191_1");
     TS_ASSERT(ws5);
-    MatrixWorkspace_sptr ws6 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15191_2");
+    MatrixWorkspace_sptr ws6 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015191_2");
     TS_ASSERT(ws6);
     removeGroupFromADS(output);
   }
 
-  void testPlus()
+  void xtestPlus()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "IRS38633+38633.nxs");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
+    TS_ASSERT(output);
+    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IRS38633_IRS38633_1");
+    TS_ASSERT(ws1);
+    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("IRS38633_IRS38633_2");
+    removeGroupFromADS(output);
+  }
+
+  void testPlusGroupWorkspaces()
   {
     Load loader;
     loader.initialize();
@@ -388,11 +404,13 @@ public:
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
+    std::set<std::string> adsContents = AnalysisDataService::Instance().getObjectNames();
+
     WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
     TS_ASSERT(output);
-    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output_1");
+    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015190_1");
     TS_ASSERT(ws1);
-    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output_2");
+    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015190_2");
     removeGroupFromADS(output);
   }
 
@@ -406,21 +424,21 @@ public:
     WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->getNumberOfEntries(),8);
-    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15189_1");
+    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_1");
     TS_ASSERT(ws1);
-    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15189_2");
+    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_2");
     TS_ASSERT(ws2);
-    MatrixWorkspace_sptr ws3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15190_1");
+    MatrixWorkspace_sptr ws3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015190_1");
     TS_ASSERT(ws3);
-    MatrixWorkspace_sptr ws4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15190_2");
+    MatrixWorkspace_sptr ws4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015190_2");
     TS_ASSERT(ws4);
-    MatrixWorkspace_sptr ws5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15191_1");
+    MatrixWorkspace_sptr ws5 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015191_1");
     TS_ASSERT(ws5);
-    MatrixWorkspace_sptr ws6 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15191_2");
+    MatrixWorkspace_sptr ws6 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015191_2");
     TS_ASSERT(ws6);
-    MatrixWorkspace_sptr ws7 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15192_1");
+    MatrixWorkspace_sptr ws7 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015192_1");
     TS_ASSERT(ws7);
-    MatrixWorkspace_sptr ws8 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15192_2");
+    MatrixWorkspace_sptr ws8 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015192_2");
     TS_ASSERT(ws8);
     removeGroupFromADS(output);
   }
@@ -435,13 +453,13 @@ public:
     WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->getNumberOfEntries(),4);
-    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15189_1");
+    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_1");
     TS_ASSERT(ws1);
-    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15189_2");
+    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_2");
     TS_ASSERT(ws2);
-    MatrixWorkspace_sptr ws3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15191_1");
+    MatrixWorkspace_sptr ws3 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015191_1");
     TS_ASSERT(ws3);
-    MatrixWorkspace_sptr ws4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("15191_2");
+    MatrixWorkspace_sptr ws4 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015191_2");
     TS_ASSERT(ws4);
     removeGroupFromADS(output);
   }
@@ -457,9 +475,9 @@ public:
     WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->getNumberOfEntries(),2);
-    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output_1");
+    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015190_MUSR00015191_MUSR00015192_1");
     TS_ASSERT(ws1);
-    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output_2");
+    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015190_MUSR00015191_MUSR00015192_2");
     TS_ASSERT(ws2);
     removeGroupFromADS(output);
   }
@@ -475,9 +493,9 @@ public:
     WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
     TS_ASSERT(output);
     TS_ASSERT_EQUALS(output->getNumberOfEntries(),2);
-    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output_1");
+    MatrixWorkspace_sptr ws1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015191_1");
     TS_ASSERT(ws1);
-    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output_2");
+    MatrixWorkspace_sptr ws2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MUSR00015189_MUSR00015191_2");
     TS_ASSERT(ws2);
     removeGroupFromADS(output);
   }

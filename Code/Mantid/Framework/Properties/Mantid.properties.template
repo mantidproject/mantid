@@ -180,3 +180,8 @@ filefinder.casesensitive=Off
 # Control which geometry the Instrument View window displays, valid values 
 # are "Default", "Neutronic" or "Physical".
 instrument.view.geometry=Default
+
+# Disabling multifile loading will allow users to load files with "," or "+"
+# in their path, but at the cost of no longer being able to load multiple 
+# files with a single call to Load.
+loading.multifile=On

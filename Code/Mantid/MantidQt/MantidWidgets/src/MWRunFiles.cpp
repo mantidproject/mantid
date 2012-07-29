@@ -134,8 +134,8 @@ void FindFilesThread::run()
 }
 
 /**
-* Create a list of file extensions from the given algorithm property.
-*/
+ * Create a list of files from the given algorithm property.
+ */
 void FindFilesThread::getFilesFromAlgorithm()
 {
   Mantid::API::IAlgorithm_sptr algorithm = Mantid::API::AlgorithmManager::Instance().createUnmanaged(m_algorithm.toStdString());
