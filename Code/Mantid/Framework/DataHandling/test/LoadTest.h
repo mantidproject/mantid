@@ -388,7 +388,7 @@ public:
     loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
     TS_ASSERT_THROWS_NOTHING(loader.execute());
 
-    WorkspaceGroup_sptr output = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LoadTest_Output");
+    MatrixWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
     TS_ASSERT(output);
     removeGroupFromADS(output);
   }
