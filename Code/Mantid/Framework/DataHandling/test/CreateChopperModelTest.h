@@ -61,16 +61,6 @@ public:
     TS_ASSERT_THROWS(alg->setPropertyValue("Parameters", ""), std::invalid_argument);
   }
 
-  void test_Setting_Chopper_Without_Valid_Chopper_Point_Throws()
-  {
-    using namespace Mantid::API;
-    Mantid::API::IAlgorithm_sptr alg = createAlgorithm(m_inputName, "FermiChopperModel");
-
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("Parameters",
-        "AngularVelocity=150,ChopperRadius=0.049,SlitThickness=0.00228,SlitRadius=1.3,Ei=45.0"));
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
-  }
-
   void test_Setting_Valid_Parameter_String_Using_Numerical_Values_Attaches_Chopper_Object()
   {
     runTestWithValidParameters("AngularVelocity=150,ChopperRadius=0.049,SlitThickness=0.00228,SlitRadius=1.3,Ei=45.0");
