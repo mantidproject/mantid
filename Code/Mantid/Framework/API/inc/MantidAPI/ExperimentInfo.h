@@ -10,7 +10,6 @@
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DeltaEMode.h"
 
-#include <auto_ptr.h>
 #include <list>
 
 namespace Mantid
