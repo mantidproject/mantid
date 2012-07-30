@@ -68,7 +68,7 @@ public:
     alg.setPropertyValue("EndWorkspaceIndex","4");
 
     TS_ASSERT_THROWS_NOTHING( alg2.initialize());
-    TS_ASSERT( alg.isInitialized() );
+    TS_ASSERT( alg2.isInitialized() );
 
     // Set the properties
     alg2.setPropertyValue("InputWorkspace","testSpace");
@@ -85,6 +85,20 @@ public:
     alg3.setPropertyValue("StartWorkspaceIndex","2");
     alg3.setPropertyValue("EndWorkspaceIndex","4");
     alg3.setPropertyValue("IncludePartialBins","1");
+  }
+
+  void testNoCrashInside1Bin()
+  {
+      TS_ASSERT_THROWS_NOTHING( algNoCrash.initialize());
+      TS_ASSERT( algNoCrash.isInitialized() );
+      // Set the properties
+      algNoCrash.setPropertyValue("InputWorkspace","testSpace");
+      algNoCrash.setPropertyValue("OutputWorkspace","outNoCrash");
+      algNoCrash.setPropertyValue("RangeLower","1.1");
+      algNoCrash.setPropertyValue("RangeUpper","1.3");
+      TS_ASSERT_THROWS_NOTHING( algNoCrash.execute());
+      TS_ASSERT( algNoCrash.isExecuted() );
+      AnalysisDataService::Instance().remove("outNoCrash");
   }
 
   void testRangeNoPartialBins()
@@ -344,6 +358,7 @@ private:
   Integration alg;   // Test with range limits
   Integration alg2;  // Test without limits
   Integration alg3; // Test with range and partial bins
+  Integration algNoCrash; //test for integration inside bin
   std::string outputSpace;
 };
 
