@@ -104,6 +104,15 @@ public:
     TS_ASSERT_DELTA(chopper.getAngularVelocity(), logValue*2.0*M_PI, 1e-10);
   }
 
+  void test_Clone_Produces_Object_With_Same_Propeties()
+  {
+    auto chopper = createValidTestChopper();
+    auto cloned = chopper->clone();
+    
+    TS_ASSERT_DIFFERS(cloned, chopper);
+    TS_ASSERT_EQUALS(cloned->getAngularVelocity(), chopper->getAngularVelocity());
+  }
+  
 private:
 
   FermiChopperModel_sptr createValidTestChopper()

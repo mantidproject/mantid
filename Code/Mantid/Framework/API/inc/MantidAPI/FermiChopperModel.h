@@ -35,6 +35,8 @@ namespace Mantid
     public:
       /// Default constructor required by the factory
       FermiChopperModel();
+      /// Returns a clone of the current object
+      virtual boost::shared_ptr<ChopperModel> clone() const;
 
       /// Set the radius of the chopper in metres
       void setChopperRadius(const double value);

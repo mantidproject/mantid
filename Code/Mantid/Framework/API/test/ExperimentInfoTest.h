@@ -30,6 +30,8 @@ using Mantid::Kernel::NexusTestHelper;
 class FakeChopper : public Mantid::API::ChopperModel
 {
 public:
+  boost::shared_ptr<ChopperModel> clone() const { return boost::make_shared<FakeChopper>(*this); }
+
   double calculatePulseTimeVariance() const
   {
     return 0.0;
@@ -38,6 +40,7 @@ public:
   {
     return 0.0;
   }
+
 private:
   void setParameterValue(const std::string &,const std::string&) {};
 };
@@ -45,6 +48,7 @@ private:
 class FakeSource : public Mantid::API::ModeratorModel
 {
 public:
+  boost::shared_ptr<ModeratorModel> clone() const { return boost::make_shared<FakeSource>(*this); }
   double emissionTimeMean() const { return 0.0;}
   double emissionTimeVariance() const { return 0.0; }
   double sampleTimeDistribution(const double) const { return 0.0; }
@@ -116,14 +120,7 @@ public:
     TS_ASSERT_THROWS(ws->setChopperModel(NULL), std::invalid_argument);
   }
 
-  void test_Setting_A_New_Chopper_To_Point_Greater_Than_Number_Chopper_Points_Throws()
-  {
-    ExperimentInfo ws; // instrument with no chopper points defined
-
-    TS_ASSERT_THROWS(ws.setChopperModel(new FakeChopper), std::runtime_error);
-  }
-
-  void test_Setting_A_New_Chopper_To_Point_Lower_Than_Number_Instrument_Chopper_Points_Succeeds()
+  void test_Setting_A_New_Chopper_To_Point_Lower_Point_Succeeds()
   {
     ExperimentInfo_sptr ws = createTestInfoWithChopperPoints(1);
 
@@ -259,6 +256,7 @@ public:
     TS_ASSERT_DELTA( ws2.sample().getOrientedLattice().c(), 3.0, 1e-4);
     TS_ASSERT_DELTA( ws2.run().getProtonCharge(), 1.234, 0.001);
     TS_ASSERT_EQUALS( ws2.getInstrument()->getName(), "MyTestInst");
+    TS_ASSERT_DIFFERS(&ws.moderatorModel(), &ws2.moderatorModel());
 
     // Changing stuff in the original workspace...
     ws.mutableSample().setName("test1");
@@ -284,6 +282,8 @@ public:
     boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
+    ws.setModeratorModel(new FakeSource);
+    ws.setChopperModel(new FakeChopper);
 
     ExperimentInfo ws2;
     ws2.copyExperimentInfoFrom( &ws );
@@ -299,7 +299,9 @@ public:
     boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
-
+    ws.setModeratorModel(new FakeSource);
+    ws.setChopperModel(new FakeChopper);
+    
     ExperimentInfo * ws2 = ws.cloneExperimentInfo();
     do_compare_ExperimentInfo(ws,*ws2);
   }
@@ -313,6 +315,8 @@ public:
     boost::shared_ptr<Instrument> inst1(new Instrument());
     inst1->setName("MyTestInst");
     ws.setInstrument(inst1);
+    ws.setModeratorModel(new FakeSource);
+    ws.setChopperModel(new FakeChopper);
 
     ExperimentInfo * ws2 = ws.cloneExperimentInfo();
 

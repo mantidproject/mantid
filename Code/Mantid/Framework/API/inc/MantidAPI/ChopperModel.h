@@ -49,6 +49,9 @@ namespace Mantid
       ChopperModel();
       /// Allow inheritance
       virtual ~ChopperModel() {}
+      /// Returns a clone of the current object
+      virtual boost::shared_ptr<ChopperModel> clone() const = 0;
+
       /// Set the reference to the run object as we need a default constructor
       /// for the factory
       void setRun(const Run & exptRun);

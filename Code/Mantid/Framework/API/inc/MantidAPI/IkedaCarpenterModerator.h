@@ -46,6 +46,8 @@ namespace Mantid
     public:
       /// Default constructor required by the factory
       IkedaCarpenterModerator();
+      /// Returns a clone of the current object
+      boost::shared_ptr<ModeratorModel> clone() const;
 
       /// Sets the value of the \f$\alpha\f$ parameter
       void setFastDecayCoefficent(const double value);

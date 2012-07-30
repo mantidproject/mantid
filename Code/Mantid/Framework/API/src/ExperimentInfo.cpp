@@ -74,6 +74,12 @@ namespace API
     m_sample = other->m_sample;
     m_run = other->m_run;
     this->setInstrument(other->getInstrument());
+    if(other->m_moderatorModel) m_moderatorModel = other->m_moderatorModel->clone();
+    m_choppers.clear();
+    for(auto iter = other->m_choppers.begin(); iter != other->m_choppers.end(); ++iter)
+    {
+      m_choppers.push_back((*iter)->clone());
+    }
   }
 
   //---------------------------------------------------------------------------------------
@@ -369,14 +375,6 @@ namespace API
     if(!chopper)
     {
       throw std::invalid_argument("ExperimentInfo::setChopper - NULL chopper object found.");
-    }
-    if(index >= sptr_instrument->getNumberOfChopperPoints())
-    {
-      std::ostringstream os;
-      os << "ExperimentInfo::setChopper - There is no chopper point defined in this instrument for index=" << index
-         << ". Instrument \"" << sptr_instrument->getName() << "\" has only " << sptr_instrument->getNumberOfChopperPoints()
-         << " chopper points defined.";
-      throw std::runtime_error(os.str());
     }
     auto iter = m_choppers.begin();
     std::advance(iter, index);

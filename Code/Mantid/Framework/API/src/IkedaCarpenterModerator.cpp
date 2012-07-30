@@ -8,6 +8,7 @@
 #include <gsl/gsl_errno.h>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 
 #include <cmath>
 #include <sstream>
@@ -34,6 +35,12 @@ namespace Mantid
       : ModeratorModel(), m_tau_f(0.0), m_tau_s(0.0), m_r(0.0), m_lookupSize(1000),
         m_areaToTimeLookup(), m_offset(0.0)
     {
+    }
+
+    /// Returns a clone of the current object
+    boost::shared_ptr<ModeratorModel> IkedaCarpenterModerator::clone() const
+    {
+      return boost::make_shared<IkedaCarpenterModerator>(*this);
     }
 
     /**

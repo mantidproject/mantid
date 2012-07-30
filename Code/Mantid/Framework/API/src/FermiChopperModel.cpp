@@ -4,6 +4,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/lexical_cast.hpp>
+#include <boost/make_shared.hpp>
 
 #include <cmath>
 #include <sstream>
@@ -26,6 +27,12 @@ namespace Mantid
       : ChopperModel(), m_chopperRadius(0.0), m_slitThickness(0.0),
         m_slitRadius(0.0), m_incidentEnergy(0.0), m_incidentEnergyLog()
     {
+    }
+
+    /// @returns a clone of the current object
+    boost::shared_ptr<ChopperModel> FermiChopperModel::clone() const
+    {
+      return boost::make_shared<FermiChopperModel>(*this);
     }
 
     /**

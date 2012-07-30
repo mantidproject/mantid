@@ -5,10 +5,12 @@
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
+#include <boost/make_shared.hpp>
 
 class MockModerator : public Mantid::API::ModeratorModel
 {
 public:
+  boost::shared_ptr<ModeratorModel> clone() const { return boost::shared_ptr<MockModerator>(); }
   MOCK_CONST_METHOD0(emissionTimeMean, double());
   MOCK_CONST_METHOD0(emissionTimeVariance, double());
   MOCK_CONST_METHOD1(sampleTimeDistribution, double(const double randNo));

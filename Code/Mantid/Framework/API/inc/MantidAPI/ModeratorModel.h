@@ -24,6 +24,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/ClassMacros.h"
 
+#include <boost/shared_ptr.hpp>
+
 #include <string>
 
 namespace Mantid
@@ -41,6 +43,9 @@ namespace Mantid
       ModeratorModel();
       /// Allow inheritance
       virtual ~ModeratorModel();
+      /// Returns a clone of the current object
+      virtual boost::shared_ptr<ModeratorModel> clone() const = 0;
+
       /// Initialize the object from a string of parameters
       void initialize(const std::string & params);
 
