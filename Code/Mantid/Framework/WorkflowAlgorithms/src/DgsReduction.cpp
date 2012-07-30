@@ -133,7 +133,12 @@ namespace WorkflowAlgorithms
         "Set the upper TOF bound for time-independent background subtraction.");
     this->setPropertySettings("TibTofRangeEnd",
         new VisibleWhenProperty("TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
-    this->declareProperty("DetectorVanadium", "", "Run numbers, files or workspaces of detector vanadium data.");
+    this->declareProperty(new FileProperty("DetectorVanadiumInputFile", "",
+        FileProperty::OptionalLoad, "_event.nxs"),
+        "File containing the sample detector vanadium data to reduce");
+    this->declareProperty(new WorkspaceProperty<>("DetectorVanadiumInputWorkspace", "",
+        Direction::Input, PropertyMode::Optional),
+        "Sample detector vanadium workspace to be reduced");
     this->declareProperty("UseBoundsForDetVan", false,
         "If true, integrate the detector vanadium over a given range.");
     this->declareProperty("DetVanIntRangeLow", EMPTY_DBL(),
@@ -160,7 +165,8 @@ namespace WorkflowAlgorithms
     this->setPropertyGroup("TimeIndepBackgroundSub", dataCorr);
     this->setPropertyGroup("TibTofRangeStart", dataCorr);
     this->setPropertyGroup("TibTofRangeEnd", dataCorr);
-    this->setPropertyGroup("DetectorVanadium", dataCorr);
+    this->setPropertyGroup("DetectorVanadiumInputFile", dataCorr);
+    this->setPropertyGroup("DetectorVanadiumInputWorkspace", dataCorr);
     this->setPropertyGroup("UseBoundsForDetVan", dataCorr);
     this->setPropertyGroup("DetVanIntRangeLow", dataCorr);
     this->setPropertyGroup("DetVanIntRangeHigh", dataCorr);
@@ -326,7 +332,7 @@ namespace WorkflowAlgorithms
   Workspace_sptr DgsReduction::loadInputData(const std::string prop,
       const bool mustLoad)
   {
-
+    g_log.warning() << "MustLoad = " << mustLoad << std::endl;
     Workspace_sptr inputWS;
 
     const std::string inFileProp = prop + "InputFile";
@@ -366,20 +372,32 @@ namespace WorkflowAlgorithms
                 this->setLoadAlg("LoadEventPreNexus");
                 this->setLoadAlgFileProp("EventFilename");
               }
-            this->reductionManager->declareProperty(new PropertyWithValue<std::string>("MonitorFilename", inputData));
+            std::string monitorFilename = prop + "MonitorFilename";
+            this->reductionManager->declareProperty(new PropertyWithValue<std::string>(monitorFilename, inputData));
           }
         // Do ISIS
         else
           {
             this->setLoadAlg("LoadRaw");
-            this->reductionManager->declareProperty(new PropertyWithValue<std::string>("DetCalFilename", inputData));
+            std::string detCalFilename = prop + "DetCalFilename";
+            this->reductionManager->declareProperty(new PropertyWithValue<std::string>(detCalFilename, inputData));
           }
 
         inputWS = this->load(inputData);
       }
     else
       {
-        throw std::runtime_error("DgsReduction: Either the Filename property or InputWorkspace property must be provided");
+        if (mustLoad)
+          {
+            std::ostringstream mess;
+            mess << "DgsReduction: Either the " << inFileProp << " property or ";
+            mess << inWsProp << " property must be provided!";
+            throw std::runtime_error(mess.str());
+          }
+        else
+          {
+            return boost::shared_ptr<Workspace>();
+          }
       }
 
     return inputWS;
@@ -411,10 +429,23 @@ namespace WorkflowAlgorithms
           }
       }
 
+    Workspace_sptr detVanWS = this->loadInputData("DetectorVanadium", false);
+    IAlgorithm_sptr detVan;
+    Workspace_sptr idetVanWS;
+    if (detVanWS)
+      {
+        detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
+        detVan->setProperty("InputWorkspace", detVanWS);
+        detVan->setProperty("ReductionProperties", reductionManagerName);
+        detVan->execute();
+        idetVanWS = detVan->getProperty("OutputWorkspace");
+      }
+
     Workspace_sptr sampleWS = this->loadInputData("Sample");
 
     IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
     etConv->setProperty("InputWorkspace", sampleWS);
+    etConv->setProperty("IntegratedDetectorVanadium", idetVanWS);
     etConv->setProperty("ReductionProperties", reductionManagerName);
     etConv->execute();
   }

@@ -75,6 +75,9 @@ namespace WorkflowAlgorithms
   {
     this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
         "A sample data workspace.");
+    this->declareProperty(new WorkspaceProperty<>("IntegratedDetectorVanadium", "",
+        Direction::Input, PropertyMode::Optional), "A workspace containing the "
+            "integrated detector vanadium.");
     this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
         Direction::Output, PropertyMode::Optional));
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
@@ -483,6 +486,18 @@ namespace WorkflowAlgorithms
             distrib->setProperty("Workspace", outWsName);
             distrib->execute();
           }
+      }
+
+    // Normalise by the detector vanadium if necessary
+    MatrixWorkspace_const_sptr detVanWS = this->getProperty("IntegratedDetectorVanadium");
+    if (detVanWS)
+      {
+        IAlgorithm_sptr divide = this->createSubAlgorithm("Divide");
+        divide->setAlwaysStoreInADS(true);
+        divide->setProperty("LHSWorkspace", outWsName);
+        divide->setProperty("RHSWorkspace", detVanWS);
+        divide->setProperty("OutputWorkspace", outWsName);
+        divide->execute();
       }
 
     if ("ISIS" == facility)
