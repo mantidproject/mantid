@@ -66,6 +66,8 @@ namespace WorkflowAlgorithms
                           "An input workspace containing the detector vanadium data in TOF units.");
     this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
                           "The workspace containing the processed results.");
+    this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
+            Direction::Output);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -73,6 +75,19 @@ namespace WorkflowAlgorithms
    */
   void DgsProcessDetectorVanadium::exec()
   {
+    g_log.notice() << "Starting DgsProcessDetectorVanadium" << std::endl;
+    // Get the reduction property manager
+    const std::string reductionManagerName = this->getProperty("ReductionProperties");
+    boost::shared_ptr<PropertyManager> reductionManager;
+    if (PropertyManagerDataService::Instance().doesExist(reductionManagerName))
+      {
+        reductionManager = PropertyManagerDataService::Instance().retrieve(reductionManagerName);
+      }
+    else
+      {
+        throw std::runtime_error("DgsProcessDetectorVanadium cannot run without a reduction PropertyManager.");
+      }
+
     this->enableHistoryRecordingForChild(true);
 
     MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
@@ -80,32 +95,23 @@ namespace WorkflowAlgorithms
     const std::string outWsName = inWsName + "idetvan";
 
     // Normalise result workspace to incident beam parameter
-    const std::string incidentBeamNormType = this->getProperty("IncidentBeamNormalisation");
-    const double monRangeLow = this->getProperty("MonitorIntRangeLow");
-    const double monRangeHigh = this->getProperty("MonitorIntRangeHigh");
-
     IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
     norm->setAlwaysStoreInADS(true);
     norm->setProperty("InputWorkspace", inWsName);
     norm->setProperty("OutputWorkspace", outWsName);
-    norm->setProperty("IncidentBeamNormalisation", incidentBeamNormType);
-    norm->setProperty("MonitorIntRangeLow", monRangeLow);
-    norm->setProperty("MonitorIntRangeHigh", monRangeHigh);
-    // SNS does current norm for now.
-    //norm->setProperty("MonitorWorkspace", monWsName);
     norm->execute();
 
-    double detVanIntRangeLow = this->getProperty("DetVanIntRangeLow");
+    double detVanIntRangeLow = reductionManager->getProperty("DetVanIntRangeLow");
     if (EMPTY_DBL() == detVanIntRangeLow)
       {
         detVanIntRangeLow = inputWS->getInstrument()->getNumberParameter("wb-integr-min")[0];
       }
-    double detVanIntRangeHigh = this->getProperty("DetVanIntRangeHigh");
+    double detVanIntRangeHigh = reductionManager->getProperty("DetVanIntRangeHigh");
     if (EMPTY_DBL() == detVanIntRangeHigh)
       {
         detVanIntRangeHigh = inputWS->getInstrument()->getNumberParameter("wb-integr-max")[0];
       }
-    const std::string detVanIntRangeUnits = this->getProperty("DetVanInRangeUnits");
+    const std::string detVanIntRangeUnits = reductionManager->getProperty("DetVanInRangeUnits");
 
     // Convert the data to the appropriate units
     IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
