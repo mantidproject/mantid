@@ -40,7 +40,7 @@ namespace Mantid
      * pg 112, equation A.48. It is intimately linked to the
      * TobyFitYVector as their values need to be in sync
      */
-    class TobyFitBMatrix : public Kernel::DblMatrix
+    class DLLExport TobyFitBMatrix : public Kernel::DblMatrix
     {
     public:
       /// Default constructor sets the size of the matrix

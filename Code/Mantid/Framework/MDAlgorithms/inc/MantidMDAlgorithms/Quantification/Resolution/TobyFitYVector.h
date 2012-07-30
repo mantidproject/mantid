@@ -53,7 +53,7 @@ namespace Mantid
      * elements. name() computes a string name for a parameter.
      *
      */
-    class TobyFitYVector
+    class DLLExport TobyFitYVector
     {
     public:
       /// Enumerate the parameters. Do NOT change the parameters or order without an

@@ -38,7 +38,7 @@ namespace Mantid
   namespace MDAlgorithms
   {
     /// Small structure to map a 4D box to named variables
-    struct QOmegaPoint
+    struct DLLExport QOmegaPoint
     {
       /// Constructor with a box & event
       QOmegaPoint(const API::IMDIterator & box, const size_t eventIndex)
@@ -63,7 +63,7 @@ namespace Mantid
      * It uses the Fit IFunction interface so that it can use the same
      * attribute mechanism
      */
-    class TobyFitResolutionModel : public MDResolutionConvolution
+    class DLLExport TobyFitResolutionModel : public MDResolutionConvolution
     {
     public:
 
