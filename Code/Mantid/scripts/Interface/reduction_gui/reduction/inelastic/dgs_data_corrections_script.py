@@ -40,7 +40,7 @@ class DataCorrectionsScript(BaseScriptElement):
         if self.tib_subtraction:
             script += "TibTofRangeStart=\"%s\",\n" % self.tib_tof_start
             script += "TibTofRangeEnd=\"%s\",\n" % self.tib_tof_end
-        script += "DetectorVanadium=\"%s\",\n" % self.detector_vanadium
+        script += "DetectorVanadiumInputFile=\"%s\",\n" % self.detector_vanadium
         script += "UseBoundsForDetVan=%s,\n" % self.det_van_integration
         if self.det_van_integration:
             script += "DetVanIntRangeLow=\"%s\",\n" % self.det_van_int_range_low
