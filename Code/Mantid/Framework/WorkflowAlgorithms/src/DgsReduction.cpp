@@ -407,7 +407,7 @@ namespace WorkflowAlgorithms
       {
         if (!boost::contains((*iter)->name(), "Input"))
           {
-            this->reductionManager->declareProperty(*iter);
+            this->reductionManager->declareProperty((*iter)->clone());
           }
       }
 
