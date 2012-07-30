@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/CompositeFunction.h"
 
+#include <map>
+
 namespace Mantid
 {
 namespace API
@@ -49,11 +51,38 @@ public:
   virtual std::string name()const {return "ImmutableCompositeFunction";}
   /// Writes itself into a string
   std::string asString()const;
+  /// Set i-th parameter
+  void setParameter(size_t i, const double& value, bool explicitlySet = true)
+  {CompositeFunction::setParameter(i, value, explicitlySet);}
+  /// Set i-th parameter description
+  void setParameterDescription(size_t i, const std::string& description)
+  {CompositeFunction::setParameterDescription(i, description);}
+  /// Set parameter by name.
+  void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
+  /// Set description of parameter by name.
+  void setParameterDescription(const std::string& name, const std::string& description);
+  /// Get i-th parameter
+  double getParameter(size_t i)const { return CompositeFunction::getParameter( i ); }
+  /// Get parameter by name.
+  double getParameter(const std::string& name)const;
+  /// Returns the index of parameter name
+  size_t parameterIndex(const std::string& name)const;
+  /// Returns the name of parameter i
+  std::string parameterName(size_t i)const;
 
 protected:
 
-  // make it protected
+  /// Make it protected
   using CompositeFunction::addFunction;
+  /// Overload addFunction to take a bare pointer
+  void addFunction(IFunction* fun);
+  /// Define an alias for a parameter
+  void setAlias(const std::string& parName, const std::string& alias);
+
+private:
+
+  /// Keep paramater aliases
+  std::map< std::string, size_t > m_alias;
 
 };
 
