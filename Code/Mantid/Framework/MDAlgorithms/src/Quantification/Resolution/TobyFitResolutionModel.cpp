@@ -18,6 +18,7 @@ namespace Mantid
     using Geometry::IObjComponent_const_sptr;
     using Geometry::IDetector_const_sptr;
     using API::Run;
+    using API::IFunction;
 
     DECLARE_MDRESOLUTIONCONVOLUTION(TobyFitResolutionModel, "TobyFitResolutionModel");
 
@@ -133,7 +134,6 @@ namespace Mantid
      */
     void TobyFitResolutionModel::declareAttributes()
     {
-      using API::IFunction;
       // Resolution attributes, all on by default
       for(unsigned int i = 0; i < TobyFitYVector::variableCount(); ++i)
       {

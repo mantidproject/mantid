@@ -12,6 +12,8 @@ namespace Mantid
 {
   namespace MDAlgorithms
   {
+    DECLARE_FOREGROUNDMODEL(Strontium122);
+
     using PhysicalConstants::MagneticIon;
     using Kernel::Math::BoseEinsteinDistribution;
 
