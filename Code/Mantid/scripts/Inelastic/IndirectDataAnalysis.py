@@ -109,7 +109,7 @@ def confitSeq(inputWS, func, startX, endX, save, plot, ftype, bg, specMin, specM
         specMax = mtd[inputWS].getNumberHistograms() - 1
     for i in range(specMin + 1, specMax + 1):
         input += ';'+inputWS+',i'+str(i)
-    outNm = getWSprefix(inputWS) + 'conv_' + ftype + bg + "_s" + str(specMin) + "_to_" + str(specMax)
+    outNm = getWSprefix(inputWS) + 'conv_' + ftype + bg + str(specMin) + "_to_" + str(specMax)
     if Verbose:
         logger.notice(func)  
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
