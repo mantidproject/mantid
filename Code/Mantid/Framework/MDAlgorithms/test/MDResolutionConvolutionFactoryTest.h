@@ -23,7 +23,7 @@ class MDResolutionConvolutionFactoryTest : public CxxTest::TestSuite
         MDResolutionConvolutionFactory::Instance().createConvolution("__NOT_VALID", "FakeForeground", fakeFunction), Exception::NotFoundError);
   }
 
-  void test_Factory_Creates_New_Convolution_Object_When_Name_And_ForegroundModel_Are_Valid()
+  void xtest_Factory_Creates_New_Convolution_Object_When_Name_And_ForegroundModel_Are_Valid()
   {
     using Mantid::MDAlgorithms::MDResolutionConvolution;
     FakeMDFunction fakeFunction;
