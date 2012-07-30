@@ -95,7 +95,7 @@ namespace WorkflowAlgorithms
 
     MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
     const std::string inWsName = inputWS->getName();
-    const std::string outWsName = inWsName + "idetvan";
+    const std::string outWsName = inWsName + "_idetvan";
 
     // Normalise result workspace to incident beam parameter
     IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
@@ -114,7 +114,7 @@ namespace WorkflowAlgorithms
       {
         detVanIntRangeHigh = inputWS->getInstrument()->getNumberParameter("wb-integr-max")[0];
       }
-    const std::string detVanIntRangeUnits = reductionManager->getProperty("DetVanInRangeUnits");
+    const std::string detVanIntRangeUnits = reductionManager->getProperty("DetVanIntRangeUnits");
 
     if ("TOF" != detVanIntRangeUnits)
       {

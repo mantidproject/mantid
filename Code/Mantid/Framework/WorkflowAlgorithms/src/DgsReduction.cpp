@@ -439,7 +439,8 @@ namespace WorkflowAlgorithms
         detVan->setProperty("InputWorkspace", detVanWS);
         detVan->setProperty("ReductionProperties", reductionManagerName);
         detVan->execute();
-        idetVanWS = detVan->getProperty("OutputWorkspace");
+        MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
+        idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
       }
 
     Workspace_sptr sampleWS = this->loadInputData("Sample");
