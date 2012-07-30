@@ -12,8 +12,8 @@ class DataCorrectionsWidget(BaseWidget):
     ## Widget name
     name = "Data Corrections"
     
-    def __init__(self, parent=None, state=None, settings=None):
-        super(DataCorrectionsWidget, self).__init__(parent, state, settings)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None):
+        super(DataCorrectionsWidget, self).__init__(parent, state, settings, data_type=data_type)
 
         class DataCorrsFrame(QtGui.QFrame, ui.inelastic.ui_dgs_data_corrections.Ui_DataCorrsFrame): 
             def __init__(self, parent=None):
@@ -44,6 +44,10 @@ class DataCorrectionsWidget(BaseWidget):
         self.connect(self._content.van_int_cb, QtCore.SIGNAL("toggled(bool)"),
                      self._det_van_intrange_widgets_state)
         
+        # Connections
+        self.connect(self._content.van_input_browse, QtCore.SIGNAL("clicked()"), 
+                     self._det_van_browse)
+
     def _monitor_intrange_widgets_state(self, state=False):
         self._content.monint_label.setEnabled(state)
         self._content.monint_low_edit.setEnabled(state)
@@ -54,6 +58,11 @@ class DataCorrectionsWidget(BaseWidget):
         self._content.van_int_range_low_edit.setEnabled(state)
         self._content.van_int_range_high_edit.setEnabled(state)
         self._content.van_int_range_units_cb.setEnabled(state)
+    
+    def _det_van_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.van_input_edit.setText(fname)   
     
     def set_state(self, state):
         """

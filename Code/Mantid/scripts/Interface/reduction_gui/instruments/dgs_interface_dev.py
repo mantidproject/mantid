@@ -22,7 +22,8 @@ class DgsInterface(InstrumentInterface):
                                       data_type = self.data_type))
         
         # Data corrections
-        self.attach(DataCorrectionsWidget(settings = self._settings))
+        self.attach(DataCorrectionsWidget(settings = self._settings,
+                                          data_type = self.data_type))
         
         # Diagnose detectors
         self.attach(DiagnoseDetectorsWidget(settings = self._settings, 
