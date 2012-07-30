@@ -1,8 +1,8 @@
 /*WIKI*
 
-Uses E= (1/2)mv^2 to calculate the energy of neutrons leaving the source. The velocity is calculated from the time it takes for the neutron pulse to travel between the two monitors whose spectra were specified.
+Uses E= (1/2)mv^2 to calculate the energy of neutrons leaving the source. The velocity is calculated from the time it takes for the neutron pulse to travel between the two monitors whose spectra were specified. If no spectra are specified, the algorithm will use the defaults for the instrument.
 
-An initial energy guess is required for the algorithm to find the correct peak. The analysis will be done on the highest peak that is within 8% of the estimated TOF given by the estimate.
+An initial energy guess is required for the algorithm to find the correct peak. The analysis will be done on the highest peak that is within 8% of the estimated TOF given by the estimate. If no initial guess is given, the algorithm will try to get it from the workspace, from a sample log variable called "EnergyRequest".
 
 Not all neutrons arrive at the monitors at the same time because their kinetic energies, and therefore velocities, are all different. The time of arrival of the neutron pulse is taken to be the mean of the two half peak height locations. The half height points are found as follows:
 # the peak height is the largest number of counts above the background in any bin in the window
@@ -79,14 +79,14 @@ void GetEi2::init()
   auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
   mustBePositive->setLower(0);
   declareProperty("Monitor1Spec", EMPTY_INT(), mustBePositive,
-    "The spectrum number of the output of the first monitor, e.g. MAPS 41474, MARI 2, MERLIN 69634\n");
+                  "The spectrum number of the output of the first monitor, e.g. MAPS 41474, MARI 2, MERLIN 69634.\n If empty, it will be read from the instrument file.\n");
   declareProperty("Monitor2Spec", EMPTY_INT(), mustBePositive,
-    "The spectrum number of the output of the second monitor e.g. MAPS 41475, MARI 3, MERLIN 69638\n");
+    "The spectrum number of the output of the second monitor e.g. MAPS 41475, MARI 3, MERLIN 69638.\n If empty, it will be read from the instrument file.\n");
   auto positiveDouble = boost::make_shared<BoundedValidator<double> >();
   positiveDouble->setLower(0.0);
   declareProperty("EnergyEstimate", EMPTY_DBL() , positiveDouble,
     "An approximate value for the typical incident energy, energy of\n"
-    "neutrons leaving the source (meV)");
+    "neutrons leaving the source (meV)\n Can be empty if there is a Sample Log called EnergyRequest. Otherwise it is mandatory.");
   declareProperty("FixEi", false, "If true, the incident energy will be set to the value of the \n"
     "EnergyEstimate property.");
 
