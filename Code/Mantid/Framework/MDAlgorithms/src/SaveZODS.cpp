@@ -141,7 +141,7 @@ namespace MDAlgorithms
 
           // Now write out the 6D vector
           std::vector<int> unit_cell_size(1, 6);
-          file->writeData("UnitCell", unitCell, unit_cell_size);
+          file->writeData("unit_cell", unitCell, unit_cell_size);
         }
       }
     }
@@ -171,8 +171,8 @@ namespace MDAlgorithms
       direction[d] = dim->getBinWidth();
       // Origin of the CENTER of the first bin
       origin[d] = dim->getMinimum() + dim->getBinWidth()/2;
-      // Size in each dimension (reverse order for RANK)
-      size[2-d] = int(dim->getNBins());
+      // Size in each dimension 
+      size[d] = int(dim->getNBins());
       // Size in each dimension (in the XYZ order)
       size_field[d] = int(dim->getNBins());
       file->writeData("direction_" + Strings::toString(d+1), direction);
