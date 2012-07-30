@@ -8,6 +8,7 @@ process.
 
 #include "MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
@@ -62,7 +63,9 @@ namespace WorkflowAlgorithms
    */
   void DgsProcessDetectorVanadium::init()
   {
-    this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+    auto wsValidator = boost::make_shared<CompositeValidator>();
+    wsValidator->add<WorkspaceUnitValidator>("TOF");
+    this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, wsValidator),
                           "An input workspace containing the detector vanadium data in TOF units.");
     this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
                           "The workspace containing the processed results.");
@@ -113,14 +116,17 @@ namespace WorkflowAlgorithms
       }
     const std::string detVanIntRangeUnits = reductionManager->getProperty("DetVanInRangeUnits");
 
-    // Convert the data to the appropriate units
-    IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
-    cnvun->setAlwaysStoreInADS(true);
-    cnvun->setProperty("InputWorkspace", outWsName);
-    cnvun->setProperty("OutputWorkspace", outWsName);
-    cnvun->setProperty("Target", detVanIntRangeUnits);
-    cnvun->setProperty("EMode", "Elastic");
-    cnvun->execute();
+    if ("TOF" != detVanIntRangeUnits)
+      {
+        // Convert the data to the appropriate units
+        IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
+        cnvun->setAlwaysStoreInADS(true);
+        cnvun->setProperty("InputWorkspace", outWsName);
+        cnvun->setProperty("OutputWorkspace", outWsName);
+        cnvun->setProperty("Target", detVanIntRangeUnits);
+        cnvun->setProperty("EMode", "Elastic");
+        cnvun->execute();
+      }
 
     // Rebin the data (not Integration !?!?!?)
     std::vector<double> binning;

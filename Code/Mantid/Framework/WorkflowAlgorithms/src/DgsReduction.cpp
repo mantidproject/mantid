@@ -152,6 +152,7 @@ namespace WorkflowAlgorithms
     std::vector<std::string> detvanIntRangeUnits;
     detvanIntRangeUnits.push_back("Energy");
     detvanIntRangeUnits.push_back("Wavelength");
+    detvanIntRangeUnits.push_back("TOF");
     this->declareProperty("DetVanIntRangeUnits", "Energy",
         boost::make_shared<StringListValidator>(detvanIntRangeUnits),
         "Options for the units on the detector vanadium integration.");

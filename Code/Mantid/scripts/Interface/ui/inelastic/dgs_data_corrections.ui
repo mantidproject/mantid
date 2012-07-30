@@ -305,6 +305,11 @@
               <string>Wavelength</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>TOF</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
