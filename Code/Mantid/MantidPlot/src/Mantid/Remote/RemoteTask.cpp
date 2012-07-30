@@ -35,14 +35,14 @@ string RemoteTask::getCmdLineParams() const
     {
         string param = m_cmdLineParams[i];
         // for each parameter, check to see if we need to substitute a user-supplied value instead...
-        for (unsigned j = 0; j < m_userSuppliedParamIds.size(); j++)
+        for (unsigned j = 0; j < m_substitutionParamIds.size(); j++)
         {
-            string searchString = string("%") + m_userSuppliedParamIds[j] + string("%");
+            string searchString = string("%") + m_substitutionParamIds[j] + string("%");
             size_t pos = param.find( searchString);
             if (pos != string::npos)
             {
                 // Ahah! Substitute the user supplied value....
-                string newParam = param.substr(0, pos) + m_userSuppliedParamValues[j] + param.substr(pos + searchString.length());
+                string newParam = param.substr(0, pos) + m_substitutionParamValues[j] + param.substr(pos + searchString.length());
                 param = newParam;
                 break;  // break out of the j loop
             }
@@ -76,14 +76,14 @@ string RemoteTask::getResourceValue (const string &name) const
     if (value.length() > 0)
     {
         // Check to see if we need to substitute a user-supplied value instead...
-        for (unsigned i = 0; i < m_userSuppliedParamIds.size(); i++)
+        for (unsigned i = 0; i < m_substitutionParamIds.size(); i++)
         {
-            string searchString = string("%") + m_userSuppliedParamIds[i] + string("%");
+            string searchString = string("%") + m_substitutionParamIds[i] + string("%");
             size_t pos = value.find( searchString);
             if (pos != string::npos)
             {
                 // Ahah! Substitute the user supplied value....
-                string newValue = value.substr(0, pos) + m_userSuppliedParamValues[i] + value.substr(pos + searchString.length());
+                string newValue = value.substr(0, pos) + m_substitutionParamValues[i] + value.substr(pos + searchString.length());
                 value = newValue;
                 break;  // break out of the loop
             }

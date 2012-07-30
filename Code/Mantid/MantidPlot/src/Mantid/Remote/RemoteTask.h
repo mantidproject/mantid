@@ -41,41 +41,63 @@ public:
 
     void setExecutable( const std::string  &executable) { m_executable = executable; }
     void appendCmdLineParam( const std::string &param) { m_cmdLineParams.push_back( param); }
-    void appendUserSuppliedParam( const std::string &paramName, const std::string &paramId)
+    void appendSubstitutionParam( const std::string &paramName, const std::string &paramId)
     {
-        m_userSuppliedParamIds.push_back( paramId);
-        m_userSuppliedParamNames.push_back( paramName);
+        m_substitutionParamIds.push_back( paramId);
+        m_substitutionParamNames.push_back( paramName);
 
         // The 'real' value will be filled in by the user before the job is submitted
-        m_userSuppliedParamValues.push_back( "");
+        m_substitutionParamValues.push_back( "");
     }
     
-    bool setUserSuppliedParamValue( unsigned paramNum, const std::string &value)
+    bool setSubstitutionParamValue( unsigned paramNum, const std::string &value)
     // Note: paramNum is zero based.
     {
-        if (paramNum >= m_userSuppliedParamNames.size())  // sanity check
+        if (paramNum >= m_substitutionParamNames.size())  // sanity check
             return false;
         
-        m_userSuppliedParamValues[paramNum] = value;
+        m_substitutionParamValues[paramNum] = value;
         return true;
     }
-    
-    unsigned long getNumUserSuppliedParams() const { return m_userSuppliedParamIds.size(); }
-    
-    std::string getUserSuppliedParamName( unsigned i)
+
+    // Assign a value to the parameter with the specified ID
+    bool setSubstitutionParamValue( const std::string &paramId, const std::string &value)
     {
-        if (i < getNumUserSuppliedParams())
-            return m_userSuppliedParamNames[i];
+      int i = getSubstitutionParamIndex( paramId);
+      if (i >= 0)
+      {
+        return setSubstitutionParamValue( i, value);
+      }
+
+      // If we get here, it's because we never found the ID
+      return false;
+    }
+    
+    unsigned long getNumSubstitutionParams() const { return m_substitutionParamIds.size(); }
+    
+    std::string getSubstitutionParamName( unsigned i) const
+    {
+        if (i < getNumSubstitutionParams())
+            return m_substitutionParamNames[i];
         
         return "";
     }
     
-    std::string getUserSuppliedParamValue( unsigned i)
+    std::string getSubstitutionParamValue( unsigned i) const
     {
-        if (i < getNumUserSuppliedParams())
-            return m_userSuppliedParamValues[i];
+        if (i < getNumSubstitutionParams())
+            return m_substitutionParamValues[i];
         
         return "";
+    }
+
+    std::string getSubstitutionParamValue( const std::string &paramId) const
+    {
+      int i = getSubstitutionParamIndex( paramId);
+      if (i >= 0)
+        return getSubstitutionParamValue( i);
+
+      return "";  // didn't find the parameter ID so return empty string
     }
     
     void appendResource( const std::string &name, const std::string &value)
@@ -86,11 +108,11 @@ public:
     bool isValid() const
     { 
         // sanity check...
-        if (m_userSuppliedParamIds.size() != m_userSuppliedParamNames.size())
+        if (m_substitutionParamIds.size() != m_substitutionParamNames.size())
             return false;
-        
-        // Note: We're deliberately NOT checking m_userSuppliedParamValues.  Those
-        // strings get filled in just before the job is submitted
+
+        if (m_substitutionParamIds.size() != m_substitutionParamValues.size())
+            return false;
         
         // The only things that are really necessary are the task name and the
         // executable name.  (MWS also requires the the number of nodes, but other job
@@ -98,14 +120,42 @@ public:
         return (m_name.length() > 0 && m_executable.length() > 0);
     }
     
+protected:
+
+    // given a substution param ID, return its index in the vector
+    // returns -1 if the ID isn't found
+    int getSubstitutionParamIndex( const std::string & paramId) const
+    {
+      // This is a bit of a nuisance since we have to do a linear search.  I looked into
+      // using a std::map instead of the vectors, but it actually makes other parts of the
+      // code more complex, so we'll just put up with the occasional linear search...
+      int i=0;
+      while (i < (int)m_substitutionParamIds.size() && m_substitutionParamIds[i] != paramId)
+      {
+        i++;
+      }
+      if (i >= (int)m_substitutionParamIds.size())
+      {
+        i=-1;
+      }
+      return i;
+    }
+
 private:
     std::string m_name;         // The name of the task.  Is sent over to the cluster (which will probably
                                 // use it for naming the files for stdout and stderr).
     std::string m_executable;  // The name of the program to run.  Probably something like /usr/bin/mpirun...
     std::vector<std::string> m_cmdLineParams;
-    std::vector<std::string> m_userSuppliedParamNames;
-    std::vector<std::string> m_userSuppliedParamIds;
-    std::vector<std::string> m_userSuppliedParamValues;
+
+    std::vector<std::string> m_substitutionParamNames;
+    std::vector<std::string> m_substitutionParamIds;
+    std::vector<std::string> m_substitutionParamValues;
+
+    // Note that param names are, in fact, optional.  The "global" parameters (such as outfile)
+    // are set by MantidPlot itself.  Since we don't ask the user for the value, these parameters
+    // shouldn't be displayed in the dialog box and therefore don't need a name.  The 3 vectors do
+    // all need to be the same size, though (so that there's no confusion about the <name,id,value>
+    // triplet), but the name may be the empty string.
 
     std::map<std::string, std::string> m_resources;  // Maps resource names to values
 };

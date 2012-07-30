@@ -258,19 +258,22 @@ void RemoteTaskDockWidget::submitJob()
     
     RemoteTask &task = m_taskHash[ selectedTask];
     QList <QLineEdit *> editList;
-    if (task.getNumUserSuppliedParams() > 0)
+    if (task.getNumSubstitutionParams() > 0)
     {
         // Need to add labels and text inputs to the dialog so the user can fill in
         // the necessary parameters.  If the user has already entered values (ie, from
         // a previous job), we'll pre-load the edit boxes with those values.
               
         QFormLayout *form = new QFormLayout;
-        for (unsigned i = 0; i < task.getNumUserSuppliedParams(); i++)
+        for (unsigned i = 0; i < task.getNumSubstitutionParams(); i++)
         {
-            QLabel *label = new QLabel( QString::fromStdString(task.getUserSuppliedParamName( i)));
-            QLineEdit *edit = new QLineEdit( QString::fromStdString(task.getUserSuppliedParamValue( i)));
-            form->addRow( label, edit);
-            editList.append( edit);  // save the pointers so we can access them below
+            if (task.getSubstitutionParamName(i).size() > 0)
+            {
+                QLabel *label = new QLabel( QString::fromStdString(task.getSubstitutionParamName( i)));
+                QLineEdit *edit = new QLineEdit( QString::fromStdString(task.getSubstitutionParamValue( i)));
+                form->addRow( label, edit);
+                editList.append( edit);  // save the pointers so we can access them below
+            }
         }
         
         vbLayout->addLayout(form);
@@ -288,8 +291,16 @@ void RemoteTaskDockWidget::submitJob()
         // First off, save the values for any user-specified params
         for (int i=0; i < editList.size(); i++)
         {
-            task.setUserSuppliedParamValue( i, editList[i]->text().toStdString());
+            task.setSubstitutionParamValue( i, editList[i]->text().toStdString());
         }
+
+        // Next, generate a value for the 'outfile' parameter.  We'll base it on the
+        // algorithm name and the current time so that it's unique.  The user should never
+        // actually see this file, so we don't need to make the string particularly friendly
+        // or convenient to deal with.  An admin might see it, though, so it ought to be
+        // pretty obvious what it is.
+        std::string outfile = m_outfilePrefix + task.getName() + "_" + Mantid::Kernel::DateAndTime::getCurrentTime().toFormattedString( "%Y-%b-%d_%H-%M-%S");
+        task.setSubstitutionParamValue("outfile", outfile);
 
         std::string jobId;
         if ( m_clusterList[ m_clusterCombo->currentIndex()]->submitJob( task, jobId) == true)
@@ -320,9 +331,25 @@ void RemoteTaskDockWidget::submitJob()
     delete d;
 }
 
-void RemoteTaskDockWidget::xmlParseServerAttributes( QDomElement & /* elm */)
+void RemoteTaskDockWidget::xmlParseServerAttributes( QDomElement &elm)
 {
-    // We don't actually do anything with the server attributes yet...
+    // At the moment, the only tag we recognize is the outfile prefix
+
+  QDomNode n = elm.firstChild();
+  while (!n.isNull())
+  {
+    QDomElement e = n.toElement();
+    if (!e.isNull())
+    {
+      if (e.tagName() == "outfile_prefix")
+      {
+        m_outfilePrefix = e.text().toStdString();
+      }
+    }
+    n = n.nextSibling();
+  }
+
+
     return;
 }
 
@@ -390,7 +417,7 @@ void RemoteTaskDockWidget::xmlParseTask( QDomElement &elm)
                         {
                             QString name = e2.attribute( "name");
                             QString id = e2.attribute( "id");
-                            task.appendUserSuppliedParam( name.toStdString(), id.toStdString());
+                            task.appendSubstitutionParam( name.toStdString(), id.toStdString());
                         }
                         else
                         {
@@ -469,6 +496,11 @@ void RemoteTaskDockWidget::xmlParseTask( QDomElement &elm)
     // Add to the view and the task hash table
     if (task.isValid())
     {
+        // evey task needs a substition parameter called 'outfile'.  This parameter's value is set automatically
+        // just before a job is submitted (see the comments in submitJob() above).  It also doesn't have a name,
+        // which keeps it from being displayed in the dialog box with the user-selectable parameters
+        task.appendSubstitutionParam("", "outfile");
+
         QListWidgetItem *taskItem;
         taskItem = new QListWidgetItem( taskDisplayName);  // algDisplayName is set at the same time as alg::m_name, so if alg is valid, so is algDisplayName...
         m_taskList->addItem( taskItem);

@@ -62,7 +62,15 @@ protected:
     QHash <QListWidgetItem *, RemoteTask> m_taskHash;
 
     // List of all the jobs we've submitted to any cluster
+    // HACK: I don't think we need this any more
     QList <RemoteJob> m_jobList;
+
+    // Server Attributes. These are specified in the config.xml file for each cluster and
+    // are updated when we parse that file.  (ie: every time the user selects a cluster
+    // from m_clusterCombo)
+    std::string m_outfilePrefix;
+
+
 
     friend class MantidUI;
 private:
