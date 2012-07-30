@@ -34,7 +34,7 @@ namespace Mantid
      * Defines the Strontium-122 model of Ewings et al.
      * This is model 207 in TobyFit.
      */
-    class Strontium122 : public ForegroundModel
+    class DLLExport Strontium122 : public ForegroundModel
     {
     public:
       /// Constructor

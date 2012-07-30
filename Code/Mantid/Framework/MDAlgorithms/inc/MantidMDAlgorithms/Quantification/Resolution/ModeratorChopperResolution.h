@@ -47,7 +47,7 @@ namespace Mantid
      * combination from a given observation
      *
      */
-    class ModeratorChopperResolution
+    class DLLExport ModeratorChopperResolution
     {
     public:
       /// Constructor

@@ -40,7 +40,8 @@ namespace Mantid
     /**
      * Defines a factory for creating convolution types from a string
      */
-    class MDResolutionConvolutionFactoryImpl : public Kernel::DynamicFactory<MDResolutionConvolution>
+    class DLLExport MDResolutionConvolutionFactoryImpl 
+      : public Kernel::DynamicFactory<MDResolutionConvolution>
     {
     private:
       /// Base-class type

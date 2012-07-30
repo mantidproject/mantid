@@ -37,7 +37,7 @@ namespace Mantid
      * It also serves as a cache for storing quicker lookups to frequently
      * used distances and values, i.e twoTheta, phi etc.
      */
-    class Observation
+    class DLLExport Observation
     {
     public:
       /// Constructor
