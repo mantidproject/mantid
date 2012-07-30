@@ -61,7 +61,7 @@ namespace Mantid
       void declareParameters();
 
       /// Name for the function
-      std::string name() const { return "CrossSectionResolutionConvolution"; }
+      std::string name() const { return "ResolutionConvolvedCrossSection"; }
       /// Set a value to a named attribute. Ensures additional parameters are set when foreground is set
       void setAttribute(const std::string& name, const API::IFunction::Attribute & value);
 

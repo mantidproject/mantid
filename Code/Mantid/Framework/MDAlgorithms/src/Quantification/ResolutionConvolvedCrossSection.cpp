@@ -13,6 +13,8 @@ namespace Mantid
 {
   namespace MDAlgorithms
   {
+    DECLARE_FUNCTION(ResolutionConvolvedCrossSection);
+
     namespace
     {
       // Attribute names
@@ -81,13 +83,13 @@ namespace Mantid
       const API::FunctionDomainMD* mdDomain = dynamic_cast<const API::FunctionDomainMD*>(&domain);
       if(!mdDomain)
       {
-        throw std::invalid_argument("CrossSectionResolutionConvolution can only be used with MD domains");
+        throw std::invalid_argument("ResolutionConvolvedCrossSection can only be used with MD domains");
       }
 
       m_workspace = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(mdDomain->getWorkspace());
       if(!m_workspace)
       {
-        throw std::invalid_argument("CrossSectionResolutionConvolution can only be used with MD event workspaces");
+        throw std::invalid_argument("ResolutionConvolvedCrossSection can only be used with MD event workspaces");
       }
       IFunctionMD::evaluateFunction(*mdDomain, values); // Calls functionMD repeatedly
     }
@@ -105,7 +107,7 @@ namespace Mantid
     {
       if(!m_convolution)
       {
-        throw std::runtime_error("CrossSectionResolutionConvolution::functionMD - Setup incomplete, no convolution type has been created");
+        throw std::runtime_error("ResolutionConvolvedCrossSection::functionMD - Setup incomplete, no convolution type has been created");
       }
 
       double signal(0.0);

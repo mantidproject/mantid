@@ -58,9 +58,9 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
 
     /// Returns the number of iterations that should be performed
-    unsigned int FitResolutionConvolvedModel::niterations() const
+    int FitResolutionConvolvedModel::niterations() const
     {
-      const unsigned int maxIter = getProperty(MAX_ITER_NAME);
+      int maxIter = getProperty(MAX_ITER_NAME);
       return maxIter;
     }
 
@@ -105,7 +105,7 @@ namespace Mantid
       fit->setProperty("InputWorkspace", getPropertyValue(INPUT_WS_NAME));
 
       // Maximum number of allowed iterations
-      const unsigned int maxIter = niterations();
+      const int maxIter = niterations();
       fit->setProperty("MaxIterations", maxIter);
 
       try
@@ -140,7 +140,7 @@ namespace Mantid
       const char seperator(',');
       stringBuilder << "name=" << ResolutionConvolvedCrossSection().name() << seperator
                     << "ResolutionFunction=" << this->getPropertyValue(RESOLUTION_NAME) << seperator
-                    << "ForegroundModel=" << this->getPropertyValue(FOREGROUND_NAME)
+                    << "ForegroundModel=" << this->getPropertyValue(FOREGROUND_NAME) << seperator
                     << this->getPropertyValue("Parameters");
       return stringBuilder.str();
     }

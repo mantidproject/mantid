@@ -30,7 +30,7 @@ namespace Mantid
      * Returns the number of iterations that should be performed
      * @returns 1 for the simulation
      */
-    unsigned int SimulateResolutionConvolvedModel::niterations() const
+    int SimulateResolutionConvolvedModel::niterations() const
     {
       return 1;
     }

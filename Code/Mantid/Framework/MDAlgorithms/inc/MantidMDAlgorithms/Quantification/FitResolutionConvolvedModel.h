@@ -38,7 +38,7 @@ namespace Mantid
 
     protected:
       /// Returns the number of iterations that should be performed
-      virtual unsigned int niterations() const;
+      virtual int niterations() const;
       /// Returns the name of the max iterations property
       std::string maxIterationsPropertyName() const;
 

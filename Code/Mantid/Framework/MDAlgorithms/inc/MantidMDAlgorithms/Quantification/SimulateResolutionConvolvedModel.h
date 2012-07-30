@@ -39,7 +39,7 @@ namespace Mantid
       virtual void initDocs();
 
       /// Returns the number of iterations that should be performed
-      virtual unsigned int niterations() const;
+      virtual int niterations() const;
 
       void init();
     };

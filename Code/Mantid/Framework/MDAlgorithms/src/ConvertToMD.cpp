@@ -351,11 +351,6 @@ void ConvertToMD::exec()
 void ConvertToMD::storeHistogramBoundaries(API::IMDEventWorkspace_sptr mdEventWS) const
 {
   const MantidVec & binBoundaries = m_InWS2D->readX(0);
-  for(auto i = (size_t)0; i < binBoundaries.size(); ++i)
-  {
-    std::cerr << binBoundaries[i] << " ";
-  }
-  std::cerr << "\n";
 
   uint16_t nexpts = mdEventWS->getNumExperimentInfo();
   for(uint16_t i = 0; i < nexpts; ++i)

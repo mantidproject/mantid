@@ -9,6 +9,7 @@
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/ParamFunction.h"
 
+using Mantid::API::IFunction;
 
 class FakeForegroundModel : public Mantid::MDAlgorithms::ForegroundModel
 {
@@ -22,7 +23,6 @@ public:
     declareParameter("FgA0", start1, "Parameter 1");
     declareParameter("FgA1", start2, "Parameter 2");
 
-    using Mantid::API::IFunction;
     declareAttribute("FgAtt0", IFunction::Attribute(att0));
     declareAttribute("FgAtt1", IFunction::Attribute(att1));
   }
@@ -97,7 +97,6 @@ public:
 
   void declareAttributes()
   {
-    using Mantid::API::IFunction;
     declareAttribute("ConvAtt0", IFunction::Attribute(initialAtt0));
     declareAttribute("ConvAtt1", IFunction::Attribute(initialAtt1));
   }
@@ -105,7 +104,6 @@ public:
   double signal(const Mantid::API::IMDIterator & , const size_t ,
                 Mantid::API::ExperimentInfo_const_sptr ) const
   {
-    using Mantid::API::IFunction;
     IFunction::Attribute att0 = getAttribute("ConvAtt0");
     if(att0.asDouble() == initialAtt0)
     {
