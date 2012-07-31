@@ -104,6 +104,16 @@ namespace WorkflowAlgorithms
     norm->setProperty("OutputWorkspace", outWsName);
     norm->execute();
 
+    const std::string hardMaskWsName = reductionManager->getProperty("HardMaskWorkspace");
+    if (!hardMaskWsName.empty())
+      {
+        IAlgorithm_sptr mask = this->createSubAlgorithm("MaskDetectors");
+        mask->setAlwaysStoreInADS(true);
+        mask->setProperty("Workspace", outWsName);
+        mask->setProperty("MaskedWorkspace", hardMaskWsName);
+        mask->execute();
+      }
+
     double detVanIntRangeLow = reductionManager->getProperty("DetVanIntRangeLow");
     if (EMPTY_DBL() == detVanIntRangeLow)
       {

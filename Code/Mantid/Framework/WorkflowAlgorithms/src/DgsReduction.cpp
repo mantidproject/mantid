@@ -7,7 +7,6 @@ parameters and generating calls to other workflow or standard algorithms.
 *WIKI*/
 
 #include "MantidWorkflowAlgorithms/DgsReduction.h"
-#include "MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h"
 
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/PropertyManagerDataService.h"
@@ -404,6 +403,43 @@ namespace WorkflowAlgorithms
     return inputWS;
   }
 
+  void DgsReduction::loadHardMask()
+  {
+    const std::string hardMask = this->getProperty("HardMaskFile");
+    std::string hardMaskWsName;
+    if (hardMask.empty())
+      {
+        hardMaskWsName = "";
+      }
+    else
+      {
+        hardMaskWsName = "hard_mask";
+        if (boost::ends_with(hardMask, ".nxs"))
+          {
+            IAlgorithm_sptr loadNxMask = this->createSubAlgorithm("Load");
+            loadNxMask->setAlwaysStoreInADS(true);
+            loadNxMask->setProperty("Filename", hardMask);
+            loadNxMask->setProperty("OutputWorkspace", hardMaskWsName);
+            loadNxMask->execute();
+          }
+        else if (boost::ends_with(hardMask, ".xml"))
+          {
+            const std::string instName = this->reductionManager->getProperty("InstrumentName");
+            IAlgorithm_sptr loadMask = this->createSubAlgorithm("LoadMask");
+            loadMask->setAlwaysStoreInADS(true);
+            loadMask->setProperty("Instrument", instName);
+            loadMask->setProperty("OutputWorkspace", hardMaskWsName);
+            loadMask->setProperty("InputFile", hardMask);
+            loadMask->execute();
+          }
+        else
+          {
+            throw std::runtime_error("Do not know how to load mask: " + hardMask);
+          }
+      }
+    this->reductionManager->declareProperty(new PropertyWithValue<std::string>("HardMaskWorkspace", hardMaskWsName));
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -430,6 +466,15 @@ namespace WorkflowAlgorithms
           }
       }
 
+    // Need to load data to get certain bits of information.
+    Workspace_sptr sampleWS = this->loadInputData("Sample");
+    MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(sampleWS);
+    this->reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", WS->getInstrument()->getName()));
+
+    // Load the hard mask if available
+    this->loadHardMask();
+
+    // Process the sample detector vanadium if present
     Workspace_sptr detVanWS = this->loadInputData("DetectorVanadium", false);
     IAlgorithm_sptr detVan;
     Workspace_sptr idetVanWS;
@@ -442,8 +487,6 @@ namespace WorkflowAlgorithms
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
         idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
       }
-
-    Workspace_sptr sampleWS = this->loadInputData("Sample");
 
     IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
     etConv->setProperty("InputWorkspace", sampleWS);
