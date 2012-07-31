@@ -1152,7 +1152,7 @@ private:
   std::string config_rootpath;
   static Kernel::Logger& g_log; /// Reference to the logger class
 public:
-  // interface for initiatilzation and interfacing
+  // interface for initialization and interfacing
   static Params* Inst() { static Params instance; return &instance;}
   void get_rawconfig(std::vector<char>& rc) { rc = rawconfig; }
   void get_config(std::vector<char>& c) { c=config; }
@@ -1215,6 +1215,7 @@ private:
   /// Execution code
   void exec();             // Overwrites Algorithm method
   std::string m_filename;
+  Params* m_parameters;
 }; // class LoadSassena
 
 } // namespace DataHandling
