@@ -72,9 +72,9 @@ void IFunction::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
  * @param expr ::    A math expression 
  * @return newly ties parameters
  */
-ParameterTie* IFunction::tie(const std::string& parName,const std::string& expr)
+ParameterTie* IFunction::tie(const std::string& parName,const std::string& expr, bool isDefault)
 {
-  ParameterTie* ti = new ParameterTie(this,parName,expr);
+  ParameterTie* ti = new ParameterTie(this,parName,expr,isDefault);
   addTie(ti);
   this->fix(getParameterIndex(*ti));
   return ti;
@@ -85,7 +85,7 @@ ParameterTie* IFunction::tie(const std::string& parName,const std::string& expr)
  * @param ties :: Comma-separated list of name=value pairs where name is a parameter name and value
  *  is a math expression tying the parameter to other parameters or a constant.
  */
-void IFunction::addTies(const std::string& ties)
+void IFunction::addTies(const std::string& ties, bool isDefault)
 {
   Expression list;
   list.parse(ties);
@@ -99,7 +99,7 @@ void IFunction::addTies(const std::string& ties)
       for( size_t i = n; i != 0; )
       {
         --i;
-        this->tie( (*t)[i].name(), value );
+        this->tie( (*t)[i].name(), value, isDefault );
       }
     }
   }
@@ -123,6 +123,7 @@ std::string IFunction::asString()const
 {
   std::ostringstream ostr;
   ostr << "name="<<this->name();
+  // print the attributes
   std::vector<std::string> attr = this->getAttributeNames();
   for(size_t i=0;i<attr.size();i++)
   {
@@ -133,15 +134,17 @@ std::string IFunction::asString()const
       ostr<<','<<attName<<'='<<attValue;
     }
   }
+  // print the parameters
   for(size_t i=0;i<nParams();i++)
   {
     ostr<<','<<parameterName(i)<<'='<<getParameter(i);
   }
+  // collect non-default constraints
   std::string constraints;
   for(size_t i=0;i<nParams();i++)
   {
     const IConstraint* c = getConstraint(i);
-    if (c)
+    if ( c && !c->isDefault() )
     {
       std::string tmp = c->asString();
       if (!tmp.empty())
@@ -154,16 +157,17 @@ std::string IFunction::asString()const
       }
     }
   }
+  // print constraints
   if (!constraints.empty())
   {
     ostr << ",constraints=(" << constraints << ")";
   }
-
+  // collect the non-default ties
   std::string ties;
   for(size_t i=0;i<nParams();i++)
   {
     const ParameterTie* tie = getTie(i);
-    if (tie)
+    if ( tie && !tie->isDefault() )
     {
       std::string tmp = tie->asString(this);
       if (!tmp.empty())
@@ -176,6 +180,7 @@ std::string IFunction::asString()const
       }
     }
   }
+  // print the ties
   if (!ties.empty())
   {
     ostr << ",ties=(" << ties << ")";
@@ -187,14 +192,14 @@ std::string IFunction::asString()const
  * @param str :: A comma-separated list of name=expr pairs, where name is a parameter name and 
  *  expr is a constraint expression.
  */
-void IFunction::addConstraints(const std::string& str)
+void IFunction::addConstraints(const std::string& str, bool isDefault)
 {
   Expression list;
   list.parse(str);
   list.toList();
   for(auto expr = list.begin(); expr != list.end(); ++expr)
   {
-    IConstraint* c = ConstraintFactory::Instance().createInitialized(this,*expr);
+    IConstraint* c = ConstraintFactory::Instance().createInitialized(this,*expr,isDefault);
     this->addConstraint(c);
   }
 }

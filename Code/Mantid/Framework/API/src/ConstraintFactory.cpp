@@ -23,14 +23,14 @@ namespace Mantid
     {
     }
 
-    IConstraint* ConstraintFactoryImpl::createInitialized(IFunction* fun, const std::string& input) const
+    IConstraint* ConstraintFactoryImpl::createInitialized(IFunction* fun, const std::string& input, bool isDefault) const
     {
       Expression expr;
       expr.parse(input);
-      return createInitialized(fun,expr);
+      return createInitialized(fun,expr,isDefault);
     }
 
-    IConstraint* ConstraintFactoryImpl::createInitialized(IFunction* fun, const Expression& expr) const
+    IConstraint* ConstraintFactoryImpl::createInitialized(IFunction* fun, const Expression& expr, bool isDefault) const
     {
       IConstraint* c = 0;
       if (expr.name() == "==")
@@ -41,7 +41,7 @@ namespace Mantid
       {
         c = createUnwrapped(expr.name());
       }
-      c->initialize(fun,expr);
+      c->initialize(fun,expr,isDefault);
       return c;
     }
 

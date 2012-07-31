@@ -68,13 +68,13 @@ namespace API
      * @param input :: The creation expression
      * @return A pointer to the created Constraint
      */
-    IConstraint* createInitialized(IFunction* fun, const std::string& input) const;
+    IConstraint* createInitialized(IFunction* fun, const std::string& input, bool isDefault = false) const;
     /**Creates an instance of a Constraint
      * @param fun :: The function
      * @param expr :: The creation expression
      * @return A pointer to the created Constraint
      */
-    IConstraint* createInitialized(IFunction* fun, const Expression& expr) const;
+    IConstraint* createInitialized(IFunction* fun, const Expression& expr, bool isDefault = false) const;
 
   private:
     friend struct Mantid::Kernel::CreateUsingNew<ConstraintFactoryImpl>;

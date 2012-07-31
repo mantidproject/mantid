@@ -14,8 +14,8 @@ namespace API
    * @param funct :: A pointer to the function which parameter will be tied
    * @param parName :: The name of the parameter to be tied
    */
-  ParameterTie::ParameterTie(IFunction* funct,const std::string& parName,const std::string& expr)
-    :ParameterReference(funct,funct->parameterIndex(parName)),m_parser(new mu::Parser()),m_function1(funct)
+  ParameterTie::ParameterTie(IFunction* funct,const std::string& parName,const std::string& expr, bool isDefault)
+    :ParameterReference(funct,funct->parameterIndex(parName),isDefault),m_parser(new mu::Parser()),m_function1(funct)
   {
     m_parser->DefineNameChars("0123456789_."
                        "abcdefghijklmnopqrstuvwxyz"

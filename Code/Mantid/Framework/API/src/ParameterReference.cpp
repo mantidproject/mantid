@@ -7,13 +7,19 @@ namespace API
 {
 
 /// Default constructor
-ParameterReference::ParameterReference() : m_function(), m_index(0)
+ParameterReference::ParameterReference() : m_function(), m_index(0), m_isDefault(false)
 {}
 
-/// Constructor
-ParameterReference::ParameterReference(IFunction* fun, std::size_t index)
+/**
+ * Constructor.
+ * @param fun :: Pointer to a function (composite or simple).
+ * @param index :: Index of a parameter of fun
+ * @param isDefault :: Flag to mark as default the value of an object associated with this reference:
+ *  a tie or a constraint. 
+ */
+ParameterReference::ParameterReference(IFunction* fun, std::size_t index, bool isDefault)
 {
-  reset(fun,index);
+  reset(fun,index,isDefault);
 }
 
 /// Return pointer to the function
@@ -28,8 +34,14 @@ std::size_t ParameterReference::getIndex() const
   return m_index;
 }
 
-/// Reset the reference
-void ParameterReference::reset(IFunction* fun, std::size_t index)
+/**
+ * Reset the reference
+ * @param fun :: Pointer to a function (composite or simple).
+ * @param index :: Index of a parameter of fun
+ * @param isDefault :: Flag to mark as default the value of an object associated with this reference:
+ *  a tie or a constraint. 
+ */
+void ParameterReference::reset(IFunction* fun, std::size_t index, bool isDefault)
 {
   IFunction* fLocal = fun;
   size_t iLocal = index;
@@ -44,9 +56,13 @@ void ParameterReference::reset(IFunction* fun, std::size_t index)
 
   m_function = fLocal;
   m_index = iLocal;
+  m_isDefault = isDefault;
 }
 
-/// Set the parameter
+/**
+ * Set the parameter
+ * @param value :: A value to set.
+ */
 void ParameterReference::setParameter(const double& value)
 {
   m_function->setParameter(m_index,value);
@@ -56,6 +72,12 @@ void ParameterReference::setParameter(const double& value)
 double ParameterReference::getParameter() const
 {
   return m_function->getParameter(m_index);
+}
+
+/// Returns the default value flag
+bool ParameterReference::isDefault() const
+{
+  return m_isDefault;
 }
 
 } // namespace API

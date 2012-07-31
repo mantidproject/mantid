@@ -324,9 +324,9 @@ public:
 
 
   /// Tie a parameter to other parameters (or a constant)
-  virtual ParameterTie* tie(const std::string& parName, const std::string& expr);
+  virtual ParameterTie* tie(const std::string& parName, const std::string& expr, bool isDefault = false);
   /// Add several ties
-  virtual void addTies(const std::string& ties);
+  virtual void addTies(const std::string& ties, bool isDefault = false);
   /// Apply the ties
   virtual void applyTies() = 0;
   /// Removes the tie off a parameter
@@ -340,7 +340,7 @@ public:
 
 
   /// Add a list of conatraints from a string
-  virtual void addConstraints(const std::string& str);
+  virtual void addConstraints(const std::string& str, bool isDefault = false);
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic) = 0;
   /// Get constraint of i-th parameter
@@ -403,9 +403,7 @@ protected:
     boost::shared_ptr<const MatrixWorkspace> ws,
     size_t wsIndex) const;
   
-  /// Create an instance of a tie without actually tying it to anything
-  //virtual ParameterTie* createTie(const std::string& parName);
-  /// Add a new tie
+  /// Add a new tie. Derived classes must provide storage for ties
   virtual void addTie(ParameterTie* tie) = 0;
 
   friend class ParameterTie;

@@ -71,7 +71,7 @@ public:
     BoundaryConstraint bc;
     Expression expr;
     expr.parse("10<Sigma<20");
-    bc.initialize(&gaus,expr);
+    bc.initialize(&gaus,expr,false);
 
     TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
     TS_ASSERT_DELTA( bc.lower(), 10 ,0.0001);
@@ -85,7 +85,7 @@ public:
     BoundaryConstraint bc;
     Expression expr;
     expr.parse("20>Sigma>10");
-    bc.initialize(&gaus,expr);
+    bc.initialize(&gaus,expr,false);
 
     TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
     TS_ASSERT_DELTA( bc.lower(), 10 ,0.0001);
@@ -99,7 +99,7 @@ public:
     BoundaryConstraint bc;
     Expression expr;
     expr.parse("10<Sigma");
-    bc.initialize(&gaus,expr);
+    bc.initialize(&gaus,expr,false);
 
     TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
     TS_ASSERT_DELTA( bc.lower(), 10 ,0.0001);
@@ -113,7 +113,7 @@ public:
     BoundaryConstraint bc;
     Expression expr;
     expr.parse("Sigma<20");
-    bc.initialize(&gaus,expr);
+    bc.initialize(&gaus,expr,false);
 
     TS_ASSERT_EQUALS( bc.getParameterName(), "Sigma" );
     TS_ASSERT_DELTA( bc.upper(), 20 ,0.0001);
@@ -127,7 +127,7 @@ public:
     BoundaryConstraint bc;
     Expression expr;
     expr.parse("Sigma==20");
-    TS_ASSERT_THROWS(bc.initialize(&gaus,expr),std::invalid_argument);
+    TS_ASSERT_THROWS(bc.initialize(&gaus,expr,false),std::invalid_argument);
   }
 
   void testInitialize6()
@@ -137,7 +137,7 @@ public:
     BoundaryConstraint bc;
     Expression expr;
     expr.parse("a<Sigma<b");
-    TS_ASSERT_THROWS(bc.initialize(&gaus,expr),std::invalid_argument);
+    TS_ASSERT_THROWS(bc.initialize(&gaus,expr,false),std::invalid_argument);
   }
 
   //test constructor with lower boundary only
@@ -145,7 +145,7 @@ public:
   {
     Gaussian gaus;
     gaus.initialize();
-    BoundaryConstraint bc(&gaus,"Sigma",0.0);
+    BoundaryConstraint bc(&gaus,"Sigma",0.0,false);
     TS_ASSERT(bc.hasLower());
     TS_ASSERT(!bc.hasUpper());
     TS_ASSERT_EQUALS(bc.lower(),0.0);
@@ -160,7 +160,7 @@ public:
     BoundaryConstraint* bc = new BoundaryConstraint;
     Expression expr;
     expr.parse("Sigma<20");
-    bc->initialize(&gaus,expr);
+    bc->initialize(&gaus,expr,false);
 
     TS_ASSERT_EQUALS( bc->getParameterName(), "Sigma" );
     TS_ASSERT_DELTA( bc->upper(), 20 ,0.0001);
@@ -189,13 +189,13 @@ public:
     BoundaryConstraint* bcSigma = new BoundaryConstraint;
     Expression exprSigma;
     exprSigma.parse("Sigma<20");
-    bcSigma->initialize(&gaus,exprSigma);
+    bcSigma->initialize(&gaus,exprSigma,false);
     gaus.addConstraint(bcSigma);
 
     BoundaryConstraint* bcHeight = new BoundaryConstraint;
     Expression exprHeight;
     exprHeight.parse("1.3<Height<3.4");
-    bcHeight->initialize(&gaus,exprHeight);
+    bcHeight->initialize(&gaus,exprHeight,false);
     gaus.addConstraint(bcHeight);
 
     IFunction_sptr fun = FunctionFactory::Instance().createInitialized(gaus.asString());

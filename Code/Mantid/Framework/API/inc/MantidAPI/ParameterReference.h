@@ -47,15 +47,19 @@ class MANTID_API_DLL ParameterReference
 {
 public:
   ParameterReference();
-  ParameterReference(IFunction* fun, std::size_t index);
+  ParameterReference(IFunction* fun, std::size_t index, bool isDefault = false);
   std::size_t getIndex() const;
-  void reset(IFunction* fun, std::size_t index);
+  void reset(IFunction* fun, std::size_t index, bool isDefault = false);
   void setParameter(const double& value);
   double getParameter() const;
   IFunction* getFunction() const;
+  bool isDefault() const;
 private:
   IFunction* m_function; ///< pointer to the function
   std::size_t m_index; ///< parameter index
+  /// Flag to mark as default the value of an object associated with this reference:
+  /// a tie or a constraint.
+  bool m_isDefault;
 };
 
 } // namespace API

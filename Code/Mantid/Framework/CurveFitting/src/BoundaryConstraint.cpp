@@ -27,7 +27,7 @@ Kernel::Logger& BoundaryConstraint::g_log = Kernel::Logger::get("BoundaryConstra
  * @param lowerBound :: The lower bound
  * @param upperBound :: The upper bound
  */
-BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound) : 
+BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, const double upperBound, bool isDefault) : 
 m_penaltyFactor(1000.0),
 m_parameterName(paramName),
 m_hasLowerBound( true), 
@@ -35,17 +35,17 @@ m_hasUpperBound( true),
 m_lowerBound(lowerBound), 
 m_upperBound(upperBound)
 {
-  reset(fun,fun->parameterIndex(paramName));
+  reset(fun,fun->parameterIndex(paramName),isDefault);
 }
 
-BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound) :
+BoundaryConstraint::BoundaryConstraint(API::IFunction* fun, const std::string paramName, const double lowerBound, bool isDefault) :
 m_penaltyFactor(1000.0),
 m_parameterName(paramName),
 m_hasLowerBound( true),
 m_hasUpperBound( false),
 m_lowerBound(lowerBound)
 {
-  reset(fun,fun->parameterIndex(paramName));
+  reset(fun,fun->parameterIndex(paramName),isDefault);
 }
 
 /** Initialize the constraint from an expression.
@@ -54,7 +54,7 @@ m_lowerBound(lowerBound)
  * " 10 < Sigma < 20 " or
  * " Sigma > 20 "
  */
-void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& expr)
+void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& expr, bool isDefault)
 {
   if ( expr.size() < 2 || expr.name() != "==")
   {
@@ -124,7 +124,7 @@ void BoundaryConstraint::initialize(API::IFunction* fun, const API::Expression& 
   try
   {
     size_t i = fun->parameterIndex(parName);
-    reset(fun,i);
+    reset(fun,i,isDefault);
     m_parameterName = parName;
   }
   catch(...)
