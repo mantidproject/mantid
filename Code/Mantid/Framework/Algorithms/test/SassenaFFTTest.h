@@ -40,12 +40,34 @@ public:
     // execute the algorithm
     TS_ASSERT_THROWS_NOTHING( m_alg.execute() );
     TS_ASSERT( m_alg.isExecuted() );
-    //this->printWorkspace2D("/tmp/sqw.dat",gwsName +"_sqw");
+    this->printWorkspace2D("/tmp/sqwZeroImaginary.dat",gwsName +"_sqw");
     // The input real part was an exponential h*exp(-x^2/(2*s^2) with h=1.0,s=1.0
     // The Fourier transform is an exponential h'*exp(-x^2/(2*s'^2) with h'=sqrt(2*pi*s)=2.507 and s=2*pi/s=0.159
     DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
     checkHeigth(ws, sqrt(2*M_PI) );
+    checkAverage(ws,0.0);
     checkSigma(ws, 1.0/(2.0*M_PI) );
+  }
+
+  /// FFT of a real symmetric Gaussian with detailed balance condition
+  void test_DetailedBalanceCondition(){
+    const double T(300);
+    const double params[] = {1.0, 1.0, 0.0, 0.1, 0.1, 2.0}; // three pairs of (Heigth,sigma) values
+    if( !m_alg.isInitialized() ){ m_alg.initialize(); }
+    const std::string gwsName("SassenaII");
+    this->createGroupWorkspace( params, gwsName );
+    m_alg.setPropertyValue("InputWorkspace", gwsName);
+    m_alg.setProperty("DetailedBalance",true);
+    m_alg.setProperty("Temp",T);
+    // execute the algorithm
+    TS_ASSERT_THROWS_NOTHING( m_alg.execute() );
+    TS_ASSERT( m_alg.isExecuted() );
+    this->printWorkspace2D("/tmp/sqwDetailedBalanceCondition.dat",gwsName +"_sqw");
+    DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
+    checkHeigth(ws, sqrt(2*M_PI) );
+    const double sigma = 1.0/(2.0*M_PI);
+    checkAverage(ws,-sigma*sigma/(2*T));
+    checkSigma(ws, sigma);
   }
 
 private:
@@ -57,7 +79,7 @@ private:
    */
   void checkHeigth(DataObjects::Workspace2D_const_sptr &ws, const double &value)
   {
-    const double frErr=1E-04; //allowed fractional error
+    const double frErr=1E-02; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv;
     for(size_t i=0; i<nspectra; i++)
@@ -65,12 +87,44 @@ private:
       double goldStandard = value/(1+ static_cast<double>(i) );
       yv = ws->readY(i);
       double h = *std::max_element( yv.begin(), yv.end() );
-      TS_ASSERT_DELTA( h, goldStandard, frErr );
+      double error1 = DBL_EPSILON*std::sqrt( yv.size() ); //rounding error if value==0
+      double error = fmax(error1, frErr*std::fabs(goldStandard));
+      TS_ASSERT_DELTA( h, goldStandard, error );
     }
   }
 
   /**
-   * Check the standar deviation
+   * Check the average
+   * @param wsName name of the workspace
+   * @param value compare to the average
+   */
+  void checkAverage(DataObjects::Workspace2D_const_sptr &ws, const double &value)
+  {
+    const double frErr=1E-02; //allowed fractional error
+    const size_t nspectra = ws->getNumberHistograms();
+    MantidVec yv,xv;
+    for(size_t i=0; i<nspectra; i++)
+    {
+      double goldStandard = (1+ static_cast<double>(i) )*value;
+      xv = ws->readX(i);
+      yv = ws->readY(i);
+      double sum = 0.0;
+      double average = 0.0;
+      MantidVec::iterator itx = xv.begin();
+      for(MantidVec::iterator it = yv.begin(); it != yv.end(); ++it)
+      {
+        sum += *it;
+        average += (*it)*(*itx);
+        ++itx;
+      }
+      average /= sum;
+      double error1 = DBL_EPSILON*std::sqrt( yv.size() ); //rounding error if value==0
+      double error = fmax(error1, frErr*std::fabs(goldStandard));
+      TS_ASSERT_DELTA( average, goldStandard, error );
+    }
+  }
+  /**
+   * Check the standard deviation
    * @param wsName name of the workspace
    * @param value compare to the standard deviation
    */
@@ -90,7 +144,9 @@ private:
       for(MantidVec::iterator it = yv.begin(); it != yv.end(); ++it) sum += *it;
       sum *= dx / static_cast<double>(nbins);
       double sigma = sum / (h * std::sqrt(2*M_PI));
-      TS_ASSERT_DELTA( sigma, goldStandard, frErr );
+      double error1 = DBL_EPSILON*std::sqrt( yv.size() ); //rounding error if value==0
+      double error = fmax(error1, frErr*std::fabs(goldStandard));
+      TS_ASSERT_DELTA( sigma, goldStandard, error );
     }
   }
 

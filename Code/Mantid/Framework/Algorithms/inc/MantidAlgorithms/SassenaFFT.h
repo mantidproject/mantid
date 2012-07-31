@@ -39,7 +39,7 @@ class DLLExport SassenaFFT : public API::Algorithm
 {
 public:
   /// Default constructor
-  SassenaFFT() : API::Algorithm() {}
+  SassenaFFT() : API::Algorithm(), m_T2meV(1.0/11.604) {}
   /// Destructor
   virtual ~SassenaFFT() {}
   /// Algorithm's name for identification overriding a virtual method
@@ -58,6 +58,7 @@ private:
   void init();
   void exec();
   bool checkGroups();
+  const double m_T2meV;  //conversion factor from Kelvin to meV
 
 }; // class SassenaFFT
 

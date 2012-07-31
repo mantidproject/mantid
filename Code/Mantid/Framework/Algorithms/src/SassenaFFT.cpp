@@ -91,14 +91,14 @@ void SassenaFFT::exec()
   //Do we apply the detailed balance condition exp(E/(2*kT)) ?
   if( this->getProperty("DetailedBalance") )
   {
-    double kT = this->getProperty("Temp");
-    kT /= 11.604;  // units of meV
+    double T = this->getProperty("Temp");
+    T *= m_T2meV;  // from Kelvin to units of meV
     API::IAlgorithm_sptr ec = this->createSubAlgorithm("ExponentialCorrection");
     ec->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", sqw);
     ec->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
-    ec->setProperty("C0",1.0);
-    ec->setProperty("C1",-1.0/(2.0*kT));
-    ec->setProperty("Operation","multiply");
+    ec->setProperty<double>("C0",1.0);
+    ec->setProperty<double>("C1",-1.0/(2.0*T));
+    ec->setPropertyValue("Operation","Multiply");
     ec->executeAsSubAlg();
   }
 
