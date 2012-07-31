@@ -78,7 +78,9 @@ namespace CurveFitting
     void createPeaksWorkspace();
 
     /// Set parameters to each peak
-    void setPeakParameters(CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak, double peakheight);
+    void setPeakParameters(
+            CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak,
+            std::map<std::string, std::pair<double, char> > parammap, double peakheight);
 
     /// Calcualte peak heights from model to data
     void calPeaksIntensities(std::vector<std::pair<int, double> >& peakheights, size_t workspaceindex);
@@ -87,11 +89,18 @@ namespace CurveFitting
     void calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> peakindices, std::vector<double> peakcenters,
                            std::vector<std::pair<double, double> > peakboundaries, std::vector<std::pair<size_t, double> >& peakintensities);
 
-    /// Calculate LeBail pattern
+    /// Calculate LeBail pattern from from input peak parameters
     void calculatePattern(size_t workspaceindex);
+
+    /// Calculate diffraction pattern
+    void calculateDiffractionPattern(size_t workspaceindex, API::FunctionDomain1DVector domain, API::FunctionValues& values,
+            std::map<std::string, std::pair<double, char> > parammap, bool recalpeakintesity);
 
     /// LeBailFit
     void doLeBailFit(size_t workspaceindex);
+
+    /// Do 1 iteration in Le Bail fit
+    bool unitLeBailFit(size_t workspaceindex, std::map<std::string, std::pair<double, char> >& parammap);
 
     /// Calculate Peaks' Intensities
     void calculatePeaksHeights(size_t workspaceindex);
@@ -101,6 +110,15 @@ namespace CurveFitting
 
     /// Numerically estimate the range of peak
     //  void estimatePeakRange(size_t workspaceindex, double center, double fwhm, double& tof_center, double& tof_left, double& tof_right);
+
+    /// Write out (domain, values) to output workspace
+    void writeToOutputWorkspace(API::FunctionDomain1DVector domain,  API::FunctionValues values);
+
+    /// Write input data and difference to output workspace
+    void writeInputDataNDiff(size_t workspaceindex, API::FunctionDomain1DVector domain);
+
+    /// Output parameters (fitted or tied)
+    void exportParametersWorkspace(std::map<std::string, std::pair<double, char> > parammap);
 
     /// Instance data
     API::MatrixWorkspace_sptr dataWS;
@@ -116,6 +134,10 @@ namespace CurveFitting
 
     API::CompositeFunction_sptr mLeBailFunction;
     std::map<std::string, std::pair<double, char> > mFuncParameters; // char = f: fit... = t: tie to value
+
+    size_t mWSIndexToWrite;
+
+    int mPeakRadius;
 
   };
 

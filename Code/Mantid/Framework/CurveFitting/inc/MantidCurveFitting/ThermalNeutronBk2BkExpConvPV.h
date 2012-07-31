@@ -54,8 +54,6 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     std::string name()const{return "ThermalNeutronBk2BkExpConvPV";}
     virtual const std::string category() const { return "Peak";}
 
-    /// Set up the range of peak calculation for higher efficiency
-
     /// Reset FWHM such that FWHM will be recalculated
     void resetFWHM();
 
