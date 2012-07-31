@@ -155,9 +155,9 @@ namespace WorkflowAlgorithms
               {
                 g_log.notice() << "Trying to determine file name" << std::endl;
                 std::string runFileName("");
-                if (reductionManager->existsProperty("MonitorFilename"))
+                if (reductionManager->existsProperty("SampleMonitorFilename"))
                   {
-                    runFileName = reductionManager->getPropertyValue("MonitorFilename");
+                    runFileName = reductionManager->getPropertyValue("SampleMonitorFilename");
                     if (runFileName.empty())
                       {
                         throw std::runtime_error("Cannot find run filename, therefore cannot find the initial energy");
@@ -489,7 +489,7 @@ namespace WorkflowAlgorithms
       }
 
     // Normalise by the detector vanadium if necessary
-    MatrixWorkspace_const_sptr detVanWS = this->getProperty("IntegratedDetectorVanadium");
+    MatrixWorkspace_sptr detVanWS = this->getProperty("IntegratedDetectorVanadium");
     if (detVanWS)
       {
         IAlgorithm_sptr divide = this->createSubAlgorithm("Divide");
