@@ -40,7 +40,7 @@ class TobyFitResolutionModelTest : public CxxTest::TestSuite
       delete conv;
     }
 
-    void xtest_Construction_With_Valid_Arguments_Creates_Object()
+    void test_Construction_With_Valid_Arguments_Creates_Object()
     {
       using namespace Mantid::MDAlgorithms;
       ResolutionConvolvedCrossSection * conv = new ResolutionConvolvedCrossSection;
@@ -50,7 +50,7 @@ class TobyFitResolutionModelTest : public CxxTest::TestSuite
       delete conv;
     }
 
-    void xtest_uninitialized_object_has_no_attributes()
+    void test_uninitialized_object_has_no_attributes()
     {
       using namespace Mantid::MDAlgorithms;
       TobyFitResolutionModel mdconvolution;
@@ -59,7 +59,7 @@ class TobyFitResolutionModelTest : public CxxTest::TestSuite
 
     }
 
-    void xtest_initialized_object_has_correct_number_of_attributes()
+    void test_initialized_object_has_correct_number_of_attributes()
     {
       using namespace Mantid::MDAlgorithms;
       TobyFitResolutionModel mdconvolution;
@@ -68,7 +68,7 @@ class TobyFitResolutionModelTest : public CxxTest::TestSuite
       TS_ASSERT_EQUALS(mdconvolution.nAttributes(), 11);
     }
 
-    void xtest_crossSection_Returns_Expected_Value_For_Specific_Parameters()
+    void test_crossSection_Returns_Expected_Value_For_Specific_Parameters()
     {
       using namespace Mantid::MDAlgorithms;
       ResolutionConvolvedCrossSection * conv = new ResolutionConvolvedCrossSection;

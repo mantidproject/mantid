@@ -56,7 +56,7 @@ public:
     delete crossSecResolution;
   }
 
-  void xtest_functionMD_Does_Not_Throw_With_Foreground_And_ResolutionModel_Attrs_Set()
+  void test_functionMD_Does_Not_Throw_With_Foreground_And_ResolutionModel_Attrs_Set()
   {
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::API;
@@ -73,7 +73,7 @@ public:
     delete crossSecResolution;
   }
 
-  void xtest_Function_Acquires_ForegroundModelParameters_When_ResolutionModel_Is_Set()
+  void test_Function_Acquires_ForegroundModelParameters_When_ResolutionModel_Is_Set()
   {
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::API;
@@ -90,7 +90,7 @@ public:
     delete crossSection;
   }
 
-  void xtest_Function_Acquires_Attributes_From_ResolutionType_When_Set()
+  void test_Function_Acquires_Attributes_From_ResolutionType_When_Set()
   {
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::API;
@@ -104,7 +104,7 @@ public:
     TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 2);
   }
 
-  void xtest_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()
+  void test_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()
   {
     // How this works -> The fake convolution's signal member is
     // set up to throw an exception if the attribute still has

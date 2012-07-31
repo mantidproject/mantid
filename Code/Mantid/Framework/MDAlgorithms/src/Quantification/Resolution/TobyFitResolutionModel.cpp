@@ -208,7 +208,7 @@ namespace Mantid
         static const double small(1e-20);
         const double prefactor = std::sqrt(-2.0*std::log(std::max(small,randomNums[nvars])));
         const double r2 = randomNums[nvars+1];
-        const double etaSig = observation.experimentInfo()->run().getLogAsSingleValue("EtaSigma");
+        const double etaSig = observation.experimentInfo()->run().getLogAsSingleValue("eta_sigma");
 
         m_etaInPlane = etaSig*prefactor*std::cos(2.0*M_PI*r2);
         m_etaOutPlane = etaSig*prefactor*std::sin(2.0*M_PI*r2);

@@ -169,7 +169,7 @@ namespace Mantid
       {
         std::set<detid_t> group;
         group.insert(detids[i]);
-        m_detGroups.insert(std::make_pair(i+1, group));
+        m_detGroups.insert(std::make_pair(static_cast<specid_t>(i+1), group));
       }
     }
 
@@ -195,7 +195,7 @@ namespace Mantid
      */
     void CreateSimulationWorkspace::loadMappingFromRAW(const std::string & filename)
     {
-      FILE *rawFile = fopen(filename.c_str(), "r");
+      FILE *rawFile = fopen(filename.c_str(), "rb");
       if(!rawFile) throw std::runtime_error("Cannot open RAW file for reading: " + filename);
 
       ISISRAW2 isisRaw;

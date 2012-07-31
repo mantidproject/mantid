@@ -21,6 +21,7 @@
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/ClassMacros.h"
@@ -42,7 +43,7 @@ namespace Mantid
      * A factory class for mapping string names of models to their
      * class types. Allows a model to be instantiated from a string.
      */
-    class DLLExport ForegroundModelFactoryImpl : public Kernel::DynamicFactory<ForegroundModel>
+    class MANTID_MDALGORITHMS_DLL ForegroundModelFactoryImpl : public Kernel::DynamicFactory<ForegroundModel>
     {
     private:
       /// Base-class type
@@ -67,10 +68,10 @@ namespace Mantid
     ///Forward declaration of a specialisation of SingletonHolder for ForegroundModelFactoryImpl (needed for dllexport/dllimport).
     #ifdef _WIN32
       // this breaks new namespace declaraion rules; need to find a better fix
-      template class DLLExport Kernel::SingletonHolder<ForegroundModelFactoryImpl>;
+      template class MANTID_MDALGORITHMS_DLL Kernel::SingletonHolder<ForegroundModelFactoryImpl>;
     #endif /* _WIN32 */
     /// Typedef singleton instance to ForegroundFactory
-    typedef  Kernel::SingletonHolder<ForegroundModelFactoryImpl> ForegroundModelFactory;
+    typedef MANTID_MDALGORITHMS_DLL Kernel::SingletonHolder<ForegroundModelFactoryImpl> ForegroundModelFactory;
   }
 }
 

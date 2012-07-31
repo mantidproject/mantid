@@ -21,6 +21,7 @@
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#include "MantidMDAlgorithms/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -40,7 +41,7 @@ namespace Mantid
     /**
      * Defines a factory for creating convolution types from a string
      */
-    class DLLExport MDResolutionConvolutionFactoryImpl 
+    class MANTID_MDALGORITHMS_DLL MDResolutionConvolutionFactoryImpl
       : public Kernel::DynamicFactory<MDResolutionConvolution>
     {
     private:
@@ -69,10 +70,10 @@ namespace Mantid
     ///Forward declaration of a specialisation of SingletonHolder for MDResolutionConvolutionFactoryImpl (needed for dllexport/dllimport).
     #ifdef _WIN32
       // this breaks new namespace declaraion rules; need to find a better fix
-      template class DLLExport Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>;
+      template class MANTID_MDALGORITHMS_DLL Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl>;
     #endif /* _WIN32 */
     /// Typedef singleton instance to MDResolutionConvolutionFactory
-    typedef Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl> MDResolutionConvolutionFactory;
+    typedef MANTID_MDALGORITHMS_DLL Kernel::SingletonHolder<MDResolutionConvolutionFactoryImpl> MDResolutionConvolutionFactory;
   }
 }
 
