@@ -9,7 +9,7 @@ class DgsInterface(InstrumentInterface):
         Defines the widgets for direct geometry spectrometer reduction
     """
     # Allowed extensions for loading data files
-    data_type = "Data files *.nxs *.dat (*.nxs *.dat)"
+    data_type = "Data files *.nxs *.dat *.xml (*.nxs *.dat *.xml)"
     
     def __init__(self, name, settings):
         super(DgsInterface, self).__init__(name, settings)
