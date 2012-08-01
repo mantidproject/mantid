@@ -836,7 +836,8 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
     else
     {
       // If it does exist make sure the value is current
-      const std::string value = getString(key, false);
+      std::string value = getString(key, false);
+      Poco::replaceInPlace(value,"\\","\\\\"); //replace single \ with double 
       updated_file += key + "=" + value;
       //Remove the key from the changed key list
       m_changed_keys.erase(key);
@@ -852,7 +853,9 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
     for (std::set<std::string>::iterator key_itr = m_changed_keys.begin(); key_itr != key_end;)
     {
       updated_file += *key_itr + "=";
-      updated_file += getString(*key_itr, false);
+      std::string value = getString(*key_itr, false);
+      Poco::replaceInPlace(value,"\\","\\\\");  //replace single \ with double 
+      updated_file += value;
       if (++key_itr != key_end)
       {
         updated_file += "\n";
