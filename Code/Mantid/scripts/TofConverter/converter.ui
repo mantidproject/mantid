@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>456</width>
+    <height>312</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>TofConverter</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>10</y>
+      <width>441</width>
+      <height>261</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>CONVERTER</string>
+    </property>
+    <widget class="QComboBox" name="inputUnits">
+     <property name="geometry">
+      <rect>
+       <x>230</x>
+       <y>20</y>
+       <width>191</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>Energy  (meV)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Wavelength (Angstroms)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Nu (THz)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Velocity (m/s)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Momentum ( k Angstroms^-1)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Temperature (K)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Energy (cm^-1)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Momentum transfer (Q Angstroms^-1)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>d-Spacing (Angstroms)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Time of flight (microseconds)</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_5">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>120</y>
+       <width>211</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Total flight path (meters)</string>
+     </property>
+     <widget class="QLineEdit" name="lineEdit_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>191</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>211</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Scattering Angle (degrees)</string>
+     </property>
+     <widget class="QLineEdit" name="lineEdit_4">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>191</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QPushButton" name="convert">
+     <property name="geometry">
+      <rect>
+       <x>230</x>
+       <y>60</y>
+       <width>191</width>
+       <height>121</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CONVERT</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>190</y>
+       <width>421</width>
+       <height>61</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>OUTPUT</string>
+     </property>
+     <widget class="QLineEdit" name="lineEdit_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>201</width>
+        <height>31</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QComboBox" name="outputUnits">
+      <property name="geometry">
+       <rect>
+        <x>220</x>
+        <y>20</y>
+        <width>191</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <item>
+       <property name="text">
+        <string>Energy  (meV)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Wavelength (Angstroms)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Nu (THz)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Velocity (m/s)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Momentum ( k Angstroms^-1)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Temperature (K)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Energy (cm^-1)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Momentum transfer (Q Angstroms^-1)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>d-Spacing (Angstroms)</string>
+       </property>
+      </item>
+      <item>
+       <property name="text">
+        <string>Time of flight (microseconds)</string>
+       </property>
+      </item>
+     </widget>
+    </widget>
+    <widget class="QLineEdit" name="InputVal">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>19</y>
+       <width>211</width>
+       <height>31</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>456</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action7">
+   <property name="text">
+    <string>7</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
