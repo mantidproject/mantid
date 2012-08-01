@@ -1411,8 +1411,14 @@ void FindPeaks::updateFitResults(API::IAlgorithm_sptr fitAlg, std::vector<double
 IFunction_sptr FindPeaks::createFunction(const double height, const double centre, const double sigma, const double a0, const double a1, const double a2, const bool withPeak)
 {
     // setup the background
+    // FIXME  Need to have a uniformed routine to name background function
+    std::string backgroundposix("");
+    if (m_backgroundType.compare("Quadratic"))
+    {
+      backgroundposix = "Background";
+    }
     auto background =
-        API::FunctionFactory::Instance().createFunction(m_backgroundType + "Background");
+        API::FunctionFactory::Instance().createFunction(m_backgroundType + backgroundposix);
     int order = this->backgroundOrder();
     background->setParameter("A0", a0);
     if (order > 0)
