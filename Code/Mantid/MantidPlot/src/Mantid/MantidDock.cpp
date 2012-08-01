@@ -865,6 +865,7 @@ void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QStri
   catch( ... )
   {
   }
+  findAbandonedWorkspaces();
 }
 
 /**
@@ -947,7 +948,11 @@ void MantidDockWidget::findAbandonedWorkspaces()
     }
     else
     {
-      topItems.remove( qName );
+      int i = topItems.indexOf( qName );
+      if ( i >= 0 )
+      {
+        topItems.removeAt( i );
+      }
     }
   }
   // if there are some names left in topItems - remove them
