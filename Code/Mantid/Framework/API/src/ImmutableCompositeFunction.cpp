@@ -126,5 +126,27 @@ using std::size_t;
     m_alias[alias] = CompositeFunction::parameterIndex( parName );
   }
 
+  /**
+   * Add default ties. Ties added with this method are created with isDefault flag set to true and 
+   * do not appear in the string returned by asString() method.
+   * @param ties :: Comma-separated list of name=value pairs where name is a parameter name and value
+   *  is a math expression tying the parameter to other parameters or a constant.
+   */
+  void ImmutableCompositeFunction::addDefaultTies(const std::string& ties)
+  {
+    CompositeFunction::addTies( ties, true );
+  }
+
+  /**
+   * Add a list of constraints from a string. Constraints added with this method are created with 
+   * isDefault flag set to true and do not appear in the string returned by asString() method.
+   * @param str :: A comma-separated list of constraint expressions.
+   */
+  void ImmutableCompositeFunction::addDefaultConstraints(const std::string& constraints)
+  {
+    CompositeFunction::addConstraints( constraints, true );
+  }
+
+
 } // namespace API
 } // namespace Mantid

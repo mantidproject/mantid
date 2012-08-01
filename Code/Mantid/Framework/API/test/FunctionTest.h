@@ -8,6 +8,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/ParameterTie.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -302,6 +303,10 @@ public:
     TS_ASSERT(   f.isActive(2));
     TS_ASSERT( ! f.isActive(3));
 
+    TS_ASSERT( ! f.getTie( 0 ) );
+    TS_ASSERT(   f.getTie( 1 ) && !f.getTie( 1 )->isDefault() );
+    TS_ASSERT( ! f.getTie( 2 ) );
+    TS_ASSERT(   f.getTie( 3 ) && !f.getTie( 3 )->isDefault() );
   }
 
   void testApplyTies()
@@ -362,6 +367,11 @@ public:
     TS_ASSERT(   f.isFixed(1));
     TS_ASSERT( ! f.isFixed(2));
     TS_ASSERT( ! f.isFixed(3));
+
+    TS_ASSERT( ! f.getTie( 0 ) );
+    TS_ASSERT(   f.getTie( 1 ) && !f.getTie( 1 )->isDefault() );
+    TS_ASSERT( ! f.getTie( 2 ) );
+    TS_ASSERT( ! f.getTie( 3 ) );
   }
 
   void testClearTies()

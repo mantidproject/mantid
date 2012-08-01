@@ -43,6 +43,7 @@ public:
 
 };
 
+//---------------------------------------------------------------------------------
 class ImmutableCompositeFunctionTest_Function: public ImmutableCompositeFunction
 {
 public:
@@ -68,6 +69,35 @@ public:
 
 DECLARE_FUNCTION(ImmutableCompositeFunctionTest_Function);
 
+//---------------------------------------------------------------------------------
+class ImmutableCompositeFunctionTest_FunctionWithTies: public ImmutableCompositeFunction
+{
+public:
+  ImmutableCompositeFunctionTest_FunctionWithTies(): ImmutableCompositeFunction()
+  {
+    IFunction* fun1 = new ImmutableCompositeFunctionTest_Linear;
+    fun1->setParameter( "a", 1.0 );
+    fun1->setParameter( "b", 2.0 );
+    addFunction( fun1 );
+
+    IFunction* fun2 = new ImmutableCompositeFunctionTest_Linear;
+    fun2->setParameter( "a", 3.0 );
+    fun2->setParameter( "b", 4.0 );
+    addFunction( fun2 );
+
+    setAlias("f0.a", "a1");
+    setAlias("f0.b", "b1");
+    setAlias("f1.a", "a2");
+    setAlias("f1.b", "b2");
+
+    addDefaultTies("b2 = a1, a2 = a1/4");
+  }
+  std::string name()const {return "ImmutableCompositeFunctionTest_FunctionWithTies";}
+};
+
+DECLARE_FUNCTION(ImmutableCompositeFunctionTest_FunctionWithTies);
+
+//---------------------------------------------------------------------------------
 class ImmutableCompositeFunctionTest_FunctionThrow: public ImmutableCompositeFunction
 {
 public:
@@ -90,6 +120,7 @@ public:
   }
 };
 
+//---------------------------------------------------------------------------------
 class ImmutableCompositeFunctionTest_FunctionThrow1: public ImmutableCompositeFunction
 {
 public:
@@ -112,6 +143,7 @@ public:
   }
 };
 
+//---------------------------------------------------------------------------------
 class ImmutableCompositeFunctionTest : public CxxTest::TestSuite
 {
 public:
@@ -284,6 +316,33 @@ public:
     TS_ASSERT( ! fun->getTie( 1 ) );
     TS_ASSERT(   fun->getTie( 2 ) );
     TS_ASSERT(   fun->getTie( 3 ) );
+  }
+
+  void testAddDefaultTies()
+  {
+    ImmutableCompositeFunctionTest_FunctionWithTies icf;
+
+    icf.applyTies();
+
+    TS_ASSERT_EQUALS( icf.getParameter(0), 1.0 );
+    TS_ASSERT_EQUALS( icf.getParameter(1), 2.0 );
+    TS_ASSERT_EQUALS( icf.getParameter(2), 0.25 );
+    TS_ASSERT_EQUALS( icf.getParameter(3), 1.0 );
+
+    TS_ASSERT_EQUALS( icf.asString(), "name=ImmutableCompositeFunctionTest_FunctionWithTies,a1=1,b1=2" );
+
+    auto fun = FunctionFactory::Instance().createInitialized( icf.asString() );
+    TS_ASSERT( fun );
+    TS_ASSERT_EQUALS( fun->nParams(), 4 );
+    TS_ASSERT_EQUALS( fun->getParameter(0), 1.0 );
+    TS_ASSERT_EQUALS( fun->getParameter(1), 2.0 );
+    TS_ASSERT_EQUALS( fun->getParameter(2), 0.25 );
+    TS_ASSERT_EQUALS( fun->getParameter(3), 1.0 );
+    TS_ASSERT( ! fun->getTie( 0 ) );
+    TS_ASSERT( ! fun->getTie( 1 ) );
+    TS_ASSERT(   fun->getTie( 2 ) );
+    TS_ASSERT(   fun->getTie( 3 ) );
+
   }
 
 };

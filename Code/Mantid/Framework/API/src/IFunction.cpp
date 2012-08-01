@@ -137,7 +137,11 @@ std::string IFunction::asString()const
   // print the parameters
   for(size_t i=0;i<nParams();i++)
   {
-    ostr<<','<<parameterName(i)<<'='<<getParameter(i);
+    const ParameterTie* tie = getTie(i);
+    if ( !tie || !tie->isDefault() )
+    {
+      ostr<<','<<parameterName(i)<<'='<<getParameter(i);
+    }
   }
   // collect non-default constraints
   std::string constraints;
@@ -189,8 +193,7 @@ std::string IFunction::asString()const
 }
 
 /** Add a list of constraints from a string
- * @param str :: A comma-separated list of name=expr pairs, where name is a parameter name and 
- *  expr is a constraint expression.
+ * @param str :: A comma-separated list of constraint expressions.
  */
 void IFunction::addConstraints(const std::string& str, bool isDefault)
 {

@@ -37,7 +37,7 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_API_DLL ImmutableCompositeFunction : public virtual CompositeFunction
+class MANTID_API_DLL ImmutableCompositeFunction : public CompositeFunction
 {
 public:
   /// Default constructor
@@ -78,6 +78,10 @@ protected:
   void addFunction(IFunction* fun);
   /// Define an alias for a parameter
   void setAlias(const std::string& parName, const std::string& alias);
+  /// Add default ties
+  void addDefaultTies(const std::string& ties);
+  /// Add default constraints
+  void addDefaultConstraints(const std::string& constraints);
 
 private:
 

@@ -134,6 +134,7 @@ namespace Mantid
         }
       }// for term
 
+      fun->applyTies();
       return fun;
     }
 
@@ -242,6 +243,7 @@ namespace Mantid
         }
       }
 
+      cfun->applyTies();
       return cfun;
     }
 
