@@ -16,7 +16,7 @@
 
 // Squash a warning coming out of an OpenCascade header
 #ifdef __INTEL_COMPILER
-  #pragma warning disable 191
+#pragma warning disable 191
 #endif
 
 #include "MantidGeometry/Rendering/OpenCascadeConfig.h"
@@ -46,85 +46,85 @@
 #include <Poly_Triangulation.hxx>
 
 #ifdef __INTEL_COMPILER
-  #pragma warning enable 191
+#pragma warning enable 191
 #endif
 
 namespace Mantid
 {
-    using Kernel::V3D;
-    using Kernel::Quat;
+  using Kernel::V3D;
+  using Kernel::Quat;
 
   namespace Geometry
   {
     Kernel::Logger& OCGeometryGenerator::PLog(Kernel::Logger::get("OCGeometryGenerator"));
     /**
-     * Constructor
-     * @param obj :: input object
-     */
+    * Constructor
+    * @param obj :: input object
+    */
     OCGeometryGenerator::OCGeometryGenerator(const Object *obj):Obj(obj)
     {
       ObjSurface=NULL;
     }
 
     /**
-     * Generate geometry, it uses OpenCascade to generate surface triangles.
-     */
+    * Generate geometry, it uses OpenCascade to generate surface triangles.
+    */
     void OCGeometryGenerator::Generate()
     {
       if(ObjSurface==NULL){
-	AnalyzeObject();
+        AnalyzeObject();
       }
     }
 
     /**
-     * Destroy the surface generated for the object
-     */
+    * Destroy the surface generated for the object
+    */
     OCGeometryGenerator::~OCGeometryGenerator(){
       if(ObjSurface!=NULL)
       {
-	delete ObjSurface;
+        delete ObjSurface;
       }
     }
 
     /**
-     * Returns the shape generated.
-     */
+    * Returns the shape generated.
+    */
     TopoDS_Shape* OCGeometryGenerator::getObjectSurface()
     {
       return ObjSurface;
     }
 
     /**
-     * Analyzes the rule tree in object and creates a Topology Shape
-     */
+    * Analyzes the rule tree in object and creates a Topology Shape
+    */
     void OCGeometryGenerator::AnalyzeObject()
     {
       if(Obj!=NULL) //If object exists
       {
-	//Get the top rule tree in Obj
-	const Rule* top=Obj->topRule();
-	if(top==NULL)
-	{
-	  ObjSurface=new TopoDS_Shape();
-	  return;
-	}
-	//Traverse through Rule
-	TopoDS_Shape Result=AnalyzeRule(const_cast<Rule*>(top));
-	try{					
-	  ObjSurface=new TopoDS_Shape(Result);
-	  BRepMesh::Mesh(Result,0.001);
-	}
-	catch(StdFail_NotDone &)
-	{
-	  PLog.error("Cannot build the geometry. Check the geometry definition");
-	}
+        //Get the top rule tree in Obj
+        const Rule* top=Obj->topRule();
+        if(top==NULL)
+        {
+          ObjSurface=new TopoDS_Shape();
+          return;
+        }
+        //Traverse through Rule
+        TopoDS_Shape Result=AnalyzeRule(const_cast<Rule*>(top));
+        try{					
+          ObjSurface=new TopoDS_Shape(Result);
+          BRepMesh::Mesh(Result,0.001);
+        }
+        catch(StdFail_NotDone &)
+        {
+          PLog.error("Cannot build the geometry. Check the geometry definition");
+        }
 
       }
     }
     /**
-     * Analyze intersection
-     * @return the resulting TopoDS_Shape
-     */
+    * Analyze intersection
+    * @return the resulting TopoDS_Shape
+    */
     TopoDS_Shape OCGeometryGenerator::AnalyzeRule(Intersection* rule)
     {
       TopoDS_Shape left=AnalyzeRule(rule->leaf(0));
@@ -174,17 +174,17 @@ namespace Mantid
     {
       if(rule==NULL)return TopoDS_Shape();
       if(rule->className()=="Intersection"){
-	return AnalyzeRule((Intersection*)rule);
+        return AnalyzeRule((Intersection*)rule);
       }else if(rule->className()=="Union"){
-	return AnalyzeRule((Union*)rule);
+        return AnalyzeRule((Union*)rule);
       }else if(rule->className()=="SurfPoint"){
-	return AnalyzeRule((SurfPoint*)rule);
+        return AnalyzeRule((SurfPoint*)rule);
       }else if(rule->className()=="CompGrp"){
-	return AnalyzeRule((CompGrp*)rule);
+        return AnalyzeRule((CompGrp*)rule);
       }else if(rule->className()=="CompObj"){
-	return AnalyzeRule((CompObj*)rule);
+        return AnalyzeRule((CompObj*)rule);
       }else if(rule->className()=="BoolValue"){
-	return AnalyzeRule((BoolValue*)rule);
+        return AnalyzeRule((BoolValue*)rule);
       }
       return TopoDS_Shape();
     }
@@ -194,23 +194,23 @@ namespace Mantid
       //Check for the type of the surface object
       if(surf->className()=="Sphere")
       {
-	return CreateSphere((Sphere*)surf);
+        return CreateSphere((Sphere*)surf);
       }
       else if(surf->className()=="Cone")
       {
-	return CreateCone((Cone*)surf);
+        return CreateCone((Cone*)surf);
       }
       else if(surf->className()=="Cylinder")
       {
-	return CreateCylinder((Cylinder*)surf);
+        return CreateCylinder((Cylinder*)surf);
       }
       else if(surf->className()=="Plane")
       {
-	return CreatePlane((Plane*)surf,orientation);
+        return CreatePlane((Plane*)surf,orientation);
       }
       else if(surf->className()=="Torus")
       {
-	return CreateTorus((Torus*)surf);
+        return CreateTorus((Torus*)surf);
       }
       return TopoDS_Shape();
     }
@@ -265,12 +265,12 @@ namespace Mantid
       //Create Half Space
       TopoDS_Shape Result;
       if(orientation>0){
-	TopoDS_Face P=BRepBuilderAPI_MakeFace(gp_Pln(normal[0],normal[1],normal[2],-distance)).Face();
-	Result=BRepPrimAPI_MakeHalfSpace(P,gp_Pnt(normal[0]*(1+t),normal[1]*(1+t),normal[2]*(1+t))).Solid();
+        TopoDS_Face P=BRepBuilderAPI_MakeFace(gp_Pln(normal[0],normal[1],normal[2],-distance)).Face();
+        Result=BRepPrimAPI_MakeHalfSpace(P,gp_Pnt(normal[0]*(1+t),normal[1]*(1+t),normal[2]*(1+t))).Solid();
       }else{
-	TopoDS_Face P=BRepBuilderAPI_MakeFace(gp_Pln(normal[0],normal[1],normal[2],-distance)).Face();
-	P.Reverse();
-	Result=BRepPrimAPI_MakeHalfSpace(P,gp_Pnt(normal[0]*(1+t),normal[1]*(1+t),normal[2]*(1+t))).Solid();
+        TopoDS_Face P=BRepBuilderAPI_MakeFace(gp_Pln(normal[0],normal[1],normal[2],-distance)).Face();
+        P.Reverse();
+        Result=BRepPrimAPI_MakeHalfSpace(P,gp_Pnt(normal[0]*(1+t),normal[1]*(1+t),normal[2]*(1+t))).Solid();
       }
       //create a box
       gp_Pnt p(-1000.0,-1000.0,-1000.0);
@@ -280,7 +280,7 @@ namespace Mantid
     }
     TopoDS_Shape OCGeometryGenerator::CreateTorus(Torus*)
     {
-//NOTE:: Not yet implemented
+      //NOTE:: Not yet implemented
       return TopoDS_Shape();
     }
 
@@ -289,14 +289,14 @@ namespace Mantid
       int countFace=0;
       if(ObjSurface!=NULL)
       {
-	TopExp_Explorer Ex;
-	for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
-	{
-	  TopoDS_Face F=TopoDS::Face(Ex.Current());
-	  TopLoc_Location L;
-	  Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
-	  countFace+=facing->NbTriangles();
-	}
+        TopExp_Explorer Ex;
+        for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
+        {
+          TopoDS_Face F=TopoDS::Face(Ex.Current());
+          TopLoc_Location L;
+          Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+          countFace+=facing->NbTriangles();
+        }
       }
       return countFace;
     }
@@ -306,14 +306,14 @@ namespace Mantid
       int countVert=0;
       if(ObjSurface!=NULL)
       {
-	TopExp_Explorer Ex;
-	for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
-	{
-	  TopoDS_Face F=TopoDS::Face(Ex.Current());
-	  TopLoc_Location L;
-	  Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
-	  countVert+=facing->NbNodes();
-	}
+        TopExp_Explorer Ex;
+        for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
+        {
+          TopoDS_Face F=TopoDS::Face(Ex.Current());
+          TopLoc_Location L;
+          Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+          countVert+=facing->NbNodes();
+        }
       }
       return countVert;
     }
@@ -324,24 +324,24 @@ namespace Mantid
       int nPts=this->getNumberOfPoints();
       if(nPts>0)
       {
-	points=new double[nPts*3];
-	int index=0;
-	TopExp_Explorer Ex;
-	for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
-	{
-	  TopoDS_Face F=TopoDS::Face(Ex.Current());
-	  TopLoc_Location L;
-	  Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
-	  TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
-	  tab = facing->Nodes();
-	  for (Standard_Integer i=1;i<=(facing->NbNodes());i++) {
-	    gp_Pnt pnt=tab.Value(i);
-	    points[index*3+0]=pnt.X();
-	    points[index*3+1]=pnt.Y();
-	    points[index*3+2]=pnt.Z();
-	    index++;
-	  }
-	}				
+        points=new double[nPts*3];
+        int index=0;
+        TopExp_Explorer Ex;
+        for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
+        {
+          TopoDS_Face F=TopoDS::Face(Ex.Current());
+          TopLoc_Location L;
+          Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+          TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
+          tab = facing->Nodes();
+          for (Standard_Integer i=1;i<=(facing->NbNodes());i++) {
+            gp_Pnt pnt=tab.Value(i);
+            points[index*3+0]=pnt.X();
+            points[index*3+1]=pnt.Y();
+            points[index*3+2]=pnt.Z();
+            index++;
+          }
+        }				
       }
       return points;
     }
@@ -352,30 +352,30 @@ namespace Mantid
       int nFaces=this->getNumberOfTriangles(); // was Points
       if(nFaces>0)
       {
-	faces=new int[nFaces*3];
-	TopExp_Explorer Ex;
-	int maxindex=0;
-	int index=0;
-	for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
-	{
-	  TopoDS_Face F=TopoDS::Face(Ex.Current());
-	  TopLoc_Location L;
-	  Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
-	  TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
-	  tab = facing->Nodes();
-	  Poly_Array1OfTriangle tri(1,facing->NbTriangles());
-	  tri = facing->Triangles();
-	  for (Standard_Integer i=1;i<=(facing->NbTriangles());i++) {
-	    Poly_Triangle trian = tri.Value(i);
-	    Standard_Integer index1,index2,index3;
-	    trian.Get(index1,index2,index3);
-	    faces[index*3+0]=maxindex+index1-1;
-	    faces[index*3+1]=maxindex+index2-1;
-	    faces[index*3+2]=maxindex+index3-1;
-	    index++;
-	  }		
-	  maxindex+=facing->NbNodes();
-	}
+        faces=new int[nFaces*3];
+        TopExp_Explorer Ex;
+        int maxindex=0;
+        int index=0;
+        for(Ex.Init(*ObjSurface,TopAbs_FACE);Ex.More();Ex.Next())
+        {
+          TopoDS_Face F=TopoDS::Face(Ex.Current());
+          TopLoc_Location L;
+          Handle (Poly_Triangulation) facing=BRep_Tool::Triangulation(F,L);
+          TColgp_Array1OfPnt tab(1,(facing->NbNodes()));
+          tab = facing->Nodes();
+          Poly_Array1OfTriangle tri(1,facing->NbTriangles());
+          tri = facing->Triangles();
+          for (Standard_Integer i=1;i<=(facing->NbTriangles());i++) {
+            Poly_Triangle trian = tri.Value(i);
+            Standard_Integer index1,index2,index3;
+            trian.Get(index1,index2,index3);
+            faces[index*3+0]=maxindex+index1-1;
+            faces[index*3+1]=maxindex+index2-1;
+            faces[index*3+2]=maxindex+index3-1;
+            index++;
+          }		
+          maxindex+=facing->NbNodes();
+        }
       }
       return faces;
     }

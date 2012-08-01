@@ -52,58 +52,60 @@ namespace Mantid
     void CacheGeometryHandler::Triangulate()
     {
       //Check whether Object is triangulated otherwise triangulate
-      if(Obj!=NULL&&!boolTriangulated){
-	Triangulator->Generate();
-	boolTriangulated=true;
+      PARALLEL_CRITICAL(Triangulate)        
+      if(Obj!=NULL&&!boolTriangulated)
+      {
+        Triangulator->Generate();
+        boolTriangulated=true;
       }
     }
 
     void CacheGeometryHandler::Render()
     {
       if(Obj!=NULL){
-	if(boolTriangulated==false)	Triangulate();
-	Renderer->Render(Triangulator->getNumberOfPoints(),Triangulator->getNumberOfTriangles(),Triangulator->getTriangleVertices(),Triangulator->getTriangleFaces());
+        if(boolTriangulated==false)	Triangulate();
+        Renderer->Render(Triangulator->getNumberOfPoints(),Triangulator->getNumberOfTriangles(),Triangulator->getTriangleVertices(),Triangulator->getTriangleFaces());
       }else if(ObjComp!=NULL){
-	Renderer->Render(ObjComp);
+        Renderer->Render(ObjComp);
       }
     }
 
     void CacheGeometryHandler::Initialize()
     {
       if(Obj!=NULL){
-	Obj->updateGeometryHandler();
-	if(boolTriangulated==false)	Triangulate();
-	Renderer->Initialize(Triangulator->getNumberOfPoints(),Triangulator->getNumberOfTriangles(),Triangulator->getTriangleVertices(),Triangulator->getTriangleFaces());
+        Obj->updateGeometryHandler();
+        if(boolTriangulated==false)	Triangulate();
+        Renderer->Initialize(Triangulator->getNumberOfPoints(),Triangulator->getNumberOfTriangles(),Triangulator->getTriangleVertices(),Triangulator->getTriangleFaces());
       }else if(ObjComp!=NULL){
-	Renderer->Initialize(ObjComp);
+        Renderer->Initialize(ObjComp);
       }
     }
 
     int CacheGeometryHandler::NumberOfTriangles()
     {
-      if(Obj!=NULL)
-      {
-	Obj->updateGeometryHandler();
-	if(boolTriangulated==false)	Triangulate();
-	return Triangulator->getNumberOfTriangles();
-      }
-      else
-      {
-	return 0;
-      }
+        if(Obj!=NULL)
+        {
+          Obj->updateGeometryHandler();
+          if(boolTriangulated==false)	Triangulate();
+          return Triangulator->getNumberOfTriangles();
+        }
+        else
+        {
+          return 0;
+        }
     }
 
     int CacheGeometryHandler::NumberOfPoints()
     {
       if(Obj!=NULL)
       {
-	Obj->updateGeometryHandler();
-	if(boolTriangulated==false)	Triangulate();
-	return Triangulator->getNumberOfPoints();
+        Obj->updateGeometryHandler();
+        if(boolTriangulated==false)	Triangulate();
+        return Triangulator->getNumberOfPoints();
       }
       else
       {
-	return 0;
+        return 0;
       }
     }
 
@@ -111,13 +113,13 @@ namespace Mantid
     {
       if(Obj!=NULL)
       {
-	Obj->updateGeometryHandler();
-	if(boolTriangulated==false)	Triangulate();
-	return Triangulator->getTriangleVertices();
+        Obj->updateGeometryHandler();
+        if(boolTriangulated==false)	Triangulate();
+        return Triangulator->getTriangleVertices();
       }
       else
       {
-	return NULL;
+        return NULL;
       }
     }
 
@@ -125,22 +127,22 @@ namespace Mantid
     {
       if(Obj!=NULL)
       {
-	Obj->updateGeometryHandler();
-	if(boolTriangulated==false)	Triangulate();
-	return Triangulator->getTriangleFaces();
+        Obj->updateGeometryHandler();
+        if(boolTriangulated==false)	Triangulate();
+        return Triangulator->getTriangleFaces();
       }
       else
       {
-	return NULL;
+        return NULL;
       }
     }
 
     /**
-       Sets the geometry cache using the triangulation information provided
-       @param noPts :: the number of points
-       @param noFaces :: the number of faces
-       @param pts :: a double array of the points
-       @param faces :: an int array of the faces
+    Sets the geometry cache using the triangulation information provided
+    @param noPts :: the number of points
+    @param noFaces :: the number of faces
+    @param pts :: a double array of the points
+    @param faces :: an int array of the faces
     */
     void CacheGeometryHandler::setGeometryCache(int noPts,int noFaces,double* pts,int* faces)
     {
