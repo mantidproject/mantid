@@ -284,11 +284,6 @@ public:
     std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1^2)";
     IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    funa->applyTies();
-
     TS_ASSERT_DELTA(funa->getParameter("a0"),1.21,0.0001);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
   }
@@ -298,11 +293,6 @@ public:
     std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1=4)";
     IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    funa->applyTies();
-
     TS_ASSERT_EQUALS(funa->getParameter("a0"),4);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),4);
   }
@@ -312,11 +302,6 @@ public:
     std::string fnString = "name=FunctionFactoryConstraintTest_FunctA,a0=0.1,a1=1.1,ties=(a0=2,a1=4)";
     IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    funa->applyTies();
-
     TS_ASSERT_EQUALS(funa->getParameter("a0"),2);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),4);
   }
@@ -328,14 +313,6 @@ public:
       "name=FunctionFactoryConstraintTest_FunctB,b0=0.2,b1=1.2;ties=(f1.b0=f0.a0+f0.a1)";
 
     IFunction_sptr fun = FunctionFactory::Instance().createInitialized(fnString);
-    TS_ASSERT(fun);
-    TS_ASSERT_EQUALS(fun->getParameter(0),0.);
-    TS_ASSERT_EQUALS(fun->getParameter(1),0.);
-    TS_ASSERT_EQUALS(fun->getParameter(2),0.2);
-    TS_ASSERT_EQUALS(fun->getParameter(3),1.2);
-
-    fun->applyTies();
-
     TS_ASSERT_EQUALS(fun->getParameter(0),14.);
     TS_ASSERT_EQUALS(fun->getParameter(1),14.);
     TS_ASSERT_EQUALS(fun->getParameter(2),28.);

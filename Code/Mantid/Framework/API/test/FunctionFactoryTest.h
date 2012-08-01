@@ -309,11 +309,6 @@ public:
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1^2)";
     IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    funa->applyTies();
-
     TS_ASSERT_DELTA(funa->getParameter("a0"),1.21,0.0001);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
 
@@ -324,11 +319,6 @@ public:
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=a1=4)";
     IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    funa->applyTies();
-
     TS_ASSERT_EQUALS(funa->getParameter("a0"),4);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),4);
 
@@ -339,11 +329,6 @@ public:
     std::string fnString = "name=FunctionFactoryTest_FunctA,a0=0.1,a1=1.1,ties=(a0=2,a1=4)";
     IFunction_sptr funa = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(funa);
-    TS_ASSERT_EQUALS(funa->getParameter("a0"),0.1);
-    TS_ASSERT_EQUALS(funa->getParameter("a1"),1.1);
-
-    funa->applyTies();
-
     TS_ASSERT_EQUALS(funa->getParameter("a0"),2);
     TS_ASSERT_EQUALS(funa->getParameter("a1"),4);
 
@@ -357,13 +342,6 @@ public:
 
     IFunction_sptr fun = FunctionFactory::Instance().createInitialized(fnString);
     TS_ASSERT(fun);
-    TS_ASSERT_EQUALS(fun->getParameter(0),0.);
-    TS_ASSERT_EQUALS(fun->getParameter(1),0.);
-    TS_ASSERT_EQUALS(fun->getParameter(2),0.2);
-    TS_ASSERT_EQUALS(fun->getParameter(3),1.2);
-
-    fun->applyTies();
-
     TS_ASSERT_EQUALS(fun->getParameter(0),14.);
     TS_ASSERT_EQUALS(fun->getParameter(1),14.);
     TS_ASSERT_EQUALS(fun->getParameter(2),28.);
@@ -396,15 +374,8 @@ public:
       "name=FunctionFactoryTest_FunctA;"
       "name=FunctionFactoryTest_FunctB";
     IFunction_sptr fun = FunctionFactory::Instance().createInitialized(fnString);
-
-    if (!fun)
-    {
-      std::cerr << "\nFailed to create MultiDomainFunction\n";
-    }
-    else
-    {
-      std::cerr << "\n" << fun->asString() << std::endl;
-    }
+    TS_ASSERT(fun);
+    // TODO: add more asserts
   }
 
 };
