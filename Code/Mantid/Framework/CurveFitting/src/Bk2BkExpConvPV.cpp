@@ -37,7 +37,6 @@ namespace CurveFitting
    */
   void Bk2BkExpConvPV::init()
   {
-    declareParameter("I", 1.0);
     declareParameter("TOF_h", -0.0);
     declareParameter("height", 1.0);
     declareParameter("Alpha",1.6);
@@ -117,7 +116,8 @@ namespace CurveFitting
     // << alpha << " beta = " << beta << " H = " << H << " eta = " << eta << std::endl;
 
     // 2. Do calculation
-    std::cout << "DB1143:  nData = " << nData << "  From " << xValues[0] << " To " << xValues[nData-1] << std::endl;
+    std::cout << "DB1143:  nData = " << nData << "  From " << xValues[0] << " To " << xValues[nData-1] <<
+                 " Height = " << height << std::endl;
     for (size_t id = 0; id < nData; ++id)
     {
       double dT = xValues[id]-tof_h;

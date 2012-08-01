@@ -77,27 +77,25 @@ public:
    */
   void test_functionCalculator()
   {
-    
-
-    // excluding the test until fixed
-    return;
-
-
-
 
     // 1. Set peak
     Bk2BkExpConvPV peak;
     peak.initialize();
 
-    peak.setParameter("I", 1.0);
+    // 1. Set parameter
     peak.setParameter("height", 1000.0);
+    peak.setParameter("TOF_h", 55175.79);
+    peak.setParameter("Alpha", 0.03613);
+    peak.setParameter("Beta", 0.02376);
+    peak.setParameter("Sigma2", 187.50514);
+    peak.setParameter("Gamma", 0.0);
 
+    // 2. Tie!
     peak.tie("TOF_h", "55175.79");
     peak.tie("Alpha", "0.03613");
     peak.tie("Beta", "0.02376");
     peak.tie("Sigma2", "187.50514");
     peak.tie("Gamma", "0.0");
-    // peak.setParameter("height", 1.0*100*1000);
 
     // 2. Set workspace
     std::vector<double> Xs;
