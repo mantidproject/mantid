@@ -40,24 +40,26 @@ namespace Algorithms
     CountEventsInPulses();
     virtual ~CountEventsInPulses();
     
-    virtual const std::string name() const {return "CountEventsInPulses"; };
-    virtual int version() const {return 1; };
-    virtual const std::string category() const {return "Utility"; };
+    virtual const std::string name() const {return "CountEventsInPulses"; }
+    virtual int version() const {return 1; }
+    virtual const std::string category() const {return "Utility"; }
 
   private:
     virtual void initDocs();
 
+    /// Properties definition
     void init();
 
+    /// Main executation body
     void exec();
 
-    void countInWorkspace2D();
-    void countInEventWorkspace();
+    /// Count
+    DataObjects::EventWorkspace_sptr countInEventWorkspace();
 
-    void countEventsOnSpectrum(size_t wsindex, MantidVec& vecX, MantidVec& vecY);
-    void countEventsOnSpectrumParallel(size_t wsindex, MantidVec& vecX, MantidVec& vecY);
-
+    /// Create an EventWorkspace from input EventWorkspace
     DataObjects::EventWorkspace_sptr createEventWorkspace(DataObjects::EventWorkspace_const_sptr parentws);
+
+    /// Count events (main algorithm)
     void convertEvents(DataObjects::EventWorkspace_sptr outWS);
 
     DataObjects::EventWorkspace_const_sptr inpWS;
@@ -68,6 +70,8 @@ namespace Algorithms
     bool mSumSpectra;
     double mUnitFactor;
     double mPulseLength;
+
+    double mTolerance;
 
   };
 

@@ -965,6 +965,41 @@ Unit * SpinEchoTime::clone() const
   return new SpinEchoTime(*this);
 }
 
+// ================================================================================
+/* Time
+ * ================================================================================
+ *
+ * Time is an independant unit to others related to energy and neutron
+ */
+DECLARE_UNIT(Time)
+
+Time::Time() : Unit()
+{
+}
+
+void Time::init()
+{
+}
+
+
+double Time::singleToTOF(const double x) const
+{
+    throw std::runtime_error("Time is not allowed to be convert to TOF. ");
+    return 0.0;
+}
+
+double Time::singleFromTOF(const double tof) const
+{
+    throw std::runtime_error("Time is not allwed to be converted from TOF. ");
+    return 0.0;
+}
+
+Unit * Time::clone() const
+{
+    return new Time(*this);
+}
+
+
 } // namespace Units
 
 } // namespace Kernel

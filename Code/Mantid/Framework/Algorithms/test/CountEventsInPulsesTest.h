@@ -40,159 +40,17 @@ public:
     return;
   }
 
-  void test_Workspace2DPer1Pulse()
-  {
-    // 1. Create Workspace
-    std::string wsname("Input01");
-    Kernel::DateAndTime run_start(10000000);
-    size_t numpulses = 1000;
-    DataObjects::EventWorkspace_sptr eventWS = creatEventWorkspace(wsname, run_start, numpulses);
-
-    // 2. Set properties and execute
-    CountEventsInPulses count;
-    TS_ASSERT_THROWS_NOTHING(count.initialize());
-
-    count.setProperty("InputWorkspace", eventWS);
-    count.setProperty("OutputWorkspace", "TestCount1");
-    count.setProperty("PulsesPerBin", 1);
-    count.setProperty("SumSpectra", false);
-    count.setProperty("Unit", "microsecond");
-    count.setProperty("Parallel", false);
-    count.setProperty("PreserveEvents", false);
-
-    TS_ASSERT_THROWS_NOTHING(count.execute());
-
-    TS_ASSERT(count.isExecuted());
-
-    // 3. Check result
-    DataObjects::Workspace2D_sptr outWS =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve("TestCount1"));
-
-    TS_ASSERT(outWS);
-
-    TS_ASSERT_EQUALS(outWS->dataX(0).size(), 1000);
-
-    for (size_t iw = 0; iw < outWS->dataY(0).size(); iw ++)
-      TS_ASSERT_DELTA(outWS->dataY(0)[iw], 0, 1.0E-8);
-
-    for (size_t iw = 3; iw < 5; iw ++)
-    {
-      for (size_t ip = 0; ip < outWS->dataY(iw).size(); ip ++)
-      {
-        size_t numevents = iw + ip + 1;
-        TS_ASSERT_DELTA(outWS->dataY(iw)[ip], static_cast<double>(numevents), 1.0E-8);
-      }
-    }
-
-    return;
-  }
-
-  void test_Workspace2DPer5Pulse()
-  {
-    // 1. Create Workspace
-    std::string wsname("Input02");
-    Kernel::DateAndTime run_start(10000000);
-    size_t numpulses = 1000;
-    DataObjects::EventWorkspace_sptr eventWS = creatEventWorkspace(wsname, run_start, numpulses);
-
-    // 2. Set properties and execute
-    CountEventsInPulses count;
-    TS_ASSERT_THROWS_NOTHING(count.initialize());
-
-    count.setProperty("InputWorkspace", eventWS);
-    count.setProperty("OutputWorkspace", "TestCount2");
-    count.setProperty("PulsesPerBin", 5);
-    count.setProperty("SumSpectra", false);
-    count.setProperty("Unit", "microsecond");
-    count.setProperty("Parallel", false);
-    count.setProperty("PreserveEvents", false);
-
-    TS_ASSERT_THROWS_NOTHING(count.execute());
-
-    TS_ASSERT(count.isExecuted());
-
-    // 3. Check result
-    DataObjects::Workspace2D_sptr outWS =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve("TestCount2"));
-
-    TS_ASSERT(outWS);
-
-    TS_ASSERT_EQUALS(outWS->dataX(0).size(), 200);
-
-    for (size_t iw = 0; iw < outWS->dataY(0).size(); iw ++)
-      TS_ASSERT_DELTA(outWS->dataY(0)[iw], 0, 1.0E-8);
-
-    for (size_t iw = 3; iw < 5; iw ++)
-    {
-      for (size_t ip = 0; ip < outWS->dataY(iw).size(); ip ++)
-      {
-        size_t numevents = 0;
-        size_t numeventstosum = 5;
-        if (ip == outWS->dataY(iw).size()-1)
-          numeventstosum += 5-1;
-        for (size_t i = 0; i < numeventstosum; i ++)
-        {
-          numevents += iw + ip*5+i + 1;
-        }
-        TS_ASSERT_DELTA(outWS->dataY(iw)[ip], static_cast<double>(numevents), 1.0E-8);
-      }
-    }
-
-    return;
-  }
-
-  void test_Workspace2DPer1PulseSumSpectra()
-  {
-    // 1. Create Workspace
-    std::string wsname("Input03");
-    Kernel::DateAndTime run_start(10000000);
-    size_t numpulses = 1000;
-    DataObjects::EventWorkspace_sptr eventWS = creatEventWorkspace(wsname, run_start, numpulses);
-
-    // 2. Set properties and execute
-    CountEventsInPulses count;
-    TS_ASSERT_THROWS_NOTHING(count.initialize());
-
-    count.setProperty("InputWorkspace", eventWS);
-    count.setProperty("OutputWorkspace", "TestCount3");
-    count.setProperty("PulsesPerBin", 1);
-    count.setProperty("SumSpectra", true);
-    count.setProperty("Unit", "microsecond");
-    count.setProperty("Parallel", false);
-    count.setProperty("PreserveEvents", false);
-
-    TS_ASSERT_THROWS_NOTHING(count.execute());
-
-    TS_ASSERT(count.isExecuted());
-
-    // 3. Check result
-    DataObjects::Workspace2D_sptr outWS =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(AnalysisDataService::Instance().retrieve("TestCount3"));
-
-    TS_ASSERT(outWS);
-
-    TS_ASSERT_EQUALS(outWS->dataX(0).size(), 1000);
-
-    for (size_t ip = 0; ip < outWS->dataY(0).size(); ip ++)
-    {
-      size_t numevents = 0;
-      for (size_t iw = 3; iw < 5; iw ++)
-      {
-        numevents += iw + ip + 1;
-      }
-      TS_ASSERT_DELTA(outWS->dataY(0)[ip], static_cast<double>(numevents), 1.0E-8);
-    }
-
-    return;
-  }
-
+  /*
+   * Test event workspace
+   */
   void test_EventWorkspacePer1Pulse()
   {
     // 1. Create Workspace
     std::string wsname("Input04");
     Kernel::DateAndTime run_start(10000000000);
-    size_t numpulses = 1000;
-    DataObjects::EventWorkspace_sptr eventWS = creatEventWorkspace(wsname, run_start, numpulses);
+    size_t numpulses = 100;
+    double pulselength = 1.0E9/50.0;
+    DataObjects::EventWorkspace_sptr eventWS = creatEventWorkspace(wsname, run_start, numpulses, pulselength);
 
     // 2. Set properties and execute
     CountEventsInPulses count;
@@ -200,11 +58,9 @@ public:
 
     count.setProperty("InputWorkspace", eventWS);
     count.setProperty("OutputWorkspace", "TestCount4");
-    count.setProperty("PulsesPerBin", 1);
+    count.setProperty("Tolerance", 0.02);
     count.setProperty("SumSpectra", false);
-    count.setProperty("Unit", "microsecond");
     count.setProperty("Parallel", false);
-    count.setProperty("PreserveEvents", true);
 
     TS_ASSERT_THROWS_NOTHING(count.execute());
 
@@ -214,39 +70,130 @@ public:
     DataObjects::EventWorkspace_sptr outWS =
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("TestCount4"));
 
+    // a. Workspace
     TS_ASSERT(outWS);
+    if (!outWS)
+    {
+        // Early return
+        return;
+    }
 
-    TS_ASSERT_EQUALS(outWS->readX(0).size(), 1000);
+    // b. Workspace size
+    ///   Preserve number of histogram
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), eventWS->getNumberHistograms());
 
+    ///   Preserve number of events
+    TS_ASSERT_EQUALS(outWS->getNumberEvents(), eventWS->getNumberEvents());
+
+    /// Number of pulses
+    TS_ASSERT_EQUALS(outWS->readX(0).size(), numpulses);
+
+    /// Zero events in spectrum 0
     for (size_t iw = 0; iw < outWS->readY(0).size(); iw ++)
       TS_ASSERT_DELTA(outWS->readY(0)[iw], 0, 1.0E-8);
 
+    /// Meet the number in details
     for (size_t iw = 3; iw < 5; iw ++)
     {
-      for (size_t ip = 0; ip < outWS->readY(iw).size(); ip ++)
-      {
-        size_t numevents = iw + ip + 1;
-        TS_ASSERT_DELTA(outWS->readY(iw)[ip], static_cast<double>(numevents), 1.0);
-      }
+        /* Special Check
+        DataObjects::EventList events = outWS->getEventList(iw);
+        for (size_t ie = 0; ie < outWS->getEventList(iw).getNumberEvents(); ++ie)
+        {
+            DataObjects::TofEvent event = events.getEvent(ie);
+            std::cout << "Event " << ie << " : TOF = " << event.tof() << "   Pulse = " << event.pulseTime() << std::endl;
+        }
+        for (size_t i = 0; i < 30; ++i)
+            std::cout << outWS->readX(iw)[i] << ", " << outWS->readY(iw)[i] << std::endl;
+        End Special Check */
+
+        for (size_t ip = 0; ip < outWS->readY(iw).size(); ip ++)
+        {
+            size_t numevents = iw + ip + 1;
+            TS_ASSERT_EQUALS(static_cast<int>(outWS->readY(iw)[ip]), static_cast<int>(numevents));
+
+            // std::cout << "Spectrum " << iw << "  Pulse " << ip << " = " << outWS->readX(iw)[ip]
+            //          << " Expected = " << numevents << "  Stored = " << outWS->readY(iw)[ip] << std::endl;
+        }
     }
 
     return;
   }
 
+
+  /*
+   * Test event workspace
+   */
+  void test_EventWorkspaceSumSpectra()
+  {
+    // 1. Create Workspace
+    std::string wsname("Input04");
+    Kernel::DateAndTime run_start(10000000000);
+    size_t numpulses = 100;
+    double pulselength = 1.0E9/50.0;
+    DataObjects::EventWorkspace_sptr eventWS = creatEventWorkspace(wsname, run_start, numpulses, pulselength);
+
+    // 2. Set properties and execute
+    CountEventsInPulses count;
+    TS_ASSERT_THROWS_NOTHING(count.initialize());
+
+    count.setProperty("InputWorkspace", eventWS);
+    count.setProperty("OutputWorkspace", "TestCount5");
+    count.setProperty("Tolerance", 0.02);
+    count.setProperty("SumSpectra", true);
+    count.setProperty("Parallel", false);
+
+    TS_ASSERT_THROWS_NOTHING(count.execute());
+
+    TS_ASSERT(count.isExecuted());
+
+    // 3. Check result
+    DataObjects::EventWorkspace_sptr outWS =
+        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("TestCount5"));
+
+    // a. Workspace
+    TS_ASSERT(outWS);
+    if (!outWS)
+    {
+        // Early return
+        return;
+    }
+
+    // b. Workspace size
+    ///   Preserve number of histogram
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
+
+    ///   Preserve number of events
+    TS_ASSERT_EQUALS(outWS->getNumberEvents(), eventWS->getNumberEvents());
+
+    /// Number of pulses
+    TS_ASSERT_EQUALS(outWS->readX(0).size(), numpulses);
+
+    for (size_t i = 0; i < 5; ++i)
+    {
+        DataObjects::EventList events = eventWS->getEventList(i);
+        std::cout << "WorkspaceIndex " << i << " Events Size = " << events.getNumberEvents() << std::endl;
+    }
+
+    return;
+  }
+
+
   /*
    * Build an eventworkspace including some events and a fake proton charge log
+   * Information
+   * (1) Pulse length in nano-second
    */
-  DataObjects::EventWorkspace_sptr creatEventWorkspace(std::string wsname, Kernel::DateAndTime run_start, size_t numpulses)
+  DataObjects::EventWorkspace_sptr creatEventWorkspace(std::string wsname, Kernel::DateAndTime run_start, size_t numpulses,
+                                                       double pulselength)
   {
+      // 1. Init to 1 spectrum, 2 vector x, 1 vector y
+      DataObjects::EventWorkspace_sptr eventWS = DataObjects::EventWorkspace_sptr(new DataObjects::EventWorkspace);
 
-    // 1. Init to 1 spectrum, 2 vector x, 1 vector y
-    DataObjects::EventWorkspace_sptr eventWS = DataObjects::EventWorkspace_sptr(new DataObjects::EventWorkspace);
-
-    eventWS->init(1, 2, 1);
-    eventWS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
-    eventWS->setYUnit("Counts");
-    eventWS->setTitle("TestWorkspace");
-    eventWS->setName(wsname);
+      eventWS->init(1, 2, 1);
+      eventWS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+      eventWS->setYUnit("Counts");
+      eventWS->setTitle("TestWorkspace");
+      eventWS->setName(wsname);
 
     eventWS->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
 
@@ -266,42 +213,48 @@ public:
     std::vector<detid_t> detids;
 
     size_t wsindex = 0;
-    for (detid2det_map::iterator it=detector_map.begin(); it!=detector_map.end(); ++it){
-      if (it->second->isMonitor()){
-        std::cout << "Detector " << it->first << " is monitor" << std::endl;
-      }
-
-      if (it->first > 0){
-        // if not monitor
-        DataObjects::EventList& events = eventWS->getOrAddEventList(wsindex);
-        events.setSpectrumNo(static_cast<specid_t>(wsindex+1));
-        events.clearDetectorIDs();
-        events.addDetectorID(it->first);
-
-        // check!
-        detid_t detectorid = -99;
-        std::set<detid_t> detectorids = eventWS->getEventList(wsindex).getDetectorIDs();
-        std::set<detid_t>::iterator detiter;
-        for (detiter=detectorids.begin(); detiter!=detectorids.end(); ++detiter){
-          detectorid = *detiter;
+    for (detid2det_map::iterator it=detector_map.begin(); it!=detector_map.end(); ++it)
+    {
+        if (it->second->isMonitor())
+        {
+            /// Monitor
+            std::cout << "Detector " << it->first << " is monitor" << std::endl;
         }
-        detids.push_back(detectorid);
-        wsindex ++;
-      }
+        else
+        {
+            /// Regular detector
+            DataObjects::EventList& events = eventWS->getOrAddEventList(wsindex);
+            events.setSpectrumNo(static_cast<specid_t>(wsindex+1));
+            events.clearDetectorIDs();
+            events.addDetectorID(it->first);
+
+            detid_t detectorid = -99;
+            std::set<detid_t> detectorids = eventWS->getEventList(wsindex).getDetectorIDs();
+            std::set<detid_t>::iterator detiter;
+            for (detiter=detectorids.begin(); detiter!=detectorids.end(); ++detiter)
+            {
+                detectorid = *detiter;
+            }
+            detids.push_back(detectorid);
+            wsindex ++;
+        }
     }
 
     // 4. Add proton charge log (for full list of pulse)
-    double pulselength = 1.0E9/50.0;
-
     double pcharge = 1.3;
 
     Kernel::TimeSeriesProperty<double>* protonchargelog = new Kernel::TimeSeriesProperty<double>("proton_charge");
+
+    // std::cout << "==========================================================" << std::endl;
+
     for (size_t i = 0; i < numpulses; i ++)
     {
       Kernel::DateAndTime pulsetime(run_start.totalNanoseconds()+static_cast<int64_t>(static_cast<double>(i)*pulselength));
       protonchargelog->addValue(pulsetime, pcharge);
     }
     eventWS->mutableRun().addProperty(protonchargelog);
+
+    // std::cout << "Number of Pulses = " << numpulses << std::endl;
 
     // 5. Add Events
     for (size_t iws = 3; iws < 5; ++iws)
@@ -313,14 +266,20 @@ public:
         Kernel::DateAndTime pulsetime = protonchargelog->nthTime(static_cast<int>(ip));
         size_t numevents = ip+iws+1;
         double dtof_ms =(pulselength*0.5)*1.0E-3/static_cast<double>(numevents);
+
         for (size_t ie = 0; ie < numevents; ie ++)
         {
           double tof = static_cast<double>(ie+1)*dtof_ms;
           DataObjects::TofEvent newevent(tof, pulsetime);
           eventlist->addEventQuickly(newevent);
+
+          // std::cout << "Spec " <<  iws << "  Pulse Time = " << pulsetime << ".. Index " << ie << "  TOF = " << tof << std::endl;
+
         } // FOR: add single event
       } // FOR: add events belonging to single pulse
     } // FOR: add events for single detector
+
+    // std::cout << "==========================================================" << std::endl;
 
     return eventWS;
   }
