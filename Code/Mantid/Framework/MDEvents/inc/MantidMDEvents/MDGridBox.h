@@ -62,7 +62,7 @@ namespace MDEvents
     size_t getChildIndexFromID(size_t childId) const;
 
     MDBoxBase<MDE,nd> * getChild(size_t index);
-    void setChild(size_t index,MDBoxBase<MDE,nd> * newChild)
+    void setChild(size_t index,MDGridBox<MDE,nd> * newChild)
     {
       // Delete the old box  (supposetly ungridded);
       delete this->boxes[index];

@@ -209,7 +209,6 @@ namespace MDEvents
     ///Setter for unmasking the box
     void unmask();
 
-    static bool splitAllIfNeeded(API::splitBoxList &theCell,Kernel::ThreadScheduler * ts);
   protected:
 
     inline void loadEvents() const;

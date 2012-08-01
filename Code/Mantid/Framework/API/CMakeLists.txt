@@ -119,6 +119,7 @@ set ( INC_FILES
 	inc/MantidAPI/AnalysisDataService.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
+#	inc/MantidAPI/BoxCtrlChangesInterface.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
 	inc/MantidAPI/ChopperModel.h

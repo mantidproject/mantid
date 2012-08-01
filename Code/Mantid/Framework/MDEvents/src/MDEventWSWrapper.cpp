@@ -76,7 +76,7 @@ void MDEventWSWrapper::addMDDataND(float *sigErr,uint16_t *runIndex,uint32_t* de
     pWs->addAndTraceEvent(MDEvents::MDEvent<nd>(*(sigErr+2*i),*(sigErr+2*i+1),*(runIndex+i),*(detId+i),(Coord+i*nd)));
   }
   // if there are boxes ready to split -- we have to indicate need for that. 
-  if(pWs->getBoxController()->getBoxesToSplit().size()>0)m_needSplitting=true;
+//  if(pWs->getBoxController()->getBoxesToSplit().size()>0)m_needSplitting=true;
 
   // This splits up all the boxes according to split thresholds and sizes.
   //Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
@@ -101,22 +101,22 @@ void MDEventWSWrapper::splitBoxList()
     MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(m_Workspace.get());
     if(!pWs)throw(std::bad_cast());
 
-    std::vector<API::splitBoxList> &BoxList = pWs->getBoxController()->getBoxesToSplit();
-    API::splitBoxList RootBox;
-    for(size_t i=0;i<BoxList.size();i++)
-    {
-      bool rootFolderReplaced=MDEvents::MDBox<MDEvents::MDEvent<nd>,nd>::splitAllIfNeeded(BoxList[i],NULL); 
-      if(rootFolderReplaced)
-      {
-        RootBox = BoxList[i];
-      }
+    //std::vector<API::splitBoxList> &BoxList = pWs->getBoxController()->getBoxesToSplit();
+    //API::splitBoxList RootBox;
+  //  for(size_t i=0;i<BoxList.size();i++)
+  //  {
+     // bool rootFolderReplaced=MDEvents::MDBox<MDEvents::MDEvent<nd>,nd>::splitAllIfNeeded(BoxList[i],NULL); 
+     // if(rootFolderReplaced)
+     // {
+     //   RootBox = BoxList[i];
+     // }
 
-    }
-    if(RootBox.boxPointer)pWs->setBox(reinterpret_cast<MDEvents::MDBoxBase<MDEvents::MDEvent<nd>,nd> *>(RootBox.boxPointer));
+  //  }
+ //   if(RootBox.boxPointer)pWs->setBox(reinterpret_cast<MDEvents::MDBoxBase<MDEvents::MDEvent<nd>,nd> *>(RootBox.boxPointer));
 
  
 
-    BoxList.clear();
+//    BoxList.clear();
     m_needSplitting=false;
 }
 

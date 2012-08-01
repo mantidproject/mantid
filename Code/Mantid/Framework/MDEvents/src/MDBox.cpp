@@ -531,53 +531,12 @@ namespace MDEvents
     // We check on equality and not >= to only add a box once.
     if (this->data.size() == this->m_BoxController->getSplitThreshold())
     {     
-      this->m_BoxController->addBoxToSplit(splitBoxList(this,index));
+//      this->m_BoxController->addBoxToSplit(splitBoxList(this,index));
     }
 
 
     dataMutex.unlock();
   }
-  /**convert input box into MDGridBox and split MDGrid box into its children
-   *
-   * @param   pointer to MDBox;
-   * @returns pointer to MDGridBox created instead of the input MDBox
-  */
-  TMDE(
-  bool MDBox)::splitAllIfNeeded(API::splitBoxList &theCell,Kernel::ThreadScheduler * ts)  
-  {
-    bool rootBoxSplit(false);
-    auto pMDBox = reinterpret_cast<MDBox<MDE,nd> *>(theCell.boxPointer);
-    if(!pMDBox)throw(std::invalid_argument("should accept MDBox argument only "));
-      // Construct the grid box. This should take the object out of the disk MRU
-    MDGridBox<MDE, nd> * gridbox = new MDGridBox<MDE, nd>(pMDBox);
-   // Track how many MDBoxes there are in the overall workspace
-    pMDBox->getBoxController()->trackNumBoxes(pMDBox->getDepth());
-
-       // And now we have a gridded box instead of a boring old regular box.
-    MDGridBox<MDE, nd> * parent = dynamic_cast<MDGridBox<MDE, nd> * >(gridbox->getParent());
-    if(parent)
-    {
-      parent->setChild(theCell.boxIndex,gridbox);
-    }
-    else  // if not parent, it is probably root box;
-    {
-      rootBoxSplit = true;
-      delete theCell.boxPointer; // this makes workspace data pointer invalid
-      theCell.boxPointer = gridbox;
-    }
-    if (ts)
-    {
-      // Create a task to split the newly created MDGridBox.
-      ts->push(new FunctionTask(boost::bind(&MDGridBox<MDE,nd>::splitAllIfNeeded, &*gridbox, ts) ) );
-    }
-    else
-    {
-      gridbox->splitAllIfNeeded(NULL);
-    }
-    return rootBoxSplit;
-  }
-
-
 
   //-----------------------------------------------------------------------------------------------
   /** Add a MDLeanEvent to the box, in a NON-THREAD-SAFE manner.

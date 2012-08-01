@@ -19,7 +19,7 @@ namespace Mantid
 {
 namespace MDEvents
 {
-/** The templated class to transform matrix workspace into MDEvent workspace when matrix workspace is ragged
+/** The class to transform matrix workspace into MDEvent workspace when matrix workspace is ragged 2D workspace
    *
    * @date 11-10-2011
 

@@ -33,6 +33,7 @@ set ( SRC_FILES
 	src/LoadSQW.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
+	src/MDBoxToChange.cpp
 	src/MDBoxBase.cpp
 	src/MDBoxIterator.cpp
 	src/MDEventFactory.cpp
@@ -106,6 +107,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/LoadSQW.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
+	inc/MantidMDEvents/MDBoxToChange.h	
 	inc/MantidMDEvents/MDBoxBase.h
 	inc/MantidMDEvents/MDBoxIterator.h
 	inc/MantidMDEvents/MDDimensionStats.h
@@ -173,8 +175,10 @@ set ( TEST_FILES
 	test/LoadSQWTest.h
 	test/MDBinTest.h
 	test/MDBoxBaseTest.h
+	test/MDBoxToChangeTest.h	
 	test/MDBoxIteratorTest.h
 	test/MDBoxTest.h
+	test/MDBoxToChangeTest.h
 	test/MDDimensionStatsTest.h
 	test/MDEventFactoryTest.h
 	test/MDEventInserterTest.h
