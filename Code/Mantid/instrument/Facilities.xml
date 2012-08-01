@@ -328,6 +328,21 @@
    <instrument name="SANS"> 
       <technique>Small Angle Scattering</technique>
    </instrument> 
+
+</facility>
+
+<facility name="ILL" FileExtensions=".nxs,.xml">
+
+- <instrument name="IN10">
+    <technique>Neutron Spectroscopy</technique> 
+    <technique>Reactor Indirect Geometry Spectroscopy</technique> 
+  </instrument>
+
+- <instrument name="IN16">
+    <technique>Neutron Spectroscopy</technique> 
+    <technique>Reactor Indirect Geometry Spectroscopy</technique> 
+  </instrument>
+
 </facility>
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
