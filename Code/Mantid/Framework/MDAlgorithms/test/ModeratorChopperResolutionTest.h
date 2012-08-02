@@ -4,6 +4,7 @@
 #include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
 
 #include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -70,6 +71,8 @@ private:
 
     m_expt->setInstrument(instrument);
     m_expt->mutableRun().addProperty("deltaE-mode", DeltaEMode::asString(Mantid::Kernel::DeltaEMode::Direct));
+    m_expt->mutableSample().setOrientedLattice(new Mantid::Geometry::OrientedLattice(5.57,5.51,12.298));
+
 
     // Add log entry
     m_expt->mutableRun().addProperty("Ei", 45.1);
