@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/AlignAndFocusPowder.cpp
 	src/ComputeSensitivity.cpp
 	src/DgsConvertToEnergyTransfer.cpp
+	src/DgsDiagnose.cpp
 	src/DgsPreprocessData.cpp
 	src/DgsProcessDetectorVanadium.cpp
 	src/DgsReduction.cpp
@@ -30,6 +31,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/AlignAndFocusPowder.h
 	inc/MantidWorkflowAlgorithms/ComputeSensitivity.h
 	inc/MantidWorkflowAlgorithms/DgsConvertToEnergyTransfer.h
+	inc/MantidWorkflowAlgorithms/DgsDiagnose.h
 	inc/MantidWorkflowAlgorithms/DgsPreprocessData.h
 	inc/MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h
 	inc/MantidWorkflowAlgorithms/DgsReduction.h
