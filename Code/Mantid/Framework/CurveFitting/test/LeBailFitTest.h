@@ -319,8 +319,10 @@ public:
   /*
    * Fit 2 (separate) peaks
    */
-  void test_fit2Peaks()
+  void Ptest_fit2Peaks()
   {
+      std::string testplan("sigma");
+
       // 1. Create input workspace
       API::MatrixWorkspace_sptr dataws;
       DataObjects::TableWorkspace_sptr parameterws;
@@ -330,7 +332,25 @@ public:
       dataws = createInputDataWorkspace(1);
       // b) Parameter
       std::map<std::string, double> parammodifymap;
-      parammodifymap.insert(std::make_pair("Zero", 50.0));
+      if (testplan.compare("zero") == 0)
+      {
+          parammodifymap.insert(std::make_pair("Zero", 50.0));
+      }
+      else if (testplan.compare("alpha") == 0)
+      {
+          double alph0 = 4.026;
+          double newalph0 = alph0*0.05;
+          parammodifymap.insert(std::make_pair("Alph0", newalph0));
+      }
+      else if (testplan.compare("sigma") == 0)
+      {
+          double sig1 = 9.901;
+          double newsig1 = sig1*0.1;
+          double sig0 = 127.37;
+          double newsig0 = sig0*0.1;
+          parammodifymap.insert(std::make_pair("Sig0", newsig0));
+          parammodifymap.insert(std::make_pair("Sig1", newsig1));
+      }
       parameterws = createPeakParameterWorkspace(parammodifymap);
       // c) Reflection (111) and (110)
       double h110 = 1.0;
@@ -403,7 +423,6 @@ public:
       }
 
       // 6. Check fit result
-
       DataObjects::TableWorkspace_sptr paramws =
               boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
               (AnalysisDataService::Instance().retrieve("PeakParameters"));
@@ -418,8 +437,23 @@ public:
       std::map<std::string, char> paramfitstatus;
       parseParameterTableWorkspace(paramws, paramvalues, paramfitstatus);
 
-      double zero = paramvalues["Zero"];
-       TS_ASSERT_DELTA(zero, 0.0, 0.5);
+      if (testplan.compare("zero") == 0)
+      {
+          double zero = paramvalues["Zero"];
+          TS_ASSERT_DELTA(zero, 0.0, 0.5);
+      }
+      else if (testplan.compare("alpha") == 0)
+      {
+          double alph0 = paramvalues["Alph0"];
+          TS_ASSERT_DELTA(alph0, 4.026, 1.00);
+      }
+      else if (testplan.compare("sigma") == 0)
+      {
+          double sig0 = paramvalues["Sig0"];
+          TS_ASSERT_DELTA(sig0, 17.37, 0.01);
+          double sig1 = paramvalues["Sig1"];
+          TS_ASSERT_DELTA(sig1, 9.901, 0.01);
+      }
 
       return;
   }
@@ -430,6 +464,146 @@ public:
    */
   void test_fitTwiPeaks()
   {
+      // 0. Test Plan
+      // std::string testplan("zero");
+      std::string testplan("alpha");
+      // std::string testplan("sigma");
+
+      // 1. Geneate data and Create input workspace
+      API::MatrixWorkspace_sptr dataws;
+      DataObjects::TableWorkspace_sptr parameterws;
+      DataObjects::TableWorkspace_sptr hklws;
+
+      //   Reflections
+      int xp932[] = {9, 3, 2};
+      std::vector<int> p932(xp932, xp932+sizeof(xp932)/sizeof(int));
+      int xp852[] = {8, 5, 2};
+      std::vector<int> p852(xp852, xp852+sizeof(xp852)/sizeof(int));
+      std::vector<std::vector<int> > hkls;
+      hkls.push_back(p932);
+      hkls.push_back(p852);
+      std::vector<double> pkheights(2, 1.0);
+
+      // Data (option 2)
+      dataws = createInputDataWorkspace(2);
+
+      // b) Parameter
+      std::map<std::string, double> parammodifymap;
+      if (testplan.compare("zero") == 0)
+      {
+          /// Failed.  As 50.0 means there are no peaks be in the calculation range
+          /// FIXME Why Intensity of 2nd peak is negative!
+          parammodifymap.insert(std::make_pair("Zero", 50.0));
+      }
+      else if (testplan.compare("alpha") == 0)
+      {
+          /// Significant change in peak shape with a different alph0
+          double alph0 = 4.026;
+          double newalph0 = alph0*0.05;
+          parammodifymap.insert(std::make_pair("Alph0", newalph0));
+      }
+      else if (testplan.compare("sigma") == 0)
+      {
+          /// Sig0 and Sig1 has very large range to output good result
+          double sig1 = 9.901;
+          double newsig1 = sig1*0.1;
+          double sig0 = 127.37;
+          double newsig0 = sig0*0.1;
+          parammodifymap.insert(std::make_pair("Sig0", newsig0));
+          parammodifymap.insert(std::make_pair("Sig1", newsig1));
+      }
+      parameterws = createPeakParameterWorkspace(parammodifymap);
+      hklws = createReflectionWorkspace(hkls, pkheights);
+
+      AnalysisDataService::Instance().addOrReplace("Data", dataws);
+      AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
+      AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
+
+      // 2. Create LeBailFit and do the calculation
+      LeBailFit lbfit;
+      lbfit.initialize();
+
+      // 3. Set properties
+      lbfit.setPropertyValue("InputWorkspace", "Data");
+      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setProperty("WorkspaceIndex", 0);
+      lbfit.setProperty("Function", "LeBailFit");
+      lbfit.setProperty("OutputWorkspace", "FitResultWS");
+      lbfit.setProperty("PeaksWorkspace", "PeakInfoWS");
+      lbfit.setProperty("PeakRadius", 8);
+
+      lbfit.execute();
+
+      // 4. Get output
+      DataObjects::Workspace2D_sptr outws =
+              boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+              (AnalysisDataService::Instance().retrieve("FitResultWS"));
+      TS_ASSERT(outws);
+      if (!outws)
+      {
+          return;
+      }
+
+      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 4);
+      if (outws->getNumberHistograms() != 4)
+      {
+          return;
+      }
+
+      // 5. Write out result
+      // FIXME Disable this section later
+      for (size_t ifl = 0; ifl < 4; ifl ++)
+      {
+          std::stringstream ss;
+          ss << "unittest_result_file_" << ifl << ".dat";
+          std::string filename = ss.str();
+
+          std::ofstream ofile;
+          ofile.open(filename.c_str());
+
+          for (size_t i = 0; i < outws->readY(ifl).size(); ++i)
+          {
+              ofile << outws->readX(ifl)[i] << "\t\t" << outws->readY(ifl)[i] << std::endl;
+          }
+
+          ofile.close();
+      }
+
+      // 6. Check fit result
+      DataObjects::TableWorkspace_sptr paramws =
+              boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
+              (AnalysisDataService::Instance().retrieve("PeakParameters"));
+      TS_ASSERT(paramws);
+      if (!paramws)
+      {
+          return;
+      }
+
+      TS_ASSERT_EQUALS(paramws->columnCount(), 3);
+      std::map<std::string, double> paramvalues;
+      std::map<std::string, char> paramfitstatus;
+      parseParameterTableWorkspace(paramws, paramvalues, paramfitstatus);
+
+      if (testplan.compare("zero") == 0)
+      {
+          double zero = paramvalues["Zero"];
+          TS_ASSERT_DELTA(zero, 0.0, 0.5);
+      }
+      else if (testplan.compare("alpha") == 0)
+      {
+          double alph0 = paramvalues["Alph0"];
+          TS_ASSERT_DELTA(alph0, 4.026, 1.00);
+      }
+      else if (testplan.compare("sigma") == 0)
+      {
+          double sig0 = paramvalues["Sig0"];
+          TS_ASSERT_DELTA(sig0, 17.37, 0.01);
+          double sig1 = paramvalues["Sig1"];
+          TS_ASSERT_DELTA(sig1, 9.901, 0.01);
+      }
+
+      return;
   }
 
   /*
