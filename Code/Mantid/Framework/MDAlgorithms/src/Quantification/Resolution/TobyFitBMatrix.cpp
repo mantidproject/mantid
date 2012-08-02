@@ -32,9 +32,9 @@ namespace Mantid
                                      const QOmegaPoint & qOmega)
     {
       // Compute transformation matrices
-      API::ExperimentInfo_const_sptr exptInfo = observation.experimentInfo();
+      const API::ExperimentInfo & exptInfo = observation.experimentInfo();
       const Kernel::DblMatrix labToDet = observation.labToDetectorTransform();
-      const Geometry::OrientedLattice & lattice = exptInfo->sample().getOrientedLattice();
+      const Geometry::OrientedLattice & lattice = exptInfo.sample().getOrientedLattice();
       const Kernel::DblMatrix & sMat = lattice.getU();
       const Kernel::DblMatrix dMat = labToDet*sMat;
 
@@ -59,11 +59,11 @@ namespace Mantid
       const double tf = x2/velf;
 
       // Chopper frequency
-      const API::ChopperModel & chopper0 = exptInfo->chopperModel(0);
+      const API::ChopperModel & chopper0 = exptInfo.chopperModel(0);
       const double angvel = chopper0.getAngularVelocity();
 
       // Moderator tilt angle
-      const API::ModeratorModel & moderator = exptInfo->moderatorModel();
+      const API::ModeratorModel & moderator = exptInfo.moderatorModel();
       const double thetam = moderator.getTiltAngleInRadians();
 
       const double g1 = (1.0 - angvel*(x0 + x1)*tan(thetam)/veli );
@@ -80,7 +80,7 @@ namespace Mantid
       const double cp_f = wf/tf;
       const double ct_f = wf/x2;
 
-      Geometry::Instrument_const_sptr instrument = exptInfo->getInstrument();
+      Geometry::Instrument_const_sptr instrument = exptInfo.getInstrument();
       boost::shared_ptr<const Geometry::ReferenceFrame> refFrame = instrument->getReferenceFrame();
 
       // Define rows of matrix that correspond to each direction
@@ -125,7 +125,7 @@ namespace Mantid
       self[up][TobyFitYVector::DetectorWidthCoord] =  0.0;
       self[up][TobyFitYVector::DetectorHeightCoord] =  0.0;
       self[up][TobyFitYVector::DetectionTime] =  0.0;
-//
+
       // Output components
       const unsigned int beamf = beam + 3;
       const unsigned int upf = up + 3;

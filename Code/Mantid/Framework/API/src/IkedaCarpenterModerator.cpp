@@ -4,6 +4,7 @@
 #include "MantidAPI/IkedaCarpenterModerator.h"
 
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <gsl/gsl_roots.h>
 #include <gsl/gsl_errno.h>
 
@@ -137,6 +138,16 @@ namespace Mantid
     //----------------------------------------------------------------------------------------
     // Private members
     //----------------------------------------------------------------------------------------
+
+    /**
+     * Custom initialize function, called after parameters have been set.
+     * Initializes the lookup table
+     */
+    void IkedaCarpenterModerator::init()
+    {
+      initLookupTable();
+    }
+
     /**
      * Sets a parameter from a name & string value
      * @param name :: The name of the parameter
@@ -190,7 +201,13 @@ namespace Mantid
     {
       if(m_areaToTimeLookup.empty())
       {
-        const_cast<IkedaCarpenterModerator*>(this)->initLookupTable();
+        PARALLEL_CRITICAL(IkedaCarpenterModerator_interpolateAreaTable)
+        {
+          if(m_areaToTimeLookup.empty())
+          {
+            const_cast<IkedaCarpenterModerator*>(this)->initLookupTable();
+          }
+        }
       }
       const unsigned int nsteps = (m_lookupSize - 1);
       const unsigned int indexBelow = static_cast<unsigned int>(std::floor(area*nsteps));
@@ -232,50 +249,234 @@ namespace Mantid
      */
     double IkedaCarpenterModerator::findMinumum(const double rangeMin, const double rangeMax, const double tolerance) const
     {
-      // Define helper structs for GSL root finding.
-      // GSL requires a params struct + a function pointer to minize. Our function
-      // is a method so we create a params object with a pointer to this object
-      // that can call the necessary areaToTimeFunction from a static method
-      // whose address can be passed to the GSL solver
-      struct FunctionParams
-      {
-        const IkedaCarpenterModerator & moderator;
-      };
-      struct FunctionCallback
-      {
-        static double function(double x, void *params)
-        {
-          struct FunctionParams *p = (struct FunctionParams*)params;
-          return p->moderator.areaToTimeFunction(x);
-        }
-      };
+      return zeroBrent(rangeMin, rangeMax, tolerance);
+      // // Define helper structs for GSL root finding.
+      // // GSL requires a params struct + a function pointer to minize. Our function
+      // // is a method so we create a params object with a pointer to this object
+      // // that can call the necessary areaToTimeFunction from a static method
+      // // whose address can be passed to the GSL solver
+      // struct FunctionParams
+      // {
+      //   const IkedaCarpenterModerator & moderator;
+      // };
+      // struct FunctionCallback
+      // {
+      //   static double function(double x, void *params)
+      //   {
+      //     struct FunctionParams *p = (struct FunctionParams*)params;
+      //     return p->moderator.areaToTimeFunction(x);
+      //   }
+      // };
 
-      gsl_function rootFindingFunction;
-      rootFindingFunction.function = &FunctionCallback::function;
-      struct FunctionParams params = { *this };
-      rootFindingFunction.params = &params;
+      // gsl_function rootFindingFunction;
+      // rootFindingFunction.function = &FunctionCallback::function;
+      // struct FunctionParams params = { *this };
+      // rootFindingFunction.params = &params;
 
-      const gsl_root_fsolver_type *solverType = gsl_root_fsolver_brent;
-      gsl_root_fsolver *solver = gsl_root_fsolver_alloc(solverType);
-      gsl_root_fsolver_set (solver, &rootFindingFunction, rangeMin, rangeMax);
+      // const gsl_root_fsolver_type *solverType = gsl_root_fsolver_brent;
+      // gsl_root_fsolver *solver = gsl_root_fsolver_alloc(solverType);
+      // gsl_root_fsolver_set (solver, &rootFindingFunction, rangeMin, rangeMax);
 
-      int status;
-      int iter = 0, max_iter = 100;
-      double root(0.0);
-      do
-      {
-        iter++;
-        status = gsl_root_fsolver_iterate (solver);
-        root = gsl_root_fsolver_root (solver);
-        const double xlo = gsl_root_fsolver_x_lower (solver);
-        const double xhi = gsl_root_fsolver_x_upper (solver);
-        status = gsl_root_test_interval (xlo, xhi, 0, tolerance);
-      }
-      while (status == GSL_CONTINUE && iter < max_iter);
+      // int status;
+      // int iter = 0, max_iter = 100;
+      // double root(0.0);
+      // do
+      // {
+      //   iter++;
+      //   status = gsl_root_fsolver_iterate (solver);
+      //   root = gsl_root_fsolver_root (solver);
+      //   const double xlo = gsl_root_fsolver_x_lower (solver);
+      //   const double xhi = gsl_root_fsolver_x_upper (solver);
+      //   status = gsl_root_test_interval (xlo, xhi, 0, tolerance);
+      // }
+      // while (status == GSL_CONTINUE && iter < max_iter);
 
-      gsl_root_fsolver_free(solver);
-      return root;
+      // gsl_root_fsolver_free(solver);
+      // return root;
     }
+
+    /**
+     * Find the minimum of the areaToTimeFunction between the given interval with the given tolerance
+     * @param rangeMin :: The start of the range where the function changes sign
+     * @param rangeMax :: The end of the range where the function changes sign
+     * @param tolerance :: The required tolerance
+     * @return The location of the minimum
+     */    
+    double IkedaCarpenterModerator::zeroBrent (const double a, const double b, const double t) const
+    {
+     //****************************************************************************
+     //
+     //  Purpose:
+     //
+     //    zeroBrent seeks the root of a function F(X) in an interval [A,B].
+     //
+     //  Discussion:
+     //
+     //    The interval [A,B] must be a change of sign interval for F.
+     //    That is, F(A) and F(B) must be of opposite signs.  Then
+     //    assuming that F is continuous implies the existence of at least
+     //    one value C between A and B for which F(C) = 0.
+     //
+     //    The location of the zero is determined to within an accuracy
+     //    of 6 * MACHEPS * fabs ( C ) + 2 * T.
+     //
+     //  Licensing:
+     //
+     //    This code is distributed under the GNU LGPL license.
+     //
+     //  Modified:
+     //
+     //    13 April 2008
+     //
+     //  Author:
+     //
+     //    Original FORTRAN77 version by Richard Brent.
+     //    C++ version by John Burkardt.
+     //
+     //  Reference:
+     //
+     //    Richard Brent,
+     //    Algorithms for Minimization Without Derivatives,
+     //    Dover, 2002,
+     //    ISBN: 0-486-41998-3,
+     //    LC: QA402.5.B74.
+     //
+     //  Parameters:
+     //
+     //    Input, double A, B, the endpoints of the change of sign interval.
+     //
+     //    Input, double T, a positive error tolerance.
+     //
+     //    Input, double F ( double X ), the name of a user-supplied function
+     //    which evaluates the function whose zero is being sought.
+     //
+     //    Output, double ZERO, the estimated value of a zero of
+     //    the function F.
+     //
+       double c;
+       double d;
+       double e;
+       double fa;
+       double fb;
+       double fc;
+       double m;
+       double macheps;
+       double p;
+       double q;
+       double r;
+       double s;
+       double sa;
+       double sb;
+       double tol;
+       //
+       //  Make local copies of A and B.
+       //
+       sa = a;
+       sb = b;
+       fa = areaToTimeFunction(sa);
+       fb = areaToTimeFunction(sb);
+
+       c = sa;
+       fc = fa;
+       e = sb - sa;
+       d = e;
+
+       macheps = 1e-14; // more than sufficient for Tobyfit
+
+       for (int i=0; true ;  i++)
+       {
+         if ( fabs ( fc ) < fabs ( fb ) )
+         {
+           sa = sb;
+           sb = c;
+           c = sa;
+           fa = fb;
+           fb = fc;
+           fc = fa;
+         }
+
+         tol = 2.0 * macheps * fabs( sb ) + t;
+         m = 0.5 * ( c - sb );
+
+         if ( fabs ( m ) <= tol || fb == 0.0 )
+         {
+           break;
+         }
+
+         if ( fabs ( e ) < tol || fabs ( fa ) <= fabs ( fb ) )
+         {
+           e = m;
+           d = e;
+         }
+         else
+         {
+           s = fb / fa;
+
+           if ( sa == c )
+           {
+             p = 2.0 * m * s;
+             q = 1.0 - s;
+           }
+           else
+           {
+             q = fa / fc;
+             r = fb / fc;
+             p = s * ( 2.0 * m * a * ( q - r ) - ( sb - sa ) * ( r - 1.0 ) );
+             q = ( q - 1.0 ) * ( r - 1.0 ) * ( s - 1.0 );
+           }
+
+           if ( 0.0 < p )
+           {
+             q = - q;
+           }
+           else
+           {
+             p = - p;
+           }
+
+           s = e;
+           e = d;
+
+           if ( 2.0 * p < 3.0 * m * q - fabs ( tol * q ) &&
+               p < fabs ( 0.5 * s * q ) )
+           {
+             d = p / q;
+           }
+           else
+           {
+             e = m;
+             d = e;
+           }
+         }
+         sa = sb;
+         fa = fb;
+
+         if ( tol < fabs ( d ) )
+         {
+           sb = sb + d;
+         }
+         else if ( 0.0 < m )
+         {
+           sb = sb + tol;
+         }
+         else
+         {
+           sb = sb - tol;
+         }
+
+         fb = areaToTimeFunction(sb);
+
+         if ( ( 0.0 < fb && 0.0 < fc ) || ( fb <= 0.0 && fc <= 0.0 ) )
+         {
+           c = sa;
+           fc = fa;
+           e = sb - sa;
+           d = e;
+         }
+       }
+       return sb;
+     }
+
 
     /**
      * Function to pass to root-finder to find the value of the area for the given fraction of the range

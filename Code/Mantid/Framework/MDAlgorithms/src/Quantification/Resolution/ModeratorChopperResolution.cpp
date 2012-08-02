@@ -40,7 +40,7 @@ namespace Mantid
     {
       const static double mevToSpeedSq = 2.0*PhysicalConstants::meV/PhysicalConstants::NeutronMass;
       const double efixed = m_observation.getEFixed();
-      const Kernel::DeltaEMode::Type emode = m_observation.experimentInfo()->getEMode();
+      const Kernel::DeltaEMode::Type emode = m_observation.experimentInfo().getEMode();
       const double sampleToDetDist = m_observation.sampleToDetectorDistance();
 
       double ei(0.0), ef(0.0);
@@ -78,7 +78,7 @@ namespace Mantid
      */
     void ModeratorChopperResolution::initCaches()
     {
-      Instrument_const_sptr instr = m_observation.experimentInfo()->getInstrument();
+      Instrument_const_sptr instr = m_observation.experimentInfo().getInstrument();
       IObjComponent_const_sptr source = instr->getSource();
 
       m_modChopDist = m_observation.moderatorToFirstChopperDistance();

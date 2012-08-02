@@ -163,6 +163,7 @@ set ( TEST_FILES
 	test/SaveZODSTest.h
 	test/SetMDUsingMaskTest.h
 	test/SimulateMDDTest.h
+	test/SimulateResolutionConvolvedModelTest.h
 	test/SimulateResolutionTest.h
 	test/Strontium122Test.h
 	test/TobyFitBMatrixTest.h

@@ -70,6 +70,8 @@ namespace Mantid
       double sampleTimeDistribution(const double flatRandomNo) const;
 
     private:
+      /// Custom initialize function, called after parameters have been set
+      void init();
       /// Set a parameter value from a string
       void setParameterValue(const std::string & name, const std::string & value);
       /// Initialize the area-to-time lookup table
@@ -81,6 +83,8 @@ namespace Mantid
       double areaToTime(const double area) const;
       /// Find the minimum of the areaToTimeFunction between the given interval with the given tolerance
       double findMinumum(const double rangeMin, const double rangeMax, const double tolerance) const;
+      /// Find the minimum of the areaToTimeFunction
+      double zeroBrent (const double a, const double b, const double t) const;
       /// Function to pass to root-finder to find the value of the area for the given fraction of the range
       double areaToTimeFunction(const double fraction) const;
       /// Returns the area of the IKeda-Carpenter function for the given time value

@@ -8,6 +8,7 @@
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidKernel/CPUTimer.h"
 
 namespace Mantid
 {
@@ -21,6 +22,8 @@ namespace Mantid
       const char * RESOLUTION_ATTR = "ResolutionFunction";
       const char * FOREGROUND_ATTR = "ForegroundModel";
     }
+
+    Kernel::Logger & ResolutionConvolvedCrossSection::g_log = Kernel::Logger::get("ResolutionConvolvedCrossSection");
 
     /**
      * Constructor
@@ -60,7 +63,7 @@ namespace Mantid
      *  @param value :: The value of the attribute
      */
     void ResolutionConvolvedCrossSection::setAttribute(const std::string& name,
-                                                         const API::IFunction::Attribute & value)
+                                                       const API::IFunction::Attribute & value)
     {
       storeAttributeValue(name, value);
 
@@ -76,22 +79,37 @@ namespace Mantid
       }
     }
 
-    /// Function you want to fit to.
-    /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-    void ResolutionConvolvedCrossSection::function(const API::FunctionDomain& domain, API::FunctionValues& values)const
+    /**
+     * Override the call to set the workspace here to store it so we can access it throughout the evaluation
+     * @param workspace
+     */
+    void ResolutionConvolvedCrossSection::setWorkspace(boost::shared_ptr<const API::Workspace> workspace)
     {
-      const API::FunctionDomainMD* mdDomain = dynamic_cast<const API::FunctionDomainMD*>(&domain);
-      if(!mdDomain)
-      {
-        throw std::invalid_argument("ResolutionConvolvedCrossSection can only be used with MD domains");
-      }
+      assert(m_convolution);
 
-      m_workspace = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(mdDomain->getWorkspace());
+      m_workspace = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(workspace);
       if(!m_workspace)
       {
         throw std::invalid_argument("ResolutionConvolvedCrossSection can only be used with MD event workspaces");
       }
-      IFunctionMD::evaluateFunction(*mdDomain, values); // Calls functionMD repeatedly
+      IFunctionMD::setWorkspace(workspace);
+      m_convolution->preprocess(m_workspace);
+    }
+
+    void ResolutionConvolvedCrossSection::function(const API::FunctionDomain& domain, API::FunctionValues& values) const
+    {
+      const API::FunctionDomainMD* dmd = dynamic_cast<const API::FunctionDomainMD*>(&domain);
+      if (!dmd)
+      {
+        throw std::invalid_argument("Unexpected domain in IFunctionMD");
+      }
+      dmd->reset();
+      size_t i=0;
+      for(const API::IMDIterator* r = dmd->getNextIterator(); r != NULL; r = dmd->getNextIterator())
+      {
+        values.setCalculated(i,functionMD(*r));
+        i++;
+      };
     }
 
 
@@ -105,25 +123,21 @@ namespace Mantid
      */
     double ResolutionConvolvedCrossSection::functionMD(const Mantid::API::IMDIterator& box) const
     {
-      if(!m_convolution)
-      {
-        throw std::runtime_error("ResolutionConvolvedCrossSection::functionMD - Setup incomplete, no convolution type has been created");
-      }
+      const size_t numEvents = box.getNumEvents();
+      if(numEvents == 0) return 0.0;
+
+      assert(m_convolution);
 
       double signal(0.0);
-      const size_t numEvents = box.getNumEvents();
       // loop over each MDPoint in current MDBox
       for(size_t j = 0; j < numEvents; j++)
       {
-        uint16_t innerRunIndex = box.getInnerRunIndex(j);
-        API::ExperimentInfo_const_sptr exptInfo = m_workspace->getExperimentInfo(innerRunIndex);
-        signal += m_convolution->signal(box, j, exptInfo);
+        double contribution =  m_convolution->signal(box, box.getInnerRunIndex(j), j);
+        signal += contribution;
       }
       // Return the mean
       return signal/static_cast<double>(numEvents);
     }
-
-
 
     /**
      * Set a pointer to the concrete convolution object from a named implementation.

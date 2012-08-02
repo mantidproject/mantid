@@ -13,6 +13,8 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
 #include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 
@@ -93,9 +95,9 @@ private:
   {
     using namespace Mantid::API;
     using namespace Mantid::MDAlgorithms;
-    ExperimentInfo_const_sptr expt = createTestExperiment();
+    m_expt = createTestExperiment();
 
-    return boost::make_shared<Observation>(expt, (Mantid::detid_t)TEST_DET_ID);
+    return boost::make_shared<Observation>(*m_expt, (Mantid::detid_t)TEST_DET_ID);
   }
 
   Mantid::API::ExperimentInfo_const_sptr createTestExperiment()
@@ -153,6 +155,8 @@ private:
 
     ObjComponent *aperture = new ObjComponent("aperture");
     aperture->setPos(V3D(0.0,0.0, -10.01));
+    Object_sptr shape = ComponentCreationHelper::createCuboid(0.047,0.047,0.001);
+    aperture->setShape(shape);
     instrument->add(aperture);
 
     ObjComponent *chopperPos = new ObjComponent("chopperPos");
@@ -169,6 +173,9 @@ private:
     V3D detPos;
     detPos.spherical_rad(6.0340, 0.37538367018968838, 2.618430210304493);
     det1->setPos(detPos);
+    shape = ComponentCreationHelper::createCappedCylinder(0.012, 0.01, detPos,V3D(0,1,0),"cyl");
+    det1->setShape(shape);
+
     instrument->add(det1);
     instrument->markAsDetector(det1);
 
@@ -180,7 +187,8 @@ private:
   enum { NUM_ROWS = 6 };
   /// Num of columns expected
   enum { NUM_COLS = 11 };
-
+  /// Test experiment
+  Mantid::API::ExperimentInfo_const_sptr m_expt;
 };
 
 #endif //MANTID_MDALGORITHMS_TOBYFITBMATRIXTEST_H_

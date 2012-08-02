@@ -48,6 +48,8 @@ namespace Mantid
 
       /// Initialize the object from a string of parameters
       void initialize(const std::string & params);
+      /// Custom init function called after parameters have been processed. Default action is to do nothing
+      virtual void init() {}
 
       /// Sets the tilt angle in degrees (converted to radians internally)
       void setTiltAngleInDegrees(const double theta);

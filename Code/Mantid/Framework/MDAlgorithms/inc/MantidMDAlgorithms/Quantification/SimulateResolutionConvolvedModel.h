@@ -2,9 +2,17 @@
 #define MANTID_MDALGORITHMS_SIMULATERESOLUTIONCONVOLVEDMODEL_H_
 
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid
 {
+  namespace API
+  {
+    class IFunction;
+    class FunctionDomainMD;
+    class FunctionValues;
+  }
+
   namespace MDAlgorithms
   {
 
@@ -37,11 +45,24 @@ namespace Mantid
 
     private:
       virtual void initDocs();
-
       /// Returns the number of iterations that should be performed
       virtual int niterations() const;
-
       void init();
+      void exec();
+
+      /// Create the MD function instance
+      boost::shared_ptr<API::IFunction> createFunction() const;
+      /// Create the input & output domains from the input workspace
+      void createDomains();
+      /// Generate the output MD workspace that is a result of the simulation
+      API::IMDEventWorkspace_sptr createOutputWorkspace() const;
+
+      /// The input workspace
+      API::IMDEventWorkspace_sptr m_inputWS;
+      /// The input domain
+      boost::shared_ptr<API::FunctionDomainMD> m_domain;
+      /// The input domain
+      boost::shared_ptr<API::FunctionValues> m_calculatedValues;
     };
 
 

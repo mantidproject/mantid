@@ -24,10 +24,9 @@ public:
   void test_object_construction_does_not_throw()
   {
     using namespace Mantid::MDAlgorithms;
-    TobyFitResolutionModel tfResolution;
 
     TobyFitYVector *yVector; // TS_ macro doesn't work with stack construction & no default constructor
-    TS_ASSERT_THROWS_NOTHING(yVector = new TobyFitYVector(tfResolution));
+    TS_ASSERT_THROWS_NOTHING(yVector = new TobyFitYVector);
 
     delete yVector;
   }
@@ -35,8 +34,7 @@ public:
   void test_Values_Vector_Is_Same_Size_As_Number_Of_Attrs()
   {
     using namespace Mantid::MDAlgorithms;
-    TobyFitResolutionModel tfResolution;
-    TobyFitYVector yVector(tfResolution);
+    TobyFitYVector yVector;
 
     TS_ASSERT_EQUALS(yVector.values().size(), TobyFitYVector::variableCount());
   }
@@ -44,17 +42,14 @@ public:
   void test_Values_Are_Not_Used_If_Inactive()
   {
     using namespace Mantid::MDAlgorithms;
-    auto tfResolution = new TobyFitResolutionModel;
-    tfResolution->initialize();
-    // turn them all off
-    MDResolutionConvolution *resolution = static_cast<MDResolutionConvolution*>(tfResolution);
+
+    TobyFitYVector yVector;
     for(unsigned int i = 0; i < TobyFitYVector::variableCount(); ++i)
     {
-      resolution->setAttributeValue(TobyFitYVector::identifier(i), 0);
+      yVector.setAttribute(yVector.identifier(i), 0);
     }
 
     std::vector<double> randNums(TobyFitYVector::variableCount(), 0.5);
-    TobyFitYVector yVector(*tfResolution);
     auto testObs = createTestObservation();
     const double deltaE = 300.0;
     QOmegaPoint qOmega(1.0,2.0,3.0,deltaE);
@@ -65,8 +60,6 @@ public:
     {
       TSM_ASSERT_DELTA(std::string("Value at index ") + boost::lexical_cast<std::string>(i) + " should be zero.", values[i], 0.0, 1e-10);
     }
-
-    delete tfResolution;
   }
 
 private:
@@ -76,9 +69,9 @@ private:
   {
     using namespace Mantid::API;
     using namespace Mantid::MDAlgorithms;
-    ExperimentInfo_const_sptr expt = createTestExperiment();
+    m_expt = createTestExperiment();
 
-    return boost::make_shared<Observation>(expt, (Mantid::detid_t)TEST_DET_ID);
+    return boost::make_shared<Observation>(*m_expt, (Mantid::detid_t)TEST_DET_ID);
   }
 
   Mantid::API::ExperimentInfo_const_sptr createTestExperiment()
@@ -174,6 +167,8 @@ private:
 
   /// Test ID value
   enum { TEST_DET_ID = 1 };
+  ///Test experiment
+  Mantid::API::ExperimentInfo_const_sptr m_expt;
 
 };
 

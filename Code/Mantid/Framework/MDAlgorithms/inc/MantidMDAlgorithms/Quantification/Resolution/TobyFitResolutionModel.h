@@ -72,20 +72,19 @@ namespace Mantid
       /// Construct with a model pointer & a pointer to the fitting function
       TobyFitResolutionModel(const API::IFunctionMD & fittedFunction,
                                       const std::string & fgModelName);
+      /// Destructor
+      ~TobyFitResolutionModel();
+
       /// Returns the function's name
-      std::string name()const { return "MonteCarloResolutionConvolution"; }
-
-      /// Returns true if the given attribute is active.
-      bool useAttribute(const unsigned int variable) const;
-      /// Returns true if the given attribute is active
-      bool useAttribute(const std::string & attr) const;
-
+      std::string name() const { return "TobyFitResolutionModel"; }
       /// Returns the value of the model convoluted with the resolution
-      double signal(const API::IMDIterator & box, const size_t eventIndex,
-                    API::ExperimentInfo_const_sptr experimentInfo) const;
+      virtual double signal(const API::IMDIterator & box, const uint16_t innerRunIndex,
+                            const size_t eventIndex) const;
 
     private:
       DISABLE_COPY_AND_ASSIGN(TobyFitResolutionModel);
+      /// Cache detector observations
+      void preprocess(const API::IMDEventWorkspace_const_sptr & workspace);
       /// Declare function attributes
       void declareAttributes();
       /// Declare fitting parameters
@@ -125,6 +124,8 @@ namespace Mantid
       int m_mcLoopMax;
       /// Tolerance for relative error. Loop breaks out when this is reached
       double m_mcRelErrorTol;
+      /// Flag for including crystal mosaic
+      int m_mosaicActive;
 
       /// A pre-sized matrix for the resolution coefficients
       mutable TobyFitBMatrix m_bmatrix;
@@ -136,6 +137,9 @@ namespace Mantid
       mutable double m_etaOutPlane;
       /// A pre-sized vector for the QE position to be evaluated
       mutable std::vector<double> m_deltaQE;
+
+      /// Cache of detector observations
+      std::map<std::pair<int, detid_t>, Observation*> m_observations;
     };
   }
 }

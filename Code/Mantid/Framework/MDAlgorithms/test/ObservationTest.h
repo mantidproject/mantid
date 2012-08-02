@@ -27,14 +27,27 @@ public:
   {
   }
 
-  void test_trying_to_construct_object_with_no_instrument_throws_exception()
-  {
-    TS_ASSERT_THROWS(Observation(createEmptyExptInfo(), g_test_id), std::runtime_error);
-  }
-
   void test_trying_to_construct_object_with_unknown_id_throws_exception()
   {
-    TS_ASSERT_THROWS(Observation(createEmptyExptInfo(), 1000), Mantid::Kernel::Exception::NotFoundError);
+    //createEmptyExptInfo();
+    auto expt = boost::make_shared<Mantid::API::ExperimentInfo>();
+    TS_ASSERT_THROWS(Observation(*expt, 1000), Mantid::Kernel::Exception::NotFoundError);
+  }
+
+  void test_trying_to_construct_object_with_no_chopper_throws()
+  {
+    TS_ASSERT_THROWS(createTestObservation(NoChopper), std::invalid_argument);
+  }
+
+  void test_trying_to_construct_object_with_no_aperature_throws()
+  {
+    TS_ASSERT_THROWS(createTestObservation(WithChopper, NoAperture), std::invalid_argument);
+  }
+
+  void test_trying_to_construct_object_with_no_det_shape_throws()
+  {
+    TS_ASSERT_THROWS(createTestObservation(WithChopper, WithAperture,DeltaEMode::Direct, V3D(1,1,1), NoDetShape),
+                     std::invalid_argument);
   }
 
   void test_efixed_returns_Ei_for_direct_mode()
@@ -68,26 +81,12 @@ public:
     TS_ASSERT_DELTA(event->sampleToDetectorDistance(), std::sqrt(11.), 1e-12);
   }
 
-  void test_moderator_to_first_chopper_distance_throws_without_chopper_present()
-  {
-    boost::shared_ptr<Observation> event = createTestObservation(NoChopper);
-
-    TS_ASSERT_THROWS(event->moderatorToFirstChopperDistance(), std::invalid_argument);
-  }
-
   void test_moderator_to_first_chopper_distance_gives_expected_result()
   {
     boost::shared_ptr<Observation> event = createTestObservation(WithChopper);
     const double expectedDistance = m_chopperPos.distance(m_sourcePos);
 
     TS_ASSERT_DELTA(event->moderatorToFirstChopperDistance(), expectedDistance, 1e-12);
-  }
-
-  void test_first_chopper_to_sample_distance_throws_if_no_chopper_present()
-  {
-    boost::shared_ptr<Observation> event = createTestObservation(NoChopper);
-
-    TS_ASSERT_THROWS(event->firstChopperToSampleDistance(), std::invalid_argument);
   }
 
   void test_first_chopper_to_sample_distance_gives_expected_result()
@@ -98,27 +97,6 @@ public:
     TS_ASSERT_DELTA(event->firstChopperToSampleDistance(), expectedDistance, 1e-12);
   }
 
-  void test_chopper_to_aperture_distance_throws_if_no_aperture_present()
-  {
-    boost::shared_ptr<Observation> event = createTestObservation(WithChopper, NoAperture);
-
-    TS_ASSERT_THROWS(event->firstApertureToFirstChopperDistance(), std::invalid_argument);
-  }
-
-  void test_chopper_to_aperture_distance_throws_if_no_chopper_present()
-  {
-    boost::shared_ptr<Observation> event = createTestObservation(NoChopper, WithAperture);
-
-    TS_ASSERT_THROWS(event->firstApertureToFirstChopperDistance(), std::invalid_argument);
-  }
-
-  void test_chopper_to_aperture_distance_throws_if_no_chopper_or_aperture_present()
-  {
-    boost::shared_ptr<Observation> event = createTestObservation(NoChopper, NoAperture);
-
-    TS_ASSERT_THROWS(event->firstApertureToFirstChopperDistance(), std::invalid_argument);
-  }
-
   void test_first_aperture_to_first_chopper_distance_gives_expected_result()
   {
     boost::shared_ptr<Observation> event = createTestObservation(WithChopper, WithAperture);
@@ -127,11 +105,25 @@ public:
     TS_ASSERT_DELTA(event->firstApertureToFirstChopperDistance(), expectedDistance, 1e-12);
   }
 
-  void test_sample_over_detector_volume_throws_when_detector_has_no_shape()
+  void test_aperture_size_is_expected()
   {
-    boost::shared_ptr<Observation> event = createTestObservation(WithChopper, WithAperture,DeltaEMode::Direct, V3D(1,1,1), NoDetShape);
+    boost::shared_ptr<Observation> event = createTestObservation(WithChopper, WithAperture);
+    const double expectedWidth(0.08), expectedHeight(0.05);
+    
+    std::pair<double,double> apSize = event->apertureSize();
+    TS_ASSERT_DELTA(apSize.first, expectedWidth, 1e-4);
+    TS_ASSERT_DELTA(apSize.second, expectedHeight, 1e-4);
+  }
 
-    TS_ASSERT_THROWS(event->sampleOverDetectorVolume(0.2, 0.15, 0.75), std::invalid_argument);
+  void test_sample_widths_are_expected()
+  {
+    boost::shared_ptr<Observation> event = createTestObservation(WithChopper, WithAperture);
+
+    const Mantid::Kernel::V3D & sampleWidths = event->sampleCuboid();
+    TS_ASSERT_DELTA(sampleWidths.X(), 0.2, 1e-5);
+    TS_ASSERT_DELTA(sampleWidths.Y(), 0.4, 1e-5);
+    TS_ASSERT_DELTA(sampleWidths.Z(), 0.6, 1e-5);
+
   }
 
   void test_sample_over_detector_volume_throws_gives_expected_pos_with_valid_random_numbers()
@@ -173,21 +165,21 @@ public:
 
 private:
 
-  Mantid::API::ExperimentInfo_sptr createEmptyExptInfo()
+  void createEmptyExptInfo()
   {
-    return boost::make_shared<Mantid::API::ExperimentInfo>();
+    m_expt = boost::make_shared<Mantid::API::ExperimentInfo>();
   }
 
   boost::shared_ptr<Observation> createTestObservation(
       const TestObjectType addChopper = WithChopper,
       const TestObjectType addAperture = WithAperture,
-      const DeltaEMode::Type emode = DeltaEMode::Elastic,
+      const DeltaEMode::Type emode = DeltaEMode::Direct,
       const V3D & detPos = V3D(1,1,3),
       const TestObjectType addDetShape = WithDetShape)
   {
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
-    ExperimentInfo_sptr exptInfo = createEmptyExptInfo();
+    createEmptyExptInfo();
 
     Instrument_sptr instrument(new Instrument("test-inst"));
     instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::Right, "frame"));
@@ -210,6 +202,8 @@ private:
     ObjComponent *samplePos = new ObjComponent("samplePos");
     instrument->add(samplePos);
     instrument->markAsSamplePos(samplePos);
+    Object_sptr sampleShape = ComponentCreationHelper::createCuboid(0.1,0.2,0.3);
+    m_expt->mutableSample().setShape(*sampleShape);
 
     if(addChopper == WithChopper)
     {
@@ -223,24 +217,26 @@ private:
     {
       ObjComponent *aperture = new ObjComponent("aperture");
       aperture->setPos(m_aperturePos);
+      Object_sptr shape = ComponentCreationHelper::createCuboid(0.04, 0.025, 0.05);
+      aperture->setShape(shape);
       instrument->add(aperture);
     }
 
-    exptInfo->setInstrument(instrument);
-    exptInfo->mutableRun().addProperty("deltaE-mode", DeltaEMode::asString(emode));
+    m_expt->setInstrument(instrument);
+    m_expt->mutableRun().addProperty("deltaE-mode", DeltaEMode::asString(emode));
 
     if(emode == DeltaEMode::Direct) // Direct
     {
       // Add log entry
-      exptInfo->mutableRun().addProperty("Ei", m_test_ei);
+      m_expt->mutableRun().addProperty("Ei", m_test_ei);
     }
     else if(emode ==  DeltaEMode::Indirect) // Indirect
     {
-      exptInfo->instrumentParameters().addDouble(det1,"EFixed", m_test_ef);
+      m_expt->instrumentParameters().addDouble(det1,"EFixed", m_test_ef);
     }
     else {}
 
-    return boost::make_shared<Observation>(exptInfo, static_cast<Mantid::detid_t>(g_test_id));
+    return boost::make_shared<Observation>(*m_expt, static_cast<Mantid::detid_t>(g_test_id));
   }
 
   enum { g_test_id = 1 };
@@ -249,6 +245,8 @@ private:
   const V3D m_sourcePos;
   const V3D m_chopperPos;
   const V3D m_aperturePos;
+
+  Mantid::API::ExperimentInfo_sptr m_expt;
 };
 
 #endif /* OBSERVATIONTEST_H_ */

@@ -48,11 +48,27 @@ namespace Mantid
      * @param tfResModel :: A reference to the current TobyFit model object to check
      * which parameters are active in this run
      */
-    TobyFitYVector::TobyFitYVector(const TobyFitResolutionModel & tfResModel)
-    : m_tfResModel(tfResModel), m_yvector(variableCount(), 0.0),
+    TobyFitYVector::TobyFitYVector() : m_yvector(variableCount(), 0.0), m_attrStates(variableCount(), true),
       m_curRandNums(NULL), m_curObs(NULL), m_curQOmega(NULL)
     {
     }
+
+    /**
+     * Sets an attribute on/off
+     * @param name :: The name of the attribute
+     * @param active :: 1 if active, 0 if not
+     */
+    void TobyFitYVector::setAttribute(const std::string & name, const int active)
+    {
+      for(unsigned int i = 0; i < variableCount(); ++i)
+      {
+        if(name == identifier(i))
+        {
+          m_attrStates[i] = active > 0; // Active if greater than zero
+        }
+      }
+    }
+
 
     /**
      * Access a the current vector index in the vector (in order to be able to multiply it with the b matrix)
@@ -103,7 +119,7 @@ namespace Mantid
       const Variable vecPos = TobyFitYVector::ModeratorTime;
       if(setToZeroIfInactive(vecPos)) return;
 
-      const API::ModeratorModel & moderator = m_curObs->experimentInfo()->moderatorModel();
+      const API::ModeratorModel & moderator = m_curObs->experimentInfo().moderatorModel();
       m_yvector[vecPos] = moderator.sampleTimeDistribution(m_curRandNums->at(vecPos));
     }
 
@@ -120,26 +136,10 @@ namespace Mantid
 
       if(inactive) return;
 
-      Geometry::Instrument_const_sptr instrument = m_curObs->experimentInfo()->getInstrument();
-      Geometry::IComponent_const_sptr aperture = instrument->getComponentByName("aperture");
-      if(!aperture)
-      {
-        throw std::runtime_error("TobyFitYVector::calculateAperatureSpread - Instrument has no defined aperture component!");
-      }
-      // Rough size
-      Geometry::BoundingBox boundBox;
-      aperture->getBoundingBox(boundBox);
-      const Kernel::V3D & minPoint = boundBox.minPoint();
-      const Kernel::V3D & maxPoint = boundBox.maxPoint();
-      // Orientation
-      boost::shared_ptr<const Geometry::ReferenceFrame> refFrame = instrument->getReferenceFrame();
-      Geometry::PointingAlong upDir = refFrame->pointingUp();
-      Geometry::PointingAlong horizontalDir = refFrame->pointingHorizontal();
-      const double width(maxPoint[horizontalDir] - minPoint[horizontalDir]),
-          height(maxPoint[upDir] - minPoint[upDir]);
+      const std::pair<double,double> & apSize = m_curObs->apertureSize();
 
-      m_yvector[vecPos1] = width * (m_curRandNums->at(vecPos1) - 0.5);
-      m_yvector[vecPos2] = height * (m_curRandNums->at(vecPos2) - 0.5);
+      m_yvector[vecPos1] = apSize.first * (m_curRandNums->at(vecPos1) - 0.5);
+      m_yvector[vecPos2] = apSize.second * (m_curRandNums->at(vecPos2) - 0.5);
     }
 
     /**
@@ -158,20 +158,10 @@ namespace Mantid
 
       if(inactive) return;
 
-      // Sample volume
-      const API::Sample & sampleDescription = m_curObs->experimentInfo()->sample();
-      const Geometry::Object & shape = sampleDescription.getShape();
-      if(shape.hasValidShape())
-      {
-        throw std::runtime_error("TobyFitYVector::calculateSampleContribution - Sample has not defined shape");
-      }
-      const Geometry::BoundingBox & bbox = shape.getBoundingBox();
-      const Kernel::V3D boxSize(bbox.width());
-      boost::shared_ptr<const Geometry::ReferenceFrame> refFrame = m_curObs->experimentInfo()->getInstrument()->getReferenceFrame();
-
-      m_yvector[vecPos1] = boxSize[refFrame->pointingHorizontal()] * (m_curRandNums->at(vecPos1));
-      m_yvector[vecPos2] = boxSize[refFrame->pointingAlongBeam()] * (m_curRandNums->at(vecPos2));
-      m_yvector[vecPos2] = boxSize[refFrame->pointingUp()] * (m_curRandNums->at(vecPos3));
+      const Kernel::V3D & boxSize = m_curObs->sampleCuboid();
+      m_yvector[vecPos1] = boxSize[0] * (m_curRandNums->at(vecPos1)); // horizontal
+      m_yvector[vecPos2] = boxSize[2] * (m_curRandNums->at(vecPos2)); //beam
+      m_yvector[vecPos2] = boxSize[1] * (m_curRandNums->at(vecPos3)); //up
     }
 
     /**
@@ -182,7 +172,7 @@ namespace Mantid
       const Variable vecPos = TobyFitYVector::ChopperTime;
       if(setToZeroIfInactive(vecPos)) return;
 
-      const API::ChopperModel & chopper = m_curObs->experimentInfo()->chopperModel(0);
+      const API::ChopperModel & chopper = m_curObs->experimentInfo().chopperModel(0);
       m_yvector[vecPos] = chopper.sampleTimeDistribution(m_curRandNums->at(vecPos));
     }
 
@@ -209,10 +199,7 @@ namespace Mantid
       const Variable vecPos = TobyFitYVector::DetectorDepth;
       if(setToZeroIfInactive(vecPos)) return;
 
-      API::ExperimentInfo_const_sptr exptInfo = m_curObs->experimentInfo();
-      Geometry::Instrument_const_sptr instrument = exptInfo->getInstrument();
-
-      m_yvector[vecPos] = detectionPoint[instrument->getReferenceFrame()->pointingAlongBeam()];
+      m_yvector[vecPos] = detectionPoint[2]; // beam
     }
 
     /**
@@ -229,11 +216,8 @@ namespace Mantid
       inactive |= setToZeroIfInactive(vecPos2);
       if(inactive) return;
 
-      API::ExperimentInfo_const_sptr exptInfo = m_curObs->experimentInfo();
-      Geometry::Instrument_const_sptr instrument = exptInfo->getInstrument();
-
-      m_yvector[vecPos1] = detectionPoint[instrument->getReferenceFrame()->pointingUp()];
-      m_yvector[vecPos2] = detectionPoint[instrument->getReferenceFrame()->pointingHorizontal()];
+      m_yvector[vecPos1] = detectionPoint[1];
+      m_yvector[vecPos2] = detectionPoint[0];
     }
 
     /**
@@ -244,8 +228,8 @@ namespace Mantid
       const Variable vecPos = TobyFitYVector::DetectionTime;
       if(setToZeroIfInactive(vecPos)) return;
 
-      API::ExperimentInfo_const_sptr exptInfo = m_curObs->experimentInfo();
-      const std::pair<double, double> binEdges = exptInfo->run().histogramBinBoundaries(m_curQOmega->deltaE);
+      const API::ExperimentInfo & exptInfo = m_curObs->experimentInfo();
+      const std::pair<double, double> binEdges = exptInfo.run().histogramBinBoundaries(m_curQOmega->deltaE);
       const double energyWidth = binEdges.second - binEdges.first;
       const double efixed = m_curObs->getEFixed();
       const double kf = std::sqrt((efixed - m_curQOmega->deltaE)*PhysicalConstants::E_mev_toNeutronWavenumberSq);
@@ -262,8 +246,7 @@ namespace Mantid
      */
     bool TobyFitYVector::setToZeroIfInactive(const Variable & attr)
     {
-      if(m_tfResModel.useAttribute(attr)) return false;
-
+      if(m_attrStates[attr]) return false;
       m_yvector[attr] = 0.0;
       return true;
     }

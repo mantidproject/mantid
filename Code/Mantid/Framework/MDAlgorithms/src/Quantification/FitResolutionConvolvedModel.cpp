@@ -5,10 +5,8 @@
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
-
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-
 #include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
@@ -24,14 +22,21 @@ namespace Mantid
     using Kernel::Direction;
     using Kernel::ListValidator;
     using Kernel::MandatoryValidator;
-    using API::WorkspaceProperty;
+    using API::ITableWorkspace;
+    using API::ITableWorkspace_sptr;
     using API::IMDEventWorkspace;
     using API::IMDEventWorkspace_sptr;
+    using API::MatrixWorkspace;
+    using API::MatrixWorkspace_sptr;
+    using API::WorkspaceProperty;
 
     namespace
     {
       // Property names
       const char * INPUT_WS_NAME = "InputWorkspace";
+      const char * SIMULATED_NAME = "OutputWorkspace";
+      const char * OUTPUT_PARS = "OutputParameters";
+      const char * OUTPUTCOV_MATRIX = "CovarianceMatrix";
       const char * RESOLUTION_NAME = "ResolutionFunction";
       const char * FOREGROUND_NAME = "ForegroundModel";
       const char * PARS_NAME = "Parameters";
@@ -70,6 +75,34 @@ namespace Mantid
       return MAX_ITER_NAME;
     }
 
+    /// Returns the name of the output parameters property
+    std::string FitResolutionConvolvedModel::outputParsPropertyName() const
+    {
+      return OUTPUT_PARS;
+    }
+
+    /// Returns the name of the covariance matrix property
+    std::string FitResolutionConvolvedModel::covMatrixPropertyName() const
+    {
+      return OUTPUTCOV_MATRIX;
+    }
+
+    /**
+     * Create the function string required by fit
+     * @return Creates a string that can be passed to fit containing the necessary setup for the function
+     */
+    std::string FitResolutionConvolvedModel::createFunctionString() const
+    {
+      std::ostringstream stringBuilder;
+
+      const char seperator(',');
+      stringBuilder << "name=" << ResolutionConvolvedCrossSection().name() << seperator
+                    << "ResolutionFunction=" << this->getPropertyValue(RESOLUTION_NAME) << seperator
+                    << "ForegroundModel=" << this->getPropertyValue(FOREGROUND_NAME) << seperator
+                    << this->getPropertyValue("Parameters");
+      return stringBuilder.str();
+    }
+
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties.
      */
@@ -77,6 +110,15 @@ namespace Mantid
     {
       declareProperty(new WorkspaceProperty<IMDEventWorkspace>(INPUT_WS_NAME,"",Direction::Input),
                       "The input MDEvent workspace");
+
+      declareProperty(new WorkspaceProperty<IMDEventWorkspace>(SIMULATED_NAME,"",Direction::Output),
+                      "The simulated output workspace");
+
+      declareProperty(new WorkspaceProperty<ITableWorkspace>(OUTPUT_PARS,"",Direction::Output),
+        "The name of the TableWorkspace in which to store the final fit parameters" );
+
+      declareProperty(new WorkspaceProperty<API::ITableWorkspace>(OUTPUTCOV_MATRIX,"",Direction::Output),
+        "The name of the TableWorkspace in which to store the final covariance matrix" );
 
       std::vector<std::string> models = MDResolutionConvolutionFactory::Instance().getKeys();
       declareProperty(RESOLUTION_NAME, "", boost::make_shared<ListValidator<std::string>>(models),
@@ -103,10 +145,13 @@ namespace Mantid
       API::IAlgorithm_sptr fit = createFittingAlgorithm();
       fit->setPropertyValue("Function", createFunctionString());
       fit->setProperty("InputWorkspace", getPropertyValue(INPUT_WS_NAME));
+      fit->setProperty("DomainType", "Simple"); // Parallel not quite giving correct answers
+      fit->setProperty("Minimizer","Levenberg-MarquardtMD");
 
-      // Maximum number of allowed iterations
       const int maxIter = niterations();
       fit->setProperty("MaxIterations", maxIter);
+      fit->setProperty("CreateOutput", true);
+      fit->setPropertyValue("Output", getPropertyValue(SIMULATED_NAME));
 
       try
       {
@@ -115,6 +160,21 @@ namespace Mantid
       catch(std::exception & exc)
       {
         throw std::runtime_error(std::string("FitResolutionConvolvedModel - Error running Fit: ") + exc.what());
+      }
+
+      // Pass on the relevant properties
+      IMDEventWorkspace_sptr simulatedData = fit->getProperty("OutputWorkspace");
+      this->setProperty(SIMULATED_NAME, simulatedData);
+
+      if(this->existsProperty(OUTPUT_PARS))
+      {
+        ITableWorkspace_sptr outputPars = fit->getProperty("OutputParameters");
+        setProperty(OUTPUT_PARS, outputPars);
+      }
+      if(this->existsProperty(OUTPUTCOV_MATRIX))
+      {
+        ITableWorkspace_sptr covarianceMatrix = fit->getProperty("OutputNormalisedCovarianceMatrix");
+        setProperty(OUTPUTCOV_MATRIX, covarianceMatrix);
       }
     }
 
@@ -129,21 +189,6 @@ namespace Mantid
       return createSubAlgorithm("Fit", startProgress, endProgress, enableLogging);
     }
 
-    /**
-     * Create the function string required by fit
-     * @return Creates a string that can be passed to fit containing the necessary setup for the function
-     */
-    std::string FitResolutionConvolvedModel::createFunctionString() const
-    {
-      std::ostringstream stringBuilder;
-
-      const char seperator(',');
-      stringBuilder << "name=" << ResolutionConvolvedCrossSection().name() << seperator
-                    << "ResolutionFunction=" << this->getPropertyValue(RESOLUTION_NAME) << seperator
-                    << "ForegroundModel=" << this->getPropertyValue(FOREGROUND_NAME) << seperator
-                    << this->getPropertyValue("Parameters");
-      return stringBuilder.str();
-    }
 
 
   } // namespace MDAlgorithms

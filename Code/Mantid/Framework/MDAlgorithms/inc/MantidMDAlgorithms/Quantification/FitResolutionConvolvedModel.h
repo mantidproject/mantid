@@ -41,6 +41,12 @@ namespace Mantid
       virtual int niterations() const;
       /// Returns the name of the max iterations property
       std::string maxIterationsPropertyName() const;
+      /// Returns the name of the output parameters property
+      std::string outputParsPropertyName() const;
+      /// Returns the name of the covariance matrix property
+      std::string covMatrixPropertyName() const;
+      /// Create the function string required by fit
+      std::string createFunctionString() const;
 
       void init();
       void exec();
@@ -48,8 +54,6 @@ namespace Mantid
     private:
       /// Create the fitting sub algorithm
       API::IAlgorithm_sptr createFittingAlgorithm();
-      /// Create the function string required by fit
-      std::string createFunctionString() const;
     };
 
 
