@@ -160,7 +160,7 @@ namespace MDAlgorithms
     // That is, data[z][y][x] = etc.
     std::vector<int> size(3, 0);
 
-    // And this will be the "size" field we save, in the usual XYZ order.
+    // And this will be the "size" field we save, which must be the same for plots to be correct
     std::vector<int> size_field(3, 0);
 
     // Dimension_X attributes give the step size for each dimension
@@ -172,9 +172,9 @@ namespace MDAlgorithms
       // Origin of the CENTER of the first bin
       origin[d] = dim->getMinimum() + dim->getBinWidth()/2;
       // Size in each dimension 
-      size[d] = int(dim->getNBins());
-      // Size in each dimension (in the XYZ order)
-      size_field[d] = int(dim->getNBins());
+      size[2-d] = int(dim->getNBins());
+      // Size in each dimension (in the ZYX order)
+      size_field[2-d] = int(dim->getNBins());
       file->writeData("direction_" + Strings::toString(d+1), direction);
     }
     file->writeData("origin", origin);
