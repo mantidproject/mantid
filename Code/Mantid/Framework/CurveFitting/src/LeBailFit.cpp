@@ -6,6 +6,9 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Fit.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidCurveFitting/BackgroundFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -67,6 +70,10 @@ void LeBailFit::init()
     /// WorkspaceIndex
     this->declareProperty("WorkspaceIndex", 0, "Workspace index of the spectrum to fit by LeBail.");
 
+    /// Interested region
+    this->declareProperty(new Kernel::ArrayProperty<double>("FitRegion"),
+                          "Region of data (TOF) for LeBail fit.  Default is whole range. ");
+
     /// Function
     std::vector<std::string> functions;
     functions.push_back("LeBailFit");
@@ -75,13 +82,28 @@ void LeBailFit::init()
     auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
     this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
+    /// Background type
+    std::vector<std::string> bkgdtype;
+    bkgdtype.push_back("Polynomial");
+    bkgdtype.push_back("Chebyshev");
+    auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
+    this->declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
+
+    /// Input background parameters (array)
+    this->declareProperty(new Kernel::ArrayProperty<double>("BackgroundParameters"),
+                          "Optional: enter a comma-separated list of background order parameters from order 0. ");
+
+    /// Input background parameters (tableworkspace)
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("BackgroundParametersWorkspace", "", Direction::InOut, API::PropertyMode::Optional),
+            "Optional table workspace containing the fit result for background.");
+
     /// OutputWorkspace
     this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace", "", Direction::Output),
                           "Output workspace containing calculated pattern or calculated background. ");
 
     /// PeaksWorkspace
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("PeaksWorkspace", "", Direction::Output),
-                        "Output workspace containing the information for all peaks. ");
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("PeaksWorkspace", "", Direction::Output, API::PropertyMode::Optional),
+                        "Optional output workspace containing the information for all peaks. ");
 
     /// UseInputPeakHeights
     this->declareProperty("UseInputPeakHeights", true,
@@ -126,6 +148,21 @@ void LeBailFit::exec()
         // automatic background points selection
         functionmode = 2;
     }
+
+    // 2B) Background
+    std::string backgroundtype = this->getProperty("BackgroundType");
+    std::vector<double> bkgdorderparams = this->getProperty("BackgroundParameters");
+    DataObjects::TableWorkspace_sptr bkgdparamws = this->getProperty("BackgroundParametersWorkspace");
+    if (!bkgdparamws)
+    {
+        std::cout << "Use background specified with vector. " << std::endl;
+    }
+    else
+    {
+        std::cout << "Use background specified by table workspace. " << std::endl;
+        parseBackgroundTableWorkspace(bkgdparamws, bkgdorderparams);
+    }
+    generateBackgroundFunction(backgroundtype, bkgdorderparams);
 
     // 3. Check and/or process inputs
     if (workspaceindex >= dataWS->getNumberHistograms())
@@ -914,7 +951,7 @@ void LeBailFit::setPeakParameters(
 
         // char fitortie = pit->second.second;
 
-        g_log.information() << "LeBailFit Set " << parname << "= " << value << std::endl;
+        g_log.debug() << "LeBailFit Set " << parname << "= " << value << std::endl;
 
         std::vector<std::string>::iterator ifind =
                 std::find(lebailparnames.begin(), lebailparnames.end(), parname);
@@ -974,6 +1011,56 @@ void LeBailFit::generatePeaksFromInput()
 
         speak->setPeakRadius(mPeakRadius);
     }
+
+    return;
+}
+
+/*
+ * Generate background function accroding to input
+ */
+void LeBailFit::generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws)
+{
+    auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
+    CurveFitting::BackgroundFunction_sptr mBackgroundFunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(background);
+
+    // CurveFitting::BackgroundFunction_sptr mBackgroundFunction = boost::make_shared<CurveFitting::BackgroundFunction>(background);
+    //            boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(
+    //            boost::make_shared<(background));
+    size_t order = bkgdparamws.size();
+    mBackgroundFunction->setAttributeValue("order", int(order));
+    for (size_t i = 0; i < order; ++i)
+    {
+        std::stringstream ss;
+        ss << "A" << i;
+        std::string parname = ss.str();
+
+        background->setParameter(parname, bkgdparamws[i]);
+    }
+
+    // FIXME Requires a background shared_pointer
+
+    return;
+}
+
+/*
+ * Parse table workspace (from Fit()) containing background parameters to a vector
+ */
+void LeBailFit::parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr bkgdparamws, std::vector<double>& bkgdorderparams)
+{
+    // 1. Clear
+    bkgdorderparams.clear();
+
+    // 2. Read background
+    std::string a("A0");
+    std::string b("A1");
+    int smaller = a.compare(b);
+    int larger = b.compare(a);
+    std::cout << smaller << ", " << larger << std::endl;
+
+    size_t order = bkgdparamws->rowCount();
+    bkgdorderparams.reserve(order);
+
+    throw std::runtime_error("To be implemented ASAP!");
 
     return;
 }
