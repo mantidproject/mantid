@@ -91,8 +91,6 @@ namespace Mantid
                        const QOmegaPoint & qOmega);
 
     private:
-      DISABLE_COPY_AND_ASSIGN(TobyFitYVector);
-
       /// Sample from moderator time distribution
       void calculateModeratorTime();
       /// Aperature contribution

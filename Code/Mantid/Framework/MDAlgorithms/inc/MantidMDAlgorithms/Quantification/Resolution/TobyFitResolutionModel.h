@@ -83,6 +83,9 @@ namespace Mantid
 
     private:
       DISABLE_COPY_AND_ASSIGN(TobyFitResolutionModel);
+
+      /// Informs the function how many threads will be processing it
+      void useNumberOfThreads(const int nthreads);
       /// Cache detector observations
       void preprocess(const API::IMDEventWorkspace_const_sptr & workspace);
       /// Declare function attributes
@@ -128,15 +131,15 @@ namespace Mantid
       int m_mosaicActive;
 
       /// A pre-sized matrix for the resolution coefficients
-      mutable TobyFitBMatrix m_bmatrix;
+      mutable std::vector<TobyFitBMatrix> m_bmatrix;
       /// A pre-sized vector for the randomly generated points
-      mutable TobyFitYVector m_yvector;
+      mutable std::vector<TobyFitYVector> m_yvector;
       /// The generated value of the in-place mosaic (eta_2)
-      mutable double m_etaInPlane;
+      mutable std::vector<double> m_etaInPlane;
       /// The generated value of the in-place mosaic (eta_3)
-      mutable double m_etaOutPlane;
+      mutable std::vector<double> m_etaOutPlane;
       /// A pre-sized vector for the QE position to be evaluated
-      mutable std::vector<double> m_deltaQE;
+      mutable std::vector<std::vector<double>> m_deltaQE;
 
       /// Cache of detector observations
       std::map<std::pair<int, detid_t>, Observation*> m_observations;

@@ -93,6 +93,7 @@ namespace Mantid
         throw std::invalid_argument("ResolutionConvolvedCrossSection can only be used with MD event workspaces");
       }
       IFunctionMD::setWorkspace(workspace);
+      m_convolution->useNumberOfThreads(PARALLEL_GET_MAX_THREADS);
       m_convolution->preprocess(m_workspace);
     }
 
@@ -103,8 +104,9 @@ namespace Mantid
       {
         throw std::invalid_argument("Unexpected domain in IFunctionMD");
       }
+
       dmd->reset();
-      size_t i=0;
+      size_t i = 0;
       for(const API::IMDIterator* r = dmd->getNextIterator(); r != NULL; r = dmd->getNextIterator())
       {
         values.setCalculated(i,functionMD(*r));
@@ -123,18 +125,19 @@ namespace Mantid
      */
     double ResolutionConvolvedCrossSection::functionMD(const Mantid::API::IMDIterator& box) const
     {
+      assert(m_convolution);
       const size_t numEvents = box.getNumEvents();
       if(numEvents == 0) return 0.0;
 
-      assert(m_convolution);
-
       double signal(0.0);
-      // loop over each MDPoint in current MDBox
-      for(size_t j = 0; j < numEvents; j++)
+      PARALLEL_FOR_NO_WSP_CHECK()
+      for(size_t j = 0; j < numEvents; ++j)
       {
         double contribution =  m_convolution->signal(box, box.getInnerRunIndex(j), j);
+        PARALLEL_ATOMIC
         signal += contribution;
       }
+
       // Return the mean
       return signal/static_cast<double>(numEvents);
     }

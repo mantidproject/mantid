@@ -78,6 +78,11 @@ namespace Mantid
        * @param workspace :: The MD that will be used for the fit
        */
       virtual void preprocess(const API::IMDEventWorkspace_const_sptr & workspace) { UNUSED_ARG(workspace); }
+      /**
+       * Called before any fit/simulation is started to tell the function how many threads will be used.
+       * Default does nothing.
+       */
+      virtual void useNumberOfThreads(const int) {}
 
       /// Declares the parameters. Overridden here to ensure that concrete models override it
       void declareAttributes();

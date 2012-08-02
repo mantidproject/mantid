@@ -37,7 +37,8 @@ namespace Mantid
       : MDResolutionConvolution(), m_randGen(new Kernel::SobolSequence(TobyFitYVector::variableCount() + 2)), // For eta
         m_activeAttrValue(1),
         m_mcLoopMin(100), m_mcLoopMax(1000), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
-        m_bmatrix(), m_yvector(), m_etaInPlane(0.0), m_etaOutPlane(0.0), m_deltaQE(4, 0.0)
+        m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
+        m_observations()
     {
     }
 
@@ -51,7 +52,8 @@ namespace Mantid
       : MDResolutionConvolution(fittedFunction, fgModel), m_randGen(new Kernel::SobolSequence(TobyFitYVector::variableCount())),
         m_activeAttrValue(1),
         m_mcLoopMin(100), m_mcLoopMax(1000), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
-        m_bmatrix(), m_yvector(), m_observations()
+        m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
+        m_observations()
     {
     }
 
@@ -95,7 +97,8 @@ namespace Mantid
         generateIntegrationVariables(detObservation, qOmega);
         calculatePerturbedQE(detObservation, qOmega);
         // Compute weight from the foreground at this point
-        const double weight = foregroundModel().scatteringIntensity(detObservation.experimentInfo(), m_deltaQE);
+        const double weight = foregroundModel().scatteringIntensity(detObservation.experimentInfo(),
+                                                                    m_deltaQE[PARALLEL_THREAD_NUMBER]);
 
         // Add on this contribution to the average
         sumSigma += weight;
@@ -113,6 +116,20 @@ namespace Mantid
     //---------------------------------------------------------------------------------
     // Private members
     //---------------------------------------------------------------------------------
+    /**
+     * Sets up the function to cope with the given number of threads processing it at once
+     * @param nthreads :: The maximum number of threads that will be used to evaluate the
+     * function
+     */
+    void TobyFitResolutionModel::useNumberOfThreads(const int nthreads)
+    {
+      m_bmatrix = std::vector<TobyFitBMatrix>(nthreads, TobyFitBMatrix());
+      m_yvector = std::vector<TobyFitYVector>(nthreads, TobyFitYVector());
+      m_etaInPlane = std::vector<double>(nthreads, 0.0);
+      m_etaOutPlane = std::vector<double>(nthreads, 0.0);
+      m_deltaQE = std::vector<std::vector<double>>(nthreads, std::vector<double>(4, 0.0));
+    }
+
     /**
      * Called before any fit/simulation is started to allow caching of
      * frequently used parameters
@@ -182,8 +199,13 @@ namespace Mantid
       else if(name == MC_MAX_NAME) m_mcLoopMax = value.asInt();
       else if(name == MC_LOOP_TOL) m_mcRelErrorTol = value.asDouble();
       else if(name == CRYSTAL_MOSAIC) m_mosaicActive = value.asInt();
-      else m_yvector.setAttribute(name, value.asInt());
-
+      else
+      {
+        for(auto iter = m_yvector.begin(); iter != m_yvector.end(); ++iter)
+        {
+          iter->setAttribute(name, value.asInt());
+        }
+      }
     }
 
     /**
@@ -205,7 +227,7 @@ namespace Mantid
     void TobyFitResolutionModel::calculateResolutionCoefficients(const Observation & observation,
                                                                  const QOmegaPoint & eventPoint) const
     {
-      m_bmatrix.recalculate(observation, eventPoint);
+      m_bmatrix[PARALLEL_THREAD_NUMBER].recalculate(observation, eventPoint);
     }
 
     /**
@@ -217,7 +239,7 @@ namespace Mantid
                                       const QOmegaPoint & eventPoint) const
     {
       const std::vector<double> & randomNums = m_randGen->nextPoint();
-      const size_t nvars = m_yvector.recalculate(randomNums, observation, eventPoint);
+      const size_t nvars = m_yvector[PARALLEL_THREAD_NUMBER].recalculate(randomNums, observation, eventPoint);
 
       // Calculate crystal mosaic contribution
       if(m_mosaicActive)
@@ -227,12 +249,12 @@ namespace Mantid
         const double r2 = randomNums[nvars+1];
         const double etaSig = observation.experimentInfo().run().getLogAsSingleValue("eta_sigma");
 
-        m_etaInPlane = etaSig*prefactor*std::cos(2.0*M_PI*r2);
-        m_etaOutPlane = etaSig*prefactor*std::sin(2.0*M_PI*r2);
+        m_etaInPlane[PARALLEL_THREAD_NUMBER] = etaSig*prefactor*std::cos(2.0*M_PI*r2);
+        m_etaOutPlane[PARALLEL_THREAD_NUMBER] = etaSig*prefactor*std::sin(2.0*M_PI*r2);
       }
       else
       {
-        m_etaInPlane = m_etaOutPlane = 0.0;
+        m_etaInPlane[PARALLEL_THREAD_NUMBER] = m_etaOutPlane[PARALLEL_THREAD_NUMBER] = 0.0;
       }
     }
 
@@ -255,15 +277,16 @@ namespace Mantid
 
       double xVec0(0.0), xVec1(0.0), xVec2(0.0),
           xVec3(0.0), xVec4(0.0), xVec5(0.0);
-      const std::vector<double> & yvalues = m_yvector.values();
+      const std::vector<double> & yvalues = m_yvector[PARALLEL_THREAD_NUMBER].values();
+      const TobyFitBMatrix & bmatrix = m_bmatrix[PARALLEL_THREAD_NUMBER];
       for(unsigned int i =0; i < TobyFitYVector::variableCount(); ++i)
       {
-        xVec0 += m_bmatrix[0][i] * yvalues[i];
-        xVec1 += m_bmatrix[1][i] * yvalues[i];
-        xVec2 += m_bmatrix[2][i] * yvalues[i];
-        xVec3 += m_bmatrix[3][i] * yvalues[i];
-        xVec4 += m_bmatrix[4][i] * yvalues[i];
-        xVec5 += m_bmatrix[5][i] * yvalues[i];
+        xVec0 += bmatrix[0][i] * yvalues[i];
+        xVec1 += bmatrix[1][i] * yvalues[i];
+        xVec2 += bmatrix[2][i] * yvalues[i];
+        xVec3 += bmatrix[3][i] * yvalues[i];
+        xVec4 += bmatrix[4][i] * yvalues[i];
+        xVec5 += bmatrix[5][i] * yvalues[i];
       }
 
       // Convert to dQ in lab frame
@@ -282,24 +305,27 @@ namespace Mantid
       const double dqlab0 = (L00*xVec3 + L01*xVec4 + L02*xVec5)/determinant;
       const double dqlab1 = (L10*xVec3 + L11*xVec4 + L12*xVec5)/determinant;
       const double dqlab2 = (L20*xVec3 + L21*xVec4 + L22*xVec5)/determinant;
-      m_deltaQE[0] = (xVec0 - dqlab0);
-      m_deltaQE[1] = (xVec1 - dqlab1);
-      m_deltaQE[2] = (xVec2 - dqlab2);
+      std::vector<double> & deltaQE = m_deltaQE[PARALLEL_THREAD_NUMBER];
+      deltaQE[0] = (xVec0 - dqlab0);
+      deltaQE[1] = (xVec1 - dqlab1);
+      deltaQE[2] = (xVec2 - dqlab2);
 
       const double efixed = observation.getEFixed();
       const double wi = std::sqrt(efixed/PhysicalConstants::E_mev_toNeutronWavenumberSq);
       const double wf = std::sqrt((efixed - qOmega.deltaE)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
-      m_deltaQE[3] = 4.1442836 * (wi*xVec2 - wf*xVec5);
+      deltaQE[3] = 4.1442836 * (wi*xVec2 - wf*xVec5);
 
       // Add on the nominal Q
-      m_deltaQE[0] += qOmega.qx;
-      m_deltaQE[1] += qOmega.qy;
-      m_deltaQE[2] += qOmega.qz;
-      m_deltaQE[3] += qOmega.deltaE;
+      deltaQE[0] += qOmega.qx;
+      deltaQE[1] += qOmega.qy;
+      deltaQE[2] += qOmega.qz;
+      deltaQE[3] += qOmega.deltaE;
 
       if(m_mosaicActive)
       {
-        const double qx(m_deltaQE[0]),qy(m_deltaQE[1]),qz(m_deltaQE[1]);
+        const double etaInPlane = m_etaInPlane[PARALLEL_THREAD_NUMBER];
+        const double etaOutPlane = m_etaOutPlane[PARALLEL_THREAD_NUMBER];
+        const double qx(deltaQE[0]),qy(deltaQE[1]),qz(deltaQE[1]);
         const double qipmodSq = qy*qy + qz*qz;
         const double qmod = std::sqrt(qx*qx + qipmodSq);
         static const double small(1e-10);
@@ -308,14 +334,14 @@ namespace Mantid
           const double qipmod = std::sqrt(qipmodSq);
           if(qipmod > small)
           {
-            m_deltaQE[0] -= qipmod*m_etaInPlane;
-            m_deltaQE[1] += ((qx*qy)*m_etaInPlane - (qz*qmod)*m_etaOutPlane)/qipmod;
-            m_deltaQE[2] += ((qx*qz)*m_etaInPlane + (qy*qmod)*m_etaOutPlane)/qipmod;
+            deltaQE[0] -= qipmod*etaInPlane;
+            deltaQE[1] += ((qx*qy)*etaInPlane - (qz*qmod)*etaOutPlane)/qipmod;
+            deltaQE[2] += ((qx*qz)*etaInPlane + (qy*qmod)*etaOutPlane)/qipmod;
           }
           else
           {
-            m_deltaQE[1] += qmod*m_etaInPlane;
-            m_deltaQE[2] += qmod*m_etaOutPlane;
+            deltaQE[1] += qmod*etaInPlane;
+            deltaQE[2] += qmod*etaOutPlane;
           }
         }
       }
