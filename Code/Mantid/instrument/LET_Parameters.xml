@@ -3,6 +3,11 @@
 
 <component-link name = "LET">
 
+<!-- Specify that the detector positions should be taken from the data file -->
+<parameter name="det-pos-source" type="string">
+  <value val="datafile"/>
+</parameter>
+
 <parameter name="deltaE-mode" type="string">
   <value val="direct"/>
 </parameter>

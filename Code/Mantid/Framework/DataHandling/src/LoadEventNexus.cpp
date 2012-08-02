@@ -1601,7 +1601,35 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   if (!executionSuccessful)
   {
     alg->getLogger().error() << "Error loading Instrument definition file\n";
+    return false;
   }
+
+  // Ticket #2049: Cleanup all loadinstrument members to a single instance
+  // If requested update the instrument to positions in the data file
+  const Geometry::ParameterMap & pmap = localWorkspace->instrumentParameters();
+  if( !pmap.contains(localWorkspace->getInstrument()->getComponentID(),"det-pos-source") ) 
+    return executionSuccessful;
+
+  boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(localWorkspace->getInstrument()->getComponentID(),"det-pos-source");
+  std::string value = updateDets->value<std::string>();
+  if(value.substr(0,8)  == "datafile" )
+  {
+    IAlgorithm_sptr updateInst = alg->createSubAlgorithm("UpdateInstrumentFromFile");
+    updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
+    updateInst->setPropertyValue("Filename", nexusfilename);
+    if(value  == "datafile-ignore-phi" )
+    {
+      updateInst->setProperty("IgnorePhi", true);
+      alg->getLogger().information("Detector positions in IDF updated with positions in the data file except for the phi values");
+    }
+    else 
+    {
+      alg->getLogger().information("Detector positions in IDF updated with positions in the data file");
+    }
+    // We want this to throw if it fails to warn the user that the information is not correct.
+    updateInst->execute();
+  }
+
   return executionSuccessful;
 }
 
