@@ -1442,8 +1442,19 @@ void Indirect::calPlotRaw()
 
   std::cout << "Indirect::calPlotRaw() calling: " << pyInput.toStdString() << std::endl;
 
+  pyInput = "try:\n  " +
+               pyInput +
+            "except ValueError as ve:" +
+            "  print str(ve)";
+
   QString pyOutput = runPythonCode(pyInput);
-    
+  
+  if( ! pyOutput.isEmpty() )
+  {
+    showInformationBox("Unable to load file.  Error: \n\n" + pyOutput + "\nCheck whether your file exists and matches the selected instrument in the Energy Transfer tab.");
+    return;
+  }
+
   Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
   const MantidVec & dataX = input->readX(0);
@@ -1770,7 +1781,19 @@ void Indirect::slicePlotRaw()
     QString pyInput = "Load(r'" + filename + "', '" + wsname + "', SpectrumMin="
       + m_uiForm.leSpectraMin->text() + ", SpectrumMax="
       + m_uiForm.leSpectraMax->text() + ")\n";
+    
+    pyInput = "try:\n  " +
+                pyInput +
+              "except ValueError as ve:" +
+              "  print str(ve)";
+
     QString pyOutput = runPythonCode(pyInput);
+    
+    if( ! pyOutput.isEmpty() )
+    {
+      showInformationBox("Unable to load file: \n\n\"" + pyOutput + "\".\n\nCheck whether your file exists and matches the selected instrument in the EnergyTransfer tab.");
+      return;
+    }
 
     Mantid::API::MatrixWorkspace_sptr input = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname.toStdString()));
 
