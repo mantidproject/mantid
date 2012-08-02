@@ -1,11 +1,6 @@
-import sys
 from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
-from PyQt4 import QtCore, uic,QtGui#PyQt imports required (may need more)
-import sys
-import math 
-import time as time
-#import numpy
-
+from PyQt4 import QtCore, QtGui
+import math
 
 class MainWindow(QtGui.QMainWindow):
 	needsThetaInputList = ['Momentum transfer (Q Angstroms^-1)', 'd-Spacing (Angstroms)']
@@ -52,9 +47,9 @@ class MainWindow(QtGui.QMainWindow):
 		QtGui.QMainWindow.__init__(self,parent)
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
-		self.ui.InputVal.setValidator(QtGui.QDoubleValidator())
-		self.ui.lineEdit_3.setValidator(QtGui.QDoubleValidator())
-		self.ui.lineEdit_4.setValidator(QtGui.QDoubleValidator())
+		self.ui.InputVal.setValidator(QtGui.QDoubleValidator(self.ui.InputVal))
+		self.ui.lineEdit_3.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_3))
+		self.ui.lineEdit_4.setValidator(QtGui.QDoubleValidator(self.ui.lineEdit_4))
 		QtCore.QObject.connect(self.ui.convert, QtCore.SIGNAL("clicked()"), self.convert )
 		QtCore.QObject.connect(self.ui.inputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
 		QtCore.QObject.connect(self.ui.outputUnits, QtCore.SIGNAL("currentIndexChanged(QString)"), self.setInstrumentInputs )
@@ -65,20 +60,25 @@ class MainWindow(QtGui.QMainWindow):
 		self.stage1output=0.0
 		self.stage2output=0.0
 	def convert(self):
+		if self.ui.InputVal.text() == "":
+			return
 		try:
 			inOption=self.ui.inputUnits.currentText()
 			outOption=self.ui.outputUnits.currentText()
 			if self.ui.lineEdit_3.text() !='':
 				self.flightpath = float(self.ui.lineEdit_3.text())
+                        else:
+				self.flightpath = -1.0
 			if self.ui.lineEdit_4.text() !='':
 				self.Theta = ((float(self.ui.lineEdit_4.text()) * 3.14159265358979323846264) / 360.0)
+				self.Theta = -1.0
 			self.stage1output= self.input2energy(float(self.ui.InputVal.text()),inOption)
 			self.stage2output= self.energy2output(self.stage1output,outOption)
 		
 			self.ui.lineEdit_2.clear()
 			self.ui.lineEdit_2.insert(str(self.stage2output))
-		except:
-			print 'Input numbers please'
+		except Exception, e:
+			QtGui.QMessageBox.warning(self, "TofConverter", str(e))
 			return
 	
 	def input2energy(self,inputval, inOption):
@@ -117,19 +117,21 @@ class MainWindow(QtGui.QMainWindow):
 
 		elif inOption == 'Momentum transfer (Q Angstroms^-1)':
 			
-			if self.Theta >=0:
+			if self.Theta >= 0.0:
 				k = inputval * 0.5 / math.sin(self.Theta)
 				Energy = e2k * k * k
 			else:
-				print 'Theta needs to be defined'
-				sys.exit
+				raise RuntimeError("Theta > 0 is required for conversion from Q")
 		elif inOption == 'd-Spacing (Angstroms)':
 			lam = 2 * inputval * math.sin(self.Theta)
 			Energy = e2lam / (lam * lam)
 
 		elif  inOption == 'Time of flight (microseconds)':
-			Energy = 1000000 * self.flightpath
-			Energy = e2v * Energy *Energy / iv2
+			if self.flightpath >= 0.0:
+				Energy = 1000000 * self.flightpath
+				Energy = e2v * Energy *Energy / iv2
+			else:
+				raise RuntimeError("Flight path >= 0 is required for conversion from TOF")
 
 		return Energy
 
@@ -163,15 +165,22 @@ class MainWindow(QtGui.QMainWindow):
 			OutputVal = Energy / e2cm
 
 		elif inOption == 'Momentum transfer (Q Angstroms^-1)':
-			k = (Energy / e2k) ** 0.5
-			OutputVal = 2 * k * math.sin(self.Theta)
-
+			if self.Theta >= 0.0:
+				k = (Energy / e2k) ** 0.5
+				OutputVal = 2 * k * math.sin(self.Theta)
+			else:
+				raise RuntimeError("Theta > 0 is required for conversion to Q")
 		elif inOption == 'd-Spacing (Angstroms)':
-			lam = (e2lam / Energy)**0.5
-			OutputVal = lam * 0.5 / math.sin(self.Theta)
-
+			if self.Theta >= 0.0:
+				lam = (e2lam / Energy)**0.5
+				OutputVal = lam * 0.5 / math.sin(self.Theta)
+			else:
+				raise RuntimeError("Theta > 0 is required for conversion to d-Spacing")
 		elif inOption == 'Time of flight (microseconds)':
-			OutputVal = self.flightpath * 1000 * ((e2v * 1000000 / Energy) ** 0.5)
+			if self.flightpath >= 0.0:
+				OutputVal = self.flightpath * 1000 * ((e2v * 1000000 / Energy) ** 0.5)
+			else:
+				raise RuntimeError("Flight path >= 0 is required for conversion to TOF")
 		
 		elif inOption == 'Energy  (meV)':
 			OutputVal = Energy
