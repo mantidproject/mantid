@@ -133,7 +133,7 @@ class Stitch1D(PythonAlgorithm):
 	   
        
     def category(self):
-        return "PythonAlgorithms"
+        return "PythonAlgorithms;;Reflectometry\\ISIS"
     
     def name(self):
         return "Stitch1D"

@@ -14,7 +14,7 @@ import numpy
 class RefEstimates(PythonAlgorithm):
     
     def category(self):
-        return "Reflectometry"
+        return "Reflectometry\\SNS"
 
     def name(self):
         return "RefEstimates"
