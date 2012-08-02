@@ -60,7 +60,7 @@ namespace WorkflowAlgorithms
     this->declareProperty(new WorkspaceProperty<>("DetVanWorkspace", "",
         Direction::Input), "The detector vanadium workspace.");
     this->declareProperty(new WorkspaceProperty<>("DetVanCompWorkspace", "",
-        Direction::Input),
+        Direction::Input, PropertyMode::Optional),
         "A detector vanadium workspace to compare against the primary one.");
     this->declareProperty(new WorkspaceProperty<>("SampleWorkspace", "",
         Direction::Input, PropertyMode::Optional),
@@ -116,8 +116,7 @@ namespace WorkflowAlgorithms
     const double samHi = reductionManager->getProperty("AcceptanceFactor");
     const double samLo = 0.0;
     const double bleedRate = reductionManager->getProperty("MaxFramerate");
-    // Get the one string property
-    const std::string bleedPixels = reductionManager->getProperty("IgnoredPixels");
+    const int bleedPixels = reductionManager->getProperty("IgnoredPixels");
     //reductionManager->getProperty();
     //reductionManager->getProperty();
 
@@ -144,6 +143,19 @@ namespace WorkflowAlgorithms
         detVan->executeAsSubAlg();
       }
 
+    AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
+    // Get the processed workspaces for possible later use.
+    MatrixWorkspace_sptr dvWS = dataStore.retrieveWS<MatrixWorkspace>(dvInternal);
+    MatrixWorkspace_sptr dvCompWS;
+    if (dataStore.doesExist(dvCompInternal))
+      {
+        dvCompWS = dataStore.retrieveWS<MatrixWorkspace>(dvCompInternal);
+      }
+    else
+      {
+        dvCompWS = boost::shared_ptr<MatrixWorkspace>();
+      }
+
     // Process the sample data if any of the sample checks are requested.
     if (checkBkg || rejectZeroBkg || createPsdBleed)
       {
@@ -156,8 +168,6 @@ namespace WorkflowAlgorithms
         norm->setProperty("ReductionProperties", reductionManagerName);
         norm->executeAsSubAlg();
       }
-
-    AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
 
     // Handle case where one of the other tests (checkBkg or rejectZeroBkg)
     // are requested, but not createPsdBleed.
@@ -231,17 +241,16 @@ namespace WorkflowAlgorithms
         mult->executeAsSubAlg();
         */
         // Normalise the background integral workspace
-        MatrixWorkspace_sptr wi = dataStore.retrieveWS<MatrixWorkspace>(dvInternal);
-        if (detVanCompWS)
+        if (dvCompWS)
           {
-            MatrixWorkspace_sptr swi = dataStore.retrieveWS<MatrixWorkspace>(dvCompInternal);
-            MatrixWorkspace_sptr hmean = 2.0 * wi * swi;
-            hmean /= (wi + swi);
+
+            MatrixWorkspace_sptr hmean = 2.0 * dvWS * dvCompWS;
+            hmean /= (dvWS + dvCompWS);
             backgroundIntWS /= hmean;
           }
         else
           {
-            backgroundIntWS /= wi;
+            backgroundIntWS /= dvWS;
           }
       }
     else
@@ -249,10 +258,10 @@ namespace WorkflowAlgorithms
         backgroundIntWS = boost::shared_ptr<MatrixWorkspace>();
       }
 
-    IAlgorithm_sptr diag = this->createSubAlgorithm("DetectorDiagnose");
+    IAlgorithm_sptr diag = this->createSubAlgorithm("DetectorDiagnostic");
     diag->setAlwaysStoreInADS(true);
     diag->setProperty("InputWorkspace", dvInternal);
-    diag->setProperty("WhiteBeamCompare", dvCompInternal);
+    diag->setProperty("WhiteBeamCompare", dvCompWS);
     diag->setProperty("SampleWorkspace", sampleWS);
     diag->setProperty("SampleTotalCountsWorkspace", totalCountsWS);
     diag->setProperty("SampleBackgroundWorkspace", backgroundIntWS);
