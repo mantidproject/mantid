@@ -453,7 +453,8 @@ namespace WorkflowAlgorithms
       return;
     }
     this->reductionManager = boost::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, this->reductionManager);
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
+        this->reductionManager);
 
     // Put all properties except input files/workspaces into property manager.
     const std::vector<Property *> props = this->getProperties();
@@ -469,7 +470,8 @@ namespace WorkflowAlgorithms
     // Need to load data to get certain bits of information.
     Workspace_sptr sampleWS = this->loadInputData("Sample");
     MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(sampleWS);
-    this->reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", WS->getInstrument()->getName()));
+    this->reductionManager->declareProperty(new PropertyWithValue<std::string>(
+        "InstrumentName", WS->getInstrument()->getName()));
 
     // Load the hard mask if available
     this->loadHardMask();
@@ -480,10 +482,16 @@ namespace WorkflowAlgorithms
     Workspace_sptr idetVanWS;
     if (detVanWS)
       {
+        IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
+        diag->setProperty("DetVanWorkspace", detVanWS);
+        diag->setProperty("SampleWorkspace", sampleWS);
+        diag->setProperty("ReductionProperties", reductionManagerName);
+        diag->executeAsSubAlg();
+
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
         detVan->setProperty("ReductionProperties", reductionManagerName);
-        detVan->execute();
+        detVan->executeAsSubAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
         idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
       }
@@ -492,7 +500,7 @@ namespace WorkflowAlgorithms
     etConv->setProperty("InputWorkspace", sampleWS);
     etConv->setProperty("IntegratedDetectorVanadium", idetVanWS);
     etConv->setProperty("ReductionProperties", reductionManagerName);
-    etConv->execute();
+    etConv->executeAsSubAlg();
   }
 
 } // namespace Mantid
