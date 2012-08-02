@@ -832,7 +832,7 @@ bool SANSRunWindow::loadUserFile()
   QString detName = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.cur_detector().name()").trimmed();
   index = m_uiForm.detbank_sel->findText(detName);  
-  if( index >= 0 && index < 2 )
+  if( index != -1 )
   {
     m_uiForm.detbank_sel->setCurrentIndex(index);
   }
@@ -1021,7 +1021,7 @@ void SANSRunWindow::updateMaskTable()
   int row = m_uiForm.mask_table->rowCount(); 
   m_uiForm.mask_table->insertRow(row); 
   m_uiForm.mask_table->setItem(row, 0, new QTableWidgetItem("Phi")); 
-  m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem(m_uiForm.detbank_sel->currentText())); 
+  m_uiForm.mask_table->setItem(row, 1, new QTableWidgetItem("-")); 
   if ( m_uiForm.mirror_phi->isChecked() ) 
   { 
     m_uiForm.mask_table->setItem(row, 2, new QTableWidgetItem("L/PHI " + phiMin + " " + phiMax));   
@@ -1899,7 +1899,9 @@ void SANSRunWindow::readNumberOfEntries(const QString & RunStep, MantidWidgets::
 QString SANSRunWindow::readUserFileGUIChanges(const States type)
 {
   //Construct a run script based upon the current values within the various widgets
-  QString exec_reduce = "i.ReductionSingleton().instrument.setDetector('" +
+  QString exec_reduce;
+  if ( m_uiForm.detbank_sel->currentIndex() < 2 )
+    exec_reduce = "i.ReductionSingleton().instrument.setDetector('" +
                             m_uiForm.detbank_sel->currentText() + "')\n";
 
   const QString outType(type == OneD ? "1D" : "2D");
@@ -2127,7 +2129,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   //Disable buttons so that interaction is limited while processing data
   setProcessingState(type);
 
-  std::cout << "\n\n" << py_code.toStdString() << "\n\n";
+  //std::cout << "\n\n" << py_code.toStdString() << "\n\n";
   QString pythonStdOut = runReduceScriptFunction(py_code);
 
   //Reset the objects by initialising a new reducer object
@@ -2234,7 +2236,16 @@ QString SANSRunWindow::reduceSingleRun() const
   }
   else
   {
-    reducer_code += "\nreduced = i.WavRangeReduction(full_trans_wav=False)";
+    if ( m_uiForm.detbank_sel->currentIndex() < 2)
+    {
+      reducer_code += "\nreduced = i.WavRangeReduction(full_trans_wav=False)";
+    }
+    else
+    {
+      reducer_code += "\nreduced = i.WavRangeReduction(full_trans_wav=False";
+      reducer_code += ", combineDet='" + m_uiForm.detbank_sel->currentText() + "')";
+    }
+
     if( m_uiForm.plot_check->isChecked() )
     {
       reducer_code += "\ni.PlotResult(reduced)";
@@ -2530,7 +2541,7 @@ void SANSRunWindow::handleInstrumentChange()
   QString detect = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.cur_detector().name()");
   int ind = m_uiForm.detbank_sel->findText(detect);  
-  if( ind >= 0 && ind < 2 )
+  if( ind != -1 )
   {
     m_uiForm.detbank_sel->setCurrentIndex(ind);
   }

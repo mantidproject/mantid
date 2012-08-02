@@ -312,21 +312,119 @@ def _setUpPeriod(i):
 
     return new_sample_workspaces
 
-def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None):
+def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None):
     """
-        Run a reduction that has been set up, from loading the raw data to calculating Q,  and
-        reset the old setup
+        Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics 
+        details to be adjusted, and the old setup is reset at the end 
+        
         @param wav_start: the first wavelength to be in the output data
         @param wav_end: the last wavelength in the output data
         @param full_trans_wav: if to use a wide wavelength range, the instrument's default wavelength range, for the transmission correction, false by default
+        @param name_suffix: append the created output workspace with this
+        @param combineDet: combineDet can be one of the following:
+                           'rear'                (run one reduction for the 'rear' detector data)
+                           'front'               (run one reduction for the 'front' detector data)
+                           'rear, front'         (run two reductions for both the 'rear' and 'front' detectors)                  
+                           'rear, front, merged' (run the same two reductions as above and addition create a merged data workspace)                          
+                           'merged'              (same as above but where the 'rear' and 'front' workspaces are deleted after the 
+                                                  merged workspace has been created) 
+                            None                 (run one reduction for whatever detector has been set as the current detector 
+                                                  before running this method) 
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ', ' + str(wav_end) + ', '+str(full_trans_wav)+')')
-
+    
     if not full_trans_wav is None:
         ReductionSingleton().full_trans_wav = full_trans_wav
 
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
-    _printMessage('Running reduction for ' + str(ReductionSingleton().to_wavelen))
+
+    retWSname = ''
+    if combineDet == None:
+        retWSname = _WavRangeReduction(name_suffix)
+    else:
+        toParse = combineDet.lower()
+        toRestoreAfterAnalysis = ReductionSingleton().instrument.cur_detector().name()
+
+        if name_suffix == None:
+            name_suffix =''
+        
+        if toParse.count('merged') == 1:
+            ReductionSingleton().to_Q.outputParts = True            
+        
+        if toParse.count('rear') == 1 or toParse.count('merged') == 1:
+            ReductionSingleton().instrument.setDetector('rear')
+            retWSname_rear = _WavRangeReduction(name_suffix)
+            
+        if toParse.count('front') == 1 or toParse.count('merged') == 1:
+            ReductionSingleton.replace(ReductionSingleton().settings())
+            ReductionSingleton().instrument.setDetector('front')
+            retWSname_front = _WavRangeReduction(name_suffix)            
+        
+        ReductionSingleton().instrument.setDetector(toRestoreAfterAnalysis)
+        
+        rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift
+        shift = rAnds.shift
+        scale = rAnds.scale
+        issueWarning('SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCALE' + str(scale) + ', SHIFT = ' +str(shift))
+                    
+        if toParse.count('merged') == 1:
+            ReductionSingleton().to_Q.outputParts = False
+        
+            retWSname_merged = retWSname_rear
+            if retWSname_merged.count('rear') == 1:
+                retWSname_merged = retWSname_merged.replace('rear', 'merged')
+            else:
+                retWSname_merged = retWSname_merged + "_merged"
+
+            Nf = mtd[retWSname_front+"_sumOfNormFactors"]
+            Nr = mtd[retWSname_rear+"_sumOfNormFactors"]
+            Cf = mtd[retWSname_front+"_sumOfCounts"]
+            Cr = mtd[retWSname_rear+"_sumOfCounts"]
+
+            fisF = mtd[retWSname_front]
+            fisR = mtd[retWSname_rear]
+            
+            minQ = max(min(fisF.dataX(0)), min(fisR.dataX(0)))
+            maxQ = min(max(fisF.dataX(0)), max(fisR.dataX(0)))
+            
+            if maxQ > minQ:
+                CropWorkspace(InputWorkspace=Nf, OutputWorkspace=Nf, XMin=minQ, XMax=maxQ)
+                CropWorkspace(InputWorkspace=Nr, OutputWorkspace=Nr, XMin=minQ, XMax=maxQ)
+                CropWorkspace(InputWorkspace=Cf, OutputWorkspace=Cf, XMin=minQ, XMax=maxQ)
+                CropWorkspace(InputWorkspace=Cr, OutputWorkspace=Cr, XMin=minQ, XMax=maxQ)
+                mergedQ = (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
+                RenameWorkspace(mergedQ, retWSname_merged)
+            else:
+                issueWarning('rear and front data has no overlapping q-region. Merged workspace no calculated')
+        
+            delete_workspaces(retWSname_rear+"_sumOfCounts")
+            delete_workspaces(retWSname_rear+"_sumOfNormFactors")
+            delete_workspaces(retWSname_front+"_sumOfCounts")
+            delete_workspaces(retWSname_front+"_sumOfNormFactors")   
+            
+            retWSname = retWSname_merged
+        elif toParse.count('rear') == 1:
+            retWSname = retWSname_rear
+        else: 
+            retWSname = retWSname_front
+        
+        if toParse == 'merged':
+            delete_workspaces(retWSname_rear)
+            delete_workspaces(retWSname_front)                     
+        
+        if toParse.count('front') == 1:
+            frontWS = mtd[retWSname_front]
+            frontWS = (frontWS+shift)*scale
+            RenameWorkspace(frontWS, retWSname_front)        
+        
+    _refresh_singleton()        
+        
+    return retWSname
+
+def _WavRangeReduction(name_suffix=None):
+    """
+        Run a reduction that has been set up, from loading the raw data to calculating Q
+    """
 
     try:
         # do a reduction
@@ -347,10 +445,9 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                 all_results += ',' + name
             GroupWorkspaces(OutputWorkspace=result, InputWorkspaces=all_results)
         else:
-            result = calculated[0] 
-               
+            result = calculated[0]            
     finally:
-        _refresh_singleton()
+        f=1 #_refresh_singleton()
 
     if name_suffix:
         old = result
@@ -376,7 +473,7 @@ def delete_workspaces(workspaces):
             except:
                 #we're only deleting to save memory, if the workspace really won't delete leave it
                 pass
-
+    
 def CompWavRanges(wavelens, plot=True):
     """
         Compares the momentum transfer results calculated from different wavelength ranges. Given

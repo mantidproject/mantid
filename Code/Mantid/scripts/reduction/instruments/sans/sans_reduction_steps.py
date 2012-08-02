@@ -1030,6 +1030,8 @@ class ConvertToQ(ReductionStep):
         self.r_cut = 0.0
         #The shortest wavelength in angstrom at which counts should be summed from all detector pixels in Angstrom
         self.w_cut = 0.0
+        # Whether to output parts when running either Q1D2 or Qxy
+        self.outputParts = False
     
     def set_output_type(self, descript):
         """
@@ -1088,10 +1090,10 @@ class ConvertToQ(ReductionStep):
 
         try:
             if self._Q_alg == 'Q1D':
-                Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut)
+                Q1D(workspace, workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
     
             elif self._Q_alg == 'Qxy':
-                Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut)
+                Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
                 ReplaceSpecialValues(workspace, workspace, NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')

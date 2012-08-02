@@ -111,6 +111,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( sumOfNormFactors = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
       (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS+"_sumOfNormFactors")) )
 
+    TS_ASSERT_DELTA( result->readX(0)[10], 0.1999, 0.0001 )
+    TS_ASSERT_DELTA( sumOfCounts->readX(0)[10], 0.1999, 0.0001 )
+    TS_ASSERT_DELTA( sumOfNormFactors->readX(0)[10], 0.1999, 0.0001 )
 
     TS_ASSERT_DELTA( result->readY(0)[1], 1131778.3299, 0.01 )
     TS_ASSERT_DELTA( sumOfCounts->readY(0)[1], 1016.8990, 0.01 )
