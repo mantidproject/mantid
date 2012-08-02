@@ -14,7 +14,6 @@ class DiagnoseDetectorsScript(BaseScriptElement):
     find_bad_detectors = False
     output_mask_file = ''
     errorbar_criterion = 3.3
-    det_van1 = ''
     high_counts = 1.0e+10
     low_counts = 1.0e-10
     median_test_high = 3
@@ -39,7 +38,6 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         if self.find_bad_detectors:
             script += "OutputMaskFile=\"%s\",\n" % self.output_mask_file
             script += "ErrorBarCriterion=%s,\n" % str(self.errorbar_criterion)
-            script += "DetectorVanadium1=\"%s\",\n" % self.det_van1
             script += "HighCounts=%s,\n" % str(self.high_counts)
             script += "LowCounts=%s,\n" % str(self.low_counts)
             script += "MedianTestHigh=%s,\n" % str(self.median_test_high)
@@ -66,7 +64,6 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         xml += "  <find_bad_detectors>%s</find_bad_detectors>\n" % self.find_bad_detectors
         xml += "  <output_mask_file>%s</output_mask_file>\n" % self.output_mask_file
         xml += "  <errorbar_criterion>%s</errorbar_criterion>\n" % str(self.errorbar_criterion)
-        xml += "  <det_van1>%s</det_van1>\n" % self.det_van1
         xml += "  <high_counts>%s</high_counts>\n" % str(self.high_counts)
         xml += "  <low_counts>%s</low_counts>\n" % str(self.low_counts)
         xml += "  <median_test_low>%s</median_test_low>\n" % str(self.median_test_low)
@@ -102,9 +99,6 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             self.errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
                                                                         "errorbar_criterion",
                                                                         default=DiagnoseDetectorsScript.errorbar_criterion)
-            self.det_van1 = BaseScriptElement.getStringElement(instrument_dom,
-                                                               "det_van1",
-                                                               default=DiagnoseDetectorsScript.det_van1)
             self.high_counts = BaseScriptElement.getFloatElement(instrument_dom,
                                                                  "high_counts",
                                                                  default=DiagnoseDetectorsScript.high_counts)
@@ -155,7 +149,6 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         self.find_bad_detectors = DiagnoseDetectorsScript.find_bad_detectors
         self.output_mask_file = DiagnoseDetectorsScript.output_mask_file
         self.errorbar_criterion = DiagnoseDetectorsScript.errorbar_criterion
-        self.det_van1 = DiagnoseDetectorsScript.det_van1
         self.high_counts = DiagnoseDetectorsScript.high_counts
         self.low_counts = DiagnoseDetectorsScript.low_counts
         self.median_test_low = DiagnoseDetectorsScript.median_test_low
