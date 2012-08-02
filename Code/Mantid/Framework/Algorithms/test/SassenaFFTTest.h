@@ -95,8 +95,8 @@ private:
       double factor = exp(exponentFactor*x);
       double h = (*it)*factor;
       double goldStandard = value/(1+ static_cast<double>(i) );
-      double error1 = DBL_EPSILON*std::sqrt( yv.size() ); //rounding error if value==0
-      double error = fmax(error1, frErr*std::fabs(goldStandard));
+      double error1 = DBL_EPSILON*std::sqrt( static_cast<double>(yv.size()) ); //rounding error if value==0
+      double error = std::max(error1, frErr*std::fabs(goldStandard));
       TS_ASSERT_DELTA( h, goldStandard, error );
     }
   }
@@ -129,8 +129,8 @@ private:
         ++itx;
       }
       average /= sum;
-      double error1 = DBL_EPSILON*std::sqrt( yv.size() ); //rounding error if value==0
-      double error = fmax(error1, frErr*std::fabs(goldStandard));
+      double error1 = DBL_EPSILON*std::sqrt( static_cast<double>(yv.size()) ); //rounding error if value==0
+      double error = std::max(error1, frErr*std::fabs(goldStandard));
       TS_ASSERT_DELTA( average, goldStandard, error );
     }
   }
@@ -169,8 +169,8 @@ private:
       }
       sum *= dx / static_cast<double>(nbins);
       double sigma = sum / (h * std::sqrt(2*M_PI));
-      double error1 = DBL_EPSILON*std::sqrt( yv.size() ); //rounding error if value==0
-      double error = fmax(error1, frErr*std::fabs(goldStandard));
+      double error1 = DBL_EPSILON*std::sqrt( static_cast<double>(yv.size()) ); //rounding error if value==0
+      double error = std::max(error1, frErr*std::fabs(goldStandard));
       TS_ASSERT_DELTA( sigma, goldStandard, error );
     }
   }
