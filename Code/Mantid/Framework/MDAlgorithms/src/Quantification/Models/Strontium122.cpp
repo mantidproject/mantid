@@ -50,17 +50,25 @@ namespace Mantid
      */
     double Strontium122::scatteringIntensity(const API::ExperimentInfo & exptSetup, const std::vector<double> & point) const
     {
-      const double qx(point[0]), qy(point[1]), qz(point[2]), eps(point[3]);
+      const double qz(point[0]), qx(point[1]), qy(point[2]), eps(point[3]); // TobyFit has axis beam=x,up=z. Mantid has beam=z,up=y
       const double qsqr = qx*qx + qy*qy + qz*qz;
       const double epssqr = eps*eps;
 
-      const Kernel::V3D qLab(qy,qz,qx); // TobyFit has axis beam=x,up=z. Mantid has beam=z,up=y
       const Geometry::OrientedLattice & latticeRot = exptSetup.sample().getOrientedLattice();
-      const double twoPi = 2.*M_PI;
+      static const double twoPi = 2.*M_PI;
 
-      const Kernel::V3D qHKL = latticeRot.hklFromQ(qLab);
-      // Mantid definition doesn't contain 2*pi in definition of reciprocal lattice parameters
-      const double qh(qHKL[0]/twoPi), qk(qHKL[1]/twoPi), ql(qHKL[2]/twoPi);
+      const Kernel::DblMatrix & ub = latticeRot.getUB();
+      const double ub00(ub[0][0]), ub01(ub[0][1]), ub02(ub[0][2]),
+                   ub10(ub[1][0]), ub11(ub[1][1]), ub12(ub[1][2]),
+                   ub20(ub[2][0]), ub21(ub[2][1]), ub22(ub[2][2]);
+      const double twoPiDet= twoPi*(ub00*(ub11*ub22 - ub12*ub21) -
+                                    ub01*(ub10*ub22 - ub12*ub20) +
+                                    ub02*(ub10*ub21 - ub11*ub20));
+
+      const double qh = ((ub11*ub22 - ub12*ub21)*qx + (ub02*ub21 - ub01*ub22)*qy + (ub01*ub12 - ub02*ub11)*qz)/twoPiDet;
+      const double qk = ((ub12*ub20 - ub10*ub22)*qx + (ub00*ub22 - ub02*ub20)*qy + (ub02*ub10 - ub00*ub12)*qz)/twoPiDet;
+      const double ql = ((ub10*ub21 - ub11*ub20)*qx + (ub01*ub20 - ub00*ub21)*qy + (ub00*ub11 - ub01*ub10)*qz)/twoPiDet;
+
       const double astar = twoPi*latticeRot.b1(); //arlu(1)
       const double bstar = twoPi*latticeRot.b2(); //arlu(2)
       const double cstar = twoPi*latticeRot.b3(); //arlu(3)

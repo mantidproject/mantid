@@ -75,7 +75,7 @@ public:
     double weight(-1.0);
     const ForegroundModel & sr122Function = sr122; // scatteringIntensity is private concrete model
     TS_ASSERT_THROWS_NOTHING( weight = sr122Function.scatteringIntensity(experimentDescr, std::vector<double>(qOmega, qOmega + 4)) );
-    //TS_ASSERT_DELTA(0.24589087, weight, 1e-8);
+    TS_ASSERT_DELTA(0.24589087, weight, 1e-8);
   }
 
 };
