@@ -93,6 +93,7 @@ void SassenaFFT::exec()
   {
     double T = this->getProperty("Temp");
     T *= m_T2meV;  // from Kelvin to units of meV
+    //The ExponentialCorrection algorithm assume the form C0*exp(-C1*x). Note the minus in the exponent
     API::IAlgorithm_sptr ec = this->createSubAlgorithm("ExponentialCorrection");
     ec->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", sqw);
     ec->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);

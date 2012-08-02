@@ -40,18 +40,21 @@ public:
     // execute the algorithm
     TS_ASSERT_THROWS_NOTHING( m_alg.execute() );
     TS_ASSERT( m_alg.isExecuted() );
-    this->printWorkspace2D("/tmp/sqwZeroImaginary.dat",gwsName +"_sqw");
+    //this->printWorkspace2D("/tmp/sqwZeroImaginary.dat",gwsName +"_sqw");
     // The input real part was an exponential h*exp(-x^2/(2*s^2) with h=1.0,s=1.0
     // The Fourier transform is an exponential h'*exp(-x^2/(2*s'^2) with h'=sqrt(2*pi*s)=2.507 and s=2*pi/s=0.159
     DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
-    checkHeigth(ws, sqrt(2*M_PI) );
-    checkAverage(ws,0.0);
-    checkSigma(ws, 1.0/(2.0*M_PI) );
+    const double exponentFactor = 0.0;
+    checkHeigth(ws, sqrt(2*M_PI), exponentFactor);
+    checkAverage(ws,0.0, exponentFactor);
+    checkSigma(ws, 1.0/(2.0*M_PI), exponentFactor);
   }
 
-  /// FFT of a real symmetric Gaussian with detailed balance condition
+   /* FFT of a real symmetric Gaussian with detailed balance condition
+   *
+   */
   void test_DetailedBalanceCondition(){
-    const double T(300);
+    const double T(100);
     const double params[] = {1.0, 1.0, 0.0, 0.1, 0.1, 2.0}; // three pairs of (Heigth,sigma) values
     if( !m_alg.isInitialized() ){ m_alg.initialize(); }
     const std::string gwsName("SassenaII");
@@ -64,29 +67,34 @@ public:
     TS_ASSERT( m_alg.isExecuted() );
     this->printWorkspace2D("/tmp/sqwDetailedBalanceCondition.dat",gwsName +"_sqw");
     DataObjects::Workspace2D_const_sptr ws = API::AnalysisDataService::Instance().retrieveWS<DataObjects::Workspace2D>(gwsName +"_sqw");
-    checkHeigth(ws, sqrt(2*M_PI) );
-    const double sigma = 1.0/(2.0*M_PI);
-    checkAverage(ws,-sigma*sigma/(2*T));
-    checkSigma(ws, sigma);
+    const double exponentFactor = -11.604/(2.0*T);
+    checkHeigth(ws, sqrt(2*M_PI),exponentFactor);
+    checkAverage(ws,0.0, exponentFactor);
+    checkSigma(ws, 1.0/(2.0*M_PI), exponentFactor);
   }
 
 private:
 
   /**
-   * Check the maximum value stored in the workspace
+   * Check the maximum value stored in the workspace when the detailed condition is applied
    * @param wsName name of the workspace
    * @param value compare to the maximum value stored in the Y-vector of the workspace
+   * @exponentFactor inverse of the exponent factor in the detailed balance condition.
    */
-  void checkHeigth(DataObjects::Workspace2D_const_sptr &ws, const double &value)
+  void checkHeigth(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
   {
-    const double frErr=1E-02; //allowed fractional error
+    const double frErr=1E-03; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv;
     for(size_t i=0; i<nspectra; i++)
     {
-      double goldStandard = value/(1+ static_cast<double>(i) );
       yv = ws->readY(i);
-      double h = *std::max_element( yv.begin(), yv.end() );
+      MantidVec::iterator it = std::max_element( yv.begin(), yv.end() );
+      size_t index = std::distance( yv.begin(), it);
+      double x = ws->readX(i).at(index);
+      double factor = exp(exponentFactor*x);
+      double h = (*it)*factor;
+      double goldStandard = value/(1+ static_cast<double>(i) );
       double error1 = DBL_EPSILON*std::sqrt( yv.size() ); //rounding error if value==0
       double error = fmax(error1, frErr*std::fabs(goldStandard));
       TS_ASSERT_DELTA( h, goldStandard, error );
@@ -94,15 +102,17 @@ private:
   }
 
   /**
-   * Check the average
+   * Check the average.
    * @param wsName name of the workspace
    * @param value compare to the average
+   * @exponentFactor inverse of the exponent factor in the detailed balance condition.
    */
-  void checkAverage(DataObjects::Workspace2D_const_sptr &ws, const double &value)
+  void checkAverage(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
   {
-    const double frErr=1E-02; //allowed fractional error
+    const double frErr=1E-03; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv,xv;
+    double factor;  //remove the detailed balance condition
     for(size_t i=0; i<nspectra; i++)
     {
       double goldStandard = (1+ static_cast<double>(i) )*value;
@@ -113,8 +123,9 @@ private:
       MantidVec::iterator itx = xv.begin();
       for(MantidVec::iterator it = yv.begin(); it != yv.end(); ++it)
       {
-        sum += *it;
-        average += (*it)*(*itx);
+        factor = exp(exponentFactor*(*itx));
+        sum += (*it)*factor;
+        average += (*it)*(*itx)*factor;
         ++itx;
       }
       average /= sum;
@@ -123,25 +134,39 @@ private:
       TS_ASSERT_DELTA( average, goldStandard, error );
     }
   }
+
   /**
    * Check the standard deviation
    * @param wsName name of the workspace
    * @param value compare to the standard deviation
+   * @exponentFactor inverse of the exponent factor in the detailed balance condition.
    */
-  void checkSigma(DataObjects::Workspace2D_const_sptr &ws, const double &value)
+  void checkSigma(DataObjects::Workspace2D_const_sptr &ws, const double &value, const double &exponentFactor)
   {
-    const double frErr=1E-04; //allowed fractional error
+    const double frErr=1E-03; //allowed fractional error
     const size_t nspectra = ws->getNumberHistograms();
     MantidVec yv,xv;
+    double factor;  //remove the detailed balance condition
     for(size_t i=0; i<nspectra; i++)
     {
       double goldStandard = (1+ static_cast<double>(i) )*value;
       double dx = (-2.0) * ws->readX(i).at(0); // extent along the X-axis
       yv = ws->readY(i);
-      double h = *std::max_element( yv.begin(), yv.end() );
+      MantidVec::iterator it = std::max_element( yv.begin(), yv.end() );
+      size_t index = std::distance( yv.begin(), it);
+      double x = ws->readX(i).at(index);
+      factor = exp(exponentFactor*x);
+      double h = (*it)*exp(x);
+      xv = ws->readX(i);
+      MantidVec::iterator itx = xv.begin();
       size_t nbins = yv.size();
       double sum = 0.0;
-      for(MantidVec::iterator it = yv.begin(); it != yv.end(); ++it) sum += *it;
+      for(MantidVec::iterator it = yv.begin(); it != yv.end(); ++it)
+      {
+        factor = exp(exponentFactor*(*itx));
+        sum += (*it)*factor;
+        ++itx;
+      }
       sum *= dx / static_cast<double>(nbins);
       double sigma = sum / (h * std::sqrt(2*M_PI));
       double error1 = DBL_EPSILON*std::sqrt( yv.size() ); //rounding error if value==0
@@ -175,7 +200,10 @@ private:
     sa.execute();
   }
 
-  /// generate a Workspace2D, each spectra is half a gaussian
+  /* Generate a Workspace2D with nspectra.
+   * Each spectra is a gaussian centered at the origin and with a different standard deviation sigma.
+   * sigma increases as sigma0*2^nspectra
+   */
   void createWorkspace2D( const std::string& wsName, const double& Heigth, const double& sigma0, const size_t &nbins, const size_t& nspectra)
   {
     DataObjects::Workspace2D_sptr ws(new DataObjects::Workspace2D);
@@ -186,7 +214,7 @@ private:
     MantidVec xv;
     for(size_t i=0; i<nbins; i++)
     {
-      int j = -static_cast<int>(nbins)/2 + static_cast<int>(i);
+      int j = -static_cast<int>(nbins/2) + static_cast<int>(i);
       xv.push_back( dt*static_cast<double>(j) );
     }
 
@@ -203,14 +231,17 @@ private:
     API::AnalysisDataService::Instance().add( wsName, ws);
   } // void createWorkspace
 
-  /// create a group workspace with 'real' and 'imaginary' workspaces
+  /* Create a group workspace with 'real' and 'imaginary' workspaces
+   * Each workspace has nspectra, each spectra is a Gaussian centered at the origin
+   * X-axis will run from -(nbins/2)*dt=-10.0 to (nbins/2)*dt=10.0
+   */
   void  createGroupWorkspace( const double * params, const std::string& gwsName)
   {
     API::WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
 
-    const size_t nbins(2000);
+    const size_t nbins(2001);
     const size_t nspectra(4);
-
+    //double dt=0.01; //this parameter has been moved to createWorkspace2D()
     std::string wsName = gwsName +"_fqt.Re";
     double Heigth = params[0];
     double sigma = params[1];
