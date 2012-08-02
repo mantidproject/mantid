@@ -243,25 +243,53 @@ namespace Mantid
      */
     void TobyFitResolutionModel::calculatePerturbedQE(const Observation & observation,const QOmegaPoint & qOmega) const
     {
-      // Calculate components of dKi & dKf, essentially X vector in TobyFit
-      const std::vector<double> xVector = m_bmatrix * m_yvector.values();
+      // -- Calculate components of dKi & dKf, essentially X vector in TobyFit --
+
+      /**
+       * This function is called for each iteration of the Monte Carlo loop
+       * and using the standard matrix algebra will produce a lot of repeated memory
+       * allocations for creating new vectors/matrices.
+
+       * The manual computation of the matrix multiplication is to avoid this overhead.
+       */
+
+      double xVec0(0.0), xVec1(0.0), xVec2(0.0),
+          xVec3(0.0), xVec4(0.0), xVec5(0.0);
+      const std::vector<double> & yvalues = m_yvector.values();
+      for(unsigned int i =0; i < TobyFitYVector::variableCount(); ++i)
+      {
+        xVec0 += m_bmatrix[0][i] * yvalues[i];
+        xVec1 += m_bmatrix[1][i] * yvalues[i];
+        xVec2 += m_bmatrix[2][i] * yvalues[i];
+        xVec3 += m_bmatrix[3][i] * yvalues[i];
+        xVec4 += m_bmatrix[4][i] * yvalues[i];
+        xVec5 += m_bmatrix[5][i] * yvalues[i];
+      }
 
       // Convert to dQ in lab frame
-      Kernel::DblMatrix labToDetInv =  observation.labToDetectorTransform();
-      labToDetInv.Invert();
-      std::vector<double> xVectorKf(3,0.0);
-      xVectorKf[0] = xVector[3];
-      xVectorKf[1] = xVector[4];
-      xVectorKf[2] = xVector[5];
-      const std::vector<double> dqInLab = labToDetInv.Tprime()*xVectorKf;
-      m_deltaQE[0] = (xVector[0] - dqInLab[0]);
-      m_deltaQE[1] = (xVector[1] - dqInLab[1]);
-      m_deltaQE[2] = (xVector[2] - dqInLab[2]);
+      // dQ = L*Xf, L = ((labToDet)^1)^T, Xf = outgoing components of X vector
+      const Kernel::DblMatrix & D =  observation.labToDetectorTransform();
+      const double D00(D[0][0]), D01(D[0][1]), D02(D[0][2]),
+                   D10(D[1][0]), D11(D[1][1]), D12(D[1][2]),
+                   D20(D[2][0]), D21(D[2][1]), D22(D[2][2]);
+      const double determinant = D00*(D11*D22 - D12*D21) -
+                                 D01*(D10*D22 - D12*D20) +
+                                 D02*(D10*D21 - D11*D20);
+      const double L00(D11*D22 - D12*D21), L01(D12*D20 - D10*D22), L02(D10*D21 - D11*D20),
+                   L10(D02*D21 - D01*D22), L11(D00*D22 - D02*D20), L12(D20*D01 - D00*D21),
+                   L20(D01*D12 - D02*D11), L21(D02*D10 - D00*D12), L22(D00*D11 - D01*D10);
+      
+      const double dqlab0 = (L00*xVec3 + L01*xVec4 + L02*xVec5)/determinant;
+      const double dqlab1 = (L10*xVec3 + L11*xVec4 + L12*xVec5)/determinant;
+      const double dqlab2 = (L20*xVec3 + L21*xVec4 + L22*xVec5)/determinant;
+      m_deltaQE[0] = (xVec0 - dqlab0);
+      m_deltaQE[1] = (xVec1 - dqlab1);
+      m_deltaQE[2] = (xVec2 - dqlab2);
 
       const double efixed = observation.getEFixed();
       const double wi = std::sqrt(efixed/PhysicalConstants::E_mev_toNeutronWavenumberSq);
       const double wf = std::sqrt((efixed - qOmega.deltaE)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
-      m_deltaQE[3] = 4.1442836 * (wi*xVector[2] - wf*xVector[5]);
+      m_deltaQE[3] = 4.1442836 * (wi*xVec2 - wf*xVec5);
 
       // Add on the nominal Q
       m_deltaQE[0] += qOmega.qx;

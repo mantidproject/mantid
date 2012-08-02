@@ -70,6 +70,8 @@ namespace Mantid
 
       /// Returns the D Matrix. Converts from lab coordindates -> detector coordinates
       const Kernel::DblMatrix & labToDetectorTransform() const;
+      /// Returns the matrix required to move from sample coordinates -> detector coordinates
+      const Kernel::DblMatrix & sampleToDetectorTransform() const;
 
     private:
       DISABLE_DEFAULT_CONSTRUCT(Observation);
@@ -106,6 +108,8 @@ namespace Mantid
       Geometry::BoundingBox m_detBox;
       /// Store the goniometer
       Geometry::Goniometer *m_gonimeter;
+      /// Store sample to detector transformation
+      Kernel::DblMatrix m_sampleToDetMatrix;
     };
   }
 

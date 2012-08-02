@@ -2,6 +2,7 @@
 // Includes
 //
 #include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 
@@ -20,7 +21,7 @@ namespace Mantid
       : m_exptInfo(exptInfo), m_efixed(0.0),
         m_twoTheta(0.0), m_phi(0.0), m_modToChop(0.0), m_apertureToChop(0.0),
         m_chopToSample(0.0), m_sampleToDet(0.0), m_beam(Geometry::Z), m_up(Geometry::Y), m_horiz(Geometry::X),
-        m_apertureSize(0.0,0.0), m_sampleWidths(), m_detBox(), m_gonimeter(NULL)
+        m_apertureSize(0.0,0.0), m_sampleWidths(), m_detBox(), m_gonimeter(NULL), m_sampleToDetMatrix(0,0)
     {
       Instrument_const_sptr instrument = exptInfo.getInstrument();
       initCaches(instrument, detID);
@@ -131,6 +132,14 @@ namespace Mantid
       return m_gonimeter->getR();
     }
 
+    /**
+     *  @return the matrix required to move from sample coordinates -> detector coordinates
+     */
+    const Kernel::DblMatrix & Observation::sampleToDetectorTransform() const
+    {
+      return m_sampleToDetMatrix;
+    }
+
     //-------------------------------------------------------------------------------------------------------
     // Private methods
     //-------------------------------------------------------------------------------------------------------
@@ -201,6 +210,7 @@ namespace Mantid
       m_gonimeter->makeUniversalGoniometer();
       m_gonimeter->setRotationAngle("phi", thetaInDegs);
       m_gonimeter->setRotationAngle("chi", phiInDegs);
+      m_sampleToDetMatrix = m_gonimeter->getR() * m_exptInfo.sample().getOrientedLattice().getU();
 
       // EFixed
       m_efixed = m_exptInfo.getEFixed(det);
