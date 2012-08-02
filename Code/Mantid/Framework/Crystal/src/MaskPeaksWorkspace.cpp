@@ -119,9 +119,12 @@ namespace Mantid
         // determine the range in time-of-flight
         double x0;
         double xf;
+        bool tofRangeSet(false);
+        if(xPeak < det->xpixels() && xPeak >= 0 && yPeak < det->ypixels() && yPeak >= 0)
         { // scope limit the workspace index
           size_t wi = this->getWkspIndex(pixel_to_wi, det, xPeak, yPeak);
           this->getTofRange(x0, xf, peak->getTOF(), inputW->readX(wi));
+          tofRangeSet = true;
         }
 
         // determine the spectrum numbers to mask
@@ -130,16 +133,38 @@ namespace Mantid
         {
           for (int iy=m_yMin; iy <= m_yMax; iy++)
           {
+            std::cout << "in inner loop " << xPeak+ix << ", " << yPeak+iy << std::endl;
             //Find the pixel ID at that XY position on the rectangular detector
             if(xPeak+ix >= det->xpixels() || xPeak+ix < 0)continue;
             if(yPeak+iy >= det->ypixels() || yPeak+iy < 0)continue;
             spectra.insert(this->getWkspIndex(pixel_to_wi, det, xPeak+ix, yPeak+iy));
+            if (!tofRangeSet)
+            { // scope limit the workspace index
+              size_t wi = this->getWkspIndex(pixel_to_wi, det, xPeak+ix, yPeak+iy);
+              this->getTofRange(x0, xf, peak->getTOF(), inputW->readX(wi));
+              tofRangeSet = true;
+            }
           }
         }
 
-        // append to the table workspace
-        API::TableRow newrow = tablews->appendRow();
-        newrow << x0 << xf << Kernel::Strings::toString(spectra);
+        // sanity check the results
+        if (!tofRangeSet)
+        {
+          g_log.warning() << "Failed to set time-of-flight range for peak (x=" << xPeak
+                          << ", y=" << yPeak << ", tof=" << peak->getTOF() << ")\n";
+        }
+        else if (spectra.empty())
+        {
+          g_log.warning() << "Failed to find spectra for peak (x=" << xPeak
+                          << ", y=" << yPeak << ", tof=" << peak->getTOF() << ")\n";
+          continue;
+        }
+        else
+        {
+          // append to the table workspace
+          API::TableRow newrow = tablews->appendRow();
+          newrow << x0 << xf << Kernel::Strings::toString(spectra);
+        }
       } // end loop over peaks
 
 
@@ -188,6 +213,15 @@ namespace Mantid
     size_t MaskPeaksWorkspace::getWkspIndex(detid2index_map *pixel_to_wi, Geometry::RectangularDetector_const_sptr det,
                                             const int x, const int y)
     {
+      if ( (x >= det->xpixels()) || (x < 0)     // this check is unnecessary as callers are doing it too
+           || (y >= det->ypixels()) || (y < 0)) // but just to make debugging easier
+      {
+        std::stringstream msg;
+        msg << "Failed to find workspace index for x=" << x << " y=" << y
+            << "(max x=" << det->xpixels() << ", max y=" << det->ypixels() << ")";
+        throw std::runtime_error(msg.str());
+      }
+
       int pixelID = det->getAtXY(x,y)->getID();
 
       //Find the corresponding workspace index, if any
