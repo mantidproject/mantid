@@ -144,7 +144,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<>("SampleWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "A sample workspace. This is used in the PSD Bleed calculation.");
-      this->setPropertyGroup("SampleWorkspace", backgroundCheck);
+      this->setPropertyGroup("SampleWorkspace", psdBleedMaskGrp);
       declareProperty("MaxTubeFramerate", 0.0, mustBePositiveDbl,
           "The maximum rate allowed for a tube in counts/us/frame.");
       this->setPropertyGroup("MaxTubeFramerate", psdBleedMaskGrp);
