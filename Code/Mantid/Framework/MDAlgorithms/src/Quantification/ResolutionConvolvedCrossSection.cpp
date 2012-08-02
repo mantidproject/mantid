@@ -126,14 +126,15 @@ namespace Mantid
     double ResolutionConvolvedCrossSection::functionMD(const Mantid::API::IMDIterator& box) const
     {
       assert(m_convolution);
-      const size_t numEvents = box.getNumEvents();
+      const int64_t numEvents = static_cast<int64_t>(box.getNumEvents());
       if(numEvents == 0) return 0.0;
 
       double signal(0.0);
       PARALLEL_FOR_NO_WSP_CHECK()
-      for(size_t j = 0; j < numEvents; ++j)
+      for(int64_t j = 0; j < numEvents; ++j)
       {
-        double contribution =  m_convolution->signal(box, box.getInnerRunIndex(j), j);
+        const int64_t loopIndex = static_cast<int64_t>(j);
+        double contribution =  m_convolution->signal(box, box.getInnerRunIndex(loopIndex), loopIndex);
         PARALLEL_ATOMIC
         signal += contribution;
       }
