@@ -184,10 +184,6 @@ namespace WorkflowAlgorithms
         "Some selection criteria for the detector tests.");
     this->setPropertySettings("ErrorBarCriterion",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    this->declareProperty("DetectorVanadium1", "",
-        "The detector vanadium file to run the tests on.");
-    this->setPropertySettings("DetectorVanadium1",
-        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->declareProperty("HighCounts", 1.e+10, mustBePositive,
         "Mask detectors above this threshold.");
     this->setPropertySettings("HighCounts",
@@ -241,12 +237,12 @@ namespace WorkflowAlgorithms
     this->declareProperty("PsdBleed", false, "If true, perform a PSD bleed test.");
     this->setPropertySettings("PsdBleed",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    this->declareProperty("MaxFramerate", "", "The maximum framerate to check.");
+    this->declareProperty("MaxFramerate", 0.01, "The maximum framerate to check.");
     this->setPropertySettings("MaxFramerate",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->setPropertySettings("MaxFramerate",
         new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
-    this->declareProperty("IgnoredPixels", "",
+    this->declareProperty("IgnoredPixels", 80,
         "A list of pixels to ignore in the calculations.");
     this->setPropertySettings("IgnoredPixels",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
@@ -256,7 +252,6 @@ namespace WorkflowAlgorithms
     this->setPropertyGroup("FindBadDetectors", findBadDets);
     this->setPropertyGroup("OutputMaskFile", findBadDets);
     this->setPropertyGroup("ErrorBarCriterion", findBadDets);
-    this->setPropertyGroup("DetectorVanadium1", findBadDets);
     this->setPropertyGroup("HighCounts", findBadDets);
     this->setPropertyGroup("LowCounts", findBadDets);
     this->setPropertyGroup("MedianTestHigh", findBadDets);
