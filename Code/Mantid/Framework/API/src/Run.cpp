@@ -620,10 +620,13 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     // Now the goniometer
     m_goniometer.saveNexus(file, GONIOMETER_LOG_NAME);
 
-    // Now the histogram bins
-    file->makeGroup(HISTO_BINS_LOG_NAME, "NXdata", 1);
-    file->writeData("value", m_histoBins);
-    file->closeGroup();
+    // Now the histogram bins, if there are any
+    if(!m_histoBins.empty())
+    {
+      file->makeGroup(HISTO_BINS_LOG_NAME, "NXdata", 1);
+      file->writeData("value", m_histoBins);
+      file->closeGroup();
+    }
 
     // Save all the properties as NXlog
     std::vector<Property *> props = m_manager.getProperties();
