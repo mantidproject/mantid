@@ -21,18 +21,19 @@ namespace API
 
 using namespace Kernel;
 
-/// The number of log entries summed when adding a run
-const int Run::ADDABLES = 6;
-
-/// The names of the log entries summed when adding two runs together
-const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour"};
-
-/// Name of the log entry containing the proton charge when retrieved using getProtonCharge
-const char * Run::PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
-
-/// Name of the log entry containing the histogram bins
-const char * Run::HISTOGRAM_BINS_LOG_NAME = "processed_histogram_bins";
-
+namespace
+{
+  /// The number of log entries summed when adding a run
+  const int ADDABLES = 6;
+  /// The names of the log entries summed when adding two runs together
+  const std::string ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour"};
+  /// Name of the log entry containing the proton charge when retrieved using getProtonCharge
+  const char * PROTON_CHARGE_LOG_NAME = "gd_prtn_chrg";
+  /// Name of the goniometer log when saved to a NeXus file
+  const char * GONIOMETER_LOG_NAME = "goniometer";
+  /// Name of the stored histogram bins log when saved to NeXus
+  const char * HISTO_BINS_LOG_NAME = "processed_histogram_bins";
+}
 // Get a reference to the logger
 Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
 
@@ -42,7 +43,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   /**
    * Default constructor
    */
-  Run::Run() : m_manager(), m_goniometer(), m_singleValueCache()
+  Run::Run() : m_manager(), m_goniometer(), m_histoBins(), m_singleValueCache()
   {
   }
 
@@ -389,6 +390,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   }
 
   //-----------------------------------------------------------------------------------------------
+
   /**
    * Store the given values as a set of energy bin boundaries. Throws
    *    - an invalid_argument if fewer than 2 values are given;
@@ -409,7 +411,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       os << "Run::storeEnergyBinBoundaries - Inconsistent start & end values given, size=" << histoBins.size() << ". Cannot interpret values as bin boundaries.";
       throw std::out_of_range(os.str());
     }
-    addProperty(new ArrayProperty<double>(HISTOGRAM_BINS_LOG_NAME, histoBins), true);
+    m_histoBins = histoBins;
   }
 
   /**
@@ -419,25 +421,25 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    */
   std::pair<double, double> Run::histogramBinBoundaries(const double value) const
   {
-    if(!m_manager.existsProperty(HISTOGRAM_BINS_LOG_NAME))
+    if(m_histoBins.empty())
     {
       throw std::runtime_error("Run::histogramBoundaries - No energy bins have been stored for this run");
     }
-    const std::vector<double> bins = getPropertyValueAsType<std::vector<double>>(HISTOGRAM_BINS_LOG_NAME);
-    if(value < bins.front())
+
+    if(value < m_histoBins.front())
     {
       std::ostringstream os;
-      os << "Run::histogramBinBoundaries- Value lower than first bin boundary. Value= " << value << ", first boundary=" << bins.front();
+      os << "Run::histogramBinBoundaries- Value lower than first bin boundary. Value= " << value << ", first boundary=" << m_histoBins.front();
       throw std::out_of_range(os.str());
     }
-    if(value > bins.back())
+    if(value > m_histoBins.back())
     {
       std::ostringstream os;
-      os << "Run::histogramBinBoundaries- Value greater than last bin boundary. Value= " << value << ", last boundary=" << bins.back();
+      os << "Run::histogramBinBoundaries- Value greater than last bin boundary. Value= " << value << ", last boundary=" << m_histoBins.back();
       throw std::out_of_range(os.str());
     }
-    const int index = VectorHelper::getBinIndex(bins, value);
-    return std::make_pair(bins[index], bins[index+1]);
+    const int index = VectorHelper::getBinIndex(m_histoBins, value);
+    return std::make_pair(m_histoBins[index], m_histoBins[index+1]);
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -616,7 +618,12 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     file->putAttr("version", 1);
 
     // Now the goniometer
-    m_goniometer.saveNexus(file, "goniometer");
+    m_goniometer.saveNexus(file, GONIOMETER_LOG_NAME);
+
+    // Now the histogram bins
+    file->makeGroup(HISTO_BINS_LOG_NAME, "NXdata", 1);
+    file->writeData("value", m_histoBins);
+    file->closeGroup();
 
     // Save all the properties as NXlog
     std::vector<Property *> props = m_manager.getProperties();
@@ -667,6 +674,12 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       {
         // Goniometer class
         m_goniometer.loadNexus(file, name_class.first);
+      }
+      else if(name_class.first == HISTO_BINS_LOG_NAME)
+      {
+        file->openGroup(name_class.first, "NXdata");
+        file->readData("value",m_histoBins);
+        file->closeGroup();
       }
       else if (name_class.first == "proton_charge")
       {

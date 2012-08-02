@@ -165,14 +165,6 @@ namespace Mantid
       /// Adds all the time series in from one property manager into another
       void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd);
 
-      /// The number of properties that are summed when two workspaces are summed
-      static const int ADDABLES;
-      /// The names of the properties to sum when two workspaces are summed
-      static const std::string ADDABLE[];
-      /// The name of the proton charge property
-      static const char *PROTON_CHARGE_LOG_NAME;
-      /// The name of the histogram bins property
-      static const char *HISTOGRAM_BINS_LOG_NAME;
       /// Static reference to the logger class
       static Kernel::Logger &g_log;
 
@@ -180,6 +172,8 @@ namespace Mantid
       Kernel::PropertyManager m_manager;
       /// Goniometer for this run
       Mantid::Geometry::Goniometer m_goniometer;
+      /// A set of histograms that can be stored here for future reference
+      std::vector<double> m_histoBins;
 
       /// Cache type for single value logs
       typedef Kernel::Cache<std::pair<std::string,Kernel::Math::StatisticType>, double> SingleValueCache;
