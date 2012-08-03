@@ -526,16 +526,19 @@ namespace MDEvents
 
     // Yes, we added some data
     this->m_dataAdded = true;
+    dataMutex.unlock();
 
     // When we reach the split threshold exactly, track that the MDBox is too small
     // We check on equality and not >= to only add a box once.
     if (this->data.size() == this->m_BoxController->getSplitThreshold())
     {     
-//      this->m_BoxController->addBoxToSplit(splitBoxList(this,index));
+       auto BoxCtrl = dynamic_cast<BoxCtrlChangesList<MDBoxToChange<MDE,nd> >*>(m_BoxController.get());
+       BoxCtrl->addBoxToSplit(MDBoxToChange<MDE,nd>(this,index));
+
     }
 
 
-    dataMutex.unlock();
+
   }
 
   //-----------------------------------------------------------------------------------------------

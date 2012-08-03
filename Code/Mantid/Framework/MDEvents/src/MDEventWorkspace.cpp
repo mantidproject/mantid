@@ -37,7 +37,8 @@ namespace MDEvents
    */
   TMDE(
   MDEventWorkspace)::MDEventWorkspace()
-  : m_BoxController(boost::make_shared<BoxController>(nd))
+    //m_BoxController(boost::make_shared<BoxController>(nd))
+  : m_BoxController(boost::make_shared<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > >(nd))
   {
     // First box is at depth 0, and has this default boxController
     data = new MDBox<MDE, nd>(m_BoxController, 0);
@@ -49,7 +50,7 @@ namespace MDEvents
   TMDE(
   MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE,nd> & other)
   : IMDEventWorkspace(other),
-    m_BoxController( new BoxController(*other.m_BoxController) )
+    m_BoxController( new BoxCtrlChangesList<MDBoxToChange<MDE,nd> >(*other.m_BoxController) )
   {
     const MDBox<MDE,nd> * mdbox = dynamic_cast<const MDBox<MDE,nd> *>(other.data);
     const MDGridBox<MDE,nd> * mdgridbox = dynamic_cast<const MDGridBox<MDE,nd> *>(other.data);

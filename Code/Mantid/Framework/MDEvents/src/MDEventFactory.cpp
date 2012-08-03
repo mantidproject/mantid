@@ -17,6 +17,7 @@
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidMDEvents/MDBoxToChange.h"
 
 // We need to include the .cpp files so that the declarations are picked up correctly. Weird, I know. 
 // See http://www.parashift.com/c++-faq-lite/templates.html#faq-35.13 

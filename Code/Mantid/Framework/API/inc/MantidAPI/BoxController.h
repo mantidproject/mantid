@@ -47,7 +47,7 @@ namespace API
 
     BoxController(const BoxController & other );
 
-    ~BoxController();
+    virtual ~BoxController();
 
     /// Serialize
     std::string toXMLString() const;

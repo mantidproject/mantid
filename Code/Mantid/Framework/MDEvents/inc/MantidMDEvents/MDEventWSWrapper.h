@@ -65,6 +65,9 @@ namespace Mantid
       API::IMDEventWorkspace_sptr createEmptyMDWS(const MDWSDescription &WSD);
       /// add the data to the internal workspace. The workspace has to exist and be initiated 
       void  addMDData(std::vector<float> &sig_err,std::vector<uint16_t> &run_index,std::vector<uint32_t> &det_id,std::vector<coord_t> &Coord,size_t data_size)const;
+      /// add the data to the internal workspace and trace boxes which changed. The workspace has to exist and be initiated 
+      void  addAndTraceMDData(std::vector<float> &sig_err,std::vector<uint16_t> &run_index,std::vector<uint32_t> &det_id,std::vector<coord_t> &Coord,size_t data_size)const;
+
       /// releases the shared pointer to the workspace, stored by the class and makes the class instance undefined; 
       void releaseWorkspace();
       /// get access to the internal workspace
@@ -90,7 +93,10 @@ namespace Mantid
       /// vector holding function pointers to the code, creating different number of dimension worspace as function of dimensions number
       std::vector<fpCreateWS> wsCreator;
       /// vector holding function pointers to the code, which adds diffrent dimension number events to the workspace
-      std::vector<fpAddData> mdEvSummator;
+      std::vector<fpAddData> mdEvAddAndForget;
+      /// vector holding function pointers to the code, which adds diffrent dimension number events to the workspace and traces the added cells
+      std::vector<fpAddData> mdEvAddAndTrace;
+
       /// vector holding function pointers to the code, which refreshes centroid (could it be moved to IMD?)
       std::vector<fpVoidMethod> mdCalCentroid;
        /// vector holding function pointers to the code, which split list of boxes need splitting
@@ -100,9 +106,13 @@ namespace Mantid
       // helper class to generate methaloop on MD workspaces dimensions:
       template< size_t i>
       friend class LOOP;
+
       // internal function tempates to generate as function of dimensions and assightn to function pointers
       template<size_t nd>
       void addMDDataND(float *sig_err,uint16_t *run_index,uint32_t* det_id,coord_t* Coord,size_t data_size)const;
+      template<size_t nd>
+      void addAndTraceMDDataND(float *sig_err,uint16_t *run_index,uint32_t* det_id,coord_t* Coord,size_t data_size)const;
+
 
       template<size_t nd>   
       void  calcCentroidND(void);

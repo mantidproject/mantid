@@ -4,7 +4,8 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/BoxController.h"
+//#include "MantidAPI/BoxController.h"
+#include "MantidMDEvents/BoxCtrlChangesList.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDLeanEvent.h"
@@ -103,7 +104,7 @@ namespace MDEvents
 
  
     void addEvent(const MDE & event);
-    void addAndTraceEvent(const MDE & point,size_t index=0);
+    void addAndTraceEvent(const MDE & point,size_t index);
 
 
     size_t addEvents(const std::vector<MDE> & events);
@@ -149,7 +150,8 @@ namespace MDEvents
     MDBoxBase<MDE, nd> * data;
 
     /// Box controller in use
-    Mantid::API::BoxController_sptr m_BoxController;
+    //Mantid::API::BoxController_sptr m_BoxController;
+    boost::shared_ptr<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > > m_BoxController;
 
   public:
     /// Typedef for a shared pointer of this kind of event workspace
