@@ -8,6 +8,13 @@
 
 namespace Mantid
 {
+  //
+  // Forward declarations
+  //
+  namespace Kernel
+  {
+    class IPropertyManager;
+  }
   namespace API
   {
     //
@@ -41,6 +48,12 @@ namespace Mantid
      */
     class MANTID_API_DLL DomainCreatorFactoryImpl : public Kernel::DynamicFactory<IDomainCreator>
     {
+    public:
+      /// Returns an initialized domain creator
+      IDomainCreator * createDomainCreator(const std::string & id, Kernel::IPropertyManager* pm,
+                                           const std::string& workspacePropertyName,
+                                           const unsigned int domainType) const;
+
     private:
       friend struct Mantid::Kernel::CreateUsingNew<DomainCreatorFactoryImpl>;
 
@@ -50,6 +63,10 @@ namespace Mantid
       DISABLE_COPY_AND_ASSIGN(DomainCreatorFactoryImpl);
       ///Private Destructor for singleton
       virtual ~DomainCreatorFactoryImpl();
+
+      // Do not use default methods
+      using Kernel::DynamicFactory<IDomainCreator>::create;
+      using Kernel::DynamicFactory<IDomainCreator>::createUnwrapped;
     };
 
     ///Forward declaration of a specialisation of SingletonHolder for DomainCreatorFactoryImpl (needed for dllexport/dllimport) and a typedef for it.

@@ -23,7 +23,6 @@ set ( SRC_FILES
 	src/FRConjugateGradientMinimizer.cpp
 	src/Fit.cpp
 	src/Fit1D.cpp
-	src/FitMD.cpp
 	src/FitMW.cpp
 	src/FlatBackground.cpp
 	src/FuncMinimizerFactory.cpp
@@ -66,7 +65,6 @@ set ( SRC_FILES
 	src/ThermalNeutronBk2BkExpConvPV.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
-	src/UserFunctionMD.cpp
 )
                 
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
@@ -99,7 +97,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/FRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
-	inc/MantidCurveFitting/FitMD.h
 	inc/MantidCurveFitting/FitMW.h
 	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/FuncMinimizerFactory.h
@@ -146,7 +143,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
-	inc/MantidCurveFitting/UserFunctionMD.h
 )
               
 set ( TEST_FILES
@@ -167,7 +163,6 @@ set ( TEST_FILES
 	test/ExpDecayOscTest.h
 	test/ExpDecayTest.h
 	test/FRConjugateGradientTest.h
-	test/FitMDTest.h
 	test/FitMWTest.h
 	test/FlatBackgroundTest.h
 	test/FuncMinimizerFactoryTest.h

@@ -7,9 +7,9 @@
 #include "MantidCurveFitting/IFuncMinimizer.h"
 #include "MantidCurveFitting/CostFuncFitting.h"
 #include "MantidCurveFitting/FitMW.h"
-#include "MantidCurveFitting/FitMD.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 
+#include "MantidAPI/DomainCreatorFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -162,13 +162,16 @@ namespace CurveFitting
     {
       creator = new FitMW(this, workspacePropertyName, m_domainType);
     }
-    else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
-    {
-      creator = new FitMD(this, workspacePropertyName, m_domainType);
-    }
     else
-    {// don't know what to do with this workspace
-      throw std::invalid_argument("Unsupported workspace type" + ws->id());
+    {
+      try
+      {
+        creator = API::DomainCreatorFactory::Instance().createDomainCreator("FitMD", this, workspacePropertyName, m_domainType);
+      }
+      catch(Kernel::Exception::NotFoundError&)
+      {
+        throw std::invalid_argument("Unsupported workspace type" + ws->id());
+      }
     }
 
     if (!m_domainCreator)
@@ -232,13 +235,16 @@ namespace CurveFitting
         {
           creator = new FitMW(this, workspacePropertyName, m_domainType);
         }
-        else if (boost::dynamic_pointer_cast<const API::IMDWorkspace>(ws))
-        {
-          creator = new FitMD(this, workspacePropertyName, m_domainType);
-        }
         else
         {// don't know what to do with this workspace
-          throw std::invalid_argument("Unsupported workspace type" + ws->id());
+          try
+          {
+            creator = API::DomainCreatorFactory::Instance().createDomainCreator("FitMD",this, workspacePropertyName, m_domainType);
+          }
+          catch(Kernel::Exception::NotFoundError&)
+          {
+            throw std::invalid_argument("Unsupported workspace type" + ws->id());
+          }
         }
         const size_t n = std::string("InputWorkspace").size();
         const std::string suffix = (workspacePropertyName.size() > n)? workspacePropertyName.substr(n) : "";

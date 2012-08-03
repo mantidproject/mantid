@@ -68,6 +68,8 @@ namespace Mantid
       {}
       /// Virtual destructor
       virtual ~IDomainCreator() {};
+      /// Initialize
+      virtual void initialize(Kernel::IPropertyManager* , const std::string&, DomainType) {}
 
       /// declare properties that specify the dataset within the workspace to fit to.
       /// @param suffix :: A suffix to give to all new properties.
@@ -128,10 +130,10 @@ namespace Mantid
  * subscribe method.
  * The id is the key that should be used to create the object
  */
-#define DECLARE_DOMAINCREATOR(classname, id) \
+#define DECLARE_DOMAINCREATOR(classname) \
   namespace { \
     Mantid::Kernel::RegistrationHelper register_alg_##classname( \
-      ((Mantid::API::DomainCreatorFactory::Instance().subscribe<classname>(id)) \
+      ((Mantid::API::DomainCreatorFactory::Instance().subscribe<classname>(#classname)) \
           , 0)); \
   }
 

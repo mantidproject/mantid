@@ -24,6 +24,7 @@ set ( SRC_FILES
 	src/CreateMDWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
+	src/FitMD.cpp
 	src/ImportMDEventWorkspace.cpp
 	src/ImportMDHistoWorkspace.cpp
 	src/ImportMDHistoWorkspaceBase.cpp
@@ -58,6 +59,7 @@ set ( SRC_FILES
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
 	src/UnitsConversionHelper.cpp
+	src/UserFunctionMD.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -95,6 +97,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/CreateMDWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/FindPeaksMD.h
+	inc/MantidMDEvents/FitMD.h
 	inc/MantidMDEvents/ImportMDEventWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspaceBase.h
@@ -135,6 +138,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/SliceMD.h
 	inc/MantidMDEvents/SlicingAlgorithm.h
 	inc/MantidMDEvents/UnitsConversionHelper.h
+	inc/MantidMDEvents/UserFunctionMD.h
 )
 
 # Test files. Other source files required.
@@ -161,6 +165,7 @@ set ( TEST_FILES
 	test/CreateMDWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/FindPeaksMDTest.h
+	test/FitMDTest.h
 	test/ImportMDEventWorkspaceTest.h
 	test/ImportMDHistoWorkspaceTest.h
 	test/IntegratePeaksMDTest.h

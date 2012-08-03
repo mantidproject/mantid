@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_USERFUNCTIONMD_H_
-#define MANTID_CURVEFITTING_USERFUNCTIONMD_H_
+#ifndef MANTID_MDEVENTS_USERFUNCTIONMD_H_
+#define MANTID_MDEVENTS_USERFUNCTIONMD_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -7,11 +7,10 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidGeometry/muParser_Silent.h"
-#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid
 {
-  namespace CurveFitting
+  namespace MDEvents
   {
     /**
     A user defined function.
@@ -40,7 +39,7 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-    class MANTID_CURVEFITTING_DLL UserFunctionMD: virtual public API::IFunctionMD, virtual public API::ParamFunction
+    class DLLExport UserFunctionMD: virtual public API::IFunctionMD, virtual public API::ParamFunction
     {
     public:
       UserFunctionMD();
@@ -84,7 +83,7 @@ namespace Mantid
       std::string m_formula;
     };
 
-  } // namespace CurveFitting
+  } // namespace MDEvents
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_USERFUNCTIONMD_H_*/
+#endif /*MANTID_MDEVENTS_USERFUNCTIONMD_H_*/
