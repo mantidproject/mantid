@@ -291,6 +291,7 @@
    <instrument name="HYSPEC" shortname="HYS" beamline="14B"> 
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
+    <livedata address="hyspec.sns.gov:31415" />
    </instrument> 
 
   <instrument name="VISION" shortname="VIS" beamline="16B">
@@ -316,6 +317,8 @@
       <technique>Tomography</technique>
    </instrument> 
    
+   <livedata listener="SNSLiveEventDataListener"/>
+
 </facility>
 
 <facility name="NCNR" FileExtensions=".dat,.xml">
