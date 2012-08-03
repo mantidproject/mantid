@@ -41,6 +41,8 @@ namespace CurveFitting
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(Fit)
 
+    using API::IDomainCreator;
+
   namespace
   {
     bool isStringEmpty(const std::string& str){return str.empty();}

@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/IDomainCreator.h"
+#include "MantidAPI/IDomainCreator.h"
 
 namespace Mantid
 {
@@ -45,14 +45,14 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport FitMD : public IDomainCreator
+    class DLLExport FitMD : public API::IDomainCreator
     {
     public:
       /// Constructor
       FitMD(Kernel::IPropertyManager* fit, const std::string& workspacePropertyName, DomainType domainType = Simple);
       /// Constructor
       FitMD(DomainType domainType = Simple)
-        :IDomainCreator(NULL,std::vector<std::string>(),domainType),
+        : API::IDomainCreator(NULL,std::vector<std::string>(),domainType),
         m_startIndex(0),m_count(0){}
       /// declare properties that specify the dataset within the workspace to fit to.
       virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true);

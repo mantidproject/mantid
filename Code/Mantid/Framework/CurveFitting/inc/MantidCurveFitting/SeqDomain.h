@@ -7,8 +7,7 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
-
-#include "MantidCurveFitting/IDomainCreator.h"
+#include "MantidAPI/IDomainCreator.h"
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
 
 #include <stdexcept>
@@ -56,14 +55,14 @@ public:
   /// Create and return i-th domain and i-th values, (i-1)th domain is released.
   virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, API::IFunctionValues_sptr& values) const;
   /// Add new domain creator
-  void addCreator( IDomainCreator_sptr creator );
+  void addCreator( API::IDomainCreator_sptr creator );
   /// Calculate the value of a least squares cost function
   virtual void leastSquaresVal(const CostFuncLeastSquares& leastSquares);
   /// Calculate the value, first and second derivatives of a least squares cost function
   virtual void leastSquaresValDerivHessian(const CostFuncLeastSquares& leastSquares, bool evalFunction, bool evalDeriv, bool evalHessian);
   /// Create an instance of SeqDomain in one of two forms: either SeqDomain for sequential domain creation
   /// or ParDomain for parallel calculations
-  static SeqDomain* create(IDomainCreator::DomainType type);
+  static SeqDomain* create(API::IDomainCreator::DomainType type);
 protected:
   /// Current index
   mutable size_t m_currentIndex;
@@ -72,7 +71,7 @@ protected:
   /// Currently active values.
   mutable std::vector< API::IFunctionValues_sptr > m_values;
   /// Domain creators.
-  std::vector< boost::shared_ptr<IDomainCreator> > m_creators;
+  std::vector< boost::shared_ptr<API::IDomainCreator> > m_creators;
 };
 
 } // namespace CurveFitting

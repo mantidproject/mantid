@@ -35,6 +35,7 @@ set ( SRC_FILES
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
 	src/IDataFileChecker.cpp
+	src/IDomainCreator.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
 	src/IFunction.cpp
@@ -46,7 +47,6 @@ set ( SRC_FILES
 	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
 	src/IMDWorkspace.cpp
-	src/ImmutableCompositeFunction.cpp
 	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
@@ -54,6 +54,7 @@ set ( SRC_FILES
 	src/ISplittersWorkspace.cpp
 	src/ITableWorkspace.cpp
 	src/IkedaCarpenterModerator.cpp
+	src/ImmutableCompositeFunction.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
 	src/ImplictFunctionFactory.cpp
@@ -153,6 +154,7 @@ set ( INC_FILES
 	inc/MantidAPI/ICostFunction.h
 	inc/MantidAPI/IDataFileChecker.h
 	inc/MantidAPI/IDataItem.h
+	inc/MantidAPI/IDomainCreator.h
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
 	inc/MantidAPI/IFunction.h
@@ -167,7 +169,6 @@ set ( INC_FILES
 	inc/MantidAPI/IMDHistoWorkspace.h
 	inc/MantidAPI/IMDIterator.h
 	inc/MantidAPI/IMDWorkspace.h
-	inc/MantidAPI/ImmutableCompositeFunction.h
 	inc/MantidAPI/IMaskWorkspace.h
 	inc/MantidAPI/IPeak.h
 	inc/MantidAPI/IPeakFunction.h
@@ -177,6 +178,7 @@ set ( INC_FILES
 	inc/MantidAPI/ITableWorkspace.h
 	inc/MantidAPI/IWorkspaceProperty.h
 	inc/MantidAPI/IkedaCarpenterModerator.h
+	inc/MantidAPI/ImmutableCompositeFunction.h
 	inc/MantidAPI/ImplicitFunctionBuilder.h
 	inc/MantidAPI/ImplicitFunctionFactory.h
 	inc/MantidAPI/ImplicitFunctionParameter.h

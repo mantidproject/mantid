@@ -27,7 +27,7 @@ namespace CurveFitting
    * Constructor
    */
   FitMD::FitMD(IPropertyManager* fit, const std::string& workspacePropertyName, DomainType domainType)
-    :IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName),domainType),
+    : API::IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName),domainType),
     m_startIndex(0),m_count(0)
   {
     if (m_workspacePropertyNames.empty())
@@ -81,7 +81,7 @@ namespace CurveFitting
           size_t count = m_maxSize;
           if ( n - i < count ) count = n - i;
           creator->setRange(i, count);
-          seqDomain->addCreator( IDomainCreator_sptr( creator ) );
+          seqDomain->addCreator( API::IDomainCreator_sptr( creator ) );
         }
         ivalues.reset( new EmptyValues( n ) );
         delete iterator;

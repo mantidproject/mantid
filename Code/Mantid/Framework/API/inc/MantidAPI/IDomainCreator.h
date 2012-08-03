@@ -1,5 +1,5 @@
-#ifndef MANTID_CURVEFITTING_IDOMAINCREATOR_H_
-#define MANTID_CURVEFITTING_IDOMAINCREATOR_H_
+#ifndef MANTID_API_IDOMAINCREATOR_H_
+#define MANTID_API_IDOMAINCREATOR_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -16,7 +16,7 @@ namespace Mantid
     class IFunctionValues;
   }
 
-  namespace CurveFitting
+  namespace API
   {
     /**
 
@@ -118,7 +118,7 @@ namespace Mantid
     typedef boost::shared_ptr<IDomainCreator> IDomainCreator_sptr;
 
     
-  } // namespace CurveFitting
+  } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_IDOMAINCREATOR_H_*/
+#endif /*MANTID_API_IDOMAINCREATOR_H_*/

@@ -1,12 +1,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/IDomainCreator.h"
-#include "MantidCurveFitting/Fit.h"
+#include "MantidAPI/IDomainCreator.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {
-namespace CurveFitting
+namespace API
 {
 
   /**

@@ -7,7 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidCurveFitting/IDomainCreator.h"
+#include "MantidAPI/IDomainCreator.h"
 
 namespace Mantid
 {
@@ -87,7 +87,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      Fit() : API::Algorithm(),m_domainType(IDomainCreator::Simple) {};
+      Fit() : API::Algorithm(),m_domainType(API::IDomainCreator::Simple) {};
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "Fit";}
       /// Algorithm's version for identification overriding a virtual method
@@ -113,11 +113,11 @@ namespace Mantid
       /// Pointer to the fitting function
       API::IFunction_sptr m_function;
       /// Pointer to a domain creator
-      boost::shared_ptr<IDomainCreator> m_domainCreator;
-      friend class IDomainCreator;
+      boost::shared_ptr<API::IDomainCreator> m_domainCreator;
+      friend class API::IDomainCreator;
       std::vector<std::string> m_workspacePropertyNames;
       /// Keep the domain type
-      IDomainCreator::DomainType m_domainType;
+      API::IDomainCreator::DomainType m_domainType;
 
     };
 
