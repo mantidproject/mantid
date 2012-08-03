@@ -63,7 +63,8 @@ namespace MantidQt
     void UserInputValidator::checkFieldIsValid(const QString & errorMessage, QLineEdit * field, QLabel * errorLabel)
     {
       int dummyPos = 0;
-      QValidator::State fieldState = field->validator()->validate(field->text(), dummyPos);
+      QString text = field->text();
+      QValidator::State fieldState = field->validator()->validate(text, dummyPos);
 
       if( fieldState == QValidator::Acceptable )
       {
