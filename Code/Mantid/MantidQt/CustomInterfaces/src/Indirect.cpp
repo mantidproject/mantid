@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect.h"
 
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtCustomInterfaces/Background.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -685,32 +686,37 @@ bool Indirect::validateInput()
   return valid;
 }
 /**
-* Validates user input on the calibration tab.
-*/
-bool Indirect::validateCalib()
+ * Validates user input on the calibration tab.
+ */
+QString Indirect::validateCalib()
 {
-  bool valid = true;
+  UserInputValidator uiv;
+  
+  uiv.checkMWRunFilesIsValid("Run", m_uiForm.cal_leRunNo);
 
-  if ( ! m_uiForm.cal_leRunNo->isValid() )
-  {
-    valid = false;
-  }
+  auto peakRange = std::make_pair(m_calDblMng->value(m_calCalProp["PeakMin"]), m_calDblMng->value(m_calCalProp["PeakMax"]));
+  auto backRange = std::make_pair(m_calDblMng->value(m_calCalProp["BackMin"]), m_calDblMng->value(m_calCalProp["BackMax"]));
+
+  uiv.checkValidRange("Peak Range", peakRange);
+  uiv.checkValidRange("Back Range", backRange);
+  uiv.checkRangesDontOverlap(peakRange, backRange);
 
   if ( m_uiForm.cal_ckRES->isChecked() )
   {
-    if ( m_calDblMng->value(m_calResProp["Start"]) > m_calDblMng->value(m_calResProp["End"]) )
-    {
-      valid = false;
-    }
+    auto backgroundRange = std::make_pair(m_calDblMng->value(m_calResProp["Start"]), m_calDblMng->value(m_calResProp["End"]));
+    uiv.checkValidRange("Background", backgroundRange);
 
-    if ( m_calDblMng->value(m_calResProp["ELow"]) > m_calDblMng->value(m_calResProp["EHigh"]) )
-    {
-      valid = false;
-    }
+    double eLow   = m_calDblMng->value(m_calResProp["ELow"]);
+    double eHigh  = m_calDblMng->value(m_calResProp["EHigh"]);
+    double eWidth = m_calDblMng->value(m_calResProp["EWidth"]);
 
+    uiv.checkBins(eLow, eWidth, eHigh);
+
+    uiv.checkRangeIsEnclosed("Background Range", backgroundRange, 
+                             "Energy Range", std::make_pair(eLow, eHigh));
   }
 
-  return valid;
+  return uiv.generateErrorMessage();
 }
 
 bool Indirect::validateSofQw()
@@ -800,16 +806,27 @@ bool Indirect::validateSofQw()
   return valid;
 }
 
-bool Indirect::validateSlice()
+QString Indirect::validateSlice()
 {
-  bool valid = true;
+  UserInputValidator uiv;
 
-  if ( ! m_uiForm.slice_inputFile->isValid() )
+  uiv.checkMWRunFilesIsValid("Input", m_uiForm.slice_inputFile);
+  if( m_uiForm.slice_ckUseCalib->isChecked() )
+    uiv.checkMWRunFilesIsValid("Calibration", m_uiForm.slice_inputFile);
+
+  auto rangeOne = std::make_pair(m_sltDblMng->value(m_sltProp["R1S"]), m_sltDblMng->value(m_sltProp["R1E"]));
+  uiv.checkValidRange("Range One", rangeOne);
+
+  bool useTwoRanges = m_sltBlnMng->value(m_sltProp["UseTwoRanges"]);
+  if( useTwoRanges )
   {
-    valid = false;
+    auto rangeTwo = std::make_pair(m_sltDblMng->value(m_sltProp["R2S"]), m_sltDblMng->value(m_sltProp["R2E"]));
+    uiv.checkValidRange("Range Two", rangeTwo);
+
+    uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
   }
 
-  return valid;
+  return uiv.generateErrorMessage();
 }
 
 void Indirect::loadSettings()
@@ -1361,9 +1378,10 @@ void Indirect::useCalib(bool state)
 void Indirect::calibCreate()
 {
   QString file = m_uiForm.cal_leRunNo->getFirstFilename();
-  if ( ! validateCalib() || file == "" )
+  QString error = validateCalib();
+  if ( ! error.isEmpty() )
   {
-    showInformationBox("Please check your input.");
+    showInformationBox(error);
   }
   else
   {
@@ -1718,9 +1736,10 @@ void Indirect::sOfQwPlotInput()
 // SLICE
 void Indirect::sliceRun()
 {
-  if ( ! validateSlice() )
+  QString error = validateSlice();
+  if ( ! error.isEmpty() )
   {
-    showInformationBox("Please check your input.");
+    showInformationBox(error);
     return;
   }
 

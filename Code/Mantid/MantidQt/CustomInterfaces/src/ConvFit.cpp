@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/ConvFit.h"
 
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -241,26 +242,27 @@ namespace IDA
    */
   QString ConvFit::validate()
   {
-    if ( uiForm().confit_cbInputType->currentIndex() == 0 ) // File
+    UserInputValidator uiv;
+
+    switch( uiForm().confit_cbInputType->currentIndex() )
     {
-      if ( ! uiForm().confit_inputFile->isValid() )
-        return "Empty or otherwise invalid file field.";
-    }
-    else // Workspace
-    {
-      if ( uiForm().confit_wsSample->currentText() == "" )
-        return "No workspace selected.";
+    case 0:
+      uiv.checkMWRunFilesIsValid("Reduction", uiForm().confit_inputFile); break;
+    case 1:
+      uiv.checkWorkspaceSelectorIsNotEmpty("Reduction", uiForm().confit_wsSample); break;
     }
 
-    if( ! uiForm().confit_resInput->isValid() )
-      return "Invalid or empty resolution file field.";
+    uiv.checkMWRunFilesIsValid("Resolution", uiForm().confit_resInput);
+
+    auto range = std::make_pair(m_cfDblMng->value(m_cfProp["StartX"]), m_cfDblMng->value(m_cfProp["EndX"]));
+    uiv.checkValidRange("Fitting Range", range);
 
     // Enforce the rule that at least one fit is needed; either a delta function, one or two lorentzian functions,
     // or both.  (The resolution function must be convolved with a model.)
     if ( uiForm().confit_cbFitType->currentIndex() == 0 && ! m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
-      return "No fit function has been selected.";
+      uiv.addErrorMessage("No fit function has been selected.");
 
-    return "";
+    return uiv.generateErrorMessage();
   }
 
   void ConvFit::loadSettings(const QSettings & settings)

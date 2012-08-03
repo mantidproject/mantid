@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/FuryFit.h"
 
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -213,7 +214,20 @@ namespace IDA
 
   QString FuryFit::validate()
   {
-    return "";
+    UserInputValidator uiv;
+
+    switch( uiForm().furyfit_cbInputType->currentIndex() )
+    {
+    case 0:
+      uiv.checkMWRunFilesIsValid("Input", uiForm().furyfit_inputFile); break;
+    case 1:
+      uiv.checkWorkspaceSelectorIsNotEmpty("Input", uiForm().furyfit_wsIqt); break;
+    }
+
+    auto range = std::make_pair(m_ffRangeManager->value(m_ffProp["StartX"]), m_ffRangeManager->value(m_ffProp["EndX"]));
+    uiv.checkValidRange("Ranges", range);
+
+    return uiv.generateErrorMessage();
   }
 
   void FuryFit::loadSettings(const QSettings & settings)

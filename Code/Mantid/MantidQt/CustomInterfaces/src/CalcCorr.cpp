@@ -1,7 +1,84 @@
 #include "MantidQtCustomInterfaces/CalcCorr.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
+#include "MantidQtMantidWidgets/WorkspaceSelector.h"
 
 #include <QLineEdit>
 #include <QList>
+#include <QValidator>
+#include <QDoubleValidator>
+
+class QDoubleMultiRangeValidator : public QValidator
+{
+public:
+  /**
+   * Constructor.
+   *
+   * @param ranges :: a set of pairs of doubles representing the valid ranges of the input
+   * @param parent :: the parent QObject of this QObject.
+   */
+  QDoubleMultiRangeValidator(std::set<std::pair<double, double>> ranges, QObject * parent) :
+    QValidator(parent), m_ranges(ranges), m_slaveVal(NULL)
+  {
+    m_slaveVal = new QDoubleValidator(this);
+  }
+
+  ~QDoubleMultiRangeValidator() {}
+  
+  /**
+   * Reimplemented from QValidator::validate(). 
+   *
+   * Returns Acceptable if the string input contains a double that is within at least one
+   * of the ranges and is in the correct format.
+   *
+   * Else returns Intermediate if input contains a double that is outside the ranges or is in 
+   * the wrong format; e.g. with too many digits after the decimal point or is empty.
+   *
+   * Else returns Invalid - i.e. the input is not a double.
+   *
+   * @param input :: the input string to validate
+   * @param pos   :: not used.
+   */
+  virtual QValidator::State	validate( QString & input, int & pos ) const
+  {
+    UNUSED_ARG(pos);
+    
+    if( m_ranges.empty() )
+      return Intermediate;
+    
+    bool acceptable = false;
+    bool intermediate = false;
+
+    // For each range in the list, use the slave QDoubleValidator to find out the state.
+    for( auto range = m_ranges.begin(); range != m_ranges.end(); ++ range )
+    {
+      assert(range->first < range->second); // Play nice.
+
+      m_slaveVal->setBottom(range->first);
+      m_slaveVal->setTop(range->second);
+
+      QValidator::State rangeState = m_slaveVal->validate(input, pos);
+
+      if( rangeState == Acceptable )
+        acceptable = true;
+      else if( rangeState == Intermediate )
+        intermediate = true;
+    }
+
+    if( acceptable )
+      return Acceptable;
+    if( intermediate )
+      return Intermediate;
+
+    return Invalid;
+  }
+
+private:
+  /// Disallow default constructor.
+  QDoubleMultiRangeValidator();
+
+  std::set<std::pair<double, double>> m_ranges;
+  QDoubleValidator * m_slaveVal;
+};
 
 namespace MantidQt
 {
@@ -10,9 +87,11 @@ namespace CustomInterfaces
 namespace IDA
 {
   CalcCorr::CalcCorr(QWidget * parent) : 
-    IDATab(parent), m_dblVal(NULL) 
+    IDATab(parent), m_dblVal(NULL), m_posDblVal(NULL) 
   {
     m_dblVal = new QDoubleValidator(this);
+    m_posDblVal = new QDoubleValidator(this);
+    m_posDblVal->setBottom(0.0);
   }
 
   void CalcCorr::setup()
@@ -23,31 +102,55 @@ namespace IDA
     connect(uiForm().absp_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(useCanChecked(bool)));
     connect(uiForm().absp_letc1, SIGNAL(editingFinished()), this, SLOT(tcSync()));
 
-    QList<QLineEdit *> fields;
-    // Shape details.
-    fields.append(uiForm().absp_lets);
-    fields.append(uiForm().absp_letc1);
-    fields.append(uiForm().absp_letc2);
-    fields.append(uiForm().absp_leavar);
-    fields.append(uiForm().absp_lewidth);
-    fields.append(uiForm().absp_ler1);
-    fields.append(uiForm().absp_ler2);
-    fields.append(uiForm().absp_ler3);
-    // Sample details.
-    fields.append(uiForm().absp_lesamden);
-    fields.append(uiForm().absp_lesamsigs);
-    fields.append(uiForm().absp_lesamsiga);
-    // Can details.
-    fields.append(uiForm().absp_lecanden);
-    fields.append(uiForm().absp_lecansigs);
-    fields.append(uiForm().absp_lecansiga);
+    // Sort the fields into various lists.
 
-    foreach(QLineEdit * field, fields)
+    QList<QLineEdit*> allFields;
+    QList<QLineEdit*> doubleFields;
+    QList<QLineEdit*> positiveDoubleFields;
+
+    positiveDoubleFields += uiForm().absp_lets;  // Thickness
+    positiveDoubleFields += uiForm().absp_letc1; // Front Thickness
+    positiveDoubleFields += uiForm().absp_letc2; // Back Thickness
+
+    positiveDoubleFields += uiForm().absp_ler1; // Radius 1
+    positiveDoubleFields += uiForm().absp_ler2; // Radius 2
+    positiveDoubleFields += uiForm().absp_ler3; // Radius 3
+    
+    positiveDoubleFields += uiForm().absp_lewidth; // Beam Width
+    
+    positiveDoubleFields += uiForm().absp_lesamden; // Sample Number Density
+    doubleFields += uiForm().absp_lesamsigs;        // Sample Scattering Cross-Section
+    doubleFields += uiForm().absp_lesamsiga;        // Sample Absorption Cross-Section
+    
+    positiveDoubleFields += uiForm().absp_lecanden; // Can Number Density
+    doubleFields += uiForm().absp_lecansigs;        // Can Scattering Cross-Section
+    doubleFields += uiForm().absp_lecansiga;        // Can Absorption Cross-Section
+
+    // Set appropriate validators.
+    foreach(QLineEdit * doubleField, doubleFields)
     {
-      // Watch all fields for changes.
-      connect(field, SIGNAL(editingFinished()), this, SLOT(inputChanged()));
-      // Allow doubles only.
-      field->setValidator(m_dblVal);
+      doubleField->setValidator(m_dblVal);
+    }
+    foreach(QLineEdit * positiveDoubleField, positiveDoubleFields)
+    {
+      positiveDoubleField->setValidator(m_posDblVal);
+    }
+
+    // Deal with the slightly more complex multi-range "Can Angle to Beam" field.
+    std::set<std::pair<double, double>> angleRanges;
+    angleRanges.insert(std::make_pair(-180, -100));
+    angleRanges.insert(std::make_pair(-80, 80));
+    angleRanges.insert(std::make_pair(100, 180));
+    QDoubleMultiRangeValidator * angleValidator = new QDoubleMultiRangeValidator(angleRanges, this);
+    uiForm().absp_leavar->setValidator(angleValidator); // Can Angle to Beam
+
+    allFields = doubleFields + positiveDoubleFields;
+    allFields += uiForm().absp_leavar;
+
+    // Connect up all fields to inputChanged method of IDATab (calls validate).
+    foreach(QLineEdit * field, allFields)
+    {
+      connect(field, SIGNAL(textEdited(const QString &)), this, SLOT(inputChanged()));
     }
 
     // "Nudge" color of title of QGroupBox to change.
@@ -143,187 +246,73 @@ namespace IDA
 
   QString CalcCorr::validate()
   {
-    QStringList invalidInputs;
-  
+    UserInputValidator uiv;
+
     // Input (file or workspace)
     if ( uiForm().absp_cbInputType->currentText() == "File" )
-    {
-      if ( ! uiForm().absp_inputFile->isValid() )
-        invalidInputs.append("Input File");
-    }
+      uiv.checkMWRunFilesIsValid("Input", uiForm().absp_inputFile);
     else
-    {
-      if ( uiForm().absp_wsInput->currentText() == "" )
-        invalidInputs.append("Input Workspace");
-    }
+      uiv.checkWorkspaceSelectorIsNotEmpty("Input", uiForm().absp_wsInput);
 
     if ( uiForm().absp_cbShape->currentText() == "Flat" )
     {
       // Flat Geometry
-      if ( uiForm().absp_lets->text() != "" )
-      {
-        uiForm().absp_valts->setText(" ");
-      }
-      else
-      {
-        uiForm().absp_valts->setText("*");
-        invalidInputs.append("Thickness");
-      }
+      uiv.checkFieldIsValid("Thickness", uiForm().absp_lets, uiForm().absp_valts);
 
       if ( uiForm().absp_ckUseCan->isChecked() )
       {
-        if ( uiForm().absp_letc1->text() != "" )
-        {
-          uiForm().absp_valtc1->setText(" ");
-        }
-        else
-        {
-          uiForm().absp_valtc1->setText("*");
-          invalidInputs.append("Front Thickness");
-        }
-
-        if ( uiForm().absp_letc2->text() != "" )
-        {
-          uiForm().absp_valtc2->setText(" ");
-        }
-        else
-        {
-          uiForm().absp_valtc2->setText("*");
-          invalidInputs.append("Back Thickness");
-        }
+        uiv.checkFieldIsValid("Front Thickness", uiForm().absp_letc1, uiForm().absp_valtc1);
+        uiv.checkFieldIsValid("Back Thickness",  uiForm().absp_letc2, uiForm().absp_valtc2);
       }
+
+      uiv.checkFieldIsValid("Can Angle to Beam must be in the range [-180 to -100], [-80 to 80] or [100 to 180].", uiForm().absp_leavar,  uiForm().absp_valAvar);
     }
 
     if ( uiForm().absp_cbShape->currentText() == "Cylinder" )
     {
       // Cylinder geometry
-      if ( uiForm().absp_ler1->text() != "" )
-      {
-        uiForm().absp_valR1->setText(" ");
-      }
-      else
-      {
-        uiForm().absp_valR1->setText("*");
-        invalidInputs.append("Radius 1");
-      }
+      uiv.checkFieldIsValid("Radius 1", uiForm().absp_ler1, uiForm().absp_valR1);
+      uiv.checkFieldIsValid("Radius 2", uiForm().absp_ler2, uiForm().absp_valR2);
+      
+      double radius1 = uiForm().absp_ler1->text().toDouble();
+      double radius2 = uiForm().absp_ler2->text().toDouble();
+      if( radius1 > radius2 )
+        uiv.addErrorMessage("Radius 1 should be less than Radius 2.");
 
-      if ( uiForm().absp_ler2->text() != "" )
-      {
-        uiForm().absp_valR2->setText(" ");
-      }
-      else
-      {
-        uiForm().absp_valR2->setText("*");
-        invalidInputs.append("Radius 2");
-      }
-    
-      // R3  only relevant when using can
+      // R3 only relevant when using can
       if ( uiForm().absp_ckUseCan->isChecked() )
       {
-        if ( uiForm().absp_ler3->text() != "" )
-        {
-          uiForm().absp_valR3->setText(" ");
-        }
-        else
-        {
-          uiForm().absp_valR3->setText("*");
-          invalidInputs.append("Radius 3");
-        }
+        uiv.checkFieldIsValid("Radius 3", uiForm().absp_ler3, uiForm().absp_valR3);
+        
+        double radius3 = uiForm().absp_ler3->text().toDouble();
+        if( radius2 > radius3 )
+          uiv.addErrorMessage("Radius 2 should be less than Radius 3.");
+
       }
+
+      uiv.checkFieldIsValid("Step Size", uiForm().absp_leavar,  uiForm().absp_valAvar);
+
+      double stepSize = uiForm().absp_leavar->text().toDouble();
+      if( stepSize > (radius2 - radius1) )
+        uiv.addErrorMessage("Step size should be less than (Radius 2 - Radius 1).");
     }
 
-    // Can angle to beam || Step size
-    if ( uiForm().absp_leavar->text() != "" )
-    {
-      uiForm().absp_valAvar->setText(" ");
-    }
-    else
-    {
-      uiForm().absp_valAvar->setText("*");
-      invalidInputs.append("Can Angle to Beam");
-    }
-
-    // Beam Width
-    if ( uiForm().absp_lewidth->text() != "" )
-    {
-      uiForm().absp_valWidth->setText(" ");
-    }
-    else
-    {
-      uiForm().absp_valWidth->setText("*");
-      invalidInputs.append("Beam Width");
-    }
+    uiv.checkFieldIsValid("Beam Width", uiForm().absp_lewidth, uiForm().absp_valWidth);
 
     // Sample details
-    if ( uiForm().absp_lesamden->text() != "" )
-    {
-      uiForm().absp_valSamden->setText(" ");
-    }
-    else
-    {
-      uiForm().absp_valSamden->setText("*");
-      invalidInputs.append("Sample Number Density");
-    }
-
-    if ( uiForm().absp_lesamsigs->text() != "" )
-    {
-      uiForm().absp_valSamsigs->setText(" ");
-    }
-    else
-    {
-      uiForm().absp_valSamsigs->setText("*");
-      invalidInputs.append("Sample Scattering Cross-Section");
-    }
-
-    if ( uiForm().absp_lesamsiga->text() != "" )
-    {
-      uiForm().absp_valSamsiga->setText(" ");
-    }
-    else
-    {
-      uiForm().absp_valSamsiga->setText("*");
-      invalidInputs.append("Sample Absorption Cross-Section");
-    }
+    uiv.checkFieldIsValid("Sample Number Density",           uiForm().absp_lesamden,  uiForm().absp_valSamden);
+    uiv.checkFieldIsValid("Sample Scattering Cross-Section", uiForm().absp_lesamsigs, uiForm().absp_valSamsigs);
+    uiv.checkFieldIsValid("Sample Absorption Cross-Section", uiForm().absp_lesamsiga, uiForm().absp_valSamsiga);
 
     // Can details (only test if "Use Can" is checked)
     if ( uiForm().absp_ckUseCan->isChecked() )
     {
-      if ( uiForm().absp_lecanden->text() != "" )
-      {
-        uiForm().absp_valCanden->setText(" ");
-      }
-      else
-      {
-        uiForm().absp_valCanden->setText("*");
-        invalidInputs.append("Can Number Density");
-      }
-
-      if ( uiForm().absp_lecansigs->text() != "" )
-      {
-        uiForm().absp_valCansigs->setText(" ");
-      }
-      else
-      {
-        uiForm().absp_valCansigs->setText("*");
-        invalidInputs.append("Can Scattering Cross-Section");
-      }
-
-      if ( uiForm().absp_lecansiga->text() != "" )
-      {
-        uiForm().absp_valCansiga->setText(" ");
-      }
-      else
-      {
-        uiForm().absp_valCansiga->setText("*");
-        invalidInputs.append("Can Absorption Cross-Section");
-      }
+      uiv.checkFieldIsValid("Can Number Density",           uiForm().absp_lecanden,  uiForm().absp_valCanden);
+      uiv.checkFieldIsValid("Can Scattering Cross-Section", uiForm().absp_lecansigs, uiForm().absp_valCansigs);
+      uiv.checkFieldIsValid("Can Absorption Cross-Section", uiForm().absp_lecansiga, uiForm().absp_valCansiga);
     }
 
-    QString error = "";
-    if( ! invalidInputs.empty() )
-      error = "Please check the following inputs: \n" + invalidInputs.join("\n");
-
-    return error;
+    return uiv.generateErrorMessage();
   }
 
   void CalcCorr::loadSettings(const QSettings & settings)

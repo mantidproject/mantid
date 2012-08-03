@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/SANSRunWindow.cpp
 	src/background.cpp
 	src/deltaECalc.cpp
+  src/UserInputValidator.cpp
 	src/WorkspaceInADS.cpp
 	src/WorkspaceMemento.cpp
 	src/RawFileMemento.cpp
@@ -67,6 +68,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/WorkspaceMemento.h
 	inc/MantidQtCustomInterfaces/RawFileMemento.h
 	inc/MantidQtCustomInterfaces/WorkspaceInADS.h
+  inc/MantidQtCustomInterfaces/UserInputValidator.h
 	inc/MantidQtCustomInterfaces/deltaECalc.h
 )
 
