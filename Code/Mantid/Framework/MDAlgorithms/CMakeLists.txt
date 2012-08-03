@@ -8,7 +8,6 @@ set ( SRC_FILES
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMD.cpp
-	src/ConvertToMDEvents.cpp
 	src/DampedHisenbergFMSW.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
@@ -54,6 +53,12 @@ set ( SRC_FILES
 	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
+# Old TMD convertToMD code prepared for deprication:	
+	src/ConvertToMDEvents.cpp	
+	src/ConvertToMDEventsParams.cpp
+	src/ConvertToMDEventsSubalgFactory.cpp
+	src/ConvertToMDEventsWSBase.cpp
+	
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -68,7 +73,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
-	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
@@ -116,6 +120,21 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/WeightedMeanMD.h
 	inc/MantidMDAlgorithms/XorMD.h
+# Old TMD convertToMD code prepared for deprication:
+    inc/MantidMDAlgorithms/ConvertToMDEvents.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h 
+	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h 	
+	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h	
+	inc/MantidMDAlgorithms/ConvertToMDEventsWSBase.h	
 )
 
 # Test files. Other source files required.

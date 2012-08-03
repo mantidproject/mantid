@@ -5,8 +5,7 @@
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDEvents/ConvToMDBase.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
-//
+
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
 
 

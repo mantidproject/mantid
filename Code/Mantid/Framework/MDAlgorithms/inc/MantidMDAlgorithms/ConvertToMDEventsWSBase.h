@@ -1,5 +1,6 @@
-#ifndef H_ICONVERT_TO_MDEVENTS_METHODS
-#define H_ICONVERT_TO_MDEVENTS_METHODS
+#ifndef H_CONVERT_TO_MDEVENTS_BASE
+#define H_CONVERT_TO_MDEVENTS_BASE
+/**TODO: FOR DEPRICATION */ 
 
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -13,7 +14,7 @@
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/MDEventWSWrapper.h"
 
-#include "MantidMDAlgorithms/ConvToMDPreprocDetectors.h"
+#include "MantidMDEvents/ConvToMDPreprocDet.h"
 
 namespace Mantid
 {
@@ -46,26 +47,26 @@ namespace MDAlgorithms
 
 
 
- class DLLExport IConvertToMDEventsWS
+ class DLLExport ConvertToMDEventsWSBase
  {
  public:
      // constructor;
-     IConvertToMDEventsWS();
+     ConvertToMDEventsWSBase();
  
     ///method which initates all main class variables 
-    virtual size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
+    virtual size_t setUPConversion(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
-    virtual ~IConvertToMDEventsWS(){};
+    virtual ~ConvertToMDEventsWSBase(){};
 /**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the subalgorithm */
     Kernel::Unit_sptr    getAxisUnits()const;
-    double               getEi()const{return TWS.Ei;}
-    int                  getEMode()const{return TWS.emode;}
-    ConvToMDPreprocDetectors  const * pPrepDetectors()const{return pDetLoc;}
+    double               getEi()const{return TWS.getEi();}
+    int                  getEMode()const{return TWS.getEMode();}
 
+    MDEvents::MDWSDescription getWSDescr()const{return TWS;};
     API::NumericAxis *getPAxis(int nAaxis)const{return dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(nAaxis));}
-    std::vector<double> getTransfMatrix()const{return TWS.rotMatrix;}
+    std::vector<double> getTransfMatrix()const{return TWS.getTransfMatrix();}
 //<------------------
 
    /** function extracts the coordinates from additional workspace porperties and places them to proper position within the vector of MD coodinates */
@@ -76,18 +77,18 @@ namespace MDAlgorithms
         min.assign(dim_min.begin(),dim_min.end());
         max.assign(dim_max.begin(),dim_max.end());
     }
-    ConvToMDPreprocDetectors const* getDetectors(){return pDetLoc;}
+    MDEvents::ConvToMDPreprocDet  const* getDetectors(){return pDetLoc;}
   protected:
    // common variables used by all workspace=related methods are deployed here
-   /// pointer to the input workspace;
-    Mantid::API::MatrixWorkspace_sptr inWS2D;
     /// the properties of the requested target MD workpsace:
     MDEvents::MDWSDescription TWS;
     //
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper ;
    // pointer to the array of detector's directions in reciprocal space
-    ConvToMDPreprocDetectors const * pDetLoc;
-   /// number of target ws dimesnions
+    MDEvents::ConvToMDPreprocDet const * pDetLoc;
+  /// pointer to the input workspace;
+    Mantid::API::MatrixWorkspace_const_sptr inWS2D;
+     /// number of target ws dimesnions
     size_t n_dims;
     /// array of variables which describe min limits for the target variables;
     std::vector<double> dim_min;
@@ -97,7 +98,7 @@ namespace MDAlgorithms
     uint16_t runIndex;
    /// logger -> to provide logging, for MD dataset file operations
     static Mantid::Kernel::Logger& convert_log;
- private:
+ protected:
     /** internal function which do one peace of work, which should be performed by one thread 
       *
       *@param job_ID -- the identifier which specifies, what part of the work on the workspace this job has to do. 
