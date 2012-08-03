@@ -158,6 +158,13 @@ namespace Mantid
         return;
       }
       auto outputWS = MDEventFactory::CreateMDWorkspace(inputWS->getNumDims(), "MDEvent");
+      // Add events
+      // TODO: Generalize to ND (the current framework is a bit limiting)
+      auto mdWS = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4>>(outputWS);
+      if(!mdWS)
+      {
+        return;
+      }
 
       // Bins extents and meta data
       for(size_t i = 0;i < 4; ++i)
@@ -181,14 +188,6 @@ namespace Mantid
       bc->setSplitInto(3);
       bc->setSplitThreshold(3000);
       outputWS->initialize();
-
-      // Add events
-      // TODO: Generalize to ND (the current framework is a bit limiting)
-      auto mdWS = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4>>(outputWS);
-      if(mdWS)
-      {
-        throw std::runtime_error("Can only handle 4D MD workspace currently");
-      }
 
       auto inputIter = inputWS->createIterator();
       size_t boxCount(0);
