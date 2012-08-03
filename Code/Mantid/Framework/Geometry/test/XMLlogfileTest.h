@@ -39,8 +39,8 @@ private:
     std::string penaltyFactor;
     const std::string fitFunc; 
     const std::string eq; 
-    const Geometry::IComponent* comp; 
-    double angleConvertConst;
+    const Geometry::IComponent* comp = NULL; 
+    double angleConvertConst = 0.0;
 
     return boost::shared_ptr<XMLlogfile>(new XMLlogfile(logfileID, value, interpolation, formula, formulaUnit, resultUnit, paramName, type, tie, constraint, penaltyFactor, fitFunc, filterBy, eq, comp, angleConvertConst));
   }
