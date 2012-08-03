@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidAPI/DomainCreatorFactory.h"
 #include "MantidAPI/IFunction.h"
 
 namespace Mantid
@@ -120,5 +121,19 @@ namespace Mantid
     
   } // namespace API
 } // namespace Mantid
+
+/* Used to register classes into the factory. creates a global object in an
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ * The id is the key that should be used to create the object
+ */
+#define DECLARE_DOMAINCREATOR(classname, id) \
+  namespace { \
+    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+      ((Mantid::API::DomainCreatorFactory::Instance().subscribe<classname>(id)) \
+          , 0)); \
+  }
+
 
 #endif /*MANTID_API_IDOMAINCREATOR_H_*/

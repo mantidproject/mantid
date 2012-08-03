@@ -22,6 +22,7 @@ set ( SRC_FILES
 	src/CostFunctionFactory.cpp
 	src/DataProcessorAlgorithm.cpp
 	src/DeprecatedAlgorithm.cpp
+	src/DomainCreatorFactory.cpp
 	src/EnabledWhenWorkspaceIsType.cpp
 	src/ExperimentInfo.cpp
 	src/Expression.cpp
@@ -133,6 +134,7 @@ set ( INC_FILES
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
 	inc/MantidAPI/DllConfig.h
+	inc/MantidAPI/DomainCreatorFactory.h
 	inc/MantidAPI/EnabledWhenWorkspaceIsType.h
 	inc/MantidAPI/ExperimentInfo.h
 	inc/MantidAPI/Expression.h
