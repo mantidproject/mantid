@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <string>
 #include <map>
 #include <vector>
@@ -213,18 +214,10 @@ public:
       g_log.debug() << "Add Data Object " << name << " successful" << std::endl;
       m_mutex.unlock();
 
-      //check the workspace invisible option set
-      std::string name_startswith=name.substr(0,2);
-      if(!isInvisbleWorkspaceOptionsSet())
-      {
-        //if the name of workspace starts with __
-        if(!name_startswith.compare("__"))
-        {
-          return;
-        }
-      }
-     
-      notificationCenter.postNotification(new AddNotification(name,Tobject));
+     if(objectIsToBeVisible(name))
+     {
+       notificationCenter.postNotification(new AddNotification(name,Tobject));
+     }
     }
     return;
   }
@@ -254,20 +247,11 @@ public:
 
       m_mutex.lock();
       datamap[foundName] = Tobject;
-
-      std::string name_startswith=name.substr(0,2);
-      //check the workspace invisible option set
-      if(!isInvisbleWorkspaceOptionsSet())
-      {
-        //if the name of workspace starts with __
-        if(!name_startswith.compare("__"))
-        {
-          m_mutex.unlock();
-          return;
-        }
-      }
       m_mutex.unlock();
-      notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));
+      if(objectIsToBeVisible(name))
+      {
+        notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));
+      }
     }
     else
     {
@@ -333,7 +317,10 @@ public:
     it = datamap.find( newName );
     if ( it != datamap.end() )
     {
-      notificationCenter.postNotification(new AfterReplaceNotification(newName,object));
+      if(objectIsToBeVisible(newName))
+      {
+        notificationCenter.postNotification(new AfterReplaceNotification(newName,object));
+      }
       datamap.erase( it );
     }
 
@@ -348,7 +335,14 @@ public:
     g_log.information("Data Object '"+ foundName +"' renamed to '" + newName + "'");
 
     m_mutex.unlock();
-    notificationCenter.postNotification(new RenameNotification(oldName, newName));
+    if(objectIsToBeVisible(newName))
+    {
+      notificationCenter.postNotification(new RenameNotification(oldName, newName));
+    }
+    else
+    {
+      notificationCenter.postNotification(new PostDeleteNotification(oldName));
+    }
     return;
   }
 
@@ -434,11 +428,24 @@ public:
     return objects;
   }
 
-  /// returns true if the InvisibleWorkspaces option set
-  bool isInvisbleWorkspaceOptionsSet()
+  /// Returns true if object with given name is considered visible
+  bool objectIsToBeVisible(const std::string & name)
   {
-    std::string isvisblews = Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces");
-    return ((!isvisblews.compare("1"))?true:false);
+    return !objectIsToBeHidden(name);
+  }
+
+  /// Returns true if object with given name is considered hidden
+  bool objectIsToBeHidden(const std::string & name)
+  {
+    if(hiddenObjectsAreVisible()) return false;
+    return boost::starts_with(name, m_prefixToHide);
+  }
+
+  /// Returns true objects prefixed with "invisible" prefix should be visible
+  bool hiddenObjectsAreVisible()
+  {
+    std::string hiddenWS = Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces");
+    return (hiddenWS == "1");
   }
 
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
@@ -448,7 +455,7 @@ public:
 
 protected:
   /// Protected constructor (singleton)
-  DataService(const std::string& name):svc_name(name),g_log(Kernel::Logger::get(svc_name)){}
+  DataService(const std::string& name) : svc_name(name),g_log(Kernel::Logger::get(svc_name)), m_prefixToHide("__"){}
   virtual ~DataService(){}
 
 private:
@@ -507,6 +514,9 @@ private:
 
   /// Static reference to the logger for this DataService
   Logger& g_log;
+
+  /// Prefix to indicate hidden object
+  std::string m_prefixToHide;
 
 }; // End Class Data service
 
