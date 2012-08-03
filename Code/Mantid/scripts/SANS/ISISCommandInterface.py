@@ -338,9 +338,18 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
 
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
 
+    rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift
+    shift = rAnds.shift
+    scale = rAnds.scale
+
     retWSname = ''
     if combineDet == None:
-        retWSname = _WavRangeReduction(name_suffix)
+        retWSname = _WavRangeReduction(name_suffix)   
+        if ReductionSingleton().instrument.cur_detector().isAlias('FRONT'):
+            issueWarning('xxxxxxxxxxxxxxxxxxxxxxxXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+            frontWS = mtd[retWSname]
+            frontWS = (frontWS+shift)*scale
+            RenameWorkspace(frontWS, retWSname)                                
     else:
         toParse = combineDet.lower()
         toRestoreAfterAnalysis = ReductionSingleton().instrument.cur_detector().name()
@@ -361,11 +370,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             retWSname_front = _WavRangeReduction(name_suffix)            
         
         ReductionSingleton().instrument.setDetector(toRestoreAfterAnalysis)
-        
-        rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift
-        shift = rAnds.shift
-        scale = rAnds.scale
-        issueWarning('SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCALE' + str(scale) + ', SHIFT = ' +str(shift))
                     
         if toParse.count('merged') == 1:
             ReductionSingleton().to_Q.outputParts = False
@@ -384,8 +388,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             fisF = mtd[retWSname_front]
             fisR = mtd[retWSname_rear]
             
-            minQ = max(min(fisF.dataX(0)), min(fisR.dataX(0)))
-            maxQ = min(max(fisF.dataX(0)), max(fisR.dataX(0)))
+            minQ = min(min(fisF.dataX(0)), min(fisR.dataX(0)))
+            maxQ = max(max(fisF.dataX(0)), max(fisR.dataX(0)))
             
             if maxQ > minQ:
                 CropWorkspace(InputWorkspace=Nf, OutputWorkspace=Nf, XMin=minQ, XMax=maxQ)
