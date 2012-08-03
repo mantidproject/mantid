@@ -162,6 +162,16 @@ namespace Mantid
     }
 
     /**
+     * Resets the random number generator ready for the next call.
+     * This ensures that each evaluation of the function during fitting gets the
+     * same set of random numbers
+     */
+    void TobyFitResolutionModel::functionEvalFinished() const
+    {
+      m_randGen->restart();
+    }
+
+    /**
      * Declare function attributes
      */
     void TobyFitResolutionModel::declareAttributes()

@@ -99,20 +99,10 @@ namespace Mantid
 
     void ResolutionConvolvedCrossSection::function(const API::FunctionDomain& domain, API::FunctionValues& values) const
     {
-      const API::FunctionDomainMD* dmd = dynamic_cast<const API::FunctionDomainMD*>(&domain);
-      if (!dmd)
-      {
-        throw std::invalid_argument("Unexpected domain in IFunctionMD");
-      }
-      dmd->reset();
-      size_t i = 0;
-      for(const API::IMDIterator* r = dmd->getNextIterator(); r != NULL; r = dmd->getNextIterator())
-      {
-        values.setCalculated(i,functionMD(*r));
-        i++;
-      };
+      m_convolution->functionEvalStarting();
+      IFunctionMD::function(domain, values);
+      m_convolution->functionEvalFinished();
     }
-
 
     /**
      * Returns the value of the function for the given MD box. For each MDPoint

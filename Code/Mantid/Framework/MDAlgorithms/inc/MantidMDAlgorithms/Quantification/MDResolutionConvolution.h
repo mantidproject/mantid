@@ -64,6 +64,25 @@ namespace Mantid
       virtual ~MDResolutionConvolution() {}
 
       /**
+       * Called once before any fit/simulation is started to allow caching of
+       * frequently used parameters
+       * @param workspace :: The MD that will be used for the fit
+       */
+      virtual void preprocess(const API::IMDEventWorkspace_const_sptr & workspace) { UNUSED_ARG(workspace); }
+      /**
+       * Called once before any fit/simulation is started to tell the function how many threads will be used.
+       * Default does nothing.
+       */
+      virtual void useNumberOfThreads(const int) {}
+      /**
+       * Called immediately before the evaluation of the main function starts
+       */
+      virtual void functionEvalStarting() const {}
+      /**
+       * Called immediately after the evaluation of the main function finishes
+       */
+      virtual void functionEvalFinished() const {}
+      /**
        * Returns the value of the cross-section convoluted with the resolution for an event
        * @param box :: An interator pointing at the current box under examination
        * @param innerRunIndex :: The index into the run for this workspace
@@ -72,17 +91,6 @@ namespace Mantid
       virtual double signal(const API::IMDIterator & box, const uint16_t innerRunIndex,
                             const size_t eventIndex) const = 0;
 
-      /**
-       * Called before any fit/simulation is started to allow caching of
-       * frequently used parameters
-       * @param workspace :: The MD that will be used for the fit
-       */
-      virtual void preprocess(const API::IMDEventWorkspace_const_sptr & workspace) { UNUSED_ARG(workspace); }
-      /**
-       * Called before any fit/simulation is started to tell the function how many threads will be used.
-       * Default does nothing.
-       */
-      virtual void useNumberOfThreads(const int) {}
 
       /// Declares the parameters. Overridden here to ensure that concrete models override it
       void declareAttributes();

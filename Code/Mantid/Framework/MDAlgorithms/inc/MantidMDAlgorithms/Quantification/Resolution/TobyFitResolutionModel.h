@@ -86,8 +86,11 @@ namespace Mantid
 
       /// Informs the function how many threads will be processing it
       void useNumberOfThreads(const int nthreads);
-      /// Cache detector observations
+      /// Cache detector observations once when the workspac is set
       void preprocess(const API::IMDEventWorkspace_const_sptr & workspace);
+      /// Resets the random number generator ready for the next call
+      void functionEvalFinished() const;
+
       /// Declare function attributes
       void declareAttributes();
       /// Declare fitting parameters
@@ -118,7 +121,7 @@ namespace Mantid
       void function(const Mantid::API::FunctionDomain&, Mantid::API::FunctionValues&) const {}
 
       /// A random number generator
-      Kernel::NDRandomNumberGenerator *m_randGen;
+      mutable Kernel::NDRandomNumberGenerator *m_randGen;
       /// The value to mark an attribute as active
       int m_activeAttrValue;
       /// Check for convergence after loop min number of steps
