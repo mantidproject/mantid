@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_SIMULATERESOLUTIONCONVOLVEDMODEL_H_
 
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidMDEvents/MDEventFactory.h"
 
 namespace Mantid
 {
@@ -55,7 +55,9 @@ namespace Mantid
       /// Create the input & output domains from the input workspace
       void createDomains();
       /// Generate the output MD workspace that is a result of the simulation
-      API::IMDEventWorkspace_sptr createOutputWorkspace() const;
+      void createOutputWorkspace();
+      /// Add the simulated events
+      void addSimulatedEvents();
 
       /// The input workspace
       API::IMDEventWorkspace_sptr m_inputWS;
@@ -63,6 +65,11 @@ namespace Mantid
       boost::shared_ptr<API::FunctionDomainMD> m_domain;
       /// The input domain
       boost::shared_ptr<API::FunctionValues> m_calculatedValues;
+      /// The output workspace type
+      typedef MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4> QOmegaWorkspace;
+
+      /// The output workspace
+      boost::shared_ptr<QOmegaWorkspace> m_outputWS;
     };
 
 

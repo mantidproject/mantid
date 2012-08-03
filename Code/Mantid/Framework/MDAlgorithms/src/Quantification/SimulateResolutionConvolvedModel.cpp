@@ -18,7 +18,6 @@ Runs a simulation of a model with a selected resolution function.
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
-#include "MantidMDEvents/MDEventFactory.h"
 
 namespace Mantid
 {
@@ -105,8 +104,19 @@ namespace Mantid
       // Do the real work
       resolution->function(*m_domain, *m_calculatedValues);
 
-      IMDEventWorkspace_sptr outputWS = createOutputWorkspace();
-      this->setProperty("OutputWorkspace", outputWS);
+      // If output workspace exists just add the events to that
+      IMDEventWorkspace_sptr existingWS = getProperty(SIMULATED_NAME);
+      if(!existingWS)
+      {
+        createOutputWorkspace();
+      }
+      else
+      {
+        m_outputWS = boost::dynamic_pointer_cast<QOmegaWorkspace>(existingWS);
+      }
+      addSimulatedEvents();
+
+      this->setProperty<IMDEventWorkspace_sptr>(SIMULATED_NAME, m_outputWS);
     }
 
     /**
@@ -143,53 +153,41 @@ namespace Mantid
      *  Generate the output MD workspace that is a result of the simulation
      * @return The generated MD event workspace
      */
-    API::IMDEventWorkspace_sptr
-    SimulateResolutionConvolvedModel::createOutputWorkspace() const
+    void SimulateResolutionConvolvedModel::createOutputWorkspace()
     {
-      static const size_t nd = 4;
-      typedef MDEventWorkspace<MDEvent<nd>,nd> QOmegaWorkspace;
+      m_outputWS = boost::shared_ptr<QOmegaWorkspace>(new QOmegaWorkspace);
 
-      auto outputWS = new QOmegaWorkspace;
-      Vec_MDHistoDimensionBuilder dimensionVec(nd);
-      MDHistoDimensionBuilder& qx = dimensionVec[0];
-      MDHistoDimensionBuilder& qy = dimensionVec[1];
-      MDHistoDimensionBuilder& qz = dimensionVec[2];
-      MDHistoDimensionBuilder& en = dimensionVec[3];
-
-      // Meta data
-      qx.setId("qx");
-      qx.setUnits("A^(-1)");
-      qy.setId("qy");
-      qy.setUnits("A^(-1)");
-      qz.setId("qz");
-      qz.setUnits("A^(-1)");
-      en.setId("en");
-      en.setUnits("MeV");
-
-      // Bins extents
-      for(size_t i = 0;i < nd; ++i)
+      // Bins extents and meta data
+      for(size_t i = 0;i < 4; ++i)
       {
         boost::shared_ptr<const Geometry::IMDDimension> inputDim = m_inputWS->getDimension(i);
-        dimensionVec[i].setName(inputDim->getName());
-        dimensionVec[i].setNumBins(1);
-        dimensionVec[i].setMin(inputDim->getMinimum());
-        dimensionVec[i].setMax(inputDim->getMaximum());
+        MDHistoDimensionBuilder builder;
+        builder.setName(inputDim->getName());
+        builder.setId(inputDim->getDimensionId());
+        builder.setUnits(inputDim->getUnits());
+        builder.setNumBins(1);
+        builder.setMin(inputDim->getMinimum());
+        builder.setMax(inputDim->getMaximum());
+
+        m_outputWS->addDimension(builder.create());
       }
-      //Add dimensions to the workspace by invoking the dimension builders.
-      outputWS->addDimension(qx.create());
-      outputWS->addDimension(qy.create());
-      outputWS->addDimension(qz.create());
-      outputWS->addDimension(en.create());
 
       // Run information
-      outputWS->copyExperimentInfos(*m_inputWS);
+      m_outputWS->copyExperimentInfos(*m_inputWS);
       // Set sensible defaults for splitting behaviour
-      BoxController_sptr bc = outputWS->getBoxController();
+      BoxController_sptr bc = m_outputWS->getBoxController();
       bc->setSplitInto(3);
       bc->setSplitThreshold(3000);
 
-      outputWS->initialize();
+      m_outputWS->initialize();
 
+    }
+
+    /**
+     * Adds simulated events to the output workspace
+     */
+    void SimulateResolutionConvolvedModel::addSimulatedEvents()
+    {
       auto inputIter = m_inputWS->createIterator();
       size_t boxCount(0);
       const float errorSq = 0.0;
@@ -198,15 +196,15 @@ namespace Mantid
         const size_t numEvents = inputIter->getNumEvents();
         const float signal = static_cast<float>(m_calculatedValues->getCalculated(boxCount));
 
-        for(size_t i = 0; i != numEvents; ++i)
+        for(size_t i = 0; i < numEvents; ++i)
         {
           
           coord_t centers[4] = { inputIter->getInnerPosition(i,0), inputIter->getInnerPosition(i,1), 
                                  inputIter->getInnerPosition(i,4), inputIter->getInnerPosition(i,3) };
-          outputWS->addEvent(MDEvent<4>(signal, errorSq, 
-                                        inputIter->getInnerRunIndex(i), 
-                                        inputIter->getInnerDetectorID(i),
-                                        centers));
+          m_outputWS->addEvent(MDEvent<4>(signal, errorSq,
+                                          inputIter->getInnerRunIndex(i),
+                                          inputIter->getInnerDetectorID(i),
+                                          centers));
           
           
         }
@@ -219,14 +217,14 @@ namespace Mantid
       // This splits up all the boxes according to split thresholds and sizes.
       auto threadScheduler = new Kernel::ThreadSchedulerFIFO();
       Kernel::ThreadPool threadPool(threadScheduler);
-      outputWS->splitAllIfNeeded(threadScheduler);
+      m_outputWS->splitAllIfNeeded(threadScheduler);
       threadPool.joinAll();
 
       // Flush memory
       API::MemoryManager::Instance().releaseFreeMemory();
 
-      return IMDEventWorkspace_sptr(outputWS);
     }
+
 
   } // namespace MDAlgorithms
 } // namespace Mantid
