@@ -346,7 +346,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     if combineDet == None:
         retWSname = _WavRangeReduction(name_suffix)   
         if ReductionSingleton().instrument.cur_detector().isAlias('FRONT'):
-            issueWarning('xxxxxxxxxxxxxxxxxxxxxxxXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
             frontWS = mtd[retWSname]
             frontWS = (frontWS+shift)*scale
             RenameWorkspace(frontWS, retWSname)                                
