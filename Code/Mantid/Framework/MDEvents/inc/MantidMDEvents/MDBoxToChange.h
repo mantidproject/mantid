@@ -2,7 +2,6 @@
 #define MDEVENTS_MDBOX_CHANGESLIST_H
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include "MantidAPI/BoxCtrlChangesInterface.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDGridBox.h"
 namespace Mantid

@@ -8,7 +8,7 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <boost/shared_ptr.hpp>
 #include <vector>
-#include "MantidAPI/BoxCtrlChangesInterface.h"
+
 
 namespace Mantid
 {
@@ -491,9 +491,7 @@ namespace API
   private:
     /// Number of bytes in a single MDLeanEvent<> of the workspace.
     size_t m_bytesPerEvent;
-
-    //BoxCtrlChangesInterface *m_ChangesList;
-
+   
   };
 
   /// Shared ptr to BoxController
