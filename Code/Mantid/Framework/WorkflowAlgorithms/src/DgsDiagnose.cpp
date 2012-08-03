@@ -8,6 +8,8 @@ hand off to the DetectorDiagnostic algorithm.
 #include "MantidWorkflowAlgorithms/DgsDiagnose.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 
+#include <boost/pointer_cast.hpp>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -117,39 +119,37 @@ namespace WorkflowAlgorithms
     const double samLo = 0.0;
     const double bleedRate = reductionManager->getProperty("MaxFramerate");
     const int bleedPixels = reductionManager->getProperty("IgnoredPixels");
-    //reductionManager->getProperty();
-    //reductionManager->getProperty();
 
     // Make some internal names for workspaces
-    const std::string dvInternal = "__det_van";
-    const std::string dvCompInternal = "__det_van_comp";
-    const std::string sampleInternal = "__sample";
-    const std::string bkgInternal = "__background_int";
-    const std::string countsInternal = "__total_counts";
+    const std::string dvInternal = "_det_van";
+    const std::string dvCompInternal = "_det_van_comp";
+    const std::string sampleInternal = "_sample";
+    const std::string bkgInternal = "_background_int";
+    const std::string countsInternal = "_total_counts";
+
+    // Clone the incoming workspace
+    IAlgorithm_sptr cloneWs = this->createSubAlgorithm("CloneWorkspace");
+    cloneWs->setProperty("InputWorkspace", detVanWS);
+    cloneWs->executeAsSubAlg();
+    // CloneWorkspace returns Workspace_sptr
+    Workspace_sptr tmp = cloneWs->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr dvWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
+    dvWS->setName(dvInternal);
 
     // Process the detector vanadium
     IAlgorithm_sptr detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
-    detVan->setAlwaysStoreInADS(true);
-    detVan->setProperty("InputWorkspace", detVanWS);
-    detVan->setProperty("OutputWorkspace", dvInternal);
+    detVan->setProperty("InputWorkspace", dvWS);
     detVan->setProperty("ReductionProperties", reductionManagerName);
     detVan->executeAsSubAlg();
+    dvWS = detVan->getProperty("OutputWorkspace");
 
     // Process the comparison detector vanadium workspace if present
+    MatrixWorkspace_sptr dvCompWS;
     if (detVanCompWS)
       {
         detVan->setProperty("InputWorkspace", detVanCompWS);
-        detVan->setProperty("OutputWorkspace", dvCompInternal);
         detVan->executeAsSubAlg();
-      }
-
-    AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
-    // Get the processed workspaces for possible later use.
-    MatrixWorkspace_sptr dvWS = dataStore.retrieveWS<MatrixWorkspace>(dvInternal);
-    MatrixWorkspace_sptr dvCompWS;
-    if (dataStore.doesExist(dvCompInternal))
-      {
-        dvCompWS = dataStore.retrieveWS<MatrixWorkspace>(dvCompInternal);
+        dvCompWS = detVan->getProperty("OutputWorkspace");
       }
     else
       {
@@ -161,23 +161,20 @@ namespace WorkflowAlgorithms
       {
         sampleWS = this->getProperty("SampleWorkspace");
 
+        IAlgorithm_sptr cloneWs = this->createSubAlgorithm("CloneWorkspace");
+        cloneWs->setProperty("InputWorkspace", sampleWS);
+        cloneWs->executeAsSubAlg();
+        Workspace_sptr tmp = cloneWs->getProperty("OutputWorkspace");
+        sampleWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
+        sampleWS->setName(sampleInternal);
+
         IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
-        norm->setAlwaysStoreInADS(true);
         norm->setProperty("InputWorkspace", sampleWS);
-        norm->setProperty("OutputWorkspace", sampleInternal);
         norm->setProperty("ReductionProperties", reductionManagerName);
         norm->executeAsSubAlg();
-      }
-
-    // Handle case where one of the other tests (checkBkg or rejectZeroBkg)
-    // are requested, but not createPsdBleed.
-    if (createPsdBleed)
-      {
-        sampleWS = dataStore.retrieveWS<MatrixWorkspace>(sampleInternal);
-      }
-    else
-      {
-        sampleWS = boost::shared_ptr<MatrixWorkspace>();
+        tmp = cloneWs->getProperty("OutputWorkspace");
+        sampleWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
+        //sampleWS->setName(sampleInternal);
       }
 
     // Create the total counts workspace if necessary
@@ -185,16 +182,16 @@ namespace WorkflowAlgorithms
     if (rejectZeroBkg)
       {
         IAlgorithm_sptr integrate = this->createSubAlgorithm("Integration");
-        integrate->setAlwaysStoreInADS(true);
-        integrate->setProperty("InputWorkspace", sampleInternal);
-        integrate->setProperty("OutputWorkspace", countsInternal);
+        integrate->setProperty("InputWorkspace", sampleWS);
+        integrate->setPropertyValue("OutputWorkspace", countsInternal);
         integrate->setProperty("IncludePartialBins", true);
         integrate->executeAsSubAlg();
-
+        g_log.warning() << "Total Counts being used" << std::endl;
         totalCountsWS = integrate->getProperty("OutputWorkspace");
       }
     else
       {
+        g_log.warning() << "Total Counts NOT being used" << std::endl;
         totalCountsWS = boost::shared_ptr<MatrixWorkspace>();
       }
 
@@ -206,40 +203,24 @@ namespace WorkflowAlgorithms
         const double rangeEnd = reductionManager->getProperty("BackgroundTofEnd");
 
         IAlgorithm_sptr integrate = this->createSubAlgorithm("Integration");
-        integrate->setAlwaysStoreInADS(true);
-        integrate->setProperty("InputWorkspace", sampleInternal);
-        integrate->setProperty("OutputWorkspace", bkgInternal);
+        integrate->setProperty("InputWorkspace", sampleWS);
+        integrate->setPropertyValue("OutputWorkspace", bkgInternal);
         integrate->setProperty("RangeLower", rangeStart);
         integrate->setProperty("RangeUpper", rangeEnd);
         integrate->setProperty("IncludePartialBins", true);
         integrate->executeAsSubAlg();
+        backgroundIntWS = integrate->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr cvu = this->createSubAlgorithm("ConvertUnits");
-        cvu->setAlwaysStoreInADS(true);
-        cvu->setProperty("InputWorkspace", bkgInternal);
-        cvu->setProperty("OutputWorkspace", bkgInternal);
+        cvu->setProperty("InputWorkspace", backgroundIntWS);
+        cvu->setProperty("OutputWorkspace", backgroundIntWS);
         cvu->setProperty("Target", "Energy");
         cvu->executeAsSubAlg();
+        backgroundIntWS = cvu->getProperty("OutputWorkspace");
 
-        backgroundIntWS = dataStore.retrieveWS<MatrixWorkspace>(bkgInternal);
         // What is this magic value !?!?!?!?
         backgroundIntWS *= 1.7016e8;
-        /*
-        const std::string scaleFactor = "__sample_bkg_sf";
-        IAlgorithm_sptr svw = this->createSubAlgorithm("CreateSingleValuedWorkspace");
-        svw->setAlwaysStoreInADS(true);
-        svw->setProperty("OutputWorkspace", scaleFactor);
-        // What is this magic value !?!?!?!?
-        svw->setProperty("DataValue", 1.7016e8);
-        svw->executeAsSubAlg();
 
-        IAlgorithm_sptr mult = this->createSubAlgorithm("Multiply");
-        mult->setAlwaysStoreInADS(true);
-        mult->setProperty("LHSWorkspace", bkgInternal);
-        mult->setProperty("RHSWorkspace", scaleFactor);
-        mult->setProperty("OutputWorkspace", bkgInternal);
-        mult->executeAsSubAlg();
-        */
         // Normalise the background integral workspace
         if (dvCompWS)
           {
@@ -258,9 +239,15 @@ namespace WorkflowAlgorithms
         backgroundIntWS = boost::shared_ptr<MatrixWorkspace>();
       }
 
+    // Handle case where one of the other tests (checkBkg or rejectZeroBkg)
+    // are requested, but not createPsdBleed.
+    if (!createPsdBleed)
+      {
+        sampleWS = boost::shared_ptr<MatrixWorkspace>();
+      }
+
     IAlgorithm_sptr diag = this->createSubAlgorithm("DetectorDiagnostic");
-    diag->setAlwaysStoreInADS(true);
-    diag->setProperty("InputWorkspace", dvInternal);
+    diag->setProperty("InputWorkspace", dvWS);
     diag->setProperty("WhiteBeamCompare", dvCompWS);
     diag->setProperty("SampleWorkspace", sampleWS);
     diag->setProperty("SampleTotalCountsWorkspace", totalCountsWS);
@@ -276,18 +263,13 @@ namespace WorkflowAlgorithms
     diag->setProperty("MaxTubeFramerate", bleedRate);
     diag->setProperty("NIgnoredCentralPixels", bleedPixels);
     diag->setProperty("OutputWorkspace", maskName);
-    //diag->setProperty("");
     diag->executeAsSubAlg();
 
-    // Cleanup
-    dataStore.remove(dvInternal);
-    dataStore.remove(dvCompInternal);
-    dataStore.remove(sampleInternal);
-    dataStore.remove(countsInternal);
-    dataStore.remove(bkgInternal);
+    MatrixWorkspace_sptr maskWS = diag->getProperty("OutputWorkspace");
 
     int numMasked = diag->getProperty("NumberOfFailures");
     g_log.information() << "Number of masked pixels = " << numMasked << std::endl;
+    this->setProperty("OutputWorkspace", maskWS);
   }
 
 } // namespace WorkflowAlgorithms

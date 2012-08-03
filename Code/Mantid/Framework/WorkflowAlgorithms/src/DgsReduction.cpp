@@ -477,12 +477,16 @@ namespace WorkflowAlgorithms
     Workspace_sptr idetVanWS;
     if (detVanWS)
       {
-        IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
-        diag->setProperty("DetVanWorkspace", detVanWS);
-        diag->setProperty("SampleWorkspace", sampleWS);
-        diag->setProperty("ReductionProperties", reductionManagerName);
-        diag->executeAsSubAlg();
-
+        const bool runDiag = this->getProperty("FindBadDetectors");
+        if (runDiag)
+          {
+            IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
+            diag->setProperty("DetVanWorkspace", detVanWS);
+            diag->setProperty("SampleWorkspace", sampleWS);
+            diag->setProperty("OutputWorkspace", "samDetVanProcMask");
+            diag->setProperty("ReductionProperties", reductionManagerName);
+            diag->executeAsSubAlg();
+          }
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
         detVan->setProperty("ReductionProperties", reductionManagerName);

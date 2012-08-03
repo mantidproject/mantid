@@ -70,9 +70,9 @@ namespace WorkflowAlgorithms
    */
   void DgsPreprocessData::init()
   {
-    this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
+    this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
         Direction::Input), "An input workspace.");
-    this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
+    this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
         Direction::Output, PropertyMode::Optional), "An output workspace.");
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
         Direction::Input);
@@ -104,6 +104,7 @@ namespace WorkflowAlgorithms
     MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
     // Make output workspace name the same as input workspace
     const std::string outWsName = inputWS->getName();
+    MatrixWorkspace_sptr outputWS;// = this->getProperty("OutputWorkspace");
 
     std::string incidentBeamNorm = reductionManager->getProperty("IncidentBeamNormalisation");
     g_log.notice() << "Incident beam norm method = " << incidentBeamNorm << std::endl;
@@ -121,9 +122,9 @@ namespace WorkflowAlgorithms
           }
         const std::string normAlg = "Normalise" + incidentBeamNorm;
         IAlgorithm_sptr norm = this->createSubAlgorithm(normAlg);
-        norm->setAlwaysStoreInADS(true);
-        norm->setProperty("InputWorkspace", outWsName);
-        norm->setProperty("OutputWorkspace", outWsName);
+        //norm->setAlwaysStoreInADS(true);
+        norm->setProperty("InputWorkspace", inputWS);
+        norm->setPropertyValue("OutputWorkspace", outWsName);
         if ("ToMonitor" == incidentBeamNorm)
           {
             // Perform extra setup for monitor normalisation
@@ -163,8 +164,10 @@ namespace WorkflowAlgorithms
           }
         norm->executeAsSubAlg();
 
+        outputWS = norm->getProperty("OutputWorkspace");
+
         IAlgorithm_sptr addLog = this->createSubAlgorithm("AddSampleLog");
-            addLog->setProperty("Workspace", outWsName);
+            addLog->setProperty("Workspace", outputWS);
             addLog->setProperty("LogName", doneLog);
             addLog->setProperty("LogText", normAlg);
             addLog->executeAsSubAlg();
@@ -177,7 +180,6 @@ namespace WorkflowAlgorithms
           }
       }
 
-    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     this->setProperty("OutputWorkspace", outputWS);
   }
 
