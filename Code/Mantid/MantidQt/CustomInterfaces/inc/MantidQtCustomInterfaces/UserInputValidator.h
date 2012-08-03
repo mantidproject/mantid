@@ -64,8 +64,7 @@ namespace MantidQt
       /// Check that the given ranges dont overlap.
       void checkRangesDontOverlap(std::pair<double, double> rangeA, std::pair<double, double> rangeB);
       /// Check that the given "outer" range completely encloses the given "inner" range.
-      void UserInputValidator::checkRangeIsEnclosed(const QString & outerName, std::pair<double, double> outer, 
-                                                    const QString & innerName, std::pair<double, double> inner);
+      void checkRangeIsEnclosed(const QString & outerName, std::pair<double, double> outer, const QString & innerName, std::pair<double, double> inner);
       /// Check that the given range can be split evenly into bins of the given width.
       void checkBins(double lower, double binWidth, double upper, double tolerance = 0.00000001);
       /// Add a custom error message to the list.
