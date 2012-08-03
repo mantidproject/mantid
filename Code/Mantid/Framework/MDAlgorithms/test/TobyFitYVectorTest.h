@@ -3,7 +3,7 @@
 
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FermiChopperModel.h"
@@ -50,7 +50,7 @@ public:
     }
 
     std::vector<double> randNums(TobyFitYVector::variableCount(), 0.5);
-    auto testObs = createTestObservation();
+    auto testObs = createTestCachedExperimentInfo();
     const double deltaE = 300.0;
     QOmegaPoint qOmega(1.0,2.0,3.0,deltaE);
     yVector.recalculate(randNums, *testObs, qOmega);
@@ -64,14 +64,14 @@ public:
 
 private:
 
-  boost::shared_ptr<Mantid::MDAlgorithms::Observation>
-  createTestObservation()
+  boost::shared_ptr<Mantid::MDAlgorithms::CachedExperimentInfo>
+  createTestCachedExperimentInfo()
   {
     using namespace Mantid::API;
     using namespace Mantid::MDAlgorithms;
     m_expt = createTestExperiment();
 
-    return boost::make_shared<Observation>(*m_expt, (Mantid::detid_t)TEST_DET_ID);
+    return boost::make_shared<CachedExperimentInfo>(*m_expt, (Mantid::detid_t)TEST_DET_ID);
   }
 
   Mantid::API::ExperimentInfo_const_sptr createTestExperiment()

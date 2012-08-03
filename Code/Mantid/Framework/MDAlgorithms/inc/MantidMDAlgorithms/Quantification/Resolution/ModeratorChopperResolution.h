@@ -40,7 +40,7 @@ namespace Mantid
 
   namespace MDAlgorithms
   {
-    class Observation;
+    class CachedExperimentInfo;
     /**
      *
      * Calculates the energy resolution for a moderator-chopper
@@ -51,7 +51,7 @@ namespace Mantid
     {
     public:
       /// Constructor
-      ModeratorChopperResolution(const Observation & observation);
+      ModeratorChopperResolution(const CachedExperimentInfo & observation);
 
       /// Destructor
       ~ModeratorChopperResolution();
@@ -67,7 +67,7 @@ namespace Mantid
       void initCaches();
 
       /// A reference to the observation object
-      const Observation & m_observation;
+      const CachedExperimentInfo & m_observation;
       /// A pointer to the moderator object
       boost::shared_ptr<const API::ModeratorModel> m_moderator;
       /// A pointer to the chopper object

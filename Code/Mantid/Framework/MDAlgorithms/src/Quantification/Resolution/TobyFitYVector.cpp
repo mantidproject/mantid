@@ -87,7 +87,7 @@ namespace Mantid
      * @returns The number of random deviates used
      */
     size_t TobyFitYVector::recalculate(const std::vector<double> & randomNums,
-        const Observation & observation,
+        const CachedExperimentInfo & observation,
         const QOmegaPoint & qOmega)
     {
       m_curRandNums = &randomNums;

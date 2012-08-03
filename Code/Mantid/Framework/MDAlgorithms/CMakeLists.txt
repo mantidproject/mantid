@@ -30,18 +30,18 @@ set ( SRC_FILES
 	src/PlusMD.cpp
 	src/PowerMD.cpp
 	src/QuadEnBackground.cpp
+	src/Quantification/CachedExperimentInfo.cpp
 	src/Quantification/FitResolutionConvolvedModel.cpp
 	src/Quantification/ForegroundModel.cpp
 	src/Quantification/ForegroundModelFactory.cpp
 	src/Quantification/MDResolutionConvolution.cpp
 	src/Quantification/MDResolutionConvolutionFactory.cpp
 	src/Quantification/Models/Strontium122.cpp
-	src/Quantification/Observation.cpp
-	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/Resolution/ModeratorChopperResolution.cpp
 	src/Quantification/Resolution/TobyFitBMatrix.cpp
 	src/Quantification/Resolution/TobyFitResolutionModel.cpp
 	src/Quantification/Resolution/TobyFitYVector.cpp
+	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
 	src/RunParam.cpp
 	src/SaveZODS.cpp
@@ -91,18 +91,18 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/PlusMD.h
 	inc/MantidMDAlgorithms/PowerMD.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
+	inc/MantidMDAlgorithms/Quantification/CachedExperimentInfo.h
 	inc/MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/Quantification/ForegroundModel.h
 	inc/MantidMDAlgorithms/Quantification/ForegroundModelFactory.h
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolution.h
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h
 	inc/MantidMDAlgorithms/Quantification/Models/Strontium122.h
-	inc/MantidMDAlgorithms/Quantification/Observation.h
-	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h
+	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/RunParam.h
 	inc/MantidMDAlgorithms/SaveZODS.h
@@ -126,6 +126,7 @@ set ( TEST_FILES
 	#test/CreateMDFitWorkspaceTest.h
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
+	test/CachedExperimentInfoTest.h
 	test/CobaltSWDTest.h
 	test/CompareMDWorkspacesTest.h
 	test/ConvertEventsToMDTest.h
@@ -153,7 +154,6 @@ set ( TEST_FILES
 	test/ModeratorChopperResolutionTest.h
 	test/MultiplyMDTest.h
 	test/NotMDTest.h
-	test/ObservationTest.h
 	test/OrMDTest.h
 	test/PlusMDTest.h
 	test/PowerMDTest.h

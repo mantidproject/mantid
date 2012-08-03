@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_OBSERVATION_H_
-#define MANTID_MDALGORITHMS_OBSERVATION_H_
+#ifndef MANTID_MDALGORITHMS_CACHEDEXPERIMENTINFO_H_
+#define MANTID_MDALGORITHMS_CACHEDEXPERIMENTINFO_H_
 /**
   Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -37,11 +37,11 @@ namespace Mantid
      * It also serves as a cache for storing quicker lookups to frequently
      * used distances and values, i.e twoTheta, phi etc.
      */
-    class DLLExport Observation
+    class DLLExport CachedExperimentInfo
     {
     public:
       /// Constructor
-      Observation(const API::ExperimentInfo & exptInfo, const detid_t detID);
+      CachedExperimentInfo(const API::ExperimentInfo & exptInfo, const detid_t detID);
 
       /// Return the experiment info
       inline const API::ExperimentInfo & experimentInfo() const { return m_exptInfo; }
@@ -74,8 +74,8 @@ namespace Mantid
       const Kernel::DblMatrix & sampleToDetectorTransform() const;
 
     private:
-      DISABLE_DEFAULT_CONSTRUCT(Observation);
-      DISABLE_COPY_AND_ASSIGN(Observation);
+      DISABLE_DEFAULT_CONSTRUCT(CachedExperimentInfo);
+      DISABLE_COPY_AND_ASSIGN(CachedExperimentInfo);
 
       /// Cache frequently used values
       void initCaches(const Geometry::Instrument_const_sptr & instrument, const detid_t detID);
@@ -116,4 +116,4 @@ namespace Mantid
 }
 
 
-#endif /* MANTID_MDALGORITHMS_OBSERVATION_H_ */
+#endif /* MANTID_MDALGORITHMS_CACHEDEXPERIMENTINFO_H_ */

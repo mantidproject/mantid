@@ -1,6 +1,6 @@
 // Includes
 #include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
@@ -18,7 +18,7 @@ namespace Mantid
      * Constructor taking an observation object
      * @param observation :: An event containing an experiment description & detector ID
      */
-    ModeratorChopperResolution::ModeratorChopperResolution(const Observation & observation) :
+    ModeratorChopperResolution::ModeratorChopperResolution(const CachedExperimentInfo & observation) :
       m_observation(observation), m_modChopDist(0.0), m_chopSampleDist(0.0)
     {
       initCaches();

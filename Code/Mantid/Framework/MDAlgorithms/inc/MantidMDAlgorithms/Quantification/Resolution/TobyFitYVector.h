@@ -36,7 +36,7 @@ namespace Mantid
     // Forward declarations
     //
     struct QOmegaPoint;
-    class Observation;
+    class CachedExperimentInfo;
 
     /**
      * Defines a vector of independent integration variables that are transformed using the
@@ -87,7 +87,7 @@ namespace Mantid
       /// Calculate the values of the integration variables for
       /// the given random variates
       size_t recalculate(const std::vector<double> & randomNums,
-                       const Observation & observation,
+                       const CachedExperimentInfo & observation,
                        const QOmegaPoint & qOmega);
 
     private:
@@ -124,7 +124,7 @@ namespace Mantid
       /// A pointer to the current set of random numbers
       const std::vector<double> * m_curRandNums;
       /// A pointer to the current observation
-      const Observation *m_curObs;
+      const CachedExperimentInfo *m_curObs;
       /// The current point in Q-DeltaE space
       const QOmegaPoint *m_curQOmega;
     };

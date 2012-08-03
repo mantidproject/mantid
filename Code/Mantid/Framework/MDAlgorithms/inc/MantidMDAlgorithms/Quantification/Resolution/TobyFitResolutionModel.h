@@ -22,7 +22,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h"
@@ -96,16 +96,16 @@ namespace Mantid
       void setAttribute(const std::string& name, const API::IFunction::Attribute & value);
 
       /// Ensure the run parameters are up to date
-      void updateRunParameters(const Observation & exptInfo) const;
+      void updateRunParameters(const CachedExperimentInfo & exptInfo) const;
 
       /// Calculate resolution coefficients
-      void calculateResolutionCoefficients(const Observation & observation,
+      void calculateResolutionCoefficients(const CachedExperimentInfo & observation,
                                            const QOmegaPoint & eventPoint) const;
       /// Generates the vector of random points
-      void generateIntegrationVariables(const Observation & observation,
+      void generateIntegrationVariables(const CachedExperimentInfo & observation,
                                         const QOmegaPoint & eventPoint) const;
       /// Map integration variables to perturbed values in Q-E space
-      void calculatePerturbedQE(const Observation & observation,const QOmegaPoint & eventPoint) const;
+      void calculatePerturbedQE(const CachedExperimentInfo & observation,const QOmegaPoint & eventPoint) const;
 
       /// Return true if it is time to check for convergence of the
       /// current sigma value
@@ -141,8 +141,8 @@ namespace Mantid
       /// A pre-sized vector for the QE position to be evaluated
       mutable std::vector<std::vector<double>> m_deltaQE;
 
-      /// Cache of detector observations
-      std::map<std::pair<int, detid_t>, Observation*> m_observations;
+      /// Cache of experiment info caches
+      std::map<std::pair<int, detid_t>, CachedExperimentInfo*> m_exptCache;
     };
   }
 }

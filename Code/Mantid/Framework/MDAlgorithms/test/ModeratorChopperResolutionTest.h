@@ -3,7 +3,7 @@
 
 #include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
 
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
@@ -17,12 +17,12 @@ public:
   void test_Returned_Width_Is_NonZero()
   {
     using Mantid::MDAlgorithms::ModeratorChopperResolution;
-    using Mantid::MDAlgorithms::Observation;
+    using Mantid::MDAlgorithms::CachedExperimentInfo;
 
-    boost::shared_ptr<Observation> testObservation = createTestObservation();
+    boost::shared_ptr<CachedExperimentInfo> testCachedExperimentInfo = createTestCachedExperimentInfo();
     ModeratorChopperResolution *modChop(NULL);
 
-    TS_ASSERT_THROWS_NOTHING(modChop = new ModeratorChopperResolution(*testObservation));
+    TS_ASSERT_THROWS_NOTHING(modChop = new ModeratorChopperResolution(*testCachedExperimentInfo));
     if(modChop)
     {
       //TS_ASSERT(modChop->energyWidth(0.1) > 0.0);
@@ -31,7 +31,7 @@ public:
   }
 
 private:
-  boost::shared_ptr<Mantid::MDAlgorithms::Observation> createTestObservation()
+  boost::shared_ptr<Mantid::MDAlgorithms::CachedExperimentInfo> createTestCachedExperimentInfo()
   {
     using namespace Mantid::Kernel;
     using namespace Mantid::API;
@@ -77,7 +77,7 @@ private:
     // Add log entry
     m_expt->mutableRun().addProperty("Ei", 45.1);
 
-    return boost::make_shared<Observation>(*m_expt, static_cast<Mantid::detid_t>(1));
+    return boost::make_shared<CachedExperimentInfo>(*m_expt, static_cast<Mantid::detid_t>(1));
   }
 
   Mantid::API::ExperimentInfo_sptr m_expt;

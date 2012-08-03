@@ -30,7 +30,7 @@ namespace Mantid
     //-------------------------------------------------------------------------
     // Forward declarations
     //-------------------------------------------------------------------------
-    class Observation;
+    class CachedExperimentInfo;
     struct QOmegaPoint;
 
     /**
@@ -47,7 +47,7 @@ namespace Mantid
       TobyFitBMatrix();
 
       /// Calculate the values for this observation & QDeltaE point
-      void recalculate(const Observation & observation,
+      void recalculate(const CachedExperimentInfo & observation,
                        const QOmegaPoint & qOmega);
 
     };

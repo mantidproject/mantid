@@ -1,7 +1,7 @@
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
@@ -28,7 +28,7 @@ namespace Mantid
      * @param observation :: The current observation
      * @param qOmega :: The current point in Q-DeltaE space
      */
-    void TobyFitBMatrix::recalculate(const Observation & observation,
+    void TobyFitBMatrix::recalculate(const CachedExperimentInfo & observation,
                                      const QOmegaPoint & qOmega)
     {
       // Compute transformation matrices

@@ -1,7 +1,7 @@
 // Includes
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -38,7 +38,7 @@ namespace Mantid
         m_activeAttrValue(1),
         m_mcLoopMin(100), m_mcLoopMax(1000), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
         m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
-        m_observations()
+        m_exptCache()
     {
     }
 
@@ -53,7 +53,7 @@ namespace Mantid
         m_activeAttrValue(1),
         m_mcLoopMin(100), m_mcLoopMax(1000), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
         m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
-        m_observations()
+        m_exptCache()
     {
     }
 
@@ -62,11 +62,11 @@ namespace Mantid
      */
     TobyFitResolutionModel::~TobyFitResolutionModel()
     {
-      auto iter = m_observations.begin();
-      while(iter != m_observations.end())
+      auto iter = m_exptCache.begin();
+      while(iter != m_exptCache.end())
       {
         delete iter->second; // Delete the observation itself
-        m_observations.erase(iter++);// Post-increment to return old iterator to remove item from map
+        m_exptCache.erase(iter++);// Post-increment to return old iterator to remove item from map
       }
     }
 
@@ -82,22 +82,22 @@ namespace Mantid
     double TobyFitResolutionModel::signal(const API::IMDIterator & box, const uint16_t innerRunIndex,
                                           const size_t eventIndex) const
     {
-      auto iter = m_observations.find(std::make_pair(innerRunIndex, box.getInnerDetectorID(eventIndex))); // Guaranteed to exist
-      const Observation & detObservation = *(iter->second);
+      auto iter = m_exptCache.find(std::make_pair(innerRunIndex, box.getInnerDetectorID(eventIndex))); // Guaranteed to exist
+      const CachedExperimentInfo & detCachedExperimentInfo = *(iter->second);
       QOmegaPoint qOmega(box, eventIndex);
 
       // Calculate the matrix of coefficients that contribute to the resolution function (the B matrix in TobyFit).
-      calculateResolutionCoefficients(detObservation, qOmega);
+      calculateResolutionCoefficients(detCachedExperimentInfo, qOmega);
 
       // Start MC loop and check the relative error every
       // min steps
       double sumSigma(0.0), sumSigmaSqr(0.0), avgSigma(0.0);
       for(int step = 1; step <= m_mcLoopMax; ++step)
       {
-        generateIntegrationVariables(detObservation, qOmega);
-        calculatePerturbedQE(detObservation, qOmega);
+        generateIntegrationVariables(detCachedExperimentInfo, qOmega);
+        calculatePerturbedQE(detCachedExperimentInfo, qOmega);
         // Compute weight from the foreground at this point
-        const double weight = foregroundModel().scatteringIntensity(detObservation.experimentInfo(),
+        const double weight = foregroundModel().scatteringIntensity(detCachedExperimentInfo.experimentInfo(),
                                                                     m_deltaQE[PARALLEL_THREAD_NUMBER]);
 
         // Add on this contribution to the average
@@ -149,10 +149,10 @@ namespace Mantid
           uint16_t innerRunIndex = iterator->getInnerRunIndex(i);
           detid_t detID = iterator->getInnerDetectorID(i);
           const auto key = std::make_pair(innerRunIndex, detID);
-          if(m_observations.find(key) == m_observations.end())
+          if(m_exptCache.find(key) == m_exptCache.end())
           {
             API::ExperimentInfo_const_sptr expt = workspace->getExperimentInfo(innerRunIndex);
-            m_observations.insert(std::make_pair(key, new Observation(*expt, detID)));
+            m_exptCache.insert(std::make_pair(key, new CachedExperimentInfo(*expt, detID)));
           }
         }
       }
@@ -213,7 +213,7 @@ namespace Mantid
      * from the fit
      * @param observation :: A reference to the current observation
      */
-    void TobyFitResolutionModel::updateRunParameters(const Observation & observation) const
+    void TobyFitResolutionModel::updateRunParameters(const CachedExperimentInfo & observation) const
     {
       UNUSED_ARG(observation);
     }
@@ -224,7 +224,7 @@ namespace Mantid
      * @param observation :: The current observation defining the point experimental setup
      * @param eventPoint :: The point in QE space that this refers to
      */
-    void TobyFitResolutionModel::calculateResolutionCoefficients(const Observation & observation,
+    void TobyFitResolutionModel::calculateResolutionCoefficients(const CachedExperimentInfo & observation,
                                                                  const QOmegaPoint & eventPoint) const
     {
       m_bmatrix[PARALLEL_THREAD_NUMBER].recalculate(observation, eventPoint);
@@ -235,7 +235,7 @@ namespace Mantid
      * @param observation :: The current observation defining the point experimental setup
      * @param eventPoint :: The point in QE space that this refers to
      */
-    void TobyFitResolutionModel::generateIntegrationVariables(const Observation & observation,
+    void TobyFitResolutionModel::generateIntegrationVariables(const CachedExperimentInfo & observation,
                                       const QOmegaPoint & eventPoint) const
     {
       const std::vector<double> & randomNums = m_randGen->nextPoint();
@@ -263,7 +263,7 @@ namespace Mantid
      * @param observation :: The current observation defining the point experimental setup
      * @param eventPoint :: The point in QE space that this refers to
      */
-    void TobyFitResolutionModel::calculatePerturbedQE(const Observation & observation,const QOmegaPoint & qOmega) const
+    void TobyFitResolutionModel::calculatePerturbedQE(const CachedExperimentInfo & observation,const QOmegaPoint & qOmega) const
     {
       // -- Calculate components of dKi & dKf, essentially X vector in TobyFit --
 

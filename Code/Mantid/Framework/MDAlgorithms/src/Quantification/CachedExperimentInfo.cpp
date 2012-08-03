@@ -1,7 +1,7 @@
 //
 // Includes
 //
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -17,7 +17,7 @@ namespace Mantid
      * @param exptInfo :: The description of the experiment
      * @param detID :: An ID a detector within the instrument
      */
-    Observation::Observation(const API::ExperimentInfo & exptInfo, detid_t detID)
+    CachedExperimentInfo::CachedExperimentInfo(const API::ExperimentInfo & exptInfo, detid_t detID)
       : m_exptInfo(exptInfo), m_efixed(0.0),
         m_twoTheta(0.0), m_phi(0.0), m_modToChop(0.0), m_apertureToChop(0.0),
         m_chopToSample(0.0), m_sampleToDet(0.0), m_beam(Geometry::Z), m_up(Geometry::Y), m_horiz(Geometry::X),
@@ -31,7 +31,7 @@ namespace Mantid
      * Returns the efixed value for this detector/experiment
      * @return
      */
-    double Observation::getEFixed() const
+    double CachedExperimentInfo::getEFixed() const
     {
       return m_efixed;
     }
@@ -39,7 +39,7 @@ namespace Mantid
      * Returns the scattering angle theta in radians
      * @return The scattering angle from the beam direction in radians
      */
-    double Observation::twoTheta() const
+    double CachedExperimentInfo::twoTheta() const
     {
       return m_twoTheta;
     }
@@ -48,7 +48,7 @@ namespace Mantid
      * Returns the azimuth angle phi in radians
      * @return Phi angle in radians
      */
-    double Observation::phi() const
+    double CachedExperimentInfo::phi() const
     {
       return m_phi;
     }
@@ -57,7 +57,7 @@ namespace Mantid
      * @return the distance from the moderator to the first chopper in metres.
      * throws if no chopper installed
      */
-    double Observation::moderatorToFirstChopperDistance() const
+    double CachedExperimentInfo::moderatorToFirstChopperDistance() const
     {
       return m_modToChop;
     }
@@ -66,7 +66,7 @@ namespace Mantid
      * @return the distance from the first aperture to the first chopper in metres.
      * throws if no chopper installed/aperture installed
      */
-    double Observation::firstApertureToFirstChopperDistance() const
+    double CachedExperimentInfo::firstApertureToFirstChopperDistance() const
     {
       return m_apertureToChop;
     }
@@ -75,7 +75,7 @@ namespace Mantid
      *
      * @return the distance from the chopper to the sample in metres
      */
-    double Observation::firstChopperToSampleDistance() const
+    double CachedExperimentInfo::firstChopperToSampleDistance() const
     {
       return m_chopToSample;
     }
@@ -83,7 +83,7 @@ namespace Mantid
     /**
      * @return the sample to detector distance in metres
      */
-    double Observation::sampleToDetectorDistance() const
+    double CachedExperimentInfo::sampleToDetectorDistance() const
     {
       return m_sampleToDet;
     }
@@ -91,13 +91,13 @@ namespace Mantid
     /**
      * Returns the aperture dimensions
      */
-    const std::pair<double,double> & Observation::apertureSize() const
+    const std::pair<double,double> & CachedExperimentInfo::apertureSize() const
     {
       return m_apertureSize;
     }
 
     /// @returns the widths of a cube that encloses the sample
-    const Kernel::V3D & Observation::sampleCuboid() const
+    const Kernel::V3D & CachedExperimentInfo::sampleCuboid() const
     {
       return m_sampleWidths;
     }
@@ -110,7 +110,7 @@ namespace Mantid
      * @return A random point of detector in the detector volume. The returned vector is oriented with the instrument's
      * reference frame
      */
-    const Kernel::V3D Observation::sampleOverDetectorVolume(const double randInBeamDir, const double randInUpDir, const double randInHorizontalDir) const
+    const Kernel::V3D CachedExperimentInfo::sampleOverDetectorVolume(const double randInBeamDir, const double randInUpDir, const double randInHorizontalDir) const
     {
       const Kernel::V3D & minPoint = m_detBox.minPoint();
       const Kernel::V3D & maxPoint = m_detBox.maxPoint();
@@ -127,7 +127,7 @@ namespace Mantid
      * Computes the matrix required to transform from lab coordinates to detector coordinates
      * @return The rotation matrix required to transform from lab coordinates to detector coordinates
      */
-    const Kernel::DblMatrix & Observation::labToDetectorTransform() const
+    const Kernel::DblMatrix & CachedExperimentInfo::labToDetectorTransform() const
     {
       return m_gonimeter->getR();
     }
@@ -135,7 +135,7 @@ namespace Mantid
     /**
      *  @return the matrix required to move from sample coordinates -> detector coordinates
      */
-    const Kernel::DblMatrix & Observation::sampleToDetectorTransform() const
+    const Kernel::DblMatrix & CachedExperimentInfo::sampleToDetectorTransform() const
     {
       return m_sampleToDetMatrix;
     }
@@ -148,7 +148,7 @@ namespace Mantid
      * @param :: The instrument for this run
      * @param :: The det ID for this observation
      */
-    void Observation::initCaches(const Geometry::Instrument_const_sptr & instrument, const detid_t detID)
+    void CachedExperimentInfo::initCaches(const Geometry::Instrument_const_sptr & instrument, const detid_t detID)
     {
       // Throws if detector does not exist
       IDetector_const_sptr det = instrument->getDetector(detID);
@@ -183,7 +183,7 @@ namespace Mantid
       aperture->getBoundingBox(apertureBox);
       if(apertureBox.isNull())
       {
-        throw std::invalid_argument("Observation::initCaches - Aperture has no bounding box, cannot sample from it");
+        throw std::invalid_argument("CachedExperimentInfo::initCaches - Aperture has no bounding box, cannot sample from it");
       }
       m_apertureSize.first = apertureBox.maxPoint()[0] - apertureBox.minPoint()[0];
       m_apertureSize.second = apertureBox.maxPoint()[1] - apertureBox.minPoint()[1];
@@ -197,7 +197,7 @@ namespace Mantid
       const Geometry::Object_const_sptr detShape = det->shape();
       if(!detShape)
       {
-        throw std::invalid_argument("Observation::initCaches - Detector has no bounding box, cannot sample from it. ID:"
+        throw std::invalid_argument("CachedExperimentInfo::initCaches - Detector has no bounding box, cannot sample from it. ID:"
                                     + boost::lexical_cast<std::string>(det->getID()));
       }
       m_detBox = detShape->getBoundingBox();

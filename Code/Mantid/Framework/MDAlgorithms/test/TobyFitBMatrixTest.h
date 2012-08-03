@@ -4,7 +4,7 @@
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/FermiChopperModel.h"
@@ -47,7 +47,7 @@ public:
   void test_Values_Are_As_Expected_For_Test_Setup()
   {
     using namespace Mantid::MDAlgorithms;
-    boost::shared_ptr<Observation> observation = createTestObservation();
+    boost::shared_ptr<CachedExperimentInfo> observation = createTestCachedExperimentInfo();
     const double deltaE = 195.0;
     QOmegaPoint qOmega(0.0,0.0,0.0,deltaE);
 
@@ -90,14 +90,14 @@ public:
 
 private:
 
-  boost::shared_ptr<Mantid::MDAlgorithms::Observation>
-  createTestObservation()
+  boost::shared_ptr<Mantid::MDAlgorithms::CachedExperimentInfo>
+  createTestCachedExperimentInfo()
   {
     using namespace Mantid::API;
     using namespace Mantid::MDAlgorithms;
     m_expt = createTestExperiment();
 
-    return boost::make_shared<Observation>(*m_expt, (Mantid::detid_t)TEST_DET_ID);
+    return boost::make_shared<CachedExperimentInfo>(*m_expt, (Mantid::detid_t)TEST_DET_ID);
   }
 
   Mantid::API::ExperimentInfo_const_sptr createTestExperiment()
