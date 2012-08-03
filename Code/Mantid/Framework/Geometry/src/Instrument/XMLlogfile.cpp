@@ -91,9 +91,24 @@ namespace Mantid
       {
         // get value from time series
 
+        typedef std::map<std::string, Kernel::Math::StatisticType> StatisticsMapType;
+        StatisticsMapType statistics_types;
+        statistics_types.insert(std::make_pair("first_value", Kernel::Math::FirstValue));
+        statistics_types.insert(std::make_pair("last_value", Kernel::Math::LastValue));
+        statistics_types.insert(std::make_pair("maximum", Kernel::Math::Maximum));
+        //statistics_types.insert(std::make_pair("mean", Kernel::Math::Mean)); //TODO, would conflict with the existing "mean" flag, which corresponds to time_averaged_mean
+        statistics_types.insert(std::make_pair("median", Kernel::Math::Median));
+        statistics_types.insert(std::make_pair("minimum", Kernel::Math::Minimum));
+        StatisticsMapType::const_iterator statisics_choice = statistics_types.find(m_extractSingleValueAs); 
+        const bool bUsingStandardStatistics = statisics_choice != statistics_types.end();
+
         if ( m_extractSingleValueAs.compare("mean" ) == 0 )
         {
           extractedValue = timeMean(logData);
+        }
+        else if(bUsingStandardStatistics)
+        {
+          extractedValue = Kernel::filterByStatistic(logData, (*statisics_choice).second);
         }
         // Looking for string: "position n", where n is an integer
         else if ( m_extractSingleValueAs.find("position") == 0 && m_extractSingleValueAs.size() >= 10 )

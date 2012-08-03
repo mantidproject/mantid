@@ -489,23 +489,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       }
       else if(auto seriesDouble = dynamic_cast<const TimeSeriesProperty<double>*>(log))
       {
-        using namespace Mantid::Kernel::Math;
-        switch(statistic)
-        {
-        case FirstValue: singleValue = seriesDouble->nthValue(0);
-          break;
-        case LastValue: singleValue = seriesDouble->nthValue(seriesDouble->size() - 1);
-          break;
-        case Minimum: singleValue = seriesDouble->getStatistics().minimum;
-          break;
-        case Maximum: singleValue = seriesDouble->getStatistics().maximum;
-          break;
-        case Mean: singleValue = seriesDouble->getStatistics().mean;
-          break;
-        case Median: singleValue = seriesDouble->getStatistics().median;
-          break;
-        default: throw std::invalid_argument("Run::getPropertyAsSingleValue - Unknown statistic type: " + boost::lexical_cast<std::string>(statistic));
-        };
+        singleValue = Mantid::Kernel::filterByStatistic(seriesDouble, statistic);
       }
       else
       {

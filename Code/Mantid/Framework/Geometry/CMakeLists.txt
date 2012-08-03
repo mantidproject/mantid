@@ -270,6 +270,7 @@ set ( TEST_FILES
 	test/UnitCellTest.h
 	test/Vertex2DListTest.h
 	test/Vertex2DTest.h
+    test/XMLlogFileTest.h
 )
 
 set ( GMOCK_TEST_FILES
