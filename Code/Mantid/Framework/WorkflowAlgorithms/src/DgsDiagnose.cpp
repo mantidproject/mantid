@@ -141,6 +141,7 @@ namespace WorkflowAlgorithms
     detVan->setProperty("InputWorkspace", dvWS);
     detVan->setProperty("ReductionProperties", reductionManagerName);
     detVan->executeAsSubAlg();
+    dvWS.reset();
     dvWS = detVan->getProperty("OutputWorkspace");
 
     // Process the comparison detector vanadium workspace if present
@@ -172,9 +173,9 @@ namespace WorkflowAlgorithms
         norm->setProperty("InputWorkspace", sampleWS);
         norm->setProperty("ReductionProperties", reductionManagerName);
         norm->executeAsSubAlg();
+        sampleWS.reset();
         tmp = cloneWs->getProperty("OutputWorkspace");
         sampleWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
-        //sampleWS->setName(sampleInternal);
       }
 
     // Create the total counts workspace if necessary
@@ -266,6 +267,13 @@ namespace WorkflowAlgorithms
     diag->executeAsSubAlg();
 
     MatrixWorkspace_sptr maskWS = diag->getProperty("OutputWorkspace");
+
+    // Cleanup
+    dvWS.reset();
+    dvCompWS.reset();
+    sampleWS.reset();
+    totalCountsWS.reset();
+    backgroundIntWS.reset();
 
     int numMasked = diag->getProperty("NumberOfFailures");
     g_log.information() << "Number of masked pixels = " << numMasked << std::endl;
