@@ -104,7 +104,6 @@ namespace Mantid
       {
         throw std::invalid_argument("Unexpected domain in IFunctionMD");
       }
-
       dmd->reset();
       size_t i = 0;
       for(const API::IMDIterator* r = dmd->getNextIterator(); r != NULL; r = dmd->getNextIterator())
@@ -138,7 +137,6 @@ namespace Mantid
         PARALLEL_ATOMIC
         signal += contribution;
       }
-
       // Return the mean
       return signal/static_cast<double>(numEvents);
     }
@@ -154,7 +152,7 @@ namespace Mantid
 
       m_convolution = MDResolutionConvolutionFactory::Instance().createConvolution(name, fgModelName,*this);
       // Pass on the attributes
-      const std::vector<std::string> names = m_convolution->getAttributeNames();
+      auto names = m_convolution->getAttributeNames();
       for(auto iter = names.begin(); iter != names.end(); ++iter)
       {
         this->declareAttribute(*iter, m_convolution->getAttribute(*iter));
@@ -166,7 +164,12 @@ namespace Mantid
       {
         this->declareParameter(fgModel.parameterName(i), fgModel.getInitialParameterValue(i), fgModel.parameterDescription(i));
       }
-
+      // Pull the foreground attributes on to here
+      names = fgModel.getAttributeNames();
+      for(auto iter = names.begin(); iter != names.end(); ++iter)
+      {
+        this->declareAttribute(*iter, fgModel.getAttribute(*iter));
+      }
     }
 
   }

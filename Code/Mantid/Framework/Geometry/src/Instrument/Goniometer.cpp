@@ -159,26 +159,17 @@ void Goniometer::setRotationAngle( size_t axisnumber, double value)
 
 /// Get GoniometerAxis obfject using motor number
 /// @param axisnumber :: axis number (from 0)
-GoniometerAxis Goniometer::getAxis( size_t axisnumber)
-{
-  if (axisnumber >= motors.size())
-    throw std::out_of_range("Goniometer::getAxis(): axis number specified is too large.");
-  return motors.at(axisnumber);//it will throw out of range exception if axisnumber is not in range
-}
-/// Get GoniometerAxis obfject using motor number
-/// @param axisnumber :: axis number (from 0)
-const GoniometerAxis Goniometer::getAxis( size_t axisnumber) const
+const GoniometerAxis & Goniometer::getAxis( size_t axisnumber) const
 {
   return motors.at(axisnumber);//it will throw out of range exception if axisnumber is not in range
 }
 
 /// Get GoniometerAxis object using motor name
 /// @param axisname :: axis name
-GoniometerAxis Goniometer::getAxis( std::string axisname)
+const GoniometerAxis & Goniometer::getAxis( std::string axisname) const
 {
   bool found=false;
-  std::vector<GoniometerAxis>::iterator it;
-  for(it=motors.begin(); it<motors.end(); ++it)
+  for(auto it=motors.begin(); it<motors.end(); ++it)
   {
       if(axisname.compare((*it).name)==0)
       {

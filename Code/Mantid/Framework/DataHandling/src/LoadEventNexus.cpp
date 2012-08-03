@@ -1457,8 +1457,6 @@ EventWorkspace_sptr LoadEventNexus::createEmptyEventWorkspace()
   eventWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   eventWS->setYUnit("Counts");
 
-  // Create a default "Universal" goniometer in the Run object
-  eventWS->mutableRun().getGoniometer().makeUniversalGoniometer();
   return eventWS;
 }
 
@@ -1676,7 +1674,19 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
       localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
     }
     else
+    {
       alg->getLogger().warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
+    }
+    /// Attempt to make a gonoimeter from the logs
+    try
+    {
+      Goniometer gm;
+      gm.makeUniversalGoniometer();
+      localWorkspace->mutableRun().setGoniometer(gm, true);
+    }
+    catch(std::runtime_error &)
+    {
+    }
   }
   catch (...)
   {

@@ -118,7 +118,7 @@ MDWSTransfTest()
 {
      ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     // rotate the crystal by twenty degrees back;
-     ws2D->mutableRun().getGoniometer().setRotationAngle(0,20);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);
      // add workspace energy
      ws2D->mutableRun().addProperty("Ei",13.,"meV",true);
 

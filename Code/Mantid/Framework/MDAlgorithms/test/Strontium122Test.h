@@ -30,9 +30,19 @@ private:
       setParameter("J2", 27.3);
       setParameter("SJc", 10.0);
       setParameter("GammaSlope", 0.08);
-      setParameter("MultEps", 0.0);
-      setParameter("TwinType", 0.0);
     }
+
+    /// Returns the number of attributes associated with the function
+     virtual size_t nAttributes()const{return 2;}
+     /// Returns a list of attribute names
+     virtual std::vector<std::string> getAttributeNames()const
+     {
+       auto names = std::vector<std::string>(2);
+       names[0] = "MultEps";
+       names[1] = "TwinType";
+       return names;
+     }
+
 
     std::string name() const { return "FakeFGModelFitFunction"; }
     double functionMD(const Mantid::API::IMDIterator&) const
@@ -43,14 +53,14 @@ private:
 
 public:
 
-  void test_Initialized_Model_Has_Eight_Parameters()
+  void test_Initialized_Model_Has_Six_Parameters()
   {
     using Mantid::MDAlgorithms::Strontium122;
     Strontium122 sr122;
 
     TS_ASSERT_EQUALS(sr122.nParams(), 0);
     sr122.initialize();
-    TS_ASSERT_EQUALS(sr122.nParams(), 8);
+    TS_ASSERT_EQUALS(sr122.nParams(), 6);
   }
 
   void test_Given_ND_Point_Returns_Expected_Value_For_Test_Parameter_Values()
@@ -59,7 +69,10 @@ public:
     using Mantid::MDAlgorithms::ForegroundModel;
     Strontium122 sr122;
     sr122.initialize();
-    FakeFGModelFitFunction fakeFitFunction(sr122);
+    sr122.setAttributeValue("MultEps", 0);
+    sr122.setAttributeValue("TwinType", 0);
+
+    FakeFGModelFitFunction fakeFitFunction(sr122); // Use fit function to access current fit values
 
     const double qx(-1.7), qy(0.0), qz(1.05), deltaE(300);
     const double qOmega[4] = {qx, qy, qz, deltaE};

@@ -73,7 +73,7 @@ public:
     delete crossSection;
   }
 
-  void test_Function_Acquires_Attributes_From_ResolutionType_When_Set()
+  void test_Function_Acquires_Attributes_From_ResolutionType_And_ForegroundModel_When_Set()
   {
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::API;
@@ -84,7 +84,7 @@ public:
     const size_t startingNAttrs = crossSection.nAttributes();
     crossSection.setAttributeValue("ResolutionFunction", "FakeConvolution");
 
-    TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 2);
+    TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 4);
   }
 
   void test_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()

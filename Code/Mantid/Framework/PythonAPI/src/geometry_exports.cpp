@@ -328,7 +328,8 @@ namespace Mantid
       .def( "pushAxis", (void ( Geometry::Goniometer::* ) ( std::string, double, double, double, double, int, int)  )(&Geometry::Goniometer::pushAxis), ( arg("name"), arg("axisX"), arg("axisY"), arg("axisZ"), arg("angle"), arg("sense")=(int)(Geometry::CCW), arg("angleUnit")=(int)(Geometry::angDegrees) ) )
       .def( "setRotationAngle", (void ( Geometry::Goniometer::* )( std::string, double) ) (&Geometry::Goniometer::setRotationAngle), (arg("name"), arg("angle") ) )
       .def( "setRotationAngle", (void ( Geometry::Goniometer::* )( size_t, double) ) (&Geometry::Goniometer::setRotationAngle), (arg("axisNumber"), arg("angle") ) )
-      .def( "getAxis", (Geometry::GoniometerAxis (Geometry::Goniometer::* )(std::string) ) (&Geometry::Goniometer::getAxis), (arg("name") ) )
+      .def( "getAxis", (const Geometry::GoniometerAxis &(Geometry::Goniometer::*)(std::string) const) (&Geometry::Goniometer::getAxis), (arg("name") ),
+            return_value_policy<copy_const_reference>())
       .def( "getNumberAxes", &Geometry::Goniometer::getNumberAxes, (arg("axisname") ) )
       .def( "makeUniversalGoniometer", (void ( Geometry::Goniometer::*)() ) (&Geometry::Goniometer::makeUniversalGoniometer) )
       .def( "getEulerAngles", (std::vector<double> ( Geometry::Goniometer::* )(std::string) ) (&Geometry::Goniometer::getEulerAngles), (arg("convention")=(std::string)("XYZ") ) )

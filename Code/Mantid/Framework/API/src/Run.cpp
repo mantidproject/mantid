@@ -168,33 +168,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     }
   }
 
-  /** Adds all the time series in the second property manager to those in the first
-  * @param sum the properties to add to
-  * @param toAdd the properties to add
-  */
-  void Run::mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd)
-  {
-    // get pointers to all the properties on the right-handside and prepare to loop through them
-    const std::vector<Property*> inc = toAdd.getProperties();
-    std::vector<Property*>::const_iterator end = inc.end();
-    for (std::vector<Property*>::const_iterator it=inc.begin(); it != end;++it)
-    {
-      const std::string rhs_name = (*it)->name();
-      try
-      {
-        //now get pointers to the same properties on the left-handside
-        Property * lhs_prop(sum.getProperty(rhs_name));
-        lhs_prop->merge(*it);
-      }
-      catch (Exception::NotFoundError &)
-      {
-        //copy any properties that aren't already on the left hand side
-        Property * copy = (*it)->clone();
-        //And we add a copy of that property to *this
-        sum.declareProperty(copy, "");
-      }
-    }
-  }
 
   //-----------------------------------------------------------------------------------------------
   /**
@@ -556,6 +529,26 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
   }
 
   //-----------------------------------------------------------------------------------------------
+  /**
+   * Set the gonoimeter & optionally read the values from the logs
+   * @param goniometer :: A refernce to a goniometer
+   * @param useLogValues :: If true, recalculate the goniometer using the log values
+   */
+  void Run::setGoniometer(const Geometry::Goniometer & goniometer, const bool useLogValues)
+  {
+    Geometry::Goniometer old = m_goniometer;
+    try
+    {
+      m_goniometer = goniometer; //copy it in
+      if(useLogValues) calculateGoniometerMatrix();
+    }
+    catch(std::runtime_error&)
+    {
+      m_goniometer = old;
+      throw;
+    }
+  }
+
   /** Get the gonimeter rotation matrix, calculated using the
    * previously set Goniometer object as well as the angles
    * loaded in the run (if any).
@@ -564,48 +557,10 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    *
    * @return 3x3 double rotation matrix
    */
-  Mantid::Kernel::DblMatrix Run::getGoniometerMatrix()
+  const Mantid::Kernel::DblMatrix & Run::getGoniometerMatrix() const
   {
-    for (size_t i=0; i < m_goniometer.getNumberAxes(); ++i)
-    {
-      std::string name = m_goniometer.getAxis(i).name;
-      if (this->hasProperty(name))
-      {
-        Property * prop = this->getProperty(name);
-        //try time series property
-        TimeSeriesProperty<double> * tsp = dynamic_cast<TimeSeriesProperty<double> *>(prop);
-        if (tsp)
-        {
-          // Set that angle
-          m_goniometer.setRotationAngle(i, tsp->getStatistics().mean);
-          g_log.debug() << "Goniometer angle " << name << " set to " <<tsp->getStatistics().mean << std::endl;
-        }
-        else
-        {
-            //try Property with value
-            PropertyWithValue<double> *pvp=dynamic_cast<PropertyWithValue<double> *>(prop);
-            if (pvp)
-            {
-                // Set that angle
-
-                m_goniometer.setRotationAngle(i, boost::lexical_cast<double>(pvp->value()));
-                g_log.debug() << "Goniometer angle " << name << " set to " <<  boost::lexical_cast<double>(pvp->value()) << std::endl;
-            }
-            else
-            {
-                throw std::runtime_error("Sample log for goniometer angle '" + name + "' was not a TimeSeriesProperty<double> or PropertyWithValue<double>.");
-            }
-        }
-
-      }
-      else
-        throw std::runtime_error("Could not find goniometer angle '" + name + "' in the run sample logs.");
-    }
     return m_goniometer.getR();
   }
-
-
-
 
   //--------------------------------------------------------------------------------------------
   /** Save the object to an open NeXus file.
@@ -705,6 +660,52 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       }
     }
   }
+
+  //-----------------------------------------------------------------------------------------------------------------------
+  // Private methods
+  //-----------------------------------------------------------------------------------------------------------------------
+
+  /** Adds all the time series in the second property manager to those in the first
+  * @param sum the properties to add to
+  * @param toAdd the properties to add
+  */
+  void Run::mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd)
+  {
+    // get pointers to all the properties on the right-handside and prepare to loop through them
+    const std::vector<Property*> inc = toAdd.getProperties();
+    std::vector<Property*>::const_iterator end = inc.end();
+    for (std::vector<Property*>::const_iterator it=inc.begin(); it != end;++it)
+    {
+      const std::string rhs_name = (*it)->name();
+      try
+      {
+        //now get pointers to the same properties on the left-handside
+        Property * lhs_prop(sum.getProperty(rhs_name));
+        lhs_prop->merge(*it);
+      }
+      catch (Exception::NotFoundError &)
+      {
+        //copy any properties that aren't already on the left hand side
+        Property * copy = (*it)->clone();
+        //And we add a copy of that property to *this
+        sum.declareProperty(copy, "");
+      }
+    }
+  }
+
+
+  /**
+   * Calculate the goniometer matrix
+   */
+  void Run::calculateGoniometerMatrix()
+  {
+    for (size_t i=0; i < m_goniometer.getNumberAxes(); ++i)
+    {
+      const double angle = getLogAsSingleValue(m_goniometer.getAxis(i).name, Kernel::Math::Mean);
+      m_goniometer.setRotationAngle(i, angle);
+    }
+  }
+
 
   /// @cond
   /// Macro to instantiate concrete template members
