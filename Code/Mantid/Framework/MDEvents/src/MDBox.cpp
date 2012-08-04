@@ -533,7 +533,7 @@ namespace MDEvents
     // We check on equality and not >= to only add a box once.
     if (this->data.size() == this->m_BoxController->getSplitThreshold())
     {     
-       auto BoxCtrl = dynamic_cast<BoxCtrlChangesList<MDBoxToChange<MDE,nd> >*>(m_BoxController.get());
+       auto BoxCtrl = dynamic_cast<BoxCtrlChangesList<MDBoxToChange<MDE,nd> >*>(this->m_BoxController.get());
        BoxCtrl->addBoxToSplit(MDBoxToChange<MDE,nd>(this,index));
 
     }
