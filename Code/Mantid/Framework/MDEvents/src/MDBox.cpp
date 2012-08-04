@@ -40,10 +40,7 @@ namespace MDEvents
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
     this->setId( splitter->getNextId() );
-    // reserve the size of data file for future add operations
-    size_t boxCapacity = splitter->getSplitThreshold();
-    if (boxCapacity>2)this->data.reserve(boxCapacity-1);
-  }
+   }
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor
@@ -63,9 +60,6 @@ namespace MDEvents
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
     this->setId( splitter->getNextId() );
-    // reserve the size of data file for future add operations
-    size_t boxCapacity = splitter->getSplitThreshold();
-    if (boxCapacity>2)this->data.reserve(boxCapacity-1);
 
   }
 

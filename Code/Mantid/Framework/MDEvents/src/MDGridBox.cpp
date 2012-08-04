@@ -788,10 +788,6 @@ namespace MDEvents
       MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
       if (box)
       {
-        if(box->getNPoints()>0)
-        {
-          continue;
-        }
         // Plain MD-Box. Does it need to split?
         if (this->m_BoxController->willSplit(box->getNPoints(), box->getDepth() ))
         {
