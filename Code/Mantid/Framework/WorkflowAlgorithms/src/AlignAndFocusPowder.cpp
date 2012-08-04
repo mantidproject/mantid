@@ -101,28 +101,20 @@ void AlignAndFocusPowder::exec()
   // retrieve the properties
   m_inputW = getProperty("InputWorkspace");
   m_eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputW );
-  if ((m_eventW != NULL))
-  {
-    //Input workspace is an event workspace. Use the other exec method
-    this->execEvent();
-    return;
-  }
   std::string instName = m_inputW->getInstrument()->getName();
   std::string calFileName=getProperty("CalFileName");
-  OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
-  MatrixWorkspace_sptr maskWS = getProperty("MaskWorkspace");
-  GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
-  std::vector<double> params=getProperty("Params");
-  bool dspace = getProperty("DSpacing");
-  double xmin = getProperty("CropMin");
-  double xmax = getProperty("CropMax");
-  double LRef = getProperty("UnwrapRef");
-  double DIFCref = getProperty("LowResRef");
-  double minwl = getProperty("CropWavelengthMin");
-  double tmin = getProperty("TMin");
-  double tmax = getProperty("TMax");
+  offsetsWS = getProperty("OffsetsWorkspace");
+  maskWS = getProperty("MaskWorkspace");
+  groupWS = getProperty("GroupingWorkspace");
 
-  // Get the input workspace
+  try {
+    if (!offsetsWS) offsetsWS = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(instName+"_offsets");
+    if (!maskWS) maskWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(instName+"_mask");
+    if (!groupWS) groupWS = AnalysisDataService::Instance().retrieveWS<GroupingWorkspace>(instName+"_group");
+  } catch (Exception::NotFoundError&) {
+  // Just checking if these files exist so they are not reloaded for chunks
+  }
+
   if ((!offsetsWS || !maskWS || !groupWS) && !calFileName.empty())
   {
     // Load the .cal file
@@ -138,6 +130,22 @@ void AlignAndFocusPowder::exec()
     AnalysisDataService::Instance().addOrReplace(instName+"_offsets", offsetsWS);
     AnalysisDataService::Instance().addOrReplace(instName+"_mask", maskWS);
   }
+  if ((m_eventW != NULL))
+  {
+    //Input workspace is an event workspace. Use the other exec method
+    this->execEvent();
+    return;
+  }
+  std::vector<double> params=getProperty("Params");
+  bool dspace = getProperty("DSpacing");
+  double xmin = getProperty("CropMin");
+  double xmax = getProperty("CropMax");
+  double LRef = getProperty("UnwrapRef");
+  double DIFCref = getProperty("LowResRef");
+  double minwl = getProperty("CropWavelengthMin");
+  double tmin = getProperty("TMin");
+  double tmax = getProperty("TMax");
+
   // Now create the output workspace
   m_outputW = getProperty("OutputWorkspace");
   if ( m_outputW != m_inputW )
@@ -272,9 +280,6 @@ void AlignAndFocusPowder::execEvent()
   // retrieve the properties
   std::string instName = m_inputW->getInstrument()->getName();
   std::string calFileName=getProperty("CalFileName");
-  OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
-  MatrixWorkspace_sptr maskWS = getProperty("MaskWorkspace");
-  GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
   std::vector<double> params=getProperty("Params");
   bool dspace = getProperty("DSpacing");
   double xmin = getProperty("CropMin");
@@ -291,24 +296,6 @@ void AlignAndFocusPowder::execEvent()
   std::string filterName = getProperty("FilterLogName");
   double filterMin = getProperty("FilterLogMinimumValue");
   double filterMax = getProperty("FilterLogMaximumValue");
-
-  // Get the input workspace
-  if ((!offsetsWS || !maskWS || !groupWS) && !calFileName.empty())
-  {
-    // Load the .cal file
-    IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile");
-    alg->setPropertyValue("CalFilename", calFileName);
-    alg->setProperty("InputWorkspace", m_inputW);
-    alg->setProperty<std::string>("WorkspaceName", instName);
-    alg->executeAsSubAlg();
-    groupWS = alg->getProperty("OutputGroupingWorkspace");
-    offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
-    maskWS = alg->getProperty("OutputMaskWorkspace");
-    AnalysisDataService::Instance().addOrReplace(instName+"_group", groupWS);
-    AnalysisDataService::Instance().addOrReplace(instName+"_offsets", offsetsWS);
-    AnalysisDataService::Instance().addOrReplace(instName+"_mask", maskWS);
-  }
-  Progress progress(this,0.0,1.0,m_eventW->getNumberHistograms());
 
   // generate the output workspace pointer
   m_outputW = getProperty("OutputWorkspace");

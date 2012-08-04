@@ -7,6 +7,9 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 
 namespace Mantid
 {
@@ -75,6 +78,9 @@ namespace Mantid
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;
       DataObjects::EventWorkspace_sptr m_eventW;
+      DataObjects::OffsetsWorkspace_sptr offsetsWS;
+      API::MatrixWorkspace_sptr maskWS;
+      DataObjects::GroupingWorkspace_sptr groupWS;
       void doSortEvents(Mantid::API::Workspace_sptr ws);
 
     };
