@@ -180,6 +180,7 @@ std::string ConvertToMDEventsParams::parseConvMode(const std::string &Q_MODE_ID,
 */
 std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS,MDEvents::MDWSDescription &TargWSDescription)const
 {
+   UNUSED_ARG(TargWSDescription);
     //// try to get the WS oriented lattice
     //if(inMatrixWS->sample().hasOrientedLattice()){        
     //    TargWSDescription.pLatt = std::auto_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(inMatrixWS->sample().getOrientedLattice()));      

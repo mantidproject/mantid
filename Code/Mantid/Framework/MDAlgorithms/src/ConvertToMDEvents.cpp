@@ -258,7 +258,7 @@ void ConvertToMDEvents::exec()
     else // user input is mainly ignored and everything is in old workspac
     {  
         // check if we are working in powder mode
-        bool is_powder = ParamParser.isPowderMode(algo_id);
+        //bool is_powder = ParamParser.isPowderMode(algo_id);
 
 
         // dimensions are already build, so build MDWS description from existing workspace
