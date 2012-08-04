@@ -23,7 +23,7 @@ public:
 void testConstructor()
 {
   rootBox = makeMDBox2();
-  MDBoxToChange<MDEvent<2>,2> * pBoxChanger;
+  MDBoxToChange<MDEvent<2>,2> * pBoxChanger(NULL);
   TS_ASSERT_THROWS_NOTHING((pBoxChanger = new MDBoxToChange<MDEvent<2> , 2>()));
   delete pBoxChanger;
   TS_ASSERT_THROWS_NOTHING((pBoxChanger = new MDBoxToChange<MDEvent<2> , 2>(dynamic_cast<MDBox<MDEvent<2>,2>*>(rootBox),0)));
@@ -46,14 +46,14 @@ void testSplitRootToGridbox()
 
 void testSplitAMemberToGridbox()
 {
-  MDBoxBase<MDEvent<2>,2>* aChildBox;
+  MDBoxBase<MDEvent<2>,2>* aChildBox(NULL);
   TS_ASSERT_THROWS_NOTHING(aChildBox = (dynamic_cast<MDGridBox<MDEvent<2>,2>*>(rootBox))->getChild(10));
 
   MDBoxToChange<MDEvent<2>,2>  BoxToSplit(dynamic_cast<MDBox<MDEvent<2>,2>*>(aChildBox),10);
 
   TSM_ASSERT("parent for the box to split should be rootbox: ",(BoxToSplit.getParent() == rootBox));
 
-  MDBoxBase<MDEvent<2>,2>* aGridBox;
+  MDBoxBase<MDEvent<2>,2>* aGridBox(NULL);
   TS_ASSERT_THROWS_NOTHING(aGridBox=BoxToSplit.splitToGridBox());
 
   TSM_ASSERT("This should be a grid box",(dynamic_cast<MDGridBox<MDEvent<2>,2>*>(aGridBox)));

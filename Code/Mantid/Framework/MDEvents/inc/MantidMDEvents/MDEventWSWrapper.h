@@ -79,8 +79,8 @@ namespace Mantid
 
       /// the accessor verify if there are boxes in box-splitter cash which need splitting;
       bool ifNeedsSplitting()const{return m_needSplitting;}
-      /// method splits list of boxes
-      void splitList(Kernel::ThreadScheduler * ts){(this->*(mdBoxListSplitter[m_NDimensions]))();}
+      /// method splits list of boxes not yet uses thread sheduler but may be later
+      void splitList(Kernel::ThreadScheduler * ){(this->*(mdBoxListSplitter[m_NDimensions]))();}
     private:
       /// maximal nuber of dimensions, currently supported by the class;
       enum{ MAX_N_DIM=8};
