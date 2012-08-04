@@ -187,6 +187,7 @@ set ( TEST_FILES
 	test/MDLeanEventTest.h
 	test/MDTransfAxisNamesTest.h
 	test/MDWSTransfTest.h
+	test/MDWSDescrTest.h	
 	test/OneStepMDEWTest.h
 	test/QueryMDWorkspaceTest.h
 	test/ReflectometryTransformQxQzTest.h

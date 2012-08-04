@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/ConvertToMDEventsWSBase.h"
 #include "MantidAPI/ExperimentInfo.h"
+/**TODO: FOR DEPRICATION */ 
 namespace Mantid
 {
 namespace MDAlgorithms

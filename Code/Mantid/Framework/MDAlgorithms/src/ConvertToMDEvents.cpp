@@ -297,6 +297,7 @@ void ConvertToMDEvents::exec()
             }
           }
     }
+    TWSD.setDetectors(det_loc);
 
  // create and initate new workspace
   if(create_new_ws)  

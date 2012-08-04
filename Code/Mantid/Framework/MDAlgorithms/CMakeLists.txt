@@ -193,6 +193,8 @@ set ( TEST_FILES
 	test/UnaryOperationMDTest.h
 	test/WeightedMeanMDTest.h
 	test/XorMDTest.h
+# Old TMD convertToMD code prepared for deprication:
+    test/ConvertToMDEventsUnitsConvTest.h 
 )
 
 set ( GMOCK_TEST_FILES
