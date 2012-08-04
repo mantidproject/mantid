@@ -34,9 +34,8 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0), m_numSplit(1), m_file(NULL), m_diskBuffer(), m_useWriteBuffer(true)
-     //m_SplitThreshold(128),
-    {
+    :nd(nd), m_maxId(0), m_numSplit(1), m_file(NULL), m_diskBuffer(), m_SplitThreshold(128),m_useWriteBuffer(true)
+      {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
       m_addingEvents_eventsPerTask = 1000;
