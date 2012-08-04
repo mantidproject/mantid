@@ -3,6 +3,7 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include "MantidMDEvents/BoxCtrlChangesList.h"
 
 using Mantid::Kernel::DiskBuffer;
 using namespace Mantid::API;
