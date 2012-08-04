@@ -61,7 +61,8 @@ void testSplitAMemberToGridbox()
 
   
 }
-MDBoxToChangeTest::MDBoxToChangeTest()
+
+MDBoxToChangeTest()
 {
   splitter = BoxController_sptr(new BoxController(2));
 }
