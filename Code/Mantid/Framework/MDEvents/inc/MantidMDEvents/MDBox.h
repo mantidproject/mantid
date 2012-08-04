@@ -5,7 +5,6 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDDimensionStats.h"
 #include "MantidMDEvents/MDLeanEvent.h"

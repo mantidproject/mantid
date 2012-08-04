@@ -194,7 +194,7 @@ set ( TEST_FILES
 	test/WeightedMeanMDTest.h
 	test/XorMDTest.h
 # Old TMD convertToMD code prepared for deprication:
-    test/ConvertToMDEventsUnitsConvTest.h 
+#    test/ConvertToMDEventsUnitsConvTest.h 
 )
 
 set ( GMOCK_TEST_FILES

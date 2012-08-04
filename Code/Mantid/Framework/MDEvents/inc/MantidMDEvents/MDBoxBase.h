@@ -7,6 +7,7 @@
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/BoxController.h"
+//#include "MantidMDEvents/BoxCtrlChangesList.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDLeanEvent.h"

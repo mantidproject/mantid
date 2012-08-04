@@ -40,7 +40,9 @@ namespace Mantid
     {
     public:
       MDBoxToChange():m_ParentGridBox(NULL),m_Index(std::numeric_limits<size_t>::max()-1){};
+
       size_t getIndex()const{return m_Index;}
+
       MDGridBox<MDE,nd>* getParent()const{return m_ParentGridBox;}
 
       // Below for the time being:
@@ -58,9 +60,10 @@ namespace Mantid
       */
       bool isFull(size_t maxSize=1000)
       {
+        /**stub */
         return true;
       }
-      /**DESCRIBE */
+      /**constructor */
       MDBoxToChange(MDBox<MDE,nd> *box,size_t Index)
       {
         m_Index = Index;
