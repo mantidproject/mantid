@@ -78,7 +78,7 @@ void CompressEvents::exec()
   double tolerance = getProperty("Tolerance");
 
   // Some starting things
-  bool inplace = (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"));
+  bool inplace = (inputWS == outputWS);
   const int noSpectra = static_cast<int>(inputWS->getNumberHistograms());
   Progress prog(this,0.0,1.0, noSpectra*2);
 

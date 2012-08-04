@@ -143,6 +143,7 @@ void AlignAndFocusPowder::exec()
   if ( m_outputW != m_inputW )
   {
      m_outputW = WorkspaceFactory::Instance().create(m_inputW);
+     m_outputW->setName(getProperty("OutputWorkspace"));
   }
 
   if (xmin > 0. || xmax > 0.)
@@ -247,8 +248,11 @@ void AlignAndFocusPowder::exec()
   convert3Alg->executeAsSubAlg();
   m_outputW = convert3Alg->getProperty("OutputWorkspace");
 
-  params.erase(params.begin());
-  params.pop_back();
+  if (params.size() != 1)
+  {
+  	params.erase(params.begin());
+  	params.pop_back();
+  }
   API::IAlgorithm_sptr rebin3Alg = createSubAlgorithm("Rebin");
   rebin3Alg->setProperty("InputWorkspace", m_outputW);
   rebin3Alg->setProperty("Params",params);
@@ -307,10 +311,12 @@ void AlignAndFocusPowder::execEvent()
   Progress progress(this,0.0,1.0,m_eventW->getNumberHistograms());
 
   // generate the output workspace pointer
-  m_outputW = this->getProperty("OutputWorkspace");
+  m_outputW = getProperty("OutputWorkspace");
   EventWorkspace_sptr m_outputEventW;
   if (m_outputW == m_inputW)
+  {
     m_outputEventW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
+  }
   else
   {
     //Make a brand new EventWorkspace
@@ -323,23 +329,28 @@ void AlignAndFocusPowder::execEvent()
 
     //Cast to the matrixOutputWS and save it
     m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEventW);
+    m_outputW->setName(getProperty("OutputWorkspace"));
   }
 
   if (filterBadPulses)
   {
-    API::IAlgorithm_sptr filterAlg = createSubAlgorithm("FilterBadPulses");
-    filterAlg->setProperty("InputWorkspace", m_outputEventW);
-    filterAlg->executeAsSubAlg();
-    m_outputEventW = filterAlg->getProperty("OutputWorkspace");
+    API::IAlgorithm_sptr filterBAlg = createSubAlgorithm("FilterBadPulses");
+    filterBAlg->setProperty("InputWorkspace", m_outputEventW);
+    filterBAlg->setProperty("OutputWorkspace", m_outputEventW);
+    filterBAlg->executeAsSubAlg();
+    m_outputEventW = filterBAlg->getProperty("OutputWorkspace");
+    m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEventW);
   }
 
   if (removePromptPulseWidth > 0.)
   {
-    API::IAlgorithm_sptr filterAlg = createSubAlgorithm("RemovePromptPulse");
-    filterAlg->setProperty("InputWorkspace", m_outputW);
-    filterAlg->setProperty("Width", removePromptPulseWidth);
-    filterAlg->executeAsSubAlg();
-    m_outputW = filterAlg->getProperty("OutputWorkspace");
+    API::IAlgorithm_sptr filterPAlg = createSubAlgorithm("RemovePromptPulse");
+    filterPAlg->setProperty("InputWorkspace", m_outputW);
+    filterPAlg->setProperty("OutputWorkspace", m_outputW);
+    filterPAlg->setProperty("Width", removePromptPulseWidth);
+    filterPAlg->executeAsSubAlg();
+    m_outputW = filterPAlg->getProperty("OutputWorkspace");
+    m_outputEventW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
 
   if (!filterName.empty())
@@ -351,13 +362,16 @@ void AlignAndFocusPowder::execEvent()
     filterLogsAlg->setProperty("MaximumValue", filterMax);
     filterLogsAlg->executeAsSubAlg();
     m_outputEventW = filterLogsAlg->getProperty("OutputWorkspace");
+    m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEventW);
   }
 
   API::IAlgorithm_sptr compressAlg = createSubAlgorithm("CompressEvents");
   compressAlg->setProperty("InputWorkspace", m_outputEventW);
+  compressAlg->setProperty("OutputWorkspace", m_outputEventW);
   compressAlg->setProperty("Tolerance",tolerance);
   compressAlg->executeAsSubAlg();
   m_outputEventW = compressAlg->getProperty("OutputWorkspace");
+  m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEventW);
 
   doSortEvents(m_outputW);
 
@@ -467,8 +481,11 @@ void AlignAndFocusPowder::execEvent()
   convert3Alg->executeAsSubAlg();
   m_outputW = convert3Alg->getProperty("OutputWorkspace");
 
-  params.erase(params.begin());
-  params.pop_back();
+  if (params.size() != 1)
+  {
+  	params.erase(params.begin());
+  	params.pop_back();
+  }
   API::IAlgorithm_sptr rebin3Alg = createSubAlgorithm("Rebin");
   rebin3Alg->setProperty("InputWorkspace", m_outputW);
   rebin3Alg->setProperty("Params",params);
