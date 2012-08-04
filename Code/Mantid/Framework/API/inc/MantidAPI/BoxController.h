@@ -34,8 +34,8 @@ namespace API
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    :nd(nd), m_maxId(0), m_numSplit(1), m_file(NULL), m_diskBuffer(), m_useWriteBuffer(true),
-     m_SplitThreshold(128)
+    :nd(nd), m_maxId(0), m_numSplit(1), m_file(NULL), m_diskBuffer(), m_useWriteBuffer(true)
+     //m_SplitThreshold(128),
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
