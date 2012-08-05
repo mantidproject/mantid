@@ -41,22 +41,22 @@
   
   <!-- Aperture -->
   <component type="aperture" name="aperture">
-    <location z="-10.16"/>
+    <location z="-10.1"/>
   </component>
  
   <type name="aperture">
   <cuboid id="aperture0">
-    <left-front-bottom-point x="-0.047" y="-0.047" z="0.0"  />
-    <left-front-top-point  x="-0.047" y="0.047" z="0.0"  />
-    <left-back-bottom-point  x="-0.047" y="-0.047" z="0.0001"  />
-    <right-front-bottom-point  x="0.047" y="-0.047" z="0.0001"  />
+    <left-front-bottom-point x="0.047" y="-0.047" z="-0.0001"  />
+    <left-front-top-point  x="0.047" y="-0.047" z="0.0001"  />
+    <left-back-bottom-point  x="-0.047" y="-0.047" z="-0.0001"  />
+    <right-front-bottom-point  x="0.047" y="0.047" z="-0.0001"  />
   </cuboid>
   <algebra val="aperture0" />
   </type>
  
  <!-- Chopper position -->
  <component type="chopper-position">
-    <location z="-1.86"/>
+    <location z="-1.8"/>
   </component>
   <type name="chopper-position" is="ChopperPos"></type>
 
