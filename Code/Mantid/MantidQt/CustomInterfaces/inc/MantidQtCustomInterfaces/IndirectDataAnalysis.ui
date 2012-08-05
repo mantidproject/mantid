@@ -23,7 +23,7 @@
       <enum>QTabWidget::Rounded</enum>
      </property>
      <property name="currentIndex">
-      <number>5</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tabElwin">
       <attribute name="title">
@@ -1953,6 +1953,78 @@
    <header>MantidQtMantidWidgets/WorkspaceSelector.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>elwin_pbPlotInput</tabstop>
+  <tabstop>elwin_ckConcat</tabstop>
+  <tabstop>elwin_ckVerbose</tabstop>
+  <tabstop>elwin_ckPlot</tabstop>
+  <tabstop>elwin_ckSave</tabstop>
+  <tabstop>msd_pbPlotInput</tabstop>
+  <tabstop>msd_ckVerbose</tabstop>
+  <tabstop>msd_ckPlot</tabstop>
+  <tabstop>msd_ckSave</tabstop>
+  <tabstop>fury_pbPlotInput</tabstop>
+  <tabstop>fury_cbResType</tabstop>
+  <tabstop>fury_cbInputType</tabstop>
+  <tabstop>fury_wsSample</tabstop>
+  <tabstop>fury_ckVerbose</tabstop>
+  <tabstop>fury_ckPlot</tabstop>
+  <tabstop>fury_ckSave</tabstop>
+  <tabstop>furyfit_cbInputType</tabstop>
+  <tabstop>furyfit_wsIqt</tabstop>
+  <tabstop>furyfit_pbPlotInput</tabstop>
+  <tabstop>furyfit_cbFitType</tabstop>
+  <tabstop>furyfit_ckConstrainIntensities</tabstop>
+  <tabstop>furyfit_ckPlotGuess</tabstop>
+  <tabstop>furyfit_leSpecNo</tabstop>
+  <tabstop>furyfit_ckPlotOutput</tabstop>
+  <tabstop>furyfit_cbPlotOutput</tabstop>
+  <tabstop>furyfit_ckSaveSeq</tabstop>
+  <tabstop>furyfit_pbSeqFit</tabstop>
+  <tabstop>confit_cbInputType</tabstop>
+  <tabstop>confit_wsSample</tabstop>
+  <tabstop>confit_pbPlotInput</tabstop>
+  <tabstop>confit_cbFitType</tabstop>
+  <tabstop>confit_cbBackground</tabstop>
+  <tabstop>confit_ckPlotGuess</tabstop>
+  <tabstop>confit_leSpecNo</tabstop>
+  <tabstop>confit_leSpecMax</tabstop>
+  <tabstop>confit_ckPlotOutput</tabstop>
+  <tabstop>confit_cbPlotOutput</tabstop>
+  <tabstop>confit_ckSaveSeq</tabstop>
+  <tabstop>confit_pbSequential</tabstop>
+  <tabstop>absp_cbInputType</tabstop>
+  <tabstop>absp_wsInput</tabstop>
+  <tabstop>absp_ckUseCan</tabstop>
+  <tabstop>absp_cbShape</tabstop>
+  <tabstop>absp_lets</tabstop>
+  <tabstop>absp_letc1</tabstop>
+  <tabstop>absp_letc2</tabstop>
+  <tabstop>absp_ler1</tabstop>
+  <tabstop>absp_ler2</tabstop>
+  <tabstop>absp_ler3</tabstop>
+  <tabstop>absp_leavar</tabstop>
+  <tabstop>absp_lewidth</tabstop>
+  <tabstop>absp_lesamden</tabstop>
+  <tabstop>absp_lesamsigs</tabstop>
+  <tabstop>absp_lesamsiga</tabstop>
+  <tabstop>absp_lecanden</tabstop>
+  <tabstop>absp_lecansigs</tabstop>
+  <tabstop>absp_lecansiga</tabstop>
+  <tabstop>absp_cbPlotOutput</tabstop>
+  <tabstop>abscor_cbSampleInputType</tabstop>
+  <tabstop>abscor_wsSample</tabstop>
+  <tabstop>abscor_cbGeometry</tabstop>
+  <tabstop>abscor_ckUseCorrections</tabstop>
+  <tabstop>abscor_ckUseCan</tabstop>
+  <tabstop>abscor_cbContainerInputType</tabstop>
+  <tabstop>abscor_wsContainer</tabstop>
+  <tabstop>abscor_cbPlotOutput</tabstop>
+  <tabstop>pbHelp</tabstop>
+  <tabstop>pbRun</tabstop>
+  <tabstop>pbManageDirs</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
