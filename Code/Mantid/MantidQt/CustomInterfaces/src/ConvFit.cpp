@@ -35,6 +35,7 @@ namespace IDA
     m_cfGrpMng = new QtGroupPropertyManager();
     m_cfBlnMng = new QtBoolPropertyManager();
     m_cfDblMng = new QtDoublePropertyManager();
+    m_stringManager = new QtStringPropertyManager();
 
     // Create TreeProperty Widget
     m_cfTree = new QtTreePropertyBrowser();
