@@ -254,7 +254,21 @@ int IVUtils::NumSteps( double min, double max, double step )
   }
   else if ( step < 0 )                     // log steps
   {
-    n_bins = (int)ceil(( (log(max) - log(min))/log(1 - step/min) ));
+//
+//  Interpret step as the negative of the fractional increase in the
+//  first bin boundary, relative to the zeroth bin boundary (min).
+//  This is the convention followed by the Rebin() algorithm in Mantid.
+//
+    n_bins = (int)ceil( (log(max) - log(min))/log(1 - step) );
+    if ( n_bins < 1 )
+      n_bins = 1;
+//
+//  This formula assumes a negative step indicates a log scale with 
+//  the size of the first bin specified by |step|.  This is not the
+//  convention used in the Rebin() algorithm, so we have commented
+//  this out and use the Mantid convention.
+//
+//  n_bins = (int)ceil( (log(max) - log(min))/log(1 - step/min) );
   }
 
   return n_bins; 
