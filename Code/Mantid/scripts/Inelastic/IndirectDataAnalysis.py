@@ -357,6 +357,7 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose = True):
     if ( Plot != 'None' ):
         furyfitPlotSeq(wsname, Plot)
     EndTime('FuryFit')
+    return mtd[wsname]
 
 def furyfitMultParsToWS(Table, Data):
     dataX = []
