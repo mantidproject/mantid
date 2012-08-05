@@ -118,19 +118,15 @@ namespace IDA
     
     positiveDoubleFields += uiForm().absp_lewidth; // Beam Width
     
-    positiveDoubleFields += uiForm().absp_lesamden; // Sample Number Density
-    doubleFields += uiForm().absp_lesamsigs;        // Sample Scattering Cross-Section
-    doubleFields += uiForm().absp_lesamsiga;        // Sample Absorption Cross-Section
+    positiveDoubleFields += uiForm().absp_lesamden;  // Sample Number Density
+    positiveDoubleFields += uiForm().absp_lesamsigs; // Sample Scattering Cross-Section
+    positiveDoubleFields += uiForm().absp_lesamsiga; // Sample Absorption Cross-Section
     
-    positiveDoubleFields += uiForm().absp_lecanden; // Can Number Density
-    doubleFields += uiForm().absp_lecansigs;        // Can Scattering Cross-Section
-    doubleFields += uiForm().absp_lecansiga;        // Can Absorption Cross-Section
+    positiveDoubleFields += uiForm().absp_lecanden;  // Can Number Density
+    positiveDoubleFields += uiForm().absp_lecansigs; // Can Scattering Cross-Section
+    positiveDoubleFields += uiForm().absp_lecansiga; // Can Absorption Cross-Section
 
     // Set appropriate validators.
-    foreach(QLineEdit * doubleField, doubleFields)
-    {
-      doubleField->setValidator(m_dblVal);
-    }
     foreach(QLineEdit * positiveDoubleField, positiveDoubleFields)
     {
       positiveDoubleField->setValidator(m_posDblVal);
@@ -144,7 +140,7 @@ namespace IDA
     QDoubleMultiRangeValidator * angleValidator = new QDoubleMultiRangeValidator(angleRanges, this);
     uiForm().absp_leavar->setValidator(angleValidator); // Can Angle to Beam
 
-    allFields = doubleFields + positiveDoubleFields;
+    allFields = positiveDoubleFields;
     allFields += uiForm().absp_leavar;
 
     // Connect up all fields to inputChanged method of IDATab (calls validate).
@@ -276,7 +272,7 @@ namespace IDA
       
       double radius1 = uiForm().absp_ler1->text().toDouble();
       double radius2 = uiForm().absp_ler2->text().toDouble();
-      if( radius1 > radius2 )
+      if( radius1 >= radius2 )
         uiv.addErrorMessage("Radius 1 should be less than Radius 2.");
 
       // R3 only relevant when using can
@@ -285,7 +281,7 @@ namespace IDA
         uiv.checkFieldIsValid("Radius 3", uiForm().absp_ler3, uiForm().absp_valR3);
         
         double radius3 = uiForm().absp_ler3->text().toDouble();
-        if( radius2 > radius3 )
+        if( radius2 >= radius3 )
           uiv.addErrorMessage("Radius 2 should be less than Radius 3.");
 
       }
@@ -293,7 +289,7 @@ namespace IDA
       uiv.checkFieldIsValid("Step Size", uiForm().absp_leavar,  uiForm().absp_valAvar);
 
       double stepSize = uiForm().absp_leavar->text().toDouble();
-      if( stepSize > (radius2 - radius1) )
+      if( stepSize >= (radius2 - radius1) )
         uiv.addErrorMessage("Step size should be less than (Radius 2 - Radius 1).");
     }
 
