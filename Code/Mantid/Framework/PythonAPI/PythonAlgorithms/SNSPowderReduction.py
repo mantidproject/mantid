@@ -353,6 +353,8 @@ class SNSPowderReduction(PythonAlgorithm):
             EditInstrumentGeometry(Workspace=wksp, NewInstrument=False, **focusPos)
             if (self._config.iparmFile is not None) and (len(self._config.iparmFile) > 0):
                 wksp.getRun()['iparm_file'] = self._config.iparmFile
+        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning[1]) # reset bin width
 
         return wksp
 

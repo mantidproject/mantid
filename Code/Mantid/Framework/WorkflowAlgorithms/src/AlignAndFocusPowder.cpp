@@ -260,7 +260,7 @@ void AlignAndFocusPowder::exec()
   focusAlg->executeAsSubAlg();
   m_outputW = focusAlg->getProperty("OutputWorkspace");
 
-  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
+/*  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
   convert3Alg->setProperty("InputWorkspace", m_outputW);
   convert3Alg->setProperty("OutputWorkspace", m_outputW);
   convert3Alg->setProperty("Target","TOF");
@@ -277,7 +277,7 @@ void AlignAndFocusPowder::exec()
   rebin3Alg->setProperty("OutputWorkspace", m_outputW);
   rebin3Alg->setProperty("Params",params);
   rebin3Alg->executeAsSubAlg();
-  m_outputW = rebin3Alg->getProperty("OutputWorkspace");
+  m_outputW = rebin3Alg->getProperty("OutputWorkspace");*/
   setProperty("OutputWorkspace",m_outputW);
 
 }
@@ -486,7 +486,7 @@ void AlignAndFocusPowder::execEvent()
 
   doSortEvents(m_outputW);
 
-  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
+/*  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
   convert3Alg->setProperty("InputWorkspace", m_outputW);
   convert3Alg->setProperty("OutputWorkspace", m_outputW);
   convert3Alg->setProperty("Target","TOF");
@@ -503,7 +503,7 @@ void AlignAndFocusPowder::execEvent()
   rebin3Alg->setProperty("OutputWorkspace", m_outputW);
   rebin3Alg->setProperty("Params",params);
   rebin3Alg->executeAsSubAlg();
-  m_outputW = rebin3Alg->getProperty("OutputWorkspace");
+  m_outputW = rebin3Alg->getProperty("OutputWorkspace");*/
   setProperty("OutputWorkspace",m_outputW);
 
 }
