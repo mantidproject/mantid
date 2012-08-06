@@ -228,6 +228,10 @@ void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Worksp
   MantidTreeWidgetItem *ws_item = createEntry(ws_name, workspace);
   setItemIcon(ws_item, workspace);
   m_tree->addTopLevelItem(ws_item);
+  if ( boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>( workspace ) )
+  {
+    findAbandonedWorkspaces();
+  }
 }
 
 /**
