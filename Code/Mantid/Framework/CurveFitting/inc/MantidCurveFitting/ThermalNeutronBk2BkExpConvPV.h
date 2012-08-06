@@ -63,6 +63,9 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     /// Get Miller Index from this peak
     void getMillerIndex(int& h, int &k, int &l);
 
+    /// Get peak parameters
+    double getPeakParameters(std::string);
+
   protected:
 
     virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
@@ -104,6 +107,8 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     int mL;
 
     bool mHKLSet;
+
+    mutable std::map<std::string, double> mParameters;
     
 };
 

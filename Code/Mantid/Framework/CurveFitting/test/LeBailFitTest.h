@@ -108,6 +108,83 @@ public:
       return;
   }
 
+
+  /*
+   * Test on peak calcualtion with non-trivial background
+   */
+  void test_cal2PeaksWithBackground()
+  {
+      // 1. Create input workspace
+      API::MatrixWorkspace_sptr dataws;
+      DataObjects::TableWorkspace_sptr parameterws;
+      DataObjects::TableWorkspace_sptr hklws;
+
+      dataws = createInputDataWorkspace(1);
+      parameterws = createPeakParameterWorkspace();
+      // a) Add reflection (111) and (110)
+      double h110 = 660.0/0.0064;
+      double h111 = 1370.0/0.008;
+      std::vector<double> peakheights;
+      peakheights.push_back(h111); peakheights.push_back(h110);
+      std::vector<std::vector<int> > hkls;
+      std::vector<int> p111;
+      p111.push_back(1); p111.push_back(1); p111.push_back(1);
+      hkls.push_back(p111);
+      std::vector<int> p110;
+      p110.push_back(1); p110.push_back(1); p110.push_back(0);
+      hkls.push_back(p110);
+      hklws = createReflectionWorkspace(hkls, peakheights);
+
+      AnalysisDataService::Instance().addOrReplace("Data", dataws);
+      AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
+      AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
+
+      // 2. Initialize the algorithm
+      LeBailFit lbfit;
+
+      TS_ASSERT_THROWS_NOTHING(lbfit.initialize());
+      TS_ASSERT(lbfit.isInitialized());
+
+      // 3. Set properties
+      lbfit.setPropertyValue("InputWorkspace", "Data");
+      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setProperty("WorkspaceIndex", 0);
+      lbfit.setProperty("BackgroundType", "Polynomial");
+      /// a second order polynomial background
+      lbfit.setPropertyValue("BackgroundParameters", "101.0, 0.001");
+      lbfit.setProperty("Function", "Calculation");
+      lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
+      lbfit.setProperty("PeaksWorkspace", "PeakParameterWS");
+      lbfit.setProperty("UseInputPeakHeights", true);
+      lbfit.setProperty("PeakRadius", 8);
+
+      // 4. Run
+      TS_ASSERT_THROWS_NOTHING(lbfit.execute());
+      TS_ASSERT(lbfit.isExecuted());
+
+      // 5. Get output & Test
+      DataObjects::Workspace2D_sptr outws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+                  AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
+      TS_ASSERT(outws);
+
+      for (size_t i = 0; i < outws->dataY(0).size(); ++i)
+          std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << std::endl;
+
+
+      double bkgdx = outws->readX(0).back()*0.001 + 101.0;
+      TS_ASSERT_DELTA(outws->readY(0).back(), bkgdx, 1.0);
+
+      // 5. Clean
+      AnalysisDataService::Instance().remove("Data");
+      AnalysisDataService::Instance().remove("PeakParameters");
+      AnalysisDataService::Instance().remove("Reflections");
+      AnalysisDataService::Instance().remove("CalculatedPeaks");
+
+      return;
+  }
+
+
   /*
    * Unit test on figure out peak height
    * The test data are of reflection (932) and (852) @ TOF = 12721.91 and 12790.13
@@ -462,7 +539,7 @@ public:
   /*
    * Fit 2 (overlapped) peaks
    */
-  void test_fitTwiPeaks()
+  void Ptest_fitTwiPeaks()
   {
       // 0. Test Plan
       // std::string testplan("zero");

@@ -135,7 +135,7 @@ void LeBailFit::exec()
     g_log.debug() << "DB1113: Input Data(Workspace) Range: " << dataWS->dataX(workspaceindex)[0] << ", "
               << dataWS->dataX(workspaceindex).back() << std::endl;
 
-    // 2. Determine Function
+    // 2. Determine Functionality
     std::string function = this->getProperty("Function");
     int functionmode = 0; // calculation
     if (function.compare("Calculation") == 0)
@@ -187,7 +187,9 @@ void LeBailFit::exec()
     {
         mLeBailFunction->addFunction(mit->second);
     }
-    std::cout << "LeBail Composite Function: " << mLeBailFunction->asString() << std::endl;
+    mLeBailFunction->addFunction(mBackgroundFunction);
+
+    g_log.information() << "LeBail Composite Function: " << mLeBailFunction->asString() << std::endl;
 
     // 5. Create output workspace
     size_t nspec = 1;
@@ -428,6 +430,13 @@ bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, std::
     // 4. Construct the Fit
     double tof_min = dataWS->dataX(workspaceindex)[0];
     double tof_max = dataWS->dataX(workspaceindex).back();
+    std::vector<double> fitrange = this->getProperty("FitRegion");
+    if (fitrange.size() == 2 && fitrange[0] < fitrange[1])
+    {
+        // Properly defined
+        tof_min = fitrange[0];
+        tof_max = fitrange[1];
+    }
 
     // a) Initialize
     API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", 0.0, 0.2, true);
@@ -963,25 +972,6 @@ void LeBailFit::setPeakParameters(
 
         peak->setParameter(parname, value);
 
-        /* Tie will be handled at in unitLeBailFit()
-        if (fitortie == 'f')
-        {
-            // Case of "Fit": do nothing
-            ;
-        }
-        else if (fitortie == 't')
-        {
-            // Case of "Tie": say tie to the value
-            std::stringstream ss;
-            ss << value;
-            peak->tie(parname, ss.str());
-        }
-        else
-        {
-            g_log.error() << "Peak parameter " << parname << ": fit/tie bit = " << fitortie << " is not allowed. " << std::endl;
-            throw std::invalid_argument("Only f and t are supported as for fit or tie.");
-        }
-        */
     } // ENDFOR: parameter iterator
 
     // 3. Peak height
@@ -1021,13 +1011,17 @@ void LeBailFit::generatePeaksFromInput()
 void LeBailFit::generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws)
 {
     auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
-    CurveFitting::BackgroundFunction_sptr mBackgroundFunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(background);
+    mBackgroundFunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(background);
 
     // CurveFitting::BackgroundFunction_sptr mBackgroundFunction = boost::make_shared<CurveFitting::BackgroundFunction>(background);
     //            boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(
     //            boost::make_shared<(background));
     size_t order = bkgdparamws.size();
-    mBackgroundFunction->setAttributeValue("order", int(order));
+    std::cout << "-----------   polynomial order = " << order << std::endl;
+
+    mBackgroundFunction->setAttributeValue("n", int(order));
+    mBackgroundFunction->initialize();
+
     for (size_t i = 0; i < order; ++i)
     {
         std::stringstream ss;

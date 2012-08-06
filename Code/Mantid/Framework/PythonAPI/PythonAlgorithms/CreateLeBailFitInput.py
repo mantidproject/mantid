@@ -167,106 +167,117 @@ class CreateLeBailFitInput(PythonAlgorithm):
         mdict = {}
         mdict["title"] = lines[0]
         bank = -1
-        for il in xrange(1, len(lines)):
+        for il in xrange(0, len(lines)):
             line = lines[il]
-            if line[0] == '!':
-                # Comment line
-                if line.count("Bank") > 0:
-                    # Line with bank
-                    terms = line.split("Bank")[1].split()
-                    bank = int(terms[0])
-                    mdict[bank] = {}
-                    if len(terms) >= 4 and terms[1] == "CWL":
-                        # center wave length
-                        cwl = float(terms[3].split("A")[0])
-                        mdict[bank]["CWL"] = cwl
-                    # ENDIF: CWL
-                # ENDIF: Containing Bank
+            print line
+            if line.count("Bank") > 0:
+                # Line with bank
+                terms = line.split("Bank")[1].split()
+                bank = int(terms[0])
+                mdict[bank] = {}
+                
+                print "DBx705: mdict.keys: ", mdict.keys()
+
+                if len(terms) >= 4 and terms[1] == "CWL":
+                    # center wave length
+                    cwl = float(terms[3].split("A")[0])
+                    mdict[bank]["CWL"] = cwl
+                # ENDIF: CWL
+            elif line[0] != '!':
+                # Not Comment line
+                if line.startswith("NPROF"):
+                    # Profile Type
+                    profiletype = int(line.split("NPROF")[1])
     
-            elif line.startswith("NPROF"):
-                # Profile Type
-                profiletype = int(line.split("NPROF")[1])
-                mdict[bank]["Profile"] = profiletype
+                    print "DBx658 bank = %d" % (bank)
+                    print "DBx658 bank keys: ", mdict.keys()
+
+                    mdict[bank]["Profile"] = profiletype
     
-            elif line.startswith("TOFRG"):
-                # Tof-min(us)    step      Tof-max(us)
-                terms = line.split()
-                mdict[bank]["tof-min"] = float(terms[1])*1.0E-3
-                mdict[bank]["tof-max"] = float(terms[3])*1.0E-3
-                mdict[bank]["step"]    = float(terms[2])*1.0E-3
+                elif line.startswith("TOFRG"):
+                    # Tof-min(us)    step      Tof-max(us)
+                    terms = line.split()
+                    mdict[bank]["tof-min"] = float(terms[1])*1.0E-3
+                    mdict[bank]["tof-max"] = float(terms[3])*1.0E-3
+                    mdict[bank]["step"]    = float(terms[2])*1.0E-3
     
-            elif line.startswith("D2TOF"):
-                # Dtt1      Dtt2         Zero 
-                terms = line.split()
-                mdict[bank]["Dtt1"] = float(terms[1])
-                if len(terms) == 3:
-                    mdict[bank]["Dtt2"] = float(terms[2])
-                    mdict[bank]["Zero"] = float(terms[3])
-                else:
+                elif line.startswith("D2TOF"):
+                    # Dtt1      Dtt2         Zero 
+                    terms = line.split()
+                    mdict[bank]["Dtt1"] = float(terms[1])
+                    if len(terms) == 3:
+                        mdict[bank]["Dtt2"] = float(terms[2])
+                        mdict[bank]["Zero"] = float(terms[3])
+                    else:
+                        mdict[bank]["Dtt2"] = 0.0
+                        mdict[bank]["Zero"] = 0.0
+    
+                elif line.startswith("ZD2TOF"):
+                    #  Zero   Dtt1  
+                    terms = line.split()
+                    mdict[bank]["Zero"] = float(terms[1])
+                    mdict[bank]["Dtt1"] = float(terms[2])
                     mdict[bank]["Dtt2"] = 0.0
-                    mdict[bank]["Zero"] = 0.0
     
-            elif line.startswith("ZD2TOF"):
-                #  Zero   Dtt1  
-                terms = line.split()
-                mdict[bank]["Zero"] = float(terms[1])
-                mdict[bank]["Dtt1"] = float(terms[2])
-                mdict[bank]["Dtt2"] = 0.0
+                elif line.startswith("D2TOT"):
+                    # Dtt1t       Dtt2t    x-cross    Width   Zerot
+                    terms = line.split()
+                    mdict[bank]["Dtt1t"] = float(terms[1])
+                    mdict[bank]["Dtt2t"] = float(terms[2])
+                    mdict[bank]["Tcross"] = float(terms[3])
+                    mdict[bank]["Width"] = float(terms[4])
+                    mdict[bank]["Zerot"] = float(terms[5])
     
-            elif line.startswith("D2TOT"):
-                # Dtt1t       Dtt2t    x-cross    Width   Zerot
-                terms = line.split()
-                mdict[bank]["Dtt1t"] = float(terms[1])
-                mdict[bank]["Dtt2t"] = float(terms[2])
-                mdict[bank]["Tcross"] = float(terms[3])
-                mdict[bank]["Width"] = float(terms[4])
-                mdict[bank]["Zerot"] = float(terms[5])
+                elif line.startswith("ZD2TOT"):
+                    # Zerot    Dtt1t       Dtt2t    x-cross    Width
+                    terms = line.split()
+                    mdict[bank]["Zerot"] = float(terms[1])
+                    mdict[bank]["Dtt1t"] = float(terms[2])
+                    mdict[bank]["Dtt2t"] = float(terms[3])
+                    mdict[bank]["Tcross"] = float(terms[4])
+                    mdict[bank]["Width"] = float(terms[5])
     
-            elif line.startswith("ZD2TOT"):
-                # Zerot    Dtt1t       Dtt2t    x-cross    Width
-                terms = line.split()
-                mdict[bank]["Zerot"] = float(terms[1])
-                mdict[bank]["Dtt1t"] = float(terms[2])
-                mdict[bank]["Dtt2t"] = float(terms[3])
-                mdict[bank]["Tcross"] = float(terms[4])
-                mdict[bank]["Width"] = float(terms[5])
+                elif line.startswith("TWOTH"):
+                    # TOF-TWOTH of the bank
+                    terms = line.split()
+                    mdict[bank]["twotheta"] = float(terms[1])
     
-            elif line.startswith("TWOTH"):
-                # TOF-TWOTH of the bank
-                terms = line.split()
-                mdict[bank]["twotheta"] = float(terms[1])
+                elif line.startswith("SIGMA"):
+                    # Gam-2     Gam-1     Gam-0 
+                    terms = line.split()
+                    mdict[bank]["Sig2"] = float(terms[1])
+                    mdict[bank]["Sig1"] = float(terms[2])
+                    mdict[bank]["Sig0"] = float(terms[3])
     
-            elif line.startswith("SIGMA"):
-                # Gam-2     Gam-1     Gam-0 
-                terms = line.split()
-                mdict[bank]["Sig2"] = float(terms[1])
-                mdict[bank]["Sig1"] = float(terms[2])
-                mdict[bank]["Sig0"] = float(terms[3])
+                elif line.startswith("GAMMA"):
+                    # Gam-2     Gam-1     Gam-0 
+                    terms = line.split()
+                    mdict[bank]["Gam2"] = float(terms[1])
+                    mdict[bank]["Gam1"] = float(terms[2])
+                    mdict[bank]["Gam0"] = float(terms[3])
     
-            elif line.startswith("GAMMA"):
-                # Gam-2     Gam-1     Gam-0 
-                terms = line.split()
-                mdict[bank]["Gam2"] = float(terms[1])
-                mdict[bank]["Gam1"] = float(terms[2])
-                mdict[bank]["Gam0"] = float(terms[3])
+                elif line.startswith("ALFBE"):
+                    # alph0       beta0       alph1       beta1 
+                    terms = line.split()
+                    mdict[bank]["Alph0"] = float(terms[1])
+                    mdict[bank]["Beta0"] = float(terms[2])
+                    mdict[bank]["Alph1"] = float(terms[3])
+                    mdict[bank]["Beta1"] = float(terms[4])
     
-            elif line.startswith("ALFBE"):
-                # alph0       beta0       alph1       beta1 
-                terms = line.split()
-                mdict[bank]["Alph0"] = float(terms[1])
-                mdict[bank]["Beta0"] = float(terms[2])
-                mdict[bank]["Alph1"] = float(terms[3])
-                mdict[bank]["Beta1"] = float(terms[4])
-    
-            elif line.startswith("ALFBT"):
-                # alph0t       beta0t       alph1t       beta1t 
-                terms = line.split()
-                mdict[bank]["Alph0t"] = float(terms[1])
-                mdict[bank]["Beta0t"] = float(terms[2])
-                mdict[bank]["Alph1t"] = float(terms[3])
-                mdict[bank]["Beta1t"] = float(terms[4])
-    
-    
+                elif line.startswith("ALFBT"):
+                    # alph0t       beta0t       alph1t       beta1t 
+                    terms = line.split()
+                    mdict[bank]["Alph0t"] = float(terms[1])
+                    mdict[bank]["Beta0t"] = float(terms[2])
+                    mdict[bank]["Alph1t"] = float(terms[3])
+                    mdict[bank]["Beta1t"] = float(terms[4])
+
+                else:
+                    pass
+            
+            else:
+                # COMMENT Line
+                pass
             # ENDIF: Line type
         # ENDFOR
 
@@ -288,6 +299,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
         bankproperty = self.getProperty("Bank")
         bank = bankproperty.value
         if paramdict.has_key(bank) is False: 
+            print "Bank Type: ", type(bank)
             raise NotImplementedError("Bank %s does not exist in input .irf file." % (bank))
 
         for parname in sorted(paramdict[bank].keys()):

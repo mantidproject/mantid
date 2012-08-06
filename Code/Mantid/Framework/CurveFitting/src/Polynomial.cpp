@@ -111,7 +111,7 @@ void Polynomial::setAttribute(const std::string& attName,const API::IFunction::A
     {
       throw std::invalid_argument("Polynomial: polynomial order cannot be negative.");
     }
-    for(int i=0;i<=m_n;++i)
+    for(int i=0; i<=m_n; ++i)
     {
       std::string parName = "A" + boost::lexical_cast<std::string>(i);
       declareParameter(parName);

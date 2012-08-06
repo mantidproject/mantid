@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidCurveFitting/BackgroundFunction.h"
 
 
 using namespace Mantid;
@@ -137,6 +138,8 @@ namespace CurveFitting
     std::vector<std::vector<int> > mPeakHKLs;
     std::map<int, double> mPeakHeights;
     std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr> mPeaks;
+
+    CurveFitting::BackgroundFunction_sptr mBackgroundFunction;
 
     API::CompositeFunction_sptr mLeBailFunction;
     std::map<std::string, std::pair<double, char> > mFuncParameters; // char = f: fit... = t: tie to value
