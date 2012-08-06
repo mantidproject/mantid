@@ -898,8 +898,10 @@ bool MergeRuns::processGroups()
   }
   outputWS->observeADSNotifications(doObserveADSNotifications);
   this->setProperty("OutputWorkspace", outputWS);
-  this->setExecuted(true);
+  
   AnalysisDataService::Instance().addOrReplace(outName, outputWS);
+  this->setExecuted(true);
+  m_notificationCenter.postNotification(new FinishedNotification(this,isExecuted()));
   return true;
 }
 
