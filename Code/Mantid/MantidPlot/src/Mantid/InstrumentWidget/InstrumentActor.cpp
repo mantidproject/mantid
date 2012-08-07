@@ -20,6 +20,7 @@
 
 #include <numeric>
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/ReadLock.h"
 
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;
@@ -167,6 +168,7 @@ Instrument_const_sptr InstrumentActor::getInstrument() const
     std::string view = Mantid::Kernel::ConfigService::Instance().getString("instrument.view.geometry");
 
     auto shared_workspace = getWorkspace();
+    Mantid::Kernel::ReadLock _lock(*shared_workspace);
 
     if ( boost::iequals("Default", view) || boost::iequals("Physical", view))
     {      
