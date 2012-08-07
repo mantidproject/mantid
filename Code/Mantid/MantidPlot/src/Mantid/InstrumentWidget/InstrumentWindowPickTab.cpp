@@ -755,6 +755,11 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
         if (run.hasProperty("Ei"))
         {
           m_emode = 1; // direct
+          if ( run.hasProperty("Ei") )
+          {
+            Mantid::Kernel::Property* prop = run.getProperty("Ei");
+            m_efixed = boost::lexical_cast<double,std::string>(prop->value());
+          }
         }
         else if (det->hasParameter("Efixed"))
         {
