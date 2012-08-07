@@ -764,15 +764,27 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
         else if (det->hasParameter("Efixed"))
         {
           m_emode = 2; // indirect
+          try
+          {
+            const Mantid::Geometry::ParameterMap& pmap = ws->constInstrumentParameters();
+            Mantid::Geometry::Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
+            if (par) 
+            {
+              m_efixed = par->value<double>();
+              //g_log.debug() << "Detector: " << det->getID() << " EFixed: " << m_efixed << "\n";
+            }
+          }
+          catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
         }
         else
         {
           //m_emode = 0; // Elastic
-          InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
+          //This should be elastic if Ei and Efixed are not set
+          /*InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
           dlg->exec();
           m_emode = dlg->getEMode();
           m_efixed = dlg->getEFixed();
-          m_delta = dlg->getDelta();
+          m_delta = dlg->getDelta();*/
         }
       }
       std::vector<double> xdata(1,x);
