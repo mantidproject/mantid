@@ -1,9 +1,7 @@
 /*WIKI*
-Creates a model for a chopper using the given parameters. The parameters are given as a string to allow flexibility for each chopper model having different parameterisation. There are two parameters that are common among all models:
-* angular velocity - The rotation frequency in hertz
-* chopper point - Optional parameter specifying which point this chopper occupies
+Creates a model for a chopper using the given parameters. The parameters are given as a string to allow flexibility for each chopper model having different parameterisation.
 
-There is an additional property called "PredefinedModel" that can be used to create an already defined model
+The chopper point is an index that can be used for multi-chopper instruments. The indices start from zero, with this being closest to moderator.
 
 Available models with parameter names:
 * FermiChopper -
