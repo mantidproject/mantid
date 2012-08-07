@@ -48,6 +48,8 @@ public:
   ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
   /// Destructor
   virtual ~ProjectionSurface();
+  /// Resets the instrument actor.
+  void resetInstrumentActor(const InstrumentActor* rootActor);
 
   //-----------------------------------
   //     Public virtual methods

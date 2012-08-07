@@ -64,6 +64,15 @@ ProjectionSurface::~ProjectionSurface()
   m_peakShapes.clear();
 }
 
+/**
+ * Resets the instrument actor. The caller must ensure that the instrument
+ * stays the same and workspace dimensions also don't change.
+ */
+void ProjectionSurface::resetInstrumentActor(const InstrumentActor* rootActor)
+{
+  m_instrActor = rootActor;
+}
+
 void ProjectionSurface::clear()
 {
   if (m_viewImage)

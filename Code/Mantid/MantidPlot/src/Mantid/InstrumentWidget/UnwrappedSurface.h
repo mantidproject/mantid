@@ -109,7 +109,6 @@ protected:
   double applyUCorrection(double u)const;
   void createPeakShapes(const QRect& viewport)const;
 
-  const InstrumentActor* m_instrActor;
   double m_u_min;                      ///< Minimum u
   double m_u_max;                      ///< Maximum u
   double m_v_min;                      ///< Minimum v

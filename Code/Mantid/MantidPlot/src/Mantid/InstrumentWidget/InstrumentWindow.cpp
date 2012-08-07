@@ -307,10 +307,15 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMi
   m_instrumentActor = new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax);
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
-  if ( resetGeometry )
+  ProjectionSurface* surface = getSurface();
+  if ( resetGeometry || !surface )
   {
     setSurfaceType(m_surfaceType); // This call must come after the InstrumentActor is created
     setupColorMap();
+  }
+  else
+  {
+    surface->resetInstrumentActor( m_instrumentActor );
   }
   mInstrumentTree->setInstrumentActor(m_instrumentActor);
   setInfoText( getSurfaceInfoText() );
