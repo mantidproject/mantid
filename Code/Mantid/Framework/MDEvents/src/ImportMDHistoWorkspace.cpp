@@ -95,8 +95,8 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void ImportMDHistoWorkspace::initDocs()
   {
-    //this->setWikiSummary("Reads a text file and generates an MDHistoWorkspace from it.");
-    //this->setOptionalMessage("Reads a text file and generates an MDHistoWorkspace from it.");
+    this->setWikiSummary("Reads a text file and generates an MDHistoWorkspace from it.");
+    this->setOptionalMessage("Reads a text file and generates an MDHistoWorkspace from it.");
   }
 
   //----------------------------------------------------------------------------------------------
