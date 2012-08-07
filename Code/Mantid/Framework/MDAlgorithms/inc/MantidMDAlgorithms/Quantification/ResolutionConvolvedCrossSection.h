@@ -66,6 +66,8 @@ namespace Mantid
     private:
       /// Override the call to set the workspace here
       void setWorkspace(boost::shared_ptr<const API::Workspace> workspace);
+      /// Returns an estimate of the number of progress reports a single evaluation of the function will have.
+      int64_t estimateNoProgressCalls() const;
 
       /// Evaluate the function across the domain
       void function(const API::FunctionDomain& domain, API::FunctionValues& values)const;

@@ -25,17 +25,22 @@
 
 namespace Mantid
 {
-namespace API
+namespace Kernel
 {
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
+class ProgressBase;
+}
+namespace API
+{
 class Workspace;
 class MatrixWorkspace;
 class ParameterTie;
 class IConstraint;
 class ParameterReference;
 class FunctionHandler;
+
 /** This is an interface to a fitting function - a semi-abstarct class.
     Functions derived from IFunction can be used with the Fit algorithm.
     IFunction defines the structure of a fitting funtion.
@@ -230,7 +235,7 @@ public:
   //---------------------------------------------------------//
 
   /// Constructor
-  IFunction():m_isParallel(false),m_handler(NULL){}
+  IFunction():m_isParallel(false),m_handler(NULL), m_progReporter(NULL) {}
   /// Virtual destructor
   virtual ~IFunction();
 
@@ -247,6 +252,15 @@ public:
   virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,double startX, double endX);
   /// Iinialize the function
   virtual void initialize(){this->init();}
+  /// Returns an estimate of the number of progress reports a single evaluation of the function will have. For backwards compatibility default=1
+  virtual int64_t estimateNoProgressCalls() const { return 1; }
+
+  /// Attach a progress reporter
+  void setProgressReporter(Kernel::ProgressBase *reporter);
+  /// Reports progress with an optional message
+  void reportProgress(const std::string & msg = "") const;
+  /// Returns true if a progress reporter is set & evalaution has been requested to stop
+  bool cancellationRequestReceived() const;
 
   /// The categories the Fit function belong to.
   /// Categories must be listed as a semi colon separated list.
@@ -418,6 +432,9 @@ protected:
 
   /// Pointer to a function handler
   FunctionHandler* m_handler;
+
+  /// Pointer to the progress handler
+  Kernel::ProgressBase *m_progReporter;
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;

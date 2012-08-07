@@ -102,6 +102,8 @@ namespace Mantid
       createDomains();
 
       // Do the real work
+      API::Progress progress(this,0.0,1.0, resolution->estimateNoProgressCalls());
+      resolution->setProgressReporter(&progress);
       resolution->function(*m_domain, *m_calculatedValues);
 
       // If output workspace exists just add the events to that
