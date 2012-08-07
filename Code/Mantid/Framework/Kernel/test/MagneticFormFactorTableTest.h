@@ -27,8 +27,8 @@ public:
 
     TS_ASSERT_DELTA( lookup->value(qsqr), 0.69202309, 1e-8);
 
-    TS_ASSERT_DELTA( lookup->value(MagneticIon::formFactorCutOff(j,l)), 0.0, 1e-8); // On 0.0
-    TS_ASSERT_DELTA( lookup->value(MagneticIon::formFactorCutOff(j,l)), 0.0, 1e-8); // On the cutoff
+    TS_ASSERT_DELTA(lookup->value(0.0), 0.9995, 1e-8); // On 0.0
+    TS_ASSERT_DELTA(lookup->value(MagneticIon::formFactorCutOff(j,l)), 0.0, 1e-8); // On the cutoff
   }
 
 };
