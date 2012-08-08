@@ -77,7 +77,7 @@
   </component>
   <component type="newpanel" idstart="31250" idfillbyfirst="y" idstepbyrow="7">
     <location y="0.43086875" x="1.586625" z="-2.0230145" name="bank25" rot="-114.64024741" axis-x="0" axis-y="1" axis-z="0">
-      <rot val="9.20075291558">
+      <rot val="-9.20075291558">
         <rot val="90.56851948" axis-x="0" axis-y="1" axis-z="0" />
       </rot>
     </location>
@@ -108,7 +108,7 @@
   </component>
   <component type="newpanel"  idstart="56250" idfillbyfirst="y" idstepbyrow="7">
     <location y="0.4253265" x="2.25948525" z="-1.5125445" name="bank45" rot="-131.244648741" axis-x="0" axis-y="1" axis-z="0">
-      <rot val="9.29227344324">
+      <rot val="-9.29227344324">
         <rot val="90.0397493667" axis-x="0" axis-y="1" axis-z="0" />
       </rot>
     </location>
