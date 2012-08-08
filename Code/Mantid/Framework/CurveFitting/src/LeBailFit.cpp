@@ -25,7 +25,7 @@ bool compDescending(int a, int b)
     return (a >= b);
 }
 
-DECLARE_ALGORITHM(LeBailFit)
+// DECLARE_ALGORITHM(LeBailFit)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
