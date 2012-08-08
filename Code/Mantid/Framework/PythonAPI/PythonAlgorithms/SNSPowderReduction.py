@@ -335,7 +335,7 @@ class SNSPowderReduction(PythonAlgorithm):
             XMin = info.tmin
         if info.tmax > 0.:
             XMax = info.tmax
-        if not info.has_dspace:
+        if not info.has_dspace and wksp.getNumberEvents() > 0:
             XMin = binning[0]
             XMax = binning[-1]
         AlignAndFocusPowder(InputWorkspace=wksp,OutputWorkspace=wksp,CalFileName=calib,Params=binning,Dspacing=info.has_dspace,
