@@ -780,11 +780,11 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
         {
           //m_emode = 0; // Elastic
           //This should be elastic if Ei and Efixed are not set
-          /*InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
+          InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
           dlg->exec();
           m_emode = dlg->getEMode();
           m_efixed = dlg->getEFixed();
-          m_delta = dlg->getDelta();*/
+          m_delta = dlg->getDelta();
         }
       }
       std::vector<double> xdata(1,x);
