@@ -386,19 +386,27 @@ def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
         # Parent algorithms store their workspaces in the ADS
         # Child algorithms store their workspaces in the property
         if not algm_obj.isChild() and _is_workspace_property(prop):
-            retvals.append(_ads[prop.valueAsStr])
+            value = prop.valueAsStr
+            if value == '':
+                if not prop.isOptional():
+                    raise RuntimeError("Logical error. Output workspace property '%s' on '%s' is mandatory but has no value."
+                                       "Please contact development team." % (name,  algm_obj.name()))
+            else:
+                retvals.append(_ads[value])
         else:
             if not hasattr(prop, 'value'):
                 print ('Unknown property type encountered. "%s" on "%s" is not understood by '
                        'Python. Return value skipped. Please contact development team' % (name, algm_obj.name()))
             else:
                 retvals.append(prop.value)
+
     nvals = len(retvals)
     nlhs = lhs[0]
     if nlhs > 1 and nvals != nlhs:
         # There is a discrepancy in the number are unpacking variables
         # Let's not have the more cryptic unpacking error raised
-        raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). These numbers must match." % (func_name, nvals, nlhs))
+        raise RuntimeError("%s is trying to return %d output(s) but you have provided %d variable(s). "
+                           "These numbers must match." % (func_name, nvals, nlhs))
     if nvals > 1:
         return tuple(retvals) # Create a tuple
     elif nvals == 1:
