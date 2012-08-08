@@ -51,9 +51,8 @@ namespace MDEvents
  public:
    void addBoxToSplit(const T &theBox)
     {
-      m_boxesToSplitMutex.lock();
+      Kernel::Mutex::ScopedLock _lock(m_boxesToSplitMutex);
       m_boxesToSplit.push_back(theBox);
-      m_boxesToSplitMutex.unlock();
     }
 
     //-----------------------------------------------------------------------------------
@@ -72,18 +71,17 @@ namespace MDEvents
     template<class MDBoxToChange >
     std::vector< MDBoxToChange > getBoxesToSplit()const
     {
-      m_boxesToSplitMutex.lock();
+      Kernel::Mutex::ScopedLock _lock(m_boxesToSplitMutex);
       return m_boxesToSplit;
-      m_boxesToSplitMutex.unlock();
     }
     //-----------------------------------------------------------------------------------
     /** Clears the list of boxes that are big enough to split */
     void clearBoxesToSplit()
     {
-      m_boxesToSplitMutex.lock();
+      Kernel::Mutex::ScopedLock _lock(m_boxesToSplitMutex);
       m_boxesToSplit.clear();
-      m_boxesToSplitMutex.unlock();
     }
+
     /**Copy constructor from a box controller pointer */
     BoxCtrlChangesList(const API::BoxController & theController):
     BoxController(theController)
@@ -103,7 +101,7 @@ namespace MDEvents
     BoxCtrlChangesList(size_t nd):BoxController(nd){};
 
  private:
-//
+
     /// Mutex for modifying the m_boxesToSplit member
     Mantid::Kernel::Mutex m_boxesToSplitMutex;
 
