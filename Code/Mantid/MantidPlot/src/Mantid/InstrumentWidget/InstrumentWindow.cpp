@@ -68,7 +68,7 @@ public:
   {
     if(m_surface)
     {
-      m_surface->updateView();
+      m_surface->updateDetectors();
       update();
     }
   }
@@ -848,6 +848,7 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
       delete m_instrumentActor;
       m_instrumentActor = NULL;
     }
+
     init( resetGeometry, autoscaling, scaleMin, scaleMax );
     updateWindow();
   }
@@ -1405,7 +1406,14 @@ int InstrumentWindow::getInstrumentDisplayHeight() const
 /// Refresh the instrument display
 void InstrumentWindow::refreshInstrumentDisplay()
 {
-  m_InstrumentDisplay->refreshView();
+  if ( isGLEnabled() )
+  {
+    m_InstrumentDisplay->refreshView();
+  }
+  else
+  {
+    m_simpleDisplay->refreshView();
+  }
 }
 
 /// Toggle between the GL and simple instrument display widgets

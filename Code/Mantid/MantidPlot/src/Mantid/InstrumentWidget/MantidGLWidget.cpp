@@ -116,15 +116,11 @@ void MantidGLWidget::paintEvent(QPaintEvent *event)
     m_surface->draw(this);
   }
 
-  //swapBuffers();
   OpenGLError::check("paintEvent");
 
   if (m_firstFrame)
   {
     m_firstFrame = false;
-    //update();
-    //saveToFile("C:/Users/hqs74821/Work/Mantid_stuff/InstrumentView/firstframe.png");
-    //std::cerr <<"Saved\n";
   }
 }
 
@@ -280,8 +276,6 @@ QColor MantidGLWidget::currentBackgroundColor() const
 void MantidGLWidget::saveToFile(const QString & filename)
 {
   if( filename.isEmpty() ) return;
-  //  QPixmap pm = renderPixmap();
-  //pm.save(filename);
   // It seems QGLWidget grabs the back buffer
   this->swapBuffers(); // temporarily swap the buffers
   QImage image = this->grabFrameBuffer();
@@ -310,7 +304,6 @@ void MantidGLWidget::enableLighting(bool on)
   {
     surface3D->enableLighting( on );
     refreshView();
-    //repaint();
   }
 }
 
@@ -337,7 +330,7 @@ void MantidGLWidget::componentSelected(Mantid::Geometry::ComponentID id)
 
 void MantidGLWidget::refreshView()
 {
-  m_surface->updateView();
+  m_surface->updateDetectors();
   update();
 }
 
