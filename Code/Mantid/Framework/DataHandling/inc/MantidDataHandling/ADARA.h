@@ -103,6 +103,8 @@ struct Event {
 
 typedef uint32_t EventBank;
 
+typedef uint32_t SourceSection;
+
 struct Header {
 	uint32_t payload_len;
 	uint32_t pkt_format;

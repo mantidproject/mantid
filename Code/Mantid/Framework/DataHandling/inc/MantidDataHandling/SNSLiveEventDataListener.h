@@ -98,7 +98,7 @@ namespace Mantid
       std::string m_instrumentXML;
 
       uint64_t m_rtdlPulseId;  // We get these two from the RTDL packet
-      bool  m_rtdlRawFlag;
+      bool  m_tofCorrectedFlag;
 
       Poco::Net::StreamSocket m_socket;
       //int m_sockfd;  // socket file descriptor

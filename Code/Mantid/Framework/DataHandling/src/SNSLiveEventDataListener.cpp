@@ -169,7 +169,7 @@ namespace DataHandling
     // time and the raw flag.  (We reference them when processing the
     // banked event packets.)
     m_rtdlPulseId = pkt.pulseId();
-    m_rtdlRawFlag = pkt.rawTOF();
+    m_tofCorrectedFlag = pkt.tofCorrected();
 
     return true;
   }
@@ -199,7 +199,7 @@ namespace DataHandling
       return false;
     }
 
-    if (m_rtdlRawFlag)
+    if (! m_tofCorrectedFlag)
     {
       // As yet, we can't handle raw TofF values.
       g_log.warning() << "Ignoring data from Pulse ID " << pkt.pulseId()
@@ -212,37 +212,40 @@ namespace DataHandling
     // Append the events
     g_log.information() << "----- Pulse ID: " << pkt.pulseId() << " -----" << std::endl;
     m_mutex.lock();
-    // Iterate through bank sections
-    const ADARA::EventBank *bank = pkt.firstBank();
-    while (bank != NULL)
+
+    // Iterate through each event
+    const ADARA::Event *event = pkt.firstEvent();
+    unsigned lastBankID = pkt.curBankId();
+    while (event != NULL)
     {
-      if (pkt.curBankId() <= 0xFFFe)
-      // Note: We ignore bank ID's >= 0xFFFE  (-2 is for error pixels and -1 is
-      // for unmappable pixels);
+      eventsPerBank++;
+      totalEvents++;
+      if (lastBankID <= 0xFFFFFFFE)  // Bank ID -1 & -2 are special cases and are not valid pixels
       {
-        eventsPerBank=0;
-
-        // Iterate through each event
-        const ADARA::Event *event = pkt.firstEvent();
-        while (event != NULL)
+        // appendEvent needs tof to be in units of microseconds, but it comes
+        // from the ADARA stream in units of 100ns.
+        if (pkt.getSourceCORFlag())
         {
-          eventsPerBank++;
-          totalEvents++;
-
-          // appendEvent needs tof to be in units of microseconds, but it comes
-          // from the ADARA stream in units of 100ns.
           appendEvent(event->pixel, event->tof / 10.0, pkt.pulseId());
-          event = pkt.nextEvent();
         }
-        g_log.debug() << "BankID " << pkt.curBankId() << " had " << eventsPerBank
-                      << " events" << std::endl;
+        else
+        {
+          appendEvent(event->pixel, (event->tof + pkt.getSourceTOFOffset()) / 10.0, pkt.pulseId());
+        }
       }
-      else
+
+      event = pkt.nextEvent();
+      if (pkt.curBankId() != lastBankID)
       {
-        g_log.information() << "Ignoring Bank ID: " << pkt.curBankId() << std::endl;
+        g_log.debug() << "BankID " << lastBankID << " had " << eventsPerBank
+                      << " events" << std::endl;
+
+        lastBankID = pkt.curBankId();
+        eventsPerBank = 0;
       }
-      bank = pkt.nextBank();
     }
+
+
     m_mutex.unlock();
     g_log.information() << "Total Events: " << totalEvents << std::endl;
     g_log.information() << "-------------------------------" << std::endl;

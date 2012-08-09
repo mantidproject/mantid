@@ -63,7 +63,7 @@ public:
 	RawDataPkt(const RawDataPkt &pkt);
 
 	uint32_t sourceID(void) const { return m_fields[0]; }
-	bool endOfPulse(void) const { return !!(m_fields[1] & 0x8000000); }
+	bool endOfPulse(void) const { return !!(m_fields[1] & 0x80000000); }
 	uint16_t pktSeq(void) const { return (m_fields[1] >> 16) & 0x7fff; }
 	uint16_t dspSeq(void) const { return m_fields[1] & 0x7fff; }
 	PulseFlavor::Enum flavor(void) const {
@@ -79,16 +79,17 @@ public:
 	uint16_t veto(void) const { return (m_fields[3] >> 10) & 0xfff; }
 	uint16_t cycle(void) const { return m_fields[3] &0x3ff; }
 	uint32_t intraPulseTime(void) const { return m_fields[4]; }
-	bool rawTOF(void) const { return !!(m_fields[5] & 0x80000000); }
+	bool tofCorrected(void) const { return !!(m_fields[5] & 0x80000000); }
 	uint32_t tofOffset(void) const { return m_fields[5] & 0x7fffffff; }
+	uint32_t tofField(void) const { return m_fields[5]; }
 
-	const Event *events(void) const { return (Event *) &m_fields[6]; }
+        const Event *events(void) const { return (const Event *) &m_fields[6]; }
 	uint32_t num_events(void) const {
 		return (m_payload_len - 24) / (2 * sizeof (uint32_t));
 	}
 
 private:
-	uint32_t *m_fields;
+        const uint32_t *m_fields;
 
 	RawDataPkt(const uint8_t *data, uint32_t len);
 
@@ -112,14 +113,14 @@ public:
 	uint16_t veto(void) const { return (m_fields[1] >> 10) & 0xfff; }
 	uint16_t cycle(void) const { return m_fields[1] &0x3ff; }
 	uint32_t intraPulseTime(void) const { return m_fields[2]; }
-	bool rawTOF(void) const { return !!(m_fields[3] & 0x80000000); }
+	bool tofCorrected(void) const { return !!(m_fields[3] & 0x80000000); }
 	uint32_t tofOffset(void) const { return m_fields[3] & 0x7fffffff; }
 	uint32_t ringPeriod(void) const { return m_fields[4]; }
 
 	// TODO implement accessor for optional fields
 
 private:
-	uint32_t *m_fields;
+        const uint32_t *m_fields;
 
 	RTDLPkt(const uint8_t *data, uint32_t len);
 
@@ -141,29 +142,40 @@ public:
 
 	uint32_t pulseCharge(void) const { return m_fields[0]; }
 	uint32_t pulseEnergy(void) const { return m_fields[1]; }
-	uint32_t ringPeriod(void) const { return m_fields[2]; }
-	uint32_t cycle(void) const { return m_fields[3]; }
-	uint32_t flags(void) const { return m_fields[4]; }
+	uint32_t cycle(void) const { return m_fields[2]; }
+	uint32_t flags(void) const { return m_fields[3]; }
 
-        // The bank and event accessors all return NULL if we've incremented
-        // past the end
-        const EventBank * firstBank() const;
-        const EventBank * nextBank() const;
+        // The source, bank and event accessors all return NULL if we've
+        // incremented past the end
         const Event * firstEvent() const;
         const Event * nextEvent() const;
 
-        uint32_t curBankId() const { return *(uint32_t *)m_curBank; }
-        uint32_t curEventCount() const { return ((uint32_t *)m_curBank)[1]; }
+        bool     getSourceCORFlag() const   { return m_isCorrected; }
+        uint32_t getSourceTOFOffset() const { return m_TOFOffset; }
+        uint32_t curBankId() const { return m_bankId; }
 
-private:
-        uint32_t *m_fields;
+        //        uint32_t curEventCount() const { return ((uint32_t *)m_curBank)[1]; }
 
-        // These are used by the EventBank and Event accessors.  If they are NULL, it
-        // means we've iterated past the end of the data.  Otherwise, they should always
-        // be valid.
-        mutable EventBank * m_curBank;
-        mutable Event * m_curEvent;
-        mutable Event * m_lastEvent;
+private:      
+        const uint32_t *m_fields;
+
+        mutable const Event * m_curEvent;
+
+        mutable unsigned m_lastFieldIndex; // index into m_fields for the last valid field in the packet
+        mutable unsigned m_curFieldIndex;  // where we currently are in the packet
+
+        // Data about the current source section
+        mutable unsigned m_sourceStartIndex;  // index into m_fields for the start of this source
+        mutable uint32_t m_bankCount;
+        mutable uint32_t m_TOFOffset;
+        mutable bool m_isCorrected;
+        mutable unsigned m_bankNum;  // which bank are we currently in (relative to the start of the section)
+
+        // Data about the current bank
+        mutable unsigned m_bankStartIndex;  // index into m_fields for the start of this source
+        mutable uint32_t m_bankId;
+        mutable uint32_t m_eventCount;
+
 
 	BankedEventPkt(const uint8_t *data, uint32_t len);
 
@@ -176,14 +188,13 @@ public:
 
 	uint32_t pulseCharge(void) const { return m_fields[0]; }
 	uint32_t pulseEnergy(void) const { return m_fields[1]; }
-	uint32_t ringPeriod(void) const { return m_fields[2]; }
-	uint32_t cycle(void) const { return m_fields[3]; }
-	uint32_t flags(void) const { return m_fields[4]; }
+	uint32_t cycle(void) const { return m_fields[2]; }
+	uint32_t flags(void) const { return m_fields[3]; }
 
 	// TODO implment monitor/event accessors
 
 private:
-	uint32_t *m_fields;
+        const uint32_t *m_fields;
 
 	BeamMonitorPkt(const uint8_t *data, uint32_t len);
 
@@ -213,7 +224,7 @@ public:
 	}
 
 private:
-	uint32_t *m_fields;
+        const uint32_t *m_fields;
 
 	RunStatusPkt(const uint8_t *data, uint32_t len);
 
@@ -359,7 +370,7 @@ public:
 	uint32_t value(void) const { return m_fields[3]; }
 
 private:
-	uint32_t *m_fields;
+        const uint32_t *m_fields;
 
 	VariableU32Pkt(const uint8_t *data, uint32_t len);
 
@@ -379,10 +390,10 @@ public:
 		return static_cast<VariableSeverity::Enum>
 							(m_fields[2] & 0xffff);
 	}
-	double value(void) const { return *(double *) &m_fields[3]; }
+        double value(void) const { return *(const double *) &m_fields[3]; }
 
 private:
-	uint32_t *m_fields;
+        const uint32_t *m_fields;
 
 	VariableDoublePkt(const uint8_t *data, uint32_t len);
 
@@ -405,7 +416,7 @@ public:
 	const std::string &value(void) const { return m_val; }
 
 private:
-	uint32_t *m_fields;
+        const uint32_t *m_fields;
 	std::string m_val;
 
 	VariableStringPkt(const uint8_t *data, uint32_t len);
