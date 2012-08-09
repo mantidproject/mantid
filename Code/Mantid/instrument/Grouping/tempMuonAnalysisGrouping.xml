@@ -1,0 +1,14 @@
+<detector-grouping description="">
+	<group name="0">
+		<ids val="33-64"/>
+	</group>
+	<group name="1">
+		<ids val="1-32"/>
+	</group>
+	<pair name="long">
+		<forward-group val="0"/>
+		<backward-group val="1"/>
+		<alpha val="1.0"/>
+	</pair>
+	<default name="long"/>
+</detector-grouping>
