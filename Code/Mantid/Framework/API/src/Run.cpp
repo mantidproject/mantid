@@ -495,8 +495,11 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       {
         throw std::invalid_argument("Run::getPropertyAsSingleValue - Property \"" + name + "\" is not a single double or time series double.");
       }
-      // Put it in the cache
-      m_singleValueCache.setCache(key, singleValue);
+      PARALLEL_CRITICAL(Run_getPropertyAsSingleValue)
+      {
+        // Put it in the cache
+        m_singleValueCache.setCache(key, singleValue);
+      }
     }
     return singleValue;
   }
