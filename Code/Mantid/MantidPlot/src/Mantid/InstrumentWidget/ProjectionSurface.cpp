@@ -71,6 +71,7 @@ ProjectionSurface::~ProjectionSurface()
 void ProjectionSurface::resetInstrumentActor(const InstrumentActor* rootActor)
 {
   m_instrActor = rootActor;
+  connect(rootActor,SIGNAL(colorMapChanged()),this,SLOT(colorMapChanged()));
 }
 
 void ProjectionSurface::clear()
@@ -410,8 +411,8 @@ void ProjectionSurface::zoom(const QRectF& area)
     top += height;
     height = -height;
   }
-//  std::cerr<<"New area:\n";
-//  std::cerr<<left<<','<<top<<' '<<width<<','<<height<<'\n'<<'\n';
+  //std::cerr<<"New area:\n";
+  //std::cerr<<left<<','<<top<<' '<<width<<','<<height<<'\n'<<'\n';
   m_viewRect = QRectF(left,top,width,height);
   m_viewChanged = true;
 }

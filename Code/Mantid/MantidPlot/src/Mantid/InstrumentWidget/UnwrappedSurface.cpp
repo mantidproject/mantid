@@ -302,6 +302,7 @@ void UnwrappedSurface::cacheAllAssemblies()
   */
 void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 {
+
   int vwidth = widget->width();
   int vheight = widget->height();
   const double dw = fabs(m_viewRect.width() / vwidth);

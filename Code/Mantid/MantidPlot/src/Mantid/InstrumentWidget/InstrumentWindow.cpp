@@ -63,8 +63,17 @@ public:
   void setSurface(ProjectionSurface* surface){m_surface = surface;}
   /// Return the surface 
   ProjectionSurface* getSurface(){return m_surface;}
-  /// Refreshes the view
-  void refreshView()
+  /// Redraw the view
+  void updateView()
+  {
+    if(m_surface)
+    {
+      m_surface->updateView();
+      update();
+    }
+  }
+  /// Update the detector information (count values) and redraw
+  void updateDetectors()
   {
     if(m_surface)
     {
@@ -425,23 +434,15 @@ void InstrumentWindow::setupColorMap()
 void InstrumentWindow::tabChanged(int i)
 {
   ProjectionSurface* surface = getSurface();
-  QString text;
-  if(i != 1) // no picking
+  if ( !surface ) return;
+  if (i == 0)
   {
-    if (surface)
-    {
-      if (i == 0)
-      {
-        surface->componentSelected();
-        m_instrumentActor->accept(SetAllVisibleVisitor());
-      }
-    }
+    // if we changed from the instrument tree tab we may have some
+    // actors hidden, restore their visibility
+    m_instrumentActor->accept(SetAllVisibleVisitor());
   }
-  if (surface)
-  {
-    setInfoText(surface->getInfoText());
-    refreshInstrumentDisplay();
-  }
+  setInfoText(surface->getInfoText());
+  updateInstrumentView();
 }
 
 /**
@@ -469,7 +470,7 @@ void InstrumentWindow::changeColormap(const QString &filename)
   if( this->isVisible() )
   {
     setupColorMap();
-    refreshInstrumentDisplay();
+    updateInstrumentView();
   }
 }
 
@@ -692,9 +693,7 @@ void InstrumentWindow::setViewDirection(const QString& input)
   {
     p3d->setViewDirection(input);
   }
-  //mViewChanged = true;
-  //m_InstrumentDisplay->repaint();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
   repaint();
 }
 
@@ -850,7 +849,7 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
     }
 
     init( resetGeometry, autoscaling, scaleMin, scaleMax );
-    updateWindow();
+    updateInstrumentDetectors();
   }
 }
 
@@ -858,18 +857,6 @@ void InstrumentWindow::clearADSHandle()
 {
   confirmClose(false);
   close();
-}
-
-void InstrumentWindow::updateWindow()
-{
-  if ( isGLEnabled() )
-  {
-    m_InstrumentDisplay->refreshView();
-  }
-  else
-  {
-    m_simpleDisplay->refreshView();
-  }
 }
 
 /**
@@ -926,7 +913,7 @@ void InstrumentWindow::set3DAxesState(bool on)
   if (p3d)
   {
     p3d->set3DAxesState(on);
-    refreshInstrumentDisplay();
+    updateInstrumentView();
   }
 }
 
@@ -942,7 +929,7 @@ void InstrumentWindow::changeScaleType(int type)
 {
   m_instrumentActor->changeScaleType(type);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 void InstrumentWindow::changeColorMapMinValue(double minValue)
@@ -950,7 +937,7 @@ void InstrumentWindow::changeColorMapMinValue(double minValue)
   m_instrumentActor->setAutoscaling(false);
   m_instrumentActor->setMinValue(minValue);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 /// Set the maximumu value of the colour map
@@ -959,14 +946,14 @@ void InstrumentWindow::changeColorMapMaxValue(double maxValue)
   m_instrumentActor->setAutoscaling(false);
   m_instrumentActor->setMaxValue(maxValue);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 void InstrumentWindow::changeColorMapRange(double minValue, double maxValue)
 {
   m_instrumentActor->setMinMaxRange(minValue,maxValue);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 void InstrumentWindow::setWireframe(bool on)
@@ -976,7 +963,7 @@ void InstrumentWindow::setWireframe(bool on)
   {
     p3d->setWireframe(on);
   }
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 /**
@@ -986,7 +973,7 @@ void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
 {
   m_instrumentActor->setIntegrationRange(xmin,xmax);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentDetectors();
   if (getTab() == PICK)
   {
     m_pickTab->changedIntegrationRange(xmin,xmax);
@@ -1253,7 +1240,7 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
     if (pws && surface)
     {
       surface->setPeaksWorkspace(pws);
-      refreshInstrumentDisplay();
+      updateInstrumentView();
       e->accept();
       return;
     }
@@ -1311,7 +1298,7 @@ void InstrumentWindow::setColorMapAutoscaling(bool on)
 {
   m_instrumentActor->setAutoscaling(on);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 /**
@@ -1403,16 +1390,29 @@ int InstrumentWindow::getInstrumentDisplayHeight() const
   return m_InstrumentDisplay->height();
 }
 
-/// Refresh the instrument display
-void InstrumentWindow::refreshInstrumentDisplay()
+/// Redraw the instrument view
+void InstrumentWindow::updateInstrumentView()
 {
   if ( isGLEnabled() )
   {
-    m_InstrumentDisplay->refreshView();
+    m_InstrumentDisplay->updateView();
   }
   else
   {
-    m_simpleDisplay->refreshView();
+    m_simpleDisplay->updateView();
+  }
+}
+
+/// Recalculate the colours and redraw the instrument view
+void InstrumentWindow::updateInstrumentDetectors()
+{
+  if ( isGLEnabled() )
+  {
+    m_InstrumentDisplay->updateDetectors();
+  }
+  else
+  {
+    m_simpleDisplay->updateDetectors();
   }
 }
 

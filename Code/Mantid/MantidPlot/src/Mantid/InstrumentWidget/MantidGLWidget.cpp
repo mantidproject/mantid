@@ -303,7 +303,7 @@ void MantidGLWidget::enableLighting(bool on)
   if (surface3D)
   {
     surface3D->enableLighting( on );
-    refreshView();
+    updateView();
   }
 }
 
@@ -328,7 +328,13 @@ void MantidGLWidget::componentSelected(Mantid::Geometry::ComponentID id)
   }
 }
 
-void MantidGLWidget::refreshView()
+void MantidGLWidget::updateView()
+{
+  m_surface->updateView();
+  update();
+}
+
+void MantidGLWidget::updateDetectors()
 {
   m_surface->updateDetectors();
   update();

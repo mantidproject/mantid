@@ -297,7 +297,7 @@ void InstrumentActor::resetColors()
 
   auto shared_workspace = getWorkspace();
 
-  Instrument_const_sptr inst = shared_workspace->getInstrument();
+  Instrument_const_sptr inst = getInstrument();
 
   //PARALLEL_FOR1(m_workspace)
   for (int iwi=0; iwi < int(m_specIntegrs.size()); iwi++)
