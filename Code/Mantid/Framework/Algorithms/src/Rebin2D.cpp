@@ -117,6 +117,12 @@ namespace Mantid
 
       this->useFractionalArea = getProperty("UseFractionalArea");
       MatrixWorkspace_sptr outputWS = createOutputWorkspace(inputWS, newXBins.access(), newYBins);
+      if(this->useFractionalArea && !boost::dynamic_pointer_cast<RebinnedOutput>(outputWS))
+      {
+        g_log.warning("Fractional area tracking requires the input workspace to contain calculated bin fractions from a parallelpiped rebin like SofQW"
+                      "Continuing without fractional area tracking");
+        this->useFractionalArea = false;
+      }
 
       //Progress reports & cancellation
       const size_t nreports(static_cast<size_t>(inputWS->getNumberHistograms()*inputWS->blocksize()));
