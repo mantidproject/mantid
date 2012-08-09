@@ -295,11 +295,9 @@ void Qxy::exec()
     MatrixWorkspace_sptr ws_sumOfCounts = WorkspaceFactory::Instance().create(outputWorkspace);
     for (size_t i = 0; i < ws_sumOfCounts->getNumberHistograms(); i++)
     {
-      for ( size_t j = 0; j < ws_sumOfCounts->dataY(i).size(); j++ )
-      {
-        ws_sumOfCounts->dataY(i)[j] = outputWorkspace->dataY(i)[j];
-        ws_sumOfCounts->dataE(i)[j] = outputWorkspace->dataE(i)[j];
-      }
+      ws_sumOfCounts->dataX(i) = outputWorkspace->dataX(i);
+      ws_sumOfCounts->dataY(i) = outputWorkspace->dataY(i);
+      ws_sumOfCounts->dataE(i) = outputWorkspace->dataE(i);
     }  
 
     helper.outputParts(this, ws_sumOfCounts, weights);

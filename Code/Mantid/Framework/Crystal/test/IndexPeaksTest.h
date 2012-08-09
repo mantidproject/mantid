@@ -75,6 +75,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", WSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Tolerance","0.1") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("RoundHKLs",false) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -89,30 +90,86 @@ public:
     // Check the output properties
     int numIndexed = alg.getProperty("NumIndexed");
     TS_ASSERT_EQUALS( numIndexed, 43);
+
     double averageError = alg.getProperty("AverageError");
     TS_ASSERT_DELTA( averageError, 0.0097, 1e-3);
 
-                                     // spot check a few peaks
-    V3D peak_0_hkl ( -4, -1, -6 );   // first peak
+                                       // spot check a few peaks for
+                                       // fractional Miller indices
+
+    V3D peak_0_hkl_d ( -4.03065, -0.9885090, -6.01095 );   // first peak
+    V3D peak_1_hkl_d ( -2.99276,  0.9955220, -4.00375 );
+    V3D peak_2_hkl_d ( -3.99311,  0.9856010, -5.00772 );
+    V3D peak_10_hkl_d( -3.01107, -0.0155531, -7.01377 );
+    V3D peak_42_hkl_d( -1.97065,  4.0283600, -6.97828 );   // last peak
+    
+    V3D error = peak_0_hkl_d -peaks[ 0].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 1e-4 );
+
+    error = peak_1_hkl_d  -peaks[ 1].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 1e-4 );
+
+    error = peak_2_hkl_d  -peaks[ 2].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 1e-4 );
+
+    error = peak_10_hkl_d -peaks[10].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 1e-4 );
+
+    error = peak_42_hkl_d -peaks[42].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 1e-4 );
+
+                                    // clear all the peak indexes then 
+                                    // re-run the algorithm, rounding the HKLs
+                                    // this time, and again check a few peaks
+    for ( size_t i = 0; i < n_peaks; i++ )
+    {
+      peaks[i].setHKL( V3D(0,0,0) );
+    }
+
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("PeaksWorkspace", WSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Tolerance","0.1") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("RoundHKLs",true) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+                                       // Check that the peaks were all indexed 
+    for ( size_t i = 0; i < n_peaks; i++ )
+    {
+      TS_ASSERT( IndexingUtils::ValidIndex( peaks[i].getHKL(), tolerance ) );
+    }
+
+    // Check the output properties
+    numIndexed = alg.getProperty("NumIndexed");
+    TS_ASSERT_EQUALS( numIndexed, 43);
+
+    averageError = alg.getProperty("AverageError");
+    TS_ASSERT_DELTA( averageError, 0.0097, 1e-3);
+
+                                     // spot check a few peaks for 
+                                     // integer Miller indices
+    V3D peak_0_hkl ( -4, -1, -6 );
     V3D peak_1_hkl ( -3,  1, -4 );
     V3D peak_2_hkl ( -4,  1, -5 );
     V3D peak_10_hkl( -3,  0, -7 );
     V3D peak_42_hkl( -2,  4, -7 );   // last peak
-    
-    V3D error = peak_0_hkl -peaks[ 0].getHKL();
-    TS_ASSERT_DELTA( error.norm(), 0.0, 0.1 );
+
+    error = peak_0_hkl -peaks[ 0].getHKL();
+    TS_ASSERT_DELTA( error.norm(), 0.0, 1e-10 );
 
     error = peak_1_hkl  -peaks[ 1].getHKL();
-    TS_ASSERT_DELTA( error.norm(), 0.0, 0.1 );
+    TS_ASSERT_DELTA( error.norm(), 0.0, 1e-10 );
 
     error = peak_2_hkl  -peaks[ 2].getHKL();
-    TS_ASSERT_DELTA( error.norm(), 0.0, 0.1 );
+    TS_ASSERT_DELTA( error.norm(), 0.0, 1e-10 );
 
     error = peak_10_hkl -peaks[10].getHKL();
-    TS_ASSERT_DELTA( error.norm(), 0.0, 0.1 );
+    TS_ASSERT_DELTA( error.norm(), 0.0, 1e-10 );
 
     error = peak_42_hkl -peaks[42].getHKL();
-    TS_ASSERT_DELTA( error.norm(), 0.0, 0.1 );
+    TS_ASSERT_DELTA( error.norm(), 0.0, 1e-10 );
+
                                      // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(WSName);
   }

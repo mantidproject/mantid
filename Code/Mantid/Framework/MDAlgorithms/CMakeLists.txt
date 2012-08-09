@@ -8,7 +8,6 @@ set ( SRC_FILES
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMD.cpp
-	src/ConvertToMDEvents.cpp
 	src/DampedHisenbergFMSW.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
@@ -30,18 +29,18 @@ set ( SRC_FILES
 	src/PlusMD.cpp
 	src/PowerMD.cpp
 	src/QuadEnBackground.cpp
+	src/Quantification/CachedExperimentInfo.cpp
 	src/Quantification/FitResolutionConvolvedModel.cpp
 	src/Quantification/ForegroundModel.cpp
 	src/Quantification/ForegroundModelFactory.cpp
 	src/Quantification/MDResolutionConvolution.cpp
 	src/Quantification/MDResolutionConvolutionFactory.cpp
 	src/Quantification/Models/Strontium122.cpp
-	src/Quantification/Observation.cpp
-	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/Resolution/ModeratorChopperResolution.cpp
 	src/Quantification/Resolution/TobyFitBMatrix.cpp
 	src/Quantification/Resolution/TobyFitResolutionModel.cpp
 	src/Quantification/Resolution/TobyFitYVector.cpp
+	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
 	src/RunParam.cpp
 	src/SaveZODS.cpp
@@ -54,6 +53,12 @@ set ( SRC_FILES
 	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
+# Old TMD convertToMD code prepared for deprication:	
+	src/ConvertToMDEvents.cpp	
+	src/ConvertToMDEventsParams.cpp
+	src/ConvertToMDEventsSubalgFactory.cpp
+	src/ConvertToMDEventsWSBase.cpp
+	
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -68,7 +73,6 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
-	inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
@@ -91,18 +95,18 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/PlusMD.h
 	inc/MantidMDAlgorithms/PowerMD.h
 	inc/MantidMDAlgorithms/QuadEnBackground.h
+	inc/MantidMDAlgorithms/Quantification/CachedExperimentInfo.h
 	inc/MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/Quantification/ForegroundModel.h
 	inc/MantidMDAlgorithms/Quantification/ForegroundModelFactory.h
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolution.h
 	inc/MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h
 	inc/MantidMDAlgorithms/Quantification/Models/Strontium122.h
-	inc/MantidMDAlgorithms/Quantification/Observation.h
-	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h
+	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/RunParam.h
 	inc/MantidMDAlgorithms/SaveZODS.h
@@ -116,6 +120,21 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/WeightedMeanMD.h
 	inc/MantidMDAlgorithms/XorMD.h
+# Old TMD convertToMD code prepared for deprication:
+    inc/MantidMDAlgorithms/ConvertToMDEvents.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h 
+	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h 	
+	inc/MantidMDAlgorithms/ConvertToMDEventsEventWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsHistoWS.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfInterface.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfModQ.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfNoQ.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsTransfQ3D.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
+	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h	
+	inc/MantidMDAlgorithms/ConvertToMDEventsWSBase.h	
 )
 
 # Test files. Other source files required.
@@ -126,6 +145,7 @@ set ( TEST_FILES
 	#test/CreateMDFitWorkspaceTest.h
 	test/AndMDTest.h
 	test/BooleanBinaryOperationMDTest.h
+	test/CachedExperimentInfoTest.h
 	test/CobaltSWDTest.h
 	test/CompareMDWorkspacesTest.h
 	test/ConvertEventsToMDTest.h
@@ -153,7 +173,6 @@ set ( TEST_FILES
 	test/ModeratorChopperResolutionTest.h
 	test/MultiplyMDTest.h
 	test/NotMDTest.h
-	test/ObservationTest.h
 	test/OrMDTest.h
 	test/PlusMDTest.h
 	test/PowerMDTest.h
@@ -163,6 +182,7 @@ set ( TEST_FILES
 	test/SaveZODSTest.h
 	test/SetMDUsingMaskTest.h
 	test/SimulateMDDTest.h
+	test/SimulateResolutionConvolvedModelTest.h
 	test/SimulateResolutionTest.h
 	test/Strontium122Test.h
 	test/TobyFitBMatrixTest.h
@@ -173,6 +193,8 @@ set ( TEST_FILES
 	test/UnaryOperationMDTest.h
 	test/WeightedMeanMDTest.h
 	test/XorMDTest.h
+# Old TMD convertToMD code prepared for deprication:
+#    test/ConvertToMDEventsUnitsConvTest.h 
 )
 
 set ( GMOCK_TEST_FILES

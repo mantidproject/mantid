@@ -39,23 +39,6 @@ public:
     MDResolutionConvolutionFactory::Instance().unsubscribe("FakeConvolution");
   }
 
-  void test_functionMD_Throws_If_Foreground_And_ResolutionModel_Attrs_Have_Not_Been_Set()
-  {
-    using namespace Mantid::MDAlgorithms;
-    using namespace Mantid::API;
-
-    Mantid::API::IMDWorkspace_sptr testWS = createTestMDWorkspace();
-    Mantid::API::IMDIterator *box = testWS->createIterator();
-    FunctionDomainMD mdDomain(testWS,0,box->getDataSize());
-    FunctionValues output;
-
-
-    IFunction * crossSecResolution = new ResolutionConvolvedCrossSection;
-    TS_ASSERT_THROWS(crossSecResolution->function(mdDomain, output), std::runtime_error);
-    delete box;
-    delete crossSecResolution;
-  }
-
   void test_functionMD_Does_Not_Throw_With_Foreground_And_ResolutionModel_Attrs_Set()
   {
     using namespace Mantid::MDAlgorithms;
@@ -66,7 +49,7 @@ public:
     FunctionValues output;
 
     IFunction * crossSecResolution = createInitializedTestConvolution();
-
+    crossSecResolution->setWorkspace(testWS);
     // TODO: Needs a better input workspace
     //TS_ASSERT_THROWS_NOTHING(crossSecResolution->function(mdDomain, output));
     delete box;
@@ -90,7 +73,7 @@ public:
     delete crossSection;
   }
 
-  void test_Function_Acquires_Attributes_From_ResolutionType_When_Set()
+  void test_Function_Acquires_Attributes_From_ResolutionType_And_ForegroundModel_When_Set()
   {
     using namespace Mantid::MDAlgorithms;
     using namespace Mantid::API;
@@ -101,7 +84,7 @@ public:
     const size_t startingNAttrs = crossSection.nAttributes();
     crossSection.setAttributeValue("ResolutionFunction", "FakeConvolution");
 
-    TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 2);
+    TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 4);
   }
 
   void test_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()
@@ -121,8 +104,7 @@ public:
     Mantid::API::IMDIterator *box = testWS->createIterator();
     FunctionDomainMD mdDomain(testWS,0,box->getDataSize());
     FunctionValues output(mdDomain);
-
-
+    crossSection->setWorkspace(testWS);
     crossSection->setAttributeValue("ConvAtt0", 100.3);
     // Fake function throws if attribute value has not changed
     TS_ASSERT_THROWS_NOTHING(crossSection->function(mdDomain, output));

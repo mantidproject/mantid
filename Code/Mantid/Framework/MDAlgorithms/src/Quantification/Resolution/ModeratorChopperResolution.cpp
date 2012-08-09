@@ -1,6 +1,6 @@
 // Includes
 #include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
@@ -18,7 +18,7 @@ namespace Mantid
      * Constructor taking an observation object
      * @param observation :: An event containing an experiment description & detector ID
      */
-    ModeratorChopperResolution::ModeratorChopperResolution(const Observation & observation) :
+    ModeratorChopperResolution::ModeratorChopperResolution(const CachedExperimentInfo & observation) :
       m_observation(observation), m_modChopDist(0.0), m_chopSampleDist(0.0)
     {
       initCaches();
@@ -40,7 +40,7 @@ namespace Mantid
     {
       const static double mevToSpeedSq = 2.0*PhysicalConstants::meV/PhysicalConstants::NeutronMass;
       const double efixed = m_observation.getEFixed();
-      const Kernel::DeltaEMode::Type emode = m_observation.experimentInfo()->getEMode();
+      const Kernel::DeltaEMode::Type emode = m_observation.experimentInfo().getEMode();
       const double sampleToDetDist = m_observation.sampleToDetectorDistance();
 
       double ei(0.0), ef(0.0);
@@ -78,7 +78,7 @@ namespace Mantid
      */
     void ModeratorChopperResolution::initCaches()
     {
-      Instrument_const_sptr instr = m_observation.experimentInfo()->getInstrument();
+      Instrument_const_sptr instr = m_observation.experimentInfo().getInstrument();
       IObjComponent_const_sptr source = instr->getSource();
 
       m_modChopDist = m_observation.moderatorToFirstChopperDistance();

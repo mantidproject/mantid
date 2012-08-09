@@ -30,6 +30,7 @@ namespace IDA
 
   private:
     QDoubleValidator * m_dblVal;
+    QDoubleValidator * m_posDblVal;
   };
 } // namespace IDA
 } // namespace CustomInterfaces

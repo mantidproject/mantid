@@ -552,6 +552,32 @@ public:
 };
 
 
+//=================================================================================================
+/// Time In Second
+class MANTID_KERNEL_DLL Time : public Unit
+{
+public:
+  const std::string unitID() const; ///< "Time"
+  const std::string caption() const { return "t"; }
+  const std::string label() const {return "Second"; }
+
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual void init();
+  virtual Unit * clone() const;
+
+  /// Constructor
+  Time();
+  /// Destructor
+  ~Time() {}
+
+protected:
+  double factorTo; ///< Constant factor for to conversion
+  double factorFrom; ///< Constant factor for from conversion
+};
+
+
+
 } // namespace Units
 
 } // namespace Kernel

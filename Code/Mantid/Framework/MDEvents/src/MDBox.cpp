@@ -2,6 +2,8 @@
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidKernel/DiskBuffer.h"
+#include "MantidMDEvents/MDGridBox.h"
+#include "MantidMDEvents/BoxCtrlChangesList.h"
 
 using Mantid::Kernel::DiskBuffer;
 using namespace Mantid::API;
@@ -38,7 +40,7 @@ namespace MDEvents
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
     this->setId( splitter->getNextId() );
-  }
+   }
 
   //-----------------------------------------------------------------------------------------------
   /** Constructor
@@ -58,6 +60,7 @@ namespace MDEvents
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
     this->setId( splitter->getNextId() );
+
   }
 
 
@@ -501,6 +504,36 @@ namespace MDEvents
 #endif
 
     dataMutex.unlock();
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add a MDEvent to the box.
+   // add a single event and set pounter to the box which needs splitting (if one actually need) 
+
+   * @param point :: reference to a MDEvent to add.
+   * @returns  :: pointer to itself if the box should be split or NULL if not yet
+   * */
+  TMDE(
+  void MDBox)::addAndTraceEvent( const MDE & point, size_t index)
+  {
+    dataMutex.lock();
+    this->data.push_back(point);
+
+    // Yes, we added some data
+    this->m_dataAdded = true;
+    dataMutex.unlock();
+
+    // When we reach the split threshold exactly, track that the MDBox is too small
+    // We check on equality and not >= to only add a box once.
+    if (this->data.size() == this->m_BoxController->getSplitThreshold())
+    {     
+       auto BoxCtrl = dynamic_cast<BoxCtrlChangesList<MDBoxToChange<MDE,nd> >*>(this->m_BoxController.get());
+       BoxCtrl->addBoxToSplit(MDBoxToChange<MDE,nd>(this,index));
+
+    }
+
+
+
   }
 
   //-----------------------------------------------------------------------------------------------

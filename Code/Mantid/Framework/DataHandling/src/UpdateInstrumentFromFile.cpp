@@ -147,7 +147,21 @@ namespace Mantid
         throw std::runtime_error("Input file does not look like an ISIS NeXus file.");
       }
       ::NeXus::File nxFile(filename);
-      nxFile.openPath("raw_data_1/isis_vms_compat");
+      try
+      {
+        nxFile.openPath("raw_data_1/isis_vms_compat");
+      }
+      catch(::NeXus::Exception&)
+      {
+        try
+        {
+          nxFile.openPath("entry/isis_vms_compat"); // Could be original event file.
+        }
+        catch(::NeXus::Exception&)
+        {
+          throw std::runtime_error("Unknown NeXus flavour. Cannot update instrument positions.");
+        }
+      }
       // Det ID
       std::vector<int32_t> detID;
       nxFile.openData("UDET");

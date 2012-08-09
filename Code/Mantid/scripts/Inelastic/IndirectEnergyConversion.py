@@ -110,7 +110,7 @@ def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=True,
             Integration(InputWorkspace=root, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
                 StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)
         else:
-            FlatBackground(root, sfile, StartX=xrange[2], EndX=xrange[3], 
+            FlatBackground(InputWorkspace=root, OutputWorkspace=sfile, StartX=xrange[2], EndX=xrange[3], 
                     Mode='Mean')
             Integration(InputWorkspace=sfile, OutputWorkspace=sfile, RangeLower=xrange[0], RangeUpper=xrange[1],
                 StartWorkspaceIndex=0, EndWorkspaceIndex=nhist-1)

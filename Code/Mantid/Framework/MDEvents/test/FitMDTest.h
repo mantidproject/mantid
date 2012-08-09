@@ -4,17 +4,16 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/FakeObjects.h"
 
-#include "MantidCurveFitting/Fit.h"
-#include "MantidCurveFitting/UserFunctionMD.h"
-
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidMDEvents/UserFunctionMD.h"
 
 #include <sstream>
 
 using namespace Mantid;
-using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
 
 class IMDWorkspaceTester;
@@ -144,30 +143,30 @@ public:
       }
     }
 
-    API::IFunction_sptr fun(new UserFunctionMD);
+    API::IFunction_sptr fun(new Mantid::MDEvents::UserFunctionMD);
     fun->setAttributeValue("Formula","h + y + (s + 0.1*y) * x");
     fun->setParameter("h",1.0);
     fun->setParameter("s",1.0);
 
-    Fit fit;
-    fit.initialize();
+    API::IAlgorithm_sptr fit = API::AlgorithmManager::Instance().create("Fit");
+    fit->initialize();
 
-    fit.setProperty("Function",fun);
-    fit.setProperty("InputWorkspace",ws2);
-    fit.setProperty("CreateOutput",true);
-    fit.setPropertyValue("Minimizer","Levenberg-MarquardtMD");
+    fit->setProperty("Function",fun);
+    fit->setProperty("InputWorkspace",ws2);
+    fit->setProperty("CreateOutput",true);
+    fit->setPropertyValue("Minimizer","Levenberg-MarquardtMD");
 
-    fit.execute();
+    fit->execute();
 
-    TS_ASSERT(fit.isExecuted());
+    TS_ASSERT(fit->isExecuted());
 
     TS_ASSERT_DELTA( fun->getParameter("h"), 10.0, 1e-3);
     TS_ASSERT_DELTA( fun->getParameter("s"), 0.5, 1e-4);
 
-    double chi2 = fit.getProperty("OutputChi2overDoF");
+    double chi2 = fit->getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA(chi2, 0.0, 1e-8);
     //TS_ASSERT_DIFFERS(chi2, 0.0);
-    TS_ASSERT_EQUALS(fit.getPropertyValue("OutputStatus"), "success");
+    TS_ASSERT_EQUALS(fit->getPropertyValue("OutputStatus"), "success");
 
     //ITableWorkspace_sptr covar = boost::dynamic_pointer_cast<ITableWorkspace>(
     //  API::AnalysisDataService::Instance().retrieve("Output_NormalisedCovarianceMatrix"));

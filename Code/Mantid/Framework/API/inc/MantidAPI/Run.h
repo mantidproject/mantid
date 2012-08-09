@@ -116,16 +116,15 @@ namespace Mantid
       /// Returns the bin boundaries for a given value
       std::pair<double, double> histogramBinBoundaries(const double energyValue) const;
 
-      /** @return a reference to the Goniometer object for this run */
-      Mantid::Geometry::Goniometer & getGoniometer()
-      { return m_goniometer; }
-
-      /** @return a reference to the const Goniometer object for this run */
-      const Mantid::Geometry::Goniometer & getGoniometer() const
-      { return m_goniometer; }
+      /// Set the gonoimeter & read the values from the logs if told to do so
+      void setGoniometer(const Geometry::Goniometer & goniometer, const bool useLogValues);
+      /** @return A reference to the const Goniometer object for this run */
+      inline const Geometry::Goniometer & getGoniometer() const { return m_goniometer; }
+      /** @return A reference to the non-const Goniometer object for this run */
+      inline Geometry::Goniometer & mutableGoniometer() { return m_goniometer; }
 
       // Retrieve the goniometer rotation matrix
-      Mantid::Kernel::DblMatrix getGoniometerMatrix();
+      const Kernel::DblMatrix & getGoniometerMatrix() const;
 
       /**
        * Add a log entry
@@ -164,15 +163,9 @@ namespace Mantid
     private:
       /// Adds all the time series in from one property manager into another
       void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd);
+      /// Calculate the gonoimeter matrix
+      void calculateGoniometerMatrix();
 
-      /// The number of properties that are summed when two workspaces are summed
-      static const int ADDABLES;
-      /// The names of the properties to sum when two workspaces are summed
-      static const std::string ADDABLE[];
-      /// The name of the proton charge property
-      static const char *PROTON_CHARGE_LOG_NAME;
-      /// The name of the histogram bins property
-      static const char *HISTOGRAM_BINS_LOG_NAME;
       /// Static reference to the logger class
       static Kernel::Logger &g_log;
 
@@ -180,6 +173,8 @@ namespace Mantid
       Kernel::PropertyManager m_manager;
       /// Goniometer for this run
       Mantid::Geometry::Goniometer m_goniometer;
+      /// A set of histograms that can be stored here for future reference
+      std::vector<double> m_histoBins;
 
       /// Cache type for single value logs
       typedef Kernel::Cache<std::pair<std::string,Kernel::Math::StatisticType>, double> SingleValueCache;

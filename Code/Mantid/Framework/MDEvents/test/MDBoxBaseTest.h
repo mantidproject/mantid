@@ -67,6 +67,10 @@ public:
   /// Add a single event
   virtual void addEvent(const MDE & /*point*/)
   {}
+  /// Add a single event and trace it if the box it has been added may need splitting 
+  virtual void addAndTraceEvent(const MDE & /*point*/,size_t /*index */)
+  {}
+
 
   /// Add a single event
   virtual void addEventUnsafe(const MDE & /*point*/)

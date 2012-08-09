@@ -108,7 +108,7 @@ public:
 
     TS_ASSERT_DELTA(ikmod->sampleTimeDistribution(0.01), -34.7497173585, 1e-10);
     TS_ASSERT_DELTA(ikmod->sampleTimeDistribution(0.1), -25.7229939652, 1e-10);
-    TS_ASSERT_DELTA(ikmod->sampleTimeDistribution(0.7), 8.34288143023, 1e-10);
+    TS_ASSERT_DELTA(ikmod->sampleTimeDistribution(0.7), 8.3428814324, 1e-10);
   }
 
   void test_sampleTimeDistribution_With_Value_Equal_To_One_Returns_998_Times_Mean()

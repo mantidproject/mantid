@@ -65,8 +65,8 @@ namespace Crystal
   /// Sets documentation strings for this algorithm
   void FilterPeaks::initDocs()
   {
-    this->setWikiSummary("Filters the peaks in a peaks workspace based upon a chosen  ");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    this->setWikiSummary("Filters the peaks in a peaks workspace based upon the value of a chosen variable.");
+    this->setOptionalMessage("Filters the peaks in a peaks workspace based upon the valur of a chosen variable.");
   }
 
   /** Initialize the algorithm's properties.
@@ -77,8 +77,8 @@ namespace Crystal
     declareProperty(new WorkspaceProperty<IPeaksWorkspace>("OutputWorkspace","",Direction::Output), "The filtered workspace");
 
     std::vector<std::string> filters;
-    filters.push_back("H+K+L");
-    filters.push_back("H2+K2+L2");
+    filters.push_back("h+k+l");
+    filters.push_back("h^2+k^2+l^2");
     filters.push_back("Intensity");
     filters.push_back("Signal/Noise");
     declareProperty("FilterVariable","",boost::make_shared<StringListValidator>(filters),"The variable on which to filter the peaks");
@@ -109,9 +109,9 @@ namespace Crystal
 
     const std::string FilterVariable = getProperty("FilterVariable");
     double (*variable)(const Mantid::DataObjects::Peak &) = 0;
-    if ( FilterVariable == "H+K+L" )
+    if ( FilterVariable == "h+k+l" )
       variable = &HKLSum;
-    else if ( FilterVariable == "H2+K2+L2" )
+    else if ( FilterVariable == "h^2+k^2+l^2" )
       variable = &HKL2;
     else if ( FilterVariable == "Intensity" )
       variable = &intensity;

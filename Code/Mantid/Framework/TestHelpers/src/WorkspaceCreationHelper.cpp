@@ -34,7 +34,7 @@ namespace WorkspaceCreationHelper
   using Mantid::MantidVec;
   using Mantid::MantidVecPtr;
   // mock algorighm
-  Kernel::Logger& MockAlgorithm::a_log =Logger::get("test-Algorithms");
+  Kernel::Logger& MockAlgorithm::g_log =Logger::get("test-Algorithms");
   MockAlgorithm::MockAlgorithm(size_t nSteps)
   {
       m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0,1,nSteps));
@@ -722,7 +722,9 @@ namespace WorkspaceCreationHelper
     AddTSPEntry( ws->mutableRun(), "phi", phi);
     AddTSPEntry( ws->mutableRun(), "chi", chi);
     AddTSPEntry( ws->mutableRun(), "omega", omega);
-    ws->mutableRun().getGoniometer().makeUniversalGoniometer();
+    Mantid::Geometry::Goniometer gm;
+    gm.makeUniversalGoniometer();
+    ws->mutableRun().setGoniometer(gm, true);
   }
 
   //
@@ -747,7 +749,9 @@ namespace WorkspaceCreationHelper
         AddTSPEntry( ws->mutableRun(), "phi", 0);
         AddTSPEntry( ws->mutableRun(), "chi", 0);
         AddTSPEntry( ws->mutableRun(), "omega", 0);
-        ws->mutableRun().getGoniometer().makeUniversalGoniometer();
+        Mantid::Geometry::Goniometer gm;
+        gm.makeUniversalGoniometer();
+        ws->mutableRun().setGoniometer(gm, true);
     }
 
     return ws;  
@@ -821,7 +825,9 @@ namespace WorkspaceCreationHelper
     AddTSPEntry( ws->mutableRun(), "phi", 0);
     AddTSPEntry( ws->mutableRun(), "chi", 0);
     AddTSPEntry( ws->mutableRun(), "omega", 0);
-    ws->mutableRun().getGoniometer().makeUniversalGoniometer();
+    Mantid::Geometry::Goniometer gm;
+    gm.makeUniversalGoniometer();
+    ws->mutableRun().setGoniometer(gm, true);
  
 
     return ws;  

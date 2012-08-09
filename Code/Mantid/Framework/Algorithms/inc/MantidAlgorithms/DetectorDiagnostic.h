@@ -63,6 +63,7 @@ namespace Mantid
       virtual void init();
       virtual void exec();
       void applyMask(API::MatrixWorkspace_sptr inputWS, API::MatrixWorkspace_sptr maskWS);
+      void doDetVanTest(API::MatrixWorkspace_sptr inputWS, API::MatrixWorkspace_sptr maskWS, int & nFails);
 
     protected:
       /// Get the total counts for each spectra
@@ -116,6 +117,16 @@ namespace Mantid
 
       /// number of parents up, 0 go to instrument
       int m_parents;
+      /// The number of tests to be run
+      double m_progStepWidth;
+      /// Starting workspace index to run tests on
+      int m_minIndex;
+      /// Ending workspace index to run tests on
+      int m_maxIndex;
+      /// Starting x-axis value for integrations
+      double m_rangeLower;
+      /// Ending x-axis value for integrations
+      double m_rangeUpper;
       //@}
 
       

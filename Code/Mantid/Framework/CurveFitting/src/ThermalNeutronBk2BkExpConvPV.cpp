@@ -203,6 +203,9 @@ double ThermalNeutronBk2BkExpConvPV::calCubicDSpace(double a, int h, int k, int 
 void ThermalNeutronBk2BkExpConvPV::calHandEta(double sigma2, double gamma, double& H, double& eta) const
 {
   // 1. Calculate H
+    // FIXME
+    // LOOK@ WHY NO CHANGE IN PLOT WITH DIFFERENT H AND SIMGA?
+
   double H_G = sqrt(8.0 * sigma2 * log(2.0));
   double H_L = gamma;
 

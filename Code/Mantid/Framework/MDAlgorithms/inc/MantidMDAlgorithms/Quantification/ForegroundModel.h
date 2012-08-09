@@ -21,9 +21,8 @@
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#include "MantidAPI/ParamFunctionAttributeHolder.h"
 #include "MantidAPI/ExperimentInfo.h"
-
+#include "MantidAPI/ParamFunctionAttributeHolder.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 
 namespace Mantid
@@ -35,9 +34,9 @@ namespace Mantid
      * to be combined with a resolution calculation.
      *
      * A concrete model should override the following functions
-     *  - declareParamters()         : Defines the parameters within the model
+     *  - declareParameters()         : Defines the parameters within the model
      *  - scatteringIntensity() : Returns a value for the cross section with the
-     *                     current parameters
+     *                            current parameters
      */
     class DLLExport ForegroundModel: public API::ParamFunctionAttributeHolder
     {
@@ -50,9 +49,13 @@ namespace Mantid
       /// Constructor taking the fitted function to access the current parameter values
       ForegroundModel(const API::IFunction & fittingFunction);
 
+      /// Returns the type of model
+      virtual ModelType modelType() const = 0;
+      /// Calculates the intensity for the model for the current parameters, expt description & ND point
+      virtual double scatteringIntensity(const API::ExperimentInfo & exptSetup, const std::vector<double> & point) const = 0;
+
       /// Set a reference to the convolved fitting function. Needed as we need a default constructor
       void setFunctionUnderMinimization(const API::IFunction & fitFunction);
-
       /// Declares the parameters
       void declareParameters();
       /// Return the initial value of the parameter according to the fit by index
@@ -63,12 +66,6 @@ namespace Mantid
       double getCurrentParameterValue(const size_t index) const;
       /// Return the current parameter according to the fit by name
       double getCurrentParameterValue(const std::string& name) const;
-
-      /// Returns the type of model
-      virtual ModelType modelType() const = 0;
-
-      /// Calculates the intensity for the model for the current parameters, expt description & ND point
-      virtual double scatteringIntensity(const API::ExperimentInfo & exptSetup, const std::vector<double> & point) const = 0;
 
     protected:
       /// Returns a reference to the fitting function
@@ -81,12 +78,10 @@ namespace Mantid
       void function(const Mantid::API::FunctionDomain&, Mantid::API::FunctionValues&) const {}
 
       /// Hide these
-      using ParamFunctionAttributeHolder::getParameter;
+      using ParamFunction::getParameter;
 
       /// A (non-owning) pointer to the function undergoing fitting
       const API::IFunction * m_fittingFunction;
-      /// A (non-owning) pointer to an experiment info
-      const API::ExperimentInfo * m_exptInfo;
       /// An offset for the number of parameters that were declared before this one
       size_t m_parOffset;
     };

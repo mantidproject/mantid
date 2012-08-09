@@ -1,10 +1,10 @@
-#ifndef MANTID_CURVEFITTING_FITMD_H_
-#define MANTID_CURVEFITTING_FITMD_H_
+#ifndef MANTID_MDEVENTS_FITMD_H_
+#define MANTID_MDEVENTS_FITMD_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/IDomainCreator.h"
+#include "MantidAPI/IDomainCreator.h"
 
 namespace Mantid
 {
@@ -17,7 +17,7 @@ namespace Mantid
     class IMDWorkspace;
   }
 
-  namespace CurveFitting
+  namespace MDEvents
   {
     /**
     Creates FunctionDomainMD from an IMDWorkspace. Does not create any properties.
@@ -44,22 +44,32 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
-    class DLLExport FitMD : public IDomainCreator
+     */
+    class DLLExport FitMD : public API::IDomainCreator
     {
     public:
+      /// Default constructor
+      FitMD();
       /// Constructor
       FitMD(Kernel::IPropertyManager* fit, const std::string& workspacePropertyName, DomainType domainType = Simple);
       /// Constructor
-      FitMD(DomainType domainType = Simple)
-        :IDomainCreator(NULL,std::vector<std::string>(),domainType),
+      FitMD(DomainType domainType)
+      : API::IDomainCreator(NULL,std::vector<std::string>(),domainType),
         m_startIndex(0),m_count(0){}
+      /// Initialize
+      void initialize(Kernel::IPropertyManager* pm, const std::string& workspacePropertyName, DomainType domainType);
+
       /// declare properties that specify the dataset within the workspace to fit to.
       virtual void declareDatasetProperties(const std::string& suffix = "",bool addProp = true);
       /// Create a domain from the input workspace
       virtual void createDomain(
-        boost::shared_ptr<API::FunctionDomain>&, 
-        boost::shared_ptr<API::IFunctionValues>&, size_t i0);
+          boost::shared_ptr<API::FunctionDomain>&,
+          boost::shared_ptr<API::IFunctionValues>&, size_t i0);
+      virtual void createOutputWorkspace(const std::string& baseName,
+          API::IFunction_sptr function,
+          boost::shared_ptr<API::FunctionDomain> domain,
+          boost::shared_ptr<API::IFunctionValues> values);
+
       /// Return the size of the domain to be created.
       virtual size_t getDomainSize() const;
       /// Set the workspace
@@ -86,8 +96,8 @@ namespace Mantid
       size_t m_count;
     };
 
-    
-  } // namespace CurveFitting
+
+  } // namespace MDEvents
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_FITMD_H_*/
+#endif /*MANTID_MDEVENTS_FITMD_H_*/

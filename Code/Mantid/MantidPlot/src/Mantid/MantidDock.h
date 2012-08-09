@@ -99,7 +99,6 @@ private:
   void addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
-  bool isInvisibleWorkspaceOptionSet();
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
   void findAbandonedWorkspaces();

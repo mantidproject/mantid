@@ -21,7 +21,7 @@ namespace Mantid
      * @param A reference to the fitting function
      */
     ForegroundModel::ForegroundModel(const API::IFunction & fittingFunction)
-      : m_fittingFunction(NULL), m_parOffset(0)
+      : API::ParamFunctionAttributeHolder(), m_fittingFunction(NULL), m_parOffset(0)
     {
       setFunctionUnderMinimization(fittingFunction);
     }

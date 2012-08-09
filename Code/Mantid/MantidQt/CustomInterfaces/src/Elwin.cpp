@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Elwin.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
@@ -127,10 +128,22 @@ namespace IDA
 
   QString Elwin::validate()
   {
-    if ( ! uiForm().elwin_inputFile->isValid() )
-      return uiForm().elwin_inputFile->getFileProblem();
+    UserInputValidator uiv;
+    
+    uiv.checkMWRunFilesIsValid("Input", uiForm().elwin_inputFile);
 
-    return "";
+    auto rangeOne = std::make_pair(m_elwDblMng->value(m_elwProp["R1S"]), m_elwDblMng->value(m_elwProp["R1E"]));
+    uiv.checkValidRange("Range One", rangeOne);
+
+    bool useTwoRanges = m_elwBlnMng->value(m_elwProp["UseTwoRanges"]);
+    if( useTwoRanges )
+    {
+      auto rangeTwo = std::make_pair(m_elwDblMng->value(m_elwProp["R2S"]), m_elwDblMng->value(m_elwProp["R2E"]));
+      uiv.checkValidRange("Range Two", rangeTwo);
+      uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
+    }
+
+    return uiv.generateErrorMessage();
   }
 
   void Elwin::loadSettings(const QSettings & settings)

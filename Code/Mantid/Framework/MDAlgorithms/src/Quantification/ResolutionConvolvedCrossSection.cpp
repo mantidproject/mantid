@@ -8,6 +8,7 @@
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidKernel/CPUTimer.h"
 
 namespace Mantid
 {
@@ -21,6 +22,8 @@ namespace Mantid
       const char * RESOLUTION_ATTR = "ResolutionFunction";
       const char * FOREGROUND_ATTR = "ForegroundModel";
     }
+
+    Kernel::Logger & ResolutionConvolvedCrossSection::g_log = Kernel::Logger::get("ResolutionConvolvedCrossSection");
 
     /**
      * Constructor
@@ -60,7 +63,7 @@ namespace Mantid
      *  @param value :: The value of the attribute
      */
     void ResolutionConvolvedCrossSection::setAttribute(const std::string& name,
-                                                         const API::IFunction::Attribute & value)
+                                                       const API::IFunction::Attribute & value)
     {
       storeAttributeValue(name, value);
 
@@ -76,24 +79,30 @@ namespace Mantid
       }
     }
 
-    /// Function you want to fit to.
-    /// @param out :: The buffer for writing the calculated values. Must be big enough to accept dataSize() values
-    void ResolutionConvolvedCrossSection::function(const API::FunctionDomain& domain, API::FunctionValues& values)const
+    /**
+     * Override the call to set the workspace here to store it so we can access it throughout the evaluation
+     * @param workspace
+     */
+    void ResolutionConvolvedCrossSection::setWorkspace(boost::shared_ptr<const API::Workspace> workspace)
     {
-      const API::FunctionDomainMD* mdDomain = dynamic_cast<const API::FunctionDomainMD*>(&domain);
-      if(!mdDomain)
-      {
-        throw std::invalid_argument("ResolutionConvolvedCrossSection can only be used with MD domains");
-      }
+      assert(m_convolution);
 
-      m_workspace = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(mdDomain->getWorkspace());
+      m_workspace = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(workspace);
       if(!m_workspace)
       {
         throw std::invalid_argument("ResolutionConvolvedCrossSection can only be used with MD event workspaces");
       }
-      IFunctionMD::evaluateFunction(*mdDomain, values); // Calls functionMD repeatedly
+      IFunctionMD::setWorkspace(workspace);
+      m_convolution->useNumberOfThreads(PARALLEL_GET_MAX_THREADS);
+      m_convolution->preprocess(m_workspace);
     }
 
+    void ResolutionConvolvedCrossSection::function(const API::FunctionDomain& domain, API::FunctionValues& values) const
+    {
+      m_convolution->functionEvalStarting();
+      IFunctionMD::function(domain, values);
+      m_convolution->functionEvalFinished();
+    }
 
     /**
      * Returns the value of the function for the given MD box. For each MDPoint
@@ -105,25 +114,22 @@ namespace Mantid
      */
     double ResolutionConvolvedCrossSection::functionMD(const Mantid::API::IMDIterator& box) const
     {
-      if(!m_convolution)
-      {
-        throw std::runtime_error("ResolutionConvolvedCrossSection::functionMD - Setup incomplete, no convolution type has been created");
-      }
+      assert(m_convolution);
+      const int64_t numEvents = static_cast<int64_t>(box.getNumEvents());
+      if(numEvents == 0) return 0.0;
 
       double signal(0.0);
-      const size_t numEvents = box.getNumEvents();
-      // loop over each MDPoint in current MDBox
-      for(size_t j = 0; j < numEvents; j++)
+      PARALLEL_FOR_NO_WSP_CHECK()
+      for(int64_t j = 0; j < numEvents; ++j)
       {
-        uint16_t innerRunIndex = box.getInnerRunIndex(j);
-        API::ExperimentInfo_const_sptr exptInfo = m_workspace->getExperimentInfo(innerRunIndex);
-        signal += m_convolution->signal(box, j, exptInfo);
+        const int64_t loopIndex = static_cast<int64_t>(j);
+        double contribution =  m_convolution->signal(box, box.getInnerRunIndex(loopIndex), loopIndex);
+        PARALLEL_ATOMIC
+        signal += contribution;
       }
       // Return the mean
       return signal/static_cast<double>(numEvents);
     }
-
-
 
     /**
      * Set a pointer to the concrete convolution object from a named implementation.
@@ -136,7 +142,7 @@ namespace Mantid
 
       m_convolution = MDResolutionConvolutionFactory::Instance().createConvolution(name, fgModelName,*this);
       // Pass on the attributes
-      const std::vector<std::string> names = m_convolution->getAttributeNames();
+      auto names = m_convolution->getAttributeNames();
       for(auto iter = names.begin(); iter != names.end(); ++iter)
       {
         this->declareAttribute(*iter, m_convolution->getAttribute(*iter));
@@ -148,7 +154,12 @@ namespace Mantid
       {
         this->declareParameter(fgModel.parameterName(i), fgModel.getInitialParameterValue(i), fgModel.parameterDescription(i));
       }
-
+      // Pull the foreground attributes on to here
+      names = fgModel.getAttributeNames();
+      for(auto iter = names.begin(); iter != names.end(); ++iter)
+      {
+        this->declareAttribute(*iter, fgModel.getAttribute(*iter));
+      }
     }
 
   }

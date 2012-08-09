@@ -377,7 +377,9 @@ public:
     // No axes by default
     TS_ASSERT_EQUALS( runInfo.getGoniometer().getNumberAxes(), 0 );
     // Now does copy work?
-    runInfo.getGoniometer().makeUniversalGoniometer();
+    Goniometer gm;
+    gm.makeUniversalGoniometer();
+    runInfo.setGoniometer(gm, false);
     TS_ASSERT_EQUALS( runInfo.getGoniometer().getNumberAxes(), 3 );
     Run runCopy(runInfo);
     TS_ASSERT_EQUALS( runCopy.getGoniometer().getNumberAxes(), 3 );
@@ -394,6 +396,30 @@ public:
     runInfo.addProperty(tsp);
   }
 
+  /** Setting up a goniometer and the angles to feed it
+   * using sample logs, then getting the right rotation matrix out.
+   */
+  void test_setGoniometerWhenLogsDoNotExistsThrows()
+  {
+    Run runInfo;
+    Goniometer gm;
+    gm.makeUniversalGoniometer();
+
+    TS_ASSERT_THROWS(runInfo.setGoniometer(gm, true), std::runtime_error);
+  }
+
+  /** Setting up a goniometer and the angles to feed it
+   * using sample logs, then getting the right rotation matrix out.
+   */
+  void test_setGoniometer_Not_Using_Logs_Preserves_Input()
+  {
+    Run runInfo;
+    DblMatrix rotation(3,3, true);
+    Goniometer gm(rotation);
+
+    TS_ASSERT_EQUALS(runInfo.getGoniometer().getNumberAxes(), 0);
+    TS_ASSERT_EQUALS(runInfo.getGoniometer().getR(), rotation);
+  }
 
   /** Setting up a goniometer and the angles to feed it
    * using sample logs, then getting the right rotation matrix out.
@@ -404,7 +430,9 @@ public:
     addTimeSeriesEntry(runInfo, "phi", 90.0);
     addTimeSeriesEntry(runInfo, "chi", 90.0);
     addTimeSeriesEntry(runInfo, "omega", 90.0);
-    runInfo.getGoniometer().makeUniversalGoniometer();
+    Goniometer gm;
+    gm.makeUniversalGoniometer();
+    runInfo.setGoniometer(gm, true);
     DblMatrix r = runInfo.getGoniometerMatrix();
     V3D rot = r * V3D(-1,0,0);
     TS_ASSERT_EQUALS( rot, V3D(1, 0, 0));
@@ -418,7 +446,10 @@ public:
     addTimeSeriesEntry(runInfo, "phi", 45.0);
     addTimeSeriesEntry(runInfo, "chi", 90.0);
     addTimeSeriesEntry(runInfo, "omega", 0.0);
-    runInfo.getGoniometer().makeUniversalGoniometer();
+    Goniometer gm;
+    gm.makeUniversalGoniometer();
+    runInfo.setGoniometer(gm, true);
+
     DblMatrix r = runInfo.getGoniometerMatrix();
     V3D rot = r * V3D(-1,0,0);
     TS_ASSERT_EQUALS( rot, V3D(0, -sqrt(0.5), sqrt(0.5)));
@@ -432,7 +463,6 @@ public:
     th.createFile("RunTest.nxs");
 
     Run run1;
-    run1.getGoniometer().makeUniversalGoniometer();
     addTimeSeriesEntry(run1, "double_series", 45.0);
     run1.addProperty( new PropertyWithValue<int>("int_val", 1234) );
     run1.addProperty( new PropertyWithValue<std::string>("string_val", "help_im_stuck_in_a_log_file") );
@@ -441,6 +471,10 @@ public:
     addTimeSeriesEntry(run1, "chi", 45.6);
     addTimeSeriesEntry(run1, "omega", 78.9);
     addTimeSeriesEntry(run1, "proton_charge", 78.9);
+
+    Goniometer gm;
+    gm.makeUniversalGoniometer();
+    run1.setGoniometer(gm, true);
 
     run1.storeHistogramBinBoundaries(m_test_energy_bins);
 

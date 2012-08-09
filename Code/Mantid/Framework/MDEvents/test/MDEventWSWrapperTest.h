@@ -28,12 +28,12 @@ public:
   {
          IMDEventWorkspace_sptr pws;
          MDWSDescription TWS0;
-         MDWSDescription TWS9(9);
+         MDWSDescription TWS10(10);
          MDWSDescription TWS5(5);
         
 
          TSM_ASSERT_THROWS("too few dimensions",pws=pWSWrap->createEmptyMDWS(TWS0),std::invalid_argument);
-         TSM_ASSERT_THROWS("too many dimensions",pws=pWSWrap->createEmptyMDWS(TWS9),std::invalid_argument);
+         TSM_ASSERT_THROWS("too many dimensions",pws=pWSWrap->createEmptyMDWS(TWS10),std::invalid_argument);
          TSM_ASSERT_THROWS("dimensions have not been defined ",pWSWrap->nDimensions(),std::invalid_argument);
 
          TSM_ASSERT_THROWS_NOTHING("should be fine",pws=pWSWrap->createEmptyMDWS(TWS5));

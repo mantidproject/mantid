@@ -8,7 +8,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
@@ -62,6 +61,13 @@ namespace MDEvents
     size_t getChildIndexFromID(size_t childId) const;
 
     MDBoxBase<MDE,nd> * getChild(size_t index);
+    void setChild(size_t index,MDGridBox<MDE,nd> * newChild)
+    {
+      // Delete the old box  (supposetly ungridded);
+      delete this->boxes[index];
+      // set new box, supposetly gridded
+      this->boxes[index]=newChild;
+    }
 
     void setChildren(const std::vector<MDBoxBase<MDE,nd> *> & boxes, const size_t indexStart, const size_t indexEnd);
 
@@ -77,6 +83,7 @@ namespace MDEvents
 
 
     void addEvent(const MDE & point);
+    void addAndTraceEvent(const MDE & point,size_t index);
 
     void addEventUnsafe(const MDE & point);
 

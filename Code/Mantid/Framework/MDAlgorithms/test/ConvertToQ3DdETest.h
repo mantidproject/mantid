@@ -136,7 +136,7 @@ void testExecAndAdd(){
     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(100,10,true);
 
   // rotate the crystal by twenty degrees back;
-     ws2D->mutableRun().getGoniometer().setRotationAngle(0,20);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);
      // add workspace energy
      ws2D->mutableRun().addProperty("Ei",13.,"meV",true);
  //  
@@ -206,9 +206,9 @@ void xtestTransfMat4()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,3, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
-     ws2D->mutableRun().getGoniometer().setRotationAngle(0,0);
-     ws2D->mutableRun().getGoniometer().setRotationAngle(1,0);
-     ws2D->mutableRun().getGoniometer().setRotationAngle(2,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
 
         std::vector<double> rot;
     //std::vector<double> rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,1,0),Kernel::V3D(1,-1,0));
@@ -226,9 +226,9 @@ void xtestTransfMat5()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,2,3, 75., 45., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
-     ws2D->mutableRun().getGoniometer().setRotationAngle(0,0);
-     ws2D->mutableRun().getGoniometer().setRotationAngle(1,0);
-     ws2D->mutableRun().getGoniometer().setRotationAngle(2,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
 
        std::vector<double> rot;
      //std::vector<double> rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,1,0),Kernel::V3D(1,-1,0));
@@ -247,9 +247,9 @@ void xtestTransf_PSI_DPSI()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
-     ws2D->mutableRun().getGoniometer().setRotationAngle(0,0); 
-     ws2D->mutableRun().getGoniometer().setRotationAngle(1,-20); // Psi, dPsi
-     ws2D->mutableRun().getGoniometer().setRotationAngle(2,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,-20); // Psi, dPsi
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
 
         std::vector<double> rot;
     //std::vector<double> rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
@@ -267,9 +267,9 @@ void xtestTransf_GL()
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(16,10,true);
      OrientedLattice * latt = new OrientedLattice(1,1,1, 90., 90., 90.);
      ws2D->mutableSample().setOrientedLattice(latt);
-     ws2D->mutableRun().getGoniometer().setRotationAngle(0,20);  //gl
-     ws2D->mutableRun().getGoniometer().setRotationAngle(1,0);
-     ws2D->mutableRun().getGoniometer().setRotationAngle(2,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);  //gl
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
 
         std::vector<double> rot;
    // std::vector<double> rot=pAlg->get_transf_matrix(ws2D,Kernel::V3D(1,0,0),Kernel::V3D(0,1,0));
@@ -293,9 +293,9 @@ void t__tResult(){
 
      Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2,polar,azim,3,-1,2,10);
 
-     ws2D->mutableRun().getGoniometer().setRotationAngle(0,0);  //gl
-     ws2D->mutableRun().getGoniometer().setRotationAngle(1,0);
-     ws2D->mutableRun().getGoniometer().setRotationAngle(2,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);  //gl
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(1,0);
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(2,0);
   
      AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 

@@ -62,7 +62,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -1500,6 +1500,21 @@ intermediate ranges are there for comparison</string>
                   <string>HAB</string>
                  </property>
                 </item>
+                <item>
+                 <property name="text">
+                  <string>merged</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>rear, front</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>rear, front, merged</string>
+                 </property>
+                </item>
                </widget>
               </item>
              </layout>
@@ -1576,6 +1591,9 @@ intermediate ranges are there for comparison</string>
                 </item>
                 <item row="0" column="2">
                  <widget class="QCheckBox" name="frontDetRescaleCB">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
@@ -1593,6 +1611,9 @@ intermediate ranges are there for comparison</string>
                 </item>
                 <item row="1" column="2">
                  <widget class="QCheckBox" name="frontDetShiftCB">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
                   <property name="text">
                    <string/>
                   </property>
@@ -1653,6 +1674,9 @@ intermediate ranges are there for comparison</string>
               </item>
               <item row="0" column="3">
                <widget class="QCheckBox" name="frontDetQrangeOnOff">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
                 <property name="text">
                  <string/>
                 </property>

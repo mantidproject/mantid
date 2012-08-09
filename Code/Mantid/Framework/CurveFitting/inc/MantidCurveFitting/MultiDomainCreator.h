@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/IDomainCreator.h"
+#include "MantidAPI/IDomainCreator.h"
 
 namespace Mantid
 {
@@ -37,14 +37,14 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport MultiDomainCreator : public IDomainCreator
+    class DLLExport MultiDomainCreator : public API::IDomainCreator
     {
       /// A friend that can create instances of this class
       //friend class Fit;
     public:
       /// Constructor
       MultiDomainCreator(Kernel::IPropertyManager* fit,const std::vector<std::string>& workspacePropertyNames):
-      IDomainCreator(fit, workspacePropertyNames),
+      API::IDomainCreator(fit, workspacePropertyNames),
       m_creators(workspacePropertyNames.size())
       {
       }
@@ -57,14 +57,14 @@ namespace Mantid
       /// Return the size of the domain to be created.
       virtual size_t getDomainSize() const{return 0;}
       /// Set ith creator
-      void setCreator(size_t i, IDomainCreator* creator);
+      void setCreator(size_t i, API::IDomainCreator* creator);
       bool hasCreator(size_t i) const;
       /// Get number of creators
       size_t getNCreators() const {return m_creators.size();}
 
     protected:
       /// Vector of creators.
-      std::vector< boost::shared_ptr<IDomainCreator> > m_creators;
+      std::vector< boost::shared_ptr<API::IDomainCreator> > m_creators;
     };
 
     

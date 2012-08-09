@@ -50,7 +50,7 @@ void SeqDomain::getDomainAndValues(size_t i, API::FunctionDomain_sptr& domain, A
  * Add new domain creator
  * @param creator :: A shared pointer to a new creator.
  */
-void SeqDomain::addCreator( IDomainCreator_sptr creator )
+void SeqDomain::addCreator( API::IDomainCreator_sptr creator )
 {
   m_creators.push_back( creator );
   m_domain.push_back( API::FunctionDomain_sptr() );
@@ -62,13 +62,13 @@ void SeqDomain::addCreator( IDomainCreator_sptr creator )
  * or ParDomain for parallel calculations
  * @param type :: Either Sequential or Parallel
  */
-SeqDomain* SeqDomain::create(IDomainCreator::DomainType type)
+SeqDomain* SeqDomain::create(API::IDomainCreator::DomainType type)
 {
-  if (type == IDomainCreator::Sequential)
+  if (type == API::IDomainCreator::Sequential)
   {
     return new SeqDomain;
   }
-  else if (type == IDomainCreator::Parallel)
+  else if (type == API::IDomainCreator::Parallel)
   {
     return new ParDomain;
   }

@@ -76,6 +76,8 @@ namespace Mantid
 
     };
 
+    typedef boost::shared_ptr<BackgroundFunction> BackgroundFunction_sptr;
+
   } // namespace CurveFitting
 } // namespace Mantid
 

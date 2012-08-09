@@ -44,6 +44,9 @@ namespace Mantid
       {
         setParameterValue(iter->first, iter->second);
       }
+
+      /// Any custom setup
+      this->init();
     }
 
     /**

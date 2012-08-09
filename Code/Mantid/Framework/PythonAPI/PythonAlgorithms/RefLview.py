@@ -15,7 +15,7 @@ import sfCalculator
 class RefLview(PythonAlgorithm):
 
     def category(self):
-        return "Reflectometry"
+        return "Reflectometry\\SNS"
 
     def name(self):
         return "RefLview"

@@ -35,9 +35,8 @@ namespace Mantid
     //
     // Forward declarations
     //
-    class TobyFitResolutionModel;
     struct QOmegaPoint;
-    class Observation;
+    class CachedExperimentInfo;
 
     /**
      * Defines a vector of independent integration variables that are transformed using the
@@ -79,20 +78,19 @@ namespace Mantid
       static const char * identifier(const unsigned int variable);
 
       /// Construct a Y vector for the current model
-      TobyFitYVector(const TobyFitResolutionModel & tfResModel);
+      TobyFitYVector();
+      /// Set an attribute on/off
+      void setAttribute(const std::string & name, const int active);
 
       /// Access a the current vector index in the vector (in order to be able to multiply it with the b matrix)
       const std::vector<double> & values() const;
       /// Calculate the values of the integration variables for
       /// the given random variates
       size_t recalculate(const std::vector<double> & randomNums,
-                       const Observation & observation,
+                       const CachedExperimentInfo & observation,
                        const QOmegaPoint & qOmega);
 
     private:
-      DISABLE_DEFAULT_CONSTRUCT(TobyFitYVector);
-      DISABLE_COPY_AND_ASSIGN(TobyFitYVector);
-
       /// Sample from moderator time distribution
       void calculateModeratorTime();
       /// Aperature contribution
@@ -118,15 +116,15 @@ namespace Mantid
       /// A static list of string identifiers
       static const char * IDENTIFIERS[NUM_OF_VARS];
 
-      /// A reference to the tobyfit model
-      const TobyFitResolutionModel & m_tfResModel;
       /// The values for the current observation
       std::vector<double> m_yvector;
+      /// Flags indicating active attributes
+      std::vector<bool> m_attrStates;
 
       /// A pointer to the current set of random numbers
       const std::vector<double> * m_curRandNums;
       /// A pointer to the current observation
-      const Observation *m_curObs;
+      const CachedExperimentInfo *m_curObs;
       /// The current point in Q-DeltaE space
       const QOmegaPoint *m_curQOmega;
     };

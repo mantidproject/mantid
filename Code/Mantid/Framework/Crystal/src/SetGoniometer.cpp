@@ -125,10 +125,8 @@ namespace Crystal
     if (gon.getNumberAxes() == 0)
       g_log.warning() << "Empty goniometer created; will always return an identity rotation matrix." << std::endl;
 
-    // All went well, copy the goniometer into it
-    ws->mutableRun().getGoniometer() = gon;
-    //force it to read the values
-    ws->mutableRun().getGoniometerMatrix(); //it will throw if log values are not found
+    // All went well, copy the goniometer into it. It will throw if the log values cannot be found
+    ws->mutableRun().setGoniometer(gon, true);
   }
 
 

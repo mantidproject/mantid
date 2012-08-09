@@ -1,54 +1,55 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>IndirectDataAnalysis</class>
- <widget class="QWidget" name="IndirectDataAnalysis" >
-  <property name="geometry" >
+ <widget class="QWidget" name="IndirectDataAnalysis">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>581</width>
+    <width>587</width>
     <height>488</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Indirect Data Analysis</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QTabWidget" name="tabWidget" >
-     <property name="enabled" >
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="enabled">
       <bool>true</bool>
      </property>
-     <property name="tabShape" >
+     <property name="tabShape">
       <enum>QTabWidget::Rounded</enum>
      </property>
-     <property name="currentIndex" >
+     <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="tabElwin" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabElwin">
+      <attribute name="title">
        <string>Elwin</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutElwin" >
+      <layout class="QVBoxLayout" name="layoutElwin">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_16" >
+        <layout class="QHBoxLayout" name="horizontalLayout_16">
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="elwin_inputFile" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>41</verstretch>
             </sizepolicy>
            </property>
-           <property name="findRunFiles" stdset="0" >
+           <property name="findRunFiles" stdset="0">
             <bool>false</bool>
            </property>
-           <property name="label" stdset="0" >
+           <property name="label" stdset="0">
             <string>Input File</string>
            </property>
-           <property name="multipleFiles" stdset="0" >
+           <property name="multipleFiles" stdset="0">
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" >
+           <property name="fileExtensions" stdset="0">
             <stringlist>
              <string>_red.nxs</string>
             </stringlist>
@@ -56,8 +57,8 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="elwin_pbPlotInput" >
-           <property name="text" >
+          <widget class="QPushButton" name="elwin_pbPlotInput">
+           <property name="text">
             <string>Plot Input</string>
            </property>
           </widget>
@@ -65,44 +66,44 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_7" >
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
          <item>
-          <layout class="QVBoxLayout" name="elwin_properties" />
+          <layout class="QVBoxLayout" name="elwin_properties"/>
          </item>
          <item>
-          <layout class="QHBoxLayout" name="elwin_plot" />
+          <layout class="QHBoxLayout" name="elwin_plot"/>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="elwin_ckConcat" >
-         <property name="text" >
+        <widget class="QCheckBox" name="elwin_ckConcat">
+         <property name="text">
           <string>Concatanate Multiple Results</string>
          </property>
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5" >
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
-          <widget class="QCheckBox" name="elwin_ckVerbose" >
-           <property name="enabled" >
+          <widget class="QCheckBox" name="elwin_ckVerbose">
+           <property name="enabled">
             <bool>false</bool>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Verbose</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="elwin_ckPlot" >
-           <property name="text" >
+          <widget class="QCheckBox" name="elwin_ckPlot">
+           <property name="text">
             <string>Plot Result</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="elwin_ckSave" >
-           <property name="text" >
+          <widget class="QCheckBox" name="elwin_ckSave">
+           <property name="text">
             <string>Save Result</string>
            </property>
           </widget>
@@ -111,31 +112,31 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabMSD" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabMSD">
+      <attribute name="title">
        <string>MSD Fit</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutMSDFit" >
+      <layout class="QVBoxLayout" name="layoutMSDFit">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_18" >
+        <layout class="QHBoxLayout" name="horizontalLayout_18">
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="msd_inputFile" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="msd_inputFile" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>41</verstretch>
             </sizepolicy>
            </property>
-           <property name="findRunFiles" stdset="0" >
+           <property name="findRunFiles" stdset="0">
             <bool>false</bool>
            </property>
-           <property name="label" stdset="0" >
+           <property name="label" stdset="0">
             <string>Input File</string>
            </property>
-           <property name="multipleFiles" stdset="0" >
+           <property name="multipleFiles" stdset="0">
             <bool>true</bool>
            </property>
-           <property name="fileExtensions" >
+           <property name="fileExtensions" stdset="0">
             <stringlist>
              <string>_eq2.nxs</string>
             </stringlist>
@@ -143,8 +144,8 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="msd_pbPlotInput" >
-           <property name="text" >
+          <widget class="QPushButton" name="msd_pbPlotInput">
+           <property name="text">
             <string>Plot Input</string>
            </property>
           </widget>
@@ -152,40 +153,40 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3" >
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <layout class="QVBoxLayout" name="msd_properties" />
+          <layout class="QVBoxLayout" name="msd_properties"/>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="msd_plot" />
+          <layout class="QVBoxLayout" name="msd_plot"/>
          </item>
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_8" >
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
          <item>
-          <widget class="QCheckBox" name="msd_ckVerbose" >
-           <property name="enabled" >
+          <widget class="QCheckBox" name="msd_ckVerbose">
+           <property name="enabled">
             <bool>false</bool>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Verbose</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="msd_ckPlot" >
-           <property name="checked" >
-            <bool>true</bool>
-           </property>
-           <property name="text" >
+          <widget class="QCheckBox" name="msd_ckPlot">
+           <property name="text">
             <string>Plot Result</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="msd_ckSave" >
-           <property name="text" >
+          <widget class="QCheckBox" name="msd_ckSave">
+           <property name="text">
             <string>Save Result</string>
            </property>
           </widget>
@@ -194,62 +195,62 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabFury" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabFury">
+      <attribute name="title">
        <string>Fury</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutFury" >
+      <layout class="QVBoxLayout" name="layoutFury">
        <item>
-        <layout class="QGridLayout" name="fury_layoutFiles" >
-         <item row="2" column="1" >
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_resFile" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+        <layout class="QGridLayout" name="fury_layoutFiles">
+         <item row="2" column="1">
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_resFile" native="true">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
              <verstretch>41</verstretch>
             </sizepolicy>
            </property>
-           <property name="findRunFiles" stdset="0" >
+           <property name="findRunFiles" stdset="0">
             <bool>false</bool>
            </property>
-           <property name="label" stdset="0" >
+           <property name="label" stdset="0">
             <string>Resolution:</string>
            </property>
-           <property name="multipleFiles" stdset="0" >
+           <property name="multipleFiles" stdset="0">
             <bool>false</bool>
            </property>
-           <property name="fileExtensions" >
+           <property name="fileExtensions" stdset="0">
             <stringlist>
              <string>_res.nxs</string>
             </stringlist>
            </property>
           </widget>
          </item>
-         <item row="0" column="2" >
-          <widget class="QPushButton" name="fury_pbPlotInput" >
-           <property name="text" >
+         <item row="0" column="2">
+          <widget class="QPushButton" name="fury_pbPlotInput">
+           <property name="text">
             <string>Plot Input</string>
            </property>
           </widget>
          </item>
-         <item row="1" column="1" >
-          <layout class="QHBoxLayout" name="horizontalLayout_17" >
+         <item row="1" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_17">
            <item>
-            <widget class="QLabel" name="fury_lbResType" >
-             <property name="text" >
+            <widget class="QLabel" name="fury_lbResType">
+             <property name="text">
               <string>Resolution File Type:</string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="fury_cbResType" >
+            <widget class="QComboBox" name="fury_cbResType">
              <item>
-              <property name="text" >
+              <property name="text">
                <string>RES File</string>
               </property>
              </item>
              <item>
-              <property name="text" >
+              <property name="text">
                <string>Data File</string>
               </property>
              </item>
@@ -257,50 +258,50 @@
            </item>
           </layout>
          </item>
-         <item row="0" column="1" >
-          <layout class="QHBoxLayout" name="fury_layout_input" >
+         <item row="0" column="1">
+          <layout class="QHBoxLayout" name="fury_layout_input">
            <item>
-            <widget class="QComboBox" name="fury_cbInputType" >
+            <widget class="QComboBox" name="fury_cbInputType">
              <item>
-              <property name="text" >
+              <property name="text">
                <string>File</string>
               </property>
              </item>
              <item>
-              <property name="text" >
+              <property name="text">
                <string>Workspace</string>
               </property>
              </item>
             </widget>
            </item>
            <item>
-            <widget class="QStackedWidget" name="fury_swInput" >
-             <property name="currentIndex" >
+            <widget class="QStackedWidget" name="fury_swInput">
+             <property name="currentIndex">
               <number>0</number>
              </property>
-             <widget class="QWidget" name="fury_page_inputFile" >
-              <layout class="QVBoxLayout" name="fury_page_inputFile_layout" >
-               <property name="margin" >
+             <widget class="QWidget" name="fury_page_inputFile">
+              <layout class="QVBoxLayout" name="fury_page_inputFile_layout">
+               <property name="margin">
                 <number>0</number>
                </property>
                <item>
-                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile" >
-                 <property name="sizePolicy" >
-                  <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile" native="true">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                    <horstretch>0</horstretch>
                    <verstretch>41</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="findRunFiles" stdset="0" >
+                 <property name="findRunFiles" stdset="0">
                   <bool>false</bool>
                  </property>
-                 <property name="label" stdset="0" >
+                 <property name="label" stdset="0">
                   <string>Sample:     </string>
                  </property>
-                 <property name="multipleFiles" stdset="0" >
+                 <property name="multipleFiles" stdset="0">
                   <bool>true</bool>
                  </property>
-                 <property name="fileExtensions" >
+                 <property name="fileExtensions" stdset="0">
                   <stringlist>
                    <string>_red.nxs</string>
                    <string>_sqw.nxs</string>
@@ -310,14 +311,14 @@
                </item>
               </layout>
              </widget>
-             <widget class="QWidget" name="fury_page_inputWorkspace" >
-              <layout class="QHBoxLayout" name="fury_layout_page_inputWorkspace" >
-               <property name="margin" >
+             <widget class="QWidget" name="fury_page_inputWorkspace">
+              <layout class="QHBoxLayout" name="fury_layout_page_inputWorkspace">
+               <property name="margin">
                 <number>0</number>
                </property>
                <item>
-                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample" >
-                 <property name="Suffix" >
+                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample">
+                 <property name="Suffix" stdset="0">
                   <string>_red</string>
                  </property>
                 </widget>
@@ -331,21 +332,21 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_22" >
+        <layout class="QHBoxLayout" name="horizontalLayout_22">
          <item>
-          <layout class="QVBoxLayout" name="fury_TreeSpace" />
+          <layout class="QVBoxLayout" name="fury_TreeSpace"/>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="fury_PlotSpace" />
+          <layout class="QVBoxLayout" name="fury_PlotSpace"/>
          </item>
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer_4" >
-         <property name="orientation" >
+        <spacer name="verticalSpacer_4">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -354,27 +355,27 @@
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_9" >
+        <layout class="QHBoxLayout" name="horizontalLayout_9">
          <item>
-          <widget class="QCheckBox" name="fury_ckVerbose" >
-           <property name="enabled" >
+          <widget class="QCheckBox" name="fury_ckVerbose">
+           <property name="enabled">
             <bool>false</bool>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Verbose</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="fury_ckPlot" >
-           <property name="text" >
+          <widget class="QCheckBox" name="fury_ckPlot">
+           <property name="text">
             <string>Plot Result</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QCheckBox" name="fury_ckSave" >
-           <property name="text" >
+          <widget class="QCheckBox" name="fury_ckSave">
+           <property name="text">
             <string>Save Result</string>
            </property>
           </widget>
@@ -383,58 +384,58 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabFuryFit" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabFuryFit">
+      <attribute name="title">
        <string>FuryFit</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutFuryFit" >
+      <layout class="QVBoxLayout" name="layoutFuryFit">
        <item>
-        <layout class="QHBoxLayout" name="furyfit_layoutInput" >
+        <layout class="QHBoxLayout" name="furyfit_layoutInput">
          <item>
-          <widget class="QComboBox" name="furyfit_cbInputType" >
+          <widget class="QComboBox" name="furyfit_cbInputType">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>File</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Workspace</string>
             </property>
            </item>
           </widget>
          </item>
          <item>
-          <widget class="QStackedWidget" name="furyfit_swInput" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+          <widget class="QStackedWidget" name="furyfit_swInput">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="currentIndex" >
+           <property name="currentIndex">
             <number>0</number>
            </property>
-           <widget class="QWidget" name="furyfit_page_inputFile" >
-            <layout class="QHBoxLayout" name="horizontalLayout_19" >
+           <widget class="QWidget" name="furyfit_page_inputFile">
+            <layout class="QHBoxLayout" name="horizontalLayout_19">
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="furyfit_inputFile" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>41</verstretch>
                 </sizepolicy>
                </property>
-               <property name="findRunFiles" stdset="0" >
+               <property name="findRunFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="label" stdset="0" >
+               <property name="label" stdset="0">
                 <string/>
                </property>
-               <property name="multipleFiles" stdset="0" >
+               <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" >
+               <property name="fileExtensions" stdset="0">
                 <stringlist>
                  <string>_iqt.nxs</string>
                 </stringlist>
@@ -443,11 +444,11 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="furyfit_page_inputWorkspace" >
-            <layout class="QHBoxLayout" name="horizontalLayout_12" >
+           <widget class="QWidget" name="furyfit_page_inputWorkspace">
+            <layout class="QHBoxLayout" name="horizontalLayout_12">
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt" >
-               <property name="Suffix" >
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt">
+               <property name="Suffix" stdset="0">
                 <string>_iqt</string>
                </property>
               </widget>
@@ -457,8 +458,8 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="furyfit_pbPlotInput" >
-           <property name="text" >
+          <widget class="QPushButton" name="furyfit_pbPlotInput">
+           <property name="text">
             <string>Plot Input</string>
            </property>
           </widget>
@@ -466,43 +467,43 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_25" >
+        <layout class="QHBoxLayout" name="horizontalLayout_25">
          <item>
-          <layout class="QVBoxLayout" name="furyfit_vlTreeProp" >
+          <layout class="QVBoxLayout" name="furyfit_vlTreeProp">
            <item>
-            <layout class="QVBoxLayout" name="verticalLayout_8" >
+            <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
-              <widget class="QLabel" name="furyfit_lbFitType" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+              <widget class="QLabel" name="furyfit_lbFitType">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="text" >
+               <property name="text">
                 <string>Fit Type:</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="furyfit_cbFitType" >
+              <widget class="QComboBox" name="furyfit_cbFitType">
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>1 Exponential</string>
                 </property>
                </item>
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>2 Exponentials</string>
                 </property>
                </item>
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>1 Stretched Exponential</string>
                 </property>
                </item>
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>1 Stretched Exponential and 1 Exponential</string>
                 </property>
                </item>
@@ -511,20 +512,20 @@
             </layout>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout" >
+            <layout class="QHBoxLayout" name="horizontalLayout">
              <item>
-              <widget class="QCheckBox" name="furyfit_ckConstrainIntensities" >
-               <property name="text" >
+              <widget class="QCheckBox" name="furyfit_ckConstrainIntensities">
+               <property name="text">
                 <string>Constrain Intensities</string>
                </property>
-               <property name="checked" >
+               <property name="checked">
                 <bool>true</bool>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QCheckBox" name="furyfit_ckPlotGuess" >
-               <property name="text" >
+              <widget class="QCheckBox" name="furyfit_ckPlotGuess">
+               <property name="text">
                 <string>Plot Guess</string>
                </property>
               </widget>
@@ -532,37 +533,37 @@
             </layout>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="furyfit_properties" />
+            <layout class="QHBoxLayout" name="furyfit_properties"/>
            </item>
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_6" >
+          <layout class="QVBoxLayout" name="verticalLayout_6">
            <item>
-            <layout class="QVBoxLayout" name="furyfit_vlPlot" />
+            <layout class="QVBoxLayout" name="furyfit_vlPlot"/>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_27" >
+            <layout class="QHBoxLayout" name="horizontalLayout_27">
              <item>
-              <widget class="QLabel" name="furyfit_lbSpectra" >
-               <property name="text" >
+              <widget class="QLabel" name="furyfit_lbSpectra">
+               <property name="text">
                 <string>Spectrum:</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="furyfit_leSpecNo" >
-               <property name="text" >
+              <widget class="QLineEdit" name="furyfit_leSpecNo">
+               <property name="text">
                 <string>0</string>
                </property>
               </widget>
              </item>
              <item>
-              <spacer name="horizontalSpacer_13" >
-               <property name="orientation" >
+              <spacer name="horizontalSpacer_13">
+               <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <property name="sizeHint" stdset="0" >
+               <property name="sizeHint" stdset="0">
                 <size>
                  <width>40</width>
                  <height>20</height>
@@ -577,20 +578,20 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_26" >
+        <layout class="QHBoxLayout" name="horizontalLayout_26">
          <item>
-          <widget class="QCheckBox" name="furyfit_ckPlotOutput" >
-           <property name="text" >
+          <widget class="QCheckBox" name="furyfit_ckPlotOutput">
+           <property name="text">
             <string>Plot Output (Single Run)</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer_8" >
-           <property name="orientation" >
+          <spacer name="horizontalSpacer_8">
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0" >
+           <property name="sizeHint" stdset="0">
             <size>
              <width>40</width>
              <height>20</height>
@@ -599,43 +600,43 @@
           </spacer>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="verticalLayout_7" >
+          <layout class="QVBoxLayout" name="verticalLayout_7">
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_13" >
+            <layout class="QHBoxLayout" name="horizontalLayout_13">
              <item>
-              <widget class="QLabel" name="furyfit_lbPlotOutputSeq" >
-               <property name="text" >
+              <widget class="QLabel" name="furyfit_lbPlotOutputSeq">
+               <property name="text">
                 <string>Plot Output:</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="furyfit_cbPlotOutput" >
+              <widget class="QComboBox" name="furyfit_cbPlotOutput">
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>None</string>
                 </property>
                </item>
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>Intensity</string>
                 </property>
                </item>
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>Tau</string>
                 </property>
                </item>
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>Beta</string>
                 </property>
                </item>
               </widget>
              </item>
              <item>
-              <widget class="QCheckBox" name="furyfit_ckSaveSeq" >
-               <property name="text" >
+              <widget class="QCheckBox" name="furyfit_ckSaveSeq">
+               <property name="text">
                 <string>Save Result</string>
                </property>
               </widget>
@@ -643,13 +644,13 @@
             </layout>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="horizontalLayout_14" >
+            <layout class="QHBoxLayout" name="horizontalLayout_14">
              <item>
-              <spacer name="horizontalSpacer_2" >
-               <property name="orientation" >
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <property name="sizeHint" stdset="0" >
+               <property name="sizeHint" stdset="0">
                 <size>
                  <width>40</width>
                  <height>20</height>
@@ -658,18 +659,18 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="furyfit_pbSeqFit" >
-               <property name="text" >
+              <widget class="QPushButton" name="furyfit_pbSeqFit">
+               <property name="text">
                 <string>Run Sequential Fit</string>
                </property>
               </widget>
              </item>
              <item>
-              <spacer name="horizontalSpacer_3" >
-               <property name="orientation" >
+              <spacer name="horizontalSpacer_3">
+               <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <property name="sizeHint" stdset="0" >
+               <property name="sizeHint" stdset="0">
                 <size>
                  <width>40</width>
                  <height>20</height>
@@ -685,52 +686,52 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabConFit" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabConFit">
+      <attribute name="title">
        <string>ConvFit</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutConFit" >
+      <layout class="QVBoxLayout" name="layoutConFit">
        <item>
-        <layout class="QHBoxLayout" name="confit_layoutInput" >
+        <layout class="QHBoxLayout" name="confit_layoutInput">
          <item>
-          <widget class="QComboBox" name="confit_cbInputType" >
+          <widget class="QComboBox" name="confit_cbInputType">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>File</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Workspace</string>
             </property>
            </item>
           </widget>
          </item>
          <item>
-          <widget class="QStackedWidget" name="confit_swInput" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+          <widget class="QStackedWidget" name="confit_swInput">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="currentIndex" >
+           <property name="currentIndex">
             <number>0</number>
            </property>
-           <widget class="QWidget" name="confit_page_inputFile" >
-            <layout class="QHBoxLayout" name="confit_layout_page_inputFile" >
+           <widget class="QWidget" name="confit_page_inputFile">
+            <layout class="QHBoxLayout" name="confit_layout_page_inputFile">
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_inputFile" >
-               <property name="findRunFiles" stdset="0" >
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_inputFile" native="true">
+               <property name="findRunFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="label" stdset="0" >
+               <property name="label" stdset="0">
                 <string/>
                </property>
-               <property name="multipleFiles" stdset="0" >
+               <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" >
+               <property name="fileExtensions" stdset="0">
                 <stringlist>
                  <string>_red.nxs</string>
                  <string>_sqw.nxs</string>
@@ -740,11 +741,11 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="confit_page_inputWorkspace" >
-            <layout class="QHBoxLayout" name="horizontalLayout_29" >
+           <widget class="QWidget" name="confit_page_inputWorkspace">
+            <layout class="QHBoxLayout" name="horizontalLayout_29">
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample" >
-               <property name="Suffix" >
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample">
+               <property name="Suffix" stdset="0">
                 <string>_red</string>
                </property>
               </widget>
@@ -754,8 +755,8 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="confit_pbPlotInput" >
-           <property name="text" >
+          <widget class="QPushButton" name="confit_pbPlotInput">
+           <property name="text">
             <string>Plot Input</string>
            </property>
           </widget>
@@ -763,23 +764,23 @@
         </layout>
        </item>
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_resInput" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_resInput" native="true">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
            <horstretch>0</horstretch>
            <verstretch>41</verstretch>
           </sizepolicy>
          </property>
-         <property name="findRunFiles" stdset="0" >
+         <property name="findRunFiles" stdset="0">
           <bool>false</bool>
          </property>
-         <property name="label" stdset="0" >
+         <property name="label" stdset="0">
           <string>Resolution File</string>
          </property>
-         <property name="multipleFiles" stdset="0" >
+         <property name="multipleFiles" stdset="0">
           <bool>false</bool>
          </property>
-         <property name="fileExtensions" >
+         <property name="fileExtensions" stdset="0">
           <stringlist>
            <string>_res.nxs</string>
            <string>.res</string>
@@ -788,34 +789,34 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="confit_layoutPlotArea" >
+        <layout class="QHBoxLayout" name="confit_layoutPlotArea">
          <item>
-          <layout class="QVBoxLayout" name="confit_layoutProperties" >
+          <layout class="QVBoxLayout" name="confit_layoutProperties">
            <item>
-            <layout class="QVBoxLayout" name="confit_layoutOptions" >
+            <layout class="QVBoxLayout" name="confit_layoutOptions">
              <item>
-              <layout class="QHBoxLayout" name="confit_layoutFitType" >
+              <layout class="QHBoxLayout" name="confit_layoutFitType">
                <item>
-                <widget class="QLabel" name="confit_lbFitType" >
-                 <property name="text" >
+                <widget class="QLabel" name="confit_lbFitType">
+                 <property name="text">
                   <string>Fit Type:</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="confit_cbFitType" >
+                <widget class="QComboBox" name="confit_cbFitType">
                  <item>
-                  <property name="text" >
+                  <property name="text">
                    <string>Zero Lorentzians</string>
                   </property>
                  </item>
                  <item>
-                  <property name="text" >
+                  <property name="text">
                    <string>One Lorentzian</string>
                   </property>
                  </item>
                  <item>
-                  <property name="text" >
+                  <property name="text">
                    <string>Two Lorentzians</string>
                   </property>
                  </item>
@@ -824,28 +825,28 @@
               </layout>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="confit_layoutBackground" >
+              <layout class="QHBoxLayout" name="confit_layoutBackground">
                <item>
-                <widget class="QLabel" name="confit_lbBackground" >
-                 <property name="text" >
+                <widget class="QLabel" name="confit_lbBackground">
+                 <property name="text">
                   <string>Background</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QComboBox" name="confit_cbBackground" >
+                <widget class="QComboBox" name="confit_cbBackground">
                  <item>
-                  <property name="text" >
+                  <property name="text">
                    <string>Fixed Flat</string>
                   </property>
                  </item>
                  <item>
-                  <property name="text" >
+                  <property name="text">
                    <string>Fit Flat</string>
                   </property>
                  </item>
                  <item>
-                  <property name="text" >
+                  <property name="text">
                    <string>Fit Linear</string>
                   </property>
                  </item>
@@ -854,10 +855,10 @@
               </layout>
              </item>
              <item>
-              <layout class="QHBoxLayout" name="horizontalLayout_30" >
+              <layout class="QHBoxLayout" name="horizontalLayout_30">
                <item>
-                <widget class="QCheckBox" name="confit_ckPlotGuess" >
-                 <property name="text" >
+                <widget class="QCheckBox" name="confit_ckPlotGuess">
+                 <property name="text">
                   <string>Plot Guess</string>
                  </property>
                 </widget>
@@ -867,65 +868,65 @@
             </layout>
            </item>
            <item>
-            <layout class="QVBoxLayout" name="confit_properties" />
+            <layout class="QVBoxLayout" name="confit_properties"/>
            </item>
           </layout>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="confit_layoutMiniPlot" >
+          <layout class="QVBoxLayout" name="confit_layoutMiniPlot">
            <item>
-            <layout class="QHBoxLayout" name="confit_plot" />
+            <layout class="QHBoxLayout" name="confit_plot"/>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="confit_layoutSpectra" >
+            <layout class="QHBoxLayout" name="confit_layoutSpectra">
              <item>
-              <widget class="QLabel" name="confit_lbSpecNo" >
-               <property name="text" >
+              <widget class="QLabel" name="confit_lbSpecNo">
+               <property name="text">
                 <string>Spectra Range</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="confit_leSpecNo" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+              <widget class="QLineEdit" name="confit_leSpecNo">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="maximumSize" >
+               <property name="maximumSize">
                 <size>
                  <width>65</width>
                  <height>16777215</height>
                 </size>
                </property>
-               <property name="text" >
+               <property name="text">
                 <string>0</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="confit_lbTo" >
-               <property name="text" >
+              <widget class="QLabel" name="confit_lbTo">
+               <property name="text">
                 <string>to</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QLineEdit" name="confit_leSpecMax" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+              <widget class="QLineEdit" name="confit_leSpecMax">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="maximumSize" >
+               <property name="maximumSize">
                 <size>
                  <width>65</width>
                  <height>16777215</height>
                 </size>
                </property>
-               <property name="text" >
+               <property name="text">
                 <string>-1</string>
                </property>
               </widget>
@@ -937,20 +938,20 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="confit_layoutOuputOptions" >
+        <layout class="QHBoxLayout" name="confit_layoutOuputOptions">
          <item>
-          <widget class="QCheckBox" name="confit_ckPlotOutput" >
-           <property name="text" >
+          <widget class="QCheckBox" name="confit_ckPlotOutput">
+           <property name="text">
             <string>Plot Output</string>
            </property>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer" >
-           <property name="orientation" >
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <property name="sizeHint" stdset="0" >
+           <property name="sizeHint" stdset="0">
             <size>
              <width>40</width>
              <height>20</height>
@@ -959,38 +960,38 @@
           </spacer>
          </item>
          <item>
-          <layout class="QVBoxLayout" name="confit_layoutSeq" >
+          <layout class="QVBoxLayout" name="confit_layoutSeq">
            <item>
-            <layout class="QHBoxLayout" name="confit_layoutSeqPlot" >
+            <layout class="QHBoxLayout" name="confit_layoutSeqPlot">
              <item>
-              <widget class="QLabel" name="confit_lbPlotSeq" >
-               <property name="text" >
+              <widget class="QLabel" name="confit_lbPlotSeq">
+               <property name="text">
                 <string>Plot Output:</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QComboBox" name="confit_cbPlotOutput" >
+              <widget class="QComboBox" name="confit_cbPlotOutput">
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>None</string>
                 </property>
                </item>
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>Intensity</string>
                 </property>
                </item>
                <item>
-                <property name="text" >
+                <property name="text">
                  <string>HWHM</string>
                 </property>
                </item>
               </widget>
              </item>
              <item>
-              <widget class="QCheckBox" name="confit_ckSaveSeq" >
-               <property name="text" >
+              <widget class="QCheckBox" name="confit_ckSaveSeq">
+               <property name="text">
                 <string>Save Result</string>
                </property>
               </widget>
@@ -998,13 +999,13 @@
             </layout>
            </item>
            <item>
-            <layout class="QHBoxLayout" name="confit_layoutSeqRun" >
+            <layout class="QHBoxLayout" name="confit_layoutSeqRun">
              <item>
-              <spacer name="horizontalSpacer_4" >
-               <property name="orientation" >
+              <spacer name="horizontalSpacer_4">
+               <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <property name="sizeHint" stdset="0" >
+               <property name="sizeHint" stdset="0">
                 <size>
                  <width>40</width>
                  <height>20</height>
@@ -1013,18 +1014,18 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="confit_pbSequential" >
-               <property name="text" >
+              <widget class="QPushButton" name="confit_pbSequential">
+               <property name="text">
                 <string>Run Sequential Fit</string>
                </property>
               </widget>
              </item>
              <item>
-              <spacer name="horizontalSpacer_5" >
-               <property name="orientation" >
+              <spacer name="horizontalSpacer_5">
+               <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <property name="sizeHint" stdset="0" >
+               <property name="sizeHint" stdset="0">
                 <size>
                  <width>40</width>
                  <height>20</height>
@@ -1040,65 +1041,65 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabAbsF2P" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabAbsF2P">
+      <attribute name="title">
        <string>Calculate Corrections</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutAbsF2P" >
+      <layout class="QVBoxLayout" name="layoutAbsF2P">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_23" >
+        <layout class="QHBoxLayout" name="horizontalLayout_23">
          <item>
-          <widget class="QLabel" name="label" >
-           <property name="text" >
+          <widget class="QLabel" name="label">
+           <property name="text">
             <string>Input type:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="absp_cbInputType" >
+          <widget class="QComboBox" name="absp_cbInputType">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>File</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Workspace</string>
             </property>
            </item>
           </widget>
          </item>
          <item>
-          <widget class="QStackedWidget" name="absp_swInput" >
-           <property name="currentIndex" >
+          <widget class="QStackedWidget" name="absp_swInput">
+           <property name="currentIndex">
             <number>0</number>
            </property>
-           <widget class="QWidget" name="page" >
-            <layout class="QVBoxLayout" name="verticalLayout_16" >
-             <property name="spacing" >
+           <widget class="QWidget" name="page">
+            <layout class="QVBoxLayout" name="verticalLayout_16">
+             <property name="spacing">
               <number>0</number>
              </property>
-             <property name="margin" >
+             <property name="margin">
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absp_inputFile" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absp_inputFile" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                  <horstretch>0</horstretch>
                  <verstretch>41</verstretch>
                 </sizepolicy>
                </property>
-               <property name="findRunFiles" stdset="0" >
+               <property name="findRunFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="label" stdset="0" >
+               <property name="label" stdset="0">
                 <string>Sample file:</string>
                </property>
-               <property name="multipleFiles" stdset="0" >
+               <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" >
+               <property name="fileExtensions" stdset="0">
                 <stringlist>
                  <string>_red.nxs</string>
                 </stringlist>
@@ -1107,17 +1108,17 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="page_2" >
-            <layout class="QHBoxLayout" name="horizontalLayout_24" >
-             <property name="spacing" >
+           <widget class="QWidget" name="page_2">
+            <layout class="QHBoxLayout" name="horizontalLayout_24">
+             <property name="spacing">
               <number>0</number>
              </property>
-             <property name="margin" >
+             <property name="margin">
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="absp_wsInput" >
-               <property name="Suffix" >
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="absp_wsInput">
+               <property name="Suffix" stdset="0">
                 <string>_red</string>
                </property>
               </widget>
@@ -1129,42 +1130,42 @@
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="absp_ckUseCan" >
-         <property name="text" >
+        <widget class="QCheckBox" name="absp_ckUseCan">
+         <property name="text">
           <string>Use Can</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="absp_gbShape" >
-         <property name="title" >
+        <widget class="QGroupBox" name="absp_gbShape">
+         <property name="title">
           <string>Shape Details</string>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout_15" >
+         <layout class="QVBoxLayout" name="verticalLayout_15">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2" >
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QLabel" name="absp_lbSampleShape" >
-              <property name="sizePolicy" >
-               <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
+             <widget class="QLabel" name="absp_lbSampleShape">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>Sample Shape:</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="absp_cbShape" >
+             <widget class="QComboBox" name="absp_cbShape">
               <item>
-               <property name="text" >
+               <property name="text">
                 <string>Flat</string>
                </property>
               </item>
               <item>
-               <property name="text" >
+               <property name="text">
                 <string>Cylinder</string>
                </property>
               </item>
@@ -1173,180 +1174,180 @@
            </layout>
           </item>
           <item>
-           <widget class="QStackedWidget" name="absp_swShapeDetails" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+           <widget class="QStackedWidget" name="absp_swShapeDetails">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="currentIndex" >
+            <property name="currentIndex">
              <number>0</number>
             </property>
-            <widget class="QWidget" name="absp_page_Flat" >
-             <layout class="QGridLayout" name="gridLayout_2" >
-              <property name="margin" >
+            <widget class="QWidget" name="absp_page_Flat">
+             <layout class="QGridLayout" name="gridLayout_2">
+              <property name="margin">
                <number>0</number>
               </property>
-              <property name="horizontalSpacing" >
+              <property name="horizontalSpacing">
                <number>6</number>
               </property>
-              <item row="0" column="0" >
-               <widget class="QLabel" name="absp_lbts" >
-                <property name="text" >
+              <item row="0" column="0">
+               <widget class="QLabel" name="absp_lbts">
+                <property name="text">
                  <string>Thickness</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1" >
-               <widget class="QLineEdit" name="absp_lets" >
-                <property name="text" >
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="absp_lets">
+                <property name="text">
                  <string/>
                 </property>
                </widget>
               </item>
-              <item row="1" column="1" >
-               <widget class="QLineEdit" name="absp_letc1" >
-                <property name="text" >
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="absp_letc1">
+                <property name="text">
                  <string/>
                 </property>
                </widget>
               </item>
-              <item row="2" column="1" >
-               <widget class="QLineEdit" name="absp_letc2" >
-                <property name="text" >
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="absp_letc2">
+                <property name="text">
                  <string/>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0" >
-               <widget class="QLabel" name="absp_lbtc1" >
-                <property name="text" >
+              <item row="1" column="0">
+               <widget class="QLabel" name="absp_lbtc1">
+                <property name="text">
                  <string>Front Thickness</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="0" >
-               <widget class="QLabel" name="absp_lbtc2" >
-                <property name="text" >
+              <item row="2" column="0">
+               <widget class="QLabel" name="absp_lbtc2">
+                <property name="text">
                  <string>Back Thickness</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="2" >
-               <widget class="QLabel" name="absp_valts" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 0);</string>
+              <item row="0" column="2">
+               <widget class="QLabel" name="absp_valts">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 0);</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="2" >
-               <widget class="QLabel" name="absp_valtc1" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 0);</string>
+              <item row="1" column="2">
+               <widget class="QLabel" name="absp_valtc1">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 0);</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="2" >
-               <widget class="QLabel" name="absp_valtc2" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 0);</string>
+              <item row="2" column="2">
+               <widget class="QLabel" name="absp_valtc2">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 0);</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
               </item>
              </layout>
             </widget>
-            <widget class="QWidget" name="absp_pageCylinder" >
-             <layout class="QGridLayout" name="gridLayout_3" >
-              <property name="margin" >
+            <widget class="QWidget" name="absp_pageCylinder">
+             <layout class="QGridLayout" name="gridLayout_3">
+              <property name="margin">
                <number>0</number>
               </property>
-              <item row="0" column="4" >
-               <widget class="QLineEdit" name="absp_ler2" >
-                <property name="text" >
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="absp_ler1">
+                <property name="text">
                  <string/>
                 </property>
                </widget>
               </item>
-              <item row="0" column="1" >
-               <widget class="QLineEdit" name="absp_ler1" >
-                <property name="text" >
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1" >
-               <widget class="QLineEdit" name="absp_ler3" >
-                <property name="enabled" >
+              <item row="2" column="1">
+               <widget class="QLineEdit" name="absp_ler3">
+                <property name="enabled">
                  <bool>false</bool>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string/>
                 </property>
                </widget>
               </item>
-              <item row="0" column="3" >
-               <widget class="QLabel" name="absp_lbR2" >
-                <property name="text" >
-                 <string>Radius 2</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="0" >
-               <widget class="QLabel" name="absp_lbR1" >
-                <property name="text" >
+              <item row="0" column="0">
+               <widget class="QLabel" name="absp_lbR1">
+                <property name="text">
                  <string>Radius 1</string>
                 </property>
                </widget>
               </item>
-              <item row="1" column="0" >
-               <widget class="QLabel" name="absp_lbR3" >
-                <property name="enabled" >
+              <item row="2" column="0">
+               <widget class="QLabel" name="absp_lbR3">
+                <property name="enabled">
                  <bool>false</bool>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>Radius 3</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="2" >
-               <widget class="QLabel" name="absp_valR1" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 0);</string>
+              <item row="0" column="2">
+               <widget class="QLabel" name="absp_valR1">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 0);</string>
                 </property>
-                <property name="text" >
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="5" >
-               <widget class="QLabel" name="absp_valR2" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 0);</string>
-                </property>
-                <property name="text" >
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="2" >
-               <widget class="QLabel" name="absp_valR3" >
-                <property name="enabled" >
+              <item row="2" column="2">
+               <widget class="QLabel" name="absp_valR3">
+                <property name="enabled">
                  <bool>false</bool>
                 </property>
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 0);</string>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 0);</string>
                 </property>
-                <property name="text" >
+                <property name="text">
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="absp_lbR2">
+                <property name="text">
+                 <string>Radius 2</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLineEdit" name="absp_ler2">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="2">
+               <widget class="QLabel" name="absp_valR2">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 0);</string>
+                </property>
+                <property name="text">
                  <string>*</string>
                 </property>
                </widget>
@@ -1356,27 +1357,27 @@
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_11" >
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
             <item>
-             <widget class="QLabel" name="absp_lbAvar" >
-              <property name="text" >
+             <widget class="QLabel" name="absp_lbAvar">
+              <property name="text">
                <string>Can Angle to Beam</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="absp_leavar" >
-              <property name="text" >
+             <widget class="QLineEdit" name="absp_leavar">
+              <property name="text">
                <string/>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLabel" name="absp_valAvar" >
-              <property name="styleSheet" >
-               <string notr="true" >color: rgb(255, 0, 0);</string>
+             <widget class="QLabel" name="absp_valAvar">
+              <property name="styleSheet">
+               <string notr="true">color: rgb(255, 0, 0);</string>
               </property>
-              <property name="text" >
+              <property name="text">
                <string>*</string>
               </property>
              </widget>
@@ -1387,27 +1388,27 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_15" >
+        <layout class="QHBoxLayout" name="horizontalLayout_15">
          <item>
-          <widget class="QLabel" name="absp_lbWidth" >
-           <property name="text" >
+          <widget class="QLabel" name="absp_lbWidth">
+           <property name="text">
             <string>Beam Width</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLineEdit" name="absp_lewidth" >
-           <property name="text" >
+          <widget class="QLineEdit" name="absp_lewidth">
+           <property name="text">
             <string/>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QLabel" name="absp_valWidth" >
-           <property name="styleSheet" >
-            <string notr="true" >color: rgb(255, 0, 0);</string>
+          <widget class="QLabel" name="absp_valWidth">
+           <property name="styleSheet">
+            <string notr="true">color: rgb(255, 0, 0);</string>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>*</string>
            </property>
           </widget>
@@ -1415,79 +1416,79 @@
         </layout>
        </item>
        <item>
-        <widget class="QGroupBox" name="absp_gbSample" >
-         <property name="title" >
+        <widget class="QGroupBox" name="absp_gbSample">
+         <property name="title">
           <string>Sample Details</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_8" >
-          <item row="0" column="0" >
-           <widget class="QLabel" name="absp_lbsamden" >
-            <property name="text" >
+         <layout class="QGridLayout" name="gridLayout_8">
+          <item row="0" column="0">
+           <widget class="QLabel" name="absp_lbsamden">
+            <property name="text">
              <string>Number Density</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1" >
-           <widget class="QLineEdit" name="absp_lesamden" >
-            <property name="text" >
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="absp_lesamden">
+            <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="0" column="3" >
-           <widget class="QLabel" name="absp_lbsamsigs" >
-            <property name="text" >
+          <item row="0" column="3">
+           <widget class="QLabel" name="absp_lbsamsigs">
+            <property name="text">
              <string>Scattering cross-section</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="4" >
-           <widget class="QLineEdit" name="absp_lesamsigs" >
-            <property name="text" >
+          <item row="0" column="4">
+           <widget class="QLineEdit" name="absp_lesamsigs">
+            <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="0" column="6" >
-           <widget class="QLabel" name="absp_lbsamsiga" >
-            <property name="text" >
+          <item row="0" column="6">
+           <widget class="QLabel" name="absp_lbsamsiga">
+            <property name="text">
              <string>Absorption cross-section</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="7" >
-           <widget class="QLineEdit" name="absp_lesamsiga" >
-            <property name="text" >
+          <item row="0" column="7">
+           <widget class="QLineEdit" name="absp_lesamsiga">
+            <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="0" column="2" >
-           <widget class="QLabel" name="absp_valSamden" >
-            <property name="styleSheet" >
-             <string notr="true" >color: rgb(255, 0, 0);</string>
+          <item row="0" column="2">
+           <widget class="QLabel" name="absp_valSamden">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>*</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="5" >
-           <widget class="QLabel" name="absp_valSamsigs" >
-            <property name="styleSheet" >
-             <string notr="true" >color: rgb(255, 0, 0);</string>
+          <item row="0" column="5">
+           <widget class="QLabel" name="absp_valSamsigs">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>*</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="8" >
-           <widget class="QLabel" name="absp_valSamsiga" >
-            <property name="styleSheet" >
-             <string notr="true" >color: rgb(255, 0, 0);</string>
+          <item row="0" column="8">
+           <widget class="QLabel" name="absp_valSamsiga">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>*</string>
             </property>
            </widget>
@@ -1496,82 +1497,82 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="absp_gbCan" >
-         <property name="enabled" >
+        <widget class="QGroupBox" name="absp_gbCan">
+         <property name="enabled">
           <bool>false</bool>
          </property>
-         <property name="title" >
+         <property name="title">
           <string>Can Details</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_7" >
-          <item row="1" column="1" >
-           <widget class="QLineEdit" name="absp_lecanden" >
-            <property name="text" >
+         <layout class="QGridLayout" name="gridLayout_7">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="absp_lecanden">
+            <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="1" column="0" >
-           <widget class="QLabel" name="absp_lbCanden" >
-            <property name="text" >
+          <item row="1" column="0">
+           <widget class="QLabel" name="absp_lbCanden">
+            <property name="text">
              <string>Number Density</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="3" >
-           <widget class="QLabel" name="absp_lbCansigs" >
-            <property name="text" >
+          <item row="1" column="3">
+           <widget class="QLabel" name="absp_lbCansigs">
+            <property name="text">
              <string>Scattering cross-section</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="4" >
-           <widget class="QLineEdit" name="absp_lecansigs" >
-            <property name="text" >
+          <item row="1" column="4">
+           <widget class="QLineEdit" name="absp_lecansigs">
+            <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="1" column="6" >
-           <widget class="QLabel" name="absp_lbCansiga" >
-            <property name="text" >
+          <item row="1" column="6">
+           <widget class="QLabel" name="absp_lbCansiga">
+            <property name="text">
              <string>Absorption cross-section</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="7" >
-           <widget class="QLineEdit" name="absp_lecansiga" >
-            <property name="text" >
+          <item row="1" column="7">
+           <widget class="QLineEdit" name="absp_lecansiga">
+            <property name="text">
              <string/>
             </property>
            </widget>
           </item>
-          <item row="1" column="2" >
-           <widget class="QLabel" name="absp_valCanden" >
-            <property name="styleSheet" >
-             <string notr="true" >color: rgb(255, 0, 0);</string>
+          <item row="1" column="2">
+           <widget class="QLabel" name="absp_valCanden">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>*</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="5" >
-           <widget class="QLabel" name="absp_valCansigs" >
-            <property name="styleSheet" >
-             <string notr="true" >color: rgb(255, 0, 0);</string>
+          <item row="1" column="5">
+           <widget class="QLabel" name="absp_valCansigs">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>*</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="8" >
-           <widget class="QLabel" name="absp_valCansiga" >
-            <property name="styleSheet" >
-             <string notr="true" >color: rgb(255, 0, 0);</string>
+          <item row="1" column="8">
+           <widget class="QLabel" name="absp_valCansiga">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>*</string>
             </property>
            </widget>
@@ -1580,39 +1581,39 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6" >
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QLabel" name="absp_lbPlotOutput" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
+          <widget class="QLabel" name="absp_lbPlotOutput">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Plot Output</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="absp_cbPlotOutput" >
+          <widget class="QComboBox" name="absp_cbPlotOutput">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>None</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Wavelength</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Angle</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Both</string>
             </property>
            </item>
@@ -1622,62 +1623,62 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabApplyAbsorptionCorrections" >
-      <attribute name="title" >
+     <widget class="QWidget" name="tabApplyAbsorptionCorrections">
+      <attribute name="title">
        <string>Apply Corrections</string>
       </attribute>
-      <layout class="QVBoxLayout" name="layoutApplyAbsCor" >
+      <layout class="QVBoxLayout" name="layoutApplyAbsCor">
        <item>
-        <layout class="QHBoxLayout" name="abscor_layoutInput" >
+        <layout class="QHBoxLayout" name="abscor_layoutInput">
          <item>
-          <widget class="QLabel" name="abscor_lbSamInputType" >
-           <property name="text" >
+          <widget class="QLabel" name="abscor_lbSamInputType">
+           <property name="text">
             <string>Input Type:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="abscor_cbSampleInputType" >
+          <widget class="QComboBox" name="abscor_cbSampleInputType">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>File</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Workspace</string>
             </property>
            </item>
           </widget>
          </item>
          <item>
-          <widget class="QStackedWidget" name="abscor_swSampleInput" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+          <widget class="QStackedWidget" name="abscor_swSampleInput">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="currentIndex" >
+           <property name="currentIndex">
             <number>0</number>
            </property>
-           <widget class="QWidget" name="abscor_samFile" >
-            <layout class="QVBoxLayout" name="verticalLayout_17" >
+           <widget class="QWidget" name="abscor_samFile">
+            <layout class="QVBoxLayout" name="verticalLayout_17">
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_sample" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_sample" native="true">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                  <horstretch>0</horstretch>
                  <verstretch>41</verstretch>
                 </sizepolicy>
                </property>
-               <property name="label" stdset="0" >
+               <property name="label" stdset="0">
                 <string/>
                </property>
-               <property name="multipleFiles" stdset="0" >
+               <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" >
+               <property name="fileExtensions" stdset="0">
                 <stringlist>
                  <string>_red.nxs</string>
                 </stringlist>
@@ -1686,11 +1687,11 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="abscor_samWS" >
-            <layout class="QHBoxLayout" name="horizontalLayout_31" >
+           <widget class="QWidget" name="abscor_samWS">
+            <layout class="QHBoxLayout" name="horizontalLayout_31">
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample" >
-               <property name="Suffix" >
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample">
+               <property name="Suffix" stdset="0">
                 <string>_red</string>
                </property>
               </widget>
@@ -1702,23 +1703,23 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="abscor_layoutGeometry" >
+        <layout class="QHBoxLayout" name="abscor_layoutGeometry">
          <item>
-          <widget class="QLabel" name="abscor_lbGeometry" >
-           <property name="text" >
+          <widget class="QLabel" name="abscor_lbGeometry">
+           <property name="text">
             <string>Geometry:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="abscor_cbGeometry" >
+          <widget class="QComboBox" name="abscor_cbGeometry">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Flat</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Cylinder</string>
             </property>
            </item>
@@ -1727,82 +1728,82 @@
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="abscor_ckUseCorrections" >
-         <property name="text" >
+        <widget class="QCheckBox" name="abscor_ckUseCorrections">
+         <property name="text">
           <string>Use Corrections</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QCheckBox" name="abscor_ckUseCan" >
-         <property name="text" >
+        <widget class="QCheckBox" name="abscor_ckUseCan">
+         <property name="text">
           <string>Use Container</string>
          </property>
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="abscor_layoutContainer" >
+        <layout class="QHBoxLayout" name="abscor_layoutContainer">
          <item>
-          <widget class="QLabel" name="abscor_lbContainerInputType" >
-           <property name="text" >
+          <widget class="QLabel" name="abscor_lbContainerInputType">
+           <property name="text">
             <string>Input Type:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="abscor_cbContainerInputType" >
+          <widget class="QComboBox" name="abscor_cbContainerInputType">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>File</string>
             </property>
            </item>
            <item>
-            <property name="text" >
+            <property name="text">
              <string>Workspace</string>
             </property>
            </item>
           </widget>
          </item>
          <item>
-          <widget class="QStackedWidget" name="abscor_swContainerInput" >
-           <property name="enabled" >
+          <widget class="QStackedWidget" name="abscor_swContainerInput">
+           <property name="enabled">
             <bool>true</bool>
            </property>
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="currentIndex" >
+           <property name="currentIndex">
             <number>0</number>
            </property>
-           <widget class="QWidget" name="abscor_conFile" >
-            <layout class="QHBoxLayout" name="horizontalLayout_34" >
-             <property name="margin" >
+           <widget class="QWidget" name="abscor_conFile">
+            <layout class="QHBoxLayout" name="horizontalLayout_34">
+             <property name="margin">
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_can" >
-               <property name="enabled" >
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_can" native="true">
+               <property name="enabled">
                 <bool>true</bool>
                </property>
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                  <horstretch>0</horstretch>
                  <verstretch>41</verstretch>
                 </sizepolicy>
                </property>
-               <property name="label" stdset="0" >
+               <property name="label" stdset="0">
                 <string/>
                </property>
-               <property name="multipleFiles" stdset="0" >
+               <property name="multipleFiles" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="optional" stdset="0" >
+               <property name="optional" stdset="0">
                 <bool>false</bool>
                </property>
-               <property name="fileExtensions" >
+               <property name="fileExtensions" stdset="0">
                 <stringlist>
                  <string>_red.nxs</string>
                 </stringlist>
@@ -1811,14 +1812,14 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="abscor_conWS" >
-            <layout class="QHBoxLayout" name="horizontalLayout_35" >
-             <property name="margin" >
+           <widget class="QWidget" name="abscor_conWS">
+            <layout class="QHBoxLayout" name="horizontalLayout_35">
+             <property name="margin">
               <number>0</number>
              </property>
              <item>
-              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer" >
-               <property name="Suffix" >
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer">
+               <property name="Suffix" stdset="0">
                 <string>_red</string>
                </property>
               </widget>
@@ -1830,24 +1831,24 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="abscor_layoutPlotOutput" >
+        <layout class="QHBoxLayout" name="abscor_layoutPlotOutput">
          <item>
-          <widget class="QLabel" name="abscor_lbPlotOutput" >
-           <property name="sizePolicy" >
-            <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
+          <widget class="QLabel" name="abscor_lbPlotOutput">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <property name="text" >
+           <property name="text">
             <string>Plot Output:</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="abscor_cbPlotOutput" >
+          <widget class="QComboBox" name="abscor_cbPlotOutput">
            <item>
-            <property name="text" >
+            <property name="text">
              <string>None</string>
             </property>
            </item>
@@ -1856,11 +1857,11 @@
         </layout>
        </item>
        <item>
-        <spacer name="abscor_verticalSpacer" >
-         <property name="orientation" >
+        <spacer name="abscor_verticalSpacer">
+         <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
-         <property name="sizeHint" stdset="0" >
+         <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
            <height>40</height>
@@ -1873,35 +1874,35 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="layout_bottom" >
+    <layout class="QHBoxLayout" name="layout_bottom">
      <item>
-      <widget class="QPushButton" name="pbHelp" >
-       <property name="enabled" >
+      <widget class="QPushButton" name="pbHelp">
+       <property name="enabled">
         <bool>true</bool>
        </property>
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
-       <property name="maximumSize" >
+       <property name="maximumSize">
         <size>
          <width>20</width>
          <height>20</height>
         </size>
        </property>
-       <property name="text" >
+       <property name="text">
         <string>?</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_14" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer_14">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -1910,18 +1911,18 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pbRun" >
-       <property name="text" >
+      <widget class="QPushButton" name="pbRun">
+       <property name="text">
         <string>Run</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer_11" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer_11">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -1930,8 +1931,8 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="pbManageDirs" >
-       <property name="text" >
+      <widget class="QPushButton" name="pbManageDirs">
+       <property name="text">
         <string>Manage Directories</string>
        </property>
       </widget>
@@ -1952,6 +1953,78 @@
    <header>MantidQtMantidWidgets/WorkspaceSelector.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>elwin_pbPlotInput</tabstop>
+  <tabstop>elwin_ckConcat</tabstop>
+  <tabstop>elwin_ckVerbose</tabstop>
+  <tabstop>elwin_ckPlot</tabstop>
+  <tabstop>elwin_ckSave</tabstop>
+  <tabstop>msd_pbPlotInput</tabstop>
+  <tabstop>msd_ckVerbose</tabstop>
+  <tabstop>msd_ckPlot</tabstop>
+  <tabstop>msd_ckSave</tabstop>
+  <tabstop>fury_pbPlotInput</tabstop>
+  <tabstop>fury_cbResType</tabstop>
+  <tabstop>fury_cbInputType</tabstop>
+  <tabstop>fury_wsSample</tabstop>
+  <tabstop>fury_ckVerbose</tabstop>
+  <tabstop>fury_ckPlot</tabstop>
+  <tabstop>fury_ckSave</tabstop>
+  <tabstop>furyfit_cbInputType</tabstop>
+  <tabstop>furyfit_wsIqt</tabstop>
+  <tabstop>furyfit_pbPlotInput</tabstop>
+  <tabstop>furyfit_cbFitType</tabstop>
+  <tabstop>furyfit_ckConstrainIntensities</tabstop>
+  <tabstop>furyfit_ckPlotGuess</tabstop>
+  <tabstop>furyfit_leSpecNo</tabstop>
+  <tabstop>furyfit_ckPlotOutput</tabstop>
+  <tabstop>furyfit_cbPlotOutput</tabstop>
+  <tabstop>furyfit_ckSaveSeq</tabstop>
+  <tabstop>furyfit_pbSeqFit</tabstop>
+  <tabstop>confit_cbInputType</tabstop>
+  <tabstop>confit_wsSample</tabstop>
+  <tabstop>confit_pbPlotInput</tabstop>
+  <tabstop>confit_cbFitType</tabstop>
+  <tabstop>confit_cbBackground</tabstop>
+  <tabstop>confit_ckPlotGuess</tabstop>
+  <tabstop>confit_leSpecNo</tabstop>
+  <tabstop>confit_leSpecMax</tabstop>
+  <tabstop>confit_ckPlotOutput</tabstop>
+  <tabstop>confit_cbPlotOutput</tabstop>
+  <tabstop>confit_ckSaveSeq</tabstop>
+  <tabstop>confit_pbSequential</tabstop>
+  <tabstop>absp_cbInputType</tabstop>
+  <tabstop>absp_wsInput</tabstop>
+  <tabstop>absp_ckUseCan</tabstop>
+  <tabstop>absp_cbShape</tabstop>
+  <tabstop>absp_lets</tabstop>
+  <tabstop>absp_letc1</tabstop>
+  <tabstop>absp_letc2</tabstop>
+  <tabstop>absp_ler1</tabstop>
+  <tabstop>absp_ler2</tabstop>
+  <tabstop>absp_ler3</tabstop>
+  <tabstop>absp_leavar</tabstop>
+  <tabstop>absp_lewidth</tabstop>
+  <tabstop>absp_lesamden</tabstop>
+  <tabstop>absp_lesamsigs</tabstop>
+  <tabstop>absp_lesamsiga</tabstop>
+  <tabstop>absp_lecanden</tabstop>
+  <tabstop>absp_lecansigs</tabstop>
+  <tabstop>absp_lecansiga</tabstop>
+  <tabstop>absp_cbPlotOutput</tabstop>
+  <tabstop>abscor_cbSampleInputType</tabstop>
+  <tabstop>abscor_wsSample</tabstop>
+  <tabstop>abscor_cbGeometry</tabstop>
+  <tabstop>abscor_ckUseCorrections</tabstop>
+  <tabstop>abscor_ckUseCan</tabstop>
+  <tabstop>abscor_cbContainerInputType</tabstop>
+  <tabstop>abscor_wsContainer</tabstop>
+  <tabstop>abscor_cbPlotOutput</tabstop>
+  <tabstop>pbHelp</tabstop>
+  <tabstop>pbRun</tabstop>
+  <tabstop>pbManageDirs</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

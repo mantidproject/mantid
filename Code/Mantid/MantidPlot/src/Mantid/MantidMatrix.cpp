@@ -180,7 +180,7 @@ bool isANumber(volatile const double& d)
 
 void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start, int end)
 {
-  if (!ws.get())
+  if (!ws)
   {
     QMessageBox::critical(0,"WorkspaceMatrixModel error","2D workspace expected.");
     m_rows = 0;
@@ -190,6 +190,7 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start, 
     return;
   }
 
+  m_workspace = ws;
   m_workspaceTotalHist = static_cast<int>(ws->getNumberHistograms());
   m_startRow = (start<0 || start>=m_workspaceTotalHist)?0:start;
   m_endRow   = (end<0 || end>=m_workspaceTotalHist || end < start)? m_workspaceTotalHist - 1 : end;
@@ -1216,7 +1217,7 @@ void MantidMatrix::repaintAll()
 
 void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
-  if( wsName != m_strName || !ws.get() ) return;
+  if( wsName != m_strName || !ws ) return;
 
   Mantid::API::MatrixWorkspace_sptr new_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_strName));
   emit needWorkspaceChange( new_workspace ); 

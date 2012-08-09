@@ -67,7 +67,7 @@ public:
     TS_ASSERT( alg.isExecuted() ); //no log values
 
     // Check the results
-    Goniometer & gon = ws->mutableRun().getGoniometer();
+    const Goniometer & gon = ws->mutableRun().getGoniometer();
     TS_ASSERT_EQUALS( gon.getNumberAxes(), 0);
     DblMatrix rot = ws->mutableRun().getGoniometerMatrix();
     TSM_ASSERT_EQUALS( "Goniometer Rotation matrix is 3x3 identity", rot,  DblMatrix(3,3, true) );
@@ -95,7 +95,7 @@ public:
     TS_ASSERT( alg.isExecuted() ); //no log values
 
     // Check the results
-    Goniometer & gon = ws->mutableRun().getGoniometer();
+    const Goniometer & gon = ws->mutableRun().getGoniometer();
     TS_ASSERT_EQUALS( gon.getNumberAxes(), 2);
 
     TS_ASSERT_EQUALS( gon.getAxis(0).name, "angle1");
@@ -134,7 +134,7 @@ public:
     else
     {
       // Check the results
-      Goniometer & gon = ws->mutableRun().getGoniometer();
+      const Goniometer & gon = ws->mutableRun().getGoniometer();
       TS_ASSERT_EQUALS( gon.getNumberAxes(), numExpected);
     }
     AnalysisDataService::Instance().remove("SetGoniometerTest_ws");

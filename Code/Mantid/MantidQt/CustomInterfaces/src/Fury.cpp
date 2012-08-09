@@ -1,4 +1,6 @@
 #include "MantidQtCustomInterfaces/Fury.h"
+
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QFileInfo>
@@ -91,60 +93,31 @@ namespace IDA
     QString pyOutput = runPythonCode(pyInput).trimmed();
   }
 
-  namespace
-  {
-    static const double TOL = 0.000001;
-
-    bool acceptableBinWidth(double range, double binWidth, double tolerance = TOL)
-    {
-      assert(binWidth > 0 && range > 0);
-
-      while( range > tolerance )
-        range -= binWidth;
-
-      return std::abs(range) <= tolerance;
-    }
-  }
-
   /**
    * Ensure we have present and valid file/ws inputs.  The underlying Fourier transform of Fury
    * also means we must enforce several rules on the parameters.
    */
   QString Fury::validate()
   {
+    UserInputValidator uiv;
+
     switch ( uiForm().fury_cbInputType->currentIndex() )
     {
-    case 0: // File
-      {
-        if ( ! uiForm().fury_iconFile->isValid() )
-          return "Empty or otherwise invalid reduction file field.";
-      }
-      break;
-    case 1: // Workspace
-      {
-        if ( uiForm().fury_wsSample->currentText() == "" )
-          return "No workspace selected.";
-      }
-      break;
+      case 0:
+        uiv.checkMWRunFilesIsValid("Reduction", uiForm().fury_iconFile); break;
+      case 1:
+        uiv.checkWorkspaceSelectorIsNotEmpty("Reduction", uiForm().fury_wsSample); break;
     }
 
-    if ( ! uiForm().fury_resFile->isValid()  )
-      return "Invalid or empty resolution file field.";
+    uiv.checkMWRunFilesIsValid("Resolution", uiForm().fury_resFile);
+    
+    double eLow   = m_furDblMng->value(m_furProp["ELow"]);
+    double eWidth = m_furDblMng->value(m_furProp["EWidth"]);
+    double eHigh  = m_furDblMng->value(m_furProp["EHigh"]);
 
-    double eWidth = boost::lexical_cast<double>(m_furProp["EWidth"]->valueText().toStdString());
-    double eLow   = boost::lexical_cast<double>(m_furProp["ELow"]->valueText().toStdString());
-    double eHigh  = boost::lexical_cast<double>(m_furProp["EHigh"]->valueText().toStdString());
+    uiv.checkBins(eLow, eWidth, eHigh);
 
-    if( eWidth == 0.0 )
-      return "EWidth (bin size) must be non-zero.";
-
-    if( eLow >= eHigh )
-      return "ELow must be lower than EHigh.";
-
-    if( ! acceptableBinWidth(eHigh - eLow, eWidth) )
-      return "All bins must be of equal width.  See Wiki.";
-
-    return "";
+    return uiv.generateErrorMessage();
   }
 
   void Fury::loadSettings(const QSettings & settings)

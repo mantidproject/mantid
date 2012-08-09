@@ -1,7 +1,5 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument valid-to="2100-01-31 23:59:59" name="HYSPEC" valid-from="2011-07-20 17:02:48.437294">
-  <!--Created by Andrei Savici-->
-  <!-- Monitor 2 distance changed (SIC 22-MAR-2012)-->
+<instrument valid-to="2100-01-31 23:59:59" name="HYSPEC" valid-from="2011-07-20 17:02:48.437294" last-modified="2012-08-01 14:28:00">
   <defaults>
     <length unit="meter"/>
     <angle unit="degree"/>
@@ -49,7 +47,7 @@
         <value val="0"/>
       </parameter>
       <parameter name="t-position">
-        <logfile id="s2"/>
+        <logfile id="s2"  eq="0.0+value"/>
       </parameter>
       <parameter name="p-position">
         <value val="0"/>
@@ -58,7 +56,7 @@
         <value val="0"/>
       </parameter>
       <parameter name="roty">
-        <logfile id="s2"/>
+        <logfile id="s2"  eq="0.0+value"/>
       </parameter>
       <parameter name="rotz">
         <value val="0"/>

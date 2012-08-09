@@ -1746,4 +1746,37 @@ namespace Mantid
   } // namespace Kernel
 } // namespace Mantid
 
-
+namespace Mantid
+{
+  namespace Kernel
+  {
+    //================================================================================================
+    /** Function filtering double TimeSeriesProperties according to the requested statistics.
+     *  @param propertyToFilter : Property to filter the statistics on.
+     *  @param statisticType : Enum indicating the type of statistics to use.
+     *  @return The TimeSeriesProperty filtered by the requested statistics. 
+     */
+    double filterByStatistic(TimeSeriesProperty<double> const * const propertyToFilter, Kernel::Math::StatisticType statisticType)
+    {
+        using namespace Kernel::Math;
+        double singleValue = 0;
+        switch(statisticType)
+        {
+        case FirstValue: singleValue = propertyToFilter->nthValue(0);
+          break;
+        case LastValue: singleValue = propertyToFilter->nthValue(propertyToFilter->size() - 1);
+          break;
+        case Minimum: singleValue = propertyToFilter->getStatistics().minimum;
+          break;
+        case Maximum: singleValue = propertyToFilter->getStatistics().maximum;
+          break;
+        case Mean: singleValue = propertyToFilter->getStatistics().mean;
+          break;
+        case Median: singleValue = propertyToFilter->getStatistics().median;
+          break;
+        default: throw std::invalid_argument("filterByStatistic - Unknown statistic type: " + boost::lexical_cast<std::string>(propertyToFilter));
+        };
+        return singleValue;
+    }
+  }
+}

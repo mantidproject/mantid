@@ -88,7 +88,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(ws->run().getLogData("angle1")->value());
     TS_ASSERT_THROWS_NOTHING(ws->run().getLogData("angle2")->value());
     
-    Goniometer & gon = ws->mutableRun().getGoniometer();
+    const Goniometer & gon = ws->run().getGoniometer();
     TS_ASSERT_EQUALS( gon.getNumberAxes(), 2);
 
     TS_ASSERT_EQUALS( gon.getAxis(0).name, "angle1");

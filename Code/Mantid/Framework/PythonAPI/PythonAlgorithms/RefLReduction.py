@@ -13,7 +13,7 @@ import sfCalculator
 class RefLReduction(PythonAlgorithm):
 
     def category(self):
-        return "Reflectometry"
+        return "Reflectometry\\SNS"
 
     def name(self):
         return "RefLReduction"

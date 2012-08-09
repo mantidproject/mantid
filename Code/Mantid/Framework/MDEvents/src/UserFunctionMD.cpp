@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/UserFunctionMD.h"
+#include "MantidMDEvents/UserFunctionMD.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -9,7 +9,7 @@
 
 namespace Mantid
 {
-  namespace CurveFitting
+  namespace MDEvents
   {
 
     // Subscribe the function into the factory.
@@ -171,5 +171,5 @@ namespace Mantid
       m_parser.SetExpr(m_formula);
     }
 
-  } // namespace CurveFitting
+  } // namespace MDEvents
 } // namespace Mantid

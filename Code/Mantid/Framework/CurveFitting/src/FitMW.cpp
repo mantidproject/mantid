@@ -72,7 +72,7 @@ namespace
   FitMW::FitMW(Kernel::IPropertyManager* fit,
     const std::string& workspacePropertyName, 
     FitMW::DomainType domainType):
-  IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName),domainType),
+    API::IDomainCreator(fit,std::vector<std::string>(1,workspacePropertyName),domainType),
   m_startX(EMPTY_DBL()),
   m_endX(EMPTY_DBL())
   {
@@ -89,7 +89,7 @@ namespace
    * @param domainType :: Type of the domain: Simple, Sequential, or Parallel.
    */
   FitMW::FitMW(FitMW::DomainType domainType):
-  IDomainCreator(NULL,std::vector<std::string>(),domainType),
+    API::IDomainCreator(NULL,std::vector<std::string>(),domainType),
   m_startX(EMPTY_DBL()),
   m_endX(EMPTY_DBL()),
   m_maxSize(10)
@@ -193,7 +193,7 @@ namespace
           size_t k = m + m_maxSize;
           if ( k > n ) k = n;
           creator->setRange( *(from + m), *(from + k - 1) );
-          seqDomain->addCreator( IDomainCreator_sptr( creator ) );
+          seqDomain->addCreator( API::IDomainCreator_sptr( creator ) );
           m = k;
         }
         ivalues.reset( new EmptyValues( n ) );

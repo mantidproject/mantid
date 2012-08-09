@@ -5,10 +5,10 @@
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/BoxController.h"
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/MDDimensionStats.h"
 #include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidKernel/ThreadScheduler.h"
 
 #undef MDBOX_TRACK_SIGNAL_WHEN_ADDING
 
@@ -168,7 +168,7 @@ namespace MDEvents
     std::vector< MDE > * getEventsCopy();
 
     void addEvent(const MDE & point);
-
+    void addAndTraceEvent(const MDE & point,size_t index);
     void addEventUnsafe(const MDE & point);
 
     size_t addEventsPart(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);

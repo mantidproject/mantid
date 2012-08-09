@@ -120,6 +120,12 @@ namespace CurveFitting
     /// Output parameters (fitted or tied)
     void exportParametersWorkspace(std::map<std::string, std::pair<double, char> > parammap);
 
+    /// Create background function
+    void generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws);
+
+    /// Parse content in a table workspace to vector for background parameters
+    void parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr bkgdparamws, std::vector<double>& bkgdorderparams);
+
     /// Instance data
     API::MatrixWorkspace_sptr dataWS;
     DataObjects::Workspace2D_sptr outputWS;

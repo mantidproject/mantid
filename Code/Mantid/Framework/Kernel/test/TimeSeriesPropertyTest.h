@@ -1489,6 +1489,84 @@ public:
     return;
   }
 
+  void test_filter_by_first_value()
+  {
+    TimeSeriesProperty<double> series("doubleProperty"); 
+ 
+    const double expectedFilteredValue = 1;
+    series.addValue("2000-11-30T01:01:01", expectedFilteredValue);
+    series.addValue("2000-11-30T01:01:02", 2);
+
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::FirstValue);
+    TSM_ASSERT_EQUALS("Filtering by FirstValue is not working.", expectedFilteredValue, actualFilteredValue);
+  }
+
+  void test_filter_by_last_value()
+  {
+    TimeSeriesProperty<double> series("doubleProperty"); 
+ 
+    const double expectedFilteredValue = 1;
+    series.addValue("2000-11-30T01:01:01", 0);
+    series.addValue("2000-11-30T01:01:02", expectedFilteredValue);
+
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::LastValue);
+    TSM_ASSERT_EQUALS("Filtering by LastValue is not working.", expectedFilteredValue, actualFilteredValue);
+  }
+
+  void test_filter_by_minimum_value()
+  {
+    TimeSeriesProperty<double> series("doubleProperty"); 
+ 
+    const double expectedFilteredValue = 1;
+    series.addValue("2000-11-30T01:01:01", 3);
+    series.addValue("2000-11-30T01:01:02", expectedFilteredValue); // minimum. 1 < 3 < 4
+    series.addValue("2000-11-30T01:01:03", 4);
+
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Minimum);
+    TSM_ASSERT_EQUALS("Filtering by Minimum is not working.", expectedFilteredValue, actualFilteredValue);
+  }
+
+  void test_filter_by_maximum_value()
+  {
+    TimeSeriesProperty<double> series("doubleProperty"); 
+ 
+    const double expectedFilteredValue = 1;
+    series.addValue("2000-11-30T01:01:01", 0.1);
+    series.addValue("2000-11-30T01:01:02", expectedFilteredValue); // maximum. 1 > 0.9 > 0.1
+    series.addValue("2000-11-30T01:01:03", 0.9);
+
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Maximum);
+    TSM_ASSERT_EQUALS("Filtering by Maximum is not working.", expectedFilteredValue, actualFilteredValue);
+  }
+
+  void test_filter_by_mean_value()
+  {
+    TimeSeriesProperty<double> series("doubleProperty"); 
+ 
+    const double expectedFilteredValue = 1;
+    series.addValue("2000-11-30T01:01:01", 0);
+    series.addValue("2000-11-30T01:01:02", expectedFilteredValue); // time series mean = value at T = (T1 + T2 + T3) / 3
+    series.addValue("2000-11-30T01:01:03", 2);
+
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Mean);
+    TSM_ASSERT_EQUALS("Filtering by Mean Time is not working.", expectedFilteredValue, actualFilteredValue);
+  }
+
+  void test_filter_by_median()
+  {
+    TimeSeriesProperty<double> series("doubleProperty"); 
+ 
+    const double expectedFilteredValue = 2;
+    series.addValue("2000-11-30T01:01:01", 0);
+    series.addValue("2000-11-30T01:01:02", 1);
+    series.addValue("2000-11-30T01:01:03", expectedFilteredValue); // Median time.
+    series.addValue("2000-11-30T01:01:04", 4);
+    series.addValue("2000-11-30T01:02:00", 5); 
+
+    const double actualFilteredValue = filterByStatistic(&series, Mantid::Kernel::Math::Median);
+    TSM_ASSERT_EQUALS("Filtering by Median Time is not working.", expectedFilteredValue, actualFilteredValue);
+  }
+
 private:
   TimeSeriesProperty<int> *iProp;
   TimeSeriesProperty<double> *dProp;

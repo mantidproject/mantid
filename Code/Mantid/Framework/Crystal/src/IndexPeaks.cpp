@@ -1,8 +1,17 @@
 /*WIKI* 
 
 
-Given a PeaksWorkspace with a UB matrix stored with the sample, this algorithm will use UB inverse to index the peaks.
-Any peak with any Miller index more than the specified tolerance away from an integer will have its (h,k,l) set to (0,0,0).
+Given a PeaksWorkspace with a UB matrix stored with the sample, this algorithm will use UB inverse 
+to index the peaks.  If there are peaks from multiple runs in the workspace, the stored UB will be 
+used to get an initial indexing for the peaks from each individual run.  Subsequently, a temporary
+UB will be optimzed for the peaks from each individual run, and used to index the peaks from that
+run.  In this way, a consistent indexing of the peaks from multiple runs will be obtained, which
+indexes the largest number of peaks, although one UB may not produce exactly that indexing for
+all peaks, within the specified tolerance.
+
+Any peak with any Miller index more than the specified tolerance away from an integer will have its 
+(h,k,l) set to (0,0,0).  The calculated Miller indices can either be rounded to the nearest integer
+value, or can be left as decimal fractions.
 
 
 *WIKI*/
@@ -72,6 +81,8 @@ namespace Crystal
 
     this->declareProperty(new PropertyWithValue<double>( "AverageError", 0.0,
           Direction::Output), "Gets set with the average HKL indexing error.");
+
+    this->declareProperty( "RoundHKLs", true, "Round H, K and L values to integers");
   }
 
   //--------------------------------------------------------------------------
@@ -97,6 +108,8 @@ namespace Crystal
        throw std::runtime_error(
              "ERROR: The stored UB is not a valid orientation matrix");
     }
+
+    bool round_hkls = this->getProperty("RoundHKLs");
 
     std::vector<Peak> &peaks = ws->getPeaks();
     size_t n_peaks = ws->getNumberPeaks();
@@ -147,7 +160,9 @@ namespace Crystal
                                                                 tolerance, 
                                                                 miller_indices,
                                                                 original_error );
-      IndexingUtils::RoundHKLs( miller_indices );
+
+      IndexingUtils::RoundHKLs( miller_indices );  // HKLs must be rounded for 
+                                                   // Optimize_UB to work
       num_indexed   = original_indexed;
       average_error = original_error; 
 
@@ -174,9 +189,11 @@ namespace Crystal
                                                              tolerance, 
                                                              miller_indices,
                                                              average_error );
-        IndexingUtils::RoundHKLs( miller_indices );
 
-        if ( num_indexed < original_indexed )   // just use the original UB
+        IndexingUtils::RoundHKLs( miller_indices ); // HKLs must be rounded for
+                                                    // Optimize_UB to work
+
+        if ( num_indexed < original_indexed )       // just use the original UB
         {
           num_indexed = original_indexed;
           average_error = original_error;
@@ -184,6 +201,14 @@ namespace Crystal
         }
 
         iteration++;
+      }
+
+      if ( !round_hkls )      // If user wants fractional hkls, recalculate them
+      {
+        num_indexed = IndexingUtils::CalculateMillerIndices( tempUB, q_vectors,
+                                                             tolerance,
+                                                             miller_indices,
+                                                             average_error );
       }
 
       total_indexed += num_indexed;

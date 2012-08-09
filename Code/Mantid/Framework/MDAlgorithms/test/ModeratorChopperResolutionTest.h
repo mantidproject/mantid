@@ -3,7 +3,8 @@
 
 #include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
 
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -16,12 +17,12 @@ public:
   void test_Returned_Width_Is_NonZero()
   {
     using Mantid::MDAlgorithms::ModeratorChopperResolution;
-    using Mantid::MDAlgorithms::Observation;
+    using Mantid::MDAlgorithms::CachedExperimentInfo;
 
-    boost::shared_ptr<Observation> testObservation = createTestObservation();
+    boost::shared_ptr<CachedExperimentInfo> testCachedExperimentInfo = createTestCachedExperimentInfo();
     ModeratorChopperResolution *modChop(NULL);
 
-    TS_ASSERT_THROWS_NOTHING(modChop = new ModeratorChopperResolution(*testObservation));
+    TS_ASSERT_THROWS_NOTHING(modChop = new ModeratorChopperResolution(*testCachedExperimentInfo));
     if(modChop)
     {
       //TS_ASSERT(modChop->energyWidth(0.1) > 0.0);
@@ -30,13 +31,13 @@ public:
   }
 
 private:
-  boost::shared_ptr<Mantid::MDAlgorithms::Observation> createTestObservation()
+  boost::shared_ptr<Mantid::MDAlgorithms::CachedExperimentInfo> createTestCachedExperimentInfo()
   {
     using namespace Mantid::Kernel;
     using namespace Mantid::API;
     using namespace Mantid::Geometry;
     using namespace Mantid::MDAlgorithms;
-    ExperimentInfo_sptr exptInfo = boost::make_shared<ExperimentInfo>();
+    m_expt = boost::make_shared<ExperimentInfo>();
 
     Instrument_sptr instrument(new Instrument("test-inst"));
     instrument->setReferenceFrame(boost::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Mantid::Geometry::Right, "frame"));
@@ -64,17 +65,22 @@ private:
 
     ObjComponent *aperture = new ObjComponent("aperture");
     aperture->setPos(V3D(0,0,-7));
+    shape = ComponentCreationHelper::createCuboid(0.04, 0.025, 0.05);
+    aperture->setShape(shape);
     instrument->add(aperture);
 
-    exptInfo->setInstrument(instrument);
-    exptInfo->mutableRun().addProperty("deltaE-mode", DeltaEMode::asString(Mantid::Kernel::DeltaEMode::Direct));
+    m_expt->setInstrument(instrument);
+    m_expt->mutableRun().addProperty("deltaE-mode", DeltaEMode::asString(Mantid::Kernel::DeltaEMode::Direct));
+    m_expt->mutableSample().setOrientedLattice(new Mantid::Geometry::OrientedLattice(5.57,5.51,12.298));
+
 
     // Add log entry
-    exptInfo->mutableRun().addProperty("Ei", 45.1);
+    m_expt->mutableRun().addProperty("Ei", 45.1);
 
-    return boost::make_shared<Observation>(exptInfo, static_cast<Mantid::detid_t>(1));
+    return boost::make_shared<CachedExperimentInfo>(*m_expt, static_cast<Mantid::detid_t>(1));
   }
 
+  Mantid::API::ExperimentInfo_sptr m_expt;
 };
 
 #endif /* MODERATORCHOPPERRESOLUTIONTEST_H_ */

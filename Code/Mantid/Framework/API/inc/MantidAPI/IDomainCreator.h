@@ -1,10 +1,11 @@
-#ifndef MANTID_CURVEFITTING_IDOMAINCREATOR_H_
-#define MANTID_CURVEFITTING_IDOMAINCREATOR_H_
+#ifndef MANTID_API_IDOMAINCREATOR_H_
+#define MANTID_API_IDOMAINCREATOR_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidAPI/DomainCreatorFactory.h"
 #include "MantidAPI/IFunction.h"
 
 namespace Mantid
@@ -16,7 +17,7 @@ namespace Mantid
     class IFunctionValues;
   }
 
-  namespace CurveFitting
+  namespace API
   {
     /**
 
@@ -67,6 +68,8 @@ namespace Mantid
       {}
       /// Virtual destructor
       virtual ~IDomainCreator() {};
+      /// Initialize
+      virtual void initialize(Kernel::IPropertyManager* , const std::string&, DomainType) {}
 
       /// declare properties that specify the dataset within the workspace to fit to.
       /// @param suffix :: A suffix to give to all new properties.
@@ -118,7 +121,21 @@ namespace Mantid
     typedef boost::shared_ptr<IDomainCreator> IDomainCreator_sptr;
 
     
-  } // namespace CurveFitting
+  } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_IDOMAINCREATOR_H_*/
+/* Used to register classes into the factory. creates a global object in an
+ * anonymous namespace. The object itself does nothing, but the comma operator
+ * is used in the call to its constructor to effect a call to the factory's
+ * subscribe method.
+ * The id is the key that should be used to create the object
+ */
+#define DECLARE_DOMAINCREATOR(classname) \
+  namespace { \
+    Mantid::Kernel::RegistrationHelper register_alg_##classname( \
+      ((Mantid::API::DomainCreatorFactory::Instance().subscribe<classname>(#classname)) \
+          , 0)); \
+  }
+
+
+#endif /*MANTID_API_IDOMAINCREATOR_H_*/

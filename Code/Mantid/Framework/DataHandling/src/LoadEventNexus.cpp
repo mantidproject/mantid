@@ -1457,8 +1457,6 @@ EventWorkspace_sptr LoadEventNexus::createEmptyEventWorkspace()
   eventWS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
   eventWS->setYUnit("Counts");
 
-  // Create a default "Universal" goniometer in the Run object
-  eventWS->mutableRun().getGoniometer().makeUniversalGoniometer();
   return eventWS;
 }
 
@@ -1601,7 +1599,35 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixW
   if (!executionSuccessful)
   {
     alg->getLogger().error() << "Error loading Instrument definition file\n";
+    return false;
   }
+
+  // Ticket #2049: Cleanup all loadinstrument members to a single instance
+  // If requested update the instrument to positions in the data file
+  const Geometry::ParameterMap & pmap = localWorkspace->instrumentParameters();
+  if( !pmap.contains(localWorkspace->getInstrument()->getComponentID(),"det-pos-source") ) 
+    return executionSuccessful;
+
+  boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(localWorkspace->getInstrument()->getComponentID(),"det-pos-source");
+  std::string value = updateDets->value<std::string>();
+  if(value.substr(0,8)  == "datafile" )
+  {
+    IAlgorithm_sptr updateInst = alg->createSubAlgorithm("UpdateInstrumentFromFile");
+    updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
+    updateInst->setPropertyValue("Filename", nexusfilename);
+    if(value  == "datafile-ignore-phi" )
+    {
+      updateInst->setProperty("IgnorePhi", true);
+      alg->getLogger().information("Detector positions in IDF updated with positions in the data file except for the phi values");
+    }
+    else 
+    {
+      alg->getLogger().information("Detector positions in IDF updated with positions in the data file");
+    }
+    // We want this to throw if it fails to warn the user that the information is not correct.
+    updateInst->execute();
+  }
+
   return executionSuccessful;
 }
 
@@ -1648,7 +1674,19 @@ BankPulseTimes * LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilena
       localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
     }
     else
+    {
       alg->getLogger().warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
+    }
+    /// Attempt to make a gonoimeter from the logs
+    try
+    {
+      Goniometer gm;
+      gm.makeUniversalGoniometer();
+      localWorkspace->mutableRun().setGoniometer(gm, true);
+    }
+    catch(std::runtime_error &)
+    {
+    }
   }
   catch (...)
   {

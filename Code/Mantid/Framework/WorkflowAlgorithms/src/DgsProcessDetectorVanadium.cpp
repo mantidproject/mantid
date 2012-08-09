@@ -65,9 +65,9 @@ namespace WorkflowAlgorithms
   {
     auto wsValidator = boost::make_shared<CompositeValidator>();
     wsValidator->add<WorkspaceUnitValidator>("TOF");
-    this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, wsValidator),
+    this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, wsValidator),
                           "An input workspace containing the detector vanadium data in TOF units.");
-    this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+    this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
                           "The workspace containing the processed results.");
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
             Direction::Output);
@@ -93,25 +93,24 @@ namespace WorkflowAlgorithms
 
     this->enableHistoryRecordingForChild(true);
 
-    MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
-    const std::string inWsName = inputWS->getName();
-    const std::string outWsName = inWsName + "_idetvan";
+    MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+    const std::string outWsName = inputWS->getName() + "_idetvan";
+    MatrixWorkspace_sptr outputWS;
 
     // Normalise result workspace to incident beam parameter
     IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
-    norm->setAlwaysStoreInADS(true);
-    norm->setProperty("InputWorkspace", inWsName);
-    norm->setProperty("OutputWorkspace", outWsName);
-    norm->execute();
+    norm->setProperty("InputWorkspace", inputWS);
+    norm->executeAsSubAlg();
+    outputWS = norm->getProperty("OutputWorkspace");
 
     const std::string hardMaskWsName = reductionManager->getProperty("HardMaskWorkspace");
     if (!hardMaskWsName.empty())
       {
         IAlgorithm_sptr mask = this->createSubAlgorithm("MaskDetectors");
-        mask->setAlwaysStoreInADS(true);
-        mask->setProperty("Workspace", outWsName);
-        mask->setProperty("MaskedWorkspace", hardMaskWsName);
-        mask->execute();
+        mask->setProperty("Workspace", outputWS);
+        mask->setPropertyValue("MaskedWorkspace", hardMaskWsName);
+        mask->executeAsSubAlg();
+        outputWS = mask->getProperty("Workspace");
       }
 
     double detVanIntRangeLow = reductionManager->getProperty("DetVanIntRangeLow");
@@ -130,12 +129,12 @@ namespace WorkflowAlgorithms
       {
         // Convert the data to the appropriate units
         IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
-        cnvun->setAlwaysStoreInADS(true);
-        cnvun->setProperty("InputWorkspace", outWsName);
-        cnvun->setProperty("OutputWorkspace", outWsName);
+        cnvun->setProperty("InputWorkspace", outputWS);
+        cnvun->setProperty("OutputWorkspace", outputWS);
         cnvun->setProperty("Target", detVanIntRangeUnits);
         cnvun->setProperty("EMode", "Elastic");
-        cnvun->execute();
+        cnvun->executeAsSubAlg();
+        outputWS = cnvun->getProperty("OutputWorkspace");
       }
 
     // Rebin the data (not Integration !?!?!?)
@@ -145,33 +144,20 @@ namespace WorkflowAlgorithms
     binning.push_back(detVanIntRangeHigh);
 
     IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
-    rebin->setAlwaysStoreInADS(true);
-    rebin->setProperty("InputWorkspace", outWsName);
-    rebin->setProperty("OutputWorkspace", outWsName);
+    rebin->setProperty("InputWorkspace", outputWS);
+    rebin->setProperty("OutputWorkspace", outputWS);
     rebin->setProperty("Params", binning);
-    rebin->execute();
+    rebin->executeAsSubAlg();
+    outputWS = rebin->getProperty("OutputWorkspace");
 
     const std::string facility = ConfigService::Instance().getFacility().name();
     if ("ISIS" == facility)
       {
         // Scale results by a constant
         double wbScaleFactor = inputWS->getInstrument()->getNumberParameter("wb-scale-factor")[0];
-        const std::string scaleFactorName = "WbScaleFactor";
-        IAlgorithm_sptr csvw = this->createSubAlgorithm("CreateSingleValuedWorkspace");
-        csvw->setAlwaysStoreInADS(true);
-        csvw->setProperty("OutputWorkspace", scaleFactorName);
-        csvw->setProperty("DataValue", wbScaleFactor);
-        csvw->execute();
-
-        IAlgorithm_sptr mult = this->createSubAlgorithm("Multiply");
-        mult->setAlwaysStoreInADS(true);
-        mult->setProperty("LHSWorkspace", outWsName);
-        mult->setProperty("RHSWorkspace", scaleFactorName);
-        mult->setProperty("OutputWorkspace", outWsName);
-        mult->execute();
+        outputWS *= wbScaleFactor;
       }
 
-    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
     this->setProperty("OutputWorkspace", outputWS);
   }
 

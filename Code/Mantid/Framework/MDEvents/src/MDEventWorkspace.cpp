@@ -37,7 +37,8 @@ namespace MDEvents
    */
   TMDE(
   MDEventWorkspace)::MDEventWorkspace()
-  : m_BoxController(boost::make_shared<BoxController>(nd))
+    //m_BoxController(boost::make_shared<BoxController>(nd))
+  : m_BoxController(boost::make_shared<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > >(nd))
   {
     // First box is at depth 0, and has this default boxController
     data = new MDBox<MDE, nd>(m_BoxController, 0);
@@ -49,7 +50,7 @@ namespace MDEvents
   TMDE(
   MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE,nd> & other)
   : IMDEventWorkspace(other),
-    m_BoxController( new BoxController(*other.m_BoxController) )
+    m_BoxController( new BoxCtrlChangesList<MDBoxToChange<MDE,nd> >(*other.m_BoxController) )
   {
     const MDBox<MDE,nd> * mdbox = dynamic_cast<const MDBox<MDE,nd> *>(other.data);
     const MDGridBox<MDE,nd> * mdgridbox = dynamic_cast<const MDGridBox<MDE,nd> *>(other.data);
@@ -68,7 +69,7 @@ namespace MDEvents
   MDEventWorkspace)::~MDEventWorkspace()
   {
     delete data;
-	m_BoxController->closeFile();
+  m_BoxController->closeFile();
   }
 
 
@@ -500,6 +501,18 @@ namespace MDEvents
     data->addEvent(event);
   }
 
+   //-----------------------------------------------------------------------------------------------
+  /** Add a single event to this workspace and remebers the MDBox, which needs splitting in the internal 
+   *  BC cache
+   *
+   * @param point :: MD Event to add.
+   * 
+   */
+  TMDE(
+  void MDEventWorkspace)::addAndTraceEvent(const MDE & point,size_t index)
+  {
+    data->addAndTraceEvent(point,index);
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Add a vector of MDEvents to the workspace.

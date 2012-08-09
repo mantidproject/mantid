@@ -43,7 +43,7 @@ class FindReflectometryLines(PythonAlgorithm):
 		return y_data
 	
 	def category(self):
-		return "PythonAlgorithms"
+		return "PythonAlgorithms;Reflectometry\\ISIS"
 
 	def name(self):
 		return "FindReflectometryLines"

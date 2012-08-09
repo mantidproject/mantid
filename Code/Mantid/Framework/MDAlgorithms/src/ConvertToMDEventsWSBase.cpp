@@ -1,12 +1,13 @@
-#include "MantidMDAlgorithms/IConvertToMDEventsWS.h"
+#include "MantidMDAlgorithms/ConvertToMDEventsWSBase.h"
 #include "MantidAPI/ExperimentInfo.h"
+/**TODO: FOR DEPRICATION */ 
 namespace Mantid
 {
 namespace MDAlgorithms
 {
 
 // logger for loading workspaces  
-   Kernel::Logger& IConvertToMDEventsWS::convert_log =Kernel::Logger::get("MD-Algorithms");
+   Kernel::Logger& ConvertToMDEventsWSBase::convert_log =Kernel::Logger::get("MD-Algorithms");
 
 /** Helper function to obtain the units set along X-axis of the input workspace. 
   *
@@ -15,7 +16,7 @@ namespace MDAlgorithms
   *@returns the name(ID) of the unit, specified along X-axis of current workspace
 */
 Kernel::Unit_sptr    
-IConvertToMDEventsWS::getAxisUnits()const{
+ConvertToMDEventsWSBase::getAxisUnits()const{
     if(!this->inWS2D.get()){
         convert_log.error()<<"getAxisUnits: invoked when input workspace is undefined\n";
         throw(std::logic_error(" should not be able to call this function when workpsace is undefined"));
@@ -41,63 +42,61 @@ IConvertToMDEventsWS::getAxisUnits()const{
 
  */
 
-bool IConvertToMDEventsWS::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)
+bool ConvertToMDEventsWSBase::fillAddProperties(std::vector<coord_t> &Coord,size_t nd,size_t n_ws_properties)
 {
      for(size_t i=n_ws_properties;i<nd;i++){
          //HACK: A METHOD, Which converts TSP into value, correspondent to time scale of matrix workspace has to be developed and deployed!
-         Kernel::Property *pProperty = (inWS2D->run().getProperty(TWS.dimNames[i]));
-         Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
-         if(run_property){
+       std::vector<std::string> dimNames = TWS.getDimNames();
+       Kernel::Property *pProperty = (inWS2D->run().getProperty(dimNames[i]));
+       Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
+       if(run_property){
                 Coord[i]=coord_t(run_property->firstValue());
-         }else{
+       }else{
               // e.g Ei can be a property and dimenson
               Kernel::PropertyWithValue<double> *proc_property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
               if(!proc_property){
-                 convert_log.error()<<" property: "<<this->TWS.dimNames[i]<<" is neither a time series (run) property nor a property with double value\n";
+                 convert_log.error()<<" property: "<<dimNames[i]<<" is neither a time series (run) property nor a property with double value\n";
                  throw(std::invalid_argument(" can not interpret property, used as dimension"));
               }
               Coord[i]  = coord_t(*(proc_property));
-         }
-        if(Coord[i]<TWS.dimMin[i] || Coord[i]>=TWS.dimMax[i])return false;
+       }
+       std::vector<double> dimMin = TWS.getDimMin();
+       std::vector<double> dimMax = TWS.getDimMax();
+       if(Coord[i]<dimMin[i] || Coord[i]>=dimMax[i])return false;
      }
      return true;
 }
 
 /** method which initates all main class variables
-  * @param pWS2D      -- shared pointer to input matirx workspace to process
-  * @param detLoc     -- class with information about datecotrs, partially transformed for convenient Q calculations
-  * @param WSD        -- class describing the target workspace. 
+   * @param WSD        -- class describing the target workspace. 
   *                      the algorithm uses target workspace limints, transformation matix from source to the target workspace and the parameters, needed for  
   *                      unit conversion (if any) 
   * @param pWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
 */
-size_t  IConvertToMDEventsWS::setUPConversion(Mantid::API::MatrixWorkspace_sptr pWS2D, ConvToMDPreprocDetectors &detLoc,const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+size_t  ConvertToMDEventsWSBase::setUPConversion(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
         TWS   = WSD;
-        inWS2D= pWS2D;
+        inWS2D= TWS.getInWS();
         pWSWrapper = inWSWrapper;
         
         // Copy ExperimentInfo (instrument, run, sample) to the output WS
-        API::ExperimentInfo_sptr ei(pWS2D->cloneExperimentInfo());
+        API::ExperimentInfo_sptr ei(inWS2D->cloneExperimentInfo());
         runIndex            = pWSWrapper->pWorkspace()->addExperimentInfo(ei);
 
-        // set values may needed for unit conversion
-        detLoc.setEmode(WSD.emode);
-        detLoc.setEfix(WSD.Ei);
-
+  
         // remember pointer to the preprocessed detectors information
-        pDetLoc    = &detLoc;
+        pDetLoc    = TWS.getDetectors();
 
-        n_dims       = this->pWSWrapper->nDimensions();
+        n_dims       = this->pWSWrapper->nDimensions();       
         
-        dim_min.assign(WSD.dimMin.begin(),WSD.dimMin.end());
-        dim_max.assign(WSD.dimMax.begin(),WSD.dimMax.end());
+        dim_min = TWS.getDimMin();
+        dim_max = TWS.getDimMax();
         
         size_t n_spectra =inWS2D->getNumberHistograms();
         return n_spectra;
 };  
 
-IConvertToMDEventsWS::IConvertToMDEventsWS()
+ConvertToMDEventsWSBase::ConvertToMDEventsWSBase()
 {}
 
 

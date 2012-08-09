@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 namespace Mantid
 {
@@ -57,19 +58,18 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
+  std::size_t getWkspIndex(detid2index_map * pixel_to_wi, Geometry::RectangularDetector_const_sptr det,
+                           const int x, const int y);
+  void getTofRange(double &tofMin, double &tofMax, const double tofPeak, const MantidVec& tof);
+
   /// Read in all the input parameters
   void retrieveProperties();
-  int Xmin;        ///< The start of the X range for fitting
-  int Xmax;        ///< The end of the X range for fitting
-  int Ymin;        ///< The start of the Y range for fitting
-  int Ymax;        ///< The end of the Y range for fitting
-  int Binmin;        ///< The start of the Bin range for fitting
-  int Binmax;        ///< The end of the TOF range for fitting
-  // int TOFmin;        ///< The start of the TOF range for fitting
-  // int TOFmax;        ///< The end of the TOF range for fitting
-  int TOFPeak;       ///< The peak in the TOF range for fitting
-  int tofISAW;       /// check if bin agrees with peak from ISAW
-  
+  int m_xMin;        ///< The start of the X range for fitting
+  int m_xMax;        ///< The end of the X range for fitting
+  int m_yMin;        ///< The start of the Y range for fitting
+  int m_yMax;        ///< The end of the Y range for fitting
+  double m_tofMin; ///< The start of the box around the peak in tof
+  double m_tofMax; ///< The end of the box around the peak in tof
 };
 
 } // namespace Algorithm

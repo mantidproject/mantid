@@ -249,7 +249,7 @@ protected:
   void setup(Mantid::API::MatrixWorkspace_const_sptr ws, int start=-1, int end=-1);
 
   ApplicationWindow *m_appWindow;
-  const Mantid::API::MatrixWorkspace_const_sptr m_workspace;
+  Mantid::API::MatrixWorkspace_const_sptr m_workspace;
   QTabWidget *m_tabs;
   QTableView *m_table_viewY;
   QTableView *m_table_viewX;

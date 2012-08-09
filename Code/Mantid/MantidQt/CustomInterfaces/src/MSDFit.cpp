@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/MSDFit.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
@@ -76,10 +77,14 @@ namespace IDA
 
   QString MSDFit::validate()
   {
-    if ( ! uiForm().msd_inputFile->isValid() )
-      return uiForm().msd_inputFile->getFileProblem();
+    UserInputValidator uiv;
+    
+    uiv.checkMWRunFilesIsValid("Input", uiForm().msd_inputFile);
 
-    return "";
+    auto range = std::make_pair(m_msdDblMng->value(m_msdProp["Start"]), m_msdDblMng->value(m_msdProp["End"]));
+    uiv.checkValidRange("a range", range);
+
+    return uiv.generateErrorMessage();
   }
 
   void MSDFit::loadSettings(const QSettings & settings)

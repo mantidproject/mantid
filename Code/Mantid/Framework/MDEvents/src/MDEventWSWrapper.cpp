@@ -65,7 +65,7 @@ void  MDEventWSWrapper::createEmptyEventWS<0>(const Strings &,const Strings &,co
 *@param dataSize -- the length of the vector of MD events
 */
 template<size_t nd>
-void MDEventWSWrapper::add_MDData(float *sigErr,uint16_t *runIndex,uint32_t* detId,coord_t* Coord,size_t dataSize)const
+void MDEventWSWrapper::addMDDataND(float *sigErr,uint16_t *runIndex,uint32_t* detId,coord_t* Coord,size_t dataSize)const
 {
 
   MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(m_Workspace.get());
@@ -76,6 +76,36 @@ void MDEventWSWrapper::add_MDData(float *sigErr,uint16_t *runIndex,uint32_t* det
     pWs->addEvent(MDEvents::MDEvent<nd>(*(sigErr+2*i),*(sigErr+2*i+1),*(runIndex+i),*(detId+i),(Coord+i*nd)));
   }
 
+
+}
+
+/** templated by number of dimesnions function to add multidimensional data to the workspace and trace the cells, which requested splitting
+*   it is  expected that all MD coordinates are within the ranges of MD defined workspace, so no checks are performed
+
+   tempate parameter:
+     * nd -- number of dimensions
+
+*@param sigErr   -- pointer to the beginning of 2*data_size array containing signal and squared error
+*@param runIndex -- pointer to the beginnign of data_size  containing run index
+*@param detId    -- pointer to the beginning of dataSize array containing detector id-s
+*@param Coord    -- pointer to the beginning of dataSize*nd array containig the coordinates od nd-dimensional events
+*
+*@param dataSize -- the length of the vector of MD events
+*/
+template<size_t nd>
+void MDEventWSWrapper::addAndTraceMDDataND(float *sigErr,uint16_t *runIndex,uint32_t* detId,coord_t* Coord,size_t dataSize)const
+{
+
+  MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(m_Workspace.get());
+  if(!pWs)throw(std::bad_cast());
+
+  for(size_t i=0;i<dataSize;i++)
+  {
+    pWs->addAndTraceEvent(MDEvents::MDEvent<nd>(*(sigErr+2*i),*(sigErr+2*i+1),*(runIndex+i),*(detId+i),(Coord+i*nd)),0);
+  }
+  // if there are boxes ready to split -- we have to indicate need for that. 
+//  if(pWs->getBoxController()->getBoxesToSplit().size()>0)m_needSplitting=true;
+
   // This splits up all the boxes according to split thresholds and sizes.
   //Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
   //ThreadPool tp(NULL);
@@ -83,17 +113,51 @@ void MDEventWSWrapper::add_MDData(float *sigErr,uint16_t *runIndex,uint32_t* det
   //tp.joinAll();        
 
 }
+
 /// the function used in template metaloop termination on 0 dimensions and to throw the error in attempt to add data to 0-dimension workspace
 template<>
-void MDEventWSWrapper::add_MDData<0>(float *,uint16_t *,uint32_t*,coord_t* ,size_t)const
+void MDEventWSWrapper::addMDDataND<0>(float *,uint16_t *,uint32_t*,coord_t* ,size_t)const
 { 
   throw(std::invalid_argument(" class has not been initiated, can not add data to 0-dimensional workspace"));
+}
+
+/***/
+//void MDEventWSWrapper::splitBoxList(Kernel::ThreadScheduler * ts)
+template<size_t nd>
+void MDEventWSWrapper::splitBoxList()
+{
+    MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(m_Workspace.get());
+    if(!pWs)throw(std::bad_cast());
+
+    //std::vector<API::splitBoxList> &BoxList = pWs->getBoxController()->getBoxesToSplit();
+    //API::splitBoxList RootBox;
+  //  for(size_t i=0;i<BoxList.size();i++)
+  //  {
+     // bool rootFolderReplaced=MDEvents::MDBox<MDEvents::MDEvent<nd>,nd>::splitAllIfNeeded(BoxList[i],NULL); 
+     // if(rootFolderReplaced)
+     // {
+     //   RootBox = BoxList[i];
+     // }
+
+  //  }
+ //   if(RootBox.boxPointer)pWs->setBox(reinterpret_cast<MDEvents::MDBoxBase<MDEvents::MDEvent<nd>,nd> *>(RootBox.boxPointer));
+
+ 
+
+//    BoxList.clear();
+    m_needSplitting=false;
+}
+
+template<>
+void MDEventWSWrapper::splitBoxList<0>()
+{
+    throw(std::invalid_argument(" class has not been initiated, can not split 0-dimensional workspace boxes"));
 }
 
 
 /// helper function to refresh centroid on MDEventWorkspace with nd dimensions 
 template<size_t nd>
-void  MDEventWSWrapper::calc_Centroid(void)
+void  MDEventWSWrapper::calcCentroidND(void)
 {
 
   MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *const pWs = dynamic_cast<MDEvents::MDEventWorkspace<MDEvents::MDEvent<nd>,nd> *>(this->m_Workspace.get());
@@ -103,7 +167,7 @@ void  MDEventWSWrapper::calc_Centroid(void)
 }
 /// the function used in template metaloop termination on 0 dimensions and as the function which will throw the error on undefined MDWorkspaceWrapper  
 template<>
-void  MDEventWSWrapper::calc_Centroid<0>(void)
+void  MDEventWSWrapper::calcCentroidND<0>(void)
 {
   throw(std::invalid_argument(" class has not been initiated"));
 }
@@ -162,9 +226,26 @@ void  MDEventWSWrapper::addMDData(std::vector<float> &sigErr,std::vector<uint16_
 
   if(dataSize==0)return;
   // perform the actual dimension-dependent addition 
-  (this->*(mdEvSummator[m_NDimensions]))(&sigErr[0],&runIndex[0],&detId[0],&Coord[0],dataSize);
+  (this->*(mdEvAddAndForget[m_NDimensions]))(&sigErr[0],&runIndex[0],&detId[0],&Coord[0],dataSize);
 
 }
+/** method adds the data to the workspace which was initiated before and traces changed cells;
+*@param sigErr   -- pointer to the beginning of 2*data_size array containing signal and squared error
+*@param runIndex -- pointer to the beginnign of data_size  containing run index
+*@param detId    -- pointer to the beginning of dataSize array containing detector id-s
+*@param Coord    -- pointer to the beginning of dataSize*nd array containig the coordinates od nd-dimensional events   
+*
+*@param dataSize -- the length of the vector of MD events
+*/
+void  MDEventWSWrapper::addAndTraceMDData(std::vector<float> &sigErr,std::vector<uint16_t> &runIndex,std::vector<uint32_t> &detId,std::vector<coord_t> &Coord,size_t dataSize)const
+{
+
+  if(dataSize==0)return;
+  // perform the actual dimension-dependent addition 
+  (this->*(mdEvAddAndTrace[m_NDimensions]))(&sigErr[0],&runIndex[0],&detId[0],&Coord[0],dataSize);
+
+}
+
 
 
 /** method should be called at the end of the algorithm, to let the workspace manager know that it has whole responsibility for the workspace
@@ -187,8 +268,10 @@ public:
   {
     LOOP< i-1 >::EXEC(pH);
     pH->wsCreator[i]    = &MDEventWSWrapper::createEmptyEventWS<i>;
-    pH->mdEvSummator[i] = &MDEventWSWrapper::add_MDData<i>;
-    pH->mdCalCentroid[i]= &MDEventWSWrapper::calc_Centroid<i>;
+    pH->mdEvAddAndForget[i]= &MDEventWSWrapper::addMDDataND<i>;
+    pH->mdEvAddAndTrace[i] = &MDEventWSWrapper::addAndTraceMDDataND<i>;
+    pH->mdCalCentroid[i]= &MDEventWSWrapper::calcCentroidND<i>;
+    pH->mdBoxListSplitter[i]=&MDEventWSWrapper::splitBoxList<i>;
 
   }
 };
@@ -199,19 +282,24 @@ class LOOP<0>
 public:
   static inline void EXEC(MDEventWSWrapper *pH)
   {           
-    pH->wsCreator[0]    =&MDEventWSWrapper::createEmptyEventWS<0>;
-    pH->mdEvSummator[0] =&MDEventWSWrapper::add_MDData<0>;
-    pH->mdCalCentroid[0]=&MDEventWSWrapper::calc_Centroid<0>;
+    pH->wsCreator[0] = &MDEventWSWrapper::createEmptyEventWS<0>;
+    pH->mdEvAddAndForget[0] = &MDEventWSWrapper::addMDDataND<0>;
+    pH->mdEvAddAndTrace[0] = &MDEventWSWrapper::addMDDataND<0>;
+    pH->mdCalCentroid[0]= &MDEventWSWrapper::calcCentroidND<0>;
+    pH->mdBoxListSplitter[0]= &MDEventWSWrapper::splitBoxList<0>;
   }
 };
 
 /**constructor */
 MDEventWSWrapper::MDEventWSWrapper():
-m_NDimensions(0)
+m_NDimensions(0),
+m_needSplitting(false)
 {
   wsCreator.resize(MAX_N_DIM+1);
-  mdEvSummator.resize(MAX_N_DIM+1);
+  mdEvAddAndForget.resize(MAX_N_DIM+1);
+  mdEvAddAndTrace.resize(MAX_N_DIM+1);
   mdCalCentroid.resize(MAX_N_DIM+1);
+  mdBoxListSplitter.resize(MAX_N_DIM+1);
   LOOP<MAX_N_DIM>::EXEC(this);
 }
 

@@ -82,9 +82,9 @@ namespace MantidQt
       QString savePyCode(); ///< create python code as string to save files
       void createRESfile(const QString& file); ///< create a RES file for use in Fury
       bool validateInput(); ///< validate input of "Energy Transfer" tab
-      bool validateCalib(); ///< validate input of "Calibration" tab
+      QString validateCalib(); ///< validate input of "Calibration" tab
       bool validateSofQw(); ///< validate input of "S(Q, w)" tab
-      bool validateSlice(); ///< validate input of "Slice" tab
+      QString validateSlice(); ///< validate input of "Slice" tab
       void loadSettings();
       void saveSettings();
 

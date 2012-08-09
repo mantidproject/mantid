@@ -315,34 +315,6 @@ class SNSPowderReduction(PythonAlgorithm):
         if wksp is None:
             return None
 
-        # load the calibration file if the workspaces aren't already in memory
-        if (not mtd.workspaceExists(self._instrument + "_offsets")) \
-              or (not mtd.workspaceExists(self._instrument + "_mask")) \
-              or (not mtd.workspaceExists(self._instrument + "_group")):
-            whichones = {}
-            whichones['MakeGroupingWorkspace'] = (not mtd.workspaceExists(self._instrument + "_group"))
-            whichones['MakeOffsetsWorkspace'] = (not mtd.workspaceExists(self._instrument + "_offsets"))
-            whichones['MakeMaskWorkspace'] = (not mtd.workspaceExists(self._instrument + "_mask"))
-            LoadCalFile(InputWorkspace=wksp, CalFileName=calib, WorkspaceName=self._instrument,
-                        **whichones)
-
-        if not "histo" in self.getProperty("Extension"):
-            # take care of filtering events
-            if self._filterBadPulses and filterBadPulsesOverride:
-                FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
-            if self._removePromptPulseWidth > 0.:
-                RemovePromptPulse(InputWorkspace=wksp, OutputWorkspace=wksp, Width= self._removePromptPulseWidth)
-            if filterLogs is not None:
-                try:
-                    logparam = wksp.getRun()[filterLogs[0]]
-                    if logparam is not None:
-                        FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName=filterLogs[0],
-                                         MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
-                except KeyError, e:
-                    raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
-                                       % (filterLogs[0], str(wksp)))            
-            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-            SortEvents(wksp)
         # determine some bits about d-space and binning
         if len(self._binning) == 3:
             info.has_dspace = self._bin_in_dspace
@@ -357,58 +329,23 @@ class SNSPowderReduction(PythonAlgorithm):
                 binning = self._binning
             else:
                 binning = [info.tmin, self._binning[0], info.tmax]
-
-        # trim off the ends
-        cropkwargs = {}
+        XMin = 0
+        XMax = 0
         if info.tmin > 0.:
-            cropkwargs["XMin"] = info.tmin
+            XMin = info.tmin
         if info.tmax > 0.:
-            cropkwargs["XMax"] = info.tmax
+            XMax = info.tmax
         if not info.has_dspace:
-            cropkwargs["XMin"] = binning[0]
-            cropkwargs["XMax"] = binning[-1]
-        if len(cropkwargs) > 0:
-            CropWorkspace(InputWorkspace=wksp, OutputWorkspace=wksp, **cropkwargs)
-        MaskDetectors(Workspace=wksp, MaskedWorkspace=self._instrument + "_mask")
-        if info.has_dspace:
-            if binning[0] > 100:
-                self.log().warning("Binning data oddly for d-spacing: %s" % str(binning))
-        else:
-            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
-        AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, OffsetsWorkspace=self._instrument + "_offsets")
-        LRef = self.getProperty("UnwrapRef")
-        DIFCref = self.getProperty("LowResRef")
-        wavelengthMin = self.getProperty("CropWavelengthMin")
-        if (LRef > 0.) or (DIFCref > 0.) or (wavelengthMin>0): # super special Jason stuff
-            kwargs = {}
-            try:
-                if info.tmin > 0:
-                    kwargs["Tmin"] = info.tmin
-                    if info.tmax > info.tmin:
-                        kwargs["Tmax"] = info.tmax
-            except:
-                pass
-            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF") # corrections only work in TOF for now
-            if LRef > 0.:
-                UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef, **kwargs)
-            if DIFCref > 0. or wavelengthMin > 0.:
-                if kwargs.has_key("Tmax"):
-                    del kwargs["Tmax"]
-                if wavelengthMin > 0.:
-                    RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, MinWavelength=wavelengthMin, **kwargs)
-                else:
-                    RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref,
-                                    K=3.22, **kwargs)
-            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
-        if info.has_dspace:
-            self.log().information("d-Spacing binning: " + str(binning))
-            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
-        if not "histo" in self.getProperty("Extension"):
-            SortEvents(InputWorkspace=wksp)
-        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp, GroupingWorkspace=self._instrument + "_group",
-                             PreserveEvents=preserveEvents)
-        if not "histo" in self.getProperty("Extension") and preserveEvents:
-            SortEvents(InputWorkspace=wksp)
+            XMin = binning[0]
+            XMax = binning[-1]
+        AlignAndFocusPowder(InputWorkspace=wksp,OutputWorkspace=wksp,CalFileName=calib,Params=binning,Dspacing=info.has_dspace,
+            CropMin=XMin,CropMax=XMax,PreserveEvents=preserveEvents,
+            FilterBadPulses=self._filterBadPulses and filterBadPulsesOverride,
+            RemovePromptPulseWidth=self._removePromptPulseWidth,CompressTolerance=COMPRESS_TOL_TOF,
+            FilterLogName=self.getProperty("FilterByLogValue"),FilterLogMinimumValue=self.getProperty("FilterMinimumValue"),
+            FilterLogMaximumValue=self.getProperty("FilterMaximumValue"),
+            UnwrapRef=self.getProperty("UnwrapRef"),LowResRef=self.getProperty("LowResRef"),
+            CropWavelengthMin=self.getProperty("CropWavelengthMin"),TMin=info.tmin,TMax=info.tmax)
 
         focusPos = self._config.getFocusPos()
         self.log().notice("FOCUS:" + str(focusPos))
@@ -416,9 +353,9 @@ class SNSPowderReduction(PythonAlgorithm):
             EditInstrumentGeometry(Workspace=wksp, NewInstrument=False, **focusPos)
             if (self._config.iparmFile is not None) and (len(self._config.iparmFile) > 0):
                 wksp.getRun()['iparm_file'] = self._config.iparmFile
-
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning[1]) # reset bin width
+
         return wksp
 
     def _getinfo(self, wksp):

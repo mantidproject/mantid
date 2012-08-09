@@ -203,13 +203,15 @@ void Q1D2::exec()
   if (doOutputParts)
   {
       MatrixWorkspace_sptr ws_sumOfCounts = WorkspaceFactory::Instance().create(outputWS);
-      for (size_t i = 0; i < ws_sumOfCounts->dataY(0).size(); i++)
+      ws_sumOfCounts->dataX(0) = outputWS->dataX(0);
+      ws_sumOfCounts->dataY(0) = outputWS->dataY(0);
+      for (size_t i = 0; i < outputWS->dataE(0).size(); i++)
       {
-        ws_sumOfCounts->dataY(0)[i] = outputWS->dataY(0)[i];
         ws_sumOfCounts->dataE(0)[i] = sqrt(outputWS->dataE(0)[i]);
       }      
 
       MatrixWorkspace_sptr ws_sumOfNormFactors = WorkspaceFactory::Instance().create(outputWS);
+      ws_sumOfNormFactors->dataX(0) = outputWS->dataX(0);
       for (size_t i = 0; i < ws_sumOfNormFactors->dataY(0).size(); i++)
       {
         ws_sumOfNormFactors->dataY(0)[i] = normSum[i];

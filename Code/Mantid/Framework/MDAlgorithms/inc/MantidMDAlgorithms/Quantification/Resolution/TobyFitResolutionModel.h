@@ -22,7 +22,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
-#include "MantidMDAlgorithms/Quantification/Observation.h"
+#include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h"
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitBMatrix.h"
@@ -72,20 +72,25 @@ namespace Mantid
       /// Construct with a model pointer & a pointer to the fitting function
       TobyFitResolutionModel(const API::IFunctionMD & fittedFunction,
                                       const std::string & fgModelName);
+      /// Destructor
+      ~TobyFitResolutionModel();
+
       /// Returns the function's name
-      std::string name()const { return "MonteCarloResolutionConvolution"; }
-
-      /// Returns true if the given attribute is active.
-      bool useAttribute(const unsigned int variable) const;
-      /// Returns true if the given attribute is active
-      bool useAttribute(const std::string & attr) const;
-
+      std::string name() const { return "TobyFitResolutionModel"; }
       /// Returns the value of the model convoluted with the resolution
-      double signal(const API::IMDIterator & box, const size_t eventIndex,
-                    API::ExperimentInfo_const_sptr experimentInfo) const;
+      virtual double signal(const API::IMDIterator & box, const uint16_t innerRunIndex,
+                            const size_t eventIndex) const;
 
     private:
       DISABLE_COPY_AND_ASSIGN(TobyFitResolutionModel);
+
+      /// Informs the function how many threads will be processing it
+      void useNumberOfThreads(const int nthreads);
+      /// Cache detector observations once when the workspac is set
+      void preprocess(const API::IMDEventWorkspace_const_sptr & workspace);
+      /// Resets the random number generator ready for the next call
+      void functionEvalFinished() const;
+
       /// Declare function attributes
       void declareAttributes();
       /// Declare fitting parameters
@@ -94,16 +99,16 @@ namespace Mantid
       void setAttribute(const std::string& name, const API::IFunction::Attribute & value);
 
       /// Ensure the run parameters are up to date
-      void updateRunParameters(const Observation & exptInfo) const;
+      void updateRunParameters(const CachedExperimentInfo & exptInfo) const;
 
       /// Calculate resolution coefficients
-      void calculateResolutionCoefficients(const Observation & observation,
+      void calculateResolutionCoefficients(const CachedExperimentInfo & observation,
                                            const QOmegaPoint & eventPoint) const;
       /// Generates the vector of random points
-      void generateIntegrationVariables(const Observation & observation,
+      void generateIntegrationVariables(const CachedExperimentInfo & observation,
                                         const QOmegaPoint & eventPoint) const;
       /// Map integration variables to perturbed values in Q-E space
-      void calculatePerturbedQE(const Observation & observation,const QOmegaPoint & eventPoint) const;
+      void calculatePerturbedQE(const CachedExperimentInfo & observation,const QOmegaPoint & eventPoint) const;
 
       /// Return true if it is time to check for convergence of the
       /// current sigma value
@@ -116,7 +121,7 @@ namespace Mantid
       void function(const Mantid::API::FunctionDomain&, Mantid::API::FunctionValues&) const {}
 
       /// A random number generator
-      Kernel::NDRandomNumberGenerator *m_randGen;
+      mutable Kernel::NDRandomNumberGenerator *m_randGen;
       /// The value to mark an attribute as active
       int m_activeAttrValue;
       /// Check for convergence after loop min number of steps
@@ -125,17 +130,22 @@ namespace Mantid
       int m_mcLoopMax;
       /// Tolerance for relative error. Loop breaks out when this is reached
       double m_mcRelErrorTol;
+      /// Flag for including crystal mosaic
+      int m_mosaicActive;
 
       /// A pre-sized matrix for the resolution coefficients
-      mutable TobyFitBMatrix m_bmatrix;
+      mutable std::vector<TobyFitBMatrix> m_bmatrix;
       /// A pre-sized vector for the randomly generated points
-      mutable TobyFitYVector m_yvector;
+      mutable std::vector<TobyFitYVector> m_yvector;
       /// The generated value of the in-place mosaic (eta_2)
-      mutable double m_etaInPlane;
+      mutable std::vector<double> m_etaInPlane;
       /// The generated value of the in-place mosaic (eta_3)
-      mutable double m_etaOutPlane;
+      mutable std::vector<double> m_etaOutPlane;
       /// A pre-sized vector for the QE position to be evaluated
-      mutable std::vector<double> m_deltaQE;
+      mutable std::vector<std::vector<double>> m_deltaQE;
+
+      /// Cache of experiment info caches
+      std::map<std::pair<int, detid_t>, CachedExperimentInfo*> m_exptCache;
     };
   }
 }

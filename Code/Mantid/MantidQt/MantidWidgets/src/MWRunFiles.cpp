@@ -656,11 +656,11 @@ void MWRunFiles::inspectThreadResult()
   }
   if( m_foundFiles.isEmpty() && !isOptional() )
   {
-    setFileProblem("Error: No files found. Check search paths and instrument selection.");
+    setFileProblem("No files found. Check search paths and instrument selection.");
   }
   else if( m_foundFiles.count() > 1 && this->allowMultipleFiles() == false )
   {
-    setFileProblem("Error: Multiple files specified.");
+    setFileProblem("Multiple files specified.");
   }
   else
   {

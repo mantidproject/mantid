@@ -101,8 +101,7 @@ public:
     declareAttribute("ConvAtt1", IFunction::Attribute(initialAtt1));
   }
 
-  double signal(const Mantid::API::IMDIterator & , const size_t ,
-                Mantid::API::ExperimentInfo_const_sptr ) const
+  double signal(const Mantid::API::IMDIterator & , const uint16_t, const size_t) const
   {
     IFunction::Attribute att0 = getAttribute("ConvAtt0");
     if(att0.asDouble() == initialAtt0)

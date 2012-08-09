@@ -54,20 +54,21 @@ namespace Mantid
       ResolutionConvolvedCrossSection();
       /// Destructor
       ~ResolutionConvolvedCrossSection();
-
       /// Declare the attributes associated with this function
       void declareAttributes();
       /// Declare model parameters.
       void declareParameters();
-
       /// Name for the function
       std::string name() const { return "ResolutionConvolvedCrossSection"; }
       /// Set a value to a named attribute. Ensures additional parameters are set when foreground is set
       void setAttribute(const std::string& name, const API::IFunction::Attribute & value);
 
     private:
-      /// Override the main domain function to access the workspace
-      void function(const API::FunctionDomain& domain, API::FunctionValues& values) const;
+      /// Override the call to set the workspace here
+      void setWorkspace(boost::shared_ptr<const API::Workspace> workspace);
+
+      /// Evaluate the function across the domain
+      void function(const API::FunctionDomain& domain, API::FunctionValues& values)const;
       /// Return the signal contribution for the given box
       double functionMD(const API::IMDIterator & box) const;
 
@@ -78,7 +79,9 @@ namespace Mantid
       MDResolutionConvolution *m_convolution;
 
       /// A pointer to the MD event workspace providing the data
-      mutable API::IMDEventWorkspace_const_sptr m_workspace;
+      API::IMDEventWorkspace_const_sptr m_workspace;
+      /// A reference to the logger
+      static Kernel::Logger & g_log;
     };
 
   }

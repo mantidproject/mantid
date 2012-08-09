@@ -184,10 +184,6 @@ namespace WorkflowAlgorithms
         "Some selection criteria for the detector tests.");
     this->setPropertySettings("ErrorBarCriterion",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    this->declareProperty("DetectorVanadium1", "",
-        "The detector vanadium file to run the tests on.");
-    this->setPropertySettings("DetectorVanadium1",
-        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->declareProperty("HighCounts", 1.e+10, mustBePositive,
         "Mask detectors above this threshold.");
     this->setPropertySettings("HighCounts",
@@ -241,12 +237,12 @@ namespace WorkflowAlgorithms
     this->declareProperty("PsdBleed", false, "If true, perform a PSD bleed test.");
     this->setPropertySettings("PsdBleed",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    this->declareProperty("MaxFramerate", "", "The maximum framerate to check.");
+    this->declareProperty("MaxFramerate", 0.01, "The maximum framerate to check.");
     this->setPropertySettings("MaxFramerate",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->setPropertySettings("MaxFramerate",
         new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
-    this->declareProperty("IgnoredPixels", "",
+    this->declareProperty("IgnoredPixels", 80,
         "A list of pixels to ignore in the calculations.");
     this->setPropertySettings("IgnoredPixels",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
@@ -256,7 +252,6 @@ namespace WorkflowAlgorithms
     this->setPropertyGroup("FindBadDetectors", findBadDets);
     this->setPropertyGroup("OutputMaskFile", findBadDets);
     this->setPropertyGroup("ErrorBarCriterion", findBadDets);
-    this->setPropertyGroup("DetectorVanadium1", findBadDets);
     this->setPropertyGroup("HighCounts", findBadDets);
     this->setPropertyGroup("LowCounts", findBadDets);
     this->setPropertyGroup("MedianTestHigh", findBadDets);
@@ -453,7 +448,8 @@ namespace WorkflowAlgorithms
       return;
     }
     this->reductionManager = boost::make_shared<PropertyManager>();
-    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, this->reductionManager);
+    PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
+        this->reductionManager);
 
     // Put all properties except input files/workspaces into property manager.
     const std::vector<Property *> props = this->getProperties();
@@ -469,7 +465,8 @@ namespace WorkflowAlgorithms
     // Need to load data to get certain bits of information.
     Workspace_sptr sampleWS = this->loadInputData("Sample");
     MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(sampleWS);
-    this->reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", WS->getInstrument()->getName()));
+    this->reductionManager->declareProperty(new PropertyWithValue<std::string>(
+        "InstrumentName", WS->getInstrument()->getName()));
 
     // Load the hard mask if available
     this->loadHardMask();
@@ -480,10 +477,20 @@ namespace WorkflowAlgorithms
     Workspace_sptr idetVanWS;
     if (detVanWS)
       {
+        const bool runDiag = this->getProperty("FindBadDetectors");
+        if (runDiag)
+          {
+            IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
+            diag->setProperty("DetVanWorkspace", detVanWS);
+            diag->setProperty("SampleWorkspace", sampleWS);
+            diag->setProperty("OutputWorkspace", "samDetVanProcMask");
+            diag->setProperty("ReductionProperties", reductionManagerName);
+            diag->executeAsSubAlg();
+          }
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
         detVan->setProperty("ReductionProperties", reductionManagerName);
-        detVan->execute();
+        detVan->executeAsSubAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
         idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
       }
@@ -492,7 +499,7 @@ namespace WorkflowAlgorithms
     etConv->setProperty("InputWorkspace", sampleWS);
     etConv->setProperty("IntegratedDetectorVanadium", idetVanWS);
     etConv->setProperty("ReductionProperties", reductionManagerName);
-    etConv->execute();
+    etConv->executeAsSubAlg();
   }
 
 } // namespace Mantid

@@ -39,7 +39,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inputWS) )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("FilterVariable", "H+K+L") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("FilterVariable", "h+k+l") )
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("FilterValue", 0.0) )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Operator", ">") )
     TS_ASSERT( alg.execute() )

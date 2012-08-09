@@ -7,6 +7,7 @@
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/BoxController.h"
+//#include "MantidMDEvents/BoxCtrlChangesList.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDLeanEvent.h"
@@ -180,6 +181,8 @@ namespace MDEvents
 
     /// Add a single event
     virtual void addEvent(const MDE & point) = 0;
+    // add a single event and set pointer to the box which needs splitting (if one actually need)    
+    virtual void addAndTraceEvent(const MDE & point,size_t index) = 0;
 
     /// Add a single event, with no mutex locking
     virtual void addEventUnsafe(const MDE & point) = 0;

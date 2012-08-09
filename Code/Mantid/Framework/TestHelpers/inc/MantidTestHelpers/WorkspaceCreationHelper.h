@@ -49,7 +49,7 @@ namespace WorkspaceCreationHelper
     /// Algorithm's category for identification
     virtual const std::string category() const { return "Test";}  
 
-    Mantid::Kernel::Logger & getLogger(){return a_log;}
+    Mantid::Kernel::Logger & getLogger(){return g_log;}
     
     Mantid::API::Progress *getProgress(){return m_Progress.get();}
     void resetProgress(size_t nSteps)
@@ -63,8 +63,8 @@ namespace WorkspaceCreationHelper
       virtual void initDocs(){};
 
       std::auto_ptr<Mantid::API::Progress > m_Progress;
-      /// logger -> to provide logging, for MD dataset file operations
-      static Mantid::Kernel::Logger  &a_log;
+      /// logger -> to provide logging, 
+      static Mantid::Kernel::Logger  &g_log;
 
  };
 

@@ -50,20 +50,13 @@ class DiagnoseDetectorsWidget(BaseWidget):
         # Connections
         self.connect(self._content.output_mask_browse, QtCore.SIGNAL("clicked()"), 
                      self._output_mask_browse)
-        self.connect(self._content.det_van1_browse, QtCore.SIGNAL("clicked()"), 
-                     self._det_van1_browse)
         self.connect(self._content.det_van2_browse, QtCore.SIGNAL("clicked()"), 
                      self._det_van2_browse)
 
     def _output_mask_browse(self):
         fname = self.data_browse_dialog()
         if fname:
-            self._content.output_mask_edit.setText(fname)   
-
-    def _det_van1_browse(self):
-        fname = self.data_browse_dialog()
-        if fname:
-            self._content.det_van1_edit.setText(fname)   
+            self._content.output_mask_edit.setText(fname)     
 
     def _det_van2_browse(self):
         fname = self.data_browse_dialog()
@@ -78,7 +71,6 @@ class DiagnoseDetectorsWidget(BaseWidget):
         self._content.find_bad_det_gb.setChecked(state.find_bad_detectors)
         self._content.output_mask_edit.setText(state.output_mask_file)
         self._content.errorbar_crit_edit.setText(QtCore.QString(str(state.errorbar_criterion)))
-        self._content.det_van1_edit.setText(state.det_van1)
         self._content.high_counts_edit.setText(QtCore.QString("%1.e" % state.high_counts))
         self._content.low_counts_edit.setText(QtCore.QString(str(state.low_counts)))
         self._content.median_test_high_edit.setText(QtCore.QString(str(state.median_test_high)))
@@ -102,7 +94,6 @@ class DiagnoseDetectorsWidget(BaseWidget):
         d.find_bad_detectors = self._content.find_bad_det_gb.isChecked()
         d.output_mask_file = self._content.output_mask_edit.text()
         d.errorbar_criterion = util._check_and_get_float_line_edit(self._content.errorbar_crit_edit)
-        d.det_van1 = self._content.det_van1_edit.text()
         d.high_counts = util._check_and_get_float_line_edit(self._content.high_counts_edit)
         d.low_counts = util._check_and_get_float_line_edit(self._content.low_counts_edit)
         d.median_test_high = util._check_and_get_float_line_edit(self._content.median_test_high_edit)

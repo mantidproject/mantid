@@ -65,7 +65,7 @@ public:
   void test_catagory()
   {
     ConvertToReflectometryQ alg;
-    TS_ASSERT_EQUALS("Reflectometry", alg.category());
+    TS_ASSERT_EQUALS("Reflectometry\\ISIS", alg.category());
   }
 
   void test_name()

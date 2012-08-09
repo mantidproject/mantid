@@ -128,49 +128,6 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
-           <item>
-            <widget class="QLabel" name="det_van1_label">
-             <property name="minimumSize">
-              <size>
-               <width>133</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Detector Van 1</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="det_van1_edit"/>
-           </item>
-           <item>
-            <widget class="QPushButton" name="det_van1_browse">
-             <property name="text">
-              <string>Browse</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>31</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-         <item>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
             <widget class="QLabel" name="high_counts_label">
