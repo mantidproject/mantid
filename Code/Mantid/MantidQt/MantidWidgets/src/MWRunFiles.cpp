@@ -121,14 +121,14 @@ void FindFilesThread::run()
       }
     }
   }
-  catch(Exception::NotFoundError& exc)
+  catch(std::exception& exc)
   {
     m_error = exc.what();
     m_filenames.clear();
   }
-  catch(std::invalid_argument& exc)
+  catch(...)
   {
-    m_error = exc.what();
+    m_error = "An unknown error occurred while trying to locate the file(s). Please contact the development team";
     m_filenames.clear();
   }
 }
