@@ -353,7 +353,17 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  
+  void testMDWorkspace()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "SEQ_MDEW.nxs");
+    const std::string outputWS("MDWS");
+    loader.setPropertyValue("OutputWorkspace",outputWS);
+    TS_ASSERT( loader.execute() );
+    TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(outputWS) );
+    AnalysisDataService::Instance().remove(outputWS);
+  }
 
   void testList()
   {
