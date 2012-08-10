@@ -125,7 +125,7 @@ public:
   /*
    * Test automatic background selection
    */
-  void test_AutoBackgroundSelection()
+  void Disabled_test_AutoBackgroundSelection()
   {
       // FIXME This will be removed later if I do not want to add data to AutoTestData.
 
