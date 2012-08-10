@@ -1041,20 +1041,61 @@ void LeBailFit::generateBackgroundFunction(std::string backgroundtype, std::vect
  */
 void LeBailFit::parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr bkgdparamws, std::vector<double>& bkgdorderparams)
 {
-    // 1. Clear
+    // 1. Clear (output) map
     bkgdorderparams.clear();
+    std::map<std::string, double> parmap;
 
-    // 2. Read background
-    std::string a("A0");
-    std::string b("A1");
-    int smaller = a.compare(b);
-    int larger = b.compare(a);
-    std::cout << smaller << ", " << larger << std::endl;
+    // 2. Check
+    std::vector<std::string> colnames = bkgdparamws->getColumnNames();
+    if (colnames.size() < 2)
+    {
+        g_log.error() << "Input parameter table workspace must have more than 1 columns" << std::endl;
+        throw std::invalid_argument("Invalid input background table workspace. ");
+    }
+    else
+    {
+        if (!(boost::starts_with(colnames[0], "Name") && boost::starts_with(colnames[1], "Value")))
+        {
+            // Column 0 and 1 must be Name and Value (at least started with)
+            g_log.error() << "Input parameter table workspace have wrong column definition." << std::endl;
+            for (size_t i = 0; i < 2; ++i)
+                g_log.error() << "Column " << i << " Should Be Name.  But Input is " << colnames[0] << std::endl;
+            throw std::invalid_argument("Invalid input background table workspace. ");
+        }
+    }
 
-    size_t order = bkgdparamws->rowCount();
-    bkgdorderparams.reserve(order);
+    // 3. Input
+    for (size_t ir = 0; ir < bkgdparamws->rowCount(); ++ir)
+    {
+        API::TableRow row = bkgdparamws->getRow(ir);
+        std::string parname;
+        double parvalue;
+        row >> parname >> parvalue;
 
-    throw std::runtime_error("To be implemented ASAP!");
+        if (parname.size() > 0 && parname[0] == 'A')
+        {
+            // Insert parameter name starting with A
+            parmap.insert(std::make_pair(parname, parvalue));
+        }
+    }
+
+    // 4. Sort: increasing order
+    bkgdorderparams.reserve(parmap.size());
+    for (size_t i = 0; i < parmap.size(); ++i)
+    {
+        bkgdorderparams.push_back(0.0);
+    }
+
+    std::map<std::string, double>::iterator mit;
+    for (mit = parmap.begin(); mit != parmap.end(); ++mit)
+    {
+        std::string parname = mit->first;
+        double parvalue = mit->second;
+        std::vector<std::string> terms;
+        boost::split(terms, parname, boost::is_any_of("A"));
+        int tmporder = atoi(terms[1].c_str());
+        bkgdorderparams[tmporder] = parvalue;
+    }
 
     return;
 }
@@ -1072,6 +1113,7 @@ void LeBailFit::importParametersTable()
         << " Number of columns = " << colnames.size() << " < 3 as required. " << std::endl;
     throw std::runtime_error("Input parameter workspace is wrong. ");
   }
+
   if (colnames[0].compare("Name") != 0 ||
       colnames[1].compare("Value") != 0 ||
       colnames[2].compare("FitOrTie") != 0)
