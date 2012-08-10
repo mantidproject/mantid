@@ -23,7 +23,8 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 
-using namespace Mantid;
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::CurveFitting;
@@ -139,6 +140,18 @@ DECLARE_FUNCTION(CurveFittingGauss);
 
 class CompositeFunctionTest : public CxxTest::TestSuite
 {
+private:
+
+  struct TestFunction
+  {
+    double operator()(double x,int)
+    {
+      double x1 = x-4;
+      double x2 = x-6;
+      return 1. + 0.1*x + std::exp(-0.5*(x1*x1)*2)+2*std::exp(-0.5*(x2*x2)*3);
+    }
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -147,7 +160,7 @@ public:
 
   CompositeFunctionTest()
   {
-    Kernel::ConfigService::Instance().setString("curvefitting.peakRadius","100");
+    Mantid::Kernel::ConfigService::Instance().setString("curvefitting.peakRadius","100");
     FrameworkManager::Instance();
   }
 
@@ -184,9 +197,9 @@ public:
     TS_ASSERT_EQUALS(mfun->getParameter(6),1.1);
     TS_ASSERT_EQUALS(mfun->getParameter(7),1.0);
 
-    WS_type ws = mkWS(1,0,10,0.1);
-    addNoise(ws,0.1);
-    storeWS("mfun",ws);
+    auto ws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(TestFunction(), 1, 0.0, 10.0, 0.1);
+    WorkspaceCreationHelper::addNoise(ws,0.1);
+    WorkspaceCreationHelper::storeWS("mfun",ws);
 
     IFunction_sptr out;
 
@@ -199,7 +212,7 @@ public:
     alg.setProperty("CreateOutput",true);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
-    WS_type outWS = getWS("mfun_Workspace");
+    auto outWS = WorkspaceCreationHelper::getWS<MatrixWorkspace>("mfun_Workspace");
 
     const Mantid::MantidVec& Y00 = ws->readY(0);
     const Mantid::MantidVec& Y0 = outWS->readY(0);
@@ -239,7 +252,7 @@ public:
     TS_ASSERT_EQUALS(out->parameterName(7),"f2.s");
     TS_ASSERT_DELTA(out->getParameter(7),2.8530,0.3);
 
-    TWS_type outParams = getTWS("mfun_Parameters");
+    auto outParams = WorkspaceCreationHelper::getWS<TableWorkspace>("mfun_Parameters");
     TS_ASSERT(outParams);
 
     TS_ASSERT_EQUALS(outParams->rowCount(),9);
@@ -277,9 +290,9 @@ public:
     TS_ASSERT_EQUALS(row.String(0),"f2.s");
     TS_ASSERT_DELTA(row.Double(1),3.0,0.2);
     
-    removeWS("mfun");
-    removeWS("mfun_0_Workspace");
-    removeWS("mfun_0_Parameters");
+    WorkspaceCreationHelper::removeWS("mfun");
+    WorkspaceCreationHelper::removeWS("mfun_0_Workspace");
+    WorkspaceCreationHelper::removeWS("mfun_0_Parameters");
 
   }
 
@@ -291,8 +304,8 @@ public:
       x[i] = 0.1 * double(i);
       y[i] = 3.3 * x[i] + 4.4;
     }
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
-    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    FunctionDomain1D_sptr domain(new FunctionDomain1DVector(x));
+    FunctionValues_sptr values(new FunctionValues(*domain));
     values->setFitData(y);
     values->setFitWeights(1.0);
 
@@ -330,8 +343,8 @@ public:
       x[i] = t;
       y[i] = 0.1 * t * t + 3.3 * t + 4.4;
     }
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector(x));
-    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    FunctionDomain1D_sptr domain(new FunctionDomain1DVector(x));
+    FunctionValues_sptr values(new FunctionValues(*domain));
     values->setFitData(y);
     values->setFitWeights(1.0);
 
@@ -349,13 +362,6 @@ public:
     mfun->addFunction(fun1);
     mfun->addFunction(fun2);
 
-    //CurveFitting::GSLJacobian J(mfun, values->size());
-    //mfun->functionDeriv(*domain,J);
-    //for(size_t i = 0; i < values->size(); ++i)
-    //{
-    //  std::cerr << (*domain)[i] << "   " << J.get(i,0) << ' ' << J.get(i,1) << ' ' << J.get(i,2) << std::endl;
-    //}
-
     boost::shared_ptr<CostFuncLeastSquares> costFun(new CostFuncLeastSquares);
     costFun->setFittingFunction(mfun,domain,values);
 
@@ -371,8 +377,8 @@ public:
 
   void test_with_LM()
   {
-    API::FunctionDomain1D_sptr domain(new API::FunctionDomain1DVector( 0.0, 10.0, 10));
-    API::FunctionValues mockData(*domain);
+    FunctionDomain1D_sptr domain(new FunctionDomain1DVector( 0.0, 10.0, 10));
+    FunctionValues mockData(*domain);
     UserFunction dataMaker;
     dataMaker.setAttributeValue("Formula","a*x+b+c*x^2");
     dataMaker.setParameter("a",3.3);
@@ -380,7 +386,7 @@ public:
     dataMaker.setParameter("c",0.1);
     dataMaker.function(*domain,mockData);
 
-    API::FunctionValues_sptr values(new API::FunctionValues(*domain));
+    FunctionValues_sptr values(new FunctionValues(*domain));
     values->setFitDataFromCalculated(mockData);
     values->setFitWeights(1.0);
 
@@ -411,79 +417,6 @@ public:
     TS_ASSERT_EQUALS(s.getError(),"success");
   }
 
-private:
-  WS_type mkWS(int nSpec,double x0,double x1,double dx,bool isHist=false)
-  {
-    int nX = int((x1 - x0)/dx) + 1;
-    int nY = nX - (isHist?1:0);
-    if (nY <= 0)
-      throw std::invalid_argument("Cannot create an empty workspace");
-
-    Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-      (WorkspaceFactory::Instance().create("Workspace2D",nSpec,nX,nY));
-
-    double x;
-
-    for(int iSpec=0;iSpec<nSpec;iSpec++)
-    {
-      Mantid::MantidVec& X = ws->dataX(iSpec);
-      Mantid::MantidVec& Y = ws->dataY(iSpec);
-      Mantid::MantidVec& E = ws->dataE(iSpec);
-      for(int i=0;i<nY;i++)
-      {
-        x = x0 + dx*i;
-        X[i] = x;
-        double x1 = x-4;
-        double x2 = x-6;
-        Y[i] = 1. + 0.1*x + exp(-0.5*(x1*x1)*2)+2*exp(-0.5*(x2*x2)*3);
-        E[i] = 1;
-      }
-      if (isHist)
-        X.back() = X[nY-1] + dx;
-    }
-    return ws;
-  }
-
-  void storeWS(const std::string& name,WS_type ws)
-  {
-    AnalysisDataService::Instance().add(name,ws);
-  }
-
-  void removeWS(const std::string& name)
-  {
-    AnalysisDataService::Instance().remove(name);
-  }
-
-  WS_type getWS(const std::string& name)
-  {
-    return AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::Workspace2D>(name);
-  }
-
-  TWS_type getTWS(const std::string& name)
-  {
-    return AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(name);
-  }
-
-  void addNoise(WS_type ws,double noise)
-  {
-    for(size_t iSpec=0;iSpec<ws->getNumberHistograms();iSpec++)
-    {
-      Mantid::MantidVec& Y = ws->dataY(iSpec);
-      Mantid::MantidVec& E = ws->dataE(iSpec);
-      for(size_t i=0;i<Y.size();i++)
-      {
-        Y[i] += noise*(-.5 + double(rand())/RAND_MAX);
-        E[i] += noise;
-      }
-    }
-  }
-
-  void interrupt()
-  {
-    int iii;
-    std::cerr<<"Enter a number:";
-    std::cin>>iii;
-  }
 };
 
 #endif /*CURVEFITTING_COMPOSITEFUNCTIONTEST_H_*/

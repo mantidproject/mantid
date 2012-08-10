@@ -5,6 +5,7 @@
 #include "MantidAlgorithms/FlatBackground.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidCurveFitting/Linear.h"
+#include "MantidKernel/MersenneTwister.h"
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 
@@ -25,11 +26,14 @@ public:
     bg = 100.0;
     Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(1,NUMBINS+1,NUMBINS);
+    const size_t seed(12345);
+    const double lower(-1.0), upper(1.0);
+    MersenneTwister randGen(seed, lower, upper);
     
     for (int i = 0; i < NUMBINS; ++i)
     {
       WS->dataX(0)[i] = i;
-      WS->dataY(0)[i] = bg+(static_cast<double>(std::rand()-RAND_MAX/2)/static_cast<double>(RAND_MAX/2));
+      WS->dataY(0)[i] = bg + randGen.nextValue();
       WS->dataE(0)[i] = 0.05*WS->dataY(0)[i];   
     }
     WS->dataX(0)[NUMBINS] = NUMBINS;

@@ -16,6 +16,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/MersenneTwister.h"
 // from SimulateMDDTest
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -138,10 +139,13 @@ public:
         // add events to make data quadratic in 4th coordinate with noise
         out3->calcVolume();
 
-        srand( static_cast<unsigned int>(time(NULL)) );
         errorsq=1.0;
         events.clear();
         double noise=0.1;
+        const size_t seed(12345);
+        const double lower(-0.5), upper(0.5);
+        MersenneTwister randGen(seed, lower, upper);
+
         for(size_t x = 0 ; x<npt ; x++ )
         {
           pos[0]=0.5+static_cast<double>(x);
@@ -155,7 +159,7 @@ public:
               {
                 double ep = 0.5+static_cast<double>(e);
                 pos[3]=ep;
-                signal=static_cast<float>(1.0+0.5*ep+0.1*ep*ep+noise*(double(rand())/double(RAND_MAX)-0.5));
+                signal=static_cast<float>(1.0+0.5*ep+0.1*ep*ep+noise*randGen.nextValue());
                 detectorId=static_cast<int32_t>(e+1);
                 events.push_back(MDEvent<4> (signal,errorsq,runIndex,detectorId,pos));
               }

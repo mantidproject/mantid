@@ -7,11 +7,12 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
@@ -68,6 +69,17 @@ namespace WorkspaceCreationHelper
 
  };
 
+  /// Adds a workspace to the ADS
+  void storeWS(const std::string& name, Mantid::API::Workspace_sptr ws);
+  /// Deletes a workspce
+  void removeWS(const std::string& name);
+  /// Returns a workspace of a given type
+  template<typename T>
+  boost::shared_ptr<T> getWS(const std::string& name)
+  {
+    return Mantid::API::AnalysisDataService::Instance().retrieveWS<T>(name);
+  }
+
   Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceRand(int size);
   Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceConstant(int size, double value, double error);
   Mantid::DataObjects::Workspace2D_sptr Create1DWorkspaceFib(int size);
@@ -92,6 +104,49 @@ namespace WorkspaceCreationHelper
    * Filled with Y = 2.0 and E = sqrt(2.0)w
    */
   Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceBinned(int nHist, const int nBins, const double xBoundaries[]);
+
+  /**
+   * Creates a 2D workspace from taking the function values from the input function. The type must define operator()()
+   * @param f :: A function to use for the signal values
+   * @param nSpec :: The number of spectra
+   * @param x0 :: The start of the x range
+   * @param x1 :: The end of the x range
+   * @param dx :: The steps in x
+   * @param isHist :: True if it should be a histogram
+   * @return The new workspace. The errors are set to 1.0
+   */
+  template<typename Func>
+  Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceFromFunction(Func f, int nSpec,double x0, double x1, double dx, bool isHist = false)
+  {
+    int nX = int((x1 - x0)/dx) + 1;
+    int nY = nX - (isHist ? 1 : 0);
+    if (nY <= 0)
+      throw std::invalid_argument("Number of bins <=0. Cannot create an empty workspace");
+
+    auto ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        Mantid::API::WorkspaceFactory::Instance().create("Workspace2D",nSpec,nX,nY));
+
+    for(int iSpec=0;iSpec<nSpec;iSpec++)
+    {
+      Mantid::MantidVec& X = ws->dataX(iSpec);
+      Mantid::MantidVec& Y = ws->dataY(iSpec);
+      Mantid::MantidVec& E = ws->dataE(iSpec);
+      for(int i=0;i<nY;i++)
+      {
+        double x = x0 + dx*i;
+        X[i] = x;
+        Y[i] = f(x,iSpec);
+        E[i] = 1;
+      }
+      if (isHist)
+        X.back() = X[nY-1] + dx;
+    }
+    return ws;
+  }
+
+  /// Add random noise to the signal
+  void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise, const double lower=-0.5, const double upper=0.5);
+
   /**
    * Create a test workspace with a fully defined instrument
    * Each spectra will have a cylindrical detector defined 2*cylinder_radius away from the centre of the

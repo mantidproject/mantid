@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidCurveFitting/Linear.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/MersenneTwister.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -23,11 +24,14 @@ public:
     const int numBins = 30;
     Mantid::DataObjects::Workspace2D_sptr WS(new Mantid::DataObjects::Workspace2D);
     WS->initialize(1,numBins+1,numBins);
+    const size_t seed(12345);
+    const double lower(-1.0), upper(1.0);
+    MersenneTwister randGen(seed, lower, upper);
     
     for (int i = 0; i < numBins; ++i)
     {
       WS->dataX(0)[i] = i;
-      WS->dataY(0)[i] = (c0 + c1*i)+(static_cast<double>(std::rand()-RAND_MAX/2)/static_cast<double>(RAND_MAX/2));
+      WS->dataY(0)[i] = (c0 + c1*i) + randGen.nextValue();
       WS->dataE(0)[i] = 0.05*WS->dataY(0)[i];   
     }
     WS->dataX(0)[numBins] = numBins;

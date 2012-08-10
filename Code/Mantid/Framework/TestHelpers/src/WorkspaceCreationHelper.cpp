@@ -1,31 +1,30 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
+#include "MantidAPI/Run.h"
+#include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include <cmath>
+#include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/Run.h"
-
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/Algorithm.h"
 
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
+#include <cmath>
 
 namespace WorkspaceCreationHelper
 {
-
-
   using namespace Mantid;
   using namespace Mantid::DataObjects;
   using namespace Mantid::Kernel;
@@ -40,6 +39,23 @@ namespace WorkspaceCreationHelper
       m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0,1,nSteps));
   }
 
+  /**
+   * @param name :: The name of the workspace
+   * @param ws :: The workspace object
+   */
+   void storeWS(const std::string& name, Mantid::API::Workspace_sptr ws)
+   {
+     Mantid::API::AnalysisDataService::Instance().add(name,ws);
+   }
+
+   /**
+    * Deletes a workspace
+    * @param name :: The name of the workspace
+    */
+   void removeWS(const std::string& name)
+   {
+     Mantid::API::AnalysisDataService::Instance().remove(name);
+   }
 
   Workspace2D_sptr Create1DWorkspaceRand(int size)
   {
@@ -249,6 +265,29 @@ namespace WorkspaceCreationHelper
     }
     retVal->generateSpectraMap();
     return retVal;
+  }
+
+  /**
+   * Add random noise to the signal
+   * @param ws :: The workspace to add the noise to
+   * @param noise :: The mean noise level
+   * @param lower :: The lower bound of the flucation (default=-0.5)
+   * @param upper:: The upper bound of the flucation (default=-0.5)
+   */
+  void addNoise(Mantid::API::MatrixWorkspace_sptr ws, double noise, const double lower, const double upper)
+  {
+    const size_t seed(12345);
+    MersenneTwister randGen(seed, lower, upper);
+    for(size_t iSpec=0;iSpec<ws->getNumberHistograms();iSpec++)
+    {
+      Mantid::MantidVec& Y = ws->dataY(iSpec);
+      Mantid::MantidVec& E = ws->dataE(iSpec);
+      for(size_t i=0;i<Y.size();i++)
+      {
+        Y[i] += noise*randGen.nextValue();
+        E[i] += noise;
+      }
+    }
   }
 
 

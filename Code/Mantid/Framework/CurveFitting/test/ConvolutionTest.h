@@ -343,12 +343,6 @@ public:
 
   }
 
-  void testFit()
-  {
-    Fit fit;
-    WS_type ws = mkWS(ConvolutionExp(),1,10,24,0.13);
-  }
-
   
   void testForCategories()
   {
@@ -356,80 +350,6 @@ public:
     const std::vector<std::string> categories = forCat.categories();
     TS_ASSERT( categories.size() == 1 );
     TS_ASSERT( categories[0] == "General" );
-  }
-
-private:
-
-  template<class Funct>
-  WS_type mkWS(Funct f,int nSpec,double x0,double x1,double dx,bool isHist=false)
-  {
-    int nX = int((x1 - x0)/dx) + 1;
-    int nY = nX - (isHist?1:0);
-    if (nY <= 0)
-      throw std::invalid_argument("Cannot create an empty workspace");
-
-    Mantid::DataObjects::Workspace2D_sptr ws = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>
-      (WorkspaceFactory::Instance().create("Workspace2D",nSpec,nX,nY));
-
-    double x;
-
-    for(int iSpec=0;iSpec<nSpec;iSpec++)
-    {
-      Mantid::MantidVec& X = ws->dataX(iSpec);
-      Mantid::MantidVec& Y = ws->dataY(iSpec);
-      Mantid::MantidVec& E = ws->dataE(iSpec);
-      for(int i=0;i<nY;i++)
-      {
-        x = x0 + dx*i;
-        X[i] = x;
-        Y[i] = f(x);
-        E[i] = 1;
-      }
-      if (isHist)
-        X.back() = X[nY-1] + dx;
-    }
-    return ws;
-  }
-
-  void storeWS(const std::string& name,WS_type ws)
-  {
-    AnalysisDataService::Instance().add(name,ws);
-  }
-
-  void removeWS(const std::string& name)
-  {
-    AnalysisDataService::Instance().remove(name);
-  }
-
-  WS_type getWS(const std::string& name)
-  {
-    return AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::Workspace2D>(name);
-  }
-
-  TWS_type getTWS(const std::string& name)
-  {
-    return AnalysisDataService::Instance().retrieveWS<Mantid::DataObjects::TableWorkspace>(name);
-  }
-
-  void addNoise(WS_type ws,double noise)
-  {
-    for(size_t iSpec=0;iSpec<ws->getNumberHistograms();iSpec++)
-    {
-      Mantid::MantidVec& Y = ws->dataY(iSpec);
-      Mantid::MantidVec& E = ws->dataE(iSpec);
-      for(size_t i=0;i<Y.size();i++)
-      {
-        Y[i] += noise*(-.5 + double(rand())/RAND_MAX);
-        E[i] += noise;
-      }
-    }
-  }
-
-  void press_return()
-  {
-    std::cerr<<"Press Return";
-    std::string str;
-    getline(std::cin,str);
   }
 
 };

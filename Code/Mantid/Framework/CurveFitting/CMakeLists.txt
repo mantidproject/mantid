@@ -226,7 +226,9 @@ target_link_libraries ( CurveFitting ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
   include_directories ( ../DataHandling/inc ../TestHelpers/inc )
-  cxxtest_add_test ( CurveFittingTest ${TEST_FILES} )
+  set ( TESTHELPER_SRCS ../TestHelpers/src/WorkspaceCreationHelper.cpp
+                        ../TestHelpers/src/ComponentCreationHelper.cpp ) # Used by cxx_test_add_test
+  cxxtest_add_test ( CurveFittingTest ${TEST_FILES}  )
   target_link_libraries( CurveFittingTest CurveFitting DataHandling DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
   add_dependencies ( FrameworkTests CurveFittingTest )
   # Add to the 'FrameworkTests' group in VS
