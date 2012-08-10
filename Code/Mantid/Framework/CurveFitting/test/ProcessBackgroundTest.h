@@ -24,7 +24,7 @@ public:
   /*
    * Test option delete region
    */
-  void Ptest_DeleteRegion()
+  void test_DeleteRegion()
   {
       // 1. Create Workspace2D
       DataObjects::Workspace2D_sptr inpws
@@ -67,7 +67,7 @@ public:
   /*
    * Test option "Add Region"
    */
-  void Ptest_AddRegion()
+  void test_AddRegion()
   {
       // 1. Create Workspace2D
       DataObjects::Workspace2D_sptr inpws
@@ -168,6 +168,7 @@ public:
               (API::AnalysisDataService::Instance().retrieve("SelectedBackgroundPoints"));
       TS_ASSERT(bkgdws);
 
+      /*
       std::ofstream ofile;
       ofile.open("selectedbackground.dat");
       for (size_t i = 0; i < bkgdws->readX(0).size(); ++i)
@@ -178,8 +179,8 @@ public:
           ofile << x << "\t" << y << "\t" << e << std::endl;
       }
       ofile.close();
+      */
 
-      TS_ASSERT_EQUALS(1, 1021);
       return;
   }
 
