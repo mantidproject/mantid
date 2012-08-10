@@ -145,7 +145,7 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   connect(m_tree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
 
   connect(m_mantidUI, SIGNAL(workspace_added(const QString &, Mantid::API::Workspace_sptr)),
-    this, SLOT(addTreeEntry(const QString &, Mantid::API::Workspace_sptr)), Qt::QueuedConnection);
+    this, SLOT(addWorkspace(const QString &, Mantid::API::Workspace_sptr)), Qt::QueuedConnection);
   connect(m_mantidUI, SIGNAL(workspace_replaced(const QString &, Mantid::API::Workspace_sptr)),
     this, SLOT(replaceTreeEntry(const QString &, Mantid::API::Workspace_sptr)),Qt::QueuedConnection);
 
@@ -207,6 +207,17 @@ Mantid::API::Workspace_sptr MantidDockWidget::getSelectedWorkspace() const
 }
 
 /**
+* Add a workspace to the tree list
+* @param ws_name The name of the workspace
+* @param workspace :: A pointer to the workspace
+*/
+void MantidDockWidget::addWorkspace(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
+{
+  addTreeEntry( ws_name, workspace );
+  findAbandonedWorkspaces();
+}
+
+/**
 * Add an item to the tree list
 * @param ws_name The name of the workspace
 * @param workspace :: A pointer to the workspace
@@ -228,10 +239,6 @@ void MantidDockWidget::addTreeEntry(const QString & ws_name, Mantid::API::Worksp
   MantidTreeWidgetItem *ws_item = createEntry(ws_name, workspace);
   setItemIcon(ws_item, workspace);
   m_tree->addTopLevelItem(ws_item);
-  if ( boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>( workspace ) )
-  {
-    findAbandonedWorkspaces();
-  }
 }
 
 /**
