@@ -928,6 +928,13 @@ Graph3D * MantidMatrix::plotGraph3D(int style)
   return plot;
 }
 
+void MantidMatrix::attachMultilayer(MultiLayer* ml)
+{
+  m_plots2D << ml;
+  connect(ml, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
+}
+
+
 /** Creates a MultiLayer graph and plots this MantidMatrix as a Spectrogram.
 
     @param type :: The "curve" type.
@@ -945,8 +952,7 @@ MultiLayer* MantidMatrix::plotGraph2D(Graph::CurveType type)
 
   ApplicationWindow *a = applicationWindow();
   MultiLayer* g = a->multilayerPlot(a->generateUniqueName(tr("Graph")));
-  m_plots2D<<g;
-  connect(g, SIGNAL(closedWindow(MdiSubWindow*)), this, SLOT(dependantClosed(MdiSubWindow*)));
+  attachMultilayer( g );
   //#799 fix for  multiple dialog creation on double clicking/ on right click menu scale on  2d plot
   //   a->connectMultilayerPlot(g);
   Graph* plot = g->activeGraph();
