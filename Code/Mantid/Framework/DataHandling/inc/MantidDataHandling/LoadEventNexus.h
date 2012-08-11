@@ -115,8 +115,10 @@ namespace Mantid
       Kernel::DateAndTime filter_time_stop;
       /// chunk number
       int chunk;
-      /// number of chunks;
+      /// number of chunks
       int totalChunks;
+      /// number of chunks per bank
+      int totalChunksE;
 
       /// Was the instrument loaded?
       bool instrument_loaded_correctly;
