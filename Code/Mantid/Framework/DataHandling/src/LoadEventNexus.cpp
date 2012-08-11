@@ -1364,8 +1364,8 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     size_t chunk_events = total_events/totalChunks;
     size_t lastChunkEvent = chunk_events;
     std::vector<size_t>::iterator it = bankNumEvents.begin();
-    size_t sum_events = *it;
-    std::advance(it, 1);
+    size_t sum_events = 0;
+
     for (int chunki = 1; chunki <=chunk; chunki++)
     {
       if (chunki != 1)
@@ -1375,7 +1375,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
       if (chunki != totalChunks)
       {
         // Save a bank for every chunk so there are no chunks with no events
-        for (size_t banki = bank0+1; banki < bankNames.size()-(totalChunks-chunki)+1; banki++)
+        for (size_t banki = bank0; banki < bankNames.size()-(totalChunks-chunki)+1; banki++)
         {
           bankn = banki;
           sum_events += *it;
@@ -1397,6 +1397,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   for (size_t i=bank0; i < bankn; i++)
   {
     // We make tasks for loading
+    std::cout << chunk <<"  "<<bankNames[i]<<"  "<<bankNumEvents[i]<<"\n";
     if (bankNumEvents[i] > 0)
       pool.schedule( new LoadBankFromDiskTask(this, bankNames[i], classType, bankNumEvents[i], oldNeXusFileNames,
                                               prog2, diskIOMutex, scheduler) );
