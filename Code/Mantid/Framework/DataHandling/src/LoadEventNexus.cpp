@@ -1385,6 +1385,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
 
     for (int chunki = 1; chunki <=chunkB; chunki++)
     {
+      size_t chunk_total = 0;
       if (chunki != 1)
       {
         bank0 = bankn;
@@ -1396,11 +1397,12 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
         {
           bankn = banki;
           sum_events += *it;
-          if ( sum_events > lastChunkEvent && sum_events > *it)
+          if ( sum_events > lastChunkEvent && chunk_total > 1 && bankn > bank0)
           {
             sum_events -= *it;
             break;
           }
+          if( *it > 1)chunk_total += *it;
           std::advance(it, 1);
         }
       }
