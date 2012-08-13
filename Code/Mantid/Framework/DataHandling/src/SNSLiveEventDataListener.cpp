@@ -166,11 +166,8 @@ namespace DataHandling
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
 
     // At the moment, all we need from the RTDL packets is the pulse
-    // time and the raw flag.  (We reference them when processing the
-    // banked event packets.)
+    // time (and its questionable whether we even need that).
     m_rtdlPulseId = pkt.pulseId();
-    m_tofCorrectedFlag = pkt.tofCorrected();
-
     return true;
   }
 
@@ -196,14 +193,6 @@ namespace DataHandling
       g_log.error() << "Ignoring data from Pulse ID" << pkt.pulseId()
                     << "because we have not received an RTDL packet for that pulse!"
                     << std::endl;
-      return false;
-    }
-
-    if (! m_tofCorrectedFlag)
-    {
-      // As yet, we can't handle raw TofF values.
-      g_log.warning() << "Ignoring data from Pulse ID " << pkt.pulseId()
-                      << " because the raw flag was set." << std::endl;
       return false;
     }
 
