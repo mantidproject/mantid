@@ -143,6 +143,7 @@ namespace CurveFitting
 
     API::CompositeFunction_sptr mLeBailFunction;
     std::map<std::string, std::pair<double, char> > mFuncParameters; // char = f: fit... = t: tie to value
+    std::vector<std::string> mPeakParameterNames; // Peak parameters' names of the peak
 
     size_t mWSIndexToWrite;
 

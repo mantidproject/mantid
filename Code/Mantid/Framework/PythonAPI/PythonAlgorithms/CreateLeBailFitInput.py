@@ -320,11 +320,12 @@ class CreateLeBailFitInput(PythonAlgorithm):
         tablews.addColumn("int", "H");
         tablews.addColumn("int", "K");
         tablews.addColumn("int", "L"); 
+        tablews.addColumn("double", "PeakHeight"); 
         tablews.addColumn("str", "Include/Exclude")
 
         # 2. Add rows
         for hkl in sorted(hkldict.keys()):
-            tablews.addRow([hkl[0], hkl[1], hkl[2], "i"])
+            tablews.addRow([hkl[0], hkl[1], hkl[2], 1.0, "i"])
         # ENDFOR
 
         return tablews

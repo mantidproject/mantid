@@ -90,8 +90,8 @@ public:
                   AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
       TS_ASSERT(outws);
 
-      //for (size_t i = 0; i < outws->dataY(0).size(); ++i)
-      //  std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << std::endl;
+      // for (size_t i = 0; i < outws->dataY(0).size(); ++i)
+      //   std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << std::endl;
 
       // 4. Calcualte data
       double y25 = 1360.20;
@@ -400,7 +400,7 @@ public:
    * Test a complete LeBail Fit process with background
    * Using Run 4862 Bank 7 as the testing data
    */
-  void Diabletest_CompleteLeBailFit_PG3Bank7()
+  void Ongoing_test_CompleteLeBailFit_PG3Bank7()
   {
       // 1. Create input workspace
       API::MatrixWorkspace_sptr dataws;
@@ -873,6 +873,9 @@ public:
       std::map<std::string, double> paramvaluemap;
       std::map<std::string, std::string> paramfitmap;
 
+      // setupPeakParameter
+      // FIXME:  STARTING FROM HERE!!!
+
       // a) Value
       paramvaluemap.insert(std::make_pair("Dtt1", 29671.7500));
       paramvaluemap.insert(std::make_pair("Dtt2" ,  0.0 ));
@@ -993,7 +996,7 @@ public:
       tablews->addColumn("int", "H");
       tablews->addColumn("int", "K");
       tablews->addColumn("int", "L");
-      tablews->addColumn("double", "height");
+      tablews->addColumn("double", "PeakHeight");
 
       // 2. Add reflections and heights
       for (size_t ipk = 0; ipk < hkls.size(); ++ipk)
