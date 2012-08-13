@@ -22,7 +22,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidKernel/System.h"
-#include "MantidPythonInterface/kernel/Converters/NumpyWrapMode.h"
+#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 
 namespace Mantid
 {

@@ -60,7 +60,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
   ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
   ${HEADER_DIR}/kernel/Converters/NDArrayTypeIndex.h
-  ${HEADER_DIR}/kernel/Converters/NumpyWrapMode.h
+  ${HEADER_DIR}/kernel/Converters/WrapWithNumpy.h
   ${HEADER_DIR}/kernel/Converters/VectorToNDArray.h
   ${HEADER_DIR}/kernel/Converters/PyArrayType.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h

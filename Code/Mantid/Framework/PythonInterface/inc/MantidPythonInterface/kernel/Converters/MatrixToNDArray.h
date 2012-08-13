@@ -23,7 +23,7 @@
  */
 #include "MantidKernel/System.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidPythonInterface/kernel/Converters/NumpyWrapMode.h"
+#include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include <boost/python/detail/prefix.hpp>
 
 namespace Mantid
