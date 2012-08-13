@@ -52,6 +52,34 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         self._verify_numpy_data(errors, expected)
         
         mtd.remove('demo')
+        
+    def test_set_signal_array_throws_if_input_array_is_of_incorrect_size(self):
+        run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
+                      Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
+        testWS = mtd['demo']
+        signal = numpy.array([1,2,3])
+        self.assertRaises(ValueError, testWS.setSignalArray, signal)
+
+    def test_set_signal_array_passes_numpy_values_to_workspace(self):
+        run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
+                      Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
+        testWS = mtd['demo']
+        signal = numpy.arange(10,19,dtype=numpy.float64)
+        signal = numpy.reshape(signal,(3,3))
+        testWS.setSignalArray(signal)
+        new_signal = testWS.getSignalArray()
+        self._verify_numpy_data(new_signal, signal)
+
+
+    def test_set_error_array_passes_numpy_values_to_workspace(self):
+        run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
+                      Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
+        testWS = mtd['demo']
+        errors = numpy.arange(20,29,dtype=numpy.float64)
+        errors = numpy.reshape(errors,(3,3))
+        testWS.setErrorSquaredArray(errors)
+        new_errors = testWS.getErrorSquaredArray()
+        self._verify_numpy_data(new_errors, errors)
 
     def _verify_numpy_data(self, test_array, expected):
         """Check the correct numpy array has been constructed"""

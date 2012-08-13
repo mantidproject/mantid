@@ -5,6 +5,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
+#include <boost/python/numeric.hpp>
 
 using Mantid::API::IMDHistoWorkspace;
 using Mantid::API::IMDHistoWorkspace_sptr;
@@ -21,10 +22,11 @@ namespace
   typedef Converters::CArrayToNDArray<Mantid::signal_t, Converters::WrapReadOnly> WrapReadOnlyNumpy;
 
   /**
-   * Returns the signal array from the workspace as a numpy array
+   * Determine the sizes of each dimensions
    * @param self :: A reference to the calling object
+   * @returns A vector of the dimension sizes
    */
-  PyObject *getSignalArrayAsNumpyArray(IMDHistoWorkspace &self)
+  std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self)
   {
     const size_t ndims = self.getNumDims();
     std::vector<Py_intptr_t> dims(ndims);
@@ -32,7 +34,17 @@ namespace
     {
       dims[i] = static_cast<Py_intptr_t>(self.getDimension(i)->getNBins());
     }
-    return WrapReadOnlyNumpy()(self.getSignalArray(), static_cast<int>(ndims), &dims[0]);
+    return dims;
+  }
+
+  /**
+   * Returns the signal array from the workspace as a numpy array
+   * @param self :: A reference to the calling object
+   */
+  PyObject *getSignalArrayAsNumpyArray(IMDHistoWorkspace &self)
+  {
+    auto dims = countDimensions(self);
+    return WrapReadOnlyNumpy()(self.getSignalArray(), static_cast<int>(dims.size()), &dims[0]);
   }
 
   /**
@@ -41,14 +53,74 @@ namespace
    */
   PyObject *getErrorSquaredArrayAsNumpyArray(IMDHistoWorkspace &self)
   {
-    const size_t ndims = self.getNumDims();
-    std::vector<Py_intptr_t> dims(ndims);
+    auto dims = countDimensions(self);
+    return WrapReadOnlyNumpy()(self.getErrorSquaredArray(), static_cast<int>(dims.size()), &dims[0]);
+  }
+
+  /**
+   * Checks the size of the given array against the given MDHistoWorkspace to see if they match. Throws if not
+   * @param self :: The calling object
+   * @param signal :: The new values
+   * @param fnLabel :: A message prefix to pass if the sizes are incorrect
+   */
+  void throwIfSizeIncorrect(IMDHistoWorkspace & self, const numeric::array & signal,const std::string & fnLabel)
+  {
+    auto wsShape = countDimensions(self);
+    const size_t ndims = wsShape.size();
+    auto arrShape = signal.attr("shape");
+    if(ndims != static_cast<size_t>(len(arrShape)))
+    {
+      std::ostringstream os;
+      os << fnLabel << ": The number of  dimensions doe not match the current workspace size. Workspace="
+         << ndims << " array=" << len(arrShape);
+      throw std::invalid_argument(os.str());
+    }
+
     for(size_t i = 0; i < ndims; ++i)
     {
-      dims[i] = static_cast<Py_intptr_t>(self.getDimension(i)->getNBins());
+      int arrDim = extract<int>(arrShape[i])();
+      if(wsShape[i] != arrDim )
+      {
+        std::ostringstream os;
+        os << fnLabel << ": The dimension size for the " << boost::lexical_cast<std::string>(i) << "th dimension do not match. "
+           << "Workspace dimension size=" << wsShape[i] << ", array size=" << arrDim;
+        throw std::invalid_argument(os.str());
+      }
     }
-    return WrapReadOnlyNumpy()(self.getErrorSquaredArray(), static_cast<int>(ndims), &dims[0]);
   }
+
+  /**
+   * Set the signal array from a numpy array. This simply loops over the array & sets each value
+   * It does not allow the workspace dimensions to be resized, it will throw if the sizes are not
+   * correct
+   */
+  void setSignalArray(IMDHistoWorkspace &self, const numeric::array & signalValues)
+  {
+    throwIfSizeIncorrect(self, signalValues, "setSignalArray");
+    object flattened = signalValues.attr("flat");
+    auto length = len(flattened);
+    for(auto i = 0; i < length; ++i)
+    {
+      self.setSignalAt(i, extract<double>(flattened[i])());
+    }
+  }
+
+  /**
+   * Set the square of the errors array from a numpy array. This simply loops over the array & sets each value
+   * It does not allow the workspace dimensions to be resized, it will throw if the sizes are not
+   * correct
+   */
+  void setErrorSquaredArray(IMDHistoWorkspace &self, const numeric::array & errorSquared)
+  {
+    throwIfSizeIncorrect(self, errorSquared, "setErrorSquaredArray");
+    object flattened = errorSquared.attr("flat");
+    auto length = len(flattened);
+    for(auto i = 0; i < length; ++i)
+    {
+      self.setErrorSquaredAt(i, extract<double>(flattened[i])());
+    }
+  }
+
 
 }
 
@@ -73,6 +145,12 @@ void export_IMDHistoWorkspace()
     .def("setSignalAt", &IMDHistoWorkspace::setSignalAt, "Sets the signal at the specified index.")
 
     .def("setErrorSquaredAt", &IMDHistoWorkspace::setErrorSquaredAt, "Sets the squared-error at the specified index.")
+
+    .def("setSignalArray", &setSignalArray,
+         "Sets the signal from a numpy array. The sizes must match the current workspace sizes. A ValueError is thrown if not")
+
+    .def("setErrorSquaredArray", &setErrorSquaredArray,
+         "Sets the square of the errors from a numpy array. The sizes must match the current workspace sizes. A ValueError is thrown if not")
 
     .def("setTo", &IMDHistoWorkspace::setTo, "Sets all signals/errors in the workspace to the given values")
 
