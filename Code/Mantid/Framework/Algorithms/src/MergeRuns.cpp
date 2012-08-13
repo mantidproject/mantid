@@ -732,37 +732,6 @@ void MergeRuns::validateMultiPeriodGroupInputs(const size_t& nInputWorkspaces) c
   }
 }
 
-/**
- Determine if the group appears to be a multiperiod group workspace.
- Checks that all nested workspaces have a nperiods log and a current_period log.
- @ return True only if it is a multiperiod group workspace.
-*/
-bool MergeRuns::isMultiPeriodGroup(WorkspaceGroup_const_sptr inputGroup) const
-{
-  bool b_isMultiPeriod = false;
-  for(size_t i = 0; i < inputGroup->size(); ++i)
-  {
-    auto item = boost::dynamic_pointer_cast<MatrixWorkspace>(inputGroup->getItem(i));
-    try
-    {
-      Property* nPeriodsProperty = item->run().getLogData("nperiods");
-      int nPeriods = atoi(nPeriodsProperty->value().c_str());
-      if(nPeriods > 1)
-      {
-        b_isMultiPeriod = true;
-      }
-      else
-      {
-        return false;
-      }
-    }
-    catch(Exception::NotFoundError &)
-    {
-    }
-  }
-  return b_isMultiPeriod;
-}
-
 /** Check the input workspace properties for groups.
 *
 * Overriden from base Algorithm class.
@@ -793,7 +762,7 @@ bool MergeRuns::checkGroups()
     WorkspaceGroup_sptr inputGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
     if(inputGroup)
     {
-      if(isMultiPeriodGroup(inputGroup))
+      if(inputGroup->isMultiperiod())
       {
         m_multiPeriodGroups.push_back(inputGroup);
       }

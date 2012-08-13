@@ -12,6 +12,8 @@
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -36,6 +38,30 @@ public:
 
 class WorkspaceGroupTest : public CxxTest::TestSuite
 {
+private:
+
+    /// Helper method to add an 'nperiods' log value to each workspace in a group.
+  void add_periods_logs(WorkspaceGroup_sptr ws, int nperiods = -1)
+  {
+    for(size_t i = 0; i < ws->size(); ++i)
+    { 
+      MatrixWorkspace_sptr currentWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
+
+      PropertyWithValue<int>* nperiodsProp = new PropertyWithValue<int>("nperiods", nperiods);
+      currentWS->mutableRun().addLogData(nperiodsProp);
+    }
+  }
+
+  // Helper type, representing some concrete workspace type.
+  class MockWorkspace : public Mantid::API::Workspace
+  {
+    MOCK_CONST_METHOD0(id, const std::string());
+    MOCK_CONST_METHOD0(name, const std::string());
+    MOCK_CONST_METHOD0(threadSafe, bool());
+    MOCK_CONST_METHOD0(toString, std::string());
+    MOCK_CONST_METHOD0(getMemorySize, size_t());
+  };
+
 public:
 
   /// Make a simple group
@@ -201,6 +227,45 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_not_multiperiod_with_less_than_one_element()
+  {
+    WorkspaceGroup group;
+    TSM_ASSERT("Cannot be multiperiod without entries", !group.isMultiperiod());
+  }
+
+  void test_not_multiperiod_without_matrix_workspaces()
+  {
+    Workspace_sptr a = boost::make_shared<MockWorkspace>();
+    WorkspaceGroup group;
+    group.addWorkspace(a);
+    TSM_ASSERT("Cannot be multiperiod unless MatrixWorkspaces are used as elements.", !group.isMultiperiod());
+  }
+
+  void test_not_multiperiod_if_missing_nperiods_log()
+  {
+    Workspace_sptr a = boost::make_shared<WorkspaceTester>(); // workspace has no nperiods entry.
+    WorkspaceGroup group;
+    group.addWorkspace(a);
+    TSM_ASSERT("Cannot be multiperiod without nperiods log.", !group.isMultiperiod());
+  }
+
+  void test_not_multiperiod_if_nperiods_log_less_than_one()
+  {
+    Workspace_sptr a = boost::make_shared<WorkspaceTester>();
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->addWorkspace(a);
+    add_periods_logs(group, 0); // nperiods set to 0.
+    TSM_ASSERT("Cannot be multiperiod without nperiods log.", !group->isMultiperiod());
+  }
+
+  void test_positive_identification_of_multiperiod_data()
+  {
+    Workspace_sptr a = boost::make_shared<WorkspaceTester>();
+    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    group->addWorkspace(a);
+    add_periods_logs(group, 1); 
+    TS_ASSERT(group->isMultiperiod());
+  }
 
 };
 

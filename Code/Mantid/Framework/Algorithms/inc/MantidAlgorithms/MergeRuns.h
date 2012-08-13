@@ -97,7 +97,6 @@ private:
   API::MatrixWorkspace_sptr rebinInput(const API::MatrixWorkspace_sptr& workspace, const std::vector<double>& params);
   std::string createFormattedInputWorkspaceNames(const size_t& periodIndex) const;
   void validateMultiPeriodGroupInputs(const size_t& nInputWorkspaces) const;
-  bool isMultiPeriodGroup(boost::shared_ptr<const Mantid::API::WorkspaceGroup> inputGroup) const;
   /// Progress reporting
   API::Progress* m_progress;
 

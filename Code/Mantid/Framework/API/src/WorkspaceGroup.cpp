@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -260,6 +261,51 @@ void WorkspaceGroup::updated() const
       // if this workspace is not in the ADS do nothing
     }
   }
+}
+
+//------------------------------------------------------------------------------
+/**
+Determine in the WorkspaceGroup is multiperiod.
+* @return True if the WorkspaceGroup instance is multiperiod.
+*/
+bool WorkspaceGroup::isMultiperiod() const
+{
+  if(m_workspaces.size() < 1)
+  {
+    g_log.debug("Not a multiperiod-group with < 1 nested workspace.");
+    return false;
+  }
+  std::vector<Workspace_sptr>::const_iterator iterator = m_workspaces.begin();
+  // Loop through all inner workspaces, checking each one in turn.
+  while(iterator != m_workspaces.end())
+  {
+    if(MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(*iterator))
+    {
+      try
+      {
+      Kernel::Property* nPeriodsProp = ws->run().getLogData("nperiods");
+      int num = -1;
+      Kernel::Strings::convert(nPeriodsProp->value(), num);
+      if(num < 1)
+      {
+        g_log.debug("Not a multiperiod-group with nperiods log < 1.");
+        return false;
+      }
+      }
+      catch(Kernel::Exception::NotFoundError&)
+      {
+        g_log.debug("Not a multiperiod-group without nperiods log on all nested workspaces.");
+        return false;
+      }
+    }
+    else
+    {
+      g_log.debug("Not a multiperiod-group unless all inner workspaces are Matrix Workspaces.");
+      return false;
+    }
+    ++iterator;
+  }
+  return true;
 }
 
 } // namespace API

@@ -92,8 +92,9 @@ public:
   bool areNamesSimilar() const;
   /// Posts a notification informing the ADS observers that group was modified
   void updated() const;
+  /// Inidicates that the workspace group can be treated as multiperiod.
+  bool isMultiperiod() const;
  
-
 private:
   /// Private, unimplemented copy constructor
   WorkspaceGroup(const WorkspaceGroup& ref);
