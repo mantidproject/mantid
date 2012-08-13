@@ -32,11 +32,11 @@ namespace API
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-  class DLLExport MutliPeriodGroupAlgorithm : public Algorithm
+  class DLLExport MultiPeriodGroupAlgorithm : public Algorithm
   {
   public:
-    MutliPeriodGroupAlgorithm();
-    virtual ~MutliPeriodGroupAlgorithm();
+    MultiPeriodGroupAlgorithm();
+    virtual ~MultiPeriodGroupAlgorithm();
 
   private:
     /// Overriden from Algorithm base

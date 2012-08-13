@@ -1,4 +1,4 @@
-#include "MantidAPI/MutliPeriodGroupAlgorithm.h"
+#include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::Kernel;
@@ -10,14 +10,14 @@ namespace API
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  MutliPeriodGroupAlgorithm::MutliPeriodGroupAlgorithm() : m_useDefaultGroupingBehaviour(true) 
+  MultiPeriodGroupAlgorithm::MultiPeriodGroupAlgorithm() : m_useDefaultGroupingBehaviour(true) 
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  MutliPeriodGroupAlgorithm::~MutliPeriodGroupAlgorithm()
+  MultiPeriodGroupAlgorithm::~MultiPeriodGroupAlgorithm()
   {
   }
   
@@ -25,7 +25,7 @@ namespace API
 Validate the multiperiods workspace groups. Gives the opportunity to exit processing if things don't look right.
 @input nInputWorkspaces: Number of input workspaces.
 */
-void MutliPeriodGroupAlgorithm::validateMultiPeriodGroupInputs(const size_t& nInputWorkspaces) const
+void MultiPeriodGroupAlgorithm::validateMultiPeriodGroupInputs(const size_t& nInputWorkspaces) const
 {
   const size_t multiPeriodGroupsSize = m_multiPeriodGroups.size();
   if(multiPeriodGroupsSize != 0 && multiPeriodGroupsSize != nInputWorkspaces)
@@ -75,7 +75,7 @@ void MutliPeriodGroupAlgorithm::validateMultiPeriodGroupInputs(const size_t& nIn
 *
 * This method (or an override) must NOT THROW any exception if there are no input workspace groups
 */
-bool MutliPeriodGroupAlgorithm::checkGroups()
+bool MultiPeriodGroupAlgorithm::checkGroups()
 {
   typedef std::vector<std::string> WorkspaceNameType;
 
@@ -132,7 +132,7 @@ merging must be A_1 + B_1 = C_1 and A_2 + B_2 = C_2. This method constructs the 
 @param periodIndex : zero based index denoting the period.
 @return comma separated string of input workspaces.
 */
-std::string MutliPeriodGroupAlgorithm::createFormattedInputWorkspaceNames(const size_t& periodIndex) const
+std::string MultiPeriodGroupAlgorithm::createFormattedInputWorkspaceNames(const size_t& periodIndex) const
 {
   std::string prefix = "";
   std::string inputWorkspaces = "";
@@ -158,7 +158,7 @@ std::string MutliPeriodGroupAlgorithm::createFormattedInputWorkspaceNames(const 
 *
 * @return true - if all the workspace members are executed.
 */
-bool MutliPeriodGroupAlgorithm::processGroups()
+bool MultiPeriodGroupAlgorithm::processGroups()
 {
   // If we are not processing multiperiod groups, use the base behaviour.
   if(m_useDefaultGroupingBehaviour)

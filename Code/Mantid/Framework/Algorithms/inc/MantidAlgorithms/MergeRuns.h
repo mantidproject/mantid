@@ -7,7 +7,7 @@
 #include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include "MantidAPI/MutliPeriodGroupAlgorithm.h"
+#include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 
@@ -57,7 +57,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MergeRuns : public API::MutliPeriodGroupAlgorithm
+class DLLExport MergeRuns : public API::MultiPeriodGroupAlgorithm
 {
 public:
   MergeRuns();

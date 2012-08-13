@@ -74,7 +74,7 @@ set ( SRC_FILES
 	src/MultiDomainFunction.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
-	src/MutliPeriodGroupAlgorithm.cpp
+	src/MultiPeriodGroupAlgorithm.cpp
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/ParamFunction.cpp
@@ -206,7 +206,7 @@ set ( INC_FILES
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
-	inc/MantidAPI/MutliPeriodGroupAlgorithm.h
+	inc/MantidAPI/MultiPeriodGroupAlgorithm.h
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
@@ -283,7 +283,7 @@ set ( TEST_FILES
 	test/MultiDomainFunctionTest.h
 	test/MultipleExperimentInfosTest.h
 	test/MultipleFilePropertyTest.h
-	test/MutliPeriodGroupAlgorithmTest.h
+	test/MultiPeriodGroupAlgorithmTest.h
 	test/NumericAxisTest.h
 	test/ParamFunctionAttributeHolderTest.h
 	test/ParameterReferenceTest.h

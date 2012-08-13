@@ -61,7 +61,7 @@ using namespace API;
 using namespace DataObjects;
 
 /// Default constructor
-MergeRuns::MergeRuns() : MutliPeriodGroupAlgorithm(),m_progress(NULL){}
+MergeRuns::MergeRuns() : MultiPeriodGroupAlgorithm(),m_progress(NULL){}
 
 /// Destructor
 MergeRuns::~MergeRuns()
