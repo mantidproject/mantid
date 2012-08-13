@@ -7,7 +7,7 @@
 #include <list>
 #include <vector>
 #include <boost/shared_ptr.hpp>
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MutliPeriodGroupAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 
@@ -57,7 +57,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport MergeRuns : public API::Algorithm
+class DLLExport MergeRuns : public API::MutliPeriodGroupAlgorithm
 {
 public:
   MergeRuns();
@@ -70,10 +70,6 @@ public:
   virtual const std::string category() const { return "Arithmetic";}
 
 private:
-  /// Overriden from Algorithm base
-  virtual bool checkGroups();
-  /// Overriden from Algorithm base.
-  virtual bool processGroups();
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Overridden Algorithm methods
@@ -95,8 +91,6 @@ private:
   void intersectionParams(const MantidVec& X1, int64_t& i, const MantidVec& X2, std::vector<double>& params) const;
   void inclusionParams(const MantidVec& X1, int64_t& i, const MantidVec& X2, std::vector<double>& params) const;
   API::MatrixWorkspace_sptr rebinInput(const API::MatrixWorkspace_sptr& workspace, const std::vector<double>& params);
-  std::string createFormattedInputWorkspaceNames(const size_t& periodIndex) const;
-  void validateMultiPeriodGroupInputs(const size_t& nInputWorkspaces) const;
   /// Progress reporting
   API::Progress* m_progress;
 
@@ -104,12 +98,6 @@ private:
   std::vector<Mantid::DataObjects::EventWorkspace_sptr> m_inEventWS;
   /// Addition tables for event workspaces
   std::vector<boost::shared_ptr<AdditionTable>> m_tables;
-  /// Flag used to determine whether to use base or local virtual methods.
-  bool m_useDefaultGroupingBehaviour;
-  /// Convenience typdef for workspace names.
-  typedef std::vector<boost::shared_ptr<Mantid::API::WorkspaceGroup> > VecWSGroupType;
-  /// multi period group workspaces.
-  VecWSGroupType m_multiPeriodGroups;
 };
 
 } // namespace Algorithm

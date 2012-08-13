@@ -74,6 +74,7 @@ set ( SRC_FILES
 	src/MultiDomainFunction.cpp
 	src/MultipleExperimentInfos.cpp
 	src/MultipleFileProperty.cpp
+	src/MutliPeriodGroupAlgorithm.cpp
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/ParamFunction.cpp
@@ -108,6 +109,7 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
         )
 
 set ( INC_FILES
+	#	inc/MantidAPI/BoxCtrlChangesInterface.h
 	inc/MantidAPI/Algorithm.h
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
@@ -119,7 +121,6 @@ set ( INC_FILES
 	inc/MantidAPI/AnalysisDataService.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
-#	inc/MantidAPI/BoxCtrlChangesInterface.h
 	inc/MantidAPI/BoxController.h
 	inc/MantidAPI/CatalogFactory.h
 	inc/MantidAPI/ChopperModel.h
@@ -205,6 +206,7 @@ set ( INC_FILES
 	inc/MantidAPI/MultiDomainFunction.h
 	inc/MantidAPI/MultipleExperimentInfos.h
 	inc/MantidAPI/MultipleFileProperty.h
+	inc/MantidAPI/MutliPeriodGroupAlgorithm.h
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
@@ -268,9 +270,9 @@ set ( TEST_FILES
 	test/IFunctionMDTest.h
 	test/ILiveListenerTest.h
 	test/IMDWorkspaceTest.h
-	test/ImmutableCompositeFunctionTest.h
 	test/ISpectrumTest.h
 	test/IkedaCarpenterModeratorTest.h
+	test/ImmutableCompositeFunctionTest.h
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
 	test/LiveListenerFactoryTest.h
@@ -281,6 +283,7 @@ set ( TEST_FILES
 	test/MultiDomainFunctionTest.h
 	test/MultipleExperimentInfosTest.h
 	test/MultipleFilePropertyTest.h
+	test/MutliPeriodGroupAlgorithmTest.h
 	test/NumericAxisTest.h
 	test/ParamFunctionAttributeHolderTest.h
 	test/ParameterReferenceTest.h
