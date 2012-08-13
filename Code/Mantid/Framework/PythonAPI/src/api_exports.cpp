@@ -778,6 +778,7 @@ using namespace boost::python;
       .def("getNames", &API::WorkspaceGroup::getNames)
       .def("add", &API::WorkspaceGroup::add)
       .def("remove", &API::WorkspaceGroup::remove)
+      .def("isMultiPeriod", &API::WorkspaceGroup::isMultiperiod)
       ;
   }
 
