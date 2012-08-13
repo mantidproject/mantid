@@ -61,7 +61,6 @@ double MatrixWSDataSource::GetXMin()
 {
   total_xmin = mat_ws->getXMin(); 
   return total_xmin;
-
 }
 
 

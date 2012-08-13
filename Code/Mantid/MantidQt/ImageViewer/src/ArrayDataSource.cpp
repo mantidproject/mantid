@@ -38,12 +38,6 @@ ArrayDataSource::ArrayDataSource( double total_xmin, double total_xmax,
                                   total_ymin, total_ymax,
                                   total_rows, total_cols )
 {
-  this->total_xmin = total_xmin;
-  this->total_xmax = total_xmax;
-  this->total_ymin = total_ymin;
-  this->total_ymax = total_ymax;
-  this->total_rows = total_rows;
-  this->total_cols = total_cols;
   this->data       = data;
 }
 
@@ -152,8 +146,8 @@ DataArray * ArrayDataSource::GetDataArray( bool is_log_x )
  * @param list Vector that will be filled out with the information strings.
  */
 void ArrayDataSource::GetInfoList( double x, 
-                                  double y,
-                                  std::vector<std::string> &list )
+                                   double y,
+                                   std::vector<std::string> &list )
 {
   list.clear();
 

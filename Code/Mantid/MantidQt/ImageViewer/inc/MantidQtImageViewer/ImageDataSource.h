@@ -73,16 +73,16 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDataSource
     virtual size_t GetNCols();
 
     /// Clamp x to the interval of x-values covered by this DataSource
-    void RestrictX( double & x );
+    virtual void RestrictX( double & x );
 
     /// Clamp y to the interval of y-values covered by this DataSource
-    void RestrictY( double & y );
+    virtual void RestrictY( double & y );
 
     /// Clamp row to a valid row number for this DataSource
-    void RestrictRow( int & row );
+    virtual void RestrictRow( int & row );
 
     /// Clamp col to a valid column number for this dataSource
-    void RestrictCol( int & col );
+    virtual void RestrictCol( int & col );
 
     /// Get a DataArray roughly spaning the specified rectangle.  NOTE: The
     /// actual size and number of steps returned in the DataArray will be  
