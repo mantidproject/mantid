@@ -13,7 +13,7 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  DECLARE_FUNCTION(LeBailFunction)
+//  DECLARE_FUNCTION(LeBailFunction)
 
   // Get a reference to the logger
   Mantid::Kernel::Logger& LeBailFunction::g_log = Kernel::Logger::get("LeBailFunction");

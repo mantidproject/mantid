@@ -1,14 +1,17 @@
-#ifndef MANTID_ALGORITHMS_PROCESSBACKGROUND_H_
-#define MANTID_ALGORITHMS_PROCESSBACKGROUND_H_
+#ifndef MANTID_CURVEFITTING_PROCESSBACKGROUND_H_
+#define MANTID_CURVEFITTING_PROCESSBACKGROUND_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
-
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
 
 namespace Mantid
 {
-namespace Algorithms
+namespace CurveFitting
 {
 
   /** ProcessBackground : Process background obtained from LeBailFit
@@ -58,6 +61,8 @@ private:
     double mLowerBound;
     double mUpperBound;
 
+    double mTolerance;
+
     /// Remove peaks in a certain region
     void removePeaks();
 
@@ -66,11 +71,14 @@ private:
 
     /// Add a certain region from a reference workspace
     void addRegion();
+
+    /// Select background points automatically
+    void autoBackgroundSelection();
     
   };
 
 
-} // namespace Algorithms
+} // namespace CurveFitting
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_PROCESSBACKGROUND_H_ */
+#endif  /* MANTID_CURVEFITTING_PROCESSBACKGROUND_H_ */

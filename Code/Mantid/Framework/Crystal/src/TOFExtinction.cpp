@@ -48,7 +48,7 @@ namespace Crystal
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(TOFExtinction)
+  //DECLARE_ALGORITHM(TOFExtinction)
 
 
   //----------------------------------------------------------------------------------------------

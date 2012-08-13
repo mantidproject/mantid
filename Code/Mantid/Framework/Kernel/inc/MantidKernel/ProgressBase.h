@@ -26,6 +26,8 @@ namespace Kernel
 
     /// Pure virtual method that does the progress reporting, to be overridden
     virtual void doReport(const std::string& msg = "") = 0;
+    /// Override so that the reporter can inform whether a cancellation request has been used
+    virtual bool hasCancellationBeenRequested() const { return false; }
 
     // ----------------------- Methods shared between progress reporters -----------------------
 

@@ -27,7 +27,7 @@ namespace
   }
 }
 
-void export_WorkspaceGroup()
+void export_WorkspaceGroup() 
 {
   REGISTER_SHARED_PTR_TO_PYTHON(WorkspaceGroup);
 
@@ -40,6 +40,7 @@ void export_WorkspaceGroup()
     .def("remove", &WorkspaceGroup::remove, "Remove a name from the group")
     .def("getItem", &getItemAsWeakPtr, return_value_policy<Policies::upcast_returned_value>(),
          "Returns the item at the given index")
+    .def("isMultiPeriod", &WorkspaceGroup::isMultiperiod, "Retuns true if the workspace group is multi-period")
     // ------------ Operators --------------------------------
     .def("__len__", &WorkspaceGroup::getNumberOfEntries)
     .def("__contains__", &WorkspaceGroup::contains)

@@ -713,7 +713,7 @@ class DetailedBalance(ReductionStep):
             workspaces = [file_ws]
 
         for ws in workspaces:
-            ExponentialCorrection(ws, ws, 1.0, correction)#, Operation="Multiply")
+            ExponentialCorrection(ws, ws, 1.0, correction, Operation="Multiply")
         
     def set_temperature(self, temp):
         self._temp = temp

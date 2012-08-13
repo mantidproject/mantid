@@ -31,6 +31,9 @@ public slots:
   void radioTimeClicked();
   void chkPreserveEventsToggled();
 
+private slots:
+  void setDefaultAccumulationMethod(const QString&);
+
 private:
   /// Initialize the layout
   virtual void initLayout();

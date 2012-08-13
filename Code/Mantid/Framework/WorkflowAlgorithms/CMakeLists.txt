@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/EQSANSDarkCurrentSubtraction.cpp
 	src/EQSANSInstrument.cpp
 	src/EQSANSLoad.cpp
+	src/EQSANSMonitorTOF.cpp
 	src/EQSANSPatchSensitivity.cpp
 	src/EQSANSQ2D.cpp
 	src/EQSANSReduce.cpp
@@ -38,6 +39,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
 	inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
 	inc/MantidWorkflowAlgorithms/EQSANSLoad.h
+	inc/MantidWorkflowAlgorithms/EQSANSMonitorTOF.h
 	inc/MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h
 	inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
 	inc/MantidWorkflowAlgorithms/EQSANSReduce.h

@@ -20,6 +20,7 @@
 
 #include <numeric>
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/ReadLock.h"
 
 using namespace Mantid::Kernel::Exception;
 using namespace Mantid::Geometry;
@@ -167,6 +168,7 @@ Instrument_const_sptr InstrumentActor::getInstrument() const
     std::string view = Mantid::Kernel::ConfigService::Instance().getString("instrument.view.geometry");
 
     auto shared_workspace = getWorkspace();
+    Mantid::Kernel::ReadLock _lock(*shared_workspace);
 
     if ( boost::iequals("Default", view) || boost::iequals("Physical", view))
     {      
@@ -295,7 +297,7 @@ void InstrumentActor::resetColors()
 
   auto shared_workspace = getWorkspace();
 
-  Instrument_const_sptr inst = shared_workspace->getInstrument();
+  Instrument_const_sptr inst = getInstrument();
 
   //PARALLEL_FOR1(m_workspace)
   for (int iwi=0; iwi < int(m_specIntegrs.size()); iwi++)

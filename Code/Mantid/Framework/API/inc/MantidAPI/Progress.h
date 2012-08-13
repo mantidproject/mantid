@@ -49,6 +49,7 @@ public:
   virtual ~Progress();
 
   void doReport(const std::string& msg = "");
+  bool hasCancellationBeenRequested() const;
 
 private:
   /// Owning algorithm

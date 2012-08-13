@@ -125,6 +125,7 @@ namespace Mantid
           .def("__init__", make_constructor(&createPropertyWithLockFlag,
                                             default_call_policies(),
                                             args("name","defaultValue", "direction", "optional", "locking", "validator")))
+          .def("isOptional", &TypedWorkspaceProperty::isOptional, "Returns true if the property has been marked as optional")
        ;
 
       }

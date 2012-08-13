@@ -594,8 +594,12 @@ bool Indirect::validateInput()
     m_uiForm.valNoGroups->setText("");
   }
 
+  int dummyPos = 0;
+  QString text = m_uiForm.leDetailedBalance->text();
+  QValidator::State fieldState = m_uiForm.leDetailedBalance->validator()->validate(text, dummyPos);
+
   // detailed balance
-  if ( m_uiForm.ckDetailedBalance->isChecked() && m_uiForm.leDetailedBalance->text() == "" )
+  if ( m_uiForm.ckDetailedBalance->isChecked() && fieldState != QValidator::Acceptable )
   {
     valid = false;
     m_uiForm.valDetailedBalance->setText("*");

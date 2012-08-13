@@ -1,7 +1,8 @@
 /*WIKI*
-Creates a blank workspace for a given instrument with the option of pulling in detector tables from a RAW/NeXus data file. The histogram sizes are given by binning parameters, see [[Rebin]], rather than explicit data arrays. There are also various options to set axes. 
+Creates a blank workspace for a given instrument with the option of pulling in detector tables from a RAW/NeXus data file. The histogram sizes are given by binning parameters, see [[Rebin]], rather than explicit data arrays.
+There is also an option to set the X axis unit.
 
-By default the spectra/detector mapping is 1:1 but there is an option, SpectraMappingFile, to use the mapping from a given file
+If the DetectorTableFilename property is blank then it is assumed that a 1:1 spectra-mapping is required and the workspace will have the same number of histograms as detectors in the instrument (not including monitors)
 *WIKI*/
 #include "MantidDataHandling/CreateSimulationWorkspace.h"
 
@@ -38,7 +39,7 @@ namespace Mantid
     int CreateSimulationWorkspace::version() const { return 1;};
 
     /// Algorithm's category for identification. @see Algorithm::category
-    const std::string CreateSimulationWorkspace::category() const { return "General";}
+    const std::string CreateSimulationWorkspace::category() const { return "Quantification";}
 
     //----------------------------------------------------------------------------------------------
     /// Sets documentation strings for this algorithm

@@ -22,7 +22,8 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include "MantidKernel/System.h"
-#include "MantidPythonInterface/kernel/Converters/NumpyWrapMode.h"
+
+#include <boost/python/detail/prefix.hpp>
 #include <vector>
 
 namespace Mantid
@@ -35,8 +36,7 @@ namespace Mantid
       // Converter implementation
       //-----------------------------------------------------------------------
       /**
-       * Converter that takes a std::vector and converts it into a
-       * numpy array.
+       * Converter that takes a std::vector and converts it into a flat numpy array.
        *
        * The type of conversion is specified by another struct/class that
        * contains a static member create.
@@ -46,47 +46,10 @@ namespace Mantid
       {
         inline PyObject * operator()(const std::vector<ElementType> & cvector) const
         {
-          // Round about way of calling the wrapNDArray template function that is defined
-          // in the cpp file
-          typedef typename ConversionPolicy::template apply<std::vector<ElementType> > policy;
-          return policy::create(cvector);
+          // Hand off the work to the conversion policy
+          typedef typename ConversionPolicy::template apply<ElementType> policy;
+          return policy::create1D(cvector);
         }
-      };
-
-      //-----------------------------------------------------------------------
-      // Conversion Policies
-      //-----------------------------------------------------------------------
-      namespace Impl
-      {
-        /**
-         * Helper functions to keep the numpy arrayobject header out
-         * the header file
-         */
-          /// Clone the data into a new array
-          template<typename VectorType>
-          PyObject *cloneToNDArray(const VectorType &);
-      }
-
-      /**
-       * Clone is a policy for VectorToNDArray
-       * to wrap the vector in a read-write numpy array
-       * that looks at the original data. No copy is performed
-       */
-      struct Clone
-      {
-        template<typename ContainerType>
-        struct apply
-        {
-          /**
-           * Returns a Numpy array that has a copy of the vectors data
-           * @param cvector
-           * @return
-           */
-          static PyObject * create(const ContainerType & cvector)
-          {
-            return Impl::cloneToNDArray<ContainerType>(cvector);
-          }
-        };
       };
 
     }

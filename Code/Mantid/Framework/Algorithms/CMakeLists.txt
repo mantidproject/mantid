@@ -138,7 +138,6 @@ set ( SRC_FILES
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
-	src/ProcessBackground.cpp
 	src/Q1D.cpp
 	src/Q1D2.cpp
 	src/Q1DWeighted.cpp
@@ -336,7 +335,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
-	inc/MantidAlgorithms/ProcessBackground.h
 	inc/MantidAlgorithms/Q1D.h
 	inc/MantidAlgorithms/Q1D2.h
 	inc/MantidAlgorithms/Q1DWeighted.h
@@ -516,7 +514,6 @@ set ( TEST_FILES
 	test/PolynomialCorrectionTest.h
 	test/PowerLawCorrectionTest.h
 	test/PowerTest.h
-	test/ProcessBackgroundTest.h
 	test/Q1D2Test.h
 	test/Q1DTest.h
 	test/Q1DWeightedTest.h

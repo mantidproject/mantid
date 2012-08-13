@@ -25,7 +25,7 @@ bool compDescending(int a, int b)
     return (a >= b);
 }
 
-DECLARE_ALGORITHM(LeBailFit)
+// DECLARE_ALGORITHM(LeBailFit)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -135,7 +135,7 @@ void LeBailFit::exec()
     g_log.debug() << "DB1113: Input Data(Workspace) Range: " << dataWS->dataX(workspaceindex)[0] << ", "
               << dataWS->dataX(workspaceindex).back() << std::endl;
 
-    // 2. Determine Function
+    // 2. Determine Functionality
     std::string function = this->getProperty("Function");
     int functionmode = 0; // calculation
     if (function.compare("Calculation") == 0)
@@ -187,7 +187,9 @@ void LeBailFit::exec()
     {
         mLeBailFunction->addFunction(mit->second);
     }
-    std::cout << "LeBail Composite Function: " << mLeBailFunction->asString() << std::endl;
+    mLeBailFunction->addFunction(mBackgroundFunction);
+
+    g_log.information() << "LeBail Composite Function: " << mLeBailFunction->asString() << std::endl;
 
     // 5. Create output workspace
     size_t nspec = 1;
@@ -428,6 +430,13 @@ bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, std::
     // 4. Construct the Fit
     double tof_min = dataWS->dataX(workspaceindex)[0];
     double tof_max = dataWS->dataX(workspaceindex).back();
+    std::vector<double> fitrange = this->getProperty("FitRegion");
+    if (fitrange.size() == 2 && fitrange[0] < fitrange[1])
+    {
+        // Properly defined
+        tof_min = fitrange[0];
+        tof_max = fitrange[1];
+    }
 
     // a) Initialize
     API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", 0.0, 0.2, true);
@@ -963,25 +972,6 @@ void LeBailFit::setPeakParameters(
 
         peak->setParameter(parname, value);
 
-        /* Tie will be handled at in unitLeBailFit()
-        if (fitortie == 'f')
-        {
-            // Case of "Fit": do nothing
-            ;
-        }
-        else if (fitortie == 't')
-        {
-            // Case of "Tie": say tie to the value
-            std::stringstream ss;
-            ss << value;
-            peak->tie(parname, ss.str());
-        }
-        else
-        {
-            g_log.error() << "Peak parameter " << parname << ": fit/tie bit = " << fitortie << " is not allowed. " << std::endl;
-            throw std::invalid_argument("Only f and t are supported as for fit or tie.");
-        }
-        */
     } // ENDFOR: parameter iterator
 
     // 3. Peak height
@@ -1021,13 +1011,17 @@ void LeBailFit::generatePeaksFromInput()
 void LeBailFit::generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws)
 {
     auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
-    CurveFitting::BackgroundFunction_sptr mBackgroundFunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(background);
+    mBackgroundFunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(background);
 
     // CurveFitting::BackgroundFunction_sptr mBackgroundFunction = boost::make_shared<CurveFitting::BackgroundFunction>(background);
     //            boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(
     //            boost::make_shared<(background));
     size_t order = bkgdparamws.size();
-    mBackgroundFunction->setAttributeValue("order", int(order));
+    std::cout << "-----------   polynomial order = " << order << std::endl;
+
+    mBackgroundFunction->setAttributeValue("n", int(order));
+    mBackgroundFunction->initialize();
+
     for (size_t i = 0; i < order; ++i)
     {
         std::stringstream ss;
@@ -1047,20 +1041,61 @@ void LeBailFit::generateBackgroundFunction(std::string backgroundtype, std::vect
  */
 void LeBailFit::parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr bkgdparamws, std::vector<double>& bkgdorderparams)
 {
-    // 1. Clear
+    // 1. Clear (output) map
     bkgdorderparams.clear();
+    std::map<std::string, double> parmap;
 
-    // 2. Read background
-    std::string a("A0");
-    std::string b("A1");
-    int smaller = a.compare(b);
-    int larger = b.compare(a);
-    std::cout << smaller << ", " << larger << std::endl;
+    // 2. Check
+    std::vector<std::string> colnames = bkgdparamws->getColumnNames();
+    if (colnames.size() < 2)
+    {
+        g_log.error() << "Input parameter table workspace must have more than 1 columns" << std::endl;
+        throw std::invalid_argument("Invalid input background table workspace. ");
+    }
+    else
+    {
+        if (!(boost::starts_with(colnames[0], "Name") && boost::starts_with(colnames[1], "Value")))
+        {
+            // Column 0 and 1 must be Name and Value (at least started with)
+            g_log.error() << "Input parameter table workspace have wrong column definition." << std::endl;
+            for (size_t i = 0; i < 2; ++i)
+                g_log.error() << "Column " << i << " Should Be Name.  But Input is " << colnames[0] << std::endl;
+            throw std::invalid_argument("Invalid input background table workspace. ");
+        }
+    }
 
-    size_t order = bkgdparamws->rowCount();
-    bkgdorderparams.reserve(order);
+    // 3. Input
+    for (size_t ir = 0; ir < bkgdparamws->rowCount(); ++ir)
+    {
+        API::TableRow row = bkgdparamws->getRow(ir);
+        std::string parname;
+        double parvalue;
+        row >> parname >> parvalue;
 
-    throw std::runtime_error("To be implemented ASAP!");
+        if (parname.size() > 0 && parname[0] == 'A')
+        {
+            // Insert parameter name starting with A
+            parmap.insert(std::make_pair(parname, parvalue));
+        }
+    }
+
+    // 4. Sort: increasing order
+    bkgdorderparams.reserve(parmap.size());
+    for (size_t i = 0; i < parmap.size(); ++i)
+    {
+        bkgdorderparams.push_back(0.0);
+    }
+
+    std::map<std::string, double>::iterator mit;
+    for (mit = parmap.begin(); mit != parmap.end(); ++mit)
+    {
+        std::string parname = mit->first;
+        double parvalue = mit->second;
+        std::vector<std::string> terms;
+        boost::split(terms, parname, boost::is_any_of("A"));
+        int tmporder = atoi(terms[1].c_str());
+        bkgdorderparams[tmporder] = parvalue;
+    }
 
     return;
 }
@@ -1078,6 +1113,7 @@ void LeBailFit::importParametersTable()
         << " Number of columns = " << colnames.size() << " < 3 as required. " << std::endl;
     throw std::runtime_error("Input parameter workspace is wrong. ");
   }
+
   if (colnames[0].compare("Name") != 0 ||
       colnames[1].compare("Value") != 0 ||
       colnames[2].compare("FitOrTie") != 0)

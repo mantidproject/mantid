@@ -455,7 +455,6 @@ namespace Mantid
 
     void Load::loadMultipleFiles()
     {
-      MultipleFileProperty * multiFileProp = dynamic_cast<MultipleFileProperty*>(getPointerToProperty("Filename"));
       const std::vector<std::vector<std::string> > allFilenames = getProperty("Filename");
       std::string outputWsName = getProperty("OutputWorkspace");
 
@@ -684,6 +683,15 @@ namespace Mantid
       catch(std::runtime_error&)
       { }
 
+      // General IMDWorkspace
+      try
+      {
+        IMDWorkspace_sptr childWS = loader->getProperty(propName);
+        return childWS;
+      }
+      catch(std::runtime_error&)
+      { }
+
       // Just workspace?
       try
       {
@@ -693,7 +701,7 @@ namespace Mantid
       catch(std::runtime_error&)
       { }
 
-      g_log.debug() << "Workspace property " << propName << " did not return to MatrixWorkspace, EventWorkspace, or IMDEventWorkspace." << std::endl;
+      g_log.debug() << "Workspace property " << propName << " did not return to MatrixWorkspace, EventWorkspace, IMDEventWorkspace, IMDWorkspace" << std::endl;
       return Workspace_sptr();
     }
 

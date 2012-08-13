@@ -1,5 +1,6 @@
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidKernel/EmptyValues.h"
 #include <gsl/gsl_sf_erf.h>
 
 #define PI 3.14159265358979323846264338327950288419716939937510582
@@ -68,6 +69,13 @@ void ThermalNeutronBk2BkExpConvPV::init()
 
     /// Lattice parameter
     declareParameter("LatticeConstant", 10.0);
+
+    /// Initialize parameters
+    mParameters.insert(std::make_pair("Alpha", 1.0));
+    mParameters.insert(std::make_pair("Beta", 1.0));
+    mParameters.insert(std::make_pair("Gamma", 1.0));
+    mParameters.insert(std::make_pair("Sigma2", 1.0));
+    mParameters.insert(std::make_pair("FWHM", 1.0));
 
     return;
 }
@@ -180,6 +188,13 @@ void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xVal
       double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
       out[id] = height*omega;
     }
+
+    // 5. Record recent value
+    mParameters["Alpha"] = alpha;
+    mParameters["Beta"] = beta;
+    mParameters["Sigma2"] = sigma2;
+    mParameters["Gamma"] = gamma;
+    mParameters["FWHM"] = H;
 
     return;
 }
@@ -382,6 +397,27 @@ std::complex<double> ThermalNeutronBk2BkExpConvPV::E1(std::complex<double> z) co
 {
     throw std::runtime_error("E1() has not been implemented yet!");
     return z;
+}
+
+/*
+ * Get peak parameters stored locally
+ */
+double ThermalNeutronBk2BkExpConvPV::getPeakParameters(std::string paramname)
+{
+    std::map<std::string, double>::iterator mit;
+    mit = mParameters.find(paramname);
+    double paramvalue;
+    if (mit == mParameters.end())
+    {
+        g_log.error() << "Parameter " << paramname << " does not exist in peak profile. " << std::endl;
+        paramvalue = Mantid::EMPTY_DBL();
+    }
+    else
+    {
+        paramvalue = mit->second;
+    }
+
+    return paramvalue;
 }
 
 } // namespace CurveFitting

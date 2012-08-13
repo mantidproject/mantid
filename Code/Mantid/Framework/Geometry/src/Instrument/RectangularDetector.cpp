@@ -365,8 +365,8 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
 
   m_xpixels = xpixels;
   m_ypixels = ypixels;
-  m_xsize = std::abs(xpixels * xstep);
-  m_ysize = std::abs(ypixels * ystep);
+  m_xsize = xpixels * xstep;
+  m_ysize = ypixels * ystep;
   m_xstart = xstart;
   m_ystart = ystart;
   m_xstep = xstep;

@@ -75,6 +75,15 @@ void Progress::doReport(const std::string& msg)
   m_alg->interruption_point();
 }
 
+/**
+ * @return true if an algorithm has been set & it has requested to be cancelled
+ */
+bool Progress::hasCancellationBeenRequested() const
+{
+  if(m_alg) return m_alg->getCancel();
+  else return false;
+}
+
 
 } // namespace API
 } // namespace Mantid

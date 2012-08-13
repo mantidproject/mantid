@@ -14,6 +14,9 @@
 
 #include "MantidCurveFitting/LeBailFit.h"
 
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
@@ -33,7 +36,7 @@ public:
    * Fundamental test to calcualte 2 peak w/o background.
    * It is migrated from LeBailFunctionTest.test_CalculatePeakParameters
    */
-  void Ptest_cal2Peaks()
+  void test_cal2Peaks()
   {
       // 1. Create input workspace
       API::MatrixWorkspace_sptr dataws;
@@ -107,6 +110,83 @@ public:
 
       return;
   }
+
+
+  /*
+   * Test on peak calcualtion with non-trivial background
+   */
+  void Ptest_cal2PeaksWithBackground()
+  {
+      // 1. Create input workspace
+      API::MatrixWorkspace_sptr dataws;
+      DataObjects::TableWorkspace_sptr parameterws;
+      DataObjects::TableWorkspace_sptr hklws;
+
+      dataws = createInputDataWorkspace(1);
+      parameterws = createPeakParameterWorkspace();
+      // a) Add reflection (111) and (110)
+      double h110 = 660.0/0.0064;
+      double h111 = 1370.0/0.008;
+      std::vector<double> peakheights;
+      peakheights.push_back(h111); peakheights.push_back(h110);
+      std::vector<std::vector<int> > hkls;
+      std::vector<int> p111;
+      p111.push_back(1); p111.push_back(1); p111.push_back(1);
+      hkls.push_back(p111);
+      std::vector<int> p110;
+      p110.push_back(1); p110.push_back(1); p110.push_back(0);
+      hkls.push_back(p110);
+      hklws = createReflectionWorkspace(hkls, peakheights);
+
+      AnalysisDataService::Instance().addOrReplace("Data", dataws);
+      AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
+      AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
+
+      // 2. Initialize the algorithm
+      LeBailFit lbfit;
+
+      TS_ASSERT_THROWS_NOTHING(lbfit.initialize());
+      TS_ASSERT(lbfit.isInitialized());
+
+      // 3. Set properties
+      lbfit.setPropertyValue("InputWorkspace", "Data");
+      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setProperty("WorkspaceIndex", 0);
+      lbfit.setProperty("BackgroundType", "Polynomial");
+      /// a second order polynomial background
+      lbfit.setPropertyValue("BackgroundParameters", "101.0, 0.001");
+      lbfit.setProperty("Function", "Calculation");
+      lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
+      lbfit.setProperty("PeaksWorkspace", "PeakParameterWS");
+      lbfit.setProperty("UseInputPeakHeights", true);
+      lbfit.setProperty("PeakRadius", 8);
+
+      // 4. Run
+      TS_ASSERT_THROWS_NOTHING(lbfit.execute());
+      TS_ASSERT(lbfit.isExecuted());
+
+      // 5. Get output & Test
+      DataObjects::Workspace2D_sptr outws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+                  AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
+      TS_ASSERT(outws);
+
+      for (size_t i = 0; i < outws->dataY(0).size(); ++i)
+          std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << std::endl;
+
+
+      double bkgdx = outws->readX(0).back()*0.001 + 101.0;
+      TS_ASSERT_DELTA(outws->readY(0).back(), bkgdx, 1.0);
+
+      // 5. Clean
+      AnalysisDataService::Instance().remove("Data");
+      AnalysisDataService::Instance().remove("PeakParameters");
+      AnalysisDataService::Instance().remove("Reflections");
+      AnalysisDataService::Instance().remove("CalculatedPeaks");
+
+      return;
+  }
+
 
   /*
    * Unit test on figure out peak height
@@ -317,6 +397,118 @@ public:
 
 
   /*
+   * Test a complete LeBail Fit process with background
+   * Using Run 4862 Bank 7 as the testing data
+   */
+  void Diabletest_CompleteLeBailFit_PG3Bank7()
+  {
+      // 1. Create input workspace
+      API::MatrixWorkspace_sptr dataws;
+      DataObjects::TableWorkspace_sptr parameterws;
+      DataObjects::TableWorkspace_sptr hklws;
+      DataObjects::TableWorkspace_sptr bkgdws;
+
+      // a)  Reflections
+      std::vector<std::vector<int> > hkls;
+      importReflectionTxtFile("/home/wzz/Mantid/Code/debug/MyTestData/pg3_4862bank7_reflection.txt", hkls);
+      size_t numpeaks = hkls.size();
+      std::cout << "TestXXX Number of peaks = " << hkls.size() << std::endl;
+
+      // b) data
+      dataws = createInputDataWorkspace(4);
+      std::cout << "Data Workspace Range: " << dataws->readX(0)[0] << ", " << dataws->readX(0).back() << std::endl;
+
+      // c) Workspaces
+      std::vector<double> pkheights(numpeaks, 1.0);
+      parameterws = createPeakParameterWorkspace();
+      hklws = createReflectionWorkspace(hkls, pkheights);
+      std::cout << "ReflectionWorkspace is created. " << std::endl;
+
+      bkgdws = createBackgroundParameterWorksapce("/home/wzz/Mantid/Code/debug/MyTestData/pg3_4862bank7_background.dat");
+      std::cout << "Background Parameters TableWorkspace is created. " << std::endl;
+
+      AnalysisDataService::Instance().addOrReplace("Data", dataws);
+      AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
+      AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
+      AnalysisDataService::Instance().addOrReplace("BackgroundParameters", bkgdws);
+
+      std::vector<double> fitregion;
+      fitregion.push_back(56198.0);
+      fitregion.push_back(151239.0);
+
+      // 3. Genearte LeBailFit algorithm and set it up
+      LeBailFit lbfit;
+      lbfit.initialize();
+
+      lbfit.setPropertyValue("InputWorkspace", "Data");
+      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setProperty("WorkspaceIndex", 0);
+      lbfit.setProperty("FitRegion", fitregion);
+      lbfit.setProperty("Function", "LeBailFit");
+      lbfit.setProperty("BackgroundType", "Polynomial");
+      lbfit.setPropertyValue("BackgroundParametersWorkspace", "BackgroundParameters");
+      lbfit.setProperty("OutputWorkspace", "FittedData");
+      lbfit.setProperty("PeaksWorkspace", "FittedPeaks");
+      lbfit.setProperty("PeakRadius", 8);
+
+      // 4. Exam
+      TS_ASSERT_THROWS_NOTHING(lbfit.execute());
+      TS_ASSERT(lbfit.isExecuted());
+
+      // a) Internal method test
+      // i)   Read Background Parameter TableWorkspace
+      // ii)  Proposed Peaks' Heights
+      // iii) Compare the cal
+
+      // Take output peak parameters
+      throw std::runtime_error("Do know how to implement");
+
+      // Take the output data
+      DataObjects::Workspace2D_sptr outws =
+              boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+              (AnalysisDataService::Instance().retrieve("FittedData"));
+      TS_ASSERT(outws);
+
+      DataObjects::TableWorkspace_sptr paramws =
+              boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
+              (AnalysisDataService::Instance().retrieve("PeakParameters"));
+      TS_ASSERT(paramws);
+      if (!paramws)
+      {
+          return;
+      }
+
+      TS_ASSERT_EQUALS(paramws->columnCount(), 3);
+      std::map<std::string, double> paramvalues;
+      std::map<std::string, char> paramfitstatus;
+      parseParameterTableWorkspace(paramws, paramvalues, paramfitstatus);
+
+      std::string testplan("zero");
+      if (testplan.compare("zero") == 0)
+      {
+          double zero = paramvalues["Zero"];
+          TS_ASSERT_DELTA(zero, 0.0, 0.5);
+      }
+      else if (testplan.compare("alpha") == 0)
+      {
+          double alph0 = paramvalues["Alph0"];
+          TS_ASSERT_DELTA(alph0, 4.026, 1.00);
+      }
+      else if (testplan.compare("sigma") == 0)
+      {
+          double sig0 = paramvalues["Sig0"];
+          TS_ASSERT_DELTA(sig0, 17.37, 0.01);
+          double sig1 = paramvalues["Sig1"];
+          TS_ASSERT_DELTA(sig1, 9.901, 0.01);
+      }
+
+
+
+  }
+
+
+  /*
    * Fit 2 (separate) peaks
    */
   void Ptest_fit2Peaks()
@@ -462,7 +654,7 @@ public:
   /*
    * Fit 2 (overlapped) peaks
    */
-  void test_fitTwiPeaks()
+  void Ptest_fitTwiPeaks()
   {
       // 0. Test Plan
       // std::string testplan("zero");
@@ -845,9 +1037,14 @@ public:
         importDataFromColumnFile("/home/wzz/Mantid/Code/debug/unittest_multigroups.dat", vecX, vecY, vecE);
         break;
 
+    case 4:
+        importDataFromColumnFile("/home/wzz/Mantid/Code/debug/MyTestData/4862b7.inp", vecX, vecY, vecE);
+        std::cout << "Option 4:  Vector Size = " << vecX.size() << std::endl;
+        break;
+
     default:
         // not supported
-        std::cout << "LeBailFitTest.createInputDataWorkspace() Option " << option << "is not supported. " << std::endl;
+        std::cout << "LeBailFitTest.createInputDataWorkspace() Option " << option << " is not supported. " << std::endl;
         throw std::invalid_argument("Unsupported option. ");
     }
 
@@ -1067,7 +1264,7 @@ public:
       }
       else
       {
-          std::cout << "File " << filename << " is opened." << std::endl;
+          std::cout << "File " << filename << " is opened for parsing." << std::endl;
       }
       char line[256];
       while(ins.getline(line, 256))
@@ -1086,6 +1283,8 @@ public:
         }
       }
 
+      ins.close();
+
       return;
   }
 
@@ -1096,6 +1295,17 @@ public:
   {
     std::ifstream ins;
     ins.open(filename.c_str());
+
+    if (!ins.is_open())
+    {
+        std::cout << "Data file " << filename << " cannot be opened. " << std::endl;
+        throw std::invalid_argument("Unable to open data fiile. ");
+    }
+    else
+    {
+        std::cout << "Data file " << filename << " is opened for parsing. " << std::endl;
+    }
+
     char line[256];
     // std::cout << "File " << filename << " isOpen = " << ins.is_open() << std::endl;
     while(ins.getline(line, 256))
@@ -1150,6 +1360,58 @@ public:
       }
 
       return;
+  }
+
+  /*
+   * Create a table worskpace for background parameters
+   * Format:
+   *    parameter name1, parameter Value1
+   *    parameter name2, parameter value2
+   */
+  DataObjects::TableWorkspace_sptr createBackgroundParameterWorksapce(std::string filename)
+  {
+      // 1. Open file
+      std::ifstream ins;
+      ins.open(filename.c_str());
+      if (!ins.is_open())
+      {
+          std::cout << "File " << filename << " cannot be opened. " << std::endl;
+          throw std::invalid_argument("Unable to open input background parameter file. ");
+      }
+
+      // 2. Parse
+      DataObjects::TableWorkspace* tablewsptr = new DataObjects::TableWorkspace();
+      DataObjects::TableWorkspace_sptr tablews(tablewsptr);
+
+      tablews->addColumn("str", "Name");
+      tablews->addColumn("double", "Value");
+
+      char line[256];
+      while(ins.getline(line, 256))
+      {
+          std::string theline(line);
+          std::vector<std::string> terms;
+          boost::split(terms, theline, boost::is_any_of(","));
+
+          if (terms.size() < 2)
+          {
+              std::cout << theline << "  --- Not a good line" << std::endl;
+              continue;
+          }
+
+          std::string parname = terms[0];
+          boost::algorithm::trim(parname);
+          std::string parvaluestr = terms[1];
+          boost::algorithm::trim(parvaluestr);
+          double parvalue = atof( parvaluestr.c_str() );
+          API::TableRow newrow = tablews->appendRow();
+          newrow << parname << parvalue;
+          std::cout << parname << "  :  " << parvalue << std::endl;
+      }
+
+      ins.close();
+
+      return tablews;
   }
 
 };

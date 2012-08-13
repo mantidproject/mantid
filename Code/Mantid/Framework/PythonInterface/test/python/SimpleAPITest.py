@@ -1,6 +1,6 @@
 import unittest
 import sys
-from mantid.api import AlgorithmFactory, mtd
+from mantid.api import AlgorithmFactory, mtd, ITableWorkspace
 import mantid.simpleapi as simpleapi
 
 class SimpleAPITest(unittest.TestCase):
@@ -98,6 +98,34 @@ If false, then the workspace gets converted to a Workspace2D histogram.
         wkspace = simpleapi.CreateWorkspace(data,data,OutputWorkspace=wsname,NSpec=1,UnitX='Wavelength')
         self.assertTrue( wsname in mtd )
     
+    def test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given(self):
+        _demo = simpleapi.CreateMDHistoWorkspace(SignalInput='1,2,3,4,5',ErrorInput='1,1,1,1,1',
+                                                Dimensionality='1',Extents='-1,1',NumberOfBins='5',Names='A',Units='U')
+        wsname = 'test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given'
+        query = simpleapi.QueryMDWorkspace(InputWorkspace=_demo,OutputWorkspace=wsname,MaximumRows='500',
+                                           Normalisation='volume')
+
+        self.assertTrue( isinstance(query, ITableWorkspace) )
+        self.assertTrue( wsname in mtd )
+
+    def test_function_returns_both_mandatory_and_optional_workspaces_when_optional_output_is_given(self):
+        _demo = simpleapi.CreateMDWorkspace(Dimensions='2',EventType='MDEvent',Extents='1,10,1,10',Names='a,b',
+                                            Units='MomentumTransfer,MomentumTransfer',SplitInto='4')
+        wsname = 'test_function_returns_only_mandatory_workspace_when_optional_output_is_not_given'
+        wsname_box = wsname + '_box'
+        query = simpleapi.QueryMDWorkspace(InputWorkspace=_demo,OutputWorkspace=wsname,MaximumRows='500',
+                                           Normalisation='volume',BoxDataTable=wsname_box)
+        
+        self.assertTrue( wsname in mtd )
+        self.assertTrue( wsname_box in mtd )
+        
+        self.assertTrue( type(query) == tuple )
+        self.assertEquals( 2, len(query) )
+        
+        self.assertTrue( isinstance(query[0], ITableWorkspace) )
+        self.assertTrue( isinstance(query[1], ITableWorkspace) )
+        
+        
     def test_that_dialog_call_raises_runtime_error(self):
         try:
             simpleapi.LoadEventNexusDialog()

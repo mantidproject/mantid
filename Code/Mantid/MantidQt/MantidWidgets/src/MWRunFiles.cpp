@@ -121,14 +121,14 @@ void FindFilesThread::run()
       }
     }
   }
-  catch(Exception::NotFoundError& exc)
+  catch(std::exception& exc)
   {
     m_error = exc.what();
     m_filenames.clear();
   }
-  catch(std::invalid_argument& exc)
+  catch(...)
   {
-    m_error = exc.what();
+    m_error = "An unknown error occurred while trying to locate the file(s). Please contact the development team";
     m_filenames.clear();
   }
 }
@@ -143,9 +143,10 @@ void FindFilesThread::getFilesFromAlgorithm()
   if(!algorithm) throw std::invalid_argument("Cannot create algorithm " + m_algorithm.toStdString() + ".");
 
   algorithm->initialize();
-  algorithm->setProperty("Filename", m_text);
+  const std::string propName = m_property.toStdString();
+  algorithm->setProperty(propName, m_text);
 
-  Property *prop = algorithm->getProperty(m_property.toStdString());
+  Property *prop = algorithm->getProperty(propName);
   
   FileProperty *fileProp = dynamic_cast<FileProperty*>(prop);
   MultipleFileProperty *multiFileProp = dynamic_cast<MultipleFileProperty*>(prop);
@@ -156,7 +157,7 @@ void FindFilesThread::getFilesFromAlgorithm()
   }
   else if( multiFileProp )
   {
-    std::vector<std::vector<std::string> > filenames = algorithm->getProperty("Filename");
+    std::vector<std::vector<std::string> > filenames = algorithm->getProperty(propName);
     std::vector<std::string> flattenedNames = MultipleFileProperty::flattenFileNames(filenames);
     
     for( auto filename = flattenedNames.begin(); filename != flattenedNames.end(); ++filename )

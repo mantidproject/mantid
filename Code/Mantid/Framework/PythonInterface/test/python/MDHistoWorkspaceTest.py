@@ -2,6 +2,8 @@ import unittest
 from testhelpers import run_algorithm
 from mantid import mtd
 
+import numpy
+
 class MDHistoWorkspaceTest(unittest.TestCase):
     """
     Test the interface to MDHistoWorkspaces
@@ -11,8 +13,10 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         run_algorithm('CreateMDWorkspace', Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',
                       MaxRecursionDepth='20',OutputWorkspace='mdw')
         run_algorithm('FakeMDEventData', InputWorkspace="mdw",  UniformParams="1e4")
-        run_algorithm('BinMD',InputWorkspace="mdw", OutputWorkspace="A", AxisAligned=True, AlignedDim0="x,0,10,10", AlignedDim1="y,0,10,10", AlignedDim2="z,0,10,10", IterateEvents="1", Parallel="0")
-        run_algorithm('BinMD',InputWorkspace="mdw", OutputWorkspace="B", AxisAligned=True, AlignedDim0="x,0,10,10", AlignedDim1="y,0,10,10", AlignedDim2="z,0,10,10", IterateEvents="1", Parallel="0")
+        run_algorithm('BinMD',InputWorkspace="mdw", OutputWorkspace="A", AxisAligned=True, AlignedDim0="x,0,10,10", AlignedDim1="y,0,10,10", 
+                      AlignedDim2="z,0,10,10", IterateEvents="1", Parallel="0")
+        run_algorithm('BinMD',InputWorkspace="mdw", OutputWorkspace="B", AxisAligned=True, AlignedDim0="x,0,10,10", AlignedDim1="y,0,10,10", 
+                      AlignedDim2="z,0,10,10", IterateEvents="1", Parallel="0")
             
     def tearDown(self):
         for name in ('A','B','C','D','E','F','G','H'):
@@ -27,7 +31,64 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         A.setSignalAt(23, 123.0)  
         A.setErrorSquaredAt(23, 345.0)  
         self.assertEqual(A.signalAt(23), 123.0)  
-        self.assertEqual(A.errorSquaredAt(23), 345.0)  
+        self.assertEqual(A.errorSquaredAt(23), 345.0)
+        
+    def test_signal_array_is_wrapped_in_read_only_numpy_array(self):
+        run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
+                      Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
+        testWS = mtd['demo']
+        signal = testWS.getSignalArray()
+        expected = numpy.array([[1,2,3],[4,5,6],[7,8,9]])
+        self._verify_numpy_data(signal, expected)
+        
+        mtd.remove('demo')
+
+    def test_errorSquared_array_is_wrapped_in_read_only_numpy_array(self):
+        run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
+                      Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
+        testWS = mtd['demo']
+        errors = testWS.getErrorSquaredArray()
+        expected = numpy.array([[1,1,1],[1,1,1],[1,1,1]])
+        self._verify_numpy_data(errors, expected)
+        
+        mtd.remove('demo')
+        
+    def test_set_signal_array_throws_if_input_array_is_of_incorrect_size(self):
+        run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
+                      Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
+        testWS = mtd['demo']
+        signal = numpy.array([1,2,3])
+        self.assertRaises(ValueError, testWS.setSignalArray, signal)
+
+    def test_set_signal_array_passes_numpy_values_to_workspace(self):
+        run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
+                      Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
+        testWS = mtd['demo']
+        signal = numpy.arange(10,19,dtype=numpy.float64)
+        signal = numpy.reshape(signal,(3,3))
+        testWS.setSignalArray(signal)
+        new_signal = testWS.getSignalArray()
+        self._verify_numpy_data(new_signal, signal)
+
+
+    def test_set_error_array_passes_numpy_values_to_workspace(self):
+        run_algorithm('CreateMDHistoWorkspace', SignalInput='1,2,3,4,5,6,7,8,9',ErrorInput='1,1,1,1,1,1,1,1,1',
+                      Dimensionality='2',Extents='-1,1,-1,1',NumberOfBins='3,3',Names='A,B',Units='U,T',OutputWorkspace='demo')
+        testWS = mtd['demo']
+        errors = numpy.arange(20,29,dtype=numpy.float64)
+        errors = numpy.reshape(errors,(3,3))
+        testWS.setErrorSquaredArray(errors)
+        new_errors = testWS.getErrorSquaredArray()
+        self._verify_numpy_data(new_errors, errors)
+
+    def _verify_numpy_data(self, test_array, expected):
+        """Check the correct numpy array has been constructed"""
+
+        self.assertTrue(isinstance(test_array, numpy.ndarray))
+        self.assertTrue(len(expected.shape), len(test_array.shape))
+        self.assertTrue(not numpy.all(test_array.flags.writeable))
+        self.assertTrue(numpy.all(numpy.equal(expected, test_array)))
+        
         
     """ Note: Look at each test for PlusMD MinusMD, and MDHistoWorkspaceTest for detailed tests including checking results.
     These tests only check that they do run. """

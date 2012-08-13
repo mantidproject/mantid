@@ -272,7 +272,14 @@ IAlgorithm_sptr LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sp
     IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Rebin2D");
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", m_integratedWSName);
-
+    if(ws->id() == "RebinnedOutput")
+    {
+      alg->setProperty("UseFractionalArea", true);
+    }
+    else
+    {
+      alg->setProperty("UseFractionalArea", false);
+    }
     // (half-width in the plane)
     double planeWidth = this->getPlanarWidth();
     // Length of the line

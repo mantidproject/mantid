@@ -49,6 +49,7 @@ set ( SRC_FILES
 	src/ParDomain.cpp
 	src/PlotPeakByLogValue.cpp
 	src/Polynomial.cpp
+	src/ProcessBackground.cpp
 	src/ProductFunction.cpp
 	src/ProductLinearExp.cpp
 	src/ProductQuadraticExp.cpp
@@ -127,6 +128,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/Polynomial.h
+	inc/MantidCurveFitting/ProcessBackground.h
 	inc/MantidCurveFitting/ProductFunction.h
 	inc/MantidCurveFitting/ProductLinearExp.h
 	inc/MantidCurveFitting/ProductQuadraticExp.h
@@ -189,6 +191,7 @@ set ( TEST_FILES
 	test/PRConjugateGradientTest.h
 	test/PlotPeakByLogValueTest.h
 	test/PolynomialTest.h
+	test/ProcessBackgroundTest.h
 	test/ProductFunctionTest.h
 	test/ProductLinearExpTest.h
 	test/ProductQuadraticExpTest.h

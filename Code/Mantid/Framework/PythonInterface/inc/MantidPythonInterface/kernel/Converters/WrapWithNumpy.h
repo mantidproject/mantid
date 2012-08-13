@@ -23,6 +23,7 @@
  */
 #include "MantidKernel/System.h"
 #include <boost/python/detail/prefix.hpp>
+#include <vector>
 
 namespace Mantid
 {
@@ -37,7 +38,8 @@ namespace Mantid
       {
         // Forward declare a conversion function. This should be specialized for each
         // container type that is to be wrapped
-        template <typename ContainerType> PyObject * wrapWithNDArray(const ContainerType &, const NumpyWrapMode);
+        template <typename ElementType> PyObject * wrapWithNDArray(const ElementType *, const int ndims, Py_intptr_t *dims,
+                                                                   const NumpyWrapMode);
       }
 
       /**
@@ -47,19 +49,34 @@ namespace Mantid
        */
       struct WrapReadOnly
       {
-        template<typename ContainerType>
+
+        template<typename ElementType>
         struct apply
         {
           /**
-           * Returns a read-only Numpy array wrapped around an existing vector
-           * @param cdata ::
+           * Returns a read-only 1D Numpy array wrapped around an existing container that knows its size
+           * @param cdata :: A const reference to an object that can be wrapped
            * @return
            */
-          static PyObject * create(const ContainerType & cdata)
+          static PyObject * create1D(const std::vector<ElementType> & cdata)
           {
-            return Impl::wrapWithNDArray(cdata, ReadOnly);
+            Py_intptr_t dims[1] = { cdata.size() };
+            return createFromArray(cdata.data(), 1, dims);
+          }
+          /**
+           * Returns a read-only Numpy array wrapped around an existing array. The template
+           * type here refers to the C-array's element type
+           * @param cdata :: A pointer to the HEAD of a data array
+           * @param ndims :: The number of dimensions
+           * @param dims :: An array of size ndims specifying the sizes of each of the dimensions
+           * @return
+           */
+          static PyObject * createFromArray(const ElementType * cdata, const int ndims, Py_intptr_t *dims)
+          {
+            return Impl::wrapWithNDArray(cdata, ndims, dims, ReadOnly);
           }
         };
+
       };
 
       /**
@@ -69,19 +86,35 @@ namespace Mantid
        */
       struct WrapReadWrite
       {
-        template<typename ContainerType>
+
+        template<typename ElementType>
         struct apply
         {
+
           /**
            * Returns a read-write Numpy array wrapped around an existing vector
            * @param cvector
            * @return
            */
-          static PyObject * create(const ContainerType & cdata)
+          static PyObject * create1D(const std::vector<ElementType> & cdata)
           {
-            return Impl::wrapWithNDArray(cdata, ReadWrite);
+            Py_intptr_t dims[1] = { cdata.size() };
+            return createFromArray(cdata.data(), 1, dims);
+          }
+          /**
+           * Returns a read-only Numpy array wrapped around an existing array. The template
+           * type here refers to the C-array's element type
+           * @param cdata :: A pointer to the HEAD of a data array
+           * @param ndims :: The number of dimensions
+           * @param dims :: An array of size ndims specifying the sizes of each of the dimensions
+           * @return
+           */
+          static PyObject * createFromArray(const ElementType * cdata, const int ndims, Py_intptr_t *dims)
+          {
+            return Impl::wrapWithNDArray(cdata, ndims, dims, ReadWrite);
           }
         };
+
       };
 
     }

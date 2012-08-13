@@ -63,12 +63,21 @@ public:
   void setSurface(ProjectionSurface* surface){m_surface = surface;}
   /// Return the surface 
   ProjectionSurface* getSurface(){return m_surface;}
-  /// Refreshes the view
-  void refreshView()
+  /// Redraw the view
+  void updateView()
   {
     if(m_surface)
     {
       m_surface->updateView();
+      update();
+    }
+  }
+  /// Update the detector information (count values) and redraw
+  void updateDetectors()
+  {
+    if(m_surface)
+    {
+      m_surface->updateDetectors();
       update();
     }
   }
@@ -307,10 +316,15 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMi
   m_instrumentActor = new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax);
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
-  if ( resetGeometry )
+  ProjectionSurface* surface = getSurface();
+  if ( resetGeometry || !surface )
   {
     setSurfaceType(m_surfaceType); // This call must come after the InstrumentActor is created
     setupColorMap();
+  }
+  else
+  {
+    surface->resetInstrumentActor( m_instrumentActor );
   }
   mInstrumentTree->setInstrumentActor(m_instrumentActor);
   setInfoText( getSurfaceInfoText() );
@@ -420,23 +434,15 @@ void InstrumentWindow::setupColorMap()
 void InstrumentWindow::tabChanged(int i)
 {
   ProjectionSurface* surface = getSurface();
-  QString text;
-  if(i != 1) // no picking
+  if ( !surface ) return;
+  if (i == 0)
   {
-    if (surface)
-    {
-      if (i == 0)
-      {
-        surface->componentSelected();
-        m_instrumentActor->accept(SetAllVisibleVisitor());
-      }
-    }
+    // if we changed from the instrument tree tab we may have some
+    // actors hidden, restore their visibility
+    m_instrumentActor->accept(SetAllVisibleVisitor());
   }
-  if (surface)
-  {
-    setInfoText(surface->getInfoText());
-    refreshInstrumentDisplay();
-  }
+  setInfoText(surface->getInfoText());
+  updateInstrumentView();
 }
 
 /**
@@ -464,7 +470,7 @@ void InstrumentWindow::changeColormap(const QString &filename)
   if( this->isVisible() )
   {
     setupColorMap();
-    refreshInstrumentDisplay();
+    updateInstrumentView();
   }
 }
 
@@ -687,9 +693,7 @@ void InstrumentWindow::setViewDirection(const QString& input)
   {
     p3d->setViewDirection(input);
   }
-  //mViewChanged = true;
-  //m_InstrumentDisplay->repaint();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
   repaint();
 }
 
@@ -843,8 +847,9 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
       delete m_instrumentActor;
       m_instrumentActor = NULL;
     }
+
     init( resetGeometry, autoscaling, scaleMin, scaleMax );
-    updateWindow();
+    updateInstrumentDetectors();
   }
 }
 
@@ -852,18 +857,6 @@ void InstrumentWindow::clearADSHandle()
 {
   confirmClose(false);
   close();
-}
-
-void InstrumentWindow::updateWindow()
-{
-  if ( isGLEnabled() )
-  {
-    m_InstrumentDisplay->refreshView();
-  }
-  else
-  {
-    m_simpleDisplay->refreshView();
-  }
 }
 
 /**
@@ -920,7 +913,7 @@ void InstrumentWindow::set3DAxesState(bool on)
   if (p3d)
   {
     p3d->set3DAxesState(on);
-    refreshInstrumentDisplay();
+    updateInstrumentView();
   }
 }
 
@@ -936,7 +929,7 @@ void InstrumentWindow::changeScaleType(int type)
 {
   m_instrumentActor->changeScaleType(type);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 void InstrumentWindow::changeColorMapMinValue(double minValue)
@@ -944,7 +937,7 @@ void InstrumentWindow::changeColorMapMinValue(double minValue)
   m_instrumentActor->setAutoscaling(false);
   m_instrumentActor->setMinValue(minValue);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 /// Set the maximumu value of the colour map
@@ -953,14 +946,14 @@ void InstrumentWindow::changeColorMapMaxValue(double maxValue)
   m_instrumentActor->setAutoscaling(false);
   m_instrumentActor->setMaxValue(maxValue);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 void InstrumentWindow::changeColorMapRange(double minValue, double maxValue)
 {
   m_instrumentActor->setMinMaxRange(minValue,maxValue);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 void InstrumentWindow::setWireframe(bool on)
@@ -970,7 +963,7 @@ void InstrumentWindow::setWireframe(bool on)
   {
     p3d->setWireframe(on);
   }
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 /**
@@ -980,7 +973,7 @@ void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
 {
   m_instrumentActor->setIntegrationRange(xmin,xmax);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentDetectors();
   if (getTab() == PICK)
   {
     m_pickTab->changedIntegrationRange(xmin,xmax);
@@ -1247,7 +1240,7 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
     if (pws && surface)
     {
       surface->setPeaksWorkspace(pws);
-      refreshInstrumentDisplay();
+      updateInstrumentView();
       e->accept();
       return;
     }
@@ -1305,7 +1298,7 @@ void InstrumentWindow::setColorMapAutoscaling(bool on)
 {
   m_instrumentActor->setAutoscaling(on);
   setupColorMap();
-  refreshInstrumentDisplay();
+  updateInstrumentView();
 }
 
 /**
@@ -1397,10 +1390,30 @@ int InstrumentWindow::getInstrumentDisplayHeight() const
   return m_InstrumentDisplay->height();
 }
 
-/// Refresh the instrument display
-void InstrumentWindow::refreshInstrumentDisplay()
+/// Redraw the instrument view
+void InstrumentWindow::updateInstrumentView()
 {
-  m_InstrumentDisplay->refreshView();
+  if ( isGLEnabled() )
+  {
+    m_InstrumentDisplay->updateView();
+  }
+  else
+  {
+    m_simpleDisplay->updateView();
+  }
+}
+
+/// Recalculate the colours and redraw the instrument view
+void InstrumentWindow::updateInstrumentDetectors()
+{
+  if ( isGLEnabled() )
+  {
+    m_InstrumentDisplay->updateDetectors();
+  }
+  else
+  {
+    m_simpleDisplay->updateDetectors();
+  }
 }
 
 /// Toggle between the GL and simple instrument display widgets

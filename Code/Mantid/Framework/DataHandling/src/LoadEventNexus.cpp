@@ -543,6 +543,16 @@ public:
         }
       }
     }
+    // We are loading part - work out the event number range
+    if (alg->chunk != EMPTY_INT() && alg->chunk <= alg->totalChunksE *(alg->totalChunks/alg->totalChunksE))
+    {
+      int chunkE = (alg->chunk - 1) % alg->totalChunksE + 1;
+      size_t max_events = stop_event - start_event + 1;
+      size_t chunk_events = max_events/alg->totalChunksE;
+      start_event += (chunkE - 1) * chunk_events;
+      // Don't change stop_event for the final chunk
+      if ( chunkE != alg->totalChunksE ) stop_event = start_event + chunk_events - 1;
+    }
 
     // Make sure it is within range
     if (stop_event > static_cast<size_t>(dim0))
@@ -1357,33 +1367,42 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   Mutex * diskIOMutex = new Mutex();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
+  totalChunksE = 1;
   if (chunk != EMPTY_INT()) // We are loading part - work out the bank number range
   {
-    if (static_cast<size_t>(totalChunks) > bankn)
-      throw std::runtime_error("Reduce number of chunks to equal or less than " + Strings::toString(bankn));
-    size_t chunk_events = total_events/totalChunks;
+    int banksNotEmpty = 0;
+    for (size_t i=bank0; i < bankn; i++)
+    {
+      if (bankNumEvents[i] > 1) banksNotEmpty++;
+    }
+    if (totalChunks > banksNotEmpty) totalChunksE = totalChunks/banksNotEmpty + 1;
+    int totalChunksB = totalChunks / totalChunksE + totalChunks%totalChunksE;
+    int chunkB = (chunk - 1) / totalChunksE + 1;
+    size_t chunk_events = total_events/totalChunksB;
     size_t lastChunkEvent = chunk_events;
     std::vector<size_t>::iterator it = bankNumEvents.begin();
-    size_t sum_events = *it;
-    std::advance(it, 1);
-    for (int chunki = 1; chunki <=chunk; chunki++)
+    size_t sum_events = 0;
+
+    for (int chunki = 1; chunki <=chunkB; chunki++)
     {
+      size_t chunk_total = 0;
       if (chunki != 1)
       {
         bank0 = bankn;
       }
-      if (chunki != totalChunks)
+      if (chunki != totalChunksB)
       {
         // Save a bank for every chunk so there are no chunks with no events
-        for (size_t banki = bank0+1; banki < bankNames.size()-(totalChunks-chunki)+1; banki++)
+        for (size_t banki = bank0; banki < bankNames.size()-(totalChunksB-chunki)+1; banki++)
         {
           bankn = banki;
           sum_events += *it;
-          if ( sum_events > lastChunkEvent) 
+          if ( sum_events > lastChunkEvent && chunk_total > 1 && bankn > bank0)
           {
             sum_events -= *it;
             break;
           }
+          if( *it > 1)chunk_total += *it;
           std::advance(it, 1);
         }
       }

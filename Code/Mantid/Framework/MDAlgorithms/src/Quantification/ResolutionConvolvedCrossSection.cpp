@@ -10,6 +10,43 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/CPUTimer.h"
 
+/// Parallel region start macro. Different to generic one as that is specific to algorithms
+/// Assumes boolean exceptionThrow has been declared
+#define PARALLEL_LOOP_BEGIN \
+    if (!exceptionThrown && !this->cancellationRequestReceived()) \
+    { \
+      try \
+      {
+
+/// Parallel region end macro. Different to generic one as that is specific to algorithms
+#define PARALLEL_LOOP_END \
+      } \
+      catch(std::exception &ex) \
+      { \
+        if (!exceptionThrown) \
+        { \
+          exceptionThrown = true; \
+          g_log.error() << "ResolutionConvolvedCrossSection: " << ex.what() << "\n"; \
+        } \
+      } \
+      catch(...) \
+      { \
+        exceptionThrown = true; \
+      } \
+    }
+
+/// Check for exceptions in parallel region
+#define PARALLEL_LOOP_CHECK \
+  if (exceptionThrown) \
+  { \
+    g_log.debug("Exception thrown in parallel region"); \
+    throw std::runtime_error("ResolutionConvolvedCrossSection: error (see log)"); \
+  } \
+  if(this->cancellationRequestReceived())\
+  {\
+    reportProgress();\
+  }
+
 namespace Mantid
 {
   namespace MDAlgorithms
@@ -97,6 +134,21 @@ namespace Mantid
       m_convolution->preprocess(m_workspace);
     }
 
+    /**
+     * Returns an estimate of the number of progress reports a single evaluation of the function will have.
+     * @return
+     */
+    int64_t ResolutionConvolvedCrossSection::estimateNoProgressCalls() const
+    {
+      int64_t ncalls(1);
+      if(m_workspace)
+      {
+        ncalls = static_cast<int64_t>(m_workspace->getNPoints());
+      }
+      return ncalls;
+    }
+
+
     void ResolutionConvolvedCrossSection::function(const API::FunctionDomain& domain, API::FunctionValues& values) const
     {
       m_convolution->functionEvalStarting();
@@ -119,14 +171,23 @@ namespace Mantid
       if(numEvents == 0) return 0.0;
 
       double signal(0.0);
+      bool exceptionThrown(false);
+
       PARALLEL_FOR_NO_WSP_CHECK()
       for(int64_t j = 0; j < numEvents; ++j)
       {
+        PARALLEL_LOOP_BEGIN
+
         const int64_t loopIndex = static_cast<int64_t>(j);
         double contribution =  m_convolution->signal(box, box.getInnerRunIndex(loopIndex), loopIndex);
         PARALLEL_ATOMIC
         signal += contribution;
+        reportProgress();
+
+        PARALLEL_LOOP_END
       }
+      PARALLEL_LOOP_CHECK
+
       // Return the mean
       return signal/static_cast<double>(numEvents);
     }

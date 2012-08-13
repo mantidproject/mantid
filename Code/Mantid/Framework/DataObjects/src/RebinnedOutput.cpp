@@ -111,18 +111,18 @@ namespace DataObjects
    */
   void RebinnedOutput::finalize(bool hasSqrdErrs)
   {
-    g_log.information() << "Starting finalize procedure." << std::endl;
+    g_log.debug() << "Starting finalize procedure." << std::endl;
     std::size_t nHist = this->getNumberHistograms();
-    g_log.information() << "Number of histograms: " << nHist << std::endl;
+    g_log.debug() << "Number of histograms: " << nHist << std::endl;
     for (std::size_t i = 0; i < nHist; ++i)
     {
       MantidVec &data = this->dataY(i);
       MantidVec &err = this->dataE(i);
       MantidVec &frac = this->dataF(i);
 
-      g_log.information() << "Data (" << i << "): ";
-      std::copy(data.begin(), data.end(), std::ostream_iterator<double>(g_log.information(), " "));
-      g_log.information() << std::endl;
+      g_log.debug() << "Data (" << i << "): ";
+      std::copy(data.begin(), data.end(), std::ostream_iterator<double>(g_log.debug(), " "));
+      g_log.debug() << std::endl;
 
       std::transform(data.begin(), data.end(), frac.begin(), data.begin(),
                      std::divides<double>());
@@ -139,12 +139,12 @@ namespace DataObjects
         std::transform(err.begin(), err.end(), frac.begin(), err.begin(),
                        std::divides<double>());
       }
-      g_log.information() << "Data Final(" << i << "): ";
-      std::copy(data.begin(), data.end(), std::ostream_iterator<double>(g_log.information(), " "));
-      g_log.information() << std::endl;
-      g_log.information() << "FArea (" << i << "): ";
-      std::copy(frac.begin(), frac.end(), std::ostream_iterator<double>(g_log.information(), " "));
-      g_log.information() << std::endl;
+      g_log.debug() << "Data Final(" << i << "): ";
+      std::copy(data.begin(), data.end(), std::ostream_iterator<double>(g_log.debug(), " "));
+      g_log.debug() << std::endl;
+      g_log.debug() << "FArea (" << i << "): ";
+      std::copy(frac.begin(), frac.end(), std::ostream_iterator<double>(g_log.debug(), " "));
+      g_log.debug() << std::endl;
     }
   }
 

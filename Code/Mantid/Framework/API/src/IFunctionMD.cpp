@@ -101,6 +101,7 @@ namespace API
     size_t i=0;
     for(const IMDIterator* r = domain.getNextIterator(); r != NULL; r = domain.getNextIterator())
     {
+      this->reportProgress("Evaluating function for box " + boost::lexical_cast<std::string>(i+1));
       values.setCalculated(i,functionMD(*r));
       i++;
     };

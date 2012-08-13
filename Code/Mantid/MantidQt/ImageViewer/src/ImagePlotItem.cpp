@@ -134,6 +134,11 @@ void ImagePlotItem::draw(       QPainter    * painter,
   size_t n_rows = data_array->GetNRows();
   size_t n_cols = data_array->GetNCols();
 
+  if ( n_rows <= 0 || n_cols <= 0 )
+  {
+    return;                                 // can't draw degenerate image
+  }
+
   double min    = data_array->GetDataMin();
   double max    = data_array->GetDataMax();
   double x_min  = data_array->GetXMin();

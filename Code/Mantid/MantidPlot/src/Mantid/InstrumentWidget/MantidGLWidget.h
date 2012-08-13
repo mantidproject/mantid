@@ -34,7 +34,8 @@ signals:
 public slots:
   void enableLighting(bool);
   //void setWireframe(bool);
-  void refreshView();
+  void updateView();
+  void updateDetectors();
   void componentSelected(Mantid::Geometry::ComponentID id);
 
 protected:

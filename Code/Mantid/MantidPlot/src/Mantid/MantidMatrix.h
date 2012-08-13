@@ -163,6 +163,9 @@ public:
   const std::string & getWorkspaceName();
 
   Spectrogram* plotSpectrogram(Graph* plot ,ApplicationWindow* app,Graph::CurveType type,bool project,ProjectData*prjdata);
+  /// Add a multilayer as a dependent mdi sub-window. This method is addeed to fix a crash (ticket #5732).
+  /// A better solution is needed
+  void attachMultilayer(MultiLayer*);
 
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
   void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);

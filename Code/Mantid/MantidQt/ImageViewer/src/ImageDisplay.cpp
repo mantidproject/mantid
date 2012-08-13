@@ -143,9 +143,9 @@ void ImageDisplay::UpdateRange()
   GetDisplayRectangle( display_rect );
                                            // range controls now determine
                                            // the number of bins
-  double min  = 0;
-  double max  = 0;
-  double step = 0;
+  double min  = total_x_min;
+  double max  = total_x_max;
+  double step = (total_x_max - total_x_min)/2000;
   range_handler->GetRange( min, max, step );
 
   int n_bins = IVUtils::NumSteps( min, max, step );
@@ -183,18 +183,18 @@ void ImageDisplay::UpdateImage()
   double scale_y_min = data_source->GetYMin();
   double scale_y_max = data_source->GetYMax();
 
-  double scale_x_min  = 0;
-  double scale_x_max  = 0;
-  double x_step = 0;
+  double scale_x_min  = total_x_min;
+  double scale_x_max  = total_x_max;
+  double x_step = (total_x_max - total_x_min)/2000;
   range_handler->GetRange( scale_x_min, scale_x_max, x_step );
 
   int n_rows = (int)data_source->GetNRows();
   int n_cols = IVUtils::NumSteps( scale_x_min, scale_x_max, x_step );
                                      // This works for linear or log scales
 
-  if ( n_rows == 0 )
+  if ( n_rows == 0 || n_cols == 0 )
   {
-    return;
+    return;                          // can't draw empty image
   }
 
   if ( slider_handler->VSliderOn() )

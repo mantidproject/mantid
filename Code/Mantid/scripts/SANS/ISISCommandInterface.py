@@ -315,7 +315,7 @@ def _setUpPeriod(i):
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics 
-        details to be adjusted, and the old setup is reset at the end 
+        details to be adjusted, and the old setup is reset at the end. 
         
         @param wav_start: the first wavelength to be in the output data
         @param wav_end: the last wavelength in the output data
@@ -323,13 +323,11 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         @param name_suffix: append the created output workspace with this
         @param combineDet: combineDet can be one of the following:
                            'rear'                (run one reduction for the 'rear' detector data)
-                           'front'               (run one reduction for the 'front' detector data)
-                           'rear, front'         (run two reductions for both the 'rear' and 'front' detectors)                  
-                           'rear, front, merged' (run the same two reductions as above and addition create a merged data workspace)                          
-                           'merged'              (same as above but where the 'rear' and 'front' workspaces are deleted after the 
-                                                  merged workspace has been created) 
+                           'front'               (run one reduction for the 'front' detector data, and rescale+shift 'front' data)
+                           'both'                (run both the above two reductions)                  
+                           'merged'              (run the same reductions as 'both' and additionally create a merged data workspace)                          
                             None                 (run one reduction for whatever detector has been set as the current detector 
-                                                  before running this method) 
+                                                  before running this method. If front apply rescale+shift) 
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ', ' + str(wav_end) + ', '+str(full_trans_wav)+')')
     
@@ -359,11 +357,11 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         if toParse.count('merged') == 1:
             ReductionSingleton().to_Q.outputParts = True            
         
-        if toParse.count('rear') == 1 or toParse.count('merged') == 1:
+        if toParse.count('rear') == 1 or toParse.count('merged') == 1 or toParse.count('both') == 1:
             ReductionSingleton().instrument.setDetector('rear')
             retWSname_rear = _WavRangeReduction(name_suffix)
             
-        if toParse.count('front') == 1 or toParse.count('merged') == 1:
+        if toParse.count('front') == 1 or toParse.count('merged') == 1 or toParse.count('both') == 1:
             ReductionSingleton.replace(ReductionSingleton().settings())
             ReductionSingleton().instrument.setDetector('front')
             retWSname_front = _WavRangeReduction(name_suffix)            
@@ -409,13 +407,10 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         elif toParse.count('rear') == 1:
             retWSname = retWSname_rear
         else: 
-            retWSname = retWSname_front
+            retWSname = retWSname_front              
         
-        if toParse == 'merged':
-            delete_workspaces(retWSname_rear)
-            delete_workspaces(retWSname_front)                     
-        
-        if toParse.count('front') == 1:
+        # if front ws calculuated rescale and shift it
+        if toParse.count('front') == 1 or toParse.count('merged') == 1 or toParse.count('both') == 1:
             frontWS = mtd[retWSname_front]
             frontWS = (frontWS+shift)*scale
             RenameWorkspace(frontWS, retWSname_front)        

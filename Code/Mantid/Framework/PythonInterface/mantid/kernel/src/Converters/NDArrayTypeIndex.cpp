@@ -21,7 +21,8 @@ namespace Mantid
       #define DEFINE_TYPE_MAPPING(CType, NDTypeNum) \
         template<> \
         int NDArrayTypeIndex<CType>::typenum = NDTypeNum;\
-        template DLLExport struct NDArrayTypeIndex<CType>;
+        template DLLExport struct NDArrayTypeIndex<CType>;\
+
 
       DEFINE_TYPE_MAPPING(int, NPY_INT);
       DEFINE_TYPE_MAPPING(long, NPY_LONG);

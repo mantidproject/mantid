@@ -61,7 +61,6 @@ double MatrixWSDataSource::GetXMin()
 {
   total_xmin = mat_ws->getXMin(); 
   return total_xmin;
-
 }
 
 
@@ -346,7 +345,7 @@ void MatrixWSDataSource::GetInfoList( double x,
       const Unit_sptr& q_unit=UnitFactory::Instance().create("MomentumTransfer");
       double mag_q = q_unit->convertSingleFromTOF( tof, l1, l2, two_theta,
                                                    emode, efixed, delta );
-      IVUtils::PushNameValue( "q", 8, 4, mag_q, list );
+      IVUtils::PushNameValue( "|Q|", 8, 4, mag_q, list );
     }
 
     if ( (! (x_label == "DeltaE")) && (two_theta != 0.0) && ( emode != 0 ) )
