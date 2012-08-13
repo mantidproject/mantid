@@ -22,6 +22,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 #include "MantidKernel/System.h"
+#include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/kernel/Converters/PyArrayType.h"
 

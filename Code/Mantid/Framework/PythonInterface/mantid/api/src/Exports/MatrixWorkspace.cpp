@@ -1,11 +1,12 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
-#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
+#include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
+#include "MantidPythonInterface/kernel/Converters/NumpyWrapMode.h"
 #include "MantidPythonInterface/kernel/PropertyWithValue.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterSingleValueHandler.h"
+#include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
-#include "MantidPythonInterface/api/CloneMatrixWorkspace.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>

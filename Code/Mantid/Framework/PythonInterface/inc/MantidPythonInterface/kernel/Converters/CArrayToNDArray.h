@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_
-#define MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_
+#ifndef MANTID_PYTHONINTERFACE_CARRAYTONDARRAY_H_
+#define MANTID_PYTHONINTERFACE_CARRAYTONDARRAY_H_
 /**
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -20,11 +20,9 @@
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
+*/
 #include "MantidKernel/System.h"
-
-#include <boost/python/detail/prefix.hpp>
-#include <vector>
+#include "MantidPythonInterface/kernel/Converters/NumpyWrapMode.h"
 
 namespace Mantid
 {
@@ -36,19 +34,20 @@ namespace Mantid
       // Converter implementation
       //-----------------------------------------------------------------------
       /**
-       * Converter that takes a std::vector and converts it into a flat numpy array.
+       * Converter that takes a c array and its size then converts/wraps it into a numpy array.
        *
        * The type of conversion is specified by another struct/class that
        * contains a static member create.
        */
       template<typename ElementType, typename ConversionPolicy>
-      struct VectorToNDArray
+      struct CArrayToNDArray
       {
-        inline PyObject * operator()(const std::vector<ElementType> & cvector) const
+        inline PyObject * operator()(const ElementType * carray, const int ndims, Py_intptr_t *dims) const
         {
-          // Hand off the work to the conversion policy
+          // Round about way of calling the wrapNDArray template function that is defined
+          // in the cpp file
           typedef typename ConversionPolicy::template apply<ElementType> policy;
-          return policy::create1D(cvector);
+          return policy::createFromArray(carray, ndims, dims);
         }
       };
 
@@ -57,4 +56,5 @@ namespace Mantid
 }
 
 
-#endif /* MANTID_PYTHONINTERFACE_VECTORTONDARRAY_H_ */
+
+#endif /* MANTID_PYTHONINTERFACE_CARRAYTONDARRAY_H_ */

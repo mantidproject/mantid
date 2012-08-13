@@ -39,13 +39,13 @@ set ( EXPORT_FILES
 )  
 
 set ( SRC_FILES
-  src/Converters/MatrixToNDArray.cpp
+  src/Converters/CloneToNumpy.cpp
   src/Converters/NDArrayToVector.cpp
   src/Converters/NDArrayTypeIndex.cpp
   src/Converters/PyArrayType.cpp
   src/Converters/PyObjectToMatrix.cpp
   src/Converters/PyObjectToV3D.cpp
-  src/Converters/VectorToNDArray.cpp
+  src/Converters/WrapWithNumpy.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
   src/Registry/UpcastRegistry.cpp
@@ -56,6 +56,7 @@ set ( SRC_FILES
 )
 
 set ( INC_FILES 
+  ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
   ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
   ${HEADER_DIR}/kernel/Converters/NDArrayTypeIndex.h
