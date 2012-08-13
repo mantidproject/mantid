@@ -1,5 +1,6 @@
 #include "MantidDataHandling/ProcessDasNexusLog.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -34,8 +35,8 @@ namespace DataHandling
   }
   
   void ProcessDasNexusLog::initDocs(){
-    this->setWikiSummary("Process DAS logs recorded in Nexus file. ");
-    this->setOptionalMessage("DAS log cannot be used directly.");
+    this->setWikiSummary("Some sample logs recorded by the SNS data acquisition group (DAS) are not usable. This very specialized algorithm will process sample logs of this type. ");
+    this->setOptionalMessage("Very specialized algorithm to fix certain SNS DAS logs that cannot be used directly.");
 
     return;
   }
@@ -44,8 +45,10 @@ namespace DataHandling
   {
     this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::InOut),
         "Input Workspace containing the log to process.");
-    this->declareProperty("LogToProcess", "", "Name of the log to process.");
-    this->declareProperty("ProcessedLog", "", "Name of the new log containing processed log.");
+    this->declareProperty("LogToProcess", "", boost::make_shared<MandatoryValidator<std::string> >(),
+        "Name of the log to process.");
+    this->declareProperty("ProcessedLog", "", boost::make_shared<MandatoryValidator<std::string> >(),
+        "Name of the new log containing processed log.");
     this->declareProperty("NumberOfOutputs", 4000, "Number of log entries written to file.  A negative input disables this option. ");
     this->declareProperty(new API::FileProperty("OutputLogFile", "", API::FileProperty::Save),
         "Directory for output files.");
@@ -66,11 +69,17 @@ namespace DataHandling
 
     // 2. Check Input
     // 1. Get log
-    Kernel::Property* log = inWS->run().getProperty(inlogname);
+    Kernel::Property* log(NULL);
+    try {
+      log = inWS->run().getProperty(inlogname);
+    } catch ( Exception::NotFoundError& )
+    {
+      // Will trigger non-existent log message below
+    }
     if (!log)
     {
       g_log.error() << "Log " << inlogname << " does not exist!" << std::endl;
-      throw std::invalid_argument("Non-exising log name");
+      throw std::invalid_argument("Non-existent log name");
     }
     Kernel::TimeSeriesProperty<double>* tslog = dynamic_cast<Kernel::TimeSeriesProperty<double>* >(log);
     if (!tslog)

@@ -1650,12 +1650,10 @@ size_t LoadNexusProcessed::calculateWorkspacesize(const std::size_t numberofspec
       int count= getNexusEntryTypes(filePath,entryName,definition);
       if(count<=-1)
       {
-        g_log.error("Error reading file " + filePath);
         throw Exception::FileError("Unable to read data in File:" , filePath);
       }
       else if(count==0)
       {
-        g_log.error("Error no entries found in " + filePath);
         throw Exception::FileError("Error no entries found in " , filePath);
       }
       int ret=0;

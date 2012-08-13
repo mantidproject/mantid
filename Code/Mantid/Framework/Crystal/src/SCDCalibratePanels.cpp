@@ -1115,7 +1115,7 @@ namespace Crystal
       vector< string > exts2;
       exts2.push_back(".DetCal");
       exts2.push_back(".xml");
-      declareProperty(new FileProperty("PreProcFilename", "", FileProperty::Save, exts2),
+      declareProperty(new FileProperty("PreProcFilename", "", FileProperty::OptionalLoad, exts2),
           "Path to file with preprocessing information");
 
       declareProperty("InitialTimeOffset", 0.0, "Initial time offset when using xml files");

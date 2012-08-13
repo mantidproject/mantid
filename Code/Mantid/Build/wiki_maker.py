@@ -34,13 +34,14 @@ def get_wiki_description(algo, version):
     else:
         f = open(source,'r')
         lines = f.read().split('\n')
+        print lines
         f.close()
         n = 0
-        while not lines[n].startswith("/*WIKI*") and not lines[n].startswith('"""*WIKI*'):
+        while not lines[n].lstrip().startswith("/*WIKI*") and not lines[n].lstrip().startswith('"""*WIKI*'):
             n += 1
         desc = ""
         n += 1
-        while not lines[n].startswith("*WIKI*"):
+        while not lines[n].lstrip().startswith("*WIKI*"):
             desc += lines[n] + "\n"
             n += 1
         return desc

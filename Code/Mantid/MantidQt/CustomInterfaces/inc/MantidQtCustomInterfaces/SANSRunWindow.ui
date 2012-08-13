@@ -62,7 +62,7 @@
       <string notr="true"/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <property name="elideMode">
       <enum>Qt::ElideNone</enum>
@@ -1502,17 +1502,12 @@ intermediate ranges are there for comparison</string>
                 </item>
                 <item>
                  <property name="text">
+                  <string>both</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
                   <string>merged</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>rear, front</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>rear, front, merged</string>
                  </property>
                 </item>
                </widget>

@@ -76,7 +76,7 @@ private slots:
   /// Input file changed in MWRunFiles widget
   void inputFileChanged_MWRunFiles();
 
-  // Load current button
+  // Load current file.
   void runLoadCurrent();
 
   /// group table changed
@@ -133,8 +133,8 @@ private slots:
   ///
   void runFirstGoodBinFront();
 
-  /// Set whether previous / next buttons are enabled.
-  void enableButtons(bool enabled);
+  // Slot for disabling loading buttons and MWRunFiles widget
+  void disableLoading();
 
   /// Check to see if the user want to append the previous run and set accordingly
   void checkAppendingPreviousRun();
@@ -188,6 +188,9 @@ private:
 
   /// Input file changed - update GUI accordingly
   void inputFileChanged(const QStringList& filenames);
+
+  /// Set whether the loading buttons and MWRunFiles widget are enabled.
+  void allowLoading(bool enabled);
 
   /// Return the pair which is in focus and -1 if none
   int pairInFocus();

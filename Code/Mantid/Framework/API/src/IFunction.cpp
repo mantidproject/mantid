@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/ProgressBase.h"
 #include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
@@ -56,6 +57,38 @@ namespace API
   {
     return FunctionFactory::Instance().createInitialized( this->asString() );
   }
+
+/**
+ * Attach a progress reporter
+ * @param reporter :: A pointer to a progress reporter that can be called during function evaluation
+ */
+void IFunction::setProgressReporter(Kernel::ProgressBase *reporter)
+{
+  m_progReporter = reporter;
+  m_progReporter->setNotifyStep(0.01);
+}
+
+/**
+ * If a reporter object is set, reports progress with an optional message
+ * @param msg :: A message to display (default = "")
+ */
+void IFunction::reportProgress(const std::string & msg) const
+{
+  if(m_progReporter)
+  {
+    const_cast<Kernel::ProgressBase*>(m_progReporter)->report(msg);
+  }
+}
+
+/**
+ *
+ * @returns true if a progress reporter is set & evalaution has been requested to stop
+ */
+bool IFunction::cancellationRequestReceived() const
+{
+  if(m_progReporter) m_progReporter->hasCancellationBeenRequested();
+  else return false;
+}
 
 /** Base class implementation calculates the derivatives numerically.
  * @param domain :: The domain of the function

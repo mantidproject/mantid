@@ -63,6 +63,7 @@ protected slots:
   void workspaceSelected();
 
 private slots:
+  void addWorkspace(const QString &, Mantid::API::Workspace_sptr);
   void addTreeEntry(const QString &, Mantid::API::Workspace_sptr);
   void replaceTreeEntry(const QString &, Mantid::API::Workspace_sptr);
   void unrollWorkspaceGroup(const QString &,Mantid::API::Workspace_sptr);

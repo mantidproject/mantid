@@ -188,9 +188,9 @@ protected:
     /// Removes an item at index.
     void remove(size_t index){m_data.erase(m_data.begin()+index);}
     /// Returns a pointer to the data element.
-    void* void_pointer(size_t index){return &m_data[index];}
+    void* void_pointer(size_t index){return &m_data.at(index);}
     /// Returns a pointer to the data element.
-    const void* void_pointer(size_t index)const {return &m_data[index];}
+    const void* void_pointer(size_t index)const {return &m_data.at(index);}
 private:
     /// Column data
     std::vector<Type> m_data;

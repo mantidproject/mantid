@@ -272,7 +272,7 @@ void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
   UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>(m_instrWindow->getSurface());
   if (!surface) return;
   surface->setFlippedView(on);
-  m_instrWindow->updateWindow();
+  m_instrWindow->updateInstrumentView();
 }
 
 /**

@@ -69,7 +69,6 @@ const UnwrappedDetector & UnwrappedDetector::operator=(const UnwrappedDetector &
 
 UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis):
     ProjectionSurface(rootActor,origin,axis),
-    m_instrActor(rootActor),
     m_u_min(DBL_MAX),
     m_u_max(-DBL_MAX),
     m_v_min(DBL_MAX),
@@ -303,6 +302,7 @@ void UnwrappedSurface::cacheAllAssemblies()
   */
 void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 {
+
   int vwidth = widget->width();
   int vheight = widget->height();
   const double dw = fabs(m_viewRect.width() / vwidth);

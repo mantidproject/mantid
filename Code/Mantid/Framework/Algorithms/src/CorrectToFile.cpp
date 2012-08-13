@@ -76,7 +76,7 @@ void CorrectToFile::exec()
   {//the correction values should be all contained in 1 spectrum
     // Check that the workspace to rebin has the same units as the one that we are matching to
     // However, just print a warning if it isn't, don't abort (since user provides the file's unit)
-    if (toCorrect->getAxis(0)->unit() != rkhInput->getAxis(0)->unit())
+    if ( toCorrect->getAxis(0)->unit()->unitID() != rkhInput->getAxis(0)->unit()->unitID() )
     {
       g_log.warning("Unit on input workspace is different to that specified in 'FirstColumnValue' property");
     }

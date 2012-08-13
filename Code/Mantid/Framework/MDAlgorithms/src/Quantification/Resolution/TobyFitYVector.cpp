@@ -159,9 +159,9 @@ namespace Mantid
       if(inactive) return;
 
       const Kernel::V3D & boxSize = m_curObs->sampleCuboid();
-      m_yvector[vecPos1] = boxSize[0] * (m_curRandNums->at(vecPos1)); // horizontal
-      m_yvector[vecPos2] = boxSize[2] * (m_curRandNums->at(vecPos2)); //beam
-      m_yvector[vecPos2] = boxSize[1] * (m_curRandNums->at(vecPos3)); //up
+      m_yvector[vecPos1] = boxSize[0] * (m_curRandNums->at(vecPos1));
+      m_yvector[vecPos2] = boxSize[1] * (m_curRandNums->at(vecPos2));
+      m_yvector[vecPos3] = boxSize[2] * (m_curRandNums->at(vecPos3));
     }
 
     /**

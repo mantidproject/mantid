@@ -64,6 +64,16 @@ ProjectionSurface::~ProjectionSurface()
   m_peakShapes.clear();
 }
 
+/**
+ * Resets the instrument actor. The caller must ensure that the instrument
+ * stays the same and workspace dimensions also don't change.
+ */
+void ProjectionSurface::resetInstrumentActor(const InstrumentActor* rootActor)
+{
+  m_instrActor = rootActor;
+  connect(rootActor,SIGNAL(colorMapChanged()),this,SLOT(colorMapChanged()));
+}
+
 void ProjectionSurface::clear()
 {
   if (m_viewImage)
@@ -401,8 +411,8 @@ void ProjectionSurface::zoom(const QRectF& area)
     top += height;
     height = -height;
   }
-//  std::cerr<<"New area:\n";
-//  std::cerr<<left<<','<<top<<' '<<width<<','<<height<<'\n'<<'\n';
+  //std::cerr<<"New area:\n";
+  //std::cerr<<left<<','<<top<<' '<<width<<','<<height<<'\n'<<'\n';
   m_viewRect = QRectF(left,top,width,height);
   m_viewChanged = true;
 }

@@ -146,13 +146,13 @@ namespace MDEvents
       std::back_inserter( box_elements )
       );
 
-    // Release the resource.
+    //// Release the resource.
     file.close();
 
     const size_t nElements = this->getBinProduct() * 2;
 
     // Handle the case that the number of elements is wrong.
-    if(box_elements.size() % nElements != 0)
+    if(box_elements.size() != nElements)
     {
       throw std::invalid_argument("The number of data entries in the file, does not match up with the specified dimensionality.");
     }
@@ -163,13 +163,14 @@ namespace MDEvents
 
     //Write to the signal and error array from the deque.
     size_t currentBox = 0;
-    for(box_collection::iterator it = box_elements.begin(); it != box_elements.end(); it+=2, ++currentBox)
+    for(box_collection::iterator it = box_elements.begin(); it != box_elements.end(); it+=2)
     {
       box_collection::iterator temp = it;
       double signal = atof((*(temp)).c_str());
       double error = atof((*(++temp)).c_str());
       signals[currentBox] = signal;
       errors[currentBox] = error*error;
+      ++currentBox;
     }
 
     //Set the output.

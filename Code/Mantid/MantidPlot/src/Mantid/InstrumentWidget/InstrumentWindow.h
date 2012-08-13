@@ -82,16 +82,18 @@ public:
   ~InstrumentWindow();
   void init(bool resetGeometry = true, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
   QString getWorkspaceName() const { return m_workspaceName; }
-  void updateWindow();
 
   SurfaceType getSurfaceType()const{return m_surfaceType;}
   /// Get pointer to the projection surface
   ProjectionSurface* getSurface() const;
   /// Set newly created projection surface
   void setSurface(ProjectionSurface* surface);
-
   /// True if the GL instrument display is currently on
   bool isGLEnabled() const;
+  /// Redraw the instrument view
+  void updateInstrumentView();
+  /// Recalculate the detector data and redraw the instrument view
+  void updateInstrumentDetectors();
 
   /// Alter data from a script. These just foward calls to the 3D widget
   void setColorMapMinValue(double minValue);
@@ -185,8 +187,6 @@ private:
   int getInstrumentDisplayWidth() const;
   /// Return the height of the instrunemt display
   int getInstrumentDisplayHeight() const;
-  /// Refresh the instrument display
-  void refreshInstrumentDisplay();
 
 
   QLabel*      mInteractionInfo;

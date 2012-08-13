@@ -755,14 +755,31 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
         if (run.hasProperty("Ei"))
         {
           m_emode = 1; // direct
+          if ( run.hasProperty("Ei") )
+          {
+            Mantid::Kernel::Property* prop = run.getProperty("Ei");
+            m_efixed = boost::lexical_cast<double,std::string>(prop->value());
+          }
         }
         else if (det->hasParameter("Efixed"))
         {
           m_emode = 2; // indirect
+          try
+          {
+            const Mantid::Geometry::ParameterMap& pmap = ws->constInstrumentParameters();
+            Mantid::Geometry::Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
+            if (par) 
+            {
+              m_efixed = par->value<double>();
+              //g_log.debug() << "Detector: " << det->getID() << " EFixed: " << m_efixed << "\n";
+            }
+          }
+          catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
         }
         else
         {
           //m_emode = 0; // Elastic
+          //This should be elastic if Ei and Efixed are not set
           InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
           dlg->exec();
           m_emode = dlg->getEMode();
@@ -774,7 +791,6 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       std::vector<double> ydata;
       unit->toTOF(xdata, ydata, l1, l2, theta2, m_emode, m_efixed, m_delta);
       tof = xdata[0];
-      count = ydata[0];
     }
 
     double knorm=NeutronMass*(l1 + l2)/(h_bar*tof*1e-6)/1e10;

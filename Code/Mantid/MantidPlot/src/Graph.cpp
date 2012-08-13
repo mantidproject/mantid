@@ -3356,7 +3356,7 @@ PlotCurve* Graph::insertCurve(PlotCurve* c, int lineWidth, int curveType)
       m_yUnits = mc->yUnits();
       m_isDistribution = mc->isDistribution();
     }
-    if ( m_xUnits != mc->xUnits() || m_yUnits != mc->yUnits() )
+    if ( m_xUnits->unitID() != mc->xUnits()->unitID() || m_yUnits->unitID() != mc->yUnits()->unitID() )
     {
       g_log.warning("You are overlaying plots from data having differing units!");
     }

@@ -36,7 +36,7 @@
 #include <qwt_text_label.h>
 #include <qwt_scale_widget.h>
 
-TextEditor::TextEditor(Graph *g): QTextEdit(g)
+TextEditor::TextEditor(Graph *g): QTextEdit(g), d_target(NULL)
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 	setFrameShadow(QFrame::Plain);
@@ -96,40 +96,43 @@ TextEditor::TextEditor(Graph *g): QTextEdit(g)
 
 void TextEditor::closeEvent(QCloseEvent *e)
 {
-		Graph *g = dynamic_cast<Graph *>(parent());
-	QString s = QString();
-	if (d_target->isA("LegendWidget")){
-		s = text();
-		dynamic_cast<LegendWidget*>(d_target)->setText(s);
-        d_target->show();
-		g->setSelectedText(NULL);
-	} else if (d_target->isA("PieLabel")){
-		s = text();
-		dynamic_cast<PieLabel*>(d_target)->setCustomText(s);
-        d_target->show();
-		g->setSelectedText(NULL);
-	} else if (d_target->isA("QwtTextLabel")){
-		QwtText title = g->plotWidget()->title();
-		s = text();
-		if(s.isEmpty())
-			s = " ";
-		title.setText(s);			
-		g->plotWidget()->setTitle(title);
-	} else if (d_target->isA("QwtScaleWidget")){
-		QwtScaleWidget *scale = (QwtScaleWidget*)d_target;
-		QwtText title = scale->title();
-		s = text();
-		if(s.isEmpty())
-			s = " ";
-		title.setText(s);
-		scale->setTitle(title);
-	}
+  if(d_target != NULL)
+  {
+    Graph *g = dynamic_cast<Graph *>(parent());
+    QString s = QString();
+    if (d_target->isA("LegendWidget")){
+      s = text();
+      dynamic_cast<LegendWidget*>(d_target)->setText(s);
+      d_target->show();
+      g->setSelectedText(NULL);
+    } else if (d_target->isA("PieLabel")){
+      s = text();
+      dynamic_cast<PieLabel*>(d_target)->setCustomText(s);
+      d_target->show();
+      g->setSelectedText(NULL);
+    } else if (d_target->isA("QwtTextLabel")){
+      QwtText title = g->plotWidget()->title();
+      s = text();
+      if(s.isEmpty())
+        s = " ";
+      title.setText(s);			
+      g->plotWidget()->setTitle(title);
+    } else if (d_target->isA("QwtScaleWidget")){
+      QwtScaleWidget *scale = (QwtScaleWidget*)d_target;
+      QwtText title = scale->title();
+      s = text();
+      if(s.isEmpty())
+        s = " ";
+      title.setText(s);
+      scale->setTitle(title);
+    }
 
-	if (d_initial_text != s)
-		g->notifyChanges();
+    if (d_initial_text != s)
+      g->notifyChanges();
 
     d_target->repaint();
-	e->accept();
+  }
+  e->accept();
 }
 
 void TextEditor::formatText(const QString& prefix, const QString& postfix)

@@ -12352,6 +12352,14 @@ Spectrogram*  ApplicationWindow::openSpectrogram(Graph*ag,const std::string &spe
   }
   if(!m) return 0 ;
   Spectrogram* sp=m->plotSpectrogram(ag,this,Graph::ColorMap,true,prjData);
+  if ( ag->multiLayer() != NULL )
+  {
+    m->attachMultilayer( ag->multiLayer() );
+  }
+  else
+  {
+    throw std::runtime_error("Open project: spectrogram cannot be initialized properly.");
+  }
   return sp;
 }
 

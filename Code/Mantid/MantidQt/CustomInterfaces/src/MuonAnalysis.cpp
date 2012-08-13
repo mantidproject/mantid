@@ -140,6 +140,7 @@ void MuonAnalysis::initLayout()
 
   // Load current
   connect(m_uiForm.loadCurrent, SIGNAL(clicked()), this, SLOT(runLoadCurrent()));
+  connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(disableLoading() ) );
 
   // If group table change
   // currentCellChanged ( int currentRow, int currentColumn, int previousRow, int previousColumn )
@@ -976,9 +977,9 @@ void MuonAnalysis::updatePairTable()
  */
 void MuonAnalysis::inputFileChanged_MWRunFiles()
 {
-  // Handle changed input, then turn previous / next buttons back on.
+  // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
-  enableButtons(true);
+  allowLoading(true);
 }
 
 /**
@@ -3043,10 +3044,23 @@ void MuonAnalysis::loadFittings()
   m_uiForm.fitBrowser->setFeatures(QDockWidget::NoDockWidgetFeatures);
 }
 
-void MuonAnalysis::enableButtons(bool enabled)
+/**
+ * Allow/disallow loading.
+ */
+void MuonAnalysis::allowLoading(bool enabled)
 {
   m_uiForm.nextRun->setEnabled(enabled);
   m_uiForm.previousRun->setEnabled(enabled);
+  m_uiForm.loadCurrent->setEnabled(enabled);
+  m_uiForm.mwRunFiles->setEnabled(enabled);
+}
+
+/**
+ * SLOT to disable loading by greying out the buttons and MWRunfiles widget responsible.
+ */
+void MuonAnalysis::disableLoading()
+{
+  allowLoading(false);
 }
 
 /**
@@ -3059,7 +3073,7 @@ void MuonAnalysis::checkAppendingPreviousRun()
     return;
   }
   
-  enableButtons(false);
+  allowLoading(false);
   
   if (m_uiForm.mwRunFiles->getText().contains("-"))
   {
@@ -3080,7 +3094,7 @@ void MuonAnalysis::checkAppendingNextRun()
   if (m_uiForm.mwRunFiles->getText().isEmpty() )
     return;
 
-  enableButtons(false);
+  allowLoading(false);
 
   if (m_uiForm.mwRunFiles->getText().contains("-"))
   {
@@ -3348,6 +3362,9 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.pairTablePlotChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(groupTabUpdatePair()));
 
   // Settings tab Auto Updates
+  connect(m_uiForm.binBoundaries, SIGNAL(editingFinished()), this, SLOT(settingsTabUpdatePlot()));
+  connect(m_uiForm.optionStepSizeText, SIGNAL(editingFinished()), this, SLOT(settingsTabUpdatePlot()));
+
   connect(m_optionTab, SIGNAL(settingsTabUpdatePlot()), this, SLOT(settingsTabUpdatePlot()));
 }
 

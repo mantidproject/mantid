@@ -9,8 +9,10 @@
 #include <QtCore/qvariant.h>
 #include <QtCore/qstringlist.h>
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include <QtGui>
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include <Qsci/qscilexerpython.h>
@@ -166,6 +168,7 @@ void StartLiveDataDialog::initLayout()
   }
 
   radioPostProcessClicked();
+  setDefaultAccumulationMethod( ui.cmbInstrument->currentText() );
 
   //=========== SLOTS =============
   connect(ui.processingAlgo, SIGNAL(changedAlgorithm()), this, SLOT(changeProcessingAlgorithm()));
@@ -184,6 +187,8 @@ void StartLiveDataDialog::initLayout()
   connect(ui.radAbsoluteTime, SIGNAL(toggled(bool)), this, SLOT(radioTimeClicked()));
 
   connect(ui.chkPreserveEvents, SIGNAL(toggled(bool)), this, SLOT(chkPreserveEventsToggled()));
+
+  connect(ui.cmbInstrument,SIGNAL(currentIndexChanged(const QString&)),this,SLOT(setDefaultAccumulationMethod(const QString&)));
 
   QHBoxLayout * buttonLayout = this->createDefaultButtonLayout();
   ui.mainLayout->addLayout(buttonLayout);
@@ -289,6 +294,31 @@ void StartLiveDataDialog::changePostProcessingAlgorithm()
   Algorithm_sptr alg = ui.postAlgo->getAlgorithm();
   if (!alg) return;
   m_postProcessingAlg = alg;
+}
+
+//------------------------------------------------------------------------------
+/** Slot called when picking a different instrument.
+ * @param inst :: The instrument name.
+ */
+void StartLiveDataDialog::setDefaultAccumulationMethod(const QString& inst)
+{
+  if ( inst.isEmpty() ) return;
+  try
+  {
+    Mantid::Kernel::InstrumentInfo instrument = Mantid::Kernel::ConfigService::Instance().getInstrument(inst.toStdString());
+    std::string listenerName = instrument.liveListener();
+    if ( listenerName.find("Histo") != std::string::npos )
+    {
+      ui.cmbAccumulationMethod->setCurrentText("Replace");
+    }
+    else
+    {
+      ui.cmbAccumulationMethod->setCurrentText("Add");
+    }
+  }
+  catch( ... )
+  {
+  }
 }
 
 }
