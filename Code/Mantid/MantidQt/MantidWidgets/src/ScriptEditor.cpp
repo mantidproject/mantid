@@ -426,8 +426,29 @@ void ScriptEditor::updateCompletionAPI(const QStringList & keywords)
   m_completer->clear();
   while( iter.hasNext() )
   {
-    m_completer->add(iter.next());
+    QString item = iter.next();
+    m_completer->add(item);
   }
+  /**
+   * 2012-08-14 M. Gigg: QScintilla v2.6.1 contains a bug
+   * surrounding the calltips. If the entire list of
+   * completions is exhausted then the underlying API
+   * keeps on trying to iterate further due to a bug in the stopping
+   * condition.
+   * It sorts the keyword list so that it can quickly jump to
+   * a starting point when trying to match what the user has typed with
+   * the completions it has. A short cut out is when it first checks that the
+   * current completion starts with the users' text and if not the loop is halted
+   * correctly.
+   *
+   * This line adds a single character that is guaranteed to be after all of the other completions
+   * (due to ascii ordering) but is not alpha-numeric so a user would not want to complete on it.
+   * Even better it won't show up in the auto complete list because a user has to type at least
+   * 2 characters for that to appear.
+   *
+   */
+  m_completer->add("{");
+
   m_completer->prepare();
 }
 
@@ -558,7 +579,7 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event)
     delete backspEvent;
     delete bracketEvent;
   }
-  
+
 
   QsciScintilla::keyPressEvent(event);
   

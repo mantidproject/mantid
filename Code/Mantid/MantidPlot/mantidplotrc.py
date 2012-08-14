@@ -86,7 +86,7 @@ if __name__ == '__main__':
         try:
             argspec = inspect.getargspec(func)
         except TypeError:
-            return ' '
+            return ''
         # Algorithm functions have varargs set not args
         args = argspec[0]
         if args != []:
@@ -117,7 +117,7 @@ if __name__ == '__main__':
                     args.append(arg)
             if len(defs) == 0: defs = None
         else:
-            return ' '
+            return ''
 
         if defs is None:
             calltip = ','.join(args)
