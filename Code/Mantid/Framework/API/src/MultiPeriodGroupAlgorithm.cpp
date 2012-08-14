@@ -206,7 +206,7 @@ bool MultiPeriodGroupAlgorithm::processGroups()
         {
           if (prop != inputProperty)
           {
-            this->setOtherProperties(alg, prop->name(), prop->value(), i+1);
+            this->setOtherProperties(alg, prop->name(), prop->value(), static_cast<int>(i+1));
           }
         }
     }
