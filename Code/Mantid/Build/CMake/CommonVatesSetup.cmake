@@ -8,6 +8,7 @@ Framework/Geometry
 Framework/Kernel
 Framework/DataObjects
 Framework/MDEvents
+Framework/NexusCPP
 )
 
 set ( COMMONVATES_SETUP_DONE TRUE )
