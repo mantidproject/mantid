@@ -43,6 +43,8 @@ namespace API
     virtual bool checkGroups();
     /// Overriden from Algorithm base.
     virtual bool processGroups();
+    /// Method to provide the name for the input workspace property.
+    virtual std::string fetchInputPropertyName() const = 0;
 
     std::string createFormattedInputWorkspaceNames(const size_t& periodIndex) const;
     void validateMultiPeriodGroupInputs(const size_t& nInputWorkspaces) const;

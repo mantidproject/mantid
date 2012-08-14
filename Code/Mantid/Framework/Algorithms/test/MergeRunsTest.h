@@ -716,7 +716,7 @@ public:
     do_test_validation_throws(aCorrupted, a);
   }
 
-  void test_with_multiperiod_data(WorkspaceGroup_sptr input)
+  void do_test_with_multiperiod_data(WorkspaceGroup_sptr input)
   {
     // Extract some internal information from the nested workspaces in order to run test asserts later.
     const size_t expectedNumHistograms = boost::dynamic_pointer_cast<MatrixWorkspace>(input->getItem(0))->getNumberHistograms();
@@ -769,6 +769,12 @@ public:
     // Creates a NON-MULIPERIOD workspace group containing two identical matrix workspaces with uniform signal and error, and No n_period logs on all workspaces.
     WorkspaceGroup_sptr input = create_good_workspace_group();
     do_test_treat_as_non_period_groups(input);
+  }
+
+  void test_with_multiperiod_data()
+  {
+    WorkspaceGroup_sptr input = create_good_multiperiod_workspace_group();
+    do_test_with_multiperiod_data(input);
   }
 
 private:

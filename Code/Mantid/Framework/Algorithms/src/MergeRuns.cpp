@@ -82,6 +82,13 @@ void MergeRuns::init()
 }
 
 //------------------------------------------------------------------------------------------------
+// @return the name of the property used to supply in input workspace(s).
+std::string MergeRuns::fetchInputPropertyName() const
+{
+  return "InputWorkspaces";
+}
+
+//------------------------------------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw Exception::NotFoundError If an input workspace doesn't exist
  *  @throw std::invalid_argument If the input workspaces are not compatible

@@ -77,7 +77,8 @@ private:
   void exec();
   void execEvent();
   void buildAdditionTables();
-
+  // Overriden MultiPeriodGroupAlgorithm method.
+  std::string fetchInputPropertyName() const;
 
   /// An addition table is a list of pairs: First int = workspace index in the EW being added, Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
   typedef std::vector< std::pair<int, int> >  AdditionTable;
