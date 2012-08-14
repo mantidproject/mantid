@@ -2982,13 +2982,27 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   QStringList kusse = prevPlotStyle.childKeys();
   if ( kusse.contains("yAxisStart") )
   {
-    double yAxisStart = prevPlotStyle.value("yAxisStart").toDouble();
-    m_uiForm.yAxisMinimumInput->setText(QString::number(yAxisStart));
+    if( ! m_uiForm.yAxisAutoscale->isChecked() )
+    {
+      double yAxisStart = prevPlotStyle.value("yAxisStart").toDouble();
+      m_uiForm.yAxisMinimumInput->setText(QString::number(yAxisStart));
+    }
+    else
+    {
+      m_optionTab->setStoredYAxisMinimum(prevPlotStyle.value("yAxisStart").toString());
+    }
   }
   if ( kusse.contains("yAxisFinish") )
   {
-    double yAxisFinish = prevPlotStyle.value("yAxisFinish").toDouble();
-    m_uiForm.yAxisMaximumInput->setText(QString::number(yAxisFinish));
+    if( ! m_uiForm.yAxisAutoscale->isChecked() )
+    {
+      double yAxisFinish = prevPlotStyle.value("yAxisFinish").toDouble();
+      m_uiForm.yAxisMaximumInput->setText(QString::number(yAxisFinish));
+    }
+    else
+    {
+      m_optionTab->setStoredYAxisMaximum(prevPlotStyle.value("yAxisFinish").toString());
+    }
   }
 
   // Load Plot Binning Options

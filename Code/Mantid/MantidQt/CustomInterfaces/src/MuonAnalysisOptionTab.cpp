@@ -176,6 +176,20 @@ void MuonAnalysisOptionTab::runyAxisAutoscale(bool state)
   m_uiForm.yAxisMinimumInput->setEnabled(!state);
   m_uiForm.yAxisMaximumInput->setEnabled(!state);
 
+  if(state)
+  {
+    m_yAxisMinimum = m_uiForm.yAxisMinimumInput->text();
+    m_yAxisMaximum = m_uiForm.yAxisMaximumInput->text();
+
+    m_uiForm.yAxisMinimumInput->setText("N/A");
+    m_uiForm.yAxisMaximumInput->setText("N/A");
+  }
+  else
+  {
+    m_uiForm.yAxisMinimumInput->setText(m_yAxisMinimum);
+    m_uiForm.yAxisMaximumInput->setText(m_yAxisMaximum);
+  }
+
   QSettings group;
   group.beginGroup(m_settingsGroup + "plotStyleOptions");
   group.setValue("axisAutoScaleOnOff", state);   
@@ -194,7 +208,7 @@ void MuonAnalysisOptionTab::runTimeComboBox(int index)
 
   if ( index == 0 ) // Start at First Good Data
   {
-    m_uiForm.timeAxisStartAtInput->setEnabled(true);
+    m_uiForm.timeAxisStartAtInput->setEnabled(false);
     m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
   }
 
@@ -424,6 +438,18 @@ void MuonAnalysisOptionTab::openDirectoryDialog()
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
   ad->show();
   ad->setFocus();
+}
+
+/// Set the *stored" yAxisMinimum value.
+void MuonAnalysisOptionTab::setStoredYAxisMinimum(QString yAxisMinimum)
+{
+  m_yAxisMinimum = yAxisMinimum;
+}
+
+/// Set the *stored" yAxisMaximum value.
+void MuonAnalysisOptionTab::setStoredYAxisMaximum(QString yAxisMaximum)
+{
+  m_yAxisMaximum = yAxisMaximum;
 }
 
 }

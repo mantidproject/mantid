@@ -61,7 +61,7 @@ class MuonAnalysisOptionTab : public QWidget
  Q_OBJECT
 public:
   /// Constructor
-  MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& group) : m_uiForm(uiForm), m_settingsGroup(group) {}
+  MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& group) : m_uiForm(uiForm), m_settingsGroup(group), m_yAxisMinimum(), m_yAxisMaximum() {}
 
   /// Initialise the layout of Muon Analysis.
   void initLayout();
@@ -71,6 +71,12 @@ public:
 
   /// When data loaded set various buttons etc to active
   void nowDataAvailable();
+
+  /// Set the *stored" yAxisMinimum value.
+  void setStoredYAxisMinimum(QString yAxisMinimum);
+
+  /// Set the *stored" yAxisMaximum value.
+  void setStoredYAxisMaximum(QString yAxisMaximum);
 
 
 public slots:
@@ -99,6 +105,11 @@ private:
   /// group defaults are saved to
   const QString& m_settingsGroup;
 
+  /// Store value when autoscale has been selected, for when it is deselected again.
+  QString m_yAxisMinimum;
+
+  /// Store value when autoscale has been selected, for when it is deselected again.
+  QString m_yAxisMaximum;
 
 private slots:  
   /// Save the settings for time axis start and validate the entry.
