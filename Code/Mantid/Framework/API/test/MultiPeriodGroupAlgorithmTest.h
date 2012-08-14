@@ -5,6 +5,7 @@
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidTestHelpers/FakeObjects.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -21,6 +22,7 @@ public:
   {
     declareProperty(new ArrayProperty<std::string>("MyInputWorkspaces"));
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "");
+    declareProperty("PropertyA", 1, boost::make_shared<Kernel::MandatoryValidator<int> >()); // I'm only adding this property to cause errors if it's not passed to spawned algorithms.
   }
   virtual void exec()
   {
@@ -171,6 +173,7 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("MyInputWorkspaces", "a, b, c");
+    alg.setProperty("PropertyA", 1);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
