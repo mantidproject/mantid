@@ -1,5 +1,6 @@
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/ArrayProperty.h"
 
 using namespace Mantid::Kernel;
 
