@@ -199,9 +199,9 @@ bool MultiPeriodGroupAlgorithm::processGroups()
     alg->initialize();
     // Copy all properties over except for input and output workspace properties.
     std::vector<Property*> props = this->getProperties();
-    for (size_t i=0; i < props.size(); i++)
+    for (size_t j=0; j < props.size(); j++)
     {
-      Property * prop = props[i];
+      Property * prop = props[j];
         if (prop)
         {
           if (prop != inputProperty)
