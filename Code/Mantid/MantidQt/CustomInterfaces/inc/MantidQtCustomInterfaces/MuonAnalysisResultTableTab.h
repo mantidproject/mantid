@@ -67,6 +67,8 @@ private slots:
   void createTable();
 
 private:
+  void storeUserSettings();
+  void applyUserSettings();
   void populateLogsAndValues(const QVector<QString>& fittedWsList);
   void populateFittings(const QVector<QString>& fittedWsList);
 
@@ -75,10 +77,13 @@ private:
   QVector<QString> getSelectedLogs();
   std::string getFileName();
   QMap<int,int> getWorkspaceColors(const QVector<QString>& wsList);
-
+  
   Ui::MuonAnalysis& m_uiForm;
   int m_numLogsdisplayed;
   QMap<QString, QMap<QString, double> > m_tableValues;
+
+  QList<QString> m_selectedLogs;
+  QList<QString> m_unselectedFittings;
 };
 
 }

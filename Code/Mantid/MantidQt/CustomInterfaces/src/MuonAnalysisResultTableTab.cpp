@@ -34,7 +34,7 @@ namespace Muon
 * Constructor
 */
 MuonAnalysisResultTableTab::MuonAnalysisResultTableTab(Ui::MuonAnalysis& uiForm)
-  : m_uiForm(uiForm), m_numLogsdisplayed(0) 
+  : m_uiForm(uiForm), m_numLogsdisplayed(0), m_selectedLogs(), m_unselectedFittings()
 {  
   // Connect the help button to the wiki page.
   connect(m_uiForm.muonAnalysisHelpResults, SIGNAL(clicked()), this, SLOT(helpResultsClicked()));
@@ -118,6 +118,75 @@ void MuonAnalysisResultTableTab::selectAllFittings(bool state)
   }
 }
 
+/**
+ * Remembers which fittings and logs have been selected/deselected by the user. Used in combination with
+ * applyUserSettings() so that we dont lose what the user has chosen when switching tabs.
+ */
+void MuonAnalysisResultTableTab::storeUserSettings()
+{
+  // Find which logs have been selected by the user.
+  for (int row = 0; row < m_uiForm.valueTable->rowCount(); ++row)
+  {
+    QTableWidgetItem * temp = m_uiForm.valueTable->item(row,0);
+    if( temp )
+    {
+      QCheckBox* logChoice = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(row,1));
+      if( logChoice->isChecked() )
+        m_selectedLogs += temp->text();
+    }
+  }
+
+  // Find which fittings have been deselected by the user.
+  for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); ++row)
+  {
+    QTableWidgetItem * temp = m_uiForm.fittingResultsTable->item(row,0);
+    if( temp )
+    {
+      QCheckBox* fittingChoice = static_cast<QCheckBox*>(m_uiForm.fittingResultsTable->cellWidget(row,1));
+      if( ! fittingChoice->isChecked() )
+        m_unselectedFittings += temp->text();
+    }
+  }
+}
+
+/**
+ * Applies the stored lists of which fittings and logs have been selected/deselected by the user.
+ */
+void MuonAnalysisResultTableTab::applyUserSettings()
+{
+  // If we're just starting the tab for the first time (and there are no user choices),
+  // then don't bother.
+  if( m_selectedLogs.isEmpty() && m_unselectedFittings.isEmpty() )
+    return;
+  
+  // If any of the logs have previously been selected by the user, select them again.
+  for (int row = 0; row < m_uiForm.valueTable->rowCount(); ++row)
+  {
+    QTableWidgetItem * temp = m_uiForm.valueTable->item(row,0);
+    if( temp )
+    {
+      if( m_selectedLogs.contains(temp->text()) )
+      {
+        QCheckBox* logChoice = static_cast<QCheckBox*>(m_uiForm.valueTable->cellWidget(row,1));
+        logChoice->setChecked(true);
+      }
+    }
+  }
+
+  // If any of the fittings have previously been deselected by the user, deselect them again.
+  for (int row = 0; row < m_uiForm.fittingResultsTable->rowCount(); ++row)
+  {
+    QTableWidgetItem * temp = m_uiForm.fittingResultsTable->item(row,0);
+    if( temp )
+    {
+      if( m_unselectedFittings.contains(temp->text()) )
+      {
+        QCheckBox* fittingChoice = static_cast<QCheckBox*>(m_uiForm.fittingResultsTable->cellWidget(row,1));
+        fittingChoice->setChecked(false);
+      }
+    }
+  }
+}
 
 /**
 * Populates the tables with all the correct log values and fitting results. It takes the
@@ -129,6 +198,8 @@ void MuonAnalysisResultTableTab::selectAllFittings(bool state)
 */
 void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
 {
+  storeUserSettings();
+  
   // Clear the previous table values
   m_tableValues.clear();
   QVector<QString> fittedWsList;
@@ -156,17 +227,27 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
     for(int i=0; i < sameFittedWsList.size(); ++i)
       m_uiForm.fittingResultsTable->insertRow(m_uiForm.fittingResultsTable->rowCount() );
 
-    // Add check boxes for the include column on fitting table.
+    // Add check boxes for the include column on fitting table, and make text uneditable.
     for (int i = 0; i < m_uiForm.fittingResultsTable->rowCount(); i++)
+    {
       m_uiForm.fittingResultsTable->setCellWidget(i,1, new QCheckBox);
+      QTableWidgetItem * textItem = m_uiForm.fittingResultsTable->item(i, 0);
+      if(textItem)
+        textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
+    }
 
     // Populate the individual log values and fittings into their respective tables.
     populateFittings(sameFittedWsList);
     populateLogsAndValues(sameFittedWsList);    
     
-    // Add check boxes for the include column on log table.
+    // Add check boxes for the include column on log table, and make text uneditable.
     for (int i = 0; i < m_uiForm.valueTable->rowCount(); i++)
+    {
       m_uiForm.valueTable->setCellWidget(i,1, new QCheckBox);
+      QTableWidgetItem * textItem = m_uiForm.valueTable->item(i, 0);
+      if(textItem)
+        textItem->setFlags(textItem->flags() & (~Qt::ItemIsEditable));
+    }
 
     QTableWidgetItem* temp = static_cast<QTableWidgetItem*>(m_uiForm.valueTable->item(0,0));
     // If there is no item in the first row then there must be no log files found between the two data sets.
@@ -179,6 +260,8 @@ void MuonAnalysisResultTableTab::populateTables(const QStringList& wsList)
       // Make sure all fittings are selected by default.
       selectAllFittings(true);
     }
+
+    applyUserSettings();
   }
   else
   {
