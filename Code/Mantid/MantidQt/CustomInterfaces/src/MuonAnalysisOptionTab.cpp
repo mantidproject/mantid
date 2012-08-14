@@ -382,13 +382,13 @@ void MuonAnalysisOptionTab::validateYMin()
 
 
 /**
-* Validate the Y Min.
+* Validate the Y Max.
 */
 void MuonAnalysisOptionTab::validateYMax()
 {
-  QString tempValue = m_uiForm.yAxisMinimumInput->text();
-  runyAxisMinimumInput();
-  if(tempValue == m_uiForm.yAxisMinimumInput->text())
+  QString tempValue = m_uiForm.yAxisMaximumInput->text();
+  runyAxisMaximumInput();
+  if(tempValue == m_uiForm.yAxisMaximumInput->text())
   {
     emit settingsTabUpdatePlot();
   }
