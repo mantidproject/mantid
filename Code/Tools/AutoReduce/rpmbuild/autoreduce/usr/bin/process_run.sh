@@ -7,7 +7,6 @@
 function process {
 # Initialize Overall Return Code, define logfile
 status=0
-#logfile=~/autoreduce.log
 logfile=/var/log/SNS_applications/autoreduce.log
 
 nexusFile=$1
@@ -24,75 +23,24 @@ visit=$4
 runNumber=$5
 echo "facility="$facility",instrument="$instrument",proposal="$proposal",visit="$visit",runNumber="$runNumber | sed "s/^/$(date)  /" >> $logfile
 
-# Create tmp metadata output directory
-metadataDir=/tmp/METADATA_XML
-if [ ! -d $metadataDir ]; then
-  mkdir $metadataDir
-  chmod 777 $metadataDir
-fi
+hostAndPort=`awk -F "=" '/hostAndPort/ { print $2 }' /etc/autoreduce/icatclient.properties`
+password=`awk -F "=" '/password/ { print $2 }' /etc/autoreduce/icatclient.properties`
 
-rawMetadataDir=/tmp/METADATA_XML/raw
-reducedMetadataDir=/tmp/METADATA_XML/reduced
-if [ ! -d $rawMetadataDir ]; then
-  mkdir $rawMetadataDir
-  chmod 777 $rawMetadataDir
-fi 
-if [ ! -d $reducedMetadataDir ]; then
-  mkdir $reducedMetadataDir
-fi 
-
-# Set raw metadata.xml
-metadataFile=$rawMetadataDir"/"$instrument"_"$runNumber".xml"
-echo "raw metadata file = "$metadataFile  | sed "s/^/$(date)  /" >> $logfile
-# Create reduced metadata.xml
-reducedMetadataFile=$reducedMetadataDir"/"$instrument"_"$runNumber".xml"
-echo "reduced metadata file = "$reducedMetadataFile  | sed "s/^/$(date)  /" >> $logfile
-
-# Create staging directory for data reduction
-redOutDir="/"$facility"/"$instrument"/"$proposal"/shared/autoreduce/"
-echo "redOutDir= "$redOutDir  | sed "s/^/$(date)  /" >> $logfile
-if [ ! -d $redOutDir ]; then
-  mkdir "$redOutDir"
-  echo $redOutDir" is created"  | sed "s/^/$(date)  /" >> $logfile
-fi
-
-
-# Create metadata file for raw data
-echo "--------Creating metadata file from NeXus file--------"
-nxingestCommand=nxingest-autoreduce
-mappingFile=/etc/autoreduce/mapping.xml
-echo $nxingestCommand $mappingFile $nexusFile $metadataFile
-echo $nxingestCommand $mappingFile $nexusFile $metadataFile  | sed "s/^/$(date)  /" >> $logfile
-start=`date +%x-%T`
-$nxingestCommand $mappingFile $nexusFile $metadataFile | sed "s/^/$(date)  /" >> $logfile
-end=`date +%x-%T`
+echo $hostAndPort, $password
 
 # Accumulate any non-zero return code
 status=$(( $status + $? ))
 #echo "status=$status"
 
-# Add preNeXus datafiles to raw metadata
-echo "--------Adding preNeXus datafiles to raw metadata--------"
-addCommand="python /usr/bin/add_raw_datafile.py"
-preNexusDir="/SNS/"$instrument"/"$proposal"/"$visit"/"$runNumber"/preNeXus/"
-echo $addCommand $runNumber $preNexusDir $metadataFile
-echo $addCommand $runNumber $preNexusDir $metadataFile | sed "s/^/$(date)  /" >> $logfile
-start=`date +%x-%T`
-$addCommand $runNumber $preNexusDir $metadataFile &>> $logfile
-end=`date +%x-%T`
-echo "Started at $start --- Ended at $end"
-echo
 
 # Catalog raw metadata
 echo "--------Catalogging raw data--------"
-icatCommand="java -jar -Djavax.net.ssl.trustStore=/etc/autoreduce/cacerts.jks"
-icatJar=/usr/lib64/autoreduce/icat3-xmlingest-client-1.0.0-SNAPSHOT.jar
-icatAdmin=snsAdmin
-echo $icatCommand $icatJar $icatAdmin $metadataFile
+ingestNexus=/usr/bin/ingestNexus
+echo $ingestNexus $nexusFile $hostAndPort $password
 echo "--------Catalogging raw data--------" | sed "s/^/$(date)  /" >> $logfile
-echo $icatCommand $icatJar $icatAdmin $metadataFile  | sed "s/^/$(date)  /" >> $logfile
+echo $ingestNexus $nexusFile $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
-$icatCommand $icatJar $icatAdmin $metadataFile | sed "s/^/$(date)  /" >> $logfile
+$ingestNexus $nexusFile $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
 end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
 echo
@@ -114,16 +62,14 @@ end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
 echo
 
-# Create metadata file for reduced data
-echo python /usr/bin/create_reduced_metadata.py $instrument $proposal $visit $runNumber $redOutDir $reducedMetadataFile  | sed "s/^/$(date)  /" >> $logfile
-python /usr/bin/create_reduced_metadata.py $instrument $proposal $visit $runNumber $redOutDir $reducedMetadataFile &>> $logfile
 
 # Catalog reduced metadata
 echo "--------Catalogging reduced data--------"
-echo $icatCommand $icatJar $icatAdmin $reducedMetadataFile
-echo $icatCommand $icatJar $icatAdmin $reducedMetadataFile | sed "s/^/$(date)  /" >> $logfile
+ingestReduced=/usr/bin/ingestReduced
+echo $ingestReduced $facility $instrument $proposal $runNumber $hostAndPort $password
+echo $ingestReduced $facility $instrument $proposal $runNumber $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
-$icatCommand $icatJar $icatAdmin $reducedMetadataFile | sed "s/^/$(date)  /" >> $logfile
+$ingestReduced $facility $instrument $proposal $runNumber $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
 end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
 echo
@@ -133,19 +79,20 @@ status=$(( $status + $? ))
 #echo "status="$status
 }
 
-if [ -n "$1" ]
-  if ! [ -d $1 ] || ! [ -e $1 ]; then
-    echo $1 "is not a valid directory or file path."
-    exit
-  fi 
-then
-  for nexusFile in `find $1 -name "*event.nxs" -print`
-  do
-    if [ -e $nexusFile ] && ! [ -h $nexusFile ]; then
-      process "$nexusFile"
-    fi
-  done
+if [ -n "$1" ]; then
+  if ! [ -d $1 ] && [ -e $1 ]  && ! [ -h $1 ]; then
+    echo "Got nexus file: " $1
+    process "$1"
+  else
+    for nexusFile in `find $1 -name "*event.nxs" -print`
+    do
+      if [ -e $nexusFile ] && ! [ -h $nexusFile ]; then
+        process "$nexusFile"
+      fi
+    done
+  fi
 else
+  # null argument
   echo "--------processRun.sh takes one argument: an archived directory--------"
   echo "You may try one of the followings:"
   echo "./processRun.sh /SNS/PG3/IPTS-6804/"
