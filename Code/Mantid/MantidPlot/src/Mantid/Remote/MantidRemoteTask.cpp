@@ -239,7 +239,7 @@ void RemoteTaskDockWidget::clusterChoiceChanged(int index)
 // Someone clicked the "Show Jobs" button.  Pop up the dialog.
 void RemoteTaskDockWidget::showJobs()
 {
-  JobStatusDialog( m_jobList, m_clusterList[ m_clusterCombo->currentIndex()]).exec();
+  JobStatusDialog( m_jobList, m_clusterList[ m_clusterCombo->currentIndex()], m_mantidUI).exec();
 }
 
 // Someone clicked the "Submit Job" button.  Pop up a dialog to grab any needed inputs

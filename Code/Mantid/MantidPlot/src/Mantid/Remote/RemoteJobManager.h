@@ -6,6 +6,7 @@
 
 #include "RemoteJob.h"
 #include <string>
+#include <ostream>
 #include <vector>
 
 class RemoteJobManager;         // Top-level abstract class
@@ -36,6 +37,12 @@ public:
                             RemoteJob::JobStatus &retStatus,
                             std::string &errMsg) = 0;
     virtual bool jobStatusAll( std::vector<RemoteJob> &jobList, std::string &errMsg) = 0;
+
+    // returns true if there's an output file associated with the specified job ID and the file is readable
+    virtual bool jobOutputReady( const std::string &jobId) = 0;
+
+    // Fetches the job's output file from the remote cluster
+    virtual bool getJobOutput( const std::string &jobId, std::ostream &outstream) = 0;
 /************
     TODO: Uncomment these when we're ready to implement
     virtual int abortJob( std::string jobId) = 0;
@@ -106,6 +113,8 @@ public:
                             RemoteJob::JobStatus &retStatus,
                             std::string &errMsg);
     virtual bool jobStatusAll( std::vector<RemoteJob> &jobList, std::string &errMsg);
+    virtual bool jobOutputReady( const std::string &jobId);
+    virtual bool getJobOutput( const std::string &jobId, std::ostream &outstream);
 
 /*******
     TODO: IMPLEMENT THESE FUNCTIONS FOR REAL!

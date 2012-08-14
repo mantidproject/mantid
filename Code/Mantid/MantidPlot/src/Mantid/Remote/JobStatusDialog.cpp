@@ -2,37 +2,32 @@
 #include "ui_JobStatusDialog.h"
 #include "RemoteJob.h"
 #include "RemoteJobManager.h"
+#include "Mantid/MantidUI.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
 
 #include <QLabel>
 #include <QPushButton>
+#include <QTemporaryFile>
+#include <QDataStream>
+#include <QMessageBox>
 
+#include <fstream>
 #include <vector>
 using namespace std;
 
-JobStatusDialog::JobStatusDialog(const QList <RemoteJob> &jobList, RemoteJobManager *manager, QWidget *parent) :
+JobStatusDialog::JobStatusDialog(const QList <RemoteJob> &jobList, RemoteJobManager *manager, MantidUI *mantidui, QWidget *parent) :
     QDialog(parent),
+    m_mantidUI(mantidui),
     ui(new Ui::JobStatusDialog),
     m_jobList( jobList),
+
     m_manager( manager)
 {
     ui->setupUi(this);
     ui->tableWidget->horizontalHeader()->setResizeMode( QHeaderView::Stretch);
 
-    /****************************
-    // Show a couple of sample jobs....
-    ui->tableWidget->setRowCount(2);
-    ui->tableWidget->setCellWidget(0, 0, new QLabel("MWS-120"));
-    ui->tableWidget->setCellWidget(0, 1, new QLabel("Chadwick"));
-    ui->tableWidget->setCellWidget(0, 2, new QLabel("Hello MPI"));
-    ui->tableWidget->setCellWidget(0, 3, new QLabel("Complete"));
-    ui->tableWidget->setCellWidget(0, 4, new QPushButton("Download",this));
-
-    ui->tableWidget->setCellWidget(1, 0, new QLabel("MWS-121"));
-    ui->tableWidget->setCellWidget(1, 1, new QLabel("Chadwick"));
-    ui->tableWidget->setCellWidget(1, 2, new QLabel("Hello MPI"));
-    ui->tableWidget->setCellWidget(1, 3, new QLabel("Running"));
-    //ui->tableWidget->setCellWidget(1, 4, new QPushButton("Download",this));
-    *****************************/
+    m_buttonMap = new QSignalMapper(this);
+    connect( m_buttonMap, SIGNAL(mapped(QString)), this, SLOT(downloadFile(QString)));
 
     updateDisplay();
 }
@@ -45,6 +40,8 @@ JobStatusDialog::~JobStatusDialog()
 void JobStatusDialog::updateDisplay()
 {
   ui->tableWidget->setRowCount( 0);
+  // Note: this will also remove all the mappings from m_buttonMap (Mappings are
+  // removed automatically when the mapped objects are destroyed.)
 
   vector <RemoteJob> jobList;
   string errMsg;
@@ -107,6 +104,10 @@ void JobStatusDialog::addRow( RemoteJob &job)
         statusString = "Removed";
         break;
 
+    case RemoteJob::JOB_DEFERRED:
+        statusString = "Deferred";
+        break;
+
     case RemoteJob::JOB_STATUS_UNKNOWN:
     default:
         statusString = "Unknown";
@@ -118,10 +119,60 @@ void JobStatusDialog::addRow( RemoteJob &job)
 
     if (status == RemoteJob::JOB_COMPLETE)
     {
-        table->setCellWidget( curRow, 4, new QPushButton("Download",this));
-        // TODO: Hook up the button to a download function!
+        // check to see if there's an output file and if it's readable.
+        if (m_manager->jobOutputReady( job.m_jobId))
+        {
+            QPushButton *pb = new QPushButton("Download",this);
+            table->setCellWidget( curRow, 4, pb);
+            m_buttonMap->setMapping(pb, QString::fromStdString( job.m_jobId));
+            connect( pb, SIGNAL(clicked()), m_buttonMap, SLOT(map()));
+        }
     }
 
+}
+
+
+// Retrieve the output file and load it into a new workspace
+void JobStatusDialog::downloadFile( QString jobId)
+{
+  // Until we get around to re-writing the whole loader subsystem to accept a
+  // stream, we'll have to save the file to a temp directory and then pass
+  // the filename into the loader class.
+
+  // This is a bit of a kludge:  I want to use QTemporaryFile, but I don't want
+  // to use QT specific stuff in m_manager.  So, I'm going to close the file
+  // that the QTemporaryFile object creates, then re-open it using a standard
+  // C++ stream.
+  QTemporaryFile outfile;
+  ofstream outstream;
+  outfile.open();  // The file isn't actually created until open() is called
+  outfile.close();
+  outstream.open( outfile.fileName());
+
+  bool fileDownloaded = m_manager->getJobOutput( jobId.toStdString(), outstream);
+  outstream.close();
+
+  // This bit was mostly copied from ApplicationWindow::loadDataFile()
+  if (fileDownloaded)
+  {
+    QFileInfo fnInfo( outfile.fileName());
+    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(fnInfo.absoluteDir().path());
+
+    // Run Load algorithm on file
+    QMap<QString,QString> params;
+    params["Filename"] = outfile.fileName();
+    m_mantidUI->executeAlgorithmDlg("Load",params);
+  }
+  else
+  {
+    // error downloading the file
+    QMessageBox ( QMessageBox::Warning, "Download Error", QString("Failed to download output for job ID ") + jobId, QMessageBox::Ok, this).exec();
+  }
+
+
+  // Note: QTemporaryFile automatically deletes the file when the object
+  // goes out of scope.  Nice!
+  return;
 }
 
 /***************************************************

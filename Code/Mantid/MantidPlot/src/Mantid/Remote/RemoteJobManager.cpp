@@ -123,7 +123,7 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
     // Path should be something like "/mws/rest", append "/jobs" to it.
     path += "/jobs";
 
-    // append the outfile variable to the URL (the PHP rembmers this so we can download the file later)
+    // append the outfile variable to the URL (the PHP remembers this so we can download the file later)
     path += "?outfile=" + remoteTask.getSubstitutionParamValue( "outfile");
 
     Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_POST, path, Poco::Net::HTTPRequest::HTTP_1_1);
@@ -301,6 +301,16 @@ bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
           retStatus = RemoteJob::JOB_REMOVED;
           retVal = true;
       }
+      else if (statusString == "DEFERRED")
+      {
+          retStatus = RemoteJob::JOB_DEFERRED;
+          retVal = true;
+      }
+      else if (statusString == "IDLE")
+      {
+          retStatus = RemoteJob::JOB_IDLE;
+          retVal = true;
+      }
       /* else if what else??? */
       else
       {
@@ -424,6 +434,15 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
       {
         status = RemoteJob::JOB_REMOVED;
       }
+      else if (statusString == "DEFERRED")
+      {
+        status = RemoteJob::JOB_DEFERRED;
+      }
+      else if (statusString == "IDLE")
+      {
+        status = RemoteJob::JOB_IDLE;
+      }
+
       /* else if what else??? */
       else
       {
@@ -439,6 +458,117 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
 
   return retVal;
 }
+
+
+// Note: This function does not actually use the Moab Web Services API.  (There's nothing in
+// MWS for dealing with output files.)  Instead, it relies on some custom PHP code that must
+// be installed on the server.  See https://github.com/neutrons/MWS-Front-End
+bool MwsRemoteJobManager::jobOutputReady( const std::string &jobId)
+{
+  bool retVal = false;  // assume failure
+
+  // Open an HTTP connection to the cluster
+  Poco::URI uri(m_serviceBaseUrl);
+  Poco::Net::HTTPClientSession session( uri.getHost(), uri.getPort());
+
+  std::ostringstream path;
+  path << uri.getPathAndQuery();
+  // Path should be something like "/mws/rest", append "/filecheck" to it.
+  path << "/filecheck";
+  // Append the URL query string
+  path << "?jobid=" << jobId;
+
+  Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, path.str(), Poco::Net::HTTPRequest::HTTP_1_1);
+  req.setContentType( "text/html");
+
+  // Set the Authorization header (base64 encoded)
+  ostringstream encodedAuth;
+  Poco::Base64Encoder encoder( encodedAuth);
+
+  if (m_password.empty())
+  {
+    getPassword();
+  }
+
+  encoder << m_userName << ":" << m_password;
+  encoder.close();
+
+  req.setCredentials( "Basic", encodedAuth.str());
+
+  session.sendRequest( req);
+
+  // All we need to check is the return code.  And all we really care about is whether
+  // the code is 200 or not.  We're not going to differentiate between the various
+  // error codes...
+
+  Poco::Net::HTTPResponse response;
+  session.receiveResponse( response);
+  if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+  {
+    retVal = true;
+  }
+
+  return retVal;
+}
+
+
+
+// Note: This function does not actually use the Moab Web Services API.  (There's nothing in
+// MWS for dealing with output files.)  Instead, it relies on some custom PHP code that must
+// be installed on the server.  See https://github.com/neutrons/MWS-Front-End
+bool MwsRemoteJobManager::getJobOutput( const std::string &jobId, std::ostream &outstream)
+{
+
+  bool retVal = false;  // assume failure
+
+  // Open an HTTP connection to the cluster
+  Poco::URI uri(m_serviceBaseUrl);
+  Poco::Net::HTTPClientSession session( uri.getHost(), uri.getPort());
+
+  std::ostringstream path;
+  path << uri.getPathAndQuery();
+  // Path should be something like "/mws/rest", append "/download" to it.
+  path << "/download";
+  // Append the URL query string
+  path << "?jobid=" << jobId;
+
+  Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, path.str(), Poco::Net::HTTPRequest::HTTP_1_1);
+  req.setContentType( "text/html");
+
+  // Set the Authorization header (base64 encoded)
+  ostringstream encodedAuth;
+  Poco::Base64Encoder encoder( encodedAuth);
+
+  if (m_password.empty())
+  {
+    getPassword();
+  }
+
+  encoder << m_userName << ":" << m_password;
+  encoder.close();
+
+  req.setCredentials( "Basic", encodedAuth.str());
+
+  session.sendRequest( req);
+
+  Poco::Net::HTTPResponse response;
+
+  // Check the return code.  If it's good, then get the session stream and pull
+  // down the rest of the file.
+  if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+  {
+    retVal = true;
+    istream & respStream = session.receiveResponse(response);
+
+    outstream << respStream.rdbuf();
+    outstream << flush;  // make sure we've got everything before the session goes out of scope
+  }
+
+  return retVal;
+}
+
+
+
 
 // Helper function used by jobStatusAll.  Converts a time string
 // returned by MWS into a properly formatted ISO 8601 string.
