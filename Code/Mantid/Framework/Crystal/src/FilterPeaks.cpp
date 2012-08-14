@@ -34,7 +34,7 @@ namespace Mantid
 namespace Crystal
 {
   // Register the algorithm into the AlgorithmFactory
-  //DECLARE_ALGORITHM(FilterPeaks)
+  DECLARE_ALGORITHM(FilterPeaks)
 
   using namespace Kernel;
   using namespace API;
