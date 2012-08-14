@@ -2,6 +2,7 @@
 
 #include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidKernel/Memory.h"
 
 class CreateWorkspaceTest : public CxxTest::TestSuite
 {
@@ -126,7 +127,16 @@ class CreateWorkspaceTestPerformance : public CxxTest::TestSuite
 public:
   void setUp()
   {
-    vec = new std::vector<double>(100000000,1.0);
+    Mantid::Kernel::MemoryStats memInfo;
+    // 100,000,000 doubles takes ~760Mb.
+    // Copying this vector into the 3 properties then requires about 3Gb of memory
+    // and if that's not available it ends up paging which can be very slow
+    size_t nelements(100000000);
+    if(memInfo.totalMem() < 3000000)
+    {
+      nelements = 40000000; // Needs about 1.2Gb
+    }
+    vec = new std::vector<double>(nelements,1.0);
   }
 
   void tearDown()
