@@ -1,0 +1,380 @@
+#!/usr/bin/env python
+VERSION = "1.4.2"
+
+from suds.client import Client
+
+import nxs, os, numpy, sys, posixpath
+import xml.utils.iso8601, ConfigParser
+from datetime import datetime
+
+def usage():
+    print 'Usage: ingestNexus <infilename> <hostAndPort> <password>'
+    print 'Example: ingestNexus PG3_10678_event.nxs orion.sns.gov:8181 password'
+    sys.exit(-1)
+
+def ingestNexus(infilename, sessionId, service, factory):
+  
+    #find facility, investigation_type 
+    config = ConfigParser.RawConfigParser()
+    config.read('/etc/autoreduce/icat4.cfg')
+
+    #open nexus file
+    file = nxs.open(infilename, 'r')
+    file.opengroup('entry')
+
+    #investigation name 
+    file.opendata('experiment_identifier')
+    name = file.getdata()
+    file.closedata()
+
+    #investigation run number 
+    file.opendata('collection_identifier')
+    visitId = file.getdata()
+    file.closedata()
+
+    #investigation title
+    file.opendata('title')
+    title = file.getdata()
+    file.closedata()
+
+    #dataset run number
+    file.opendata('run_number')
+    runNumber = file.getdata() 
+    file.closedata()
+
+    #dataset notes 
+    file.opendata('notes')
+    notes = file.getdata()
+    file.closedata()
+
+    #dataset proton_charge 
+    file.opendata('proton_charge')
+    protonCharge = file.getdata()
+    file.closedata()
+
+    #dataset total_counts 
+    file.opendata('total_counts')
+    totalCounts = file.getdata()
+    file.closedata()
+
+    #dataset duration 
+    file.opendata('duration')
+    duration = file.getdata()
+    file.closedata()
+
+    #investigation instrument 
+    file.opengroup('instrument')
+    file.opendata('name')
+    for attr,value in file.attrs():
+        if attr == 'short_name':
+            instrument = factory.create("instrument")
+            instrument.id = config.get('Instrument', value.lower())
+    file.closedata()
+    file.closegroup()
+
+    print "Search investigation: ", str(datetime.now()) 
+    investigations = service.search(sessionId, "Investigation INCLUDE Sample [name = '" + name + "' AND visitId = '" + visitId + "']")
+
+    if len(investigations) == 0:
+        investigation = factory.create("investigation")
+        createInv = True
+
+        #find facility, investigation_type 
+        facility = factory.create("facility")
+        facility.id = config.get('Facility', 'sns')
+        investigation.facility = facility
+        
+        invType = factory.create("investigationType")
+        invType.id = config.get('InvestigationType', 'experiment')
+        investigation.type = invType 
+
+        investigation.name = name 
+        investigation.visitId = visitId 
+        investigation.instrument = instrument 
+        investigation.title = title 
+    else:
+        createInv = False 
+        print "found investigation"
+        investigation = investigations[0]
+
+    #set dataset name 
+    dataset = factory.create("dataset")
+
+    dsType = factory.create("datasetType")
+    dsType.id = config.get('DatasetType', 'experiment_raw')
+    dataset.type = dsType
+    dataset.name = runNumber 
+    dataset.description = title 
+  
+    #set dataset start time 
+    file.opendata('start_time')
+    dataset.startDate = file.getdata()
+    file.closedata()
+
+    #set dataset end time 
+    file.opendata('end_time')
+    dataset.endDate = file.getdata()
+    file.closedata()
+
+    run_path = posixpath.abspath(posixpath.join(infilename, '../..'))
+    dataset.location = run_path
+    datafiles = []
+
+    #set dataset parameters
+    parameters = []
+
+    #1) parameter proton_charge 
+    if protonCharge:
+        parameterType = factory.create("parameterType")
+        parameterType.id = config.get('ParameterType', 'proton_charge')
+        parameterType.applicableToDataset = config.getboolean('ParameterType', 'proton_charge_applicable_to_dataset')
+        datasetParameter = factory.create("datasetParameter")
+        datasetParameter.type = parameterType
+        datasetParameter.numericValue = protonCharge 
+        parameters.append(datasetParameter)
+
+    #2) parameter total_counts 
+    if totalCounts:
+        parameterType = factory.create("parameterType")
+        parameterType.id = config.get('ParameterType', 'total_counts')
+        parameterType.applicableToDataset = config.getboolean('ParameterType', 'total_counts_applicable_to_dataset')
+        datasetParameter = factory.create("datasetParameter")
+        datasetParameter.type = parameterType 
+        datasetParameter.numericValue = totalCounts
+        parameters.append(datasetParameter)
+
+    #3) parameter duration 
+    if duration:
+        parameterType = factory.create("parameterType")
+        parameterType.id = config.get('ParameterType', 'duration')
+        parameterType.applicableToDataset = config.getboolean('ParameterType', 'duration_applicable_to_dataset')
+        datasetParameter = factory.create("datasetParameter")
+        datasetParameter.type = parameterType 
+        datasetParameter.numericValue = duration 
+        parameters.append(datasetParameter)
+
+    #4) parameter notes
+    if notes:
+        parameterType = factory.create("parameterType")
+        parameterType.id = config.get('ParameterType', 'notes')
+        parameterType.applicableToDataset = config.getboolean('ParameterType', 'notes_applicable_to_dataset')
+        datasetParameter = factory.create("datasetParameter")
+        datasetParameter.type = parameterType 
+        datasetParameter.stringValue = notes 
+        parameters.append(datasetParameter)
+
+    dataset.parameters = parameters
+
+    for dirpath, dirnames, filenames in os.walk(run_path):
+        for filename in [f for f in filenames]:
+            if filename.startswith('.') != True:
+                datafile = factory.create("datafile")
+                filepath = os.path.join(dirpath,filename)
+                extension = os.path.splitext(filename)[1][1:]
+                datafile.name = filename
+                datafile.location = filepath
+                dfFormat = factory.create("datafileFormat")
+                dfFormat.id = config.get('DatafileFormat', extension)
+                datafile.datafileFormat = dfFormat 
+                modTime = os.path.getmtime(filepath)
+                datafile.datafileCreateTime = xml.utils.iso8601.tostring(modTime)
+                datafile.fileSize = os.path.getsize(filepath)
+
+                datafiles.append(datafile)
+
+    dataset.datafiles = datafiles
+
+    samples = []
+    investigationUsers = []
+
+    for a ,nxclass in file.entries():
+
+        if nxclass == "NXsample":
+            sample = factory.create("sample")
+            file.opendata('name')
+            sample.name = file.getdata()
+            file.closedata()
+
+            sampleParameters = []
+
+            #set sample nature
+            file.opendata('nature')
+            nature = file.getdata()
+            file.closedata()
+            if nature:       
+                parameterType = factory.create("parameterType")
+                parameterType.id = config.get('ParameterType', 'nature')
+                parameterType.applicableToSample = config.getboolean('ParameterType', 'nature_applicable_to_sample')
+                sampleParameter = factory.create("sampleParameter")
+                sampleParameter.type = parameterType
+                sampleParameter.stringValue = nature 
+                sampleParameters.append(sampleParameter)
+        
+            file.opendata('identifier')
+            identifier = file.getdata()
+            file.closedata()
+  
+            if identifier:
+                parameterType = factory.create("parameterType")
+                parameterType.id = config.get('ParameterType', 'identifier')
+                parameterType.applicableToSample = config.getboolean('ParameterType', 'identifier_applicable_to_sample')
+                sampleParameter = factory.create("sampleParameter")
+                sampleParameter.type = parameterType
+                sampleParameter.stringValue = identifier
+                sampleParameters.append(sampleParameter)
+        
+            sample.parameters = sampleParameters
+            samples.append(sample)
+
+        if nxclass == "NXuser":
+            a = "a"
+            #investigationUser = setInvestigationUser(file, sessionId, factory, service)
+            #investigationUsers.append(investigationUser)
+
+    #investigation.investigationUsers = investigationUsers
+
+    file.closegroup()
+    file.close()
+    if createInv == True:
+        #Create new investigation
+        datasets = []
+        datasets.append(dataset)
+        investigation.datasets = datasets
+        investigation.samples = samples
+        print "Creating new investigation: ", str(datetime.now()) 
+        invId = service.create(sessionId, investigation)
+
+        print "Getting dataset: ", str(datetime.now()) 
+        newInvestigations = service.search(sessionId, "Investigation INCLUDE Dataset [id = '" + str(invId) + "']")
+        
+        if len(newInvestigations) == 1:
+            newInvestigation = newInvestigations[0]
+        
+        if len(newInvestigation.datasets) == 1:
+            newDatasets = newInvestigation.datasets
+            newDataset = newDatasets[0]
+        
+        print "Getting sample ", str(datetime.now()) 
+        newInvestigations = service.search(sessionId, "Investigation INCLUDE Sample [id = '" + str(invId) + "']")
+        
+        if len(newInvestigations) == 1:
+            newInvestigation = newInvestigations[0]
+            newSamples = newInvestigation.samples
+        
+        newDataset.sample = newSamples
+        newDataset.investigation = newInvestigation
+        newDataset.type = dsType
+        print "Updating dataset: ", str(datetime.now()) 
+        service.update(sessionId, newDataset)
+
+    else:
+        #Found investigation, may create new sample or add new dataset
+        print "Searching investigation and dataset ", str(datetime.now()) 
+        investigations = service.search(sessionId, "Investigation [name = '" + investigation.name + "'] <-> Dataset [name = '" + dataset.name + "']")
+        if len(investigations) == 0:
+            createSample = True 
+            for invSample in investigation.samples:
+                if invSample.name == sample.name: 
+                    createSample = False 
+                    sample = invSample
+                    break
+
+            if createSample == True:
+                sample.investigation = investigation
+                print "Adding new sample to existing investigation: ", str(datetime.now()) 
+                sample.id = service.create(sessionId, sample)
+ 
+            dataset.investigation = investigation
+            dataset.sample = sample 
+            dataset.type = dsType
+            print "Adding new dataset to investigation: ", str(datetime.now()) 
+            service.create(sessionId, dataset)
+        else:
+            print "Run " + runNumber + " is already cataloged."
+         
+
+    print "INVESTIGATION:"
+    print "  NAME: %s"%(str(investigation.name))
+
+    print "DATASET:"
+    print "  RUN NUMBER: %s"%(str(dataset.name))
+    print "  TITLE: %s"%(str(dataset.description))
+    print "  START TIME: %s"%(str(dataset.startDate))
+    print "  END TIME: %s"%(str(dataset.endDate))
+
+    '''for datafile in dataset.datafiles:
+        print "DATAFILE:"
+        print "  NAME: %s"%(str(datafile.name))
+        print "  LOCATION: %s"%(str(datafile.location))'''
+
+    print "SAMPLE: "
+    print "  NAME: %s"%(str(sample.name))
+
+    return investigation
+
+
+def setInvestigationUser(file, sessionId, factory, service):
+    file.opendata('facility_user_id')
+    facility_user_id = file.getdata()
+    file.closedata()
+
+    user = factory.create("user")
+    user.name = "Hello" 
+    #service.create(sessionId, user)
+
+    investigationUser = factory.create("investigationUser")
+    investigationUser.user = user
+
+    '''print "facility_user_id: %s"%(facility_user_id)
+    searchKey = "User [name = '" + facility_user_id + "']"
+    users = service.search(sessionId, searchKey)
+
+    investigationUser = factory.create("investigationUser")
+
+    for user in users:
+        print user.name
+
+    if len(users) != 1:
+        print "Couldn't find user: %s"%(facility_user_id)
+        user = factory.create("user")
+        user.name = facility_user_id
+        file.opendata('name')
+        user.fullName = file.getdata()
+        file.closedata()
+        service.create(sessionId, user)
+        investigationUser.user = user 
+    else :
+        print "Found user: %s"%(facility_user_id)
+        #investigationUser.user = users[0]        
+        user = factory.create("user")
+        user.name = "Hello" 
+        investigationUser.user = user'''
+    return investigationUser
+
+def main(argv):
+    args = sys.argv[1:]
+    if len(args) != 3:
+        usage()
+
+    infilename = args[0]
+    hostAndPort = args[1]
+    password = args[2]
+
+    client = Client("https://" + hostAndPort + "/ICATService/ICAT?wsdl")
+    service = client.service
+    factory = client.factory
+
+    print "Begin login at: ", str(datetime.now()) 
+    sessionId = service.login("root", password)
+    print "End login at: ", str(datetime.now()) 
+
+    print "Begin ingestNexus at: ", str(datetime.now()) 
+    investigation = ingestNexus(infilename, sessionId, service, factory)
+    print "End ingestNexus at: ", str(datetime.now()) 
+
+    print "Begin logout at: ", str(datetime.now()) 
+    service.logout(sessionId)
+    print "End logout at: ", str(datetime.now()) 
+
+if __name__ == "__main__":
+   main(sys.argv[1:])
