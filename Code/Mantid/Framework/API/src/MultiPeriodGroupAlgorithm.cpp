@@ -81,7 +81,7 @@ bool MultiPeriodGroupAlgorithm::checkGroups()
 
   // Perform a check that the input property is the correct type.
   Property* inputProperty = this->getProperty(this->fetchInputPropertyName());
-  if(!dynamic_cast<ArrayProperty<std::string>*>(inputProperty))
+  if(!dynamic_cast<ArrayProperty<std::string>* >(inputProperty))
   {
     throw std::runtime_error("Support for input workspaces that are not string Arrays are not currently supported.");
     /*Note that we could extend this algorithm to cover other input property types if required, but we don't need that funtionality now.*/
