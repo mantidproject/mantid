@@ -547,11 +547,11 @@ public:
     if (alg->chunk != EMPTY_INT() && alg->chunk <= alg->totalChunksE *(alg->totalChunks/alg->totalChunksE))
     {
       int chunkE = (alg->chunk - 1) % alg->totalChunksE + 1;
-      size_t max_events = stop_event - start_event + 1;
+      size_t max_events = stop_event - start_event;
       size_t chunk_events = max_events/alg->totalChunksE;
       start_event += (chunkE - 1) * chunk_events;
       // Don't change stop_event for the final chunk
-      if ( chunkE != alg->totalChunksE ) stop_event = start_event + chunk_events - 1;
+      if ( chunkE != alg->totalChunksE ) stop_event = start_event + chunk_events;
     }
 
     // Make sure it is within range
