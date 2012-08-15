@@ -79,7 +79,7 @@ void MuonAnalysisOptionTab::initLayout()
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisStartAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
   connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(returnPressed ()), this, SIGNAL(settingsTabUpdatePlot()));
-  
+  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(editingFinished()), this, SLOT(storeCustomTimeValue()));
   // Validate
   connect(m_uiForm.yAxisMinimumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMinimumInput()));
   connect(m_uiForm.yAxisMaximumInput, SIGNAL(editingFinished ()), this, SLOT(runyAxisMaximumInput()));
@@ -200,16 +200,19 @@ void MuonAnalysisOptionTab::runyAxisAutoscale(bool state)
 */
 void MuonAnalysisOptionTab::runTimeComboBox(int index)
 {
-  if ( index == 1 ) // Start at Time Zero
+  switch(index)
   {
-    m_uiForm.timeAxisStartAtInput->setEnabled(false);
-    m_uiForm.timeAxisStartAtInput->setText("0");
-  }
-
-  if ( index == 0 ) // Start at First Good Data
-  {
+  case(0): // Start at First Good Data
     m_uiForm.timeAxisStartAtInput->setEnabled(false);
     m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
+    break;
+  case(1): // Start at Time Zero
+    m_uiForm.timeAxisStartAtInput->setEnabled(false);
+    m_uiForm.timeAxisStartAtInput->setText("0");
+    break;
+  case(2): // Custom Value
+    m_uiForm.timeAxisStartAtInput->setEnabled(true);
+    m_uiForm.timeAxisStartAtInput->setText(m_customTimeValue);
   }
 
   // save this new choice
@@ -441,15 +444,33 @@ void MuonAnalysisOptionTab::openDirectoryDialog()
 }
 
 /// Set the *stored" yAxisMinimum value.
-void MuonAnalysisOptionTab::setStoredYAxisMinimum(QString yAxisMinimum)
+void MuonAnalysisOptionTab::setStoredYAxisMinimum(const QString & yAxisMinimum)
 {
   m_yAxisMinimum = yAxisMinimum;
 }
 
 /// Set the *stored" yAxisMaximum value.
-void MuonAnalysisOptionTab::setStoredYAxisMaximum(QString yAxisMaximum)
+void MuonAnalysisOptionTab::setStoredYAxisMaximum(const QString & yAxisMaximum)
 {
   m_yAxisMaximum = yAxisMaximum;
+}
+
+/// Set the stored custom time value.
+void MuonAnalysisOptionTab::setStoredCustomTimeValue(const QString & storedCustomTimeValue)
+{
+  m_customTimeValue = storedCustomTimeValue;
+}
+
+///
+void MuonAnalysisOptionTab::storeCustomTimeValue()
+{
+  if( m_uiForm.timeComboBox->currentIndex() == 2 )
+  {
+    m_customTimeValue = m_uiForm.timeAxisStartAtInput->text();
+    QSettings group;
+    group.beginGroup(m_settingsGroup + "plotStyleOptions");
+    group.setValue("customTimeValue", m_customTimeValue);
+  }
 }
 
 }

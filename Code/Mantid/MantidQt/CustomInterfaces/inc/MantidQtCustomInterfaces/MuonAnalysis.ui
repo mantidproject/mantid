@@ -1894,6 +1894,11 @@ p, li { white-space: pre-wrap; }
                   <string>Start at Time Zero</string>
                  </property>
                 </item>
+                <item>
+                 <property name="text">
+                  <string>Custom Value</string>
+                 </property>
+                </item>
                </widget>
               </item>
               <item row="0" column="0">

@@ -2965,15 +2965,18 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   // load Plot Style options
   QSettings prevPlotStyle;
   prevPlotStyle.beginGroup(group + "plotStyleOptions");
-  int timeComboBoxIndex = prevPlotStyle.value("timeComboBoxIndex", 0).toInt();
-  m_uiForm.timeComboBox->setCurrentIndex(timeComboBoxIndex);
-  m_optionTab->runTimeComboBox(timeComboBoxIndex);
 
   double timeAxisStart = prevPlotStyle.value("timeAxisStart", 0.3).toDouble();
   double timeAxisFinish = prevPlotStyle.value("timeAxisFinish", 16.0).toDouble();
 
   m_uiForm.timeAxisStartAtInput->setText(QString::number(timeAxisStart));
   m_uiForm.timeAxisFinishAtInput->setText(QString::number(timeAxisFinish));
+
+  m_optionTab->setStoredCustomTimeValue(prevPlotStyle.value("customTimeValue").toString());
+  
+  int timeComboBoxIndex = prevPlotStyle.value("timeComboBoxIndex", 0).toInt();
+  m_uiForm.timeComboBox->setCurrentIndex(timeComboBoxIndex);
+  m_optionTab->runTimeComboBox(timeComboBoxIndex);
 
   bool axisAutoScaleOnOff = prevPlotStyle.value("axisAutoScaleOnOff", 1).toBool();
   m_uiForm.yAxisAutoscale->setChecked(axisAutoScaleOnOff);

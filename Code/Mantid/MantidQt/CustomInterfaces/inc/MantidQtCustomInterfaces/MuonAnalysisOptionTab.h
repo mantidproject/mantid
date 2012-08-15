@@ -61,7 +61,7 @@ class MuonAnalysisOptionTab : public QWidget
  Q_OBJECT
 public:
   /// Constructor
-  MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& group) : m_uiForm(uiForm), m_settingsGroup(group), m_yAxisMinimum(), m_yAxisMaximum() {}
+  MuonAnalysisOptionTab(Ui::MuonAnalysis& uiForm, const QString& group) : m_uiForm(uiForm), m_settingsGroup(group), m_yAxisMinimum(), m_yAxisMaximum(), m_customTimeValue() {}
 
   /// Initialise the layout of Muon Analysis.
   void initLayout();
@@ -73,11 +73,13 @@ public:
   void nowDataAvailable();
 
   /// Set the *stored" yAxisMinimum value.
-  void setStoredYAxisMinimum(QString yAxisMinimum);
+  void setStoredYAxisMinimum(const QString & yAxisMinimum);
 
   /// Set the *stored" yAxisMaximum value.
-  void setStoredYAxisMaximum(QString yAxisMaximum);
+  void setStoredYAxisMaximum(const QString & yAxisMaximum);
 
+  /// Set the stored custom time value.
+  void setStoredCustomTimeValue(const QString & storedCustomTimeValue);
 
 public slots:
   /// Set the run time in muon analysis and save into settings.
@@ -110,6 +112,9 @@ private:
 
   /// Store value when autoscale has been selected, for when it is deselected again.
   QString m_yAxisMaximum;
+
+  /// Store the user's custom time value.
+  QString m_customTimeValue;
 
 private slots:  
   /// Save the settings for time axis start and validate the entry.
@@ -159,6 +164,9 @@ private slots:
   
   /// Opens the managed directory dialog for easier access for the user.
   void openDirectoryDialog();
+
+  /// Stores the custom time value.
+  void storeCustomTimeValue();
 };
 
 }
