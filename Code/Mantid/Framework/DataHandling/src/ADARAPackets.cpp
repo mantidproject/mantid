@@ -139,8 +139,17 @@ const Event * BankedEventPkt::firstEvent() const
   m_eventCount = m_fields[m_bankStartIndex + 1];
 
   m_curFieldIndex = m_bankStartIndex+2;
-  m_curEvent = (const Event *)&m_fields[m_curFieldIndex];
 
+  // Check to see if we've already passed the end of the packet.  (ie: the packet
+  // had no events)
+  if (m_curFieldIndex > m_lastFieldIndex)
+  {
+    m_curEvent = NULL;
+  }
+  else
+  {
+    m_curEvent = (const Event *)&m_fields[m_curFieldIndex];
+  }
 
   return m_curEvent;
 }
