@@ -84,6 +84,18 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ScriptEditor : public QsciScintilla
   Q_OBJECT;
 
 public:
+  /**
+   * Exception type to indicate that saving was cancelled
+   */
+  class SaveCancelledException : public std::exception
+  {
+  public:
+    /// Return a message
+    const char* what() const throw() { return "File saving was cancelled"; }
+  };
+
+
+public:
   /// Constructor
   ScriptEditor(QWidget* parent = 0, QsciLexer* lexer = NULL);
   ///Destructor
@@ -136,7 +148,7 @@ public slots:
   /// Save to the current filename, opening a dialog if blank
   void saveToCurrentFile();
   /// Save a the text to the given filename
-  bool saveScript(const QString & filename);
+  void saveScript(const QString & filename);
 
   /// Ensure the margin width is big enough to hold everything + padding
   void padMargin();

@@ -8,6 +8,8 @@
 #include "ScriptingLangDialog.h"
 #include "MultiTabScriptInterpreter.h"
 
+#include "MantidQtMantidWidgets/ScriptEditor.h"
+
 // Qt
 #include <QPoint>
 #include <QAction>
@@ -17,6 +19,9 @@
 #include <QTabBar>
 #include <QFileInfo>
 #include <QFileDialog>
+
+// std
+#include <stdexcept>
 
 //***************************************************************************
 //
@@ -127,15 +132,31 @@ void MultiTabScriptInterpreter::openRecentScript(int index)
 /// Save current file
 void MultiTabScriptInterpreter::saveToCurrentFile()
 {
-  m_current->saveToCurrentFile();
-  setTabTitle(m_current, m_current->filename());
+  try
+  {
+    m_current->saveToCurrentFile();
+    setTabTitle(m_current, m_current->filename());
+  }
+  catch(ScriptEditor::SaveCancelledException&) {}
+  catch(std::runtime_error& exc)
+  {
+    QMessageBox::critical(this, tr("MantidPlot"), tr(exc.what()));
+  }
 }
 
 /// Save to new file
 void MultiTabScriptInterpreter::saveAs()
 {
-  m_current->saveAs();
-  setTabTitle(m_current, m_current->filename());
+  try
+  {
+    m_current->saveAs();
+    setTabTitle(m_current, m_current->filename());
+  }
+  catch(ScriptEditor::SaveCancelledException&) {}
+  catch(std::runtime_error& exc)
+  {
+    QMessageBox::critical(this, tr("MantidPlot"), tr(exc.what()));
+  }
 }
 
 /// Print the current script

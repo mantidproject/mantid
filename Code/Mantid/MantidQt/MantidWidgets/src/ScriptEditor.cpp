@@ -32,6 +32,7 @@
 // std
 #include <cmath>
 #include <iostream>
+#include <stdexcept>
 
 //***************************************************************************
 //
@@ -255,7 +256,10 @@ void ScriptEditor::saveAs()
   QString filter = "Scripts (*.py *.PY);;All Files (*)";
   QString filename = QFileDialog::getSaveFileName(NULL, "MantidPlot - Save", "",filter, &selectedFilter);
 
-  if( filename.isEmpty() ) return;
+  if( filename.isEmpty() )
+  {
+    throw SaveCancelledException();
+  }
   if( QFileInfo(filename).suffix().isEmpty() )
   {
     QString ext = selectedFilter.section('(',1).section(' ', 0, 0);
@@ -283,23 +287,21 @@ void ScriptEditor::saveToCurrentFile()
 /**
  * Save the text to the given filename
  * @param filename :: The filename to use
+ * @throws std::runtime_error if the file could not be opened
  */
-bool ScriptEditor::saveScript(const QString & filename)
+void ScriptEditor::saveScript(const QString & filename)
 {
   QFile file(filename);
   if( !file.open(QIODevice::WriteOnly) )
   {
-    QMessageBox::critical(this, tr("MantidPlot - File error"), 
-        tr("Could not open file \"%1\" for writing.").arg(filename));
-    return false;
+    QString msg = QString("Could not open file \"%1\" for writing.").arg(filename);
+    throw std::runtime_error(msg.toAscii().data());
   }
 
   m_filename = filename;
   writeToDevice(file);
   file.close();
   setModified(false);
-
-  return true;
 }
 
 /**
