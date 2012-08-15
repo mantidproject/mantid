@@ -141,11 +141,12 @@ set ( INC_FILES
 	inc/MantidKernel/Glob.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
-	inc/MantidKernel/ISaveable.h
-	inc/MantidKernel/IValidator.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/Interpolation.h
+  inc/MantidKernel/ISaveable.h
+  inc/MantidKernel/ITimeSeriesProperty.h
+  inc/MantidKernel/IValidator.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h

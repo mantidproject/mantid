@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
@@ -126,7 +127,7 @@ namespace Mantid
        Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
     template<typename TYPE>
-    class DLLExport TimeSeriesProperty : public Property
+    class DLLExport TimeSeriesProperty : public Property, public ITimeSeriesProperty
     {
     public:
       /// Constructor
@@ -210,6 +211,8 @@ namespace Mantid
       /// Set a property from a DataItem
       std::string setDataItem(const boost::shared_ptr<DataItem>);
 
+      /// Deletes the series of values in the property
+      void clear();
       /// Clears and creates a TimeSeriesProperty from these parameters
       void create(const Kernel::DateAndTime &start_time, const std::vector<double> & time_sec, const std::vector<TYPE> & new_values);
       /// Clears and creates a TimeSeriesProperty from these parameters
@@ -271,20 +274,20 @@ namespace Mantid
       virtual std::string setValueFromProperty( const Property& right );
 
       /// Holds the time series data
-      mutable std::vector<TimeValueUnit<TYPE> > mP;
+      mutable std::vector<TimeValueUnit<TYPE> > m_values;
 
       /// The number of values (or time intervals) in the time series. It can be different from m_propertySeries.size()
       mutable int m_size;
 
       /// Flag to state whether mP is sorted or not
-      mutable bool mPropSortedFlag;
+      mutable bool m_propSortedFlag;
 
       /// The filter
-      mutable std::vector<std::pair<Kernel::DateAndTime, bool> > mFilter;
+      mutable std::vector<std::pair<Kernel::DateAndTime, bool> > m_filter;
       /// Quick reference regions for filter
-      mutable std::vector<std::pair<size_t, size_t> > mFilterQuickRef;
+      mutable std::vector<std::pair<size_t, size_t> > m_filterQuickRef;
       /// True if a filter has been applied
-      mutable bool mFilterApplied;
+      mutable bool m_filterApplied;
 
       /// Static reference to the logger class
       static Logger& g_log;
@@ -295,8 +298,8 @@ namespace Mantid
     Logger& TimeSeriesProperty<TYPE>::g_log = Logger::get("TimeSeriesProperty");
 
 
-     /// Function filtering double TimeSeriesProperties according to the requested statistics.
-     double DLLExport filterByStatistic(TimeSeriesProperty<double> const * const propertyToFilter, Kernel::Math::StatisticType statistic_type);
+    /// Function filtering double TimeSeriesProperties according to the requested statistics.
+    double DLLExport filterByStatistic(TimeSeriesProperty<double> const * const propertyToFilter, Kernel::Math::StatisticType statistic_type);
 
   } // namespace Kernel
 } // namespace Mantid
