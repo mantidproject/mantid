@@ -359,20 +359,30 @@ def get_mandatory_args(func_name, required_args ,*args, **kwargs):
 
 
 #------------------------------------------------------------------------------
+# Flag to indicate if warnings should be issued regarding errors on loading 
+__ISSUE_WARNINGS = True
 
 def translate():
     """
         Loop through the algorithms and register a function call 
         for each of them
     """
+    global __ISSUE_WARNINGS
     for algorithm in mtd._getRegisteredAlgorithms(include_hidden=True):
         name = algorithm[0]
         if specialization_exists(name):
             continue
         highest_version = max(algorithm[1])
-        # Create the algorithm object
-        _algm_object = mtd.createUnmanagedAlgorithm(name, max(algorithm[1]))
-        create_algorithm(name, highest_version, _algm_object)
-        create_algorithm_dialog(name, highest_version, _algm_object)
+        try:
+            # Create the algorithm object
+            _algm_object = mtd.createUnmanagedAlgorithm(name, max(algorithm[1]))
+            create_algorithm(name, highest_version, _algm_object)
+            create_algorithm_dialog(name, highest_version, _algm_object)
+        except Exception, exc:
+            if __ISSUE_WARNINGS: 
+                mtd.sendWarningMessage("Cannot load '%s' algorithm. Error='%s'" % (name,str(exc)))
+            continue
+    # After this has run once, turn the warnings off 
+    __ISSUE_WARNINGS = False
 
 translate()
