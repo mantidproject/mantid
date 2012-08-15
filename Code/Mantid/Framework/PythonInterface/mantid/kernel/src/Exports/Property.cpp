@@ -39,7 +39,8 @@ void export_Property()
                   "The property's doc string")
     .add_property("direction", &Mantid::Kernel::Property::direction,
                   "Input, Output, InOut or Unknown. See the Direction class")
-    .add_property("units", &Mantid::Kernel::Property::units, "The units attached to this property")
+    .add_property("units", make_function(&Mantid::Kernel::Property::units, return_value_policy<copy_const_reference>()),
+                  "The units attached to this property")
     .add_property("valueAsStr", &Mantid::Kernel::Property::value, "The value of the property as a string. "
                   "For some property types, e.g. Workspaces, it is useful to be able to refer to the string value directly")
     .add_property("allowedValues", &Mantid::Kernel::Property::allowedValues, "A list of allowed values")
