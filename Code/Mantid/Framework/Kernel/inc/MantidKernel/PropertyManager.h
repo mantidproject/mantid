@@ -91,6 +91,8 @@ public:
   /// Return the property manager serialized as a string.
   virtual std::string asString(bool withDefaultValues = false, char separator=',') const;
 
+  typedef boost::shared_ptr<PropertyManager> PropertyManager_sptr;
+
 protected:
   using IPropertyManager::declareProperty;
 

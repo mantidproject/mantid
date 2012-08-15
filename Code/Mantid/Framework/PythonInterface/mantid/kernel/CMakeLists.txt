@@ -36,6 +36,7 @@ set ( EXPORT_FILES
   src/Exports/UnitConversion.cpp
   src/Exports/UnitFactory.cpp
   src/Exports/DeltaEMode.cpp
+  src/Exports/PropertyManager.cpp
 )  
 
 set ( SRC_FILES
