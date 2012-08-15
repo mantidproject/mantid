@@ -511,8 +511,28 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    */
   Kernel::Property * Run::getProperty(const std::string & name) const
   {
-    Kernel::Property *p = m_manager.getProperty(name);
-    return p;
+    return m_manager.getProperty(name);
+  }
+
+  /** Clear out the contents of all logs of type TimeSeriesProperty.
+   *  Single-value properties will be left unchanged.
+   *
+   *  The method has been fully implemented here instead of as a pass-through to
+   *  PropertyManager to limit its visibility to Run clients.
+   */
+  void Run::clearTimeSeriesLogs()
+  {
+    auto & props = getProperties();
+
+    // Loop over the set of properties, identifying those that are time-series properties
+    // and then clearing them out.
+    for ( auto it = props.begin(); it != props.end(); ++it)
+    {
+      if ( auto tsp = dynamic_cast<ITimeSeriesProperty*>(*it) )
+      {
+        tsp->clear();
+      }
+    }
   }
 
   //-----------------------------------------------------------------------------------------------

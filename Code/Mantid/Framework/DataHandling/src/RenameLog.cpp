@@ -1,5 +1,6 @@
 #include "MantidDataHandling/RenameLog.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

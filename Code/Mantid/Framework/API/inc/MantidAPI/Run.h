@@ -5,14 +5,20 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Cache.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/Statistics.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include <vector>
 
 namespace Mantid
 {
+  namespace Kernel
+  {
+    template<typename TYPE>
+    class TimeSeriesProperty;
+  }
+
   namespace API
   {
 
@@ -48,8 +54,8 @@ namespace Mantid
     public:
       /// Default constructor
       Run();
-      /// Virtual destructor
-      virtual ~Run();
+      /// Destructor. Doesn't need to be virtual as long as nothing inherits from this class.
+      ~Run();
       /// Copy constructor
       Run(const Run& copy);
       /// Assignment operator
@@ -155,6 +161,9 @@ namespace Mantid
        */
       double getLogAsSingleValue(const std::string & name, Kernel::Math::StatisticType statistic = Kernel::Math::Mean) const { return getPropertyAsSingleValue(name, statistic); }
       
+      /// Empty the values out of all TimeSeriesProperty logs
+      void clearTimeSeriesLogs();
+
       /// Save the run to a NeXus file with a given group name
       void saveNexus(::NeXus::File * file, const std::string & group) const;
       /// Load the run from a NeXus file with a given group name
@@ -189,7 +198,7 @@ namespace Mantid
      * @param overwrite :: If true, a current value is overwritten. (Default: False)
      */
     template<class TYPE>
-      void Run::addProperty(const std::string & name, const TYPE & value, bool overwrite)
+    void Run::addProperty(const std::string & name, const TYPE & value, bool overwrite)
     {
       addProperty(new Kernel::PropertyWithValue<TYPE>(name, value), overwrite);
     }
@@ -203,7 +212,7 @@ namespace Mantid
      * @param overwrite :: If true, a current value is overwritten. (Default: False)
      */
     template<class TYPE>
-      void Run::addProperty(const std::string & name, const TYPE & value, const std::string& units, bool overwrite)
+    void Run::addProperty(const std::string & name, const TYPE & value, const std::string& units, bool overwrite)
     {
       Kernel::Property * newProp = new Kernel::PropertyWithValue<TYPE>(name, value);
       newProp->setUnits(units);
