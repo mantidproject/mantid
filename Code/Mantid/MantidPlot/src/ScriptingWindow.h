@@ -16,6 +16,7 @@ class QTextEdit;
 class QPoint;
 class QMenu;
 class QAction;
+class QActionGroup;
 class QCloseEvent;
 class QShowEvent;
 class QHideEvent;
@@ -62,24 +63,6 @@ signals:
   void closeMe();
   /// Tell others we are hiding
   void hideMe();
-  
-private:
-  /// Create menu bar
-  void initMenus();
-
-  /// Create all actions
-  void initActions();
-  /// Create the file actions
-  void initFileMenuActions();
-  /// Create the edit menu actions
-  void initEditMenuActions();
-  /// Create the execute menu actions
-  void initExecMenuActions();
-  /// Create the window menu actions
-  void initWindowMenuActions();
-
-  /// Accept a custom defined event
-  void customEvent(QEvent * event);
 
 private slots:
   /// Populate file menu
@@ -106,6 +89,32 @@ private slots:
   /// asks the manager to open it
   void openRecentScript(QAction*);
 
+  /// Execute all using the current mode option
+  void executeAll();
+  ///Execute selection using the current mode option
+  void executeSelection();
+
+private:
+  /// Create menu bar
+  void initMenus();
+
+  /// Create all actions
+  void initActions();
+  /// Create the file actions
+  void initFileMenuActions();
+  /// Create the edit menu actions
+  void initEditMenuActions();
+  /// Create the execute menu actions
+  void initExecMenuActions();
+  /// Create the window menu actions
+  void initWindowMenuActions();
+  /// Returns the current execution mode
+  Script::ExecutionMode getExecutionMode() const;
+
+  /// Accept a custom defined event
+  void customEvent(QEvent * event);
+
+
 private:
   /// The script editors' manager
   MultiTabScriptInterpreter *m_manager;
@@ -124,6 +133,12 @@ private:
   QMenu *m_runMenu;
   /// Execute menu actions
   QAction *m_execSelect, *m_execAll;
+  /// Execution mode menu
+  QMenu *m_execModeMenu;
+  /// Execute mode actions
+  QAction *m_execParallel, *m_execSerial;
+  /// Action group for execution mode
+  QActionGroup *m_execModeGroup;
   /// Window menu
   QMenu *m_windowMenu;
   /// Window actions

@@ -259,14 +259,16 @@ void MultiTabScriptInterpreter::paste()
 
 /**
  * Execute the highlighted code from the current tab
+ * *@param mode :: The mode used to execute
  */
 void MultiTabScriptInterpreter::executeAll(const Script::ExecutionMode mode)
 {
   m_current->executeAll(mode);
 }
 
-/**
- * Execute the whole script
+/* Execute the highlighted code from the current tab using the
+ * given execution mode
+ * @param mode :: The mode used to execute
  */
 void MultiTabScriptInterpreter::executeSelection(const Script::ExecutionMode mode)
 {

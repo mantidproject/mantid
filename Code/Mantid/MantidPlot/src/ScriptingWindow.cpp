@@ -163,142 +163,8 @@ void ScriptingWindow::executeCurrentTab(const Script::ExecutionMode mode)
 }
 
 //-------------------------------------------
-// Private non-slot member functions
+// Private slot member functions
 //-------------------------------------------
-/**
- * Accept a custom event and in this case test if it is a ScriptingChangeEvent
- * @param event :: The custom event
- */ 
-void ScriptingWindow::customEvent(QEvent *event)
-{
-  if( !m_manager->isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT )
-  {
-    ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent*>(event);
-    setWindowTitle("MantidPlot: " + sce->scriptingEnv()->languageName() + " Window");
-  }
-}
-
-/**
- *
- */
-void ScriptingWindow::updateWindowFlags()
-{
-  Qt::WindowFlags flags = Qt::Window;
-  if( m_alwaysOnTop->isChecked() )
-  {
-    flags |= Qt::WindowStaysOnTopHint;
-  }
-  setWindowFlags(flags);
-  //This is necessary due to the setWindowFlags function reparenting the window and causing is
-  //to hide itself
-  show();
-}
-
-/**
- *  Update menus based on current tab states. Called when
- *  the number of tabs changes
- *  @param ntabs :: The number of tabs now open
- */
-void ScriptingWindow::setMenuStates(int ntabs)
-{
-  const bool tabsOpen(ntabs > 0);
-  m_editMenu->setEnabled(tabsOpen);
-  m_runMenu->setEnabled(tabsOpen);
-}
-
-/**
- * Set the state of the execution actions/menu depending on the flag
- * @param state :: If the true the items are enabled, otherwise the are disabled
- */
-void ScriptingWindow::setEditActionsDisabled(bool state)
-{
-  m_editMenu->setDisabled(state);
-}
-
-/**
- * Set the state of the execution actions/menu depending on the flag
- * @param state :: If the true the items are enabled, otherwise the are disabled
- */
-void ScriptingWindow::setExecutionActionsDisabled(bool state)
-{
-  m_execSelect->setDisabled(state);
-  m_execAll->setDisabled(state);
-  m_runMenu->setDisabled(state);
-}
-
-/**
- * Maps the QAction to an index in the recent scripts list
- * @param item A pointer to the action that triggered the slot
- */
-void ScriptingWindow::openRecentScript(QAction* item)
-{
-  const QList<QAction*> actions = m_recentScripts->actions();
-  const int index = actions.indexOf(item);
-  assert(index >= 0);
-  m_manager->openRecentScript(index);
-}
-
-//-------------------------------------------
-// Private non-slot member functions
-//-------------------------------------------
-/**
- * calls MultiTabScriptInterpreter saveToString and  
- *  saves the currently opened script file names to a string
- */
-QString ScriptingWindow::saveToString()
-{
-  return m_manager->saveToString();
-}
-
-/**
- * Saves scripts file names to a string 
- * @param value If true a future close event will be accepted otherwise it will be ignored
- */
-void ScriptingWindow::acceptCloseEvent(const bool value)
-{
-  m_acceptClose = value;
-}
-
-/**
- * Initialise the menus
- */
-void ScriptingWindow::initMenus()
-{
-  initActions();
-
-  m_fileMenu = menuBar()->addMenu(tr("&File"));
-#ifdef SCRIPTING_DIALOG
-  m_scripting_lang = new QAction(tr("Scripting &language"), this);
-  connect(m_scripting_lang, SIGNAL(triggered()), this, SIGNAL(chooseScriptingLanguage()));
-#endif
-  connect(m_fileMenu, SIGNAL(aboutToShow()), this, SLOT(populateFileMenu()));
-
-
-  m_editMenu = menuBar()->addMenu(tr("&Edit"));
-  connect(m_editMenu, SIGNAL(aboutToShow()), this, SLOT(populateEditMenu()));
-  connect(m_manager, SIGNAL(executionStateChanged(bool)), this, SLOT(setEditActionsDisabled(bool)));
-
-  m_runMenu = menuBar()->addMenu(tr("E&xecute"));
-  connect(m_runMenu, SIGNAL(aboutToShow()), this, SLOT(populateExecMenu()));
-  connect(m_manager, SIGNAL(executionStateChanged(bool)), this, SLOT(setExecutionActionsDisabled(bool)));
-
-  m_windowMenu = menuBar()->addMenu(tr("&Window"));
-  connect(m_windowMenu, SIGNAL(aboutToShow()), this, SLOT(populateWindowMenu()));
-
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(setMenuStates(int)));
-
-  // The menu items must be populated for the shortcuts to work
-  populateFileMenu();
-  populateEditMenu();
-  populateExecMenu();
-  populateWindowMenu();
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateFileMenu()));
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateEditMenu()));
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateExecMenu()));
-  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateWindowMenu()));
-
-}
-
 /// Populate file menu
 void ScriptingWindow::populateFileMenu()
 {
@@ -361,6 +227,12 @@ void ScriptingWindow::populateExecMenu()
   m_runMenu->addAction(m_execSelect);
   m_runMenu->addAction(m_execAll);
 
+  m_runMenu->addSeparator();
+
+  m_execModeMenu->clear();
+  m_execModeMenu->addAction(m_execParallel);
+  m_execModeMenu->addAction(m_execSerial);
+  m_runMenu->addMenu(m_execModeMenu);
 }
 
 /// Populate window menu
@@ -383,6 +255,146 @@ void ScriptingWindow::populateWindowMenu()
     m_windowMenu->addAction(m_toggleFolding);
   }
 }
+
+/**
+ *
+ */
+void ScriptingWindow::updateWindowFlags()
+{
+  Qt::WindowFlags flags = Qt::Window;
+  if( m_alwaysOnTop->isChecked() )
+  {
+    flags |= Qt::WindowStaysOnTopHint;
+  }
+  setWindowFlags(flags);
+  //This is necessary due to the setWindowFlags function reparenting the window and causing is
+  //to hide itself
+  show();
+}
+
+/**
+ *  Update menus based on current tab states. Called when
+ *  the number of tabs changes
+ *  @param ntabs :: The number of tabs now open
+ */
+void ScriptingWindow::setMenuStates(int ntabs)
+{
+  const bool tabsOpen(ntabs > 0);
+  m_editMenu->setEnabled(tabsOpen);
+  m_runMenu->setEnabled(tabsOpen);
+}
+
+/**
+ * Set the state of the execution actions/menu depending on the flag
+ * @param state :: If the true the items are enabled, otherwise the are disabled
+ */
+void ScriptingWindow::setEditActionsDisabled(bool state)
+{
+  m_editMenu->setDisabled(state);
+}
+
+/**
+ * Set the state of the execution actions/menu depending on the flag
+ * @param state :: If the true the items are enabled, otherwise the are disabled
+ */
+void ScriptingWindow::setExecutionActionsDisabled(bool state)
+{
+  m_execSelect->setDisabled(state);
+  m_execAll->setDisabled(state);
+  m_execModeMenu->setDisabled(state);
+  m_runMenu->setDisabled(state);
+}
+
+/**
+ * Maps the QAction to an index in the recent scripts list
+ * @param item A pointer to the action that triggered the slot
+ */
+void ScriptingWindow::openRecentScript(QAction* item)
+{
+  const QList<QAction*> actions = m_recentScripts->actions();
+  const int index = actions.indexOf(item);
+  assert(index >= 0);
+  m_manager->openRecentScript(index);
+}
+
+/**
+ * Ask the manager to execute all code based on the currently selected mode
+ */
+void ScriptingWindow::executeAll()
+{
+  m_manager->executeAll(this->getExecutionMode());
+}
+
+/**
+ * Ask the manager to execute the current selection based on the currently selected mode
+ */
+void ScriptingWindow::executeSelection()
+{
+  m_manager->executeSelection(this->getExecutionMode());
+}
+
+/**
+ * calls MultiTabScriptInterpreter saveToString and  
+ *  saves the currently opened script file names to a string
+ */
+QString ScriptingWindow::saveToString()
+{
+  return m_manager->saveToString();
+}
+
+/**
+ * Saves scripts file names to a string 
+ * @param value If true a future close event will be accepted otherwise it will be ignored
+ */
+void ScriptingWindow::acceptCloseEvent(const bool value)
+{
+  m_acceptClose = value;
+}
+
+//-------------------------------------------
+// Private non-slot member functions
+//-------------------------------------------
+
+/**
+ * Initialise the menus
+ */
+void ScriptingWindow::initMenus()
+{
+  initActions();
+
+  m_fileMenu = menuBar()->addMenu(tr("&File"));
+#ifdef SCRIPTING_DIALOG
+  m_scripting_lang = new QAction(tr("Scripting &language"), this);
+  connect(m_scripting_lang, SIGNAL(triggered()), this, SIGNAL(chooseScriptingLanguage()));
+#endif
+  connect(m_fileMenu, SIGNAL(aboutToShow()), this, SLOT(populateFileMenu()));
+
+  m_editMenu = menuBar()->addMenu(tr("&Edit"));
+  connect(m_editMenu, SIGNAL(aboutToShow()), this, SLOT(populateEditMenu()));
+  connect(m_manager, SIGNAL(executionStateChanged(bool)), this, SLOT(setEditActionsDisabled(bool)));
+
+  m_runMenu = menuBar()->addMenu(tr("E&xecute"));
+  connect(m_runMenu, SIGNAL(aboutToShow()), this, SLOT(populateExecMenu()));
+  connect(m_manager, SIGNAL(executionStateChanged(bool)), this, SLOT(setExecutionActionsDisabled(bool)));
+  m_execModeMenu = new QMenu("Mode", this);
+
+  m_windowMenu = menuBar()->addMenu(tr("&Window"));
+  connect(m_windowMenu, SIGNAL(aboutToShow()), this, SLOT(populateWindowMenu()));
+
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(setMenuStates(int)));
+
+  // The menu items must be populated for the shortcuts to work
+  populateFileMenu();
+  populateEditMenu();
+  populateExecMenu();
+  populateWindowMenu();
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateFileMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateEditMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateExecMenu()));
+  connect(m_manager, SIGNAL(tabCountChanged(int)), this, SLOT(populateWindowMenu()));
+
+}
+
 
 /**
  *  Create all actions
@@ -472,17 +484,27 @@ void ScriptingWindow::initEditMenuActions()
 void ScriptingWindow::initExecMenuActions()
 {
   m_execSelect = new QAction(tr("E&xecute Selection"), this);
-  connect(m_execSelect, SIGNAL(triggered()), m_manager, SLOT(executeSelection()));
+  connect(m_execSelect, SIGNAL(triggered()), this, SLOT(executeSelection()));
 
   QList<QKeySequence> shortcuts;
   shortcuts << Qt::CTRL + Qt::Key_Return << Qt::CTRL + Qt::Key_Enter;
   m_execSelect->setShortcuts(shortcuts);
 
   m_execAll = new QAction(tr("Execute &All"), this);
-  connect(m_execAll, SIGNAL(triggered()), m_manager, SLOT(executeAll()));
+  connect(m_execAll, SIGNAL(triggered()), this, SLOT(executeAll()));
   shortcuts.clear();
   shortcuts << Qt::CTRL + Qt::SHIFT + Qt::Key_Return << Qt::CTRL + Qt::SHIFT + Qt::Key_Enter;
   m_execAll->setShortcuts(shortcuts);
+
+  m_execParallel = new QAction("Asynchronous", this);
+  m_execParallel->setCheckable(true);
+  m_execSerial = new QAction("Serialised", this);
+  m_execSerial->setCheckable(true);
+
+  m_execModeGroup = new QActionGroup(this);
+  m_execModeGroup->addAction(m_execParallel);
+  m_execModeGroup->addAction(m_execSerial);
+  m_execParallel->setChecked(true);
 }
 
 /**
@@ -524,4 +546,26 @@ void ScriptingWindow::initWindowMenuActions()
   m_toggleFolding = new QAction(tr("Code &Folding"), this);
   m_toggleFolding->setCheckable(true);
   connect(m_toggleFolding, SIGNAL(toggled(bool)), m_manager, SLOT(toggleCodeFolding(bool)));
+}
+
+/**
+ * Returns the current execution mode set in the menu
+ */
+Script::ExecutionMode ScriptingWindow::getExecutionMode() const
+{
+  if(m_execParallel->isChecked()) return Script::Asynchronous;
+  else return Script::Serialised;
+}
+
+/**
+ * Accept a custom event and in this case test if it is a ScriptingChangeEvent
+ * @param event :: The custom event
+ */
+void ScriptingWindow::customEvent(QEvent *event)
+{
+  if( !m_manager->isExecuting() && event->type() == SCRIPTING_CHANGE_EVENT )
+  {
+    ScriptingChangeEvent *sce = static_cast<ScriptingChangeEvent*>(event);
+    setWindowTitle("MantidPlot: " + sce->scriptingEnv()->languageName() + " Window");
+  }
 }

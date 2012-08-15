@@ -133,10 +133,10 @@ public slots:
 
   /** @name Execute members.*/
   //@{
-  /// Execute
-  void executeAll(const Script::ExecutionMode mode = Script::Asynchronous);
-  ///Execute all
-  void executeSelection(const Script::ExecutionMode mode = Script::Asynchronous);
+  /// Execute all using the given mode
+  void executeAll(const Script::ExecutionMode mode);
+  ///Execute selection using the given mode
+  void executeSelection(const Script::ExecutionMode mode);
   /// Evaluate
   void evaluate();
 
