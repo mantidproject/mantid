@@ -188,6 +188,14 @@ namespace WorkflowAlgorithms
         "Mask detectors below this threshold.");
     this->setPropertySettings("LowCounts",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    this->declareProperty("LowOutlier", 0.01,
+    	"Lower bound defining outliers as fraction of median value");
+    this->setPropertySettings("LowOutlier",
+    	new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    this->declareProperty("HighOutlier", 100.,
+    	"Upper bound defining outliers as fraction of median value");
+    this->setPropertySettings("HighOutlier",
+    	new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->declareProperty("MedianTestHigh", 3.0, mustBePositive,
         "Mask detectors above this threshold.");
     this->setPropertySettings("MedianTestHigh",
@@ -261,6 +269,8 @@ namespace WorkflowAlgorithms
     this->setPropertyGroup("OutputMaskFile", findBadDets);
     this->setPropertyGroup("HighCounts", findBadDets);
     this->setPropertyGroup("LowCounts", findBadDets);
+    this->setPropertyGroup("LowOutlier", findBadDets);
+    this->setPropertyGroup("HighOutlier", findBadDets);
     this->setPropertyGroup("MedianTestHigh", findBadDets);
     this->setPropertyGroup("MedianTestLow", findBadDets);
     this->setPropertyGroup("ErrorBarCriterion", findBadDets);

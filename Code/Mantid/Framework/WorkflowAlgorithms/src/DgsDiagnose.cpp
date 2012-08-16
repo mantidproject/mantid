@@ -111,6 +111,8 @@ namespace WorkflowAlgorithms
     // Numeric properties
     const double huge = reductionManager->getProperty("HighCounts");
     const double tiny = reductionManager->getProperty("LowCounts");
+    const double vanOutHi = reductionManager->getProperty("HighOutlier");
+    const double vanOutLo = reductionManager->getProperty("LowOutlier");
     const double vanHi = reductionManager->getProperty("MedianTestHigh");
     const double vanLo = reductionManager->getProperty("MedianTestLow");
     const double vanSigma = reductionManager->getProperty("ErrorBarCriterion");
@@ -256,6 +258,8 @@ namespace WorkflowAlgorithms
     diag->setProperty("SampleBackgroundWorkspace", backgroundIntWS);
     diag->setProperty("LowThreshold", tiny);
     diag->setProperty("HighThreshold", huge);
+    diag->setProperty("LowOutlier", vanOutLo);
+    diag->setProperty("HighOutlier", vanOutHi);
     diag->setProperty("LowThresholdFraction", vanLo);
     diag->setProperty("HighThresholdFraction", vanHi);
     diag->setProperty("SignificanceTest", vanSigma);
