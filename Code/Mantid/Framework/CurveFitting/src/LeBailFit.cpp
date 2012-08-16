@@ -9,6 +9,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/TextAxis.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -25,7 +26,7 @@ bool compDescending(int a, int b)
     return (a >= b);
 }
 
-// DECLARE_ALGORITHM(LeBailFit)
+DECLARE_ALGORITHM(LeBailFit)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -78,7 +79,7 @@ void LeBailFit::init()
     std::vector<std::string> functions;
     functions.push_back("LeBailFit");
     functions.push_back("Calculation");
-    // disable unctions.push_back("AutoSelectBackgroundPoints");
+    functions.push_back("CalculateBackground");
     auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
     this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
@@ -194,14 +195,20 @@ void LeBailFit::exec()
 
     g_log.information() << "LeBail Composite Function: " << mLeBailFunction->asString() << std::endl;
 
-    // 5. Create output workspace
+    // 5. Crop workspace if required
+    this->cropWorkspace();
+
+    // 6. Create output workspace
     size_t nspec = 3;
     if (functionmode == 0)
     {
         // Lebail Fit mode
         // (0) final calculated result (1) original data (2) difference
-        // (3) first calculation
-        nspec = 4;
+        // (3) fitted pattern w/o background
+        // (4) background (being fitted after peak)
+        // (5) calculation based on input only (no fit)
+        // (6) background (input)
+        nspec = 7;
     }
     else if (functionmode == 1)
     {
@@ -221,6 +228,33 @@ void LeBailFit::exec()
       outputWS->dataY(0)[i] = dataWS->readY(workspaceindex)[i];
     }
     outputWS->getAxis(0)->setUnit("TOF");
+    API::TextAxis* tAxis;
+
+    // b) Set Axis
+    if (functionmode == 0)
+    {
+        tAxis = new API::TextAxis(7);
+        tAxis->setLabel(0, "Data");
+        tAxis->setLabel(1, "Calc");
+        tAxis->setLabel(2, "Diff");
+        tAxis->setLabel(3, "CalcNoBkgd");
+        tAxis->setLabel(4, "OutBkgd");
+        tAxis->setLabel(5, "InpCalc");
+        tAxis->setLabel(6, "InBkgd");
+    }
+    else if (functionmode == 1)
+    {
+        tAxis = new API::TextAxis(nspec);
+        tAxis->setLabel(0, "Calc");
+        tAxis->setLabel(1, "CalcNoBkgd");
+        tAxis->setLabel(2, "Bkgd");
+        for (size_t i = 0; i < (nspec-3); ++i)
+        {
+            tAxis->setLabel(3+i, "Peak");
+        }
+    }
+
+    outputWS->replaceAxis(1, tAxis);
 
     this->setProperty("OutputWorkspace", outputWS);
 
@@ -400,139 +434,20 @@ bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, std::
     bool calpeakintensity = true;
     this->calculateDiffractionPattern(workspaceindex, domain, values, parammap, calpeakintensity);
 
-    // 2.5 Apply initial calculated result to output workspace
-    mWSIndexToWrite = 3;
+    // a) Apply initial calculated result to output workspace
+    mWSIndexToWrite = 5;
+    writeToOutputWorkspace(domain, values);
+
+    // b) Calculate input background
+    mBackgroundFunction->function(domain, values);
+    mWSIndexToWrite = 6;
     writeToOutputWorkspace(domain, values);
 
     // 3. Construct the tie.  2-level loop. (1) peak parameter (2) peak
-    std::map<std::string, std::pair<double, char> >::iterator pariter;
-    for (pariter = mFuncParameters.begin(); pariter != mFuncParameters.end(); ++pariter)
-    {
-        std::string parname = pariter->first;
-        double parvalue = pariter->second.first;
-        char fitortie = pariter->second.second;
-
-        // a) Check whether it is a parameter used in Peak
-        std::vector<std::string>::iterator sit;
-        sit = std::find(mPeakParameterNames.begin(), mPeakParameterNames.end(), parname);
-        if (sit == mPeakParameterNames.end())
-        {
-            // Not there
-            g_log.warning() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak. " << std::endl;
-            continue;
-        }
-
-        if (fitortie == 't')
-        {
-            // a) Tie the value to a constant number
-            std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator piter;
-            size_t peakindex = 0;
-            for (piter = mPeaks.begin(); piter != mPeaks.end(); ++piter)
-            {
-                std::stringstream ss1, ss2;
-                ss1 << "f" << peakindex << "." << parname;
-                ss2 << parvalue;
-                std::string tiepart1 = ss1.str();
-                std::string tievalue = ss2.str();
-                mLeBailFunction->tie(tiepart1, tievalue);
-                g_log.information() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
-
-                ++ peakindex;
-            } // For each peak
-        }
-        else
-        {
-            // b) Tie the values among all peaks, but will fit
-            for (size_t ipk = 1; ipk < mPeaks.size(); ++ipk)
-            {
-                std::stringstream ss1, ss2;
-                ss1 << "f" << (ipk-1) << "." << parname;
-                ss2 << "f" << ipk << "." << parname;
-                std::string tiepart1 = ss1.str();
-                std::string tiepart2 = ss2.str();
-                mLeBailFunction->tie(tiepart1, tiepart2);
-                g_log.information() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /" << std::endl;
-            }
-        }
-    }
+    this->setLeBailFitParameters();
 
     // 4. Construct the Fit
-    double tof_min = dataWS->dataX(workspaceindex)[0];
-    double tof_max = dataWS->dataX(workspaceindex).back();
-    std::vector<double> fitrange = this->getProperty("FitRegion");
-    if (fitrange.size() == 2 && fitrange[0] < fitrange[1])
-    {
-        // Properly defined
-        tof_min = fitrange[0];
-        tof_max = fitrange[1];
-    }
-
-    // a) Initialize
-    API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", 0.0, 0.2, true);
-    fitalg->initialize();
-
-    g_log.information() << "Function To Fit: " << mLeBailFunction->asString() << std::endl;
-
-    // b) Set property
-    fitalg->setProperty("Function", boost::shared_ptr<API::IFunction>(mLeBailFunction));
-    fitalg->setPropertyValue("InputWorkspace", dataWS->name());
-    fitalg->setProperty("WorkspaceIndex", int(workspaceindex));
-    fitalg->setProperty("StartX", tof_min);
-    fitalg->setProperty("EndX", tof_max);
-    fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
-    fitalg->setProperty("CostFunction", "Least squares");
-    fitalg->setProperty("MaxIterations", 100);
-
-    // c) Execute
-    bool successfulfit = fitalg->execute();
-    if (!fitalg->isExecuted() || ! successfulfit)
-    {
-        // Early return due to bad fit
-        g_log.error() << "Fitting to LeBail function failed. " << std::endl;
-        return false;
-    }
-
-    double chi2 = fitalg->getProperty("OutputChi2overDoF");
-    std::string fitstatus = fitalg->getProperty("OutputStatus");
-
-    g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 = " << chi2
-                   << " Fit Status = " << fitstatus << std::endl;
-
-    // b) Get parameters
-    API::IFunction_sptr fitout = fitalg->getProperty("Function");
-
-    std::vector<std::string> parnames = fitout->getParameterNames();
-    std::sort(parnames.begin(), parnames.end());
-
-    std::vector<std::string>::iterator nit;
-    for (nit = parnames.begin(); nit != parnames.end(); ++ nit)
-    {
-        std::string parname = *nit;
-        double curvalue = fitout->getParameter(parname);
-
-        // split parameter string
-        std::vector<std::string> results;
-        boost::split(results, parname, boost::is_any_of("."));
-
-        if (results.size() != 2)
-        {
-            g_log.error() << "Parameter name : " << parname << " does not have 1 and only 1 (.).  Cannot support!" << std::endl;
-            throw std::runtime_error("Unable to support parameter name to split.");
-        }
-
-        if (results[0].compare("f0") == 0)
-        {
-            g_log.debug() << "DB216 Parameter " << results[1] << ": " << curvalue << std::endl;
-
-            // Set to parammap
-            if (parammap[results[1]].second == 'f')
-            {
-                // Fit
-                parammap[results[1]] = std::make_pair(curvalue, 'f');
-                g_log.information() << "DB1105 Fit Parameter " << results[1] << " To  " << curvalue << std::endl;
-            }
-        }
-    }
+    this->fitLeBailFunction(workspaceindex, parammap);
 
     // 5. Do calculation again and set the output
     calpeakintensity = true;
@@ -540,7 +455,7 @@ bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, std::
     this->calculateDiffractionPattern(workspaceindex, domain, newvalues, parammap, calpeakintensity);
 
     // Add final calculated value to output workspace
-    mWSIndexToWrite = 0;
+    mWSIndexToWrite = 1;
     writeToOutputWorkspace(domain, newvalues);
 
     // Add original data and
@@ -548,6 +463,175 @@ bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, std::
 
     return true;
 }
+
+/*
+ * Split peaks to peak groups.  Peaks in same peak group are connected.
+ */
+std::vector<std::set<size_t> > LeBailFit::splitPeaksToGroups()
+{
+    throw std::runtime_error("This method should be refactored from some existing methods");
+
+    std::vector<std::set<size_t> > groups;
+
+    return groups;
+}
+
+
+/*
+ * Calculate background of the specified diffraction pattern
+ * by
+ * 1. fix the peak parameters but height;
+ * 2. fit only heights of the peaks in a peak-group and background coefficients (assumed order 2 or 3 polynomial)
+ * 3. remove peaks by the fitting result
+ */
+void LeBailFit::calBackground(size_t workspaceindex)
+{
+    // 1. Split all the peaks into groups
+    std::vector<std::set<size_t> > peakgroups;
+    peakgroups = this->splitPeaksToGroups(); // this can be refactored from some exisiting functions
+
+    // 2. Do fit for each peak group
+    for (size_t ipg = 0; ipg < peakgroups.size(); ++ipg)
+    {
+        // a. Construct the composite function
+        API::CompositeFunction tempfunction;
+        API::CompositeFunction_sptr groupedpeaks = boost::make_shared<API::CompositeFunction>(tempfunction);
+
+        /// Add peaks and set up peaks' parameters
+        for (size_t ipk = 0; ipk < peakgroups[ipg].size(); ++ipk)
+        {
+            // can be very wrong!
+            throw std::runtime_error("Implement it! Need to design a good data structure for peak groups. ");
+            groupedpeaks->addFunction(mPeaks[ipk]);
+
+            // ii. Set up peak function
+            std::vector<std::string> peakparamnames = mPeaks[ipk]->getParameterNames();
+            for (size_t im = 0; im < peakparamnames.size(); ++im)
+            {
+                std::string parname = peakparamnames[im];
+                if (parname.compare("Height"))
+                {
+                    double parvalue = mPeaks[ipk]->getParameter(parname);
+
+                    // If not peak height
+                    std::stringstream ssname, ssvalue;
+                    ssname << "f" << im << "." << parname;
+                    ssvalue << parvalue;
+                    groupedpeaks->tie(ssname.str(), ssvalue.str());
+                }
+            }
+        } // FOR 1 Peak in PeaksGroup
+
+        double tof_min, tof_max;
+        throw std::runtime_error("tof_min and tof_max are not calculated!");
+
+        /// Background (Polynomial)
+        std::vector<double> orderparm;
+        orderparm.push_back(0.0);
+        orderparm.push_back(0.0);
+        orderparm.push_back(0.0);
+        CurveFitting::BackgroundFunction_sptr backgroundfunc = this->generateBackgroundFunction("Polynomial", orderparm);
+
+        groupedpeaks->addFunction(backgroundfunc);
+
+
+        // b. Fit peaks in the peak group
+        API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", 0.0, double(ipg)*0.9/double(peakgroups.size()), true);
+        fitalg->initialize();
+
+        fitalg->setProperty("Function", boost::shared_ptr<API::IFunction>(groupedpeaks));
+        fitalg->setPropertyValue("InputWorkspace", dataWS->name());
+        fitalg->setProperty("WorkspaceIndex", int(workspaceindex));
+        fitalg->setProperty("StartX", tof_min);
+        fitalg->setProperty("EndX", tof_max);
+        fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+        fitalg->setProperty("CostFunction", "Least squares");
+        fitalg->setProperty("MaxIterations", 100);
+
+        // c. Execute
+        bool successfulfit = fitalg->execute();
+        if (!fitalg->isExecuted() || ! successfulfit)
+        {
+            // Early return due to bad fit
+            g_log.error() << "Fitting to LeBail function failed. " << std::endl;
+            continue;
+        }
+
+        double chi2 = fitalg->getProperty("OutputChi2overDoF");
+        std::string fitstatus = fitalg->getProperty("OutputStatus");
+
+        g_log.information() << "LeBailFit (Background) Fit result:  Chi^2 = " << chi2
+                       << " Fit Status = " << fitstatus << std::endl;
+
+        // d. Get status and fitted parameter
+        API::IFunction_sptr fitout = fitalg->getProperty("Function");
+
+        std::vector<std::string> parnames = fitout->getParameterNames();
+
+        for (size_t ipn = 0; ipn < parnames.size(); ++ipn)
+        {
+            std::string parname = parnames[ipn];
+            g_log.information() << "File Name = " << parname << std::endl;
+
+            double peakheight;
+            /// FIXME : make peakheight = ???
+            if (peakheight < 0)
+            {
+                g_log.error() << "Fit for peak ??? is wrong.  Peak height cannot be negative! " << std::endl;
+                peakheight = 0;
+            }
+        }
+        throw std::runtime_error("to be implemented after this!");
+
+        // e. Check peaks' heights that they must be positive or 0.
+        //    Give out warning if it doesn't seem right;
+
+
+    } // for all peak-groups
+
+    // 4. Combine output and calcualte for background
+    // Spectrum 0: Original data
+    // Spectrum 1: Background calculated (important output)
+    // Spectrum 2: Peaks without background
+
+    // a) Reset background function
+    std::vector<std::string> paramnames;
+    paramnames = mBackgroundFunction->getParameterNames();
+    std::vector<std::string>::iterator pariter;
+    for (pariter = paramnames.begin(); pariter != paramnames.end(); ++pariter)
+    {
+        mBackgroundFunction->setParameter(*pariter, 0.0);
+    }
+
+    API::FunctionDomain1DVector domain(dataWS->readX(workspaceindex));
+    API::FunctionValues values(domain);
+    mLeBailFunction->function(domain, values);
+
+    for (size_t i = 0; i < dataWS->readX(workspaceindex).size(); ++i)
+    {
+        outputWS->dataX(0)[i] = domain[i];
+        outputWS->dataX(1)[i] = domain[i];
+        outputWS->dataX(2)[i] = domain[i];
+
+        double y = outputWS->dataY(workspaceindex)[i];
+        outputWS->dataY(0)[i] = y;
+        outputWS->dataY(1)[i] = y-values[i];
+        outputWS->dataY(2)[i] = values[i];
+
+        double e = outputWS->dataE(workspaceindex)[i];
+        outputWS->dataE(0)[i] = e;
+        double eb = 1.0;
+        if ( fabs(outputWS->dataY(1)[i]) > 1.0)
+        {
+            eb = sqrt(fabs(outputWS->dataY(1)[i]));
+        }
+        outputWS->dataE(1)[i] = eb;
+        outputWS->dataE(2)[i] = sqrt(values[i]);
+    }
+
+    return;
+}
+
 
 /*
  * Calculate peak heights from the model to the observed data
@@ -565,8 +649,8 @@ void LeBailFit::calPeaksIntensities(std::vector<std::pair<int, double> >& peakhe
     peakheights.clear();
 
     // 1) Sort peaks list by HKL^2:
-    //    FIXME: This sorting scheme may be brokend, if the crystal is not cubical!
-    std::cout << "DBX122 PeakHKL2 Size = " << mPeakHKL2.size() << std::endl;
+    //    FIXME: This sorting scheme may be broken, if the crystal is not cubical!
+    g_log.information() << "DBX122 PeakHKL2 Size = " << mPeakHKL2.size() << std::endl;
     std::sort(mPeakHKL2.begin(), mPeakHKL2.end(), CurveFitting::compDescending);
 
     // 1. Calculate the FWHM of each peak: Only peakcenterpairs is in order of peak position.
@@ -807,6 +891,167 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> pea
     }
 
     return;
+}
+
+/*
+ * Set up the fit/tie/set-parameter for LeBail Fit (mode)
+ */
+void LeBailFit::setLeBailFitParameters()
+{
+    // 1. Set up all the peaks' parameters... tie to a constant value.. or fit by tieing same parameters of among peaks
+    std::map<std::string, std::pair<double, char> >::iterator pariter;
+    for (pariter = mFuncParameters.begin(); pariter != mFuncParameters.end(); ++pariter)
+    {
+        std::string parname = pariter->first;
+        double parvalue = pariter->second.first;
+        char fitortie = pariter->second.second;
+
+        // a) Check whether it is a parameter used in Peak
+        std::vector<std::string>::iterator sit;
+        sit = std::find(mPeakParameterNames.begin(), mPeakParameterNames.end(), parname);
+        if (sit == mPeakParameterNames.end())
+        {
+            // Not there
+            g_log.warning() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak. " << std::endl;
+            continue;
+        }
+
+        if (fitortie == 't')
+        {
+            // a) Tie the value to a constant number
+            std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator piter;
+            size_t peakindex = 0;
+            for (piter = mPeaks.begin(); piter != mPeaks.end(); ++piter)
+            {
+                std::stringstream ss1, ss2;
+                ss1 << "f" << peakindex << "." << parname;
+                ss2 << parvalue;
+                std::string tiepart1 = ss1.str();
+                std::string tievalue = ss2.str();
+                mLeBailFunction->tie(tiepart1, tievalue);
+                g_log.information() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
+
+                ++ peakindex;
+            } // For each peak
+        }
+        else
+        {
+            // b) Tie the values among all peaks, but will fit
+            for (size_t ipk = 1; ipk < mPeaks.size(); ++ipk)
+            {
+                std::stringstream ss1, ss2;
+                ss1 << "f" << (ipk-1) << "." << parname;
+                ss2 << "f" << ipk << "." << parname;
+                std::string tiepart1 = ss1.str();
+                std::string tiepart2 = ss2.str();
+                mLeBailFunction->tie(tiepart1, tiepart2);
+                g_log.information() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /" << std::endl;
+            }
+        }
+    } // FOR-peaks
+
+    // 2. Tie all background paramters to constants/current values
+    size_t funcindex = mPeaks.size();
+    std::vector<std::string> bkgdparnames = mBackgroundFunction->getParameterNames();
+    for (size_t ib = 0; ib < bkgdparnames.size(); ++ib)
+    {
+        std::string parname = bkgdparnames[ib];
+        double parvalue = mBackgroundFunction->getParameter(parname);
+        std::stringstream ss1, ss2;
+        ss1 << "f" << funcindex << "." << parname;
+        ss2 << parvalue;
+        std::string tiepart1 = ss1.str();
+        std::string tievalue = ss2.str();
+        mLeBailFunction->tie(tiepart1, tievalue);
+        g_log.information() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
+    }
+
+    return;
+}
+
+/*
+ * Fit LeBailFunction by calling Fit()
+ */
+bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, std::pair<double, char> > &parammap)
+{
+    double tof_min = dataWS->dataX(workspaceindex)[0];
+    double tof_max = dataWS->dataX(workspaceindex).back();
+    std::vector<double> fitrange = this->getProperty("FitRegion");
+    if (fitrange.size() == 2 && fitrange[0] < fitrange[1])
+    {
+        // Properly defined
+        tof_min = fitrange[0];
+        tof_max = fitrange[1];
+    }
+
+    // a) Initialize
+    API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", 0.0, 0.2, true);
+    fitalg->initialize();
+
+    g_log.information() << "Function To Fit: " << mLeBailFunction->asString() << std::endl;
+
+    // b) Set property
+    fitalg->setProperty("Function", boost::shared_ptr<API::IFunction>(mLeBailFunction));
+    fitalg->setPropertyValue("InputWorkspace", dataWS->name());
+    fitalg->setProperty("WorkspaceIndex", int(workspaceindex));
+    fitalg->setProperty("StartX", tof_min);
+    fitalg->setProperty("EndX", tof_max);
+    fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+    fitalg->setProperty("CostFunction", "Least squares");
+    fitalg->setProperty("MaxIterations", 100);
+
+    // c) Execute
+    bool successfulfit = fitalg->execute();
+    if (!fitalg->isExecuted() || ! successfulfit)
+    {
+        // Early return due to bad fit
+        g_log.error() << "Fitting to LeBail function failed. " << std::endl;
+        return false;
+    }
+
+    double chi2 = fitalg->getProperty("OutputChi2overDoF");
+    std::string fitstatus = fitalg->getProperty("OutputStatus");
+
+    g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 = " << chi2
+                   << " Fit Status = " << fitstatus << std::endl;
+
+    // b) Get parameters
+    API::IFunction_sptr fitout = fitalg->getProperty("Function");
+
+    std::vector<std::string> parnames = fitout->getParameterNames();
+    std::sort(parnames.begin(), parnames.end());
+
+    std::vector<std::string>::iterator nit;
+    for (nit = parnames.begin(); nit != parnames.end(); ++ nit)
+    {
+        std::string parname = *nit;
+        double curvalue = fitout->getParameter(parname);
+
+        // split parameter string
+        std::vector<std::string> results;
+        boost::split(results, parname, boost::is_any_of("."));
+
+        if (results.size() != 2)
+        {
+            g_log.error() << "Parameter name : " << parname << " does not have 1 and only 1 (.).  Cannot support!" << std::endl;
+            throw std::runtime_error("Unable to support parameter name to split.");
+        }
+
+        if (results[0].compare("f0") == 0)
+        {
+            g_log.debug() << "DB216 Parameter " << results[1] << ": " << curvalue << std::endl;
+
+            // Set to parammap
+            if (parammap[results[1]].second == 'f')
+            {
+                // Fit
+                parammap[results[1]] = std::make_pair(curvalue, 'f');
+                g_log.information() << "DB1105 Fit Parameter " << results[1] << " To  " << curvalue << std::endl;
+            }
+        }
+    }
+
+    return true;
 }
 
 /*
@@ -1052,8 +1297,10 @@ void LeBailFit::generatePeaksFromInput()
 /*
  * Generate background function accroding to input
  */
-void LeBailFit::generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws)
+CurveFitting::BackgroundFunction_sptr LeBailFit::generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws)
 {
+    g_log.error() << "ERRORx305 mBackgroundFunction should be replaced by a local variable and returned. " << std::endl;
+
     auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
     mBackgroundFunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(background);
 
@@ -1075,11 +1322,9 @@ void LeBailFit::generateBackgroundFunction(std::string backgroundtype, std::vect
         background->setParameter(parname, bkgdparamws[i]);
     }
 
-    // FIXME Requires a background shared_pointer
+    g_log.information() << "DBx423: My Background Function: " << mBackgroundFunction->asString() << std::endl;
 
-    std::cout << "DBx423: My Background Function: " << mBackgroundFunction->asString() << std::endl;
-
-    return;
+    return mBackgroundFunction;
 }
 
 /*
@@ -1326,21 +1571,36 @@ void LeBailFit::writeToOutputWorkspace(API::FunctionDomain1DVector domain,  API:
 }
 
 /*
- * Write orignal data and difference b/w data and model to
+ * Crop workspace if user required
+ */
+void LeBailFit::cropWorkspace()
+{
+    std::vector<double> fitrange = this->getProperty("FitRegion");
+    if (fitrange.size() == 2)
+    {
+        throw std::runtime_error("CropWorkspace() To Be Implemented Soon!");
+    }
+
+    return;
+}
+
+/*
+ * Write orignal data and difference b/w data and model to output's workspace
+ * index 0 and 2
  */
 void LeBailFit::writeInputDataNDiff(size_t workspaceindex, API::FunctionDomain1DVector domain)
 {
     // 1. X-axis
     for (size_t i = 0; i < domain.size(); ++i)
     {
-        outputWS->dataX(1)[i] = domain[i];
+        outputWS->dataX(0)[i] = domain[i];
         outputWS->dataX(2)[i] = domain[i];
     }
 
     // 2. Add data and difference to output workspace (spectrum 1)
     for (size_t i = 0; i < dataWS->readY(workspaceindex).size(); ++i)
     {
-        double modelvalue = outputWS->readY(0)[i];
+        double modelvalue = outputWS->readY(1)[i];
         double inputvalue = dataWS->readY(workspaceindex)[i];
         double diff = modelvalue - inputvalue;
         outputWS->dataY(1)[i] = inputvalue;
