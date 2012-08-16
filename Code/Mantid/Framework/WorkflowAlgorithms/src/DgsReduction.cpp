@@ -21,7 +21,7 @@ parameters and generating calls to other workflow or standard algorithms.
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <strstream>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

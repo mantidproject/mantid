@@ -206,6 +206,11 @@ endif ()
 
 target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
 
+# Disable Intel compiler coming from boost python code
+if ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" )
+  add_definitions ( -wd1875 )
+endif ()
+
 ###########################################################################
 # Unit tests setup
 ###########################################################################
