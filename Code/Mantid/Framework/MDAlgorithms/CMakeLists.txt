@@ -140,65 +140,65 @@ set ( INC_FILES
 # Test files. Other source files required.
 set ( TEST_FILES
 	#
-	#	test/ConvertToMDEventsCoordTransfTest.h
+	#	ConvertToMDEventsCoordTransfTest.h
 	# these tests are as they test verify different parts of the CPR algorithms
-	#test/CreateMDFitWorkspaceTest.h
-	test/AndMDTest.h
-	test/BooleanBinaryOperationMDTest.h
-	test/CachedExperimentInfoTest.h
-	test/CobaltSWDTest.h
-	test/CompareMDWorkspacesTest.h
-	test/ConvertEventsToMDTest.h
-	test/ConvertToDetectorFaceMDTest.h
-	test/ConvertToMDTest.h
-	test/ConvertToMDTestPerformance.h
-	test/ConvertToQ3DdETest.h
-	test/DampedHisenbergFMSWTest.h
-	test/DivideMDTest.h
-	test/EqualToMDTest.h
-	test/ExponentialMDTest.h
-	test/FitResolutionConvolvedModelTest.h
-	test/ForegroundModelTest.h
-	test/GreaterThanMDTest.h
-	test/InvalidParameterParserTest.h
-	test/InvalidParameterTest.h
-	test/LessThanMDTest.h
-	test/LogarithmMDTest.h
-	test/MDResolutionConvolutionFactoryTest.h
-	test/MagneticFormFactorTest.h
-	test/MaskMDTest.h
-	test/MergeMDFilesTest.h
-	test/MergeMDTest.h
-	test/MinusMDTest.h
-	test/ModeratorChopperResolutionTest.h
-	test/MultiplyMDTest.h
-	test/NotMDTest.h
-	test/OrMDTest.h
-	test/PlusMDTest.h
-	test/PowerMDTest.h
-	test/QuadEnBackgroundTest.h
-	test/ResolutionConvolvedCrossSectionTest.h
-	test/RunParamTest.h
-	test/SaveZODSTest.h
-	test/SetMDUsingMaskTest.h
-	test/SimulateMDDTest.h
-	test/SimulateResolutionConvolvedModelTest.h
-	test/SimulateResolutionTest.h
-	test/Strontium122Test.h
-	test/TobyFitBMatrixTest.h
-	test/TobyFitResolutionModelTest.h
-	test/TobyFitSimulateTest.h
-	test/TobyFitYVectorTest.h
-	test/TransformMDTest.h
-	test/UnaryOperationMDTest.h
-	test/WeightedMeanMDTest.h
-	test/XorMDTest.h
+	#CreateMDFitWorkspaceTest.h
+	AndMDTest.h
+	BooleanBinaryOperationMDTest.h
+	CachedExperimentInfoTest.h
+	CobaltSWDTest.h
+	CompareMDWorkspacesTest.h
+	ConvertEventsToMDTest.h
+	ConvertToDetectorFaceMDTest.h
+	ConvertToMDTest.h
+	ConvertToMDTestPerformance.h
+	ConvertToQ3DdETest.h
+	DampedHisenbergFMSWTest.h
+	DivideMDTest.h
+	EqualToMDTest.h
+	ExponentialMDTest.h
+	FitResolutionConvolvedModelTest.h
+	ForegroundModelTest.h
+	GreaterThanMDTest.h
+	InvalidParameterParserTest.h
+	InvalidParameterTest.h
+	LessThanMDTest.h
+	LogarithmMDTest.h
+	MDResolutionConvolutionFactoryTest.h
+	MagneticFormFactorTest.h
+	MaskMDTest.h
+	MergeMDFilesTest.h
+	MergeMDTest.h
+	MinusMDTest.h
+	ModeratorChopperResolutionTest.h
+	MultiplyMDTest.h
+	NotMDTest.h
+	OrMDTest.h
+	PlusMDTest.h
+	PowerMDTest.h
+	QuadEnBackgroundTest.h
+	ResolutionConvolvedCrossSectionTest.h
+	RunParamTest.h
+	SaveZODSTest.h
+	SetMDUsingMaskTest.h
+	SimulateMDDTest.h
+	SimulateResolutionConvolvedModelTest.h
+	SimulateResolutionTest.h
+	Strontium122Test.h
+	TobyFitBMatrixTest.h
+	TobyFitResolutionModelTest.h
+	TobyFitSimulateTest.h
+	TobyFitYVectorTest.h
+	TransformMDTest.h
+	UnaryOperationMDTest.h
+	WeightedMeanMDTest.h
+	XorMDTest.h
 # Old TMD convertToMD code prepared for deprication:
-#    test/ConvertToMDEventsUnitsConvTest.h 
+#    ConvertToMDEventsUnitsConvTest.h 
 )
 
 set ( GMOCK_TEST_FILES
-	test/BinaryOperationMDTest.h
+	BinaryOperationMDTest.h
 )
 
 if(UNITY_BUILD)
@@ -220,26 +220,8 @@ include_directories ( inc ../MDEvents/inc)
 
 target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
 
-# Create test file projects
-if ( CXXTEST_FOUND )
-  include_directories( ../TestHelpers/inc ../DataHandling/inc ../CurveFitting/inc)	
-  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
-  # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 
-                        ../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../TestHelpers/src/MDEventsTestHelper.cpp
-                        ../TestHelpers/src/BinaryOperationMDTestHelper.cpp )
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting Nexus NexusCPP ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
-  else ()
-    cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting Nexus NexusCPP)
-  endif ()
-  add_dependencies ( FrameworkTests MDAlgorithmsTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET MDAlgorithmsTest PROPERTY FOLDER "UnitTests" )
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

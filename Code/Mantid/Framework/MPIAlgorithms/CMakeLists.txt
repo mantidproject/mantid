@@ -7,8 +7,8 @@ set ( INC_FILES inc/MantidMPIAlgorithms/BroadcastWorkspace.h
                 inc/MantidMPIAlgorithms/MPISerialization.h
 )
 
-set ( TEST_FILES test/BroadcastWorkspaceTest.h
-                 test/GatherWorkspacesTest.h
+set ( TEST_FILES BroadcastWorkspaceTest.h
+                 GatherWorkspacesTest.h
 )
 
 # Add the target for this directory
@@ -22,15 +22,8 @@ include_directories ( inc )
 
 target_link_libraries ( MPIAlgorithms ${MANTIDLIBS} )
 
-if ( CXXTEST_FOUND )
-  include_directories ( ../TestHelpers/inc )
-  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp ../TestHelpers/src/WorkspaceCreationHelper.cpp )
-  cxxtest_add_test ( MPIAlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( MPIAlgorithmsTest MPIAlgorithms )
-  add_dependencies ( FrameworkTests MPIAlgorithmsTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET MPIAlgorithmsTest PROPERTY FOLDER "UnitTests" )
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

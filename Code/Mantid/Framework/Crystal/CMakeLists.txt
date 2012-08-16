@@ -82,41 +82,41 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	test/AnvredCorrectionTest.h
-	test/CalculateUMatrixTest.h
-	test/CentroidPeaksTest.h
-	test/CombinePeaksWorkspacesTest.h
-	test/DiffPeaksWorkspacesTest.h
-	test/FilterPeaksTest.h
-	test/FindSXPeaksTest.h
-	test/FindUBUsingFFTTest.h
-	test/FindUBUsingIndexedPeaksTest.h
-	test/FindUBUsingLatticeParametersTest.h
-	test/FindUBUsingMinMaxDTest.h
-	test/IndexPeaksTest.h
-	test/IndexSXPeaksTest.h
-	test/IntegratePeakTimeSlicesTest.h
-	test/LoadHKLTest.h
-	test/LoadIsawPeaksTest.h
-	test/LoadIsawUBTest.h
-	test/MaskPeaksWorkspaceTest.h
-	test/NormaliseVanadiumTest.h
-	test/PeakIntegrationTest.h
-	test/PeakIntensityVsRadiusTest.h
-	test/PredictPeaksTest.h
-	test/SCDCalibratePanelsTest.h
-	test/SCDPanelErrorsTest.h
-	test/SaveHKLTest.h
-	test/SaveIsawPeaksTest.h
-	test/SaveIsawUBTest.h
-	test/SavePeaksFileTest.h
-	test/SelectCellOfTypeTest.h
-	test/SelectCellWithFormTest.h
-	test/SetGoniometerTest.h
-	test/SetUBTest.h
-	test/ShowPossibleCellsTest.h
-	test/SortHKLTest.h
-	test/TransformHKLTest.h
+	AnvredCorrectionTest.h
+	CalculateUMatrixTest.h
+	CentroidPeaksTest.h
+	CombinePeaksWorkspacesTest.h
+	DiffPeaksWorkspacesTest.h
+	FilterPeaksTest.h
+	FindSXPeaksTest.h
+	FindUBUsingFFTTest.h
+	FindUBUsingIndexedPeaksTest.h
+	FindUBUsingLatticeParametersTest.h
+	FindUBUsingMinMaxDTest.h
+	IndexPeaksTest.h
+	IndexSXPeaksTest.h
+	IntegratePeakTimeSlicesTest.h
+	LoadHKLTest.h
+	LoadIsawPeaksTest.h
+	LoadIsawUBTest.h
+	MaskPeaksWorkspaceTest.h
+	NormaliseVanadiumTest.h
+	PeakIntegrationTest.h
+	PeakIntensityVsRadiusTest.h
+	PredictPeaksTest.h
+	SCDCalibratePanelsTest.h
+	SCDPanelErrorsTest.h
+	SaveHKLTest.h
+	SaveIsawPeaksTest.h
+	SaveIsawUBTest.h
+	SavePeaksFileTest.h
+	SelectCellOfTypeTest.h
+	SelectCellWithFormTest.h
+	SetGoniometerTest.h
+	SetUBTest.h
+	ShowPossibleCellsTest.h
+	SortHKLTest.h
+	TransformHKLTest.h
 )
 
 if(UNITY_BUILD)
@@ -132,23 +132,11 @@ set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal )
 set_property ( TARGET Crystal PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
-#include_directories ( ../MDEvents/inc)
 
 target_link_libraries ( Crystal ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
-if ( CXXTEST_FOUND )
-  include_directories ( ../DataHandling/inc ../MDEvents/inc ../TestHelpers/inc )
-  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
-  # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 
-                        ../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../TestHelpers/src/MDEventsTestHelper.cpp )
-  cxxtest_add_test ( CrystalTest ${TEST_FILES} )
-  target_link_libraries ( CrystalTest Crystal DataHandling MDEvents )
-  add_dependencies ( FrameworkTests CrystalTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET CrystalTest PROPERTY FOLDER "UnitTests" )
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

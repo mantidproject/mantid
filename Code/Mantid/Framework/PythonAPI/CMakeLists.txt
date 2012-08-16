@@ -39,27 +39,27 @@ set ( PY_FILES MantidFramework.py __init__.py setup.py mantidsimple.py)
 
 # cxxtest unit tests
 set ( TEST_FILES
-	test/PythonFrameworkTests.h
+	PythonFrameworkTests.h
 )
 
 # Python unit tests
 set ( TEST_PY_FILES 
-  test/GoniometerTest.py
-  test/ImportTest.py
-  test/IPeaksWorkspaceTest.py
-  test/LoadLiveDataTest.py
-  test/MatrixWorkspaceTest.py
-  test/MDHistoWorkspaceTest.py
-  test/NumpyTest.py
-  test/PythonAlgorithmTest.py
-  test/RunPythonScriptTest.py
-  test/SANSMaskCommandsTest.py
-  test/SANSWorkflowTest.py
-  test/SimpleAPILoadTest.py
-  test/SimpleAPIFitTest.py
-  test/SettingsTest.py
-  test/WorkspaceGroupTest.py
-  test/WorkspaceHistoryTest.py
+  GoniometerTest.py
+  ImportTest.py
+  IPeaksWorkspaceTest.py
+  LoadLiveDataTest.py
+  MatrixWorkspaceTest.py
+  MDHistoWorkspaceTest.py
+  NumpyTest.py
+  PythonAlgorithmTest.py
+  RunPythonScriptTest.py
+  SANSMaskCommandsTest.py
+  SANSWorkflowTest.py
+  SimpleAPILoadTest.py
+  SimpleAPIFitTest.py
+  SettingsTest.py
+  WorkspaceGroupTest.py
+  WorkspaceHistoryTest.py
 )
 
 if(UNITY_BUILD)
@@ -210,26 +210,7 @@ target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
 # Unit tests setup
 ###########################################################################
 
-if ( CXXTEST_FOUND )
-  include_directories ( ../TestHelpers/inc )
-  cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
-  target_link_libraries( PythonAPITest PythonAPI )
-  
-  # Specify implicit dependency, but don't link to it
-  add_dependencies ( PythonAPITest UserAlgorithms )
-  add_dependencies ( FrameworkTests PythonAPITest )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET PythonAPITest PROPERTY FOLDER "UnitTests" )
-endif ()
-
-# python unit tests
-if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( VanillaPythonTest.py ${TEST_PY_FILES} "" )
-  add_dependencies ( VanillaPythonTest.py PythonAPI Algorithms )
-  add_dependencies ( FrameworkTests VanillaPythonTest.py )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET VanillaPythonTest.py PROPERTY FOLDER "UnitTests" )
-endif ()
+add_subdirectory ( test )
 
 ###########################################################################
 # things to put together a main program

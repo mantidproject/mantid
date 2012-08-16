@@ -269,114 +269,114 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	#Needs fixing to not rely on network. test/SNSLiveEventDataListenerTest.h
-	#test/LoadDAETest.h
-	#test/LoadILLTest.h
-	#test/LoadSNSNexusTest.h # TODO has no active tests in it
-	#test/LoadSassenaTest.h
-	test/AppendGeometryToSNSNexusTest.h
-	test/CompressEventsTest.h
-	test/CreateChopperModelTest.h
-	test/CreateModeratorModelTest.h
-	test/CreateSampleShapeTest.h
-	test/CreateSimulationWorkspaceTest.h
-	test/DefineGaugeVolumeTest.h
-	test/DeleteTableRowsTest.h
-	test/DetermineChunkingTest.h
-	test/FakeEventDataListenerTest.h
-	test/FileEventDataListenerTest.h
-	test/FindDetectorsInShapeTest.h
-	test/FindDetectorsParTest.h
-	test/GenerateGroupingPowderTest.h
-	test/GetMaskedDetectorsTest.h
-	test/GroupDetectors2Test.h
-	test/GroupDetectorsTest.h
-	test/ISISDataArchiveTest.h
-	test/ISISHistoDataListenerTest.h
-	test/InstrumentRayTracerTest.h
-	test/LiveDataAlgorithmTest.h
-	test/LoadAsciiTest.h
-	test/LoadCalFileTest.h
-	test/LoadCanSAS1dTest.h
-	test/LoadDaveGrpTest.h
-	test/LoadDetectorInfoTest.h
-	test/LoadDetectorsGroupingFileTest.h
-	test/LoadDspacemapTest.h
-	test/LoadEmptyInstrumentTest.h
-	test/LoadEventNexusTest.h
-	test/LoadEventPreNexus2Test.h
-	test/LoadEventPreNexusTest.h
-	test/LoadISISNexusTest.h
-	test/LoadInstrumentFromRawTest.h
-	test/LoadInstrumentTest.h
-	test/LoadIsawDetCalTest.h
-	test/LoadLiveDataTest.h
-	test/LoadLogTest.h
-	test/LoadLogsFromSNSNexusTest.h
-	test/LoadMappingTableTest.h
-	test/LoadMaskTest.h
-	test/LoadMuonLogTest.h
-	test/LoadMuonNexus2Test.h
-	test/LoadMuonNexusTest.h
-	test/LoadNXSPETest.h
-	test/LoadNexusLogsTest.h
-	test/LoadNexusMonitorsTest.h
-	test/LoadNexusProcessedTest.h
-	test/LoadNexusTest.h
-	test/LoadParameterFileTest.h
-	test/LoadPreNexusMonitorsTest.h
-	test/LoadPreNexusTest.h
-	test/LoadQKKTest.h
-	test/LoadRKHTest.h
-	test/LoadRSaveNLoadNcspTest.h
-	test/LoadRaw2Test.h
-	test/LoadRaw3Test.h
-	test/LoadRawBin0Test.h
-	test/LoadRawSpectrum0Test.h
-	test/LoadRawTest.h
-	test/LoadSNSEventNexusTest.h
-	test/LoadSNSspecTest.h
-	test/LoadSPETest.h
-	test/LoadSaveAsciiTest.h
-	test/LoadSpice2dTest.h
-	test/LoadTOFRawNexusTest.h
-	test/LoadTest.h
-	test/ManagedRawFileWorkspace2DTest.h
-	test/MaskDetectorsInShapeTest.h
-	test/MaskDetectorsTest.h
-	test/Merge2WorkspaceLogsTest.h
-	test/MonitorLiveDataTest.h
-	test/MoveInstrumentComponentTest.h
-	test/NexusTesterTest.h
-	test/OrbiterDataArchiveTest.h
-	test/ProcessDasNexusLogTest.h
-	test/RawFileInfoTest.h
-	test/RemoveLogsTest.h
-	test/RenameLogTest.h
-	test/SNSDataArchiveTest.h
-	test/SaveCSVTest.h
-	test/SaveCalFileTest.h
-	test/SaveCanSAS1dTest.h
-	test/SaveDASCTest.h
-	test/SaveDaveGrpTest.h
-	test/SaveDetectorsGroupingTest.h
-	test/SaveDspacemapTest.h
-	test/SaveFocussedXYETest.h
-	test/SaveIsawDetCalTest.h
-	test/SaveMaskTest.h
-	test/SaveNISTDATTest.h
-	test/SaveNXSPETest.h
-	test/SaveNexusProcessedTest.h
-	test/SaveNexusTest.h
-	test/SavePARTest.h
-	test/SavePHXTest.h
-	test/SaveRKHTest.h
-	test/SaveSPETest.h
-	test/SaveToSNSHistogramNexusTest.h
-	test/SetScalingPSDTest.h
-	test/StartLiveDataTest.h
-	test/UpdateInstrumentFromFileTest.h
-	test/XMLlogfileTest.h
+	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
+	#LoadDAETest.h
+	#LoadILLTest.h
+	#LoadSNSNexusTest.h # TODO has no active tests in it
+	#LoadSassenaTest.h
+	AppendGeometryToSNSNexusTest.h
+	CompressEventsTest.h
+	CreateChopperModelTest.h
+	CreateModeratorModelTest.h
+	CreateSampleShapeTest.h
+	CreateSimulationWorkspaceTest.h
+	DefineGaugeVolumeTest.h
+	DeleteTableRowsTest.h
+	DetermineChunkingTest.h
+	FakeEventDataListenerTest.h
+	FileEventDataListenerTest.h
+	FindDetectorsInShapeTest.h
+	FindDetectorsParTest.h
+	GenerateGroupingPowderTest.h
+	GetMaskedDetectorsTest.h
+	GroupDetectors2Test.h
+	GroupDetectorsTest.h
+	ISISDataArchiveTest.h
+	ISISHistoDataListenerTest.h
+	InstrumentRayTracerTest.h
+	LiveDataAlgorithmTest.h
+	LoadAsciiTest.h
+	LoadCalFileTest.h
+	LoadCanSAS1dTest.h
+	LoadDaveGrpTest.h
+	LoadDetectorInfoTest.h
+	LoadDetectorsGroupingFileTest.h
+	LoadDspacemapTest.h
+	LoadEmptyInstrumentTest.h
+	LoadEventNexusTest.h
+	LoadEventPreNexus2Test.h
+	LoadEventPreNexusTest.h
+	LoadISISNexusTest.h
+	LoadInstrumentFromRawTest.h
+	LoadInstrumentTest.h
+	LoadIsawDetCalTest.h
+	LoadLiveDataTest.h
+	LoadLogTest.h
+	LoadLogsFromSNSNexusTest.h
+	LoadMappingTableTest.h
+	LoadMaskTest.h
+	LoadMuonLogTest.h
+	LoadMuonNexus2Test.h
+	LoadMuonNexusTest.h
+	LoadNXSPETest.h
+	LoadNexusLogsTest.h
+	LoadNexusMonitorsTest.h
+	LoadNexusProcessedTest.h
+	LoadNexusTest.h
+	LoadParameterFileTest.h
+	LoadPreNexusMonitorsTest.h
+	LoadPreNexusTest.h
+	LoadQKKTest.h
+	LoadRKHTest.h
+	LoadRSaveNLoadNcspTest.h
+	LoadRaw2Test.h
+	LoadRaw3Test.h
+	LoadRawBin0Test.h
+	LoadRawSpectrum0Test.h
+	LoadRawTest.h
+	LoadSNSEventNexusTest.h
+	LoadSNSspecTest.h
+	LoadSPETest.h
+	LoadSaveAsciiTest.h
+	LoadSpice2dTest.h
+	LoadTOFRawNexusTest.h
+	LoadTest.h
+	ManagedRawFileWorkspace2DTest.h
+	MaskDetectorsInShapeTest.h
+	MaskDetectorsTest.h
+	Merge2WorkspaceLogsTest.h
+	MonitorLiveDataTest.h
+	MoveInstrumentComponentTest.h
+	NexusTesterTest.h
+	OrbiterDataArchiveTest.h
+	ProcessDasNexusLogTest.h
+	RawFileInfoTest.h
+	RemoveLogsTest.h
+	RenameLogTest.h
+	SNSDataArchiveTest.h
+	SaveCSVTest.h
+	SaveCalFileTest.h
+	SaveCanSAS1dTest.h
+	SaveDASCTest.h
+	SaveDaveGrpTest.h
+	SaveDetectorsGroupingTest.h
+	SaveDspacemapTest.h
+	SaveFocussedXYETest.h
+	SaveIsawDetCalTest.h
+	SaveMaskTest.h
+	SaveNISTDATTest.h
+	SaveNXSPETest.h
+	SaveNexusProcessedTest.h
+	SaveNexusTest.h
+	SavePARTest.h
+	SavePHXTest.h
+	SaveRKHTest.h
+	SaveSPETest.h
+	SaveToSNSHistogramNexusTest.h
+	SetScalingPSDTest.h
+	StartLiveDataTest.h
+	UpdateInstrumentFromFileTest.h
+	XMLlogfileTest.h
 )
 
 
@@ -409,20 +409,8 @@ include_directories ( inc ../Nexus/inc)
 #target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${HDF5_LIBRARIES})
 target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus)
 
-if ( CXXTEST_FOUND )
-  include_directories ( ../TestHelpers/inc )
-  # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
-  # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp
-                        ../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        test/TestDataListener.cpp 
-                        )
-  cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
-  target_link_libraries( DataHandlingTest DataHandling )
-  add_dependencies ( FrameworkTests DataHandlingTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET DataHandlingTest PROPERTY FOLDER "UnitTests" )
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

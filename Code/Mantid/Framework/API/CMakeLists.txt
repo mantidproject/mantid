@@ -240,74 +240,74 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	test/AlgorithmHasPropertyTest.h
-	test/AlgorithmHistoryTest.h
-	test/AlgorithmManagerTest.h
-	test/AlgorithmPropertyTest.h
-	test/AlgorithmProxyTest.h
-	test/AlgorithmTest.h
-	test/AnalysisDataServiceTest.h
-	test/AsynchronousTest.h
-	test/BoxControllerTest.h
-	test/CompositeFunctionTest.h
-	test/CoordTransformTest.h
-	test/CostFunctionFactoryTest.h
-	test/DataProcessorAlgorithmTest.h
-	test/EnabledWhenWorkspaceIsTypeTest.h
-	test/ExperimentInfoTest.h
-	test/ExpressionTest.h
-	test/FermiChopperModelTest.h
-	test/FileFinderTest.h
-	test/FilePropertyTest.h
-	test/FrameworkManagerTest.h
-	test/FunctionDomainTest.h
-	test/FunctionFactoryTest.h
-	test/FunctionPropertyTest.h
-	test/FunctionTest.h
-	test/FunctionValuesTest.h
-	test/IEventListTest.h
-	test/IFunction1DTest.h
-	test/IFunctionMDTest.h
-	test/ILiveListenerTest.h
-	test/IMDWorkspaceTest.h
-	test/ISpectrumTest.h
-	test/IkedaCarpenterModeratorTest.h
-	test/ImmutableCompositeFunctionTest.h
-	test/ImplicitFunctionParserFactoryTest.h
-	test/InstrumentDataServiceTest.h
-	test/LiveListenerFactoryTest.h
-	test/MDGeometryTest.h
-	test/MatrixWorkspaceMDIteratorTest.h
-	test/MemoryManagerTest.h
-	test/ModeratorModelTest.h
-	test/MultiDomainFunctionTest.h
-	test/MultipleExperimentInfosTest.h
-	test/MultipleFilePropertyTest.h
-	test/MultiPeriodGroupAlgorithmTest.h
-	test/NumericAxisTest.h
-	test/ParamFunctionAttributeHolderTest.h
-	test/ParameterReferenceTest.h
-	test/ParameterTieTest.h
-	test/PropertyManagerDataServiceTest.h
-	test/PropertyNexusTest.h
-	test/RunTest.h
-	test/SampleEnvironmentTest.h
-	test/SampleTest.h
-	test/SpectraAxisTest.h
-	test/SpectraDetectorMapTest.h
-	test/TextAxisTest.h
-	test/VectorParameterParserTest.h
-	test/VectorParameterTest.h
-	test/WorkspaceFactoryTest.h
-	test/WorkspaceGroupTest.h
-	test/WorkspaceHistoryTest.h
-	test/WorkspacePropertyTest.h
+	AlgorithmHasPropertyTest.h
+	AlgorithmHistoryTest.h
+	AlgorithmManagerTest.h
+	AlgorithmPropertyTest.h
+	AlgorithmProxyTest.h
+	AlgorithmTest.h
+	AnalysisDataServiceTest.h
+	AsynchronousTest.h
+	BoxControllerTest.h
+	CompositeFunctionTest.h
+	CoordTransformTest.h
+	CostFunctionFactoryTest.h
+	DataProcessorAlgorithmTest.h
+	EnabledWhenWorkspaceIsTypeTest.h
+	ExperimentInfoTest.h
+	ExpressionTest.h
+	FermiChopperModelTest.h
+	FileFinderTest.h
+	FilePropertyTest.h
+	FrameworkManagerTest.h
+	FunctionDomainTest.h
+	FunctionFactoryTest.h
+	FunctionPropertyTest.h
+	FunctionTest.h
+	FunctionValuesTest.h
+	IEventListTest.h
+	IFunction1DTest.h
+	IFunctionMDTest.h
+	ILiveListenerTest.h
+	IMDWorkspaceTest.h
+	ISpectrumTest.h
+	IkedaCarpenterModeratorTest.h
+	ImmutableCompositeFunctionTest.h
+	ImplicitFunctionParserFactoryTest.h
+	InstrumentDataServiceTest.h
+	LiveListenerFactoryTest.h
+	MDGeometryTest.h
+	MatrixWorkspaceMDIteratorTest.h
+	MemoryManagerTest.h
+	ModeratorModelTest.h
+	MultiDomainFunctionTest.h
+	MultipleExperimentInfosTest.h
+	MultipleFilePropertyTest.h
+	MultiPeriodGroupAlgorithmTest.h
+	NumericAxisTest.h
+	ParamFunctionAttributeHolderTest.h
+	ParameterReferenceTest.h
+	ParameterTieTest.h
+	PropertyManagerDataServiceTest.h
+	PropertyNexusTest.h
+	RunTest.h
+	SampleEnvironmentTest.h
+	SampleTest.h
+	SpectraAxisTest.h
+	SpectraDetectorMapTest.h
+	TextAxisTest.h
+	VectorParameterParserTest.h
+	VectorParameterTest.h
+	WorkspaceFactoryTest.h
+	WorkspaceGroupTest.h
+	WorkspaceHistoryTest.h
+	WorkspacePropertyTest.h
 )
 
 set ( GMOCK_TEST_FILES
-        test/ImplicitFunctionFactoryTest.h
-        test/ImplicitFunctionParameterParserFactoryTest.h
-	test/MatrixWorkspaceTest.h
+        ImplicitFunctionFactoryTest.h
+        ImplicitFunctionParameterParserFactoryTest.h
+	MatrixWorkspaceTest.h
 )
 
 
@@ -333,21 +333,8 @@ set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} )
 
-if ( CXXTEST_FOUND )
-  include_directories ( ../TestHelpers/inc )
-  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp )
-  
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( APITest API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  )
-  else ()
-    cxxtest_add_test ( APITest ${TEST_FILES} )
-    target_link_libraries( APITest API  )
-  endif()
-  add_dependencies ( FrameworkTests APITest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET APITest PROPERTY FOLDER "UnitTests" )
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

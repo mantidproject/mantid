@@ -190,91 +190,91 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	test/AcompTest.h
-	test/AlgebraTest.h
-	test/BnIdTest.h
-	test/BoundingBoxTest.h
-	test/CompAssemblyTest.h
-	test/ComponentParserTest.h
-	test/ComponentTest.h
-	test/CompositeImplicitFunctionTest.h
-	test/ConeTest.h
-	test/ConventionalCellTest.h
-	test/ConvexPolygonTest.h
-	test/CylinderTest.h
-	test/DetectorGroupTest.h
-	test/DetectorTest.h
-	test/FitParameterTest.h
-	test/GeneralTest.h
-	test/GoniometerTest.h
-	test/IMDDimensionFactoryTest.h
-	test/IMDDimensionTest.h
-	test/IndexingUtilsTest.h
-	test/InstrumentDefinitionParserTest.h
-	test/InstrumentRayTracerTest.h
-	test/InstrumentTest.h
-	test/LaszloIntersectionTest.h
-	test/LineIntersectVisitTest.h
-	test/LineTest.h
-	test/MDBoxImplicitFunctionTest.h
-	test/MDGeometryXMLParserTest.h
-	test/MDHistoDimensionBuilderTest.h
-	test/MDHistoDimensionTest.h
-	test/MDImplicitFunctionTest.h
-	test/MDPlaneImplicitFunctionTest.h
-	test/MDPlaneTest.h
-	test/MapSupportTest.h
-	test/MaterialTest.h
-	test/MathSupportTest.h
-	test/NearestNeighboursFactoryTest.h
-	test/NearestNeighboursTest.h
-	test/NullImplicitFunctionTest.h
-	test/ObjCompAssemblyTest.h
-	test/ObjComponentTest.h
-	test/ObjectTest.h
-	test/OneToOneSpectraDetectorMapTest.h
-	test/OrientedLatticeTest.h
-	test/ParCompAssemblyTest.h
-	test/ParComponentFactoryTest.h
-	test/ParDetectorTest.h
-	test/ParInstrumentTest.h
-	test/ParObjCompAssemblyTest.h
-	test/ParObjComponentTest.h
-	test/ParameterMapTest.h
-	test/ParametrizedComponentTest.h
-	test/PlaneTest.h
-	test/PointGroupTest.h
-	test/PolygonEdgeTest.h
-	test/QuadrilateralTest.h
-	test/RectangularDetectorPixelTest.h
-	test/RectangularDetectorTest.h
-	test/ReducedCellTest.h
-	test/ReferenceFrameTest.h
-	test/ReflectionConditionTest.h
-	test/RotCounterTest.h
-	test/RulesBoolValueTest.h
-	test/RulesCompGrpTest.h
-	test/RulesCompObjTest.h
-	test/RulesIntersectionTest.h
-	test/RulesSurfPointTest.h
-	test/RulesTest.h
-	test/RulesUnionTest.h
-	test/ScalarUtilsTest.h
-	test/ShapeFactoryTest.h
-	test/SphereTest.h
-	test/SurfaceFactoryTest.h
-	test/SurfaceTest.h
-	test/TorusTest.h
-	test/TrackTest.h
-	test/TripleTest.h
-	test/UnitCellTest.h
-	test/Vertex2DListTest.h
-	test/Vertex2DTest.h
-    test/XMLlogfileTest.h
+	AcompTest.h
+	AlgebraTest.h
+	BnIdTest.h
+	BoundingBoxTest.h
+	CompAssemblyTest.h
+	ComponentParserTest.h
+	ComponentTest.h
+	CompositeImplicitFunctionTest.h
+	ConeTest.h
+	ConventionalCellTest.h
+	ConvexPolygonTest.h
+	CylinderTest.h
+	DetectorGroupTest.h
+	DetectorTest.h
+	FitParameterTest.h
+	GeneralTest.h
+	GoniometerTest.h
+	IMDDimensionFactoryTest.h
+	IMDDimensionTest.h
+	IndexingUtilsTest.h
+	InstrumentDefinitionParserTest.h
+	InstrumentRayTracerTest.h
+	InstrumentTest.h
+	LaszloIntersectionTest.h
+	LineIntersectVisitTest.h
+	LineTest.h
+	MDBoxImplicitFunctionTest.h
+	MDGeometryXMLParserTest.h
+	MDHistoDimensionBuilderTest.h
+	MDHistoDimensionTest.h
+	MDImplicitFunctionTest.h
+	MDPlaneImplicitFunctionTest.h
+	MDPlaneTest.h
+	MapSupportTest.h
+	MaterialTest.h
+	MathSupportTest.h
+	NearestNeighboursFactoryTest.h
+	NearestNeighboursTest.h
+	NullImplicitFunctionTest.h
+	ObjCompAssemblyTest.h
+	ObjComponentTest.h
+	ObjectTest.h
+	OneToOneSpectraDetectorMapTest.h
+	OrientedLatticeTest.h
+	ParCompAssemblyTest.h
+	ParComponentFactoryTest.h
+	ParDetectorTest.h
+	ParInstrumentTest.h
+	ParObjCompAssemblyTest.h
+	ParObjComponentTest.h
+	ParameterMapTest.h
+	ParametrizedComponentTest.h
+	PlaneTest.h
+	PointGroupTest.h
+	PolygonEdgeTest.h
+	QuadrilateralTest.h
+	RectangularDetectorPixelTest.h
+	RectangularDetectorTest.h
+	ReducedCellTest.h
+	ReferenceFrameTest.h
+	ReflectionConditionTest.h
+	RotCounterTest.h
+	RulesBoolValueTest.h
+	RulesCompGrpTest.h
+	RulesCompObjTest.h
+	RulesIntersectionTest.h
+	RulesSurfPointTest.h
+	RulesTest.h
+	RulesUnionTest.h
+	ScalarUtilsTest.h
+	ShapeFactoryTest.h
+	SphereTest.h
+	SurfaceFactoryTest.h
+	SurfaceTest.h
+	TorusTest.h
+	TrackTest.h
+	TripleTest.h
+	UnitCellTest.h
+	Vertex2DListTest.h
+	Vertex2DTest.h
+    XMLlogfileTest.h
 )
 
 set ( GMOCK_TEST_FILES
-    test/MDGeometryXMLBuilderTest.h
+    MDGeometryXMLBuilderTest.h
 )
 
 
@@ -324,26 +324,8 @@ if (NOT NO_OPENCASCADE)
   target_link_libraries ( Geometry ${OPENCASCADE_LIBRARIES} )
 endif ()
 
-if ( CXXTEST_FOUND )
-  # This is required to pick up ComponentCreationHelper, which is the only TestHelpers class that may be 
-  # used by Geometry tests (as it does not depend on any higher package than geometry)
-  include_directories( ../TestHelpers/inc )
-  # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
-  # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp )
-
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( GeometryTest Geometry ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} Kernel)
-  else ()
-    cxxtest_add_test ( GeometryTest ${TEST_FILES} )
-    target_link_libraries( GeometryTest Geometry Kernel)
-  endif()
-  
-  add_dependencies ( FrameworkTests GeometryTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET GeometryTest PROPERTY FOLDER "UnitTests" )
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

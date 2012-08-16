@@ -62,35 +62,35 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	test/CompressedWorkspace2DTest.h
-	test/EventListTest.h
-	test/EventWorkspaceMRUTest.h
-	test/EventWorkspaceTest.h
-	test/GroupingWorkspaceTest.h
-	test/Histogram1DTest.h
-	test/LibraryManagerTest.h
-	test/ManagedDataBlock2DTest.h
-	test/ManagedHistogram1DTest.h
-	test/ManagedWorkspace2DTest.h
-	test/MaskWorkspaceTest.h
-	test/MementoTableWorkspaceTest.h
-	test/OffsetsWorkspaceTest.h
-	test/PeakColumnTest.h
-	test/PeakTest.h
-	test/PeaksWorkspaceTest.h
-	test/RebinnedOutputTest.h
-	test/RefAxisTest.h
-	test/SpecialWorkspace2DTest.h
-	test/SplittersWorkspaceTest.h
-	test/TableWorkspacePropertyTest.h
-	test/TableWorkspaceTest.h
-	test/TofEventTest.h
-	test/WeightedEventNoTimeTest.h
-	test/WeightedEventTest.h
-	test/Workspace2DTest.h
-	test/WorkspaceIteratorTest.h
-	test/WorkspaceSingleValueTest.h
-	test/WorkspaceValidatorsTest.h
+	CompressedWorkspace2DTest.h
+	EventListTest.h
+	EventWorkspaceMRUTest.h
+	EventWorkspaceTest.h
+	GroupingWorkspaceTest.h
+	Histogram1DTest.h
+	LibraryManagerTest.h
+	ManagedDataBlock2DTest.h
+	ManagedHistogram1DTest.h
+	ManagedWorkspace2DTest.h
+	MaskWorkspaceTest.h
+	MementoTableWorkspaceTest.h
+	OffsetsWorkspaceTest.h
+	PeakColumnTest.h
+	PeakTest.h
+	PeaksWorkspaceTest.h
+	RebinnedOutputTest.h
+	RefAxisTest.h
+	SpecialWorkspace2DTest.h
+	SplittersWorkspaceTest.h
+	TableWorkspacePropertyTest.h
+	TableWorkspaceTest.h
+	TofEventTest.h
+	WeightedEventNoTimeTest.h
+	WeightedEventTest.h
+	Workspace2DTest.h
+	WorkspaceIteratorTest.h
+	WorkspaceSingleValueTest.h
+	WorkspaceValidatorsTest.h
 )
 
 
@@ -113,19 +113,8 @@ include_directories ( ${ZLIB_INCLUDE_DIRS} )
 
 target_link_libraries ( DataObjects ${MANTIDLIBS} ${ZLIB_LIBRARIES} )
 
-if ( CXXTEST_FOUND )
-  include_directories ( ../TestHelpers/inc )
-  # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
-  # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp ../TestHelpers/src/WorkspaceCreationHelper.cpp )
-  cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )
-  target_link_libraries( DataObjectsTest DataObjects )
-  # Specify implicit dependency, but don't link to it
-  add_dependencies ( DataObjectsTest UserAlgorithms )
-  add_dependencies ( FrameworkTests DataObjectsTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET DataObjectsTest PROPERTY FOLDER "UnitTests" )
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

@@ -392,176 +392,176 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	#	test/CalMuonDeadTimeTest.h
-	test/AddLogDerivativeTest.h
-	test/AddSampleLogTest.h
-	test/AlignDetectorsTest.h
-	test/AlphaCalcTest.h
-	test/AnyShapeAbsorptionTest.h
-	test/AppendSpectraTest.h
-	test/ApplyDeadTimeCorrTest.h
-	test/ApplyDetailedBalanceTest.h
-	test/ApplyTransmissionCorrectionTest.h
-	test/BinaryOperateMasksTest.h
-	test/BinaryOperationTest.h
-	test/CalculateEfficiencyTest.h
-	test/CalculateTransmissionBeamSpreaderTest.h
-	test/CalculateTransmissionTest.h
-	test/ChainedOperatorTest.h
-	test/ChangeBinOffsetTest.h
-	test/ChangeLogTimeTest.h
-	test/ChangePulsetimeTest.h
-	test/CheckWorkspacesMatchTest.h
-	test/ChopDataTest.h
-	test/CloneWorkspaceTest.h
-	test/CommutativeBinaryOperationTest.h
-	test/CompressedRebinTest.h
-	test/ConjoinWorkspacesTest.h
-	test/ConvertFromDistributionTest.h
-	test/ConvertSpectrumAxisTest.h
-	test/ConvertTableToMatrixWorkspaceTest.h
-	test/ConvertToDistributionTest.h
-	test/ConvertToEventWorkspaceTest.h
-	test/ConvertToHistogramTest.h
-	test/ConvertToMatrixWorkspaceTest.h
-	test/ConvertToPointDataTest.h
-	test/ConvertUnitsTest.h
-	test/CopySampleTest.h
-	test/CorrectKiKfTest.h
-	test/CorrectToFileTest.h
-	test/CountEventsInPulsesTest.h
-	test/CreateCalFileByNamesTest.h
-	test/CreateDummyCalFileTest.h
-	test/CreateGroupingWorkspaceTest.h
-	test/CreateLogPropertyTableTest.h
-	test/CreatePSDBleedMaskTest.h
-	test/CreatePeaksWorkspaceTest.h
-	test/CreateSingleValuedWorkspaceTest.h
-	test/CreateWorkspaceTest.h
-	test/CropWorkspaceTest.h
-	test/CuboidGaugeVolumeAbsorptionTest.h
-	test/CylinderAbsorptionTest.h
-	test/DeleteWorkspaceTest.h
-	test/DetectorEfficiencyCorTest.h
-	test/DetectorEfficiencyVariationTest.h
-	test/DiffractionEventCalibrateDetectorsTest.h
-	test/DiffractionFocussing2Test.h
-	test/DiffractionFocussingTest.h
-	test/DivideTest.h
-	test/DspacemaptoCalTest.h
-	test/EditInstrumentGeometryTest.h
-	test/ExponentialCorrectionTest.h
-	test/ExponentialTest.h
-	test/ExtractFFTSpectrumTest.h
-	test/ExtractMaskTest.h
-	test/ExtractSingleSpectrumTest.h
-	test/FFTDerivativeTest.h
-	test/FFTSmooth2Test.h
-	test/FFTTest.h
-	test/FilterBadPulsesTest.h
-	test/FilterByLogValueTest.h
-	test/FilterByTime2Test.h
-	test/FilterByTimeTest.h
-	test/FilterEventsHighFrequencyTest.h
-	test/FilterEventsTest.h
-	test/FindCenterOfMassPosition2Test.h
-	test/FindCenterOfMassPositionTest.h
-	test/FindDeadDetectorsTest.h
-	test/FindDetectorsOutsideLimitsTest.h
-	test/FindPeaksTest.h
-	test/FlatBackgroundTest.h
-	test/FlatPlateAbsorptionTest.h
-	test/GenerateEventsFilterTest.h
-	test/GeneratePeaksTest.h
-	test/GeneratePythonScriptTest.h
-	test/GetDetOffsetsMultiPeaksTest.h
-	test/GetDetectorOffsetsTest.h
-	test/GetEiTest.h
-	test/GetTimeSeriesLogInformationTest.h
-	test/GhostCorrectionTest.h
-	test/GroupWorkspacesTest.h
-	test/HRPDSlabCanAbsorptionTest.h
-	test/He3TubeEfficiencyTest.h
-	test/IQTransformTest.h
-	test/IdentifyNoisyDetectorsTest.h
-	test/IntegrationTest.h
-	test/InterpolatingRebinTest.h
-	test/InvertMaskTest.h
-	test/LogarithmTest.h
-	test/MaskBinsFromTableTest.h
-	test/MaskBinsTest.h
-	test/MaxMinTest.h
-	test/MedianDetectorTestTest.h
-	test/MergeRunsTest.h
-	test/MinusTest.h
-	test/ModeratorTzeroTest.h
-	test/MonteCarloAbsorptionTest.h
-	test/MultipleScatteringCylinderAbsorptionTest.h
-	test/MultiplyRangeTest.h
-	test/MultiplyTest.h
-	test/MuonAsymmetryCalcTest.h
-	test/MuonRemoveExpDecayTest.h
-	test/NormaliseByCurrentTest.h
-	test/NormaliseByDetectorTest.h
-	test/NormaliseToMonitorTest.h
-	test/OneMinusExponentialCorTest.h
-	test/PDFFTTest.h
-	test/PauseTest.h
-	test/PlotAsymmetryByLogValueTest.h
-	test/PlusTest.h
-	test/PointByPointVCorrectionTest.h
-	test/PoissonErrorsTest.h
-	test/PolynomialCorrectionTest.h
-	test/PowerLawCorrectionTest.h
-	test/PowerTest.h
-	test/Q1D2Test.h
-	test/Q1DTest.h
-	test/Q1DWeightedTest.h
-	test/QxyTest.h
-	test/RayTracerTesterTest.h
-	test/ReadGroupsFromFileTest.h
-	test/RealFFTTest.h
-	test/Rebin2DTest.h
-	test/RebinTest.h
-	test/RebinToWorkspaceTest.h
-	test/RebunchTest.h
-	test/RegroupTest.h
-	test/RemoveBinsTest.h
-	test/RemoveLowResTOFTest.h
-	test/RemovePromptPulseTest.h
-	test/RenameWorkspaceTest.h
-	test/ReplaceSpecialValuesTest.h
-	test/ResetNegativesTest.h
-	test/ResizeRectangularDetectorTest.h
-	test/SassenaFFTTest.h
-	test/ScaleTest.h
-	test/ScaleXTest.h
-	test/ShiftLogTimeTest.h
-	test/SignalOverErrorTest.h
-	test/SmoothDataTest.h
-	test/SmoothNeighboursTest.h
-	test/SofQW2Test.h
-	test/SofQW3Test.h
-	test/SofQWTest.h
-	test/SolidAngleTest.h
-	test/SortEventsTest.h
-	test/SpatialGroupingTest.h
-	test/SphericalAbsorptionTest.h
-	test/StripPeaksTest.h
-	test/StripVanadiumPeaks2Test.h
-	test/StripVanadiumPeaksTest.h
-	test/SumNeighboursTest.h
-	test/SumRowColumnTest.h
-	test/SumSpectraTest.h
-	test/TransposeTest.h
-	test/UnGroupWorkspaceTest.h
-	test/UnaryOperationTest.h
-	test/UnwrapSNSTest.h
-	test/UnwrapTest.h
-	test/WeightedMeanTest.h
-	test/WeightingStrategyTest.h
-	test/WorkspaceCreationHelperTest.h
-	test/WorkspaceGroupTest.h
+	#	CalMuonDeadTimeTest.h
+	AddLogDerivativeTest.h
+	AddSampleLogTest.h
+	AlignDetectorsTest.h
+	AlphaCalcTest.h
+	AnyShapeAbsorptionTest.h
+	AppendSpectraTest.h
+	ApplyDeadTimeCorrTest.h
+	ApplyDetailedBalanceTest.h
+	ApplyTransmissionCorrectionTest.h
+	BinaryOperateMasksTest.h
+	BinaryOperationTest.h
+	CalculateEfficiencyTest.h
+	CalculateTransmissionBeamSpreaderTest.h
+	CalculateTransmissionTest.h
+	ChainedOperatorTest.h
+	ChangeBinOffsetTest.h
+	ChangeLogTimeTest.h
+	ChangePulsetimeTest.h
+	CheckWorkspacesMatchTest.h
+	ChopDataTest.h
+	CloneWorkspaceTest.h
+	CommutativeBinaryOperationTest.h
+	CompressedRebinTest.h
+	ConjoinWorkspacesTest.h
+	ConvertFromDistributionTest.h
+	ConvertSpectrumAxisTest.h
+	ConvertTableToMatrixWorkspaceTest.h
+	ConvertToDistributionTest.h
+	ConvertToEventWorkspaceTest.h
+	ConvertToHistogramTest.h
+	ConvertToMatrixWorkspaceTest.h
+	ConvertToPointDataTest.h
+	ConvertUnitsTest.h
+	CopySampleTest.h
+	CorrectKiKfTest.h
+	CorrectToFileTest.h
+	CountEventsInPulsesTest.h
+	CreateCalFileByNamesTest.h
+	CreateDummyCalFileTest.h
+	CreateGroupingWorkspaceTest.h
+	CreateLogPropertyTableTest.h
+	CreatePSDBleedMaskTest.h
+	CreatePeaksWorkspaceTest.h
+	CreateSingleValuedWorkspaceTest.h
+	CreateWorkspaceTest.h
+	CropWorkspaceTest.h
+	CuboidGaugeVolumeAbsorptionTest.h
+	CylinderAbsorptionTest.h
+	DeleteWorkspaceTest.h
+	DetectorEfficiencyCorTest.h
+	DetectorEfficiencyVariationTest.h
+	DiffractionEventCalibrateDetectorsTest.h
+	DiffractionFocussing2Test.h
+	DiffractionFocussingTest.h
+	DivideTest.h
+	DspacemaptoCalTest.h
+	EditInstrumentGeometryTest.h
+	ExponentialCorrectionTest.h
+	ExponentialTest.h
+	ExtractFFTSpectrumTest.h
+	ExtractMaskTest.h
+	ExtractSingleSpectrumTest.h
+	FFTDerivativeTest.h
+	FFTSmooth2Test.h
+	FFTTest.h
+	FilterBadPulsesTest.h
+	FilterByLogValueTest.h
+	FilterByTime2Test.h
+	FilterByTimeTest.h
+	FilterEventsHighFrequencyTest.h
+	FilterEventsTest.h
+	FindCenterOfMassPosition2Test.h
+	FindCenterOfMassPositionTest.h
+	FindDeadDetectorsTest.h
+	FindDetectorsOutsideLimitsTest.h
+	FindPeaksTest.h
+	FlatBackgroundTest.h
+	FlatPlateAbsorptionTest.h
+	GenerateEventsFilterTest.h
+	GeneratePeaksTest.h
+	GeneratePythonScriptTest.h
+	GetDetOffsetsMultiPeaksTest.h
+	GetDetectorOffsetsTest.h
+	GetEiTest.h
+	GetTimeSeriesLogInformationTest.h
+	GhostCorrectionTest.h
+	GroupWorkspacesTest.h
+	HRPDSlabCanAbsorptionTest.h
+	He3TubeEfficiencyTest.h
+	IQTransformTest.h
+	IdentifyNoisyDetectorsTest.h
+	IntegrationTest.h
+	InterpolatingRebinTest.h
+	InvertMaskTest.h
+	LogarithmTest.h
+	MaskBinsFromTableTest.h
+	MaskBinsTest.h
+	MaxMinTest.h
+	MedianDetectorTestTest.h
+	MergeRunsTest.h
+	MinusTest.h
+	ModeratorTzeroTest.h
+	MonteCarloAbsorptionTest.h
+	MultipleScatteringCylinderAbsorptionTest.h
+	MultiplyRangeTest.h
+	MultiplyTest.h
+	MuonAsymmetryCalcTest.h
+	MuonRemoveExpDecayTest.h
+	NormaliseByCurrentTest.h
+	NormaliseByDetectorTest.h
+	NormaliseToMonitorTest.h
+	OneMinusExponentialCorTest.h
+	PDFFTTest.h
+	PauseTest.h
+	PlotAsymmetryByLogValueTest.h
+	PlusTest.h
+	PointByPointVCorrectionTest.h
+	PoissonErrorsTest.h
+	PolynomialCorrectionTest.h
+	PowerLawCorrectionTest.h
+	PowerTest.h
+	Q1D2Test.h
+	Q1DTest.h
+	Q1DWeightedTest.h
+	QxyTest.h
+	RayTracerTesterTest.h
+	ReadGroupsFromFileTest.h
+	RealFFTTest.h
+	Rebin2DTest.h
+	RebinTest.h
+	RebinToWorkspaceTest.h
+	RebunchTest.h
+	RegroupTest.h
+	RemoveBinsTest.h
+	RemoveLowResTOFTest.h
+	RemovePromptPulseTest.h
+	RenameWorkspaceTest.h
+	ReplaceSpecialValuesTest.h
+	ResetNegativesTest.h
+	ResizeRectangularDetectorTest.h
+	SassenaFFTTest.h
+	ScaleTest.h
+	ScaleXTest.h
+	ShiftLogTimeTest.h
+	SignalOverErrorTest.h
+	SmoothDataTest.h
+	SmoothNeighboursTest.h
+	SofQW2Test.h
+	SofQW3Test.h
+	SofQWTest.h
+	SolidAngleTest.h
+	SortEventsTest.h
+	SpatialGroupingTest.h
+	SphericalAbsorptionTest.h
+	StripPeaksTest.h
+	StripVanadiumPeaks2Test.h
+	StripVanadiumPeaksTest.h
+	SumNeighboursTest.h
+	SumRowColumnTest.h
+	SumSpectraTest.h
+	TransposeTest.h
+	UnGroupWorkspaceTest.h
+	UnaryOperationTest.h
+	UnwrapSNSTest.h
+	UnwrapTest.h
+	WeightedMeanTest.h
+	WeightingStrategyTest.h
+	WorkspaceCreationHelperTest.h
+	WorkspaceGroupTest.h
 )
 
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
@@ -572,7 +572,7 @@ set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
     )
 
 # Python unit tests
-set ( TEST_PY_FILES test/NormaliseToUnityTest.py
+set ( TEST_PY_FILES NormaliseToUnityTest.py
 )
 
 if(UNITY_BUILD)
@@ -593,46 +593,9 @@ include_directories ( inc )
 
 target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
-if ( CXXTEST_FOUND )
-  # Generate the MultiplyTest.h and DivideTest.h
-  set ( MULTIPLYDIVIDETEST_CLASS MultiplyTest )
-  set ( MULTIPLYDIVIDETEST_DO_DIVIDE false )
-  configure_file ( test/MultiplyDivideTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/test/MultiplyTest.h)
-  set ( MULTIPLYDIVIDETEST_CLASS DivideTest )
-  set ( MULTIPLYDIVIDETEST_DO_DIVIDE true )
-  configure_file ( test/MultiplyDivideTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/test/DivideTest.h)
+# Add the unit tests directory
+add_subdirectory ( test )
 
-  # Generate the PlusTest.h and MinusTest.h
-  set ( PLUSMINUSTEST_CLASS PlusTest )
-  set ( PLUSMINUSTEST_DO_PLUS true )
-  configure_file ( test/PlusMinusTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/test/PlusTest.h)
-  set ( PLUSMINUSTEST_CLASS MinusTest )
-  set ( PLUSMINUSTEST_DO_PLUS false )
-  configure_file ( test/PlusMinusTest.in.h      ${CMAKE_CURRENT_SOURCE_DIR}/test/MinusTest.h)
-  
-  # Make the rest of the tests
-  include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../MDEvents/inc)
-  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
-  # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 
-                        ../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../TestHelpers/src/SANSInstrumentCreationHelper.cpp
-                        ../TestHelpers/src/MDEventsTestHelper.cpp )
-  cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling MDEvents )
-  add_dependencies ( FrameworkTests AlgorithmsTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "UnitTests" )
-endif ()
-
-# python unit tests
-if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( AlgorithmPythonUnitTests.py ${TEST_PY_FILES} )
-  add_dependencies ( AlgorithmPythonUnitTests.py PythonAPI )
-  add_dependencies ( FrameworkTests AlgorithmPythonUnitTests.py )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET AlgorithmPythonUnitTests.py PROPERTY FOLDER "UnitTests" )
-endif ()
 ###########################################################################
 # Installation settings
 ###########################################################################

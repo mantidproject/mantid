@@ -138,7 +138,7 @@ def add_to_cmake(subproject, classname, args, subfolder):
     if args.cpp:
         lines = redo_cmake_section(lines, "SRC_FILES", "src/" + subfolder + classname + ".cpp")
     if args.test:
-        lines = redo_cmake_section(lines, "TEST_FILES", "test/" + classname + "Test.h")
+        lines = redo_cmake_section(lines, "TEST_FILES", classname + "Test.h")
     
     f = open(cmake_path, 'w')
     text = "\n".join(lines) 
@@ -159,7 +159,7 @@ def remove_from_cmake(subproject, classname, args, subfolder):
     if args.cpp:
         lines = redo_cmake_section(lines, "SRC_FILES", "",  "src/" + subfolder + classname + ".cpp")
     if args.test:
-        lines = redo_cmake_section(lines, "TEST_FILES", "", "test/" + classname + "Test.h")
+        lines = redo_cmake_section(lines, "TEST_FILES", "", classname + "Test.h")
     
     f = open(cmake_path, 'w')
     text = "\n".join(lines) 
