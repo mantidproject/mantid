@@ -109,14 +109,15 @@ namespace WorkflowAlgorithms
     const bool createPsdBleed = reductionManager->getProperty("PsdBleed");
 
     // Numeric properties
-    const double vanSigma = reductionManager->getProperty("ErrorBarCriterion");
     const double huge = reductionManager->getProperty("HighCounts");
     const double tiny = reductionManager->getProperty("LowCounts");
     const double vanHi = reductionManager->getProperty("MedianTestHigh");
     const double vanLo = reductionManager->getProperty("MedianTestLow");
-    const double variation = reductionManager->getProperty("ProptionalChangeCriterion");
-    const double samHi = reductionManager->getProperty("AcceptanceFactor");
-    const double samLo = 0.0;
+    const double vanSigma = reductionManager->getProperty("ErrorBarCriterion");
+    const double variation = reductionManager->getProperty("DetVanRatioVariation");
+    const double samHi = reductionManager->getProperty("SamBkgMedianTestHigh");
+    const double samLo = reductionManager->getProperty("SamBkgMedianTestLow");
+    const double samSigma = reductionManager->getProperty("SamBkgErrorBarCriterion");
     const double bleedRate = reductionManager->getProperty("MaxFramerate");
     const int bleedPixels = reductionManager->getProperty("IgnoredPixels");
 
@@ -249,18 +250,19 @@ namespace WorkflowAlgorithms
 
     IAlgorithm_sptr diag = this->createSubAlgorithm("DetectorDiagnostic");
     diag->setProperty("InputWorkspace", dvWS);
-    diag->setProperty("WhiteBeamCompare", dvCompWS);
+    diag->setProperty("DetVanCompare", dvCompWS);
     diag->setProperty("SampleWorkspace", sampleWS);
     diag->setProperty("SampleTotalCountsWorkspace", totalCountsWS);
     diag->setProperty("SampleBackgroundWorkspace", backgroundIntWS);
     diag->setProperty("LowThreshold", tiny);
     diag->setProperty("HighThreshold", huge);
-    diag->setProperty("SignificanceTest", vanSigma);
     diag->setProperty("LowThresholdFraction", vanLo);
     diag->setProperty("HighThresholdFraction", vanHi);
-    diag->setProperty("WhiteBeamVariation", variation);
+    diag->setProperty("SignificanceTest", vanSigma);
+    diag->setProperty("DetVanRatioVariation", variation);
     diag->setProperty("SampleBkgLowAcceptanceFactor", samLo);
     diag->setProperty("SampleBkgHighAcceptanceFactor", samHi);
+    diag->setProperty("SampleBkgSignificanceTest", samSigma);
     diag->setProperty("MaxTubeFramerate", bleedRate);
     diag->setProperty("NIgnoredCentralPixels", bleedPixels);
     diag->setProperty("OutputWorkspace", maskName);
