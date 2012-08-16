@@ -20,9 +20,9 @@ class DiagnoseDetectorsScript(BaseScriptElement):
     median_test_low = 0.1
     errorbar_criterion = 0.0
     det_van2 = ''
-    ratio_var_criterion = 1.1
+    detvan_ratio_var = 1.1
     background_check = True
-    sambkg_median_test_high = 3
+    sambkg_median_test_high = 5
     sambkg_median_test_low = 0.1
     sambkg_errorbar_criterion = 3.3
     tof_start = 18000
@@ -46,7 +46,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             script += "MedianTestLow=%s,\n" % str(self.median_test_low)
             script += "ErrorBarCriterion=%s,\n" % str(self.errorbar_criterion)
             script += "DetectorVanadium2=\"%s\",\n" % self.det_van2
-            script += "RatioVariationCriterion=%s,\n" % str(self.ratio_var_criterion)
+            script += "DetVanRatioVariation=%s,\n" % str(self.detvan_ratio_var)
             script += "BackgroundCheck=%s,\n" % self.background_check
             if self.background_check:
                 script += "SamBkgMedianTestHigh=%s,\n" % str(self.sambkg_median_test_high)
@@ -75,7 +75,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         xml += "  <median_test_high>%s</median_test_high>\n" % str(self.median_test_high)
         xml += "  <errorbar_criterion>%s</errorbar_criterion>\n" % str(self.errorbar_criterion)
         xml += "  <det_van2>%s</det_van2>\n" % self.det_van2
-        xml += "  <ratio_var_criterion>%s</ratio_var_criterion>\n" % str(self.ratio_var_criterion)
+        xml += "  <detvan_ratio_var>%s</detvan_ratio_var>\n" % str(self.detvan_ratio_var)
         xml += "  <background_check>%s</backgound_check>\n" % self.background_check
         xml += "  <sambkg_median_test_low>%s</sambkg_median_test_low>\n" % str(self.sambkg_median_test_low)
         xml += "  <sambkg_median_test_high>%s</sambkg_median_test_high>\n" % str(self.sambkg_median_test_high)
@@ -122,9 +122,9 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             self.det_van2 = BaseScriptElement.getStringElement(instrument_dom,
                                                                "det_van2",
                                                                default=DiagnoseDetectorsScript.det_van2)
-            self.ratio_var_criterion = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                         "ratio_var_criterion",
-                                                                         default=DiagnoseDetectorsScript.ratio_var_criterion)
+            self.detvan_ratio_var = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                      "detvan_ratio_var",
+                                                                      default=DiagnoseDetectorsScript.detvan_ratio_var)
             self.background_check = BaseScriptElement.getBoolElement(instrument_dom,
                                                                      "background_check",
                                                                      default=DiagnoseDetectorsScript.background_check)
@@ -168,7 +168,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         self.median_test_high = DiagnoseDetectorsScript.median_test_high
         self.errorbar_criterion = DiagnoseDetectorsScript.errorbar_criterion
         self.det_van2 = DiagnoseDetectorsScript.det_van2
-        self.ratio_var_criterion = DiagnoseDetectorsScript.ratio_var_criterion
+        self.detvan_ratio_var = DiagnoseDetectorsScript.detvan_ratio_var
         self.background_check = DiagnoseDetectorsScript.background_check
         self.sambkg_median_test_low = DiagnoseDetectorsScript.sambkg_median_test_low
         self.sambkg_median_test_high = DiagnoseDetectorsScript.sambkg_median_test_high
