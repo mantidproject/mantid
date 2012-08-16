@@ -178,7 +178,7 @@ namespace Mantid
       m_progStepWidth = 0;
       {
         int numTests(1); // if detector vanadium present, do it!
-        if (!getPropertyValue("WhiteBeamCompare").empty())
+        if (!getPropertyValue("DetVanCompare").empty())
           numTests += 1;
         if (!getPropertyValue("SampleTotalCountsWorkspace").empty())
           numTests += 1;
