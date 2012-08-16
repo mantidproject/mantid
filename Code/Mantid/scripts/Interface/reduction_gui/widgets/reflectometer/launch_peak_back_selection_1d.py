@@ -4,7 +4,7 @@ from __future__ import with_statement
 # numpy module
 import numpy as np
 
-from pylab import *
+#from pylab import *
 
 # for command-line arguments
 import sys
