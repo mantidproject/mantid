@@ -31,11 +31,15 @@ class DiagnoseDetectorsWidget(BaseWidget):
 
     def initialize_content(self):
         # Constraints
-        for widget in [self._content.errorbar_crit_edit,
+        for widget in [
                        self._content.median_test_high_edit,
                        self._content.median_test_low_edit,
-                       self._content.prop_change_crit_edit,
-                       self._content.accept_factor_edit]:
+                       self._content.errorbar_crit_edit,
+                       self._content.ratio_var_crit_edit,
+                       self._content.sambkg_median_test_high_edit,
+                       self._content.sambkg_median_test_low_edit,
+                       self._content.sambkg_errorbar_crit_edit
+                       ]:
             
             dvp = QtGui.QDoubleValidator(widget)
             dvp.setBottom(0.0)
@@ -70,15 +74,17 @@ class DiagnoseDetectorsWidget(BaseWidget):
         """
         self._content.find_bad_det_gb.setChecked(state.find_bad_detectors)
         self._content.output_mask_edit.setText(state.output_mask_file)
-        self._content.errorbar_crit_edit.setText(QtCore.QString(str(state.errorbar_criterion)))
         self._content.high_counts_edit.setText(QtCore.QString("%1.e" % state.high_counts))
         self._content.low_counts_edit.setText(QtCore.QString(str(state.low_counts)))
         self._content.median_test_high_edit.setText(QtCore.QString(str(state.median_test_high)))
         self._content.median_test_low_edit.setText(QtCore.QString(str(state.median_test_low)))
+        self._content.errorbar_crit_edit.setText(QtCore.QString(str(state.errorbar_criterion)))
         self._content.det_van2_edit.setText(state.det_van2)
-        self._content.prop_change_crit_edit.setText(QtCore.QString(str(state.prop_change_criterion)))
+        self._content.ratio_var_crit_edit.setText(QtCore.QString(str(state.ratio_var_criterion)))
         self._content.background_check_gb.setChecked(state.background_check)
-        self._content.accept_factor_edit.setText(QtCore.QString(str(state.acceptance_factor)))
+        self._content.sambkg_median_test_high_edit.setText(QtCore.QString(str(state.sambkg_median_test_high)))
+        self._content.sambkg_median_test_low_edit.setText(QtCore.QString(str(state.sambkg_median_test_low)))
+        self._content.sambkg_errorbar_crit_edit.setText(QtCore.QString(str(state.sambkg_errorbar_criterion)))
         self._content.tof_start_edit.setText(QtCore.QString(str(state.tof_start)))
         self._content.tof_end_edit.setText(QtCore.QString(str(state.tof_end)))
         self._content.reject_zero_bg_cb.setChecked(state.reject_zero_bkg)
@@ -93,15 +99,18 @@ class DiagnoseDetectorsWidget(BaseWidget):
         d = DiagnoseDetectorsScript()
         d.find_bad_detectors = self._content.find_bad_det_gb.isChecked()
         d.output_mask_file = self._content.output_mask_edit.text()
-        d.errorbar_criterion = util._check_and_get_float_line_edit(self._content.errorbar_crit_edit)
+        
         d.high_counts = util._check_and_get_float_line_edit(self._content.high_counts_edit)
         d.low_counts = util._check_and_get_float_line_edit(self._content.low_counts_edit)
         d.median_test_high = util._check_and_get_float_line_edit(self._content.median_test_high_edit)
         d.median_test_low = util._check_and_get_float_line_edit(self._content.median_test_low_edit)
+        d.errorbar_criterion = util._check_and_get_float_line_edit(self._content.errorbar_crit_edit)
         d.det_van2 = self._content.det_van2_edit.text()
-        d.prop_change_criterion = util._check_and_get_float_line_edit(self._content.prop_change_crit_edit)
+        d.ratio_var_criterion = util._check_and_get_float_line_edit(self._content.ratio_var_crit_edit)
         d.background_check = self._content.background_check_gb.isChecked()
-        d.acceptance_factor = util._check_and_get_float_line_edit(self._content.accept_factor_edit)
+        d.sambkg_median_test_high = util._check_and_get_float_line_edit(self._content.sambkg_median_test_high_edit)
+        d.sambkg_median_test_low = util._check_and_get_float_line_edit(self._content.sambkg_median_test_low_edit)
+        d.sambkg_errorbar_criterion = util._check_and_get_float_line_edit(self._content.sambkg_errorbar_crit_edit)
         d.tof_start = util._check_and_get_int_line_edit(self._content.tof_start_edit)
         d.tof_end = util._check_and_get_int_line_edit(self._content.tof_end_edit)
         d.reject_zero_bkg = self._content.reject_zero_bg_cb.isChecked()
