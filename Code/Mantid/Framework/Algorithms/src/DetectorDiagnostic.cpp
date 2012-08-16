@@ -93,7 +93,7 @@ namespace Mantid
       declareProperty("LevelsUp",0,mustBePosInt,"Levels above pixel that will be used to compute the median.\n"
                       "If no level is specified, or 0, the median is over the whole instrument.");
       this->setPropertyGroup("LevelsUp", medianDetTestGrp);
-      declareProperty("SignificanceTest", 3.3, mustBePositiveDbl,
+      declareProperty("SignificanceTest", 0.0, mustBePositiveDbl,
                       "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
                       "difference with respect to the median value must also exceed this number of error bars");
       this->setPropertyGroup("SignificanceTest", medianDetTestGrp);
@@ -112,15 +112,15 @@ namespace Mantid
       this->setPropertyGroup("ExcludeZeroesFromMedian", medianDetTestGrp);
 
       string detEffVarGrp("Detector Efficiency Variation");
-      declareProperty(new WorkspaceProperty<>("WhiteBeamCompare","",Direction::Input, PropertyMode::Optional),
-                      "Name of a matching second white beam vanadium run from the same\n"
+      declareProperty(new WorkspaceProperty<>("DetVanCompare","",Direction::Input, PropertyMode::Optional),
+                      "Name of a matching second detector vanadium run from the same\n"
                       "instrument. It must be treated in the same manner as the input detector vanadium." );
-      this->setPropertyGroup("WhiteBeamCompare", detEffVarGrp);
-      declareProperty("WhiteBeamVariation", 1.1, mustBePositiveDbl,
+      this->setPropertyGroup("DetVanCompare", detEffVarGrp);
+      declareProperty("DetVanRatioVariation", 1.1, mustBePositiveDbl,
                       "Identify spectra whose total number of counts has changed by more\n"
                       "than this factor of the median change between the two input workspaces" );
-      this->setPropertyGroup("WhiteBeamVariation", detEffVarGrp);
-      setPropertySettings("WhiteBeamVariation", new EnabledWhenProperty("WhiteBeamCompare", IS_NOT_DEFAULT));
+      this->setPropertyGroup("DetVanRatioVariation", detEffVarGrp);
+      setPropertySettings("DetVanRatioVariation", new EnabledWhenProperty("DetVanCompare", IS_NOT_DEFAULT));
 
       string countsCheck("Check Sample Counts");
       declareProperty(new WorkspaceProperty<>("SampleTotalCountsWorkspace", "",
@@ -139,6 +139,10 @@ namespace Mantid
       declareProperty("SampleBkgHighAcceptanceFactor", 5.0, mustBePositiveDbl,
           "High threshold for the background check MedianDetectorTest.");
       this->setPropertyGroup("SampleBkgHighAcceptanceFactor", backgroundCheck);
+      declareProperty("SampleBkgSignificanceTest", 3.3, mustBePositiveDbl,
+                      "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+                      "difference with respect to the median value must also exceed this number of error bars");
+      this->setPropertyGroup("SampleBkgSignificanceTest", backgroundCheck);
 
       string psdBleedMaskGrp("Create PSD Bleed Mask");
       declareProperty(new WorkspaceProperty<>("SampleWorkspace", "",
@@ -190,13 +194,14 @@ namespace Mantid
       int numFailed(0);
       MatrixWorkspace_sptr maskWS;
 
-      // Perform FindDetectorsOutsideLimits and MedianDetectorTest on det van
+      // Perform FindDetectorsOutsideLimits and MedianDetectorTest on the
+      // detector vanadium
       this->doDetVanTest(countsWS, maskWS, numFailed);
 
       // DetectorEfficiencyVariation (only if two workspaces are specified)
-      if (!getPropertyValue("WhiteBeamCompare").empty())
+      if (!getPropertyValue("DetVanCompare").empty())
       {
-          MatrixWorkspace_sptr input2WS = getProperty("WhiteBeamCompare");
+          MatrixWorkspace_sptr input2WS = getProperty("DetVanCompare");
 
           MatrixWorkspace_sptr compareWS = integrateSpectra(input2WS, m_minIndex, m_maxIndex,
               m_rangeLower, m_rangeUpper, true);
@@ -204,8 +209,10 @@ namespace Mantid
           // apply mask to what we are going to input
           applyMask(compareWS, maskWS);
 
-          // get the relavant inputs
-          double variation = getProperty("WhiteBeamVariation");
+          this->doDetVanTest(compareWS, maskWS, numFailed);
+
+          // get the relevant inputs
+          double variation = getProperty("DetVanRatioVariation");
 
           // run the subalgorithm
           IAlgorithm_sptr alg = createSubAlgorithm("DetectorEfficiencyVariation", m_fracDone, m_fracDone+m_progStepWidth);
@@ -227,6 +234,7 @@ namespace Mantid
       // Zero total counts check for sample counts
       if (!getPropertyValue("SampleTotalCountsWorkspace").empty())
         {
+          g_log.warning() << "DetDiag using total counts" << std::endl;
           MatrixWorkspace_sptr totalCountsWS = getProperty("SampleTotalCountsWorkspace");
           // apply mask to what we are going to input
           applyMask(totalCountsWS, maskWS);
@@ -243,6 +251,11 @@ namespace Mantid
           maskWS += localMaskWS;
           int localFails = zeroChk->getProperty("NumberOfFailures");
           numFailed += localFails;
+          MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(localMaskWS);
+          if (m)
+            {
+              g_log.information() << "A: " << m->getNumberMasked() << std::endl;
+            }
         }
 
       // Background check
@@ -252,9 +265,9 @@ namespace Mantid
           // apply mask to what we are going to input
           applyMask(bkgWS, maskWS);
 
-          double significanceTest = getProperty("SignificanceTest");
-          double lowThreshold = getProperty("LowThresholdFraction");
-          double highThreshold = getProperty("HighThresholdFraction");
+          double significanceTest = getProperty("SampleBkgSignificanceTest");
+          double lowThreshold = getProperty("SampleBkgLowAcceptanceFactor");
+          double highThreshold = getProperty("SampleBkgHighAcceptanceFactor");
 
           // run the subalgorithm
           IAlgorithm_sptr alg = createSubAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone+m_progStepWidth);
@@ -280,7 +293,7 @@ namespace Mantid
       if (maxTubeFrameRate > 0. && !getPropertyValue("SampleWorkspace").empty())
       {
           MatrixWorkspace_sptr sampleWS = getProperty("SampleWorkspace");
-          // get the relavant inputs
+          // get the relevant inputs
           int numIgnore = getProperty("NIgnoredCentralPixels");
 
           // run the subalgorithm
@@ -298,6 +311,12 @@ namespace Mantid
 
       g_log.information() << numFailed << " spectra are being masked\n";
       setProperty("NumberOfFailures", numFailed);
+
+      MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(maskWS);
+      if (m)
+        {
+          g_log.information() << "B: " << m.get()->getNumberMasked() << std::endl;
+        }
       setProperty("OutputWorkspace", maskWS);
     }
 
@@ -313,10 +332,10 @@ namespace Mantid
     }
 
     void DetectorDiagnostic::doDetVanTest(API::MatrixWorkspace_sptr inputWS,
-        API::MatrixWorkspace_sptr maskWS, int &nFails)
+        API::MatrixWorkspace_sptr &maskWS, int &nFails)
     {
       // FindDetectorsOutsideLimits
-      // get the relavant inputs
+      // get the relevant inputs
       double lowThreshold = getProperty("LowThreshold");
       double highThreshold = getProperty("HighThreshold");
 
@@ -332,10 +351,15 @@ namespace Mantid
       fdol->setProperty("HighThreshold", highThreshold);
       fdol->executeAsSubAlg();
       maskWS = fdol->getProperty("OutputWorkspace");
+      MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(maskWS);
+      if (m)
+        {
+          g_log.information() << "A: " << m.get()->getNumberMasked() << std::endl;
+        }
       int localFails = fdol->getProperty("NumberOfFailures");
       nFails += localFails;
 
-      // get the relavant inputs for the MedianDetectorTests
+      // get the relevant inputs for the MedianDetectorTests
       int parents = getProperty("LevelsUp");
       double significanceTest = getProperty("SignificanceTest");
       double lowThresholdFrac = getProperty("LowThresholdFraction");
@@ -365,6 +389,12 @@ namespace Mantid
       mdt->setProperty("ExcludeZeroesFromMedian", excludeZeroes);
       mdt->executeAsSubAlg();
       MatrixWorkspace_sptr localMaskWS = mdt->getProperty("OutputWorkspace");
+      m = boost::dynamic_pointer_cast<MaskWorkspace>(localMaskWS);
+      if (m)
+        {
+          g_log.information() << "A: " << m.get()->getNumberMasked() << std::endl;
+        }
+
       maskWS += localMaskWS;
       localFails = mdt->getProperty("NumberOfFailures");
       nFails += localFails;
@@ -374,7 +404,9 @@ namespace Mantid
     // Public member functions
     //--------------------------------------------------------------------------
     DetectorDiagnostic::DetectorDiagnostic() : 
-      API::Algorithm(), m_fracDone(0.0), m_TotalTime(RTTotal)
+      API::Algorithm(), m_fracDone(0.0), m_TotalTime(RTTotal), m_parents(0),
+      m_progStepWidth(0.0), m_minIndex(0), m_maxIndex(EMPTY_INT()),
+      m_rangeLower(EMPTY_DBL()), m_rangeUpper(EMPTY_DBL())
     {
     }
 
