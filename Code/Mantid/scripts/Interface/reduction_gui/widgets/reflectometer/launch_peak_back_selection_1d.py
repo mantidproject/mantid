@@ -4,8 +4,6 @@ from __future__ import with_statement
 # numpy module
 import numpy as np
 
-#from pylab import *
-
 # for command-line arguments
 import sys
 
@@ -590,7 +588,6 @@ class DesignerMainWindow(QtGui.QMainWindow):
             dr.connect()
             self.drs.append(dr)
 
-        plt.show()
         self.canvas.draw()
 
         #set the x-axes range visible
