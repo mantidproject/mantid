@@ -1397,7 +1397,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
         {
           bankn = banki;
           sum_events += *it;
-          if ( sum_events > lastChunkEvent && chunk_total > 1 && bankn > bank0)
+          if ( sum_events > lastChunkEvent && chunk_total > chunk_events/2 && bankn > bank0)
           {
             sum_events -= *it;
             break;
