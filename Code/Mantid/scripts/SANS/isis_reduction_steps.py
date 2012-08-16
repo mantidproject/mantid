@@ -1647,7 +1647,7 @@ class UserFile(ReductionStep):
             if det_specif.startswith('CORR'):
                 self._readDetectorCorrections(upper_line[8:], reducer)
             elif det_specif.startswith('RESCALE') or det_specif.startswith('SHIFT'):
-                self._readFrontRescaleShiftSetup(upper_line[4:], reducer)                
+                self._readFrontRescaleShiftSetup(det_specif, reducer)                
             else:
                 # for /DET/FRONT and /DET/REAR commands
                 reducer.instrument.setDetector(det_specif)
@@ -1934,7 +1934,7 @@ class UserFile(ReductionStep):
         values = details.split() 
         rAnds = reducer.instrument.getDetector('FRONT').rescaleAndShift
         rAnds.qRangeUserSelected = False
-        if details.startwith('RESCALE'):
+        if details.startswith('RESCALE'):
             if 'FIT' in details:
                 if len(values) == 1:
                     rAnds.fitRescale = True 
@@ -1950,7 +1950,7 @@ class UserFile(ReductionStep):
                     rAnds.scale = float(values[1])
                 else:
                     _issueWarning("Command: \"DET/" + details + "\" not valid. Expected format is /DET/RESCALE r")
-        elif details.startwith('SHIFT'):
+        elif details.startswith('SHIFT'):
             if 'FIT' in details:
                 if len(values) == 1:
                     rAnds.fitShift = True 
