@@ -14,13 +14,13 @@ from PyQt4 import QtGui
 
 # import the MainWindow widget from the converted .ui files
 #from peak_back_selection_1d import Ui_MplMainWindow
-from matplotlib.figure import Figure
-from matplotlib.patches import Rectangle
+#from matplotlib.figure import Figure
+#from matplotlib.patches import Rectangle
 
 # import the Qt4Agg FigureCanvas Object, that binds Figure to 
 # Qt4Agg backend. It also inherits from QWidget
-from matplotlib.backends.backend_qt4agg import  FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
+#from matplotlib.backends.backend_qt4agg import  FigureCanvasQTAgg as FigureCanvas
+#from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 
 from mantidsimple import *
 
