@@ -72,6 +72,7 @@ endif(UNITY_BUILD)
 ###########################################################################
 add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB -DBOOST_PYTHON_STATIC_LIB -DBOOST_PYTHON_SOURCE )
 
+include_directories ( ${PYTHON_INCLUDE_PATH} )
 find_package ( Numpy REQUIRED )
 include_directories ( ${PYTHON_NUMPY_INCLUDE_DIR} )
 include_directories ( inc )

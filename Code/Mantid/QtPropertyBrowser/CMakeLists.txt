@@ -10,8 +10,8 @@ project ( QtPropertyBrowser )
 # allows building as a stand-alone project
 if ( NOT QT_FOUND )
   find_package( Qt4 COMPONENTS QtCore QtGui REQUIRED )
-  include( ${QT_USE_FILE} )
 endif ()
+include ( UseSystemQt4 )
 
 # Add the sources
 set( QTPROPERTYBROWSER_SRCS

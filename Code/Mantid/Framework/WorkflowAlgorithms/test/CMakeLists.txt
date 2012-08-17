@@ -1,4 +1,6 @@
 if ( CXXTEST_FOUND )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+
   # Make the rest of the tests
   include_directories ( ../../DataHandling/inc )
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )

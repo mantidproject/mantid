@@ -11,6 +11,7 @@ endif ()
 # Now add the packages one-by-one, building up the dependencies as we go
 ###########################################################################
 
+include ( UseSystemQt4 )
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 include_directories ( API/inc )
 add_subdirectory ( API )

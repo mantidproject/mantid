@@ -98,6 +98,8 @@ target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIB
 ###########################################################################
 
 if ( CXXTEST_FOUND )
+    include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+
     include_directories ( ../../Framework/TestHelpers/inc
                           ../../Framework/DataObjects/inc )
     
@@ -152,6 +154,3 @@ endif () # (not for windows)
 
 install ( TARGETS MantidQtAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${LIB_DIR} )
 
-set ( TEST_FILES
-	test/AlgorithmRunnerTest.h
-)

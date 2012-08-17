@@ -45,8 +45,6 @@ set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRAR
 ## The executable
 set ( PYTHON_EXECUTABLE "${CMAKE_LIBRARY_PATH}/Python27/python.exe" CACHE FILEPATH "The location of the python executable" FORCE ) 
 set ( PYTHON_EXECUTABLE_DEBUG "${CMAKE_LIBRARY_PATH}/Python27/python_d.exe" CACHE FILEPATH "The location of the debug build of the python executable" FORCE ) 
-## Add the include directory
-include_directories ( ${PYTHON_INCLUDE_DIRS} )
 
 # Finally create variables containing the required distribution files
 set ( PY_DIST_DIRS "${CMAKE_LIBRARY_PATH}/Python27/DLLs" "${CMAKE_LIBRARY_PATH}/Python27/Lib" )

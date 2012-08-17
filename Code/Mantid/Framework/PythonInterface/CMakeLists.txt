@@ -11,6 +11,8 @@ set ( Boost_LIBRARIES ) # Empty out the variable after previous use
 set ( Boost_USE_DEBUG_PYTHON TRUE )
 find_package ( Boost REQUIRED python )
 
+include_directories ( ${PYTHON_INCLUDE_PATH} )
+
 find_package ( Numpy REQUIRED )
 include_directories ( SYSTEM ${PYTHON_NUMPY_INCLUDE_DIR} )
 set ( HEADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidPythonInterface )
@@ -61,6 +63,8 @@ set ( TEST_FILES
 )  
   
 if ( CXXTEST_FOUND )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+
   cxxtest_add_test ( PythonInterfaceTest ${TEST_FILES} )
   if ( WIN32 )
     set_target_properties( PythonInterfaceTest PROPERTIES COMPILE_FLAGS "/w44244" )

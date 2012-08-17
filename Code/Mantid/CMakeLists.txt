@@ -27,7 +27,6 @@ set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 # Check for Qt (DarwinSetup below needs a variable from this)
 ###########################################################################
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
-include ( UseSystemQt4 )
 
 ###########################################################################
 # Set paths to Third_Party for Windows builds
@@ -37,7 +36,7 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	if ( NOT THIRD_PARTY )
   		set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )  
 	endif ()
-	# Print out were we think we are looking for 3rd party stuff
+	# Print out where we think we are looking for 3rd party stuff
 	message (STATUS "Setting THIRD_PARTY to be ${THIRD_PARTY}." )
 
 	# Check that the 3rd party directory exists.
