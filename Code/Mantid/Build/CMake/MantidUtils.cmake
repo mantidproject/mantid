@@ -64,8 +64,7 @@ endfunction( ADD_COMPILE_PY_TARGET )
 #
 # NAME: COPY_PYTHON_FILES_TO_DIR
 # Adds a set of custom commands for each python file to copy
-# the given file along with its .pyc file, that is assumed to exist
-# by the side of the py file.
+# the given file along with its .pyc file (generated).
 #   - PY_FILES :: A list of python files to copy. Note you will have
 #                 to quote an expanded list
 #   - SRC_DIR :: The src directory of the files to be copied
@@ -81,6 +80,7 @@ function( COPY_PYTHON_FILES_TO_DIR PY_FILES SRC_DIR DEST_DIR INSTALLED_FILES )
         set( _pyc_bin ${DEST_DIR}/${_basefilename}.pyc )
         add_custom_command ( OUTPUT ${_py_bin} ${_pyc_bin}
                              DEPENDS ${SRC_DIR}/${PYFILE}
+                             COMMAND ${PYTHON_EXECUTABLE} -m compileall -q ${SOURCE_DIR}
                              COMMAND ${CMAKE_COMMAND} ARGS -E copy
                                ${_py_src} ${_py_bin}
                              COMMAND ${CMAKE_COMMAND} ARGS -E copy
