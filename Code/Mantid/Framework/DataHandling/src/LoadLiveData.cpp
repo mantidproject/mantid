@@ -65,6 +65,8 @@ This could cause Mantid to run very slowly or to crash due to lack of memory.
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/CPUTimer.h"
 
+#include <boost/algorithm/string.hpp>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -160,7 +162,73 @@ namespace DataHandling
       if (!AnalysisDataService::Instance().doesExist(inputName))
         g_log.error() << "Something really wrong happened when adding " << inputName << " to ADS. " << this->getPropertyValue("OutputWorkspace") << std::endl;
 
-      alg->setPropertyValue("InputWorkspace", inputName);
+      // What is the name of the input workspace property
+      if (alg->existsProperty("InputWorkspace"))
+      {
+          g_log.debug() << "Using InputWorkspace as the input workspace property name." << std::endl;
+          alg->setPropertyValue("InputWorkspace", inputName);
+      }
+      else
+      {
+          // Look for the first Workspace property that is marked INPUT.
+          std::vector<Property*> proplist = alg->getProperties();
+          g_log.debug() << "Processing algorithm (" << alg->name() << ") has " << proplist.size() << " properties." << std::endl;
+          bool inputPropertyWorkspaceFound = false;
+          for (size_t i=0; i<proplist.size(); ++i)
+          {
+              Property * prop = proplist[i];
+              if ((prop->direction() == 0) && (inputPropertyWorkspaceFound == false))
+              {
+                  if (boost::ends_with(prop->type(), "Workspace"))
+                  {
+                      g_log.information() << "Using " << prop->name() << " as the input property." << std::endl;
+                      alg->setPropertyValue(prop->name(), inputName);
+                      inputPropertyWorkspaceFound = true;
+                  }
+              }
+          }
+      }
+
+      //TODO: (Ticket #5774) Decide if we should do the same for output (see below) - Also do we need to do a similar thing for post-processing.
+
+/*  Leaving the following code in for the moment - will be removed as part of trac ticket #5774.
+
+      // Now look at the output workspace property
+      if (alg->existsProperty("OutputWorkspace"))
+      {
+          g_log.debug() << "Using OutputWorkspace as the output workspace property name." << std::endl;
+          alg->setPropertyValue("OutputWorkspace", outputName);
+      }
+      else
+      {
+          // Look for the first Workspace property that is marked OUTPUT.
+          std::vector<Property*> proplist = alg->getProperties();
+          g_log.debug() << "Processing algorithm (" << alg->name() << ") has " << proplist.size() << " properties." << std::endl;
+          bool outputPropertyWorkspaceFound = false;
+          for (size_t i=0; i<proplist.size(); ++i)
+          {
+              Property * prop = proplist[i];
+              if ((prop->direction() == 1) && (outputPropertyWorkspaceFound == false))
+              {
+                  g_log.information() << "*** " << outputPropertyWorkspaceFound << std::endl;
+                  if (prop->type() == "MatrixWorkspace")
+                  {
+                      g_log.information() << "Using " << prop->name() << " as the input property." << std::endl;
+                      alg->setPropertyValue(prop->name(), outputName);
+                      outputPropertyWorkspaceFound = true;
+                  }
+              }
+
+//              g_log.debug() << "Propery #" << i << std::endl;
+//              g_log.debug() << "\tName: " << prop->name() << std::endl;
+//              g_log.debug() << "\tDirection: " << prop->direction() << std::endl;
+//              g_log.debug() << "\tType: " << prop->type() << std::endl;
+//              g_log.debug() << "\tType_Info: " << prop->type_info() << std::endl;
+
+          }
+      }
+*/
+
       alg->setPropertyValue("OutputWorkspace", outputName);
       alg->setChild(true);
       alg->execute();
