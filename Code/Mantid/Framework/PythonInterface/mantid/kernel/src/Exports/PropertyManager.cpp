@@ -6,6 +6,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/PropertyValueHandler.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 
@@ -43,13 +44,49 @@ namespace
       entry->set(&self, name, value);
     }
   }
+
+  /**
+   * Create a new property from the value within the boost::python object
+   * It is equivalent to a python method that starts with 'self'
+   * @param self :: A reference to the calling object
+   * @param name :: The name of the property
+   * @param value :: The value of the property as a bpl object
+   */
+  void declareProperty(PropertyManager &self, const std::string & name,
+                       boost::python::object value)
+  {
+    Mantid::Kernel::Property *p = Registry::PropertyWithValueFactory::create(name, value, 0);
+    self.declareProperty(p);
+  }
+
+  /**
+   * Create or set a property from the value within the boost::python object
+   * It is equivalent to a python method that starts with 'self' and allows
+   * python dictionary type usage.
+   * @param self :: A reference to the calling object
+   * @param name :: The name of the property
+   * @param value :: The value of the property as a bpl object
+   */
+  void declareOrSetProperty(PropertyManager &self, const std::string & name,
+                            boost::python::object value)
+  {
+    bool propExists = self.existsProperty(name);
+    if (propExists)
+      {
+        ::setProperty(self, name, value);
+      }
+    else
+      {
+        ::declareProperty(self, name, value);
+      }
+  }
 }
 
 void export_PropertyManager()
 {
   REGISTER_SHARED_PTR_TO_PYTHON(PropertyManager);
   class_<PropertyManager, bases<IPropertyManager>, boost::noncopyable>("PropertyManager")
-		  .def("propertyCount", &PropertyManager::propertyCount, "Returns the number of properties being managed")
+          .def("propertyCount", &PropertyManager::propertyCount, "Returns the number of properties being managed")
     	  .def("getProperty", &PropertyManager::getProperty, return_value_policy<return_by_value>(),
     	  		"Returns the property of the given name. Use .value to give the value")
     	  .def("getPropertyValue", &PropertyManager::getPropertyValue,
@@ -59,10 +96,12 @@ void export_PropertyManager()
     	  .def("setPropertyValue", &PropertyManager::setPropertyValue,
     	  		"Set the value of the named property via a string")
     	  .def("setProperty", &setProperty, "Set the value of the named property")
+    	  .def("declareProperty", &declareProperty, "Create a new named property")
     	  // Special methods to act like a dictionary
     	  .def("__len__", &PropertyManager::propertyCount)
     	  .def("__contains__", &PropertyManager::existsProperty)
     	  .def("__getitem__", &PropertyManager::getProperty)
+    	  .def("__setitem__", &declareOrSetProperty)
     	  ;
 }
 
