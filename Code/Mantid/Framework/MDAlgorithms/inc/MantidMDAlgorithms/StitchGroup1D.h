@@ -3,9 +3,18 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
+  namespace API
+  {
+    class IMDHistoWorkspace;
+  }
+  namespace MDEvents
+  {
+    class MDHistoWorkspace;
+  }
 namespace MDAlgorithms
 {
 
@@ -42,6 +51,15 @@ namespace MDAlgorithms
     virtual const std::string category() const;
 
   private:
+
+    void checkIndividualWorkspace(boost::shared_ptr<const API::IMDHistoWorkspace> workspace) const;
+    void checkBothWorkspaces(boost::shared_ptr<const API::IMDHistoWorkspace> rhsWorkspace, boost::shared_ptr<const API::IMDHistoWorkspace> lhsWorkspace) const;
+    boost::shared_ptr<MDEvents::MDHistoWorkspace> trimOutIntegratedDimension(boost::shared_ptr<API::IMDHistoWorkspace> ws);
+    double integrateOver(boost::shared_ptr<API::IMDHistoWorkspace> ws, const double& startOverlap, const double& endOverlap);
+
+    void overlayOverlap(boost::shared_ptr<MDEvents::MDHistoWorkspace> sum, boost::shared_ptr<API::IMDHistoWorkspace> overlap);
+    boost::shared_ptr<MDEvents::MDHistoWorkspace> extractOverlapAsWorkspace(boost::shared_ptr<API::IMDHistoWorkspace> scaledWorkspace1, const double& startOverlap, const double& endOverlap);
+
     virtual void initDocs();
     void init();
     void exec();

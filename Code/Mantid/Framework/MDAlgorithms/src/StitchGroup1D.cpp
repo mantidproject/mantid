@@ -1,21 +1,51 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+Performs 1D stitching of Reflectometry 2D MDHistoWorkspaces. Based on the Quick script developed at ISIS. This only works on 1D Histogrammed MD Workspaces.
+
+Scales either the LHS or RHS workspace by some scale factor which, can be manually specified, or calculated from the overlap.
+
+Calculates the weighted mean values in the overlap region and then combines the overlap region with the difference of the LHS and RHS workspaces
 *WIKI*/
 
 #include "MantidMDAlgorithms/StitchGroup1D.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/EnabledWhenProperty.h"
+#include <boost/assign.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
 namespace MDAlgorithms
 {
+
+  Geometry::IMDDimension_const_sptr getFirstNonIntegratedDimension(IMDHistoWorkspace_const_sptr ws)
+  {
+    auto nonIntegratedDimensions =  ws->getNonIntegratedDimensions();
+    if(nonIntegratedDimensions.size() == 0)
+    {
+      throw std::runtime_error("Workspace has no non-integrated dimensions.");
+    }
+    return nonIntegratedDimensions.front();
+  }
+
+  Geometry::IMDDimension_const_sptr getFirstIntegratedDimension(IMDHistoWorkspace_const_sptr ws)
+  {
+    for(size_t i =0; i < ws->getNumDims(); ++i)
+    {
+      Geometry::IMDDimension_const_sptr dim = ws->getDimension(i);
+      if(dim->getIsIntegrated())
+      {
+        return dim;
+      }
+    }
+  }
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(StitchGroup1D)
@@ -60,7 +90,7 @@ namespace MDAlgorithms
   {
     declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("RHSWorkspace", "", Direction::Input), "Input MD Histo Workspace");
     declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("LHSWorkspace", "", Direction::Input), "Input MD Histo Workspace");
-    declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspace", "", Direction::Input), "Input MD Histo Workspace");
+    declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("OutputWorkspace", "", Direction::Output), "Input MD Histo Workspace");
     auto overlap_validator = new CompositeValidator();
     overlap_validator->add(boost::make_shared<BoundedValidator<double> >(0.0, 1.0));
     overlap_validator->add(boost::make_shared<MandatoryValidator<double> >());    
@@ -72,18 +102,276 @@ namespace MDAlgorithms
     declareProperty("ScaleRHSWorkspace", true, "Scaling either with respect to RHS or LHS Workspace.");
     declareProperty("UseManualScaleFactor", false, "True to use a provided value for the scale factor.");
     declareProperty("ManualScaleFactor", 1.0, "Provided value for the scale factor.");
+    setPropertySettings("ManualScaleFactor", new EnabledWhenProperty("UseManualScaleFactor", IS_NOT_DEFAULT) );
     declareProperty("OutScaleFactor", -2.0, "The actual used value for the scaling factor.", Direction::Output); 
+
+  }
+
+  void StitchGroup1D::checkIndividualWorkspace(IMDHistoWorkspace_const_sptr ws) const
+  {
+    size_t ndims = ws->getNumDims();
+    if ((ndims < 1) || (ndims > 2))
+    {
+      throw  std::runtime_error( ws->name() + " must have 1 or 2 dimensions" );
+    }
+    if(ndims == 1)
+    {
+      auto dim1 = ws->getDimension(0);
+      if (dim1->getNBins() == 1)
+      {
+        throw std::runtime_error(ws->name() + " is one-dimensional, so must have an un-integrated dimension.");
+      }
+    }
+    if(ndims == 2)
+    {
+      auto dim1 = ws->getDimension(0);
+      auto dim2 = ws->getDimension(1);
+      if(dim1->getIsIntegrated() ^ dim2->getIsIntegrated())
+      {
+        std::runtime_error(ws->name() + " is two-dimensional, so must have one integrated and one un-integrated dimension.");
+      }
+    }
+  }
+
+  void StitchGroup1D::checkBothWorkspaces(IMDHistoWorkspace_const_sptr lhsWorkspace, IMDHistoWorkspace_const_sptr rhsWorkspace) const
+  {
+    size_t ndims = std::min(lhsWorkspace->getNumDims(), rhsWorkspace->getNumDims());
+    for(size_t i = 0; i < ndims; ++i)
+    {
+      auto ws1Dim = lhsWorkspace->getDimension(i);
+      auto ws2Dim = rhsWorkspace->getDimension(i);
+
+      if(ws1Dim->getNBins() != ws2Dim->getNBins())
+      {
+        throw std::runtime_error(lhsWorkspace->name() + " and " + rhsWorkspace->name() + " do not have the same number of bins.");
+      }
+
+      if(ws1Dim->getName() != ws2Dim->getName())
+      {
+        throw std::runtime_error("Dimension names do not match up.");
+      }
+      auto ws1DimIntegrated = getFirstNonIntegratedDimension(lhsWorkspace);
+      auto ws2DimIntegrated = getFirstNonIntegratedDimension(rhsWorkspace);
+
+      if (ws1DimIntegrated->getMaximum() != ws2DimIntegrated->getMaximum())
+      {
+        throw std::runtime_error("Max values in the two non-integrated dimensions of the combining workspaces are not equal.");
+      }
+      if (ws1DimIntegrated->getMinimum() != ws2DimIntegrated->getMinimum())
+      {
+        throw std::runtime_error("Min values in the two non-integrated dimensions of the combining workspaces are not equal.");
+      }
+    }
+  }
+
+  MDHistoWorkspace_sptr StitchGroup1D::trimOutIntegratedDimension(IMDHistoWorkspace_sptr ws)
+  {
+    auto dim = getFirstNonIntegratedDimension(ws);
+    auto nbins = dim->getNBins();
+        
+    Mantid::MantidVec signals(nbins);
+    Mantid::MantidVec errors(nbins);
+    Mantid::MantidVec extents = boost::assign::list_of(dim->getMinimum())(dim->getMaximum());
+    std::vector<int> vecNBins = boost::assign::list_of(nbins);
+    std::vector<std::string> names = boost::assign::list_of(dim->getName());
+    std::vector<std::string> units = boost::assign::list_of(dim->getUnits());
+
+    for(size_t index = 0; index < nbins; ++index)
+
+    {
+      signals[index] = ws->signalAt(index);
+      double errSq = ws->errorSquaredAt(index);
+      double err = std::sqrt(errSq);
+      errors[index] = err;
+    }
+
+    IAlgorithm_sptr createMDHistoWorkspace = this->createSubAlgorithm("CreateMDHistoWorkspace");
+    createMDHistoWorkspace->initialize();
+    createMDHistoWorkspace->setProperty("SignalInput", signals);
+    createMDHistoWorkspace->setProperty("ErrorInput", errors);
+    createMDHistoWorkspace->setProperty("Dimensionality", 1);
+    createMDHistoWorkspace->setProperty("Extents", extents);
+    createMDHistoWorkspace->setProperty("NumberOfBins", vecNBins);
+    createMDHistoWorkspace->setProperty("Names", names);
+    createMDHistoWorkspace->setProperty("Units", units);
+    createMDHistoWorkspace->executeAsSubAlg();
+    IMDHistoWorkspace_sptr outWS = createMDHistoWorkspace->getProperty("OutputWorkspace");
+    return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
+  };
+
+  double StitchGroup1D::integrateOver(IMDHistoWorkspace_sptr ws, const double& fractionLow, const double& fractionHigh)
+  {
+    auto dim = getFirstNonIntegratedDimension(ws);
+    size_t nbins = dim->getNBins();
+    int binLow = int(nbins * fractionLow);
+    int binHigh = int(nbins * fractionHigh);
+    double sumSignal = 0.0;
+    for(int index = binLow; index < binHigh; ++index)
+    {
+      sumSignal += ws->signalAt(index);
+    }
+    return sumSignal;
+  }
+
+  void StitchGroup1D::overlayOverlap(MDHistoWorkspace_sptr sum, IMDHistoWorkspace_sptr overlap)
+  {
+    auto targetDim = sum->getDimension(0);
+    double targetQMax = targetDim->getMaximum();
+    double targetQMin = targetDim->getMinimum();
+    size_t targetNbins = targetDim->getNBins();
+    double targetStep = targetNbins / (targetQMax - targetQMin); 
+    double targetC = -1 * targetStep * targetQMin;
+
+    auto overlapDim = overlap->getDimension(0);
+    double overlapQMax = overlapDim->getMaximum();
+    double overlapQMin = overlapDim->getMinimum();
+    size_t overlapNBins = overlapDim->getNBins();
+    double overlapStep = (overlapQMax - overlapQMin) / overlapNBins;
+    double overlapC = overlapQMin;
+
+    for(size_t i = 0; i < overlapNBins; ++i)
+    {
+      double q = double((overlapStep * i) + overlapC);
+      // Find the target index by recentering (adding 0.5) and then truncating to an integer.
+      size_t targetIndex = size_t((targetStep * q) + targetC + 0.5) ;
+      sum->setSignalAt(targetIndex, overlap->signalAt(i));
+      sum->setErrorSquaredAt(targetIndex, overlap->errorSquaredAt(i));
+    }
+  }
+
+  MDHistoWorkspace_sptr StitchGroup1D::extractOverlapAsWorkspace(IMDHistoWorkspace_sptr ws, const double& fractionLow, const double& fractionHigh)
+  {
+    auto dim = getFirstNonIntegratedDimension(ws);
+    auto nbins = dim->getNBins();
+    int binLow = int(nbins * fractionLow);
+    int binHigh = int(nbins * fractionHigh);
+    double step = ( dim->getMaximum() - dim->getMinimum() )/ nbins;
+    double qLow = (binLow * step) + dim->getMinimum();
+    double qHigh = (binHigh * step) + dim->getMinimum();
+
+    const int binRange = binHigh - binLow;
+    Mantid::MantidVec signals(binRange);
+    Mantid::MantidVec errors(binRange);
+    Mantid::MantidVec extents = boost::assign::list_of(qLow)(qHigh);
+    std::vector<int> vecNBins(1, binRange);
+    std::vector<std::string> names = boost::assign::list_of(dim->getName());
+    std::vector<std::string> units = boost::assign::list_of(dim->getUnits());
+
+    int counter = 0;
+    for(int index = binLow; index < binHigh; ++index)
+    {
+      signals[counter] = ws->signalAt(index);
+      errors[counter] =  std::sqrt(ws->errorSquaredAt(index));
+      ++counter;
+    }
+
+    IAlgorithm_sptr createMDHistoWorkspace = this->createSubAlgorithm("CreateMDHistoWorkspace");
+    createMDHistoWorkspace->initialize();
+    createMDHistoWorkspace->setProperty("SignalInput", signals);
+    createMDHistoWorkspace->setProperty("ErrorInput", errors);
+    createMDHistoWorkspace->setProperty("Dimensionality", 1);
+    createMDHistoWorkspace->setProperty("Extents", extents);
+    createMDHistoWorkspace->setProperty("NumberOfBins", vecNBins);
+    createMDHistoWorkspace->setProperty("Names", names);
+    createMDHistoWorkspace->setProperty("Units", units);
+    createMDHistoWorkspace->executeAsSubAlg();
+    IMDHistoWorkspace_sptr outWS = createMDHistoWorkspace->getProperty("OutputWorkspace");
+    return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
   }
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
-   */
+  */
   void StitchGroup1D::exec()
   {
-    // TODO Auto-generated execute stub
+    MDHistoWorkspace_sptr workspace1;
+    MDHistoWorkspace_sptr workspace2;
+    {
+      IMDHistoWorkspace_sptr temp1 = this->getProperty("LHSWorkspace");
+      IMDHistoWorkspace_sptr temp2 = this->getProperty("RHSWorkspace");
+      workspace1 = boost::dynamic_pointer_cast<MDHistoWorkspace>(temp1);
+      workspace2 = boost::dynamic_pointer_cast<MDHistoWorkspace>(temp2);
+    }
+
+    checkIndividualWorkspace(workspace1);
+    checkIndividualWorkspace(workspace2);
+    checkBothWorkspaces(workspace1, workspace2);
+
+    double startOverlap = this->getProperty("StartOverlap");
+    double endOverlap = this->getProperty("EndOverlap"); 
+    bool b_manualScaleFactor = this->getProperty("UseManualScaleFactor");
+    bool b_scaleWorkspace2 = this->getProperty("ScaleRHSWorkspace");
+
+    if(startOverlap >= endOverlap)
+    {
+      throw std::runtime_error("StartOverlap must be < EndOverlap");
+    }
+
+    MDHistoWorkspace_sptr ws1_Flattened = this->trimOutIntegratedDimension(workspace1);
+    MDHistoWorkspace_sptr ws2_Flattened = this->trimOutIntegratedDimension(workspace2);
+
+    double ws1_Overlap = this->integrateOver(ws1_Flattened, startOverlap, endOverlap);
+    double ws2_Overlap = this->integrateOver(ws2_Flattened, startOverlap, endOverlap);
+
+    double scaleFactor = 0;
+    MDHistoWorkspace_sptr  scaledWorkspace1;
+    MDHistoWorkspace_sptr  scaledWorkspace2;
+
+    if (b_manualScaleFactor)
+    {
+      scaleFactor = this->getProperty("ManualScaleFactor");
+      if (b_scaleWorkspace2)
+      {
+        scaledWorkspace1 = ws1_Flattened;
+        scaledWorkspace2 = ws2_Flattened;
+        scaledWorkspace2->multiply(scaleFactor, 0);
+      }
+      else
+      {
+        scaledWorkspace1 = ws1_Flattened;
+        scaledWorkspace1->multiply(scaleFactor, 0);
+        scaledWorkspace2 = ws2_Flattened;
+      }
+    }
+    else
+    {
+      if (b_scaleWorkspace2)
+      {
+        scaleFactor = (ws1_Overlap / ws2_Overlap);
+        scaledWorkspace1 = ws1_Flattened;
+        scaledWorkspace2 = ws2_Flattened;
+        scaledWorkspace2->multiply(scaleFactor, 0);
+      }
+      else
+      {
+        scaleFactor = (ws2_Overlap / ws1_Overlap);
+        scaledWorkspace1 = ws1_Flattened;
+        scaledWorkspace1->multiply(scaleFactor, 0);
+        scaledWorkspace2 = ws2_Flattened;
+      }
+    } 
+
+    this->setProperty("OutScaleFactor", scaleFactor);
+    auto workspace1Overlap = this->extractOverlapAsWorkspace(scaledWorkspace1, startOverlap, endOverlap);
+    auto workspace2Overlap = this->extractOverlapAsWorkspace(scaledWorkspace2, startOverlap, endOverlap);
+
+    IAlgorithm_sptr weightedMeanMD = this->createSubAlgorithm("WeightedMeanMD");
+    weightedMeanMD->initialize();
+    weightedMeanMD->setProperty("LHSWorkspace", workspace1Overlap);
+    weightedMeanMD->setProperty("RHSWorkspace", workspace2Overlap);
+    weightedMeanMD->executeAsSubAlg();
+    IMDWorkspace_sptr weightedMeanOverlap = weightedMeanMD->getProperty("OutputWorkspace");
+
+    IAlgorithm_sptr plusMD = this->createSubAlgorithm("PlusMD");
+    plusMD->initialize();
+    plusMD->setProperty("LHSWorkspace", scaledWorkspace1);
+    plusMD->setProperty("RHSWorkspace", scaledWorkspace2);
+    plusMD->executeAsSubAlg();
+    IMDWorkspace_sptr sum = plusMD->getProperty("OutputWorkspace");
+
+    overlayOverlap(boost::dynamic_pointer_cast<MDHistoWorkspace>(sum), boost::dynamic_pointer_cast<IMDHistoWorkspace>(weightedMeanOverlap));
+    this->setProperty("OutputWorkspace", sum);
   }
-
-
 
 } // namespace MDAlgorithms
 } // namespace Mantid
