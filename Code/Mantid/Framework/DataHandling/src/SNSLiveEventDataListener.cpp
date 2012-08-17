@@ -4,6 +4,7 @@
 #include "MantidDataHandling/ADARAParser.h"
 #include "MantidDataHandling/SNSLiveEventDataListener.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WriteLock.h"
 
@@ -12,9 +13,18 @@
 #include <Poco/Net/SocketStream.h>
 #include <Poco/Timestamp.h>
 
+// Includes for parsing the XML device descriptions
+#include "Poco/DOM/DOMParser.h"
+#include "Poco/DOM/Document.h"
+//#include "Poco/DOM/NodeIterator.h"
+#include "Poco/DOM/NodeFilter.h"
+#include "Poco/DOM/AutoPtr.h"
+#include "Poco/SAX/InputSource.h"
+
 #include <Poco/Thread.h>
 #include <Poco/Runnable.h>
 
+#include <time.h>
 #include <sstream>    // for ostringstream
 #include <string>
 #include <exception>
@@ -41,11 +51,22 @@ namespace DataHandling
   /// Constructor
   SNSLiveEventDataListener::SNSLiveEventDataListener()
     : ILiveListener(), ADARA::Parser(),
-      m_buffer(), m_workspaceInitialized( false), m_socket(),
+      m_workspaceInitialized( false), m_socket(),
       m_isConnected( false), m_stopThread( false)
     // ADARA::Parser() will accept values for buffer size and max packet size, but the
     // defaults will work fine
   {
+    m_buffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
+        (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
+    // The numbers in the create() function don't matter - they'll get overwritten
+    // down in initWorkspace() when we load the instrument definition.
+    // We need m_buffer created now, though, so we can add properties to it from
+    // all of the variable value packets that may arrive before we can call
+    // initWorkspace().
+
+    // Initialize the heartbeat time to the current time so we don't get a bunch of
+    // timeout errors when the background thread starts.
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
   }
     
   /// Destructor
@@ -261,8 +282,8 @@ namespace DataHandling
     {
       m_instrumentXML = pkt.info();
 
-      // if we also have the instrument name (from the run status packet), then
-      // we can initialize our workspace
+      // if we also have the instrument name (from the beamline info packet),
+      // then we can initialize our workspace.  Otherwise, we'll just wait.
       if (m_instrumentName.size() > 0)
       {
         initWorkspace();
@@ -293,15 +314,210 @@ namespace DataHandling
     return true;
   }
 
+
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
+  {
+    // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
+    time_t runStartTime = pkt.runStart() + ADARA::EPICS_EPOCH_OFFSET;
+
+    // Add the run_start property
+    char timeString[64];  // largest the string should end up is 20 (plus a null terminator)
+    strftime( timeString, 64, "%FT%H:%M:%SZ", gmtime( &runStartTime));
+    // addProperty() wants the time as an ISO 8601 string
+    m_buffer->mutableRun().addProperty("run_start", std::string( timeString) );
+
+    return true;
+  }
+
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableU32Pkt &pkt)
+  {
+    unsigned devId = pkt.devId();
+    unsigned pvId = pkt.varId();
+
+    // Look up the name of this variable
+    NameMapType::const_iterator it = m_nameMap.find( std::make_pair(devId, pvId));
+
+    if (it == m_nameMap.end())
+    {
+      g_log.error() << "Ignoring variable value packet for device " << devId << ", variable "
+                    << pvId << " because we haven't received a device descriptor packet for it."
+                    << std::endl;
+    }
+    else
+    {
+      m_buffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( pkt.pulseId(), pkt.value());
+    }
+
+    return true;
+  }
+
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableDoublePkt &pkt)
+  {
+    unsigned devId = pkt.devId();
+    unsigned pvId = pkt.varId();
+
+    // Look up the name of this variable
+    NameMapType::const_iterator it = m_nameMap.find( std::make_pair(devId, pvId));
+
+    if (it == m_nameMap.end())
+    {
+      g_log.error() << "Ignoring variable value packet for device " << devId << ", variable "
+                    << pvId << " because we haven't received a device descriptor packet for it."
+                    << std::endl;
+    }
+    else
+    {
+      m_buffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( pkt.pulseId(), pkt.value());
+    }
+
+    return true;
+  }
+
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableStringPkt &pkt)
+  {
+    unsigned devId = pkt.devId();
+    unsigned pvId = pkt.varId();
+
+    // Look up the name of this variable
+    NameMapType::const_iterator it = m_nameMap.find( std::make_pair(devId, pvId));
+
+    if (it == m_nameMap.end())
+    {
+      g_log.error() << "Ignoring variable value packet for device " << devId << ", variable "
+                    << pvId << " because we haven't received a device descriptor packet for it."
+                    << std::endl;
+    }
+    else
+    {
+      m_buffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( pkt.pulseId(), pkt.value());
+    }
+
+    return true;
+  }
+
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &pkt)
+  {
+    std::istringstream input( pkt.description());
+    Poco::XML::InputSource src(input);
+    Poco::XML::DOMParser parser;
+    Poco::AutoPtr<Poco::XML::Document> doc = parser.parse(&src);
+    const Poco::XML::Node* deviceNode = doc->firstChild();
+
+    // The 'device' should be the root element of the document.  I'm just being paranoid here.
+    while (deviceNode != NULL && deviceNode->nodeName() != "device")
+    {
+      deviceNode = deviceNode->nextSibling();
+    }
+
+    if (deviceNode == NULL)
+    {
+      g_log.error() << "Device descriptor packet did not contain a device element!!  This should never happen!" << std::endl;
+      return false;
+    }
+
+    // Find the process_variables element
+    // Note: for now, I'm ignoring the 'device_name' & 'enumeration' elements because I don't
+    // think I need them
+
+    const Poco::XML::Node *node = deviceNode->firstChild();
+    while (node != NULL && node->nodeName() != "process_variables" )
+    {
+      node = node->nextSibling();
+    }
+
+    if (node == NULL)
+    {
+      g_log.warning() << "Device descriptor packet did not contain a a process_variables element." << std::endl;
+      return true;  // Returning true because this is not actually an error - or at least not a Mantid error.
+    }
+
+    node = node->firstChild();
+    while (node != NULL)
+    {
+      // iterate through each individual variable...
+      if (node->nodeName() == "process_variable")
+      {
+        // we need the name, ID and type
+        const Poco::XML::Node*pvNode = node->firstChild();
+        std::string pvName;
+        std::string pvId;
+        std::string pvUnits;
+        std::string pvType;
+        while (pvNode != NULL)
+        {
+          if (pvNode->nodeName() == "pv_name")
+            pvName = pvNode->firstChild()->nodeValue();
+          else if (pvNode->nodeName() == "pv_id")
+            pvId = pvNode->firstChild()->nodeValue();
+          else if (pvNode->nodeName() == "pv_type")
+            pvType = pvNode->firstChild()->nodeValue();
+          else if (pvNode->nodeName() == "pv_units")
+            pvUnits = pvNode->firstChild()->nodeValue();
+
+          pvNode = pvNode->nextSibling();
+        }
+
+        // We need at least the name, id & type before we can create the property
+        // (Units are optional)
+        if ( pvName.size() == 0 || pvId.size() == 0 || pvType.size() == 0)
+        {
+          if (pvName.size() == 0)
+          {
+            pvName = "<UNKNOWN>";
+          }
+          g_log.warning() << "Ignoring process variable " << pvName << " because it was missing required fields." << std::endl;
+        }
+        else
+        {
+          // create the property in the workspace - this is a little bit kludgy because
+          // the type is specified as a string in the XML, but we pass the actual keyword
+          // to the template declaration.  Hense all the if...else if...else stuff...
+          Property *prop;
+          if (pvType == "double")
+          {
+            prop = new TimeSeriesProperty<double>(pvName);
+          }
+          else if ( (pvType == "integer") ||
+                    (pvType == "unsigned") ||
+                    (pvType.find("enum_") == 0) )
+          // Note: Mantid doesn't currently support unsigned int properties
+          // Note: We're treating enums as ints (at least for now)
+          // Note: ADARA doesn't currently define an integer variable value packet (only unsigned)
+          {
+            prop = new TimeSeriesProperty<int>(pvName);
+          }
+          else if (pvType == "string")
+          {
+            prop = new TimeSeriesProperty<std::string>(pvName);
+          }
+
+          if (pvUnits.size() > 0)
+          {
+            prop->setUnits( pvUnits);
+          }
+
+          m_buffer->mutableRun().addLogData(prop);
+
+
+          // Add the pv id, device id and pv name to the name map so we can find the
+          // name when we process the variable value packets
+          unsigned pvIdNum;
+          std::istringstream(pvId) >> pvIdNum;
+          m_nameMap[ std::make_pair( pkt.devId(), pvIdNum)] = pvName;
+        }
+      }
+
+      node = node->nextSibling();
+    }
+
+    return true;
+  }
+
+
   void SNSLiveEventDataListener::initWorkspace()
   {
     // Use the LoadEmptyInstrument algorithm to create a proper workspace
     // for whatever beamline we're on
-
-    m_buffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
-        (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
-    // The numbers in the create() function don't matter
-
     boost::shared_ptr<Algorithm>loadInst = Mantid::API::AlgorithmManager::Instance().createUnmanaged( "LoadInstrument");
     loadInst->initialize();
     loadInst->setChild( true);  // keep the workspace out of the ADS
@@ -365,6 +581,9 @@ namespace DataHandling
 
     //Copy geometry over.
     API::WorkspaceFactory::Instance().initializeFromParent(m_buffer, temp, false);
+
+    // Clear out the old logs
+    temp->mutableRun().clearTimeSeriesLogs();
 
     // Get an exclusive lock
     m_mutex.lock();    

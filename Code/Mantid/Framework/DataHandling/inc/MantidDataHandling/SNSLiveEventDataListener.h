@@ -70,6 +70,11 @@ namespace Mantid
       virtual bool rxPacket( const ADARA::HeartbeatPkt &pkt);
       virtual bool rxPacket( const ADARA::GeometryPkt &pkt);
       virtual bool rxPacket( const ADARA::BeamlineInfoPkt &pkt);
+      virtual bool rxPacket( const ADARA::RunStatusPkt &pkt);
+      virtual bool rxPacket( const ADARA::VariableU32Pkt &pkt);
+      virtual bool rxPacket( const ADARA::VariableDoublePkt &pkt);
+      virtual bool rxPacket( const ADARA::VariableStringPkt &pkt);
+      virtual bool rxPacket( const ADARA::DeviceDescriptorPkt &pkt);
       //virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
 
     private:
@@ -114,6 +119,17 @@ namespace Mantid
                                         // packet.  SMS is supposed to send these out
                                         // periodicaly.  If we don't get them, there's a
                                         // problem somewhere.
+
+      // --- Data structures necessary for handling all the process variable info ---
+
+      // maps <device id, variable id> to variable name
+      // (variable names are unique, so we don't need to worry about device names.)
+      typedef std::map <std::pair <unsigned, unsigned>, std::string> NameMapType;
+      NameMapType m_nameMap;
+
+
+
+      // ----------------------------------------------------------------------------
 
       static Kernel::Logger& g_log;   ///< reference to the logger clas
      
