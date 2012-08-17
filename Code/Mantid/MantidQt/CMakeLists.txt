@@ -52,6 +52,7 @@ endif ()
 # Do the sip generation, for python bindings
 ###########################################################################
 
+include_directories ( ${PYTHON_INCLUDE_PATH} )
 find_package ( PyQt4 REQUIRED )
 find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
