@@ -316,12 +316,19 @@
 	<technique>Neutron Diffraction</technique>
     <technique>Single Crystal Diffraction</technique>
    </instrument> 
-   
-   <instrument name="HYSPEC" shortname="HYS" beamline="14B"> 
+  
+  <instrument name="HYSPEC" shortname="HYS" beamline="14B"> 
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+    <!--livedata address="hyspec.sns.gov:31415" /-->
+  </instrument> 
+  
+  <!-- This is a virtual temp instrument for testing ADARA -->
+  <instrument name="HYSPECA" shortname="HYSA" beamline="14BS"> 
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <livedata address="hyspec.sns.gov:31415" />
-   </instrument> 
+  </instrument> 
 
   <instrument name="VISION" shortname="VIS" beamline="16B">
     <technique>Neutron Spectroscopy</technique>
