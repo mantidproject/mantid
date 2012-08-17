@@ -256,7 +256,7 @@ endif ()
 ###########################################################################
 # Ship .py & .pyc files
 ###########################################################################
-install_python_files ( ${CMAKE_CURRENT_SOURCE_DIR} ${PY_FILES} ${BIN_DIR} )
+install_python_files ( ${CMAKE_CURRENT_SOURCE_DIR} "${PY_FILES}" ${BIN_DIR} )
 
 install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
                                       PATTERN ".svn" EXCLUDE )

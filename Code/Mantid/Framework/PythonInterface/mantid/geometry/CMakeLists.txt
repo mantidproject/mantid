@@ -61,5 +61,5 @@ target_link_libraries ( PythonGeometryModule PythonKernelModule ${PYTHON_DEPS} )
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonGeometryModule DESTINATION ${BIN_DIR}/mantid/geometry )
+install ( TARGETS PythonGeometryModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/geometry )
 

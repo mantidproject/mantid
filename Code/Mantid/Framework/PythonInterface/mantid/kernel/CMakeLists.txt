@@ -139,7 +139,7 @@ endif()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonKernelModule DESTINATION ${BIN_DIR}/mantid/kernel )
+install ( TARGETS PythonKernelModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/kernel )
 if ( UNIX )
 install ( TARGETS _dlopen DESTINATION ${BIN_DIR}/mantid/kernel )
 endif()
