@@ -103,6 +103,12 @@ namespace CurveFitting
     /// Do 1 iteration in Le Bail fit
     bool unitLeBailFit(size_t workspaceindex, std::map<std::string, std::pair<double, char> >& parammap);
 
+    /// Set up Lebail
+    void setLeBailFitParameters();
+
+    /// Do 1 fit on LeBailFunction
+    bool fitLeBailFunction(size_t workspaceindex, std::map<std::string, std::pair<double, char> > &parammap);
+
     /// Calculate Peaks' Intensities
     void calculatePeaksHeights(size_t workspaceindex);
 
@@ -122,10 +128,19 @@ namespace CurveFitting
     void exportParametersWorkspace(std::map<std::string, std::pair<double, char> > parammap);
 
     /// Create background function
-    void generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws);
+    CurveFitting::BackgroundFunction_sptr generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws);
 
     /// Parse content in a table workspace to vector for background parameters
     void parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr bkgdparamws, std::vector<double>& bkgdorderparams);
+
+    /// Crop the workspace for better usage
+    void cropWorkspace();
+
+    /// Calcualte background by fitting peak heights
+    void calBackground(size_t workspaceindex);
+
+    /// Split peaks to peak groups
+    std::vector<std::set<size_t> > splitPeaksToGroups();
 
     /// Instance data
     API::MatrixWorkspace_sptr dataWS;

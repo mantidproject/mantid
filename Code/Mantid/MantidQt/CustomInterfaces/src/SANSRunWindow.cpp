@@ -2232,6 +2232,10 @@ QString SANSRunWindow::reduceSingleRun() const
     reducer_code += "("+m_uiForm.wavRanges->text()+") ";
     reducer_code += ", plot=";
     reducer_code += m_uiForm.plot_check->isChecked() ? "True" : "False";
+    if ( m_uiForm.detbank_sel->currentIndex() >= 2)
+    {    
+      reducer_code += ", combineDet='" + m_uiForm.detbank_sel->currentText() + "'";
+    }
     reducer_code += ")";
   }
   else

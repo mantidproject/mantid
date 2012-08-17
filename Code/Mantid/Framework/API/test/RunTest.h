@@ -396,6 +396,33 @@ public:
     runInfo.addProperty(tsp);
   }
 
+  void test_clear()
+  {
+    // Set up a Run object with 3 properties in it (1 time series, 2 single value)
+    Run runInfo;
+    const std::string stringProp("aStringProp");
+    const std::string stringVal("testing");
+    runInfo.addProperty(stringProp,stringVal);
+    const std::string intProp("anIntProp");
+    runInfo.addProperty(intProp,99);
+    const std::string tspProp("tsp");
+    addTestTimeSeries(runInfo,"tsp");
+
+    // Check it's set up right
+    TS_ASSERT_EQUALS( runInfo.getProperties().size(), 3 );
+    auto tsp = runInfo.getTimeSeriesProperty<double>(tspProp);
+    TS_ASSERT_EQUALS( tsp->realSize(), 10 )
+
+    // Do the clearing work
+    TS_ASSERT_THROWS_NOTHING( runInfo.clearTimeSeriesLogs() );
+
+    // Check the time-series property is empty, but not the others
+    TS_ASSERT_EQUALS( runInfo.getProperties().size(), 3 );
+    TS_ASSERT_EQUALS( tsp->realSize(), 0 )
+    TS_ASSERT_EQUALS( runInfo.getPropertyValueAsType<std::string>(stringProp), stringVal );
+    TS_ASSERT_EQUALS( runInfo.getPropertyValueAsType<int>(intProp), 99 );
+  }
+
   /** Setting up a goniometer and the angles to feed it
    * using sample logs, then getting the right rotation matrix out.
    */

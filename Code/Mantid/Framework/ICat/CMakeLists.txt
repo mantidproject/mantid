@@ -41,14 +41,14 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	test/CatalogDownloadDataFilesTest.h
-	test/CatalogGetDataFilesTest.h
-	test/CatalogGetDataSetsTest.h
-	test/CatalogListInstrumentsTest.h
-	test/CatalogListInvestigationTypesTest.h
-	test/CatalogLoginTest.h
-	test/CatalogMyDataSearchTest.h
-	test/CatalogSearchTest.h
+	CatalogDownloadDataFilesTest.h
+	CatalogGetDataFilesTest.h
+	CatalogGetDataSetsTest.h
+	CatalogListInstrumentsTest.h
+	CatalogListInvestigationTypesTest.h
+	CatalogLoginTest.h
+	CatalogMyDataSearchTest.h
+	CatalogSearchTest.h
 )
 
 if(UNITY_BUILD)
@@ -75,19 +75,8 @@ include_directories ( inc )
 
 target_link_libraries ( ICat ${MANTIDLIBS} ${OPENSSL_LIBRARIES} )
 
-if ( CXXTEST_FOUND )
-  # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable.
-  # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS test/ICatTestHelper.cpp )
-
-  # The actual test suite
-  cxxtest_add_test ( ICatTest ${TEST_FILES} )
-  target_link_libraries( ICatTest ICat )
-  add_dependencies ( FrameworkTests ICatTest )
-  
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET ICatTest PROPERTY FOLDER "UnitTests" )
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

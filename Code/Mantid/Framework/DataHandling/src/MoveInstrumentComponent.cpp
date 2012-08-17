@@ -71,6 +71,9 @@ void MoveInstrumentComponent::exec()
   const double Z = getProperty("Z");
   const bool RelativePosition = getProperty("RelativePosition");
 
+  // Get the ParameterMap reference before the instrument so that
+  // we avoid a copy
+  Geometry::ParameterMap& pmap = WS->instrumentParameters();
   Instrument_const_sptr inst = WS->getInstrument();
   IComponent_const_sptr comp;
 
@@ -130,8 +133,6 @@ void MoveInstrumentComponent::exec()
       rot.inverse();
       rot.rotate(Pos);
   }
-
-  Geometry::ParameterMap& pmap = WS->instrumentParameters();
   // Add a parameter for the new position
   pmap.addV3D(comp.get(), "pos", Pos);
 

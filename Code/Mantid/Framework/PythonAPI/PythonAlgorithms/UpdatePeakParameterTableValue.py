@@ -65,7 +65,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
             rownumberlist = sorted(rownumberlist)
         elif len(rownumberlist) == 0:
             # if no input row number/parameter name, set the value to all rows
-            numrows = tablews.rowCount()
+            numrows = tableWS.rowCount()
             rownumberlist = range(0, numrows)
         # ENDIF
         # for irow in rownumberlist:

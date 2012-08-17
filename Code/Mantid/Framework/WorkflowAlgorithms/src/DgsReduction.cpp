@@ -21,7 +21,7 @@ parameters and generating calls to other workflow or standard algorithms.
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
-#include <strstream>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -180,10 +180,6 @@ namespace WorkflowAlgorithms
         "The output mask file name used for the results of the detector tests.");
     this->setPropertySettings("OutputMaskFile",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    this->declareProperty("ErrorBarCriterion", 3.3, mustBePositive,
-        "Some selection criteria for the detector tests.");
-    this->setPropertySettings("ErrorBarCriterion",
-        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->declareProperty("HighCounts", 1.e+10, mustBePositive,
         "Mask detectors above this threshold.");
     this->setPropertySettings("HighCounts",
@@ -192,6 +188,14 @@ namespace WorkflowAlgorithms
         "Mask detectors below this threshold.");
     this->setPropertySettings("LowCounts",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    this->declareProperty("LowOutlier", 0.01,
+    	"Lower bound defining outliers as fraction of median value");
+    this->setPropertySettings("LowOutlier",
+    	new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    this->declareProperty("HighOutlier", 100.,
+    	"Upper bound defining outliers as fraction of median value");
+    this->setPropertySettings("HighOutlier",
+    	new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->declareProperty("MedianTestHigh", 3.0, mustBePositive,
         "Mask detectors above this threshold.");
     this->setPropertySettings("MedianTestHigh",
@@ -200,21 +204,33 @@ namespace WorkflowAlgorithms
         "Mask detectors below this threshold.");
     this->setPropertySettings("MedianTestLow",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    this->declareProperty("ErrorBarCriterion", 3.3, mustBePositive,
+        "Some selection criteria for the detector tests.");
+    this->setPropertySettings("ErrorBarCriterion",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->declareProperty("DetectorVanadium2", "",
         "The detector vanadium to check against for time variations.");
     this->setPropertySettings("DetectorVanadium2",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    this->declareProperty("ProptionalChangeCriterion", 1.1, mustBePositive,
+    this->declareProperty("DetVanRatioVariation", 1.1, mustBePositive,
         "Mask detectors if the time variation is above this threshold.");
-    this->setPropertySettings("ProptionalChangeCriterion",
+    this->setPropertySettings("DetVanRatioVariation",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->declareProperty("BackgroundCheck", false,
         "If true, run a background check on detector vanadium.");
     this->setPropertySettings("BackgroundCheck",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-    this->declareProperty("AcceptanceFactor", 5.0, mustBePositive,
+    this->declareProperty("SamBkgMedianTestHigh", 3.0, mustBePositive,
         "Mask detectors above this threshold.");
-    this->setPropertySettings("AcceptanceFactor",
+    this->setPropertySettings("SamBkgMedianTestHigh",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    this->declareProperty("SamBkgMedianTestLow", 0.1, mustBePositive,
+        "Mask detectors below this threshold.");
+    this->setPropertySettings("SamBkgMedianTestLow",
+        new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+    this->declareProperty("SamBkgErrorBarCriterion", 3.3, mustBePositive,
+        "Some selection criteria for the detector tests.");
+    this->setPropertySettings("SamBkgErrorBarCriterion",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     auto mustBeIntPositive = boost::make_shared<BoundedValidator<size_t> >();
     mustBeIntPositive->setLower(0);
@@ -251,15 +267,19 @@ namespace WorkflowAlgorithms
 
     this->setPropertyGroup("FindBadDetectors", findBadDets);
     this->setPropertyGroup("OutputMaskFile", findBadDets);
-    this->setPropertyGroup("ErrorBarCriterion", findBadDets);
     this->setPropertyGroup("HighCounts", findBadDets);
     this->setPropertyGroup("LowCounts", findBadDets);
+    this->setPropertyGroup("LowOutlier", findBadDets);
+    this->setPropertyGroup("HighOutlier", findBadDets);
     this->setPropertyGroup("MedianTestHigh", findBadDets);
     this->setPropertyGroup("MedianTestLow", findBadDets);
+    this->setPropertyGroup("ErrorBarCriterion", findBadDets);
     this->setPropertyGroup("DetectorVanadium2", findBadDets);
-    this->setPropertyGroup("ProptionalChangeCriterion", findBadDets);
+    this->setPropertyGroup("DetVanRatioVariation", findBadDets);
     this->setPropertyGroup("BackgroundCheck", findBadDets);
-    this->setPropertyGroup("AcceptanceFactor", findBadDets);
+    this->setPropertyGroup("SamBkgMedianTestHigh", findBadDets);
+    this->setPropertyGroup("SamBkgMedianTestLow", findBadDets);
+    this->setPropertyGroup("SamBkgErrorBarCriterion", findBadDets);
     this->setPropertyGroup("BackgroundTofStart", findBadDets);
     this->setPropertyGroup("BackgroundTofEnd", findBadDets);
     this->setPropertyGroup("RejectZeroBackground", findBadDets);

@@ -183,6 +183,10 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             For REFM, this is X
             For REFL, this is Y
         """
+        
+#        import launch_peak_back_selection_1d_v2
+#        launch_peak_back_selection_1d_v2.start()
+        
         min, max = self._integrated_plot(True,
                                          self._summary.data_run_number_edit,
                                          self._summary.data_peak_from_pixel,

@@ -312,10 +312,10 @@ def _setUpPeriod(i):
 
     return new_sample_workspaces
 
-def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None):
+def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, resetSetup=True):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics 
-        details to be adjusted, and the old setup is reset at the end. 
+        details to be adjusted, and optionally the old setup is reset at the end. 
         
         @param wav_start: the first wavelength to be in the output data
         @param wav_end: the last wavelength in the output data
@@ -328,6 +328,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                            'merged'              (run the same reductions as 'both' and additionally create a merged data workspace)                          
                             None                 (run one reduction for whatever detector has been set as the current detector 
                                                   before running this method. If front apply rescale+shift) 
+        @param resetSetup: if true reset setup at the end
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ', ' + str(wav_end) + ', '+str(full_trans_wav)+')')
     
@@ -415,7 +416,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             frontWS = (frontWS+shift)*scale
             RenameWorkspace(frontWS, retWSname_front)        
         
-    _refresh_singleton()        
+    if resetSetup:
+        _refresh_singleton()        
         
     return retWSname
 
@@ -472,12 +474,13 @@ def delete_workspaces(workspaces):
                 #we're only deleting to save memory, if the workspace really won't delete leave it
                 pass
     
-def CompWavRanges(wavelens, plot=True):
+def CompWavRanges(wavelens, plot=True, combineDet=None):
     """
         Compares the momentum transfer results calculated from different wavelength ranges. Given
         the list of wave ranges [a, b, c] it reduces for wavelengths a-b, b-c and a-c.
         @param wavelens: the list of wavelength ranges
         @param plot: set this to true to plot the result (must be run in Mantid), default is true
+        @param combineDet: see description in WavRangeReduction
     """ 
 
     _printMessage('CompWavRanges( %s,plot=%s)'%(str(wavelens),plot))
@@ -493,15 +496,9 @@ def CompWavRanges(wavelens, plot=True):
             raise RuntimeError('Error CompWavRanges() requires a list of wavelengths between which reductions will be performed.')
     
     try:
-        ReductionSingleton().to_wavelen.set_rebin(w_low=wavelens[0],
-            w_high=wavelens[len(wavelens)-1])
-        #run the reductions, calculated will be an array with the names of all the workspaces produced
-        calculated = [ReductionSingleton()._reduce()]
+        calculated = [WavRangeReduction(wav_start=wavelens[0], wav_end=wavelens[len(wavelens)-1], combineDet=combineDet,resetSetup=False)]
         for i in range(0, len(wavelens)-1):
-            ReductionSingleton.replace(ReductionSingleton().settings())
-            ReductionSingleton().to_wavelen.set_rebin(
-                            w_low=wavelens[i], w_high=wavelens[i+1])
-            calculated.append(ReductionSingleton()._reduce())
+            calculated.append(WavRangeReduction(wav_start=wavelens[i], wav_end=wavelens[i+1], combineDet=combineDet, resetSetup=False))
     finally:
         _refresh_singleton()
 

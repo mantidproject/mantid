@@ -183,16 +183,6 @@ void EQSANSMonitorTOF::exec()
   YOut[tof_bin_range-2-cutoff] = 0.0;
   EOut[tof_bin_range-2-cutoff] = 0.0;
 
-  // Rebin so that the distribution fits nicely in the histogram
-  IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin");
-  rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
-
-  std::string params = "0,1,"
-      + Poco::NumberFormatter::format(tof_bin_range);
-
-  rebinAlg->setPropertyValue("Params", params);
-  rebinAlg->executeAsSubAlg();
-  outputWS = rebinAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace",outputWS);
 }
 

@@ -86,7 +86,7 @@ void IFunction::reportProgress(const std::string & msg) const
  */
 bool IFunction::cancellationRequestReceived() const
 {
-  if(m_progReporter) m_progReporter->hasCancellationBeenRequested();
+  if (m_progReporter) return m_progReporter->hasCancellationBeenRequested();
   else return false;
 }
 

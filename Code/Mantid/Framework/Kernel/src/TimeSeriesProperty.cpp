@@ -14,7 +14,7 @@ namespace Mantid
      */
     template <typename TYPE>
     TimeSeriesProperty<TYPE>::TimeSeriesProperty(const std::string &name) :
-    Property(name, typeid(std::vector<TimeValueUnit<TYPE> >)), mP(), m_size(), mPropSortedFlag(), mFilterApplied()
+    Property(name, typeid(std::vector<TimeValueUnit<TYPE> >)), m_values(), m_size(), m_propSortedFlag(), m_filterApplied()
     {
     }
 
@@ -40,7 +40,7 @@ namespace Mantid
     size_t TimeSeriesProperty<TYPE>::getMemorySize() const
     {
       //Rough estimate
-      return mP.size() * (sizeof(TYPE) + sizeof(DateAndTime));
+      return m_values.size() * (sizeof(TYPE) + sizeof(DateAndTime));
     }
 
     /**
@@ -68,8 +68,8 @@ namespace Mantid
       {
         if (this->operator!=(*rhs))
         {
-          mP.insert(mP.end(), rhs->mP.begin(), rhs->mP.end());
-          mPropSortedFlag = false;
+          m_values.insert(m_values.end(), rhs->m_values.begin(), rhs->m_values.end());
+          m_propSortedFlag = false;
         }
         else
         {
@@ -78,7 +78,7 @@ namespace Mantid
         }
 
         //Count the REAL size.
-        m_size = static_cast<int>(mP.size());
+        m_size = static_cast<int>(m_values.size());
 
       }
       else
@@ -165,30 +165,30 @@ namespace Mantid
       sort();
 
       // 1. Do nothing for single (constant) value
-      if (mP.size() <= 1)
+      if (m_values.size() <= 1)
         return;
 
       // 2. Determine index for start and remove  Note erase is [...)
       int istart = this->findIndex(start);
-      if (mP[istart].time() != start)
+      if (m_values[istart].time() != start)
       {
         // increment by 1 to insure mP[istart] be deleted
         istart ++;
       }
       typename std::vector<TimeValueUnit<TYPE> >::iterator iterhead;
-      iterhead = mP.begin()+istart;
-      mP.erase(mP.begin(), iterhead);
+      iterhead = m_values.begin()+istart;
+      m_values.erase(m_values.begin(), iterhead);
 
       // 3. Determine index for end and remove  Note erase is [...)
       int iend = this->findIndex(stop);
-      if (static_cast<size_t>(iend) < mP.size())
+      if (static_cast<size_t>(iend) < m_values.size())
       {
         // Delete from [iend to mp.end)
-        iterhead = mP.begin() + iend;
-        mP.erase(iterhead, mP.end());
+        iterhead = m_values.begin() + iend;
+        m_values.erase(iterhead, m_values.end());
       }
 
-      m_size = static_cast<int>(mP.size());
+      m_size = static_cast<int>(m_values.size());
     }
 
 
@@ -203,7 +203,7 @@ namespace Mantid
       sort();
 
       // 2. Return for single value
-      if (mP.size() <= 1)
+      if (m_values.size() <= 1)
       {
         return;
       }
@@ -211,7 +211,7 @@ namespace Mantid
       // 3. Prepare a copy
       std::vector<TimeValueUnit<TYPE> > mp_copy;
 
-      g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << mP.size() << std::endl;
+      g_log.debug() << "DB541  mp_copy Size = " << mp_copy.size() << "  Original MP Size = " << m_values.size() << std::endl;
 
       // 4. Create new
       for (size_t isp = 0; isp < splittervec.size(); ++isp)
@@ -226,10 +226,10 @@ namespace Mantid
           // The splitter is not well defined, and use the first
           tstartindex = 0;
         }
-        else if (tstartindex >= int(mP.size()))
+        else if (tstartindex >= int(m_values.size()))
         {
           // The splitter is not well defined, adn use the last
-          tstartindex = int(mP.size())-1;
+          tstartindex = int(m_values.size())-1;
         }
 
         int tstopindex = findIndex(t_stop);
@@ -238,47 +238,47 @@ namespace Mantid
         {
           tstopindex = 0;
         }
-        else if (tstopindex >= int(mP.size()))
+        else if (tstopindex >= int(m_values.size()))
         {
-          tstopindex = int(mP.size())-1;
+          tstopindex = int(m_values.size())-1;
         }
         else
         {
-          if (t_stop == mP[size_t(tstopindex)].time() && size_t(tstopindex) > 0)
+          if (t_stop == m_values[size_t(tstopindex)].time() && size_t(tstopindex) > 0)
           {
             tstopindex --;
           }
         }
 
         /* Check */
-        if (tstartindex < 0 || tstopindex >= int(mP.size()))
+        if (tstartindex < 0 || tstopindex >= int(m_values.size()))
         {
           g_log.warning() << "Memory Leak In SplitbyTime!" << std::endl;
         }
 
         if (tstartindex == tstopindex)
         {
-          TimeValueUnit<TYPE> temp(t_start, mP[tstartindex].value());
+          TimeValueUnit<TYPE> temp(t_start, m_values[tstartindex].value());
           mp_copy.push_back(temp);
         }
         else
         {
-          mp_copy.push_back(TimeValueUnit<TYPE>(t_start, mP[tstartindex].value()));
+          mp_copy.push_back(TimeValueUnit<TYPE>(t_start, m_values[tstartindex].value()));
           for (size_t im = size_t(tstartindex+1); im <= size_t(tstopindex); ++im)
           {
-            mp_copy.push_back(TimeValueUnit<TYPE>(mP[im].time(), mP[im].value()));
+            mp_copy.push_back(TimeValueUnit<TYPE>(m_values[im].time(), m_values[im].value()));
           }
         }
       } // ENDFOR
 
-      g_log.debug() << "DB530  Filtered Log Size = " << mp_copy.size() << "  Original Log Size = " << mP.size() << std::endl;
+      g_log.debug() << "DB530  Filtered Log Size = " << mp_copy.size() << "  Original Log Size = " << m_values.size() << std::endl;
 
       // 5. Clear
-      mP.clear();
-      mP = mp_copy;
+      m_values.clear();
+      m_values = mp_copy;
       mp_copy.clear();
 
-      m_size = static_cast<int>(mP.size());
+      m_size = static_cast<int>(m_values.size());
 
       return;
     }
@@ -311,15 +311,15 @@ namespace Mantid
         if (myOutput)
         {
           outputs_tsp.push_back(myOutput);
-          if (this->mP.size() == 1)
+          if (this->m_values.size() == 1)
           {
             // Special case for TSP with a single entry = just copy.
-            myOutput->mP = this->mP;
+            myOutput->m_values = this->m_values;
             myOutput->m_size = 1;
           }
           else
           {
-            myOutput->mP.clear();
+            myOutput->m_values.clear();
             myOutput->m_size=0;
           }
         }
@@ -330,7 +330,7 @@ namespace Mantid
       }
 
       // 2. Special case for TSP with a single entry = just copy.
-      if (this->mP.size() == 1)
+      if (this->m_values.size() == 1)
         return;
 
       // 3. We will be iterating through all the entries in the the map/vector
@@ -352,19 +352,19 @@ namespace Mantid
 
         // Skip the events before the start of the time
         // TODO  Algorithm here can be refactored for better performance
-        while (ip < this->mP.size() && mP[ip].time() < start)
+        while (ip < this->m_values.size() && m_values[ip].time() < start)
           ip ++;
 
         //Go through all the events that are in the interval (if any)
         // while ((it != this->m_propertySeries.end()) && (it->first < stop))
-        while (ip < this->mP.size() && mP[ip].time() < stop)
+        while (ip < this->m_values.size() && m_values[ip].time() < stop)
         {
           if ((index >= 0) && (index < static_cast<int>(numOutputs)))
           {
             TimeSeriesProperty<TYPE> * myOutput = outputs_tsp[index];
             //Copy the log out to the output
             if (myOutput)
-              myOutput->addValue(mP[ip].time(), mP[ip].value());
+              myOutput->addValue(m_values[ip].time(), m_values[ip].value());
           }
           ++ip;
         }
@@ -376,7 +376,7 @@ namespace Mantid
           break;
 
         //No need to keep looping through the filter if we are out of events
-        if (ip == this->mP.size())
+        if (ip == this->m_values.size())
           break;
 
       } //Looping through entries in the splitter vector
@@ -405,7 +405,7 @@ namespace Mantid
     void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance, bool centre)
     {
       //Do nothing if the log is empty.
-      if (mP.size() == 0)
+      if (m_values.size() == 0)
         return;
 
       // 1. Sort
@@ -419,12 +419,12 @@ namespace Mantid
       DateAndTime lastTime, t;
       DateAndTime start, stop;
 
-      for (size_t i = 0; i < mP.size(); i ++)
+      for (size_t i = 0; i < m_values.size(); i ++)
       {
         lastTime = t;
         //The new entry
-        t =mP[i].time();
-        TYPE val = mP[i].value();
+        t =m_values[i].time();
+        TYPE val = m_values[i].value();
 
         //A good value?
         isGood = ((val >= min) && (val < max));
@@ -491,10 +491,10 @@ namespace Mantid
       // 2. Data Strcture
       std::map<DateAndTime, TYPE> asMap;
 
-      if (mP.size() > 0)
+      if (m_values.size() > 0)
       {
-        for (size_t i = 0; i < mP.size(); i ++)
-          asMap[mP[i].time()] = mP[i].value();
+        for (size_t i = 0; i < m_values.size(); i ++)
+          asMap[m_values[i].time()] = m_values[i].value();
       }
 
       return asMap;
@@ -510,10 +510,10 @@ namespace Mantid
       sort();
 
       std::vector<TYPE> out;
-      out.reserve(mP.size());
+      out.reserve(m_values.size());
 
-      for (size_t i = 0; i < mP.size(); i ++)
-        out.push_back(mP[i].value());
+      for (size_t i = 0; i < m_values.size(); i ++)
+        out.push_back(m_values[i].value());
 
       return out;
     }
@@ -528,11 +528,11 @@ namespace Mantid
       sort();
 
       std::vector<DateAndTime> out;
-      out.reserve(mP.size());
+      out.reserve(m_values.size());
 
-      for (size_t i = 0; i < mP.size(); i ++)
+      for (size_t i = 0; i < m_values.size(); i ++)
       {
-        out.push_back(mP[i].time());
+        out.push_back(m_values[i].time());
       }
 
       return out;
@@ -549,12 +549,12 @@ namespace Mantid
 
       // 2. Output data structure
       std::vector<double> out;
-      out.reserve(mP.size());
+      out.reserve(m_values.size());
 
-      Kernel::DateAndTime start = mP[0].time();
-      for (size_t i = 0; i < mP.size(); i ++)
+      Kernel::DateAndTime start = m_values[0].time();
+      for (size_t i = 0; i < m_values.size(); i ++)
       {
-        out.push_back( DateAndTime::secondsFromDuration(mP[i].time() - start) );
+        out.push_back( DateAndTime::secondsFromDuration(m_values[i].time() - start) );
       }
 
       return out;
@@ -571,14 +571,14 @@ namespace Mantid
     {
 
       TimeValueUnit<TYPE> newvalue(time, value);
-      mP.push_back(newvalue);
+      m_values.push_back(newvalue);
 
       m_size ++;
-      if (m_size == 1 || ( mPropSortedFlag && !(*mP.rbegin() < *(mP.rbegin()+1)) ) )
-        mPropSortedFlag = false;
+      if (m_size == 1 || ( m_propSortedFlag && !(*m_values.rbegin() < *(m_values.rbegin()+1)) ) )
+        m_propSortedFlag = false;
       else
-        mPropSortedFlag = false;
-      mFilterApplied = false;
+        m_propSortedFlag = false;
+      m_filterApplied = false;
 
       return;
     }
@@ -622,13 +622,13 @@ namespace Mantid
           break;
         else
         {
-          mP.push_back(TimeValueUnit<TYPE>(times[i], values[i]));
+          m_values.push_back(TimeValueUnit<TYPE>(times[i], values[i]));
           m_size ++;
         }
       }
 
       if (values.size() > 0)
-        mPropSortedFlag = false;
+        m_propSortedFlag = false;
 
       return;
         }
@@ -640,12 +640,12 @@ namespace Mantid
     template<typename TYPE>
     DateAndTime TimeSeriesProperty<TYPE>::lastTime() const
     {
-      if (mP.size()==0)
+      if (m_values.size()==0)
         throw std::runtime_error("TimeSeriesProperty is empty");
 
       sort();
 
-      return mP.rbegin()->time();
+      return m_values.rbegin()->time();
     }
 
     /** Returns the first value regardless of filter
@@ -654,12 +654,12 @@ namespace Mantid
     template<typename TYPE>
     TYPE TimeSeriesProperty<TYPE>::firstValue() const
     {
-      if (mP.size() == 0)
+      if (m_values.size() == 0)
         throw std::runtime_error("TimeSeriesProperty is empty");
 
       sort();
 
-      return mP[0].value();
+      return m_values[0].value();
     }
 
     /** Returns the first time regardless of filter
@@ -668,12 +668,12 @@ namespace Mantid
     template<typename TYPE>
     DateAndTime TimeSeriesProperty<TYPE>::firstTime() const
     {
-      if (mP.size()==0)
+      if (m_values.size()==0)
         throw std::runtime_error("TimeSeriesProperty is empty");
 
       sort();
 
-      return mP[0].time();
+      return m_values[0].time();
     }
 
     /**
@@ -683,12 +683,12 @@ namespace Mantid
     template<typename TYPE>
     TYPE TimeSeriesProperty<TYPE>::lastValue() const
     {
-      if (mP.size() == 0)
+      if (m_values.size() == 0)
         throw std::runtime_error("TimeSeriesProperty is empty");
 
       sort();
 
-      return mP.rbegin()->value();
+      return m_values.rbegin()->value();
     }
 
 
@@ -707,7 +707,7 @@ namespace Mantid
     template<typename TYPE>
     int TimeSeriesProperty<TYPE>::realSize() const
     {
-      return static_cast<int>(mP.size());
+      return static_cast<int>(m_values.size());
     }
 
 
@@ -721,12 +721,12 @@ namespace Mantid
       sort();
 
       std::stringstream ins;
-      for (size_t i = 0; i < mP.size(); i ++)
+      for (size_t i = 0; i < m_values.size(); i ++)
       {
         try
         {
-          ins << mP[i].time().toSimpleString();
-          ins << "  " << mP[i].value() << std::endl;
+          ins << m_values[i].time().toSimpleString();
+          ins << "  " << m_values[i].value() << std::endl;
         }
         catch (...)
         {
@@ -748,12 +748,12 @@ namespace Mantid
       sort();
 
       std::vector<std::string> values;
-      values.reserve(mP.size());
+      values.reserve(m_values.size());
 
-      for (size_t i = 0; i < mP.size(); i ++)
+      for (size_t i = 0; i < m_values.size(); i ++)
       {
         std::stringstream line;
-        line << mP[i].time().toSimpleString() << " " << mP[i].value();
+        line << m_values[i].time().toSimpleString() << " " << m_values[i].value();
         values.push_back(line.str());
       }
 
@@ -776,19 +776,19 @@ namespace Mantid
       // 2. Build map
 
       std::map<DateAndTime, TYPE> asMap;
-      if (mP.size() == 0)
+      if (m_values.size() == 0)
         return asMap;
 
-      TYPE d = mP[0].value();
-      asMap[mP[0].time()] = d;
+      TYPE d = m_values[0].value();
+      asMap[m_values[0].time()] = d;
 
-      for (size_t i = 1; i < mP.size(); i ++)
+      for (size_t i = 1; i < m_values.size(); i ++)
       {
-        if (mP[i].value() != d)
+        if (m_values[i].value() != d)
         {
           // Only put entry with different value from last entry to map
-          asMap[mP[i].time()] = mP[i].value();
-          d = mP[i].value();
+          asMap[m_values[i].time()] = m_values[i].value();
+          d = m_values[i].value();
         }
       }
       return asMap;
@@ -813,6 +813,18 @@ namespace Mantid
     std::string TimeSeriesProperty<TYPE>::setDataItem(const boost::shared_ptr<DataItem>)
     {
       throw Exception::NotImplementedError("TimeSeriesProperty<TYPE>::setValue - Cannot extract TimeSeries from DataItem");
+    }
+
+    /** Clears out the values in the property
+     */
+    template<typename TYPE>
+    void TimeSeriesProperty<TYPE>::clear()
+    {
+      m_size = 0;
+      m_values.clear();
+
+      m_propSortedFlag = false;
+      m_filterApplied = false;
     }
 
     /**
@@ -848,23 +860,19 @@ namespace Mantid
       if (new_times.size() != new_values.size())
         throw std::invalid_argument("TimeSeriesProperty::create: mismatched size for the time and values vectors.");
 
-      m_size = 0;
-      mP.clear();
-      mP.reserve(new_times.size());
+      clear();
+      m_values.reserve(new_times.size());
 
       std::size_t num = new_values.size();
       for (std::size_t i=0; i < num; i++)
       {
         // By providing a guess iterator to the insert method, it speeds inserting up by a good amount.
         TimeValueUnit<TYPE> newentry(new_times[i], new_values[i]);
-        mP.push_back(newentry);
+        m_values.push_back(newentry);
       }
 
       // reset the size
-      m_size = static_cast<int>(mP.size());
-
-      mPropSortedFlag = false;
-      mFilterApplied = false;
+      m_size = static_cast<int>(m_values.size());
 
       return;
     }
@@ -876,7 +884,7 @@ namespace Mantid
     template<typename TYPE>
     TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime& t) const
     {
-      if (mP.size() == 0)
+      if (m_values.size() == 0)
         throw std::runtime_error("Property is empty.  Cannot return any value");
 
       // 1. Get sorted
@@ -884,25 +892,25 @@ namespace Mantid
 
       // 2.
       TYPE value;
-      if (t < mP[0].time())
+      if (t < m_values[0].time())
       {
         // 1. Out side of lower bound
-        value = mP[0].value();
+        value = m_values[0].value();
       }
-      else if (t >= mP.back().time())
+      else if (t >= m_values.back().time())
       {
         // 2. Out side of upper bound
-        value = mP.back().value();
+        value = m_values.back().value();
       }
       else
       {
         // 3. Within boundary
         int index = this->findIndex(t);
 
-        if (index < 0 || index >= int(mP.size()))
+        if (index < 0 || index >= int(m_values.size()))
           throw std::logic_error("findIndex() returns index outside range. It is not supposed to be. ");
 
-        value = mP[static_cast<size_t>(index)].value();
+        value = m_values[static_cast<size_t>(index)].value();
       }
 
       return value;
@@ -915,7 +923,7 @@ namespace Mantid
     template<typename TYPE>
     TYPE TimeSeriesProperty<TYPE>::getSingleValue(const DateAndTime& t, int& index) const
     {
-      if (mP.size() == 0)
+      if (m_values.size() == 0)
         throw std::runtime_error("Property is empty.  Cannot return any value");
 
       // 1. Get sorted
@@ -923,27 +931,27 @@ namespace Mantid
 
       // 2.
       TYPE value;
-      if (t < mP[0].time())
+      if (t < m_values[0].time())
       {
         // 1. Out side of lower bound
-        value = mP[0].value();
+        value = m_values[0].value();
         index = 0;
       }
-      else if (t >= mP.back().time())
+      else if (t >= m_values.back().time())
       {
         // 2. Out side of upper bound
-        value = mP.back().value();
-        index = int(mP.size())-1;
+        value = m_values.back().value();
+        index = int(m_values.size())-1;
       }
       else
       {
         // 3. Within boundary
         index = this->findIndex(t);
 
-        if (index < 0 || index >= int(mP.size()))
+        if (index < 0 || index >= int(m_values.size()))
           throw std::logic_error("findIndex() returns index outside range. It is not supposed to be. ");
 
-        value = mP[static_cast<size_t>(index)].value();
+        value = m_values[static_cast<size_t>(index)].value();
       }
 
       return value;
@@ -958,9 +966,9 @@ namespace Mantid
     {
       TYPE total = 0;
 
-      for (size_t i = 0; i < mP.size(); ++i)
+      for (size_t i = 0; i < m_values.size(); ++i)
       {
-        total += mP[i].value();
+        total += m_values[i].value();
       }
       return total;
     }
@@ -979,7 +987,7 @@ namespace Mantid
     TimeInterval TimeSeriesProperty<TYPE>::nthInterval(int n) const
     {
       // 0. Throw exception
-      if (mP.size() == 0)
+      if (m_values.size() == 0)
         throw std::runtime_error("TimeSeriesProperty is empty (nthInterval)");
 
       // 1. Sort
@@ -989,27 +997,27 @@ namespace Mantid
 
       Kernel::TimeInterval deltaT;
 
-      if (mFilter.size() == 0)
+      if (m_filter.size() == 0)
       {
         // I. No filter
-        if (n >= static_cast<int>(mP.size()))
+        if (n >= static_cast<int>(m_values.size()))
         {
           // 1. Out of bound
           ;
         }
-        else if (n == static_cast<int>(mP.size())-1)
+        else if (n == static_cast<int>(m_values.size())-1)
         {
           // 2. Last one by making up an end time.
-          time_duration d = mP.rbegin()->time() - (mP.rbegin()+1)->time();
-          DateAndTime endTime = mP.rbegin()->time() + d;
-          Kernel::TimeInterval dt(mP.rbegin()->time(), endTime);
+          time_duration d = m_values.rbegin()->time() - (m_values.rbegin()+1)->time();
+          DateAndTime endTime = m_values.rbegin()->time() + d;
+          Kernel::TimeInterval dt(m_values.rbegin()->time(), endTime);
           deltaT = dt;
         }
         else
         {
           // 3. Regular
-          DateAndTime startT = mP[n].time();
-          DateAndTime endT = mP[n+1].time();
+          DateAndTime startT = m_values[n].time();
+          DateAndTime endT = m_values[n+1].time();
           TimeInterval dt(startT, endT);
           deltaT = dt;
         }
@@ -1020,18 +1028,18 @@ namespace Mantid
         // II.0 apply Filter
         this->applyFilter();
 
-        if (static_cast<size_t>(n) > mFilterQuickRef.back().second+1)
+        if (static_cast<size_t>(n) > m_filterQuickRef.back().second+1)
         {
           // 1. n > size of the allowed region, do nothing to dt
           ;
         }
-        else if (static_cast<size_t>(n) == mFilterQuickRef.back().second+1)
+        else if (static_cast<size_t>(n) == m_filterQuickRef.back().second+1)
         {
           // 2. n = size of the allowed region, duplicate the last one
-          size_t ind_t1 = mFilterQuickRef.back().first;
+          size_t ind_t1 = m_filterQuickRef.back().first;
           size_t ind_t2 = ind_t1-1;
-          Kernel::DateAndTime t1 = (mP.begin()+ind_t1)->time();
-          Kernel::DateAndTime t2 = (mP.begin()+ind_t2)->time();
+          Kernel::DateAndTime t1 = (m_values.begin()+ind_t1)->time();
+          Kernel::DateAndTime t2 = (m_values.begin()+ind_t2)->time();
           time_duration d = t1-t2;
           Kernel::DateAndTime t3 = t1+d;
           Kernel::TimeInterval dt(t1, t3);
@@ -1044,17 +1052,17 @@ namespace Mantid
           Kernel::DateAndTime tf;
 
           size_t refindex = this->findNthIndexFromQuickRef(n);
-          if (refindex + 3 >= mFilterQuickRef.size())
+          if (refindex + 3 >= m_filterQuickRef.size())
             throw std::logic_error("nthInterval:  Haven't considered this case.");
 
-          int diff = n - static_cast<int>(mFilterQuickRef[refindex].second);
+          int diff = n - static_cast<int>(m_filterQuickRef[refindex].second);
           if (diff < 0)
             throw std::logic_error("nthInterval:  diff cannot be less than 0.");
 
           // i) start time
-          Kernel::DateAndTime ftime0 = mFilter[mFilterQuickRef[refindex].first].first;
-          size_t iStartIndex = mFilterQuickRef[refindex+1].first+static_cast<size_t>(diff);
-          Kernel::DateAndTime ltime0 = mP[iStartIndex].time();
+          Kernel::DateAndTime ftime0 = m_filter[m_filterQuickRef[refindex].first].first;
+          size_t iStartIndex = m_filterQuickRef[refindex+1].first+static_cast<size_t>(diff);
+          Kernel::DateAndTime ltime0 = m_values[iStartIndex].time();
           if (iStartIndex == 0 && ftime0 < ltime0)
           {
             // a) Special case that True-filter time starts before log time
@@ -1073,17 +1081,17 @@ namespace Mantid
 
           // ii) end time
           size_t iStopIndex = iStartIndex + 1;
-          if (iStopIndex >= mP.size())
+          if (iStopIndex >= m_values.size())
           {
             // a) Last log entry is for the start
-            Kernel::DateAndTime ftimef = mFilter[mFilterQuickRef[refindex+3].first].first;
+            Kernel::DateAndTime ftimef = m_filter[m_filterQuickRef[refindex+3].first].first;
             tf = ftimef;
           }
           else
           {
             // b) Using the earlier value of next log entry and next filter entry
-            Kernel::DateAndTime ltimef = mP[iStopIndex].time();
-            Kernel::DateAndTime ftimef = mFilter[mFilterQuickRef[refindex+3].first].first;
+            Kernel::DateAndTime ltimef = m_values[iStopIndex].time();
+            Kernel::DateAndTime ftimef = m_filter[m_filterQuickRef[refindex+3].first].first;
             if (ltimef < ftimef)
               tf = ltimef;
             else
@@ -1110,23 +1118,23 @@ namespace Mantid
       TYPE value;
 
       // 1. Throw error if property is empty
-      if (mP.size() == 0)
+      if (m_values.size() == 0)
         throw std::runtime_error("TimeSeriesProperty is empty");
 
       // 2. Sort and apply filter
       sort();
 
-      if (mFilter.size() == 0)
+      if (m_filter.size() == 0)
       {
         // 3. Situation 1:  No filter
-        if (static_cast<size_t>(n) < mP.size())
+        if (static_cast<size_t>(n) < m_values.size())
         {
-          TimeValueUnit<TYPE> entry = mP[n];
+          TimeValueUnit<TYPE> entry = m_values[n];
           value = entry.value();
         }
         else
         {
-          TimeValueUnit<TYPE> entry = mP[m_size-1];
+          TimeValueUnit<TYPE> entry = m_values[m_size-1];
           value = entry.value();
         }
       }
@@ -1135,11 +1143,11 @@ namespace Mantid
         // 4. Situation 2: There is filter
         this->applyFilter();
 
-        if (static_cast<size_t>(n) > mFilterQuickRef.back().second+1)
+        if (static_cast<size_t>(n) > m_filterQuickRef.back().second+1)
         {
           // 1. n >= size of the allowed region
-          size_t ilog = (mFilterQuickRef.rbegin()+1)->first;
-          value = mP[ilog].value();
+          size_t ilog = (m_filterQuickRef.rbegin()+1)->first;
+          value = m_values[ilog].value();
         }
         else
         {
@@ -1148,12 +1156,12 @@ namespace Mantid
           Kernel::DateAndTime tf;
 
           size_t refindex = findNthIndexFromQuickRef(n);
-          if (refindex+3 >= mFilterQuickRef.size())
+          if (refindex+3 >= m_filterQuickRef.size())
           {
             throw std::logic_error("Not consider out of boundary case here. ");
           }
-          size_t ilog = mFilterQuickRef[refindex+1].first + (n-mFilterQuickRef[refindex].second);
-          value = mP[ilog].value();
+          size_t ilog = m_filterQuickRef[refindex+1].first + (n-m_filterQuickRef[refindex].second);
+          value = m_values[ilog].value();
         } // END-IF-ELSE Cases
       }
 
@@ -1170,13 +1178,13 @@ namespace Mantid
     {
       sort();
 
-      if (mP.size() == 0)
+      if (m_values.size() == 0)
         throw std::runtime_error("TimeSeriesProperty is empty");
 
-      if (n < 0 || n >= static_cast<int>(mP.size()))
-        n = static_cast<int>(mP.size())-1;
+      if (n < 0 || n >= static_cast<int>(m_values.size()))
+        n = static_cast<int>(m_values.size())-1;
 
-      return mP[n].time();
+      return m_values[n].time();
     }
 
     /* Divide the property into  allowed and disallowed time intervals according to \a filter.
@@ -1194,8 +1202,8 @@ namespace Mantid
     void TimeSeriesProperty<TYPE>::filterWith(const TimeSeriesProperty<bool>* filter)
     {
       // 1. Clear the current
-      mFilter.clear();
-      mFilterQuickRef.clear();
+      m_filter.clear();
+      m_filterQuickRef.clear();
 
       if (filter->size() == 0)
       {
@@ -1206,7 +1214,7 @@ namespace Mantid
       // 2. Construct mFilter
       std::vector<Kernel::DateAndTime> filtertimes = filter->timesAsVector();
       std::vector<bool> filtervalues = filter->valuesAsVector();
-      mFilter.reserve(filtertimes.size()+1);
+      m_filter.reserve(filtertimes.size()+1);
 
       bool lastIsTrue = false;
       for (size_t i = 0; i < filtertimes.size(); i ++)
@@ -1214,13 +1222,13 @@ namespace Mantid
         if (filtervalues[i] && !lastIsTrue)
         {
           // Get a true in filter but last recorded value is for false
-          mFilter.push_back(std::make_pair(filtertimes[i], true));
+          m_filter.push_back(std::make_pair(filtertimes[i], true));
           lastIsTrue = true;
         }
         else if (!filtervalues[i] && lastIsTrue)
         {
           // Get a False in filter but last recorded value is for TRUE
-          mFilter.push_back(std::make_pair(filtertimes[i], false));
+          m_filter.push_back(std::make_pair(filtertimes[i], false));
           lastIsTrue = false;
         }
       }
@@ -1229,12 +1237,12 @@ namespace Mantid
       if (filtervalues.back())
       {
         DateAndTime lastTime, nextLastT;
-        if (mP.back().time() > filtertimes.back())
+        if (m_values.back().time() > filtertimes.back())
         {
           // Last log time is later than last filter time
-          lastTime = mP.back().time();
-          if ( mP[mP.size()-2].time() > filtertimes.back() )
-            nextLastT = mP[mP.size()-2].time();
+          lastTime = m_values.back().time();
+          if ( m_values[m_values.size()-2].time() > filtertimes.back() )
+            nextLastT = m_values[m_values.size()-2].time();
           else
             nextLastT = filtertimes.back();
         }
@@ -1242,9 +1250,9 @@ namespace Mantid
         {
           // Last log time is no later than last filter time
           lastTime = filtertimes.back();
-          if (mP.back().time() > filtertimes[filtertimes.size()-1])
+          if (m_values.back().time() > filtertimes[filtertimes.size()-1])
           {
-            nextLastT = mP.back().time();
+            nextLastT = m_values.back().time();
           }
           else
           {
@@ -1254,11 +1262,11 @@ namespace Mantid
 
         time_duration dtime = lastTime - nextLastT;
 
-        mFilter.push_back(std::make_pair(lastTime+dtime, false));
+        m_filter.push_back(std::make_pair(lastTime+dtime, false));
       }
 
       // 3. Reset flag and do filter
-      mFilterApplied = false;
+      m_filterApplied = false;
       applyFilter();
 
       return;
@@ -1270,8 +1278,8 @@ namespace Mantid
     template<typename TYPE>
     void TimeSeriesProperty<TYPE>::clearFilter()
     {
-      mFilter.clear();
-      mFilterQuickRef.clear();
+      m_filter.clear();
+      m_filterQuickRef.clear();
 
       return;
     }
@@ -1283,19 +1291,19 @@ namespace Mantid
     template<typename TYPE>
     void TimeSeriesProperty<TYPE>::countSize() const
     {
-      if (mFilter.size() == 0)
+      if (m_filter.size() == 0)
       {
         // 1. Not filter
-        m_size = int(mP.size());
+        m_size = int(m_values.size());
       }
       else
       {
         // 2. With Filter
-        if (!mFilterApplied)
+        if (!m_filterApplied)
         {
           this->applyFilter();
         }
-        m_size = int(mFilterQuickRef.back().second);
+        m_size = int(m_filterQuickRef.back().second);
       }
 
       return;
@@ -1396,9 +1404,9 @@ namespace Mantid
       size_t numremoved = 0;
 
       typename std::vector<TimeValueUnit<TYPE> >::iterator vit;
-      vit = mP.begin()+1;
-      Kernel::DateAndTime prevtime = mP.begin()->time();
-      while (vit != mP.end())
+      vit = m_values.begin()+1;
+      Kernel::DateAndTime prevtime = m_values.begin()->time();
+      while (vit != m_values.end())
       {
         Kernel::DateAndTime currtime = vit->time();
         if (prevtime == currtime)
@@ -1408,7 +1416,7 @@ namespace Mantid
               (vit-1)->value() << std::endl;
 
           // A duplicated entry!
-          vit = mP.erase(vit-1);
+          vit = m_values.erase(vit-1);
 
           numremoved ++;
         }
@@ -1431,8 +1439,8 @@ namespace Mantid
     std::string TimeSeriesProperty<TYPE>::toString() const
     {
       std::stringstream ss;
-      for (size_t i = 0; i < mP.size(); ++i)
-        ss << mP[i].time() << "\t\t" << mP[i].value() << std::endl;
+      for (size_t i = 0; i < m_values.size(); ++i)
+        ss << m_values[i].time() << "\t\t" << m_values[i].value() << std::endl;
 
       return ss.str();
     }
@@ -1447,10 +1455,10 @@ namespace Mantid
     template <typename TYPE>
     void TimeSeriesProperty<TYPE>::sort() const
     {
-      if (!mPropSortedFlag)
+      if (!m_propSortedFlag)
       {
-        std::sort(mP.begin(), mP.end());
-        mPropSortedFlag = true;
+        std::sort(m_values.begin(), m_values.end());
+        m_propSortedFlag = true;
       }
     }
 
@@ -1462,24 +1470,24 @@ namespace Mantid
     int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const
     {
       // 0. Return with an empty container
-      if (mP.size() == 0)
+      if (m_values.size() == 0)
         return 0;
 
       // 1. Sort
       sort();
 
       // 2. Extreme value
-      if (t <= mP[0].time())
+      if (t <= m_values[0].time())
         return 0;
-      else if (t >= mP.back().time())
-        return (int(mP.size()-1));
+      else if (t >= m_values.back().time())
+        return (int(m_values.size()-1));
 
       // 3. Find by lower_bound()
-      typename std::vector<TimeValueUnit<TYPE> >::iterator fid;
-      TimeValueUnit<TYPE> temp(t, mP[0].value());
-      fid = std::lower_bound(mP.begin(), mP.end(), temp);
+      typename std::vector<TimeValueUnit<TYPE> >::const_iterator fid;
+      TimeValueUnit<TYPE> temp(t, m_values[0].value());
+      fid = std::lower_bound(m_values.begin(), m_values.end(), temp);
 
-      int newindex = int(fid-mP.begin());
+      int newindex = int(fid-m_values.begin());
       if (fid->time() > t)
         newindex --;
 
@@ -1501,7 +1509,7 @@ namespace Mantid
       {
         throw std::invalid_argument("Start Index cannot be less than 0");
       }
-      if (iend >= static_cast<int>(mP.size()))
+      if (iend >= static_cast<int>(m_values.size()))
       {
         throw std::invalid_argument("End Index cannot exceed the boundary");
       }
@@ -1511,27 +1519,27 @@ namespace Mantid
       }
 
       // 1. Return instantly if it is out of boundary
-      if (t < (mP.begin()+istart)->time())
+      if (t < (m_values.begin()+istart)->time())
       {
         return -1;
       }
-      if (t > (mP.begin()+iend)->time())
+      if (t > (m_values.begin()+iend)->time())
       {
-        return static_cast<int>(mP.size());
+        return static_cast<int>(m_values.size());
       }
 
       // 2. Sort
       sort();
 
       // 3. Construct the pair for comparison and do lower_bound()
-      TimeValueUnit<TYPE> temppair(t, mP[0].value());
+      TimeValueUnit<TYPE> temppair(t, m_values[0].value());
       typename std::vector<TimeValueUnit<TYPE> >::iterator fid;
-      fid = std::lower_bound((mP.begin()+istart), (mP.begin()+iend+1), temppair);
-      if (fid == mP.end())
+      fid = std::lower_bound((m_values.begin()+istart), (m_values.begin()+iend+1), temppair);
+      if (fid == m_values.end())
         throw std::runtime_error("Cannot find data");
 
       // 4. Calculate return value
-      size_t index = size_t(fid-mP.begin());
+      size_t index = size_t(fid-m_values.begin());
 
       return int(index);
     }
@@ -1546,56 +1554,56 @@ namespace Mantid
     void TimeSeriesProperty<TYPE>::applyFilter() const
     {
       // 1. Check and reset
-      if (mFilterApplied)
+      if (m_filterApplied)
         return;
-      if (mFilter.size() == 0)
+      if (m_filter.size() == 0)
         return;
 
-      mFilterQuickRef.clear();
+      m_filterQuickRef.clear();
 
       // 2. Apply filter
       int icurlog = 0;
-      for (size_t ift = 0; ift < mFilter.size(); ift ++)
+      for (size_t ift = 0; ift < m_filter.size(); ift ++)
       {
-        if (mFilter[ift].second)
+        if (m_filter[ift].second)
         {
           // a) Filter == True: indicating the start of a quick reference region
           int istart = 0;
           if (icurlog > 0)
             istart = icurlog-1;
 
-          if (icurlog < static_cast<int>(mP.size()))
-            icurlog = this->upperBound(mFilter[ift].first, istart, static_cast<int>(mP.size())-1);
+          if (icurlog < static_cast<int>(m_values.size()))
+            icurlog = this->upperBound(m_filter[ift].first, istart, static_cast<int>(m_values.size())-1);
 
           if (icurlog < 0)
           {
             // i. If it is out of lower boundary, add filter time, add 0 time
-            if (mFilterQuickRef.size() > 0)
+            if (m_filterQuickRef.size() > 0)
               throw std::logic_error("return log index < 0 only occurs with the first log entry");
 
-            mFilterQuickRef.push_back(std::make_pair(ift, 0));
-            mFilterQuickRef.push_back(std::make_pair(0, 0));
+            m_filterQuickRef.push_back(std::make_pair(ift, 0));
+            m_filterQuickRef.push_back(std::make_pair(0, 0));
 
             icurlog = 0;
           }
-          else if (icurlog >= static_cast<int>(mP.size()))
+          else if (icurlog >= static_cast<int>(m_values.size()))
           {
             // ii.  If it is out of upper boundary, still record it.  but make the log entry to mP.size()+1
             size_t ip = 0;
-            if (mFilterQuickRef.size() >= 4)
-              ip = mFilterQuickRef.back().second;
-            mFilterQuickRef.push_back(std::make_pair(ift, ip));
-            mFilterQuickRef.push_back(std::make_pair(mP.size()+1, ip));
+            if (m_filterQuickRef.size() >= 4)
+              ip = m_filterQuickRef.back().second;
+            m_filterQuickRef.push_back(std::make_pair(ift, ip));
+            m_filterQuickRef.push_back(std::make_pair(m_values.size()+1, ip));
           }
           else
           {
             // iii. The returned value is in the boundary.
             size_t numintervals = 0;
-            if (mFilterQuickRef.size() > 0)
+            if (m_filterQuickRef.size() > 0)
             {
-              numintervals = mFilterQuickRef.back().second;
+              numintervals = m_filterQuickRef.back().second;
             }
-            if (mFilter[ift].first < mP[icurlog].time())
+            if (m_filter[ift].first < m_values[icurlog].time())
             {
               if (icurlog == 0)
               {
@@ -1603,28 +1611,28 @@ namespace Mantid
               }
               icurlog --;
             }
-            mFilterQuickRef.push_back(std::make_pair(ift, numintervals));
+            m_filterQuickRef.push_back(std::make_pair(ift, numintervals));
             // Note: numintervals inherits from last filter
-            mFilterQuickRef.push_back(std::make_pair(icurlog, numintervals));
+            m_filterQuickRef.push_back(std::make_pair(icurlog, numintervals));
           }
         } // Filter value is True
-        else  if (mFilterQuickRef.size()%4 == 2)
+        else  if (m_filterQuickRef.size()%4 == 2)
         {
           // b) Filter == False: indicating the end of a quick reference region
           int ilastlog = icurlog;
 
-          if (ilastlog < static_cast<int>(mP.size()))
+          if (ilastlog < static_cast<int>(m_values.size()))
           {
             // B1: Last TRUE entry is still within log
-            icurlog = this->upperBound(mFilter[ift].first, icurlog, static_cast<int>(mP.size())-1);
+            icurlog = this->upperBound(m_filter[ift].first, icurlog, static_cast<int>(m_values.size())-1);
 
             if (icurlog < 0)
             {
               // i.   Some false filter is before the first log entry.  The previous filter does not make sense
-              if (mFilterQuickRef.size() != 2)
+              if (m_filterQuickRef.size() != 2)
                 throw std::logic_error("False filter is before first log entry.  QuickRef size must be 2.");
-              mFilterQuickRef.pop_back();
-              mFilterQuickRef.clear();
+              m_filterQuickRef.pop_back();
+              m_filterQuickRef.clear();
             }
             else
             {
@@ -1636,25 +1644,25 @@ namespace Mantid
               if (delta_numintervals < 0)
                 throw std::logic_error("Havn't considered delta numinterval can be less than 0.");
 
-              size_t new_numintervals = mFilterQuickRef.back().second + static_cast<size_t>(delta_numintervals);
+              size_t new_numintervals = m_filterQuickRef.back().second + static_cast<size_t>(delta_numintervals);
 
-              mFilterQuickRef.push_back(std::make_pair(icurlog, new_numintervals));
-              mFilterQuickRef.push_back(std::make_pair(ift, new_numintervals));
+              m_filterQuickRef.push_back(std::make_pair(icurlog, new_numintervals));
+              m_filterQuickRef.push_back(std::make_pair(ift, new_numintervals));
             }
           }
           else
           {
             // B2. Last TRUE filter's time is already out side of log.
-            size_t new_numintervals = mFilterQuickRef.back().second+1;
-            mFilterQuickRef.push_back(std::make_pair(icurlog-1, new_numintervals));
-            mFilterQuickRef.push_back(std::make_pair(ift, new_numintervals));
+            size_t new_numintervals = m_filterQuickRef.back().second+1;
+            m_filterQuickRef.push_back(std::make_pair(icurlog-1, new_numintervals));
+            m_filterQuickRef.push_back(std::make_pair(ift, new_numintervals));
           }
         } // Filter value is FALSE
 
       } // ENDFOR
 
       // 5. Change flag
-      mFilterApplied = true;
+      m_filterApplied = true;
 
       // 6. Re-count size
       countSize();
@@ -1675,21 +1683,21 @@ namespace Mantid
       // 1. Do check
       if (n < 0)
         throw std::invalid_argument("Unable to take into account negative index. ");
-      else if (mFilterQuickRef.size() == 0)
+      else if (m_filterQuickRef.size() == 0)
         throw std::runtime_error("Quick reference is not established. ");
 
       // 2. Return...
-      if (static_cast<size_t>(n) >= mFilterQuickRef.back().second)
+      if (static_cast<size_t>(n) >= m_filterQuickRef.back().second)
       {
         // 2A.  Out side of boundary
-        index = mFilterQuickRef.size();
+        index = m_filterQuickRef.size();
       }
       else
       {
         // 2B. Inside
-        for (size_t i = 0; i < mFilterQuickRef.size(); i+=4)
+        for (size_t i = 0; i < m_filterQuickRef.size(); i+=4)
         {
-          if (static_cast<size_t>(n) >= mFilterQuickRef[i].second && static_cast<size_t>(n) < mFilterQuickRef[i+3].second)
+          if (static_cast<size_t>(n) >= m_filterQuickRef[i].second && static_cast<size_t>(n) < m_filterQuickRef[i+3].second)
           {
             index = i;
             break;
@@ -1714,12 +1722,12 @@ namespace Mantid
       {
         return "Could not set value: properties have different type.";
       }
-      mP = prop->mP;
+      m_values = prop->m_values;
       m_size = prop->m_size;
-      mPropSortedFlag = prop->mPropSortedFlag;
-      mFilter = prop->mFilter;
-      mFilterQuickRef = prop->mFilterQuickRef;
-      mFilterApplied = prop->mFilterApplied;
+      m_propSortedFlag = prop->m_propSortedFlag;
+      m_filter = prop->m_filter;
+      m_filterQuickRef = prop->m_filterQuickRef;
+      m_filterApplied = prop->m_filterApplied;
       return "";
     }
 

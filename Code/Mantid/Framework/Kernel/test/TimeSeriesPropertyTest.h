@@ -137,6 +137,7 @@ public:
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(iProp), static_cast<Property*>(0) );
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(dProp), static_cast<Property*>(0) );
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(sProp), static_cast<Property*>(0) );
+    TS_ASSERT_DIFFERS( dynamic_cast<ITimeSeriesProperty*>(iProp), static_cast<ITimeSeriesProperty*>(0) );
   }
 
 
@@ -822,6 +823,21 @@ public:
     delete p;
 
     return;
+  }
+
+  void test_clear()
+  {
+    TimeSeriesProperty<int> * p = new TimeSeriesProperty<int>("aProp");
+    p->addValue("2007-11-30T16:17:00",1);
+
+    TS_ASSERT_EQUALS( p->size(), 1);
+    TS_ASSERT_EQUALS( p->realSize(), 1);
+
+    ITimeSeriesProperty * pi = p;
+    TS_ASSERT_THROWS_NOTHING( pi->clear() );
+
+    TS_ASSERT_EQUALS( p->size(), 0);
+    TS_ASSERT_EQUALS( p->realSize(), 0);
   }
 
   /*

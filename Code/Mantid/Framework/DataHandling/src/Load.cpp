@@ -336,7 +336,7 @@ namespace Mantid
         // Wipe all properties except the Load native ones
         if( m_baseProps.find(name) == m_baseProps.end() )
         {
-          this->removeProperty(name, false);
+          this->removeProperty(name);
         }
       }
 

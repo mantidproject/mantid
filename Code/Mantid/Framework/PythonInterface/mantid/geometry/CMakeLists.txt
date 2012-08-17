@@ -35,7 +35,8 @@ set ( PY_FILES
 #############################################################################################
 # Generate a source file from the export definitions and provided template
 #############################################################################################
-CREATE_MODULE ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/geometry.cpp EXPORT_FILES SRC_FILES )
+create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/geometry.cpp EXPORT_FILES 
+                SRC_FILES )
 
 #############################################################################################
 # Copy over the pure Python files for the module
@@ -43,16 +44,9 @@ CREATE_MODULE ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/geometry.cpp EXPO
 # Set the destination directory
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/geometry )
 
-set ( PYTHON_INSTALL_FILES "" )
-foreach ( PYFILE ${PY_FILES} )
-  add_custom_command ( OUTPUT ${OUTPUT_DIR}/${PYFILE}
-             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-             COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-             ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-             ${OUTPUT_DIR}/${PYFILE}
-  )
-  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${OUTPUT_DIR}/${PYFILE} )
-endforeach ( PYFILE )
+
+copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+                           PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Create the target for this directory
@@ -67,5 +61,5 @@ target_link_libraries ( PythonGeometryModule PythonKernelModule ${PYTHON_DEPS} )
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonGeometryModule DESTINATION ${BIN_DIR}/mantid/geometry )
+install ( TARGETS PythonGeometryModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/geometry )
 

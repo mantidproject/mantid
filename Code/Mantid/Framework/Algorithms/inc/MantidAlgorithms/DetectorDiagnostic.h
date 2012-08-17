@@ -63,7 +63,7 @@ namespace Mantid
       virtual void init();
       virtual void exec();
       void applyMask(API::MatrixWorkspace_sptr inputWS, API::MatrixWorkspace_sptr maskWS);
-      void doDetVanTest(API::MatrixWorkspace_sptr inputWS, API::MatrixWorkspace_sptr maskWS, int & nFails);
+      void doDetVanTest(API::MatrixWorkspace_sptr inputWS, API::MatrixWorkspace_sptr &maskWS, int & nFails);
 
     protected:
       /// Get the total counts for each spectra

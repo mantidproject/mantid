@@ -68,6 +68,9 @@ void RotateInstrumentComponent::exec()
 
   if (X + Y + Z == 0.0) throw std::invalid_argument("The rotation axis must not be a zero vector");
 
+  // Get the ParameterMap reference before the instrument so that
+  // we avoid a copy
+  Geometry::ParameterMap& pmap = WS->instrumentParameters();
   Instrument_const_sptr inst = WS->getInstrument();
   IComponent_const_sptr comp;
 
@@ -120,8 +123,6 @@ void RotateInstrumentComponent::exec()
       }
   }
 
-  //Need to get the address to the base instrument component
-  Geometry::ParameterMap& pmap = WS->instrumentParameters();
   // Add a parameter for the new rotation
   pmap.addQuat(comp.get(), "rot", Rot);
 

@@ -110,33 +110,11 @@ void LoadLog::init()
 
 }
 
-  //@cond NODOC
-  namespace
-  {
-    struct FileMatcher
-    {
-      FileMatcher(const std::string & expression) : m_expression(expression) {}
-
-      bool operator()(const std::string & test) const
-      {
-        boost::regex regex(m_expression, boost::regex_constants::icase);
-        return boost::regex_match(test, regex);
-      }
-      
-    private:
-      FileMatcher();
-      const std::string m_expression;
-    };
-  }
-  //@endcond
-
-
-
 /** Check if the file is SNS text; load it if it is, return false otherwise.
  *
  * @return true if the file was a SNS style; false otherwise.
  */
-  bool LoadLog::LoadSNSText()
+bool LoadLog::LoadSNSText()
 {
 
   // Get the SNS-specific parameter

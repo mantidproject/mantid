@@ -39,27 +39,27 @@ set ( PY_FILES MantidFramework.py __init__.py setup.py mantidsimple.py)
 
 # cxxtest unit tests
 set ( TEST_FILES
-	test/PythonFrameworkTests.h
+	PythonFrameworkTests.h
 )
 
 # Python unit tests
 set ( TEST_PY_FILES 
-  test/GoniometerTest.py
-  test/ImportTest.py
-  test/IPeaksWorkspaceTest.py
-  test/LoadLiveDataTest.py
-  test/MatrixWorkspaceTest.py
-  test/MDHistoWorkspaceTest.py
-  test/NumpyTest.py
-  test/PythonAlgorithmTest.py
-  test/RunPythonScriptTest.py
-  test/SANSMaskCommandsTest.py
-  test/SANSWorkflowTest.py
-  test/SimpleAPILoadTest.py
-  test/SimpleAPIFitTest.py
-  test/SettingsTest.py
-  test/WorkspaceGroupTest.py
-  test/WorkspaceHistoryTest.py
+  GoniometerTest.py
+  ImportTest.py
+  IPeaksWorkspaceTest.py
+  LoadLiveDataTest.py
+  MatrixWorkspaceTest.py
+  MDHistoWorkspaceTest.py
+  NumpyTest.py
+  PythonAlgorithmTest.py
+  RunPythonScriptTest.py
+  SANSMaskCommandsTest.py
+  SANSWorkflowTest.py
+  SimpleAPILoadTest.py
+  SimpleAPIFitTest.py
+  SettingsTest.py
+  WorkspaceGroupTest.py
+  WorkspaceHistoryTest.py
 )
 
 if(UNITY_BUILD)
@@ -77,26 +77,21 @@ include_directories ( ${PYTHON_NUMPY_INCLUDE_DIR} )
 include_directories ( inc )
 
 ###########################################################################
-# Copy the required python files into the build destination
+# Build a pyc file in the binary directory for each python file 
 ###########################################################################
 
 # Now the common files for all distributions
-set ( PYTHON_INSTALL_FILES "" )
-foreach ( PYFILE ${PY_FILES} )
-  add_custom_command ( OUTPUT ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE}
-                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} 
-  )
-  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE} )
-endforeach ( PYFILE )
+copy_python_files_to_dir( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} PYTHON_INSTALL_FILES )
+
+# Python algorithms
+add_compile_py_target( PythonAlgorithms ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
 
 ###########################################################################
 # Create the target for this directory
 ###########################################################################
 
 add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${BOOST_SRC} ${PYTHON_INSTALL_FILES} )
+add_dependencies( PythonAPI PythonAlgorithms )
 if ( UNIX )
   set ( DLOPEN_SRC src/dlopen.c )
   add_library ( dlopen ${DLOPEN_SRC} )
@@ -206,30 +201,16 @@ endif ()
 
 target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
 
+# Disable Intel compiler coming from boost python code
+if ( ${CMAKE_CXX_COMPILER_ID} MATCHES "Intel" )
+  add_definitions ( -wd1875 )
+endif ()
+
 ###########################################################################
 # Unit tests setup
 ###########################################################################
 
-if ( CXXTEST_FOUND )
-  include_directories ( ../TestHelpers/inc )
-  cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
-  target_link_libraries( PythonAPITest PythonAPI )
-  
-  # Specify implicit dependency, but don't link to it
-  add_dependencies ( PythonAPITest UserAlgorithms )
-  add_dependencies ( FrameworkTests PythonAPITest )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET PythonAPITest PROPERTY FOLDER "UnitTests" )
-endif ()
-
-# python unit tests
-if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( VanillaPythonTest.py ${TEST_PY_FILES} "" )
-  add_dependencies ( VanillaPythonTest.py PythonAPI Algorithms )
-  add_dependencies ( FrameworkTests VanillaPythonTest.py )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET VanillaPythonTest.py PROPERTY FOLDER "UnitTests" )
-endif ()
+add_subdirectory ( test )
 
 ###########################################################################
 # things to put together a main program
@@ -271,6 +252,11 @@ install ( TARGETS PythonAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR} )
 if ( UNIX )
   install ( TARGETS dlopen DESTINATION ${BIN_DIR} )
 endif ()
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
+
+###########################################################################
+# Ship .py & .pyc files
+###########################################################################
+install_python_files ( ${CMAKE_CURRENT_SOURCE_DIR} "${PY_FILES}" ${BIN_DIR} )
+
 install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
-                                      PATTERN ".svn" EXCLUDE PATTERN "*.pyc" EXCLUDE )
+                                      PATTERN ".svn" EXCLUDE )

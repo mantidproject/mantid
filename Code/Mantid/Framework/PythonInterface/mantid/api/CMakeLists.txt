@@ -47,19 +47,18 @@ set ( EXPORT_FILES
   src/Exports/Sample.cpp
   src/Exports/Run.cpp
   src/Exports/WorkspaceFactory.cpp
+  src/Exports/PropertyManagerDataService.cpp
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions
 set ( SRC_FILES 
   src/PythonAlgorithm/AlgorithmWrapper.cpp
-  src/PythonAlgorithm/PropertyWithValueFactory.cpp
   src/PythonAlgorithm/PythonAlgorithm.cpp
   src/CloneMatrixWorkspace.cpp
 )
 
 set ( INC_FILES 
   ${HEADER_DIR}/api/PythonAlgorithm/AlgorithmWrapper.h
-  ${HEADER_DIR}/api/PythonAlgorithm/PropertyWithValueFactory.h
   ${HEADER_DIR}/api/PythonAlgorithm/PythonAlgorithm.h
   ${HEADER_DIR}/api/BinaryOperations.h
   ${HEADER_DIR}/api/CloneMatrixWorkspace.h
@@ -73,27 +72,20 @@ set ( PY_FILES
   _workspaceops.py
 )
 
-# Set the destination directory
-set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/api )
-
 #############################################################################################
 # Generate a source file from the export definitions
 #############################################################################################
-CREATE_MODULE ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/api.cpp EXPORT_FILES SRC_FILES )
+create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/api.cpp EXPORT_FILES 
+                SRC_FILES )
 
 #############################################################################################
 # Copy over the pure Python files for the module
 #############################################################################################
-set ( PYTHON_INSTALL_FILES "" )
-foreach ( PYFILE ${PY_FILES} )
-  add_custom_command ( OUTPUT ${OUTPUT_DIR}/${PYFILE}
-                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-                       ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                       ${OUTPUT_DIR}/${PYFILE}
-  )
-  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${OUTPUT_DIR}/${PYFILE} )
-endforeach ( PYFILE )
+# Set the destination directory
+set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/api )
+
+copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+                           PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Create the target for this directory
@@ -109,4 +101,4 @@ target_link_libraries ( PythonAPIModule PythonGeometryModule PythonKernelModule 
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonAPIModule DESTINATION ${BIN_DIR}/mantid/api )
+install ( TARGETS PythonAPIModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/api )

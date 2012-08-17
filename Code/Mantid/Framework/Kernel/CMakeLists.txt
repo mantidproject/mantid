@@ -141,11 +141,12 @@ set ( INC_FILES
 	inc/MantidKernel/Glob.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
-	inc/MantidKernel/ISaveable.h
-	inc/MantidKernel/IValidator.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/Interpolation.h
+  inc/MantidKernel/ISaveable.h
+  inc/MantidKernel/ITimeSeriesProperty.h
+  inc/MantidKernel/IValidator.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h
@@ -219,95 +220,95 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	test/ArrayBoundedValidatorTest.h
-	test/ArrayLengthValidatorTest.h
-	test/ArrayPropertyTest.h
-	test/AtomTest.h
-	test/BinFinderTest.h
-	test/BinaryFileTest.h
-	test/BoseEinsteinDistributionTest.h
-	test/BoundedValidatorTest.h
-	test/CPUTimerTest.h
-	test/CacheTest.h
-	test/CompositeValidatorTest.h
-	test/ConfigServiceTest.h
-	test/DataServiceTest.h
-	test/DateAndTimeTest.h
-	test/DateValidatorTest.h
-	test/DeltaEModeTest.h
-	test/DirectoryValidatorTest.h
-	test/DiskBufferTest.h
-	test/DynamicFactoryTest.h
-	test/EnabledWhenPropertyTest.h
-	test/EnvironmentHistoryTest.h
-	test/FacilitiesTest.h
-	test/FileValidatorTest.h
-	test/FilterChannelTest.h
-	test/FilteredTimeSeriesPropertyTest.h
-	test/FloatingPointComparisonTest.h
-	test/FreeBlockTest.h
-	test/FunctionTaskTest.h
-	test/GlobTest.h
-	test/IPropertySettingsTest.h
-	test/ISaveableTest.h
-	test/IValidatorTest.h
-	test/InstrumentInfoTest.h
-	test/InterpolationTest.h
-	test/ListValidatorTest.h
-	test/LogFilterTest.h
-	test/LogParserTest.h
-	test/LoggerTest.h
-	test/MRUListTest.h
-	test/MagneticFormFactorTableTest.h
-	test/MagneticIonTest.h
-	test/MandatoryValidatorTest.h
-	test/MaskedPropertyTest.h
-	test/MatrixPropertyTest.h
-	test/MatrixTest.h
-	test/MemoryTest.h
-	test/MersenneTwisterTest.h
-	test/MultiFileNameParserTest.h
-	test/MultiFileValidatorTest.h
-	test/MutexTest.h
-	test/NDPseudoRandomNumberGeneratorTest.h
-	test/NDRandomNumberGeneratorTest.h
-	test/NeutronAtomTest.h
-	test/NullValidatorTest.h
-	test/ProgressBaseTest.h
-	test/ProgressTextTest.h
-	test/PropertyHistoryTest.h
-	test/PropertyManagerTest.h
-	test/PropertyTest.h
-	test/PropertyWithValueTest.h
-	test/QuatTest.h
-	test/ReadLockTest.h
-	test/RebinHistogramTest.h
-	test/RebinParamsValidatorTest.h
-	test/RegexStringsTest.h
-	test/SignalChannelTest.h
-	test/SobolSequenceTest.h
-	test/StatisticsTest.h
-	test/StringsTest.h
-	test/TaskTest.h
-	test/ThreadPoolRunnableTest.h
-	test/ThreadPoolTest.h
-	test/ThreadSchedulerMutexesTest.h
-	test/ThreadSchedulerTest.h
-	test/TimeSeriesPropertyTest.h
-	test/TimeSplitterTest.h
-	test/TimerTest.h
-	test/TypedValidatorTest.h
-	test/UnitConversionTest.h
-	test/UnitFactoryTest.h
-	test/UnitTest.h
-	test/UserStringParserTest.h
-	test/UtilsTest.h
-	test/V2DTest.h
-	test/V3DTest.h
-	test/VMDTest.h
-	test/VectorHelperTest.h
-	test/VisibleWhenPropertyTest.h
-	test/WriteLockTest.h
+	ArrayBoundedValidatorTest.h
+	ArrayLengthValidatorTest.h
+	ArrayPropertyTest.h
+	AtomTest.h
+	BinFinderTest.h
+	BinaryFileTest.h
+	BoseEinsteinDistributionTest.h
+	BoundedValidatorTest.h
+	CPUTimerTest.h
+	CacheTest.h
+	CompositeValidatorTest.h
+	ConfigServiceTest.h
+	DataServiceTest.h
+	DateAndTimeTest.h
+	DateValidatorTest.h
+	DeltaEModeTest.h
+	DirectoryValidatorTest.h
+	DiskBufferTest.h
+	DynamicFactoryTest.h
+	EnabledWhenPropertyTest.h
+	EnvironmentHistoryTest.h
+	FacilitiesTest.h
+	FileValidatorTest.h
+	FilterChannelTest.h
+	FilteredTimeSeriesPropertyTest.h
+	FloatingPointComparisonTest.h
+	FreeBlockTest.h
+	FunctionTaskTest.h
+	GlobTest.h
+	IPropertySettingsTest.h
+	ISaveableTest.h
+	IValidatorTest.h
+	InstrumentInfoTest.h
+	InterpolationTest.h
+	ListValidatorTest.h
+	LogFilterTest.h
+	LogParserTest.h
+	LoggerTest.h
+	MRUListTest.h
+	MagneticFormFactorTableTest.h
+	MagneticIonTest.h
+	MandatoryValidatorTest.h
+	MaskedPropertyTest.h
+	MatrixPropertyTest.h
+	MatrixTest.h
+	MemoryTest.h
+	MersenneTwisterTest.h
+	MultiFileNameParserTest.h
+	MultiFileValidatorTest.h
+	MutexTest.h
+	NDPseudoRandomNumberGeneratorTest.h
+	NDRandomNumberGeneratorTest.h
+	NeutronAtomTest.h
+	NullValidatorTest.h
+	ProgressBaseTest.h
+	ProgressTextTest.h
+	PropertyHistoryTest.h
+	PropertyManagerTest.h
+	PropertyTest.h
+	PropertyWithValueTest.h
+	QuatTest.h
+	ReadLockTest.h
+	RebinHistogramTest.h
+	RebinParamsValidatorTest.h
+	RegexStringsTest.h
+	SignalChannelTest.h
+	SobolSequenceTest.h
+	StatisticsTest.h
+	StringsTest.h
+	TaskTest.h
+	ThreadPoolRunnableTest.h
+	ThreadPoolTest.h
+	ThreadSchedulerMutexesTest.h
+	ThreadSchedulerTest.h
+	TimeSeriesPropertyTest.h
+	TimeSplitterTest.h
+	TimerTest.h
+	TypedValidatorTest.h
+	UnitConversionTest.h
+	UnitFactoryTest.h
+	UnitTest.h
+	UserStringParserTest.h
+	UtilsTest.h
+	V2DTest.h
+	V3DTest.h
+	VMDTest.h
+	VectorHelperTest.h
+	VisibleWhenPropertyTest.h
+	WriteLockTest.h
 )
 
 if(UNITY_BUILD)
@@ -332,24 +333,8 @@ if ( WIN32 )
   target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
 endif()
 
-if ( CXXTEST_FOUND )
-  cxxtest_add_test ( KernelTest ${TEST_FILES} )
-  include_directories ( inc test )
-  target_link_libraries( KernelTest Kernel ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
-  add_dependencies ( FrameworkTests KernelTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET KernelTest PROPERTY FOLDER "UnitTests" )
-
-  add_custom_command ( TARGET KernelTest POST_BUILD 
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-                         ${CMAKE_CURRENT_SOURCE_DIR}/../Properties/MantidTest.properties
-                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-                         ${CMAKE_CURRENT_SOURCE_DIR}/../Properties/MantidTest.user.properties
-                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-  )
-
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # This section deals with creating the MantidVersion implementation

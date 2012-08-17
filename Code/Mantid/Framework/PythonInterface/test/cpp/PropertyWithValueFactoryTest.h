@@ -7,7 +7,7 @@
   #pragma warning(disable:4244)
   #pragma warning(disable:4005)
 #endif
-#include "MantidPythonInterface/api/PythonAlgorithm/PropertyWithValueFactory.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #ifdef _MSC_VER
   #pragma warning(push)
 #endif
@@ -17,7 +17,7 @@
 
 //-------------------------------------------------------------------------
 
-using Mantid::PythonInterface::PropertyWithValueFactory;
+using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::Direction;
 

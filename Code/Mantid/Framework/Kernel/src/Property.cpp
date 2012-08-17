@@ -146,7 +146,7 @@ int Property::size() const
  * not been set before.
  * @return the property's units
  */
-std::string Property::units() const
+const std::string & Property::units() const
 {
   return m_units;
 }
@@ -156,9 +156,9 @@ std::string Property::units() const
  *
  * @param unit :: string to set for the units.
  */
-void Property::setUnits(std::string unit)
+void Property::setUnits(const std::string & unit)
 {
-  m_units = std::string(unit); //force the copy constructor
+  m_units = unit;
 }
 
 //-------------------------------------------------------------------------------------------------

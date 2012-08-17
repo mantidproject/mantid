@@ -148,64 +148,64 @@ set ( INC_FILES
 )
               
 set ( TEST_FILES
-	# test/ChebyshevPolynomialBackgroundTest.h
-	#test/SCDPanelErrorsTest.h
-	test/AbragamTest.h
-	test/BFGSTest.h
-	test/BivariateNormalTest.h
-	test/Bk2BkExpConvPVTest.h
-	test/BoundaryConstraintTest.h
-	test/ChebyshevTest.h
-	test/CompositeFunctionTest.h
-	test/ConvolutionTest.h
-	test/DeltaFunctionTest.h
-	test/DiffSphereTest.h
-	test/EndErfcTest.h
-	test/ExpDecayMuonTest.h
-	test/ExpDecayOscTest.h
-	test/ExpDecayTest.h
-	test/FRConjugateGradientTest.h
-	test/FitMWTest.h
-	test/FlatBackgroundTest.h
-	test/FuncMinimizerFactoryTest.h
-	test/FunctionFactoryConstraintTest.h
-	test/GSLMatrixTest.h
-	test/GausDecayTest.h
-	test/GausOscTest.h
-	test/Gaussian1DTest.h
-	test/GaussianTest.h
-	test/IkedaCarpenterPVTest.h
-	test/LeBailFitTest.h
-	test/LeBailFunctionTest.h
-	test/LeastSquaresTest.h
-	test/LevenbergMarquardtMDTest.h
-	test/LevenbergMarquardtTest.h
-	test/LinearBackgroundTest.h
-	test/LinearTest.h
-	test/LogNormalTest.h
-	test/Lorentzian1DTest.h
-	test/LorentzianTest.h
-	test/MultiDomainCreatorTest.h
-	test/MultiDomainFunctionTest.h
-	test/MuonFInteractionTest.h
-	test/PRConjugateGradientTest.h
-	test/PlotPeakByLogValueTest.h
-	test/PolynomialTest.h
-	test/ProcessBackgroundTest.h
-	test/ProductFunctionTest.h
-	test/ProductLinearExpTest.h
-	test/ProductQuadraticExpTest.h
-	test/QuadraticTest.h
-	test/ResolutionTest.h
-	test/SimplexTest.h
-	test/SpecialFunctionSupportTest.h
-	test/SplineBackgroundTest.h
-	test/StaticKuboToyabeTest.h
-	test/StretchExpMuonTest.h
-	test/StretchExpTest.h
-	test/ThermalNeutronBk2BkExpConvPVTest.h
-	test/UserFunction1DTest.h
-	test/UserFunctionTest.h
+	# ChebyshevPolynomialBackgroundTest.h
+	#SCDPanelErrorsTest.h
+	AbragamTest.h
+	BFGSTest.h
+	BivariateNormalTest.h
+	Bk2BkExpConvPVTest.h
+	BoundaryConstraintTest.h
+	ChebyshevTest.h
+	CompositeFunctionTest.h
+	ConvolutionTest.h
+	DeltaFunctionTest.h
+	DiffSphereTest.h
+	EndErfcTest.h
+	ExpDecayMuonTest.h
+	ExpDecayOscTest.h
+	ExpDecayTest.h
+	FRConjugateGradientTest.h
+	FitMWTest.h
+	FlatBackgroundTest.h
+	FuncMinimizerFactoryTest.h
+	FunctionFactoryConstraintTest.h
+	GSLMatrixTest.h
+	GausDecayTest.h
+	GausOscTest.h
+	Gaussian1DTest.h
+	GaussianTest.h
+	IkedaCarpenterPVTest.h
+	LeBailFitTest.h
+	LeBailFunctionTest.h
+	LeastSquaresTest.h
+	LevenbergMarquardtMDTest.h
+	LevenbergMarquardtTest.h
+	LinearBackgroundTest.h
+	LinearTest.h
+	LogNormalTest.h
+	Lorentzian1DTest.h
+	LorentzianTest.h
+	MultiDomainCreatorTest.h
+	MultiDomainFunctionTest.h
+	MuonFInteractionTest.h
+	PRConjugateGradientTest.h
+	PlotPeakByLogValueTest.h
+	PolynomialTest.h
+	ProcessBackgroundTest.h
+	ProductFunctionTest.h
+	ProductLinearExpTest.h
+	ProductQuadraticExpTest.h
+	QuadraticTest.h
+	ResolutionTest.h
+	SimplexTest.h
+	SpecialFunctionSupportTest.h
+	SplineBackgroundTest.h
+	StaticKuboToyabeTest.h
+	StretchExpMuonTest.h
+	StretchExpTest.h
+	ThermalNeutronBk2BkExpConvPVTest.h
+	UserFunction1DTest.h
+	UserFunctionTest.h
 )
 
 
@@ -227,16 +227,8 @@ include_directories ( inc )
 
 target_link_libraries ( CurveFitting ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
-if ( CXXTEST_FOUND )
-  include_directories ( ../DataHandling/inc ../TestHelpers/inc )
-  set ( TESTHELPER_SRCS ../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../TestHelpers/src/ComponentCreationHelper.cpp ) # Used by cxx_test_add_test
-  cxxtest_add_test ( CurveFittingTest ${TEST_FILES}  )
-  target_link_libraries( CurveFittingTest CurveFitting DataHandling DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
-  add_dependencies ( FrameworkTests CurveFittingTest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET CurveFittingTest PROPERTY FOLDER "UnitTests" )
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

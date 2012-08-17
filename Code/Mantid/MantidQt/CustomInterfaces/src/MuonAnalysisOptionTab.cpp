@@ -212,7 +212,10 @@ void MuonAnalysisOptionTab::runTimeComboBox(int index)
     break;
   case(2): // Custom Value
     m_uiForm.timeAxisStartAtInput->setEnabled(true);
-    m_uiForm.timeAxisStartAtInput->setText(m_customTimeValue);
+    if(m_customTimeValue.isEmpty())
+      m_uiForm.timeAxisStartAtInput->setText("0.0");
+    else
+      m_uiForm.timeAxisStartAtInput->setText(m_customTimeValue);
   }
 
   // save this new choice

@@ -153,9 +153,9 @@ public:
 
   virtual int size() const;
 
-  virtual std::string units() const;
+  virtual const std::string & units() const;
 
-  virtual void setUnits(std::string unit);
+  virtual void setUnits(const std::string & unit);
 
   virtual size_t getMemorySize() const
   { return sizeof(Property); }

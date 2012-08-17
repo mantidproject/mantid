@@ -36,6 +36,7 @@ set ( EXPORT_FILES
   src/Exports/UnitConversion.cpp
   src/Exports/UnitFactory.cpp
   src/Exports/DeltaEMode.cpp
+  src/Exports/PropertyManager.cpp
 )  
 
 set ( SRC_FILES
@@ -46,6 +47,7 @@ set ( SRC_FILES
   src/Converters/PyObjectToMatrix.cpp
   src/Converters/PyObjectToV3D.cpp
   src/Converters/WrapWithNumpy.cpp
+  src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
   src/Registry/UpcastRegistry.cpp
@@ -74,6 +76,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
   ${HEADER_DIR}/kernel/Policies/upcast_returned_value.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
+  ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/RegisterSingleValueHandler.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/SingleValueTypeHandler.h
@@ -98,7 +101,8 @@ set ( PY_FILES
 #############################################################################################
 # Generate a source file from the export definitions and provided template
 #############################################################################################
-CREATE_MODULE ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp EXPORT_FILES SRC_FILES )
+create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp EXPORT_FILES 
+                SRC_FILES )
 
 #############################################################################################
 # Copy over the pure Python files for the module
@@ -106,16 +110,8 @@ CREATE_MODULE ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp EXPORT
 # Set the destination directory
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/kernel )
 
-set ( PYTHON_INSTALL_FILES "" )
-foreach ( PYFILE ${PY_FILES} )
-  add_custom_command ( OUTPUT ${OUTPUT_DIR}/${PYFILE}
-             DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-             COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-             ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-             ${OUTPUT_DIR}/${PYFILE}
-  )
-  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${OUTPUT_DIR}/${PYFILE} )
-endforeach ( PYFILE )
+copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+                           PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Create the target for this directory
@@ -145,7 +141,7 @@ endif()
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonKernelModule DESTINATION ${BIN_DIR}/mantid/kernel )
+install ( TARGETS PythonKernelModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/kernel )
 if ( UNIX )
 install ( TARGETS _dlopen DESTINATION ${BIN_DIR}/mantid/kernel )
 endif()

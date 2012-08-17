@@ -144,65 +144,64 @@ set ( INC_FILES
 	inc/MantidMDEvents/UserFunctionMD.h
 )
 
-# Test files. Other source files required.
+# Test files.
 set ( TEST_FILES
-	#
-	test/AffineMatrixParameterParserTest.h
-	test/AffineMatrixParameterTest.h
-	test/BinToMDHistoWorkspaceTest.h
-	test/BoxControllerSettingsAlgorithmTest.h
-	test/CentroidPeaksMDTest.h
-	test/CloneMDWorkspaceTest.h
-	test/ConvertToDiffractionMDWorkspaceTest.h
-	test/ConvertToMDFactoryTest.h
-	test/ConvertToMDParamsTest.h
-	test/ConvertToMDUnitsConvTest.h
-	test/ConvertToMDWSTest.h
-	test/ConvertToReflectometryQTest.h
-	test/CoordTransformAffineParserTest.h
-	test/CoordTransformAffineTest.h
-	test/CoordTransformAlignedTest.h
-	test/CoordTransformDistanceParserTest.h
-	test/CoordTransformDistanceTest.h
-	test/CreateMDHistoWorkspaceTest.h
-	test/CreateMDWorkspaceTest.h
-	test/FakeMDEventDataTest.h
-	test/FindPeaksMDTest.h
-	test/FitMDTest.h
-	test/ImportMDEventWorkspaceTest.h
-	test/ImportMDHistoWorkspaceTest.h
-	test/IntegratePeaksMDTest.h
-	test/LoadMDTest.h
-	test/LoadSQWTest.h
-	test/MDBinTest.h
-	test/MDBoxBaseTest.h
-	test/MDBoxIteratorTest.h
-	test/MDBoxTest.h
-	test/MDBoxToChangeTest.h
-	test/MDDimensionStatsTest.h
-	test/MDEventFactoryTest.h
-	test/MDEventInserterTest.h
-	test/MDEventTest.h
-	test/MDEventWSWrapperTest.h
-	test/MDEventWorkspaceTest.h
-	test/MDGridBoxTest.h
-	test/MDHistoWorkspaceIteratorTest.h
-	test/MDHistoWorkspaceTest.h
-	test/MDLeanEventTest.h
-	test/MDTransfAxisNamesTest.h
-	test/MDWSTransfTest.h
-	test/MDWSDescrTest.h	
-	test/OneStepMDEWTest.h
-	test/QueryMDWorkspaceTest.h
-	test/ReflectometryTransformQxQzTest.h
-	test/SaveMDTest.h
-	test/SkippingPolicyTest.h
-	test/SliceMDTest.h
-	test/SlicingAlgorithmTest.h
+	AffineMatrixParameterParserTest.h
+	AffineMatrixParameterTest.h
+	BinToMDHistoWorkspaceTest.h
+	BoxControllerSettingsAlgorithmTest.h
+	CentroidPeaksMDTest.h
+	CloneMDWorkspaceTest.h
+	ConvertToDiffractionMDWorkspaceTest.h
+	ConvertToMDFactoryTest.h
+	ConvertToMDParamsTest.h
+	ConvertToMDUnitsConvTest.h
+	ConvertToMDWSTest.h
+	ConvertToReflectometryQTest.h
+	CoordTransformAffineParserTest.h
+	CoordTransformAffineTest.h
+	CoordTransformAlignedTest.h
+	CoordTransformDistanceParserTest.h
+	CoordTransformDistanceTest.h
+	CreateMDHistoWorkspaceTest.h
+	CreateMDWorkspaceTest.h
+	FakeMDEventDataTest.h
+	FindPeaksMDTest.h
+	FitMDTest.h
+	ImportMDEventWorkspaceTest.h
+	ImportMDHistoWorkspaceTest.h
+	IntegratePeaksMDTest.h
+	LoadMDTest.h
+	LoadSQWTest.h
+	MDBinTest.h
+	MDBoxBaseTest.h
+	MDBoxIteratorTest.h
+	MDBoxTest.h
+	MDBoxToChangeTest.h
+	MDDimensionStatsTest.h
+	MDEventFactoryTest.h
+	MDEventInserterTest.h
+	MDEventTest.h
+	MDEventWSWrapperTest.h
+	MDEventWorkspaceTest.h
+	MDGridBoxTest.h
+	MDHistoWorkspaceIteratorTest.h
+	MDHistoWorkspaceTest.h
+	MDLeanEventTest.h
+	MDTransfAxisNamesTest.h
+	MDWSTransfTest.h
+	MDWSDescrTest.h	
+	OneStepMDEWTest.h
+	QueryMDWorkspaceTest.h
+	ReflectometryTransformQxQzTest.h
+	SaveMDTest.h
+	SkippingPolicyTest.h
+	SliceMDTest.h
+	SlicingAlgorithmTest.h
 )
 
 set ( GMOCK_TEST_FILES
-	test/BinMDTest.h
+	BinMDTest.h
 )
 
 if(UNITY_BUILD)
@@ -229,29 +228,8 @@ set_property ( TARGET MDEvents PROPERTY FOLDER "MantidFramework" )
 include_directories( inc )
 target_link_libraries ( MDEvents ${MANTIDLIBS} )
 
-# Create test file projects
-if ( CXXTEST_FOUND )
-  include_directories ( ../TestHelpers/inc ../DataHandling/inc )
-  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
-  # It will go out of scope at the end of this file so doesn't need un-setting
-  set ( TESTHELPER_SRCS ../TestHelpers/src/ComponentCreationHelper.cpp 
-                        ../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../TestHelpers/src/MDEventsTestHelper.cpp )
-  
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( MDEventsTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( MDEventsTest MDEvents ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} DataHandling )
-  else ()
-    cxxtest_add_test ( MDEventsTest ${TEST_FILES} )
-    target_link_libraries( MDEventsTest MDEvents DataHandling)
-  endif ()
-  
-  add_dependencies ( FrameworkTests MDEventsTest )
-  
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET MDEventsTest PROPERTY FOLDER "UnitTests" )
-  
-endif ()
+# Add the unit tests directory
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

@@ -180,7 +180,7 @@ namespace Mantid
      * @param name :: Name of the property to be removed.
      *  @param delproperty :: if true, delete the named property
      */
-    void PropertyManagerOwner::removeProperty(const std::string &name, const bool delproperty=true)
+    void PropertyManagerOwner::removeProperty(const std::string &name, const bool delproperty)
     {
       m_properties->removeProperty(name, delproperty);
     }
