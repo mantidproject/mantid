@@ -134,7 +134,7 @@ namespace CurveFitting
     void parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr bkgdparamws, std::vector<double>& bkgdorderparams);
 
     /// Crop the workspace for better usage
-    void cropWorkspace();
+    API::MatrixWorkspace_sptr cropWorkspace(API::MatrixWorkspace_sptr inpws, size_t wsindex);
 
     /// Calcualte background by fitting peak heights
     void calBackground(size_t workspaceindex);
