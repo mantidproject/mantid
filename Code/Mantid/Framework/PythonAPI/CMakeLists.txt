@@ -81,30 +81,17 @@ include_directories ( inc )
 ###########################################################################
 
 # Now the common files for all distributions
-set ( PYTHON_INSTALL_FILES "" )
-foreach ( PYFILE ${PY_FILES} )
-  get_filename_component( _basefilename ${PYFILE} NAME_WE )
-  set( _py_src ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE} )
-  set( _py_bin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE} )
-  set( _pyc_src ${CMAKE_CURRENT_SOURCE_DIR}/${_basefilename}.pyc )
-  set( _pyc_bin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_basefilename}.pyc )
-  add_custom_command ( OUTPUT ${_py_bin} ${_pyc_bin}
-                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                       COMMAND ${PYTHON_EXECUTABLE} ARGS -m compileall 
-                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                         ${_py_src} ${_py_bin}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                         ${_pyc_src} ${_pyc_bin}
-  )
-  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${_pyc_bin} )
-endforeach ( PYFILE )
+copy_python_files_to_dir( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} PYTHON_INSTALL_FILES )
+
+# Python algorithms
+add_compile_py_target( PythonAlgorithms ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
 
 ###########################################################################
 # Create the target for this directory
 ###########################################################################
 
 add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${BOOST_SRC} ${PYTHON_INSTALL_FILES} )
+add_dependencies( PythonAPI PythonAlgorithms )
 if ( UNIX )
   set ( DLOPEN_SRC src/dlopen.c )
   add_library ( dlopen ${DLOPEN_SRC} )
@@ -269,9 +256,7 @@ endif ()
 ###########################################################################
 # Ship .py & .pyc files
 ###########################################################################
-install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
 install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
 
-add_compile_py_target( PythonAlgorithms ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
 install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
                                       PATTERN ".svn" EXCLUDE )
