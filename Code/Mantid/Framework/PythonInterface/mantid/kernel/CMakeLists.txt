@@ -47,6 +47,7 @@ set ( SRC_FILES
   src/Converters/PyObjectToMatrix.cpp
   src/Converters/PyObjectToV3D.cpp
   src/Converters/WrapWithNumpy.cpp
+  src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
   src/Registry/UpcastRegistry.cpp
@@ -75,6 +76,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
   ${HEADER_DIR}/kernel/Policies/upcast_returned_value.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
+  ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/RegisterSingleValueHandler.h
   ${HEADER_DIR}/kernel/Registry/SequenceTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/SingleValueTypeHandler.h
