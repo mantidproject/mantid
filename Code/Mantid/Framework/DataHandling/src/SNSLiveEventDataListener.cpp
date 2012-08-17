@@ -209,7 +209,7 @@ namespace DataHandling
     {
       eventsPerBank++;
       totalEvents++;
-      if (lastBankID <= 0xFFFFFFFE)  // Bank ID -1 & -2 are special cases and are not valid pixels
+      if (lastBankID < 0xFFFFFFFE)  // Bank ID -1 & -2 are special cases and are not valid pixels
       {
         // appendEvent needs tof to be in units of microseconds, but it comes
         // from the ADARA stream in units of 100ns.
