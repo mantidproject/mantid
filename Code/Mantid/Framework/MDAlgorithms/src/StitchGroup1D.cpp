@@ -25,6 +25,12 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
+  /**
+  Non-member helper function. Extracts the first instance of a non-integrated dimension. Throws if one cannot be found.
+  @param ws: Input workspace to query.
+  @return shared pointer to the non-integrated dimension.
+  @throw runtime_error if there is not a single non-integrated dimension available.
+  */
   Geometry::IMDDimension_const_sptr getFirstNonIntegratedDimension(IMDHistoWorkspace_const_sptr ws)
   {
     auto nonIntegratedDimensions =  ws->getNonIntegratedDimensions();
@@ -33,18 +39,6 @@ namespace MDAlgorithms
       throw std::runtime_error("Workspace has no non-integrated dimensions.");
     }
     return nonIntegratedDimensions.front();
-  }
-
-  Geometry::IMDDimension_const_sptr getFirstIntegratedDimension(IMDHistoWorkspace_const_sptr ws)
-  {
-    for(size_t i =0; i < ws->getNumDims(); ++i)
-    {
-      Geometry::IMDDimension_const_sptr dim = ws->getDimension(i);
-      if(dim->getIsIntegrated())
-      {
-        return dim;
-      }
-    }
   }
 
   // Register the algorithm into the AlgorithmFactory
@@ -104,9 +98,13 @@ namespace MDAlgorithms
     declareProperty("ManualScaleFactor", 1.0, "Provided value for the scale factor.");
     setPropertySettings("ManualScaleFactor", new EnabledWhenProperty("UseManualScaleFactor", IS_NOT_DEFAULT) );
     declareProperty("OutScaleFactor", -2.0, "The actual used value for the scaling factor.", Direction::Output); 
-
   }
 
+  /**
+  Check/Validate that a given workspace is suitable as an algorithm input.
+  @param ws : The input workspace to check.
+  @throws if the workspace is not suitable.
+  */
   void StitchGroup1D::checkIndividualWorkspace(IMDHistoWorkspace_const_sptr ws) const
   {
     size_t ndims = ws->getNumDims();
@@ -133,6 +131,12 @@ namespace MDAlgorithms
     }
   }
 
+  /**
+  Validate that two input workspaces are suitable. 
+  @param lhsworkspace : workspace 1 input.
+  @param rhsworkspace : workspace 2 input.
+  @throws if there are any inconsistencies between the two input workspaces.
+  */
   void StitchGroup1D::checkBothWorkspaces(IMDHistoWorkspace_const_sptr lhsWorkspace, IMDHistoWorkspace_const_sptr rhsWorkspace) const
   {
     size_t ndims = std::min(lhsWorkspace->getNumDims(), rhsWorkspace->getNumDims());
@@ -164,6 +168,12 @@ namespace MDAlgorithms
     }
   }
 
+  /**
+  Reconstruct a workspace as a truely 1D workspace. This is required if one of the dimensions has been integrated-out.
+  A new workspace is fabricated to be identical to the original, but missing the input integrated dimension.
+  @param ws : input workspace to flatten.
+  @retrun flattened 1D Histo workspace.
+  */
   MDHistoWorkspace_sptr StitchGroup1D::trimOutIntegratedDimension(IMDHistoWorkspace_sptr ws)
   {
     auto dim = getFirstNonIntegratedDimension(ws);
@@ -199,6 +209,13 @@ namespace MDAlgorithms
     return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
   };
 
+  /**
+  Sum over the signal value in the specified input workspace between a start and end position.
+  @param ws : workspace to integrate over
+  @param fractionLow : Low fraction along the 1D axis to start integration from.
+  @param fractionHigh : High fraction along the 1D axis to stop integration at.
+  @return the integrated/summed value.
+  */
   double StitchGroup1D::integrateOver(IMDHistoWorkspace_sptr ws, const double& fractionLow, const double& fractionHigh)
   {
     auto dim = getFirstNonIntegratedDimension(ws);
@@ -213,32 +230,46 @@ namespace MDAlgorithms
     return sumSignal;
   }
 
-  void StitchGroup1D::overlayOverlap(MDHistoWorkspace_sptr sum, IMDHistoWorkspace_sptr overlap)
+  /**
+  Overlay the overlap 1D workspace over the original 1D workspace. overlap shouuld overwrite values on the sum workspace.
+  @param original : Original 1D workspace to be overwritten only in the region of the overlap.
+  @param overlap : Overlap 1D workspace to overwrite with
+  */
+  void StitchGroup1D::overlayOverlap(MDHistoWorkspace_sptr original, IMDHistoWorkspace_sptr overlap)
   {
-    auto targetDim = sum->getDimension(0);
-    double targetQMax = targetDim->getMaximum();
-    double targetQMin = targetDim->getMinimum();
-    size_t targetNbins = targetDim->getNBins();
-    double targetStep = targetNbins / (targetQMax - targetQMin); 
-    double targetC = -1 * targetStep * targetQMin;
+    const auto targetDim = original->getDimension(0);
+    const double targetQMax = targetDim->getMaximum();
+    const double targetQMin = targetDim->getMinimum();
+    const size_t targetNbins = targetDim->getNBins();
+    const double targetStep = targetNbins / (targetQMax - targetQMin); 
+    const double targetC = -1 * targetStep * targetQMin;
 
-    auto overlapDim = overlap->getDimension(0);
-    double overlapQMax = overlapDim->getMaximum();
-    double overlapQMin = overlapDim->getMinimum();
-    size_t overlapNBins = overlapDim->getNBins();
-    double overlapStep = (overlapQMax - overlapQMin) / overlapNBins;
-    double overlapC = overlapQMin;
+    const auto overlapDim = overlap->getDimension(0);
+    const double overlapQMax = overlapDim->getMaximum();
+    const double overlapQMin = overlapDim->getMinimum();
+    const size_t overlapNBins = overlapDim->getNBins();
+    const double overlapStep = (overlapQMax - overlapQMin) / overlapNBins;
+    const double overlapC = overlapQMin;
 
     for(size_t i = 0; i < overlapNBins; ++i)
     {
-      double q = double((overlapStep * i) + overlapC);
+      // Calculate the q value for each index in the overlap region.
+      const double q = double((overlapStep * i) + overlapC);
       // Find the target index by recentering (adding 0.5) and then truncating to an integer.
       size_t targetIndex = size_t((targetStep * q) + targetC + 0.5) ;
-      sum->setSignalAt(targetIndex, overlap->signalAt(i));
-      sum->setErrorSquaredAt(targetIndex, overlap->errorSquaredAt(i));
+      // Overwrite signal
+      original->setSignalAt(targetIndex, overlap->signalAt(i));
+      // Overwrite error
+      original->setErrorSquaredAt(targetIndex, overlap->errorSquaredAt(i));
     }
   }
 
+  /**
+  Extract the overlap region as a distinct workspace.
+  @param fractionLow : Low fraction to start slicing from
+  @param fractionHigh : High fraction to stop slicing from
+  @return MDHistoWorkspace encompasing the overlap region only.
+  */
   MDHistoWorkspace_sptr StitchGroup1D::extractOverlapAsWorkspace(IMDHistoWorkspace_sptr ws, const double& fractionLow, const double& fractionHigh)
   {
     auto dim = getFirstNonIntegratedDimension(ws);
