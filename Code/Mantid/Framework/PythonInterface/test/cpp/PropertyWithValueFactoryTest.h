@@ -17,7 +17,7 @@
 
 //-------------------------------------------------------------------------
 
-using Mantid::PythonInterface::PropertyWithValueFactory;
+using Mantid::PythonInterface::Registry::PropertyWithValueFactory;
 using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::Direction;
 

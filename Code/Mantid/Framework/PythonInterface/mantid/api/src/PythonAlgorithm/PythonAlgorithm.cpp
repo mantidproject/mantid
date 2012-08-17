@@ -33,7 +33,7 @@ namespace Mantid
                                           const boost::python::object & validator,
                                           const std::string & doc, const int direction)
     {
-      this->declareProperty(PropertyWithValueFactory::create(name, defaultValue, validator, direction), doc);
+      this->declareProperty(Registry::PropertyWithValueFactory::create(name, defaultValue, validator, direction), doc);
     }
 
     /**
@@ -46,7 +46,7 @@ namespace Mantid
     void PythonAlgorithm::declareProperty(const std::string & name, const boost::python::object & defaultValue,
                                           const std::string & doc, const int direction)
     {
-      this->declareProperty(PropertyWithValueFactory::create(name, defaultValue, direction), doc);
+      this->declareProperty(Registry::PropertyWithValueFactory::create(name, defaultValue, direction), doc);
     }
 
     /**

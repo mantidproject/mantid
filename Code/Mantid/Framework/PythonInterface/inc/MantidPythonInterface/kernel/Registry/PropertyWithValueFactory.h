@@ -40,23 +40,26 @@ namespace Mantid
 
   namespace PythonInterface
   {
-    /**
-     * Defines a static factory class that creates PropertyWithValue
-     * instances from python objects.
-     */
-    class DLLExport PropertyWithValueFactory
+    namespace Registry
     {
-    public:
-      /// Creates a property from the value, validator and direction
-      static Kernel::Property * create(const std::string & name, const boost::python::object & defaultValue,
-                                       const boost::python::object & validator, const unsigned int direction);
-      /// Creates a property from the given value and direction
-      static Kernel::Property * create(const std::string & name, const boost::python::object & defaultValue, 
-                                       const unsigned int direction);
-    private:
-      /// Return a handler that maps the python type to a C++ type
-      static Registry::PropertyValueHandler *lookup(PyTypeObject * const pythonType);
-    };
+      /**
+       * Defines a static factory class that creates PropertyWithValue
+       * instances from python objects.
+       */
+      class DLLExport PropertyWithValueFactory
+      {
+      public:
+        /// Creates a property from the value, validator and direction
+        static Kernel::Property * create(const std::string & name, const boost::python::object & defaultValue,
+            const boost::python::object & validator, const unsigned int direction);
+        /// Creates a property from the given value and direction
+        static Kernel::Property * create(const std::string & name, const boost::python::object & defaultValue,
+            const unsigned int direction);
+      private:
+        /// Return a handler that maps the python type to a C++ type
+        static PropertyValueHandler *lookup(PyTypeObject * const pythonType);
+      };
+    }
   }
 }
 
