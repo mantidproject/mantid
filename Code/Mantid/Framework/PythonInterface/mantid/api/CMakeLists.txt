@@ -74,27 +74,20 @@ set ( PY_FILES
   _workspaceops.py
 )
 
-# Set the destination directory
-set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/api )
-
 #############################################################################################
 # Generate a source file from the export definitions
 #############################################################################################
-CREATE_MODULE ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/api.cpp EXPORT_FILES SRC_FILES )
+create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/api.cpp EXPORT_FILES 
+                SRC_FILES )
 
 #############################################################################################
 # Copy over the pure Python files for the module
 #############################################################################################
-set ( PYTHON_INSTALL_FILES "" )
-foreach ( PYFILE ${PY_FILES} )
-  add_custom_command ( OUTPUT ${OUTPUT_DIR}/${PYFILE}
-                       DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-                       ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                       ${OUTPUT_DIR}/${PYFILE}
-  )
-  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${OUTPUT_DIR}/${PYFILE} )
-endforeach ( PYFILE )
+# Set the destination directory
+set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/api )
+
+copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+                           PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Create the target for this directory

@@ -771,10 +771,51 @@ if ( APPLE )
   set_source_files_properties(MANTID_RC_FILE PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif ()
 
+###########################################################################
+# Required Python config files
+###########################################################################
+
+add_compile_py_target( CompileMantidPlotScripts ${CMAKE_CURRENT_SOURCE_DIR} )
+
+# Top-level python scripts
+set( PY_FILES mantidplotrc.py mantidplot.py )
+copy_python_files_to_dir ( "${PY_FILES}" 
+                            ${CMAKE_CURRENT_SOURCE_DIR} 
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} 
+                            PYTHON_INSTALL_FILES )
+# mantidplot.py package
+set( MTDPLOTPY_FILES 
+  __init__.py
+  proxies.py
+)
+copy_python_files_to_dir ( "${MTDPLOTPY_FILES}" 
+                            ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy 
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
+                            MTDPLOT_INSTALL_FILES )
+
+# IPython scripts
+set( IPY_FILES 
+  __init__.py
+  internal_ipkernel.py
+  ipython_plugin.py
+)
+copy_python_files_to_dir ( "${IPY_FILES}" 
+                            ${CMAKE_CURRENT_SOURCE_DIR}/ipython_plugin 
+                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_plugin 
+                            IPYTHON_INSTALL_FILES )
+
+###########################################################################
+# MantidPlot executable
+###########################################################################
+
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp 
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} 
 							${RES_FILES} ${MANTID_RC_FILE}
+							${PYTHON_INSTALL_FILES} ${IPYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES}
 )
+
+# Target dependencies
+add_dependencies( MantidPlot CompileMantidPlotScripts )
 
 # Library dependencies
 target_link_libraries ( MantidPlot 
@@ -809,36 +850,6 @@ if( WIN32 )
      set_target_properties( MantidPlot PROPERTIES COMPILE_DEFINITIONS "_CONSOLE" )
    endif ( CONSOLE )
 endif( WIN32 )
-
-###########################################################################
-# Now copy the required python files into the build destination
-###########################################################################
-
-set ( PYTHON_INSTALL_FILES mantidplotrc.py mantidplot.py)
-foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
-  # Command to copy when MantidPlot rebuilds. Does not work if the .py files ONLY were modified!
-  add_custom_command ( TARGET MantidPlot POST_BUILD
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy
-                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-                       DEPENDS ${PYFILE}
-                       COMMENT "Copying ${PYFILE}"
-  )
-  # Perform a copy at cmake run time
-  configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} COPYONLY ) 
-endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
-
-add_custom_command ( TARGET MantidPlot POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
-                       ${CMAKE_CURRENT_SOURCE_DIR}/mantidplotpy
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidplotpy
-)
-
-add_custom_command ( TARGET MantidPlot POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_directory
-                       ${CMAKE_CURRENT_SOURCE_DIR}/ipython_plugin
-                       ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/ipython_plugin
-)
 
 ###########################################################################
 # Documentation targets
@@ -910,9 +921,10 @@ endif()
 install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR} 
                              BUNDLE DESTINATION .
 )
+
 install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
-install ( DIRECTORY mantidplotpy DESTINATION ${BIN_DIR} )
-install ( DIRECTORY ipython_plugin DESTINATION ${BIN_DIR} )
+install ( FILES ${MTDPLOT_INSTALL_FILES} DESTINATION ${BIN_DIR}/mantidplotpy )
+install ( FILES ${IPYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR}/ipython_plugin )
 
 if ( APPLE )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in

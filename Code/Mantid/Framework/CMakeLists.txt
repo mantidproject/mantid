@@ -116,6 +116,11 @@ set ( MANTIDLIBS ${MANTIDLIBS} API )
 
 add_subdirectory (PythonAPI)
 add_subdirectory (PythonInterface)
+# Compile python user scripts
+add_compile_py_target( scripts ${CMAKE_CURRENT_SOURCE_DIR}/../scripts ".*_template" )
+# Compile instrument python scripts
+add_compile_py_target( instrument_scripts ${CMAKE_CURRENT_SOURCE_DIR}/../instrument ) 
+add_dependencies (PythonInterface scripts instrument_scripts)
 
 find_package ( Matlab )
 if( MATLAB_FOUND )
@@ -183,6 +188,5 @@ install ( DIRECTORY ../instrument/ DESTINATION ${INBUNDLE}instrument
           PATTERN "*UNIT_TESTING*" EXCLUDE
 )
 
-# Scripts
-install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE 
-                                                 PATTERN "*.pyc" EXCLUDE )
+# Ships both py & pyc files
+install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE )

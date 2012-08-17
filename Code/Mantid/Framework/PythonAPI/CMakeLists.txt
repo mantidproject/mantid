@@ -77,19 +77,27 @@ include_directories ( ${PYTHON_NUMPY_INCLUDE_DIR} )
 include_directories ( inc )
 
 ###########################################################################
-# Copy the required python files into the build destination
+# Build a pyc file in the binary directory for each python file 
 ###########################################################################
 
 # Now the common files for all distributions
 set ( PYTHON_INSTALL_FILES "" )
 foreach ( PYFILE ${PY_FILES} )
-  add_custom_command ( OUTPUT ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE}
+  get_filename_component( _basefilename ${PYFILE} NAME_WE )
+  set( _py_src ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE} )
+  set( _py_bin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE} )
+  set( _pyc_src ${CMAKE_CURRENT_SOURCE_DIR}/${_basefilename}.pyc )
+  set( _pyc_bin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_basefilename}.pyc )
+  add_custom_command ( OUTPUT ${_py_bin} ${_pyc_bin}
                        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                       COMMAND ${PYTHON_EXECUTABLE} ARGS -m compileall 
                          ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
-                         ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} 
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                         ${_py_src} ${_py_bin}
+                       COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                         ${_pyc_src} ${_pyc_bin}
   )
-  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE} )
+  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${_pyc_bin} )
 endforeach ( PYFILE )
 
 ###########################################################################
@@ -257,6 +265,13 @@ install ( TARGETS PythonAPI ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR} )
 if ( UNIX )
   install ( TARGETS dlopen DESTINATION ${BIN_DIR} )
 endif ()
+
+###########################################################################
+# Ship .py & .pyc files
+###########################################################################
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
+install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
+
+add_compile_py_target( PythonAlgorithms ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
 install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
-                                      PATTERN ".svn" EXCLUDE PATTERN "*.pyc" EXCLUDE )
+                                      PATTERN ".svn" EXCLUDE )

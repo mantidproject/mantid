@@ -164,7 +164,8 @@ endif ()
 # Installation settings
 ###########################################################################
 
+# Regex matches any .py or .pyc file. The $ ensures that this is the last 
+# part of the string
 install ( DIRECTORY mantid DESTINATION ${BIN_DIR} 
-          PATTERN "*.pyc" EXCLUDE 
-          PATTERN "CMakeLists.txt" EXCLUDE 
+          FILES_MATCHING REGEX ".*.pyc?$"
           PATTERN "src" EXCLUDE )
