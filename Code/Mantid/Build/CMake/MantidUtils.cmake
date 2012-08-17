@@ -90,3 +90,21 @@ function( COPY_PYTHON_FILES_TO_DIR PY_FILES SRC_DIR DEST_DIR INSTALLED_FILES )
     endforeach ( PYFILE )
     set ( ${INSTALLED_FILES} ${COPIED_FILES} PARENT_SCOPE )
 endfunction( COPY_PYTHON_FILES_TO_DIR )
+
+#######################################################################
+
+# NAME: INSTALL_PYTHON_FILES
+# Adds an install target for a list of Python files and also includes 
+# pyc files, which are assumed to be next to each file.
+#  - SRC_DIR :: The source directory of the files
+#  - PY_FILES :: A list of the python files
+#  - DEST_DIR :: The final directory
+function( INSTALL_PYTHON_FILES SRC_DIR PY_FILES DEST_DIR )
+  foreach( PYFILE ${PY_FILES} )
+      set( _py_src ${SRC_DIR}/${PYFILE} )
+      get_filename_component( _basefilename ${_py_src} NAME_WE )
+      set( _pyc_src ${SRC_DIR}/${_basefilename}.pyc )
+      set( PY_INSTALL_FILES ${PY_INSTALL_FILES} ${_py_src} ${_pyc_src} )
+  endforeach( PYFILE )
+  install ( FILES ${PY_INSTALL_FILES} DESTINATION ${DEST_DIR} )
+endfunction( INSTALL_PYTHON_FILES )
