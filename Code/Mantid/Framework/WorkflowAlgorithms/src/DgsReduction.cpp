@@ -338,6 +338,8 @@ namespace WorkflowAlgorithms
 
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
         Direction::Output);
+    this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
+        Direction::Output, PropertyMode::Optional));
   }
 
   /**
@@ -519,6 +521,7 @@ namespace WorkflowAlgorithms
     etConv->setProperty("InputWorkspace", sampleWS);
     etConv->setProperty("IntegratedDetectorVanadium", idetVanWS);
     etConv->setProperty("ReductionProperties", reductionManagerName);
+    etConv->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
     etConv->executeAsSubAlg();
   }
 

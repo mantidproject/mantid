@@ -106,7 +106,13 @@ namespace WorkflowAlgorithms
     MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
     const std::string inWsName = inputWS->getName();
     // Make the result workspace name
-    std::string outWsName = inWsName + "_et";
+    std::string outWsName  = this->getPropertyValue("OutputWorkspace");
+    if (outWsName.length() == 0)
+    {
+        outWsName = inWsName + "_et";
+        g_log.warning() << "No OutputWorkspace defined, defaulting to " << outWsName << std::endl;
+    }
+
     // Make a monitor workspace name for SNS data
     std::string monWsName = inWsName + "_monitors";
     bool preserveEvents = false;
