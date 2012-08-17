@@ -114,11 +114,12 @@ BankedEventPkt::BankedEventPkt(const uint8_t *data, uint32_t len) :
 		throw invalid_packet("BankedEvent packet is too short");
 
         m_lastFieldIndex = (payload_length() / 4) - 1;
-        firstEvent();
 }
 
+
 BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt) :
-        Packet(pkt), m_fields((const uint32_t *)payload()) { }
+  Packet(pkt), m_fields((const uint32_t *)payload()),
+  m_lastFieldIndex((payload_length() / 4) - 1) { }
 
 
 // The fact that events are wrapped up in banks which are wrapped up in source
@@ -126,29 +127,18 @@ BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt) :
 // TOF offset fields for each source).  All we've got is firstEvent() and
 // nextEvent().  nextEvent() will be smart enough to skip over the source
 // section headers and bank headers.
+
+// A packet can have 0 or more sources and each source can have 0 or more events.
+// That means the only payload we're guarenteed to have is the first 4 fields.
+// After that, we've got to start checking against the payload len...
 const Event * BankedEventPkt::firstEvent() const
 {
-  m_sourceStartIndex = 4; // index into m_fields for the start of this source
-  m_bankCount = m_fields[m_sourceStartIndex + 3];
-  m_TOFOffset = m_fields[m_sourceStartIndex + 2] & 0x7FFFFFFF;
-  m_isCorrected = m_fields[m_sourceStartIndex + 2] & 0x80000000;
-  m_bankNum = 1;  // banks are numbered from 1 to m_bankCount
-
-  m_bankStartIndex = m_sourceStartIndex + 4; // index into m_fields for the start of this bank
-  m_bankId = m_fields[m_bankStartIndex];
-  m_eventCount = m_fields[m_bankStartIndex + 1];
-
-  m_curFieldIndex = m_bankStartIndex+2;
-
-  // Check to see if we've already passed the end of the packet.  (ie: the packet
-  // had no events)
-  if (m_curFieldIndex > m_lastFieldIndex)
+  m_curEvent = NULL;
+  m_curFieldIndex = 4;
+  while (m_curEvent == NULL && m_curFieldIndex <= m_lastFieldIndex)
   {
-    m_curEvent = NULL;
-  }
-  else
-  {
-    m_curEvent = (const Event *)&m_fields[m_curFieldIndex];
+    // Start of a new source
+    firstEventInSource();
   }
 
   return m_curEvent;
@@ -158,45 +148,94 @@ const Event * BankedEventPkt::nextEvent() const
 {
   if (m_curEvent)  // If we're null, it's because we've already incremented past the last event
   {
+    m_curEvent = NULL;
     m_curFieldIndex += 2;  // go to where the next event will start (if there is a next event)
 
-    // First - have we reached the end of the packet?
-    if (m_curFieldIndex > m_lastFieldIndex)
+    // have we passed the end of the bank?
+    if (m_curFieldIndex < (m_bankStartIndex + 2 + (2*m_eventCount)))
     {
-      m_curEvent = NULL;
+      // this is the easy case - the next event is in the current bank
+      m_curEvent = (const Event *)&m_fields[m_curFieldIndex];
     }
-    // next - have we passed the end of the bank?
-    else if (m_curFieldIndex >= (m_bankStartIndex + 2 + (2*m_eventCount)))
+    else
     {
-      // are there any more banks in the current source?
-      if (m_bankNum >= m_bankCount)
+      m_bankNum++;
+      while (m_bankNum <= m_bankCount && m_curEvent == NULL)
       {
-        // nope - move to the next source section
-        m_sourceStartIndex = m_curFieldIndex;
-        m_bankCount = m_fields[m_sourceStartIndex + 3];
-        m_TOFOffset = m_fields[m_sourceStartIndex + 2] & 0x7FFFFFFF;
-        m_isCorrected = m_fields[m_sourceStartIndex + 2] & 0x80000000;
-        m_bankNum = 1;  // banks are numbered from 1 to m_bankCount
-        m_bankStartIndex = m_sourceStartIndex + 4;
-      }
-      else
-      {
-        m_bankNum++;
-        m_bankStartIndex = m_curFieldIndex;  // index into m_fields for the start of this source
+        firstEventInBank();
+        if (m_curEvent == NULL)
+        {
+          // Increment banknum because there were no events in the bank we
+          // just tested
+          m_bankNum++;
+        }
       }
 
-      m_bankId = m_fields[m_bankStartIndex];
-      m_eventCount = m_fields[m_bankStartIndex + 1];
-      m_curFieldIndex = m_bankStartIndex + 2;  // skip over the bank header fields
-      m_curEvent = (const Event *)&m_fields[m_curFieldIndex];
-    }
-    else // this is the easy case - the next event is in the current bank
-    {
-      m_curEvent = (const Event *)&m_fields[m_curFieldIndex];
+      // If we still haven't found an event, check for more source sections
+      while (m_curEvent == NULL && m_curFieldIndex < m_lastFieldIndex)
+      {
+        firstEventInSource();
+      }
     }
   }
 
   return m_curEvent;
+}
+
+// Helper functions for firstEvent() & nextEvent()
+
+// Assumes m_curFieldIndex points to the start of a source section.
+// Sets m_curEvent to the first event in that source (or NULL if
+// the source is empty).  Sets m_curFieldIndex pointing at the
+// event or at the start of the next source if there were no events.
+void BankedEventPkt::firstEventInSource() const
+{
+  m_sourceStartIndex = m_curFieldIndex; // index into m_fields for the start of this source
+  m_bankCount = m_fields[m_sourceStartIndex + 3];
+  if (m_bankCount > 0)
+  {
+    m_TOFOffset = m_fields[m_sourceStartIndex + 2] & 0x7FFFFFFF;
+    m_isCorrected = m_fields[m_sourceStartIndex + 2] & 0x80000000;
+    m_bankNum = 1;  // banks are numbered from 1 to m_bankCount.
+    m_curFieldIndex = m_sourceStartIndex + 4;
+
+    while (m_bankNum <= m_bankCount && m_curEvent == NULL)
+    {
+      firstEventInBank();
+      if (m_curEvent == NULL)
+      {
+        // Increment banknum because there were no events in the bank we
+        // just tested
+        m_bankNum++;
+      }
+    }
+  }
+  else // no banks in this source, skip to the next source
+  {
+    m_curFieldIndex += 4;
+    m_curEvent = NULL;
+  }
+}
+
+// Assumes m_curFieldIndex points at the start of a bank.  Sets m_curEvent
+// to the first event in that bank (or NULL if the bank is empty).  Sets
+// m_curFieldIndex to the first event if it exists or to the start of the
+// next bank if the bank is empty, or to the start of the next source if
+// was the last bank.
+void BankedEventPkt::firstEventInBank() const
+{
+  m_bankStartIndex = m_curFieldIndex; // index into m_fields for the start of this bank
+  m_bankId = m_fields[m_bankStartIndex];
+  m_eventCount = m_fields[m_bankStartIndex + 1];
+  m_curFieldIndex = m_bankStartIndex + 2;
+  if (m_eventCount > 0)
+  {
+    m_curEvent = (const Event *)&m_fields[m_curFieldIndex];
+  }
+  else
+  {
+    m_curEvent = NULL;
+  }
 }
 
 /* ------------------------------------------------------------------------ */

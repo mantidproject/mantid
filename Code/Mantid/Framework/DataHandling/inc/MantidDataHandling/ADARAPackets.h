@@ -157,6 +157,11 @@ public:
         //        uint32_t curEventCount() const { return ((uint32_t *)m_curBank)[1]; }
 
 private:      
+
+        // Two helper functions for firstEvent() & nextEvent()
+        void firstEventInSource() const;
+        void firstEventInBank() const;
+
         const uint32_t *m_fields;
 
         mutable const Event * m_curEvent;
