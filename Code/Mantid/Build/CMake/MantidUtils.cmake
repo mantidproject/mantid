@@ -81,9 +81,9 @@ function( COPY_PYTHON_FILES_TO_DIR PY_FILES SRC_DIR DEST_DIR INSTALLED_FILES )
         set( _pyc_bin ${DEST_DIR}/${_basefilename}.pyc )
         add_custom_command ( OUTPUT ${_py_bin} ${_pyc_bin}
                              DEPENDS ${SRC_DIR}/${PYFILE}
-                             COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                             COMMAND ${CMAKE_COMMAND} ARGS -E copy
                                ${_py_src} ${_py_bin}
-                             COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                             COMMAND ${CMAKE_COMMAND} ARGS -E copy
                                ${_pyc_src} ${_pyc_bin} )
     set ( COPIED_FILES ${COPIED_FILES} ${_py_bin} )
     set ( COPIED_FILES ${COPIED_FILES} ${_pyc_bin} )

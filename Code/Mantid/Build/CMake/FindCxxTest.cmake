@@ -132,7 +132,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
       set (_cxxtest_h_files ${part} ${_cxxtest_h_files})
     endforeach (part ${ARGN})
     
-    get_filename_component( _test_dir ${ARGV1} PATH )
+    set ( _test_dir ${CMAKE_CURRENT_SOURCE_DIR} )
     if( EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.h )
       ADD_PRECOMPILED_HEADER( ${_test_dir}/PrecompiledHeader.h ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir} ${CMAKE_CURRENT_SOURCE_DIR}/${_test_dir}/PrecompiledHeader.cpp _cxxtest_cpp_files _cxxtest_h_files)
     ENDIF ()     
