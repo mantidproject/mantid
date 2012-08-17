@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/api/PythonAlgorithm/PropertyWithValueFactory.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 #include "MantidPythonInterface/kernel/Registry/SingleValueTypeHandler.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include <cassert>

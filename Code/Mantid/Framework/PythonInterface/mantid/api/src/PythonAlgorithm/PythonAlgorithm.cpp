@@ -2,7 +2,7 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/api/PythonAlgorithm/PythonAlgorithm.h"
-#include "MantidPythonInterface/api/PythonAlgorithm/PropertyWithValueFactory.h"
+#include "MantidPythonInterface/kernel/Registry/PropertyWithValueFactory.h"
 
 namespace Mantid
 {
