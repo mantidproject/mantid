@@ -73,11 +73,11 @@ namespace
     bool propExists = self.existsProperty(name);
     if (propExists)
       {
-        ::setProperty(self, name, value);
+        setProperty(self, name, value);
       }
     else
       {
-        ::declareProperty(self, name, value);
+        declareProperty(self, name, value);
       }
   }
 }
