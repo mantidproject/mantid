@@ -57,6 +57,134 @@ namespace Crystal
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
+
+  class DataModeHandler
+  {
+  public:
+
+     DataModeHandler()
+     {
+       this->baseRCRadius=-1;
+       this->lastRCRadius=-1;
+       this->lastRow=-1;
+       this->lastCol=-1;
+       EdgeX=EdgeY=-1;
+       calcNewRCRadius = -1;
+       time = -1;
+       CalcVariance = true;
+
+       currentRadius =-1;
+       currentPosition= Kernel::V3D();
+       HalfWidthAtHalfHeightRadius=-1;
+       back_calc=Intensity_calc=row_calc=col_calc=Vx_calc= Vy_calc= Vxy_calc=-1;
+     }
+
+     DataModeHandler( const DataModeHandler &handler);
+     DataModeHandler(double baseRCRadius, double lastRCRadius,
+            double lastRow, double lastCol, double CellWidth, double CellHeight,
+            bool CalcVariance)
+     {
+       this->baseRCRadius=baseRCRadius;
+       this->lastRCRadius=lastRCRadius;
+       this->lastRow=lastRow;
+       this->lastCol=lastCol;
+       this->CellWidth = CellWidth;
+       this->CellHeight = CellHeight;
+       this->CalcVariance = CalcVariance;
+       this->case4=false;
+       EdgeX=EdgeY=-1;
+       calcNewRCRadius = -1;
+       time = -1;
+
+       this->currentRadius =-1;
+       this->currentPosition= Kernel::V3D();
+       HalfWidthAtHalfHeightRadius=-1;
+       back_calc=Intensity_calc=row_calc=col_calc=Vx_calc= Vy_calc= Vxy_calc=-1;
+     }
+     void setTime( double time )
+     {
+          this->time=time;
+     }
+     void setStatBase(std::vector<double> const &StatBase );
+     //Will calc
+     void setHeighHalfWidthInfo( Mantid::MantidVecPtr &xvals,
+         Mantid::MantidVecPtr &yvals,Mantid::MantidVecPtr &counts,
+         double ROW,double COL);
+
+     void setCurrentRadius( double radius)
+     {
+       currentRadius = radius;
+     }
+     void setCurrentCenter( Kernel::V3D newCenter)
+     {
+       currentPosition = newCenter;
+     }
+
+     double getCurrentRadius( )
+     {
+       return currentRadius ;
+     }
+     Kernel::V3D getCurrentCenter( )
+     {
+       return currentPosition;
+     }
+     void updateEdgeXsize( double newsize)
+     { if(EdgeX < 0)
+          EdgeX = newsize;
+        else if( newsize < EdgeX)
+         EdgeX = newsize;
+     }
+     void updateEdgeYsize( double newsize)
+     { if(EdgeY < 0)
+          EdgeY = newsize;
+        else if( newsize < EdgeY)
+         EdgeY = newsize;
+     }
+     void CalcVariancesFromData( double background,  double row,
+                           double col, double &Varx, double &Vary, double &Varxy,
+                           std::vector<double>&ParameterValues);
+     bool IsEnoughData(double *ParameterValues,Kernel::Logger& g_log);
+
+     double getNewRCRadius();
+     double getInitBackground(){ return back_calc;}
+     double getInitRow(){ return row_calc;}
+     double getInitCol(){ return col_calc;}
+     double getInitIntensity(){ return Intensity_calc;}
+     double getInitVarx(){ return Vx_calc;}
+     double getInitVary(){ return Vy_calc;}
+     double getInitVarxy(){ return Vxy_calc;}
+     std::string CalcConstraints(std::vector< std::pair<double,double> > & Bounds,
+        bool CalcVariances );
+     std::string getTies(){ return "";}
+     bool CalcVariances( );
+
+     double StatBaseVals( int index){return StatBase[index];}
+
+     double CalcISAWIntensity( const double* params) const;
+
+     double CalcISAWIntensityVariance(  const double* params, const double* errs, double chiSqOvDOF) const;
+
+     double CalcSampleIntensityMultiplier( const double* params) const;
+
+
+     double baseRCRadius;
+     double lastRCRadius;
+     double HalfWidthAtHalfHeightRadius;
+     double calcNewRCRadius;
+     double lastRow;
+     double lastCol;
+     double time;
+     double CellWidth;
+     double CellHeight;
+     double currentRadius;
+     Kernel::V3D   currentPosition;
+     std::vector<double> StatBase;
+     double EdgeX,EdgeY;
+     bool CalcVariance;
+     bool case4;//if true result of successful merge of dir =1 chan=0 and chan=1
+     double back_calc,Intensity_calc,row_calc,col_calc,Vx_calc, Vy_calc, Vxy_calc;
+  };
+
 class DLLExport IntegratePeakTimeSlices:  public Mantid::API::Algorithm
 {
 public:
@@ -101,7 +229,7 @@ private:
 
   std::string ParameterNames[7];
 
-  double AttributeValues[20] ;
+  boost::shared_ptr<DataModeHandler> AttributeValues ;
   double ParameterValues[7] ;
 
   Mantid::detid2index_map * wi_to_detid_map;
@@ -116,11 +244,14 @@ private:
   double COL;           ///< for Describing the Column(or 0) describing the center of the  Peak
   double CellWidth;     ///< for Describing the Plane at the Peak
   double CellHeight;     ///< for Describing the Plane at the Peak
+  int NROWS;
+  int NCOLS;
 
   void SetUpData( API::MatrixWorkspace_sptr          & Data,
                   API::MatrixWorkspace_sptr    const & inpWkSpace,
                   boost::shared_ptr< Geometry::IComponent> comp,
-                  const int                       chan,
+                  const int                       chanMin,
+                  const int                       chanMax,
                   double                          CentX,
                   double                          CentY,
                   Kernel::V3D                     &CentNghbr,
@@ -151,13 +282,16 @@ private:
 
   void SetUpData1( API::MatrixWorkspace_sptr      &Data,
                    API::MatrixWorkspace_sptr     const &inpWkSpace,
-                   const int                     chan,
+                   const int                       chanMin,
+                   const int                       chanMax,
                    double                         Radius,
                    Kernel::V3D                    CentPos , ///< Center on Plane,
                    std::string                    &spec_idList
 
                    ) ;
-
+  void Fit(API::MatrixWorkspace_sptr &Data,double &chisq, bool &done,
+        std::vector<std::string>&names, std::vector<double>&params,
+        std::vector<double>&errs,double lastRow,double lastCol,double neighborRadius);
 
   std::string CalculateFunctionProperty_Fit(  ) ;
 
@@ -166,10 +300,10 @@ private:
                   std::vector<std::string >         const &names,
                   double                                   chisq
                 ) ;
-
-  void UpdateOutputWS( DataObjects::TableWorkspace_sptr         &TabWS,
+  //returns last row added
+  int UpdateOutputWS( DataObjects::TableWorkspace_sptr         &TabWS,
                        const int                                  dir,
-                       const int                                  chan,
+                       const double                                  chan,
                        std::vector<double >                 const &params,
                        std::vector<double >                 const &errs,
                        std::vector<std::string>             const &names,
@@ -200,12 +334,6 @@ private:
             std::vector<std::string> const &nameList);
 
 
-  void getInitParamValues( std::vector<double> const &StatBase,
-                           const double               TotBoundaryIntensities,
-                           const int                  nBoundaryCells);
-
-  void CalcVariancesFromData( double background, double meanx, double meany,
-      double &Varxx, double &Varxy, double &Varyy);
 
   double CalculateIsawIntegrateError(const double background,
                                      const double backError,
@@ -214,16 +342,17 @@ private:
                                      const int ncells);
 
   void FindPlane( Kernel::V3D & center,  Kernel:: V3D & xvec,    Kernel::V3D& yvec,
-                  double &ROW,          double &COL,             double &pixWidthx,
+                  double &ROW,          double &COL,    int &NROWS,
+                  int & NCOLS,        double &pixWidthx,
                   double&pixHeighty,   DataObjects::Peak const &peak) const;
 
   int find( Mantid::MantidVec const & X,
             const double              time);
 
+  //returns true if Neighborhood list is changed
+  bool updateNeighbors( boost::shared_ptr< Geometry::IComponent> &comp,
+      Kernel:: V3D CentPos, Kernel::V3D oldCenter,double NewRadius, double &neighborRadius);
 
-  bool IsEnoughData(   ) ;
-
-  std::string CalcConstraints( std::vector< std::pair<double,double> > & Bounds );
 
 
   bool    debug;

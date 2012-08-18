@@ -113,10 +113,9 @@ namespace Mantid
 
 #define NParameters  7
 
-//TODO  Adjust for edge peaks. Identify, if so do not calculate (co)variances, do NOT say bad slice when
-   //Fit and IsawIntensity too far apart. Also, using std devn's to determine size of rectangle has to be completely redone.
 
 
+    double probs[9]={.5f,.5987f,.6915f,.7734f,.8413f,.8944f,.9322f,.9599f,.9772f};
     IntegratePeakTimeSlices::IntegratePeakTimeSlices() :
       Algorithm(), wi_to_detid_map(NULL), R0(-1)
     {
@@ -157,8 +156,8 @@ namespace Mantid
       ParameterNames[5] = "SSrow";
       ParameterNames[6] = "SSrc";
 
-      for (int i = 0; i < NAttributes; i++)
-        AttributeValues[i] = 0;
+     // for (int i = 0; i < NAttributes; i++)
+     //   AttributeValues[i] = 0;
 
       for (int i = 0; i < NParameters; i++)
         ParameterValues[i] = 0;
@@ -205,6 +204,9 @@ namespace Mantid
 
       declareProperty("Ties","","Tie parameters(Background,Intensity, Mrow,...) to values/formulas.");
 
+      declareProperty("NBadEdgePixels", 0, "Number of  bad Edge Pixels");
+
+
       declareProperty("Intensity", 0.0, "Peak Integrated Intensity", Direction::Output);
 
       declareProperty("SigmaIntensity",0.0,"Peak Integrated Intensity Error", Direction::Output);
@@ -212,60 +214,93 @@ namespace Mantid
 
     }
 
-    void IntegratePeakTimeSlices::CalcVariancesFromData( double background, double meanx, double meany,
-                                                        double &Varxx, double &Varxy, double &Varyy)
+    DataModeHandler::DataModeHandler(const DataModeHandler & handler)
     {
-      double Den = AttributeValues[IIntensities]-background*AttributeValues[ISS1];
-      Varxx =(AttributeValues[ISSIxx]-2*meanx*AttributeValues[ISSIx]+meanx*meanx*AttributeValues[IIntensities]-
-               background*(AttributeValues[ISSxx]-2*meanx*AttributeValues[ISSx]+meanx*meanx*AttributeValues[ISS1]))
+
+      this->baseRCRadius = handler.baseRCRadius;
+      this->lastRCRadius = handler.lastRCRadius;
+      this->HalfWidthAtHalfHeightRadius = handler.HalfWidthAtHalfHeightRadius;
+      this->calcNewRCRadius = handler.calcNewRCRadius;
+      this->lastRow = handler.lastRow;
+      this->lastCol = handler.lastCol;
+      this->time = handler.time;
+      this->CellWidth = handler.CellWidth;
+      this->CellHeight = handler.CellHeight;
+      this->currentRadius = handler.currentRadius;
+      this->currentPosition = handler.currentPosition;
+      this->StatBase = handler.StatBase;
+      this->EdgeX = handler.EdgeX;
+      this->EdgeY = handler.EdgeY;
+      this->CalcVariance = handler.CalcVariance;
+
+      this->back_calc = handler.back_calc;
+      this->Intensity_calc = handler.Intensity_calc;
+      this->row_calc = handler.row_calc;
+      this->col_calc = handler.col_calc;
+      this->Vx_calc = handler.Vx_calc;
+      this->Vy_calc = handler.Vy_calc;
+      this->Vxy_calc = handler.Vxy_calc;
+      this->case4 = handler.case4;
+    }
+    void DataModeHandler::CalcVariancesFromData( double background, double meanx, double meany,
+                                                        double &Varxx, double &Varxy, double &Varyy,
+                                                        std::vector<double>&ParameterValues)
+    {
+      double Den = StatBase[IIntensities]-background*StatBase[ISS1];
+      Varxx =(StatBase[ISSIxx]-2*meanx*StatBase[ISSIx]+meanx*meanx*StatBase[IIntensities]-
+               background*(StatBase[ISSxx]-2*meanx*StatBase[ISSx]+meanx*meanx*StatBase[ISS1]))
                /Den;
 
-      Varyy=(AttributeValues[ISSIyy]-2*meany*AttributeValues[ISSIy]+meany*meany*AttributeValues[IIntensities]-
-          background*(AttributeValues[ISSyy]-2*meany*AttributeValues[ISSy]+meany*meany*AttributeValues[ISS1]))
+      Varyy=(StatBase[ISSIyy]-2*meany*StatBase[ISSIy]+meany*meany*StatBase[IIntensities]-
+          background*(StatBase[ISSyy]-2*meany*StatBase[ISSy]+meany*meany*StatBase[ISS1]))
           /Den;
 
-      Varxy =(AttributeValues[ISSIxy]-meanx*AttributeValues[ISSIy]-meany*AttributeValues[ISSIx]+
-          meanx*meany*AttributeValues[IIntensities]-
-          background*(AttributeValues[ISSxy]-meanx*AttributeValues[ISSy]-meany*AttributeValues[ISSx]+meanx*meany*AttributeValues[ISS1]))
+      Varxy =(StatBase[ISSIxy]-meanx*StatBase[ISSIy]-meany*StatBase[ISSIx]+
+          meanx*meany*StatBase[IIntensities]-
+          background*(StatBase[ISSxy]-meanx*StatBase[ISSy]-meany*StatBase[ISSx]+meanx*meany*StatBase[ISS1]))
           /Den;
-      Varxx =  std::min<double>(Varxx, 1.21*ParameterValues[IVXX]);//copied from BiVariateNormal
-      Varxx = std::max<double>(Varxx, .79*ParameterValues[IVXX]);
-      Varyy =  std::min<double>(Varyy, 1.21*ParameterValues[IVYY]);
-      Varyy = std::max<double>(Varyy, .79*ParameterValues[IVYY]);
+      if( ParameterValues.size() >IVXX)
+      {
+        Varxx =  std::min<double>(Varxx, 1.21*ParameterValues[IVXX]);//copied from BiVariateNormal
+        Varxx = std::max<double>(Varxx, .79*ParameterValues[IVXX]);
+        Varyy =  std::min<double>(Varyy, 1.21*ParameterValues[IVYY]);
+        Varyy = std::max<double>(Varyy, .79*ParameterValues[IVYY]);
+      }
 
     };
 
-    std::string IntegratePeakTimeSlices::CalcConstraints( std::vector< std::pair<double,double> > & Bounds)
+    std::string DataModeHandler::CalcConstraints( std::vector< std::pair<double,double> > & Bounds,
+           bool CalcVariances)
     {
-      double TotIntensity = AttributeValues[IIntensities];
-      double ncells       =AttributeValues[ISS1];
-      double Variance = AttributeValues[IVariance];
-      double TotBoundaryIntensities= AttributeValues[ITotBoundary ];
-      double TotBoundaryVariances = AttributeValues[IVarBoundary];
-      double nBoundaryCells=   AttributeValues[INBoundary];
+      double TotIntensity = StatBase[IIntensities];
+      double ncells       =StatBase[ISS1];
+      double Variance = StatBase[IVariance];
+      double TotBoundaryIntensities= StatBase[ITotBoundary ];
+      double TotBoundaryVariances = StatBase[IVarBoundary];
+      double nBoundaryCells=   StatBase[INBoundary];
       double back = TotBoundaryIntensities/nBoundaryCells;
       double backVar= TotBoundaryVariances/nBoundaryCells/nBoundaryCells;
       double IntensVar = Variance +ncells*ncells*backVar;
 
       double relError = .15;
 
-      if( ParameterValues[IBACK] != back )
+      if( back_calc != back )
         relError = .35;
 
       int N = NParameters;
-      if( getProperty("CalculateVariances"))
+      if( CalcVariances)
         N = N-3;
 
 
       ostringstream str;
-      str<< max<double>(0.0, ParameterValues[0]-(1+2*relError)*sqrt(backVar))<<"<Background<"<<(back+(1+2*relError)*sqrt(backVar))
-         <<","<< max<double>(0.0, ParameterValues[1]-(1+2*relError)*sqrt(IntensVar))<<
+      str<< max<double>(0.0, back_calc-(1+2*relError)*sqrt(backVar))<<"<Background<"<<(back+(1+2*relError)*sqrt(backVar))
+         <<","<< max<double>(0.0, Intensity_calc-(1+2*relError)*sqrt(IntensVar))<<
          "<Intensity<"<<TotIntensity-ncells*back+(1+2*relError)*sqrt(IntensVar);
-      double min =max<double>(0.0, ParameterValues[0]-(1+2*relError)*sqrt(backVar));
+      double min =max<double>(0.0, back_calc-(1+2*relError)*sqrt(backVar));
       double maxx =back+(1+2*relError)*sqrt(backVar);
       Bounds.push_back( pair<double,double>(min,maxx ));
-      Bounds.push_back( pair<double,double>(max<double>(0.0, ParameterValues[1]-(1+2*relError)*sqrt(IntensVar)),TotIntensity-ncells*back+(1+2*relError)*sqrt(IntensVar)));
-      for( int i=2; i<N; i++ )
+      Bounds.push_back( pair<double,double>(max<double>(0.0, Intensity_calc-(1+2*relError)*sqrt(IntensVar)),TotIntensity-ncells*back+(1+2*relError)*sqrt(IntensVar)));
+     /* for( int i=2; i<N; i++ )
       {
         if( i>0)
           str<<",";
@@ -278,6 +313,34 @@ namespace Mantid
 
         str<<(1-relErr1)*val <<"<"<<ParameterNames[i]<<"<"<<(1+relErr1)*val;
         Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+      }
+     */
+      double val =col_calc;
+
+      double relErr1=.75*relError;
+
+
+      str<<","<<(1-relErr1)*val <<"<"<<"Mcol"<<"<"<<(1+relErr1)*val;
+      Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+
+      val = row_calc;
+      str<<","<<(1-relErr1)*val <<"<"<<"Mrow"<<"<"<<(1+relErr1)*val;
+      Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+
+      if( N >=5)
+      {val = Vx_calc;
+      str<<","<<(1-relErr1)*val <<"<"<<"SScol"<<"<"<<(1+relErr1)*val;
+      Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+
+      val = Vy_calc;
+      str<<","<<(1-relErr1)*val <<"<"<<"SSrow"<<"<"<<(1+relErr1)*val;
+      Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+
+
+      val = Vxy_calc;
+      str<<","<<(1-relErr1)*val <<"<"<<"SSrc"<<"<"<<(1+relErr1)*val;
+      Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+
       }
 
       return str.str();
@@ -328,8 +391,8 @@ namespace Mantid
          // if( comp->type().compare(0,8,"Detector")==0 || comp->type().compare("RectangularDetectorPixel")==0)
           if( det )
            {
-
-                   if( (det->getPos()-Center).norm() <Radius)
+                   V3D pos = det->getPos() -Center;
+                   if( pos.X()*pos.X()+pos.Y()*pos.Y()+pos.Z()*pos.Z() <Radius*Radius)
                    {
                      ArryofID[N]=  det->getID();
                       N++;
@@ -387,14 +450,139 @@ namespace Mantid
      }
 
    }
+   void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,double &chisq,
+       bool &done,       std::vector<string>&names, std::vector<double>&params,
+       std::vector<double>&errs,double lastRow,double lastCol,double neighborRadius)
+   {
+
+     std::vector<std::pair<double, double> > Bounds;
+      IAlgorithm_sptr fit_alg;
+      fit_alg = createSubAlgorithm("Fit");
+      std::string fun_str = CalculateFunctionProperty_Fit();
+
+      std::string SSS("   Fit string ");
+      SSS += fun_str;
+      g_log.debug(SSS);
+
+      bool CalcVars = AttributeValues->CalcVariances();
+      std::string Constraints = AttributeValues->CalcConstraints(Bounds, CalcVars);
+      fit_alg->setPropertyValue("Function", fun_str);
+
+      fit_alg->setProperty("InputWorkspace", Data);
+      fit_alg->setProperty("WorkspaceIndex", 0);
+      fit_alg->setProperty("StartX", 0.0);
+      fit_alg->setProperty("EndX", 0.0 + (double) NeighborIDs[1]);
+      fit_alg->setProperty("MaxIterations", 5000);
+      fit_alg->setProperty("CreateOutput", true);
+
+      fit_alg->setProperty("Output", "out");
+
+      fit_alg->setProperty("MaxIterations", 50);
+
+      std::string tie = getProperty("Ties");
+      if (tie.length() > (size_t) 0)
+        fit_alg->setProperty("Ties", tie);
+      if (Constraints.length() > (size_t) 0)
+        fit_alg->setProperty("Constraints", Constraints);
+      try
+      {
+        fit_alg->executeAsSubAlg();
+
+        chisq = fit_alg->getProperty("OutputChi2overDoF");
+
+        names.clear(); params.clear();errs.clear();
+        ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
+        for( int prm = 0; prm < (int)RRes->rowCount()-1; prm++ )
+        {
+          names.push_back( RRes->getRef< string >( "Name", prm ) );
+          params.push_back( RRes->getRef< double >( "Value", prm ));
+          double error = RRes->getRef< double >( "Error",prm);
+          errs.push_back( error );
+        }
+        if( names.size()< 5)
+        {
+          names.push_back( ParameterNames[IVXX] );
+          names.push_back( ParameterNames[IVYY] );
+          names.push_back( ParameterNames[IVXY] );
+          double Varxx, Varxy,Varyy;
+          AttributeValues->CalcVariancesFromData( params[IBACK], params[IXMEAN], params[IYMEAN],
+              Varxx, Varxy, Varyy, params);
+          params.push_back( Varxx );
+          params.push_back( Varyy );
+          params.push_back( Varxy );
+          errs.push_back( 0 );
+          errs.push_back( 0 );
+          errs.push_back( 0 );
+
+        }
+
+      } catch (std::exception &Ex1)//ties or something else went wrong in BivariateNormal
+      {
+        done = true;
+        g_log.debug("Bivariate Error :" + std::string(Ex1.what()));
+      }
+      if (!done)//Bivariate error happened
+      {
+
+       g_log.debug() << "   Thru Algorithm: chiSq=" << setw(7) << chisq << endl;
+       g_log.debug() << "  Row,Col Radius=" << lastRow << "," << lastCol << "," << neighborRadius << std::endl;
+
+        double sqrtChisq = -1;
+        if (chisq >= 0)
+          sqrtChisq = (chisq);
+
+        sqrtChisq = max<double> (sqrtChisq, AttributeValues->StatBaseVals(IIntensities)
+            / AttributeValues->StatBaseVals(ISS1));
+        sqrtChisq = SQRT(sqrtChisq);
+
+        for (size_t kk = 0; kk < params.size(); kk++)
+        {
+          g_log.debug() << "   Parameter " << setw(8) << names[kk] << " " << setw(8) << params[kk];
+          // if (names[kk].substr(0, 2) != string("SS"))
+          g_log.debug() << "(" << setw(8) << (errs[kk] * sqrtChisq) << ")";
+          if (Bounds.size() > kk)
+          {
+            pair<double, double> upLow = Bounds[kk];
+            g_log.debug() << " Bounds(" << upLow.first << "," << upLow.second << ")";
+          }
+          g_log.debug() << endl;
+        }
 
 
+      }
+
+   }
+
+   bool IntegratePeakTimeSlices::updateNeighbors( boost::shared_ptr< Geometry::IComponent> &comp,
+       V3D CentPos,  V3D oldCenter,double NewRadius, double &neighborRadius)
+   {
+       double DD =(CentPos - oldCenter).norm();
+       bool  changed = false;
+       if(DD +NewRadius >neighborRadius)
+       {
+          int NN= int(2*NewRadius*2*NewRadius*2.25/CellWidth/CellHeight);
+          if( NeighborIDs[0]< NN)
+          {
+            delete [] NeighborIDs;
+            NeighborIDs = new int[NN+2];
+            NeighborIDs[0]=NN+2;
+          }else
+            NN= NeighborIDs[0]-2;
+          NeighborIDs[1]=2;
+          neighborRadius = 1.5*NewRadius;
+          //CentNghbr = CentPos;
+          getNeighborPixIDs(comp, CentPos, neighborRadius, NeighborIDs);
+          changed=true;
+
+       }else// big enough neighborhood so
+         neighborRadius -= DD;
+
+       return changed;
+   }
     void IntegratePeakTimeSlices::exec()
     {
 
-      char logInfo[200];
-
-      double dQ = getProperty("PeakQspan");
+      double dQ= getProperty("PeakQspan");
 
       g_log.debug("------------------Start Peak Integrate-------------------");
 
@@ -430,11 +618,13 @@ namespace Mantid
 
       boost::shared_ptr< Geometry::IComponent>panel =
               boost::const_pointer_cast< Geometry::IComponent>( panel_const);
+
       if( !panel  || !panel_const)
       {
         g_log.error( "Cannot get panel for a peak");
         throw std::runtime_error("Cannot get panel for a peak");
       }
+
       BoundingBox box;
       panel->getBoundingBox( box);
 
@@ -444,10 +634,11 @@ namespace Mantid
               g_log.error("Detector pixel is NOT inside the Peaks Bank");
               throw std::runtime_error("Detector pixel is NOT inside the Peaks Bank");
           }
-      FindPlane(  center,  xvec,  yvec, ROW, COL, CellWidth, CellHeight, peak);
 
-      sprintf(logInfo, std::string("   Peak Index %5d\n").c_str(), indx);
-      g_log.debug(std::string(logInfo));
+      FindPlane(  center,  xvec,  yvec, ROW, COL,NROWS,NCOLS, CellWidth, CellHeight, peak);
+
+     // sprintf(logInfo, std::string("   Peak Index %5d\n").c_str(), indx);
+      g_log.debug() <<"   Peak Index "<<indx <<std::endl;
 
       double TotVariance = 0;
       double TotIntensity = 0;
@@ -485,8 +676,6 @@ namespace Mantid
         dChan = max<int> (dChan, 3);
 
 
-        int MaxChan = -1;
-        double MaxCounts = -1;
         double Centy = Row0;
         double Centx = Col0;
         IDetector_const_sptr CenterDet =  peak.getDetector();
@@ -502,11 +691,6 @@ namespace Mantid
 
 
         Nneighbors = min<int>(Nneighbors,(int)inpWkSpace->getNumberHistograms()-2);
-        //inpWkSpace->buildNearestNeighbours( true);
-        //neighbors = inpWkSpace->getNeighboursExact( spec, Nneighbors ,true);
-
-        //neighbors  = inpWkSpace->getNeighbours( CentDetspec, neighborRadius, true);
-        //neighbors[CentDetspec]=Kernel::V3D(0.0,0.0,0.0);
         delete [] NeighborIDs;
 
         NeighborIDs = new int[Nneighbors+2];
@@ -518,10 +702,13 @@ namespace Mantid
 
         if( NeighborIDs[1] <10)
         {
-          //std::cout<<"There were "<< NeighborIDs[1] <<"neighbors" <<std::endl;
           g_log.error("Not enough neighboring pixels to fit ");
           throw std::runtime_error("Not enough neighboring pixels to fit ");
         }
+
+        int MaxChan = -1;
+        double MaxCounts = -1;
+
         for( int dir =1 ; dir >-2; dir -=2)
         for( int t= 0; t < dChan && !done; t++)
           if( dir < 0 &&  t==0 )
@@ -540,18 +727,24 @@ namespace Mantid
                          std::string("Workspace2D"), 3,NN,NN);
 
               Kernel::V3D CentPos = center+yvec*(Centy-ROW)*CellHeight + xvec*(Centx-COL)*CellWidth;
-              SetUpData1(Data, inpWkSpace,  Chan+dir*t,  R ,CenterDet->getPos(), spec_idList);
-              if (AttributeValues[ISSIxx] > 0)
+
+              boost::shared_ptr<DataModeHandler> XXX( new DataModeHandler(R,R,Centx,Centy,CellWidth,CellHeight,
+                                                   getProperty("CalculateVariances")));
+              AttributeValues = XXX;
+
+              SetUpData1(Data, inpWkSpace,  Chan+dir*t, Chan+dir*t,  R ,CenterDet->getPos(), spec_idList);
+
+              if (AttributeValues->StatBaseVals(ISSIxx) > 0)
               {
-                if (AttributeValues[IIntensities] > MaxCounts)
+                if (AttributeValues->StatBaseVals(IIntensities) > MaxCounts)
                 {
-                  MaxCounts = AttributeValues[IIntensities];
+                  MaxCounts = AttributeValues->StatBaseVals(IIntensities);
                   MaxChan = Chan + dir * t;
                 }
-                if (AttributeValues[IIntensities] > 0)
+                if (AttributeValues->StatBaseVals(IIntensities) > 0)
                 {
-                  Centx = AttributeValues[ISSIx] / AttributeValues[IIntensities];
-                  Centy = AttributeValues[ISSIy] / AttributeValues[IIntensities];
+                  Centx = AttributeValues->StatBaseVals(ISSIx) / AttributeValues->StatBaseVals(IIntensities);
+                  Centy = AttributeValues->StatBaseVals(ISSIy) / AttributeValues->StatBaseVals(IIntensities);
                 }
                 else
                   done = true;
@@ -559,15 +752,19 @@ namespace Mantid
               else
                 done = true;
               
+              if( t >= 3 &&  (AttributeValues->StatBaseVals(IIntensities) < MaxCounts/2.0) && MaxCounts >= 0)
+                 done = true;
+
            }
 
+        if( MaxChan >0)
+            Chan =  MaxChan ;
 
-        Chan = max<int>( Chan , MaxChan );
-
-
-        sprintf(logInfo, std::string("   largest Channel,Radius,CellWidth,CellHeight = %d  %7.3f  %7.3f  %7.3f\n").c_str(),
-                           Chan, R, CellWidth, CellHeight);
-        g_log.debug(std::string(logInfo));
+      //  sprintf(logInfo, std::string("   largest Channel,Radius,CellWidth,CellHeight = %d  %7.3f  %7.3f  %7.3f\n").c_str(),
+      //                     Chan, R, CellWidth, CellHeight);
+        g_log.debug()<<
+            "   largest Channel,Radius,CellWidth,CellHeight = "<<Chan<<" "<< R<<" "<<CellWidth<<" "
+                                                 << CellHeight<<std::endl;
 
         if (R < 2*max<double>(CellWidth, CellHeight) || dChan < 3)
         {
@@ -578,8 +775,6 @@ namespace Mantid
         InitializeColumnNamesInTableWorkspace(TabWS);
 
 
-        IAlgorithm_sptr fit_alg;
-
         double time;
         int ncells;
 
@@ -587,6 +782,9 @@ namespace Mantid
 
         // Set from attributes replace by R0
         R0= -1;
+        int LastTableRow = -1;
+        boost::shared_ptr<DataModeHandler>origAttributeList(new DataModeHandler());
+        boost::shared_ptr<DataModeHandler>lastAttributeList( new DataModeHandler());
 
         for (int dir = 1; dir >= -1; dir -= 2)
         {
@@ -597,17 +795,14 @@ namespace Mantid
             {
               lastRow = Row0;
               lastCol = Col0;
+              lastAttributeList = origAttributeList;
             }
             else if( Chan+dir*chan <0 || Chan+dir*chan >= (int)X.size())
                done = true;
             else
             {
 
-
-              int nchan = chan;
               int xchan = Chan + dir * chan;
-              if (nchan <= 1)
-                nchan = 1;
 
               size_t topIndex = xchan + 1;
               if (topIndex >= X.size())
@@ -618,140 +813,66 @@ namespace Mantid
               double Radius = 2*R;
 
               if( R0 >0)
-              {
                  Radius = R0;
 
-              }
               int NN= NeighborIDs[1];
+
               MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
                   std::string("Workspace2D"), 3, NN,NN);//neighbors.size(), neighbors.size());
 
-              sprintf(logInfo, string(
-                              " A:chan= %d  time=%7.2f  Radius=%7.3f  row= %5.2f  col=%5.2f \n").c_str(),
-                                 xchan, time, Radius, lastRow, lastCol);
-              g_log.debug(std::string(logInfo));
+             // sprintf(logInfo, string(
+             //                 " A:chan= %d  time=%7.2f  Radius=%7.3f  row= %5.2f  col=%5.2f \n").c_str(),
+              //                   xchan, time, Radius, lastRow, lastCol);//std::string(logInfo)
+              g_log.debug()<<" A:chan="<< xchan<<"  time="<<time<<"   Radius="<<Radius
+                  <<"row= "<<lastRow<<"  col="<<lastCol<<std::endl;
 
-
-              SetUpData(Data, inpWkSpace, panel, xchan, lastCol,lastRow,Cent,//CentDetspec,//NeighborIDs,
+              SetUpData(Data, inpWkSpace, panel, xchan,xchan, lastCol,lastRow,Cent,
                                                       neighborRadius, Radius, spec_idList);
 
-              Data->setName("index0");
+              AttributeValues->setTime( time);
 
-              ncells = (int) (AttributeValues[ISS1]);
+              if( dir==1 && chan ==0)
+                origAttributeList= AttributeValues;
+
+
+              ncells = (int) (AttributeValues->StatBaseVals(ISS1));
 
               std::vector<double> params;
               std::vector<double> errs;
               std::vector<std::string> names;
+              vector<pair<double, double> > Bounds;
 
-              if (IsEnoughData() && ParameterValues[ITINTENS] > 0)
+              if (AttributeValues->IsEnoughData( ParameterValues, g_log) && ParameterValues[ITINTENS] > 0)
               {
+                double chisq;
 
-                fit_alg = createSubAlgorithm("Fit");
+                Fit(Data,chisq,done,  names,params,errs, lastRow, lastCol, neighborRadius);
 
-                std::string fun_str = CalculateFunctionProperty_Fit();
-
-                std::string SSS("   Fit string ");
-                SSS += fun_str;
-                g_log.debug(SSS);
-                vector< pair<double,double> >  Bounds;
-                std::string Constraints = CalcConstraints( Bounds);
-                fit_alg->setPropertyValue("Function", fun_str);
-
-                fit_alg->setProperty("InputWorkspace", Data);
-                fit_alg->setProperty("WorkspaceIndex", 0);
-                fit_alg->setProperty("StartX", 0.0);
-                fit_alg->setProperty("EndX", 0.0 + (double)NeighborIDs[1]);
-                fit_alg->setProperty("MaxIterations", 5000);
-                fit_alg->setProperty( "CreateOutput",true);
-
-
-                fit_alg->setProperty( "Output","out");
-
-                fit_alg->setProperty("MaxIterations", 50);
-
-
-                std::string tie = getProperty("Ties");
-                if( tie.length() > (size_t)0)
-                  fit_alg->setProperty("Ties", tie);
-                if( Constraints.length() > (size_t)0)
-                  fit_alg->setProperty("Constraints", Constraints);
-                try
+                if(!done)//Bivariate error happened
                 {
-                  fit_alg->executeAsSubAlg();
-
-                  double chisq = fit_alg->getProperty("OutputChi2overDoF");
-
-                  ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
-                  for( int prm = 0; prm < (int)RRes->rowCount()-1; prm++ )
-                  {
-                    names.push_back( RRes->getRef< string >( "Name", prm ) );
-                    params.push_back( RRes->getRef< double >( "Value", prm ));
-                    double error = RRes->getRef< double >( "Error",prm);
-                    errs.push_back( error );
-                  }
-                  if( names.size()< 5)
-                  {
-                    names.push_back( ParameterNames[IVXX] );
-                    names.push_back( ParameterNames[IVYY] );
-                    names.push_back( ParameterNames[IVXY] );
-                    double Varxx, Varxy,Varyy;
-                    CalcVariancesFromData( params[IBACK], params[IXMEAN], params[IYMEAN],
-                                                Varxx,   Varxy, Varyy);
-                    params.push_back( Varxx );
-                    params.push_back( Varyy );
-                    params.push_back( Varxy );
-                    errs.push_back( 0 );
-                    errs.push_back( 0 );
-                    errs.push_back( 0 );
-
-                  }
-
-                  ostringstream res;
-                  res << "   Thru Algorithm: chiSq=" << setw(7) << chisq << endl;
-                  res<<"  Row,Col Radius=" << lastRow << "," << lastCol <<"," <<neighborRadius << std::endl;
-
-                  double sqrtChisq = -1;
-                  if (chisq >= 0)
-                    sqrtChisq =(chisq);
-
-                  sqrtChisq = max< double >( sqrtChisq,AttributeValues[IIntensities]/AttributeValues[ISS1] );
-                  sqrtChisq = SQRT( sqrtChisq);
-
-                  for (size_t kk = 0; kk < params.size(); kk++)
-                  {
-                    res << "   Parameter " << setw(8) << names[kk] << " " << setw(8) << params[kk];
-                   // if (names[kk].substr(0, 2) != string("SS"))
-                      res << "(" << setw(8) << (errs[kk] * sqrtChisq) << ")";
-                      if( Bounds.size() >kk)
-                      {
-                        pair<double,double> upLow = Bounds[kk];
-                        res<<" Bounds("<<upLow.first<<","<<upLow.second<<")";
-                      }
-                    res << endl;
-                  }
-                  g_log.debug(res.str());
 
                   if (isGoodFit(params, errs, names, chisq))
                   {
-                    UpdateOutputWS(TabWS, dir, xchan, params, errs, names, chisq, time, spec_idList);
+                    LastTableRow =UpdateOutputWS(TabWS, dir, xchan, params, errs, names, chisq,
+                          AttributeValues->time, spec_idList);
 
-                    double TotSliceIntensity = AttributeValues[IIntensities];
-                    double TotSliceVariance = AttributeValues[IVariance];
-                    //std::cout<<"errs="<< errs[0]<<std::endl;
+                    double TotSliceIntensity = AttributeValues->StatBaseVals(IIntensities);
+                    double TotSliceVariance = AttributeValues->StatBaseVals(IVariance);
+
                     updatePeakInformation(    params,             errs,           names,
                                               TotVariance,       TotIntensity,
                                               TotSliceIntensity, TotSliceVariance, chisq,
                                               ncells);
 
+                    lastAttributeList= AttributeValues;
+
+                    if( dir==1 && chan==0)
+                      origAttributeList =lastAttributeList;
                   }
                   else
 
                     done = true;
 
-                }catch( std::exception &Ex1)//ties or something else went wrong in BivariateNormal
-                {
-                     done = true;
-                     g_log.debug("Bivariate Error :"+std::string(Ex1.what()));
                 }
 
               }
@@ -761,10 +882,107 @@ namespace Mantid
 
               }
 
+              if( done )//try to merge
+              {     done = false;
+                    //std::cout<<"TRY TO MERGE indx/xchan="<<indx<<"/"<<xchan<<std::endl;
+                    int chanMin,chanMax;
+                    if( ( dir ==1 && chan ==0 ) || lastAttributeList->CellHeight < 0)
+                    {
+                      chanMin=xchan;
+                      chanMax =xchan+1;
+                      if( dir < 0)
+                        chanMax++;
+                      boost::shared_ptr<DataModeHandler>XXX(new DataModeHandler(*AttributeValues));
+                      AttributeValues = XXX;
+                      AttributeValues->setTime((X[chanMax]+ X[chanMin])/2.0);
+
+                    }else//lastAttributeList exists
+
+                    {
+                      chanMin = std::min<int>( xchan, xchan-dir);
+                      chanMax = chanMin+1;
+                      if( lastAttributeList->case4)
+                         chanMax++;
+
+                     boost::shared_ptr<DataModeHandler>XXX(new DataModeHandler(*lastAttributeList));
+                     AttributeValues = XXX;
+
+                     AttributeValues->setTime( (time+AttributeValues->time)/2.0);
+                    }
+
+
+                    if( updateNeighbors(panel, AttributeValues->getCurrentCenter(),
+                                 Cent,AttributeValues->getCurrentRadius(),neighborRadius))
+                         Cent = AttributeValues->getCurrentCenter();
+
+                    int NN= NeighborIDs[1];
+                    MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
+                                     std::string("Workspace2D"), 3, NN,NN);
+
+                    SetUpData1(Data    , inpWkSpace, chanMin, chanMax,
+                        AttributeValues->getCurrentRadius()            ,
+                        AttributeValues->getCurrentCenter(), spec_idList);
+
+                    double chisq;
+
+                    g_log.debug("Try Merge 2 time slices");
+                    if( AttributeValues->IsEnoughData(ParameterValues, g_log))
+
+                       Fit(Data,chisq,done, names, params,
+                             errs, lastRow, lastCol, neighborRadius);
+                    else
+                      chisq=-1;
+
+                    if(!done && isGoodFit(params, errs, names, chisq))
+                    {
+
+                      if( LastTableRow >=0 && LastTableRow < TabWS->rowCount())
+                        TabWS->removeRow(LastTableRow);
+                      else
+                        LastTableRow =-1;
+
+                      LastTableRow =UpdateOutputWS(TabWS, dir, (chanMin+chanMax)/2.0, params, errs,
+                                      names, chisq,  AttributeValues->time, spec_idList);
+
+                      if( lastAttributeList->CellHeight > 0)
+                      {
+                        TotIntensity -=lastAttributeList->StatBaseVals(IIntensities);
+                        TotVariance -= lastAttributeList->StatBaseVals(IVariance);
+                      }
+
+                      double TotSliceIntensity = AttributeValues->StatBaseVals(IIntensities);
+
+                      double TotSliceVariance = AttributeValues->StatBaseVals(IVariance);
+
+
+                      updatePeakInformation(    params,             errs,           names,
+                                      TotVariance,       TotIntensity,
+                                     TotSliceIntensity, TotSliceVariance, chisq,
+                                      (int) AttributeValues->StatBaseVals(ISS1));
+
+                     // lastAttributeList= AttributeValues;
+
+                      if( dir ==1 && (chan ==0||chan==1))
+                      {
+                        lastAttributeList->case4 = true;
+                        origAttributeList =lastAttributeList;
+                      }else
+                        LastTableRow = -1;
+
+
+                    }else
+                    {
+                      boost::shared_ptr<DataModeHandler>XXX( new DataModeHandler());
+                      lastAttributeList =XXX;
+                    }
+                    done = true;
+                   // std::cout<<"END TRY TO MERGE indx="<<indx<<"/"<<xchan<<std::endl;
+             }
+
               //Get ready for the next round
               Data.reset();
-              if (fit_alg)
-                fit_alg.reset();
+             // if (fit_alg)
+             //   fit_alg.reset();
 
               if (!done)
               {
@@ -808,10 +1026,6 @@ namespace Mantid
 
       try
       {
-        //std::cout<<std::endl<<"Setting Peak and Intensity ,sigma="<<TotIntensity<<","<<
-        //       sqrt(TotVariance)<<std::endl;
-       // peak.setIntensity(TotIntensity);
-       // peak.setSigmaIntensity(sqrt(TotVariance));
 
         setProperty("OutputWorkspace", TabWS);
 
@@ -996,10 +1210,12 @@ namespace Mantid
 
 
 
-    void IntegratePeakTimeSlices::getInitParamValues(std::vector<double> const &StatBase,
-                                                     const double               TotBoundaryIntensities,
-                                                     const int                  nBoundaryCells)
+    void DataModeHandler::setStatBase(std::vector<double> const &StatBase)
+
     {
+      double   TotBoundaryIntensities =StatBase[ITotBoundary ] ;
+      int      nBoundaryCells = (int)StatBase[INBoundary];
+      this->StatBase = StatBase;
       double b = 0;
       if (nBoundaryCells > 0)
         b = TotBoundaryIntensities / nBoundaryCells;
@@ -1026,15 +1242,9 @@ namespace Mantid
       int ntimes = 0;
       double Mx, My, Sxx, Syy, Sxy;
 
-      //Variances at background =0. Should be used to nail down initial parameters.
-    /*  double Sxx0 = (StatBase[ISSIxx]-StatBase[ISSIx]*StatBase[ISSIx]/ StatBase[IIntensities])
-                                    / StatBase[IIntensities];
 
-      double Syy0 = (StatBase[ISSIyy]-StatBase[ISSIy]*StatBase[ISSIy]/ StatBase[IIntensities])
-                                 / StatBase[IIntensities];
-    */
-      double RangeX= AttributeValues[INCol]/2;
-      double RangeY = AttributeValues[INRows]/2;
+      double RangeX= StatBase[INCol]/2;
+      double RangeY = StatBase[INRows]/2;
       while (!done && ntimes < 29)
       {
         Mx = StatBase[ISSIx] - b * StatBase[ISSx];
@@ -1061,23 +1271,109 @@ namespace Mantid
 
       }
 
-      ParameterValues[IBACK] = b;
-      ParameterValues[ITINTENS] = StatBase[IIntensities] - b * nCells;
-      ParameterValues[IXMEAN] = Mx / Den;
-      ParameterValues[IYMEAN] = My / Den;
-      ParameterValues[IVXX] = Sxx;
-      ParameterValues[IVYY] = Syy;
-      ParameterValues[IVXY] = Sxy;
+     back_calc = b;
+     Intensity_calc= StatBase[IIntensities] - b * nCells;
+     col_calc = Mx / Den;
+     row_calc = My / Den;
+     Vx_calc = Sxx;
+     Vy_calc = Syy;
+     Vxy_calc = Sxy;
+
+
 
     }
 
+    double DataModeHandler::getNewRCRadius()
+    {
+      double Vx,Vy;
+      Vx = Vy =HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
 
+      if( EdgeX < 0)
+      Vx = std::max<double>(HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius,
+              Vx_calc);
 
+      if( EdgeY < 0)
+        Vy =std::max<double>(HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius,
+          Vy_calc);
+
+      double  DD = max<double>( sqrt(Vy)*CellHeight, sqrt(Vx)*CellWidth);
+      double NewRadius= 1.4* max<double>( 5*max<double>(CellWidth,CellHeight), 4*DD);
+      NewRadius = min<double>(baseRCRadius, NewRadius);
+               //1.4 is needed to get more background cells. In rectangle the corners were background
+
+       NewRadius = min<double>(35*max<double>(CellWidth,CellHeight),NewRadius);
+
+       return NewRadius;
+    }
+
+    void DataModeHandler::setHeighHalfWidthInfo( Mantid::MantidVecPtr &xvals,
+                                                 Mantid::MantidVecPtr &yvals,
+                                                 Mantid::MantidVecPtr &counts,
+                                                 double ROW,
+                                                 double COL)
+    {
+      double minCount,
+             maxCount;
+      MantidVec X = xvals.access();
+      MantidVec Y = yvals.access();
+      MantidVec C = counts.access();
+      int N = (int)X.size();
+
+      if( N <= 2 )
+      {
+        HalfWidthAtHalfHeightRadius = -1;
+        return;
+      }
+
+      minCount = maxCount = C[0];
+      for( int i = 1; i < N; i++ )
+        if( C[i] > maxCount )
+          maxCount = C[i];
+        else if( C[i] < minCount )
+          minCount = C[i];
+
+      int N2Av = std::min<int>( 10,( int )( N/10 ) );
+      int nMax = 0;
+      int nMin = 0;
+      double TotMax = 0;
+      double TotMin = 0;
+      double offset = std::max<double>( 1,( maxCount - minCount )/20 );
+
+      for( int i = 0; i < N; i++ )
+        if( nMax < N2Av && C[i]>maxCount - offset )
+        {
+          TotMax += C[i];
+          nMax++;
+        }else if( nMin < N2Av && C[i] < minCount + offset )
+        {
+          TotMin += C[i];
+          nMin++;
+        }
+      double TotR = 0;
+      int nR = 0;
+      double MidVal = ( TotMax/nMax + TotMin/nMin )/2.0;
+
+      while( nR <= 0 )
+      {
+        for( int i = 0; i < N; i++ )
+        if( C[i] < MidVal + offset && C[i] > MidVal - offset )
+        {
+          double X1 = X[i] - COL;
+          double Y1 = Y[i] - ROW;
+          TotR += sqrt( X1*X1 + Y1*Y1 );
+          nR++;
+        }
+        offset *= 1.1;
+      }
+      double AvR = TotR/nR;
+      HalfWidthAtHalfHeightRadius = AvR/.8326;
+    }
     //Data is the slice subdate, inpWkSpace is ALl the data,
     void IntegratePeakTimeSlices::SetUpData( MatrixWorkspace_sptr          & Data,
                                              MatrixWorkspace_sptr    const & inpWkSpace,
                                              boost::shared_ptr< Geometry::IComponent> comp,
-                                             const int                       chan,
+                                             const int                       chanMin,
+                                             const int                       chanMax,
                                              double                          CentX,
                                              double                          CentY,
                                              Kernel::V3D                     &CentNghbr,
@@ -1088,25 +1384,23 @@ namespace Mantid
                                              double                         Radius,
                                              string                     &spec_idList)
     {
-     // size_t wsIndx = inpWkSpace->getIndexFromSpectrumNumber(CentDetspec);
-
-     // Geometry::IDetector_const_sptr CentDett= inpWkSpace->getDetector( wsIndx);
 
       Kernel::V3D CentPos1 = center + xvec*(CentX-COL)*CellWidth
                                    + yvec*(CentY-ROW)*CellHeight;
 
-      SetUpData1(Data             , inpWkSpace, chan,
+      boost::shared_ptr<DataModeHandler> X(new DataModeHandler(Radius,Radius,CentX,CentY,
+          CellWidth,CellHeight,getProperty("CalculateVariances")));
+
+      AttributeValues = X;
+
+      SetUpData1(Data             , inpWkSpace, chanMin, chanMax,
                  Radius            , CentPos1, spec_idList);
 
-      if( AttributeValues[ISSIxx]< 0)// Not enough data
+      if( AttributeValues->StatBaseVals(ISSIxx)< 0)// Not enough data
           return;
 
-      double  DD = max<double>( sqrt(ParameterValues[IVYY])*CellHeight, sqrt(ParameterValues[IVXX])*CellWidth);
-      double NewRadius= 1.4* max<double>( 5*max<double>(CellWidth,CellHeight), 4*DD);
-      //1.4 is needed to get more background cells. In rectangle the corners were background
 
-      NewRadius = min<double>(30*max<double>(CellWidth,CellHeight),NewRadius);
-
+      double NewRadius = AttributeValues->getNewRCRadius();
       if( R0 > 0)
       {
          NewRadius = R0;
@@ -1120,29 +1414,35 @@ namespace Mantid
       Kernel::V3D CentPos = center + xvec*(CentX-COL)*CellWidth + yvec*(CentY-ROW)*CellHeight;
 
 
-      DD =(CentPos - CentPos1).norm();
-     // Kernel::V3D CentDetPos = CentDett->getPos();
+      double DD =(CentPos - CentNghbr).norm();
 
-      if(DD +NewRadius >neighborRadius)
-      {
-         int NN= int(2*NewRadius*2*NewRadius*2.25/CellWidth/CellHeight);
-         if( NeighborIDs[0]< NN)
-         {
-           delete [] NeighborIDs;
-           NeighborIDs = new int[NN+2];
-           NeighborIDs[0]=NN+2;
-         }else
-           NN= NeighborIDs[0]-2;
-         NeighborIDs[1]=2;
-         neighborRadius = 1.5*NewRadius;
-         CentNghbr = CentPos;
-         getNeighborPixIDs(comp, CentPos, neighborRadius, NeighborIDs);
+          if(DD +NewRadius >neighborRadius)
+          {
+             int NN= int(2*NewRadius*2*NewRadius*2.25/CellWidth/CellHeight);
+             if( NeighborIDs[0]< NN)
+             {
+               delete [] NeighborIDs;
+               NeighborIDs = new int[NN+2];
+               NeighborIDs[0]=NN+2;
+             }else
+               NN= NeighborIDs[0]-2;
+             NeighborIDs[1]=2;
+             neighborRadius = 1.5*NewRadius;
+             CentNghbr = CentPos;
+             getNeighborPixIDs(comp, CentPos, neighborRadius, NeighborIDs);
 
 
-      }else// big enough neighborhood so
-        neighborRadius -= DD;
+          }else// big enough neighborhood so
+            neighborRadius -= DD;
 
-      SetUpData1(Data, inpWkSpace, chan,
+      //if( changed) CentNghbr = CentPos.
+      boost::shared_ptr<DataModeHandler> X1(new DataModeHandler(Radius,NewRadius,CentX,CentY,
+          CellWidth,CellHeight, getProperty("CalculateVariances")));
+
+      AttributeValues = X1;
+      AttributeValues->setCurrentRadius( NewRadius);
+      AttributeValues->setCurrentCenter( CentPos);
+      SetUpData1(Data, inpWkSpace, chanMin, chanMax,
                  NewRadius, CentPos, spec_idList );
 
     }
@@ -1151,22 +1451,23 @@ namespace Mantid
 
     void  IntegratePeakTimeSlices:: SetUpData1(API::MatrixWorkspace_sptr              &Data,
                                                API::MatrixWorkspace_sptr        const &inpWkSpace,
-                                               const int                               chan,
+                                               const int                               chanMin,
+                                               const int                               chanMax,
                                                double                      Radius,
                                                Kernel::V3D                 CentPos,
                                                string                     &spec_idList
                                                )
     {
       UNUSED_ARG(g_log);
-
+      std::vector<double> StatBase(NAttributes);
       if( NeighborIDs[1] < 10)
       {
-        AttributeValues[ISSIxx]= -1;
+         StatBase[ISSIxx]= -1;
         return;
       }
       boost::shared_ptr<Workspace2D> ws = boost::shared_dynamic_cast<Workspace2D>(Data);
 
-      std::vector<double> StatBase;
+      int NBadEdges = getProperty("NBadEdgePixels");
       spec_idList.clear();
 
       for (int i = 0; i < NAttributes + 2; i++)
@@ -1185,8 +1486,7 @@ namespace Mantid
       double TotBoundaryIntensities = 0;
       int nBoundaryCells = 0;
       double TotBoundaryVariances =0;
-     // std::map<specid_t, V3D >::iterator it;
-     // std::map<detid_t, size_t>::iterator det2wsInxIterator;
+
 
       int N=0;
       double BoundaryRadius=min<double>(.90*Radius, Radius-1.5*max<double>(CellWidth,CellHeight));
@@ -1194,12 +1494,7 @@ namespace Mantid
              maxRow =-1,
              minCol =20000,
              maxCol =-1;
-      //for( it = neighbors.begin(); it != neighbors.end(); it++)
-     //   if((CentDetPos+ (*it).second -CentPos).norm()>Radius)
-      //  {
 
-     //   }else
-     // std::cout<<"-------- data-------"<<std::endl;
       int jj=0;
       Mantid::MantidVecPtr pX;
 
@@ -1210,7 +1505,7 @@ namespace Mantid
 
         size_t workspaceIndex ;
         if( wi_to_detid_map->count(DetID)>0)
-           workspaceIndex= wi_to_detid_map->find(DetID)->second;//inpWkSpace->getIndexFromSpectrumNumber(spec );
+           workspaceIndex= wi_to_detid_map->find(DetID)->second;
         else
         {
          g_log.error("No workspaceIndex for detID="+DetID);
@@ -1227,23 +1522,37 @@ namespace Mantid
           spec_idList +=  "," ;
 
 
-
-        if ((pixPos - CentPos).norm() < Radius)
+        V3D dist = pixPos - CentPos;
+        if (dist.scalar_prod(dist) < Radius*Radius)
 
         { spec_idList +=  boost::lexical_cast<std::string>( inpWkSpace->getSpectrum( workspaceIndex )->getSpectrumNo());
 
-          double row = ROW + (pixPos - center).scalar_prod(yvec) / CellHeight;
+          double R1 = dist.scalar_prod(yvec);
+          double R1a = R1/CellHeight;
 
-          double col = COL + (pixPos - center).scalar_prod(xvec) / CellWidth;
+          double row = ROW + R1a;//(pixPos - center).scalar_prod(yvec) / CellHeight;
 
+          double C1 = dist.scalar_prod(xvec);
+          double C1a = C1/CellWidth;
 
+          double col = COL + C1a;//(pixPos - center).scalar_prod(xvec) / CellWidth;
 
+         // std::cout<<R1<<","<<R1a<<","<<ROW<<","<<row<<","<<C1<<","<<C1a<<","<<COL<<","<<col<<std::endl;
+          if( row >NBadEdges && col >NBadEdges &&
+              (NROWS<0 || row<NROWS-NBadEdges) &&
+              ( NCOLS <0 || col<NCOLS-NBadEdges))
+          {
           Mantid::MantidVec histogram = inpWkSpace->readY(workspaceIndex);
 
           Mantid::MantidVec histoerrs = inpWkSpace->readE(workspaceIndex);
 
-          double intensity = histogram[chan];
-          double variance = histoerrs[chan] * histoerrs[chan];
+          double intensity = 0;
+          double variance =0;
+          for(int chan=chanMin;chan <= chanMax;chan++)
+          {
+            intensity +=histogram[chan];
+            variance +=histoerrs[chan] * histoerrs[chan];
+          }
 
           N++;
           yvalB.push_back(intensity);
@@ -1255,8 +1564,6 @@ namespace Mantid
           YvalB.push_back((double) row);
 
           xRef.push_back((double)jj);jj++;
-  
-
 
           updateStats(intensity, variance, row, col, StatBase);
 
@@ -1279,7 +1586,13 @@ namespace Mantid
           if (col > maxCol)
             maxCol = col;
 
+          }//if not bad edge
+          else
+          {
 
+            AttributeValues->updateEdgeYsize(abs(ROW-row));
+            AttributeValues->updateEdgeXsize(abs(COL-col));
+          }
         }
         }
 
@@ -1287,12 +1600,10 @@ namespace Mantid
       Data->setX(1, pX);
       Data->setX(2, pX);
 
-
-     // std::cout<<std::endl<<"N elts="<<N<< ","<<TotBoundaryIntensities<<","<<nBoundaryCells<<std::endl;
       ws->setData(0, yvals, errs);
       ws->setData(1, xvals);
       ws->setData(2, Yvals);
-
+      AttributeValues->setHeighHalfWidthInfo(xvals,Yvals,yvals,ROW,COL);
 
       ws->setName("index0");
       StatBase[IStartRow] = minRow;
@@ -1300,15 +1611,19 @@ namespace Mantid
       StatBase[INRows] = maxRow-minRow+1;
       StatBase[INCol] = maxCol-minCol+1;
 
-      getInitParamValues(StatBase, TotBoundaryIntensities, nBoundaryCells);
 
-      for (int i = 0; i < NAttributes; i++)
-        AttributeValues[i] = StatBase[i];
+      StatBase[ITotBoundary ] = TotBoundaryIntensities;
+      StatBase[INBoundary] = nBoundaryCells;
+      StatBase[IVarBoundary]= TotBoundaryVariances;
+      AttributeValues->setStatBase( StatBase );
 
-      AttributeValues[ITotBoundary ] = TotBoundaryIntensities;
-      AttributeValues[INBoundary] = nBoundaryCells;
-      AttributeValues[IVarBoundary]= TotBoundaryVariances;
-
+      ParameterValues[IBACK] = AttributeValues->getInitBackground();
+      ParameterValues[ITINTENS] = AttributeValues->getInitIntensity();
+      ParameterValues[IXMEAN] = AttributeValues->getInitCol();
+      ParameterValues[IYMEAN] =AttributeValues->getInitRow();
+      ParameterValues[IVXX] = AttributeValues->getInitVarx();
+      ParameterValues[IVYY] = AttributeValues->getInitVary();
+      ParameterValues[IVXY] = AttributeValues->getInitVarxy();
     }
 
     std::string IntegratePeakTimeSlices::CalculateFunctionProperty_Fit()
@@ -1318,14 +1633,14 @@ namespace Mantid
 
       fun_str << "name=BivariateNormal,";
 
-      if( getProperty( "CalculateVariances") && !EdgePeak)
+      if( AttributeValues->CalcVariances())
               fun_str<<"CalcVariances=1";
           else
-              fun_str<<"CalcVariances = -1";
+              fun_str<<"CalcVariances=-1";
 
 
       int NN =  NParameters;
-      if( getProperty("CalculateVariances") && !EdgePeak)
+      if( AttributeValues->CalcVariances())
            NN -=3;
 
       for (int i = 0; i < NN; i++)
@@ -1361,47 +1676,39 @@ namespace Mantid
       int Ibk = find("Background", names);
       int IIntensity = find("Intensity", names);
 
-      char logInfo[200];
+
 
       if (chisq < 0)
       {
 
-        sprintf(logInfo, std::string("   Bad Slice- negative chiSq= %7.2f\n").c_str(), chisq);
-
-          g_log.debug(std::string(logInfo));
-        return false;
+          g_log.debug()<<"   Bad Slice- negative chiSq= "<<chisq<<std::endl;;
+         return false;
       }
 
-      int ncells = (int) (AttributeValues[ISS1]);
+      int ncells = (int) (AttributeValues->StatBaseVals(ISS1));
 
-      if (AttributeValues[IIntensities] <= 0 || (AttributeValues[IIntensities] - params[Ibk] * ncells)
+      if (AttributeValues->StatBaseVals(IIntensities) <= 0 || (AttributeValues->StatBaseVals(IIntensities) - params[Ibk] * ncells)
           <= 0)
       {
 
-        sprintf(logInfo, std::string("   Bad Slice. Negative Counts= %7.2f\n").c_str(),
-            AttributeValues[IIntensities] - params[Ibk] * ncells);
-
-           g_log.debug(std::string(logInfo));
+           g_log.debug()<<"   Bad Slice. Negative Counts= "<<AttributeValues->StatBaseVals(IIntensities) - params[Ibk] * ncells
+               <<std::endl;;
         return false;
       }
 
-      double x = params[IIntensity] / (AttributeValues[IIntensities] - params[Ibk] * ncells);
+      double x = params[IIntensity] / (AttributeValues->StatBaseVals(IIntensities) - params[Ibk] * ncells);
 
       if ((x < .8 || x > 1.25)&& !EdgePeak)// The fitted intensity should be close to tot intensity - background
       {
+        g_log.debug()<< "   Bad Slice. Fitted Intensity & Observed Intensity(-back) too different. ratio="
+                                               <<x<<std::endl;
 
-        sprintf(
-            logInfo,
-            std::string(
-                "   Bad Slice. Fitted Intensity & Observed Intensity(-back) too different. ratio= %7.2f\n").c_str(),
-            x);
-
-          g_log.debug(std::string(logInfo));
         return false;
       }
+
       bool GoodNums = true;
 
-      for (size_t i = 0; i < errs.size(); i++) //NaN's
+      for (size_t i = 0; i < errs.size(); i++)
         if (errs[i] != errs[i])
           GoodNums = false;
         else if( errs[i] < 0)
@@ -1417,7 +1724,8 @@ namespace Mantid
 
       GoodNums = true;
 
-      if (params[Ibk] < 0)
+     // std::cout<<"xxxx"<<params[Ibk]<<","<<(params[Ibk] < -.001)<<","<<(params[IIntensity]<0)<<std::endl;
+      if (params[Ibk] < -.001)
         GoodNums = false;
 
       if (params[IIntensity] < 0)
@@ -1425,23 +1733,24 @@ namespace Mantid
 
       double sqrChi = SQRT(chisq);
 
-      if (AttributeValues[IIntensities] > 0)
-        if (sqrChi * errs[IIntensity] / AttributeValues[IIntensities] > .2)
+      if (AttributeValues->StatBaseVals(IIntensities) > 0)
+        if (sqrChi * errs[IIntensity] / AttributeValues->StatBaseVals(IIntensities) > .2)
           GoodNums = false;
+
+//TODO limit rel errors on row and col's. Weak peaks have row.col values migrate a lot
+
 
       if (!GoodNums)
 
-          g_log.debug(
+      {   g_log.debug(
             "   Bad Slice.Some params and errs are out of bounds or relative errors are too high");
+          return false;
+      }
 
       if (params[IIntensity] > 0)
-        if (errs[IIntensity] * SQRT(chisq) / params[IIntensity] > .1)
+        if (errs[IIntensity] * SQRT(chisq) / params[IIntensity] > .35)
         {
-
-          sprintf(logInfo, std::string("   Bad Slice. rel errors too large= %7.2f\n").c_str(),
-              errs[ITINTENS] * sqrt(chisq));
-
-            g_log.debug(std::string(logInfo));
+            g_log.debug()<<"   Bad Slice. rel errors too large= "<< errs[ITINTENS] * sqrt(chisq)<<std::endl;;
           return false;
         }
 
@@ -1450,16 +1759,26 @@ namespace Mantid
       double maxPeakHeightTheoretical = params[ITINTENS] / 2 / M_PI / sqrt(params[IVXX] * params[IVYY]
           - params[IVXY] * params[IVXY]);
 
-      if (maxPeakHeightTheoretical < 1.5)
+      double AvHeight = AttributeValues->StatBaseVals(IIntensities)/AttributeValues->StatBaseVals(ISS1)-params[IBACK];
+
+      if (maxPeakHeightTheoretical < 5*AvHeight || AvHeight < 0 || maxPeakHeightTheoretical < 0)
       {
 
-        sprintf(logInfo, std::string("   Bad Slice. Peak too small= %7.2f\n").c_str(),
-            maxPeakHeightTheoretical);
+       // sprintf(logInfo, std::string("   Bad Slice. Peak too small= %7.2f\n").c_str(),
+       //     maxPeakHeightTheoretical);
 
-           g_log.debug(std::string(logInfo));
+           g_log.debug()<<"   Bad Slice. Peak too small= "<<maxPeakHeightTheoretical<<
+                  "/"<<AvHeight<<std::endl;
         return false;
       }
 
+      //Exponential too steep, i.e. intensities at pixels 1 from center are <3* intensity center
+      if( params[IVXX]+params[IVYY] >
+               2.6*(params[IVXX]*params[IVYY]-params[IVXY]*params[IVXY]))
+          {
+        g_log.debug()<<"      Bad Slice. Too steep exponential"<< std::endl;
+             return false;
+          }
       return true;
     }
 
@@ -1484,10 +1803,10 @@ namespace Mantid
 
     }
 
-
-    void IntegratePeakTimeSlices::UpdateOutputWS( DataObjects::TableWorkspace_sptr         &TabWS,
+    //returns row where info was last added
+    int IntegratePeakTimeSlices::UpdateOutputWS( DataObjects::TableWorkspace_sptr         &TabWS,
                                                   const int                                  dir,
-                                                  const int                                  chan,
+                                                  const double                                  chan,
                                                   std::vector<double >                 const &params,
                                                   std::vector<double >                 const &errs,
                                                   std::vector<std::string>             const &names,
@@ -1510,8 +1829,8 @@ namespace Mantid
 
       int TableRow = static_cast<int>(TabWS->insertRow(newRowIndex));
 
-      int ncells = (int) (AttributeValues[ISS1]);
-      double chisq= max<double>(Chisq, AttributeValues[IIntensities]/max<int>(ncells,1));
+      int ncells = (int) (AttributeValues->StatBaseVals(ISS1));
+      double chisq= max<double>(Chisq, AttributeValues->StatBaseVals(IIntensities)/max<int>(ncells,1));
 
       TabWS->getRef<double> (std::string("Background"), TableRow) = params[Ibk];
       TabWS->getRef<double> (std::string("Channel"), TableRow) = chan;
@@ -1529,29 +1848,31 @@ namespace Mantid
       TabWS->getRef<double> (std::string("NCells"), TableRow) = ncells;
       TabWS->getRef<double> (std::string("ChiSqrOverDOF"), TableRow) = chisq;
 
-      TabWS->getRef<double> (std::string("TotIntensity"), TableRow) = AttributeValues[IIntensities];
+      TabWS->getRef<double> (std::string("TotIntensity"), TableRow) = AttributeValues->StatBaseVals(IIntensities);
       TabWS->getRef<double> (std::string("BackgroundError"), TableRow) = errs[Ibk] * SQRT(chisq);
-      TabWS->getRef<double> (std::string("ISAWIntensity"), TableRow) = AttributeValues[IIntensities]
+      TabWS->getRef<double> (std::string("ISAWIntensity"), TableRow) = AttributeValues->StatBaseVals(IIntensities)
                                                                              - params[Ibk] * ncells;
 
       TabWS->getRef<double> (std::string("ISAWIntensityError"), TableRow) = CalculateIsawIntegrateError(
-          params[Ibk], errs[Ibk], chisq, AttributeValues[IVariance], ncells);
+          params[Ibk], errs[Ibk], chisq, AttributeValues->StatBaseVals(IVariance), ncells);
       
       TabWS->getRef<double> (std::string("Time"), TableRow) = time;
 
-      TabWS->getRef<double>(std::string("TotalBoundary"), TableRow)= AttributeValues[ ITotBoundary];
-      TabWS->getRef<double>(std::string("NBoundaryCells"), TableRow)= AttributeValues[ INBoundary];
+      TabWS->getRef<double>(std::string("TotalBoundary"), TableRow)= AttributeValues->StatBaseVals( ITotBoundary);
+      TabWS->getRef<double>(std::string("NBoundaryCells"), TableRow)= AttributeValues->StatBaseVals( INBoundary);
 
 
-      TabWS->getRef<double> (std::string("Start Row"), TableRow) = AttributeValues[IStartRow];
-      TabWS->getRef<double> (std::string("End Row"), TableRow) = AttributeValues[IStartRow]
-          + AttributeValues[INRows] - 1;
+      TabWS->getRef<double> (std::string("Start Row"), TableRow) = AttributeValues->StatBaseVals(IStartRow);
+      TabWS->getRef<double> (std::string("End Row"), TableRow) = AttributeValues->StatBaseVals(IStartRow)
+          + AttributeValues->StatBaseVals(INRows) - 1;
 
-      TabWS->getRef<double> (std::string("Start Col"), TableRow) = AttributeValues[IStartCol];
-      TabWS->getRef<double> (std::string("End Col"), TableRow) = AttributeValues[IStartCol]
-          + AttributeValues[INCol] - 1;
-      TabWS->getRef<double> (std::string("TotIntensityError"), TableRow) = SQRT(AttributeValues[IVariance]);
+      TabWS->getRef<double> (std::string("Start Col"), TableRow) = AttributeValues->StatBaseVals(IStartCol);
+      TabWS->getRef<double> (std::string("End Col"), TableRow) = AttributeValues->StatBaseVals(IStartCol)
+          + AttributeValues->StatBaseVals(INCol) - 1;
+      TabWS->getRef<double> (std::string("TotIntensityError"), TableRow) = SQRT(AttributeValues->StatBaseVals(IVariance));
       TabWS->getRef<string>( std::string("SpecIDs"), TableRow ) = spec_idList;
+
+      return newRowIndex;
     }
 
     
@@ -1568,161 +1889,173 @@ namespace Mantid
     {
       int Ibk = find("Background", names);
       double err =0;
+      double intensty=0;
       if( !EdgePeak  )
       {
         err = CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceVariance, ncells);
-
+        intensty =TotSliceIntensity - params[IBACK] * ncells;
         TotIntensity += TotSliceIntensity - params[IBACK] * ncells;
 
         TotVariance += err * err;
 
       }else
       {
-       int IerrInt = find("Intensity", names);
-       TotIntensity += params[IerrInt];
-       err = errs[IerrInt];
+       int IInt = find("Intensity", names);
+       intensty = params[IInt];
+       TotIntensity += params[IInt];
+       err = errs[IInt];
        TotVariance += err * err;
 
       }
+     // std::cout<<EdgePeak<<"("<<intensty<<","<<AttributeValues->CalcISAWIntensity(params.data())<<")("
+     //       <<err*err<<","<< AttributeValues->CalcISAWIntensityVariance(params.data(),errs.data(), chisqdivDOF)<<")"<<std::endl;
 
     }
 
+    bool DataModeHandler::CalcVariances( )
+    {
+      if( !CalcVariance)
+        return false;
 
-    bool IntegratePeakTimeSlices::IsEnoughData()
+      double param[7]={back_calc,Intensity_calc,col_calc,row_calc,Vx_calc,Vy_calc, Vxy_calc};
+
+      double r = CalcSampleIntensityMultiplier(param);
+
+      if( r <= 1.0)
+        return CalcVariance;
+      else
+        return false;
+    }
+
+   bool DataModeHandler::IsEnoughData( double *ParameterValues, Kernel::Logger& g_log )
     {
 
-      char logInfo[200];
 
-      double VIx0_num = AttributeValues[ISSIxx] - 2 * ParameterValues[IXMEAN] * AttributeValues[ISSIx]
-          + ParameterValues[IXMEAN] * ParameterValues[IXMEAN] * AttributeValues[IIntensities];
+      double VIx0_num = StatBase[ISSIxx] - 2 * ParameterValues[IXMEAN] * StatBase[ISSIx]
+          + ParameterValues[IXMEAN] * ParameterValues[IXMEAN] * StatBase[IIntensities];
 
-      double VIy0_num = AttributeValues[ISSIyy] - 2 * ParameterValues[IYMEAN] * AttributeValues[ISSIy]
-          + ParameterValues[IYMEAN] * ParameterValues[IYMEAN] * AttributeValues[IIntensities];
+      double VIy0_num = StatBase[ISSIyy] - 2 * ParameterValues[IYMEAN] * StatBase[ISSIy]
+          + ParameterValues[IYMEAN] * ParameterValues[IYMEAN] * StatBase[IIntensities];
 
-      double VIxy0_num = AttributeValues[ISSIxy] - ParameterValues[IXMEAN] * AttributeValues[ISSIy]
-          - ParameterValues[IYMEAN] * AttributeValues[ISSIx] + ParameterValues[IYMEAN]
-          * ParameterValues[IXMEAN] * AttributeValues[IIntensities];
+      double VIxy0_num = StatBase[ISSIxy] - ParameterValues[IXMEAN] * StatBase[ISSIy]
+          - ParameterValues[IYMEAN] * StatBase[ISSIx] + ParameterValues[IYMEAN]
+          * ParameterValues[IXMEAN] * StatBase[IIntensities];
 
-      double Vx0_num = AttributeValues[ISSxx] - 2 * ParameterValues[IXMEAN] * AttributeValues[ISSx]
-          + ParameterValues[IXMEAN] * ParameterValues[IXMEAN] * AttributeValues[INRows]
-              * AttributeValues[INCol];
+      double Vx0_num = StatBase[ISSxx] - 2 * ParameterValues[IXMEAN] * StatBase[ISSx]
+          + ParameterValues[IXMEAN] * ParameterValues[IXMEAN] * StatBase[INRows]
+              * StatBase[INCol];
 
-      double Vy0_num = AttributeValues[ISSyy] - 2 * ParameterValues[IYMEAN] * AttributeValues[ISSy]
-          + ParameterValues[IYMEAN] * ParameterValues[IYMEAN] * AttributeValues[INRows]
-              * AttributeValues[INCol];
+      double Vy0_num = StatBase[ISSyy] - 2 * ParameterValues[IYMEAN] * StatBase[ISSy]
+          + ParameterValues[IYMEAN] * ParameterValues[IYMEAN] * StatBase[INRows]
+              * StatBase[INCol];
 
-      double Vxy0_num = AttributeValues[ISSIxy] - ParameterValues[IXMEAN] * AttributeValues[ISSIy]
-          - ParameterValues[IYMEAN] * AttributeValues[ISSIx] + ParameterValues[IYMEAN]
-          * ParameterValues[IXMEAN] * AttributeValues[INRows] * AttributeValues[INCol];
+      double Vxy0_num = StatBase[ISSIxy] - ParameterValues[IXMEAN] * StatBase[ISSIy]
+          - ParameterValues[IYMEAN] * StatBase[ISSIx] + ParameterValues[IYMEAN]
+          * ParameterValues[IXMEAN] * StatBase[INRows] * StatBase[INCol];
 
-      double Denominator = AttributeValues[IIntensities] - ParameterValues[IBACK]
-          * AttributeValues[INRows] * AttributeValues[INCol];
+      double Denominator = StatBase[IIntensities] - ParameterValues[IBACK]
+          * StatBase[INRows] * StatBase[INCol];
 
-      double Vx = (VIx0_num - ParameterValues[IBACK] * Vx0_num) / Denominator;
-      double Vy = (VIy0_num - ParameterValues[IBACK] * Vy0_num) / Denominator;
-      double Vxy = (VIxy0_num - ParameterValues[IBACK] * Vxy0_num) / Denominator;
+      if( Denominator <=0)
+      {
+        g_log.debug()<<" No counts after background removed"<<std::endl;
+        return false;
+      }
+      double Vx = ( VIx0_num - ParameterValues[IBACK] * Vx0_num ) / Denominator;
+      double Vy = ( VIy0_num - ParameterValues[IBACK] * Vy0_num ) / Denominator;
+      double Vxy = ( VIxy0_num - ParameterValues[IBACK] * Vxy0_num ) / Denominator;
 
       double Z = 4 * M_PI * M_PI * (Vx * Vy - Vxy * Vxy);
 
-      if (fabs(Z) < .10) //Not high enough of a peak
+      if ( fabs(Z) < .10 ) //Not high enough of a peak
       {
-        sprintf(logInfo, std::string("   Not Enough Data, Peak Height(%7.2f) is too low\n").c_str(), Z);
-
-        g_log.debug(std::string(logInfo));
+        g_log.debug()<<"   Not Enough Data, Peak Heigh "<<Z <<" is too low"<<std::endl;
         return false;
       }
-
-      // if (Vx <= 0 || Vy <= 0 || Vxy * Vxy / Vx / Vy > .8)// All points close to one line
-      //    return false;
 
       return true;
 
     }
-    /*
-       int* ArryofIDs = new int[500];
-        ArryofIDs[0]=500;
-        ArryofIDs[1]=2;
-        Kernel::V3D Center = pixelp->getPos();
-        double Radius = .5;
-        std::cout<<"IntegratePeakCheck G"<<std::endl;
-        boost::shared_ptr< Geometry::RectangularDetector> comp1 =
-                boost::const_pointer_cast< Geometry::RectangularDetector> (bankR);
-        boost::shared_ptr<Geometry::IComponent>comp =
-            boost::dynamic_pointer_cast<Geometry::IComponent>( comp1);
-        std::cout<<"IntegratePeakCheck H"<<std::endl;
-        std::cout<<"Neighbors="<<getNeighborPixIDs(comp, Center,Radius,ArryofIDs)<<","<<ArryofIDs[1]<<Center<<std::endl;
-        std::cout<<"IntegratePeakCheck I"<<std::endl;
-        for( int i=2; i<ArryofIDs[1];i++)
-        {
-          std::pair< int, int > res = bankR->getXYForDetectorID( ArryofIDs[i]);
-          std::cout<<"("<<res.first<<","<<res.second<<")";
 
-        }
-        std::cout<<std::endl;
-        delete ArryofIDs;
+   double DataModeHandler::CalcISAWIntensity(const double* params)const
+   {
 
-      bool IntegratePeakTimeSlices:: getNeighborPixIDs( boost::shared_ptr< Geometry::IComponent> comp,
-                               Kernel::V3D &Center,
-                               double &Radius,
-                              int* &ArryofID)
-       {
-            std::cout<< comp->type()<<std::endl;
-            int N = ArryofID[1];
-            int MaxN= ArryofID[0];
-            if( N >= MaxN)
-              return false;
-            Geometry::BoundingBox box;
-            comp->getBoundingBox( box);
+     double ExperimentalIntensity  = StatBase[IIntensities]-
+                                         params[IBACK]*StatBase[ISS1];
 
-            double minx = Center.X() - Radius;
-            double miny = Center.Y() - Radius;
-            double minz = Center.Z() - Radius;
-            double maxx = Center.X() + Radius;
-            double maxy = Center.Y() + Radius;
-            double maxz = Center.Z() + Radius;
+     double FitIntensity =  params[ITINTENS];
+     double r= CalcSampleIntensityMultiplier( params );
 
-            if( box.xMin()>=maxx)
-                return true;
-            if( box.xMax() <=minx)
-               return true;;
-            if( box.yMin()>=maxy)
-                return true;;
-            if( box.yMax() <=miny)
-               return true;;
-            if( box.zMin()>=maxz)
-                return true;;
-            if( box.zMax() <=minz)
-               return true;;
+     double alpha =(float)( 0+.5*( r-1 ) );
+     alpha = std::min<double>( 1.0f , alpha );
 
-            if( comp->type().compare("Detector")==0 || comp->type().compare("RectangularDetectorPixel")==0)
-             {       std::cout<<"Detector case"<<std::endl;
-                     boost::shared_ptr<Geometry::Detector> det =   boost::dynamic_pointer_cast<Geometry::Detector>( comp);
-                     ArryofID[N]=  det->getID();
-                     N++;
-                     ArryofID[1] = N;
-                    return true;
-              }
+     return ExperimentalIntensity*r*( 1-alpha )+ alpha * FitIntensity;
 
-             boost::shared_ptr<const Geometry::CompAssembly> Assembly =
-                 boost::dynamic_pointer_cast<const Geometry::CompAssembly>( comp);
+   }
 
-             if( !Assembly)
-                return true;
+   double DataModeHandler::CalcISAWIntensityVariance( const double* params,const double* errs, double chiSqOvDOF)const
+   {
 
-             bool b = true;
-             std::cout<<"#kids="<<Assembly->nelements()<<std::endl;
-             for( int i=0; i< Assembly->nelements() && b; i++)
-                b= getNeighborPixIDs( Assembly->getChild(i),Center,Radius,ArryofID);
+     int ncells = (int)StatBase[ISS1];
+     double B = StatBase[IVariance] / ncells;
+      if( B < chiSqOvDOF)
+         B = chiSqOvDOF;
 
-             return b;
-       }
-   */
+     double ExperimVar = StatBase[IVariance];
+     double IntensityBackError = errs[IBACK] * sqrt(B);
+
+
+     ExperimVar += IntensityBackError * IntensityBackError * ncells*ncells + params[IBACK]*ncells;
+
+     double FitVar= errs[ITINTENS]* errs[ITINTENS]* B;
+
+     double r= CalcSampleIntensityMultiplier( params );
+     double alpha =(float)( 0+.5*( r - 1 ));
+      alpha = std::min<double>( 1.0f , alpha );
+
+      return ExperimVar*r*r*( 1 - alpha ) + alpha * FitVar;
+   }
+
+   double DataModeHandler::CalcSampleIntensityMultiplier( const double* params)const
+   {
+           int MinRow = (int)StatBase[ IStartRow ];
+           int MaxRow = MinRow+(int)StatBase[ INRows ]-1;
+           int MinCol = (int)StatBase[ IStartCol ];
+           int MaxCol= MinCol + (int)StatBase[ INCol ]-1;
+           double r=1;
+
+           if( params[IVXX] <=0 || params[IVYY]<=0)
+             return 1.0;
+
+           double NstdX = 4*min<double>(  params[ IXMEAN ]-MinCol , MaxCol-params[ IXMEAN ] )
+                            /sqrt(params[ IVXX ]);
+
+           double NstdY = 4*min<double>(  params[ IYMEAN ] - MinRow , MaxRow-params[ IYMEAN ] )
+                         /sqrt(params[IVYY]);
+           double sgn = 1;
+           if( NstdX < 0 ){ sgn = -1; }
+
+           if( NstdX >= 7.5 )r = 1.0;
+           else if( sgn > 0 ) r = 1/probs[(int)( NstdX+.5 )];
+           else  r = 1/(1-probs[(int)( -NstdX+.5)]  );
+
+          if( NstdY < 0 ){ sgn = -1; }
+
+           if( NstdY >= 7.5 )r *= 1.0;
+           else if( sgn >0)r *= 1/probs[(int)( NstdY+.5 )];
+           else  r *= 1/(1-probs[(int)(-NstdY+.5) ]);
+
+           r = std::max<double>( r , 1.0 );
+           return r;
+   }
+
     void IntegratePeakTimeSlices::FindPlane( V3D & center, V3D & xvec, V3D& yvec,
-                                             double &ROW, double &COL,
-                                             double &pixWidthx, double&pixHeighty,
+                                             double &ROW, double &COL,int &NROWS,
+                                             int & NCOLS,double &pixWidthx, double&pixHeighty,
                                              DataObjects::Peak const &peak) const
     {
 
+      NROWS= NCOLS = -1;
       IDetector_const_sptr det = peak.getDetector();
       V3D detPos = det->getPos();
 
@@ -1730,55 +2063,7 @@ namespace Mantid
       center.setY( detPos.Y());
       center.setZ( detPos.Z());
 
-      boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
-      /*  //Will not use shape() then surface normals. Only works for rectangular detectors.
-    // RectangleDetectors also work but no other Composite classes
-
-      std::cout<<"    C"<< parent->type()<<std::endl;
-      boost::shared_ptr<const Mantid::Geometry::ObjComponent> ObjCompParent =
-          boost::dynamic_pointer_cast<const Mantid::Geometry::ObjComponent >
-            ( det);//parent);
-      std::cout<<"    D"<<std::endl;
-      while ( !ObjCompParent && parent)
-      {
-        std::cout<<"    D "<< parent->type()<<std::endl;
-        parent = parent->getParent();
-        ObjCompParent =
-                  boost::dynamic_pointer_cast<const Mantid::Geometry::ObjComponent >
-                    ( parent);
-      }
-      if( !ObjCompParent)
-      {
-        std::cout<<"detector parent is NOT an ObjComponent"<<std::endl;
-        return;
-      }
-      Object_const_sptr shape = ObjCompParent->shape();
-      const std::vector<const Surface*> surfaces=shape->getSurfacePtr  ( ) ;
-      V3D surfaceNormal(0,0,0);
-      V3D badSurfaceNormal(0,0,0);
-      double minDistance = 1000000.00;
-      std::cout<<"    nsurfaces for "<< det->getName()<<"="<<surfaces.size()<<std::endl;
-      for(size_t i =0; i< surfaces.size() ; i++)
-      {
-        std::cout<<"    dist of det from surface "<<i<<" is "<<surfaces[i]->distance( det->getPos())<<std::endl;
-        std::cout<<"       surf normal="<<surfaces[i]->surfaceNormal( det->getPos())<<std::endl;
-        if( surfaces[i]->distance( det->getPos())< minDistance)
-        {
-          surfaceNormal = surfaces[i]->surfaceNormal( det->getPos());
-          minDistance= surfaces[i]->distance( det->getPos());
-        }
-      }
-      std::cout<<"    surface normal is "<<surfaceNormal<<std::endl;
-      if( surfaceNormal == badSurfaceNormal || minDistance >100)
-      {
-        std::cout<<"Could not find a close surface"<<std::endl;
-        return;
-      }
-     */
       boost::shared_ptr<const Detector> dett = boost::dynamic_pointer_cast<const Detector >(det);
-
-       BoundingBox B;
-       dett->getBoundingBox( B );
 
        pixWidthx  = dett->getWidth();
        pixHeighty = dett->getHeight();
@@ -1800,11 +2085,16 @@ namespace Mantid
        yvec.setX( yaxis0.X());
        yvec.setY( yaxis0.Y());
        yvec.setZ( yaxis0.Z());
-       ROW=0;
-       COL=0;
-       boost::shared_ptr<const RectangularDetector>ddet = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
-       if( !ddet)
-         ddet = boost::dynamic_pointer_cast<const RectangularDetector>(parent->getParent());
+       ROW=peak.getRow();
+       COL=peak.getCol();
+       Geometry::Instrument_const_sptr inst =peak.getInstrument();
+       if( !inst)
+          throw std::invalid_argument("No instrument for peak");
+       boost::shared_ptr< const
+             IComponent >  panel =inst->getComponentByName( peak.getBankName());
+
+       boost::shared_ptr<const RectangularDetector>ddet = boost::dynamic_pointer_cast<const RectangularDetector>(panel);
+
        if( ddet )
        {
           std::pair<int,int> CR =ddet->getXYForDetectorID(det->getID());
@@ -1813,9 +2103,38 @@ namespace Mantid
           pixWidthx = ddet->xstep();
           pixHeighty= ddet->ystep();
 
-       }
+          NROWS = ddet->ypixels();
+          NCOLS = ddet->xpixels();
 
-  // std::cout<<"Center,ROW,COL="<<center<<","<<ROW<<","<<COL<<","<<CellWidth<<","<<CellHeight<<std::endl;
+          return;
+
+       }
+       //Get NROWS and NCOLS for other panels
+      NROWS= NCOLS = -1;
+
+       if( !inst)
+         return;
+
+       if( !panel)
+         return;
+       boost::shared_ptr<const Component>compPanel =
+                        boost::dynamic_pointer_cast<const Component>(panel);
+       boost::shared_ptr<IComponent> panel1( compPanel->base()->clone());
+       BoundingBox B;
+
+       Quat rot =panel1->getRotation();
+
+       rot.inverse();
+
+       panel1->rotate(rot);
+
+       panel1->getBoundingBox(B);
+
+
+       NROWS = (int)((B.yMax()-B.yMin())/pixHeighty+.5);
+       NCOLS = (int)((B.xMax()-B.xMin())/pixWidthx+.5);
+
+
     }
 }//namespace Crystal
 }//namespace Mantid
