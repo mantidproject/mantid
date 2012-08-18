@@ -122,6 +122,8 @@ void export_Run()
   class_< Run,  boost::noncopyable >("Run", no_init)
     .def("getProtonCharge", &Run::getProtonCharge, "Return the total good proton charge for the run")
 
+    .def("integrateProtonCharge", &Run::integrateProtonCharge, "Return the total good proton charge for the run")
+
     .def("hasProperty", &Run::hasProperty, "Returns True if the given log value is contained within the run")
 
     .def("getProperty", &Run::getProperty, return_value_policy<return_by_value>(), "Returns the named property (log value). Use '.value' to return the value.")
