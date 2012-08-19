@@ -87,7 +87,13 @@ void AlignAndFocusPowder::init()
   declareProperty("CropWavelengthMin", 0., "Crop the data at this minimum wavelength. Overrides LowResRef.");
   declareProperty("TMin", 0.0, "Minimum for TOF or dspace axis. (Default 0.) ");
   declareProperty("TMax", 0.0, "Maximum for TOF or dspace axis. (Default 0.) ");
+  declareProperty("PrimaryFlightPath", -1.0, "If positive, focus postiions are changed.  (Default -1) ");
+  declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
+    "Spectrum IDs (note that it is not detector ID or workspace indices).");
 
+  declareProperty(new ArrayProperty<double>("L2"), "Seconary flight (L2) paths for each detector");
+  declareProperty(new ArrayProperty<double>("Polar"), "Polar angles (two thetas) for detectors");
+  declareProperty(new ArrayProperty<double>("Azimuthal"), "Azimuthal angles (out-of-plain) for detectors");
 
 }
 
@@ -106,6 +112,12 @@ void AlignAndFocusPowder::exec()
   offsetsWS = getProperty("OffsetsWorkspace");
   maskWS = getProperty("MaskWorkspace");
   groupWS = getProperty("GroupingWorkspace");
+  l1 = getProperty("PrimaryFlightPath");
+  specids = getProperty("SpectrumIDs");
+  l2s = getProperty("L2");
+  tths = getProperty("Polar");
+  phis = getProperty("Azimuthal");
+
 
   try {
     if (!offsetsWS) offsetsWS = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(instName+"_offsets");
@@ -260,7 +272,21 @@ void AlignAndFocusPowder::exec()
   focusAlg->executeAsSubAlg();
   m_outputW = focusAlg->getProperty("OutputWorkspace");
 
-/*  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
+  if (l1 > 0)
+  {
+    API::IAlgorithm_sptr editAlg = createSubAlgorithm("EditInstrumentGeometry");
+    editAlg->setProperty("Workspace", m_outputW);
+    editAlg->setProperty("NewInstrument", false);
+    editAlg->setProperty("PrimaryFlightPath", l1);
+    editAlg->setProperty("Polar", tths);
+    editAlg->setProperty("SpectrumIDs", specids);
+    editAlg->setProperty("L2", l2s);
+    editAlg->setProperty("Azimuthal", phis);
+    editAlg->executeAsSubAlg();
+    m_outputW = editAlg->getProperty("Workspace");
+  }
+
+  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
   convert3Alg->setProperty("InputWorkspace", m_outputW);
   convert3Alg->setProperty("OutputWorkspace", m_outputW);
   convert3Alg->setProperty("Target","TOF");
@@ -277,7 +303,7 @@ void AlignAndFocusPowder::exec()
   rebin3Alg->setProperty("OutputWorkspace", m_outputW);
   rebin3Alg->setProperty("Params",params);
   rebin3Alg->executeAsSubAlg();
-  m_outputW = rebin3Alg->getProperty("OutputWorkspace");*/
+  m_outputW = rebin3Alg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace",m_outputW);
 
 }
@@ -486,7 +512,21 @@ void AlignAndFocusPowder::execEvent()
 
   doSortEvents(m_outputW);
 
-/*  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
+  if (l1 > 0)
+  {
+    API::IAlgorithm_sptr editAlg = createSubAlgorithm("EditInstrumentGeometry");
+    editAlg->setProperty("Workspace", m_outputW);
+    editAlg->setProperty("NewInstrument", false);
+    editAlg->setProperty("PrimaryFlightPath", l1);
+    editAlg->setProperty("Polar", tths);
+    editAlg->setProperty("SpectrumIDs", specids);
+    editAlg->setProperty("L2", l2s);
+    editAlg->setProperty("Azimuthal", phis);
+    editAlg->executeAsSubAlg();
+    m_outputW = editAlg->getProperty("Workspace");
+  }
+
+  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
   convert3Alg->setProperty("InputWorkspace", m_outputW);
   convert3Alg->setProperty("OutputWorkspace", m_outputW);
   convert3Alg->setProperty("Target","TOF");
@@ -503,7 +543,7 @@ void AlignAndFocusPowder::execEvent()
   rebin3Alg->setProperty("OutputWorkspace", m_outputW);
   rebin3Alg->setProperty("Params",params);
   rebin3Alg->executeAsSubAlg();
-  m_outputW = rebin3Alg->getProperty("OutputWorkspace");*/
+  m_outputW = rebin3Alg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace",m_outputW);
 
 }

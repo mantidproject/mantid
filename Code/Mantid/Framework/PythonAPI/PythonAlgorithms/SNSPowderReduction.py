@@ -193,7 +193,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("VanadiumBackgroundNumber", 0) #, BoundedValidator(-1))
         self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load, 
                                       extensions = ["cal"]))
-        self.declareProperty(FileProperty(name="CharacterizationRunsFile",defaultValue="",action=FileAction.Load, 
+        self.declareProperty(FileProperty(name="CharacterizationRunsFile",defaultValue="",action=FileAction.OptionalLoad, 
                                       extensions = ["txt"]),"File with characterization runs denoted")
         self.declareProperty("UnwrapRef", 0.,
                              "Reference total flight path for frame unwrapping. Zero skips the correction")
@@ -229,7 +229,6 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty(FileProperty(name="OutputDirectory",defaultValue="",action=FileAction.Directory))
         self.declareProperty("NormalizeByCurrent", True, "Normalized by Current")
         self.declareProperty("FinalDataUnits", "dSpacing", StringListValidator(["dSpacing","MomentumTransfer"]))
-        #self.declareProperty(ITableWorkspaceProperty("TableWorkspace", "", Direction.Output), "Name of Focus Position Table Workspace")
 
     def _loadData(self, runnumber, extension, filterWall=None, **chunk):
         if  runnumber is None or runnumber <= 0:
@@ -331,6 +330,9 @@ class SNSPowderReduction(PythonAlgorithm):
             XMin = binning[0]
             XMax = binning[-1]
             
+        focusPos = self._config.getFocusPos()
+        if focusPos is None:
+	    focusPos = {}
         wksp = api.AlignAndFocusPowder(InputWorkspace=wksp,OutputWorkspace=wksp,CalFileName=calib,Params=binning,Dspacing=info.has_dspace,
             CropMin=XMin,CropMax=XMax,PreserveEvents=preserveEvents,
             FilterBadPulses=self._filterBadPulses and filterBadPulsesOverride,
@@ -338,15 +340,7 @@ class SNSPowderReduction(PythonAlgorithm):
             FilterLogName=self.getProperty("FilterByLogValue").value,FilterLogMinimumValue=self.getProperty("FilterMinimumValue").value,
             FilterLogMaximumValue=self.getProperty("FilterMaximumValue").value,
             UnwrapRef=self.getProperty("UnwrapRef").value,LowResRef=self.getProperty("LowResRef").value,
-            CropWavelengthMin=self.getProperty("CropWavelengthMin").value,TMin=info.tmin,TMax=info.tmax)
-        
-        focusPos = self._config.getFocusPos()
-        if not focusPos is None:
-            api.EditInstrumentGeometry(Workspace=wksp, NewInstrument=False, **focusPos)
-            if (self._config.iparmFile is not None) and (len(self._config.iparmFile) > 0):
-                wksp.getRun()['iparm_file'] = self._config.iparmFile
-        wksp = api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
-        wksp = api.Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[binning[1]]) # reset bin width
+            CropWavelengthMin=self.getProperty("CropWavelengthMin").value,TMin=info.tmin,TMax=info.tmax, **focusPos)
 
         return wksp
 

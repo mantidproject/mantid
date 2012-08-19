@@ -81,6 +81,11 @@ namespace Mantid
       DataObjects::OffsetsWorkspace_sptr offsetsWS;
       API::MatrixWorkspace_sptr maskWS;
       DataObjects::GroupingWorkspace_sptr groupWS;
+      double l1;
+      std::vector<int32_t> specids;
+      std::vector<double> l2s;
+      std::vector<double> tths;
+      std::vector<double> phis;
       void doSortEvents(Mantid::API::Workspace_sptr ws);
 
     };
