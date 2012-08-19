@@ -936,7 +936,7 @@ namespace Mantid
                     if(!done && isGoodFit(params, errs, names, chisq))
                     {
 
-                      if( LastTableRow >=0 && LastTableRow < TabWS->rowCount())
+                      if( LastTableRow >=0 && LastTableRow < (int) TabWS->rowCount())
                         TabWS->removeRow(LastTableRow);
                       else
                         LastTableRow =-1;

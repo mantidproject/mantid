@@ -194,9 +194,9 @@ public:
        TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
   
 
-       TS_ASSERT_LESS_THAN(fabs(intensity -60000), 1000.0);
+       TS_ASSERT_LESS_THAN(fabs(intensity -60000), 1500.0);
       //Not sure why this reduced the error so much in the test
-      TS_ASSERT_LESS_THAN(fabs(sigma -460), 41.0);
+      TS_ASSERT_LESS_THAN(fabs(sigma -539), 21.0);
 
 
       TS_ASSERT_EQUALS( Twk->rowCount(), 7);
@@ -204,20 +204,20 @@ public:
       if( Twk->rowCount() <5)
           return;
 
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Time"), 0) - 19250), 20);  
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Time"), 0) - 19200), 20);
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) -  1.4  ), .5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) -  1.2619  ), .5);
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) -  11300), 120);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) -  11309.8 ), 120);
       
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  437), 5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  553), 5);
     
 
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   77), 3.5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   60.4183), 3.5);
 
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) - 4361.8 ), 10);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) -  5298.4  ), 10);
       
   
 
@@ -227,7 +227,7 @@ public:
       std::cout<<"Intensitty="<<intensity<<"   sigma="<<sigma<<
                "  Theoret intensity="<<TotIntensity<<std::endl;
       std::cout<<std::setw(15)<<"Act Int";
-      for( int j=12; j< 12+Twk->rowCount();j++)
+      for( int j=12; j< 12+(int)Twk->rowCount();j++)
              std::cout<< setw(12)<<T[j];
       std::cout<<std::endl;
 
@@ -249,107 +249,32 @@ public:
 
 
 
-  Intensitty=59870.7   sigma=665.098
-           Time       19250       19350       19450       19550       19650       19750       19850
-        Channel          12          13          14          15          16          17          18
-     Background     1.42777     1.52378      1.5442     1.59245      1.5442     1.52378     1.42777
-      Intensity     3728.05        7427     11136.6     14848.6     11136.6        7427     3728.05
-           Mcol     17.0001          17          17          17          17          17     17.0001
-           Mrow     12.0001     12.0001          12          12          12     12.0001     12.0001
-          SScol     3.98569     3.97392     3.97892     3.97874     3.97892     3.97392     3.98569
-          SSrow     3.98622     3.97946     3.97847      3.9784     3.97847     3.97946     3.98622
-           SSrc -0.00115238 5.38493e-05 0.000837369 0.000628028 0.000837369 5.38493e-05 -0.00115238
-         NCells         169         156         169         169         169         156         169
-  ChiSqrOverDOF     35.7813     155.375     321.268     571.226     321.268     155.375     35.7813
-   TotIntensity      3986.6      7718.4     11486.6     15236.6     11486.6      7718.4      3986.6
-BackgroundError    0.547322     1.20823     1.64171     2.18909     1.64171     1.20823    0.547322
-FitIntensityError     50.3565     106.679     150.909     201.222     150.909     106.679     50.3565
-  ISAWIntensity     3745.31     7480.69     11225.6     14967.5     11225.6     7480.69     3745.31
-ISAWIntensityError     113.065     208.524     297.868      390.35     297.868     208.524     113.065
-      Start Row           5           6           6           6           6           6           5
-        End Row          17          17          18          18          18          17          17
-      Start Col          10          11          11          11          11          11          10
-        End Col          22          23          23          23          23          23          22
-------------------------------------------------------------------------------------
-better-Calc new Variances instead of using attrib sent in  4 std dev
-Intensitty=59953.3   sigma=621.308  Theoret intensity=60000
+Intensity=58989.5   sigma=539.266  Theoret intensity=60000
         Act Int        3750        7500       11250       15000       11250        7500        3750
-           Time       19250       19350       19450       19550       19650       19750       19850
-        Channel          12          13          14          15          16          17          18
-     Background     1.40659     1.42122     1.43184     1.44245     1.43184     1.42122     1.40659
-      Intensity     3728.63     7453.29     11179.9     14906.6     11179.9     7453.29     3728.63
-           Mcol          17          17          17          17          17          17          17
-           Mrow          12          12          12          12          12          12          12
-          SScol     3.98984     3.98363     3.98363     3.98363     3.98363     3.98363     3.98984
-          SSrow     3.98933     3.98363     3.98363     3.98363     3.98363     3.98363     3.98933
-           SSrc-6.21198e-14-1.64668e-12-1.28421e-12-9.32082e-13-1.28421e-12-1.64668e-12-6.21198e-14
-         NCells         289         289         289         289         289         289         289
-  ChiSqrOverDOF      20.689     83.3321     187.497     333.329     187.497     83.3321      20.689
-   TotIntensity      4154.6      7904.6     11654.6     15404.6     11654.6      7904.6      4154.6
-BackgroundError    0.294296    0.590553    0.885829     1.18111    0.885829    0.590553    0.294296
-FitIntensityError     35.4244     71.0317     106.547     142.063     106.547     71.0317     35.4244
-  ISAWIntensity      3748.1     7493.87     11240.8     14987.7     11240.8     7493.87      3748.1
-ISAWIntensityError     108.604     193.503      278.58     363.777      278.58     193.503     108.604
-  TotalBoundary        89.6        89.6        89.6        89.6        89.6        89.6        89.6
- NBoundaryCells          64          64          64          64          64          64          64
-      Start Row           3           4           4           4           4           4           3
-        End Row          19          20          20          20          20          20          19
-      Start Col           9           9           9           9           9           9           9
-        End Col          25          25          25          25          25          25          25
+           Time       19200       19350       19450       19550       19650       19750       19900
+        Channel        11.5          13          14          15          16          17        18.5
+     Background     2.78004      1.2619     1.26187     1.26226     1.26187      1.2619     2.78004
+      Intensity     3751.16     7556.68     11309.8       15063     11309.8     7556.68     3751.16
+           Mcol          27          27          27          27          27          27          27
+           Mrow     22.0001     22.0001     22.0001     22.0001     22.0001     22.0001     22.0001
+          SScol     4.45014     4.45002     4.45012     4.45013     4.45012     4.45002     4.45014
+          SSrow      4.4498     4.45009     4.45004     4.45006     4.45004     4.45009      4.4498
+           SSrc 0.000203427 0.000317585 0.000485281 0.000653647 0.000485281 0.000317585 0.000203427
+         NCells         553         553         553         553         553         553         553
+  ChiSqrOverDOF     9.58119     26.8175     60.4183     107.505     60.4183     26.8175     9.58119
+   TotIntensity      5298.4      8274.2     12024.2     15774.2     12024.2      8274.2      5298.4
+BackgroundError    0.144835    0.242935    0.367252    0.491398    0.367252    0.242935    0.144835
+FitIntensityError     33.4156      56.727     88.5118     119.975     88.5118      56.727     33.4156
+  ISAWIntensity     3761.04     7576.37     11326.4     15076.2     11326.4     7576.37     3761.04
+ISAWIntensityError     115.112     164.378     232.309     300.527     232.309     164.378     115.112
+  TotalBoundary       347.2       173.6       173.6       173.6       173.6       173.6       347.2
+ NBoundaryCells         124         124         124         124         124         124         124
+      Start Row           9           9           9           9           9           9           9
+        End Row          35          35          35          35          35          35          35
+      Start Col          14          14          14          14          14          14          14
+        End Col          40          40          40          40          40          40          40
+TotIntensityError     72.7901     90.9626     109.655     125.595     109.655     90.9626     72.7901
 
-========================================================================================
-Circular regions
-Intensitty=59982.9   sigma=606.577  Theoret intensity=60000
-        Act Int        3750        7500       11250       15000       11250        7500        3750
-           Time       19250       19350       19450       19550       19650       19750       19850
-        Channel          12          13          14          15          16          17          18
-     Background     1.40266     1.40532     1.40798     1.41064     1.40798     1.40532     1.40266
-      Intensity     3733.82     7467.64     11201.5     14935.3     11201.5     7467.64     3733.82
-           Mcol          27          27          27          27          27          27          27
-           Mrow          22          22          22          22          22          22          22
-          SScol     3.99206     3.99206     3.99206     3.99206     3.99206     3.99206     3.99206
-          SSrow     3.99206     3.99206     3.99206     3.99206     3.99206     3.99206     3.99206
-           SSrc-5.34109e-12-5.46531e-12-4.38881e-12-2.48423e-12-4.38881e-12-5.46531e-12-5.34109e-12
-         NCells         401         401         401         401         401         401         401
-  ChiSqrOverDOF     14.8788     59.5151     133.909     238.061     133.909     59.5151     14.8788
-   TotIntensity      4311.4      8061.4     11811.4     15561.4     11811.4      8061.4      4311.4
-BackgroundError    0.205936    0.411872    0.617809    0.823745    0.617809    0.411872    0.205936
-FitIntensityError     29.2084     58.4169     87.6253     116.834     87.6253     58.4169     29.2084
-  ISAWIntensity     3748.93     7497.87     11246.8     14995.7     11246.8     7497.87     3748.93
-ISAWIntensityError     108.136     189.481     271.573     353.892     271.573     189.481     108.136
-  TotalBoundary       151.2       151.2       151.2       151.2       151.2       151.2       151.2
- NBoundaryCells         108         108         108         108         108         108         108
-      Start Row          11          11          11          11          11          11          11
-        End Row          33          33          33          33          33          33          33
-      Start Col          16          16          16          16          16          16          16
-        End Col          38          38          38          38          38          38          38
-==================================================================================
-Circular Regions 4sigs, CalcVar=0(redo of optimization). Constraints on variables added
-Intensitty=60340.5   sigma=466.885  Theoret intensity=60000
-        Act Int        3750        7500       11250       15000       11250        7500        3750
-           Time       19250       19350       19450       19550       19650       19750       19850
-        Channel          12          13          14          15          16          17          18
-     Background     1.41953     1.23611     1.23688     1.23589     1.23688     1.23611     1.41953
-      Intensity     3745.82     7568.01       11331     15097.3       11331     7568.01     3745.82
-           Mcol          27          27          27          27          27          27          27
-           Mrow          22          22          22          22          22          22          22
-          SScol     4.44865     4.45006     4.45015        4.45     4.45015     4.45006     4.44865
-          SSrow     4.44851     4.45003     4.45003     4.45013     4.45003     4.45003     4.44851
-           SSrc 0.000101854 0.000169181 0.000257058 0.000347122 0.000257058 0.000169181 0.000101854
-         NCells         437         437         437         437         437         437         437
-  ChiSqrOverDOF     9.98124     34.0985     76.7824     136.568     76.7824     34.0985     9.98124
-   TotIntensity      4361.8      8111.8     11861.8     15611.8     11861.8      8111.8      4361.8
-BackgroundError    0.175194    0.317447    0.480952    0.242143    0.480952    0.317447    0.175194
-FitIntensityError      38.725     65.9045     103.054     124.116     103.054     65.9045      38.725
-  ISAWIntensity     3741.47     7571.62     11321.3     15071.7     11321.3     7571.62     3741.47
-ISAWIntensityError     104.132     167.022     237.858     165.375     237.858     167.022     104.132
-  TotalBoundary       123.2       123.2       123.2       123.2       123.2       123.2       123.2
- NBoundaryCells          88          88          88          88          88          88          88
-      Start Row          11          11          11          11          11          11          11
-        End Row          33          33          33          33          33          33          33
-      Start Col          16          16          16          16          16          16          16
-        End Col          38          38          38          38          38          38          38
-TotIntensityError     66.0439     90.0655     108.912     124.947     108.912     90.0655     66.0439
 
 
        */
