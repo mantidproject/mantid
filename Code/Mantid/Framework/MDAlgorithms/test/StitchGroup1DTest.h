@@ -506,14 +506,11 @@ public:
       auto outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(alg.getPropertyValue("OutputWorkspace"));
       for(size_t i = 0; i < 10; ++i)
       {
-        std::stringstream out;
-        out << "error occured on " << i;
-
-        TSM_ASSERT_DELTA(out.str(), expected_output_signal[i], outWS->signalAt(i), 0.0001);  
+        TS_ASSERT_DELTA(expected_output_signal[i], outWS->signalAt(i), 0.0001);  
       }
 
       double scale_factor = alg.getProperty("OutScaleFactor");
-      TS_ASSERT_EQUALS(manual_scale_factor, scale_factor, 0.0001);
+      TS_ASSERT_EQUALS(manual_scale_factor, scale_factor);
     }
 };
 

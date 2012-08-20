@@ -91,8 +91,6 @@ namespace MDAlgorithms
 
     declareProperty("StartOverlap", 0.0, overlap_validator->clone(), "Fraction along axis to start overlap. 0 to 1.");
     declareProperty("EndOverlap", 0.1, overlap_validator->clone(), "Fraction along axis to end overlap. 0 to 1.");
-    declareProperty("ExpectGroupWorkspaces", false, "True if the input workspaces expected to be group workspaces.");
-    declareProperty("GroupWorkspaceIndex", 0, "Index of the workspace in the group workspaces");
     declareProperty("ScaleRHSWorkspace", true, "Scaling either with respect to RHS or LHS Workspace.");
     declareProperty("UseManualScaleFactor", false, "True to use a provided value for the scale factor.");
     declareProperty("ManualScaleFactor", 1.0, "Provided value for the scale factor.");
