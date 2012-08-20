@@ -30,6 +30,8 @@
 #include "ScriptingEnv.h"
 #include <QRegExp>
 
+#include <QtConcurrentRun>
+
 
 Script::Script(ScriptingEnv *env, const QString &name,
                const InteractionType interact, QObject * context)
@@ -94,8 +96,10 @@ bool Script::execute(const ScriptCode & code)
 QFuture<bool> Script::executeAsync(const ScriptCode & code)
 {
   setupCode(code);
-  m_execThread->start();
-  return m_execThread->future();
+  emit started("");
+  return QtConcurrent::run(this, &Script::executeImpl);
+  //m_execThread->start();
+  //return m_execThread->future();
 }
 
 
