@@ -1,7 +1,7 @@
 """Test the exposed ArrayProperty
 """
 import unittest
-from mantid.kernel import (FloatArrayProperty, StringArrayProperty, Direction, 
+from mantid.kernel import (FloatArrayProperty, StringArrayProperty, IntArrayProperty, Direction, 
                            NullValidator)
 from mantid.api import PythonAlgorithm
 import numpy as np
@@ -101,15 +101,37 @@ class ArrayPropertyTest(unittest.TestCase):
             _input_values = None
 
             def PyInit(self):
-                        name = "numbers"
-                        self.declareProperty(
-                            FloatArrayProperty("Input", Direction.Input), "Float array")
+                name = "numbers"
+                self.declareProperty(
+                    FloatArrayProperty("Input", Direction.Input), "Float array")
 
             def PyExec(self):
                 self._input_values = self.getProperty("Input").value
         
         input_values = [1.1,2.5,5.6,4.6,9.0,6.0]
         self._do_algorithm_test(AlgWithFloatArrayProperty, input_values)
+        
+    def test_PythonAlgorithm_setProperty_With_Ranges(self):
+        """
+            Test ArrayProperty within a python algorithm can
+            be set with a string range
+        """
+        class AlgWithIntArrayProperty(PythonAlgorithm):
+            
+            _input_values = None
+
+            def PyInit(self):
+                self.declareProperty(IntArrayProperty("Input", Direction.Input), "Run numbers")
+
+            def PyExec(self):
+                self._input_values = self.getProperty("Input").value
+                
+        alg = AlgWithIntArrayProperty()
+        alg.initialize()
+        alg.setProperty("Input", "10:15")
+        alg.execute()
+        
+        self.assertEquals(6, len(alg._input_values))
 
     def test_PythonAlgorithm_setProperty_with_StringArrayProperty(self):
         """
@@ -142,3 +164,6 @@ class ArrayPropertyTest(unittest.TestCase):
         self.assertEquals(len(alg._input_values), len(input_values))
         for index, val in enumerate(input_values):
             self.assertEquals(val,input_values[index])
+
+if __name__ == "__main__":
+    unittest.main()
