@@ -410,7 +410,10 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
       {
         (*itVar).second.getValue( varObj);
         itVar = varObj.find( "SUBMITTING_APP");  // This string *must* match the one used in ::submitJob()!S
-        if (itVar != varObj.end())
+// Commenting out the actual 'if' test until Adaptive Computing fix #15864
+// As it is right now, MWS 'forgets' about the variables tags after about 45 minutes which means
+// we wind up with an empty job status dialog.
+//        if (itVar != varObj.end())
         {
           // This is a job submitted by MantidPlot.  Construct a RemoteJob instance and add it to jobList
           // Fields passed to the constructor for RemoteJob
