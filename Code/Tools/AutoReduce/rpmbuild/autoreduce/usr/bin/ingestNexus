@@ -6,6 +6,7 @@ from suds.client import Client
 import nxs, os, numpy, sys, posixpath
 import xml.utils.iso8601, ConfigParser
 from datetime import datetime
+from nxs import NeXusError
 
 def usage():
     print 'Usage: ingestNexus <infilename> <hostAndPort> <password>'
@@ -20,7 +21,17 @@ def ingestNexus(infilename, sessionId, service, factory):
 
     #open nexus file
     file = nxs.open(infilename, 'r')
-    file.opengroup('entry')
+    try:
+        file.opengroup('entry')
+    except NeXusError:
+        print "Couldn't open entry"
+        try:
+            file.opengroup('entry-Off_Off')
+            print "Opened entry-Off_Off"
+        except:
+            print "except"
+    except:
+        print('except')
 
     #investigation name 
     file.opendata('experiment_identifier')
