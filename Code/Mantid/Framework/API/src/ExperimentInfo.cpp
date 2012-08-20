@@ -337,6 +337,17 @@ namespace API
       }
     }
   }
+  
+  //---------------------------------------------------------------------------------------
+  /**
+   * Replaces current parameter map with a copy of the given map
+   * @ pmap const reference to parameter map whose copy replaces the current parameter map
+   */
+  void ExperimentInfo::replaceInstrumentParameters(const Geometry::ParameterMap & pmap)
+  {
+    this->m_parmap.reset(new ParameterMap(pmap));
+  }
+
 
   //---------------------------------------------------------------------------------------
 

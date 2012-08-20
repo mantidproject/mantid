@@ -67,6 +67,9 @@ namespace API
     // Add parameters to the instrument parameter map
     virtual void populateInstrumentParameters();
 
+    /// Replaces current parameter map with copy of given map
+    void replaceInstrumentParameters(const Geometry::ParameterMap & pmap);
+
     /// Set an object describing the source properties and take ownership
     void setModeratorModel(ModeratorModel *source);
     /// Returns a reference to the source properties object
