@@ -221,7 +221,7 @@ public:
       sig0=115;
 
 
-    TS_ASSERT_DELTA( sigIntensity,sig0, 5.0);
+    TS_ASSERT_DELTA( sigIntensity,sig0, 25.0);
   
     AnalysisDataService::Instance().remove("TOPAZ");
 
