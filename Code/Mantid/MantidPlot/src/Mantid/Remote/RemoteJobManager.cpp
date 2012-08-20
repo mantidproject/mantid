@@ -106,6 +106,7 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
     json << "\"user\": \"" << m_userName << "\",\n";
     json << "\"group\": \"" << remoteTask .getResourceValue( "group") << "\",\n";
     json << "\"name\": \"" << remoteTask .getName() << "\",\n";
+    json << "\"variables\": {\"SUBMITTING_APP\": \"MantidPlot\"},\n";
     json << "\"requirements\": [{\n";
     json << "\t\"requiredProcessorCountMinimum\": \"" << remoteTask .getResourceValue("nodes") << "\"}]\n";  // don't forget the , before the \n if this is no longer the last line in the json
     //json << "\"standardErrorFilePath\": \"/home/" + user + "\",\n";
@@ -402,56 +403,69 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
       JSONObject oneJob;
       it->getValue( oneJob);
 
-      // Fields passed to the constructor for RemoteJob
-      string jobId;
-      RemoteJob::JobStatus status;
-      string algName;
+      // Verify that this is a job that was originally submitted by MantidPlot
+      JSONObject varObj;
+      JSONObject::const_iterator itVar = oneJob.find("variables");
+      if (itVar != oneJob.end())
+      {
+        (*itVar).second.getValue( varObj);
+        itVar = varObj.find( "SUBMITTING_APP");  // This string *must* match the one used in ::submitJob()!S
+        if (itVar != varObj.end())
+        {
+          // This is a job submitted by MantidPlot.  Construct a RemoteJob instance and add it to jobList
+          // Fields passed to the constructor for RemoteJob
+          string jobId;
+          RemoteJob::JobStatus status;
+          string algName;
 
-      (*oneJob.find("id")).second.getValue( jobId);
-      (*oneJob.find( "name")).second.getValue( algName);
-      string submitTimeString;
-      (*oneJob.find( "submitDate")).second.getValue( submitTimeString);
-      // Unfortunately, the string that MWS returns is not quite in ISO 8601 format
-      convertToISO8601( submitTimeString);
+          (*oneJob.find("id")).second.getValue( jobId);
+          (*oneJob.find( "name")).second.getValue( algName);
+          string submitTimeString;
+          (*oneJob.find( "submitDate")).second.getValue( submitTimeString);
+          // Unfortunately, the string that MWS returns is not quite in ISO 8601 format
+          convertToISO8601( submitTimeString);
 
-      string statusString;
-      (*oneJob.find( "expectedState")).second.getValue( statusString);
+          string statusString;
+          (*oneJob.find( "expectedState")).second.getValue( statusString);
 
-      // Convert the string into a JobStatus
-      if (statusString == "RUNNING")
-      {
-        status = RemoteJob::JOB_RUNNING;
-      }
-      else if (statusString == "QUEUED")
-      {
-        status = RemoteJob::JOB_QUEUED;
-      }
-      else if (statusString == "COMPLETED")
-      {
-        status = RemoteJob::JOB_COMPLETE;
-      }
-      else if (statusString == "REMOVED")
-      {
-        status = RemoteJob::JOB_REMOVED;
-      }
-      else if (statusString == "DEFERRED")
-      {
-        status = RemoteJob::JOB_DEFERRED;
-      }
-      else if (statusString == "IDLE")
-      {
-        status = RemoteJob::JOB_IDLE;
-      }
+          // Convert the string into a JobStatus
+          if (statusString == "RUNNING")
+          {
+            status = RemoteJob::JOB_RUNNING;
+          }
+          else if (statusString == "QUEUED")
+          {
+            status = RemoteJob::JOB_QUEUED;
+          }
+          else if (statusString == "COMPLETED")
+          {
+            status = RemoteJob::JOB_COMPLETE;
+          }
+          else if (statusString == "REMOVED")
+          {
+            status = RemoteJob::JOB_REMOVED;
+          }
+          else if (statusString == "DEFERRED")
+          {
+            status = RemoteJob::JOB_DEFERRED;
+          }
+          else if (statusString == "IDLE")
+          {
+            status = RemoteJob::JOB_IDLE;
+          }
 
-      /* else if what else??? */
-      else
-      {
-        status = RemoteJob::JOB_STATUS_UNKNOWN;
-        errMsg = "Unknown job state: " + statusString;
-        retVal = false;
-      }
+          /* else if what else??? */
+          else
+          {
+            status = RemoteJob::JOB_STATUS_UNKNOWN;
+            errMsg = "Unknown job state: " + statusString;
+            retVal = false;
+          }
 
-      jobList.push_back(RemoteJob(jobId, this, status, algName, Mantid::Kernel::DateAndTime( submitTimeString)));
+          jobList.push_back(RemoteJob(jobId, this, status, algName, Mantid::Kernel::DateAndTime( submitTimeString)));
+        }
+
+      }
       it++;
     }
   }
