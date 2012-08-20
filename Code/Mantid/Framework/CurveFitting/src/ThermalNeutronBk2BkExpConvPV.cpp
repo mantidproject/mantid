@@ -5,6 +5,8 @@
 
 #define PI 3.14159265358979323846264338327950288419716939937510582
 
+using namespace std;
+
 
 namespace Mantid
 {
@@ -344,6 +346,8 @@ double ThermalNeutronBk2BkExpConvPV::calPeakCenter() const
     double dtt1t = getParameter("Dtt1t");
     double dtt2t = getParameter("Dtt2t");
 
+    // std::cout << "Lattice = " << latticeconstant << ", Dtt1 = " << dtt1 << ", Dtt1t = " << dtt1t << std::endl;
+
     // 2. Calcualte center of d-space
     double dh = calCubicDSpace(latticeconstant, mH, mK, mL);
 
@@ -395,9 +399,61 @@ double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, do
  */
 std::complex<double> ThermalNeutronBk2BkExpConvPV::E1(std::complex<double> z) const
 {
-    throw std::runtime_error("E1() has not been implemented yet!");
-    return z;
+    std::complex<double> e1;
+
+    double rz = real(z);
+    double az = abs(z);
+
+    if (fabs(az) < 1.0E-8)
+    {
+        // If z = 0, then the result is infinity... diverge!
+        complex<double> r(1.0E300, 0.0);
+        e1 = r;
+    }
+    else if (az > 10.0 || (rz < 0.0 && az < 20.0))
+    {
+        // Some interesting region, equal to integrate to infinity, converged
+        complex<double> r(1.0, 0.0);
+        e1 = r;
+        complex<double> cr = r;
+
+        for (size_t k = 0; k < 150; ++k)
+        {
+            double dk = double(k);
+            cr = -cr * dk * z / ( (dk + 2.0)*(dk+2.0) );
+            e1 += cr;
+            if (abs(cr) < abs(e1)*1.0E-15)
+            {
+                // cr is converged to zero
+                break;
+            }
+        } // ENDFOR k
+
+        e1 = -e1 - log(z) + (z*e1);
+    }
+    else
+    {
+        complex<double> ct0(0.0, 0.0);
+        for (int k = 120; k > 0; --k)
+        {
+            complex<double> dk(double(k), 0.0);
+            ct0 = dk / (10.0 + dk / (z + ct0));
+        } // ENDFOR k
+
+        e1 = 1.0 / (z + ct0);
+        e1 = e1 * exp(-z);
+        if (rz < 0.0 && fabs(imag(z)) < 1.0E-10 )
+        {
+            complex<double> u(0.0, 1.0);
+            e1 = e1 - (PI * u);
+        }
+    }
+
+    return e1;
+
 }
+
+
 
 /*
  * Get peak parameters stored locally
