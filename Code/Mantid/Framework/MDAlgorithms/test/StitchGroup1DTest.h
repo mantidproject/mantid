@@ -15,6 +15,23 @@ using namespace Mantid::Kernel;
 
 class StitchGroup1DTest : public CxxTest::TestSuite
 {
+
+private:
+
+  // Helper method to fabricate multi-period group workspaces.
+  void add_periods_logs(WorkspaceGroup_sptr ws)
+  {
+    int nperiods = static_cast<int>(ws->size());
+    for(size_t i = 0; i < ws->size(); ++i)
+    { 
+      MatrixWorkspace_sptr currentWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws->getItem(i));
+
+      PropertyWithValue<int>* nperiodsProp = new PropertyWithValue<int>("nperiods", nperiods);
+      currentWS->mutableRun().addLogData(nperiodsProp);
+      PropertyWithValue<int>* currentPeriodsProp = new PropertyWithValue<int>("current_period", static_cast<int>(i+1));
+      currentWS->mutableRun().addLogData(currentPeriodsProp);
+    }
+  }
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -474,6 +491,9 @@ public:
       {
         TS_ASSERT_DELTA(expected_output_signal[i], outWS->signalAt(i), 0.0001);  
       }
+
+      Mantid::API::AnalysisDataService::Instance().remove(algA->getPropertyValue("OutputWorkspace"));
+      Mantid::API::AnalysisDataService::Instance().remove(algB->getPropertyValue("OutputWorkspace"));  
     }
 
     void test_flat_offsetting_schenario_with_manual_scaling()
@@ -511,6 +531,65 @@ public:
 
       double scale_factor = alg.getProperty("OutScaleFactor");
       TS_ASSERT_EQUALS(manual_scale_factor, scale_factor);
+
+      Mantid::API::AnalysisDataService::Instance().remove(algA->getPropertyValue("OutputWorkspace"));
+      Mantid::API::AnalysisDataService::Instance().remove(algB->getPropertyValue("OutputWorkspace"));  
+    }
+
+    void test_on_multi_period_group()
+    {
+      Mantid::API::FrameworkManagerImpl& frameworkManager = Mantid::API::FrameworkManager::Instance();
+
+      auto algA = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=0,0,0,3,3,3,3,3,3,3;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=10,1;Names=A,B;Units=U1,U2;OutputWorkspace=flat_signal_a");
+      auto algB = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=2,2,2,2,2,2,2,0,0,0;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=10,1;Names=A,B;Units=U1,U2;OutputWorkspace=flat_signal_b");
+      auto algC = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=0,0,0,4,4,4,4,4,4,4;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=10,1;Names=A,B;Units=U1,U2;OutputWorkspace=flat_signal_c");
+      auto algD = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=2,2,2,2,2,2,2,0,0,0;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=10,1;Names=A,B;Units=U1,U2;OutputWorkspace=flat_signal_d");
+      
+      std::vector<double> expected_output_signalAB(10, 3); 
+      std::vector<double> expected_output_signalCD(10, 4); 
+
+      IMDHistoWorkspace_sptr a = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
+      IMDHistoWorkspace_sptr b = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
+      IMDHistoWorkspace_sptr c = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algC->getPropertyValue("OutputWorkspace"));
+      IMDHistoWorkspace_sptr d = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algD->getPropertyValue("OutputWorkspace"));
+
+      WorkspaceGroup_sptr lhs = boost::make_shared<Mantid::API::WorkspaceGroup>();
+      WorkspaceGroup_sptr rhs = boost::make_shared<Mantid::API::WorkspaceGroup>();
+      add_periods_logs(lhs);
+      add_periods_logs(rhs);
+      lhs->addWorkspace(a);
+      lhs->addWorkspace(c);
+      rhs->addWorkspace(b);
+      rhs->addWorkspace(d);
+      AnalysisDataService::Instance().addOrReplace("lhs", lhs);
+      AnalysisDataService::Instance().addOrReplace("rhs", rhs);
+
+      StitchGroup1D alg;
+      alg.setRethrows(true);
+      alg.initialize();
+
+      alg.setPropertyValue("LHSWorkspace", "lhs");
+      alg.setPropertyValue("RHSWorkspace", "rhs");
+      alg.setPropertyValue("OutputWorkspace", "converted");
+      alg.setProperty("StartOverlap", 0.3);
+      alg.setProperty("EndOverlap", 0.7);
+      alg.execute();
+
+      auto outWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(alg.getPropertyValue("OutputWorkspace"));
+      TS_ASSERT_EQUALS(2, outWS->size());
+      auto outWS_1 = boost::dynamic_pointer_cast<IMDHistoWorkspace>(outWS->getItem(0));
+      for(size_t i = 0; i < 10; ++i)
+      {
+        TS_ASSERT_DELTA(expected_output_signalAB[i], outWS_1->signalAt(i), 0.0001);  
+      }
+      auto outWS_2 = boost::dynamic_pointer_cast<IMDHistoWorkspace>(outWS->getItem(1));
+      for(size_t i = 0; i < 10; ++i)
+      {
+        TS_ASSERT_DELTA(expected_output_signalCD[i], outWS_2->signalAt(i), 0.0001);  
+      }
+
+      Mantid::API::AnalysisDataService::Instance().remove("lhs");
+      Mantid::API::AnalysisDataService::Instance().remove("rhs"); 
     }
 };
 

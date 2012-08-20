@@ -161,7 +161,7 @@ class Stitch1D(PythonAlgorithm):
         self.declareProperty(name="OutScaleFactor", defaultValue=-2.0, direction = Direction.Output, doc="The actual used value for the scaling factor.");
 
     def PyExec(self):
-    
+        self.log().warning("This algorithm has been deprecated. Use StitchGroup1D instead.")
         workspace1 = mtd[self.getPropertyValue("Workspace1")]
         workspace2 = mtd[self.getPropertyValue("Workspace2")]
         self.__check_individual_Workspace(workspace1)
