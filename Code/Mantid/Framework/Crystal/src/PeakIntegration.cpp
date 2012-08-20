@@ -31,7 +31,7 @@ Integrate and calculate error of integration of each peak from single crystal da
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/MemoryManager.h"
-#include <boost/thread.hpp>
+
 
 namespace Mantid
 {

@@ -35,13 +35,13 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Unit.h"
-#include "MantidKernel/MersenneTwister.h"
+//#include "MantidKernel/MersenneTwister.h"
 #include "MantidAPI/IPeak.h"
 #include <math.h>
 #include <cstdlib>
 #include <iostream>
-#include <boost/thread.hpp>
-#include <boost/ref.hpp>
+//#include <boost/thread.hpp>
+//#include <boost/ref.hpp>
 #include <map>
 #include "MantidKernel/Quat.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -291,7 +291,7 @@ public:
   {
     Mantid::API::FrameworkManager::Instance();
     usePoisson = false;
-    m_randGen.setSeed(1234);
+   // m_randGen.setSeed(1234);
   }
 /*
    int* ArryofIDs = new int[500];
@@ -719,7 +719,7 @@ ISAWIntensityError     59.4822     69.8998     78.9547      87.073     78.9547  
   {
     boost::shared_ptr<Algorithm> loadPeaks = AlgorithmFactory::Instance().create("LoadIsawPeaks",1);
     loadPeaks->initialize();
-    loadPeaks->setProperty("Filename","/usr2/DATA/Projects/TOPAZ/T5637_44/ISAW_EV_TESTS/IntPk.integrate"");
+    loadPeaks->setProperty("Filename","/usr2/DATA/Projects/TOPAZ/T5637_44/ISAW_EV_TESTS/IntPk.integrate");
     loadPeaks->setPropertyValue("OutputWorkspace", "Peaks");
     loadPeaks->execute();
     loadPeaks->setPropertyValue("OutputWorkspace", "Peaks");
@@ -876,11 +876,11 @@ ISAWIntensityError     59.4822     69.8998     78.9547      87.073     78.9547  
 
 private:
   bool usePoisson;
-  Mantid::Kernel::MersenneTwister m_randGen;
+  //Mantid::Kernel::MersenneTwister m_randGen;
   double  Poisson( double mean)
   {
     double T = exp(-mean);
-    double P = m_randGen.nextValue();
+    double P = 1;//m_randGen.nextValue();
     int N=0;
     double S =T;
    // std::cout<< "Poisson "<< mean<<","<<P<<","<<T;
