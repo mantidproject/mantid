@@ -58,7 +58,7 @@ set ( SRC_FILES
 	src/ConvertToMDEventsParams.cpp
 	src/ConvertToMDEventsSubalgFactory.cpp
 	src/ConvertToMDEventsWSBase.cpp
-	
+	src/StitchGroup1D.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -135,6 +135,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h	
 	inc/MantidMDAlgorithms/ConvertToMDEventsWSBase.h	
+    inc/MantidMDAlgorithms/StitchGroup1D.h
 )
 
 # Test files. Other source files required.
@@ -193,6 +194,7 @@ set ( TEST_FILES
 	UnaryOperationMDTest.h
 	WeightedMeanMDTest.h
 	XorMDTest.h
+    StitchGroup1DTest.h
 # Old TMD convertToMD code prepared for deprication:
 #    ConvertToMDEventsUnitsConvTest.h 
 )
