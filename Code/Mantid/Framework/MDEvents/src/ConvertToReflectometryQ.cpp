@@ -304,8 +304,15 @@ namespace MDEvents
       transform = ReflectometryMDTransform_sptr(new ReflectometryTransformKiKf(dim0min, dim0max, dim1min, dim1max, incidentTheta));
     }
 
+    auto outputWS = transform->execute(inputWs);
+
+    // Copy ExperimentInfo (instrument, run, sample) to the output WS
+    ExperimentInfo_sptr ei(inputWs->cloneExperimentInfo());
+    uint16_t runIndex = outputWS->addExperimentInfo(ei);
+    UNUSED_ARG(runIndex);
+
     //Execute the transform and bind to the output.
-    setProperty("OutputWorkspace", transform->execute(inputWs));
+    setProperty("OutputWorkspace", outputWS);
   }
 
 } // namespace Mantid

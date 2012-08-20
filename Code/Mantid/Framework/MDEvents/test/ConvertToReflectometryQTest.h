@@ -35,6 +35,9 @@ private:
     MatrixWorkspace_sptr in_ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
     in_ws->getAxis(0)->setUnit("Wavelength");
 
+    Kernel::PropertyWithValue<std::string>* testProperty = new Kernel::PropertyWithValue<std::string>("test_property", "test_value", Kernel::Direction::Input);
+    in_ws->mutableRun().addLogData(testProperty);
+
     Mantid::API::NumericAxis* const newAxis = new Mantid::API::NumericAxis(in_ws->getAxis(1)->length());
     in_ws->replaceAxis(1,newAxis);
     newAxis->unit() = boost::make_shared<Mantid::Kernel::Units::Degrees>();
@@ -153,7 +156,7 @@ public:
      alg->execute();
      auto ws = boost::shared_dynamic_cast<Mantid::API::IMDEventWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("OutputTransformedWorkspace"));
      TS_ASSERT(ws != NULL);
-     //Other tests required here!
+     TS_ASSERT_EQUALS(1, ws->getExperimentInfo(0)->run().getLogData().size());
   }
 };
 
