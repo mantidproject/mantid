@@ -76,10 +76,6 @@ private:
   API::MatrixWorkspace_sptr m_givingWorkspace;
   /// The receiving workspace
   API::MatrixWorkspace_sptr m_receivingWorkspace;
-  /// Constant reference to parameters of instrument in giving workspace
-  //const Geometry::ParameterMap& m_givParams;
-  /// Mutable reference to parameters of instrument in receiving workspace
-  //Geometry::ParameterMap& m_recParams;
 
   /// Static reference to the logger class
   static Mantid::Kernel::Logger& g_log;

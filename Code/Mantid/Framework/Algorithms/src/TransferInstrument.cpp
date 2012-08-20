@@ -65,30 +65,20 @@ void TransferInstrument::init()
 void TransferInstrument::exec()
 {
 
-  g_log.warning("Transfer instrument: begin");
-
   // Get the giving workspace
   m_givingWorkspace = getProperty("GivingWorkspace");
 
   // Get the receiving workspace
   m_receivingWorkspace = getProperty("ReceivingWorkspace"); 
 
-  g_log.warning("Transfer instrument: checking properties");
-
   // Retrieve and validate the input properties
   this->checkProperties();
 
-  g_log.warning("Transfer instrument: getting parameters to copy");
-
   // Get parameters
-  const Geometry::ParameterMap& m_givParams = m_givingWorkspace->constInstrumentParameters() ;
-
-  g_log.warning("Transfer instrument: copying parameters");
+  const Geometry::ParameterMap& givParams = m_givingWorkspace->constInstrumentParameters() ;
 
   // Copy parameters
-  m_receivingWorkspace->replaceInstrumentParameters( m_givParams );
-  
-  g_log.warning("Transfer instrument: finished");
+  m_receivingWorkspace->replaceInstrumentParameters( givParams );
 
 }
 
