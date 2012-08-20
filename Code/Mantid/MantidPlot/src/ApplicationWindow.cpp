@@ -16565,7 +16565,7 @@ void ApplicationWindow::executeScriptFile(const QString & filename, const Script
   Script *runner = scriptingEnv()->newScript(filename, this, Script::NonInteractive);
   runner->redirectStdOut(false);
   scriptingEnv()->redirectStdOut(false);
-  if(execMode == Script::Asynchronous)
+  if(false)//execMode == Script::Asynchronous)
   {
     QFuture<bool> job = runner->executeAsync(code);
     while(job.isRunning())
