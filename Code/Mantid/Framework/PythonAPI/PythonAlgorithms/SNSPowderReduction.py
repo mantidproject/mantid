@@ -173,9 +173,10 @@ class SNSPowderReduction(PythonAlgorithm):
         instruments = []
         for item in sns.instruments("Neutron Diffraction"): instruments.append(item.shortName())
         self.declareProperty("Instrument", "PG3", StringListValidator(instruments), "Powder diffractometer's name")
-        # MantidKernel/ArrayBoundedValidator should just do lower bound
-        self.declareProperty(IntArrayProperty("RunNumber", values=[0], validator=IntArrayBoundedValidator(0,999999),
-                                            direction=Direction.Input))
+        arrvalidator = IntArrayBoundedValidator()
+        arrvalidator.setLower(0)
+        self.declareProperty(IntArrayProperty("RunNumber", values=[0], validator=arrvalidator,
+                             direction=Direction.Input))
         extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml"]
         self.declareProperty("Extension", "_event.nxs",
                              StringListValidator(extensions))
@@ -186,11 +187,12 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareProperty("PushDataPositive", "None",
                              StringListValidator(["None", "ResetToZero", "AddMinimum"]),
                              "Add a constant to the data that makes it positive over the whole range.")
-        self.declareProperty("BackgroundNumber", 0) #, BoundedValidator(-1),
-                             #"If specified overrides value in CharacterizationRunsFile If -1 turns off correction.")
-        self.declareProperty("VanadiumNumber", 0) #, BoundedValidator(-1),
-                             #"If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
-        self.declareProperty("VanadiumBackgroundNumber", 0) #, BoundedValidator(-1))
+        self.declareProperty("BackgroundNumber", defaultValue=0, validator=IntBoundedValidator(lower=-1),
+                             doc="If specified overrides value in CharacterizationRunsFile If -1 turns off correction.")
+        self.declareProperty("VanadiumNumber", defaultValue=0, validator=IntBoundedValidator(lower=-1),
+                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
+        self.declareProperty("VanadiumBackgroundNumber", defaultValue=0, validator=IntBoundedValidator(lower=-1),
+                             doc="If specified overrides value in CharacterizationRunsFile. If -1 turns off correction.")
         self.declareProperty(FileProperty(name="CalibrationFile",defaultValue="",action=FileAction.Load, 
                                       extensions = ["cal"]))
         self.declareProperty(FileProperty(name="CharacterizationRunsFile",defaultValue="",action=FileAction.OptionalLoad, 
