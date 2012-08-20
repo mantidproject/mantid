@@ -218,8 +218,8 @@ namespace MDAlgorithms
   {
     auto dim = getFirstNonIntegratedDimension(ws);
     size_t nbins = dim->getNBins();
-    int binLow = int(nbins * fractionLow);
-    int binHigh = int(nbins * fractionHigh);
+    int binLow = int(double(nbins) * fractionLow);
+    int binHigh = int(double(nbins) * fractionHigh);
     double sumSignal = 0.0;
     for(int index = binLow; index < binHigh; ++index)
     {
@@ -239,20 +239,20 @@ namespace MDAlgorithms
     const double targetQMax = targetDim->getMaximum();
     const double targetQMin = targetDim->getMinimum();
     const size_t targetNbins = targetDim->getNBins();
-    const double targetStep = targetNbins / (targetQMax - targetQMin); 
+    const double targetStep = double(targetNbins) / (targetQMax - targetQMin); 
     const double targetC = -1 * targetStep * targetQMin;
 
     const auto overlapDim = overlap->getDimension(0);
     const double overlapQMax = overlapDim->getMaximum();
     const double overlapQMin = overlapDim->getMinimum();
     const size_t overlapNBins = overlapDim->getNBins();
-    const double overlapStep = (overlapQMax - overlapQMin) / overlapNBins;
+    const double overlapStep = (overlapQMax - overlapQMin) / double(overlapNBins);
     const double overlapC = overlapQMin;
 
     for(size_t i = 0; i < overlapNBins; ++i)
     {
       // Calculate the q value for each index in the overlap region.
-      const double q = double((overlapStep * i) + overlapC);
+      const double q = (overlapStep * double(i)) + overlapC;
       // Find the target index by recentering (adding 0.5) and then truncating to an integer.
       size_t targetIndex = size_t((targetStep * q) + targetC + 0.5) ;
       // Overwrite signal
@@ -274,9 +274,9 @@ namespace MDAlgorithms
     auto nbins = dim->getNBins();
     int binLow = int(nbins * fractionLow);
     int binHigh = int(nbins * fractionHigh);
-    double step = ( dim->getMaximum() - dim->getMinimum() )/ nbins;
-    double qLow = (binLow * step) + dim->getMinimum();
-    double qHigh = (binHigh * step) + dim->getMinimum();
+    double step = ( dim->getMaximum() - dim->getMinimum() )/ double(nbins);
+    double qLow = (double(binLow) * step) + dim->getMinimum();
+    double qHigh = (double(binHigh) * step) + dim->getMinimum();
 
     const int binRange = binHigh - binLow;
     Mantid::MantidVec signals(binRange);
