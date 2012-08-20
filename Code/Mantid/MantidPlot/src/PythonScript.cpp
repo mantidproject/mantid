@@ -38,7 +38,6 @@
 
 #include <QVariant>
 #include <QMessageBox>
-#include <QtConcurrentRun>
 
 #include <iostream>
 #include <stdexcept>
@@ -63,6 +62,7 @@ namespace
     PyObject_CallMethod(scriptObj, "lineNumberChanged", "O i", frame->f_code->co_filename, frame->f_lineno);
     return retcode;
   }
+
 }
 
 
@@ -531,14 +531,7 @@ QVariant PythonScript::evaluateImpl()
 
 bool PythonScript::executeImpl()
 {
-  emit startedSerial("");
   return executeString();
-}
-
-QFuture<bool> PythonScript::executeAsyncImpl()
-{
-  emit startedAsync("");
-  return QtConcurrent::run(this, &PythonScript::executeString);
 }
 
 

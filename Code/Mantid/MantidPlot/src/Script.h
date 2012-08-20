@@ -29,11 +29,12 @@
 #ifndef SCRIPT_H
 #define SCRIPT_H
 
-#include <QVariant>
-#include <QString>
-#include <QStringList>
 #include <QEvent>
 #include <QFuture>
+#include <QThread>
+#include <QString>
+#include <QStringList>
+#include <QVariant>
 
 #include "ScriptCode.h"
 
@@ -56,7 +57,7 @@ class Script : public QObject
   /// Interaction type
   enum InteractionType {Interactive, NonInteractive};
   /// Execution mode
-  enum ExecutionMode {Serialised, Asynchronous, NotExecuting};
+  enum ExecutionMode {Serialised, Asynchronous, Running, NotExecuting};
 
   /// Constructor
   Script(ScriptingEnv *env, const QString &name, const InteractionType interact,
@@ -106,10 +107,8 @@ public slots:
 
   /// Sets the execution mode to NotExecuting
   void setNotExecuting();
-  /// Sets the execution mode to Serialised
-  void setExecutingSerialised();
-  /// Sets the execution mode to Serialised
-  void setExecutingAsync();
+  /// Sets the execution mode to Running to indicate something is running
+  void setIsRunning();
 
   // local variables
   virtual bool setQObject(QObject*, const char*) { return false; }
@@ -119,10 +118,6 @@ public slots:
 signals:
   /// A signal defining when this script has started executing
   void started(const QString & message);
-  /// A separate signal defining when this script has started executing serial running
-  void startedSerial(const QString & message);
-  /// A separate signal defining when this script has started executing asynchronously
-  void startedAsync(const QString & message);
   /// A signal defining when this script has completed successfully
   void finished(const QString & message);
   /// signal an error condition / exception
@@ -147,10 +142,41 @@ protected:
   virtual QVariant evaluateImpl() = 0;
   /// Execute the Code, returning false on an error / exception.
   virtual bool executeImpl() = 0;
-  /// Execute the code asynchronously, returning immediately after the execution has started
-  virtual QFuture<bool> executeAsyncImpl() = 0;
 
 private:
+  /**
+   * Worker thread for the asynchronous exec calls
+   */
+  class ScriptThread : public QThread
+  {
+  public:
+    ScriptThread(Script & script)
+      : QThread(), m_script(script), m_future()
+    {}
+
+    QFuture<bool> future()
+    {
+      return m_future;
+    }
+
+    void run()
+    {
+      QFutureInterface<bool> *progressObject(new QFutureInterface<bool>);
+      m_future = progressObject->future();
+
+      progressObject->reportStarted();
+      const bool result = m_script.execute(m_script.scriptCode());
+
+      progressObject->reportResult(result, 0);
+      progressObject->reportFinished();
+      delete progressObject;
+    }
+
+  private:
+    Script & m_script;
+    QFuture<bool> m_future;
+  };
+
   /// Setup the code from a script code object
   void setupCode(const ScriptCode & code);
   /// Normalise line endings for the given code. The Python C/API does not seem to like CRLF endings so normalise to just LF
@@ -165,6 +191,8 @@ private:
 
   InteractionType m_interactMode;
   ExecutionMode m_execMode;
+
+  ScriptThread *m_execThread;
 };
 
 

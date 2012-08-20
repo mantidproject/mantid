@@ -37,6 +37,7 @@
 #include <QFileInfo>
 #include <QDir>
 
+
 class ScriptingEnv;
 class PythonScripting;
 struct _sipWrapperType;
@@ -144,6 +145,7 @@ private:
     QString m_path;
   };
 
+
   inline PythonScripting * pythonEnv() const { return m_pythonEnv; }
   void initialize(const QString & name, QObject *context);
   void beginStdoutRedirect();
@@ -156,8 +158,6 @@ private:
   QVariant evaluateImpl();
   /// Execute the current code and return a boolean indicating success/failure
   bool executeImpl();
-  /// Execute the code asynchronously, returning immediately after the execution has started
-  QFuture<bool> executeAsyncImpl();
 
   /// Performs the call to Python from a string
   bool executeString();

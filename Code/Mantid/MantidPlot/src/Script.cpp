@@ -30,24 +30,25 @@
 #include "ScriptingEnv.h"
 #include <QRegExp>
 
+
 Script::Script(ScriptingEnv *env, const QString &name,
                const InteractionType interact, QObject * context)
   : QObject(), m_env(env), m_name() , m_context(context),
     m_redirectOutput(true), m_reportProgress(false), m_interactMode(interact),
-    m_execMode(NotExecuting)
+    m_execMode(NotExecuting), m_execThread(new ScriptThread(*this))
 {
   m_env->incref();
 
   setName(name);
 
-  connect(this, SIGNAL(startedSerial(const QString &)), this, SLOT(setExecutingSerialised()));
-  connect(this, SIGNAL(startedAsync(const QString &)), this, SLOT(setExecutingAsync()));
+  connect(this, SIGNAL(started(const QString &)), this, SLOT(setIsRunning()));
   connect(this, SIGNAL(finished(const QString &)), this, SLOT(setNotExecuting()));
   connect(this, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(setNotExecuting()));
 }
 
 Script::~Script()
 {
+  delete m_execThread;
   m_env->decref();
 }
 
@@ -85,6 +86,7 @@ QVariant Script::evaluate(const ScriptCode & code)
 bool Script::execute(const ScriptCode & code)
 {
   setupCode(code);
+  emit started("");
   return this->executeImpl();
 }
 
@@ -92,7 +94,8 @@ bool Script::execute(const ScriptCode & code)
 QFuture<bool> Script::executeAsync(const ScriptCode & code)
 {
   setupCode(code);
-  return this->executeAsyncImpl();
+  m_execThread->start();
+  return m_execThread->future();
 }
 
 
@@ -102,15 +105,10 @@ void Script::setNotExecuting()
   m_execMode = NotExecuting;
 }
 
-/// Sets the execution mode to Serialised
-void Script::setExecutingSerialised()
+/// Sets the execution mode to Running to indicate something is running
+void Script::setIsRunning()
 {
-  m_execMode = Serialised;
-}
-/// Sets the execution mode to Serialised
-void Script::setExecutingAsync()
-{
-  m_execMode = Asynchronous;
+  m_execMode = Running;
 }
 
 /**

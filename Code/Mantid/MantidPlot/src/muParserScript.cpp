@@ -498,11 +498,3 @@ bool muParserScript::executeImpl()
   }
   return true;
 }
-
-/**
- * Execute the script in a seprate thread
- */
-QFuture<bool> muParserScript::executeAsyncImpl()
-{
-  throw std::runtime_error("muParser does not support asynchronous execution");
-}

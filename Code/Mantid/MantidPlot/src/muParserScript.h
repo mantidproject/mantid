@@ -55,7 +55,6 @@ class muParserScript: public Script
     QString evalSingleLineToString(const QLocale& locale, char f, int prec);
     bool compileImpl();
     bool executeImpl();
-    QFuture<bool> executeAsyncImpl();
     bool setQObject(QObject *val, const char *name);
     bool setInt(int val, const char* name);
     bool setDouble(double val, const char* name);
