@@ -777,7 +777,7 @@ public:
     do_test_with_multiperiod_data(input);
   }
 
-  void test_useCustomInputPropertyName
+  void test_useCustomInputPropertyName()
   {
     MergeRuns alg;
     TS_ASSERT(alg.useCustomInputPropertyName());
