@@ -81,9 +81,9 @@ function( COPY_PYTHON_FILES_TO_DIR PY_FILES SRC_DIR DEST_DIR INSTALLED_FILES )
         add_custom_command ( OUTPUT ${_py_bin} ${_pyc_bin}
                              DEPENDS ${SRC_DIR}/${PYFILE}
                              COMMAND ${PYTHON_EXECUTABLE} -m compileall -q ${SRC_DIR}
-                             COMMAND ${CMAKE_COMMAND} ARGS -E copy
+                             COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
                                ${_py_src} ${_py_bin}
-                             COMMAND ${CMAKE_COMMAND} ARGS -E copy
+                             COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
                                ${_pyc_src} ${_pyc_bin} )
     set ( COPIED_FILES ${COPIED_FILES} ${_py_bin} )
     set ( COPIED_FILES ${COPIED_FILES} ${_pyc_bin} )
