@@ -1,5 +1,7 @@
 set( VSI_GLOBAL_SCRIPTS ${CMAKE_CURRENT_SOURCE_DIR}/test/global/scripts )
 
+include ( UseSystemQt4 )
+
 add_subdirectory( QtWidgets )
 include_directories( QtWidgets/inc )
 
