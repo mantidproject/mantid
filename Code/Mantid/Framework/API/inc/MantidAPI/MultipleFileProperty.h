@@ -127,6 +127,8 @@ namespace API
     static std::vector<std::string> flattenFileNames(const std::vector<std::vector<std::string> > & fileNames);
 
   private:
+    std::string setValueAsSingleFile(const std::string & propValue);
+    std::string setValueAsMultipleFiles(const std::string & propValue);
     /// Whether or not the user has turned on multifile loading.
     bool m_multiFileLoadingEnabled;
 

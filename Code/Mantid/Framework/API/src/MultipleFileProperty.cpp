@@ -19,35 +19,37 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+namespace // anonymous
+{
+  // A standard implementation of the missing "copy_if" algorithm, found at:
+  // http://lists.boost.org/Archives/boost/2001/01/8022.php
+  template<typename In, typename Out, typename Pred> 
+  Out copy_if(In first, In last, Out res, Pred Pr) 
+  { 
+    while (first != last) { 
+      if (Pr(*first)) 
+        *res++ = *first; 
+      ++first; 
+    } 
+    return res; 
+  }
+  
+  /**
+   * Unary predicate for use with copy_if.  Checks for the existance of
+   * a "*" wild card in the file extension string passed to it.
+   */
+  bool doesNotContainWildCard(const std::string & ext)
+  {
+    if (std::string::npos != ext.find("*"))
+      return false;
+    return true;
+  }
+} // anonymous namespace
+
 namespace Mantid
 {
 namespace API
 {
-  // Forward declarations
-  namespace
-  {
-    /**
-     * A functor that stores a list of extensions and then accumulates the full, resolved file
-     * names that are passed to it on to an output string.  Used with the accumulate STL algorithm.
-     */
-    class AppendFullFileName
-    {
-    public:
-      AppendFullFileName(const std::vector<std::string> & exts);
-
-      std::string & operator()(std::string & result, const std::vector<std::string> & fileNames);
-      std::string & operator()(std::string & result, const std::string & fileName);
-
-    private:
-      const std::vector<std::string> & m_exts;
-    };
-
-    std::vector<std::vector<std::string> > unflattenFileNames(
-      const std::vector<std::string> & flattenedFileNames);
-
-    std::string toSingleString(const std::vector<std::vector<std::string>> & filenames);
-  }
-  
   /**
    * Constructor
    *
@@ -61,7 +63,7 @@ namespace API
   ) : PropertyWithValue<std::vector<std::vector<std::string> > >( name,
         std::vector<std::vector<std::string> >(), boost::make_shared<MultiFileValidator>(exts), Direction::Input),
       m_multiFileLoadingEnabled(),
-      m_exts(exts),
+      m_exts(),
       m_parser(),
       m_defaultExt(""),
       g_log(Kernel::Logger::get("MultipleFileProperty"))
@@ -72,6 +74,12 @@ namespace API
       m_multiFileLoadingEnabled = true;
     else
       m_multiFileLoadingEnabled = false;
+
+    // Store only those extensions that do not contain wild cards.
+    std::copy_if(
+      exts.begin(), exts.end(), 
+      std::back_inserter(m_exts), 
+      doesNotContainWildCard);
   }
 
   /**
@@ -94,142 +102,27 @@ namespace API
     if( propValue.empty())
       return "No file(s) specified.";
 
+    // If multiple file loading is disabled, then set value assuming it is a single file.
     if( ! m_multiFileLoadingEnabled )
     {
       g_log.debug("MultiFile loading is not enabled, acting as standard FileProperty.");
+      return setValueAsSingleFile(propValue);
+    }
+
+    try
+    {
+      // Else try and set the value, assuming it could be one or more files.
+      return setValueAsMultipleFiles(propValue);
+    }
+    catch(const std::runtime_error & re)
+    {
+      g_log.debug("MultiFile loading has failed. Acting as standard FileProperty.");
       
-      // Use a slave FileProperty to do the job for us.
-      FileProperty slaveFileProp( "Slave", "", FileProperty::Load, m_exts, Direction::Input);
+      const std::string error = setValueAsSingleFile(propValue);
 
-      std::string error = slaveFileProp.setValue(propValue);
-
-      if(!error.empty())
-        return error;
-
-      // Store.
-      try
-      {
-        std::vector<std::vector<std::string>> result;
-        toValue(slaveFileProp(), result, "", "");
-        PropertyWithValue<std::vector<std::vector<std::string> > >::operator=(result);
-        return "";
-      }
-      catch ( std::invalid_argument& except)
-      {
-        g_log.debug() << "Could not set property " << name() << ": " << except.what();
-        return except.what();
-      }
-      return "";
+      // If we failed for whatever reason, catch the message and return it.
+      return "Unable to parse runs: \"" + std::string(re.what()) + "\". ";
     }
-
-    const std::string INVALID = "\\+\\+|,,|\\+,|,\\+";
-    boost::smatch invalid_substring;
-    if( boost::regex_search(
-          propValue.begin(), propValue.end(), 
-          invalid_substring,
-          boost::regex(INVALID)) )
-      return "Unable to parse filename due to an empty token.";
-
-    // Else if multifile loading *is* enabled, then users make the concession that they cannot use "," or "+" in
-    // directory names; they are used as operators only.
-    const std::string NUM_COMMA_ALPHA   = "(?<=\\d)\\s*,\\s*(?=\\D)";
-    const std::string ALPHA_COMMA_ALPHA = "(?<=\\D)\\s*,\\s*(?=\\D)";
-    const std::string NUM_PLUS_ALPHA    = "(?<=\\d)\\s*\\+\\s*(?=\\D)";
-    const std::string ALPHA_PLUS_ALPHA  = "(?<=\\D)\\s*\\+\\s*(?=\\D)";
-    const std::string COMMA_OPERATORS   = NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA;
-    const std::string PLUS_OPERATORS    = NUM_PLUS_ALPHA  + "|" + ALPHA_PLUS_ALPHA;
-    
-    std::stringstream errorMsg;
-
-    // Tokenise on allowed comma operators, and iterate over each token.
-    boost::sregex_token_iterator end;
-    boost::sregex_token_iterator commaToken(
-      propValue.begin(), propValue.end(), 
-      boost::regex(COMMA_OPERATORS), -1);
-    
-    std::vector<std::vector<std::string> > fileNames;
-
-    try
-    {
-      for(; commaToken != end; ++commaToken)
-      {
-        const std::string comma = commaToken->str();
-        
-        // Tokenise on allowed plus operators, and iterate over each token.
-        boost::sregex_token_iterator plusToken(
-          comma.begin(), comma.end(), 
-          boost::regex(PLUS_OPERATORS, boost::regex_constants::perl), -1);
-
-        std::vector<std::vector<std::vector<std::string>>> temp;
-
-        for(; plusToken != end; ++plusToken)
-        {
-          const std::string plus = plusToken->str();
-
-          try
-          {
-            m_parser.parse(plus);
-          }
-          catch(const std::runtime_error & re)
-          {
-            errorMsg << "Unable to parse runs: \"" << re.what() << "\". ";
-          }
-
-          std::vector<std::vector<std::string>> f = m_parser.fileNames();
-
-          // If there are no files, then we should use this token as it was passed to the property,
-          // in its untampered form. This will enable us to deal with the case where a user is trying to 
-          // load a single (and possibly existing) file within a token, but which has unexpected zero 
-          // padding, or some other anomaly.
-          if( flattenFileNames(f).size() == 0 )
-            f.push_back(std::vector<std::string>(1, plus));
-          
-          temp.push_back(f);
-        }
-
-        // See [3] in header documentation.  Basically, for reasons of ambiguity, we cant add 
-        // together plusTokens if they contain more than one file.  Throw on any instances of this.
-        if( temp.size() > 1 )
-        {
-          for(auto tempFiles = temp.begin(); tempFiles != temp.end(); ++tempFiles)
-            if( flattenFileNames(*tempFiles).size() > 1 )
-              throw std::runtime_error("Adding a range of files to another file(s) is not currently supported.");
-        }
-
-        for( auto multifile = temp.begin(); multifile != temp.end(); ++multifile )
-          fileNames.insert(
-            fileNames.end(),
-            multifile->begin(), multifile->end());
-      }
-    }
-    catch(const std::runtime_error & re)
-    {
-      errorMsg << "Unable to parse runs: \"" << re.what() << "\". ";
-      return errorMsg.str();
-    }
-
-    if(fileNames.size() == 1 && fileNames[0].size() == 1)
-      fileNames[0][0] = propValue;
-
-    
-    std::string fullFileNames = "";
-    try
-    {
-      // Use an AppendFullFileName functor object with std::accumulate to append
-      // full filenames to a single string.
-      AppendFullFileName appendFullFileName(m_exts);
-      fullFileNames = std::accumulate(
-        fileNames.begin(), fileNames.end(),
-        std::string(""),
-        appendFullFileName);
-    }
-    catch(const std::runtime_error & re)
-    {
-      return re.what();
-    }
-
-    // Now re-set the value using the full paths found.
-    return PropertyWithValue<std::vector<std::vector<std::string> > >::setValue(fullFileNames);
   }
   
   std::string MultipleFileProperty::value() const
@@ -283,135 +176,253 @@ namespace API
     return flattenedFileNames;
   }
 
-  //////////////////////////////////////////////////////////////////////
-  // Anonymous
-  //////////////////////////////////////////////////////////////////////
-
-  namespace
+  /**
+   * Called by setValue in the case where a user has disabled multiple file loading.
+   *
+   * @param propValue :: A string of the allowed format, indicating the user's choice of files.
+   * @return A string indicating the outcome of the attempt to set the property. An empty string indicates success.
+   */
+  std::string MultipleFileProperty::setValueAsSingleFile(const std::string & propValue)
   {
-    // Functor with overloaded function operator, for use with the "accumulate" STL algorithm.
-    // Has state to store extensions.
-    AppendFullFileName:: AppendFullFileName(const std::vector<std::string> & exts) :
-      m_exts(exts)
-    {}
+    // Use a slave FileProperty to do the job for us.
+    FileProperty slaveFileProp( "Slave", "", FileProperty::Load, m_exts, Direction::Input);
 
-    /**
-     * Takes in a vector of filenames, tries to find their full path if possible, then cumulatively appends 
-     * them to the result string.
-     *
-     * @param result :: the cumulative result so far
-     * @param fileNames :: the name to look for, and append to the result
-     * @return the cumulative result, after the filenames have been appended.
-     */
-    std::string & AppendFullFileName::operator()(std::string & result, const std::vector<std::string> & fileNames)
+    std::string error = slaveFileProp.setValue(propValue);
+
+    if(!error.empty())
+      return error;
+
+    // Store.
+    try
     {
-      // Append nothing if there are no file names to add.
-      if(fileNames.empty())
-        return result;
+      std::vector<std::vector<std::string>> result;
+      toValue(slaveFileProp(), result, "", "");
+      PropertyWithValue<std::vector<std::vector<std::string> > >::operator=(result);
+      return "";
+    }
+    catch ( std::invalid_argument& except)
+    {
+      g_log.debug() << "Could not set property " << name() << ": " << except.what();
+      return except.what();
+    }
+    return "";
+  }
+  
+  /**
+   * Called by setValue in the case where multiple file loading is enabled.
+   *
+   * NOTE: If multifile loading is enabled, then users make the concession that they cannot use "," or "+" in
+   *       directory names; they are used as operators only.
+   *
+   * @param propValue :: A string of the allowed format, indicating the user's choice of files.
+   * @return A string indicating the outcome of the attempt to set the property. An empty string indicates success.
+   */
+  std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string & propValue)
+  {
+    // Return error if there are any adjacent + or , operators.
+    const std::string INVALID = "\\+\\+|,,|\\+,|,\\+";
+    boost::smatch invalid_substring;
+    if( boost::regex_search(
+          propValue.begin(), propValue.end(), 
+          invalid_substring,
+          boost::regex(INVALID)) )
+      return "Unable to parse filename due to an empty token.";
 
-      if(!result.empty())
-        result += ",";
+    // Regular expressions that represent the allowed instances of + or , operators.
+    const std::string NUM_COMMA_ALPHA   = "(?<=\\d)\\s*,\\s*(?=\\D)";
+    const std::string ALPHA_COMMA_ALPHA = "(?<=\\D)\\s*,\\s*(?=\\D)";
+    const std::string NUM_PLUS_ALPHA    = "(?<=\\d)\\s*\\+\\s*(?=\\D)";
+    const std::string ALPHA_PLUS_ALPHA  = "(?<=\\D)\\s*\\+\\s*(?=\\D)";
+    const std::string COMMA_OPERATORS   = NUM_COMMA_ALPHA + "|" + ALPHA_COMMA_ALPHA;
+    const std::string PLUS_OPERATORS    = NUM_PLUS_ALPHA  + "|" + ALPHA_PLUS_ALPHA;
+    
+    std::stringstream errorMsg;
+    std::vector<std::vector<std::string> > fileNames;
 
-      AppendFullFileName appendFullFileName(m_exts);
+    // Tokenise on allowed comma operators, and iterate over each token.
+    boost::sregex_token_iterator end;
+    boost::sregex_token_iterator commaToken(
+      propValue.begin(), propValue.end(), 
+      boost::regex(COMMA_OPERATORS), -1);
 
-      // Change each file name into a full file name, and append each one onto a plus-separated string.
-      std::string fullFileNames;
-      fullFileNames = std::accumulate(
-        fileNames.begin(), fileNames.end(),
-        fullFileNames, 
-        appendFullFileName); // Call other overloaded operator on each filename in vector
+    for(; commaToken != end; ++commaToken)
+    {
+      const std::string commaTokenString = commaToken->str();
         
-      // Append the file names to result, and return them.
-      result += fullFileNames;
-      return result;
-    }
+      // Tokenise on allowed plus operators.
+      boost::sregex_token_iterator plusToken(
+        commaTokenString.begin(), commaTokenString.end(), 
+        boost::regex(PLUS_OPERATORS, boost::regex_constants::perl), -1);
 
-    /**
-     * Takes in a filename, tries to find it's full path if possible, then cumulatively appends it to a result string.
-     *
-     * @param result :: the cumulative result so far
-     * @param fileName :: the name to look for, and append to the result
-     * @return the cumulative result, after the filename has been appended.
-     * @throws std::runtime_error if an individual filename could not be set to the FileProperty object
-     */
-    std::string & AppendFullFileName::operator()(std::string & result, const std::string & fileName)
-    {
-      // Append nothing if there is no file name to add.
-      if(fileName.empty())
-        return result;
+      std::vector<std::vector<std::string>> temp;
 
-      if(!result.empty())
-        result += "+";
-      
-      // Trim whitespace from filename.
-      std::string value = fileName;
-      boost::algorithm::trim(value);
+      // Put the tokens into a vector before iterating over it this time,
+      // so we can see how many we have.
+      std::vector<std::string> plusTokenStrings;
+      for(; plusToken != end; ++plusToken)
+        plusTokenStrings.push_back(plusToken->str());
 
-      // Initialise a "slave" FileProperty object to do all the work.
-      FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts, Direction::Input);
-
-      std::string error = slaveFileProp.setValue(value);
-
-      // If an error was returned then we throw it out of the functor, to be
-      // returned by MultiFileProperty.setvalue(...).
-      if(!error.empty())
-        throw std::runtime_error(error);
-
-      // Append the file name to result, and return it.
-      result += slaveFileProp();
-      return result;
-    }
-
-    /**
-     * Turn (1, 2, 30, 31) into ((1), (2), (30), (31)).
-     */
-    std::vector<std::vector<std::string> > unflattenFileNames(
-      const std::vector<std::string> & flattenedFileNames)
-    {
-      std::vector<std::vector<std::string> > unflattenedFileNames;
-
-      std::vector<std::string>::const_iterator it = flattenedFileNames.begin();
-
-      for(; it != flattenedFileNames.end(); ++it)
+      for(auto plusTokenString = plusTokenStrings.begin(); plusTokenString != plusTokenStrings.end(); ++plusTokenString)
       {
-        unflattenedFileNames.push_back(
-          std::vector<std::string>(1,(*it)));
-      }
-
-      return unflattenedFileNames;
-    }
-
-    /**
-     * Converts a vector of vector of strings into a single comma and plus separated string.
-     * For example [["a", "b"],["x", "y", "z"]] into "a+b,x+y+z".
-     *
-     * @param - vector of vector of strings (filenames).
-     *
-     * @returns a single comma and plus separated string.
-     */
-    std::string toSingleString(const std::vector<std::vector<std::string>> & filenames)
-    {
-      std::string result;
-
-      for( auto filenameList = filenames.begin(); filenameList != filenames.end(); ++filenameList)
-      {
-        std::string innerResult = "";
-        
-        for( auto filename = filenameList->begin(); filename != filenameList->end(); ++filename)
+        try
         {
-          if( ! innerResult.empty() )
-            innerResult += "+";
-          innerResult += *filename;
+          m_parser.parse(*plusTokenString);
+        }
+        catch(const std::runtime_error & re)
+        {
+          errorMsg << "Unable to parse run(s): \"" << re.what() << "\", so will treat as a single file.  ";
         }
 
-        if( ! result.empty() )
-          result += ",";
-        result += innerResult;
+        std::vector<std::vector<std::string>> f = m_parser.fileNames();
+
+        // If there are no files, then we should keep this token as it was passed to the property,
+        // in its untampered form. This will enable us to deal with the case where a user is trying to 
+        // load a single (and possibly existing) file within a token, but which has unexpected zero 
+        // padding, or some other anomaly.
+        if( flattenFileNames(f).size() == 0 )
+          f.push_back(std::vector<std::string>(1, *plusTokenString));
+        
+        if( plusTokenStrings.size() > 1 )
+        {
+          // See [3] in header documentation.  Basically, for reasons of ambiguity, we cant add 
+          // together plusTokens if they contain a range of files.  So throw on any instances of this
+          // when there is more than plusToken.
+          if( f.size() > 1 )
+            return "Adding a range of files to another file(s) is not currently supported.";
+
+          if( temp.size() == 0 )
+            temp.push_back(f[0]);
+          else
+          {
+            for( auto parsedFile = f[0].begin(); parsedFile != f[0].end(); ++parsedFile )
+              temp[0].push_back(*parsedFile);
+          }
+        }
+        else
+        {
+          temp.insert(temp.end(), f.begin(), f.end());
+        }
       }
 
-      return result;
+      fileNames.insert(fileNames.end(), temp.begin(), temp.end());
     }
-  } // anonymous namespace
+    
+    std::vector<std::vector<std::string>> allUnresolvedFileNames = fileNames;
+    std::vector<std::vector<std::string>> allFullFileNames;
+
+    // First, find the default extension.  Flatten all the unresolved filenames first, to make this easier.
+    std::vector<std::string> flattenedAllUnresolvedFileNames = flattenFileNames(allUnresolvedFileNames);
+    std::string defaultExt = "";
+    auto unresolvedFileName = flattenedAllUnresolvedFileNames.begin();
+    for( ; unresolvedFileName != flattenedAllUnresolvedFileNames.end(); ++unresolvedFileName )
+    {
+      try
+      {
+        // Check for an extension.
+        Poco::Path path(*unresolvedFileName);
+        if( ! path.getExtension().empty() )
+        {
+          defaultExt = "." + path.getExtension();
+          break;
+        }
+            
+      }
+      catch( Poco::Exception & )
+      {
+        // Safe to ignore?  Need a better understanding of the circumstances under which
+        // this throws.
+      }
+    }
+    
+    // Cycle through each vector of unresolvedFileNames in allUnresolvedFileNames.  Remember, each vector contains files that are to be added together.
+    auto unresolvedFileNames = allUnresolvedFileNames.begin();
+    for( ; unresolvedFileNames != allUnresolvedFileNames.end(); ++unresolvedFileNames )
+    {
+      // Check for the existance of wild cards. (Instead of iterating over all the filenames just join them together
+      // and search for "*" in the result.)
+      if(std::string::npos != boost::algorithm::join(*unresolvedFileNames, "").find("*"))
+        return "Searching for files by wildcards is not currently supported.";
+
+      std::vector<std::string> fullFileNames;
+
+      for( auto unresolvedFileName = unresolvedFileNames->begin(); unresolvedFileName != unresolvedFileNames->end(); ++unresolvedFileName )
+      {
+        bool useDefaultExt;
+
+        try
+        {
+          // Check for an extension.
+          Poco::Path path(*unresolvedFileName);
+
+          if( path.getExtension().empty() )
+            useDefaultExt = true;
+          else
+            useDefaultExt = false;
+        }
+        catch( Poco::Exception & )
+        {
+          // Just shove the problematic filename straight into FileProperty and see
+          // if we have any luck.
+          useDefaultExt = false;
+        }
+
+        std::string fullyResolvedFile = "";
+
+        if( !useDefaultExt )
+        {
+          FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts, Direction::Input);
+          std::string error = slaveFileProp.setValue(*unresolvedFileName);
+
+          // If an error was returned then pass it along.
+          if(!error.empty())
+          {
+            errorMsg << "Unable to find file matching the string \"" + *unresolvedFileName + "\": \"" + error + "\".";
+            throw std::runtime_error(errorMsg.str());
+          }
+          
+          fullyResolvedFile = slaveFileProp();
+        }
+        else
+        {
+          // If a default ext has been specified/found, then use it.
+          if( ! defaultExt.empty() )
+          {
+            FileProperty slaveFileProp("Slave", "", FileProperty::Load, std::vector<std::string>(1, defaultExt), Direction::Input);
+            std::string error = slaveFileProp.setValue(*unresolvedFileName + defaultExt);
+            if(!error.empty())
+              throw std::runtime_error("Unable to find file matching the string \"" + *unresolvedFileName + defaultExt + "\".");
+            fullyResolvedFile = slaveFileProp();
+          }
+          // Else try each of the suggested extensions in turn, and whichever one works becomes the defaultExt.
+          else
+          {
+            for( auto ext = m_exts.begin(); ext != m_exts.end(); ++ext )
+            {
+              FileProperty slaveFileProp("Slave", "", FileProperty::Load, std::vector<std::string>(1, *ext), Direction::Input);
+              std::string error = slaveFileProp.setValue(*unresolvedFileName + *ext);
+              if(!error.empty())
+                continue;
+              fullyResolvedFile = slaveFileProp();
+              defaultExt = *ext;
+
+              break;
+            }
+
+            if( fullyResolvedFile.empty() )
+              throw std::runtime_error("Unable to find file matching the string \"" + *unresolvedFileName + "\", even after appending suggested file extensions.");
+          }
+        }
+
+        // Append the file name to result.
+        fullFileNames.push_back(fullyResolvedFile);
+      }
+
+      allFullFileNames.push_back(fullFileNames);
+    }
+
+    // Now re-set the value using the full paths found.
+    return PropertyWithValue<std::vector<std::vector<std::string> > >::setValue(toString(allFullFileNames));
+  }
 
 } // namespace Mantid
 } // namespace API

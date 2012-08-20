@@ -546,6 +546,23 @@ public:
 
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
+
+  void test_outputWsNameSameAsOneOfTheSinglePeriodFileNames()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "LOQ48127.raw, CSP79590.raw");
+    loader.setPropertyValue("OutputWorkspace","LOQ48127");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    std::set<std::string> adsContents = AnalysisDataService::Instance().getObjectNames();
+
+    WorkspaceGroup_sptr wsg = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("LOQ48127");
+    TS_ASSERT(wsg);
+    TS_ASSERT_EQUALS(wsg->getNames().size(), 3);
+
+    AnalysisDataService::Instance().remove("LOQ48127");
+  }
 };
 
 #endif /*LOADTEST_H_*/

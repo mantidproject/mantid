@@ -14,6 +14,7 @@
 #include <cassert>
 
 #include <ctype.h>
+#include <cctype>
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -67,7 +68,7 @@ namespace Kernel
       std::vector<std::vector<unsigned int> > & parseToken(std::vector<std::vector<unsigned int> > & parsedRuns, const std::string & token);
       std::vector<std::vector<unsigned int> > generateRange(unsigned int from, unsigned int to, unsigned int stepSize, bool addRuns);
       void validateToken(const std::string & token);
-      bool matchesFully(const std::string & stringToMatch, const std::string & regexString);
+      bool matchesFully(const std::string & stringToMatch, const std::string & regexString, bool caseless = false);
       std::string getMatchingString(const std::string & regexString, const std::string & toParse, bool caseless = false);
       std::string pad(std::string run, unsigned int padLength);
 
@@ -304,45 +305,54 @@ namespace Kernel
       if( base.empty() )
         throw std::runtime_error("There does not appear to be any runs present.");
 
-      // If there is only a list of runs, then we need to use the default instrument.
-      if( matchesFully(base, Regexs::LIST) )
+      // See if the user has typed in one of the available instrument names.
+      for( auto instName = m_validInstNames.begin(); instName != m_validInstNames.end(); ++instName )
       {
-        m_runString = base;
-        m_instString = ConfigService::Instance().getString("default.instrument");
+        // USE CASELESS MATCHES HERE.
+        if(matchesFully(base, *instName + ".*", true))
+        {
+          m_instString = getMatchingString("^" + *instName, base, true);
+          break;
+        }
+      }
 
-        // Do the files of the default instrument have an underscore?
-        InstrumentInfo instInfo = ConfigService::Instance().getInstrument(m_instString);
-        m_underscoreString = instInfo.delimiter();
+      // If not, use the default, or throw if we encounter an unrecognisable non-numeric string.
+      if( m_instString.empty() )
+      {
+        if( base.empty() )
+          throw std::runtime_error("There does not appear to be any runs present.");
+
+        if( isdigit(base[0]) )
+          m_instString = ConfigService::Instance().getString("default.instrument");
+        else
+          throw std::runtime_error("There does not appear to be a valid instrument name present.");
       }
       else
       {
-        // At this point, if we have a valid and parsable run string, then what remains must be
-        // one of the available instrument names followed by a possible underscore and a list of runs.
-        for( auto instName = m_validInstNames.begin(); instName != m_validInstNames.end(); ++instName )
-        {
-          if(matchesFully(base, *instName + ".*"))
-          {
-            m_instString = getMatchingString("^" + *instName, base, true); // Caseless.
-            break;
-          }
-        }
-
-        if( m_instString.empty() )
-          throw std::runtime_error("There does not appear to be a valid instrument name present.");
-
-        // Check for an underscore after the instrument name.
-        size_t underscore = base.find_last_of("_");
-        if(underscore == m_instString.size())
-          m_underscoreString = "_";
-
-        // We can now deduce the run string.  Throw if not found since runs are required.
-        m_runString = base.substr(m_underscoreString.size() + m_instString.size());
-        if(m_runString.empty())
-          throw std::runtime_error("There does not appear to be any runs present.");
+        // Chop off instrument name.
+        base = base.substr(m_instString.size(), base.size());
       }
 
+      if( base.empty() )
+        throw std::runtime_error("There does not appear to be any runs present.");
+      
       InstrumentInfo instInfo = ConfigService::Instance().getInstrument(m_instString);
+      m_instString = instInfo.shortName(); // Make sure we're using the shortened form of the isntrument name.
       m_zeroPadding = instInfo.zeroPadding();
+
+      if(boost::starts_with(base, instInfo.delimiter()))
+      {
+        // Store the instrument delimiter, and strip it off the start of the string.
+        m_underscoreString = instInfo.delimiter();
+        base = base.substr(m_underscoreString.size(), base.size());
+      }
+      
+      m_runString = getMatchingString("^" + Regexs::LIST, base);
+      
+      const std::string remainder = base.substr(m_runString.size(), base.size());
+      if( ! remainder.empty() )
+        throw std::runtime_error("There is an unparsable token present.");
+
     }
 
     /////////////////////////////////////////////////////////////////////////////
@@ -671,9 +681,15 @@ namespace Kernel
        *
        * @returns true if the string matches fully, or false otherwise.
        */
-      bool matchesFully(const std::string & stringToMatch, const std::string & regexString)
+      bool matchesFully(const std::string & stringToMatch, const std::string & regexString, bool caseless)
       {
-        const boost::regex regex("^(" + regexString + "$)");
+        boost::regex regex;
+
+        if( caseless )
+          regex = boost::regex("^(" + regexString + "$)", boost::regex::icase);
+        else
+          regex = boost::regex("^(" + regexString + "$)");
+
         return boost::regex_match(stringToMatch, regex);
       }
 
