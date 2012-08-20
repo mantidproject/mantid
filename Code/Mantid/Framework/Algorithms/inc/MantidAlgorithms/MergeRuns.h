@@ -68,7 +68,8 @@ public:
   virtual int version() const { return 1; }
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Arithmetic";}
-
+  // Overriden MultiPeriodGroupAlgorithm method.
+  bool useCustomInputPropertyName() const;
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
@@ -79,6 +80,7 @@ private:
   void buildAdditionTables();
   // Overriden MultiPeriodGroupAlgorithm method.
   std::string fetchInputPropertyName() const;
+  
 
   /// An addition table is a list of pairs: First int = workspace index in the EW being added, Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
   typedef std::vector< std::pair<int, int> >  AdditionTable;

@@ -89,6 +89,13 @@ std::string MergeRuns::fetchInputPropertyName() const
 }
 
 //------------------------------------------------------------------------------------------------
+// @returns true since "InputWorkspaces" is a non-workspace array property taken to be the input.
+bool MergeRuns::useCustomInputPropertyName() const
+{
+  return true;
+}
+
+//------------------------------------------------------------------------------------------------
 /** Executes the algorithm
  *  @throw Exception::NotFoundError If an input workspace doesn't exist
  *  @throw std::invalid_argument If the input workspaces are not compatible

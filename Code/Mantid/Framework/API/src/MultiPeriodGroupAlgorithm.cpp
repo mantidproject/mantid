@@ -65,6 +65,22 @@ void MultiPeriodGroupAlgorithm::validateMultiPeriodGroupInputs(const size_t& nIn
   }
 }
 
+/**
+Try to add the input workspace to the multiperiod input group list.
+@param ws: candidate workspace
+*/
+void MultiPeriodGroupAlgorithm::tryAddInputWorkspaceToInputGroups(Workspace_sptr ws)
+{
+  WorkspaceGroup_sptr inputGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+  if(inputGroup)
+  {
+    if(inputGroup->isMultiperiod())
+    {
+      m_multiPeriodGroups.push_back(inputGroup);
+    }
+  }
+}
+
 /** Check the input workspace properties for groups.
 *
 * Overriden from base Algorithm class.
@@ -78,38 +94,53 @@ void MultiPeriodGroupAlgorithm::validateMultiPeriodGroupInputs(const size_t& nIn
 */
 bool MultiPeriodGroupAlgorithm::checkGroups()
 {
-  typedef std::vector<std::string> WorkspaceNameType;
-
-  // Perform a check that the input property is the correct type.
-  Property* inputProperty = this->getProperty(this->fetchInputPropertyName());
-  if(!dynamic_cast<ArrayProperty<std::string>* >(inputProperty))
-  {
-    throw std::runtime_error("Support for input workspaces that are not string Arrays are not currently supported.");
-    /*Note that we could extend this algorithm to cover other input property types if required, but we don't need that funtionality now.*/
-  }
-
   m_multiPeriodGroups.clear();
-  WorkspaceNameType workspaces = this->getProperty(this->fetchInputPropertyName());
-  WorkspaceNameType::iterator it = workspaces.begin();
-
-  // Inspect all the input workspaces in the ArrayProperty input.
-  while(it != workspaces.end())
+  
+  /**
+  Handles the case in which the algorithm is providing a non-workspace property as an input.
+  This is currenly the case for algorithms that take an array of strings as an input where each entry is the name of a workspace.
+  */
+  if(this->useCustomInputPropertyName())
   {
-    Workspace_sptr ws = AnalysisDataService::Instance().retrieve(*it);
-    if(!ws)
+    typedef std::vector<std::string> WorkspaceNameType;
+
+    // Perform a check that the input property is the correct type.
+    Property* inputProperty = this->getProperty(this->fetchInputPropertyName());
+    if(!dynamic_cast<ArrayProperty<std::string>* >(inputProperty))
     {
-      throw Kernel::Exception::NotFoundError("Workspace", *it);
+      throw std::runtime_error("Support for custom input workspaces that are not string Arrays are not currently supported.");
+      /*Note that we could extend this algorithm to cover other input property types if required, but we don't need that funtionality now.*/
     }
-    WorkspaceGroup_sptr inputGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
-    if(inputGroup)
+
+    WorkspaceNameType workspaces = this->getProperty(this->fetchInputPropertyName());
+    WorkspaceNameType::iterator it = workspaces.begin();
+
+    // Inspect all the input workspaces in the ArrayProperty input.
+    while(it != workspaces.end())
     {
-      if(inputGroup->isMultiperiod())
+      Workspace_sptr ws = AnalysisDataService::Instance().retrieve(*it);
+      if(!ws)
       {
-        m_multiPeriodGroups.push_back(inputGroup);
+        throw Kernel::Exception::NotFoundError("Workspace", *it);
       }
+      tryAddInputWorkspaceToInputGroups(ws);
+      ++it;
     }
-    ++it;
   }
+  else
+  {
+    WorkspaceVector inWorkspaces;
+    WorkspaceVector outWorkspaces;
+    this->findWorkspaceProperties(inWorkspaces, outWorkspaces);
+    UNUSED_ARG(outWorkspaces);
+    WorkspaceVector::iterator it = inWorkspaces.begin();
+    while(it != inWorkspaces.end())
+    {
+      tryAddInputWorkspaceToInputGroups(*it);
+      ++it;
+    }
+  }
+
   const size_t multiPeriodGroupsSize = m_multiPeriodGroups.size();
   // If there are no MULTIPERIOD group workpaces detected, we hand the checking back up toe the base class.
   if(multiPeriodGroupsSize == 0)
@@ -120,7 +151,7 @@ bool MultiPeriodGroupAlgorithm::checkGroups()
     return Algorithm::checkGroups(); 
   }
   // Check that we have correct looking group workspace indexes.
-  validateMultiPeriodGroupInputs(workspaces.size());
+  validateMultiPeriodGroupInputs(m_multiPeriodGroups.size());
 
   m_useDefaultGroupingBehaviour = false;
   return !m_useDefaultGroupingBehaviour;
@@ -153,6 +184,36 @@ std::string MultiPeriodGroupAlgorithm::createFormattedInputWorkspaceNames(const 
   return inputWorkspaces;
 }
 
+/**
+Copy input workspaces assuming we are working with multi-period groups workspace inputs.
+@param alg: The spawned algorithm to set the properties on.
+@param periodNumber: The relevant period number used to index into the group workspaces
+*/
+void MultiPeriodGroupAlgorithm::copyInputWorkspaceProperties(IAlgorithm* alg, const int& periodNumber)
+{
+  std::vector<Property*> props = this->getProperties();
+  for (size_t j=0; j < props.size(); j++)
+  {
+    Property * prop = props[j];
+    if (prop)
+    {
+      if (prop->direction() == Direction::Input)
+      {
+        if(const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(prop))
+        {
+          if(WorkspaceGroup_sptr inputws = boost::dynamic_pointer_cast<WorkspaceGroup>(wsProp->getWorkspace()))
+          {
+            if(inputws->isMultiperiod())
+            {
+              alg->setProperty(prop->name(), inputws->getItem(periodNumber-1));
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 //--------------------------------------------------------------------------------------------
 /** Process WorkspaceGroup inputs.
 *
@@ -174,21 +235,17 @@ bool MultiPeriodGroupAlgorithm::processGroups()
   {
     return Algorithm::processGroups();
   }
-  // Get the name of the property identified as the input workspace property. 
-  Property* inputProperty = this->getProperty(this->fetchInputPropertyName());
-
   Property* outputWorkspaceProperty = this->getProperty("OutputWorkspace");
   const std::string outName = outputWorkspaceProperty->value();
 
   size_t nPeriods = m_multiPeriodGroups[0]->size();
   const bool doObserveADSNotifications = true;
   WorkspaceGroup_sptr outputWS = boost::make_shared<WorkspaceGroup>(!doObserveADSNotifications);
+
   // Loop through all the periods. Create spawned algorithms of the same type as this to process pairs from the input groups.
   for(size_t i = 0; i < nPeriods; ++i)
   {
-    // Create a formatted input workspace list for the spawned algorithm containing the names of the pairs of workspaces to merge. Note that this feature is setup for string array input workspace properties.
-    const std::string inputWorkspaces = createFormattedInputWorkspaceNames(i); 
-
+    const int periodNumber = static_cast<int>(i+1);
     Algorithm_sptr alg_sptr = API::AlgorithmManager::Instance().createUnmanaged(this->name(), this->version());
     IAlgorithm* alg = alg_sptr.get();
     if(!alg)
@@ -197,22 +254,23 @@ bool MultiPeriodGroupAlgorithm::processGroups()
       throw std::runtime_error("Algorithm creation failed.");
     }
     alg->initialize();
-    // Copy all properties over except for input and output workspace properties.
-    std::vector<Property*> props = this->getProperties();
-    for (size_t j=0; j < props.size(); j++)
+    // Copy properties that aren't workspaces properties.
+    copyNonWorkspaceProperties(alg, periodNumber);
+
+    if(this->useCustomInputPropertyName())
     {
-      Property * prop = props[j];
-        if (prop)
-        {
-          if (prop != inputProperty)
-          {
-            this->setOtherProperties(alg, prop->name(), prop->value(), static_cast<int>(i+1));
-          }
-        }
+      // Get the name of the property identified as the input workspace property. 
+      Property* inputProperty = this->getProperty(this->fetchInputPropertyName());
+
+      const std::string inputWorkspaces = createFormattedInputWorkspaceNames(i); 
+      // Set the input workspace property.
+      alg->setPropertyValue(this->fetchInputPropertyName(), inputWorkspaces);
     }
-    // Set the input workspace property.
-    alg->setPropertyValue(this->fetchInputPropertyName(), inputWorkspaces);
-    // Create a name for the output workspace based upon the requested name for the overall output group workspace.
+    else
+    {
+      // Configure input properties that are group workspaces.
+      copyInputWorkspaceProperties(alg, periodNumber);      
+    }
     const std::string outName_i = outName + "_" + Strings::toString(i+1);
     alg->setPropertyValue("OutputWorkspace", outName_i);
     // Run the spawned algorithm.
@@ -223,6 +281,7 @@ bool MultiPeriodGroupAlgorithm::processGroups()
     // Add the output workpace from the spawned algorithm to the group.
     outputWS->add(outName_i);
   }
+
   outputWS->observeADSNotifications(doObserveADSNotifications);
   this->setProperty("OutputWorkspace", outputWS);
   this->setExecuted(true);

@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_STITCHGROUP1D_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MultiPeriodGroupAlgorithm.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -40,7 +40,7 @@ namespace MDAlgorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport StitchGroup1D  : public API::Algorithm
+  class DLLExport StitchGroup1D  : public API::MultiPeriodGroupAlgorithm
   {
   public:
     StitchGroup1D();
@@ -52,6 +52,7 @@ namespace MDAlgorithms
 
   private:
 
+    std::string fetchInputPropertyName() const;
     void checkIndividualWorkspace(boost::shared_ptr<const API::IMDHistoWorkspace> workspace) const;
     void checkBothWorkspaces(boost::shared_ptr<const API::IMDHistoWorkspace> rhsWorkspace, boost::shared_ptr<const API::IMDHistoWorkspace> lhsWorkspace) const;
     boost::shared_ptr<MDEvents::MDHistoWorkspace> trimOutIntegratedDimension(boost::shared_ptr<API::IMDHistoWorkspace> ws);

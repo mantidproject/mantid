@@ -313,10 +313,19 @@ protected:
   virtual bool checkGroups();
   virtual bool processGroups();
   virtual void setOtherProperties(IAlgorithm * alg, const std::string & propertyName, const std::string & propertyValue, int periodNum);
+  typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;
+
+  void findWorkspaceProperties(WorkspaceVector& inputWorkspaces,
+      WorkspaceVector& outputWorkspaces) const;
+
+  void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
+
+  /// All the WorkspaceProperties that are Input or InOut. Set in execute()
+  std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
 
 private:
   /// VectorWorkspaces
-  typedef std::vector<boost::shared_ptr<Workspace> > WorkspaceVector;
+  
 
   /// Private Copy constructor: NO COPY ALLOWED
   Algorithm(const Algorithm&);
@@ -328,8 +337,7 @@ private:
 
   void store();
   void fillHistory(Mantid::Kernel::DateAndTime, double,std::size_t);
-  void findWorkspaceProperties(WorkspaceVector& inputWorkspaces,
-      WorkspaceVector& outputWorkspaces) const;
+
   void logAlgorithmInfo() const;
 
 
@@ -360,14 +368,10 @@ private:
   /// Vector of all the workspaces that have been write-locked
   WorkspaceVector m_writeLockedWorkspaces;
 
-  /// All the WorkspaceProperties that are Input or InOut. Set in execute()
-  std::vector<IWorkspaceProperty *> m_inputWorkspaceProps;
   /// All the WorkspaceProperties that are Output or InOut. Set in execute()
   std::vector<IWorkspaceProperty *> m_outputWorkspaceProps;
   /// All the WorkspaceProperties that are Output (not inOut). Set in execute()
   std::vector<IWorkspaceProperty *> m_pureOutputWorkspaceProps;
-
-  void copyNonWorkspaceProperties(IAlgorithm * alg, int periodNum);
 
   /// One vector of workspaces for each input workspace property
   std::vector<WorkspaceVector> m_groups;

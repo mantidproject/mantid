@@ -98,6 +98,11 @@ namespace MDAlgorithms
     declareProperty("OutScaleFactor", -2.0, "The actual used value for the scaling factor.", Direction::Output); 
   }
 
+  std::string StitchGroup1D::fetchInputPropertyName() const
+  {
+    return "RHSWorkspace";
+  }
+
   /**
   Check/Validate that a given workspace is suitable as an algorithm input.
   @param ws : The input workspace to check.
@@ -272,8 +277,8 @@ namespace MDAlgorithms
   {
     auto dim = getFirstNonIntegratedDimension(ws);
     auto nbins = dim->getNBins();
-    int binLow = int(nbins * fractionLow);
-    int binHigh = int(nbins * fractionHigh);
+    int binLow = int(double(nbins) * fractionLow);
+    int binHigh = int(double(nbins) * fractionHigh);
     double step = ( dim->getMaximum() - dim->getMinimum() )/ double(nbins);
     double qLow = (double(binLow) * step) + dim->getMinimum();
     double qHigh = (double(binHigh) * step) + dim->getMinimum();

@@ -10,13 +10,13 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-  // ------------------------------------------------------------------
-// Working, concrete MultiPeriodGroupAlgorithm
-class TestAlgorithm : public MultiPeriodGroupAlgorithm
+// ------------------------------------------------------------------
+// Working, concrete MultiPeriodGroupAlgorithm. With single input array property.
+class TestAlgorithmA : public MultiPeriodGroupAlgorithm
 {
 public:
-  TestAlgorithm(){}
-  virtual const std::string name() const {return "TestAlgorithm";}
+  TestAlgorithmA(){}
+  virtual const std::string name() const {return "TestAlgorithmA";}
   virtual int version() const {return 1;}
   virtual void init() 
   {
@@ -32,13 +32,63 @@ public:
   {
     return "MyInputWorkspaces";
   }
-  virtual ~TestAlgorithm()
+  virtual bool useCustomInputPropertyName() const
+  {
+    return true;
+  }
+  virtual ~TestAlgorithmA()
   {
   }
 };
-DECLARE_ALGORITHM( TestAlgorithm)
+DECLARE_ALGORITHM( TestAlgorithmA)
 // ------------------------------------------------------------------
 // End class dec
+
+// ------------------------------------------------------------------
+// Working, concrete MultiPeriodGroupAlgorithm. With proper named group input properties.
+class TestAlgorithmB : public MultiPeriodGroupAlgorithm
+{
+public:
+  TestAlgorithmB(){}
+  virtual const std::string name() const {return "TestAlgorithmB";}
+  virtual int version() const {return 1;}
+  virtual void init() 
+  {
+    declareProperty(new WorkspaceProperty<>("PropertyA", "ws1", Direction::Input));
+    declareProperty(new WorkspaceProperty<>("PropertyB", "ws2", Direction::Input));
+    declareProperty(new WorkspaceProperty<>("PropertyC", "ws3", Direction::Input));
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "");
+    declareProperty("PropertyX", 1, boost::make_shared<Kernel::MandatoryValidator<int> >()); // I'm only adding this property to cause errors if it's not passed to spawned algorithms.
+  }
+  virtual void exec()
+  {
+    MatrixWorkspace_sptr a = getProperty("PropertyA");
+    MatrixWorkspace_sptr b = getProperty("PropertyB");
+    MatrixWorkspace_sptr c = getProperty("PropertyC");
+    int x = getProperty("PropertyX");
+    UNUSED_ARG(a);
+    UNUSED_ARG(b);
+    UNUSED_ARG(c);
+    UNUSED_ARG(x);
+
+    setProperty("OutputWorkspace", Workspace_sptr(new WorkspaceTester));
+  }
+  virtual std::string fetchInputPropertyName() const
+  {
+    return "";
+  }
+  virtual bool useCustomInputPropertyName() const
+  {
+    return false;
+  }
+  virtual ~TestAlgorithmB()
+  {
+  }
+};
+DECLARE_ALGORITHM( TestAlgorithmB)
+// ------------------------------------------------------------------
+// End class dec
+
 
 class MultiPeriodGroupAlgorithmTest : public CxxTest::TestSuite
 {
@@ -105,6 +155,7 @@ public:
       {
         return "InputWorkspaces";
       }
+      virtual bool useCustomInputPropertyName() const {return true;}
       virtual ~BrokenAlgorithm()
       {
       }
@@ -145,6 +196,7 @@ public:
       {
         return "made_up_property_name";
       }
+      virtual bool useCustomInputPropertyName() const {return true;}
       virtual ~BrokenAlgorithm()
       {
       }
@@ -163,17 +215,43 @@ public:
     TSM_ASSERT_THROWS("Should throw because fetchInputPropertyName is returning the name of a property which doesn't exist.", alg.execute(), Kernel::Exception::NotFoundError);
   }
 
-  void test_process_groups()
+  void test_process_groups_with_array_input()
   {
     WorkspaceGroup_sptr a = create_good_multiperiod_workspace_group("a");
     WorkspaceGroup_sptr b = create_good_multiperiod_workspace_group("b");
     WorkspaceGroup_sptr c = create_good_multiperiod_workspace_group("c");
 
-    TestAlgorithm alg;
+    TestAlgorithmA alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setPropertyValue("MyInputWorkspaces", "a, b, c");
     alg.setProperty("PropertyA", 1);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    WorkspaceGroup_sptr wsgroup = Mantid::API::AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("outWS");
+    TS_ASSERT(wsgroup != NULL);
+    TS_ASSERT_EQUALS(a->size(), wsgroup->size());
+  }
+
+  void test_process_groups_with_workspace_type_inputs()
+  {
+    WorkspaceGroup_sptr a = create_good_multiperiod_workspace_group("a");
+    WorkspaceGroup_sptr b = create_good_multiperiod_workspace_group("b");
+    WorkspaceGroup_sptr c = create_good_multiperiod_workspace_group("c");
+
+    AnalysisDataService::Instance().addOrReplace("ws1", a);
+    AnalysisDataService::Instance().addOrReplace("ws2", b);
+    AnalysisDataService::Instance().addOrReplace("ws3", c);
+
+    TestAlgorithmB alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("PropertyA", a);
+    alg.setProperty("PropertyB", b);
+    alg.setProperty("PropertyC", c);
+    alg.setProperty("PropertyX", 1);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
