@@ -1847,7 +1847,10 @@ void Graph::deselect()
 {
   deselectMarker();
   scalePicker->deselect();  
-  d_legend->setSelected(false);
+  if(d_legend != NULL)
+  {
+    d_legend->setSelected(false);
+  }
   titlePicker->setSelected(false);
   deselectCurves();
 }
@@ -1886,7 +1889,10 @@ bool Graph::titleSelected()
 
 void Graph::selectTitle(bool select)
 {
-  d_legend->setSelected(!select);
+  if(d_legend != NULL)
+  {
+    d_legend->setSelected(!select);
+  }
   titlePicker->setSelected(select);
   
   if (select){
