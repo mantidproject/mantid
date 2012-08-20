@@ -259,9 +259,6 @@ bool MultiPeriodGroupAlgorithm::processGroups()
 
     if(this->useCustomInputPropertyName())
     {
-      // Get the name of the property identified as the input workspace property. 
-      Property* inputProperty = this->getProperty(this->fetchInputPropertyName());
-
       const std::string inputWorkspaces = createFormattedInputWorkspaceNames(i); 
       // Set the input workspace property.
       alg->setPropertyValue(this->fetchInputPropertyName(), inputWorkspaces);
