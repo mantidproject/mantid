@@ -145,6 +145,7 @@ namespace Mantid
 
           // Count the new # of boxes.
           lastNumBoxes = m_OutWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
+          eventsAdded  = 0;
           pProgress->report(wi);
         }
 

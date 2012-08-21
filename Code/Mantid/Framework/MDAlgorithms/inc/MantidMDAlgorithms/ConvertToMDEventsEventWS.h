@@ -115,7 +115,7 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public C
          //ts->push( new FunctionTask( func, cost) );
 
           // Keep a running total of how many events we've added
-          if (bc->shouldSplitBoxes(n_added_events,nEventsInWS,lastNumBoxes))
+          if (bc->shouldSplitBoxes(nEventsInWS,n_added_events,lastNumBoxes))
           {
             // Do all the adding tasks
             //   tp.joinAll();    
@@ -126,6 +126,7 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public C
 
             // Count the new # of boxes.
               lastNumBoxes = pWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
+              n_added_events=0;
               pProg->report(wi);
            }
    

@@ -126,7 +126,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra)
 void ConvToMDHistoWS::runConversion(API::Progress *pProgress)
 {
   // counder for the number of events
-  size_t n_added_events(0);
+  size_t nAddedEvents(0);
   //
   Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
   size_t lastNumBoxes                = bc->getTotalNumMDBoxes();
@@ -157,10 +157,10 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress)
   for (size_t i = 0; i < nValidSpectra; i+=m_spectraChunk)
   {
     size_t n_thread_ev = this->conversionChunk(i);
-    n_added_events+=n_thread_ev;
-    nEventsInWS   +=n_thread_ev;
+    nAddedEvents+=n_thread_ev;
+    nEventsInWS +=n_thread_ev;
 
-   if (bc->shouldSplitBoxes(nEventsInWS,n_added_events, lastNumBoxes))
+   if (bc->shouldSplitBoxes(nEventsInWS,nAddedEvents,lastNumBoxes))
     {
       // Do all the adding tasks
       tp.joinAll();    
@@ -169,8 +169,10 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress)
       if (ts->size() > 0)       tp.joinAll();
       // Count the new # of boxes.
       lastNumBoxes = m_OutWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
+      nAddedEvents = 0;
+      pProgress->report(i);
     }
-    pProgress->report(i);
+
     //if (m_OutWSWrapper->ifNeedsSplitting())
     //{
     //  // Do all the adding tasks

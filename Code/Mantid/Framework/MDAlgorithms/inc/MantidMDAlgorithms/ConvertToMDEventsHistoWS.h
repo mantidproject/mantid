@@ -156,7 +156,7 @@ public:
                    // reset buffer counts
                    n_coordinates=0;
                    n_buf_events=0;
-                   if (bc->shouldSplitBoxes(n_added_events,nEventsInWS,lastNumBoxes))
+                   if (bc->shouldSplitBoxes(nEventsInWS,n_added_events,lastNumBoxes))
                    {
                         // Do all the adding tasks
                         //   tp.joinAll();    
@@ -166,8 +166,9 @@ public:
                         //if (ts->size() > 0)       tp.joinAll();
                         // Count the new # of boxes.
                         lastNumBoxes = pWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
+                        n_added_events=0;
+                        pProg->report(i);
                     }
-                    pProg->report(i);
                 }
 #else
                 n_coordinates=0;
