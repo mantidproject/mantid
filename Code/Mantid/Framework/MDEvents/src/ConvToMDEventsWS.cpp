@@ -95,9 +95,8 @@ namespace Mantid
 
 
       m_EventWS  = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
-      if(!m_EventWS.get()){
+      if(!m_EventWS)
         throw(std::logic_error(" ConvertToMDEventWS should work with defined event workspace"));
-      }
 
       return numSpec;
     }

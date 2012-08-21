@@ -184,7 +184,7 @@ void ConvertToMDEvents::exec()
     this->subAlgFactory.init(ParamParser);
 
   // initiate class which would deal with any dimension workspaces, handling 
-  if(!pWSWrapper.get()){
+  if(!pWSWrapper){
     pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
   }
   // -------- Input workspace
@@ -197,7 +197,7 @@ void ConvertToMDEvents::exec()
   // shared pointer to target workspace
   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
   bool create_new_ws(false);
-  if(!spws.get())
+  if(!spws)
   {
     create_new_ws = true;
   }else{ 

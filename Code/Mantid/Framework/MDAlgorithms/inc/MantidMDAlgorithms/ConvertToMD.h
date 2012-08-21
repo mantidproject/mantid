@@ -72,7 +72,7 @@ namespace MDAlgorithms
    /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
    boost::shared_ptr<MDEvents::MDEventWSWrapper> m_OutWSWrapper;
    /// progress reporter
-   std::auto_ptr<API::Progress > m_Progress;
+   boost::scoped_ptr<API::Progress > m_Progress;
    /// pointer to the class, which does the particular conversion
    boost::shared_ptr<MDEvents::ConvToMDBase> m_Convertor; 
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);

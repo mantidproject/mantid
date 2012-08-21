@@ -197,7 +197,7 @@ void ConvertToMD::exec()
   // shared pointer to target workspace
   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
   bool create_new_ws(false);
-  if(!spws.get())
+  if(!spws)
   {
     create_new_ws = true;
   }else{ 
@@ -284,9 +284,9 @@ void ConvertToMD::exec()
           if(!(reuse_preprocecced_detectors&&g_DetLoc.isDefined(m_InWS2D))){
             // amount of work:
             const size_t nHist = m_InWS2D->getNumberHistograms();
-            m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
-            g_DetLoc.processDetectorsPositions(m_InWS2D,g_Log,m_Progress.get());
+            m_Progress = boost::scoped_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
             g_log.information()<<" preprocessing detectors\n";
+            g_DetLoc.processDetectorsPositions(m_InWS2D,g_Log,m_Progress.get());  
             if(g_DetLoc.nDetectors()==0){
                 g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
                 throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
@@ -328,7 +328,7 @@ void ConvertToMD::exec()
   // initate conversion and estimate amout of job to do
   size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper);
   // progress reporter
-  m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
+  m_Progress = boost::scoped_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
 
   g_log.information()<<" conversion started\n";
   m_Convertor->runConversion(m_Progress.get());

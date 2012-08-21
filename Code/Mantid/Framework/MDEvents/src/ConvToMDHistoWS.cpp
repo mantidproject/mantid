@@ -25,7 +25,7 @@ size_t  ConvToMDHistoWS::initialize(const MDEvents::MDWSDescription &WSD, boost:
 
   // check if we indeed have matrix workspace as input.
   DataObjects::Workspace2D_const_sptr pWS2D  = boost::dynamic_pointer_cast<const DataObjects::Workspace2D>(m_InWS2D);
-  if(!pWS2D.get())throw(std::logic_error("ConvToMDEventsHisto should work with defined histrohram workspace"));
+  if(!pWS2D)throw(std::logic_error("ConvToMDEventsHisto should work with defined histrohram workspace"));
 
   return numSpec;
 }

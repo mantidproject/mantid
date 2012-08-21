@@ -5,7 +5,7 @@
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h"
-//#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -43,8 +43,7 @@ namespace MDAlgorithms
  
  
 /// Convert to MD Events class itself:
- // class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm, public API::DeprecatedAlgorithm
-  class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm
+  class DLLExport ConvertToMDEvents  : public MDEvents::BoxControllerSettingsAlgorithm, public API::DeprecatedAlgorithm
   {
   public:
     ConvertToMDEvents();
