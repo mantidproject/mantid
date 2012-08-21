@@ -814,7 +814,7 @@ public:
    * Test Data:
    * (1) 4862b7
    */
-  void test_BackgroundCalculation()
+  void LocalPassed_test_BackgroundCalculation()
   {
     // 1. Create data
     API::MatrixWorkspace_sptr dataws;
