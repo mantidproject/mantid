@@ -142,6 +142,9 @@ namespace CurveFitting
     /// Split peaks to peak groups
     std::vector<std::set<size_t> > splitPeaksToGroups();
 
+    /// Auxiliary.  Split composite function name to function index and parameter name
+    void parseCompFunctionParameterName(std::string fullparname, std::string& parname, size_t& funcindex);
+
     /// Instance data
     API::MatrixWorkspace_sptr dataWS;
     DataObjects::Workspace2D_sptr outputWS;
@@ -161,6 +164,15 @@ namespace CurveFitting
     std::vector<std::string> mPeakParameterNames; // Peak parameters' names of the peak
 
     size_t mWSIndexToWrite;
+
+    /// Map to store peak group information: key (int) = (hkl)^2; value = group ID
+    std::map<int, size_t> mPeakGroupMap;
+
+    /// Map to store fitting Chi^2: key = group index; value = chi^2
+    std::map<size_t, double> mPeakGroupFitChi2Map;
+
+    /// Map to store fitting Status: key = group index; value = fit status
+    std::map<size_t, std::string> mPeakGroupFitStatusMap;
 
     int mPeakRadius;
 

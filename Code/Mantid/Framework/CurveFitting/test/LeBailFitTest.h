@@ -814,7 +814,7 @@ public:
    * Test Data:
    * (1) 4862b7
    */
-  void OnGoing_test_BackgroundCalculation()
+  void test_BackgroundCalculation()
   {
     // 1. Create data
     API::MatrixWorkspace_sptr dataws;
@@ -877,6 +877,20 @@ public:
 
     std::cout << "Background Workspace Range: " << tofmin << ", " << tofmax << std::endl;
 
+    /* --- Write out data file for checking ---
+    std::ofstream purepeakfile, bkgdfile;
+    purepeakfile.open("PeaksOnlyBank7.dat");
+    bkgdfile.open("BackgroundBank7.dat");
+    for (size_t i = 0; i < outbkgdws->readX(0).size(); ++i)
+    {
+        bkgdfile << outbkgdws->readX(1)[i] << "    " << outbkgdws->readY(1)[i] << std::endl;
+        purepeakfile << outbkgdws->readX(2)[i] << "    " << outbkgdws->readY(2)[i] << std::endl;
+    }
+    purepeakfile.close();
+    bkgdfile.close();
+
+    *****************/
+
     // b) Histograms
     TS_ASSERT_EQUALS(outbkgdws->getNumberHistograms(), 3);
 
@@ -886,7 +900,7 @@ public:
             (AnalysisDataService::Instance().retrieve("CaclulatedPeaks"));
     TS_ASSERT(peakparamws);
 
-    TS_ASSERT_EQUALS(peakparamws->rowCount(), parameterws->rowCount())
+    TS_ASSERT_EQUALS(peakparamws->rowCount(), hklws->rowCount())
 
   }
 

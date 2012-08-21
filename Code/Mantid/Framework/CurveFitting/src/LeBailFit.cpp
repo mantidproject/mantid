@@ -90,6 +90,8 @@ void LeBailFit::init()
     auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
     this->declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
 
+    this->declareProperty("BackgroundFunctionOrder", 12, "Order of background function.");
+
     /// Input background parameters (array)
     this->declareProperty(new Kernel::ArrayProperty<double>("BackgroundParameters"),
                           "Optional: enter a comma-separated list of background order parameters from order 0. ");
@@ -406,9 +408,21 @@ void LeBailFit::doLeBailFit(size_t workspaceindex)
  */
 void LeBailFit::calBackground(size_t workspaceindex)
 {
+    // 0. Set peak parameters to each peak
+    // 1. Set parameters to each peak
+    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator pit;
+    for (pit = mPeaks.begin(); pit != mPeaks.end(); ++pit)
+    {
+        int hkl2 = pit->first;
+        double peakheight = mPeakHeights[hkl2];
+        setPeakParameters(mPeaks[hkl2], mFuncParameters, peakheight);
+    }
+
     // 1. Split all the peaks into groups
     std::vector<std::set<size_t> > peakgroups;
     peakgroups = this->splitPeaksToGroups(); // this can be refactored from some exisiting functions
+
+    int bkgdfuncorder = this->getProperty("BackgroundFunctionOrder");
 
     // 2. Do fit for each peak group
     for (size_t ipg = 0; ipg < peakgroups.size(); ++ipg)
@@ -417,27 +431,28 @@ void LeBailFit::calBackground(size_t workspaceindex)
         API::CompositeFunction tempfunction;
         API::CompositeFunction_sptr groupedpeaks = boost::make_shared<API::CompositeFunction>(tempfunction);
 
-        std::cout << "DBx445 Peak Group " << ipg << std::endl;
+        g_log.information() << "DBx445 Peak Group " << ipg << std::endl;
+
+        double tof_min = dataWS->readX(workspaceindex).back()+ 1.0;
+        double tof_max = dataWS->readX(workspaceindex)[0] - 1.0;
 
         /// Add peaks and set up peaks' parameters
         std::set<size_t> peakindices = peakgroups[ipg];
         std::set<size_t>::iterator psiter;
+
+        std::vector<int> hklslookup;
+        int funcid = 0;
         for (psiter = peakindices.begin(); psiter != peakindices.end(); ++psiter)
         {
+            // i. Add peak function in the composite function
             size_t indpeak = *psiter;
             int hkl2 = mPeakHKL2[indpeak]; // key
-            double fwhm = mPeaks[hkl2]->fwhm();
-            double center = mPeaks[hkl2]->centre();
-            std::cout << "Peak Index " << indpeak << " @ TOF = " << center << " FWHM =" << fwhm << std::endl;
-
-            std::cout << "DBx456 Debug Early Continue!" << std::endl;
-            continue;
-
-            // can be very wrong!
-            throw std::runtime_error("Implement it! Need to design a good data structure for peak groups. ");
+            hklslookup.push_back(hkl2);
             groupedpeaks->addFunction(mPeaks[hkl2]);
 
-            // ii. Set up peak function
+            mPeakGroupMap.insert(std::make_pair(hkl2, ipg));
+
+            // ii. Set up peak function, i.e., tie peak parameters except Height
             std::vector<std::string> peakparamnames = mPeaks[hkl2]->getParameterNames();
             for (size_t im = 0; im < peakparamnames.size(); ++im)
             {
@@ -448,41 +463,61 @@ void LeBailFit::calBackground(size_t workspaceindex)
 
                     // If not peak height
                     std::stringstream ssname, ssvalue;
-                    ssname << "f" << im << "." << parname;
+                    ssname << "f" << funcid << "." << parname;
                     ssvalue << parvalue;
                     groupedpeaks->tie(ssname.str(), ssvalue.str());
+                    groupedpeaks->setParameter(ssname.str(), parvalue);
                 }
             }
+
+            // iii. find fitting boundary
+            double fwhm = mPeaks[hkl2]->fwhm();
+            double center = mPeaks[hkl2]->centre();
+            g_log.information() << "DB1201 Peak Index " << indpeak << " @ TOF = " << center << " FWHM =" << fwhm << std::endl;
+
+            double leftbound = center-mPeakRadius*0.5*fwhm;
+            double rightbound = center+mPeakRadius*0.5*fwhm;
+            if (leftbound < tof_min)
+            {
+                tof_min = leftbound;
+            }
+            if (rightbound > tof_max)
+            {
+                tof_max = rightbound;
+            }
+
+            // iv. Progress function id
+            ++ funcid;
+
         } // FOR 1 Peak in PeaksGroup
-
-        std::cout << "DBx456 Debug Early Continue!" << std::endl;
-        continue;
-
-        double tof_min, tof_max;
-        throw std::runtime_error("tof_min and tof_max are not calculated!");
 
         /// Background (Polynomial)
         std::vector<double> orderparm;
-        orderparm.push_back(0.0);
-        orderparm.push_back(0.0);
-        orderparm.push_back(0.0);
+        for (size_t iod = 0; iod <= size_t(bkgdfuncorder); ++iod)
+        {
+            orderparm.push_back(0.0);
+        }
         CurveFitting::BackgroundFunction_sptr backgroundfunc = this->generateBackgroundFunction("Polynomial", orderparm);
 
         groupedpeaks->addFunction(backgroundfunc);
 
+        g_log.information() << "DB1217 Composite Function of Peak Group: " << groupedpeaks->asString()
+                  << std::endl << "Boundary: " << tof_min << ", " << tof_max << std::endl;
 
         // b. Fit peaks in the peak group
-        API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", 0.0, double(ipg)*0.9/double(peakgroups.size()), true);
+        /* Disabled to find memory leak */
+        double unitprog = double(ipg)*0.9/double(peakgroups.size());
+        API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", double(ipg)*unitprog, double(ipg+1)*unitprog, true);
         fitalg->initialize();
 
         fitalg->setProperty("Function", boost::shared_ptr<API::IFunction>(groupedpeaks));
-        fitalg->setPropertyValue("InputWorkspace", dataWS->name());
+        fitalg->setProperty("InputWorkspace", dataWS);
         fitalg->setProperty("WorkspaceIndex", int(workspaceindex));
         fitalg->setProperty("StartX", tof_min);
         fitalg->setProperty("EndX", tof_max);
         fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
         fitalg->setProperty("CostFunction", "Least squares");
-        fitalg->setProperty("MaxIterations", 100);
+        fitalg->setProperty("MaxIterations", 1000);
 
         // c. Execute
         bool successfulfit = fitalg->execute();
@@ -499,34 +534,57 @@ void LeBailFit::calBackground(size_t workspaceindex)
         g_log.information() << "LeBailFit (Background) Fit result:  Chi^2 = " << chi2
                        << " Fit Status = " << fitstatus << std::endl;
 
+        mPeakGroupFitChi2Map.insert(std::make_pair(ipg, chi2));
+        mPeakGroupFitStatusMap.insert(std::make_pair(ipg, fitstatus));
+
         // d. Get status and fitted parameter
-        API::IFunction_sptr fitout = fitalg->getProperty("Function");
-
-        std::vector<std::string> parnames = fitout->getParameterNames();
-
-        for (size_t ipn = 0; ipn < parnames.size(); ++ipn)
+        if (fitstatus.compare("success") == 0 && chi2 < 1.0E6)
         {
-            std::string parname = parnames[ipn];
-            g_log.information() << "File Name = " << parname << std::endl;
-
-            double peakheight;
-            /// FIXME : make peakheight = ???
-            if (peakheight < 0)
+            // A successful fit
+            /*
+            API::IFunction_sptr fitout = fitalg->getProperty("Function");
+            std::vector<std::string> parnames = fitout->getParameterNames();
+            std::map<size_t, double> peakheights;
+            for (size_t ipn = 0; ipn < parnames.size(); ++ipn)
             {
-                g_log.error() << "Fit for peak ??? is wrong.  Peak height cannot be negative! " << std::endl;
-                peakheight = 0;
+                /// Parameter names from function are in format fx.name.
+                std::string funcparname = parnames[ipn];
+                std::string parname;
+                size_t functionindex;
+                parseCompFunctionParameterName(funcparname, parname, functionindex);
+
+                g_log.information() << "Parameter Name = " << parname << "(" << funcparname
+                                    << ") = " << fitout->getParameter(funcparname) << std::endl;
+
+                if (parname.compare("Height") == 0)
+                {
+                    peakheights.insert(std::make_pair(functionindex, fitout->getParameter(funcparname)));
+                }
             }
+            */
+
+            // e. Check peaks' heights that they must be positive or 0.
+            //    Give out warning if it doesn't seem right;
+            for (size_t ipk = 0; ipk < hklslookup.size(); ++ipk)
+            {
+                // There is no need to set height as after Fit the result is stored already.
+                // double height = peakheights[ipk];
+
+                int hkl2 = hklslookup[ipk];
+                double height = mPeaks[hkl2]->getParameter("Height");
+                if (height < 0)
+                {
+                    g_log.error() << "Fit for peak (HKL^2 = " << hkl2 << ") is wrong.  Peak height cannot be negative! " << std::endl;
+                    height = 0.0;
+                    mPeaks[hkl2]->setParameter("Height", height);
+                }
+
+                // g_log.information() << "DBx507  Peak " << hkl2 << " Height.  Stored In Peak = " << mPeaks[hkl2]->getParameter("Height")
+                //       << "  vs. From Fit = " << height << std::endl;
+            }
+
         }
-        throw std::runtime_error("to be implemented after this!");
-
-        // e. Check peaks' heights that they must be positive or 0.
-        //    Give out warning if it doesn't seem right;
-
-
     } // for all peak-groups
-
-    std::cout << "DBx456 Debug Early Return!" << std::endl;
-    return;
 
     // 4. Combine output and calcualte for background
     // Spectrum 0: Original data
@@ -1187,6 +1245,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
         double curvalue = fitout->getParameter(parname);
 
         // split parameter string
+        // FIXME These codes are duplicated as to method parseCompFunctionParameterName().  Refactor!
         std::vector<std::string> results;
         boost::split(results, parname, boost::is_any_of("."));
 
@@ -1234,7 +1293,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
 
 /// =================================== Methods about input/output & create workspace ================================================ ///
 /*
- * Create and set up an output TableWorkspace for all the peaks.
+ * Create and set up an output TableWorkspace for all the peaks
  */
 void LeBailFit::createPeaksWorkspace()
 {
@@ -1246,23 +1305,65 @@ void LeBailFit::createPeaksWorkspace()
     peakWS->addColumn("int", "H");
     peakWS->addColumn("int", "K");
     peakWS->addColumn("int", "L");
-    peakWS->addColumn("double", "height");
+    peakWS->addColumn("double", "Height");
     peakWS->addColumn("double", "TOF_h");
+    peakWS->addColumn("int", "PeakGroup");
+    peakWS->addColumn("double", "Chi^2");
+    peakWS->addColumn("str", "FitStatus");
 
     // 3. Construct a list
     std::sort(mPeakHKL2.begin(), mPeakHKL2.end(), compDescending);
 
     for (size_t ipk = 0; ipk < mPeakHKL2.size(); ++ipk)
     {
+        // a. Access peak function
         int hkl2 = mPeakHKL2[ipk];
         CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr tpeak = mPeaks[hkl2];
+
+        // b. Get peak's nature parameters
         int h, k, l;
         tpeak->getMillerIndex(h, k, l);
         double tof_h = tpeak->centre();
         double height = tpeak->height();
 
-        API::TableRow newrow = peakWS->appendRow();
-        newrow << h << k << l << height << tof_h;
+        // c. Get peak's fitting and etc.
+        size_t peakgroupindex = mPeaks.size()+10; /// Far more than max peak group index
+        std::map<int, size_t>::iterator git;
+        git = mPeakGroupMap.find(hkl2);
+        if (git != mPeakGroupMap.end())
+        {
+            peakgroupindex = git->second;
+        }
+
+        double chi2 = -1.0;
+        std::string fitstatus("No Fit");
+
+        std::map<size_t, double>::iterator cit;
+        std::map<size_t, std::string>::iterator sit;
+        cit = mPeakGroupFitChi2Map.find(peakgroupindex);
+        if (cit != mPeakGroupFitChi2Map.end())
+        {
+            chi2 = cit->second;
+        }
+        sit = mPeakGroupFitStatusMap.find(peakgroupindex);
+        if (sit != mPeakGroupFitStatusMap.end())
+        {
+            fitstatus = sit->second;
+        }
+
+        /// Peak group index converted to integer
+        int ipeakgroupindex = -1;
+        if (peakgroupindex < mPeaks.size())
+        {
+            ipeakgroupindex = int(peakgroupindex);
+        }
+
+        API::TableRow newrow = peakWS->appendRow();       
+        if (tof_h < 0)
+        {
+            g_log.error() << "For peak (HKL)^2 = " << hkl2 << "  TOF_h is NEGATIVE!" << std::endl;
+        }
+        newrow << h << k << l << height << tof_h << ipeakgroupindex << chi2 << fitstatus;
     }
 
     // 4. Set
@@ -1318,7 +1419,7 @@ CurveFitting::BackgroundFunction_sptr LeBailFit::generateBackgroundFunction(std:
     //            boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(
     //            boost::make_shared<(background));
     size_t order = bkgdparamws.size();
-    std::cout << "-----------   polynomial order = " << order << std::endl;
+    g_log.information() << "DB1250 Generate background function of order = " << order << std::endl;
 
     bkgdfunc->setAttributeValue("n", int(order));
     bkgdfunc->initialize();
@@ -1693,6 +1794,41 @@ void LeBailFit::exportParametersWorkspace(std::map<std::string, std::pair<double
 
     // 4. Add to output peroperty
     this->setProperty("ParametersWorkspace", parameterws);
+
+    return;
+}
+
+/// ===================================   Auxiliary Functions   ==================================== ///
+
+/*
+ * Parse fx.abc to x and abc where x is the index of function and abc is the parameter name
+ */
+void LeBailFit::parseCompFunctionParameterName(std::string fullparname, std::string& parname, size_t& funcindex)
+{
+    std::vector<std::string> terms;
+    boost::split(terms, fullparname, boost::is_any_of("."));
+
+    if (terms.size() != 2)
+    {
+        g_log.error() << "Parameter name : " << fullparname << " does not have 1 and only 1 (.).  Cannot support!" << std::endl;
+        throw std::runtime_error("Unable to support parameter name to split.");
+    }
+
+    // 1. Term 0, Index
+    if (terms[0][0] != 'f')
+    {
+        g_log.error() << "Function name is not started from 'f'.  But " << terms[0] << ".  It is not supported!" << std::endl;
+        throw std::runtime_error("Unsupported CompositeFunction parameter name.");
+    }
+    std::vector<std::string> t2s;
+    boost::split(t2s, terms[0], boost::is_any_of("f"));
+    std::stringstream ss(t2s[1]);
+    ss >> funcindex;
+
+    // 2. Term 1, Name
+    parname = terms[1];
+
+    // g_log.debug() << "DBx518 Split Parameter " << fullparname << " To Function Index " << funcindex << "  Name = " << parname << std::endl;
 
     return;
 }
