@@ -66,8 +66,10 @@ void AlignAndFocusPowder::init()
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.");
   declareProperty("Dspacing", true,"Bin in Dspace. (Default true)");
-  declareProperty("CropMin", 0.0, "Minimum for Cropping TOF or dspace axis. (Default 0.) ");
-  declareProperty("CropMax", 0.0, "Maximum for Croping TOF or dspace axis. (Default 0.) ");
+  declareProperty("DMin", 0.0, "Minimum for Dspace axis. (Default 0.) ");
+  declareProperty("DMax", 0.0, "Maximum for Dspace axis. (Default 0.) ");
+  declareProperty("TMin", 0.0, "Minimum for TOF axis. (Default 0.) ");
+  declareProperty("TMax", 0.0, "Maximum for TOF or dspace axis. (Default 0.) ");
   declareProperty("PreserveEvents", true,
     "If the InputWorkspace is an EventWorkspace, this will preserve the full event list (warning: this will use much more memory!).");
   declareProperty("FilterBadPulses", true,
@@ -85,14 +87,11 @@ void AlignAndFocusPowder::init()
   declareProperty("UnwrapRef", 0., "Reference total flight path for frame unwrapping. Zero skips the correction");
   declareProperty("LowResRef", 0., "Reference DIFC for resolution removal. Zero skips the correction");
   declareProperty("CropWavelengthMin", 0., "Crop the data at this minimum wavelength. Overrides LowResRef.");
-  declareProperty("TMin", 0.0, "Minimum for TOF or dspace axis. (Default 0.) ");
-  declareProperty("TMax", 0.0, "Maximum for TOF or dspace axis. (Default 0.) ");
-  declareProperty("PrimaryFlightPath", -1.0, "If positive, focus postiions are changed.  (Default -1) ");
+  declareProperty("PrimaryFlightPath", -1.0, "If positive, focus positions are changed.  (Default -1) ");
   declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
-    "Spectrum IDs (note that it is not detector ID or workspace indices).");
-
-  declareProperty(new ArrayProperty<double>("L2"), "Seconary flight (L2) paths for each detector");
-  declareProperty(new ArrayProperty<double>("Polar"), "Polar angles (two thetas) for detectors");
+    "Optional: Spectrum IDs (note that it is not detector ID or workspace indices).");
+  declareProperty(new ArrayProperty<double>("L2"), "Optional: Secondary flight (L2) paths for each detector");
+  declareProperty(new ArrayProperty<double>("Polar"), "Optional: Polar angles (two thetas) for detectors");
   declareProperty(new ArrayProperty<double>("Azimuthal"), "Azimuthal angles (out-of-plain) for detectors");
 
 }
@@ -107,8 +106,8 @@ void AlignAndFocusPowder::exec()
   // retrieve the properties
   m_inputW = getProperty("InputWorkspace");
   m_eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputW );
-  std::string instName = m_inputW->getInstrument()->getName();
-  std::string calFileName=getProperty("CalFileName");
+  instName = m_inputW->getInstrument()->getName();
+  calFileName = getPropertyValue("CalFileName");
   offsetsWS = getProperty("OffsetsWorkspace");
   maskWS = getProperty("MaskWorkspace");
   groupWS = getProperty("GroupingWorkspace");
@@ -117,7 +116,58 @@ void AlignAndFocusPowder::exec()
   l2s = getProperty("L2");
   tths = getProperty("Polar");
   phis = getProperty("Azimuthal");
-
+  params=getProperty("Params");
+  dspace = getProperty("DSpacing");
+  double dmin = getProperty("DMin");
+  double dmax = getProperty("DMax");
+  LRef = getProperty("UnwrapRef");
+  DIFCref = getProperty("LowResRef");
+  minwl = getProperty("CropWavelengthMin");
+  tmin = getProperty("TMin");
+  tmax = getProperty("TMax");
+  // determine some bits about d-space and binning
+  if (params.size() == 1)
+  {
+    if (dmax > 0) dspace = true;
+    else dspace=false;
+  }
+  if (dspace)
+  {
+    if (params.size() == 1)
+    {
+    	double step = params[0];
+        params[0] = dmin;
+        params.push_back(step);
+        params.push_back(dmax);
+    }
+    g_log.information() << "d-Spacing Binning: " << params[0] << "  " << params[1] << "  " << params[2] <<"\n";
+  }
+  else
+  {
+    if (params.size() == 1)
+    {
+    	double step = params[0];
+        params[0] = tmin;
+        params.push_back(step);
+        params.push_back(tmax);
+    }
+    g_log.information() << "TOF Binning: " << params[0] << "  " << params[1] << "  " << params[2] <<"\n";
+  }
+  xmin = 0;
+  xmax = 0;
+  if (tmin > 0.)
+  {
+    xmin = tmin;
+  }
+  if (tmax > 0.)
+  {
+    xmax = tmax;
+  }
+  if (!dspace)
+  {
+    xmin = params[0];
+    xmax = params[2];
+  }
 
   try {
     if (!offsetsWS) offsetsWS = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(instName+"_offsets");
@@ -148,15 +198,6 @@ void AlignAndFocusPowder::exec()
     this->execEvent();
     return;
   }
-  std::vector<double> params=getProperty("Params");
-  bool dspace = getProperty("DSpacing");
-  double xmin = getProperty("CropMin");
-  double xmax = getProperty("CropMax");
-  double LRef = getProperty("UnwrapRef");
-  double DIFCref = getProperty("LowResRef");
-  double minwl = getProperty("CropWavelengthMin");
-  double tmin = getProperty("TMin");
-  double tmax = getProperty("TMax");
 
   // Now create the output workspace
   m_outputW = getProperty("OutputWorkspace");
@@ -316,17 +357,6 @@ void AlignAndFocusPowder::exec()
 void AlignAndFocusPowder::execEvent()
 {
   // retrieve the properties
-  std::string instName = m_inputW->getInstrument()->getName();
-  std::string calFileName=getProperty("CalFileName");
-  std::vector<double> params=getProperty("Params");
-  bool dspace = getProperty("DSpacing");
-  double xmin = getProperty("CropMin");
-  double xmax = getProperty("CropMax");
-  double LRef = getProperty("UnwrapRef");
-  double DIFCref = getProperty("LowResRef");
-  double minwl = getProperty("CropWavelengthMin");
-  double tmin = getProperty("TMin");
-  double tmax = getProperty("TMax");
   bool preserveEvents = getProperty("PreserveEvents");
   bool filterBadPulses = getProperty("FilterBadPulses");
   double removePromptPulseWidth = getProperty("RemovePromptPulseWidth");

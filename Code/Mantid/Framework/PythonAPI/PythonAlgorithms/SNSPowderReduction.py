@@ -33,6 +33,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 self.has_dspace = has_dspace
                 self.tmin = 0. # default value
                 self.tmax = 0. # default value
+                self.dmin = 0. # default value
+                self.dmax = 0. # default value
 
                 # calculate the remaining indices
                 offset = 5
@@ -56,7 +58,7 @@ class SNSPowderReduction(PythonAlgorithm):
             self._data = {}
             self.use_dspace = False
             self._use_vnoise = False
-            self._focusPos = None
+            self._focusPos = {}
             self.iparmFile = None
             if self.filename is None:
                 return
@@ -76,7 +78,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
         def _generateFocusPos(self, lines):
             if not lines[0].startswith("Instrument parameter file:"):
-                return (lines, None)
+                return (lines, {})
 
             result = {}
 
@@ -278,7 +280,14 @@ class SNSPowderReduction(PythonAlgorithm):
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
             if self._info is None:
                 self._info = self._getinfo(temp)
-            temp = self._focus(temp, calib, self._info, filterLogs, preserveEvents, normByCurrent, filterBadPulsesOverride)
+            temp = api.AlignAndFocusPowder(InputWorkspace=temp,OutputWorkspace=temp,CalFileName=calib,Params=self._binning,Dspacing=self._bin_in_dspace,
+                DMin=self._info.dmin,DMax=self._info.dmax,TMin=self._info.tmin,TMax=self._info.tmax,PreserveEvents=preserveEvents,
+                FilterBadPulses=self._filterBadPulses and filterBadPulsesOverride,
+                RemovePromptPulseWidth=self._removePromptPulseWidth,CompressTolerance=COMPRESS_TOL_TOF,
+                FilterLogName=self.getProperty("FilterByLogValue").value,FilterLogMinimumValue=self.getProperty("FilterMinimumValue").value,
+                FilterLogMaximumValue=self.getProperty("FilterMaximumValue").value,
+                UnwrapRef=self.getProperty("UnwrapRef").value,LowResRef=self.getProperty("LowResRef").value,
+                CropWavelengthMin=self.getProperty("CropWavelengthMin").value, **(self._config.getFocusPos()))
             if firstChunk:
                 wksp = api.RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
                 firstChunk = False
@@ -300,49 +309,6 @@ class SNSPowderReduction(PythonAlgorithm):
 
         self._save(wksp, self._info, False, True)
         self.log().information("Done focussing data")
-
-        return wksp
-
-    def _focus(self, wksp, calib, info, filterLogs=None, preserveEvents=True,
-               normByCurrent=True, filterBadPulsesOverride=True):
-        if wksp is None:
-            return None
-
-        # determine some bits about d-space and binning
-        if len(self._binning) == 3:
-            info.has_dspace = self._bin_in_dspace
-        if info.has_dspace:
-            if len(self._binning) == 3:
-                binning = self._binning
-            else:
-                binning = [info.dmin, self._binning[0], info.dmax]
-            self.log().information("d-Spacing Binning: " + str(binning))
-        else:
-            if len(self._binning) == 3:
-                binning = self._binning
-            else:
-                binning = [info.tmin, self._binning[0], info.tmax]
-        XMin = 0
-        XMax = 0
-        if info.tmin > 0.:
-            XMin = info.tmin
-        if info.tmax > 0.:
-            XMax = info.tmax
-        if not info.has_dspace:
-            XMin = binning[0]
-            XMax = binning[-1]
-            
-        focusPos = self._config.getFocusPos()
-        if focusPos is None:
-	    focusPos = {}
-        wksp = api.AlignAndFocusPowder(InputWorkspace=wksp,OutputWorkspace=wksp,CalFileName=calib,Params=binning,Dspacing=info.has_dspace,
-            CropMin=XMin,CropMax=XMax,PreserveEvents=preserveEvents,
-            FilterBadPulses=self._filterBadPulses and filterBadPulsesOverride,
-            RemovePromptPulseWidth=self._removePromptPulseWidth,CompressTolerance=COMPRESS_TOL_TOF,
-            FilterLogName=self.getProperty("FilterByLogValue").value,FilterLogMinimumValue=self.getProperty("FilterMinimumValue").value,
-            FilterLogMaximumValue=self.getProperty("FilterMaximumValue").value,
-            UnwrapRef=self.getProperty("UnwrapRef").value,LowResRef=self.getProperty("LowResRef").value,
-            CropWavelengthMin=self.getProperty("CropWavelengthMin").value,TMin=info.tmin,TMax=info.tmax, **focusPos)
 
         return wksp
 

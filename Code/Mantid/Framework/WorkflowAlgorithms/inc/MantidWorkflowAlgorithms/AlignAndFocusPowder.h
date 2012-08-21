@@ -86,6 +86,17 @@ namespace Mantid
       std::vector<double> l2s;
       std::vector<double> tths;
       std::vector<double> phis;
+      std::string instName;
+      std::string calFileName;
+      std::vector<double> params;
+      bool dspace;
+      double xmin;
+      double xmax;
+      double LRef;
+      double DIFCref;
+      double minwl;
+      double tmin;
+      double tmax;
       void doSortEvents(Mantid::API::Workspace_sptr ws);
 
     };
