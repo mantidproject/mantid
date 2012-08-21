@@ -3,12 +3,14 @@
 #include "ScriptingEnv.h"
 #include "MantidQtMantidWidgets/ScriptEditor.h"
 
-#include <QVBoxLayout>
+#include <QAction>
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QMenu>
-#include <QAction>
 #include <QPushButton>
+#include <QVBoxLayout>
+
+#include <stdexcept>
 
 /**
  * Construct a widget
@@ -223,7 +225,7 @@ void ScriptFileInterpreter::showFindReplaceDialog()
 }
 
 /**
- * Execute the whole script in the editor. This is always asynchronous
+ * Execute the whole script in the editor.
  */
 void ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode)
 {
@@ -231,7 +233,7 @@ void ScriptFileInterpreter::executeAll(const Script::ExecutionMode mode)
 }
 
 /**
- * Execute the current selection from the editor. This is always asynchronous
+ * Execute the current selection from the editor.
  */
 void ScriptFileInterpreter::executeSelection(const Script::ExecutionMode mode)
 {
@@ -380,7 +382,14 @@ void ScriptFileInterpreter::executeCode(const ScriptCode & code, const Script::E
   if(code.isEmpty()) return;
   if(mode == Script::Asynchronous)
   {
-    m_runner->executeAsync(code);
+    try
+    {
+      m_runner->executeAsync(code);
+    }
+    catch(std::runtime_error& exc)
+    {
+      QMessageBox::critical(this, "MantidPlot", exc.what());
+    }
   }
   else if(mode == Script::Serialised)
   {

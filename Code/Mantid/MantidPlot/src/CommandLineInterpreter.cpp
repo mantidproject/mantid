@@ -2,12 +2,16 @@
 #include "ScriptingEnv.h"
 #include "MantidQtMantidWidgets/FindDialog.h"
 
-#include <QKeyEvent>
-#include <QMenu>
 #include <QApplication>
 #include <QClipboard>
+#include <QKeyEvent>
+#include <QMessageBox>
+#include <QMenu>
 
 #include <Qsci/qscilexer.h>
+
+#include <iostream>
+#include <stdexcept>
 
 //-----------------------------------------------------------------------------
 // InputSplitter class
@@ -717,7 +721,14 @@ void CommandLineInterpreter::execute()
   }
   else
   {
-    m_runner->executeAsync(code);
+    try
+    {
+      m_runner->executeAsync(code);
+    }
+    catch(std::runtime_error &exc)
+    {
+      QMessageBox::warning(this, "MantidPlot", exc.what());
+    }
     m_history.addCode(code);
   }
 }

@@ -14859,7 +14859,15 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     {
       if(quit)
       {
-        executeScriptFile(file_name, Script::Asynchronous);
+        try
+        {
+          executeScriptFile(file_name, Script::Asynchronous);
+        }
+        catch(std::runtime_error& exc)
+        {
+          std::cerr << "Error thrown while running scrip file asynchronously '" << exc.what() << "'\n";
+          setExitCode(1);
+        }
         saved = true;
         this->close();
       }

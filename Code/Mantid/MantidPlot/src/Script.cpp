@@ -30,6 +30,55 @@
 #include "ScriptingEnv.h"
 #include <QRegExp>
 
+#include <stdexcept>
+
+//--------------------------------------------------------------------------------------------------
+// ScriptTask
+//--------------------------------------------------------------------------------------------------
+/**
+ * Constructor taking a script reference
+ */
+Script::ScriptTask::ScriptTask(Script & script)
+  : QFutureInterface<bool>(), QRunnable(), m_script(script)
+{
+}
+
+/// Starts a thread/or uses the current thread
+/// by using the script thread pool to start this job
+QFuture<bool> Script::ScriptTask::start()
+{
+  this->setRunnable(this);
+  this->reportStarted();
+  QFuture<bool> future = this->future();
+  m_script.m_thread->start(this);
+  return future;
+}
+
+/// Runs the task in the thread
+void Script::ScriptTask::run()
+{
+  const bool result = m_script.execute(m_script.scriptCode());
+
+  this->reportResult(result);
+  this->reportFinished(); // FutureInterface
+}
+
+//--------------------------------------------------------------------------------------------------
+// ScriptThreadPool
+//--------------------------------------------------------------------------------------------------
+/**
+ * Constructor. Allows only a single thread that does not expire
+ */
+Script::ScriptThreadPool::ScriptThreadPool() : QThreadPool()
+{
+  this->setMaxThreadCount(1);
+  this->setExpiryTimeout(-1);
+}
+
+//--------------------------------------------------------------------------------------------------
+// Script
+//--------------------------------------------------------------------------------------------------
+
 #include <QtConcurrentRun>
 
 
@@ -37,10 +86,9 @@ Script::Script(ScriptingEnv *env, const QString &name,
                const InteractionType interact, QObject * context)
   : QObject(), m_env(env), m_name() , m_context(context),
     m_redirectOutput(true), m_reportProgress(false), m_interactMode(interact),
-    m_execMode(NotExecuting), m_execThread(new ScriptThread(*this))
+    m_execMode(NotExecuting), m_thread(new ScriptThreadPool)
 {
   m_env->incref();
-
   setName(name);
 
   connect(this, SIGNAL(started(const QString &)), this, SLOT(setIsRunning()));
@@ -50,7 +98,7 @@ Script::Script(ScriptingEnv *env, const QString &name,
 
 Script::~Script()
 {
-  delete m_execThread;
+  delete m_thread;
   m_env->decref();
 }
 
@@ -88,7 +136,6 @@ QVariant Script::evaluate(const ScriptCode & code)
 bool Script::execute(const ScriptCode & code)
 {
   setupCode(code);
-  emit started("");
   return this->executeImpl();
 }
 
@@ -96,10 +143,41 @@ bool Script::execute(const ScriptCode & code)
 QFuture<bool> Script::executeAsync(const ScriptCode & code)
 {
   setupCode(code);
-  emit started("");
-  return QtConcurrent::run(this, &Script::executeImpl);
-  //m_execThread->start();
-  //return m_execThread->future();
+  ScriptTask *asyncScript = new ScriptTask(*this);
+  return asyncScript->start();
+//  if(m_scriptTask)
+//  {
+//    throw std::runtime_error("Cannot run two copies of the same script at the same time!");
+//  }
+//  std::cerr << "execute async\n";
+//  setupCode(code);
+//
+//  m_execThread = new QThread;
+//  connect(m_scriptTask, SIGNAL(finished()), this, SLOT(asyncRunCleanup()));
+//  m_scriptTask->moveToThread(m_execThread);
+//  connect(m_execThread, SIGNAL(started()), m_scriptTask, SLOT(run()));
+//  connect(m_execThread, SIGNAL(finished()), m_execThread, SLOT(quit()));
+//
+//  // Ensures that the job will report bask as running as soon as we return from here
+//  m_scriptTask->reportStarted();
+//  m_execThread->start();
+//  return m_scriptTask->future();
+//  setupCode(code);
+//  m_scriptTask = new ScriptTask(*this);
+//  connect(m_scriptTask, SIGNAL(finished()), this, SLOT(asyncRunCleanup()));
+//  m_scriptTask->moveToThread(m_execThread);
+//  //connect(m_execThread, SIGNAL(started()), m_scriptTask, SLOT(run()));
+//  m_scriptTask->reportStarted();
+//
+//  if(!m_execThread->isRunning())
+//  {
+//    m_execThread->start();
+//  }
+//  m_mutex.unlock();
+//  m_scriptTask->run();
+//  m_mutex.lock();
+//
+//  //m_taskReady.wait(&m_mutex);
 }
 
 
