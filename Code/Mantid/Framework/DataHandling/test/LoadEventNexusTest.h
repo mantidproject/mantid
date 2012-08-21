@@ -213,7 +213,7 @@ public:
 
     double max = events.begin()->tof();
     double min = events.begin()->tof();
-    for(int j = 0; j < events.size(); ++j)
+    for(size_t j = 0; j < events.size(); ++j)
     {
       max = events[j].tof() > max ? events[j].tof() : max;
       min = events[j].tof() < min ? events[j].tof() : min;
