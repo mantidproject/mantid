@@ -21,19 +21,6 @@ using namespace Mantid::API;
 
 namespace // anonymous
 {
-  // A standard implementation of the missing "copy_if" algorithm, found at:
-  // http://lists.boost.org/Archives/boost/2001/01/8022.php
-  template<typename In, typename Out, typename Pred> 
-  Out copy_if(In first, In last, Out res, Pred Pr) 
-  { 
-    while (first != last) { 
-      if (Pr(*first)) 
-        *res++ = *first; 
-      ++first; 
-    } 
-    return res; 
-  }
-  
   /**
    * Unary predicate for use with copy_if.  Checks for the existance of
    * a "*" wild card in the file extension string passed to it.
@@ -75,11 +62,9 @@ namespace API
     else
       m_multiFileLoadingEnabled = false;
 
-    // Store only those extensions that do not contain wild cards.
-    std::copy_if(
-      exts.begin(), exts.end(), 
-      std::back_inserter(m_exts), 
-      doesNotContainWildCard);
+    for( auto ext = exts.begin(); ext != exts.end(); ++ext )
+      if( doesNotContainWildCard(*ext) )
+        m_exts.push_back(*ext);
   }
 
   /**
