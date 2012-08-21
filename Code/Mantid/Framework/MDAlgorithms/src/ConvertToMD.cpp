@@ -284,7 +284,7 @@ void ConvertToMD::exec()
           if(!(reuse_preprocecced_detectors&&g_DetLoc.isDefined(m_InWS2D))){
             // amount of work:
             const size_t nHist = m_InWS2D->getNumberHistograms();
-            m_Progress = boost::scoped_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
+            m_Progress.reset(new API::Progress(this,0.0,1.0,nHist));
             g_log.information()<<" preprocessing detectors\n";
             g_DetLoc.processDetectorsPositions(m_InWS2D,g_Log,m_Progress.get());  
             if(g_DetLoc.nDetectors()==0){
@@ -328,7 +328,7 @@ void ConvertToMD::exec()
   // initate conversion and estimate amout of job to do
   size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper);
   // progress reporter
-  m_Progress = boost::scoped_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
+  m_Progress.reset(new API::Progress(this,0.0,1.0,n_steps)); 
 
   g_log.information()<<" conversion started\n";
   m_Convertor->runConversion(m_Progress.get());
