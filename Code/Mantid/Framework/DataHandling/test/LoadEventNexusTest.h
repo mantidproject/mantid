@@ -29,9 +29,52 @@ using namespace Mantid::DataHandling;
 
 class LoadEventNexusTest : public CxxTest::TestSuite
 {
+private:
+
+  void do_test_filtering_start_and_end_filtered_loading(const bool metadataonly)
+  {
+    const std::string wsName = "test_filtering";
+    const double filterStart = 1;
+    const double filterEnd = 1000;
+
+    LoadEventNexus * ld = new LoadEventNexus;
+    ld->initialize();
+    ld->setPropertyValue("OutputWorkspace", wsName);
+    ld->setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ld->setProperty("FilterByTimeStart", filterStart);
+    ld->setProperty("FilterByTimeStop", filterEnd);
+    ld->setProperty("MetaDataOnly", metadataonly);
+
+    ld->execute();
+    TS_ASSERT( ld->isExecuted() );
+
+    auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
+
+    Property* prop = outWs->run().getLogData("SampleTemp");
+    TSM_ASSERT_EQUALS("Should have 14 elements after filtering.", 14, prop->size());
+    if(prop->size() != 14)
+      return;
+    //Further tests
+    TimeSeriesProperty<double>* sampleTemps = dynamic_cast<TimeSeriesProperty<double>* >(prop);
+    auto filteredLogStartTime = sampleTemps->nthTime(0);
+    auto filteredLogEndTime = sampleTemps->nthTime(sampleTemps->size()-1);
+  }
+
 public:
 
-    void test_SingleBank_PixelsOnlyInThatBank()
+  void test_start_and_end_time_filtered_loading_meta_data_only()
+  {
+    const bool metadataonly = true;
+    do_test_filtering_start_and_end_filtered_loading(metadataonly);
+  }
+
+  void test_start_and_end_time_filtered_loading()
+  {
+    const bool metadataonly = false;
+    do_test_filtering_start_and_end_filtered_loading(metadataonly);
+  }
+
+  void test_SingleBank_PixelsOnlyInThatBank()
   {
     doTestSingleBank(true, false);
   }
@@ -157,6 +200,38 @@ public:
     }
 
 
+  }
+
+  void test_TOF_filtered_loading()
+  {
+    const std::string wsName = "test_filtering";
+    const double filterStart = 45000;
+    const double filterEnd = 59000;
+
+    LoadEventNexus * ld = new LoadEventNexus;
+    ld->initialize();
+    ld->setPropertyValue("OutputWorkspace", wsName);
+    ld->setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ld->setProperty("FilterByTofMin", filterStart);
+    ld->setProperty("FilterByTofMax", filterEnd);
+
+    ld->execute();
+    TS_ASSERT( ld->isExecuted() );
+
+    auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
+
+    auto eventList = outWs->getEventList(4348);
+    auto events = eventList.getEvents();
+
+    double max = events.begin()->tof();
+    double min = events.begin()->tof();
+    for(int j = 0; j < events.size(); ++j)
+    {
+      max = events[j].tof() > max ? events[j].tof() : max;
+      min = events[j].tof() < min ? events[j].tof() : min;
+    }
+    TSM_ASSERT("The max TOF in the workspace should be equal to or less than the filtered cut-off", max <= filterEnd);
+    TSM_ASSERT("The min TOF in the workspace should be equal to or greater than the filtered cut-off", min >= filterStart);
   }
 
   void test_FilteredLoad_vs_LoadThenFilter()
