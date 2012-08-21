@@ -58,9 +58,8 @@ DECLARE_ALGORITHM(ConvertToMD)
 // Sets documentation strings for this algorithm
 void ConvertToMD::initDocs()
 {
-    this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, it will be replaced");
-    this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, it will be replaced");
-//TODO:    "If the OutputWorkspace exists, then events are added to it." 
+    this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions.");
+    this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions.");
 }
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -200,9 +199,12 @@ void ConvertToMD::exec()
   if(!spws)
   {
     create_new_ws = true;
-  }else{ 
+  }
+  else
+  { 
       bool should_overwrite = getProperty("OverwriteExisting");
-      if (should_overwrite){
+      if (should_overwrite)
+      {
           create_new_ws=true;
       }else{
           create_new_ws=false;
@@ -287,7 +289,8 @@ void ConvertToMD::exec()
             m_Progress.reset(new API::Progress(this,0.0,1.0,nHist));
             g_log.information()<<" preprocessing detectors\n";
             g_DetLoc.processDetectorsPositions(m_InWS2D,g_Log,m_Progress.get());  
-            if(g_DetLoc.nDetectors()==0){
+            if(g_DetLoc.nDetectors()==0)
+            {
                 g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
                 throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
             }
