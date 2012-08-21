@@ -209,7 +209,7 @@ double ThermalNeutronBk2BkExpConvPV::calCubicDSpace(double a, int h, int k, int 
     // TODO This function will be refactored in future.
     double hklfactor = sqrt(double(h*h)+double(k*k)+double(l*l));
     double d = a/hklfactor;
-    g_log.debug() << "DB143 a = " << a << " (HKL) = " << h << ", " << k << ", " << l << ": d = " << d << std::endl;
+    // g_log.debug() << "DB143 a = " << a << " (HKL) = " << h << ", " << k << ", " << l << ": d = " << d << std::endl;
 
     return d;
 }
@@ -356,6 +356,15 @@ double ThermalNeutronBk2BkExpConvPV::calPeakCenter() const
     double Th_e = zero + dtt1*dh;
     double Th_t = zerot + dtt1t*dh - dtt2t/dh;
     double tof_h = n*Th_e + (1-n)*Th_t;
+
+    if (tof_h < 0)
+    {
+        g_log.error() << "Peak " << mH << ", " << mH << ", " << mL << ": TOF-h cannot be negative! "
+                      << "Lattice = " << latticeconstant << ", d-spacing = " << dh << std::endl
+                      << "Zero    = " << zero << ", Zerot = " << zerot << std::endl
+                      << "Dtt1    = " << dtt1 << ", Dtt1t = " << dtt1t << ", Dtt2t   = " << dtt2t << std::endl
+                      << "Width   = " << wcross << ", Tcross = " << Tcross << ", n = " << n << std::endl;
+    }
 
     return tof_h;
 }
