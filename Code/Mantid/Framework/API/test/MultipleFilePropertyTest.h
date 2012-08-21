@@ -94,9 +94,8 @@ public:
     m_tempDirs.insert(m_dummyFilesDir);
     m_tempDirs.insert(m_dirWithWhitespace);
 
-    m_exts = boost::assign::list_of
-      (".raw")
-      (".nxs");
+    m_exts.push_back(".raw");
+    m_exts.push_back(".nxs");
 
     std::set<std::string> dummyFilenames = boost::assign::list_of
       // Standard raw file runs.
