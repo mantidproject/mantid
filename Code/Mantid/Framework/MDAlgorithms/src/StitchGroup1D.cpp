@@ -198,6 +198,20 @@ namespace MDAlgorithms
       errors[index] = err;
     }
 
+    return create1DHistoWorkspace(signals, errors, extents, vecNBins, names, units);
+  };
+
+  /**
+  Creates a 1D MDHistoWorkspace from the inputs arrays. Runs the CreateMDHistoWorkspace algorithm as a subalgorithm.
+  @param signals: signal collection
+  @param errors: error collection
+  @param extents: extents collection
+  @param vecNBins: number of bins collection
+  @param names: names collection
+  @param units: units collection
+  */
+  MDHistoWorkspace_sptr StitchGroup1D::create1DHistoWorkspace(const MantidVec& signals,const MantidVec& errors, const MantidVec& extents, const std::vector<int>& vecNBins, const std::vector<std::string> names, const std::vector<std::string>& units)
+  {
     IAlgorithm_sptr createMDHistoWorkspace = this->createSubAlgorithm("CreateMDHistoWorkspace");
     createMDHistoWorkspace->initialize();
     createMDHistoWorkspace->setProperty("SignalInput", signals);
@@ -210,7 +224,7 @@ namespace MDAlgorithms
     createMDHistoWorkspace->executeAsSubAlg();
     IMDHistoWorkspace_sptr outWS = createMDHistoWorkspace->getProperty("OutputWorkspace");
     return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
-  };
+  }
 
   /**
   Sum over the signal value in the specified input workspace between a start and end position.
@@ -299,18 +313,7 @@ namespace MDAlgorithms
       ++counter;
     }
 
-    IAlgorithm_sptr createMDHistoWorkspace = this->createSubAlgorithm("CreateMDHistoWorkspace");
-    createMDHistoWorkspace->initialize();
-    createMDHistoWorkspace->setProperty("SignalInput", signals);
-    createMDHistoWorkspace->setProperty("ErrorInput", errors);
-    createMDHistoWorkspace->setProperty("Dimensionality", 1);
-    createMDHistoWorkspace->setProperty("Extents", extents);
-    createMDHistoWorkspace->setProperty("NumberOfBins", vecNBins);
-    createMDHistoWorkspace->setProperty("Names", names);
-    createMDHistoWorkspace->setProperty("Units", units);
-    createMDHistoWorkspace->executeAsSubAlg();
-    IMDHistoWorkspace_sptr outWS = createMDHistoWorkspace->getProperty("OutputWorkspace");
-    return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
+    return create1DHistoWorkspace(signals, errors, extents, vecNBins, names, units);
   }
 
   //----------------------------------------------------------------------------------------------
