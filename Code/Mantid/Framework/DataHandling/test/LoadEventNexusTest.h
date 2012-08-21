@@ -62,18 +62,6 @@ private:
 
 public:
 
-  void test_start_and_end_time_filtered_loading_meta_data_only()
-  {
-    const bool metadataonly = true;
-    do_test_filtering_start_and_end_filtered_loading(metadataonly);
-  }
-
-  void test_start_and_end_time_filtered_loading()
-  {
-    const bool metadataonly = false;
-    do_test_filtering_start_and_end_filtered_loading(metadataonly);
-  }
-
   void test_SingleBank_PixelsOnlyInThatBank()
   {
     doTestSingleBank(true, false);
@@ -473,8 +461,20 @@ public:
         if (nanosec==0) { std::cout << "Failure at WI " << wi << std::endl; return; }
       }
     }
-
   }
+
+  void test_start_and_end_time_filtered_loading_meta_data_only()
+  {
+    const bool metadataonly = true;
+    do_test_filtering_start_and_end_filtered_loading(metadataonly);
+  }
+
+  void test_start_and_end_time_filtered_loading()
+  {
+    const bool metadataonly = false;
+    do_test_filtering_start_and_end_filtered_loading(metadataonly);
+  }
+
 };
 
 //------------------------------------------------------------------------------

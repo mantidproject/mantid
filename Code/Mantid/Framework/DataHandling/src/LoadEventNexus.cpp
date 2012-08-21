@@ -1255,6 +1255,49 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     g_log.error() << "Error loading metadata: " << e.what() << std::endl;
   }
 
+  // --------------------------- Time filtering ------------------------------------
+  double filter_time_start_sec, filter_time_stop_sec;
+  filter_time_start_sec = getProperty("FilterByTimeStart");
+  filter_time_stop_sec = getProperty("FilterByTimeStop");
+  chunk = getProperty("ChunkNumber");
+  totalChunks = getProperty("TotalChunks");
+
+  //Default to ALL pulse times
+  bool is_time_filtered = false;
+  filter_time_start = Kernel::DateAndTime::minimum();
+  filter_time_stop = Kernel::DateAndTime::maximum();
+
+  if (m_allBanksPulseTimes->numPulses > 0)
+  {
+    //If not specified, use the limits of doubles. Otherwise, convert from seconds to absolute PulseTime
+    if (filter_time_start_sec != EMPTY_DBL())
+    {
+      filter_time_start = run_start + filter_time_start_sec;
+      is_time_filtered = true;
+    }
+
+    if (filter_time_stop_sec != EMPTY_DBL())
+    {
+      filter_time_stop = run_start + filter_time_stop_sec;
+      is_time_filtered = true;
+    }
+
+    //Silly values?
+    if (filter_time_stop < filter_time_start)
+    {
+      std::string msg = "Your ";
+      if(monitors) msg += "monitor ";
+      msg += "filter for time's Stop value is smaller than the Start value.";
+      throw std::invalid_argument(msg);
+    }
+  }
+
+  if (is_time_filtered)
+  {
+    //Now filter out the run, using the DateAndTime type.
+    WS->mutableRun().filterByTime(filter_time_start, filter_time_stop);
+  }
+
   if(metaDataOnly) {
     //Now, create a default X-vector for histogramming, with just 2 bins.
     Kernel::cow_ptr<MantidVec> axis;
@@ -1316,44 +1359,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   // Set all (empty) event lists as sorted by pulse time. That way, calling SortEvents will not try to sort these empty lists.
   for (size_t i=0; i < WS->getNumberHistograms(); i++)
     WS->getEventList(i).setSortOrder(DataObjects::PULSETIME_SORT);
-
-
-  // --------------------------- Time filtering ------------------------------------
-  double filter_time_start_sec, filter_time_stop_sec;
-  filter_time_start_sec = getProperty("FilterByTimeStart");
-  filter_time_stop_sec = getProperty("FilterByTimeStop");
-  chunk = getProperty("ChunkNumber");
-  totalChunks = getProperty("TotalChunks");
-
-  //Default to ALL pulse times
-  bool is_time_filtered = false;
-  filter_time_start = Kernel::DateAndTime::minimum();
-  filter_time_stop = Kernel::DateAndTime::maximum();
-
-  if (m_allBanksPulseTimes->numPulses > 0)
-  {
-    //If not specified, use the limits of doubles. Otherwise, convert from seconds to absolute PulseTime
-    if (filter_time_start_sec != EMPTY_DBL())
-    {
-      filter_time_start = run_start + filter_time_start_sec;
-      is_time_filtered = true;
-    }
-
-    if (filter_time_stop_sec != EMPTY_DBL())
-    {
-      filter_time_stop = run_start + filter_time_stop_sec;
-      is_time_filtered = true;
-    }
-
-    //Silly values?
-    if (filter_time_stop < filter_time_start)
-    {
-      std::string msg = "Your ";
-      if(monitors) msg += "monitor ";
-      msg += "filter for time's Stop value is smaller than the Start value.";
-      throw std::invalid_argument(msg);
-    }
-  }
 
   //Count the limits to time of flight
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
@@ -1425,12 +1430,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   delete diskIOMutex;
   delete prog2;
 
-
-  if (is_time_filtered)
-  {
-    //Now filter out the run, using the DateAndTime type.
-    WS->mutableRun().filterByTime(filter_time_start, filter_time_stop);
-  }
 
   //Info reporting
   const std::size_t eventsLoaded = WS->getNumberEvents();
