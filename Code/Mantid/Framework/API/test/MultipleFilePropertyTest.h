@@ -61,6 +61,12 @@ namespace // anonymous
 
 class MultipleFilePropertyTest : public CxxTest::TestSuite
 {
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor (& destructor) isn't called when running other tests
+  static MultipleFilePropertyTest *createSuite() { return new MultipleFilePropertyTest(); }
+  static void destroySuite( MultipleFilePropertyTest *suite ) { delete suite; }
+
 private:
   std::string m_multiFileLoadingSetting;
   std::string m_oldDataSearchDirectories;
