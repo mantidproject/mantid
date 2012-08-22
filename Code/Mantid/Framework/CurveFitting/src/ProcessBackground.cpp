@@ -316,13 +316,29 @@ DECLARE_ALGORITHM(ProcessBackground)
       std::vector<double> realx, realy, reale;
       for (size_t i = 0; i < bkgdpoints.size(); ++i)
       {
-          // a) Find the index in
+          // a) Data validity test
+          double bkgdpoint = bkgdpoints[i];
+          if (bkgdpoint < inpWS->readX(wsindex)[0])
+          {
+              g_log.warning() << "Input background point " << bkgdpoint << " is out of lower boundary.  Use X[0] = "
+                              << inpWS->readX(wsindex)[0] << " instead." << std::endl;
+              bkgdpoint = inpWS->readX(wsindex)[0];
+          }
+          else if (bkgdpoint > inpWS->readX(wsindex).back())
+          {
+              g_log.warning() << "Input background point " << bkgdpoint << " is out of upper boundary.  Use X[-1] = "
+                              << inpWS->readX(wsindex).back() << " instead." << std::endl;
+              bkgdpoint = inpWS->readX(wsindex).back();
+          }
+
+          // b) Find the index in
           std::vector<double>::const_iterator it;
-          it = std::lower_bound(inpWS->readX(wsindex).begin(), inpWS->readX(wsindex).end(), bkgdpoints[i]);
+          it = std::lower_bound(inpWS->readX(wsindex).begin(), inpWS->readX(wsindex).end(), bkgdpoint);
           size_t index = size_t(it - inpWS->readX(wsindex).begin());
 
-          // std::cout << "DB502: Index = " << index << " For TOF = " << bkgdpoints[i] << " in [" << inpWS->readX(wsindex)[0] << ", "
-          //          << inpWS->readX(wsindex).back() << "] " << std::endl;
+          g_log.debug() << "DBx502 Background Points " << i << " Index = " << index << " For TOF = "
+                        << bkgdpoints[i] << " in [" << inpWS->readX(wsindex)[0] << ", "
+                        << inpWS->readX(wsindex).back() << "] " << std::endl;
 
           // b) Add to list
           realx.push_back(inpWS->readX(wsindex)[index]);
@@ -372,11 +388,12 @@ DECLARE_ALGORITHM(ProcessBackground)
       }
 
       bkgdfunction->setAttributeValue("n", 6);
+      g_log.debug() << "DBx622 Background Workspace has " << bkgdWS->readX(0).size() << " data points." << std::endl;
 
       fit->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(bkgdfunction));
       fit->setProperty("InputWorkspace", bkgdWS);
       fit->setProperty("WorkspaceIndex", 0);
-      fit->setProperty("MaxIterations", 50);
+      fit->setProperty("MaxIterations", 500);
       fit->setProperty("StartX", realx[0]);
       fit->setProperty("EndX", realx.back());
       fit->setProperty("Minimizer", "Levenberg-Marquardt");

@@ -98,9 +98,9 @@ public:
       double y59 = 0.285529;
       double y86 = 648.998;
 
-      TS_ASSERT_DELTA(outws->readY(0)[25], y25, 0.1);
-      TS_ASSERT_DELTA(outws->readY(0)[59], y59, 0.0001);
-      TS_ASSERT_DELTA(outws->readY(0)[86], y86, 0.001);
+      TS_ASSERT_DELTA(outws->readY(1)[25], y25, 0.1);
+      TS_ASSERT_DELTA(outws->readY(1)[59], y59, 0.0001);
+      TS_ASSERT_DELTA(outws->readY(1)[86], y86, 0.001);
 
       // 5. Clean
       AnalysisDataService::Instance().remove("Data");
@@ -171,12 +171,13 @@ public:
                   AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
       TS_ASSERT(outws);
 
+      /*
       for (size_t i = 0; i < outws->dataY(0).size(); ++i)
           std::cout << outws->dataX(0)[i] << "\t\t" << outws->dataY(0)[i] << std::endl;
+          */
 
-
-      double bkgdx = outws->readX(0).back()*0.001 + 101.0;
-      TS_ASSERT_DELTA(outws->readY(0).back(), bkgdx, 1.0);
+      double bkgdx = outws->readX(1).back()*0.001 + 101.0;
+      TS_ASSERT_DELTA(outws->readY(1).back(), bkgdx, 1.0);
 
       // 5. Clean
       AnalysisDataService::Instance().remove("Data");

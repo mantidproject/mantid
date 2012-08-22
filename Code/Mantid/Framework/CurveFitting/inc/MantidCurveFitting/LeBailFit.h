@@ -9,6 +9,7 @@
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 
 using namespace Mantid;
@@ -76,7 +77,7 @@ namespace CurveFitting
     void generatePeaksFromInput();
 
     /// Create and set up output table workspace for peaks
-    void createPeaksWorkspace();
+    void exportEachPeaksParameters();
 
     /// Set parameters to each peak
     void setPeakParameters(
@@ -155,14 +156,25 @@ namespace CurveFitting
     std::vector<int> mPeakHKL2; // Peak's h^2+k^2+l^2: seaving as key for mPeakHeights adn mPeaks
     std::vector<std::vector<int> > mPeakHKLs;
     std::map<int, double> mPeakHeights;
+
+    /// =============================   Functions  =========================== ///
+    /// Neutron peak functions
     std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr> mPeaks;
-
+    /// Background function
     CurveFitting::BackgroundFunction_sptr mBackgroundFunction;
-
+    /// Le Bail Function (Composite)
     API::CompositeFunction_sptr mLeBailFunction;
-    std::map<std::string, std::pair<double, char> > mFuncParameters; // char = f: fit... = t: tie to value
-    std::vector<std::string> mPeakParameterNames; // Peak parameters' names of the peak
 
+    /// Function parameters updated by fit
+    std::map<std::string, std::pair<double, char> > mFuncParameters; // char = f: fit... = t: tie to value
+    /// Input function parameters that are stored for reference
+    std::map<std::string, double> mOrigFuncParameters;
+    /// Peak parameters list
+    std::vector<std::string> mPeakParameterNames; // Peak parameters' names of the peak
+    /// Parameter error
+    std::map<std::string, double> mFuncParameterErrors;
+
+    /// =============================    =========================== ///
     size_t mWSIndexToWrite;
 
     /// Map to store peak group information: key (int) = (hkl)^2; value = group ID
