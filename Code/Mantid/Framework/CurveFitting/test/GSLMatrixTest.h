@@ -150,6 +150,29 @@ public:
     }
   }
 
+  void test_invert()
+  {
+    GSLMatrix m(2,2);
+    m.set(0,0,1);
+    m.set(0,1,1);
+    m.set(1,0,0);
+    m.set(1,1,1);
+    m.invert();
+    TS_ASSERT_EQUALS(m.get(0,0), 1);
+    TS_ASSERT_EQUALS(m.get(0,1), -1);
+    TS_ASSERT_EQUALS(m.get(1,0), 0);
+    TS_ASSERT_EQUALS(m.get(1,1), 1);
+    m.set(0,0,2);
+    m.set(0,1,0);
+    m.set(1,0,0);
+    m.set(1,1,2);
+    m.invert();
+    TS_ASSERT_EQUALS(m.get(0,0), 0.5);
+    TS_ASSERT_EQUALS(m.get(0,1), 0);
+    TS_ASSERT_EQUALS(m.get(1,0), 0);
+    TS_ASSERT_EQUALS(m.get(1,1), 0.5);
+  }
+
 };
 
 #endif /*GSLMATRIXTEST_H_*/
