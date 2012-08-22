@@ -602,7 +602,9 @@ public:
   void loadTof(::NeXus::File & file)
   {
     // Allocate the array
-    m_event_time_of_flight = new float[m_loadSize[0]];
+    float* temp = new float[m_loadSize[0]];
+    delete [] m_event_time_of_flight;
+    m_event_time_of_flight = temp;
 
     // Get the list of event_time_of_flight's
     if (!m_oldNexusFileNames)
