@@ -113,8 +113,9 @@ void test_buildFromEWS()
      EventWorkspace_sptr outWS = convertToEvents(inWS);
 
      // build ws description from event ws
-      std::vector<std::string> dimProperyNames; //--- empty property names
-      TS_ASSERT_THROWS_NOTHING(TestWS.buildFromMatrixWS(outWS,"Q3D","Direct",dimProperyNames));
+     std::vector<std::string> dimProperyNames; //--- empty property names
+     TS_ASSERT_THROWS_NOTHING(TestWS.buildFromMatrixWS(outWS,"Q3D","Direct",dimProperyNames));
+     TS_ASSERT_THROWS_NOTHING(TestWS.setDetectors(det_loc));
 
      ws_events =boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
      if (!ws_events){
@@ -228,8 +229,8 @@ logProvider(100)
 
    int numBins=10;
    ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);
-
-  
+   // this should disable multithreading
+   ws2D->mutableRun().addProperty("NUM_THREADS",0);  
   
 }
 // function repeats convert to events algorithm which for some mysterious reasons do not work here as subalgorithm.

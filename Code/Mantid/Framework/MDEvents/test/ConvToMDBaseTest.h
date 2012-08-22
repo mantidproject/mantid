@@ -28,9 +28,9 @@ class ConvToMDBaseTest : public CxxTest::TestSuite, public WorkspaceCreationHelp
      MDWSDescription WSD;
      // matrix ws, sometimes can be obtained from description as a const pointer, but better not to do it for modifications
      Mantid::API::MatrixWorkspace_sptr ws2D;
-     // the shared pointer to the expected taget Event ws;
+     // the shared pointer to the expected taget Event ws; Not used here, just set up
      boost::shared_ptr<MDEventWSWrapper> outWSWrapper;
-     // preprocessed detectors location (emulated static algorithm variable)
+     // preprocessed detectors location (emulates static algorithm variable)
      MDEvents::ConvToMDPreprocDet DetLoc;
 public:
 static ConvToMDBaseTest *createSuite() {
