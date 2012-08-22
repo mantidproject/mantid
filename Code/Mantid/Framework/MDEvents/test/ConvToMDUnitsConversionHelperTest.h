@@ -135,7 +135,7 @@ void testConvertToTofInelasticWS()
 }
 
 
-ConvertToMDUnitsConvTest()
+ConvToMDUnitsConversionHelperTest()
 {
     
    API::FrameworkManager::Instance();
