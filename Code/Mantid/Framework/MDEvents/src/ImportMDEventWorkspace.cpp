@@ -318,7 +318,7 @@ namespace MDEvents
     {
       file.open(filename.c_str(), std::ios::in);
     }
-    catch (std::ifstream::failure e) 
+    catch (std::ifstream::failure& e) 
     {
       g_log.error() << "Cannot open file: " << filename;
       throw e;
