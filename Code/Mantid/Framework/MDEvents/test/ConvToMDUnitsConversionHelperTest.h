@@ -20,16 +20,16 @@ using namespace Mantid::MDEvents;
 
 
 
-class ConvertToMDUnitsConvTest : public CxxTest::TestSuite
+class ConvToMDUnitsConversionHelperTest : public CxxTest::TestSuite
 {
    Mantid::API::MatrixWorkspace_sptr ws2D;
    ConvToMDPreprocDet det_loc;
 
 public:
-static ConvertToMDUnitsConvTest *createSuite() {
-    return new ConvertToMDUnitsConvTest(); 
+static ConvToMDUnitsConversionHelperTest *createSuite() {
+    return new ConvToMDUnitsConversionHelperTest(); 
 }
-static void destroySuite(ConvertToMDUnitsConvTest  * suite) { delete suite; }    
+static void destroySuite(ConvToMDUnitsConversionHelperTest  * suite) { delete suite; }    
 
 void testSpecialConversionTOF()
 {
