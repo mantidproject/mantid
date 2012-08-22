@@ -138,8 +138,6 @@ public:
       ("IRS10005_graphite002_info.nxs")
       // File with no extension.
       ("bl6_flux_at_sample")
-      // Lower-case instrument name.
-      ("osi89816.raw")
       // A single "non-run" file, that we should be able to load.
       ("IRS10001-10005_graphite002_info.nxs")
       // A file with a "+" and "," in the name, to see if it can be loaded
@@ -329,15 +327,6 @@ public:
     std::vector<std::vector<std::string>> fileNames = p();
 
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("bl6_flux_at_sample"));
-  }
-
-  void test_singleFile_lowercaseInstrumentName()
-  {
-    MultipleFileProperty p("Filename");
-    p.setValue("OSI89816.raw");
-    std::vector<std::vector<std::string>> fileNames = p();
-
-    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("OSI89816.raw"));
   }
 
   void test_multipleFiles_shortForm_commaList()
