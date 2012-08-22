@@ -31,7 +31,7 @@ using namespace Mantid::MDEvents;
 
 
 
-class ConvertToMDWSTest : public CxxTest::TestSuite
+class ConvToMDEventsVSHistoTest : public CxxTest::TestSuite
 {
   // matrix ws and event ws which contains the same data
    Mantid::API::MatrixWorkspace_sptr ws2D;
@@ -54,10 +54,10 @@ class ConvertToMDWSTest : public CxxTest::TestSuite
    WorkspaceCreationHelper::MockAlgorithm logProvider;
 
 public:
-static ConvertToMDWSTest *createSuite() {
-    return new ConvertToMDWSTest();    
+static ConvToMDEventsVSHistoTest *createSuite() {
+    return new ConvToMDEventsVSHistoTest();    
 }
-static void destroySuite(ConvertToMDWSTest  * suite) { delete suite; }    
+static void destroySuite(ConvToMDEventsVSHistoTest  * suite) { delete suite; }    
 
 void test_PreprocessDetectors()
 {
@@ -211,7 +211,7 @@ void test_compareTwoConversions()
 }
 
 // constructor:
-ConvertToMDWSTest ():
+ConvToMDEventsVSHistoTest():
 TestWS(4),
 logProvider(100)
 {    
