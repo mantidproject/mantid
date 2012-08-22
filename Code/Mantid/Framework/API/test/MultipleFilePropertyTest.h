@@ -136,11 +136,10 @@ public:
       ("IRS10003_graphite002_info.nxs")
       ("IRS10004_graphite002_info.nxs")
       ("IRS10005_graphite002_info.nxs")
+      // File with no extension.
+      ("bl6_flux_at_sample")
       // A single "non-run" file, that we should be able to load.
       ("IRS10001-10005_graphite002_info.nxs")
-      // A complex file name, to highlight any special character problems.
-      // \ / : * ? " < > | are not allowed...
-      //("Complex.Filename.!_-+%£$%^&()[]{}~#@';,.test")
       // A file with a "+" and "," in the name, to see if it can be loaded
       // when multifileloading is turned off via the preferences file.
       ("_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt");
@@ -319,6 +318,15 @@ public:
     std::vector<std::vector<std::string>> fileNames = p();
 
     TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("IRS10001-10005_graphite002_info.nxs"));
+  }
+
+  void test_singleFile_fileThatHasNoExtension()
+  {
+    MultipleFileProperty p("Filename");
+    p.setValue("bl6_flux_at_sample");
+    std::vector<std::vector<std::string>> fileNames = p();
+
+    TS_ASSERT_EQUALS(fileNames[0][0], dummyFile("bl6_flux_at_sample"));
   }
 
   void test_multipleFiles_shortForm_commaList()
@@ -606,18 +614,6 @@ public:
 
     MultipleFileProperty p("Filename");
     p.setValue("_test_multiFileLoadingSwitchedOff_tempFileWithA+AndA,InTheName.txt");
-    std::vector<std::vector<std::string>> fileNames = p();
-
-    TS_ASSERT_EQUALS(fileNames.size(), 1);
-    TS_ASSERT_EQUALS(fileNames[0].size(), 1);
-  }
-
-  void xtest_multiFileLoadingSwitchedOff_complexFilename()
-  {
-    g_config.setString("loading.multifile", "Off");
-
-    MultipleFileProperty p("Filename");
-    //p.setValue("Complex.Filename.!_-+%£$%^&()[]{}~#@';,.test");
     std::vector<std::vector<std::string>> fileNames = p();
 
     TS_ASSERT_EQUALS(fileNames.size(), 1);

@@ -105,6 +105,9 @@ namespace API
       
       const std::string error = setValueAsSingleFile(propValue);
 
+      if( error.empty() )
+        return "";
+
       // If we failed for whatever reason, catch the message and return it.
       return "Unable to parse runs: \"" + std::string(re.what()) + "\". ";
     }
