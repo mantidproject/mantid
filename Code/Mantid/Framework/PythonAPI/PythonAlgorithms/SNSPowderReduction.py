@@ -268,7 +268,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
         return strategy
 
-    def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=None, preserveEvents=True,
+    def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=["", 0.0, 0.0], preserveEvents=True,
                normByCurrent=True, filterBadPulsesOverride=True):
         # generate the workspace name
         wksp = "%s_%d" % (self._instrument, runnumber)
@@ -280,14 +280,15 @@ class SNSPowderReduction(PythonAlgorithm):
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
             if self._info is None:
                 self._info = self._getinfo(temp)
-            temp = api.AlignAndFocusPowder(InputWorkspace=temp,OutputWorkspace=temp,CalFileName=calib,Params=self._binning,Dspacing=self._bin_in_dspace,
-                DMin=self._info.dmin,DMax=self._info.dmax,TMin=self._info.tmin,TMax=self._info.tmax,PreserveEvents=preserveEvents,
+            temp = api.AlignAndFocusPowder(InputWorkspace=temp, OutputWorkspace=temp, CalFileName=calib,
+                Params=self._binning, Dspacing=self._bin_in_dspace,
+                DMin=self._info.dmin, DMax=self._info.dmax, TMin=self._info.tmin, TMax=self._info.tmax,
+                PreserveEvents=preserveEvents,
                 FilterBadPulses=self._filterBadPulses and filterBadPulsesOverride,
-                RemovePromptPulseWidth=self._removePromptPulseWidth,CompressTolerance=COMPRESS_TOL_TOF,
-                FilterLogName=self.getProperty("FilterByLogValue").value,FilterLogMinimumValue=self.getProperty("FilterMinimumValue").value,
-                FilterLogMaximumValue=self.getProperty("FilterMaximumValue").value,
-                UnwrapRef=self.getProperty("UnwrapRef").value,LowResRef=self.getProperty("LowResRef").value,
-                CropWavelengthMin=self.getProperty("CropWavelengthMin").value, **(self._config.getFocusPos()))
+                RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
+                FilterLogName=filterLogs[0], FilterLogMinimumValue=filterLogs[1],
+                FilterLogMaximumValue=filterLogs[2], UnwrapRef=self._LRef, LowResRef=self._DIFCref,
+                CropWavelengthMin=self._wavelengthMin, **(self._config.getFocusPos()))
             if firstChunk:
                 wksp = api.RenameWorkspace(InputWorkspace=temp, OutputWorkspace=wksp)
                 firstChunk = False
@@ -301,7 +302,7 @@ class SNSPowderReduction(PythonAlgorithm):
             # When chunks are added, proton charge is summed for all chunks
             wksp.getRun().integrateProtonCharge()
         api.DeleteWorkspace('Chunks')
-        if preserveEvents and not "histo" in self.getProperty("Extension").value:
+        if preserveEvents and not "histo" in extension:
             wksp = api.CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if normByCurrent:
             wksp = api.NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -373,13 +374,14 @@ class SNSPowderReduction(PythonAlgorithm):
         self._instrument = self.getProperty("Instrument").value
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._instrument
-#        self._timeMin = self.getProperty("FilterByTimeMin")
-#        self._timeMax = self.getProperty("FilterByTimeMax")
         self._filterBadPulses = self.getProperty("FilterBadPulses").value
         self._removePromptPulseWidth = self.getProperty("RemovePromptPulseWidth").value
+        self._LRef = self.getProperty("UnwrapRef").value
+        self._DIFCref = self.getProperty("LowResRef").value
+        self._wavelengthMin = self.getProperty("CropWavelengthMin").value
         filterLogs = self.getProperty("FilterByLogValue").value
         if len(filterLogs.strip()) <= 0:
-            filterLogs = None
+            filterLogs = ["", 0.0, 0.0]
         else:
             filterLogs = [filterLogs, 
                           self.getProperty("FilterMinimumValue").value, self.getProperty("FilterMaximumValue").value]
@@ -417,7 +419,7 @@ class SNSPowderReduction(PythonAlgorithm):
                         raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
                                            % (tempinfo.wl, info.wl))
                     samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
-                    if not "histo" in self.getProperty("Extension").value:
+                    if not "histo" in SUFFIX:
                         samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                        Tolerance=COMPRESS_TOL_TOF) # 10ns
                     api.DeleteWorkspace(str(temp))
@@ -564,7 +566,7 @@ class SNSPowderReduction(PythonAlgorithm):
             # the final bit of math
             if canRun is not None:
                 samRun -= canRun
-                if not "histo" in self.getProperty("Extension").value and preserveEvents:
+                if not "histo" in SUFFIX and preserveEvents:
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                Tolerance=COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
@@ -576,7 +578,7 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 normalized = False
 
-            if not "histo" in self.getProperty("Extension").value and preserveEvents and HAVE_MPI is False:
+            if not "histo" in SUFFIX and preserveEvents and HAVE_MPI is False:
                 samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                            Tolerance=COMPRESS_TOL_TOF) # 5ns/
 

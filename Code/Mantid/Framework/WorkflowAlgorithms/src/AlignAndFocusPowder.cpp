@@ -133,25 +133,31 @@ void AlignAndFocusPowder::exec()
   }
   if (dspace)
   {
-    if (params.size() == 1)
+    if (params.size() == 1 && dmax > 0)
     {
     	double step = params[0];
-        params[0] = dmin;
-        params.push_back(step);
-        params.push_back(dmax);
+        if (step > 0 || dmin > 0)
+        {
+          params[0] = dmin;
+          params.push_back(step);
+          params.push_back(dmax);
+          g_log.information() << "d-Spacing Binning: " << params[0] << "  " << params[1] << "  " << params[2] <<"\n";
+        }
     }
-    g_log.information() << "d-Spacing Binning: " << params[0] << "  " << params[1] << "  " << params[2] <<"\n";
   }
   else
   {
-    if (params.size() == 1)
+    if (params.size() == 1 && tmax > 0)
     {
     	double step = params[0];
-        params[0] = tmin;
-        params.push_back(step);
-        params.push_back(tmax);
+        if (step > 0 || tmin > 0)
+        {
+          params[0] = tmin;
+          params.push_back(step);
+          params.push_back(tmax);
+          g_log.information() << "TOF Binning: " << params[0] << "  " << params[1] << "  " << params[2] <<"\n";
+        }
     }
-    g_log.information() << "TOF Binning: " << params[0] << "  " << params[1] << "  " << params[2] <<"\n";
   }
   xmin = 0;
   xmax = 0;
@@ -163,7 +169,7 @@ void AlignAndFocusPowder::exec()
   {
     xmax = tmax;
   }
-  if (!dspace)
+  if (!dspace && params.size() == 3)
   {
     xmin = params[0];
     xmax = params[2];
@@ -408,8 +414,9 @@ void AlignAndFocusPowder::execEvent()
     m_outputEventW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
 
-  if (!filterName.empty())
+  if (!filterName.empty() && m_outputW->mutableRun().getLogData(filterName))
   {
+    
     API::IAlgorithm_sptr filterLogsAlg = createSubAlgorithm("FilterByLogValue");
     filterLogsAlg->setProperty("InputWorkspace", m_outputEventW);
     filterLogsAlg->setProperty("OutputWorkspace", m_outputEventW);
