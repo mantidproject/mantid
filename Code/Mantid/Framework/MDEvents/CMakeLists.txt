@@ -158,6 +158,7 @@ set ( TEST_FILES
 	ConvertToMDUnitsConvTest.h
 	ConvertToMDWSTest.h
 	ConvertToReflectometryQTest.h
+	ConvToMDBaseTest.h
 	CoordTransformAffineParserTest.h
 	CoordTransformAffineTest.h
 	CoordTransformAlignedTest.h

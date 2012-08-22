@@ -184,15 +184,12 @@ void ConvertToMDEvents::exec()
     this->subAlgFactory.init(ParamParser);
 
   // initiate class which would deal with any dimension workspaces, handling 
-  if(!pWSWrapper){
-    pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
-  }
+  if(!pWSWrapper)pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+ 
   // -------- Input workspace
   this->inWS2D = getProperty("InputWorkspace");
-  if(!inWS2D)
-  {
-    convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
-  }
+  if(!inWS2D)convert_log.error()<<" can not obtain input matrix workspace from analysis data service\n";
+ 
   // ------- Is there any output workspace?
   // shared pointer to target workspace
   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
@@ -200,11 +197,16 @@ void ConvertToMDEvents::exec()
   if(!spws)
   {
     create_new_ws = true;
-  }else{ 
+  }
+  else
+  { 
       bool should_overwrite = getProperty("OverwriteExisting");
-      if (should_overwrite){
+      if (should_overwrite)
+      {
           create_new_ws=true;
-      }else{
+      }
+      else
+      {
           create_new_ws=false;
       }
   }
@@ -273,9 +275,7 @@ void ConvertToMDEvents::exec()
         // reset new ws description name
         TWSD = OLDWSD;
        // set up target coordinate system
-        TWSD.m_RotMatrix = MsliceProj.getTransfMatrix(TWSD,convert_to_);
-   
-    
+        TWSD.m_RotMatrix = MsliceProj.getTransfMatrix(TWSD,convert_to_);   
     }
 
     // Check what to do with detectors:  
@@ -319,7 +319,9 @@ void ConvertToMDEvents::exec()
     int maxDepth = this->getProperty("MaxRecursionDepth");
     if (minDepth>maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth ");
     spws->setMinRecursionDepth(size_t(minDepth));  
-  }else{
+  }
+  else
+  {
       pWSWrapper->setMDWS(spws);
   }
   // convert original box into mdGridBox

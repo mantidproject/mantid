@@ -135,7 +135,8 @@ namespace Mantid
         //ts->push( new FunctionTask( func, cost) );
 
         // Keep a running total of how many events we've added
-        if (bc->shouldSplitBoxes(nEventsInWS,eventsAdded, lastNumBoxes)){
+        if (bc->shouldSplitBoxes(nEventsInWS,eventsAdded, lastNumBoxes))
+        {
           // Do all the adding tasks
           tp.joinAll();    
           // Now do all the splitting tasks

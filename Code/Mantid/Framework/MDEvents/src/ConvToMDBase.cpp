@@ -44,12 +44,26 @@ namespace Mantid
 
 
       size_t n_spectra =m_InWS2D->getNumberHistograms();
+
+      // get property which controls multithreaded run. If present, this property describes number of threads (or one) deployed to run conversion
+      // (this can be for debugging or other tricky reasons)
+      Kernel::Property *pProperty = m_InWS2D->run().getProperty("NUM_THREADS");
+      Kernel::PropertyWithValue<int> *thrProperty = dynamic_cast<Kernel::PropertyWithValue<int> *>(pProperty);  
+      if(thrProperty)
+      {
+        m_NumThreads = int(*(thrProperty));
+      }
+      else
+      {
+        m_NumThreads = -1;
+      }
+      
       return n_spectra;
     };  
 
     /** empty default constructor */
-    ConvToMDBase::ConvToMDBase()
-    {}
+    ConvToMDBase::ConvToMDBase():m_NumThreads(-1)
+    { }
 
 
 

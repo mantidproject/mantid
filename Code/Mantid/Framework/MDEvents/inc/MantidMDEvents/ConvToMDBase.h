@@ -84,6 +84,8 @@ namespace MDEvents
    std::vector<coord_t> m_Coord;
    // class responsible for converting units if necessary;
    UnitsConversionHelper m_UnitConversion;
+   // the parameter, which control if algorithm should run multithreaded. Usually it should on multiprocessor machine, but multithreaded can be disabled/modified setting appropriate property
+   int m_NumThreads;
  private:
     /** internal function which do one peace of work, which should be performed by one thread 
       *

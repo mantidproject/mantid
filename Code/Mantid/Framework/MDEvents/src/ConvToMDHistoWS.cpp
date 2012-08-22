@@ -37,7 +37,7 @@ size_t  ConvToMDHistoWS::initialize(const MDEvents::MDWSDescription &WSD, boost:
 */
 size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra)
 {
-  size_t n_added_events(0),n_buf_events(0);
+  size_t nAddedEvents(0),nBufEvents(0);
 
   const size_t specSize = this->m_InWS2D->blocksize();    
   // preprocessed detectors associate each spectra with a detector (position)
@@ -91,35 +91,35 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra)
       float ErrSq = float(Error[j]*Error[j]);
 
       // coppy all data into data buffer for future transformation into events;
-      sig_err[2*n_buf_events+0]= float(Signal[j]);
-      sig_err[2*n_buf_events+1]= ErrSq;
-      run_index[n_buf_events]  = m_RunIndex;
-      det_ids[n_buf_events]    = det_id;
+      sig_err[2*nBufEvents+0]= float(Signal[j]);
+      sig_err[2*nBufEvents+1]= ErrSq;
+      run_index[nBufEvents]  = m_RunIndex;
+      det_ids[nBufEvents]    = det_id;
 
       for(size_t ii=0;ii<m_NDims;ii++) allCoord[n_coordinates++]=locCoord[ii];
      
 
       // calculate number of events
-      n_buf_events++;
-      if(n_buf_events>=m_bufferSize)
+      nBufEvents++;
+      if(nBufEvents>=m_bufferSize)
       {
-        m_OutWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_buf_events);
-        n_added_events+=n_buf_events;
+        m_OutWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,nBufEvents);
+        nAddedEvents+=nBufEvents;
         // reset buffer counts
         n_coordinates= 0;
-        n_buf_events = 0;
+        nBufEvents   = 0;
       }
     } // end spectra loop     
   } // end detectors loop;
 
-  if(n_buf_events>0)
+  if(nBufEvents>0)
   {
-    m_OutWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,n_buf_events);
-    n_added_events+=n_buf_events;
-    n_buf_events=0;
+    m_OutWSWrapper->addMDData(sig_err,run_index,det_ids,allCoord,nBufEvents);
+    nAddedEvents+=nBufEvents;
+    nBufEvents=0;
   }
 
-  return n_added_events;
+  return nAddedEvents;
 }
 
 /** run conversion as multithread job*/
@@ -149,6 +149,7 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress)
   Kernel::ThreadPool tp(ts, 0, new API::Progress(*pProgress));
   // estimate the size of data conversion a single thread should perform
 
+  //TO DO: this piece of code should be carefully rethinked
   //size_t nThreads = tp.getNumPhysicalCores();
   size_t nThreads = 1;
   this->estimateThreadWork(nThreads,specSize);
@@ -156,12 +157,12 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress)
   //External loop over the spectra:
   for (size_t i = 0; i < nValidSpectra; i+=m_spectraChunk)
   {
-    size_t n_thread_ev = this->conversionChunk(i);
-    nAddedEvents+=n_thread_ev;
-    nEventsInWS +=n_thread_ev;
+    size_t nThreadEv = this->conversionChunk(i);
+    nAddedEvents+=nThreadEv;
+    nEventsInWS +=nThreadEv;
 
    if (bc->shouldSplitBoxes(nEventsInWS,nAddedEvents,lastNumBoxes))
-    {
+   {
       // Do all the adding tasks
       tp.joinAll();    
       // Now do all the splitting tasks
@@ -171,7 +172,7 @@ void ConvToMDHistoWS::runConversion(API::Progress *pProgress)
       lastNumBoxes = m_OutWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
       nAddedEvents = 0;
       pProgress->report(i);
-    }
+   }
 
     //if (m_OutWSWrapper->ifNeedsSplitting())
     //{
