@@ -153,11 +153,10 @@ set ( TEST_FILES
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
 	ConvertToDiffractionMDWorkspaceTest.h
-	ConvertToMDFactoryTest.h
-#	ConvertToMDParamsTest.h
 	ConvertToMDWSTest.h
 	ConvertToReflectometryQTest.h
 	ConvToMDBaseTest.h
+	ConvToMDTransfFactoryTest.h	
 	ConvToMDUnitsConversionHelperTest.h	
 	CoordTransformAffineParserTest.h
 	CoordTransformAffineTest.h
