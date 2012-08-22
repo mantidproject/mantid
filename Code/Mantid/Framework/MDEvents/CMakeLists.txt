@@ -154,11 +154,11 @@ set ( TEST_FILES
 	CloneMDWorkspaceTest.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToMDFactoryTest.h
-	ConvertToMDParamsTest.h
-	ConvertToMDUnitsConvTest.h
+#	ConvertToMDParamsTest.h
 	ConvertToMDWSTest.h
 	ConvertToReflectometryQTest.h
 	ConvToMDBaseTest.h
+	ConvToMDUnitsConversionHelperTest.h	
 	CoordTransformAffineParserTest.h
 	CoordTransformAffineTest.h
 	CoordTransformAlignedTest.h
@@ -191,7 +191,7 @@ set ( TEST_FILES
 	MDLeanEventTest.h
 	MDTransfAxisNamesTest.h
 	MDWSTransfTest.h
-	MDWSDescrTest.h	
+	MDWSDescriptionTest.h	
 	OneStepMDEWTest.h
 	QueryMDWorkspaceTest.h
 	ReflectometryTransformQxQzTest.h
