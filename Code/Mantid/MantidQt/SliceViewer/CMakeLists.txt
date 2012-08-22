@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/DimensionSliceWidget.cpp
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
+    src/PeakOverlay.cpp
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
@@ -21,6 +22,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
+    inc/MantidQtSliceViewer/PeakOverlay.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
@@ -35,6 +37,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
+    inc/MantidQtSliceViewer/PeakOverlay.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h

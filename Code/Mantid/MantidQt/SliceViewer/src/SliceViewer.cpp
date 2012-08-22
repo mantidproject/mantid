@@ -12,6 +12,7 @@
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
+#include "MantidQtSliceViewer/PeakOverlay.h"
 #include "MantidQtSliceViewer/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
@@ -137,6 +138,8 @@ SliceViewer::SliceViewer(QWidget *parent)
   // -------- Line Overlay ----------------
   m_lineOverlay = new LineOverlay(m_plot, m_plot->canvas());
   m_lineOverlay->setShown(false);
+
+  m_peakOverlay = new PeakOverlay(m_plot, m_plot->canvas());
 
   m_overlayWSOutline = new LineOverlay(m_plot, m_lineOverlay);
   m_overlayWSOutline->setShowHandles(false);

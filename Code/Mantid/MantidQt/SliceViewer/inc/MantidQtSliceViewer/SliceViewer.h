@@ -12,6 +12,7 @@
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
+#include "MantidQtSliceViewer/PeakOverlay.h"
 #include "QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <QtCore/QtCore>
@@ -184,6 +185,8 @@ private:
 
   /// The LineOverlay widget for drawing the outline of the rebinned workspace
   LineOverlay * m_overlayWSOutline;
+
+  PeakOverlay * m_peakOverlay;
 
   /// Object for running algorithms in the background
   MantidQt::API::AlgorithmRunner * m_algoRunner;
