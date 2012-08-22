@@ -103,8 +103,6 @@ namespace Mantid
 
     void ConvToMDEventsWS::runConversion(API::Progress *pProgress)
     {
-      Kernel::ThreadScheduler * ts(NULL);
-      Kernel::ThreadPool tp;
 
       // Get the box controller
       Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
@@ -116,6 +114,7 @@ namespace Mantid
       size_t nValidSpectra  = m_DetLoc->nDetectors();
 
       //--->>> Thread control stuff
+      Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
       int nThreads(m_NumThreads);
       if(nThreads<0)nThreads= 0; // negative m_NumThreads correspond to all cores used, 0 no threads and positive number -- nThreads requested;
       bool runMultithreaded = false;
@@ -126,9 +125,8 @@ namespace Mantid
         ts = new Kernel::ThreadSchedulerFIFO();     
         // it will initiate thread pool with number threads or machine's cores (0 in tp constructor)
         pProgress->resetNumSteps(nValidSpectra,0,1);
-        Kernel::ThreadPool tpt(ts,nThreads, new API::Progress(*pProgress));
-        tp = tpt;
       }
+      Kernel::ThreadPool tp(ts,nThreads, new API::Progress(*pProgress));  
       //<<<--  Thread control stuff
 
 

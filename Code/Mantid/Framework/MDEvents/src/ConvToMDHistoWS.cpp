@@ -127,8 +127,6 @@ namespace Mantid
     {
       // counder for the number of events
       size_t nAddedEvents(0); 
-      Kernel::ThreadScheduler * ts(NULL);
-      Kernel::ThreadPool tp;
       //
       Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
       size_t lastNumBoxes                = bc->getTotalNumMDBoxes();
@@ -142,7 +140,9 @@ namespace Mantid
       // if any property dimension is outside of the data range requested, the job is done;
       if(!m_QConverter->calcGenericVariables(m_Coord,m_NDims))return; 
 
+  
       //--->>> Thread control stuff
+      Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
       int nThreads(m_NumThreads);
       if(nThreads<0)nThreads= 0; // negative m_NumThreads correspond to all cores used, 0 no threads and positive number -- nThreads requested;
       bool runMultithreaded = false;
@@ -152,9 +152,9 @@ namespace Mantid
         // Create the thread pool that will run all of these.
         ts = new Kernel::ThreadSchedulerFIFO();     
         // it will initiate thread pool with number threads or machine's cores (0 in tp constructor)
-        Kernel::ThreadPool tpt(ts,nThreads, new API::Progress(*pProgress));
-        tp = tpt;
+        pProgress->resetNumSteps(nValidSpectra,0,1);
       }
+      Kernel::ThreadPool tp(ts,nThreads, new API::Progress(*pProgress));  
       //<<<--  Thread control stuff
 
       // estimate the size of data conversion a single thread should perform
