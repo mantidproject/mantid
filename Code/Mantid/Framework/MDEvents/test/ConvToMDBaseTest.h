@@ -2,8 +2,10 @@
 #define MDEVENTS_CONV2_MDBASE_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidMDEvents/ConvToMDBase.h"
+#include "MantidMDEvents/MDEventWSWrapper.h"
+#include "MantidMDEvents/MDTransfDEHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -20,10 +22,16 @@ public:
 };
 
 // The test
-class ConvToMDBaseTest : public CxxTest::TestSuite
+class ConvToMDBaseTest : public CxxTest::TestSuite, public WorkspaceCreationHelper::MockAlgorithm
 {
     // Matrix workspace description;
      MDWSDescription WSD;
+     // matrix ws, sometimes can be obtained from description as a const pointer, but better not to do it for modifications
+     Mantid::API::MatrixWorkspace_sptr ws2D;
+     // the shared pointer to the expected taget Event ws;
+     boost::shared_ptr<MDEventWSWrapper> outWSWrapper;
+     // preprocessed detectors location (emulated static algorithm variable)
+     MDEvents::ConvToMDPreprocDet DetLoc;
 public:
 static ConvToMDBaseTest *createSuite() {
     return new ConvToMDBaseTest();    
@@ -37,10 +45,44 @@ void testConstructor()
   TSM_ASSERT_EQUALS("uninitiated num threads parameter should be equal -1",-1,pConvToMDBase->getNumThreads());
 
 }
+void testInitAndSetNumThreads()
+{
+  ConvToMDBaseTestHelper testClass;
+  TS_ASSERT_THROWS_NOTHING(outWSWrapper->createEmptyMDWS(WSD));
+
+  TSM_ASSERT_THROWS("Should throw if detectors prepositions are not initiated ",testClass.initialize(WSD,outWSWrapper),std::logic_error);
+  // should calculate the detectors info
+  this->buildDetInfo(ws2D);
+  TS_ASSERT_THROWS_NOTHING(testClass.initialize(WSD,outWSWrapper));
+  TSM_ASSERT_EQUALS("uninitiated num threads parameter should be still equal -1",-1,testClass.getNumThreads());
+  
+  std::string QMode  = WSD.getQMode();
+  std::string dEMode = WSD.getEModeStr();
+  ws2D->mutableRun().addProperty("NUM_THREADS",0);
+
+  WSD.buildFromMatrixWS(ws2D,QMode,dEMode);
+  this->buildDetInfo(ws2D);
+
+  TS_ASSERT_THROWS_NOTHING(testClass.initialize(WSD,outWSWrapper));
+  TSM_ASSERT_EQUALS("Initialized above num threads parameter should be equal to 0 (which would disable multithreading)",0,testClass.getNumThreads());
+  ws2D->mutableRun().removeProperty("NUM_THREADS");
+
+  // and this should let us run 2 thread program
+  ws2D->mutableRun().addProperty("NUM_THREADS",2);
+  WSD.buildFromMatrixWS(ws2D,QMode,dEMode);
+  this->buildDetInfo(ws2D);
+
+  TS_ASSERT_THROWS_NOTHING(testClass.initialize(WSD,outWSWrapper));
+  TSM_ASSERT_EQUALS("Initialized above num threads parameter should be equal to 2:",2,testClass.getNumThreads());
+
+  // avoid side effects of this test to possible others;
+  ws2D->mutableRun().removeProperty("NUM_THREADS");
+
+}
 private: 
   ConvToMDBaseTest()
   {
-     Mantid::API::MatrixWorkspace_sptr ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
+     ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     // rotate the crystal by twenty degrees back;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);
      // add workspace energy
@@ -48,12 +90,32 @@ private:
      // ADD time series property
      ws2D->mutableRun().addProperty("H",10.,"Gs");
   
-    std::vector<double> dimMin(4,-10);
-    std::vector<double> dimMax(4, 20);
-    std::vector<std::string> PropNamews;
+     std::vector<double> dimMin(4,-10);
+     std::vector<double> dimMax(4, 20);
+     std::vector<std::string> PropNamews;
      WSD.setMinMax(dimMin,dimMax);   
      WSD.buildFromMatrixWS(ws2D,"Q3D","Direct",PropNamews);
+
+    outWSWrapper = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
   }
+  // helper function to build the detector info
+  void buildDetInfo( Mantid::API::MatrixWorkspace_sptr spWS)
+  {
+    if(WSD.isDetInfoLost())
+    { // in NoQ mode one may not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
+         DetLoc.buildFakeDetectorsPositions(spWS);
+    }else{  // preprocess or not the detectors positions    
+       // amount of work:
+        const size_t nHist = spWS->getNumberHistograms();
+        boost::scoped_ptr<API::Progress> theProgress(new API::Progress(this,0.0,1.0,nHist));
+       
+        DetLoc.processDetectorsPositions(spWS,this->getLogger(),theProgress.get());  
+        if(DetLoc.nDetectors()==0)throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
+           
+    }
+    WSD.setDetectors(DetLoc);
+  }
+
 
 };
 

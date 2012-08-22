@@ -53,7 +53,7 @@ namespace MDEvents
 class DLLExport MDWSDescription
 {
 public:  // for the time being
-    /// the string which describes subalgorithm, used to convert source ws to target MD ws. 
+    /// the string which describes subalgorithm, used to convert source ws to target MD ws. At the moment, it coinsides with Q-mode
     std::string AlgID; 
     // the matrix which describes target coordiante system of the workpsace and connected with convert_to_factor;
     Kernel::DblMatrix m_Wtransf; 
@@ -73,7 +73,10 @@ public:  // for the time being
     std::vector<double>      getDimMax()const{return m_DimMax;}
     std::vector<size_t>      getNBins()const{return m_NBins;}
     std::vector<coord_t>     getAddCoord()const{return m_AddCoord;}
+    std::string              getEModeStr()const;
     CnvrtToMD::EModes        getEMode()const{return m_Emode;}
+    std::string              getQMode()const{return AlgID;}
+
 
     void getMinMax(std::vector<double> &min,std::vector<double> &max)const;
     std::vector<double> getTransfMatrix()const{return m_RotMatrix;}
@@ -81,9 +84,7 @@ public:  // for the time being
     ConvToMDPreprocDet const * getDetectors(){return m_DetLoc;}
     ConvToMDPreprocDet const * getDetectors()const{return m_DetLoc;}
 
-
-    API::MatrixWorkspace_const_sptr getInWS()               const{return m_InWS;}
-
+    API::MatrixWorkspace_const_sptr getInWS()                const{return m_InWS;}
     std::string getWSName()                                  const{return m_InWS->name();}
     bool isPowder()                                          const{return !m_InWS->sample().hasOrientedLattice();}
     bool hasLattice()                                        const{return m_InWS->sample().hasOrientedLattice();}

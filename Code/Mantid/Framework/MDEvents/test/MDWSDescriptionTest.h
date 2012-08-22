@@ -16,6 +16,7 @@ public:
   void testBuildFromMatrixWS2D()
   {
     MDWSDescription WSD;
+    TSM_ASSERT("Initial preprocessed detector state should be NULL ",WSD.getDetectors()==NULL);
     // dimensions (min-max) have not been set
     TS_ASSERT_THROWS(WSD.buildFromMatrixWS(ws2D,"|Q|","Direct"),std::invalid_argument);
     std::vector<double> dimMin(2,-1);
@@ -23,6 +24,9 @@ public:
     WSD.setMinMax(dimMin,dimMax);   
     TS_ASSERT_THROWS_NOTHING(WSD.buildFromMatrixWS(ws2D,"|Q|","Direct"));
     TS_ASSERT_EQUALS(2,WSD.nDimensions());
+
+    TSM_ASSERT("initiating from new matix workspace should nullify preprocessed detectors pointer",WSD.getDetectors()==NULL);
+
   }
   void testBuildFromMatrixWS4D()
   {
@@ -39,6 +43,8 @@ public:
     PropNamews[1]="H";
     TS_ASSERT_THROWS_NOTHING(WSD.buildFromMatrixWS(ws2D,"|Q|","Indirect",PropNamews));
     TS_ASSERT_EQUALS(4,WSD.nDimensions());
+
+    TSM_ASSERT("initiating from new matix workspace should nullify preprocessed detectors pointer",WSD.getDetectors()==NULL);
   }
   void testGetWS4DimIDFine()
   {
@@ -62,6 +68,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(TWS.buildFromMatrixWS(ws2D,TWS.AlgID,"Indirect",other_dim_names));
 
+    TSM_ASSERT("initiating from new matix workspace should nullify preprocessed detectors pointer",TWS.getDetectors()==NULL);
     //std::vector<std::string> dimID= TWS.getDefaultDimIDQ3D(1);
     //for(size_t i=0;i<4;i++)
     //{

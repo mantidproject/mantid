@@ -116,12 +116,14 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
   if(m_Emode==CnvrtToMD::Direct||m_Emode==CnvrtToMD::Indir)
     if(isNaN(getEi(m_InWS)))throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
 
-
-
   //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
   m_GoniomMatr = m_InWS->run().getGoniometer().getR();
 
+  // to be on a safe side, the preprocessed detectrod position should be reset at this point as we can initiate old WSDescr class with absolutely new ws;
+  m_DetLoc = NULL;
+
 } 
+
 
 /** the function builds MD event WS description from existing workspace. 
 * Primary used to obtain existing ws parameters 
@@ -151,6 +153,9 @@ void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS
 
   }
   m_Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
+
+  // to be on a safe side, the preprocessed detectrod position should be reset at this point as we can initiate old WSDescr class with absolutely new ws;
+  m_DetLoc = NULL;
 
 }
 /** When the workspace has been build from existing MDWrokspace, some target worskpace parameters can not be defined,
@@ -201,15 +206,13 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
   //TODO: More thorough checks may be nesessary to prevent adding different kind of workspaces e.g 4D |Q|-dE-T-P workspace to Q3d+dE ws
 }
 
-
-
-
 /// empty constructor
 MDWSDescription::MDWSDescription(unsigned int nDimensions):
   m_Wtransf(3,3,true),
   m_GoniomMatr(3,3,true),
   m_RotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
-  m_Emode(CnvrtToMD::Undef)
+  m_Emode(CnvrtToMD::Undef),
+  m_DetLoc(NULL)
 {
 
   this->resizeDimDescriptions(nDimensions);
@@ -253,8 +256,14 @@ void MDWSDescription::getMinMax(std::vector<double> &min,std::vector<double> &ma
   max.assign(m_DimMax.begin(),m_DimMax.end());
 }
 //******************************************************************************************************************************************
-//*************   STATIC HELPER FUNCTIONS
+//*************   HELPER FUNCTIONS
 //******************************************************************************************************************************************
+/** Returns symbolic representation of current Emode */
+std::string MDWSDescription::getEModeStr()const
+{
+  MDTransfDEHelper         deHelper;
+  return deHelper.getEmode(m_Emode);
+}
 /** Helper function to obtain the energy of incident neutrons from the input workspaec
 *
 *@param pHost the pointer to the algorithm to work with

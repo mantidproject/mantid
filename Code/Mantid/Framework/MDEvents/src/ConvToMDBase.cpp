@@ -19,7 +19,15 @@ namespace Mantid
     size_t  ConvToMDBase::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
       m_DetLoc = WSD.getDetectors();
-      m_InWS2D  = WSD.getInWS();
+      m_InWS2D = WSD.getInWS();
+
+      // check if detector information has been precalculated:
+      if(m_DetLoc)
+      {
+        if(!m_DetLoc->isDefined(m_InWS2D))throw(std::logic_error("Detector information has to be precalculated properly before this method is deployed"));
+      }else{
+        throw(std::logic_error("Detector information has to be precalculated before this method is deployed"));
+      }
 
       // set up output MD workspace wrapper
       m_OutWSWrapper = inWSWrapper;
@@ -47,22 +55,21 @@ namespace Mantid
 
       // get property which controls multithreaded run. If present, this property describes number of threads (or one) deployed to run conversion
       // (this can be for debugging or other tricky reasons)
-      Kernel::Property *pProperty = m_InWS2D->run().getProperty("NUM_THREADS");
-      Kernel::PropertyWithValue<int> *thrProperty = dynamic_cast<Kernel::PropertyWithValue<int> *>(pProperty);  
-      if(thrProperty)
+      m_NumThreads = -1;
+      try
       {
-        m_NumThreads = int(*(thrProperty));
+        Kernel::Property *pProperty = m_InWS2D->run().getProperty("NUM_THREADS");
+        Kernel::PropertyWithValue<int> *thrProperty = dynamic_cast<Kernel::PropertyWithValue<int> *>(pProperty);  
+        if(thrProperty)m_NumThreads = int(*(thrProperty));
       }
-      else
-      {
-        m_NumThreads = -1;
-      }
-      
+      catch(Kernel::Exception::NotFoundError &){}
+   
+     
       return n_spectra;
     };  
 
     /** empty default constructor */
-    ConvToMDBase::ConvToMDBase():m_NumThreads(-1)
+    ConvToMDBase::ConvToMDBase():m_NumThreads(-1),m_DetLoc(NULL)
     { }
 
 
