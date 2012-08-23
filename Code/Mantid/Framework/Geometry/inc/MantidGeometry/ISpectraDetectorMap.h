@@ -6,11 +6,15 @@
 //------------------------------------------------------------------------------
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
-#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
+#include <map>
 #include <vector>
 
 namespace Mantid
 {
+  /// Map single det ID of group to its members
+  typedef std::map<detid_t, std::vector<detid_t> > det2group_map;
+
   namespace Geometry
   {
     /**
@@ -69,9 +73,10 @@ namespace Mantid
         typedef std::forward_iterator_tag iterator_category;
 
       public:
-        const_iterator(){}
+        const_iterator() : m_proxy(NULL) {}
         const_iterator(IteratorProxy *itr_proxy)
           : m_proxy(itr_proxy) {}
+        ~const_iterator() { delete m_proxy; }
         const_iterator(const const_iterator & other)
         {
           this->operator=(other);
@@ -141,6 +146,9 @@ namespace Mantid
       virtual std::size_t nSpectra() const = 0;
       /// Clear the map
       virtual void clear() = 0;
+
+      /// Create a map between a single ID & a list of ID having the same spectrum number
+      virtual boost::shared_ptr<det2group_map> createIDGroupsMap() const = 0;
 
       /**@name Iterate over the whole map */
       //@{
