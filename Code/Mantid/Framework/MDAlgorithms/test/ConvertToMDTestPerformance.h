@@ -78,7 +78,7 @@ void test_EventNoUnitsConv()
 
     ConvToMDSelector AlgoSelector;
     pConvMethods = AlgoSelector.convSelector(inWsEv);
-    pConvMethods->initialize(WSD,pTargWS);
+    TS_ASSERT_THROWS_NOTHING(pConvMethods->initialize(WSD,pTargWS));
 
     pMockAlgorithm->resetProgress(numHist);
     //Clock.elapsedCPU();
@@ -205,8 +205,8 @@ Rot(3,3)
    inWsEv->mutableRun().addProperty("Ei",12.,"meV",true);
 
    inWs2D = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(int(numHist), int(nEvents)));
-    // add workspace energy
-    inWs2D->mutableRun().addProperty("Ei",12.,"meV",true);
+   // add workspace energy
+   inWs2D->mutableRun().addProperty("Ei",12.,"meV",true);
 
 
    pMockAlgorithm = std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm>(new WorkspaceCreationHelper::MockAlgorithm(numHist));
@@ -214,8 +214,8 @@ Rot(3,3)
 
    pTargWS = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
 
-    Rot.setRandom(100);
-    Rot.toRotation();
+   Rot.setRandom(100);
+   Rot.toRotation();
 
 
 }

@@ -25,7 +25,8 @@ namespace Mantid
       if(det_dir.empty())return false;
       if(!inputWS)throw(std::invalid_argument("ConvToMDPreprocDet::isDefined function does not work with empty input workspace pointer"));
 
-      if(pBaseInstr !=inputWS->getInstrument()->baseInstrument())return false;
+      //TODO: an rough instrument comparison has to be performed here.
+      //if(pBaseInstr !=inputWS->getInstrument()->baseInstrument())return false;
       return true;
     }
 
