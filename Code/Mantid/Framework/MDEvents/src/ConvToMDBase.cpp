@@ -59,8 +59,29 @@ namespace Mantid
       try
       {
         Kernel::Property *pProperty = m_InWS2D->run().getProperty("NUM_THREADS");
-        Kernel::PropertyWithValue<int> *thrProperty = dynamic_cast<Kernel::PropertyWithValue<int> *>(pProperty);  
-        if(thrProperty)m_NumThreads = int(*(thrProperty));
+        Kernel::PropertyWithValue<double> *thrProperty = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
+        if(thrProperty)
+        {
+          double nDThrheads = double(*(thrProperty));
+          try
+          {
+            m_NumThreads = boost::lexical_cast<int>(nDThrheads);
+            g_Log.information()<<"***--> Changing number of running threads to "<<m_NumThreads<<std::endl;
+            if(m_NumThreads<0)
+            {
+                g_Log.information()<<"*  --> This will reset number of threads to number of physical cores\n ";
+            }
+            else if(m_NumThreads==0)
+            {
+                g_Log.information()<<"*  --> This will disable multithreading\n ";
+            }
+            else if(m_NumThreads>0)
+            {
+                g_Log.information()<<"*  --> Multithreading processing will launch "<<m_NumThreads<<" Threads\n";
+            }
+          }
+          catch(...){};
+        }
       }
       catch(Kernel::Exception::NotFoundError &){}
    
