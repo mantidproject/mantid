@@ -142,6 +142,8 @@ public slots:
   void rebinParamsChanged();
   void dynamicRebinComplete(bool error);
 
+  // Peaks overlay
+  void peakOverlay_toggled(bool);
 
 private:
   void loadSettings();
@@ -243,7 +245,7 @@ private:
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
-    *m_syncRebinMode, *m_syncRebinLock;
+    *m_syncRebinMode, *m_syncRebinLock, *m_syncPeakOverlay;
 
   /// Cached double for infinity
   double m_inf;

@@ -8,7 +8,8 @@
 #include <QDialog>
 #include <QListWidget>
 #include <QStringList>
-
+#include "WidgetDllOption.h"
+#include <string>
 
 namespace MantidQt
 {
@@ -41,14 +42,14 @@ namespace MantidWidgets
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>    
 */
-class SelectWorkspacesDialog : public QDialog
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS SelectWorkspacesDialog : public QDialog
 {
   Q_OBJECT
 
 public:
   
   /// Constructor
-  SelectWorkspacesDialog (QDialog* parent);
+  SelectWorkspacesDialog (QWidget* parent = NULL, const std::string& typeFilter = "");
 
   /// Return the selected names
   QStringList getSelectedNames()const;

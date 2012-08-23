@@ -17,6 +17,7 @@
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
+#include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "qmainwindow.h"
 #include "qmenubar.h"
 #include <iomanip>
@@ -116,12 +117,14 @@ SliceViewer::SliceViewer(QWidget *parent)
   initZoomer();
   ui.btnZoom->hide();
 
+ 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
   QObject::connect(ui.btnClearLine, SIGNAL(clicked()), this, SLOT(clearLine()));
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(setColorScaleAutoFull()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(setColorScaleAutoSlice()));
   QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this, SLOT(rebinParamsChanged()));
+  QObject::connect(ui.btnPeakOverlay, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
 
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
@@ -139,13 +142,14 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_lineOverlay = new LineOverlay(m_plot, m_plot->canvas());
   m_lineOverlay->setShown(false);
 
-  m_peakOverlay = new PeakOverlay(m_plot, m_plot->canvas());
-
   m_overlayWSOutline = new LineOverlay(m_plot, m_lineOverlay);
   m_overlayWSOutline->setShowHandles(false);
   m_overlayWSOutline->setShowLine(false);
   m_overlayWSOutline->setShown(false);
 
+  // -------- Peak Overlay ----------------
+  //m_peakOverlay = new PeakOverlay(m_plot, m_plot->canvas()); //TODO use the peak overlay
+  ui.btnPeakOverlay->setEnabled(true);
 }
 
 //------------------------------------------------------------------------------------
@@ -288,6 +292,13 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(rebinParamsChanged()));
   m_menuView->addAction(action);
   m_actionRefreshRebin = action;
+
+  m_menuView->addSeparator();
+
+  action = new QAction(QPixmap(), "Peak Overlay", this);
+  m_syncPeakOverlay = new SyncedCheckboxes(action, ui.btnPeakOverlay, false);
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
+  m_menuView->addAction(action);
 
   m_menuView->addSeparator();
 
@@ -2039,6 +2050,28 @@ void SliceViewer::dynamicRebinComplete(bool error)
   else
     m_overlayWSOutline->setShown(false);
   this->updateDisplay();
+}
+
+/**
+Event handler for selection/de-selection of peak overlays.
+@param checked : True if peak overlay option is checked.
+*/
+void SliceViewer::peakOverlay_toggled(bool checked)
+{
+  if(checked)
+  {
+    MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace");
+    int ret = dlg.exec();
+    if(ret == QDialog::Accepted)
+    {
+      QStringList list = dlg.getSelectedNames();
+      UNUSED_ARG(list); // TODO, display these peak workspaces.
+    }
+    else
+    {
+      return;
+    }
+  }
 }
 
 } //namespace
