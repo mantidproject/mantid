@@ -38,7 +38,7 @@ void testSpecialConversionTOF()
     TS_ASSERT(!pThisUnit->quickConversion("MomentumTransfer",factor,power));
 }
 
-void testTOFConversionRuns()
+void xestTOFConversionRuns()
 { 
 
     Kernel::Unit_sptr pSourceWSUnit     = Kernel::UnitFactory::Instance().create("Wavelength");
@@ -57,7 +57,7 @@ void testTOFConversionRuns()
 
 
 
-void testConvertFastFromInelasticWS()
+void xestConvertFastFromInelasticWS()
 {
     UnitsConversionHelper Conv;
     MDWSDescription WSD;
@@ -80,7 +80,7 @@ void testConvertFastFromInelasticWS()
      }
 
 }
-void testConvertToTofInelasticWS()
+void xestConvertToTofInelasticWS()
 {
     UnitsConversionHelper Conv;
     MDWSDescription WSD;
