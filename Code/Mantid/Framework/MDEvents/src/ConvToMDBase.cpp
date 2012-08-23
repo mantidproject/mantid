@@ -90,7 +90,7 @@ namespace Mantid
     };  
 
     /** empty default constructor */
-    ConvToMDBase::ConvToMDBase():m_NumThreads(-1),m_DetLoc(NULL)
+    ConvToMDBase::ConvToMDBase():m_DetLoc(NULL),m_NumThreads(-1)
     { }
 
 

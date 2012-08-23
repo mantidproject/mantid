@@ -129,10 +129,10 @@ private:
     unsigned int m_NDims;
     // shared pointer to the source matrix workspace
     API::MatrixWorkspace_const_sptr m_InWS;
-   // pointer to the array of detector's directions in the reciprocal space
-    ConvToMDPreprocDet const * m_DetLoc;
     /// energy transfer analysis mode 
     CnvrtToMD::EModes m_Emode;
+   // pointer to the array of detector's directions in the reciprocal space
+    ConvToMDPreprocDet const * m_DetLoc;
     /// the vector of MD coordinates, which are obtained from workspace properties.
     std::vector<coord_t> m_AddCoord;
     /// the names for the target workspace dimensions and properties of input MD workspace

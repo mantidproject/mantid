@@ -14,7 +14,7 @@ using namespace Mantid::API;
 // TEST HELPER
 class ConvToMDBaseTestHelper : public ConvToMDBase
 {
-  size_t conversionChunk(size_t job_ID){return 0;}
+  size_t conversionChunk(size_t ){return 0;}
 public:
   void runConversion(API::Progress *){};
   int getNumThreads(){return m_NumThreads;}
