@@ -6,7 +6,7 @@ import time
 import sys
 from functools import partial
 from reduction_gui.widgets.base_widget import BaseWidget
-from launch_peak_back_selection_1d import DesignerMainWindow
+#from launch_peak_back_selection_1d import DesignerMainWindow
 
 IS_IN_MANTIDPLOT = False
 try:
@@ -85,11 +85,11 @@ class BaseRefWidget(BaseWidget):
         self.connect(self._summary.data_background_switch, QtCore.SIGNAL("clicked(bool)"), self._data_background_clicked)
         self.connect(self._summary.tof_range_switch, QtCore.SIGNAL("clicked(bool)"), self._tof_range_clicked)
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
-#        self.connect(self._summary.plot_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_x)
-#        self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
+        self.connect(self._summary.plot_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_x)
+        self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
         self.connect(self._summary.norm_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_y)
-#        self.connect(self._summary.norm_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_x)
-#        self.connect(self._summary.norm_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_y_bck)
+        self.connect(self._summary.norm_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_x)
+        self.connect(self._summary.norm_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_y_bck)
         self.connect(self._summary.plot_tof_btn, QtCore.SIGNAL("clicked()"), self._plot_tof)
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
@@ -723,60 +723,47 @@ class BaseRefWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-#        app = QtGui.QApplication(sys.argv)
-        # instantiate the main window
-        
-#        dmw = DesignerMainWindow(self,
-#                                 peakFrom,
-#                                 peakTo,
-#                                 backFrom,
-#                                 backTo,
-#                                 lowresFrom,
-#                                 lowresTo)
-        
-        run_number = self._summary.data_run_number_edit.text()
-        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
-        
-        #range_min = int(min_ctrl.text())
-        #range_max = int(max_ctrl.text())
-            
-        # For REFL, Y is high-res
-        is_pixel_y = True
-        is_high_res = True
-        isPeak = True
-        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
-                                                                      high_res=is_high_res,
-                                                                      instrument=self.short_name,
-                                                                      isPeak=isPeak)
 
-        # for low res
-        is_high_res = False
-        is_pixel_y = False
-        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
-                                                                      high_res=is_high_res,
-                                                                      instrument=self.short_name,
-                                                                      isPeak=isPeak)
-        
-        
-        basename = os.path.basename(f)
-        wk1 = "Peak - " + basename + " - Y pixel "
-        wk2 = "Peak - " + basename + " - X pixel "
-        dmw = DesignerMainWindow(parent=self, wk1=wk1, wk2=wk2, type='data')
-                
-        # show it
-        dmw.show()
-        # start the Qt main loop execution, existing from this script
-        # with the same return code of Qt application
-#        sys.exit(app.exec_())
+#        run_number = self._summary.data_run_number_edit.text()
+#        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
+#        
+#        #range_min = int(min_ctrl.text())
+#        #range_max = int(max_ctrl.text())
+#            
+#        # For REFL, Y is high-res
+#        is_pixel_y = True
+#        is_high_res = True
+#        isPeak = True
+#        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
+#                                                                      high_res=is_high_res,
+#                                                                      instrument=self.short_name,
+#                                                                      isPeak=isPeak)
+#
+#        # for low res
+#        is_high_res = False
+#        is_pixel_y = False
+#        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
+#                                                                      high_res=is_high_res,
+#                                                                      instrument=self.short_name,
+#                                                                      isPeak=isPeak)
+#        
+#        
+#        basename = os.path.basename(f)
+#        wk1 = "Peak - " + basename + " - Y pixel "
+#        wk2 = "Peak - " + basename + " - X pixel "
+#        dmw = DesignerMainWindow(parent=self, wk1=wk1, wk2=wk2, type='data')
+#                
+#        # show it
+#        dmw.show()
+#        # start the Qt main loop execution, existing from this script
+#        # with the same return code of Qt application
+##        sys.exit(app.exec_())
 
-
-
-
-#        min, max = self._integrated_plot(True,
-#                                         self._summary.data_run_number_edit,
-#                                         self._summary.data_peak_from_pixel,
-#                                         self._summary.data_peak_to_pixel,
-#                                         True)
+        min, max = self._integrated_plot(True,
+                                         self._summary.data_run_number_edit,
+                                         self._summary.data_peak_from_pixel,
+                                         self._summary.data_peak_to_pixel,
+                                         True)
 #                
     def _plot_count_vs_y_bck(self):
         """
@@ -785,13 +772,12 @@ class BaseRefWidget(BaseWidget):
             For REFM, this is X
             For REFL, this is Y
         """
-        dmw = DesignerMainWindow(self, 'data')
-        dmw.show()
-#        self._integrated_plot(True,
-#                              self._summary.data_run_number_edit,
-#                              self._summary.data_background_from_pixel1,
-#                              self._summary.data_background_to_pixel1,
-#                              False)
+
+        self._integrated_plot(True,
+                              self._summary.data_run_number_edit,
+                              self._summary.data_background_from_pixel1,
+                              self._summary.data_background_to_pixel1,
+                              False)
         
     def _plot_count_vs_x(self):
         """
@@ -799,68 +785,66 @@ class BaseRefWidget(BaseWidget):
             For REFM, this is Y
             For REFL, this is X
         """
-        dmw = DesignerMainWindow(self, 'data')
-        dmw.show()
-#        min, max = self._integrated_plot(False,
-#                                         self._summary.data_run_number_edit,
-#                                         self._summary.x_min_edit,
-#                                         self._summary.x_max_edit)
+
+        min, max = self._integrated_plot(False,
+                                         self._summary.data_run_number_edit,
+                                         self._summary.x_min_edit,
+                                         self._summary.x_max_edit)
     
     def _norm_count_vs_y(self):
-        run_number = self._summary.norm_run_number_edit.text()
-        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
         
-        #range_min = int(min_ctrl.text())
-        #range_max = int(max_ctrl.text())
-            
-        # For REFL, Y is high-res
-        is_pixel_y = True
-        is_high_res = True
-        isPeak = True
-        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
-                                                                      high_res=is_high_res,
-                                                                      instrument=self.short_name,
-                                                                      isPeak=isPeak)
-
-        # for low res
-        is_high_res = False
-        is_pixel_y = False
-        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
-                                                                      high_res=is_high_res,
-                                                                      instrument=self.short_name,
-                                                                      isPeak=isPeak)
-        
-        
-        basename = os.path.basename(f)
-        wk1 = "Peak - " + basename + " - Y pixel "
-        wk2 = "Peak - " + basename + " - X pixel "
-        dmw = DesignerMainWindow(parent=self, wk1=wk1, wk2=wk2, type='norm')
-                
-        # show it
-        dmw.show()
+#        run_number = self._summary.norm_run_number_edit.text()
+#        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]
+#        
+#        #range_min = int(min_ctrl.text())
+#        #range_max = int(max_ctrl.text())
+#            
+#        # For REFL, Y is high-res
+#        is_pixel_y = True
+#        is_high_res = True
+#        isPeak = True
+#        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
+#                                                                      high_res=is_high_res,
+#                                                                      instrument=self.short_name,
+#                                                                      isPeak=isPeak)
+#
+#        # for low res
+#        is_high_res = False
+#        is_pixel_y = False
+#        min, max = data_manipulation.counts_vs_pixel_distribution(f, is_pixel_y=is_pixel_y,
+#                                                                      high_res=is_high_res,
+#                                                                      instrument=self.short_name,
+#                                                                      isPeak=isPeak)
+#        
+#        
+#        basename = os.path.basename(f)
+#        wk1 = "Peak - " + basename + " - Y pixel "
+#        wk2 = "Peak - " + basename + " - X pixel "
+#        dmw = DesignerMainWindow(parent=self, wk1=wk1, wk2=wk2, type='norm')
+#                
+#        # show it
+#        dmw.show()
 
 #        dmw = DesignerMainWindow(self, 'norm')
 #        dmw.show()
-#        min, max = self._integrated_plot(True, 
-#                                         self._summary.norm_run_number_edit,
-#                                         self._summary.norm_peak_from_pixel,
-#                                         self._summary.norm_peak_to_pixel)
+        min, max = self._integrated_plot(True, 
+                                         self._summary.norm_run_number_edit,
+                                         self._summary.norm_peak_from_pixel,
+                                         self._summary.norm_peak_to_pixel)
 
     def _norm_count_vs_y_bck(self):
-        dmw = DesignerMainWindow(self, 'norm')
-        dmw.show()
-#        self._integrated_plot(True, 
-#                              self._summary.norm_run_number_edit,
-#                              self._summary.norm_background_from_pixel1,
-#                              self._summary.norm_background_to_pixel1)
+
+        self._integrated_plot(True, 
+                              self._summary.norm_run_number_edit,
+                              self._summary.norm_background_from_pixel1,
+                              self._summary.norm_background_to_pixel1)
 
     def _norm_count_vs_x(self):
-        dmw = DesignerMainWindow(self, 'norm')
-        dmw.show()
-#        min, max = self._integrated_plot(False,
-#                                         self._summary.norm_run_number_edit,                              
-#                                         self._summary.norm_x_min_edit,
-#                                         self._summary.norm_x_max_edit)
+
+        min, max = self._integrated_plot(False,
+                                         self._summary.norm_run_number_edit,                              
+                                         self._summary.norm_x_min_edit,
+                                         self._summary.norm_x_max_edit)
 
     def _integrated_plot(self, is_high_res, file_ctrl, min_ctrl, max_ctrl, isPeak=True):
         """

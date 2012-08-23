@@ -37,7 +37,7 @@
         <x>0</x>
         <y>0</y>
         <width>1242</width>
-        <height>1351</height>
+        <height>1371</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -986,6 +986,31 @@ p, li { white-space: pre-wrap; }
                           </property>
                          </spacer>
                         </item>
+                        <item>
+                         <widget class="QPushButton" name="plot_count_vs_y_btn">
+                          <property name="minimumSize">
+                           <size>
+                            <width>150</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>150</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="toolTip">
+                           <string>Plot detector counts versus Y pixel</string>
+                          </property>
+                          <property name="autoFillBackground">
+                           <bool>false</bool>
+                          </property>
+                          <property name="text">
+                           <string>Counts vs y</string>
+                          </property>
+                         </widget>
+                        </item>
                        </layout>
                       </item>
                       <item>
@@ -1196,6 +1221,31 @@ p, li { white-space: pre-wrap; }
                           </property>
                          </spacer>
                         </item>
+                        <item>
+                         <widget class="QPushButton" name="plot_count_vs_y_bck_btn">
+                          <property name="minimumSize">
+                           <size>
+                            <width>150</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>150</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="toolTip">
+                           <string>Plot detector counts versus Y pixel</string>
+                          </property>
+                          <property name="autoFillBackground">
+                           <bool>false</bool>
+                          </property>
+                          <property name="text">
+                           <string>Counts vs y</string>
+                          </property>
+                         </widget>
+                        </item>
                        </layout>
                       </item>
                       <item>
@@ -1385,34 +1435,34 @@ p, li { white-space: pre-wrap; }
                           </property>
                          </spacer>
                         </item>
+                        <item>
+                         <widget class="QPushButton" name="plot_count_vs_x_btn">
+                          <property name="minimumSize">
+                           <size>
+                            <width>150</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>150</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="toolTip">
+                           <string>Plot detector counts versus Y pixel</string>
+                          </property>
+                          <property name="autoFillBackground">
+                           <bool>false</bool>
+                          </property>
+                          <property name="text">
+                           <string>Counts vs x</string>
+                          </property>
+                         </widget>
+                        </item>
                        </layout>
                       </item>
                      </layout>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="plot_count_vs_y_btn">
-                      <property name="minimumSize">
-                       <size>
-                        <width>150</width>
-                        <height>50</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>150</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="toolTip">
-                       <string>Plot detector counts versus Y pixel</string>
-                      </property>
-                      <property name="autoFillBackground">
-                       <bool>false</bool>
-                      </property>
-                      <property name="text">
-                       <string>Data Selection</string>
-                      </property>
-                     </widget>
                     </item>
                    </layout>
                   </item>
@@ -2261,6 +2311,25 @@ p, li { white-space: pre-wrap; }
                           </property>
                          </spacer>
                         </item>
+                        <item>
+                         <widget class="QPushButton" name="norm_count_vs_y_btn">
+                          <property name="minimumSize">
+                           <size>
+                            <width>150</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>150</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>Counts vs y</string>
+                          </property>
+                         </widget>
+                        </item>
                        </layout>
                       </item>
                       <item>
@@ -2545,6 +2614,25 @@ p, li { white-space: pre-wrap; }
                           </property>
                          </spacer>
                         </item>
+                        <item>
+                         <widget class="QPushButton" name="norm_count_vs_y_bck_btn">
+                          <property name="minimumSize">
+                           <size>
+                            <width>150</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>150</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>Counts vs y</string>
+                          </property>
+                         </widget>
+                        </item>
                        </layout>
                       </item>
                       <item>
@@ -2719,28 +2807,28 @@ p, li { white-space: pre-wrap; }
                           </property>
                          </spacer>
                         </item>
+                        <item>
+                         <widget class="QPushButton" name="norm_count_vs_x_btn">
+                          <property name="minimumSize">
+                           <size>
+                            <width>150</width>
+                            <height>0</height>
+                           </size>
+                          </property>
+                          <property name="maximumSize">
+                           <size>
+                            <width>150</width>
+                            <height>16777215</height>
+                           </size>
+                          </property>
+                          <property name="text">
+                           <string>Counts vs x</string>
+                          </property>
+                         </widget>
+                        </item>
                        </layout>
                       </item>
                      </layout>
-                    </item>
-                    <item>
-                     <widget class="QPushButton" name="norm_count_vs_y_btn">
-                      <property name="minimumSize">
-                       <size>
-                        <width>150</width>
-                        <height>50</height>
-                       </size>
-                      </property>
-                      <property name="maximumSize">
-                       <size>
-                        <width>150</width>
-                        <height>16777215</height>
-                       </size>
-                      </property>
-                      <property name="text">
-                       <string>Norm. Selection</string>
-                      </property>
-                     </widget>
                     </item>
                    </layout>
                   </item>
