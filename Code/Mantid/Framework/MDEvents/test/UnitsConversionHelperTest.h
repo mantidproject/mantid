@@ -38,7 +38,7 @@ void testSpecialConversionTOF()
     TS_ASSERT(!pThisUnit->quickConversion("MomentumTransfer",factor,power));
 }
 
-void xestTOFConversionRuns()
+void testTOFConversionRuns()
 { 
 
     Kernel::Unit_sptr pSourceWSUnit     = Kernel::UnitFactory::Instance().create("Wavelength");
@@ -57,7 +57,7 @@ void xestTOFConversionRuns()
 
 
 
-void xestConvertFastFromInelasticWS()
+void testConvertFastFromInelasticWS()
 {
     UnitsConversionHelper Conv;
     MDWSDescription WSD;
@@ -80,7 +80,7 @@ void xestConvertFastFromInelasticWS()
      }
 
 }
-void xestConvertToTofInelasticWS()
+void testConvertToTofInelasticWS()
 {
     UnitsConversionHelper Conv;
     MDWSDescription WSD;
@@ -123,6 +123,7 @@ void xestConvertToTofInelasticWS()
 
      // initialize matrix ws description, to the same number of dimensions as before
      WSD.buildFromMatrixWS(ws2D,"|Q|","Direct");
+     WSD.setDetectors(det_loc);
 
      //initialize Convert back;
      TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"DeltaE"));
