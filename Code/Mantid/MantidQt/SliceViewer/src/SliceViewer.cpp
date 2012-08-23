@@ -1214,13 +1214,20 @@ QwtDoubleInterval SliceViewer::getRange(std::vector<IMDIterator *> iterators)
 /// Find the full range of values in the workspace
 void SliceViewer::findRangeFull()
 {
-  if (!m_ws) return;
+  IMDWorkspace_sptr workspace_used = m_ws;
+  if(m_rebinMode)
+  {
+    workspace_used = this->m_overlayWS;
+  }
+
+  if (!workspace_used) return;
+
   // Acquire a scoped read-only lock on the workspace, preventing it from being written
   // while we iterate through.
-  ReadLock lock(*m_ws);
+  ReadLock lock(*workspace_used);
 
   // Iterate through the entire workspace
-  std::vector<IMDIterator *> iterators = m_ws->createIterators(PARALLEL_GET_MAX_THREADS);
+  std::vector<IMDIterator *> iterators = workspace_used->createIterators(PARALLEL_GET_MAX_THREADS);
   m_colorRangeFull = getRange(iterators);
 }
 
@@ -1230,10 +1237,16 @@ void SliceViewer::findRangeFull()
 part of the workspace */
 void SliceViewer::findRangeSlice()
 {
-  if (!m_ws) return;
+  IMDWorkspace_sptr workspace_used = m_ws;
+  if(m_rebinMode)
+  {
+    workspace_used = this->m_overlayWS;
+  }
+
+  if (!workspace_used) return;
   // Acquire a scoped read-only lock on the workspace, preventing it from being written
   // while we iterate through.
-  ReadLock lock(*m_ws);
+  ReadLock lock(*workspace_used);
 
   m_colorRangeSlice = QwtDoubleInterval(0., 1.0);
 
@@ -1242,8 +1255,8 @@ void SliceViewer::findRangeSlice()
   QwtDoubleInterval yint = m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
 
   // Find the min-max extents in each dimension
-  VMD min(m_ws->getNumDims());
-  VMD max(m_ws->getNumDims());
+  VMD min(workspace_used->getNumDims());
+  VMD max(workspace_used->getNumDims());
   for (size_t d=0; d<m_dimensions.size(); d++)
   {
     DimensionSliceWidget * widget = m_dimWidgets[d];
