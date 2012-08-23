@@ -19,17 +19,16 @@ using namespace Mantid::Geometry;
 using namespace Mantid::MDEvents;
 
 
-
-class ConvToMDUnitsConversionHelperTest : public CxxTest::TestSuite
+class UnitsConversionHelperTest : public CxxTest::TestSuite
 {
    Mantid::API::MatrixWorkspace_sptr ws2D;
    ConvToMDPreprocDet det_loc;
 
 public:
-static ConvToMDUnitsConversionHelperTest *createSuite() {
-    return new ConvToMDUnitsConversionHelperTest(); 
+static UnitsConversionHelperTest *createSuite() {
+    return new UnitsConversionHelperTest(); 
 }
-static void destroySuite(ConvToMDUnitsConversionHelperTest  * suite) { delete suite; }    
+static void destroySuite(UnitsConversionHelperTest  * suite) { delete suite; }    
 
 void testSpecialConversionTOF()
 {
@@ -135,7 +134,7 @@ void testConvertToTofInelasticWS()
 }
 
 
-ConvToMDUnitsConversionHelperTest()
+UnitsConversionHelperTest()
 {
     
    API::FrameworkManager::Instance();

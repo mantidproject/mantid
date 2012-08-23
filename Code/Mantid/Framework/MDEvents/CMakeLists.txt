@@ -156,7 +156,7 @@ set ( TEST_FILES
 	ConvertToReflectometryQTest.h
 	ConvToMDBaseTest.h
 	ConvToMDEventsVSHistoTest.h		
-	ConvToMDUnitsConversionHelperTest.h	
+	UnitsConversionHelperTest.h	
 	CoordTransformAffineParserTest.h
 	CoordTransformAffineTest.h
 	CoordTransformAlignedTest.h
