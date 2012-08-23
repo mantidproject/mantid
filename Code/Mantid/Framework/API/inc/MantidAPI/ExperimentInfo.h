@@ -6,6 +6,7 @@
 #include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -69,6 +70,13 @@ namespace API
 
     /// Replaces current parameter map with copy of given map
     void replaceInstrumentParameters(const Geometry::ParameterMap & pmap);
+
+    /// Cache a lookup of grouped detIDs to member IDs
+    void cacheDetectorGroupings(const det2group_map & mapping);
+    /// Returns the detector IDs that make up the group that this ID is part of
+    const std::vector<detid_t> & getGroupMembers(const detid_t detID) const;
+    /// Get a detector or detector group from an ID
+    Geometry::IDetector_const_sptr getDetectorByID(const detid_t detID) const;
 
     /// Set an object describing the source properties and take ownership
     void setModeratorModel(ModeratorModel *source);
@@ -141,6 +149,9 @@ namespace API
   private:
     /// Save information about a set of detectors to Nexus
     void saveDetectorSetInfoToNexus (::NeXus::File * file, std::vector<detid_t> detIDs ) const;
+
+    /// Detector grouping information
+    det2group_map m_detgroups;
   };
 
   /// Shared pointer to ExperimentInfo

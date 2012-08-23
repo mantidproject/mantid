@@ -894,7 +894,7 @@ namespace Mantid
       if (!spec)
         throw Kernel::Exception::NotFoundError("MatrixWorkspace::getDetector(): NULL spectrum found at the given workspace index.", "");
 
-      const std::set<detid_t> dets = spec->getDetectorIDs();
+      const std::set<detid_t> & dets = spec->getDetectorIDs();
       Instrument_const_sptr localInstrument = getInstrument();
       if( !localInstrument )
       {
@@ -903,8 +903,6 @@ namespace Mantid
       }
 
       const size_t ndets = dets.size();
-      //std::cout << "MatrixWorkspace::getDetector() has " << ndets << std::endl;
-
       if ( ndets == 1 )
       {
         // If only 1 detector for the spectrum number, just return it

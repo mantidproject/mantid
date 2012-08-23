@@ -4,13 +4,13 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/ChopperModel.h"
 #include "MantidAPI/ModeratorModel.h"
-
-#include "MantidKernel/ConfigService.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/NexusTestHelper.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
+
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
@@ -417,6 +417,52 @@ public:
     TS_ASSERT_EQUALS(exptInfo->getEFixed(test_id), test_ef);
   }
 
+  void test_getDetectorByID()
+  {
+    ExperimentInfo_sptr exptInfo(new ExperimentInfo);
+    addInstrumentWithParameter(*exptInfo, "a", "b");
+
+    IDetector_const_sptr det;
+    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
+    TS_ASSERT(det);
+    
+    // Set a mapping
+    std::vector<Mantid::detid_t> group(2, 1);
+    group[1] = 2;
+    Mantid::det2group_map mapping;
+    mapping.insert(std::make_pair(1, group));
+    exptInfo->cacheDetectorGroupings(mapping);
+    
+    TS_ASSERT_THROWS_NOTHING(det = exptInfo->getDetectorByID(1));
+    TS_ASSERT(det);
+    TS_ASSERT(boost::dynamic_pointer_cast<const DetectorGroup>(det));
+  }
+
+  void test_Setting_Group_Lookup_To_Empty_Map_Does_Not_Throw()
+  {
+    ExperimentInfo expt;
+    std::map<Mantid::detid_t, std::vector<Mantid::detid_t>> mappings;
+
+    TS_ASSERT_THROWS_NOTHING(expt.cacheDetectorGroupings(mappings));
+  }
+
+  void test_Getting_Group_Members_For_Unknown_ID_Throws()
+  {
+    ExperimentInfo expt;
+
+    TS_ASSERT_THROWS(expt.getGroupMembers(1), std::runtime_error);
+  }
+
+  void test_Setting_Group_Lookup_To_Non_Empty_Map_Allows_Retrieval_Of_Correct_IDs()
+  {
+    ExperimentInfo expt;
+    std::map<Mantid::detid_t, std::vector<Mantid::detid_t>> mappings;
+    mappings.insert(std::make_pair(1, std::vector<Mantid::detid_t>(1,2)));
+    expt.cacheDetectorGroupings(mappings);
+
+    std::vector<Mantid::detid_t> ids;
+    TS_ASSERT_THROWS_NOTHING(ids = expt.getGroupMembers(1));
+  }
 
   struct fromToEntry
   {

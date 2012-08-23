@@ -348,6 +348,54 @@ namespace API
     this->m_parmap.reset(new ParameterMap(pmap));
   }
 
+  //---------------------------------------------------------------------------------------
+  /**
+   * Caches a lookup for the detector IDs of the members that are part of the same group
+   * Allows much more efficient lookup than going through the SpectraDetectorMap
+   * @param mapping :: A map between a detector ID and the other IDs that are part of the same
+   * group.
+   */
+  void ExperimentInfo::cacheDetectorGroupings(const det2group_map & mapping)
+  {
+    m_detgroups = mapping;
+  }
+
+  //---------------------------------------------------------------------------------------
+  /// Returns the detector IDs that make up the group that this ID is part of
+  const std::vector<detid_t> & ExperimentInfo::getGroupMembers(const detid_t detID) const
+  {
+    auto iter = m_detgroups.find(detID);
+    if(iter != m_detgroups.end())
+    {
+      return iter->second;
+    }
+    else
+    {
+      throw std::runtime_error("ExperimentInfo::getGroupMembers - Unable to find ID " + boost::lexical_cast<std::string>(detID) + " in lookup");
+    }
+  }
+
+  //---------------------------------------------------------------------------------------
+  /**
+   * Get a detector or detector group from an ID
+   * @param detID :: 
+   * @returns A single detector or detector group depending on the mapping set.
+   * @see set
+   */
+  Geometry::IDetector_const_sptr ExperimentInfo::getDetectorByID(const detid_t detID) const
+  {
+    if(m_detgroups.empty())
+    {
+      g_log.debug("No detector mapping cached, getting detector from instrument");
+      return getInstrument()->getDetector(detID);
+    }
+    else
+    {
+      const std::vector<detid_t> & ids = this->getGroupMembers(detID);
+      return getInstrument()->getDetectorG(ids);
+    }
+  }
+
 
   //---------------------------------------------------------------------------------------
 
