@@ -58,7 +58,7 @@ void testInitAndSetNumThreads()
   
   std::string QMode  = WSD.getQMode();
   std::string dEMode = WSD.getEModeStr();
-  ws2D->mutableRun().addProperty("NUM_THREADS",0);
+  ws2D->mutableRun().addProperty("NUM_THREADS",0.);
 
   WSD.buildFromMatrixWS(ws2D,QMode,dEMode);
   this->buildDetInfo(ws2D);
@@ -68,7 +68,7 @@ void testInitAndSetNumThreads()
   ws2D->mutableRun().removeProperty("NUM_THREADS");
 
   // and this should let us run 2 thread program
-  ws2D->mutableRun().addProperty("NUM_THREADS",2);
+  ws2D->mutableRun().addProperty("NUM_THREADS",2.);
   WSD.buildFromMatrixWS(ws2D,QMode,dEMode);
   this->buildDetInfo(ws2D);
 
