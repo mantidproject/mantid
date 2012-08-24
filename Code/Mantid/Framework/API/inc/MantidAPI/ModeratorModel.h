@@ -56,9 +56,9 @@ namespace Mantid
       /// Returns the value of the tilt angle in radians
       double getTiltAngleInRadians() const;
 
-      /// Returns the mean time for emission in seconds
+      /// Returns the mean time for emission in microseconds
       virtual double emissionTimeMean() const = 0;
-      /// Returns the variance of emission time in seconds
+      /// Returns the variance of emission time in microseconds
       virtual double emissionTimeVariance() const = 0;
       /// Returns a time, in seconds, sampled from the distibution given a flat random number
       virtual double sampleTimeDistribution(const double flatRandomNo) const = 0;

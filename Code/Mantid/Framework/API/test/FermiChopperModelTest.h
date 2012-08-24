@@ -53,8 +53,7 @@ public:
     chopper->setAngularVelocityInHz(350);
     chopper->setChopperRadius(155.0/1000.);
 
-    double timeVariance(0.0);
-    TS_ASSERT_THROWS(timeVariance = chopper->pulseTimeVariance(), std::invalid_argument);
+    TS_ASSERT_THROWS(chopper->pulseTimeVariance(), std::invalid_argument);
   }
 
   void test_sampleTimeDistribution_Throws_When_Given_Number_Outside_Zero_To_One()
