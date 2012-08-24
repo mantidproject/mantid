@@ -127,7 +127,7 @@ namespace Mantid
       m_outputWS->getAxis(0)->setUnit(getProperty("UnitX"));
       m_outputWS->setYUnit("SpectraNumber");
 
-      m_progress = boost::shared_ptr<Progress>(new Progress(this,0.5, 1.0, nhistograms));
+      m_progress = boost::shared_ptr<Progress>(new Progress(this,0.5, 0.75, nhistograms));
 
       PARALLEL_FOR1(m_outputWS)
       for(int64_t i = 0; i < static_cast<int64_t>(nhistograms); ++i)
@@ -135,8 +135,16 @@ namespace Mantid
         m_outputWS->setX(i, binBoundaries);
         m_progress->report("Setting X values");
       }
-
       applyDetectorMapping();
+
+
+      // Update the instrument from the file if necessary
+      const std::string detTableFile = getProperty("DetectorTableFilename");
+      if(boost::algorithm::ends_with(detTableFile, ".raw") || boost::algorithm::ends_with(detTableFile, ".RAW") ||
+         boost::algorithm::ends_with(detTableFile, ".nxs") || boost::algorithm::ends_with(detTableFile, ".NXS"))
+      {
+        adjustInstrument(detTableFile);
+      }
     }
 
     /**
@@ -302,7 +310,41 @@ namespace Mantid
         spectrum->addDetectorIDs(iter->second);
         ++wsIndex;
       }
+      m_outputWS->generateSpectraMap();
     }
+
+    /**
+     * Apply any instrument adjustments from the file
+     * @param filename :: The file to take the positions
+     */
+    void CreateSimulationWorkspace::adjustInstrument(const std::string & filename)
+    {
+      // If requested update the instrument to positions in the raw file
+      const Geometry::ParameterMap & pmap = m_outputWS->instrumentParameters();
+      Geometry::Instrument_const_sptr instrument = m_outputWS->getInstrument();
+      boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(instrument->getComponentID(),"det-pos-source");
+      if(!updateDets) return; // No tag, use IDF
+
+      std::string value = updateDets->value<std::string>();
+      if(value.substr(0,8)  == "datafile" )
+      {
+        IAlgorithm_sptr updateInst = createSubAlgorithm("UpdateInstrumentFromFile",0.75,1.0);
+        updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outputWS);
+        updateInst->setPropertyValue("Filename", filename);
+        if(value  == "datafile-ignore-phi" )
+        {
+          updateInst->setProperty("IgnorePhi", true);
+          g_log.information("Detector positions in IDF updated with positions in the data file except for the phi values");
+        }
+        else
+        {
+          g_log.information("Detector positions in IDF updated with positions in the data file");
+        }
+        // We want this to throw if it fails to warn the user that the information is not correct.
+        updateInst->execute();
+      }
+    }
+
 
   } // namespace DataHandling
 } // namespace Mantid
