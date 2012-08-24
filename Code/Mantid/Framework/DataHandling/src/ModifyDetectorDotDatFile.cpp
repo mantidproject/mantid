@@ -122,6 +122,17 @@ namespace DataHandling
     getline( in, str );
     out << str << "\n";
 
+    int i=0;
+
+    // Format details
+    int pOffset = 3; // Precision of Offset
+    int pOther = 5; // Precision of Other floats
+    int wDet = 9; // Field width of Detector ID
+    int wOff = 8; // Field width of Offset
+    int wRad = 10; // Field width of Radius
+    int wCode = 6; // Field width of Code
+    int wAng = 12; // Field width of angles
+
     // Read input file line by line, modify line as necessary and put line into output file
     while( getline( in, str ) ){
 
@@ -146,10 +157,15 @@ namespace DataHandling
           std::streampos width = istr.tellg(); // Amount of string to replace
           // Some experimenting with line manipulation
           std::ostringstream oss;
-          oss <<" "<< detID <<" "<< offset <<" "<< 20.0/7.0 <<"  "<< code <<"  "<< 360.0/7.0 <<"  "<< -400.0/7.0 ;
+          oss  << std::fixed << std::right ;
+          oss.precision(pOffset);
+          oss << std::setw(wDet) << detID << std::setw(wOff) << offset;
+          oss.precision(pOther);
+          oss << std::setw(wRad) << (55.0+i)/6.0 << std::setw(wCode) << code << std::setw(wAng) << (360.0+i)/7.01 << std::setw(wAng) << -(400.0-i)/7.0 ;
           std::string prefix = oss.str();
           std::string suffix = str.substr( width, std::string::npos );
           out << prefix << suffix << "\n";
+          i++;
        } else {
        // We do not modify any other type of line
           out << str << "\n";
