@@ -30,11 +30,6 @@ namespace SliceViewer
     m_opacityMax(1),
     m_opacityMin(0.1)
   {
-    //setAttribute(Qt::WA_TransparentForMouseEvents);
-    // We need mouse events all the time
-    setMouseTracking(true);
-    //setAttribute(Qt::WA_TransparentForMouseEvents);
-    // Make sure mouse propagates
     setAttribute(Qt::WA_NoMousePropagation, false);
   }
     
@@ -45,14 +40,37 @@ namespace SliceViewer
   {
   }
 
-  void PeakOverlay::setPlaneDistance(const double& distance)
+  //----------------------------------------------------------------------------------------------
+  /** Set the distance between the plane and the center of the peak in md coordinates
+
+  ASCII diagram below to demonstrate how dz (distance in z) is used to determine the radius of the sphere-plane intersection at that point,
+  resloves both rx and ry. Also uses the distance to calculate the opacity to apply.
+
+  @param dz : distance from the peak cetner in the md coordinates of the z-axis.
+
+       /---------\
+      /           \
+  ---/---------rx--\---------------- plane
+     |    dz|     /| peak
+     |      |   /  |
+     |      . /    |
+     |             |
+     \             /
+      \           /
+       \---------/
+  */
+  void PeakOverlay::setPlaneDistance(const double& dz)
   {
-    const double distanceSQ = distance * distance;
+    /*
+    Note that this is actually slightly wrong since the distance is in the z-axis, we must scale the distance to the x-axis and
+    y-axis first. However, since the same feature will be applied to each peak radius and each peak opacity, I'm leaving it for the time-being.
+    */
+    const double distanceSQ = dz * dz;
     m_radiusXAtDistance = std::sqrt( (m_radius.x() * m_radius.x()) - distanceSQ );
     m_radiusYAtDistance = std::sqrt( (m_radius.y() * m_radius.y()) - distanceSQ );
 
     // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
-    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius.x()) * distance  + m_opacityMax;
+    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius.x()) * dz  + m_opacityMax;
     m_opacityAtDistance = m_opacityAtDistance >= m_opacityMin ? m_opacityAtDistance : m_opacityMin;
 
     this->update(); //repaint
@@ -87,7 +105,7 @@ namespace SliceViewer
   /// Paint the overlay
   void PeakOverlay::paintEvent(QPaintEvent * /*event*/)
   {
-    // Linear Transform from MD coordinates into Windows/Qt coordinates for ellipse rendering.
+    // Linear Transform from MD coordinates into Windows/Qt coordinates for ellipse rendering. TODO: This can be done outside of paintEvent.
     const int xOrigin = m_plot->transform( QwtPlot::xBottom, m_origin.x() );
     const int yOrigin = m_plot->transform( QwtPlot::yLeft, m_origin.y() );
     const QPointF originWindows(xOrigin, yOrigin);
@@ -107,7 +125,7 @@ namespace SliceViewer
     QPainter painter(this);
     painter.setRenderHint( QPainter::Antialiasing );
 
-    painter.setOpacity(m_opacityAtDistance);
+    painter.setOpacity(m_opacityAtDistance); //Set the pre-calculated opacity
     painter.setBrush(Qt::cyan);
     painter.drawEllipse( originWindows, rx, ry );
 
