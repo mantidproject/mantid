@@ -8,6 +8,7 @@ Modifies an ISIS detector dot data file, so that the detector positions are as i
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/ModifyDetectorDotDatFile.h"
+// #include "MantidDataHandling/LoadDetectorInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/System.h"
@@ -109,16 +110,50 @@ namespace DataHandling
     getline( in, str );
     std::istringstream header2(str);
     header2 >> detectorCount >> numColumns;
-    // check that we have at least 1 detector and five columns
-    if( detectorCount < 1 || numColumns < 5) {
+    out << str << "\n";
+    // check that we have at least 1 detector and six columns
+    if( detectorCount < 1 || numColumns < 6) {
+          out.close();
+          in.close();
           throw Exception::FileError("Incompatible file format found when reading line 2 in the input file", inputFilename);
     }
+
+    // Copy column title line
+    getline( in, str );
     out << str << "\n";
 
     // Read input file line by line, modify line as necessary and put line into output file
     while( getline( in, str ) ){
-       // We do not yet modify
-       out << str << "\n";
+
+       std::istringstream istr(str);
+    
+       int detID;
+       float offset;
+       int code;
+       float dump; // ignored data
+
+       if (str.empty() || str[0] == '#')
+       { // comments and empty lines are allowed and just copied
+           out << str << "\n";
+           continue;
+       }
+
+       // First six columns in the file, the detector ID and a code for the type of detector CODE = 3 (psd gas tube)
+       istr >> detID >> offset >> dump >> code >> dump >> dump;
+
+       if( code == 3 ){
+          // This is detector will look for it in workspace and if found use its position
+          std::streampos width = istr.tellg(); // Amount of string to replace
+          // Some experimenting with line manipulation
+          std::ostringstream oss;
+          oss <<" "<< detID <<" "<< offset <<" "<< 20.0/7.0 <<"  "<< code <<"  "<< 360.0/7.0 <<"  "<< -400.0/7.0 ;
+          std::string prefix = oss.str();
+          std::string suffix = str.substr( width, std::string::npos );
+          out << prefix << suffix << "\n";
+       } else {
+       // We do not modify any other type of line
+          out << str << "\n";
+       }
     }
 
     out.close();
