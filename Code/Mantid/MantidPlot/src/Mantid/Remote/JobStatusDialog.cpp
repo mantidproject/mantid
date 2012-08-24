@@ -21,7 +21,8 @@ JobStatusDialog::JobStatusDialog(const QList <RemoteJob> &jobList, RemoteJobMana
     ui(new Ui::JobStatusDialog),
     m_jobList( jobList),
 
-    m_manager( manager)
+    m_manager( manager),
+    m_displayReady( false)
 {
     ui->setupUi(this);
     ui->tableWidget->horizontalHeader()->setResizeMode( QHeaderView::Stretch);
@@ -48,6 +49,7 @@ void JobStatusDialog::updateDisplay()
 
   if (m_manager->jobStatusAll( jobList, errMsg))
   {
+    sort( jobList.begin(), jobList.end());  // Sorts the list by job id
     vector <RemoteJob>::iterator it = jobList.begin();
     while (it != jobList.end())
     {
@@ -59,6 +61,17 @@ void JobStatusDialog::updateDisplay()
         it++;
     }
 
+    m_displayReady = true;
+  }
+  else
+  {
+      // D'oh!  There was some kind of error querying the jobs.  The
+      // errMsg string should have some kind of explanation.  Display it
+      // in (yet another) dialog box.
+      QMessageBox msgBox;
+      msgBox.setText(tr("Job query failed."));
+      msgBox.setInformativeText( QString::fromStdString( errMsg));
+      msgBox.exec();
   }
 }
 
@@ -143,11 +156,20 @@ void JobStatusDialog::downloadFile( QString jobId)
   // to use QT specific stuff in m_manager.  So, I'm going to close the file
   // that the QTemporaryFile object creates, then re-open it using a standard
   // C++ stream.
-  QTemporaryFile outfile;
-  ofstream outstream;
-  outfile.open();  // The file isn't actually created until open() is called
-  outfile.close();
-  outstream.open( outfile.fileName());
+
+  // Use a temporary file that will end in .nxs (so the file loader algorithm
+  // will recognize it)
+  //QTemporaryFile outfile( QDir::tempPath() + "/workspace.XXXXXX.nxs");
+  //outfile.open();  // The file isn't actually created until open() is called
+  //outfile.close();
+  //ofstream outstream;
+  //outstream.open( outfile.fileName());
+
+  // HACK: Can't use QTemporaryFile because the actual workspace load occurs in another thread
+  // which means the QTemporaryFile object goes out of scope and deletes the file before
+  // the load algorithm has a chance to run.
+  // Using a hard-code output stream for now....
+  ofstream outstream( (QDir::tempPath() + "/downloaded_workspace.nxs").toStdString());
 
   bool fileDownloaded = m_manager->getJobOutput( jobId.toStdString(), outstream);
   outstream.close();
@@ -155,12 +177,11 @@ void JobStatusDialog::downloadFile( QString jobId)
   // This bit was mostly copied from ApplicationWindow::loadDataFile()
   if (fileDownloaded)
   {
-    QFileInfo fnInfo( outfile.fileName());
-    MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(fnInfo.absoluteDir().path());
-
     // Run Load algorithm on file
     QMap<QString,QString> params;
-    params["Filename"] = outfile.fileName();
+    // HACK! See above about the hard-coded file name...
+    //params["Filename"] = outfile.fileName();
+    params["Filename"] = QDir::tempPath() + "/downloaded_workspace.nxs";
     m_mantidUI->executeAlgorithmDlg("Load",params);
   }
   else

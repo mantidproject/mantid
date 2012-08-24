@@ -4,7 +4,7 @@
 #include "SimpleJSON.h"
 
 #include <Poco/Base64Encoder.h>
-#include <Poco/Net/HTTPClientSession.h>
+#include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/URI.h>
@@ -118,7 +118,17 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
 
     // Open an HTTP connection to the cluster
     Poco::URI uri(m_serviceBaseUrl);
-    Poco::Net::HTTPClientSession session( uri.getHost(), uri.getPort());
+    
+    if (uri.getScheme() != "https")
+    {
+      // Disallow unencrypted channels (because we're sending the password in the
+      // HTTP auth header)
+      retString = "Refusing to initiate unencrypted channel.  Only HTTPS URL's are allowed.";
+      return false;
+    }
+    
+    Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+    Poco::Net::HTTPSClientSession session( uri.getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
 
     std::string path = uri.getPathAndQuery();
     // Path should be something like "/mws/rest", append "/jobs" to it.
@@ -222,7 +232,17 @@ bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
 
   // Open an HTTP connection to the cluster
   Poco::URI uri(m_serviceBaseUrl);
-  Poco::Net::HTTPClientSession session( uri.getHost(), uri.getPort());
+  
+  if (uri.getScheme() != "https")
+  {
+    // Disallow unencrypted channels (because we're sending the password in the
+    // HTTP auth header)
+    errMsg = "Refusing to initiate unencrypted channel.  Only HTTPS URL's are allowed.";
+    return false;
+  }
+  
+  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  Poco::Net::HTTPSClientSession session( uri.getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
 
   std::ostringstream path;
   path << uri.getPathAndQuery();
@@ -342,7 +362,16 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
 
   // Open an HTTP connection to the cluster
   Poco::URI uri(m_serviceBaseUrl);
-  Poco::Net::HTTPClientSession session( uri.getHost(), uri.getPort());
+  
+  if (uri.getScheme() != "https")
+  {
+    // Disallow unencrypted channels (because we're sending the password in the
+    // HTTP auth header
+    errMsg = "Refusing to initiate unencrypted channel.  Only HTTPS URL's are allowed.";
+    return false;
+  }
+  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  Poco::Net::HTTPSClientSession session( uri.getHost(), uri.getPort(), context);
 
   std::ostringstream path;
   path << uri.getPathAndQuery();
@@ -486,7 +515,9 @@ bool MwsRemoteJobManager::jobOutputReady( const std::string &jobId)
 
   // Open an HTTP connection to the cluster
   Poco::URI uri(m_serviceBaseUrl);
-  Poco::Net::HTTPClientSession session( uri.getHost(), uri.getPort());
+  
+  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  Poco::Net::HTTPSClientSession session( uri.getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
 
   std::ostringstream path;
   path << uri.getPathAndQuery();
@@ -540,7 +571,9 @@ bool MwsRemoteJobManager::getJobOutput( const std::string &jobId, std::ostream &
 
   // Open an HTTP connection to the cluster
   Poco::URI uri(m_serviceBaseUrl);
-  Poco::Net::HTTPClientSession session( uri.getHost(), uri.getPort());
+  
+  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  Poco::Net::HTTPSClientSession session( uri.getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
 
   std::ostringstream path;
   path << uri.getPathAndQuery();

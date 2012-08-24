@@ -39,6 +39,9 @@ public:
     // At this point, the default copy constructor and assignment operator are valid and
     // useful.  If that changes, we'll either need to explicitly implement them or else
     // declare them private.
+
+    // Allow for sorting based on the job id
+    bool operator< ( const RemoteJob & rval) const { return (m_jobId.compare(rval.m_jobId) < 0); }
     
     std::string m_jobId;            // Returned by RemoteJobManager::submitJob()
     RemoteJobManager *m_manager;    // Pointer to the job manager that was used to submit the job in the first place
