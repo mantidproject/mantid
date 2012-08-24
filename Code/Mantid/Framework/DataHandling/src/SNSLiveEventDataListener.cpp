@@ -200,7 +200,7 @@ namespace DataHandling
   {
 
     // A few counters that we use for logging purposes
-    unsigned eventsPerBank;
+    unsigned eventsPerBank = 0;
     unsigned totalEvents = 0;
 
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
@@ -472,7 +472,7 @@ namespace DataHandling
           // create the property in the workspace - this is a little bit kludgy because
           // the type is specified as a string in the XML, but we pass the actual keyword
           // to the template declaration.  Hense all the if...else if...else stuff...
-          Property *prop;
+          Property *prop = NULL;
           if (pvType == "double")
           {
             prop = new TimeSeriesProperty<double>(pvName);
