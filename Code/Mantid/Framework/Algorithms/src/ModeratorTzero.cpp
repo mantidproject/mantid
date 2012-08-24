@@ -266,7 +266,6 @@ void ModeratorTzero::CalculateTfLi(MatrixWorkspace_sptr inputWS, size_t i, doubl
   }
   catch (Exception::NotFoundError&)
   {
-    g_log.error("Detector "+boost::lexical_cast<std::string>(i)+" not found");
     t_f = TfError;
     return;
   }
