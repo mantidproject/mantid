@@ -89,6 +89,7 @@ endif()
 ###########################################################################
 # Find PyQt & sip
 ###########################################################################
+find_package ( PythonInterp )
 find_package ( PyQt4 REQUIRED )
 find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
