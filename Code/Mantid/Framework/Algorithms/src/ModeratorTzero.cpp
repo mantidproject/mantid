@@ -143,11 +143,11 @@ void ModeratorTzero::exec()
 
   // do the shift in X
   const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
-  //Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
-  //PARALLEL_FOR2(inputWS, outputWS)
+  Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
+  PARALLEL_FOR2(inputWS, outputWS)
   for (size_t i=0; i < numHists; ++i)
   {
-    //PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERUPT_REGION
     double t_f, L_i;
     CalculateTfLi(inputWS, i ,t_f, L_i);
     // shift the time of flights
@@ -169,8 +169,8 @@ void ModeratorTzero::exec()
     //Copy y and e data
     outputWS->dataY(i) = inputWS->dataY(i);
     outputWS->dataE(i) = inputWS->dataE(i);
-    //prog.report();
-    //PARALLEL_END_INTERUPT_REGION
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
@@ -314,7 +314,6 @@ void ModeratorTzero::CalculateTfLi(MatrixWorkspace_sptr inputWS, size_t i, doubl
       t_f = TfError;
     }
   }
-
 } // end of CalculateTf(const MatrixWorkspace_sptr inputWS, size_t i)
 
 } // namespace Algorithms
