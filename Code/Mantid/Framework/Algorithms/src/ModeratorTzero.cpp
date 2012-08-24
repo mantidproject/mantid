@@ -145,11 +145,12 @@ void ModeratorTzero::exec()
   const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
   PARALLEL_FOR2(inputWS, outputWS)
-  for (size_t i=0; i < numHists; ++i)
+  for (int i=0; i < static_cast<int>(numHists); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     double t_f, L_i;
-    CalculateTfLi(inputWS, i ,t_f, L_i);
+    size_t wsIndex = static_cast<size_t>(i);
+    CalculateTfLi(inputWS, wsIndex ,t_f, L_i);
     // shift the time of flights
     if(t_f >= 0) //t_f < 0 when no detector info is available
     {
@@ -228,15 +229,16 @@ void ModeratorTzero::execEvent()
   // Loop over the spectra
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
   PARALLEL_FOR1(outputWS)
-  for (size_t i = 0; i < size_t(numHists); ++i)
+  for (int i = 0; i < static_cast<int>(numHists); ++i)
   {
+    size_t wsIndex = static_cast<size_t>(i);
     PARALLEL_START_INTERUPT_REGION
-    EventList &evlist=outputWS->getEventList(i);
+    EventList &evlist=outputWS->getEventList(wsIndex);
     if( evlist.getNumberEvents() > 0 ) //don't bother with empty lists
     {
       // Calculate the time from sample to detector 'i'
       double t_f, L_i;
-      CalculateTfLi(matrixOutputWS, i, t_f, L_i);
+      CalculateTfLi(matrixOutputWS, wsIndex, t_f, L_i);
       if(t_f >= 0)
       {
         double scaling = L_i/(L_i+m_gradient);
