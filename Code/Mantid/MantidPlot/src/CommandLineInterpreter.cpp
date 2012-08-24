@@ -303,6 +303,20 @@ void CommandLineInterpreter::cut()
   }
 }
 
+/**
+ * Overrides base class to slot. Calls base class and catches
+ * possible cancellation exception
+ */
+void CommandLineInterpreter::saveAs()
+{
+  try
+  {
+    ScriptEditor::saveAs();
+  }
+  catch(ScriptEditor::SaveCancelledException&)
+  {
+  }
+}
 
 /**
  * Display the context menu
@@ -474,7 +488,7 @@ void CommandLineInterpreter::initActions()
   connect(m_paste, SIGNAL(triggered()), this, SLOT(paste()));
 
   m_saveAs = new QAction(tr("Save &As"), this);
-  connect(m_paste, SIGNAL(triggered()), this, SLOT(saveAs()));
+  connect(m_saveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
 
   m_zoomIn = new QAction(("Increase font size"), this);
   // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
