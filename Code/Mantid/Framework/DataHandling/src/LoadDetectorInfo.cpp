@@ -92,7 +92,7 @@ void LoadDetectorInfo::exec()
   m_error = false;
   m_moveDets = getProperty("RelocateDets");
   m_pmap = &(m_workspace->instrumentParameters());
-  m_instrument = m_workspace->getInstrument()->baseInstrument();
+  m_instrument = m_workspace->getInstrument();
 
   if( m_moveDets )
   {
