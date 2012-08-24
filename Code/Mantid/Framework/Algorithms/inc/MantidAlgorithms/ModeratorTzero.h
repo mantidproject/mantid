@@ -79,8 +79,9 @@ public:
 
 private:
   //conversion constants applicable to histogram and event workspaces
-  double scaling;
-  double intercept;
+  double m_gradient;
+  double m_intercept;
+  Mantid::Geometry::Instrument_const_sptr m_instrument;
   // Sets documentation strings for this algorithm
   virtual void initDocs();
   // Initialisation code
@@ -89,8 +90,8 @@ private:
   void exec();
   // Execution code for event workspace
   void execEvent();
-  // Calculate time from sample to detector 'i'
-  double CalculateTf(Mantid::Geometry::IObjComponent_const_sptr sample, Mantid::API::MatrixWorkspace_sptr inputWS, int64_t i);
+  // Calculate time from sample to detector and initial flight path
+  void CalculateTfLi(Mantid::API::MatrixWorkspace_sptr inputWS, size_t i, double &t_f, double &L_i);
 
 };
 

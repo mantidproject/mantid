@@ -29,6 +29,7 @@ This algorithm will replace TOF with TOF' = TOF-t_0 = t_i+t_f
      t_0 = a/v_i+b   a and b are constants derived from the aforementioned heuristic formula.
                      a=gradient*3.956E-03, [a]=meter,    b=intercept, [b]=microsec
      Putting all together:  TOF' = (L_i/(L_i+a))*(TOF-t_f-b) + t_f,   [TOF']=microsec
+     If the detector is a monitor, then we set t_f=0 since there is no sample, and L_i the distance from moderator to monitor
 *WIKI*/
 
 //----------------------------------------------------------------------
@@ -39,6 +40,8 @@ This algorithm will replace TOF with TOF' = TOF-t_0 = t_i+t_f
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/UnitFactory.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
@@ -82,13 +85,13 @@ void ModeratorTzero::exec()
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   //Get a pointer to the instrument contained in the workspace
-  Instrument_const_sptr instrument = inputWS->getInstrument();
+  m_instrument = inputWS->getInstrument();
 
   //deltaE-mode (should be "indirect")
   std::string Emode;
   try
   {
-    Emode = instrument->getStringParameter("deltaE-mode")[0];
+    Emode = m_instrument->getStringParameter("deltaE-mode")[0];
     g_log.debug() << "Instrument Geometry: " << Emode << std::endl;
     if(Emode != "indirect")
     {
@@ -102,37 +105,20 @@ void ModeratorTzero::exec()
   }
 
   //gradient, intercept constants
-  double gradient;
   try
   {
-    gradient = instrument->getNumberParameter("Moderator.TimeZero.gradient")[0]; //[gradient]=microsecond/Angstrom
+    m_gradient = m_instrument->getNumberParameter("Moderator.TimeZero.gradient")[0]; //[gradient]=microsecond/Angstrom
     //conversion factor for gradient from microsecond/Angstrom to meters
     double convfactor = 1e+4*PhysicalConstants::h/PhysicalConstants::NeutronMass;
-    gradient *= convfactor; //[gradient] = meter
-    this->intercept = instrument->getNumberParameter("Moderator.TimeZero.intercept")[0]; //[intercept]=microsecond
-    g_log.debug() << "Moderator Time Zero: gradient=" << gradient << "intercept=" << this->intercept << std::endl;
+    m_gradient *= convfactor; //[gradient] = meter
+    m_intercept = m_instrument->getNumberParameter("Moderator.TimeZero.intercept")[0]; //[intercept]=microsecond
+    g_log.debug() << "Moderator Time Zero: gradient=" << m_gradient << "intercept=" << m_intercept << std::endl;
   }
   catch (Exception::NotFoundError &)
   {
     g_log.error("Unable to retrieve Moderator Time Zero parameters (gradient and intercept)");
     throw Exception::InstrumentDefinitionError("Unable to retrieve Moderator Time Zero parameters (gradient and intercept)", inputWS->getTitle());
   }
-
-  //distance L_i between source and sample ([Li]=meters). Calculate scaling
-  IObjComponent_const_sptr source = instrument->getSource();
-  IObjComponent_const_sptr sample = instrument->getSample();
-  double L_i;
-  try
-  {
-    L_i = source->getDistance(*sample);
-    g_log.debug() << "Source-sample distance: " << L_i << std::endl;
-  }
-  catch (Exception::NotFoundError &)
-  {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
-  }
-  this->scaling = L_i/(L_i+gradient);
 
   //Run execEvent if eventWorkSpace
   EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
@@ -156,26 +142,25 @@ void ModeratorTzero::exec()
   }
 
   // do the shift in X
-  const int64_t numHists = static_cast<int64_t>(inputWS->getNumberHistograms());
-  Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
-  PARALLEL_FOR2(inputWS, outputWS)
-  for (int64_t i=0; i < numHists; ++i)
+  const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
+  //Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
+  //PARALLEL_FOR2(inputWS, outputWS)
+  for (size_t i=0; i < numHists; ++i)
   {
-    PARALLEL_START_INTERUPT_REGION
-    // Calculate the time t_f from sample to detector 'i'
-    double t_f = CalculateTf(sample,inputWS,i);
+    //PARALLEL_START_INTERUPT_REGION
+    double t_f, L_i;
+    CalculateTfLi(inputWS, i ,t_f, L_i);
     // shift the time of flights
-    if(t_f > 0) //t_f < 0 when no detector info is available
+    if(t_f >= 0) //t_f < 0 when no detector info is available
     {
-      double offset = (1-this->scaling)*t_f - this->scaling*this->intercept;;
+      double scaling = L_i/(L_i+m_gradient);
+      double offset = (1-scaling)*t_f - scaling*m_intercept;
       MantidVec &inbins = inputWS->dataX(i);
       MantidVec &outbins = outputWS->dataX(i);
       for(unsigned int j=0; j < inbins.size(); j++)
       {
-        outbins[j] = this->scaling*inbins[j] + offset;
+        outbins[j] = scaling*inbins[j] + offset;
       }
-      //g_log.debug() << "inbins[0]=" << inbins[0] << " outbins[0]=" << outbins[0] << std::endl;
-      //g_log.debug() << "inbins[last] " << inbins[inbins.size()-1] << " outbins[last]" << outbins[inbins.size()-1] << std::endl;
     }
     else
     {
@@ -184,8 +169,8 @@ void ModeratorTzero::exec()
     //Copy y and e data
     outputWS->dataY(i) = inputWS->dataY(i);
     outputWS->dataE(i) = inputWS->dataE(i);
-    prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    //prog.report();
+    //PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
@@ -217,7 +202,7 @@ void ModeratorTzero::execEvent()
   EventWorkspace_const_sptr inputWS= boost::dynamic_pointer_cast<const EventWorkspace>(matrixInputWS);
 
   // generate the output workspace pointer
-  const int64_t numHists = static_cast<int64_t>(inputWS->getNumberHistograms());
+  const size_t numHists = static_cast<size_t>(inputWS->getNumberHistograms());
   Mantid::API::MatrixWorkspace_sptr matrixOutputWS = getProperty("OutputWorkspace");
   EventWorkspace_sptr outputWS;
   if (matrixOutputWS == matrixInputWS)
@@ -243,21 +228,20 @@ void ModeratorTzero::execEvent()
   // Loop over the spectra
   Progress prog(this,0.0,1.0,numHists); //report progress of algorithm
   PARALLEL_FOR1(outputWS)
-  for (int64_t i = 0; i < int64_t(numHists); ++i)
+  for (size_t i = 0; i < size_t(numHists); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     EventList &evlist=outputWS->getEventList(i);
     if( evlist.getNumberEvents() > 0 ) //don't bother with empty lists
     {
       // Calculate the time from sample to detector 'i'
-      double t_f = CalculateTf(sample,matrixOutputWS,i);
-      if(t_f > 0)
+      double t_f, L_i;
+      CalculateTfLi(matrixOutputWS, i, t_f, L_i);
+      if(t_f >= 0)
       {
+        double scaling = L_i/(L_i+m_gradient);
         //Calculate new time of flight, TOF'=scaling*(TOF-t_f-intercept)+t_f = scaling*TOF + (1-scaling)*t_f - scaling*intercept
-        //g_log.debug() << "dataX before: "<< evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
-        evlist.convertTof(this->scaling, (1-this->scaling)*t_f - this->scaling*intercept);
-        //g_log.debug() << this->scaling << " " << (1-this->scaling)*t_f - this->scaling*intercept << std::endl;
-        //g_log.debug() << "dataX after: "<< evlist.dataX()[0] << " " << evlist.dataX()[1] << std::endl;
+        evlist.convertTof(scaling, (1-scaling)*t_f - scaling*m_intercept);
       }
     }
     prog.report();
@@ -267,12 +251,14 @@ void ModeratorTzero::execEvent()
       outputWS->clearMRU(); // Clears the Most Recent Used lists */
 } // end of void ModeratorTzero::execEvent()
 
-//calculate time from sample to detector. Determined only by detector specs
-double ModeratorTzero::CalculateTf(IObjComponent_const_sptr sample, MatrixWorkspace_sptr inputWS, int64_t i)
+//calculate time from sample to detector
+void ModeratorTzero::CalculateTfLi(MatrixWorkspace_sptr inputWS, size_t i, double &t_f, double &L_i)
 {
   static const double convFact = 1.0e-6*sqrt(2*PhysicalConstants::meV/PhysicalConstants::NeutronMass);
   static const double TfError = -1.0; //signal error when calculating final time
   // Get detector position
+  if (i==5761)
+    std::cout << "i=" << i << std::endl;
   IDetector_const_sptr det;
   try
   {
@@ -280,39 +266,56 @@ double ModeratorTzero::CalculateTf(IObjComponent_const_sptr sample, MatrixWorksp
   }
   catch (Exception::NotFoundError&)
   {
-    g_log.error("Detector not found");
-    return TfError;
+    g_log.error("Detector "+boost::lexical_cast<std::string>(i)+" not found");
+    t_f = TfError;
+    return;
   }
 
-  // Get final energy E_f, final velocity v_f
-  double t_f;
-  std::vector< double >  wsProp=det->getNumberParameter("Efixed");
-  if ( !wsProp.empty() )
+  if( det->isMonitor() )
   {
-    double E_f = wsProp.at(0); //[E_f]=meV
-    double v_f = convFact * sqrt(E_f); //[v_f]=meter/microsec
-    //g_log.debug() << "detector: " << i << " E_f:="<< E_f << " v_f=" << v_f << std::endl;
-    //obtain L_f, calculate t_f
-    double L_f;
-    try
-    {
-      L_f = det->getDistance(*sample);
-      t_f = L_f / v_f;
-      //g_log.debug() << "detector: " << i << " L_f=" << L_f << " t_f=" << t_f << std::endl;
-    }
-    catch (Exception::NotFoundError &)
-    {
-      g_log.error("Unable to calculate detector-sample distance");
-      throw Exception::InstrumentDefinitionError("Unable to calculate detector-sample distance", inputWS->getTitle());
-    }
+    L_i = m_instrument->getSource()->getDistance(*det);
+    t_f = 0.0; //t_f=0.0 since there is no sample to detector path
   }
   else
   {
-    g_log.debug() <<"Efixed not found for detector "<< i << std::endl;
-    return TfError;
+    IObjComponent_const_sptr sample = m_instrument->getSample();
+    try
+    {
+      L_i = m_instrument->getSource()->getDistance(*sample);
+    }
+    catch (Exception::NotFoundError &)
+    {
+      g_log.error("Unable to calculate source-sample distance");
+      throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWS->getTitle());
+    }
+    // Get final energy E_f, final velocity v_f
+    std::vector< double >  wsProp=det->getNumberParameter("Efixed");
+    if ( !wsProp.empty() )
+    {
+      double E_f = wsProp.at(0); //[E_f]=meV
+      double v_f = convFact * sqrt(E_f); //[v_f]=meter/microsec
+      //obtain L_f, calculate t_f
+      double L_f;
+      try
+      {
+        L_f = det->getDistance(*sample);
+        t_f = L_f / v_f;
+        //g_log.debug() << "detector: " << i << " L_f=" << L_f << " t_f=" << t_f << std::endl;
+      }
+      catch (Exception::NotFoundError &)
+      {
+        g_log.error("Unable to calculate detector-sample distance");
+        throw Exception::InstrumentDefinitionError("Unable to calculate detector-sample distance", inputWS->getTitle());
+      }
+    }
+    else
+    {
+      g_log.debug() <<"Efixed not found for detector "<< i << std::endl;
+      t_f = TfError;
+    }
   }
-  return t_f;
-} // end of CalculateTf(const MatrixWorkspace_sptr inputWS, int64_t i)
+
+} // end of CalculateTf(const MatrixWorkspace_sptr inputWS, size_t i)
 
 } // namespace Algorithms
 } // namespace Mantid

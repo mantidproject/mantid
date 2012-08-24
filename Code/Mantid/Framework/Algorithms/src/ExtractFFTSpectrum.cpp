@@ -1,7 +1,6 @@
-/*WIKI* 
+/*WIKI* This algorithm iterates the [[FFT]] algorithm on each spectrum of InputWorkspace, computing the Fourier Transform and storing the transformed spectrum in OutputWorkspace. If InputImagWorkspace is also passed, then the pair spectrum ''i'' of InputWorkspace (real) and spectrum ''i'' of InputImagWorkspace (real) are taken together as spectrum ''i'' of a complex workspace, on which [[FFT]] is applied.
 
-
-
+The FFTPart parameter specifies which spectra is selected from the output of the [[FFT]] algorithm. Allowed values are: 3 - the real part of the transform, 4 - the imaginary part, 5 - the modulus. Values 0,1, and 2 repeat the spectra for values 3,4, and 5 respectively, but for the positive frequencies only. Consult the [[FFT]] for more details.
 *WIKI*/
 //----------------------------------------------------------------------
 // Includes
