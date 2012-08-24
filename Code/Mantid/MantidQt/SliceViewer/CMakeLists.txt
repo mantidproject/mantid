@@ -62,11 +62,7 @@ set ( TEST_PY_FILES
 	test/QwtTypesPythonInterfaceTest.py
 )
 
-
 include_directories ( inc )
-include_directories ( ../../QtPropertyBrowser/src )
-include_directories ( ../MantidWidgets/inc )
-
 
 ###########################################################################
 # Main Library Target
@@ -90,67 +86,19 @@ add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
 add_library ( MantidQtSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtSliceViewer MantidQtAPI MantidWidgets QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
-
-###########################################################################
-# DEMO/GUI TESTING APPLICATIONS
-###########################################################################
-
-if ( WIN32 )
-# Does not work on windows for some reason
-else ()
-
-add_executable ( ColorBarWidgetDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/main_ColorBarWidgetDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
-target_link_libraries ( ColorBarWidgetDemo MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
-
-
-include_directories ( ../../Framework/MDEvents/inc )
-include_directories ( ../../Framework/DataObjects/inc )
-include_directories ( ../../Framework/Algorithms/inc )
-include_directories ( ../../Framework/API/inc )
-include_directories ( ../../Framework/DataHandling/inc )
-include_directories ( ../../Framework/TestHelpers/inc )
-include_directories ( ../../Framework/Geometry/inc )
-
-# Extra, optional targets for demoing GUI elements
-add_executable ( SliceViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_SliceViewerDemo.cpp  
-                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-target_link_libraries ( SliceViewerDemo 
-                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
-                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
-
-add_executable ( SliceViewerWindowDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_SliceViewerWindowDemo.cpp  
-                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-target_link_libraries ( SliceViewerWindowDemo 
-                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
-                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
-
-add_executable ( LineViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_LineViewerDemo.cpp  
-                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-target_link_libraries ( LineViewerDemo 
-                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
-                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
-                       
-endif ()
+target_link_libraries ( MantidQtSliceViewer MantidQtAPI MantidWidgets ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # Unit tests setup
 ###########################################################################
 
-# Check system version
-if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
-  	# This is RHEL5. GUI tests hang on this platform for some reason
-  	message ( "RHEL5 hangs on GUI tests. Disabling MantidQt SliceViewer python tests." )
-else ()
-
-	if ( PYUNITTEST_FOUND )
-	  pyunittest_add_test ( SliceViewerMantidPlotTest.py ${TEST_PY_FILES} "" )
-	  add_dependencies ( SliceViewerMantidPlotTest.py MantidQtAPI MantidWidgets CustomDialogs 
-	                     CustomInterfaces MantidQtSliceViewer Algorithms )
-	  add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
-	  # Add to the 'UnitTests' group in VS
-	  set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )
-	endif ()
+if ( PYUNITTEST_FOUND )
+	pyunittest_add_test ( SliceViewerMantidPlotTest.py ${TEST_PY_FILES} "" )
+	add_dependencies ( SliceViewerMantidPlotTest.py MantidQtAPI MantidWidgets CustomDialogs 
+	                   CustomInterfaces MantidQtSliceViewer Algorithms )
+	add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
+	# Add to the 'UnitTests' group in VS
+	set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )
 endif ()
 
 ###########################################################################

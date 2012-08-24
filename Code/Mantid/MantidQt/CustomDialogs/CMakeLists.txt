@@ -48,9 +48,6 @@ set ( UI_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
 )
 
 include_directories ( inc )
-include_directories ( ../MantidWidgets/inc )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MantidWidgets )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../API )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 

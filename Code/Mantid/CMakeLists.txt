@@ -87,6 +87,13 @@ if( QWT_VERSION VERSION_LESS 5.0 OR QWT_VERSION VERSION_EQUAL 6.0 OR
 endif() 
 
 ###########################################################################
+# Find PyQt & sip
+###########################################################################
+find_package ( PyQt4 REQUIRED )
+find_package ( SIP REQUIRED )
+separate_arguments ( PYQT4_SIP_FLAGS )
+
+###########################################################################
 # Add QtPropertyBrowser to build
 ###########################################################################
 add_subdirectory ( QtPropertyBrowser )
@@ -108,12 +115,12 @@ add_dependencies ( check GUITests )
 
 add_subdirectory ( MantidQt )
 
-include_directories ( QtPropertyBrowser/src )
-include_directories ( MantidQt/API/inc )
-include_directories ( MantidQt/MantidWidgets/inc )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/API )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/MantidWidgets )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/SliceViewer )
+#include_directories ( QtPropertyBrowser/src )
+#include_directories ( MantidQt/API/inc )
+#include_directories ( MantidQt/MantidWidgets/inc )
+#include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/API )
+#include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/MantidWidgets )
+#include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/SliceViewer )
 
 if ( UNIX )
   #Experimental feature. Unix only at this point.

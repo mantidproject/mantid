@@ -90,8 +90,6 @@ set ( UI_FILES
     inc/MantidQtMantidWidgets/UserFunctionDialog.ui
 )
 
-
-include_directories ( inc )
 include_directories ( ../../QtPropertyBrowser/src )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
@@ -99,7 +97,6 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
 find_package ( QScintilla REQUIRED )
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )

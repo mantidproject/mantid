@@ -5,6 +5,7 @@ set( PROJECT_NAME VatesSimpleGui )
 # Setup the include locations.
 include_directories(
   inc
+  ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${CMAKE_CURRENT_BINARY_DIR}/../ViewWidgets

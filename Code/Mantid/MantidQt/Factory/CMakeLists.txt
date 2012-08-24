@@ -19,7 +19,6 @@ set ( TEST_FILES
 
 include_directories ( inc )
 include_directories ( ../SliceViewer/inc )
-include_directories ( ../MantidWidgets/inc )
 
 ###########################################################################
 # Main Library Target
@@ -41,7 +40,7 @@ add_definitions ( -DIN_MANTIDQT_FACTORY )
 add_library ( MantidQtFactory ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtFactory MantidQtAPI QtPropertyBrowser MantidQtSliceViewer ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( MantidQtFactory MantidQtAPI MantidQtSliceViewer ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # Installation settings
