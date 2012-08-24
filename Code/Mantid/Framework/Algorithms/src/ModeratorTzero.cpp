@@ -259,8 +259,6 @@ void ModeratorTzero::CalculateTfLi(MatrixWorkspace_sptr inputWS, size_t i, doubl
   static const double convFact = 1.0e-6*sqrt(2*PhysicalConstants::meV/PhysicalConstants::NeutronMass);
   static const double TfError = -1.0; //signal error when calculating final time
   // Get detector position
-  if (i==5761)
-    std::cout << "i=" << i << std::endl;
   IDetector_const_sptr det;
   try
   {
