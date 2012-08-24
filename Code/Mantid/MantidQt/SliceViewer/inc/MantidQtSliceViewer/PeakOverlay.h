@@ -7,9 +7,8 @@
 #include <QtCore/QtCore>
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
-#include <qwt_plot_spectrogram.h>
 #include <qpainter.h>
-
+#include "MantidQtSliceViewer/PeakOverlayView.h"
 
 
 namespace MantidQt
@@ -17,7 +16,7 @@ namespace MantidQt
 namespace SliceViewer
 {
 
-  /** GUI for overlaying a peak ellipse on the plot.
+  /** Widget representing a peak ellipse on the plot.
     
     @date 2012-08-22
 
@@ -41,7 +40,7 @@ namespace SliceViewer
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlay : public QWidget
+  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlay : public QWidget, public PeakOverlayView
   {
     Q_OBJECT
 
@@ -55,9 +54,6 @@ namespace SliceViewer
     /// Get the origin. md x, md y
     const QPointF & getOrigin() const;
     double getRadius() const;
-
-  signals:
-    
 
   private:
 

@@ -147,8 +147,8 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_overlayWSOutline->setShowLine(false);
   m_overlayWSOutline->setShown(false);
   // -------- Peak Overlay ----------------
-  m_peakOverlay = new PeakOverlay(m_plot, m_plot->canvas(), QPointF(0.5,0.5), QPointF(0.1, 0.2)); //TODO use the peak overlay
-  m_peakOverlay->setPlaneDistance(0);
+  //PeakOverlay* m_peakOverlay = new PeakOverlay(m_plot, m_plot->canvas(), QPointF(0.5,0.5), QPointF(0.1, 0.2)); //TODO use the peak overlay
+  //m_peakOverlay->setPlaneDistance(0);
   ui.btnPeakOverlay->setEnabled(true);
 }
 

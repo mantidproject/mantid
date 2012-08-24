@@ -5,6 +5,8 @@ set ( SRC_FILES
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
     src/PeakOverlay.cpp
+    src/PeakOverlayFactory.cpp
+    src/PeaksPresenter.cpp
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
@@ -23,6 +25,10 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
     inc/MantidQtSliceViewer/PeakOverlay.h
+    inc/MantidQtSliceViewer/PeakOverlayView.h
+    inc/MantidQtSliceViewer/PeakOverlayViewFactory.h
+    inc/MantidQtSliceViewer/PeakOverlayFactory.h
+    inc/MantidQtSliceViewer/PeaksPresenter.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
@@ -54,6 +60,10 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/ColorBarWidget.ui
 	inc/MantidQtSliceViewer/SnapToGridDialog.ui
 	inc/MantidQtSliceViewer/XYLimitsDialog.ui
+)
+
+set ( TEST_FILES
+    test/PeaksPresenterTest.h
 )
 
 # Python unit tests
@@ -99,6 +109,26 @@ if ( PYUNITTEST_FOUND )
 	add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
 	# Add to the 'UnitTests' group in VS
 	set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )
+endif ()
+
+if ( CXXTEST_FOUND )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+
+  include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc )
+
+  set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp 
+  ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp   
+  )
+
+  if ( GMOCK_FOUND AND GTEST_FOUND )
+    cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
+    target_link_libraries( SliceViewerTest MantidQtSliceViewer DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+
+    add_dependencies( GUITests SliceViewerTest )
+    # Add to the 'UnitTests' group in VS
+    set_property( TARGET SliceViewerTest PROPERTY FOLDER "UnitTests" )
+  endif ()
+
 endif ()
 
 ###########################################################################
