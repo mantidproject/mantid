@@ -69,16 +69,12 @@ namespace Mantid
       void init();
       /// Overwrites Algorithm method
       void exec();
+      /// Set the detector position from the calibration table
+      void setDetectorPosition(const Geometry::Instrument_const_sptr & instrument, const int detID,
+                               Mantid::Kernel::V3D pos, bool sameParent );
 
-      /// Assumes the file is a raw file
-      //void updateFromRaw(boost::shared_ptr<Geometry::Instrument> instrument, 
-      //  const std::string & filename);
-      /// Assumes the file is an ISIS NeXus file
-      //void updateFromNeXus(boost::shared_ptr<Geometry::Instrument> instrument, 
-      //  const std::string & filename);
-      /// Set the new detector positions
-      void setDetectorPosition(API::MatrixWorkspace_sptr Ws, boost::shared_ptr<Geometry::Instrument> instrument,
-        int detID, Mantid::Kernel::V3D pos, bool sameParent );
+      /// A pointer to the parameter map being modified
+      Geometry::ParameterMap *m_pmap;
     };
 
   } // namespace Algorithms

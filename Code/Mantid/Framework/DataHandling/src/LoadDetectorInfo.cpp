@@ -42,7 +42,7 @@ const LoadDetectorInfo::detectDatForm
 LoadDetectorInfo::LoadDetectorInfo() 
   : Algorithm(), m_workspace(), m_numHists(-1), m_monitors(),
     m_monitorXs(), m_commonXs(false), m_monitOffset(UNSETOFFSET), m_error(false),
-    m_FracCompl(0.0), m_moveDets(false), m_samplePos(), m_baseInstrument()
+    m_FracCompl(0.0), m_moveDets(false), m_samplePos(), m_pmap(NULL), m_instrument()
 {
 }
 
@@ -91,7 +91,9 @@ void LoadDetectorInfo::exec()
   m_monitOffset = UNSETOFFSET;
   m_error = false;
   m_moveDets = getProperty("RelocateDets");
-  m_baseInstrument = m_workspace->getInstrument()->baseInstrument();
+  m_pmap = &(m_workspace->instrumentParameters());
+  m_instrument = m_workspace->getInstrument()->baseInstrument();
+
   if( m_moveDets )
   {
     Geometry::IObjComponent_const_sptr sample = m_workspace->getInstrument()->getSample();
@@ -120,8 +122,11 @@ void LoadDetectorInfo::exec()
 
   if (m_error)
   {
-    g_log.warning() << "Note workspace " << getPropertyValue("Workspace") << " has been changed so if you intend to fix detector mismatch problems by running " << name() << " on this workspace again is likely to corrupt it" << std::endl;
+    g_log.warning() << "Note workspace " << getPropertyValue("Workspace") << " has been changed so if you intend to fix detector mismatch problems by running "
+                    << name() << " on this workspace again is likely to corrupt it" << std::endl;
   }
+  m_pmap = NULL; // Only valid for execution
+  m_instrument.reset(); // Get rid of parameterized instrument reference promptly
 }
 
 /** Reads detector information from a .dat file, the file contains one line per detector
@@ -413,21 +418,11 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
 */
 void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInfo &change)
 {
-  Geometry::IDetector_sptr det;
-  try
-  {
-    det = boost::const_pointer_cast<IDetector>(m_baseInstrument->getDetector(params.detID));
-  }
-  catch( std::runtime_error &e)
-  {
-    throw Exception::NotFoundError(e.what(), params.detID);
-  }
-
-  Geometry::ParameterMap &pmap = m_workspace->instrumentParameters();
+  Geometry::IDetector_const_sptr det = m_instrument->getDetector(params.detID);
   // Set the detectors pressure.
-  pmap.addDouble(det->getComponentID(), "3He(atm)", params.pressure);
+  m_pmap->addDouble(det->getComponentID(), "3He(atm)", params.pressure);
   // Set the wall thickness
-  pmap.addDouble(det->getComponentID(), "wallT(m)", params.wallThick);
+  m_pmap->addDouble(det->getComponentID(), "wallT(m)", params.wallThick);
 
   // If we have a l2, theta and phi. Update the postion if required
   if( m_moveDets && 
@@ -446,15 +441,15 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
       rot.inverse();
       rot.rotate(newPos);
     }
-    det->setPos(newPos);
+    m_pmap->addV3D(det->getComponentID(),"pos",newPos);
   }
 
 
-  // this operation has been successful if we are here, the following infomation is usefull for logging
+  // this operation has been successful if we are here, the following information is useful for logging
   change = params;
 }
 
-/** Decides if the bin boundaries for all non-monitor spectra will be the same and runs the appropiate
+/** Decides if the bin boundaries for all non-monitor spectra will be the same and runs the appropriate
 *  function. It is possible for this function to set all detectors spectra X-values when they shouldn't
 *  @param lastOffset :: the delay time of the last detector is only used if differentDelays is false or if detectID and delays are leave empty e.g. when we use common bins
 *  @param differentDelays :: if the number of adjustments is greater than or equal to the number of spectra and this is false then common bins will be used

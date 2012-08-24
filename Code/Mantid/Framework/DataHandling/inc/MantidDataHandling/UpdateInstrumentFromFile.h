@@ -83,15 +83,15 @@ namespace Mantid
       void exec();
 
       /// Assumes the file is a raw file
-      void updateFromRaw(boost::shared_ptr<Geometry::Instrument> instrument, 
-        const std::string & filename);
+      void updateFromRaw(const std::string & filename);
       /// Assumes the file is an ISIS NeXus file
-      void updateFromNeXus(boost::shared_ptr<Geometry::Instrument> instrument, 
-        const std::string & filename);
+      void updateFromNeXus(const std::string & filename);
       /// Set the new detector positions
-      void setDetectorPositions(boost::shared_ptr<Geometry::Instrument> instrument,
-        const std::vector<int32_t> & detID, const std::vector<float> & l2, 
-        const std::vector<float> & theta, const std::vector<float> & phi);
+      void setDetectorPositions(const std::vector<int32_t> & detID, const std::vector<float> & l2,
+                                const std::vector<float> & theta, const std::vector<float> & phi);
+
+      /// The input workspace to modify
+      API::MatrixWorkspace_sptr m_workspace;
     };
 
   } // namespace DataHandling
