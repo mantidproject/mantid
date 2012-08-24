@@ -64,8 +64,8 @@ namespace MDAlgorithms
     void exec();
    /// Sets documentation strings for this algorithm
     virtual void initDocs();
-    /// Store the histogram bins into each output experiment info
-    void storeHistogramBoundaries(API::IMDEventWorkspace_sptr mdEventWS) const;
+    /// Store metadata
+    void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;
 
    /// pointer to the input workspace;
    Mantid::API::MatrixWorkspace_sptr m_InWS2D;

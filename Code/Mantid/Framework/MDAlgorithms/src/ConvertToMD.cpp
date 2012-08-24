@@ -335,7 +335,7 @@ void ConvertToMD::exec()
 
   g_log.information()<<" conversion started\n";
   m_Convertor->runConversion(m_Progress.get());
-  storeHistogramBoundaries(spws);
+  copyMetaData(spws);
 
   //JOB COMPLETED:
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
@@ -348,18 +348,20 @@ void ConvertToMD::exec()
 }
 
 /**
- * Store the histogram bins into each output experiment info
+ * Copy over the metadata from the input matrix workspace
  * @param mdEventWS :: The output MDEventWorkspace
  */
-void ConvertToMD::storeHistogramBoundaries(API::IMDEventWorkspace_sptr mdEventWS) const
+void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const
 {
   const MantidVec & binBoundaries = m_InWS2D->readX(0);
+  auto mapping = m_InWS2D->spectraMap().createIDGroupsMap();
 
   uint16_t nexpts = mdEventWS->getNumExperimentInfo();
   for(uint16_t i = 0; i < nexpts; ++i)
   {
     ExperimentInfo_sptr expt = mdEventWS->getExperimentInfo(i);
     expt->mutableRun().storeHistogramBinBoundaries(binBoundaries);
+    expt->cacheDetectorGroupings(*mapping);
   }
 }
 
