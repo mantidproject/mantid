@@ -7,7 +7,9 @@
 #include <QtCore/QtCore>
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
+#include <qwt_plot_spectrogram.h>
 #include <qpainter.h>
+
 
 
 namespace MantidQt
@@ -15,7 +17,7 @@ namespace MantidQt
 namespace SliceViewer
 {
 
-  /** GUI for overlaying a peak circle on the plot.
+  /** GUI for overlaying a peak ellipse on the plot.
     
     @date 2012-08-22
 
@@ -43,25 +45,11 @@ namespace SliceViewer
   {
     Q_OBJECT
 
-    /// Enum giving IDs to the 4 handles on the widget
-    enum eHandleID
-    {
-      HandleNone = -1,
-      HandleA = 0,
-      HandleB = 1,
-      HandleWidthTop = 2,
-      HandleWidthBottom = 3,
-      HandleCenter = 4 // Anywhere inside the center
-    };
-
   public:
-    PeakOverlay(QwtPlot * plot, QWidget * parent);
+    PeakOverlay(QwtPlot * plot, QWidget * parent, const QPointF& origin, const QPointF& radius);
     virtual ~PeakOverlay();
     
-    void reset();
-
-    void setOrigin(QPointF origin);
-    void setRadius(double radius);
+    void setPlaneDistance(const double& distance); 
 
     const QPointF & getOrigin() const;
     double getRadius() const;
@@ -74,26 +62,21 @@ namespace SliceViewer
     //QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
     void paintEvent(QPaintEvent *event);
 
-    //eHandleID mouseOverHandle(QPoint pos);
-    //bool mouseOverCenter(QPoint pos);
-    //void handleDrag(QMouseEvent * event);
-    //void mouseMoveEvent(QMouseEvent * event);
-    //void mousePressEvent(QMouseEvent * event);
-    //void mouseReleaseEvent(QMouseEvent * event);
-
     QSize sizeHint() const;
     QSize size() const;
     int height() const;
     int width() const;
 
-  protected:
-
     /// QwtPlot containing this
     QwtPlot * m_plot;
-
     QPointF m_origin;
+    QPointF m_radius;
+    const double m_opacityMax;
+    const double m_opacityMin;
+    double m_opacityAtDistance;
 
-    double m_radius;
+    double m_radiusXAtDistance;
+    double m_radiusYAtDistance;
 
   };
 
