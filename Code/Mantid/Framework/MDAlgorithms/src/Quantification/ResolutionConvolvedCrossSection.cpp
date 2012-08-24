@@ -149,11 +149,47 @@ namespace Mantid
     }
 
 
-    void ResolutionConvolvedCrossSection::function(const API::FunctionDomain& domain, API::FunctionValues& values) const
+    void ResolutionConvolvedCrossSection::function(const API::FunctionDomain&, API::FunctionValues& values) const
     {
       m_convolution->functionEvalStarting();
-      IFunctionMD::function(domain, values);
+      //IFunctionMD::function(domain, values);
+
+      auto iter = m_workspace->createIterator();
+      size_t resultValueIndex(0);
+      do
+      {
+        evaluate(*iter, values, resultValueIndex);
+      }
+      while(iter->next());
+      delete iter;
+
       m_convolution->functionEvalFinished();
+    }
+
+    void ResolutionConvolvedCrossSection::evaluate(const API::IMDIterator & box, API::FunctionValues& resultValues, size_t & resultValueIndex)const
+    {
+      assert(m_convolution);
+      const int64_t numEvents = static_cast<int64_t>(box.getNumEvents());
+      if(numEvents == 0) return;
+
+      bool exceptionThrown(false);
+      PARALLEL_FOR_NO_WSP_CHECK()
+      for(int64_t j = 0; j < numEvents; ++j)
+      {
+        PARALLEL_LOOP_BEGIN
+
+        const int64_t loopIndex = static_cast<int64_t>(j);
+        double contribution =  m_convolution->signal(box, box.getInnerRunIndex(loopIndex), loopIndex);
+        PARALLEL_CRITICAL(ResolutionConvolvedCrossSection_evaluate)
+        {
+          resultValues.setCalculated(resultValueIndex, contribution);
+          ++resultValueIndex;
+        }
+        reportProgress();
+
+        PARALLEL_LOOP_END
+      }
+      PARALLEL_LOOP_CHECK
     }
 
     /**

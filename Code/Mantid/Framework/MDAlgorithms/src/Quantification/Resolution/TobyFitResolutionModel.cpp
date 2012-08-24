@@ -5,8 +5,8 @@
 
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/SobolSequence.h"
+#include "MantidKernel/Timer.h"
 
 namespace Mantid
 {
@@ -96,10 +96,14 @@ namespace Mantid
       {
         generateIntegrationVariables(detCachedExperimentInfo, qOmega);
         calculatePerturbedQE(detCachedExperimentInfo, qOmega);
-        // Compute weight from the foreground at this point
-        const double weight = foregroundModel().scatteringIntensity(detCachedExperimentInfo.experimentInfo(),
-                                                                    m_deltaQE[PARALLEL_THREAD_NUMBER]);
 
+        std::vector<double> & q0 = m_deltaQE[PARALLEL_THREAD_NUMBER]; // Currently ordered beam,perp,up (z,x,y)
+        // Reorder to X,Y,Z
+        std::swap(q0[0],q0[1]);
+        std::swap(q0[1],q0[2]);
+
+        // Compute weight from the foreground at this point
+        const double weight = foregroundModel().scatteringIntensity(detCachedExperimentInfo.experimentInfo(), q0);
         // Add on this contribution to the average
         sumSigma += weight;
         sumSigmaSqr += weight*weight;
@@ -137,7 +141,7 @@ namespace Mantid
      */
     void TobyFitResolutionModel::preprocess(const API::IMDEventWorkspace_const_sptr & workspace)
     {
-      Kernel::CPUTimer timer;
+      Kernel::Timer timer;
       // Fill the observation cache
       auto iterator = workspace->createIterator();
       g_log.debug() << "Starting preprocessing loop\n";
@@ -157,7 +161,7 @@ namespace Mantid
         }
       }
       while(iterator->next());
-      g_log.debug() << "Done preprocessing loop:" << timer.elapsedWallClock() << " seconds\n";
+      g_log.debug() << "Done preprocessing loop:" << timer.elapsed() << " seconds\n";
       delete iterator;
     }
 
@@ -254,10 +258,13 @@ namespace Mantid
       // Calculate crystal mosaic contribution
       if(m_mosaicActive)
       {
+        const double & r1 = randomNums[nvars];
+        const double & r2 = randomNums[nvars+1];
         static const double small(1e-20);
-        const double prefactor = std::sqrt(-2.0*std::log(std::max(small,randomNums[nvars])));
-        const double r2 = randomNums[nvars+1];
-        const double etaSig = observation.experimentInfo().run().getLogAsSingleValue("eta_sigma");
+        static const double fwhhToStdDev = M_PI/180./std::sqrt(log(256.0)); // degrees FWHH -> st.dev. in radians
+
+        const double prefactor = std::sqrt(-2.0*std::log(std::max(r1,small)));
+        const double etaSig = observation.experimentInfo().run().getLogAsSingleValue("eta_sigma")*fwhhToStdDev;
 
         m_etaInPlane[PARALLEL_THREAD_NUMBER] = etaSig*prefactor*std::cos(2.0*M_PI*r2);
         m_etaOutPlane[PARALLEL_THREAD_NUMBER] = etaSig*prefactor*std::sin(2.0*M_PI*r2);
@@ -289,14 +296,15 @@ namespace Mantid
           xVec3(0.0), xVec4(0.0), xVec5(0.0);
       const std::vector<double> & yvalues = m_yvector[PARALLEL_THREAD_NUMBER].values();
       const TobyFitBMatrix & bmatrix = m_bmatrix[PARALLEL_THREAD_NUMBER];
-      for(unsigned int i =0; i < TobyFitYVector::variableCount(); ++i)
+      for(unsigned int i = 0; i < TobyFitYVector::variableCount(); ++i)
       {
-        xVec0 += bmatrix[0][i] * yvalues[i];
-        xVec1 += bmatrix[1][i] * yvalues[i];
-        xVec2 += bmatrix[2][i] * yvalues[i];
-        xVec3 += bmatrix[3][i] * yvalues[i];
-        xVec4 += bmatrix[4][i] * yvalues[i];
-        xVec5 += bmatrix[5][i] * yvalues[i];
+        const double & yi = yvalues[i];
+        xVec0 += bmatrix[0][i] * yi;
+        xVec1 += bmatrix[1][i] * yi;
+        xVec2 += bmatrix[2][i] * yi;
+        xVec3 += bmatrix[3][i] * yi;
+        xVec4 += bmatrix[4][i] * yi;
+        xVec5 += bmatrix[5][i] * yi;
       }
 
       // Convert to dQ in lab frame
@@ -323,19 +331,13 @@ namespace Mantid
       const double efixed = observation.getEFixed();
       const double wi = std::sqrt(efixed/PhysicalConstants::E_mev_toNeutronWavenumberSq);
       const double wf = std::sqrt((efixed - qOmega.deltaE)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
-      deltaQE[3] = 4.1442836 * (wi*xVec2 - wf*xVec5);
-
-      // Add on the nominal Q
-      deltaQE[0] += qOmega.qx;
-      deltaQE[1] += qOmega.qy;
-      deltaQE[2] += qOmega.qz;
-      deltaQE[3] += qOmega.deltaE;
+      deltaQE[3] = 4.1442836 * (wi*xVec0 - wf*xVec3);
 
       if(m_mosaicActive)
       {
-        const double etaInPlane = m_etaInPlane[PARALLEL_THREAD_NUMBER];
-        const double etaOutPlane = m_etaOutPlane[PARALLEL_THREAD_NUMBER];
-        const double qx(deltaQE[0]),qy(deltaQE[1]),qz(deltaQE[1]);
+        const double & etaInPlane = m_etaInPlane[PARALLEL_THREAD_NUMBER];
+        const double & etaOutPlane = m_etaOutPlane[PARALLEL_THREAD_NUMBER];
+        const double qx(qOmega.qx + deltaQE[1]),qy(qOmega.qy + deltaQE[2]),qz(qOmega.qz + deltaQE[0]);
         const double qipmodSq = qy*qy + qz*qz;
         const double qmod = std::sqrt(qx*qx + qipmodSq);
         static const double small(1e-10);
@@ -355,6 +357,14 @@ namespace Mantid
           }
         }
       }
+
+      // Add on the nominal Q
+      deltaQE[0] += qOmega.qz; //beam
+      deltaQE[1] += qOmega.qx; //perp
+      deltaQE[2] += qOmega.qy; //up
+
+      deltaQE[3] += qOmega.deltaE;
+
     }
 
     /**

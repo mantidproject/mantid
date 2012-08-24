@@ -144,10 +144,7 @@ namespace Mantid
      */
     void SimulateResolutionConvolvedModel::createDomains()
     {
-      auto iterator = m_inputWS->createIterator();
-      const size_t dataSize = iterator->getDataSize();
-      delete iterator;
-      m_domain.reset(new FunctionDomainMD(m_inputWS, 0, dataSize));
+      m_domain.reset(new FunctionDomainMD(m_inputWS, 0, 0));
       m_calculatedValues.reset(new FunctionValues(*m_domain));
     }
 
@@ -167,7 +164,7 @@ namespace Mantid
         builder.setName(inputDim->getName());
         builder.setId(inputDim->getDimensionId());
         builder.setUnits(inputDim->getUnits());
-        builder.setNumBins(1);
+        builder.setNumBins(inputDim->getNBins());
         builder.setMin(inputDim->getMinimum());
         builder.setMax(inputDim->getMaximum());
 
@@ -182,7 +179,7 @@ namespace Mantid
       bc->setSplitThreshold(3000);
 
       m_outputWS->initialize();
-
+      m_outputWS->splitBox(); // Make grid box
     }
 
     /**
@@ -191,40 +188,36 @@ namespace Mantid
     void SimulateResolutionConvolvedModel::addSimulatedEvents()
     {
       auto inputIter = m_inputWS->createIterator();
-      size_t boxCount(0);
+      size_t resultValueIndex(0);
       const float errorSq = 0.0;
       do
       {
         const size_t numEvents = inputIter->getNumEvents();
-        const float signal = static_cast<float>(m_calculatedValues->getCalculated(boxCount));
-
-        for(size_t i = 0; i < numEvents; ++i)
+        for(size_t i = 0; i < numEvents; ++i,++resultValueIndex)
         {
-          
+          const float signal = static_cast<float>(m_calculatedValues->getCalculated(resultValueIndex));
           coord_t centers[4] = { inputIter->getInnerPosition(i,0), inputIter->getInnerPosition(i,1), 
-                                 inputIter->getInnerPosition(i,4), inputIter->getInnerPosition(i,3) };
+                                 inputIter->getInnerPosition(i,2), inputIter->getInnerPosition(i,3) };
           m_outputWS->addEvent(MDEvent<4>(signal, errorSq,
                                           inputIter->getInnerRunIndex(i),
                                           inputIter->getInnerDetectorID(i),
                                           centers));
-          
-          
         }
-        ++boxCount;
+        ++resultValueIndex;
       }
       while(inputIter->next());
-
       delete inputIter;
+
       API::MemoryManager::Instance().releaseFreeMemory();
       // This splits up all the boxes according to split thresholds and sizes.
       auto threadScheduler = new Kernel::ThreadSchedulerFIFO();
       Kernel::ThreadPool threadPool(threadScheduler);
       m_outputWS->splitAllIfNeeded(threadScheduler);
       threadPool.joinAll();
+      m_outputWS->refreshCache();
 
       // Flush memory
       API::MemoryManager::Instance().releaseFreeMemory();
-
     }
 
 

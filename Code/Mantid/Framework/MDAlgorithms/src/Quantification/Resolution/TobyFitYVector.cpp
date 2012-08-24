@@ -120,7 +120,7 @@ namespace Mantid
       if(setToZeroIfInactive(vecPos)) return;
 
       const API::ModeratorModel & moderator = m_curObs->experimentInfo().moderatorModel();
-      m_yvector[vecPos] = moderator.sampleTimeDistribution(m_curRandNums->at(vecPos));
+      m_yvector[vecPos] = moderator.sampleTimeDistribution(m_curRandNums->at(vecPos))*1e-06;
     }
 
     /**
@@ -143,13 +143,26 @@ namespace Mantid
     }
 
     /**
+     * Chopper time spread due to the chopper component
+     */
+    void TobyFitYVector::calculateChopperTime()
+    {
+      const Variable vecPos = TobyFitYVector::ChopperTime;
+      if(setToZeroIfInactive(vecPos)) return;
+
+      const API::ChopperModel & chopper = m_curObs->experimentInfo().chopperModel(0);
+      double & chopTime = m_yvector[vecPos];
+      chopTime = chopper.sampleTimeDistribution(m_curRandNums->at(vecPos));
+    }
+
+    /**
      * Sample over the sample volume
      */
     void TobyFitYVector::calculateSampleContribution()
     {
-      const Variable vecPos1 = TobyFitYVector::ScatterPointX;
-      const Variable vecPos2 = TobyFitYVector::ScatterPointY;
-      const Variable vecPos3 = TobyFitYVector::ScatterPointZ;
+      const Variable vecPos1 = TobyFitYVector::ScatterPointBeam;
+      const Variable vecPos2 = TobyFitYVector::ScatterPointPerp;
+      const Variable vecPos3 = TobyFitYVector::ScatterPointUp;
 
       // Inactive if any is inactive
       bool inactive = setToZeroIfInactive(vecPos1);
@@ -159,21 +172,9 @@ namespace Mantid
       if(inactive) return;
 
       const Kernel::V3D & boxSize = m_curObs->sampleCuboid();
-      m_yvector[vecPos1] = boxSize[0] * (m_curRandNums->at(vecPos1));
-      m_yvector[vecPos2] = boxSize[1] * (m_curRandNums->at(vecPos2));
-      m_yvector[vecPos3] = boxSize[2] * (m_curRandNums->at(vecPos3));
-    }
-
-    /**
-     * Chopper time spread due to the chopper component
-     */
-    void TobyFitYVector::calculateChopperTime()
-    {
-      const Variable vecPos = TobyFitYVector::ChopperTime;
-      if(setToZeroIfInactive(vecPos)) return;
-
-      const API::ChopperModel & chopper = m_curObs->experimentInfo().chopperModel(0);
-      m_yvector[vecPos] = chopper.sampleTimeDistribution(m_curRandNums->at(vecPos));
+      m_yvector[vecPos1] = boxSize[2]*(m_curRandNums->at(vecPos1) - 0.5);
+      m_yvector[vecPos2] = boxSize[0]*(m_curRandNums->at(vecPos2) - 0.5);
+      m_yvector[vecPos3] = boxSize[1]*(m_curRandNums->at(vecPos3) - 0.5);
     }
 
     /**
@@ -183,8 +184,8 @@ namespace Mantid
     {
       const Kernel::V3D detectionPoint =
           m_curObs->sampleOverDetectorVolume(m_curRandNums->at(TobyFitYVector::DetectorDepth),
-              m_curRandNums->at(TobyFitYVector::DetectorHeightCoord),
-              m_curRandNums->at(TobyFitYVector::DetectorWidthCoord));
+                                             m_curRandNums->at(TobyFitYVector::DetectorWidthCoord),
+                                             m_curRandNums->at(TobyFitYVector::DetectorHeightCoord));
 
       calculateDetectorDepthContribution(detectionPoint);
       calculateDetectorSpreadContribution(detectionPoint);
@@ -199,7 +200,7 @@ namespace Mantid
       const Variable vecPos = TobyFitYVector::DetectorDepth;
       if(setToZeroIfInactive(vecPos)) return;
 
-      m_yvector[vecPos] = detectionPoint[2]; // beam
+      m_yvector[vecPos] = 0.5*detectionPoint[2]; // beam
     }
 
     /**
@@ -208,16 +209,16 @@ namespace Mantid
      */
     void TobyFitYVector::calculateDetectorSpreadContribution(const Kernel::V3D & detectionPoint)
     {
-      const Variable vecPos1 = TobyFitYVector::DetectorHeightCoord;
-      const Variable vecPos2 = TobyFitYVector::DetectorWidthCoord;
+      const Variable vecPos1 = TobyFitYVector::DetectorWidthCoord;
+      const Variable vecPos2 = TobyFitYVector::DetectorHeightCoord;
 
       // Inactive if any is inactive
       bool inactive = setToZeroIfInactive(vecPos1);
       inactive |= setToZeroIfInactive(vecPos2);
       if(inactive) return;
 
-      m_yvector[vecPos1] = detectionPoint[1];
-      m_yvector[vecPos2] = detectionPoint[0];
+      m_yvector[vecPos1] = 0.5*detectionPoint[0]; // perp
+      m_yvector[vecPos2] = 0.5*detectionPoint[1]; // up
     }
 
     /**
@@ -232,9 +233,9 @@ namespace Mantid
       const std::pair<double, double> binEdges = exptInfo.run().histogramBinBoundaries(m_curQOmega->deltaE);
       const double energyWidth = binEdges.second - binEdges.first;
       const double efixed = m_curObs->getEFixed();
-      const double kf = std::sqrt((efixed - m_curQOmega->deltaE)*PhysicalConstants::E_mev_toNeutronWavenumberSq);
+      const double wf = std::sqrt((efixed - m_curQOmega->deltaE)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
       const double factor(3.8323960e-4);
-      const double detTimeBin = energyWidth * factor * m_curObs->sampleToDetectorDistance() / std::pow(kf, 3.0);
+      const double detTimeBin = energyWidth * factor * m_curObs->sampleToDetectorDistance() / std::pow(wf, 3.0);
 
       m_yvector[vecPos] = detTimeBin * (m_curRandNums->at(vecPos) - 0.5);
     }

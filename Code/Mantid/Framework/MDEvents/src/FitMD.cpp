@@ -174,7 +174,7 @@ namespace Mantid
         builder.setName(inputDim->getName());
         builder.setId(inputDim->getDimensionId());
         builder.setUnits(inputDim->getUnits());
-        builder.setNumBins(1);
+        builder.setNumBins(inputDim->getNBins());
         builder.setMin(inputDim->getMinimum());
         builder.setMax(inputDim->getMaximum());
 
@@ -188,20 +188,21 @@ namespace Mantid
       bc->setSplitInto(3);
       bc->setSplitThreshold(3000);
       outputWS->initialize();
+      outputWS->splitBox();
 
       auto inputIter = inputWS->createIterator();
-      size_t boxCount(0);
+      size_t resultValueIndex(0);
       do
       {
         const size_t numEvents = inputIter->getNumEvents();
-        const float signal = static_cast<float>(values->getFitData(boxCount));
-        float errorSq = static_cast<float>(values->getFitWeight(boxCount));
-        errorSq *= errorSq;
-        for(size_t i = 0; i < numEvents; ++i)
+        for(size_t i = 0; i < numEvents; ++i, ++resultValueIndex)
         {
+          const float signal = static_cast<float>(values->getFitData(resultValueIndex));
+          float errorSq = static_cast<float>(values->getFitWeight(resultValueIndex));
+          errorSq *= errorSq;
 
           coord_t centers[4] = { inputIter->getInnerPosition(i,0), inputIter->getInnerPosition(i,1),
-                                 inputIter->getInnerPosition(i,4), inputIter->getInnerPosition(i,3) };
+                                 inputIter->getInnerPosition(i,2), inputIter->getInnerPosition(i,3) };
           mdWS->addEvent(MDEvent<4>(signal, errorSq,
                                     inputIter->getInnerRunIndex(i),
                                     inputIter->getInnerDetectorID(i),
@@ -209,18 +210,17 @@ namespace Mantid
 
 
         }
-        ++boxCount;
       }
       while(inputIter->next());
-
       delete inputIter;
+
       API::MemoryManager::Instance().releaseFreeMemory();
       // This splits up all the boxes according to split thresholds and sizes.
       auto threadScheduler = new Kernel::ThreadSchedulerFIFO();
       Kernel::ThreadPool threadPool(threadScheduler);
       outputWS->splitAllIfNeeded(threadScheduler);
       threadPool.joinAll();
-
+      outputWS->refreshCache();
       // Flush memory
       API::MemoryManager::Instance().releaseFreeMemory();
 

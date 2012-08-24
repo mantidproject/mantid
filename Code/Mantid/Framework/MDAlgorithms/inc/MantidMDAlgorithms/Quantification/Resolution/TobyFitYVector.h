@@ -64,12 +64,12 @@ namespace Mantid
         ApertureWidthCoord, // width-coordinate of neutron at apperture
         ApertureHeightCoord, // height-coordinate of neutron at apperture
         ChopperTime, // deviation in time of arrival at chopper
-        ScatterPointX, // x-coordinate of point of scattering in sample frame
-        ScatterPointY, // y-coordinate of point of scattering in sample frame
-        ScatterPointZ, // z-coordinate of point of scattering in sample frame
+        ScatterPointBeam, // beam direction coordinate of point of scattering in sample frame
+        ScatterPointPerp, // perpendicular-coordinate of point of scattering in sample frame
+        ScatterPointUp, // up-coordinate of point of scattering in sample frame
         DetectorDepth, // depth into detector where neutron was detected
-        DetectorWidthCoord, // x-coordinate of point of detection in detector frame
-        DetectorHeightCoord, // y-coordinate of point of detection in detector frame
+        DetectorWidthCoord, // width-coordinate of point of detection in detector frame
+        DetectorHeightCoord, // height-coordinate of point of detection in detector frame
         DetectionTime, // deviation in detection time of neutron
       };
       /// Returns the number of parameters
