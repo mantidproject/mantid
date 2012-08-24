@@ -490,20 +490,28 @@ namespace DataHandling
           {
             prop = new TimeSeriesProperty<std::string>(pvName);
           }
-
-          if (pvUnits.size() > 0)
+          else
           {
-            prop->setUnits( pvUnits);
+              // invalid type string
+              g_log.warning() << "Ignoring process variable " << pvName << " because it had an unrecognized type ("
+                                << pvType << ")." << std::endl;
           }
+          
+          if (prop)
+          {
+            if (pvUnits.size() > 0)
+            {
+                prop->setUnits( pvUnits);
+            }
 
-          m_buffer->mutableRun().addLogData(prop);
+            m_buffer->mutableRun().addLogData(prop);
 
-
-          // Add the pv id, device id and pv name to the name map so we can find the
-          // name when we process the variable value packets
-          unsigned pvIdNum;
-          std::istringstream(pvId) >> pvIdNum;
-          m_nameMap[ std::make_pair( pkt.devId(), pvIdNum)] = pvName;
+            // Add the pv id, device id and pv name to the name map so we can find the
+            // name when we process the variable value packets
+            unsigned pvIdNum;
+            std::istringstream(pvId) >> pvIdNum;
+            m_nameMap[ std::make_pair( pkt.devId(), pvIdNum)] = pvName;
+          }
         }
       }
 
