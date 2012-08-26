@@ -439,7 +439,7 @@ void AlignAndFocusPowder::execEvent()
 
   doSortEvents(m_outputW);
 
-  if (xmin > 0. || xmax > 0.)
+  if ((xmin > 0. || xmax > 0.) && m_outputEventW->getNumberEvents() > 0)
   {
 	  API::IAlgorithm_sptr cropAlg = createSubAlgorithm("CropWorkspace");
 	  cropAlg->setProperty("InputWorkspace", m_outputW);
