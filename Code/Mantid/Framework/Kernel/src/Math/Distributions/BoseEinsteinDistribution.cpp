@@ -3,6 +3,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/lexical_cast.hpp>
+#include <iostream>
 
 namespace Mantid {  namespace Kernel
 {
@@ -90,7 +91,9 @@ namespace Mantid {  namespace Kernel
         if(magnitudeY > 0.1 )
         {
           const double expMinusY = std::exp(-magnitudeY);
-          return magnitudeY / (1.0 - expMinusY);
+          double result = magnitudeY / (1.0 - expMinusY);
+          if( y < 0 ) result *= expMinusY;
+          return result;
         }
         else
         {

@@ -79,9 +79,7 @@ public:
     const double energy = -20;
     const double temperature = 35.0;
 
-    const double expected = 20.026407635389;
-
-
+    const double expected = 0.026407635389;
     TS_ASSERT_DELTA(BoseEinsteinDistribution::np1Eps(energy, temperature), expected, 1e-12);
   }
 

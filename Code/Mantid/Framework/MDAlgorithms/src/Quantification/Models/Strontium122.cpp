@@ -84,7 +84,7 @@ namespace Mantid
      */
     double Strontium122::scatteringIntensity(const API::ExperimentInfo & exptSetup, const std::vector<double> & point) const
     {
-      const double qz(point[0]), qx(point[1]), qy(point[2]), eps(point[3]); // TobyFit has axis beam=x,up=z. Mantid has beam=z,up=y
+      const double qx(point[0]), qy(point[1]), qz(point[2]), eps(point[3]);
       const double qsqr = qx*qx + qy*qy + qz*qz;
       const double epssqr = eps*eps;
 
@@ -115,14 +115,20 @@ namespace Mantid
                                     ub01*(ub10*ub22 - ub12*ub20) +
                                     ub02*(ub10*ub21 - ub11*ub20));
 
-      const double qh = ((ub11*ub22 - ub12*ub21)*qx + (ub02*ub21 - ub01*ub22)*qy + (ub01*ub12 - ub02*ub11)*qz)/twoPiDet;
-      const double qk = ((ub12*ub20 - ub10*ub22)*qx + (ub00*ub22 - ub02*ub20)*qy + (ub02*ub10 - ub00*ub12)*qz)/twoPiDet;
-      const double ql = ((ub10*ub21 - ub11*ub20)*qx + (ub01*ub20 - ub00*ub21)*qy + (ub00*ub11 - ub01*ub10)*qz)/twoPiDet;
+      double qh = ((ub11*ub22 - ub12*ub21)*qx + (ub02*ub21 - ub01*ub22)*qy + (ub01*ub12 - ub02*ub11)*qz)/twoPiDet;
+      double qk = ((ub12*ub20 - ub10*ub22)*qx + (ub00*ub22 - ub02*ub20)*qy + (ub02*ub10 - ub00*ub12)*qz)/twoPiDet;
+      double ql = ((ub10*ub21 - ub11*ub20)*qx + (ub01*ub20 - ub00*ub21)*qy + (ub00*ub11 - ub01*ub10)*qz)/twoPiDet;
 
-      const double astar = twoPi*lattice.b1(); //arlu(1)
-      const double bstar = twoPi*lattice.b2(); //arlu(2)
-      const double cstar = twoPi*lattice.b3(); //arlu(3)
-
+      double astar = twoPi*lattice.b1(); //arlu(1)
+      double bstar = twoPi*lattice.b2(); //arlu(2)
+      double cstar = twoPi*lattice.b3(); //arlu(3)
+      
+      // Transform from Mantidto TF coordinates
+      std::swap(qh,ql);
+      std::swap(astar,cstar);
+      std::swap(qk,ql);
+      std::swap(bstar,cstar);
+      
       const double tempInK = exptSetup.getLogAsSingleValue("temperature_log");
       const double boseFactor = BoseEinsteinDistribution::np1Eps(eps,tempInK);
       const double magFormFactorSqr = std::pow(m_formFactorTable.value(qsqr), 2);
