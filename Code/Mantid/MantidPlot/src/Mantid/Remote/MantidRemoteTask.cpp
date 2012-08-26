@@ -264,7 +264,7 @@ void RemoteTaskDockWidget::submitJob()
     vbLayout->addWidget( new QLabel( tr( "Submit job to ") + clusterName));
     
     RemoteTask &task = m_taskHash[ selectedTask];
-    QList <QLineEdit *> editList;
+    QList <QWidget *> widgetList;
     if (task.getNumSubstitutionParams() > 0)
     {
         // Need to add labels and text inputs to the dialog so the user can fill in
@@ -277,9 +277,40 @@ void RemoteTaskDockWidget::submitJob()
             if (task.getSubstitutionParamName(i).size() > 0)
             {
                 QLabel *label = new QLabel( QString::fromStdString(task.getSubstitutionParamName( i)));
-                QLineEdit *edit = new QLineEdit( QString::fromStdString(task.getSubstitutionParamValue( i)));
-                form->addRow( label, edit);
-                editList.append( edit);  // save the pointers so we can access them below
+                QComboBox *combo;
+                QLineEdit *edit;
+                std::string choices;
+                size_t startPos = 0;
+                size_t endPos = 0;
+                switch (task.getSubstitutionParamType(i))
+                {
+                    case RemoteTask::TEXT_BOX:
+                        edit = new QLineEdit( QString::fromStdString(task.getSubstitutionParamValue( i)));
+                        form->addRow( label, edit);
+                        widgetList.append( edit);  // save the pointers so we can access them below
+                        break;
+
+                    case RemoteTask::CHOICE_BOX:
+                        combo = new QComboBox();
+                        choices = task.getSubstitutionChoiceString(i);
+                        // choices is a semi-colon delimited string.  parse it and add all the
+                        // choices to the combo box
+                        startPos = 0;
+                        endPos = 0;
+                        do
+                        {
+                            endPos = choices.find( ';', startPos);
+                            combo->addItem( QString::fromStdString(choices.substr(startPos, (endPos-startPos))));
+                            startPos = endPos + 1;
+                        } while (endPos != std::string::npos);
+                        form->addRow( label, combo);
+                        widgetList.append( combo);  // save the pointers so we can access them below
+                        break;
+                    case RemoteTask::UNKNOWN_TYPE:
+                    default:
+                        // Should never happen....
+                        logObject.error("Skipping user parameter of unknown type.  Check cluster's XML config!");
+                }
             }
         }
         
@@ -296,9 +327,26 @@ void RemoteTaskDockWidget::submitJob()
     if (d->exec() == QDialog::Accepted)
     {
         // First off, save the values for any user-specified params
-        for (int i=0; i < editList.size(); i++)
+        for (int i=0; i < widgetList.size(); i++)
         {
-            task.setSubstitutionParamValue( i, editList[i]->text().toStdString());
+            QComboBox *combo = NULL;
+            QLineEdit *edit = NULL;
+            QWidget *widget = widgetList[i];
+
+            edit = dynamic_cast<QLineEdit *>(widget);
+            if (edit)
+            {
+                task.setSubstitutionParamValue( i, edit->text().toStdString());
+            }
+            else
+            {
+                combo = dynamic_cast<QComboBox *>(widget);
+                if (combo)
+                {
+                    task.setSubstitutionParamValue(i, combo->currentText().toStdString());
+                }
+            }
+
         }
 
         // Next, generate a value for the 'outfile' parameter.  We'll base it on the
@@ -420,18 +468,72 @@ void RemoteTaskDockWidget::xmlParseTask( QDomElement &elm)
                 {
                     if (e2.tagName() == "parameter")
                     {
-                        if (e2.hasAttribute( "name") && e2.hasAttribute( "id"))
+                        QString name;
+                        QString id;
+                        RemoteTask::ParamType type = RemoteTask::TEXT_BOX;  // text box is the default
+                        QString choiceString;  // default choice string is empty
+                        if (e2.hasAttribute( "name"))
                         {
-                            QString name = e2.attribute( "name");
-                            QString id = e2.attribute( "id");
-                            task.appendSubstitutionParam( name.toStdString(), id.toStdString());
+                            name = e2.attribute( "name");
                         }
-                        else
+
+                        if (e2.hasAttribute( "id"))
+                        {
+                            id = e2.attribute( "id");
+                        }
+
+                        if (e2.hasAttribute( "type"))
+                        {
+                            QString idString = e2.attribute( "type");
+                            idString.toLower();  // we'll be nice and make the types case insensitive
+                            if (idString == "text")
+                            {
+                                type = RemoteTask::TEXT_BOX;
+                            }
+                            else if (idString == "choice")
+                            {
+                                type = RemoteTask::CHOICE_BOX;
+                            }
+                            else
+                            {
+                                type = RemoteTask::UNKNOWN_TYPE;
+                            }
+                        }
+
+                        if (e2.hasAttribute( "choices"))
+                        {
+                            choiceString = e2.attribute( "choices");
+                        }
+
+                        // Now some error & sanity checks...
+                        // name and id are required
+                        if ( ! e2.hasAttribute( "name") || !e2.hasAttribute( "id"))
                         {
                             QMessageBox msgBox;
                             msgBox.setText("Invalid User Parameter");
                             msgBox.setInformativeText( e2.tagName() + QString(tr(" tags must contain 'name' and 'id' attributes.")));
                             msgBox.exec();
+                        }
+                        // type must be recognized
+                        else if (type == RemoteTask::UNKNOWN_TYPE)
+                        {
+                            QMessageBox msgBox;
+                            msgBox.setText("Unrecognized User Parameter Type");
+                            msgBox.setInformativeText( QString( "'") + e2.attribute("type") + QString(tr("' is not a recognized parameter type.")));
+                            msgBox.exec();
+                        }
+                        // if type is type CHOICE_BOX, then we need a choice string
+                        else if (type == RemoteTask::CHOICE_BOX && choiceString.size() == 0)
+                        {
+                            QMessageBox msgBox;
+                            msgBox.setText("Unrecognized User Parameter Type");
+                            msgBox.setInformativeText( QString(tr("Parameter of type 'choice' has no choices specified.")));
+                            msgBox.exec();
+                        }
+                        // OK, it passed its sanity checks - add it
+                        else
+                        {
+                            task.appendSubstitutionParam( name.toStdString(), id.toStdString(), type, choiceString.toStdString());
                         }
                     }
                     else

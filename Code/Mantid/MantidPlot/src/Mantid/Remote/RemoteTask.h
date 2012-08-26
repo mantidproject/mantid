@@ -14,6 +14,10 @@
 class RemoteTask
 {
 public:
+
+    // Defines the type of user parameter.  Only two real types at the moment.
+    // UNKNOWN_TYPE is used for error and sanity checks
+    enum ParamType { TEXT_BOX, CHOICE_BOX, UNKNOWN_TYPE };
     
     RemoteTask( const std::string &taskName = "", const std::string &executable = "") :
         m_executable( executable) { setName( taskName);}
@@ -41,10 +45,14 @@ public:
 
     void setExecutable( const std::string  &executable) { m_executable = executable; }
     void appendCmdLineParam( const std::string &param) { m_cmdLineParams.push_back( param); }
-    void appendSubstitutionParam( const std::string &paramName, const std::string &paramId)
+    void appendSubstitutionParam( const std::string &paramName, const std::string &paramId, ParamType paramType=TEXT_BOX, const std::string &choiceString = "")
     {
         m_substitutionParamIds.push_back( paramId);
         m_substitutionParamNames.push_back( paramName);
+
+        // Note: we really should check to see that there's a valid choice string for any type CHOICE_BOX
+        m_substitutionParamTypes.push_back(paramType);
+        m_substitutionChoiceStrings.push_back(choiceString);
 
         // The 'real' value will be filled in by the user before the job is submitted
         m_substitutionParamValues.push_back( "");
@@ -99,6 +107,26 @@ public:
 
       return "";  // didn't find the parameter ID so return empty string
     }
+
+    ParamType getSubstitutionParamType( unsigned i) const
+    {
+        if (i < getNumSubstitutionParams())
+            return m_substitutionParamTypes[i];
+
+        return UNKNOWN_TYPE;
+    }
+
+    std::string getSubstitutionChoiceString( unsigned i) const
+    {
+        if (i < getNumSubstitutionParams())
+        {
+            // Only return a string if the corresponding type is CHOICE_BOX
+            if (getSubstitutionParamType(i) == CHOICE_BOX)
+                return m_substitutionChoiceStrings[i];
+        }
+
+        return "";
+    }
     
     void appendResource( const std::string &name, const std::string &value)
     {
@@ -112,6 +140,12 @@ public:
             return false;
 
         if (m_substitutionParamIds.size() != m_substitutionParamValues.size())
+            return false;
+
+        if (m_substitutionParamIds.size() != m_substitutionParamTypes.size())
+            return false;
+
+        if (m_substitutionParamIds.size() != m_substitutionChoiceStrings.size())
             return false;
         
         // The only things that are really necessary are the task name and the
@@ -147,15 +181,20 @@ private:
     std::string m_executable;  // The name of the program to run.  Probably something like /usr/bin/mpirun...
     std::vector<std::string> m_cmdLineParams;
 
+    std::vector<ParamType>   m_substitutionParamTypes;
     std::vector<std::string> m_substitutionParamNames;
     std::vector<std::string> m_substitutionParamIds;
     std::vector<std::string> m_substitutionParamValues;
+    std::vector<std::string> m_substitutionChoiceStrings;
 
     // Note that param names are, in fact, optional.  The "global" parameters (such as outfile)
     // are set by MantidPlot itself.  Since we don't ask the user for the value, these parameters
-    // shouldn't be displayed in the dialog box and therefore don't need a name.  The 3 vectors do
-    // all need to be the same size, though (so that there's no confusion about the <name,id,value>
-    // triplet), but the name may be the empty string.
+    // shouldn't be displayed in the dialog box and therefore don't need a name.  The 5 vectors do
+    // all need to be the same size, though (so that there's no confusion about the <type,name,
+    // id,value,choice string> tuple), but the name may be the empty string.
+    //
+    // m_substitionChoiceStrings are similar:  choices are only valid for params of type CHOICE_BOX,
+    // but other types of params must have an empty string here so that the vector sizes all match.
 
     std::map<std::string, std::string> m_resources;  // Maps resource names to values
 };
