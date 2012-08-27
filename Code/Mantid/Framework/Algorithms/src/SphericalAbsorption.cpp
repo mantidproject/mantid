@@ -89,8 +89,8 @@ void SphericalAbsorption::exec()
   anvred->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", correctionFactors);
   anvred->setProperty("PreserveEvents", true);
   anvred->setProperty("ReturnTransmissionOnly", true);
-  anvred->setProperty("LinearScatteringCoef", m_refAtten);
-  anvred->setProperty("LinearAbsorptionCoef", m_scattering);
+  anvred->setProperty("LinearScatteringCoef", m_scattering);
+  anvred->setProperty("LinearAbsorptionCoef", m_refAtten);
   anvred->setProperty("Radius", m_sphRadius);
   anvred->executeAsSubAlg();
   // Get back the result

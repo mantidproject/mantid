@@ -50,8 +50,8 @@ public:
     std::string outputWS("factors");
     TS_ASSERT_THROWS_NOTHING( atten->setPropertyValue("OutputWorkspace",outputWS) );
     TS_ASSERT_THROWS_NOTHING( atten->setPropertyValue("SphericalSampleRadius","0.17") );
-    TS_ASSERT_THROWS_NOTHING( atten->setPropertyValue("AttenuationXSection","1.302") );
-    TS_ASSERT_THROWS_NOTHING( atten->setPropertyValue("ScatteringXSection","1.686") );
+    TS_ASSERT_THROWS_NOTHING( atten->setPropertyValue("AttenuationXSection","1.686") );
+    TS_ASSERT_THROWS_NOTHING( atten->setPropertyValue("ScatteringXSection","1.302") );
     TS_ASSERT_THROWS_NOTHING( atten->setPropertyValue("SampleNumberDensity","0.01") );
     TS_ASSERT_THROWS_NOTHING( atten->execute() );
     TS_ASSERT( atten->isExecuted() );
