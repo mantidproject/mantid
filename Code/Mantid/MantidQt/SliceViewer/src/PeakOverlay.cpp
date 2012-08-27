@@ -67,7 +67,7 @@ namespace SliceViewer
   const QPointF & PeakOverlay::getOrigin() const
   { return m_origin; }
 
-  const double PeakOverlay::getRadius() const
+  double PeakOverlay::getRadius() const
   { return m_radius; }
 
   //----------------------------------------------------------------------------------------------

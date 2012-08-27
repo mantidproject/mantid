@@ -64,7 +64,7 @@ namespace SliceViewer
     void setRadius(double radius);
 
     const QPointF & getOrigin() const;
-    const double getRadius() const;
+    double getRadius() const;
 
   signals:
     
