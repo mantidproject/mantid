@@ -144,9 +144,16 @@ void RemoteTaskDockWidget::update()
     if (m_configReply)
     {
         QDomDocument doc("ServerSettings");
-        if (!doc.setContent(m_configReply))
+        QString parseErrMsg;
+        int errLine = 0;
+        int errCol = 0;
+        if (!doc.setContent(m_configReply, &parseErrMsg, &errLine, &errCol))
         {
-            QMessageBox( QMessageBox::Warning, "XML Error", tr("Failed to read XML configuration file."), QMessageBox::Ok).exec();
+            QString mbText = QString( tr("Failed to parse XML configuration file.")) + QString("\n") +
+                             QString( tr("Error type: ")) + parseErrMsg + QString("\n") +
+                             QString( tr("Line: ")) + QString::number(errLine) + QString("\n") +
+                             QString( tr("Col: ")) + QString::number(errCol);
+            QMessageBox ( QMessageBox::Warning, "XML Error", mbText, QMessageBox::Ok).exec();
             return;
         }
 
