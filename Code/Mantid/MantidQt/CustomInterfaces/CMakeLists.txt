@@ -124,7 +124,16 @@ include_directories ( ../../QtPropertyBrowser/src )
 include_directories (../../Framework/MDEvents/inc)
 include_directories (../../Framework/DataObjects/inc)
 
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
+# Ugly hack to get around issue in Boost version 1.48.0 
+# in conjunction with Qt 4.7.4 or greater
+set ( qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH} )
+if ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
+	set( extra_options "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED")
+else ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
+	set ( extra_options "" )
+endif ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
+
+qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS ${extra_options} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
