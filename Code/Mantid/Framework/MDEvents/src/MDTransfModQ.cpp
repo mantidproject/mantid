@@ -258,7 +258,7 @@ namespace Mantid
 
     /// constructor;
     MDTransfModQ::MDTransfModQ():
-    m_Det(NULL),m_NMatrixDim(-1)
+    m_Det(NULL)//,m_NMatrixDim(-1)
     {}    
 
   } // End MDAlgorighms namespace
