@@ -50,9 +50,9 @@ void HRPDSlabCanAbsorption::init()
   auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
   mustBePositive->setLower(0.0);
   declareProperty("SampleAttenuationXSection", -1.0, mustBePositive,
-    "The attenuation cross-section for the sample material in barns");
+    "The ABSORPTION cross-section for the sample material in barns");
   declareProperty("SampleScatteringXSection", -1.0, mustBePositive,
-    "The scattering cross-section for the sample material in barns");
+    "The scattering cross-section (coherent + incoherent) for the sample material in barns");
   declareProperty("SampleNumberDensity", -1.0, mustBePositive,
     "The number density of the sample in number per cubic angstrom");
 
