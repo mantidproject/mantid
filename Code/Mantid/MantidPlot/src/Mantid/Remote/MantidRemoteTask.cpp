@@ -286,6 +286,7 @@ void RemoteTaskDockWidget::submitJob()
                 QLabel *label = new QLabel( QString::fromStdString(task.getSubstitutionParamName( i)));
                 QComboBox *combo;
                 QLineEdit *edit;
+                QCheckBox *checkbox;
                 std::string choices;
                 size_t startPos = 0;
                 size_t endPos = 0;
@@ -313,6 +314,22 @@ void RemoteTaskDockWidget::submitJob()
                         form->addRow( label, combo);
                         widgetList.append( combo);  // save the pointers so we can access them below
                         break;
+
+                    case RemoteTask::CHECK_BOX:
+                        checkbox = new QCheckBox( );
+                        if ( task.getSubstitutionParamValue( i) == "TRUE")
+                        {
+                          checkbox->setChecked( true);
+                        }
+                        else
+                        {
+                          checkbox->setChecked( false);
+                        }
+
+                        form->addRow( label, checkbox);
+                        widgetList.append( checkbox);  // save the pointers so we can access them below
+                        break;
+
                     case RemoteTask::UNKNOWN_TYPE:
                     default:
                         // Should never happen....
@@ -338,22 +355,29 @@ void RemoteTaskDockWidget::submitJob()
         {
             QComboBox *combo = NULL;
             QLineEdit *edit = NULL;
+            QCheckBox *checkbox = NULL;
             QWidget *widget = widgetList[i];
 
-            edit = dynamic_cast<QLineEdit *>(widget);
-            if (edit)
+
+            if ( (edit = dynamic_cast<QLineEdit *>(widget)) )
             {
                 task.setSubstitutionParamValue( i, edit->text().toStdString());
             }
-            else
+            else if ( (combo = dynamic_cast<QComboBox *>(widget)) )
             {
-                combo = dynamic_cast<QComboBox *>(widget);
-                if (combo)
+                task.setSubstitutionParamValue(i, combo->currentText().toStdString());
+            }
+            else if ( (checkbox = dynamic_cast<QCheckBox *>(widget)) )
+            {
+                if (checkbox->isChecked())
                 {
-                    task.setSubstitutionParamValue(i, combo->currentText().toStdString());
+                    task.setSubstitutionParamValue(i, "TRUE");
+                }
+                else
+                {
+                    task.setSubstitutionParamValue(i, "FALSE");
                 }
             }
-
         }
 
         // Next, generate a value for the 'outfile' parameter.  We'll base it on the
@@ -500,6 +524,10 @@ void RemoteTaskDockWidget::xmlParseTask( QDomElement &elm)
                             else if (idString == "choice")
                             {
                                 type = RemoteTask::CHOICE_BOX;
+                            }
+                            else if (idString == "boolean")
+                            {
+                                type = RemoteTask::CHECK_BOX;
                             }
                             else
                             {

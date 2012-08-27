@@ -17,7 +17,7 @@ public:
 
     // Defines the type of user parameter.  Only two real types at the moment.
     // UNKNOWN_TYPE is used for error and sanity checks
-    enum ParamType { TEXT_BOX, CHOICE_BOX, UNKNOWN_TYPE };
+    enum ParamType { TEXT_BOX, CHOICE_BOX, CHECK_BOX, UNKNOWN_TYPE };
     
     RemoteTask( const std::string &taskName = "", const std::string &executable = "") :
         m_executable( executable) { setName( taskName);}
