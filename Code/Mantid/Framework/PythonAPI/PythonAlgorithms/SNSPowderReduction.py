@@ -301,6 +301,9 @@ class SNSPowderReduction(PythonAlgorithm):
         if self._chunks > 0:
             # When chunks are added, proton charge is summed for all chunks
             wksp.getRun().integrateProtonCharge()
+        if (self._config.iparmFile is not None) and (len(self._config.iparmFile) > 0):
+            # When chunks are added, add iparamFile
+            wksp.getRun()['iparm_file'] = self._config.iparmFile
         api.DeleteWorkspace('Chunks')
         if preserveEvents and not "histo" in extension:
             wksp = api.CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
