@@ -195,6 +195,20 @@ public:
 
   }
 
+  void test_set_wrong_index()
+  {
+    multi.setDomainIndices(1,std::vector<size_t>());
+    multi.setDomainIndices(2,std::vector<size_t>());
+
+    FunctionValues values(domain);
+
+    multi.setDomainIndex(0,3);
+    TS_ASSERT_THROWS( multi.function(domain,values), std::invalid_argument );
+
+    multi.setDomainIndex(0,4);
+    TS_ASSERT_THROWS( multi.function(domain,values), std::invalid_argument );
+  }
+
   void test_calc()
   {
     multi.setDomainIndex(0,0);
