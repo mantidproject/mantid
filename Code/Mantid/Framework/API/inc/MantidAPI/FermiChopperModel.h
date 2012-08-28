@@ -59,6 +59,8 @@ namespace Mantid
 
       /// Returns a time sample from the distribution given a flat random number
       double sampleTimeDistribution(const double randomNo) const;
+      /// Returns a time sampled from the jitter distribution
+      double sampleJitterDistribution(const double randomNo) const;
 
     private:
       /// Set a parameter value from a string
@@ -70,6 +72,7 @@ namespace Mantid
       double regimeFactor(const double gamma) const;
       /// Map a flat random number to a triangular distibution of unit area
       double sampleFromTriangularDistribution(const double randomNo) const;
+
 
       /// The radius of the chopper in metres
       double m_chopperRadius;

@@ -113,6 +113,22 @@ namespace Mantid
      }
     }
 
+    /**
+     * Returns a time sampled from the jitter distribution
+     * @param randomNo :: A flat random number in the range [0,1]
+     * @return A time sample from a jitter distribution with peak at min=-1, max=1 and peak at 0
+     */
+    double FermiChopperModel::sampleJitterDistribution(const double randomNo) const
+    {
+      const double jitSig = getStdDevJitter();
+      if(jitSig > 0.0) // Avoid sampling if unnecessary
+      {
+        const double effectiveJitter = std::sqrt(6.0)*jitSig;
+        return effectiveJitter*sampleFromTriangularDistribution(randomNo);
+      }
+      return 0.0;
+    }
+
     //----------------------------------------------------------------------------------------
     // Private members
    //----------------------------------------------------------------------------------------

@@ -34,7 +34,7 @@ namespace Mantid
      * Default constructor
      */
     TobyFitResolutionModel::TobyFitResolutionModel()
-      : MDResolutionConvolution(), m_randGen(new Kernel::SobolSequence(TobyFitYVector::variableCount() + 2)), // For eta
+      : MDResolutionConvolution(), m_randGen(new Kernel::SobolSequence(TobyFitYVector::requiredRandomNums() + 2)), // Extra 2 for mosaic
         m_activeAttrValue(1),
         m_mcLoopMin(100), m_mcLoopMax(1000), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
         m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),

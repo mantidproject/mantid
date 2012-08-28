@@ -40,6 +40,10 @@ public:
   {
     return 0.0;
   }
+  double sampleJitterDistribution(const double) const
+  {
+    return 0.0;
+  }
 
 private:
   void setParameterValue(const std::string &,const std::string&) {};

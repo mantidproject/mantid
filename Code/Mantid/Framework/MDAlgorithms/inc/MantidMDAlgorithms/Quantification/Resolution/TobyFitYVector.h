@@ -72,8 +72,10 @@ namespace Mantid
         DetectorHeightCoord, // height-coordinate of point of detection in detector frame
         DetectionTime, // deviation in detection time of neutron
       };
-      /// Returns the number of parameters
+      /// Returns the number of parameters, i.e. length of the Y vector
       static unsigned int variableCount();
+      /// Returns the length of random numbers required
+      static unsigned int requiredRandomNums();
       /// Return a string identifier for the given attribute
       static const char * identifier(const unsigned int variable);
 

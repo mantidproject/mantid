@@ -4,8 +4,8 @@ Creates a model of a moderator using the given parameters. The parameters are gi
 Available models with parameter names:
 * IkedaCarpenterModerator -
 ** TiltAngle - The tilt angle in degrees;
-** TauF - The fast decay coefficient in seconds
-** TauS - The slow decay coefficient in seconds
+** TauF - The fast decay coefficient in microseconds
+** TauS - The slow decay coefficient in microseconds
 ** R - The mixing coefficient
 *WIKI*/
 

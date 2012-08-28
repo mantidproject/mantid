@@ -25,10 +25,18 @@ namespace Mantid
         "DetectionTime",
     };
 
+    //@todo Need to generalise to better account for 1:many mapping of variables to random number requirements
+
     /// Returns the number of parameters
     unsigned int TobyFitYVector::variableCount()
     {
       return NUM_OF_VARS;
+    }
+
+    /// Returns the length of random numbers required
+    unsigned int TobyFitYVector::requiredRandomNums()
+    {
+      return NUM_OF_VARS + 1; // An extra one for the jitter that is not counted as a separate variable
     }
 
     /**
@@ -151,8 +159,9 @@ namespace Mantid
       if(setToZeroIfInactive(vecPos)) return;
 
       const API::ChopperModel & chopper = m_curObs->experimentInfo().chopperModel(0);
-      double & chopTime = m_yvector[vecPos];
+      double & chopTime = m_yvector[vecPos]; // Note the reference
       chopTime = chopper.sampleTimeDistribution(m_curRandNums->at(vecPos));
+      chopTime += chopper.sampleJitterDistribution(m_curRandNums->at(vecPos + 1));
     }
 
     /**

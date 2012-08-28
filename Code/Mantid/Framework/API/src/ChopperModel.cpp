@@ -14,13 +14,15 @@ namespace Mantid
   {
     namespace
     {
-      // Angular speed parameter
+      // Parameter names
       const char * ANGULAR_VEL = "AngularVelocity";
+      const char * JITTER = "JitterSigma";
     }
 
     /// Default constructor required by the factory
     ChopperModel::ChopperModel() : 
-      m_exptRun(NULL), m_angularSpeed(0.0), m_angularSpeedLog(), m_pulseVariance(0.0)
+      m_exptRun(NULL), m_angularSpeed(0.0), m_angularSpeedLog(), m_jitterSigma(0.0),
+      m_pulseVariance(0.0)
     {
     }
 
@@ -48,7 +50,7 @@ namespace Mantid
       if(keyValues.empty())
       {
         throw std::invalid_argument("ChopperModel::initialize - Parameter string was not empty but no values"
-            "could be parsed. Check it has the key=value format.");
+            " could be parsed. Check it is a comma-separated key=value string");
       }
 
       setBaseParameters(keyValues);
@@ -105,6 +107,15 @@ namespace Mantid
       }
     }
 
+    /**
+     * Sets the chopper jitter sigma value in microseconds. This is the FWHH value.
+     * @param value :: The FWHH value in microseconds for the chopper jitter
+     */
+    void ChopperModel::setJitterFWHH(const double value)
+    {
+      m_jitterSigma =  value/1e6/ std::sqrt(std::log(256.0));
+    }
+
     //-------------------------------------------------------------------------
     // Private methods
     //-------------------------------------------------------------------------
@@ -116,19 +127,25 @@ namespace Mantid
      */
     void ChopperModel::setBaseParameters(std::map<std::string,std::string> & keyValues)
     {
-      auto angIter = keyValues.find(ANGULAR_VEL);
-      if(angIter != keyValues.end())
+      auto iter = keyValues.find(ANGULAR_VEL);
+      if(iter != keyValues.end())
       {
         try
         {
-          setAngularVelocityInHz(boost::lexical_cast<double>(angIter->second));
+          setAngularVelocityInHz(boost::lexical_cast<double>(iter->second));
         }
         catch(boost::bad_lexical_cast&)
         {
           // Assume the value is a log name
-          setAngularVelocityLog(angIter->second);
+          setAngularVelocityLog(iter->second);
         }
         keyValues.erase(ANGULAR_VEL);
+      }
+      iter = keyValues.find(JITTER);
+      if(iter != keyValues.end())
+      {
+        setJitterFWHH(boost::lexical_cast<double>(iter->second));
+        keyValues.erase(JITTER);
       }
 
     }
