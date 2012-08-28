@@ -43,7 +43,7 @@ namespace MantidQt
       /// Get the origin. md x, md y
       virtual const QPointF & getOrigin() const = 0;
       /// Get the radius. md x, md y
-      virtual const double &  getRadius() const = 0;
+      virtual double  getRadius() const = 0;
       /// Update the view.
       virtual void updateView() = 0;
       /// Destructor

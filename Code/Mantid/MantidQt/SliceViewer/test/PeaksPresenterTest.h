@@ -28,7 +28,7 @@ private:
   public:
     MOCK_METHOD1(setPlaneDistance, void(const double&));
     MOCK_CONST_METHOD0(getOrigin, const QPointF&());
-    MOCK_CONST_METHOD0(getRadius, const double&());
+    MOCK_CONST_METHOD0(getRadius, const double());
     MOCK_METHOD0(updateView, void());
     ~MockPeakOverlayView(){}
   };

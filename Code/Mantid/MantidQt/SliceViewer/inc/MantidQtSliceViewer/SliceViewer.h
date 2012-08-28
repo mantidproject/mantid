@@ -165,9 +165,6 @@ private:
 
 
 private:
-  // -------------------------- Controllers ------------------------
-
-  boost::shared_ptr<PeaksPresenter>  m_peaksPresenter;
 
   // -------------------------- Widgets ----------------------------
 
@@ -271,6 +268,9 @@ private:
 
   /// If true, the rebinned overlayWS is locked until refreshed.
   bool m_rebinLocked;
+
+  // -------------------------- Controllers ------------------------
+  boost::shared_ptr<PeaksPresenter>  m_peaksPresenter;
 };
 
 } // namespace SliceViewer
