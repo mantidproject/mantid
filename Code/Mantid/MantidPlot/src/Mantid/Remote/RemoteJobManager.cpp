@@ -7,6 +7,8 @@
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Net/HTTPCookie.h>
+#include <Poco/Net/NameValueCollection.h>
 #include <Poco/URI.h>
 
 #include <ostream>
@@ -158,6 +160,9 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
     // body.  (Apperently, either MWS or maybe Tomcat assumes the length to be 0 if it's not specified?!?)
     req.setContentLength( (int)(json.str().length()) );
 
+    // Attach any cookies we've got from previous responses
+    req.setCookies( getCookies());
+
     //std::ostream &reqBody = session.sendRequest( req);
     //reqBody << json.str();
     session.sendRequest( req) << json.str();
@@ -171,6 +176,15 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
     // anyway.
 
     std::istream &responseStream = session.receiveResponse( response);
+    std::vector<Poco::Net::HTTPCookie> newCookies;
+    // For as yet unknown reasons, we don't always get a session cookie back from the
+    // server.  In that case, we don't want to overwrite the cookie we're currently
+    // using...
+    response.getCookies( newCookies);
+    if (newCookies.size() > 0)
+    {
+      m_cookies = newCookies;
+    }
 
     if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_CREATED)
     {
@@ -266,10 +280,22 @@ bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
 
   req.setCredentials( "Basic", encodedAuth.str());
 
+  // Attach any cookies we've got from previous responses
+  req.setCookies( getCookies());
+
   session.sendRequest( req);
 
   Poco::Net::HTTPResponse response;
   std::istream &responseStream = session.receiveResponse( response);
+  std::vector<Poco::Net::HTTPCookie> newCookies;
+  // For as yet unknown reasons, we don't always get a session cookie back from the
+  // server.  In that case, we don't want to overwrite the cookie we're currently
+  // using...
+  response.getCookies( newCookies);
+  if (newCookies.size() > 0)
+  {
+    m_cookies = newCookies;
+  }
 
   if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_OK)
   {
@@ -393,12 +419,24 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
   encoder << m_userName << ":" << m_password;
   encoder.close();
 
+  // Attach any cookies we've got from previous responses
+  req.setCookies( getCookies());
+
   req.setCredentials( "Basic", encodedAuth.str());
 
   session.sendRequest( req);
 
   Poco::Net::HTTPResponse response;
   std::istream &responseStream = session.receiveResponse( response);
+  std::vector<Poco::Net::HTTPCookie> newCookies;
+  // For as yet unknown reasons, we don't always get a session cookie back from the
+  // server.  In that case, we don't want to overwrite the cookie we're currently
+  // using...
+  response.getCookies( newCookies);
+  if (newCookies.size() > 0)
+  {
+    m_cookies = newCookies;
+  }
 
   if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_OK)
   {
@@ -543,6 +581,9 @@ bool MwsRemoteJobManager::jobOutputReady( const std::string &jobId)
 
   req.setCredentials( "Basic", encodedAuth.str());
 
+  // Attach any cookies we've got from previous responses
+  req.setCookies( getCookies());
+
   session.sendRequest( req);
 
   // All we need to check is the return code.  And all we really care about is whether
@@ -551,6 +592,16 @@ bool MwsRemoteJobManager::jobOutputReady( const std::string &jobId)
 
   Poco::Net::HTTPResponse response;
   session.receiveResponse( response);
+  std::vector<Poco::Net::HTTPCookie> newCookies;
+  // For as yet unknown reasons, we don't always get a session cookie back from the
+  // server.  In that case, we don't want to overwrite the cookie we're currently
+  // using...
+  response.getCookies( newCookies);
+  if (newCookies.size() > 0)
+  {
+    m_cookies = newCookies;
+  }
+
   if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
   {
     retVal = true;
@@ -599,6 +650,9 @@ bool MwsRemoteJobManager::getJobOutput( const std::string &jobId, std::ostream &
 
   req.setCredentials( "Basic", encodedAuth.str());
 
+  // Attach any cookies we've got from previous responses
+  req.setCookies( getCookies());   
+
   session.sendRequest( req);
 
   Poco::Net::HTTPResponse response;
@@ -609,6 +663,15 @@ bool MwsRemoteJobManager::getJobOutput( const std::string &jobId, std::ostream &
   {
     retVal = true;
     istream & respStream = session.receiveResponse(response);
+    std::vector<Poco::Net::HTTPCookie> newCookies;
+    // For as yet unknown reasons, we don't always get a session cookie back from the
+    // server.  In that case, we don't want to overwrite the cookie we're currently
+    // using...
+    response.getCookies( newCookies);
+    if (newCookies.size() > 0)
+    {
+      m_cookies = newCookies;
+    }
 
     outstream << respStream.rdbuf();
     outstream << flush;  // make sure we've got everything before the session goes out of scope
@@ -678,6 +741,21 @@ std::string MwsRemoteJobManager::escapeQuoteChars( const std::string & str)
 
   return out;
 }
+
+
+// Converts the vector of HTTPCookie objects into a NameValueCollection
+Poco::Net::NameValueCollection MwsRemoteJobManager::getCookies()
+{
+  Poco::Net::NameValueCollection nvc;
+  std::vector<Poco::Net::HTTPCookie>::const_iterator it = m_cookies.begin();
+  while (it != m_cookies.end())
+  {
+    nvc.add( (*it).getName(), (*it).getValue());
+    it++;
+  }
+  return nvc;
+}
+
 
 // On success, creates a new object and returns pointer to it.  On failure,
 // returns NULL

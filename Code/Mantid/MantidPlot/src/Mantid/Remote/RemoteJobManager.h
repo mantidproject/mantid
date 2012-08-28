@@ -9,6 +9,9 @@
 #include <ostream>
 #include <vector>
 
+#include <Poco/Net/HTTPCookie.h>
+#include <Poco/Net/NameValueCollection.h>
+
 class RemoteJobManager;         // Top-level abstract class
 class HttpRemoteJobManager;     // Mid-level abstract class. (Not sure we really need this.)
 class MwsRemoteJobManager;      // Abstract class - communicates w/ Moab Web Services
@@ -147,6 +150,16 @@ private:
     std::map<std::string, std::string> m_tzOffset;  // Maps timezone abbreviations to their offsets
                                                     // (See the comments in the constructor and in
                                                     // convertToISO8601()
+
+    // Store any cookies that the HTTP server sends us so we can send them back
+    // on future requests.  (In particular, the ORNL servers use session cookies
+    // so we don't have to authenticate to the LDAP server on every single request.)
+    //
+    // NOTE: For reasons that are unclear, Poco's HTTPResponse class returns cookies
+    // in a vector of HTTPCookie objects, but its HTTPRequest::setCookies() function
+    // takes a NameValueCollection object, so we have to convert.  (WTF Poco devs?!?)
+    std::vector<Poco::Net::HTTPCookie> m_cookies;
+    Poco::Net::NameValueCollection getCookies();
 
 };
 
