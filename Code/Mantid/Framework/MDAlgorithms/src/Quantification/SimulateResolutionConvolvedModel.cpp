@@ -193,17 +193,17 @@ namespace Mantid
       do
       {
         const size_t numEvents = inputIter->getNumEvents();
-        for(size_t i = 0; i < numEvents; ++i,++resultValueIndex)
+        for(size_t i = 0; i < numEvents; ++i)
         {
           const float signal = static_cast<float>(m_calculatedValues->getCalculated(resultValueIndex));
-          coord_t centers[4] = { inputIter->getInnerPosition(i,0), inputIter->getInnerPosition(i,1), 
+          coord_t centers[4] = { inputIter->getInnerPosition(i,0), inputIter->getInnerPosition(i,1),
                                  inputIter->getInnerPosition(i,2), inputIter->getInnerPosition(i,3) };
           m_outputWS->addEvent(MDEvent<4>(signal, errorSq,
                                           inputIter->getInnerRunIndex(i),
                                           inputIter->getInnerDetectorID(i),
                                           centers));
+          ++resultValueIndex;
         }
-        ++resultValueIndex;
       }
       while(inputIter->next());
       delete inputIter;

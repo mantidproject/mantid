@@ -207,8 +207,6 @@ namespace Mantid
                                     inputIter->getInnerRunIndex(i),
                                     inputIter->getInnerDetectorID(i),
                                     centers));
-
-
         }
       }
       while(inputIter->next());

@@ -152,7 +152,6 @@ namespace Mantid
     void ResolutionConvolvedCrossSection::function(const API::FunctionDomain&, API::FunctionValues& values) const
     {
       m_convolution->functionEvalStarting();
-      //IFunctionMD::function(domain, values);
 
       auto iter = m_workspace->createIterator();
       size_t resultValueIndex(0);
