@@ -23,6 +23,9 @@ namespace SliceViewer
   class PeakOverlayViewFactory;
   class PeakOverlayView;
 
+  /*---------------------------------------------------------
+  Abstract PeaksPresenter
+  ----------------------------------------------------------*/
   class DLLExport PeaksPresenter
   {
   public:
@@ -30,6 +33,11 @@ namespace SliceViewer
     virtual void updateWithSlicePoint(const double& slicePoint) = 0;
   };
 
+  /*---------------------------------------------------------
+  NullPeaksPresenter
+
+  This implementation prevents the client code having to run Null checks on the PeaksPresenter pointer before using it.
+  ----------------------------------------------------------*/
   class DLLExport NullPeaksPresenter : public PeaksPresenter
   {
   public:
@@ -37,9 +45,14 @@ namespace SliceViewer
     virtual void updateWithSlicePoint(const double& slicePoint)
     {
       UNUSED_ARG(slicePoint);
-    };
+    }
   };
 
+  /*---------------------------------------------------------
+  ConcretePeaksPresenter
+
+  Concrete implmentation of the Peaks presenter. 
+  ----------------------------------------------------------*/
   class DLLExport ConcretePeaksPresenter : public PeaksPresenter
   {
   public:
