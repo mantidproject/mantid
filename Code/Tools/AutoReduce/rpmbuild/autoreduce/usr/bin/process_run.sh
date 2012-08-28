@@ -47,6 +47,14 @@ echo
 
 # Reduce raw data
 echo "--------Reducing data--------"
+sharedDir="/"$facility"/"$instrument"/"$proposal"/shared/"
+redOutDir="/"$facility"/"$instrument"/"$proposal"/shared/autoreduce/"
+echo "redOutDir= "$redOutDir | sed "s/^/$(date) /" >> $logfile
+if [ ! -d $redOutDir ]; then
+  mkdir "$redOutDir"
+  echo $redOutDir" is created" | sed "s/^/$(date) /" >> $logfile
+fi
+
 reduce_script="/SNS/"$instrument"/shared/autoreduce/reduce_"$instrument".py"
 if [ ! -f $reduce_script ];
 then
