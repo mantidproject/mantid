@@ -14,6 +14,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/FileFinder.h"
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
@@ -107,6 +109,7 @@ void AlignAndFocusPowder::exec()
   m_inputW = getProperty("InputWorkspace");
   m_eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputW );
   instName = m_inputW->getInstrument()->getName();
+  instName = Kernel::ConfigService::Instance().getInstrument(instName).shortName();
   calFileName = getPropertyValue("CalFileName");
   offsetsWS = getProperty("OffsetsWorkspace");
   maskWS = getProperty("MaskWorkspace");
@@ -226,7 +229,7 @@ void AlignAndFocusPowder::exec()
 
   API::IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors");
   maskAlg->setProperty("Workspace", m_outputW);
-  maskAlg->setProperty("MaskedWorkspace", instName+"_mask");
+  maskAlg->setProperty("MaskedWorkspace", maskWS);
   maskAlg->executeAsSubAlg();
   m_outputW = maskAlg->getProperty("Workspace");
 
@@ -243,7 +246,7 @@ void AlignAndFocusPowder::exec()
   API::IAlgorithm_sptr alignAlg = createSubAlgorithm("AlignDetectors");
   alignAlg->setProperty("InputWorkspace", m_outputW);
   alignAlg->setProperty("OutputWorkspace", m_outputW);
-  alignAlg->setProperty("OffsetsWorkspace", instName+"_offsets");
+  alignAlg->setProperty("OffsetsWorkspace", offsetsWS);
   alignAlg->executeAsSubAlg();
   m_outputW = alignAlg->getProperty("OutputWorkspace");
 
@@ -314,7 +317,7 @@ void AlignAndFocusPowder::exec()
   API::IAlgorithm_sptr focusAlg = createSubAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", m_outputW);
   focusAlg->setProperty("OutputWorkspace", m_outputW);
-  focusAlg->setProperty("GroupingWorkspace", instName+"_group");
+  focusAlg->setProperty("GroupingWorkspace", groupWS);
   focusAlg->setProperty("PreserveEvents", false);
   focusAlg->executeAsSubAlg();
   m_outputW = focusAlg->getProperty("OutputWorkspace");
@@ -452,7 +455,7 @@ void AlignAndFocusPowder::execEvent()
 
   API::IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors");
   maskAlg->setProperty("Workspace", m_outputW);
-  maskAlg->setProperty("MaskedWorkspace", instName+"_mask");
+  maskAlg->setProperty("MaskedWorkspace", maskWS);
   maskAlg->executeAsSubAlg();
   m_outputW = maskAlg->getProperty("Workspace");
 
@@ -469,7 +472,7 @@ void AlignAndFocusPowder::execEvent()
   API::IAlgorithm_sptr alignAlg = createSubAlgorithm("AlignDetectors");
   alignAlg->setProperty("InputWorkspace", m_outputW);
   alignAlg->setProperty("OutputWorkspace", m_outputW);
-  alignAlg->setProperty("OffsetsWorkspace", instName+"_offsets");
+  alignAlg->setProperty("OffsetsWorkspace", offsetsWS);
   alignAlg->executeAsSubAlg();
   m_outputW = alignAlg->getProperty("OutputWorkspace");
 
@@ -542,7 +545,7 @@ void AlignAndFocusPowder::execEvent()
   API::IAlgorithm_sptr focusAlg = createSubAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", m_outputW);
   focusAlg->setProperty("OutputWorkspace", m_outputW);
-  focusAlg->setProperty("GroupingWorkspace", instName+"_group");
+  focusAlg->setProperty("GroupingWorkspace", groupWS);
   focusAlg->setProperty("PreserveEvents", preserveEvents);
   focusAlg->executeAsSubAlg();
   m_outputW = focusAlg->getProperty("OutputWorkspace");
