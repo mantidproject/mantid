@@ -27,9 +27,8 @@ private:
   {
   public:
     MOCK_METHOD1(setPlaneDistance, void(const double&));
-    MOCK_CONST_METHOD0(getOrigin, const QPointF&());
-    MOCK_CONST_METHOD0(getRadius, double());
     MOCK_METHOD0(updateView, void());
+    MOCK_METHOD1(setSlicePoint, void(const double&));
     ~MockPeakOverlayView(){}
   };
 
@@ -82,7 +81,7 @@ public:
     EXPECT_CALL(*pMockView, updateView()).Times(expectedNumberPeaks);
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
     
-    EXPECT_CALL(*mockViewFactory, createView(_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(expectedNumberPeaks);
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
@@ -91,9 +90,32 @@ public:
     // Updating should cause all of the held views to be updated too.
     presenter.update();
     
-    TSM_ASSERT("MockViewFactory not used as expected.", Mock::VerifyAndClearExpectations(mockViewFactory));
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
+  }
 
+  void test_set_slice_point()
+  {
+    // Create a widget factory mock
+    auto mockViewFactory = new MockPeakOverlayFactory;
+
+    const double slicePoint = 0.1;
+    const int expectedNumberPeaks = 10;
+
+    // Create a mock view object that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    EXPECT_CALL(*pMockView, setSlicePoint(slicePoint)).Times(expectedNumberPeaks);
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
+
+    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(expectedNumberPeaks);
+
+    // Construction should cause the widget factory to be used to generate peak overlay objects.
+    ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
+
+    // Updating should cause all of the held views to be updated too.
+    presenter.updateWithSlicePoint(slicePoint);
+
+    TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
   }
   
 };

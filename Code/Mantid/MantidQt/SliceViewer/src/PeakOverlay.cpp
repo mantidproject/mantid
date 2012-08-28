@@ -22,7 +22,7 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const QPointF& origin, const double& radius)
+  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius)
   : QWidget( parent ),
     m_plot(plot),
     m_origin(origin),
@@ -47,7 +47,7 @@ namespace SliceViewer
   ASCII diagram below to demonstrate how dz (distance in z) is used to determine the radius of the sphere-plane intersection at that point,
   resloves both rx and ry. Also uses the distance to calculate the opacity to apply.
 
-  @param dz : distance from the peak cetner in the md coordinates of the z-axis.
+  @param atPoint : distance from the peak cetner in the md coordinates of the z-axis.
 
        /---------\
       /           \
@@ -60,19 +60,30 @@ namespace SliceViewer
       \           /
        \---------/
   */
-  void PeakOverlay::setPlaneDistance(const double& dz)
+  void PeakOverlay::setSlicePoint(const double& z)
   {
-    const double distanceSQ = dz * dz;
-    m_radiusAtDistance = std::sqrt( (m_radius * m_radius) - distanceSQ );
+    const double distance = z - m_origin.Z();
+    const double distanceSQ = distance * distance;
+    const double radSQ = m_radius * m_radius;
+
+    if(distanceSQ < radSQ)
+    {
+      m_radiusAtDistance = std::sqrt( radSQ - distanceSQ );
+    }
+    else
+    {
+      m_radiusAtDistance = 0;
+    }
+    
 
     // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
-    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius) * dz  + m_opacityMax;
+    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius) * distance  + m_opacityMax;
     m_opacityAtDistance = m_opacityAtDistance >= m_opacityMin ? m_opacityAtDistance : m_opacityMin;
 
     this->update(); //repaint
   }
 
-  const QPointF & PeakOverlay::getOrigin() const
+  const Mantid::Kernel::V3D & PeakOverlay::getOrigin() const
   { return m_origin; }
 
   double PeakOverlay::getRadius() const
@@ -102,8 +113,8 @@ namespace SliceViewer
   void PeakOverlay::paintEvent(QPaintEvent * /*event*/)
   {
     // Linear Transform from MD coordinates into Windows/Qt coordinates for ellipse rendering. TODO: This can be done outside of paintEvent.
-    const int xOrigin = m_plot->transform( QwtPlot::xBottom, m_origin.x() );
-    const int yOrigin = m_plot->transform( QwtPlot::yLeft, m_origin.y() );
+    const int xOrigin = m_plot->transform( QwtPlot::xBottom, m_origin.X() );
+    const int yOrigin = m_plot->transform( QwtPlot::yLeft, m_origin.Y() );
     const QPointF originWindows(xOrigin, yOrigin);
 
     const QwtDoubleInterval interval = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();

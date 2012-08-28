@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include <vector>
 #include <boost/shared_ptr.hpp>
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -26,12 +27,17 @@ namespace SliceViewer
   {
   public:
     virtual void update() = 0;
+    virtual void updateWithSlicePoint(const double& slicePoint) = 0;
   };
 
   class DLLExport NullPeaksPresenter : public PeaksPresenter
   {
   public:
     virtual void update(){};
+    virtual void updateWithSlicePoint(const double& slicePoint)
+    {
+      UNUSED_ARG(slicePoint);
+    };
   };
 
   class DLLExport ConcretePeaksPresenter : public PeaksPresenter
@@ -39,6 +45,7 @@ namespace SliceViewer
   public:
     ConcretePeaksPresenter(PeakOverlayViewFactory* factory, boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS);
     virtual void update();
+    virtual void updateWithSlicePoint(const double& slicePoint);
   private:
     typedef std::vector< boost::shared_ptr<PeakOverlayView> > VecPeakOverlayView;
     /// Peak overlay views.

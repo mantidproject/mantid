@@ -38,12 +38,8 @@ namespace MantidQt
     class DLLExport PeakOverlayView
     {
     public:
-      /// Set the distance between the plane and the origin in md-z coordinates.
-      virtual void setPlaneDistance(const double& dz) = 0; 
-      /// Get the origin. md x, md y
-      virtual const QPointF & getOrigin() const = 0;
-      /// Get the radius. md x, md y
-      virtual double  getRadius() const = 0;
+      /// Set the position of the slice point.
+      virtual void setSlicePoint(const double&) = 0; 
       /// Update the view.
       virtual void updateView() = 0;
       /// Destructor

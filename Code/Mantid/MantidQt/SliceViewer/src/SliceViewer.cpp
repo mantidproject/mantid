@@ -1422,7 +1422,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
-  m_peaksPresenter->update();
+  m_peaksPresenter->updateWithSlicePoint(m_dimWidgets[2]->getSlicePoint());
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);

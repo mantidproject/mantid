@@ -22,7 +22,6 @@ namespace SliceViewer
       const Mantid::API::IPeak& peak = peaksWS->getPeak(i);
       auto view = boost::shared_ptr<PeakOverlayView>( factory_scptr->createView(peak) );
       m_viewPeaks.push_back( view );
-      view->setPlaneDistance(0); // HACK
     }
   }
 
@@ -34,6 +33,18 @@ namespace SliceViewer
       (*it)->updateView();
       ++it;
     }
+  }
+
+  void ConcretePeaksPresenter::updateWithSlicePoint(const double& slicePoint)
+  {
+    VecPeakOverlayView::iterator it = m_viewPeaks.begin();
+    while(it != m_viewPeaks.end())
+    {
+      auto view = (*it);
+      view->setSlicePoint(slicePoint);
+      ++it;
+    }
+
   }
 }
 }

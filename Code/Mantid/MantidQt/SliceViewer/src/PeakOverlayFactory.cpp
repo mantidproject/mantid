@@ -46,9 +46,7 @@ namespace MantidQt
            3) Create the origin x, y based on these hkl values.
         */
 
-        QPointF origin(position.X(), position.Y()); // This needs to be calculated properly! See above.
-
-        return boost::make_shared<PeakOverlay>(m_plot, m_parent, origin, radius);
+        return boost::make_shared<PeakOverlay>(m_plot, m_parent, position, radius);
       }
 
       PeakOverlayFactory::~PeakOverlayFactory()

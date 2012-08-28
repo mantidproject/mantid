@@ -3,6 +3,7 @@
 
 #include "DllOption.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 #include <q3iconview.h>
 #include <QtCore/QtCore>
 #include <QtGui/qwidget.h>
@@ -46,15 +47,15 @@ namespace SliceViewer
 
   public:
     /// Constructor
-    PeakOverlay(QwtPlot * plot, QWidget * parent, const QPointF& origin, const double& radius);
+    PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius);
     /// Destructor
     virtual ~PeakOverlay();
-    /// Set the distance between the origin and the plane in the z-md-coordinate system.
-    virtual void setPlaneDistance(const double& dz); 
+    /// Set the slice point at position.
+    virtual void setSlicePoint(const double& point); 
     /// Update the view.
     virtual void updateView();
     /// Get the origin. md x, md y
-    const QPointF & getOrigin() const;
+    const Mantid::Kernel::V3D & getOrigin() const;
     double getRadius() const;
 
   private:
@@ -69,8 +70,8 @@ namespace SliceViewer
 
     /// QwtPlot containing this
     QwtPlot * m_plot;
-    /// Origin md-x, md-y
-    QPointF m_origin;
+    /// Origin md-x, md-y, and md-z
+    Mantid::Kernel::V3D m_origin;
     /// Radius md-x, md-y
     double m_radius;
     /// Max opacity
