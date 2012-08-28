@@ -106,8 +106,9 @@ namespace SliceViewer
     const int yOrigin = m_plot->transform( QwtPlot::yLeft, m_origin.y() );
     const QPointF originWindows(xOrigin, yOrigin);
 
-    const double yMin = m_plot->axisScaleDiv(QwtPlot::yLeft)->lowerBound();
-    const double yMax = m_plot->axisScaleDiv(QwtPlot::yLeft)->upperBound();
+    const QwtDoubleInterval interval = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();
+    const double yMin = interval.minValue();
+    const double yMax = interval.maxValue();
     const double scale = height()/(yMax - yMin);
 
     const double radius = scale * m_radiusAtDistance;
