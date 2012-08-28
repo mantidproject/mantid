@@ -3,6 +3,16 @@
 
 #include "MantidKernel/System.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
+#include <boost/shared_ptr.hpp>
+
+namespace Mantid
+{
+  namespace API
+  {
+    // Forward dec.
+    class IPeak;
+  }
+}
 
 namespace MantidQt
 {
@@ -35,8 +45,8 @@ namespace MantidQt
     class DLLExport PeakOverlayViewFactory
     {
     public:
-      /// Set the distance between the plane and the origin in md-z coordinates.
-      virtual PeakOverlayView* createView(const QPointF& origin, const QPointF& radius) const = 0;
+      /// Create a peak view from the peak object.
+      virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::API::IPeak&) const = 0;
       /// Destructor
       virtual ~PeakOverlayViewFactory()
       {

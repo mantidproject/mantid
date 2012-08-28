@@ -8,20 +8,31 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
-  PeaksPresenter::PeaksPresenter(PeakOverlayViewFactory* factory, Mantid::API::IPeaksWorkspace_sptr peaksWS)
+  ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory* factory, Mantid::API::IPeaksWorkspace_sptr peaksWS)
   {
     if(factory == NULL)
     {
       throw std::invalid_argument("PeakOverlayViewFactory is null");
     }
+
+    // Create views for every peak in the workspace.
     boost::scoped_ptr<PeakOverlayViewFactory> factory_scptr(factory);
     for(int i = 0; i < peaksWS->getNumberPeaks(); ++i)
     {
       const Mantid::API::IPeak& peak = peaksWS->getPeak(i);
-      //peak.getHKL();
-      //TODO: translate the peak into an origin & radius.
+      auto view = boost::shared_ptr<PeakOverlayView>( factory_scptr->createView(peak) );
+      m_viewPeaks.push_back( view );
+      view->setPlaneDistance(0); // HACK
+    }
+  }
 
-      factory_scptr->createView(QPointF(0,0), QPointF(1,1));
+  void ConcretePeaksPresenter::update()
+  {
+    VecPeakOverlayView::iterator it = m_viewPeaks.begin();
+    while(it != m_viewPeaks.end())
+    {
+      (*it)->updateView();
+      ++it;
     }
   }
 }

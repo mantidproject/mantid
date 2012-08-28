@@ -46,11 +46,13 @@ namespace SliceViewer
 
   public:
     /// Constructor
-    PeakOverlay(QwtPlot * plot, QWidget * parent, const QPointF& origin, const QPointF& radius);
+    PeakOverlay(QwtPlot * plot, QWidget * parent, const QPointF& origin, const double& radius);
     /// Destructor
     virtual ~PeakOverlay();
     /// Set the distance between the origin and the plane in the z-md-coordinate system.
-    void setPlaneDistance(const double& dz); 
+    virtual void setPlaneDistance(const double& dz); 
+    /// Update the view.
+    virtual void updateView();
     /// Get the origin. md x, md y
     const QPointF & getOrigin() const;
     double getRadius() const;
@@ -70,7 +72,7 @@ namespace SliceViewer
     /// Origin md-x, md-y
     QPointF m_origin;
     /// Radius md-x, md-y
-    QPointF m_radius;
+    double m_radius;
     /// Max opacity
     const double m_opacityMax;
     /// Min opacity
@@ -78,10 +80,8 @@ namespace SliceViewer
     /// Cached opacity at the distance z from origin
     double m_opacityAtDistance;
     /// Cached radius at the distance z from origin
-    double m_radiusXAtDistance;
-    /// Cached radius x at the distance x from origin, in md-x coordinates
-    double m_radiusYAtDistance;
-    /// Cached radius y at the distance y from origin, in md-y coordinates
+    double m_radiusAtDistance;
+    /// Cached radius at distance
   };
 
 

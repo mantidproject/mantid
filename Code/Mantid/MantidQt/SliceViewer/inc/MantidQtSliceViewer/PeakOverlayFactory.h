@@ -40,10 +40,11 @@ namespace MantidQt
     private:
       QwtPlot * m_plot;
       QWidget * m_parent;
+      PeakDimensions m_peakDims;
     public:
-      PeakOverlayFactory(QwtPlot * plot, QWidget * parent);
+      PeakOverlayFactory(QwtPlot * plot, QWidget * parent, const PeakDimensions peakDims);
       virtual ~PeakOverlayFactory();
-      virtual PeakOverlayView* createView(const QPointF& origin, const QPointF& radius) const;
+      virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::API::IPeak&) const;
     };
   }
 }

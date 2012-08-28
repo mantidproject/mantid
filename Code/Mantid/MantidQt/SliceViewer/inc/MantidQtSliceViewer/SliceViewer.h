@@ -33,6 +33,9 @@ namespace MantidQt
 namespace SliceViewer
 {
 
+// Forward dec
+class PeaksPresenter;
+
 /** GUI for viewing a 2D slice out of a multi-dimensional workspace.
  * You can select which dimension to plot as X,Y, and the cut point
  * along the other dimension(s).
@@ -162,6 +165,10 @@ private:
 
 
 private:
+  // -------------------------- Controllers ------------------------
+
+  boost::shared_ptr<PeaksPresenter>  m_peaksPresenter;
+
   // -------------------------- Widgets ----------------------------
 
   /// Auto-generated UI controls.

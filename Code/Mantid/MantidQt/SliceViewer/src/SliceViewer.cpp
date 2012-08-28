@@ -2,6 +2,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -17,6 +18,8 @@
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtSliceViewer/PeakOverlayFactory.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "qmainwindow.h"
 #include "qmenubar.h"
@@ -49,6 +52,7 @@
 #include <qwt_scale_map.h>
 #include <sstream>
 #include <vector>
+#include <boost/make_shared.hpp>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
@@ -88,7 +92,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_dimX(0), m_dimY(1),
       m_logColor(false),
       m_fastRender(true),
-      m_rebinMode(false), m_rebinLocked(true)
+      m_rebinMode(false), m_rebinLocked(true), m_peaksPresenter(PeaksPresenter_sptr(new NullPeaksPresenter))
 {
 	ui.setupUi(this);
 
@@ -149,6 +153,11 @@ SliceViewer::SliceViewer(QWidget *parent)
   // -------- Peak Overlay ----------------
   //PeakOverlay* m_peakOverlay = new PeakOverlay(m_plot, m_plot->canvas(), QPointF(0.5,0.5), QPointF(0.1, 0.2)); //TODO use the peak overlay
   //m_peakOverlay->setPlaneDistance(0);
+
+  //IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>("loadedpeaks2");
+  //    PeakOverlayFactory* factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), PeakDimensions::HKLView);
+  //    m_peaksPresenter = boost::make_shared<PeaksPresenter>(factory, peaksWS);
+
   ui.btnPeakOverlay->setEnabled(true);
 }
 
@@ -969,6 +978,7 @@ void SliceViewer::resetZoom()
   resetAxis(m_spect->yAxis(), m_Y );
   // Make sure the view updates
   m_plot->replot();
+  m_peaksPresenter->update();
 }
 
 //------------------------------------------------------------------------------------
@@ -1412,6 +1422,7 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
+  m_peaksPresenter->update();
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
@@ -1753,6 +1764,7 @@ void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, doubl
   m_plot->setAxisScale( m_spect->yAxis(), ybottom, ytop);
   // Make sure the view updates
   m_plot->replot();
+  m_peaksPresenter->update();
 }
 
 //------------------------------------------------------------------------------------
@@ -2065,11 +2077,12 @@ void SliceViewer::peakOverlay_toggled(bool checked)
     if(ret == QDialog::Accepted)
     {
       QStringList list = dlg.getSelectedNames();
-      UNUSED_ARG(list); // TODO, display these peak workspaces.
-    }
-    else
-    {
-      return;
+      if(!list.isEmpty())
+      {
+        IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
+        PeakOverlayFactory* factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), PeakDimensions::HKLView);
+        m_peaksPresenter = boost::make_shared<ConcretePeaksPresenter>(factory, peaksWS);
+      }
     }
   }
 }

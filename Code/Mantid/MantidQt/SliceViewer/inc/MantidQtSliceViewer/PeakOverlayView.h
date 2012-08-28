@@ -8,6 +8,9 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+    /// Enum describing types of peak dimensions.
+    enum PeakDimensions{LabView, SampleView, HKLView};
+
     /** Abstract view in MVP model representing a PeakOverlay.
     
     @date 2012-08-24
@@ -40,7 +43,9 @@ namespace MantidQt
       /// Get the origin. md x, md y
       virtual const QPointF & getOrigin() const = 0;
       /// Get the radius. md x, md y
-      virtual const QPointF &  getRadius() const = 0;
+      virtual const double &  getRadius() const = 0;
+      /// Update the view.
+      virtual void updateView() = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

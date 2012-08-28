@@ -22,7 +22,7 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const QPointF& origin, const QPointF& radius)
+  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const QPointF& origin, const double& radius)
   : QWidget( parent ),
     m_plot(plot),
     m_origin(origin),
@@ -31,6 +31,7 @@ namespace SliceViewer
     m_opacityMin(0.1)
   {
     setAttribute(Qt::WA_NoMousePropagation, false);
+    this->setVisible(true);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -61,16 +62,11 @@ namespace SliceViewer
   */
   void PeakOverlay::setPlaneDistance(const double& dz)
   {
-    /*
-    Note that this is actually slightly wrong since the distance is in the z-axis, we must scale the distance to the x-axis and
-    y-axis first. However, since the same feature will be applied to each peak radius and each peak opacity, I'm leaving it for the time-being.
-    */
     const double distanceSQ = dz * dz;
-    m_radiusXAtDistance = std::sqrt( (m_radius.x() * m_radius.x()) - distanceSQ );
-    m_radiusYAtDistance = std::sqrt( (m_radius.y() * m_radius.y()) - distanceSQ );
+    m_radiusAtDistance = std::sqrt( (m_radius * m_radius) - distanceSQ );
 
     // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
-    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius.x()) * dz  + m_opacityMax;
+    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius) * dz  + m_opacityMax;
     m_opacityAtDistance = m_opacityAtDistance >= m_opacityMin ? m_opacityAtDistance : m_opacityMin;
 
     this->update(); //repaint
@@ -109,17 +105,12 @@ namespace SliceViewer
     const int xOrigin = m_plot->transform( QwtPlot::xBottom, m_origin.x() );
     const int yOrigin = m_plot->transform( QwtPlot::yLeft, m_origin.y() );
     const QPointF originWindows(xOrigin, yOrigin);
-    
-    const double xMin = m_plot->axisScaleDiv(QwtPlot::xBottom)->lowerBound();
-    const double  xMax = m_plot->axisScaleDiv(QwtPlot::xBottom)->upperBound();
-    const double scaleX = width()/(xMax - xMin);
 
-    const double  yMin = m_plot->axisScaleDiv(QwtPlot::yLeft)->lowerBound();
-    const double  yMax = m_plot->axisScaleDiv(QwtPlot::yLeft)->upperBound();
-    const double scaleY = height()/(yMax - yMin);
+    const double yMin = m_plot->axisScaleDiv(QwtPlot::yLeft)->lowerBound();
+    const double yMax = m_plot->axisScaleDiv(QwtPlot::yLeft)->upperBound();
+    const double scale = height()/(yMax - yMin);
 
-    int rx = scaleX * m_radiusXAtDistance;
-    int ry = scaleY * m_radiusYAtDistance;
+    const double radius = scale * m_radiusAtDistance;
 
     // Draw circle and inner circle.
     QPainter painter(this);
@@ -127,13 +118,19 @@ namespace SliceViewer
 
     painter.setOpacity(m_opacityAtDistance); //Set the pre-calculated opacity
     painter.setBrush(Qt::cyan);
-    painter.drawEllipse( originWindows, rx, ry );
+    painter.drawEllipse( originWindows, radius, radius );
 
     QPen pen( Qt::green );
     pen.setWidth(2);
     painter.setPen( pen );
-    painter.drawEllipse( originWindows, rx, ry );
+    painter.drawEllipse( originWindows, radius, radius );
 
+  }
+
+  void PeakOverlay::updateView()
+  {
+    this->update();
+    this->repaint();
   }
 
 

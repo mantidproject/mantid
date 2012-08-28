@@ -1,12 +1,16 @@
 #include "MantidQtSliceViewer/PeakOverlayFactory.h"
 #include "MantidQtSliceViewer/PeakOverlay.h"
+#include "MantidAPI/IPeak.h"
+#include <boost/make_shared.hpp>
+
+using namespace Mantid::API;
 
 namespace MantidQt
 {
   namespace SliceViewer
   {
     
-      PeakOverlayFactory::PeakOverlayFactory(QwtPlot * plot, QWidget * parent) : m_plot(plot), m_parent(parent)
+      PeakOverlayFactory::PeakOverlayFactory(QwtPlot * plot, QWidget * parent, const PeakDimensions peakDims) : m_plot(plot), m_parent(parent), m_peakDims(peakDims)
       {
         if(!plot)
           throw std::invalid_argument("PeakOverlayFactory plot is null");
@@ -14,9 +18,37 @@ namespace MantidQt
           throw std::invalid_argument("PeakOverlayFactory parent widget is null");
       }
       
-      PeakOverlayView* PeakOverlayFactory::createView(const QPointF& origin, const QPointF& radius) const
+      boost::shared_ptr<PeakOverlayView> PeakOverlayFactory::createView(const Mantid::API::IPeak& peak) const
       {
-        return new PeakOverlay(m_plot, m_parent, origin, radius);
+        Mantid::Kernel::V3D position;
+        switch(m_peakDims)
+        {
+        case PeakDimensions::LabView:
+          position = peak.getQLabFrame();
+          break;
+        case PeakDimensions::SampleView:
+          position = peak.getQSampleFrame();
+          break;
+        case PeakDimensions::HKLView:
+          position = peak.getHKL();
+          break;
+        default:
+          throw std::runtime_error("Unknown PeakDimension type");
+        }
+
+        double radius = peak.getIntensity(); //TODO: we should normalise this!
+        radius = 1; //HACK
+        //QwtText xDim = m_plot->axisTitle(QwtPlot::xBottom);
+        //QwtText yDim = m_plot->axisTitle(QwtPlot::yLeft);
+
+        /* 1) Find out which dimensions are being plotted on x and y 
+           2) Find out what h, k, l each of these dimensions correspond to.
+           3) Create the origin x, y based on these hkl values.
+        */
+
+        QPointF origin(position.X(), position.Y()); // This needs to be calculated properly! See above.
+
+        return boost::make_shared<PeakOverlay>(m_plot, m_parent, origin, radius);
       }
 
       PeakOverlayFactory::~PeakOverlayFactory()
