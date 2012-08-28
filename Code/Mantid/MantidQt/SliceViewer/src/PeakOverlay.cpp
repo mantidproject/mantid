@@ -27,7 +27,7 @@ namespace SliceViewer
     m_plot(plot),
     m_origin(origin),
     m_radius(radius),
-    m_opacityMax(1),
+    m_opacityMax(0.6),
     m_opacityMin(0.1)
   {
     setAttribute(Qt::WA_NoMousePropagation, false);
@@ -134,6 +134,7 @@ namespace SliceViewer
 
     QPen pen( Qt::green );
     pen.setWidth(2);
+    pen.setStyle(Qt::DashDotLine);
     painter.setPen( pen );
     painter.drawEllipse( originWindows, radius, radius );
 
@@ -145,6 +146,10 @@ namespace SliceViewer
     this->repaint();
   }
 
+  void PeakOverlay::hideView()
+  {
+    this->hide();
+  }
 
 } // namespace Mantid
 } // namespace SliceViewer

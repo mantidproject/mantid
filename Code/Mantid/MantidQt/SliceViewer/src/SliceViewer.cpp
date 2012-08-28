@@ -2085,6 +2085,10 @@ void SliceViewer::peakOverlay_toggled(bool checked)
       }
     }
   }
+  else
+  {
+    m_peaksPresenter = boost::make_shared<NullPeaksPresenter>();
+  }
 }
 
 } //namespace

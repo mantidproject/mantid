@@ -57,6 +57,7 @@ namespace SliceViewer
   {
   public:
     ConcretePeaksPresenter(PeakOverlayViewFactory* factory, boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS);
+    virtual ~ConcretePeaksPresenter();
     virtual void update();
     virtual void updateWithSlicePoint(const double& slicePoint);
   private:

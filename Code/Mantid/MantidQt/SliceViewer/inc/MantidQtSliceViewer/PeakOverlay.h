@@ -52,6 +52,8 @@ namespace SliceViewer
     virtual ~PeakOverlay();
     /// Set the slice point at position.
     virtual void setSlicePoint(const double& point); 
+    /// Hide the view.
+    virtual void hideView();
     /// Update the view.
     virtual void updateView();
     /// Get the origin. md x, md y

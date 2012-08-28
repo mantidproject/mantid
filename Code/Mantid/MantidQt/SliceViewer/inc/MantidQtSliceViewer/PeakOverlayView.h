@@ -42,6 +42,8 @@ namespace MantidQt
       virtual void setSlicePoint(const double&) = 0; 
       /// Update the view.
       virtual void updateView() = 0;
+      /// Hide the view.
+      virtual void hideView() = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

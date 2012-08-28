@@ -27,24 +27,26 @@ namespace SliceViewer
 
   void ConcretePeaksPresenter::update()
   {
-    VecPeakOverlayView::iterator it = m_viewPeaks.begin();
-    while(it != m_viewPeaks.end())
+    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
     {
       (*it)->updateView();
-      ++it;
     }
   }
 
   void ConcretePeaksPresenter::updateWithSlicePoint(const double& slicePoint)
   {
-    VecPeakOverlayView::iterator it = m_viewPeaks.begin();
-    while(it != m_viewPeaks.end())
+    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
     {
-      auto view = (*it);
-      view->setSlicePoint(slicePoint);
-      ++it;
+      (*it)->setSlicePoint(slicePoint);
     }
+  }
 
+  ConcretePeaksPresenter::~ConcretePeaksPresenter()
+  {
+    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+    {
+      (*it)->hideView();
+    }
   }
 }
 }

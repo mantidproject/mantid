@@ -29,6 +29,7 @@ private:
     MOCK_METHOD1(setPlaneDistance, void(const double&));
     MOCK_METHOD0(updateView, void());
     MOCK_METHOD1(setSlicePoint, void(const double&));
+    MOCK_METHOD0(hideView, void());
     ~MockPeakOverlayView(){}
   };
 
@@ -114,6 +115,28 @@ public:
 
     // Updating should cause all of the held views to be updated too.
     presenter.updateWithSlicePoint(slicePoint);
+
+    TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
+  }
+
+  void test_hide_owned_views_on_death()
+  {
+    // Create a widget factory mock
+    auto mockViewFactory = new MockPeakOverlayFactory;
+
+    const int expectedNumberPeaks = 1;
+
+    // Create a mock view object that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberPeaks);
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
+
+    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(expectedNumberPeaks);
+
+    {
+      ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
+    } // Guaranteed destruction at this point. Destructor should trigger hide on all owned views.
 
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
   }
