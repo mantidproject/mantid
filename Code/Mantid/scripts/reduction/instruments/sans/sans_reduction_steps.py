@@ -967,9 +967,9 @@ class CalculateNorm(object):
                 RenameWorkspace(self.TMP_WORKSPACE_NAME, wave_adj)
             else:
                 #multiplying two raw counts workspaces gives a dependence on the bin width^2 which Mantid isn't set up to handle (dependence on the bin width = is distribution = is handled)
-                if not mtd[wave_adj].isDistribution():
-                    if not mtd[self.TMP_WORKSPACE_NAME].isDistribution():
-                        ConvertToDistribution(self.TMP_WORKSPACE_NAME)
+                #if not mtd[wave_adj].isDistribution():
+                #    if not mtd[self.TMP_WORKSPACE_NAME].isDistribution():
+                #        ConvertToDistribution(self.TMP_WORKSPACE_NAME)
                 Multiply(self.TMP_WORKSPACE_NAME, wave_adj, wave_adj)
 
         # read pixel correction file
