@@ -346,8 +346,7 @@ void CommandLineInterpreter::showContextMenu(const QPoint & clickPoint)
  */
 void CommandLineInterpreter::displayOutput(const QString & messages)
 {
-  if(!text().endsWith("\n")) append("\n");
-  if(messages != "\n") append(messages);
+  append(messages);
 }
 
 /**
@@ -356,7 +355,6 @@ void CommandLineInterpreter::displayOutput(const QString & messages)
  */
 void CommandLineInterpreter::displayError(const QString & messages)
 {
-  if(!text().endsWith("\n")) append("\n");
   append(messages);
 }
 
@@ -366,7 +364,7 @@ void CommandLineInterpreter::displayError(const QString & messages)
 void CommandLineInterpreter::insertInputPrompt()
 {
   const int prevPromptLineIndex = m_currentPromptLineIndex;
-  append("\n");
+  if(!text().endsWith("\n")) append("\n"); // If the text is already on a new line don't bother with another
   moveCursorToStartOfLastLine();
   m_currentPromptLineIndex = indexOfLastLine();
   // Order is important. Qscintilla tries to make the markers
@@ -718,6 +716,8 @@ void CommandLineInterpreter::tryExecute()
   }
   else
   {
+    // Move cursor to start of fresh line to guarantee output is on fresh line
+    append("\n");
     execute();
   }
 }
