@@ -225,7 +225,8 @@ class SNSPowderReduction(PythonAlgorithm):
                              "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
         self.declareProperty("FilterBadPulses", True, "Filter out events measured while proton charge is more than 5% below average")
-        outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof', 'gsas and fullprof and pdfgetn']
+        outfiletypes = ['gsas', 'fullprof', 'gsas and fullprof', 'gsas and fullprof and pdfgetn', 'NeXus',
+                            'gsas and NeXus', 'fullprof and NeXus', 'gsas and fullprof and NeXus', 'gsas and fullprof and pdfgetn and NeXus']
         self.declareProperty("FilterByLogValue", "", "Name of log value to filter by")
         self.declareProperty("FilterMinimumValue", 0.0, "Minimum log value for which to keep events.")
         self.declareProperty("FilterMaximumValue", 0.0, "Maximum log value for which to keep events.")
@@ -358,7 +359,11 @@ class SNSPowderReduction(PythonAlgorithm):
             api.SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, 
                     MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
         if "fullprof" in self._outTypes:
-            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".dat")
+            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".dat")          
+        if "NeXus" in self._outTypes:
+            api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits"))
+            api.Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning) # crop edges
+            api.SaveNexus(InputWorkspace=wksp, Filename=filename+".nxs")
 
         # always save python script
         api.GeneratePythonScript(InputWorkspace=wksp, Filename=filename+".py")
@@ -445,7 +450,11 @@ class SNSPowderReduction(PythonAlgorithm):
             elif canRun < 0: # turn off the correction
                 canRun = 0
             if canRun > 0:
-                if ("%s_%d" % (self._instrument, canRun)) in mtd:
+                canFile = "%s_%d" % (self._instrument, canRun)+".nxs"
+                if HAVE_MPI and os.path.exists(canFile):
+                    if mpi.world.rank == 0:                     
+                        canRun = api.Load(Filename=canFile, OutputWorkspace=canRun)
+                elif ("%s_%d" % (self._instrument, canRun)) in mtd:
                     canRun = mtd["%s_%d" % (self._instrument, canRun)]
                 else:
                     if self.getProperty("FilterCharacterizations").value:
@@ -454,13 +463,11 @@ class SNSPowderReduction(PythonAlgorithm):
                     else:
                         canRun = self._focusChunks(canRun, SUFFIX, (0., 0.), calib,
                                preserveEvents=preserveEvents)
-                if HAVE_MPI:
-                    if mpi.world.rank == 0:
-                        canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
-                        workspacelist.append(str(canRun))
-                else:
                     canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
-                    workspacelist.append(str(canRun))
+                    if HAVE_MPI:
+                        if mpi.world.rank == 0:
+                            api.SaveNexus(InputWorkspace=canRun, Filename=canFile)
+                workspacelist.append(str(canRun))
             else:
                 canRun = None
 
@@ -471,7 +478,11 @@ class SNSPowderReduction(PythonAlgorithm):
             elif vanRun < 0: # turn off the correction
                 vanRun = 0
             if vanRun > 0:
-                if ("%s_%d" % (self._instrument, vanRun)) in mtd:
+                vanFile = "%s_%d" % (self._instrument, vanRun)+".nxs"
+                if HAVE_MPI and os.path.exists(vanFile):
+                    if mpi.world.rank == 0:                     
+                        vanRun = api.Load(Filename=vanFile, OutputWorkspace=vanRun)
+                elif ("%s_%d" % (self._instrument, vanRun)) in mtd:
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
                 else:
                     vnoiseRun = self._info.vnoise # noise run for the vanadium
@@ -558,10 +569,10 @@ class SNSPowderReduction(PythonAlgorithm):
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
                     vanRun = api.SetUncertainties(InputWorkspace=vanRun, OutputWorkspace=vanRun)
-                if HAVE_MPI:
-                    if mpi.world.rank > 0:
-                        return
-                vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                    if HAVE_MPI:
+                        if mpi.world.rank == 0:
+                            api.SaveNexus(InputWorkspace=vanRun, Filename=vanFile)
                 workspacelist.append(str(vanRun))
             else:
                 vanRun = None
