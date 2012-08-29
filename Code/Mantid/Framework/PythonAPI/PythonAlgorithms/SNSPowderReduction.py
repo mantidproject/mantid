@@ -178,7 +178,7 @@ class SNSPowderReduction(PythonAlgorithm):
         arrvalidator = IntArrayBoundedValidator()
         arrvalidator.setLower(0)
         self.declareProperty(IntArrayProperty("RunNumber", values=[0], validator=arrvalidator,
-                             direction=Direction.Input))
+                             direction=Direction.Input), "Number of sample run or 0 for only Vanadium and/or Background")
         extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml"]
         self.declareProperty("Extension", "_event.nxs",
                              StringListValidator(extensions))
@@ -437,7 +437,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
         for samRun in samRuns:
             # first round of processing the sample
-            if not self.getProperty("Sum").value:
+            if not self.getProperty("Sum").value and samRun > 0:
                 self._info = None
                 samRun = self._focusChunks(samRun, SUFFIX, filterWall, calib, filterLogs,
                                preserveEvents=preserveEvents, normByCurrent=normbycurrent)
@@ -577,6 +577,8 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 vanRun = None
 
+            if samRun == 0:
+                return
             # the final bit of math
             if canRun is not None:
                 samRun -= canRun
