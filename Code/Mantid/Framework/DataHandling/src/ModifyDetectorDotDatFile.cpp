@@ -138,8 +138,8 @@ namespace DataHandling
 
        std::istringstream istr(str);
     
-       int detID;
-       float offset;
+       detid_t detID;
+       double offset;
        int code;
        float dump; // ignored data
 
@@ -154,18 +154,28 @@ namespace DataHandling
 
        if( code == 3 ){
           // This is detector will look for it in workspace and if found use its position
-          std::streampos width = istr.tellg(); // Amount of string to replace
-          // Some experimenting with line manipulation
-          std::ostringstream oss;
-          oss  << std::fixed << std::right ;
-          oss.precision(pOffset);
-          oss << std::setw(wDet) << detID << std::setw(wOff) << offset;
-          oss.precision(pOther);
-          oss << std::setw(wRad) << (55.0+i)/6.0 << std::setw(wCode) << code << std::setw(wAng) << (360.0+i)/7.01 << std::setw(wAng) << -(400.0-i)/7.0 ;
-          std::string prefix = oss.str();
-          std::string suffix = str.substr( width, std::string::npos );
-          out << prefix << suffix << "\n";
-          i++;
+          Geometry::IDetector_const_sptr det = ws->getDetectorByID( detID );
+          if( det ) {
+              V3D pos = det->getPos();
+              double l2;
+              double theta;
+              double phi;
+              pos.getSpherical ( l2, theta, phi ); 
+              std::streampos width = istr.tellg(); // Amount of string to replace
+              // Some experimenting with line manipulation
+              std::ostringstream oss;
+              oss  << std::fixed << std::right ;
+              oss.precision(pOffset);
+              oss << std::setw(wDet) << detID << std::setw(wOff) << offset;
+              oss.precision(pOther);
+              oss << std::setw(wRad) << l2 << std::setw(wCode) << code << std::setw(wAng) << theta << std::setw(wAng) << phi ;
+              std::string prefix = oss.str();
+              std::string suffix = str.substr( width, std::string::npos );
+              out << prefix << suffix << "\n";
+              i++;
+          } else {  // Detector not found, don't modify
+              out << str << "\n";
+          }
        } else {
        // We do not modify any other type of line
           out << str << "\n";
