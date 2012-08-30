@@ -7,6 +7,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidCurveFitting/Polynomial.h"
+#include "MantidCurveFitting/Chebyshev.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -379,7 +380,9 @@ DECLARE_ALGORITHM(ProcessBackground)
       }
       else if (backgroundtype.compare("Chebyshev") == 0)
       {
-          throw std::runtime_error("Chebyshev background has not been implemented.");
+          CurveFitting::Chebyshev cheby;
+          bkgdfunction = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>
+                  (boost::make_shared<CurveFitting::Chebyshev>(cheby));
       }
       else
       {
