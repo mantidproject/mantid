@@ -567,8 +567,14 @@ class WeightedAzimuthalAverage(ReductionStep):
             
         output_ws = workspace+str(self._suffix)
 
-        ConvertToMatrixWorkspace(workspace, '__'+workspace)
-        Q1DWeighted(InputWorkspace='__'+workspace, 
+        # If we kept the events this far, we need to convert the input workspace
+        # to a histogram here
+        input_workspace = workspace
+        if not isinstance(mtd[workspace]._getHeldObject(), MatrixWorkspace):
+            input_workspace = '__'+workspace
+            ConvertToMatrixWorkspace(workspace, input_workspace)
+            
+        Q1DWeighted(InputWorkspace=input_workspace, 
                     OutputWorkspace=output_ws, 
                     OutputBinning=self._binning,
                     NPixelDivision=self._nsubpix,
