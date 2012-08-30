@@ -75,6 +75,8 @@ namespace CurveFitting
     double m_EndX;
   };
 
+  typedef boost::shared_ptr<Polynomial> Polynomial_sptr;
+
 
 } // namespace CurveFitting
 } // namespace Mantid
