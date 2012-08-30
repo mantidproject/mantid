@@ -23,13 +23,13 @@ namespace MantidQt
         Mantid::Kernel::V3D position;
         switch(m_peakDims)
         {
-        case PeakDimensions::LabView:
+        case LabView:
           position = peak.getQLabFrame();
           break;
-        case PeakDimensions::SampleView:
+        case SampleView:
           position = peak.getQSampleFrame();
           break;
-        case PeakDimensions::HKLView:
+        case HKLView:
           position = peak.getHKL();
           break;
         default:

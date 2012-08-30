@@ -30,7 +30,7 @@ namespace SliceViewer
   {
   public:
     virtual void update() = 0;
-    virtual void updateWithSlicePoint(const double& slicePoint) = 0;
+    virtual void updateWithSlicePoint(const double&) = 0;
   };
 
   /*---------------------------------------------------------
@@ -42,9 +42,8 @@ namespace SliceViewer
   {
   public:
     virtual void update(){};
-    virtual void updateWithSlicePoint(const double& slicePoint)
+    virtual void updateWithSlicePoint(const double&)
     {
-      UNUSED_ARG(slicePoint);
     }
   };
 
