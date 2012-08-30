@@ -100,16 +100,16 @@ m_sampleActor(NULL)
   /// Cache a map (actually a vector) to workspace indexes.
   shared_workspace->getDetectorIDToWorkspaceIndexVector(m_id2wi_vector, m_id2wi_offset, false);
 
-  auto instrument = getInstrument();
+  Instrument_const_sptr instrument = getInstrument();
 
   // If the instrument is empty, maybe only having the sample and source
-  int nelements = instrument->nelements();
-  if (nelements == 0 ||
-      nelements == 1 && (instrument->getSource() || instrument->getSample()) ||
-      nelements == 2 && instrument->getSource() && instrument->getSample()
-    )
+  const int nelements = instrument->nelements();
+  if ( ( nelements == 0 ) ||
+       ( nelements == 1 && ( instrument->getSource() || instrument->getSample() ) ) ||
+       ( nelements == 2 && instrument->getSource() && instrument->getSample() )
+     )
   {
-    QMessageBox::warning(NULL,"MantidPlot - Warning","The instrument is probably empty","OK");
+    QMessageBox::warning(NULL,"MantidPlot - Warning","This instrument appears to contain no detectors","OK");
   }
 
   // this adds actors for all instrument components to the scene and fills in m_detIDs
