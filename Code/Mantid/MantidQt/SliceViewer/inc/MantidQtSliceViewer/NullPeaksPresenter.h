@@ -15,7 +15,7 @@ namespace MantidQt
     class DLLExport NullPeaksPresenter : public PeaksPresenter
     {
     public:
-      virtual void update(){};
+      virtual void update(){}
       virtual void updateWithSlicePoint(const double&)
       {
       }
