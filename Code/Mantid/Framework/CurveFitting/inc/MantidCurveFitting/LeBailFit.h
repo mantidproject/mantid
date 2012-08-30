@@ -186,7 +186,11 @@ namespace CurveFitting
     /// Map to store fitting Status: key = group index; value = fit status
     std::map<size_t, std::string> mPeakGroupFitStatusMap;
 
+    /// Peak Radius
     int mPeakRadius;
+
+    /// Fit Chi^2
+    double mLeBaiLFitChi2;
 
   };
 

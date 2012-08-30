@@ -42,8 +42,7 @@ LeBailFit::~LeBailFit()
 {
 }
   
-/*
- * Sets documentation strings for this algorithm
+/** Sets documentation strings for this algorithm
  */
 void LeBailFit::initDocs()
 {
@@ -51,8 +50,7 @@ void LeBailFit::initDocs()
     this->setOptionalMessage("Do LeBail Fit to a spectrum of powder diffraction data. ");
 }
 
-/*
- * Define the input properties for this algorithm
+/** Define the input properties for this algorithm
  */
 void LeBailFit::init()
 {
@@ -121,8 +119,7 @@ void LeBailFit::init()
     return;
 }
 
-/*
- * Implement abstract Algorithm methods
+/** Implement abstract Algorithm methods
  */
 void LeBailFit::exec()
 {
@@ -219,14 +216,22 @@ void LeBailFit::exec()
     }
     else if (functionmode == 1)
     {
-        // There will be Number(Peaks) + 1 spectrum in output workspace in calculation mode.
-        // One spectrum for each peak
+        // Calcualtion mode
+        // (0) Data
+        // (1) Calculation (LeBail)
+        // (2) Difference
+        // (3) Calculation w/o background
+        // (4) Background
+        // (5+) One spectrum for each peak
+
+        nspec = 5;
         bool plotindpeak = this->getProperty("PlotIndividualPeaks");
         if (plotindpeak)
             nspec += mPeaks.size();
     }
     else if (functionmode == 2)
     {
+        // Background calculation mode
         nspec = 3;
     }
 
@@ -244,6 +249,7 @@ void LeBailFit::exec()
     // b) Set Axis
     if (functionmode == 0)
     {
+        // Fit mode
         tAxis = new API::TextAxis(7);
         tAxis->setLabel(0, "Data");
         tAxis->setLabel(1, "Calc");
@@ -255,20 +261,23 @@ void LeBailFit::exec()
     }
     else if (functionmode == 1)
     {
+        // Calculation (Le Bail) mode
         tAxis = new API::TextAxis(nspec);
         tAxis->setLabel(0, "Data");
         tAxis->setLabel(1, "Calc");
-        tAxis->setLabel(2, "CalcNoBkgd");
-        tAxis->setLabel(3, "Bkgd");
-        for (size_t i = 0; i < (nspec-4); ++i)
+        tAxis->setLabel(2, "Diff");
+        tAxis->setLabel(3, "CalcNoBkgd");
+        tAxis->setLabel(4, "Bkgd");
+        for (size_t i = 0; i < (nspec-5); ++i)
         {
             std::stringstream ss;
             ss << "Peak_" << i;
-            tAxis->setLabel(4+i, ss.str());
+            tAxis->setLabel(5+i, ss.str());
         }
     }
     else if (functionmode == 2)
     {
+        // Background mode
         tAxis = new API::TextAxis(3);
         tAxis->setLabel(0, "Data");
         tAxis->setLabel(1, "Background");
@@ -280,6 +289,8 @@ void LeBailFit::exec()
     this->setProperty("OutputWorkspace", outputWS);
 
     // 6. Real work
+    mLeBaiLFitChi2 = -1; // Initialize
+
     switch (functionmode)
     {
     case 0:
@@ -315,13 +326,11 @@ void LeBailFit::exec()
 
 /// =================================== Level 1 methods called by exec() directly ================================================ ///
 
-/*
- * Calcualte LeBail diffraction pattern:
- * Output spectra:
- * 0: calculated pattern
- * 1: input pattern w/o background
- * 2: calculated background
- * 3~3+N-1: optional individual peak
+/** Calcualte LeBail diffraction pattern:
+ *  Output spectra:
+ *  0: data;  1: calculated pattern; 3: difference
+ *  4: input pattern w/o background
+ *  5~5+(N-1): optional individual peak
  */
 void LeBailFit::calculatePattern(size_t workspaceindex)
 {
@@ -335,7 +344,7 @@ void LeBailFit::calculatePattern(size_t workspaceindex)
     this->calculateDiffractionPattern(workspaceindex, domain, values, mFuncParameters, !useinputpeakheights);
 
     // 3. For X of first 4
-    for (size_t isp = 0; isp < 4; ++isp)
+    for (size_t isp = 0; isp < 5; ++isp)
     {
         for (size_t i = 0; i < domain.size(); ++i)
             outputWS->dataX(isp)[i] = domain[i];
@@ -344,16 +353,17 @@ void LeBailFit::calculatePattern(size_t workspaceindex)
     // 4. Retrieve and construct the output
     for (size_t i = 0; i < values.size(); ++i)
     {
-        outputWS->dataY(0)[i] = dataWS->readX(workspaceindex)[i];
+        outputWS->dataY(0)[i] = dataWS->readY(workspaceindex)[i];
         outputWS->dataY(1)[i] = values[i];
+        outputWS->dataY(2)[i] = outputWS->dataY(0)[i] - outputWS->dataY(1)[i];
     }
 
     // 5. Background and pattern w/o background.
     mBackgroundFunction->function(domain, values);
     for (size_t i = 0; i < values.size(); ++i)
     {
-        outputWS->dataY(2)[i] = dataWS->readY(workspaceindex)[i] - values[i];
-        outputWS->dataY(3)[i] = values[i];
+        outputWS->dataY(3)[i] = outputWS->readY(1)[i] - values[i];
+        outputWS->dataY(4)[i] = values[i];
     }
 
     // 4. Do peak calculation for all peaks, and append to output workspace
@@ -366,18 +376,18 @@ void LeBailFit::calculatePattern(size_t workspaceindex)
             CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak = mPeaks[hkl2];
             if (!peak)
             {
-                g_log.error() << "There is no peak corresponding to (HKL)^2 = " << hkl2 << std::endl;
+                g_log.warning() << "There is no peak corresponding to (HKL)^2 = " << hkl2 << std::endl;
             }
             else
             {
                 peak->function(domain, values);
                 for (size_t i = 0; i < domain.size(); ++i)
                 {
-                    outputWS->dataX(ipk+4)[i] = domain[i];
+                    outputWS->dataX(ipk+5)[i] = domain[i];
                 }
                 for (size_t i = 0; i < values.size(); ++i)
                 {
-                    outputWS->dataY(ipk+4)[i] = values[i];
+                    outputWS->dataY(ipk+5)[i] = values[i];
                 }
             }
         }
@@ -497,12 +507,13 @@ void LeBailFit::calBackground(size_t workspaceindex)
         } // FOR 1 Peak in PeaksGroup
 
         /// Background (Polynomial)
+        std::string backgroundtype = getProperty("BackgroundType");
         std::vector<double> orderparm;
         for (size_t iod = 0; iod <= size_t(bkgdfuncorder); ++iod)
         {
             orderparm.push_back(0.0);
         }
-        CurveFitting::BackgroundFunction_sptr backgroundfunc = this->generateBackgroundFunction("Polynomial", orderparm);
+        CurveFitting::BackgroundFunction_sptr backgroundfunc = this->generateBackgroundFunction(backgroundtype, orderparm);
 
         groupedpeaks->addFunction(backgroundfunc);
 
@@ -654,6 +665,7 @@ void LeBailFit::calculateDiffractionPattern(
     // 2. Calculate peak intensities
     if (recalpeakintesity)
     {
+        // Re-calcualte peak intensity
         std::vector<std::pair<int, double> > peakheights;
         this->calPeaksIntensities(peakheights, workspaceindex);
 
@@ -672,7 +684,7 @@ void LeBailFit::calculateDiffractionPattern(
                 peak->setParameter("Height", peakheights[ipk].second);
             }
         }
-    } // Re-calcualte peak intensity
+    }
 
     // 3. Calcualte model pattern
     mLeBailFunction->function(domain, values);
@@ -1259,10 +1271,11 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
         return false;
     }
 
-    double chi2 = fitalg->getProperty("OutputChi2overDoF");
+    mLeBaiLFitChi2 = fitalg->getProperty("OutputChi2overDoF");
     std::string fitstatus = fitalg->getProperty("OutputStatus");
 
-    g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 = " << chi2
+
+    g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 = " << mLeBaiLFitChi2
                    << " Fit Status = " << fitstatus << std::endl;
 
     API::ITableWorkspace_sptr fitvaluews
@@ -1401,6 +1414,11 @@ void LeBailFit::exportEachPeaksParameters()
     peakWS->addColumn("int", "L");
     peakWS->addColumn("double", "Height");
     peakWS->addColumn("double", "TOF_h");
+    peakWS->addColumn("double", "Alpha");
+    peakWS->addColumn("double", "Beta");
+    peakWS->addColumn("double", "Sigma2");
+    peakWS->addColumn("double", "Gamma");
+    peakWS->addColumn("double", "FWHM");
     peakWS->addColumn("int", "PeakGroup");
     peakWS->addColumn("double", "Chi^2");
     peakWS->addColumn("str", "FitStatus");
@@ -1419,6 +1437,11 @@ void LeBailFit::exportEachPeaksParameters()
         tpeak->getMillerIndex(h, k, l);
         double tof_h = tpeak->centre();
         double height = tpeak->height();
+        double alpha = tpeak->getPeakParameters("Alpha");
+        double beta = tpeak->getPeakParameters("Beta");
+        double sigma2 = tpeak->getPeakParameters("Sigma2");
+        double gamma = tpeak->getPeakParameters("Gamma");
+        double fwhm = tpeak->fwhm();
 
         // c. Get peak's fitting and etc.
         size_t peakgroupindex = mPeaks.size()+10; /// Far more than max peak group index
@@ -1457,7 +1480,8 @@ void LeBailFit::exportEachPeaksParameters()
         {
             g_log.error() << "For peak (HKL)^2 = " << hkl2 << "  TOF_h is NEGATIVE!" << std::endl;
         }
-        newrow << h << k << l << height << tof_h << ipeakgroupindex << chi2 << fitstatus;
+        newrow << h << k << l << height << tof_h << alpha << beta << sigma2 << gamma << fwhm
+               << ipeakgroupindex << chi2 << fitstatus;
     }
 
     // 4. Set
@@ -1504,7 +1528,8 @@ void LeBailFit::generatePeaksFromInput()
 /*
  * Generate background function accroding to input: mBackgroundFunction
  */
-CurveFitting::BackgroundFunction_sptr LeBailFit::generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws)
+CurveFitting::BackgroundFunction_sptr LeBailFit::generateBackgroundFunction(std::string backgroundtype,
+                                                                            std::vector<double> bkgdparamws)
 {
     auto background = API::FunctionFactory::Instance().createFunction(backgroundtype);
     CurveFitting::BackgroundFunction_sptr bkgdfunc = boost::dynamic_pointer_cast<CurveFitting::BackgroundFunction>(background);
@@ -1915,6 +1940,10 @@ void LeBailFit::exportParametersWorkspace(std::map<std::string, std::pair<double
         } // ENDIF
 
     }
+
+    // 3b. Chi^2
+    API::TableRow chi2row = tablews->appendRow();
+    chi2row << "Chi2" << mLeBaiLFitChi2 << "t" << 0.0 << 0.0;
 
     // 4. Add to output peroperty
     this->setProperty("ParametersWorkspace", parameterws);
