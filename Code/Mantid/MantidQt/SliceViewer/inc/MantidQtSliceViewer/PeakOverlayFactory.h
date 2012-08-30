@@ -6,6 +6,16 @@
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
+#include <boost/shared_ptr.hpp>
+
+namespace Mantid
+{
+  namespace API
+  {
+    /// Forward dec.
+    class IMDWorkspace;
+  }
+}
 
 namespace MantidQt
 {
@@ -42,9 +52,10 @@ namespace MantidQt
       QWidget * m_parent;
       PeakDimensions m_peakDims;
     public:
-      PeakOverlayFactory(QwtPlot * plot, QWidget * parent, const PeakDimensions peakDims);
+      PeakOverlayFactory(QwtPlot * plot, QWidget * parent, boost::shared_ptr<const Mantid::API::IMDWorkspace> ws);
       virtual ~PeakOverlayFactory();
       virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::API::IPeak&) const;
+      PeakDimensions getPeakDimensions() const;
     };
   }
 }

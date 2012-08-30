@@ -2081,7 +2081,7 @@ void SliceViewer::peakOverlay_toggled(bool checked)
       if(!list.isEmpty())
       {
         IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
-        PeakOverlayFactory* factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), PeakDimensions::HKLView);
+        PeakOverlayFactory* factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), m_ws);
         m_peaksPresenter = PeaksPresenter_sptr(new ConcretePeaksPresenter(factory, peaksWS));
       }
     }

@@ -30,6 +30,7 @@ private:
     MOCK_METHOD0(updateView, void());
     MOCK_METHOD1(setSlicePoint, void(const double&));
     MOCK_METHOD0(hideView, void());
+    MOCK_METHOD1(setNormalisation, void(const double&));
     ~MockPeakOverlayView(){}
   };
 
@@ -60,13 +61,21 @@ public:
 
     // Set the expectation on the number of calls
     const int expectedNumberPeaks = 10;
-    EXPECT_CALL(*mockViewFactory, createView(_)).Times(expectedNumberPeaks).WillRepeatedly(Return(boost::make_shared<NiceMock<MockPeakOverlayView> >()));;
+    
+    // Create a mock view object that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    EXPECT_CALL(*pMockView, setNormalisation(_)).Times(expectedNumberPeaks);
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
+
+    
+    EXPECT_CALL(*mockViewFactory, createView(_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));;
     Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(expectedNumberPeaks);
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
     ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
 
     TSM_ASSERT("MockViewFactory not used as expected.", Mock::VerifyAndClearExpectations(mockViewFactory));
+    TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
   }
 
   void test_update()

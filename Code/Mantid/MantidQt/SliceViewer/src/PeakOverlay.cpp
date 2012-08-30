@@ -22,11 +22,12 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius)
+  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& intensity)
   : QWidget( parent ),
     m_plot(plot),
     m_origin(origin),
-    m_radius(radius),
+    m_intensity(intensity),
+    m_normalisation(1),
     m_opacityMax(0.6),
     m_opacityMin(0.1)
   {
@@ -39,6 +40,24 @@ namespace SliceViewer
    */
   PeakOverlay::~PeakOverlay()
   {
+  }
+
+   //----------------------------------------------------------------------------------------------
+  /** Setter for the normalisation denominator.
+  @param normalisation : normalisation denominator to use.
+   */
+  void PeakOverlay::setNormalisation(const double& normalisation)
+  {
+    m_normalisation = normalisation;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Method to determine if the intensity has been set.
+  @return True if the intensity is provided.
+   */
+  bool PeakOverlay::hasIntensity() const
+  {
+    return m_intensity != 0;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -62,8 +81,13 @@ namespace SliceViewer
   */
   void PeakOverlay::setSlicePoint(const double& z)
   {
-    const double distance = z - m_origin.Z();
-    const double distanceSQ = distance * distance;
+    const double distanceSQ = (z - m_origin.Z()) * (z - m_origin.Z());
+    const double distance = std::sqrt(distanceSQ);
+    m_radius = 1;
+    if(hasIntensity())
+    {
+      m_radius = m_intensity / m_normalisation;
+    }
     const double radSQ = m_radius * m_radius;
 
     if(distanceSQ < radSQ)
@@ -74,8 +98,12 @@ namespace SliceViewer
     {
       m_radiusAtDistance = 0;
     }
-    
 
+    const QwtDoubleInterval interval = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();
+    const double yMin = interval.minValue();
+    const double yMax = interval.maxValue();
+    m_scale = height()/(yMax - yMin);
+    
     // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
     m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius) * distance  + m_opacityMax;
     m_opacityAtDistance = m_opacityAtDistance >= m_opacityMin ? m_opacityAtDistance : m_opacityMin;
@@ -117,27 +145,22 @@ namespace SliceViewer
     const int yOrigin = m_plot->transform( QwtPlot::yLeft, m_origin.Y() );
     const QPointF originWindows(xOrigin, yOrigin);
 
-    const QwtDoubleInterval interval = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();
-    const double yMin = interval.minValue();
-    const double yMax = interval.maxValue();
-    const double scale = height()/(yMax - yMin);
+    const double innerRadius = m_scale * m_radiusAtDistance;
+    double outerRadius = m_scale * m_radius;
+    double lineWidth = outerRadius - innerRadius;
+    outerRadius -= lineWidth/2;
 
-    const double radius = scale * m_radiusAtDistance;
-
-    // Draw circle and inner circle.
     QPainter painter(this);
     painter.setRenderHint( QPainter::Antialiasing );
-
-    painter.setOpacity(m_opacityAtDistance); //Set the pre-calculated opacity
-    painter.setBrush(Qt::cyan);
-    painter.drawEllipse( originWindows, radius, radius );
-
+    
+    // Draw Outer circle
     QPen pen( Qt::green );
-    pen.setWidth(2);
-    pen.setStyle(Qt::DashDotLine);
+    pen.setWidth(static_cast<int>(lineWidth));
     painter.setPen( pen );
-    painter.drawEllipse( originWindows, radius, radius );
-
+    pen.setStyle(Qt::SolidLine);
+    painter.setOpacity(m_opacityAtDistance); //Set the pre-calculated opacity
+    painter.drawEllipse( originWindows, outerRadius, outerRadius );
+    
   }
 
   void PeakOverlay::updateView()

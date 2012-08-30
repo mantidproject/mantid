@@ -47,7 +47,7 @@ namespace SliceViewer
 
   public:
     /// Constructor
-    PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius);
+    PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& intensity);
     /// Destructor
     virtual ~PeakOverlay();
     /// Set the slice point at position.
@@ -59,6 +59,8 @@ namespace SliceViewer
     /// Get the origin. md x, md y
     const Mantid::Kernel::V3D & getOrigin() const;
     double getRadius() const;
+    /// Setter for the normalisation.
+    void setNormalisation(const double& normalisation);
 
   private:
 
@@ -70,12 +72,16 @@ namespace SliceViewer
     int height() const;
     int width() const;
 
+    bool hasIntensity() const;
+
     /// QwtPlot containing this
     QwtPlot * m_plot;
     /// Origin md-x, md-y, and md-z
     Mantid::Kernel::V3D m_origin;
-    /// Radius md-x, md-y
-    double m_radius;
+    /// intensity
+    double m_intensity;
+    /// normalisation value.
+    double m_normalisation;
     /// Max opacity
     const double m_opacityMax;
     /// Min opacity
@@ -84,7 +90,10 @@ namespace SliceViewer
     double m_opacityAtDistance;
     /// Cached radius at the distance z from origin
     double m_radiusAtDistance;
-    /// Cached radius at distance
+    /// Cached radius
+    double m_radius;
+    /// Cached scale
+    double m_scale;
   };
 
 

@@ -60,6 +60,8 @@ namespace API
 
   };
 
+  typedef boost::shared_ptr<MultipleExperimentInfos> MultipleExperimentInfos_sptr;
+  typedef boost::shared_ptr<const MultipleExperimentInfos> MultipleExperimentInfos_const_sptr;
 
 } // namespace API
 } // namespace Mantid
