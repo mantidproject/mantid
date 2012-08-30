@@ -2082,13 +2082,13 @@ void SliceViewer::peakOverlay_toggled(bool checked)
       {
         IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
         PeakOverlayFactory* factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), PeakDimensions::HKLView);
-        m_peaksPresenter = boost::make_shared<ConcretePeaksPresenter>(factory, peaksWS);
+        m_peaksPresenter = PeaksPresenter_sptr(new ConcretePeaksPresenter(factory, peaksWS));
       }
     }
   }
   else
   {
-    m_peaksPresenter = boost::make_shared<NullPeaksPresenter>();
+    m_peaksPresenter = PeaksPresenter_sptr(new NullPeaksPresenter);
   }
 }
 
