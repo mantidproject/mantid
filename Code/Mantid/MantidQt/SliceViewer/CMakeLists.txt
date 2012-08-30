@@ -19,11 +19,13 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	inc/MantidQtSliceViewer/ColorBarWidget.h
+	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
+	inc/MantidQtSliceViewer/NullPeaksPresenter.h
     inc/MantidQtSliceViewer/PeakOverlay.h
     inc/MantidQtSliceViewer/PeakOverlayView.h
     inc/MantidQtSliceViewer/PeakOverlayViewFactory.h

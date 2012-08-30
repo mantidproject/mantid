@@ -5,7 +5,7 @@
 #include <gmock/gmock.h>
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeak.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
