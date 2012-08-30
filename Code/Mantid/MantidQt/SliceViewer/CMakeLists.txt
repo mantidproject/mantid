@@ -1,12 +1,12 @@
 set ( SRC_FILES
 	src/ColorBarWidget.cpp
+    src/ConcretePeaksPresenter.cpp
 	src/CustomTools.cpp
 	src/DimensionSliceWidget.cpp
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
     src/PeakOverlay.cpp
     src/PeakOverlayFactory.cpp
-    src/PeaksPresenter.cpp
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
@@ -65,7 +65,7 @@ set ( UI_FILES
 )
 
 set ( TEST_FILES
-    test/PeaksPresenterTest.h
+    test/ConcretePeaksPresenterTest.h
 )
 
 # Python unit tests

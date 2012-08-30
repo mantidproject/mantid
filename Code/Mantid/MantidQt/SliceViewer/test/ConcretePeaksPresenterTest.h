@@ -16,7 +16,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace testing;
 
-class PeaksPresenterTest : public CxxTest::TestSuite
+class ConcretePeaksPresenterTest : public CxxTest::TestSuite
 {
 private:
 
