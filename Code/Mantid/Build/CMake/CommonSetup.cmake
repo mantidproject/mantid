@@ -46,6 +46,7 @@ include ( VersionNumber )
 # Look for dependencies - bail out if any not found
 ###########################################################################
 
+set ( Boost_NO_BOOST_CMAKE TRUE )
 find_package ( Boost REQUIRED signals date_time regex ) 
 include_directories( SYSTEM ${Boost_INCLUDE_DIRS} )
 add_definitions ( -DBOOST_ALL_DYN_LINK )
