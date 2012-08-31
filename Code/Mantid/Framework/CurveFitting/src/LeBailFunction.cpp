@@ -151,7 +151,7 @@ namespace CurveFitting
 
       // b) Set peak parameters
       mPeaks[id]->setParameter("TOF_h", tof_h);
-      mPeaks[id]->setParameter("height", heights[id]);
+      mPeaks[id]->setParameter("Height", heights[id]);
       mPeaks[id]->setParameter("Alpha", alpha);
       mPeaks[id]->setParameter("Beta", beta);
       mPeaks[id]->setParameter("Sigma2", sigma2);
@@ -218,7 +218,7 @@ namespace CurveFitting
       // b) Set peak parameters
       g_log.debug() << "DB546 Peak @ d = " << dh << " Set Height = " << dh << std::endl;
       mPeaks[id]->setParameter("TOF_h", tof_h);
-      mPeaks[id]->setParameter("height", heights[id]);
+      mPeaks[id]->setParameter("Height", heights[id]);
       mPeaks[id]->setParameter("Alpha", alpha);
       mPeaks[id]->setParameter("Beta", beta);
       mPeaks[id]->setParameter("Sigma2", sigma2);
