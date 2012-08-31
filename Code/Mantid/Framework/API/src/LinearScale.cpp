@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "MantidAPI/LinearScale.h"
-#include "MantidAPI/TransformScaleFactory.h"
+//#include "MantidAPI/TransformScaleFactory.h"
 
 namespace Mantid
 {
