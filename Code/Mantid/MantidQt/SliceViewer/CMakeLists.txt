@@ -69,7 +69,7 @@ set ( UI_FILES
 
 set ( TEST_FILES
     test/ConcretePeaksPresenterTest.h
-    test/PeakOverlayFactoryBaseTest.h
+    #test/PeakOverlayFactoryBaseTest.h
 )
 
 # Python unit tests
