@@ -1128,8 +1128,7 @@ bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, std::
     return true;
 }
 
-/*
- * Set up the fit/tie/set-parameter for LeBail Fit (mode)
+/** Set up the fit/tie/set-parameter for LeBail Fit (mode)
  */
 void LeBailFit::setLeBailFitParameters()
 {
@@ -1226,11 +1225,13 @@ void LeBailFit::setLeBailFitParameters()
     return;
 }
 
-/*
- * Fit LeBailFunction by calling Fit()
+/** Fit LeBailFunction by calling Fit()
+  * Be called after all functions in LeBailFunction (composite) are set up (tie, constrain)
+  * Output: a parameter name-value map
  */
 bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, std::pair<double, char> > &parammap)
 {
+    // 1. Prepare fitting boundary parameters.
     double tof_min = dataWS->dataX(workspaceindex)[0];
     double tof_max = dataWS->dataX(workspaceindex).back();
     std::vector<double> fitrange = this->getProperty("FitRegion");
@@ -1241,6 +1242,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
         tof_max = fitrange[1];
     }
 
+    // 2. Call Fit to fit LeBail function.
     // a) Initialize
     std::string fitoutputwsrootname("xLeBailOutput");
 
@@ -1289,7 +1291,6 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
             std::string parname;
             double parvalue, parerror;
             row >> parname >> parvalue >> parerror;
-            // g_log.information() << "Row " << ir << ": " << parname << " = " << parvalue << " +/- " << parerror << std::endl;
         }
     }
 
@@ -1298,11 +1299,6 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
 
     std::vector<std::string> parnames = fitout->getParameterNames();
 
-    /* Temp disabled
-    std::sort(parnames.begin(), parnames.end());
-    std::vector<std::string>::iterator nit;
-    for (nit = parnames.begin(); nit != parnames.end(); ++ nit)
-        */
     for (size_t ip = 0; ip < parnames.size(); ++ip)
     {
         std::string parname = parnames[ip];
@@ -1320,7 +1316,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
             throw std::runtime_error("Unable to support parameter name to split.");
         }
 
-        /// Value: result[0] = f0, result[1] = parameter name
+        // Note: result[0] = f0, result[1] = parameter name
         if (results[0].compare("f0") == 0)
         {
             g_log.debug() << "DB216 Parameter " << results[1] << ": " << curvalue << std::endl;
@@ -1330,12 +1326,12 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
             {
                 // Fit
                 parammap[results[1]] = std::make_pair(curvalue, 'f');
-                g_log.information() << "DB1105 Fit Parameter " << results[1] << " To  " << curvalue
-                                    << ", chi^2 = " << error << std::endl;
+                g_log.information() << "  [Fitting Result] Parameter " << results[1] << " = " << curvalue
+                                    << ", parameter chi^2 = " << error << std::endl;
             }
         }
 
-        /// Error
+        // Error
         if (error > 1.0E-2)
         {
             mFuncParameterErrors.insert(std::make_pair(parname, error));
@@ -1397,8 +1393,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
  */
 
 /// =================================== Methods about input/output & create workspace ================================================ ///
-/*
- * Create and set up an output TableWorkspace for each individual peaks
+/** Create and set up an output TableWorkspace for each individual peaks
  * Parameters include H, K, L, Height, TOF_h, PeakGroup, Chi^2, FitStatus
  * Where chi^2 and fit status are used only in 'CalculateBackground'
  */
@@ -1491,8 +1486,7 @@ void LeBailFit::exportEachPeaksParameters()
 }
 
 
-/*
- * Generate a list of peaks from input
+/** Generate a list of peaks from input
  */
 void LeBailFit::generatePeaksFromInput()
 {   
@@ -1525,8 +1519,7 @@ void LeBailFit::generatePeaksFromInput()
     return;
 }
 
-/*
- * Generate background function accroding to input: mBackgroundFunction
+/** Generate background function accroding to input: mBackgroundFunction
  */
 CurveFitting::BackgroundFunction_sptr LeBailFit::generateBackgroundFunction(std::string backgroundtype,
                                                                             std::vector<double> bkgdparamws)
@@ -1557,12 +1550,11 @@ CurveFitting::BackgroundFunction_sptr LeBailFit::generateBackgroundFunction(std:
     return bkgdfunc;
 }
 
-/*
- * Parse table workspace (from Fit()) containing background parameters to a vector
+/** Parse table workspace (from Fit()) containing background parameters to a vector
  */
 void LeBailFit::parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr bkgdparamws, std::vector<double>& bkgdorderparams)
 {
-    g_log.information() << "DB1105 Parsing background TableWorkspace." << std::endl;
+    g_log.debug() << "DB1105A Parsing background TableWorkspace." << std::endl;
 
     // 1. Clear (output) map
     bkgdorderparams.clear();
@@ -1587,7 +1579,7 @@ void LeBailFit::parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr b
         }
     }
 
-    g_log.information() << "DB1105 Background TableWorkspace is valid. " << std::endl;
+    g_log.debug() << "DB1105B Background TableWorkspace is valid. " << std::endl;
 
     // 3. Input
     for (size_t ir = 0; ir < bkgdparamws->rowCount(); ++ir)
@@ -1634,8 +1626,7 @@ void LeBailFit::parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr b
     return;
 }
 
-/*
- * Parse the input TableWorkspace to some maps for easy access
+/** Parse the input TableWorkspace to some maps for easy access
  */
 void LeBailFit::importParametersTable()
 {
