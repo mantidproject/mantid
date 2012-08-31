@@ -4,12 +4,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <vector>
+#include <boost/shared_ptr.hpp>
+
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ITransformScale.h"
 
-#include <boost/shared_ptr.hpp>
-
-#include <stdexcept>
 
 namespace Mantid
 {
