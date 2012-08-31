@@ -8,7 +8,8 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
-  ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory* factory, Mantid::API::IPeaksWorkspace_sptr peaksWS)
+
+  ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory* factory, Mantid::API::IPeaksWorkspace_sptr peaksWS) : m_viewPeaks(peaksWS->getNumberPeaks())
   {
     if(factory == NULL)
     {
@@ -16,20 +17,19 @@ namespace SliceViewer
     }
 
     // Create views for every peak in the workspace.
-    double sumIntensity = 0;
     boost::scoped_ptr<PeakOverlayViewFactory> factory_scptr(factory);
+    double maxIntensity = peaksWS->getPeak(0).getIntensity();
     for(int i = 0; i < peaksWS->getNumberPeaks(); ++i)
     {
       const Mantid::API::IPeak& peak = peaksWS->getPeak(i);
-      sumIntensity += peak.getIntensity();
-      auto view = boost::shared_ptr<PeakOverlayView>( factory_scptr->createView(peak) );
-      m_viewPeaks.push_back( view );
+      maxIntensity = peak.getIntensity() > maxIntensity ? peak.getIntensity() : maxIntensity;
+      m_viewPeaks[i] = boost::shared_ptr<PeakOverlayView>( factory_scptr->createView(peak) );
     }
 
     // Set the normalisation. Applies to all peaks with intensity.
     for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
     {
-      (*it)->setNormalisation(sumIntensity);
+      (*it)->setNormalisation(maxIntensity);
     }
 
   }

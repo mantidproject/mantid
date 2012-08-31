@@ -8,6 +8,7 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+    typedef std::vector< boost::shared_ptr<PeakOverlayView> > VecPeakOverlayView;
     /*---------------------------------------------------------
     ConcretePeaksPresenter
 
@@ -21,7 +22,6 @@ namespace MantidQt
       virtual void update();
       virtual void updateWithSlicePoint(const double& slicePoint);
     private:
-      typedef std::vector< boost::shared_ptr<PeakOverlayView> > VecPeakOverlayView;
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;
     };
