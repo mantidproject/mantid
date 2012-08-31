@@ -117,7 +117,7 @@ set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
 #    inc/MantidAPI/GridDomain.h
 #    inc/MantidAPI/GridDomain1D.h
-#    inc/MantidAPI/ITransformScale.h
+    inc/MantidAPI/ITransformScale.h
 #    inc/MantidAPI/TransformScaleFactory.h
 #    inc/MantidAPI/LinearScale.h
 #    inc/MantidAPI/LogarithmScale.h

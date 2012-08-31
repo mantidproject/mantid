@@ -41,7 +41,7 @@ namespace API
   Code Documentation is available at: <http://doxygen.mantidproject.org>.
 */
 
-class MANTID_API_DLL LinearScale : public ITransformScale
+class MANTID_API_DLL LinearScale : public API::ITransformScale
 {
 public:
   LinearScale();
