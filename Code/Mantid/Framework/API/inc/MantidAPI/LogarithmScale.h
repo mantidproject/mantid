@@ -46,10 +46,10 @@ class MANTID_API_DLL LogarithmScale : public ITransformScale
 public:
   LogarithmScale() : m_base(M_E) {};
   ~LogarithmScale();
+  const std::string name() const { return "LogarithmScale"; }
+  void transform( std::vector<double> &gd );
   void setBase( double &base);
   /// The scaling transformation. First and last elements of the grid remain unchanged
-  void transform( std::vector<double> &gd );
-  const std::string name() const { return "LogarithmScale"; }
 
 private:
   double m_base; //base of the logarithm

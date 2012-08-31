@@ -44,7 +44,6 @@ class MANTID_API_DLL ITransformScale
 public:
   /// Virtual destructor
   virtual ~ITransformScale() {}
-  virtual void initialize();
   virtual const std::string name() const { return "ITransformScale"; }
   /// The scaling transformation. Override with method of derived classes
   virtual void transform( std::vector<double> &gd );
