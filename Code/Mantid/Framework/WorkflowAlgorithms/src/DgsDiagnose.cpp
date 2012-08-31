@@ -125,7 +125,7 @@ namespace WorkflowAlgorithms
     const double samLo = reductionManager->getProperty("SamBkgMedianTestLow");
     const double samSigma = reductionManager->getProperty("SamBkgErrorBarCriterion");
     const double bleedRate = reductionManager->getProperty("MaxFramerate");
-    const long bleedPixels = reductionManager->getProperty("IgnoredPixels");
+    const long bleedPixels = static_cast<long>(reductionManager->getProperty("IgnoredPixels"));
 
     // Make some internal names for workspaces
     const std::string dvInternal = "_det_van";
