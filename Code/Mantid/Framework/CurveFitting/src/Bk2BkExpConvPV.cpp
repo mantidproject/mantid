@@ -38,7 +38,7 @@ namespace CurveFitting
   void Bk2BkExpConvPV::init()
   {
     declareParameter("TOF_h", -0.0);
-    declareParameter("height", 1.0);
+    declareParameter("Height", 1.0);
     declareParameter("Alpha",1.6);
     declareParameter("Beta",1.6);
     declareParameter("Sigma2", 1.0);
@@ -61,13 +61,13 @@ namespace CurveFitting
     setParameter("height", h);
 
     return;
-  };
+  }
 
   double Bk2BkExpConvPV::height() const
   {
-    double height = this->getParameter("height");
+    double height = this->getParameter("Height");
     return height;
-  };
+  }
 
   double Bk2BkExpConvPV::fwhm() const
   {
@@ -80,21 +80,20 @@ namespace CurveFitting
     }
 
     return mFWHM;
-  };
+  }
 
   void Bk2BkExpConvPV::setFwhm(const double w)
   {
     UNUSED_ARG(w);
     throw std::invalid_argument("Unable to set FWHM");
-  };
+  }
 
   void Bk2BkExpConvPV::setCentre(const double c)
   {
     setParameter("TOF_h",c);
-  };
+  }
 
-  /*
-   * Implement the peak calculating formula
+  /** Implement the peak calculating formula
    */
   void Bk2BkExpConvPV::functionLocal(double* out, const double* xValues, const size_t nData) const
   {
@@ -103,7 +102,7 @@ namespace CurveFitting
     const double beta = this->getParameter("Beta");
     const double sigma2 = this->getParameter("Sigma2");
     const double gamma = this->getParameter("Gamma");
-    const double height = this->getParameter("height");
+    const double height = this->getParameter("Height");
     const double tof_h = this->getParameter("TOF_h");
 
     double invert_sqrt2sigma = 1.0/sqrt(2.0*sigma2);
@@ -112,18 +111,16 @@ namespace CurveFitting
     double H, eta;
     calHandEta(sigma2, gamma, H, eta);
 
-    // g_log.debug() << "DB1140: TOF_h = " << tof_h << " h = " << height << ", I = " << this->getParameter("I") << " alpha = "
-    // << alpha << " beta = " << beta << " H = " << H << " eta = " << eta << std::endl;
+    g_log.debug() << "DB1143:  nData = " << nData << " From " << xValues[0] << " To " << xValues[nData-1]
+                  << " TOF_h = " << tof_h << " Height = " << height << " alpha = " << alpha << " beta = " << beta << " H = " << H << " eta = " << eta
+                  << std::endl;
 
     // 2. Do calculation
-    std::cout << "DB1143:  nData = " << nData << "  From " << xValues[0] << " To " << xValues[nData-1] <<
-                 " Height = " << height << std::endl;
     for (size_t id = 0; id < nData; ++id)
     {
       double dT = xValues[id]-tof_h;
       double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
       out[id] = height*omega;
-      // std::cout << "DB1143  " << xValues[id] << "   " << out[id] << "   " << omega << std::endl;
     }
 
     return;
@@ -205,7 +202,7 @@ namespace CurveFitting
 
     if (eta > 1 || eta < 0)
     {
-      g_log.error() << "Calculated eta = " << eta << " is out of range [0, 1]." << std::endl;
+      g_log.error() << "Bk2BkExpConvPV: Calculated eta = " << eta << " is out of range [0, 1]." << std::endl;
     }
 
     return;
