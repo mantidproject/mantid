@@ -26,11 +26,13 @@ QMainWindow(NULL,f),
 d_app(appWindow)
 {
   setFocusPolicy(Qt::StrongFocus);
+  setWindowIcon(QIcon(":/MantidPlot_Icon_32offset.png"));
   connect(appWindow,SIGNAL(shutting_down()),this,SLOT(close()));
 #ifdef Q_OS_WIN
   // remember the flags
   m_flags = windowFlags();
 #endif
+
   // Window must NOT get deleted automatically when closed.
   // Instead, the ApplicationWindow->removeFloatingWindow() call takes care of
   // calling deleteLater().
