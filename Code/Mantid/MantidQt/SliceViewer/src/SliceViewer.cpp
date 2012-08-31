@@ -3,6 +3,8 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -21,6 +23,7 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayFactory.h"
+#include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "qmainwindow.h"
 #include "qmenubar.h"
@@ -2081,7 +2084,17 @@ void SliceViewer::peakOverlay_toggled(bool checked)
       if(!list.isEmpty())
       {
         IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
-        PeakOverlayFactory* factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), m_ws);
+        PeakOverlayFactory* factory = NULL;
+        try
+        {
+          FirstExperimentInfoQueryAdapter<Mantid::API::IMDHistoWorkspace> query(m_ws);
+          factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), query);
+        }
+        catch(std::invalid_argument&)
+        {
+          FirstExperimentInfoQueryAdapter<Mantid::API::IMDEventWorkspace> query(m_ws);
+          factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), query);
+        }
         m_peaksPresenter = PeaksPresenter_sptr(new ConcretePeaksPresenter(factory, peaksWS));
       }
     }

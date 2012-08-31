@@ -3,7 +3,7 @@
 #define MANTID_SLICEVIEWER_PEAKOVERLAY_FACTORY_H_
 
 #include "DllOption.h"
-#include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtSliceViewer/PeakOverlayFactoryBase.h"
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
 #include <boost/shared_ptr.hpp>
@@ -21,6 +21,7 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+
     /** Concrete view factory. For creating instances of PeakOverlay widget.
 
     @date 2012-08-24
@@ -45,17 +46,16 @@ namespace MantidQt
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport PeakOverlayFactory : public PeakOverlayViewFactory
+    class DLLExport PeakOverlayFactory : public PeakOverlayFactoryBase
     {
     private:
       QwtPlot * m_plot;
       QWidget * m_parent;
       PeakDimensions m_peakDims;
     public:
-      PeakOverlayFactory(QwtPlot * plot, QWidget * parent, boost::shared_ptr<const Mantid::API::IMDWorkspace> ws);
+      PeakOverlayFactory(QwtPlot * plot, QWidget * parent, const FirstExperimentInfoQuery& query);
       virtual ~PeakOverlayFactory();
-      virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::API::IPeak&) const;
-      PeakDimensions getPeakDimensions() const;
+      virtual boost::shared_ptr<PeakOverlayView> createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius, const bool hasIntensity) const;
     };
   }
 }

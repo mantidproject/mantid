@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include <QPointF>
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt
 {
@@ -51,6 +52,10 @@ namespace MantidQt
       {
       }
     };
+
+    typedef boost::shared_ptr<const PeakOverlayView> PeakOverlayView_const_sptr;
+    typedef boost::shared_ptr<PeakOverlayView> PeakOverlayView_sptr;
+
   }
 }
 

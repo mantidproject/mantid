@@ -22,14 +22,15 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& intensity)
+  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, bool hasIntensity)
   : QWidget( parent ),
     m_plot(plot),
     m_origin(origin),
-    m_intensity(intensity),
+    m_intensity(radius),
     m_normalisation(1),
     m_opacityMax(0.6),
-    m_opacityMin(0.1)
+    m_opacityMin(0.1),
+    m_hasIntensity(hasIntensity)
   {
     setAttribute(Qt::WA_NoMousePropagation, false);
     this->setVisible(true);
@@ -49,15 +50,6 @@ namespace SliceViewer
   void PeakOverlay::setNormalisation(const double& normalisation)
   {
     m_normalisation = normalisation;
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Method to determine if the intensity has been set.
-  @return True if the intensity is provided.
-   */
-  bool PeakOverlay::hasIntensity() const
-  {
-    return m_intensity != 0;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -83,12 +75,8 @@ namespace SliceViewer
   {
     const double distanceSQ = (z - m_origin.Z()) * (z - m_origin.Z());
     const double distance = std::sqrt(distanceSQ);
-    m_radius = 1;
-    if(hasIntensity())
-    {
-      m_radius = m_intensity / m_normalisation;
-    }
-    const double radSQ = m_radius * m_radius;
+    const double radius = getRadius();
+    const double radSQ = radius * radius;
 
     if(distanceSQ < radSQ)
     {
@@ -105,7 +93,7 @@ namespace SliceViewer
     m_scale = height()/(yMax - yMin);
     
     // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
-    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius) * distance  + m_opacityMax;
+    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/radius) * distance  + m_opacityMax;
     m_opacityAtDistance = m_opacityAtDistance >= m_opacityMin ? m_opacityAtDistance : m_opacityMin;
 
     this->update(); //repaint
@@ -115,7 +103,13 @@ namespace SliceViewer
   { return m_origin; }
 
   double PeakOverlay::getRadius() const
-  { return m_radius; }
+  { 
+    if(m_hasIntensity)
+    {
+      return m_intensity / m_normalisation;
+    }
+    return 1;
+  }
 
   //----------------------------------------------------------------------------------------------
   /// Return the recommended size of the widget
@@ -146,7 +140,7 @@ namespace SliceViewer
     const QPointF originWindows(xOrigin, yOrigin);
 
     const double innerRadius = m_scale * m_radiusAtDistance;
-    double outerRadius = m_scale * m_radius;
+    double outerRadius = m_scale * getRadius();
     double lineWidth = outerRadius - innerRadius;
     outerRadius -= lineWidth/2;
 
