@@ -6,7 +6,6 @@
 #include <stdexcept>
 
 #include "MantidAPI/LogarithmScale.h"
-#include "MantidAPI/GridDomain1D.h"
 #include "MantidAPI/TransformScaleFactory.h"
 
 namespace Mantid
