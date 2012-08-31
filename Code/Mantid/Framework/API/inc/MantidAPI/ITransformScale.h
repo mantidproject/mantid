@@ -44,10 +44,10 @@ class MANTID_API_DLL ITransformScale
 {
 public:
   /// Virtual destructor
-  virtual ~ITransformScale() {}
+  virtual ~ITransformScale();
   virtual const std::string name() const { return "ITransformScale"; }
   /// The scaling transformation. Override with method of derived classes
-  virtual void transform( std::vector<double> &gd );
+  virtual void transform( std::vector<double> &gd ) = 0;
 
 protected:
   static Kernel::Logger& g_log;
