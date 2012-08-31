@@ -211,7 +211,9 @@ public:
 
     MockPeakOverlayFactory mockFactory(mockQuery);
 
-    EXPECT_CALL(mockFactory, createViewAtPoint(_,_,hasVariableRadius)).Times(1).WillOnce(Return(PeakOverlayView_sptr(new MockPeakOverlayView)));
+    MockPeakOverlayView* pMockView = new MockPeakOverlayView;
+    PeakOverlayView_sptr mockView(pMockView);
+    EXPECT_CALL(mockFactory, createViewAtPoint(_,_,hasVariableRadius)).Times(1).WillOnce(Return(mockView));
 
     mockFactory.createView(mockPeak);
  
@@ -244,7 +246,10 @@ public:
     EXPECT_CALL(mockPeak, getQLabFrame()).Times(1).WillOnce(Return(Mantid::Kernel::V3D(0,0,0)));
 
     MockPeakOverlayFactory mockFactory(mockQuery);
-    EXPECT_CALL(mockFactory, createViewAtPoint(_,_,_)).Times(1).WillOnce(Return(PeakOverlayView_sptr(new MockPeakOverlayView)));
+
+    MockPeakOverlayView* pMockView = new MockPeakOverlayView;
+    PeakOverlayView_sptr mockView(pMockView);
+    EXPECT_CALL(mockFactory, createViewAtPoint(_,_,_)).Times(1).WillOnce(Return(mockView));
 
     mockFactory.createView(mockPeak);
  
@@ -264,7 +269,10 @@ public:
     EXPECT_CALL(mockPeak, getQSampleFrame()).Times(1).WillOnce(Return(Mantid::Kernel::V3D(0,0,0)));
 
     MockPeakOverlayFactory mockFactory(mockQuery);
-    EXPECT_CALL(mockFactory, createViewAtPoint(_,_,_)).Times(1).WillOnce(Return(PeakOverlayView_sptr(new MockPeakOverlayView)));
+    
+    MockPeakOverlayView* pMockView = new MockPeakOverlayView;
+    PeakOverlayView_sptr mockView(pMockView);
+    EXPECT_CALL(mockFactory, createViewAtPoint(_,_,_)).Times(1).WillOnce(Return(mockView));
 
     mockFactory.createView(mockPeak);
  
@@ -284,7 +292,10 @@ public:
     EXPECT_CALL(mockPeak, getHKL()).Times(1).WillOnce(Return(Mantid::Kernel::V3D(0,0,0)));
 
     MockPeakOverlayFactory mockFactory(mockQuery);
-    EXPECT_CALL(mockFactory, createViewAtPoint(_,_,_)).Times(1).WillOnce(Return(PeakOverlayView_sptr(new MockPeakOverlayView)));
+
+    MockPeakOverlayView* pMockView = new MockPeakOverlayView;
+    PeakOverlayView_sptr mockView(pMockView);
+    EXPECT_CALL(mockFactory, createViewAtPoint(_,_,_)).Times(1).WillOnce(Return(mockView));
 
     mockFactory.createView(mockPeak);
  
