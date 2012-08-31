@@ -463,9 +463,10 @@ std::complex<double> ThermalNeutronBk2BkExpConvPV::E1(std::complex<double> z) co
 }
 
 
-
 /*
  * Get peak parameters stored locally
+ * Get some internal parameters values including
+ * (a) Alpha, (b) Beta, (c) Gamma, (d) Sigma2
  */
 double ThermalNeutronBk2BkExpConvPV::getPeakParameters(std::string paramname)
 {
