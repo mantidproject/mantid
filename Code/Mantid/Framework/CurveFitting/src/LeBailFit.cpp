@@ -172,7 +172,7 @@ void LeBailFit::exec()
 
     // 4. Create LeBail Function & initialize from input
     // a. Peaks
-    generatePeaksFromInput();
+    generatePeaksFromInput(workspaceindex);
 
     // b. Background
     std::string backgroundtype = this->getProperty("BackgroundType");
@@ -794,7 +794,7 @@ void LeBailFit::calPeaksIntensities(std::vector<std::pair<int, double> >& peakhe
 
     // 1) Sort peaks list by HKL^2:
     //    FIXME: This sorting scheme may be broken, if the crystal is not cubical!
-    g_log.information() << "DBX122 PeakHKL2 Size = " << mPeakHKL2.size() << std::endl;
+    g_log.debug() << "DBx122 PeakHKL2 Size = " << mPeakHKL2.size() << std::endl;
     std::sort(mPeakHKL2.begin(), mPeakHKL2.end(), CurveFitting::compDescending);
 
     // 1. Calculate the FWHM of each peak: Only peakcenterpairs is in order of peak position.
@@ -1146,7 +1146,7 @@ void LeBailFit::setLeBailFitParameters()
         if (sit == mPeakParameterNames.end())
         {
             // Not there
-            g_log.warning() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak. " << std::endl;
+            g_log.debug() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak. " << std::endl;
             continue;
         }
 
@@ -1163,7 +1163,7 @@ void LeBailFit::setLeBailFitParameters()
                 std::string tiepart1 = ss1.str();
                 std::string tievalue = ss2.str();
                 mLeBailFunction->tie(tiepart1, tievalue);
-                g_log.information() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
+                g_log.debug() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
 
                 ++ peakindex;
             } // For each peak
@@ -1179,7 +1179,7 @@ void LeBailFit::setLeBailFitParameters()
                 std::string tiepart1 = ss1.str();
                 std::string tiepart2 = ss2.str();
                 mLeBailFunction->tie(tiepart1, tiepart2);
-                g_log.information() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /" << std::endl;
+                g_log.debug() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /" << std::endl;
             }
         }
     } // FOR-Function Parameters
@@ -1202,7 +1202,7 @@ void LeBailFit::setLeBailFitParameters()
 
         ++peakindex;
 
-        g_log.information() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
+        g_log.debug() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
 
     } // For each peak
 
@@ -1219,7 +1219,7 @@ void LeBailFit::setLeBailFitParameters()
         std::string tiepart1 = ss1.str();
         std::string tievalue = ss2.str();
         mLeBailFunction->tie(tiepart1, tievalue);
-        g_log.information() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
+        g_log.debug() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
     }
 
     return;
@@ -1284,7 +1284,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
             = (fitalg->getProperty("OutputParameters"));
     if (fitvaluews)
     {
-        g_log.notice() << "Yes! Got the table workspace.  Col No = " << fitvaluews->columnCount() << std::endl;
+        g_log.debug() << "DBx318 Got the table workspace.  Col No = " << fitvaluews->columnCount() << std::endl;
         for (size_t ir = 0; ir < fitvaluews->rowCount(); ++ir)
         {
             API::TableRow row = fitvaluews->getRow(ir);
@@ -1316,7 +1316,29 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
             throw std::runtime_error("Unable to support parameter name to split.");
         }
 
+        // Error only set in one parameter if multiple function has same parameter tied.
+        if (error > 1.0E-5)
+        {
+            // Update the function parameters' error
+            mFuncParameterErrors.insert(std::make_pair(parname, error));
+
+            // Output
+            if (parammap[results[1]].second == 'f')
+            {
+                // Fit
+                parammap[results[1]] = std::make_pair(curvalue, 'f');
+                g_log.information() << "  [Fitting Result] Parameter " << results[1] << " = " << curvalue
+                                    << ", parameter chi^2 = " << error << std::endl;
+            }
+            else
+            {
+                g_log.warning() << " [Fitting Result] Parameter " << results[1] << " is not set to refine.  "
+                                << "But its chi^2 =" << error << std::endl;
+            }
+        }
+
         // Note: result[0] = f0, result[1] = parameter name
+        /*
         if (results[0].compare("f0") == 0)
         {
             g_log.debug() << "DB216 Parameter " << results[1] << ": " << curvalue << std::endl;
@@ -1330,18 +1352,14 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
                                     << ", parameter chi^2 = " << error << std::endl;
             }
         }
+        */
 
-        // Error
-        if (error > 1.0E-2)
-        {
-            mFuncParameterErrors.insert(std::make_pair(parname, error));
-        }
+
     }
 
     // c) Get parameter output workspace from it for error
     if (fitvaluews)
     {
-        g_log.notice() << "Yes! Got the table workspace.  Col No = " << fitvaluews->columnCount() << std::endl;
         for (size_t ir = 0; ir < fitvaluews->rowCount(); ++ir)
         {
             // 1. Get row and parse
@@ -1487,27 +1505,64 @@ void LeBailFit::exportEachPeaksParameters()
 
 
 /** Generate a list of peaks from input
+  * Initial screening will be made to exclude peaks out of data range
  */
-void LeBailFit::generatePeaksFromInput()
+void LeBailFit::generatePeaksFromInput(size_t workspaceindex)
 {   
     // There is no need to consider peak's order now due to map
+
+    size_t numpeaksoutofrange = 0;
     for (size_t ipk = 0; ipk < mPeakHKLs.size(); ++ipk)
     {
-        CurveFitting::ThermalNeutronBk2BkExpConvPV tmppeak;
+        // 1. Calculate peak position from input parameter by assuming that Zero, Zerot, Dtt1, and etc does not shift too much
+        //    FIXME - Make this an option
         int h = mPeakHKLs[ipk][0];
         int k = mPeakHKLs[ipk][1];
         int l = mPeakHKLs[ipk][2];
-        tmppeak.setMillerIndex(h, k, l);
-        tmppeak.initialize();
-        CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr speak = boost::make_shared<CurveFitting::ThermalNeutronBk2BkExpConvPV>(tmppeak);
-
         int hkl2 = h*h+k*k+l*l;
-        mPeaks.insert(std::make_pair(hkl2, speak));
 
-        speak->setPeakRadius(mPeakRadius);
+        double d_h = calculatePeakCenter(h, k, l);
+        double tof_h = convertUnitToTOF(d_h);
+
+        bool excludepeak = false;
+        if (tof_h < dataWS->readX(workspaceindex)[0] || tof_h > dataWS->readX(workspaceindex).back())
+        {
+            g_log.warning() << "Input peak (" << h << ", " << k << ", " << l << ") is out of range. "
+                            << "d_h = " << d_h << ";  TOF_h = " << tof_h << std::endl;
+            numpeaksoutofrange ++;
+            excludepeak = true;
+        }
+
+        // 2. Create the peak instance and set it up
+        if (!excludepeak)
+        {
+            CurveFitting::ThermalNeutronBk2BkExpConvPV tmppeak;
+
+            tmppeak.setMillerIndex(h, k, l);
+            tmppeak.initialize();
+            CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr speak = boost::make_shared<CurveFitting::ThermalNeutronBk2BkExpConvPV>(tmppeak);
+            speak->setPeakRadius(mPeakRadius);
+
+            // 3. Add to object instance
+            mPeaks.insert(std::make_pair(hkl2, speak));
+
+            //    Set up mPeakHKL2 for another type of indexing
+            std::vector<int>::iterator fit = std::find(mPeakHKL2.begin(), mPeakHKL2.end(), hkl2);
+            if (fit != mPeakHKL2.end())
+            {
+                g_log.error() << "H^2+K^2+L^2 = " << hkl2 << " already exists. This situation is not considered" << std::endl;
+                throw std::invalid_argument("2 reflections have same H^2+K^2+L^2, which is not supported.");
+            }
+            else
+            {
+                mPeakHKL2.insert(fit, hkl2);
+            }
+        }
     }
 
-    /// Set the parameters' names
+    g_log.warning() << "There are " << numpeaksoutofrange << " peaks not within the data range." << std::endl;
+
+    // 4. Set the parameters' names
     mPeakParameterNames.clear();
     if (mPeaks.size() > 0)
     {
@@ -1728,17 +1783,7 @@ void LeBailFit::importReflections()
         trow >> h >> k >> l;
 
         // 2. Check whether this (hkl)^2 exits.  Throw exception if it exist
-        int hkl2 = h*h + k*k + l*l;
-        std::vector<int>::iterator fit = std::find(mPeakHKL2.begin(), mPeakHKL2.end(), hkl2);
-        if (fit != mPeakHKL2.end())
-        {
-            g_log.error() << "H^2+K^2+L^2 = " << hkl2 << " already exists. This situation is not considered" << std::endl;
-            throw std::invalid_argument("2 reflections have same H^2+K^2+L^2, which is not supported.");
-        }
-        else
-        {
-            mPeakHKL2.insert(fit, hkl2);
-        }
+        //    Leave this part late to generate peaks
 
         // 3. Insert related data structure
         std::vector<int> hkl;
@@ -1755,6 +1800,7 @@ void LeBailFit::importReflections()
         }
 
         // FIXME: Need to add the option to store user's selection to include/exclude peak
+        int hkl2 = h*h + k*k + l*l;
 
         mPeakHeights.insert(std::make_pair(hkl2, peakheight));
   } // ENDFOR row
@@ -1975,6 +2021,45 @@ void LeBailFit::parseCompFunctionParameterName(std::string fullparname, std::str
     // g_log.debug() << "DBx518 Split Parameter " << fullparname << " To Function Index " << funcindex << "  Name = " << parname << std::endl;
 
     return;
+}
+
+/** Calculate peak's d-spacing from its HKL and
+  */
+double LeBailFit::calculatePeakCenter(int h, int k, int l)
+{
+    double a = mFuncParameters["LatticeConstant"].first;
+    if (a < 1.0E-2)
+    {
+        std::stringstream errmsg;
+        errmsg << "Lattice constant is unphysically small.  a = " << a << std::endl;
+        throw std::invalid_argument(errmsg.str());
+    }
+
+    double hklfactor = sqrt(double(h*h)+double(k*k)+double(l*l));
+    double dh = a/hklfactor;
+
+    return dh;
+}
+
+/** Convert unit from d-spacing to TOF
+  */
+double LeBailFit::convertUnitToTOF(double dh)
+{
+    // FIXME - Can use ThermalNeutronDtoTOFFunction later...
+    double dtt1 = mFuncParameters["Dtt1"].first;
+    double dtt1t = mFuncParameters["Dtt1t"].first;
+    double dtt2t = mFuncParameters["Dtt2t"].first;
+    double zero = mFuncParameters["Zero"].first;
+    double zerot = mFuncParameters["Zerot"].first;
+    double width = mFuncParameters["Width"].first;
+    double tcross = mFuncParameters["Tcross"].first;
+
+    double n = 0.5*gsl_sf_erfc(width*(tcross-1/dh));
+    double Th_e = zero + dtt1*dh;
+    double Th_t = zerot + dtt1t*dh - dtt2t/dh;
+    double tof_h = n*Th_e + (1-n)*Th_t;
+
+    return tof_h;
 }
 
 } // namespace CurveFitting

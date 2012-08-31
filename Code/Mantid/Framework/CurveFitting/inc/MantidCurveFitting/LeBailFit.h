@@ -10,7 +10,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
-
+#include <gsl/gsl_sf_erf.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -74,7 +74,7 @@ namespace CurveFitting
     void importReflections();
 
     /// Create a list of peaks
-    void generatePeaksFromInput();
+    void generatePeaksFromInput(size_t workspaceindex);
 
     /// Create and set up output table workspace for peaks
     void exportEachPeaksParameters();
@@ -173,6 +173,12 @@ namespace CurveFitting
     std::vector<std::string> mPeakParameterNames; // Peak parameters' names of the peak
     /// Parameter error
     std::map<std::string, double> mFuncParameterErrors;
+
+    /// Calcualte peak's position in d-spacing.
+    double calculatePeakCenter(int h, int k, int l);
+
+    /// Convert unit from d-spacing to TOF
+    double convertUnitToTOF(double dh);
 
     /// =============================    =========================== ///
     size_t mWSIndexToWrite;
