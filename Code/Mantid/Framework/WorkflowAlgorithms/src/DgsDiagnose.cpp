@@ -7,11 +7,15 @@ hand off to the DetectorDiagnostic algorithm.
 
 #include "MantidWorkflowAlgorithms/DgsDiagnose.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 
+#include <boost/lexical_cast.hpp>
 #include <boost/pointer_cast.hpp>
+#include <boost/tokenizer.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -121,7 +125,7 @@ namespace WorkflowAlgorithms
     const double samLo = reductionManager->getProperty("SamBkgMedianTestLow");
     const double samSigma = reductionManager->getProperty("SamBkgErrorBarCriterion");
     const double bleedRate = reductionManager->getProperty("MaxFramerate");
-    const int bleedPixels = reductionManager->getProperty("IgnoredPixels");
+    const long bleedPixels = reductionManager->getProperty("IgnoredPixels");
 
     // Make some internal names for workspaces
     const std::string dvInternal = "_det_van";
@@ -190,12 +194,10 @@ namespace WorkflowAlgorithms
         integrate->setPropertyValue("OutputWorkspace", countsInternal);
         integrate->setProperty("IncludePartialBins", true);
         integrate->executeAsSubAlg();
-        g_log.warning() << "Total Counts being used" << std::endl;
         totalCountsWS = integrate->getProperty("OutputWorkspace");
       }
     else
       {
-        g_log.warning() << "Total Counts NOT being used" << std::endl;
         totalCountsWS = boost::shared_ptr<MatrixWorkspace>();
       }
 
@@ -205,7 +207,6 @@ namespace WorkflowAlgorithms
       {
         const double rangeStart = reductionManager->getProperty("BackgroundTofStart");
         const double rangeEnd = reductionManager->getProperty("BackgroundTofEnd");
-
         IAlgorithm_sptr integrate = this->createSubAlgorithm("Integration");
         integrate->setProperty("InputWorkspace", sampleWS);
         integrate->setPropertyValue("OutputWorkspace", bkgInternal);
@@ -268,11 +269,53 @@ namespace WorkflowAlgorithms
     diag->setProperty("SampleBkgHighAcceptanceFactor", samHi);
     diag->setProperty("SampleBkgSignificanceTest", samSigma);
     diag->setProperty("MaxTubeFramerate", bleedRate);
-    diag->setProperty("NIgnoredCentralPixels", bleedPixels);
+    diag->setProperty("NIgnoredCentralPixels", static_cast<int>(bleedPixels));
     diag->setProperty("OutputWorkspace", maskName);
-    diag->executeAsSubAlg();
 
-    MatrixWorkspace_sptr maskWS = diag->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr maskWS;
+    int numMasked(0);
+    std::vector<std::string> diag_spectra = dvWS->getInstrument()->getStringParameter("diag_spectra");
+    if (diag_spectra.empty())
+      {
+        diag->executeAsSubAlg();
+        maskWS = diag->getProperty("OutputWorkspace");
+        numMasked = diag->getProperty("NumberOfFailures");
+      }
+    else
+      {
+        typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+        boost::char_separator<char> sep("(,);");
+        tokenizer tokens(diag_spectra[0], sep);
+        for (tokenizer::iterator tok_iter = tokens.begin();
+             tok_iter != tokens.end(); )
+          {
+            int startIndex = boost::lexical_cast<int>(*tok_iter);
+            startIndex -= 1;
+            ++tok_iter;
+            int endIndex = boost::lexical_cast<int>(*tok_iter);
+            endIndex -= 1;
+            g_log.information() << "Pixel range: (" << startIndex << ", " << endIndex << ")" << std::endl;
+            diag->setProperty("StartWorkspaceIndex", startIndex);
+            diag->setProperty("EndWorkspaceIndex", endIndex);
+            diag->executeAsSubAlg();
+            if (maskWS)
+              {
+                MatrixWorkspace_sptr tmp = diag->getProperty("OutputWorkspace");
+                IAlgorithm_sptr comb = createSubAlgorithm("BinaryOperateMasks");
+                comb->setProperty("InputWorkspace1", maskWS);
+                comb->setProperty("InputWorkspace2", tmp);
+                comb->setProperty("OutputWorkspace", maskWS);
+                comb->setProperty("OperationType", "OR");
+                comb->executeAsSubAlg();
+              }
+            else
+              {
+                maskWS = diag->getProperty("OutputWorkspace");
+              }
+            numMasked += static_cast<int>(diag->getProperty("NumberOfFailures"));
+            ++tok_iter;
+          }
+      }
 
     // Cleanup
     dvWS.reset();
@@ -281,8 +324,8 @@ namespace WorkflowAlgorithms
     totalCountsWS.reset();
     backgroundIntWS.reset();
 
-    int numMasked = diag->getProperty("NumberOfFailures");
-    g_log.information() << "Number of masked pixels = " << numMasked << std::endl;
+    MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(maskWS);
+    g_log.information() << "Number of masked pixels = " << m->getNumberMasked() << std::endl;
     this->setProperty("OutputWorkspace", maskWS);
   }
 
