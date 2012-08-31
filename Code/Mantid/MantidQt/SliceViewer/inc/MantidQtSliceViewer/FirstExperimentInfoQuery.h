@@ -50,7 +50,7 @@ namespace MantidQt
 
       bool hasOrientedLattice() const
       {
-        Mantid::API::MultipleExperimentInfos_const_sptr expInfos = boost::dynamic_pointer_cast<const MultipleExperimentInfos>(m_ws);  
+        Mantid::API::MultipleExperimentInfos_const_sptr expInfos = boost::dynamic_pointer_cast<const Mantid::API::MultipleExperimentInfos>(m_ws);  
         bool hasLattice = false;
         if( expInfos != NULL && expInfos->getNumExperimentInfo() > 0)
         {
@@ -62,7 +62,7 @@ namespace MantidQt
 
       bool hasRotatedGoniometer() const
       {
-        Mantid::API::MultipleExperimentInfos_const_sptr expInfos = boost::dynamic_pointer_cast<const MultipleExperimentInfos>(m_ws);  
+        Mantid::API::MultipleExperimentInfos_const_sptr expInfos = boost::dynamic_pointer_cast<const Mantid::API::MultipleExperimentInfos>(m_ws);  
         bool hasRotatedGoniometer = false;
         if( expInfos != NULL && expInfos->getNumExperimentInfo() > 0)
         {
