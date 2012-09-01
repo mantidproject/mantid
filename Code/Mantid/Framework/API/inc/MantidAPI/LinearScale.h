@@ -45,10 +45,10 @@ class MANTID_API_DLL LinearScale : public API::ITransformScale
 {
 public:
   LinearScale();
-  ~LinearScale();
+  virtual ~LinearScale();
   /// The scaling transformation. First and last elements of the grid remain unchanged
-  const std::string name() const { return "LinearScale"; }
-  void transform( std::vector<double> &gd );
+  virtual const std::string name() const { return "LinearScale"; }
+  virtual void transform( std::vector<double> &gd );
 }; // class LinearScale
 
 

@@ -46,7 +46,7 @@ public:
   /// Virtual destructor
   virtual ~ITransformScale();
   virtual const std::string name() const { return "ITransformScale"; }
-  /// The scaling transformation. Override with method of derived classes
+  /// The scaling transformation. Define in derived classes
   virtual void transform( std::vector<double> &gd ) = 0;
 
 protected:
