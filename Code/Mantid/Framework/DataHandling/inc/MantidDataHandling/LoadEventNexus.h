@@ -117,8 +117,10 @@ namespace Mantid
       int chunk;
       /// number of chunks
       int totalChunks;
+      /// for multiple chunks per bank
+      int firstChunkForBank;
       /// number of chunks per bank
-      int totalChunksE;
+      size_t eventsPerChunk;
 
       /// Was the instrument loaded?
       bool instrument_loaded_correctly;

@@ -258,6 +258,8 @@ class SNSPowderReduction(PythonAlgorithm):
             chunk = {}
             
         wksp = api.Load(Filename=filename, OutputWorkspace=name, **chunk)
+        if HAVE_MPI:
+            print "MPI Task = ", mpi.world.rank, "Number Events = ", wksp.getNumberEvents()
         return wksp
 
     def _getStrategy(self, runnumber, extension):
