@@ -45,7 +45,7 @@ class MANTID_API_DLL LogarithmScale : public ITransformScale
 {
 public:
   LogarithmScale() : m_base(M_E) {};
-  ~LogarithmScale();
+  ~LogarithmScale() {};
   const std::string name() const { return "LogarithmScale"; }
   void transform( std::vector<double> &gd );
   void setBase( double &base);

@@ -50,7 +50,7 @@ public:
   virtual void transform( std::vector<double> &gd ) = 0;
 
 protected:
-  static Kernel::Logger& g_log;
+  static Mantid::Kernel::Logger& g_log;
 }; // class ITransformScale
 
 /// typedef for a shared pointer

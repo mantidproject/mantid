@@ -13,7 +13,7 @@ namespace Mantid
 namespace API
 {
 
-DECLARE_TRANSFORMSCALE(LogarithmScale);
+//DECLARE_TRANSFORMSCALE(LogarithmScale);
 
 void LogarithmScale::setBase( double &base)
 {
