@@ -43,6 +43,7 @@ namespace API
 class MANTID_API_DLL ITransformScale
 {
 public:
+  ITransformScale();
   /// Virtual destructor needed for an abstract class
   virtual ~ITransformScale() {};
   virtual const std::string name() const { return "ITransformScale"; }
@@ -50,7 +51,7 @@ public:
   virtual void transform( std::vector<double> &gd ) = 0;
 
 protected:
-  static Mantid::Kernel::Logger& g_log;
+  static Kernel::Logger& g_log;
 }; // class ITransformScale
 
 /// typedef for a shared pointer
