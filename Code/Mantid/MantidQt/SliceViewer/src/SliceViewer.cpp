@@ -1426,7 +1426,8 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
-  m_peaksPresenter->updateWithSlicePoint(m_dimWidgets[2]->getSlicePoint());
+  if ( m_dimWidgets.size() > 2 ) // Temporary fix for crash when displaying Workspace2D (where m_dimWidgets only has 2 elements)
+    m_peaksPresenter->updateWithSlicePoint(m_dimWidgets[2]->getSlicePoint());
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
