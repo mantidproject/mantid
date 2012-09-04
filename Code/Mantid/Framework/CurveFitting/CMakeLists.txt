@@ -2,6 +2,7 @@ set ( SRC_FILES
 	#	src/CostFuncIgnorePosPeaks.cpp
 	#	src/SCDPanelErrors.cpp
 	# src/ChebyshevPolynomialBackground.cpp
+	#src/VisionCalibrationMultiplePeak.cpp
 	src/Abragam.cpp
 	src/BFGS_Minimizer.cpp
 	src/BackToBackExponential.cpp
@@ -74,6 +75,7 @@ set ( INC_FILES
 	#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
+	#inc/MantidCurveFitting/VisionCalibrationMultiplePeak.h
 	inc/MantidCurveFitting/Abragam.h
 	inc/MantidCurveFitting/BFGS_Minimizer.h
 	inc/MantidCurveFitting/BackToBackExponential.h
