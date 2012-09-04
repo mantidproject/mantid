@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 #include "MantidAPI/LogarithmScale.h"
-#include "MantidAPI/TransformScaleFactory.h"
+//#include "MantidAPI/TransformScaleFactory.h"
 
 namespace Mantid
 {

@@ -4,7 +4,7 @@ set ( SRC_FILES
     src/ITransformScale.cpp
 #    src/TransformScaleFactory.cpp
     src/LinearScale.cpp
-#    src/LogarithmScale.cpp
+    src/LogarithmScale.cpp
 	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
 	src/AlgorithmHasProperty.cpp
@@ -121,7 +121,7 @@ set ( INC_FILES
     inc/MantidAPI/ITransformScale.h
 #    inc/MantidAPI/TransformScaleFactory.h
     inc/MantidAPI/LinearScale.h
-#    inc/MantidAPI/LogarithmScale.h
+    inc/MantidAPI/LogarithmScale.h
 	inc/MantidAPI/Algorithm.h
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h

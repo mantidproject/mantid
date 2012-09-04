@@ -43,7 +43,7 @@ namespace API
 class MANTID_API_DLL ITransformScale
 {
 public:
-  ITransformScale();
+  ITransformScale() {};
   /// Virtual destructor needed for an abstract class
   virtual ~ITransformScale() {};
   virtual const std::string name() const { return "ITransformScale"; }
