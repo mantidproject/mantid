@@ -262,12 +262,26 @@ void CompAssembly::getChildren(std::vector<IComponent_const_sptr> & outVector, b
 /**
 * Find a component by name.
 * @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
+* If the name contains '/', it will search the the component whose name occurs before the '/' 
+* then within that component's assembly,
+* search the the component whose name occurs after the '/' and so on with any subsequent '/'. 
+* For example to find 'tube020' in 'panel07', one could use the cname 'panel07/tube020', 
+* given that tube020 is unique within panel07.
 * @param nlevels :: Optional argument to limit number of levels searched.
 * @returns A shared pointer to the component
 */
 boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::string & cname, int nlevels) const
 {
   boost::shared_ptr<const IComponent> node = boost::shared_ptr<const IComponent>(this, NoDeleting());
+
+  // If name has '/' in it, how am I going to describe this neatly?
+  size_t cut = cname.find('/');
+  if ( cut < cname.length() ) {
+    node = this->getComponentByName( cname.substr(0,cut-1));
+    boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(node);
+    return asmb->getComponentByName( cname.substr(cut,std::string::npos) );
+  }
+
   // Check the instrument name first
   if( this->getName() == cname )
   {
