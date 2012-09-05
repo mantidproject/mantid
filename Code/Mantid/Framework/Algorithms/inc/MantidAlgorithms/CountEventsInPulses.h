@@ -62,15 +62,23 @@ namespace Algorithms
     /// Rebin workspace
     void rebin(DataObjects::EventWorkspace_sptr outputWS);
 
+    /// Compress events
+    DataObjects::EventWorkspace_sptr compressEvents(DataObjects::EventWorkspace_sptr inputws, double tolerance);
+
     DataObjects::EventWorkspace_const_sptr inpWS;
     std::vector<double> mTimesInSecond; // Full size time in second
     std::vector<Kernel::DateAndTime> mBinTimes; // Time with pulses binned
-    size_t mBinSize;
+
+    /// Sum spectra or not
     bool mSumSpectra;
+
     double mUnitFactor;
+
+    /// Average length of pulse in unit of second
     double mPulseLength;
 
-    double mTolerance;
+    /// Bin size for future rebinning
+    double mBinSize;
 
   };
 

@@ -51,8 +51,12 @@ namespace Algorithms
       this->declareProperty(new API::WorkspaceProperty<DataObjects::EventWorkspace>("OutputWorkspace", "", Direction::Output),
                             "Output EventWorkspace for events count along run time.");
 
+      // Bin size
+      this->declareProperty("BinSize",  EMPTY_DBL(),
+                            "Bin size for output workspace in unit of time.  Left empty will use default equal to length of 1 pulse.");
+
       // Tolerance (resolution)
-      this->declareProperty("Tolerance",  0.16, "Tolerance of events compressed in unit of second.  Zero disables.");
+      this->declareProperty("Tolerance",  EMPTY_DBL(), "Tolerance of events compressed in unit of second.  Left empty disables.");
 
       // Sum spectra or not
       this->declareProperty("SumSpectra", true, "Whether to sum up all spectra.");
@@ -69,8 +73,23 @@ namespace Algorithms
   {
       // 1. Get input
       inpWS = this->getProperty("InputWorkspace");
-      mTolerance = this->getProperty("Tolerance");
+
+      mBinSize = this->getProperty("BinSize");
+      bool usedefaultbinsize = false;
+      if (mBinSize == EMPTY_DBL())
+      {
+          usedefaultbinsize = true;
+      }
+
       mSumSpectra = this->getProperty("SumSpectra");
+
+      double tolerance = this->getProperty("Tolerance");
+      bool compressevent = true;
+      if (tolerance == EMPTY_DBL())
+      {
+          compressevent = false;
+      }
+
 
       // 2. Some survey of
       Kernel::TimeSeriesProperty<double>* protonchargelog =
@@ -95,6 +114,11 @@ namespace Algorithms
       double stddev = sqrt(dt2/static_cast<double>(mTimesInSecond.size())-mPulseLength*mPulseLength);
       g_log.notice() << "For Each Pulse: Delta T = " << mPulseLength << "  Standard deviation = " << stddev << std::endl;
 
+      if (usedefaultbinsize)
+      {
+          mBinSize = mPulseLength;
+      }
+
       // 3. Setup for parallelization
       bool useparallel = this->getProperty("Parallel");
       int nummaxcores = 1;
@@ -116,42 +140,13 @@ namespace Algorithms
       // 6. Rebin
       rebin(outputWS);
 
-      /* Combined to previous
-      // 5. Sum spectrum?
-      // FIXME Combine this part to event-conversion.
-      if (mSumSpectra)
+      // 7. Compress events
+      if (compressevent)
       {
-          std::cout << "About to sort events! " << std::endl;
-          API::Algorithm_sptr sumspec = this->createSubAlgorithm("SumSpectra", 0.9, 1.0, true);
-          sumspec->initialize();
-          sumspec->setProperty("InputWorkspace", outputWS);
-          sumspec->setProperty("OutputWorkspace", "TempWS");
-
-          bool sumsuccessful = sumspec->execute();
-          if (!sumsuccessful)
-          {
-              g_log.error() << "Sum Spectra Failed!" << std::endl;
-          }
-          else
-          {
-              API::MatrixWorkspace_sptr testws = sumspec->getProperty("OutputWorkspace");
-              if (!testws)
-              {
-                  g_log.error() << "SumSpectra failed as the output is not a MatrixWorkspace. " << std::endl;
-                  throw std::runtime_error("SumSpectra failed as the output is not a MatrixWorkspace.");
-              }
-              else
-              {
-                  outputWS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(testws);
-              }
-          }
+          outputWS = compressEvents(outputWS, tolerance);
       }
-      */
 
-      // ... Call Compress mTolerance
-      // FIXME Call a sub algorithm CompressEvents()
-
-      // Output
+      // 8. Output
       this->setProperty("OutputWorkspace", outputWS);
 
       return;
@@ -180,6 +175,8 @@ namespace Algorithms
               =  boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
               (API::WorkspaceFactory::Instance().create("EventWorkspace", numspec, 1, 1));
       API::WorkspaceFactory::Instance().initializeFromParent(parentws, outputWS, diffsize);
+
+      outputWS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Time");
 
       return outputWS;
   }
@@ -218,6 +215,55 @@ namespace Algorithms
       }
 
       return;
+  }
+
+
+  /** Compress event
+    */
+  DataObjects::EventWorkspace_sptr CountEventsInPulses::compressEvents(DataObjects::EventWorkspace_sptr inputws, double tolerance)
+  {
+      API::Algorithm_sptr alg = this->createSubAlgorithm("CompressEvents", 0.9, 1.0, true);
+      alg->initialize();
+
+      alg->setProperty("InputWorkspace", inputws);
+      alg->setProperty("OutputWorkspace", "TempWS");
+      alg->setProperty("Tolerance", tolerance);
+
+      bool successful = alg->execute();
+
+      DataObjects::EventWorkspace_sptr outputws;
+
+      if (!successful)
+      {
+          // Failed
+          outputws = inputws;
+          g_log.warning() << "CompressEvents() Failed!" << std::endl;
+      }
+      else
+      {
+          // Successful
+          outputws = alg->getProperty("OutputWorkspace");
+          if (!outputws)
+          {
+              g_log.error() << "CompressEvents failed as the output is not a MatrixWorkspace. " << std::endl;
+              throw std::runtime_error("SumSpectra failed as the output is not a MatrixWorkspace.");
+          }
+
+          /*
+          API::MatrixWorkspace_sptr testws = alg->getProperty("OutputWorkspace");
+          if (!testws)
+          {
+              g_log.error() << "CompressEvents failed as the output is not a MatrixWorkspace. " << std::endl;
+              throw std::runtime_error("SumSpectra failed as the output is not a MatrixWorkspace.");
+          }
+          else
+          {
+              outputws = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(testws);
+          }
+         */
+      }
+
+      return outputws;
   }
 
   /** Convert events to "fake" events as counts in outWS
