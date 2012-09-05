@@ -264,7 +264,7 @@ void CompAssembly::getChildren(std::vector<IComponent_const_sptr> & outVector, b
 * @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
 * If the name contains '/', it will search the the component whose name occurs before the '/' 
 * then within that component's assembly,
-* search the the component whose name occurs after the '/' and so on with any subsequent '/'. 
+* search the component whose name occurs after the '/' and so on with any subsequent '/'. 
 * For example to find 'tube020' in 'panel07', one could use the cname 'panel07/tube020', 
 * given that tube020 is unique within panel07.
 * @param nlevels :: Optional argument to limit number of levels searched.
@@ -274,12 +274,18 @@ boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::
 {
   boost::shared_ptr<const IComponent> node = boost::shared_ptr<const IComponent>(this, NoDeleting());
 
-  // If name has '/' in it, how am I going to describe this neatly?
+  // If name has '/' in it, it is taken as part of a path name of the component.
+  // Steps may be skipped at a '/' from the path name, 
+  // but if what follows the skip is not unique within what precedes it, only the first found is returned.
   size_t cut = cname.find('/');
   if ( cut < cname.length() ) {
-    node = this->getComponentByName( cname.substr(0,cut-1));
-    boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(node);
-    return asmb->getComponentByName( cname.substr(cut,std::string::npos) );
+    node = this->getComponentByName( cname.substr(0,cut));
+    if(node) {
+       boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(node);
+       return asmb->getComponentByName( cname.substr(cut+1,std::string::npos) );
+    } else {
+        return boost::shared_ptr<const IComponent>(); // Search failed
+    }
   }
 
   // Check the instrument name first
