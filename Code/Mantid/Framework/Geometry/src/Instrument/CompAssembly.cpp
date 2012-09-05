@@ -267,7 +267,9 @@ void CompAssembly::getChildren(std::vector<IComponent_const_sptr> & outVector, b
 * search the component whose name occurs after the '/' and so on with any subsequent '/'. 
 * For example to find 'tube020' in 'panel07', one could use the cname 'panel07/tube020', 
 * given that tube020 is unique within panel07.
-* @param nlevels :: Optional argument to limit number of levels searched.
+* @param nlevels :: Optional argument to limit number of levels searched. 
+* If cname has a '/', then nlevels will apply to each step delimited by the '/'s, rather than the whole search.
+* In particular, nlevels=1, would force cname to be a full path name.
 * @returns A shared pointer to the component
 */
 boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::string & cname, int nlevels) const
@@ -279,10 +281,10 @@ boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::
   // but if what follows the skip is not unique within what precedes it, only the first found is returned.
   size_t cut = cname.find('/');
   if ( cut < cname.length() ) {
-    node = this->getComponentByName( cname.substr(0,cut));
+    node = this->getComponentByName( cname.substr(0,cut), nlevels);
     if(node) {
        boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(node);
-       return asmb->getComponentByName( cname.substr(cut+1,std::string::npos) );
+       return asmb->getComponentByName( cname.substr(cut+1,std::string::npos), nlevels );
     } else {
         return boost::shared_ptr<const IComponent>(); // Search failed
     }
