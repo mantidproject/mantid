@@ -382,6 +382,12 @@ public:
     TS_ASSERT( i->getComponentByName("bank").get() );
     //Det 1
     TS_ASSERT( i->getComponentByName("det1").get() );
+    // Whole path
+    TS_ASSERT( i->getComponentByName("TestInstrument/bank/det1").get() );
+    // Path with 'bank' skipped
+    TS_ASSERT( i->getComponentByName("TestInstrument/det1").get() );
+    // Path starting from 'bank'
+    TS_ASSERT( i->getComponentByName("bank/det1").get() );
 
     delete i;
   }
