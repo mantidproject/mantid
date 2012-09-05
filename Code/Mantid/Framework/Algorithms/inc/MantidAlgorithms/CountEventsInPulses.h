@@ -53,17 +53,16 @@ namespace Algorithms
     /// Main executation body
     void exec();
 
-    /// Count
-    DataObjects::EventWorkspace_sptr countInEventWorkspace();
-
     /// Create an EventWorkspace from input EventWorkspace
-    DataObjects::EventWorkspace_sptr createEventWorkspace(DataObjects::EventWorkspace_const_sptr parentws);
+    DataObjects::EventWorkspace_sptr createEventWorkspace(DataObjects::EventWorkspace_const_sptr parentws, bool sumspectrum);
 
     /// Count events (main algorithm)
-    void convertEvents(DataObjects::EventWorkspace_sptr outWS);
+    void convertEvents(DataObjects::EventWorkspace_sptr outWS, bool sumspectra);
+
+    /// Rebin workspace
+    void rebin(DataObjects::EventWorkspace_sptr outputWS);
 
     DataObjects::EventWorkspace_const_sptr inpWS;
-    std::vector<Kernel::DateAndTime> mTimes; // Full size time
     std::vector<double> mTimesInSecond; // Full size time in second
     std::vector<Kernel::DateAndTime> mBinTimes; // Time with pulses binned
     size_t mBinSize;
