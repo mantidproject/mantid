@@ -120,8 +120,8 @@ private:
      /// Show information about the point (x, y) on the image in the table
      void ShowInfoList( double x, double y );
 
-     // Show information about the y value selected in peak/back/left/right boxes
-     void ShowPeakBackSelectionValue(double y );
+     // Show information about the x and y values selected in peak/back/tof/left/right boxes
+     void ShowPeakBackSelectionValue(double x, double y );
 
      std::vector<QRgb>    positive_color_table;
      std::vector<QRgb>    negative_color_table;

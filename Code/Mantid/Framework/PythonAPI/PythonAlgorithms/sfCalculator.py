@@ -715,7 +715,6 @@ def isRunsSorted(list_runs, S1H, S2H):
     
     return True
 
-
 def calculateAndFit(numerator='',
                     denominator='',
                     list_peak_back_numerator=None,
