@@ -300,11 +300,12 @@ void ImagePlotItem::draw(       QPainter    * painter,
     
     coeff_left = (float(pix_x_max) - float(pix_x_min)) / (float(x_max) - float(x_min));
     int tof_value;
+    float coeff_bottom_right;
     
     //tof min
     float TOFmin = float(myImage->getTOFmin());
     if (TOFmin != 0) {
-        coeff_bottom_right = float(TOFmin) - float(x_min)
+        coeff_bottom_right = float(TOFmin) - float(x_min);
         tof_value = coeff_left * coeff_bottom_right + float(pix_x_min);
         painter->drawLine(QPoint(tof_value,pix_y_min), QPoint(tof_value,pix_y_max));
     }
@@ -312,7 +313,7 @@ void ImagePlotItem::draw(       QPainter    * painter,
     //tof max
     float TOFmax = float(myImage->getTOFmax());
     if (TOFmax != 0) {
-        coeff_bottom_right = float(TOFmax) - float(x_min)
+        coeff_bottom_right = float(TOFmax) - float(x_min);
         tof_value = coeff_left * coeff_bottom_right + float(pix_x_min);
         painter->drawLine(QPoint(tof_value,pix_y_min), QPoint(tof_value,pix_y_max));
     }
