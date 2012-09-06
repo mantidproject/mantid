@@ -149,16 +149,6 @@ class BASISReduction(PythonAlgorithm):
                                                    False) + "_sqw.nxs"
             api.SaveNexus(Filename=processed_filename, 
                           InputWorkspace=self._samSqwWs) 
-    
-    def _makeBins(self, params, fromMicroEv=False):
-        """
-        Create a binning parameter array from a comma-delimited string
-        """
-        if fromMicroEv:
-            scale = MICROEV_TO_MILLIEV
-        else:
-            scale = 1.0
-        return [float(x)/scale for x in params.split(',')]
 
     def _getRuns(self, rlist):
         """
@@ -183,7 +173,7 @@ class BASISReduction(PythonAlgorithm):
     
     def _makeRunFile(self, run):
         """
-        Make filename like BSS_24234_event.nxs
+        Make name like BSS24234
         """
         return self._short_inst + str(run) 
     
