@@ -101,7 +101,7 @@ namespace Mantid
       }
 
       m_indexCalculator =  MatrixWSIndexCalculator(this->blocksize());
-      // Indicate that this Algorithm has been initialized to prevent duplicate attempts.
+      // Indicate that this workspace has been initialized to prevent duplicate attempts.
       m_isInitialized = true;
     }
 

@@ -125,7 +125,9 @@ namespace API
   MantidVecPtr ISpectrum::ptrX() const
   { return refX; }
 
-
+  /// Returns a pointer to the x data
+  MantidVecPtr ISpectrum::ptrDx() const
+  { return refDx; }
 
   // =============================================================================================
   // --------------------------------------------------------------------------
