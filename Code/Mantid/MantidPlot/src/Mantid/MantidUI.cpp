@@ -2150,7 +2150,7 @@ MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph
 
   // TODO: Use the default style instead of a line if nothing is passed into this method
   ml = appWindow()->multilayerPlot(t,t->colNames(),style);
-  setUpBinGraph(ml,wsName, ws);
+  m->setBinGraph(ml,t);
   ml->confirmClose(false);
   QApplication::restoreOverrideCursor();
   return ml;
