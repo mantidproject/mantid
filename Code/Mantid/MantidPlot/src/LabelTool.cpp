@@ -1,13 +1,12 @@
 #include "LabelTool.h"
 
-LabelTool::LabelTool(Graph *graph, const QObject *status_target, const char *status_slot)
+LabelTool::LabelTool(Graph *graph)
   : QObject(graph->plotWidget()->canvas()),
 	PlotToolInterface(graph),
 
-    m_yAxisPicker(new QwtPicker(graph->plotWidget()->axisWidget(Plot::yLeft))),
-    m_xAxisPicker(new QwtPicker(graph->plotWidget()->axisWidget(Plot::xBottom))),
     m_canvasPicker(new QwtPicker(graph->plotWidget()->canvas())),
-    
+    m_xAxisPicker(new QwtPicker(graph->plotWidget()->axisWidget(Plot::xBottom))),   
+    m_yAxisPicker(new QwtPicker(graph->plotWidget()->axisWidget(Plot::yLeft))),
     m_xPos(), m_yPos(), m_axisX(), m_axisY(), m_axisCoordsX(), m_axisCoordsY(), m_error(), m_dataCoords()
 {
     connect(m_xAxisPicker, SIGNAL(selected(const QwtPolygon &)), this, SLOT(xAxisClicked(const QwtPolygon &)));
@@ -42,11 +41,9 @@ void LabelTool::xAxisClicked(const QwtPolygon &x)
   // Obtains the origins of the canvas and of the axis.
   QPoint canvasOrigin = d_graph->plotWidget()->canvas()->pos();
   int canvasOriginX = canvasOrigin.x();
-  int canvasOriginY = canvasOrigin.y();
 
   QPoint xOrigin = d_graph->plotWidget()->axisWidget(QwtPlot::xBottom)->pos();
   int xAxisOriginXValue = xOrigin.x();
-  int xAxisOriginYValue = xOrigin.y();
 
   /**
    * The difference in the origins is calculated then taken into account when converting the pixel coordinates of the
@@ -88,11 +85,9 @@ void LabelTool::yAxisClicked(const QwtPolygon &y)
 
   // Obtains the origins of the canvas and of the axis.
   QPoint canvasOrigin = d_graph->plotWidget()->canvas()->pos();
-  int canvasOriginX = canvasOrigin.x();
   int canvasOriginY = canvasOrigin.y();
 
   QPoint yOrigin = d_graph->plotWidget()->axisWidget(QwtPlot::yLeft)->pos();
-  int yAxisOriginXValue = yOrigin.x();
   int yAxisOriginYValue = yOrigin.y();
   
 /**
@@ -198,7 +193,7 @@ void LabelTool::canvasClicked(const QwtPolygon &c)
   }
 
   // Calls the function for when a blank canvas is clicked if there are no points within the specified ranges.
-  if( pointsWithinRange.size() == NULL )
+  if( pointsWithinRange.isEmpty() )
   {
     blankCanvasClick();
     break;
