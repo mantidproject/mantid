@@ -19,6 +19,7 @@ from mantid import config
 import os
 
 MICROEV_TO_MILLIEV = 1000.0
+DEFAULT_BINS = [0., 0., 0.]
 
 class BASISReduction(PythonAlgorithm):
     def category(self):
@@ -35,9 +36,12 @@ class BASISReduction(PythonAlgorithm):
         self.declareProperty("RunNumbers", "", "Sample run numbers")
         self.declareProperty("NoMonitorNorm", False, 
                              "Stop monitor normalization")
-        self.declareProperty("EnergyBins", "", 
+        self.declareProperty(FloatArrayProperty("EnergyBins", DEFAULT_BINS, 
+                                                direction=Direction.Input), 
                              "Energy transfer binning scheme (in ueV)")
-        self.declareProperty("MomentumTransferBins", "", 
+        self.declareProperty(FloatArrayProperty("MomentumTransferBins", 
+                                                DEFAULT_BINS, 
+                                                direction=Direction.Input), 
                              "Momentum transfer binning scheme")
         self.declareProperty("MaskGroupFileDir", "/SNS/BSS/shared/autoreduce",
                              "Directory location for standard masking and grouping files.")
@@ -49,8 +53,8 @@ class BASISReduction(PythonAlgorithm):
     def PyExec(self):
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
-        self._etBins = self._makeBins(self.getProperty("EnergyBins").value, True)
-        self._qBins = self._makeBins(self.getProperty("MomentumTransferBins").value)
+        self._etBins = self.getProperty("EnergyBins").value / MICROEV_TO_MILLIEV
+        self._qBins = self.getProperty("MomentumTransferBins").value
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
         self._ancFileDir = self.getProperty("MaskGroupFileDir").value
         self._groupDetOpt = self.getProperty("GroupDetectors").value
