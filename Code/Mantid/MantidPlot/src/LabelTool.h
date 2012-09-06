@@ -40,7 +40,7 @@ class LabelTool : public QObject, public QVector<QPoint>, public PlotToolInterfa
 {
   Q_OBJECT
 public: 
- LabelTool(Graph *graph, const QObject *status_target=NULL, const char *status_slot="");
+ LabelTool(Graph *graph);
  virtual ~LabelTool();
  virtual int rtti() const {return PlotToolInterface::Rtti_LabelTool;};
  
