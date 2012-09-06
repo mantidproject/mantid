@@ -220,7 +220,7 @@ namespace Geometry
       std::ostringstream oss;
       std::vector<boost::shared_ptr<const IComponent> >::reverse_iterator rit;
       for ( rit=ancestors.rbegin() ; rit < ancestors.rend(); ++rit ) {
-        oss << *rit << "/";
+        oss << (*rit)->getName() << "/";
       }
       oss << this->getName();
       return oss.str();
