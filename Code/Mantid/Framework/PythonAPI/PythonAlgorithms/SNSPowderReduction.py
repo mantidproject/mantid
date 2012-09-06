@@ -455,6 +455,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 canFile = "%s_%d" % (self._instrument, canRun)+".nxs"
                 if HAVE_MPI and os.path.exists(canFile):
                     if mpi.world.rank == 0:                     
+                        canRun = "%s_%d" % (self._instrument, canRun)
                         canRun = api.Load(Filename=canFile, OutputWorkspace=canRun)
                 elif ("%s_%d" % (self._instrument, canRun)) in mtd:
                     canRun = mtd["%s_%d" % (self._instrument, canRun)]
@@ -483,6 +484,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 vanFile = "%s_%d" % (self._instrument, vanRun)+".nxs"
                 if HAVE_MPI and os.path.exists(vanFile):
                     if mpi.world.rank == 0:                     
+                        vanRun = "%s_%d" % (self._instrument, vanRun)
                         vanRun = api.Load(Filename=vanFile, OutputWorkspace=vanRun)
                 elif ("%s_%d" % (self._instrument, vanRun)) in mtd:
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
@@ -579,6 +581,9 @@ class SNSPowderReduction(PythonAlgorithm):
             else:
                 vanRun = None
 
+            if HAVE_MPI:
+                if mpi.world.rank > 0:
+                    return
             if samRun == 0:
                 return
             # the final bit of math
