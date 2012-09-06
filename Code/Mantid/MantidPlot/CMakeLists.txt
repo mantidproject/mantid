@@ -56,6 +56,8 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Integration.cpp
                    src/Interpolation.cpp
                    src/InterpolationDialog.cpp
+				   src/LabelTool.cpp
+				   src/LabelToolDialog.cpp
                    src/LayerDialog.cpp
                    src/LegendWidget.cpp
                    src/LineDialog.cpp
@@ -281,6 +283,8 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Integration.h
                    src/InterpolationDialog.h
                    src/Interpolation.h
+				   src/LabelTool.h
+				   src/LabelToolDialog.h
                    src/LayerDialog.h
                    src/LegendWidget.h
                    src/LineDialog.h
@@ -565,6 +569,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/Integration.h
                         src/InterpolationDialog.h
                         src/Interpolation.h
+						src/LabelTool.h
                         src/LayerDialog.h
                         src/LegendWidget.h
                         src/LineDialog.h
@@ -682,6 +687,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
+               src/LabelToolDialog.ui
                src/Mantid/FirstTimeSetup.ui
                src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui

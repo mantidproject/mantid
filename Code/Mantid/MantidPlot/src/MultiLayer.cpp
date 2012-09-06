@@ -976,7 +976,6 @@ void MultiLayer::setFonts(const QFont& titleFnt, const QFont& scaleFnt,
 void MultiLayer::connectLayer(Graph *g)
 {
 	connect (g,SIGNAL(drawLineEnded(bool)), this, SIGNAL(drawLineEnded(bool)));
-	connect (g,SIGNAL(drawTextOff()),this,SIGNAL(drawTextOff()));
 	connect (g,SIGNAL(showPlotDialog(int)),this,SIGNAL(showPlotDialog(int)));
 	connect (g,SIGNAL(createTable(const QString&,int,int,const QString&)),
 			this,SIGNAL(createTable(const QString&,int,int,const QString&)));
@@ -985,7 +984,7 @@ void MultiLayer::connectLayer(Graph *g)
 	connect (g,SIGNAL(showAxisDialog(int)),this,SIGNAL(showAxisDialog(int)));
 	connect (g,SIGNAL(axisDblClicked(int)),this,SIGNAL(showScaleDialog(int)));
 	connect (g,SIGNAL(showAxisTitleDialog()),this,SIGNAL(showAxisTitleDialog()));
-		connect (g,SIGNAL(showMarkerPopupMenu()),this,SIGNAL(showMarkerPopupMenu()));
+	connect (g,SIGNAL(showMarkerPopupMenu()),this,SIGNAL(showMarkerPopupMenu()));
 	connect (g,SIGNAL(showCurveContextMenu(int)),this,SIGNAL(showCurveContextMenu(int)));
 	connect (g,SIGNAL(cursorInfo(const QString&)),this,SIGNAL(cursorInfo(const QString&)));
 	connect (g,SIGNAL(viewImageDialog()),this,SIGNAL(showImageDialog()));
@@ -994,7 +993,7 @@ void MultiLayer::connectLayer(Graph *g)
 	connect (g,SIGNAL(selectedGraph(Graph*)),this, SLOT(setActiveGraph(Graph*)));
 	connect (g,SIGNAL(viewTextDialog()),this,SIGNAL(showTextDialog()));
 	connect (g,SIGNAL(currentFontChanged(const QFont&)), this, SIGNAL(currentFontChanged(const QFont&)));
-    connect (g,SIGNAL(enableTextEditor(Graph *)), this, SIGNAL(enableTextEditor(Graph *)));
+  connect (g,SIGNAL(enableTextEditor(Graph *)), this, SIGNAL(enableTextEditor(Graph *)));
 }
 
 bool MultiLayer::eventFilter(QObject *object, QEvent *e)

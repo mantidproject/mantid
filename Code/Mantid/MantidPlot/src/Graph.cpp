@@ -175,7 +175,7 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 
 
   connect (cp,SIGNAL(selectPlot()),this,SLOT(activateGraph()));
-  connect (cp,SIGNAL(drawTextOff()),this,SIGNAL(drawTextOff()));
+  // connect (cp,SIGNAL(drawTextOff()),this,SIGNAL(drawTextOff()));
   connect (cp,SIGNAL(viewImageDialog()),this,SIGNAL(viewImageDialog()));
   connect (cp,SIGNAL(viewLineDialog()),this,SIGNAL(viewLineDialog()));
   connect (cp,SIGNAL(showPlotDialog(int)),this,SIGNAL(showPlotDialog(int)));
@@ -3824,6 +3824,7 @@ void Graph::zoomOut()
   }
 }
 
+
 void Graph::drawText(bool on)
 {
   deselectMarker();
@@ -3838,6 +3839,7 @@ void Graph::drawText(bool on)
   }
   drawTextOn = on;
 }
+
 
 ImageMarker* Graph::addImage(ImageMarker* mrk)
 {
@@ -3911,6 +3913,19 @@ void Graph::insertImageMarker(const QStringList& lst, int fileVersion)
       mrk->setBoundingRect(lst[2].toDouble(), lst[3].toDouble(), lst[4].toDouble(), lst[5].toDouble());
   }
 }
+
+/*
+void Graph::addLabel(bool on)
+{
+  
+  QMessageBox::information(this,
+  tr("Click Detected"),
+  tr("'Add Label' tool selected. \n"
+     "You are now able to label graphs."),
+     QMessageBox::Ok|QMessageBox::Default,
+     QMessageBox::NoButton, QMessageBox::NoButton);
+}
+*/
 
 void Graph::drawLine(bool on, bool arrow)
 {

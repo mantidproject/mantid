@@ -432,6 +432,9 @@ public slots:
   bool drawTextActive(){return drawTextOn;};
   LegendWidget* insertText(LegendWidget*);
 
+  //!Used when wanting to add label to a graph
+  // void addLabel(bool on);
+
   //! Used when opening a project file
   LegendWidget* insertText(const QStringList& list, int fileVersion);
 
@@ -773,7 +776,7 @@ public slots:
 signals:
   void selectedGraph (Graph*);
   void closedGraph();
-  void drawTextOff();
+  // void drawTextOff();
   void drawLineEnded(bool);
   void cursorInfo(const QString&);
   void showPlotDialog(int);

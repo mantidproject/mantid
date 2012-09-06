@@ -82,7 +82,7 @@ public:
 	void showTextDialog(){emit showDialog();};
 	void showContextMenu(){emit showMenu();};
 
-    void print(QPainter *p, const QwtScaleMap map[QwtPlot::axisCnt]);
+  void print(QPainter *p, const QwtScaleMap map[QwtPlot::axisCnt]);
 	void setFixedCoordinatesMode(bool on = true);
 	
 private:
