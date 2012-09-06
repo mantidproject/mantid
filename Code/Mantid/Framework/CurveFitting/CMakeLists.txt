@@ -64,6 +64,7 @@ set ( SRC_FILES
 	src/SteepestDescentMinimizer.cpp
 	src/StretchExp.cpp
 	src/StretchExpMuon.cpp
+	src/TabulatedFunction.cpp
 	src/ThermalNeutronBk2BkExpConvPV.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
@@ -144,6 +145,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h
 	inc/MantidCurveFitting/StretchExpMuon.h
+	inc/MantidCurveFitting/TabulatedFunction.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
@@ -205,6 +207,7 @@ set ( TEST_FILES
 	StaticKuboToyabeTest.h
 	StretchExpMuonTest.h
 	StretchExpTest.h
+	TabulatedFunctionTest.h
 	ThermalNeutronBk2BkExpConvPVTest.h
 	UserFunction1DTest.h
 	UserFunctionTest.h
