@@ -43,7 +43,7 @@ void MoveInstrumentComponent::init()
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
       "The name of the workspace for which the new instrument configuration will have an effect. Any other workspaces stored in the analysis data service will be unaffected.");
   declareProperty("ComponentName","",
-      "The name of the component to move. Component names are defined in the instrument definition files.");
+    "The name of the component to move. Component names are defined in the instrument definition files. A pathname delited by '/' may be used for non-unique name.");
   declareProperty("DetectorID",-1,
       "The ID of the detector to move. If both the component name and the detector ID are set the latter will be used.");
   declareProperty("X",0.0,

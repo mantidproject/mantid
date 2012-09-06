@@ -19,7 +19,7 @@ namespace Mantid
     Required Properties:
     <UL>
     <LI> Workspace - The workspace to which the change will apply </LI>
-    <LI> ComponentName - The name of the component which will be moved </LI>
+    <LI> ComponentName - The name of the component which will be moved. A pathname delited by '/' may be used for non-unique name. </LI>
     <LI> DetectorID - The detector id of the component to move. Either ComponentName or DetectorID 
          can be used to identify the component. If both are given the DetectorID will bw used.
     </LI>
