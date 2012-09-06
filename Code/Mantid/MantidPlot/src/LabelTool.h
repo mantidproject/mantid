@@ -10,7 +10,7 @@
 #include "PlotCurve.h"
 #include "PlotToolInterface.h"
 
-#include "Mantid\MantidMatrixCurve.h" 
+#include "Mantid/MantidMatrixCurve.h" 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 
