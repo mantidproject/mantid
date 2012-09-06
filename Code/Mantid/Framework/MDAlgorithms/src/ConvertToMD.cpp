@@ -105,6 +105,15 @@ ConvertToMD::init()
          " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
          "(though crystal as powder is also analysed in this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
 
+     /// temporary, untill dEMode is not properly defined on Workspace
+     MDEvents::MDTransfDEHelper AlldEModes;
+     std::vector<std::string> dE_modes = AlldEModes.getEmodes();
+     declareProperty("dEAnalysisMode",dE_modes[CnvrtToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
+        "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
+        " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
+        """NoDE"" choice corresponds to ""CopyToMD"" analysis mode and is selected automatically if the QDimensions is set to ""CopyToMD""",Direction::InOut);                
+
+
      MDEvents::MDWSTransform QScl;
      std::vector<std::string> QScales = QScl.getQScalings();
      declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
@@ -115,13 +124,6 @@ ConvertToMD::init()
         "  Orthogonal HKL     -- three Q components are divided by 2pi/a,2pi/b and 2pi/c lattice vectors.\n"
         "  HKL                 -- converted to HKL (multiplied by B-matrix which is equivalent to Orthogonal HKL for rectilinear lattices.\n" 
         "This parameter is currently ignored in ""mod|Q|"" and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace.");
-     /// temporary
-     MDEvents::MDTransfDEHelper AlldEModes;
-     std::vector<std::string> dE_modes = AlldEModes.getEmodes();
-     declareProperty("dEAnalysisMode",dE_modes[CnvrtToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
-        "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
-        " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
-        """NoDE"" choice corresponds to ""CopyToMD"" analysis mode and is selected automatically if the QDimensions is set to ""CopyToMD""",Direction::InOut);                
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
         " List(comma separated) of additional to Q and DeltaE variables which form additional (orthogonal) to Q dimensions"
