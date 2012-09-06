@@ -163,6 +163,17 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void test_Attributes()
+  {
+    TabulatedFunction fun;
+    auto names = fun.getAttributeNames();
+    TS_ASSERT_EQUALS( names.size(), 2 );
+    TS_ASSERT_EQUALS( names[0], "FileName" );
+    TS_ASSERT_EQUALS( names[1], "Workspace" );
+    TS_ASSERT( fun.hasAttribute("FileName") );
+    TS_ASSERT( fun.hasAttribute("Workspace") );
+  }
+
 private:
   const std::string m_asciiFileName;
   const std::string m_nexusFileName;

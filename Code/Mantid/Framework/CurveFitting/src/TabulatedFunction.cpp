@@ -121,7 +121,9 @@ void TabulatedFunction::clear()
 /// Returns a list of attribute names
 std::vector<std::string> TabulatedFunction::getAttributeNames()const
 {
-  std::vector<std::string> res(1,"FileName");
+  std::vector<std::string> res(2);
+  res[0] = "FileName";
+  res[1] = "Workspace";
   return res;
 }
 
@@ -173,6 +175,17 @@ IFunction::Attribute TabulatedFunction::getAttribute(const std::string& attName)
     return Attribute( m_wsName );
   }
   return IFunction::getAttribute( attName );
+}
+
+/**
+ * Check if attribute attName exists
+ * @param attName :: A name to check.
+ */
+bool TabulatedFunction::hasAttribute(const std::string& attName)const
+{
+  std::string aName( attName );
+  std::transform(aName.begin(),aName.end(),aName.begin(),toupper);
+  return aName == "FILENAME" || aName == "WORKSPACE";
 }
 
 /**

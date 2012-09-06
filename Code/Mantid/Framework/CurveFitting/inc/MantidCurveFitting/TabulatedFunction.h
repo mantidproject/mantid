@@ -84,7 +84,7 @@ public:
   /// Set a value to attribute attName
   void setAttribute(const std::string& attName,const IFunction::Attribute& value);
   /// Check if attribute attName exists
-  bool hasAttribute(const std::string& attName)const{return attName == "FileName";}
+  bool hasAttribute(const std::string& attName)const;
 
 private:
 
