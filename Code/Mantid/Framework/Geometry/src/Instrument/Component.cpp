@@ -208,6 +208,25 @@ namespace Geometry
       return m_name;
   }
 
+  /** Get the full path name of the Component
+  *  @return this.name
+  */
+  std::string Component::getFullName() const
+  {
+    std::vector<boost::shared_ptr<const IComponent> > ancestors = this->getAncestors();
+    if( ancestors.size() == 0) {
+      return this->getName();
+    } else {
+      std::ostringstream oss;
+      std::vector<boost::shared_ptr<const IComponent> >::reverse_iterator rit;
+      for ( rit=ancestors.rbegin() ; rit < ancestors.rend(); ++rit ) {
+        oss << *rit << "/";
+      }
+      oss << this->getName();
+      return oss.str();
+    }
+  }
+
   /** Set the position of the Component
    *  The position is with respect to the parent Component
    *  @param x :: x position
