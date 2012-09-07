@@ -593,7 +593,7 @@ namespace Mantid
           }
           else
           {
-            out << comp->getName();
+            out << comp->getFullName();  // Use full path name to ensure unambiguous naming
           }
           out << ';' << p->type()<< ';' << p->name() << ';' << p->asString() << '|';
         }

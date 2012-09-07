@@ -148,6 +148,7 @@ namespace Mantid
         return std::vector<boost::shared_ptr<const IComponent> >();
       }
       std::string getName() const{return "";}
+      std::string getFullName() const{return "";}
       void setParent(IComponent*){}
       void setName(const std::string&){}
 
