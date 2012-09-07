@@ -156,7 +156,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         sv.openFromXML(self.xml_3d)
         # Check the settings
         # Automatically grabbed the histo version
-        self.assertEqual(sv.getWorkspaceName(), "TOPAZ_3680_mdhisto")
+        self.assertEqual(sv.getWorkspaceName(), "TOPAZ_3680_visual_md")
         self.assertEqual(sv.getDimX(), 1)
         self.assertEqual(sv.getDimY(), 2)
         self.assertAlmostEqual( sv.getSlicePoint(0), 4.84211, 3)
