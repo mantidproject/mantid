@@ -372,7 +372,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_peak_from_pixel_label_2">
+                         <widget class="QLabel" name="data_peak_from_pixel_label">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -400,7 +400,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="data_peak_from_pixel_2">
+                         <widget class="QLineEdit" name="data_peak_from_pixel">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                             <horstretch>0</horstretch>
@@ -425,7 +425,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_peak_from_pixel_estimate_2">
+                         <widget class="QLabel" name="data_peak_from_pixel_estimate">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -868,7 +868,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_peak_to_pixel_label_2">
+                         <widget class="QLabel" name="data_peak_to_pixel_label">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -887,7 +887,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="data_peak_to_pixel_2">
+                         <widget class="QLineEdit" name="data_peak_to_pixel">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                             <horstretch>0</horstretch>
@@ -912,7 +912,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_peak_to_pixel_estimate_2">
+                         <widget class="QLabel" name="data_peak_to_pixel_estimate">
                           <property name="minimumSize">
                            <size>
                             <width>40</width>
@@ -987,7 +987,7 @@ p, li { white-space: pre-wrap; }
                          </spacer>
                         </item>
                         <item>
-                         <widget class="QPushButton" name="plot_count_vs_y_btn_2">
+                         <widget class="QPushButton" name="plot_count_vs_y_btn">
                           <property name="minimumSize">
                            <size>
                             <width>150</width>
@@ -1019,7 +1019,7 @@ p, li { white-space: pre-wrap; }
                          <number>0</number>
                         </property>
                         <item>
-                         <widget class="QCheckBox" name="data_background_switch_2">
+                         <widget class="QCheckBox" name="data_background_switch">
                           <property name="minimumSize">
                            <size>
                             <width>170</width>
@@ -1041,7 +1041,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_background_from_pixel1_label_2">
+                         <widget class="QLabel" name="data_background_from_pixel1_label">
                           <property name="enabled">
                            <bool>true</bool>
                           </property>
@@ -1072,7 +1072,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="data_background_from_pixel1_2">
+                         <widget class="QLineEdit" name="data_background_from_pixel1">
                           <property name="enabled">
                            <bool>true</bool>
                           </property>
@@ -1106,7 +1106,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_background_from_pixel1_missing_2">
+                         <widget class="QLabel" name="data_background_from_pixel1_missing">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -1131,7 +1131,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_background_to_pixel1_label_2">
+                         <widget class="QLabel" name="data_background_to_pixel1_label">
                           <property name="enabled">
                            <bool>true</bool>
                           </property>
@@ -1153,7 +1153,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="data_background_to_pixel1_2">
+                         <widget class="QLineEdit" name="data_background_to_pixel1">
                           <property name="enabled">
                            <bool>true</bool>
                           </property>
@@ -1181,7 +1181,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_background_to_pixel1_missing_2">
+                         <widget class="QLabel" name="data_background_to_pixel1_missing">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -1222,7 +1222,7 @@ p, li { white-space: pre-wrap; }
                          </spacer>
                         </item>
                         <item>
-                         <widget class="QPushButton" name="plot_count_vs_y_bck_btn_2">
+                         <widget class="QPushButton" name="plot_count_vs_y_bck_btn">
                           <property name="minimumSize">
                            <size>
                             <width>150</width>
@@ -1254,7 +1254,7 @@ p, li { white-space: pre-wrap; }
                          <number>0</number>
                         </property>
                         <item>
-                         <widget class="QCheckBox" name="data_low_res_range_switch_2">
+                         <widget class="QCheckBox" name="data_low_res_range_switch">
                           <property name="minimumSize">
                            <size>
                             <width>170</width>
@@ -1273,7 +1273,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_low_res_from_label_2">
+                         <widget class="QLabel" name="data_low_res_from_label">
                           <property name="enabled">
                            <bool>false</bool>
                           </property>
@@ -1304,7 +1304,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="x_min_edit_2">
+                         <widget class="QLineEdit" name="x_min_edit">
                           <property name="enabled">
                            <bool>false</bool>
                           </property>
@@ -1326,7 +1326,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="x_min_estimate_2">
+                         <widget class="QLabel" name="x_min_estimate">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -1354,7 +1354,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_low_res_to_label_2">
+                         <widget class="QLabel" name="data_low_res_to_label">
                           <property name="enabled">
                            <bool>false</bool>
                           </property>
@@ -1376,7 +1376,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="x_max_edit_2">
+                         <widget class="QLineEdit" name="x_max_edit">
                           <property name="enabled">
                            <bool>false</bool>
                           </property>
@@ -1398,7 +1398,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="x_max_estimate_2">
+                         <widget class="QLabel" name="x_max_estimate">
                           <property name="minimumSize">
                            <size>
                             <width>40</width>
@@ -1436,7 +1436,7 @@ p, li { white-space: pre-wrap; }
                          </spacer>
                         </item>
                         <item>
-                         <widget class="QPushButton" name="plot_count_vs_x_btn_2">
+                         <widget class="QPushButton" name="plot_count_vs_x_btn">
                           <property name="minimumSize">
                            <size>
                             <width>150</width>
@@ -1481,6 +1481,9 @@ p, li { white-space: pre-wrap; }
                      <layout class="QVBoxLayout" name="verticalLayout_13">
                       <item>
                        <widget class="QPushButton" name="pushButton_2">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
                         <property name="minimumSize">
                          <size>
                           <width>0</width>
@@ -1500,6 +1503,9 @@ p, li { white-space: pre-wrap; }
                       </item>
                       <item>
                        <widget class="QPushButton" name="pushButton_3">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
                         <property name="minimumSize">
                          <size>
                           <width>0</width>
@@ -2915,6 +2921,9 @@ p, li { white-space: pre-wrap; }
                      <layout class="QVBoxLayout" name="verticalLayout_17">
                       <item>
                        <widget class="QPushButton" name="pushButton_4">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
                         <property name="minimumSize">
                          <size>
                           <width>0</width>
@@ -2934,6 +2943,9 @@ p, li { white-space: pre-wrap; }
                       </item>
                       <item>
                        <widget class="QPushButton" name="pushButton_5">
+                        <property name="enabled">
+                         <bool>false</bool>
+                        </property>
                         <property name="minimumSize">
                          <size>
                           <width>0</width>

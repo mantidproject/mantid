@@ -899,7 +899,7 @@ class BaseRefWidget(BaseWidget):
             return
         try:
             f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))[0]
-            print FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
+#            print FileFinder.findRuns("%s%s" % (self.instrument_name, str(self._summary.norm_run_number_edit.text())))
             
             range_min = int(self._summary.data_from_tof.text())
             range_max = int(self._summary.data_to_tof.text())

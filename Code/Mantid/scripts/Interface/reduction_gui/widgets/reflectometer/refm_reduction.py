@@ -547,7 +547,7 @@ class DataReflWidget(BaseWidget):
         if not IS_IN_MANTIDPLOT:
             return
         
-        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))
+        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]
 
         range_min = int(min_ctrl.text())
         range_max = int(max_ctrl.text())
