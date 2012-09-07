@@ -212,6 +212,7 @@ MDWSDescription::MDWSDescription(unsigned int nDimensions):
   m_GoniomMatr(3,3,true),
   m_RotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
   m_Emode(CnvrtToMD::Undef),
+  m_LorentzCorr(false),
   m_DetLoc(NULL)
 {
 

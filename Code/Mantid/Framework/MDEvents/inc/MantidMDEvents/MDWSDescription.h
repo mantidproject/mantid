@@ -77,19 +77,21 @@ public:  // for the time being
     CnvrtToMD::EModes        getEMode()const{return m_Emode;}
     std::string              getQMode()const{return AlgID;}
 
-
+    /**check if one needs to perform Lorentz corrections */
+    bool isLorentsCorrections()const{return m_LorentzCorr;}
     void getMinMax(std::vector<double> &min,std::vector<double> &max)const;
     std::vector<double> getTransfMatrix()const{return m_RotMatrix;}
     
     ConvToMDPreprocDet const * getDetectors(){return m_DetLoc;}
     ConvToMDPreprocDet const * getDetectors()const{return m_DetLoc;}
 
-    API::MatrixWorkspace_const_sptr getInWS()                const{return m_InWS;}
-    std::string getWSName()                                  const{return m_InWS->name();}
-    bool isPowder()                                          const{return !m_InWS->sample().hasOrientedLattice();}
-    bool hasLattice()                                        const{return m_InWS->sample().hasOrientedLattice();}
-    bool isDetInfoLost()                                     const{return isDetInfoLost(m_InWS);}
-    double getEi()                                           const{return getEi(m_InWS);}
+    // workspace related helper functions, providing access to various workspace functions
+    API::MatrixWorkspace_const_sptr getInWS()const{return m_InWS;}
+    std::string getWSName()const{return m_InWS->name();}
+    bool isPowder()const{return !m_InWS->sample().hasOrientedLattice();}
+    bool hasLattice()const{return m_InWS->sample().hasOrientedLattice();}
+    bool isDetInfoLost()const{return isDetInfoLost(m_InWS);}
+    double getEi()const{return getEi(m_InWS);}
     boost::shared_ptr<Geometry::OrientedLattice> getLattice()const{return getOrientedLattice(m_InWS);}
 
   /// constructor
@@ -112,6 +114,8 @@ public:  // for the time being
    // this is rather misleading function, as MD workspace do not have dimension units
    void setDimUnit(unsigned int nDim,const std::string &Unit);
    void setDetectors(const ConvToMDPreprocDet &g_DetLoc);
+   /** do we need to perform Lorentz corrections */ 
+   void setLorentsCorr(bool On=false){m_LorentzCorr=On;}
 // static helper functions:
     /// helper function checks if min values are less them max values and are consistent between each other 
     static void checkMinMaxNdimConsistent(const std::vector<double> &minVal,const std::vector<double> &maxVal);
@@ -131,6 +135,8 @@ private:
     API::MatrixWorkspace_const_sptr m_InWS;
     /// energy transfer analysis mode 
     CnvrtToMD::EModes m_Emode;
+    /// if one needs to calculate Lorentz corrections
+    bool m_LorentzCorr;
    // pointer to the array of detector's directions in the reciprocal space
     ConvToMDPreprocDet const * m_DetLoc;
     /// the vector of MD coordinates, which are obtained from workspace properties.

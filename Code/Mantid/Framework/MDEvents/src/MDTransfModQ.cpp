@@ -39,7 +39,7 @@ namespace Mantid
 
 
 
-    bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord)const
+    bool MDTransfModQ::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord, double & /*signal*/,double &/*ErrSq*/)const
     {
       if(m_Emode == CnvrtToMD::Elastic)
       {

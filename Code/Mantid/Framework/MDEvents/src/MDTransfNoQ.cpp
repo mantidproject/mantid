@@ -67,7 +67,7 @@ namespace Mantid
       }
       return true;
     }
-    bool MDTransfNoQ::calcMatrixCoord(const double& X,std::vector<coord_t> &Coord)const
+    bool MDTransfNoQ::calcMatrixCoord(const double& X,std::vector<coord_t> &Coord,double & /*s*/, double & /*errSq*/)const
     {
       if(X<m_DimMin[0]||X>=m_DimMax[0])return false;
 

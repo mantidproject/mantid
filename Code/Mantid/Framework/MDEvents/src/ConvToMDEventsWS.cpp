@@ -51,11 +51,13 @@ namespace Mantid
       for (; it != it_end; it++)
       {
         double val=localUnitConv.convertUnits(it->tof());         
-        if(!m_QConverter->calcMatrixCoord(val,locCoord))continue; // skip ND outside the range
+        double signal = it->weight();
+        double errorSq= it->errorSquared();
+        if(!m_QConverter->calcMatrixCoord(val,locCoord,signal,errorSq))continue; // skip ND outside the range
 
 
-        sig_err.push_back(float(it->weight()));
-        sig_err.push_back(float(it->errorSquared()));
+        sig_err.push_back(float(signal));
+        sig_err.push_back(float(errorSq));
         run_index.push_back(runIndexLoc);
         det_ids.push_back(detID);
         allCoord.insert(allCoord.end(),locCoord.begin(),locCoord.end());

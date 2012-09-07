@@ -85,13 +85,14 @@ ConvertToMD::init()
 
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,ws_valid),
-        "An input Matrix Workspace (Matrix 2D or Event) with units along X-axis and defined instrument with defined sample");
+        "An input Matrix Workspace (2DMatrix or Event workspace) ");
    
      declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
                   "Name of the output MDEventWorkspace");
+
      declareProperty(new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
-              "By default, existing Output Workspace will be replaced. Select false if you want to add new events to the workspace, which already exist.\n"
-              " Can be very inefficient for file-based workspaces");
+              "By default (""1""), existing Output Workspace will be replaced. Select false (""0"") if you want to add new events to the workspace, which already exist.\n"
+              "Choosing ""0"" can be very inefficient for file-based workspaces");
 
      std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
      // something to do with different moments of thime when algorithm or test loads library. To avoid empty factory always do this. 
@@ -99,31 +100,21 @@ ConvertToMD::init()
   
      /// this variable describes default possible ID-s for Q-dimensions   
      declareProperty("QDimensions",Q_modes[0],boost::make_shared<StringListValidator>(Q_modes),
-         "You can to transfer source workspace into target MD workspace directly by supplying string ""CopyToMD""\n"
-         " (No Q analysis, or Q conversion is performed),\n"
-         "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""Q3D"". \n"
-         " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
-         "(though crystal as powder is also analysed in this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
-
+          "String, describing available analysis modes, registered with [[MD Transformation factory]].\n"
+          "The modes names are ""CopyToMD"", ""mod|Q|"" and ""Q3D""",Direction::InOut);
      /// temporary, untill dEMode is not properly defined on Workspace
      MDEvents::MDTransfDEHelper AlldEModes;
      std::vector<std::string> dE_modes = AlldEModes.getEmodes();
      declareProperty("dEAnalysisMode",dE_modes[CnvrtToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
-        "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
-        " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
-        """NoDE"" choice corresponds to ""CopyToMD"" analysis mode and is selected automatically if the QDimensions is set to ""CopyToMD""",Direction::InOut);                
-
+       "You can analyse neutron energy transfer in ""Direct"", ""Indirect"" or ""Elastic"" mode. \n"
+       " The analysis mode has to correspond to experimental set up. Selecting inelastic mode increases the number of the target workspace dimensions by one.\n"
+       " See [[MD Transformation factory]] for further details.",Direction::InOut);
 
      MDEvents::MDWSTransform QScl;
      std::vector<std::string> QScales = QScl.getQScalings();
      declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
-        "This property to normalize three momentums obtained in Q3D mode. Possible values are:\n"
-        "  No Scaling,        -- momentums in Momentum or MomentumTransfer units  A^-1\n"
-        "  Q in lattice units -- single scale, where all momentums are divided by the minimal reciprocal lattice vector 2*Pi/Max(a_latt)\n"
-        "                        where a_lat is the maximal lattice parameter\n"
-        "  Orthogonal HKL     -- three Q components are divided by 2pi/a,2pi/b and 2pi/c lattice vectors.\n"
-        "  HKL                 -- converted to HKL (multiplied by B-matrix which is equivalent to Orthogonal HKL for rectilinear lattices.\n" 
-        "This parameter is currently ignored in ""mod|Q|"" and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace.");
+       "This property to normalize three momentums obtained in ""Q3D"" mode.\n"
+       " See [[MD Transformation factory]] for description and available scaling modes.");
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
         " List(comma separated) of additional to Q and DeltaE variables which form additional (orthogonal) to Q dimensions"
@@ -137,6 +128,10 @@ ConvertToMD::init()
         " Useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
         "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another. </span>"
         " In this case switch has to be set to false, as first instrument would be used for all workspaces othewise and no check for its validity is performed."); 
+    // if one needs to use Lorentz corrections
+    declareProperty(new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input), 
+        "Correct the weights of events or signals and errors transformed into reciprocal space by multiplying them by the Lorentz multiplier: sin(theta)^2/lambda^4.\n"
+        "Currently works in Q3D Elastic case only.");     
 
     declareProperty(new ArrayProperty<double>("MinValues"),
         "It has to be N comma separated values, where N is defined as: \n"
@@ -233,6 +228,8 @@ void ConvertToMD::exec()
     targWSDescr.setMinMax(dimMin,dimMax);   
     targWSDescr.buildFromMatrixWS(m_InWS2D,Q_mod_req,dE_mod_req,other_dim_names);
 
+    bool LorentzCorrections = getProperty("LorentzCorrection");
+    targWSDescr.setLorentsCorr(LorentzCorrections);
 
   // instanciate class, responsible for defining Mslice-type projection
     MDEvents::MDWSTransform MsliceProj;

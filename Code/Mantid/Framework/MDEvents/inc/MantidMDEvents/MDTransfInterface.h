@@ -19,7 +19,7 @@ namespace MDEvents
 1) First task resolved during algorithm initialization and defines the number of dimensions, coordinate system, dimension units and ID-s etc.
   This information is used when creating the target MD workspace or checking if existing MD workspace can be used as target for the selected subalgorithm
 
-2) Second task achieved during conversion itself. The subclass will works with input workpsace and convert a single point of the input ws into 
+2) Second task performed during conversion itself. The subclass will works with input workpsace and convert a single point of the input ws into 
    the vector of MD coordinates.  
   * MD coordinates are stored in the vector of n-dimensions* 
 
@@ -58,7 +58,7 @@ namespace MDEvents
 class MDTransfInterface
 {
 public:
-    /**The method returns the name, under which the transformation would be known to a user */
+    /**The method returns the name, under which the transformation would be known to a user. Its overloaded and implemented in  */
     virtual const std::string transfID()const=0;
  /** MD transformation can often be used together with energy analysis mode; This function should be overloaded 
        if the transformation indeed can do the energy analysis */
@@ -91,16 +91,19 @@ public:
      * @param j    -- index of internal loop, identifying generic x-coordinate
      * 
      * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
+     *
+     * @param s      -- signal value which can change or remain unchanged depending on MD coordinates or can affect MD coordinates
+     * @param err    -- error value which can change or remain unchanged depending on MD coordinates or can affect MD coordinates
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      *
      * in most existing algorighms X does not depend on Y coordinate, so we can place generalization here; 
      * It should be overridden if the dependence on Y coordinate do exist.
      */
-    virtual bool calcMatrixCoordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord)const
+    virtual bool calcMatrixCoordinates(const MantidVec& X,size_t i,size_t j,std::vector<coord_t> &Coord, double &s,double &err)const
     {
        UNUSED_ARG(i);
        double X_ev =double(0.5*(X[j]+X[j+1])); // ! POSSIBLE FACTORY HERE !!! if the histogram interpolation is different
-       return calcMatrixCoord(X_ev,Coord);
+       return calcMatrixCoord(X_ev,Coord,s,err);
     }
   
  /**  The method to calculate all remaining coordinates, defined within the inner loop
@@ -108,9 +111,12 @@ public:
      * @param X    -- X workspace value
      * 
      * @param Coord  -- subalgorithm specific number of coordinates, placed in the proper position of the Coordinate vector
+
+     * @param signal -- signal value which can change or remain unchanged depending on MD coordinates or can affect MD coordinates
+     * @param errSq  -- squared error value which can change or remain unchanged depending on MD coordinates or can affect MD coordinates
      * @return true  -- if all Coord are within the range requested by algorithm. false otherwise   
      * */
-    virtual bool calcMatrixCoord(const double & X,std::vector<coord_t> &Coord)const=0;
+    virtual bool calcMatrixCoord(const double & X,std::vector<coord_t> &Coord, double &signal, double &errSq)const=0;
 
     /* clone method allowing to provide the copy of the particular class */
     virtual MDTransfInterface * clone() const = 0;

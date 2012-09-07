@@ -83,16 +83,16 @@ namespace Mantid
         //=> START INTERNAL LOOP OVER THE "TIME"
         for (size_t j = 0; j < specSize; ++j)
         {
+          double signal = Signal[j];
           // drop NaN events
-          if(isNaN(Signal[j]))continue;
+          if(isNaN(signal))continue;
+          double errorSq  = Error[j]*Error[j];
 
-          if(!m_QConverter->calcMatrixCoordinates(XtargetUnits,i,j,locCoord))continue; // skip ND outside the range
+          if(!m_QConverter->calcMatrixCoordinates(XtargetUnits,i,j,locCoord,signal,errorSq))continue; // skip ND outside the range
           //  ADD RESULTING EVENTS TO THE BUFFER
-          float ErrSq = float(Error[j]*Error[j]);
-
           // coppy all data into data buffer for future transformation into events;
-          sig_err[2*nBufEvents+0]= float(Signal[j]);
-          sig_err[2*nBufEvents+1]= ErrSq;
+          sig_err[2*nBufEvents+0]= float(signal);
+          sig_err[2*nBufEvents+1]= float(errorSq);
           run_index[nBufEvents]  = m_RunIndex;
           det_ids[nBufEvents]    = det_id;
 
