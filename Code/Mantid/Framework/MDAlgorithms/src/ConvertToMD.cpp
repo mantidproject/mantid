@@ -134,17 +134,9 @@ ConvertToMD::init()
         "Currently works in Q3D Elastic case only.");     
 
     declareProperty(new ArrayProperty<double>("MinValues"),
-        "It has to be N comma separated values, where N is defined as: \n"
-        "a) 1+delta(dE)+N_OtherDimensions if the first dimension (QDimensions property) is equal to |Q| or \n"
-        "b) 3+delta(dE)+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  Q3D or \n\n"
-        "c) (1 or 2)+N_OtherDimesnions if QDimesnins property is emtpty. \n"     
-         " where delta(dE)==1 in direct and indirect modes and 0 otherwise\n"
-         " In case c) the target workspace dimensions are defined by the [[units]] of the input workspace axis.\n\n"
-         " This property contains minimal values for all dimensions.\n"
-         " Momentum values expected to be in [A^-1] and energy transfer (if any) expressed in [meV]\n"
-         " In case b), the target dimensions for Q3D are either momentums if QinHKL is false or are momentums divided by correspondent lattice parameters if QinHKL is true\n"
-         " All other values are in the [[units]] they are expressed in their log files\n"
-         " Values lower then the specified one will be ignored and not transferred into the target MD workspace\n");
+        "It has to be N comma separated values, where N is the number of dimensions of the target workspace.\n"
+        "Values smaller then specified here will not be added to workspace.\n"
+        "Number N is defined by properties 4,6 and 7 and described on [[MD Transformation factory]] page.\n");
 //TODO:    " If a minimal target workspace range is higher then the one specified here, the target workspace range will be used instead " );
 
    declareProperty(new ArrayProperty<double>("MaxValues"),
