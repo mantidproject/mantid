@@ -593,6 +593,14 @@ void ImageDisplay::ShowPeakBackSelectionValue(double x, double y )
     }
 
     /**
+     * set the peak left
+     */
+    void ImageDisplay::setPeakLeft(int value)
+    {
+        peakLeft = value;
+    }
+
+    /**
      * return the value of the peak right
      **/
     int ImageDisplay::getPeakRight()

@@ -154,6 +154,13 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
     QObject::connect( image_picker, SIGNAL(mouseMoved()),
                      this, SLOT(imagePicker_moved()) );
 
+    /*
+     * Connections on the peak, back and TOF input boxes
+     */
+    QObject::connect(iv_ui->lineEdit_peakLeft, SIGNAL(returnPressed()),
+                     this, SLOT(edit_manual_input()) );
+                     
+    
     
     
     
@@ -324,7 +331,17 @@ void IVConnections::graph_range_changed()
 //  v_graph_display->SetRangeScale( range_scale );
 }
 
+void IVConnections::edit_manual_input()
+    {
+        std::cout << "inside edit_manual " << std::endl;
+        std::cout << "iv_ui->lineEdit_peakLeft->text(): ";
+        std::cout << iv_ui->lineEdit_peakLeft << std::endl;
+//        std::cout << "peak left: " << yValue << std::endl;
+        image_display->setPeakLeft(10);
 
+    }
+    
+    
 void IVConnections::v_scroll_bar_moved()
 {
   image_display->UpdateImage();
