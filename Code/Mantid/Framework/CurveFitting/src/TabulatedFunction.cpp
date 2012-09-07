@@ -298,7 +298,6 @@ void TabulatedFunction::loadWorkspace(boost::shared_ptr<MatrixWorkspace> ws)
   const bool hist = ws->isHistogramData();
   const size_t nbins = ws->blocksize();
 
-  double first = ws->readX(0)[0];
   double last;
   if ( hist ) { last = ws->readX(0)[nbins]; }
   else { last = ws->readX(0)[nbins-1]; }
