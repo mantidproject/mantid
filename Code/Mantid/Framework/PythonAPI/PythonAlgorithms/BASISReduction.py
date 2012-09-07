@@ -60,11 +60,10 @@ class BASISReduction(PythonAlgorithm):
         self._groupDetOpt = self.getProperty("GroupDetectors").value
 
         datasearch = config["datasearch.searcharchive"]
-        #if (datasearch != "On"):
-        #    config["datasearch.searcharchive"] = "On"
+        if (datasearch != "On"):
+            config["datasearch.searcharchive"] = "On"
 
         config.appendDataSearchDir(self._ancFileDir)
-        config.appendDataSearchDir("/SNS/BSS/IPTS-7787/data/")
 
         api.LoadMask(Instrument='BASIS', OutputWorkspace='BASIS_MASK', 
                      InputFile='BASIS_Mask.xml')
