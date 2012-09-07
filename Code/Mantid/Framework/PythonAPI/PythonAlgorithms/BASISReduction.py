@@ -60,10 +60,11 @@ class BASISReduction(PythonAlgorithm):
         self._groupDetOpt = self.getProperty("GroupDetectors").value
 
         datasearch = config["datasearch.searcharchive"]
-        if (datasearch != "On"):
-            config["datasearch.searcharchive"] = "On"
+        #if (datasearch != "On"):
+        #    config["datasearch.searcharchive"] = "On"
 
         config.appendDataSearchDir(self._ancFileDir)
+        config.appendDataSearchDir("/SNS/BSS/IPTS-7787/data/")
 
         api.LoadMask(Instrument='BASIS', OutputWorkspace='BASIS_MASK', 
                      InputFile='BASIS_Mask.xml')
@@ -71,6 +72,7 @@ class BASISReduction(PythonAlgorithm):
         self._run_list = self._getRuns(self.getProperty("RunNumbers").value)
         for run_set in self._run_list:
             self._samWs = self._makeRunName(run_set[0])
+            self._samMonWs = self._samWs + "_monitors"
             self._samWsRun = str(run_set[0])
             for run in run_set:
                 ws_name = self._makeRunName(run)
@@ -78,52 +80,61 @@ class BASISReduction(PythonAlgorithm):
                 run_file = self._makeRunFile(run)
                 
                 api.Load(Filename=run_file, OutputWorkspace=ws_name)
-                api.MaskDetectors(Workspace=ws_name, 
-                                  MaskedWorkspace='BASIS_MASK')
-                api.ModeratorTzero(InputWorkspace=ws_name, OutputWorkspace=ws_name)
-                api.LoadParameterFile(Workspace=ws_name, 
-                                      Filename='BASIS_silicon_111_Parameters.xml')
-                api.ConvertUnits(InputWorkspace=ws_name, 
-                                 OutputWorkspace=ws_name,
-                                 Target='Wavelength', EMode='Indirect')
-                
                 if not self._noMonNorm:
                     api.LoadNexusMonitors(Filename=run_file, 
                                           OutputWorkspace=mon_ws_name)
-                    api.ModeratorTzero(InputWorkspace=mon_ws_name, 
-                                       OutputWorkspace=mon_ws_name)
-                    api.Rebin(InputWorkspace=mon_ws_name, 
-                              OutputWorkspace=mon_ws_name, Params='10')
-                    api.ConvertUnits(InputWorkspace=mon_ws_name, 
-                                     OutputWorkspace=mon_ws_name, 
-                                     Target='Wavelength')
-                    api.OneMinusExponentialCor(InputWorkspace=mon_ws_name,
-                                               OutputWorkspace=mon_ws_name,
-                                               C='0.20749999999999999', 
-                                               C1='0.001276')
-                    api.Scale(InputWorkspace=mon_ws_name, 
-                          OutputWorkspace=mon_ws_name,
-                          Factor='9.9999999999999995e-07')
-                    api.RebinToWorkspace(WorkspaceToRebin=ws_name, 
-                                         WorkspaceToMatch=mon_ws_name,
-                                         OutputWorkspace=ws_name)
-                    api.Divide(LHSWorkspace=ws_name, RHSWorkspace=mon_ws_name, 
-                               OutputWorkspace=ws_name)
-                    # Remove monitor workspace from list
-                    api.DeleteWorkspace(mon_ws_name)
-                    
-                api.ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, 
-                                 Target='DeltaE', EMode='Indirect')
-                api.CorrectKiKf(InputWorkspace=ws_name, OutputWorkspace=ws_name, 
-                                EMode='Indirect')
-                
                 if self._samWs != ws_name:
                     api.Plus(LHSWorkspace=self._samWs, RHSWorkspace=ws_name,
                              OutputWorkspace=self._samWs)
-                    api.DeleteWorkspace(ws_name)  
-
-            # Run things that need to be done once    
-            api.Rebin(InputWorkspace=self._samWs, OutputWorkspace=self._samWs, 
+                    api.DeleteWorkspace(ws_name)
+                if self._samMonWs != mon_ws_name and not self._noMonNorm:
+                    api.Plus(LHSWorkspace=self._samMonWs, 
+                             RHSWorkspace=mon_ws_name,
+                             OutputWorkspace=self._samMonWs)
+                    api.DeleteWorkspace(mon_ws_name)
+            
+            # After files are all added, run the reduction
+            api.MaskDetectors(Workspace=self._samWs, 
+                              MaskedWorkspace='BASIS_MASK')
+            api.ModeratorTzero(InputWorkspace=self._samWs, 
+                               OutputWorkspace=self._samWs)
+            api.LoadParameterFile(Workspace=self._samWs, 
+                                  Filename='BASIS_silicon_111_Parameters.xml')
+            api.ConvertUnits(InputWorkspace=self._samWs, 
+                                 OutputWorkspace=self._samWs,
+                                 Target='Wavelength', EMode='Indirect')
+                
+            if not self._noMonNorm:
+                api.ModeratorTzero(InputWorkspace=self._samMonWs, 
+                                   OutputWorkspace=self._samMonWs)
+                api.Rebin(InputWorkspace=self._samMonWs, 
+                          OutputWorkspace=self._samMonWs, Params='10')
+                api.ConvertUnits(InputWorkspace=self._samMonWs, 
+                                 OutputWorkspace=self._samMonWs, 
+                                 Target='Wavelength')
+                api.OneMinusExponentialCor(InputWorkspace=self._samMonWs,
+                                           OutputWorkspace=self._samMonWs,
+                                           C='0.20749999999999999', 
+                                           C1='0.001276')
+                api.Scale(InputWorkspace=self._samMonWs, 
+                          OutputWorkspace=self._samMonWs,
+                          Factor='9.9999999999999995e-07')
+                api.RebinToWorkspace(WorkspaceToRebin=self._samWs, 
+                                     WorkspaceToMatch=self._samMonWs,
+                                     OutputWorkspace=self._samWs)
+                api.Divide(LHSWorkspace=self._samWs, 
+                           RHSWorkspace=self._samMonWs, 
+                           OutputWorkspace=self._samWs)
+                    
+            api.ConvertUnits(InputWorkspace=self._samWs, 
+                             OutputWorkspace=self._samWs, 
+                             Target='DeltaE', EMode='Indirect')
+            api.CorrectKiKf(InputWorkspace=self._samWs, 
+                            OutputWorkspace=self._samWs, 
+                            EMode='Indirect')
+                   
+            api.Rebin(InputWorkspace=self._samWs, 
+                      OutputWorkspace=self._samWs, 
                       Params=self._etBins)
             if self._groupDetOpt != "None":
                 if self._groupDetOpt == "Low-Resolution":
@@ -141,7 +152,7 @@ class BASISReduction(PythonAlgorithm):
                        EFixed='2.0826')
             
             dave_grp_filename = self._makeRunName(self._samWsRun, 
-                                                  False) + ".grp"
+                                                  False) + ".dat"
             api.SaveDaveGrp(Filename=dave_grp_filename, 
                             InputWorkspace=self._samSqwWs,
                             ToMicroEV=True)
