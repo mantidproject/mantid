@@ -341,16 +341,16 @@ p, li { white-space: pre-wrap; }
                    </layout>
                   </item>
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_3">
+                   <layout class="QHBoxLayout" name="horizontalLayout_23">
                     <item>
-                     <layout class="QVBoxLayout" name="verticalLayout_14">
+                     <layout class="QVBoxLayout" name="verticalLayout_16">
                       <item>
-                       <layout class="QHBoxLayout" name="horizontalLayout_5">
+                       <layout class="QHBoxLayout" name="horizontalLayout_24">
                         <property name="spacing">
                          <number>0</number>
                         </property>
                         <item>
-                         <widget class="QLabel" name="label_2">
+                         <widget class="QLabel" name="label_9">
                           <property name="minimumSize">
                            <size>
                             <width>170</width>
@@ -372,7 +372,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_peak_from_pixel_label">
+                         <widget class="QLabel" name="data_peak_from_pixel_label_2">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -400,7 +400,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="data_peak_from_pixel">
+                         <widget class="QLineEdit" name="data_peak_from_pixel_2">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                             <horstretch>0</horstretch>
@@ -425,7 +425,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_peak_from_pixel_estimate">
+                         <widget class="QLabel" name="data_peak_from_pixel_estimate_2">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -868,7 +868,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_peak_to_pixel_label">
+                         <widget class="QLabel" name="data_peak_to_pixel_label_2">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -887,7 +887,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="data_peak_to_pixel">
+                         <widget class="QLineEdit" name="data_peak_to_pixel_2">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                             <horstretch>0</horstretch>
@@ -912,7 +912,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_peak_to_pixel_estimate">
+                         <widget class="QLabel" name="data_peak_to_pixel_estimate_2">
                           <property name="minimumSize">
                            <size>
                             <width>40</width>
@@ -971,7 +971,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <spacer name="horizontalSpacer_8">
+                         <spacer name="horizontalSpacer_9">
                           <property name="orientation">
                            <enum>Qt::Horizontal</enum>
                           </property>
@@ -987,7 +987,7 @@ p, li { white-space: pre-wrap; }
                          </spacer>
                         </item>
                         <item>
-                         <widget class="QPushButton" name="plot_count_vs_y_btn">
+                         <widget class="QPushButton" name="plot_count_vs_y_btn_2">
                           <property name="minimumSize">
                            <size>
                             <width>150</width>
@@ -1007,19 +1007,19 @@ p, li { white-space: pre-wrap; }
                            <bool>false</bool>
                           </property>
                           <property name="text">
-                           <string>Counts vs y</string>
+                           <string>Counts vs Y (1D)</string>
                           </property>
                          </widget>
                         </item>
                        </layout>
                       </item>
                       <item>
-                       <layout class="QHBoxLayout" name="horizontalLayout_8">
+                       <layout class="QHBoxLayout" name="horizontalLayout_31">
                         <property name="spacing">
                          <number>0</number>
                         </property>
                         <item>
-                         <widget class="QCheckBox" name="data_background_switch">
+                         <widget class="QCheckBox" name="data_background_switch_2">
                           <property name="minimumSize">
                            <size>
                             <width>170</width>
@@ -1041,7 +1041,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_background_from_pixel1_label">
+                         <widget class="QLabel" name="data_background_from_pixel1_label_2">
                           <property name="enabled">
                            <bool>true</bool>
                           </property>
@@ -1072,7 +1072,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="data_background_from_pixel1">
+                         <widget class="QLineEdit" name="data_background_from_pixel1_2">
                           <property name="enabled">
                            <bool>true</bool>
                           </property>
@@ -1106,7 +1106,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_background_from_pixel1_missing">
+                         <widget class="QLabel" name="data_background_from_pixel1_missing_2">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -1131,7 +1131,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_background_to_pixel1_label">
+                         <widget class="QLabel" name="data_background_to_pixel1_label_2">
                           <property name="enabled">
                            <bool>true</bool>
                           </property>
@@ -1153,7 +1153,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="data_background_to_pixel1">
+                         <widget class="QLineEdit" name="data_background_to_pixel1_2">
                           <property name="enabled">
                            <bool>true</bool>
                           </property>
@@ -1181,7 +1181,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_background_to_pixel1_missing">
+                         <widget class="QLabel" name="data_background_to_pixel1_missing_2">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -1206,7 +1206,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <spacer name="horizontalSpacer_2">
+                         <spacer name="horizontalSpacer_3">
                           <property name="orientation">
                            <enum>Qt::Horizontal</enum>
                           </property>
@@ -1222,7 +1222,7 @@ p, li { white-space: pre-wrap; }
                          </spacer>
                         </item>
                         <item>
-                         <widget class="QPushButton" name="plot_count_vs_y_bck_btn">
+                         <widget class="QPushButton" name="plot_count_vs_y_bck_btn_2">
                           <property name="minimumSize">
                            <size>
                             <width>150</width>
@@ -1242,19 +1242,19 @@ p, li { white-space: pre-wrap; }
                            <bool>false</bool>
                           </property>
                           <property name="text">
-                           <string>Counts vs y</string>
+                           <string>Counts vs Y (1D)</string>
                           </property>
                          </widget>
                         </item>
                        </layout>
                       </item>
                       <item>
-                       <layout class="QHBoxLayout" name="horizontalLayout_20">
+                       <layout class="QHBoxLayout" name="horizontalLayout_32">
                         <property name="spacing">
                          <number>0</number>
                         </property>
                         <item>
-                         <widget class="QCheckBox" name="data_low_res_range_switch">
+                         <widget class="QCheckBox" name="data_low_res_range_switch_2">
                           <property name="minimumSize">
                            <size>
                             <width>170</width>
@@ -1273,7 +1273,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_low_res_from_label">
+                         <widget class="QLabel" name="data_low_res_from_label_2">
                           <property name="enabled">
                            <bool>false</bool>
                           </property>
@@ -1304,7 +1304,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="x_min_edit">
+                         <widget class="QLineEdit" name="x_min_edit_2">
                           <property name="enabled">
                            <bool>false</bool>
                           </property>
@@ -1326,7 +1326,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="x_min_estimate">
+                         <widget class="QLabel" name="x_min_estimate_2">
                           <property name="sizePolicy">
                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                             <horstretch>0</horstretch>
@@ -1354,7 +1354,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="data_low_res_to_label">
+                         <widget class="QLabel" name="data_low_res_to_label_2">
                           <property name="enabled">
                            <bool>false</bool>
                           </property>
@@ -1376,7 +1376,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLineEdit" name="x_max_edit">
+                         <widget class="QLineEdit" name="x_max_edit_2">
                           <property name="enabled">
                            <bool>false</bool>
                           </property>
@@ -1398,7 +1398,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <widget class="QLabel" name="x_max_estimate">
+                         <widget class="QLabel" name="x_max_estimate_2">
                           <property name="minimumSize">
                            <size>
                             <width>40</width>
@@ -1420,7 +1420,7 @@ p, li { white-space: pre-wrap; }
                          </widget>
                         </item>
                         <item>
-                         <spacer name="horizontalSpacer_10">
+                         <spacer name="horizontalSpacer_18">
                           <property name="orientation">
                            <enum>Qt::Horizontal</enum>
                           </property>
@@ -1436,7 +1436,7 @@ p, li { white-space: pre-wrap; }
                          </spacer>
                         </item>
                         <item>
-                         <widget class="QPushButton" name="plot_count_vs_x_btn">
+                         <widget class="QPushButton" name="plot_count_vs_x_btn_2">
                           <property name="minimumSize">
                            <size>
                             <width>150</width>
@@ -1456,13 +1456,81 @@ p, li { white-space: pre-wrap; }
                            <bool>false</bool>
                           </property>
                           <property name="text">
-                           <string>Counts vs x</string>
+                           <string>Counts vs X (1D)</string>
                           </property>
                          </widget>
                         </item>
                        </layout>
                       </item>
                      </layout>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_22">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <layout class="QVBoxLayout" name="verticalLayout_13">
+                      <item>
+                       <widget class="QPushButton" name="pushButton_2">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>50</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>50</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string> Y vs X (2D)</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="pushButton_3">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>50</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>50</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string> Y vs TOF (2D)</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_5">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
                     </item>
                    </layout>
                   </item>
@@ -1666,7 +1734,7 @@ p, li { white-space: pre-wrap; }
                    </layout>
                   </item>
                   <item>
-                   <layout class="QHBoxLayout" name="horizontalLayout_4">
+                   <layout class="QHBoxLayout" name="horizontalLayout_3">
                     <item>
                      <layout class="QVBoxLayout" name="verticalLayout_15">
                       <item>
@@ -2326,7 +2394,7 @@ p, li { white-space: pre-wrap; }
                            </size>
                           </property>
                           <property name="text">
-                           <string>Counts vs y</string>
+                           <string>Counts vs Y</string>
                           </property>
                          </widget>
                         </item>
@@ -2629,7 +2697,7 @@ p, li { white-space: pre-wrap; }
                            </size>
                           </property>
                           <property name="text">
-                           <string>Counts vs y</string>
+                           <string>Counts vs Y</string>
                           </property>
                          </widget>
                         </item>
@@ -2822,13 +2890,81 @@ p, li { white-space: pre-wrap; }
                            </size>
                           </property>
                           <property name="text">
-                           <string>Counts vs x</string>
+                           <string>Counts vs X</string>
                           </property>
                          </widget>
                         </item>
                        </layout>
                       </item>
                      </layout>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_25">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <layout class="QVBoxLayout" name="verticalLayout_17">
+                      <item>
+                       <widget class="QPushButton" name="pushButton_4">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>50</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>50</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string> Y vs X (2D)</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="pushButton_5">
+                        <property name="minimumSize">
+                         <size>
+                          <width>0</width>
+                          <height>50</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>16777215</width>
+                          <height>50</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string> Y vs TOF (2D)</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_26">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
                     </item>
                    </layout>
                   </item>
