@@ -169,6 +169,15 @@ public:
     TS_ASSERT(ancs[0]->isParametrized());
   }
 
+  void testGetFullName()
+  {
+    Component parent("Parent",V3D(1,1,1),Quat(1,1,1,1));
+    Component q("Child",V3D(5,6,7),&parent);
+
+    TS_ASSERT_EQUALS( parent.getFullName(),"Parent");
+    TS_ASSERT_EQUALS( q.getFullName(),"Parent/Child");
+  }
+
   void testSetParent()
   {
     Component parent("Parent",V3D(1,1,1));

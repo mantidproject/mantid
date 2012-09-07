@@ -209,7 +209,7 @@ namespace Geometry
   }
 
   /** Get the full path name of the Component
-  *  @return this.name
+  *  @return full path name 
   */
   std::string Component::getFullName() const
   {
