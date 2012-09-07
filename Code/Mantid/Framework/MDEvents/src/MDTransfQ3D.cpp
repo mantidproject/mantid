@@ -5,7 +5,7 @@ namespace Mantid
 {
   namespace MDEvents
   {
-    // register the class, whith conversion factory under ModQ name
+    // register the class, whith conversion factory under Q3D name
     DECLARE_MD_TRANSFID(MDTransfQ3D,Q3D);
 
     /** method returns number of matrix dimensions calculated by this class
@@ -131,8 +131,11 @@ namespace Mantid
       // get transformation matrix (needed for CrystalAsPoder mode)
       m_RotMat = ConvParams.getTransfMatrix();
 
-      // get pointer to the positions of the detectors
-      std::vector<Kernel::V3D> const & DetDir = ConvParams.getDetectors()->getDetDir();
+      // get pointer to the positions of the preprocessed detectors
+      ConvToMDPreprocDet const *pPrepDet = ConvParams.getDetectors();
+      if(!pPrepDet)throw(std::runtime_error("Preprocessed Detectors positions have not been properly defined "));
+
+      std::vector<Kernel::V3D> const & DetDir = pPrepDet->getDetDir();
       m_Det = &DetDir[0];     //
 
       // get min and max values defined by the algorithm. 
