@@ -57,7 +57,7 @@ namespace Mantid
 
       /// Private Constructor for singleton class
       TransformScaleFactoryImpl();
-      ///Private Destructor for singleton
+      ///Private destructor for singleton
       virtual ~TransformScaleFactoryImpl();
       /// Override the DynamicFactory::createUnwrapped() method. We don't want it used here.
       ITransformScale* createUnwrapped(const std::string& className) const;

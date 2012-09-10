@@ -60,13 +60,13 @@ typedef boost::shared_ptr<ITransformScale> ITransformScale_sptr;
 } // namespace API
 } // namespace Mantid
 
-/*
+
 #define DECLARE_TRANSFORMSCALE(classname) \
   namespace { \
   Mantid::Kernel::RegistrationHelper register_trs_##classname( \
   ((Mantid::API::TransformScaleFactory::Instance().subscribe<classname>(#classname)) \
   , 0)); \
   }
-*/
+
 
 #endif /*MANTID_API_ITRANSFORMSCALE_H_*/
