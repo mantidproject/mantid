@@ -1,6 +1,7 @@
 
 #include <iostream>
 #include <qwt_plot_canvas.h>
+#include <QString>
 
 #include "MantidQtRefDetectorViewer/IVConnections.h"
 #include "MantidQtRefDetectorViewer/ColorMaps.h"
@@ -335,7 +336,7 @@ void IVConnections::edit_manual_input()
     {
         std::cout << "inside edit_manual " << std::endl;
         std::cout << "iv_ui->lineEdit_peakLeft->text(): ";
-        std::cout << iv_ui->lineEdit_peakLeft << std::endl;
+        std::cout <<  QString::toStdString(iv_ui->lineEdit_peakLeft->displayText());
 //        std::cout << "peak left: " << yValue << std::endl;
         image_display->setPeakLeft(10);
 
