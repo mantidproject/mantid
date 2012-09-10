@@ -364,7 +364,7 @@ class SNSPowderReduction(PythonAlgorithm):
             api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info.bank, Filename=filename+".dat")          
         if "NeXus" in self._outTypes:
             api.ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target=self.getProperty("FinalDataUnits").value)
-            api.Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning) # crop edges
+            #api.Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning) # crop edges
             api.SaveNexus(InputWorkspace=wksp, Filename=filename+".nxs")
 
         # always save python script
