@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/FunctionDomain.h"
@@ -59,8 +60,8 @@ protected:
   static Kernel::Logger& g_log;
 
 private:
-/// composition of grids
-std::vector< boost::shared_ptr<GridDomain> > m_grids;
+  /// composition of grids
+  std::vector< boost::shared_ptr<GridDomain> > m_grids;
 
 }; // class IGridDomain
 

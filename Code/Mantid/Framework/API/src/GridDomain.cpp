@@ -12,6 +12,8 @@ namespace Mantid
 namespace API
 {
 
+Kernel::Logger& GridDomain::g_log = Kernel::Logger::get("GridDomain");
+
 /// number of points in the grid
 size_t GridDomain::size() const{
   if( !m_grids.size() ) return 0;
