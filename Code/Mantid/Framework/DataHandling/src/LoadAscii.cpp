@@ -294,19 +294,11 @@ namespace Mantid
           {
             spectra[i].dataE().push_back(values[i*2+2]);
           }
-          else
-          {
-            spectra[i].dataE().push_back(0.0);
-          }
           if( haveXErrors )
           {
             // Note: we only have X errors with 4-column files.
             // We are only here when i=0.
             spectra[i].dataDx().push_back(values[3]);
-          }
-          else
-          {
-            spectra[i].dataDx().push_back(0.0);
           }
         }
         ++numBins;
@@ -328,7 +320,11 @@ namespace Mantid
       {
         localWorkspace->dataX(i) = spectra[i].dataX();
         localWorkspace->dataY(i) = spectra[i].dataY();
-        localWorkspace->dataE(i) = spectra[i].dataE();
+        /* If Y or E errors are not there, DON'T copy across as the 'spectra' vectors
+           have not been filled above. The workspace will by default have vectors of
+           the right length filled with zeroes. */
+        if ( haveErrors ) localWorkspace->dataE(i) = spectra[i].dataE();
+        if ( haveXErrors ) localWorkspace->dataDx(i) = spectra[i].dataDx();
         // Just have spectrum number start at 1 and count up
         localWorkspace->getAxis(1)->spectraNo(i) = static_cast<specid_t>(i+1);
       }

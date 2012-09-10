@@ -43,6 +43,17 @@ public:
     Poco::File(filename).remove();
   }
 
+  void test_Four_Column_Example_With_No_Header()
+  {
+    const std::string filename("LoadAsciiTest_test_No_Header_4.txt");
+    writeFourColumnTestFile(filename);
+    Mantid::API::MatrixWorkspace_sptr outputWS = runTest(filename, "CSV", true);
+    TS_ASSERT_EQUALS(outputWS->readDx(0)[0], 0.1);
+    TS_ASSERT_EQUALS(outputWS->readDx(0)[18], 1.9);
+    TS_ASSERT_EQUALS(outputWS->readDx(0)[29], 0.8);
+    Poco::File(filename).remove();
+  }
+
   void test_Spacing_Around_Separators()
   {
     const std::string filename("LoadAsciiTest_test_Spaced_Separators.txt");
@@ -183,6 +194,43 @@ private:
     file.close();
   }
 
+  void writeFourColumnTestFile(const std::string & filename)
+  {
+    std::ofstream file(filename.c_str());
+    // Main contents
+    file << "\n#\n 1,0.4577471236305,0.4583269753105,0.1\n"
+        " 2,0.36808374279,0.3361919003876,0.2\n"
+        " 3,0.5247352519303,0.7957701345866,0.3\n"
+        " 4,0.7798699911496,0.1859797967467,0.4\n"
+        " 5,0.174779503769,0.0634479812006,0.5\n"
+        " 6,0.002655110324412,0.7216711935789,0.6\n"
+        " 7,0.5001983703116,0.07010101626637,0.7\n"
+        " 8,0.5070039979247,0.9710074159978,0.8\n"
+        " 9,0.1597338785974,0.1830805383465,0.9\n"
+        " 10,0.1679128391369,0.04217658009583,1.0\n"
+        " 11,0.7866756187628,0.7596057008576,1.1\n"
+        " 12,0.8730735190893,0.8811609241005,1.2\n"
+        " 13,0.6683553575243,0.7220984527116,1.3\n"
+        " 14,0.9721366008484,0.00183111056856,1.4\n"
+        " 15,0.9330729087191,0.9965819269387,1.5\n"
+        "#\n"
+        " 16,0.1107211523789,0.2854091006195,1.6\n"
+        " 17,0.8644672994171,0.7749870296335,1.7\n"
+        " 18,0.8381298257393,0.2118594927824,1.8\n"
+        " 19,0.4269539475692,0.7621692556536,1.9\n"
+        " 20,0.9880977813044,0.295571764275,1.8\n"
+        " 21,0.2509231849116,0.3411664174322,1.7\n"
+        " 22,0.3361613818781,0.1708120975372,1.6\n"
+        " 23,0.8218024231697,0.5710928678243,1.5\n"
+        " 24,0.552476577044,0.8368785668508,1.4\n"
+        " 25,0.06305124057741,0.7369609668264,1.3\n"
+        " 26,0.1279030732139,0.1528061769463,1.2\n"
+        " 27,0.5297708059938,0.4314706869716,1.1\n"
+        " 28,0.8762779625843,0.8930631427961,1.0\n"
+        " 29,0.6566362498856,0.4864040040284,0.9\n"
+        " 30,0.9277321695608,0.6603289895322,0.8\n";
+        file.close();
+  }
 
   Mantid::API::MatrixWorkspace_sptr 
   runTest(const std::string & filename, const std::string & sep, const bool threeColumn,
@@ -217,7 +265,6 @@ private:
         TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->caption(), "Energy");
         TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "meV");
         dataStore.remove(outputName);
-        outputWS = MatrixWorkspace_sptr();
       }
     }
     else
@@ -254,14 +301,17 @@ private:
       TS_ASSERT_EQUALS(outputWS->readX(0)[0], 0.25);
       TS_ASSERT_EQUALS(outputWS->readY(0)[0], 0.19104);
       TS_ASSERT_EQUALS(outputWS->readE(0)[0], 0.0);
+      TS_ASSERT_EQUALS(outputWS->readDx(0)[0], 0.0);
 
       TS_ASSERT_EQUALS(outputWS->readX(0)[18], 0.34);
       TS_ASSERT_EQUALS(outputWS->readY(0)[18], 0.1825);
       TS_ASSERT_EQUALS(outputWS->readE(0)[18], 0.0);
+      TS_ASSERT_EQUALS(outputWS->readDx(0)[18], 0.0);
 
       TS_ASSERT_EQUALS(outputWS->readX(0)[50], 0.50); 
       TS_ASSERT_EQUALS(outputWS->readY(0)[50], 0.16611);
       TS_ASSERT_EQUALS(outputWS->readE(0)[50], 0.0);
+      TS_ASSERT_EQUALS(outputWS->readDx(0)[50], 0.0);
     }
   }
 

@@ -92,7 +92,12 @@ namespace API
   MantidVec& ISpectrum::dataX()
   { return refX.access(); }
 
-  ///Returns the x error data
+  /** Returns the x error data
+   *  BE VERY CAUTIOUS about using this method (when, e.g., just copying
+   *  data from an input to output workspace) if you are not actively
+   *  using X errors. It may result in the breaking of sharing between
+   *  Dx vectors and a significant and unnecessary bloating of memory usage.
+   */
   MantidVec& ISpectrum::dataDx()
   { return refDx.access(); }
 
