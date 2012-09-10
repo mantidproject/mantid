@@ -3,14 +3,14 @@
 #PBS -l walltime=30:00
 #PBS -N NOMAD_Reduction
 
-export OMP_NUM_THREADS=4
-let total_tasks=48
 let first=5418
-let last=5421
+let last=5423
 let can=5426
 let van=5428
 
-cd /home/vel/scripts
+let total_tasks=$(wc -l $PBS_NODEFILE | awk '{print $1}')
+export OMP_NUM_THREADS=192/$total_tasks
+cd $PBS_O_WORKDIR
 export LD_LIBRARY_PATH=/shared/openmpi/gcc/lib:/home/vel/Mantid/Code/mpi-build/lib:/home/tr9/mantid-deps 
 export PYTHONPATH=/home/vel/Mantid/Code/mpi-build/bin:/home/tr9/mantid-deps/site-packages:/home/vel/Mantid/Code/Mantid/Framework/PythonAPI/PythonAlgorithms
 
