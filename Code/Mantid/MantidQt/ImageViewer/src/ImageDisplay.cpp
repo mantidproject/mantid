@@ -142,12 +142,16 @@ void ImageDisplay::UpdateRange()
   QRect display_rect;
   GetDisplayRectangle( display_rect );
                                            // range controls now determine
-                                           // the number of bins
+                                            // the number of bins
   double min  = total_x_min;
   double max  = total_x_max;
   double step = (total_x_max - total_x_min)/2000;
   range_handler->GetRange( min, max, step );
 
+//    std::cout << "In ImageDisplay::UpdateRange() ";
+//    std::cout 
+    
+    
   int n_bins = IVUtils::NumSteps( min, max, step );
   if ( n_bins == 0 )
   {

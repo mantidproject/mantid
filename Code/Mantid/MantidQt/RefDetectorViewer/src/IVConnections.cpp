@@ -281,7 +281,7 @@ IVConnections::~IVConnections()
   // std::cout << "IVConnections destructor called" << std::endl;
 
   delete image_picker;
-    delete image_picker2;
+  delete image_picker2;
   delete h_graph_picker;
   delete v_graph_picker;
   delete color_group;
@@ -334,11 +334,11 @@ void IVConnections::graph_range_changed()
 
 void IVConnections::edit_manual_input()
     {
-        std::cout << "inside edit_manual " << std::endl;
-        std::cout << "iv_ui->lineEdit_peakLeft->text(): ";
-        std::cout <<  QString::toStdString(iv_ui->lineEdit_peakLeft->displayText());
-//        std::cout << "peak left: " << yValue << std::endl;
-        image_display->setPeakLeft(10);
+//        std::cout << "inside edit_manual " << std::endl;
+//        std::cout << "iv_ui->lineEdit_peakLeft->text(): ";
+//        std::cout <<  QString::toStdString(iv_ui->lineEdit_peakLeft->displayText());
+////        std::cout << "peak left: " << yValue << std::endl;
+//        image_display->setPeakLeft(10);
 
     }
     
