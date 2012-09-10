@@ -585,19 +585,59 @@ void ImageDisplay::ShowPeakBackSelectionValue(double x, double y )
     int ImageDisplay::TOFmax = 0;
 
     /**
-     * return the value of the peak left
-     **/
-    int ImageDisplay::getPeakLeft()
-    {
-        return peakLeft;
-    }
-
-    /**
      * set the peak left
      */
     void ImageDisplay::setPeakLeft(int value)
     {
         peakLeft = value;
+    }
+    
+    /**
+     * set the peak right
+     */
+    void ImageDisplay::setPeakRight(int value)
+    {
+        peakRight = value;
+    }
+
+    /**
+     * set the back left
+     */
+    void ImageDisplay::setBackLeft(int value)
+    {
+        backLeft = value;
+    }
+    
+    /**
+     * set the back right
+     */
+    void ImageDisplay::setBackRight(int value)
+    {
+        backRight = value;
+    }
+
+    /**
+     * set the TOF min
+     */
+    void ImageDisplay::setTOFmin(int value)
+    {
+        TOFmin = value;
+    }
+    
+    /**
+     * set the TOF max
+     */
+    void ImageDisplay::setTOFmax(int value)
+    {
+        TOFmax = value;
+    }
+    
+    /**
+     * return the value of the peak left
+     **/
+    int ImageDisplay::getPeakLeft()
+    {
+        return peakLeft;
     }
 
     /**

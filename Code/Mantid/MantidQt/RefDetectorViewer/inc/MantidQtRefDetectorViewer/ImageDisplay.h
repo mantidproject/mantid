@@ -111,7 +111,12 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
     static int getTOFmax();
     
     static void setPeakLeft(int value);
-
+    static void setPeakRight(int value);
+    static void setBackLeft(int value);
+    static void setBackRight(int value);
+    static void setTOFmin(int value);
+    static void setTOFmax(int value);
+    
 private:
      /// Check if the DataSource has been changed under us
      bool DataSourceRangeChanged();

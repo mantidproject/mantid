@@ -562,9 +562,11 @@ class DataReflWidget(BaseWidget):
             # For REFM it's the other way around
             if self.short_name == "REFM":
                 is_pixel_y = not is_pixel_y
-            
+    
             tof_min = int(self._summary.data_from_tof.text())
             tof_max = int(self._summary.data_to_tof.text())
+    
+            print 'file requested is: ' , f[0]
     
             min, max = data_manipulation.counts_vs_pixel_distribution(f[0], is_pixel_y=is_pixel_y,
                                                                       callback=call_back,

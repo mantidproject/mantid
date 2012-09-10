@@ -1,10 +1,12 @@
 
 #include <iostream>
+#include <QLineEdit>
 #include <qwt_plot_canvas.h>
-#include <QString>
 
 #include "MantidQtRefDetectorViewer/IVConnections.h"
 #include "MantidQtRefDetectorViewer/ColorMaps.h"
+#include "MantidQtRefDetectorViewer/IVUtils.h"
+#include "MantidQtRefDetectorViewer/ErrorHandler.h"
 
 namespace MantidQt
 {
@@ -160,11 +162,17 @@ IVConnections::IVConnections( Ui_MainWindow* ui,
      */
     QObject::connect(iv_ui->lineEdit_peakLeft, SIGNAL(returnPressed()),
                      this, SLOT(edit_manual_input()) );
+    QObject::connect(iv_ui->lineEdit_peakRight, SIGNAL(returnPressed()),
+                     this, SLOT(edit_manual_input()) );
+    QObject::connect(iv_ui->lineEdit_backLeft, SIGNAL(returnPressed()),
+                     this, SLOT(edit_manual_input()) );
+    QObject::connect(iv_ui->lineEdit_backRight, SIGNAL(returnPressed()),
+                     this, SLOT(edit_manual_input()) );
+    QObject::connect(iv_ui->lineEdit_TOFmin, SIGNAL(returnPressed()),
+                     this, SLOT(edit_manual_input()) );
+    QObject::connect(iv_ui->lineEdit_TOFmax, SIGNAL(returnPressed()),
+                     this, SLOT(edit_manual_input()) );
                      
-    
-    
-    
-    
   QObject::connect(iv_ui->imageSplitter, SIGNAL(splitterMoved(int,int)), 
                    this, SLOT(imageSplitter_moved()) );
 
@@ -333,14 +341,61 @@ void IVConnections::graph_range_changed()
 }
 
 void IVConnections::edit_manual_input()
-    {
-//        std::cout << "inside edit_manual " << std::endl;
-//        std::cout << "iv_ui->lineEdit_peakLeft->text(): ";
-//        std::cout <<  QString::toStdString(iv_ui->lineEdit_peakLeft->displayText());
-////        std::cout << "peak left: " << yValue << std::endl;
-//        image_display->setPeakLeft(10);
+{
 
+    std::cout << "here" << std::endl;
+    
+    QLineEdit* peak_left_control = iv_ui->lineEdit_peakLeft;        
+    double peak_left = 100;
+    if (!IVUtils::StringToDouble(peak_left_control->text().toStdString(), peak_left))
+    {
+        ErrorHandler::Error("Peak Left is not a NUMBER! Value reset to 100.");
     }
+    image_display->setPeakLeft(peak_left);
+
+    QLineEdit* peak_right_control = iv_ui->lineEdit_peakRight;
+    double peak_right = 200;
+    if (!IVUtils::StringToDouble(peak_right_control->text().toStdString(), peak_right))
+    {
+        ErrorHandler::Error("Peak Right is not a NUMBER! Value reset to 200.");
+    }
+    image_display->setPeakRight(peak_right);
+
+    QLineEdit* back_left_control = iv_ui->lineEdit_backLeft;        
+    double back_left = 50;
+    if (!IVUtils::StringToDouble(back_left_control->text().toStdString(), back_left))
+    {
+        ErrorHandler::Error("Back. Left is not a NUMBER! Value reset to 50.");
+    }
+    image_display->setBackLeft(back_left);
+
+    QLineEdit* back_right_control = iv_ui->lineEdit_backRight;
+    double back_right = 250;
+    if (!IVUtils::StringToDouble(back_right_control->text().toStdString(), back_right))
+    {
+        ErrorHandler::Error("Back. Right is not a NUMBER! Value reset to 250.");
+    }
+    image_display->setBackRight(back_right);
+
+    QLineEdit* tof_min_control = iv_ui->lineEdit_TOFmin;        
+    double tof_min = 50;
+    if (!IVUtils::StringToDouble(tof_min_control->text().toStdString(), tof_min))
+    {
+        ErrorHandler::Error("TOF min is not a NUMBER! Value reset to 50.");
+    }
+    image_display->setTOFmin(tof_min);
+    
+    QLineEdit* tof_max_control = iv_ui->lineEdit_TOFmax;        
+    double tof_max = 250;
+    if (!IVUtils::StringToDouble(tof_max_control->text().toStdString(), tof_max))
+    {
+        ErrorHandler::Error("TOF max is not a NUMBER! Value reset to 250.");
+    }
+    
+    image_display->UpdateImage();
+    std::cout << "peak_left: " << peak_left << std::endl;
+
+}
     
     
 void IVConnections::v_scroll_bar_moved()
