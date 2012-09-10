@@ -48,27 +48,22 @@ DECLARE_FUNCTION(BivariateNormal)
 
 Kernel::Logger& BivariateNormal::g_log= Kernel::Logger::get("BivariateNormal");
 
-BivariateNormal::BivariateNormal() : API::IFunction1D(), expVals(NULL)
-
+BivariateNormal::BivariateNormal() :
+    API::ParamFunction(),
+    CalcVxx(false), CalcVyy(false), CalcVxy(false),
+    NCells(0),
+    mIx(0.0), mx(0.0), mIy(0.0), my(0.0),
+    SIxx(0.0), SIyy(0.0), SIxy(0.0), Sxx(0.0), Syy(0.0), Sxy(0.0),
+    TotI(0.0), TotN(0.0),
+    Varx0(-1.0), Vary0(-1.0),
+    expVals(NULL)
 {
   LastParams[IVXX] = -1;
- // g_log.setLevel(7);
-   CalcVxx= CalcVyy= CalcVxy= false;
-  Varx0 = Vary0 = -1;
-  expVals = NULL;
-
 }
 
 BivariateNormal::~BivariateNormal()
 {
-
- if( expVals)
-     delete [] expVals;
-
- expVals = NULL;
-
-
-
+  delete [] expVals;
 }
 
 // overwrite IFunction base class methods
@@ -84,9 +79,9 @@ BivariateNormal::~BivariateNormal()
    int NCells;
    bool isNaNs;
    API::MatrixWorkspace_const_sptr ws = getMatrixWorkspace();
-   MantidVec D = ws->dataY(0);
-   MantidVec X = ws->dataY(1);
-   MantidVec Y = ws->dataY(2);
+   const MantidVec & D = ws->dataY(0);
+   const MantidVec & X = ws->dataY(1);
+   const MantidVec & Y = ws->dataY(2);
 
    initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells, Varxx,Varxy,Varyy);
 
@@ -613,9 +608,9 @@ void BivariateNormal::initCommon()
 
   }
 
-void BivariateNormal::initCoeff( MantidVec &D,
-                                 MantidVec &X,
-                                 MantidVec &Y,
+void BivariateNormal::initCoeff( const MantidVec &D,
+                                 const MantidVec &X,
+                                 const MantidVec &Y,
                                  double &coefNorm,
                                  double &expCoeffx2,
                                  double & expCoeffy2,
@@ -631,19 +626,16 @@ void BivariateNormal::initCoeff( MantidVec &D,
      if( CalcVxx ||nParams() <6)
      {
        Varxx = (SIxx +(getParameter("Mcol")- mIx)*(getParameter("Mcol")-mIx)*
-
-        TotI -getParameter("Background")*Sxx -getParameter("Background")*(getParameter("Mcol")
-             - (mx))*(getParameter("Mcol")-(mx) )*TotN)/(TotI -getParameter("Background")*
-            TotN) ;
+               TotI -getParameter("Background")*Sxx -getParameter("Background")*(getParameter("Mcol")
+               - (mx))*(getParameter("Mcol")-(mx) )*TotN)/(TotI -getParameter("Background")*
+               TotN) ;
 
        if( Varx0 > 0) Varxx = std::min<double>(Varxx, 1.21*Varx0);
        if( Varx0 > 0) Varxx = std::max<double>(Varxx, .79*Varx0);
 
-     }else
-       {
-        Varxx = getParameter( IVXX);
-
-       }
+     } else {
+       Varxx = getParameter( IVXX);
+     }
 
 
 
@@ -651,17 +643,15 @@ void BivariateNormal::initCoeff( MantidVec &D,
      if( CalcVyy||nParams() <6)
      {
        Varyy = (SIyy +(getParameter("Mrow")- (mIy))*(getParameter("Mrow")- (mIy) )*
-       TotI -getParameter("Background")* (Syy) -getParameter("Background")*(getParameter("Mrow")- (my) )*
-       (getParameter("Mrow")-
-        (my) )* TotN )/( TotI -getParameter("Background")*
-            TotN );
-      if( Vary0 > 0) Varyy = std::min<double>(Varyy, 1.21*Vary0);
-      if( Vary0 > 0)Varyy = std::max<double>(Varyy, .79*Vary0);
+               TotI -getParameter("Background")* (Syy) -getParameter("Background")*(getParameter("Mrow")- (my) )*
+               (getParameter("Mrow")-
+               (my) )* TotN )/( TotI -getParameter("Background")*
+               TotN );
+       if( Vary0 > 0) Varyy = std::min<double>(Varyy, 1.21*Vary0);
+       if( Vary0 > 0)Varyy = std::max<double>(Varyy, .79*Vary0);
 
-     }else
-     {
+     } else {
        Varyy = getParameter( IVYY);
-
      }
 
 
@@ -669,14 +659,15 @@ void BivariateNormal::initCoeff( MantidVec &D,
 
      if( CalcVxy|| nParams() <6)
      {
-       Varxy =( (SIxy) +(getParameter("Mcol")- (mIx) )*(getParameter("Mrow") - (mIy) )*
-           TotI -getParameter("Background")* (Sxy) -getParameter("Background")*(getParameter("Mcol")- (mx) )*
-            (getParameter("Mrow")-
-        (my) )* TotN)/( TotI -getParameter("Background")*
-            TotN);
+       Varxy = ( (SIxy) +(getParameter("Mcol")- (mIx) )*(getParameter("Mrow") - (mIy) )*
+               TotI -getParameter("Background")* (Sxy) -getParameter("Background")*(getParameter("Mcol")- (mx) )*
+               (getParameter("Mrow")-
+               (my) )* TotN)/( TotI -getParameter("Background")*
+               TotN);
 
-     }else
+     } else {
        Varxy = getParameter( IVXY);
+     }
 
      double uu = Varxx* Varyy - Varxy * Varxy;
 

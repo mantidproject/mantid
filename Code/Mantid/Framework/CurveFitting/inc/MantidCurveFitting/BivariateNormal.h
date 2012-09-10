@@ -163,9 +163,9 @@ namespace Mantid
       void initCommon();///<Check for changes in parameters, etc. Calculates common values
 
 
-      void initCoeff( MantidVec &D,
-                       MantidVec &X,
-                       MantidVec &Y,
+      void initCoeff( const MantidVec &D,
+                      const MantidVec &X,
+                      const MantidVec &Y,
                        double &coefNorm,
                        double &expCoeffx2,
                        double & expCoeffy2,
