@@ -34,6 +34,7 @@ class BASISReduction(PythonAlgorithm):
         self._extension = "_event.nxs"
 
         self.declareProperty("RunNumbers", "", "Sample run numbers")
+        self.declareProperty("DoIndividual", False, "Do each run individually")
         self.declareProperty("NoMonitorNorm", False, 
                              "Stop monitor normalization")
         self.declareProperty(FloatArrayProperty("EnergyBins", DEFAULT_BINS, 
@@ -53,6 +54,7 @@ class BASISReduction(PythonAlgorithm):
     def PyExec(self):
         config['default.facility'] = "SNS"
         config['default.instrument'] = self._long_inst
+        self._doIndiv = self.getProperty("DoIndividual").value
         self._etBins = self.getProperty("EnergyBins").value / MICROEV_TO_MILLIEV
         self._qBins = self.getProperty("MomentumTransferBins").value
         self._noMonNorm = self.getProperty("NoMonitorNorm").value
@@ -168,8 +170,11 @@ class BASISReduction(PythonAlgorithm):
         run_list = []
         rlvals = rlist.split(';')
         for rlval in rlvals:
-            iap = IntArrayProperty("", rlval)  
-            run_list.append(iap.value)
+            iap = IntArrayProperty("", rlval)
+            if self._doIndiv:
+                run_list.extend([[x] for x in iap.value])
+            else:  
+                run_list.append(iap.value)
         return run_list
 
     def _makeRunName(self, run, useShort=True):

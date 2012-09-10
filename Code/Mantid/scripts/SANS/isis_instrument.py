@@ -63,72 +63,17 @@ class DetectorBank:
                 @param qMax: When set to None (default) then for fitting use the overlapping q region of front and rear detectors               
             """
             self.scale = scale
-            self._shift = shift
-            self._fitScale = bool(fitScale)
-            self._fitShift = bool(fitShift)
-            self._qMin = qMin
-            self._qMax = qMax
+            self.shift = shift
+            self.fitScale = bool(fitScale)
+            self.fitShift = bool(fitShift)
+            self.qMin = qMin
+            self.qMax = qMax
             
-            if self._qMin == None or self._qMax == None:
-                self._qRangeUserSelected = False
+            if self.qMin == None or self.qMax == None:
+                self.qRangeUserSelected = False
             else:
-                self._qRangeUserSelected = True                
+                self.qRangeUserSelected = True                
                 
-        def get_scale(self):
-            return self._scale
-
-        def set_scale(self, val):
-            self._scale = val
-            
-        scale = property(get_scale, set_scale, None, None)            
-            
-        def get_shift(self):
-            return self._shift
-
-        def set_shift(self, val):
-            self._shift = val
-            
-        shift = property(get_shift, set_shift, None, None)
-
-        def get_qRangeUserSelected(self):
-            return self._qRangeUserSelected
-
-        def set_qRangeUserSelected(self, val):
-            self._qRangeUserSelected = bool(val)
-            
-        qRangeUserSelected = property(get_qRangeUserSelected, set_qRangeUserSelected, None, None)            
-            
-        def get_fitScale(self):
-            return self._fitScale
-
-        def set_fitScale(self, val):
-            self._fitScale = bool(val)
-            
-        fitScale = property(get_fitScale, set_fitScale, None, None)             
-            
-        def get_fitShift(self):
-            return self._fitShift
-
-        def set_fitShift(self, val):
-            self._fitShift = bool(val)
-            
-        fitShift = property(get_fitShift, set_fitShift, None, None)              
-            
-        def get_qMin(self):
-            return self._qMin
-
-        def set_qMin(self, val):
-            self._qMin = val
-            
-        qMin = property(get_qMin, set_qMin, None, None)            
-            
-        def get_qMax(self):
-            return self._qMax
-
-        def set_qMax(self, val):
-            self._qMax = val                                                 
-
-        qMax = property(get_qMax, set_qMax, None, None) 
 
     def __init__(self, instr, det_type):
         #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience 
