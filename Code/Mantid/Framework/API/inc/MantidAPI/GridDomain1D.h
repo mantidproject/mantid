@@ -45,7 +45,7 @@ class MANTID_API_DLL GridDomain1D: public API::GridDomain
 {
 public:
   GridDomain1D() {};
-  virtual ~GridDomain1D();
+  virtual ~GridDomain1D() {};
   /// initialize
   void initialize(double &startX, double &endX, size_t &n, std::string scaling);
   /// number of grid point	s
