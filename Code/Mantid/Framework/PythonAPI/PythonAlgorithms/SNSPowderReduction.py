@@ -489,10 +489,10 @@ class SNSPowderReduction(PythonAlgorithm):
                 elif ("%s_%d" % (self._instrument, vanRun)) in mtd:
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
                 else:
-                    if samRun > 0:
-                        vnoiseRun = self._info.vnoise # noise run for the vanadium
-                    else:
+                    if samRun == 0:
                         vnoiseRun = 0
+                    else:
+                        vnoiseRun = self._info.vnoise # noise run for the vanadium
                     if self.getProperty("FilterCharacterizations").value:
                         vanRun = self._focusChunks(vanRun, SUFFIX, filterWall, calib,
                                preserveEvents=False, normByCurrent = (vnoiseRun <= 0))
