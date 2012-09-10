@@ -70,6 +70,7 @@ class PlotToolInterface
         Rtti_MultiPeakFitTool,
         Rtti_LineProfileTool,
         Rtti_SelectPeakTool,
+        Rtti_LabelTool,
 
         Rtti_PlotUserTool = 1000
     };

@@ -31,8 +31,6 @@ namespace DataHandling
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadSassenaParams)
-//register the algorithm into LoadAlgorithmFactory
-DECLARE_LOADALGORITHM(LoadSassenaParams)
 
 // Initialize the loggers
 Kernel::Logger& XMLInterface::g_log = Kernel::Logger::get("XMLInterface");
@@ -1741,7 +1739,7 @@ void Params::init(int argc,char** argv)
     else
       config_rootpath = ( boost::filesystem::initial_path() / boost::filesystem::path(filename).parent_path() ).string();
    g_log.information("Looking for configuration file: " + filename);
-   read_xml(filename);
+   this->read_xml(filename);
    }
   else
   {
@@ -1749,8 +1747,12 @@ void Params::init(int argc,char** argv)
     throw;
   }
   g_log.information("Analyzing command line for parameter overwrites");
-  overwrite_options(vm);
+  this->overwrite_options(vm);
 }
+
+/// Empty default constructor
+LoadSassenaParams::LoadSassenaParams() : Algorithm()
+{}
 
 /// Sets documentation strings for this algorithm
 void LoadSassenaParams::initDocs()
@@ -1767,26 +1769,21 @@ void LoadSassenaParams::initDocs()
 void LoadSassenaParams::init()
 {
   this->declareProperty(new API::FileProperty("Filename", "Anonymous", API::FileProperty::Load, ".xml"),"A Sassena XML input file");
-  this->declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("InputWorkspace","",Kernel::Direction::Input, API::PropertyMode::Optional), "Optional, group workspace to append the parameters as logs.");
+  this->declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("Workspace","",Kernel::Direction::InOut, API::PropertyMode::Optional), "Optional, group workspace to append the parameters as logs.");
 }
 
 /// Execute the algorithm
 void LoadSassenaParams::exec()
 {
   m_filename = this->getPropertyValue("Filename");
-  m_parameters = Params::Inst();
-  m_parameters->read_xml(m_filename);
-  const std::string gwsName = this->getPropertyValue("InputWorkspace");
-  if (gwsName)
-  {
-    API::IAlgorithm_sptr logsLoader = this->createSubAlgorithm("LoadSassenaLogs");
-    API::WorkspaceGroup_sptr gws = this->getProperty("InputWorkspace");
-    logsLoader->setPropertyValue("InputWorkspace", gwsName);
-    logsLoader->setPropertyValue("Filename", m_filename);
-    logsLoader->executeAsSubAlg();
-  }
+  m_parameters = Params::Inst();  // instantiate the singleton
+  //convoluted, but preserves Params::init coding
+  int argc=2;
+  char *argv[] = {"sassena", "--config="}; //option to pass the file
+  std::strcat(argv[1],m_filename.c_str());
+  m_parameters->init( argc, argv );  //will read the file
 
-} // end of LoadSassena::exec()
+} // LoadSassena::exec()
 
-} // endof namespace DataHandling
-} // endof namespace Mantid
+} // namespace DataHandling
+} // namespace Mantid

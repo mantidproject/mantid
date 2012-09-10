@@ -31,7 +31,7 @@ using namespace Mantid::MDEvents;
 
 
 
-class ConvertToMDWSTest : public CxxTest::TestSuite
+class ConvToMDEventsVSHistoTest : public CxxTest::TestSuite
 {
   // matrix ws and event ws which contains the same data
    Mantid::API::MatrixWorkspace_sptr ws2D;
@@ -54,10 +54,10 @@ class ConvertToMDWSTest : public CxxTest::TestSuite
    WorkspaceCreationHelper::MockAlgorithm logProvider;
 
 public:
-static ConvertToMDWSTest *createSuite() {
-    return new ConvertToMDWSTest();    
+static ConvToMDEventsVSHistoTest *createSuite() {
+    return new ConvToMDEventsVSHistoTest();    
 }
-static void destroySuite(ConvertToMDWSTest  * suite) { delete suite; }    
+static void destroySuite(ConvToMDEventsVSHistoTest  * suite) { delete suite; }    
 
 void test_PreprocessDetectors()
 {
@@ -113,8 +113,9 @@ void test_buildFromEWS()
      EventWorkspace_sptr outWS = convertToEvents(inWS);
 
      // build ws description from event ws
-      std::vector<std::string> dimProperyNames; //--- empty property names
-      TS_ASSERT_THROWS_NOTHING(TestWS.buildFromMatrixWS(outWS,"Q3D","Direct",dimProperyNames));
+     std::vector<std::string> dimProperyNames; //--- empty property names
+     TS_ASSERT_THROWS_NOTHING(TestWS.buildFromMatrixWS(outWS,"Q3D","Direct",dimProperyNames));
+     TS_ASSERT_THROWS_NOTHING(TestWS.setDetectors(det_loc));
 
      ws_events =boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
      if (!ws_events){
@@ -211,7 +212,7 @@ void test_compareTwoConversions()
 }
 
 // constructor:
-ConvertToMDWSTest ():
+ConvToMDEventsVSHistoTest():
 TestWS(4),
 logProvider(100)
 {    
@@ -228,8 +229,8 @@ logProvider(100)
 
    int numBins=10;
    ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);
-
-  
+   // this should disable multithreading
+   ws2D->mutableRun().addProperty("NUM_THREADS",0);  
   
 }
 // function repeats convert to events algorithm which for some mysterious reasons do not work here as subalgorithm.

@@ -117,6 +117,27 @@ public:
 
   }
 
+  void testMoveByFullName()
+  {
+    MoveInstrumentComponent mover;
+    mover.initialize();
+    mover.setPropertyValue("Workspace",wsName);
+    mover.setPropertyValue("ComponentName","bank/det1");
+    mover.setPropertyValue("X","10");
+    mover.setPropertyValue("Y","20");
+    mover.setPropertyValue("Z","30");
+    mover.setPropertyValue("RelativePosition","0");
+    mover.execute();
+
+    Instrument_const_sptr inst = WS->getInstrument();
+    // get pointer to the first detector in the bank
+    boost::shared_ptr<const IComponent> comp = (*boost::dynamic_pointer_cast<const ICompAssembly>((*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
+
+      V3D pos = comp->getPos();
+      TS_ASSERT_EQUALS(pos,V3D(10,20,30))
+
+  }
+
 private:
     std::string wsName;
     Detector *det1,*det2,*det3;

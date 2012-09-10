@@ -62,8 +62,10 @@ namespace Mantid
       // Overridden Algorithm methods
       virtual void init();
       virtual void exec();
+      /// Apply a given mask
       void applyMask(API::MatrixWorkspace_sptr inputWS, API::MatrixWorkspace_sptr maskWS);
-      void doDetVanTest(API::MatrixWorkspace_sptr inputWS, API::MatrixWorkspace_sptr &maskWS, int & nFails);
+      /// Perform checks on detector vanadium
+      API::MatrixWorkspace_sptr doDetVanTest(API::MatrixWorkspace_sptr inputWS, int & nFails);
 
     protected:
       /// Get the total counts for each spectra

@@ -31,7 +31,7 @@ public:
     delete yVector;
   }
 
-  void test_Values_Vector_Is_Same_Size_As_Number_Of_Attrs()
+  void test_Values_Vector_Is_Same_Size_As_Number_Of_Variables()
   {
     using namespace Mantid::MDAlgorithms;
     TobyFitYVector yVector;

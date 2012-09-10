@@ -313,7 +313,7 @@ namespace Mantid
       GSLMatrix LU(*this);
       gsl_permutation * p = gsl_permutation_alloc( n );
       gsl_linalg_LU_decomp( LU.gsl(), p, &s );
-      gsl_linalg_LU_invert( LU.gsl(), p, gsl() );
+      gsl_linalg_LU_invert( LU.gsl(), p, this->gsl() );
       gsl_permutation_free( p );
     }
   };

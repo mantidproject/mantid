@@ -64,11 +64,17 @@ namespace Mantid
       void setAngularVelocityLog(const std::string & name);
       /// Returns the current angular velocity in rads/sec
       double getAngularVelocity() const;
-      
+      /// Sets the chopper jitter sigma value in microseconds. This is the FWHH value
+      void setJitterFWHH(const double value);
+      /// Returns the std deviation of the jitter value in seconds
+      inline double getStdDevJitter() const { return m_jitterSigma; }
+
       /// Returns the variance of a the time pulse through this chopper in seconds^2
       double pulseTimeVariance() const;
       /// Returns a time sampled from the chopper distribution
       virtual double sampleTimeDistribution(const double randomNo) const = 0;
+      /// Returns a time sampled from the jitter distribution
+      virtual double sampleJitterDistribution(const double randomNo) const = 0;
 
     protected:
       /// Set a named parameter from a string value
@@ -94,6 +100,8 @@ namespace Mantid
       double m_angularSpeed;
       /// Rotation speed log name
       std::string m_angularSpeedLog;
+      /// Std deviation of chopper jitter in seconds
+      double m_jitterSigma;
       /// Current value of the variance of the pulse
       double m_pulseVariance;
     };

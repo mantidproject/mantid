@@ -5,7 +5,7 @@ namespace Mantid
 {
   namespace MDEvents
   {
-    // register the class, whith conversion factory under ModQ name
+    // register the class, whith conversion factory under Q3D name
     DECLARE_MD_TRANSFID(MDTransfQ3D,Q3D);
 
     /** method returns number of matrix dimensions calculated by this class
@@ -23,11 +23,11 @@ namespace Mantid
     }
 
 
-    bool MDTransfQ3D::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord)const
+    bool MDTransfQ3D::calcMatrixCoord(const double& x,std::vector<coord_t> &Coord,double &s, double &err)const
     {
       if(m_Emode == CnvrtToMD::Elastic)
       {
-        return calcMatrixCoord3DElastic(x,Coord);
+        return calcMatrixCoord3DElastic(x,Coord,s,err);
       }else{
         return calcMatrixCoord3DInelastic(x,Coord);
       }
@@ -82,10 +82,10 @@ namespace Mantid
     *
     * it uses preprocessed detectors positions, which are calculated by PreprocessDetectors algorithm and set up by 
     * calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i) method. */    
-    bool MDTransfQ3D::calcMatrixCoord3DElastic(const double& k0,std::vector<coord_t> &Coord)const
+    bool MDTransfQ3D::calcMatrixCoord3DElastic(const double& k0,std::vector<coord_t> &Coord,double & signal, double &errSq)const
     {
-
-      double  qx  =  -m_ex*k0;                
+      
+      double  qx  =  -m_ex*k0;
       double  qy  =  -m_ey*k0;
       double  qz  = (1-m_ez)*k0;
 
@@ -93,8 +93,34 @@ namespace Mantid
       Coord[1]  = (coord_t)(m_RotMat[3]*qx+m_RotMat[4]*qy+m_RotMat[5]*qz);  if(Coord[1]<m_DimMin[1]||Coord[1]>=m_DimMax[1])return false;
       Coord[2]  = (coord_t)(m_RotMat[6]*qx+m_RotMat[7]*qy+m_RotMat[8]*qz);  if(Coord[2]<m_DimMin[2]||Coord[2]>=m_DimMax[2])return false;
 
+      /*Apply Lorentz corrections if necessary */ 
+      if(m_isLorentzCorrected)
+      {
+        double kdash   = k0/(2*M_PI);
+        double correct = m_SinThetaSq*kdash*kdash*kdash*kdash;
+        signal *= correct;
+        errSq  *= (correct*correct);
+      }
+
+
       return true;
 
+    }
+
+    /** Method updates the value of preprocessed detector coordinates in Q-space, used by other functions 
+    *@param i -- index of the detector, which corresponds to the spectra to process. 
+    * 
+    */
+    bool MDTransfQ3D::calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i)
+    {
+      UNUSED_ARG(Coord); 
+      m_ex = (m_Det+i)->X();
+      m_ey = (m_Det+i)->Y();
+      m_ez = (m_Det+i)->Z();
+      // if Lorentz-corrected, retrieve the sin(Theta)^2 for the detector;
+      if(m_isLorentzCorrected)m_SinThetaSq = *(m_SinThetaSqArray+i);
+
+      return true;
     }
 
     /** function initalizes all variables necessary for converting workspace variables into MD variables in ModQ (elastic/inelastic) cases  */
@@ -105,8 +131,11 @@ namespace Mantid
       // get transformation matrix (needed for CrystalAsPoder mode)
       m_RotMat = ConvParams.getTransfMatrix();
 
-      // get pointer to the positions of the detectors
-      std::vector<Kernel::V3D> const & DetDir = ConvParams.getDetectors()->getDetDir();
+      // get pointer to the positions of the preprocessed detectors
+      ConvToMDPreprocDet const *pPrepDet = ConvParams.getDetectors();
+      if(!pPrepDet)throw(std::runtime_error("Preprocessed Detectors positions have not been properly defined "));
+
+      std::vector<Kernel::V3D> const & DetDir = pPrepDet->getDetDir();
       m_Det = &DetDir[0];     //
 
       // get min and max values defined by the algorithm. 
@@ -124,7 +153,15 @@ namespace Mantid
         // the wave vector of incident neutrons;
         m_Ki=sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
       }else{
-        if (m_Emode != CnvrtToMD::Elastic) throw(std::invalid_argument("MDTransfModQ::initialize::Unknown or unsupported energy conversion mode"));
+        if (m_Emode != CnvrtToMD::Elastic) throw(std::runtime_error("MDTransfQ3D::initialize::Unknown or unsupported energy conversion mode"));
+        // check if we need to calculate Lorentz corrections and if we do, prepare values for their precalculation:
+        m_isLorentzCorrected = ConvParams.isLorentsCorrections();
+        if(m_isLorentzCorrected)
+        {
+          std::vector<double> const & SinThetaSq = ConvParams.getDetectors()->getSinThetaSq();
+          m_SinThetaSqArray = &SinThetaSq[0];
+          if(!m_SinThetaSqArray)throw(std::runtime_error("MDTransfQ3D::initialize::Uninitilized Sin(Theta)^2 array for calculating Lorentz corrections"));
+        }
       }
 
     }
@@ -186,7 +223,7 @@ namespace Mantid
 
 
     /// constructor;
-    MDTransfQ3D::MDTransfQ3D()
+    MDTransfQ3D::MDTransfQ3D():m_isLorentzCorrected(false)
     {}    
 
   } // End MDAlgorighms namespace

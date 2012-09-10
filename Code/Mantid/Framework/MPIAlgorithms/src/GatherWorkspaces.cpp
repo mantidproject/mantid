@@ -138,6 +138,11 @@ void GatherWorkspaces::exec()
   {  
     reduce(included, totalSpec, sumSpec, std::plus<std::size_t>(), 0);
   }
+  else if (accum == "Add")
+  {  
+    // only use so there is a barrier before memory required for communication
+    included.barrier();
+  }
 
   eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inputWorkspace);
   if (eventW != NULL)
@@ -171,7 +176,9 @@ void GatherWorkspaces::exec()
       {
          outputWorkspace->dataX(wi) = inputWorkspace->readX(wi);
          reduce(included, inputWorkspace->readY(wi), outputWorkspace->dataY(wi), vplus(), 0);
+         included.barrier();
          reduce(included, inputWorkspace->readE(wi), outputWorkspace->dataE(wi), eplus(), 0);
+         included.barrier();
       }
       else if (accum == "Append")
       {  
@@ -210,7 +217,9 @@ void GatherWorkspaces::exec()
       if (accum == "Add")
       {
         reduce(included, inputWorkspace->readY(wi), vplus(), 0);
+        included.barrier();
         reduce(included, inputWorkspace->readE(wi), eplus(), 0);
+        included.barrier();
       }
       else if (accum == "Append")
       {

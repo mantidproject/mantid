@@ -53,7 +53,6 @@ set ( TEST_PY_FILES
 )
 
 include_directories ( inc )
-include_directories ( ../../Framework/API/inc )
 
 
 ###########################################################################
@@ -69,7 +68,6 @@ set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories ( inc )
 
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_IMAGEVIEWER )
@@ -79,14 +77,14 @@ add_library ( MantidQtImageViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
 target_link_libraries ( MantidQtImageViewer
-                        MantidQtAPI MantidWidgets QtPropertyBrowser ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+                        MantidQtAPI MantidWidgets ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # DEMO/GUI TESTING APPLICATIONS
 ###########################################################################
 
 add_executable ( ImageViewDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/ImageViewDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
-target_link_libraries ( ImageViewDemo MantidQtAPI QtPropertyBrowser
+target_link_libraries ( ImageViewDemo MantidQtAPI
                         ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 add_executable ( ImageViewNxEventFile EXCLUDE_FROM_ALL ${ALL_SRC}

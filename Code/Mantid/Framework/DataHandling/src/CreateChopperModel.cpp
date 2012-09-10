@@ -9,6 +9,7 @@ Available models with parameter names:
 ** ChopperRadius - The radius, in metres, of the whole chopper
 ** SlitThickness - The thickness, in metres, of the slit
 ** SlitRadius - The radius of curvature, in metres, of the slit
+** JitterSigma - The FWHH value for the jitter calculation in microseconds
 ** Ei - The Ei for this run as a value or log name
 *WIKI*/
 

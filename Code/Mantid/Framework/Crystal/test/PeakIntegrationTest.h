@@ -214,14 +214,14 @@ public:
     double intensity0=4418;
     if( slices)
       intensity0= 3141;
-    TS_ASSERT_DELTA(intensity,intensity0, 100.0);
+    TS_ASSERT_DELTA(intensity,intensity0, 400.0);
   
     double sig0=66;
     if( slices)
       sig0=115;
 
 
-    TS_ASSERT_DELTA( sigIntensity,sig0, 5.0);
+    TS_ASSERT_DELTA( sigIntensity,sig0, 25.0);
   
     AnalysisDataService::Instance().remove("TOPAZ");
 

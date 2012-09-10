@@ -544,8 +544,21 @@ namespace Mantid
       {
         API::WorkspaceGroup_sptr group = groupWsList(loadedWsList);
         setProperty("OutputWorkspace", group);
+
         std::vector<std::string> childWsNames = group->getNames();
         size_t count = 1;
+        for(auto childWsName = childWsNames.begin(); childWsName != childWsNames.end(); ++childWsName )
+        {
+          if( *childWsName == outputWsName )
+          {
+            Mantid::API::Workspace_sptr child = group->getItem(*childWsName);
+            child->setName(child->getName() + "_" + boost::lexical_cast<std::string>(count));
+            count++;
+          }
+        }
+
+        childWsNames = group->getNames();
+        count = 1;
         for(auto childWsName = childWsNames.begin(); childWsName != childWsNames.end(); ++childWsName, ++count )
         {
           Workspace_sptr childWs = group->getItem(*childWsName);
@@ -838,7 +851,7 @@ namespace Mantid
         {
           std::vector<std::string> childrenNames = isGroup->getNames();
           size_t count = 1;
-          for( auto childName = childrenNames.begin(); childName != childrenNames.end(); ++childName, ++count)
+          for( auto childName = childrenNames.begin(); childName != childrenNames.end(); ++childName, ++count )
           {
             Workspace_sptr childWs = isGroup->getItem(*childName);
             isGroup->remove(*childName);

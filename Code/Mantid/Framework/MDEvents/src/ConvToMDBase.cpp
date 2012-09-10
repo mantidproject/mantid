@@ -19,7 +19,15 @@ namespace Mantid
     size_t  ConvToMDBase::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
       m_DetLoc = WSD.getDetectors();
-      m_InWS2D  = WSD.getInWS();
+      m_InWS2D = WSD.getInWS();
+
+      // check if detector information has been precalculated:
+      if(m_DetLoc)
+      {
+        if(!m_DetLoc->isDefined(m_InWS2D))throw(std::logic_error("Detector information has to be precalculated properly before this method is deployed"));
+      }else{
+        throw(std::logic_error("Detector information has to be precalculated before this method is deployed"));
+      }
 
       // set up output MD workspace wrapper
       m_OutWSWrapper = inWSWrapper;
@@ -44,12 +52,46 @@ namespace Mantid
 
 
       size_t n_spectra =m_InWS2D->getNumberHistograms();
+
+      // get property which controls multithreaded run. If present, this property describes number of threads (or one) deployed to run conversion
+      // (this can be for debugging or other tricky reasons)
+      m_NumThreads = -1;
+      try
+      {
+        Kernel::Property *pProperty = m_InWS2D->run().getProperty("NUM_THREADS");
+        Kernel::PropertyWithValue<double> *thrProperty = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
+        if(thrProperty)
+        {
+          double nDThrheads = double(*(thrProperty));
+          try
+          {
+            m_NumThreads = boost::lexical_cast<int>(nDThrheads);
+            g_Log.information()<<"***--> NUM_THREADS property is set changing number of running threads to "<<m_NumThreads<<std::endl;
+            if(m_NumThreads<0)
+            {
+                g_Log.information()<<"***--> This resets number of threads to number of physical cores\n ";
+            }
+            else if(m_NumThreads==0)
+            {
+                g_Log.information()<<"***--> This disables multithreading\n ";
+            }
+            else if(m_NumThreads>0)
+            {
+                g_Log.information()<<"***--> Multithreading processing will launch "<<m_NumThreads<<" Threads\n";
+            }
+          }
+          catch(...){};
+        }
+      }
+      catch(Kernel::Exception::NotFoundError &){}
+   
+     
       return n_spectra;
     };  
 
     /** empty default constructor */
-    ConvToMDBase::ConvToMDBase()
-    {}
+    ConvToMDBase::ConvToMDBase():m_DetLoc(NULL),m_NumThreads(-1)
+    { }
 
 
 

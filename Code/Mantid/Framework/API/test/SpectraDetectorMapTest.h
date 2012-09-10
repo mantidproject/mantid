@@ -126,6 +126,27 @@ public:
     }
   }
 
+  void test_Group_Map_Returns_Correct_Mappings()
+  {
+    SpectraDetectorMap spectraMap;
+    const int nspectra(3);
+    const int ndets(4);
+    std::vector<std::vector<int>> spectra(nspectra);
+    for(int i = 0; i < nspectra; ++i)
+    {
+      auto & spectrum = spectra[i];
+      for(int j = 0; j < ndets; ++j)
+      {
+        spectrum.push_back(i + j);
+      }
+      spectraMap.addSpectrumEntries(i+1, spectrum);
+    }
+
+    auto mapping = spectraMap.createIDGroupsMap();
+    TS_ASSERT_EQUALS(mapping->size(), nspectra);
+
+  }
+
   void testOperatorEquals()
   {
     TS_ASSERT( sdMap == sdMap )

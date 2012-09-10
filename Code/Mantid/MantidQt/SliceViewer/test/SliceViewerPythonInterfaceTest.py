@@ -150,13 +150,13 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
     def test_openFromXML_3D_binned(self):
         sv = self.sv
         self.setUpXML()
-        BinMD(InputWorkspace="TOPAZ_3680", OutputWorkspace="TOPAZ_3680_mdhisto",
+        BinMD(InputWorkspace="TOPAZ_3680", OutputWorkspace="TOPAZ_3680_visual_md",
               AxisAligned=1, AlignedDim0="Q_lab_x,0,10,20", AlignedDim1="Q_lab_y,0,10,20", AlignedDim2="Q_lab_z,0,10,20")
         # Read the XML and set the view
         sv.openFromXML(self.xml_3d)
         # Check the settings
         # Automatically grabbed the histo version
-        self.assertEqual(sv.getWorkspaceName(), "TOPAZ_3680_mdhisto")
+        self.assertEqual(sv.getWorkspaceName(), "TOPAZ_3680_visual_md")
         self.assertEqual(sv.getDimX(), 1)
         self.assertEqual(sv.getDimY(), 2)
         self.assertAlmostEqual( sv.getSlicePoint(0), 4.84211, 3)

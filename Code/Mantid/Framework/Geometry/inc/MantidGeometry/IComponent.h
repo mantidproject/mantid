@@ -87,6 +87,8 @@ namespace Mantid
       virtual void setName(const std::string&) = 0;
       //! Get the IComponent name
       virtual std::string getName() const = 0;
+      //! Get the IComponent full path name
+      virtual std::string getFullName() const = 0;
       //! Set the IComponent position, x, y, z respective to parent (if present) otherwise absolute
       virtual void setPos(double, double, double) = 0;
       /** Set the position of the component

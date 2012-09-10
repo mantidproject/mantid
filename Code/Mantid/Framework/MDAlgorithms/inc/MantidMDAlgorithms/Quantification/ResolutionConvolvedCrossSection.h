@@ -71,6 +71,10 @@ namespace Mantid
 
       /// Evaluate the function across the domain
       void function(const API::FunctionDomain& domain, API::FunctionValues& values)const;
+
+      void evaluate(const API::IMDIterator & box, API::FunctionValues& resultValues, size_t & resultValueIndex)const;
+
+
       /// Return the signal contribution for the given box
       double functionMD(const API::IMDIterator & box) const;
 

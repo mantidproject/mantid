@@ -64,6 +64,8 @@ namespace Mantid
       MantidVecPtr createBinBoundaries() const;
       /// Apply the created mapping to the workspace
       void applyDetectorMapping();
+      /// Apply any instrument adjustments from the file
+      void adjustInstrument(const std::string & filename);
 
       /// Pointer to a progress object
       boost::shared_ptr<API::Progress> m_progress;

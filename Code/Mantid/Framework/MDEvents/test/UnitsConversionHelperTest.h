@@ -19,17 +19,16 @@ using namespace Mantid::Geometry;
 using namespace Mantid::MDEvents;
 
 
-
-class ConvertToMDUnitsConvTest : public CxxTest::TestSuite
+class UnitsConversionHelperTest : public CxxTest::TestSuite
 {
    Mantid::API::MatrixWorkspace_sptr ws2D;
    ConvToMDPreprocDet det_loc;
 
 public:
-static ConvertToMDUnitsConvTest *createSuite() {
-    return new ConvertToMDUnitsConvTest(); 
+static UnitsConversionHelperTest *createSuite() {
+    return new UnitsConversionHelperTest(); 
 }
-static void destroySuite(ConvertToMDUnitsConvTest  * suite) { delete suite; }    
+static void destroySuite(UnitsConversionHelperTest  * suite) { delete suite; }    
 
 void testSpecialConversionTOF()
 {
@@ -124,6 +123,7 @@ void testConvertToTofInelasticWS()
 
      // initialize matrix ws description, to the same number of dimensions as before
      WSD.buildFromMatrixWS(ws2D,"|Q|","Direct");
+     WSD.setDetectors(det_loc);
 
      //initialize Convert back;
      TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"DeltaE"));
@@ -135,7 +135,7 @@ void testConvertToTofInelasticWS()
 }
 
 
-ConvertToMDUnitsConvTest()
+UnitsConversionHelperTest()
 {
     
    API::FrameworkManager::Instance();

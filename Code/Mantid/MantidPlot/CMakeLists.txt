@@ -56,6 +56,7 @@ set ( QTIPLOT_SRCS src/ApplicationWindow.cpp
                    src/Integration.cpp
                    src/Interpolation.cpp
                    src/InterpolationDialog.cpp
+                   src/LabelTool.cpp
                    src/LayerDialog.cpp
                    src/LegendWidget.cpp
                    src/LineDialog.cpp
@@ -281,6 +282,7 @@ set ( QTIPLOT_HDRS src/ApplicationWindow.h
                    src/Integration.h
                    src/InterpolationDialog.h
                    src/Interpolation.h
+                   src/LabelTool.h
                    src/LayerDialog.h
                    src/LegendWidget.h
                    src/LineDialog.h
@@ -457,9 +459,6 @@ include ( UseSystemQt4 )
 ###########################################################################
 
 include_directories ( ${PYTHON_INCLUDE_PATH} )
-find_package ( PyQt4 REQUIRED )
-find_package ( SIP REQUIRED )
-separate_arguments ( PYQT4_SIP_FLAGS )
 
 set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/src/qti.sip )
 set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/src/sipqti.cpp.in )
@@ -568,6 +567,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
                         src/Integration.h
                         src/InterpolationDialog.h
                         src/Interpolation.h
+                        src/LabelTool.h
                         src/LayerDialog.h
                         src/LegendWidget.h
                         src/LineDialog.h
@@ -756,9 +756,17 @@ add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (
 include_directories ( src )
 include_directories ( src/lib/include )
 include_directories ( src/lib/3rdparty/qtcolorpicker/src )
+
+include_directories ( ../QtPropertyBrowser/src )
+include_directories ( ../MantidQt/API/inc )
+include_directories ( ../MantidQt/MantidWidgets/inc )
 include_directories ( ../MantidQt/SliceViewer/inc )
 include_directories ( ../MantidQt/ImageViewer/inc )
 include_directories ( ../MantidQt/Factory/inc )
+# ui_ files end up in these places
+include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/API )
+include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets )
+include_directories ( ${CMAKE_BINARY_DIR}/MantidQt/SliceViewer )
 
 
 ###########################################################################

@@ -3,6 +3,8 @@
 //------------------------------------------------------------------------------
 #include "MantidGeometry/Instrument/OneToOneSpectraDetectorMap.h"
 #include "MantidKernel/Exception.h"
+
+#include <boost/make_shared.hpp>
 #include <iostream>
 #include <sstream>
 
@@ -91,6 +93,20 @@ namespace Mantid
       return spectra;
     }
     
+    /**
+     * Create a map between a single ID & and single ID as this implentation is 1:1
+     * @returns A mapping from a single ID to a collection of IDs
+     */
+    boost::shared_ptr<det2group_map> OneToOneSpectraDetectorMap::createIDGroupsMap() const
+    {
+      auto mapping = boost::make_shared<det2group_map>();
+      for(specid_t i = m_start; i <= m_end; ++i)
+      {
+        mapping->insert(std::make_pair(i, std::vector<detid_t>(i)));
+      }
+      return mapping;
+    }
+
     /**
      * Return an iterator pointing at the first element
      * @returns A ISpectraDetectorMap::const_iterator pointing at the first element

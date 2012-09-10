@@ -16,7 +16,7 @@ class LoadRun(ReductionStep):
         to the beam center and normalize the data.
     """
     def __init__(self, datafile=None, sample_det_dist=None, sample_det_offset=0, beam_center=None,
-                 wavelength=None, wavelength_spread=None):
+                 wavelength=None, wavelength_spread=None, mask_side=None):
         """
             @param datafile: file path of data to load
             @param sample_det_dist: sample-detector distance [mm] (will overwrite header info)
@@ -24,6 +24,7 @@ class LoadRun(ReductionStep):
             @param beam_center: [center_x, center_y] [pixels]
             @param wavelength: if provided, wavelength will be fixed at that value [A]
             @param wavelength_spread: if provided along with wavelength, it will be fixed at that value [A] 
+            @param mask_side: mask the front detector side if 0, the back side if 1, or no masking if None
         """
         super(LoadRun, self).__init__()
         self._data_file = datafile
@@ -31,13 +32,26 @@ class LoadRun(ReductionStep):
         self.set_sample_detector_offset(sample_det_offset)
         self.set_beam_center(beam_center)
         self.set_wavelength(wavelength, wavelength_spread)
+        self.mask_detector_side(mask_side)
         
     def clone(self, data_file=None):
         if data_file is None:
             data_file = self._data_file
         return LoadRun(datafile=data_file, sample_det_dist=self._sample_det_dist,
                        sample_det_offset=self._sample_det_offset, beam_center=self._beam_center,
-                       wavelength=self._wavelength, wavelength_spread=self._wavelength_spread)
+                       wavelength=self._wavelength, wavelength_spread=self._wavelength_spread,
+                       mask_side=self._mask_side)
+        
+    def mask_detector_side(self, side=None):
+        """
+            Select a detector side to mask
+            0 = front side
+            1 = back side
+        """
+        if side is None or side in [0, 1]:
+            self._mask_side = side
+        else:
+            raise RuntimeError, "LoadRun.mask_detector_side expects None, 0, or 1"
         
     def set_wavelength(self, wavelength=None, wavelength_spread=None):
         if wavelength is not None and type(wavelength) != int and type(wavelength) != float:
@@ -173,4 +187,18 @@ class LoadRun(ReductionStep):
         if type(data_file)==list:
             n_files = len(data_file)
             
+        # Mask the back side or front side as needed
+        # Front detector IDs
+        if self._mask_side is not None and self._mask_side in [0, 1]:
+            nx = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+            ny = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+            id_side = []
+            
+            for iy in range(ny):
+                for ix in range(self._mask_side, nx+self._mask_side, 2):
+                    id_side.append([iy,ix])
+
+            det_side = reducer.instrument.get_detector_from_pixel(id_side, workspace)
+            MaskDetectors(Workspace=workspace, DetectorList=det_side) 
+        
         return output_str

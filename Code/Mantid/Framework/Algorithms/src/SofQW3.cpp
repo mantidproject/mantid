@@ -243,8 +243,18 @@ namespace Algorithms
   double SofQW3::calculateQ(const double efixed, const double deltaE,
                             const double twoTheta, const double azimuthal) const
   {
-    const double ki = std::sqrt(efixed * SofQW::energyToK());
-    const double kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
+    double ki = 0.0;
+    double kf = 0.0;
+    if (m_emode == 1)
+      {
+        ki = std::sqrt(efixed * SofQW::energyToK());
+        kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
+      }
+    else if(m_emode == 2)
+      {
+        ki = std::sqrt((deltaE + efixed) * SofQW::energyToK());
+        kf = std::sqrt(efixed * SofQW::energyToK());
+      }
     const double Qx = ki - kf * std::cos(twoTheta);
     const double Qy = -kf * std::sin(twoTheta) * std::cos(azimuthal);
     const double Qz = -kf * std::sin(twoTheta) * std::sin(azimuthal);

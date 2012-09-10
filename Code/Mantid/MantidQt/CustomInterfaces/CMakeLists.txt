@@ -111,22 +111,29 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
 )
 
 set( TEST_FILES
-               test/EventNexusFileMementoTest.h
-               test/WorkspaceMementoTest.h
-               test/WorkspaceInADSTest.h
-               test/RawFileMementoTest.h
+               EventNexusFileMementoTest.h
+               WorkspaceMementoTest.h
+               WorkspaceInADSTest.h
+               RawFileMementoTest.h
 )
 
 include_directories ( inc )
-include_directories ( ../MantidWidgets/inc )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MantidWidgets )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../API )
 include_directories ( ../../QtPropertyBrowser/src )
 # the directory with the information about ConvertToMD interface definitions
-#include_directories (../../Framework/MDAlgorithms/inc)
+# TODO: Remove these illegal dependencies (ticket #5151)
 include_directories (../../Framework/MDEvents/inc)
+include_directories (../../Framework/DataObjects/inc)
 
-qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
+# Ugly hack to get around issue in Boost version 1.48.0 
+# in conjunction with Qt 4.7.4 or greater
+set ( qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH} )
+if ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
+	set( extra_options "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED")
+else ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
+	set ( extra_options "" )
+endif ( ${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3 )
+
+qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} OPTIONS ${extra_options} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
@@ -145,25 +152,15 @@ add_library ( CustomInterfaces ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 # Set the name of the generated library
 set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )
 
-Find_Package(Threads)
+find_Package(Threads)
 
 target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser MDEvents ${CMAKE_THREAD_LIBS_INIT})
 
-if ( CXXTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+###########################################################################
+# Testing
+###########################################################################
 
-  include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc )
-
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( CustomInterfacesTest CustomInterfaces DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
-
-    add_dependencies( GUITests CustomInterfacesTest )
-    # Add to the 'UnitTests' group in VS
-    set_property( TARGET CustomInterfacesTest PROPERTY FOLDER "UnitTests" )
-  endif ()
-
-endif ()
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

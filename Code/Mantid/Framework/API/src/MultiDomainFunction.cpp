@@ -109,7 +109,7 @@ namespace API
     }
     const CompositeDomain& cd = dynamic_cast<const CompositeDomain&>(domain);
     // domain must not have less parts than m_maxIndex
-    if (cd.getNParts() < m_maxIndex)
+    if (cd.getNParts() <= m_maxIndex)
     {
       throw std::invalid_argument("CompositeDomain has too few parts (" 
         + boost::lexical_cast<std::string>(cd.getNParts()) +

@@ -65,6 +65,7 @@ namespace Mantid
         .def("getPos", &Geometry::IComponent::getPos)
         .def("getDistance", &Geometry::IComponent::getDistance)
         .def("getName", &Geometry::IComponent::getName)
+        .def("getFullName", &Geometry::IComponent::getFullName) 
         .def("type", &Geometry::IComponent::type)
         ;
 

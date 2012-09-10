@@ -2,12 +2,16 @@
 #include "ScriptingEnv.h"
 #include "MantidQtMantidWidgets/FindDialog.h"
 
-#include <QKeyEvent>
-#include <QMenu>
 #include <QApplication>
 #include <QClipboard>
+#include <QKeyEvent>
+#include <QMessageBox>
+#include <QMenu>
 
 #include <Qsci/qscilexer.h>
+
+#include <iostream>
+#include <stdexcept>
 
 //-----------------------------------------------------------------------------
 // InputSplitter class
@@ -299,6 +303,20 @@ void CommandLineInterpreter::cut()
   }
 }
 
+/**
+ * Overrides base class to slot. Calls base class and catches
+ * possible cancellation exception
+ */
+void CommandLineInterpreter::saveAs()
+{
+  try
+  {
+    ScriptEditor::saveAs();
+  }
+  catch(ScriptEditor::SaveCancelledException&)
+  {
+  }
+}
 
 /**
  * Display the context menu
@@ -328,8 +346,7 @@ void CommandLineInterpreter::showContextMenu(const QPoint & clickPoint)
  */
 void CommandLineInterpreter::displayOutput(const QString & messages)
 {
-  if(!text().endsWith("\n")) append("\n");
-  if(messages != "\n") append(messages);
+  append(messages);
 }
 
 /**
@@ -338,7 +355,6 @@ void CommandLineInterpreter::displayOutput(const QString & messages)
  */
 void CommandLineInterpreter::displayError(const QString & messages)
 {
-  if(!text().endsWith("\n")) append("\n");
   append(messages);
 }
 
@@ -348,7 +364,7 @@ void CommandLineInterpreter::displayError(const QString & messages)
 void CommandLineInterpreter::insertInputPrompt()
 {
   const int prevPromptLineIndex = m_currentPromptLineIndex;
-  append("\n");
+  if(!text().endsWith("\n")) append("\n"); // If the text is already on a new line don't bother with another
   moveCursorToStartOfLastLine();
   m_currentPromptLineIndex = indexOfLastLine();
   // Order is important. Qscintilla tries to make the markers
@@ -470,7 +486,7 @@ void CommandLineInterpreter::initActions()
   connect(m_paste, SIGNAL(triggered()), this, SLOT(paste()));
 
   m_saveAs = new QAction(tr("Save &As"), this);
-  connect(m_paste, SIGNAL(triggered()), this, SLOT(saveAs()));
+  connect(m_saveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
 
   m_zoomIn = new QAction(("Increase font size"), this);
   // Setting two shortcuts makes it work for both the plus on the keypad and one above an =
@@ -700,6 +716,8 @@ void CommandLineInterpreter::tryExecute()
   }
   else
   {
+    // Move cursor to start of fresh line to guarantee output is on fresh line
+    append("\n");
     execute();
   }
 }
@@ -717,7 +735,14 @@ void CommandLineInterpreter::execute()
   }
   else
   {
-    m_runner->executeAsync(code);
+    try
+    {
+      m_runner->executeAsync(code);
+    }
+    catch(std::runtime_error &exc)
+    {
+      QMessageBox::warning(this, "MantidPlot", exc.what());
+    }
     m_history.addCode(code);
   }
 }

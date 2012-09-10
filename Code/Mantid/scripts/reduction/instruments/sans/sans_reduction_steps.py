@@ -567,8 +567,14 @@ class WeightedAzimuthalAverage(ReductionStep):
             
         output_ws = workspace+str(self._suffix)
 
-        ConvertToMatrixWorkspace(workspace, '__'+workspace)
-        Q1DWeighted(InputWorkspace='__'+workspace, 
+        # If we kept the events this far, we need to convert the input workspace
+        # to a histogram here
+        input_workspace = workspace
+        if not isinstance(mtd[workspace]._getHeldObject(), MatrixWorkspace):
+            input_workspace = '__'+workspace
+            ConvertToMatrixWorkspace(workspace, input_workspace)
+            
+        Q1DWeighted(InputWorkspace=input_workspace, 
                     OutputWorkspace=output_ws, 
                     OutputBinning=self._binning,
                     NPixelDivision=self._nsubpix,
@@ -966,10 +972,6 @@ class CalculateNorm(object):
                 wave_adj = self.WAVE_CORR_NAME
                 RenameWorkspace(self.TMP_WORKSPACE_NAME, wave_adj)
             else:
-                #multiplying two raw counts workspaces gives a dependence on the bin width^2 which Mantid isn't set up to handle (dependence on the bin width = is distribution = is handled)
-                if not mtd[wave_adj].isDistribution():
-                    if not mtd[self.TMP_WORKSPACE_NAME].isDistribution():
-                        ConvertToDistribution(self.TMP_WORKSPACE_NAME)
                 Multiply(self.TMP_WORKSPACE_NAME, wave_adj, wave_adj)
 
         # read pixel correction file

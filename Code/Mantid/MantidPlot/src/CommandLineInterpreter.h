@@ -84,6 +84,8 @@ public slots:
   void paste();
   /// Cut can only edit text on the current input line
   void cut();
+  /// Overrides base class to slot
+  void saveAs();
 
 private slots:
   /// Custom context menu

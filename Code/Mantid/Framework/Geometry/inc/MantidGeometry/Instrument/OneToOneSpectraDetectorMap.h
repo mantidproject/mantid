@@ -73,6 +73,9 @@ namespace Mantid
       /// Clear the map
       inline void clear() { m_end = 1; m_start = 2; }
 
+      /// Create a map between a single ID & a list of IDs
+      boost::shared_ptr<det2group_map> createIDGroupsMap() const;
+
       /**@name Iterate over the whole map */
       //@{
       /// Begin

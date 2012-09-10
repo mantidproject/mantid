@@ -43,7 +43,8 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite
    WorkspaceCreationHelper::MockAlgorithm reporter;
 
    boost::shared_ptr<ConvToMDBase> pConvMethods;
-   ConvToMDPreprocDet g_DetLoc;
+   ConvToMDPreprocDet DetLoc_events;
+   ConvToMDPreprocDet DetLoc_histo;
    // pointer to mock algorithm to work with progress bar
    std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
 
@@ -69,7 +70,7 @@ void test_EventNoUnitsConv()
 
     WSD.buildFromMatrixWS(inWsEv,"Q3D","Indirect");
 
-    WSD.setDetectors(g_DetLoc);
+    WSD.setDetectors(DetLoc_events);
     WSD.m_RotMatrix = Rot;
 
     // create new target MD workspace
@@ -78,7 +79,7 @@ void test_EventNoUnitsConv()
 
     ConvToMDSelector AlgoSelector;
     pConvMethods = AlgoSelector.convSelector(inWsEv);
-    pConvMethods->initialize(WSD,pTargWS);
+    TS_ASSERT_THROWS_NOTHING(pConvMethods->initialize(WSD,pTargWS));
 
     pMockAlgorithm->resetProgress(numHist);
     //Clock.elapsedCPU();
@@ -100,7 +101,7 @@ void test_EventFromTOFConv()
     WSD.setMinMax(min,max);
     WSD.buildFromMatrixWS(inWsEv,"Q3D","Indirect");
 
-    WSD.setDetectors(g_DetLoc);
+    WSD.setDetectors(DetLoc_events);
     WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -134,7 +135,7 @@ void test_HistoFromTOFConv()
 
     WSD.buildFromMatrixWS(inWs2D,"Q3D","Indirect");
 
-    WSD.setDetectors(g_DetLoc);
+    WSD.setDetectors(DetLoc_histo);
     WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -171,7 +172,7 @@ void test_HistoNoUnitsConv()
 
     WSD.buildFromMatrixWS(inWs2D,"Q3D","Indirect");
 
-    WSD.setDetectors(g_DetLoc);
+    WSD.setDetectors(DetLoc_histo);
     WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -205,17 +206,18 @@ Rot(3,3)
    inWsEv->mutableRun().addProperty("Ei",12.,"meV",true);
 
    inWs2D = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(int(numHist), int(nEvents)));
-    // add workspace energy
-    inWs2D->mutableRun().addProperty("Ei",12.,"meV",true);
+   // add workspace energy
+   inWs2D->mutableRun().addProperty("Ei",12.,"meV",true);
 
 
    pMockAlgorithm = std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm>(new WorkspaceCreationHelper::MockAlgorithm(numHist));
-   g_DetLoc.processDetectorsPositions(inWs2D,pMockAlgorithm->getLogger(),pMockAlgorithm->getProgress());
+   DetLoc_histo.processDetectorsPositions(inWs2D,pMockAlgorithm->getLogger(),pMockAlgorithm->getProgress());
+   DetLoc_events.processDetectorsPositions(inWsEv,pMockAlgorithm->getLogger(),pMockAlgorithm->getProgress());
 
    pTargWS = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
 
-    Rot.setRandom(100);
-    Rot.toRotation();
+   Rot.setRandom(100);
+   Rot.toRotation();
 
 
 }

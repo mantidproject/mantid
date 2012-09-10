@@ -50,7 +50,7 @@ public:
 // calc target coordinates interface:
     bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd);
     bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
-    bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord)const;
+    bool calcMatrixCoord(const double& k0,std::vector<coord_t> &Coord, double &s, double &err)const;
     // constructor;
     MDTransfNoQ();
     /* clone method allowing to provide the copy of the particular class */

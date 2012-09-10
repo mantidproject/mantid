@@ -83,7 +83,7 @@ public:
     peak.initialize();
 
     // 1. Set parameter
-    peak.setParameter("height", 1000.0);
+    peak.setParameter("Height", 1000.0);
     peak.setParameter("TOF_h", 55175.79);
     peak.setParameter("Alpha", 0.03613);
     peak.setParameter("Beta", 0.02376);
@@ -162,9 +162,9 @@ public:
       {
         TS_ASSERT_DELTA(out->getParameter("TOF_h"), 55175.79, 1.0E-8);
       }
-      else if (parnames[ip].compare("height") == 0)
+      else if (parnames[ip].compare("Height") == 0)
       {
-        TS_ASSERT_DELTA(out->getParameter("height"), 96000, 100);
+        TS_ASSERT_DELTA(out->getParameter("Height"), 96000, 100);
       }
     }
 

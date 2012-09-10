@@ -10,6 +10,7 @@ This algorithm loads all monitors found in a NeXus file into a single [[Workspac
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <Poco/File.h>
@@ -212,8 +213,14 @@ void LoadNexusMonitors::exec()
   this->WS->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
   this->WS->setYUnit("Counts");
 
-  // Lod the logs
+  // Load the logs
   this->runLoadLogs(this->filename, this->WS);
+
+  // The run_start will be loaded from the pulse times.
+  Kernel::DateAndTime run_start(0,0);
+  run_start = this->WS->getFirstPulseTime();
+  this->WS->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
+
   // Load the instrument
   this->runLoadInstrument(instrumentName, this->WS);
 

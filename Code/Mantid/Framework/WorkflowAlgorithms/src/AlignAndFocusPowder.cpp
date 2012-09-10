@@ -14,6 +14,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/FileFinder.h"
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;
@@ -66,8 +68,10 @@ void AlignAndFocusPowder::init()
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.");
   declareProperty("Dspacing", true,"Bin in Dspace. (Default true)");
-  declareProperty("CropMin", 0.0, "Minimum for Cropping TOF or dspace axis. (Default 0.) ");
-  declareProperty("CropMax", 0.0, "Maximum for Croping TOF or dspace axis. (Default 0.) ");
+  declareProperty("DMin", 0.0, "Minimum for Dspace axis. (Default 0.) ");
+  declareProperty("DMax", 0.0, "Maximum for Dspace axis. (Default 0.) ");
+  declareProperty("TMin", 0.0, "Minimum for TOF axis. (Default 0.) ");
+  declareProperty("TMax", 0.0, "Maximum for TOF or dspace axis. (Default 0.) ");
   declareProperty("PreserveEvents", true,
     "If the InputWorkspace is an EventWorkspace, this will preserve the full event list (warning: this will use much more memory!).");
   declareProperty("FilterBadPulses", true,
@@ -85,9 +89,12 @@ void AlignAndFocusPowder::init()
   declareProperty("UnwrapRef", 0., "Reference total flight path for frame unwrapping. Zero skips the correction");
   declareProperty("LowResRef", 0., "Reference DIFC for resolution removal. Zero skips the correction");
   declareProperty("CropWavelengthMin", 0., "Crop the data at this minimum wavelength. Overrides LowResRef.");
-  declareProperty("TMin", 0.0, "Minimum for TOF or dspace axis. (Default 0.) ");
-  declareProperty("TMax", 0.0, "Maximum for TOF or dspace axis. (Default 0.) ");
-
+  declareProperty("PrimaryFlightPath", -1.0, "If positive, focus positions are changed.  (Default -1) ");
+  declareProperty(new ArrayProperty<int32_t>("SpectrumIDs"),
+    "Optional: Spectrum IDs (note that it is not detector ID or workspace indices).");
+  declareProperty(new ArrayProperty<double>("L2"), "Optional: Secondary flight (L2) paths for each detector");
+  declareProperty(new ArrayProperty<double>("Polar"), "Optional: Polar angles (two thetas) for detectors");
+  declareProperty(new ArrayProperty<double>("Azimuthal"), "Azimuthal angles (out-of-plain) for detectors");
 
 }
 
@@ -101,11 +108,75 @@ void AlignAndFocusPowder::exec()
   // retrieve the properties
   m_inputW = getProperty("InputWorkspace");
   m_eventW = boost::dynamic_pointer_cast<EventWorkspace>( m_inputW );
-  std::string instName = m_inputW->getInstrument()->getName();
-  std::string calFileName=getProperty("CalFileName");
+  instName = m_inputW->getInstrument()->getName();
+  instName = Kernel::ConfigService::Instance().getInstrument(instName).shortName();
+  calFileName = getPropertyValue("CalFileName");
   offsetsWS = getProperty("OffsetsWorkspace");
   maskWS = getProperty("MaskWorkspace");
   groupWS = getProperty("GroupingWorkspace");
+  l1 = getProperty("PrimaryFlightPath");
+  specids = getProperty("SpectrumIDs");
+  l2s = getProperty("L2");
+  tths = getProperty("Polar");
+  phis = getProperty("Azimuthal");
+  params=getProperty("Params");
+  dspace = getProperty("DSpacing");
+  double dmin = getProperty("DMin");
+  double dmax = getProperty("DMax");
+  LRef = getProperty("UnwrapRef");
+  DIFCref = getProperty("LowResRef");
+  minwl = getProperty("CropWavelengthMin");
+  tmin = getProperty("TMin");
+  tmax = getProperty("TMax");
+  // determine some bits about d-space and binning
+  if (params.size() == 1)
+  {
+    if (dmax > 0) dspace = true;
+    else dspace=false;
+  }
+  if (dspace)
+  {
+    if (params.size() == 1 && dmax > 0)
+    {
+    	double step = params[0];
+        if (step > 0 || dmin > 0)
+        {
+          params[0] = dmin;
+          params.push_back(step);
+          params.push_back(dmax);
+          g_log.information() << "d-Spacing Binning: " << params[0] << "  " << params[1] << "  " << params[2] <<"\n";
+        }
+    }
+  }
+  else
+  {
+    if (params.size() == 1 && tmax > 0)
+    {
+    	double step = params[0];
+        if (step > 0 || tmin > 0)
+        {
+          params[0] = tmin;
+          params.push_back(step);
+          params.push_back(tmax);
+          g_log.information() << "TOF Binning: " << params[0] << "  " << params[1] << "  " << params[2] <<"\n";
+        }
+    }
+  }
+  xmin = 0;
+  xmax = 0;
+  if (tmin > 0.)
+  {
+    xmin = tmin;
+  }
+  if (tmax > 0.)
+  {
+    xmax = tmax;
+  }
+  if (!dspace && params.size() == 3)
+  {
+    xmin = params[0];
+    xmax = params[2];
+  }
 
   try {
     if (!offsetsWS) offsetsWS = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(instName+"_offsets");
@@ -136,15 +207,6 @@ void AlignAndFocusPowder::exec()
     this->execEvent();
     return;
   }
-  std::vector<double> params=getProperty("Params");
-  bool dspace = getProperty("DSpacing");
-  double xmin = getProperty("CropMin");
-  double xmax = getProperty("CropMax");
-  double LRef = getProperty("UnwrapRef");
-  double DIFCref = getProperty("LowResRef");
-  double minwl = getProperty("CropWavelengthMin");
-  double tmin = getProperty("TMin");
-  double tmax = getProperty("TMax");
 
   // Now create the output workspace
   m_outputW = getProperty("OutputWorkspace");
@@ -167,7 +229,7 @@ void AlignAndFocusPowder::exec()
 
   API::IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors");
   maskAlg->setProperty("Workspace", m_outputW);
-  maskAlg->setProperty("MaskedWorkspace", instName+"_mask");
+  maskAlg->setProperty("MaskedWorkspace", maskWS);
   maskAlg->executeAsSubAlg();
   m_outputW = maskAlg->getProperty("Workspace");
 
@@ -184,7 +246,7 @@ void AlignAndFocusPowder::exec()
   API::IAlgorithm_sptr alignAlg = createSubAlgorithm("AlignDetectors");
   alignAlg->setProperty("InputWorkspace", m_outputW);
   alignAlg->setProperty("OutputWorkspace", m_outputW);
-  alignAlg->setProperty("OffsetsWorkspace", instName+"_offsets");
+  alignAlg->setProperty("OffsetsWorkspace", offsetsWS);
   alignAlg->executeAsSubAlg();
   m_outputW = alignAlg->getProperty("OutputWorkspace");
 
@@ -255,12 +317,26 @@ void AlignAndFocusPowder::exec()
   API::IAlgorithm_sptr focusAlg = createSubAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", m_outputW);
   focusAlg->setProperty("OutputWorkspace", m_outputW);
-  focusAlg->setProperty("GroupingWorkspace", instName+"_group");
+  focusAlg->setProperty("GroupingWorkspace", groupWS);
   focusAlg->setProperty("PreserveEvents", false);
   focusAlg->executeAsSubAlg();
   m_outputW = focusAlg->getProperty("OutputWorkspace");
 
-/*  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
+  if (l1 > 0)
+  {
+    API::IAlgorithm_sptr editAlg = createSubAlgorithm("EditInstrumentGeometry");
+    editAlg->setProperty("Workspace", m_outputW);
+    editAlg->setProperty("NewInstrument", false);
+    editAlg->setProperty("PrimaryFlightPath", l1);
+    editAlg->setProperty("Polar", tths);
+    editAlg->setProperty("SpectrumIDs", specids);
+    editAlg->setProperty("L2", l2s);
+    editAlg->setProperty("Azimuthal", phis);
+    editAlg->executeAsSubAlg();
+    m_outputW = editAlg->getProperty("Workspace");
+  }
+
+  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
   convert3Alg->setProperty("InputWorkspace", m_outputW);
   convert3Alg->setProperty("OutputWorkspace", m_outputW);
   convert3Alg->setProperty("Target","TOF");
@@ -277,7 +353,7 @@ void AlignAndFocusPowder::exec()
   rebin3Alg->setProperty("OutputWorkspace", m_outputW);
   rebin3Alg->setProperty("Params",params);
   rebin3Alg->executeAsSubAlg();
-  m_outputW = rebin3Alg->getProperty("OutputWorkspace");*/
+  m_outputW = rebin3Alg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace",m_outputW);
 
 }
@@ -290,17 +366,6 @@ void AlignAndFocusPowder::exec()
 void AlignAndFocusPowder::execEvent()
 {
   // retrieve the properties
-  std::string instName = m_inputW->getInstrument()->getName();
-  std::string calFileName=getProperty("CalFileName");
-  std::vector<double> params=getProperty("Params");
-  bool dspace = getProperty("DSpacing");
-  double xmin = getProperty("CropMin");
-  double xmax = getProperty("CropMax");
-  double LRef = getProperty("UnwrapRef");
-  double DIFCref = getProperty("LowResRef");
-  double minwl = getProperty("CropWavelengthMin");
-  double tmin = getProperty("TMin");
-  double tmax = getProperty("TMax");
   bool preserveEvents = getProperty("PreserveEvents");
   bool filterBadPulses = getProperty("FilterBadPulses");
   double removePromptPulseWidth = getProperty("RemovePromptPulseWidth");
@@ -352,8 +417,9 @@ void AlignAndFocusPowder::execEvent()
     m_outputEventW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
   }
 
-  if (!filterName.empty())
+  if (!filterName.empty() && m_outputW->mutableRun().getLogData(filterName))
   {
+    
     API::IAlgorithm_sptr filterLogsAlg = createSubAlgorithm("FilterByLogValue");
     filterLogsAlg->setProperty("InputWorkspace", m_outputEventW);
     filterLogsAlg->setProperty("OutputWorkspace", m_outputEventW);
@@ -376,7 +442,7 @@ void AlignAndFocusPowder::execEvent()
 
   doSortEvents(m_outputW);
 
-  if (xmin > 0. || xmax > 0.)
+  if ((xmin > 0. || xmax > 0.) && m_outputEventW->getNumberEvents() > 0)
   {
 	  API::IAlgorithm_sptr cropAlg = createSubAlgorithm("CropWorkspace");
 	  cropAlg->setProperty("InputWorkspace", m_outputW);
@@ -389,7 +455,7 @@ void AlignAndFocusPowder::execEvent()
 
   API::IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors");
   maskAlg->setProperty("Workspace", m_outputW);
-  maskAlg->setProperty("MaskedWorkspace", instName+"_mask");
+  maskAlg->setProperty("MaskedWorkspace", maskWS);
   maskAlg->executeAsSubAlg();
   m_outputW = maskAlg->getProperty("Workspace");
 
@@ -406,7 +472,7 @@ void AlignAndFocusPowder::execEvent()
   API::IAlgorithm_sptr alignAlg = createSubAlgorithm("AlignDetectors");
   alignAlg->setProperty("InputWorkspace", m_outputW);
   alignAlg->setProperty("OutputWorkspace", m_outputW);
-  alignAlg->setProperty("OffsetsWorkspace", instName+"_offsets");
+  alignAlg->setProperty("OffsetsWorkspace", offsetsWS);
   alignAlg->executeAsSubAlg();
   m_outputW = alignAlg->getProperty("OutputWorkspace");
 
@@ -479,14 +545,28 @@ void AlignAndFocusPowder::execEvent()
   API::IAlgorithm_sptr focusAlg = createSubAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", m_outputW);
   focusAlg->setProperty("OutputWorkspace", m_outputW);
-  focusAlg->setProperty("GroupingWorkspace", instName+"_group");
+  focusAlg->setProperty("GroupingWorkspace", groupWS);
   focusAlg->setProperty("PreserveEvents", preserveEvents);
   focusAlg->executeAsSubAlg();
   m_outputW = focusAlg->getProperty("OutputWorkspace");
 
   doSortEvents(m_outputW);
 
-/*  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
+  if (l1 > 0)
+  {
+    API::IAlgorithm_sptr editAlg = createSubAlgorithm("EditInstrumentGeometry");
+    editAlg->setProperty("Workspace", m_outputW);
+    editAlg->setProperty("NewInstrument", false);
+    editAlg->setProperty("PrimaryFlightPath", l1);
+    editAlg->setProperty("Polar", tths);
+    editAlg->setProperty("SpectrumIDs", specids);
+    editAlg->setProperty("L2", l2s);
+    editAlg->setProperty("Azimuthal", phis);
+    editAlg->executeAsSubAlg();
+    m_outputW = editAlg->getProperty("Workspace");
+  }
+
+  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
   convert3Alg->setProperty("InputWorkspace", m_outputW);
   convert3Alg->setProperty("OutputWorkspace", m_outputW);
   convert3Alg->setProperty("Target","TOF");
@@ -503,7 +583,7 @@ void AlignAndFocusPowder::execEvent()
   rebin3Alg->setProperty("OutputWorkspace", m_outputW);
   rebin3Alg->setProperty("Params",params);
   rebin3Alg->executeAsSubAlg();
-  m_outputW = rebin3Alg->getProperty("OutputWorkspace");*/
+  m_outputW = rebin3Alg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace",m_outputW);
 
 }

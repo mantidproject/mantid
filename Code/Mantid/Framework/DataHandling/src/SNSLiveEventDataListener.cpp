@@ -300,8 +300,8 @@ namespace DataHandling
     // We only need to process a beamlineinfo packet once
     if (m_workspaceInitialized == false)
     {
-      // We need the instrument name (we'll use the shortname);
-      m_instrumentName = pkt.shortName();
+      // We need the instrument name
+      m_instrumentName = pkt.longName();
 
       // If we've also got the XML definition (from the Geometry packet), then
       // we can create our workspace.  Otherwise, we'll just wait

@@ -290,6 +290,15 @@ def SetWavelength(wavelength, spread):
         raise RuntimeError, "SetWavelength was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
     ReductionSingleton().get_data_loader().set_wavelength(wavelength, spread)
     
+def MaskDetectorSide(side_to_mask=None):
+    if not isinstance(ReductionSingleton().get_data_loader(), hfir_load.LoadRun):
+        raise RuntimeError, "MaskDetectorSide was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
+    if side_to_mask.lower() == "front":
+        side_to_mask = 0
+    elif side_to_mask.lower() == "back":
+        side_to_mask = 1
+    ReductionSingleton().get_data_loader().mask_detector_side(side_to_mask)
+    
 def ResetWavelength():
     """
         Resets the wavelength to the data file default

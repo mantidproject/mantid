@@ -111,10 +111,11 @@
 #include "CustomActionDialog.h"
 #include "MdiSubWindow.h"
 #include "FloatingWindow.h"
+#include "DataPickerTool.h"
 
 // TODO: move tool-specific code to an extension manager
 #include "ScreenPickerTool.h"
-#include "DataPickerTool.h"
+#include "LabelTool.h"
 #include "TranslateCurveTool.h"
 #include "MultiPeakFitTool.h"
 #include "LineProfileTool.h"
@@ -994,6 +995,13 @@ void ApplicationWindow::initToolBars()
   btnPicker->setIcon(QIcon(getQPixmap("cursor_16_xpm")) );
   plotTools->addAction(btnPicker); //disabled until fixed (#2783)
 
+  btnLabel = new QAction(tr("Label &Tool"), this);
+  btnLabel->setShortcut( tr("ALT+T") );
+  btnLabel->setActionGroup(dataTools);
+  btnLabel->setIcon(QIcon(getQPixmap("text_xpm")));
+  btnLabel->setCheckable(true);
+  plotTools->addAction(btnLabel); //disabled until fixed (#2783)
+  
   actionDrawPoints = new QAction(tr("&Draw Data Points"), this);
   actionDrawPoints->setActionGroup(dataTools);
   actionDrawPoints->setCheckable( true );
@@ -1029,13 +1037,6 @@ void ApplicationWindow::initToolBars()
 
   connect( dataTools, SIGNAL( triggered( QAction* ) ), this, SLOT( pickDataTool( QAction* ) ) );
   plotTools->addSeparator ();
-
-  actionAddText = new QAction(tr("Add &Text"), this);
-  actionAddText->setShortcut( tr("ALT+T") );
-  actionAddText->setIcon(QIcon(getQPixmap("text_xpm")));
-  actionAddText->setCheckable(true);
-  connect(actionAddText, SIGNAL(activated()), this, SLOT(addText()));
-  plotTools->addAction(actionAddText);
 
   btnArrow = new QAction(tr("Draw &Arrow"), this);
   btnArrow->setShortcut( tr("CTRL+ALT+A") );
@@ -1274,7 +1275,7 @@ void ApplicationWindow::initMainMenu()
   graph->addAction(actionAddFunctionCurve);
   graph->addAction(actionNewLegend);
   graph->insertSeparator();
-  graph->addAction(actionAddText);
+  graph->addAction(btnLabel);
   graph->addAction(btnArrow);
   graph->addAction(btnLine);
   graph->addAction(actionTimeStamp);
@@ -8206,23 +8207,28 @@ void ApplicationWindow::addTimeStamp()
     g->addTimeStamp();
 }
 
-void ApplicationWindow::disableAddText()
+void ApplicationWindow::addLabel()
 {
-  actionAddText->setChecked(false);
-  showTextDialog();
-}
-
-void ApplicationWindow::addText()
-{
-  if (!btnPointer->isOn())
-    btnPointer->setOn(TRUE);
-
-  MultiLayer *plot = dynamic_cast<MultiLayer*>(activeWindow(MultiLayerWindow));
+    MultiLayer *plot = dynamic_cast<MultiLayer*>(activeWindow(MultiLayerWindow));
   if (!plot)
     return;
+
+  if (plot->isEmpty())
+  {
+    QMessageBox::warning(this,tr("MantidPlot - Warning"),//Mantid
+        tr("<h4>There are no plot layers available in this window.</h4>"
+            "<p><h4>Please add a layer and try again!</h4>"));
+    
+    btnPointer->setChecked(true);
+    return;  
+  }
+
   Graph *g = dynamic_cast<Graph*>(plot->activeGraph());
   if (g)
-    g->drawText(true);
+  {
+    g->setActiveTool(new LabelTool(g));
+  }
+  displayBar->show();
 }
 
 void ApplicationWindow::addImage()
@@ -8406,15 +8412,22 @@ void ApplicationWindow::clearSelection()
     dynamic_cast<Table*>(m)->clearSelection();
   else if (m->isA("Matrix"))
     dynamic_cast<Matrix*>(m)->clearSelection();
-  else if (m->isA("MultiLayer")){
+  else if (m->isA("MultiLayer"))
+  {
     Graph* g = dynamic_cast<MultiLayer*>(m)->activeGraph();
     if (!g)
       return;
 
-    if (g->activeTool()){
+    if (g->activeTool())
+    {
       if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
         dynamic_cast<RangeSelectorTool*>(g->activeTool())->clearSelection();
-    } else if (g->titleSelected())
+
+      if (g->activeTool()->rtti() == PlotToolInterface::Rtti_LabelTool)
+        dynamic_cast<LabelTool*>(g->activeTool())->removeTextBox();
+    }
+    
+    else if (g->titleSelected())
       g->removeTitle();
     else if (g->markerSelected())
       g->removeMarker();
@@ -12569,6 +12582,8 @@ void ApplicationWindow::pickDataTool( QAction* action )
     zoomIn();
   else if (action == btnZoomOut)
     zoomOut();
+  else if (action == btnLabel)
+    addLabel();
   else if (action == btnArrow)
     drawArrow();
   else if (action == btnLine)
@@ -12594,7 +12609,6 @@ void ApplicationWindow::connectMultilayerPlot(MultiLayer *g)
   connect (g,SIGNAL(showCurveContextMenu(int)), this, SLOT(showCurveContextMenu(int)));
   connect (g,SIGNAL(showCurvesDialog()),this,SLOT(showCurvesDialog()));
   connect (g,SIGNAL(drawLineEnded(bool)), btnPointer, SLOT(setOn(bool)));
-  connect (g,SIGNAL(drawTextOff()),this, SLOT(disableAddText()));
   connect (g, SIGNAL(showAxisTitleDialog()), this, SLOT(showAxisTitleDialog()));
 
   connect (g,SIGNAL(showMarkerPopupMenu()),this,SLOT(showMarkerPopupMenu()));
@@ -14048,6 +14062,9 @@ void ApplicationWindow::translateActionsStrings()
   btnPicker->setMenuText(tr("S&creen Reader"));
   btnPicker->setToolTip(tr("Screen reader"));
 
+  btnLabel->setMenuText(tr("Add &Label"));
+  btnLabel->setToolTip(tr("Add Label"));
+
   actionDrawPoints->setMenuText(tr("&Draw Data Points"));
   actionDrawPoints->setToolTip(tr("Draw Data Points"));
 
@@ -14058,10 +14075,6 @@ void ApplicationWindow::translateActionsStrings()
   btnRemovePoints->setMenuText(tr("Remove &Bad Data Points..."));
   btnRemovePoints->setShortcut(tr("Alt+B"));
   btnRemovePoints->setToolTip(tr("Remove data points"));
-
-  actionAddText->setMenuText(tr("Add &Text"));
-  actionAddText->setToolTip(tr("Add Text"));
-  actionAddText->setShortcut(tr("ALT+T"));
 
   btnArrow->setMenuText(tr("Draw &Arrow"));
   btnArrow->setShortcut(tr("CTRL+ALT+A"));
@@ -14859,7 +14872,15 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     {
       if(quit)
       {
-        executeScriptFile(file_name, Script::Asynchronous);
+        try
+        {
+          executeScriptFile(file_name, Script::Asynchronous);
+        }
+        catch(std::runtime_error& exc)
+        {
+          std::cerr << "Error thrown while running scrip file asynchronously '" << exc.what() << "'\n";
+          setExitCode(1);
+        }
         saved = true;
         this->close();
       }
@@ -17726,6 +17747,8 @@ void ApplicationWindow::customMultilayerToolButtons(MultiLayer* w)
       actionDrawPoints->setOn(true);
     else if (dynamic_cast<ScreenPickerTool*>(tool))
       btnPicker->setOn(true);
+    else if (dynamic_cast<LabelTool*>(tool))
+      btnLabel->setOn(true);
     else
       btnPointer->setOn(true);
   }

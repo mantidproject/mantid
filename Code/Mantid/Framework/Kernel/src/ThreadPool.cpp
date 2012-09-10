@@ -200,8 +200,6 @@ namespace Kernel
     }
 
   }
-
-
-
+ 
 } // namespace Kernel
 } // namespace Mantid

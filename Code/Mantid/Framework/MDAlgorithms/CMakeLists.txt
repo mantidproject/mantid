@@ -135,6 +135,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h	
 	inc/MantidMDAlgorithms/ConvertToMDEventsWSBase.h	
+# END TMD	
     inc/MantidMDAlgorithms/StitchGroup1D.h
 )
 

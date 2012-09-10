@@ -149,9 +149,6 @@ namespace Mantid
       /// Returns a shared pointer to a component
       boost::shared_ptr<const IComponent> getComponentByID(ComponentID id) const;
 
-      /// Returns a pointer to the first component encountered with the given name
-      boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname, int nlevels = 0) const;
-
       /// Returns pointers to all components encountered with the given name
       std::vector<boost::shared_ptr<const IComponent> > getAllComponentsWithName(const std::string & cname) const;
 

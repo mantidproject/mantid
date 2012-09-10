@@ -96,7 +96,7 @@ namespace SliceViewer
 class SliceViewerWindow : QMainWindow
 {
 %TypeHeaderCode
-#include "SliceViewer/inc/MantidQtSliceViewer/SliceViewerWindow.h"
+#include "MantidQtSliceViewer/SliceViewerWindow.h"
 %End
 %Docstring
 
@@ -166,7 +166,7 @@ MantidQt::SliceViewer::LineViewer* SliceViewerWindow::getLiner()
 class LineViewer : QWidget
 {
 %TypeHeaderCode
-#include "SliceViewer/inc/MantidQtSliceViewer/LineViewer.h"
+#include "MantidQtSliceViewer/LineViewer.h"
 %End
 
 %Docstring
@@ -444,7 +444,7 @@ int LineViewer::getPlotAxis()
 class SliceViewer : QWidget
 {
 %TypeHeaderCode
-#include "SliceViewer/inc/MantidQtSliceViewer/SliceViewer.h"
+#include "MantidQtSliceViewer/SliceViewer.h"
 %End
 
 %Docstring
@@ -1053,7 +1053,7 @@ namespace Factory
 class WidgetFactory
 {
 %TypeHeaderCode
-#include "Factory/inc/MantidQtFactory/WidgetFactory.h"
+#include "MantidQtFactory/WidgetFactory.h"
 #include <QVector>
 %End
 

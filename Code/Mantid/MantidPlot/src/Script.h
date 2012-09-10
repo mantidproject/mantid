@@ -31,9 +31,10 @@
 
 #include <QEvent>
 #include <QFuture>
-#include <QThread>
+#include <QRunnable>
 #include <QString>
 #include <QStringList>
+#include <QThreadPool>
 #include <QVariant>
 
 #include "ScriptCode.h"
@@ -43,6 +44,7 @@
 //-------------------------------------------
 class ApplicationWindow;
 class ScriptingEnv;
+class Script;
 
 /**
  * Script objects represent a chunk of code, possibly together with local
@@ -145,36 +147,26 @@ protected:
 
 private:
   /**
-   * Worker thread for the asynchronous exec calls
+   * Worker task for the asynchronous exec calls
    */
-  class ScriptThread : public QThread
+  class ScriptTask : public QFutureInterface<bool>, public QRunnable
   {
   public:
-    ScriptThread(Script & script)
-      : QThread(), m_script(script), m_future()
-    {}
-
-    QFuture<bool> future()
-    {
-      return m_future;
-    }
-
-    void run()
-    {
-      QFutureInterface<bool> *progressObject(new QFutureInterface<bool>);
-      m_future = progressObject->future();
-
-      progressObject->reportStarted();
-      const bool result = m_script.execute(m_script.scriptCode());
-
-      progressObject->reportResult(result, 0);
-      progressObject->reportFinished();
-      delete progressObject;
-    }
+    ScriptTask(Script & script);
+    QFuture<bool> start();
+    void run();
 
   private:
+    ScriptTask();
     Script & m_script;
-    QFuture<bool> m_future;
+  };
+  /**
+   * ThreadPool that allows only a single thread
+   */
+  class ScriptThreadPool : public QThreadPool
+  {
+  public:
+    ScriptThreadPool();
   };
 
   /// Setup the code from a script code object
@@ -192,10 +184,8 @@ private:
   InteractionType m_interactMode;
   ExecutionMode m_execMode;
 
-  ScriptThread *m_execThread;
+  ScriptThreadPool *m_thread;
 };
-
-
 
 
 #endif

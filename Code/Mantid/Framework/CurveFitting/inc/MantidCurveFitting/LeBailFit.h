@@ -9,7 +9,8 @@
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
-
+#include "MantidAPI/ITableWorkspace.h"
+#include <gsl/gsl_sf_erf.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -73,10 +74,10 @@ namespace CurveFitting
     void importReflections();
 
     /// Create a list of peaks
-    void generatePeaksFromInput();
+    void generatePeaksFromInput(size_t workspaceindex);
 
     /// Create and set up output table workspace for peaks
-    void createPeaksWorkspace();
+    void exportEachPeaksParameters();
 
     /// Set parameters to each peak
     void setPeakParameters(
@@ -142,6 +143,9 @@ namespace CurveFitting
     /// Split peaks to peak groups
     std::vector<std::set<size_t> > splitPeaksToGroups();
 
+    /// Auxiliary.  Split composite function name to function index and parameter name
+    void parseCompFunctionParameterName(std::string fullparname, std::string& parname, size_t& funcindex);
+
     /// Instance data
     API::MatrixWorkspace_sptr dataWS;
     DataObjects::Workspace2D_sptr outputWS;
@@ -152,17 +156,47 @@ namespace CurveFitting
     std::vector<int> mPeakHKL2; // Peak's h^2+k^2+l^2: seaving as key for mPeakHeights adn mPeaks
     std::vector<std::vector<int> > mPeakHKLs;
     std::map<int, double> mPeakHeights;
+
+    /// =============================   Functions  =========================== ///
+    /// Neutron peak functions
     std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr> mPeaks;
-
+    /// Background function
     CurveFitting::BackgroundFunction_sptr mBackgroundFunction;
-
+    /// Le Bail Function (Composite)
     API::CompositeFunction_sptr mLeBailFunction;
-    std::map<std::string, std::pair<double, char> > mFuncParameters; // char = f: fit... = t: tie to value
-    std::vector<std::string> mPeakParameterNames; // Peak parameters' names of the peak
 
+    /// Function parameters updated by fit
+    std::map<std::string, std::pair<double, char> > mFuncParameters; // char = f: fit... = t: tie to value
+    /// Input function parameters that are stored for reference
+    std::map<std::string, double> mOrigFuncParameters;
+    /// Peak parameters list
+    std::vector<std::string> mPeakParameterNames; // Peak parameters' names of the peak
+    /// Parameter error
+    std::map<std::string, double> mFuncParameterErrors;
+
+    /// Calcualte peak's position in d-spacing.
+    double calculatePeakCenter(int h, int k, int l);
+
+    /// Convert unit from d-spacing to TOF
+    double convertUnitToTOF(double dh);
+
+    /// =============================    =========================== ///
     size_t mWSIndexToWrite;
 
+    /// Map to store peak group information: key (int) = (hkl)^2; value = group ID
+    std::map<int, size_t> mPeakGroupMap;
+
+    /// Map to store fitting Chi^2: key = group index; value = chi^2
+    std::map<size_t, double> mPeakGroupFitChi2Map;
+
+    /// Map to store fitting Status: key = group index; value = fit status
+    std::map<size_t, std::string> mPeakGroupFitStatusMap;
+
+    /// Peak Radius
     int mPeakRadius;
+
+    /// Fit Chi^2
+    double mLeBaiLFitChi2;
 
   };
 

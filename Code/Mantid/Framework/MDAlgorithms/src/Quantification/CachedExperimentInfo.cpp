@@ -5,6 +5,8 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 
 namespace Mantid
 {
@@ -105,20 +107,20 @@ namespace Mantid
     /**
      * Returns a V3D for a randomly sampled point within the detector volume
      * @param randInBeamDir :: A flat random number
+     * @param randInPerpDir :: A flat random number
      * @param randInUpDir :: A flat random number
-     * @param randInHorizontalDir :: A flat random number
      * @return A random point of detector in the detector volume. The returned vector is oriented with the instrument's
      * reference frame
      */
-    const Kernel::V3D CachedExperimentInfo::sampleOverDetectorVolume(const double randInBeamDir, const double randInUpDir, const double randInHorizontalDir) const
+    const Kernel::V3D CachedExperimentInfo::sampleOverDetectorVolume(const double randInBeamDir, const double randInPerpDir, const double randInUpDir) const
     {
       const Kernel::V3D & minPoint = m_detBox.minPoint();
       const Kernel::V3D & maxPoint = m_detBox.maxPoint();
 
       Kernel::V3D detectionPoint;
-      detectionPoint[m_beam] = (randInBeamDir - 0.5)*(maxPoint[m_beam] - minPoint[m_beam]);
-      detectionPoint[m_up] = (randInUpDir - 0.5)*(maxPoint[m_up] - minPoint[m_up]);
-      detectionPoint[m_horiz] = (randInHorizontalDir - 0.5)*(maxPoint[m_horiz] - minPoint[m_horiz]);
+      detectionPoint[0] = (randInBeamDir - 0.5)*(maxPoint[2] - minPoint[2]);
+      detectionPoint[1] = (randInPerpDir - 0.5)*(maxPoint[0] - minPoint[0]);
+      detectionPoint[2] = (randInUpDir - 0.5)*(maxPoint[1] - minPoint[1]);
 
       return detectionPoint;
     }
@@ -151,7 +153,8 @@ namespace Mantid
     void CachedExperimentInfo::initCaches(const Geometry::Instrument_const_sptr & instrument, const detid_t detID)
     {
       // Throws if detector does not exist
-      IDetector_const_sptr det = instrument->getDetector(detID);
+      // Takes into account possible detector mapping
+      IDetector_const_sptr det = m_exptInfo.getDetectorByID(detID);
 
       // Instrument distances
       boost::shared_ptr<const ReferenceFrame> refFrame = instrument->getReferenceFrame();
@@ -194,7 +197,7 @@ namespace Mantid
       m_sampleWidths = shape.getBoundingBox().width();
 
       // Detector volume
-      const Geometry::Object_const_sptr detShape = det->shape();
+      const Geometry::Object_const_sptr detShape = instrument->getDetector(detID)->shape();
       if(!detShape)
       {
         throw std::invalid_argument("CachedExperimentInfo::initCaches - Detector has no bounding box, cannot sample from it. ID:"
@@ -210,13 +213,10 @@ namespace Mantid
       m_gonimeter->makeUniversalGoniometer();
       m_gonimeter->setRotationAngle("phi", thetaInDegs);
       m_gonimeter->setRotationAngle("chi", phiInDegs);
-      m_sampleToDetMatrix = m_gonimeter->getR() * m_exptInfo.sample().getOrientedLattice().getU();
+      m_sampleToDetMatrix = m_gonimeter->getR()*m_exptInfo.sample().getOrientedLattice().getU();
 
       // EFixed
       m_efixed = m_exptInfo.getEFixed(det);
-
-
     }
-
   }
 }

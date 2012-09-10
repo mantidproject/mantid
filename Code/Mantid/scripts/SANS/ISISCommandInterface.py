@@ -338,39 +338,70 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
 
     rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift
-    shift = rAnds.shift
-    scale = rAnds.scale
-
+    # check if fit is required.
+    fitRequired = False 
+    if rAnds.fitScale or rAnds.fitShift:
+        fitRequired = True
+            
     retWSname = ''
     if combineDet == None:
         retWSname = _WavRangeReduction(name_suffix)   
         if ReductionSingleton().instrument.cur_detector().isAlias('FRONT'):
+            if fitRequired:
+                # first then generate rear reduced data
+                ReductionSingleton.replace(ReductionSingleton().settings())
+                ReductionSingleton().instrument.setDetector('rear')
+                retWSname_rear = _WavRangeReduction(name_suffix)               
+                ReductionSingleton().instrument.setDetector('front')
+                # then ready to fit rescale and shift for front data                  
+                scale, shift = _fitRescaleAndShift(rAnds, retWSname, retWSname_rear)
+                ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift
+                ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale                 
+            rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift             
+            shift = rAnds.shift
+            scale = rAnds.scale            
             frontWS = mtd[retWSname]
             frontWS = (frontWS+shift)*scale
             RenameWorkspace(frontWS, retWSname)                                
-    else:
+    else:       
         toParse = combineDet.lower()
         toRestoreAfterAnalysis = ReductionSingleton().instrument.cur_detector().name()
 
         if name_suffix == None:
             name_suffix =''
         
+        toRestoreOutputParts = ReductionSingleton().to_Q.outputParts     
+           
         if toParse.count('merged') == 1:
+            # if 'merged' set ensure that when cross section is calculated that the parts
+            # are also outputted            
             ReductionSingleton().to_Q.outputParts = True            
         
-        if toParse.count('rear') == 1 or toParse.count('merged') == 1 or toParse.count('both') == 1:
+        #retWSname_rear = None
+        if toParse.count('rear') == 1 or toParse.count('merged') == 1 \
+          or toParse.count('both') == 1 or fitRequired:
             ReductionSingleton().instrument.setDetector('rear')
             retWSname_rear = _WavRangeReduction(name_suffix)
             
+        #retWSname_front = None
         if toParse.count('front') == 1 or toParse.count('merged') == 1 or toParse.count('both') == 1:
             ReductionSingleton.replace(ReductionSingleton().settings())
             ReductionSingleton().instrument.setDetector('front')
             retWSname_front = _WavRangeReduction(name_suffix)            
+            
+        if fitRequired:
+            scale, shift = _fitRescaleAndShift(rAnds, retWSname_front, retWSname_rear)
+            ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift
+            ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale                 
         
         ReductionSingleton().instrument.setDetector(toRestoreAfterAnalysis)
-                    
+          
+        shift = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift
+        scale = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale
+                            
         if toParse.count('merged') == 1:
-            ReductionSingleton().to_Q.outputParts = False
+            # finished calculating cross section so can restore this value
+            ReductionSingleton().to_Q.outputParts = toRestoreOutputParts
         
             retWSname_merged = retWSname_rear
             if retWSname_merged.count('rear') == 1:
@@ -414,12 +445,69 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         if toParse.count('front') == 1 or toParse.count('merged') == 1 or toParse.count('both') == 1:
             frontWS = mtd[retWSname_front]
             frontWS = (frontWS+shift)*scale
-            RenameWorkspace(frontWS, retWSname_front)        
-        
+            RenameWorkspace(frontWS, retWSname_front)    
+             
     if resetSetup:
         _refresh_singleton()        
         
     return retWSname
+
+def _fitRescaleAndShift(rAnds, frontData, rearData):
+    """
+        Fit rear data to FRONTnew(Q) = ( FRONT(Q) + SHIFT )xRESCALE,
+        FRONT(Q) is the frontData argument. Returns scale and shift
+
+        @param rAnds: A DetectorBank -> _RescaleAndShift structure        
+        @param frontData: Reduced front data
+        @param rearData: Reduced rear data
+    """ 
+    if rAnds.fitScale==False and rAnds.fitShift==False:
+        return rAnds.scale, rAnds.shift
+    
+    if rAnds.fitScale==False:
+        if rAnds.qRangeUserSelected:
+            Fit(InputWorkspace=rearData, 
+                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
+                Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)          
+        else:
+            Fit(InputWorkspace=rearData, 
+                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
+                Output="__fitRescaleAndShift")   
+    elif rAnds.fitShift==False:
+        if rAnds.qRangeUserSelected:        
+            Fit(InputWorkspace=rearData, 
+                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
+                Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)               
+        else:           
+            Fit(InputWorkspace=rearData, 
+                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
+                Output="__fitRescaleAndShift")   
+    else:
+        if rAnds.qRangeUserSelected:          
+            Fit(InputWorkspace=rearData, 
+                Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                +";name=FlatBackground",
+                Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
+        else:
+            Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, workspace="'+str(frontData)+'"'
+                +";name=FlatBackground",Output="__fitRescaleAndShift")
+                        
+    param = mtd['__fitRescaleAndShift_Parameters']
+    
+    row1 = param.row(0).items()
+    row2 = param.row(1).items()
+    scale = row1[1][1]
+    scaleTimesShift = row2[1][1]
+    
+    delete_workspaces('__fitRescaleAndShift_Parameters') 
+    delete_workspaces('__fitRescaleAndShift_NormalisedCovarianceMatrix') 
+    delete_workspaces('__fitRescaleAndShift_Workspace')     
+            
+    return scale, scaleTimesShift / scale
 
 def _WavRangeReduction(name_suffix=None):
     """
@@ -474,13 +562,14 @@ def delete_workspaces(workspaces):
                 #we're only deleting to save memory, if the workspace really won't delete leave it
                 pass
     
-def CompWavRanges(wavelens, plot=True, combineDet=None):
+def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
     """
         Compares the momentum transfer results calculated from different wavelength ranges. Given
         the list of wave ranges [a, b, c] it reduces for wavelengths a-b, b-c and a-c.
         @param wavelens: the list of wavelength ranges
         @param plot: set this to true to plot the result (must be run in Mantid), default is true
         @param combineDet: see description in WavRangeReduction
+        @param resetSetup: if true reset setup at the end        
     """ 
 
     _printMessage('CompWavRanges( %s,plot=%s)'%(str(wavelens),plot))
@@ -495,11 +584,12 @@ def CompWavRanges(wavelens, plot=True, combineDet=None):
         if type(wavelens) != type((1,)):
             raise RuntimeError('Error CompWavRanges() requires a list of wavelengths between which reductions will be performed.')
     
-    try:
-        calculated = [WavRangeReduction(wav_start=wavelens[0], wav_end=wavelens[len(wavelens)-1], combineDet=combineDet,resetSetup=False)]
-        for i in range(0, len(wavelens)-1):
-            calculated.append(WavRangeReduction(wav_start=wavelens[i], wav_end=wavelens[i+1], combineDet=combineDet, resetSetup=False))
-    finally:
+
+    calculated = [WavRangeReduction(wav_start=wavelens[0], wav_end=wavelens[len(wavelens)-1], combineDet=combineDet,resetSetup=False)]
+    for i in range(0, len(wavelens)-1):
+        calculated.append(WavRangeReduction(wav_start=wavelens[i], wav_end=wavelens[i+1], combineDet=combineDet, resetSetup=False))
+
+    if resetSetup:
         _refresh_singleton()
 
     if plot:

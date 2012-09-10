@@ -8,6 +8,8 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include <string>
+#include <iostream>
+#include <sstream>
 #include <typeinfo>
 #include <vector>
 #include <Poco/SAX/Attributes.h>
@@ -100,6 +102,9 @@ namespace Mantid
 
       //! Get the IComponent name
       std::string getName() const;
+
+      //! Get the full pathname
+      std::string getFullName() const;
 
       //! Set the IComponent position, x, y, z respective to parent (if present) otherwise absolute
       void setPos(double, double, double);

@@ -17,12 +17,14 @@ namespace MDAlgorithms
 */
 Kernel::Unit_sptr    
 ConvertToMDEventsWSBase::getAxisUnits()const{
-    if(!this->inWS2D.get()){
+    if(!this->inWS2D)
+    {
         convert_log.error()<<"getAxisUnits: invoked when input workspace is undefined\n";
         throw(std::logic_error(" should not be able to call this function when workpsace is undefined"));
     }
     API::NumericAxis *pAxis = dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(0));
-    if(!pAxis){
+    if(!pAxis)
+    {
         convert_log.error()<<"getAxisUnits: can not obtained when first workspace axis is undefined or not numeric\n";
         throw(std::logic_error(" should not be able to call this function when X-axis is wrong"));
     }
@@ -49,9 +51,11 @@ bool ConvertToMDEventsWSBase::fillAddProperties(std::vector<coord_t> &Coord,size
        std::vector<std::string> dimNames = TWS.getDimNames();
        Kernel::Property *pProperty = (inWS2D->run().getProperty(dimNames[i]));
        Kernel::TimeSeriesProperty<double> *run_property = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProperty);  
-       if(run_property){
+       if(run_property)
+       {
                 Coord[i]=coord_t(run_property->firstValue());
-       }else{
+       }else
+       {
               // e.g Ei can be a property and dimenson
               Kernel::PropertyWithValue<double> *proc_property = dynamic_cast<Kernel::PropertyWithValue<double> *>(pProperty);  
               if(!proc_property){

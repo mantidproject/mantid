@@ -77,9 +77,9 @@ public:
     const double qx(-1.7), qy(0.0), qz(1.05), deltaE(300);
     const double qOmega[4] = {qx, qy, qz, deltaE};
     Mantid::API::ExperimentInfo experimentDescr;
-    auto lattice = new Mantid::Geometry::OrientedLattice(5.57,5.51,12.298);
-    Mantid::Kernel::V3D uVec(9.700000e-03,9.800000e-03,9.996000e-01),
-        vVec(9.992000e-01,-3.460000e-02,-4.580000e-02);
+    auto lattice = new Mantid::Geometry::OrientedLattice(5.51,12.298,5.57);
+    Mantid::Kernel::V3D uVec(9.800000e-03,9.996000e-01,9.700000e-03),
+      vVec(-3.460000e-02,-4.580000e-02,9.992000e-01);
     lattice->setUFromVectors(uVec, vVec);
 
     experimentDescr.mutableSample().setOrientedLattice(lattice);
@@ -88,7 +88,8 @@ public:
     double weight(-1.0);
     const ForegroundModel & sr122Function = sr122; // scatteringIntensity is private concrete model
     TS_ASSERT_THROWS_NOTHING( weight = sr122Function.scatteringIntensity(experimentDescr, std::vector<double>(qOmega, qOmega + 4)) );
-    TS_ASSERT_DELTA(0.24589087, weight, 1e-8);
+    std::cerr << std::setiosflags(std::ios_base::fixed) << std::setprecision(8) << weight << "\n";
+    TS_ASSERT_DELTA(0.21372221, weight, 1e-8);
   }
 
 };

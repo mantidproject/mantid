@@ -57,7 +57,7 @@ namespace MDAlgorithms
     void checkBothWorkspaces(boost::shared_ptr<const API::IMDHistoWorkspace> rhsWorkspace, boost::shared_ptr<const API::IMDHistoWorkspace> lhsWorkspace) const;
     boost::shared_ptr<MDEvents::MDHistoWorkspace> trimOutIntegratedDimension(boost::shared_ptr<API::IMDHistoWorkspace> ws);
     double integrateOver(boost::shared_ptr<API::IMDHistoWorkspace> ws, const double& startOverlap, const double& endOverlap);
-
+    boost::shared_ptr<MDEvents::MDHistoWorkspace> create1DHistoWorkspace(const MantidVec& signals,const MantidVec& errors, const MantidVec& extents, const std::vector<int>& vecNBins, const std::vector<std::string> names, const std::vector<std::string>& units);
     void overlayOverlap(boost::shared_ptr<MDEvents::MDHistoWorkspace> sum, boost::shared_ptr<API::IMDHistoWorkspace> overlap);
     boost::shared_ptr<MDEvents::MDHistoWorkspace> extractOverlapAsWorkspace(boost::shared_ptr<API::IMDHistoWorkspace> scaledWorkspace1, const double& startOverlap, const double& endOverlap);
 

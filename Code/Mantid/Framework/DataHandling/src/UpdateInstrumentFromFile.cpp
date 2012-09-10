@@ -76,10 +76,8 @@ namespace Mantid
     {
       // Retrieve the filename from the properties
       const std::string filename = getPropertyValue("Filename");
-      MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
-      // Have to resort to a cast here. Really I think this algorithm should be changing the parameter map.
-      Instrument_sptr instrument = boost::const_pointer_cast<Instrument>(localWorkspace->getInstrument()->baseInstrument());
-      if (instrument.get() == 0)
+      m_workspace = getProperty("Workspace");
+      if(!m_workspace->getInstrument())
       {
         throw std::runtime_error("Input workspace has no defined instrument");
       }
@@ -88,22 +86,21 @@ namespace Mantid
       boost::scoped_ptr<LoadRawHelper> rawCheck(new LoadRawHelper()); 
       if( rawCheck->fileCheck(filename) > 0 )
       {
-        updateFromRaw(instrument, filename);
+        updateFromRaw(filename);
       }
       // Assume it is a NeXus file for now 
       // @todo: When Nexus is merged use the file checker also
       else
       {
-        updateFromNeXus(instrument, filename);
+        updateFromNeXus(filename);
       }
     }
 
     /**
     * Update the detector information from a raw file
-    * @param instrument :: A shared pointer to the base instrument, it will throw if a parametrized one is given
     * @param filename :: The input filename
     */
-    void UpdateInstrumentFromFile::updateFromRaw(boost::shared_ptr<Geometry::Instrument> instrument, const std::string & filename)
+    void UpdateInstrumentFromFile::updateFromRaw(const std::string & filename)
     {
       ISISRAW2 iraw;
       if (iraw.readFromFile(filename.c_str(),false) != 0)
@@ -128,15 +125,14 @@ namespace Mantid
         phi = std::vector<float>(numDetector, 0.0);
       }
       g_log.information() << "Setting detector postions from RAW file.\n";
-      setDetectorPositions(instrument,detID, l2, theta, phi);
+      setDetectorPositions(detID, l2, theta, phi);
     }
 
     /**
     * Update the detector information from a NeXus file
-    * @param instrument :: A shared pointer to the base instrument
     * @param filename :: The input filename
     */
-    void UpdateInstrumentFromFile::updateFromNeXus(boost::shared_ptr<Geometry::Instrument> instrument, const std::string & filename)
+    void UpdateInstrumentFromFile::updateFromNeXus(const std::string & filename)
     {
       try
       {
@@ -180,31 +176,31 @@ namespace Mantid
       nxFile.closeData();
 
       g_log.information() << "Setting detector postions from NeXus file.\n";
-      setDetectorPositions(instrument,detID, l2, theta, phi);
+      setDetectorPositions(detID, l2, theta, phi);
     }
 
     /**
      * Set the detector positions given the r,theta and phi.
-     * @param instrument :: A shared pointer to the base instrument
      * @param detID :: A vector of detector IDs
      * @param l2 :: A vector of l2 distances
      * @param theta :: A vector of theta distances
      * @param phi :: A vector of phi values
      */
-    void UpdateInstrumentFromFile::setDetectorPositions(boost::shared_ptr<Geometry::Instrument> instrument,
-      const std::vector<int32_t> & detID, const std::vector<float> & l2, 
-      const std::vector<float> & theta, const std::vector<float> & phi)
+    void UpdateInstrumentFromFile::setDetectorPositions(const std::vector<int32_t> & detID, const std::vector<float> & l2,
+                                                        const std::vector<float> & theta, const std::vector<float> & phi)
       {
         const bool ignorePhi = getProperty("IgnorePhi");
         const bool moveMonitors = getProperty("MoveMonitors");
         const bool ignoreMonitors(!moveMonitors);
         const int numDetector = static_cast<int>(detID.size());
+        Geometry::ParameterMap & pmap = m_workspace->instrumentParameters();
+        Geometry::Instrument_const_sptr instrument = m_workspace->getInstrument();
         g_log.information() << "Setting new positions for " << numDetector << " detectors\n";
         for (int i = 0; i < numDetector; ++i)
         {
           try
           {
-            Geometry::IDetector_sptr det = boost::const_pointer_cast<Geometry::IDetector>(instrument->getDetector(detID[i]));
+            Geometry::IDetector_const_sptr det = instrument->getDetector(detID[i]);
             if( ignoreMonitors && det->isMonitor() ) continue;
             V3D parentPos;
             if( det->getParent() ) parentPos = det->getParent()->getPos();
@@ -224,7 +220,7 @@ namespace Mantid
             Kernel::Quat q = det->getParent()->getRotation();
             q.inverse();
             q.rotate(r);
-            det->setPos(r);
+            pmap.addV3D(det.get(), "pos", r);
           }
           catch (Kernel::Exception::NotFoundError&)
           {

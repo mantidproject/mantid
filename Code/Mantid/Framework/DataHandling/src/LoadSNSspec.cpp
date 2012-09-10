@@ -114,125 +114,127 @@ namespace Mantid
     */
     void LoadSNSspec::exec()
     {
-	  std::string filename = getProperty("Filename");
-	  std::ifstream file(filename.c_str());
+      std::string filename = getProperty("Filename");
+      std::ifstream file(filename.c_str());
 
-	  file.seekg (0, std::ios::end);
-	  Progress progress(this,0,1,static_cast<int>(file.tellg()));
-	  file.seekg (0, std::ios::beg);
+      file.seekg (0, std::ios::end);
+      Progress progress(this,0,1,static_cast<int>(file.tellg()));
+      file.seekg (0, std::ios::beg);
 
-	  std::string str;
+      std::string str;
 
-	  std::vector<DataObjects::Histogram1D> spectra;
-	  //size_t iLine=0;    // line number
-	  int nSpectra = 0;
-	  int nBins = 0; //number of rows
+      std::vector<DataObjects::Histogram1D> spectra;
+      //size_t iLine=0;    // line number
+      int nSpectra = 0;
+      int nBins = 0; //number of rows
 
-	  //bool numeric = true;
-	  std::vector<double> input;
+      //bool numeric = true;
+      std::vector<double> input;
 
-	  //determine the number of lines starting by #L
-	  //as there is one per set of data
-	  int spectra_nbr = 0;
-	  while(getline(file,str))
-    {
-      if (str.empty() ) continue;
-      if (str[0] == '#' && str[1] == 'L')
-      {
-        spectra_nbr++;
-      }
-    }
-
-	  spectra.resize(spectra_nbr);
-	  file.clear(); //end of file has been reached so we need to clear file state
-	  file.seekg (0, std::ios::beg); //go back to beginning of file
-
-	  int working_with_spectrum_nbr = -1; //spectrum number
-	  while(getline(file,str))
-	  {
-	    progress.report(static_cast<int>(file.tellg()));
-
-	    //line with data, need to be parsed by white spaces
-      if (!str.empty() && str[0] != '#')
-      {
-        typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
-        boost::char_separator<char> sep(" ");
-        tokenizer tok(str, sep);
-        for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
+      //determine the number of lines starting by #L
+      //as there is one per set of data
+      int spectra_nbr = 0;
+      while(getline(file,str))
         {
-          std::stringstream ss;
-          ss << *beg;
-          double d;
-          ss >> d;
-          input.push_back(d);
+          if (str.empty() ) continue;
+          if (str[0] == '#' && str[1] == 'L')
+            {
+              spectra_nbr++;
+            }
         }
-      }
 
-	    if (str.empty())
-	    {
-		  if (working_with_spectrum_nbr != -1)
-		  {
-		    for(int j=0; j<static_cast<int>(input.size()-1); j++)
-		    {
-		      spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
-			  j++;
-			  spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
-			  j++;
-			  spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
-			  nBins = j/3;
-		    }
-		  }
-		  working_with_spectrum_nbr++;
-		  input.clear();
-	    }
+      spectra.resize(spectra_nbr);
+      file.clear(); //end of file has been reached so we need to clear file state
+      file.seekg (0, std::ios::beg); //go back to beginning of file
 
-	  } //end of read file
-
-	  try
-	  {
-	    if (spectra_nbr == 0)
-	      throw "Undefined number of spectra";
-
-      if (working_with_spectrum_nbr == (spectra_nbr-1))
-      {
-        for(int j=0; j<static_cast<int>(input.size()-1); j++)
+      int working_with_spectrum_nbr = -1; //spectrum number
+      while(getline(file,str))
         {
-          spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
-          j++;
-          spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
-          j++;
-          spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
-          nBins = j/3;
-        }
+          progress.report(static_cast<int>(file.tellg()));
+
+          //line with data, need to be parsed by white spaces
+          if (!str.empty() && str[0] != '#')
+            {
+              typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
+              boost::char_separator<char> sep(" ");
+              tokenizer tok(str, sep);
+              for (tokenizer::iterator beg=tok.begin(); beg!=tok.end(); ++beg)
+                {
+                  std::stringstream ss;
+                  ss << *beg;
+                  double d;
+                  ss >> d;
+                  input.push_back(d);
+                }
+            }
+
+          if (str.empty())
+            {
+              if (working_with_spectrum_nbr != -1)
+                {
+                  for(int j=0; j<static_cast<int>(input.size()-1); j++)
+                    {
+                      spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
+                      j++;
+                      spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
+                      j++;
+                      spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
+                      nBins = j/3;
+                    }
+                  spectra[working_with_spectrum_nbr].dataX().push_back(input[input.size()-1]);
+                }
+              working_with_spectrum_nbr++;
+              input.clear();
+            }
+
+        } //end of read file
+
+      try
+      {
+          if (spectra_nbr == 0)
+            throw "Undefined number of spectra";
+
+          if (working_with_spectrum_nbr == (spectra_nbr-1))
+            {
+              for(int j=0; j<static_cast<int>(input.size()-1); j++)
+                {
+                  spectra[working_with_spectrum_nbr].dataX().push_back(input[j]);
+                  j++;
+                  spectra[working_with_spectrum_nbr].dataY().push_back(input[j]);
+                  j++;
+                  spectra[working_with_spectrum_nbr].dataE().push_back(input[j]);
+                  nBins = j/3;
+                }
+              spectra[working_with_spectrum_nbr].dataX().push_back(input[input.size()-1]);
+            }
       }
-    }
-    catch (...)
-    {
-    }
+      catch (...)
+      {
+      }
 
-    try
-    {
-      nSpectra = spectra_nbr;
-	    MatrixWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>
-	    (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins,nBins));
+      try
+      {
+          nSpectra = spectra_nbr;
+          MatrixWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>
+          (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins+1,nBins));
 
-	    localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
+          localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
 
-	    for(int i=0;i<nSpectra;i++)
-	    {
-		  localWorkspace->dataX(i) = spectra[i].dataX();
-		  localWorkspace->dataY(i) = spectra[i].dataY();
-		  localWorkspace->dataE(i) = spectra[i].dataE();
-		  // Just have spectrum number start at 1 and count up
-		  localWorkspace->getAxis(1)->spectraNo(i) = i+1;
-	    }
+          for(int i=0;i<nSpectra;i++)
+            {
+              localWorkspace->dataX(i) = spectra[i].dataX();
+              localWorkspace->dataY(i) = spectra[i].dataY();
+              localWorkspace->dataE(i) = spectra[i].dataE();
+              // Just have spectrum number start at 1 and count up
+              localWorkspace->getAxis(1)->spectraNo(i) = i+1;
+            }
 
-	    setProperty("OutputWorkspace",localWorkspace);
-	  }
-	  catch (Exception::NotFoundError &)
-	  {
-	    // Asked for dimensionless workspace (obviously not in unit factory)
-	  }
+          setProperty("OutputWorkspace",localWorkspace);
+      }
+      catch (Exception::NotFoundError &)
+      {
+          // Asked for dimensionless workspace (obviously not in unit factory)
+      }
 
     }
     /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
@@ -243,16 +245,16 @@ namespace Mantid
  */
     bool LoadSNSspec::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
     {
-       std::string extn=extension(filePath);
+      std::string extn=extension(filePath);
       bool bascii(false);
       (!extn.compare("txt"))?bascii=true:bascii=false;
 
       bool is_ascii (true);
       for(size_t i=0; i<nread; i++)
-      {
-        if (!isascii(header.full_hdr[i]))
-          is_ascii =false;
-      }
+        {
+          if (!isascii(header.full_hdr[i]))
+            is_ascii =false;
+        }
       return(is_ascii|| bascii?true:false);
     }
 

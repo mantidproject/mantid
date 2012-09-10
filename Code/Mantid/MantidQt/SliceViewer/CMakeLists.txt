@@ -1,9 +1,13 @@
 set ( SRC_FILES
 	src/ColorBarWidget.cpp
+        src/ConcretePeaksPresenter.cpp
 	src/CustomTools.cpp
 	src/DimensionSliceWidget.cpp
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
+	src/PeakOverlay.cpp
+	src/PeakOverlayFactory.cpp
+	src/PeakOverlayFactoryBase.cpp
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
@@ -16,11 +20,20 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	inc/MantidQtSliceViewer/ColorBarWidget.h
+	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
+	inc/MantidQtSliceViewer/FirstExperimentInfoQuery.h
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
+	inc/MantidQtSliceViewer/NullPeaksPresenter.h
+	inc/MantidQtSliceViewer/PeakOverlay.h
+	inc/MantidQtSliceViewer/PeakOverlayView.h
+	inc/MantidQtSliceViewer/PeakOverlayViewFactory.h
+	inc/MantidQtSliceViewer/PeakOverlayFactory.h
+	inc/MantidQtSliceViewer/PeakOverlayFactoryBase.h
+	inc/MantidQtSliceViewer/PeaksPresenter.h
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
@@ -35,6 +48,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
+	inc/MantidQtSliceViewer/PeakOverlay.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
@@ -53,17 +67,18 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/XYLimitsDialog.ui
 )
 
+set ( TEST_FILES
+    test/ConcretePeaksPresenterTest.h
+    test/PeakOverlayFactoryBaseTest.h
+)
+
 # Python unit tests
 set ( TEST_PY_FILES 
 	test/SliceViewerPythonInterfaceTest.py
 	test/QwtTypesPythonInterfaceTest.py
 )
 
-
 include_directories ( inc )
-include_directories ( ../../QtPropertyBrowser/src )
-include_directories ( ../MantidWidgets/inc )
-
 
 ###########################################################################
 # Main Library Target
@@ -87,67 +102,39 @@ add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
 add_library ( MantidQtSliceViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtSliceViewer MantidQtAPI MantidWidgets QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
-
-###########################################################################
-# DEMO/GUI TESTING APPLICATIONS
-###########################################################################
-
-if ( WIN32 )
-# Does not work on windows for some reason
-else ()
-
-add_executable ( ColorBarWidgetDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/main_ColorBarWidgetDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
-target_link_libraries ( ColorBarWidgetDemo MantidQtAPI QtPropertyBrowser ${QT_LIBRARIES} ${QWT_LIBRARIES} )
-
-
-include_directories ( ../../Framework/MDEvents/inc )
-include_directories ( ../../Framework/DataObjects/inc )
-include_directories ( ../../Framework/Algorithms/inc )
-include_directories ( ../../Framework/API/inc )
-include_directories ( ../../Framework/DataHandling/inc )
-include_directories ( ../../Framework/TestHelpers/inc )
-include_directories ( ../../Framework/Geometry/inc )
-
-# Extra, optional targets for demoing GUI elements
-add_executable ( SliceViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_SliceViewerDemo.cpp  
-                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-target_link_libraries ( SliceViewerDemo 
-                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
-                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
-
-add_executable ( SliceViewerWindowDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_SliceViewerWindowDemo.cpp  
-                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-target_link_libraries ( SliceViewerWindowDemo 
-                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
-                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
-
-add_executable ( LineViewerDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main_LineViewerDemo.cpp  
-                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-target_link_libraries ( LineViewerDemo 
-                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  MantidQtSliceViewer  MDEvents Geometry
-                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
-                       
-endif ()
+target_link_libraries ( MantidQtSliceViewer MantidQtAPI MantidWidgets ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # Unit tests setup
 ###########################################################################
 
-# Check system version
-if ( ${CMAKE_SYSTEM} MATCHES ".*\\.el5" )
-  	# This is RHEL5. GUI tests hang on this platform for some reason
-  	message ( "RHEL5 hangs on GUI tests. Disabling MantidQt SliceViewer python tests." )
-else ()
+if ( PYUNITTEST_FOUND )
+	pyunittest_add_test ( SliceViewerMantidPlotTest.py ${TEST_PY_FILES} "" )
+	add_dependencies ( SliceViewerMantidPlotTest.py MantidQtAPI MantidWidgets CustomDialogs 
+	                   CustomInterfaces MantidQtSliceViewer Algorithms )
+	add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
+	# Add to the 'UnitTests' group in VS
+	set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )
+endif ()
 
-	if ( PYUNITTEST_FOUND )
-	  pyunittest_add_test ( SliceViewerMantidPlotTest.py ${TEST_PY_FILES} "" )
-	  add_dependencies ( SliceViewerMantidPlotTest.py MantidQtAPI MantidWidgets CustomDialogs 
-	                     CustomInterfaces MantidQtSliceViewer Algorithms )
-	  add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
-	  # Add to the 'UnitTests' group in VS
-	  set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )
-	endif ()
+if ( CXXTEST_FOUND )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+
+  include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc )
+
+  set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp 
+  ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp   
+  )
+
+  if ( GMOCK_FOUND AND GTEST_FOUND )
+    cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
+    target_link_libraries( SliceViewerTest MantidQtSliceViewer DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+
+    add_dependencies( GUITests SliceViewerTest )
+    # Add to the 'UnitTests' group in VS
+    set_property( TARGET SliceViewerTest PROPERTY FOLDER "UnitTests" )
+  endif ()
+
 endif ()
 
 ###########################################################################

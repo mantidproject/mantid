@@ -544,14 +544,11 @@ public:
       }
     }
     // We are loading part - work out the event number range
-    if (alg->chunk != EMPTY_INT() && alg->chunk <= alg->totalChunksE *(alg->totalChunks/alg->totalChunksE))
+    if (alg->chunk != EMPTY_INT())
     {
-      int chunkE = (alg->chunk - 1) % alg->totalChunksE + 1;
-      size_t max_events = stop_event - start_event;
-      size_t chunk_events = max_events/alg->totalChunksE;
-      start_event += (chunkE - 1) * chunk_events;
+      start_event = (alg->chunk - alg->firstChunkForBank) * alg->eventsPerChunk;
       // Don't change stop_event for the final chunk
-      if ( chunkE != alg->totalChunksE ) stop_event = start_event + chunk_events;
+      if ( start_event + alg->eventsPerChunk < stop_event ) stop_event = start_event + alg->eventsPerChunk;
     }
 
     // Make sure it is within range
@@ -602,7 +599,9 @@ public:
   void loadTof(::NeXus::File & file)
   {
     // Allocate the array
-    m_event_time_of_flight = new float[m_loadSize[0]];
+    float* temp = new float[m_loadSize[0]];
+    delete [] m_event_time_of_flight;
+    m_event_time_of_flight = temp;
 
     // Get the list of event_time_of_flight's
     if (!m_oldNexusFileNames)
@@ -1255,6 +1254,49 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     g_log.error() << "Error loading metadata: " << e.what() << std::endl;
   }
 
+  // --------------------------- Time filtering ------------------------------------
+  double filter_time_start_sec, filter_time_stop_sec;
+  filter_time_start_sec = getProperty("FilterByTimeStart");
+  filter_time_stop_sec = getProperty("FilterByTimeStop");
+  chunk = getProperty("ChunkNumber");
+  totalChunks = getProperty("TotalChunks");
+
+  //Default to ALL pulse times
+  bool is_time_filtered = false;
+  filter_time_start = Kernel::DateAndTime::minimum();
+  filter_time_stop = Kernel::DateAndTime::maximum();
+
+  if (m_allBanksPulseTimes->numPulses > 0)
+  {
+    //If not specified, use the limits of doubles. Otherwise, convert from seconds to absolute PulseTime
+    if (filter_time_start_sec != EMPTY_DBL())
+    {
+      filter_time_start = run_start + filter_time_start_sec;
+      is_time_filtered = true;
+    }
+
+    if (filter_time_stop_sec != EMPTY_DBL())
+    {
+      filter_time_stop = run_start + filter_time_stop_sec;
+      is_time_filtered = true;
+    }
+
+    //Silly values?
+    if (filter_time_stop < filter_time_start)
+    {
+      std::string msg = "Your ";
+      if(monitors) msg += "monitor ";
+      msg += "filter for time's Stop value is smaller than the Start value.";
+      throw std::invalid_argument(msg);
+    }
+  }
+
+  if (is_time_filtered)
+  {
+    //Now filter out the run, using the DateAndTime type.
+    WS->mutableRun().filterByTime(filter_time_start, filter_time_stop);
+  }
+
   if(metaDataOnly) {
     //Now, create a default X-vector for histogramming, with just 2 bins.
     Kernel::cow_ptr<MantidVec> axis;
@@ -1317,44 +1359,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   for (size_t i=0; i < WS->getNumberHistograms(); i++)
     WS->getEventList(i).setSortOrder(DataObjects::PULSETIME_SORT);
 
-
-  // --------------------------- Time filtering ------------------------------------
-  double filter_time_start_sec, filter_time_stop_sec;
-  filter_time_start_sec = getProperty("FilterByTimeStart");
-  filter_time_stop_sec = getProperty("FilterByTimeStop");
-  chunk = getProperty("ChunkNumber");
-  totalChunks = getProperty("TotalChunks");
-
-  //Default to ALL pulse times
-  bool is_time_filtered = false;
-  filter_time_start = Kernel::DateAndTime::minimum();
-  filter_time_stop = Kernel::DateAndTime::maximum();
-
-  if (m_allBanksPulseTimes->numPulses > 0)
-  {
-    //If not specified, use the limits of doubles. Otherwise, convert from seconds to absolute PulseTime
-    if (filter_time_start_sec != EMPTY_DBL())
-    {
-      filter_time_start = run_start + filter_time_start_sec;
-      is_time_filtered = true;
-    }
-
-    if (filter_time_stop_sec != EMPTY_DBL())
-    {
-      filter_time_stop = run_start + filter_time_stop_sec;
-      is_time_filtered = true;
-    }
-
-    //Silly values?
-    if (filter_time_stop < filter_time_start)
-    {
-      std::string msg = "Your ";
-      if(monitors) msg += "monitor ";
-      msg += "filter for time's Stop value is smaller than the Start value.";
-      throw std::invalid_argument(msg);
-    }
-  }
-
   //Count the limits to time of flight
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
@@ -1367,50 +1371,57 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   Mutex * diskIOMutex = new Mutex();
   size_t bank0 = 0;
   size_t bankn = bankNames.size();
-  totalChunksE = 1;
+
   if (chunk != EMPTY_INT()) // We are loading part - work out the bank number range
   {
-    int banksNotEmpty = 0;
-    for (size_t i=bank0; i < bankn; i++)
+    eventsPerChunk = total_events / totalChunks;
+    // Sort banks by size
+    size_t tmp;
+    string stmp;
+    for (size_t i = 0; i < bankn; i++)
+       for (size_t j = 0; j < bankn - 1; j++)
+          if (bankNumEvents[j] < bankNumEvents[j + 1])
+          {
+             tmp = bankNumEvents[j];
+             bankNumEvents[j] = bankNumEvents[j + 1];
+             bankNumEvents[j + 1] = tmp;
+             stmp = bankNames[j];
+             bankNames[j] = bankNames[j + 1];
+             bankNames[j + 1] = stmp;
+          }
+    int bigBanks = 0;
+    for (size_t i = 0; i < bankn; i++) if (bankNumEvents[i] > eventsPerChunk)bigBanks++;
+    // Each chunk is part of bank or multiple whole banks
+    // 0.5 for last chunk of a bank with multiple chunks
+    // 0.1 for multiple whole banks not completely filled
+    eventsPerChunk += static_cast<size_t>((static_cast<double>(bigBanks) / static_cast<double>(totalChunks) * 
+                                          0.5 + 0.05) * static_cast<double>(eventsPerChunk));
+    double partialChunk = 0.;
+    firstChunkForBank = 1;
+    for (int chunki = 1; chunki <=chunk; chunki++)
     {
-      if (bankNumEvents[i] > 1) banksNotEmpty++;
-    }
-    if (totalChunks > banksNotEmpty) totalChunksE = totalChunks/banksNotEmpty + 1;
-    int totalChunksB = totalChunks / totalChunksE + totalChunks%totalChunksE;
-    int chunkB = (chunk - 1) / totalChunksE + 1;
-    size_t chunk_events = total_events/totalChunksB;
-    size_t lastChunkEvent = chunk_events;
-    std::vector<size_t>::iterator it = bankNumEvents.begin();
-    size_t sum_events = 0;
-
-    for (int chunki = 1; chunki <=chunkB; chunki++)
-    {
-      size_t chunk_total = 0;
-      if (chunki != 1)
+      if (partialChunk > 1.)
       {
+        partialChunk = 0.;
+        firstChunkForBank = chunki;
         bank0 = bankn;
       }
-      if (chunki != totalChunksB)
+      if (bankNumEvents[bank0] > 1)
       {
-        // Save a bank for every chunk so there are no chunks with no events
-        for (size_t banki = bank0; banki < bankNames.size()-(totalChunksB-chunki)+1; banki++)
-        {
-          bankn = banki;
-          sum_events += *it;
-          if ( sum_events > lastChunkEvent && chunk_total > chunk_events/2 && bankn > bank0)
-          {
-            sum_events -= *it;
-            break;
-          }
-          if( *it > 1)chunk_total += *it;
-          std::advance(it, 1);
-        }
+        partialChunk += static_cast<double>(eventsPerChunk)/static_cast<double>(bankNumEvents[bank0]);
       }
-      else
-      {
-        bankn = bankNames.size();
-      }
-      lastChunkEvent += chunk_events;
+      if (chunki < totalChunks) bankn = bank0 + 1;
+      else bankn = bankNames.size();
+      if (chunki == firstChunkForBank && partialChunk > 1.0) bankn += static_cast<size_t>(partialChunk) - 1;
+      if (bankn > bankNames.size()) bankn = bankNames.size();
+    }
+    for (size_t i=bank0; i < bankn; i++)
+    {
+      size_t start_event = (chunk - firstChunkForBank) * eventsPerChunk;
+      size_t stop_event = bankNumEvents[i];
+      // Don't change stop_event for the final chunk
+      if ( start_event + eventsPerChunk < stop_event ) stop_event = start_event + eventsPerChunk;
+      bankNumEvents[i] = stop_event - start_event;
     }
   }
   for (size_t i=bank0; i < bankn; i++)
@@ -1425,12 +1436,6 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   delete diskIOMutex;
   delete prog2;
 
-
-  if (is_time_filtered)
-  {
-    //Now filter out the run, using the DateAndTime type.
-    WS->mutableRun().filterByTime(filter_time_start, filter_time_stop);
-  }
 
   //Info reporting
   const std::size_t eventsLoaded = WS->getNumberEvents();

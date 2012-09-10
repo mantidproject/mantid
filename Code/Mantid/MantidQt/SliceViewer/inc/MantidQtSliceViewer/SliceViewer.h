@@ -12,6 +12,7 @@
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
+#include "MantidQtSliceViewer/PeakOverlay.h"
 #include "QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <QtCore/QtCore>
@@ -31,6 +32,9 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
+
+// Forward dec
+class PeaksPresenter;
 
 /** GUI for viewing a 2D slice out of a multi-dimensional workspace.
  * You can select which dimension to plot as X,Y, and the cut point
@@ -141,6 +145,8 @@ public slots:
   void rebinParamsChanged();
   void dynamicRebinComplete(bool error);
 
+  // Peaks overlay
+  void peakOverlay_toggled(bool);
 
 private:
   void loadSettings();
@@ -159,6 +165,7 @@ private:
 
 
 private:
+
   // -------------------------- Widgets ----------------------------
 
   /// Auto-generated UI controls.
@@ -184,6 +191,8 @@ private:
 
   /// The LineOverlay widget for drawing the outline of the rebinned workspace
   LineOverlay * m_overlayWSOutline;
+
+  //PeakOverlay * m_peakOverlay;
 
   /// Object for running algorithms in the background
   MantidQt::API::AlgorithmRunner * m_algoRunner;
@@ -240,7 +249,7 @@ private:
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
-    *m_syncRebinMode, *m_syncRebinLock;
+    *m_syncRebinMode, *m_syncRebinLock, *m_syncPeakOverlay;
 
   /// Cached double for infinity
   double m_inf;
@@ -259,6 +268,9 @@ private:
 
   /// If true, the rebinned overlayWS is locked until refreshed.
   bool m_rebinLocked;
+
+  // -------------------------- Controllers ------------------------
+  boost::shared_ptr<PeaksPresenter>  m_peaksPresenter;
 };
 
 } // namespace SliceViewer

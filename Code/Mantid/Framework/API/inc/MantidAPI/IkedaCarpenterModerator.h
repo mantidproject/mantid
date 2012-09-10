@@ -62,9 +62,9 @@ namespace Mantid
       /// Gets the value of the \f$R\f$ parameter.
       double getMixingCoefficient() const;
 
-      /// Returns the mean time for emission in seconds
+      /// Returns the mean time for emission in microseconds
       double emissionTimeMean() const;
-      /// Returns the variance of emission time in seconds
+      /// Returns the variance of emission time in microseconds
       double emissionTimeVariance() const;
       /// Returns a time, in seconds, sampled from the distibution given a flat random number
       double sampleTimeDistribution(const double flatRandomNo) const;

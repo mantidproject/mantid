@@ -120,6 +120,9 @@ namespace Mantid
       /// Returns the number of unique spectra in the map
       std::size_t nSpectra() const;
 
+      /// Create a map between a single ID & a list of ID having the same spectrum number
+      virtual boost::shared_ptr<det2group_map> createIDGroupsMap() const;
+
       /**@name Iterate over the whole map */
       //@{
       /// Begin

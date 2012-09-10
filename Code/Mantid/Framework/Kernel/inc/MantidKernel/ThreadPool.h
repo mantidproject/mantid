@@ -62,8 +62,6 @@ namespace Kernel
     void joinAll();
 
     static size_t getNumPhysicalCores();
-
-
   protected:
     /// Number of cores used
     size_t m_numThreads;
@@ -82,6 +80,12 @@ namespace Kernel
 
     /// Progress reporter
     ProgressBase * m_prog;
+  private:
+    // prohibit default copy constructor as it does not work
+    ThreadPool(const ThreadPool &);
+    // prohibit asighnment as it does not work
+    ThreadPool & operator= (const ThreadPool & other);
+
   };
 
 

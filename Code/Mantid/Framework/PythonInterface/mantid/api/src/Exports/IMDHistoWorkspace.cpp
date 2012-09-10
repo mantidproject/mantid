@@ -58,6 +58,16 @@ namespace
   }
 
   /**
+   * Returns the number of events array from the workspace as a numpy array
+   * @param self :: A reference to the calling object
+   */
+  PyObject *getNumEventsArrayAsNumpyArray(IMDHistoWorkspace &self)
+  {
+    auto dims = countDimensions(self);
+    return WrapReadOnlyNumpy()(self.getNumEventsArray(), static_cast<int>(dims.size()), &dims[0]);
+  }
+
+  /**
    * Checks the size of the given array against the given MDHistoWorkspace to see if they match. Throws if not
    * @param self :: The calling object
    * @param signal :: The new values
@@ -135,6 +145,9 @@ void export_IMDHistoWorkspace()
 
     .def("getErrorSquaredArray", &getErrorSquaredArrayAsNumpyArray,
          "Returns a read-only numpy array containing the square of the error values")
+
+    .def("getNumEventsArray", &getNumEventsArrayAsNumpyArray,
+         "Returns a read-only numpy array containing the number of MD events in each bin")
 
     .def("signalAt", &IMDHistoWorkspace::signalAt, return_value_policy<copy_non_const_reference>(),
          "Return a reference to the signal at the linear index")

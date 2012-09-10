@@ -75,6 +75,7 @@ namespace API
     virtual const MantidVec& readDx() const;
 
     virtual MantidVecPtr ptrX() const;
+    virtual MantidVecPtr ptrDx() const;
 
     virtual void setData(const MantidVec& Y) = 0;
     virtual void setData(const MantidVec& Y, const MantidVec& E) = 0;

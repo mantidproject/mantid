@@ -65,6 +65,8 @@ namespace Mantid
       virtual int addCopy(IComponent*, const std::string&) = 0;
       //! Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
       virtual boost::shared_ptr<IComponent> getChild(const int i) const = 0;
+      /// Returns a pointer to the first component of assembly encountered with the given name
+      virtual boost::shared_ptr<const IComponent> getComponentByName(const std::string & cname, int nlevels = 0) const = 0; 
       //! Get all children
       virtual void getChildren(std::vector<IComponent_const_sptr> & outVector, bool recursive) const = 0;
       //! Overloaded index operator. Get a pointer to the ith component in the assembly

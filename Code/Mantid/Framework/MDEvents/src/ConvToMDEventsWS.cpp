@@ -51,11 +51,13 @@ namespace Mantid
       for (; it != it_end; it++)
       {
         double val=localUnitConv.convertUnits(it->tof());         
-        if(!m_QConverter->calcMatrixCoord(val,locCoord))continue; // skip ND outside the range
+        double signal = it->weight();
+        double errorSq= it->errorSquared();
+        if(!m_QConverter->calcMatrixCoord(val,locCoord,signal,errorSq))continue; // skip ND outside the range
 
 
-        sig_err.push_back(float(it->weight()));
-        sig_err.push_back(float(it->errorSquared()));
+        sig_err.push_back(float(signal));
+        sig_err.push_back(float(errorSq));
         run_index.push_back(runIndexLoc);
         det_ids.push_back(detID);
         allCoord.insert(allCoord.end(),locCoord.begin(),locCoord.end());
@@ -95,15 +97,15 @@ namespace Mantid
 
 
       m_EventWS  = boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
-      if(!m_EventWS.get()){
+      if(!m_EventWS)
         throw(std::logic_error(" ConvertToMDEventWS should work with defined event workspace"));
-      }
 
       return numSpec;
     }
 
     void ConvToMDEventsWS::runConversion(API::Progress *pProgress)
     {
+
       // Get the box controller
       Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
       size_t lastNumBoxes = bc->getTotalNumMDBoxes();
@@ -113,12 +115,21 @@ namespace Mantid
       // preprocessed detectors insure that each detector has its own spectra
       size_t nValidSpectra  = m_DetLoc->nDetectors();
 
-      // Create the thread pool that will run all of these.
+      //--->>> Thread control stuff
       Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();
-      // initiate thread pool with number of machine's cores (0 in tp constructor)
-      //Kernel::ThreadScheduler * ts = NULL;       
-      pProgress->resetNumSteps(nValidSpectra,0,1);
-      Kernel::ThreadPool tp(ts, 0, new API::Progress(*pProgress));
+      int nThreads(m_NumThreads);
+      if(nThreads<0)nThreads= 0; // negative m_NumThreads correspond to all cores used, 0 no threads and positive number -- nThreads requested;
+      bool runMultithreaded = false;
+      if(m_NumThreads!=0)
+      {
+        runMultithreaded  = true;
+        // Create the thread pool that will run all of these.
+        ts = new Kernel::ThreadSchedulerFIFO();     
+        // it will initiate thread pool with number threads or machine's cores (0 in tp constructor)
+        pProgress->resetNumSteps(nValidSpectra,0,1);
+      }
+      Kernel::ThreadPool tp(ts,nThreads, new API::Progress(*pProgress));  
+      //<<<--  Thread control stuff
 
 
       // if any property dimension is outside of the data range requested, the job is done;
@@ -136,23 +147,35 @@ namespace Mantid
         //ts->push( new FunctionTask( func, cost) );
 
         // Keep a running total of how many events we've added
-        if (bc->shouldSplitBoxes(nEventsInWS,eventsAdded, lastNumBoxes)){
-          // Do all the adding tasks
-          tp.joinAll();    
-          // Now do all the splitting tasks
-          m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
-          if (ts->size() > 0)  tp.joinAll();
-
+        if (bc->shouldSplitBoxes(nEventsInWS,eventsAdded, lastNumBoxes))
+        {
+          if(runMultithreaded)
+          {
+            // Do all the adding tasks
+            tp.joinAll();    
+            // Now do all the splitting tasks
+            m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
+            if (ts->size() > 0)       tp.joinAll();
+          }else{
+            m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(NULL); // it is done this way as it is possible trying to do single threaded split more efficiently
+          }
           // Count the new # of boxes.
           lastNumBoxes = m_OutWSWrapper->pWorkspace()->getBoxController()->getTotalNumMDBoxes();
+          eventsAdded  = 0;
           pProgress->report(wi);
         }
 
-      }
-      tp.joinAll();
+      }   
       // Do a final splitting of everything 
-      m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
-      tp.joinAll();
+      if(runMultithreaded)
+      {
+        tp.joinAll();
+        m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(ts);
+        tp.joinAll();
+      }else{
+        m_OutWSWrapper->pWorkspace()->splitAllIfNeeded(NULL);
+      }
+
       // Recount totals at the end.
       m_OutWSWrapper->pWorkspace()->refreshCache(); 
       m_OutWSWrapper->refreshCentroid();

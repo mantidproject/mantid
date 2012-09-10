@@ -61,15 +61,6 @@ private:
     TS_ASSERT_THROWS_NOTHING(loaderHRP.execute());
     TS_ASSERT( loaderHRP.isExecuted() );
 
-    // now try to reload in detector positions from Nexus file
-   // UpdateInstrumentFromFile loadPos;
-   // loadPos.initialize();
-   // loadPos.setPropertyValue("Filename", "HRP38692a.nxs");
-  //  loadPos.setPropertyValue("Workspace", wsName);
-   // loadPos.setProperty("MoveMonitors", moveMonitors);
-   // TS_ASSERT_THROWS_NOTHING(loadPos.execute());
-  //  TS_ASSERT( loadPos.isExecuted() );
-
     // Get back the saved workspace
      MatrixWorkspace_sptr output;
      TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));

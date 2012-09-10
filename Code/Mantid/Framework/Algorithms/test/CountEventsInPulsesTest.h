@@ -58,7 +58,7 @@ public:
 
     count.setProperty("InputWorkspace", eventWS);
     count.setProperty("OutputWorkspace", "TestCount4");
-    count.setProperty("Tolerance", 0.02);
+    count.setProperty("BinSize", 0.02);
     count.setProperty("SumSpectra", false);
     count.setProperty("Parallel", false);
 
@@ -79,20 +79,20 @@ public:
     }
 
     // b. Workspace size
-    ///   Preserve number of histogram
+    //   Preserve number of histogram
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), eventWS->getNumberHistograms());
 
-    ///   Preserve number of events
+    //   Preserve number of events
     TS_ASSERT_EQUALS(outWS->getNumberEvents(), eventWS->getNumberEvents());
 
-    /// Number of pulses
+    // Number of pulses
     TS_ASSERT_EQUALS(outWS->readX(0).size(), numpulses);
 
-    /// Zero events in spectrum 0
+    // Zero events in spectrum 0
     for (size_t iw = 0; iw < outWS->readY(0).size(); iw ++)
       TS_ASSERT_DELTA(outWS->readY(0)[iw], 0, 1.0E-8);
 
-    /// Meet the number in details
+    // Meet the number in details
     for (size_t iw = 3; iw < 5; iw ++)
     {
         /* Special Check
@@ -138,7 +138,7 @@ public:
 
     count.setProperty("InputWorkspace", eventWS);
     count.setProperty("OutputWorkspace", "TestCount5");
-    count.setProperty("Tolerance", 0.02);
+    count.setProperty("BinSize", 0.02);
     count.setProperty("SumSpectra", true);
     count.setProperty("Parallel", false);
 
@@ -164,6 +164,64 @@ public:
 
     ///   Preserve number of events
     TS_ASSERT_EQUALS(outWS->getNumberEvents(), eventWS->getNumberEvents());
+
+    /// Number of pulses
+    TS_ASSERT_EQUALS(outWS->readX(0).size(), numpulses);
+
+    for (size_t i = 0; i < 5; ++i)
+    {
+        DataObjects::EventList events = eventWS->getEventList(i);
+        std::cout << "WorkspaceIndex " << i << " Events Size = " << events.getNumberEvents() << std::endl;
+    }
+
+    return;
+  }
+
+  /*
+   * Test event workspace
+   */
+  void test_EventWorkspaceSumSpectraCompressEvents()
+  {
+    // 1. Create Workspace
+    std::string wsname("Input05");
+    Kernel::DateAndTime run_start(10000000000);
+    size_t numpulses = 100;
+    double pulselength = 1.0E9/50.0;
+    DataObjects::EventWorkspace_sptr eventWS = creatEventWorkspace(wsname, run_start, numpulses, pulselength);
+
+    // 2. Set properties and execute
+    CountEventsInPulses count;
+    TS_ASSERT_THROWS_NOTHING(count.initialize());
+
+    count.setProperty("InputWorkspace", eventWS);
+    count.setProperty("OutputWorkspace", "TestCount6");
+    count.setProperty("BinSize", 0.02);
+    count.setProperty("SumSpectra", true);
+    count.setProperty("Parallel", false);
+    count.setProperty("Tolerance", 0.01);
+
+    TS_ASSERT_THROWS_NOTHING(count.execute());
+
+    TS_ASSERT(count.isExecuted());
+
+    // 3. Check result
+    DataObjects::EventWorkspace_sptr outWS =
+        boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve("TestCount6"));
+
+    // a. Workspace
+    TS_ASSERT(outWS);
+    if (!outWS)
+    {
+        // Early return
+        return;
+    }
+
+    // b. Workspace size
+    ///   Preserve number of histogram
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
+
+    ///   Preserve number of events
+    TS_ASSERT(outWS->getNumberEvents() < eventWS->getNumberEvents());
 
     /// Number of pulses
     TS_ASSERT_EQUALS(outWS->readX(0).size(), numpulses);

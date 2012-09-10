@@ -58,9 +58,8 @@ DECLARE_ALGORITHM(ConvertToMD)
 // Sets documentation strings for this algorithm
 void ConvertToMD::initDocs()
 {
-    this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, it will be replaced");
-    this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions. If the OutputWorkspace exists, it will be replaced");
-//TODO:    "If the OutputWorkspace exists, then events are added to it." 
+    this->setWikiSummary("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions.");
+    this->setOptionalMessage("Create a MDEventWorkspace with selected dimensions, e.g. the reciprocal space of momentums (Qx, Qy, Qz) or momentums modules |Q|, energy transfer dE if availible and any other user specified log values which can be treated as dimensions.");
 }
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -86,13 +85,14 @@ ConvertToMD::init()
 
 
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input,ws_valid),
-        "An input Matrix Workspace (Matrix 2D or Event) with units along X-axis and defined instrument with defined sample");
+        "An input Matrix Workspace (2DMatrix or Event workspace) ");
    
      declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
                   "Name of the output MDEventWorkspace");
+
      declareProperty(new PropertyWithValue<bool>("OverwriteExisting", true, Direction::Input),
-              "By default, existing Output Workspace will be replaced. Select false if you want to add new events to the workspace, which already exist.\n"
-              " Can be very inefficient for file-based workspaces");
+              "By default (""1""), existing Output Workspace will be replaced. Select false (""0"") if you want to add new events to the workspace, which already exist.\n"
+              "Choosing ""0"" can be very inefficient for file-based workspaces");
 
      std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
      // something to do with different moments of thime when algorithm or test loads library. To avoid empty factory always do this. 
@@ -100,29 +100,21 @@ ConvertToMD::init()
   
      /// this variable describes default possible ID-s for Q-dimensions   
      declareProperty("QDimensions",Q_modes[0],boost::make_shared<StringListValidator>(Q_modes),
-         "You can to transfer source workspace into target MD workspace directly by supplying string ""CopyToMD""\n"
-         " (No Q analysis, or Q conversion is performed),\n"
-         "into mod(Q) (1 dimension) providing ""|Q|"" string or into 3 dimensions in Q space ""Q3D"". \n"
-         " First mode used for copying data from input workspace into multidimensional target workspace, second -- mainly for powder analysis\n"
-         "(though crystal as powder is also analysed in this mode) and the third -- for crystal analysis.\n",Direction::InOut); 
+          "String, describing available analysis modes, registered with [[MD Transformation factory]].\n"
+          "The modes names are ""CopyToMD"", ""mod|Q|"" and ""Q3D""",Direction::InOut);
+     /// temporary, untill dEMode is not properly defined on Workspace
+     MDEvents::MDTransfDEHelper AlldEModes;
+     std::vector<std::string> dE_modes = AlldEModes.getEmodes();
+     declareProperty("dEAnalysisMode",dE_modes[CnvrtToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
+       "You can analyse neutron energy transfer in ""Direct"", ""Indirect"" or ""Elastic"" mode. \n"
+       " The analysis mode has to correspond to experimental set up. Selecting inelastic mode increases the number of the target workspace dimensions by one.\n"
+       " See [[MD Transformation factory]] for further details.",Direction::InOut);
 
      MDEvents::MDWSTransform QScl;
      std::vector<std::string> QScales = QScl.getQScalings();
      declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
-        "This property to normalize three momentums obtained in Q3D mode. Possible values are:\n"
-        "  No Scaling,        -- momentums in Momentum or MomentumTransfer units  A^-1\n"
-        "  Q in lattice units -- single scale, where all momentums are divided by the minimal reciprocal lattice vector 2*Pi/Max(a_latt)\n"
-        "                        where a_lat is the maximal lattice parameter\n"
-        "  Orthogonal HKL     -- three Q components are divided by 2pi/a,2pi/b and 2pi/c lattice vectors.\n"
-        "  HKL                 -- converted to HKL (multiplied by B-matrix which is equivalent to Orthogonal HKL for rectilinear lattices.\n" 
-        "This parameter is currently ignored in ""mod|Q|"" and ""CopyToMD"" modes and if a reciprocal lattice is not defined in the input workspace.");
-     /// temporary
-     MDEvents::MDTransfDEHelper AlldEModes;
-     std::vector<std::string> dE_modes = AlldEModes.getEmodes();
-     declareProperty("dEAnalysisMode",dE_modes[CnvrtToMD::Direct],boost::make_shared<StringListValidator>(dE_modes),
-        "You can analyse neutron energy transfer in direct, indirect or elastic mode. The analysis mode has to correspond to experimental set up.\n"
-        " Selecting inelastic mode increases the number of the target workspace dimensions by one. (by DeltaE -- the energy transfer)\n"
-        """NoDE"" choice corresponds to ""CopyToMD"" analysis mode and is selected automatically if the QDimensions is set to ""CopyToMD""",Direction::InOut);                
+       "This property to normalize three momentums obtained in ""Q3D"" mode.\n"
+       " See [[MD Transformation factory]] for description and available scaling modes.");
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
         " List(comma separated) of additional to Q and DeltaE variables which form additional (orthogonal) to Q dimensions"
@@ -136,19 +128,15 @@ ConvertToMD::init()
         " Useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
         "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another. </span>"
         " In this case switch has to be set to false, as first instrument would be used for all workspaces othewise and no check for its validity is performed."); 
+    // if one needs to use Lorentz corrections
+    declareProperty(new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input), 
+        "Correct the weights of events or signals and errors transformed into reciprocal space by multiplying them by the Lorentz multiplier: sin(theta)^2/lambda^4.\n"
+        "Currently works in Q3D Elastic case only.");     
 
     declareProperty(new ArrayProperty<double>("MinValues"),
-        "It has to be N comma separated values, where N is defined as: \n"
-        "a) 1+delta(dE)+N_OtherDimensions if the first dimension (QDimensions property) is equal to |Q| or \n"
-        "b) 3+delta(dE)+N_OtherDimensions if the first (3) dimensions (QDimensions property) equal  Q3D or \n\n"
-        "c) (1 or 2)+N_OtherDimesnions if QDimesnins property is emtpty. \n"     
-         " where delta(dE)==1 in direct and indirect modes and 0 otherwise\n"
-         " In case c) the target workspace dimensions are defined by the [[units]] of the input workspace axis.\n\n"
-         " This property contains minimal values for all dimensions.\n"
-         " Momentum values expected to be in [A^-1] and energy transfer (if any) expressed in [meV]\n"
-         " In case b), the target dimensions for Q3D are either momentums if QinHKL is false or are momentums divided by correspondent lattice parameters if QinHKL is true\n"
-         " All other values are in the [[units]] they are expressed in their log files\n"
-         " Values lower then the specified one will be ignored and not transferred into the target MD workspace\n");
+        "It has to be N comma separated values, where N is the number of dimensions of the target workspace.\n"
+        "Values smaller then specified here will not be added to workspace.\n"
+        "Number N is defined by properties 4,6 and 7 and described on [[MD Transformation factory]] page.\n");
 //TODO:    " If a minimal target workspace range is higher then the one specified here, the target workspace range will be used instead " );
 
    declareProperty(new ArrayProperty<double>("MaxValues"),
@@ -197,12 +185,15 @@ void ConvertToMD::exec()
   // shared pointer to target workspace
   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
   bool create_new_ws(false);
-  if(!spws.get())
+  if(!spws)
   {
     create_new_ws = true;
-  }else{ 
+  }
+  else
+  { 
       bool should_overwrite = getProperty("OverwriteExisting");
-      if (should_overwrite){
+      if (should_overwrite)
+      {
           create_new_ws=true;
       }else{
           create_new_ws=false;
@@ -229,6 +220,8 @@ void ConvertToMD::exec()
     targWSDescr.setMinMax(dimMin,dimMax);   
     targWSDescr.buildFromMatrixWS(m_InWS2D,Q_mod_req,dE_mod_req,other_dim_names);
 
+    bool LorentzCorrections = getProperty("LorentzCorrection");
+    targWSDescr.setLorentsCorr(LorentzCorrections);
 
   // instanciate class, responsible for defining Mslice-type projection
     MDEvents::MDWSTransform MsliceProj;
@@ -284,10 +277,11 @@ void ConvertToMD::exec()
           if(!(reuse_preprocecced_detectors&&g_DetLoc.isDefined(m_InWS2D))){
             // amount of work:
             const size_t nHist = m_InWS2D->getNumberHistograms();
-            m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,nHist));
-            g_DetLoc.processDetectorsPositions(m_InWS2D,g_Log,m_Progress.get());
+            m_Progress.reset(new API::Progress(this,0.0,1.0,nHist));
             g_log.information()<<" preprocessing detectors\n";
-            if(g_DetLoc.nDetectors()==0){
+            g_DetLoc.processDetectorsPositions(m_InWS2D,g_Log,m_Progress.get());  
+            if(g_DetLoc.nDetectors()==0)
+            {
                 g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
                 throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
             }
@@ -328,11 +322,11 @@ void ConvertToMD::exec()
   // initate conversion and estimate amout of job to do
   size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper);
   // progress reporter
-  m_Progress = std::auto_ptr<API::Progress >(new API::Progress(this,0.0,1.0,n_steps)); 
+  m_Progress.reset(new API::Progress(this,0.0,1.0,n_steps)); 
 
   g_log.information()<<" conversion started\n";
   m_Convertor->runConversion(m_Progress.get());
-  storeHistogramBoundaries(spws);
+  copyMetaData(spws);
 
   //JOB COMPLETED:
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
@@ -345,18 +339,20 @@ void ConvertToMD::exec()
 }
 
 /**
- * Store the histogram bins into each output experiment info
+ * Copy over the metadata from the input matrix workspace
  * @param mdEventWS :: The output MDEventWorkspace
  */
-void ConvertToMD::storeHistogramBoundaries(API::IMDEventWorkspace_sptr mdEventWS) const
+void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const
 {
   const MantidVec & binBoundaries = m_InWS2D->readX(0);
+  auto mapping = m_InWS2D->spectraMap().createIDGroupsMap();
 
   uint16_t nexpts = mdEventWS->getNumExperimentInfo();
   for(uint16_t i = 0; i < nexpts; ++i)
   {
     ExperimentInfo_sptr expt = mdEventWS->getExperimentInfo(i);
     expt->mutableRun().storeHistogramBinBoundaries(binBoundaries);
+    expt->cacheDetectorGroupings(*mapping);
   }
 }
 

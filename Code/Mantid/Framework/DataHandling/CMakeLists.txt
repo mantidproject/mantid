@@ -93,6 +93,7 @@ set ( SRC_FILES
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
 	src/Merge2WorkspaceLogs.cpp
+	src/ModifyDetectorDotDatFile.cpp
 	src/MonitorLiveData.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
@@ -223,6 +224,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
 	inc/MantidDataHandling/Merge2WorkspaceLogs.h
+	inc/MantidDataHandling/ModifyDetectorDotDatFile.h
 	inc/MantidDataHandling/MonitorLiveData.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NexusTester.h

@@ -641,7 +641,8 @@ SampleType ConvertToMDEventsParams::getSampleType(const std::string &AlgID)const
 */
 double ConvertToMDEventsParams::getEi(API::MatrixWorkspace_const_sptr inWS2D)const
 {
-    if(!inWS2D.get()){
+    if(!inWS2D)
+    {
         convert_log.error()<<"getEi: invoked on empty input workspace \n";
         throw(std::logic_error(" should not call this function when input workpace is undefined"));
     }

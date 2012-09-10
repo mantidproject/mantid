@@ -630,8 +630,7 @@ public slots:
   void drawLine();
   void drawArrow();
   void drawPoints();
-  void addText();
-  void disableAddText();
+  void addLabel();
   void addImage();
   void zoomIn();
   void zoomOut();
@@ -1421,7 +1420,7 @@ private:
   QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
   QAction *actionExportPDF, *actionReadOnlyCol, *actionStemPlot;
   QAction *actionCloseAllWindows, *actionClearLogInfo, *actionClearConsole, *actionShowPlotWizard, *actionShowConfigureDialog;
-  QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars, *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage, *actionAddText;
+  QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars, *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage;
   QAction *actionPlotL, *actionPlotP, *actionPlotLP, *actionPlotVerticalDropLines, *actionPlotSpline;
   QAction *actionPlotVertSteps, *actionPlotHorSteps, *actionPlotVerticalBars;
   QAction *actionPlotHorizontalBars, *actionPlotArea, *actionPlotPie, *actionPlotVectXYAM, *actionPlotVectXYXY;
@@ -1464,7 +1463,7 @@ private:
   QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
   QAction *actionDeleteRows, *actionDrawPoints;
   QAction *btnCursor, *btnSelect, *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;
-  QAction *btnZoomIn, *btnZoomOut, *btnPointer, *btnLine, *btnArrow;
+  QAction *btnZoomIn, *btnZoomOut, *btnPointer, *btnLine, *btnArrow, *btnLabel;
   QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
   QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;
   QAction *actionMatrixGrayScale, *actionMatrixRainbowScale, *actionMatrixCustomScale, *actionRotateMatrixMinus;

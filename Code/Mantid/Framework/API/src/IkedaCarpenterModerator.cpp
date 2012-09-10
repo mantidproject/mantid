@@ -46,7 +46,7 @@ namespace Mantid
 
     /**
      * Sets the value of the \f$\alpha\f$ parameter
-     * @param value :: A value for the fast decay coefficient in seconds
+     * @param value :: A value for the fast decay coefficient in microseconds
      */
     void IkedaCarpenterModerator::setFastDecayCoefficent(const double value)
     {
@@ -54,7 +54,7 @@ namespace Mantid
     }
 
     /**
-     * @returns Returns the value of the \f$\alpha\f$ parameter in seconds
+     * @returns Returns the value of the \f$\alpha\f$ parameter in microseconds
      */
     double IkedaCarpenterModerator::getFastDecayCoefficent() const
     {
@@ -63,7 +63,7 @@ namespace Mantid
 
     /**
      * Sets the value of the \f$\beta\f$ parameter
-     * @param value :: A value for the slow decay coefficient in seconds
+     * @param value :: A value for the slow decay coefficient in microseconds
      */
     void IkedaCarpenterModerator::setSlowDecayCoefficent(const double value)
     {
@@ -71,7 +71,7 @@ namespace Mantid
     }
 
     /**
-     * @returns Returns the value of the \f$\beta\f$ parameter in seconds
+     * @returns Returns the value of the \f$\beta\f$ parameter in microseconds
      */
     double IkedaCarpenterModerator::getSlowDecayCoefficent() const
     {
@@ -88,7 +88,7 @@ namespace Mantid
     }
 
     /**
-     * @returns Returns the value of the \f$\beta\f$ parameter in seconds
+     * @returns Returns the value of the \f$\beta\f$ parameter in microseconds
      */
     double IkedaCarpenterModerator::getMixingCoefficient() const
     {
@@ -98,7 +98,7 @@ namespace Mantid
 
     /**
      * Mean emission time: \f$\tau_mean=3*\tau_f + R\tau_s\f$
-     *  @returns The mean time for emission in seconds
+     *  @returns The mean time for emission in microseconds
      */
     double IkedaCarpenterModerator::emissionTimeMean() const
     {
@@ -107,7 +107,7 @@ namespace Mantid
 
     /**
      * Variance of emission time: \f$\tau_sig=\sqrt{3*\tau_f^2 + R(2-R)*\tau_s^2}\f$
-     *  @returns The spread of emission times in seconds^2
+     *  @returns The spread of emission times in microseconds^2
      */
     double IkedaCarpenterModerator::emissionTimeVariance() const
     {

@@ -175,7 +175,6 @@ Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 
 
   connect (cp,SIGNAL(selectPlot()),this,SLOT(activateGraph()));
-  connect (cp,SIGNAL(drawTextOff()),this,SIGNAL(drawTextOff()));
   connect (cp,SIGNAL(viewImageDialog()),this,SIGNAL(viewImageDialog()));
   connect (cp,SIGNAL(viewLineDialog()),this,SIGNAL(viewLineDialog()));
   connect (cp,SIGNAL(showPlotDialog(int)),this,SIGNAL(showPlotDialog(int)));
@@ -3824,6 +3823,7 @@ void Graph::zoomOut()
   }
 }
 
+
 void Graph::drawText(bool on)
 {
   deselectMarker();
@@ -3838,6 +3838,7 @@ void Graph::drawText(bool on)
   }
   drawTextOn = on;
 }
+
 
 ImageMarker* Graph::addImage(ImageMarker* mrk)
 {

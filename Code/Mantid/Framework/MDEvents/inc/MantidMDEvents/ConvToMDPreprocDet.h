@@ -86,6 +86,7 @@ public:
 
     std::vector<double>const & getL2()const{return L2;}
     std::vector<double>const & getTwoTheta()const{return TwoTheta;}
+    std::vector<double>const & getSinThetaSq()const{return SinThetaSq;}
     std::vector<size_t>const  & getDetIDMap()const{return detIDMap;}
     std::vector<size_t>const  & getSpec2DetMap()const{return spec2detMap;}
     std::vector<Kernel::V3D>const & getDetDir()const{return det_dir;}
@@ -127,13 +128,15 @@ private:
     // sample-detector distance
     std::vector<double>       L2;     
     // Diffraction angle
-    std::vector<double>       TwoTheta;
+    std::vector<double>      TwoTheta;
+    // sin^2(Theta)
+    std::vector<double>      SinThetaSq;
     // the detector ID;
-    std::vector<int32_t>      det_id;  
+    std::vector<int32_t>     det_id;  
     // stores spectra index which corresponds to a valid detector index;
-    std::vector<size_t>       detIDMap; 
+    std::vector<size_t>      detIDMap; 
     // stores detector index which corresponds to the workspace index;
-    std::vector<size_t>       spec2detMap; 
+    std::vector<size_t>      spec2detMap; 
 };
 
 

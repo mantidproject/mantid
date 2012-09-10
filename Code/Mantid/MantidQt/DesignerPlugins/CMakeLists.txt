@@ -19,9 +19,7 @@ set ( MOC_FILES ${INC_FILES} )
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 include_directories ( inc )
-include_directories ( ../MantidWidgets/inc )
 include_directories ( ../SliceViewer/inc )
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MantidWidgets )
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../SliceViewer )
 
 # Define a compiler variable to set the name of the library within the code. This

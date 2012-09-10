@@ -773,7 +773,6 @@ public slots:
 signals:
   void selectedGraph (Graph*);
   void closedGraph();
-  void drawTextOff();
   void drawLineEnded(bool);
   void cursorInfo(const QString&);
   void showPlotDialog(int);

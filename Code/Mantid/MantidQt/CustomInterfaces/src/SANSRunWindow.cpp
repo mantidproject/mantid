@@ -2132,19 +2132,18 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   //std::cout << "\n\n" << py_code.toStdString() << "\n\n";
   QString pythonStdOut = runReduceScriptFunction(py_code);
 
-  //Reset the objects by initialising a new reducer object
-  py_code = "i.ReductionSingleton().set_instrument(isis_instrument."+getInstrumentClass()+")";
-  //restore the settings from the user file
-  py_code += "\ni.ReductionSingleton().user_file_path='"+
-    QFileInfo(m_uiForm.userfile_edit->text()).path() + "'";
-  py_code += "\ni.ReductionSingleton().user_settings = _user_settings_copy";
-  py_code += "\ni.ReductionSingleton().user_settings.execute(i.ReductionSingleton())";
-
-  std::cout << "\n\n" << py_code.toStdString() << "\n\n";
-  runReduceScriptFunction(py_code);
-
+  // update fields in GUI as a consequence of results obtained during reduction
   if ( runMode == SingleMode )
   {
+    // update front rescale and fit values
+    double scale = runReduceScriptFunction(
+      "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale").trimmed().toDouble();
+    m_uiForm.frontDetRescale->setText(QString::number(scale, 'f', 3));
+    double shift = runReduceScriptFunction(
+      "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift").trimmed().toDouble();
+    m_uiForm.frontDetShift->setText(QString::number(shift, 'f', 3));
+
+    // first process pythonStdOut
     QStringList pythonDiag = pythonStdOut.split(PYTHON_SEP);
     if ( pythonDiag.count() > 1 )
     {
@@ -2153,6 +2152,18 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
       resetDefaultOutput(reducedWS);
     }
   }
+
+  //Reset the objects by initialising a new reducer object
+  //py_code = "i._refresh_singleton()";
+  py_code = "\ni.ReductionSingleton().set_instrument(isis_instrument."+getInstrumentClass()+")";
+  //restore the settings from the user file
+  py_code += "\ni.ReductionSingleton().user_file_path='"+
+    QFileInfo(m_uiForm.userfile_edit->text()).path() + "'";
+  py_code += "\ni.ReductionSingleton().user_settings = _user_settings_copy";
+  py_code += "\ni.ReductionSingleton().user_settings.execute(i.ReductionSingleton())";
+
+  std::cout << "\n\n" << py_code.toStdString() << "\n\n";
+  runReduceScriptFunction(py_code);
 
   // Mark that a reload is necessary to rerun the same reduction
   forceDataReload();
@@ -2236,18 +2247,20 @@ QString SANSRunWindow::reduceSingleRun() const
     {    
       reducer_code += ", combineDet='" + m_uiForm.detbank_sel->currentText() + "'";
     }
-    reducer_code += ")";
+    reducer_code += ", resetSetup=False)";
   }
   else
   {
     if ( m_uiForm.detbank_sel->currentIndex() < 2)
     {
-      reducer_code += "\nreduced = i.WavRangeReduction(full_trans_wav=False)";
+      reducer_code += "\nreduced = i.WavRangeReduction(full_trans_wav=False";
+      reducer_code += ", resetSetup=False)";
     }
     else
     {
       reducer_code += "\nreduced = i.WavRangeReduction(full_trans_wav=False";
-      reducer_code += ", combineDet='" + m_uiForm.detbank_sel->currentText() + "')";
+      reducer_code += ", combineDet='" + m_uiForm.detbank_sel->currentText() + "'";
+      reducer_code += ", resetSetup=False)";
     }
 
     if( m_uiForm.plot_check->isChecked() )

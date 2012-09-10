@@ -67,20 +67,15 @@ set ( UI_FILES
 )
 
 set( TEST_FILES
-   test/MantidColorMapTest.h
-   test/MantidQwtMatrixWorkspaceDataTest.h
+   MantidColorMapTest.h
+   MantidQwtMatrixWorkspaceDataTest.h
 )
-
-include_directories ( inc )
-include_directories ( ../MantidWidgets/inc )
-include_directories ( ../MantidWidgets )
 
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
-qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_API )
@@ -97,56 +92,7 @@ target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIB
 # Testing
 ###########################################################################
 
-if ( CXXTEST_FOUND )
-    include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
-
-    include_directories ( ../../Framework/TestHelpers/inc
-                          ../../Framework/DataObjects/inc )
-    
-    # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
-    # It will go out of scope at the end of this file so doesn't need un-setting
-    set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-                          ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp )
-    
-    cxxtest_add_test ( MantidQtAPITest ${TEST_FILES} )
-    target_link_libraries( MantidQtAPITest MantidQtAPI DataObjects)
-    add_dependencies( GUITests MantidQtAPITest )
-    
-    # Add to the 'UnitTests' group in VS
-    set_property( TARGET MantidQtAPITest PROPERTY FOLDER "UnitTests" )
-endif ()
-
-###########################################################################
-# DEMO/GUI TESTING APPLICATIONS
-###########################################################################
-
-if ( NOT WIN32 )
-# Does not work on windows for some reason
-
-include_directories ( ../../Framework/MDEvents/inc )
-include_directories ( ../../Framework/DataObjects/inc )
-include_directories ( ../../Framework/Algorithms/inc )
-include_directories ( ../../Framework/API/inc )
-include_directories ( ../../Framework/DataHandling/inc )
-include_directories ( ../../Framework/TestHelpers/inc )
-include_directories ( ../../Framework/Geometry/inc )
-
-# Extra, optional targets for demoing GUI elements
-add_executable ( PropertyWidgetsDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} test/main_PropertyWidgetsDemo.cpp  
-                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-target_link_libraries ( PropertyWidgetsDemo 
-                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  Geometry
-                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
-
-# Extra, optional targets for demoing GUI elements
-add_executable ( GenericDialogDemo EXCLUDE_FROM_ALL ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} test/GenericDialogDemo.cpp  
-                           ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS} ${RES_FILES} ${MANTID_RC_FILE} )
-target_link_libraries ( GenericDialogDemo 
-                       ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets  Geometry
-                       QtPropertyBrowser ${QT_LIBRARIES} ${ZLIB_LIBRARIES} ${QWT_LIBRARIES} )
-                       
-endif () # (not for windows)
-
+add_subdirectory ( test )
 
 ###########################################################################
 # Installation settings

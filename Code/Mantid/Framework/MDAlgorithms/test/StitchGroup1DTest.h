@@ -7,6 +7,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include <boost/assign.hpp>
+#include <boost/make_shared.hpp>
 
 using Mantid::MDAlgorithms::StitchGroup1D;
 using namespace Mantid::MDEvents;
@@ -32,6 +33,32 @@ private:
       currentWS->mutableRun().addLogData(currentPeriodsProp);
     }
   }
+
+  // Helper method to make the stitch group 1D algorithm
+  IAlgorithm_sptr make_algorithm(Workspace_sptr lhsWorkspace, Workspace_sptr rhsWorkspace, const std::string& outputWorkspaceName, const double& startOverlap, const double& endOverlap, const bool scaleRHSWS = true)
+  {
+      IAlgorithm_sptr alg = boost::make_shared<StitchGroup1D>();
+      alg->setRethrows(true);
+      alg->initialize();
+
+      alg->setProperty("LHSWorkspace", lhsWorkspace);
+      alg->setProperty("RHSWorkspace", rhsWorkspace);
+      alg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
+      alg->setProperty("StartOverlap", startOverlap);
+      alg->setProperty("EndOverlap", endOverlap);
+      alg->setProperty("ScaleRHSWorkspace", scaleRHSWS);
+      return alg;
+  }
+
+  // Helper method to make the stitch group 1D algorithm
+  IAlgorithm_sptr make_algorithm(const std::string& lhsWorkspaceName, const std::string& rhsWorkspaceName, const std::string& outputWorkspaceName, const double& startOverlap, const double& endOverlap, const bool scaleRHSWS = true)
+  {
+    auto lhsWS = Mantid::API::AnalysisDataService::Instance().retrieve(lhsWorkspaceName);
+    auto rhsWS = Mantid::API::AnalysisDataService::Instance().retrieve(rhsWorkspaceName);
+    return make_algorithm(lhsWS, rhsWS, outputWorkspaceName, startOverlap, endOverlap, scaleRHSWS);
+  }
+
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -101,92 +128,44 @@ public:
 
     void test_lhsworkspace_with_three_input_dimensions_throws()
     {
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = make_algorithm(this->__three_dim_workspace_name, this->__good_workspace_name, "converted", 0.0, 0.3);
 
-      alg.setPropertyValue("LHSWorkspace", this->__three_dim_workspace_name);
-      alg.setPropertyValue("RHSWorkspace", this->__good_workspace_name);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.0);
-      alg.setProperty("EndOverlap", 0.3);
-
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     }
 
     void test_rhsworkspace_with_three_input_dimensions_throws()
     {
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = make_algorithm(this->__good_workspace_name, this->__three_dim_workspace_name, "converted", 0.0, 0.3);
 
-      alg.setPropertyValue("LHSWorkspace", this->__good_workspace_name);
-      alg.setPropertyValue("RHSWorkspace", this->__three_dim_workspace_name);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.0);
-      alg.setProperty("EndOverlap", 0.3);
-
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     }
 
     void test_lhsworkspace_with_two_integrated_input_dimensions_throws()
     {
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = make_algorithm(this->__integrated_two_dim_workspace_name, this->__good_workspace_name, "converted", 0.0, 0.3);
 
-      alg.setPropertyValue("LHSWorkspace", this->__integrated_two_dim_workspace_name);
-      alg.setPropertyValue("RHSWorkspace", this->__good_workspace_name);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.0);
-      alg.setProperty("EndOverlap", 0.3);
-
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     }
 
     void test_rhsworkspace_with_two_integrated_input_dimensions_throws()
     {
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = make_algorithm(this->__good_workspace_name, this->__integrated_two_dim_workspace_name, "converted", 0.0, 0.3);
 
-      alg.setPropertyValue("LHSWorkspace", this->__good_workspace_name);
-      alg.setPropertyValue("RHSWorkspace", this->__integrated_two_dim_workspace_name);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.0);
-      alg.setProperty("EndOverlap", 0.3);
-
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     }
 
     void test_lhsworkspace_with_two_non_integrated_dimensions_throws()
     {
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = make_algorithm(this->__unintegrated_two_dim_workspace_name, this->__good_workspace_name, "converted", 0.0, 0.3);
 
-      alg.setPropertyValue("LHSWorkspace", this->__unintegrated_two_dim_workspace_name);
-      alg.setPropertyValue("RHSWorkspace", this->__good_workspace_name);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.0);
-      alg.setProperty("EndOverlap", 0.3);
-
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     }
 
     void test_rhsworkspace_with_two_non_integrated_dimensions_throws()
     {
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = make_algorithm(this->__good_workspace_name, this->__unintegrated_two_dim_workspace_name, "converted", 0.0, 0.3);
 
-      alg.setPropertyValue("LHSWorkspace", this->__good_workspace_name);
-      alg.setPropertyValue("RHSWorkspace", this->__unintegrated_two_dim_workspace_name);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.0);
-      alg.setProperty("EndOverlap", 0.3);
-
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     }
 
     void test_lhsworkspace_and_rhsworkspace_have_different_binning_throws()
@@ -199,17 +178,9 @@ public:
       IMDHistoWorkspace_sptr lhsWorkspace = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr rhsWorkspace = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
 
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
-
-      alg.setProperty("LHSWorkspace", lhsWorkspace);
-      alg.setProperty("RHSWorkspace", rhsWorkspace);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.0);
-      alg.setProperty("EndOverlap", 0.3);
+      IAlgorithm_sptr alg = make_algorithm(lhsWorkspace, rhsWorkspace, "converted", 0.0, 0.3);
         
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
 
       Mantid::API::AnalysisDataService::Instance().remove(algA->getPropertyValue("OutputWorkspace"));
       Mantid::API::AnalysisDataService::Instance().remove(algB->getPropertyValue("OutputWorkspace"));
@@ -217,17 +188,9 @@ public:
 
     void do_test_permitted_dimensionalities(IMDHistoWorkspace_sptr a, IMDHistoWorkspace_sptr  b)
     {
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = make_algorithm(a, b, "converted", 0.0, 0.3);
 
-      alg.setProperty("LHSWorkspace", a);
-      alg.setProperty("RHSWorkspace", b);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.0);
-      alg.setProperty("EndOverlap", 0.3);
-
-      TS_ASSERT_THROWS_NOTHING(alg.execute());
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
     }
 
     void test_can_have_single_1d_input_workspaces()
@@ -286,17 +249,9 @@ public:
       IMDHistoWorkspace_sptr a = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr b = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
 
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = make_algorithm(a, b, "converted", 0.0, 0.3);
 
-      alg.setProperty("LHSWorkspace", a);
-      alg.setProperty("RHSWorkspace", b);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.0);
-      alg.setProperty("EndOverlap", 0.3);
-
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
 
       Mantid::API::AnalysisDataService::Instance().remove(algA->getPropertyValue("OutputWorkspace"));
       Mantid::API::AnalysisDataService::Instance().remove(algB->getPropertyValue("OutputWorkspace"));
@@ -350,17 +305,9 @@ public:
 
     void test_end_overlap_equal_to_start_overlap_throws()
     {
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = make_algorithm(this->__good_workspace_name, this->__good_workspace_name, "converted", 0.5, 0.5);
 
-      alg.setPropertyValue("LHSWorkspace", this->__good_workspace_name);
-      alg.setPropertyValue("RHSWorkspace", this->__good_workspace_name);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.5);
-      alg.setProperty("EndOverlap", 0.5);
-
-      TS_ASSERT_THROWS(alg.execute(), std::runtime_error);
+      TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
     }
 
     void test_calculates_scaling_factor_correctly()
@@ -375,27 +322,19 @@ public:
       IMDHistoWorkspace_sptr a = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr b = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
 
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
-
-      alg.setProperty("LHSWorkspace", a);
-      alg.setProperty("RHSWorkspace", b);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.5);
-      alg.setProperty("EndOverlap", 1.0);
-      alg.execute();
+      IAlgorithm_sptr alg = make_algorithm(a, b, "converted", 0.5, 1.0);
+      alg->execute();
 
       Mantid::API::AnalysisDataService::Instance().remove(algA->getPropertyValue("OutputWorkspace"));
       Mantid::API::AnalysisDataService::Instance().remove(algB->getPropertyValue("OutputWorkspace"));  
 
       // Check defaults.
-      bool useManualScaling = alg.getProperty("UseManualScaleFactor");
+      bool useManualScaling = alg->getProperty("UseManualScaleFactor");
       TS_ASSERT(!useManualScaling);
-      bool scaleRHSWorkspace = alg.getProperty("ScaleRHSWorkspace");
+      bool scaleRHSWorkspace = alg->getProperty("ScaleRHSWorkspace");
       TS_ASSERT(scaleRHSWorkspace);
 
-      double scaleFactor = alg.getProperty("OutScaleFactor");
+      double scaleFactor = alg->getProperty("OutScaleFactor");
 
       // 1 * (( 1 + 1) / (2 + 3)) = 0.4
       const double expectedScaleFactor = 0.4;
@@ -414,25 +353,16 @@ public:
       IMDHistoWorkspace_sptr a = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr b = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
 
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
-
-      alg.setProperty("LHSWorkspace", a);
-      alg.setProperty("RHSWorkspace", b);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.5);
-      alg.setProperty("EndOverlap", 1.0);
-      alg.setProperty("ScaleRHSWorkspace", false);
-      alg.execute();
+      IAlgorithm_sptr alg = make_algorithm(a, b, "converted", 0.5, 1.0, false);
+      alg->execute();
 
       Mantid::API::AnalysisDataService::Instance().remove(algA->getPropertyValue("OutputWorkspace"));
       Mantid::API::AnalysisDataService::Instance().remove(algB->getPropertyValue("OutputWorkspace"));  
 
-      bool useManualScaling = alg.getProperty("UseManualScaleFactor");
+      bool useManualScaling = alg->getProperty("UseManualScaleFactor");
       TS_ASSERT(!useManualScaling);
 
-      double scaleFactor = alg.getProperty("OutScaleFactor");
+      double scaleFactor = alg->getProperty("OutScaleFactor");
 
       // 1 * ((2 + 3)/( 1 + 1)) = 2.5
       const double expectedScaleFactor = 2.5;
@@ -475,18 +405,10 @@ public:
       IMDHistoWorkspace_sptr a = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr b = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
 
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = make_algorithm(a, b, "converted", 0.3, 0.7);
+      alg->execute();
 
-      alg.setProperty("LHSWorkspace", a);
-      alg.setProperty("RHSWorkspace", b);
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.3);
-      alg.setProperty("EndOverlap", 0.7);
-      alg.execute();
-
-      auto outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(alg.getPropertyValue("OutputWorkspace"));
+      auto outWS = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(alg->getPropertyValue("OutputWorkspace"));
       for(size_t i = 0; i < 10; ++i)
       {
         TS_ASSERT_DELTA(expected_output_signal[i], outWS->signalAt(i), 0.0001);  
@@ -564,18 +486,18 @@ public:
       AnalysisDataService::Instance().addOrReplace("lhs", lhs);
       AnalysisDataService::Instance().addOrReplace("rhs", rhs);
 
-      StitchGroup1D alg;
-      alg.setRethrows(true);
-      alg.initialize();
+      IAlgorithm_sptr alg = boost::make_shared<StitchGroup1D>();
+      alg->setRethrows(true);
+      alg->initialize();
 
-      alg.setPropertyValue("LHSWorkspace", "lhs");
-      alg.setPropertyValue("RHSWorkspace", "rhs");
-      alg.setPropertyValue("OutputWorkspace", "converted");
-      alg.setProperty("StartOverlap", 0.3);
-      alg.setProperty("EndOverlap", 0.7);
-      alg.execute();
+      alg->setProperty("LHSWorkspace", "lhs");
+      alg->setProperty("RHSWorkspace", "rhs");
+      alg->setPropertyValue("OutputWorkspace", "converted");
+      alg->setProperty("StartOverlap", 0.3);
+      alg->setProperty("EndOverlap", 0.7);
+      alg->execute();
 
-      auto outWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(alg.getPropertyValue("OutputWorkspace"));
+      auto outWS = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(alg->getPropertyValue("OutputWorkspace"));
       TS_ASSERT_EQUALS(2, outWS->size());
       auto outWS_1 = boost::dynamic_pointer_cast<IMDHistoWorkspace>(outWS->getItem(0));
       for(size_t i = 0; i < 10; ++i)

@@ -1,5 +1,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+
+#include <boost/make_shared.hpp>
 #include <climits>
 #include <iostream>
 
@@ -295,6 +297,28 @@ namespace Mantid
         ++itr;
       }
       return numUnique;
+    }
+
+    //------------------------------------------------------------------------------------------------
+    /**
+     * Create a map between a single ID & a list of ID having the same spectrum number
+     * @returns A map with the key as the detector ID and the value as the detector IDs
+     * having the same spectrum number
+     */
+    boost::shared_ptr<det2group_map> SpectraDetectorMap::createIDGroupsMap() const
+    {
+      auto mapping = new det2group_map;
+
+      for(auto iter = m_s2dmap.begin(); iter != m_s2dmap.end(); ++iter)
+      {
+        auto dets = this->getDetectors(iter->first);
+        if(!dets.empty())
+        {
+          mapping->insert(std::make_pair(dets.front(), dets));
+        }
+      }
+
+      return boost::shared_ptr<det2group_map>(mapping);
     }
 
     //------------------------------------------------------------------------------------------------

@@ -48,11 +48,8 @@ class DLLExport MDTransfQ3D: public MDTransfModQ
 public:
     /// the name, this subalgorithm is known to users (will appear in selection list)
     const std::string transfID()const; // {return "Q3D"; }
-    /** energy conversion modes supported by this class; 
-      * The class supports three standard energy conversion modes */
-    //std::vector<std::string> getEmodes()const;
-
-    bool calcMatrixCoord(const double& X,std::vector<coord_t> &Coord)const;
+    bool calcYDepCoordinates(std::vector<coord_t> &Coord,size_t i);
+    bool calcMatrixCoord(const double& X,std::vector<coord_t> &Coord, double &s, double &err)const;
     // constructor;
     MDTransfQ3D();
     /* clone method allowing to provide the copy of the particular class */
@@ -73,10 +70,16 @@ public:
     std::vector<std::string> getDefaultDimID(CnvrtToMD::EModes dEmode,
         API::MatrixWorkspace_const_sptr Sptr = API::MatrixWorkspace_const_sptr())const;
 protected:
-    // all variables are the same as in ModQ
+    // the variable which verifies if Lorentz corrections have to be calculated in Elastic mode;
+    bool m_isLorentzCorrected;
+    // pointer to the array of precalculated sin^2(Theta) values for all detectors, used if Lorentz corrections calculations are requested
+    double const * m_SinThetaSqArray;
+    // current value of Sin(Theta)^2 corresponding to the current detector value and used to calculate Lorentz corrections
+    double m_SinThetaSq;
+    // all other variables are the same as in ModQ   
 private:
      /// how to transform workspace data in elastic case
-    inline bool calcMatrixCoord3DElastic(const double &k0,std::vector<coord_t> &Coored)const;
+    inline bool calcMatrixCoord3DElastic(const double &k0,std::vector<coord_t> &Coored,double &s, double &err)const;
     /// how to transform workspace data in inelastic case
     inline bool calcMatrixCoord3DInelastic(const double &DeltaE,std::vector<coord_t> &Coored)const;
     

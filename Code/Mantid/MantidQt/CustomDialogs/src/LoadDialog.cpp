@@ -67,7 +67,10 @@ namespace MantidQt
       QString suggestion;
       if( m_form.fileWidget->isValid() )
       {
-        suggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).baseName();
+        if( m_form.fileWidget->getFilenames().size() == 1 )
+          suggestion = QFileInfo(m_form.fileWidget->getFirstFilename()).baseName();
+        else
+          suggestion = "MultiFiles";
       }
       m_form.workspaceEdit->setText(suggestion);
     }

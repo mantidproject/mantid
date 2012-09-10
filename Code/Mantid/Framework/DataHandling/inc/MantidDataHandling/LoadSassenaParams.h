@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
 // special library headers

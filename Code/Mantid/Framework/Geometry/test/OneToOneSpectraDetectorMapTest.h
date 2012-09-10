@@ -46,8 +46,14 @@ public:
     TSM_ASSERT_EQUALS("Number of elements should match number of spectra (0)", 0, empty.nSpectra());
     OneToOneSpectraDetectorMap many(1,10);
     TSM_ASSERT_EQUALS("Number of elements should match number of spectra (10)", 10, many.nSpectra());
-    
-    
+  }
+
+  void test_DetToDetList_Gives_One_To_One_Map()
+  {
+    OneToOneSpectraDetectorMap single(1,100);
+    auto mapping = single.createIDGroupsMap();
+
+    TSM_ASSERT_EQUALS("Detector to group map should be the same size as the spectra map", single.nElements(), mapping->size());
   }
 
   void test_That_Two_Objects_With_The_Same_Start_And_End_Are_Considered_Equal()

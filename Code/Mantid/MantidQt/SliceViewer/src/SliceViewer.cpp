@@ -2,6 +2,9 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
@@ -12,10 +15,16 @@
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
+#include "MantidQtSliceViewer/PeakOverlay.h"
 #include "MantidQtSliceViewer/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
+#include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
+#include "MantidQtSliceViewer/NullPeaksPresenter.h"
+#include "MantidQtSliceViewer/PeakOverlayFactory.h"
+#include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
+#include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "qmainwindow.h"
 #include "qmenubar.h"
 #include <iomanip>
@@ -47,6 +56,7 @@
 #include <qwt_scale_map.h>
 #include <sstream>
 #include <vector>
+#include <boost/make_shared.hpp>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
@@ -86,7 +96,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_dimX(0), m_dimY(1),
       m_logColor(false),
       m_fastRender(true),
-      m_rebinMode(false), m_rebinLocked(true)
+      m_rebinMode(false), m_rebinLocked(true), m_peaksPresenter(PeaksPresenter_sptr(new NullPeaksPresenter))
 {
 	ui.setupUi(this);
 
@@ -115,12 +125,14 @@ SliceViewer::SliceViewer(QWidget *parent)
   initZoomer();
   ui.btnZoom->hide();
 
+ 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
   QObject::connect(ui.btnClearLine, SIGNAL(clicked()), this, SLOT(clearLine()));
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(setColorScaleAutoFull()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(setColorScaleAutoSlice()));
   QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this, SLOT(rebinParamsChanged()));
+  QObject::connect(ui.btnPeakOverlay, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
 
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this, SLOT(loadColorMapSlot()));
@@ -142,7 +154,15 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_overlayWSOutline->setShowHandles(false);
   m_overlayWSOutline->setShowLine(false);
   m_overlayWSOutline->setShown(false);
+  // -------- Peak Overlay ----------------
+  //PeakOverlay* m_peakOverlay = new PeakOverlay(m_plot, m_plot->canvas(), QPointF(0.5,0.5), QPointF(0.1, 0.2)); //TODO use the peak overlay
+  //m_peakOverlay->setPlaneDistance(0);
 
+  //IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>("loadedpeaks2");
+  //    PeakOverlayFactory* factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), PeakDimensions::HKLView);
+  //    m_peaksPresenter = boost::make_shared<PeaksPresenter>(factory, peaksWS);
+
+  ui.btnPeakOverlay->setEnabled(true);
 }
 
 //------------------------------------------------------------------------------------
@@ -285,6 +305,13 @@ void SliceViewer::initMenus()
   connect(action, SIGNAL(triggered()), this, SLOT(rebinParamsChanged()));
   m_menuView->addAction(action);
   m_actionRefreshRebin = action;
+
+  m_menuView->addSeparator();
+
+  action = new QAction(QPixmap(), "Peak Overlay", this);
+  m_syncPeakOverlay = new SyncedCheckboxes(action, ui.btnPeakOverlay, false);
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
+  m_menuView->addAction(action);
 
   m_menuView->addSeparator();
 
@@ -955,6 +982,7 @@ void SliceViewer::resetZoom()
   resetAxis(m_spect->yAxis(), m_Y );
   // Make sure the view updates
   m_plot->replot();
+  m_peaksPresenter->update();
 }
 
 //------------------------------------------------------------------------------------
@@ -1214,13 +1242,20 @@ QwtDoubleInterval SliceViewer::getRange(std::vector<IMDIterator *> iterators)
 /// Find the full range of values in the workspace
 void SliceViewer::findRangeFull()
 {
-  if (!m_ws) return;
+  IMDWorkspace_sptr workspace_used = m_ws;
+  if(m_rebinMode)
+  {
+    workspace_used = this->m_overlayWS;
+  }
+
+  if (!workspace_used) return;
+
   // Acquire a scoped read-only lock on the workspace, preventing it from being written
   // while we iterate through.
-  ReadLock lock(*m_ws);
+  ReadLock lock(*workspace_used);
 
   // Iterate through the entire workspace
-  std::vector<IMDIterator *> iterators = m_ws->createIterators(PARALLEL_GET_MAX_THREADS);
+  std::vector<IMDIterator *> iterators = workspace_used->createIterators(PARALLEL_GET_MAX_THREADS);
   m_colorRangeFull = getRange(iterators);
 }
 
@@ -1230,10 +1265,16 @@ void SliceViewer::findRangeFull()
 part of the workspace */
 void SliceViewer::findRangeSlice()
 {
-  if (!m_ws) return;
+  IMDWorkspace_sptr workspace_used = m_ws;
+  if(m_rebinMode)
+  {
+    workspace_used = this->m_overlayWS;
+  }
+
+  if (!workspace_used) return;
   // Acquire a scoped read-only lock on the workspace, preventing it from being written
   // while we iterate through.
-  ReadLock lock(*m_ws);
+  ReadLock lock(*workspace_used);
 
   m_colorRangeSlice = QwtDoubleInterval(0., 1.0);
 
@@ -1242,8 +1283,8 @@ void SliceViewer::findRangeSlice()
   QwtDoubleInterval yint = m_plot->axisScaleDiv( m_spect->yAxis() )->interval();
 
   // Find the min-max extents in each dimension
-  VMD min(m_ws->getNumDims());
-  VMD max(m_ws->getNumDims());
+  VMD min(workspace_used->getNumDims());
+  VMD max(workspace_used->getNumDims());
   for (size_t d=0; d<m_dimensions.size(); d++)
   {
     DimensionSliceWidget * widget = m_dimWidgets[d];
@@ -1385,6 +1426,8 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
+  if ( m_dimWidgets.size() > 2 ) // Temporary fix for crash when displaying Workspace2D (where m_dimWidgets only has 2 elements)
+    m_peaksPresenter->updateWithSlicePoint(m_dimWidgets[2]->getSlicePoint());
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
@@ -1726,6 +1769,7 @@ void SliceViewer::setXYLimits(double xleft, double xright, double ybottom, doubl
   m_plot->setAxisScale( m_spect->yAxis(), ybottom, ytop);
   // Make sure the view updates
   m_plot->replot();
+  m_peaksPresenter->update();
 }
 
 //------------------------------------------------------------------------------------
@@ -1781,7 +1825,7 @@ void SliceViewer::openFromXML(const QString & xml)
   if (wsName.empty()) throw std::runtime_error("SliceViewer::openFromXML(): Empty MDWorkspaceName found!");
 
   // Look for the rebinned workspace with a custom name:
-  std::string histoName = wsName + "_mdhisto";
+  std::string histoName = wsName + "_visual_md";
   // Use the rebinned workspace if available.
   if (AnalysisDataService::Instance().doesExist(histoName))
     this->setWorkspace(QString::fromStdString(histoName));
@@ -2023,6 +2067,43 @@ void SliceViewer::dynamicRebinComplete(bool error)
   else
     m_overlayWSOutline->setShown(false);
   this->updateDisplay();
+}
+
+/**
+Event handler for selection/de-selection of peak overlays.
+@param checked : True if peak overlay option is checked.
+*/
+void SliceViewer::peakOverlay_toggled(bool checked)
+{
+  if(checked)
+  {
+    MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace");
+    int ret = dlg.exec();
+    if(ret == QDialog::Accepted)
+    {
+      QStringList list = dlg.getSelectedNames();
+      if(!list.isEmpty())
+      {
+        IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
+        PeakOverlayFactory* factory = NULL;
+        try
+        {
+          FirstExperimentInfoQueryAdapter<Mantid::API::IMDHistoWorkspace> query(m_ws);
+          factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), query);
+        }
+        catch(std::invalid_argument&)
+        {
+          FirstExperimentInfoQueryAdapter<Mantid::API::IMDEventWorkspace> query(m_ws);
+          factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), query);
+        }
+        m_peaksPresenter = PeaksPresenter_sptr(new ConcretePeaksPresenter(factory, peaksWS));
+      }
+    }
+  }
+  else
+  {
+    m_peaksPresenter = PeaksPresenter_sptr(new NullPeaksPresenter);
+  }
 }
 
 } //namespace

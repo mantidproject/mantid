@@ -14,17 +14,6 @@ namespace Geometry
   using Kernel::V3D;
   using Kernel::Quat;
 
-  /// Void deleter for shared pointers
-class NoDeleting
-{
-public:
-    /// deleting operator. Does nothing
-    void operator()(void*p)
-    {
-      (void) p; //Avoid compiler warnings
-    }
-};
-
 
 /** Empty constructor
  */
@@ -270,11 +259,84 @@ void CompAssembly::getChildren(std::vector<IComponent_const_sptr> & outVector, b
   }
 }
 
+/**
+* Find a component by name.
+* @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
+* If the name contains '/', it will search the the component whose name occurs before the '/' 
+* then within that component's assembly,
+* search the component whose name occurs after the '/' and so on with any subsequent '/'. 
+* For example to find 'tube020' in 'panel07', one could use the cname 'panel07/tube020', 
+* given that tube020 is unique within panel07.
+* @param nlevels :: Optional argument to limit number of levels searched. 
+* If cname has a '/', then nlevels will apply to each step delimited by the '/'s, rather than the whole search.
+* In particular, nlevels=1, would force cname to be a full path name.
+* @returns A shared pointer to the component
+*/
+boost::shared_ptr<const IComponent> CompAssembly::getComponentByName(const std::string & cname, int nlevels) const
+{
+  boost::shared_ptr<const IComponent> node = boost::shared_ptr<const IComponent>(this, NoDeleting());
+
+  // If name has '/' in it, it is taken as part of a path name of the component.
+  // Steps may be skipped at a '/' from the path name, 
+  // but if what follows the skip is not unique within what precedes it, only the first found is returned.
+  size_t cut = cname.find('/');
+  if ( cut < cname.length() ) {
+    node = this->getComponentByName( cname.substr(0,cut), nlevels);
+    if(node) {
+       boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(node);
+       return asmb->getComponentByName( cname.substr(cut+1,std::string::npos), nlevels );
+    } else {
+        return boost::shared_ptr<const IComponent>(); // Search failed
+    }
+  }
+
+  // Check the instrument name first
+  if( this->getName() == cname )
+  {
+    return node;
+  }
+  // Otherwise Search the instrument tree using a breadth-first search algorithm since most likely candidates
+  // are higher-level components
+  // I found some useful info here http://www.cs.bu.edu/teaching/c/tree/breadth-first/
+  std::deque<boost::shared_ptr<const IComponent> > nodeQueue;
+  // Need to be able to enter the while loop
+  nodeQueue.push_back(node);
+  int nlevel = 0;
+  const bool limitSearch(nlevels > 0);
+  while( !nodeQueue.empty() )
+  {
+    node = nodeQueue.front();
+    nodeQueue.pop_front();
+    int nchildren(0);
+    boost::shared_ptr<const ICompAssembly> asmb = boost::dynamic_pointer_cast<const ICompAssembly>(node);
+    if( asmb )
+    {
+      nchildren = asmb->nelements();
+    }
+    for( int i = 0; i < nchildren; ++i )
+    {
+      boost::shared_ptr<const IComponent> comp = (*asmb)[i];
+      if( comp->getName() == cname )
+      {
+        return comp;
+      }
+      else
+      {
+        nodeQueue.push_back(comp);
+      }
+    }
+    nlevel++;
+    if( limitSearch && nlevel == nlevels) break;
+  }// while-end
+
+  // If we have reached here then the search failed
+  return boost::shared_ptr<const IComponent>();
+}
 
 
 //------------------------------------------------------------------------------------------------
 /**
- * Get the bounding box for this assembly. It is simply the sum of the bounding boxes of its children
+* Get the bounding box for this assembly. It is simply the sum of the bounding boxes of its children
  * @param assemblyBox :: [Out] The resulting bounding box is stored here.
  */
 void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const

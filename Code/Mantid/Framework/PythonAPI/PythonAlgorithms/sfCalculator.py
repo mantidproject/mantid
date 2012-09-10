@@ -495,10 +495,10 @@ def outputFittingParameters(a, b, error_a, error_b,
                 _S2H = "{0:.2f}".format(abs(S2H[i]))
                 _S1W = "{0:.2f}".format(abs(S1W[i]))
                 _S2W = "{0:.2f}".format(abs(S2W[i]))
-                _a = "{0:.2f}".format(a[i])
-                _b = "{0:.2f}".format(b[i])
-                _error_a = "{0:.2f}".format(float(error_a[i]))
-                _error_b = "{0:.2f}".format(float(error_b[i]))
+                _a = "{0:}".format(a[i])
+                _b = "{0:}".format(b[i])
+                _error_a = "{0:}".format(float(error_a[i]))
+                _error_b = "{0:}".format(float(error_b[i]))
             
                 _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
                 _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
@@ -523,10 +523,10 @@ def outputFittingParameters(a, b, error_a, error_b,
             _S2H = "{0:.2f}".format(abs(S2H[j]))
             _S1W = "{0:.2f}".format(abs(S1W[j]))
             _S2W = "{0:.2f}".format(abs(S2W[j]))
-            _a = "{0:.2f}".format(a[j])
-            _b = "{0:.2f}".format(b[j])
-            _error_a = "{0:.2f}".format(float(error_a[j]))
-            _error_b = "{0:.2f}".format(float(error_b[j]))
+            _a = "{0:}".format(a[j])
+            _b = "{0:}".format(b[j])
+            _error_a = "{0:}".format(float(error_a[j]))
+            _error_b = "{0:}".format(float(error_b[j]))
             
             _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
             _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
@@ -554,10 +554,10 @@ def outputFittingParameters(a, b, error_a, error_b,
             _S2H = "{0:.2f}".format(abs(S2H[i]))
             _S1W = "{0:.2f}".format(abs(S1W[i]))
             _S2W = "{0:.2f}".format(abs(S2W[i]))
-            _a = "{0:.2f}".format(a[i])
-            _b = "{0:.2f}".format(b[i])
-            _error_a = "{0:.2f}".format(float(error_a[i]))
-            _error_b = "{0:.2f}".format(float(error_b[i]))
+            _a = "{0:}".format(a[i])
+            _b = "{0:}".format(b[i])
+            _error_a = "{0:}".format(float(error_a[i]))
+            _error_b = "{0:}".format(float(error_b[i]))
             
             _line += 'S1H=' + _S1H + ' ' + 'S2H=' + _S2H + ' '
             _line += 'S1W=' + _S1W + ' ' + 'S2W=' + _S2W + ' '
@@ -714,7 +714,6 @@ def isRunsSorted(list_runs, S1H, S2H):
             return False
     
     return True
-
 
 def calculateAndFit(numerator='',
                     denominator='',

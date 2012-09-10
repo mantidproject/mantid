@@ -134,10 +134,9 @@ public:
     Mantid::Kernel::V3D detectionPoint;
     TS_ASSERT_THROWS_NOTHING(detectionPoint = event->sampleOverDetectorVolume(0.2, 0.15, 0.75));
 
-    TS_ASSERT_DELTA(detectionPoint[Mantid::Geometry::X], 0.006, 1e-8);
-    TS_ASSERT_DELTA(detectionPoint[Mantid::Geometry::Y], -0.00350008, 1e-8);
-    TS_ASSERT_DELTA(detectionPoint[Mantid::Geometry::Z], -0.0072, 1e-8);
-
+    TS_ASSERT_DELTA(detectionPoint[0], -0.0072, 1e-8); // Beam
+    TS_ASSERT_DELTA(detectionPoint[1], -0.0084, 1e-8); // Perp
+    TS_ASSERT_DELTA(detectionPoint[2], 0.00250006, 1e-8); // Up
   }
   void test_labToDetTransformation_Yields_Expected_Matrix()
   {

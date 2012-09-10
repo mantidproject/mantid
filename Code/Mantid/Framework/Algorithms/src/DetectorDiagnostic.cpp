@@ -1,3 +1,17 @@
+/*WIKI*
+This algorithm is a C++ replacement for the Python diagnostics.diagnose
+function located in the scripts/inelastic directory. The algorithm expects
+processed workspaces as input just as the other function did. The main
+functionality of the algorithm is to determine issues with detector vanadium
+runs and mask out bad pixels. The algorithms that are run on the detector
+vanadium are FindDetectorsOutsideLimits and MedianDetectorTest. It also performs
+a second set of diagnostics on another detector vanadium run and
+DetectorEfficiencyVariation on the two. The algorithm also checks processed
+sample workspaces (total counts and background) for bad pixels as well. The total
+counts workspace is tested with FindDetectorsOutsideLimits. The background
+workspace is run through MedianDetector test. A processed sample workspace can
+be given to perform and CreatePSDBleedMask will be run on it.
+*WIKI*/
 //--------------------------------------------------------------------------
 // Includes
 //--------------------------------------------------------------------------
@@ -171,23 +185,27 @@ namespace Mantid
 
       // integrate the data once to pass to subalgorithms
       m_fracDone = 0.;
-      MatrixWorkspace_sptr countsWS = integrateSpectra(inputWS, m_minIndex, m_maxIndex,
-                                                       m_rangeLower, m_rangeUpper, true);
+
+      // Get the other workspaces
+      MatrixWorkspace_sptr input2WS = getProperty("DetVanCompare");
+      MatrixWorkspace_sptr totalCountsWS = getProperty("SampleTotalCountsWorkspace");
+      MatrixWorkspace_sptr bkgWS = getProperty("SampleBackgroundWorkspace");
+      MatrixWorkspace_sptr sampleWS = getProperty("SampleWorkspace");
 
       // calculate the number of tests for progress bar
       m_progStepWidth = 0;
       {
         int numTests(1); // if detector vanadium present, do it!
-        if (!getPropertyValue("DetVanCompare").empty())
+        if (input2WS)
           numTests += 1;
-        if (!getPropertyValue("SampleTotalCountsWorkspace").empty())
+        if (totalCountsWS)
           numTests += 1;
-        if (!getPropertyValue("SampleBackgroundWorkspace").empty())
+        if (bkgWS)
           numTests += 1;
         double temp = getProperty("MaxTubeFramerate");
-        if (temp > 0. && !getPropertyValue("SampleWorkspace").empty())
+        if (temp > 0. && sampleWS)
           numTests += 1;
-
+        g_log.information() << "Number of tests requested: " << numTests << std::endl;
         m_progStepWidth = (1.-m_fracDone) / static_cast<double>(numTests);
       }
 
@@ -196,29 +214,25 @@ namespace Mantid
 
       // Perform FindDetectorsOutsideLimits and MedianDetectorTest on the
       // detector vanadium
-      this->doDetVanTest(countsWS, maskWS, numFailed);
+      maskWS = this->doDetVanTest(inputWS, numFailed);
 
       // DetectorEfficiencyVariation (only if two workspaces are specified)
-      if (!getPropertyValue("DetVanCompare").empty())
+      if (input2WS)
       {
-          MatrixWorkspace_sptr input2WS = getProperty("DetVanCompare");
-
-          MatrixWorkspace_sptr compareWS = integrateSpectra(input2WS, m_minIndex, m_maxIndex,
-              m_rangeLower, m_rangeUpper, true);
-
           // apply mask to what we are going to input
-          applyMask(compareWS, maskWS);
+          applyMask(input2WS, maskWS);
 
-          this->doDetVanTest(compareWS, maskWS, numFailed);
+          maskWS = this->doDetVanTest(input2WS, numFailed);
 
           // get the relevant inputs
           double variation = getProperty("DetVanRatioVariation");
 
           // run the subalgorithm
-          IAlgorithm_sptr alg = createSubAlgorithm("DetectorEfficiencyVariation", m_fracDone, m_fracDone+m_progStepWidth);
+          IAlgorithm_sptr alg = createSubAlgorithm("DetectorEfficiencyVariation",
+              m_fracDone, m_fracDone+m_progStepWidth);
           m_fracDone += m_progStepWidth;
-          alg->setProperty("WhiteBeamBase", countsWS);
-          alg->setProperty("WhiteBeamCompare", compareWS);
+          alg->setProperty("WhiteBeamBase", inputWS);
+          alg->setProperty("WhiteBeamCompare", input2WS);
           alg->setProperty("StartWorkspaceIndex", m_minIndex);
           alg->setProperty("EndWorkspaceIndex", m_maxIndex);
           alg->setProperty("RangeLower", m_rangeLower);
@@ -226,20 +240,20 @@ namespace Mantid
           alg->setProperty("Variation", variation);
           alg->executeAsSubAlg();
           MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
-          maskWS += localMaskWS;
+          applyMask(inputWS, localMaskWS);
+          applyMask(input2WS, localMaskWS);
           int localFails = alg->getProperty("NumberOfFailures");
           numFailed += localFails;
       }
 
       // Zero total counts check for sample counts
-      if (!getPropertyValue("SampleTotalCountsWorkspace").empty())
+      if (totalCountsWS)
         {
-          g_log.warning() << "DetDiag using total counts" << std::endl;
-          MatrixWorkspace_sptr totalCountsWS = getProperty("SampleTotalCountsWorkspace");
           // apply mask to what we are going to input
           applyMask(totalCountsWS, maskWS);
 
-          IAlgorithm_sptr zeroChk = createSubAlgorithm("FindDetectorsOutsideLimits", m_fracDone, m_fracDone+m_progStepWidth);
+          IAlgorithm_sptr zeroChk = createSubAlgorithm("FindDetectorsOutsideLimits",
+              m_fracDone, m_fracDone+m_progStepWidth);
           m_fracDone += m_progStepWidth;
           zeroChk->setProperty("InputWorkspace", totalCountsWS);
           zeroChk->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -248,20 +262,14 @@ namespace Mantid
           zeroChk->setProperty("HighThreshold", 1.0e100);
           zeroChk->executeAsSubAlg();
           MatrixWorkspace_sptr localMaskWS = zeroChk->getProperty("OutputWorkspace");
-          maskWS += localMaskWS;
+          applyMask(inputWS, localMaskWS);
           int localFails = zeroChk->getProperty("NumberOfFailures");
           numFailed += localFails;
-          MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(localMaskWS);
-          if (m)
-            {
-              g_log.information() << "A: " << m->getNumberMasked() << std::endl;
-            }
         }
 
       // Background check
-      if (!getPropertyValue("SampleBackgroundWorkspace").empty())
+      if (bkgWS)
         {
-          MatrixWorkspace_sptr bkgWS = getProperty("SampleBackgroundWorkspace");
           // apply mask to what we are going to input
           applyMask(bkgWS, maskWS);
 
@@ -270,7 +278,8 @@ namespace Mantid
           double highThreshold = getProperty("SampleBkgHighAcceptanceFactor");
 
           // run the subalgorithm
-          IAlgorithm_sptr alg = createSubAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone+m_progStepWidth);
+          IAlgorithm_sptr alg = createSubAlgorithm("MedianDetectorTest",
+              m_fracDone, m_fracDone+m_progStepWidth);
           m_fracDone += m_progStepWidth;
           alg->setProperty("InputWorkspace", bkgWS);
           alg->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -283,28 +292,28 @@ namespace Mantid
           alg->setProperty("ExcludeZeroesFromMedian", true);
           alg->executeAsSubAlg();
           MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
-          maskWS += localMaskWS;
+          applyMask(inputWS, localMaskWS);
           int localFails = alg->getProperty("NumberOfFailures");
           numFailed += localFails;
         }
 
       // CreatePSDBleedMask (if selected)
       double maxTubeFrameRate = getProperty("MaxTubeFramerate");
-      if (maxTubeFrameRate > 0. && !getPropertyValue("SampleWorkspace").empty())
+      if (maxTubeFrameRate > 0. && sampleWS)
       {
-          MatrixWorkspace_sptr sampleWS = getProperty("SampleWorkspace");
           // get the relevant inputs
           int numIgnore = getProperty("NIgnoredCentralPixels");
 
           // run the subalgorithm
-          IAlgorithm_sptr alg = createSubAlgorithm("CreatePSDBleedMask", m_fracDone, m_fracDone+m_progStepWidth);
+          IAlgorithm_sptr alg = createSubAlgorithm("CreatePSDBleedMask",
+              m_fracDone, m_fracDone+m_progStepWidth);
           m_fracDone += m_progStepWidth;
           alg->setProperty("InputWorkspace", sampleWS);
           alg->setProperty("MaxTubeFramerate", maxTubeFrameRate);
           alg->setProperty("NIgnoredCentralPixels", numIgnore);
           alg->executeAsSubAlg();
           MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
-          maskWS += localMaskWS;
+          applyMask(inputWS, localMaskWS);
           int localFails = alg->getProperty("NumberOfFailures");
           numFailed += localFails;
       }
@@ -312,14 +321,23 @@ namespace Mantid
       g_log.information() << numFailed << " spectra are being masked\n";
       setProperty("NumberOfFailures", numFailed);
 
-      MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(maskWS);
-      if (m)
-        {
-          g_log.information() << "B: " << m.get()->getNumberMasked() << std::endl;
-        }
+      // Extract the mask from the vanadium workspace
+      std::vector<int> detList;
+      IAlgorithm_sptr extract = createSubAlgorithm("ExtractMask");
+      extract->setProperty("InputWorkspace", inputWS);
+      extract->setProperty("OutputWorkspace", "final_mask");
+      extract->setProperty("DetectorList", detList);
+      extract->executeAsSubAlg();
+      maskWS = extract->getProperty("OutputWorkspace");
+
       setProperty("OutputWorkspace", maskWS);
     }
 
+    /**
+     * Function to apply a given mask to a workspace.
+     * @param inputWS : the workspace to mask
+     * @param maskWS : the workspace containing the masking information
+     */
     void DetectorDiagnostic::applyMask(API::MatrixWorkspace_sptr inputWS,
                                        API::MatrixWorkspace_sptr maskWS)
     {
@@ -331,18 +349,27 @@ namespace Mantid
       maskAlg->executeAsSubAlg();
     }
 
-    void DetectorDiagnostic::doDetVanTest(API::MatrixWorkspace_sptr inputWS,
-        API::MatrixWorkspace_sptr &maskWS, int &nFails)
+    /**
+     * Function that encapulates the standard detector vanadium tests.
+     * @param inputWS : the detector vanadium workspace to test
+     * @param nFails : placeholder for the number of failures
+     * @return : the resulting mask from the checks
+     */
+    API::MatrixWorkspace_sptr DetectorDiagnostic::doDetVanTest(API::MatrixWorkspace_sptr inputWS,
+        int &nFails)
     {
+      MatrixWorkspace_sptr localMask;
+
       // FindDetectorsOutsideLimits
       // get the relevant inputs
       double lowThreshold = getProperty("LowThreshold");
       double highThreshold = getProperty("HighThreshold");
-
       // run the subalgorithm
-      IAlgorithm_sptr fdol = createSubAlgorithm("FindDetectorsOutsideLimits", m_fracDone, m_fracDone+m_progStepWidth);
+      IAlgorithm_sptr fdol = createSubAlgorithm("FindDetectorsOutsideLimits",
+          m_fracDone, m_fracDone+m_progStepWidth);
       m_fracDone += m_progStepWidth;
       fdol->setProperty("InputWorkspace", inputWS);
+      fdol->setProperty("OutputWorkspace", localMask);
       fdol->setProperty("StartWorkspaceIndex", m_minIndex);
       fdol->setProperty("EndWorkspaceIndex", m_maxIndex);
       fdol->setProperty("RangeLower", m_rangeLower);
@@ -350,12 +377,7 @@ namespace Mantid
       fdol->setProperty("LowThreshold", lowThreshold);
       fdol->setProperty("HighThreshold", highThreshold);
       fdol->executeAsSubAlg();
-      maskWS = fdol->getProperty("OutputWorkspace");
-      MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(maskWS);
-      if (m)
-        {
-          g_log.information() << "A: " << m.get()->getNumberMasked() << std::endl;
-        }
+      localMask = fdol->getProperty("OutputWorkspace");
       int localFails = fdol->getProperty("NumberOfFailures");
       nFails += localFails;
 
@@ -370,7 +392,7 @@ namespace Mantid
 
       // MedianDetectorTest
       // apply mask to what we are going to input
-      applyMask(inputWS, maskWS);
+      applyMask(inputWS, localMask);
 
       // run the subalgorithm
       IAlgorithm_sptr mdt = createSubAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone+m_progStepWidth);
@@ -388,16 +410,12 @@ namespace Mantid
       mdt->setProperty("HighOutlier", highOutlier);
       mdt->setProperty("ExcludeZeroesFromMedian", excludeZeroes);
       mdt->executeAsSubAlg();
-      MatrixWorkspace_sptr localMaskWS = mdt->getProperty("OutputWorkspace");
-      m = boost::dynamic_pointer_cast<MaskWorkspace>(localMaskWS);
-      if (m)
-        {
-          g_log.information() << "A: " << m.get()->getNumberMasked() << std::endl;
-        }
-
-      maskWS += localMaskWS;
+      localMask = mdt->getProperty("OutputWorkspace");
       localFails = mdt->getProperty("NumberOfFailures");
       nFails += localFails;
+
+      applyMask(inputWS, localMask);
+      return localMask;
     }
 
     //--------------------------------------------------------------------------

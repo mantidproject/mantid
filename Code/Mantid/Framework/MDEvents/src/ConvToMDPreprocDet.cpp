@@ -23,8 +23,9 @@ namespace Mantid
     bool ConvToMDPreprocDet::isDefined(const API::MatrixWorkspace_const_sptr &inputWS)const
     {
       if(det_dir.empty())return false;
-
-      if(pBaseInstr !=inputWS->getInstrument()->baseInstrument())return false;
+      if(!inputWS)throw(std::invalid_argument("ConvToMDPreprocDet::isDefined function does not work with empty input workspace pointer"));
+      // make crude comparison of instruments
+      if ( pBaseInstr->getName() != inputWS->getInstrument()->getName() )return false;
       return true;
     }
 
@@ -35,6 +36,7 @@ namespace Mantid
       this->L2.resize(nHist);
       this->TwoTheta.resize(nHist);
       this->detIDMap.resize(nHist);
+      this->SinThetaSq.resize(nHist);
       this->spec2detMap.assign(nHist,uint32_t(-1));
 
 
@@ -100,11 +102,14 @@ namespace Mantid
         double polar        =  inputWS->detectorTwoTheta(spDet);
         double azim         =  spDet->getPhi();    
         this->TwoTheta[actual_detectors_count]  =  polar;
-
+     
         double sPhi=sin(polar);
         double ez = cos(polar);
         double ex = sPhi*cos(azim);
         double ey = sPhi*sin(azim);
+        double sinTheta=sin(0.5*polar);
+        this->SinThetaSq[actual_detectors_count]  = sinTheta*sinTheta;
+
 
         this->det_dir[actual_detectors_count].setX(ex);
         this->det_dir[actual_detectors_count].setY(ey);
@@ -122,6 +127,7 @@ namespace Mantid
         this->det_id.resize(actual_detectors_count);
         this->L2.resize(actual_detectors_count);
         this->TwoTheta.resize(actual_detectors_count);
+        this->SinThetaSq.resize(actual_detectors_count);
         this->detIDMap.resize(actual_detectors_count);
       }
       Log.information()<<"finished preprocessing detectors locations \n";
@@ -151,6 +157,7 @@ namespace Mantid
 
 
         this->TwoTheta[i] =  polar;
+        this->SinThetaSq[i]= 0;
 
 
         double ez = 1.;
@@ -182,6 +189,7 @@ namespace Mantid
       this->det_id.clear();
       this->L2.clear();
       this->TwoTheta.clear();
+      this->SinThetaSq.clear();
       this->detIDMap.clear();
       this->spec2detMap.clear();
 

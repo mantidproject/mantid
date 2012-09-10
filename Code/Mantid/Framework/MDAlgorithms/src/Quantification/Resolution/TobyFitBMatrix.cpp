@@ -79,58 +79,52 @@ namespace Mantid
       const double ct_f = wf/x2;
 
       // Define rows of matrix that correspond to each direction
-      const unsigned int beam = 2;
-      const unsigned int up = 1;
-      const unsigned int horiz = 0;
-
+      const unsigned int beam(0), perp(1), up(2);
       TobyFitBMatrix & self = *this;
       double *beamVec = self[beam];
-      double *horizVec = self[horiz];
+      double *perpVec = self[perp];
       double *upVec = self[up];
 
       beamVec[TobyFitYVector::ModeratorTime] =  cp_i;
       beamVec[TobyFitYVector::ApertureWidthCoord] = -cp_i * gg1;
       beamVec[TobyFitYVector::ApertureHeightCoord] =  0.0;
       beamVec[TobyFitYVector::ChopperTime] = -cp_i;
-      beamVec[TobyFitYVector::ScatterPointX] =  cp_i * gg2 * sMat[0][0];
-      beamVec[TobyFitYVector::ScatterPointY] =  cp_i * gg2 * sMat[0][1];
-      beamVec[TobyFitYVector::ScatterPointZ] =  cp_i * gg2 * sMat[0][2];
+      beamVec[TobyFitYVector::ScatterPointBeam] =  cp_i * gg2 * sMat[1][0];
+      beamVec[TobyFitYVector::ScatterPointPerp] =  cp_i * gg2 * sMat[1][1];
+      beamVec[TobyFitYVector::ScatterPointUp] =  cp_i * gg2 * sMat[1][2];
       beamVec[TobyFitYVector::DetectorDepth] =  0.0;
       beamVec[TobyFitYVector::DetectorWidthCoord] =  0.0;
       beamVec[TobyFitYVector::DetectorHeightCoord] =  0.0;
       beamVec[TobyFitYVector::DetectionTime] =  0.0;
 
-      horizVec[TobyFitYVector::ModeratorTime] =  0.0;
-      horizVec[TobyFitYVector::ApertureWidthCoord] = -ct_i;
-      horizVec[TobyFitYVector::ApertureHeightCoord] =  0.0;
-      horizVec[TobyFitYVector::ChopperTime] =  0.0;
-      horizVec[TobyFitYVector::ScatterPointX] =  ct_i * sMat[0][0];
-      horizVec[TobyFitYVector::ScatterPointY] =  ct_i * sMat[0][1];
-      horizVec[TobyFitYVector::ScatterPointZ] =  ct_i * sMat[0][2];
-      horizVec[TobyFitYVector::DetectorDepth] =  0.0;
-      horizVec[TobyFitYVector::DetectorWidthCoord] =  0.0;
-      horizVec[TobyFitYVector::DetectorHeightCoord] =  0.0;
-      horizVec[TobyFitYVector::DetectionTime]=  0.0;
+      perpVec[TobyFitYVector::ModeratorTime] =  0.0;
+      perpVec[TobyFitYVector::ApertureWidthCoord] =  -ct_i;
+      perpVec[TobyFitYVector::ApertureHeightCoord] = 0.0;
+      perpVec[TobyFitYVector::ChopperTime] =  0.0;
+      perpVec[TobyFitYVector::ScatterPointBeam] =  ct_i * sMat[1][0];
+      perpVec[TobyFitYVector::ScatterPointPerp] =  ct_i * sMat[1][1];
+      perpVec[TobyFitYVector::ScatterPointUp] =  ct_i * sMat[1][2];
+      perpVec[TobyFitYVector::DetectorDepth] =  0.0;
+      perpVec[TobyFitYVector::DetectorWidthCoord] =  0.0;
+      perpVec[TobyFitYVector::DetectorHeightCoord] =  0.0;
+      perpVec[TobyFitYVector::DetectionTime] =  0.0;
 
       upVec[TobyFitYVector::ModeratorTime] =  0.0;
-      upVec[TobyFitYVector::ApertureWidthCoord] =  0.0;
-      upVec[TobyFitYVector::ApertureHeightCoord] = -ct_i;
+      upVec[TobyFitYVector::ApertureWidthCoord] = 0.0;
+      upVec[TobyFitYVector::ApertureHeightCoord] =  -ct_i;
       upVec[TobyFitYVector::ChopperTime] =  0.0;
-      upVec[TobyFitYVector::ScatterPointX] =  ct_i * sMat[1][0];
-      upVec[TobyFitYVector::ScatterPointY] =  ct_i * sMat[1][1];
-      upVec[TobyFitYVector::ScatterPointZ] =  ct_i * sMat[1][2];
+      upVec[TobyFitYVector::ScatterPointBeam] =  ct_i * sMat[2][0];
+      upVec[TobyFitYVector::ScatterPointPerp] =  ct_i * sMat[2][1];
+      upVec[TobyFitYVector::ScatterPointUp] =  ct_i * sMat[2][2];
       upVec[TobyFitYVector::DetectorDepth] =  0.0;
       upVec[TobyFitYVector::DetectorWidthCoord] =  0.0;
       upVec[TobyFitYVector::DetectorHeightCoord] =  0.0;
-      upVec[TobyFitYVector::DetectionTime] =  0.0;
+      upVec[TobyFitYVector::DetectionTime]=  0.0;
 
-      // Output components
-      const unsigned int beamf = beam + 3;
-      const unsigned int upf = up + 3;
-      const unsigned int horizf = horiz + 3;
-
+      // ---------- Output components ----------------------------------------
+      const unsigned int beamf(3), perpf(4), upf(5);
       double *beamOutVec = self[beamf];
-      double *horizOutVec = self[horizf];
+      double *perpOutVec = self[perpf];
       double *upOutVec = self[upf];
       const Kernel::DblMatrix & ds = observation.sampleToDetectorTransform();
 
@@ -138,37 +132,38 @@ namespace Mantid
       beamOutVec[TobyFitYVector::ApertureWidthCoord] =  cp_f *  ff1;
       beamOutVec[TobyFitYVector::ApertureHeightCoord] =  0.0;
       beamOutVec[TobyFitYVector::ChopperTime] =  cp_f * (x0+x1)/x0;
-      beamOutVec[TobyFitYVector::ScatterPointX] =  cp_f * ( sMat[2][0]/veli - (ds[2][0])/velf - ff2*sMat[0][0] );
-      beamOutVec[TobyFitYVector::ScatterPointY] =  cp_f * ( sMat[2][1]/veli - (ds[2][1])/velf - ff2*sMat[0][1] );
-      beamOutVec[TobyFitYVector::ScatterPointZ] =  cp_f * ( sMat[2][2]/veli - (ds[2][2])/velf - ff2*sMat[0][2] );
+      beamOutVec[TobyFitYVector::ScatterPointBeam] =  cp_f * ( sMat[0][0]/veli - (ds[0][0])/velf - ff2*sMat[1][0] );
+      beamOutVec[TobyFitYVector::ScatterPointPerp] =  cp_f * ( sMat[0][1]/veli - (ds[0][1])/velf - ff2*sMat[1][1] );
+      beamOutVec[TobyFitYVector::ScatterPointUp] =  cp_f * ( sMat[0][2]/veli - (ds[0][2])/velf - ff2*sMat[1][2] );
       beamOutVec[TobyFitYVector::DetectorDepth] =  cp_f/velf;
       beamOutVec[TobyFitYVector::DetectorWidthCoord] =  0.0;
       beamOutVec[TobyFitYVector::DetectorHeightCoord] =  0.0;
       beamOutVec[TobyFitYVector::DetectionTime]= -cp_f;
 
-      horizOutVec[TobyFitYVector::ModeratorTime] =  0.0;
-      horizOutVec[TobyFitYVector::ApertureWidthCoord] =  0.0;
-      horizOutVec[TobyFitYVector::ApertureHeightCoord] =  0.0;
-      horizOutVec[TobyFitYVector::ChopperTime] =  0.0;
-      horizOutVec[TobyFitYVector::ScatterPointX] = -ct_f * ( ds[0][0] );
-      horizOutVec[TobyFitYVector::ScatterPointY] = -ct_f * ( ds[0][1] );
-      horizOutVec[TobyFitYVector::ScatterPointZ] = -ct_f * ( ds[0][2] );
-      horizOutVec[TobyFitYVector::DetectorDepth]=  0.0;
-      horizOutVec[TobyFitYVector::DetectorWidthCoord] =  ct_f;
-      horizOutVec[TobyFitYVector::DetectorHeightCoord] =  0.0;
-      horizOutVec[TobyFitYVector::DetectionTime]=  0.0;
+      perpOutVec[TobyFitYVector::ModeratorTime] =  0.0;
+      perpOutVec[TobyFitYVector::ApertureWidthCoord] =  0.0;
+      perpOutVec[TobyFitYVector::ApertureHeightCoord] =  0.0;
+      perpOutVec[TobyFitYVector::ChopperTime] =  0.0;
+      perpOutVec[TobyFitYVector::ScatterPointBeam] = -ct_f * ( ds[1][0] );
+      perpOutVec[TobyFitYVector::ScatterPointPerp] = -ct_f * ( ds[1][1] );
+      perpOutVec[TobyFitYVector::ScatterPointUp] = -ct_f * ( ds[1][2] );
+      perpOutVec[TobyFitYVector::DetectorDepth] =  0.0;
+      perpOutVec[TobyFitYVector::DetectorWidthCoord] =  0.0;
+      perpOutVec[TobyFitYVector::DetectorHeightCoord] =  ct_f;
+      perpOutVec[TobyFitYVector::DetectionTime]=  0.0;
 
       upOutVec[TobyFitYVector::ModeratorTime] =  0.0;
       upOutVec[TobyFitYVector::ApertureWidthCoord] =  0.0;
       upOutVec[TobyFitYVector::ApertureHeightCoord] =  0.0;
       upOutVec[TobyFitYVector::ChopperTime] =  0.0;
-      upOutVec[TobyFitYVector::ScatterPointX] = -ct_f * ( ds[1][0] );
-      upOutVec[TobyFitYVector::ScatterPointY] = -ct_f * ( ds[1][1] );
-      upOutVec[TobyFitYVector::ScatterPointZ] = -ct_f * ( ds[1][2] );
-      upOutVec[TobyFitYVector::DetectorDepth] =  0.0;
-      upOutVec[TobyFitYVector::DetectorWidthCoord] =  0.0;
-      upOutVec[TobyFitYVector::DetectorHeightCoord] =  ct_f;
+      upOutVec[TobyFitYVector::ScatterPointBeam] = -ct_f * ( ds[2][0] );
+      upOutVec[TobyFitYVector::ScatterPointPerp] = -ct_f * ( ds[2][1] );
+      upOutVec[TobyFitYVector::ScatterPointUp] = -ct_f * ( ds[2][2] );
+      upOutVec[TobyFitYVector::DetectorDepth]=  0.0;
+      upOutVec[TobyFitYVector::DetectorWidthCoord] =  ct_f;
+      upOutVec[TobyFitYVector::DetectorHeightCoord] =  0.0;
       upOutVec[TobyFitYVector::DetectionTime]=  0.0;
+
     }
   }
 }
