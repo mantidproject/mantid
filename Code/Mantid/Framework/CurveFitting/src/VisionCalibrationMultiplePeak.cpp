@@ -21,10 +21,193 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+DECLARE_FUNCTION(VisionCalibrationMock);
+DECLARE_FUNCTION(VisionCalibrationLBGGs);
 DECLARE_FUNCTION(VisionCalibrationLBGGm); // Register VisionCalibrationLBGGs in the function factory
 DECLARE_ALGORITHM(VisionCalibrationMultiplePeak); // Register VisionCalibrationMultiplePeak in the algorithm factory
 
-VisionCalibrationLBGGs::VisionCalibrationLBGGs() : m_attName("spectrumIndex")
+VisionCalibrationMock::VisionCalibrationMock() : m_attName("spectrumIndex") , m_att(0)
+{
+  declareParameter("A0", 0.0,"linear background constant");
+  declareParameter("A1", 0.0,"linear background slope");
+
+  declareParameter("B10", 1.0,"first quadratic constant");
+//  declareParameter("B11", 0.0,"first quadratic slope");
+//  declareParameter("B12", 0.0,"first quadratic curvature");
+
+  declareParameter("PeakCenter1", 0.0,"first Gaussian peak center");
+  declareParameter("Sigma1", 1.0,"first Gaussian standard deviation");
+
+  declareParameter("B20", 1.0,"second quadratic constant");
+//  declareParameter("B21", 0.0,"second quadratic slope");
+//  declareParameter("B22", 0.0,"second quadratic curvature");
+
+  declareParameter("PeakCenter2", 0.0,"second Gaussian peak center");
+  declareParameter("Sigma2", 1.0,"second Gaussian standard deviation");
+
+}//VisionCalibrationMock::VisionCalibrationMock
+
+void VisionCalibrationMock::setActiveParameter(size_t i,double value)
+{
+  if ( !isActive(i) )  throw std::runtime_error("Attempt to use an inactive parameter");
+  if (parameterName(i) == "Sigma1")
+    setParameter(i,sqrt(fabs(1./value)),false); //set the active parameter as (1/Sigma1^2)
+  else if (parameterName(i) == "Sigma2")
+    setParameter(i,sqrt(fabs(1./value)),false);
+  else
+   setParameter(i,value,false);
+} // setActiveParameter
+
+double VisionCalibrationMock::activeParameter(size_t i)const
+{
+  if ( !isActive(i) )  throw std::runtime_error("Attempt to use an inactive parameter");
+  if (parameterName(i) == "Sigma1")
+    return 1./pow(getParameter(i),2); // return (1/Sigma1^2) in place of Sigma1
+  else if (parameterName(i) == "Sigma2")
+    return 1./pow(getParameter(i),2);
+  else
+    return getParameter(i);
+} // setActiveParameter
+
+void VisionCalibrationMock::setAttribute(const std::string& attName,const Attribute& att)
+{
+  if (attName == m_attName)
+  {
+    m_att.setInt( att.asInt() );
+    return ;
+  }
+  g_log.error(attName+" is not an attribute of this function");
+} // setAttribute
+
+API::IFunction::Attribute VisionCalibrationMock::getAttribute(const std::string& attName)const
+{
+  if (attName == m_attName) return m_att;
+  g_log.error(attName+" is not an attribute of this function");
+  return Attribute(-1);
+}  // getAttribute
+
+void VisionCalibrationMock::function1D(double* out, const double* xValues, const size_t nData) const
+{
+  const double &a0 = getParameter("A0");
+  const double &a1 = getParameter("A1");
+
+  const double &b10 = getParameter("B10");
+//  const double &b11 = getParameter("B11");
+//  const double &b12 = getParameter("B12");
+
+  const double &pc1 = getParameter("PeakCenter1");
+  const double &s1 = getParameter("Sigma1");
+  const double &r1 = pow(1/s1,2); // active parameter in place of Sigma1
+
+  const double &b20 = getParameter("B20");
+//  const double &b21 = getParameter("B21");
+//  const double &b22 = getParameter("B22");
+
+  const double &pc2 = getParameter("PeakCenter2");
+  const double &s2 = getParameter("Sigma2");
+  const double &r2 = pow(1/s2,2);
+
+  const double spc = (double)( m_att.asInt() );
+
+  for(size_t i=0; i<nData; i++)
+  {
+    double x = xValues[i];
+
+    double lb = a0+ a1 * x;
+
+//    double q1 = b10 + spc * (b11 + b12 * spc);
+    double q1 = b10;
+    double d1 = x-pc1;
+    double g1 = exp(-0.5 * r1 * d1 * d1);
+
+//    double q2 = b20 + spc * (b21 + b22 * spc);
+    double q2 = b20;
+    double d2 = x-pc2;
+    double g2 = exp(-0.5 * r2 * d2 * d2);
+
+    out[i] = lb + q1*g1 + q2*g2;
+  }
+}//function1D
+
+void VisionCalibrationMock::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
+{
+  const double &b10 = getParameter("B10");
+//  const double &b11 = getParameter("B11");
+//  const double &b12 = getParameter("B12");
+
+  const double &pc1 = getParameter("PeakCenter1");
+  const double &s1 = getParameter("Sigma1");
+  const double &r1 = pow(1/s1,2); // active parameter in place of Sigma1
+
+  const double &b20 = getParameter("B20");
+//  const double &b21 = getParameter("B21");
+//  const double &b22 = getParameter("B22");
+
+  const double &pc2 = getParameter("PeakCenter2");
+  const double &s2 = getParameter("Sigma2");
+  const double &r2 = pow(1/s2,2);
+
+  const double spc = (double)( m_att.asInt() );
+
+  for(size_t i=0; i<nData; i++)
+  {
+    double x = xValues[i];
+
+//    double q1 = b10 + spc * (b11 + b12 * spc);
+    double q1 = b10;
+    double d1 = x-pc1;
+    double g1 = exp(-0.5 * r1 * d1 * d1);
+
+//    double q2 = b20 + spc * (b21 + b22 * spc);
+    double q2 = b20;
+    double d2 = x-pc2;
+    double g2 = exp(-0.5 * r2 * d2 * d2);
+
+    //partial derivative with respect to a0
+    out->set(i,0,1.0);
+    //partial derivative with respect to a1
+    out->set(i,1,x);
+
+    //partial derivative with respect to b10
+    out->set(i,2,g1);
+    //partial derivative with respect to b11
+//    out->set(i,3,x*g1);
+    //partial derivative with respect to b12
+//    out->set(i,4,x*x*g1);
+
+    //partial derivative with respect to r1 (not s1)
+//    out->set(i,5,q1*(-0.5*d1*d1*g1));
+      out->set(i,3,q1*(-0.5*d1*d1*g1));
+    //partial derivative with respect to pc1
+//    out->set(i,6,q1*(r1*d1*g1));
+      out->set(i,4,q1*(r1*d1*g1));
+
+    //partial derivative with respect to b20
+//    out->set(i,7,g2);
+      out->set(i,5,g2);
+    //partial derivative with respect to b21
+//    out->set(i,8,x*g2);
+    //partial derivative with respect to b22
+//    out->set(i,9,x*x*g2);
+
+    //partial derivative with respect to r2 (not s2)
+//    out->set(i,10,q2*(-0.5*d2*d2*g2));
+    out->set(i,6,q2*(-0.5*d2*d2*g2));
+    //partial derivative with respect to pc2
+//    out->set(i,11,q2*(r2*d2*g2));
+    out->set(i,7,q2*(r2*d2*g2));
+
+  }
+
+}// functionDeriv1D
+
+
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+VisionCalibrationLBGGs::VisionCalibrationLBGGs() : m_attName("spectrumIndex") , m_att(0)
 {
   declareParameter("A0", 0.0,"linear background constant");
   declareParameter("A1", 0.0,"linear background slope");
@@ -40,10 +223,8 @@ VisionCalibrationLBGGs::VisionCalibrationLBGGs() : m_attName("spectrumIndex")
   declareParameter("B21", 0.0,"second quadratic slope");
   declareParameter("B22", 0.0,"second quadratic curvature");
 
-  declareParameter("PeakCenter1", 0.0,"second Gaussian peak center");
-  declareParameter("Sigma1", 1.0,"second Gaussian standard deviation");
-
-  m_att.setInt(0);
+  declareParameter("PeakCenter2", 0.0,"second Gaussian peak center");
+  declareParameter("Sigma2", 1.0,"second Gaussian standard deviation");
 
 }//VisionCalibrationLBGGs::VisionCalibrationLBGGs
 
@@ -191,7 +372,6 @@ void VisionCalibrationLBGGs::functionDeriv1D(API::Jacobian* out, const double* x
   }
 
 }// functionDeriv1D
-
 
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 // +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

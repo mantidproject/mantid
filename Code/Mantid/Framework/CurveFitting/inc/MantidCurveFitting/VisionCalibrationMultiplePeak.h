@@ -50,6 +50,33 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
  * The height of each Gaussian is a quadratic function
  */
 
+class DLLExport VisionCalibrationMock : public API::ParamFunction, public API::IFunction1D
+{
+
+public:
+  VisionCalibrationMock();
+  virtual ~VisionCalibrationMock() {};
+  virtual std::string name() const { return "VisionCalibrationMock"; }
+  virtual const std::string category() const { return "Vision\\FitFunctions"; }
+  /// Set the active parameters in place of the Gaussian standard deviations
+  virtual void setActiveParameter( size_t i, double value );
+  /// Return the active parameter value in place of the Gaussian standard deviation
+  virtual double activeParameter( size_t i ) const;
+  virtual size_t nAttributes() const { return 1; }
+  virtual void setAttribute( const std::string& attName, const Attribute& );
+  virtual Attribute getAttribute( const std::string& attName ) const;
+  virtual bool hasAttribute( const std::string& attName ) const { return attName == m_attName; };
+
+protected:
+  virtual void function1D( double* out, const double* xValues, const size_t nData ) const;
+  virtual void functionDeriv1D( API::Jacobian* out, const double* xValues, const size_t nData );
+
+  private:
+  const std::string m_attName; //name of the attribute
+  mutable Attribute m_att;    // attribute
+
+}; // class VisionCalibrationLBGGs
+
 class DLLExport VisionCalibrationLBGGs : public API::ParamFunction, public API::IFunction1D
 {
 
