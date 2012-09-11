@@ -258,7 +258,7 @@ namespace WorkflowAlgorithms
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->setPropertySettings("MaxFramerate",
         new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
-    this->declareProperty("IgnoredPixels", 80,
+    this->declareProperty("IgnoredPixels", 80.0,
         "A list of pixels to ignore in the calculations.");
     this->setPropertySettings("IgnoredPixels",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
@@ -457,6 +457,26 @@ namespace WorkflowAlgorithms
     this->reductionManager->declareProperty(new PropertyWithValue<std::string>("HardMaskWorkspace", hardMaskWsName));
   }
 
+  void DgsReduction::loadGroupingFile()
+  {
+    const std::string groupFile = this->getProperty("GroupingFile");
+    std::string groupingWsName;
+    if (groupFile.empty())
+      {
+        groupingWsName = "";
+      }
+    else
+      {
+        groupingWsName = "grouping";
+        IAlgorithm_sptr loadGrpFile = this->createSubAlgorithm("LoadDetectorsGroupingFile");
+        loadGrpFile->setAlwaysStoreInADS(true);
+        loadGrpFile->setProperty("InputFile", groupFile);
+        loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
+        loadGrpFile->execute();
+      }
+    this->reductionManager->declareProperty(new PropertyWithValue<std::string>("GroupingWorkspace", groupingWsName));
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -492,6 +512,8 @@ namespace WorkflowAlgorithms
 
     // Load the hard mask if available
     this->loadHardMask();
+    // Load the grouping file if available
+    this->loadGroupingFile();
 
     // Process the sample detector vanadium if present
     Workspace_sptr detVanWS = this->loadInputData("DetectorVanadium", false);
