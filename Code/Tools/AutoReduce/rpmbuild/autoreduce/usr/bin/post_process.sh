@@ -12,6 +12,8 @@ logfile=/var/log/SNS_applications/autoreduce.log
 
 nexusFile=$1
 # Pass input data
+echo 
+echo "=========Post Processing========="
 echo "nexusFile =" $nexusFile | sed "s/^/$(date)  /" >> $logfile
 
 # Parse nexus file path to get facility, instrument...
@@ -24,8 +26,14 @@ visit=$4
 runNumber=$5
 echo "facility="$facility",instrument="$instrument",proposal="$proposal",visit="$visit",runNumber="$runNumber | sed "s/^/$(date)  /" >> $logfile
 
-hostAndPort=`awk -F "=" '/hostAndPort/ { print $2 }' /etc/autoreduce/icatclient.properties`
-password=`awk -F "=" '/password/ { print $2 }' /etc/autoreduce/icatclient.properties`
+icatConfig=/etc/autoreduce/icatclient.properties
+if [ -f $icatConfig ]; then
+  hostAndPort=`awk -F "=" '/hostAndPort/ { print $2 }' $icatConfig`
+  password=`awk -F "=" '/password/ { print $2 }' $icatConfig`
+else 
+  hostAndPort=icat-testing.sns.gov:8181
+  password=password
+fi
 
 # Accumulate any non-zero return code
 status=$(( $status + $? ))
@@ -42,7 +50,6 @@ start=`date +%x-%T`
 $ingestNexus $nexusFile $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
 end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
-echo
 
 # Reduce raw data
 echo "--------Reducing data--------"
@@ -67,8 +74,6 @@ start=`date +%x-%T`
 $redCommand $nexusFile $redOutDir &>> $logfile
 end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
-echo
-
 
 # Catalog reduced metadata
 echo "--------Catalogging reduced data--------"

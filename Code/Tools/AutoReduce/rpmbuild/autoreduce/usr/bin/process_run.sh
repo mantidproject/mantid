@@ -4,8 +4,8 @@
 #process_run.sh 
 #
 
-echo "calling post_process.sh"
+echo "Calling post_process.sh "$1
 
 nohup /usr/bin/post_process.sh $1 >> /var/log/SNS_applications/autoreduce.log 2>&1 &
 
-echo "end calling post_process.sh"
+echo "End calling post_process.sh"
