@@ -1,7 +1,7 @@
 Summary: autoreduce
 Name: autoreduce
 Version: 1.2
-Release: 2 
+Release: 3 
 Group: Applications/Engineering
 prefix: /usr
 BuildRoot: %{_tmppath}/%{name}
@@ -33,6 +33,7 @@ mkdir -p %{buildroot}%{_bindir}
 install -m 755	 ../autoreduce/usr/bin/ingestNexus	 %{buildroot}%{_bindir}/ingestNexus
 install -m 755	 ../autoreduce/usr/bin/ingestReduced	 %{buildroot}%{_bindir}/ingestReduced
 install -m 755	 ../autoreduce/usr/bin/process_run.sh	 %{buildroot}%{_bindir}/process_run.sh
+install -m 755	 ../autoreduce/usr/bin/post_process.sh	 %{buildroot}%{_bindir}/post_process.sh
 mkdir -p %{buildroot}%{_libdir}
 install -m 755 -d 	 ../autoreduce/usr/lib/autoreduce	 %{buildroot}%{_libdir}/autoreduce
 
@@ -46,4 +47,5 @@ chgrp snswheel %{_sysconfdir}/autoreduce/icatclient.properties
 %attr(755, -, -) %{_bindir}/ingestNexus
 %attr(755, -, -) %{_bindir}/ingestReduced
 %attr(755, -, -) %{_bindir}/process_run.sh
+%attr(755, -, -) %{_bindir}/post_process.sh
 %attr(755, -, -) %{_libdir}/autoreduce
