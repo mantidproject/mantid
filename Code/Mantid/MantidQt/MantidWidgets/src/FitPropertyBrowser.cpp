@@ -201,11 +201,12 @@ void FitPropertyBrowser::init()
   m_output = m_stringManager->addProperty("Output");
   m_minimizer = m_enumManager->addProperty("Minimizer");  
   m_minimizers << "Levenberg-Marquardt"
+               << "Levenberg-MarquardtMD"
                << "Simplex"
                << "Conjugate gradient (Fletcher-Reeves imp.)"
                << "Conjugate gradient (Polak-Ribiere imp.)"
                << "BFGS"
-                << "Levenberg-MarquardtMD";
+               << "Damping";
   m_enumManager->setEnumNames(m_minimizer, m_minimizers);
   m_costFunction = m_enumManager->addProperty("Cost function");
   m_costFunctions << "Least squares";
@@ -1069,13 +1070,10 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
       if (f) setCurrentFunction(f);
       emit functionChanged();
   }
-  //    Unreachable code
-  //else if (prop->propertyName() == "Workspace")
-  //{
-  //    PropertyHandler* h = getHandler()->findHandler(prop);
-  //    if (!h) return;
-  //    h->setFunctionWorkspace();
-  //}
+  else if ( prop == m_minimizer )
+  {
+    minimizerChanged();
+  }
 }
 
 /** Called when a bool property changed
@@ -2924,6 +2922,12 @@ void FitPropertyBrowser::columnChanged(QtProperty* prop)
     }
   }
 }
+
+/// Called when the minimizer changes. Creates minimizes's properties.
+void FitPropertyBrowser::minimizerChanged()
+{
+}
+
 
 } // MantidQt
 } // API

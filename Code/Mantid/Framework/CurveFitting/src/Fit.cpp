@@ -3,12 +3,12 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Fit.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidCurveFitting/FuncMinimizerFactory.h"
-#include "MantidCurveFitting/IFuncMinimizer.h"
 #include "MantidCurveFitting/CostFuncFitting.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
 
+#include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/DomainCreatorFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -103,7 +103,7 @@ namespace CurveFitting
     }
     Kernel::Property* prop = getPointerToProperty("Minimizer");
     auto minimizerProperty = dynamic_cast<Kernel::PropertyWithValue<std::string>*>( prop );
-    std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
+    std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys();
     if ( m_domainType != IDomainCreator::Simple )
     {
       auto it = std::find(minimizerOptions.begin(), minimizerOptions.end(), "Levenberg-Marquardt");
@@ -293,7 +293,7 @@ namespace CurveFitting
     // Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
 
-    std::vector<std::string> minimizerOptions = FuncMinimizerFactory::Instance().getKeys();
+    std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys();
 
     declareProperty("Minimizer","Levenberg-Marquardt",
       Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(minimizerOptions)),
@@ -358,7 +358,7 @@ namespace CurveFitting
 
     // get the minimizer
     std::string minimizerName = getPropertyValue("Minimizer");
-    IFuncMinimizer_sptr minimizer = FuncMinimizerFactory::Instance().create(minimizerName);
+    API::IFuncMinimizer_sptr minimizer = API::FuncMinimizerFactory::Instance().create(minimizerName);
 
     // Try to retrieve optional properties
     const int maxIterations = getProperty("MaxIterations");

@@ -1,13 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/IFuncMinimizer.h"
+#include "MantidAPI/IFuncMinimizer.h"
 
 #include <boost/lexical_cast.hpp>
 
 namespace Mantid
 {
-namespace CurveFitting
+namespace API
 {
 
 /**
@@ -46,5 +46,5 @@ bool IFuncMinimizer::minimize(size_t maxIterations)
 
 }
 
-} // namespace CurveFitting
+} // namespace API
 } // namespace Mantid

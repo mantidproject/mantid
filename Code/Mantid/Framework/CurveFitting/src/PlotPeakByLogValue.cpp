@@ -34,7 +34,7 @@ In this example a group of three Matrix workspaces were fitted with a [[Gaussian
 #include <boost/lexical_cast.hpp>
 
 #include "MantidCurveFitting/PlotPeakByLogValue.h"
-#include "MantidCurveFitting/FuncMinimizerFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/WorkspaceGroup.h"

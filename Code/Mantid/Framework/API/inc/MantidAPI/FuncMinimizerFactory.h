@@ -1,17 +1,17 @@
-#ifndef MANTID_CURVEFITTING_FUNCMINIMIZERFACTORY_H_
-#define MANTID_CURVEFITTING_FUNCMINIMIZERFACTORY_H_
+#ifndef MANTID_API_FUNCMINIMIZERFACTORY_H_
+#define MANTID_API_FUNCMINIMIZERFACTORY_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include <vector>
-#include "MantidCurveFitting/DllConfig.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
 {
-namespace CurveFitting
+namespace API
 {
 
 //----------------------------------------------------------------------
@@ -49,7 +49,7 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
 */
 
-  class DLLExport FuncMinimizerFactoryImpl : public Kernel::DynamicFactory<IFuncMinimizer>
+  class MANTID_API_DLL FuncMinimizerFactoryImpl : public Kernel::DynamicFactory<IFuncMinimizer>
   {
   public:
     /**Creates an instance of a function
@@ -78,4 +78,4 @@ namespace CurveFitting
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_FUNCMINIMIZERFACTORY_H_*/
+#endif /*MANTID_API_FUNCMINIMIZERFACTORY_H_*/

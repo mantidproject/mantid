@@ -1,21 +1,21 @@
-#ifndef MANTID_CURVEFITTING_IFUNCMINIMIZER_H_
-#define MANTID_CURVEFITTING_IFUNCMINIMIZER_H_
+#ifndef MANTID_API_IFUNCMINIMIZER_H_
+#define MANTID_API_IFUNCMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidAPI/ICostFunction.h"
-#include "MantidCurveFitting/FuncMinimizerFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 
 namespace Mantid
 {
 namespace API
 {
-  class IFitFunction;
-}
-namespace CurveFitting
-{
+// Forward declaration
+class IFitFunction;
+
 /** An interface for function minimizers. Minimizers minimize cost functions.
 
     @author Anders Markvardsen, ISIS, RAL
@@ -41,7 +41,7 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IFuncMinimizer 
+class MANTID_API_DLL IFuncMinimizer: public Kernel::PropertyManager
 {
 public:
   /// Virtual destructor
@@ -73,7 +73,7 @@ protected:
 
 typedef boost::shared_ptr<IFuncMinimizer> IFuncMinimizer_sptr;
 
-} // namespace CurveFitting
+} // namespace API
 } // namespace Mantid
 
 /**
@@ -82,8 +82,8 @@ typedef boost::shared_ptr<IFuncMinimizer> IFuncMinimizer_sptr;
 #define DECLARE_FUNCMINIMIZER(classname,username) \
         namespace { \
 	Mantid::Kernel::RegistrationHelper register_funcminimizer_##classname( \
-  ((Mantid::CurveFitting::FuncMinimizerFactory::Instance().subscribe<classname>(#username)) \
+  ((Mantid::API::FuncMinimizerFactory::Instance().subscribe<classname>(#username)) \
 	, 0)); \
 	} 
 
-#endif /*MANTID_CURVEFITTING_IFUNCMINIMIZER_H_*/
+#endif /*MANTID_API_IFUNCMINIMIZER_H_*/

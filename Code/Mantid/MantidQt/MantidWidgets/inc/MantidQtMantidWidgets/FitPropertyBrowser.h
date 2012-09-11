@@ -7,6 +7,7 @@
 
 #include <QDockWidget>
 #include <QMap>
+#include <QList>
 
 #include "MantidQtAPI/WorkspaceObserver.h"
 
@@ -323,6 +324,8 @@ protected:
 
   /// Create a double property and set some settings
   QtProperty* addDoubleProperty(const QString& name)const;
+  /// Called when the minimizer changes. Creates minimizes's properties.
+  void minimizerChanged();
 
   /// Property managers:
   QtGroupPropertyManager  *m_groupManager;
@@ -348,6 +351,7 @@ protected:
   QtProperty *m_xColumn;
   QtProperty *m_yColumn;
   QtProperty *m_errColumn;
+  QList<QtProperty*> m_minimizerProperties;
 
   /// A copy of the edited function
   boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;

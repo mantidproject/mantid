@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/IFuncMinimizer.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidCurveFitting/GSLVector.h"
 #include "MantidCurveFitting/GSLMatrix.h"
 
@@ -41,7 +41,7 @@ class CostFuncLeastSquares;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LevenbergMarquardtMDMinimizer : public IFuncMinimizer
+class DLLExport LevenbergMarquardtMDMinimizer : public API::IFuncMinimizer
 {
 public:
   /// Constructor

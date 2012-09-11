@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/Convolution.cpp
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
+	src/DampingMinimizer.cpp
 	src/DeltaFunction.cpp
 	src/DerivMinimizer.cpp
 	src/DiffSphere.cpp
@@ -26,14 +27,12 @@ set ( SRC_FILES
 	src/Fit1D.cpp
 	src/FitMW.cpp
 	src/FlatBackground.cpp
-	src/FuncMinimizerFactory.cpp
 	src/GSLFunctions.cpp
 	src/GausDecay.cpp
 	src/GausOsc.cpp
 	src/Gaussian.cpp
 	src/Gaussian1D.cpp
 	src/GaussianLinearBG1D.cpp
-	src/IFuncMinimizer.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LeBailFit.cpp
 	src/LeBailFunction.cpp
@@ -89,6 +88,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Convolution.h
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
+	inc/MantidCurveFitting/DampingMinimizer.h
 	inc/MantidCurveFitting/DeltaFunction.h
 	inc/MantidCurveFitting/DerivMinimizer.h
 	inc/MantidCurveFitting/DiffSphere.h
@@ -103,7 +103,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Fit1D.h
 	inc/MantidCurveFitting/FitMW.h
 	inc/MantidCurveFitting/FlatBackground.h
-	inc/MantidCurveFitting/FuncMinimizerFactory.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
 	inc/MantidCurveFitting/GSLMatrix.h
@@ -113,7 +112,6 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/Gaussian1D.h
 	inc/MantidCurveFitting/GaussianLinearBG1D.h
-	inc/MantidCurveFitting/IFuncMinimizer.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LeBailFit.h

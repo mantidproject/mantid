@@ -36,6 +36,7 @@ set ( SRC_FILES
 	src/FileFinder.cpp
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
+	src/FuncMinimizerFactory.cpp
 	src/FunctionDomain1D.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
@@ -45,6 +46,7 @@ set ( SRC_FILES
 	src/IDomainCreator.cpp
 	src/IEventList.cpp
 	src/IEventWorkspace.cpp
+	src/IFuncMinimizer.cpp
 	src/IFunction.cpp
 	src/IFunction1D.cpp
 	src/IFunctionMD.cpp
@@ -156,6 +158,7 @@ set ( INC_FILES
 	inc/MantidAPI/FileFinder.h
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
+	inc/MantidAPI/FuncMinimizerFactory.h
 	inc/MantidAPI/FunctionDomain.h
 	inc/MantidAPI/FunctionDomain1D.h
 	inc/MantidAPI/FunctionDomainMD.h
@@ -173,6 +176,7 @@ set ( INC_FILES
 	inc/MantidAPI/IDomainCreator.h
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
+	inc/MantidAPI/IFuncMinimizer.h
 	inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunction1D.h
 	inc/MantidAPI/IFunctionMD.h

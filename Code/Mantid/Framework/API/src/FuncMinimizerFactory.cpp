@@ -1,11 +1,11 @@
-#include "MantidCurveFitting/FuncMinimizerFactory.h"
-#include "MantidCurveFitting/IFuncMinimizer.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
 
 namespace Mantid
 {
-  namespace CurveFitting
+  namespace API
   {
 
     FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl() : Kernel::DynamicFactory<IFuncMinimizer>(), g_log(Kernel::Logger::get("FuncMinimizerFactory"))

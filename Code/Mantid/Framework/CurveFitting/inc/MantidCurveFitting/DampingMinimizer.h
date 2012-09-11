@@ -1,23 +1,24 @@
-#ifndef MANTID_CURVEFITTING_LEVENBERGMARQUARDTMINIMIZER_H_
-#define MANTID_CURVEFITTING_LEVENBERGMARQUARDTMINIMIZER_H_
+#ifndef MANTID_CURVEFITTING_DAMPINGMINIMIZER_H_
+#define MANTID_CURVEFITTING_DAMPINGMINIMIZER_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFuncMinimizer.h"
-#include <gsl/gsl_multifit_nlin.h>
-#include "MantidAPI/IFunction.h"
-#include "MantidCurveFitting/GSLFunctions.h"
+#include "MantidCurveFitting/GSLVector.h"
+#include "MantidCurveFitting/GSLMatrix.h"
 
 namespace Mantid
 {
 namespace CurveFitting
 {
-/** Implementing Levenberg-Marquardt by wrapping the IFuncMinimizer interface
-    around the GSL implementation of this algorithm.
 
-    @author Anders Markvardsen, ISIS, RAL
-    @date 11/12/2009
+class CostFuncLeastSquares;
+
+/** 
+    Implements a least squares minimization algorithm with damping.
+
+    @author Roman Tolchenov, Tessella plc
 
     Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -39,16 +40,13 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LevenbergMarquardtMinimizer : public API::IFuncMinimizer
+class DLLExport DampingMinimizer : public API::IFuncMinimizer
 {
 public:
-  /// constructor and destructor
-  ~LevenbergMarquardtMinimizer();
-  LevenbergMarquardtMinimizer(){}
-
-  /// Overloading base class methods
+  /// Constructor
+  DampingMinimizer();
   /// Name of the minimizer.
-  std::string name() const {return "Levenberg-Marquardt";}
+  std::string name() const {return "DampingMinimizer";}
 
   /// Initialize minimizer, i.e. pass a function to minimize.
   virtual void initialize(API::ICostFunction_sptr function);
@@ -57,23 +55,13 @@ public:
   /// Return current value of the cost function
   virtual double costFunctionVal();
 
-
 private:
-  void calCovarianceMatrix(double epsrel, gsl_matrix * covar);
-  int hasConverged();
-
-  /// GSL data container
-  GSL_FitData *m_data;
-
-  /// GSL minimizer container
-  gsl_multifit_function_fdf gslContainer;
-
-  /// pointer to the GSL solver doing the work
-  gsl_multifit_fdfsolver *m_gslSolver;
-
-  /// Stored to access IFunction interface in iterate()
-  API::IFunction_sptr m_function;
-
+  /// Pointer to the cost function. Must be the least squares.
+  boost::shared_ptr<CostFuncLeastSquares> m_leastSquares;
+  /// Relative tolerance.
+  double m_relTol;
+  /// The damping mu parameter in the Levenberg-Marquardt method.
+  //double m_damping;
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;
 };
@@ -82,4 +70,4 @@ private:
 } // namespace CurveFitting
 } // namespace Mantid
 
-#endif /*MANTID_CURVEFITTING_LEVENBERGMARQUARDTMINIMIZER_H_*/
+#endif /*MANTID_CURVEFITTING_DAMPINGMINIMIZER_H_*/

@@ -4,7 +4,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/IFuncMinimizer.h"
+#include "MantidAPI/IFuncMinimizer.h"
+
 #include <gsl/gsl_multimin.h>
 
 namespace Mantid
@@ -37,7 +38,7 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SimplexMinimizer : public IFuncMinimizer
+class DLLExport SimplexMinimizer : public API::IFuncMinimizer
 {
 public:
   /// constructor and destructor
