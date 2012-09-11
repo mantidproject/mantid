@@ -522,6 +522,7 @@ namespace WorkflowAlgorithms
     if (detVanWS)
       {
         const bool runDiag = this->getProperty("FindBadDetectors");
+        MatrixWorkspace_sptr diagMaskWs;
         if (runDiag)
           {
             IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
@@ -530,9 +531,11 @@ namespace WorkflowAlgorithms
             diag->setProperty("OutputWorkspace", "samDetVanProcMask");
             diag->setProperty("ReductionProperties", reductionManagerName);
             diag->executeAsSubAlg();
+            diagMaskWs = diag->getProperty("OutputWorkspace");
           }
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
+        detVan->setProperty("DiagMaskWorkspace", diagMaskWs);
         detVan->setProperty("ReductionProperties", reductionManagerName);
         detVan->executeAsSubAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
