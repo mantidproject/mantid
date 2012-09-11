@@ -544,34 +544,28 @@ void ImageDisplay::ShowPeakBackSelectionValue(double x, double y )
     if (radioButtonPeakLeft->isChecked()) { //peak left selected
         lineEditPeakLeft->setText(yValue);
         ImageDisplay::peakLeft = static_cast<int>(y);
-        return;
     }
     if (radioButtonPeakRight->isChecked()) { //peak right selected
         lineEditPeakRight->setText(yValue);
         ImageDisplay::peakRight = static_cast<int>(y);
-        return;
     }
     if (radioButtonBackLeft->isChecked()) { //back left selected
         lineEditBackLeft->setText(yValue);
         ImageDisplay::backLeft = static_cast<int>(y);
-        return;
     }
     if (radioButtonBackRight->isChecked()) { //back right selected
         lineEditBackRight->setText(yValue);
         ImageDisplay::backRight = static_cast<int>(y);
-        return;
     }
     
     QString xValue = QString("%1").arg(int(x));
     if (radioButtonTOFmin->isChecked()) { //tof min selected
         lineEditTOFmin->setText(xValue);
         ImageDisplay::TOFmin = static_cast<int>(x);
-        return;
     }
     if (radioButtonTOFmax->isChecked()) { // tof max selected
         lineEditTOFmax->setText(xValue);
         ImageDisplay::TOFmax = static_cast<int>(x);
-        return;
     }
     
     UpdateImage(); //force refresh of the plot

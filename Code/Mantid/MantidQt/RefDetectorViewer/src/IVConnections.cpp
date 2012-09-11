@@ -343,8 +343,6 @@ void IVConnections::graph_range_changed()
 void IVConnections::edit_manual_input()
 {
 
-    std::cout << "here" << std::endl;
-    
     QLineEdit* peak_left_control = iv_ui->lineEdit_peakLeft;        
     double peak_left = 100;
     if (!IVUtils::StringToDouble(peak_left_control->text().toStdString(), peak_left))
@@ -391,9 +389,9 @@ void IVConnections::edit_manual_input()
     {
         ErrorHandler::Error("TOF max is not a NUMBER! Value reset to 250.");
     }
+    image_display->setTOFmax(tof_max);
     
     image_display->UpdateImage();
-    std::cout << "peak_left: " << peak_left << std::endl;
 
 }
     
