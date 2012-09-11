@@ -18099,12 +18099,16 @@ QPoint ApplicationWindow::positionNewFloatingWindow(QSize sz) const
 /**
  * Add a sub-window to as a docked MDI window.
  * @param w :: Pointer to a MdiSubWindow which will be wrapped in a QMdiSubWindow.
+ * @param pos :: Position of the top-left corner of the new window.
  */
 QMdiSubWindow* ApplicationWindow::addMdiSubWindowAsDocked(MdiSubWindow* w, QPoint pos)
 {
   QMdiSubWindow* sw = this->d_workspace->addSubWindow(w);
   sw->resize(w->size());
-  sw->move(pos);
+  if ( pos != QPoint(-1,-1) )
+  {
+    sw->move(pos);
+  }
   return sw;
 }
 

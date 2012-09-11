@@ -1045,7 +1045,7 @@ public slots:
 
   //   Methods for Floating windows
   FloatingWindow* addMdiSubWindowAsFloating(MdiSubWindow* w, QPoint pos = QPoint(-1,-1));
-  QMdiSubWindow* addMdiSubWindowAsDocked(MdiSubWindow* w, QPoint pos = QPoint(0,0));
+  QMdiSubWindow* addMdiSubWindowAsDocked(MdiSubWindow* w, QPoint pos = QPoint(-1,-1));
   void mdiWindowActivated(MdiSubWindow* w);
   void changeToFloating(MdiSubWindow* w);
   void changeToDocked(MdiSubWindow* w);
