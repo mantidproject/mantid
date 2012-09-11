@@ -134,14 +134,27 @@ namespace WorkflowAlgorithms
     const std::string bkgInternal = "_background_int";
     const std::string countsInternal = "_total_counts";
 
-    // Clone the incoming workspace
-    IAlgorithm_sptr cloneWs = this->createSubAlgorithm("CloneWorkspace");
-    cloneWs->setProperty("InputWorkspace", detVanWS);
-    cloneWs->executeAsSubAlg();
-    // CloneWorkspace returns Workspace_sptr
-    Workspace_sptr tmp = cloneWs->getProperty("OutputWorkspace");
-    MatrixWorkspace_sptr dvWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
-    dvWS->setName(dvInternal);
+    // If we are running this standalone, the IncidentEnergyGuess property in
+    // the reduction property manager does not exist. If that is true, then we
+    // don't have to clone workspaces.
+    bool isStandAlone = !reductionManager->existsProperty("IncidentEnergyGuess");
+
+    MatrixWorkspace_sptr dvWS;
+    if (!isStandAlone)
+      {
+        // Clone the incoming workspace
+        IAlgorithm_sptr cloneWs = this->createSubAlgorithm("CloneWorkspace");
+        cloneWs->setProperty("InputWorkspace", detVanWS);
+        cloneWs->executeAsSubAlg();
+        // CloneWorkspace returns Workspace_sptr
+        Workspace_sptr tmp = cloneWs->getProperty("OutputWorkspace");
+        dvWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
+        dvWS->setName(dvInternal);
+      }
+    else
+      {
+        dvWS = detVanWS;
+      }
 
     // Process the detector vanadium
     IAlgorithm_sptr detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
@@ -169,20 +182,23 @@ namespace WorkflowAlgorithms
       {
         sampleWS = this->getProperty("SampleWorkspace");
 
-        IAlgorithm_sptr cloneWs = this->createSubAlgorithm("CloneWorkspace");
-        cloneWs->setProperty("InputWorkspace", sampleWS);
-        cloneWs->executeAsSubAlg();
-        Workspace_sptr tmp = cloneWs->getProperty("OutputWorkspace");
-        sampleWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
-        sampleWS->setName(sampleInternal);
+        Workspace_sptr tmp;
+        if (!isStandAlone)
+          {
+            IAlgorithm_sptr cloneWs = this->createSubAlgorithm("CloneWorkspace");
+            cloneWs->setProperty("InputWorkspace", sampleWS);
+            cloneWs->executeAsSubAlg();
+            tmp = cloneWs->getProperty("OutputWorkspace");
+            sampleWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
+            sampleWS->setName(sampleInternal);
+          }
 
         IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
         norm->setProperty("InputWorkspace", sampleWS);
         norm->setProperty("ReductionProperties", reductionManagerName);
         norm->executeAsSubAlg();
         sampleWS.reset();
-        tmp = cloneWs->getProperty("OutputWorkspace");
-        sampleWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
+        sampleWS = norm->getProperty("OutputWorkspace");
       }
 
     // Create the total counts workspace if necessary
@@ -277,7 +293,7 @@ namespace WorkflowAlgorithms
     std::vector<std::string> diag_spectra = dvWS->getInstrument()->getStringParameter("diag_spectra");
     if (diag_spectra.empty())
       {
-        diag->executeAsSubAlg();
+        diag->execute();
         maskWS = diag->getProperty("OutputWorkspace");
         numMasked = diag->getProperty("NumberOfFailures");
       }
@@ -297,7 +313,7 @@ namespace WorkflowAlgorithms
             g_log.information() << "Pixel range: (" << startIndex << ", " << endIndex << ")" << std::endl;
             diag->setProperty("StartWorkspaceIndex", startIndex);
             diag->setProperty("EndWorkspaceIndex", endIndex);
-            diag->executeAsSubAlg();
+            diag->execute();
             if (maskWS)
               {
                 MatrixWorkspace_sptr tmp = diag->getProperty("OutputWorkspace");
@@ -306,7 +322,7 @@ namespace WorkflowAlgorithms
                 comb->setProperty("InputWorkspace2", tmp);
                 comb->setProperty("OutputWorkspace", maskWS);
                 comb->setProperty("OperationType", "OR");
-                comb->executeAsSubAlg();
+                comb->execute();
               }
             else
               {
