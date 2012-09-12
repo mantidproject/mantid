@@ -78,6 +78,10 @@ namespace WorkflowAlgorithms
     this->declareProperty(new WorkspaceProperty<>("IntegratedDetectorVanadium", "",
         Direction::Input, PropertyMode::Optional), "A workspace containing the "
             "integrated detector vanadium.");
+    this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace",
+        "", Direction::Input, PropertyMode::Optional), "A mask workspace");
+    this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("GroupingWorkspace",
+        "", Direction::Input, PropertyMode::Optional), "A grouping workspace");
     this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
         Direction::Output, PropertyMode::Optional));
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
@@ -468,6 +472,24 @@ namespace WorkflowAlgorithms
     kikf->setProperty("EMode", "Direct");
     kikf->execute();
 
+    // Mask and group workspace if necessary.
+    MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
+    MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
+    if (maskWS || groupWS)
+    {
+      IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
+      remap->setProperty("InputWorkspace", outWsName);
+      remap->setProperty("OutputWorkspace", outWsName);
+      if (maskWS)
+      {
+        remap->setProperty("MaskWorkspace", maskWS);
+      }
+      if (groupWS)
+      {
+        remap->setProperty("GroupingWorkspace", groupWS);
+      }
+      remap->executeAsSubAlg();
+    }
     // Rebin to ensure consistency
     if (!etBinning.empty())
       {
@@ -505,6 +527,28 @@ namespace WorkflowAlgorithms
         divide->setProperty("OutputWorkspace", outWsName);
         divide->execute();
       }
+
+    // Correct for solid angle if grouping is requested, but detector vanadium
+    // not used.
+    if (groupWS && !detVanWS)
+    {
+      std::string solidAngWsName = "SolidAngle";
+      IAlgorithm_sptr solidAngle = this->createSubAlgorithm("SolidAngle");
+      solidAngle->setProperty("InputWorkspace", outWsName);
+      solidAngle->setProperty("OutputWorkspace", solidAngWsName);
+      solidAngle->execute();
+      MatrixWorkspace_sptr solidAngWS = solidAngle->getProperty("OutputWorkspace");
+
+      IAlgorithm_sptr divide = this->createSubAlgorithm("Divide");
+      divide->setAlwaysStoreInADS(true);
+      divide->setProperty("LHSWorkspace", outWsName);
+      divide->setProperty("RHSWorkspace", solidAngWS);
+      divide->setProperty("OutputWorkspace", outWsName);
+      divide->execute();
+
+      solidAngWS.reset();
+    }
+
 
     if ("ISIS" == facility)
       {

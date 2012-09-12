@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/DgsPreprocessData.cpp
 	src/DgsProcessDetectorVanadium.cpp
 	src/DgsReduction.cpp
+	src/DgsRemap.cpp
 	src/EQSANSDarkCurrentSubtraction.cpp
 	src/EQSANSInstrument.cpp
 	src/EQSANSLoad.cpp
@@ -36,6 +37,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/DgsPreprocessData.h
 	inc/MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h
 	inc/MantidWorkflowAlgorithms/DgsReduction.h
+	inc/MantidWorkflowAlgorithms/DgsRemap.h
 	inc/MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h
 	inc/MantidWorkflowAlgorithms/EQSANSInstrument.h
 	inc/MantidWorkflowAlgorithms/EQSANSLoad.h
