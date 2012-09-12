@@ -514,6 +514,9 @@ namespace Mantid
       // Load the grouping file if available
       MatrixWorkspace_sptr groupingWS = this->loadGroupingFile();
 
+      // This will be diagnostic mask if DgsDiagnose is run and hard mask if not.
+      MatrixWorkspace_sptr maskWS;
+
       // Process the sample detector vanadium if present
       Workspace_sptr detVanWS = this->loadInputData("DetectorVanadium", false);
       IAlgorithm_sptr detVan;
@@ -521,7 +524,6 @@ namespace Mantid
       if (detVanWS)
       {
         const bool runDiag = this->getProperty("FindBadDetectors");
-        MatrixWorkspace_sptr diagMaskWs;
         if (runDiag)
         {
           IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
@@ -530,11 +532,20 @@ namespace Mantid
           diag->setProperty("OutputWorkspace", "samDetVanProcMask");
           diag->setProperty("ReductionProperties", reductionManagerName);
           diag->executeAsSubAlg();
-          diagMaskWs = diag->getProperty("OutputWorkspace");
+          maskWS = diag->getProperty("OutputWorkspace");
         }
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
-        detVan->setProperty("DiagMaskWorkspace", diagMaskWs);
+        if (!maskWS)
+        {
+          maskWS = hardMaskWS;
+          hardMaskWS.reset();
+        }
+        detVan->setProperty("MaskWorkspace", maskWS);
+        if (groupingWS)
+        {
+          detVan->setProperty("GroupingWorkspace", groupingWS);
+        }
         detVan->setProperty("ReductionProperties", reductionManagerName);
         detVan->executeAsSubAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
@@ -544,6 +555,14 @@ namespace Mantid
       IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
       etConv->setProperty("InputWorkspace", sampleWS);
       etConv->setProperty("IntegratedDetectorVanadium", idetVanWS);
+      if (maskWS)
+      {
+        etConv->setProperty("MaskWorkspace", maskWS);
+      }
+      if (groupingWS)
+      {
+        etConv->setProperty("GroupingWorkspace", groupingWS);
+      }
       etConv->setProperty("ReductionProperties", reductionManagerName);
       etConv->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
       etConv->executeAsSubAlg();

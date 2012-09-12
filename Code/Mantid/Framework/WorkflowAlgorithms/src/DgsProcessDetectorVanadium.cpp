@@ -66,9 +66,9 @@ namespace Mantid
       wsValidator->add<WorkspaceUnitValidator>("TOF");
       this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, wsValidator),
           "An input workspace containing the detector vanadium data in TOF units.");
-      this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("DiagMaskWorkspace",
+      this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace",
           "", Direction::Input, PropertyMode::Optional),
-          "Workspace containing a mask determined by a diagnostic procedure");
+          "A mask workspace");
       this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("GroupingWorkspace",
           "", Direction::Input, PropertyMode::Optional), "A grouping workspace");
       this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
@@ -98,35 +98,14 @@ namespace Mantid
       this->enableHistoryRecordingForChild(true);
 
       MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-      const std::string outWsName = inputWS->getName() + "_idetvan";
       MatrixWorkspace_sptr outputWS;
 
       // Normalise result workspace to incident beam parameter
       IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
       norm->setProperty("InputWorkspace", inputWS);
+      norm->setProperty("OutputWorkspace", inputWS);
       norm->executeAsSubAlg();
       outputWS = norm->getProperty("OutputWorkspace");
-
-      // Apply masking from either DgsDiagnose or a given hard mask. If the
-      // DgsDiagnose and hard mask are present, only do DgsDiagnose since the
-      // hard mask will already be incorporated.
-      const std::string hardMaskWsName = reductionManager->getProperty("HardMaskWorkspace");
-      MatrixWorkspace_sptr diagMaskWs = this->getProperty("DiagMaskWorkspace");
-      if (!hardMaskWsName.empty() || diagMaskWs)
-      {
-        IAlgorithm_sptr mask = this->createSubAlgorithm("MaskDetectors");
-        mask->setProperty("Workspace", outputWS);
-        if (diagMaskWs)
-        {
-          mask->setProperty("MaskedWorkspace", diagMaskWs);
-        }
-        else
-        {
-          mask->setPropertyValue("MaskedWorkspace", hardMaskWsName);
-        }
-        mask->execute();
-        outputWS = mask->getProperty("Workspace");
-      }
 
       double detVanIntRangeLow = reductionManager->getProperty("DetVanIntRangeLow");
       if (EMPTY_DBL() == detVanIntRangeLow)
@@ -166,12 +145,17 @@ namespace Mantid
       outputWS = rebin->getProperty("OutputWorkspace");
 
       // Mask and group workspace if necessary.
+      MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
       MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
-      if (groupWS)
+      if (maskWS || groupWS)
       {
         IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
         remap->setProperty("InputWorkspace", outputWS);
         remap->setProperty("OutputWorkspace", outputWS);
+        if (maskWS)
+        {
+          remap->setProperty("MaskWorkspace", maskWS);
+        }
         if (groupWS)
         {
           remap->setProperty("GroupingWorkspace", groupWS);
@@ -188,7 +172,6 @@ namespace Mantid
         outputWS *= wbScaleFactor;
       }
 
-      outputWS->setName(outWsName);
       if (reductionManager->existsProperty("SaveProcessedDetVan"))
       {
         bool saveProc = reductionManager->getProperty("SaveProcessedDetVan");
@@ -201,7 +184,7 @@ namespace Mantid
           {
             IAlgorithm_sptr save = this->createSubAlgorithm("SaveNexus");
             save->setProperty("InputWorkspace", outputWS);
-            outputFile += ".nxs";
+            outputFile += "_idetvan.nxs";
             save->setProperty("FileName", outputFile);
             save->execute();
           }
