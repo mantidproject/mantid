@@ -51,8 +51,8 @@ namespace WorkflowAlgorithms
     void exec();
     API::Workspace_sptr loadInputData(const std::string prop,
         const bool mustLoad=true);
-    void loadGroupingFile();
-    void loadHardMask();
+    API::MatrixWorkspace_sptr loadGroupingFile();
+    API::MatrixWorkspace_sptr loadHardMask();
 
 
     boost::shared_ptr<Kernel::PropertyManager> reductionManager;

@@ -422,50 +422,48 @@ namespace WorkflowAlgorithms
     return inputWS;
   }
 
-  void DgsReduction::loadHardMask()
+  MatrixWorkspace_sptr DgsReduction::loadHardMask()
   {
     const std::string hardMask = this->getProperty("HardMaskFile");
     std::string hardMaskWsName;
     if (hardMask.empty())
       {
-        hardMaskWsName = "";
+        return boost::shared_ptr<MatrixWorkspace>();
       }
     else
       {
         hardMaskWsName = "hard_mask";
+        IAlgorithm_sptr loadMask;
         if (boost::ends_with(hardMask, ".nxs"))
           {
-            IAlgorithm_sptr loadNxMask = this->createSubAlgorithm("Load");
-            loadNxMask->setAlwaysStoreInADS(true);
-            loadNxMask->setProperty("Filename", hardMask);
-            loadNxMask->setProperty("OutputWorkspace", hardMaskWsName);
-            loadNxMask->execute();
+            loadMask = this->createSubAlgorithm("Load");
+            loadMask->setProperty("Filename", hardMask);
           }
         else if (boost::ends_with(hardMask, ".xml"))
           {
             const std::string instName = this->reductionManager->getProperty("InstrumentName");
-            IAlgorithm_sptr loadMask = this->createSubAlgorithm("LoadMask");
-            loadMask->setAlwaysStoreInADS(true);
+            loadMask = this->createSubAlgorithm("LoadMask");
             loadMask->setProperty("Instrument", instName);
-            loadMask->setProperty("OutputWorkspace", hardMaskWsName);
             loadMask->setProperty("InputFile", hardMask);
-            loadMask->execute();
           }
         else
           {
             throw std::runtime_error("Do not know how to load mask: " + hardMask);
           }
+        loadMask->setAlwaysStoreInADS(true);
+        loadMask->setProperty("OutputWorkspace", hardMaskWsName);
+        loadMask->execute();
+        return loadMask->getProperty("OutputWorkspace");
       }
-    this->reductionManager->declareProperty(new PropertyWithValue<std::string>("HardMaskWorkspace", hardMaskWsName));
   }
 
-  void DgsReduction::loadGroupingFile()
+  MatrixWorkspace_sptr DgsReduction::loadGroupingFile()
   {
     const std::string groupFile = this->getProperty("GroupingFile");
     std::string groupingWsName;
     if (groupFile.empty())
       {
-        groupingWsName = "";
+      return boost::shared_ptr<MatrixWorkspace>();
       }
     else
       {
@@ -475,8 +473,8 @@ namespace WorkflowAlgorithms
         loadGrpFile->setProperty("InputFile", groupFile);
         loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
         loadGrpFile->execute();
+        return loadGrpFile->getProperty("OutputWorkspace");
       }
-    this->reductionManager->declareProperty(new PropertyWithValue<std::string>("GroupingWorkspace", groupingWsName));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -513,9 +511,9 @@ namespace WorkflowAlgorithms
         "InstrumentName", WS->getInstrument()->getName()));
 
     // Load the hard mask if available
-    this->loadHardMask();
+    MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
     // Load the grouping file if available
-    this->loadGroupingFile();
+    MatrixWorkspace_sptr groupingWS = this->loadGroupingFile();
 
     // Process the sample detector vanadium if present
     Workspace_sptr detVanWS = this->loadInputData("DetectorVanadium", false);
