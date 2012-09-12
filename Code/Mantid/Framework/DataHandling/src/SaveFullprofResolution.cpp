@@ -68,7 +68,7 @@ namespace DataHandling
 
     // 3. Write to file
     std::ofstream ofile;
-    ofile.open(irffilename);
+    ofile.open(irffilename.c_str());
     ofile << filestr;
     ofile.close();
 
