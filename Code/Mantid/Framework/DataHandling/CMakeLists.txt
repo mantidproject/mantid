@@ -114,6 +114,7 @@ set ( SRC_FILES
 	src/SaveDetectorMasks.cpp
 	src/SaveDetectorsGrouping.cpp
 	src/SaveDspacemap.cpp
+	src/SaveFullprofResolution.cpp
 	src/SaveFocusedXYE.cpp
 	src/SaveGSS.cpp
 	src/SaveISISNexus.cpp
@@ -245,6 +246,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDetectorMasks.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
 	inc/MantidDataHandling/SaveDspacemap.h
+	inc/MantidDataHandling/SaveFullprofResolution.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveISISNexus.h
@@ -271,11 +273,11 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
-	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
 	#LoadDAETest.h
 	#LoadILLTest.h
 	#LoadSNSNexusTest.h # TODO has no active tests in it
 	#LoadSassenaTest.h
+	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
 	AppendGeometryToSNSNexusTest.h
 	CompressEventsTest.h
 	CreateChopperModelTest.h
@@ -363,6 +365,7 @@ set ( TEST_FILES
 	SaveDaveGrpTest.h
 	SaveDetectorsGroupingTest.h
 	SaveDspacemapTest.h
+	SaveFullprofResolutionTest.h
 	SaveFocussedXYETest.h
 	SaveIsawDetCalTest.h
 	SaveMaskTest.h
