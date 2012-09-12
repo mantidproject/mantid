@@ -72,6 +72,8 @@ namespace WorkflowAlgorithms
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("DiagMaskWorkspace",
         "", Direction::Input, PropertyMode::Optional),
         "Workspace containing a mask determined by a diagnostic procedure");
+    this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("GroupingWorkspace",
+        "", Direction::Input, PropertyMode::Optional), "A grouping workspace");
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
                           "The workspace containing the processed results.");
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
@@ -165,6 +167,21 @@ namespace WorkflowAlgorithms
     rebin->setProperty("Params", binning);
     rebin->executeAsSubAlg();
     outputWS = rebin->getProperty("OutputWorkspace");
+
+    // Mask and group workspace if necessary.
+    MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
+    if (groupWS)
+    {
+      IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
+      remap->setProperty("InputWorkspace", outputWS);
+      remap->setProperty("OutputWorkspace", outputWS);
+      if (groupWS)
+      {
+        remap->setProperty("GroupingWorkspace", groupWS);
+      }
+      remap->executeAsSubAlg();
+      outputWS = remap->getProperty("OutputWorkspace");
+    }
 
     const std::string facility = ConfigService::Instance().getFacility().name();
     if ("ISIS" == facility)
