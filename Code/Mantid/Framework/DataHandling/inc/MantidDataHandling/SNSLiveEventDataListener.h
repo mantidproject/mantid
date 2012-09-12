@@ -92,8 +92,10 @@ namespace Mantid
       // is microseconds!)
       // pulseTime is the start of the pulse relative to Jan 1, 1990.
       // Both values are designed to be passed straight into the TofEvent constructor.
-      
+
+      ILiveListener::RunStatus m_status;
       DataObjects::EventWorkspace_sptr m_buffer; ///< Used to buffer events between calls to extractData()
+
       bool m_workspaceInitialized;
       std::string m_wsName;
       detid2index_map * m_indexMap;  // maps pixel id's to workspace indexes
@@ -109,7 +111,8 @@ namespace Mantid
       bool m_isConnected;
 
       Poco::Thread m_thread;
-      Poco::FastMutex m_mutex;
+      Poco::FastMutex m_mutex;  // protects m_buffer & m_status
+      bool m_pauseNetRead;
       bool m_stopThread;  // background thread checks this periodically.  If true, the
                           // thread exits
 
