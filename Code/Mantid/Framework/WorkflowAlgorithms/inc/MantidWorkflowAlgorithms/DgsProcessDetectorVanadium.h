@@ -6,15 +6,15 @@
 
 namespace Mantid
 {
-namespace WorkflowAlgorithms
-{
+  namespace WorkflowAlgorithms
+  {
 
-  /** DgsProcessDetectorVanadium : This is the algorithm responsible for processing the
+    /** DgsProcessDetectorVanadium : This is the algorithm responsible for processing the
     detector vanadium into the form needed for the normalisation of sample data in the
     convert to energy transfer process.
 
     @date 2012-07-25
-    
+
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -34,27 +34,24 @@ namespace WorkflowAlgorithms
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport DgsProcessDetectorVanadium  : public API::Algorithm
-  {
-  public:
-    DgsProcessDetectorVanadium();
-    virtual ~DgsProcessDetectorVanadium();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
+     */
+    class DLLExport DgsProcessDetectorVanadium  : public API::Algorithm
+    {
+    public:
+      DgsProcessDetectorVanadium();
+      virtual ~DgsProcessDetectorVanadium();
 
-  private:
-    virtual void initDocs();
-    void init();
-    void exec();
+      virtual const std::string name() const;
+      virtual int version() const;
+      virtual const std::string category() const;
 
+    private:
+      virtual void initDocs();
+      void init();
+      void exec();
+    };
 
-  };
-
-
-} // namespace WorkflowAlgorithms
+  } // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif  /* MANTID_WORKFLOWALGORITHMS_DGSPROCESSDETECTORVANADIUM_H_ */
