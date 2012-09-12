@@ -6,14 +6,14 @@
 #include <stdexcept>
 
 #include "MantidAPI/LogarithmScale.h"
-//#include "MantidAPI/TransformScaleFactory.h"
+#include "MantidAPI/TransformScaleFactory.h"
 
 namespace Mantid
 {
 namespace API
 {
 
-//DECLARE_TRANSFORMSCALE(LogarithmScale);
+DECLARE_TRANSFORMSCALE(LogarithmScale);
 
 void LogarithmScale::setBase( double &base)
 {

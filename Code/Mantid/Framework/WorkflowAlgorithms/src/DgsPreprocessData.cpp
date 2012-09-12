@@ -180,6 +180,7 @@ namespace WorkflowAlgorithms
           }
       }
 
+    outputWS->setName(outWsName);
     this->setProperty("OutputWorkspace", outputWS);
   }
 

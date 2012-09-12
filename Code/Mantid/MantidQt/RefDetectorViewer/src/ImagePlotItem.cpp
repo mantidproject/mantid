@@ -116,7 +116,7 @@ void ImagePlotItem::draw(       QPainter    * painter,
                           const QwtScaleMap & yMap,
                           const QRect       &       ) const
 {
-  if ( !positive_color_table )     // if no color table, the data is not yet
+    if ( !positive_color_table )     // if no color table, the data is not yet
   {                                // set, so just return
     return;
   }
@@ -262,6 +262,7 @@ void ImagePlotItem::draw(       QPainter    * painter,
     ImageDisplay* myImage;
     
     float peakLeft = float(myImage->getPeakLeft());
+        
     if (peakLeft != 0) {
     coeff_top_right = float(y_max) - float(peakLeft);
     pixel_value = int((coeff_top_right / coeff_left) + float(pix_y_max));

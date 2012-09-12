@@ -674,7 +674,7 @@ namespace DataObjects
   {
     if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataDx, histogram number out of range");
-    return this->data[index]->dataDx();
+    return this->data[index]->readDx();
   }
 
 

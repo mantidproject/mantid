@@ -138,6 +138,8 @@ namespace WorkflowAlgorithms
     this->declareProperty(new WorkspaceProperty<>("DetectorVanadiumInputWorkspace", "",
         Direction::Input, PropertyMode::Optional),
         "Sample detector vanadium workspace to be reduced");
+    this->declareProperty("SaveProcessedDetVan", false,
+        "Save the processed detector vanadium workspace");
     this->declareProperty("UseBoundsForDetVan", false,
         "If true, integrate the detector vanadium over a given range.");
     this->declareProperty("DetVanIntRangeLow", EMPTY_DBL(),
@@ -258,7 +260,7 @@ namespace WorkflowAlgorithms
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
     this->setPropertySettings("MaxFramerate",
         new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
-    this->declareProperty("IgnoredPixels", 80,
+    this->declareProperty("IgnoredPixels", 80.0,
         "A list of pixels to ignore in the calculations.");
     this->setPropertySettings("IgnoredPixels",
         new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
@@ -457,6 +459,26 @@ namespace WorkflowAlgorithms
     this->reductionManager->declareProperty(new PropertyWithValue<std::string>("HardMaskWorkspace", hardMaskWsName));
   }
 
+  void DgsReduction::loadGroupingFile()
+  {
+    const std::string groupFile = this->getProperty("GroupingFile");
+    std::string groupingWsName;
+    if (groupFile.empty())
+      {
+        groupingWsName = "";
+      }
+    else
+      {
+        groupingWsName = "grouping";
+        IAlgorithm_sptr loadGrpFile = this->createSubAlgorithm("LoadDetectorsGroupingFile");
+        loadGrpFile->setAlwaysStoreInADS(true);
+        loadGrpFile->setProperty("InputFile", groupFile);
+        loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
+        loadGrpFile->execute();
+      }
+    this->reductionManager->declareProperty(new PropertyWithValue<std::string>("GroupingWorkspace", groupingWsName));
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -492,6 +514,8 @@ namespace WorkflowAlgorithms
 
     // Load the hard mask if available
     this->loadHardMask();
+    // Load the grouping file if available
+    this->loadGroupingFile();
 
     // Process the sample detector vanadium if present
     Workspace_sptr detVanWS = this->loadInputData("DetectorVanadium", false);
@@ -500,6 +524,7 @@ namespace WorkflowAlgorithms
     if (detVanWS)
       {
         const bool runDiag = this->getProperty("FindBadDetectors");
+        MatrixWorkspace_sptr diagMaskWs;
         if (runDiag)
           {
             IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
@@ -508,9 +533,11 @@ namespace WorkflowAlgorithms
             diag->setProperty("OutputWorkspace", "samDetVanProcMask");
             diag->setProperty("ReductionProperties", reductionManagerName);
             diag->executeAsSubAlg();
+            diagMaskWs = diag->getProperty("OutputWorkspace");
           }
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
+        detVan->setProperty("DiagMaskWorkspace", diagMaskWs);
         detVan->setProperty("ReductionProperties", reductionManagerName);
         detVan->executeAsSubAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");

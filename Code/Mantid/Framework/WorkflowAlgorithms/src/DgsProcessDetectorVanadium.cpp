@@ -12,6 +12,8 @@ process.
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -67,6 +69,9 @@ namespace WorkflowAlgorithms
     wsValidator->add<WorkspaceUnitValidator>("TOF");
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, wsValidator),
                           "An input workspace containing the detector vanadium data in TOF units.");
+    this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("DiagMaskWorkspace",
+        "", Direction::Input, PropertyMode::Optional),
+        "Workspace containing a mask determined by a diagnostic procedure");
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
                           "The workspace containing the processed results.");
     this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
@@ -103,13 +108,24 @@ namespace WorkflowAlgorithms
     norm->executeAsSubAlg();
     outputWS = norm->getProperty("OutputWorkspace");
 
+    // Apply masking from either DgsDiagnose or a given hard mask. If the
+    // DgsDiagnose and hard mask are present, only do DgsDiagnose since the
+    // hard mask will already be incorporated.
     const std::string hardMaskWsName = reductionManager->getProperty("HardMaskWorkspace");
-    if (!hardMaskWsName.empty())
+    MatrixWorkspace_sptr diagMaskWs = this->getProperty("DiagMaskWorkspace");
+    if (!hardMaskWsName.empty() || diagMaskWs)
       {
         IAlgorithm_sptr mask = this->createSubAlgorithm("MaskDetectors");
         mask->setProperty("Workspace", outputWS);
-        mask->setPropertyValue("MaskedWorkspace", hardMaskWsName);
-        mask->executeAsSubAlg();
+        if (diagMaskWs)
+          {
+            mask->setProperty("MaskedWorkspace", diagMaskWs);
+          }
+        else
+          {
+            mask->setPropertyValue("MaskedWorkspace", hardMaskWsName);
+          }
+        mask->execute();
         outputWS = mask->getProperty("Workspace");
       }
 
@@ -156,6 +172,26 @@ namespace WorkflowAlgorithms
         // Scale results by a constant
         double wbScaleFactor = inputWS->getInstrument()->getNumberParameter("wb-scale-factor")[0];
         outputWS *= wbScaleFactor;
+      }
+
+    outputWS->setName(outWsName);
+    if (reductionManager->existsProperty("SaveProcessedDetVan"))
+      {
+        bool saveProc = reductionManager->getProperty("SaveProcessedDetVan");
+        if (saveProc)
+          {
+            std::string outputFile = outputWS->name();
+            g_log.warning() << "DetVan WS: " << outputFile << std::endl;
+            // Don't save private calculation workspaces
+            if (!outputFile.empty() && !boost::starts_with(outputFile, "_"))
+              {
+                IAlgorithm_sptr save = this->createSubAlgorithm("SaveNexus");
+                save->setProperty("InputWorkspace", outputWS);
+                outputFile += ".nxs";
+                save->setProperty("FileName", outputFile);
+                save->execute();
+              }
+          }
       }
 
     this->setProperty("OutputWorkspace", outputWS);

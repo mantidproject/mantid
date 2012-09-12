@@ -19,6 +19,9 @@ namespace MDAlgorithms
    *
    * Gateway for number of subalgorithms, some are very important, some are questionable 
    * Intended to cover wide range of cases; 
+   *
+   * The description of the algorithm is avalible at: <http://www.mantidproject.org/ConvertToMD> 
+   * The detailed description of the algoritm is provided at: <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>
 
    * @date 11-10-2011
 
@@ -63,10 +66,7 @@ namespace MDAlgorithms
     void init();
     void exec();
    /// Sets documentation strings for this algorithm
-    virtual void initDocs();
-    /// Store metadata
-    void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;
-
+    virtual void initDocs();  
    /// pointer to the input workspace;
    Mantid::API::MatrixWorkspace_sptr m_InWS2D;
    /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
@@ -80,8 +80,19 @@ namespace MDAlgorithms
    /// logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& g_Log;
    //------------------------------------------------------------------------------------------------------------------------------------------
-   protected: //for testing
+   protected: //for testing, otherwise private:
         static Mantid::Kernel::Logger & getLogger();
+
+        // Workflow helpers:
+        /**Check if target workspace new or existing one and we need to create new workspace*/
+        bool doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws);
+      /**Create new MD workspace using existing parameters for algorithm */
+        API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDEvents::MDWSDescription &NewMDWSDescription);
+
+        bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dE_mod_req,const std::vector<std::string> &other_dim_names,
+                                      const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr);
+       /// Store metadata
+       void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;
 
  };
 

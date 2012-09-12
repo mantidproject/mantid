@@ -1,6 +1,6 @@
 set ( SRC_FILES
-#    src/GridDomain.cpp
-#    src/GridDomain1D.cpp
+    src/GridDomain.cpp
+    src/GridDomain1D.cpp
     src/ITransformScale.cpp
     src/TransformScaleFactory.cpp
     src/LinearScale.cpp
@@ -116,8 +116,8 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
 
 set ( INC_FILES
 	#	inc/MantidAPI/BoxCtrlChangesInterface.h
-#    inc/MantidAPI/GridDomain.h
-#    inc/MantidAPI/GridDomain1D.h
+    inc/MantidAPI/GridDomain.h
+    inc/MantidAPI/GridDomain1D.h
     inc/MantidAPI/ITransformScale.h
     inc/MantidAPI/TransformScaleFactory.h
     inc/MantidAPI/LinearScale.h

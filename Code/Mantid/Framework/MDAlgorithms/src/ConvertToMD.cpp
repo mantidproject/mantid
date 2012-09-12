@@ -3,7 +3,7 @@
 
 Transforms a workspace into MDEvent workspace with dimensions defined by user. 
    
-Gateway for set of subalgorithms, combined together to convert input 2D matrix workspace or event workspace with any units along X-axis into  multidimensional event workspace. 
+Gateway for set of subalgorithms, combined together to convert input 2D matrix workspace or Event workspace with any units along X-axis into  multidimensional event workspace. 
 
 Depending on the user input and the data, find in the input workspace, the algorithms transform the input workspace into 1 to 4 dimensional MDEvent workspace and adds to this workspace additional dimensions, which are described by the workspace properties and requested by user.
 
@@ -173,98 +173,29 @@ ConvertToMD::init()
 /* Execute the algorithm.   */
 void ConvertToMD::exec()
 {
-  // initiate class which would deal with any dimension workspaces, handling 
-  if(!m_OutWSWrapper)
-  {
-    m_OutWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
-  }
-  // -------- Input workspace
+  // initiate class which would deal with any dimension workspaces requested by algorithm parameters
+  if(!m_OutWSWrapper) m_OutWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+
+  // -------- get Input workspace
    m_InWS2D = getProperty("InputWorkspace");
-
-  // ------- Is there any output workspace?
-  // shared pointer to target workspace
-  API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
-  bool create_new_ws(false);
-  if(!spws)
-  {
-    create_new_ws = true;
-  }
-  else
-  { 
-      bool should_overwrite = getProperty("OverwriteExisting");
-      if (should_overwrite)
-      {
-          create_new_ws=true;
-      }else{
-          create_new_ws=false;
-      }
-  }
- 
-  // Collate and Analyze the requests to the job, specified by the input parameters
-  // what dimension names requested by the user by:
+   
+   // get the output workspace
+   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
+  
+  // Collect and Analyze the requests to the job, specified by the input parameters:
     //a) Q selector:
-    std::string Q_mod_req                    = getProperty("QDimensions");
+    std::string QModReq                    = getProperty("QDimensions");
     //b) the energy exchange mode
-    std::string dE_mod_req                   = getProperty("dEAnalysisMode");
+    std::string dEModReq                   = getProperty("dEAnalysisMode");
     //c) other dim property;
-    std::vector<std::string> other_dim_names = getProperty("OtherDimensions");
+    std::vector<std::string> otherDimNames = getProperty("OtherDimensions");
     //d) part of the procedure, specifying the target dimensions units. Currently only Q3D target units can be converted to different flavours of hkl
-    std::string convert_to_                  = getProperty("QConversionScales");
+    std::string convertTo_                 = getProperty("QConversionScales");
 
-// Build the target ws description as function of the input ws and the parameters, supplied to the algorithm 
+    // Build the target ws description as function of the input & output ws and the parameters, supplied to the algorithm 
     MDEvents::MDWSDescription targWSDescr;
-   // set the min and max values for the dimensions from the input porperties
-    std::vector<double> dimMin = getProperty("MinValues");
-    std::vector<double> dimMax = getProperty("MaxValues");
-    // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less the
-    targWSDescr.setMinMax(dimMin,dimMax);   
-    targWSDescr.buildFromMatrixWS(m_InWS2D,Q_mod_req,dE_mod_req,other_dim_names);
-
-    bool LorentzCorrections = getProperty("LorentzCorrection");
-    targWSDescr.setLorentsCorr(LorentzCorrections);
-
-  // instanciate class, responsible for defining Mslice-type projection
-    MDEvents::MDWSTransform MsliceProj;
-    if(create_new_ws)
-    {
-        //identify if u,v are present among input parameters and use defaults if not
-        std::vector<double> ut = getProperty("UProj");
-        std::vector<double> vt = getProperty("VProj");
-        std::vector<double> wt = getProperty("WProj");
-        try
-        {
-            MsliceProj.setUVvectors(ut,vt,wt);
-        }
-        catch(std::invalid_argument &)
-        {
-            g_log.error() << "The projections are coplanar. Will use defaults [1,0,0],[0,1,0] and [0,0,1]" << std::endl;
-        }
-       // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
-
-
-        // check if we are working in powder mode
-        // set up target coordinate system and identify/set the (multi) dimension's names to use
-         targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convert_to_);     
-      
-    }
-    else // user input is mainly ignored and everything is in old workspac
-    {  
-
-        // dimensions are already build, so build MDWS description from existing workspace
-        MDEvents::MDWSDescription oldWSDescr;
-        oldWSDescr.buildFromMDWS(spws);
-
-        // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace 
-        // and derived from input parameters. 
-        oldWSDescr.setUpMissingParameters(targWSDescr);      
-        // check inconsistencies
-        oldWSDescr.checkWSCorresponsMDWorkspace(targWSDescr);
-        // reset new ws description name
-        targWSDescr =oldWSDescr;
-       // set up target coordinate system
-        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convert_to_);
-    
-    }
+    // get workspace parameters and build target workspace descritpion, report if there is need to build new target MD workspace
+    bool createNewTargetWs = buildTargetWSDescription(spws,QModReq,dEModReq,otherDimNames,convertTo_,targWSDescr);
 
     // Check what to do with detectors:  
     if(targWSDescr.isDetInfoLost())
@@ -273,8 +204,8 @@ void ConvertToMD::exec()
     }
     else  // preprocess or not the detectors positions
     {
-          bool reuse_preprocecced_detectors = getProperty("UsePreprocessedDetectors");
-          if(!(reuse_preprocecced_detectors&&g_DetLoc.isDefined(m_InWS2D))){
+          bool reusePreproceccedDetectors = getProperty("UsePreprocessedDetectors");
+          if(!(reusePreproceccedDetectors&&g_DetLoc.isDefined(m_InWS2D))){
             // amount of work:
             const size_t nHist = m_InWS2D->getNumberHistograms();
             m_Progress.reset(new API::Progress(this,0.0,1.0,nHist));
@@ -289,32 +220,14 @@ void ConvertToMD::exec()
     }
     targWSDescr.setDetectors(g_DetLoc);
 
- // create and initate new workspace
-  if(create_new_ws)  
-  {
-    spws = m_OutWSWrapper->createEmptyMDWS(targWSDescr);
-    if(!spws)
-    {
-        g_log.error()<<"can not create target event workspace with :"<<targWSDescr.nDimensions()<<" dimensions\n";
-        throw(std::invalid_argument("can not create target workspace"));
-    }
-    // Build up the box controller
-    Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
-    // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
-    this->setBoxController(bc);
-    // split boxes;
-    spws->splitBox();
-  // Do we split more due to MinRecursionDepth?
-    int minDepth = this->getProperty("MinRecursionDepth");
-    int maxDepth = this->getProperty("MaxRecursionDepth");
-    if (minDepth>maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth ");
-    spws->setMinRecursionDepth(size_t(minDepth));  
-  }else{
-      m_OutWSWrapper->setMDWS(spws);
-  }
+ // create and initate new workspace or set up existing workspace as a target. 
+  if(createNewTargetWs)  
+    spws = this->createNewMDWorkspace(targWSDescr);
+  else // setup existing MD workspace as workspace target.
+     m_OutWSWrapper->setMDWS(spws);
+
 
   //DO THE JOB:
-
   // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
   ConvToMDSelector AlgoSelector;
   m_Convertor  = AlgoSelector.convSelector(m_InWS2D,m_Convertor);
@@ -330,7 +243,6 @@ void ConvertToMD::exec()
 
   //JOB COMPLETED:
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
-
   // free the algorithm from the responsibility for the target workspace to allow it to be deleted if necessary
   m_OutWSWrapper->releaseWorkspace();
   // free up the sp to the input workspace, which would be deleted if nobody needs it any more;
@@ -339,7 +251,7 @@ void ConvertToMD::exec()
 }
 
 /**
- * Copy over the metadata from the input matrix workspace
+ * Copy over the metadata from the input matrix workspace to output MDEventWorkspace
  * @param mdEventWS :: The output MDEventWorkspace
  */
 void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const
@@ -359,7 +271,123 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const
 /** Constructor */
 ConvertToMD::ConvertToMD()
 {}
+/** handle the input parameters and build target workspace description as function of input parameters */ 
+bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &QModReq,const std::string &dEModReq,const std::vector<std::string> &otherDimNames,
+                                           const std::string &convertTo_,MDEvents::MDWSDescription &targWSDescr)
+{
+  // ------- Is there need to creeate new ouptutworpaced?  
+    bool createNewTargetWs =doWeNeedNewTargetWorkspace(spws );
+ 
 
+   // set the min and max values for the dimensions from the input porperties
+    std::vector<double> dimMin = getProperty("MinValues");
+    std::vector<double> dimMax = getProperty("MaxValues");
+    // verify that the number min/max values is equivalent to the number of dimensions defined by properties and min is less max
+    targWSDescr.setMinMax(dimMin,dimMax);   
+    targWSDescr.buildFromMatrixWS(m_InWS2D,QModReq,dEModReq,otherDimNames);
+
+    bool LorentzCorrections = getProperty("LorentzCorrection");
+    targWSDescr.setLorentsCorr(LorentzCorrections);
+
+  // instanciate class, responsible for defining Mslice-type projection
+    MDEvents::MDWSTransform MsliceProj;
+    if(createNewTargetWs)
+    {
+        //identify if u,v are present among input parameters and use defaults if not
+        std::vector<double> ut = getProperty("UProj");
+        std::vector<double> vt = getProperty("VProj");
+        std::vector<double> wt = getProperty("WProj");
+        try
+        {
+            MsliceProj.setUVvectors(ut,vt,wt);
+        }
+        catch(std::invalid_argument &)
+        {
+            g_log.error() << "The projections are coplanar. Will use defaults [1,0,0],[0,1,0] and [0,0,1]" << std::endl;
+        }
+       // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
+
+
+        // check if we are working in powder mode
+        // set up target coordinate system and identify/set the (multi) dimension's names to use
+         targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convertTo_);           
+    }
+    else // user input is mainly ignored and everything is in old workspac
+    {  
+
+        // dimensions are already build, so build MDWS description from existing workspace
+        MDEvents::MDWSDescription oldWSDescr;
+        oldWSDescr.buildFromMDWS(spws);
+
+        // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace 
+        // and derived from input parameters. 
+        oldWSDescr.setUpMissingParameters(targWSDescr);      
+        // check inconsistencies
+        oldWSDescr.checkWSCorresponsMDWorkspace(targWSDescr);
+        // reset new ws description name
+        targWSDescr =oldWSDescr;
+       // set up target coordinate system
+        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convertTo_);
+    
+    }
+    return createNewTargetWs;
+}
+
+
+/**Create new MD workspace and set up its box controller using algorithm's box controllers properties 
+* @param NewMDWSDescription -- the constructed MD workspace description;
+*/
+API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(const MDEvents::MDWSDescription &targWSDescr)
+{
+   // create new md workspace and set internal shared pointer of m_OutWSWrapper to this workspace
+    API::IMDEventWorkspace_sptr spws = m_OutWSWrapper->createEmptyMDWS(targWSDescr);
+    if(!spws)
+    {
+        g_log.error()<<"can not create target event workspace with :"<<targWSDescr.nDimensions()<<" dimensions\n";
+        throw(std::invalid_argument("can not create target workspace"));
+    }
+    // Build up the box controller
+    Mantid::API::BoxController_sptr bc = m_OutWSWrapper->pWorkspace()->getBoxController();
+    // Build up the box controller, using the properties in BoxControllerSettingsAlgorithm
+    this->setBoxController(bc);
+    // split boxes;
+    spws->splitBox();
+  // Do we split more due to MinRecursionDepth?
+    int minDepth = this->getProperty("MinRecursionDepth");
+    int maxDepth = this->getProperty("MaxRecursionDepth");
+    if (minDepth>maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth ");
+    spws->setMinRecursionDepth(size_t(minDepth));  
+
+    return spws;
+
+}
+
+/**Check if the target workspace new or exists and we need to create new workspace
+ *@param spws -- shared pointer to target MD workspace, which can be undefined if the workspace does not exist
+ *@param      -- Algorithnm property "OverwriteExisting" which specifies if one needs to owerwrite existing workspace
+ *
+ *@returns true if one needs to create new workspace and false otherwise
+*/
+bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
+{
+
+  bool createNewWs(false);
+  if(!spws)
+  {
+    createNewWs = true;
+  }
+  else
+  { 
+      bool shouldOverwrite = getProperty("OverwriteExisting");
+      if (shouldOverwrite )
+      {
+          createNewWs=true;
+      }else{
+          createNewWs=false;
+      }
+  }
+  return createNewWs;
+}
 
 } // namespace Mantid
 } // namespace MDAlgorithms

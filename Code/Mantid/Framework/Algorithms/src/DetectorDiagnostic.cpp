@@ -70,33 +70,36 @@ namespace Mantid
 
     void DetectorDiagnostic::init()
     {
-      declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
-                      "Name of the integrated detector vanadium (white beam) workspace." );
-      declareProperty(new WorkspaceProperty<>("OutputWorkspace","", Direction::Output),
-                      "A MaskWorkspace containing the masked spectra as zeroes and ones.");
+      this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
+          Direction::Input),
+          "Name of the integrated detector vanadium (white beam) workspace." );
+      this->declareProperty(new WorkspaceProperty<>("HardMaskWorkspace", "",
+          Direction::Input, PropertyMode::Optional), "A hard mask to apply to the inputworkspace");
+      this->declareProperty(new WorkspaceProperty<>("OutputWorkspace","", Direction::Output),
+          "A MaskWorkspace containing the masked spectra as zeroes and ones.");
       auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
       mustBePosInt->setLower(0);
-      declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
-                      "The index number of the first spectrum to include in the calculation\n"
-                      "(default 0)" );
-      declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
-                      "The index number of the last spectrum to include in the calculation\n"
-                      "(default the last histogram)" );
-      declareProperty("RangeLower", EMPTY_DBL(),
+      this->declareProperty("StartWorkspaceIndex", 0, mustBePosInt,
+          "The index number of the first spectrum to include in the calculation\n"
+          "(default 0)" );
+      this->declareProperty("EndWorkspaceIndex", EMPTY_INT(), mustBePosInt,
+          "The index number of the last spectrum to include in the calculation\n"
+          "(default the last histogram)" );
+      this->declareProperty("RangeLower", EMPTY_DBL(),
           "No bin with a boundary at an x value less than this will be used\n"
           "in the summation that decides if a detector is 'bad' (default: the\n"
           "start of each histogram)" );
-      declareProperty("RangeUpper", EMPTY_DBL(),
+      this->declareProperty("RangeUpper", EMPTY_DBL(),
           "No bin with a boundary at an x value higher than this value will\n"
           "be used in the summation that decides if a detector is 'bad'\n"
           "(default: the end of each histogram)" );
 
       string findDetOutLimGrp("Find Detectors Outside Limits");
-      declareProperty("LowThreshold", 0.0,
+      this->declareProperty("LowThreshold", 0.0,
           "Spectra whose total number of counts are equal to or below this value\n"
           "will be marked bad (default 0)" );
       this->setPropertyGroup("LowThreshold", findDetOutLimGrp);
-      declareProperty("HighThreshold", EMPTY_DBL(),
+      this->declareProperty("HighThreshold", EMPTY_DBL(),
           "Spectra whose total number of counts are equal to or above this value\n"
           "will be marked bad (default off)" );
       this->setPropertyGroup("HighThreshold", findDetOutLimGrp);
@@ -104,93 +107,97 @@ namespace Mantid
       string medianDetTestGrp("Median Detector Test");
       auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double> >();
       mustBePositiveDbl->setLower(0);
-      declareProperty("LevelsUp",0,mustBePosInt,"Levels above pixel that will be used to compute the median.\n"
-                      "If no level is specified, or 0, the median is over the whole instrument.");
+      this->declareProperty("LevelsUp", 0, mustBePosInt,
+          "Levels above pixel that will be used to compute the median.\n"
+          "If no level is specified, or 0, the median is over the whole instrument.");
       this->setPropertyGroup("LevelsUp", medianDetTestGrp);
-      declareProperty("SignificanceTest", 0.0, mustBePositiveDbl,
-                      "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
-                      "difference with respect to the median value must also exceed this number of error bars");
+      this->declareProperty("SignificanceTest", 0.0, mustBePositiveDbl,
+          "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+          "difference with respect to the median value must also exceed this number of error bars");
       this->setPropertyGroup("SignificanceTest", medianDetTestGrp);
-      declareProperty("LowThresholdFraction", 0.1,
-                      "Lower acceptable bound as fraction of median value" );
+      this->declareProperty("LowThresholdFraction", 0.1,
+          "Lower acceptable bound as fraction of median value" );
       this->setPropertyGroup("LowThresholdFraction", medianDetTestGrp);
-      declareProperty("HighThresholdFraction", 1.5,
-                      "Upper acceptable bound as fraction of median value");
+      this->declareProperty("HighThresholdFraction", 1.5,
+          "Upper acceptable bound as fraction of median value");
       this->setPropertyGroup("HighThresholdFraction", medianDetTestGrp);
-      declareProperty("LowOutlier", 0.01, "Lower bound defining outliers as fraction of median value");
+      this->declareProperty("LowOutlier", 0.01, "Lower bound defining outliers as fraction of median value");
       this->setPropertyGroup("LowOutlier", medianDetTestGrp);
-      declareProperty("HighOutlier", 100., "Upper bound defining outliers as fraction of median value");
+      this->declareProperty("HighOutlier", 100., "Upper bound defining outliers as fraction of median value");
       this->setPropertyGroup("HighOutlier", medianDetTestGrp);
-      declareProperty("ExcludeZeroesFromMedian", false, "If false (default) zeroes will be included in "
-                      "the median calculation, otherwise they will not be included but they will be left unmasked");
+      this->declareProperty("ExcludeZeroesFromMedian", false, "If false (default) zeroes will be included in "
+          "the median calculation, otherwise they will not be included but they will be left unmasked");
       this->setPropertyGroup("ExcludeZeroesFromMedian", medianDetTestGrp);
 
       string detEffVarGrp("Detector Efficiency Variation");
-      declareProperty(new WorkspaceProperty<>("DetVanCompare","",Direction::Input, PropertyMode::Optional),
-                      "Name of a matching second detector vanadium run from the same\n"
-                      "instrument. It must be treated in the same manner as the input detector vanadium." );
+      this->declareProperty(new WorkspaceProperty<>("DetVanCompare", "",
+          Direction::Input, PropertyMode::Optional),
+          "Name of a matching second detector vanadium run from the same\n"
+          "instrument. It must be treated in the same manner as the input detector vanadium." );
       this->setPropertyGroup("DetVanCompare", detEffVarGrp);
-      declareProperty("DetVanRatioVariation", 1.1, mustBePositiveDbl,
-                      "Identify spectra whose total number of counts has changed by more\n"
-                      "than this factor of the median change between the two input workspaces" );
+      this->declareProperty("DetVanRatioVariation", 1.1, mustBePositiveDbl,
+          "Identify spectra whose total number of counts has changed by more\n"
+          "than this factor of the median change between the two input workspaces" );
       this->setPropertyGroup("DetVanRatioVariation", detEffVarGrp);
-      setPropertySettings("DetVanRatioVariation", new EnabledWhenProperty("DetVanCompare", IS_NOT_DEFAULT));
+      this->setPropertySettings("DetVanRatioVariation",
+          new EnabledWhenProperty("DetVanCompare", IS_NOT_DEFAULT));
 
       string countsCheck("Check Sample Counts");
-      declareProperty(new WorkspaceProperty<>("SampleTotalCountsWorkspace", "",
+      this->declareProperty(new WorkspaceProperty<>("SampleTotalCountsWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "A sample workspace integrated over the full axis range.");
       this->setPropertyGroup("SampleTotalCountsWorkspace", countsCheck);
 
       string backgroundCheck("Check Sample Background");
-      declareProperty(new WorkspaceProperty<>("SampleBackgroundWorkspace", "",
+      this->declareProperty(new WorkspaceProperty<>("SampleBackgroundWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "A sample workspace integrated over the background region.");
       this->setPropertyGroup("SampleBackgroundWorkspace", backgroundCheck);
-      declareProperty("SampleBkgLowAcceptanceFactor", 0.0, mustBePositiveDbl,
+      this->declareProperty("SampleBkgLowAcceptanceFactor", 0.0, mustBePositiveDbl,
           "Low threshold for the background check MedianDetectorTest.");
       this->setPropertyGroup("SampleBkgLowAcceptanceFactor", backgroundCheck);
-      declareProperty("SampleBkgHighAcceptanceFactor", 5.0, mustBePositiveDbl,
+      this->declareProperty("SampleBkgHighAcceptanceFactor", 5.0, mustBePositiveDbl,
           "High threshold for the background check MedianDetectorTest.");
       this->setPropertyGroup("SampleBkgHighAcceptanceFactor", backgroundCheck);
-      declareProperty("SampleBkgSignificanceTest", 3.3, mustBePositiveDbl,
-                      "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
-                      "difference with respect to the median value must also exceed this number of error bars");
+      this->declareProperty("SampleBkgSignificanceTest", 3.3, mustBePositiveDbl,
+          "Error criterion as a multiple of error bar i.e. to fail the test, the magnitude of the\n"
+          "difference with respect to the median value must also exceed this number of error bars");
       this->setPropertyGroup("SampleBkgSignificanceTest", backgroundCheck);
 
       string psdBleedMaskGrp("Create PSD Bleed Mask");
-      declareProperty(new WorkspaceProperty<>("SampleWorkspace", "",
+      this->declareProperty(new WorkspaceProperty<>("SampleWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "A sample workspace. This is used in the PSD Bleed calculation.");
       this->setPropertyGroup("SampleWorkspace", psdBleedMaskGrp);
-      declareProperty("MaxTubeFramerate", 0.0, mustBePositiveDbl,
+      this->declareProperty("MaxTubeFramerate", 0.0, mustBePositiveDbl,
           "The maximum rate allowed for a tube in counts/us/frame.");
       this->setPropertyGroup("MaxTubeFramerate", psdBleedMaskGrp);
-      declareProperty("NIgnoredCentralPixels", 80, mustBePosInt,
+      this->declareProperty("NIgnoredCentralPixels", 80, mustBePosInt,
           "The number of pixels about the centre to ignore.");
       this->setPropertyGroup("NIgnoredCentralPixels", psdBleedMaskGrp);
-      setPropertySettings("NIgnoredCentralPixels", new EnabledWhenProperty("MaxTubeFramerate", IS_NOT_DEFAULT));
+      this->setPropertySettings("NIgnoredCentralPixels",
+          new EnabledWhenProperty("MaxTubeFramerate", IS_NOT_DEFAULT));
 
-      declareProperty("NumberOfFailures", 0, Direction::Output);
+      this->declareProperty("NumberOfFailures", 0, Direction::Output);
     }
 
     void DetectorDiagnostic::exec()
     {
       // get the generic information that everybody uses
-      MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-      m_minIndex = getProperty("StartWorkspaceIndex");
-      m_maxIndex = getProperty("EndWorkspaceIndex");
-      m_rangeLower = getProperty("RangeLower");
-      m_rangeUpper = getProperty("RangeUpper");
+      MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+      m_minIndex = this->getProperty("StartWorkspaceIndex");
+      m_maxIndex = this->getProperty("EndWorkspaceIndex");
+      m_rangeLower = this->getProperty("RangeLower");
+      m_rangeUpper = this->getProperty("RangeUpper");
 
       // integrate the data once to pass to subalgorithms
       m_fracDone = 0.;
 
       // Get the other workspaces
-      MatrixWorkspace_sptr input2WS = getProperty("DetVanCompare");
-      MatrixWorkspace_sptr totalCountsWS = getProperty("SampleTotalCountsWorkspace");
-      MatrixWorkspace_sptr bkgWS = getProperty("SampleBackgroundWorkspace");
-      MatrixWorkspace_sptr sampleWS = getProperty("SampleWorkspace");
+      MatrixWorkspace_sptr input2WS = this->getProperty("DetVanCompare");
+      MatrixWorkspace_sptr totalCountsWS = this->getProperty("SampleTotalCountsWorkspace");
+      MatrixWorkspace_sptr bkgWS = this->getProperty("SampleBackgroundWorkspace");
+      MatrixWorkspace_sptr sampleWS = this->getProperty("SampleWorkspace");
 
       // calculate the number of tests for progress bar
       m_progStepWidth = 0;
@@ -202,7 +209,7 @@ namespace Mantid
           numTests += 1;
         if (bkgWS)
           numTests += 1;
-        double temp = getProperty("MaxTubeFramerate");
+        double temp = this->getProperty("MaxTubeFramerate");
         if (temp > 0. && sampleWS)
           numTests += 1;
         g_log.information() << "Number of tests requested: " << numTests << std::endl;
@@ -212,6 +219,16 @@ namespace Mantid
       int numFailed(0);
       MatrixWorkspace_sptr maskWS;
 
+      // Apply hard mask if present
+      MatrixWorkspace_sptr hardMaskWS = this->getProperty("HardMaskWorkspace");
+      if (hardMaskWS)
+      {
+        IAlgorithm_sptr md = this->createSubAlgorithm("MaskDetectors");
+        md->setProperty("Workspace", inputWS);
+        md->setProperty("MaskedWorkspace", hardMaskWS);
+        md->executeAsSubAlg();
+      }
+
       // Perform FindDetectorsOutsideLimits and MedianDetectorTest on the
       // detector vanadium
       maskWS = this->doDetVanTest(inputWS, numFailed);
@@ -219,103 +236,103 @@ namespace Mantid
       // DetectorEfficiencyVariation (only if two workspaces are specified)
       if (input2WS)
       {
-          // apply mask to what we are going to input
-          applyMask(input2WS, maskWS);
+        // apply mask to what we are going to input
+        this->applyMask(input2WS, maskWS);
 
-          maskWS = this->doDetVanTest(input2WS, numFailed);
+        maskWS = this->doDetVanTest(input2WS, numFailed);
 
-          // get the relevant inputs
-          double variation = getProperty("DetVanRatioVariation");
+        // get the relevant inputs
+        double variation = this->getProperty("DetVanRatioVariation");
 
-          // run the subalgorithm
-          IAlgorithm_sptr alg = createSubAlgorithm("DetectorEfficiencyVariation",
-              m_fracDone, m_fracDone+m_progStepWidth);
-          m_fracDone += m_progStepWidth;
-          alg->setProperty("WhiteBeamBase", inputWS);
-          alg->setProperty("WhiteBeamCompare", input2WS);
-          alg->setProperty("StartWorkspaceIndex", m_minIndex);
-          alg->setProperty("EndWorkspaceIndex", m_maxIndex);
-          alg->setProperty("RangeLower", m_rangeLower);
-          alg->setProperty("RangeUpper", m_rangeUpper);
-          alg->setProperty("Variation", variation);
-          alg->executeAsSubAlg();
-          MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
-          applyMask(inputWS, localMaskWS);
-          applyMask(input2WS, localMaskWS);
-          int localFails = alg->getProperty("NumberOfFailures");
-          numFailed += localFails;
+        // run the subalgorithm
+        IAlgorithm_sptr alg = this->createSubAlgorithm("DetectorEfficiencyVariation",
+            m_fracDone, m_fracDone+m_progStepWidth);
+        m_fracDone += m_progStepWidth;
+        alg->setProperty("WhiteBeamBase", inputWS);
+        alg->setProperty("WhiteBeamCompare", input2WS);
+        alg->setProperty("StartWorkspaceIndex", m_minIndex);
+        alg->setProperty("EndWorkspaceIndex", m_maxIndex);
+        alg->setProperty("RangeLower", m_rangeLower);
+        alg->setProperty("RangeUpper", m_rangeUpper);
+        alg->setProperty("Variation", variation);
+        alg->executeAsSubAlg();
+        MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
+        applyMask(inputWS, localMaskWS);
+        applyMask(input2WS, localMaskWS);
+        int localFails = alg->getProperty("NumberOfFailures");
+        numFailed += localFails;
       }
 
       // Zero total counts check for sample counts
       if (totalCountsWS)
-        {
-          // apply mask to what we are going to input
-          applyMask(totalCountsWS, maskWS);
+      {
+        // apply mask to what we are going to input
+        applyMask(totalCountsWS, maskWS);
 
-          IAlgorithm_sptr zeroChk = createSubAlgorithm("FindDetectorsOutsideLimits",
-              m_fracDone, m_fracDone+m_progStepWidth);
-          m_fracDone += m_progStepWidth;
-          zeroChk->setProperty("InputWorkspace", totalCountsWS);
-          zeroChk->setProperty("StartWorkspaceIndex", m_minIndex);
-          zeroChk->setProperty("EndWorkspaceIndex", m_maxIndex);
-          zeroChk->setProperty("LowThreshold", 1.0e-10);
-          zeroChk->setProperty("HighThreshold", 1.0e100);
-          zeroChk->executeAsSubAlg();
-          MatrixWorkspace_sptr localMaskWS = zeroChk->getProperty("OutputWorkspace");
-          applyMask(inputWS, localMaskWS);
-          int localFails = zeroChk->getProperty("NumberOfFailures");
-          numFailed += localFails;
-        }
+        IAlgorithm_sptr zeroChk = this->createSubAlgorithm("FindDetectorsOutsideLimits",
+            m_fracDone, m_fracDone+m_progStepWidth);
+        m_fracDone += m_progStepWidth;
+        zeroChk->setProperty("InputWorkspace", totalCountsWS);
+        zeroChk->setProperty("StartWorkspaceIndex", m_minIndex);
+        zeroChk->setProperty("EndWorkspaceIndex", m_maxIndex);
+        zeroChk->setProperty("LowThreshold", 1.0e-10);
+        zeroChk->setProperty("HighThreshold", 1.0e100);
+        zeroChk->executeAsSubAlg();
+        MatrixWorkspace_sptr localMaskWS = zeroChk->getProperty("OutputWorkspace");
+        applyMask(inputWS, localMaskWS);
+        int localFails = zeroChk->getProperty("NumberOfFailures");
+        numFailed += localFails;
+      }
 
       // Background check
       if (bkgWS)
-        {
-          // apply mask to what we are going to input
-          applyMask(bkgWS, maskWS);
+      {
+        // apply mask to what we are going to input
+        this->applyMask(bkgWS, maskWS);
 
-          double significanceTest = getProperty("SampleBkgSignificanceTest");
-          double lowThreshold = getProperty("SampleBkgLowAcceptanceFactor");
-          double highThreshold = getProperty("SampleBkgHighAcceptanceFactor");
+        double significanceTest = this->getProperty("SampleBkgSignificanceTest");
+        double lowThreshold = this->getProperty("SampleBkgLowAcceptanceFactor");
+        double highThreshold = this->getProperty("SampleBkgHighAcceptanceFactor");
 
-          // run the subalgorithm
-          IAlgorithm_sptr alg = createSubAlgorithm("MedianDetectorTest",
-              m_fracDone, m_fracDone+m_progStepWidth);
-          m_fracDone += m_progStepWidth;
-          alg->setProperty("InputWorkspace", bkgWS);
-          alg->setProperty("StartWorkspaceIndex", m_minIndex);
-          alg->setProperty("EndWorkspaceIndex", m_maxIndex);
-          alg->setProperty("SignificanceTest", significanceTest);
-          alg->setProperty("LowThreshold", lowThreshold);
-          alg->setProperty("HighThreshold", highThreshold);
-          alg->setProperty("LowOutlier", 0.0);
-          alg->setProperty("HighOutlier", 1.0e100);
-          alg->setProperty("ExcludeZeroesFromMedian", true);
-          alg->executeAsSubAlg();
-          MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
-          applyMask(inputWS, localMaskWS);
-          int localFails = alg->getProperty("NumberOfFailures");
-          numFailed += localFails;
-        }
+        // run the subalgorithm
+        IAlgorithm_sptr alg = this->createSubAlgorithm("MedianDetectorTest",
+            m_fracDone, m_fracDone+m_progStepWidth);
+        m_fracDone += m_progStepWidth;
+        alg->setProperty("InputWorkspace", bkgWS);
+        alg->setProperty("StartWorkspaceIndex", m_minIndex);
+        alg->setProperty("EndWorkspaceIndex", m_maxIndex);
+        alg->setProperty("SignificanceTest", significanceTest);
+        alg->setProperty("LowThreshold", lowThreshold);
+        alg->setProperty("HighThreshold", highThreshold);
+        alg->setProperty("LowOutlier", 0.0);
+        alg->setProperty("HighOutlier", 1.0e100);
+        alg->setProperty("ExcludeZeroesFromMedian", true);
+        alg->executeAsSubAlg();
+        MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
+        applyMask(inputWS, localMaskWS);
+        int localFails = alg->getProperty("NumberOfFailures");
+        numFailed += localFails;
+      }
 
       // CreatePSDBleedMask (if selected)
-      double maxTubeFrameRate = getProperty("MaxTubeFramerate");
+      double maxTubeFrameRate = this->getProperty("MaxTubeFramerate");
       if (maxTubeFrameRate > 0. && sampleWS)
       {
-          // get the relevant inputs
-          int numIgnore = getProperty("NIgnoredCentralPixels");
+        // get the relevant inputs
+        int numIgnore = this->getProperty("NIgnoredCentralPixels");
 
-          // run the subalgorithm
-          IAlgorithm_sptr alg = createSubAlgorithm("CreatePSDBleedMask",
-              m_fracDone, m_fracDone+m_progStepWidth);
-          m_fracDone += m_progStepWidth;
-          alg->setProperty("InputWorkspace", sampleWS);
-          alg->setProperty("MaxTubeFramerate", maxTubeFrameRate);
-          alg->setProperty("NIgnoredCentralPixels", numIgnore);
-          alg->executeAsSubAlg();
-          MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
-          applyMask(inputWS, localMaskWS);
-          int localFails = alg->getProperty("NumberOfFailures");
-          numFailed += localFails;
+        // run the subalgorithm
+        IAlgorithm_sptr alg = this->createSubAlgorithm("CreatePSDBleedMask",
+            m_fracDone, m_fracDone+m_progStepWidth);
+        m_fracDone += m_progStepWidth;
+        alg->setProperty("InputWorkspace", sampleWS);
+        alg->setProperty("MaxTubeFramerate", maxTubeFrameRate);
+        alg->setProperty("NIgnoredCentralPixels", numIgnore);
+        alg->executeAsSubAlg();
+        MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
+        applyMask(inputWS, localMaskWS);
+        int localFails = alg->getProperty("NumberOfFailures");
+        numFailed += localFails;
       }
 
       g_log.information() << numFailed << " spectra are being masked\n";
@@ -323,14 +340,14 @@ namespace Mantid
 
       // Extract the mask from the vanadium workspace
       std::vector<int> detList;
-      IAlgorithm_sptr extract = createSubAlgorithm("ExtractMask");
+      IAlgorithm_sptr extract = this->createSubAlgorithm("ExtractMask");
       extract->setProperty("InputWorkspace", inputWS);
       extract->setProperty("OutputWorkspace", "final_mask");
       extract->setProperty("DetectorList", detList);
       extract->executeAsSubAlg();
       maskWS = extract->getProperty("OutputWorkspace");
 
-      setProperty("OutputWorkspace", maskWS);
+      this->setProperty("OutputWorkspace", maskWS);
     }
 
     /**
@@ -339,7 +356,7 @@ namespace Mantid
      * @param maskWS : the workspace containing the masking information
      */
     void DetectorDiagnostic::applyMask(API::MatrixWorkspace_sptr inputWS,
-                                       API::MatrixWorkspace_sptr maskWS)
+        API::MatrixWorkspace_sptr maskWS)
     {
       IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors"); // should set progress bar
       maskAlg->setProperty("Workspace", inputWS);
@@ -362,10 +379,10 @@ namespace Mantid
 
       // FindDetectorsOutsideLimits
       // get the relevant inputs
-      double lowThreshold = getProperty("LowThreshold");
-      double highThreshold = getProperty("HighThreshold");
+      double lowThreshold = this->getProperty("LowThreshold");
+      double highThreshold = this->getProperty("HighThreshold");
       // run the subalgorithm
-      IAlgorithm_sptr fdol = createSubAlgorithm("FindDetectorsOutsideLimits",
+      IAlgorithm_sptr fdol = this->createSubAlgorithm("FindDetectorsOutsideLimits",
           m_fracDone, m_fracDone+m_progStepWidth);
       m_fracDone += m_progStepWidth;
       fdol->setProperty("InputWorkspace", inputWS);
@@ -382,20 +399,21 @@ namespace Mantid
       nFails += localFails;
 
       // get the relevant inputs for the MedianDetectorTests
-      int parents = getProperty("LevelsUp");
-      double significanceTest = getProperty("SignificanceTest");
-      double lowThresholdFrac = getProperty("LowThresholdFraction");
-      double highThresholdFrac = getProperty("HighThresholdFraction");
-      double lowOutlier = getProperty("LowOutlier");
-      double highOutlier = getProperty("HighOutlier");
-      bool excludeZeroes = getProperty("ExcludeZeroesFromMedian");
+      int parents = this->getProperty("LevelsUp");
+      double significanceTest = this->getProperty("SignificanceTest");
+      double lowThresholdFrac = this->getProperty("LowThresholdFraction");
+      double highThresholdFrac = this->getProperty("HighThresholdFraction");
+      double lowOutlier = this->getProperty("LowOutlier");
+      double highOutlier = this->getProperty("HighOutlier");
+      bool excludeZeroes = this->getProperty("ExcludeZeroesFromMedian");
 
       // MedianDetectorTest
       // apply mask to what we are going to input
-      applyMask(inputWS, localMask);
+      this->applyMask(inputWS, localMask);
 
       // run the subalgorithm
-      IAlgorithm_sptr mdt = createSubAlgorithm("MedianDetectorTest", m_fracDone, m_fracDone+m_progStepWidth);
+      IAlgorithm_sptr mdt = this->createSubAlgorithm("MedianDetectorTest",
+          m_fracDone, m_fracDone+m_progStepWidth);
       m_fracDone += m_progStepWidth;
       mdt->setProperty("InputWorkspace", inputWS);
       mdt->setProperty("StartWorkspaceIndex", m_minIndex);
@@ -414,7 +432,7 @@ namespace Mantid
       localFails = mdt->getProperty("NumberOfFailures");
       nFails += localFails;
 
-      applyMask(inputWS, localMask);
+      this->applyMask(inputWS, localMask);
       return localMask;
     }
 
@@ -422,9 +440,9 @@ namespace Mantid
     // Public member functions
     //--------------------------------------------------------------------------
     DetectorDiagnostic::DetectorDiagnostic() : 
-      API::Algorithm(), m_fracDone(0.0), m_TotalTime(RTTotal), m_parents(0),
-      m_progStepWidth(0.0), m_minIndex(0), m_maxIndex(EMPTY_INT()),
-      m_rangeLower(EMPTY_DBL()), m_rangeUpper(EMPTY_DBL())
+          API::Algorithm(), m_fracDone(0.0), m_TotalTime(RTTotal), m_parents(0),
+          m_progStepWidth(0.0), m_minIndex(0), m_maxIndex(EMPTY_INT()),
+          m_rangeLower(EMPTY_DBL()), m_rangeUpper(EMPTY_DBL())
     {
     }
 
@@ -508,9 +526,9 @@ namespace Mantid
       return mymap;
     }
     /** This function will check how to group spectra when calculating median
-      *
-      *
-      */
+     *
+     *
+     */
     std::vector<std::vector<size_t> > DetectorDiagnostic::makeMap(API::MatrixWorkspace_sptr countsWS)
     {
       std::multimap<Mantid::Geometry::ComponentID,size_t> mymap;
@@ -637,9 +655,10 @@ namespace Mantid
         }
         PARALLEL_CHECK_INTERUPT_REGION
 
-        if(medianInput.empty()){
-            g_log.information("some group has no valid histograms. Will use 0 for median.");
-            medianInput.push_back(0.);
+        if(medianInput.empty())
+        {
+          g_log.information("some group has no valid histograms. Will use 0 for median.");
+          medianInput.push_back(0.);
         }
 
         // We need a sorted array to calculate the median

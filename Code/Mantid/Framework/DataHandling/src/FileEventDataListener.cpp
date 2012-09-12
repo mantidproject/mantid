@@ -18,9 +18,14 @@ namespace DataHandling
   /// Constructor
   FileEventDataListener::FileEventDataListener() : ILiveListener(),
       m_filename(ConfigService::Instance().getString("fileeventdatalistener.filename")),
-      m_tempWSname("__filelistenerchunk"), m_nextChunk(1), m_chunkload(NULL)
+      m_tempWSname("__filelistenerchunk"), m_nextChunk(1), m_chunkload(NULL), m_preNexus(false)
   {
     if ( m_filename.empty() ) g_log.error("Configuration property fileeventdatalistener.filename not found. The algorithm will fail!");
+    if ( m_filename.find("runinfo") != std::string::npos )
+    {
+      m_preNexus = true;
+      g_log.information() << "Using LoadPreNexus on file " << m_filename << std::endl;
+    }
 
     if ( ! ConfigService::Instance().getValue("fileeventdatalistener.chunks",m_numChunks) )
     {
@@ -102,13 +107,26 @@ namespace DataHandling
   /// Load the next chunk of data. Calls Algorithm::executeAsync to do it in another thread.
   void FileEventDataListener::loadChunk()
   {
-    m_loader = AlgorithmManager::Instance().createUnmanaged("LoadEventPreNexus");
+    std::string loadingAlg, fileProp;
+    if ( m_preNexus )
+    {
+      loadingAlg = "LoadPreNexus";
+      fileProp = "Filename";
+    }
+    else
+    {
+      loadingAlg = "LoadEventPreNexus";
+      fileProp = "EventFilename";
+    }
+
+    m_loader = AlgorithmManager::Instance().createUnmanaged(loadingAlg);
     m_loader->initialize();
 //    loader->setChild(true); // It can't be a child because the output needs to go in the ADS
     m_loader->setLogging(false);
-    m_loader->setPropertyValue("EventFilename",m_filename);
+    m_loader->setPropertyValue(fileProp,m_filename);
     m_loader->setProperty("ChunkNumber",m_nextChunk++); // post-increment
     m_loader->setProperty("TotalChunks",m_numChunks);
+    if ( m_preNexus ) m_loader->setProperty("LoadMonitors",false);
     m_loader->setPropertyValue("OutputWorkspace",m_tempWSname); // Goes into 'hidden' workspace
     m_chunkload = new Poco::ActiveResult<bool>(m_loader->executeAsync());
   }

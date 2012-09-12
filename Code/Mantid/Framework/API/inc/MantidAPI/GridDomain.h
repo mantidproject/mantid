@@ -1,21 +1,22 @@
-#ifndef MANTID_API_LINEARSCALE_H_
-#define MANTID_API_LINEARSCALE_H_
+#ifndef MANTID_API_GRIDDOMAIN_H_
+#define MANTID_API_GRIDDOMAIN_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
 #include <boost/shared_ptr.hpp>
+#include <vector>
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/ITransformScale.h"
-
+#include "MantidAPI/FunctionDomain.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
 namespace API
 {
-/*Base class  representing a linear scaling transformation acting on a one-dimensional grid domain
+/*Base class that represents the grid domain from which a function may take its arguments.
+  Grids are multidimensional objects, grids are a composition of grids.
 
   @author Jose Borreguero
   @date Aug/28/2012
@@ -41,18 +42,33 @@ namespace API
   Code Documentation is available at: <http://doxygen.mantidproject.org>.
 */
 
-class MANTID_API_DLL LinearScale : public API::ITransformScale
+class MANTID_API_DLL GridDomain: public API::FunctionDomain
 {
 public:
-  LinearScale() {};
-  virtual ~LinearScale() {};
-  /// The scaling transformation. First and last elements of the grid remain unchanged
-  virtual const std::string name() const { return "LinearScale"; }
-  virtual void transform( std::vector<double> &gd );
-}; // class LinearScale
+  GridDomain() {};
+  virtual ~GridDomain() {};
+  /// number of grid points
+  size_t size() const;
+  /// number of dimensions in the grid
+  size_t nDimensions();
+  /// get the grid at specified index
+  boost::shared_ptr<GridDomain> getGrid(size_t index);
+  /// re-scale all grids
+  void reScale( const std::string &scaling);
 
+protected:
+  static Kernel::Logger& g_log;
+
+private:
+  /// composition of grids
+  std::vector< boost::shared_ptr<GridDomain> > m_grids;
+
+}; // class IGridDomain
+
+/// typedef for a shared pointer
+typedef boost::shared_ptr<GridDomain> GridDomain_sptr;
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_LINEARSCALE_H_*/
+#endif /*MANTID_API_GRIDDOMAIN_H_*/

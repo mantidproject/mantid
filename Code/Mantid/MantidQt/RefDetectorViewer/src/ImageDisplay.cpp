@@ -544,34 +544,28 @@ void ImageDisplay::ShowPeakBackSelectionValue(double x, double y )
     if (radioButtonPeakLeft->isChecked()) { //peak left selected
         lineEditPeakLeft->setText(yValue);
         ImageDisplay::peakLeft = static_cast<int>(y);
-        return;
     }
     if (radioButtonPeakRight->isChecked()) { //peak right selected
         lineEditPeakRight->setText(yValue);
         ImageDisplay::peakRight = static_cast<int>(y);
-        return;
     }
     if (radioButtonBackLeft->isChecked()) { //back left selected
         lineEditBackLeft->setText(yValue);
         ImageDisplay::backLeft = static_cast<int>(y);
-        return;
     }
     if (radioButtonBackRight->isChecked()) { //back right selected
         lineEditBackRight->setText(yValue);
         ImageDisplay::backRight = static_cast<int>(y);
-        return;
     }
     
     QString xValue = QString("%1").arg(int(x));
     if (radioButtonTOFmin->isChecked()) { //tof min selected
         lineEditTOFmin->setText(xValue);
         ImageDisplay::TOFmin = static_cast<int>(x);
-        return;
     }
     if (radioButtonTOFmax->isChecked()) { // tof max selected
         lineEditTOFmax->setText(xValue);
         ImageDisplay::TOFmax = static_cast<int>(x);
-        return;
     }
     
     UpdateImage(); //force refresh of the plot
@@ -584,6 +578,54 @@ void ImageDisplay::ShowPeakBackSelectionValue(double x, double y )
     int ImageDisplay::TOFmin = 0;
     int ImageDisplay::TOFmax = 0;
 
+    /**
+     * set the peak left
+     */
+    void ImageDisplay::setPeakLeft(int value)
+    {
+        peakLeft = value;
+    }
+    
+    /**
+     * set the peak right
+     */
+    void ImageDisplay::setPeakRight(int value)
+    {
+        peakRight = value;
+    }
+
+    /**
+     * set the back left
+     */
+    void ImageDisplay::setBackLeft(int value)
+    {
+        backLeft = value;
+    }
+    
+    /**
+     * set the back right
+     */
+    void ImageDisplay::setBackRight(int value)
+    {
+        backRight = value;
+    }
+
+    /**
+     * set the TOF min
+     */
+    void ImageDisplay::setTOFmin(int value)
+    {
+        TOFmin = value;
+    }
+    
+    /**
+     * set the TOF max
+     */
+    void ImageDisplay::setTOFmax(int value)
+    {
+        TOFmax = value;
+    }
+    
     /**
      * return the value of the peak left
      **/

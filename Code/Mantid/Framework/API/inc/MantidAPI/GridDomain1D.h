@@ -1,21 +1,21 @@
-#ifndef MANTID_API_LINEARSCALE_H_
-#define MANTID_API_LINEARSCALE_H_
+#ifndef MANTID_API_GRIDDOMAIN1D_H_
+#define MANTID_API_GRIDDOMAIN1D_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <vector>
+#include <stdexcept>
 #include <boost/shared_ptr.hpp>
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/ITransformScale.h"
-
+#include "MantidAPI/GridDomain.h"
 
 namespace Mantid
 {
 namespace API
 {
-/*Base class  representing a linear scaling transformation acting on a one-dimensional grid domain
+/*Base class that represents a one dimensional grid domain,
+  from which a function may take its arguments.
 
   @author Jose Borreguero
   @date Aug/28/2012
@@ -41,18 +41,31 @@ namespace API
   Code Documentation is available at: <http://doxygen.mantidproject.org>.
 */
 
-class MANTID_API_DLL LinearScale : public API::ITransformScale
+class MANTID_API_DLL GridDomain1D: public API::GridDomain
 {
 public:
-  LinearScale() {};
-  virtual ~LinearScale() {};
-  /// The scaling transformation. First and last elements of the grid remain unchanged
-  virtual const std::string name() const { return "LinearScale"; }
-  virtual void transform( std::vector<double> &gd );
-}; // class LinearScale
+  GridDomain1D() {};
+  virtual ~GridDomain1D() {};
+  /// initialize
+  void initialize(double &startX, double &endX, size_t &n, std::string scaling);
+  /// number of grid point	s
+  size_t size() const { return m_points.size(); }
+  /// number of dimensions in the grid
+  size_t nDimensions() { return 1; }
+  void reScale( const std::string &scaling );
+  void SetScalingName(const std::string scaling);
+  std::vector<double> &getPoints(){ return m_points; }
 
+private:
+  std::string m_scaling;
+  std::vector<double> m_points;
+
+}; // class IGridDomain
+
+/// typedef for a shared pointer
+typedef boost::shared_ptr<GridDomain1D> GridDomain1D_sptr;
 
 } // namespace API
 } // namespace Mantid
 
-#endif /*MANTID_API_LINEARSCALE_H_*/
+#endif /*MANTID_API_GRIDDOMAIN1D_H_*/
