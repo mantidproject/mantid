@@ -12,6 +12,8 @@ process.
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -170,6 +172,26 @@ namespace WorkflowAlgorithms
         // Scale results by a constant
         double wbScaleFactor = inputWS->getInstrument()->getNumberParameter("wb-scale-factor")[0];
         outputWS *= wbScaleFactor;
+      }
+
+    outputWS->setName(outWsName);
+    if (reductionManager->existsProperty("SaveProcessedDetVan"))
+      {
+        bool saveProc = reductionManager->getProperty("SaveProcessedDetVan");
+        if (saveProc)
+          {
+            std::string outputFile = outputWS->name();
+            g_log.warning() << "DetVan WS: " << outputFile << std::endl;
+            // Don't save private calculation workspaces
+            if (!outputFile.empty() && !boost::starts_with(outputFile, "_"))
+              {
+                IAlgorithm_sptr save = this->createSubAlgorithm("SaveNexus");
+                save->setProperty("InputWorkspace", outputWS);
+                outputFile += ".nxs";
+                save->setProperty("FileName", outputFile);
+                save->execute();
+              }
+          }
       }
 
     this->setProperty("OutputWorkspace", outputWS);

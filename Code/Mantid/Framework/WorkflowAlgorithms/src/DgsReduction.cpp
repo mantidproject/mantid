@@ -138,6 +138,8 @@ namespace WorkflowAlgorithms
     this->declareProperty(new WorkspaceProperty<>("DetectorVanadiumInputWorkspace", "",
         Direction::Input, PropertyMode::Optional),
         "Sample detector vanadium workspace to be reduced");
+    this->declareProperty("SaveProcessedDetVan", false,
+        "Save the processed detector vanadium workspace");
     this->declareProperty("UseBoundsForDetVan", false,
         "If true, integrate the detector vanadium over a given range.");
     this->declareProperty("DetVanIntRangeLow", EMPTY_DBL(),
