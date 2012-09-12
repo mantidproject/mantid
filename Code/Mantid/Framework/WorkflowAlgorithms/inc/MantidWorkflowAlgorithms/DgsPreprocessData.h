@@ -6,13 +6,13 @@
 
 namespace Mantid
 {
-namespace WorkflowAlgorithms
-{
+  namespace WorkflowAlgorithms
+  {
 
-  /** DgsPreprocessData : This algorithm is responsible for normalising the
-   * data to current (proton charge) or monitor. For SNS, this will be
-   * hardwired to be current.
-    
+    /** DgsPreprocessData : This algorithm is responsible for normalising the
+     * data to current (proton charge) or monitor. For SNS, this will be
+     * hardwired to be current.
+
     @date 2012-07-16
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -34,25 +34,24 @@ namespace WorkflowAlgorithms
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport DgsPreprocessData  : public API::Algorithm
-  {
-  public:
-    DgsPreprocessData();
-    virtual ~DgsPreprocessData();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
+     */
+    class DLLExport DgsPreprocessData  : public API::Algorithm
+    {
+    public:
+      DgsPreprocessData();
+      virtual ~DgsPreprocessData();
 
-  private:
-    virtual void initDocs();
-    void init();
-    void exec();
-  };
+      virtual const std::string name() const;
+      virtual int version() const;
+      virtual const std::string category() const;
 
+    private:
+      virtual void initDocs();
+      void init();
+      void exec();
+    };
 
-} // namespace WorkflowAlgorithms
+  } // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif  /* MANTID_WORKFLOWALGORITHMS_DGSPREPROCESSDATA_H_ */
