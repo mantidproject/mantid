@@ -7,12 +7,12 @@
 
 namespace Mantid
 {
-namespace WorkflowAlgorithms
-{
+  namespace WorkflowAlgorithms
+  {
 
-  /** DgsReduction : This is the top-level workflow algorithm for controlling
-   * direct geometry spectrometer reduction.
-    
+    /** DgsReduction : This is the top-level workflow algorithm for controlling
+     * direct geometry spectrometer reduction.
+
     @date 2012-06-06
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -34,32 +34,30 @@ namespace WorkflowAlgorithms
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport DgsReduction  : public API::DataProcessorAlgorithm
-  {
-  public:
-    DgsReduction();
-    virtual ~DgsReduction();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
+     */
+    class DLLExport DgsReduction  : public API::DataProcessorAlgorithm
+    {
+    public:
+      DgsReduction();
+      virtual ~DgsReduction();
 
-  private:
-    virtual void initDocs();
-    void init();
-    void exec();
-    API::Workspace_sptr loadInputData(const std::string prop,
-        const bool mustLoad=true);
-    API::MatrixWorkspace_sptr loadGroupingFile();
-    API::MatrixWorkspace_sptr loadHardMask();
+      virtual const std::string name() const;
+      virtual int version() const;
+      virtual const std::string category() const;
 
+    private:
+      virtual void initDocs();
+      void init();
+      void exec();
+      API::Workspace_sptr loadInputData(const std::string prop,
+          const bool mustLoad=true);
+      API::MatrixWorkspace_sptr loadGroupingFile();
+      API::MatrixWorkspace_sptr loadHardMask();
 
-    boost::shared_ptr<Kernel::PropertyManager> reductionManager;
-  };
+      boost::shared_ptr<Kernel::PropertyManager> reductionManager;
+    };
 
-
-} // namespace WorkflowAlgorithms
+  } // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif  /* MANTID_WORKFLOWALGORITHMS_DGSREDUCTION_H_ */
