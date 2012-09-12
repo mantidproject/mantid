@@ -72,6 +72,8 @@ namespace Mantid
     {
       declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
                       "Name of the integrated detector vanadium (white beam) workspace." );
+      declareProperty(new WorkspaceProperty<>("HardMaskWorkspace", "",
+          Direction::Input, PropertyMode::Optional), "A hard mask to apply to the inputworkspace");
       declareProperty(new WorkspaceProperty<>("OutputWorkspace","", Direction::Output),
                       "A MaskWorkspace containing the masked spectra as zeroes and ones.");
       auto mustBePosInt = boost::make_shared<BoundedValidator<int> >();
@@ -211,6 +213,16 @@ namespace Mantid
 
       int numFailed(0);
       MatrixWorkspace_sptr maskWS;
+
+      // Apply hard mask if present
+      MatrixWorkspace_sptr hardMaskWS = this->getProperty("HardMaskWorkspace");
+      if (hardMaskWS)
+        {
+          IAlgorithm_sptr md = this->createSubAlgorithm("MaskDetectors");
+          md->setProperty("Workspace", inputWS);
+          md->setProperty("MaskedWorkspace", hardMaskWS);
+          md->executeAsSubAlg();
+        }
 
       // Perform FindDetectorsOutsideLimits and MedianDetectorTest on the
       // detector vanadium
