@@ -170,6 +170,7 @@ namespace Mantid
       this->setPropertyGroup("TibTofRangeEnd", dataCorr);
       this->setPropertyGroup("DetectorVanadiumInputFile", dataCorr);
       this->setPropertyGroup("DetectorVanadiumInputWorkspace", dataCorr);
+      this->setPropertyGroup("SaveProcessedDetVan", dataCorr);
       this->setPropertyGroup("UseProcessedDetVan", dataCorr);
       this->setPropertyGroup("UseBoundsForDetVan", dataCorr);
       this->setPropertyGroup("DetVanIntRangeLow", dataCorr);
@@ -287,6 +288,7 @@ namespace Mantid
       this->setPropertyGroup("DetectorVanadium2InputFile", findBadDets);
       this->setPropertyGroup("DetectorVanadium2InputWorkspace", findBadDets);
       this->setPropertyGroup("DetVanRatioVariation", findBadDets);
+      this->setPropertyGroup("BackgroundCheck", findBadDets);
       this->setPropertyGroup("SamBkgMedianTestHigh", findBadDets);
       this->setPropertyGroup("SamBkgMedianTestLow", findBadDets);
       this->setPropertyGroup("SamBkgErrorBarCriterion", findBadDets);
