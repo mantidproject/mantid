@@ -59,9 +59,11 @@ namespace WorkflowAlgorithms
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace",
         "", Direction::Input), "An input workspace to mask and group.");
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace",
-        "", Direction::Input), "A workspace containing masking information.");
+        "", Direction::Input, PropertyMode::Optional),
+        "A workspace containing masking information.");
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("GroupingWorkspace",
-        "", Direction::Input), "A workspace containing grouping information");
+        "", Direction::Input, PropertyMode::Optional),
+        "A workspace containing grouping information");
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace",
         "", Direction::Output), "The resulting workspace.");
   }
@@ -93,10 +95,11 @@ namespace WorkflowAlgorithms
 
       IAlgorithm_sptr group = this->createSubAlgorithm("GroupDetectors");
       group->setProperty("InputWorkspace", inputWS);
-      group->setProperty("OutputWorkspace", outputWS);
+      group->setProperty("OutputWorkspace", inputWS);
       group->setProperty("DetectorList", groupDetIdList);
       group->setProperty("Behaviour", "Average");
       group->executeAsSubAlg();
+      outputWS = group->getProperty("OutputWorkspace");
     }
 
     this->setProperty("OutputWorkspace", outputWS);
