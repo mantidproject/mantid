@@ -528,6 +528,28 @@ namespace WorkflowAlgorithms
         divide->execute();
       }
 
+    // Correct for solid angle if grouping is requested, but detector vanadium
+    // not used.
+    if (groupWS && !detVanWS)
+    {
+      std::string solidAngWsName = "SolidAngle";
+      IAlgorithm_sptr solidAngle = this->createSubAlgorithm("SolidAngle");
+      solidAngle->setProperty("InputWorkspace", outWsName);
+      solidAngle->setProperty("OutputWorkspace", solidAngWsName);
+      solidAngle->execute();
+      MatrixWorkspace_sptr solidAngWS = solidAngle->getProperty("OutputWorkspace");
+
+      IAlgorithm_sptr divide = this->createSubAlgorithm("Divide");
+      divide->setAlwaysStoreInADS(true);
+      divide->setProperty("LHSWorkspace", outWsName);
+      divide->setProperty("RHSWorkspace", solidAngWS);
+      divide->setProperty("OutputWorkspace", outWsName);
+      divide->execute();
+
+      solidAngWS.reset();
+    }
+
+
     if ("ISIS" == facility)
       {
         double scaleFactor = inputWS->getInstrument()->getNumberParameter("scale-factor")[0];
