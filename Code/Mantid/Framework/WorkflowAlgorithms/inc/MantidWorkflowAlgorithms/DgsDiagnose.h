@@ -6,11 +6,11 @@
 
 namespace Mantid
 {
-namespace WorkflowAlgorithms
-{
+  namespace WorkflowAlgorithms
+  {
 
-  /** DgsDiagnose : TODO: DESCRIPTION
-    
+    /** DgsDiagnose : TODO: DESCRIPTION
+
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
@@ -30,27 +30,24 @@ namespace WorkflowAlgorithms
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport DgsDiagnose  : public API::Algorithm
-  {
-  public:
-    DgsDiagnose();
-    virtual ~DgsDiagnose();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
+     */
+    class DLLExport DgsDiagnose  : public API::Algorithm
+    {
+    public:
+      DgsDiagnose();
+      virtual ~DgsDiagnose();
 
-  private:
-    virtual void initDocs();
-    void init();
-    void exec();
+      virtual const std::string name() const;
+      virtual int version() const;
+      virtual const std::string category() const;
 
+    private:
+      virtual void initDocs();
+      void init();
+      void exec();
+    };
 
-  };
-
-
-} // namespace WorkflowAlgorithms
+  } // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif  /* MANTID_WORKFLOWALGORITHMS_DGSDIAGNOSE_H_ */
