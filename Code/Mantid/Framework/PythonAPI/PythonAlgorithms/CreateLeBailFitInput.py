@@ -293,7 +293,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
         tablews.addColumn("str", "Name")
         tablews.addColumn("double", "Value")
         tablews.addColumn("str", "FitOrTie")
-        tablews.addColumn("int", "FitOrder")
+        tablews.addColumn("double", "Min")
+        tablews.addColumn("double", "Max")
+        tablews.addColumn("double", "StepSize")
 
         # 2. Add value
         bankproperty = self.getProperty("Bank")
@@ -304,12 +306,12 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         for parname in sorted(paramdict[bank].keys()):
             print "%s ; %f " % (parname, paramdict[bank][parname])
-            tablews.addRow([parname, paramdict[bank][parname], "f", -1])
+            tablews.addRow([parname, paramdict[bank][parname], "f", -1.0E100, 1.0E100, 1.0])
         # ENDFOR
 
         # 3. Add lattice constant
         latticeconstant = self.getProperty("LatticeConstant").value
-        tablews.addRow(["LatticeConstant", latticeconstant, "f", -1])
+        tablews.addRow(["LatticeConstant", latticeconstant, "t", 0.1, 1.0E5, 0.1])
 
         return tablews
 

@@ -33,7 +33,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         tableprop = mantid.api.ITableWorkspaceProperty("PeakParameterWorkspace", "", mantid.kernel.Direction.Input)
 	self.declareProperty(tableprop, "Name of Calibration Table Workspace")
 
-        colchoices = ["Value", "FitOrTie"]
+        colchoices = ["Value", "FitOrTie", "Min", "Max", "StepSize"]
         self.declareProperty("Column", "Value", mantid.kernel.StringListValidator(colchoices), "Column to have value changed")
 
         rowprop = mantid.kernel.IntArrayProperty("Rows", [])
@@ -44,20 +44,22 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         self.declareProperty("NewFloatValue", 0.0, "New double value to set to the selected cell(s).")
 
-        self.declareProperty("NewStringValue", "Fit", "New string value to set to the selected cell(s).")
+        self.declareProperty("NewStringValue", "", "New string value to set to the selected cell(s).")
 
     def PyExec(self):
         """ Main Execution Body
         """
         # 1. Process input parameter TableWorkspace
-        tableWS  = self.getProperty("PeakParameterWorkspace").value
-        tableparameterdict = self.getInfo(tableWS)
+        tableWS = self.getProperty("PeakParameterWorkspace").value
+        result = self.parseTableWorkspace(tableWS)
+        paramnamedict = result[0]
+        colnamedict = result[1]
 
-        # 2. Process input row/column information
+        # 2. Process input row (to change) information
         rownumberlist = list(self.getProperty("Rows").value)
         parameterlist = self.getProperty("ParameterNames").value
         for parametername in parameterlist:
-            rows = self.convertParameterNameToTableRows(parametername, tableparameterdict)
+            rows = self.convertParameterNameToTableRows(parametername, paramnamedict)
             rownumberlist.extend(rows)
         # ENDFOR
 
@@ -71,20 +73,21 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         # for irow in rownumberlist:
         #     print "Update value on row %d" % (irow)
 
-        # 3. Column and value
+        # 3. Process column (to change) information
         colname = self.getProperty("Column").value
-        if colname == "Value":
-            icolumn = 1
+        if colnamedict.has_key(colname): 
+            icolumn = colnamedict[colname]
         else:
-            icolumn = 2
+            raise NotImplementedError("Column name %s does not exist in TableWorkspace %s" 
+                    % (colname, tablews.name()))
 
         # 3. Set value
-        if icolumn == 1:
-            value = self.getProperty("NewFloatValue").value
-        elif icolumn == 2:
+        if colname in ["FitOrTie", "Name"]:
+            # string value
             value = self.getProperty("NewStringValue").value.lower()
         else:
-            raise NotImplementedError("Impossible to have icolumn != 1 or 2")
+            # float value
+            value = self.getProperty("NewFloatValue").value
 
         # print "Input Value = %s.  Type = %s" % (str(value), type(value))
         
@@ -94,8 +97,66 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         return
         
-    def convertParameterNameToTableRows(self, parametername, parameterdict):
+    def convertParameterNameToTableRows(self, parametername, paramnamedict):
         """ Convert parameter name (incomplete might be) to row number(s)
+        An algorithm to recognize parameter with blurred definition will be use such as
+        (1) exactly same and case insensitive;
+        (2) *partialname
+        (3) partialname*
+        (4) *partialname*
+	(5) partialname?
+
+        Argument:
+         - parametername:  parameter name to change value
+         - paramnamedict:  dictionary key = parameter name, value = row number in table workspace
+
+        Return: List of row numbers (integer) 
+        """
+        rownumbers= []
+
+        # 1. make case insensitive
+        parnametofit = parametername.lower()
+
+        for parname in self.parameternames:
+            parname_low = parname.lower()
+
+            ismatch = False
+
+            if parname_low == parnametofit:
+                # exactly match
+                ismatch = True
+
+            elif parnametofit.startswith("*") and parnametofit.endswith("*"):
+                # *XXXX*
+                corestr = parnametofit.split("*")[1]
+                if parname_low.count(corestr) >= 1:
+                    ismatch = True
+
+            elif parnametofit.startswith("*"):
+                # *NNNNN
+                corestr = parnametofit.split("*")[1]
+                if parname_low.endswith(parnametofit):
+                    ismatch = True
+                    self.parametersToFit.append(corestr)
+
+            elif parnametofit.endswith("*"):
+                # NNNNN*
+                corestr = parnametofit.split("*")[0]
+                if parname_low.startswith(corestr):
+                    ismatch = True
+
+	    elif parnametofit.endswith("?"):
+	        # NNNNN?
+	        corestr = parnametofit.split("?")[0]
+	        if parname_low.startswith(corestr) and len(parname_low) == len(parnametofit):
+                    ismatch = True
+            # ENDIFELSE
+
+            if ismatch is True:
+                rownumber = paramnamedict[parname]
+                rownumbers.append(rownumber)
+        # ENDFOR: 
+        
         """
         # 1. Identify incomplete parameter name
         withstar = parametername.count('*') > 0
@@ -125,29 +186,53 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         for ir in rows:
             wbuf += "%d, " % (ir)
         # print wbuf
+        """
                
-        return rows
+        return rownumbers
 
-    def getInfo(self, tablews):
+    def parseTableWorkspace(self, tablews):
         """ Get information from table workspace
+
+        Return:  dictionary, key = row number, value = name
         """
         parameterdict = {}
+
+        # 1. Column name information
         colnames = tablews.getColumnNames()
+        self.tableColNames = colnames
+        colnamedict = {}
+        for ic in xrange( len(colnames) ):
+            colnamedict[colnames[ic]] = ic
+
+        # 2. Check validity of workspace
         if len(colnames) < 2:
             raise NotImplementedError("Input table workspace is not supported due to column size.")
         if colnames[0] != "Name" or colnames[1] != "Value":
             raise NotImplementedError("Input table workspace is not supported due to column name.")
-        
-        numrows = tablews.rowCount()
-    
+       
+        # 3. Parse!
         parametersdict = {}
+        parnamedict = {}
+        self.parameternames = []
+
+        numrows = tablews.rowCount()
         for irow in xrange(numrows):
     	    parname = tablews.cell(irow, 0)
             parname = parname.lower()
-            parameterdict[irow] = parname
+            parnamedict[parname] = irow
+            self.parameternames.append(parname)
+
+            # NEW! Collect each variable in 
+            valuelist = []
+            for icol in xrange(len(colnames)):
+                value = tablews.cell(irow, icol)
+                valuelist.append(value)
+                parameterdict[parname] = valuelist
+            # ENDFOR
+
         # ENDFOR
         
-        return parameterdict
+        return (parnamedict, colnamedict, parameterdict)
 
 
 # ENDCLASS
