@@ -139,6 +139,8 @@ namespace Mantid
           "Sample detector vanadium workspace to be reduced");
       this->declareProperty("SaveProcessedDetVan", false,
           "Save the processed detector vanadium workspace");
+      this->declareProperty("UseProcessedDetVan", false, "If true, treat the detector vanadium as processed.\n"
+          "This includes not running diagnostics on the processed data.");
       this->declareProperty("UseBoundsForDetVan", false,
           "If true, integrate the detector vanadium over a given range.");
       this->declareProperty("DetVanIntRangeLow", EMPTY_DBL(),
@@ -168,6 +170,7 @@ namespace Mantid
       this->setPropertyGroup("TibTofRangeEnd", dataCorr);
       this->setPropertyGroup("DetectorVanadiumInputFile", dataCorr);
       this->setPropertyGroup("DetectorVanadiumInputWorkspace", dataCorr);
+      this->setPropertyGroup("UseProcessedDetVan", dataCorr);
       this->setPropertyGroup("UseBoundsForDetVan", dataCorr);
       this->setPropertyGroup("DetVanIntRangeLow", dataCorr);
       this->setPropertyGroup("DetVanIntRangeHigh", dataCorr);
