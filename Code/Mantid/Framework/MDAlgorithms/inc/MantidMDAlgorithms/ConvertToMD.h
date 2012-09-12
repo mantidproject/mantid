@@ -19,6 +19,9 @@ namespace MDAlgorithms
    *
    * Gateway for number of subalgorithms, some are very important, some are questionable 
    * Intended to cover wide range of cases; 
+   *
+   * The description of the algorithm is avalible at: <http://www.mantidproject.org/ConvertToMD> 
+   * The detailed description of the algoritm is provided at: <http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation>
 
    * @date 11-10-2011
 
@@ -84,7 +87,7 @@ namespace MDAlgorithms
         /**Check if target workspace new or existing one and we need to create new workspace*/
         bool doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws);
       /**Create new MD workspace using existing parameters for algorithm */
-        void createNewMDWorkspace(const MDEvents::MDWSDescription &NewMDWSDescription);
+        API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDEvents::MDWSDescription &NewMDWSDescription);
 
         bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dE_mod_req,const std::vector<std::string> &other_dim_names,
                                       const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr);

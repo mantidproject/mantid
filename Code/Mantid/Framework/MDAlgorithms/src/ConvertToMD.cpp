@@ -222,7 +222,7 @@ void ConvertToMD::exec()
 
  // create and initate new workspace or set up existing workspace as a target. 
   if(createNewTargetWs)  
-    this->createNewMDWorkspace(targWSDescr);
+    spws = this->createNewMDWorkspace(targWSDescr);
   else // setup existing MD workspace as workspace target.
      m_OutWSWrapper->setMDWS(spws);
 
@@ -337,7 +337,7 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
 /**Create new MD workspace and set up its box controller using algorithm's box controllers properties 
 * @param NewMDWSDescription -- the constructed MD workspace description;
 */
-void ConvertToMD::createNewMDWorkspace(const MDEvents::MDWSDescription &targWSDescr)
+API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(const MDEvents::MDWSDescription &targWSDescr)
 {
    // create new md workspace and set internal shared pointer of m_OutWSWrapper to this workspace
     API::IMDEventWorkspace_sptr spws = m_OutWSWrapper->createEmptyMDWS(targWSDescr);
@@ -357,6 +357,8 @@ void ConvertToMD::createNewMDWorkspace(const MDEvents::MDWSDescription &targWSDe
     int maxDepth = this->getProperty("MaxRecursionDepth");
     if (minDepth>maxDepth) throw std::invalid_argument("MinRecursionDepth must be >= MaxRecursionDepth ");
     spws->setMinRecursionDepth(size_t(minDepth));  
+
+    return spws;
 
 }
 
