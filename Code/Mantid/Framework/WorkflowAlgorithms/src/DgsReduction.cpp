@@ -209,9 +209,15 @@ namespace Mantid
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("ErrorBarCriterion",
           new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-      this->declareProperty("DetectorVanadium2", "",
-          "The detector vanadium to check against for time variations.");
-      this->setPropertySettings("DetectorVanadium2",
+      this->declareProperty(new FileProperty("DetectorVanadium2InputFile", "",
+          FileProperty::OptionalLoad, "_event.nxs"),
+          "File containing detector vanadium data to compare against");
+      this->declareProperty(new WorkspaceProperty<>("DetectorVanadium2InputWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "Detector vanadium workspace to compare against");
+      this->setPropertySettings("DetectorVanadium2InputFile",
+          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+      this->setPropertySettings("DetectorVanadium2InputWorkspace",
           new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
       this->declareProperty("DetVanRatioVariation", 1.1, mustBePositive,
           "Mask detectors if the time variation is above this threshold.");
@@ -275,9 +281,9 @@ namespace Mantid
       this->setPropertyGroup("MedianTestHigh", findBadDets);
       this->setPropertyGroup("MedianTestLow", findBadDets);
       this->setPropertyGroup("ErrorBarCriterion", findBadDets);
-      this->setPropertyGroup("DetectorVanadium2", findBadDets);
+      this->setPropertyGroup("DetectorVanadium2InputFile", findBadDets);
+      this->setPropertyGroup("DetectorVanadium2InputWorkspace", findBadDets);
       this->setPropertyGroup("DetVanRatioVariation", findBadDets);
-      this->setPropertyGroup("BackgroundCheck", findBadDets);
       this->setPropertyGroup("SamBkgMedianTestHigh", findBadDets);
       this->setPropertyGroup("SamBkgMedianTestLow", findBadDets);
       this->setPropertyGroup("SamBkgErrorBarCriterion", findBadDets);
@@ -519,6 +525,8 @@ namespace Mantid
 
       // Process the sample detector vanadium if present
       Workspace_sptr detVanWS = this->loadInputData("DetectorVanadium", false);
+      // Process a comparison detector vanadium if present
+      Workspace_sptr detVan2WS = this->loadInputData("DetectorVanadium2", false);
       IAlgorithm_sptr detVan;
       Workspace_sptr idetVanWS;
       if (detVanWS)
@@ -528,6 +536,7 @@ namespace Mantid
         {
           IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
           diag->setProperty("DetVanWorkspace", detVanWS);
+          diag->setProperty("DetVanCompWorkspace", detVan2WS);
           diag->setProperty("SampleWorkspace", sampleWS);
           diag->setProperty("OutputWorkspace", "samDetVanProcMask");
           diag->setProperty("ReductionProperties", reductionManagerName);
