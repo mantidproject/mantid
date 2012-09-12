@@ -178,12 +178,11 @@ namespace Mantid
         if (saveProc)
         {
           std::string outputFile = outputWS->name();
-          g_log.warning() << "DetVan WS: " << outputFile << std::endl;
           // Don't save private calculation workspaces
           if (!outputFile.empty() && !boost::starts_with(outputFile, "_"))
           {
             IAlgorithm_sptr save = this->createSubAlgorithm("SaveNexus");
-            save->setProperty("InputWorkspace", outputWS);
+            save->setProperty("InputWorkspace", outputFile);
             outputFile += "_idetvan.nxs";
             save->setProperty("FileName", outputFile);
             save->execute();
