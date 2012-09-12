@@ -57,7 +57,7 @@ public:
       std::vector<int> p110;
       p110.push_back(1); p110.push_back(1); p110.push_back(0);
       hkls.push_back(p110);
-      hklws = createReflectionWorkspace(hkls, peakheights);
+      hklws = createInputHKLWorkspace(hkls, peakheights);
 
       AnalysisDataService::Instance().addOrReplace("Data", dataws);
       AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
@@ -71,12 +71,13 @@ public:
 
       // 3. Set properties
       lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("OutputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
       lbfit.setProperty("WorkspaceIndex", 0);
       lbfit.setProperty("Function", "Calculation");
       lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
-      lbfit.setProperty("PeaksWorkspace", "PeakParameterWS");
+      lbfit.setProperty("OutputPeaksWorkspace", "PeakParameterWS");
       lbfit.setProperty("UseInputPeakHeights", true);
       lbfit.setProperty("PeakRadius", 8);
 
@@ -136,7 +137,7 @@ public:
       std::vector<int> p110;
       p110.push_back(1); p110.push_back(1); p110.push_back(0);
       hkls.push_back(p110);
-      hklws = createReflectionWorkspace(hkls, peakheights);
+      hklws = createInputHKLWorkspace(hkls, peakheights);
 
       AnalysisDataService::Instance().addOrReplace("Data", dataws);
       AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
@@ -150,15 +151,16 @@ public:
 
       // 3. Set properties
       lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
+      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("OutputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
+      lbfit.setProperty("OutputPeaksWorkspace", "PeakParameterWS");
       lbfit.setProperty("WorkspaceIndex", 0);
       lbfit.setProperty("BackgroundType", "Polynomial");
       /// a second order polynomial background
       lbfit.setPropertyValue("BackgroundParameters", "101.0, 0.001");
       lbfit.setProperty("Function", "Calculation");
-      lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
-      lbfit.setProperty("PeaksWorkspace", "PeakParameterWS");
       lbfit.setProperty("UseInputPeakHeights", true);
       lbfit.setProperty("PeakRadius", 8);
 
@@ -213,7 +215,7 @@ public:
       dataws = createInputDataWorkspace(2);
       std::map<std::string, double> parammodifymap;
       parameterws = createPeakParameterWorkspace(parammodifymap, 1);
-      hklws = createReflectionWorkspace(hkls, pkheights);
+      hklws = createInputHKLWorkspace(hkls, pkheights);
 
       AnalysisDataService::Instance().addOrReplace("Data", dataws);
       AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
@@ -226,13 +228,14 @@ public:
       // 3. Computation
       // 3. Set properties
       lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("OutputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
       lbfit.setProperty("WorkspaceIndex", 0);
       lbfit.setProperty("Function", "Calculation");
       lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
       lbfit.setProperty("UseInputPeakHeights", false);
-      lbfit.setProperty("PeaksWorkspace", "PeaksParameters");
+      lbfit.setProperty("OutputPeaksWorkspace", "PeaksParameters");
 
       TS_ASSERT_THROWS_NOTHING(lbfit.execute());
       TS_ASSERT(lbfit.isExecuted());
@@ -247,7 +250,7 @@ public:
           return;
       }
 
-      TS_ASSERT_EQUALS(outputws->getNumberHistograms(), 3);
+      TS_ASSERT_EQUALS(outputws->getNumberHistograms(), 5);
 
       /* Output
       for (size_t ih = 0; ih < outputws->getNumberHistograms(); ++ih)
@@ -335,7 +338,7 @@ public:
       // c) Workspaces
       std::vector<double> pkheights(numpeaks, 1.0);
       parameterws = createPeakParameterWorkspace();
-      hklws = createReflectionWorkspace(hkls, pkheights);
+      hklws = createInputHKLWorkspace(hkls, pkheights);
 
       AnalysisDataService::Instance().addOrReplace("Data", dataws);
       AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
@@ -348,8 +351,8 @@ public:
       // 3. Computation
       // 3. Set properties
       lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
       lbfit.setProperty("WorkspaceIndex", 0);
       lbfit.setProperty("Function", "Calculation");
       lbfit.setProperty("OutputWorkspace", "CalculatedPeaks");
@@ -399,9 +402,9 @@ public:
   /*
    * Fit 2 (separate) peaks (Partial data)
    */
-  void Ptest_fit2Peaks()
+  void PassedDiabled_test_fit2Peaks()
   {
-      std::string testplan("sigma");
+      std::string testplan("zero");
 
       // 1. Create input workspace
       API::MatrixWorkspace_sptr dataws;
@@ -444,7 +447,7 @@ public:
       std::vector<int> p110;
       p110.push_back(1); p110.push_back(1); p110.push_back(0);
       hkls.push_back(p110);
-      hklws = createReflectionWorkspace(hkls, peakheights);
+      hklws = createInputHKLWorkspace(hkls, peakheights);
 
       AnalysisDataService::Instance().addOrReplace("Data", dataws);
       AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
@@ -457,12 +460,13 @@ public:
 
       // 3. Set properties
       lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("OutputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
       lbfit.setProperty("WorkspaceIndex", 0);
       lbfit.setProperty("Function", "LeBailFit");
       lbfit.setProperty("OutputWorkspace", "FitResultWS");
-      lbfit.setProperty("PeaksWorkspace", "PeakInfoWS");
+      lbfit.setProperty("OutputPeaksWorkspace", "PeakInfoWS");
       lbfit.setProperty("PeakRadius", 8);
 
       lbfit.execute();
@@ -477,7 +481,7 @@ public:
           return;
       }
 
-      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 4);
+      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 7);
       if (outws->getNumberHistograms() != 4)
       {
           return;
@@ -542,7 +546,7 @@ public:
   /*
    * Fit 2 (overlapped) peaks (Partial data)
    */
-  void Ptest_fitTwinPeaks()
+  void PassedDiabled_test_fitTwinPeaks()
   {
       // 0. Test Plan
       // std::string testplan("zero");
@@ -593,7 +597,7 @@ public:
           parammodifymap.insert(std::make_pair("Sig1", newsig1));
       }
       parameterws = createPeakParameterWorkspace(parammodifymap, 1);
-      hklws = createReflectionWorkspace(hkls, pkheights);
+      hklws = createInputHKLWorkspace(hkls, pkheights);
 
       AnalysisDataService::Instance().addOrReplace("Data", dataws);
       AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
@@ -605,12 +609,13 @@ public:
 
       // 3. Set properties
       lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("OutputParameterWorkspace", "NewPeakParameters");
+      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
       lbfit.setProperty("WorkspaceIndex", 0);
       lbfit.setProperty("Function", "LeBailFit");
       lbfit.setProperty("OutputWorkspace", "FitResultWS");
-      lbfit.setProperty("PeaksWorkspace", "PeakInfoWS");
+      lbfit.setProperty("OutputPeaksWorkspace", "PeakInfoWS");
       lbfit.setProperty("PeakRadius", 8);
 
       lbfit.execute();
@@ -625,8 +630,8 @@ public:
           return;
       }
 
-      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 4);
-      if (outws->getNumberHistograms() != 4)
+      TS_ASSERT_EQUALS(outws->getNumberHistograms(), 7);
+      if (outws->getNumberHistograms() != 7)
       {
           return;
       }
@@ -653,14 +658,14 @@ public:
       // 6. Check fit result
       DataObjects::TableWorkspace_sptr paramws =
               boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
-              (AnalysisDataService::Instance().retrieve("PeakParameters"));
+              (AnalysisDataService::Instance().retrieve("NewPeakParameters"));
       TS_ASSERT(paramws);
       if (!paramws)
       {
           return;
       }
 
-      TS_ASSERT_EQUALS(paramws->columnCount(), 3);
+      TS_ASSERT(paramws->columnCount() > 3);
       std::map<std::string, double> paramvalues;
       std::map<std::string, char> paramfitstatus;
       parseParameterTableWorkspace(paramws, paramvalues, paramfitstatus);
@@ -715,8 +720,8 @@ public:
       // c) Workspaces
       std::vector<double> pkheights(numpeaks, 1.0);
       parameterws = createPeakParameterWorkspace();
-      hklws = createReflectionWorkspace(hkls, pkheights);
-      std::cout << "ReflectionWorkspace is created. " << std::endl;
+      hklws = createInputHKLWorkspace(hkls, pkheights);
+      std::cout << "InputHKLWorkspace is created. " << std::endl;
 
       bkgdws = createBackgroundParameterWorksapce("/home/wzz/Mantid/Code/debug/MyTestData/pg3_4862bank7_background.dat");
       std::cout << "Background Parameters TableWorkspace is created. " << std::endl;
@@ -735,15 +740,15 @@ public:
       lbfit.initialize();
 
       lbfit.setPropertyValue("InputWorkspace", "Data");
-      lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
-      lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+      lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
+      lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
       lbfit.setProperty("WorkspaceIndex", 0);
       lbfit.setProperty("FitRegion", fitregion);
       lbfit.setProperty("Function", "LeBailFit");
       lbfit.setProperty("BackgroundType", "Polynomial");
-      lbfit.setPropertyValue("BackgroundParametersWorkspace", "BackgroundParameters");
+      lbfit.setPropertyValue("BackgroundInputParameterWorkspace", "BackgroundParameters");
       lbfit.setProperty("OutputWorkspace", "FittedData");
-      lbfit.setProperty("PeaksWorkspace", "FittedPeaks");
+      lbfit.setProperty("OutputPeaksWorkspace", "FittedPeaks");
       lbfit.setProperty("PeakRadius", 8);
 
       // 4. Exam
@@ -837,8 +842,8 @@ public:
     parameterws = createPeakParameterWorkspace(parammodifymap, 2);
 
     std::vector<double> pkheights(numpeaks, 1.0);
-    hklws = createReflectionWorkspace(hkls, pkheights);
-    std::cout << "ReflectionWorkspace is created.  Number of reflections =  " << hklws->rowCount() << std::endl;
+    hklws = createInputHKLWorkspace(hkls, pkheights);
+    std::cout << "InputHKLWorkspace is created.  Number of reflections =  " << hklws->rowCount() << std::endl;
 
     AnalysisDataService::Instance().addOrReplace("Data", dataws);
     AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
@@ -853,14 +858,14 @@ public:
     lbfit.initialize();
 
     lbfit.setPropertyValue("InputWorkspace", "Data");
-    lbfit.setPropertyValue("ParametersWorkspace", "PeakParameters");
-    lbfit.setPropertyValue("ReflectionsWorkspace", "Reflections");
+    lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
+    lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
     lbfit.setProperty("WorkspaceIndex", 0);
     lbfit.setProperty("FitRegion", fitregion);
     lbfit.setProperty("Function", "CalculateBackground");
     lbfit.setProperty("BackgroundType", "Polynomial");
     lbfit.setProperty("OutputWorkspace", "CalculatedBackground");
-    lbfit.setProperty("PeaksWorkspace", "CaclulatedPeaks");
+    lbfit.setProperty("OutputPeaksWorkspace", "CaclulatedPeaks");
     lbfit.setProperty("PeakRadius", 8);
 
     TS_ASSERT_THROWS_NOTHING(lbfit.execute());
@@ -1164,12 +1169,12 @@ public:
   /*
    * Create reflection table workspaces
    */
-  DataObjects::TableWorkspace_sptr createReflectionWorkspace(std::vector<std::vector<int> > hkls, std::vector<double> heights)
+  DataObjects::TableWorkspace_sptr createInputHKLWorkspace(std::vector<std::vector<int> > hkls, std::vector<double> heights)
   {
       // 0. Check
       if (hkls.size() != heights.size())
       {
-          std::cout << "createReflectionWorkspace: input two vectors have different sizes.  It is not supported." << std::endl;
+          std::cout << "createInputHKLWorkspace: input two vectors have different sizes.  It is not supported." << std::endl;
           throw std::invalid_argument("Vectors for HKL and heights are of different sizes.");
       }
 
