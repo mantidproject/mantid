@@ -20,11 +20,13 @@ parameters and generating calls to other workflow or standard algorithms.
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 
 #include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -448,6 +450,7 @@ namespace Mantid
       {
         hardMaskWsName = "hard_mask";
         IAlgorithm_sptr loadMask;
+        bool castWorkspace = false;
         if (boost::ends_with(hardMask, ".nxs"))
         {
           loadMask = this->createSubAlgorithm("Load");
@@ -459,6 +462,7 @@ namespace Mantid
           loadMask = this->createSubAlgorithm("LoadMask");
           loadMask->setProperty("Instrument", instName);
           loadMask->setProperty("InputFile", hardMask);
+          castWorkspace = true;
         }
         else
         {
@@ -467,6 +471,11 @@ namespace Mantid
         loadMask->setAlwaysStoreInADS(true);
         loadMask->setProperty("OutputWorkspace", hardMaskWsName);
         loadMask->execute();
+        if (castWorkspace)
+        {
+          MaskWorkspace_sptr tmp = loadMask->getProperty("OutputWorkspace");
+          return boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
+        }
         return loadMask->getProperty("OutputWorkspace");
       }
     }
