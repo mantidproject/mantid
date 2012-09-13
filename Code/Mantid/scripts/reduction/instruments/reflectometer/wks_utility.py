@@ -64,24 +64,48 @@ def getSh(mt, top_tag, bottom_tag):
     sh = math.fabs(float(sb[0]) - float(st[0]))
     units = mt_run.getProperty(top_tag).units
     return sh, units
-    
+
+def getSheight(mt, index):
+    """
+        return the DAS hardware slits height of slits # index
+    """
+    mt_run = mt.getRun()
+    tag = 'S' + index + 'VHeight'
+    value = mt_run.getProperty(tag).value
+    return value[0]
+        
 def getS1h(mt=None):
     """    
         returns the height and units of the slit #1 
     """
     if mt != None:
-        _h, units = getSh(mt, 's1t', 's1b') 
-        return _h, units
-    return None, ''
+#        _h, units = getSh(mt, 's1t', 's1b')
+        _h = getSheight(mt, '1') 
+        return _h
+    return None
     
 def getS2h(mt=None):
     """    
         returns the height and units of the slit #2 
     """
     if mt != None:
-        _h, units = getSh(mt, 's2t', 's2b') 
-        return _h, units
-    return None, None
+#        _h, units = getSh(mt, 's2t', 's2b')
+        _h = getSheight(mt, '2') 
+        return _h
+    return None
+
+
+
+
+def getSwidth(mt, index):
+    """
+        returns the width and units of the given index slits
+        defined by the DAS hardware
+    """
+    mt_run = mt.getRun()
+    tag = 'S' + index + 'HWidth'
+    value = mt_run.getProperty(tag).value
+    return value[0]
 
 def getSw(mt, left_tag, right_tag):
     """
@@ -99,18 +123,21 @@ def getS1w(mt=None):
         returns the width and units of the slit #1 
     """
     if mt != None:
-        _w, units = getSw(mt, 's1l', 's1r') 
-        return _w, units
-    return None, ''
+#        _w, units = getSw(mt, 's1l', 's1r') 
+        _w = getSwidth(mt, '1')
+        return _w
+    return None
     
 def getS2w(mt=None):
     """    
         returns the width and units of the slit #2 
     """
     if mt != None:
-        _w, units = getSh(mt, 's2l', 's2r') 
-        return _w, units
-    return None, None
+#        _w, units = getSh(mt, 's2l', 's2r') 
+        _w = getSwidth(mt, '2')
+        return _w
+    return None
+
 
 def getLambdaValue(mt):
     """
@@ -119,6 +146,7 @@ def getLambdaValue(mt):
     mt_run = mt.getRun()
     _lambda = mt_run.getProperty('LambdaRequest').value
     return _lambda
+
 
 def getPixelXPixelY(mt1, maxX=304, maxY=256):
     """
@@ -566,14 +594,16 @@ def ref_beamdiv_correct(cpix, mt, det_secondary,
     if cpix is None:
         cpix = 133.5
         
-    first_slit_size = getS1h(mt)
-    last_slit_size = getS2h(mt)
+#    first_slit_size = getS1h(mt)
+    first_slit_size = getSheight(mt, '1')
+#    last_slit_size = getS2h(mt)
+    last_slit_size = getSheight(mt,'2')
     
     last_slit_dist = 0.654 #m
     slit_dist = 0.885000050068 #m
     
-    first_slit_size = float(first_slit_size[0]) * 0.001
-    last_slit_size = float(last_slit_size[0]) * 0.001
+    first_slit_size = float(first_slit_size) * 0.001
+    last_slit_size = float(last_slit_size) * 0.001
     
     _y = 0.5 * (first_slit_size + last_slit_size)
     _x = slit_dist
@@ -763,15 +793,15 @@ def applySF(InputWorkspace,
         s1h = getS1h(mtd[InputWorkspace])
         s2h = getS2h(mtd[InputWorkspace])
         
-        s1h_value = abs(s1h[0])
-        s2h_value = abs(s2h[0])
+        s1h_value = abs(s1h)
+        s2h_value = abs(s2h)
      
         #retrieve s1w and s2w values
         s1w = getS1w(mtd[InputWorkspace])
         s2w = getS2w(mtd[InputWorkspace])
         
-        s1w_value = abs(s1w[0])
-        s2w_value = abs(s2w[0])
+        s1w_value = abs(s1w)
+        s2w_value = abs(s2w)
         
 #        print sfFactorTable
 
