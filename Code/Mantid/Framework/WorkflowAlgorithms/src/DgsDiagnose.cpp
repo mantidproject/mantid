@@ -339,34 +339,19 @@ namespace Mantid
       totalCountsWS.reset();
       backgroundIntWS.reset();
 
-      // If mask file name is set or the processed detector vanadium is
-      // being saved, save out the diagnositic mask.
-      if (reductionManager->existsProperty("SaveProcessedDetVan") ||
-          reductionManager->existsProperty("OutputMaskFile"))
+      // If mask file name is set save out the diagnostic mask.
+      if (reductionManager->existsProperty("OutputMaskFile"))
       {
-        // Now actually get the parameters
-        bool saveProcDetVan = false;
-        if (reductionManager->existsProperty("SaveProcessedDetVan"))
+        std::string maskFilename = reductionManager->getPropertyValue("OutputMaskFile");
+        if (maskFilename.empty())
         {
-          saveProcDetVan = reductionManager->getProperty("SaveProcessedDetVan");
+          maskFilename = maskName + ".xml";
         }
-        std::string maskFilename = "";
-        if (reductionManager->existsProperty("OutputMaskFile"))
-        {
-          maskFilename = reductionManager->getPropertyValue("OutputMaskFile");
-        }
-        if (saveProcDetVan || !maskFilename.empty())
-        {
-          if (maskFilename.empty())
-          {
-            maskFilename = maskName + ".xml";
-          }
 
-          IAlgorithm_sptr saveNxs = this->createSubAlgorithm("SaveMask");
-          saveNxs->setProperty("InputWorkspace", maskWS);
-          saveNxs->setProperty("OutputFile", maskFilename);
-          saveNxs->execute();
-        }
+        IAlgorithm_sptr saveNxs = this->createSubAlgorithm("SaveMask");
+        saveNxs->setProperty("InputWorkspace", maskWS);
+        saveNxs->setProperty("OutputFile", maskFilename);
+        saveNxs->execute();
       }
 
       MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(maskWS);
