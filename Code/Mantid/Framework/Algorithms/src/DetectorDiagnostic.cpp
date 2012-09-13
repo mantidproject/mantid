@@ -199,6 +199,12 @@ namespace Mantid
       MatrixWorkspace_sptr bkgWS = this->getProperty("SampleBackgroundWorkspace");
       MatrixWorkspace_sptr sampleWS = this->getProperty("SampleWorkspace");
 
+      std::string maskName = this->getPropertyValue("OutputWorkspace");
+      if (maskName.empty())
+      {
+        maskName = "diagnostic_mask";
+      }
+
       // calculate the number of tests for progress bar
       m_progStepWidth = 0;
       {
@@ -232,6 +238,7 @@ namespace Mantid
       // Perform FindDetectorsOutsideLimits and MedianDetectorTest on the
       // detector vanadium
       maskWS = this->doDetVanTest(inputWS, numFailed);
+      maskWS->setName(maskName);
 
       // DetectorEfficiencyVariation (only if two workspaces are specified)
       if (input2WS)
@@ -346,6 +353,7 @@ namespace Mantid
       extract->setProperty("DetectorList", detList);
       extract->executeAsSubAlg();
       maskWS = extract->getProperty("OutputWorkspace");
+      maskWS->setName(maskName);
 
       this->setProperty("OutputWorkspace", maskWS);
     }
