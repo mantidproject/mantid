@@ -216,12 +216,11 @@ namespace Mantid
 
       //Load instrument and other data once then copy it later
       m_progress->report("Loading instrument");
+      local_workspace->setdefaultNexusInstrumentVersionNumber(1);
       loadRunDetails(local_workspace, entry);
-      // Now lets see if we can run ExperimentInfo::loadExperimentInfoNexus
-        // Hop to the right point
       m_cppFile->openPath(entry.path());
       std::string parameterString;
-      try {
+      try {  // Try to get instrument info from instrument and sample sections of Nexus file
         local_workspace->loadExperimentInfoNexus( m_cppFile, parameterString );
       } catch(std::exception & ) {  // No valid instrument and sample section found
         parameterString="not found";

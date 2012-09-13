@@ -128,6 +128,9 @@ namespace API
     /// Get the IDF using the instrument name
     static std::string getInstrumentFilename(const std::string& instrumentName);
 
+    /// Set the default Nexus File Instrument section Version Number
+    void setdefaultNexusInstrumentVersionNumber( int vn );
+
   protected:
 
     /// Static reference to the logger class
@@ -152,6 +155,9 @@ namespace API
 
     /// Detector grouping information
     det2group_map m_detgroups;
+
+    /// Default of the Nexus File Instrument section version number
+    int m_defaultNexusInstrumentVersionNumber;
   };
 
   /// Shared pointer to ExperimentInfo

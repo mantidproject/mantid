@@ -54,6 +54,7 @@ namespace API
     m_parmap(new ParameterMap()),
     sptr_instrument(new Instrument())
   {
+    m_defaultNexusInstrumentVersionNumber = 0;
   }
     
   //----------------------------------------------------------------------------------------------
@@ -73,6 +74,7 @@ namespace API
   {
     m_sample = other->m_sample;
     m_run = other->m_run;
+    m_defaultNexusInstrumentVersionNumber = other->m_defaultNexusInstrumentVersionNumber;
     this->setInstrument(other->getInstrument());
     if(other->m_moderatorModel) m_moderatorModel = other->m_moderatorModel->clone();
     m_choppers.clear();
@@ -838,6 +840,20 @@ namespace API
       return ExperimentInfo::getInstrumentFilename(instrumentName, date);
   }
 
+  /**
+  *  The instrument section of a Nexus file may have differening structure. 
+  *  This will be determined by the version number attribute of the instrument entry,
+  *  if such an attribute exists. If there is no such attribute then a default value
+  *  is used. This must be 0 for a PrecessedNexus file, to allow old versions to be read.
+  *  For other types of Nexus file this value may need to be set, hence this function
+  *
+  * @param vn :: the required default version number of the instrument section
+  */
+  void ExperimentInfo::setdefaultNexusInstrumentVersionNumber( int vn )
+  {
+    m_defaultNexusInstrumentVersionNumber = vn;
+  }
+
 
   //--------------------------------------------------------------------------------------------
   /** Save the object to an open NeXus file.
@@ -992,7 +1008,7 @@ namespace API
     file->openGroup("instrument", "NXinstrument");
     file->readData("name", instrumentName);
 
-    int version = 1; // Temporarily change default version to 1, should be 0
+    int version = m_defaultNexusInstrumentVersionNumber;  // 0 for ProcessedNexus
     try { file->getAttr("version", version); } catch (...) {}
     if (version == 0)
     { // Old style: instrument_source and instrument_parameter_map were at the same level as instrument.
