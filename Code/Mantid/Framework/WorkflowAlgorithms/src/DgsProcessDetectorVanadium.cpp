@@ -106,6 +106,7 @@ namespace Mantid
       norm->setProperty("OutputWorkspace", inputWS);
       norm->executeAsSubAlg();
       outputWS = norm->getProperty("OutputWorkspace");
+      std::string outWsName = outputWS->getName();
 
       double detVanIntRangeLow = reductionManager->getProperty("DetVanIntRangeLow");
       if (EMPTY_DBL() == detVanIntRangeLow)
@@ -140,9 +141,11 @@ namespace Mantid
       IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
       rebin->setProperty("InputWorkspace", outputWS);
       rebin->setProperty("OutputWorkspace", outputWS);
+      rebin->setProperty("PreserveEvents", false);
       rebin->setProperty("Params", binning);
       rebin->executeAsSubAlg();
       outputWS = rebin->getProperty("OutputWorkspace");
+      outputWS->setName(outWsName);
 
       // Mask and group workspace if necessary.
       MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
@@ -177,12 +180,13 @@ namespace Mantid
         bool saveProc = reductionManager->getProperty("SaveProcessedDetVan");
         if (saveProc)
         {
-          std::string outputFile = outputWS->name();
+          std::string outputFile = outputWS->getName();
+
           // Don't save private calculation workspaces
           if (!outputFile.empty() && !boost::starts_with(outputFile, "_"))
           {
             IAlgorithm_sptr save = this->createSubAlgorithm("SaveNexus");
-            save->setProperty("InputWorkspace", outputFile);
+            save->setProperty("InputWorkspace", outputWS);
             outputFile += "_idetvan.nxs";
             save->setProperty("FileName", outputFile);
             save->execute();
