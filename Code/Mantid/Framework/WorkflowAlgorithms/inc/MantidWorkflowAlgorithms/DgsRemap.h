@@ -45,6 +45,8 @@ namespace WorkflowAlgorithms
     virtual void initDocs();
     void init();
     void exec();
+    void execGrouping(API::MatrixWorkspace_sptr iWS, API::MatrixWorkspace_sptr &oWS);
+    void execMasking(API::MatrixWorkspace_sptr iWS);
 
 
   };

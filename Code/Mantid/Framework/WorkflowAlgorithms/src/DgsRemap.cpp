@@ -1,6 +1,7 @@
 /*WIKI*
 
 This algorithm is responsible for masking and grouping the given input workspace.
+One can use the ExecuteOppositeOrder to do grouping first then masking.
 
 *WIKI*/
 
@@ -64,6 +65,8 @@ namespace WorkflowAlgorithms
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("GroupingWorkspace",
         "", Direction::Input, PropertyMode::Optional),
         "A workspace containing grouping information");
+    this->declareProperty("ExecuteOppositeOrder", false,
+        "Execute grouping before masking.");
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace",
         "", Direction::Output), "The resulting workspace.");
   }
@@ -74,18 +77,38 @@ namespace WorkflowAlgorithms
   void DgsRemap::exec()
   {
     MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-    MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
-    MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
     MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
+    bool runOpposite = this->getProperty("ExecuteOppositeOrder");
+    if (!runOpposite)
+    {
+      this->execMasking(inputWS);
+      this->execGrouping(inputWS, outputWS);
+    }
+    else
+    {
+      this->execGrouping(inputWS, outputWS);
+      this->execMasking(inputWS);
+    }
+
+    this->setProperty("OutputWorkspace", outputWS);
+  }
+
+  void DgsRemap::execMasking(MatrixWorkspace_sptr iWS)
+  {
+    MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
     if (maskWS)
     {
       IAlgorithm_sptr mask = this->createSubAlgorithm("MaskDetectors");
-      mask->setProperty("Workspace", inputWS);
+      mask->setProperty("Workspace", iWS);
       mask->setProperty("MaskedWorkspace", maskWS);
       mask->executeAsSubAlg();
     }
+  }
 
+  void DgsRemap::execGrouping(MatrixWorkspace_sptr iWS, MatrixWorkspace_sptr &oWS)
+  {
+    MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
     if (groupWS)
     {
       int64_t ngroups = 0;
@@ -94,15 +117,14 @@ namespace WorkflowAlgorithms
       gWS->makeDetectorIDToGroupVector(groupDetIdList, ngroups);
 
       IAlgorithm_sptr group = this->createSubAlgorithm("GroupDetectors");
-      group->setProperty("InputWorkspace", inputWS);
-      group->setProperty("OutputWorkspace", inputWS);
+      group->setProperty("InputWorkspace", iWS);
+      group->setProperty("OutputWorkspace", iWS);
       group->setProperty("DetectorList", groupDetIdList);
       group->setProperty("Behaviour", "Average");
       group->executeAsSubAlg();
-      outputWS = group->getProperty("OutputWorkspace");
+      oWS = group->getProperty("OutputWorkspace");
     }
-
-    this->setProperty("OutputWorkspace", outputWS);
   }
+
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
