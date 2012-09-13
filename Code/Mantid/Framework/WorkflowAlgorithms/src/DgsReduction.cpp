@@ -401,6 +401,10 @@ namespace Mantid
             this->setLoadAlg("LoadEventPreNexus");
             this->setLoadAlgFileProp("EventFilename");
           }
+          if (boost::ends_with(inputData, "_idetvan.nxs"))
+          {
+            this->setLoadAlg("LoadNexus");
+          }
           std::string monitorFilename = prop + "MonitorFilename";
           this->reductionManager->declareProperty(new PropertyWithValue<std::string>(monitorFilename, inputData));
         }
@@ -530,11 +534,12 @@ namespace Mantid
 
       // Process the sample detector vanadium if present
       Workspace_sptr detVanWS = this->loadInputData("DetectorVanadium", false);
+      bool isProcessedDetVan = this->getProperty("UseProcessedDetVan");
       // Process a comparison detector vanadium if present
       Workspace_sptr detVan2WS = this->loadInputData("DetectorVanadium2", false);
       IAlgorithm_sptr detVan;
       Workspace_sptr idetVanWS;
-      if (detVanWS)
+      if (detVanWS && !isProcessedDetVan)
       {
         const bool runDiag = this->getProperty("FindBadDetectors");
         if (runDiag)
@@ -564,6 +569,11 @@ namespace Mantid
         detVan->executeAsSubAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
         idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
+      }
+      else
+      {
+        idetVanWS = detVanWS;
+        detVanWS.reset();
       }
 
       IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
