@@ -488,6 +488,11 @@ namespace WorkflowAlgorithms
       {
         remap->setProperty("GroupingWorkspace", groupWS);
       }
+      if (reductionManager->existsProperty("UseProcessedDetVan"))
+      {
+        bool runOpposite = reductionManager->getProperty("UseProcessedDetVan");
+        remap->setProperty("ExecuteOppositeOrder", runOpposite);
+      }
       remap->executeAsSubAlg();
     }
     // Rebin to ensure consistency
@@ -548,7 +553,6 @@ namespace WorkflowAlgorithms
 
       solidAngWS.reset();
     }
-
 
     if ("ISIS" == facility)
       {
