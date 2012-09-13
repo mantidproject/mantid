@@ -329,7 +329,7 @@ namespace DataHandling
     // Exactly what we have to do depends on the status field
     if (pkt.status() == ADARA::RunStatus::NEW_RUN)
     {
-      // Starting a new run:  update m_status and add the run_start property
+      // Starting a new run:  update m_status and add the run_start & run_number properties
 
       if (runStatus() != NoRun)
       {
@@ -355,6 +355,17 @@ namespace DataHandling
       // addProperty() wants the time as an ISO 8601 string
 
       m_buffer->mutableRun().addProperty("run_start", std::string( timeString) );
+
+      // Add the run_number property
+      if ( m_buffer->mutableRun().hasProperty("run_number") )
+      {
+        m_buffer->mutableRun().removeProperty( "run_number"); // remove to old run_start value
+      }
+
+      // Oddly, the run number property needs to be a string....
+      std::ostringstream runNum;
+      runNum << pkt.runNumber();
+      m_buffer->mutableRun().addProperty( "run_number", runNum.str());
 
     }
     else if (pkt.status() == ADARA::RunStatus::END_RUN)
