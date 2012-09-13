@@ -343,15 +343,13 @@ namespace Mantid
       if (reductionManager->existsProperty("OutputMaskFile"))
       {
         std::string maskFilename = reductionManager->getPropertyValue("OutputMaskFile");
-        if (maskFilename.empty())
+        if (!maskFilename.empty())
         {
-          maskFilename = maskName + ".xml";
+          IAlgorithm_sptr saveNxs = this->createSubAlgorithm("SaveMask");
+          saveNxs->setProperty("InputWorkspace", maskWS);
+          saveNxs->setProperty("OutputFile", maskFilename);
+          saveNxs->execute();
         }
-
-        IAlgorithm_sptr saveNxs = this->createSubAlgorithm("SaveMask");
-        saveNxs->setProperty("InputWorkspace", maskWS);
-        saveNxs->setProperty("OutputFile", maskFilename);
-        saveNxs->execute();
       }
 
       MaskWorkspace_sptr m = boost::dynamic_pointer_cast<MaskWorkspace>(maskWS);
