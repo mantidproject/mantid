@@ -403,7 +403,7 @@ public:
    */
   const T& operator[](size_t i){return m_column->cell<T>(i);}
   /// Size of the vector
-  size_t size(){m_column->size();}
+  size_t size(){return m_column->size();}
 private:
   Column_const_sptr m_column;///< Pointer to the underlying column
 };
