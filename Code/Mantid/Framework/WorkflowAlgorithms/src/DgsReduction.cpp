@@ -582,6 +582,7 @@ namespace Mantid
       else
       {
         idetVanWS = detVanWS;
+        maskWS = boost::dynamic_pointer_cast<MatrixWorkspace>(idetVanWS);
         detVanWS.reset();
       }
 
