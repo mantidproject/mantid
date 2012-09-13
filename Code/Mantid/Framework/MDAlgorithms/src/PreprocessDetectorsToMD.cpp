@@ -86,7 +86,8 @@ namespace Mantid
       //
       Geometry::IObjComponent_const_sptr source = instrument->getSource();
       Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-      if ((!source) || (!sample)) {
+      if ((!source) || (!sample)) 
+      {
         g_log.error()<<" Instrument is not fully defined. Can not identify source or sample\n";
         throw Kernel::Exception::InstrumentDefinitionError("Instrubment not sufficiently defined: failed to get source and/or sample");
       }
@@ -96,37 +97,53 @@ namespace Mantid
       {
         double L1  = source->getDistance(*sample);
         g_log.debug() << "Source-sample distance: " << L1 << std::endl;
+        targWS->declareProperty(new Kernel::PropertyWithValue<double>("L1",L1),"L1 is the source to sample distance");
       }
       catch (Kernel::Exception::NotFoundError &)
-      {
-          throw Kernel::Exception::InstrumentDefinitionError("Unable to calculate source-sample distance for workspace", inputWS->getTitle());
-      }
+      { throw Kernel::Exception::InstrumentDefinitionError("Unable to calculate source-sample distance for workspace", inputWS->getTitle());  }
+     
     
 
-       auto aColumm = targWS->getColumn("spec2detMap");
+       auto sp2detMap = targWS->getColumn("spec2detMap");
+       auto detId     = targWS->getColumn("DetectorID");
+       auto detIDMap  = targWS->getColumn("detIDMap");
+  //  this->detIDMap[actual_detectors_count]  = i;
+       //std::vector<size_t> & sp2detMap = aColumn->data();
 //       aColumm
 
 
       //// progress messave appearence
-      //size_t div=100;
+       size_t div=100;
+       size_t nHist = targWS->rowCount();
+       Mantid::API::Progress theProgress(this,0,1,nHist);
       //// Loop over the spectra
-      //size_t actual_detectors_count(0);
-      //for (size_t i = 0; i < nHist; i++)
-      //{
+       size_t liveDetectorsCount(0);
+      for (size_t i = 0; i < nHist; i++)
+      {
+       sp2detMap->cell<size_t>(i)=std::numeric_limits<size_t>::quiet_NaN();
+       detId->cell<uint32_t>(i)  =std::numeric_limits<uint32_t>::quiet_NaN();
+       detIDMap->cell<size_t>(i) =std::numeric_limits<size_t>::quiet_NaN();
 
-      //  Geometry::IDetector_const_sptr spDet;
-      //  try           // get detector or detector group which corresponds to the spectra i
-      //    spDet= inputWS->getDetector(i);      
-      //  catch(Kernel::Exception::NotFoundError &)
-      //    continue;
+       // get detector or detector group which corresponds to the spectra i
+        Geometry::IDetector_const_sptr spDet;
+        try
+        {
+          spDet= inputWS->getDetector(i);      
+        }
+        catch(Kernel::Exception::NotFoundError &)
+        {
+          continue;
+        }
+
+        // Check that we aren't dealing with monitor...
+        if (spDet->isMonitor())continue;   
+
+        sp2detMap->cell<size_t>(i) = liveDetectorsCount;
+        detId->cell<uint32_t>(liveDetectorsCount)=spDet->getID();
+        detIDMap->cell<size_t>(liveDetectorsCount)=i;
 
 
-      //  // Check that we aren't dealing with monitor...
-      //  if (spDet->isMonitor())continue;   
 
-      //  this->spec2detMap[i] = actual_detectors_count;
-      //  this->det_id[actual_detectors_count]    = spDet->getID();
-      //  this->detIDMap[actual_detectors_count]  = i;
       //  this->L2[actual_detectors_count]        = spDet->getDistance(*sample);
 
       //  double polar        =  inputWS->detectorTwoTheta(spDet);
@@ -145,11 +162,11 @@ namespace Mantid
       //  this->det_dir[actual_detectors_count].setY(ey);
       //  this->det_dir[actual_detectors_count].setZ(ez);
 
-      //  actual_detectors_count++;
+         liveDetectorsCount++;
 
-      //  if(i%div==0) pProgress->report(i);
+        if(i%div==0) theProgress.report(i,"Preprocessing detectors");
 
-      //}
+      }
       //// 
       //if(actual_detectors_count<nHist)
       //{
@@ -161,7 +178,7 @@ namespace Mantid
       //  this->detIDMap.resize(actual_detectors_count);
       //}
       //Log.information()<<"finished preprocessing detectors locations \n";
-      //pProgress->report();
+      theProgress.report();
     }
 
 
