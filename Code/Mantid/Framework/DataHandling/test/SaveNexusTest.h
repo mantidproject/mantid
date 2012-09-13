@@ -17,6 +17,8 @@
 #include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include <Poco/Path.h>
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <Poco/File.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -37,7 +39,7 @@ public:
   }
   
   
-void testExecOnMuon()
+  void testExecOnMuon()
   {
     Mantid::DataHandling::LoadNexus nxLoad;
     std::string outputSpace,inputFile;
@@ -89,6 +91,21 @@ void testExecOnMuon()
     remove(outputFile.c_str());
   }
 
+  void test_pass_inputworkspace_as_pointer()
+  {
+    Workspace_sptr ws = WorkspaceCreationHelper::Create2DWorkspace123(2,5);
+
+    SaveNexus alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",ws);
+    alg.setProperty("Filename","out.nxs");
+
+    std::string outputFile = alg.getPropertyValue("Filename");
+
+    const bool executed = alg.execute();
+    TSM_ASSERT( "SaveNexus did not execute successfully", executed )
+    if ( executed ) Poco::File(outputFile).remove();
+  }
   
 private:
   SaveNexus algToBeTested;

@@ -127,7 +127,7 @@ void SaveNexus::exec()
 {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("FileName");
-  m_inputWorkspace = getPropertyValue("InputWorkspace");
+  m_inputWorkspace = getProperty("InputWorkspace");
   //retrieve the append property
   bool bAppend = getProperty("Append");
   // if bAppend is default (false) overwrite (delete )the .nxs file 
@@ -175,8 +175,8 @@ void SaveNexus::runSaveNexusProcessed()
   // Pass through the same output filename
   saveNexusPro->setPropertyValue("Filename", m_filename);
   // Set the workspace property
-  std::string inputWorkspace = "inputWorkspace";
-  saveNexusPro->setPropertyValue(inputWorkspace, m_inputWorkspace);
+  std::string inputWorkspace = "InputWorkspace";
+  saveNexusPro->setProperty(inputWorkspace, m_inputWorkspace);
   //
   std::vector<int> specList = getProperty("WorkspaceIndexList");
   if (!specList.empty())

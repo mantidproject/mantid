@@ -80,7 +80,7 @@ namespace Mantid
       /// The file type to save, currently only one type possible
       std::string m_filetype;
       /// Pointer to the local workspace
-      std::string m_inputWorkspace;
+      API::Workspace_sptr m_inputWorkspace;
       /// Method to execute SNP sub algorithm
       void runSaveNexusProcessed();
       /// sets non workspace properties for the algorithm
