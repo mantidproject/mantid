@@ -1,7 +1,7 @@
 /***************************************************************************/
 /**
  This file is a SIP file for binding C++ methods of the 
- MantidQt widgets (SliceViewer in particular)
+ MantidQt widgets (SliceViewer and RefDetectorViewer in particular)
  to Python.
  
 */
@@ -320,4 +320,133 @@ private:
 }; // end namespace
 }; // end namespace
 
+
+
+/****************************************************************************
+/*** RefDetectorViewer ******************************************************
+/****************************************************************************
+namespace MantidQt
+{
+namespace RefDetectorViewer
+{
+	
+//*WIKI* == Classes ==
+//*WIKI* Here follows a list of the classes exposed to python and the methods you can execute on them.
+
+/**************************************
+/**************************************
+/**************************************
+
+class ArrayDataSource : ImageDataSource
+{
+%TypeHeaderCode
+#include "RefDetectorViewer/inc/MantidQtRefDetectorViewer/ArrayDataSource.h"
+%End
+%Docstring
+
+ArrayDataSource
+===============
+
+	This class provides a wrapper around a simple 2D array of doubles stored
+	in row-major order in a 1D array, so that the array can be viewed using
+	the RefDetector data viewer.
+
+%End
+
+public:
+	ArrayDataSource(double total_xmin, double total_xmax,
+				    double total_ymin, double total_ymax,
+				    size_t total_rows, size_t total_cols, 
+				    float* data);
+	MantidQt::RefDetectorViewer::DataArray* getDataArray( double xmin,
+														  double xmax,
+														  double ymin,
+														  double ymax,
+														  size_t n_rows,
+														  size_t n_cols,
+														  bool is_log_x);
+														  
+};
+
+/**************************************
+/**************************************
+/**************************************
+
+class DataArray
+{
+%TypeHeaderCode
+#include "RefDetectorViewer/inc/MantidQtRefDetectorViewer/DataArray.h"
+%End
+%Docstring
+
+DataArray
+=========
+	
+	This class provides a simple immutable wrapper around a block of data
+	returned from an ImageDataSource
+	
+%End
+
+public:
+	DataArray(double xmin, double xmax,
+			  double ymin, double ymax,
+			  bool is_log_x,
+			  size_t n_rows, size_t n_cols,
+			  float *data);
+
+//*WIKI* == get the smallest or largest x or y values actually covered by the DataArray
+	double GetXMin() const;
+	double GetXMax() const;
+	double GetYMin() const;
+	double GetYMax() const;
+	
+//*WIKI* == check if the returned array is binned logarithmically in 'x'
+	bool isLogX() const;
+	
+//*WIKI* == get the smallest or largest value recorded in the DataArray
+	double getDataMin() const;
+	double getDataMax() const;
+	
+//*WIKI* == get the number of rows or columns in the DataArray
+	size_t GetNRows() const;
+	size_t GetNCols() const;
+	
+//*WIKI* == get simple array containing all values, packed in a 1D array	
+	float *GetData() const;
+	
+//*WIKI* == get the value at the specified row and column
+	double GetValue(int row, int col) const;
+
+//*WIKI* == get the value from the row and column containing the specified point
+	double GetValue(double x, double y) const;
+	
+};	
+
+/**************************************
+/**************************************
+/**************************************
+
+class ImageView : QMainWindow
+{
+%TypeHeaderCode
+#include "RefDetectorViewer/inc/MantidQtRefDetectorViewer/ImageView.h"
+%End
+%Docstring
+
+ImageView
+=========
+
+	This is the QMainWindow for the RefDetectorViewer. Data is
+	displayed in an ImageView by constructing the ImageView object
+	and specifying a particular Data Source
+	
+%End
+
+public:
+	ImageView(ImageDataSource* dataSource);
+	
+};
+
+}; // end namespace
+}; // end namespace
 

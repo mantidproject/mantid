@@ -515,26 +515,37 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         st = mt_run.getProperty(top_tag).value
         sb = mt_run.getProperty(bottom_tag).value
         sh = math.fabs(float(sb[0]) - float(st[0]))
-        units = mt_run.getProperty(top_tag).units
-        return sh, units
+        return sh
     
+    def getSheight(self, mt, index):
+        """
+            returns the height and units of the given index slits
+            defined by the DAS hardware
+        """
+        mt_run = mt.getRun()
+        tag = 'S' + index + 'VHeight'
+        value = mt_run.getProperty(tag).value
+        return value[0]
+
     def getS1h(self,mt=None):
         """    
             returns the height and units of the slit #1 
         """
         if mt != None:
-            _h, units = self.getSh(mt, 's1t', 's1b')
-            return _h, units
+#            _h, units = self.getSh(mt, 's1t', 's1b')
+            _h  = self.getSheight(mt, '1')
+            return _h
         return None, ''
     
     def getS2h(self,mt=None):
         """    
-            returns the height and units of the slit #2 
+            returns the height of the slit #2 
         """
         if mt != None:
-            _h, units = self.getSh(mt, 's2t', 's2b') 
-            return _h, units
-        return None, None
+#            _h, units = self.getSh(mt, 's2t', 's2b') 
+            _h = self.getSheight(mt, '2')
+            return _h
+        return None
 
     def getSw(self,mt, left_tag, right_tag):
         """
@@ -544,16 +555,26 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
         sl = mt_run.getProperty(left_tag).value
         sr = mt_run.getProperty(right_tag).value
         sw = math.fabs(float(sl[0]) - float(sr[0]))
-        units = mt_run.getProperty(left_tag).units
-        return sw, units
+        return sw
+
+    def getSwidth(self, mt, index):
+        """
+            returns the width and units of the given index slits
+            defined by the DAS hardware
+        """
+        mt_run = mt.getRun()
+        tag = 'S' + index + 'HWidth'
+        value = mt_run.getProperty(tag).value
+        return value[0]
 
     def getS1w(self,mt=None):
         """    
             returns the width and units of the slit #1 
         """
         if mt != None:
-            _w, units = self.getSw(mt, 's1l', 's1r') 
-            return _w, units
+#            _w, units = self.getSw(mt, 's1l', 's1r')
+            _w = self.getSwidth(mt, '1') 
+            return _w 
         return None, ''
     
     def getS2w(self,mt=None):
@@ -561,9 +582,10 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
             returns the width and units of the slit #2 
         """
         if mt != None:
-            _w, units = self.getSh(mt, 's2l', 's2r') 
-            return _w, units
-        return None, None
+#            _w, units = self.getSh(mt, 's2l', 's2r')
+            _w = self.getSwidth(mt, '2') 
+            return _w
+        return None 
 
     def getSlitsValueAndLambda(self,file):
         """
@@ -578,13 +600,13 @@ class DataReflSFCalculatorWidget(BaseRefWidget):
                        OutputWorkspace='tmpWks',
                        MetaDataOnly='1')
         mt1 = mtd['tmpWks']
-        _s1h_value, _s1h_units = self.getS1h(mt=mt1)
-        _s2h_value, _s2h_units = self.getS2h(mt=mt1)
+        _s1h_value = self.getS1h(mt=mt1)
+        _s2h_value = self.getS2h(mt=mt1)
         S1H = "%2.4f" %(_s1h_value)
         S2H = "%2.4f" %(_s2h_value)
         
-        _s1w_value, _s1w_units = self.getS1w(mt=mt1)
-        _s2w_value, _s2w_units = self.getS2w(mt=mt1)
+        _s1w_value = self.getS1w(mt=mt1)
+        _s2w_value = self.getS2w(mt=mt1)
         S1W = "%2.4f" %(_s1w_value)
         S2W = "%2.4f" %(_s2w_value)
         

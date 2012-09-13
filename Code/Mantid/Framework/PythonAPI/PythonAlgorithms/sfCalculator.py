@@ -614,23 +614,47 @@ def getSh(mt, top_tag, bottom_tag):
     units = mt_run.getProperty(top_tag).units
     return sh, units
     
+def getSheight(mt, index):
+    """
+        return the DAS hardware slits height of slits # index
+    """
+    mt_run = mt.getRun()
+    tag = 'S' + index + 'VHeight'
+    value = mt_run.getProperty(tag).value
+    return value[0]
+    
 def getS1h(mt=None):
     """    
         returns the height and units of the slit #1 
     """
     if mt != None:
-        _h, units = getSh(mt, 's1t', 's1b') 
-        return _h, units
-    return None, ''
+#        _h, units = getSh(mt, 's1t', 's1b')
+        _h = getSheight(mt, '1') 
+        return _h
+    return None
     
 def getS2h(mt=None):
     """    
         returns the height and units of the slit #2 
     """
     if mt != None:
-        _h, units = getSh(mt, 's2t', 's2b') 
-        return _h, units
-    return None, None
+#        _h, units = getSh(mt, 's2t', 's2b')
+        _h = getSheight(mt, '2') 
+        return _h
+    return None
+
+
+
+
+def getSwidth(mt, index):
+    """
+        returns the width and units of the given index slits
+        defined by the DAS hardware
+    """
+    mt_run = mt.getRun()
+    tag = 'S' + index + 'HWidth'
+    value = mt_run.getProperty(tag).value
+    return value[0]
 
 def getSw(mt, left_tag, right_tag):
     """
@@ -648,18 +672,22 @@ def getS1w(mt=None):
         returns the width and units of the slit #1 
     """
     if mt != None:
-        _w, units = getSw(mt, 's1l', 's1r') 
-        return _w, units
-    return None, ''
+#        _w, units = getSw(mt, 's1l', 's1r') 
+        _w = getSwidth(mt, '1')
+        return _w
+    return None
     
 def getS2w(mt=None):
     """    
         returns the width and units of the slit #2 
     """
     if mt != None:
-        _w, units = getSh(mt, 's2l', 's2r') 
-        return _w, units
-    return None, None
+#        _w, units = getSh(mt, 's2l', 's2r') 
+        _w = getSwidth(mt, '2')
+        return _w
+    return None
+
+
 
 def getSlitsValueAndLambda(full_list_runs, 
                            S1H, S2H, 
@@ -680,13 +708,13 @@ def getSlitsValueAndLambda(full_list_runs,
                        OutputWorkspace='tmpWks',
                        MetaDataOnly='1')
         mt1 = mtd['tmpWks']
-        _s1h_value, _s1h_units = getS1h(mt1)
-        _s2h_value, _s2h_units = getS2h(mt1)
+        _s1h_value = getS1h(mt1)
+        _s2h_value = getS2h(mt1)
         S1H[i] = _s1h_value
         S2H[i] = _s2h_value
         
-        _s1w_value, _s1w_units = getS1w(mt1)
-        _s2w_value, _s2w_units = getS2w(mt1)
+        _s1w_value = getS1w(mt1)
+        _s2w_value = getS2w(mt1)
         S1W[i] = _s1w_value
         S2W[i] = _s2w_value
         

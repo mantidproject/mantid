@@ -138,7 +138,14 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
             _load_entry("entry-%s" % p, ws, p)        
     else:
         _load_entry("entry", ws_base)
+
+    print 'ws_base is: ' , ws_base
     
+    
+
+
+
+    return   #remove_me
         
     if callback is not None:
         from LargeScaleStructures import data_stitching
