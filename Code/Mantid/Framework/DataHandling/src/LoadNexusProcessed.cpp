@@ -163,7 +163,7 @@ void LoadNexusProcessed::exec()
 
   const std::string basename = "mantid_workspace_";
   if( nperiods == 1 || entrynumber > 0 )
-  {
+  {  // Load one first level entry, specified if there are several
     if( entrynumber == 0 ) ++entrynumber;
     std::ostringstream os;
     os << entrynumber;
@@ -172,7 +172,7 @@ void LoadNexusProcessed::exec()
     setProperty("OutputWorkspace", workspace);
   }
   else
-  {
+  {  // Load all first level entries
     WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
     //This forms the name of the group
     std::string base_name = getPropertyValue("OutputWorkspace");
@@ -645,6 +645,7 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std::stri
   }  
 
 
+  // Determine workspace type and name of group containing workspace characteristics
   bool isEvent = false;
   std::string workspaceType = "Workspace2D";
   std::string group_name = "workspace";

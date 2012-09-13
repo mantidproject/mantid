@@ -87,6 +87,9 @@ namespace Mantid
       // Create the root Nexus class
       NXRoot root(m_filename);
 
+      // "Open" the same file but with the C++ interface
+      m_cppFile = new ::NeXus::File(root.m_fileID);
+
       // Open the raw data group 'raw_data_1'
       NXEntry entry = root.openEntry("raw_data_1");
 
@@ -214,9 +217,22 @@ namespace Mantid
       //Load instrument and other data once then copy it later
       m_progress->report("Loading instrument");
       loadRunDetails(local_workspace, entry);
-      //Populate the Spectra Map with parameters
-      local_workspace->replaceSpectraMap(new SpectraDetectorMap(spec(),udet(),udet.dim0()));
-      runLoadInstrument(local_workspace);
+      // Now lets see if we can run ExperimentInfo::loadExperimentInfoNexus
+        // Hop to the right point
+      m_cppFile->openPath(entry.path());
+      std::string parameterString;
+      try {
+        local_workspace->loadExperimentInfoNexus( m_cppFile, parameterString );
+      } catch(std::exception & ) {  // No valid instrument and sample section found
+        parameterString="not found";
+      }
+      if( parameterString == "not found") {
+        //Populate the Spectra Map with parameters from IDF file and use LoadInstrument algorithm
+        local_workspace->replaceSpectraMap(new SpectraDetectorMap(spec(),udet(),udet.dim0()));
+        runLoadInstrument(local_workspace);
+      } else {  // Use parameters got from instrument section of Nexus file
+        local_workspace->readParameterMap(parameterString);
+      }
 
       loadSampleData(local_workspace, entry);
       m_progress->report("Loading logs");

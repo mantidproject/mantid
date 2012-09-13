@@ -9,6 +9,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -165,6 +166,10 @@ namespace Mantid
 
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);
+
+      // C++ interface to the NXS file
+      ::NeXus::File * m_cppFile;
+
     };
 
   } // namespace DataHandling

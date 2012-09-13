@@ -992,7 +992,7 @@ namespace API
     file->openGroup("instrument", "NXinstrument");
     file->readData("name", instrumentName);
 
-    int version = 0;
+    int version = 1; // Temporarily change default version to 1, should be 0
     try { file->getAttr("version", version); } catch (...) {}
     if (version == 0)
     { // Old style: instrument_source and instrument_parameter_map were at the same level as instrument.
