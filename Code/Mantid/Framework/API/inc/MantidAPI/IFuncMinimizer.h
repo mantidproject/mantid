@@ -7,7 +7,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidAPI/ICostFunction.h"
-#include "MantidAPI/FuncMinimizerFactory.h"
 
 namespace Mantid
 {
@@ -75,15 +74,5 @@ typedef boost::shared_ptr<IFuncMinimizer> IFuncMinimizer_sptr;
 
 } // namespace API
 } // namespace Mantid
-
-/**
- * Macro for declaring a new type of minimizers to be used with the FuncMinimizerFactory
- */
-#define DECLARE_FUNCMINIMIZER(classname,username) \
-        namespace { \
-	Mantid::Kernel::RegistrationHelper register_funcminimizer_##classname( \
-  ((Mantid::API::FuncMinimizerFactory::Instance().subscribe<classname>(#username)) \
-	, 0)); \
-	} 
 
 #endif /*MANTID_API_IFUNCMINIMIZER_H_*/

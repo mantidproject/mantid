@@ -358,7 +358,7 @@ namespace CurveFitting
 
     // get the minimizer
     std::string minimizerName = getPropertyValue("Minimizer");
-    API::IFuncMinimizer_sptr minimizer = API::FuncMinimizerFactory::Instance().create(minimizerName);
+    API::IFuncMinimizer_sptr minimizer = API::FuncMinimizerFactory::Instance().createMinimizer(minimizerName);
 
     // Try to retrieve optional properties
     const int maxIterations = getProperty("MaxIterations");

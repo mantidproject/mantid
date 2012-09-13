@@ -2,7 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/BFGS_Minimizer.h"
+
 #include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
+
 #include "MantidKernel/Logger.h"
 
 namespace Mantid

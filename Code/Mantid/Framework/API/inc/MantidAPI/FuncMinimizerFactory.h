@@ -52,12 +52,8 @@ namespace API
   class MANTID_API_DLL FuncMinimizerFactoryImpl : public Kernel::DynamicFactory<IFuncMinimizer>
   {
   public:
-    /**Creates an instance of a function
-     * @param type :: The function's type
-     * @return A pointer to the created function
-     */
-    IFuncMinimizer* createFunction(const std::string& type) const;
-
+    /// Creates an instance of a minimizer
+    boost::shared_ptr<IFuncMinimizer> createMinimizer(const std::string& type) const;
 
   private:
     friend struct Mantid::Kernel::CreateUsingNew<FuncMinimizerFactoryImpl>;
@@ -71,11 +67,21 @@ namespace API
         ///Forward declaration of a specialisation of SingletonHolder for AlgorithmFactoryImpl (needed for dllexport/dllimport) and a typedef for it.
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
-        template class Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>;
+        template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl>;
 #endif /* _WIN32 */
-        typedef Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl> FuncMinimizerFactory;
+        typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<FuncMinimizerFactoryImpl> FuncMinimizerFactory;
         
 } // namespace API
 } // namespace Mantid
+
+/**
+ * Macro for declaring a new type of minimizers to be used with the FuncMinimizerFactory
+ */
+#define DECLARE_FUNCMINIMIZER(classname,username) \
+        namespace { \
+	Mantid::Kernel::RegistrationHelper register_funcminimizer_##classname( \
+  ((Mantid::API::FuncMinimizerFactory::Instance().subscribe<classname>(#username)) \
+	, 0)); \
+	} 
 
 #endif /*MANTID_API_FUNCMINIMIZERFACTORY_H_*/

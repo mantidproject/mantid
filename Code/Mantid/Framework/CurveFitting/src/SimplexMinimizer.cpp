@@ -3,6 +3,9 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/SimplexMinimizer.h"
 #include "MantidCurveFitting/CostFuncFitting.h"
+
+#include "MantidAPI/FuncMinimizerFactory.h"
+
 #include "MantidKernel/Logger.h"
 
 namespace Mantid

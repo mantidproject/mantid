@@ -2,8 +2,11 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/LevenbergMarquardtMinimizer.h"
-#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
+
+#include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
+
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"

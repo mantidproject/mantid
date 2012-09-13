@@ -169,7 +169,6 @@ set ( TEST_FILES
 	FRConjugateGradientTest.h
 	FitMWTest.h
 	FlatBackgroundTest.h
-	FuncMinimizerFactoryTest.h
 	FunctionFactoryConstraintTest.h
 	GSLMatrixTest.h
 	GausDecayTest.h

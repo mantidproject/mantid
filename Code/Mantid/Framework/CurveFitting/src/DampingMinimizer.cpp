@@ -2,9 +2,12 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/DampingMinimizer.h"
-#include "MantidAPI/CostFunctionFactory.h"
 #include "MantidCurveFitting/CostFuncLeastSquares.h"
+
+#include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFunction.h"
+
 #include "MantidKernel/Logger.h"
 
 #include <boost/lexical_cast.hpp>

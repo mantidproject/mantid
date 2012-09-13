@@ -276,6 +276,7 @@ set ( TEST_FILES
 	FileFinderTest.h
 	FilePropertyTest.h
 	FrameworkManagerTest.h
+	FuncMinimizerFactoryTest.h
 	FunctionDomainTest.h
 	FunctionFactoryTest.h
 	FunctionPropertyTest.h

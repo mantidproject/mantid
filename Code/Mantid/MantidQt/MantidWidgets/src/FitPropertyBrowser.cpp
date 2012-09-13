@@ -17,6 +17,9 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/Expression.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/IFuncMinimizer.h"
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 
@@ -2826,7 +2829,7 @@ void FitPropertyBrowser::setWorkspaceProperties()
   }
 }
 
-/**
+/**=================================================================================================
  * Create a MatrixWorkspace from a TableWorkspace. Name of the TableWorkspace is in m_workspace
  * property, column names to use are in m_xColumn, m_yColumn, and m_errColumn.
  */
@@ -2895,7 +2898,7 @@ Mantid::API::Workspace_sptr FitPropertyBrowser::createMatrixFromTableWorkspace()
   }
 }
 
-/**
+/**=================================================================================================
  * Slot connected to the change signals of properties m_xColumn, m_yColumn, and m_errColumn.
  * @param prop :: Property that changed.
  */
@@ -2923,9 +2926,28 @@ void FitPropertyBrowser::columnChanged(QtProperty* prop)
   }
 }
 
-/// Called when the minimizer changes. Creates minimizes's properties.
+/**=================================================================================================
+ * Called when the minimizer changes. Creates minimizes's properties.
+ */
 void FitPropertyBrowser::minimizerChanged()
 {
+  std::cerr << typeid(Mantid::API::FuncMinimizerFactory::Instance()).name() << std::endl;
+  // delete old minimizer properties
+  foreach(QtProperty* prop,m_minimizerProperties)
+  {
+    m_settingsGroup->property()->removeSubProperty( prop );
+  }
+
+  // add new minimizer properties
+  auto minzer = Mantid::API::FuncMinimizerFactory::Instance().createMinimizer( this->minimizer() );
+  auto& properties = minzer->getProperties();
+  for(auto it = properties.begin(); it != properties.end(); ++it)
+  {
+    QString propName = QString::fromStdString( (**it).name() );
+    QtProperty* prop = this->addDoubleProperty( propName );
+    m_settingsGroup->property()->addSubProperty( prop );
+    m_minimizerProperties.append( prop );
+  }
 }
 
 
