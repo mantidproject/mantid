@@ -29,12 +29,14 @@ namespace DataObjects
      TableWorkspace is an implementation of Workspace in which the data are organised in columns of same size.
      Elements of a column have the same data type. Columns can be added to the TableWorkspace with
      ctreateColumn(type,name). name is a name given to the column. type is a symbolic name for the data type of the column. Predefined types are:
-     - "int"    for int
-     - "float"  for float
-     - "double" for double
-     - "bool"   for bool
-     - "str"    for std::string
-     - "V3D"    for Mantid::Kernel::V3D
+     - "int"     for int
+     - "int32_t" for int32_t
+     - "size_t"  for size_t
+     - "float"   for float
+     - "double"  for double
+     - "bool"    for bool
+     - "str"     for std::string
+     - "V3D"     for Mantid::Kernel::V3D
 
      User defined types can be used after declaring them with DECLARE_TABLECOLUMN macro: 
      DECLARE_TABLECOLUMN(typeName, UserDefinedType)

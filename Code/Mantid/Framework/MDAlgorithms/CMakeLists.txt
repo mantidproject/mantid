@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/OrMD.cpp
 	src/PlusMD.cpp
 	src/PowerMD.cpp
+    src/PreprocessDetectorsToMD.cpp
 	src/QuadEnBackground.cpp
 	src/Quantification/CachedExperimentInfo.cpp
 	src/Quantification/FitResolutionConvolvedModel.cpp
@@ -94,6 +95,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/OrMD.h
 	inc/MantidMDAlgorithms/PlusMD.h
 	inc/MantidMDAlgorithms/PowerMD.h
+    inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h	
 	inc/MantidMDAlgorithms/QuadEnBackground.h
 	inc/MantidMDAlgorithms/Quantification/CachedExperimentInfo.h
 	inc/MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h

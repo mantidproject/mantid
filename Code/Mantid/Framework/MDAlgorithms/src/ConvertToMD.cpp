@@ -38,6 +38,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::MDEvents;
 using namespace Mantid::MDEvents::CnvrtToMD;
+
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -221,7 +222,7 @@ void ConvertToMD::exec()
     targWSDescr.setDetectors(g_DetLoc);
 
  // create and initate new workspace or set up existing workspace as a target. 
-  if(createNewTargetWs)  
+  if(createNewTargetWs)  // create new
     spws = this->createNewMDWorkspace(targWSDescr);
   else // setup existing MD workspace as workspace target.
      m_OutWSWrapper->setMDWS(spws);

@@ -8,6 +8,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/PropertyManager.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
@@ -124,7 +125,7 @@ public:
 
 
 // =====================================================================================
-class ITableWorkspace_DllExport ITableWorkspace: public API::Workspace
+class ITableWorkspace_DllExport ITableWorkspace: public API::Workspace,public Kernel::PropertyManager
 {
 public:
   /// Virtual destructor.
@@ -373,9 +374,9 @@ public:
         @param i :: Element's position
         @return the column at the requested index
    */
-  T& operator[](size_t i){return m_column->cell<T>(static_cast<int>(i));}
+  T& operator[](size_t i){return m_column->cell<T>(i);}
   /// Size of the vector
-  size_t size(){return static_cast<int>(m_column->size());}
+  size_t size(){return (m_column->size());}
 private:
   Column_sptr m_column;///< Pointer to the underlying column
 };
@@ -400,9 +401,9 @@ public:
         @param i :: Element's position
         @return the column at the requested index
    */
-  const T& operator[](size_t i){return m_column->cell<T>(static_cast<int>(i));}
+  const T& operator[](size_t i){return m_column->cell<T>(i);}
   /// Size of the vector
-  size_t size(){return static_cast<int>(m_column->size());}
+  size_t size(){m_column->size();}
 private:
   Column_const_sptr m_column;///< Pointer to the underlying column
 };

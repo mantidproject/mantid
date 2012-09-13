@@ -39,6 +39,8 @@ class TableVector;
     DECLARE_TABLECOLUMN macro. Predeclared types are:
 
     "int"    for int
+    "int32_t" for int32_t
+    "size_t" for size_t
     "float"  for float
     "double" for double
     "bool"   for Boolean

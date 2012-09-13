@@ -40,7 +40,7 @@ namespace DataObjects
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SplittersWorkspace : public API::ISplittersWorkspace, public DataObjects::TableWorkspace
+  class DLLExport SplittersWorkspace : virtual public DataObjects::TableWorkspace, virtual public API::ISplittersWorkspace
   {
   public:
     SplittersWorkspace();

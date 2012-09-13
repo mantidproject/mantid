@@ -8,6 +8,8 @@ namespace DataObjects
 {
 
 DECLARE_TABLECOLUMN(int,int)
+DECLARE_TABLECOLUMN(int32_t,int32_t)
+DECLARE_TABLECOLUMN(size_t,size_t)
 DECLARE_TABLECOLUMN(float,float)
 DECLARE_TABLECOLUMN(double,double)
 DECLARE_TABLECOLUMN(API::Boolean,bool)
