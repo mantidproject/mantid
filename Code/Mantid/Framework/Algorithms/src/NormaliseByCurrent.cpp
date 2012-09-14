@@ -120,7 +120,7 @@ void NormaliseByCurrent::exec()
 
   // The operator overloads properly take into account of both EventWorkspaces and doing it in place or not.
 
-  if (getPropertyValue("InputWorkspace") != getPropertyValue("OutputWorkspace"))
+  if (inputWS != outputWS)
   {
     outputWS = inputWS*charge;
     setProperty("OutputWorkspace", outputWS);
@@ -128,7 +128,6 @@ void NormaliseByCurrent::exec()
   else
   {
     inputWS *= charge;
-    setProperty("OutputWorkspace", inputWS);
   }
 
   outputWS->setYUnitLabel("Counts per microAmp.hour");

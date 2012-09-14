@@ -101,7 +101,7 @@ namespace Mantid
     void Rebin::exec()
     {
       // Get the input workspace
-      MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+      MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
       MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
       // Are we preserving event workspace-iness?
@@ -244,7 +244,7 @@ namespace Mantid
           g_log.information() << "Rebin: Converting Data to Histogram." << std::endl;
           Mantid::API::Algorithm_sptr subAlg = createSubAlgorithm("ConvertToHistogram");
           subAlg->initialize();
-          subAlg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
+          subAlg->setProperty("InputWorkspace", inputWS);
           subAlg->execute();
           inputWS = subAlg->getProperty("OutputWorkspace");
         }

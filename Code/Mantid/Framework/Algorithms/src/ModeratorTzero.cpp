@@ -128,17 +128,12 @@ void ModeratorTzero::exec()
     return;
   }
 
-  MatrixWorkspace_sptr outputWS;
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   //Check whether input = output to see whether a new workspace is required.
-  if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
-  {
-    outputWS = inputWS;
-  }
-  else
+  if ( outputWS != inputWS )
   {
     //Create new workspace for output from old
     outputWS = WorkspaceFactory::Instance().create(inputWS);
-    outputWS->isDistribution(inputWS->isDistribution());
   }
 
   // do the shift in X
