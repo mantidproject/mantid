@@ -191,10 +191,12 @@ namespace WorkflowAlgorithms
                   }
 
                 std::string loadAlgName("");
+                std::string fileProp("");
                 if (boost::ends_with(runFileName, "_event.nxs"))
                   {
                     g_log.notice() << "Loading NeXus monitors" << std::endl;
                     loadAlgName = "LoadNexusMonitors";
+                    fileProp = "Filename";
                   }
 
                 if (boost::ends_with(runFileName, "_neutron_event.dat"))
@@ -203,12 +205,13 @@ namespace WorkflowAlgorithms
                     loadAlgName = "LoadPreNexusMonitors";
                     boost::replace_first(runFileName, "_neutron_event.dat",
                         "_runinfo.xml");
+                    fileProp = "RunInfoFilename";
                   }
 
                 // Load the monitors
                 IAlgorithm_sptr loadmon = this->createSubAlgorithm(loadAlgName);
                 loadmon->setAlwaysStoreInADS(true);
-                loadmon->setProperty("Filename", runFileName);
+                loadmon->setProperty(fileProp, runFileName);
                 loadmon->setProperty("OutputWorkspace", monWsName);
                 loadmon->execute();
 
