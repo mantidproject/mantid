@@ -121,7 +121,7 @@ public:
         TS_ASSERT(blog);
         TS_ASSERT_EQUALS(blog->size(),2);
 
-        TS_ASSERT_EQUALS(ws->sample().getName(),"");
+        TS_ASSERT_EQUALS(ws->sample().getName(),"PMMA_SAN25_1.5%_TRANS_150");
         
         Property *l_property = ws->run().getLogData( "run_number" );
         TS_ASSERT_EQUALS( l_property->value(), "49886" );
