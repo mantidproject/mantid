@@ -6,12 +6,12 @@
 
 namespace Mantid
 {
-namespace WorkflowAlgorithms
-{
+  namespace WorkflowAlgorithms
+  {
 
-  /** DgsConvertToEnergyTransfer : This is the algorithm responsible for the
-   * conversion from TOF to energy transfer.
-    
+    /** DgsConvertToEnergyTransfer : This is the algorithm responsible for the
+     * conversion from TOF to energy transfer.
+
     @date 2012-07-11
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -33,27 +33,24 @@ namespace WorkflowAlgorithms
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
-  class DLLExport DgsConvertToEnergyTransfer  : public API::Algorithm
-  {
-  public:
-    DgsConvertToEnergyTransfer();
-    virtual ~DgsConvertToEnergyTransfer();
-    
-    virtual const std::string name() const;
-    virtual int version() const;
-    virtual const std::string category() const;
+     */
+    class DLLExport DgsConvertToEnergyTransfer  : public API::Algorithm
+    {
+    public:
+      DgsConvertToEnergyTransfer();
+      virtual ~DgsConvertToEnergyTransfer();
 
-  private:
-    virtual void initDocs();
-    void init();
-    void exec();
+      virtual const std::string name() const;
+      virtual int version() const;
+      virtual const std::string category() const;
 
+    private:
+      virtual void initDocs();
+      void init();
+      void exec();
+    };
 
-  };
-
-
-} // namespace WorkflowAlgorithms
+  } // namespace WorkflowAlgorithms
 } // namespace Mantid
 
 #endif  /* MANTID_WORKFLOWALGORITHMS_DGSCONVERTTOENERGYTRANSFER_H_ */
