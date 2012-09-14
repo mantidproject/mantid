@@ -1033,10 +1033,19 @@ void FitPropertyBrowser::setOutputName(const std::string& name)
 }
 
 /// Get the minimizer
-std::string FitPropertyBrowser::minimizer()const
+std::string FitPropertyBrowser::minimizer(bool withProperties)const
 {
   int i = m_enumManager->value(m_minimizer);
-  return m_minimizers[i].toStdString();
+  QString minimStr = m_minimizers[i];
+  // append minimizer properties as name=value pairs
+  if ( withProperties )
+  {
+    foreach(QtProperty* prop,m_minimizerProperties)
+    {
+      minimStr += "," + prop->propertyName() + "=" + QString::number( m_doubleManager->value(prop) );
+    }
+  }
+  return minimStr.toStdString();
 }
 
 /// Get the cost function
@@ -1443,7 +1452,7 @@ void FitPropertyBrowser::fit()
     alg->setProperty("StartX",startX());
     alg->setProperty("EndX",endX());
     alg->setPropertyValue("Output",outputName());
-    alg->setPropertyValue("Minimizer",minimizer());
+    alg->setPropertyValue("Minimizer",minimizer(true));
     alg->setPropertyValue("CostFunction",costFunction());
     observeFinish(alg);
     alg->executeAsync();
@@ -2931,7 +2940,6 @@ void FitPropertyBrowser::columnChanged(QtProperty* prop)
  */
 void FitPropertyBrowser::minimizerChanged()
 {
-  std::cerr << typeid(Mantid::API::FuncMinimizerFactory::Instance()).name() << std::endl;
   // delete old minimizer properties
   foreach(QtProperty* prop,m_minimizerProperties)
   {

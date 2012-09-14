@@ -45,6 +45,8 @@ double SimplexMinimizer::fun(const gsl_vector * x, void *params)
 
 SimplexMinimizer::SimplexMinimizer():
 m_size(1.0),
+m_simplexStepSize(NULL),
+m_startGuess(NULL),
 m_gslSolver(NULL)
 {
 }
@@ -116,9 +118,18 @@ SimplexMinimizer::~SimplexMinimizer()
 /// clear memory
 void SimplexMinimizer::clearMemory()
 {
-  gsl_vector_free(m_simplexStepSize);
-  gsl_vector_free(m_startGuess);
-  gsl_multimin_fminimizer_free(m_gslSolver);
+  if ( m_simplexStepSize )
+  {
+    gsl_vector_free(m_simplexStepSize);
+  }
+  if ( m_startGuess )
+  {
+    gsl_vector_free(m_startGuess);
+  }
+  if ( m_gslSolver )
+  {
+    gsl_multimin_fminimizer_free(m_gslSolver);
+  }
 }
 
 double SimplexMinimizer::costFunctionVal()

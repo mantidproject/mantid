@@ -139,6 +139,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/SimplexMinimizer.h
 	inc/MantidCurveFitting/SpecialFunctionSupport.h
 	inc/MantidCurveFitting/SplineBackground.h
+	inc/MantidCurveFitting/StartsWithValidator.h
 	inc/MantidCurveFitting/StaticKuboToyabe.h
 	inc/MantidCurveFitting/SteepestDescentMinimizer.h
 	inc/MantidCurveFitting/StretchExp.h

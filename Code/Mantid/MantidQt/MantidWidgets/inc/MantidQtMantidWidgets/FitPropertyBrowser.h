@@ -129,7 +129,7 @@ public:
   /// Set the output name
   void setOutputName(const std::string&);
   /// Get the minimizer
-  std::string minimizer()const;
+  std::string minimizer(bool withProperties = false)const;
   /// Get the cost function
   std::string costFunction()const;
 

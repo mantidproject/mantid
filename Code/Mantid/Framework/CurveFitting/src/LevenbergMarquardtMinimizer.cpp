@@ -65,8 +65,14 @@ void LevenbergMarquardtMinimizer::initialize(API::ICostFunction_sptr costFunctio
 
 LevenbergMarquardtMinimizer::~LevenbergMarquardtMinimizer()
 {
-  delete m_data;
-  gsl_multifit_fdfsolver_free(m_gslSolver);
+  if ( m_data )
+  {
+    delete m_data;
+  }
+  if ( m_gslSolver )
+  {
+    gsl_multifit_fdfsolver_free(m_gslSolver);
+  }
 }
 
 bool LevenbergMarquardtMinimizer::iterate() 

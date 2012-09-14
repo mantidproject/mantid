@@ -44,7 +44,7 @@ class DLLExport LevenbergMarquardtMinimizer : public API::IFuncMinimizer
 public:
   /// constructor and destructor
   ~LevenbergMarquardtMinimizer();
-  LevenbergMarquardtMinimizer(){}
+  LevenbergMarquardtMinimizer():m_data(NULL),m_gslSolver(NULL){}
 
   /// Overloading base class methods
   /// Name of the minimizer.

@@ -6,6 +6,7 @@
 #include "MantidCurveFitting/CostFuncFitting.h"
 #include "MantidCurveFitting/FitMW.h"
 #include "MantidCurveFitting/MultiDomainCreator.h"
+#include "MantidCurveFitting/StartsWithValidator.h"
 
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
@@ -109,7 +110,7 @@ namespace CurveFitting
       auto it = std::find(minimizerOptions.begin(), minimizerOptions.end(), "Levenberg-Marquardt");
       minimizerOptions.erase( it );
     }
-    minimizerProperty->replaceValidator( Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(minimizerOptions)) );
+    minimizerProperty->replaceValidator( Kernel::IValidator_sptr(new StartsWithValidator(minimizerOptions)) );
   }
 
   void Fit::setFunction()
@@ -296,8 +297,8 @@ namespace CurveFitting
     std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys();
 
     declareProperty("Minimizer","Levenberg-Marquardt",
-      Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(minimizerOptions)),
-      "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Kernel::Direction::InOut);
+      Kernel::IValidator_sptr(new StartsWithValidator(minimizerOptions)),
+      "The minimizer method applied to do the fit, default is Levenberg-Marquardt");
 
     std::vector<std::string> costFuncOptions = API::CostFunctionFactory::Instance().getKeys();
     // select only CostFuncFitting variety

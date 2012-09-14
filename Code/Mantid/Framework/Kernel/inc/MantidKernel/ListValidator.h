@@ -87,7 +87,7 @@ public:
   {
     m_allowedValues.insert(value);
   }
-private:
+protected:
   /** Checks if the string passed is in the list
    *  @param value :: The value to test
    *  @return "" if the value is on the list, or "The value is not in the list of allowed values"
