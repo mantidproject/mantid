@@ -341,8 +341,46 @@ public:
       TS_ASSERT_EQUALS( d, 1.0 );
       TS_ASSERT_THROWS(d = tw.getColumn("S")->toDouble(0),std::runtime_error);
 
+  }
+  void testGetVectorSetVectorValues()
+  {
+
+    TableWorkspace tw(3);
+    tw.addColumn("size_t","SizeT");
+    tw.addColumn("double","Double");
+    tw.addColumn("str","String");
+
+
+    std::vector<size_t> &SizeTData = tw.getColVector<size_t>("SizeT");
+    TS_ASSERT_THROWS(tw.getColVector<int>("Double"),std::bad_cast);
+    std::vector<double> &DoublData = tw.getColVector<double>("Double");
+    std::vector<std::string> &StrData = tw.getColVector<std::string>("String");
+
+    SizeTData[0] = 10;
+    SizeTData[1] = 20;
+    SizeTData[2] = 30;
+    DoublData[0] = 100.;
+    DoublData[1] = 200.;
+    DoublData[2] = 300.;
+
+    StrData[0] = "1";
+    StrData[1] = "2";
+    StrData[2] = "3";
+
+    auto SizeTDataI = tw.getColVector<size_t>(0);
+    TS_ASSERT_THROWS(tw.getColVector<int>(1),std::bad_cast);
+    auto DoublDataI = tw.getColVector<double>(1);
+    auto StrDataI = tw.getColVector<std::string>(2);
+
+    for(size_t i=0;i<3;i++)
+    {
+      TS_ASSERT_EQUALS(SizeTData[i],SizeTDataI[i]);
+      TS_ASSERT_EQUALS(DoublData[i],DoublDataI[i]);
+      TS_ASSERT_EQUALS(StrData[i],StrDataI[i]);
+    }
 
   }
+
 
 };
 

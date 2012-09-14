@@ -54,11 +54,12 @@ set ( SRC_FILES
 	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
-# Old TMD convertToMD code prepared for deprication:	
+# Old TMP convertToMD code prepared for deprication:	
 	src/ConvertToMDEvents.cpp	
 	src/ConvertToMDEventsParams.cpp
 	src/ConvertToMDEventsSubalgFactory.cpp
 	src/ConvertToMDEventsWSBase.cpp
+#end TMP	
 	src/StitchGroup1D.cpp
 )
 
@@ -122,7 +123,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/WeightedMeanMD.h
 	inc/MantidMDAlgorithms/XorMD.h
-# Old TMD convertToMD code prepared for deprication:
+# Old TMP convertToMD code prepared for deprication:
     inc/MantidMDAlgorithms/ConvertToMDEvents.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsParams.h 
 	inc/MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h 	
@@ -137,7 +138,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDEventsUnitsConv.h
 	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h	
 	inc/MantidMDAlgorithms/ConvertToMDEventsWSBase.h	
-# END TMD	
+# END TMP	
     inc/MantidMDAlgorithms/StitchGroup1D.h
 )
 
@@ -180,6 +181,7 @@ set ( TEST_FILES
 	OrMDTest.h
 	PlusMDTest.h
 	PowerMDTest.h
+	PreprocessDetectorsToMDTest.h	
 	QuadEnBackgroundTest.h
 	ResolutionConvolvedCrossSectionTest.h
 	RunParamTest.h

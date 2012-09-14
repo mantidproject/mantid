@@ -21,6 +21,7 @@ namespace Mantid
     {
       setRowCount(nrows);
     }
+ 
 
     ///Destructor
     TableWorkspace::~TableWorkspace()

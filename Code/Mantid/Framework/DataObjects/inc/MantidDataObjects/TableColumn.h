@@ -105,9 +105,21 @@ public:
         if(name.find("d")!=std::string::npos){
             this->m_type ="double";
         }
+        if(name.find("u")!=std::string::npos)
+        {
+          if(length == 4)
+          {
+              this->m_type=="uint32_t";
+          }
+          if(length == 8)
+          {
+              this->m_type=="uint64_t";
+          }
+        }
         if(this->m_type.empty()){
             this->m_type=name;
         }
+
     }
 
     //TableColumn();

@@ -56,7 +56,9 @@ namespace MDAlgorithms
       virtual void initDocs();  
 
     protected: // for testing
-      void processDetectorsPositions(const API::MatrixWorkspace_sptr inputWS,DataObjects::TableWorkspace_sptr &targWS);
+      void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS);
+      // build a table workspace corresponding to the input matrix workspace
+      boost::shared_ptr<DataObjects::TableWorkspace> createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS);
     };
 
 }  // MDEvents

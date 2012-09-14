@@ -152,6 +152,7 @@ namespace MDEvents
     /// Box controller in use
     //Mantid::API::BoxController_sptr m_BoxController;
     boost::shared_ptr<BoxCtrlChangesList<MDBoxToChange<MDE,nd> > > m_BoxController;
+   private:
 
   public:
     /// Typedef for a shared pointer of this kind of event workspace

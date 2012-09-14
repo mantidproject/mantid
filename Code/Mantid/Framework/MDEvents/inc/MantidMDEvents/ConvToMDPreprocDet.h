@@ -1,5 +1,7 @@
 #ifndef MANTID_MDEVENTS_PREPROC_DET_H
 #define MANTID_MDEVENTS_PREPROC_DET_H
+/**TODO: FOR DEPRICATION */ 
+
 /** This structure is the basis and temporary replacement for future subalgorithm, which calculates 
    * matrix workspace with various precprocessed detectors parameters.
    * The lightweight class below contain 3D uint vectors, pointing to the positions of the detectors

@@ -113,6 +113,57 @@ namespace DataObjects
     std::vector<std::string> getColumnNames() const;
     /// Number of rows in the workspace.
     size_t rowCount() const {return m_rowCount;}
+    /** get access to column vecotor for index i.
+     *  The operation is unsafe with regards to the operaitons resizing obtained vector. 
+     *   This will destroy all table ws internal cohirency DO NOT OBUSE! 
+     *   Writing to vecot is safe. */
+    template<class T> 
+    std::vector<T> & getColVector(size_t index)
+    {
+      auto pTableCol = dynamic_cast<TableColumn<T>* >(m_columns[index].get());
+      if(pTableCol)
+        return pTableCol->data();
+      else
+        throw(std::bad_cast("TableWorkspace::getColVector: Can not cast to proper TableCol type"));
+    }
+    /** get constant access to column vecotor for index i. */
+    template<class T> 
+    const std::vector<T> & getColVector(size_t index)const
+    {
+      auto pTableCol = dynamic_cast<TableColumn<T> *>(m_columns[index].get());
+      if(pTableCol)
+        return pTableCol->data();
+      else
+        throw(std::bad_cast("TableWorkspace::getColVector()const: Can not cast to proper TableCol type"));
+    }
+    /** get access to the column vecotor for column with given name . 
+      *
+      *  The operation is unsafe with regards to the operaitons resizing obtained vector. 
+      *  This will destroy all table workspace internal cohirency DO NOT ABUSE! 
+      *  Writing to vector is safe. */
+    template<class T> 
+    std::vector<T> & getColVector(const std::string& name)
+    {
+      column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));
+      if(ci == m_columns.end())throw(std::runtime_error("column with name: "+name+" does not exist"));
+      auto pTableCol = dynamic_cast<TableColumn<T> *>(ci->get());
+      if(pTableCol)
+        return pTableCol->data();
+      else
+        throw(std::bad_cast("TableWorkspace::getColVector()const: Can not cast to proper TableCol type"));
+    }
+    /** get access to column vecotor for column with given name  */
+    template<class T> 
+    const std::vector<T> & getColVector(const std::string& name)const
+    {
+      column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));
+      if(ci == m_columns.end())throw(std::runtime_error("column with name: "+name+" does not exist"));
+      auto pTableCol = dynamic_cast<TableColumn<T> *>(ci->get());
+      if(pTableCol)
+        return pTableCol->data();
+      else
+        throw(std::bad_cast("TableWorkspace::getColVector()const: Can not cast to proper TableCol type"));
+    }
     /// Resizes the workspace.
     void setRowCount(size_t count);
     /// Inserts a row before row pointed to by index and fills it with default vales.
