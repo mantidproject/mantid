@@ -349,7 +349,7 @@ void IVConnections::edit_manual_input()
     {
         ErrorHandler::Error("Peak Left is not a NUMBER! Value reset to 100.");
     }
-    image_display->setPeakLeft(peak_left);
+    image_display->setPeakLeft(static_cast<int>(peak_left));
 
     QLineEdit* peak_right_control = iv_ui->lineEdit_peakRight;
     double peak_right = 200;
@@ -357,7 +357,7 @@ void IVConnections::edit_manual_input()
     {
         ErrorHandler::Error("Peak Right is not a NUMBER! Value reset to 200.");
     }
-    image_display->setPeakRight(peak_right);
+    image_display->setPeakRight(static_cast<int>(peak_right));
 
     QLineEdit* back_left_control = iv_ui->lineEdit_backLeft;        
     double back_left = 50;
@@ -365,7 +365,7 @@ void IVConnections::edit_manual_input()
     {
         ErrorHandler::Error("Back. Left is not a NUMBER! Value reset to 50.");
     }
-    image_display->setBackLeft(back_left);
+    image_display->setBackLeft(static_cast<int>(back_left));
 
     QLineEdit* back_right_control = iv_ui->lineEdit_backRight;
     double back_right = 250;
@@ -373,7 +373,7 @@ void IVConnections::edit_manual_input()
     {
         ErrorHandler::Error("Back. Right is not a NUMBER! Value reset to 250.");
     }
-    image_display->setBackRight(back_right);
+    image_display->setBackRight(static_cast<int>(back_right));
 
     QLineEdit* tof_min_control = iv_ui->lineEdit_TOFmin;        
     double tof_min = 50;
@@ -381,7 +381,7 @@ void IVConnections::edit_manual_input()
     {
         ErrorHandler::Error("TOF min is not a NUMBER! Value reset to 50.");
     }
-    image_display->setTOFmin(tof_min);
+    image_display->setTOFmin(static_cast<int>(tof_min));
     
     QLineEdit* tof_max_control = iv_ui->lineEdit_TOFmax;        
     double tof_max = 250;
@@ -389,7 +389,7 @@ void IVConnections::edit_manual_input()
     {
         ErrorHandler::Error("TOF max is not a NUMBER! Value reset to 250.");
     }
-    image_display->setTOFmax(tof_max);
+    image_display->setTOFmax(static_cast<int>(tof_max));
     
     image_display->UpdateImage();
 
