@@ -187,7 +187,7 @@ namespace Mantid
           "The output mask file name used for the results of the detector tests.");
       this->setPropertySettings("OutputMaskFile",
           new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-      this->declareProperty("HighCounts", 1.e+10, mustBePositive,
+      this->declareProperty("HighCounts", 1.0e+10, mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("HighCounts",
           new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
@@ -233,7 +233,7 @@ namespace Mantid
           "If true, run a background check on detector vanadium.");
       this->setPropertySettings("BackgroundCheck",
           new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-      this->declareProperty("SamBkgMedianTestHigh", 3.0, mustBePositive,
+      this->declareProperty("SamBkgMedianTestHigh", 5.0, mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("SamBkgMedianTestHigh",
           new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
@@ -257,7 +257,7 @@ namespace Mantid
           "End TOF for the background check.");
       this->setPropertySettings("BackgroundTofEnd",
           new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-      this->declareProperty("RejectZeroBackground", true,
+      this->declareProperty("RejectZeroBackground", false,
           "If true, check the background region for anomolies.");
       this->setPropertySettings("RejectZeroBackground",
           new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
