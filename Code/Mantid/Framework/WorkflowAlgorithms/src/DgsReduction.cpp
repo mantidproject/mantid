@@ -376,28 +376,15 @@ namespace Mantid
       else if (!inputData.empty())
       {
         const std::string facility = ConfigService::Instance().getFacility().name();
+        this->setLoadAlg("Load");
         if ("SNS" == facility)
         {
-          if (boost::ends_with(inputData, "_event.nxs"))
-          {
-            this->setLoadAlg("LoadEventNexus");
-          }
-          if (boost::ends_with(inputData, "_neutron_event.dat"))
-          {
-            this->setLoadAlg("LoadEventPreNexus");
-            this->setLoadAlgFileProp("EventFilename");
-          }
-          if (boost::ends_with(inputData, "_idetvan.nxs"))
-          {
-            this->setLoadAlg("LoadNexus");
-          }
           std::string monitorFilename = prop + "MonitorFilename";
           this->reductionManager->declareProperty(new PropertyWithValue<std::string>(monitorFilename, inputData));
         }
         // Do ISIS
         else
         {
-          this->setLoadAlg("LoadRaw");
           std::string detCalFilename = prop + "DetCalFilename";
           this->reductionManager->declareProperty(new PropertyWithValue<std::string>(detCalFilename, inputData));
         }
