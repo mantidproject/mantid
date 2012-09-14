@@ -25,27 +25,37 @@ class DataCorrectionsScript(BaseScriptElement):
     det_van_int_range_low = ''
     det_van_int_range_high = ''
     det_van_int_range_units = 'DeltaE'
+    save_proc_det_van = False
+    use_proc_det_van = False    
     
     def __init__(self):
         super(DataCorrectionsScript, self).__init__()
         self.reset()
         
     def to_script(self):
-        script =  "FilterBadPulses=%s,\n" % self.filter_bad_pulses
+        script = ""
+        if self.filter_bad_pulses:
+            script +=  "FilterBadPulses=%s,\n" % self.filter_bad_pulses
         script += "IncidentBeamNormalisation=\"%s\",\n" % self.incident_beam_norm
         if self.incident_beam_norm == "ToMonitor":
             script += "MonitorIntRangeLow=\"%s\",\n" % self.monitor_int_low
             script += "MonitorIntRangeHigh=\"%s\",\n" % self.monitor_int_high
-        script += "TimeIndepBackgroundSub=%s,\n" % self.tib_subtraction
         if self.tib_subtraction:
+            script += "TimeIndepBackgroundSub=%s,\n" % self.tib_subtraction
             script += "TibTofRangeStart=\"%s\",\n" % self.tib_tof_start
             script += "TibTofRangeEnd=\"%s\",\n" % self.tib_tof_end
-        script += "DetectorVanadiumInputFile=\"%s\",\n" % self.detector_vanadium
-        script += "UseBoundsForDetVan=%s,\n" % self.det_van_integration
-        if self.det_van_integration:
-            script += "DetVanIntRangeLow=\"%s\",\n" % self.det_van_int_range_low
-            script += "DetVanIntRangeHigh=\"%s\",\n" % self.det_van_int_range_high
-            script += "DetVanIntRangeUnits=\"%s\",\n" % self.det_van_int_range_units
+        if self.detector_vanadium != '':
+            script += "DetectorVanadiumInputFile=\"%s\",\n" % self.detector_vanadium
+            script += "UseBoundsForDetVan=%s,\n" % self.det_van_integration
+            if self.det_van_integration:
+                script += "DetVanIntRangeLow=\"%s\",\n" % self.det_van_int_range_low
+                script += "DetVanIntRangeHigh=\"%s\",\n" % self.det_van_int_range_high
+                script += "DetVanIntRangeUnits=\"%s\",\n" % self.det_van_int_range_units
+            if self.save_proc_det_van:
+                script += "SaveProcessedDetVan=%s,\n" % self.save_proc_det_van
+            if self.use_proc_det_van:
+                script += "UseProcessedDetVan=%s,\n" % self.use_proc_det_van
+
         return script
     
     def to_xml(self):
@@ -65,6 +75,8 @@ class DataCorrectionsScript(BaseScriptElement):
         xml += "  <detvan_range_low>%s</detvan_range_low>\n" % self.det_van_int_range_low
         xml += "  <detvan_range_high>%s</detvan_range_high>\n" % self.det_van_int_range_high
         xml += "  <detvan_range_units>%s</detvan_range_units>\n" % self.det_van_int_range_units
+        xml += "  <save_proc_detvan>%s</save_proc_detvan>\n" % str(self.save_proc_det_van)
+        xml += "  <use_proc_detvan>%s</use_proc_detvan>\n" % str(self.use_proc_det_van)
         xml += "</DataCorrections>\n"
         return xml
     
@@ -84,10 +96,10 @@ class DataCorrectionsScript(BaseScriptElement):
                                                                          "incident_beam_norm",
                                                                          default=DataCorrectionsScript.incident_beam_norm)
             self.monitor_int_low = BaseScriptElement.getStringElement(instrument_dom,
-                                                                      "",
+                                                                      "monint_range_low",
                                                                       default=DataCorrectionsScript.monitor_int_low)
             self.monitor_int_high = BaseScriptElement.getStringElement(instrument_dom,
-                                                                       "",
+                                                                       "monint_range_high",
                                                                        default=DataCorrectionsScript.monitor_int_high)
             self.tib_subtraction = BaseScriptElement.getBoolElement(instrument_dom,
                                                                     "timeindepbkg_sub",
@@ -113,6 +125,12 @@ class DataCorrectionsScript(BaseScriptElement):
             self.det_van_int_range_units = BaseScriptElement.getStringElement(instrument_dom,
                                                                               "detvan_range_units",
                                                                               default=DataCorrectionsScript.det_van_int_range_units)
+            self.save_proc_det_van = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                      "save_proc_detvan",
+                                                                      default=DataCorrectionsScript.save_proc_det_van)
+            self.use_proc_det_van = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                     "use_proc_detvan",
+                                                                     default=DataCorrectionsScript.use_proc_det_van)
 
     def reset(self):
         """
@@ -130,4 +148,6 @@ class DataCorrectionsScript(BaseScriptElement):
         self.det_van_int_range_low = DataCorrectionsScript.det_van_int_range_low
         self.det_van_int_range_high = DataCorrectionsScript.det_van_int_range_high
         self.det_van_int_range_units = DataCorrectionsScript.det_van_int_range_units
+        self.save_proc_det_van = DataCorrectionsScript.save_proc_det_van
+        self.use_proc_det_van = DataCorrectionsScript.use_proc_det_van
         

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>962</width>
-    <height>598</height>
+    <width>963</width>
+    <height>591</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -215,122 +215,162 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_7">
-     <item>
-      <widget class="QGroupBox" name="det_van_gb">
-       <property name="title">
-        <string>Detector Vanadium</string>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
+    <widget class="QGroupBox" name="det_van_gb">
+     <property name="title">
+      <string>Detector Vanadium</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5">
-          <item>
-           <widget class="QLabel" name="van_input_label">
-            <property name="text">
-             <string>Input</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="van_input_edit"/>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_5">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>19</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="van_input_browse">
-            <property name="text">
-             <string>Browse</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QLabel" name="van_input_label">
+          <property name="text">
+           <string>Input</string>
+          </property>
+         </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <item>
-           <widget class="QCheckBox" name="van_int_cb">
-            <property name="minimumSize">
-             <size>
-              <width>138</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Use Bounds?</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="van_int_range_label">
-            <property name="text">
-             <string>Range</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="van_int_range_low_edit"/>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="van_int_range_high_edit"/>
-          </item>
-          <item>
-           <widget class="QComboBox" name="van_int_range_units_cb">
-            <property name="minimumSize">
-             <size>
-              <width>110</width>
-              <height>0</height>
-             </size>
-            </property>
-            <item>
-             <property name="text">
-              <string>Energy</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Wavelength</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>TOF</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QLineEdit" name="van_input_edit"/>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>19</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="van_input_browse">
+          <property name="text">
+           <string>Browse</string>
+          </property>
+         </widget>
         </item>
        </layout>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_4">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="QCheckBox" name="van_int_cb">
+          <property name="minimumSize">
+           <size>
+            <width>138</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Use Bounds?</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="van_int_range_label">
+          <property name="text">
+           <string>Range</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="van_int_range_low_edit"/>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="van_int_range_high_edit"/>
+        </item>
+        <item>
+         <widget class="QComboBox" name="van_int_range_units_cb">
+          <property name="minimumSize">
+           <size>
+            <width>110</width>
+            <height>0</height>
+           </size>
+          </property>
+          <item>
+           <property name="text">
+            <string>Energy</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Wavelength</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>TOF</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="QCheckBox" name="save_procdetvan_cb">
+          <property name="text">
+           <string>Save Processed</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="minimumSize">
+           <size>
+            <width>40</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="use_procdetvan_cb">
+          <property name="text">
+           <string>Use Processed</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_7">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer_4">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>940</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <spacer name="verticalSpacer">

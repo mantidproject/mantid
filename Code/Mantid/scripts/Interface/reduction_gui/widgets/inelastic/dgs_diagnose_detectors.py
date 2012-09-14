@@ -72,7 +72,6 @@ class DiagnoseDetectorsWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: DiagnoseDetectorsScript object
         """
-        self._content.find_bad_det_gb.setChecked(state.find_bad_detectors)
         self._content.output_mask_edit.setText(state.output_mask_file)
         self._content.high_counts_edit.setText(QtCore.QString("%1.e" % state.high_counts))
         self._content.low_counts_edit.setText(QtCore.QString(str(state.low_counts)))
@@ -97,9 +96,7 @@ class DiagnoseDetectorsWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         d = DiagnoseDetectorsScript()
-        d.find_bad_detectors = self._content.find_bad_det_gb.isChecked()
         d.output_mask_file = self._content.output_mask_edit.text()
-        
         d.high_counts = util._check_and_get_float_line_edit(self._content.high_counts_edit)
         d.low_counts = util._check_and_get_float_line_edit(self._content.low_counts_edit)
         d.median_test_high = util._check_and_get_float_line_edit(self._content.median_test_high_edit)

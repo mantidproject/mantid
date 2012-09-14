@@ -84,6 +84,8 @@ class DataCorrectionsWidget(BaseWidget):
         self._content.van_int_range_high_edit.setText(state.det_van_int_range_high)
         entry_index = self._content.van_int_range_units_cb.findText(state.det_van_int_range_units)
         self._content.van_int_range_units_cb.setCurrentIndex(entry_index)
+        self._content.save_procdetvan_cb.setChecked(state.save_proc_det_van)
+        self._content.use_procdetvan_cb.setChecked(state.use_proc_det_van)
 
     def get_state(self):
         """
@@ -102,5 +104,7 @@ class DataCorrectionsWidget(BaseWidget):
         d.det_van_int_range_low = self._content.van_int_range_low_edit.text()
         d.det_van_int_range_high = self._content.van_int_range_high_edit.text()
         d.det_van_int_range_units = self._content.van_int_range_units_cb.currentText()
+        d.save_proc_det_van = self._content.save_procdetvan_cb.isChecked()
+        d.use_proc_det_van = self._content.use_procdetvan_cb.isChecked()
         return d
     

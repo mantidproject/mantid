@@ -27,8 +27,9 @@ class AbsoluteUnitsScript(BaseScriptElement):
         self.reset()
         
     def to_script(self):
-        script =  "DoAbsoluteUnits=%s,\n" % self.do_absolute_units
+        script = ""
         if self.do_absolute_units:
+            script +=  "DoAbsoluteUnits=%s,\n" % self.do_absolute_units
             script += "AbsUnitsVanadium=\"%s\",\n" % self.absunits_vanadium
             script += "AbsUnitsGroupingFile=\"%s\",\n" % self.grouping_file
             script += "AbsUnitsDetectorVanadium=\"%s\",\n" % self.absunits_detector_vanadium

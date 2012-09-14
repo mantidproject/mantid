@@ -29,14 +29,20 @@ class SampleSetupScript(BaseScriptElement):
     def to_script(self):
         script =  "SampleInputFile=\"%s\",\n" % self.sample_file
         script += "IncidentEnergyGuess=\"%s\",\n" % self.incident_energy_guess
-        script += "UseIncidentEnergyGuess=%s,\n" % self.use_ei_guess
-        if self.rebin_et:
+        if self.use_ei_guess != SampleSetupScript.use_ei_guess:
+            script += "UseIncidentEnergyGuess=%s,\n" % self.use_ei_guess
+        if self.et_range_low != SampleSetupScript.et_range_low or \
+           self.et_range_width != SampleSetupScript.et_range_width or \
+           self.et_range_high != SampleSetupScript.et_range_high:
             script += "EnergyTransferRange=\"%s,%s,%s\",\n" % (self.et_range_low, 
                                                                self.et_range_width, 
                                                                self.et_range_high)
+        if self.et_is_distribution != SampleSetupScript.et_is_distribution:
             script += "SofPhiEIsDistribution=%s,\n" % self.et_is_distribution
-        script += "HardMaskFile=\"%s\",\n" % self.hardmask_file
-        script += "GroupingFile=\"%s\",\n" % self.grouping_file
+        if self.hardmask_file != SampleSetupScript.hardmask_file:
+            script += "HardMaskFile=\"%s\",\n" % self.hardmask_file
+        if self.grouping_file != SampleSetupScript.grouping_file:
+            script += "GroupingFile=\"%s\",\n" % self.grouping_file
         return script
         
     def to_xml(self):
@@ -52,7 +58,7 @@ class SampleSetupScript(BaseScriptElement):
         xml += "    <width>%s</width>\n"  % self.et_range_width
         xml += "    <high>%s</high>\n" % self.et_range_high
         xml += "  </et_range>\n"
-        xml += "  <sofphie_is_distribution>%s</sofphie_is_distribution>" % str(self.et_is_distribution)
+        xml += "  <sofphie_is_distribution>%s</sofphie_is_distribution>\n" % str(self.et_is_distribution)
         xml += "  <hardmask_file>%s</hardmask_file>\n" % self.hardmask_file
         xml += "  <grouping_file>%s</grouping_file>\n" % self.grouping_file
         xml += "</SampleSetup>\n"

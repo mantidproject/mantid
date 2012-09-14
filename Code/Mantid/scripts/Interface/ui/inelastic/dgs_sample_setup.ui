@@ -139,7 +139,7 @@
       <string>Energy Transfer Range (meV)</string>
      </property>
      <property name="checkable">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="checked">
       <bool>false</bool>
@@ -149,9 +149,15 @@
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QLabel" name="etr_low_label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="minimumSize">
            <size>
-            <width>93</width>
+            <width>60</width>
             <height>0</height>
            </size>
           </property>
@@ -225,17 +231,17 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <spacer name="horizontalSpacer_8">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
+         <widget class="QLabel" name="label">
+          <property name="minimumSize">
            <size>
-            <width>40</width>
-            <height>20</height>
+            <width>25</width>
+            <height>0</height>
            </size>
           </property>
-         </spacer>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QCheckBox" name="et_is_distribution_cb">

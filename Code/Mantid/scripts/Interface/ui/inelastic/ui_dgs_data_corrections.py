@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/inelastic/dgs_data_corrections.ui'
 #
-# Created: Mon Jul 30 15:59:44 2012
+# Created: Fri Sep 14 14:22:32 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_DataCorrsFrame(object):
     def setupUi(self, DataCorrsFrame):
         DataCorrsFrame.setObjectName(_fromUtf8("DataCorrsFrame"))
-        DataCorrsFrame.resize(962, 598)
+        DataCorrsFrame.resize(963, 591)
         DataCorrsFrame.setFrameShape(QtGui.QFrame.StyledPanel)
         DataCorrsFrame.setFrameShadow(QtGui.QFrame.Raised)
         self.verticalLayout_2 = QtGui.QVBoxLayout(DataCorrsFrame)
@@ -95,8 +95,6 @@ class Ui_DataCorrsFrame(object):
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem2)
         self.verticalLayout_2.addLayout(self.horizontalLayout_4)
-        self.horizontalLayout_7 = QtGui.QHBoxLayout()
-        self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.det_van_gb = QtGui.QGroupBox(DataCorrsFrame)
         self.det_van_gb.setObjectName(_fromUtf8("det_van_gb"))
         self.verticalLayout = QtGui.QVBoxLayout(self.det_van_gb)
@@ -138,12 +136,27 @@ class Ui_DataCorrsFrame(object):
         self.van_int_range_units_cb.addItem(_fromUtf8(""))
         self.horizontalLayout_6.addWidget(self.van_int_range_units_cb)
         self.verticalLayout.addLayout(self.horizontalLayout_6)
-        self.horizontalLayout_7.addWidget(self.det_van_gb)
+        self.horizontalLayout_7 = QtGui.QHBoxLayout()
+        self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
+        self.save_procdetvan_cb = QtGui.QCheckBox(self.det_van_gb)
+        self.save_procdetvan_cb.setObjectName(_fromUtf8("save_procdetvan_cb"))
+        self.horizontalLayout_7.addWidget(self.save_procdetvan_cb)
+        self.label_2 = QtGui.QLabel(self.det_van_gb)
+        self.label_2.setMinimumSize(QtCore.QSize(40, 0))
+        self.label_2.setText(_fromUtf8(""))
+        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.horizontalLayout_7.addWidget(self.label_2)
+        self.use_procdetvan_cb = QtGui.QCheckBox(self.det_van_gb)
+        self.use_procdetvan_cb.setObjectName(_fromUtf8("use_procdetvan_cb"))
+        self.horizontalLayout_7.addWidget(self.use_procdetvan_cb)
         spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem4)
-        self.verticalLayout_2.addLayout(self.horizontalLayout_7)
-        spacerItem5 = QtGui.QSpacerItem(20, 124, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout.addLayout(self.horizontalLayout_7)
+        self.verticalLayout_2.addWidget(self.det_van_gb)
+        spacerItem5 = QtGui.QSpacerItem(940, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.verticalLayout_2.addItem(spacerItem5)
+        spacerItem6 = QtGui.QSpacerItem(20, 124, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_2.addItem(spacerItem6)
 
         self.retranslateUi(DataCorrsFrame)
         QtCore.QMetaObject.connectSlotsByName(DataCorrsFrame)
@@ -169,4 +182,6 @@ class Ui_DataCorrsFrame(object):
         self.van_int_range_units_cb.setItemText(0, QtGui.QApplication.translate("DataCorrsFrame", "Energy", None, QtGui.QApplication.UnicodeUTF8))
         self.van_int_range_units_cb.setItemText(1, QtGui.QApplication.translate("DataCorrsFrame", "Wavelength", None, QtGui.QApplication.UnicodeUTF8))
         self.van_int_range_units_cb.setItemText(2, QtGui.QApplication.translate("DataCorrsFrame", "TOF", None, QtGui.QApplication.UnicodeUTF8))
+        self.save_procdetvan_cb.setText(QtGui.QApplication.translate("DataCorrsFrame", "Save Processed", None, QtGui.QApplication.UnicodeUTF8))
+        self.use_procdetvan_cb.setText(QtGui.QApplication.translate("DataCorrsFrame", "Use Processed", None, QtGui.QApplication.UnicodeUTF8))
 

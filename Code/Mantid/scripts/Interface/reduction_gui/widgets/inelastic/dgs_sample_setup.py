@@ -36,11 +36,8 @@ class SampleSetupWidget(BaseWidget):
         self._content.ei_guess_edit.setValidator(dv)
         util.set_valid(self._content.ei_guess_edit, False)
         self._content.etr_low_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_low_edit))
-        util.set_valid(self._content.etr_low_edit, False)
         self._content.etr_width_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_width_edit))
-        util.set_valid(self._content.etr_width_edit, False)
         self._content.etr_high_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_high_edit))
-        util.set_valid(self._content.etr_high_edit, False)
         
         # Connections
         self.connect(self._content.sample_browse, QtCore.SIGNAL("clicked()"), 
@@ -49,11 +46,10 @@ class SampleSetupWidget(BaseWidget):
                      self._hardmask_browse)
         self.connect(self._content.grouping_browse, QtCore.SIGNAL("clicked()"), 
                      self._grouping_browse)
+        
         # Validated widgets
+        self._connect_validated_lineedit(self._content.sample_edit)
         self._connect_validated_lineedit(self._content.ei_guess_edit)
-        self._connect_validated_lineedit(self._content.etr_low_edit)
-        self._connect_validated_lineedit(self._content.etr_width_edit)
-        self._connect_validated_lineedit(self._content.etr_high_edit)
 
     def _check_and_set_lineedit_content(self, lineedit, content):
         lineedit.setText(content)
@@ -63,6 +59,7 @@ class SampleSetupWidget(BaseWidget):
         call_back = partial(self._validate_edit, ctrl=ui_ctrl)
         self.connect(ui_ctrl, QtCore.SIGNAL("editingFinished()"), call_back)
         self.connect(ui_ctrl, QtCore.SIGNAL("textEdited(QString)"), call_back)
+        self.connect(ui_ctrl, QtCore.SIGNAL("textChanged(QString)"), call_back)
 
     def _validate_edit(self, ctrl=None):
         is_valid = True
@@ -90,17 +87,15 @@ class SampleSetupWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: SampleSetupScript object
         """
-        self._content.sample_edit.setText(state.sample_file)
+        self._check_and_set_lineedit_content(self._content.sample_edit,
+                                             state.sample_file)
         self._check_and_set_lineedit_content(self._content.ei_guess_edit, 
                                              state.incident_energy_guess)
         self._content.use_ei_guess_chkbox.setChecked(state.use_ei_guess)
         self._content.et_range_box.setChecked(state.rebin_et)
-        self._check_and_set_lineedit_content(self._content.etr_low_edit, 
-                                             state.et_range_low)
-        self._check_and_set_lineedit_content(self._content.etr_width_edit, 
-                                             state.et_range_width)
-        self._check_and_set_lineedit_content(self._content.etr_high_edit, 
-                                             state.et_range_high)
+        self._content.etr_low_edit.setText(state.et_range_low)
+        self._content.etr_width_edit.setText(state.et_range_width)
+        self._content.etr_high_edit.setText(state.et_range_high)
         self._content.et_is_distribution_cb.setChecked(state.et_is_distribution)
         self._content.hardmask_edit.setText(state.hardmask_file)
         self._content.grouping_edit.setText(state.grouping_file)
