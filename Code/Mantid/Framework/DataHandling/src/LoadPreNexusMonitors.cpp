@@ -122,6 +122,10 @@ void LoadPreNexusMonitors::exec()
       g_log.debug() << "\tname: " << pE->getAttribute("name") << std::endl;
       g_log.debug() << "\tdescription: " << pE->getAttribute("description") << std::endl;
 
+      // Now lets get the tof binning settings
+      Poco::XML::Element* pTimeChannels = pE->getChildElement("NumTimeChannels");
+      tmin = boost::lexical_cast<double>(pTimeChannels->getAttribute("startbin"));
+      tstep = boost::lexical_cast<double>(pTimeChannels->getAttribute("width"));
     }
 
     // Look for the 'DataList' node to get the monitor dims.

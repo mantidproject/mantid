@@ -56,6 +56,7 @@ public:
     TS_ASSERT( (ws->dataX(0)) == (ws->dataX(1)) );
 
     // Check a particular value
+    TS_ASSERT_EQUALS( ws->dataX(1)[3424], 3424.0);
     TS_ASSERT_EQUALS( ws->dataY(1)[3424], 858);
 
     Mantid::API::AnalysisDataService::Instance().remove(outWS);
