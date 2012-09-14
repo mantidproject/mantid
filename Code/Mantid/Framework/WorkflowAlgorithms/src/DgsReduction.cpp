@@ -181,104 +181,88 @@ namespace Mantid
 
       // Finding bad detectors
       std::string findBadDets = "Finding Bad Detectors";
-      this->declareProperty("FindBadDetectors", false,
-          "If true, run all of the detector diagnostics tests and create a mask.");
       this->declareProperty("OutputMaskFile", "",
           "The output mask file name used for the results of the detector tests.");
       this->setPropertySettings("OutputMaskFile",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("HighCounts", 1.0e+10, mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("HighCounts",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("LowCounts", 1.e-10, mustBePositive,
           "Mask detectors below this threshold.");
       this->setPropertySettings("LowCounts",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("LowOutlier", 0.01,
           "Lower bound defining outliers as fraction of median value");
       this->setPropertySettings("LowOutlier",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("HighOutlier", 100.,
           "Upper bound defining outliers as fraction of median value");
       this->setPropertySettings("HighOutlier",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("MedianTestHigh", 3.0, mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("MedianTestHigh",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("MedianTestLow", 0.1, mustBePositive,
           "Mask detectors below this threshold.");
       this->setPropertySettings("MedianTestLow",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("ErrorBarCriterion", 3.3, mustBePositive,
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("ErrorBarCriterion",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty(new FileProperty("DetectorVanadium2InputFile", "",
           FileProperty::OptionalLoad, "_event.nxs"),
           "File containing detector vanadium data to compare against");
       this->declareProperty(new WorkspaceProperty<>("DetectorVanadium2InputWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "Detector vanadium workspace to compare against");
-      this->setPropertySettings("DetectorVanadium2InputFile",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-      this->setPropertySettings("DetectorVanadium2InputWorkspace",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
       this->declareProperty("DetVanRatioVariation", 1.1, mustBePositive,
           "Mask detectors if the time variation is above this threshold.");
       this->setPropertySettings("DetVanRatioVariation",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("DetectorVanadium2InputFile", IS_NOT_EQUAL_TO, ""));
+
       this->declareProperty("BackgroundCheck", false,
           "If true, run a background check on detector vanadium.");
-      this->setPropertySettings("BackgroundCheck",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
       this->declareProperty("SamBkgMedianTestHigh", 5.0, mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("SamBkgMedianTestHigh",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
       this->declareProperty("SamBkgMedianTestLow", 0.1, mustBePositive,
           "Mask detectors below this threshold.");
       this->setPropertySettings("SamBkgMedianTestLow",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
       this->declareProperty("SamBkgErrorBarCriterion", 3.3, mustBePositive,
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("SamBkgErrorBarCriterion",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
       auto mustBeIntPositive = boost::make_shared<BoundedValidator<size_t> >();
       mustBeIntPositive->setLower(0);
       size_t tof_start = 18000;
       this->declareProperty("BackgroundTofStart", tof_start, mustBeIntPositive,
           "Start TOF for the background check.");
       this->setPropertySettings("BackgroundTofStart",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
       size_t tof_end = 19500;
       this->declareProperty("BackgroundTofEnd", tof_end, mustBeIntPositive,
           "End TOF for the background check.");
       this->setPropertySettings("BackgroundTofEnd",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
+          new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
+
       this->declareProperty("RejectZeroBackground", false,
           "If true, check the background region for anomolies.");
-      this->setPropertySettings("RejectZeroBackground",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-      this->setPropertySettings("RejectZeroBackground",
-          new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
+
       this->declareProperty("PsdBleed", false, "If true, perform a PSD bleed test.");
-      this->setPropertySettings("PsdBleed",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
       this->declareProperty("MaxFramerate", 0.01, "The maximum framerate to check.");
-      this->setPropertySettings("MaxFramerate",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
       this->setPropertySettings("MaxFramerate",
           new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
       this->declareProperty("IgnoredPixels", 80.0,
           "A list of pixels to ignore in the calculations.");
       this->setPropertySettings("IgnoredPixels",
-          new VisibleWhenProperty("FindBadDetectors", IS_EQUAL_TO, "1"));
-      this->setPropertySettings("IgnoredPixels",
           new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
 
-      this->setPropertyGroup("FindBadDetectors", findBadDets);
       this->setPropertyGroup("OutputMaskFile", findBadDets);
       this->setPropertyGroup("HighCounts", findBadDets);
       this->setPropertyGroup("LowCounts", findBadDets);
@@ -550,18 +534,15 @@ namespace Mantid
       Workspace_sptr idetVanWS;
       if (detVanWS && !isProcessedDetVan)
       {
-        const bool runDiag = this->getProperty("FindBadDetectors");
-        if (runDiag)
-        {
-          IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
-          diag->setProperty("DetVanWorkspace", detVanWS);
-          diag->setProperty("DetVanCompWorkspace", detVan2WS);
-          diag->setProperty("SampleWorkspace", sampleWS);
-          diag->setProperty("OutputWorkspace", "samDetVanProcMask");
-          diag->setProperty("ReductionProperties", reductionManagerName);
-          diag->executeAsSubAlg();
-          maskWS = diag->getProperty("OutputWorkspace");
-        }
+        IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
+        diag->setProperty("DetVanWorkspace", detVanWS);
+        diag->setProperty("DetVanCompWorkspace", detVan2WS);
+        diag->setProperty("SampleWorkspace", sampleWS);
+        diag->setProperty("OutputWorkspace", "samDetVanProcMask");
+        diag->setProperty("ReductionProperties", reductionManagerName);
+        diag->executeAsSubAlg();
+        maskWS = diag->getProperty("OutputWorkspace");
+
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
         if (!maskWS)
