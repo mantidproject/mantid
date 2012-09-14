@@ -107,7 +107,7 @@ void VisionCalibrationMock::function1D(double* out, const double* xValues, const
   const double &s2 = getParameter("Sigma2");
   const double &r2 = pow(1/s2,2);
 
-  const double spc = (double)( m_att.asInt() );
+//  const double spc = (double)( m_att.asInt() );
 
   for(size_t i=0; i<nData; i++)
   {
@@ -147,7 +147,7 @@ void VisionCalibrationMock::functionDeriv1D(API::Jacobian* out, const double* xV
   const double &s2 = getParameter("Sigma2");
   const double &r2 = pow(1/s2,2);
 
-  const double spc = (double)( m_att.asInt() );
+//  const double spc = (double)( m_att.asInt() );
 
   for(size_t i=0; i<nData; i++)
   {
