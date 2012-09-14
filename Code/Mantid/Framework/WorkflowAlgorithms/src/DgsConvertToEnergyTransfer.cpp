@@ -126,7 +126,19 @@ namespace WorkflowAlgorithms
     g_log.notice() << "Processing for " << facility << std::endl;
     const double eiGuess = reductionManager->getProperty("IncidentEnergyGuess");
     const bool useEiGuess = reductionManager->getProperty("UseIncidentEnergyGuess");
-    const std::vector<double> etBinning = reductionManager->getProperty("EnergyTransferRange");
+    std::vector<double> etBinning = reductionManager->getProperty("EnergyTransferRange");
+
+    // Create a default set of binning parameters: (-0.5Ei, dE/100, Ei)
+    // where dE = Ei - -0.5Ei
+    if (etBinning.empty())
+    {
+      double emin = -0.5 * eiGuess;
+      double emax = eiGuess;
+      double deltaE = (emax - emin) / 100.0;
+      etBinning.push_back(emin);
+      etBinning.push_back(deltaE);
+      etBinning.push_back(emax);
+    }
 
     double incidentEnergy = 0.0;
     double monPeak = 0.0;
@@ -319,11 +331,6 @@ namespace WorkflowAlgorithms
             cnvun->setProperty("EFixed", incidentEnergy);
             cnvun->execute();
 
-            if (etBinning.empty())
-              {
-                throw std::runtime_error("Need Et rebinning parameters in order to use background subtraction");
-              }
-
             // Rebin to Et
             rebin->setProperty("InputWorkspace", outWsName);
             rebin->setProperty("OutputWorkspace", outWsName);
@@ -417,18 +424,14 @@ namespace WorkflowAlgorithms
     cnvun->setProperty("EFixed", incidentEnergy);
     cnvun->execute();
 
-    // Rebin if necessary
-    if (!etBinning.empty())
-      {
-        g_log.notice() << "Rebinning data" << std::endl;
-        IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
-        rebin->setAlwaysStoreInADS(true);
-        rebin->setProperty("InputWorkspace", outWsName);
-        rebin->setProperty("OutputWorkspace", outWsName);
-        rebin->setProperty("Params", etBinning);
-        rebin->setProperty("PreserveEvents", preserveEvents);
-        rebin->execute();
-      }
+    g_log.notice() << "Rebinning data" << std::endl;
+    IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+    rebin->setAlwaysStoreInADS(true);
+    rebin->setProperty("InputWorkspace", outWsName);
+    rebin->setProperty("OutputWorkspace", outWsName);
+    rebin->setProperty("Params", etBinning);
+    rebin->setProperty("PreserveEvents", preserveEvents);
+    rebin->execute();
 
     // Correct for detector efficiency
     if ("SNS" == facility)
@@ -496,30 +499,24 @@ namespace WorkflowAlgorithms
       remap->executeAsSubAlg();
     }
     // Rebin to ensure consistency
-    if (!etBinning.empty())
-      {
-        const bool sofphieIsDistribution = reductionManager->getProperty("SofPhiEIsDistribution");
+    const bool sofphieIsDistribution = reductionManager->getProperty("SofPhiEIsDistribution");
 
-        g_log.notice() << "Rebinning data" << std::endl;
-        IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
-        rebin->setAlwaysStoreInADS(true);
-        rebin->setProperty("InputWorkspace", outWsName);
-        rebin->setProperty("OutputWorkspace", outWsName);
-        rebin->setProperty("Params", etBinning);
-        if (sofphieIsDistribution)
-          {
-            rebin->setProperty("PreserveEvents", false);
-          }
-        rebin->execute();
+    g_log.notice() << "Rebinning data" << std::endl;
+    rebin->setProperty("InputWorkspace", outWsName);
+    rebin->setProperty("OutputWorkspace", outWsName);
+    if (sofphieIsDistribution)
+    {
+      rebin->setProperty("PreserveEvents", false);
+    }
+    rebin->execute();
 
-        if (sofphieIsDistribution)
-          {
-            g_log.notice() << "Making distribution" << std::endl;
-            IAlgorithm_sptr distrib = this->createSubAlgorithm("ConvertToDistribution");
-            distrib->setProperty("Workspace", outWsName);
-            distrib->execute();
-          }
-      }
+    if (sofphieIsDistribution)
+    {
+      g_log.notice() << "Making distribution" << std::endl;
+      IAlgorithm_sptr distrib = this->createSubAlgorithm("ConvertToDistribution");
+      distrib->setProperty("Workspace", outWsName);
+      distrib->execute();
+    }
 
     // Normalise by the detector vanadium if necessary
     MatrixWorkspace_sptr detVanWS = this->getProperty("IntegratedDetectorVanadium");
