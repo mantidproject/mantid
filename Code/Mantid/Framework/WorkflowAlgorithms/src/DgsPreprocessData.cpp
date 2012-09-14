@@ -168,6 +168,8 @@ namespace Mantid
         addLog->setProperty("LogName", doneLog);
         addLog->setProperty("LogText", normAlg);
         addLog->executeAsSubAlg();
+
+        outputWS->setName(outWsName);
       }
       else
       {
@@ -175,9 +177,9 @@ namespace Mantid
         {
           g_log.information() << "Preprocessing already done on " << outWsName << std::endl;
         }
+        outputWS = inputWS;
       }
 
-      outputWS->setName(outWsName);
       this->setProperty("OutputWorkspace", outputWS);
     }
 
