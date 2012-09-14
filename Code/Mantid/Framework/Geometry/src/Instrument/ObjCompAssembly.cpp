@@ -248,18 +248,11 @@ void ObjCompAssembly::getChildren(std::vector<IComponent_const_sptr> & outVector
   }
 }
 
-/**
-* Find a component by name.
-* @param cname :: The name of the component. If there are multiple matches, the first one found is returned.
-* If the name contains '/', it will search the the component whose name occurs before the '/' 
-* then within that component's assembly,
-* search the the component whose name occurs after the '/' and so on with any subsequent '/'. 
-* For example to find 'tube020' in 'panel07', one could use the cname 'panel07/tube020', 
-* given that tube020 is unique within panel07.
-* @param nlevels :: Optional argument to limit number of levels searched.
-* @returns A shared pointer to the component
-*/
-boost::shared_ptr<const IComponent> ObjCompAssembly::getComponentByName(const std::string & cname, int nlevels) const
+/** Find a component by name.
+ *  Not implemented for this class.
+ *  @throws Kernel::Exception::NotImplementedError
+ */
+boost::shared_ptr<const IComponent> ObjCompAssembly::getComponentByName(const std::string &, int) const
 {
    /* Not implemented for ObjCompAssembly */
   throw ( new Kernel::Exception::NotImplementedError (" ObjCompAssembly::getComponentByName called") );
