@@ -25,10 +25,12 @@ namespace Mantid
     // Sets documentation strings for this algorithm
     void PreprocessDetectorsToMD::initDocs()
     {    
-      this->setWikiSummary("Service algorigthm to preprocess detector's positions namely  \n"
+      this->setWikiSummary("Servicing algorigthm to preprocess detector's positions namely  \n"
                            "to perform generic part of the transformation from a matrix workspace of a real instrument to\n"
                            "physical MD workspace of an experimental results (e.g Q-space).");
-      this->setOptionalMessage("Servicing algorithm");
+      this->setOptionalMessage("preprocess detector's positions namely perform generic part of the transformation \n"
+                               "from a physical space of a real instrument to\n"
+                               "physical MD workspace of an experimental results (e.g Q-space).");
     }
     //----------------------------------------------------------------------------------------------
     /** Initialize the algorithm's properties. */
@@ -44,7 +46,7 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Kernel::Direction::Input,ws_valid),
         "An input Matrix Workspace");
 
-      declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","",Kernel::Direction::InOut),
+      declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","",Kernel::Direction::Output),
         "Name of the output Table workspace. If the workspace exists, it will be replaced");
 
     }
@@ -54,11 +56,13 @@ namespace Mantid
     void PreprocessDetectorsToMD::exec()
     {
         // -------- get Input workspace
-      MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  
+      MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");  
       // -------- build target workspace:
       auto  targWS = createTableWorkspace(inputWS);
-
+      // process detectors positions
+      this->processDetectorsPositions(inputWS,targWS);
+      // set up target workspace 
+      setProperty("OutputWorkspace",targWS);
     }
     /***/
     boost::shared_ptr<DataObjects::TableWorkspace> PreprocessDetectorsToMD::createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS)
