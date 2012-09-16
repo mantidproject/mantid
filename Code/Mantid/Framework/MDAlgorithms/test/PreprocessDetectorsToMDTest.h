@@ -37,7 +37,7 @@ void testCreateTarget()
 {
   TS_ASSERT_THROWS_NOTHING(tws = pAlg->createTableWorkspace(ws2D));
 
-  TS_ASSERT(!tws);
+  TS_ASSERT(tws);
 
   TS_ASSERT_EQUALS(4,tws->rowCount());
   TS_ASSERT_EQUALS(7,tws->columnCount());
@@ -62,7 +62,7 @@ void testPreprocessDetectors()
   std::string InstrName;
   TS_ASSERT_THROWS_NOTHING(nDet = tws->getProperty("ActualDetectorsNum"));
   TS_ASSERT_THROWS_NOTHING(L1  = tws->getProperty("L1"));
-  TS_ASSERT_THROWS_NOTHING(InstrName = tws->getProperty("InstrumentName"));  
+  TS_ASSERT_THROWS_NOTHING(InstrName =std::string(tws->getProperty("InstrumentName")));  
 
   TS_ASSERT_DELTA(10,L1,1.e-11);
   TS_ASSERT_EQUALS(4,nDet);

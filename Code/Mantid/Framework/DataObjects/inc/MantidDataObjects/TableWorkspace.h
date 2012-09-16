@@ -115,8 +115,9 @@ namespace DataObjects
     size_t rowCount() const {return m_rowCount;}
     /** get access to column vecotor for index i.
      *  The operation is unsafe with regards to the operaitons resizing obtained vector. 
-     *   This will destroy all table ws internal cohirency DO NOT OBUSE! 
-     *   Writing to vecot is safe. */
+     *   This will destroy all table ws internal coherency. DO NOT OBUSE! 
+     *  e.g.: resise/reserve are unsafe 
+     *   Writing/reading data to vector through [] or at() is safe. */
     template<class T> 
     std::vector<T> & getColVector(size_t index)
     {
@@ -143,10 +144,10 @@ namespace DataObjects
       }
     }
     /** get access to the column vecotor for column with given name . 
-      *
-      *  The operation is unsafe with regards to the operaitons resizing obtained vector. 
-      *  This will destroy all table workspace internal cohirency DO NOT ABUSE! 
-      *  Writing to vector is safe. */
+     *
+     *   This will destroy all table ws internal coherency. DO NOT OBUSE! 
+     *  e.g.: resise/reserve are unsafe 
+     *   Writing/reading data to vector through [] or at() is safe. */
     template<class T> 
     std::vector<T> & getColVector(const std::string& name)
     {
