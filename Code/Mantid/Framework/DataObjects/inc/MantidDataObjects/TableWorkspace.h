@@ -124,7 +124,10 @@ namespace DataObjects
       if(pTableCol)
         return pTableCol->data();
       else
-        throw(std::bad_cast("TableWorkspace::getColVector: Can not cast to proper TableCol type"));
+      {
+        g_log.error()<<"TableWorkspace::getColVector()const: Can not cast to proper TableCol type\n";
+        throw(std::bad_cast());
+      }
     }
     /** get constant access to column vecotor for index i. */
     template<class T> 
@@ -134,7 +137,10 @@ namespace DataObjects
       if(pTableCol)
         return pTableCol->data();
       else
-        throw(std::bad_cast("TableWorkspace::getColVector()const: Can not cast to proper TableCol type"));
+      {
+        g_log.error()<<"TableWorkspace::getColVector()const: Can not cast to proper TableCol type\n";
+        throw(std::bad_cast());
+      }
     }
     /** get access to the column vecotor for column with given name . 
       *
@@ -150,7 +156,9 @@ namespace DataObjects
       if(pTableCol)
         return pTableCol->data();
       else
-        throw(std::bad_cast("TableWorkspace::getColVector()const: Can not cast to proper TableCol type"));
+      {
+        throw(std::bad_cast());
+      }
     }
     /** get access to column vecotor for column with given name  */
     template<class T> 
@@ -162,7 +170,10 @@ namespace DataObjects
       if(pTableCol)
         return pTableCol->data();
       else
-        throw(std::bad_cast("TableWorkspace::getColVector()const: Can not cast to proper TableCol type"));
+      {
+        g_log.error()<<"TableWorkspace::getColVector()const: Can not cast to proper TableCol type\n";
+        throw(std::bad_cast());
+      }
     }
     /// Resizes the workspace.
     void setRowCount(size_t count);
