@@ -57,8 +57,8 @@ void testPreprocessDetectors()
     TS_ASSERT_EQUALS(i,spec2detMap[i]);
   }
 
-  double L1;
-  uint32_t nDet; 
+  double L1(0);
+  uint32_t nDet(0); 
   std::string InstrName;
   TS_ASSERT_THROWS_NOTHING(nDet = tws->getProperty("ActualDetectorsNum"));
   TS_ASSERT_THROWS_NOTHING(L1  = tws->getProperty("L1"));
