@@ -218,17 +218,9 @@ namespace Mantid
             //getei->setProperty("Monitor1Spec", eiMon1Spec);
             //getei->setProperty("Monitor2Spec", eiMon2Spec);
             getei->setProperty("EnergyEstimate", eiGuess);
-            try
-            {
-              getei->execute();
-              incidentEnergy = getei->getProperty("IncidentEnergy");
-              tZero = getei->getProperty("Tzero");
-            }
-            catch (...)
-            {
-              g_log.error() << "GetEi failed, using guess as initial energy and T0 = 0" << std::endl;
-              incidentEnergy = eiGuess;
-            }
+            getei->execute();
+            incidentEnergy = getei->getProperty("IncidentEnergy");
+            tZero = getei->getProperty("Tzero");
           }
         }
 
