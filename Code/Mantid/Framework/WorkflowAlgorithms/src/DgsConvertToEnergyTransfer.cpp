@@ -20,6 +20,7 @@ energy transfer for direct geometry spectrometers.
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -223,6 +224,14 @@ namespace Mantid
             tZero = getei->getProperty("Tzero");
           }
         }
+
+        // Add T0 to sample logs
+        IAlgorithm_sptr addLog = this->createSubAlgorithm("AddSampleLog");
+        addLog->setProperty("Workspace", inWsName);
+        addLog->setProperty("LogName", "CalculatedT0");
+        addLog->setProperty("LogType", "Number");
+        addLog->setProperty("LogText", boost::lexical_cast<std::string>(tZero));
+        addLog->executeAsSubAlg();
 
         g_log.notice() << "Adjusting for T0" << std::endl;
         IAlgorithm_sptr alg = this->createSubAlgorithm("ChangeBinOffset");
