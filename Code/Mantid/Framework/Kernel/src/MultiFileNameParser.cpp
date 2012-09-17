@@ -70,7 +70,7 @@ namespace Kernel
       void validateToken(const std::string & token);
       bool matchesFully(const std::string & stringToMatch, const std::string & regexString, bool caseless = false);
       std::string getMatchingString(const std::string & regexString, const std::string & toParse, bool caseless = false);
-      std::string pad(std::string run, unsigned int padLength);
+      std::string pad(unsigned int run, const std::string& instString);
 
       std::set< std::pair<unsigned int, unsigned int> > & mergeAdjacentRanges(
         std::set< std::pair<unsigned int, unsigned int> > & ranges, 
@@ -190,7 +190,9 @@ namespace Kernel
     /// Constructor.
     Parser::Parser() :
       m_runs(), m_fileNames(), m_multiFileName(), m_dirString(), m_instString(), 
-      m_underscoreString(), m_runString(), m_extString(), m_zeroPadding(), m_validInstNames()
+      m_underscoreString(), m_runString(), m_extString(), 
+      //m_zeroPadding(),
+      m_validInstNames()
     {
       ConfigServiceImpl & config = ConfigService::Instance();
 
@@ -238,9 +240,9 @@ namespace Kernel
 
       // Set up helper functor.
       GenerateFileName generateFileName(
-        m_dirString + m_instString + m_underscoreString,
+        m_dirString,
         m_extString,
-        m_zeroPadding);
+        m_instString);
 
       // Generate complete file names for each run using helper functor.
       std::transform(
@@ -338,7 +340,7 @@ namespace Kernel
       
       InstrumentInfo instInfo = ConfigService::Instance().getInstrument(m_instString);
       m_instString = instInfo.shortName(); // Make sure we're using the shortened form of the isntrument name.
-      m_zeroPadding = instInfo.zeroPadding();
+      //m_zeroPadding = instInfo.zeroPadding(0);
 
       if(boost::starts_with(base, instInfo.delimiter()))
       {
@@ -366,8 +368,8 @@ namespace Kernel
      * @param suffix      :: a string that suffixes the generated file names.
      * @param zeroPadding :: the number of zeros with which to pad the run number of genrerated file names.
      */
-    GenerateFileName::GenerateFileName(const std::string & prefix, const std::string & suffix, int zeroPadding) :
-        m_prefix(prefix), m_suffix(suffix), m_zeroPadding(zeroPadding)
+    GenerateFileName::GenerateFileName(const std::string & prefix, const std::string & suffix, const std::string & instString) :
+        m_prefix(prefix), m_suffix(suffix), m_instString(instString)
       {}
 
     /**
@@ -402,7 +404,7 @@ namespace Kernel
       std::stringstream fileName;
 
       fileName << m_prefix
-               << pad(boost::lexical_cast<std::string>(run), m_zeroPadding)
+               << pad(run, m_instString)
                << m_suffix;
 
       return fileName.str();
@@ -728,20 +730,25 @@ namespace Kernel
       /**
        * Zero pads the run number used in a file name to required length.
        *
-       * @param run - the run number of the file.  May as well pass by value here.
-       * @param count - the required length of the string.
+       * @param run - the run number of the file.
+       * @param instString - the name of the instrument
        *
        * @returns the string, padded to the required length.
        * @throws std::runtime_error if run is longer than size of count.
        */
-      std::string pad(std::string run, unsigned int padLength)
+      std::string pad(unsigned int run, const std::string& instString)
       {
-        if(run.size() < padLength)
-          return run.insert(0, padLength - run.size(), '0');
-        else if(run.size() > padLength)
-          throw std::runtime_error("Could not parse run number \"" + run + 
+        InstrumentInfo instInfo = ConfigService::Instance().getInstrument(instString);
+        std::string prefix = instInfo.filePrefix( run ) + instInfo.delimiter();
+        unsigned int padLength = instInfo.zeroPadding( run );
+        std::string runStr = boost::lexical_cast<std::string>( run );
+        if(runStr.size() < padLength)
+          runStr.insert(0, padLength - runStr.size(), '0');
+        else if(runStr.size() > padLength)
+          throw std::runtime_error("Could not parse run number \"" + runStr + 
             "\" since the instrument run number length required is " + boost::lexical_cast<std::string>(padLength));
-        return run;
+        runStr.insert(0, prefix);
+        return runStr;
       }
 
       /**

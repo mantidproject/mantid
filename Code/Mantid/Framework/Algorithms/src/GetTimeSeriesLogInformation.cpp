@@ -800,7 +800,7 @@ namespace Algorithms
   void GetTimeSeriesLogInformation::exportErrorLog(API::MatrixWorkspace_sptr ws, std::vector<Kernel::DateAndTime> abstimevec, double dts)
   {
     std::string outputdir = getProperty("OutputDirectory");
-    if (outputdir[outputdir.size()-1] != '/')
+    if (!outputdir.empty() && outputdir[outputdir.size()-1] != '/')
       outputdir += "/";
 
     std::string ofilename = outputdir + "errordeltatime.txt";
