@@ -125,22 +125,20 @@ namespace Mantid
       const bool useEiGuess = reductionManager->getProperty("UseIncidentEnergyGuess");
       std::vector<double> etBinning = reductionManager->getProperty("EnergyTransferRange");
 
-      // Create a default set of binning parameters: (-0.5Ei, dE/100, Ei)
-      // where dE = Ei - -0.5Ei
+      // Create a default set of binning parameters: (-0.5Ei, 0.01Ei, Ei)
       if (etBinning.empty())
       {
         double emin = -0.5 * eiGuess;
-        double emax = eiGuess;
-        double deltaE = (emax - emin) / 100.0;
+        double deltaE = eiGuess / 100.0;
         etBinning.push_back(emin);
         etBinning.push_back(deltaE);
-        etBinning.push_back(emax);
+        etBinning.push_back(eiGuess);
       }
 
       double incidentEnergy = 0.0;
       double monPeak = 0.0;
-      specid_t eiMon1Spec = 0;
-      specid_t eiMon2Spec = 0;
+      //specid_t eiMon1Spec = 0;
+      //specid_t eiMon2Spec = 0;
 
       if ("SNS" == facility)
       {
@@ -215,16 +213,10 @@ namespace Mantid
             reductionManager->declareProperty(new PropertyWithValue<std::string>("MonitorWorkspace", monWsName));
 
             // Calculate Ei
-            // Get the monitor spectra indices from the parameters
-            // TODO: Get these from algorithm properties. No longer need to read them from parameter file.
-            MatrixWorkspace_const_sptr monWS = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(monWsName);
-            eiMon1Spec = static_cast<specid_t>(monWS->getInstrument()->getNumberParameter("ei-mon1-spec")[0]);
-            eiMon2Spec = static_cast<specid_t>(monWS->getInstrument()->getNumberParameter("ei-mon2-spec")[0]);
-
             IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
             getei->setProperty("InputWorkspace", monWsName);
-            getei->setProperty("Monitor1Spec", eiMon1Spec);
-            getei->setProperty("Monitor2Spec", eiMon2Spec);
+            //getei->setProperty("Monitor1Spec", eiMon1Spec);
+            //getei->setProperty("Monitor2Spec", eiMon2Spec);
             getei->setProperty("EnergyEstimate", eiGuess);
             try
             {
@@ -253,13 +245,11 @@ namespace Mantid
       // Do ISIS
       else
       {
-        eiMon1Spec = static_cast<specid_t>(inputWS->getInstrument()->getNumberParameter("ei-mon1-spec")[0]);
-        eiMon2Spec = static_cast<specid_t>(inputWS->getInstrument()->getNumberParameter("ei-mon2-spec")[0]);
         IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
         getei->setAlwaysStoreInADS(true);
         getei->setProperty("InputWorkspace", inWsName);
-        getei->setProperty("Monitor1Spec", eiMon1Spec);
-        getei->setProperty("Monitor2Spec", eiMon2Spec);
+        //getei->setProperty("Monitor1Spec", eiMon1Spec);
+        //getei->setProperty("Monitor2Spec", eiMon2Spec);
         getei->setProperty("EnergyEstimate", eiGuess);
         getei->execute();
 
