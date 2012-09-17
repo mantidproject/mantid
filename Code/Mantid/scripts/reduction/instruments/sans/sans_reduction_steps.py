@@ -417,13 +417,19 @@ class DirectBeamTransmission(BaseTransmission):
             Apply transmission correction
             @param workspace: workspace to apply correction to
         """
+        # Make sure the binning is compatible
+        RebinToWorkspace(self._transmission_ws, workspace, OutputWorkspace=self._transmission_ws+'_rebin')
         #Apply angle-dependent transmission correction using the zero-angle transmission
         if self._theta_dependent:
             ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                        TransmissionWorkspace=self._transmission_ws, 
+                                        TransmissionWorkspace=self._transmission_ws+'_rebin', 
                                         OutputWorkspace=workspace)          
         else:
-            Divide(workspace, self._transmission_ws, workspace)  
+            Divide(workspace, self._transmission_ws+'_rebin', workspace)  
+
+        if mtd.workspaceExists(self._transmission_ws+'_rebin'):
+            mtd.deleteWorkspace(self._transmission_ws+'_rebin')          
+       
         
     def execute(self,reducer, workspace=None):
         """
