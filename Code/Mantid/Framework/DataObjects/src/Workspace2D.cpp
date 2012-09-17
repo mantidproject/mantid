@@ -30,7 +30,7 @@ namespace Mantid
     ///Destructor
     Workspace2D::~Workspace2D()
     {
-      // Clear out the memory
+      // Clear out the memory.
       for (size_t i=0; i<data.size(); i++)
       {
         delete data[i];
