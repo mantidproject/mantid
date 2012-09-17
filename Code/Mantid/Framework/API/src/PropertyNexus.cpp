@@ -131,6 +131,12 @@ namespace PropertyNexus
     // Times in second offsets
     std::vector<double> timeSec;
     std::string startStr = "";
+    std::string unitsStr="";
+    try
+    {
+        file->getAttr("units", unitsStr);
+    }
+    catch (::NeXus::Exception &) {}
 
     // Get the entries so that you can check if the "time" field is present
     std::map<std::string, std::string> entries = file->getEntries();
@@ -206,6 +212,8 @@ namespace PropertyNexus
 
     file->closeData();
     file->closeGroup();
+    //add units
+    retVal->setUnits(unitsStr);
     return retVal;
   }
 
@@ -255,6 +263,7 @@ namespace PropertyNexus
     if( value.empty() ) return;
     file->makeGroup(prop->name(), "NXlog", 1);
     file->writeData("value", value );
+    file->putAttr("units",prop->units());
     saveTimeVector(file, prop);
     file->closeGroup();
   }
