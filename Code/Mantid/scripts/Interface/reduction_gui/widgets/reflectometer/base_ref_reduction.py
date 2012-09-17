@@ -764,7 +764,9 @@ class BaseRefWidget(BaseWidget):
                                          self._summary.data_peak_from_pixel,
                                          self._summary.data_peak_to_pixel,
                                          True)
-#                
+        print 'after error in line 767'
+
+
     def _plot_count_vs_y_bck(self):
         """
             Plot counts as a function of high-resolution pixels
@@ -773,7 +775,7 @@ class BaseRefWidget(BaseWidget):
             For REFL, this is Y
         """
 
-        self._integrated_plot(True,
+        min, max = self._integrated_plot(True,
                               self._summary.data_run_number_edit,
                               self._summary.data_background_from_pixel1,
                               self._summary.data_background_to_pixel1,
@@ -864,6 +866,7 @@ class BaseRefWidget(BaseWidget):
             @param max_ctrl: control widget containing the range maximum
             @param isPeak: are we working with peak or with background
         """
+        
         if not IS_IN_MANTIDPLOT:
             return
         
@@ -876,7 +879,7 @@ class BaseRefWidget(BaseWidget):
             def call_back(xmin, xmax):
                 min_ctrl.setText("%-d" % int(xmin))
                 max_ctrl.setText("%-d" % int(xmax))
-            
+
             # For REFL, Y is high-res
             is_pixel_y = is_high_res
             # For REFM it's the other way around
