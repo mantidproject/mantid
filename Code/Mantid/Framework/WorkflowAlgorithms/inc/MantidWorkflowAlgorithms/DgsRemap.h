@@ -9,9 +9,13 @@ namespace Mantid
 namespace WorkflowAlgorithms
 {
 
-  /** DgsRemap : TODO: DESCRIPTION
+  /** DgsRemap : This algorithm takes a workspace and masks and groups that
+   * workspace if appropriate information is passed. It can be run in reverse
+   * (group then mask) mode.
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    @date 2012-12-09
 
     This file is part of Mantid.
 

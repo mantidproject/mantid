@@ -9,9 +9,13 @@ namespace Mantid
   namespace WorkflowAlgorithms
   {
 
-    /** DgsDiagnose : TODO: DESCRIPTION
+    /** DgsDiagnose : This algorithm constructs all of the necessary workspaces
+     * for performing detector diagnostics and then runs the diagnostic
+     * algorithm.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    @date 2012-02-08
 
     This file is part of Mantid.
 
