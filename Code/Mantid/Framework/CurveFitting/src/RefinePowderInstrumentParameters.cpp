@@ -934,7 +934,7 @@ void RefinePowderInstrumentParameters::generateOutputPeakParameterWorkspace(std:
           h = peakiter->first[0];
           k = peakiter->first[1];
           l = peakiter->first[2];
-          double d_h = lattice/sqrt(h*h + k*k + l*l);
+          double d_h = lattice/std::sqrt(h*h + k*k + l*l);
 
           // TOF_h (Y value observed)
           double tof_h = peakiter->second->centre();
