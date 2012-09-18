@@ -291,6 +291,33 @@ namespace Mantid
       const double binOffset = -monPeak;
       reductionManager->declareProperty(new PropertyWithValue<double>("TofRangeOffset", binOffset));
 
+      if ("ISIS" == facility)
+      {
+        std::string detcalFile("");
+        if (reductionManager->existsProperty("SampleDetCalFilename"))
+        {
+          detcalFile = reductionManager->getPropertyValue("SampleDetCalFilename");
+        }
+        // Try to get it from run object.
+        else
+        {
+          detcalFile = inputWS->run().getProperty("Filename")->value();
+        }
+        if (!detcalFile.empty())
+        {
+          const bool relocateDets = reductionManager->getProperty("RelocateDetectors");
+          IAlgorithm_sptr loaddetinfo = this->createSubAlgorithm("LoadDetectorInfo");
+          loaddetinfo->setProperty("Workspace", outWsName);
+          loaddetinfo->setProperty("DataFilename", detcalFile);
+          loaddetinfo->setProperty("RelocateDets", relocateDets);
+          loaddetinfo->execute();
+        }
+        else
+        {
+          throw std::runtime_error("Cannot find detcal filename in run object or as parameter.");
+        }
+      }
+
       // Subtract time-independent background if necessary
       const bool doTibSub = reductionManager->getProperty("TimeIndepBackgroundSub");
       if (doTibSub)
@@ -385,7 +412,6 @@ namespace Mantid
         // Do ISIS
         else
         {
-          // TODO: More setup work needs to be done.
           IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
           flatBg->setAlwaysStoreInADS(true);
           flatBg->setProperty("InputWorkspace", outWsName);

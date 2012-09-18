@@ -81,6 +81,10 @@ namespace Mantid
       this->declareProperty(new WorkspaceProperty<>("SampleInputWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "Workspace to be reduced");
+      this->declareProperty(new FileProperty("DetCalFilename", "",
+          FileProperty::OptionalLoad), "A detector calibration file.");
+      this->declareProperty("RelocateDetectors", false,
+          "Move detectors to position specified in cal file.");
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);
       this->declareProperty("IncidentEnergyGuess", EMPTY_DBL(), mustBePositive,
@@ -108,6 +112,8 @@ namespace Mantid
 
       this->setPropertyGroup("SampleInputFile", sampleSetup);
       this->setPropertyGroup("SampleInputWorkspace", sampleSetup);
+      this->setPropertyGroup("DetCalFilename", sampleSetup);
+      this->setPropertyGroup("RelocateDetectors", sampleSetup);
       this->setPropertyGroup("IncidentEnergyGuess", sampleSetup);
       this->setPropertyGroup("UseIncidentEnergyGuess", sampleSetup);
       this->setPropertyGroup("TimeZeroGuess", sampleSetup);
@@ -398,8 +404,18 @@ namespace Mantid
         // Do ISIS
         else
         {
-          std::string detCalFilename = prop + "DetCalFilename";
-          this->reductionManager->declareProperty(new PropertyWithValue<std::string>(detCalFilename, inputData));
+          std::string detCalFileFromAlg = this->getProperty("DetCalFilename");
+          std::string detCalFileProperty = prop + "DetCalFilename";
+          std::string detCalFilename("");
+          if (!detCalFileFromAlg.empty())
+          {
+            detCalFilename = detCalFileFromAlg;
+          }
+          else
+          {
+            detCalFilename = inputData;
+          }
+          this->reductionManager->declareProperty(new PropertyWithValue<std::string>(detCalFileProperty, detCalFilename));
         }
 
         inputWS = this->load(inputData);
