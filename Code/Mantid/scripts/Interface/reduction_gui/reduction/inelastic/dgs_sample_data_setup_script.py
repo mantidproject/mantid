@@ -12,6 +12,8 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class SampleSetupScript(BaseScriptElement):
     
     sample_file = ""
+    detcal_file = ""
+    relocate_dets = False
     incident_energy_guess = ""
     use_ei_guess = False
     tzero_guess = 0.0
@@ -31,6 +33,10 @@ class SampleSetupScript(BaseScriptElement):
         
     def to_script(self):
         script =  "SampleInputFile=\"%s\",\n" % self.sample_file
+        if detcal_file != SampleSetupScript.detcal_file:
+            script += "DetCalFilename=\"%s\",\n" % self.detcal_file
+        if relocate_dets != SampleSetupScript.relocate_dets:
+            script += "RelocateDetectors=%s,\n" % self.relocate_dets
         script += "IncidentEnergyGuess=\"%s\",\n" % self.incident_energy_guess
         if self.use_ei_guess != SampleSetupScript.use_ei_guess:
             script += "UseIncidentEnergyGuess=%s,\n" % self.use_ei_guess
@@ -60,6 +66,8 @@ class SampleSetupScript(BaseScriptElement):
         """
         xml = "<SampleSetup>\n"
         xml += "  <sample_input_file>%s</sample_input_file>\n" % self.sample_file
+        xml += "  <detcal_file>%s</detcal_file>\n" % self.detcal_file
+        xml += "  <relocate_dets>%s</relocate_dets>\n" % self.relocate_dets
         xml += "  <incident_energy_guess>%s</incident_energy_guess>\n" % self.incident_energy_guess
         xml += "  <use_ei_guess>%s</use_ei_guess>\n" % str(self.use_ei_guess)
         xml += "  <tzero_guess>%s</tzero_guess>\n" % str(self.tzero_guess)
@@ -88,6 +96,12 @@ class SampleSetupScript(BaseScriptElement):
             self.sample_file = BaseScriptElement.getStringElement(instrument_dom, 
                                                                   "sample_input_file",
                                                                   default=SampleSetupScript.sample_file)
+            self.detcal_file = BaseScriptElement.getStringElement(instrument_dom,
+                                                                  "detcal_file",
+                                                                  default=SampleSetupScript.detcal_file)
+            self.relocate_dets = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                  "relocate_dets",
+                                                                  default=SampleSetupScript.relocate_dets)
             self.incident_energy_guess = BaseScriptElement.getStringElement(instrument_dom,
                                                                             "incident_energy_guess",
                                                                             default=SampleSetupScript.incident_energy_guess)
@@ -127,6 +141,8 @@ class SampleSetupScript(BaseScriptElement):
             Reset state
         """
         self.sample_file = SampleSetupScript.sample_file
+        self.detcal_file = SampleSetupScript.detcal_file
+        self.relocate_dets = SampleSetupScript.relocate_dets
         self.incident_energy_guess = SampleSetupScript.incident_energy_guess
         self.use_ei_guess = SampleSetupScript.use_ei_guess
         self.tzero_guess = SampleSetupScript.tzero_guess

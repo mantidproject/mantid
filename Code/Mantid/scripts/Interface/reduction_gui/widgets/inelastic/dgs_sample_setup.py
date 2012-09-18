@@ -46,6 +46,8 @@ class SampleSetupWidget(BaseWidget):
         # Connections
         self.connect(self._content.sample_browse, QtCore.SIGNAL("clicked()"), 
                      self._sample_browse)
+        self.connect(self._content.detcal_browse, QtCore.SIGNAL("clicked()"), 
+                     self._detcal_browse)
         self.connect(self._content.hardmask_browse, QtCore.SIGNAL("clicked()"), 
                      self._hardmask_browse)
         self.connect(self._content.grouping_browse, QtCore.SIGNAL("clicked()"), 
@@ -83,6 +85,11 @@ class SampleSetupWidget(BaseWidget):
         if fname:
             self._content.sample_edit.setText(fname)   
 
+    def _detcal_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.sample_edit.setText(fname)   
+
     def _hardmask_browse(self):
         fname = self.data_browse_dialog()
         if fname:
@@ -100,6 +107,7 @@ class SampleSetupWidget(BaseWidget):
         """
         self._check_and_set_lineedit_content(self._content.sample_edit,
                                              state.sample_file)
+        self._content.detcal_edit.setText(state.detcal_file)
         self._check_and_set_lineedit_content(self._content.ei_guess_edit, 
                                              state.incident_energy_guess)
         self._content.use_ei_guess_chkbox.setChecked(state.use_ei_guess)
@@ -120,6 +128,7 @@ class SampleSetupWidget(BaseWidget):
         """
         s = SampleSetupScript()
         s.sample_file = self._content.sample_edit.text()
+        s.detcal_file = self._content.detcal_edit.text()
         s.incident_energy_guess = self._content.ei_guess_edit.text()
         s.use_ei_guess = self._content.use_ei_guess_chkbox.isChecked()
         s.tzero_guess = util._check_and_get_float_line_edit(self._content.tzero_guess_edit)
