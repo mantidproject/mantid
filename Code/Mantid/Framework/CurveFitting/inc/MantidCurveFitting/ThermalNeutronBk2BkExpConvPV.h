@@ -66,6 +66,10 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     /// Get peak parameters
     double getPeakParameters(std::string);
 
+    /// Calculate peak parameters (alpha, beta, sigma2..)
+    void calculateParameters(double& tof_h, double& eta, double& alpha, double& beta, double& H,
+                             double &sigma2, double& gamma, double &N, bool explicitoutput) const;
+
   protected:
 
     virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
@@ -94,7 +98,7 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
 
     /// Calculate peak profile I(TOF) = Omega(TOF)
     double calOmega(double x, double eta, double N, double alpha, double beta, double H,
-        double sigma2, double invert_sqrt2sigma) const;
+        double sigma2, double invert_sqrt2sigma, bool explicitoutput=true) const;
 
     /*
      * Set 2 functions to be hidden from client

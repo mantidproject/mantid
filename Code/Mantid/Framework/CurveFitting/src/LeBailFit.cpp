@@ -10,9 +10,13 @@
 #include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidCurveFitting/BoundaryConstraint.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
+
+using namespace std;
 
 namespace Mantid
 {
@@ -119,6 +123,12 @@ void LeBailFit::init()
     // Pattern calcualtion
     this->declareProperty("PlotIndividualPeaks", false, "Option to output each individual peak in mode Calculation.");
 
+    // Minimizer
+    std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys(); // :Instance().getKeys();
+    declareProperty("Minimizer","Levenberg-MarquardtMD",
+                    Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(minimizerOptions)),
+                    "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Kernel::Direction::InOut);
+
     return;
 }
 
@@ -126,206 +136,144 @@ void LeBailFit::init()
  */
 void LeBailFit::exec()
 {
-    // 1. Get input and perform some check
-    // a) Data workspace and do crop
-    //    Import
-    API::MatrixWorkspace_sptr inpWS = this->getProperty("InputWorkspace");
+  // 1. Get input and perform some check
+  // a) Import data workspace and related, do crop
+  API::MatrixWorkspace_sptr inpWS = this->getProperty("InputWorkspace");
 
-    int tempindex = this->getProperty("WorkspaceIndex");
-    if (tempindex < 0)
-        throw std::invalid_argument("Input workspace index cannot be negative.");
-    size_t workspaceindex = size_t(tempindex);
+  int tempindex = this->getProperty("WorkspaceIndex");
+  if (tempindex < 0)
+    throw std::invalid_argument("Input workspace index cannot be negative.");
+  size_t workspaceindex = size_t(tempindex);
 
-    /// Check and/or process inputs
-    if (workspaceindex >= inpWS->getNumberHistograms())
-    {
-        g_log.error() << "Input WorkspaceIndex " << workspaceindex << " is out of boundary [0, "
-                      << inpWS->getNumberHistograms() << ")" << std::endl;
-        throw std::invalid_argument("Invalid input workspace index. ");
-    }
+  if (workspaceindex >= inpWS->getNumberHistograms())
+  {
+    // throw if workspace index is not correct
+    g_log.error() << "Input WorkspaceIndex " << workspaceindex << " is out of boundary [0, "
+                  << inpWS->getNumberHistograms() << ")" << std::endl;
+    throw std::invalid_argument("Invalid input workspace index. ");
+  }
 
-    g_log.debug() << "DB1113: Input Data(Workspace) Range: " << inpWS->dataX(workspaceindex)[0] << ", "
-                  << inpWS->dataX(workspaceindex).back() << std::endl;
+  // Crop workspace
+  g_log.debug() << "DB1113A: Original input Data(Workspace, before cropping) Range: " << inpWS->dataX(workspaceindex)[0] << ", "
+                << inpWS->dataX(workspaceindex).back() << std::endl;
 
-    /// Crop workspace
-    dataWS = this->cropWorkspace(inpWS, workspaceindex);
+  dataWS = this->cropWorkspace(inpWS, workspaceindex);
 
-    // b) Peak parameters and etc.
-    parameterWS = this->getProperty("InputParameterWorkspace");
-    reflectionWS = this->getProperty("InputHKLWorkspace");
-    mPeakRadius = this->getProperty("PeakRadius");
+  g_log.debug() << "DB1113B: Processed input Data(Workspace, after cropping) Range: " << inpWS->dataX(workspaceindex)[0] << ", "
+                << inpWS->dataX(workspaceindex).back() << std::endl;
 
-    // 2. Determine Functionality
-    std::string function = this->getProperty("Function");
-    int functionmode = 0; // calculation
-    if (function.compare("Calculation") == 0)
-    {
-        // peak calculation
-        functionmode = 1;
-    }
-    else if (function.compare("CalculateBackground") == 0)
-    {
-        // automatic background points selection
-        functionmode = 2;
-    }
+  // b) Minimizer
+  std::string minim = getProperty("Minimizer");
+  mMinimizer = minim;
 
-    // 3. Import parameters from table workspace
-    this->importParametersTable();
-    this->importReflections();
+  // c) Peak parameters and related.
+  parameterWS = this->getProperty("InputParameterWorkspace");
+  reflectionWS = this->getProperty("InputHKLWorkspace");
+  mPeakRadius = this->getProperty("PeakRadius");
 
-    // 4. Create LeBail Function & initialize from input
-    // a. Peaks
-    generatePeaksFromInput(workspaceindex);
+  // d) Determine Functionality (function mode)
+  std::string function = this->getProperty("Function");
+  int functionmode = 0; // Default: LeBailFit
+  if (function.compare("Calculation") == 0)
+  {
+    // peak calculation
+    functionmode = 1;
+  }
+  else if (function.compare("CalculateBackground") == 0)
+  {
+    // automatic background points selection
+    functionmode = 2;
+  }
 
-    // b. Background
-    std::string backgroundtype = this->getProperty("BackgroundType");
-    std::vector<double> bkgdorderparams = this->getProperty("BackgroundParameters");
-    DataObjects::TableWorkspace_sptr bkgdparamws = this->getProperty("BackgroundParametersWorkspace");
-    if (!bkgdparamws)
-    {
-        std::cout << "DBx327 Use background specified with vector. " << std::endl;
-    }
-    else
-    {
-        std::cout << "DBx327 Use background specified by table workspace. " << std::endl;
-        parseBackgroundTableWorkspace(bkgdparamws, bkgdorderparams);
-    }
-    mBackgroundFunction = generateBackgroundFunction(backgroundtype, bkgdorderparams);
+  // 2. Import parameters from table workspace
+  this->importParametersTable();
+  this->importReflections();
 
-    // c. Create CompositeFunction
-    API::CompositeFunction compfunction;
-    mLeBailFunction = boost::make_shared<API::CompositeFunction>(compfunction);
+  // 3. Create LeBail Function & initialize from input
+  // a. All individual peaks
+  bool inputparamcorrect = generatePeaksFromInput(workspaceindex);
 
-    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator mit;
-    for (mit = mPeaks.begin(); mit != mPeaks.end(); ++ mit)
-    {
-        mLeBailFunction->addFunction(mit->second);
-    }
-    mLeBailFunction->addFunction(mBackgroundFunction);
+  // b. Background
+  std::string backgroundtype = this->getProperty("BackgroundType");
+  std::vector<double> bkgdorderparams = this->getProperty("BackgroundParameters");
+  DataObjects::TableWorkspace_sptr bkgdparamws = this->getProperty("BackgroundParametersWorkspace");
+  if (!bkgdparamws)
+  {
+    g_log.information() << "DBx327 Use background specified with vector. " << std::endl;
+  }
+  else
+  {
+    g_log.information() << "DBx327 Use background specified by table workspace. " << std::endl;
+    parseBackgroundTableWorkspace(bkgdparamws, bkgdorderparams);
+  }
+  mBackgroundFunction = generateBackgroundFunction(backgroundtype, bkgdorderparams);
 
-    g_log.information() << "LeBail Composite Function: " << mLeBailFunction->asString() << std::endl;
+  // c. Create CompositeFunction
+  API::CompositeFunction compfunction;
+  mLeBailFunction = boost::make_shared<API::CompositeFunction>(compfunction);
 
-    // 5. Create output workspace
-    size_t nspec = 4;
-    if (functionmode == 0)
-    {
-        // Lebail Fit mode
-        // (0) final calculated result (1) original data (2) difference
-        // (3) fitted pattern w/o background
-        // (4) background (being fitted after peak)
-        // (5) calculation based on input only (no fit)
-        // (6) background (input)
-        nspec = 7;
-    }
-    else if (functionmode == 1)
-    {
-        // Calcualtion mode
-        // (0) Data
-        // (1) Calculation (LeBail)
-        // (2) Difference
-        // (3) Calculation w/o background
-        // (4) Background
-        // (5+) One spectrum for each peak
+  std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator mit;
+  for (mit = mPeaks.begin(); mit != mPeaks.end(); ++ mit)
+  {
+    mLeBailFunction->addFunction(mit->second);
+  }
+  mLeBailFunction->addFunction(mBackgroundFunction);
 
-        nspec = 5;
-        bool plotindpeak = this->getProperty("PlotIndividualPeaks");
-        if (plotindpeak)
-            nspec += mPeaks.size();
-    }
-    else if (functionmode == 2)
-    {
-        // Background calculation mode
-        nspec = 3;
-    }
+  g_log.information() << "LeBail Composite Function: " << mLeBailFunction->asString() << std::endl;
 
-    size_t nbin = dataWS->dataX(workspaceindex).size();
-    outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-                API::WorkspaceFactory::Instance().create("Workspace2D", nspec, nbin, nbin));
-    for (size_t i = 0; i < nbin; ++i)
-    {
-      outputWS->dataX(0)[i] = dataWS->readX(workspaceindex)[i];
-      outputWS->dataY(0)[i] = dataWS->readY(workspaceindex)[i];
-    }
-    outputWS->getAxis(0)->setUnit("TOF");
-    API::TextAxis* tAxis;
+  // 5. Create output workspace
+  this->createOutputDataWorkspace(workspaceindex, functionmode);
+  this->setProperty("OutputWorkspace", outputWS);
 
-    // b) Set Axis
-    if (functionmode == 0)
-    {
-        // Fit mode
-        tAxis = new API::TextAxis(7);
-        tAxis->setLabel(0, "Data");
-        tAxis->setLabel(1, "Calc");
-        tAxis->setLabel(2, "Diff");
-        tAxis->setLabel(3, "CalcNoBkgd");
-        tAxis->setLabel(4, "OutBkgd");
-        tAxis->setLabel(5, "InpCalc");
-        tAxis->setLabel(6, "InBkgd");
-    }
-    else if (functionmode == 1)
-    {
-        // Calculation (Le Bail) mode
-        tAxis = new API::TextAxis(nspec);
-        tAxis->setLabel(0, "Data");
-        tAxis->setLabel(1, "Calc");
-        tAxis->setLabel(2, "Diff");
-        tAxis->setLabel(3, "CalcNoBkgd");
-        tAxis->setLabel(4, "Bkgd");
-        for (size_t i = 0; i < (nspec-5); ++i)
-        {
-            std::stringstream ss;
-            ss << "Peak_" << i;
-            tAxis->setLabel(5+i, ss.str());
-        }
-    }
-    else if (functionmode == 2)
-    {
-        // Background mode
-        tAxis = new API::TextAxis(3);
-        tAxis->setLabel(0, "Data");
-        tAxis->setLabel(1, "Background");
-        tAxis->setLabel(2, "DataNoBackground");
-    }
+  // 6. Real work
+  mLeBaiLFitChi2 = -1; // Initialize
 
-    outputWS->replaceAxis(1, tAxis);
-
-    this->setProperty("OutputWorkspace", outputWS);
-
-    // 6. Real work
-    mLeBaiLFitChi2 = -1; // Initialize
-
-    switch (functionmode)
-    {
+  switch (functionmode)
+  {
     case 0:
-        // LeBail Fit
-        g_log.notice() << "Function: Do LeBail Fit." << std::endl;
+      // LeBail Fit
+      g_log.notice() << "Function: Do LeBail Fit." << std::endl;
+      if (inputparamcorrect)
+      {
         doLeBailFit(workspaceindex);
-        break;
+      }
+      else
+      {
+        fakeOutputData(workspaceindex, functionmode);
+      }
+      break;
 
     case 1:
-        // Calculation
-        g_log.notice() << "Function: Pattern Calculation." << std::endl;
+      // Calculation
+      g_log.notice() << "Function: Pattern Calculation." << std::endl;
+      if (inputparamcorrect)
+      {
         calculatePattern(workspaceindex);
-        break;
+      }
+      else
+      {
+        fakeOutputData(workspaceindex, functionmode);
+      }
+      break;
 
     case 2:
-        // Calculating background
-        g_log.notice() << "Function: Calculate Background (Precisely). " << std::endl;
-        calBackground(workspaceindex);
-        break;
+      // Calculating background
+      g_log.notice() << "Function: Calculate Background (Precisely). " << std::endl;
+      calBackground(workspaceindex);
+      break;
 
     default:
-        // Impossible
-        g_log.warning() << "FunctionMode = " << functionmode <<".  It is not possible" << std::endl;
-        break;
-    }    
+      // Impossible
+      g_log.warning() << "FunctionMode = " << functionmode <<".  It is not possible" << std::endl;
+      break;
+  }
 
-    // 7. Output peak (table) workspace
-    exportEachPeaksParameters();
+  // 7. Output peak (table) workspace
+  exportEachPeaksParameters();
 
-    exportParametersWorkspace(mFuncParameters);
+  exportParametersWorkspace(mFuncParameters);
 
-    return;
+  return;
 }
 
 
@@ -339,14 +287,16 @@ void LeBailFit::exec()
  */
 void LeBailFit::calculatePattern(size_t workspaceindex)
 {
-    // 1. Generate domain and value
-    const std::vector<double> x = dataWS->readX(workspaceindex);
-    API::FunctionDomain1DVector domain(x);
-    API::FunctionValues values(domain);
 
-    // 2. Calculate diffraction pattern
-    bool useinputpeakheights = this->getProperty("UseInputPeakHeights");
-    this->calculateDiffractionPattern(workspaceindex, domain, values, mFuncParameters, !useinputpeakheights);
+
+  // 1. Generate domain and value
+  const std::vector<double> x = dataWS->readX(workspaceindex);
+  API::FunctionDomain1DVector domain(x);
+  API::FunctionValues values(domain);
+
+  // 2. Calculate diffraction pattern
+  bool useinputpeakheights = this->getProperty("UseInputPeakHeights");
+  this->calculateDiffractionPattern(workspaceindex, domain, values, mFuncParameters, !useinputpeakheights);
 
     // 3. For X of first 4
     for (size_t isp = 0; isp < 5; ++isp)
@@ -401,13 +351,59 @@ void LeBailFit::calculatePattern(size_t workspaceindex)
     return;
 }
 
+
+/** Fake calculated pattern
+  */
+void LeBailFit::fakeOutputData(size_t workspaceindex, int functionmode)
+{
+  // 1. Initialization
+  g_log.notice() << "Input peak parameters are incorrect.  Fake output data for function mode "
+                 << functionmode << std::endl;
+
+  if (functionmode == 2)
+  {
+    std::stringstream errmsg;
+    errmsg << "Function mode " << functionmode << " is not supported for fake output data.";
+    g_log.error() << errmsg.str() << std::endl;
+    throw std::invalid_argument(errmsg.str());
+  }
+
+  // 2. X&Y values
+  const MantidVec& IX = dataWS->readX(workspaceindex);
+  for (size_t iw = 0; iw < outputWS->getNumberHistograms(); ++iw)
+  {
+    MantidVec& X = outputWS->dataX(iw);
+    for (size_t i = 0; i < X.size(); ++i)
+    {
+      X[i] = IX[i];
+    }
+
+    MantidVec& Y = outputWS->dataY(iw);
+    if (iw == 0)
+    {
+      const MantidVec& IY = dataWS->readY(workspaceindex);
+      for (size_t i = 0; i < IY.size(); ++i)
+        Y[i] = IY[i];
+    }
+    else
+    {
+      for (size_t i = 0; i < Y.size(); ++i)
+        Y[i] = 0.0;
+    }
+
+  }
+
+  return;
+}
+
+
 /*
  * LeBail Fitting for one self-consistent iteration
  */
 void LeBailFit::doLeBailFit(size_t workspaceindex)
 {
     // 1. Get a copy of input function parameters (map)
-    std::map<std::string, std::pair<double, char> > parammap;
+    std::map<std::string, Parameter> parammap;
     parammap = mFuncParameters;
 
     // 2. Do 1 iteration of LeBail fit
@@ -536,7 +532,8 @@ void LeBailFit::calBackground(size_t workspaceindex)
         fitalg->setProperty("WorkspaceIndex", int(workspaceindex));
         fitalg->setProperty("StartX", tof_min);
         fitalg->setProperty("EndX", tof_max);
-        fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+        // fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+        fitalg->setProperty("Minimizer", mMinimizer);
         fitalg->setProperty("CostFunction", "Least squares");
         fitalg->setProperty("MaxIterations", 4000);
 
@@ -656,23 +653,23 @@ void LeBailFit::calBackground(size_t workspaceindex)
  */
 void LeBailFit::calculateDiffractionPattern(
         size_t workspaceindex, API::FunctionDomain1DVector domain, API::FunctionValues& values,
-        std::map<std::string, std::pair<double, char> > parammap, bool recalpeakintesity)
+        std::map<std::string, Parameter > parammap, bool recalpeakintesity)
 {
-    // 1. Set parameters to each peak
-    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator pit;
-    for (pit = mPeaks.begin(); pit != mPeaks.end(); ++pit)
-    {
-        int hkl2 = pit->first;
-        double peakheight = mPeakHeights[hkl2];
-        setPeakParameters(mPeaks[hkl2], parammap, peakheight);
-    }
+  // 1. Set parameters to each peak
+  std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator pit;
+  for (pit = mPeaks.begin(); pit != mPeaks.end(); ++pit)
+  {
+    int hkl2 = pit->first;
+    double peakheight = mPeakHeights[hkl2];
+    setPeakParameters(mPeaks[hkl2], parammap, peakheight);
+  }
 
-    // 2. Calculate peak intensities
-    if (recalpeakintesity)
-    {
-        // Re-calcualte peak intensity
-        std::vector<std::pair<int, double> > peakheights;
-        this->calPeaksIntensities(peakheights, workspaceindex);
+  // 2. Calculate peak intensities
+  if (recalpeakintesity)
+  {
+    // Re-calcualte peak intensity
+    std::vector<std::pair<int, double> > peakheights;
+    this->calPeaksIntensities(peakheights, workspaceindex);
 
         for (size_t ipk = 0; ipk < peakheights.size(); ++ipk)
         {
@@ -920,147 +917,193 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> gro
                                             std::vector<std::pair<double, double> > peakboundaries,
                                             std::vector<std::pair<size_t, double> >& peakintensities)
 {
-    // 1. Determine range of the peak group
-    if (groupedpeaksindexes.size() == 0)
-    {
-        std::stringstream errmsg;
-        errmsg << "DB252 Group Size = " << groupedpeaksindexes.size() << " is not allowed. " << std::endl;
-        throw std::runtime_error(errmsg.str());
-    }
-    else
-    {
-        std::cout << "DB252 Group Size = " << groupedpeaksindexes.size() << " including peak indexed " << std::endl;
-    }
+  // 1. Determine range of the peak group
+  if (groupedpeaksindexes.size() == 0)
+  {
+    std::stringstream errmsg;
+    errmsg << "DB252 Group Size = " << groupedpeaksindexes.size() << " is not allowed. " << std::endl;
+    throw std::runtime_error(errmsg.str());
+  }
+  else
+  {
+    g_log.debug() << "DB252 Group Size = " << groupedpeaksindexes.size() << " including peak indexed " << std::endl;
+  }
 
-    peakintensities.clear();
+  //   Clean output
+  peakintensities.clear();
 
-    std::vector<size_t> peaks; // index for mPeakHKL2
-    std::set<size_t>::iterator pit;
-    for (pit = groupedpeaksindexes.begin(); pit != groupedpeaksindexes.end(); ++pit)
-    {
-        peaks.push_back(*pit);
-        std::cout << "Peak index = " << *pit << std::endl;
-    }
+  std::vector<size_t> peaks; // index for mPeakHKL2
+  std::set<size_t>::iterator pit;
+  for (pit = groupedpeaksindexes.begin(); pit != groupedpeaksindexes.end(); ++pit)
+  {
+    peaks.push_back(*pit);
+    g_log.debug() << "Peak index = " << *pit << std::endl;
+  }
 
-    if (peaks.size() > 1)
-        std::sort(peaks.begin(), peaks.end());
+  if (peaks.size() > 1)
+    std::sort(peaks.begin(), peaks.end());
 
-    size_t iLeftPeak = peaks[0];
-    double leftpeakcenter = peakcenters[iLeftPeak];
-    double mostleftpeakwidth = -peakboundaries[iLeftPeak].first+peakcenters[iLeftPeak];
-    double leftbound = leftpeakcenter-PEAKRANGECONSTANT*mostleftpeakwidth;
+  size_t iLeftPeak = peaks[0];
+  double leftpeakcenter = peakcenters[iLeftPeak];
+  double mostleftpeakwidth = -peakboundaries[iLeftPeak].first+peakcenters[iLeftPeak];
+  double leftbound = leftpeakcenter-PEAKRANGECONSTANT*mostleftpeakwidth;
 
-    size_t iRightPeak = peaks.back();
-    double rightpeakcenter = peakcenters[iRightPeak];
-    double mostrightpeakwidth = peakboundaries[iRightPeak].second-peakcenters[iRightPeak];
-    double rightbound = rightpeakcenter+PEAKRANGECONSTANT*mostrightpeakwidth;
+  size_t iRightPeak = peaks.back();
+  double rightpeakcenter = peakcenters[iRightPeak];
+  double mostrightpeakwidth = peakboundaries[iRightPeak].second-peakcenters[iRightPeak];
+  double rightbound = rightpeakcenter+PEAKRANGECONSTANT*mostrightpeakwidth;
 
-    std::cout << "DB1204 Left bound = " << leftbound << " (" << iLeftPeak << "), Right bound = " << rightbound << "(" << iRightPeak << ")."
-                 << std::endl;
+  g_log.debug() << "DB1204 Left bound = " << leftbound << " (" << iLeftPeak << "), Right bound = " << rightbound << "(" << iRightPeak << ")."
+                << std::endl;
 
-    // 1.5 Return if the complete peaks' range is out side of all data (boundary)
-    if (leftbound < dataWS->readX(wsindex)[0] || rightbound > dataWS->readX(wsindex).back())
-    {
-        for (size_t i = 0; i < peaks.size(); ++i)
-        {
-            peakintensities.push_back(std::make_pair(peaks[i], 0.0));
-        }
-        return;
-    }
-
-    // 2. Obtain access of dataWS to calculate from
-    const MantidVec& datax = dataWS->readX(wsindex);
-    const MantidVec& datay = dataWS->readY(wsindex);
-    std::vector<double>::const_iterator cit;
-
-    cit = std::lower_bound(datax.begin(), datax.end(), leftbound);
-    size_t ileft = size_t(cit-datax.begin());
-    if (ileft > 0)
-        ileft -= 1;
-
-    cit = std::lower_bound(datax.begin(), datax.end(), rightbound);
-    size_t iright = size_t(cit-datax.begin());
-    if (iright < datax.size()-1)
-        iright += 1;
-
-    if (iright <= ileft)
-    {
-        g_log.error() << "Try to integrate peak from " << leftbound << " To " << rightbound << std::endl <<
-                         "  Peak boundaries : " << peakboundaries[peaks[0]].first << ", " << peakboundaries[peaks[0]].second <<
-                         "  Peak center: " << peakcenters[peaks[0]] << "  ... " << peakcenters[peaks.back()] << std::endl;
-        throw std::logic_error("iRight cannot be less or equal to iLeft.");
-    }
-    else
-    {
-        std::cout << "DB452 Integrate peak from " << leftbound << "/" <<
-                         ileft << " To " << rightbound << "/" << iright << std::endl;
-    }
-
-    // 3. Integrate
-    size_t ndata = iright - ileft + 1;
-    std::vector<double>::const_iterator xbegin = datax.begin()+ileft;
-    std::vector<double>::const_iterator xend;
-    if (iright+1 <= datax.size()-1)
-        xend = datax.begin()+iright+1;
-    else
-        xend = datax.end();
-    std::vector<double> reddatax(xbegin, xend); // reduced-size data x
-
-    std::cout << "DBx356:  ndata = " << ndata << " Reduced data range: " << reddatax[0] << ", " << reddatax.back() << std::endl;
-
-    API::FunctionDomain1DVector xvalues(reddatax);
-    std::vector<double> sumYs;
-    sumYs.reserve(xvalues.size());
-
-    for (size_t iy = 0; iy < xvalues.size(); ++iy)
-    {
-        sumYs.push_back(0.0);
-    }
-
-    std::vector<API::FunctionValues> peakvalues;
-    std::vector<API::FunctionValues> bkgdvalues;
-
+  // 1.5 Return if the complete peaks' range is out side of all data (boundary)
+  if (leftbound < dataWS->readX(wsindex)[0] || rightbound > dataWS->readX(wsindex).back())
+  {
     for (size_t i = 0; i < peaks.size(); ++i)
     {
-        size_t peakindex = peaks[i];
-        int hkl2 = mPeakHKL2[peakindex];
-        std::cout << "DBx359  Peak " << peakindex << ": (HKL)^2 = " << hkl2 << std::endl;
-        CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr ipeak = mPeaks[hkl2];
-        if (!ipeak)
-            throw std::runtime_error("Not a peak function at all. ");
-        API::FunctionValues yvalues(xvalues);
-        API::FunctionValues bvalues(xvalues);
-
-        ipeak->function(xvalues, yvalues);
-        peakvalues.push_back(yvalues);
-
-        mBackgroundFunction->function(xvalues, bvalues);
-        bkgdvalues.push_back(bvalues);
-
-        for (size_t j = 0; j < ndata; ++j)
-        {
-            sumYs[j] += yvalues[j];
-        }
+      peakintensities.push_back(std::make_pair(peaks[i], 0.0));
     }
-
-    // 3. Calculate intensity for each peak
-    for (size_t i = 0; i < peaks.size(); ++i)
-    {
-        double intensity = 0.0;
-        for (size_t j = 0; j < sumYs.size(); ++j)
-        {
-            if (sumYs[j] > 1.0E-5)
-            {
-                // Remove background from observed data
-                double temp = (datay[ileft+j]-bkgdvalues[i][j])*peakvalues[i][j]/sumYs[j];
-                intensity += temp*(datax[ileft+j+1]-datax[ileft+j]);
-            }
-        }
-        peakintensities.push_back(std::make_pair(peaks[i], intensity));
-        std::cout << "DBx406 Result Per Group: Peak " << peaks[i] << "  Height = " << intensity << std::endl;
-    }
-
     return;
+  }
+
+  // 2. Obtain access of dataWS to calculate from
+  const MantidVec& datax = dataWS->readX(wsindex);
+  const MantidVec& datay = dataWS->readY(wsindex);
+  std::vector<double>::const_iterator cit;
+
+  cit = std::lower_bound(datax.begin(), datax.end(), leftbound);
+  size_t ileft = size_t(cit-datax.begin());
+  if (ileft > 0)
+    ileft -= 1;
+
+  cit = std::lower_bound(datax.begin(), datax.end(), rightbound);
+  size_t iright = size_t(cit-datax.begin());
+  if (iright < datax.size()-1)
+    iright += 1;
+
+  if (iright <= ileft)
+  {
+    g_log.error() << "Try to integrate peak from " << leftbound << " To " << rightbound << std::endl <<
+                     "  Peak boundaries : " << peakboundaries[peaks[0]].first << ", " << peakboundaries[peaks[0]].second <<
+                     "  Peak center: " << peakcenters[peaks[0]] << "  ... " << peakcenters[peaks.back()] << std::endl;
+    throw std::logic_error("iRight cannot be less or equal to iLeft.");
+  }
+  else
+  {
+    g_log.debug() << "DB452 Integrate peak from " << leftbound << "/"
+                  << ileft << " To " << rightbound << "/" << iright << std::endl;
+  }
+
+  // 3. Integrate
+  size_t ndata = iright - ileft + 1;
+  std::vector<double>::const_iterator xbegin = datax.begin()+ileft;
+  std::vector<double>::const_iterator xend;
+  if (iright+1 <= datax.size()-1)
+    xend = datax.begin()+iright+1;
+  else
+    xend = datax.end();
+  std::vector<double> reddatax(xbegin, xend); // reduced-size data x
+
+  g_log.debug() << "DBx356:  ndata = " << ndata << " Reduced data range: " << reddatax[0] << ", " << reddatax.back() << std::endl;
+
+  API::FunctionDomain1DVector xvalues(reddatax);
+  std::vector<double> sumYs;
+  sumYs.reserve(xvalues.size());
+
+  for (size_t iy = 0; iy < xvalues.size(); ++iy)
+  {
+    sumYs.push_back(0.0);
+  }
+
+  std::vector<API::FunctionValues> peakvalues;
+  std::vector<API::FunctionValues> bkgdvalues;
+
+  // Integrate each peak
+  for (size_t i = 0; i < peaks.size(); ++i)
+  {
+    size_t peakindex = peaks[i];
+    int hkl2 = mPeakHKL2[peakindex];
+    CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr ipeak = mPeaks[hkl2];
+    if (!ipeak)
+      throw std::runtime_error("Not a peak function at all. ");
+    API::FunctionValues yvalues(xvalues);
+    API::FunctionValues bvalues(xvalues);
+
+    ipeak->function(xvalues, yvalues);
+    peakvalues.push_back(yvalues);
+
+    mBackgroundFunction->function(xvalues, bvalues);
+    bkgdvalues.push_back(bvalues);
+
+    g_log.information() << "DBx359 Integrate Peak " << peakindex << ": (HKL)^2 = " << hkl2
+                        << " TOF_h = " << ipeak->centre() << " within [" << xvalues[0]
+                        << ", " << xvalues[xvalues.size()-1] << "]" << std::endl;
+
+    for (size_t j = 0; j < ndata; ++j)
+    {
+      if (yvalues[j] < DBL_MAX && yvalues[j] > DBL_MIN)
+      {
+        sumYs[j] += yvalues[j];
+      }
+      else
+      {
+        g_log.error() << "Error1030 Peak value @ " << xvalues[j] << " is infinity.  Peak's FWHM = "
+                      << ipeak->fwhm() << ", Height = " << ipeak->height() << std::endl;
+        sumYs[j] += yvalues[j];
+      }
+    }
+  }
+
+  // 3. Calculate intensity for each peak
+  for (size_t i = 0; i < peaks.size(); ++i)
+  {
+    double intensity = 0.0;
+
+    for (size_t j = 0; j < sumYs.size(); ++j)
+    {
+      if (sumYs[j] > 1.0E-5)
+      {
+        // Remove background from observed data
+        double temp;
+        if (sumYs[j] > 1.0E-5)
+        {
+          temp = (datay[ileft+j]-bkgdvalues[i][j])*peakvalues[i][j]/sumYs[j];
+        }
+        else
+        {
+          temp = 0.0;
+        }
+
+        intensity += temp*(datax[ileft+j+1]-datax[ileft+j]);
+
+        if (intensity != intensity)
+        {
+          // case of NaN
+          g_log.warning() << "Unphysical intensity.  Temp = " << temp << "  SumY = " << sumYs[j]
+                          << "  Peak value = " << peakvalues[i][j] << " Data = " << datay[ileft+j]
+                          << "  Background = " << bkgdvalues[i][j] << std::endl;
+        }
+      }
+    } // FOR: j
+
+    // b) Check intensity
+    if (intensity < 0.0)
+    {
+      intensity = 0.0;
+    }
+
+    peakintensities.push_back(std::make_pair(peaks[i], intensity));
+    g_log.debug() << "DBx406 Result Per Group: Peak " << peaks[i] << "  Height = " << intensity << std::endl;
+  }
+
+  std::stringstream msg;
+  for (size_t i = 0; i < peakintensities.size(); ++i)
+  {
+    msg << "P" << i << " = " << peakintensities[i].second << "; ";
+  }
+  g_log.information() << msg.str() << std::endl;
+
+  return;
 }
 
 /*
@@ -1068,10 +1111,10 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> gro
  */
 void LeBailFit::setPeakParameters(
         CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak,
-        std::map<std::string, std::pair<double, char> > parammap, double peakheight)
+        std::map<std::string, Parameter> parammap, double peakheight)
 {
     // 1. Set parameters ...
-    std::map<std::string, std::pair<double, char> >::iterator pit;
+    std::map<std::string, Parameter>::iterator pit;
 
     std::vector<std::string> lebailparnames = peak->getParameterNames();
     std::sort(lebailparnames.begin(), lebailparnames.end());
@@ -1080,7 +1123,7 @@ void LeBailFit::setPeakParameters(
     for (pit = parammap.begin(); pit != parammap.end(); ++pit)
     {
         std::string parname = pit->first;
-        double value = pit->second.first;
+        double value = pit->second.value;
 
         // char fitortie = pit->second.second;
 
@@ -1113,7 +1156,7 @@ void LeBailFit::setPeakParameters(
  * a) Calculate pattern for peak intensities
  * b) Set peak intensities
  */
-bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, std::pair<double, char> >& parammap)
+bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, Parameter>& parammap)
 {
     // 1. Generate domain and value
     const std::vector<double> x = dataWS->readX(workspaceindex);
@@ -1158,146 +1201,167 @@ bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, std::
  */
 void LeBailFit::setLeBailFitParameters()
 {
-    // 1. Set up all the peaks' parameters... tie to a constant value.. or fit by tieing same parameters of among peaks
-    std::map<std::string, std::pair<double, char> >::iterator pariter;    
-    for (pariter = mFuncParameters.begin(); pariter != mFuncParameters.end(); ++pariter)
+  // 1. Set up all the peaks' parameters... tie to a constant value.. or fit by tieing same parameters of among peaks
+  std::map<std::string, Parameter>::iterator pariter;
+  for (pariter = mFuncParameters.begin(); pariter != mFuncParameters.end(); ++pariter)
+  {
+    Parameter funcparam = pariter->second;
+
+    g_log.debug() << "Step 1:  Set peak parameter " << funcparam.name << std::endl;
+
+    std::string parname = pariter->first;
+    double parvalue = funcparam.value;
+    bool tofit = funcparam.fit;
+
+    // a) Check whether it is a parameter used in Peak
+    std::vector<std::string>::iterator sit;
+    sit = std::find(mPeakParameterNames.begin(), mPeakParameterNames.end(), parname);
+    if (sit == mPeakParameterNames.end())
     {
-        std::string parname = pariter->first;
-        double parvalue = pariter->second.first;
-        char fitortie = pariter->second.second;
+      // Not a peak profile parameter
+      g_log.debug() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak. " << std::endl;
+      continue;
+    }
 
-        // a) Check whether it is a parameter used in Peak
-        std::vector<std::string>::iterator sit;
-        sit = std::find(mPeakParameterNames.begin(), mPeakParameterNames.end(), parname);
-        if (sit == mPeakParameterNames.end())
-        {
-            // Not there
-            g_log.debug() << "Unable to tie parameter " << parname << " b/c it is not a parameter for peak. " << std::endl;
-            continue;
-        }
-
-        if (fitortie == 't')
-        {
-            // a) Tie the value to a constant number
-            std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator piter;
-            size_t peakindex = 0;
-            for (piter = mPeaks.begin(); piter != mPeaks.end(); ++piter)
-            {
-                std::stringstream ss1, ss2;
-                ss1 << "f" << peakindex << "." << parname;
-                ss2 << parvalue;
-                std::string tiepart1 = ss1.str();
-                std::string tievalue = ss2.str();
-                mLeBailFunction->tie(tiepart1, tievalue);
-                g_log.debug() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
-
-                ++ peakindex;
-            } // For each peak
-        }
-        else
-        {
-            // b) Tie the values among all peaks, but will fit
-            for (size_t ipk = 1; ipk < mPeaks.size(); ++ipk)
-            {
-                std::stringstream ss1, ss2;
-                ss1 << "f" << (ipk-1) << "." << parname;
-                ss2 << "f" << ipk << "." << parname;
-                std::string tiepart1 = ss1.str();
-                std::string tiepart2 = ss2.str();
-                mLeBailFunction->tie(tiepart1, tiepart2);
-                g_log.debug() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /" << std::endl;
-            }
-        }
-    } // FOR-Function Parameters
-
-    // 1B Set 'Height' to be fixed
-    std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator peakiter;
-    size_t peakindex = 0;
-    for (peakiter = mPeaks.begin(); peakiter != mPeaks.end(); ++peakiter)
+    if (!tofit)
     {
-        // a. Get peak height
-        std::string parname("Height");
-        double parvalue = peakiter->second->getParameter(parname);
-
+      // a) Tie the value to a constant number
+      std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator piter;
+      size_t peakindex = 0;
+      for (piter = mPeaks.begin(); piter != mPeaks.end(); ++piter)
+      {
         std::stringstream ss1, ss2;
         ss1 << "f" << peakindex << "." << parname;
         ss2 << parvalue;
         std::string tiepart1 = ss1.str();
         std::string tievalue = ss2.str();
         mLeBailFunction->tie(tiepart1, tievalue);
-
-        ++peakindex;
-
         g_log.debug() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
 
-    } // For each peak
-
-    // 2. Tie all background paramters to constants/current values
-    size_t funcindex = mPeaks.size();
-    std::vector<std::string> bkgdparnames = mBackgroundFunction->getParameterNames();
-    for (size_t ib = 0; ib < bkgdparnames.size(); ++ib)
-    {
-        std::string parname = bkgdparnames[ib];
-        double parvalue = mBackgroundFunction->getParameter(parname);
-        std::stringstream ss1, ss2;
-        ss1 << "f" << funcindex << "." << parname;
-        ss2 << parvalue;
-        std::string tiepart1 = ss1.str();
-        std::string tievalue = ss2.str();
-        mLeBailFunction->tie(tiepart1, tievalue);
-        g_log.debug() << "LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
+        ++ peakindex;
+      } // For each peak
     }
+    else
+    {
+      // b) Tie the values among all peaks, but will fit
+      for (size_t ipk = 1; ipk < mPeaks.size(); ++ipk)
+      {
+        std::stringstream ss1, ss2;
+        ss1 << "f" << (ipk-1) << "." << parname;
+        ss2 << "f" << ipk << "." << parname;
+        std::string tiepart1 = ss1.str();
+        std::string tiepart2 = ss2.str();
+        mLeBailFunction->tie(tiepart1, tiepart2);
+        g_log.debug() << "LeBailFit.  Fit(Tie) / " << tiepart1 << " / " << tiepart2 << " /" << std::endl;
+      }
 
-    return;
+      // c) Set the constraint
+      std::stringstream parss;
+      parss << "f0." << parname;
+      string parnamef0 = parss.str();
+      CurveFitting::BoundaryConstraint* bc = new BoundaryConstraint(mLeBailFunction.get(), parnamef0, funcparam.minvalue, funcparam.maxvalue);
+      mLeBailFunction->addConstraint(bc);
+    }
+  } // FOR-Function Parameters
+
+  // 1B Set 'Height' to be fixed
+  std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator peakiter;
+  size_t peakindex = 0;
+  for (peakiter = mPeaks.begin(); peakiter != mPeaks.end(); ++peakiter)
+  {
+    // a. Get peak height
+    std::string parname("Height");
+    double parvalue = peakiter->second->getParameter(parname);
+
+    std::stringstream ss1, ss2;
+    ss1 << "f" << peakindex << "." << parname;
+    ss2 << parvalue;
+    std::string tiepart1 = ss1.str();
+    std::string tievalue = ss2.str();
+
+    g_log.debug() << "Step 1B: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
+
+    mLeBailFunction->tie(tiepart1, tievalue);
+
+    ++peakindex;
+
+  } // For each peak
+
+  // 2. Tie all background paramters to constants/current values
+  size_t funcindex = mPeaks.size();
+  std::vector<std::string> bkgdparnames = mBackgroundFunction->getParameterNames();
+  for (size_t ib = 0; ib < bkgdparnames.size(); ++ib)
+  {
+    std::string parname = bkgdparnames[ib];
+    double parvalue = mBackgroundFunction->getParameter(parname);
+    std::stringstream ss1, ss2;
+    ss1 << "f" << funcindex << "." << parname;
+    ss2 << parvalue;
+    std::string tiepart1 = ss1.str();
+    std::string tievalue = ss2.str();
+
+    g_log.debug() << "Step 2: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
+
+    mLeBailFunction->tie(tiepart1, tievalue);
+  }
+
+  return;
 }
 
 /** Fit LeBailFunction by calling Fit()
   * Be called after all functions in LeBailFunction (composite) are set up (tie, constrain)
   * Output: a parameter name-value map
  */
-bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, std::pair<double, char> > &parammap)
+bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, Parameter> &parammap)
 {
-    // 1. Prepare fitting boundary parameters.
-    double tof_min = dataWS->dataX(workspaceindex)[0];
-    double tof_max = dataWS->dataX(workspaceindex).back();
-    std::vector<double> fitrange = this->getProperty("FitRegion");
-    if (fitrange.size() == 2 && fitrange[0] < fitrange[1])
-    {
-        // Properly defined
-        tof_min = fitrange[0];
-        tof_max = fitrange[1];
-    }
+  // 1. Prepare fitting boundary parameters.
+  double tof_min = dataWS->dataX(workspaceindex)[0];
+  double tof_max = dataWS->dataX(workspaceindex).back();
+  std::vector<double> fitrange = this->getProperty("FitRegion");
+  if (fitrange.size() == 2 && fitrange[0] < fitrange[1])
+  {
+    // Properly defined
+    tof_min = fitrange[0];
+    tof_max = fitrange[1];
+  }
 
-    // 2. Call Fit to fit LeBail function.
-    // a) Initialize
-    std::string fitoutputwsrootname("xLeBailOutput");
+  // 2. Call Fit to fit LeBail function.
+  // a) Initialize
+  std::string fitoutputwsrootname("xLeBailOutput");
 
-    API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", 0.0, 0.2, true);
-    fitalg->initialize();
+  API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", 0.0, 0.2, true);
+  fitalg->initialize();
 
-    g_log.information() << "Function To Fit: " << mLeBailFunction->asString() << std::endl;
+  g_log.information() << "[Before Fit] Function To Fit: " << mLeBailFunction->asString() << std::endl;
 
-    // b) Set property
-    fitalg->setProperty("Function", boost::shared_ptr<API::IFunction>(mLeBailFunction));
-    fitalg->setProperty("InputWorkspace", dataWS);
-    fitalg->setProperty("WorkspaceIndex", int(workspaceindex));
-    fitalg->setProperty("StartX", tof_min);
-    fitalg->setProperty("EndX", tof_max);
-    fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
-    fitalg->setProperty("CostFunction", "Least squares");
-    fitalg->setProperty("MaxIterations", 1000);
-    fitalg->setProperty("CreateOutput", true);
-    fitalg->setProperty("Output", fitoutputwsrootname);
-    fitalg->setProperty("CalcErrors", true);
+  // b) Set property
+  fitalg->setProperty("Function", boost::shared_ptr<API::IFunction>(mLeBailFunction));
+  fitalg->setProperty("InputWorkspace", dataWS);
+  fitalg->setProperty("WorkspaceIndex", int(workspaceindex));
+  fitalg->setProperty("StartX", tof_min);
+  fitalg->setProperty("EndX", tof_max);
+  fitalg->setProperty("Minimizer", mMinimizer);
+  // fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+  fitalg->setProperty("CostFunction", "Least squares");
+  fitalg->setProperty("MaxIterations", 1000);
+  fitalg->setProperty("CreateOutput", true);
+  fitalg->setProperty("Output", fitoutputwsrootname);
+  fitalg->setProperty("CalcErrors", true);
 
-    // c) Execute
-    bool successfulfit = fitalg->execute();
-    if (!fitalg->isExecuted() || ! successfulfit)
-    {
-        // Early return due to bad fit
-        g_log.error() << "Fitting to LeBail function failed. " << std::endl;
-        return false;
-    }
+  g_log.information() << "[Property Set]" << std::endl;
+
+  // c) Execute
+  bool successfulfit = fitalg->execute();
+  if (!fitalg->isExecuted() || ! successfulfit)
+  {
+    // Early return due to bad fit
+    g_log.error() << "Fitting to LeBail function failed. " << std::endl;
+    return false;
+  }
+  else
+  {
+    g_log.information() << "[Fit Le Bail Function] Fitting successful. " << std::endl;
+  }
 
     mLeBaiLFitChi2 = fitalg->getProperty("OutputChi2overDoF");
     std::string fitstatus = fitalg->getProperty("OutputStatus");
@@ -1348,37 +1412,22 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
             mFuncParameterErrors.insert(std::make_pair(parname, error));
 
             // Output
-            if (parammap[results[1]].second == 'f')
+            std::string parnamex = results[1];
+            if (parammap[parnamex].fit)
             {
-                // Fit
-                parammap[results[1]] = std::make_pair(curvalue, 'f');
-                g_log.information() << "  [Fitting Result] Parameter " << results[1] << " = " << curvalue
-                                    << ", parameter chi^2 = " << error << std::endl;
+              // Fit
+              parammap[parnamex].value = curvalue;
+              parammap[parnamex].fit = true;
+              // parammap[parname] = std::make_pair(curvalue, 'f');
+              g_log.information() << "  [Fitting Result] Parameter " << parnamex << " = " << curvalue
+                                  << ", parameter chi^2 = " << error << std::endl;
             }
             else
             {
-                g_log.warning() << " [Fitting Result] Parameter " << results[1] << " is not set to refine.  "
+                g_log.warning() << " [Fitting Result] Parameter " << parnamex << " is not set to refine.  "
                                 << "But its chi^2 =" << error << std::endl;
             }
         }
-
-        // Note: result[0] = f0, result[1] = parameter name
-        /*
-        if (results[0].compare("f0") == 0)
-        {
-            g_log.debug() << "DB216 Parameter " << results[1] << ": " << curvalue << std::endl;
-
-            // Set to parammap
-            if (parammap[results[1]].second == 'f')
-            {
-                // Fit
-                parammap[results[1]] = std::make_pair(curvalue, 'f');
-                g_log.information() << "  [Fitting Result] Parameter " << results[1] << " = " << curvalue
-                                    << ", parameter chi^2 = " << error << std::endl;
-            }
-        }
-        */
-
     }
 
     // c) Get parameter output workspace from it for error
@@ -1441,147 +1490,181 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, s
  */
 void LeBailFit::exportEachPeaksParameters()
 {
-    // 1. Create peaks workspace
-    DataObjects::TableWorkspace tbws;
-    DataObjects::TableWorkspace_sptr peakWS = boost::make_shared<DataObjects::TableWorkspace>(tbws);
+  // 1. Create peaks workspace
+  DataObjects::TableWorkspace tbws;
+  DataObjects::TableWorkspace_sptr peakWS = boost::make_shared<DataObjects::TableWorkspace>(tbws);
 
-    // 2. Set up peak workspace
-    peakWS->addColumn("int", "H");
-    peakWS->addColumn("int", "K");
-    peakWS->addColumn("int", "L");
-    peakWS->addColumn("double", "Height");
-    peakWS->addColumn("double", "TOF_h");
-    peakWS->addColumn("double", "Alpha");
-    peakWS->addColumn("double", "Beta");
-    peakWS->addColumn("double", "Sigma2");
-    peakWS->addColumn("double", "Gamma");
-    peakWS->addColumn("double", "FWHM");
-    peakWS->addColumn("int", "PeakGroup");
-    peakWS->addColumn("double", "Chi^2");
-    peakWS->addColumn("str", "FitStatus");
+  // 2. Set up peak workspace
+  peakWS->addColumn("int", "H");
+  peakWS->addColumn("int", "K");
+  peakWS->addColumn("int", "L");
+  peakWS->addColumn("double", "Height");
+  peakWS->addColumn("double", "TOF_h");
+  peakWS->addColumn("double", "Alpha");
+  peakWS->addColumn("double", "Beta");
+  peakWS->addColumn("double", "Sigma2");
+  peakWS->addColumn("double", "Gamma");
+  peakWS->addColumn("double", "FWHM");
+  peakWS->addColumn("int", "PeakGroup");
+  peakWS->addColumn("double", "Chi^2");
+  peakWS->addColumn("str", "FitStatus");
 
-    // 3. Construct a list
-    std::sort(mPeakHKL2.begin(), mPeakHKL2.end(), compDescending);
+  // 3. Construct a list
+  std::sort(mPeakHKL2.begin(), mPeakHKL2.end(), compDescending);
 
-    for (size_t ipk = 0; ipk < mPeakHKL2.size(); ++ipk)
+  for (size_t ipk = 0; ipk < mPeakHKL2.size(); ++ipk)
+  {
+    // a. Access peak function
+    int hkl2 = mPeakHKL2[ipk];
+    CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr tpeak = mPeaks[hkl2];
+
+    // b. Get peak's nature parameters
+    int h, k, l;
+    tpeak->getMillerIndex(h, k, l);
+    double tof_h = tpeak->centre();
+    double height = tpeak->height();
+    double alpha = tpeak->getPeakParameters("Alpha");
+    double beta = tpeak->getPeakParameters("Beta");
+    double sigma2 = tpeak->getPeakParameters("Sigma2");
+    double gamma = tpeak->getPeakParameters("Gamma");
+    double fwhm = tpeak->fwhm();
+
+    // c. Get peak's fitting and etc.
+    size_t peakgroupindex = mPeaks.size()+10; // Far more than max peak group index
+    std::map<int, size_t>::iterator git;
+    git = mPeakGroupMap.find(hkl2);
+    if (git != mPeakGroupMap.end())
     {
-        // a. Access peak function
-        int hkl2 = mPeakHKL2[ipk];
-        CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr tpeak = mPeaks[hkl2];
-
-        // b. Get peak's nature parameters
-        int h, k, l;
-        tpeak->getMillerIndex(h, k, l);
-        double tof_h = tpeak->centre();
-        double height = tpeak->height();
-        double alpha = tpeak->getPeakParameters("Alpha");
-        double beta = tpeak->getPeakParameters("Beta");
-        double sigma2 = tpeak->getPeakParameters("Sigma2");
-        double gamma = tpeak->getPeakParameters("Gamma");
-        double fwhm = tpeak->fwhm();
-
-        // c. Get peak's fitting and etc.
-        size_t peakgroupindex = mPeaks.size()+10; /// Far more than max peak group index
-        std::map<int, size_t>::iterator git;
-        git = mPeakGroupMap.find(hkl2);
-        if (git != mPeakGroupMap.end())
-        {
-            peakgroupindex = git->second;
-        }
-
-        double chi2 = -1.0;
-        std::string fitstatus("No Fit");
-
-        std::map<size_t, double>::iterator cit;
-        std::map<size_t, std::string>::iterator sit;
-        cit = mPeakGroupFitChi2Map.find(peakgroupindex);
-        if (cit != mPeakGroupFitChi2Map.end())
-        {
-            chi2 = cit->second;
-        }
-        sit = mPeakGroupFitStatusMap.find(peakgroupindex);
-        if (sit != mPeakGroupFitStatusMap.end())
-        {
-            fitstatus = sit->second;
-        }
-
-        /// Peak group index converted to integer
-        int ipeakgroupindex = -1;
-        if (peakgroupindex < mPeaks.size())
-        {
-            ipeakgroupindex = int(peakgroupindex);
-        }
-
-        API::TableRow newrow = peakWS->appendRow();       
-        if (tof_h < 0)
-        {
-            g_log.error() << "For peak (HKL)^2 = " << hkl2 << "  TOF_h is NEGATIVE!" << std::endl;
-        }
-        newrow << h << k << l << height << tof_h << alpha << beta << sigma2 << gamma << fwhm
-               << ipeakgroupindex << chi2 << fitstatus;
+      peakgroupindex = git->second;
     }
 
-    // 4. Set
-    this->setProperty("OutputPeaksWorkspace", peakWS);
+    double chi2 = -1.0;
+    std::string fitstatus("No Fit");
 
-    return;
+    std::map<size_t, double>::iterator cit;
+    std::map<size_t, std::string>::iterator sit;
+    cit = mPeakGroupFitChi2Map.find(peakgroupindex);
+    if (cit != mPeakGroupFitChi2Map.end())
+    {
+      chi2 = cit->second;
+    }
+    sit = mPeakGroupFitStatusMap.find(peakgroupindex);
+    if (sit != mPeakGroupFitStatusMap.end())
+    {
+      fitstatus = sit->second;
+    }
+
+    /// Peak group index converted to integer
+    int ipeakgroupindex = -1;
+    if (peakgroupindex < mPeaks.size())
+    {
+      ipeakgroupindex = int(peakgroupindex);
+    }
+
+    API::TableRow newrow = peakWS->appendRow();
+    if (tof_h < 0)
+    {
+      g_log.error() << "For peak (HKL)^2 = " << hkl2 << "  TOF_h is NEGATIVE!" << std::endl;
+    }
+    newrow << h << k << l << height << tof_h << alpha << beta << sigma2 << gamma << fwhm
+           << ipeakgroupindex << chi2 << fitstatus;
+  }
+
+  // 4. Set
+  this->setProperty("OutputPeaksWorkspace", peakWS);
+
+  return;
 }
 
 
 /** Generate a list of peaks from input
   * Initial screening will be made to exclude peaks out of data range
+  * The peak parameters will be set up to each peak
+  * If the peak parameters are invalid:
+  * (1) alpha < 0
+  * (2) beta < 0
+  * (3) sigma2 < 0
+  * An error message will be spit out and there will be an early return
+  *
+  * RETURN:  True if no peak parameters is wrong!
  */
-void LeBailFit::generatePeaksFromInput(size_t workspaceindex)
+bool LeBailFit::generatePeaksFromInput(size_t workspaceindex)
 {   
   // There is no need to consider peak's order now due to map
 
+  //1. Generate peaks
   size_t numpeaksoutofrange = 0;
+  bool peakparametererror = false;
   for (size_t ipk = 0; ipk < mPeakHKLs.size(); ++ipk)
   {
-    // 1. Calculate peak position from input parameter by assuming that Zero, Zerot, Dtt1, and etc does not shift too much
-    //    FIXME - Make this an option
+    // 1. Generate peak
     int h = mPeakHKLs[ipk][0];
     int k = mPeakHKLs[ipk][1];
     int l = mPeakHKLs[ipk][2];
     int hkl2 = h*h+k*k+l*l;
 
-    double d_h = calculatePeakCenter(h, k, l);
-    double tof_h = convertUnitToTOF(d_h);
+    CurveFitting::ThermalNeutronBk2BkExpConvPV tmppeak;
+    tmppeak.setMillerIndex(h, k, l);
+    tmppeak.initialize();
+    CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr speak = boost::make_shared
+        <CurveFitting::ThermalNeutronBk2BkExpConvPV>(tmppeak);
 
-    bool excludepeak = false;
+    // 2. Set peak function
+    this->setPeakParameters(speak, this->mFuncParameters, false);
+
+    // 3. Check peak parameters
+    double eta, alpha, beta, H, sigma2, gamma, N, tof_h;
+    speak->calculateParameters(tof_h, eta, alpha, beta, H, sigma2, gamma, N, false);
+    speak->setPeakRadius(mPeakRadius);
+
+    // 4. Exclude peak out of range
     if (tof_h < dataWS->readX(workspaceindex)[0] || tof_h > dataWS->readX(workspaceindex).back())
     {
       g_log.warning() << "Input peak (" << h << ", " << k << ", " << l << ") is out of range. "
-                      << "d_h = " << d_h << ";  TOF_h = " << tof_h << std::endl;
+                      << "TOF_h = " << tof_h << std::endl;
       numpeaksoutofrange ++;
-      excludepeak = true;
+
+      continue;
     }
 
-    // 2. Create the peak instance and set it up
-    if (!excludepeak)
+    // 5. Check peak parameters' validity
+    // double alpha = speak->getParameter("Alpha");
+    if (alpha != alpha || alpha <= 0)
     {
-      CurveFitting::ThermalNeutronBk2BkExpConvPV tmppeak;
-
-      tmppeak.setMillerIndex(h, k, l);
-      tmppeak.initialize();
-      CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr speak = boost::make_shared<CurveFitting::ThermalNeutronBk2BkExpConvPV>(tmppeak);
-      speak->setPeakRadius(mPeakRadius);
-
-      // 3. Add to object instance
-      mPeaks.insert(std::make_pair(hkl2, speak));
-
-      //    Set up mPeakHKL2 for another type of indexing
-      std::vector<int>::iterator fit = std::find(mPeakHKL2.begin(), mPeakHKL2.end(), hkl2);
-      if (fit != mPeakHKL2.end())
-      {
-        g_log.error() << "H^2+K^2+L^2 = " << hkl2 << " already exists. This situation is not considered" << std::endl;
-        throw std::invalid_argument("2 reflections have same H^2+K^2+L^2, which is not supported.");
-      }
-      else
-      {
-        mPeakHKL2.insert(fit, hkl2);
-      }
+      g_log.warning() << "Peak (" << h << ", " << k << ", " << l << ") Alpha = " <<
+                         alpha << " is not physical!" << std::endl;
+      peakparametererror = true;
     }
+    // double beta = speak->getParameter("Beta");
+    if (beta != beta || beta <= 0)
+    {
+      g_log.warning() << "Peak (" << h << ", " << k << ", " << l << ") Beta = " <<
+                         beta << " is not physical!" << std::endl;
+      peakparametererror = true;
+    }
+    // double sigma2 = speak->getParameter("Sigma2");
+    if (sigma2 != sigma2 || sigma2 <= 0)
+    {
+      g_log.warning() << "Peak (" << h << ", " << k << ", " << l << ") Sigma^2 = " <<
+                         sigma2 << " is not physical!" << std::endl;
+      peakparametererror = true;
+    }
+
+    // 6. Add peak to peak map
+    mPeaks.insert(std::make_pair(hkl2, speak));
+    std::vector<int>::iterator fit = std::find(mPeakHKL2.begin(), mPeakHKL2.end(), hkl2);
+    if (fit != mPeakHKL2.end())
+    {
+      std::stringstream errmsg;
+      errmsg << "H^2+K^2+L^2 = " << hkl2 << " already exists. This situation is not considered";
+      g_log.error()  << errmsg.str() << std::endl;
+      throw std::invalid_argument(errmsg.str());
+    }
+    else
+    {
+      mPeakHKL2.insert(fit, hkl2);
+    }
+
   }
 
   g_log.notice() << "[LeBailFit] Input peaks: " << mPeakHKLs.size() << "; Peaks within range: " << mPeakHKL2.size()
@@ -1596,7 +1679,7 @@ void LeBailFit::generatePeaksFromInput(size_t workspaceindex)
   }
   std::sort(mPeakParameterNames.begin(), mPeakParameterNames.end());
 
-  return;
+  return (!peakparametererror);
 }
 
 /** Generate background function accroding to input: mBackgroundFunction
@@ -1710,51 +1793,157 @@ void LeBailFit::parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr b
  */
 void LeBailFit::importParametersTable()
 {
-    g_log.information() << "DB1118: Import Peak Parameters TableWorkspace. " << std::endl;
-
   // 1. Check column orders
-  std::vector<std::string> colnames = parameterWS->getColumnNames();
-  if (colnames.size() < 3)
+  if (parameterWS->columnCount() < 3)
   {
     g_log.error() << "Input parameter table workspace does not have enough number of columns. "
-        << " Number of columns = " << colnames.size() << " < 3 as required. " << std::endl;
-    throw std::runtime_error("Input parameter workspace is wrong. ");
-  }
-
-  if (colnames[0].compare("Name") != 0 ||
-      colnames[1].compare("Value") != 0 ||
-      colnames[2].compare("FitOrTie") != 0)
-  {
-    g_log.error() << "Input parameter table workspace does not have the columns in order.  "
-        << " It must be Name, Value, FitOrTie." << std::endl;
-    throw std::runtime_error("Input parameter workspace is wrong. ");
+                  << " Number of columns (Input =" << parameterWS->columnCount() << ") >= 3 as required. " << std::endl;
+    throw std::invalid_argument("Input parameter workspace is wrong. ");
   }
 
   // 2. Import data to maps
-  std::string parname, fitortie;
-  double value;
-
   size_t numrows = parameterWS->rowCount();
+  std::vector<std::string> colnames = parameterWS->getColumnNames();
+  size_t numcols = colnames.size();
+
+  std::map<std::string, double> tempdblmap;
+  std::map<std::string, std::string> tempstrmap;
+  std::map<std::string, double>::iterator dbliter;
+  std::map<string, string>::iterator striter;
+
+  std::string colname;
+  double dblvalue;
+  std::string strvalue;
 
   for (size_t ir = 0; ir < numrows; ++ir)
   {
+    // a) Clear the map
+    tempdblmap.clear();
+    tempstrmap.clear();
+
+    // b) Get the row
     API::TableRow trow = parameterWS->getRow(ir);
-    trow >> parname >> value >> fitortie;
-    // fit or tie?
-    char tofit = 'f';
-    if (fitortie.length() > 0)
+
+    // c) Parse each term
+    for (size_t icol = 0; icol < numcols; ++icol)
     {
-      char fc = fitortie.c_str()[0];
-      if (fc == 't' || fc == 'T')
+      colname = colnames[icol];
+      if (colname.compare("FitOrTie") != 0 && colname.compare("Name") != 0)
       {
-        tofit = 't';
+        // double data
+        trow >> dblvalue;
+        tempdblmap.insert(std::make_pair(colname, dblvalue));
+      }
+      else
+      {
+        // string data
+        trow >> strvalue;
+        tempstrmap.insert(std::make_pair(colname, strvalue));
       }
     }
-    mFuncParameters.insert(std::make_pair(parname, std::make_pair(value, tofit)));
-    mOrigFuncParameters.insert(std::make_pair(parname, value));
+
+    // d) Construct a Parameter instance
+    Parameter newparameter;
+    // i.   name
+    striter = tempstrmap.find("Name");
+    if (striter != tempstrmap.end())
+    {
+      newparameter.name = striter->second;
+    }
+    else
+    {
+      std::stringstream errmsg;
+      errmsg << "Parameter (table) workspace " << parameterWS->name()
+             << " does not contain column 'Name'.  It is not a valid input.  Quit ";
+      g_log.error() << errmsg.str() << std::endl;
+      throw std::invalid_argument(errmsg.str());
+    }
+
+    // ii.  fit
+    striter = tempstrmap.find("FitOrTie");
+    if (striter != tempstrmap.end())
+    {
+      std::string fitortie = striter->second;
+      bool tofit = true;
+      if (fitortie.length() > 0)
+      {
+        char fc = fitortie.c_str()[0];
+        if (fc == 't' || fc == 'T')
+        {
+          tofit = false;
+        }
+      }
+      newparameter.fit = tofit;
+    }
+    else
+    {
+      std::stringstream errmsg;
+      errmsg << "Parameter (table) workspace " << parameterWS->name()
+             << " does not contain column 'FitOrTie'.  It is not a valid input.  Quit ";
+      g_log.error() << errmsg.str() << std::endl;
+      throw std::invalid_argument(errmsg.str());
+    }
+
+    // iii. value
+    dbliter = tempdblmap.find("Value");
+    if (dbliter != tempdblmap.end())
+    {
+      newparameter.value = dbliter->second;
+    }
+    else
+    {
+      std::stringstream errmsg;
+      errmsg << "Parameter (table) workspace " << parameterWS->name()
+             << " does not contain column 'Value'.  It is not a valid input.  Quit ";
+      g_log.error() << errmsg.str() << std::endl;
+      throw std::invalid_argument(errmsg.str());
+    }
+
+    // iv.  min
+    dbliter = tempdblmap.find("Min");
+    if (dbliter != tempdblmap.end())
+    {
+      newparameter.minvalue = dbliter->second;
+    }
+    else
+    {
+      newparameter.minvalue = -1.0E10;
+    }
+
+    // v.   max
+    dbliter = tempdblmap.find("Max");
+    if (dbliter != tempdblmap.end())
+    {
+      newparameter.maxvalue = dbliter->second;
+    }
+    else
+    {
+      newparameter.maxvalue = 1.0E10;
+    }
+
+    // vi.  stepsize
+    dbliter = tempdblmap.find("StepSize");
+    if (dbliter != tempdblmap.end())
+    {
+      newparameter.stepsize = dbliter->second;
+    }
+    else
+    {
+      newparameter.stepsize = 1.0;
+    }
+
+    // vii. error
+    newparameter.error = 1.0E10;
+
+    mFuncParameters.insert(std::make_pair(newparameter.name, newparameter));
+    mOrigFuncParameters.insert(std::make_pair(newparameter.name, newparameter.value));
+
+    g_log.information() << newparameter.name << ": " << newparameter.minvalue << ", " << newparameter.maxvalue << ", "
+                        << newparameter.stepsize << std::endl;
   }
 
-  g_log.information() << "DB1118: Finished Importing Peak Parameters TableWorkspace. " << std::endl;
+  g_log.information() << "DB1118: Successfully Imported Peak Parameters TableWorkspace "
+                      << parameterWS->name() << std::endl;
 
   return;
 }
@@ -1948,8 +2137,9 @@ void LeBailFit::writeInputDataNDiff(size_t workspaceindex, API::FunctionDomain1D
 /*
  * Create a new table workspace for parameter values and set to output
  * to replace the input peaks' parameter workspace
+ * Old: std::pair<double, char>
  */
-void LeBailFit::exportParametersWorkspace(std::map<std::string, std::pair<double, char> > parammap)
+void LeBailFit::exportParametersWorkspace(std::map<std::string, Parameter> parammap)
 {
     DataObjects::TableWorkspace *tablews;
 
@@ -1966,49 +2156,52 @@ void LeBailFit::exportParametersWorkspace(std::map<std::string, std::pair<double
     tablews->addColumn("double", "Diff");
 
     // 3. Add value
-    std::map<std::string, std::pair<double, char> >::iterator paramiter;
+    std::map<std::string, Parameter>::iterator paramiter;
     std::map<std::string, double >::iterator opiter;
     for (paramiter = parammap.begin(); paramiter != parammap.end(); ++paramiter)
     {
         std::string parname = paramiter->first;
         if (parname.compare("Height"))
         {
-            /// If not Height
-            // a. current value
-            double parvalue = paramiter->second.first;
+          // If not Height
+          // a. current value
+          double parvalue = paramiter->second.value;
 
-            // b. fit or tie?
-            char fitortie = paramiter->second.second;
-            std::stringstream ss;
-            ss << fitortie;
-            std::string fit_tie = ss.str();
+          // b. fit or tie?
+          char fitortie = 't';
+          if (paramiter->second.fit)
+          {
+            fitortie = 'f';
+          }
+          std::stringstream ss;
+          ss << fitortie;
+          std::string fit_tie = ss.str();
 
-            // c. original value
-            opiter = mOrigFuncParameters.find(parname);
-            double origparvalue = -1.0E100;
-            if (opiter != mOrigFuncParameters.end())
-            {
-                origparvalue = opiter->second;
-            }
+          // c. original value
+          opiter = mOrigFuncParameters.find(parname);
+          double origparvalue = -1.0E100;
+          if (opiter != mOrigFuncParameters.end())
+          {
+            origparvalue = opiter->second;
+          }
 
-            // d. chi^2
-            double chi2 = 0.0;
-            opiter = mFuncParameterErrors.find(parname);
-            if (opiter != mFuncParameterErrors.end())
-            {
-                chi2 = opiter->second;
-            }
+          // d. chi^2
+          double chi2 = 0.0;
+          opiter = mFuncParameterErrors.find(parname);
+          if (opiter != mFuncParameterErrors.end())
+          {
+            chi2 = opiter->second;
+          }
 
-            // e. create the row
-            double diff = origparvalue - parvalue;
-            double min = -1.0E-10;
-            double max = 1.0E10;
-            double step = 1.0;
+          // e. create the row
+          double diff = origparvalue - parvalue;
+          double min = paramiter->second.minvalue;
+          double max = paramiter->second.maxvalue;
+          double step = paramiter->second.stepsize;
 
-            API::TableRow newparam = tablews->appendRow();
-            newparam << parname << parvalue << fit_tie << chi2 << min << max << step << diff;
+          API::TableRow newparam = tablews->appendRow();
+          newparam << parname << parvalue << fit_tie << chi2 << min << max << step << diff;
         } // ENDIF
-
     }
 
     // 3b. Chi^2
@@ -2056,43 +2249,97 @@ void LeBailFit::parseCompFunctionParameterName(std::string fullparname, std::str
     return;
 }
 
-/** Calculate peak's d-spacing from its HKL and
+/** Create output data workspace
   */
-double LeBailFit::calculatePeakCenter(int h, int k, int l)
+void LeBailFit::createOutputDataWorkspace(size_t workspaceindex, int functionmode)
 {
-    double a = mFuncParameters["LatticeConstant"].first;
-    if (a < 1.0E-2)
+  // 1. Determine number of output spectra
+  size_t nspec;
+  if (functionmode == 0)
+  {
+    // Lebail Fit mode
+    // (0) final calculated result (1) original data (2) difference
+    // (3) fitted pattern w/o background
+    // (4) background (being fitted after peak)
+    // (5) calculation based on input only (no fit)
+    // (6) background (input)
+    nspec = 7;
+  }
+  else if (functionmode == 1)
+  {
+    // Calcualtion mode
+    // (0) Data
+    // (1) Calculation (LeBail)
+    // (2) Difference
+    // (3) Calculation w/o background
+    // (4) Background
+    // (5+) One spectrum for each peak
+
+    nspec = 5;
+    bool plotindpeak = this->getProperty("PlotIndividualPeaks");
+    if (plotindpeak)
+      nspec += mPeaks.size();
+  }
+  else if (functionmode == 2)
+  {
+    // Background calculation mode
+    nspec = 3;
+  }
+
+  // 2. Create workspace2D
+  size_t nbin = dataWS->dataX(workspaceindex).size();
+  outputWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        API::WorkspaceFactory::Instance().create("Workspace2D", nspec, nbin, nbin));
+  for (size_t i = 0; i < nbin; ++i)
+  {
+    outputWS->dataX(0)[i] = dataWS->readX(workspaceindex)[i];
+    outputWS->dataY(0)[i] = dataWS->readY(workspaceindex)[i];
+  }
+  outputWS->getAxis(0)->setUnit("TOF");
+
+  // 3. Set axis
+  API::TextAxis* tAxis;
+
+  if (functionmode == 0)
+  {
+    // Fit mode
+    tAxis = new API::TextAxis(7);
+    tAxis->setLabel(0, "Data");
+    tAxis->setLabel(1, "Calc");
+    tAxis->setLabel(2, "Diff");
+    tAxis->setLabel(3, "CalcNoBkgd");
+    tAxis->setLabel(4, "OutBkgd");
+    tAxis->setLabel(5, "InpCalc");
+    tAxis->setLabel(6, "InBkgd");
+  }
+  else if (functionmode == 1)
+  {
+    // Calculation (Le Bail) mode
+    tAxis = new API::TextAxis(nspec);
+    tAxis->setLabel(0, "Data");
+    tAxis->setLabel(1, "Calc");
+    tAxis->setLabel(2, "Diff");
+    tAxis->setLabel(3, "CalcNoBkgd");
+    tAxis->setLabel(4, "Bkgd");
+    for (size_t i = 0; i < (nspec-5); ++i)
     {
-        std::stringstream errmsg;
-        errmsg << "Lattice constant is unphysically small.  a = " << a << std::endl;
-        throw std::invalid_argument(errmsg.str());
+      std::stringstream ss;
+      ss << "Peak_" << i;
+      tAxis->setLabel(5+i, ss.str());
     }
+  }
+  else if (functionmode == 2)
+  {
+    // Background mode
+    tAxis = new API::TextAxis(3);
+    tAxis->setLabel(0, "Data");
+    tAxis->setLabel(1, "Background");
+    tAxis->setLabel(2, "DataNoBackground");
+  }
 
-    double hklfactor = sqrt(double(h*h)+double(k*k)+double(l*l));
-    double dh = a/hklfactor;
+  outputWS->replaceAxis(1, tAxis);
 
-    return dh;
-}
-
-/** Convert unit from d-spacing to TOF
-  */
-double LeBailFit::convertUnitToTOF(double dh)
-{
-    // FIXME - Can use ThermalNeutronDtoTOFFunction later...
-    double dtt1 = mFuncParameters["Dtt1"].first;
-    double dtt1t = mFuncParameters["Dtt1t"].first;
-    double dtt2t = mFuncParameters["Dtt2t"].first;
-    double zero = mFuncParameters["Zero"].first;
-    double zerot = mFuncParameters["Zerot"].first;
-    double width = mFuncParameters["Width"].first;
-    double tcross = mFuncParameters["Tcross"].first;
-
-    double n = 0.5*gsl_sf_erfc(width*(tcross-1/dh));
-    double Th_e = zero + dtt1*dh;
-    double Th_t = zerot + dtt1t*dh - dtt2t/dh;
-    double tof_h = n*Th_e + (1-n)*Th_t;
-
-    return tof_h;
+  return;
 }
 
 } // namespace CurveFitting

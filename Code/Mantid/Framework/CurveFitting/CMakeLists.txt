@@ -54,6 +54,7 @@ set ( SRC_FILES
 	src/ProductLinearExp.cpp
 	src/ProductQuadraticExp.cpp
 	src/Quadratic.cpp
+	src/RefinePowderInstrumentParameters.cpp
 	src/Resolution.cpp
 	src/SeqDomain.cpp
 	src/SimplexMinimizer.cpp
@@ -65,6 +66,7 @@ set ( SRC_FILES
 	src/StretchExpMuon.cpp
 	src/TabulatedFunction.cpp
 	src/ThermalNeutronBk2BkExpConvPV.cpp
+	src/ThermalNeutronDtoTOFFunction.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
 )
@@ -134,6 +136,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ProductLinearExp.h
 	inc/MantidCurveFitting/ProductQuadraticExp.h
 	inc/MantidCurveFitting/Quadratic.h
+	inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/Resolution.h
 	inc/MantidCurveFitting/SeqDomain.h
 	inc/MantidCurveFitting/SimplexMinimizer.h
@@ -146,6 +149,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/StretchExpMuon.h
 	inc/MantidCurveFitting/TabulatedFunction.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h
+	inc/MantidCurveFitting/ThermalNeutronDtoTOFFunction.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
 )
@@ -198,6 +202,7 @@ set ( TEST_FILES
 	ProductLinearExpTest.h
 	ProductQuadraticExpTest.h
 	QuadraticTest.h
+	RefinePowderInstrumentParametersTest.h
 	ResolutionTest.h
 	SimplexTest.h
 	SpecialFunctionSupportTest.h
@@ -207,6 +212,7 @@ set ( TEST_FILES
 	StretchExpTest.h
 	TabulatedFunctionTest.h
 	ThermalNeutronBk2BkExpConvPVTest.h
+	ThermalNeutronDtoTOFFunctionTest.h
 	UserFunction1DTest.h
 	UserFunctionTest.h
 )

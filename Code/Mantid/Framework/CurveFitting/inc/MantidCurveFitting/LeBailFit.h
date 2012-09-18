@@ -44,6 +44,19 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
+
+  struct Parameter
+  {
+    std::string name;
+    double value;
+    double minvalue;
+    double maxvalue;
+    bool fit;
+    double stepsize;
+    double error;
+  };
+
+
   class DLLExport LeBailFit : public API::Algorithm
   {
   public:
@@ -74,7 +87,7 @@ namespace CurveFitting
     void importReflections();
 
     /// Create a list of peaks
-    void generatePeaksFromInput(size_t workspaceindex);
+    bool generatePeaksFromInput(size_t workspaceindex);
 
     /// Create and set up output table workspace for peaks
     void exportEachPeaksParameters();
@@ -82,7 +95,7 @@ namespace CurveFitting
     /// Set parameters to each peak
     void setPeakParameters(
             CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak,
-            std::map<std::string, std::pair<double, char> > parammap, double peakheight);
+            std::map<std::string, Parameter> parammap, double peakheight);
 
     /// Calcualte peak heights from model to data
     void calPeaksIntensities(std::vector<std::pair<int, double> >& peakheights, size_t workspaceindex);
@@ -96,19 +109,19 @@ namespace CurveFitting
 
     /// Calculate diffraction pattern
     void calculateDiffractionPattern(size_t workspaceindex, API::FunctionDomain1DVector domain, API::FunctionValues& values,
-            std::map<std::string, std::pair<double, char> > parammap, bool recalpeakintesity);
+            std::map<std::string, Parameter> parammap, bool recalpeakintesity);
 
     /// LeBailFit
     void doLeBailFit(size_t workspaceindex);
 
     /// Do 1 iteration in Le Bail fit
-    bool unitLeBailFit(size_t workspaceindex, std::map<std::string, std::pair<double, char> >& parammap);
+    bool unitLeBailFit(size_t workspaceindex, std::map<std::string, Parameter>& parammap);
 
     /// Set up Lebail
     void setLeBailFitParameters();
 
     /// Do 1 fit on LeBailFunction
-    bool fitLeBailFunction(size_t workspaceindex, std::map<std::string, std::pair<double, char> > &parammap);
+    bool fitLeBailFunction(size_t workspaceindex, std::map<std::string, Parameter> &parammap);
 
     /// Calculate Peaks' Intensities
     void calculatePeaksHeights(size_t workspaceindex);
@@ -126,7 +139,10 @@ namespace CurveFitting
     void writeInputDataNDiff(size_t workspaceindex, API::FunctionDomain1DVector domain);
 
     /// Output parameters (fitted or tied)
-    void exportParametersWorkspace(std::map<std::string, std::pair<double, char> > parammap);
+    void exportParametersWorkspace(std::map<std::string, Parameter> parammap);
+
+    /// Create output data workspace
+    void createOutputDataWorkspace(size_t workspaceindex, int functionmode);
 
     /// Create background function
     CurveFitting::BackgroundFunction_sptr generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws);
@@ -145,6 +161,9 @@ namespace CurveFitting
 
     /// Auxiliary.  Split composite function name to function index and parameter name
     void parseCompFunctionParameterName(std::string fullparname, std::string& parname, size_t& funcindex);
+
+    /// Fake calculated pattern
+    void fakeOutputData(size_t workspaceindex, int functionmode);
 
     /// Instance data
     API::MatrixWorkspace_sptr dataWS;
@@ -166,7 +185,7 @@ namespace CurveFitting
     API::CompositeFunction_sptr mLeBailFunction;
 
     /// Function parameters updated by fit
-    std::map<std::string, std::pair<double, char> > mFuncParameters; // char = f: fit... = t: tie to value
+    std::map<std::string, Parameter> mFuncParameters; // char = f: fit... = t: tie to value
     /// Input function parameters that are stored for reference
     std::map<std::string, double> mOrigFuncParameters;
     /// Peak parameters list
@@ -175,10 +194,10 @@ namespace CurveFitting
     std::map<std::string, double> mFuncParameterErrors;
 
     /// Calcualte peak's position in d-spacing.
-    double calculatePeakCenter(int h, int k, int l);
+    // double calculatePeakCenter(int h, int k, int l);
 
     /// Convert unit from d-spacing to TOF
-    double convertUnitToTOF(double dh);
+    // double convertUnitToTOF(double dh);
 
     /// =============================    =========================== ///
     size_t mWSIndexToWrite;
@@ -197,6 +216,9 @@ namespace CurveFitting
 
     /// Fit Chi^2
     double mLeBaiLFitChi2;
+
+    /// Minimizer
+    std::string mMinimizer;
 
   };
 

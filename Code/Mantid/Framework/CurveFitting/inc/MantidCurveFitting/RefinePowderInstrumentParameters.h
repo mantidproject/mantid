@@ -93,15 +93,39 @@ namespace CurveFitting
 
     void fitPeaks(int workspaceindex, std::vector<std::vector<int> >& goodfitpeaks, std::vector<double> &goodfitchi2);
 
+    /// Fit a single peak
+    bool fitSinglePeak(API::CompositeFunction_sptr compfunction, Bk2BkExpConvPV_sptr peak, BackgroundFunction_sptr background,
+                       double leftdev, double rightdev, size_t workspaceindex, double prog, double deltaprog,
+                       double &chi2, std::string &fitstatus);
+
+    bool fitSinglePeakSimple(API::CompositeFunction_sptr compfunction, CurveFitting::Bk2BkExpConvPV_sptr peak,
+                             CurveFitting::BackgroundFunction_sptr background, double leftdev, double rightdev,
+                             size_t workspaceindex, double prog, double deltaprog,
+                             double& chi2, std::string& fitstatus);
+
+    /// Find max height (peak center)
+    void findMaxHeight(API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                       double xmin, double xmax, double& center, double& centerleftbound, double& centerrightbound);
+
     bool fitLinearBackground(CurveFitting::Bk2BkExpConvPV_sptr peak,
-                             size_t workspaceindex, Polynomial_sptr, double xmin, double xmax);
+                             size_t workspaceindex, BackgroundFunction_sptr, double xmin, double xmax);
+
+    /// Fit background by removing the peak analytically
+    bool fitBackground(CurveFitting::Bk2BkExpConvPV_sptr peak, size_t workspaceindex,
+                       CurveFitting::BackgroundFunction_sptr bkgdfunc, double xmin, double xmax);
 
     /// Generate (output) workspace of peak centers
     void genPeakCentersWorkspace(std::map<std::vector<int>, CurveFitting::Bk2BkExpConvPV_sptr> peaks,
                                       std::vector<std::vector<int> > goodpeaks, std::vector<double> goodfitchi2);
 
+    /// Generate output peak parameters workspace
+    void generateOutputPeakParameterWorkspace(std::vector<std::vector<int> > goodfitpeaks);
+
     /// Fit instrument geometry parameters by ThermalNeutronDtoTOFFunction
     void fitInstrumentParameters();
+
+    /// Calculate d-space value from peak's miller index for thermal neutron
+    double calculateDspaceValue(std::vector<int> hkl);
 
     /// Create output of peak patterns
     DataObjects::Workspace2D_sptr createPeakDataWorkspace(size_t workspaceindex);
@@ -126,6 +150,9 @@ namespace CurveFitting
 
     /// Data for each individual peaks. (HKL)^2, vector index, function values
     std::map<int, std::pair<std::vector<size_t>, API::FunctionValues> > mPeakData;
+
+    ///
+    std::vector<std::string> mPeakParameterNames;
 
   };
 

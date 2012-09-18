@@ -402,7 +402,7 @@ public:
   /*
    * Fit 2 (separate) peaks (Partial data)
    */
-  void PassedDiabled_test_fit2Peaks()
+  void Passed_fit2Peaks()
   {
       std::string testplan("zero");
 

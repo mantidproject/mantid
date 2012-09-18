@@ -122,83 +122,121 @@ void ThermalNeutronBk2BkExpConvPV::getMillerIndex(int& h, int &k, int &l)
     return;
 }
 
+/** Calculate peak parameters (fundamential Back-to-back PV),including
+  * alpha, beta, sigma^2, eta, H
+  */
+void ThermalNeutronBk2BkExpConvPV::calculateParameters(double& tof_h, double& eta, double& alpha, double& beta,
+                                                       double& H, double &sigma2, double &gamma, double& N, bool explicitoutput) const
+{
+  // 1. Get parameters (class)
+  double alph0 = getParameter("Alph0");
+  double alph1 = getParameter("Alph1");
+  double beta0 = getParameter("Beta0");
+  double beta1 = getParameter("Beta1");
+  double alph0t = getParameter("Alph0t");
+  double alph1t = getParameter("Alph1t");
+  double beta0t = getParameter("Beta0t");
+  double beta1t = getParameter("Beta1t");
+  double dtt1 = getParameter("Dtt1");
+  double dtt1t = getParameter("Dtt1t");
+  double dtt2t = getParameter("Dtt2t");
+  double zero = getParameter("Zero");
+  double zerot = getParameter("Zerot");
+  double sig0 = getParameter("Sig0");
+  double sig1 = getParameter("Sig1");
+  double sig2 = getParameter("Sig2");
+  double gam0 = getParameter("Gam0");
+  double gam1 = getParameter("Gam1");
+  double gam2 = getParameter("Gam2");
+  double wcross = getParameter("Width");
+  double Tcross = getParameter("Tcross");
+  double latticeconstant = getParameter("LatticeConstant");
+
+  // 2. Calcualte Peak Position d-spacing and TOF
+  double dh = calCubicDSpace(latticeconstant, mH, mK, mL);
+
+  // 3. Calculate all the parameters
+  // i. Start to calculate alpha, beta, sigma2, gamma,
+  double n = 0.5*gsl_sf_erfc(wcross*(Tcross-1/dh));
+
+  double alpha_e = alph0 + alph1*dh;
+  double alpha_t = alph0t - alph1t/dh;
+  alpha = 1/(n*alpha_e + (1-n)*alpha_t);
+
+  double beta_e = beta0 + beta1*dh;
+  double beta_t = beta0t - beta1t/dh;
+  beta = 1/(n*beta_e + (1-n)*beta_t);
+
+  double Th_e = zero + dtt1*dh;
+  double Th_t = zerot + dtt1t*dh - dtt2t/dh;
+  tof_h = n*Th_e + (1-n)*Th_t;
+
+  sigma2 = sig0 + sig1*std::pow(dh, 2) + sig2*std::pow(dh, 4);
+  gamma = gam0 + gam1*dh + gam2*std::pow(dh, 2);
+
+  // 3. Calcualte H for the peak
+  calHandEta(sigma2, gamma, H, eta);
+
+  N = alpha*beta*0.5/(alpha+beta);
+
+  // 4. Record recent value
+  mParameters["Alpha"] = alpha;
+  mParameters["Beta"] = beta;
+  mParameters["Sigma2"] = sigma2;
+  mParameters["Gamma"] = gamma;
+  mParameters["FWHM"] = H;
+
+  // 5. Debug output
+  if (explicitoutput)
+  {
+    std::cout << "alpha = " << alpha << ", beta = " << beta
+              << ", N = " << N << std::endl;
+    std::cout << "  n = " << n << ", alpha_e = " << alpha_e << ", alpha_t = " << alpha_t << std::endl;
+    std::cout << " dh = " << dh << ", alph0t = " << alph0t << ", alph1t = " << alph1t
+              << ", alph0 = " << alph0 << ", alph1 = " << alph1 << std::endl;
+    std::cout << "  n = " << n << ", beta_e = " << beta_e << ", beta_t = " << beta_t << std::endl;
+    std::cout << " dh = " << dh << ", beta0t = " << beta0t << ", beta1t = " << beta1t << std::endl;
+  }
+
+  return;
+}
+
 /*
  * Override function1D
  */
 void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xValues, size_t nData) const
-{
-    // 1. Get parameters (class)
-    double alph0 = getParameter("Alph0");
-    double alph1 = getParameter("Alph1");
-    double beta0 = getParameter("Beta0");
-    double beta1 = getParameter("Beta1");
-    double alph0t = getParameter("Alph0t");
-    double alph1t = getParameter("Alph1t");
-    double beta0t = getParameter("Beta0t");
-    double beta1t = getParameter("Beta1t");
-    double dtt1 = getParameter("Dtt1");
-    double dtt1t = getParameter("Dtt1t");
-    double dtt2t = getParameter("Dtt2t");
-    double zero = getParameter("Zero");
-    double zerot = getParameter("Zerot");
-    double sig0 = getParameter("Sig0");
-    double sig1 = getParameter("Sig1");
-    double sig2 = getParameter("Sig2");
-    double gam0 = getParameter("Gam0");
-    double gam1 = getParameter("Gam1");
-    double gam2 = getParameter("Gam2");
-    double wcross = getParameter("Width");
-    double Tcross = getParameter("Tcross");
-    double latticeconstant = getParameter("LatticeConstant");
-    double height = getParameter("Height");
+{  
+  // 1. Calculate peak parameters
+  double height = getParameter("Height");
 
-    // 2. Calcualte Peak Position d-spacing and TOF
-    double dh = calCubicDSpace(latticeconstant, mH, mK, mL);
+  double tof_h, alpha, beta, H, sigma2, eta, N, gamma;
+  this->calculateParameters(tof_h, eta, alpha, beta, H, sigma2, gamma, N, false);
 
-    // a) Calculate all the parameters
-    double alpha, beta, tof_h, sigma2, gamma;
+  double invert_sqrt2sigma = 1.0/sqrt(2.0*sigma2);
 
-    // i. Start to calculate alpha, beta, sigma2, gamma,
-    double n = 0.5*gsl_sf_erfc(wcross*(Tcross-1/dh));
+  for (size_t id = 0; id < nData; ++id)
+  {
+    // a) Caclualte peak intensity
+    double dT = xValues[id]-tof_h;
+    double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
 
-    double alpha_e = alph0 + alph1*dh;
-    double alpha_t = alph0t - alph1t/dh;
-    alpha = 1/(n*alpha_e + (1-n)*alpha_t);
-
-    double beta_e = beta0 + beta1*dh;
-    double beta_t = beta0t - beta1t/dh;
-    beta = 1/(n*beta_e + (1-n)*beta_t);
-
-    double Th_e = zero + dtt1*dh;
-    double Th_t = zerot + dtt1t*dh - dtt2t/dh;
-    tof_h = n*Th_e + (1-n)*Th_t;
-
-    sigma2 = sig0 + sig1*std::pow(dh, 2) + sig2*std::pow(dh, 4);
-    gamma = gam0 + gam1*dh + gam2*std::pow(dh, 2);
-
-    // 3. Calcualte H for the peak
-    double H, eta;
-    calHandEta(sigma2, gamma, H, eta);
-
-    // 4. Calcualte peak value
-    double invert_sqrt2sigma = 1.0/sqrt(2.0*sigma2);
-    double N = alpha*beta*0.5/(alpha+beta);
-
-    for (size_t id = 0; id < nData; ++id)
+    if (!(omega > -DBL_MAX && omega < DBL_MAX))
     {
-      double dT = xValues[id]-tof_h;
-      double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
+      // Output with error
+      g_log.error() << "Calcuate Peak " << mH << ", " << mK << ", " << mL << " wrong!" << std::endl;
+      bool explicitoutput = true;
+      calculateParameters(tof_h, eta, alpha, beta, H, sigma2, gamma, N, explicitoutput);
+      calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma, explicitoutput);
+
+      out[id] = DBL_MAX;
+    }
+    else
+    {
       out[id] = height*omega;
     }
+  } // ENDFOR data points
 
-    // 5. Record recent value
-    mParameters["Alpha"] = alpha;
-    mParameters["Beta"] = beta;
-    mParameters["Sigma2"] = sigma2;
-    mParameters["Gamma"] = gamma;
-    mParameters["FWHM"] = H;
-
-    return;
+  return;
 }
 
 /*
@@ -375,7 +413,7 @@ double ThermalNeutronBk2BkExpConvPV::calPeakCenter() const
  * This is the core component to calcualte peak profile
  */
 double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, double beta, double H,
-    double sigma2, double invert_sqrt2sigma) const
+    double sigma2, double invert_sqrt2sigma, bool explicitoutput) const
 {
   // 1. Prepare
   std::complex<double> p(alpha*x, alpha*H*0.5);
@@ -388,7 +426,21 @@ double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, do
   double z = (beta*sigma2 - x)*invert_sqrt2sigma;
 
   // 2. Calculate
-  double omega1 = (1-eta)*N*(exp(u)*gsl_sf_erfc(y) + std::exp(v)*gsl_sf_erfc(z));
+  double part1, part2;
+
+  double erfcy = gsl_sf_erfc(y);
+  if (fabs(erfcy) > DBL_MIN)
+    part1 = exp(u)*erfcy;
+  else
+    part1 = 0.0;
+
+  double erfcz = gsl_sf_erfc(z);
+  if (fabs(erfcz) > DBL_MIN)
+    part2 = exp(v)*erfcz;
+  else
+    part2 = 0.0;
+
+  double omega1 = (1-eta)*N*(part1 + part2);
   double omega2;
   if (eta < 1.0E-8)
   {
@@ -399,6 +451,15 @@ double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, do
     omega2 = 2*N*eta/PI*(imag(exp(p)*E1(p)) + imag(exp(q)*E1(q)));
   }
   double omega = omega1+omega2;
+
+  if (explicitoutput && !(omega > -DBL_MAX && omega < DBL_MAX))
+  {
+    std::cout << "Find omega = " << omega << " is infinity! omega1 = " << omega1 << ", omega2 = " << omega2 << std::endl;
+    std::cout << "  u = " << u << ", v = " << v << ", erfc(y) = " << gsl_sf_erfc(y)
+                  << ", erfc(z) = " << gsl_sf_erfc(z) << std::endl;
+    std::cout << "  alpha = " << alpha << ", x = " << x << " sigma2 = " << sigma2
+                  << ", N = " << N << std::endl;
+  }
 
   return omega;
 }

@@ -200,6 +200,22 @@ public:
       TS_ASSERT_DELTA(zero, 0.0, 10.0);
       TS_ASSERT_DELTA(zerot, 60.0, 10.0);
 
+      // Optionally some data output
+      DataObjects::Workspace2D_sptr peakdataws =
+              boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+              (AnalysisDataService::Instance().retrieve("FittedPeaksData"));
+      std::ofstream modelss, diffss;
+      modelss.open("model.dat");
+      diffss.open("difference.dat");
+
+      for (size_t i = 0; i < peakdataws->readX(1).size(); ++i)
+      {
+          modelss << peakdataws->readX(1)[i] << "     " << peakdataws->readY(1)[i] << std::endl;
+          diffss <<  peakdataws->readX(2)[i] << "     " << peakdataws->readY(2)[i] << std::endl;
+      }
+      modelss.close();
+      diffss.close();
+
       // 4. Clean
       AnalysisDataService::Instance().remove("DataWorkspace");
       AnalysisDataService::Instance().remove("PeakParameters");
