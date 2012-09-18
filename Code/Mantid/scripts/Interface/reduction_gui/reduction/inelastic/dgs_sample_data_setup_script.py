@@ -15,6 +15,8 @@ class SampleSetupScript(BaseScriptElement):
     incident_energy_guess = ""
     use_ei_guess = False
     tzero_guess = 0.0
+    monitor1_specid = ""
+    monitor2_specid = ""
     rebin_et = False
     et_range_low = ""
     et_range_width = ""
@@ -34,6 +36,10 @@ class SampleSetupScript(BaseScriptElement):
             script += "UseIncidentEnergyGuess=%s,\n" % self.use_ei_guess
             if self.tzero_guess != SampleSetupScript.tzero_guess:
                 script += "TimeZeroGuess=%s,\n" % str(self.tzero_guess)
+        if self.monitor1_specid != SampleSetupScript.monitor1_specid:
+            script += "Monitor1SpecId=\"%s\",\n" % self.monitor1_specid
+        if self.monitor2_specid != SampleSetupScript.monitor2_specid:
+            script += "Monitor2SpecId=\"%s\",\n" % self.monitor2_specid
         if self.et_range_low != SampleSetupScript.et_range_low or \
            self.et_range_width != SampleSetupScript.et_range_width or \
            self.et_range_high != SampleSetupScript.et_range_high:
@@ -57,6 +63,8 @@ class SampleSetupScript(BaseScriptElement):
         xml += "  <incident_energy_guess>%s</incident_energy_guess>\n" % self.incident_energy_guess
         xml += "  <use_ei_guess>%s</use_ei_guess>\n" % str(self.use_ei_guess)
         xml += "  <tzero_guess>%s</tzero_guess>\n" % str(self.tzero_guess)
+        xml += "  <monitor1_specid>%s</monitor1_specid>\n" % self.monitor1_specid
+        xml += "  <monitor2_specid>%s</monitor2_specid>\n" % self.monitor2_specid
         xml += "  <et_range>\n"
         xml += "    <low>%s</low>\n" % self.et_range_low
         xml += "    <width>%s</width>\n"  % self.et_range_width
@@ -89,6 +97,12 @@ class SampleSetupScript(BaseScriptElement):
             self.tzero_guess = BaseScriptElement.getFloatElement(instrument_dom,
                                                                  "tzero_guess",
                                                                  default=SampleSetupScript.tzero_guess)
+            self.monitor1_specid = BaseScriptElement.getIntElement(instrument_dom,
+                                                                   "monitor1_specid",
+                                                                   default=SampleSetupScript.monitor1_specid)
+            self.monitor2_specid = BaseScriptElement.getIntElement(instrument_dom,
+                                                                   "monitor2_specid",
+                                                                   default=SampleSetupScript.monitor2_specid)
             self.et_range_low = BaseScriptElement.getStringElement(instrument_dom,
                                                                    "et_range/low",
                                                                    default=SampleSetupScript.et_range_low)
@@ -116,6 +130,8 @@ class SampleSetupScript(BaseScriptElement):
         self.incident_energy_guess = SampleSetupScript.incident_energy_guess
         self.use_ei_guess = SampleSetupScript.use_ei_guess
         self.tzero_guess = SampleSetupScript.tzero_guess
+        self.monitor1_specid = SampleSetupScript.monitor1_specid
+        self.monitor2_specid = SampleSetupScript.monitor2_specid
         self.rebin_et = SampleSetupScript.rebin_et
         self.et_range_low = SampleSetupScript.et_range_low
         self.et_range_width = SampleSetupScript.et_range_width
