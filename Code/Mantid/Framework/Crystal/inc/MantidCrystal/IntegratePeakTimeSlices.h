@@ -64,19 +64,7 @@ namespace Crystal
 
      DataModeHandler()
      {
-       this->baseRCRadius=-1;
-       this->lastRCRadius=-1;
-       this->lastRow=-1;
-       this->lastCol=-1;
-       EdgeX=EdgeY=-1;
-       calcNewRCRadius = -1;
-       time = -1;
-       CalcVariance = true;
-
-       currentRadius =-1;
-       currentPosition= Kernel::V3D();
-       HalfWidthAtHalfHeightRadius=-1;
-       back_calc=Intensity_calc=row_calc=col_calc=Vx_calc= Vy_calc= Vxy_calc=-1;
+      init();
      }
 
      DataModeHandler( const DataModeHandler &handler);
@@ -84,6 +72,7 @@ namespace Crystal
             double lastRow, double lastCol, double CellWidth, double CellHeight,
             bool CalcVariance)
      {
+       init();
        this->baseRCRadius=baseRCRadius;
        this->lastRCRadius=lastRCRadius;
        this->lastRow=lastRow;
@@ -91,15 +80,6 @@ namespace Crystal
        this->CellWidth = CellWidth;
        this->CellHeight = CellHeight;
        this->CalcVariance = CalcVariance;
-       this->case4=false;
-       EdgeX=EdgeY=-1;
-       calcNewRCRadius = -1;
-       time = -1;
-
-       this->currentRadius =-1;
-       this->currentPosition= Kernel::V3D();
-       HalfWidthAtHalfHeightRadius=-1;
-       back_calc=Intensity_calc=row_calc=col_calc=Vx_calc= Vy_calc= Vxy_calc=-1;
      }
      void setTime( double time )
      {
@@ -183,6 +163,24 @@ namespace Crystal
      bool CalcVariance;
      bool case4;//if true result of successful merge of dir =1 chan=0 and chan=1
      double back_calc,Intensity_calc,row_calc,col_calc,Vx_calc, Vy_calc, Vxy_calc;
+  private:
+     void init()
+      {
+        this->baseRCRadius = -1;
+        this->lastRCRadius = -1;
+        this->lastRow = -1;
+        this->lastCol = -1;
+        EdgeX = EdgeY = -1;
+        calcNewRCRadius = -1;
+        time = -1;
+        CalcVariance = true;
+        CellWidth = CellHeight = 0;
+        currentRadius = -1;
+        currentPosition = Kernel::V3D();
+        HalfWidthAtHalfHeightRadius = -1;
+        case4 = false;
+        back_calc = Intensity_calc = row_calc = col_calc = Vx_calc = Vy_calc = Vxy_calc = -1;
+      }
   };
 
 class DLLExport IntegratePeakTimeSlices:  public Mantid::API::Algorithm

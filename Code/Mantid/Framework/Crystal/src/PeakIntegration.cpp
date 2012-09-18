@@ -95,6 +95,7 @@ namespace Mantid
       setPropertyGroup("YMax", grp1);
       setPropertyGroup("TOFBinMin", grp1);
       setPropertyGroup("TOFBinMax", grp1);
+      declareProperty("NBadEdgePixels",0,"Number of bad Edge Pixels");
 
     }
 
@@ -259,9 +260,9 @@ namespace Mantid
         TOFmax = iTOF;
         if(TOFmax <= TOFmin)continue;
         const int n = TOFmax-TOFmin+1;
-        double pktime = 0.0;
+        //double pktime = 0.0;
 
-        for (iTOF = TOFmin; iTOF < TOFmax; iTOF++) pktime+= X[iTOF];
+        //for (iTOF = TOFmin; iTOF < TOFmax; iTOF++) pktime+= X[iTOF];
         if(n >= 8 && IC)//Number of fitting parameters large enough if Ikeda-Carpenter fit
         {
           for (iTOF=TOFmin; iTOF <= TOFmax; iTOF++) 
@@ -315,9 +316,9 @@ namespace Mantid
             Beta0 = params[3];
             Kappa = params[4];
             haveFit = true;
-          }*/
+          }
           std::string funct = fit_alg->getPropertyValue("Function");
-      
+        */
       
           //Evaluate fit at points
           const Mantid::MantidVec& y = fitWS->readY(1);
@@ -700,6 +701,10 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
       slice_alg->setProperty<PeaksWorkspace_sptr>("Peaks", Peaks);
       slice_alg->setProperty("PeakIndex", ipeak);
       slice_alg->setProperty("PeakQspan", qspan);
+
+      int nPixels = std::max<int>(0, getProperty("NBadEdgePixels"));
+
+      slice_alg->setProperty("NBadEdgePixels", nPixels);
       slice_alg->executeAsSubAlg();
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 

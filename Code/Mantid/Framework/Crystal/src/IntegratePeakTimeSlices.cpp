@@ -886,7 +886,7 @@ namespace Mantid
               {     done = false;
                     //std::cout<<"TRY TO MERGE indx/xchan="<<indx<<"/"<<xchan<<std::endl;
                     int chanMin,chanMax;
-                    if( ( dir ==1 && chan ==0 ) || lastAttributeList->CellHeight < 0)
+                    if( ( dir ==1 && chan ==0 ) || lastAttributeList->CellHeight <= 0)
                     {
                       chanMin=xchan;
                       chanMax =xchan+1;
@@ -944,7 +944,7 @@ namespace Mantid
                       LastTableRow =UpdateOutputWS(TabWS, dir, (chanMin+chanMax)/2.0, params, errs,
                                       names, chisq,  AttributeValues->time, spec_idList);
 
-                      if( lastAttributeList->CellHeight > 0)
+                      if( lastAttributeList->CellHeight > 0 && lastAttributeList->StatBase.size()>=NAttributes)
                       {
                         TotIntensity -=lastAttributeList->StatBaseVals(IIntensities);
                         TotVariance -= lastAttributeList->StatBaseVals(IVariance);
@@ -1889,11 +1889,11 @@ namespace Mantid
     {
       int Ibk = find("Background", names);
       double err =0;
-      double intensty=0;
+     // double intensty=0; //for debugging only
       if( !EdgePeak  )
       {
         err = CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceVariance, ncells);
-        intensty =TotSliceIntensity - params[IBACK] * ncells;
+      //  intensty =TotSliceIntensity - params[IBACK] * ncells;
         TotIntensity += TotSliceIntensity - params[IBACK] * ncells;
 
         TotVariance += err * err;
@@ -1901,7 +1901,7 @@ namespace Mantid
       }else
       {
        int IInt = find("Intensity", names);
-       intensty = params[IInt];
+     //  intensty = params[IInt];
        TotIntensity += params[IInt];
        err = errs[IInt];
        TotVariance += err * err;
