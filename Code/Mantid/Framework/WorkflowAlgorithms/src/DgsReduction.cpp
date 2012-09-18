@@ -87,6 +87,10 @@ namespace Mantid
           "Set the value of the incident energy guess in meV.");
       this->declareProperty("UseIncidentEnergyGuess", false,
           "Use the incident energy guess as the actual value (will not be calculated).");
+      this->declareProperty("TimeZeroGuess", 0.0,
+          "Set the value of time zero offset in microseconds.");
+      this->setPropertySettings("TimeZeroGuess",
+          new VisibleWhenProperty("UseIncidentEnergyGuess", IS_EQUAL_TO, "1"));
       this->declareProperty(new ArrayProperty<double>("EnergyTransferRange",
           boost::make_shared<RebinParamsValidator>(true)),
           "A comma separated list of first bin boundary, width, last bin boundary.\n"
@@ -100,6 +104,7 @@ namespace Mantid
       this->setPropertyGroup("SampleInputWorkspace", sampleSetup);
       this->setPropertyGroup("IncidentEnergyGuess", sampleSetup);
       this->setPropertyGroup("UseIncidentEnergyGuess", sampleSetup);
+      this->setPropertyGroup("TimeZeroGuess", sampleSetup);
       this->setPropertyGroup("EnergyTransferRange", sampleSetup);
       this->setPropertyGroup("SofPhiEIsDistribution", sampleSetup);
       this->setPropertyGroup("HardMaskFile", sampleSetup);

@@ -124,6 +124,7 @@ namespace Mantid
       g_log.notice() << "Processing for " << facility << std::endl;
       const double eiGuess = reductionManager->getProperty("IncidentEnergyGuess");
       const bool useEiGuess = reductionManager->getProperty("UseIncidentEnergyGuess");
+      const double tZeroGuess = reductionManager->getProperty("TimeZeroGuess");
       std::vector<double> etBinning = reductionManager->getProperty("EnergyTransferRange");
 
       // Create a default set of binning parameters: (-0.5Ei, 0.01Ei, Ei)
@@ -161,6 +162,10 @@ namespace Mantid
             double powVal = 1.0 + incidentEnergy;
             tZero = (0.1982 * std::pow(powVal, -0.84098)) * 1000.0;
           }
+          if (tZeroGuess != 0.0)
+          {
+            tZero = tZeroGuess;
+          }
         }
         // Do ARCS and SEQUOIA
         else
@@ -168,6 +173,7 @@ namespace Mantid
           if (useEiGuess)
           {
             incidentEnergy = eiGuess;
+            tZero = tZeroGuess;
           }
           else
           {
