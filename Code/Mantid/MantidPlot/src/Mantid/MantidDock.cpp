@@ -165,6 +165,8 @@ QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
   connect(m_tree,SIGNAL(itemSelectionChanged()),this,SLOT(treeSelectionChanged()));
 
   connect(m_tree, SIGNAL(itemExpanded(QTreeWidgetItem*)), this, SLOT(populateChildData(QTreeWidgetItem*)));
+
+  connect(this,SIGNAL(rerunFindAbandonedWorkspaces()),this,SLOT(findAbandonedWorkspaces()),Qt::QueuedConnection);
 }
 
 /**
@@ -919,33 +921,57 @@ void MantidDockWidget::findAbandonedWorkspaces()
     topItems.append( m_tree->topLevelItem(i)->text(0) );
   }
   // list of all workspaces in the ADS
-  auto workspaces = Mantid::API::AnalysisDataService::Instance().getObjects();
+  auto wsSet = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+  std::vector<std::string> workspaces( wsSet.begin(), wsSet.end() );
   // find all groups, remove their members from workspaces
-  for( auto ws = workspaces.begin(); ws != workspaces.end(); ++ws )
+  for( auto wsName = workspaces.begin(); wsName != workspaces.end(); ++wsName )
   {
-    if ( !(*ws) ) continue;
-    if ( auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>( *ws ) )
+    try
     {
-      size_t n = static_cast<size_t>( group->getNumberOfEntries() );
-      for(size_t i = 0; i < n; ++i)
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieve( *wsName );
+      if ( auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>( ws ) )
       {
-        auto it = std::find(workspaces.begin(), workspaces.end(), group->getItem( i ));
-        if ( it != workspaces.end() )
+        size_t n = static_cast<size_t>( group->getNumberOfEntries() );
+        for(size_t i = 0; i < n; ++i)
         {
-          it->reset();
+          if ( i >= group->getNumberOfEntries() )
+          {
+            emit rerunFindAbandonedWorkspaces();
+            return;
+          }
+          const std::string name = group->getItem(i)->name();
+          auto it = std::find( workspaces.begin(), workspaces.end(), name );
+          if ( it != workspaces.end() )
+          {
+            it->clear();
+          }
         }
       }
     }
+    catch(...) 
+    {
+      emit rerunFindAbandonedWorkspaces();
+      return;
+    }
   }
   // now workspaces contains only top-level items
-  for( auto ws = workspaces.begin(); ws != workspaces.end(); ++ws )
+  for( auto wsName = workspaces.begin(); wsName != workspaces.end(); ++wsName )
   {
-    if ( !(*ws) ) continue;
-    QString qName = QString::fromStdString( (**ws).name() );
+    if ( wsName->empty() ) continue;
+    QString qName = QString::fromStdString( *wsName );
     auto item = m_tree->findItems( qName, Qt::MatchFixedString );
     if ( item.isEmpty() )
     {
-      addTreeEntry( qName, *ws );
+      try
+      {
+        auto ws = Mantid::API::AnalysisDataService::Instance().retrieve( *wsName );
+        addTreeEntry( qName, ws );
+      }
+      catch(...)
+      {
+        emit rerunFindAbandonedWorkspaces();
+        return;
+      }
     }
     else
     {

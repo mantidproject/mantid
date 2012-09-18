@@ -48,6 +48,9 @@ public:
   QString getSelectedWorkspaceName() const;
   Mantid::API::Workspace_sptr getSelectedWorkspace() const;
 
+signals:
+  void rerunFindAbandonedWorkspaces();
+
 public slots:
   void clickedWorkspace(QTreeWidgetItem*, int);
   void deleteWorkspaces();
@@ -80,6 +83,7 @@ private slots:
   void showDetectorTable();
   void convertToMatrixWorkspace();
   void convertMDHistoToMatrixWorkspace();
+  void findAbandonedWorkspaces();
 
 private:
   void createWorkspaceMenuActions();
@@ -102,7 +106,6 @@ private:
   void addTableWorkspaceMenuItems(QMenu * menu) const;
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
-  void findAbandonedWorkspaces();
   
 protected:
   MantidTreeWidget * m_tree;
