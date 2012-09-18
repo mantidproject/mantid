@@ -516,7 +516,7 @@ void RefinePowderInstrumentParameters::generateOutputPeakParameterWorkspace(std:
 
       // 8. Fit background again
       // FIXME : Continue to implement from here
-      throw std::runtime_error("Continue to implement from here!");
+      // throw std::runtime_error("Continue to implement from here!");
       // goodbkgdfit = fitBackground(peak, workspaceindex, background, leftbound, rightbound);
 
 

@@ -197,8 +197,8 @@ public:
       double zero = fitparamvalues["Zero"];
       double zerot = fitparamvalues["Zerot"];
 
-      TS_ASSERT_DELTA(zero, 0.0, 10.0);
-      TS_ASSERT_DELTA(zerot, 60.0, 10.0);
+      TS_ASSERT_DELTA(zero, 20.0, 10.0);
+      TS_ASSERT_DELTA(zerot, 40.0, 10.0);
 
       // Optionally some data output
       DataObjects::Workspace2D_sptr peakdataws =
