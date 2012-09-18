@@ -37,10 +37,15 @@ namespace Crystal
    *   <LI>f*_Yrot-Rotation(degrees) Panel Center in y axis direction</LI>
    *   <LI>f*_Zrot-Rotation(degrees) Panel Center in z axis direction</LI>
    * </UL>
-   *
-   *<UL> Note that the order of rotations are z first, then y then x.</UL>
-   *
-   *<UL>Attributes
+   */
+
+   /**
+    *  Note that the order of rotations are z first, then y then x.
+   */
+
+  /**
+   *Attributes
+   *<UL>
    *   <LI>a,b,c,alpha,beta,gamma- The lattice parameters. The angles are in degrees</LI>
    *   <LI>PeakWorkspaceName- The name of where the PeaksWorkspace is stored in the AnalysisDataService</LI>
    *   <LI>BankNames- The ! separated "list" of / separated panel names that this IFitFunction uses. The parameters
@@ -66,6 +71,8 @@ namespace Crystal
    *       wrt xyz of the errors in the q values for this peak at the given parameters.</LI>
    *
    *  </UL>
+   */
+   /**
    * @author Ruth Mikkelson, SNS ORNL
    * @date 1/27/2012
    *
