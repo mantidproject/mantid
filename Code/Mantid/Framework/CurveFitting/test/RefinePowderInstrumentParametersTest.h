@@ -23,6 +23,15 @@ public:
   static RefinePowderInstrumentParametersTest *createSuite() { return new RefinePowderInstrumentParametersTest(); }
   static void destroySuite( RefinePowderInstrumentParametersTest *suite ) { delete suite; }
 
+  void test_init()
+  {
+    RefinePowderInstrumentParameters alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    return;
+  }
+
 
   /*
    * Fit with one shifted parmeter 'Zero'
@@ -147,7 +156,7 @@ public:
   /*
    * Fit both zero and zerot
    */
-  void test_FitBoth()
+  void Ptest_FitBoth()
   {
       // 1. Generate testing workspace
       std::map<std::string, double> newparamvalues;
