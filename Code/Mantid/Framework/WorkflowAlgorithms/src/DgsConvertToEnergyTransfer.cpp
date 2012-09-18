@@ -139,8 +139,8 @@ namespace Mantid
 
       double incidentEnergy = 0.0;
       double monPeak = 0.0;
-      //specid_t eiMon1Spec = 0;
-      //specid_t eiMon2Spec = 0;
+      int eiMon1Spec = reductionManager->getProperty("Monitor1SpecId");
+      int eiMon2Spec = reductionManager->getProperty("Monitor2SpecId");;
 
       if ("SNS" == facility)
       {
@@ -222,8 +222,8 @@ namespace Mantid
             // Calculate Ei
             IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
             getei->setProperty("InputWorkspace", monWsName);
-            //getei->setProperty("Monitor1Spec", eiMon1Spec);
-            //getei->setProperty("Monitor2Spec", eiMon2Spec);
+            getei->setProperty("Monitor1Spec", eiMon1Spec);
+            getei->setProperty("Monitor2Spec", eiMon2Spec);
             getei->setProperty("EnergyEstimate", eiGuess);
             getei->execute();
             incidentEnergy = getei->getProperty("IncidentEnergy");
@@ -255,8 +255,8 @@ namespace Mantid
         IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
         getei->setAlwaysStoreInADS(true);
         getei->setProperty("InputWorkspace", inWsName);
-        //getei->setProperty("Monitor1Spec", eiMon1Spec);
-        //getei->setProperty("Monitor2Spec", eiMon2Spec);
+        getei->setProperty("Monitor1Spec", eiMon1Spec);
+        getei->setProperty("Monitor2Spec", eiMon2Spec);
         getei->setProperty("EnergyEstimate", eiGuess);
         getei->execute();
 

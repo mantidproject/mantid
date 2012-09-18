@@ -91,6 +91,12 @@ namespace Mantid
           "Set the value of time zero offset in microseconds.");
       this->setPropertySettings("TimeZeroGuess",
           new VisibleWhenProperty("UseIncidentEnergyGuess", IS_EQUAL_TO, "1"));
+      auto mustBePositiveInt = boost::make_shared<BoundedValidator<int> >();
+      mustBePositiveInt->setLower(0);
+      this->declareProperty("Monitor1SpecId", EMPTY_INT(), mustBePositiveInt,
+          "Spectrum ID for the first monitor to use in Ei calculation.");
+      this->declareProperty("Monitor2SpecId", EMPTY_INT(), mustBePositiveInt,
+          "Spectrum ID for the second monitor to use in Ei calculation.");
       this->declareProperty(new ArrayProperty<double>("EnergyTransferRange",
           boost::make_shared<RebinParamsValidator>(true)),
           "A comma separated list of first bin boundary, width, last bin boundary.\n"
@@ -105,6 +111,8 @@ namespace Mantid
       this->setPropertyGroup("IncidentEnergyGuess", sampleSetup);
       this->setPropertyGroup("UseIncidentEnergyGuess", sampleSetup);
       this->setPropertyGroup("TimeZeroGuess", sampleSetup);
+      this->setPropertyGroup("Monitor1SpecId", sampleSetup);
+      this->setPropertyGroup("Monitor2SpecId", sampleSetup);
       this->setPropertyGroup("EnergyTransferRange", sampleSetup);
       this->setPropertyGroup("SofPhiEIsDistribution", sampleSetup);
       this->setPropertyGroup("HardMaskFile", sampleSetup);
