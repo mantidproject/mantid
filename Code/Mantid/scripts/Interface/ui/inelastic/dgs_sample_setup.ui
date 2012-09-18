@@ -131,6 +131,36 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QLabel" name="tzero_guess_label">
+       <property name="text">
+        <string>TZero Guess</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="tzero_guess_edit"/>
+     </item>
+     <item>
+      <widget class="QLabel" name="tzero_guess_unit_label">
+       <property name="text">
+        <string>microseconds</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </item>
    <item>

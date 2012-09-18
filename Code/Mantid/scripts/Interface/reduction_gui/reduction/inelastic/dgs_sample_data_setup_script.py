@@ -14,6 +14,7 @@ class SampleSetupScript(BaseScriptElement):
     sample_file = ""
     incident_energy_guess = ""
     use_ei_guess = False
+    tzero_guess = 0.0
     rebin_et = False
     et_range_low = ""
     et_range_width = ""
@@ -31,6 +32,8 @@ class SampleSetupScript(BaseScriptElement):
         script += "IncidentEnergyGuess=\"%s\",\n" % self.incident_energy_guess
         if self.use_ei_guess != SampleSetupScript.use_ei_guess:
             script += "UseIncidentEnergyGuess=%s,\n" % self.use_ei_guess
+            if self.tzero_guess != SampleSetupScript.tzero_guess:
+                script += "TimeZeroGuess=%s,\n" % str(self.tzero_guess)
         if self.et_range_low != SampleSetupScript.et_range_low or \
            self.et_range_width != SampleSetupScript.et_range_width or \
            self.et_range_high != SampleSetupScript.et_range_high:
@@ -53,6 +56,7 @@ class SampleSetupScript(BaseScriptElement):
         xml += "  <sample_input_file>%s</sample_input_file>\n" % self.sample_file
         xml += "  <incident_energy_guess>%s</incident_energy_guess>\n" % self.incident_energy_guess
         xml += "  <use_ei_guess>%s</use_ei_guess>\n" % str(self.use_ei_guess)
+        xml += "  <tzero_guess>%s</tzero_guess>\n" % str(self.tzero_guess)
         xml += "  <et_range>\n"
         xml += "    <low>%s</low>\n" % self.et_range_low
         xml += "    <width>%s</width>\n"  % self.et_range_width
@@ -82,6 +86,9 @@ class SampleSetupScript(BaseScriptElement):
             self.use_ei_guess = BaseScriptElement.getBoolElement(instrument_dom,
                                                                  "use_ei_guess",
                                                                  default=SampleSetupScript.use_ei_guess)
+            self.tzero_guess = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                 "tzero_guess",
+                                                                 default=SampleSetupScript.tzero_guess)
             self.et_range_low = BaseScriptElement.getStringElement(instrument_dom,
                                                                    "et_range/low",
                                                                    default=SampleSetupScript.et_range_low)
@@ -108,6 +115,7 @@ class SampleSetupScript(BaseScriptElement):
         self.sample_file = SampleSetupScript.sample_file
         self.incident_energy_guess = SampleSetupScript.incident_energy_guess
         self.use_ei_guess = SampleSetupScript.use_ei_guess
+        self.tzero_guess = SampleSetupScript.tzero_guess
         self.rebin_et = SampleSetupScript.rebin_et
         self.et_range_low = SampleSetupScript.et_range_low
         self.et_range_width = SampleSetupScript.et_range_width
