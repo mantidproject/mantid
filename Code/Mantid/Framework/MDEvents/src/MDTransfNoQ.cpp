@@ -41,7 +41,7 @@ namespace Mantid
     { 
 
       // get pointer to the positions of the detectors
-      std::vector<Kernel::V3D> const & DetDir = ConvParams.getDetectors()->getDetDir();
+      std::vector<Kernel::V3D> const & DetDir = ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections"); 
       m_Det = &DetDir[0];     //
 
       // get min and max values defined by the algorithm. 

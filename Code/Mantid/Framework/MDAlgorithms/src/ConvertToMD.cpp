@@ -29,6 +29,7 @@ Depending on the user input and the data, find in the input workspace, the algor
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidMDEvents/ConvToMDSelector.h"
+#include "MantidDataObjects/TableWorkspace.h" 
 #include "MantidMDEvents/MDTransfDEHelper.h"
 
 using namespace Mantid;
@@ -46,8 +47,6 @@ namespace MDAlgorithms
 
 // logger for the algorithm workspaces  
 Kernel::Logger& ConvertToMD::g_Log =Kernel::Logger::get("MD-Algorithms");
-// the variable describes the locations of the preprocessed detectors, which can be stored and reused if the algorithm runs more then once;
-MDEvents::ConvToMDPreprocDet ConvertToMD::g_DetLoc;
 //
 Mantid::Kernel::Logger & 
 ConvertToMD::getLogger(){return g_Log;}
@@ -67,8 +66,6 @@ void ConvertToMD::initDocs()
  */
 ConvertToMD::~ConvertToMD()
 {
-    // if the algorithm has gone, then the preprocessed detectors should probably too
-    g_DetLoc.clearAll();
 }
 //
 //const double rad2deg = 180.0 / M_PI;
@@ -124,11 +121,12 @@ ConvertToMD::init()
         " have to coincide with the log names for the records of these variables in the source workspace");
 
     // this property is mainly for subalgorithms to set-up as they have to identify if they use the same instrument. 
-    declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
-        "Store the part of the detectors transformation into reciprocal space to save/reuse it later.\n"
-        " Useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
-        "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another. </span>"
-        " In this case switch has to be set to false, as first instrument would be used for all workspaces othewise and no check for its validity is performed."); 
+    declareProperty(new PropertyWithValue<std::string>("PreprocessedDetectors","PreprocessedDetectorsWS",Direction::Input), 
+      "The name of the table workspace where the part of the detectors transformation into reciprocal space, calculated by [[PreprocessDetectorsToMD]] algorithm stored.\n"
+      "If the workspace is not found in analysis data service, [[PreprocessDetectorsToMD]] used to calculate it. If found, the algorithm will use the workspace from DS\n"
+      "Useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
+      "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another. </span>"
+      "In this case this property has to be set empty and the workspace will be recalculated inernaly each time the algorithm is invoked"); 
     // if one needs to use Lorentz corrections
     declareProperty(new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input), 
         "Correct the weights of events or signals and errors transformed into reciprocal space by multiplying them by the Lorentz multiplier: sin(theta)^2/lambda^4.\n"
@@ -198,57 +196,37 @@ void ConvertToMD::exec()
     // get workspace parameters and build target workspace descritpion, report if there is need to build new target MD workspace
     bool createNewTargetWs = buildTargetWSDescription(spws,QModReq,dEModReq,otherDimNames,convertTo_,targWSDescr);
 
-    // Check what to do with detectors:  
-    if(targWSDescr.isDetInfoLost())
-    { // in NoQ mode one may not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
-         g_DetLoc.buildFakeDetectorsPositions(m_InWS2D);
-    }
-    else  // preprocess or not the detectors positions
-    {
-          bool reusePreproceccedDetectors = getProperty("UsePreprocessedDetectors");
-          if(!(reusePreproceccedDetectors&&g_DetLoc.isDefined(m_InWS2D))){
-            // amount of work:
-            const size_t nHist = m_InWS2D->getNumberHistograms();
-            m_Progress.reset(new API::Progress(this,0.0,1.0,nHist));
-            g_log.information()<<" preprocessing detectors\n";
-            g_DetLoc.processDetectorsPositions(m_InWS2D,g_Log,m_Progress.get());  
-            if(g_DetLoc.nDetectors()==0)
-            {
-                g_log.error()<<" no valid detectors identified associated with spectra, nothing to do\n";
-                throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
-            }
-          }
-    }
-    targWSDescr.setDetectors(g_DetLoc);
+    // preprocess detectors;
+    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D);
 
- // create and initate new workspace or set up existing workspace as a target. 
-  if(createNewTargetWs)  // create new
-    spws = this->createNewMDWorkspace(targWSDescr);
-  else // setup existing MD workspace as workspace target.
-     m_OutWSWrapper->setMDWS(spws);
+    // create and initate new workspace or set up existing workspace as a target. 
+    if(createNewTargetWs)  // create new
+       spws = this->createNewMDWorkspace(targWSDescr);
+    else // setup existing MD workspace as workspace target.
+       m_OutWSWrapper->setMDWS(spws);
 
 
-  //DO THE JOB:
-  // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
-  ConvToMDSelector AlgoSelector;
-  m_Convertor  = AlgoSelector.convSelector(m_InWS2D,m_Convertor);
+    //DO THE JOB:
+     // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
+     ConvToMDSelector AlgoSelector;
+     m_Convertor  = AlgoSelector.convSelector(m_InWS2D,m_Convertor);
 
-  // initate conversion and estimate amout of job to do
-  size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper);
-  // progress reporter
-  m_Progress.reset(new API::Progress(this,0.0,1.0,n_steps)); 
+    // initate conversion and estimate amout of job to do
+     size_t n_steps = m_Convertor->initialize(targWSDescr,m_OutWSWrapper);
+    // progress reporter
+     m_Progress.reset(new API::Progress(this,0.0,1.0,n_steps)); 
 
-  g_log.information()<<" conversion started\n";
-  m_Convertor->runConversion(m_Progress.get());
-  copyMetaData(spws);
+     g_log.information()<<" conversion started\n";
+     m_Convertor->runConversion(m_Progress.get());
+     copyMetaData(spws);
 
-  //JOB COMPLETED:
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
-  // free the algorithm from the responsibility for the target workspace to allow it to be deleted if necessary
-  m_OutWSWrapper->releaseWorkspace();
-  // free up the sp to the input workspace, which would be deleted if nobody needs it any more;
-  m_InWS2D.reset();
-  return;
+     //JOB COMPLETED:
+     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(spws));
+   // free the algorithm from the responsibility for the target workspace to allow it to be deleted if necessary
+     m_OutWSWrapper->releaseWorkspace();
+    // free up the sp to the input workspace, which would be deleted if nobody needs it any more;
+     m_InWS2D.reset();
+     return;
 }
 
 /**
@@ -389,6 +367,55 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
   }
   return createNewWs;
 }
+/**The method responsible for preprocessing detectors positions into reciprocal space  
+  *@param InWS2D -- input Matrix workspace with defined instrument 
+  *
+  *@returns TableWorkspace_const_sptr the pointer to the table workspace which contains positions of the preprocessed detectorsl
+  *         Depenting on the algorithm parameters, this worksapce is also stored in the analysis data service. 
+ */
+DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D)
+{
+
+    DataObjects::TableWorkspace_sptr TargTableWS;
+    bool storeInDataService(true);
+    std::string WSName = std::string(getProperty("PreprocessedDetectors"));
+    if(WSName.empty()) // TargTableWS is recalculated each time;
+    {
+      storeInDataService = false;
+      WSName = "ServiceTableWS";
+    }
+    else
+    {
+      storeInDataService = true;
+      TargTableWS = API::AnalysisDataService::Instance().retrieveWS<DataObjects::TableWorkspace>(WSName);
+      // that is it, workspace exists and we may try to use it
+      if(TargTableWS)
+      {
+        // let's take at least some precaution to ensure that instrument have not changed
+        std::string currentWSInstrumentName = InWS2D->getInstrument()->getName();
+        std::string oldInstrName            = std::string(TargTableWS->getProperty("InstrumentName"));
+        if(oldInstrName==currentWSInstrumentName) return TargTableWS;
+      }
+
+    }
+
+     Mantid::API::Algorithm_sptr childAlg = createSubAlgorithm("PreprocessDetectorsToMD",0.,1.);
+     if(!childAlg)throw(std::runtime_error("Can not create child subalgorithm to preprocess detectors"));
+     childAlg->setProperty("InputWorkspace",InWS2D);
+     childAlg->setProperty("OutputWorkspace",WSName);
+
+     childAlg->execute();
+     if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child subalgorithm to preprocess detectors"));
+
+     TargTableWS = childAlg->getProperty(WSName);
+     if(!TargTableWS)throw(std::runtime_error("Can not retrieve results of child subalgorithm to preprocess detectors work"));
+
+     if(storeInDataService) API::AnalysisDataService::Instance().addOrReplace(WSName,TargTableWS);
+
+     return TargTableWS;
+
+}
+
 
 } // namespace Mantid
 } // namespace MDAlgorithms

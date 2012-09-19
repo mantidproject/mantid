@@ -11,8 +11,8 @@ set ( SRC_FILES
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
-	src/ConvToMDPreprocDet.cpp
-	src/ConvToMDSelector.cpp
+	src/ConvToMDPreprocDet.cpp # for deprication
+	src/ConvToMDSelector.cpp   # for deprication
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToReflectometryQ.cpp
 	src/CoordTransformAffine.cpp

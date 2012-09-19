@@ -44,17 +44,6 @@ void MDWSDescription::setDimUnit(unsigned int nDim,const std::string &Unit)
   m_DimUnits[nDim] = Unit;
 }
 
-/** method sets up the pointer to the class which contains detectors parameters
-* @param   -- DetLoc the class which contaits the preprocessed detectors parameters
-*
-* Throws if the parameters were not defined
-*/
-void MDWSDescription::setDetectors(const ConvToMDPreprocDet &DetLoc)
-{
-  m_DetLoc = &DetLoc;
-  if(m_DetLoc->nDetectors()==0) throw(std::invalid_argument( " Preprocessed detectors positions are either empty or undefined. Nothing to do"));
-
-}
 /** the method builds the MD ws description from existing matrix workspace and the requested transformation parameters. 
 *@param  pWS    -- input matrix workspace to be converted into MD workpsace
 *@param  QMode  -- momentum conversion mode. Any mode supported by Q conversion factory. Class just carries up the name of Q-mode, 
@@ -119,9 +108,6 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
   //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
   m_GoniomMatr = m_InWS->run().getGoniometer().getR();
 
-  // to be on a safe side, the preprocessed detectrod position should be reset at this point as we can initiate old WSDescr class with absolutely new ws;
-  m_DetLoc = NULL;
-
 } 
 
 
@@ -154,8 +140,6 @@ void MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS
   }
   m_Wtransf = Kernel::DblMatrix(pWS->getWTransf()); 
 
-  // to be on a safe side, the preprocessed detectrod position should be reset at this point as we can initiate old WSDescr class with absolutely new ws;
-  m_DetLoc = NULL;
 
 }
 /** When the workspace has been build from existing MDWrokspace, some target worskpace parameters can not be defined,
@@ -212,8 +196,7 @@ MDWSDescription::MDWSDescription(unsigned int nDimensions):
   m_GoniomMatr(3,3,true),
   m_RotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
   m_Emode(CnvrtToMD::Undef),
-  m_LorentzCorr(false),
-  m_DetLoc(NULL)
+  m_LorentzCorr(false)
 {
 
   this->resizeDimDescriptions(nDimensions);
@@ -367,15 +350,6 @@ boost::shared_ptr<Geometry::OrientedLattice> MDWSDescription::getOrientedLattice
 
 }
 
-/// function checks if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
-// will be moved to PreprocessToMD soon
-bool MDWSDescription::isDetInfoLost(Mantid::API::MatrixWorkspace_const_sptr inWS2D)
-{
-  API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
-     // if this is numeric axis, then the detector's information has been lost:
-  if(pYAxis)     return true; 
-  return false;
-}
 
 } //end namespace MDEvents 
 } //end namespace Mantid

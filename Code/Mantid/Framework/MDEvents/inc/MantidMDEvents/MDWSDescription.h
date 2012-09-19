@@ -11,6 +11,7 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
 #include "MantidMDEvents/MDTransfDEHelper.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 
 namespace Mantid
@@ -62,6 +63,9 @@ public:  // for the time being
     Kernel::DblMatrix m_GoniomMatr;
     // the vector which represent linear form of momentun transformation 
     std::vector<double> m_RotMatrix;
+
+    // preprocessed detectors workspace:
+    DataObjects::TableWorkspace_const_sptr m_PreprDetTable;
    //=======================
 /*---> accessors: */
     unsigned int         nDimensions()const{return m_NDims;}
@@ -82,15 +86,11 @@ public:  // for the time being
     void getMinMax(std::vector<double> &min,std::vector<double> &max)const;
     std::vector<double> getTransfMatrix()const{return m_RotMatrix;}
     
-    ConvToMDPreprocDet const * getDetectors(){return m_DetLoc;}
-    ConvToMDPreprocDet const * getDetectors()const{return m_DetLoc;}
-
     // workspace related helper functions, providing access to various workspace functions
     API::MatrixWorkspace_const_sptr getInWS()const{return m_InWS;}
     std::string getWSName()const{return m_InWS->name();}
     bool isPowder()const{return !m_InWS->sample().hasOrientedLattice();}
     bool hasLattice()const{return m_InWS->sample().hasOrientedLattice();}
-    bool isDetInfoLost()const{return isDetInfoLost(m_InWS);}
     double getEi()const{return getEi(m_InWS);}
     boost::shared_ptr<Geometry::OrientedLattice> getLattice()const{return getOrientedLattice(m_InWS);}
 
@@ -123,8 +123,6 @@ public:  // for the time being
     static double   getEi(API::MatrixWorkspace_const_sptr inWS2D);
    /** function extracts the coordinates from additional workspace porperties and places them to AddCoord vector for further usage*/
     static void fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimProperyNames,std::vector<coord_t> &AddCoord);
-    /** checks if matrix ws has information about detectors*/
-    static bool isDetInfoLost(Mantid::API::MatrixWorkspace_const_sptr inWS2D);
 
     static boost::shared_ptr<Geometry::OrientedLattice> getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D);
 private:
@@ -137,8 +135,6 @@ private:
     CnvrtToMD::EModes m_Emode;
     /// if one needs to calculate Lorentz corrections
     bool m_LorentzCorr;
-   // pointer to the array of detector's directions in the reciprocal space
-    ConvToMDPreprocDet const * m_DetLoc;
     /// the vector of MD coordinates, which are obtained from workspace properties.
     std::vector<coord_t> m_AddCoord;
     /// the names for the target workspace dimensions and properties of input MD workspace

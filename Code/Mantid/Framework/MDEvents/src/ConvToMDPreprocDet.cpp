@@ -1,3 +1,4 @@
+/**TODO: FOR DEPRICATION */ 
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
 #include "MantidKernel/Exception.h"
 

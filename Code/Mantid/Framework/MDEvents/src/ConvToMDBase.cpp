@@ -18,16 +18,12 @@ namespace Mantid
     */
     size_t  ConvToMDBase::initialize(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
-      m_DetLoc = WSD.getDetectors();
+
       m_InWS2D = WSD.getInWS();
 
       // check if detector information has been precalculated:
-      if(m_DetLoc)
-      {
-        if(!m_DetLoc->isDefined(m_InWS2D))throw(std::logic_error("Detector information has to be precalculated properly before this method is deployed"));
-      }else{
-        throw(std::logic_error("Detector information has to be precalculated before this method is deployed"));
-      }
+      if(!WSD.m_PreprDetTable)throw(std::runtime_error("Detector information has to be precalculated before ConvToMDBase::initialize is deployed"));
+    
 
       // set up output MD workspace wrapper
       m_OutWSWrapper = inWSWrapper;
@@ -90,7 +86,7 @@ namespace Mantid
     };  
 
     /** empty default constructor */
-    ConvToMDBase::ConvToMDBase():m_DetLoc(NULL),m_NumThreads(-1)
+    ConvToMDBase::ConvToMDBase():m_NumThreads(-1)
     { }
 
 

@@ -132,10 +132,7 @@ namespace Mantid
       m_RotMat = ConvParams.getTransfMatrix();
 
       // get pointer to the positions of the preprocessed detectors
-      ConvToMDPreprocDet const *pPrepDet = ConvParams.getDetectors();
-      if(!pPrepDet)throw(std::runtime_error("Preprocessed Detectors positions have not been properly defined "));
-
-      std::vector<Kernel::V3D> const & DetDir = pPrepDet->getDetDir();
+      std::vector<Kernel::V3D> const & DetDir = ConvParams.m_PreprDetTable->getColVector<Kernel::V3D>("DetDirections"); 
       m_Det = &DetDir[0];     //
 
       // get min and max values defined by the algorithm. 
@@ -158,7 +155,13 @@ namespace Mantid
         m_isLorentzCorrected = ConvParams.isLorentsCorrections();
         if(m_isLorentzCorrected)
         {
-          std::vector<double> const & SinThetaSq = ConvParams.getDetectors()->getSinThetaSq();
+          auto &TwoTheta =  ConvParams.m_PreprDetTable->getColVector<double>("TwoTheta"); 
+          std::vector<double> SinThetaSq(TwoTheta.size());
+          for(size_t i=0;i<TwoTheta.size();i++)
+          {
+            double sth = sin(0.5*TwoTheta[i]);
+            SinThetaSq[i]=sth*sth;
+          }
           m_SinThetaSqArray = &SinThetaSq[0];
           if(!m_SinThetaSqArray)throw(std::runtime_error("MDTransfQ3D::initialize::Uninitilized Sin(Theta)^2 array for calculating Lorentz corrections"));
         }

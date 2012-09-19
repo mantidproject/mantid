@@ -67,9 +67,6 @@ namespace MDEvents
   protected:
    // pointer to input matrix workspace;
    API::MatrixWorkspace_const_sptr m_InWS2D;
-   // common variables used by all workspace-related methods are specified here
-   // pointer to class, which describes preprocessed detectors location
-   ConvToMDPreprocDet const * m_DetLoc;
    // pointer to the class, which keeps target workspace and provides functions adding additional MD events to it. 
    boost::shared_ptr<MDEvents::MDEventWSWrapper> m_OutWSWrapper;
     // shared pointer to the converter, which convertd WS coordinates to MD coordinates

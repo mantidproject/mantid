@@ -75,9 +75,8 @@ namespace MDAlgorithms
    boost::scoped_ptr<API::Progress > m_Progress;
    /// pointer to the class, which does the particular conversion
    boost::shared_ptr<MDEvents::ConvToMDBase> m_Convertor; 
-   /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
-   static MDEvents::ConvToMDPreprocDet g_DetLoc;  
-   /// logger -> to provide logging, for MD dataset file operations
+ 
+  /// logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& g_Log;
    //------------------------------------------------------------------------------------------------------------------------------------------
    protected: //for testing, otherwise private:
@@ -94,6 +93,8 @@ namespace MDAlgorithms
        /// Store metadata
        void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;
 
+       // 
+       DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D);
  };
 
 } // namespace Mantid
