@@ -219,7 +219,7 @@ void LeBailFit::exec()
   }
   mLeBailFunction->addFunction(mBackgroundFunction);
 
-  g_log.information() << "LeBail Composite Function: " << mLeBailFunction->asString() << std::endl;
+  g_log.debug() << "LeBail Composite Function: " << mLeBailFunction->asString() << std::endl;
 
   // 5. Create output workspace
   this->createOutputDataWorkspace(workspaceindex, functionmode);
@@ -671,27 +671,41 @@ void LeBailFit::calculateDiffractionPattern(
     std::vector<std::pair<int, double> > peakheights;
     this->calPeaksIntensities(peakheights, workspaceindex);
 
-        for (size_t ipk = 0; ipk < peakheights.size(); ++ipk)
-        {
-            int hkl2 = peakheights[ipk].first;
-            std::cout << "Peak w/ HKL^2 = " << hkl2 << "  Intensity = " << peakheights[ipk].second << std::endl;
+    std::stringstream msg;
+    msg << "[DB1209 Pattern Calcuation]  Number of Peaks = " << peakheights.size() << std::endl;
 
-            CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak = mPeaks[hkl2];
-            if (!peak)
-            {
-                g_log.error() << "No peak corresponds to (HKL)^2 = " << hkl2 << std::endl;
-            }
-            else
-            {
-                peak->setParameter("Height", peakheights[ipk].second);
-            }
-        }
-    }
+    for (size_t ipk = 0; ipk < peakheights.size(); ++ipk)
+    {
+      int hkl2 = peakheights[ipk].first;
+      CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak = mPeaks[hkl2];
+      if (!peak)
+      {
+        g_log.error() << "No peak corresponds to (HKL)^2 = " << hkl2 << std::endl;
+      }
+      else
+      {
+        peak->setParameter("Height", peakheights[ipk].second);
+      }
 
-    // 3. Calcualte model pattern
-    mLeBailFunction->function(domain, values);
+      // Debug output
+      msg << "Peak HKL^2 = " << hkl2 << ", H = " << peakheights[ipk].second;
+      if (ipk % 4 == 0)
+      {
+        msg << std::endl;
+      }
+      else
+      {
+        msg << "; ";
+      }
+    } // ENDFOR: Peak
 
-    return;
+    g_log.information() << msg.str() << std::endl;
+  }
+
+  // 3. Calcualte model pattern
+  mLeBailFunction->function(domain, values);
+
+  return;
 }
 
 /*
@@ -1035,9 +1049,9 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> gro
     mBackgroundFunction->function(xvalues, bvalues);
     bkgdvalues.push_back(bvalues);
 
-    g_log.information() << "DBx359 Integrate Peak " << peakindex << ": (HKL)^2 = " << hkl2
-                        << " TOF_h = " << ipeak->centre() << " within [" << xvalues[0]
-                        << ", " << xvalues[xvalues.size()-1] << "]" << std::endl;
+    g_log.debug() << "DBx359 Integrate Peak " << peakindex << ": (HKL)^2 = " << hkl2
+                  << " TOF_h = " << ipeak->centre() << " within [" << xvalues[0]
+                  << ", " << xvalues[xvalues.size()-1] << "]" << std::endl;
 
     for (size_t j = 0; j < ndata; ++j)
     {
@@ -1096,12 +1110,14 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> gro
     g_log.debug() << "DBx406 Result Per Group: Peak " << peaks[i] << "  Height = " << intensity << std::endl;
   }
 
+  /*
   std::stringstream msg;
   for (size_t i = 0; i < peakintensities.size(); ++i)
   {
     msg << "P" << i << " = " << peakintensities[i].second << "; ";
   }
   g_log.information() << msg.str() << std::endl;
+  */
 
   return;
 }
@@ -1261,6 +1277,17 @@ void LeBailFit::setLeBailFitParameters()
       string parnamef0 = parss.str();
       CurveFitting::BoundaryConstraint* bc = new BoundaryConstraint(mLeBailFunction.get(), parnamef0, funcparam.minvalue, funcparam.maxvalue);
       mLeBailFunction->addConstraint(bc);
+
+      /*
+      for (size_t ipk = 0; ipk < mPeaks.size(); ++ipk)
+      {
+        std::stringstream parss;
+        parss << "f" << ipk << "." << parname;
+        string parnamef = parss.str();
+        CurveFitting::BoundaryConstraint* bc = new BoundaryConstraint(mLeBailFunction.get(), parnamef, funcparam.minvalue, funcparam.maxvalue);
+        mLeBailFunction->addConstraint(bc);
+      }
+      */
     }
   } // FOR-Function Parameters
 
@@ -1620,8 +1647,8 @@ bool LeBailFit::generatePeaksFromInput(size_t workspaceindex)
     // 4. Exclude peak out of range
     if (tof_h < dataWS->readX(workspaceindex)[0] || tof_h > dataWS->readX(workspaceindex).back())
     {
-      g_log.warning() << "Input peak (" << h << ", " << k << ", " << l << ") is out of range. "
-                      << "TOF_h = " << tof_h << std::endl;
+      g_log.debug() << "Input peak (" << h << ", " << k << ", " << l << ") is out of range. "
+                    << "TOF_h = " << tof_h << std::endl;
       numpeaksoutofrange ++;
 
       continue;
@@ -1778,13 +1805,13 @@ void LeBailFit::parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr b
     }
 
     // 5. Debug output
-    std::cout << "DBx416 Background Order = " << bkgdorderparams.size() << std::endl;
+    std::stringstream msg;
+    msg << "Background Order = " << bkgdorderparams.size() << ": ";
     for (size_t iod = 0; iod < bkgdorderparams.size(); ++iod)
     {
-        std::cout << "DBx416 A" << iod << " = " << bkgdorderparams[iod] << std::endl;
+      msg << "A" << iod << " = " << bkgdorderparams[iod] << "; ";
     }
-
-    g_log.information() << "DB1105 Importing background TableWorkspace is finished. " << std::endl;
+    g_log.information() << "DB1105 Importing background TableWorkspace is finished. " << msg.str() << std::endl;
 
     return;
 }
@@ -1938,8 +1965,13 @@ void LeBailFit::importParametersTable()
     mFuncParameters.insert(std::make_pair(newparameter.name, newparameter));
     mOrigFuncParameters.insert(std::make_pair(newparameter.name, newparameter.value));
 
-    g_log.information() << newparameter.name << ": " << newparameter.minvalue << ", " << newparameter.maxvalue << ", "
-                        << newparameter.stepsize << std::endl;
+    if (newparameter.fit)
+    {
+      g_log.information() << "[Input]: " << newparameter.name << ": value = " << newparameter.value
+                          << " Range: [" << newparameter.minvalue << ", " << newparameter.maxvalue
+                          << "], MC Step = " << newparameter.stepsize << ", Fit? = "
+                          << newparameter.fit << std::endl;
+    }
   }
 
   g_log.information() << "DB1118: Successfully Imported Peak Parameters TableWorkspace "
@@ -1979,11 +2011,13 @@ void LeBailFit::importReflections()
         hasPeakHeight = true;
     }
 
+    /* FIXME This section is disabled presently
     bool userexcludepeaks = false;
     if (colnames.size() >= 5 && colnames[4].compare("Include/Exclude") == 0)
     {
         userexcludepeaks = true;
     }
+    */
 
     // 2. Import data to maps
     int h, k, l;

@@ -61,10 +61,10 @@ class CreateLeBailFitInput(PythonAlgorithm):
         # 3. Import reflections list
         hkldict = self.importFullProfHKLFile(reflectionfilename)
 
-        print "Debug output"
+        print "[Create LeBailFit Inputs]"
         hkllist = sorted(hkldict.keys())
         for hkl in hkllist:
-            print "(%d, %d, %d): FWHM = %f" % (hkl[0], hkl[1], hkl[2], hkldict[hkl]["FWHM"])
+            print "Import Peak (%d, %d, %d): FWHM = %f" % (hkl[0], hkl[1], hkl[2], hkldict[hkl]["FWHM"])
 
         # 4. Import parameter file (.irf)
         peakparamsdict = self.parseFullprofPeakProfileFile(irffilename)
@@ -169,15 +169,12 @@ class CreateLeBailFitInput(PythonAlgorithm):
         bank = -1
         for il in xrange(0, len(lines)):
             line = lines[il]
-            print line
             if line.count("Bank") > 0:
                 # Line with bank
                 terms = line.split("Bank")[1].split()
                 bank = int(terms[0])
                 mdict[bank] = {}
                 
-                print "DBx705: mdict.keys: ", mdict.keys()
-
                 if len(terms) >= 4 and terms[1] == "CWL":
                     # center wave length
                     cwl = float(terms[3].split("A")[0])
@@ -189,8 +186,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
                     # Profile Type
                     profiletype = int(line.split("NPROF")[1])
     
-                    print "DBx658 bank = %d" % (bank)
-                    print "DBx658 bank keys: ", mdict.keys()
+                    print "Import .irf File.  Bank = %d" % (bank)
 
                     mdict[bank]["Profile"] = profiletype
     
@@ -305,7 +301,7 @@ class CreateLeBailFitInput(PythonAlgorithm):
             raise NotImplementedError("Bank %s does not exist in input .irf file." % (bank))
 
         for parname in sorted(paramdict[bank].keys()):
-            print "%s ; %f " % (parname, paramdict[bank][parname])
+            print "Insert parameter %s , value = %f " % (parname, paramdict[bank][parname])
             tablews.addRow([parname, paramdict[bank][parname], "f", -1.0E100, 1.0E100, 1.0])
         # ENDFOR
 

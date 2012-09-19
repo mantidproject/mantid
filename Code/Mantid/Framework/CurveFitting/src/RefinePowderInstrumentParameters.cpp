@@ -383,17 +383,17 @@ void RefinePowderInstrumentParameters::generateOutputPeakParameterWorkspace(std:
                                                        size_t workspaceindex, double prog, double deltaprog,
                                                        double& chi2, std::string& fitstatus)
   {
-      // 1. Find the observed peak center
-      double tof_h_inp = peak->centre();
+    // 1. Find the observed peak center
+    double tof_h_inp = peak->centre();
 
-      std::cout << "Find peak in range (" << tof_h_inp-leftdev << ", " <<
-                   tof_h_inp+rightdev << ")" << std::endl;
+    g_log.information() << "Find peak in range (" << tof_h_inp-leftdev << ", " <<
+                           tof_h_inp+rightdev << ")" << std::endl;
 
-      double tof_h_obs, tof_left, tof_right;
-      findMaxHeight(dataWS, workspaceindex, tof_h_inp-leftdev, tof_h_inp+rightdev,
-                    tof_h_obs, tof_left, tof_right);
+    double tof_h_obs, tof_left, tof_right;
+    findMaxHeight(dataWS, workspaceindex, tof_h_inp-leftdev, tof_h_inp+rightdev,
+                  tof_h_obs, tof_left, tof_right);
 
-      std::cout << "Found peak @ " << tof_h_obs << "  +/- " << tof_left << ", " << tof_right << std::endl;
+    g_log.information() << "Found peak @ " << tof_h_obs << "  +/- " << tof_left << ", " << tof_right << std::endl;
 
       // 2) Find local background
       /*
@@ -448,7 +448,7 @@ void RefinePowderInstrumentParameters::generateOutputPeakParameterWorkspace(std:
       rightbound = tof_h_obs + 4.0*fwhm_inp;
 
       g_log.information() << "Single peak fitting range: Left bound = " << leftbound << "  Right bound = "
-                    << rightbound << std::endl;
+                          << rightbound << std::endl;
 
       // 6) Fit peak
       g_log.information() << "FitSinglePeak + Background Function: " << compfunction->asString() << std::endl;
@@ -821,7 +821,9 @@ void RefinePowderInstrumentParameters::generateOutputPeakParameterWorkspace(std:
   bool RefinePowderInstrumentParameters::fitBackground(CurveFitting::Bk2BkExpConvPV_sptr peak, size_t workspaceindex,
                                                        CurveFitting::BackgroundFunction_sptr bkgdfunc, double xmin, double xmax)
   {
-      // 1. Re-construct a workspace for fitting the background
+    // 1. Re-construct a workspace for fitting the background
+    g_log.information() << "Fit Background For Peak @ " << peak->centre() << " of spectra " << workspaceindex
+                        << " Background function name = " << bkgdfunc->name() << " Range: " << xmin << xmax << std::endl;
 
 
       /* FIXME This disabled section will be rewritten for faster speed
@@ -1183,7 +1185,9 @@ void RefinePowderInstrumentParameters::generateOutputPeakParameterWorkspace(std:
   /** Calculate thermal neutron's d-spacing
     */
   double RefinePowderInstrumentParameters::calculateDspaceValue(std::vector<int> hkl)
-  {
+  {    
+    g_log.information() << "HKL = " << hkl[0] << hkl[1] <<  hkl[2] << std::endl;
+
       throw std::runtime_error("To be implemented soon!");
 
       return -1.0;
