@@ -57,8 +57,10 @@ namespace MDAlgorithms
 
     protected: // for testing
       void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS);
+      void buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS);
       // build a table workspace corresponding to the input matrix workspace
       boost::shared_ptr<DataObjects::TableWorkspace> createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS);
+      bool isDetInfoLost(Mantid::API::MatrixWorkspace_const_sptr inWS2D)const;
     };
 
 }  // MDEvents

@@ -355,14 +355,6 @@ void MDWSDescription::checkMinMaxNdimConsistent(const std::vector<double> &minVa
   }
 }
 
- /// function checks if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
-bool MDWSDescription::isDetInfoLost(Mantid::API::MatrixWorkspace_const_sptr inWS2D)
-{
-  API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
-     // if this is numeric axis, then the detector's information has been lost:
-  if(pYAxis)     return true; 
-  return false;
-}
  /** function retrieves copy of the oriented lattice from the workspace */
 boost::shared_ptr<Geometry::OrientedLattice> MDWSDescription::getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D)
 {
@@ -373,6 +365,16 @@ boost::shared_ptr<Geometry::OrientedLattice> MDWSDescription::getOrientedLattice
   
   return orl;
 
+}
+
+/// function checks if source workspace still has information about detectors. Some ws (like rebinned one) do not have this information any more. 
+// will be moved to PreprocessToMD soon
+bool MDWSDescription::isDetInfoLost(Mantid::API::MatrixWorkspace_const_sptr inWS2D)
+{
+  API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inWS2D->getAxis(1));
+     // if this is numeric axis, then the detector's information has been lost:
+  if(pYAxis)     return true; 
+  return false;
 }
 
 } //end namespace MDEvents 
