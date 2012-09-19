@@ -19,6 +19,10 @@ public:
       {
          PreprocessDetectorsToMD::processDetectorsPositions(inputWS,targWS);
       }
+      void buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
+      {
+          PreprocessDetectorsToMD::buildFakeDetectorsPositions(inputWS,targWS);
+      }
 };
 
 
@@ -60,14 +64,59 @@ void testPreprocessDetectors()
   double L1(0);
   uint32_t nDet(0); 
   std::string InstrName;
+  bool fakeDetectrors(false);
   TS_ASSERT_THROWS_NOTHING(nDet = tws->getProperty("ActualDetectorsNum"));
   TS_ASSERT_THROWS_NOTHING(L1  = tws->getProperty("L1"));
   TS_ASSERT_THROWS_NOTHING(InstrName =std::string(tws->getProperty("InstrumentName")));  
+  TS_ASSERT_THROWS_NOTHING(fakeDetectrors=tws->getProperty("FakeDetectors"));  
 
   TS_ASSERT_DELTA(10,L1,1.e-11);
   TS_ASSERT_EQUALS(4,nDet);
   TS_ASSERT_EQUALS("basic",InstrName);
+  TS_ASSERT(!fakeDetectrors);
 }
+
+
+void testFakeDetectors()
+{
+ 
+  TS_ASSERT_THROWS_NOTHING(pAlg->buildFakeDetectorsPositions(ws2D,tws));
+
+  size_t nVal = tws->rowCount();
+
+  auto & spec2detMap = tws->getColVector<size_t>("spec2detMap");
+  auto & detId       = tws->getColVector<int32_t>("DetectorID");
+  auto &detIDMap     = tws->getColVector<size_t>("detIDMap");
+  auto &L2         = tws->getColVector<double>("L2");
+  auto &TwoTheta   = tws->getColVector<double>("TwoTheta");
+  auto &Azimuthal  = tws->getColVector<double>("Azimuthal");
+  auto &detDir     = tws->getColVector<Kernel::V3D>("DetDirections"); 
+
+  for(size_t i=0;i<nVal;i++)
+  {
+    TS_ASSERT_EQUALS(i,spec2detMap[i]);
+    TS_ASSERT_EQUALS(i,detId[i]);
+    TS_ASSERT_EQUALS(i,detIDMap[i]);
+    TS_ASSERT_DELTA(1,L2[i],1.e-11);
+    TS_ASSERT_DELTA(0,TwoTheta[i],1.e-11);
+    TS_ASSERT_DELTA(0,Azimuthal[i],1.e-11);
+  }
+
+  double L1(0);
+  uint32_t nDet(0); 
+  std::string InstrName;
+  bool fakeDetectrors(false);
+  TS_ASSERT_THROWS_NOTHING(nDet = tws->getProperty("ActualDetectorsNum"));
+  TS_ASSERT_THROWS_NOTHING(L1  = tws->getProperty("L1"));
+  TS_ASSERT_THROWS_NOTHING(InstrName =std::string(tws->getProperty("InstrumentName")));  
+  TS_ASSERT_THROWS_NOTHING(fakeDetectrors=tws->getProperty("FakeDetectors"));  
+
+  TS_ASSERT_DELTA(1,L1,1.e-11);
+  TS_ASSERT_EQUALS(4,nDet);
+  TS_ASSERT_EQUALS("FakeInstrument",InstrName);
+  TS_ASSERT(fakeDetectrors);
+}
+
 
 PreprocessDetectorsToMDTest()
 {
