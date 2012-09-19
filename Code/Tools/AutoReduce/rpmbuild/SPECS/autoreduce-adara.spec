@@ -1,7 +1,7 @@
 Summary: autoreduce-adara
 Name: autoreduce-adara
 Version: 1.0
-Release: 1 
+Release: 2 
 Group: Applications/Engineering
 prefix: /usr
 BuildRoot: %{_tmppath}/%{name}
@@ -27,7 +27,6 @@ Autoreduce program to automatically reduce neutron data after a run
 rm -rf %{buildroot}
 mkdir -p %{buildroot}%{_sysconfdir}/autoreduce
 install -m 664	../autoreduce-adara/etc/autoreduce/icat4.cfg	 %{buildroot}%{_sysconfdir}/autoreduce/icat4.cfg
-install -m 664	../autoreduce-adara/etc/autoreduce/icatclient.properties	 %{buildroot}%{_sysconfdir}/autoreduce/icatclient.properties
 install -m 755 -d 	 ../autoreduce-adara/usr	 %{buildroot}/usr
 mkdir -p %{buildroot}%{_bindir}
 install -m 755	 ../autoreduce-adara/usr/bin/ingestNexus_adara	 %{buildroot}%{_bindir}/ingestNexus_adara
@@ -36,11 +35,9 @@ install -m 755	 ../autoreduce-adara/usr/bin/process_run_adara.sh	 %{buildroot}%{
 
 %post
 chgrp snswheel %{_sysconfdir}/autoreduce/icat4.cfg
-chgrp snswheel %{_sysconfdir}/autoreduce/icatclient.properties
 
 %files
 %config %{_sysconfdir}/autoreduce/icat4.cfg
-%config %{_sysconfdir}/autoreduce/icatclient.properties
 %attr(755, -, -) %{_bindir}/ingestNexus_adara
 %attr(755, -, -) %{_bindir}/ingestReduced_adara
 %attr(755, -, -) %{_bindir}/process_run_adara.sh
