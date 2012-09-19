@@ -24,7 +24,7 @@ class DataCorrectionsScript(BaseScriptElement):
     det_van_integration = False
     det_van_int_range_low = ''
     det_van_int_range_high = ''
-    det_van_int_range_units = 'DeltaE'
+    det_van_int_range_units = 'Energy'
     save_proc_det_van = False
     use_proc_det_van = False    
     
@@ -38,8 +38,10 @@ class DataCorrectionsScript(BaseScriptElement):
             script +=  "FilterBadPulses=%s,\n" % self.filter_bad_pulses
         script += "IncidentBeamNormalisation=\"%s\",\n" % self.incident_beam_norm
         if self.incident_beam_norm == "ToMonitor":
-            script += "MonitorIntRangeLow=\"%s\",\n" % self.monitor_int_low
-            script += "MonitorIntRangeHigh=\"%s\",\n" % self.monitor_int_high
+            if self.monitor_int_low != DataCorrectionsScript.monitor_int_low:
+                script += "MonitorIntRangeLow=\"%s\",\n" % self.monitor_int_low
+            if self.monitor_int_high != DataCorrectionsScript.monitor_int_high:
+                script += "MonitorIntRangeHigh=\"%s\",\n" % self.monitor_int_high
         if self.tib_subtraction:
             script += "TimeIndepBackgroundSub=%s,\n" % self.tib_subtraction
             script += "TibTofRangeStart=\"%s\",\n" % self.tib_tof_start

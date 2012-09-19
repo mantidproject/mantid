@@ -33,9 +33,9 @@ class SampleSetupScript(BaseScriptElement):
         
     def to_script(self):
         script =  "SampleInputFile=\"%s\",\n" % self.sample_file
-        if detcal_file != SampleSetupScript.detcal_file:
+        if self.detcal_file != SampleSetupScript.detcal_file:
             script += "DetCalFilename=\"%s\",\n" % self.detcal_file
-        if relocate_dets != SampleSetupScript.relocate_dets:
+        if self.relocate_dets != SampleSetupScript.relocate_dets:
             script += "RelocateDetectors=%s,\n" % self.relocate_dets
         script += "IncidentEnergyGuess=\"%s\",\n" % self.incident_energy_guess
         if self.use_ei_guess != SampleSetupScript.use_ei_guess:
