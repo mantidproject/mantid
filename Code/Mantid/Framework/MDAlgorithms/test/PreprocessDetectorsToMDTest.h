@@ -117,6 +117,38 @@ void testFakeDetectors()
   TS_ASSERT(fakeDetectrors);
 }
 
+void testTheAlg()
+{
+    auto pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(new PrepcocessDetectorsToMDTestHelper());
+    TS_ASSERT_THROWS_NOTHING(pAlg->initialize());
+
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testMatrWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","PreprocessedDetectors"));
+
+    TS_ASSERT_THROWS_NOTHING(pAlg->execute());
+    TSM_ASSERT("Should be successful ",pAlg->isExecuted());
+
+    API::Workspace_sptr wsOut =  API::AnalysisDataService::Instance().retrieve("PreprocessedDetectors");
+    TSM_ASSERT("can not retrieve table worksapce from analysis data service ",wsOut);
+    DataObjects::TableWorkspace_sptr tws = boost::dynamic_pointer_cast< DataObjects::TableWorkspace>(wsOut);
+    TSM_ASSERT("can not interpet the workspace as table workspace",tws);
+
+   double L1(0);
+  uint32_t nDet(0); 
+  std::string InstrName;
+  bool fakeDetectrors(false);
+  TS_ASSERT_THROWS_NOTHING(nDet = tws->getProperty("ActualDetectorsNum"));
+  TS_ASSERT_THROWS_NOTHING(L1  = tws->getProperty("L1"));
+  TS_ASSERT_THROWS_NOTHING(InstrName =std::string(tws->getProperty("InstrumentName")));  
+  TS_ASSERT_THROWS_NOTHING(fakeDetectrors=tws->getProperty("FakeDetectors"));  
+
+  TS_ASSERT_DELTA(10,L1,1.e-11);
+  TS_ASSERT_EQUALS(4,nDet);
+  TS_ASSERT_EQUALS("basic",InstrName);
+  TS_ASSERT(!fakeDetectrors);
+
+}
+
 
 PreprocessDetectorsToMDTest()
 {
@@ -127,7 +159,7 @@ PreprocessDetectorsToMDTest()
      // add workspace energy
      ws2D->mutableRun().addProperty("Ei",13.,"meV",true);
 
-     API::AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+     API::AnalysisDataService::Instance().addOrReplace("testMatrWS", ws2D);
 
 
 }
