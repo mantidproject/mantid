@@ -22,7 +22,8 @@
     <livedata address="NDXCRISP:6789" />
   </instrument>
 
-  <instrument name="ENGIN-X" shortname="ENGINX" zeropadding="8">
+  <instrument name="ENGIN-X" shortname="ENGINX" >
+    <zeropadding size="8"/>
     <technique>Neutron Diffraction</technique>
     <livedata address="NDXENGINX:6789" />
   </instrument>
@@ -79,6 +80,7 @@
   </instrument>
 
   <instrument name="OSIRIS" shortname="OSI" beamline="N6">
+    <zeropadding size="8" startRunNumber="99780" prefix="OSIRIS"/>
     <technique>Neutron Diffraction</technique>
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
@@ -124,60 +126,70 @@
     <livedata address="NDXVESUVIO:6789" />
   </instrument>
   
-  <instrument name="LET" zeropadding="8">
+  <instrument name="LET">
+    <zeropadding size="8"/>
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <livedata address="NDXLET:6789" />
   </instrument>
 
-  <instrument name="NIMROD" zeropadding="8">
+  <instrument name="NIMROD">
+    <zeropadding size="8"/>
     <technique>Neutron Diffraction</technique>
     <technique>Neutron Diffraction with isotopic substitution</technique>
     <livedata address="NDXNIMROD:6789" />
   </instrument>
 
-  <instrument name="OFFSPEC" zeropadding="8">
+  <instrument name="OFFSPEC">
+    <zeropadding size="8"/>
     <technique>Reflectometry</technique>
     <livedata address="NDXOFFSPEC:6789" />
   </instrument>
 
-  <instrument name="POLREF" zeropadding="8">
+  <instrument name="POLREF">
+    <zeropadding size="8"/>
     <technique>Reflectometry</technique>
     <livedata address="NDXPOLREF:6789" />
   </instrument>
 
-  <instrument name="SANS2D" zeropadding="8">
+  <instrument name="SANS2D">
+    <zeropadding size="8"/>
     <technique>Small Angle Scattering</technique>
     <livedata address="NDXSANS2D:6789" />
   </instrument>
   
-  <instrument name="WISH" zeropadding="8">
+  <instrument name="WISH">
+    <zeropadding size="8"/>
     <technique>Neutron Diffraction</technique>
     <technique>Powder Diffraction</technique>
     <technique>Single Crystal Diffraction</technique>
     <livedata address="NDXWISH:6789" />
   </instrument>
   
-  <instrument name="HIFI" zeropadding="8">
+  <instrument name="HIFI">
+    <zeropadding size="8"/>
     <technique>Muon level crossing resonance</technique>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXHIFI:6789" />
   </instrument>
   
-  <instrument name="MUSR" zeropadding="8">
+  <instrument name="MUSR">
+    <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXMUSR:6789" />
   </instrument>
   
-  <instrument name="EMU" zeropadding="8">
+  <instrument name="EMU">
+    <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXEMU:6789" />
   </instrument>  
  
-  <instrument name="ARGUS" zeropadding="7">
+  <instrument name="ARGUS">
+    <zeropadding size="7"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXARGUS:6789" />
@@ -186,6 +198,8 @@
   <livedata listener="ISISHistoDataListener"/>
 
   <instrument name="TESTHISTOLISTENER"> 
+    <zeropadding size="8"/>
+    <zeropadding size="11" startRunNumber="300" prefix="TST"/>
     <technique>Test ISISHistoDataListener</technique>
     <livedata address="127.0.0.1:6789" />
   </instrument>
