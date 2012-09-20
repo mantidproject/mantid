@@ -107,6 +107,12 @@ void testISLorents()
 
   // let's preprocess detectors positions to go any further
   WSDescr.m_PreprDetTable = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2D);
+  // let's set 2Theta=0 for simplicity and violate const correctness for testing purposes here
+  auto &TwoTheta  = const_cast<std::vector<double> &>(WSDescr.m_PreprDetTable->getColVector<double>("TwoTheta"));
+  for(size_t i=0;i<TwoTheta.size();i++)
+  {
+    TwoTheta[i]=0;
+  }
 
   TSM_ASSERT_THROWS_NOTHING("should initialize properly: ",Q3DTransf.initialize(WSDescr));
   TSM_ASSERT("Should not be lorentz corrected by default ",!Q3DTransf.getLorentzCorr());

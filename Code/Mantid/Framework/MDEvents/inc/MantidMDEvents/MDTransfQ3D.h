@@ -74,6 +74,8 @@ protected:
     bool m_isLorentzCorrected;
     // pointer to the array of precalculated sin^2(Theta) values for all detectors, used if Lorentz corrections calculations are requested
     double const * m_SinThetaSqArray;
+    // the vector containing precaluclated sin^2(theta) values
+    std::vector<double> SinThetaSq;
     // current value of Sin(Theta)^2 corresponding to the current detector value and used to calculate Lorentz corrections
     double m_SinThetaSq;
     // all other variables are the same as in ModQ   
