@@ -370,7 +370,7 @@ class ISISInstrument(instrument.Instrument):
         
         isis = mtd.settings.facility('ISIS')
         # Number of digits in standard file name
-        self.run_number_width = isis.instrument(self._NAME).zeroPadding()
+        self.run_number_width = isis.instrument(self._NAME).zeroPadding(0)
 
         #this variable isn't used again and stops the instrument from being deep copied if this instance is deep copied
         self.definition = None
