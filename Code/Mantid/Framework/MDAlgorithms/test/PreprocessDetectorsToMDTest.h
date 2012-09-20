@@ -92,6 +92,9 @@ void testFakeDetectors()
   auto &Azimuthal  = tws->getColVector<double>("Azimuthal");
   auto &detDir     = tws->getColVector<Kernel::V3D>("DetDirections"); 
 
+  TS_ASSERT(&detDir[0]);
+  TS_ASSERT_EQUALS(mVal,detDir.size());
+
   for(size_t i=0;i<nVal;i++)
   {
     TS_ASSERT_EQUALS(i,spec2detMap[i]);

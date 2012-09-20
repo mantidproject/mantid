@@ -208,9 +208,10 @@ namespace Mantid
       g_log.information()<<"finished preprocessing detectors locations, found: "<<liveDetectorsCount<<" detectors out of: "<<nHist<<" Histohrams\n";
     }
 
-    /** method calculates fake detectors positoin in the case whein real detector information has been lost  */
+    /** method calculates fake detectors positions in the situation when real detector information has been lost  */
     void PreprocessDetectorsToMD::buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
     {
+      UNUSED_ARG(inputWS);
       // set sample-detector postion equal to 1;
       targWS->setProperty<double>("L1",1.);
       // 
@@ -227,13 +228,9 @@ namespace Mantid
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
 
 
-      //// progress messave appearence
-      size_t div=100;
+      //// progress messave appearence  
       size_t nHist = targWS->rowCount();
-      Mantid::API::Progress theProgress(this,0,1,nHist);
-      //// Loop over the spectra
-      uint32_t liveDetectorsCount(0);
-
+      targWS->setProperty<uint32_t>("ActualDetectorsNum",uint32_t(nHist));
 
       double polar(0);
       // Loop over the spectra

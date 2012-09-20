@@ -50,9 +50,10 @@ void testInitAndSetNumThreads()
   ConvToMDBaseTestHelper testClass;
   TS_ASSERT_THROWS_NOTHING(outWSWrapper->createEmptyMDWS(WSD));
 
-  TSM_ASSERT_THROWS("Should throw if detectors prepositions are not initiated ",testClass.initialize(WSD,outWSWrapper),std::logic_error);
-  // should calculate the detectors info
+  TSM_ASSERT_THROWS("Should throw if detectors prepositions are not initiated ",testClass.initialize(WSD,outWSWrapper),std::runtime_error);
+  // should calculate the detectors info for WDS
   this->buildDetInfo(ws2D);
+
   TS_ASSERT_THROWS_NOTHING(testClass.initialize(WSD,outWSWrapper));
   TSM_ASSERT_EQUALS("uninitiated num threads parameter should be still equal -1",-1,testClass.getNumThreads());
   

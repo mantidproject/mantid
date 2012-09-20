@@ -1159,7 +1159,6 @@ namespace WorkspaceCreationHelper
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
 
       //// progress messave appearence
-      size_t div=100;
       size_t nHist = targWS->rowCount();
         //// Loop over the spectra
       uint32_t liveDetectorsCount(0);
