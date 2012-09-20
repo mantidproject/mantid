@@ -77,7 +77,7 @@ bool ConvertToMDEventsWSBase::fillAddProperties(std::vector<coord_t> &Coord,size
   *                      unit conversion (if any) 
   * @param pWSWrapper -- shared pointer to target MD Event workspace to add converted events to.
 */
-size_t  ConvertToMDEventsWSBase::setUPConversion(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+size_t  ConvertToMDEventsWSBase::setUPConversion(const MDEvents::MDWSDescriptionDepricated &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
 {
         TWS   = WSD;
         inWS2D= TWS.getInWS();

@@ -18,7 +18,7 @@
        on ws with oriented lattice by writing the templated class and 
        Overloading the methods:
    public:
-       size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
+       size_t setUPConversion(Mantid::API::MatrixWorkspace_sptr , const PreprocessedDetectors &,const MDEvents::MDWSDescriptionDepricated &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
        void runConversion(API::Progress *);
    private:
       virtual size_t conversionChunk(size_t job_ID);
@@ -70,7 +70,7 @@ class ConvertToMDEventsWS: public ConvertToMDEventsWSBase
 public:
     ConvertToMDEventsWS(){};
     /**templated virtual function to set up conversion*/
-    size_t setUPConversion(const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
+    size_t setUPConversion(const MDEvents::MDWSDescriptionDepricated &, boost::shared_ptr<MDEvents::MDEventWSWrapper> )
     {return 0;}
     /**templated virtual function to run conversion itself*/
     void runConversion(API::Progress *){};
@@ -87,7 +87,7 @@ class ConvertToMDEventsWS: public ConvertToMDEventsWSBase
 public:
     ConvertToMDEventsWS(){};
     /**templated virtual function to set up conversion*/
-    size_t setUPConversion(const MDEvents::MDWSDescription &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
+    size_t setUPConversion(const MDEvents::MDWSDescriptionDepricated &, boost::shared_ptr<MDEvents::MDEventWSWrapper> );
     /**templated virtual function to run conversion itself*/
     void runConversion(API::Progress *);
 protected:

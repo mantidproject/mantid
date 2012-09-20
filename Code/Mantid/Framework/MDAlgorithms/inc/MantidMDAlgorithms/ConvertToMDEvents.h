@@ -2,7 +2,7 @@
 #define MANTID_MD_CONVERT2_MDEVENTS
 /**TODO: FOR DEPRICATION */ 
 
-#include "MantidMDEvents/MDWSDescription.h"
+#include "MantidMDEvents/MDWSDescriptionDepricated.h"
 #include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidMDAlgorithms/ConvertToMDEventsSubalgFactory.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
@@ -67,7 +67,7 @@ namespace MDAlgorithms
    /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper;
    /// the properties of the requested target MD workpsace:
-    MDEvents::MDWSDescription TWSD;
+    MDEvents::MDWSDescriptionDepricated TWSD;
    /// the variable which keeps preprocessed positions of the detectors if any availible (TODO: should it be a table ws and separate algorithm?);
    static MDEvents::ConvToMDPreprocDet det_loc;  
   /// progress reporter

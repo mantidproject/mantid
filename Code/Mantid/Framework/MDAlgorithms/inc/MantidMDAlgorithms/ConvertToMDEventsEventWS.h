@@ -69,7 +69,7 @@ class ConvertToMDEventsWS<ConvertToMD::EventWSType,Q,MODE,CONV,Sample>: public C
      // vector to keep generic part of event coordinates
      std::vector<coord_t> Coord;
  public:
-    size_t  setUPConversion(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+    size_t  setUPConversion(const MDEvents::MDWSDescriptionDepricated &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
         size_t numSpec=ConvertToMDEventsWSBase::setUPConversion(WSD,inWSWrapper);
 

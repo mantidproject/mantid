@@ -14,13 +14,14 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 //
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDBoxBase.h"
 #include "MantidMDEvents/ConvToMDBase.h"
 #include "MantidMDEvents/ConvToMDSelector.h"
-#include "MantidMDEvents/ConvToMDPreprocDet.h"
+
 
 
 using namespace Mantid;
@@ -42,7 +43,7 @@ class ConvToMDEventsVSHistoTest : public CxxTest::TestSuite
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pEventMDWSWrapper;
 
    // preprocessed detectors positions and target ws description
-   ConvToMDPreprocDet det_loc;
+   DataObjects::TableWorkspace_sptr detLoc;
    MDEvents::MDWSDescription TestWS;
 
    std::auto_ptr<ConvToMDBase> pConvMethods;
@@ -59,11 +60,6 @@ static ConvToMDEventsVSHistoTest *createSuite() {
 }
 static void destroySuite(ConvToMDEventsVSHistoTest  * suite) { delete suite; }    
 
-void test_PreprocessDetectors()
-{
-    TS_ASSERT_THROWS_NOTHING(det_loc.processDetectorsPositions(ws2D,logProvider.getLogger(),logProvider.getProgress()));
-
-}
 
 void test_TwoTransfMethods()
 {
@@ -71,7 +67,7 @@ void test_TwoTransfMethods()
     // define the parameters of the conversion
     std::vector<std::string> dimProperyNames; //--- empty property names
     TS_ASSERT_THROWS_NOTHING(TestWS.buildFromMatrixWS(ws2D,"Q3D","Direct",dimProperyNames));
-    TS_ASSERT_THROWS_NOTHING(TestWS.setDetectors(det_loc));
+    TestWS.m_PreprDetTable = detLoc;
 
     std::vector<double> dimMin(4,-3);
     std::vector<double> dimMax(4, 3);
@@ -115,7 +111,7 @@ void test_buildFromEWS()
      // build ws description from event ws
      std::vector<std::string> dimProperyNames; //--- empty property names
      TS_ASSERT_THROWS_NOTHING(TestWS.buildFromMatrixWS(outWS,"Q3D","Direct",dimProperyNames));
-     TS_ASSERT_THROWS_NOTHING(TestWS.setDetectors(det_loc));
+     TestWS.m_PreprDetTable = detLoc;
 
      ws_events =boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outWS);
      if (!ws_events){
@@ -231,6 +227,8 @@ logProvider(100)
    ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);
    // this should disable multithreading
    ws2D->mutableRun().addProperty("NUM_THREADS",0);  
+
+   detLoc = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2D);
   
 }
 // function repeats convert to events algorithm which for some mysterious reasons do not work here as subalgorithm.

@@ -72,7 +72,7 @@ class ConvertToMDEventsWS<ConvertToMD::Ws2DHistoType,Q,MODE,CONV,Sample>: public
      // not yet parallel
      virtual size_t conversionChunk(size_t job_ID){UNUSED_ARG(job_ID); return 0;}
 public:
-    size_t  setUPConversion(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
+    size_t  setUPConversion(const MDEvents::MDWSDescriptionDepricated &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper)
     {
         size_t numSpec=ConvertToMDEventsWSBase::setUPConversion(WSD,inWSWrapper);
         // initiate the templated class which does the conversion of workspace data into MD WS coordinates;

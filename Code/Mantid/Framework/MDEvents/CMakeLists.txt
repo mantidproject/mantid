@@ -50,6 +50,7 @@ set ( SRC_FILES
 	src/MDTransfNoQ.cpp
 	src/MDTransfQ3D.cpp
 	src/MDWSDescription.cpp
+	src/MDWSDescriptionDepricated.cpp	
 	src/MDWSTransform.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
@@ -129,6 +130,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/MDTransfNoQ.h
 	inc/MantidMDEvents/MDTransfQ3D.h
 	inc/MantidMDEvents/MDWSDescription.h
+	inc/MantidMDEvents/MDWSDescriptionDepricated.h
 	inc/MantidMDEvents/MDWSTransform.h
 	inc/MantidMDEvents/OneStepMDEW.h
 	inc/MantidMDEvents/QueryMDWorkspace.h

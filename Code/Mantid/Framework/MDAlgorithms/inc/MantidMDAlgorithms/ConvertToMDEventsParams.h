@@ -5,7 +5,7 @@
 #include <string>
 #include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidMDEvents/MDWSDescription.h"
+#include "MantidMDEvents/MDWSDescriptionDepricated.h"
 
 namespace Mantid
 {
@@ -122,7 +122,7 @@ class DLLExport ConvertToMDEventsParams
 
   /** The main purpose of this class: identifies the ID of the conversion subalgorithm to run on a workspace and fills in ws description */
   std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                               const Strings &other_dim_names,size_t maxNdim,MDEvents::MDWSDescription &TargWSDescription);
+                               const Strings &other_dim_names,size_t maxNdim,MDEvents::MDWSDescriptionDepricated &TargWSDescription);
   /** get the identifier of the correspondent algorithm as function of integer ws ID-s. This function is used during subalgorithm instanciation
     * to generate algorithmID, which will be used later (through funcion identifyTheAlg) to retrive suitable subalgorithm.  */
   std::string getAlgoID(QMode Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS,SampleType Sample)const;
@@ -163,15 +163,15 @@ class DLLExport ConvertToMDEventsParams
   std::string parseDEMode(const std::string &Q_MODE_ID,const std::string &dE_mode_req,const Strings &ws_dim_units,                                
                                 Strings &out_dim_units,int &ndE_dims,std::string &natural_units)const;
  /// identify what kind of input workspace is there:
-  std::string parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS, MDEvents::MDWSDescription &TargWSDescription)const;
+  std::string parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS, MDEvents::MDWSDescriptionDepricated &TargWSDescription)const;
    //<---< Parts of the identifyMatrixAlg;
 
   /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS  as function of the input artuments and the WS format */
   std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                Strings &out_dim_units,MDEvents::MDWSDescription &TargWSDescription);
+                                Strings &out_dim_units,MDEvents::MDWSDescriptionDepricated &TargWSDescription);
 
   /** function builds list of dimension names, dimension units and dimension ID-s used to describe target MD workspace as the function of MD workspace and selected subalgorithm */
-  void buildMDDimDescription(API::MatrixWorkspace_const_sptr inWS,const std::string &AlgoID,const Strings &other_dim_names,MDEvents::MDWSDescription &TargWSDescription)const;
+  void buildMDDimDescription(API::MatrixWorkspace_const_sptr inWS,const std::string &AlgoID,const Strings &other_dim_names,MDEvents::MDWSDescriptionDepricated &TargWSDescription)const;
 
   /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */
    void getAddDimensionNames(API::MatrixWorkspace_const_sptr inMatrixWS,Strings &addDimNames,Strings &addDimUnits)const;

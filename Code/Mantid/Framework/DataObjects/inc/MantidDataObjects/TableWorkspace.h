@@ -165,7 +165,7 @@ namespace DataObjects
     template<class T> 
     const std::vector<T> & getColVector(const std::string& name)const
     {
-      column_it ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));
+      auto ci = std::find_if(m_columns.begin(),m_columns.end(),FindName(name));
       if(ci == m_columns.end())throw(std::runtime_error("column with name: "+name+" does not exist"));
       auto pTableCol = dynamic_cast<TableColumn<T> *>(ci->get());
       if(pTableCol)
@@ -356,6 +356,10 @@ private:
         FindName(const std::string& name):m_name(name){}
         /// Comparison operator
         bool operator()(boost::shared_ptr<API::Column>& cp)const
+        {
+            return cp->name() == m_name;
+        }
+        bool operator()(const boost::shared_ptr<const API::Column>& cp)const
         {
             return cp->name() == m_name;
         }

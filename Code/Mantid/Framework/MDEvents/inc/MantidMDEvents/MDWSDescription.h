@@ -113,7 +113,6 @@ public:  // for the time being
    void setDimName(unsigned int nDim,const std::string &Name);
    // this is rather misleading function, as MD workspace do not have dimension units
    void setDimUnit(unsigned int nDim,const std::string &Unit);
-   void setDetectors(const ConvToMDPreprocDet &g_DetLoc);
    /** do we need to perform Lorentz corrections */ 
    void setLorentsCorr(bool On=false){m_LorentzCorr=On;}
 // static helper functions:
@@ -125,7 +124,7 @@ public:  // for the time being
     static void fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimProperyNames,std::vector<coord_t> &AddCoord);
 
     static boost::shared_ptr<Geometry::OrientedLattice> getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D);
-private:
+protected: // until MDWSDesctiptionDepricatedExist
     /// the variable which describes the number of the dimensions, in the target workspace. 
     /// Calculated from number of input properties and the operations, performed on input workspace;
     unsigned int m_NDims;

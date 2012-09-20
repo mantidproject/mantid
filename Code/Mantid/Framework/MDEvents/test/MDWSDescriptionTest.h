@@ -16,7 +16,7 @@ public:
   void testBuildFromMatrixWS2D()
   {
     MDWSDescription WSD;
-    TSM_ASSERT("Initial preprocessed detector state should be NULL ",WSD.getDetectors()==NULL);
+
     // dimensions (min-max) have not been set
     TS_ASSERT_THROWS(WSD.buildFromMatrixWS(ws2D,"|Q|","Direct"),std::invalid_argument);
     std::vector<double> dimMin(2,-1);
@@ -25,7 +25,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(WSD.buildFromMatrixWS(ws2D,"|Q|","Direct"));
     TS_ASSERT_EQUALS(2,WSD.nDimensions());
 
-    TSM_ASSERT("initiating from new matix workspace should nullify preprocessed detectors pointer",WSD.getDetectors()==NULL);
 
   }
   void testBuildFromMatrixWS4D()
@@ -44,7 +43,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(WSD.buildFromMatrixWS(ws2D,"|Q|","Indirect",PropNamews));
     TS_ASSERT_EQUALS(4,WSD.nDimensions());
 
-    TSM_ASSERT("initiating from new matix workspace should nullify preprocessed detectors pointer",WSD.getDetectors()==NULL);
   }
   void testGetWS4DimIDFine()
   {
@@ -64,11 +62,10 @@ public:
     std::vector<std::string> dim_units = TWS.getDimUnits();
     TSM_ASSERT_EQUALS("Last dimension of Inelastic transformation should be DeltaE","DeltaE",dim_units[3]);
     TSM_ASSERT_EQUALS("Alg ID would be: ","Q3D",TWS.AlgID);
-    TSM_ASSERT("detector infromation should be present in the workspace ",!TWS.isDetInfoLost());
+
 
     TS_ASSERT_THROWS_NOTHING(TWS.buildFromMatrixWS(ws2D,TWS.AlgID,"Indirect",other_dim_names));
 
-    TSM_ASSERT("initiating from new matix workspace should nullify preprocessed detectors pointer",TWS.getDetectors()==NULL);
     //std::vector<std::string> dimID= TWS.getDefaultDimIDQ3D(1);
     //for(size_t i=0;i<4;i++)
     //{

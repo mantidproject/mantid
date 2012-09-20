@@ -1087,4 +1087,142 @@ namespace WorkspaceCreationHelper
     return peaksWS;
   }
 
+   /** helper method to create preprocessed detector's table workspace */
+   boost::shared_ptr<DataObjects::TableWorkspace> createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS)
+    {
+      const size_t nHist = inputWS->getNumberHistograms();
+
+      // set the target workspace
+      auto targWS = boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace(nHist));
+      // detectors positions
+      if(!targWS->addColumn("V3D","DetDirections"))throw(std::runtime_error("Can not add column DetDirectrions"));
+      // sample-detector distance;
+      if(!targWS->addColumn("double","L2"))throw(std::runtime_error("Can not add column L2"));
+      // Diffraction angle
+      if(!targWS->addColumn("double","TwoTheta"))throw(std::runtime_error("Can not add column TwoTheta"));
+      if(!targWS->addColumn("double","Azimuthal"))throw(std::runtime_error("Can not add column Azimuthal"));
+      // the detector ID;
+      if(!targWS->addColumn("int32_t","DetectorID"))throw(std::runtime_error("Can not add column DetectorID"));
+      // stores spectra index which corresponds to a valid detector index;
+      if(!targWS->addColumn("size_t","detIDMap"))throw(std::runtime_error("Can not add column detIDMap"));
+      // stores detector index which corresponds to the workspace index;
+      if(!targWS->addColumn("size_t","spec2detMap"))throw(std::runtime_error("Can not add column spec2detMap"));
+      // will see about that
+      // sin^2(Theta)
+      //    std::vector<double>      SinThetaSq;
+
+      targWS->declareProperty(new Kernel::PropertyWithValue<std::string>("InstrumentName",""),"The name which should unique identify current instrument");
+      targWS->declareProperty(new Kernel::PropertyWithValue<double>("L1",0),"L1 is the source to sample distance");
+      targWS->declareProperty(new Kernel::PropertyWithValue<uint32_t>("ActualDetectorsNum",0),"The actual number of detectors receivinv signal");
+      targWS->declareProperty(new Kernel::PropertyWithValue<bool>("FakeDetectors",false),"If the detectors were actually processed from real instrument or generated for some fake one ");
+      return targWS;
+    }
+
+    /** method does preliminary calculations of the detectors positions to convert results into k-dE space ;
+    and places the resutls into static cash to be used in subsequent calls to this algorithm */
+  void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
+    {  
+      // 
+      Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
+      //this->pBaseInstr                = instrument->baseInstrument();
+      //
+      Geometry::IObjComponent_const_sptr source = instrument->getSource();
+      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      if ((!source) || (!sample)) 
+      {
+ 
+        throw Kernel::Exception::InstrumentDefinitionError("Instrubment not sufficiently defined: failed to get source and/or sample");
+      }
+
+      // L1
+      try
+      {
+        double L1  = source->getDistance(*sample);
+        targWS->setProperty<double>("L1",L1);
+      }
+      catch (Kernel::Exception::NotFoundError &)
+      { 
+        throw Kernel::Exception::InstrumentDefinitionError("Unable to calculate source-sample distance for workspace", inputWS->getTitle());  
+      }
+      // Instrument name
+      std::string InstrName=instrument->getName();
+      targWS->setProperty<std::string>("InstrumentName",InstrName);
+      targWS->setProperty<bool>("FakeDetectors",false);
+
+      // get access to the workspace memory
+      auto &sp2detMap  = targWS->getColVector<size_t>("spec2detMap");
+      auto &detId      = targWS->getColVector<int32_t>("DetectorID");
+      auto &detIDMap   = targWS->getColVector<size_t>("detIDMap");
+      auto &L2         = targWS->getColVector<double>("L2");
+      auto &TwoTheta   = targWS->getColVector<double>("TwoTheta");
+      auto &Azimuthal  = targWS->getColVector<double>("Azimuthal");
+      auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
+
+      //// progress messave appearence
+      size_t div=100;
+      size_t nHist = targWS->rowCount();
+        //// Loop over the spectra
+      uint32_t liveDetectorsCount(0);
+      for (size_t i = 0; i < nHist; i++)
+      {
+        sp2detMap[i]=std::numeric_limits<size_t>::quiet_NaN();
+        detId[i]    =std::numeric_limits<int32_t>::quiet_NaN();
+        detIDMap[i] =std::numeric_limits<size_t>::quiet_NaN();
+        L2[i]       =std::numeric_limits<double>::quiet_NaN(); 
+        TwoTheta[i] =std::numeric_limits<double>::quiet_NaN(); 
+        Azimuthal[i]=std::numeric_limits<double>::quiet_NaN(); 
+
+        // get detector or detector group which corresponds to the spectra i
+        Geometry::IDetector_const_sptr spDet;
+        try
+        {
+          spDet= inputWS->getDetector(i);      
+        }
+        catch(Kernel::Exception::NotFoundError &)
+        {
+          continue;
+        }
+
+        // Check that we aren't dealing with monitor...
+        if (spDet->isMonitor())continue;   
+
+        // calculate the requested values;
+        sp2detMap[i]                = liveDetectorsCount;
+        detId[liveDetectorsCount]   = int32_t(spDet->getID());
+        detIDMap[liveDetectorsCount]= i;
+        L2[liveDetectorsCount]      = spDet->getDistance(*sample);
+
+        double polar   =  inputWS->detectorTwoTheta(spDet);
+        double azim    =  spDet->getPhi();    
+        TwoTheta[liveDetectorsCount]  =  polar;
+        Azimuthal[liveDetectorsCount] =  azim;
+
+        double sPhi=sin(polar);
+        double ez = cos(polar);
+        double ex = sPhi*cos(azim);
+        double ey = sPhi*sin(azim);
+
+        detDir[liveDetectorsCount].setX(ex);
+        detDir[liveDetectorsCount].setY(ey);
+        detDir[liveDetectorsCount].setZ(ez);
+
+        //double sinTheta=sin(0.5*polar);
+        //this->SinThetaSq[liveDetectorsCount]  = sinTheta*sinTheta;
+
+        liveDetectorsCount++;
+    
+
+      }
+      targWS->setProperty<uint32_t>("ActualDetectorsNum",liveDetectorsCount);
+
+  
+    }
+
+  boost::shared_ptr<Mantid::DataObjects::TableWorkspace> buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
+  {
+    Mantid::DataObjects::TableWorkspace_sptr DetPos = createTableWorkspace(ws);
+    processDetectorsPositions(ws,DetPos);
+
+    return DetPos;
+  }
 }

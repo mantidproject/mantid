@@ -75,6 +75,13 @@ namespace MDEvents
    size_t m_NDims;
    // index of current run(workspace). Used for MD WS combining
    uint16_t m_RunIndex;
+   //---> preprocessed detectors information
+   // number of valid spectra
+   size_t m_NSpectra;
+   std::vector<size_t> m_detIDMap;
+   std::vector<int32_t> m_detID;
+
+   //<--- End of preprocessed detectors information
    // logger -> to provide logging, for MD dataset file operations
    static Mantid::Kernel::Logger& g_Log;
    // vector to keep MD coordinates of single event 

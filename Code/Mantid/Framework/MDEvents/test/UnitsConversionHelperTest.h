@@ -22,7 +22,7 @@ using namespace Mantid::MDEvents;
 class UnitsConversionHelperTest : public CxxTest::TestSuite
 {
    Mantid::API::MatrixWorkspace_sptr ws2D;
-   ConvToMDPreprocDet det_loc;
+   Mantid::DataObjects::TableWorkspace_sptr  detLoc;
 
 public:
 static UnitsConversionHelperTest *createSuite() {
@@ -67,7 +67,7 @@ void testConvertFastFromInelasticWS()
     WSD.setMinMax(min,max);
 
     WSD.buildFromMatrixWS(ws2D,"|Q|","Direct");
-    WSD.setDetectors(det_loc);
+    WSD.m_PreprDetTable = detLoc;
 
 
     // initialize peculiar conversion from ws units to DeltaE_inWavenumber
@@ -90,7 +90,7 @@ void testConvertToTofInelasticWS()
     WSD.setMinMax(min,max);
 
     WSD.buildFromMatrixWS(ws2D,"|Q|","Direct");
-    WSD.setDetectors(det_loc);
+    WSD.m_PreprDetTable = detLoc;
 
     // initalize Convert to TOF
     TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"TOF"));
@@ -123,7 +123,7 @@ void testConvertToTofInelasticWS()
 
      // initialize matrix ws description, to the same number of dimensions as before
      WSD.buildFromMatrixWS(ws2D,"|Q|","Direct");
-     WSD.setDetectors(det_loc);
+    WSD.m_PreprDetTable = detLoc;
 
      //initialize Convert back;
      TS_ASSERT_THROWS_NOTHING(Conv.initialize(WSD,"DeltaE"));
@@ -152,7 +152,7 @@ UnitsConversionHelperTest()
    int numBins=10;
    ws2D =WorkspaceCreationHelper::createProcessedInelasticWS(L2, polar, azimutal,numBins,-1,3,3);
 
-   det_loc.buildFakeDetectorsPositions(ws2D);
+   detLoc = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2D);
   
 
 }

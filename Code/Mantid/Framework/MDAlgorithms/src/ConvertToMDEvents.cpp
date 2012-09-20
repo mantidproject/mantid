@@ -223,7 +223,7 @@ void ConvertToMDEvents::exec()
     std::string convert_to_                  = getProperty("QConversionScales");
 
 // Build the target ws description as function of the input ws and the parameters, supplied to the algorithm 
-    MDEvents::MDWSDescription TWSD;
+    MDEvents::MDWSDescriptionDepricated TWSD;
    // set the min and max values for the dimensions from the input porperties
     std::vector<double> dimMin = getProperty("MinValues");
     std::vector<double> dimMax = getProperty("MaxValues");
@@ -264,7 +264,7 @@ void ConvertToMDEvents::exec()
 
 
         // dimensions are already build, so build MDWS description from existing workspace
-        MDEvents::MDWSDescription OLDWSD;
+        MDEvents::MDWSDescriptionDepricated OLDWSD;
         OLDWSD.buildFromMDWS(spws);
 
         // some conversion parameters can not be defined by the target workspace. They have to be retrieved from the input workspace 

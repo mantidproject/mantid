@@ -1,3 +1,4 @@
+/**TODO: FOR DEPRICATION */ 
 #include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
 
 #include "MantidMDEvents/MDEvent.h"
@@ -8,7 +9,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidMDEvents/MDTransfAxisNames.h"
-/**TODO: FOR DEPRICATION */ 
 
 namespace Mantid
 {
@@ -178,7 +178,7 @@ std::string ConvertToMDEventsParams::parseConvMode(const std::string &Q_MODE_ID,
  *@returns   -- the ID of the workspace of one of the supported types. Throws if can not dynamiucally cast the pointer to the workspace:
  *@returns modified TargWSDescription -- sets the oriented lattice and goniometer transformation if the input workspace has one
 */
-std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS,MDEvents::MDWSDescription &TargWSDescription)const
+std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS,MDEvents::MDWSDescriptionDepricated &TargWSDescription)const
 {
    UNUSED_ARG(TargWSDescription);
     //// try to get the WS oriented lattice
@@ -225,7 +225,7 @@ std::string ConvertToMDEventsParams::parseWSType(API::MatrixWorkspace_const_sptr
 
 */
 std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS, const std::string &Q_mode_req, const std::string &dE_mode_req,
-                                                       Strings &out_dim_units, MDEvents::MDWSDescription &TargWSDescription)
+                                                       Strings &out_dim_units, MDEvents::MDWSDescriptionDepricated &TargWSDescription)
 {
     // the key which would describe the algorithm to deploy on the matrix
     std::string algo_id;
@@ -371,7 +371,7 @@ void  ConvertToMDEventsParams::getAlgoModes(const std::string &AlgoID, QMode &Q,
 */
 std::string ConvertToMDEventsParams::identifyTheAlg(API::MatrixWorkspace_const_sptr inWS,const std::string &Q_mode_req, 
                                                    const std::string &dE_mode_req,const std::vector<std::string> &otherDimNames,
-                                                   size_t maxNdim,MDEvents::MDWSDescription &TargWSDescription)
+                                                   size_t maxNdim,MDEvents::MDWSDescriptionDepricated &TargWSDescription)
 {
 
    //Strings dim_IDs_requested,dim_units_requested;
@@ -472,7 +472,7 @@ void ConvertToMDEventsParams::getAddDimensionNames(API::MatrixWorkspace_const_sp
 /** function builds list of dimension names, dimension units and dimension ID-s used to describe target MD workspace as the function of MD workspace and selected subalgorithm
 */
 void ConvertToMDEventsParams::buildMDDimDescription(API::MatrixWorkspace_const_sptr inWS,const std::string &AlgoID,const Strings &other_dim_names,
-                              MDEvents::MDWSDescription &TargWSDescription)const
+                              MDEvents::MDWSDescriptionDepricated &TargWSDescription)const
 {
    // dimension names present in input workspace
     Strings ws_dimNames, ws_dimIDs;

@@ -20,8 +20,12 @@ namespace Mantid
     {
 
       m_InWS2D = WSD.getInWS();
+      // preprocessed detectors information:
+      m_NSpectra = WSD.m_PreprDetTable->getProperty("ActualDetectorsNum");
+      m_detIDMap = WSD.m_PreprDetTable->getColVector<size_t>("detIDMap");
+      m_detID    = WSD.m_PreprDetTable->getColVector<int32_t>("DetectorID");
 
-      // check if detector information has been precalculated:
+       // check if detector information has been precalculated:
       if(!WSD.m_PreprDetTable)throw(std::runtime_error("Detector information has to be precalculated before ConvToMDBase::initialize is deployed"));
     
 

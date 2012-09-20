@@ -101,21 +101,8 @@ private:
   // helper function to build the detector info
   void buildDetInfo( Mantid::API::MatrixWorkspace_sptr spWS)
   {
-    if(WSD.isDetInfoLost())
-    { // in NoQ mode one may not have DetPositions any more. Neither this information is needed for anything except data conversion interface. 
-         DetLoc.buildFakeDetectorsPositions(spWS);
-    }else{  // preprocess or not the detectors positions    
-       // amount of work:
-        const size_t nHist = spWS->getNumberHistograms();
-        boost::scoped_ptr<API::Progress> theProgress(new API::Progress(this,0.0,1.0,nHist));
-       
-        DetLoc.processDetectorsPositions(spWS,this->getLogger(),theProgress.get());  
-        if(DetLoc.nDetectors()==0)throw(std::invalid_argument("no valid detectors indentified associated with any spectra"));
-           
-    }
-    WSD.setDetectors(DetLoc);
+     WSD.m_PreprDetTable = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(spWS);
   }
-
 
 };
 

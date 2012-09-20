@@ -106,9 +106,7 @@ void testISLorents()
   TSM_ASSERT_THROWS("No detectors yet defined, so should thow run time error: ",Q3DTransf.initialize(WSDescr),std::runtime_error);
 
   // let's preprocess detectors positions to go any further
-  ConvToMDPreprocDet PrepDet;
-  PrepDet.buildFakeDetectorsPositions(ws2D);
-  WSDescr.setDetectors(PrepDet);
+  WSDescr.m_PreprDetTable = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2D);
 
   TSM_ASSERT_THROWS_NOTHING("should initialize properly: ",Q3DTransf.initialize(WSDescr));
   TSM_ASSERT("Should not be lorentz corrected by default ",!Q3DTransf.getLorentzCorr());

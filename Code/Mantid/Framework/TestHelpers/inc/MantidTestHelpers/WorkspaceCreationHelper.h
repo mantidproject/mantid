@@ -7,6 +7,7 @@
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraDetectorMap.h"
@@ -218,6 +219,8 @@ namespace WorkspaceCreationHelper
 
   /// Create a simple peaks workspace containing the given number of peaks
   boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace> createPeaksWorkspace(const int numPeaks = 2);
+  /**Build table workspace with preprocessed detectors for existign worksapce with instrument */
+  boost::shared_ptr<Mantid::DataObjects::TableWorkspace> buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws);
 }
 
 #endif /*WORKSPACECREATIONHELPER_H_*/

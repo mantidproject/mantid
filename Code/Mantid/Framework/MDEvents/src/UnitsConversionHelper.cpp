@@ -87,10 +87,10 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, con
 
 
   // get detectors positions and other data needed for units conversion:
-  m_pTwoThetas =  &(targetWSDescr.getDetectors()->getTwoTheta());      
-  m_pL2s       =  &(targetWSDescr.getDetectors()->getL2());
+  m_pTwoThetas =  &(targetWSDescr.m_PreprDetTable->getColVector<double>("TwoTheta"));      
+  m_pL2s       =  &(targetWSDescr.m_PreprDetTable->getColVector<double>("L2"));
 
-  m_L1        =  targetWSDescr.getDetectors()->getL1();
+  m_L1        =  targetWSDescr.m_PreprDetTable->getProperty("L1");
   // get efix
   m_Efix      =  targetWSDescr.getEi();
   m_Emode     =  (int)targetWSDescr.getEMode();

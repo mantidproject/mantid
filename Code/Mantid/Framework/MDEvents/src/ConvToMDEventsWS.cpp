@@ -17,7 +17,7 @@ namespace Mantid
       UnitsConversionHelper localUnitConv(m_UnitConversion);
 
       size_t numEvents     = el.getNumberEvents();      
-      uint32_t detID       = m_DetLoc->getDetID(workspaceIndex);
+      uint32_t detID       = m_detID[workspaceIndex];
       uint16_t runIndexLoc = m_RunIndex;
 
       std::vector<coord_t>locCoord(m_Coord);
@@ -113,7 +113,7 @@ namespace Mantid
       // Is the access to input events thread-safe?
       // bool MultiThreadedAdding = m_EventWS->threadSafe();
       // preprocessed detectors insure that each detector has its own spectra
-      size_t nValidSpectra  = m_DetLoc->nDetectors();
+      size_t nValidSpectra  = m_NSpectra;
 
       //--->>> Thread control stuff
       Kernel::ThreadScheduler * ts = new Kernel::ThreadSchedulerFIFO();

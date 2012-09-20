@@ -62,7 +62,7 @@ struct CoordTransformer<ConvertToMD::NoQ,MODE,CONV,TYPE,SAMPLE>
        //
        pHost->getMinMax(dim_min,dim_max);
         // set up units conversion defined by the host algorithm.  
-       MDEvents::MDWSDescription  Dummy;
+       MDEvents::MDWSDescriptionDepricated  Dummy;
        CONV_UNITS_FROM.setUpConversion(Dummy,"",""); 
        return true;
     }

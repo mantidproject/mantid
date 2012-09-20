@@ -41,7 +41,7 @@ namespace Mantid
 
       const size_t specSize = this->m_InWS2D->blocksize();    
       // preprocessed detectors associate each spectra with a detector (position)
-      size_t nValidSpectra  = m_DetLoc->nDetectors();
+      size_t nValidSpectra  = m_NSpectra;
 
       // create local unit conversion class
       UnitsConversionHelper localUnitConv(m_UnitConversion);
@@ -62,8 +62,8 @@ namespace Mantid
       //External loop over the spectra:
       for (size_t i = startSpectra; i < nSpectraToProcess; ++i)
       {
-        size_t iSpctr             = m_DetLoc->getDetSpectra(i);
-        int32_t det_id            = m_DetLoc->getDetID(i);
+        size_t iSpctr             = m_detIDMap[i];
+        int32_t det_id            = m_detID[i];
 
         const MantidVec& X        = m_InWS2D->readX(iSpctr);
         const MantidVec& Signal   = m_InWS2D->readY(iSpctr);
@@ -135,7 +135,7 @@ namespace Mantid
 
       const size_t specSize = m_InWS2D->blocksize();    
       // preprocessed detectors associate each spectra with a detector (position)
-      size_t nValidSpectra  = m_DetLoc->nDetectors();
+      size_t nValidSpectra  = m_NSpectra;
 
       // if any property dimension is outside of the data range requested, the job is done;
       if(!m_QConverter->calcGenericVariables(m_Coord,m_NDims))return; 

@@ -2,7 +2,7 @@
 #define H_CONVERT_TO_MDEVENTS_UNITS
 /**TODO: FOR DEPRICATION */ 
 #include "MantidMDAlgorithms/ConvertToMDEventsParams.h"
-#include "MantidMDEvents/MDWSDescription.h"
+#include "MantidMDEvents/MDWSDescriptionDepricated.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 /** Set of internal classes used by ConvertToMDEvents algorithm and responsible for Units conversion
@@ -53,7 +53,7 @@ struct UnitsConverter
      *                     relevant to the units conversion
      *@param targ_units -- the units we want to convert to 
     */
-    inline void  setUpConversion(const MDEvents::MDWSDescription &targetWSDescr, const std::string &units_from,const std::string &units_to )
+    inline void  setUpConversion(const MDEvents::MDWSDescriptionDepricated &targetWSDescr, const std::string &units_from,const std::string &units_to )
     {UNUSED_ARG(targetWSDescr);UNUSED_ARG(units_from);UNUSED_ARG(units_to);}
     /// Update all spectra dependednt  variables, relevant to conversion in the loop over spectra (detectors)
     inline void     updateConversion(size_t i){UNUSED_ARG(i);}
@@ -76,7 +76,7 @@ template<ConvertToMD::XCoordType TYPE>
 struct UnitsConverter<ConvertToMD::ConvFast,TYPE>
 {
 
-    void setUpConversion(const MDEvents::MDWSDescription &targetWSDescr, const std::string &units_from,const std::string &units_to)
+    void setUpConversion(const MDEvents::MDWSDescriptionDepricated &targetWSDescr, const std::string &units_from,const std::string &units_to)
     {       
        UNUSED_ARG(targetWSDescr);
        //const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();
@@ -111,7 +111,7 @@ template<ConvertToMD::XCoordType TYPE>
 struct UnitsConverter<ConvertToMD::ConvFromTOF,TYPE>
 {
 
-    void setUpConversion(const MDEvents::MDWSDescription &targetWSDescr, const std::string &units_from,const std::string &units_to)
+    void setUpConversion(const MDEvents::MDWSDescriptionDepricated &targetWSDescr, const std::string &units_from,const std::string &units_to)
     {       
        // check if axis units are TOF
        //const Kernel::Unit_sptr pThisUnit= pHost->getAxisUnits();       
@@ -172,7 +172,7 @@ template<ConvertToMD::XCoordType TYPE>
 struct UnitsConverter<ConvertToMD::ConvByTOF,TYPE>
 {
 
-    void setUpConversion(const MDEvents::MDWSDescription &targetWSDescr, const std::string &units_from,const std::string &units_to)
+    void setUpConversion(const MDEvents::MDWSDescriptionDepricated &targetWSDescr, const std::string &units_from,const std::string &units_to)
     {       
 
        pSourceWSUnit=     Kernel::UnitFactory::Instance().create(units_from);

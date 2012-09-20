@@ -13,6 +13,7 @@
 
 #include "MantidAPI/TextAxis.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
+#include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -42,9 +43,9 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite
 
    WorkspaceCreationHelper::MockAlgorithm reporter;
 
-   boost::shared_ptr<ConvToMDBase> pConvMethods;
-   ConvToMDPreprocDet DetLoc_events;
-   ConvToMDPreprocDet DetLoc_histo;
+   boost::shared_ptr<ConvToMDBase>  pConvMethods;
+   DataObjects::TableWorkspace_sptr pDetLoc_events;
+   DataObjects::TableWorkspace_sptr pDetLoc_histo;
    // pointer to mock algorithm to work with progress bar
    std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
 
@@ -70,7 +71,7 @@ void test_EventNoUnitsConv()
 
     WSD.buildFromMatrixWS(inWsEv,"Q3D","Indirect");
 
-    WSD.setDetectors(DetLoc_events);
+    WSD.m_PreprDetTable =pDetLoc_events;
     WSD.m_RotMatrix = Rot;
 
     // create new target MD workspace
@@ -101,7 +102,7 @@ void test_EventFromTOFConv()
     WSD.setMinMax(min,max);
     WSD.buildFromMatrixWS(inWsEv,"Q3D","Indirect");
 
-    WSD.setDetectors(DetLoc_events);
+    WSD.m_PreprDetTable =pDetLoc_events;
     WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -135,7 +136,7 @@ void test_HistoFromTOFConv()
 
     WSD.buildFromMatrixWS(inWs2D,"Q3D","Indirect");
 
-    WSD.setDetectors(DetLoc_histo);
+    WSD.m_PreprDetTable =pDetLoc_histo;
     WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -172,7 +173,7 @@ void test_HistoNoUnitsConv()
 
     WSD.buildFromMatrixWS(inWs2D,"Q3D","Indirect");
 
-    WSD.setDetectors(DetLoc_histo);
+    WSD.m_PreprDetTable =pDetLoc_histo;
     WSD.m_RotMatrix = Rot;
     // create new target MD workspace
     pTargWS->releaseWorkspace();   
@@ -204,20 +205,37 @@ Rot(3,3)
    inWsEv = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateRandomEventWorkspace(nEvents, numHist, 0.1));
    inWsEv->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(int(numHist)) );
    inWsEv->mutableRun().addProperty("Ei",12.,"meV",true);
+   API::AnalysisDataService::Instance().addOrReplace("TestEventWS",inWsEv);
+
 
    inWs2D = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(int(numHist), int(nEvents)));
    // add workspace energy
    inWs2D->mutableRun().addProperty("Ei",12.,"meV",true);
+   API::AnalysisDataService::Instance().addOrReplace("TestMatrixWS",inWs2D);
+
+    auto pAlg = std::auto_ptr<PreprocessDetectorsToMD>(new PreprocessDetectorsToMD());
+    pAlg->initialize();
+
+    pAlg->setPropertyValue("InputWorkspace","TestMatrixWS");
+    pAlg->setPropertyValue("OutputWorkspace","PreprocessedDetectorsTable");
+
+    pAlg->execute();
+    if(!pAlg->isExecuted())throw(std::runtime_error("Can not preprocess histogram detectors to MD"));
+ 
+    pDetLoc_histo = pAlg->getProperty("PreprocessedDetectorsTable");
+    if(!pAlg->isExecuted())throw(std::runtime_error("Can not preprocess histogram detectors to MD"));
+
+    pAlg->setPropertyValue("InputWorkspace","TestEventWS");
+    pAlg->execute();
+
+    pDetLoc_events = pAlg->getProperty("PreprocessedDetectorsTable");
+    if(!pAlg->isExecuted())throw(std::runtime_error("Can not preprocess events detectors to MD"));
 
 
-   pMockAlgorithm = std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm>(new WorkspaceCreationHelper::MockAlgorithm(numHist));
-   DetLoc_histo.processDetectorsPositions(inWs2D,pMockAlgorithm->getLogger(),pMockAlgorithm->getProgress());
-   DetLoc_events.processDetectorsPositions(inWsEv,pMockAlgorithm->getLogger(),pMockAlgorithm->getProgress());
+    pTargWS = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
 
-   pTargWS = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
-
-   Rot.setRandom(100);
-   Rot.toRotation();
+    Rot.setRandom(100);
+    Rot.toRotation();
 
 
 }

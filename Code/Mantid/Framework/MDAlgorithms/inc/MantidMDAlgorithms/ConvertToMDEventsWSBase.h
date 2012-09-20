@@ -11,7 +11,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidMDEvents/MDWSDescription.h"
+#include "MantidMDEvents/MDWSDescriptionDepricated.h"
 #include "MantidMDEvents/MDEventWSWrapper.h"
 
 #include "MantidMDEvents/ConvToMDPreprocDet.h"
@@ -54,7 +54,7 @@ namespace MDAlgorithms
      ConvertToMDEventsWSBase();
  
     ///method which initates all main class variables 
-    virtual size_t setUPConversion(const MDEvents::MDWSDescription &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
+    virtual size_t setUPConversion(const MDEvents::MDWSDescriptionDepricated &WSD, boost::shared_ptr<MDEvents::MDEventWSWrapper> inWSWrapper);
     /// method which starts the conversion procedure
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
@@ -64,7 +64,7 @@ namespace MDAlgorithms
     double               getEi()const{return TWS.getEi();}
     int                  getEMode()const{return TWS.getEMode();}
 
-    MDEvents::MDWSDescription getWSDescr()const{return TWS;};
+    MDEvents::MDWSDescriptionDepricated getWSDescr()const{return TWS;};
     API::NumericAxis *getPAxis(int nAaxis)const{return dynamic_cast<API::NumericAxis *>(this->inWS2D->getAxis(nAaxis));}
     std::vector<double> getTransfMatrix()const{return TWS.getTransfMatrix();}
 //<------------------
@@ -81,7 +81,7 @@ namespace MDAlgorithms
   protected:
    // common variables used by all workspace=related methods are deployed here
     /// the properties of the requested target MD workpsace:
-    MDEvents::MDWSDescription TWS;
+    MDEvents::MDWSDescriptionDepricated TWS;
     //
    boost::shared_ptr<MDEvents::MDEventWSWrapper> pWSWrapper ;
    // pointer to the array of detector's directions in reciprocal space
