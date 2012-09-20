@@ -102,9 +102,7 @@ public:
       "    <instrument name=\"HRPD\" shortname=\"HRP\">"
       "      <technique>Powder Diffraction</technique>"
       "    </instrument>"
-      "    <instrument name=\"WISH\" >"
-      "      <zeropadding size=\"8\"/>"
-      "      <zeropadding size=\"15\" startRunNumber=\"300\"/>"
+      "    <instrument name=\"WISH\" zeropadding=\"8\">"
       "      <technique>Powder Diffraction</technique>"
       "      <technique>Single Crystal Diffraction</technique>"
       "    </instrument>"
@@ -139,14 +137,13 @@ public:
     InstrumentInfo instr = fac->instrument("HRP"); // Tests getting by short name
     TS_ASSERT_EQUALS(instr.name(),"HRPD");
     TS_ASSERT_EQUALS(instr.shortName(),"HRP");
-    TS_ASSERT_EQUALS(instr.zeroPadding(123),5);
+    TS_ASSERT_EQUALS(instr.zeroPadding(),5);
 
     TS_ASSERT_THROWS_NOTHING(fac->instrument("WISH"));
     instr = fac->instrument("WISH");
     TS_ASSERT_EQUALS(instr.name(),"WISH");
     TS_ASSERT_EQUALS(instr.shortName(),"WISH");
-    TS_ASSERT_EQUALS(instr.zeroPadding(123),8);
-    TS_ASSERT_EQUALS(instr.zeroPadding(301),15);
+    TS_ASSERT_EQUALS(instr.zeroPadding(),8);
 
     const std::vector<InstrumentInfo> pwdInstr = fac->instruments("Powder Diffraction");
     TS_ASSERT_EQUALS(pwdInstr.size(),2);

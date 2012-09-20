@@ -8,7 +8,6 @@
 #include "MantidKernel/Logger.h"
 #include <set>
 #include <string>
-#include <map>
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -64,10 +63,8 @@ public:
   const std::string name() const;
   /// Return the short name of the instrument
   const std::string shortName() const ;
-  /// Returns zero padding for this instrument and a run number
-  int zeroPadding(unsigned int runNumber) const;
-  /// Returns file prefix for this instrument and a run number
-  std::string filePrefix(unsigned int runNumber) const;
+  /// Returns zero padding for this instrument
+  int zeroPadding() const;
   /// Returns the default delimiter between instrument name and run number
   std::string delimiter() const;
   /// Returns the name of the live listener
@@ -82,20 +79,11 @@ public:
 private:
   void fillTechniques(const Poco::XML::Element* elem);
   void fillLiveData(const Poco::XML::Element* elem);
-  void fillZeroPadding(const Poco::XML::Element* elem);
-
-  /// Typedef for the zeropadding holder, first is starting run-number, 
-  /// second is file prefix - zero padding pair
-  typedef std::map<unsigned int, std::pair<std::string,int> > ZeroPaddingMap;
-  /// get the zeropadding part
-  int getZeroPadding(ZeroPaddingMap::const_iterator it) const {return it->second.second;}
-  /// get the prefix part
-  const std::string& getPrefix(ZeroPaddingMap::const_iterator it) const {return it->second.first;}
 
   const FacilityInfo* m_facility;          ///< Facility
   std::string m_name;                      ///< Instrument name
   std::string m_shortName;                 ///< Instrument short name
-  ZeroPaddingMap m_zeroPadding;            ///< Run number-dependent zero padding
+  int m_zeroPadding;                       ///< Zero padding
   std::string m_delimiter;                 ///< Delimiter between instrument name and run number
   std::string m_liveListener;              ///< Name of the live listener class
   std::string m_liveDataAddress;           ///< Host & port for live data connection

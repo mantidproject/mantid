@@ -64,10 +64,6 @@ class ExperimentInfoTest : public CxxTest::TestSuite
 {
 public:
 
-  ExperimentInfoTest()
-  {
-    ConfigService::Instance().updateFacilities();
-  }
 
   void test_GetInstrument_default()
   {
@@ -550,7 +546,6 @@ public:
   //
   void testHelperFunctions()
   {
-    ConfigService::Instance().updateFacilities();
     ExperimentInfo helper;
     std::string boevs = helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
     TS_ASSERT(!boevs.empty());

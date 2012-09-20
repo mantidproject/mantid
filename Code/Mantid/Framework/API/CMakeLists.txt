@@ -288,7 +288,7 @@ set ( TEST_FILES
 	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
-#	IkedaCarpenterModeratorTest.h
+	IkedaCarpenterModeratorTest.h
 	ImmutableCompositeFunctionTest.h
 	ImplicitFunctionParserFactoryTest.h
 	InstrumentDataServiceTest.h

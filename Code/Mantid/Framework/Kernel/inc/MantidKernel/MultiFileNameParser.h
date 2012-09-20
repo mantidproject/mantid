@@ -121,7 +121,7 @@ namespace Kernel
       /// The various sections of the given string to parse.
       std::string m_dirString, m_instString, m_underscoreString, m_runString, m_extString;
       /// The instrument-specific run zero padding value.
-      //int m_zeroPadding;
+      int m_zeroPadding;
       /// All the valid instrument names.
       std::set<std::string, ReverseCaselessCompare> m_validInstNames;
     };
@@ -134,7 +134,7 @@ namespace Kernel
     {
     public:
       /// Constructor.
-      GenerateFileName(const std::string & prefix, const std::string & suffix, const std::string & instString);
+      GenerateFileName(const std::string & prefix, const std::string & suffix, int zeroPadding);
 
       /// Overloaded function operator that generates a vector of file names from a vector of runs.
       std::vector<std::string> operator()(const std::vector<unsigned int> & runs);
@@ -146,8 +146,8 @@ namespace Kernel
       std::string m_prefix;
       /// String that suffixes any generated file names.
       std::string m_suffix;
-      /// String that identifies the instrument
-      std::string m_instString;
+      /// The length of zero padding needed.
+      int m_zeroPadding;
     };
 
     /**

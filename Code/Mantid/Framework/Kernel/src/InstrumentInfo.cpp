@@ -10,8 +10,6 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
 
-#include <boost/lexical_cast.hpp>
-
 #include <algorithm>
 
 namespace Mantid
@@ -29,6 +27,11 @@ namespace Mantid
     InstrumentInfo::InstrumentInfo(const FacilityInfo* f,const Poco::XML::Element* elem)
       : m_facility(f), m_liveListener(), m_liveDataAddress()
     {
+      std::string paddingStr = elem->getAttribute("zeropadding");
+      if ( paddingStr.empty() || !Mantid::Kernel::Strings::convert(paddingStr,m_zeroPadding) )
+      {
+        m_zeroPadding = f->zeroPadding();
+      }
 
       m_name = elem->getAttribute("name");
       if (m_name.empty())
@@ -52,7 +55,6 @@ namespace Mantid
 
       fillTechniques(elem);
       fillLiveData(elem);
-      fillZeroPadding(elem);
     }
 
     /**
@@ -84,54 +86,9 @@ namespace Mantid
     }
 
     /// Returns zero padding for this instrument
-    int InstrumentInfo::zeroPadding(unsigned int runNumber) const
+    int InstrumentInfo::zeroPadding() const
     {
-      if ( m_zeroPadding.empty() ) return m_facility->zeroPadding();
-      if ( m_zeroPadding.size() == 1 )
-      {
-        auto padding = m_zeroPadding.begin();
-        if ( runNumber >= padding->first )
-          return getZeroPadding(padding);
-        else
-          return m_facility->zeroPadding();
-      }
-      auto last = m_zeroPadding.end(); --last;
-      for(auto it = m_zeroPadding.begin(); it != last; ++it)
-      {
-        auto next = it; ++next;
-        if ( runNumber >= it->first && runNumber < next->first )
-        {
-          return getZeroPadding(it);
-        }
-      }
-      return getZeroPadding(last);
-    }
-
-    /**
-     * Returns file prefix for this instrument and a run number.
-     * @param runNumber :: A run number.
-     */
-    std::string InstrumentInfo::filePrefix(unsigned int runNumber) const
-    {
-      if ( m_zeroPadding.empty() ) return m_shortName;
-      if ( m_zeroPadding.size() == 1 )
-      {
-        auto padding = m_zeroPadding.begin();
-        if ( runNumber >= padding->first )
-          return getPrefix(padding);
-        else
-          return m_shortName;
-      }
-      auto last = m_zeroPadding.end(); --last;
-      for(auto it = m_zeroPadding.begin(); it != last; ++it)
-      {
-        auto next = it; ++next;
-        if ( runNumber >= it->first && runNumber < next->first )
-        {
-          return getPrefix(it);
-        }
-      }
-      return getPrefix(last);
+      return m_zeroPadding;
     }
 
     /// Returns the name of the live listener
@@ -159,68 +116,6 @@ namespace Mantid
     const FacilityInfo& InstrumentInfo::facility() const
     {
       return *m_facility;
-    }
-
-    /// Called from constructor to fill zero padding
-    void InstrumentInfo::fillZeroPadding(const Poco::XML::Element* elem)
-    {
-      Poco::XML::NodeList* pNL_zeropadding = elem->getElementsByTagName("zeropadding");
-      unsigned long n = pNL_zeropadding->length();
-
-      for (unsigned long i = 0; i < n; ++i)
-      {
-        auto elem = dynamic_cast<Poco::XML::Element*>( pNL_zeropadding->item(i) );
-        if ( !elem ) continue;
-        // read the zero padding size
-        if ( !elem->hasAttribute("size") )
-        {
-          g_log.error("Zeropadding size is missing for instrument "+m_name);
-          throw std::runtime_error("Zeropadding size is missing for instrument "+m_name);
-        }
-        auto& sizeStr = elem->getAttribute("size");
-        int size = 0;
-        if ( !Mantid::Kernel::Strings::convert(sizeStr,size) )
-        {
-          g_log.error("Zeropadding size must be an integer value (instrument "+m_name+")");
-          throw std::runtime_error("Zeropadding size must be an integer value (instrument "+m_name+")");
-        }
-        // read the start run number
-        unsigned int startRunNumber = 0;
-        if ( !elem->hasAttribute("startRunNumber") )
-        {
-          if ( !m_zeroPadding.empty() )
-          {
-            g_log.error("Zeropadding size is missing for instrument "+m_name);
-            throw std::runtime_error("Zeropadding size is missing for instrument "+m_name);
-          }
-        }
-        else
-        {
-          auto& startRunNumberStr = elem->getAttribute("startRunNumber");
-          try
-          {
-            startRunNumber = boost::lexical_cast<unsigned int>( startRunNumberStr );
-          }
-          catch(...)
-          {
-            g_log.error("Zeropadding start run number must be an integer value (instrument "+m_name+")");
-            throw std::runtime_error("Zeropadding start run number must be an integer value (instrument "+m_name+")");
-          }
-        }
-        // read the file prefix
-        std::string prefix = m_shortName;
-        if ( elem->hasAttribute("prefix") )
-        {
-          prefix = elem->getAttribute("prefix");
-        }
-        m_zeroPadding[startRunNumber] = std::make_pair(prefix,size);
-      }
-      pNL_zeropadding->release();
-
-      if (m_zeroPadding.empty())
-      {
-        m_zeroPadding[0] = std::make_pair(m_shortName,m_facility->zeroPadding());
-      }
     }
 
     /// Called from constructor to fill live listener name

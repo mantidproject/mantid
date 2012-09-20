@@ -265,9 +265,8 @@ namespace Mantid
         runPart = hint.substr(nChars);
       }
 
-      unsigned int irunPart = boost::lexical_cast<unsigned int>( runPart );
       Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getInstrument(instrPart);
-      size_t nZero = instr.zeroPadding(irunPart);
+      size_t nZero = instr.zeroPadding();
       // remove any leading zeros in case there are too many of them
       std::string::size_type i = runPart.find_first_not_of('0');
       runPart.erase(0, i);

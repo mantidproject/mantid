@@ -37,7 +37,7 @@ public:
 
     TS_ASSERT_EQUALS( inst.name(), "AnInst" );
     TS_ASSERT_EQUALS( inst.shortName(), "AnInst" );
-    TS_ASSERT_EQUALS( inst.zeroPadding(123), fac->zeroPadding() );
+    TS_ASSERT_EQUALS( inst.zeroPadding(), 0 );
     TS_ASSERT( inst.delimiter().empty() );
     TS_ASSERT( inst.liveListener().empty() );
     TS_ASSERT( inst.liveDataAddress().empty() );
@@ -66,7 +66,7 @@ public:
 
     InstrumentInfo inst = fac->instruments().front();
 
-    TS_ASSERT_EQUALS( inst.zeroPadding(123), 99 );
+    TS_ASSERT_EQUALS( inst.zeroPadding(), 99 );
     TS_ASSERT_EQUALS( inst.delimiter(), "!" );
     TS_ASSERT_EQUALS( inst.liveListener(), "I'm listening" );
 
@@ -79,8 +79,7 @@ public:
       "<facilities>"
       "  <facility name=\"MyFacility\" zeropadding=\"99\" delimiter=\"!\" FileExtensions=\".xyz\">"
       "    <livedata listener=\"I'm listening\" />"
-      "    <instrument name=\"AnInst\" delimiter=\"?\" >"
-      "      <zeropadding size=\"66\"/>"
+      "    <instrument name=\"AnInst\" zeropadding=\"66\" delimiter=\"?\" >"
       "      <livedata listener=\"pardon\" />"
       "      <technique>Measuring Stuff</technique>"
       "    </instrument>"
@@ -92,7 +91,7 @@ public:
 
     InstrumentInfo inst = fac->instruments().front();
 
-    TS_ASSERT_EQUALS( inst.zeroPadding(123), 66 );
+    TS_ASSERT_EQUALS( inst.zeroPadding(), 66 );
     TS_ASSERT_EQUALS( inst.delimiter(), "?" );
     TS_ASSERT_EQUALS( inst.liveListener(), "pardon" );
 
@@ -102,8 +101,7 @@ public:
   void test_setting_all_aspects_of_instrument()
   {
     const std::string instStr =
-      "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-      "  <zeropadding size=\"8\"/>"
+      "<instrument name=\"MyInst\" shortname=\"mine\" zeropadding=\"8\" delimiter=\":\" >"
       "  <livedata listener=\"AListener\" address=\"myinst.facility.gov:99\" />"
       "  <technique>Measuring Stuff</technique>"
       "  <technique>Doing Stuff</technique>"
@@ -116,7 +114,7 @@ public:
 
     TS_ASSERT_EQUALS( inst.name(), "MyInst" );
     TS_ASSERT_EQUALS( inst.shortName(), "mine" );
-    TS_ASSERT_EQUALS( inst.zeroPadding(123), 8 );
+    TS_ASSERT_EQUALS( inst.zeroPadding(), 8 );
     TS_ASSERT_EQUALS( inst.delimiter(), ":" );
     TS_ASSERT_EQUALS( inst.liveListener(), "AListener" );
     TS_ASSERT_EQUALS( inst.liveDataAddress(), "myinst.facility.gov:99" );
@@ -132,91 +130,6 @@ public:
     TS_ASSERT_EQUALS( ss.str(), "MyInst" );
 
     delete fac;
-  }
-  
-  void test_multiple_zeropadding()
-  {
-    const std::string instStr =
-      "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-      "  <technique>Measuring Stuff</technique>"
-      "  <zeropadding size=\"8\"/>"
-      "  <zeropadding size=\"15\" startRunNumber=\"123\" prefix=\"MyNewInstrument\"/>"
-      "  <zeropadding size=\"20\" startRunNumber=\"321\"/>"
-      "</instrument>";
-
-    FacilityInfo * fac = NULL;
-    TS_ASSERT_THROWS_NOTHING( fac = createInstInfoInMinimalFacility(instStr) );
-    
-    InstrumentInfo inst = fac->instruments().front();
-
-    TS_ASSERT_EQUALS( inst.zeroPadding(0), 8 );
-    TS_ASSERT_EQUALS( inst.zeroPadding(12), 8 );
-    TS_ASSERT_EQUALS( inst.zeroPadding(122), 8 );
-    TS_ASSERT_EQUALS( inst.zeroPadding(123), 15 );
-    TS_ASSERT_EQUALS( inst.zeroPadding(130), 15 );
-    TS_ASSERT_EQUALS( inst.zeroPadding(320), 15 );
-    TS_ASSERT_EQUALS( inst.zeroPadding(321), 20 );
-    TS_ASSERT_EQUALS( inst.zeroPadding(32100), 20 );
-
-    TS_ASSERT_EQUALS( inst.filePrefix(0), "mine" );
-    TS_ASSERT_EQUALS( inst.filePrefix(12), "mine" );
-    TS_ASSERT_EQUALS( inst.filePrefix(122), "mine" );
-    TS_ASSERT_EQUALS( inst.filePrefix(123), "MyNewInstrument" );
-    TS_ASSERT_EQUALS( inst.filePrefix(130), "MyNewInstrument" );
-    TS_ASSERT_EQUALS( inst.filePrefix(320), "MyNewInstrument" );
-    TS_ASSERT_EQUALS( inst.filePrefix(321), "mine" );
-    TS_ASSERT_EQUALS( inst.filePrefix(32100), "mine" );
-
-    delete fac;
-  }
-  
-  void test_error_in_multiple_zeropadding()
-  {
-    const std::string instStr =
-      "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-      "  <technique>Measuring Stuff</technique>"
-      "  <zeropadding size=\"8\"/>"
-      "  <zeropadding size=\"15\"/>"
-      "</instrument>";
-
-    FacilityInfo * fac = NULL;
-    TS_ASSERT_THROWS( fac = createInstInfoInMinimalFacility(instStr), std::runtime_error );
-  }
-  
-  void test_error_1_in_multiple_zeropadding()
-  {
-    const std::string instStr =
-      "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-      "  <technique>Measuring Stuff</technique>"
-      "  <zeropadding size=\"nan\"/>"
-      "</instrument>";
-
-    FacilityInfo * fac = NULL;
-    TS_ASSERT_THROWS( fac = createInstInfoInMinimalFacility(instStr), std::runtime_error );
-  }
-  
-  void test_error_2_in_multiple_zeropadding()
-  {
-    const std::string instStr =
-      "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-      "  <technique>Measuring Stuff</technique>"
-      "  <zeropadding size=\"8\" startRunNumber=\"nan\"/>"
-      "</instrument>";
-
-    FacilityInfo * fac = NULL;
-    TS_ASSERT_THROWS( fac = createInstInfoInMinimalFacility(instStr), std::runtime_error );
-  }
-  
-  void test_error_3_in_multiple_zeropadding()
-  {
-    const std::string instStr =
-      "<instrument name=\"MyInst\" shortname=\"mine\" delimiter=\":\" >"
-      "  <technique>Measuring Stuff</technique>"
-      "  <zeropadding startRunNumber=\"333\"/>"
-      "</instrument>";
-
-    FacilityInfo * fac = NULL;
-    TS_ASSERT_THROWS( fac = createInstInfoInMinimalFacility(instStr), std::runtime_error );
   }
   
   void test_equality_operator()
