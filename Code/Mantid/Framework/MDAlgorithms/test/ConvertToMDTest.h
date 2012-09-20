@@ -87,7 +87,7 @@ void testExecNoQ()
 
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
     pAlg->setPropertyValue("OutputWorkspace","WS3DNoQ");
-    pAlg->setPropertyValue("UsePreprocessedDetectors","0");
+    pAlg->setPropertyValue("PreprocessedDetectors","");
     pAlg->setPropertyValue("QDimensions","CopyToMD");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
 //    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "NoDE"));
@@ -114,7 +114,7 @@ void testExecModQ()
     pAlg->setPropertyValue("OutputWorkspace","WS3DmodQ");
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
     pAlg->setPropertyValue("QDimensions","|Q|");
-    pAlg->setPropertyValue("UsePreprocessedDetectors","0");
+    pAlg->setPropertyValue("PreprocessedDetectors","");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
     //
@@ -132,7 +132,7 @@ void testExecQ3D()
     pAlg->setPropertyValue("OutputWorkspace","WS5DQ3D");
     pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
     pAlg->setPropertyValue("OtherDimensions","phi,chi");
-    pAlg->setPropertyValue("UsePreprocessedDetectors","0");
+    pAlg->setPropertyValue("PreprocessedDetectors","");
      
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));

@@ -196,16 +196,16 @@ void ConvertToMD::exec()
     // get workspace parameters and build target workspace descritpion, report if there is need to build new target MD workspace
     bool createNewTargetWs = buildTargetWSDescription(spws,QModReq,dEModReq,otherDimNames,convertTo_,targWSDescr);
 
-    // preprocess detectors;
-    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D);
-
-    // create and initate new workspace or set up existing workspace as a target. 
+     // create and initate new workspace or set up existing workspace as a target. 
     if(createNewTargetWs)  // create new
        spws = this->createNewMDWorkspace(targWSDescr);
     else // setup existing MD workspace as workspace target.
        m_OutWSWrapper->setMDWS(spws);
+ 
+    // preprocess detectors;
+    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D);
 
-
+ 
     //DO THE JOB:
      // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
      ConvToMDSelector AlgoSelector;
@@ -382,32 +382,38 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
     if(WSName.empty()) // TargTableWS is recalculated each time;
     {
       storeInDataService = false;
-      WSName = "ServiceTableWS";
+      WSName = "ServiceTableWS";  // TODO: should be hidden?
     }
     else
     {
       storeInDataService = true;
-      TargTableWS = API::AnalysisDataService::Instance().retrieveWS<DataObjects::TableWorkspace>(WSName);
-      // that is it, workspace exists and we may try to use it
-      if(TargTableWS)
+      if(API::AnalysisDataService::Instance().doesExist(WSName))      // that is it, workspace exists and we may try to use it
       {
-        // let's take at least some precaution to ensure that instrument have not changed
-        std::string currentWSInstrumentName = InWS2D->getInstrument()->getName();
-        std::string oldInstrName            = std::string(TargTableWS->getProperty("InstrumentName"));
-        if(oldInstrName==currentWSInstrumentName) return TargTableWS;
+        TargTableWS = API::AnalysisDataService::Instance().retrieveWS<DataObjects::TableWorkspace>(WSName);
+        // get number of all histohrams (may be masked or invalid)
+        size_t nHist = InWS2D->getNumberHistograms();
+        size_t nDetMap=TargTableWS->rowCount();
+        if(nHist==nDetMap)
+        {
+          // let's take at least some precaution to ensure that instrument have not changed
+          std::string currentWSInstrumentName = InWS2D->getInstrument()->getName();
+          std::string oldInstrName            = std::string(TargTableWS->getProperty("InstrumentName"));
+
+          if(oldInstrName==currentWSInstrumentName) return TargTableWS;
+        }
       }
 
     }
 
      Mantid::API::Algorithm_sptr childAlg = createSubAlgorithm("PreprocessDetectorsToMD",0.,1.);
      if(!childAlg)throw(std::runtime_error("Can not create child subalgorithm to preprocess detectors"));
-     childAlg->setProperty("InputWorkspace",InWS2D);
+     childAlg->setProperty("InputWorkspace",InWS2D->getName());
      childAlg->setProperty("OutputWorkspace",WSName);
 
      childAlg->execute();
      if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child subalgorithm to preprocess detectors"));
 
-     TargTableWS = childAlg->getProperty(WSName);
+     TargTableWS = childAlg->getProperty("OutputWorkspace");
      if(!TargTableWS)throw(std::runtime_error("Can not retrieve results of child subalgorithm to preprocess detectors work"));
 
      if(storeInDataService) API::AnalysisDataService::Instance().addOrReplace(WSName,TargTableWS);

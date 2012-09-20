@@ -77,7 +77,7 @@ namespace MDEvents
    uint16_t m_RunIndex;
    //---> preprocessed detectors information
    // number of valid spectra
-   size_t m_NSpectra;
+   uint32_t m_NSpectra;
    std::vector<size_t> m_detIDMap;
    std::vector<int32_t> m_detID;
 

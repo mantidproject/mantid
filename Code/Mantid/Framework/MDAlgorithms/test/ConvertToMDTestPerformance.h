@@ -222,22 +222,25 @@ Rot(3,3)
     pAlg->execute();
     if(!pAlg->isExecuted())throw(std::runtime_error("Can not preprocess histogram detectors to MD"));
  
-    pDetLoc_histo = pAlg->getProperty("PreprocessedDetectorsTable");
-    if(!pAlg->isExecuted())throw(std::runtime_error("Can not preprocess histogram detectors to MD"));
+    API::Workspace_sptr tWs =  API::AnalysisDataService::Instance().retrieve("PreprocessedDetectorsTable");
+    pDetLoc_histo = boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(tWs);
+    if(!pDetLoc_histo)throw(std::runtime_error("Can not obtain preprocessed histogram detectors "));
 
     pAlg->setPropertyValue("InputWorkspace","TestEventWS");
     pAlg->execute();
-
-    pDetLoc_events = pAlg->getProperty("PreprocessedDetectorsTable");
     if(!pAlg->isExecuted())throw(std::runtime_error("Can not preprocess events detectors to MD"));
 
+    tWs =  API::AnalysisDataService::Instance().retrieve("PreprocessedDetectorsTable");
+    pDetLoc_events = boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(tWs);
+    if(!pDetLoc_events)throw(std::runtime_error("Can not obtain preprocessed events detectors "));
 
     pTargWS = boost::shared_ptr<MDEventWSWrapper>(new MDEventWSWrapper());
 
     Rot.setRandom(100);
     Rot.toRotation();
 
-
+    // this will be used to display progress
+    pMockAlgorithm = std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm>(new WorkspaceCreationHelper::MockAlgorithm());
 }
 
 };

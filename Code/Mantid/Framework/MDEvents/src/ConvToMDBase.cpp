@@ -20,7 +20,7 @@ namespace Mantid
     {
 
       m_InWS2D = WSD.getInWS();
-      // preprocessed detectors information:
+      // preprocessed detectors information:       
       m_NSpectra = WSD.m_PreprDetTable->getProperty("ActualDetectorsNum");
       m_detIDMap = WSD.m_PreprDetTable->getColVector<size_t>("detIDMap");
       m_detID    = WSD.m_PreprDetTable->getColVector<int32_t>("DetectorID");

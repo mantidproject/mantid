@@ -41,7 +41,7 @@ namespace Mantid
       // workspace needs instrument
       ws_valid->add<API::InstrumentValidator>();
       // the validator which checks if the workspace has axis and any units
-      ws_valid->add<API::WorkspaceUnitValidator>("");
+      //ws_valid->add<API::WorkspaceUnitValidator>("");
 
 
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Kernel::Direction::Input,ws_valid),
