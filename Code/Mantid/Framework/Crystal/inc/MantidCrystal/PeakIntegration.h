@@ -64,19 +64,9 @@ private:
   void fitSpectra(const int s, double TOFPeakd, double& I, double& sigI);
   /// Read in all the input parameters
   void retrieveProperties();
-  void sumneighbours(std::string det_name, int x0, int y0, int SumX, int SumY, double TOFPeakd, bool &haveMask, double PeakIntensity, int ***mask, int idet);
   int fitneighbours(int ipeak, std::string det_name, int x0, int y0, int idet, double qspan, PeaksWorkspace_sptr &Peaks);
-  void neighbours(double **matrix, int i, int j, int m, int n, int **mask);
-  void cluster(double **matrix, int m, int n, int **mask);
-  void smooth(double **matrix, int m, int n, double **smmatrix);
   
   detid2index_map * pixel_to_wi; ///< Map of pixel to workspace index
-  int Xmin;        ///< The start of the X range for fitting
-  int Xmax;        ///< The end of the X range for fitting
-  int Ymin;        ///< The start of the Y range for fitting
-  int Ymax;        ///< The end of the Y range for fitting
-  int Binmin;        ///< The start of the Bin range for fitting
-  int Binmax;        ///< The end of the TOF range for fitting
   bool IC;           ///< Ikeida Carpenter fit of TOF
 
 };
