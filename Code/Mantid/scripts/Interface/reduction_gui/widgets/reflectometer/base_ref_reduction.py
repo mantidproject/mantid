@@ -764,8 +764,6 @@ class BaseRefWidget(BaseWidget):
                                          self._summary.data_peak_from_pixel,
                                          self._summary.data_peak_to_pixel,
                                          True)
-        print 'after error in line 767'
-
 
     def _plot_count_vs_y_bck(self):
         """
@@ -871,7 +869,7 @@ class BaseRefWidget(BaseWidget):
             return
         
         try:
-            f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]
+            f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]  
             
             range_min = int(min_ctrl.text())
             range_max = int(max_ctrl.text())
@@ -893,6 +891,7 @@ class BaseRefWidget(BaseWidget):
                                                                       high_res=is_high_res,
                                                                       instrument=self.short_name,
                                                                       isPeak=isPeak)
+                        
             return min, max            
         except:
             pass

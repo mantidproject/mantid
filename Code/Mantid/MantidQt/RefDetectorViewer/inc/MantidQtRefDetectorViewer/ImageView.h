@@ -65,7 +65,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView : public QMainWindow
     void*            saved_ui;               // Ui_MainWindow*
     void*            saved_slider_handler;   // SliderHandler*
     void*            saved_range_handler;    // RangeHandler*
-    void*            saved_image_display;    // ImageDisplay*
+    void*            saved_image_display;    // RefImageDisplay*
     void*            saved_iv_connections;   // IVConnections*
 };
 

@@ -316,7 +316,7 @@ size_t DataArray::ColumnOfX( double x ) const
   }
 
   RestrictCol( col );
-  return (size_t)col;
+  return (int)col;
 }
 
 
@@ -362,7 +362,7 @@ size_t DataArray::RowOfY( double y ) const
   int row = (int)((double)n_rows * (y-ymin)/(ymax-ymin));
 
   RestrictRow( row );
-  return (size_t)row;
+  return (int)row;
 }
 
 

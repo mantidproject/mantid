@@ -4,8 +4,8 @@
 #include  "MantidQtRefDetectorViewer/ColorMaps.h"
 
 #include "ui_ImageView.h"
-#include "MantidQtRefDetectorViewer/IVConnections.h"
-#include "MantidQtRefDetectorViewer/ImageDisplay.h"
+#include "MantidQtRefDetectorViewer/RefIVConnections.h"
+#include "MantidQtRefDetectorViewer/RefImageDisplay.h"
 #include "MantidQtRefDetectorViewer/SliderHandler.h"
 #include "MantidQtRefDetectorViewer/RangeHandler.h"
 
@@ -38,7 +38,7 @@ ImageView::ImageView( ImageDataSource* data_source )
   window->setAttribute(Qt::WA_DeleteOnClose);  // We just need to close the
                                                // window to trigger the 
                                                // destructor and clean up
-    window->setWindowTitle(QString::fromUtf8("Reflector Detector Viewer"));
+  window->setWindowTitle(QString::fromUtf8("Reflector Detector Viewer"));
 
   SliderHandler* slider_handler = new SliderHandler( ui );
   saved_slider_handler = slider_handler;
@@ -52,7 +52,7 @@ ImageView::ImageView( ImageDataSource* data_source )
   h_graph = new GraphDisplay( ui->h_graphPlot, false );
   v_graph = new GraphDisplay( ui->v_graphPlot, true );
 
-  ImageDisplay* image_display = new ImageDisplay( ui->imagePlot,
+  RefImageDisplay* image_display = new RefImageDisplay( ui->imagePlot,
                                                   slider_handler,
                                                   range_handler,
                                                   h_graph, v_graph,
@@ -71,7 +71,7 @@ ImageView::ImageView( ImageDataSource* data_source )
                                                   ui->lineEdit_TOFmax);
   saved_image_display = image_display;
 
-  IVConnections* iv_connections = new IVConnections( ui, this, 
+  RefIVConnections* iv_connections = new RefIVConnections( ui, this, 
                                                      image_display, 
                                                      h_graph, v_graph );
     
@@ -88,7 +88,7 @@ ImageView::~ImageView()
   delete  h_graph;
   delete  v_graph;
 
-  ImageDisplay* image_display = static_cast<ImageDisplay*>(saved_image_display);
+  RefImageDisplay* image_display = static_cast<RefImageDisplay*>(saved_image_display);
   delete  image_display;
 
   SliderHandler* slider_handler = 
@@ -99,8 +99,8 @@ ImageView::~ImageView()
                              static_cast<RangeHandler*>(saved_range_handler);
   delete  range_handler;
 
-  IVConnections* iv_connections = 
-                             static_cast<IVConnections*>(saved_iv_connections);
+  RefIVConnections* iv_connections = 
+                             static_cast<RefIVConnections*>(saved_iv_connections);
   delete  iv_connections;
 
   Ui_MainWindow* ui = static_cast<Ui_MainWindow*>(saved_ui);

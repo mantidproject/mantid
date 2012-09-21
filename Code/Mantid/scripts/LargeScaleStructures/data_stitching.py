@@ -30,7 +30,7 @@ class RangeSelector(object):
                     range_min=None, range_max=None, x_title=None,
                     log_scale=False,
                     ws_output_base=None):
-            
+                        
             self._call_back = call_back
             self._ws_output_base = ws_output_base
             
@@ -38,7 +38,7 @@ class RangeSelector(object):
                              QtCore.SIGNAL("x_range_update(double,double)"),
                              self._call_back)
             g = mantidplot.graph(self._graph)
-            
+
             if g is not None:
                 g.close()
                 

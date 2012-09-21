@@ -98,7 +98,7 @@ DataArray * ArrayDataSource::GetDataArray( double xmin,   double  xmax,
     mid_y = ymin + ((double)row + 0.5) * y_step;
     IVUtils::Interpolate( total_ymin, total_ymax, mid_y,
                                  0.0, (double)total_rows, d_y_index );
-    source_row = (size_t)d_y_index;
+    source_row = (int)d_y_index;
     for ( size_t col = 0; col < n_cols; col++ )
     {
       mid_x = xmin + ((double)col + 0.5) * x_step;

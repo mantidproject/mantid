@@ -1,4 +1,4 @@
-#ifndef IMAGE_DATA_SOURCE_H
+    #ifndef IMAGE_DATA_SOURCE_H
 #define IMAGE_DATA_SOURCE_H
 
 #include <cstddef>

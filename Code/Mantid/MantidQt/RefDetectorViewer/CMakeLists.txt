@@ -1,17 +1,17 @@
 set ( SRC_FILES
        src/ColorMaps.cpp        
-       src/ImageDisplay.cpp   
+       src/RefImageDisplay.cpp   
        src/IVUtils.cpp        
        src/TrackingPicker.cpp
        src/DataArray.cpp        
-       src/ImagePlotItem.cpp  
+       src/RefImagePlotItem.cpp  
        src/QtUtils.cpp
        src/GraphDisplay.cpp     
        src/ImageView.cpp      
        src/SliderHandler.cpp
        src/RangeHandler.cpp
        src/ImageDataSource.cpp  
-       src/IVConnections.cpp 
+       src/RefIVConnections.cpp 
        src/MatrixWSDataSource.cpp
        src/MatrixWSImageView.cpp
        src/ArrayDataSource.cpp
@@ -21,10 +21,10 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
        inc/MantidQtRefDetectorViewer/ColorMaps.h
-       inc/MantidQtRefDetectorViewer/ImageDisplay.h
-       inc/MantidQtRefDetectorViewer/IVConnections.h
+       inc/MantidQtRefDetectorViewer/RefImageDisplay.h
+       inc/MantidQtRefDetectorViewer/RefIVConnections.h
        inc/MantidQtRefDetectorViewer/DataArray.h
-       inc/MantidQtRefDetectorViewer/ImagePlotItem.h
+       inc/MantidQtRefDetectorViewer/RefImagePlotItem.h
        inc/MantidQtRefDetectorViewer/IVUtils.h
        inc/MantidQtRefDetectorViewer/TrackingPicker.h
        inc/MantidQtRefDetectorViewer/GraphDisplay.h
@@ -40,7 +40,7 @@ set ( INC_FILES
 )
 
 set ( MOC_FILES 
-       inc/MantidQtRefDetectorViewer/IVConnections.h
+       inc/MantidQtRefDetectorViewer/RefIVConnections.h
        inc/MantidQtRefDetectorViewer/TrackingPicker.h
 )
 

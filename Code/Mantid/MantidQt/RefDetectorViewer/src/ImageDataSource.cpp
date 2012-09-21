@@ -86,7 +86,7 @@ size_t ImageDataSource::GetNRows()
 /**
  * Get the total number of columns the data is divided into
  */
-size_t ImageDataSource::GetNCols()
+size_t  ImageDataSource::GetNCols()
 {
   return total_cols;
 }
