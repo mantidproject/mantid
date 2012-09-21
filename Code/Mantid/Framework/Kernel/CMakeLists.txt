@@ -67,6 +67,7 @@ set ( SRC_FILES
 	src/SignalChannel.cpp
 	src/SingletonHolder.cpp
 	src/SobolSequence.cpp
+	src/StartsWithValidator.cpp
 	src/Statistics.cpp
 	src/Strings.cpp
 	src/TestChannel.cpp
@@ -190,6 +191,7 @@ set ( INC_FILES
 	inc/MantidKernel/SignalChannel.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/SobolSequence.h
+	inc/MantidKernel/StartsWithValidator.h
 	inc/MantidKernel/Statistics.h
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
@@ -287,6 +289,7 @@ set ( TEST_FILES
 	RegexStringsTest.h
 	SignalChannelTest.h
 	SobolSequenceTest.h
+	StartsWithValidatorTest.h
 	StatisticsTest.h
 	StringsTest.h
 	TaskTest.h

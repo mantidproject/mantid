@@ -11,9 +11,9 @@
 
 namespace Mantid
 {
-namespace CurveFitting
+namespace Kernel
 {
-/** StartsWithValidator is a validator that requires the value of a property to start with of one 
+/** StartsWithValidator is a validator that requires the value of a property to start with one 
     of the strings in a defined list of possibilities.
 
     Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -36,9 +36,14 @@ namespace CurveFitting
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class StartsWithValidator : public Kernel::StringListValidator
+class DLLExport StartsWithValidator : public Kernel::StringListValidator
 {
 public:
+  /**
+   * Default constructor.
+   * @param values :: A vector with the allowed values.
+   */
+  StartsWithValidator():Kernel::StringListValidator(){}
   /**
    * Constructor.
    * @param values :: A vector with the allowed values.
@@ -49,29 +54,18 @@ public:
    * @param values :: A set with the allowed values.
    */
   StartsWithValidator(const std::set<std::string>& values):Kernel::StringListValidator(values){}
+  /// Clone the validator
+  IValidator_sptr clone() const{ return boost::make_shared<StartsWithValidator>(*this); }
 protected:
-  /** Checks if the string passed is in the list
+  /** Checks if the string passed starts with one from the list
    *  @param value :: The value to test
    *  @return "" if the value is on the list, or "The value does not start with any of the allowed values"
    */
-  std::string checkValidity(const std::string & value) const
-  {
-    for(auto it = m_allowedValues.begin(); it != m_allowedValues.end(); ++it )
-    {
-      if ( value.substr(0, it->size()) == *it )
-      {
-        return "";
-      }
-    }
-    if ( isEmpty(value) ) return "Select a value";
-    std::ostringstream os;
-    os << "The value \"" << value << "\" does not start with any of the allowed values";
-    return os.str();
-  }
+  std::string checkValidity(const std::string & value) const;
 
 };
 
-} // namespace CurveFitting
+} // namespace Kernel
 } // namespace Mantid
 
 #endif /*MANTID_KERNEL_STARTSWITHVALIDATOR_H_*/
