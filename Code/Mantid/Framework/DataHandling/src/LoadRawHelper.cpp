@@ -538,6 +538,10 @@ namespace Mantid
       if (i != std::string::npos) instrumentID.erase(i);
 
       IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
+      // Enable progress reporting by sub-algorithm - 
+      loadInst->addObserver(m_progressObserver);
+      setChildStartProgress(0.0);
+      setChildEndProgress(0.25);
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       bool executionSuccessful(true);
       try
@@ -577,6 +581,9 @@ namespace Mantid
             IAlgorithm_sptr updateInst = createSubAlgorithm("UpdateInstrumentFromFile");
             updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
             updateInst->setPropertyValue("Filename", fileName);
+            updateInst->addObserver(m_progressObserver); // Enable progress reporting bu subalgorithm
+            setChildStartProgress(0.25);
+            setChildEndProgress(0.50);
             if(value  == "datafile-ignore-phi" )
             {
               updateInst->setProperty("IgnorePhi", true);

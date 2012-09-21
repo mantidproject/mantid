@@ -225,7 +225,7 @@ namespace Mantid
           catch (Kernel::Exception::NotFoundError&)
           {
           }
-          progress(static_cast<double>(i)/numDetector);
+          progress(static_cast<double>(i)/numDetector,"Updating Detector Positions from File");
         }  
 
       }

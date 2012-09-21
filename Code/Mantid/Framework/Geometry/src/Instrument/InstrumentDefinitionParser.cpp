@@ -280,7 +280,7 @@ namespace Geometry
     if (prog) prog->resetNumSteps(pNL_comp_length, 0.0, 1.0);
     for (unsigned long i = 0; i < pNL_comp_length; i++)
     {
-      if(prog) prog->report();
+      if(prog) prog->report("Loading instrument Definition");
       // we are only interest in the top level component elements hence
       // the reason for the if statement below
 
