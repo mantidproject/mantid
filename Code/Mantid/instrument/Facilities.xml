@@ -51,6 +51,7 @@
   </instrument>
 
   <instrument name="IRIS" shortname="IRS" beamline="N6">
+    <zeropadding size="8" startRunNumber="54938" prefix="IRIS"/>
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
     <livedata address="NDXIRIS:6789" />
