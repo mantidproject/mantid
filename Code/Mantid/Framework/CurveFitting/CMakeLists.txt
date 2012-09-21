@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/FitMW.cpp
 	src/FlatBackground.cpp
 	src/GSLFunctions.cpp
+	src/GSLMatrix.cpp
 	src/GausDecay.cpp
 	src/GausOsc.cpp
 	src/Gaussian.cpp

@@ -114,6 +114,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     std::cerr << "H:\n" << H ;
     std::cerr << "-----------------------------\n";
     for(size_t j = 0; j < n; ++j)  {std::cerr << dd.get(j) << ' '; } std::cerr << std::endl;
+    std::cerr << "det=" << H.det() << std::endl;
   }
 
   /// Parameter corrections
@@ -125,7 +126,6 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   if (debug)
   {
     for(size_t j = 0; j < n; ++j)  {std::cerr << dx.get(j) << ' '; } std::cerr << std::endl << std::endl;
-    //system("pause");
   }
 
   // save previous state
