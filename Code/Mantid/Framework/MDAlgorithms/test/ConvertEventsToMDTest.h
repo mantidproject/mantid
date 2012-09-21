@@ -45,7 +45,7 @@ void testEventWS()
    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","testMDEvWorkspace"));
    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OtherDimensions",""));
    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
-   pAlg->setPropertyValue("PreprocessedDetectors","");
+   pAlg->setPropertyValue("PreprocDetectorsWS","");
    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Elastic"));
    pAlg->setPropertyValue("MinValues","-10,-10,-10");
    pAlg->setPropertyValue("MaxValues"," 10, 10, 10");

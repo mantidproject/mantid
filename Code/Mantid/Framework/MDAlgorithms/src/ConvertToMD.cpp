@@ -121,11 +121,11 @@ ConvertToMD::init()
         " have to coincide with the log names for the records of these variables in the source workspace");
 
     // this property is mainly for subalgorithms to set-up as they have to identify if they use the same instrument. 
-    declareProperty(new PropertyWithValue<std::string>("PreprocessedDetectors","PreprocessedDetectorsWS",Direction::Input), 
+    declareProperty(new PropertyWithValue<std::string>("PreprocDetectorsWS","PreprocessedDetectorsWS",Direction::Input), 
       "The name of the table workspace where the part of the detectors transformation into reciprocal space, calculated by [[PreprocessDetectorsToMD]] algorithm stored.\n"
       "If the workspace is not found in analysis data service, [[PreprocessDetectorsToMD]] used to calculate it. If found, the algorithm will use the workspace from DS\n"
       "Useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
-      "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another. </span>"
+      "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another. </span>\n"
       "In this case this property has to be set empty and the workspace will be recalculated inernaly each time the algorithm is invoked"); 
     // if one needs to use Lorentz corrections
     declareProperty(new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input), 
@@ -378,18 +378,18 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
 
     DataObjects::TableWorkspace_sptr TargTableWS;
     bool storeInDataService(true);
-    std::string WSName = std::string(getProperty("PreprocessedDetectors"));
-    if(WSName.empty()) // TargTableWS is recalculated each time;
+    std::string OutWSName = std::string(getProperty("PreprocDetectorsWS"));
+    if(OutWSName.empty()) // TargTableWS is recalculated each time;
     {
       storeInDataService = false;
-      WSName = "ServiceTableWS";  // TODO: should be hidden?
+      OutWSName = "ServiceTableWS";  // TODO: should be hidden?
     }
     else
     {
       storeInDataService = true;
-      if(API::AnalysisDataService::Instance().doesExist(WSName))      // that is it, workspace exists and we may try to use it
+      if(API::AnalysisDataService::Instance().doesExist(OutWSName))      // that is it, workspace exists and we may try to use it
       {
-        TargTableWS = API::AnalysisDataService::Instance().retrieveWS<DataObjects::TableWorkspace>(WSName);
+        TargTableWS = API::AnalysisDataService::Instance().retrieveWS<DataObjects::TableWorkspace>(OutWSName);
         // get number of all histohrams (may be masked or invalid)
         size_t nHist = InWS2D->getNumberHistograms();
         size_t nDetMap=TargTableWS->rowCount();
@@ -404,21 +404,32 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
       }
 
     }
+    // if input workspace does not exist in analysis data service, we have to add it there to work with algorithm /sucs...
+    std::string InWSName = InWS2D->getName();
+    if(!API::AnalysisDataService::Instance().doesExist(InWSName))
+    {
+       if(InWSName.empty())InWSName = "ImputMatrixWS";
+       // wery bad, but what can we do otherwise... -> pool out the class pointer which is not const 
+       API::AnalysisDataService::Instance().addOrReplace(InWSName,m_InWS2D);
+    }
 
-     Mantid::API::Algorithm_sptr childAlg = createSubAlgorithm("PreprocessDetectorsToMD",0.,1.);
-     if(!childAlg)throw(std::runtime_error("Can not create child subalgorithm to preprocess detectors"));
-     childAlg->setProperty("InputWorkspace",InWS2D->getName());
-     childAlg->setProperty("OutputWorkspace",WSName);
+    Mantid::API::Algorithm_sptr childAlg = createSubAlgorithm("PreprocessDetectorsToMD",0.,1.);
+    if(!childAlg)throw(std::runtime_error("Can not create child subalgorithm to preprocess detectors"));
+    childAlg->setProperty("InputWorkspace",InWSName);
+    childAlg->setProperty("OutputWorkspace",OutWSName);
 
-     childAlg->execute();
-     if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child subalgorithm to preprocess detectors"));
+    childAlg->execute();
+    if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child subalgorithm to preprocess detectors"));
 
-     TargTableWS = childAlg->getProperty("OutputWorkspace");
-     if(!TargTableWS)throw(std::runtime_error("Can not retrieve results of child subalgorithm to preprocess detectors work"));
+    TargTableWS = childAlg->getProperty("OutputWorkspace");
+    if(!TargTableWS)throw(std::runtime_error("Can not retrieve results of child subalgorithm to preprocess detectors work"));
 
-     if(storeInDataService) API::AnalysisDataService::Instance().addOrReplace(WSName,TargTableWS);
+    if(storeInDataService)
+      API::AnalysisDataService::Instance().addOrReplace(OutWSName,TargTableWS);
+    else
+      TargTableWS->setName(OutWSName);
 
-     return TargTableWS;
+    return TargTableWS;
 
 }
 

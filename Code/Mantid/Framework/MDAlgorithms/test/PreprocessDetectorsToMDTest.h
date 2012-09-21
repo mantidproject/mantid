@@ -126,12 +126,12 @@ void testTheAlg()
     TS_ASSERT_THROWS_NOTHING(pAlg->initialize());
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testMatrWS"));
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","PreprocessedDetectors"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","PreprocDetectorsWS"));
 
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
     TSM_ASSERT("Should be successful ",pAlg->isExecuted());
 
-    API::Workspace_sptr wsOut =  API::AnalysisDataService::Instance().retrieve("PreprocessedDetectors");
+    API::Workspace_sptr wsOut =  API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWS");
     TSM_ASSERT("can not retrieve table worksapce from analysis data service ",wsOut);
     DataObjects::TableWorkspace_sptr tws = boost::dynamic_pointer_cast< DataObjects::TableWorkspace>(wsOut);
     TSM_ASSERT("can not interpet the workspace as table workspace",tws);

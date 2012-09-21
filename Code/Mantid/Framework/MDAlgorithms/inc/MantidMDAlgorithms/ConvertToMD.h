@@ -67,8 +67,6 @@ namespace MDAlgorithms
     void exec();
    /// Sets documentation strings for this algorithm
     virtual void initDocs();  
-   /// pointer to the input workspace;
-   Mantid::API::MatrixWorkspace_sptr m_InWS2D;
    /// the pointer to class which keeps output MD workspace and is responsible for adding data to N-dimensional workspace;
    boost::shared_ptr<MDEvents::MDEventWSWrapper> m_OutWSWrapper;
    /// progress reporter
@@ -80,11 +78,14 @@ namespace MDAlgorithms
    static Mantid::Kernel::Logger& g_Log;
    //------------------------------------------------------------------------------------------------------------------------------------------
    protected: //for testing, otherwise private:
-        static Mantid::Kernel::Logger & getLogger();
+       /// pointer to the input workspace;
+      Mantid::API::MatrixWorkspace_sptr m_InWS2D;
+
+       static Mantid::Kernel::Logger & getLogger();
 
         // Workflow helpers:
         /**Check if target workspace new or existing one and we need to create new workspace*/
-        bool doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws);
+       bool doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws);
       /**Create new MD workspace using existing parameters for algorithm */
         API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDEvents::MDWSDescription &NewMDWSDescription);
 

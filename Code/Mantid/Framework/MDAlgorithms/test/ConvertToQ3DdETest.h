@@ -305,7 +305,7 @@ void t__tResult(){
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("EnergyInput", "12."));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QdEValuesMin", "-10.,-10.,-10,-2"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QdEValuesMax", " 10., 10., 10, 8"))
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("UsePreprocessedDetectors","0"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("PreprocDetectorsWS",""));
 
     pAlg->execute();
     TSM_ASSERT("Should be successful ",pAlg->isExecuted());
