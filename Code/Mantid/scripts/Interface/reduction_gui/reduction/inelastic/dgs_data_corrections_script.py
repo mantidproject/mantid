@@ -48,8 +48,8 @@ class DataCorrectionsScript(BaseScriptElement):
             script += "TibTofRangeEnd=\"%s\",\n" % self.tib_tof_end
         if self.detector_vanadium != '':
             script += "DetectorVanadiumInputFile=\"%s\",\n" % self.detector_vanadium
-            script += "UseBoundsForDetVan=%s,\n" % self.det_van_integration
             if self.det_van_integration:
+                script += "UseBoundsForDetVan=%s,\n" % self.det_van_integration
                 script += "DetVanIntRangeLow=\"%s\",\n" % self.det_van_int_range_low
                 script += "DetVanIntRangeHigh=\"%s\",\n" % self.det_van_int_range_high
                 script += "DetVanIntRangeUnits=\"%s\",\n" % self.det_van_int_range_units
