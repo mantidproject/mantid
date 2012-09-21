@@ -1,5 +1,7 @@
 /* WIKI*
-dfkl;aflfk;
+  It is helper algorithm, used to make general part of transformation from real to reciprocal space. 
+  It is used by ConvertToMD algorithm to save time on this transformation when the algorithm used multiple times for the same instrument. 
+  It is also should be used to calculate limits of transformation in Q-space and the detectors trajectories in Q-space. 
 
 *WIKI*/
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
@@ -48,7 +50,7 @@ namespace Mantid
         "An input Matrix Workspace");
 
       declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","",Kernel::Direction::Output),
-        "Name of the output Table workspace. If the workspace exists, it will be replaced");
+        "Name of the output Table workspace with preprocessed detectors data. If the workspace exists, it will be replaced");
 
       //declareProperty(new PropertyWithValue<bool>("FakeDetectors",false,Kernel::Direction::Input),
       //  "If selected, generates table workspace with fake detectors, all allocated in a monitor position.\n"
