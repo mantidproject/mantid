@@ -526,12 +526,25 @@ namespace Mantid
           this->reductionManager->declareProperty((*iter)->clone());
         }
       }
+      // Determine the default facility
+      const FacilityInfo defaultFacility = ConfigService::Instance().getFacility();
 
       // Need to load data to get certain bits of information.
       Workspace_sptr sampleWS = this->loadInputData("Sample");
       MatrixWorkspace_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(sampleWS);
       this->reductionManager->declareProperty(new PropertyWithValue<std::string>(
           "InstrumentName", WS->getInstrument()->getName()));
+
+      // Check the facility for the loaded file and make sure it's the
+      // same as the default.
+      const InstrumentInfo info = ConfigService::Instance().getInstrument(WS->getInstrument()->getName());
+      if (defaultFacility.name() != info.facility().name())
+      {
+        std::ostringstream mess;
+        mess << "Default facility must be set to " << defaultFacility.name();
+        mess << " in order for reduction to work!";
+        throw std::runtime_error(mess.str());
+      }
 
       // Load the hard mask if available
       MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
