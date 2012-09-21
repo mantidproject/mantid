@@ -97,7 +97,7 @@ void GetEi2::init()
     "The time in <math>\\mu s</math> when the count rate of the first monitor, which defaults to the last monitor the beam hits before the sample, is greatest. It is the mean X value for the bin with the highest number of counts per second and is also writen to Mantid's log.",
     Direction::Output);
 
-  declareProperty("FirstMonitorIndex", (size_t)0,
+  declareProperty("FirstMonitorIndex", 0,
     "The spectrum index of the first montitor in the input workspace.", Direction::Output);
 
   declareProperty("Tzero", EMPTY_DBL(),
@@ -203,7 +203,7 @@ double GetEi2::calculateEi(const double initial_guess)
     const double peak_guess = det_distances[i]*std::sqrt(m_t_to_mev/initial_guess);
     if( m_fixedei && i == 0 )
     {
-      m_peak1_pos = std::make_pair(ws_index, peak_guess);
+      m_peak1_pos = std::make_pair(static_cast<int>(ws_index), peak_guess);
       g_log.information() << "First monitor peak = " << peak_guess << " microseconds from fixed Ei = " << initial_guess << " meV\n"; 
       break;
     }
@@ -215,7 +215,7 @@ double GetEi2::calculateEi(const double initial_guess)
     if( i == 0 )
     {  
       //Store for later adjustment of bins
-      m_peak1_pos = std::make_pair(ws_index, peak_times[i]);
+      m_peak1_pos = std::make_pair(static_cast<int>(ws_index), peak_times[i]);
     }
   }
   
