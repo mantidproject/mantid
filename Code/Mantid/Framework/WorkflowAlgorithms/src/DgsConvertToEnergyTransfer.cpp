@@ -139,8 +139,8 @@ namespace Mantid
 
       double incidentEnergy = 0.0;
       double monPeak = 0.0;
-      int eiMon1Spec = reductionManager->getProperty("Monitor1SpecId");
-      int eiMon2Spec = reductionManager->getProperty("Monitor2SpecId");;
+      specid_t eiMon1Spec = static_cast<specid_t>(reductionManager->getProperty("Monitor1SpecId"));
+      specid_t eiMon2Spec = static_cast<specid_t>(reductionManager->getProperty("Monitor2SpecId"));
 
       if ("SNS" == facility)
       {
@@ -261,7 +261,7 @@ namespace Mantid
         getei->execute();
 
         monPeak = getei->getProperty("FirstMonitorPeak");
-        const specid_t monIndex = getei->getProperty("FirstMonitorIndex");
+        const specid_t monIndex = static_cast<const specid_t>(getei->getProperty("FirstMonitorIndex"));
         // Why did the old way get it from the log?
         incidentEnergy = getei->getProperty("IncidentEnergy");
 
