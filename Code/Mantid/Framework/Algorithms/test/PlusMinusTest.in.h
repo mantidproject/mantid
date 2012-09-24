@@ -430,9 +430,27 @@ public:
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
       if (DO_PLUS)
       {
-        // Commutes unless doing it inplace, inplace = fails
         if (inplace!=0)
-          performTest_fails(work_in1,work_in2, inplace!=0);
+        {
+          // This checks that 'in-place' succeeds, but the output workspace is a new one (with the same name)
+          Plus plus;
+          plus.initialize();
+          plus.setProperty("LHSWorkspace",work_in1);
+          plus.setProperty("RHSWorkspace",work_in2);
+          AnalysisDataService::Instance().add("outWS",work_in1);
+          plus.setPropertyValue("OutputWorkspace","outWS");
+          TS_ASSERT( plus.execute() );
+
+          MatrixWorkspace_const_sptr bob = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+          // It's a different workspace to either of the inputs
+          TS_ASSERT_DIFFERS( bob, work_in1 );
+          TS_ASSERT_DIFFERS( bob, work_in2 );
+          // Its dimensions match the RHS input
+          TS_ASSERT_EQUALS( bob->size(), work_in2->size() );
+
+          // Fails if the event workspace is on the left and you ask for it in place
+          performTest_fails(work_in2,work_in1, inplace!=0);
+        }
         else
           performTest(work_in1,work_in2, inplace!=0, false /*not event*/, 4.0, 2.0,
               false, true /*algorithmWillCommute*/);
