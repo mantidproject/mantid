@@ -203,7 +203,16 @@ class BaseRefWidget(BaseWidget):
         #ths
         ths = mt_run.getProperty('ths').value[0]
         
-        return [tthd,ths]
+        #lambda requested
+        lambda_requested = mt_run.getProperty('LambdaRequest').value[0]
+        
+        #s1h, s2h, s1w and s2w
+        s1h = mt_run.getProperty('S1VHeight').value[0]
+        s2h = mt_run.getProperty('S2VHeight').value[0]
+        s1w = mt_run.getProperty('S1HWidth').value[0]
+        s2w = mt_run.getProperty('S2HWidth').value[0]
+        
+        return [tthd,ths, lambda_requested, s1h, s2h, s1w, s2w]
     
     def data_run_number_validated(self):
         """
@@ -219,14 +228,39 @@ class BaseRefWidget(BaseWidget):
             lambdaRequest = ''
             
             metadata= self.getMetadata(_file)
-            
+
+            #tthd             
             tthd_value = metadata[0]
             tthd_value_string = '{0:.2f}'.format(tthd_value)
             self._summary.tthd_value.setText(tthd_value_string)
             
+            #ths
             ths_value = metadata[1]
             ths_value_string = '{0:.2f}'.format(ths_value)
             self._summary.ths_value.setText(ths_value_string)
+
+            #lambda requested
+            lambda_value = metadata[2]
+            lambda_value_string = '{0:.2f}'.format(lambda_value)
+            self._summary.lambda_request.setText(lambda_value_string)
+            
+            #s1h, s2h, s1w and s2w
+            s1h_value = metadata[3]
+            s1h_value_string = '{0:.2f}'.format(s1h_value)
+            self._summary.s1h.setText(s1h_value_string)
+
+            s2h_value = metadata[4]
+            s2h_value_string = '{0:.2f}'.format(s2h_value)
+            self._summary.s2h.setText(s2h_value_string)
+
+            s1w_value = metadata[5]
+            s1w_value_string = '{0:.2f}'.format(s1w_value)
+            self._summary.s1w.setText(s1w_value_string)
+
+            s2w_value = metadata[6]
+            s2w_value_string = '{0:.2f}'.format(s2w_value)
+            self._summary.s2w.setText(s2w_value_string)
+
 #            self._summary.data_run_number_processing.hide()
         except:
             pass
