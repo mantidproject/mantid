@@ -171,15 +171,11 @@ namespace Mantid
       if (m_flipSides)
       {
         //Flip the workspaces left and right
-        MatrixWorkspace_const_sptr temp = m_lhs;
-        m_lhs = m_rhs;
-        m_rhs = temp;
-        EventWorkspace_const_sptr etemp = m_elhs;
-        m_elhs = m_erhs;
-        m_erhs = etemp;
+        std::swap(m_lhs,m_rhs);
+        std::swap(m_elhs,m_erhs);
       }
 
-      // Check that the input workspace are compatible
+      // Check that the input workspaces are compatible
       if (!checkCompatibility(m_lhs,m_rhs))
       {
         std::ostringstream ostr;
@@ -228,11 +224,9 @@ namespace Mantid
 
         // We need to create a new workspace for the output if:
         //   (a) the output workspace hasn't been set to one of the input ones, or
-        //   (b) output WAS == rhs, but it has been flipped for whatever reason (incorrect size)
-        //        meaning that it now points to lhs (which we don't want to change)
-        //        so we need to copy lhs into m_out.
+        //   (b) it has been, but it's not the correct dimensions
         if ( (m_out != m_lhs && m_out != m_rhs) ||
-            ( m_out == m_lhs && ( m_flipSides ) )  )
+             (m_out == m_rhs && ( m_lhs->size() > m_rhs->size() )) )
         {
           // Make sure to delete anything that might be in the output name.
 // Removed ahead of 2.0 release to avoid problems detailed in trac #4630. Hopefully temporary (see #4635).
@@ -318,8 +312,8 @@ namespace Mantid
      */
     bool BinaryOperation::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
-      Unit_const_sptr lhs_unit = Unit_sptr();
-      Unit_const_sptr rhs_unit = Unit_sptr();
+      Unit_const_sptr lhs_unit;
+      Unit_const_sptr rhs_unit;
       if ( lhs->axes() && rhs->axes() ) // If one of these is a WorkspaceSingleValue then we don't want to check units match
       {
         lhs_unit = lhs->getAxis(0)->unit();
