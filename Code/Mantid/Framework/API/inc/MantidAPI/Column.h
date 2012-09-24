@@ -107,7 +107,7 @@ public:
     /// Must return overall memory size taken by the column.
     virtual long int sizeOfData()const = 0;
 
-    /// Virtual destructor. Fully clone any column.
+    /// Virtual constructor. Fully clone any column.
     virtual Column* clone() const = 0;
 
     /// Cast an element to double if possible
