@@ -490,10 +490,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         if self._filename is not None:
             fname = self._filename
         else:
-            fname = '.'
-        
+            fname = self._instrument + '_'
+                
         fname_qstr = QtGui.QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
-                                                       self._last_directory, 
+                                                       self._last_directory + '/' + fname,  
                                                        "Settings files (*.xml)")
         fname = str(QtCore.QFileInfo(fname_qstr).filePath())
         if len(fname)>0:
