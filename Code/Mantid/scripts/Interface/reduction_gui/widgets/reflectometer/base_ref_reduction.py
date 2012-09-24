@@ -359,8 +359,12 @@ class BaseRefWidget(BaseWidget):
 #            print 'Workspace "ref_combined" does not exist !'
 #            return
         
+        #get default output file name         
+        run_number = self._summary.data_run_number_edit.text()
+        default_file_name = 'REFL_' + run_number + '_combined_data.txt'
+        
         #retrieve name of the output file
-        file_name = QtGui.QFileDialog.getSaveFileName(self, "Select or define a ASCII file name", "", "(*.txt)")
+        file_name = QtGui.QFileDialog.getSaveFileName(self, "Select or define a ASCII file name", default_file_name, "(*.txt)")
         if (str(file_name).strip() == ''):
             return
         
