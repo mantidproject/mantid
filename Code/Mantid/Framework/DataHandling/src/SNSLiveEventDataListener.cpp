@@ -331,7 +331,7 @@ namespace DataHandling
     {
       // Starting a new run:  update m_status and add the run_start & run_number properties
 
-      if (runStatus() != NoRun)
+      if (m_status != NoRun)
       {
         // Previous status should have been NoRun.  Spit out a warning if it's not.
         g_log.warning() << "Unexpected start of run.  Run status should have been "
@@ -370,15 +370,18 @@ namespace DataHandling
     }
     else if (pkt.status() == ADARA::RunStatus::END_RUN)
     {
-      // Run has ended:  update m_status and swap buffers so that the current buffer
-      // only has values from the run that just ended
+      // Run has ended:  update m_status and set the flag to stop parsing network packets.
+      // (see comments below for why)
 
-      if (runStatus() != Running)
+      if ((m_status != Running) && (m_status != BeginRun))
       {
-        // Previous status should have been NoRun.  Spit out a warning if it's not.
-        g_log.warning() << "Unexpected end of run.  Run status should have been " << Running
-                        << " (Running), but was " << m_status << std::endl;
+        // Previous status should have been Running or BeginRun.  Spit out a
+        // warning if it's not.  (If it's BeginRun, that's fine.  Itjust means
+        // that the run ended before extractData() was called.)
+        g_log.warning() << "Unexpected end of run.  Run status should have been "
+                        << Running << " (Running), but was " << m_status << std::endl;
       }
+      m_status = EndRun;
 
       // Set the flag to make us stop reading from the network.
       // Stopping network reads solves a number of problems:
@@ -394,7 +397,8 @@ namespace DataHandling
       //
       // Because of this, however, if extractData() isn't called at least once per run,
       // the network packets may start to back up and SMS may eventually disconnect us.
-      // This flag will be cleared down in extractData().
+      // This flag will be cleared down in runStatus(), which is guaranteed to be called
+      // after extractData().
       m_pauseNetRead = true;
     }
 
@@ -671,9 +675,24 @@ namespace DataHandling
     std::swap(m_buffer, temp);
     m_mutex.unlock();
 
+    return temp;
+  }
 
-    // update the run status if necessary
-    // (see the comments in ILiveListener.h)
+
+  ILiveListener::RunStatus SNSLiveEventDataListener::runStatus()
+  {
+    // The MonitorLiveData algorithm calls this function *after* the call to
+    // extract data, which means the value we return should reflect the
+    // value that's appropriate for the events that were returned when
+    // extractData was called().
+
+    ILiveListener::RunStatus rv = m_status;
+
+    // It's only appropriate to return EndRun once (ie: when we've just
+    // returned the last events from the run).  After that, we need to
+    // change the status to NoRun.
+    // As far as I can tell, nobody ever checks for BeginRun, but I'm
+    // assuming the same logic applies....
     if (m_status == BeginRun)
     {
       m_status = Running;
@@ -681,17 +700,21 @@ namespace DataHandling
     else if (m_status == EndRun)
     {
       m_status = NoRun;
+
+      // If the run has ended, replace the old workspace with a new one
+      // (This ensures that we're not using log data and/or geometry from
+      // a previous run that are no longer valid.  SMS is guaranteed to
+      // send us new device descriptor packets at the start of every run.)
+      // Note: we can get away with not locking a mutex here because the
+      // background thread is still paused.
+      m_workspaceInitialized = false;
+      m_buffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
+          (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     }
 
     m_pauseNetRead = false;  // make sure the network reads start back up
 
-    return temp;
-  }
-
-
-  ILiveListener::RunStatus SNSLiveEventDataListener::runStatus()
-  {
-    return m_status;
+    return rv;
   }
   
   

@@ -57,6 +57,11 @@ namespace Mantid
       boost::shared_ptr<API::Workspace> extractData();
 
       ILiveListener::RunStatus runStatus();
+      // Note: runStatus() might actually update the value of m_status, so
+      // it probably shouldn't be called by other member functions.  The
+      // logic it uses for updating m_status is only valid if the function
+      // is only called by the MonitorLiveData algorithm.
+
       bool isConnected();
 
       virtual void run();  // the background thread.  What gets executed when we call
