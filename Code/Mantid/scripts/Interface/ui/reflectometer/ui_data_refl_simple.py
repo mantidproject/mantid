@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'data_refl_simple.ui'
 #
-# Created: Fri Sep 21 13:06:25 2012
+# Created: Mon Sep 24 07:07:27 2012
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -1658,7 +1658,11 @@ class Ui_Frame(object):
         self.q_bins_label.setText(QtGui.QApplication.translate("Frame", "Number of bins  ", None, QtGui.QApplication.UnicodeUTF8))
         self.q_step_label.setText(QtGui.QApplication.translate("Frame", "Q steps ", None, QtGui.QApplication.UnicodeUTF8))
         self.q_step_edit.setText(QtGui.QApplication.translate("Frame", "0", None, QtGui.QApplication.UnicodeUTF8))
-        self.q_step_unit_label.setText(QtGui.QApplication.translate("Frame", " 1/Å", None, QtGui.QApplication.UnicodeUTF8))
+        self.q_step_unit_label.setText(QtGui.QApplication.translate("Frame", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Lucida Grande\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">&#916;Q/Q</p></body></html>", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Frame", "Logarithmic binning", None, QtGui.QApplication.UnicodeUTF8))
         self.log_scale_chk.setText(QtGui.QApplication.translate("Frame", "Log scale", None, QtGui.QApplication.UnicodeUTF8))
         self.angle_offset_label.setText(QtGui.QApplication.translate("Frame", "Angle offset", None, QtGui.QApplication.UnicodeUTF8))
