@@ -257,14 +257,14 @@ namespace Mantid
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("SamBkgErrorBarCriterion",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
-      auto mustBeIntPositive = boost::make_shared<BoundedValidator<size_t> >();
+      auto mustBeIntPositive = boost::make_shared<BoundedValidator<int> >();
       mustBeIntPositive->setLower(0);
-      size_t tof_start = 18000;
+      int tof_start = 18000;
       this->declareProperty("BackgroundTofStart", tof_start, mustBeIntPositive,
           "Start TOF for the background check.");
       this->setPropertySettings("BackgroundTofStart",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
-      size_t tof_end = 19500;
+      int tof_end = 19500;
       this->declareProperty("BackgroundTofEnd", tof_end, mustBeIntPositive,
           "End TOF for the background check.");
       this->setPropertySettings("BackgroundTofEnd",

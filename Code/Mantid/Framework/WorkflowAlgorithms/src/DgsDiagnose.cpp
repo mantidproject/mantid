@@ -221,13 +221,13 @@ namespace Mantid
       MatrixWorkspace_sptr backgroundIntWS;
       if (checkBkg)
       {
-        const double rangeStart = reductionManager->getProperty("BackgroundTofStart");
-        const double rangeEnd = reductionManager->getProperty("BackgroundTofEnd");
+        const int rangeStart = reductionManager->getProperty("BackgroundTofStart");
+        const int rangeEnd = reductionManager->getProperty("BackgroundTofEnd");
         IAlgorithm_sptr integrate = this->createSubAlgorithm("Integration");
         integrate->setProperty("InputWorkspace", sampleWS);
         integrate->setPropertyValue("OutputWorkspace", bkgInternal);
-        integrate->setProperty("RangeLower", rangeStart);
-        integrate->setProperty("RangeUpper", rangeEnd);
+        integrate->setProperty("RangeLower", static_cast<double>(rangeStart));
+        integrate->setProperty("RangeUpper", static_cast<double>(rangeEnd));
         integrate->setProperty("IncludePartialBins", true);
         integrate->executeAsSubAlg();
         backgroundIntWS = integrate->getProperty("OutputWorkspace");
