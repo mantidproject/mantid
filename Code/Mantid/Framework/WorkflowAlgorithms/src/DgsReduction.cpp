@@ -356,7 +356,7 @@ namespace Mantid
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
           Direction::Output);
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
-          Direction::Output, PropertyMode::Optional));
+          Direction::Output), "Provide a name for the output workspace.");
     }
 
     /**
@@ -557,6 +557,9 @@ namespace Mantid
         throw std::runtime_error(mess.str());
       }
 
+      // Get output workspace pointer
+      MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
+
       // Load the hard mask if available
       MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
       // Load the grouping file if available
@@ -621,6 +624,9 @@ namespace Mantid
       etConv->setProperty("ReductionProperties", reductionManagerName);
       etConv->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
       etConv->executeAsSubAlg();
+      outputWS = etConv->getProperty("OutputWorkspace");
+
+      this->setProperty("OutputWorkspace", outputWS);
     }
 
   } // namespace Mantid

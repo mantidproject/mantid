@@ -604,7 +604,6 @@ namespace Mantid
         mult->executeAsSubAlg();
       }
 
-      AnalysisDataService::Instance().add(outWsName, outputWS);
       this->setProperty("OutputWorkspace", outputWS);
     }
 
