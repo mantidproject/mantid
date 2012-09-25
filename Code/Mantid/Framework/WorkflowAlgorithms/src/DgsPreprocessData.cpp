@@ -67,9 +67,9 @@ namespace Mantid
      */
     void DgsPreprocessData::init()
     {
-      this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
+      this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
           Direction::Input), "An input workspace.");
-      this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
+      this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
           Direction::Output, PropertyMode::Optional), "An output workspace.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
           Direction::Input);
@@ -125,7 +125,11 @@ namespace Mantid
         if ("ToMonitor" == incidentBeamNorm)
         {
           // Perform extra setup for monitor normalisation
-          const double rangeOffset = reductionManager->getProperty("TofRangeOffset");
+          double rangeOffset = 0.0;
+          if (reductionManager->existsProperty("TofRangeOffset"))
+          {
+            rangeOffset = reductionManager->getProperty("TofRangeOffset");
+          }
           double rangeMin = reductionManager->getProperty("MonitorIntRangeLow");
           if (EMPTY_DBL() == rangeMin)
           {
