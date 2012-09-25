@@ -3,10 +3,16 @@
   It is used by ConvertToMD algorithm to save time on this transformation when the algorithm used multiple times for the same instrument. 
   It is also should be used to calculate limits of transformation in Q-space and the detectors trajectories in Q-space. 
 
+  The result of this algorithm do in fact define an "ideal instrument", which is used to convert experimental data into the reciprocal space.
+  The purpose of PreprocessDetectorsToMD is to return these data in the form, which can be easy extracted, 
+  observed and modified to see and check all corrections done to the real instrument. 
+
 *WIKI*/
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/NumericAxis.h"
+
 //#include "
 
 
@@ -52,6 +58,11 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","",Kernel::Direction::Output),
         "Name of the output Table workspace with preprocessed detectors data. If the workspace exists, it will be replaced");
 
+      declareProperty(new Kernel::PropertyWithValue<bool>("GetEFixed",false,Kernel::Direction::Input),
+        "This option make sence for Indirect instruments only. \n"
+        "If selected, the column, which corresponds to each detector's fixed energy will be added to resulting table workspace\n"
+        "The algorithm will work for any other instrument, but the fixed energies would not have much meaning.");
+
       //declareProperty(new PropertyWithValue<bool>("FakeDetectors",false,Kernel::Direction::Input),
       //  "If selected, generates table workspace with fake detectors, all allocated in a monitor position.\n"
       //  "Number of detectors is equal to number of spectra and real detectors, if present are ignored ");
@@ -80,6 +91,7 @@ namespace Mantid
     {
       const size_t nHist = inputWS->getNumberHistograms();
 
+
       // set the target workspace
       auto targWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(nHist));
       // detectors positions
@@ -95,6 +107,14 @@ namespace Mantid
       if(!targWS->addColumn("size_t","detIDMap"))throw(std::runtime_error("Can not add column detIDMap"));
       // stores detector index which corresponds to the workspace index;
       if(!targWS->addColumn("size_t","spec2detMap"))throw(std::runtime_error("Can not add column spec2detMap"));
+
+      // check if one wants to obtain detector's efixed"    
+      m_getEFixed = this->getProperty("GetEFixed");
+      if(m_getEFixed)
+        if(!targWS->addColumn("float","eFixed"))throw(std::runtime_error("Can not add column containing efixed"));
+
+
+
       // will see about that
       // sin^2(Theta)
       //    std::vector<double>      SinThetaSq;
@@ -148,6 +168,14 @@ namespace Mantid
       auto &Azimuthal  = targWS->getColVector<double>("Azimuthal");
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
 
+      // Efixed; do we need one and does one exist?
+      double Efi = getEfixed(inputWS);
+      float *pEfixedArray(NULL);
+      const Geometry::ParameterMap& pmap = inputWS->constInstrumentParameters(); 
+      if (m_getEFixed)
+        pEfixedArray     = targWS->getColDataArray<float>("eFixed"); 
+
+
       //// progress messave appearence
       size_t div=100;
       size_t nHist = targWS->rowCount();
@@ -163,6 +191,7 @@ namespace Mantid
         TwoTheta[i] =std::numeric_limits<double>::quiet_NaN(); 
         Azimuthal[i]=std::numeric_limits<double>::quiet_NaN(); 
 
+   
         // get detector or detector group which corresponds to the spectra i
         Geometry::IDetector_const_sptr spDet;
         try
@@ -199,6 +228,21 @@ namespace Mantid
 
         //double sinTheta=sin(0.5*polar);
         //this->SinThetaSq[liveDetectorsCount]  = sinTheta*sinTheta;
+
+        // specific code which should work and makes sence 
+        // for indirect instrument but may be deployed on any code with Ei property defined;
+        if(pEfixedArray)
+        {
+          try
+          {
+            Geometry::Parameter_sptr par = pmap.getRecursive(spDet.get(),"Efixed");
+            if (par) Efi = par->value<double>();
+          }
+          catch(std::runtime_error&)
+          {}
+          // set efixed for each existing detector
+          *(pEfixedArray+liveDetectorsCount) = (float)(Efi);
+        }
 
         liveDetectorsCount++;
         if(i%div==0) theProgress.report(i,"Preprocessing detectors");
@@ -268,6 +312,41 @@ namespace Mantid
       return false;
     }
 
+    /**Method returns the efixed value if the one is requested in Algorithm parameters 
+     *  Only indirect instruments can have efxed and this efixed is on detectors. 
+     *
+     *  This method provide guess for efixed for all other kind of instruments. Correct indirect instrument will overwrite 
+     *  this value while wrongly defined or different types of instruments will provide the value of "Ei" property (log value)
+     *  or undefined if "Ei" property is not found.
+     *
+     */
+    double PreprocessDetectorsToMD::getEfixed(const API::MatrixWorkspace_const_sptr &inputWS)const
+    {
+      Kernel::DeltaEMode::Type eMode;
+      double Efi = EMPTY_DBL();
+      if(m_getEFixed)
+      {
+        try
+        {
+          eMode = inputWS->getEMode();
+        }catch(...) // TODO: What would it throw?
+        {
+          eMode = Kernel::DeltaEMode::Undefined;
+        }
+        // is efixed on workspace properties? (it can be defined for some reason if detectors do not have one, and then it would exist as Ei)
+        try
+        {
+          Efi =  inputWS->run().getPropertyValueAsType<double>("Ei");
+        }
+        catch(Kernel::Exception::NotFoundError &)
+        {}
 
+
+        if(eMode != Kernel::DeltaEMode::Indirect)
+          g_log.warning()<<" Requested Efixed for instrument of type: "<<Kernel::DeltaEMode::asString(eMode)<<std::endl;
+
+      }
+      return Efi;
+    }
   }
 }

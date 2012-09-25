@@ -381,6 +381,29 @@ public:
 
   }
 
+  void testGetColDataArray()
+  {
+     TableWorkspace tw(3);
+     tw.addColumn("float","MyFloatData");
+
+     double *pdData =tw.getColDataArray<double>("MyFloatData");
+     TS_ASSERT(!pdData);
+     float *pfData =tw.getColDataArray<float>("NonExistingColumn");
+     TS_ASSERT(!pfData);
+
+
+     float *pData = tw.getColDataArray<float>("MyFloatData");
+     TS_ASSERT(pData);
+     for(int i=0;i<3;i++)
+       *(pData+i) = float(i+10);
+
+      std::vector<float> &MyFloats = tw.getColVector<float>("MyFloatData");
+      for(int i=0;i<3;i++)
+      {
+        TS_ASSERT_DELTA(*(pData+i),MyFloats[i],1.e-6);
+      }
+  }
+
 
 };
 

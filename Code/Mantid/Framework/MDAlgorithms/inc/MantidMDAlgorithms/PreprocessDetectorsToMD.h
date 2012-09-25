@@ -54,13 +54,16 @@ namespace MDAlgorithms
       void exec();
       /// Sets documentation strings for this algorithm
       virtual void initDocs();  
-
+      /// the variable specifies if one needs to calculate efixed for detectors (make sence for indirect instruments)
+      bool m_getEFixed;
     protected: // for testing
       void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS);
       void buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS);
       // build a table workspace corresponding to the input matrix workspace
       boost::shared_ptr<DataObjects::TableWorkspace> createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS);
       bool isDetInfoLost(Mantid::API::MatrixWorkspace_const_sptr inWS2D)const;
+      // helper function to get efixed if it is there or not;
+      double getEfixed(const API::MatrixWorkspace_const_sptr &inputWS)const;
     };
 
 }  // MDEvents

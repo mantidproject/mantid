@@ -176,6 +176,8 @@ public:
 
     /// Reference to the data.
     std::vector<Type>& data(){return m_data;}
+    /// Pointer to the data array
+    Type *dataArray(){return &m_data[0];}
 
     /// return a value casted to double; the users responsibility is to be sure, that the casting is possible
     double operator[](size_t i)const

@@ -23,6 +23,12 @@ public:
       {
           PreprocessDetectorsToMD::buildFakeDetectorsPositions(inputWS,targWS);
       }
+
+      PrepcocessDetectorsToMDTestHelper():
+      PreprocessDetectorsToMD()
+      {
+        PreprocessDetectorsToMD::initialize();
+      }
 };
 
 
@@ -122,8 +128,7 @@ void testFakeDetectors()
 
 void testTheAlg()
 {
-    auto pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(new PrepcocessDetectorsToMDTestHelper());
-    TS_ASSERT_THROWS_NOTHING(pAlg->initialize());
+    auto pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(new PrepcocessDetectorsToMDTestHelper()); 
 
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testMatrWS"));
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","PreprocDetectorsWS"));
@@ -152,10 +157,35 @@ void testTheAlg()
 
 }
 
+void testCreateWSWithEfixed()
+{
+    auto pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(new PrepcocessDetectorsToMDTestHelper()); 
+
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InputWorkspace","testMatrWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("OutputWorkspace","PreprocDetectorsWS"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("GetEFixed","1"));
+
+    TS_ASSERT_THROWS_NOTHING(pAlg->execute());
+    TSM_ASSERT("Should be successful ",pAlg->isExecuted());
+
+    API::Workspace_sptr wsOut =  API::AnalysisDataService::Instance().retrieve("PreprocDetectorsWS");
+    TSM_ASSERT("can not retrieve table worksapce from analysis data service ",wsOut);
+    DataObjects::TableWorkspace_sptr tws = boost::dynamic_pointer_cast< DataObjects::TableWorkspace>(wsOut);
+    TSM_ASSERT("can not interpet the workspace as table workspace",tws);
+
+     auto &Efixed     = tws->getColVector<float>("eFixed"); 
+     for(size_t i=0;i<Efixed.size();i++)
+     {
+       TS_ASSERT_DELTA(13.,Efixed[i],1.e-6);
+     }
+
+}
+
 
 PreprocessDetectorsToMDTest()
 {
      pAlg = std::auto_ptr<PrepcocessDetectorsToMDTestHelper>(new PrepcocessDetectorsToMDTestHelper());
+
      ws2D = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
     // rotate the crystal by twenty degrees back;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);

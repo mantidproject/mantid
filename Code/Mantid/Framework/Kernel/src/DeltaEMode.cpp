@@ -19,6 +19,7 @@ namespace Mantid
           index.insert(std::make_pair(DeltaEMode::Elastic, "Elastic"));
           index.insert(std::make_pair(DeltaEMode::Direct, "Direct"));
           index.insert(std::make_pair(DeltaEMode::Indirect, "Indirect"));
+          index.insert(std::make_pair(DeltaEMode::Undefined, "Undefined"));
         }
         std::map<DeltaEMode::Type, std::string> index;
       };
@@ -41,6 +42,7 @@ namespace Mantid
       size_t index(0);
       for(auto iter = lookup.index.begin(); iter != lookup.index.end(); ++iter)
       {
+        if(iter->first == DeltaEMode::Undefined)continue;
         modes[index] = iter->second;
         ++index;
       }
