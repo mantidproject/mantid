@@ -6,6 +6,7 @@ One can use the ExecuteOppositeOrder to do grouping first then masking.
 *WIKI*/
 
 #include "MantidWorkflowAlgorithms/DgsRemap.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 
 using namespace Mantid::Kernel;
@@ -65,6 +66,8 @@ namespace WorkflowAlgorithms
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("GroupingWorkspace",
         "", Direction::Input, PropertyMode::Optional),
         "A workspace containing grouping information");
+    this->declareProperty(new FileProperty("OldGroupingFile", "",
+        FileProperty::OptionalLoad), "Name of an old grouping format (not XML) file.");
     this->declareProperty("ExecuteOppositeOrder", false,
         "Execute grouping before masking.");
     this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace",
@@ -109,17 +112,29 @@ namespace WorkflowAlgorithms
   void DgsRemap::execGrouping(MatrixWorkspace_sptr iWS, MatrixWorkspace_sptr &oWS)
   {
     MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
-    if (groupWS)
+    std::string oldGroupingFile = this->getProperty("OldGroupingFile");
+    if (groupWS && !oldGroupingFile.empty())
     {
-      int64_t ngroups = 0;
-      std::vector<int> groupDetIdList;
-      GroupingWorkspace_sptr gWS = boost::dynamic_pointer_cast<GroupingWorkspace>(groupWS);
-      gWS->makeDetectorIDToGroupVector(groupDetIdList, ngroups);
+      throw std::runtime_error("Choose either GroupingWorkspace or OldGroupingFile property!");
+    }
 
+    if (groupWS || !oldGroupingFile.empty())
+    {
       IAlgorithm_sptr group = this->createSubAlgorithm("GroupDetectors");
       group->setProperty("InputWorkspace", iWS);
       group->setProperty("OutputWorkspace", iWS);
-      group->setProperty("DetectorList", groupDetIdList);
+      if (groupWS)
+      {
+        int64_t ngroups = 0;
+        std::vector<int> groupDetIdList;
+        GroupingWorkspace_sptr gWS = boost::dynamic_pointer_cast<GroupingWorkspace>(groupWS);
+        gWS->makeDetectorIDToGroupVector(groupDetIdList, ngroups);
+        group->setProperty("DetectorList", groupDetIdList);
+      }
+      if (!oldGroupingFile.empty())
+      {
+        group->setProperty("MapFile", oldGroupingFile);
+      }
       group->setProperty("Behaviour", "Average");
       group->executeAsSubAlg();
       oWS = group->getProperty("OutputWorkspace");
