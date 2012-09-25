@@ -71,6 +71,7 @@ namespace Mantid
           "A mask workspace");
       this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("GroupingWorkspace",
           "", Direction::Input, PropertyMode::Optional), "A grouping workspace");
+      this->declareProperty("NoGrouping", false, "Flag to turn off grouping. This is mainly to cover the use of old format grouping files.");
       this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
           "The workspace containing the processed results.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
@@ -150,22 +151,22 @@ namespace Mantid
       // Mask and group workspace if necessary.
       MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
       MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
-      if (maskWS || groupWS)
+      std::string oldGroupFile("");
+      if (reductionManager->existsProperty("OldGroupingFilename"))
       {
-        IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
-        remap->setProperty("InputWorkspace", outputWS);
-        remap->setProperty("OutputWorkspace", outputWS);
-        if (maskWS)
-        {
-          remap->setProperty("MaskWorkspace", maskWS);
-        }
-        if (groupWS)
-        {
-          remap->setProperty("GroupingWorkspace", groupWS);
-        }
-        remap->executeAsSubAlg();
-        outputWS = remap->getProperty("OutputWorkspace");
+        oldGroupFile = reductionManager->getPropertyValue("OldGroupingFilename");
       }
+      IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
+      remap->setProperty("InputWorkspace", outputWS);
+      remap->setProperty("OutputWorkspace", outputWS);
+      remap->setProperty("MaskWorkspace", maskWS);
+      remap->setProperty("GroupingWorkspace", groupWS);
+      if (!this->getProperty("NoGrouping"))
+      {
+        remap->setProperty("OldGroupingFile", oldGroupFile);
+      }
+      remap->executeAsSubAlg();
+      outputWS = remap->getProperty("OutputWorkspace");
 
       const std::string facility = ConfigService::Instance().getFacility().name();
       if ("ISIS" == facility)
