@@ -490,13 +490,24 @@ namespace Mantid
       }
       else
       {
-        groupingWsName = "grouping";
-        IAlgorithm_sptr loadGrpFile = this->createSubAlgorithm("LoadDetectorsGroupingFile");
-        loadGrpFile->setAlwaysStoreInADS(true);
-        loadGrpFile->setProperty("InputFile", groupFile);
-        loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
-        loadGrpFile->execute();
-        return loadGrpFile->getProperty("OutputWorkspace");
+        try
+        {
+          groupingWsName = "grouping";
+          IAlgorithm_sptr loadGrpFile = this->createSubAlgorithm("LoadDetectorsGroupingFile");
+          loadGrpFile->setAlwaysStoreInADS(true);
+          loadGrpFile->setProperty("InputFile", groupFile);
+          loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
+          loadGrpFile->execute();
+          return loadGrpFile->getProperty("OutputWorkspace");
+        }
+        catch (...)
+        {
+          // This must be an old format grouping file.
+          // Set a property to use later.
+          g_log.warning() << "Old format grouping file in use." << std::endl;
+          this->reductionManager->declareProperty(new PropertyWithValue<std::string>("OldGroupingFilename", groupFile));
+          return boost::shared_ptr<MatrixWorkspace>();
+        }
       }
     }
 
