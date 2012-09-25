@@ -158,6 +158,7 @@ namespace Mantid
       // Process the detector vanadium
       IAlgorithm_sptr detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
       detVan->setProperty("InputWorkspace", dvWS);
+      detVan->setProperty("NoGrouping", true);
       detVan->setProperty("ReductionProperties", reductionManagerName);
       detVan->executeAsSubAlg();
       dvWS.reset();
