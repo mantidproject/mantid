@@ -15,6 +15,7 @@ from dgs_interface_dev import DgsInterface
 
 INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface, 
                             "GPSANS": HFIRInterface},
+                   "ISIS": {"MERLIN": DgsInterface},
                    "SNS":  {"ARCS": DgsInterface,
                             "CNCS": DgsInterface,
                             "EQSANS": EQSANSInterface,
