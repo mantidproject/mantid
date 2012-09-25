@@ -130,7 +130,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.tabWidget.clear()
         self.progress_bar.hide()
         
-        facility_name = ''
         if self._instrument == '' or self._instrument is None:
             if IS_IN_MANTIDPLOT:
                 c = ConfigService()
@@ -140,7 +139,6 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                     instr = instr.replace("-","")
                     if instr in INSTRUMENT_DICT[facility].keys():
                         self._instrument = instr
-                        facility_name = facility
                         
                 # If we still can't find an instrument, show the
                 # instrument selection dialog
@@ -162,7 +160,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self._interface.destroy()
             
         self.general_settings.instrument_name = self._instrument
-        self.general_settings.facility_name = facility_name
+        c = ConfigService()
+        self.general_settings.facility_name = str(c.facility().name())
         self._interface = instrument_factory(self._instrument, settings=self.general_settings)
         
         if self._interface is not None:
