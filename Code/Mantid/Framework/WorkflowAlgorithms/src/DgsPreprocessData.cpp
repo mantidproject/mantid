@@ -70,7 +70,7 @@ namespace Mantid
       this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
           Direction::Input), "An input workspace.");
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
-          Direction::Output, PropertyMode::Optional), "An output workspace.");
+          Direction::Output), "The name for the output workspace.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
           Direction::Input);
     }
@@ -99,9 +99,7 @@ namespace Mantid
       const std::string doneLog = "DirectInelasticReductionNormalisedBy";
 
       MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-      // Make output workspace name the same as input workspace
-      const std::string outWsName = inputWS->getName();
-      MatrixWorkspace_sptr outputWS;// = this->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
       std::string incidentBeamNorm = reductionManager->getProperty("IncidentBeamNormalisation");
       g_log.notice() << "Incident beam norm method = " << incidentBeamNorm << std::endl;
@@ -121,7 +119,7 @@ namespace Mantid
         IAlgorithm_sptr norm = this->createSubAlgorithm(normAlg);
         //norm->setAlwaysStoreInADS(true);
         norm->setProperty("InputWorkspace", inputWS);
-        norm->setPropertyValue("OutputWorkspace", outWsName);
+        norm->setProperty("OutputWorkspace", outputWS);
         if ("ToMonitor" == incidentBeamNorm)
         {
           // Perform extra setup for monitor normalisation
@@ -172,14 +170,12 @@ namespace Mantid
         addLog->setProperty("LogName", doneLog);
         addLog->setProperty("LogText", normAlg);
         addLog->executeAsSubAlg();
-
-        outputWS->setName(outWsName);
       }
       else
       {
         if (normAlreadyDone)
         {
-          g_log.information() << "Preprocessing already done on " << outWsName << std::endl;
+          g_log.information() << "Preprocessing already done on " << inputWS->getName() << std::endl;
         }
         outputWS = inputWS;
       }

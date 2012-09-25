@@ -81,7 +81,7 @@ namespace Mantid
       this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("GroupingWorkspace",
           "", Direction::Input, PropertyMode::Optional), "A grouping workspace");
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
-          Direction::Output, PropertyMode::Optional));
+          Direction::Output), "The name for the output workspace.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
     }
 
@@ -106,22 +106,10 @@ namespace Mantid
       this->enableHistoryRecordingForChild(true);
 
       MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-      const std::string inWsName = inputWS->getName();
-      // Make the result workspace name
-      std::string outWsName("");
       MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
-      if (!outputWS)
-      {
-        outWsName = inWsName + "_et";
-        g_log.warning() << "No OutputWorkspace defined, defaulting to " << outWsName << std::endl;
-      }
-      else
-      {
-        outWsName = outputWS->getName();
-      }
 
       // Make a monitor workspace name for SNS data
-      std::string monWsName = inWsName + "_monitors";
+      std::string monWsName = inputWS->getName() + "_monitors";
       bool preserveEvents = false;
 
       // Calculate the initial energy and time zero
@@ -239,11 +227,10 @@ namespace Mantid
         g_log.notice() << "Adjusting for T0" << std::endl;
         IAlgorithm_sptr alg = this->createSubAlgorithm("ChangeBinOffset");
         alg->setProperty("InputWorkspace", inputWS);
-        alg->setProperty("OutputWorkspace", outWsName);
+        alg->setProperty("OutputWorkspace", outputWS);
         alg->setProperty("Offset", -tZero);
         alg->executeAsSubAlg();
         outputWS = alg->getProperty("OutputWorkspace");
-        outputWS->setName(outWsName);
 
         // Add T0 to sample logs
         IAlgorithm_sptr addLog = this->createSubAlgorithm("AddSampleLog");
@@ -270,14 +257,10 @@ namespace Mantid
 
         IAlgorithm_sptr cbo = this->createSubAlgorithm("ChangeBinOffset");
         cbo->setProperty("InputWorkspace", inputWS);
-        cbo->setProperty("OutputWorkspace", outWsName);
+        cbo->setProperty("OutputWorkspace", outputWS);
         cbo->setProperty("Offset", -monPeak);
         cbo->executeAsSubAlg();
         outputWS = cbo->getProperty("OutputWorkspace");
-        if (outputWS)
-        {
-          outputWS->setName(outWsName);
-        }
 
         IDetector_const_sptr monDet = inputWS->getDetector(monIndex);
         V3D monPos = monDet->getPos();
@@ -543,7 +526,6 @@ namespace Mantid
       }
       rebin->executeAsSubAlg();
       outputWS = rebin->getProperty("OutputWorkspace");
-      outputWS->setName(outWsName);
 
       if (sofphieIsDistribution)
       {
