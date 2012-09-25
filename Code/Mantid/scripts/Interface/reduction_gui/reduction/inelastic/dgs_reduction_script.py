@@ -25,8 +25,10 @@ class DgsReductionScripter(BaseReductionScripter):
         """
             Generate reduction script
             @param file_name: name of the file to write the script to
-        """
-        script =  "%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
+        """     
+        script = "config['default.instrument']=\"%s\"\n" % self.facility_name
+        script += "\n"
+        script +=  "%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
         for item in self._observers:
             if item.state() is not None:
                 for subitem in str(item.state()).split('\n'):
