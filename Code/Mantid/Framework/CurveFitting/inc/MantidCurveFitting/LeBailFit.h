@@ -60,6 +60,14 @@ namespace CurveFitting
   class DLLExport LeBailFit : public API::Algorithm
   {
   public:
+    /// Enumerate
+    enum FunctionMode
+    {
+      CALCULATION,
+      FIT,
+      BACKGROUNDPROCESS
+    };
+
     LeBailFit();
     virtual ~LeBailFit();
 
@@ -142,7 +150,7 @@ namespace CurveFitting
     void exportParametersWorkspace(std::map<std::string, Parameter> parammap);
 
     /// Create output data workspace
-    void createOutputDataWorkspace(size_t workspaceindex, int functionmode);
+    void createOutputDataWorkspace(size_t workspaceindex, FunctionMode functionmode);
 
     /// Create background function
     CurveFitting::BackgroundFunction_sptr generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws);
@@ -198,6 +206,9 @@ namespace CurveFitting
 
     /// Convert unit from d-spacing to TOF
     // double convertUnitToTOF(double dh);
+
+    /// Calculate some statistics for fitting/calculating result
+    void doResultStatistics();
 
     /// =============================    =========================== ///
     size_t mWSIndexToWrite;
