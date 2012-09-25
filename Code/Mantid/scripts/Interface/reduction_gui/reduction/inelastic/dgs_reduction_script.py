@@ -18,8 +18,8 @@ class DgsReductionScripter(BaseReductionScripter):
     WIDTH_END = "".join([" " for i in range(len(TOPLEVEL_WORKFLOWALG))])
     WIDTH = WIDTH_END + " "
     
-    def __init__(self, name="SEQ"):
-        super(DgsReductionScripter, self).__init__(name=name)
+    def __init__(self, name="SEQ", facility="SNS"):
+        super(DgsReductionScripter, self).__init__(name=name, facility=facility)
         
     def to_script(self, file_name=None):
         """

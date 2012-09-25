@@ -15,7 +15,7 @@ class DgsInterface(InstrumentInterface):
         super(DgsInterface, self).__init__(name, settings)
         
         # Scripter object to interface with Mantid 
-        self.scripter = DgsReductionScripter()        
+        self.scripter = DgsReductionScripter(name=name, facility=settings.facility_name)        
 
         # Sample run setup
         self.attach(SampleSetupWidget(settings = self._settings, 
