@@ -12,8 +12,8 @@ set ( SRC_FILES
        src/RangeHandler.cpp
        src/ImageDataSource.cpp  
        src/RefIVConnections.cpp 
-       src/MatrixWSDataSource.cpp
-       src/MatrixWSImageView.cpp
+       src/RefMatrixWSDataSource.cpp
+       src/RefMatrixWSImageView.cpp
        src/ArrayDataSource.cpp
        src/ErrorHandler.cpp
 )
@@ -33,8 +33,8 @@ set ( INC_FILES
        inc/MantidQtRefDetectorViewer/ImageDataSource.h
        inc/MantidQtRefDetectorViewer/SliderHandler.h
        inc/MantidQtRefDetectorViewer/RangeHandler.h
-       inc/MantidQtRefDetectorViewer/MatrixWSDataSource.h
-       inc/MantidQtRefDetectorViewer/MatrixWSImageView.h
+       inc/MantidQtRefDetectorViewer/RefMatrixWSDataSource.h
+       inc/MantidQtRefDetectorViewer/RefMatrixWSImageView.h
        inc/MantidQtRefDetectorViewer/ArrayDataSource.h
        inc/MantidQtRefDetectorViewer/ErrorHandler.h
 )

@@ -1039,6 +1039,34 @@ void SliceViewer::refreshRebin()
 
 
 
+namespace MantidQt
+{
+namespace RefDetectorViewer
+{
+
+
+//*WIKI* == Classes ==
+//*WIKI* Here follows a list of the classes exposed to python and the methods you can execute on them.
+
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class MatrixWSDataSource
+{
+%TypeHeaderCode
+#include "MantidQtRefDetectorViewer/MatrixWSDataSource.h"
+%end
+
+public:
+	MatrixWSDataSource ( Mantid::API::MatrixWorkspace_sptr mat_ws);
+}
+
+
+}; // end namespace
+}; // end namespace
+
+
 
 
 
@@ -1119,6 +1147,8 @@ WidgetFactory::WidgetFactory()
 
 }; // end namespace
 }; // end namespace
+
+
 
 
 
