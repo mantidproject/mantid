@@ -220,7 +220,7 @@ namespace Mantid
           "Upper bound defining outliers as fraction of median value");
       this->setPropertySettings("HighOutlier",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
-      this->declareProperty("MedianTestHigh", 3.0, mustBePositive,
+      this->declareProperty("MedianTestHigh", 2.0, mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("MedianTestHigh",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
@@ -245,11 +245,11 @@ namespace Mantid
 
       this->declareProperty("BackgroundCheck", false,
           "If true, run a background check on detector vanadium.");
-      this->declareProperty("SamBkgMedianTestHigh", 5.0, mustBePositive,
+      this->declareProperty("SamBkgMedianTestHigh", 1.5, mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("SamBkgMedianTestHigh",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
-      this->declareProperty("SamBkgMedianTestLow", 0.1, mustBePositive,
+      this->declareProperty("SamBkgMedianTestLow", 0.0, mustBePositive,
           "Mask detectors below this threshold.");
       this->setPropertySettings("SamBkgMedianTestLow",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
