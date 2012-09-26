@@ -119,6 +119,8 @@ namespace Mantid
       m_ez = (m_Det+i)->Z();
       // if Lorentz-corrected, retrieve the sin(Theta)^2 for the detector;
       if(m_isLorentzCorrected)m_SinThetaSq = *(m_SinThetaSqArray+i);
+      // if input energy changes on each detector (efixed, indirect mode only), then set up its value
+      if(m_pEfixedArray)m_Ei = double(*(m_pEfixedArray+i));
 
       return true;
     }

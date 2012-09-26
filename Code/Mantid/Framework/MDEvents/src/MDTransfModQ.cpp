@@ -90,6 +90,8 @@ namespace Mantid
       m_ex = (m_Det+i)->X();
       m_ey = (m_Det+i)->Y();
       m_ez = (m_Det+i)->Z();
+      // if input energy changes on each detector (efixed, indirect mode only), then set up its value
+      if(m_pEfixedArray)m_Ei = double(*(m_pEfixedArray+i));
       return true;
     }
     /** function calculates workspace-dependent coordinates in inelastic case. 
@@ -198,6 +200,9 @@ namespace Mantid
         m_Ei  =  ConvParams.getEi();
         // the wave vector of incident neutrons;
         m_Ki=sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
+
+        m_pEfixedArray=NULL;
+        if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");
       }else{
         if (m_Emode != CnvrtToMD::Elastic)throw(std::invalid_argument("MDTransfModQ::initialize::Unknown energy conversion mode"));
       }

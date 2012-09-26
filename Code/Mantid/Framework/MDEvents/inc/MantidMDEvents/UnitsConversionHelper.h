@@ -68,6 +68,8 @@ class DLLExport UnitsConversionHelper
       double m_L1,m_Efix,m_TwoTheta,m_L2;
       std::vector<double>const *m_pTwoThetas;
       std::vector<double>const *m_pL2s;
+      // pointer to detector specific input energy (eFixed) defined for indirect instruments;
+      float *m_pEfixedArray;
 
 public:
     UnitsConversionHelper():m_pTwoThetas(NULL),m_pL2s(NULL){};

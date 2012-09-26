@@ -203,7 +203,7 @@ void ConvertToMD::exec()
        m_OutWSWrapper->setMDWS(spws);
  
     // preprocess detectors;
-    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D);
+    targWSDescr.m_PreprDetTable = this->preprocessDetectorsPositions(m_InWS2D,dEModReq);
 
  
     //DO THE JOB:
@@ -373,7 +373,7 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
   *@returns TableWorkspace_const_sptr the pointer to the table workspace which contains positions of the preprocessed detectorsl
   *         Depenting on the algorithm parameters, this worksapce is also stored in the analysis data service. 
  */
-DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D)
+DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested)
 {
 
     DataObjects::TableWorkspace_sptr TargTableWS;
@@ -417,6 +417,10 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
     if(!childAlg)throw(std::runtime_error("Can not create child subalgorithm to preprocess detectors"));
     childAlg->setProperty("InputWorkspace",InWSName);
     childAlg->setProperty("OutputWorkspace",OutWSName);
+    if(dEModeRequested == "Indirect")  // TODO: redefine this through Kernel::Emodes
+      childAlg->setProperty("GetEFixed",OutWSName); 
+
+
 
     childAlg->execute();
     if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child subalgorithm to preprocess detectors"));

@@ -91,10 +91,13 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, con
   m_pL2s       =  &(targetWSDescr.m_PreprDetTable->getColVector<double>("L2"));
 
   m_L1        =  targetWSDescr.m_PreprDetTable->getProperty("L1");
-  // get efix
-  m_Efix      =  targetWSDescr.getEi();
+  
   m_Emode     =  (int)targetWSDescr.getEMode();
 
+  // get efix
+  m_Efix      =  targetWSDescr.getEi();
+  m_pEfixedArray=NULL;
+  if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = targetWSDescr.m_PreprDetTable->getColDataArray<float>("eFixed");
 }
 /** Method updates unit conversion given the index of detector parameters in the array of detectors */
 void UnitsConversionHelper::updateConversion(size_t i)
@@ -108,7 +111,10 @@ void UnitsConversionHelper::updateConversion(size_t i)
       double delta;
       m_TwoTheta = (*m_pTwoThetas)[i];
       m_L2       = (*m_pL2s)[i];
-      m_TargetUnit->initialize(m_L1,m_L2,m_TwoTheta,m_Emode,m_Efix,delta);
+      double    Efix = m_Efix;
+      if(m_pEfixedArray)Efix=(double)(*(m_pEfixedArray+i));
+
+      m_TargetUnit->initialize(m_L1,m_L2,m_TwoTheta,m_Emode,Efix,delta);
       return;
     }
   case(CnvrtToMD::ConvertByTOF):
@@ -116,8 +122,11 @@ void UnitsConversionHelper::updateConversion(size_t i)
       double delta;
       m_TwoTheta = (*m_pTwoThetas)[i];
       m_L2       = (*m_pL2s)[i];
-      m_TargetUnit->initialize(m_L1,m_L2,m_TwoTheta,m_Emode,m_Efix,delta);
-      m_SourceWSUnit->initialize(m_L1,m_L2,m_TwoTheta,m_Emode,m_Efix,delta);
+      double  Efix = m_Efix;
+      if(m_pEfixedArray)Efix=(double)(*(m_pEfixedArray+i));
+
+      m_TargetUnit->initialize(m_L1,m_L2,m_TwoTheta,m_Emode,Efix,delta);
+      m_SourceWSUnit->initialize(m_L1,m_L2,m_TwoTheta,m_Emode,Efix,delta);
       return;
     }
   default:
@@ -166,6 +175,7 @@ UnitsConversionHelper::UnitsConversionHelper(const UnitsConversionHelper &anothe
   m_L2         = another.m_L2;
   m_pTwoThetas = another.m_pTwoThetas;
   m_pL2s       = another.m_pL2s;
+  m_pEfixedArray=another.m_pEfixedArray;
 
   if(another.m_SourceWSUnit)m_SourceWSUnit = Kernel::Unit_sptr(another.m_SourceWSUnit->clone());      
   if(another.m_TargetUnit)  m_TargetUnit   = Kernel::Unit_sptr(another.m_TargetUnit->clone());

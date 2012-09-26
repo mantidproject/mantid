@@ -25,9 +25,9 @@ class Convert2AnyTestHelper: public ConvertToMD
 {
 public:
     Convert2AnyTestHelper(){};
-    TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D)
+    TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string dEModeRequested="Direct")
     {
-      return ConvertToMD::preprocessDetectorsPositions(InWS2D);
+      return ConvertToMD::preprocessDetectorsPositions(InWS2D,dEModeRequested);
     }
     void setSourceWS(Mantid::API::MatrixWorkspace_sptr InWS2D)
     {

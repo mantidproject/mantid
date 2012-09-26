@@ -95,11 +95,13 @@ protected:
     /** the vector of the additional coordinates which define additional MD dimensions. 
         For implemented ModQ case, these dimensions do not depend on matrix coordinates and are determined by WS properties */
     std::vector<coord_t>  m_AddDimCoordinates;
-    //************* These two variables are relevant to inelastic modes only and will be used in inelastic cases:
-    // the energy of the incident neutrons
-    double m_Ei;
+    //************* The variables below are relevant to inelastic modes only and will be used in inelastic cases:
     // the wavevector of incident neutrons
     double m_Ki;  
+    // the energy of the incident neutrons
+    double m_Ei;
+    // pointer to detector specific input energy (eFixed) defined for indirect instruments; This one is relewant to indirect instruments only;
+    float *m_pEfixedArray;
 private:
      /// how to transform workspace data in elastic case
     inline bool calcMatrixCoordElastic(const double &k0,std::vector<coord_t> &Coored)const;

@@ -95,7 +95,7 @@ namespace MDAlgorithms
        void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;
 
        // 
-       DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D);
+       DataObjects::TableWorkspace_const_sptr preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested);
  };
 
 } // namespace Mantid
