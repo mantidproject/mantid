@@ -117,7 +117,11 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         filename = name + extension
 
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
+        #alg = LoadEventNexus(Filename=filename, ChunkNumber=3, TotalChunks=3,  OutputWorkspace=name, **kwargs)
         wksp = alg.workspace()
+        if str(self._instrument) == "NOM":
+            LoadInstrument(Workspace=wksp, Filename="NOMAD_Definition_20120701-20120731.xml",RewriteSpectraMap=True)
+
         return wksp
 
     def _loadHistoNeXusData(self, runnumber, extension):
@@ -290,7 +294,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp, SumX=self._xpixelbin, SumY=self._ypixelbin)
         # Bin events in d-Spacing
         if not "histo" in self.getProperty("Extension"):
-        	Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str(abs(self._binning[1]))+","+str(self._binning[2]))
+        	Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
         # Remove old calibration files
         cmd = "rm "+calib
         os.system(cmd)
@@ -302,7 +306,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
                 SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset", WeightedSum="Flat",
                                  AdjX=self._xpixelbin, AdjY=self._ypixelbin)
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str(abs(self._binning[1]))+","+str(self._binning[2]))
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
         CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
         
