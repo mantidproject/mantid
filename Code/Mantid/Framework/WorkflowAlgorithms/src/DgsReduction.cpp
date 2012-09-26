@@ -573,14 +573,20 @@ namespace Mantid
       Workspace_sptr idetVanWS;
       if (detVanWS && !isProcessedDetVan)
       {
+        std::string detVanMaskName = detVanWS->getName() + "_diagmask";
+
         IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
         diag->setProperty("DetVanWorkspace", detVanWS);
         diag->setProperty("DetVanCompWorkspace", detVan2WS);
         diag->setProperty("SampleWorkspace", sampleWS);
-        diag->setProperty("OutputWorkspace", "samDetVanProcMask");
+        diag->setProperty("OutputWorkspace", detVanMaskName);
         diag->setProperty("ReductionProperties", reductionManagerName);
         diag->executeAsSubAlg();
         maskWS = diag->getProperty("OutputWorkspace");
+
+        this->declareProperty(new WorkspaceProperty<>("SampleDetVanDiagMask",
+            detVanMaskName, Direction::Output));
+        this->setProperty("SampleDetVanDiagMask", maskWS);
 
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
@@ -594,10 +600,16 @@ namespace Mantid
         {
           detVan->setProperty("GroupingWorkspace", groupingWS);
         }
+        std::string idetVanName = detVanWS->getName() + "_idetvan";
+
+        detVan->setProperty("OutputWorkspace", idetVanName);
         detVan->setProperty("ReductionProperties", reductionManagerName);
         detVan->executeAsSubAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
         idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
+        this->declareProperty(new WorkspaceProperty<>("IntegratedNormWorkspace",
+            idetVanName, Direction::Output));
+        this->setProperty("IntegratedNormWorkspace", idetVanWS);
       }
       else
       {
