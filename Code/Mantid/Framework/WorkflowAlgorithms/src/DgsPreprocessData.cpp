@@ -117,7 +117,6 @@ namespace Mantid
         }
         const std::string normAlg = "Normalise" + incidentBeamNorm;
         IAlgorithm_sptr norm = this->createSubAlgorithm(normAlg);
-        //norm->setAlwaysStoreInADS(true);
         norm->setProperty("InputWorkspace", inputWS);
         norm->setProperty("OutputWorkspace", outputWS);
         if ("ToMonitor" == incidentBeamNorm)
