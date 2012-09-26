@@ -65,6 +65,7 @@ set ( SRC_FILES
 	src/LoadNexusLogs.cpp
 	src/LoadNexusMonitors.cpp
 	src/LoadNexusProcessed.cpp
+	src/LoadPDFgetNFile.cpp
 	src/LoadParameterFile.cpp
 	src/LoadPreNexus.cpp
 	src/LoadPreNexusMonitors.cpp
@@ -114,8 +115,8 @@ set ( SRC_FILES
 	src/SaveDetectorMasks.cpp
 	src/SaveDetectorsGrouping.cpp
 	src/SaveDspacemap.cpp
-	src/SaveFullprofResolution.cpp
 	src/SaveFocusedXYE.cpp
+	src/SaveFullprofResolution.cpp
 	src/SaveGSS.cpp
 	src/SaveISISNexus.cpp
 	src/SaveIsawDetCal.cpp
@@ -202,6 +203,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadNexusLogs.h
 	inc/MantidDataHandling/LoadNexusMonitors.h
 	inc/MantidDataHandling/LoadNexusProcessed.h
+	inc/MantidDataHandling/LoadPDFgetNFile.h
 	inc/MantidDataHandling/LoadParameterFile.h
 	inc/MantidDataHandling/LoadPreNexus.h
 	inc/MantidDataHandling/LoadPreNexusMonitors.h
@@ -246,8 +248,8 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveDetectorMasks.h
 	inc/MantidDataHandling/SaveDetectorsGrouping.h
 	inc/MantidDataHandling/SaveDspacemap.h
-	inc/MantidDataHandling/SaveFullprofResolution.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
+	inc/MantidDataHandling/SaveFullprofResolution.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveISISNexus.h
 	inc/MantidDataHandling/SaveIsawDetCal.h
@@ -328,6 +330,7 @@ set ( TEST_FILES
 	LoadNexusMonitorsTest.h
 	LoadNexusProcessedTest.h
 	LoadNexusTest.h
+	LoadPDFgetNFileTest.h
 	LoadParameterFileTest.h
 	LoadPreNexusMonitorsTest.h
 	LoadPreNexusTest.h
@@ -366,8 +369,8 @@ set ( TEST_FILES
 	SaveDaveGrpTest.h
 	SaveDetectorsGroupingTest.h
 	SaveDspacemapTest.h
-	SaveFullprofResolutionTest.h
 	SaveFocussedXYETest.h
+	SaveFullprofResolutionTest.h
 	SaveIsawDetCalTest.h
 	SaveMaskTest.h
 	SaveNISTDATTest.h
