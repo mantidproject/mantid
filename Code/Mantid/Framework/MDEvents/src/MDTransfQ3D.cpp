@@ -128,7 +128,7 @@ namespace Mantid
     /** function initalizes all variables necessary for converting workspace variables into MD variables in ModQ (elastic/inelastic) cases  */
     void MDTransfQ3D::initialize(const MDWSDescription &ConvParams)
     { 
-
+      m_pEfixedArray = NULL;
       //********** Generic part of initialization, common for elastic and inelastic modes:
       // get transformation matrix (needed for CrystalAsPoder mode)
       m_RotMat = ConvParams.getTransfMatrix();
@@ -152,6 +152,9 @@ namespace Mantid
         m_Ei  =  ConvParams.getEi();
         // the wave vector of incident neutrons;
         m_Ki=sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
+
+        m_pEfixedArray=NULL;
+        if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = ConvParams.m_PreprDetTable->getColDataArray<float>("eFixed");  
       }else{
         if (m_Emode != CnvrtToMD::Elastic) throw(std::runtime_error("MDTransfQ3D::initialize::Unknown or unsupported energy conversion mode"));
         // check if we need to calculate Lorentz corrections and if we do, prepare values for their precalculation:

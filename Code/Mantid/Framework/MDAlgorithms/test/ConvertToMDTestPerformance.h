@@ -5,8 +5,6 @@
 #include <iomanip>
 #include <iostream>
 
-// this preprocessor definition disables "ADD TO MD WORKSPACE" operations and should be enabled if this is necessary. (for debug purposes only!)
-
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/CPUTimer.h"

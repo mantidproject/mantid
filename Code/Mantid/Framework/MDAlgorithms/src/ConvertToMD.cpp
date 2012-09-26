@@ -418,7 +418,7 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
     childAlg->setProperty("InputWorkspace",InWSName);
     childAlg->setProperty("OutputWorkspace",OutWSName);
     if(dEModeRequested == "Indirect")  // TODO: redefine this through Kernel::Emodes
-      childAlg->setProperty("GetEFixed",OutWSName); 
+      childAlg->setProperty("GetEFixed",true); 
 
 
 
