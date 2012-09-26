@@ -45,7 +45,7 @@ public:
 
     TS_ASSERT(outws);
 
-    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 6);
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 2);
   }
 
   /** Test to load .sq file
