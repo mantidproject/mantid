@@ -134,7 +134,7 @@ namespace Mantid
           }
           rangeMin += rangeOffset;
           double rangeMax = reductionManager->getProperty("MonitorIntRangeHigh");
-          if (EMPTY_DBL() == rangeMin)
+          if (EMPTY_DBL() == rangeMax)
           {
             rangeMax = inputWS->getInstrument()->getNumberParameter("norm-mon1-max")[0];
           }
