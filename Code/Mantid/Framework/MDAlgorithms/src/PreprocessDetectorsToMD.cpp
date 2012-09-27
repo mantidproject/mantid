@@ -124,6 +124,10 @@ namespace Mantid
       targWS->declareProperty(new Kernel::PropertyWithValue<double>("Ei",EMPTY_DBL()),"Incident energy for Direct or Analysis energy for indirect instrument");
       targWS->declareProperty(new Kernel::PropertyWithValue<uint32_t>("ActualDetectorsNum",0),"The actual number of detectors receivinv signal");
       targWS->declareProperty(new Kernel::PropertyWithValue<bool>("FakeDetectors",false),"If the detectors were actually processed from real instrument or generated for some fake one ");
+
+      double Efi = getEi(inputWS);
+      targWS->setProperty<double>("Ei",Efi);
+
       return targWS;
     }
 
@@ -170,9 +174,7 @@ namespace Mantid
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
 
       // Efixed; do we need one and does one exist?
-      double Efi = getEi(inputWS,m_getEFixed);
-      targWS->setProperty<double>("Ei",Efi);
-
+      double Efi = targWS->getProperty("Ei");
       float *pEfixedArray(NULL);
       const Geometry::ParameterMap& pmap = inputWS->constInstrumentParameters(); 
       if (m_getEFixed)
@@ -266,10 +268,6 @@ namespace Mantid
       targWS->setProperty<std::string>("InstrumentName","FakeInstrument");    
       targWS->setProperty<bool>("FakeDetectors",true);
 
-      // Ei or Efixed; do we need one and does one exist?
-      double Efi = getEi(inputWS);
-      targWS->setProperty<double>("Ei",Efi);
-
 
       // get access to the workspace memory
       auto &sp2detMap  = targWS->getColVector<size_t>("spec2detMap");
@@ -327,31 +325,23 @@ namespace Mantid
      *  or undefined if "Ei" property is not found.
      *
      */
-    double PreprocessDetectorsToMD::getEi(const API::MatrixWorkspace_const_sptr &inputWS,bool needEi)const
-    {
-      Kernel::DeltaEMode::Type eMode;
+    double PreprocessDetectorsToMD::getEi(const API::MatrixWorkspace_const_sptr &inputWS)const
+    { 
       double Efi = EMPTY_DBL();
-      if(!needEi)return Efi;
-
-      // Try to obtain Ei
-      try
-      {
-         eMode = inputWS->getEMode();
-      }catch(...) // TODO: What would it throw?
-      {
-         eMode = Kernel::DeltaEMode::Undefined;
-      }
+   
+    
       // is Ei on workspace properties? (it can be defined for some reason if detectors do not have one, and then it would exist as Ei)
-      bool eFixedFound(false);
+      bool EiFound(false);
       try
       {
          Efi =  inputWS->run().getPropertyValueAsType<double>("Ei");
-         eFixedFound = true;
+         EiFound = true;
       }
       catch(Kernel::Exception::NotFoundError &)
       {}
-      // try to get Efixed as property on 
-      if (!eFixedFound)
+      // try to get Efixed as property on a workspace, obtained for indirect instrument
+      bool eFixedFound(false);
+      if (!EiFound)
       {
         try
         {
@@ -362,10 +352,8 @@ namespace Mantid
         {}
       }
 
-      if(eMode != Kernel::DeltaEMode::Indirect)
-          g_log.warning()<<" Requested Efixed for instrument of type: "<<Kernel::DeltaEMode::asString(eMode)<<std::endl;
-      if(!eFixedFound)
-          g_log.warning()<<" Efixed requested but have not been found\n";
+      if (!(EiFound||eFixedFound))
+        g_log.debug()<<" Ei/Efixed equested but have not been found\n";
 
       return Efi;
     }

@@ -63,7 +63,7 @@ namespace MDAlgorithms
       boost::shared_ptr<DataObjects::TableWorkspace> createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS);
       bool isDetInfoLost(Mantid::API::MatrixWorkspace_const_sptr inWS2D)const;
       // helper function to get efixed if it is there or not;
-      double getEi(const API::MatrixWorkspace_const_sptr &inputWS,bool needEi)const;
+      double getEi(const API::MatrixWorkspace_const_sptr &inputWS)const;
     };
 
 }  // MDEvents
