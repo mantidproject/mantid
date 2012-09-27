@@ -38,12 +38,13 @@ namespace Mantid
     const std::vector<std::string> DeltaEMode::availableTypes()
     {
       const ModeIndex & lookup = typeStringLookup();
-      std::vector<std::string> modes(lookup.index.size());
+      std::vector<std::string> modes;
+      modes.reserve(lookup.index.size());
       size_t index(0);
       for(auto iter = lookup.index.begin(); iter != lookup.index.end(); ++iter)
       {
         if(iter->first == DeltaEMode::Undefined)continue;
-        modes[index] = iter->second;
+        modes.push_back(iter->second);
         ++index;
       }
       return modes;
