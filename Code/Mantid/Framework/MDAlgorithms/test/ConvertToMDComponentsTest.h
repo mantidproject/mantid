@@ -42,13 +42,13 @@ public:
 
 
 //
-class Convert2MDComponentsTest : public CxxTest::TestSuite
+class ConvertToMDComponentsTest : public CxxTest::TestSuite
 {
  std::auto_ptr<Convert2MDComponentsTestHelper> pAlg;
  Mantid::API::MatrixWorkspace_sptr ws2D;
 public:
-static Convert2MDComponentsTest *createSuite() { return new Convert2MDComponentsTest(); }
-static void destroySuite(Convert2MDComponentsTest * suite) { delete suite; }    
+static ConvertToMDComponentsTest *createSuite() { return new ConvertToMDComponentsTest(); }
+static void destroySuite(ConvertToMDComponentsTest * suite) { delete suite; }    
 
 
 void testPreprocDetLogic()
@@ -117,7 +117,7 @@ void testCalcDECol()
 
 
 
-Convert2MDComponentsTest()
+ConvertToMDComponentsTest()
 {
      pAlg = std::auto_ptr<Convert2MDComponentsTestHelper>(new Convert2MDComponentsTestHelper());
      ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
@@ -128,7 +128,7 @@ Convert2MDComponentsTest()
 
      AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 }
-~Convert2MDComponentsTest()
+~ConvertToMDComponentsTest()
 {
     AnalysisDataService::Instance().remove("testWSProcessed");
 }
