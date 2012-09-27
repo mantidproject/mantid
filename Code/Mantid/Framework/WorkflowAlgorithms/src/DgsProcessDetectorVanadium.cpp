@@ -64,15 +64,16 @@ namespace Mantid
     {
       auto wsValidator = boost::make_shared<CompositeValidator>();
       wsValidator->add<WorkspaceUnitValidator>("TOF");
-      this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input, wsValidator),
+      this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, wsValidator),
           "An input workspace containing the detector vanadium data in TOF units.");
-      this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("MaskWorkspace",
+      this->declareProperty(new WorkspaceProperty<>("MaskWorkspace",
           "", Direction::Input, PropertyMode::Optional),
           "A mask workspace");
-      this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("GroupingWorkspace",
+      this->declareProperty(new WorkspaceProperty<>("GroupingWorkspace",
           "", Direction::Input, PropertyMode::Optional), "A grouping workspace");
-      this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "", Direction::Output),
-          "The workspace containing the processed results.");
+      this->declareProperty("NoGrouping", false, "Flag to turn off grouping. This is mainly to cover the use of old format grouping files.");
+      this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+          "The name for the output workspace.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
           Direction::Output);
     }
@@ -98,15 +99,14 @@ namespace Mantid
       this->enableHistoryRecordingForChild(true);
 
       MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-      MatrixWorkspace_sptr outputWS;
+      MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
       // Normalise result workspace to incident beam parameter
       IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
       norm->setProperty("InputWorkspace", inputWS);
-      norm->setProperty("OutputWorkspace", inputWS);
+      norm->setProperty("OutputWorkspace", outputWS);
       norm->executeAsSubAlg();
       outputWS = norm->getProperty("OutputWorkspace");
-      std::string outWsName = outputWS->getName();
 
       double detVanIntRangeLow = reductionManager->getProperty("DetVanIntRangeLow");
       if (EMPTY_DBL() == detVanIntRangeLow)
@@ -145,27 +145,26 @@ namespace Mantid
       rebin->setProperty("Params", binning);
       rebin->executeAsSubAlg();
       outputWS = rebin->getProperty("OutputWorkspace");
-      outputWS->setName(outWsName);
 
       // Mask and group workspace if necessary.
       MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
       MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
-      if (maskWS || groupWS)
+      std::string oldGroupFile("");
+      if (reductionManager->existsProperty("OldGroupingFilename"))
       {
-        IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
-        remap->setProperty("InputWorkspace", outputWS);
-        remap->setProperty("OutputWorkspace", outputWS);
-        if (maskWS)
-        {
-          remap->setProperty("MaskWorkspace", maskWS);
-        }
-        if (groupWS)
-        {
-          remap->setProperty("GroupingWorkspace", groupWS);
-        }
-        remap->executeAsSubAlg();
-        outputWS = remap->getProperty("OutputWorkspace");
+        oldGroupFile = reductionManager->getPropertyValue("OldGroupingFilename");
       }
+      IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
+      remap->setProperty("InputWorkspace", outputWS);
+      remap->setProperty("OutputWorkspace", outputWS);
+      remap->setProperty("MaskWorkspace", maskWS);
+      remap->setProperty("GroupingWorkspace", groupWS);
+      if (!this->getProperty("NoGrouping"))
+      {
+        remap->setProperty("OldGroupingFile", oldGroupFile);
+      }
+      remap->executeAsSubAlg();
+      outputWS = remap->getProperty("OutputWorkspace");
 
       const std::string facility = ConfigService::Instance().getFacility().name();
       if ("ISIS" == facility)

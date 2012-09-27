@@ -10,12 +10,15 @@ class DgsInterface(InstrumentInterface):
     """
     # Allowed extensions for loading data files
     data_type = "Data files *.* (*.*)"
+
     
     def __init__(self, name, settings):
         super(DgsInterface, self).__init__(name, settings)
         
+        self.ERROR_REPORT_NAME = "dgs_error_report.xml"
+        
         # Scripter object to interface with Mantid 
-        self.scripter = DgsReductionScripter()        
+        self.scripter = DgsReductionScripter(name=name, facility=settings.facility_name)        
 
         # Sample run setup
         self.attach(SampleSetupWidget(settings = self._settings, 

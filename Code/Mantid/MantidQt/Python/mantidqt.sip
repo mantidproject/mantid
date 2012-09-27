@@ -1041,7 +1041,6 @@ void SliceViewer::refreshRebin()
 
 
 
-
 namespace MantidQt
 {
 namespace Factory
@@ -1119,6 +1118,8 @@ WidgetFactory::WidgetFactory()
 
 }; // end namespace
 }; // end namespace
+
+
 
 
 

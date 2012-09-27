@@ -257,15 +257,11 @@ namespace Mantid
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("SamBkgErrorBarCriterion",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
-      auto mustBeIntPositive = boost::make_shared<BoundedValidator<size_t> >();
-      mustBeIntPositive->setLower(0);
-      size_t tof_start = 18000;
-      this->declareProperty("BackgroundTofStart", tof_start, mustBeIntPositive,
+      this->declareProperty("BackgroundTofStart", EMPTY_DBL(), mustBePositive,
           "Start TOF for the background check.");
       this->setPropertySettings("BackgroundTofStart",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
-      size_t tof_end = 19500;
-      this->declareProperty("BackgroundTofEnd", tof_end, mustBeIntPositive,
+      this->declareProperty("BackgroundTofEnd", EMPTY_DBL(), mustBePositive,
           "End TOF for the background check.");
       this->setPropertySettings("BackgroundTofEnd",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
@@ -356,7 +352,7 @@ namespace Mantid
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
           Direction::Output);
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
-          Direction::Output, PropertyMode::Optional));
+          Direction::Output), "Provide a name for the output workspace.");
     }
 
     /**
@@ -490,13 +486,24 @@ namespace Mantid
       }
       else
       {
-        groupingWsName = "grouping";
-        IAlgorithm_sptr loadGrpFile = this->createSubAlgorithm("LoadDetectorsGroupingFile");
-        loadGrpFile->setAlwaysStoreInADS(true);
-        loadGrpFile->setProperty("InputFile", groupFile);
-        loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
-        loadGrpFile->execute();
-        return loadGrpFile->getProperty("OutputWorkspace");
+        try
+        {
+          groupingWsName = "grouping";
+          IAlgorithm_sptr loadGrpFile = this->createSubAlgorithm("LoadDetectorsGroupingFile");
+          loadGrpFile->setAlwaysStoreInADS(true);
+          loadGrpFile->setProperty("InputFile", groupFile);
+          loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
+          loadGrpFile->execute();
+          return loadGrpFile->getProperty("OutputWorkspace");
+        }
+        catch (...)
+        {
+          // This must be an old format grouping file.
+          // Set a property to use later.
+          g_log.warning() << "Old format grouping file in use." << std::endl;
+          this->reductionManager->declareProperty(new PropertyWithValue<std::string>("OldGroupingFilename", groupFile));
+          return boost::shared_ptr<MatrixWorkspace>();
+        }
       }
     }
 
@@ -545,6 +552,9 @@ namespace Mantid
         mess << " in order for reduction to work!";
         throw std::runtime_error(mess.str());
       }
+
+      // Get output workspace pointer
+      MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
       // Load the hard mask if available
       MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
@@ -610,6 +620,9 @@ namespace Mantid
       etConv->setProperty("ReductionProperties", reductionManagerName);
       etConv->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
       etConv->executeAsSubAlg();
+      outputWS = etConv->getProperty("OutputWorkspace");
+
+      this->setProperty("OutputWorkspace", outputWS);
     }
 
   } // namespace Mantid

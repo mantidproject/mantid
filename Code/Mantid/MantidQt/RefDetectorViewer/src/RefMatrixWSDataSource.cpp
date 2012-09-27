@@ -1,5 +1,5 @@
 /**
- *  File: MatrixWSDataSource.cpp
+ *  File: RefMatrixWSDataSource.cpp
  */
 
 #include <iostream>
@@ -7,7 +7,7 @@
 
 #include <QThread>
 
-#include "MantidQtRefDetectorViewer/MatrixWSDataSource.h"
+#include "MantidQtRefDetectorViewer/RefMatrixWSDataSource.h"
 #include "MantidQtRefDetectorViewer/IVUtils.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -31,7 +31,7 @@ namespace RefDetectorViewer
  *
  * @param mat_ws  Shared pointer to the matrix workspace being "wrapped"
  */
-MatrixWSDataSource::MatrixWSDataSource( MatrixWorkspace_sptr mat_ws )
+RefMatrixWSDataSource::RefMatrixWSDataSource( MatrixWorkspace_sptr mat_ws )
                  :ImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
 {
   this->mat_ws = mat_ws;
@@ -48,7 +48,7 @@ MatrixWSDataSource::MatrixWSDataSource( MatrixWorkspace_sptr mat_ws )
 }
 
 
-MatrixWSDataSource::~MatrixWSDataSource()
+RefMatrixWSDataSource::~RefMatrixWSDataSource()
 {
 }
 
@@ -57,7 +57,7 @@ MatrixWSDataSource::~MatrixWSDataSource()
  * Get the smallest 'x' value covered by the data.  Must override base class
  * method, since the DataSource can be changed!
  */
-double MatrixWSDataSource::GetXMin()
+double RefMatrixWSDataSource::GetXMin()
 {
   total_xmin = mat_ws->getXMin(); 
   return total_xmin;
@@ -68,7 +68,7 @@ double MatrixWSDataSource::GetXMin()
  * Get the largest 'x' value covered by the data.  Must override base class
  * method, since the DataSource can be changed!
  */
-double MatrixWSDataSource::GetXMax()
+double RefMatrixWSDataSource::GetXMax()
 {
   total_xmax = mat_ws->getXMax(); 
   return total_xmax;
@@ -79,7 +79,7 @@ double MatrixWSDataSource::GetXMax()
  * Get the largest 'y' value covered by the data.  Must override base class
  * method, since the DataSource can be changed!
  */
-double MatrixWSDataSource::GetYMax()
+double RefMatrixWSDataSource::GetYMax()
 {
   total_ymax = (double)mat_ws->getNumberHistograms();
   return total_ymax;
@@ -90,7 +90,7 @@ double MatrixWSDataSource::GetYMax()
  * Get the total number of rows the data is divided into.  Must override base
  * class method, since the DataSource can be changed!
  */
-size_t MatrixWSDataSource::GetNRows()
+size_t RefMatrixWSDataSource::GetNRows()
 {
   total_ymax = (double)mat_ws->getNumberHistograms();
   return total_rows;
@@ -115,7 +115,7 @@ size_t MatrixWSDataSource::GetNRows()
  * @param is_log_x  Flag indicating whether or not the data should be
  *                  binned logarithmically.  (NOT USED YET)
  */
-DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
+DataArray* RefMatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
                                              double ymin,   double  ymax,
                                              size_t n_rows, size_t  n_cols,
                                              bool   is_log_x )
@@ -201,7 +201,7 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
  * @param is_log_x  Flag indicating whether or not the data should be
  *                  binned logarithmically.  (NOT USED YET)
  */
-DataArray * MatrixWSDataSource::GetDataArray( bool is_log_x )
+DataArray * RefMatrixWSDataSource::GetDataArray( bool is_log_x )
 {
   return GetDataArray( total_xmin, total_xmax, total_ymin, total_ymax,
                        total_rows, total_cols, is_log_x );
@@ -217,7 +217,7 @@ DataArray * MatrixWSDataSource::GetDataArray( bool is_log_x )
  * @param y    The y-coordinate of the point of interest in the data.
  * @param list Vector that will be filled out with the information strings.
  */
-void MatrixWSDataSource::GetInfoList( double x, 
+void RefMatrixWSDataSource::GetInfoList( double x, 
                                       double y,
                                       std::vector<std::string> &list )
 {

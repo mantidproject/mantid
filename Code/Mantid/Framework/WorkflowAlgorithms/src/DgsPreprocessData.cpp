@@ -67,10 +67,10 @@ namespace Mantid
      */
     void DgsPreprocessData::init()
     {
-      this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
+      this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
           Direction::Input), "An input workspace.");
-      this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-          Direction::Output, PropertyMode::Optional), "An output workspace.");
+      this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
+          Direction::Output), "The name for the output workspace.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
           Direction::Input);
     }
@@ -99,9 +99,7 @@ namespace Mantid
       const std::string doneLog = "DirectInelasticReductionNormalisedBy";
 
       MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-      // Make output workspace name the same as input workspace
-      const std::string outWsName = inputWS->getName();
-      MatrixWorkspace_sptr outputWS;// = this->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
       std::string incidentBeamNorm = reductionManager->getProperty("IncidentBeamNormalisation");
       g_log.notice() << "Incident beam norm method = " << incidentBeamNorm << std::endl;
@@ -119,13 +117,16 @@ namespace Mantid
         }
         const std::string normAlg = "Normalise" + incidentBeamNorm;
         IAlgorithm_sptr norm = this->createSubAlgorithm(normAlg);
-        //norm->setAlwaysStoreInADS(true);
         norm->setProperty("InputWorkspace", inputWS);
-        norm->setPropertyValue("OutputWorkspace", outWsName);
+        norm->setProperty("OutputWorkspace", outputWS);
         if ("ToMonitor" == incidentBeamNorm)
         {
           // Perform extra setup for monitor normalisation
-          const double rangeOffset = reductionManager->getProperty("TofRangeOffset");
+          double rangeOffset = 0.0;
+          if (reductionManager->existsProperty("TofRangeOffset"))
+          {
+            rangeOffset = reductionManager->getProperty("TofRangeOffset");
+          }
           double rangeMin = reductionManager->getProperty("MonitorIntRangeLow");
           if (EMPTY_DBL() == rangeMin)
           {
@@ -168,14 +169,12 @@ namespace Mantid
         addLog->setProperty("LogName", doneLog);
         addLog->setProperty("LogText", normAlg);
         addLog->executeAsSubAlg();
-
-        outputWS->setName(outWsName);
       }
       else
       {
         if (normAlreadyDone)
         {
-          g_log.information() << "Preprocessing already done on " << outWsName << std::endl;
+          g_log.information() << "Preprocessing already done on " << inputWS->getName() << std::endl;
         }
         outputWS = inputWS;
       }

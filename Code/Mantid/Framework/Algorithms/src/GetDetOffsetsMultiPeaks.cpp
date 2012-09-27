@@ -172,8 +172,11 @@ namespace Mantid
         else
           widthRight = .5 * (peaks[i+1] - peaks[i]);
 
-        widthLeft  = std::min(widthLeft, maxWidth);
-        widthRight = std::min(widthRight, maxWidth);
+        if (maxWidth > 0)
+        {
+          widthLeft  = maxWidth;
+          widthRight = maxWidth;
+        }
 
         windows[2*i]   = peaks[i] - widthLeft;
         windows[2*i+1] = peaks[i] + widthRight;

@@ -1,5 +1,5 @@
-#ifndef MATRIX_WS_IMAGE_VIEW_H
-#define MATRIX_WS_IMAGE_VIEW_H
+#ifndef REF_MATRIX_WS_IMAGE_VIEW_H
+#define REF_MATRIX_WS_IMAGE_VIEW_H
 
 #include "MantidQtRefDetectorViewer/DllOptionIV.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -7,7 +7,7 @@
 #include "MantidQtRefDetectorViewer/ImageView.h"
 
 /**
-    @class MatrixWSDataSource 
+    @class RefMatrixWSImageView 
   
        This is the top level class for showing a matrix workspace
     using an ImageViewer.
@@ -41,14 +41,14 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSImageView 
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSImageView 
 {
   public:
 
     /// Construct an image viewer for the specifed MatrixWorkspace
-    MatrixWSImageView( Mantid::API::MatrixWorkspace_sptr mat_ws );
+    RefMatrixWSImageView( Mantid::API::MatrixWorkspace_sptr mat_ws );
 
-   ~MatrixWSImageView();
+   ~RefMatrixWSImageView();
 
   private:
     ImageView *image_view;
@@ -57,4 +57,4 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSImageView
 } // namespace MantidQt 
 } // namespace ImageView 
 
-#endif // MATRIX_WS_IMAGE_VIEW_H
+#endif // REF_MATRIX_WS_IMAGE_VIEW_H

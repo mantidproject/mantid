@@ -18,15 +18,17 @@ class DgsReductionScripter(BaseReductionScripter):
     WIDTH_END = "".join([" " for i in range(len(TOPLEVEL_WORKFLOWALG))])
     WIDTH = WIDTH_END + " "
     
-    def __init__(self, name="SEQ"):
-        super(DgsReductionScripter, self).__init__(name=name)
+    def __init__(self, name="SEQ", facility="SNS"):
+        super(DgsReductionScripter, self).__init__(name=name, facility=facility)
         
     def to_script(self, file_name=None):
         """
             Generate reduction script
             @param file_name: name of the file to write the script to
-        """
-        script =  "%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
+        """     
+        script = "config['default.instrument']=\"%s\"\n" % self.facility_name
+        script += "\n"
+        script +=  "%s(\n" % DgsReductionScripter.TOPLEVEL_WORKFLOWALG
         for item in self._observers:
             if item.state() is not None:
                 for subitem in str(item.state()).split('\n'):

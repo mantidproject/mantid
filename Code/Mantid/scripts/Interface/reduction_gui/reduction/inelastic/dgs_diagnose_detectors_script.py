@@ -23,8 +23,8 @@ class DiagnoseDetectorsScript(BaseScriptElement):
     sambkg_median_test_high = 5
     sambkg_median_test_low = 0.1
     sambkg_errorbar_criterion = 3.3
-    tof_start = 18000
-    tof_end = 19500
+    tof_start = ''
+    tof_end = ''
     reject_zero_bkg = False
     psd_bleed = False
     max_framerate = ''
@@ -54,17 +54,24 @@ class DiagnoseDetectorsScript(BaseScriptElement):
                 script += "DetVanRatioVariation=%s,\n" % str(self.detvan_ratio_var)
         if self.background_check:
             script += "BackgroundCheck=%s,\n" % self.background_check
-            script += "SamBkgMedianTestHigh=%s,\n" % str(self.sambkg_median_test_high)
-            script += "SamBkgMedianTestLow=%s,\n" % str(self.sambkg_median_test_low)
-            script += "SamBkgErrorBarCriterion=%s,\n" % str(self.sambkg_errorbar_criterion)
-            script += "BackgroundTofStart=%s,\n" % str(self.tof_start)
-            script += "BackgroundTofEnd=%s,\n" % str(self.tof_end)
+            if self.sambkg_median_test_high != DiagnoseDetectorsScript.sambkg_median_test_high:
+                script += "SamBkgMedianTestHigh=%s,\n" % str(self.sambkg_median_test_high)
+            if self.sambkg_median_test_low != DiagnoseDetectorsScript.sambkg_median_test_low:
+                script += "SamBkgMedianTestLow=%s,\n" % str(self.sambkg_median_test_low)
+            if self.sambkg_errorbar_criterion != DiagnoseDetectorsScript.sambkg_errorbar_criterion:
+                script += "SamBkgErrorBarCriterion=%s,\n" % str(self.sambkg_errorbar_criterion)
+            if self.tof_start != DiagnoseDetectorsScript.tof_start:
+                script += "BackgroundTofStart=%s,\n" % self.tof_start
+            if self.tof_end != DiagnoseDetectorsScript.tof_end:
+                script += "BackgroundTofEnd=%s,\n" % int(self.tof_end)
         if self.reject_zero_bkg:
-            script += "RejectZeroBackground=%s,\n" % self.reject_zero_bkg
+            script += "RejectZeroBackground=%s,\n" % int(self.reject_zero_bkg)
         if self.psd_bleed:
             script += "PsdBleed=%s,\n" % self.psd_bleed
-            script += "MaxFramerate=\"%s\",\n" % self.max_framerate
-            script += "IgnoredPixels=\"%s\",\n" % self.ignored_pixels 
+            if self.max_framerate != DiagnoseDetectorsScript.max_framerate:
+                script += "MaxFramerate=%s,\n" % float(self.max_framerate)
+            if self.ignored_pixels != DiagnoseDetectorsScript.ignored_pixels:
+                script += "IgnoredPixels=\"%s\",\n" % self.ignored_pixels 
         return script
     
     def to_xml(self):

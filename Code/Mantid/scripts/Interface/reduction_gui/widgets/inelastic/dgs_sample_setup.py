@@ -107,6 +107,7 @@ class SampleSetupWidget(BaseWidget):
         """
         self._check_and_set_lineedit_content(self._content.sample_edit,
                                              state.sample_file)
+        self._content.output_ws_edit.setText(state.output_wsname)
         self._content.detcal_edit.setText(state.detcal_file)
         self._check_and_set_lineedit_content(self._content.ei_guess_edit, 
                                              state.incident_energy_guess)
@@ -128,6 +129,7 @@ class SampleSetupWidget(BaseWidget):
         """
         s = SampleSetupScript()
         s.sample_file = self._content.sample_edit.text()
+        s.output_wsname = self._content.output_ws_edit.text()
         s.detcal_file = self._content.detcal_edit.text()
         s.incident_energy_guess = self._content.ei_guess_edit.text()
         s.use_ei_guess = self._content.use_ei_guess_chkbox.isChecked()

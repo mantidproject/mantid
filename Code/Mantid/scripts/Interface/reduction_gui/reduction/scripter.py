@@ -265,8 +265,9 @@ class BaseReductionScripter(object):
                 raise RuntimeError, "State reset called without a valid initialized state"
             
     
-    def __init__(self, name=""):
+    def __init__(self, name="", facility=""):
         self.instrument_name = name
+        self.facility_name = facility
         self._observers = []
         self._output_directory = os.path.expanduser('~')
         if HAS_MANTID:

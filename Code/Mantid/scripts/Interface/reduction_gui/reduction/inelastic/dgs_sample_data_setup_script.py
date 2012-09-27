@@ -12,6 +12,7 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 class SampleSetupScript(BaseScriptElement):
     
     sample_file = ""
+    output_wsname = ""
     detcal_file = ""
     relocate_dets = False
     incident_energy_guess = ""
@@ -33,11 +34,19 @@ class SampleSetupScript(BaseScriptElement):
         
     def to_script(self):
         script =  "SampleInputFile=\"%s\",\n" % self.sample_file
+        tmp_wsname = ""
+        if self.output_wsname == SampleSetupScript.output_wsname:
+            # Make a default name from the incoming file
+            tmp = os.path.split(os.path.splitext(str(self.sample_file))[0])[-1]
+            tmp_wsname = tmp + "_spe"
+        else:
+            tmp_wsname = self.output_wsname
+        script += "OutputWorkspace=\"%s\",\n" % tmp_wsname
         if self.detcal_file != SampleSetupScript.detcal_file:
             script += "DetCalFilename=\"%s\",\n" % self.detcal_file
         if self.relocate_dets != SampleSetupScript.relocate_dets:
             script += "RelocateDetectors=%s,\n" % self.relocate_dets
-        script += "IncidentEnergyGuess=\"%s\",\n" % self.incident_energy_guess
+        script += "IncidentEnergyGuess=%s,\n" % float(self.incident_energy_guess)
         if self.use_ei_guess != SampleSetupScript.use_ei_guess:
             script += "UseIncidentEnergyGuess=%s,\n" % self.use_ei_guess
             if self.tzero_guess != SampleSetupScript.tzero_guess:
@@ -66,6 +75,7 @@ class SampleSetupScript(BaseScriptElement):
         """
         xml = "<SampleSetup>\n"
         xml += "  <sample_input_file>%s</sample_input_file>\n" % self.sample_file
+        xml += "  <output_wsname>%s</output_wsname>\n" % self.output_wsname
         xml += "  <detcal_file>%s</detcal_file>\n" % self.detcal_file
         xml += "  <relocate_dets>%s</relocate_dets>\n" % self.relocate_dets
         xml += "  <incident_energy_guess>%s</incident_energy_guess>\n" % self.incident_energy_guess
@@ -96,6 +106,9 @@ class SampleSetupScript(BaseScriptElement):
             self.sample_file = BaseScriptElement.getStringElement(instrument_dom, 
                                                                   "sample_input_file",
                                                                   default=SampleSetupScript.sample_file)
+            self.output_wsname = BaseScriptElement.getStringElement(instrument_dom,
+                                                                    "output_wsname",
+                                                                    default=SampleSetupScript.output_wsname)
             self.detcal_file = BaseScriptElement.getStringElement(instrument_dom,
                                                                   "detcal_file",
                                                                   default=SampleSetupScript.detcal_file)
@@ -141,6 +154,7 @@ class SampleSetupScript(BaseScriptElement):
             Reset state
         """
         self.sample_file = SampleSetupScript.sample_file
+        self.output_wsname = SampleSetupScript.output_wsname
         self.detcal_file = SampleSetupScript.detcal_file
         self.relocate_dets = SampleSetupScript.relocate_dets
         self.incident_energy_guess = SampleSetupScript.incident_energy_guess

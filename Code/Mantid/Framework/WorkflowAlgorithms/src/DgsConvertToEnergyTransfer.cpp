@@ -81,7 +81,7 @@ namespace Mantid
       this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("GroupingWorkspace",
           "", Direction::Input, PropertyMode::Optional), "A grouping workspace");
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
-          Direction::Output, PropertyMode::Optional));
+          Direction::Output), "The name for the output workspace.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
     }
 
@@ -105,18 +105,11 @@ namespace Mantid
 
       this->enableHistoryRecordingForChild(true);
 
-      MatrixWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
-      const std::string inWsName = inputWS->getName();
-      // Make the result workspace name
-      std::string outWsName  = this->getPropertyValue("OutputWorkspace");
-      if (outWsName.length() == 0)
-      {
-        outWsName = inWsName + "_et";
-        g_log.warning() << "No OutputWorkspace defined, defaulting to " << outWsName << std::endl;
-      }
+      MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+      MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
       // Make a monitor workspace name for SNS data
-      std::string monWsName = inWsName + "_monitors";
+      std::string monWsName = inputWS->getName() + "_monitors";
       bool preserveEvents = false;
 
       // Calculate the initial energy and time zero
@@ -215,7 +208,7 @@ namespace Mantid
             loadmon->setAlwaysStoreInADS(true);
             loadmon->setProperty(fileProp, runFileName);
             loadmon->setProperty("OutputWorkspace", monWsName);
-            loadmon->execute();
+            loadmon->executeAsSubAlg();
 
             reductionManager->declareProperty(new PropertyWithValue<std::string>("MonitorWorkspace", monWsName));
 
@@ -225,40 +218,37 @@ namespace Mantid
             getei->setProperty("Monitor1Spec", eiMon1Spec);
             getei->setProperty("Monitor2Spec", eiMon2Spec);
             getei->setProperty("EnergyEstimate", eiGuess);
-            getei->execute();
+            getei->executeAsSubAlg();
             incidentEnergy = getei->getProperty("IncidentEnergy");
             tZero = getei->getProperty("Tzero");
           }
         }
 
+        g_log.notice() << "Adjusting for T0" << std::endl;
+        IAlgorithm_sptr alg = this->createSubAlgorithm("ChangeBinOffset");
+        alg->setProperty("InputWorkspace", inputWS);
+        alg->setProperty("OutputWorkspace", outputWS);
+        alg->setProperty("Offset", -tZero);
+        alg->executeAsSubAlg();
+        outputWS = alg->getProperty("OutputWorkspace");
+
         // Add T0 to sample logs
         IAlgorithm_sptr addLog = this->createSubAlgorithm("AddSampleLog");
-        addLog->setProperty("Workspace", inWsName);
+        addLog->setProperty("Workspace", outputWS);
         addLog->setProperty("LogName", "CalculatedT0");
         addLog->setProperty("LogType", "Number");
         addLog->setProperty("LogText", boost::lexical_cast<std::string>(tZero));
         addLog->executeAsSubAlg();
-
-        g_log.notice() << "Adjusting for T0" << std::endl;
-        IAlgorithm_sptr alg = this->createSubAlgorithm("ChangeBinOffset");
-        alg->setAlwaysStoreInADS(true);
-        alg->setChild(true);
-        alg->enableHistoryRecordingForChild(true);
-        alg->setProperty("InputWorkspace", inWsName);
-        alg->setProperty("OutputWorkspace", outWsName);
-        alg->setProperty("Offset", -tZero);
-        alg->execute();
       }
       // Do ISIS
       else
       {
         IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
-        getei->setAlwaysStoreInADS(true);
-        getei->setProperty("InputWorkspace", inWsName);
+        getei->setProperty("InputWorkspace", inputWS);
         getei->setProperty("Monitor1Spec", eiMon1Spec);
         getei->setProperty("Monitor2Spec", eiMon2Spec);
         getei->setProperty("EnergyEstimate", eiGuess);
-        getei->execute();
+        getei->executeAsSubAlg();
 
         monPeak = getei->getProperty("FirstMonitorPeak");
         const specid_t monIndex = static_cast<const specid_t>(getei->getProperty("FirstMonitorIndex"));
@@ -266,26 +256,25 @@ namespace Mantid
         incidentEnergy = getei->getProperty("IncidentEnergy");
 
         IAlgorithm_sptr cbo = this->createSubAlgorithm("ChangeBinOffset");
-        cbo->setAlwaysStoreInADS(true);
-        cbo->enableHistoryRecordingForChild(true);
-        cbo->setProperty("InputWorkspace", inWsName);
-        cbo->setProperty("OutputWorkspace", outWsName);
+        cbo->setProperty("InputWorkspace", inputWS);
+        cbo->setProperty("OutputWorkspace", outputWS);
         cbo->setProperty("Offset", -monPeak);
-        cbo->execute();
+        cbo->executeAsSubAlg();
+        outputWS = cbo->getProperty("OutputWorkspace");
 
         IDetector_const_sptr monDet = inputWS->getDetector(monIndex);
         V3D monPos = monDet->getPos();
         std::string srcName = inputWS->getInstrument()->getSource()->getName();
 
         IAlgorithm_sptr moveInstComp = this->createSubAlgorithm("MoveInstrumentComponent");
-        moveInstComp->setAlwaysStoreInADS(true);
-        moveInstComp->setProperty("Workspace", outWsName);
+        moveInstComp->setProperty("Workspace", outputWS);
         moveInstComp->setProperty("ComponentName", srcName);
         moveInstComp->setProperty("X", monPos.X());
         moveInstComp->setProperty("Y", monPos.Y());
         moveInstComp->setProperty("Z", monPos.Z());
         moveInstComp->setProperty("RelativePosition", false);
-        moveInstComp->execute();
+        moveInstComp->executeAsSubAlg();
+        outputWS = moveInstComp->getProperty("Workspace");
       }
 
       const double binOffset = -monPeak;
@@ -307,10 +296,11 @@ namespace Mantid
         {
           const bool relocateDets = reductionManager->getProperty("RelocateDetectors");
           IAlgorithm_sptr loaddetinfo = this->createSubAlgorithm("LoadDetectorInfo");
-          loaddetinfo->setProperty("Workspace", outWsName);
+          loaddetinfo->setProperty("Workspace", outputWS);
           loaddetinfo->setProperty("DataFilename", detcalFile);
           loaddetinfo->setProperty("RelocateDets", relocateDets);
-          loaddetinfo->execute();
+          loaddetinfo->executeAsSubAlg();
+          outputWS = loaddetinfo->getProperty("Workspace");
         }
         else
         {
@@ -339,206 +329,211 @@ namespace Mantid
           // result workspace.
           std::string origBkgWsName = "background_origin_ws";
           IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
-          rebin->setAlwaysStoreInADS(true);
-          rebin->setProperty("InputWorkspace", outWsName);
+          rebin->setProperty("InputWorkspace", outputWS);
           rebin->setProperty("OutputWorkspace", origBkgWsName);
           rebin->setProperty("Params", params);
-          rebin->execute();
+          rebin->executeAsSubAlg();
+          MatrixWorkspace_sptr origBkgWS = rebin->getProperty("OutputWorkspace");
 
           // Convert result workspace to DeltaE since we have Et binning
           IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
-          cnvun->setAlwaysStoreInADS(true);
-          cnvun->setProperty("InputWorkspace", outWsName);
-          cnvun->setProperty("OutputWorkspace", outWsName);
+          cnvun->setProperty("InputWorkspace", outputWS);
+          cnvun->setProperty("OutputWorkspace", outputWS);
           cnvun->setProperty("Target", "DeltaE");
           cnvun->setProperty("EMode", "Direct");
           cnvun->setProperty("EFixed", incidentEnergy);
-          cnvun->execute();
+          cnvun->executeAsSubAlg();
+          outputWS = cnvun->getProperty("OutputWorkspace");
 
           // Rebin to Et
-          rebin->setProperty("InputWorkspace", outWsName);
-          rebin->setProperty("OutputWorkspace", outWsName);
+          rebin->setProperty("InputWorkspace", outputWS);
+          rebin->setProperty("OutputWorkspace", outputWS);
           rebin->setProperty("Params", etBinning);
           rebin->setProperty("PreserveEvents", false);
-          rebin->execute();
+          rebin->executeAsSubAlg();
+          outputWS = rebin->getProperty("OutputWorkspace");
 
           // Convert result workspace to TOF
-          cnvun->setProperty("InputWorkspace", outWsName);
-          cnvun->setProperty("OutputWorkspace", outWsName);
+          cnvun->setProperty("InputWorkspace", outputWS);
+          cnvun->setProperty("OutputWorkspace", outputWS);
           cnvun->setProperty("Target", "TOF");
           cnvun->setProperty("EMode", "Direct");
           cnvun->setProperty("EFixed", incidentEnergy);
-          cnvun->execute();
+          cnvun->executeAsSubAlg();
+          outputWS = cnvun->getProperty("OutputWorkspace");
 
           // Make result workspace a distribution
           IAlgorithm_sptr cnvToDist = this->createSubAlgorithm("ConvertToDistribution");
           cnvToDist->setAlwaysStoreInADS(true);
-          cnvToDist->setProperty("Workspace", outWsName);
-          cnvToDist->execute();
+          cnvToDist->setProperty("Workspace", outputWS);
+          cnvToDist->executeAsSubAlg();
+          outputWS = cnvToDist->getProperty("OutputWorkspace");
 
           // Calculate the background
           std::string bkgWsName = "background_ws";
           IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
-          flatBg->setAlwaysStoreInADS(true);
-          flatBg->setProperty("InputWorkspace", origBkgWsName);
+          flatBg->setProperty("InputWorkspace", origBkgWS);
           flatBg->setProperty("OutputWorkspace", bkgWsName);
           flatBg->setProperty("StartX", tibTofStart);
           flatBg->setProperty("EndX", tibTofEnd);
           flatBg->setProperty("Mode", "Mean");
           flatBg->setProperty("OutputMode", "Return Background");
-          flatBg->execute();
+          flatBg->executeAsSubAlg();
+          MatrixWorkspace_sptr bkgWS = flatBg->getProperty("OutputWorkspace");
 
           // Remove unneeded original background workspace
           IAlgorithm_sptr delWs = this->createSubAlgorithm("DeleteWorkspace");
-          delWs->setProperty("Workspace", origBkgWsName);
-          delWs->execute();
+          delWs->setProperty("Workspace", origBkgWS);
+          delWs->executeAsSubAlg();
 
           // Make background workspace a distribution
-          cnvToDist->setProperty("Workspace", bkgWsName);
-          cnvToDist->execute();
+          cnvToDist->setProperty("Workspace", bkgWS);
+          cnvToDist->executeAsSubAlg();
+          bkgWS = flatBg->getProperty("Workspace");
 
           // Subtrac background from result workspace
           IAlgorithm_sptr minus = this->createSubAlgorithm("Minus");
           minus->setAlwaysStoreInADS(true);
-          minus->setProperty("LHSWorkspace", outWsName);
-          minus->setProperty("RHSWorkspace", bkgWsName);
-          minus->setProperty("OutputWorkspace", outWsName);
-          minus->execute();
+          minus->setProperty("LHSWorkspace", outputWS);
+          minus->setProperty("RHSWorkspace", bkgWS);
+          minus->setProperty("OutputWorkspace", outputWS);
+          minus->executeAsSubAlg();
 
           // Remove unneeded background workspace
-          delWs->setProperty("Workspace", bkgWsName);
-          delWs->execute();
+          delWs->setProperty("Workspace", bkgWS);
+          delWs->executeAsSubAlg();
         }
         // Do ISIS
         else
         {
           IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
-          flatBg->setAlwaysStoreInADS(true);
-          flatBg->setProperty("InputWorkspace", outWsName);
-          flatBg->setProperty("OutputWorkspace", outWsName);
+          flatBg->setProperty("InputWorkspace", outputWS);
+          flatBg->setProperty("OutputWorkspace", outputWS);
           flatBg->setProperty("StartX", tibTofStart);
           flatBg->setProperty("EndX", tibTofEnd);
           flatBg->setProperty("Mode", "Mean");
-          flatBg->execute();
+          flatBg->executeAsSubAlg();
+          outputWS = flatBg->getProperty("OutputWorkspace");
         }
 
         // Convert result workspace back to histogram
         IAlgorithm_sptr cnvFrDist = this->createSubAlgorithm("ConvertFromDistribution");
-        cnvFrDist->setAlwaysStoreInADS(true);
-        cnvFrDist->setProperty("Workspace", outWsName);
-        cnvFrDist->execute();
+        cnvFrDist->setProperty("Workspace", outputWS);
+        cnvFrDist->executeAsSubAlg();
+        outputWS = cnvFrDist->getProperty("Workspace");
       }
 
       // Normalise result workspace to incident beam parameter
       IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
-      norm->setAlwaysStoreInADS(true);
-      norm->setProperty("InputWorkspace", outWsName);
-      norm->setProperty("OutputWorkspace", outWsName);
-      norm->execute();
+      norm->setProperty("InputWorkspace", outputWS);
+      norm->setProperty("OutputWorkspace", outputWS);
+      norm->executeAsSubAlg();
+      outputWS = norm->getProperty("OutputWorkspace");
 
       // Convert to energy transfer
       g_log.notice() << "Converting to energy transfer." << std::endl;
       IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
-      cnvun->setAlwaysStoreInADS(true);
-      cnvun->setProperty("InputWorkspace", outWsName);
-      cnvun->setProperty("OutputWorkspace", outWsName);
+      cnvun->setProperty("InputWorkspace", outputWS);
+      cnvun->setProperty("OutputWorkspace", outputWS);
       cnvun->setProperty("Target", "DeltaE");
       cnvun->setProperty("EMode", "Direct");
       cnvun->setProperty("EFixed", incidentEnergy);
-      cnvun->execute();
+      cnvun->executeAsSubAlg();
+      outputWS = cnvun->getProperty("OutputWorkspace");
 
       g_log.notice() << "Rebinning data" << std::endl;
       IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
-      rebin->setAlwaysStoreInADS(true);
-      rebin->setProperty("InputWorkspace", outWsName);
-      rebin->setProperty("OutputWorkspace", outWsName);
+      rebin->setProperty("InputWorkspace", outputWS);
+      rebin->setProperty("OutputWorkspace", outputWS);
       rebin->setProperty("Params", etBinning);
       rebin->setProperty("PreserveEvents", preserveEvents);
-      rebin->execute();
+      rebin->executeAsSubAlg();
+      outputWS = rebin->getProperty("OutputWorkspace");
 
       // Correct for detector efficiency
       if ("SNS" == facility)
       {
         // He3TubeEfficiency requires the workspace to be in wavelength
-        cnvun->setAlwaysStoreInADS(true);
-        cnvun->setProperty("InputWorkspace", outWsName);
-        cnvun->setProperty("OutputWorkspace", outWsName);
+        cnvun->setProperty("InputWorkspace", outputWS);
+        cnvun->setProperty("OutputWorkspace", outputWS);
         cnvun->setProperty("Target", "Wavelength");
-        cnvun->execute();
+        cnvun->executeAsSubAlg();
+        outputWS = cnvun->getProperty("OutputWorkspace");
 
         // Do the correction
         IAlgorithm_sptr alg2 = this->createSubAlgorithm("He3TubeEfficiency");
-        alg2->setAlwaysStoreInADS(true);
-        alg2->setProperty("InputWorkspace", outWsName);
-        alg2->setProperty("OutputWorkspace", outWsName);
-        alg2->execute();
+        alg2->setProperty("InputWorkspace", outputWS);
+        alg2->setProperty("OutputWorkspace", outputWS);
+        alg2->executeAsSubAlg();
+        outputWS = alg2->getProperty("OutputWorkspace");
 
         // Convert back to energy transfer
-        cnvun->setAlwaysStoreInADS(true);
-        cnvun->setProperty("InputWorkspace", outWsName);
-        cnvun->setProperty("OutputWorkspace", outWsName);
+        cnvun->setProperty("InputWorkspace", outputWS);
+        cnvun->setProperty("OutputWorkspace", outputWS);
         cnvun->setProperty("Target", "DeltaE");
-        cnvun->execute();
+        cnvun->executeAsSubAlg();
+        outputWS = cnvun->getProperty("OutputWorkspace");
       }
       // Do ISIS
       else
       {
         IAlgorithm_sptr alg = this->createSubAlgorithm("DetectorEfficiencyCor");
-        alg->setAlwaysStoreInADS(true);
-        alg->setProperty("InputWorkspace", outWsName);
-        alg->setProperty("OutputWorkspace", outWsName);
-        alg->execute();
+        alg->setProperty("InputWorkspace", outputWS);
+        alg->setProperty("OutputWorkspace", outputWS);
+        alg->executeAsSubAlg();
+        outputWS = alg->getProperty("OutputWorkspace");
       }
 
       // Correct for Ki/Kf
       IAlgorithm_sptr kikf = this->createSubAlgorithm("CorrectKiKf");
-      kikf->setAlwaysStoreInADS(true);
-      kikf->setProperty("InputWorkspace", outWsName);
-      kikf->setProperty("OutputWorkspace", outWsName);
+      kikf->setProperty("InputWorkspace", outputWS);
+      kikf->setProperty("OutputWorkspace", outputWS);
       kikf->setProperty("EMode", "Direct");
-      kikf->execute();
+      kikf->executeAsSubAlg();
+      outputWS = kikf->getProperty("OutputWorkspace");
 
       // Mask and group workspace if necessary.
       MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
       MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
-      if (maskWS || groupWS)
+      std::string oldGroupFile("");
+      if (reductionManager->existsProperty("OldGroupingFilename"))
       {
-        IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
-        remap->setProperty("InputWorkspace", outWsName);
-        remap->setProperty("OutputWorkspace", outWsName);
-        if (maskWS)
-        {
-          remap->setProperty("MaskWorkspace", maskWS);
-        }
-        if (groupWS)
-        {
-          remap->setProperty("GroupingWorkspace", groupWS);
-        }
-        if (reductionManager->existsProperty("UseProcessedDetVan"))
-        {
-          bool runOpposite = reductionManager->getProperty("UseProcessedDetVan");
-          remap->setProperty("ExecuteOppositeOrder", runOpposite);
-        }
-        remap->executeAsSubAlg();
+        oldGroupFile = reductionManager->getPropertyValue("OldGroupingFilename");
       }
+      IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
+      remap->setProperty("InputWorkspace", outputWS);
+      remap->setProperty("OutputWorkspace", outputWS);
+      remap->setProperty("MaskWorkspace", maskWS);
+      remap->setProperty("GroupingWorkspace", groupWS);
+      remap->setProperty("OldGroupingFile", oldGroupFile);
+      if (reductionManager->existsProperty("UseProcessedDetVan"))
+      {
+        bool runOpposite = reductionManager->getProperty("UseProcessedDetVan");
+        remap->setProperty("ExecuteOppositeOrder", runOpposite);
+      }
+      remap->executeAsSubAlg();
+      outputWS = remap->getProperty("OutputWorkspace");
+
       // Rebin to ensure consistency
       const bool sofphieIsDistribution = reductionManager->getProperty("SofPhiEIsDistribution");
 
       g_log.notice() << "Rebinning data" << std::endl;
-      rebin->setProperty("InputWorkspace", outWsName);
-      rebin->setProperty("OutputWorkspace", outWsName);
+      rebin->setProperty("InputWorkspace", outputWS);
+      rebin->setProperty("OutputWorkspace", outputWS);
       if (sofphieIsDistribution)
       {
         rebin->setProperty("PreserveEvents", false);
       }
-      rebin->execute();
+      rebin->executeAsSubAlg();
+      outputWS = rebin->getProperty("OutputWorkspace");
 
       if (sofphieIsDistribution)
       {
         g_log.notice() << "Making distribution" << std::endl;
         IAlgorithm_sptr distrib = this->createSubAlgorithm("ConvertToDistribution");
-        distrib->setProperty("Workspace", outWsName);
-        distrib->execute();
+        distrib->setProperty("Workspace", outputWS);
+        distrib->executeAsSubAlg();
+        outputWS = distrib->getProperty("Workspace");
       }
 
       // Normalise by the detector vanadium if necessary
@@ -546,11 +541,11 @@ namespace Mantid
       if (detVanWS)
       {
         IAlgorithm_sptr divide = this->createSubAlgorithm("Divide");
-        divide->setAlwaysStoreInADS(true);
-        divide->setProperty("LHSWorkspace", outWsName);
+        divide->setProperty("LHSWorkspace", outputWS);
         divide->setProperty("RHSWorkspace", detVanWS);
-        divide->setProperty("OutputWorkspace", outWsName);
-        divide->execute();
+        divide->setProperty("OutputWorkspace", outputWS);
+        divide->executeAsSubAlg();
+        outputWS = divide->getProperty("OutputWorkspace");
       }
 
       // Correct for solid angle if grouping is requested, but detector vanadium
@@ -559,17 +554,17 @@ namespace Mantid
       {
         std::string solidAngWsName = "SolidAngle";
         IAlgorithm_sptr solidAngle = this->createSubAlgorithm("SolidAngle");
-        solidAngle->setProperty("InputWorkspace", outWsName);
+        solidAngle->setProperty("InputWorkspace", outputWS);
         solidAngle->setProperty("OutputWorkspace", solidAngWsName);
-        solidAngle->execute();
+        solidAngle->executeAsSubAlg();
         MatrixWorkspace_sptr solidAngWS = solidAngle->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr divide = this->createSubAlgorithm("Divide");
-        divide->setAlwaysStoreInADS(true);
-        divide->setProperty("LHSWorkspace", outWsName);
+        divide->setProperty("LHSWorkspace", outputWS);
         divide->setProperty("RHSWorkspace", solidAngWS);
-        divide->setProperty("OutputWorkspace", outWsName);
-        divide->execute();
+        divide->setProperty("OutputWorkspace", outputWS);
+        divide->executeAsSubAlg();
+        outputWS = divide->getProperty("OutputWorkspace");
 
         solidAngWS.reset();
       }
@@ -579,20 +574,18 @@ namespace Mantid
         double scaleFactor = inputWS->getInstrument()->getNumberParameter("scale-factor")[0];
         const std::string scaleFactorName = "ScaleFactor";
         IAlgorithm_sptr csvw = this->createSubAlgorithm("CreateSingleValuedWorkspace");
-        csvw->setAlwaysStoreInADS(true);
         csvw->setProperty("OutputWorkspace", scaleFactorName);
         csvw->setProperty("DataValue", scaleFactor);
-        csvw->execute();
+        csvw->executeAsSubAlg();
+        MatrixWorkspace_sptr scaleFactorWS = csvw->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr mult = this->createSubAlgorithm("Multiply");
-        mult->setAlwaysStoreInADS(true);
-        mult->setProperty("LHSWorkspace", outWsName);
-        mult->setProperty("RHSWorkspace", scaleFactorName);
-        mult->setProperty("OutputWorkspace", outWsName);
-        mult->execute();
+        mult->setProperty("LHSWorkspace", outputWS);
+        mult->setProperty("RHSWorkspace", scaleFactorWS);
+        mult->setProperty("OutputWorkspace", outputWS);
+        mult->executeAsSubAlg();
       }
 
-      MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
       this->setProperty("OutputWorkspace", outputWS);
     }
 

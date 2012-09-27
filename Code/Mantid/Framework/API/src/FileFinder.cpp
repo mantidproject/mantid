@@ -369,7 +369,7 @@ namespace Mantid
         } 
         else 
         {
-          g_log.notice() << "Unable to find files via direcotry search with the filename that looks like a full filename" << "\n";
+          g_log.debug() << "Unable to find files via directory search with the filename that looks like a full filename" << "\n";
         }
       }
 

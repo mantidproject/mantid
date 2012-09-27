@@ -931,8 +931,8 @@ void MantidDockWidget::findAbandonedWorkspaces()
       auto ws = Mantid::API::AnalysisDataService::Instance().retrieve( *wsName );
       if ( auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>( ws ) )
       {
-        size_t n = static_cast<size_t>( group->getNumberOfEntries() );
-        for(size_t i = 0; i < n; ++i)
+        int n = group->getNumberOfEntries();
+        for(int i = 0; i < n; ++i)
         {
           if ( i >= group->getNumberOfEntries() )
           {

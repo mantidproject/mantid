@@ -1,5 +1,5 @@
-#ifndef MATRIX_WS_DATA_SOURCE_H
-#define MATRIX_WS_DATA_SOURCE_H
+#ifndef REF_MATRIX_WS_DATA_SOURCE_H
+#define REF_MATRIX_WS_DATA_SOURCE_H
 
 #include <cstddef>
 
@@ -10,7 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 
 /**
-    @class MatrixWSDataSource 
+    @class RefMatrixWSDataSource 
   
        This class provides a concrete implementation of an ImageDataSource
     that gets it's data from a matrix workspace.
@@ -44,14 +44,14 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSDataSource: public ImageDataSource
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSDataSource: public ImageDataSource
 {
   public:
 
     /// Construct a DataSource object around the specifed MatrixWorkspace
-    MatrixWSDataSource( Mantid::API::MatrixWorkspace_sptr mat_ws );
+    RefMatrixWSDataSource( Mantid::API::MatrixWorkspace_sptr mat_ws );
 
-   ~MatrixWSDataSource();
+   ~RefMatrixWSDataSource();
 
     /// OVERRIDES: Get the smallest 'x' value covered by the data
     virtual double GetXMin();
@@ -89,4 +89,4 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSDataSource: public ImageDataSource
 } // namespace MantidQt 
 } // namespace ImageView 
 
-#endif // MATRIX_WS_DATA_SOURCE_H
+#endif // REF_MATRIX_WS_DATA_SOURCE_H
