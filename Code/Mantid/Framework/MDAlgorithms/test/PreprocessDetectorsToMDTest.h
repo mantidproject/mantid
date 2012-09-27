@@ -176,7 +176,7 @@ void testCreateWSWithEfixed()
      auto &Efixed     = tws->getColVector<float>("eFixed"); 
      for(size_t i=0;i<Efixed.size();i++)
      {
-       TS_ASSERT_DELTA(13.,Efixed[i],1.e-6);
+       TS_ASSERT_DELTA(13.f,Efixed[i],1.e-6);
      }
 
 }

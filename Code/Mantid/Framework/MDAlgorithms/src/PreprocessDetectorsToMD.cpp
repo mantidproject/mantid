@@ -334,16 +334,30 @@ namespace Mantid
           eMode = Kernel::DeltaEMode::Undefined;
         }
         // is efixed on workspace properties? (it can be defined for some reason if detectors do not have one, and then it would exist as Ei)
+        bool eFixedFound(false);
         try
         {
           Efi =  inputWS->run().getPropertyValueAsType<double>("Ei");
+          eFixedFound = true;
         }
         catch(Kernel::Exception::NotFoundError &)
         {}
+        // try to get Efixed as property on 
+        if (!eFixedFound)
+        {
+            try
+            {
+              Efi  =inputWS->run().getPropertyValueAsType<double>("eFixed");
+              eFixedFound = true;
+            }catch(Kernel::Exception::NotFoundError &)
+            {}
+        }
 
 
         if(eMode != Kernel::DeltaEMode::Indirect)
           g_log.warning()<<" Requested Efixed for instrument of type: "<<Kernel::DeltaEMode::asString(eMode)<<std::endl;
+        if(!eFixedFound)
+          g_log.warning()<<" Efixed requested but have not been found\n";
 
       }
       return Efi;

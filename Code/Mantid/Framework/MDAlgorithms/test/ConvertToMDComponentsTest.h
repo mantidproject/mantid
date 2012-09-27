@@ -108,7 +108,7 @@ void testCalcDECol()
 
       for(size_t i=0;i<TableWS7->rowCount();i++)
       {
-          TS_ASSERT_DELTA(13.,*(pDataArray+i),1.e-6);
+          TS_ASSERT_DELTA(13.f,*(pDataArray+i),1.e-6);
       }
 
 
@@ -124,7 +124,7 @@ Convert2MDComponentsTest()
     // rotate the crystal by twenty degrees back;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);
      // add workspace energy
-     ws2D->mutableRun().addProperty("Ei",13.,"meV",true);
+     ws2D->mutableRun().addProperty("eFixed",13.,"meV",true);
 
      AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
 }
