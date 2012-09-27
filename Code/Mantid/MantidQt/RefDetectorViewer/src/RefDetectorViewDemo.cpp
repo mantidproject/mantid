@@ -6,7 +6,7 @@
 #include <QtGui>
 
 #include "MantidQtRefDetectorViewer/IVUtils.h"
-#include "MantidQtRefDetectorViewer/ImageView.h"
+#include "MantidQtRefDetectorViewer/RefImageView.h"
 #include "MantidQtRefDetectorViewer/ArrayDataSource.h"
 
 using namespace MantidQt;
@@ -80,7 +80,7 @@ int main( int argc, char **argv )
   ArrayDataSource* source = 
                    new ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data );
 
-  MantidQt::RefDetectorViewer::ImageView image_view( source );
+  MantidQt::RefDetectorViewer::RefImageView image_view( source );
 
                        // Don't delete on close in this case, since image_view
                        // will be deleted when the application ends

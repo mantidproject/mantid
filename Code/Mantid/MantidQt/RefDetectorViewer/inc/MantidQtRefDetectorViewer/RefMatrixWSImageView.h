@@ -4,7 +4,7 @@
 #include "MantidQtRefDetectorViewer/DllOptionIV.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include "MantidQtRefDetectorViewer/ImageView.h"
+#include "MantidQtRefDetectorViewer/RefImageView.h"
 
 /**
     @class RefMatrixWSImageView 
@@ -51,7 +51,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSImageView
    ~RefMatrixWSImageView();
 
   private:
-    ImageView *image_view;
+    RefImageView *image_view;
 };
 
 } // namespace MantidQt 

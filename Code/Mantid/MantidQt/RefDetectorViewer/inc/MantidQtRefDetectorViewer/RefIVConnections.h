@@ -5,8 +5,8 @@
 #include <QtGui/QWidget>
 #include <QActionGroup>
 
-#include "ui_ImageView.h"
-#include "MantidQtRefDetectorViewer/ImageView.h"
+#include "ui_RefImageView.h"
+#include "MantidQtRefDetectorViewer/RefImageView.h"
 #include "MantidQtRefDetectorViewer/TrackingPicker.h"
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
 #include "MantidQtRefDetectorViewer/GraphDisplay.h"
@@ -61,7 +61,7 @@ public:
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
   RefIVConnections( Ui_MainWindow* ui, 
-                 ImageView*     image_view,
+                 RefImageView*     image_view,
                  RefImageDisplay*  image_display,
                  GraphDisplay*  h_graph_display,
                  GraphDisplay*  v_graph_display );
@@ -99,7 +99,7 @@ public slots:
 private:
 
   Ui_MainWindow*   iv_ui;
-  ImageView*       iv_main_window;
+  RefImageView*       iv_main_window;
   RefImageDisplay*    image_display;
   GraphDisplay*    h_graph_display;
   GraphDisplay*    v_graph_display;

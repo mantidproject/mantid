@@ -7,7 +7,7 @@ set ( SRC_FILES
        src/RefImagePlotItem.cpp  
        src/QtUtils.cpp
        src/GraphDisplay.cpp     
-       src/ImageView.cpp      
+       src/RefImageView.cpp      
        src/SliderHandler.cpp
        src/RangeHandler.cpp
        src/ImageDataSource.cpp  
@@ -28,7 +28,7 @@ set ( INC_FILES
        inc/MantidQtRefDetectorViewer/IVUtils.h
        inc/MantidQtRefDetectorViewer/TrackingPicker.h
        inc/MantidQtRefDetectorViewer/GraphDisplay.h
-       inc/MantidQtRefDetectorViewer/ImageView.h
+       inc/MantidQtRefDetectorViewer/RefImageView.h
        inc/MantidQtRefDetectorViewer/QtUtils.h
        inc/MantidQtRefDetectorViewer/ImageDataSource.h
        inc/MantidQtRefDetectorViewer/SliderHandler.h
@@ -45,7 +45,7 @@ set ( MOC_FILES
 )
 
 set ( UI_FILES 
-       inc/MantidQtRefDetectorViewer/ImageView.ui
+       inc/MantidQtRefDetectorViewer/RefImageView.ui
 )
 
 # Python unit tests

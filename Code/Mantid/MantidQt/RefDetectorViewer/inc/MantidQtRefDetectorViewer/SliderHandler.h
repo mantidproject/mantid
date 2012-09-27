@@ -3,7 +3,7 @@
 
 #include <QRect>
 
-#include "ui_ImageView.h"
+#include "ui_RefImageView.h"
 #include "MantidQtRefDetectorViewer/ImageDataSource.h"
 #include "MantidQtRefDetectorViewer/DllOptionIV.h"
 

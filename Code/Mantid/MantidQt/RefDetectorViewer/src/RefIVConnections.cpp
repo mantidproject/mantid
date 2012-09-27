@@ -30,7 +30,7 @@ namespace RefDetectorViewer
  *
  */
 RefIVConnections::RefIVConnections( Ui_MainWindow* ui, 
-                              ImageView*     iv_main_window,
+                              RefImageView*     iv_main_window,
                               RefImageDisplay*  image_display,
                               GraphDisplay*  h_graph_display,
                               GraphDisplay*  v_graph_display )
