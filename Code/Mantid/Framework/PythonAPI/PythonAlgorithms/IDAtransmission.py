@@ -1,7 +1,6 @@
 # Algorithm to start Bayes programs
 from MantidFramework import *
 from mantidsimple import *
-from mantidplotpy import *
 import IndirectTrans as Main
 
 class IDAtransmission(PythonAlgorithm):
