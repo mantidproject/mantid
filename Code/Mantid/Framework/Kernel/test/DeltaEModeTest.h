@@ -18,7 +18,7 @@ public:
   void test_availableTypes_Are_The_3_Expected_In_The_Correct_Order()
   {
     const std::vector<std::string> modes = DeltaEMode::availableTypes();
-    TS_ASSERT_EQUALS(modes.size(), 4);
+    TS_ASSERT_EQUALS(modes.size(), 3);
     TS_ASSERT_EQUALS(modes[0], m_elasticString);
     TS_ASSERT_EQUALS(modes[1], m_directString);
     TS_ASSERT_EQUALS(modes[2], m_indirectString);

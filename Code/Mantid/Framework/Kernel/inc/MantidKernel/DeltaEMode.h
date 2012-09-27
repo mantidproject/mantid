@@ -39,10 +39,14 @@ namespace Mantid
      */
     struct MANTID_KERNEL_DLL DeltaEMode
     {
-      /// Define the available energy transfer modes
+      /** Define the available energy transfer modes
+       *  It is important to assign enums proper numbers, until direct correspondence between enums and their emodes 
+       *  used by the external units conversion algorithms within the Mantid, so the agreement should be the stame        */
       enum Type 
-      { Elastic, Direct, Indirect,
-                  Undefined ///<< The type for the situations, where instrument can not be reasonably defined (e.g.  ws with detector information lost)
+      { Elastic =0, 
+        Direct  =1, 
+        Indirect=2,
+        Undefined //< The type for the situations, where instrument can not be reasonably defined (e.g.  ws with detector information lost)
                             /// this mode should not be displayed among modes availible to select but may have string representation
       };
       /// Return a string representation of the given mode
