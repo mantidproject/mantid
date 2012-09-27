@@ -518,6 +518,7 @@ namespace DataHandling
         const Poco::XML::Node*pvNode = node->firstChild();
         std::string pvName;
         std::string pvId;
+        unsigned pvIdNum;
         std::string pvUnits;
         std::string pvType;
         while (pvNode != NULL)
@@ -525,7 +526,10 @@ namespace DataHandling
           if (pvNode->nodeName() == "pv_name")
             pvName = pvNode->firstChild()->nodeValue();
           else if (pvNode->nodeName() == "pv_id")
+          {
             pvId = pvNode->firstChild()->nodeValue();
+            std::istringstream(pvId) >> pvIdNum;
+          }
           else if (pvNode->nodeName() == "pv_type")
             pvType = pvNode->firstChild()->nodeValue();
           else if (pvNode->nodeName() == "pv_units")
@@ -546,48 +550,53 @@ namespace DataHandling
         }
         else
         {
-          // create the property in the workspace - this is a little bit kludgy because
-          // the type is specified as a string in the XML, but we pass the actual keyword
-          // to the template declaration.  Hense all the if...else if...else stuff...
-          Property *prop = NULL;
-          if (pvType == "double")
+          // Check the nameMap - we may have already received a description for this
+          // device.  (SMS will re-send DeviceDescriptor packets under certain
+          // circumstances.)
+          NameMapType::const_iterator it = m_nameMap.find( std::make_pair(pkt.devId(), pvIdNum));
+          if (it == m_nameMap.end())
           {
-            prop = new TimeSeriesProperty<double>(pvName);
-          }
-          else if ( (pvType == "integer") ||
-                    (pvType == "unsigned") ||
-                    (pvType.find("enum_") == 0) )
-          // Note: Mantid doesn't currently support unsigned int properties
-          // Note: We're treating enums as ints (at least for now)
-          // Note: ADARA doesn't currently define an integer variable value packet (only unsigned)
-          {
-            prop = new TimeSeriesProperty<int>(pvName);
-          }
-          else if (pvType == "string")
-          {
-            prop = new TimeSeriesProperty<std::string>(pvName);
-          }
-          else
-          {
-              // invalid type string
-              g_log.warning() << "Ignoring process variable " << pvName << " because it had an unrecognized type ("
-                                << pvType << ")." << std::endl;
-          }
-          
-          if (prop)
-          {
-            if (pvUnits.size() > 0)
+            // create the property in the workspace - this is a little bit kludgy because
+            // the type is specified as a string in the XML, but we pass the actual keyword
+            // to the template declaration.  Hense all the if...else if...else stuff...
+            Property *prop = NULL;
+            if (pvType == "double")
             {
-                prop->setUnits( pvUnits);
+              prop = new TimeSeriesProperty<double>(pvName);
+            }
+            else if ( (pvType == "integer") ||
+                      (pvType == "unsigned") ||
+                      (pvType.find("enum_") == 0) )
+            // Note: Mantid doesn't currently support unsigned int properties
+            // Note: We're treating enums as ints (at least for now)
+            // Note: ADARA doesn't currently define an integer variable value packet (only unsigned)
+            {
+              prop = new TimeSeriesProperty<int>(pvName);
+            }
+            else if (pvType == "string")
+            {
+              prop = new TimeSeriesProperty<std::string>(pvName);
+            }
+            else
+            {
+                // invalid type string
+                g_log.warning() << "Ignoring process variable " << pvName << " because it had an unrecognized type ("
+                                << pvType << ")." << std::endl;
             }
 
-            m_buffer->mutableRun().addLogData(prop);
+            if (prop)
+            {
+              if (pvUnits.size() > 0)
+              {
+                  prop->setUnits( pvUnits);
+              }
 
-            // Add the pv id, device id and pv name to the name map so we can find the
-            // name when we process the variable value packets
-            unsigned pvIdNum;
-            std::istringstream(pvId) >> pvIdNum;
-            m_nameMap[ std::make_pair( pkt.devId(), pvIdNum)] = pvName;
+              m_buffer->mutableRun().addLogData(prop);
+
+              // Add the pv id, device id and pv name to the name map so we can find the
+              // name when we process the variable value packets
+              m_nameMap[ std::make_pair( pkt.devId(), pvIdNum)] = pvName;
+            }
           }
         }
       }
@@ -708,6 +717,7 @@ namespace DataHandling
       // Note: we can get away with not locking a mutex here because the
       // background thread is still paused.
       m_workspaceInitialized = false;
+      m_nameMap.clear();
       m_buffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
           (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     }
