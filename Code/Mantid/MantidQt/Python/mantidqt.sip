@@ -1123,6 +1123,35 @@ WidgetFactory::WidgetFactory()
 
 
 
+namespace MantidQt
+{
+namespace RefDetectorViewer
+{
+
+
+//*WIKI* == Classes ==
+//*WIKI* Here follows a list of the classes exposed to python and the methods you can execute on them.
+
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+class RefMatrixWSImageView
+{
+%TypeHeaderCode
+#include "MantidQtRefDetectorViewer/RefMatrixWSImageView.h"
+%End
+
+public:
+	RefMatrixWSImageView (QString wps_name);
+};
+
+}; // end namespace
+}; // end namespace
+
+
+
+
 
 
 

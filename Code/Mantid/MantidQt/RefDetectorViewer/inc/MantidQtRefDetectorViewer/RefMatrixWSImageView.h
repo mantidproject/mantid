@@ -48,6 +48,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSImageView
     /// Construct an image viewer for the specifed MatrixWorkspace
     RefMatrixWSImageView( Mantid::API::MatrixWorkspace_sptr mat_ws );
 
+    RefMatrixWSImageView( QString wps_name);
+    
    ~RefMatrixWSImageView();
 
   private:
