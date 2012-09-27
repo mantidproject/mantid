@@ -1,6 +1,6 @@
+/**TODO: FOR DEPRICATION */ 
 #ifndef MANTID_MDEVENTS_WS_DESCRIPTION_DEPR_H
 #define MANTID_MDEVENTS_WS_DESCRIPTION_DEPR_H
-/**TODO: FOR DEPRICATION */ 
 
 #include "MantidMDEvents/MDWSDescription.h"
 #include "MantidMDEvents/ConvToMDPreprocDet.h"

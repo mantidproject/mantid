@@ -155,6 +155,7 @@ set ( TEST_FILES
 	CompareMDWorkspacesTest.h
 	ConvertEventsToMDTest.h
 	ConvertToDetectorFaceMDTest.h
+	ConvertToMDComponentsTest.h	
 	ConvertToMDTest.h
 	ConvertToMDTestPerformance.h
 	ConvertToQ3DdETest.h

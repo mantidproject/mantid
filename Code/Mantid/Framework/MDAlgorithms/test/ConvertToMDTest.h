@@ -82,48 +82,6 @@ void testSetUpThrow()
 
 }
 
-void testPreprocDetLogic()
-{
-     Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
-     // if workspace name is specified, it has been preprocessed and added to analysis data service:
-
-     pAlg->setPropertyValue("PreprocDetectorsWS","PreprDetWS");
-     auto TableWS= pAlg->preprocessDetectorsPositions(ws2D);
-     auto TableWSs = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("PreprDetWS");
-     TS_ASSERT_EQUALS(TableWS.get(),TableWSs.get());
-     // does not calculate ws second time:
-     auto TableWS2= pAlg->preprocessDetectorsPositions(ws2D);
-     TS_ASSERT_EQUALS(TableWS2.get(),TableWSs.get());
-
-     // but now it does calculate a new workspace
-     pAlg->setPropertyValue("PreprocDetectorsWS","");
-     auto TableWS3= pAlg->preprocessDetectorsPositions(ws2D);
-     TS_ASSERT(TableWSs.get()!=TableWS3.get());
-
-     TS_ASSERT_EQUALS("ServiceTableWS",TableWS3->getName());
-     TSM_ASSERT("Should not add service WS to the data service",!AnalysisDataService::Instance().doesExist("ServiceTableWS"));
-
-     // now it does not calulates new workspace and takes old from data service
-     pAlg->setPropertyValue("PreprocDetectorsWS","PreprDetWS");
-     auto TableWS4= pAlg->preprocessDetectorsPositions(ws2D);
-     TS_ASSERT_EQUALS(TableWS4.get(),TableWSs.get());
-
-     // and now it does not take old and caluclated new
-     pAlg->setPropertyValue("PreprocDetectorsWS","PreprDetWS2");
-     auto TableWS5= pAlg->preprocessDetectorsPositions(ws2D);
-     TS_ASSERT(TableWS5.get()!=TableWS4.get());
-
-     // workspace with different number of detectors calculated into different workspace, replacing the previous one into dataservice
-      Mantid::API::MatrixWorkspace_sptr ws2DNew =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(9,10,true);
-      // this is the probems with alg, as ws has to be added to data service to be avail to algorithm.
-      pAlg->setSourceWS(ws2DNew);
-
-      auto TableWS6= pAlg->preprocessDetectorsPositions(ws2DNew);
-      TS_ASSERT(TableWS6.get()!=TableWS5.get());
-      TS_ASSERT_EQUALS(9,TableWS6->rowCount());
-      TS_ASSERT_EQUALS(4,TableWS5->rowCount());
-}
-
 void testExecNoQ()
 {
 
@@ -245,6 +203,10 @@ ConvertToMDTest(){
      ws2D->mutableRun().addProperty("Ei",13.,"meV",true);
 
      AnalysisDataService::Instance().addOrReplace("testWSProcessed", ws2D);
+}
+~ConvertToMDTest()
+{
+  AnalysisDataService::Instance().remove("testWSProcessed");
 }
 private:
 
