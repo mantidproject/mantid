@@ -262,7 +262,7 @@ namespace Mantid
     /** method calculates fake detectors positions in the situation when real detector information has been lost  */
     void PreprocessDetectorsToMD::buildFakeDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
     {
-      UNUSED_ARG(targWS);
+      UNUSED_ARG(inputWS);
       // set sample-detector postion equal to 1;
       targWS->setProperty<double>("L1",1.);
       // 
