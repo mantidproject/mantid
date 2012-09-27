@@ -46,6 +46,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport MDWSDescriptionDepricated : public MDWSDescription
 {
 public: 
+    double getEi()const{return getEi(m_InWS);}
 
     bool isDetInfoLost()const{return isDetInfoLost(m_InWS);}
 
@@ -64,6 +65,10 @@ public:
    void setDetectors(const ConvToMDPreprocDet &g_DetLoc);
    /** checks if matrix ws has information about detectors*/
     static bool isDetInfoLost(Mantid::API::MatrixWorkspace_const_sptr inWS2D);
+
+  /** Obtain input workspace energy (relevend in inelastic mode)*/
+    static double   getEi(API::MatrixWorkspace_const_sptr inWS2D);
+
 private:
    // pointer to the array of detector's directions in the reciprocal space
     ConvToMDPreprocDet const * m_DetLoc;

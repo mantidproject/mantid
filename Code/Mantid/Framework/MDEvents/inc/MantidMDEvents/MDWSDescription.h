@@ -91,7 +91,6 @@ public:  // for the time being
     std::string getWSName()const{return m_InWS->name();}
     bool isPowder()const{return !m_InWS->sample().hasOrientedLattice();}
     bool hasLattice()const{return m_InWS->sample().hasOrientedLattice();}
-    double getEi()const{return getEi(m_InWS);}
     boost::shared_ptr<Geometry::OrientedLattice> getLattice()const{return getOrientedLattice(m_InWS);}
 
   /// constructor
@@ -118,9 +117,7 @@ public:  // for the time being
 // static helper functions:
     /// helper function checks if min values are less them max values and are consistent between each other 
     static void checkMinMaxNdimConsistent(const std::vector<double> &minVal,const std::vector<double> &maxVal);
-   /** Obtain input workspace energy (relevend in inelastic mode)*/
-    static double   getEi(API::MatrixWorkspace_const_sptr inWS2D);
-   /** function extracts the coordinates from additional workspace porperties and places them to AddCoord vector for further usage*/
+    /** function extracts the coordinates from additional workspace porperties and places them to AddCoord vector for further usage*/
     static void fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,const std::vector<std::string> &dimProperyNames,std::vector<coord_t> &AddCoord);
 
     static boost::shared_ptr<Geometry::OrientedLattice> getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D);

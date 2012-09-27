@@ -12,13 +12,6 @@ namespace Mantid
 namespace MDEvents
 {
 
-/// Template to check if a variable equal to NaN
-template <class T>
-inline bool isNaN(T val)
-{
-  volatile T buf=val;
-  return (val!=buf);
-}
 /** set specific (non-default) dimension name 
 * @param nDim   -- number of dimension;
 * @param Name   -- the name to assighn into diemnsion names vector;
@@ -100,10 +93,6 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
     }
   }
 
-
-  // in direct or indirect mode input ws has to have input energy
-  if(m_Emode==CnvrtToMD::Direct||m_Emode==CnvrtToMD::Indir)
-    if(isNaN(getEi(m_InWS)))throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
 
   //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
   m_GoniomMatr = m_InWS->run().getGoniometer().getR();
@@ -248,36 +237,7 @@ std::string MDWSDescription::getEModeStr()const
   MDTransfDEHelper         deHelper;
   return deHelper.getEmode(m_Emode);
 }
-/** Helper function to obtain the energy of incident neutrons from the input workspaec
-*
-*@param pHost the pointer to the algorithm to work with
-*
-*@returns the incident energy of the neutrons or quet NaN if can not retrieve one 
-*/
-double MDWSDescription::getEi(API::MatrixWorkspace_const_sptr inWS2D)
-{
-  if(!inWS2D)throw(std::invalid_argument(" getEi: invoked on empty input workspace "));
 
-  Kernel::PropertyWithValue<double>  *pProp(NULL);
-  try
-  {
-    pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(inWS2D->run().getProperty("Ei"));
-  }
-  catch(...)
-  {}
-  // this can be preferable name for indirect conversion
-  try
-  {
-    pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(inWS2D->run().getProperty("eFixed"));
-  }
-  catch(...)
-  {}
-
-
-  if(!pProp) return std::numeric_limits<double>::quiet_NaN();
-
-  return (*pProp); 
-}
 /** function extracts the coordinates from additional workspace porperties and places them to proper position within 
 *  the vector of MD coodinates for the particular workspace.
 *

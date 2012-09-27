@@ -63,5 +63,36 @@ bool MDWSDescriptionDepricated::isDetInfoLost(Mantid::API::MatrixWorkspace_const
   if(pYAxis) return true;
   return false;
 }
+
+/** Helper function to obtain the energy of incident neutrons from the input workspaec
+*
+*@param pHost the pointer to the algorithm to work with
+*
+*@returns the incident energy of the neutrons or quet NaN if can not retrieve one 
+*/
+double MDWSDescriptionDepricated::getEi(API::MatrixWorkspace_const_sptr inWS2D)
+{
+  if(!inWS2D)throw(std::invalid_argument(" getEi: invoked on empty input workspace "));
+
+  Kernel::PropertyWithValue<double>  *pProp(NULL);
+  try
+  {
+    pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(inWS2D->run().getProperty("Ei"));
+  }
+  catch(...)
+  {}
+  // this can be preferable name for indirect conversion
+  try
+  {
+    pProp  =dynamic_cast<Kernel::PropertyWithValue<double>  *>(inWS2D->run().getProperty("eFixed"));
+  }
+  catch(...)
+  {}
+
+
+  if(!pProp) return std::numeric_limits<double>::quiet_NaN();
+
+  return (*pProp); 
+}
 } //end namespace MDEvents
 } //end namespace Mantid

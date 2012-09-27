@@ -89,7 +89,7 @@ namespace MDAlgorithms
       /**Create new MD workspace using existing parameters for algorithm */
         API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDEvents::MDWSDescription &NewMDWSDescription);
 
-        bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dE_mod_req,const std::vector<std::string> &other_dim_names,
+        bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dEModeRequested,const std::vector<std::string> &other_dim_names,
                                       const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr);
        /// Store metadata
        void copyMetaData(API::IMDEventWorkspace_sptr mdEventWS) const;

@@ -1089,11 +1089,12 @@ namespace WorkspaceCreationHelper
 
    /** helper method to create preprocessed detector's table workspace */
    boost::shared_ptr<DataObjects::TableWorkspace> createTableWorkspace(const API::MatrixWorkspace_const_sptr &inputWS)
-    {
+   {
       const size_t nHist = inputWS->getNumberHistograms();
 
+
       // set the target workspace
-      auto targWS = boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace(nHist));
+      auto targWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(nHist));
       // detectors positions
       if(!targWS->addColumn("V3D","DetDirections"))throw(std::runtime_error("Can not add column DetDirectrions"));
       // sample-detector distance;
@@ -1107,12 +1108,14 @@ namespace WorkspaceCreationHelper
       if(!targWS->addColumn("size_t","detIDMap"))throw(std::runtime_error("Can not add column detIDMap"));
       // stores detector index which corresponds to the workspace index;
       if(!targWS->addColumn("size_t","spec2detMap"))throw(std::runtime_error("Can not add column spec2detMap"));
-      // will see about that
+
+       // will see about that
       // sin^2(Theta)
       //    std::vector<double>      SinThetaSq;
 
       targWS->declareProperty(new Kernel::PropertyWithValue<std::string>("InstrumentName",""),"The name which should unique identify current instrument");
       targWS->declareProperty(new Kernel::PropertyWithValue<double>("L1",0),"L1 is the source to sample distance");
+      targWS->declareProperty(new Kernel::PropertyWithValue<double>("Ei",EMPTY_DBL()),"Incident energy for Direct or Analysis energy for indirect instrument");
       targWS->declareProperty(new Kernel::PropertyWithValue<uint32_t>("ActualDetectorsNum",0),"The actual number of detectors receivinv signal");
       targWS->declareProperty(new Kernel::PropertyWithValue<bool>("FakeDetectors",false),"If the detectors were actually processed from real instrument or generated for some fake one ");
       return targWS;
@@ -1120,11 +1123,9 @@ namespace WorkspaceCreationHelper
 
     /** method does preliminary calculations of the detectors positions to convert results into k-dE space ;
     and places the resutls into static cash to be used in subsequent calls to this algorithm */
-  void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
-    {  
-      // 
-      Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
-      //this->pBaseInstr                = instrument->baseInstrument();
+  void processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS,double Ei)
+  {  
+       Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
       //
       Geometry::IObjComponent_const_sptr source = instrument->getSource();
       Geometry::IObjComponent_const_sptr sample = instrument->getSample();
@@ -1157,6 +1158,8 @@ namespace WorkspaceCreationHelper
       auto &TwoTheta   = targWS->getColVector<double>("TwoTheta");
       auto &Azimuthal  = targWS->getColVector<double>("Azimuthal");
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
+
+      targWS->setProperty<double>("Ei",Ei);
 
       //// progress messave appearence
       size_t nHist = targWS->rowCount();
@@ -1220,7 +1223,8 @@ namespace WorkspaceCreationHelper
   boost::shared_ptr<Mantid::DataObjects::TableWorkspace> buildPreprocessedDetectorsWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
   {
     Mantid::DataObjects::TableWorkspace_sptr DetPos = createTableWorkspace(ws);
-    processDetectorsPositions(ws,DetPos);
+    double Ei = ws->run().getPropertyValueAsType<double>("Ei");
+    processDetectorsPositions(ws,DetPos,Ei);
 
     return DetPos;
   }

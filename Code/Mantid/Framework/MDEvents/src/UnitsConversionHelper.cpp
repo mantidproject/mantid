@@ -95,7 +95,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, con
   m_Emode     =  (int)targetWSDescr.getEMode();
 
   // get efix
-  m_Efix      =  targetWSDescr.getEi();
+  m_Efix      =  targetWSDescr.m_PreprDetTable->getProperty("Ei");
   m_pEfixedArray=NULL;
   if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = targetWSDescr.m_PreprDetTable->getColDataArray<float>("eFixed");
 }

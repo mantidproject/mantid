@@ -67,8 +67,13 @@ void ConvertToMD::initDocs()
 ConvertToMD::~ConvertToMD()
 {
 }
-//
-//const double rad2deg = 180.0 / M_PI;
+/// Template to check if a variable equal to NaN
+template <class T>
+inline bool isNaN(T val)
+{
+  volatile T buf=val;
+  return (val!=buf);
+}
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
@@ -417,7 +422,11 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
     if(!childAlg)throw(std::runtime_error("Can not create child subalgorithm to preprocess detectors"));
     childAlg->setProperty("InputWorkspace",InWSName);
     childAlg->setProperty("OutputWorkspace",OutWSName);
-    if(dEModeRequested == "Indirect")  // TODO: redefine this through Kernel::Emodes
+
+ // check and get energy conversion mode;
+    MDTransfDEHelper dEChecker;
+    CnvrtToMD::EModes Emode = dEChecker.getEmode(dEModeRequested);
+    if(Emode == CnvrtToMD::Indir)  // TODO: redefine this through Kernel::Emodes
       childAlg->setProperty("GetEFixed",true); 
 
 
@@ -432,6 +441,15 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
       API::AnalysisDataService::Instance().addOrReplace(OutWSName,TargTableWS);
     else
       TargTableWS->setName(OutWSName);
+
+  
+   // in direct or indirect mode input ws has to have input energy
+    if(Emode==CnvrtToMD::Direct||Emode==CnvrtToMD::Indir)
+    {
+       double   m_Ei  = TargTableWS->getProperty("Ei");
+       if(isNaN(m_Ei))throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
+    }
+
 
     return TargTableWS;
 
