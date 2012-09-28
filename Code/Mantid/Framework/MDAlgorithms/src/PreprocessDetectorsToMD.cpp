@@ -318,8 +318,8 @@ namespace Mantid
       return false;
     }
 
-    /**Method returns the efixed or Ei value if the one is requested in according to the Algorithm parameters 
-     *  Indirect instruments can have efxed and Direct instruments can have Ei
+    /** Method returns the efixed or Ei value stored in properties of the input workspace.
+     *  Indirect instruments can have eFxed and Direct instruments can have Ei defined as the properties of the workspace. 
      *
      *  This method provide guess for efixed for all other kind of instruments. Correct indirect instrument will overwrite 
      *  this value while wrongly defined or different types of instruments will provide the value of "Ei" property (log value)
@@ -328,7 +328,7 @@ namespace Mantid
      */
     double PreprocessDetectorsToMD::getEi(const API::MatrixWorkspace_const_sptr &inputWS)const
     { 
-      double Efi = EMPTY_DBL();
+      double Efi = std::numeric_limits<double>::quiet_NaN();
    
     
       // is Ei on workspace properties? (it can be defined for some reason if detectors do not have one, and then it would exist as Ei)
@@ -354,7 +354,7 @@ namespace Mantid
       }
 
       if (!(EiFound||eFixedFound))
-        g_log.debug()<<" Ei/Efixed equested but have not been found\n";
+        g_log.debug()<<" Ei/eFixed requested but have not been found\n";
 
       return Efi;
     }

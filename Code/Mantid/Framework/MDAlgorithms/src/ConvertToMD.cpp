@@ -375,16 +375,18 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
 /**The method responsible for preprocessing detectors positions into reciprocal space  
   *@param InWS2D -- input Matrix workspace with defined instrument 
   *
-  *@returns TableWorkspace_const_sptr the pointer to the table workspace which contains positions of the preprocessed detectorsl
-  *         Depenting on the algorithm parameters, this worksapce is also stored in the analysis data service. 
+  *@returns TableWorkspace_const_sptr the pointer to the table workspace which contains positions of the preprocessed detectors
+  *         Depenting on the algorithm parameters, this worksapce is also stored in the analysis data service and may have additional properties.
  */
 DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions( Mantid::API::MatrixWorkspace_const_sptr InWS2D,const std::string &dEModeRequested)
 {
 
     DataObjects::TableWorkspace_sptr TargTableWS;
+
+    // Do we need to reuse output workspace
     bool storeInDataService(true);
     std::string OutWSName = std::string(getProperty("PreprocDetectorsWS"));
-    if(OutWSName.empty()) // TargTableWS is recalculated each time;
+    if(OutWSName=="-"||OutWSName.empty()) // TargTableWS is recalculated each time;
     {
       storeInDataService = false;
       OutWSName = "ServiceTableWS";  // TODO: should be hidden?
@@ -392,8 +394,11 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
     else
     {
       storeInDataService = true;
-      if(API::AnalysisDataService::Instance().doesExist(OutWSName))      // that is it, workspace exists and we may try to use it
-      {
+    }
+
+     // if output workspace exists in dataservice, we may try to use it
+    if(storeInDataService && API::AnalysisDataService::Instance().doesExist(OutWSName) ) 
+    {
         TargTableWS = API::AnalysisDataService::Instance().retrieveWS<DataObjects::TableWorkspace>(OutWSName);
         // get number of all histohrams (may be masked or invalid)
         size_t nHist = InWS2D->getNumberHistograms();
@@ -406,15 +411,16 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
 
           if(oldInstrName==currentWSInstrumentName) return TargTableWS;
         }
-      }
-
     }
-    // if input workspace does not exist in analysis data service, we have to add it there to work with algorithm /sucs...
+    // No result found in analysis data service or the result is unsatisfactory. Try to calculate target workspace.  
+
+    // if input workspace does not exist in analysis data service, we have to add it there to work with the sub-algorithm 
     std::string InWSName = InWS2D->getName();
     if(!API::AnalysisDataService::Instance().doesExist(InWSName))
     {
        if(InWSName.empty())InWSName = "ImputMatrixWS";
        // wery bad, but what can we do otherwise... -> pool out the class pointer which is not const 
+       // add input matrix ws to the analysis data service in order for subalgorithm to retrieve it. 
        API::AnalysisDataService::Instance().addOrReplace(InWSName,m_InWS2D);
     }
 
@@ -423,12 +429,11 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
     childAlg->setProperty("InputWorkspace",InWSName);
     childAlg->setProperty("OutputWorkspace",OutWSName);
 
- // check and get energy conversion mode;
+ // check and get energy conversion mode to define additional subalgorithm parameters
     MDTransfDEHelper dEChecker;
     CnvrtToMD::EModes Emode = dEChecker.getEmode(dEModeRequested);
     if(Emode == CnvrtToMD::Indir)  // TODO: redefine this through Kernel::Emodes
       childAlg->setProperty("GetEFixed",true); 
-
 
 
     childAlg->execute();
@@ -443,16 +448,29 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
       TargTableWS->setName(OutWSName);
 
   
+   // check if we got what we wanted:
+
    // in direct or indirect mode input ws has to have input energy
     if(Emode==CnvrtToMD::Direct||Emode==CnvrtToMD::Indir)
     {
        double   m_Ei  = TargTableWS->getProperty("Ei");
-       if(isNaN(m_Ei))throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
+       if(isNaN(m_Ei))
+       {
+         // Direct mode needs Ei
+         if(Emode==CnvrtToMD::Direct)throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
+
+         // Do we have at least something for Indirect?
+         float *eFixed = TargTableWS->getColDataArray<float>("eFixed");
+         if(!eFixed)
+           throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
+
+         uint32_t NDetectors = TargTableWS->getProperty("ActualDetectorsNum");
+         for(uint32_t i=0;i<NDetectors;i++)
+           if(isNaN(*(eFixed+i)))throw(std::invalid_argument("Undefined eFixed energy for detector N: "+boost::lexical_cast<std::string>(i)));
+       }
     }
 
-
     return TargTableWS;
-
 }
 
 
