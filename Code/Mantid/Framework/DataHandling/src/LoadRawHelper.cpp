@@ -528,7 +528,9 @@ namespace Mantid
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
     /// @param fileName :: the raw file filename
     /// @param localWorkspace :: The workspace to load the instrument for
-    void LoadRawHelper::runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace)
+    /// @param progStart :: progress at start
+    /// @param progEnd :: progress at end
+    void LoadRawHelper::runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd)
     {
       g_log.debug("Loading the instrument definition...");
       progress(m_prog, "Loading the instrument geometry...");
@@ -540,8 +542,8 @@ namespace Mantid
       IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
       // Enable progress reporting by sub-algorithm - 
       loadInst->addObserver(m_progressObserver);
-      setChildStartProgress(0.0);
-      setChildEndProgress(0.25);
+      setChildStartProgress(progStart);
+      setChildEndProgress((progStart+progEnd)/2);
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       bool executionSuccessful(true);
       try
@@ -581,9 +583,9 @@ namespace Mantid
             IAlgorithm_sptr updateInst = createSubAlgorithm("UpdateInstrumentFromFile");
             updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
             updateInst->setPropertyValue("Filename", fileName);
-            updateInst->addObserver(m_progressObserver); // Enable progress reporting bu subalgorithm
-            setChildStartProgress(0.25);
-            setChildEndProgress(0.50);
+            updateInst->addObserver(m_progressObserver); // Enable progress reporting by subalgorithm
+            setChildStartProgress((progStart+progEnd)/2);
+            setChildEndProgress(progEnd);
             if(value  == "datafile-ignore-phi" )
             {
               updateInst->setProperty("IgnorePhi", true);

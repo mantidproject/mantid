@@ -109,7 +109,7 @@ namespace Mantid
       std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes,
                                                                  const int64_t& lengthIn);
       /// loadinstrument sub algorithm
-      void runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr);
+      void runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr, double, double );
       /// loadinstrumentfromraw algorithm
       void runLoadInstrumentFromRaw(const std::string& fileName,DataObjects::Workspace2D_sptr);
       /// loadinstrumentfromraw sub algorithm

@@ -48,7 +48,7 @@ using namespace API;
 
 /// Constructor
 LoadRaw3::LoadRaw3() :
-  m_filename(), m_noTimeRegimes(0),m_prog(0.0),
+  m_filename(), m_noTimeRegimes(0),m_prog(0.0), m_prog_start(0.0), m_prog_end(1.0),
   m_lengthIn(0), m_timeChannelsVec(),m_total_specs(0)
 {
 }
@@ -142,7 +142,7 @@ void LoadRaw3::exec()
   // Only run the sub-algorithms once
   loadRunParameters(localWorkspace);
   runLoadMappingTable(m_filename,localWorkspace);
-  runLoadInstrument(m_filename,localWorkspace);
+  runLoadInstrument(m_filename,localWorkspace, 0.0, 0.5);
   Run& run = localWorkspace->mutableRun();
   if (bLoadlogFiles)
   {
@@ -153,6 +153,10 @@ void LoadRaw3::exec()
   // Set the total proton charge for this run
   setProtonCharge(run);
   setRunNumber(run);
+
+  // Delay progress start because of sub-algorithms run
+  m_prog_start = 0.5;  
+  setProg(0.0);  
 
   // populate instrument parameters
   g_log.debug("Populating the instrument parameters...");
@@ -301,7 +305,7 @@ void LoadRaw3::exec()
         setWorkspaceProperty(localWorkspace, ws_grp, period, false);
       }
       // progress for workspace groups 
-      m_prog = static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1);
+      setProg ( static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1) );
     }
 
   } // loop over periods
@@ -347,14 +351,14 @@ void LoadRaw3::excludeMonitors(FILE* file,const int & period,const std::vector<s
 			//increment workspace index
 			++wsIndex;
 
-			if (m_numberOfPeriods == 1)
-			{
-				if (++histCurrent % 100 == 0)
-				{
-					m_prog = static_cast<double>(histCurrent) / histTotal;
-				}
-				interruption_point();
-			}
+      if (m_numberOfPeriods == 1)
+      {
+        if (++histCurrent % 100 == 0)
+        {
+          setProg( static_cast<double>(histCurrent) / histTotal );
+        }
+        interruption_point();
+      }
 
 		}//end of if loop for spec min,max check
 		else
@@ -397,7 +401,7 @@ void LoadRaw3::includeMonitors(FILE* file,const int64_t& period,DataObjects::Wor
 		  {
 			  if (++histCurrent % 100 == 0)
 			  {
-				  m_prog = double(histCurrent) / histTotal;
+				  setProg( double(histCurrent) / histTotal );
 			  }
 			  interruption_point();
 		  }
@@ -457,7 +461,7 @@ void LoadRaw3::separateMonitors(FILE* file,const int64_t& period,const std::vect
         {
           if (++histCurrent % 100 == 0)
           {
-            m_prog = static_cast<double>(histCurrent) / histTotal;
+            setProg( static_cast<double>(histCurrent) / histTotal );
           }
           interruption_point();
         }
@@ -479,6 +483,13 @@ void LoadRaw3::setOptionalProperties()
   m_spec_min = getProperty("SpectrumMin");
 
 }
+
+/// This sets the progress taking account of progress time taken up by subalgorithms
+void LoadRaw3::setProg( double prog )
+{
+  m_prog = m_prog_start + (m_prog_end - m_prog_start)*prog;
+}
+
 
 /**This method validatates workspace sizes if exclude monitors or separate monitors options is selected
   *@param bexcludeMonitors :: boolean option for exclude monitors
@@ -567,12 +578,12 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
   progress(m_prog, "Reading raw file data...");
   DataObjects::Workspace2D_sptr localWorkspace = DataObjects::Workspace2D_sptr(
     new ManagedRawFileWorkspace2D(fileName, static_cast<int>(option)));
-  m_prog = 0.2;
+  setProg( 0.2 );
   loadRunParameters(localWorkspace);
-  runLoadInstrument(fileName,localWorkspace);
-  m_prog = 0.4;
+  runLoadInstrument(fileName,localWorkspace, 0.2, 0.4 );
+  setProg( 0.4 );
   runLoadMappingTable(fileName,localWorkspace);
-  m_prog = 0.5;
+  setProg( 0.5 );
   if (bLoadlogFiles)
   {
     runLoadLog(fileName,localWorkspace);
@@ -581,17 +592,17 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
   }
   setProtonCharge(localWorkspace->mutableRun());
 
-  m_prog = 0.7;
+  setProg( 0.7 );
   progress(m_prog);
   for (int i = 0; i < m_numberOfSpectra; ++i)
   {
     localWorkspace->getAxis(1)->spectraNo(i) = i + 1;
   }
-  m_prog = 0.9;
+  setProg( 0.9 );
   localWorkspace->populateInstrumentParameters();
   separateOrexcludeMonitors(localWorkspace, bincludeMonitors, bexcludeMonitors, 
 	  bseparateMonitors,m_numberOfSpectra,fileName);
-  m_prog = 1.0;
+  setProg( 1.0 );
   progress(m_prog);
   setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(localWorkspace));
 }

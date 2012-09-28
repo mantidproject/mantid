@@ -128,6 +128,9 @@ namespace Mantid
 
       ///sets optional properties
       void setOptionalProperties();
+
+      ///sets progress taking account of progress time taken up by subalgorithms
+      void setProg( double );
       
       /// The name and path of the input file
       std::string m_filename;
@@ -142,6 +145,9 @@ namespace Mantid
       int64_t m_noTimeRegimes;
       /// The current value of the progress counter
       double m_prog;
+      /// Start and ends values of progress counter
+      double m_prog_start;
+      double m_prog_end;
 
       /// Read in the time bin boundaries
       int64_t m_lengthIn;
