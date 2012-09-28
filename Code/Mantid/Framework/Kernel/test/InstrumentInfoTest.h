@@ -179,8 +179,7 @@ public:
       "  <zeropadding size=\"15\"/>"
       "</instrument>";
 
-    FacilityInfo * fac = NULL;
-    TS_ASSERT_THROWS( fac = createInstInfoInMinimalFacility(instStr), std::runtime_error );
+    TS_ASSERT_THROWS( createInstInfoInMinimalFacility(instStr), std::runtime_error );
   }
   
   void test_error_1_in_multiple_zeropadding()
@@ -191,8 +190,7 @@ public:
       "  <zeropadding size=\"nan\"/>"
       "</instrument>";
 
-    FacilityInfo * fac = NULL;
-    TS_ASSERT_THROWS( fac = createInstInfoInMinimalFacility(instStr), std::runtime_error );
+    TS_ASSERT_THROWS( createInstInfoInMinimalFacility(instStr), std::runtime_error );
   }
   
   void test_error_2_in_multiple_zeropadding()
@@ -203,8 +201,7 @@ public:
       "  <zeropadding size=\"8\" startRunNumber=\"nan\"/>"
       "</instrument>";
 
-    FacilityInfo * fac = NULL;
-    TS_ASSERT_THROWS( fac = createInstInfoInMinimalFacility(instStr), std::runtime_error );
+    TS_ASSERT_THROWS( createInstInfoInMinimalFacility(instStr), std::runtime_error );
   }
   
   void test_error_3_in_multiple_zeropadding()
@@ -215,8 +212,7 @@ public:
       "  <zeropadding startRunNumber=\"333\"/>"
       "</instrument>";
 
-    FacilityInfo * fac = NULL;
-    TS_ASSERT_THROWS( fac = createInstInfoInMinimalFacility(instStr), std::runtime_error );
+    TS_ASSERT_THROWS( createInstInfoInMinimalFacility(instStr), std::runtime_error );
   }
   
   void test_equality_operator()

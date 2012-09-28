@@ -467,7 +467,6 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
 {
   std::list<MatrixWorkspace_sptr> inWS;
 
-  size_t numSpec(0);
   std::string xUnitID;
   std::string YUnit;
   bool dist(false);
@@ -502,7 +501,6 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
     // Check a few things are the same for all input workspaces
     if ( i == 0 )
     {
-      numSpec = ws->getNumberHistograms();
       xUnitID = ws->getAxis(0)->unit()->unitID();
       YUnit = ws->YUnit();
       dist = ws->isDistribution();

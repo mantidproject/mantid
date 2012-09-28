@@ -19,7 +19,7 @@ RefMatrixWSImageView::RefMatrixWSImageView( MatrixWorkspace_sptr mat_ws )
                                          // is closed
 }
 
-RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
+RefMatrixWSImageView::RefMatrixWSImageView( QString )
 {
 //    std::cout << "wps name is : " << wps_name << std::endl;
 }

@@ -58,6 +58,8 @@ private:
     TimeSeriesProperty<double>* sampleTemps = dynamic_cast<TimeSeriesProperty<double>* >(prop);
     auto filteredLogStartTime = sampleTemps->nthTime(0);
     auto filteredLogEndTime = sampleTemps->nthTime(sampleTemps->size()-1);
+    TS_ASSERT_EQUALS("2010-Mar-25 16:09:31.511000032",filteredLogStartTime.toSimpleString());
+    TS_ASSERT_EQUALS("2010-Mar-25 16:11:41.558003540",filteredLogEndTime.toSimpleString());
   }
 
 public:

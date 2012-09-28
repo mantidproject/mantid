@@ -24,7 +24,7 @@ set( USE_PARAVIEW ON CACHE BOOL "Create paraview plugins. " )
 find_package( ParaView )
 if( ParaView_FOUND AND USE_PARAVIEW )
 
-  include( ${PARAVIEW_USE_FILE} )
+  include ( ${PARAVIEW_USE_FILE} )
   add_subdirectory( VatesAPI )
   add_subdirectory( ParaviewPlugins )
   add_subdirectory( VatesSimpleGui )

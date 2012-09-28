@@ -142,7 +142,7 @@ public:
 		if (sipCpp->text(row, col) != "")
 			sipRes = sipCpp->cell(row, col);
 		else {
-			sipRes = NULL;
+			sipRes = 0.0;
 			PyErr_SetString(PyExc_ValueError, "Empty table cell");
 		}
 	}

@@ -244,16 +244,11 @@ std::string ConvertToMDEventsParams::identifyMatrixAlg(API::MatrixWorkspace_cons
     }
 
     // get optional Y axis which can be used in NoQ-kind of algorithms
-    bool is_detector_information_lost= false;
     API::NumericAxis *pYAxis = dynamic_cast<API::NumericAxis *>(inMatrixWS->getAxis(1));
     if(pYAxis){
         std::string Dim2Unit = pYAxis->unit()->unitID();
         ws_dim_units.push_back(Dim2Unit);
-        // if this is numeric axis, then the detector's information has been lost:
-        is_detector_information_lost=true;
-    }         
-    //if Y axis of matix workspace contains some meaningful info, the detector information is certainly lost. 
-    is_detector_information_lost = TargWSDescription.isDetInfoLost(inMatrixWS);
+    }
 
     std::string Q_MODE_ID,DE_MODE_ID,CONV_MODE_ID,WS_ID;
     int nQ_dims(0),ndE_dims(0);

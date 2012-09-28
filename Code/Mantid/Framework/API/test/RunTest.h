@@ -580,6 +580,8 @@ public:
     {
       value = m_testRun.getPropertyAsSingleValue(m_propName);
     }
+    // Enure variable is used so that it is not optimised away by the compiler
+    value += 1.0;
   }
 
   Run m_testRun;
