@@ -1095,12 +1095,12 @@ namespace Crystal
       vector< string > exts;
       exts.push_back(".DetCal");
       exts.push_back(".Det_Cal");
-      declareProperty(new FileProperty("DetCalFilename", "", FileProperty::OptionalSave, exts),
+      declareProperty(new FileProperty("DetCalFilename", "", FileProperty::Save, exts),
           "Path to an ISAW-style .detcal file to save.");
 
       vector< string > exts1;
       exts1.push_back(".xml");
-      declareProperty(new FileProperty("XmlFilename", "", FileProperty::OptionalSave, exts1),
+      declareProperty(new FileProperty("XmlFilename", "", FileProperty::Save, exts1),
           "Path to an Mantid .xml description(for LoadParameterFile) file to save.");
 
 

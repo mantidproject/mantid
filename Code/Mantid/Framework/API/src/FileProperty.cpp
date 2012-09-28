@@ -110,7 +110,7 @@ bool FileProperty::isDirectoryProperty() const
 */
 bool FileProperty::isOptional() const
 {
-  return (m_action == OptionalLoad || m_action == OptionalSave || m_action == OptionalDirectory);
+  return (m_action == OptionalLoad || m_action == OptionalSave);
 }
 
 /**
@@ -124,7 +124,14 @@ std::string FileProperty::setValue(const std::string & propValue)
   if( propValue.empty() )
   {
     PropertyWithValue<std::string>::setValue("");
-    return isEmptyValueValid();
+    if( isOptional() )
+    {
+      return "";
+    }
+    else
+    { 
+      return "No file specified.";
+    }
   }
 
   // If this looks like an absolute path then don't do any searching but make sure the 
@@ -152,40 +159,6 @@ std::string FileProperty::setValue(const std::string & propValue)
     errorMsg = setSaveProperty(propValue);
   }
   return errorMsg;
-}
-
-/**
- * Checks whether the current value is considered valid. Use the validator unless the
- * value is an empty string. In this case it is only valid if the property is not optional
- * @Returns an empty string if the property is valid, otherwise contains an error message
- */
-std::string FileProperty::isValid() const
-{
-  const std::string & value = (*this)();
-  if(value.empty())
-  {
-    return isEmptyValueValid();
-  }
-  else
-  {
-    return PropertyWithValue<std::string>::isValid();
-  }
-}
-
-/**
- * @returns a string depending on whether an empty value is valid
- */
-std::string FileProperty::isEmptyValueValid() const
-{
-  if( isOptional() )
-  {
-    return "";
-  }
-  else
-  {
-    return "No file specified.";
-  }
-
 }
 
 /**

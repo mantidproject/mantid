@@ -56,6 +56,8 @@ public:
     size_t numevents = 10;
     size_t lenlog = 20;
 
+    std::cout << "Run Start Time = " << run_start << " / " << run_start.totalNanoseconds() << " ns" << std::endl;
+
     double detoffset = 1.0;
     double deltatof = 200;
     buildEventWorkspace(eventWS, run_start, numevents, detoffset);

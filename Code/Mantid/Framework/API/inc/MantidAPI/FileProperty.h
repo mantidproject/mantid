@@ -67,9 +67,6 @@ public:
   bool isOptional() const;
   ///Overridden setValue method
   virtual std::string setValue(const std::string & propValue);
-  /// Returns an empty string if the property is valid, otherwise contains an error message
-  virtual std::string isValid() const;
-
   /// Returns the main file extension that's used 
   std::string getDefaultExt() const {return m_defaultExt;}
 
@@ -77,9 +74,6 @@ public:
   using Kernel::PropertyWithValue<std::string>::operator=;
 
  private:
-  /// Returns a string depending on whether an empty value is valid
-  std::string isEmptyValueValid() const;
-  /// Setup based on the default extension
   void setUp(const std::string & defExt);
   /// Do the allowed values match the facility preference extensions for run files
   bool extsMatchRunFiles();
