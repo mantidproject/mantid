@@ -114,8 +114,9 @@ namespace DataObjects
     /// Number of rows in the workspace.
     size_t rowCount() const {return m_rowCount;}
     /** get access to column vecotor for index i.
+     *
      *  The operation is unsafe with regards to the operaitons resizing obtained vector. 
-     *   This will destroy all table ws internal coherency. DO NOT OBUSE! 
+     *   This will destroy all table ws internal coherency. DO NOT ABUSE! 
      *  e.g.: resise/reserve are unsafe 
      *   Writing/reading data to vector through [] or at() is safe. */
     template<class T> 
@@ -126,7 +127,7 @@ namespace DataObjects
         return pTableCol->data();
       else
       {
-        g_log.error()<<"TableWorkspace::getColVector()const: Can not cast to proper TableCol type\n";
+        g_log.error()<<"TableWorkspace::getColVector(): Can not cast to proper TableCol type\n";
         throw(std::bad_cast());
       }
     }
@@ -145,7 +146,8 @@ namespace DataObjects
     }
     /** get access to the column vecotor for column with given name . 
      *
-     *   This will destroy all table ws internal coherency. DO NOT OBUSE! 
+     *  The operation is unsafe with regards to the operaitons resizing obtained vector. 
+     *  This will destroy all table ws internal coherency. DO NOT ABUSE! 
      *  e.g.: resise/reserve are unsafe 
      *   Writing/reading data to vector through [] or at() is safe. */
     template<class T> 

@@ -128,7 +128,7 @@ ConvertToMD::init()
     // this property is mainly for subalgorithms to set-up as they have to identify if they use the same instrument. 
     declareProperty(new PropertyWithValue<std::string>("PreprocDetectorsWS","PreprocessedDetectorsWS",Direction::Input), 
       "The name of the table workspace where the part of the detectors transformation into reciprocal space, calculated by [[PreprocessDetectorsToMD]] algorithm stored.\n"
-      "If the workspace is not found in analysis data service, [[PreprocessDetectorsToMD]]  used to calculate it. If found, the algorithm will use existing workspace.\n"
+      "If the workspace is not found in analysis data service, [[PreprocessDetectorsToMD]]  used to calculate it. If found, the algorithm uses existing workspace.\n"
       "The field is useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
       "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another.  </span>\n"
        "In this case this property has to be set to ""-"" sting (without quotes) or empty (possible from script only) to force\n"
