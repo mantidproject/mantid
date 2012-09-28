@@ -117,7 +117,7 @@ namespace Mantid
       // Calculate the initial energy and time zero
       const std::string facility = ConfigService::Instance().getFacility().name();
       g_log.notice() << "Processing for " << facility << std::endl;
-      double eiGuess = this->getProperty("IndicentEnergyGuess");
+      double eiGuess = this->getProperty("IncidentEnergyGuess");
       if (EMPTY_DBL() == eiGuess)
       {
         eiGuess = reductionManager->getProperty("IncidentEnergyGuess");
