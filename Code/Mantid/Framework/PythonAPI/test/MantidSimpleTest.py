@@ -120,7 +120,7 @@ mtd.registerPyAlgorithm(%(name)s())
         try:
             subprocess.check_call(cmd,shell=True)
         except subprocess.CalledProcessError:
-            self.fail("Error occurred running one Python algorithm from another")
+            self.fail("Error occurred running one Python algorithm from another: %s" % str(exc))
         
         # Ensure the files are removed promptly
         del a,b

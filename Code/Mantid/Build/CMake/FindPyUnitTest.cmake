@@ -37,10 +37,10 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   if( MSVC )
     # We need to call the debug executable for the debug builds
     add_test (NAME ${_pyunit_testname}_py_Debug CONFIGURATIONS Debug
-              COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
+              COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Debug"
               ${PYTHON_EXECUTABLE_DEBUG} -B $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
     add_test (NAME ${_pyunit_testname}_py CONFIGURATIONS Release
-              COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
+              COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Release"
               ${PYTHON_EXECUTABLE} -B $<TARGET_FILE_DIR:PythonAPI>/${_pyunit_testname_file} )
   else()
     add_test (NAME ${_pyunit_testname}_py

@@ -208,8 +208,8 @@ registerAlgorithm(%(name)s)
         cmd = sys.executable + ' -c "from mantid.simpleapi import %(name)s;%(name)s()"' % {'name':name1}
         try:
             subprocess.check_call(cmd,shell=True)
-        except subprocess.CalledProcessError:
-            self.fail("Error occurred running one Python algorithm from another")
+        except subprocess.CalledProcessError, exc:
+            self.fail("Error occurred running one Python algorithm from another: %s" % str(exc))
         
         # Ensure the files are removed promptly
         del a,b
