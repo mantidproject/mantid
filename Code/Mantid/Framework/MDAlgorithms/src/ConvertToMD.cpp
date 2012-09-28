@@ -261,9 +261,8 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
                                            const std::string &convertTo_,MDEvents::MDWSDescription &targWSDescr)
 {
   // ------- Is there need to creeate new ouptutworpaced?  
-    bool createNewTargetWs =doWeNeedNewTargetWorkspace(spws );
+    bool createNewTargetWs =doWeNeedNewTargetWorkspace(spws);
  
-
    // set the min and max values for the dimensions from the input porperties
     std::vector<double> dimMin = getProperty("MinValues");
     std::vector<double> dimMax = getProperty("MaxValues");
@@ -283,23 +282,18 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
         std::vector<double> vt = getProperty("VProj");
         std::vector<double> wt = getProperty("WProj");
         try
-        {
-            MsliceProj.setUVvectors(ut,vt,wt);
-        }
+        {     MsliceProj.setUVvectors(ut,vt,wt);   }
         catch(std::invalid_argument &)
-        {
-            g_log.error() << "The projections are coplanar. Will use defaults [1,0,0],[0,1,0] and [0,0,1]" << std::endl;
-        }
-       // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
+        {     g_log.error() << "The projections are coplanar. Will use defaults [1,0,0],[0,1,0] and [0,0,1]" << std::endl;     }
 
+       // otherwise input uv are ignored -> later it can be modified to set ub matrix if no given, but this may overcomplicate things. 
 
         // check if we are working in powder mode
         // set up target coordinate system and identify/set the (multi) dimension's names to use
          targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convertTo_);           
     }
-    else // user input is mainly ignored and everything is in old workspac
+    else // user input is mainly ignored and everything is in old MD workspace
     {  
-
         // dimensions are already build, so build MDWS description from existing workspace
         MDEvents::MDWSDescription oldWSDescr;
         oldWSDescr.buildFromMDWS(spws);
@@ -312,8 +306,7 @@ bool ConvertToMD::buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,cons
         // reset new ws description name
         targWSDescr =oldWSDescr;
        // set up target coordinate system
-        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convertTo_);
-    
+        targWSDescr.m_RotMatrix = MsliceProj.getTransfMatrix(targWSDescr,convertTo_);   
     }
     return createNewTargetWs;
 }
@@ -373,7 +366,7 @@ bool ConvertToMD::doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws)
   }
   return createNewWs;
 }
-/**The method responsible for preprocessing detectors positions into reciprocal space  
+/**The method responsible for analyzing input workspace parameters and preprocessing detectors positions into reciprocal space  
   *@param InWS2D -- input Matrix workspace with defined instrument 
   *
   *@returns TableWorkspace_const_sptr the pointer to the table workspace which contains positions of the preprocessed detectors
