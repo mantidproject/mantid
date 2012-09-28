@@ -2,6 +2,7 @@
 #define MANTID_MDEVENTS_WS_DESCRIPTION_H
 
 
+#include "MantidKernel/PropertyManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
@@ -51,7 +52,7 @@ namespace MDEvents
 
 
 /// helper class describes the properties of target MD workspace, which should be obtained as the result of conversion algorithm. 
-class DLLExport MDWSDescription
+class DLLExport MDWSDescription : public Kernel::PropertyManager
 {
 public:  // for the time being
     /// the string which describes subalgorithm, used to convert source ws to target MD ws. At the moment, it coinsides with Q-mode
