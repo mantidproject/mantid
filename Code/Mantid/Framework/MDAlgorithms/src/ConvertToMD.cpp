@@ -128,10 +128,11 @@ ConvertToMD::init()
     // this property is mainly for subalgorithms to set-up as they have to identify if they use the same instrument. 
     declareProperty(new PropertyWithValue<std::string>("PreprocDetectorsWS","PreprocessedDetectorsWS",Direction::Input), 
       "The name of the table workspace where the part of the detectors transformation into reciprocal space, calculated by [[PreprocessDetectorsToMD]] algorithm stored.\n"
-      "If the workspace is not found in analysis data service, [[PreprocessDetectorsToMD]] used to calculate it. If found, the algorithm will use the workspace from DS\n"
-      "Useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
-      "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another. </span>\n"
-      "In this case this property has to be set empty and the workspace will be recalculated inernaly each time the algorithm is invoked"); 
+      "If the workspace is not found in analysis data service, [[PreprocessDetectorsToMD]]  used to calculate it. If found, the algorithm will use existing workspace.\n"
+      "The field is useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
+      "<span style=""color:#FF0000""> Dangerous if one uses number of workspaces with modified derived instrument one after another.  </span>\n"
+       "In this case this property has to be set to ""-"" sting (without quotes) or empty (possible from script only) to force\n"
+       "the workspace recalculation each time the algorithm is invoked");
     // if one needs to use Lorentz corrections
     declareProperty(new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input), 
         "Correct the weights of events or signals and errors transformed into reciprocal space by multiplying them by the Lorentz multiplier: sin(theta)^2/lambda^4.\n"
@@ -180,11 +181,11 @@ void ConvertToMD::exec()
   // initiate class which would deal with any dimension workspaces requested by algorithm parameters
   if(!m_OutWSWrapper) m_OutWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
 
-  // -------- get Input workspace
-   m_InWS2D = getProperty("InputWorkspace");
+   // -------- get Input workspace
+    m_InWS2D = getProperty("InputWorkspace");
    
-   // get the output workspace
-   API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
+    // get the output workspace
+    API::IMDEventWorkspace_sptr spws = getProperty("OutputWorkspace");
   
   // Collect and Analyze the requests to the job, specified by the input parameters:
     //a) Q selector:

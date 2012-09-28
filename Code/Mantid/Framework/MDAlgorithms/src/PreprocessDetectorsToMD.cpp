@@ -53,15 +53,15 @@ namespace Mantid
 
 
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Kernel::Direction::Input,ws_valid),
-        "An input Matrix Workspace with instrument");
+        "Name of an input Matrix Workspace with instrument.");
 
       declareProperty(new WorkspaceProperty<TableWorkspace>("OutputWorkspace","",Kernel::Direction::Output),
-        "Name of the output Table workspace with preprocessed detectors data. If the workspace exists, it will be replaced");
+        "Name of the output Table workspace with preprocessed detectors data. If the workspace exists, it will be replaced.");
 
       declareProperty(new Kernel::PropertyWithValue<bool>("GetEFixed",false,Kernel::Direction::Input),
-        "This option make sence for Indirect instruments only. \n"
-        "If selected, the column, which corresponds to each detector's fixed energy will be added to resulting table workspace\n"
-        "The algorithm will work for any other instrument, but the fixed energies would not have much meaning.");
+        "This option makes sense for Indirect instrument, where each detector can have its own energy, defined by correspondent crystal-analyser position.\n"
+        "If this option is selected for other instrument types, the value of eFixed is taken from workspace property ""Ei"" or ""eFixed"" if ""Ei""\n"
+        "is missing and is set to NaN if no such properties are defined on the input workspace.");
 
       //declareProperty(new PropertyWithValue<bool>("FakeDetectors",false,Kernel::Direction::Input),
       //  "If selected, generates table workspace with fake detectors, all allocated in a monitor position.\n"
