@@ -51,7 +51,7 @@ namespace Mantid
       void exec();
       API::Workspace_sptr loadInputData(const std::string prop,
           const bool mustLoad=true);
-      API::MatrixWorkspace_sptr loadGroupingFile();
+      API::MatrixWorkspace_sptr loadGroupingFile(const std::string prop);
       API::MatrixWorkspace_sptr loadHardMask();
 
       boost::shared_ptr<Kernel::PropertyManager> reductionManager;

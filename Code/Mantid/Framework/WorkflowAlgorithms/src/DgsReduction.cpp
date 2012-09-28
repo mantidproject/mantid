@@ -304,17 +304,29 @@ namespace Mantid
       std::string absUnitsCorr = "Absolute Units Correction";
       this->declareProperty("DoAbsoluteUnits", false,
           "If true, perform an absolute units normalisation.");
-      this->declareProperty("AbsUnitsVanadium" "",
-          "The vanadium file used as the sample in the absolute units normalisation.");
-      this->setPropertySettings("AbsUnitsVanadium",
+      this->declareProperty(new FileProperty("AbsUnitsSampleInputFile", "",
+          FileProperty::OptionalLoad),
+          "The sample (vanadium) file used in the absolute units normalisation.");
+      this->setPropertySettings("AbsUnitsSampleInputFile",
+          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      this->declareProperty(new WorkspaceProperty<>("AbsUnitsSampleInputWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "The sample (vanadium) workspace for absolute units normalisation.");
+      this->setPropertySettings("AbsUnitsSampleInputWorkspace",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
       this->declareProperty("AbsUnitsGroupingFile", "",
           "Grouping file for absolute units normalisation.");
       this->setPropertySettings("AbsUnitsGroupingFile",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
-      this->declareProperty("AbsUnitsDetectorVanadium", "",
+      this->declareProperty(new FileProperty("AbsUnitsDetectorVanadiumInputFile",
+          "", FileProperty::OptionalLoad),
           "The detector vanadium file used in the absolute units normalisation.");
-      this->setPropertySettings("AbsUnitsDetectorVanadium",
+      this->setPropertySettings("AbsUnitsDetectorVanadiumInputFile",
+          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      this->declareProperty(new WorkspaceProperty<>("AbsUnitsDetectorVanadiumInputWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "The detector vanadium workspace for absolute units normalisation.");
+      this->setPropertySettings("AbsUnitsDetectorVanadiumInputWorkspace",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
       this->declareProperty("AbsUnitsIncidentEnergy", EMPTY_DBL(), mustBePositive,
           "The incident energy for the vanadium sample.");
@@ -339,9 +351,11 @@ namespace Mantid
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
 
       this->setPropertyGroup("DoAbsoluteUnits", absUnitsCorr);
-      this->setPropertyGroup("AbsUnitsVanadium", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsSampleInputFile", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsSampleInputWorkspace", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsGroupingFile", absUnitsCorr);
-      this->setPropertyGroup("AbsUnitsDetectorVanadium", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsDetectorVanadiumInputFile", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsDetectorVanadiumInputWorkspace", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsIncidentEnergy", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsMinimumEnergy", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsMaximumEnergy", absUnitsCorr);
@@ -476,9 +490,10 @@ namespace Mantid
       }
     }
 
-    MatrixWorkspace_sptr DgsReduction::loadGroupingFile()
+    MatrixWorkspace_sptr DgsReduction::loadGroupingFile(const std::string prop)
     {
-      const std::string groupFile = this->getProperty("GroupingFile");
+      const std::string propName = prop + "GroupingFile";
+      const std::string groupFile = this->getProperty(propName);
       std::string groupingWsName;
       if (groupFile.empty())
       {
@@ -488,7 +503,7 @@ namespace Mantid
       {
         try
         {
-          groupingWsName = "grouping";
+          groupingWsName = prop + "Grouping";
           IAlgorithm_sptr loadGrpFile = this->createSubAlgorithm("LoadDetectorsGroupingFile");
           loadGrpFile->setAlwaysStoreInADS(true);
           loadGrpFile->setProperty("InputFile", groupFile);
@@ -501,7 +516,8 @@ namespace Mantid
           // This must be an old format grouping file.
           // Set a property to use later.
           g_log.warning() << "Old format grouping file in use." << std::endl;
-          this->reductionManager->declareProperty(new PropertyWithValue<std::string>("OldGroupingFilename", groupFile));
+          this->reductionManager->declareProperty(new PropertyWithValue<std::string>(
+              prop + "OldGroupingFilename", groupFile));
           return boost::shared_ptr<MatrixWorkspace>();
         }
       }
@@ -559,7 +575,7 @@ namespace Mantid
       // Load the hard mask if available
       MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
       // Load the grouping file if available
-      MatrixWorkspace_sptr groupingWS = this->loadGroupingFile();
+      MatrixWorkspace_sptr groupingWS = this->loadGroupingFile("");
 
       // This will be diagnostic mask if DgsDiagnose is run and hard mask if not.
       MatrixWorkspace_sptr maskWS;
@@ -633,6 +649,106 @@ namespace Mantid
       etConv->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
       etConv->executeAsSubAlg();
       outputWS = etConv->getProperty("OutputWorkspace");
+
+      // Perform absolute normalisation if necessary
+      Workspace_sptr absSampleWS = this->loadInputData("AbsUnitsSample", false);
+      if (absSampleWS)
+      {
+        MatrixWorkspace_sptr absUnitsWS;
+        MatrixWorkspace_sptr absGroupingWS = this->loadGroupingFile("AbsUnits");
+
+        // Process absolute units detector vanadium if necessary
+        Workspace_sptr absDetVanWS = this->loadInputData("AbsUnitsDetectorVanadium", false);
+        Workspace_sptr absIdetVanWS;
+        if (absDetVanWS)
+        {
+          std::string idetVanName = absDetVanWS->getName() + "_idetvan";
+          detVan->setProperty("InputWorkspace", absDetVanWS);
+          detVan->setProperty("OutputWorkspace", idetVanName);
+          if (maskWS)
+          {
+            detVan->setProperty("MaskWorkspace", maskWS);
+          }
+          if (absGroupingWS)
+          {
+            detVan->setProperty("GroupingWorkspace", absGroupingWS);
+          }
+          detVan->executeAsSubAlg();
+          MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
+          absIdetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
+        }
+        else
+        {
+          absIdetVanWS = absDetVanWS;
+        }
+
+        const std::string absWsName = absSampleWS->getName() + "_absunits";
+        etConv->setProperty("InputWorkspace", absSampleWS);
+        etConv->setProperty("OutputWorkspace", absWsName);
+        etConv->setProperty("IntegratedDetectorVanadium", absIdetVanWS);
+        etConv->executeAsSubAlg();
+        absUnitsWS = etConv->getProperty("OutputWorkspace");
+
+        const double vanadiumMass = this->getProperty("VanadiumMass");
+        const double vanadiumRmm = absUnitsWS->getInstrument()->getNumberParameter("vanadium-rmm")[0];
+
+        absUnitsWS /= (vanadiumMass / vanadiumRmm);
+
+        // Set integration range for absolute units sample
+        double eMin = this->getProperty("AbsUnitsMinimumEnergy");
+        double eMax = this->getProperty("AbsUnitsMaximumEnergy");
+        std::vector<double> params;
+        params.push_back(eMin);
+        params.push_back(eMax - eMin);
+        params.push_back(eMax);
+
+        IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+        rebin->setProperty("InputWorkspace", absUnitsWS);
+        rebin->setProperty("OutputWorkspace", absUnitsWS);
+        rebin->setProperty("Params", params);
+        rebin->executeAsSubAlg();
+        absUnitsWS = rebin->getProperty("OutputWorkspace");
+
+        IAlgorithm_sptr cToMWs = this->createSubAlgorithm("ConvertToMatrixWorkspace");
+        cToMWs->setProperty("InputWorkspace", absUnitsWS);
+        cToMWs->setProperty("OutputWorkspace", absUnitsWS);
+        absUnitsWS = cToMWs->getProperty("OutputWorkspace");
+
+        // TODO: Need to run diagnostics
+
+        // TODO: Mask the detectors
+
+        IAlgorithm_sptr cFrmDist = this->createSubAlgorithm("ConvertFromDistribution");
+        cFrmDist->setProperty("Workspace", absUnitsWS);
+        cFrmDist->executeAsSubAlg();
+        absUnitsWS = cFrmDist->getProperty("Workspace");
+
+        // TODO: Calculate weighted average of integrated spectra
+
+        // If the absolute units detector vanadium is used, do extra correction.
+        if (!absIdetVanWS)
+        {
+          Property *prop = absUnitsWS.get()->run().getProperty("Ei");
+          const double ei = boost::lexical_cast<double>(prop->value());
+          double xsection = 0.0;
+          if (200.0 <= ei)
+          {
+            xsection = 420.0;
+          }
+          else
+          {
+            xsection = 400.0 + (ei / 10.0);
+          }
+          absUnitsWS /= xsection;
+          const double sampleMass = this->getProperty("SampleMass");
+          const double sampleRmm = this->getProperty("SampleRmm");
+          absUnitsWS *= (sampleMass / sampleRmm);
+        }
+
+        // TODO: Mask detectors from abs units onto sample before division
+
+        outputWS /= absUnitsWS;
+      }
 
       this->setProperty("OutputWorkspace", outputWS);
     }
