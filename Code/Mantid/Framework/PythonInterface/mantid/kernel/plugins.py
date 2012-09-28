@@ -11,10 +11,12 @@ from mantid.kernel import logger, Logger, ConfigService
 
 class PluginLoader(object):
 
+    extension = ".py"
+
     def __init__(self, filepath):
         if not _os.path.isfile(filepath):
             raise ValueError("PluginLoader expects a single filename. '%s' does not point to an existing file" % filepath)
-        if not filepath.endswith('.py'):
+        if not filepath.endswith(self.extension):
             raise ValueError("PluginLoader expects a filename ending with .py. '%s' does not have a .py extension" % filepath)
         self._filepath = filepath
         self._logger = Logger.get("PluginLoader")
@@ -32,6 +34,22 @@ class PluginLoader(object):
         name = _os.path.splitext(name)[0]
         self._logger.debug("Loading python plugin %s" % pathname)
         return _imp.load_source(name, pathname)
+
+#======================================================================================================================
+
+def find_plugins(top_dir):
+    """
+       Searches recursively from the given directory to find the list of plugins that should be loaded
+    """
+    if not _os.path.isdir(top_dir):
+        raise ValueError("Cannot search given path for plugins, path is not a directory: %s " % str(top_dir))
+    plugins = []
+    for root, dirs, files in _os.walk(top_dir):
+        for f in files:
+            if f.endswith(PluginLoader.extension):
+                plugins.append(_os.path.join(root, f))
+    
+    return plugins
 
 #======================================================================================================================
 
@@ -55,19 +73,30 @@ def load(path):
 
     loaded = []
     if type(path) == list:
-        for p in path: 
-            loaded += load(p)
-    elif _os.path.isfile(path) and path.endswith('.py'): # Single file
-        try:
-            if contains_newapi_algorithm(path):
-                name, module = load_plugin(path)
-                loaded.append(module)
-        except Exception, exc:
-            logger.warning("Failed to load plugin %s. Error: %s" % (path, str(exc)))
+        loaded += load_from_list(path)
+    elif _os.path.isfile(path) and path.endswith(PluginLoader.extension): # Single file
+        loaded += load_from_file(path)
     elif _os.path.isdir(path):
         loaded += load_from_dir(path)
     else:
         raise RuntimeError("Unknown type of path found when trying to load plugins: '%s'" % str(path))
+    
+    return loaded
+
+#======================================================================================================================
+
+def load_from_list(paths):
+    """
+        Load all modules in the given list
+        
+        @param paths :: A list of filenames to load
+    """
+    loaded = []
+    for p in paths:
+        try:
+            loaded += load(p)
+        except RuntimeError:
+            continue
 
     return loaded
 
@@ -79,14 +108,28 @@ def load_from_dir(directory):
         
         @param directory :: A path that must point to a directory
     """
-    if not _os.path.isdir(directory):
-        raise RuntimeError("The path given does not point to an existing directory")
+    plugins = find_plugins(directory)
     loaded = []
-    for root, dirs, files in _os.walk(directory):
-        for f in files:
-            if f.endswith(".py"):
-                filename = _os.path.join(root, f)
-                loaded += load(filename)
+    for filepath in plugins:
+        loaded += load(filepath)
+
+    return loaded
+
+#======================================================================================================================
+
+def load_from_file(filepath):
+    """
+        If the algorithm is a new API algorithm then load it
+        
+        @param filepath :: A path that must point to a file
+    """
+    loaded = []
+    try:
+        if contains_newapi_algorithm(filepath):
+            name, module = load_plugin(filepath)
+            loaded.append(module)
+    except Exception, exc:
+        logger.warning("Failed to load plugin %s. Error: %s" % (filepath, str(exc)))
 
     return loaded
 
@@ -132,9 +175,8 @@ def contains_newapi_algorithm(filename):
     """
         Inspects the given file to check whether
         it contains an algorithm written with this API.
-        The check is simple. If either the import
-        MantidFramework or mantidsimple are discovered then
-        it will not be considered a new API algorithm
+        The check is simple. If registerPyAlgorithm is
+        discovered then it will not be considered a new API algorithm
         
         @param filename :: A full file path pointing to a python file
         @returns True if a python algorithm written with the new API

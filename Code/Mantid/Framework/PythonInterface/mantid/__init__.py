@@ -83,11 +83,16 @@ import simpleapi as _simpleapi
 from kernel import plugins as _plugins
 
 plugin_dirs = kernel.config['pythonalgorithms.directories'].split(";")
+plugin_files = []
+for directory in plugin_dirs:
+    plugin_files += _plugins.find_plugins(directory)
 
-_simpleapi.mockup(plugin_dirs)
-modules = _plugins.load(plugin_dirs)
-# Now everything is loaded create the proper definitions in the module
+# Mockup the full API first so that any Python algorithm module has something to import
+_simpleapi.mockup(plugin_files)
+# Now actually load the Python plugins
+plugin_modules = _plugins.load(plugin_files)
+# Create the proper definitions in the module
 new_attrs = _simpleapi.translate()
 # Finally, overwrite the mocked function definitions in the loaded modules with the real ones 
-_plugins.sync_attrs(_simpleapi, new_attrs, modules)
+_plugins.sync_attrs(_simpleapi, new_attrs, plugin_modules)
 ################################################################################

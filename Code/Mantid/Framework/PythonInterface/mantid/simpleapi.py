@@ -614,10 +614,10 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
 
 #==============================================================================
 
-def mockup(directories):
+def mockup(plugins):
     """
         Creates fake, error-raising functions for all loaded algorithms plus
-        any python algorithms in the given directories. 
+        any plugins given. 
         The function name for the Python algorithms are taken from the filename 
         so this mechanism requires the algorithm name to match the filename.
         
@@ -631,36 +631,34 @@ def mockup(directories):
         function definitions can overwrite the "fake" ones. 
     """
     #--------------------------------------------------------------------------------------------------------
+    def create_fake_function(name):
+        """Create fake functions for the given name
+        """
+        #------------------------------------------------------------------------------------------------
+        def fake_function(*args, **kwargs):
+            raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
+                               " This is an error in the core setup logic of the mantid module, please contact the development team.")
+        #------------------------------------------------------------------------------------------------
+        if "." in name:
+            name = name.rstrip('.py')
+        if specialization_exists(name):
+            return
+        fake_function.__name__ = name
+        f = fake_function.func_code
+        c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, f.co_consts, f.co_names,\
+                      ("", ""), f.co_filename, f.co_name, f.co_firstlineno, f.co_lnotab, f.co_freevars)
+        # Replace the code object of the wrapper function
+        fake_function.func_code = c
+        globals()[name] = fake_function
+    #--------------------------------------------------------------------------------------------------------
     def create_fake_functions(alg_names):
         """Create fake functions for all of the listed names
         """
         #----------------------------------------------------------------------------------------------------
-        def create_fake(name):
-            """Create fake functions for the given name
-            """
-            #------------------------------------------------------------------------------------------------
-            def fake_function(*args, **kwargs):
-                raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
-                                   " This is an error in the core setup logic of the mantid module, please contact the development team.")
-            #------------------------------------------------------------------------------------------------
-            if "." in name:
-                if name.endswith('.py'):
-                    name = name.rstrip('.py')
-                else:
-                    return
-            if specialization_exists(name):
-                return
-            fake_function.__name__ = name
-            f = fake_function.func_code
-            c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, f.co_consts, f.co_names,\
-                          ("", ""), f.co_filename, f.co_name, f.co_firstlineno, f.co_lnotab, f.co_freevars)
-            # Replace the code object of the wrapper function
-            fake_function.func_code = c
-            globals()[name] = fake_function
-        #----------------------------------------------------------------------------------------------------
         for alg_name in alg_names:
-            create_fake(alg_name)
+            create_fake_function(alg_name)
     #--------------------------------------------------------------------------------------------------------
+
     # Start with the loaded C++ algorithms
     from api import AlgorithmFactory
     import os
@@ -668,11 +666,10 @@ def mockup(directories):
     create_fake_functions(cppalgs.keys())
     
     # Now the plugins
-    if type(directories) != list:
-        directories = [directories]
-    for top_dir in directories:
-        for root, dirs, filenames in os.walk(top_dir):
-            create_fake_functions(filenames)
+    for plugin in plugins:
+        name = os.path.basename(plugin)
+        name = os.path.splitext(name)[0]
+        create_fake_function(name)
 
 #==============================================================================
 
