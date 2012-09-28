@@ -197,8 +197,8 @@ class %(name)s(PythonAlgorithm):
         
 registerAlgorithm(%(name)s)
 """
-        name1 = "TemporaryPythonAlgorithm1"
-        name2 = "TemporaryPythonAlgorithm2"
+        name1 = "SimpleAPIPythonAlgorithm1"
+        name2 = "SimpleAPIPythonAlgorithm2"
         src1 = src % {"name":name1,"execline1":name2+"()","execline2":"api."+name2+"()"}
         src2 = src % {"name":name2,"execline1":"pass","execline2":"pass"}
         a = TemporaryPythonAlgorithm(name1,src1)

@@ -108,8 +108,8 @@ class %(name)s(PythonAlgorithm):
         
 mtd.registerPyAlgorithm(%(name)s())
 """
-        name1 = "TemporaryPythonAlgorithm1"
-        name2 = "TemporaryPythonAlgorithm2"
+        name1 = "MantidSimplePythonAlgorithm1"
+        name2 = "MantidSimplePythonAlgorithm2"
         src1 = src % {"name":name1,"execline":name2+"()"}
         src2 = src % {"name":name2,"execline":"pass"}
         a = TemporaryPythonAlgorithm(name1,src1)
