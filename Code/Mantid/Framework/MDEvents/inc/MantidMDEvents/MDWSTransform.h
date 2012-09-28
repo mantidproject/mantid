@@ -88,7 +88,7 @@ private:
    bool v3DIsDefault(const std::vector<double> &vect,const std::string &message)const;
 protected: // for testing
   /// function generates "Kind of" W transformation matrix for different Q-conversion modes;
-   Kernel::DblMatrix buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling scaling)const;
+   Kernel::DblMatrix buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling scaling,bool UnitUB=false)const;
    /// build orthogonal coordinate around two input vecotors u and v expressed in rlu;
    //std::vector<Kernel::V3D> buildOrtho3D(const Kernel::DblMatrix &BM,const Kernel::V3D &u, const Kernel::V3D &v)const;
 

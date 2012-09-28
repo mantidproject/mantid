@@ -27,7 +27,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
 {
 
   Kernel::Matrix<double> mat(3,3,true);
-  Kernel::Matrix<double> ub;
+  //Kernel::Matrix<double> ub;
 
   bool powderMode = TargWSDescription.isPowder();
 
@@ -45,26 +45,32 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
   }
   //
   if(has_lattice)
-  {
-
     TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID);
-    // Obtain the transformation matrix to Cartezian related to Crystal
-    mat = TargWSDescription.m_GoniomMatr*TargWSDescription.m_Wtransf;
-    // and this is the transformation matrix to notional
-    //mat = gon*Latt.getUB();
-    mat.Invert();
-  }
+  else // goniometer is still present, so the transformation to sample frame
+       TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,NoScaling,true);
 
+  // Obtain the transformation matrix to Cartezian related to Crystal
+   mat = TargWSDescription.m_GoniomMatr*TargWSDescription.m_Wtransf;
+   // and this is the transformation matrix to notional
+   //mat = gon*Latt.getUB();
+   mat.Invert();
 
   std::vector<double> rotMat = mat.getVector();
+  g_Log.debug()<<" *********** Q-transformation matrix ***********************\n";
+  g_Log.debug()<<"***     *qx         !     *qy         !     *qz           !\n";
+  g_Log.debug()<<"q1= "<<rotMat[0]<<" ! "<<rotMat[1]<<" ! "<<rotMat[2]<<" !\n";
+  g_Log.debug()<<"q2= "<<rotMat[2]<<" ! "<<rotMat[3]<<" ! "<<rotMat[4]<<" !\n";
+  g_Log.debug()<<"q3= "<<rotMat[5]<<" ! "<<rotMat[6]<<" ! "<<rotMat[7]<<" !\n";
+  g_Log.debug()<<" *********** *********************** ***********************\n";
   return rotMat;
 }
-
-
-Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling ScaleID)const
+/**
+ Method builds transfomration Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs
+*/
+Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling ScaleID,bool UnitUB)const
 {
-  //implements strategy Q=R*U*B*W*h where W-transf is W or WB or W*Unit*Lattice_param depending on inputs:
-  if(!TargWSDescription.hasLattice()){      
+  //implements strategy 
+  if(!(TargWSDescription.hasLattice()||UnitUB)){      
     throw(std::invalid_argument("this funcntion should be called only on workspace with defined oriented lattice"));
   }
 
@@ -95,7 +101,12 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
         Wmat[i][j]=dim_directions[j][i];
   }
   Kernel::DblMatrix Scale(3,3,true);
-  boost::shared_ptr<Geometry::OrientedLattice> spLatt = TargWSDescription.getLattice();
+  boost::shared_ptr<Geometry::OrientedLattice> spLatt;
+  if(UnitUB)
+    spLatt = boost::shared_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(1,1,1));
+  else
+    spLatt= TargWSDescription.getLattice();
+
   switch (ScaleID)
   {
   case NoScaling:    //< momentums in A^-1
