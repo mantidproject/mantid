@@ -332,7 +332,7 @@ DECLARE_DEFAULTRETURN(PyAlgorithmBase*, NULL)
 class PyAlgorithmWrapper : public PyAlgorithmBase, public boost::python::wrapper<PyAlgorithmBase>
 {
 public:
-  ///Overridden name method
+  ///Overridden name method. Cannot be overridden in Python
   const std::string name() const; 
   ///Overridden version method
   int version() const ;

@@ -15,18 +15,9 @@ namespace Mantid
     using Environment::CallMethod_NoArg;
 
     /**
-     * Returns the name of the algorithm. If not overridden
-     * it returns the class name
+     * Returns the name of the algorithm. This cannot be overridden in Python.
      */
     const std::string AlgorithmWrapper::name() const
-    {
-      return CallMethod_NoArg<std::string>::dispatchWithDefaultReturn(getSelf(), "name", defaultName());
-    }
-
-    /**
-     * Returns the base class version of name
-     */
-    const std::string AlgorithmWrapper::defaultName() const
     {
       return std::string(getSelf()->ob_type->tp_name);
     }

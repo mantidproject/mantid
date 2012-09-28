@@ -7,11 +7,11 @@ Scales either the LHS or RHS workspace by some scale factor which, can be manual
 Calculates the weighted mean values in the overlap region and then combines the overlap region with the difference of the LHS and RHS workspaces
 
 *WIKI*"""
-
 import mantid.simpleapi as api
 
 from mantid.api import *
 from mantid.kernel import *
+
 import numpy as np
 import math
 
@@ -87,7 +87,7 @@ class Stitch1D(PythonAlgorithm):
             signals[index] = ws.signalAt(index)
             errors[index] = ws.errorSquaredAt(index)
         errors = np.sqrt(errors)
-        
+
         one_d_workspace = api.CreateMDHistoWorkspace(SignalInput=signals,ErrorInput=errors,Dimensionality=1,Extents=[q_low, q_high],NumberOfBins=[nbins],Names=[dim.getName()],Units=[dim.getUnits()])
         result = api.RenameWorkspace(InputWorkspace=one_d_workspace, OutputWorkspace=ws.name() + "_one_d")
         return result
@@ -139,9 +139,6 @@ class Stitch1D(PythonAlgorithm):
        
     def category(self):
         return "PythonAlgorithms;;Reflectometry\\ISIS"
-    
-    def name(self):
-        return "Stitch1D"
     
     def PyInit(self):
         self.declareProperty(IMDHistoWorkspaceProperty("Workspace1", "", Direction.Input), "Input MD Histo Workspace")

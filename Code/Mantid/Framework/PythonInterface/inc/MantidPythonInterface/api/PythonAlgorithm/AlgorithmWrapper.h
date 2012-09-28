@@ -45,9 +45,7 @@ namespace Mantid
     {
     public:
       /// Returns the name of the algorithm
-      virtual const std::string name() const;
-      /// A default version, chosen if no override exists
-      const std::string defaultName() const;
+      const std::string name() const;
 
       /// Returns a version of the algorithm
       virtual int version() const;

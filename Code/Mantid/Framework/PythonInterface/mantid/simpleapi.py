@@ -19,8 +19,8 @@
     and assign it to the rebinned variable
     
 """
-import api
-import kernel
+import api as _api
+import kernel as _kernel
 from kernel import funcreturns as _funcreturns
 from api import AnalysisDataService as _ads
 from api import FrameworkManager as _framework
@@ -291,7 +291,7 @@ def _is_workspace_property(prop):
         @param prop - A property object
         @returns True if the property is considered to be of type workspace
     """
-    if isinstance(prop, api.IWorkspaceProperty):
+    if isinstance(prop, _api.IWorkspaceProperty):
         return True
     if 'Workspace' in prop.name: return True
     # Doesn't look like a workspace property
@@ -431,7 +431,7 @@ def _set_properties(alg_object, *args, **kwargs):
         value = kwargs[key]
         # Anything stored in the ADS must be set by string value
         # if it is not a child algorithm. 
-        if (not alg_object.isChild()) and isinstance(value, kernel.DataItem):
+        if (not alg_object.isChild()) and isinstance(value, _kernel.DataItem):
             alg_object.setPropertyValue(key, value.name())
         else:
             alg_object.setProperty(key, value)
@@ -536,10 +536,10 @@ def _set_properties_dialog(algm_object, *args, **kwargs):
         if isinstance(value, numpy.ndarray):
             value = list(value) # Temp until more complete solution available (#2340)
         if isinstance(value, list) or \
-           isinstance(value, kernel.std_vector_dbl) or \
-           isinstance(value, kernel.std_vector_int) or \
-           isinstance(value, kernel.std_vector_long) or \
-           isinstance(value, kernel.std_vector_size_t):
+           isinstance(value, _kernel.std_vector_dbl) or \
+           isinstance(value, _kernel.std_vector_int) or \
+           isinstance(value, _kernel.std_vector_long) or \
+           isinstance(value, _kernel.std_vector_size_t):
             return str(value).lstrip('[').rstrip(']')
         elif isinstance(value, tuple):
             return str(value).lstrip('(').rstrip(')')
@@ -612,7 +612,67 @@ def create_algorithm_dialog(algorithm, version, _algm_object):
         if len(alias)>0:
             globals()["%sDialog" % alias] = algorithm_wrapper
 
+#==============================================================================
 
+def mockup(directories):
+    """
+        Creates fake, error-raising functions for all loaded algorithms plus
+        any python algorithms in the given directories. 
+        The function name for the Python algorithms are taken from the filename 
+        so this mechanism requires the algorithm name to match the filename.
+        
+        This mechanism solves the "chicken-and-egg" problem with Python algorithms trying
+        to use other Python algorithms through the simple API functions. The issue
+        occurs when a python algorithm tries to import the simple API function of another
+        Python algorithm that has not been loaded yet, usually when it is further along
+        in the alphabet. The first algorithm stops with an import error as that function
+        is not yet known. By having a pre-loading step all of the necessary functions
+        on this module can be created and after the plugins are loaded the correct
+        function definitions can overwrite the "fake" ones. 
+    """
+    #--------------------------------------------------------------------------------------------------------
+    def create_fake_functions(alg_names):
+        """Create fake functions for all of the listed names
+        """
+        #----------------------------------------------------------------------------------------------------
+        def create_fake(name):
+            """Create fake functions for the given name
+            """
+            #------------------------------------------------------------------------------------------------
+            def fake_function(*args, **kwargs):
+                raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
+                                   " This is an error in the core setup logic of the mantid module, please contact the development team.")
+            #------------------------------------------------------------------------------------------------
+            if "." in name:
+                if name.endswith('.py'):
+                    name = name.rstrip('.py')
+                else:
+                    return
+            if specialization_exists(name):
+                return
+            fake_function.__name__ = name
+            f = fake_function.func_code
+            c = f.__new__(f.__class__, f.co_argcount, f.co_nlocals, f.co_stacksize, f.co_flags, f.co_code, f.co_consts, f.co_names,\
+                          ("", ""), f.co_filename, f.co_name, f.co_firstlineno, f.co_lnotab, f.co_freevars)
+            # Replace the code object of the wrapper function
+            fake_function.func_code = c
+            globals()[name] = fake_function
+        #----------------------------------------------------------------------------------------------------
+        for alg_name in alg_names:
+            create_fake(alg_name)
+    #--------------------------------------------------------------------------------------------------------
+    # Start with the loaded C++ algorithms
+    from api import AlgorithmFactory
+    import os
+    cppalgs = AlgorithmFactory.getRegisteredAlgorithms(True)
+    create_fake_functions(cppalgs.keys())
+    
+    # Now the plugins
+    if type(directories) != list:
+        directories = [directories]
+    for top_dir in directories:
+        for root, dirs, filenames in os.walk(top_dir):
+            create_fake_functions(filenames)
 
 #==============================================================================
 
@@ -620,9 +680,12 @@ def translate():
     """
         Loop through the algorithms and register a function call 
         for each of them
+        
+        @returns a list of new function calls
     """
     from api import AlgorithmFactory, AlgorithmManager
-     
+    
+    new_functions = []
     algs = AlgorithmFactory.getRegisteredAlgorithms(True)
     algorithm_mgr = AlgorithmManager
     for name, versions in algs.iteritems():
@@ -636,33 +699,7 @@ def translate():
             continue
         create_algorithm(name, max(versions), _algm_object)
         create_algorithm_dialog(name, max(versions), _algm_object)
-
-def mockout_api():
-    """
-        Creates fake, error-raising functions for all currently loaded algorithm
-        plugins, including Python algorithms.
-    """
-    def create_fake_function(plugins):
-        def fake_function(*args, **kwargs):
-            raise RuntimeError("Mantid import error. The mock simple API functions have not been replaced!" +
-                               " This is an error in the core setup logic of the mantid module, please contact the development team.")
-        
-        for name in plugins:
-                if name.endswith('.py'):
-                    name = name.rstrip('.py')
-                if specialization_exists(name):
-                    continue
-                fake_function.__name__ = name
-                if name not in globals():
-                    globals()[name] = fake_function
-    #
-    from api import AlgorithmFactory
-    import os
-    cppalgs = AlgorithmFactory.getRegisteredAlgorithms(True)
-    create_fake_function(cppalgs.keys())
+        new_functions.append(name)
     
-    directories = kernel.config["pythonalgorithms.directories"].split(';')
-    for top_dir in directories:
-        for root, dirs, files in os.walk(top_dir):
-            create_fake_function(files)
+    return new_functions
 

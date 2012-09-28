@@ -57,6 +57,7 @@ set ( TEST_PY_FILES
   SANSWorkflowTest.py
   SimpleAPILoadTest.py
   SimpleAPIFitTest.py
+  MantidSimpleTest.py
   SettingsTest.py
   WorkspaceGroupTest.py
   WorkspaceHistoryTest.py

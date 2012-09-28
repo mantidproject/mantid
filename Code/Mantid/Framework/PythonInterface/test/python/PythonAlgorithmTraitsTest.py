@@ -19,9 +19,6 @@ class TestPyAlgDefaultAttrs(PythonAlgorithm):
 
 class TestPyAlgOverriddenAttrs(PythonAlgorithm):
     
-    def name(self):
-        return 'CoolAlgorithm'
-    
     def version(self):
         return 2
     
@@ -68,9 +65,9 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertEquals(alg.category(), "PythonAlgorithms")
 
     def test_alg_with_overridden_attrs(self):
-        testhelpers.assertRaisesNothing(self,AlgorithmManager.createUnmanaged, "CoolAlgorithm")
-        alg = AlgorithmManager.createUnmanaged("CoolAlgorithm")
-        self.assertEquals(alg.name(), "CoolAlgorithm")
+        testhelpers.assertRaisesNothing(self,AlgorithmManager.createUnmanaged, "TestPyAlgOverriddenAttrs")
+        alg = AlgorithmManager.createUnmanaged("TestPyAlgOverriddenAttrs")
+        self.assertEquals(alg.name(), "TestPyAlgOverriddenAttrs")
         self.assertEquals(alg.version(), 2)
         self.assertEquals(alg.category(), "BestAlgorithms")
 

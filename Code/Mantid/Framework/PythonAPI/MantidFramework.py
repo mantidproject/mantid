@@ -1193,10 +1193,13 @@ class MantidPyFramework(FrameworkManager):
 
         # Run through init steps 
         import mantidsimple as _mantidsimple
+        dir_list = mtd.getConfigProperty("pythonalgorithms.directories").split(';')
+        _mantidsimple.mockup(dir_list)
         pyalg_loader = PyAlgLoader()
-        pyalg_loader.load_modules(refresh=False)
-        _mantidsimple.translate() # Make sure the PythonAlgorithm functions are written
-
+        plugins = pyalg_loader.load_modules(refresh=False)
+        new_attrs = _mantidsimple.translate() # Make sure the PythonAlgorithm functions are written
+        _sync_attrs(_mantidsimple, new_attrs,plugins)
+        
         self.__is_initialized = True
 
     # Overload for the 'other' spelling
@@ -1429,12 +1432,15 @@ class PyAlgLoader(object):
             return
         # Check defined Python algorithm directories and load any modules
         changes = False
+        loaded_modules = []
         for path in dir_list:
             if path == '':
                 continue
-            if self._importAlgorithms(path, refresh):
-                changes = True
-#
+            changes, plugins = self._importAlgorithms(path, refresh)
+            loaded_modules += plugins
+        
+        return loaded_modules
+
 # ------- Private methods --------------
 #
     def _importAlgorithms(self, path, refresh):
@@ -1468,17 +1474,21 @@ class PyAlgLoader(object):
                     changes = True
                     # Cleanup system path
                     del sys.path[0]
+                    return sys.modules[modname]
             except(StandardError), exp:
                 mtd.sendLogMessage('Error: Importing module "%s" failed". %s' % (modname,str(exp)))
             except:
                 mtd.sendLogMessage('Error: Unknown error on Python algorithm module import. "%s" skipped' % modname)
 
-        # Find sub-directories     
+        # Find sub-directories
+        plugins = []
         for root, dirs, files in os.walk(path):
             for f in files:
-                _process_file(root, f)
+                loaded_module = _process_file(root, f)
+                if loaded_module is not None:
+                    plugins.append(loaded_module)
             
-        return changes
+        return changes, plugins
 
     def _containsOldAPIAlgorithm(self, modfilename):
         file = open(modfilename,'r')
@@ -1490,6 +1500,27 @@ class PyAlgLoader(object):
         file.close()
         return alg_found
 #-------------------------------------------------------------------------------------------
+def _sync_attrs(source_module, attrs, clients):
+    """
+        Syncs the attribute definitions between the 
+        given list from the source module & list of client modules such
+        that the function defintions point to the same
+        one
+        
+        @param source_module :: The module containing the "correct"
+                                definitions
+        @param attrs :: The list of attributes to change in the client modules
+        @param clients :: A list of modules whose attribute definitions
+                          should be taken from source
+    """
+    for func_name in attrs:
+        attr = getattr(source_module, func_name)
+        for plugin in clients:
+            if hasattr(plugin, func_name):
+                setattr(plugin, func_name, attr)
+
+#-------------------------------------------------------------------------------------------
+
 ##
 # PyAlgorithm class
 ##

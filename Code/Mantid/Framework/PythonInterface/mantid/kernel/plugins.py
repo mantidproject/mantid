@@ -33,6 +33,8 @@ class PluginLoader(object):
         self._logger.debug("Loading python plugin %s" % pathname)
         return _imp.load_source(name, pathname)
 
+#======================================================================================================================
+
 def load(path):
     """
         High-level function to import the module(s) on the given path. 
@@ -44,29 +46,33 @@ def load(path):
         recursively; if the path contains a list of directories then
         all files in each are loaded in turn
         
-        @return A list of the names of the loaded modules. Note this
+        @return A list of the loaded modules. Note this
         will not included modules that will have attempted to be
         reloaded but had not been changed
     """
-    loaded = {}
-    if _os.path.isfile(path) and path.endswith('.py'): # Single file
+    if ";" in path:
+        path = path.split(";")
+
+    loaded = []
+    if type(path) == list:
+        for p in path: 
+            loaded += load(p)
+    elif _os.path.isfile(path) and path.endswith('.py'): # Single file
         try:
             if contains_newapi_algorithm(path):
                 name, module = load_plugin(path)
-                loaded[name] = module
+                loaded.append(module)
         except Exception, exc:
             logger.warning("Failed to load plugin %s. Error: %s" % (path, str(exc)))
-    elif _os.path.isdir(path): # Directory
-        loaded.update(load_from_dir(path))
-    else: # a list 
-        if ';' in path:
-            path = path.split(';')
-        if type(path) is list: # Call load again for each one
-            for p in path: 
-                loaded.update(load(p))
+    elif _os.path.isdir(path):
+        loaded += load_from_dir(path)
+    else:
+        raise RuntimeError("Unknown type of path found when trying to load plugins: '%s'" % str(path))
 
     return loaded
-    
+
+#======================================================================================================================
+
 def load_from_dir(directory):
     """
         Load all modules in the given directory
@@ -75,13 +81,16 @@ def load_from_dir(directory):
     """
     if not _os.path.isdir(directory):
         raise RuntimeError("The path given does not point to an existing directory")
-    loaded = {}
+    loaded = []
     for root, dirs, files in _os.walk(directory):
         for f in files:
-            filename = _os.path.join(root, f)
-            loaded.update(load(filename))
-            
+            if f.endswith(".py"):
+                filename = _os.path.join(root, f)
+                loaded += load(filename)
+
     return loaded
+
+#======================================================================================================================
 
 def load_plugin(plugin_path):
     """
@@ -95,6 +104,29 @@ def load_plugin(plugin_path):
     loader = PluginLoader(plugin_path)
     module = loader.run()
     return module.__name__, module
+
+#======================================================================================================================
+
+def sync_attrs(source_module, attrs, clients):
+    """
+        Syncs the attribute definitions between the 
+        given list from the source module & list of client modules such
+        that the function defintions point to the same
+        one
+        
+        @param source_module :: The module containing the "correct"
+                                definitions
+        @param attrs :: The list of attributes to change in the client modules
+        @param clients :: A list of modules whose attribute definitions
+                          should be taken from source
+    """
+    for func_name in attrs:
+        attr = getattr(source_module, func_name)
+        for plugin in clients:
+            if hasattr(plugin, func_name):
+                setattr(plugin, func_name, attr)
+
+#======================================================================================================================
 
 def contains_newapi_algorithm(filename):
     """

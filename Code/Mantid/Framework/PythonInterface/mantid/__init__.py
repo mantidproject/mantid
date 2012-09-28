@@ -82,7 +82,12 @@ __version__ = kernel.version_str()
 import simpleapi as _simpleapi
 from kernel import plugins as _plugins
 
-#_simpleapi.mockout_api()
-_plugins.load(kernel.config['pythonalgorithms.directories'])
-# Now everything is loaded create the proper definitions
-_simpleapi.translate()
+plugin_dirs = kernel.config['pythonalgorithms.directories'].split(";")
+
+_simpleapi.mockup(plugin_dirs)
+modules = _plugins.load(plugin_dirs)
+# Now everything is loaded create the proper definitions in the module
+new_attrs = _simpleapi.translate()
+# Finally, overwrite the mocked function definitions in the loaded modules with the real ones 
+_plugins.sync_attrs(_simpleapi, new_attrs, modules)
+################################################################################

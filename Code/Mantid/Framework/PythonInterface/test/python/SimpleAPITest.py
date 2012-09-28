@@ -1,7 +1,38 @@
 import unittest
-import sys
 from mantid.api import AlgorithmFactory, mtd, ITableWorkspace
 import mantid.simpleapi as simpleapi
+
+import os
+import sys
+
+#======================================================================================================================
+# Helper class for test
+class TemporaryPythonAlgorithm(object):
+    """
+    Dumps the given code to a file in the Python algorithm directory
+    an removes the file in the del method
+    """
+    def __init__(self, name, code):
+        from mantid import config
+        
+        plugin_dirs = config['pythonalgorithms.directories'].split(";")
+        if len(plugin_dirs) == 0:
+            raise RuntimeError("No Python algorithm directories defined")
+        
+        self._pyfile = os.path.join(plugin_dirs[0], name + ".py")
+        alg_file = open(self._pyfile, "w")
+        alg_file.write(code)
+        alg_file.close()
+        
+    def __del__(self):
+        try:
+            os.remove(self._pyfile)
+            pycfile = self._pyfile.replace(".py",".pyc")
+            os.remove(pycfile)
+        except OSError:
+            pass
+
+#======================================================================================================================
 
 class SimpleAPITest(unittest.TestCase):
 
@@ -142,10 +173,46 @@ If false, then the workspace gets converted to a Workspace2D histogram.
         
         raw = simpleapi.LoadRaw('IRS21360.raw',SpectrumMax=1)
         raw = convert(raw)
-        # If this fails then the function above chose the name of the variabe
+        # If this fails then the function above chose the name of the variable
         # over the actual object name
         self.assertTrue('workspace' not in mtd)
+
+    def test_python_alg_can_use_other_python_alg_through_simple_api(self):
+        """
+        Runs a test in a separate process as it requires a reload of the
+        whole mantid module 
+        """
+        src = """
+from mantid.api import PythonAlgorithm, registerAlgorithm
+import mantid.simpleapi as api
+from mantid.simpleapi import *
+
+class %(name)s(PythonAlgorithm):
+
+    def PyInit(self):
+        pass
+    def PyExec(self):
+        %(execline1)s
+        %(execline2)s
         
+registerAlgorithm(%(name)s)
+"""
+        name1 = "TemporaryPythonAlgorithm1"
+        name2 = "TemporaryPythonAlgorithm2"
+        src1 = src % {"name":name1,"execline1":name2+"()","execline2":"api."+name2+"()"}
+        src2 = src % {"name":name2,"execline1":"pass","execline2":"pass"}
+        a = TemporaryPythonAlgorithm(name1,src1)
+        b = TemporaryPythonAlgorithm(name2,src2)
+        import subprocess
+        # Try to use algorithm 1 to run algorithm 2
+        cmd = sys.executable + ' -c "from mantid.simpleapi import %(name)s;%(name)s()"' % {'name':name1}
+        try:
+            subprocess.check_call(cmd,shell=True)
+        except subprocess.CalledProcessError:
+            self.fail("Error occurred running one Python algorithm from another")
+        
+        # Ensure the files are removed promptly
+        del a,b
 
 if __name__ == '__main__':
     unittest.main()
