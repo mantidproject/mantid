@@ -365,7 +365,7 @@ namespace Mantid
     {
       Mantid::Geometry::MDGeometryXMLParser sourceGeometry(m_view->getAppliedGeometryXML());
       sourceGeometry.execute();
-      return sourceGeometry.hasTDimension() && (sourceGeometry.getTDimension()->getNBins() > 1);
+      return sourceGeometry.hasTDimension();
     }
 
     std::vector<double> MDEWRebinningPresenter::getTimeStepValues() const
