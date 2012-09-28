@@ -1,44 +1,54 @@
 """*WIKI* 
+An example algorithm.
 
-
+The wiki description of the algorithm should go here.
 *WIKI*"""
-"""*WIKI* 
+from mantid.api import *
+from mantid.kernel import *
 
-*WIKI*"""
-
-from MantidFramework import *
-
+#
+# The following points are recommendations for writing Python algorithms:
+#  - The class name should match the file name; 
+#  - Each file should contain exactly one algorithm.
+#
 class Squares(PythonAlgorithm):
 
     def PyInit(self):
-        self.declareProperty("MaxRange", -1, Validator = BoundedValidator(Lower=0), Description = "A value for the end of the range(inclusive)")
-        self.declareProperty("Preamble", "", Validator = MandatoryValidator(), Description = "Optional preamble")
-        self.declareProperty("Sum", False, Description = "If True, sum the squared values")
-        self.declareFileProperty("OutputFile","", FileAction.Save, ['txt'])
-        self.declareWorkspaceProperty("OutputWorkspace", "", Direction = Direction.Output, Description = '')
+        # Integer property. IntBoundedValidator restricts values to be greater than 0
+        self.declareProperty("MaxRange", -1, validator = IntBoundedValidator(lower=0), doc = "A value for the end of the range(inclusive)")
+        # String property. StringMandatoryValidator requires that the value not be empty 
+        self.declareProperty("Preamble", "", validator = StringMandatoryValidator(), doc = "Required preamble")
+        self.declareProperty("Sum", False, doc = "If True, sum the squared values")
+        self.declareProperty(FileProperty("OutputFile","", action=FileAction.Save, extensions=['txt']))
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction = Direction.Output), "A workspace containing the squares")
         
     def PyExec(self):
-        msg = self.getProperty("Preamble")
-        endrange = self.getProperty("MaxRange")
+        msg = self.getProperty("Preamble").value # Convert to string
+        endrange = self.getProperty("MaxRange").value # Convert to int
+        do_sum = self.getProperty('Sum').value # Convert to boolean
 
         if endrange <= 0:
             raise RuntimeError('No values to use!')
 
-        wspace = WorkspaceFactory.createMatrixWorkspace(1,endrange,endrange)
-        sum = 0 
+        wspace = WorkspaceFactory.create("Workspace2D",NVectors=1,XLength=endrange,YLength=endrange)
         for i in range(1,endrange + 1):
             wspace.dataX(0)[i-1] = 1
             wspace.dataY(0)[i-1] = i*i
             wspace.dataE(0)[i-1] = i
-            sum += i*i
-        self.log().information('The sum of the squares of numbers up to ' + str(endrange) + ' is: ' + str(sum))
-            
-        self.setProperty("OutputWorkspace", wspace)
-        if self.getProperty('Sum'):
-            filename = self.getProperty("OutputFile")
-            file = open(filename,'w')
-            file.write('The sum of the squares of numbers up to ' + str(endrange) + ' is: ' + str(sum) + '\n')
+
+        self.setProperty("OutputWorkspace", wspace) # Stores the workspace as the given name
+        if do_sum:
+            sum = 0
+            for i in range(1,endrange + 1):
+                sum += i*i
+            self.log().notice('The sum of the squares of numbers up to ' + str(endrange) + ' is: ' + str(sum))
+
+
+            filename = self.getProperty("OutputFile").value # convert to a string
+            sumfile = open(filename,'w')
+            sumfile.write('The sum of the squares of numbers up to ' + str(endrange) + ' is: ' + str(sum) + '\n')
+            sumfile.close()
         
 #############################################################################################
 
-mtd.registerPyAlgorithm(Squares())
+registerAlgorithm(Squares)
