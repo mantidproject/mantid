@@ -253,9 +253,6 @@ namespace Mantid
         // What is this magic value !?!?!?!?
         backgroundIntWS *= 1.7016e8;
 
-        //this->declareProperty(new WorkspaceProperty<>("BackgoundIntWorkspace", "", Direction::Output));
-        //this->setProperty("BackgroundIntWorkspace", backgroundIntWS);
-
         // Normalise the background integral workspace
         if (dvCompWS)
         {
