@@ -61,6 +61,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 instrument = None
 
         self._instrument = instrument
+        self._facility = None
         
         # List of allowed instrument
         self._instrument_list = instrument_list
@@ -160,8 +161,16 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self._interface.destroy()
             
         self.general_settings.instrument_name = self._instrument
-        c = ConfigService()
-        self.general_settings.facility_name = str(c.facility().name())
+        # Find corresponding facility
+        if self._facility is None:
+            for facility in INSTRUMENT_DICT.keys():
+                if self._instrument in INSTRUMENT_DICT[facility].keys():
+                    self._facility = facility
+                    break
+        if self._facility is None:
+            self._facility = str(c.facility().name())
+                
+        self.general_settings.facility_name = self._facility
         self._interface = instrument_factory(self._instrument, settings=self.general_settings)
         
         if self._interface is not None:
@@ -313,6 +322,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         dialog.exec_()
         if dialog.result()==1:
             self._instrument = dialog.instr_combo.currentText()
+            self._facility = dialog.facility_combo.currentText()
             self.setup_layout()
             self._new()
             
