@@ -637,6 +637,8 @@ namespace Mantid
       IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
       etConv->setProperty("InputWorkspace", sampleWS);
       etConv->setProperty("IntegratedDetectorVanadium", idetVanWS);
+      const double ei = this->getProperty("IncidentEnergyGuess");
+      etConv->setProperty("IncidentEnergyGuess", ei);
       if (maskWS)
       {
         etConv->setProperty("MaskWorkspace", maskWS);
@@ -685,6 +687,8 @@ namespace Mantid
         const std::string absWsName = absSampleWS->getName() + "_absunits";
         etConv->setProperty("InputWorkspace", absSampleWS);
         etConv->setProperty("OutputWorkspace", absWsName);
+        const double ei = this->getProperty("AbsUnitsIncidentEnergy");
+        etConv->setProperty("IncidentEnergyGuess", ei);
         etConv->setProperty("IntegratedDetectorVanadium", absIdetVanWS);
         etConv->executeAsSubAlg();
         absUnitsWS = etConv->getProperty("OutputWorkspace");
@@ -714,9 +718,33 @@ namespace Mantid
         cToMWs->setProperty("OutputWorkspace", absUnitsWS);
         absUnitsWS = cToMWs->getProperty("OutputWorkspace");
 
-        // TODO: Need to run diagnostics
+        // Run diagnostics
+        const double huge = reductionManager->getProperty("HighCounts");
+        const double tiny = reductionManager->getProperty("LowCounts");
+        const double vanOutLo = absUnitsWS->getInstrument()->getNumberParameter("monovan_lo_bound")[0];
+        const double vanOutHi = absUnitsWS->getInstrument()->getNumberParameter("monovan_hi_bound")[0];
+        const double vanLo = absUnitsWS->getInstrument()->getNumberParameter("monovan_lo_frac")[0];
+        const double vanHi = absUnitsWS->getInstrument()->getNumberParameter("monovan_hi_frac")[0];
+        const double vanSigma = absUnitsWS->getInstrument()->getNumberParameter("diag_samp_sig")[0];
 
-        // TODO: Mask the detectors
+        IAlgorithm_sptr diag = this->createSubAlgorithm("DetectorDiagnostic");
+        diag->setProperty("InputWorkspace", absUnitsWS);
+        diag->setProperty("OutputWorkspace", "absUnitsDiagMask");
+        diag->setProperty("LowThreshold", tiny);
+        diag->setProperty("HighThreshold", huge);
+        diag->setProperty("LowOutlier", vanOutLo);
+        diag->setProperty("HighOutlier", vanOutHi);
+        diag->setProperty("LowThresholdFraction", vanLo);
+        diag->setProperty("HighThresholdFraction", vanHi);
+        diag->setProperty("SignificanceTest", vanSigma);
+        diag->executeAsSubAlg();
+        MatrixWorkspace_sptr absMaskWS = diag->getProperty("OutputWorkspace");
+
+        IAlgorithm_sptr mask = this->createSubAlgorithm("MaskDetectors");
+        mask->setProperty("Workspace", absUnitsWS);
+        mask->setProperty("MaskedWorkspace", absMaskWS);
+        mask->executeAsSubAlg();
+        absUnitsWS = mask->getProperty("Workspace");
 
         IAlgorithm_sptr cFrmDist = this->createSubAlgorithm("ConvertFromDistribution");
         cFrmDist->setProperty("Workspace", absUnitsWS);
@@ -745,8 +773,12 @@ namespace Mantid
           absUnitsWS *= (sampleMass / sampleRmm);
         }
 
-        // TODO: Mask detectors from abs units onto sample before division
+        mask->setProperty("Workspace", outputWS);
+        mask->setProperty("MaskedWorkspace", absMaskWS);
+        mask->executeAsSubAlg();
+        outputWS = mask->getProperty("Workspace");
 
+        // Do absolute normalisation
         outputWS /= absUnitsWS;
       }
 
