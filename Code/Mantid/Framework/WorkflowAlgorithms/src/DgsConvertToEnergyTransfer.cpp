@@ -73,6 +73,8 @@ namespace Mantid
     {
       this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
           "A sample data workspace.");
+      this->declareProperty("IncidentEnergyGuess", EMPTY_DBL(),
+          "This is the starting point for the incident energy calculation.");
       this->declareProperty(new WorkspaceProperty<>("IntegratedDetectorVanadium", "",
           Direction::Input, PropertyMode::Optional), "A workspace containing the "
           "integrated detector vanadium.");
@@ -115,7 +117,11 @@ namespace Mantid
       // Calculate the initial energy and time zero
       const std::string facility = ConfigService::Instance().getFacility().name();
       g_log.notice() << "Processing for " << facility << std::endl;
-      const double eiGuess = reductionManager->getProperty("IncidentEnergyGuess");
+      double eiGuess = this->getProperty("IndicentEnergyGuess");
+      if (EMPTY_DBL() == eiGuess)
+      {
+        eiGuess = reductionManager->getProperty("IncidentEnergyGuess");
+      }
       const bool useEiGuess = reductionManager->getProperty("UseIncidentEnergyGuess");
       const double tZeroGuess = reductionManager->getProperty("TimeZeroGuess");
       std::vector<double> etBinning = reductionManager->getProperty("EnergyTransferRange");
