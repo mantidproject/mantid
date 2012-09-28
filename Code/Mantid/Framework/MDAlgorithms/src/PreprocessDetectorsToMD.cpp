@@ -3,18 +3,16 @@
   It is used by ConvertToMD algorithm to save time on this transformation when the algorithm used multiple times for the same instrument. 
   It is also should be used to calculate limits of transformation in Q-space and the detectors trajectories in Q-space. 
 
-  The result of this algorithm do in fact define an "ideal instrument", which is used to convert experimental data into the reciprocal space.
-  The purpose of PreprocessDetectorsToMD is to return these data in the form, which can be easy extracted, 
-  observed and modified to see and check all corrections done to the real instrument. 
-
+   The result of this algorithm do in fact define an "ideal instrument", which is used to convert experimental data into the reciprocal space.
+   Additional purpose of '''PreprocessDetectorsToMD''' is to return these data in the form, which can be easy extracted, observed and modified 
+   to see and check all corrections done to the real instrument before starting transformation from the experiment's(instrument) space to the 
+   target physical space. 
+  
 *WIKI*/
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidAPI/NumericAxis.h"
-
-//#include "
-
 
 using namespace Mantid;
 using namespace Mantid::API;
