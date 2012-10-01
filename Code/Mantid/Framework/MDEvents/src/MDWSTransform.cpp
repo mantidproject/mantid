@@ -53,7 +53,7 @@ CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription 
 
   if(isGonUnitMat && isLatticeUnitMat ) return LabFrame;
   if(!isGonUnitMat && isLatticeUnitMat) return SampleFrame;
-  return HKL_frame;
+  return HKLFrame;
 }
 
 
@@ -96,7 +96,7 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
       mat = TargWSDescription.m_GoniomMatr*TargWSDescription.m_Wtransf;
       break;
     }
-  case(CnvrtToMD::HKL_frame):
+  case(CnvrtToMD::HKLFrame):
     {
       TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID);
    // Obtain the transformation matrix to Cartezian related to Crystal
@@ -235,12 +235,12 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
     }
   case(CnvrtToMD::SampleFrame):
     {
-      dim_names[0]="Q_sample_x";
-      dim_names[1]="Q_sample_y";
-      dim_names[2]="Q_sample_z";
+      dim_names[0]="Q_smpl_x";
+      dim_names[1]="Q_smpl_y";
+      dim_names[2]="Q_smpl_z";
       break;
     }
-  case(CnvrtToMD::HKL_frame):
+  case(CnvrtToMD::HKLFrame):
     {
       dim_names[0]="H";
       dim_names[1]="K";

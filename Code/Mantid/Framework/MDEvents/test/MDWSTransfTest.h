@@ -19,6 +19,10 @@ class MDWSTransformTestHelper: public MDWSTransform
    {
      return MDWSTransform::getTransfMatrix(TargWSDescription,scaling);
    }
+   CnvrtToMD::TargetFrame findTargetFrame(MDEvents::MDWSDescription &TargWSDescription)const
+   {
+     return MDWSTransform::findTargetFrame(TargWSDescription);
+   }
 
 };
 
@@ -34,6 +38,28 @@ public:
   static MDWSTransfTest *createSuite() { return new MDWSTransfTest(); }
   static void destroySuite( MDWSTransfTest *suite ) { delete suite; }
 
+
+void testFindTargetFrame()
+{
+   MDEvents::MDWSDescription TargWSDescription;
+   Mantid::API::MatrixWorkspace_sptr spws =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
+   std::vector<double> minVal(4,-3),maxVal(4,3);
+   TargWSDescription.setMinMax(minVal,maxVal);
+
+   TargWSDescription.buildFromMatrixWS(spws,"Q3D","Direct");
+
+   MDWSTransformTestHelper Transf;
+   TS_ASSERT_EQUALS(CnvrtToMD::LabFrame,Transf.findTargetFrame(TargWSDescription));
+
+   spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
+   TargWSDescription.m_GoniomMatr = spws->run().getGoniometer().getR();
+
+   TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame,Transf.findTargetFrame(TargWSDescription));
+
+   spws->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(*pLattice)); 
+   TS_ASSERT_EQUALS(CnvrtToMD::HKLFrame,Transf.findTargetFrame(TargWSDescription));
+
+}
 
 void test_buildDimNames(){
 
