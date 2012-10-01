@@ -656,6 +656,7 @@ namespace Mantid
       Workspace_sptr absSampleWS = this->loadInputData("AbsUnitsSample", false);
       if (absSampleWS)
       {
+        std::string absUnitsName = absSampleWS->getName() + "_absunits";
         MatrixWorkspace_sptr absUnitsWS;
         MatrixWorkspace_sptr absGroupingWS = this->loadGroupingFile("AbsUnits");
 
@@ -675,6 +676,7 @@ namespace Mantid
           {
             detVan->setProperty("GroupingWorkspace", absGroupingWS);
           }
+          detVan->setProperty("AlternateGroupingTag", "AbsUnits");
           detVan->executeAsSubAlg();
           MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
           absIdetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
@@ -690,6 +692,15 @@ namespace Mantid
         const double ei = this->getProperty("AbsUnitsIncidentEnergy");
         etConv->setProperty("IncidentEnergyGuess", ei);
         etConv->setProperty("IntegratedDetectorVanadium", absIdetVanWS);
+        if (maskWS)
+        {
+          etConv->setProperty("MaskWorkspace", maskWS);
+        }
+        if (absGroupingWS)
+        {
+          etConv->setProperty("GroupingWorkspace", absGroupingWS);
+        }
+        etConv->setProperty("AlternateGroupingTag", "AbsUnits");
         etConv->executeAsSubAlg();
         absUnitsWS = etConv->getProperty("OutputWorkspace");
 
@@ -751,7 +762,11 @@ namespace Mantid
         cFrmDist->executeAsSubAlg();
         absUnitsWS = cFrmDist->getProperty("Workspace");
 
-        // TODO: Calculate weighted average of integrated spectra
+        IAlgorithm_sptr wMean = this->createSubAlgorithm("WeightedMeanOfWorkspace");
+        wMean->setProperty("InputWorkspace", absUnitsWS);
+        wMean->setProperty("OutputWorkspace", absUnitsWS);
+        wMean->executeAsSubAlg();
+        absUnitsWS = wMean->getProperty("OutputWorkspace");
 
         // If the absolute units detector vanadium is used, do extra correction.
         if (!absIdetVanWS)
@@ -780,6 +795,10 @@ namespace Mantid
 
         // Do absolute normalisation
         outputWS /= absUnitsWS;
+
+        this->declareProperty(new WorkspaceProperty<>("AbsUnitsWorkspace",
+            absUnitsName, Direction::Output));
+        this->setProperty("AbsUnitsWorkspace", absUnitsWS);
       }
 
       this->setProperty("OutputWorkspace", outputWS);
