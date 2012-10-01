@@ -49,6 +49,13 @@ namespace CnvrtToMD
         HKLScale,            //< non-orthogonal system for non-reclenear lattice
         NCoordScalings
     }; 
+    /// enum describes availible target coordinate systems for Q3D mode
+    enum TargetFrame
+    {
+      LabFrame, //< * '''Q (lab frame)''': this calculates the momentum transfer (ki-kf) for each event is calculated in the experimental lab frame.
+      SampleFrame, //< * '''Q (sample frame)''': the goniometer rotation of the sample is taken out, to give Q in the frame of the sample. See [[SetGoniometer]] to specify the goniometer used in the experiment.     
+      HKL_frame   //<* '''HKL''': uses the UB matrix (see [[SetUB]], [[FindUBUsingFFT]] and others) to calculate the HKL Miller indices of each event.
+    };
 }
 
 class DLLExport MDWSTransform
@@ -60,10 +67,7 @@ public:
       * sets default values u and v to [1,0,0] and [0,1,0] if not present or any error. */
     void setUVvectors(const std::vector<double> &ut,const std::vector<double> &vt,const std::vector<double> &wt);
 
-   /** function provides the linear representation for the transformation matrix, which translate momentums from laboratory to crystal cartezian 
-       (C)- Busing, Levi 1967 coordinate system */
    std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
-   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling scaling)const;
   
    /// construct meaningful dimension names for Q3D case and different transformation types defined by the class
    void setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const;
@@ -91,6 +95,10 @@ protected: // for testing
    Kernel::DblMatrix buildQTrahsf(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling scaling,bool UnitUB=false)const;
    /// build orthogonal coordinate around two input vecotors u and v expressed in rlu;
    //std::vector<Kernel::V3D> buildOrtho3D(const Kernel::DblMatrix &BM,const Kernel::V3D &u, const Kernel::V3D &v)const;
+
+   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling &scaling)const;
+
+   CnvrtToMD::TargetFrame findTargetFrame(MDEvents::MDWSDescription &TargWSDescription)const;
 
 };
 

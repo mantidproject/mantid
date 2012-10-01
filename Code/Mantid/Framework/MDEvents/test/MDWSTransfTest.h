@@ -12,7 +12,15 @@ using namespace Mantid;
 using namespace Mantid::MDEvents;
 using namespace Mantid::Kernel;
 
+class MDWSTransformTestHelper: public MDWSTransform
+{
+  public:
+   std::vector<double> getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling &scaling)const
+   {
+     return MDWSTransform::getTransfMatrix(TargWSDescription,scaling);
+   }
 
+};
 
 
 class MDWSTransfTest : public CxxTest::TestSuite
@@ -79,12 +87,13 @@ void testTransfMat1()
      w[1]=-1;
      std::vector<double> rot;
 
-     MDWSTransform MsliceTransf;
+     MDWSTransformTestHelper MsliceTransf;
      MsliceTransf.setUVvectors(u,v,w);
 
 
-      TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::HKLScale));
-      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::HKLScale));
+     CnvrtToMD::CoordScaling scales = CnvrtToMD::HKLScale;
+     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+     TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::HKLScale));
 
       dimNames = TWS.getDimNames();
       TS_ASSERT_EQUALS("[H,0,0]",dimNames[0]);
@@ -94,7 +103,8 @@ void testTransfMat1()
 
 
       std::vector<double> rot1;
-      TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,CnvrtToMD::OrthogonalHKLScale));
+      scales = CnvrtToMD::OrthogonalHKLScale;
+      TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,scales));
       TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::OrthogonalHKLScale));
 
       dimNames = TWS.getDimNames();

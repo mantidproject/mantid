@@ -11,30 +11,64 @@ namespace MDEvents
 Kernel::Logger& MDWSTransform::g_Log =Kernel::Logger::get("MD-Algorithms");
 using namespace CnvrtToMD;
 
+/** method returns the linear representation for the transformation matrix, which translate momentums from laboratory to the requested 
+ *   coordinate system. 
+ *
+ *  depending on the presence of UB matrix and goniometer settings, it may be:
+ * a) the laboratory -- (no UB matrix, goniometer angles set to 0)
+   b) Q (sample frame)''': the goniometer rotation of the sample is taken out, to give Q in the frame of the sample. See [[SetGoniometer]] to specify the goniometer used in the experiment.
+   c) Crystal or crystal cartezian (C)- Busing, Levi 1967 coordinate system -- depenging on Q-scale requested
+
+*/
 std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,const std::string &QScaleRequested)const
 {
   CoordScaling ScaleID = getQScaling(QScaleRequested);
+  std::vector<double> transf = getTransfMatrix(TargWSDescription,ScaleID);
+
   if(TargWSDescription.AlgID.compare("Q3D")==0)
   {
     this->setQ3DDimensionsNames(TargWSDescription,ScaleID);
   }
 
-  return getTransfMatrix(TargWSDescription,ScaleID);
+  return transf;
+}
+/** Method analyzes the state of UB matrix and goniometer attached to the workspace and desides, which target 
+  * coordinate system these variables identify. 
+   */ 
+CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription &TargWSDescription)const
+{
+
+  Kernel::Matrix<double> IMat(3,3,true);
+  bool isGonUnitMat   = IMat.equals(TargWSDescription.m_GoniomMatr);
+
+  bool isLatticeUnitMat;
+  if(TargWSDescription.hasLattice())
+  {
+    Kernel::Matrix<double> UB = TargWSDescription.getLattice()->getUB();
+    isLatticeUnitMat = IMat.equals(UB);
+  }else{
+    isLatticeUnitMat = false;
+  }
+  
+
+  if(isGonUnitMat && isLatticeUnitMat ) return LabFrame;
+  if(!isGonUnitMat && isLatticeUnitMat) return SampleFrame;
+  return HKL_frame;
 }
 
+
 /** The matrix to convert neutron momentums into the target coordinate system   */
-std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CoordScaling ScaleID)const
+std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &TargWSDescription,CoordScaling &ScaleID)const
 {
 
   Kernel::Matrix<double> mat(3,3,true);
-  //Kernel::Matrix<double> ub;
-
+ 
   bool powderMode = TargWSDescription.isPowder();
 
   bool has_lattice(true);
   if(!TargWSDescription.hasLattice())  has_lattice=false;
 
-  if(!powderMode && (!has_lattice))
+  if( !(powderMode||has_lattice))
   {
     std::string inWsName = TargWSDescription.getWSName();
     // warn about 3D case without lattice
@@ -43,17 +77,38 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
       " as no oriented lattice has been defined. \n"
       " Will use unit transformation matrix\n";
   }
+  CnvrtToMD::TargetFrame CoordFrameID = findTargetFrame(TargWSDescription);
+  switch(CoordFrameID)
+  {
+  case(CnvrtToMD::LabFrame):
+    {
+      ScaleID = NoScaling;
+      TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID,true);
+      // ignore goniometer
+      mat = TargWSDescription.m_Wtransf;
+      break;
+    }
+  case(CnvrtToMD::SampleFrame):
+    {
+      ScaleID = NoScaling;
+      TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID,true);
+    // Obtain the transformation matrix to Cartezian related to Crystal
+      mat = TargWSDescription.m_GoniomMatr*TargWSDescription.m_Wtransf;
+      break;
+    }
+  case(CnvrtToMD::HKL_frame):
+    {
+      TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID);
+   // Obtain the transformation matrix to Cartezian related to Crystal
+      mat = TargWSDescription.m_GoniomMatr*TargWSDescription.m_Wtransf;
+     break;
+    }
+ default:
+    throw(std::invalid_argument(" Unknow or undefined Target Frame ID"));
+  }
   //
-  if(has_lattice)
-    TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID);
-  else // goniometer is still present, so the transformation to sample frame
-       TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,NoScaling,true);
-
-  // Obtain the transformation matrix to Cartezian related to Crystal
-   mat = TargWSDescription.m_GoniomMatr*TargWSDescription.m_Wtransf;
-   // and this is the transformation matrix to notional
-   //mat = gon*Latt.getUB();
-   mat.Invert();
+   // and this is the transformation matrix to notional   
+  mat.Invert();
 
   std::vector<double> rotMat = mat.getVector();
   g_Log.debug()<<" *********** Q-transformation matrix ***********************\n";
@@ -123,13 +178,13 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
     }
   case OrthogonalHKLScale://< each momentum component divided by appropriate lattice parameter; equivalent to hkl for orthogonal axis
     {
-      if(TargWSDescription.hasLattice())
+      if(spLatt)
         for(int i=0;i<3;i++){ Scale[i][i] = (2*M_PI)/spLatt->a(i);}             
         break;
     }
   case HKLScale:   //< non-orthogonal system for non-orthogonal lattice
     {
-      if(TargWSDescription.hasLattice()) Scale = spLatt->getUB()*(2*M_PI);
+      if(spLatt) Scale = spLatt->getUB()*(2*M_PI);
       break;
     }
 
@@ -167,9 +222,34 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
     for(int i=0;i<3;i++)LatPar[i]=spLatt->a(i);
   }
 
-  dim_names[0]="H";
-  dim_names[1]="K";
-  dim_names[2]="L";
+  CnvrtToMD::TargetFrame TargFrameID = findTargetFrame(TargWSDescription);
+
+  switch(TargFrameID)
+  {
+  case(CnvrtToMD::LabFrame):
+    {
+      dim_names[0]="Q_x";
+      dim_names[1]="Q_y";
+      dim_names[2]="Q_z";
+      break;
+    }
+  case(CnvrtToMD::SampleFrame):
+    {
+      dim_names[0]="Q_sample_x";
+      dim_names[1]="Q_sample_y";
+      dim_names[2]="Q_sample_z";
+      break;
+    }
+  case(CnvrtToMD::HKL_frame):
+    {
+      dim_names[0]="H";
+      dim_names[1]="K";
+      dim_names[2]="L";
+      break;
+    }
+  default:
+    throw(std::invalid_argument(" Unknow or undefined Target Frame ID"));
+  }
 
   dim_directions.resize(3);
   dim_directions[0]=m_UProj;
