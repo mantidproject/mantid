@@ -466,17 +466,13 @@ namespace Mantid
           loadMask = this->createSubAlgorithm("Load");
           loadMask->setProperty("Filename", hardMask);
         }
-        else if (boost::ends_with(hardMask, ".xml"))
+        else
         {
           const std::string instName = this->reductionManager->getProperty("InstrumentName");
           loadMask = this->createSubAlgorithm("LoadMask");
           loadMask->setProperty("Instrument", instName);
           loadMask->setProperty("InputFile", hardMask);
           castWorkspace = true;
-        }
-        else
-        {
-          throw std::runtime_error("Do not know how to load mask: " + hardMask);
         }
         loadMask->setAlwaysStoreInADS(true);
         loadMask->setProperty("OutputWorkspace", hardMaskWsName);
