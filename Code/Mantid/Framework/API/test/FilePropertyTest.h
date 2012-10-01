@@ -58,9 +58,7 @@ public:
   {
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load);
-
-    // Check type
-    TS_ASSERT_EQUALS(fp->isLoadProperty(), true);
+    doPropertyTraitTests(*fp, true, false,false);
     TS_ASSERT_EQUALS(fp->getDefaultExt(), "");
 
     ///Test a file in the test directory
@@ -80,9 +78,8 @@ public:
     std::vector<std::string> exts(1, "raw");
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Load, exts);
-    // Check type
-    TS_ASSERT_EQUALS(fp->isLoadProperty(), true);
-    TS_ASSERT_EQUALS(fp->isOptional(), false);
+    doPropertyTraitTests(*fp, true, false,false);
+
     TS_ASSERT_EQUALS(fp->getDefaultExt(), "raw");
 
     ///Test a GEM file in the test directory
@@ -108,9 +105,7 @@ public:
     std::vector<std::string> exts(1, "raw");
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::OptionalLoad, exts);
-    // Check type
-    TS_ASSERT_EQUALS(fp->isLoadProperty(), true);
-    TS_ASSERT_EQUALS(fp->isOptional(), true);
+    doPropertyTraitTests(*fp, true, false,true);
 
     std::string msg = fp->setValue("LOQ48127.raw");
     TS_ASSERT_EQUALS(msg, "");
@@ -133,9 +128,7 @@ public:
   {
     Mantid::API::FileProperty *fp = 
       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::Save);
-    // Check type
-    TS_ASSERT_EQUALS(fp->isLoadProperty(), false);
-
+    doPropertyTraitTests(*fp, false ,true,false);
     //Test for some random file name as this doesn't need to exist here
     std::string msg = fp->setValue("filepropertytest.sav");
     TS_ASSERT_EQUALS(msg, "");
@@ -143,6 +136,34 @@ public:
     delete fp;
   }
   
+  void testOptionalSaveProperty()
+   {
+     Mantid::API::FileProperty *fp =
+       new Mantid::API::FileProperty("Filename","", Mantid::API::FileProperty::OptionalSave);
+     doPropertyTraitTests(*fp, false ,true, true);
+     //Test for some random file name as this doesn't need to exist here
+     std::string msg = fp->setValue("filepropertytest.sav");
+     TS_ASSERT_EQUALS(msg, "");
+
+     delete fp;
+   }
+
+  void doPropertyTraitTests(const Mantid::API::FileProperty & fileProp,
+       const bool loadProp, const bool saveProp, const bool validByDefault)
+  {
+    // Check type
+    TS_ASSERT_EQUALS(fileProp.isLoadProperty(), loadProp);
+    TS_ASSERT_EQUALS(fileProp.isSaveProperty(), saveProp);
+    if(validByDefault)
+    {
+      TS_ASSERT_EQUALS(fileProp.isValid(), "");
+    }
+    else
+    {
+      TS_ASSERT_DIFFERS(fileProp.isValid(), "");
+    }
+  }
+
   void testThatRunNumberReturnsFileWithCorrectPrefix()
   {
     Mantid::API::FileProperty *fp = 

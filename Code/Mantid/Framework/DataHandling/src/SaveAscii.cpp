@@ -51,14 +51,15 @@ namespace Mantid
     /// Initialisation method.
     void SaveAscii::init()
     {
+      declareProperty(new WorkspaceProperty<>("InputWorkspace",
+        "",Direction::Input), "The name of the workspace that will be saved.");
+
       std::vector<std::string> exts;
       exts.push_back(".dat");
       exts.push_back(".txt");
       exts.push_back(".csv");
       declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
 		      "A comma separated Ascii file that will be created");
-      declareProperty(new WorkspaceProperty<>("InputWorkspace",
-        "",Direction::Input), "The name of the workspace that will be saved.");
 
       auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
       mustBePositive->setLower(1);

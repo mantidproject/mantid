@@ -46,11 +46,11 @@ namespace Mantid
     void SaveVTK::init()
     {
       //Declare mandatory properties
-      declareProperty(new FileProperty("Filename", "", FileProperty::Save),
-		      "The name to use when writing the file");
       declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
         "The workspace name to use as input" );
+      declareProperty(new FileProperty("Filename", "", FileProperty::Save),
+		      "The name to use when writing the file");
       //Declare optional properties
       auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
       mustBePositive->setLower(0.0);

@@ -56,14 +56,6 @@ namespace Mantid
     void
     SaveNXSPE::init()
     {
-
-      std::vector < std::string > exts;
-      exts.push_back(".nxspe");
-
-      declareProperty(new API::FileProperty("Filename", "", FileProperty::Save,
-          exts),
-          "The name of the NXSPE file to write, as a full or relative path");
-
       auto wsValidator = boost::make_shared<CompositeValidator>() ;
       wsValidator->add(boost::make_shared<API::WorkspaceUnitValidator>("DeltaE"));
       wsValidator->add<API::CommonBinsValidator>();
@@ -72,6 +64,13 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InputWorkspace",
           "", Direction::Input, wsValidator),
           "Name of the workspace to be saved.");
+
+      std::vector < std::string > exts;
+      exts.push_back(".nxspe");
+
+      declareProperty(new API::FileProperty("Filename", "", FileProperty::Save,
+          exts),
+          "The name of the NXSPE file to write, as a full or relative path");
 
       // if the value is not set, one should better have it invalid, e.g. NaN
       declareProperty("Efixed",SaveNXSPE::MASK_FLAG,

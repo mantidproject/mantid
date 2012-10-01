@@ -49,10 +49,10 @@ namespace DataHandling
         "Name of the log to process.");
     this->declareProperty("ProcessedLog", "", boost::make_shared<MandatoryValidator<std::string> >(),
         "Name of the new log containing processed log.");
-    this->declareProperty("NumberOfOutputs", 4000, "Number of log entries written to file.  A negative input disables this option. ");
-    this->declareProperty(new API::FileProperty("OutputLogFile", "", API::FileProperty::Save),
-        "Directory for output files.");
     this->declareProperty(new API::FileProperty("OutputDirectory", "", API::FileProperty::Directory),
+        "Directory for output files.");
+    this->declareProperty("NumberOfOutputs", 4000, "Number of log entries written to file.  A negative input disables this option. ");
+    this->declareProperty(new API::FileProperty("OutputLogFile", "", API::FileProperty::OptionalSave),
         "Directory for output files.");
 
     return;

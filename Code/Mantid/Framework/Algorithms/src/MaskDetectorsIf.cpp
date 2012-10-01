@@ -68,7 +68,7 @@ void MaskDetectorsIf::init()
 	  declareProperty("Value",0.0);
 	  declareProperty(new API::FileProperty("InputCalFile","", API::FileProperty::Load, ".cal"),
 			  "The name of the CalFile with grouping data" );
-	  declareProperty(new API::FileProperty("OutputCalFile","", API::FileProperty::Save, ".cal"),
+	  declareProperty(new API::FileProperty("OutputCalFile","", API::FileProperty::OptionalSave, ".cal"),
 			  "The name of the CalFile with grouping data" );
 }
 
@@ -142,7 +142,16 @@ void MaskDetectorsIf::retrieveProperties()
 	else if (select_operator=="NotEqual")
 		 compar_f=std::not_equal_to<double>();
 
-		 return;
+        std::string newf=getProperty("OutputCalFile");
+        // MG 2012-10-01: A bug fixed the save file property to be invalid by default
+        // which would have moved the argument order. The property is now
+        // optional and checked here
+        if(newf.empty())
+        {
+          throw std::runtime_error("OutputCalFile is empty. Enter a filename");
+        }
+
+        return;
 }
 
 /**

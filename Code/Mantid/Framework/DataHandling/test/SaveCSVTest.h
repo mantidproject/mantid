@@ -59,12 +59,11 @@ public:
   {
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
   
-    algToBeTested.setPropertyValue("InputWorkspace", "SAVECSVTEST-testSpace");     
+    algToBeTested.setPropertyValue("InputWorkspace", "SAVECSVTEST-testSpace");
     
     // Should fail because mandatory parameter has not been set
-    algToBeTested.execute();
+    TS_ASSERT_THROWS(algToBeTested.execute(), std::runtime_error);
     TS_ASSERT_EQUALS(algToBeTested.isExecuted(), false)
-        
     
     // Now set it...
     // specify name of file to save 1D-workspace to
