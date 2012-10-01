@@ -24,7 +24,7 @@ namespace RefDetectorViewer
  *
  *  @param data_source  The source of the data that will be displayed. 
  */
-RefImageView::RefImageView( ImageDataSource* data_source )
+RefImageView::RefImageView( RefImageDataSource* data_source )
 {
   Ui_MainWindow* ui = new Ui_MainWindow();
   saved_ui          = ui; 

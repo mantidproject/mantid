@@ -3,7 +3,7 @@
 
 #include <cstddef>
 #include "MantidQtRefDetectorViewer/DataArray.h"
-#include "MantidQtRefDetectorViewer/ImageDataSource.h"
+#include "MantidQtRefDetectorViewer/RefImageDataSource.h"
 
 /**
     @class ArrayDataSource 
@@ -41,7 +41,7 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ArrayDataSource: public ImageDataSource
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ArrayDataSource: public RefImageDataSource
 {
   public:
 

@@ -12,7 +12,6 @@ using namespace RefDetectorViewer;
 RefMatrixWSImageView::RefMatrixWSImageView( MatrixWorkspace_sptr mat_ws )
 {
   RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );
-
   image_view = new RefImageView( source );  // this is the QMainWindow
                                          // for the viewer.  It is
                                          // deleted when the window
@@ -21,7 +20,8 @@ RefMatrixWSImageView::RefMatrixWSImageView( MatrixWorkspace_sptr mat_ws )
 
 RefMatrixWSImageView::RefMatrixWSImageView( QString )
 {
-//    std::cout << "wps name is : " << wps_name << std::endl;
+//    RefMatrixWSDataSource* source = new RefMatrixWSDataSource(wps_name);
+//    image_view = new RefImageView( source );
 }
 
 RefMatrixWSImageView::~RefMatrixWSImageView()

@@ -15,6 +15,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Run.h"
 #include "MantidQtRefDetectorViewer/ErrorHandler.h"
+#include "MantidQtRefDetectorViewer/ArrayDataSource.h"
+#include "MantidQtRefDetectorViewer/IVUtils.h"
 
 using namespace Mantid;
 using namespace Kernel;
@@ -32,7 +34,7 @@ namespace RefDetectorViewer
  * @param mat_ws  Shared pointer to the matrix workspace being "wrapped"
  */
 RefMatrixWSDataSource::RefMatrixWSDataSource( MatrixWorkspace_sptr mat_ws )
-                 :ImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
+                 :RefImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
 {
   this->mat_ws = mat_ws;
 
@@ -46,8 +48,7 @@ RefMatrixWSDataSource::RefMatrixWSDataSource( MatrixWorkspace_sptr mat_ws )
 
   total_cols = 1000000;              // Default data resolution
 }
-
-
+    
 RefMatrixWSDataSource::~RefMatrixWSDataSource()
 {
 }

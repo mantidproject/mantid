@@ -4,7 +4,7 @@
 #include <cstddef>
 
 #include "MantidQtRefDetectorViewer/DataArray.h"
-#include "MantidQtRefDetectorViewer/ImageDataSource.h"
+#include "MantidQtRefDetectorViewer/RefImageDataSource.h"
 #include "MantidQtRefDetectorViewer/DllOptionIV.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -44,7 +44,7 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSDataSource: public ImageDataSource
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSDataSource: public RefImageDataSource
 {
   public:
 
@@ -67,7 +67,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSDataSource: public ImageDataSou
 
     /// Get DataArray covering full range of data in x, and y directions
     DataArray * GetDataArray( bool is_log_x );
-
+    
     /// Get DataArray covering restricted range of data 
     DataArray * GetDataArray( double  xmin,
                               double  xmax,
@@ -83,7 +83,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSDataSource: public ImageDataSou
                       std::vector<std::string> &list );
   private:
     Mantid::API::MatrixWorkspace_sptr  mat_ws;
-
+    
 };
 
 } // namespace MantidQt 

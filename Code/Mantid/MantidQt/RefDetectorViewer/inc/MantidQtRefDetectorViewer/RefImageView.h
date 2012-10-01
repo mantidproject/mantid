@@ -5,7 +5,7 @@
 #include <QtGui>
 
 #include "MantidQtRefDetectorViewer/GraphDisplay.h"
-#include "MantidQtRefDetectorViewer/ImageDataSource.h"
+#include "MantidQtRefDetectorViewer/RefImageDataSource.h"
 #include "MantidQtRefDetectorViewer/DllOptionIV.h"
 
 /**
@@ -50,7 +50,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageView : public QMainWindow
   public:
 
      /// Construct an ImageView to display data from the specified data source 
-     RefImageView( ImageDataSource* data_source );
+     RefImageView( RefImageDataSource* data_source );
 
     ~RefImageView();
 

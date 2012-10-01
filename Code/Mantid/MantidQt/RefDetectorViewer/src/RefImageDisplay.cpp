@@ -9,7 +9,7 @@
 #include <qwt_scale_engine.h>
 
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
-#include "MantidQtRefDetectorViewer/ImageDataSource.h"
+#include "MantidQtRefDetectorViewer/RefImageDataSource.h"
 #include "MantidQtRefDetectorViewer/DataArray.h"
 #include "MantidQtRefDetectorViewer/ColorMaps.h"
 #include "MantidQtRefDetectorViewer/QtUtils.h"
@@ -107,7 +107,7 @@ RefImageDisplay::~RefImageDisplay()
  * @param data_source The ImageDataSource that provides the array of values
  *                    and information for the table.
  */
-void RefImageDisplay::SetDataSource( ImageDataSource* data_source )
+void RefImageDisplay::SetDataSource( RefImageDataSource* data_source )
 {
   this->data_source = data_source;
   h_graph_display->SetDataSource( data_source );

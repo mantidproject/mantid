@@ -27,7 +27,7 @@ SliderHandler::SliderHandler( Ui_MainWindow* iv_ui )
  * @param data_source  ImageDataSource that provides the data to be drawn
  */
 void SliderHandler::ConfigureSliders( QRect            draw_area, 
-                                      ImageDataSource* data_source )
+                                     RefImageDataSource* data_source )
 {
   QScrollBar* v_scroll = iv_ui->imageVerticalScrollBar;
   int n_rows = (int)data_source->GetNRows();

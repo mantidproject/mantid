@@ -61,7 +61,7 @@ GraphDisplay::~GraphDisplay()
  * @param data_source The ImageDataSource that provides information for
  *                    the table.
  */
-void GraphDisplay::SetDataSource( ImageDataSource* data_source )
+void GraphDisplay::SetDataSource( RefImageDataSource* data_source )
 {
   this->data_source = data_source;
 }

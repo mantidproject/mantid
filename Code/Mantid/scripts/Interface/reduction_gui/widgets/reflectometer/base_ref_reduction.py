@@ -87,9 +87,17 @@ class BaseRefWidget(BaseWidget):
         self.connect(self._summary.plot_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y)
         self.connect(self._summary.plot_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_x)
         self.connect(self._summary.plot_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._plot_count_vs_y_bck)
+        
+        self.connect(self._summary.plot_data_count_vs_x_2d_btn, QtCore.SIGNAL("clicked(bool)"), self._plot_data_count_vs_x_2d)
+        self.connect(self._summary.plot_data_count_vs_tof_2d_btn, QtCore.SIGNAL("clicked(bool)"), self._plot_data_count_vs_tof_2d)
+        
         self.connect(self._summary.norm_count_vs_y_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_y)
         self.connect(self._summary.norm_count_vs_x_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_x)
         self.connect(self._summary.norm_count_vs_y_bck_btn, QtCore.SIGNAL("clicked()"), self._norm_count_vs_y_bck)
+
+        self.connect(self._summary.plot_norm_count_vs_x_2d_btn, QtCore.SIGNAL("clicked(bool)"), self._plot_norm_count_vs_x_2d)
+        self.connect(self._summary.plot_norm_count_vs_tof_2d_btn, QtCore.SIGNAL("clicked(bool)"), self._plot_norm_count_vs_tof_2d)
+        
         self.connect(self._summary.plot_tof_btn, QtCore.SIGNAL("clicked()"), self._plot_tof)
         self.connect(self._summary.add_dataset_btn, QtCore.SIGNAL("clicked()"), self._add_data)
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
@@ -829,6 +837,62 @@ class BaseRefWidget(BaseWidget):
                                          self._summary.x_min_edit,
                                          self._summary.x_max_edit)
     
+    def _plot_data_count_vs_x_2d(self):
+        """
+            Will launch the 2d plot for the data of counts vs x
+        """
+        return
+    
+    
+    def _plot_data_count_vs_tof_2d(self):
+        """
+            Will launch the 2d plot for the data of counts vs TOF
+        """
+        
+        #retrieve name of workspace first
+        run_number =  self._summary.data_run_number_edit.text()
+        file_path = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]  
+
+        basename = os.path.basename(file_path)
+        ws_base = "__%s" % basename
+    
+        print self.instrument_name
+        if (self.instrument_name == 'REF_L'):
+            ws_output_base = "Pixel Y vs TOF" + " - " + basename
+        else:
+            ws_output_base = "Pixel X vs TOF" + " - " + basename
+
+#        if (self.instrument_name == 'REF_L'):
+#            if isPeak:
+#                type = 'Peak'
+#            else:
+#                type = 'Background'
+#            if is_pixel_y is False:
+#                x_title = "X pixel"
+#            else:
+#                x_title = "Y pixel"
+#            ws_output_base =  type + " - " + basename + " - " + x_title 
+#        else:
+#            ws_output_base = "Counts vs TOF - %s" % basename
+#            x_title = "Y pixel"
+#            if is_pixel_y is False:
+#                ws_output_base = "Counts vs X pixel - %s" % basename
+#                x_title = "X pixel"
+
+        print ws_output_base
+        
+        range_min = int(self._summary.data_from_tof.text())
+        range_max = int(self._summary.data_to_tof.text())
+
+        call_back = None
+        data_manipulation.counts_vs_pixel_distribution(file_path, 
+                                                       True, 
+                                                       None) 
+        ws_output_base = "Peak - " + basename + " - Y pixel _2D"
+
+        import mantidqtpython 
+        mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base)
+    
     def _norm_count_vs_y(self):
         
 #        run_number = self._summary.norm_run_number_edit.text()
@@ -884,6 +948,21 @@ class BaseRefWidget(BaseWidget):
                                          self._summary.norm_x_min_edit,
                                          self._summary.norm_x_max_edit)
 
+    def _plot_norm_count_vs_x_2d(self):
+        """
+            Will launch the 2d plot for the norm of counts vs x
+        """
+        return
+    
+    
+    def _plot_norm_count_vs_tof_2d(self):
+        """
+            Will launch the 2d plot for the norm of counts vs TOF
+        """
+        print 'inside plot_norm_count_vs_tof_2d'
+
+    
+    
     def _integrated_plot(self, is_high_res, file_ctrl, min_ctrl, max_ctrl, isPeak=True):
         """
             Plot counts as a function of:

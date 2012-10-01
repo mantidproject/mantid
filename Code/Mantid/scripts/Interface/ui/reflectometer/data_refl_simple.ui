@@ -1480,7 +1480,7 @@ p, li { white-space: pre-wrap; }
                     <item>
                      <layout class="QVBoxLayout" name="verticalLayout_13">
                       <item>
-                       <widget class="QPushButton" name="pushButton_2">
+                       <widget class="QPushButton" name="plot_data_count_vs_x_2d_btn">
                         <property name="enabled">
                          <bool>false</bool>
                         </property>
@@ -1502,9 +1502,9 @@ p, li { white-space: pre-wrap; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QPushButton" name="pushButton_3">
+                       <widget class="QPushButton" name="plot_data_count_vs_tof_2d_btn">
                         <property name="enabled">
-                         <bool>false</bool>
+                         <bool>true</bool>
                         </property>
                         <property name="minimumSize">
                          <size>
@@ -3341,7 +3341,7 @@ p, li { white-space: pre-wrap; }
                     <item>
                      <layout class="QVBoxLayout" name="verticalLayout_17">
                       <item>
-                       <widget class="QPushButton" name="pushButton_4">
+                       <widget class="QPushButton" name="plot_norm_count_vs_x_2d_btn">
                         <property name="enabled">
                          <bool>false</bool>
                         </property>
@@ -3363,7 +3363,7 @@ p, li { white-space: pre-wrap; }
                        </widget>
                       </item>
                       <item>
-                       <widget class="QPushButton" name="pushButton_5">
+                       <widget class="QPushButton" name="plot_norm_count_vs_tof_2d_btn">
                         <property name="enabled">
                          <bool>false</bool>
                         </property>

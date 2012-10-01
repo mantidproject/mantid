@@ -2,7 +2,7 @@
 #define RANGE_HANDLER_H
 
 #include "ui_RefImageView.h"
-#include "MantidQtRefDetectorViewer/ImageDataSource.h"
+#include "MantidQtRefDetectorViewer/RefImageDataSource.h"
 #include "MantidQtRefDetectorViewer/DllOptionIV.h"
 
 /**
@@ -49,7 +49,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RangeHandler
     RangeHandler( Ui_MainWindow* iv_ui );
 
     /// Configure min, max and step controls for the specified data source
-    void ConfigureRangeControls( ImageDataSource* data_source );
+    void ConfigureRangeControls( RefImageDataSource* data_source );
 
     /// Get the range of data to display in the image, from GUI controls
     void GetRange( double &min, double &max, double &step );

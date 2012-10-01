@@ -5,7 +5,7 @@
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-#include "MantidQtRefDetectorViewer/ImageDataSource.h"
+#include "MantidQtRefDetectorViewer/RefImageDataSource.h"
 #include "MantidQtRefDetectorViewer/DllOptionIV.h"
 
 /**
@@ -55,7 +55,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay
   ~GraphDisplay();
 
    /// Set the source of information for the table of position information 
-   void SetDataSource( ImageDataSource* data_source );
+   void SetDataSource( RefImageDataSource* data_source );
 
    /// Set the actual data that will be displayed on the graph
    void SetData( const QVector<double> & xData,
@@ -81,7 +81,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER GraphDisplay
    QwtPlot*          graph_plot;
    QwtPlotCurve*     curve;
 //   QTableWidget*     graph_table;
-   ImageDataSource*  data_source;
+   RefImageDataSource*  data_source;
 
    bool    is_vertical;
    bool    is_log_x;
