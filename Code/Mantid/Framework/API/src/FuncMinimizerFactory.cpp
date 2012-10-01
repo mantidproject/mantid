@@ -28,9 +28,16 @@ FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl() : Kernel::DynamicFactory<IF
 */
 boost::shared_ptr<IFuncMinimizer> FuncMinimizerFactoryImpl::createMinimizer(const std::string& str) const
 {
+  // check if there are any properties defined - look for a comma
+  if ( str.find(',') == std::string::npos )
+  {// no properties - create minimizer and return
+    return create( str );
+  }
+
+  // parse the string
   Expression parser;
   parser.parse( str );
-  parser.toList(); // make it a list even if it has 1 item
+  parser.toList(); // make sure it is a list
   const size_t n = parser.size();
   if ( n == 0 )
   {
@@ -43,7 +50,7 @@ boost::shared_ptr<IFuncMinimizer> FuncMinimizerFactoryImpl::createMinimizer(cons
   const std::string type = parser[0].str();
   auto minimizer = create( type );
 
-  // set the properties if there are any
+  // set the properties
   for(size_t i = 1; i < n; ++i)
   {
     auto& param = parser[i];

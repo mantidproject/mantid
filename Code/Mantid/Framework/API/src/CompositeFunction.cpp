@@ -121,10 +121,17 @@ void CompositeFunction::function(const FunctionDomain& domain, FunctionValues& v
  */
 void CompositeFunction::functionDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
-  for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+  if ( m_useNumericDerivatives )
   {
-    PartialJacobian J(&jacobian,paramOffset(iFun));
-    getFunction(iFun)->functionDeriv(domain,J);
+    calNumericalDeriv(domain, jacobian);
+  }
+  else
+  {
+    for(size_t iFun = 0; iFun < nFunctions(); ++iFun)
+    {
+      PartialJacobian J(&jacobian,paramOffset(iFun));
+      getFunction(iFun)->functionDeriv(domain,J);
+    }
   }
 }
 
@@ -602,18 +609,6 @@ size_t CompositeFunction::functionIndex(std::size_t i)const
 }
 
 /**
- * Get the index of the function to which parameter i belongs
- * @param i :: The active parameter index
- * @return active function index of the requested parameter
- */
-//size_t CompositeFunction::functionIndexActive(std::size_t i)const
-//{
-//  if( i >= nParams() )
-//    throw std::out_of_range("Function parameter index out of range.");
-//  return m_IFunctionActive[i];
-//}
-
-/**
 * @param varName :: The variable name which may contain function index ( [f<index.>]name )
 * @param index :: Receives function index or throws std::invalid_argument
 * @param name :: Receives the parameter name
@@ -819,6 +814,16 @@ IFunction_sptr CompositeFunction::getContainingFunction(const ParameterReference
   }
   return IFunction_sptr();
 }
+
+/**
+ * Enable/disable numeric derivative calculation.
+ * @param yes :: Set to true to use numeric derivative calculation.
+ */
+void CompositeFunction::useNumericDerivatives( bool yes ) const
+{
+  m_useNumericDerivatives = yes;
+}
+
 
 } // namespace API
 } // namespace Mantid

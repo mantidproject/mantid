@@ -25,7 +25,7 @@ namespace CurveFitting
 DECLARE_FUNCMINIMIZER(LevenbergMarquardtMDMinimizer,Levenberg-MarquardtMD)
 
 // Get a reference to the logger
-Kernel::Logger& LevenbergMarquardtMDMinimizer::g_log = Kernel::Logger::get("LevenbergMarquardtMDMinimizer");
+Kernel::Logger& LevenbergMarquardtMDMinimizer::g_log = Kernel::Logger::get("Lev-MarqMD");
 
 /// Constructor
 LevenbergMarquardtMDMinimizer::LevenbergMarquardtMDMinimizer():
@@ -36,6 +36,8 @@ m_mu(0),
 m_nu(2.0),
 m_rho(1.0)
 {
+  declareProperty("MuMax",1e6,"Maximum value of mu.");
+  declareProperty("Debug",false,"Turn on the debug output.");
 }
 
 /// Initialize minimizer, i.e. pass a function to minimize.
@@ -54,7 +56,8 @@ void LevenbergMarquardtMDMinimizer::initialize(API::ICostFunction_sptr function)
 /// Do one iteration.
 bool LevenbergMarquardtMDMinimizer::iterate()
 {
-  const bool debug = false;
+  const bool debug = getProperty("Debug");
+  const double muMax = getProperty("MuMax");
 
   if ( !m_leastSquares )
   {
@@ -64,7 +67,13 @@ bool LevenbergMarquardtMDMinimizer::iterate()
 
   if ( n == 0 )
   {
-    m_errorString = "No parameters to fit";
+    m_errorString = "No parameters to fit.";
+    return false;
+  }
+
+  if ( m_mu > muMax )
+  {
+    m_errorString = "Failed to converge.";
     return false;
   }
 
@@ -88,7 +97,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
 
   if (debug)
   {
-    std::cerr << "mu=" << m_mu << std::endl;
+    g_log.warning() << "mu=" << m_mu << std::endl;
   }
 
   if (m_D.empty())
@@ -97,8 +106,11 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   }
 
   // copy the hessian
-  GSLMatrix H(m_leastSquares->getHessian()/*m_hessian*/);
-  GSLVector dd(m_leastSquares->getDeriv()/*m_der*/);
+  GSLMatrix H( m_leastSquares->getHessian() );
+  GSLVector dd( m_leastSquares->getDeriv() );
+
+  // scaling factors
+  std::vector<double> sf(n);
 
   for(size_t i = 0; i < n; ++i)
   {
@@ -107,17 +119,41 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     m_D[i] = d;
     double tmp = H.get(i,i) + m_mu * d;
     H.set(i,i,tmp);
+    sf[i] = sqrt( tmp );
+    if ( tmp == 0.0 )
+    {
+      m_errorString = "Singular matrix.";
+      return false;
+    }
+  }
+
+  // apply scaling
+  for(size_t i = 0; i < n; ++i)
+  {
+    double d = dd.get(i);
+    dd.set( i, d / sf[i] );
+    for(size_t j = i; j < n; ++j)
+    {
+      const double f = sf[i] * sf[j];
+      double tmp = H.get(i,j);
+      H.set(i,j,tmp/f);
+      if ( i != j )
+      {
+        tmp = H.get(j,i);
+        H.set(j,i,tmp/f);
+      }
+    }
   }
 
   if (debug && m_rho > 0)
   {
-    std::cerr << "H:\n" << H ;
-    std::cerr << "-----------------------------\n";
-    for(size_t j = 0; j < n; ++j)  {std::cerr << dd.get(j) << ' '; } std::cerr << std::endl;
-    std::cerr << "det=" << H.det() << std::endl;
+    g_log.warning() << "H:\n" << H ;
+    g_log.warning() << "-----------------------------\n";
+    for(size_t j = 0; j < n; ++j)  {g_log.warning() << dd.get(j) << ' '; } g_log.warning() << std::endl;
+    g_log.warning() << "det=" << H.det() << std::endl;
   }
 
-  /// Parameter corrections
+  // Parameter corrections
   GSLVector dx(n);
   // To find dx solve the system of linear equations   H * dx == -m_der
   dd *= -1.0;
@@ -125,7 +161,19 @@ bool LevenbergMarquardtMDMinimizer::iterate()
 
   if (debug)
   {
-    for(size_t j = 0; j < n; ++j)  {std::cerr << dx.get(j) << ' '; } std::cerr << std::endl << std::endl;
+    g_log.warning() << "\nScaling:" << std::endl;
+    for(size_t j = 0; j < n; ++j)  {g_log.warning() << sf[j] << ' '; } g_log.warning() << std::endl;
+    g_log.warning() << "Corrections:" << std::endl;
+    for(size_t j = 0; j < n; ++j)  {g_log.warning() << dx.get(j) << ' '; } g_log.warning() << std::endl << std::endl;
+  }
+
+  // restore scaling
+  for(size_t i = 0; i < n; ++i)
+  {
+    double d = dx.get(i);
+    dx.set( i, d / sf[i] );
+    d = dd.get(i);
+    dd.set( i, d * sf[i] );
   }
 
   // save previous state
@@ -137,7 +185,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     m_leastSquares->setParameter(i,d);
     if (debug)
     {
-      std::cerr << "P" << i << ' ' << d << std::endl;
+      g_log.warning() << "P" << i << ' ' << d << std::endl;
     }
   }
   m_leastSquares->getFittingFunction()->applyTies();
@@ -155,8 +203,8 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   if (debug)
   {
     static size_t iter = 0;
-    std::cerr << "iter " << ++iter << std::endl;
-    std::cerr << "F " << m_F << ' ' << F1 << ' ' << dL << std::endl;
+    g_log.warning() << "iter " << ++iter << std::endl;
+    g_log.warning() << "F " << m_F << ' ' << F1 << ' ' << dL << std::endl;
   }
 
   // Try the stop condition
@@ -196,7 +244,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
   }
   if (debug)
   {
-    std::cerr << "rho=" << m_rho << std::endl;
+    g_log.warning() << "rho=" << m_rho << std::endl;
   }
 
   if (m_rho > 0)
@@ -212,7 +260,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     m_nu = 2.0;
     m_F = F1;
     if (debug)
-    std::cerr << "times " << m_rho << std::endl;
+    g_log.warning() << "times " << m_rho << std::endl;
     // drop saved state, accept new parameters
     m_leastSquares->drop();
   }
@@ -225,6 +273,7 @@ bool LevenbergMarquardtMDMinimizer::iterate()
     m_F = m_leastSquares->val();
   }
 
+  //m_leastSquares->drop();
   return true;
 }
 

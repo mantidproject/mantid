@@ -54,7 +54,7 @@ class MANTID_API_DLL CompositeFunction : public virtual IFunction
 {
 public:
   /// Default constructor
-  CompositeFunction(): m_nParams(0){}
+  CompositeFunction(): m_nParams(0),m_useNumericDerivatives(false){}
   /// Copy contructor
   //CompositeFunction(const CompositeFunction&);
   ///Assignment operator
@@ -161,14 +161,14 @@ public:
   void replaceFunctionPtr(const IFunction_sptr f_old,IFunction_sptr f_new);
   /// Get the function index
   std::size_t functionIndex(std::size_t i)const;
-  /// Get the function index
-  //std::size_t functionIndexActive(std::size_t i)const;
   /// Returns the index of parameter i as it declared in its function
   size_t parameterLocalIndex(size_t i)const;
   /// Returns the name of parameter i as it declared in its function
   std::string parameterLocalName(size_t i)const;
   /// Check the function.
   void checkFunction();
+  /// Enable/disable numeric derivative calculation
+  void useNumericDerivatives( bool yes ) const;
 
   /// Returns the number of attributes associated with the function
   virtual size_t nLocalAttributes()const {return 0;}
@@ -217,6 +217,8 @@ private:
   size_t m_nParams;
   /// Function counter to be used in nextConstraint
   mutable size_t m_iConstraintFunction;
+  /// Flag set to use numerical derivatives
+  mutable bool m_useNumericDerivatives;
 };
 
 ///shared pointer to the composite function base class

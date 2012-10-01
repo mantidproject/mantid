@@ -1386,6 +1386,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
   g_log.debug() << "[Before Fit] Function To Fit: " << mLeBailFunction->asString() << std::endl;
 
   // b) Set property
+  mLeBailFunction->useNumericDerivatives( true );
   fitalg->setProperty("Function", boost::shared_ptr<API::IFunction>(mLeBailFunction));
   fitalg->setProperty("InputWorkspace", dataWS);
   fitalg->setProperty("WorkspaceIndex", int(workspaceindex));

@@ -1042,7 +1042,19 @@ std::string FitPropertyBrowser::minimizer(bool withProperties)const
   {
     foreach(QtProperty* prop,m_minimizerProperties)
     {
-      minimStr += "," + prop->propertyName() + "=" + QString::number( m_doubleManager->value(prop) );
+      minimStr += "," + prop->propertyName() + "=";
+      if ( prop->propertyManager() == m_doubleManager )
+      {
+        minimStr += QString::number( m_doubleManager->value(prop) );
+      }
+      else if ( prop->propertyManager() == m_boolManager )
+      {
+        minimStr += QString::number( m_boolManager->value(prop) );
+      }
+      else
+      {
+        minimStr += m_stringManager->value(prop);
+      }
     }
   }
   return minimStr.toStdString();
@@ -2952,7 +2964,24 @@ void FitPropertyBrowser::minimizerChanged()
   for(auto it = properties.begin(); it != properties.end(); ++it)
   {
     QString propName = QString::fromStdString( (**it).name() );
-    QtProperty* prop = this->addDoubleProperty( propName );
+    QtProperty* prop = NULL;
+    if ( auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<bool>* >(*it) )
+    {
+      prop = m_boolManager->addProperty( propName );
+      bool val = *prp;
+      m_boolManager->setValue( prop, val );
+    }
+    else if ( auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(*it) )
+    {
+      prop = this->addDoubleProperty( propName );
+      double val = *prp;
+      m_doubleManager->setValue( prop, val );
+    }
+    else
+    {
+      prop = m_stringManager->addProperty( propName );
+      QString val = QString::fromStdString( prp->value() );
+    }
     m_settingsGroup->property()->addSubProperty( prop );
     m_minimizerProperties.append( prop );
   }
