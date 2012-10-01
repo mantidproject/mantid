@@ -295,7 +295,7 @@ namespace NeXus {
      * @param extendible :: true if the vector is to be extendible.
      */
     template <typename NumT>
-    void writeData(const std::string& name, const std::vector<NumT>& value,const std::string & units="");
+    void writeData(const std::string& name, const std::vector<NumT>& value);
 
     /**
      * Create a 1D data field, insert the data, and close the data.
@@ -305,7 +305,7 @@ namespace NeXus {
      * @param value :: The value to put into the file.
      */
     template <typename NumT>
-    void writeData(const std::string& name, const NumT& value,const std::string & units="");
+    void writeData(const std::string& name, const NumT& value);
 
     /**
      * Create a n-dimension data field, insert the data, and close the data.
@@ -317,7 +317,7 @@ namespace NeXus {
      */
     template <typename NumT>
     void writeData(const std::string& name, const std::vector<NumT>& value,
-                   const std::vector<int>& dims,const std::string & units="");
+                   const std::vector<int>& dims);
 
 
 

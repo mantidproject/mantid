@@ -346,9 +346,9 @@ void File::makeData(const string & name, const NXnumtype type,
 
 
 template <typename NumT>
-void File::writeData(const string& name, const NumT& value,const string& units ) {
+void File::writeData(const string& name, const NumT& value) {
   std::vector<NumT> v(1, value);
-  this->writeData(name, v,units);
+  this->writeData(name, v);
 }
 
 void File::writeData(const string& name, const char* value) {
@@ -371,20 +371,16 @@ void File::writeData(const string& name, const string& value) {
 
 
 template <typename NumT>
-void File::writeData(const string& name, const vector<NumT>& value, const std::string &units) {
+void File::writeData(const string& name, const vector<NumT>& value) {
   vector<int> dims(1, static_cast<int>(value.size()));
-  this->writeData(name, value, dims,units);
+  this->writeData(name, value, dims);
 }
 
 template <typename NumT>
 void File::writeData(const string& name, const vector<NumT>& value,
-                     const vector<int>& dims, const std::string &units) {
+                     const vector<int>& dims) {
   this->makeData(name, getType<NumT>(), dims, true);
   this->putData(value);
-  if (units.length()>0)
-  {
-      this->putAttr("units",units);
-  }
   this->closeData();
 }
 
@@ -1402,50 +1398,50 @@ template
 NXDLL_EXPORT char File::getAttr(const AttrInfo& info);
 
 template
-NXDLL_EXPORT void File::writeData(const string& name, const float& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const float& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const double& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const double& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const int8_t& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const int8_t& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const uint8_t& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const uint8_t& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const int16_t& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const int16_t& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const uint16_t& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const uint16_t& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const int32_t& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const int32_t& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const uint32_t& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const uint32_t& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const int64_t& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const int64_t& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const uint64_t& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const uint64_t& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const char& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const char& value);
 
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<float>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<float>& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<double>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<double>& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<int8_t>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<int8_t>& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<uint8_t>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<uint8_t>& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<int16_t>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<int16_t>& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<uint16_t>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<uint16_t>& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<int32_t>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<int32_t>& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<uint32_t>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<uint32_t>& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<int64_t>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<int64_t>& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<uint64_t>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<uint64_t>& value);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<char>& value, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<char>& value);
 
 template
 NXDLL_EXPORT void File::writeExtendibleData(const string& name, std::vector<float>& value);
@@ -1563,25 +1559,25 @@ template
 NXDLL_EXPORT void File::writeUpdatedData(const string& name, vector<char>& value, std::vector<int> & dims);
 
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<float>& value, const std::vector<int>& dims, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<float>& value, const std::vector<int>& dims);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<double>& value, const std::vector<int>& dims, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<double>& value, const std::vector<int>& dims);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<int8_t>& value, const std::vector<int>& dims, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<int8_t>& value, const std::vector<int>& dims);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<uint8_t>& value, const std::vector<int>& dims, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<uint8_t>& value, const std::vector<int>& dims);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<int16_t>& value, const std::vector<int>& dims, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<int16_t>& value, const std::vector<int>& dims);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<uint16_t>& value, const std::vector<int>& dims, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<uint16_t>& value, const std::vector<int>& dims);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<int32_t>& value, const std::vector<int>& dims, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<int32_t>& value, const std::vector<int>& dims);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<uint32_t>& value, const std::vector<int>& dims, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<uint32_t>& value, const std::vector<int>& dims);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<int64_t>& value, const std::vector<int>& dims, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<int64_t>& value, const std::vector<int>& dims);
 template
-NXDLL_EXPORT void File::writeData(const string& name, const vector<uint64_t>& value, const std::vector<int>& dims, const string& units);
+NXDLL_EXPORT void File::writeData(const string& name, const vector<uint64_t>& value, const std::vector<int>& dims);
 
 template
 NXDLL_EXPORT void File::writeCompData(const string & name, const vector<float> & value,

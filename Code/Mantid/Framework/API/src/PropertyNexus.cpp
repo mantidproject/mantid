@@ -263,8 +263,10 @@ namespace PropertyNexus
     std::vector<NumT> value = prop->valuesAsVector();
     if( value.empty() ) return;
     file->makeGroup(prop->name(), "NXlog", 1);
-    file->writeData("value", value,prop->units() );
-    //file->putAttr("units",prop->units());
+    file->writeData("value", value );
+    file->openData("value");
+    file->putAttr("units",prop->units());
+    file->closeData();
     saveTimeVector(file, prop);
     file->closeGroup();
   }
