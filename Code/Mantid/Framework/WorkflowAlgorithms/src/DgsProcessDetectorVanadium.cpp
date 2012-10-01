@@ -71,6 +71,8 @@ namespace Mantid
           "A mask workspace");
       this->declareProperty(new WorkspaceProperty<>("GroupingWorkspace",
           "", Direction::Input, PropertyMode::Optional), "A grouping workspace");
+      this->declareProperty("AlternateGroupingTag", "",
+          "Allows modification to the OldGroupingFile property name");
       this->declareProperty("NoGrouping", false, "Flag to turn off grouping. This is mainly to cover the use of old format grouping files.");
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
           "The name for the output workspace.");
@@ -150,9 +152,11 @@ namespace Mantid
       MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
       MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
       std::string oldGroupFile("");
-      if (reductionManager->existsProperty("OldGroupingFilename"))
+      std::string filePropMod = this->getProperty("AlternateGroupingTag");
+      std::string fileProp = filePropMod + "OldGroupingFilename";
+      if (reductionManager->existsProperty(fileProp))
       {
-        oldGroupFile = reductionManager->getPropertyValue("OldGroupingFilename");
+        oldGroupFile = reductionManager->getPropertyValue(fileProp);
       }
       IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
       remap->setProperty("InputWorkspace", outputWS);
