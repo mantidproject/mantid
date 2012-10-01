@@ -286,7 +286,6 @@ namespace Mantid
       }
 
       const double binOffset = -monPeak;
-      reductionManager->declareProperty(new PropertyWithValue<double>("TofRangeOffset", binOffset));
 
       if ("ISIS" == facility)
       {
@@ -435,6 +434,7 @@ namespace Mantid
       IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
       norm->setProperty("InputWorkspace", outputWS);
       norm->setProperty("OutputWorkspace", outputWS);
+      norm->setProperty("TofRangeOffset", binOffset);
       norm->executeAsSubAlg();
       outputWS = norm->getProperty("OutputWorkspace");
 

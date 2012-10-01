@@ -71,6 +71,8 @@ namespace Mantid
           Direction::Input), "An input workspace.");
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
           Direction::Output), "The name for the output workspace.");
+      this->declareProperty("TofRangeOffset", 0.0,
+          "An addition to the TOF axis for monitor integration.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
           Direction::Input);
     }
@@ -122,11 +124,7 @@ namespace Mantid
         if ("ToMonitor" == incidentBeamNorm)
         {
           // Perform extra setup for monitor normalisation
-          double rangeOffset = 0.0;
-          if (reductionManager->existsProperty("TofRangeOffset"))
-          {
-            rangeOffset = reductionManager->getProperty("TofRangeOffset");
-          }
+          double rangeOffset = this->getProperty("TofRangeOffset");
           double rangeMin = reductionManager->getProperty("MonitorIntRangeLow");
           if (EMPTY_DBL() == rangeMin)
           {
