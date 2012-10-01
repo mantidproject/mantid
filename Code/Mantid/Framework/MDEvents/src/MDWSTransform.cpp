@@ -47,13 +47,13 @@ CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription 
     Kernel::Matrix<double> UB = TargWSDescription.getLattice()->getUB();
     isLatticeUnitMat = IMat.equals(UB);
   }else{
-    isLatticeUnitMat = false;
+    isLatticeUnitMat = true;
   }
   
 
   if(isGonUnitMat && isLatticeUnitMat ) return LabFrame;
-  if(!isGonUnitMat && isLatticeUnitMat) return SampleFrame;
-  return HKLFrame;
+  if(!isLatticeUnitMat)return HKLFrame;
+  return SampleFrame;
 }
 
 
