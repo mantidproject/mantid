@@ -8,6 +8,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include <limits>
+
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
@@ -62,9 +64,9 @@ public:
     MatrixWorkspace_sptr inputWS = createWorkspace(false);
 
     // Put bad values into workspace
-    inputWS->dataY(1)[0] = 0.0/0.0;
-    inputWS->dataE(1)[1] = 0.0/0.0;
-    inputWS->dataY(1)[2] = 1.0/0.0;
+    inputWS->dataY(1)[0] = std::numeric_limits<double>::quiet_NaN();
+    inputWS->dataE(1)[1] = std::numeric_limits<double>::quiet_NaN();
+    inputWS->dataY(1)[2] = std::numeric_limits<double>::infinity();
 
     // Name of the output workspace.
     std::string outWSName("WeightedMeanOfWorkspaceTest_OutputWS");
