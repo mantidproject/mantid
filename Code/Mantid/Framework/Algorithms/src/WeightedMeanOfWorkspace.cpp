@@ -16,6 +16,8 @@ and the variance is calculated by:
 #include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
+#include <boost/math/special_functions/fpclassify.hpp>
+
 namespace Mantid
 {
   using namespace API;
@@ -77,54 +79,43 @@ namespace Mantid
     void WeightedMeanOfWorkspace::exec()
     {
       MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
-      g_log.warning() << "Help1" << std::endl;
       // Check if it is an event workspace
       EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
       if (eventW != NULL)
       {
         throw std::runtime_error("WeightedMeanOfWorkspace cannot handle EventWorkspaces!");
       }
-      g_log.warning() << "Help2" << std::endl;
       // Create the output workspace
       MatrixWorkspace_sptr singleValued = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
-      g_log.warning() << "Help3" << std::endl;
       // Calculate weighted mean
       std::size_t numHists = inputWS->getNumberHistograms();
       double averageValue = 0.0;
       double weightSum = 0.0;
       for (std::size_t i = 0; i < numHists; ++i)
       {
-        g_log.warning() << "Iteration " << i << std::endl;
         IDetector_const_sptr det = inputWS->getDetector(i);
         if( det->isMonitor() || det->isMasked() )
         {
           continue;
         }
-        g_log.warning() << "OK Pixel" << std::endl;
         MantidVec y = inputWS->dataY(i);
         MantidVec e = inputWS->dataE(i);
         double weight = 0.0;
-        g_log.warning() << "A: " << y.size() << std::endl;
         for (std::size_t j = 0; j < y.size(); ++j)
         {
           if (!boost::math::isnan(y[j]) && !boost::math::isinf(y[j]) &&
               !boost::math::isnan(e[j]) && !boost::math::isinf(e[j]))
           {
             weight = 1.0 / (e[j] * e[j]);
-            g_log.warning() << "B: " << weight << std::endl;
             averageValue += (y[j] * weight);
-            g_log.warning() << "G: " << averageValue << std::endl;
             weightSum += weight;
           }
         }
       }
-      g_log.warning() << "Help4 " << averageValue << ", " << weightSum << std::endl;
       singleValued->dataX(0)[0] = 0.0;
       singleValued->dataY(0)[0] = averageValue / weightSum;
       singleValued->dataE(0)[0] = std::sqrt(weightSum);
-      g_log.warning() << "Help5" << std::endl;
       this->setProperty("OutputWorkspace", singleValued);
-      g_log.warning() << "Help6" << std::endl;
     }
 
   } // namespace Algorithms
