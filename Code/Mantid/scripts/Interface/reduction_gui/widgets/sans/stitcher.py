@@ -48,6 +48,11 @@ class StitcherWidget(BaseWidget):
         self._medium_q_data = None
         self._high_q_data = None
         
+        # Flag to know when a field has been modified by hand
+        self._low_q_modified = False
+        self._medium_q_modified = False
+        self._high_q_modified = False
+        
         self._referenceID = 0
         
         self._graph = "StitchedData"
@@ -122,6 +127,13 @@ class StitcherWidget(BaseWidget):
                     self.populate_combobox(filteredObj)
                     filteredObj.update()
                 elif event.type() == QtCore.QEvent.KeyPress:
+                    if filteredObj==self._content.low_q_combo:
+                        self._low_q_modified = True
+                    elif filteredObj==self._content.medium_q_combo:
+                        self._medium_q_modified = True
+                    elif filteredObj==self._content.high_q_combo:
+                        self._high_q_modified = True
+                        
                     if event.key() == QtCore.Qt.Key_Return or event.key() == QtCore.Qt.Key_Enter:
                         filteredObj.setItemText(0, filteredObj.lineEdit().text())
                         if filteredObj==self._content.low_q_combo:
@@ -278,6 +290,7 @@ class StitcherWidget(BaseWidget):
                                             self._content.low_scale_edit,
                                             self._content.low_first_spin,
                                             self._content.low_last_spin)
+        self._low_q_modified = False
 
     def _update_medium_q(self, ws=None):
         """
@@ -289,6 +302,7 @@ class StitcherWidget(BaseWidget):
                                                self._content.medium_scale_edit,
                                                self._content.medium_first_spin,
                                                self._content.medium_last_spin)
+        self._medium_q_modified = False
 
     def _update_high_q(self, ws=None):
         """
@@ -300,6 +314,7 @@ class StitcherWidget(BaseWidget):
                                              self._content.high_scale_edit,
                                              self._content.high_first_spin,
                                              self._content.high_last_spin)
+        self._high_q_modified = False
 
         file = str(self._content.high_q_combo.lineEdit().text())
         if len(file.strip())==0:
@@ -321,7 +336,6 @@ class StitcherWidget(BaseWidget):
         else:
             self._high_q_data = None
             util.set_valid(self._content.high_q_combo.lineEdit(), False)
-        self._plotted = False
 
     def data_browse_dialog(self):
         """
@@ -391,9 +405,12 @@ class StitcherWidget(BaseWidget):
             Perform auto-scaling
         """
         # Update data sets, in case the user typed in a file name without using the browse button
-        self._update_low_q()
-        self._update_medium_q()
-        self._update_high_q()
+        if self._low_q_modified:
+            self._update_low_q()
+        if self._medium_q_modified:
+            self._update_medium_q()
+        if self._high_q_modified:
+            self._update_high_q()
         
         s = Stitcher()
         if self._low_q_data is not None:
