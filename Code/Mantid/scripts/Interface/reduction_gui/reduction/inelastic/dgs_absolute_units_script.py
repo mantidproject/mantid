@@ -37,7 +37,7 @@ class AbsoluteUnitsScript(BaseScriptElement):
                 script += "AbsUnitsDetectorVanadiumInputFile=\"%s\",\n" % self.absunits_detector_vanadium
             if self.incident_energy != AbsoluteUnitsScript.incident_energy:
                 script += "AbsUnitsIncidentEnergy=\"%s\",\n" % self.incident_energy
-            if self.emin != AbsoluteUnitsScript.emin
+            if self.emin != AbsoluteUnitsScript.emin:
                 script += "AbsUnitsMinimumEnergy=%s,\n" % str(self.emin)
             if self.emax != AbsoluteUnitsScript.emax:
                 script += "AbsUnitsMaximumEnergy=%s,\n" % str(self.emax)
