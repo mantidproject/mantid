@@ -224,6 +224,7 @@ namespace Mantid
       TYPE getSingleValue(const DateAndTime& t, int& index) const;
       /// Returns total value, added up for all times regardless of filter
       TYPE getTotalValue() const;
+      //template<typename U,typename TYPE>  U getTotalValue() const;   
 
       /// Returns n-th valid time interval, in a very inefficient way.
       TimeInterval nthInterval(int n) const;

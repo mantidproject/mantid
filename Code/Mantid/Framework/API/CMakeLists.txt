@@ -73,6 +73,7 @@ set ( SRC_FILES
 	src/LoadAlgorithmFactory.cpp
 	src/LocatedDataRef.cpp
 	src/LocatedDataValue.cpp
+	src/LogManager.cpp	
 	src/MDGeometry.cpp
 	src/MatrixWSIndexCalculator.cpp
 	src/MatrixWorkspace.cpp
@@ -213,6 +214,7 @@ set ( INC_FILES
 	inc/MantidAPI/LoadAlgorithmFactory.h
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
+	inc/MantidAPI/LogManager.h
 	inc/MantidAPI/MDGeometry.h
 	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h

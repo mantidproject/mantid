@@ -8,7 +8,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/PropertyManager.h"
+
 
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
@@ -125,7 +125,7 @@ public:
 
 
 // =====================================================================================
-class ITableWorkspace_DllExport ITableWorkspace: public API::Workspace,public Kernel::PropertyManager
+class ITableWorkspace_DllExport ITableWorkspace: public API::Workspace
 {
 public:
   /// Virtual destructor.
