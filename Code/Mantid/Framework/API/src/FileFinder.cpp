@@ -405,7 +405,7 @@ namespace Mantid
             g_log.information() << "found path = " << path << '\n';
             return path;
           } else {
-            g_log.notice() << "Unable to find files via archive search with the filename that looks like a full filename" << "\n";
+            g_log.information() << "Unable to find files via archive search with the filename that looks like a full filename" << "\n";
           }
         }
       }
@@ -454,7 +454,7 @@ namespace Mantid
           g_log.information() << "found path = " << path << '\n';
           return path;
         } else {
-          g_log.notice() << "Unable to find files with extensions that comes with the filename" << "\n";
+          g_log.information() << "Unable to find files with extensions that comes with the filename" << "\n";
         }
       }
 
@@ -468,7 +468,7 @@ namespace Mantid
           g_log.information() << "found path = " << path << '\n';
           return path;
         } else {
-          g_log.notice() << "Unable to find files with extensions that are supplied by users or algorithms" << "\n";
+          g_log.information() << "Unable to find files with extensions that are supplied by users or algorithms" << "\n";
         }
       }
 
@@ -485,10 +485,10 @@ namespace Mantid
         g_log.information() << "found path = " << path << '\n';
         return path;
       } else {
-        g_log.notice() << "Unable to find files with extensions that are defined in the Facility.xml file" << "\n";
+        g_log.information() << "Unable to find files with extensions that are defined in the Facilities.xml file" << "\n";
       }
 
-      g_log.notice() << "Unable to find file path for " << hint << "\n";
+      g_log.information() << "Unable to find file path for " << hint << "\n";
 
       return "";
     }
