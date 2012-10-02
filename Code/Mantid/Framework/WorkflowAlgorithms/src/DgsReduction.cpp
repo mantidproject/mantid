@@ -228,7 +228,7 @@ namespace Mantid
           "Mask detectors below this threshold.");
       this->setPropertySettings("MedianTestLow",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
-      this->declareProperty("ErrorBarCriterion", 3.3, mustBePositive,
+      this->declareProperty("ErrorBarCriterion", 0.0, mustBePositive,
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("ErrorBarCriterion",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
