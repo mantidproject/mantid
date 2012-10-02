@@ -29,16 +29,24 @@ class AbsoluteUnitsScript(BaseScriptElement):
     def to_script(self):
         script = ""
         if self.do_absolute_units:
-            script +=  "DoAbsoluteUnits=%s,\n" % self.do_absolute_units
-            script += "AbsUnitsVanadium=\"%s\",\n" % self.absunits_vanadium
-            script += "AbsUnitsGroupingFile=\"%s\",\n" % self.grouping_file
-            script += "AbsUnitsDetectorVanadium=\"%s\",\n" % self.absunits_detector_vanadium
-            script += "AbsUnitsIncidentEnergy=\"%s\",\n" % self.incident_energy
-            script += "AbsUnitsMinimumEnergy=%s,\n" % str(self.emin)
-            script += "AbsUnitsMaximumEnergy=%s,\n" % str(self.emax)
-            script += "VanadiumMass=%s,\n" % str(self.vandium_mass)
-            script += "SampleMass=%s,\n" % str(self.sample_mass)
-            script += "SampleRmm=%s,\n" % str(self.sample_rmm)
+            script += "DoAbsoluteUnits=%s,\n" % self.do_absolute_units
+            script += "AbsUnitsSampleInputFile=\"%s\",\n" % self.absunits_vanadium
+            if self.grouping_file != AbsoluteUnitsScript.grouping_file:
+                script += "AbsUnitsGroupingFile=\"%s\",\n" % self.grouping_file
+            if self.absunits_detector_vanadium != AbsoluteUnitsScript.absunits_detector_vanadium:
+                script += "AbsUnitsDetectorVanadiumInputFile=\"%s\",\n" % self.absunits_detector_vanadium
+            if self.incident_energy != AbsoluteUnitsScript.incident_energy:
+                script += "AbsUnitsIncidentEnergy=\"%s\",\n" % self.incident_energy
+            if self.emin != AbsoluteUnitsScript.emin
+                script += "AbsUnitsMinimumEnergy=%s,\n" % str(self.emin)
+            if self.emax != AbsoluteUnitsScript.emax:
+                script += "AbsUnitsMaximumEnergy=%s,\n" % str(self.emax)
+            if self.vandium_mass != AbsoluteUnitsScript.vandium_mass:
+                script += "VanadiumMass=%s,\n" % str(self.vandium_mass)
+            if self.sample_mass != AbsoluteUnitsScript.sample_mass:
+                script += "SampleMass=%s,\n" % str(self.sample_mass)
+            if self.sample_rmm != AbsoluteUnitsScript.sample_rmm:
+                script += "SampleRmm=%s,\n" % str(self.sample_rmm)
         return script
     
     def to_xml(self):
