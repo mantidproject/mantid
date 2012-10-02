@@ -405,7 +405,7 @@ QString MWDiag::createDiagnosticScript() const
       "huge=" + highCounts + ","
       "van_lo=" + lowMedian + ","
       "van_hi=" + highMedian + ","
-      "van_sig=" + significance + ","
+      "samp_sig=" + significance + ","
       "samp_hi=" + acceptance + ","
       "bkgd_range=" + bkgdRange + ","
       "variation=" + variation + ","
@@ -420,7 +420,7 @@ QString MWDiag::createDiagnosticScript() const
       "huge=" + highCounts + ","
       "van_lo=" + lowMedian + ","
       "van_hi=" + highMedian + ","
-      "van_sig=" + significance + ","
+      "samp_sig=" + significance + ","
       "hard_mask=" + hard_mask_file;
   }
   
