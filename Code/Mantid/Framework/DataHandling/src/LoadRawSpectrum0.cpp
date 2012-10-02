@@ -111,7 +111,7 @@ void LoadRawSpectrum0::initDocs()
 
 			if(bLoadlogFiles)
 			{
-				runLoadLog(m_filename,localWorkspace);
+				runLoadLog(m_filename,localWorkspace, 0.0, 0.0);
         const int period_number = 1;
         createPeriodLogs(period_number, localWorkspace);
 			}

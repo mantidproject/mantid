@@ -142,11 +142,13 @@ void LoadRaw3::exec()
   // Only run the sub-algorithms once
   loadRunParameters(localWorkspace);
   runLoadMappingTable(m_filename,localWorkspace);
-  runLoadInstrument(m_filename,localWorkspace, 0.0, 0.5);
+  runLoadInstrument(m_filename,localWorkspace, 0.0, 0.4);
+  m_prog_start = 0.4;
   Run& run = localWorkspace->mutableRun();
   if (bLoadlogFiles)
   {
-    runLoadLog(m_filename,localWorkspace);
+    runLoadLog(m_filename,localWorkspace, 0.4, 0.5);
+    m_prog_start = 0.5;
     const int period_number = 1;
     createPeriodLogs(period_number, localWorkspace);
   }
@@ -154,8 +156,7 @@ void LoadRaw3::exec()
   setProtonCharge(run);
   setRunNumber(run);
 
-  // Delay progress start because of sub-algorithms run
-  m_prog_start = 0.5;  
+  // Set progress to start of range taking account of subalgorithms 
   setProg(0.0);  
 
   // populate instrument parameters
@@ -586,7 +587,7 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
   setProg( 0.5 );
   if (bLoadlogFiles)
   {
-    runLoadLog(fileName,localWorkspace);
+    runLoadLog(fileName,localWorkspace, 0.5, 0.7);
     const int current_period = 1;
     createPeriodLogs(current_period,localWorkspace);
   }

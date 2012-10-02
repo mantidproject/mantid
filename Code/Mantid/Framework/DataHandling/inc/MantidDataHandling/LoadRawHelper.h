@@ -115,7 +115,7 @@ namespace Mantid
       /// loadinstrumentfromraw sub algorithm
       void runLoadMappingTable(const std::string& fileName,DataObjects::Workspace2D_sptr);
       /// load log algorithm
-      void runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr);
+      void runLoadLog(const std::string& fileName,DataObjects::Workspace2D_sptr, double, double);
 
       /// Create the period specific logs
       void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace);

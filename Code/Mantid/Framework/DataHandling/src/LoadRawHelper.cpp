@@ -533,6 +533,7 @@ namespace Mantid
     void LoadRawHelper::runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd)
     {
       g_log.debug("Loading the instrument definition...");
+      m_prog = progStart;
       progress(m_prog, "Loading the instrument geometry...");
 
       std::string instrumentID = isisRaw->i_inst; // get the instrument name
@@ -670,16 +671,27 @@ namespace Mantid
     /// Run the LoadLog sub-algorithm
     /// @param fileName :: the raw file filename
     /// @param localWorkspace :: The workspace to load the logs for
-    void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace)
+    void LoadRawHelper::runLoadLog(const std::string& fileName, DataObjects::Workspace2D_sptr localWorkspace, double progStart, double progEnd )
     {
 
       g_log.debug("Loading the log files...");
+      if( progStart < progEnd ) {
+         m_prog = progStart;
+      }
       progress(m_prog, "Reading log files...");
       IAlgorithm_sptr loadLog = createSubAlgorithm("LoadLog");
       // Pass through the same input filename
       loadLog->setPropertyValue("Filename", fileName);
       // Set the workspace property to be the same one filled above
       loadLog->setProperty<MatrixWorkspace_sptr> ("Workspace", localWorkspace);
+
+      // Enable progress reporting by sub-algorithm - if progress range has duration
+      if( progStart < progEnd ) {
+        loadLog->addObserver(m_progressObserver);
+        setChildStartProgress(progStart);
+        setChildEndProgress(progEnd);
+      }
+
 
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
@@ -1008,6 +1020,9 @@ namespace Mantid
     void LoadRawHelper::loadSpectra(FILE* file,const int& period,const int& total_specs,
       DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec)
     {
+      double progStart = m_prog;
+      double progEnd = 1.0; // Assume this function is called last
+
       int64_t histCurrent = -1;
       int64_t wsIndex=0;
       int64_t numberOfPeriods=static_cast<int64_t>(isisRaw->t_nper);
@@ -1034,7 +1049,7 @@ namespace Mantid
           {
             if (++histCurrent % 100 == 0)
             {
-              m_prog = static_cast<double>(histCurrent) / histTotal;
+              m_prog = progStart + (progEnd - progStart)*(static_cast<double>(histCurrent) / histTotal);
             }
             interruption_point();
           }
