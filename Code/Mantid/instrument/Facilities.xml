@@ -398,6 +398,78 @@
   </instrument>
 
 </facility>
+    
+<facility name="SINQ" FileExtensions=".hdf">
+
+  <instrument name="HRPT">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="DMC">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="TriCS">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="POLDI">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="ORION">
+    <technique>Neutron Diffraction</technique>
+  </instrument>
+
+  <instrument name="SANS-I">
+    <technique>Small Angle Scattering</technique>
+  </instrument>
+  
+  <instrument name="SANS-II">
+    <technique>Small Angle Scattering</technique>
+  </instrument>
+
+  <instrument name="AMOR">
+    <technique>Reflectometry</technique>
+  </instrument>
+
+  <instrument name="MORPHEUS">
+    <technique>Reflectometry</technique>
+  </instrument>
+
+  <instrument name="NARZISS">
+    <technique>Reflectometry</technique>
+  </instrument>
+
+  <instrument name="FOCUS">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="Rita-II">
+    <technique>Triple Axis Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="TASP">
+    <technique>Triple Axis Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="EIGER">
+    <technique>Triple Axis Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="MARS">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Indirect Geometry Spectroscopy</technique>
+  </instrument>
+
+  <instrument name="MuPAD">
+  </instrument>
+
+  <instrument name="ECHO">
+  </instrument>
+
+</facility>
 
 <facility name="TEST" FileExtensions=".nxs,.dat,.xml">
 
