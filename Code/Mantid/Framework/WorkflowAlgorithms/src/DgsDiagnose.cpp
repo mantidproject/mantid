@@ -94,7 +94,6 @@ namespace Mantid
         throw std::runtime_error("DgsDiagnose cannot run without a reduction PropertyManager.");
       }
 
-      this->enableHistoryRecordingForChild(true);
       std::string maskName = this->getPropertyValue("OutputWorkspace");
       if (maskName.empty())
       {

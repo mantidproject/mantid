@@ -95,8 +95,6 @@ namespace Mantid
         throw std::runtime_error("DgsPreprocessData cannot run without a reduction PropertyManager.");
       }
 
-      this->enableHistoryRecordingForChild(true);
-
       // Log name that will indicate if the preprocessing has been done.
       const std::string doneLog = "DirectInelasticReductionNormalisedBy";
 

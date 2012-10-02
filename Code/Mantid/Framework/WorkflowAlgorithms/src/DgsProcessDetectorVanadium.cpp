@@ -98,8 +98,6 @@ namespace Mantid
         throw std::runtime_error("DgsProcessDetectorVanadium cannot run without a reduction PropertyManager.");
       }
 
-      this->enableHistoryRecordingForChild(true);
-
       MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
       MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
