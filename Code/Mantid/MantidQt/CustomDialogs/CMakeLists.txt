@@ -5,6 +5,7 @@ set ( SRC_FILES src/CreateSampleShapeDialog.cpp
                 src/LoadDialog.cpp
                 src/LoadAsciiDialog.cpp
                 src/LoadDAEDialog.cpp
+                src/LoadInstrumentDialog.cpp               
                 src/LoadRawDialog.cpp
                 src/LOQScriptInputDialog.cpp
                 src/MantidGLWidget.cpp
@@ -23,6 +24,7 @@ set ( MOC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
                 inc/MantidQtCustomDialogs/LoadDialog.h
                 inc/MantidQtCustomDialogs/LoadAsciiDialog.h
                 inc/MantidQtCustomDialogs/LoadDAEDialog.h
+                inc/MantidQtCustomDialogs/LoadInstrumentDialog.h               
                 inc/MantidQtCustomDialogs/LoadRawDialog.h
                 inc/MantidQtCustomDialogs/LOQScriptInputDialog.h
                 inc/MantidQtCustomDialogs/MantidGLWidget.h
@@ -42,6 +44,7 @@ set ( UI_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.ui
                inc/MantidQtCustomDialogs/LOQScriptInputDialog.ui
                inc/MantidQtCustomDialogs/PlotAsymmetryByLogValueDialog.ui
                inc/MantidQtCustomDialogs/LoadDialog.ui
+               inc/MantidQtCustomDialogs/LoadInstrumentDialog.ui              
                inc/MantidQtCustomDialogs/StartLiveDataDialog.ui
                inc/MantidQtCustomDialogs/SlicingAlgorithmDialog.ui
                inc/MantidQtCustomDialogs/FitDialog.ui
