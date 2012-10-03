@@ -92,9 +92,9 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             if self.tof_start != DiagnoseDetectorsScript.tof_start:
                 script += "BackgroundTofStart=%s,\n" % self.tof_start
             if self.tof_end != DiagnoseDetectorsScript.tof_end:
-                script += "BackgroundTofEnd=%s,\n" % int(self.tof_end)
+                script += "BackgroundTofEnd=%s,\n" % self.tof_end
         if self.reject_zero_bkg:
-            script += "RejectZeroBackground=%s,\n" % int(self.reject_zero_bkg)
+            script += "RejectZeroBackground=%s,\n" % self.reject_zero_bkg
         if self.psd_bleed:
             script += "PsdBleed=%s,\n" % self.psd_bleed
             if self.max_framerate != DiagnoseDetectorsScript.max_framerate:
