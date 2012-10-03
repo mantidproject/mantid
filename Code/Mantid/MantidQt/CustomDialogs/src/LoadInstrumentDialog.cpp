@@ -76,13 +76,10 @@ namespace MantidQt
         if(result == QMessageBox::Cancel)
         {
           ui.ck_rewrite_spec_map->setChecked(false);
-        }
-        else
-        {
-          AlgorithmDialog::accept();
+          return;
         }
       }
-      
+      AlgorithmDialog::accept();
     }
     
     /**
