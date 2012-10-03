@@ -752,7 +752,7 @@ namespace Mantid
         double eMin = this->getParameter("AbsUnitsMinimumEnergy", absUnitsWS,
             "monovan-integr-min");
         double eMax = this->getParameter("AbsUnitsMaximumEnergy", absUnitsWS,
-            "monovan-intger-max");
+            "monovan-integr-max");
         std::vector<double> params;
         params.push_back(eMin);
         params.push_back(eMax - eMin);
