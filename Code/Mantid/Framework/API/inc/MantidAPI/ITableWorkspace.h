@@ -125,7 +125,7 @@ public:
 
 
 // =====================================================================================
-class ITableWorkspace_DllExport ITableWorkspace: public API::Workspace, virtual public PropertyManager
+class ITableWorkspace_DllExport ITableWorkspace: public API::Workspace, virtual public Kernel::PropertyManager
 {
 public:
   /// Virtual destructor.

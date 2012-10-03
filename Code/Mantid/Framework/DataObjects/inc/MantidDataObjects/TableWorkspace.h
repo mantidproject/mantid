@@ -407,7 +407,7 @@ private:
     /// Logger
     static Kernel::Logger& g_log;
 
-    Kernel::PropertyManager_sptr m_TableProperties;
+   // Kernel::PropertyManager_sptr m_TableProperties;
 
 };
 
