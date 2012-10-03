@@ -332,22 +332,45 @@ namespace Mantid
           "The incident energy for the vanadium sample.");
       this->setPropertySettings("AbsUnitsIncidentEnergy",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
-      this->declareProperty("AbsUnitsMinimumEnergy", -1.0,
+      this->declareProperty("AbsUnitsMinimumEnergy", EMPTY_DBL(),
           "The minimum energy for the integration range.");
       this->setPropertySettings("AbsUnitsMinimumEnergy",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
-      this->declareProperty("AbsUnitsMaximumEnergy", 1.0,
+      this->declareProperty("AbsUnitsMaximumEnergy", EMPTY_DBL(),
           "The maximum energy for the integration range.");
       this->setPropertySettings("AbsUnitsMaximumEnergy",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
-      this->declareProperty("VanadiumMass", 32.58, "The mass of vanadium.");
+      this->declareProperty("VanadiumMass", EMPTY_DBL(), "The mass of vanadium.");
       this->setPropertySettings("VanadiumMass",
+          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      this->declareProperty("VanadiumRmm", EMPTY_DBL(), "The mass of vanadium.");
+      this->setPropertySettings("VanadiumRmm",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
       this->declareProperty("SampleMass", 1.0, "The mass of sample.");
       this->setPropertySettings("SampleMass",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
       this->declareProperty("SampleRmm", 1.0, "The rmm of sample.");
       this->setPropertySettings("SampleRmm",
+          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      this->declareProperty("AbsUnitsLowOutlier", EMPTY_DBL(),
+          "Lower bound defining outliers as fraction of median value");
+      this->setPropertySettings("AbsUnitsLowOutlier",
+          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      this->declareProperty("AbsUnitsHighOutlier", EMPTY_DBL(),
+          "Upper bound defining outliers as fraction of median value");
+      this->setPropertySettings("AbsUnitsHighOutlier",
+          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      this->declareProperty("AbsUnitsMedianTestHigh", EMPTY_DBL(), mustBePositive,
+          "Mask detectors above this threshold.");
+      this->setPropertySettings("AbsUnitsMedianTestHigh",
+          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      this->declareProperty("AbsUnitsMedianTestLow", EMPTY_DBL(), mustBePositive,
+          "Mask detectors below this threshold.");
+      this->setPropertySettings("AbsUnitsMedianTestLow",
+          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      this->declareProperty("AbsUnitsErrorBarCriterion", EMPTY_DBL(), mustBePositive,
+          "Some selection criteria for the detector tests.");
+      this->setPropertySettings("AbsUnitsErrorBarCriterion",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
 
       this->setPropertyGroup("DoAbsoluteUnits", absUnitsCorr);
@@ -360,8 +383,14 @@ namespace Mantid
       this->setPropertyGroup("AbsUnitsMinimumEnergy", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsMaximumEnergy", absUnitsCorr);
       this->setPropertyGroup("VanadiumMass", absUnitsCorr);
+      this->setPropertyGroup("VanadiumRmm", absUnitsCorr);
       this->setPropertyGroup("SampleMass", absUnitsCorr);
       this->setPropertyGroup("SampleRmm", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsLowOutlier", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsHighOutlier", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsMedianTestHigh", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsMedianTestLow", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsErrorBarCriterion", absUnitsCorr);
 
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
           Direction::Output);
@@ -517,6 +546,17 @@ namespace Mantid
           return boost::shared_ptr<MatrixWorkspace>();
         }
       }
+    }
+
+    double DgsReduction::getParameter(std::string algParam,
+        MatrixWorkspace_sptr ws, std::string altParam)
+    {
+      double param = this->getProperty(algParam);
+      if (EMPTY_DBL() == param)
+      {
+        param = ws->getInstrument()->getNumberParameter(altParam)[0];
+      }
+      return param;
     }
 
     //----------------------------------------------------------------------------------------------
@@ -700,14 +740,19 @@ namespace Mantid
         etConv->executeAsSubAlg();
         absUnitsWS = etConv->getProperty("OutputWorkspace");
 
-        const double vanadiumMass = this->getProperty("VanadiumMass");
-        const double vanadiumRmm = absUnitsWS->getInstrument()->getNumberParameter("vanadium-rmm")[0];
+        const double vanadiumMass = this->getParameter("VanadiumMass",
+            absUnitsWS, "vanadium-mass");
+
+        const double vanadiumRmm = this->getParameter("VanadiumRmm",
+            absUnitsWS, "vanadium-rmm");
 
         absUnitsWS /= (vanadiumMass / vanadiumRmm);
 
         // Set integration range for absolute units sample
-        double eMin = this->getProperty("AbsUnitsMinimumEnergy");
-        double eMax = this->getProperty("AbsUnitsMaximumEnergy");
+        double eMin = this->getParameter("AbsUnitsMinimumEnergy", absUnitsWS,
+            "monovan-integr-min");
+        double eMax = this->getParameter("AbsUnitsMaximumEnergy", absUnitsWS,
+            "monovan-intger-max");
         std::vector<double> params;
         params.push_back(eMin);
         params.push_back(eMax - eMin);
@@ -728,11 +773,16 @@ namespace Mantid
         // Run diagnostics
         const double huge = reductionManager->getProperty("HighCounts");
         const double tiny = reductionManager->getProperty("LowCounts");
-        const double vanOutLo = absUnitsWS->getInstrument()->getNumberParameter("monovan_lo_bound")[0];
-        const double vanOutHi = absUnitsWS->getInstrument()->getNumberParameter("monovan_hi_bound")[0];
-        const double vanLo = absUnitsWS->getInstrument()->getNumberParameter("monovan_lo_frac")[0];
-        const double vanHi = absUnitsWS->getInstrument()->getNumberParameter("monovan_hi_frac")[0];
-        const double vanSigma = absUnitsWS->getInstrument()->getNumberParameter("diag_samp_sig")[0];
+        const double vanOutLo = this->getParameter("AbsUnitsLowOutlier",
+            absUnitsWS, "monovan_lo_bound");
+        const double vanOutHi = this->getParameter("AbsUnitsHighOutlier",
+            absUnitsWS, "monovan_hi_bound");
+        const double vanLo = this->getParameter("AbsUnitsMedianTestLow",
+            absUnitsWS, "monovan_lo_frac");
+        const double vanHi = this->getParameter("AbsUnitsMedianTestHigh",
+            absUnitsWS, "monovan_hi_frac");
+        const double vanSigma = this->getParameter("AbsUnitsErrorBarCriterion",
+            absUnitsWS, "diag_samp_sig");
 
         IAlgorithm_sptr diag = this->createSubAlgorithm("DetectorDiagnostic");
         diag->setProperty("InputWorkspace", absUnitsWS);
