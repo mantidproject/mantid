@@ -89,9 +89,9 @@ namespace Mantid
       const Kernel::DblMatrix & getGoniometerMatrix() const;
 
       /// Save the run to a NeXus file with a given group name
-      void saveNexus(::NeXus::File * file, const std::string & group) const;
+      void saveNexus(::NeXus::File * file, const std::string & group, bool keepOpen=false) const;
       /// Load the run from a NeXus file with a given group name
-      void loadNexus(::NeXus::File * file, const std::string & group);
+      void loadNexus(::NeXus::File * file, const std::string & group, bool keepOpen=false);
 
     private:
       /// Calculate the gonoimeter matrix

@@ -337,7 +337,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * @param file :: open NeXus file
    * @param group :: name of the group to create
    */
-  void Run::saveNexus(::NeXus::File * file, const std::string & group) const
+  void Run::saveNexus(::NeXus::File * file, const std::string & group,bool keepOpen) const
   {
     LogManager::saveNexus(file,group,true);
 
@@ -352,7 +352,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       file->closeGroup();
     }
 
-    file->closeGroup();
+    if(!keepOpen)file->closeGroup();
   }
 
   //--------------------------------------------------------------------------------------------
@@ -361,7 +361,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * @param group :: name of the group to open. Empty string to NOT open a group, but
    * load any NXlog in the current open group.
    */
-  void Run::loadNexus(::NeXus::File * file, const std::string & group)
+  void Run::loadNexus(::NeXus::File * file, const std::string & group, bool keepOpen)
   {
     LogManager::loadNexus(file,group,true);
 
@@ -392,7 +392,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
         this->setProtonCharge(charge);
       }
     }
-    if (!group.empty()) file->closeGroup();
+    if (!(group.empty() || keepOpen)) file->closeGroup();
 
 
     if( this->hasProperty("proton_charge") )
