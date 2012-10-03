@@ -20,13 +20,6 @@ namespace API
 {
 
 using namespace Kernel;
-namespace
-{
-  /// The number of log entries summed when adding a run
-  const int ADDABLES = 6;
-  /// The names of the log entries summed when adding two runs together
-  const std::string ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour"}; 
-}
 
 // Get a reference to the logger
 Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
@@ -74,40 +67,6 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
     return *this;
   }
 
-
-  //-----------------------------------------------------------------------------------------------
-  /**
-   * Adds just the properties that are safe to add. All time series are
-   * merged together and the list of addable properties are added
-   * @param rhs The object that is being added to this.
-   * @returns A reference to the summed object
-   */
-  LogManager& LogManager::operator+=(const LogManager& rhs)
-  {
-    //merge and copy properties where there is no risk of corrupting data
-    mergeMergables(m_manager, rhs.m_manager);
-
-    // Other properties are added to gether if they are on the approved list
-    for(int i = 0; i < ADDABLES; ++i )
-    {
-      if (rhs.m_manager.existsProperty(ADDABLE[i]))
-      {
-        // get a pointer to the property on the right-handside workspace
-        Property * right = rhs.m_manager.getProperty(ADDABLE[i]);
-
-        // now deal with the left-handside
-        if (m_manager.existsProperty(ADDABLE[i]))
-        {
-          Property * left = m_manager.getProperty(ADDABLE[i]);
-          left->operator+=(right);
-        }
-        else
-          //no property on the left-handside, create one and copy the right-handside across verbatum
-          m_manager.declareProperty(right->clone(), "");
-      }
-    }
-    return *this;
-  }
 
   /**
   * Set the run start and end
@@ -395,23 +354,13 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
   /** Save the object to an open NeXus file.
    * @param file :: open NeXus file
    * @param group :: name of the group to create
+   * @param keepOpen :: do not close group on exit to allow overloading and child classes writing to the same group 
    */
-  void LogManager::saveNexus(::NeXus::File * file, const std::string & group) const
+  void LogManager::saveNexus(::NeXus::File * file, const std::string & group,bool keepOpen) const
   {
     file->makeGroup(group, "NXgroup", 1);
     file->putAttr("version", 1);
-
-    //// Now the goniometer
-    //m_goniometer.saveNexus(file, GONIOMETER_LOG_NAME);
-
-    //// Now the histogram bins, if there are any
-    //if(!m_histoBins.empty())
-    //{
-    //  file->makeGroup(HISTO_BINS_LOG_NAME, "NXdata", 1);
-    //  file->writeData("value", m_histoBins);
-    //  file->closeGroup();
-    //}
-
+       
     // Save all the properties as NXlog
     std::vector<Property *> props = m_manager.getProperties();
     for (size_t i=0; i<props.size(); i++)
@@ -425,16 +374,17 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
         g_log.warning(exc.what());
       }
     }
-    file->closeGroup();
+    if(!keepOpen)file->closeGroup();
   }
 
   //--------------------------------------------------------------------------------------------
   /** Load the object from an open NeXus file.
    * @param file :: open NeXus file
    * @param group :: name of the group to open. Empty string to NOT open a group, but
+   * @param keepOpen :: do not close group on exit to allow overloading and child classes reading from the same group
    * load any NXlog in the current open group.
    */
-  void LogManager::loadNexus(::NeXus::File * file, const std::string & group)
+  void LogManager::loadNexus(::NeXus::File * file, const std::string & group,bool keepOpen)
   {
     if (!group.empty()) file->openGroup(group, "NXgroup");
 
@@ -458,52 +408,14 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
         }
       }
     }
-    if (!group.empty()) file->closeGroup();
-
-
-    //if( this->hasProperty("proton_charge") )
-    //{
-    //  // Old files may have a proton_charge field, single value.
-    //  // Modern files (e.g. SNS) have a proton_charge TimeSeriesProperty.
-    //  PropertyWithValue<double> *charge_log = dynamic_cast<PropertyWithValue<double>*>(this->getProperty("proton_charge"));
-    //  if (charge_log)
-    //  {  this->setProtonCharge(boost::lexical_cast<double>(charge_log->value()));
-    //  }
-    //}
+    if (!(group.empty()||keepOpen))file->closeGroup();
+   
   }
 
   //-----------------------------------------------------------------------------------------------------------------------
   // Private methods
   //-----------------------------------------------------------------------------------------------------------------------
-
-  /** Adds all the time series in the second property manager to those in the first
-  * @param sum the properties to add to
-  * @param toAdd the properties to add
-  */
-  void LogManager::mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd)
-  {
-    // get pointers to all the properties on the right-handside and prepare to loop through them
-    const std::vector<Property*> inc = toAdd.getProperties();
-    std::vector<Property*>::const_iterator end = inc.end();
-    for (std::vector<Property*>::const_iterator it=inc.begin(); it != end;++it)
-    {
-      const std::string rhs_name = (*it)->name();
-      try
-      {
-        //now get pointers to the same properties on the left-handside
-        Property * lhs_prop(sum.getProperty(rhs_name));
-        lhs_prop->merge(*it);
-      }
-      catch (Exception::NotFoundError &)
-      {
-        //copy any properties that aren't already on the left hand side
-        Property * copy = (*it)->clone();
-        //And we add a copy of that property to *this
-        sum.declareProperty(copy, "");
-      }
-    }
-  }
-
+ 
 
 
   /// @cond

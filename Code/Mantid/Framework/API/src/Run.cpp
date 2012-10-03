@@ -23,6 +23,10 @@ using namespace Kernel;
 
 namespace
 {
+  /// The number of log entries summed when adding a run
+  const int ADDABLES = 6;
+  /// The names of the log entries summed when adding two runs together
+  const std::string ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour"}; 
   /// Name of the goniometer log when saved to a NeXus file
   const char * GONIOMETER_LOG_NAME = "goniometer";
   /// Name of the stored histogram bins log when saved to NeXus
@@ -87,6 +91,39 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     LogManager::filterByTime(start,stop);
     //Re-integrate proton charge
     this->integrateProtonCharge();
+  }
+
+  /**
+   * Adds just the properties that are safe to add. All time series are
+   * merged together and the list of addable properties are added
+   * @param rhs The object that is being added to this.
+   * @returns A reference to the summed object
+   */
+  Run& Run::operator+=(const Run& rhs)
+  {
+    //merge and copy properties where there is no risk of corrupting data
+    mergeMergables(m_manager, rhs.m_manager);
+
+    // Other properties are added together if they are on the approved list
+    for(int i = 0; i < ADDABLES; ++i )
+    {
+      if (rhs.m_manager.existsProperty(ADDABLE[i]))
+      {
+        // get a pointer to the property on the right-handside workspace
+        Property * right = rhs.m_manager.getProperty(ADDABLE[i]);
+
+        // now deal with the left-handside
+        if (m_manager.existsProperty(ADDABLE[i]))
+        {
+          Property * left = m_manager.getProperty(ADDABLE[i]);
+          left->operator+=(right);
+        }
+        else
+          //no property on the left-handside, create one and copy the right-handside across verbatum
+          m_manager.declareProperty(right->clone(), "");
+      }
+    }
+    return *this;
   }
 
 
@@ -302,13 +339,12 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    */
   void Run::saveNexus(::NeXus::File * file, const std::string & group) const
   {
-    file->makeGroup(group, "NXgroup", 1);
-    file->putAttr("version", 1);
+    LogManager::saveNexus(file,group,true);
 
-    // Now the goniometer
+    // write the goniometer
     m_goniometer.saveNexus(file, GONIOMETER_LOG_NAME);
 
-    // Now the histogram bins, if there are any
+    // write the histogram bins, if there are any
     if(!m_histoBins.empty())
     {
       file->makeGroup(HISTO_BINS_LOG_NAME, "NXdata", 1);
@@ -316,19 +352,6 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
       file->closeGroup();
     }
 
-    // Save all the properties as NXlog
-    std::vector<Property *> props = m_manager.getProperties();
-    for (size_t i=0; i<props.size(); i++)
-    {
-      try
-      {
-        PropertyNexus::saveProperty(file, props[i]);
-      }
-      catch(std::invalid_argument &exc)
-      {
-        g_log.warning(exc.what());
-      }
-    }
     file->closeGroup();
   }
 
@@ -340,7 +363,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    */
   void Run::loadNexus(::NeXus::File * file, const std::string & group)
   {
-    if (!group.empty()) file->openGroup(group, "NXgroup");
+    LogManager::loadNexus(file,group,true);
 
     std::map<std::string, std::string> entries;
     file->getEntries(entries);
@@ -350,18 +373,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     {
       // Get the name/class pair
       const std::pair<std::string, std::string> & name_class = *it;
-      // NXLog types are the main one.
-      if (name_class.second == "NXlog")
-      {
-        Property * prop = PropertyNexus::loadProperty(file, name_class.first);
-        if (prop)
-        {
-          if (m_manager.existsProperty(prop->name() ))
-            m_manager.removeProperty(prop->name() );
-          m_manager.declareProperty(prop);
-        }
-      }
-      else if (name_class.second == "NXpositioner")
+      if (name_class.second == "NXpositioner")
       {
         // Goniometer class
         m_goniometer.loadNexus(file, name_class.first);
@@ -372,7 +384,7 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
         file->readData("value",m_histoBins);
         file->closeGroup();
       }
-      else if (name_class.first == "proton_charge")
+      else if (name_class.first == "proton_charge" && !this->hasProperty("proton_charge"))
       {
         // Old files may have a proton_charge field, single value (not even NXlog)
         double charge;
@@ -410,6 +422,33 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
     }
   }
 
+ /** Adds all the time series in the second property manager to those in the first
+  * @param sum the properties to add to
+  * @param toAdd the properties to add
+  */
+  void Run::mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd)
+  {
+    // get pointers to all the properties on the right-handside and prepare to loop through them
+    const std::vector<Property*> inc = toAdd.getProperties();
+    std::vector<Property*>::const_iterator end = inc.end();
+    for (std::vector<Property*>::const_iterator it=inc.begin(); it != end;++it)
+    {
+      const std::string rhs_name = (*it)->name();
+      try
+      {
+        //now get pointers to the same properties on the left-handside
+        Property * lhs_prop(sum.getProperty(rhs_name));
+        lhs_prop->merge(*it);
+      }
+      catch (Exception::NotFoundError &)
+      {
+        //copy any properties that aren't already on the left hand side
+        Property * copy = (*it)->clone();
+        //And we add a copy of that property to *this
+        sum.declareProperty(copy, "");
+      }
+    }
+  }
 
 } //API namespace
 

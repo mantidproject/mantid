@@ -54,6 +54,9 @@ namespace Mantid
       Run(const Run& copy);
       /// Assignment operator
       const Run& operator=(const Run& rhs);
+   /// Addition
+      Run& operator+=(const Run& rhs);
+
     
       /// Filter the logs by time
       void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
@@ -101,6 +104,9 @@ namespace Mantid
       /// A set of histograms that can be stored here for future reference
       std::vector<double> m_histoBins;
 
+     /// Adds all the time series in from one property manager into another
+      void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd); 
+ 
      };
 
   }

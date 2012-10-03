@@ -60,9 +60,7 @@ namespace Mantid
       LogManager(const LogManager& copy);
       /// Assignment operator
       const LogManager& operator=(const LogManager& rhs);
-      /// Addition
-      LogManager& operator+=(const LogManager& rhs);
-
+   
 
       //-------------------------------------------------------------
       /// Set the run start and end
@@ -74,14 +72,14 @@ namespace Mantid
       //-------------------------------------------------------------
 
       /// Filter the logs by time
-      void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
+      virtual void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
       /// Split the logs based on the given intervals
-      void splitByTime(Kernel::TimeSplitterType& splitter, std::vector<  LogManager* > outputs) const;
+      virtual void splitByTime(Kernel::TimeSplitterType& splitter, std::vector<  LogManager* > outputs) const;
       /// Filter the run by the given boolean log
       void filterByLog(const Kernel::TimeSeriesProperty<bool> & filter);
 
       /// Return an approximate memory size for the object in bytes
-      size_t getMemorySize() const;
+      virtual size_t getMemorySize() const;
 
       /// Add data to the object in the form of a property
       void addProperty(Kernel::Property *prop, bool overwrite = false);
@@ -113,14 +111,7 @@ namespace Mantid
       /// Returns the named property as a pointer
       Kernel::Property * getProperty(const std::string & name) const;
 
-      /// Set the proton charge
-      void setProtonCharge( const double charge);
-      /// Get the proton charge
-      double getProtonCharge() const;
-      /// Integrate the proton charge over the whole run time
-      double integrateProtonCharge();
-
-    
+       
       /**
        * Add a log entry
        * @param p :: A pointer to the property containing the log entry
@@ -154,9 +145,9 @@ namespace Mantid
       void clearTimeSeriesLogs();
 
       /// Save the run to a NeXus file with a given group name
-      void saveNexus(::NeXus::File * file, const std::string & group) const;
+      virtual void saveNexus(::NeXus::File * file, const std::string & group,bool keepOpen=false) const;
       /// Load the run from a NeXus file with a given group name
-      void loadNexus(::NeXus::File * file, const std::string & group);
+      virtual void loadNexus(::NeXus::File * file, const std::string & group,bool keepOpen=false);
 
     protected:
       /// Static reference to the logger class
@@ -165,10 +156,8 @@ namespace Mantid
       Kernel::PropertyManager m_manager;
      /// Name of the log entry containing the proton charge when retrieved using getProtonCharge
       static const char * PROTON_CHARGE_LOG_NAME;
-    private:
-      /// Adds all the time series in from one property manager into another
-      void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd); 
-      /// Cache type for single value logs
+     private:
+       /// Cache type for single value logs
       typedef Kernel::Cache<std::pair<std::string,Kernel::Math::StatisticType>, double> SingleValueCache;
      /// Cache for the retrieved single values
       mutable SingleValueCache m_singleValueCache;
