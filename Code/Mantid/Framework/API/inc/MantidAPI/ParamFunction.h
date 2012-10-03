@@ -126,7 +126,7 @@ public:
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName);
   /// Set parameters to satisfy constraints
-  void setParametersToSatisfyConstraints();
+  void setUp();
 
   //using IFunction::removeTie;
 

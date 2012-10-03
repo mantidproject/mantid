@@ -541,35 +541,6 @@ void CompositeFunction::replaceFunction(size_t i,IFunction_sptr f)
     }
   }
 
-  // Modify function indeces: The new function may have different number of active parameters
-  //{
-  //  std::vector<size_t>::iterator itFun = std::find(m_IFunctionActive.begin(),m_IFunctionActive.end(),i);
-  //  if (itFun != m_IFunctionActive.end())
-  //  {
-  //    if (na_old > na_new)
-  //    {
-  //      m_IFunctionActive.erase(itFun,itFun + na_old - na_new);
-  //    }
-  //    else if (na_old < na_new) 
-  //    {
-  //      m_IFunctionActive.insert(itFun,na_new - na_old,i);
-  //    }
-  //  }
-  //  else if (na_new > 0)
-  //  {
-  //    itFun = std::find_if(m_IFunctionActive.begin(),m_IFunctionActive.end(),std::bind2nd(std::greater<size_t>(),i));
-  //    m_IFunctionActive.insert(itFun,na_new,i);
-  //  }
-  //}
-
-  //size_t dna = na_new - na_old;
-  //m_nActive += dna;
-  //// Recalc the active offsets 
-  //for(size_t j=i+1;j<nFunctions();j++)
-  //{
-  //  m_activeOffsets[j] += dna;
-  //}
-
   size_t dnp = np_new - np_old;
   m_nParams += dnp;
   // Shift the parameter offsets down by the total number of i-th function's params
@@ -737,11 +708,25 @@ void CompositeFunction::addConstraint(IConstraint* ic)
   getFunction(iFun)->addConstraint(ic);
 }
 
-void CompositeFunction::setParametersToSatisfyConstraints()
+/**
+ * Prepare the function for a fit.
+ */
+void CompositeFunction::setUp()
 {
+  // set up the member functions
   for(size_t i=0;i<nFunctions();i++)
   {
-    getFunction(i)->setParametersToSatisfyConstraints();
+    getFunction(i)->setUp();
+  }
+  // if parameters have non-constant ties enable numerical derivatives
+  for(size_t i = 0; i < nParams(); ++i)
+  {
+    ParameterTie* tie = getTie( i );
+    if ( tie && !tie->isConstant() )
+    {
+      useNumericDerivatives( true );
+      break;
+    }
   }
 }
 

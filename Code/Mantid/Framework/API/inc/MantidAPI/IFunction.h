@@ -362,12 +362,13 @@ public:
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName) = 0;
 
-  /// Set the parameters of the function to satisfy the constraints of
+  /// Set up the function for a fit. It can involve
+  /// setting the parameters of the function to satisfy the constraints
   /// of the function. For example
   /// for a BoundaryConstraint this if param value less than lower boundary
   /// it is set to that value and vice versa for if the param value is larger
   /// than the upper boundary value.
-  virtual void setParametersToSatisfyConstraints() {};
+  virtual void setUp() = 0;
 
   /// Returns the number of attributes associated with the function
   virtual size_t nAttributes()const{return 0;}

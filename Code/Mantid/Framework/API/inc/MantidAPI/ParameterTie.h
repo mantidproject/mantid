@@ -61,6 +61,8 @@ public:
 
   /// Check if the tie has any references to certain parameters
   bool findParametersOf(const IFunction* fun)const;
+  /// Check if the tie is a constant
+  bool isConstant() const;
 
 protected:
   mu::Parser* m_parser;         ///< math parser

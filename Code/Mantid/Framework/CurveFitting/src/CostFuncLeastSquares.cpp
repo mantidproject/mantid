@@ -172,7 +172,7 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
     addValDerivHessian(m_function,m_domain,simpleValues,evalFunction,evalDeriv,evalHessian);
   }
 
-  // Add constraints penaly
+  // Add constraints penalty
   size_t np = m_function->nParams();
   if (evalFunction)
   {
@@ -192,10 +192,10 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
     size_t i = 0;
     for(size_t ip = 0; ip < np; ++ip)
     {
+      if ( !m_function->isActive(ip) ) continue;
       API::IConstraint* c = m_function->getConstraint(ip);
       if (c)
       {
-        if ( !m_function->isActive(ip) ) continue;
         double d =  m_der.get(i) + c->checkDeriv();
         m_der.set(i,d);
       }
@@ -209,10 +209,10 @@ double CostFuncLeastSquares::valDerivHessian(bool evalFunction, bool evalDeriv, 
     size_t i = 0;
     for(size_t ip = 0; ip < np; ++ip)
     {
+      if ( !m_function->isActive(ip) ) continue;
       API::IConstraint* c = m_function->getConstraint(ip);
       if (c)
       {
-        if ( !m_function->isActive(ip) ) continue;
         double d =  m_hessian.get(i,i) + c->checkDeriv2();
         m_hessian.set(i,i,d);
       }

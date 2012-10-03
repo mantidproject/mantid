@@ -502,7 +502,7 @@ void ParamFunction::removeConstraint(const std::string& parName)
   }
 }
 
-void ParamFunction::setParametersToSatisfyConstraints()
+void ParamFunction::setUp()
 {
   for (size_t i = 0; i < m_constraints.size(); i++)
   {

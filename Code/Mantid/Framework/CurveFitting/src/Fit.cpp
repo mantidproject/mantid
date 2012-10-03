@@ -349,6 +349,9 @@ namespace CurveFitting
     {
       m_function->addConstraints(contstraints);
     }
+    
+    // prepare the function for a fit
+    m_function->setUp();
 
     API::FunctionDomain_sptr domain;
     API::IFunctionValues_sptr values;

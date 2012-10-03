@@ -141,7 +141,7 @@ public:
   void addConstraint(IConstraint* ic);
   /// Get constraint of i-th parameter
   virtual IConstraint* getConstraint(size_t i)const;
-  void setParametersToSatisfyConstraints();
+  void setUp();
   /// Remove a constraint
   void removeConstraint(const std::string& parName);
 

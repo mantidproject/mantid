@@ -200,6 +200,13 @@ namespace API
     return false;
   }
 
+  /**
+   * Check if the tie is a constant.
+   */
+  bool ParameterTie::isConstant() const
+  {
+    return m_varMap.empty();
+  }
 
 } // namespace CurveFitting
 } // namespace Mantid
