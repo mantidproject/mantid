@@ -51,7 +51,7 @@
 
 		<!-- Remove zeroes in background (s_zero)-->
 		<parameter name="diag_samp_zero">
-		  <value val="1.0"/>
+		  <value val="0.0"/>
 		</parameter>
 
 		<!-- Fraction of median to consider counting low for the white beam diag (sv_lo)-->
