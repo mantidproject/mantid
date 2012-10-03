@@ -43,7 +43,7 @@ namespace MantidQt
 
       connect(ui.controls, SIGNAL(accepted()), this, SLOT(accept()));
 
-      connect(ui.ck_rewrite_spec_map, SIGNAL(clicked(bool)), this, SLOT(onRewriteSpectraMapClicked(bool)));
+      connect(ui.btn_idf, SIGNAL(clicked()), this, SLOT(onBrowse()));
     }
 
     /**
