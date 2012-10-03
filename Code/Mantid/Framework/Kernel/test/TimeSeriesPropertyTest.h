@@ -186,7 +186,7 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  void test_filterByTime_and_getTotalValue()
+  void test_filterByTime()
   {
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
@@ -197,7 +197,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:50",6) );
 
     TS_ASSERT_EQUALS( log->realSize(), 6);
-    TS_ASSERT_EQUALS( log->getTotalValue(), 21);
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
 
@@ -206,7 +205,6 @@ public:
     log->filterByTime(start, stop);
 
     TS_ASSERT_EQUALS( log->realSize(), 3);
-    TS_ASSERT_EQUALS( log->getTotalValue(), 9);
 
     delete log;
   }
@@ -229,7 +227,6 @@ public:
     */
 
     TS_ASSERT_EQUALS( log->realSize(), 6);
-    TS_ASSERT_EQUALS( log->getTotalValue(), 21);
 
     Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"),
         DateAndTime("2007-11-30T16:17:40"), 0);
@@ -242,7 +239,6 @@ public:
     log->filterByTimes(splitters);
 
     TS_ASSERT_EQUALS( log->realSize(), 3);
-    TS_ASSERT_EQUALS( log->getTotalValue(), 9);
 
     delete log;
 
@@ -263,7 +259,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:30",10) );
 
     TS_ASSERT_EQUALS( log->realSize(), 10);
-    TS_ASSERT_EQUALS( log->getTotalValue(), 55);
 
     Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"),
         DateAndTime("2007-11-30T16:17:40"), 0);
@@ -280,7 +275,6 @@ public:
     log->filterByTimes(splitters);
 
     TS_ASSERT_EQUALS( log->realSize(), 6);
-    TS_ASSERT_EQUALS( log->getTotalValue(), 33);
 
     delete log;
 
@@ -294,7 +288,6 @@ public:
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
     TS_ASSERT_EQUALS( log->realSize(), 1);
-    TS_ASSERT_EQUALS( log->getTotalValue(), 1);
 
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
@@ -302,7 +295,6 @@ public:
 
     // Still there!
     TS_ASSERT_EQUALS( log->realSize(), 1);
-    TS_ASSERT_EQUALS( log->getTotalValue(), 1);
 
     delete log;
   }
@@ -315,7 +307,6 @@ public:
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT_THROWS_NOTHING( log->addValue("1990-01-01",1) );
     TS_ASSERT_EQUALS( log->realSize(), 1);
-    TS_ASSERT_EQUALS( log->getTotalValue(), 1);
 
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
@@ -323,7 +314,6 @@ public:
 
     // Still there!
     TS_ASSERT_EQUALS( log->realSize(), 1);
-    TS_ASSERT_EQUALS( log->getTotalValue(), 1);
 
     delete log;
   }

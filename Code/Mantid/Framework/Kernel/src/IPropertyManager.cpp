@@ -66,7 +66,7 @@ namespace Mantid
     IPropertyManager::TypedValue::operator int32_t () { return pm.getValue<int32_t>(prop); }
     IPropertyManager::TypedValue::operator uint32_t () { return pm.getValue<uint32_t>(prop); }
     IPropertyManager::TypedValue::operator int64_t () { return pm.getValue<int64_t>(prop); }    
-    IPropertyManager::TypedValue::operator uint64_t () { return pm.getValue<int64_t>(prop); }    
+    IPropertyManager::TypedValue::operator uint64_t () { return pm.getValue<uint64_t>(prop); }
     IPropertyManager::TypedValue::operator bool () { return pm.getValue<bool>(prop); }
     IPropertyManager::TypedValue::operator double () { return pm.getValue<double>(prop); }
     IPropertyManager::TypedValue::operator std::string () { return pm.getPropertyValue(prop); }

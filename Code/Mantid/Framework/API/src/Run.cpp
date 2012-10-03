@@ -13,6 +13,7 @@
 #include <boost/lexical_cast.hpp>
 
 #include <algorithm>
+#include <numeric>
 
 namespace Mantid
 {
@@ -213,7 +214,8 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
 
     if (log)
     {
-      double total = log->getTotalValue();
+      const std::vector<double> logValues = log->valuesAsVector();
+      double total = std::accumulate(logValues.begin(), logValues.end(), 0.0);
       std::string unit = log->units();
       // Do we need to take account of a unit
       if(unit.find("picoCoulomb") != std::string::npos )
