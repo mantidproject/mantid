@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidKernel/V3D.h"
@@ -111,61 +111,29 @@ public:
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-#ifdef _WIN32
-#ifdef IN_MANTID_API
-  #define ITableWorkspace_DllExport __declspec( dllexport )
-#else
-  #define ITableWorkspace_DllExport __declspec( dllimport )
-#endif
-#else
-#define ITableWorkspace_DllExport
-#define ITableWorkspace_DllImport
-#endif
-
-
 
 // =====================================================================================
-class ITableWorkspace_DllExport ITableWorkspace: public API::Workspace
+class MANTID_API_DLL ITableWorkspace: public API::Workspace
 {
 public:
   ///Constructor
-  ITableWorkspace():m_LogManager(new API::LogManager)
-  {}
+  ITableWorkspace();
   /// Virtual destructor.
-  virtual ~ITableWorkspace(){}
- /// Copy constructor
-  ITableWorkspace(const ITableWorkspace &other)
-  {
-    m_LogManager = boost::make_shared<API::LogManager>(*other.m_LogManager);
-  }
+  virtual ~ITableWorkspace();
+  /// Copy constructor
+  ITableWorkspace(const ITableWorkspace &other);
   /// Operator =
-  ITableWorkspace & operator=(const ITableWorkspace &rhs)
-  {
-    if(&rhs != this)m_LogManager = boost::make_shared<API::LogManager>(*rhs.m_LogManager);
-    return *this;  
-  }
+  ITableWorkspace & operator=(const ITableWorkspace &rhs);
   /// Return the workspace typeID
   virtual const std::string id() const{return "ITableWorkspace";}
-
   /** Creates a new column
    * @param type :: The datatype of the column
    * @param name :: The name to assign to the column
    * @return True if the column was successfully added
    */
   virtual bool addColumn(const std::string& type, const std::string& name) = 0;
-
   /// Creates n new columns of the same type.
-  virtual bool addColumns(const std::string& type, const std::string& name, size_t n)
-  {
-    bool ok = true;
-    for(size_t i=0;i<n;i++)
-    {
-      std::ostringstream ostr;
-      ostr<<name<<'_'<<i;
-      ok = ok && addColumn(type,ostr.str());
-    }
-    return ok;
-  }
+  virtual bool addColumns(const std::string& type, const std::string& name, size_t n);
   /**Get access to shared pointer containing workspace porperties */
   API::LogManager_sptr logs(){return m_LogManager;}
   /**Get constant access to shared pointer containing workspace porperties */
@@ -208,11 +176,7 @@ public:
   virtual void removeRow(size_t index) = 0;
 
   /// Appends a row.
-  TableRowHelper appendRow()
-  {
-    insertRow(rowCount());
-    return getRow(rowCount()-1);
-  }
+  TableRowHelper appendRow();
 
   /** Does this type of TableWorkspace need a custom sorting call (e.g. PeaksWorkspace)
    * @return true if the workspace needs custom sorting calls */
@@ -222,19 +186,11 @@ public:
   /// Overridable method to custom-sort the workspace
   virtual void sort(std::vector< std::pair<std::string, bool> > & criteria);
 
+  /// Access the column with name \c name trough a ColumnVector object
+  TableColumnHelper getVector(const std::string& name);
 
   /// Access the column with name \c name trough a ColumnVector object
-  TableColumnHelper getVector(const std::string& name)
-  {
-    return TableColumnHelper(this,name);
-  }
-
-  /// Access the column with name \c name trough a ColumnVector object
-  TableConstColumnHelper getVector(const std::string& name)const
-  {
-    return TableConstColumnHelper(this,name);
-  }
-
+  TableConstColumnHelper getVector(const std::string& name)const;
   template <class T>
   /**  Get a reference to a data element
          @param name :: Column name.

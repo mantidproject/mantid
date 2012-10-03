@@ -11,6 +11,73 @@ namespace API
 // Get a reference to the logger
 Kernel::Logger& ITableWorkspace::g_log = Kernel::Logger::get("ITableWorkspace");
 
+/// Constructor
+ITableWorkspace::ITableWorkspace() : m_LogManager(new API::LogManager)
+{}
+
+/// Virtual destructor.
+ITableWorkspace::~ITableWorkspace()
+{}
+ 
+/// Copy constructor
+ITableWorkspace::ITableWorkspace(const ITableWorkspace &other) : Workspace(other)
+{
+  m_LogManager = boost::make_shared<API::LogManager>(*other.m_LogManager);
+}
+
+/// Assignemtn
+ITableWorkspace & ITableWorkspace::operator=(const ITableWorkspace &rhs)
+{
+  if(&rhs != this)m_LogManager = boost::make_shared<API::LogManager>(*rhs.m_LogManager);
+  return *this;  
+}
+
+
+/** Creates n new columns of the same type
+ * @param type :: The datatype of the column
+ * @param name :: The name to assign to the column
+ * @param n :: The number of columns to create
+ * @return True if the column was successfully added
+ */
+bool ITableWorkspace::addColumns(const std::string& type, const std::string& name, size_t n)
+{
+  bool ok = true;
+  for(size_t i=0;i<n;i++)
+  {
+    std::ostringstream ostr;
+    ostr<<name<<'_'<<i;
+    ok = ok && addColumn(type,ostr.str());
+  }
+  return ok;
+}
+
+/// Appends a row.
+TableRowHelper ITableWorkspace::appendRow()
+{
+  insertRow(rowCount());
+  return getRow(rowCount()-1);
+}
+
+/**
+ * Access the column with name \c name trough a ColumnVector object
+ * @param name :: The name of the column
+ * @returns The named column 
+ */
+TableColumnHelper ITableWorkspace::getVector(const std::string& name)
+{
+  return TableColumnHelper(this,name);
+}
+
+/**
+ * Access the column with name \c name trough a ColumnVector object (const)
+ * @param name :: The name of the column
+ * @returns The named column 
+ */
+TableConstColumnHelper ITableWorkspace::getVector(const std::string& name) const
+{
+  return TableConstColumnHelper(this,name);
+}
+
 /**
  * If the workspace is the AnalysisDataService sends AfterReplaceNotification.
  */
