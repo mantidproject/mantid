@@ -96,7 +96,7 @@
 
 		<!-- True if background is to be checked -->
 		<parameter name="check_background">
-		  <value val="1.0"/>
+		  <value val="0.0"/>
 		</parameter>
 
 		<!-- True if the bleed tests should be run -->
