@@ -17,7 +17,8 @@ namespace Mantid
     Kernel::Logger& TableWorkspace::g_log = Kernel::Logger::get("TableWorkspace");
 
     /// Constructor
-    TableWorkspace::TableWorkspace(size_t nrows) : ITableWorkspace(), m_rowCount(0)
+    TableWorkspace::TableWorkspace(size_t nrows) : ITableWorkspace(), m_rowCount(0),
+    m_LogManager(new API::LogManager)
     {
       setRowCount(nrows);
     }
@@ -35,6 +36,7 @@ namespace Mantid
         data_size += (*c)->sizeOfData();
 
       }
+      data_size+= m_LogManager->getMemorySize();
       return data_size;
     }
 

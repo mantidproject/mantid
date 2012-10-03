@@ -117,13 +117,11 @@ class MANTID_API_DLL ITableWorkspace: public API::Workspace
 {
 public:
   ///Constructor
-  ITableWorkspace();
+  ITableWorkspace()
+  {}
   /// Virtual destructor.
-  virtual ~ITableWorkspace();
-  /// Copy constructor
-  ITableWorkspace(const ITableWorkspace &other);
-  /// Operator =
-  ITableWorkspace & operator=(const ITableWorkspace &rhs);
+  virtual ~ITableWorkspace(){}
+ 
   /// Return the workspace typeID
   virtual const std::string id() const{return "ITableWorkspace";}
   /** Creates a new column
@@ -135,9 +133,9 @@ public:
   /// Creates n new columns of the same type.
   virtual bool addColumns(const std::string& type, const std::string& name, size_t n);
   /**Get access to shared pointer containing workspace porperties */
-  API::LogManager_sptr logs(){return m_LogManager;}
+  virtual API::LogManager_sptr logs() = 0;
   /**Get constant access to shared pointer containing workspace porperties */
-  API::LogManager_const_sptr getLogs()const{return m_LogManager;}
+  virtual API::LogManager_const_sptr getLogs()const = 0;
 
   /// Removes a column.
   virtual void removeColumn( const std::string& name) = 0;
@@ -319,9 +317,6 @@ protected:
   {
     c->remove(index);
   }
-
-  API::LogManager_sptr m_LogManager;
-
 private:
   /// Logger
   static Kernel::Logger& g_log;

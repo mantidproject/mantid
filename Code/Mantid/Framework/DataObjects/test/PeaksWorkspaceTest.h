@@ -18,6 +18,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/LogManager.h"
+
 #include <Poco/File.h>
 
 
@@ -129,7 +131,7 @@ public:
 
   }
 
-  void test_saveNexus()
+  void xest_saveNexus()
   {
     // Ensure the plugin libraries are loaded so that we can use LoadNexusProcessed
     Mantid::API::FrameworkManager::Instance();
@@ -210,6 +212,41 @@ public:
       Poco::File(absFilename).remove();
   }
 
+
+   void test_getSetLogAccess()
+   {
+       bool trueSwitch(true);
+       PeaksWorkspace * pw = buildPW();
+
+       LogManager_const_sptr props = pw->getLogs();
+       std::string existingVal;
+
+       TS_ASSERT_THROWS_NOTHING(existingVal=props->getPropertyValueAsType<std::string>("TestProp"));
+       TS_ASSERT_EQUALS("value",existingVal);
+
+       // define local scope;
+       if(trueSwitch)
+       {
+          // get mutable pointer to existing values;
+          LogManager_sptr mprops = pw->logs();
+
+          TS_ASSERT_THROWS_NOTHING(mprops->addProperty<std::string>("TestProp2","value2"));
+          
+          TS_ASSERT(mprops->hasProperty("TestProp2"));
+          TS_ASSERT(!props->hasProperty("TestProp2"));
+          TS_ASSERT(pw->run().hasProperty("TestProp2"));
+       }
+       // nothing terrible happened and workspace still have this property
+       TS_ASSERT(pw->run().hasProperty("TestProp2"));
+
+       delete pw;
+   }
+
+   PeaksWorkspaceTest()
+   {
+      FrameworkManager::Instance();
+      AlgorithmManager::Instance();
+   }
 
 };
 

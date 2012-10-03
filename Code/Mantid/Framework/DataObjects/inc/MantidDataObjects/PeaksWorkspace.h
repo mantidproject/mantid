@@ -75,6 +75,11 @@ namespace DataObjects
 
     PeaksWorkspace* clone() const;
 
+    /**Get access to shared pointer containing workspace porperties */
+    API::LogManager_sptr logs();
+    /**Get constant access to shared pointer containing workspace porperties; Copies logs into new LogManager variable */
+    API::LogManager_const_sptr getLogs()const{return API::LogManager_const_sptr(new API::LogManager(this->run()));}
+
     virtual ~PeaksWorkspace();
 
     boost::shared_ptr<PeaksWorkspace> clone();
@@ -194,10 +199,12 @@ namespace DataObjects
 
     // ====================================== End ITableWorkspace Methods ==================================
 
-	// --- Nexus Methods ---
+  // --- Nexus Methods ---
     // Save to Nexus
     void saveNexus(::NeXus::File * file ) const;
-
+    // adapter for logs() function, which create reference to this class itself and does not allow to delete the shared pointers,
+    // returned by logs() function when they go out of scope
+    API::LogManager_sptr m_logCash;
   };
 
 

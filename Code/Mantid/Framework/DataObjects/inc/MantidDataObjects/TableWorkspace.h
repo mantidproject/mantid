@@ -114,6 +114,11 @@ namespace DataObjects
     std::vector<std::string> getColumnNames() const;
     /// Number of rows in the workspace.
     size_t rowCount() const {return m_rowCount;}
+    /**Get access to shared pointer containing workspace porperties */
+    API::LogManager_sptr logs(){return m_LogManager;}
+    /**Get constant access to shared pointer containing workspace porperties */
+    API::LogManager_const_sptr getLogs()const{return m_LogManager;}
+
     /** get access to column vecotor for index i.
      *
      *  The operation is unsafe with regards to the operaitons resizing obtained vector. 
@@ -378,7 +383,17 @@ private:
       findValue(value,row,col);
     }
 
-
+/// Copy constructor
+   TableWorkspace(const TableWorkspace &other);
+  //{
+  //  m_LogManager = boost::make_shared<API::LogManager>(*other.m_LogManager);
+  //}
+  /// Operator =
+  TableWorkspace & operator=(const TableWorkspace &rhs);
+  //{
+  //  if(&rhs != this)m_LogManager = boost::make_shared<API::LogManager>(*rhs.m_LogManager);
+  //  return *this;  
+  //}
 private:
     /// Used in std::find_if algorithm to find a Column with name \a name.
     class FindName
@@ -407,7 +422,9 @@ private:
     /// Logger
     static Kernel::Logger& g_log;
 
-   // Kernel::PropertyManager_sptr m_TableProperties;
+    /// shared pointer to the logManager, responsible for the workspace properties.   
+    API::LogManager_sptr m_LogManager;
+
 
 };
 
