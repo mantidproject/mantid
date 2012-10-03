@@ -17,6 +17,7 @@ set ( SRC_FILES
 	src/Instrument/DetectorGroup.cpp
 	src/Instrument/FitParameter.cpp
 	src/Instrument/Goniometer.cpp
+	src/Instrument/IDFObject.cpp
 	src/Instrument/InstrumentDefinitionParser.cpp
 	src/Instrument/NearestNeighbours.cpp
 	src/Instrument/NearestNeighboursFactory.cpp
@@ -120,6 +121,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/DetectorGroup.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
+	inc/MantidGeometry/Instrument/IDFObject.h
 	inc/MantidGeometry/Instrument/INearestNeighbours.h
 	inc/MantidGeometry/Instrument/INearestNeighboursFactory.h
 	inc/MantidGeometry/Instrument/InstrumentDefinitionParser.h
@@ -207,6 +209,7 @@ set ( TEST_FILES
 	FitParameterTest.h
 	GeneralTest.h
 	GoniometerTest.h
+  IDFObjectTest.h
 	IMDDimensionFactoryTest.h
 	IMDDimensionTest.h
 	IndexingUtilsTest.h
