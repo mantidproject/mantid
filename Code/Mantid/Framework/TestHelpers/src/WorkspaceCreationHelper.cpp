@@ -1113,11 +1113,9 @@ namespace WorkspaceCreationHelper
       // sin^2(Theta)
       //    std::vector<double>      SinThetaSq;
 
-      targWS->declareProperty(new Kernel::PropertyWithValue<std::string>("InstrumentName",""),"The name which should unique identify current instrument");
-      targWS->declareProperty(new Kernel::PropertyWithValue<double>("L1",0),"L1 is the source to sample distance");
-      targWS->declareProperty(new Kernel::PropertyWithValue<double>("Ei",EMPTY_DBL()),"Incident energy for Direct or Analysis energy for indirect instrument");
-      targWS->declareProperty(new Kernel::PropertyWithValue<uint32_t>("ActualDetectorsNum",0),"The actual number of detectors receivinv signal");
-      targWS->declareProperty(new Kernel::PropertyWithValue<bool>("FakeDetectors",false),"If the detectors were actually processed from real instrument or generated for some fake one ");
+  
+
+      //,"If the detectors were actually processed from real instrument or generated for some fake one ");
       return targWS;
     }
 
@@ -1139,7 +1137,7 @@ namespace WorkspaceCreationHelper
       try
       {
         double L1  = source->getDistance(*sample);
-        targWS->setProperty<double>("L1",L1);
+        targWS->logs()->addProperty<double>("L1",L1,true);
       }
       catch (Kernel::Exception::NotFoundError &)
       { 
@@ -1147,8 +1145,9 @@ namespace WorkspaceCreationHelper
       }
       // Instrument name
       std::string InstrName=instrument->getName();
-      targWS->setProperty<std::string>("InstrumentName",InstrName);
-      targWS->setProperty<bool>("FakeDetectors",false);
+      targWS->logs()->addProperty<std::string>("InstrumentName",InstrName,true);
+      targWS->logs()->addProperty<bool>("FakeDetectors",false,true); 
+      targWS->logs()->addProperty<double>("Ei",Ei,true); //"Incident energy for Direct or Analysis energy for indirect instrument");
 
       // get access to the workspace memory
       auto &sp2detMap  = targWS->getColVector<size_t>("spec2detMap");
@@ -1159,7 +1158,7 @@ namespace WorkspaceCreationHelper
       auto &Azimuthal  = targWS->getColVector<double>("Azimuthal");
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
 
-      targWS->setProperty<double>("Ei",Ei);
+
 
       //// progress messave appearence
       size_t nHist = targWS->rowCount();
@@ -1215,7 +1214,7 @@ namespace WorkspaceCreationHelper
     
 
       }
-      targWS->setProperty<uint32_t>("ActualDetectorsNum",liveDetectorsCount);
+      targWS->logs()->addProperty<uint32_t>("ActualDetectorsNum",liveDetectorsCount,true); //,"The actual number of detectors receivinv signal");
 
   
     }

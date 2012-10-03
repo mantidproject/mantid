@@ -90,12 +90,12 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, con
   m_pTwoThetas =  &(targetWSDescr.m_PreprDetTable->getColVector<double>("TwoTheta"));      
   m_pL2s       =  &(targetWSDescr.m_PreprDetTable->getColVector<double>("L2"));
 
-  m_L1        =  targetWSDescr.m_PreprDetTable->getProperty("L1");
+  m_L1        =  targetWSDescr.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("L1");
   
   m_Emode     =  (int)targetWSDescr.getEMode();
 
   // get efix
-  m_Efix      =  targetWSDescr.m_PreprDetTable->getProperty("Ei");
+  m_Efix      =  targetWSDescr.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("Ei");
   m_pEfixedArray=NULL;
   if(m_Emode==(int)CnvrtToMD::Indir) m_pEfixedArray = targetWSDescr.m_PreprDetTable->getColDataArray<float>("eFixed");
 }

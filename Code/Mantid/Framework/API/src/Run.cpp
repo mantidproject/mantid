@@ -136,21 +136,23 @@ Kernel::Logger& Run::g_log = Kernel::Logger::get("Run");
    * @param splitter :: TimeSplitterType with the intervals and destinations.
    * @param outputs :: Vector of output runs.
    */
-  void Run::splitByTime(TimeSplitterType& splitter, std::vector< Run * > outputs) const
+  void Run::splitByTime(TimeSplitterType& splitter, std::vector< LogManager * > outputs) const
   {
-    size_t n = outputs.size();
-    std::vector<LogManager *> outputsBase(outputs.begin(),outputs.end());
-    LogManager::splitByTime(splitter,outputsBase);
+ 
+    //std::vector<LogManager *> outputsBase(outputs.begin(),outputs.end());
+    LogManager::splitByTime(splitter,outputs);
 
+    size_t n = outputs.size();
     //Re-integrate proton charge of all outputs
     for (size_t i=0; i<n; i++)
     {
-      if (outputsBase[i])
+      if (outputs[i])
       {
-        outputs[i] = dynamic_cast<Run *>(outputsBase[i]);
-        outputs[i]->integrateProtonCharge();
+        auto run = dynamic_cast<Run *>(outputs[i]);
+        if(run)run->integrateProtonCharge();
       }
     }
+
   }
 
  

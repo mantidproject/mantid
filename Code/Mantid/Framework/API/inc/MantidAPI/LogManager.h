@@ -162,6 +162,11 @@ namespace Mantid
      /// Cache for the retrieved single values
       mutable SingleValueCache m_singleValueCache;
     };
+    ///shared pointer to the logManager base class
+    typedef boost::shared_ptr<LogManager> LogManager_sptr;
+    ///shared pointer to the logManager base class (const version)
+    typedef boost::shared_ptr<const LogManager> LogManager_const_sptr;
+
 
     /**
      * Add a property of a specified type (Simply creates a Kernel::Property of that type

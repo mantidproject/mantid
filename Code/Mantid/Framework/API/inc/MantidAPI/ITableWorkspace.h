@@ -8,7 +8,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/Column.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/PropertyManager.h"
+#include "MantidAPI/LogManager.h"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
@@ -125,11 +125,25 @@ public:
 
 
 // =====================================================================================
-class ITableWorkspace_DllExport ITableWorkspace: public API::Workspace, virtual public Kernel::PropertyManager
+class ITableWorkspace_DllExport ITableWorkspace: public API::Workspace
 {
 public:
+  ///Constructor
+  ITableWorkspace():m_LogManager(new API::LogManager)
+  {}
   /// Virtual destructor.
   virtual ~ITableWorkspace(){}
+ /// Copy constructor
+  ITableWorkspace(const ITableWorkspace &other)
+  {
+    m_LogManager = boost::make_shared<API::LogManager>(*other.m_LogManager);
+  }
+  /// Operator =
+  ITableWorkspace & operator=(const ITableWorkspace &rhs)
+  {
+    if(&rhs != this)m_LogManager = boost::make_shared<API::LogManager>(*rhs.m_LogManager);
+    return *this;  
+  }
   /// Return the workspace typeID
   virtual const std::string id() const{return "ITableWorkspace";}
 
@@ -152,6 +166,10 @@ public:
     }
     return ok;
   }
+  /**Get access to shared pointer containing workspace porperties */
+  API::LogManager_sptr logs(){return m_LogManager;}
+  /**Get constant access to shared pointer containing workspace porperties */
+  API::LogManager_const_sptr getLogs()const{return m_LogManager;}
 
   /// Removes a column.
   virtual void removeColumn( const std::string& name) = 0;
@@ -346,9 +364,13 @@ protected:
     c->remove(index);
   }
 
+  API::LogManager_sptr m_LogManager;
+
 private:
   /// Logger
   static Kernel::Logger& g_log;
+  // Non-copyable, non-assignable
+
 };
 
 

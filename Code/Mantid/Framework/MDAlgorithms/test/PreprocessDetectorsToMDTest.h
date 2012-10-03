@@ -71,10 +71,10 @@ void testPreprocessDetectors()
   uint32_t nDet(0); 
   std::string InstrName;
   bool fakeDetectrors(false);
-  TS_ASSERT_THROWS_NOTHING(nDet = tws->getProperty("ActualDetectorsNum"));
-  TS_ASSERT_THROWS_NOTHING(L1  = tws->getProperty("L1"));
-  TS_ASSERT_THROWS_NOTHING(InstrName =std::string(tws->getProperty("InstrumentName")));  
-  TS_ASSERT_THROWS_NOTHING(fakeDetectrors=tws->getProperty("FakeDetectors"));  
+  TS_ASSERT_THROWS_NOTHING(nDet = tws->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum"));
+  TS_ASSERT_THROWS_NOTHING(L1  = tws->getLogs()->getPropertyValueAsType<double>("L1"));
+  TS_ASSERT_THROWS_NOTHING(InstrName =tws->getLogs()->getPropertyValueAsType<std::string>("InstrumentName"));  
+  TS_ASSERT_THROWS_NOTHING(fakeDetectrors=tws->getLogs()->getPropertyValueAsType<bool>("FakeDetectors"));  
 
   TS_ASSERT_DELTA(10,L1,1.e-11);
   TS_ASSERT_EQUALS(4,nDet);
@@ -115,10 +115,10 @@ void testFakeDetectors()
   uint32_t nDet(0); 
   std::string InstrName;
   bool fakeDetectrors(false);
-  TS_ASSERT_THROWS_NOTHING(nDet = tws->getProperty("ActualDetectorsNum"));
-  TS_ASSERT_THROWS_NOTHING(L1  = tws->getProperty("L1"));
-  TS_ASSERT_THROWS_NOTHING(InstrName =std::string(tws->getProperty("InstrumentName")));  
-  TS_ASSERT_THROWS_NOTHING(fakeDetectrors=tws->getProperty("FakeDetectors"));  
+  TS_ASSERT_THROWS_NOTHING(nDet = tws->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum"));
+  TS_ASSERT_THROWS_NOTHING(L1  = tws->getLogs()->getPropertyValueAsType<double>("L1"));
+  TS_ASSERT_THROWS_NOTHING(InstrName =tws->getLogs()->getPropertyValueAsType<std::string>("InstrumentName"));  
+  TS_ASSERT_THROWS_NOTHING(fakeDetectrors=tws->getLogs()->getPropertyValueAsType<bool>("FakeDetectors"));  
 
   TS_ASSERT_DELTA(1,L1,1.e-11);
   TS_ASSERT_EQUALS(4,nDet);
@@ -145,10 +145,10 @@ void testTheAlg()
   uint32_t nDet(0); 
   std::string InstrName;
   bool fakeDetectrors(false);
-  TS_ASSERT_THROWS_NOTHING(nDet = tws->getProperty("ActualDetectorsNum"));
-  TS_ASSERT_THROWS_NOTHING(L1  = tws->getProperty("L1"));
-  TS_ASSERT_THROWS_NOTHING(InstrName =std::string(tws->getProperty("InstrumentName")));  
-  TS_ASSERT_THROWS_NOTHING(fakeDetectrors=tws->getProperty("FakeDetectors"));  
+  TS_ASSERT_THROWS_NOTHING(nDet = tws->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum"));
+  TS_ASSERT_THROWS_NOTHING(L1  = tws->getLogs()->getPropertyValueAsType<double>("L1"));
+  TS_ASSERT_THROWS_NOTHING(InstrName =tws->getLogs()->getPropertyValueAsType<std::string>("InstrumentName"));  
+  TS_ASSERT_THROWS_NOTHING(fakeDetectrors=tws->getLogs()->getPropertyValueAsType<bool>("FakeDetectors"));  
 
   TS_ASSERT_DELTA(10,L1,1.e-11);
   TS_ASSERT_EQUALS(4,nDet);

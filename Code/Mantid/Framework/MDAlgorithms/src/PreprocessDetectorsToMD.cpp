@@ -117,14 +117,8 @@ namespace Mantid
       // sin^2(Theta)
       //    std::vector<double>      SinThetaSq;
 
-      targWS->declareProperty(new Kernel::PropertyWithValue<std::string>("InstrumentName",""),"The name which should unique identify current instrument");
-      targWS->declareProperty(new Kernel::PropertyWithValue<double>("L1",0),"L1 is the source to sample distance");
-      targWS->declareProperty(new Kernel::PropertyWithValue<double>("Ei",EMPTY_DBL()),"Incident energy for Direct or Analysis energy for indirect instrument");
-      targWS->declareProperty(new Kernel::PropertyWithValue<uint32_t>("ActualDetectorsNum",0),"The actual number of detectors receivinv signal");
-      targWS->declareProperty(new Kernel::PropertyWithValue<bool>("FakeDetectors",false),"If the detectors were actually processed from real instrument or generated for some fake one ");
-
       double Efi = getEi(inputWS);
-      targWS->setProperty<double>("Ei",Efi);
+      targWS->logs()->addProperty<double>("Ei",Efi,true);
 
       return targWS;
     }
@@ -150,7 +144,7 @@ namespace Mantid
       try
       {
         double L1  = source->getDistance(*sample);
-        targWS->setProperty<double>("L1",L1);
+        targWS->logs()->addProperty<double>("L1",L1,true);
         g_log.debug() << "Source-sample distance: " << L1 << std::endl;
       }
       catch (Kernel::Exception::NotFoundError &)
@@ -159,8 +153,8 @@ namespace Mantid
       }
       // Instrument name
       std::string InstrName=instrument->getName();
-      targWS->setProperty<std::string>("InstrumentName",InstrName);
-      targWS->setProperty<bool>("FakeDetectors",false);
+      targWS->logs()->addProperty<std::string>("InstrumentName",InstrName,true); // "The name which should unique identify current instrument");
+      targWS->logs()->addProperty<bool>("FakeDetectors",false,true);
 
       // get access to the workspace memory
       auto &sp2detMap  = targWS->getColVector<size_t>("spec2detMap");
@@ -172,7 +166,7 @@ namespace Mantid
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
 
       // Efixed; do we need one and does one exist?
-      double Efi = targWS->getProperty("Ei");
+      double Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
       float *pEfixedArray(NULL);
       const Geometry::ParameterMap& pmap = inputWS->constInstrumentParameters(); 
       if (m_getEFixed)
@@ -238,7 +232,7 @@ namespace Mantid
         {
           try
           {
-            Geometry::Parameter_sptr par = pmap.getRecursive(spDet.get(),"Efixed");
+            Geometry::Parameter_sptr par = pmap.getRecursive(spDet.get(),"eFixed");
             if (par) Efi = par->value<double>();
           }
           catch(std::runtime_error&)
@@ -251,7 +245,7 @@ namespace Mantid
         if(i%div==0) theProgress.report(i,"Preprocessing detectors");
 
       }
-      targWS->setProperty<uint32_t>("ActualDetectorsNum",liveDetectorsCount);
+      targWS->logs()->addProperty<uint32_t>("ActualDetectorsNum",liveDetectorsCount,true);
 
       theProgress.report();
       g_log.information()<<"finished preprocessing detectors locations, found: "<<liveDetectorsCount<<" detectors out of: "<<nHist<<" Histohrams\n";
@@ -262,10 +256,11 @@ namespace Mantid
     {
       UNUSED_ARG(inputWS);
       // set sample-detector postion equal to 1;
-      targWS->setProperty<double>("L1",1.);
+      targWS->logs()->addProperty<double>("L1",1.,true);
       // 
-      targWS->setProperty<std::string>("InstrumentName","FakeInstrument");    
-      targWS->setProperty<bool>("FakeDetectors",true);
+      targWS->logs()->addProperty<std::string>("InstrumentName","FakeInstrument",true);    
+      targWS->logs()->addProperty<bool>("FakeDetectors",true,true);
+
 
 
       // get access to the workspace memory
@@ -280,7 +275,7 @@ namespace Mantid
 
       //// progress messave appearence  
       size_t nHist = targWS->rowCount();
-      targWS->setProperty<uint32_t>("ActualDetectorsNum",uint32_t(nHist));
+      targWS->logs()->addProperty<uint32_t>("ActualDetectorsNum",uint32_t(nHist),true);
 
       double polar(0);
       // Loop over the spectra

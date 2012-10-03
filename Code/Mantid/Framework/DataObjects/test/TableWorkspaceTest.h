@@ -404,6 +404,16 @@ public:
       }
   }
 
+  void testAddProperty()
+  {
+    TableWorkspace tw(3);
+    TS_ASSERT_THROWS_NOTHING(tw.logs()->addProperty("SomeInt",int(10)));
+    TS_ASSERT_EQUALS(10,tw.getLogs()->getPropertyValueAsType<int>("SomeInt"));
+
+    TS_ASSERT_THROWS_NOTHING(tw.logs()->addProperty<double>("SomeDouble",100));
+    TS_ASSERT_DELTA(100,tw.getLogs()->getPropertyValueAsType<double>("SomeDouble"),1.e-7);
+  }
+
 
 };
 

@@ -198,7 +198,7 @@ namespace Mantid
       if(m_Emode == CnvrtToMD::Direct||m_Emode == CnvrtToMD::Indir)
       {
         // energy needed in inelastic case
-        m_Ei  =  ConvParams.m_PreprDetTable->getProperty("Ei");
+        m_Ei  =  ConvParams.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("Ei");
         // the wave vector of incident neutrons;
         m_Ki=sqrt(m_Ei/PhysicalConstants::E_mev_toNeutronWavenumberSq); 
 

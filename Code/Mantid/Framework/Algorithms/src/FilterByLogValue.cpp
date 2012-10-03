@@ -251,12 +251,12 @@ void FilterByLogValue::exec()
     PARALLEL_CHECK_INTERUPT_REGION
 
     //To split/filter the runs, first you make a vector with just the one output run
-    std::vector< Run *> output_runs;
-    Run * output_run = new Run(inputWS->mutableRun());
+    std::vector< LogManager *> output_runs;
+    LogManager * output_run = new Run(inputWS->mutableRun());
     output_runs.push_back( output_run );
     inputWS->run().splitByTime(splitter, output_runs);
     // Set the output back in the input
-    inputWS->mutableRun() = *output_runs[0];
+    inputWS->mutableRun() = *(static_cast<Run*>(output_runs[0]));
     inputWS->mutableRun().integrateProtonCharge();
 
     //Cast the outputWS to the matrixOutputWS and save it
@@ -296,7 +296,7 @@ void FilterByLogValue::exec()
     outputWS->doneAddingEventLists();
 
     //To split/filter the runs, first you make a vector with just the one output run
-    std::vector< Run *> output_runs;
+    std::vector< LogManager *> output_runs;
     output_runs.push_back( &outputWS->mutableRun() );
     inputWS->run().splitByTime(splitter, output_runs);
 

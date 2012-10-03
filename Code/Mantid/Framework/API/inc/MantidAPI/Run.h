@@ -61,7 +61,7 @@ namespace Mantid
       /// Filter the logs by time
       void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
       /// Split the logs based on the given intervals
-      void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Run * > outputs) const;
+      void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< LogManager * > outputs) const;
   
       /// Return an approximate memory size for the object in bytes
       size_t getMemorySize() const;

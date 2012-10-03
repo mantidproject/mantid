@@ -401,7 +401,7 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
         {
           // let's take at least some precaution to ensure that instrument have not changed
           std::string currentWSInstrumentName = InWS2D->getInstrument()->getName();
-          std::string oldInstrName            = std::string(TargTableWS->getProperty("InstrumentName"));
+          std::string oldInstrName            = TargTableWS->getLogs()->getPropertyValueAsType<std::string>("InstrumentName");
 
           if(oldInstrName==currentWSInstrumentName) return TargTableWS;
         }
@@ -447,7 +447,7 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
    // in direct or indirect mode input ws has to have input energy
     if(Emode==CnvrtToMD::Direct||Emode==CnvrtToMD::Indir)
     {
-       double   m_Ei  = TargTableWS->getProperty("Ei");
+       double   m_Ei  = TargTableWS->getLogs()->getPropertyValueAsType<double>("Ei");
        if(isNaN(m_Ei))
        {
          // Direct mode needs Ei
@@ -458,7 +458,7 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
          if(!eFixed)
            throw(std::invalid_argument("Input neutron's energy has to be defined in inelastic mode "));
 
-         uint32_t NDetectors = TargTableWS->getProperty("ActualDetectorsNum");
+         uint32_t NDetectors = TargTableWS->getLogs()->getPropertyValueAsType<uint32_t>("ActualDetectorsNum");
          for(uint32_t i=0;i<NDetectors;i++)
            if(isNaN(*(eFixed+i)))throw(std::invalid_argument("Undefined eFixed energy for detector N: "+boost::lexical_cast<std::string>(i)));
        }
