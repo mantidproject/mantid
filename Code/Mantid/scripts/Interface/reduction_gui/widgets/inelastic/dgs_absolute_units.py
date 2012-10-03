@@ -23,17 +23,30 @@ class AbsoluteUnitsWidget(BaseWidget):
         self._content = AbsUnitsFrame(self)
         self._layout.addWidget(self._content)
         self.initialize_content()
+        self._instrument_name = settings.instrument_name
         
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(AbsoluteUnitsScript())
+            self.set_state(AbsoluteUnitsScript(self._instrument_name))
 
     def initialize_content(self):
         # Constraints
-        dvp = QtGui.QDoubleValidator(self._content.ei_edit)
-        dvp.setBottom(0.0)
-        self._content.ei_edit.setValidator(dvp)
+        for widget in [
+                       self._content.ei_edit,
+                       self._content.van_rmm_edit,
+                       self._content.sample_mass_edit,
+                       self._content.sample_rmm_edit,
+                       self._content.median_test_high_edit,
+                       self._content.median_test_low_edit,
+                       self._content.median_test_out_high_edit,
+                       self._content.median_test_out_low_edit,
+                       self._content.errorbar_crit_edit,
+                       ]:
+            
+            dvp = QtGui.QDoubleValidator(widget)
+            dvp.setBottom(0.0)
+            widget.setValidator(dvp)
         
         # Connections
         self.connect(self._content.absunits_van_browse, QtCore.SIGNAL("clicked()"), 
@@ -71,14 +84,21 @@ class AbsoluteUnitsWidget(BaseWidget):
         self._content.emin_edit.setText(QtCore.QString(str(state.emin)))
         self._content.emax_edit.setText(QtCore.QString(str(state.emax)))
         self._content.van_mass_edit.setText(QtCore.QString(str(state.vandium_mass)))
+        self._content.van_rmm_edit.setText(QtCore.QString(str(state.vandium_rmm)))
         self._content.sample_mass_edit.setText(QtCore.QString(str(state.sample_mass)))
         self._content.sample_rmm_edit.setText(QtCore.QString(str(state.sample_rmm)))
+        self._content.median_test_high_edit.setText(QtCore.QString(str(state.absunits_median_test_high)))
+        self._content.median_test_low_edit.setText(QtCore.QString(str(state.absunits_median_test_low)))
+        self._content.median_test_out_high_edit.setText(QtCore.QString(str(state.absunits_median_test_out_high)))
+        self._content.median_test_out_low_edit.setText(QtCore.QString(str(state.absunits_median_test_out_low)))
+        self._content.errorbar_crit_edit.setText(QtCore.QString(str(state.absunits_errorbar_criterion)))
+
         
     def get_state(self):
         """
             Returns an object with the state of the interface
         """
-        a = AbsoluteUnitsScript()
+        a = AbsoluteUnitsScript(self._instrument_name)
         a.do_absolute_units = self._content.absunits_gb.isChecked()
         a.absunits_vanadium = self._content.absunits_van_edit.text()
         a.grouping_file = self._content.grouping_file_edit.text()
@@ -87,7 +107,14 @@ class AbsoluteUnitsWidget(BaseWidget):
         a.emin = util._check_and_get_float_line_edit(self._content.emin_edit)
         a.emax = util._check_and_get_float_line_edit(self._content.emax_edit)
         a.vanadium_mass = util._check_and_get_float_line_edit(self._content.van_mass_edit)
+        a.vanadium_rmm = util._check_and_get_float_line_edit(self._content.van_rmm_edit)
         a.sample_mass = util._check_and_get_float_line_edit(self._content.sample_mass_edit)
         a.sample_rmm = util._check_and_get_float_line_edit(self._content.sample_rmm_edit)
+        a.absunits_median_test_high = util._check_and_get_float_line_edit(self._content.median_test_high_edit)
+        a.absunits_median_test_low = util._check_and_get_float_line_edit(self._content.median_test_low_edit)
+        a.absunits_median_test_out_high = util._check_and_get_float_line_edit(self._content.median_test_out_high_edit)
+        a.absunits_median_test_out_low = util._check_and_get_float_line_edit(self._content.median_test_out_low_edit)
+        a.absunits_errorbar_criterion = util._check_and_get_float_line_edit(self._content.errorbar_crit_edit)
+
         return a
         

@@ -23,6 +23,8 @@ class InstrumentParameters(object):
         else:
             if self.instrument_name != inst_name:
                 self._load_param_file(inst_name)
+            else:
+                print "Doing nothing"
                 
     def _load_param_file(self, inst_name):
         InstrumentParameters.instrument_name = inst_name

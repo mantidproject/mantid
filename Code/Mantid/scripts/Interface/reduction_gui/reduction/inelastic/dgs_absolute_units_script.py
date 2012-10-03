@@ -19,13 +19,33 @@ class AbsoluteUnitsScript(BaseScriptElement):
     emin = -1.0
     emax = 1.0
     vandium_mass = 32.58
+    vanadium_rmm = 50.9415
     sample_mass = 1.0
     sample_rmm = 1.0
+    absunits_median_test_high = 1.2
+    absunits_median_test_low = 0.8
+    absunits_median_test_out_high = 100
+    absunits_median_test_out_low = 0.01
+    absunits_errorbar_criterion = 0.0
     
-    def __init__(self):
+    def __init__(self, inst_name):
         super(AbsoluteUnitsScript, self).__init__()
+        self.set_default_pars(inst_name)
         self.reset()
         
+    def set_default_pars(self, inst_name):
+        import dgs_utils
+        ip = dgs_utils.InstrumentParameters(inst_name)
+        AbsoluteUnitsScript.emin = ip.get_parameter("monovan-integr-min")
+        AbsoluteUnitsScript.emax = ip.get_parameter("monovan-integr-max")
+        AbsoluteUnitsScript.vandium_mass = ip.get_parameter("vanadium-mass")
+        AbsoluteUnitsScript.vandium_rmm = ip.get_parameter("vanadium-rmm")
+        AbsoluteUnitsScript.absunits_median_test_out_high = ip.get_parameter("monovan_hi_bound")
+        AbsoluteUnitsScript.absunits_median_test_out_low = ip.get_parameter("monovan_lo_bound")
+        AbsoluteUnitsScript.absunits_median_test_high = ip.get_parameter("monovan_hi_frac")
+        AbsoluteUnitsScript.absunits_median_test_low = ip.get_parameter("monovan_lo_frac")
+        AbsoluteUnitsScript.absunits_errorbar_criterion = ip.get_parameter("diag_samp_sig")
+                
     def to_script(self):
         script = ""
         if self.do_absolute_units:
@@ -43,10 +63,22 @@ class AbsoluteUnitsScript(BaseScriptElement):
                 script += "AbsUnitsMaximumEnergy=%s,\n" % str(self.emax)
             if self.vandium_mass != AbsoluteUnitsScript.vandium_mass:
                 script += "VanadiumMass=%s,\n" % str(self.vandium_mass)
+            if self.vanadium_rmm != AbsoluteUnitsScript.vanadium_rmm:
+                script += "VanadiumRmm=%s,\n" % str(self.vanadium_rmm)
             if self.sample_mass != AbsoluteUnitsScript.sample_mass:
                 script += "SampleMass=%s,\n" % str(self.sample_mass)
             if self.sample_rmm != AbsoluteUnitsScript.sample_rmm:
                 script += "SampleRmm=%s,\n" % str(self.sample_rmm)
+            if self.absunits_median_test_out_low != AbsoluteUnitsScript.absunits_median_test_out_low:
+                script += "AbsUnitsLowOutlier=%s,\n" % str(self.absunits_median_test_out_low)
+            if self.absunits_median_test_out_high != AbsoluteUnitsScript.absunits_median_test_out_high:
+                script += "AbsUnitsHighOutlier=%s,\n" % str(self.absunits_median_test_out_high)
+            if self.absunits_median_test_high != AbsoluteUnitsScript.absunits_median_test_high:
+                script += "AbsUnitsMedianTestHigh=%s,\n" % str(self.absunits_median_test_high)
+            if self.absunits_median_test_low != AbsoluteUnitsScript.absunits_median_test_low:
+                script += "AbsUnitsMedianTestLow=%s,\n" % str(self.absunits_median_test_low)
+            if self.absunits_errorbar_criterion != AbsoluteUnitsScript.absunits_errorbar_criterion:
+                script += "AbsUnitsErrorBarCriterion=%s,\n" % str(self.absunits_errorbar_criterion)
         return script
     
     def to_xml(self):
@@ -62,8 +94,14 @@ class AbsoluteUnitsScript(BaseScriptElement):
         xml += "  <minimum_energy>%s</minimum_energy>\n" % str(self.emin)
         xml += "  <maximum_energy>%s</maximum_energy>\n" % str(self.emax)
         xml += "  <vanadium_mass>%s</vanadium_mass>\n" % str(self.vandium_mass)
+        xml += "  <vanadium_rmm>%s</vanadium_rmm>\n" % str(self.vandium_rmm)
         xml += "  <sample_mass>%s</sample_mass>\n" % str(self.sample_mass)
         xml += "  <sample_rmm>%s</sample_rmm>\n" % str(self.sample_rmm)
+        xml += "  <median_test_outlier_low>%s</median_test_outlier_low>\n" % str(self.absunits_median_test_out_low)
+        xml += "  <median_test_outlier_high>%s</median_test_outlier_high>\n" % str(self.absunits_median_test_out_high)
+        xml += "  <median_test_low>%s</median_test_low>\n" % str(self.absunits_median_test_low)
+        xml += "  <median_test_high>%s</median_test_high>\n" % str(self.absunits_median_test_high)
+        xml += "  <errorbar_criterion>%s</errorbar_criterion>\n" % str(self.absunits_errorbar_criterion)
         xml += "</AbsoluteUnits>\n"
         return xml
     
@@ -100,12 +138,30 @@ class AbsoluteUnitsScript(BaseScriptElement):
             self.vandium_mass = BaseScriptElement.getFloatElement(instrument_dom,
                                                                   "vanadium_mass",
                                                                   default=AbsoluteUnitsScript.vandium_mass)
+            self.vandium_rmm = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                 "vanadium_rmm",
+                                                                 default=AbsoluteUnitsScript.vandium_rmm)
             self.sample_mass = BaseScriptElement.getFloatElement(instrument_dom,
                                                                  "sample_mass",
                                                                  default=AbsoluteUnitsScript.sample_mass)
             self.sample_rmm = BaseScriptElement.getFloatElement(instrument_dom,
                                                                 "sample_rmm",
                                                                 default=AbsoluteUnitsScript.sample_rmm)            
+            self.absunits_median_test_out_low = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                                  "median_test_out_low",
+                                                                                  default=AbsoluteUnitsScript.absunits_median_test_out_low)
+            self.absunits_median_test_out_high = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                                   "median_test_out_high",
+                                                                                   default=AbsoluteUnitsScript.absunits_median_test_out_high)
+            self.absunits_median_test_low = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                              "median_test_low",
+                                                                              default=AbsoluteUnitsScript.absunits_median_test_low)
+            self.absunits_median_test_high = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                               "median_test_high",
+                                                                               default=AbsoluteUnitsScript.absunits_median_test_high)
+            self.absunits_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                                 "errorbar_criterion",
+                                                                                 default=AbsoluteUnitsScript.absunits_errorbar_criterion)    
 
     def reset(self):
         """
@@ -119,5 +175,11 @@ class AbsoluteUnitsScript(BaseScriptElement):
         self.emin = AbsoluteUnitsScript.emin
         self.emax = AbsoluteUnitsScript.emax
         self.vandium_mass = AbsoluteUnitsScript.vandium_mass
+        self.vandium_rmm = AbsoluteUnitsScript.vandium_rmm
         self.sample_mass = AbsoluteUnitsScript.sample_mass
         self.sample_rmm = AbsoluteUnitsScript.sample_rmm
+        self.absunits_median_test_out_low = AbsoluteUnitsScript.absunits_median_test_out_low
+        self.absunits_median_test_out_high = AbsoluteUnitsScript.absunits_median_test_out_high
+        self.absunits_median_test_low = AbsoluteUnitsScript.absunits_median_test_low
+        self.absunits_median_test_high = AbsoluteUnitsScript.absunits_median_test_high
+        self.absunits_errorbar_criterion = AbsoluteUnitsScript.absunits_errorbar_criterion
