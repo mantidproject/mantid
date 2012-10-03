@@ -86,6 +86,9 @@ datasearch.directories = @DATADIRS@
 # points to the ParaView obtained from the Mantid download page
 paraview.path = @PARAVIEW_APP_BIN_DIR@
 
+# Whether to look for ParaView (0 = try to use, 1 = don't use).
+paraview.ignore = @IGNORE_PARAVIEW@
+
 # A semi-colon(;) separated list of directories to use to search for files other than data
 # Use forward slash / for all paths
 usersearch.directories = 

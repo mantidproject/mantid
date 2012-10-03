@@ -370,6 +370,7 @@ endif ()
 
 set ( PLUGINS "." )
 set ( PV_PLUGINS "./pvplugins" )
+set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
 set ( PYTHONALGS ${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
@@ -400,13 +401,22 @@ else ()
 endif ()
 
 set ( PLUGINS ${MANTID_ROOT}/plugins )
-set ( QTPLUGINS ${MANTID_ROOT}/plugins/qtplugins/mantid )
-set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps )
-set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_SUBDIR} )
-
 set ( PYTHONALGS ${PLUGINS}/PythonAlgs )
 set ( DATADIRS "" )
-  
+
+# For a framework-only (e.g. MPI) build some of these are not relevant and should
+# be left empty to avoid warnings on starting Mantid
+if ( ${CMAKE_PROJECT_NAME} MATCHES "MantidFramework" )
+  set ( QTPLUGINS "" )
+  set ( COLORMAPS_FOLDER "" )
+  set ( PV_PLUGINS "" )
+  set ( IGNORE_PARAVIEW "1" )
+else ()
+  set ( QTPLUGINS ${MANTID_ROOT}/plugins/qtplugins/mantid )
+  set ( COLORMAPS_FOLDER ${MANTID_ROOT}/colormaps )
+  set ( PV_PLUGINS ${MANTID_ROOT}/${PVPLUGINS_SUBDIR} )
+endif ()
+
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
 )
