@@ -212,6 +212,8 @@ namespace Mantid
         copy->addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
         it++;
       }
+      // copy logs/properties.
+      copy->m_LogManager = boost::make_shared<API::LogManager>(*this->m_LogManager);
       return copy;
     };
 
