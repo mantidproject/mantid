@@ -961,7 +961,7 @@ namespace Mantid
      * Returns total value, added up for all times regardless of filter
      *  @return Total value from all times
      */
-    template<typename TYPE> 
+    template<typename TYPE>
     TYPE TimeSeriesProperty<TYPE>::getTotalValue() const
     {
       TYPE total = 0;
@@ -973,18 +973,18 @@ namespace Mantid
       return total;
     }
 
-  /*  template<>  
-    int TimeSeriesProperty<bool>::getTotalValue() const
+    template<> 
+    bool TimeSeriesProperty<bool>::getTotalValue() const
     {
-      int total = 0;
+      if(m_values.size()==0)return false;
+      bool total = m_values[0].value();
 
-      for (size_t i = 0; i < m_values.size(); ++i)
+      for (size_t i = 1; i < m_values.size(); ++i)
       {
-        if(m_values[i].value())total++;
+        total&=m_values[i].value();
       }
       return total;
-    }*/
-
+    }
 
 
     /** Returns n-th valid time interval, in a very inefficient way.

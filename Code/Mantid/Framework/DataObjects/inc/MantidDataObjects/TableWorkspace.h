@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/PropertyManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/TableColumn.h"
 #include <boost/shared_ptr.hpp>
@@ -405,6 +406,8 @@ private:
     size_t m_rowCount;
     /// Logger
     static Kernel::Logger& g_log;
+
+    Kernel::PropertyManager_sptr m_TableProperties;
 
 };
 
