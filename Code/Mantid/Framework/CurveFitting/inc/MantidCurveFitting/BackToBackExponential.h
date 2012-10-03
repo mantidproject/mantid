@@ -51,6 +51,7 @@ namespace Mantid
     class DLLExport BackToBackExponential : public API::IPeakFunction
     {
     public:
+      BackToBackExponential() : m_cutOff(10.0) {};
       /// Destructor
       virtual ~BackToBackExponential() {};
 
@@ -85,6 +86,8 @@ namespace Mantid
         UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
       }
 
+    private:
+      const double m_cutOff; //prevent overflow
     };
 
   } // namespace CurveFitting

@@ -37,10 +37,14 @@ void BackToBackExponential::function1D(double* out, const double* xValues, const
     double s2 = s*s;
     for (size_t i = 0; i < nData; i++) {
       double diff=xValues[i]-x0;
-      if ( fabs(diff) < 10*s )
+      if ( fabs(diff) < 20*s )
       {
-        out[i] = I*(exp(a/2*(a*s2+2*diff))*gsl_sf_erfc((a*s2+diff)/sqrt(2*s2))
-                    + exp(b/2*(b*s2-2*diff))*gsl_sf_erfc((b*s2-diff)/sqrt(2*s2)));
+        double val = 0.0;
+        double arg1 = a/2*(a*s2+2*diff);
+        if( arg1 < m_cutOff ) val += exp(arg1)*gsl_sf_erfc((a*s2+diff)/sqrt(2*s2)); //prevent overflow
+        double arg2 = b/2*(b*s2-2*diff);
+        if( arg2 < m_cutOff ) val += exp(arg2)*gsl_sf_erfc((b*s2-diff)/sqrt(2*s2)); //prevent overflow
+        out[i] = I*val;
       }
       else
         out[i] = 0.0;
@@ -60,17 +64,32 @@ void BackToBackExponential::functionDeriv1D(Jacobian* out, const double* xValues
     {
       double diff = xValues[i]-x0;
 
-      if ( fabs(diff) < 10*s )
+      if ( fabs(diff) < 20*s )
       {
 
-        double e_a = exp(0.5*a*(a*s2+2*diff));
-        double e_b = exp(0.5*b*(b*s2-2*diff));
-        double erfc_a = gsl_sf_erfc((a*s2+diff)/sqrt(2*s2));
-        double erfc_b = gsl_sf_erfc((b*s2-diff)/sqrt(2*s2));
+        double e_a = 0.0;
+        double erfc_a = 0.0;
+        double div_erfc_a = 0.0;
+        double arg1 = 0.5*a*(a*s2+2*diff);
+        if(arg1 < m_cutOff) //prevent overflow
+        {
+          e_a = exp(arg1);
+          erfc_a = gsl_sf_erfc((a*s2+diff)/sqrt(2*s2));
+          // apart from a prefactor terms arising from derivative or argument of erfc's divided by sqrt(2)
+          div_erfc_a = - exp( -(a*s2+diff)*(a*s2+diff)/(2*s2)+0.5*a*(a*s2+2.0*diff) ) * M_SQRT2/M_SQRTPI;
+        }
 
-        // apart from a prefactor terms arising from defivative or argument of erfc's divided by sqrt(2)
-        double div_erfc_a = - exp( -(a*s2+diff)*(a*s2+diff)/(2*s2)+0.5*a*(a*s2+2.0*diff) ) * M_SQRT2/M_SQRTPI;
-        double div_erfc_b = - exp( -(b*s2-diff)*(b*s2-diff)/(2*s2)+0.5*b*(b*s2-2.0*diff) ) * M_SQRT2/M_SQRTPI;
+        double e_b = 0.0;
+        double erfc_b = 0.0;
+        double div_erfc_b = 0.0;
+        double arg2 = 0.5*b*(b*s2-2*diff);
+        if(arg2 < m_cutOff) //prevent overflow
+        {
+          e_b = exp(arg2);
+          erfc_b = gsl_sf_erfc((b*s2-diff)/sqrt(2*s2));
+          // apart from a prefactor terms arising from derivative or argument of erfc's divided by sqrt(2)
+          div_erfc_b = - exp( -(b*s2-diff)*(b*s2-diff)/(2*s2)+0.5*b*(b*s2-2.0*diff) ) * M_SQRT2/M_SQRTPI;
+        }
 
         out->set(i,0, (e_a*erfc_a+e_b*erfc_b));
         out->set(i,1, I*( s*div_erfc_a + e_a*(a*s2+diff)*erfc_a ));
