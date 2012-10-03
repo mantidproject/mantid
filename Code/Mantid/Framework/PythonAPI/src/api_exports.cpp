@@ -848,10 +848,10 @@ using namespace boost::python;
     register_ptr_to_python<API::Run*>();
 
 #define EXPORT_ADDPROPERTY(type, suffix)\
-    .def("addProperty_"#suffix,(void (API::Run::*)(const std::string &, const type&, bool))&Run::addProperty)
+    .def("addProperty_"#suffix,(void (API::LogManager::*)(const std::string &, const type&, bool))&LogManager::addProperty)
 
 #define EXPORT_ADDPROPERTY_UNITS(type, suffix)\
-    .def("addProperty_"#suffix,(void (API::Run::*)(const std::string &, const type&, const std::string &, bool))&Run::addProperty)
+    .def("addProperty_"#suffix,(void (API::LogManager::*)(const std::string &, const type&, const std::string &, bool))&LogManager::addProperty)
 
     //Run class
     class_< API::Run,  boost::noncopyable >("Run", no_init)
