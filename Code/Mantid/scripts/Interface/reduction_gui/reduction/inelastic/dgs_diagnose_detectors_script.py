@@ -14,6 +14,8 @@ class DiagnoseDetectorsScript(BaseScriptElement):
     output_mask_file = ''
     high_counts = 1.0e+10
     low_counts = 1.0e-10
+    median_test_out_high = 100
+    median_test_out_low = 0.01
     median_test_high = 3
     median_test_low = 0.1
     errorbar_criterion = 0.0
@@ -30,9 +32,32 @@ class DiagnoseDetectorsScript(BaseScriptElement):
     max_framerate = ''
     ignored_pixels = ''
 
-    def __init__(self):
+    def __init__(self, inst_name):
         super(DiagnoseDetectorsScript, self).__init__()
+        self.set_default_pars(inst_name)
         self.reset()
+        
+    def set_default_pars(self, inst_name):
+        import dgs_utils
+        ip = dgs_utils.InstrumentParameters(inst_name)
+        DiagnoseDetectorsScript.high_counts = ip.get_parameter("diag_huge")
+        DiagnoseDetectorsScript.low_counts = ip.get_parameter("diag_tiny")
+        DiagnoseDetectorsScript.median_test_out_high = ip.get_parameter("diag_van_out_hi")
+        DiagnoseDetectorsScript.median_test_out_low = ip.get_parameter("diag_van_out_lo")
+        DiagnoseDetectorsScript.median_test_high = ip.get_parameter("diag_van_hi")
+        DiagnoseDetectorsScript.median_test_low = ip.get_parameter("diag_van_lo")
+        DiagnoseDetectorsScript.errorbar_criterion = ip.get_parameter("diag_van_sig")
+        DiagnoseDetectorsScript.detvan_ratio_var = ip.get_parameter("diag_variation")
+        DiagnoseDetectorsScript.background_check = ip.get_bool_param("check_background")
+        DiagnoseDetectorsScript.sambkg_median_test_high = ip.get_parameter("diag_samp_hi")
+        DiagnoseDetectorsScript.sambkg_median_test_low = ip.get_parameter("diag_samp_lo")
+        DiagnoseDetectorsScript.sambkg_errorbar_criterion = ip.get_parameter("diag_samp_sig")
+        DiagnoseDetectorsScript.tof_start = ip.get_parameter("bkgd-range-min")
+        DiagnoseDetectorsScript.tof_end = ip.get_parameter("bkgd-range-max")
+        DiagnoseDetectorsScript.reject_zero_bkg = ip.get_bool_param("diag_samp_zero")
+        DiagnoseDetectorsScript.psd_bleed = ip.get_bool_param("diag_bleed_test")
+        DiagnoseDetectorsScript.max_framerate = ip.get_parameter("diag_bleed_maxrate")
+        DiagnoseDetectorsScript.ignored_pixels = ip.get_parameter("diag_bleed_pixels")
         
     def to_script(self):
         script = ""
@@ -42,6 +67,10 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             script += "HighCounts=%s,\n" % str(self.high_counts)
         if self.low_counts != DiagnoseDetectorsScript.low_counts:
             script += "LowCounts=%s,\n" % str(self.low_counts)
+        if self.median_test_out_low != DiagnoseDetectorsScript.median_test_out_low:
+            script += "LowOutlier=%s,\n" %str(self.median_test_out_low)
+        if self.median_test_out_high != DiagnoseDetectorsScript.median_test_out_high:
+            script += "HighOutlier=%s,\n" %str(self.median_test_out_high)
         if self.median_test_high != DiagnoseDetectorsScript.median_test_high:
             script += "MedianTestHigh=%s,\n" % str(self.median_test_high)
         if self.median_test_low != DiagnoseDetectorsScript.median_test_low:
@@ -82,6 +111,8 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         xml += "  <output_mask_file>%s</output_mask_file>\n" % self.output_mask_file
         xml += "  <high_counts>%s</high_counts>\n" % str(self.high_counts)
         xml += "  <low_counts>%s</low_counts>\n" % str(self.low_counts)
+        xml += "  <median_test_outlier_low>%s</median_test_outlier_low>\n" % str(self.median_test_out_low)
+        xml += "  <median_test_outlier_high>%s</median_test_outlier_high>\n" % str(self.median_test_out_high)
         xml += "  <median_test_low>%s</median_test_low>\n" % str(self.median_test_low)
         xml += "  <median_test_high>%s</median_test_high>\n" % str(self.median_test_high)
         xml += "  <errorbar_criterion>%s</errorbar_criterion>\n" % str(self.errorbar_criterion)
@@ -118,6 +149,12 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             self.low_counts = BaseScriptElement.getFloatElement(instrument_dom,
                                                                 "low_counts",
                                                                 default=DiagnoseDetectorsScript.low_counts)
+            self.median_test_out_low = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                         "median_test_out_low",
+                                                                         default=DiagnoseDetectorsScript.median_test_out_low)
+            self.median_test_out_high = BaseScriptElement.getFloatElement(instrument_dom,
+                                                                          "median_test_out_high",
+                                                                          default=DiagnoseDetectorsScript.median_test_out_high)
             self.median_test_low = BaseScriptElement.getFloatElement(instrument_dom,
                                                                      "median_test_low",
                                                                      default=DiagnoseDetectorsScript.median_test_low)
@@ -171,6 +208,8 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         self.output_mask_file = DiagnoseDetectorsScript.output_mask_file
         self.high_counts = DiagnoseDetectorsScript.high_counts
         self.low_counts = DiagnoseDetectorsScript.low_counts
+        self.median_test_out_low = DiagnoseDetectorsScript.median_test_out_low
+        self.median_test_out_high = DiagnoseDetectorsScript.median_test_out_high
         self.median_test_low = DiagnoseDetectorsScript.median_test_low
         self.median_test_high = DiagnoseDetectorsScript.median_test_high
         self.errorbar_criterion = DiagnoseDetectorsScript.errorbar_criterion

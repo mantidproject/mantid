@@ -75,7 +75,7 @@
          <widget class="QLabel" name="high_counts_label">
           <property name="minimumSize">
            <size>
-            <width>133</width>
+            <width>137</width>
             <height>0</height>
            </size>
           </property>
@@ -98,12 +98,12 @@
          <widget class="QLabel" name="low_counts_label">
           <property name="minimumSize">
            <size>
-            <width>110</width>
+            <width>135</width>
             <height>0</height>
            </size>
           </property>
           <property name="text">
-           <string>Low counts</string>
+           <string> Low counts</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -141,7 +141,7 @@
          <widget class="QLabel" name="median_test_high_label">
           <property name="minimumSize">
            <size>
-            <width>133</width>
+            <width>137</width>
             <height>0</height>
            </size>
           </property>
@@ -169,7 +169,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Median test low</string>
+           <string>        Median test low</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -188,6 +188,63 @@
         </item>
         <item>
          <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_12">
+        <item>
+         <widget class="QLabel" name="median_test_out_high_label">
+          <property name="text">
+           <string>Median high outliers</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="median_test_out_high_edit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="median_test_out_low_label">
+          <property name="minimumSize">
+           <size>
+            <width>125</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string> Median low outliers</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="median_test_out_low_edit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_12">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
