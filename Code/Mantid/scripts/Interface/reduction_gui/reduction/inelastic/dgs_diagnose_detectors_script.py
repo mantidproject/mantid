@@ -68,9 +68,9 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         if self.low_counts != DiagnoseDetectorsScript.low_counts:
             script += "LowCounts=%s,\n" % str(self.low_counts)
         if self.median_test_out_low != DiagnoseDetectorsScript.median_test_out_low:
-            script += "LowOutlier=%s,\n" %str(self.median_test_out_low)
+            script += "LowOutlier=%s,\n" % str(self.median_test_out_low)
         if self.median_test_out_high != DiagnoseDetectorsScript.median_test_out_high:
-            script += "HighOutlier=%s,\n" %str(self.median_test_out_high)
+            script += "HighOutlier=%s,\n" % str(self.median_test_out_high)
         if self.median_test_high != DiagnoseDetectorsScript.median_test_high:
             script += "MedianTestHigh=%s,\n" % str(self.median_test_high)
         if self.median_test_low != DiagnoseDetectorsScript.median_test_low:
