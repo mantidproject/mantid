@@ -162,10 +162,15 @@ private:
 /// Private constructor for singleton class
 ConfigServiceImpl::ConfigServiceImpl() :
   m_pConf(NULL), m_pSysConfig(NULL), g_log(Logger::get("ConfigService")), m_changed_keys(),
-      m_ConfigPaths(), m_AbsolutePaths(), m_strBaseDir(""), m_PropertyString(""),
-      m_properties_file_name("Mantid.properties"),
-      m_user_properties_file_name("Mantid.user.properties"), m_DataSearchDirs(), m_UserSearchDirs(),
-      m_instr_prefixes(), m_removedFlag("@@REMOVED@@")
+  m_ConfigPaths(), m_AbsolutePaths(), m_strBaseDir(""), m_PropertyString(""),
+  m_properties_file_name("Mantid.properties"),
+#ifdef MPI_BUILD
+  // Use a different user properties file for an mpi-enabled build to avoid confusion if both are used on the same filesystem
+  m_user_properties_file_name("Mantid-mpi.user.properties"),
+#else
+  m_user_properties_file_name("Mantid.user.properties"),
+#endif
+  m_DataSearchDirs(), m_UserSearchDirs(), m_instr_prefixes(), m_removedFlag("@@REMOVED@@")
 {
   //getting at system details
   m_pSysConfig = new WrappedObject<Poco::Util::SystemConfiguration> ;
@@ -1644,9 +1649,8 @@ Ammend paths to point to include the paraview core libraries.
 */
 void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
 {
-  std::string platformPathName;
 #ifdef _WIN32
-  platformPathName = "PATH";
+  const std::string platformPathName = "PATH";
   Poco::Path existingPath;
   char separator = existingPath.pathSeparator();
   std::string strSeparator;
