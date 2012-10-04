@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_IDFOBJECT_H_
 
 #include "MantidKernel/System.h"
+#include <boost/shared_ptr.hpp>
 #include <Poco/Timestamp.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -48,8 +49,14 @@ namespace Geometry
     virtual ~IDFObject();
 
   private:
-    Poco::File m_defFile;
+    IDFObject(const IDFObject&);
+    IDFObject & operator=(const IDFObject&);
+    const Poco::File m_defFile;
+    const bool m_hasFileName;
   };
+
+  typedef boost::shared_ptr<IDFObject> IDFObject_sptr;
+  typedef boost::shared_ptr<const IDFObject> IDFObject_const_sptr;
 
 
 } // namespace Geometry

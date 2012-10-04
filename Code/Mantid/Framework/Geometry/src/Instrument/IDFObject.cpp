@@ -9,7 +9,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    IDFObject::IDFObject(const std::string& fileName) : m_defFile(fileName)
+    IDFObject::IDFObject(const std::string& fileName) : m_defFile(fileName), m_hasFileName(!fileName.empty())
     {
     }
 
@@ -62,7 +62,7 @@ namespace Mantid
     */
     bool IDFObject::exists() const
     {
-      return m_defFile.exists();
+      return m_hasFileName && m_defFile.exists();
     }
 
 

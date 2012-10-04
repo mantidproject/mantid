@@ -24,6 +24,12 @@ public:
     TS_ASSERT(obj.exists());
   }
 
+  void testDoesntExistIfEmpty()
+  {
+    IDFObject obj("");
+    TS_ASSERT(!obj.exists());
+  }
+
   void testDoesntExist()
   {
     const std::string filename = "made_up_file.xml";

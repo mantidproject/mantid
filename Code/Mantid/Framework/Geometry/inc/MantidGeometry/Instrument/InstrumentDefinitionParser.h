@@ -9,6 +9,7 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ProgressBase.h"
+#include "MantidGeometry/Instrument/IDFObject.h"
 
 
 namespace Mantid
@@ -48,8 +49,14 @@ namespace Geometry
     InstrumentDefinitionParser();
     ~InstrumentDefinitionParser();
 
+    /// Caching 
+    enum CachingOption{NoneApplied, ReadAdjacent, ReadFallBack, WroteCache };
+
     /// Set up parser
     void initialize(const std::string & filename, const std::string & instName, const std::string & xmlText);
+
+    /// Set up parser. 
+    void initialize(IDFObject_const_sptr xmlFile, IDFObject_const_sptr expectedCacheFile, const std::string & instName, const std::string & xmlText);
 
     /// Parse XML contents
     Instrument_sptr parseXML(Kernel::ProgressBase * prog);
@@ -67,6 +74,9 @@ namespace Geometry
 
     /// Save DOM tree to xml file
     void saveDOM_Tree(std::string& outFilename);
+
+    /// Getter the the applied caching option.
+    CachingOption getAppliedCachingOption() const;
 
   private:
     /// Static reference to the logger class
@@ -133,7 +143,7 @@ namespace Geometry
     void makeXYplaneFaceComponent(Geometry::IComponent* &in, const Kernel::V3D& facingPoint);
 
     /// Reads in or creates the geometry cache ('vtp') file
-    void setupGeometryCache();
+    CachingOption setupGeometryCache();
 
     /// If appropriate, creates a second instrument containing neutronic detector positions
     void createNeutronicInstrument();
@@ -150,6 +160,16 @@ public: //for testing
     Kernel::V3D getAbsolutPositionInCompCoorSys(Geometry::ICompAssembly* comp, Kernel::V3D);
 
 private:
+
+    /// Checks if the proposed cache file can be read from.
+    bool canUseProposedCacheFile(IDFObject_const_sptr cache) const;
+
+    /// Reads from a cache file.
+    void applyCache(IDFObject_const_sptr cacheToApply);
+
+    /// Write out a cache file.
+    void writeAndApplyCache(IDFObject_const_sptr usedCache);
+
     /// This method returns the parent appended which its child components and also name of type of the last child component
     std::string getShapeCoorSysComp(Geometry::ICompAssembly* parent,
       Poco::XML::Element* pLocElem, std::map<std::string,Poco::XML::Element*>& getTypeElement,
@@ -168,8 +188,12 @@ private:
     /// Get position coordinates from XML element
     Kernel::V3D parsePosition(Poco::XML::Element* pElem);
 
-    /// The name and path of the input file
-    std::string m_filename;
+    /// Input xml file
+    IDFObject_const_sptr m_xmlFile;
+
+    /// Input vtp file
+    IDFObject_const_sptr m_cacheFile;
+
     /// Name of the instrument
     std::string m_instName;
 
@@ -230,6 +254,9 @@ private:
 
     /// Map to store positions of parent components in spherical coordinates
     std::map<const Geometry::IComponent*,SphVec> m_tempPosHolder;
+
+    /// Caching applied.
+    CachingOption m_cachingOption;
   };
 
 
