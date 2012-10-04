@@ -161,7 +161,7 @@ namespace Mantid
             double powVal = 1.0 + incidentEnergy;
             tZero = (0.1982 * std::pow(powVal, -0.84098)) * 1000.0;
           }
-          if (tZeroGuess != 0.0)
+          if (EMPTY_DBL() != tZeroGuess)
           {
             tZero = tZeroGuess;
           }
@@ -172,7 +172,10 @@ namespace Mantid
           if (useEiGuess)
           {
             incidentEnergy = eiGuess;
-            tZero = tZeroGuess;
+            if (EMPTY_DBL() != tZeroGuess)
+            {
+              tZero = tZeroGuess;
+            }
           }
           else
           {

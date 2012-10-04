@@ -91,7 +91,7 @@ namespace Mantid
           "Set the value of the incident energy guess in meV.");
       this->declareProperty("UseIncidentEnergyGuess", false,
           "Use the incident energy guess as the actual value (will not be calculated).");
-      this->declareProperty("TimeZeroGuess", 0.0,
+      this->declareProperty("TimeZeroGuess", EMPTY_DBL(),
           "Set the value of time zero offset in microseconds.");
       this->setPropertySettings("TimeZeroGuess",
           new VisibleWhenProperty("UseIncidentEnergyGuess", IS_EQUAL_TO, "1"));
