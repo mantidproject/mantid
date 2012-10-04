@@ -83,8 +83,8 @@ class AbsoluteUnitsWidget(BaseWidget):
         self._content.ei_edit.setText(state.incident_energy)
         self._content.emin_edit.setText(QtCore.QString(str(state.emin)))
         self._content.emax_edit.setText(QtCore.QString(str(state.emax)))
-        self._content.van_mass_edit.setText(QtCore.QString(str(state.vandium_mass)))
-        self._content.van_rmm_edit.setText(QtCore.QString(str(state.vandium_rmm)))
+        self._content.van_mass_edit.setText(QtCore.QString(str(state.vanadium_mass)))
+        self._content.van_rmm_edit.setText(QtCore.QString(str(state.vanadium_rmm)))
         self._content.sample_mass_edit.setText(QtCore.QString(str(state.sample_mass)))
         self._content.sample_rmm_edit.setText(QtCore.QString(str(state.sample_rmm)))
         self._content.median_test_high_edit.setText(QtCore.QString(str(state.absunits_median_test_high)))
@@ -93,7 +93,6 @@ class AbsoluteUnitsWidget(BaseWidget):
         self._content.median_test_out_low_edit.setText(QtCore.QString(str(state.absunits_median_test_out_low)))
         self._content.errorbar_crit_edit.setText(QtCore.QString(str(state.absunits_errorbar_criterion)))
 
-        
     def get_state(self):
         """
             Returns an object with the state of the interface
@@ -115,6 +114,5 @@ class AbsoluteUnitsWidget(BaseWidget):
         a.absunits_median_test_out_high = util._check_and_get_float_line_edit(self._content.median_test_out_high_edit)
         a.absunits_median_test_out_low = util._check_and_get_float_line_edit(self._content.median_test_out_low_edit)
         a.absunits_errorbar_criterion = util._check_and_get_float_line_edit(self._content.errorbar_crit_edit)
-
         return a
         

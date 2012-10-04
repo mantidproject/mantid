@@ -233,6 +233,13 @@
          <widget class="QLineEdit" name="van_input_edit"/>
         </item>
         <item>
+         <widget class="QPushButton" name="van_input_browse">
+          <property name="text">
+           <string>Browse</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="horizontalSpacer_5">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -247,13 +254,6 @@
            </size>
           </property>
          </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="van_input_browse">
-          <property name="text">
-           <string>Browse</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </item>
@@ -275,15 +275,45 @@
         <item>
          <widget class="QLabel" name="van_int_range_label">
           <property name="text">
-           <string>Range</string>
+           <string>Range:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="van_int_range_low_edit"/>
+         <widget class="QLineEdit" name="van_int_range_low_edit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="van_int_range_high_edit"/>
+         <widget class="QLabel" name="label_3">
+          <property name="minimumSize">
+           <size>
+            <width>60</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>to</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="van_int_range_high_edit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QComboBox" name="van_int_range_units_cb">
@@ -309,6 +339,19 @@
            </property>
           </item>
          </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_4">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -358,19 +401,6 @@
       </item>
      </layout>
     </widget>
-   </item>
-   <item>
-    <spacer name="horizontalSpacer_4">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>940</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item>
     <spacer name="verticalSpacer">

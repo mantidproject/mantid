@@ -28,9 +28,20 @@ class DataCorrectionsScript(BaseScriptElement):
     save_proc_det_van = False
     use_proc_det_van = False    
     
-    def __init__(self):
+    def __init__(self, inst_name):
         super(DataCorrectionsScript, self).__init__()
+        self.set_default_pars(inst_name)
         self.reset()
+        
+    def set_default_pars(self, inst_name):
+        import dgs_utils
+        ip = dgs_utils.InstrumentParameters(inst_name)
+        DataCorrectionsScript.monitor_int_low = ip.get_parameter("norm-mon1-min")
+        DataCorrectionsScript.monitor_int_high = ip.get_parameter("norm-mon1-max")
+        DataCorrectionsScript.tib_tof_start = ip.get_parameter("bkgd-range-min")
+        DataCorrectionsScript.tib_tof_end = ip.get_parameter("bkgd-range-max")
+        DataCorrectionsScript.det_van_int_range_low = ip.get_parameter("wb-integr-min")
+        DataCorrectionsScript.det_van_int_range_high = ip.get_parameter("wb-integr-max")
         
     def to_script(self):
         script = ""
@@ -39,20 +50,25 @@ class DataCorrectionsScript(BaseScriptElement):
         script += "IncidentBeamNormalisation=\"%s\",\n" % self.incident_beam_norm
         if self.incident_beam_norm == "ToMonitor":
             if self.monitor_int_low != DataCorrectionsScript.monitor_int_low:
-                script += "MonitorIntRangeLow=\"%s\",\n" % self.monitor_int_low
+                script += "MonitorIntRangeLow=%s,\n" % self.monitor_int_low
             if self.monitor_int_high != DataCorrectionsScript.monitor_int_high:
-                script += "MonitorIntRangeHigh=\"%s\",\n" % self.monitor_int_high
+                script += "MonitorIntRangeHigh=%s,\n" % self.monitor_int_high
         if self.tib_subtraction:
             script += "TimeIndepBackgroundSub=%s,\n" % self.tib_subtraction
-            script += "TibTofRangeStart=\"%s\",\n" % self.tib_tof_start
-            script += "TibTofRangeEnd=\"%s\",\n" % self.tib_tof_end
+            if self.tib_tof_start != DataCorrectionsScript.tib_tof_start:
+                script += "TibTofRangeStart=%s,\n" % self.tib_tof_start
+            if self.tib_tof_end != DataCorrectionsScript.tib_tof_end:
+                script += "TibTofRangeEnd=%s,\n" % self.tib_tof_end
         if self.detector_vanadium != '':
             script += "DetectorVanadiumInputFile=\"%s\",\n" % self.detector_vanadium
             if self.det_van_integration:
-                script += "UseBoundsForDetVan=%s,\n" % self.det_van_integration
-                script += "DetVanIntRangeLow=\"%s\",\n" % self.det_van_int_range_low
-                script += "DetVanIntRangeHigh=\"%s\",\n" % self.det_van_int_range_high
-                script += "DetVanIntRangeUnits=\"%s\",\n" % self.det_van_int_range_units
+                if self.det_van_integration:
+                    script += "UseBoundsForDetVan=%s,\n" % self.det_van_integration
+                    if self.det_van_int_range_low != DataCorrectionsScript.det_van_int_range_low:
+                        script += "DetVanIntRangeLow=%s,\n" % self.det_van_int_range_low
+                    script += "DetVanIntRangeHigh=%s,\n" % self.det_van_int_range_high
+                if self.det_van_int_range_units != DataCorrectionsScript.det_van_int_range_units:
+                    script += "DetVanIntRangeUnits=%s,\n" % self.det_van_int_range_units
             if self.save_proc_det_van:
                 script += "SaveProcessedDetVan=%s,\n" % self.save_proc_det_van
             if self.use_proc_det_van:

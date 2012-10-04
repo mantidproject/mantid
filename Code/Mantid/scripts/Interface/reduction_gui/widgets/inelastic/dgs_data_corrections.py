@@ -23,11 +23,12 @@ class DataCorrectionsWidget(BaseWidget):
         self._content = DataCorrsFrame(self)
         self._layout.addWidget(self._content)
         self.initialize_content()
+        self._instrument_name = settings.instrument_name
         
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(DataCorrectionsScript())
+            self.set_state(DataCorrectionsScript(self._instrument_name))
 
     def initialize_content(self):
         # Make group for incident beam normalisation radio buttons
@@ -73,15 +74,15 @@ class DataCorrectionsWidget(BaseWidget):
         button_index = DataCorrectionsScript.INCIDENT_BEAM_NORM_TYPES.index(state.incident_beam_norm)
         cbutton = self.incident_beam_norm_grp.button(button_index)
         cbutton.setChecked(True)
-        self._content.monint_low_edit.setText(state.monitor_int_low)
-        self._content.monint_high_edit.setText(state.monitor_int_high)
+        self._content.monint_low_edit.setText(str(state.monitor_int_low))
+        self._content.monint_high_edit.setText(str(state.monitor_int_high))
         self._content.background_sub_gb.setChecked(state.tib_subtraction)
-        self._content.tof_start_edit.setText(state.tib_tof_start)
-        self._content.tof_end_edit.setText(state.tib_tof_end)
+        self._content.tof_start_edit.setText(str(state.tib_tof_start))
+        self._content.tof_end_edit.setText(str(state.tib_tof_end))
         self._content.van_input_edit.setText(state.detector_vanadium)
         self._content.van_int_cb.setChecked(state.det_van_integration)
-        self._content.van_int_range_low_edit.setText(state.det_van_int_range_low)
-        self._content.van_int_range_high_edit.setText(state.det_van_int_range_high)
+        self._content.van_int_range_low_edit.setText(str(state.det_van_int_range_low))
+        self._content.van_int_range_high_edit.setText(str(state.det_van_int_range_high))
         entry_index = self._content.van_int_range_units_cb.findText(state.det_van_int_range_units)
         self._content.van_int_range_units_cb.setCurrentIndex(entry_index)
         self._content.save_procdetvan_cb.setChecked(state.save_proc_det_van)
@@ -91,18 +92,18 @@ class DataCorrectionsWidget(BaseWidget):
         """
             Returns an object with the state of the interface
         """
-        d = DataCorrectionsScript()
+        d = DataCorrectionsScript(self._instrument_name)
         d.filter_bad_pulses = self._content.filter_bad_pulses_chkbox.isChecked()
         d.incident_beam_norm = DataCorrectionsScript.INCIDENT_BEAM_NORM_TYPES[self.incident_beam_norm_grp.checkedId()]
-        d.monitor_int_low = self._content.monint_low_edit.text()
-        d.monitor_int_high = self._content.monint_high_edit.text()
+        d.monitor_int_low = util._check_and_get_float_line_edit(self._content.monint_low_edit)
+        d.monitor_int_high = util._check_and_get_float_line_edit(self._content.monint_high_edit)
         d.tib_subtraction = self._content.background_sub_gb.isChecked()
-        d.tib_tof_start = self._content.tof_start_edit.text()
-        d.tib_tof_end = self._content.tof_end_edit.text()
+        d.tib_tof_start = util._check_and_get_float_line_edit(self._content.tof_start_edit)
+        d.tib_tof_end = util._check_and_get_float_line_edit(self._content.tof_end_edit)
         d.detector_vanadium = self._content.van_input_edit.text()
         d.det_van_integration = self._content.van_int_cb.isChecked()
-        d.det_van_int_range_low = self._content.van_int_range_low_edit.text()
-        d.det_van_int_range_high = self._content.van_int_range_high_edit.text()
+        d.det_van_int_range_low = util._check_and_get_float_line_edit(self._content.van_int_range_low_edit)
+        d.det_van_int_range_high = util._check_and_get_float_line_edit(self._content.van_int_range_high_edit)
         d.det_van_int_range_units = self._content.van_int_range_units_cb.currentText()
         d.save_proc_det_van = self._content.save_procdetvan_cb.isChecked()
         d.use_proc_det_van = self._content.use_procdetvan_cb.isChecked()

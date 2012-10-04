@@ -98,9 +98,9 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         if self.psd_bleed:
             script += "PsdBleed=%s,\n" % self.psd_bleed
             if self.max_framerate != DiagnoseDetectorsScript.max_framerate:
-                script += "MaxFramerate=%s,\n" % float(self.max_framerate)
+                script += "MaxFramerate=%s,\n" % str(self.max_framerate)
             if self.ignored_pixels != DiagnoseDetectorsScript.ignored_pixels:
-                script += "IgnoredPixels=\"%s\",\n" % self.ignored_pixels 
+                script += "IgnoredPixels=%s,\n" % str(self.ignored_pixels) 
         return script
     
     def to_xml(self):
