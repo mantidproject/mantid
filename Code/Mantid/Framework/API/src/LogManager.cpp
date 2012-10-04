@@ -153,6 +153,7 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
     //Make a vector of managers for the splitter. Fun!
     std::vector< PropertyManager *> output_managers;
     size_t n = outputs.size();
+    output_managers.reserve(n);
     for (size_t i=0; i<n; i++)
     {
       if (outputs[i])

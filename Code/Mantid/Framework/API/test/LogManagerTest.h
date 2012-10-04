@@ -49,7 +49,14 @@ namespace
     run.addProperty(timeSeries);
   }
 }
-
+ 
+  void addTimeSeriesEntry(LogManager & runInfo, std::string name, double val)
+  {
+    TimeSeriesProperty<double> * tsp;
+    tsp = new TimeSeriesProperty<double>(name);
+    tsp->addValue("2011-05-24T00:00:00", val);
+    runInfo.addProperty(tsp);
+  }
 
 class LogManagerTest : public CxxTest::TestSuite
 {
@@ -228,16 +235,7 @@ public:
   }
 
 
-  
-
-  void addTimeSeriesEntry(LogManager & runInfo, std::string name, double val)
-  {
-    TimeSeriesProperty<double> * tsp;
-    tsp = new TimeSeriesProperty<double>(name);
-    tsp->addValue("2011-05-24T00:00:00", val);
-    runInfo.addProperty(tsp);
-  }
-
+ 
   void test_clear()
   {
     // Set up a Run object with 3 properties in it (1 time series, 2 single value)
