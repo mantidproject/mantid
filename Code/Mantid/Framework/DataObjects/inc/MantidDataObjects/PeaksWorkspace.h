@@ -75,9 +75,16 @@ namespace DataObjects
 
     PeaksWorkspace* clone() const;
 
-    /**Get access to shared pointer containing workspace porperties */
+    /**Get access to shared pointer containing workspace porperties. This function is there to provide common interface of iTableWorkspace
+      * Despite it is non-constant method, it should not be used to change the log values as the changes may depend on the order of 
+      * PeakWorkspace cloning & changes applyed through this pointer. See PeakWorkspaceTest (test_getSetLogAccess) -- for example of this behaviour. 
+      * Use mutableRun interface to change log values instead of this method. 
+     **/
     API::LogManager_sptr logs();
-    /**Get constant access to shared pointer containing workspace porperties; Copies logs into new LogManager variable */
+    /**Get constant access to shared pointer containing workspace porperties;
+       Copies logs into new LogManager variable
+       Meaningfull only for some multithereaded methods when a thread may want to have its own copy of logs
+    */
     API::LogManager_const_sptr getLogs()const{return API::LogManager_const_sptr(new API::LogManager(this->run()));}
 
     virtual ~PeaksWorkspace();

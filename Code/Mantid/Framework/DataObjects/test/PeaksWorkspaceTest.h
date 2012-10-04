@@ -131,7 +131,7 @@ public:
 
   }
 
-  void xest_saveNexus()
+  void test_saveNexus()
   {
     // Ensure the plugin libraries are loaded so that we can use LoadNexusProcessed
     Mantid::API::FrameworkManager::Instance();
@@ -239,7 +239,34 @@ public:
        // nothing terrible happened and workspace still have this property
        TS_ASSERT(pw->run().hasProperty("TestProp2"));
 
-       delete pw;
+       auto pw1 = pw->clone();
+       if(trueSwitch)
+       {
+          // get mutable pointer to existing values, which would be taken from the cash
+          LogManager_sptr mprops1 = pw->logs();
+          // and in ideal world this should cause CowPtr to diverge but it does not
+          TS_ASSERT_THROWS_NOTHING(mprops1->addProperty<std::string>("TestProp1-3","value1-3"));
+          TS_ASSERT(mprops1->hasProperty("TestProp1-3"));
+          //THE CHANGES TO PW ARE APPLIED TO the COPY (PW1 too!!!!)
+          TS_ASSERT(pw->run().hasProperty("TestProp1-3"));
+          TS_ASSERT(pw1->run().hasProperty("TestProp1-3"));
+       }
+       TS_ASSERT(pw1->run().hasProperty("TestProp1-3"));
+       if(trueSwitch)
+       {
+          // but this will cause it to diverge
+          LogManager_sptr mprops2 = pw1->logs();
+          // and this  causes CowPtr to diverge
+          TS_ASSERT_THROWS_NOTHING(mprops2->addProperty<std::string>("TestProp2-3","value2-3"));
+          TS_ASSERT(mprops2->hasProperty("TestProp2-3"));
+          TS_ASSERT(!pw->run().hasProperty("TestProp2-3"));
+          TS_ASSERT(pw1->run().hasProperty("TestProp2-3"));
+       }
+
+
+       TSM_ASSERT_THROWS_NOTHING("should clearly delete pw1",pw1.reset());
+
+       TSM_ASSERT_THROWS_NOTHING("should clearly delete pw",delete pw);
    }
 
    PeaksWorkspaceTest()
