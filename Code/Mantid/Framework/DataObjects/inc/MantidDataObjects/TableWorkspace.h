@@ -383,17 +383,6 @@ private:
       findValue(value,row,col);
     }
 
-/// Copy constructor
-   TableWorkspace(const TableWorkspace &other);
-  //{
-  //  m_LogManager = boost::make_shared<API::LogManager>(*other.m_LogManager);
-  //}
-  /// Operator =
-  TableWorkspace & operator=(const TableWorkspace &rhs);
-  //{
-  //  if(&rhs != this)m_LogManager = boost::make_shared<API::LogManager>(*rhs.m_LogManager);
-  //  return *this;  
-  //}
 private:
     /// Used in std::find_if algorithm to find a Column with name \a name.
     class FindName
@@ -425,7 +414,10 @@ private:
     /// shared pointer to the logManager, responsible for the workspace properties.   
     API::LogManager_sptr m_LogManager;
 
-
+    // not asignable, not copy constructable, clonable
+/// Copy constructor
+   TableWorkspace(const TableWorkspace &other);
+   TableWorkspace & operator=(const TableWorkspace &rhs);
 };
 
 /// Typedef for a shared pointer to \c TableWorkspace

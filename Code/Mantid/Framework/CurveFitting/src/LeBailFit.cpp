@@ -1544,8 +1544,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
 void LeBailFit::exportEachPeaksParameters()
 {
   // 1. Create peaks workspace
-  DataObjects::TableWorkspace tbws;
-  DataObjects::TableWorkspace_sptr peakWS = boost::make_shared<DataObjects::TableWorkspace>(tbws);
+  DataObjects::TableWorkspace_sptr peakWS = DataObjects::TableWorkspace_sptr(new DataObjects::TableWorkspace);
 
   // 2. Set up peak workspace
   peakWS->addColumn("int", "H");

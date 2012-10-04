@@ -11,27 +11,6 @@ namespace API
 // Get a reference to the logger
 Kernel::Logger& ITableWorkspace::g_log = Kernel::Logger::get("ITableWorkspace");
 
-/// Constructor
-ITableWorkspace::ITableWorkspace() : m_LogManager(new API::LogManager)
-{}
-
-/// Virtual destructor.
-ITableWorkspace::~ITableWorkspace()
-{}
- 
-/// Copy constructor
-ITableWorkspace::ITableWorkspace(const ITableWorkspace &other) : Workspace(other)
-{
-  m_LogManager = boost::make_shared<API::LogManager>(*other.m_LogManager);
-}
-
-/// Assignemtn
-ITableWorkspace & ITableWorkspace::operator=(const ITableWorkspace &rhs)
-{
-  if(&rhs != this)m_LogManager = boost::make_shared<API::LogManager>(*rhs.m_LogManager);
-  return *this;  
-}
-
 
 /** Creates n new columns of the same type
  * @param type :: The datatype of the column

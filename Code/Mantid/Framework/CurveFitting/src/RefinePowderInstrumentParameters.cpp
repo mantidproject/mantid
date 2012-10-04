@@ -130,8 +130,8 @@ DECLARE_ALGORITHM(RefinePowderInstrumentParameters)
       this->setProperty("OutputDataWorkspace", peakdataws);
 
       // 7. Output new instrument parameters
-      DataObjects::TableWorkspace rawtable;
-      DataObjects::TableWorkspace_sptr newtablews = boost::make_shared<DataObjects::TableWorkspace>(rawtable);
+      //DataObjects::TableWorkspace rawtable; -->> TableWorkspace is not copyable (default CC is incorrect and no point in writing a non-default one)
+      DataObjects::TableWorkspace_sptr newtablews = boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
       newtablews->addColumn("str", "Name");
       newtablews->addColumn("double", "Value");
       newtablews->addColumn("str", "FitOrTie");

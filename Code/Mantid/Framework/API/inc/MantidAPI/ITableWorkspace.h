@@ -117,8 +117,7 @@ class MANTID_API_DLL ITableWorkspace: public API::Workspace
 {
 public:
   ///Constructor
-  ITableWorkspace()
-  {}
+  ITableWorkspace() {}
   /// Virtual destructor.
   virtual ~ITableWorkspace(){}
  
@@ -320,7 +319,6 @@ protected:
 private:
   /// Logger
   static Kernel::Logger& g_log;
-  // Non-copyable, non-assignable
 
 };
 

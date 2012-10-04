@@ -83,8 +83,7 @@ namespace DataObjects
     API::LogManager_sptr logs();
     /**Get constant access to shared pointer containing workspace porperties;
        Copies logs into new LogManager variable
-       Meaningfull only for some multithereaded methods when a thread may want to have its own copy of logs
-    */
+       Meaningfull only for some multithereaded methods when a thread may want to have its own copy of logs   */
     API::LogManager_const_sptr getLogs()const{return API::LogManager_const_sptr(new API::LogManager(this->run()));}
 
     virtual ~PeaksWorkspace();
