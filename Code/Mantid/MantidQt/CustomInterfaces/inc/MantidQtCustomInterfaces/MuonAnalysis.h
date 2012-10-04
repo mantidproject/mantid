@@ -399,6 +399,11 @@ private:
   /// handles result table tab work
   MantidQt::CustomInterfaces::Muon::MuonAnalysisResultTableTab* m_resultTableTab;
 
+  /// Time zero as stored in Nexus file. Need this because when loading Muon data
+  /// the x-axis has already been adjusted to that nexus time zero so if user select
+  /// a different time zero need to adjust the relative offset to this value
+  double m_nexusTimeZero;
+
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
 };

@@ -79,7 +79,9 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_currentDataName("N/A"), m_assigned(false), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
-  m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), m_updating(false), m_loaded(false), m_deadTimesChanged(false), m_textToDisplay("")
+  m_tabNumber(0), m_groupNames(), m_settingsGroup("CustomInterfaces/MuonAnalysis/"), 
+  m_updating(false), m_loaded(false), m_deadTimesChanged(false), m_textToDisplay(""),
+  m_nexusTimeZero(0.0)
 {
   try
   {
@@ -1180,7 +1182,11 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   m_uiForm.instrumentDescription->setText(str.str().c_str());
 
   m_uiForm.timeZeroFront->setText(QString::number(timeZero, 'g',2));
+  // I want the nexus time to equal exactly how it is stored in time zero text box
+  // so that later I can check if user has altered it
+  m_nexusTimeZero = boost::lexical_cast<double>(m_uiForm.timeZeroFront->text().toStdString());
   m_uiForm.firstGoodBinFront->setText(QString::number(firstGoodData-timeZero,'g',2));
+
   // since content of first-good-bin changed run this slot
   runFirstGoodBinFront();
 
@@ -1882,6 +1888,24 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   if (newRaw)
   {
     m_fitDataTab->makeRawWorkspace(wsname);
+  }
+
+  // adjust for time zero if necessary
+  if ( m_nexusTimeZero != boost::lexical_cast<double>(timeZero().toStdString()) )
+  {
+    try {
+      Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+
+      double shift = m_nexusTimeZero - boost::lexical_cast<double>(timeZero().toStdString());
+      Mantid::API::IAlgorithm_sptr rebinAlg = Mantid::API::AlgorithmManager::Instance().create("ChangeBinOffset");
+      rebinAlg->setPropertyValue("InputWorkspace", wsname);
+      rebinAlg->setPropertyValue("OutputWorkspace", wsname);
+      rebinAlg->setProperty("Offset", shift);
+      rebinAlg->execute();    
+    }
+    catch(...) {
+      QMessageBox::information(this, "Mantid - Muon Analysis", "The workspace couldn't be corrected for time zero.");
+    }
   }
 
   // rebin data if option set in Plot Options
