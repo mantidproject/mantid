@@ -23,6 +23,7 @@
 #include "MantidAPI/IAlgorithm.h"
 
 using Mantid::API::IAlgorithm_sptr;
+using Mantid::Kernel::V3D;
 
 
 
@@ -81,12 +82,14 @@ namespace Crystal
        this->CellHeight = CellHeight;
        this->CalcVariance = CalcVariance;
      }
+
      void setTime( double time )
      {
           this->time=time;
      }
+
      void setStatBase(std::vector<double> const &StatBase );
-     //Will calc
+
      void setHeighHalfWidthInfo( Mantid::MantidVecPtr &xvals,
          Mantid::MantidVecPtr &yvals,Mantid::MantidVecPtr &counts,
          double ROW,double COL);
@@ -95,9 +98,10 @@ namespace Crystal
      {
        currentRadius = radius;
      }
-     void setCurrentCenter( Kernel::V3D newCenter)
+     void setCurrentCenter(const Kernel::V3D newCenter)
      {
-       currentPosition = newCenter;
+       Kernel::V3D XX( newCenter);
+       currentPosition = XX;
      }
 
      double getCurrentRadius( )
@@ -109,36 +113,83 @@ namespace Crystal
        return currentPosition;
      }
      void updateEdgeXsize( double newsize)
-     { if(EdgeX < 0)
+     {
+       if(EdgeX < 0)
+
           EdgeX = newsize;
+
         else if( newsize < EdgeX)
+
          EdgeX = newsize;
      }
+
      void updateEdgeYsize( double newsize)
-     { if(EdgeY < 0)
+     {
+       if(EdgeY < 0)
+
           EdgeY = newsize;
+
         else if( newsize < EdgeY)
+
          EdgeY = newsize;
+
      }
+
      void CalcVariancesFromData( double background,  double row,
                            double col, double &Varx, double &Vary, double &Varxy,
                            std::vector<double>&ParameterValues);
-     bool IsEnoughData(double *ParameterValues,Kernel::Logger& g_log);
+
+     bool IsEnoughData(const double *ParameterValues, Kernel::Logger& g_log);
 
      double getNewRCRadius();
-     double getInitBackground(){ return back_calc;}
-     double getInitRow(){ return row_calc;}
-     double getInitCol(){ return col_calc;}
-     double getInitIntensity(){ return Intensity_calc;}
-     double getInitVarx(){ return Vx_calc;}
-     double getInitVary(){ return Vy_calc;}
-     double getInitVarxy(){ return Vxy_calc;}
+
+     double getInitBackground()
+     {
+       return back_calc;
+     }
+
+     double getInitRow()
+     {
+       return row_calc;
+     }
+
+     double getInitCol()
+     {
+       return col_calc;
+     }
+
+     double getInitIntensity()
+     {
+       return Intensity_calc;
+     }
+
+     double getInitVarx()
+     {
+       return Vx_calc;
+     }
+
+     double getInitVary()
+     {
+       return Vy_calc;
+     }
+
+     double getInitVarxy()
+     {
+       return Vxy_calc;
+     }
      std::string CalcConstraints(std::vector< std::pair<double,double> > & Bounds,
-        bool CalcVariances );
-     std::string getTies(){ return "";}
+                                                          bool CalcVariances );
+     std::string getTies()
+     {
+       return "";
+     }
+
      bool CalcVariances( );
 
-     double StatBaseVals( int index){return StatBase[index];}
+     double StatBaseVals( int index)
+     {
+       return StatBase[index];
+     }
 
      double CalcISAWIntensity( const double* params) const;
 
@@ -151,35 +202,49 @@ namespace Crystal
      double lastRCRadius;
      double HalfWidthAtHalfHeightRadius;
      double calcNewRCRadius;
+
      double lastRow;
      double lastCol;
      double time;
      double CellWidth;
      double CellHeight;
+
      double currentRadius;
      Kernel::V3D   currentPosition;
      std::vector<double> StatBase;
+
      double EdgeX,EdgeY;
      bool CalcVariance;
      bool case4;//if true result of successful merge of dir =1 chan=0 and chan=1
-     double back_calc,Intensity_calc,row_calc,col_calc,Vx_calc, Vy_calc, Vxy_calc;
+     double back_calc,
+            Intensity_calc,
+            row_calc,
+            col_calc,
+            Vx_calc,
+            Vy_calc,
+            Vxy_calc;
+
   private:
      void init()
       {
-        this->baseRCRadius = -1;
-        this->lastRCRadius = -1;
-        this->lastRow = -1;
-        this->lastCol = -1;
+        baseRCRadius = -1;
+        lastRCRadius = -1;
+        lastRow = -1;
+        lastCol = -1;
         EdgeX = EdgeY = -1;
         calcNewRCRadius = -1;
+
         time = -1;
         CalcVariance = true;
         CellWidth = CellHeight = 0;
         currentRadius = -1;
+
         currentPosition = Kernel::V3D();
         HalfWidthAtHalfHeightRadius = -1;
         case4 = false;
-        back_calc = Intensity_calc = row_calc = col_calc = Vx_calc = Vy_calc = Vxy_calc = -1;
+
+        back_calc = Intensity_calc = row_calc =
+            col_calc = Vx_calc = Vy_calc = Vxy_calc = -1;
       }
   };
 

@@ -63,6 +63,9 @@ This Algorithm is also used by the [[PeakIntegration]] algorithm when the Fit ta
 #include <algorithm>
 #include <math.h>
 #include <cstdio>
+#include <stdio.h>
+#include <time.h>
+
 //#include <boost/random/poisson_distribution.hpp>
 #include "MantidAPI/ISpectrum.h"
 using namespace Mantid::Kernel;
@@ -450,7 +453,7 @@ namespace Mantid
      }
 
    }
-   void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,double &chisq,
+   void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,double &chisqOverDOF,
        bool &done,       std::vector<string>&names, std::vector<double>&params,
        std::vector<double>&errs,double lastRow,double lastCol,double neighborRadius)
    {
@@ -488,7 +491,7 @@ namespace Mantid
       {
         fit_alg->executeAsSubAlg();
 
-        chisq = fit_alg->getProperty("OutputChi2overDoF");
+        chisqOverDOF = fit_alg->getProperty("OutputChi2overDoF");
 
         names.clear(); params.clear();errs.clear();
         ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
@@ -524,12 +527,12 @@ namespace Mantid
       if (!done)//Bivariate error happened
       {
 
-       g_log.debug() << "   Thru Algorithm: chiSq=" << setw(7) << chisq << endl;
+       g_log.debug() << "   Thru Algorithm: chiSq=" << setw(7) << chisqOverDOF << endl;
        g_log.debug() << "  Row,Col Radius=" << lastRow << "," << lastCol << "," << neighborRadius << std::endl;
 
         double sqrtChisq = -1;
-        if (chisq >= 0)
-          sqrtChisq = (chisq);
+        if (chisqOverDOF >= 0)
+          sqrtChisq = (chisqOverDOF);
 
         sqrtChisq = max<double> (sqrtChisq, AttributeValues->StatBaseVals(IIntensities)
             / AttributeValues->StatBaseVals(ISS1));
@@ -581,6 +584,9 @@ namespace Mantid
    }
     void IntegratePeakTimeSlices::exec()
     {
+      time_t seconds1;
+
+      seconds1 = time (NULL);
 
       double dQ= getProperty("PeakQspan");
 
@@ -613,6 +619,7 @@ namespace Mantid
       int indx = getProperty("PeakIndex");
 
       IPeak &peak = peaksW->getPeak(indx);
+
 
       boost::shared_ptr<const Geometry::IComponent> panel_const= peak.getInstrument()->getComponentByName( peak.getBankName());
 
@@ -844,16 +851,16 @@ namespace Mantid
 
               if (AttributeValues->IsEnoughData( ParameterValues, g_log) && ParameterValues[ITINTENS] > 0)
               {
-                double chisq;
+                double chisqOverDOF;
 
-                Fit(Data,chisq,done,  names,params,errs, lastRow, lastCol, neighborRadius);
+                Fit(Data,chisqOverDOF,done,  names,params,errs, lastRow, lastCol, neighborRadius);
 
                 if(!done)//Bivariate error happened
                 {
 
-                  if (isGoodFit(params, errs, names, chisq))
+                  if (isGoodFit(params, errs, names, chisqOverDOF))
                   {
-                    LastTableRow =UpdateOutputWS(TabWS, dir, xchan, params, errs, names, chisq,
+                    LastTableRow =UpdateOutputWS(TabWS, dir, xchan, params, errs, names, chisqOverDOF,
                           AttributeValues->time, spec_idList);
 
                     double TotSliceIntensity = AttributeValues->StatBaseVals(IIntensities);
@@ -861,7 +868,7 @@ namespace Mantid
 
                     updatePeakInformation(    params,             errs,           names,
                                               TotVariance,       TotIntensity,
-                                              TotSliceIntensity, TotSliceVariance, chisq,
+                                              TotSliceIntensity, TotSliceVariance, chisqOverDOF,
                                               ncells);
 
                     lastAttributeList= AttributeValues;
@@ -923,17 +930,17 @@ namespace Mantid
                         AttributeValues->getCurrentRadius()            ,
                         AttributeValues->getCurrentCenter(), spec_idList);
 
-                    double chisq;
+                    double chisqOverDOF;
 
                     g_log.debug("Try Merge 2 time slices");
                     if( AttributeValues->IsEnoughData(ParameterValues, g_log))
 
-                       Fit(Data,chisq,done, names, params,
+                       Fit(Data,chisqOverDOF,done, names, params,
                              errs, lastRow, lastCol, neighborRadius);
                     else
-                      chisq=-1;
+                      chisqOverDOF=-1;
 
-                    if(!done && isGoodFit(params, errs, names, chisq))
+                    if(!done && isGoodFit(params, errs, names, chisqOverDOF))
                     {
 
                       if( LastTableRow >=0 && LastTableRow < (int) TabWS->rowCount())
@@ -942,7 +949,7 @@ namespace Mantid
                         LastTableRow =-1;
 
                       LastTableRow =UpdateOutputWS(TabWS, dir, (chanMin+chanMax)/2.0, params, errs,
-                                      names, chisq,  AttributeValues->time, spec_idList);
+                                      names, chisqOverDOF,  AttributeValues->time, spec_idList);
 
                       if( lastAttributeList->CellHeight > 0 && lastAttributeList->StatBase.size()>=NAttributes)
                       {
@@ -957,7 +964,7 @@ namespace Mantid
 
                       updatePeakInformation(    params,             errs,           names,
                                       TotVariance,       TotIntensity,
-                                     TotSliceIntensity, TotSliceVariance, chisq,
+                                     TotSliceIntensity, TotSliceVariance, chisqOverDOF,
                                       (int) AttributeValues->StatBaseVals(ISS1));
 
                      // lastAttributeList= AttributeValues;
@@ -1031,7 +1038,11 @@ namespace Mantid
 
         setProperty("Intensity", TotIntensity);
         setProperty("SigmaIntensity", SQRT(TotVariance));
+        time_t seconds2;
 
+        seconds2 = time (NULL);
+        double   dif = difftime (seconds2,seconds1);
+        g_log.debug() <<"Finished Integr peak number "<< indx <<" in "<< dif<<" seconds"<<std::endl;
 
       } catch (std::exception &ss)
       {
@@ -1319,11 +1330,9 @@ namespace Mantid
       MantidVec C = counts.access();
       int N = (int)X.size();
 
+      HalfWidthAtHalfHeightRadius = -1;
       if( N <= 2 )
-      {
-        HalfWidthAtHalfHeightRadius = -1;
         return;
-      }
 
       minCount = maxCount = C[0];
       for( int i = 1; i < N; i++ )
@@ -1332,23 +1341,30 @@ namespace Mantid
         else if( C[i] < minCount )
           minCount = C[i];
 
+      if( minCount == maxCount)
+        return;
+
       int N2Av = std::min<int>( 10,( int )( N/10 ) );
       int nMax = 0;
       int nMin = 0;
       double TotMax = 0;
       double TotMin = 0;
-      double offset = std::max<double>( 1,( maxCount - minCount )/20 );
+      double offset = std::max<double>(1, (maxCount - minCount) / 20);
 
-      for( int i = 0; i < N; i++ )
-        if( nMax < N2Av && C[i]>maxCount - offset )
+      for (int i = 0; i < N && (nMax < N2Av || nMin < N2Av); i++)
+        if (nMax < N2Av && C[i] > maxCount - offset)
         {
           TotMax += C[i];
           nMax++;
-        }else if( nMin < N2Av && C[i] < minCount + offset )
+
+        }
+        else if (nMin < N2Av && C[i] < minCount + offset)
+
         {
           TotMin += C[i];
           nMin++;
         }
+
       double TotR = 0;
       int nR = 0;
       double MidVal = ( TotMax/nMax + TotMin/nMin )/2.0;
@@ -1377,9 +1393,6 @@ namespace Mantid
                                              double                          CentX,
                                              double                          CentY,
                                              Kernel::V3D                     &CentNghbr,
-                                             //specid_t                      &CentDetspec,
-                                             //int*                            nghbrs,//Not used
-                                            // std::map< specid_t, V3D >     &neighbors,
                                              double                        &neighborRadius,//from CentDetspec
                                              double                         Radius,
                                              string                     &spec_idList)
@@ -1671,17 +1684,17 @@ namespace Mantid
     bool IntegratePeakTimeSlices::isGoodFit(std::vector<double >              const & params,
                                             std::vector<double >              const & errs,
                                             std::vector<std::string >         const &names,
-                                            double chisq)
+                                            double chisqOverDOF)
     {
       int Ibk = find("Background", names);
       int IIntensity = find("Intensity", names);
 
 
 
-      if (chisq < 0)
+      if (chisqOverDOF < 0)
       {
 
-          g_log.debug()<<"   Bad Slice- negative chiSq= "<<chisq<<std::endl;;
+          g_log.debug()<<"   Bad Slice- negative chiSq= "<<chisqOverDOF<<std::endl;;
          return false;
       }
 
@@ -1707,17 +1720,36 @@ namespace Mantid
       }
 
       bool GoodNums = true;
-
+      bool paramBad=false;
+      size_t BadParamNum =-1;
       for (size_t i = 0; i < errs.size(); i++)
         if (errs[i] != errs[i])
+        {
           GoodNums = false;
+          paramBad=false;
+          BadParamNum=i;
+        }
         else if( errs[i] < 0)
+        {
           GoodNums = false;
+          paramBad=false;
+          BadParamNum=i;
+        }
         else if (params[i] != params[i])
+        {
           GoodNums = false;
+          paramBad=true;
+          BadParamNum=i;
+        }
 
       if (!GoodNums)
-        g_log.debug("   Bad Slice.Some params and errs are not numbers");
+        {
+          std::string obj=" parameter ";
+          if( !paramBad )
+            obj=" error ";
+          g_log.debug()<<"   Bad Slice."<<obj<<BadParamNum<<
+                    " is not a number"<< std::endl;
+        }
 
       if( !GoodNums)
         return false;
@@ -1731,28 +1763,31 @@ namespace Mantid
       if (params[IIntensity] < 0)
         GoodNums = false;
 
-      double sqrChi = SQRT(chisq);
+      //double sqrChi = SQRT(chisqOverDOF);
 
-      if (AttributeValues->StatBaseVals(IIntensities) > 0)
-        if (sqrChi * errs[IIntensity] / AttributeValues->StatBaseVals(IIntensities) > .2)
-          GoodNums = false;
+      double IsawIntensity= AttributeValues->CalcISAWIntensity( params.data());
+      double IsawVariance = AttributeValues->CalcISAWIntensityVariance(params.data(), errs.data(),chisqOverDOF);
+
+      if (IsawVariance > 0)
+        {
+         if (IsawIntensity*IsawIntensity/IsawVariance < 9)
+           GoodNums = false;
+        }
+      else
+        GoodNums = false;
 
 //TODO limit rel errors on row and col's. Weak peaks have row.col values migrate a lot
 
 
       if (!GoodNums)
 
-      {   g_log.debug(
-            "   Bad Slice.Some params and errs are out of bounds or relative errors are too high");
+      {   g_log.debug()<<
+            "   Bad Slice.Background or Intensity params or errs are out of bounds or relative errors are too high";
+
+
           return false;
       }
 
-      if (params[IIntensity] > 0)
-        if (errs[IIntensity] * SQRT(chisq) / params[IIntensity] > .35)
-        {
-            g_log.debug()<<"   Bad Slice. rel errors too large= "<< errs[ITINTENS] * sqrt(chisq)<<std::endl;;
-          return false;
-        }
 
       //Check weak peak. Max theoretical height should be more than 3
 
@@ -1761,14 +1796,18 @@ namespace Mantid
 
       double AvHeight = AttributeValues->StatBaseVals(IIntensities)/AttributeValues->StatBaseVals(ISS1)-params[IBACK];
 
-      if (maxPeakHeightTheoretical < 5*AvHeight || AvHeight < 0 || maxPeakHeightTheoretical < 0)
+      if (maxPeakHeightTheoretical < 2*AvHeight || AvHeight < 0 || maxPeakHeightTheoretical < 0)
       {
-
-       // sprintf(logInfo, std::string("   Bad Slice. Peak too small= %7.2f\n").c_str(),
-       //     maxPeakHeightTheoretical);
 
            g_log.debug()<<"   Bad Slice. Peak too small= "<<maxPeakHeightTheoretical<<
                   "/"<<AvHeight<<std::endl;
+        return false;
+      }
+
+      double Nrows = AttributeValues->getCurrentRadius();
+      if( maxPeakHeightTheoretical < 1 && (params[IVXX] > Nrows*Nrows/20 || params[IVYY] > Nrows*Nrows/20))
+      {
+        g_log.debug()<<"Peak is too flat "<<std::endl;
         return false;
       }
 
@@ -1776,9 +1815,10 @@ namespace Mantid
       if( params[IVXX]+params[IVYY] >
                2.6*(params[IVXX]*params[IVYY]-params[IVXY]*params[IVXY]))
           {
-        g_log.debug()<<"      Bad Slice. Too steep exponential"<< std::endl;
+              g_log.debug()<<"      Bad Slice. Too steep of an exponential"<< std::endl;
              return false;
           }
+
       return true;
     }
 
@@ -1927,7 +1967,7 @@ namespace Mantid
         return false;
     }
 
-   bool DataModeHandler::IsEnoughData( double *ParameterValues, Kernel::Logger& g_log )
+   bool DataModeHandler::IsEnoughData( const double *ParameterValues, Kernel::Logger& g_log )
     {
 
 
