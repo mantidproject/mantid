@@ -464,9 +464,11 @@
   </instrument>
 
   <instrument name="MuPAD">
+    <technique>UNKOWN</technique>
   </instrument>
 
   <instrument name="ECHO">
+    <technique>UNKOWN</technique>
   </instrument>
 
 </facility>
