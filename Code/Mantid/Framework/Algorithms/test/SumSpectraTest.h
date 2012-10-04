@@ -78,7 +78,7 @@ public:
 
     // Check the detectors mapped to the single spectra
     const ISpectrum * spec = output2D->getSpectrum(0);
-    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 2);
     TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), 2);
     TS_ASSERT( spec->hasDetectorID(3) );
     TS_ASSERT( spec->hasDetectorID(4) );
@@ -130,7 +130,7 @@ public:
 
     // Check the detectors mapped to the single spectra
     const ISpectrum * spec = output2D->getSpectrum(0);
-    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 0);
+    TS_ASSERT_EQUALS( spec->getSpectrumNo(), 1);
     // Spectra at workspace index 1 is masked, 8 & 9 are monitors
     TS_ASSERT_EQUALS( spec->getDetectorIDs().size(), 7);
     TS_ASSERT( spec->hasDetectorID(1) );
