@@ -278,7 +278,7 @@ namespace Mantid
         throw std::invalid_argument("Run number does not match instrument's zero padding");
       }
 
-      instrPart = instr.shortName();
+      instrPart = instr.filePrefix(irunPart);
 
       return std::make_pair(instrPart, runPart);
 
