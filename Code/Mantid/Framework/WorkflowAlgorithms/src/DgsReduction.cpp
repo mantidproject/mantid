@@ -152,6 +152,7 @@ namespace Mantid
           "Set the upper TOF bound for time-independent background subtraction.");
       this->setPropertySettings("TibTofRangeEnd",
           new VisibleWhenProperty("TimeIndepBackgroundSub", IS_EQUAL_TO, "1"));
+      this->declareProperty("CorrectKiKf", true, "Apply the ki/kf correction.");
       this->declareProperty(new FileProperty("DetectorVanadiumInputFile", "",
           FileProperty::OptionalLoad, "_event.nxs"),
           "File containing the sample detector vanadium data to reduce");
@@ -189,6 +190,7 @@ namespace Mantid
       this->setPropertyGroup("TimeIndepBackgroundSub", dataCorr);
       this->setPropertyGroup("TibTofRangeStart", dataCorr);
       this->setPropertyGroup("TibTofRangeEnd", dataCorr);
+      this->setPropertyGroup("CorrectKiKf", dataCorr);
       this->setPropertyGroup("DetectorVanadiumInputFile", dataCorr);
       this->setPropertyGroup("DetectorVanadiumInputWorkspace", dataCorr);
       this->setPropertyGroup("SaveProcessedDetVan", dataCorr);
@@ -265,10 +267,8 @@ namespace Mantid
           "End TOF for the background check.");
       this->setPropertySettings("BackgroundTofEnd",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
-
       this->declareProperty("RejectZeroBackground", false,
           "If true, check the background region for anomolies.");
-
       this->declareProperty("PsdBleed", false, "If true, perform a PSD bleed test.");
       this->declareProperty("MaxFramerate", 0.01, "The maximum framerate to check.");
       this->setPropertySettings("MaxFramerate",

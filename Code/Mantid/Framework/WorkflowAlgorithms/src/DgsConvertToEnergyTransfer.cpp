@@ -493,13 +493,17 @@ namespace Mantid
         outputWS = alg->getProperty("OutputWorkspace");
       }
 
-      // Correct for Ki/Kf
-      IAlgorithm_sptr kikf = this->createSubAlgorithm("CorrectKiKf");
-      kikf->setProperty("InputWorkspace", outputWS);
-      kikf->setProperty("OutputWorkspace", outputWS);
-      kikf->setProperty("EMode", "Direct");
-      kikf->executeAsSubAlg();
-      outputWS = kikf->getProperty("OutputWorkspace");
+      const bool correctKiKf = reductionManager->getProperty("CorrectKiKf");
+      if (correctKiKf)
+      {
+        // Correct for Ki/Kf
+        IAlgorithm_sptr kikf = this->createSubAlgorithm("CorrectKiKf");
+        kikf->setProperty("InputWorkspace", outputWS);
+        kikf->setProperty("OutputWorkspace", outputWS);
+        kikf->setProperty("EMode", "Direct");
+        kikf->executeAsSubAlg();
+        outputWS = kikf->getProperty("OutputWorkspace");
+      }
 
       // Mask and group workspace if necessary.
       MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
