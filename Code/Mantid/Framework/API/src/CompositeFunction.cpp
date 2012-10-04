@@ -329,18 +329,7 @@ bool CompositeFunction::isFixed(size_t i)const
 void CompositeFunction::fix(size_t i)
 {
   size_t iFun = functionIndex(i);
-  //std::vector<size_t>::iterator ia = std::find(m_IFunctionActive.begin(),m_IFunctionActive.end(),iFun);
-  //if (ia == m_IFunctionActive.end())
-  //{// isFixed(i) should have returned true
-  //  throw std::runtime_error("Inconsistency in CompositeFunction when fixing parameter "+
-  //    boost::lexical_cast<std::string>(i));
-  //}
-  //m_IFunctionActive.erase(ia);
   m_functions[ iFun ]->fix(i - m_paramOffsets[iFun]);
-
-  //m_nActive--;
-  //for(size_t j=iFun+1;j<nFunctions();j++)
-  //  m_activeOffsets[j] -= 1;
 }
 
 /** Makes a parameter active again. It doesn't change the parameter's tie.
@@ -349,13 +338,7 @@ void CompositeFunction::fix(size_t i)
 void CompositeFunction::unfix(size_t i)
 {
   size_t iFun = functionIndex(i);
-
-  //m_IFunctionActive.insert(m_IFunctionActive.begin() + m_activeOffsets[iFun],iFun);
   m_functions[ iFun ]->unfix(i - m_paramOffsets[iFun]);
-
-  //m_nActive++;
-  //for(size_t j=iFun+1;j<nFunctions();j++)
-  //  m_activeOffsets[j] += 1;
 }
 
 /** Makes sure that the function is consistent. 
@@ -363,11 +346,8 @@ void CompositeFunction::unfix(size_t i)
 void CompositeFunction::checkFunction()
 {
   m_nParams = 0;
-  //m_nActive = 0;
   m_paramOffsets.clear();
-  //m_activeOffsets.clear();
   m_IFunction.clear();
-  //m_IFunctionActive.clear();
 
   std::vector<IFunction_sptr> functions(m_functions.begin(),m_functions.end());
   m_functions.clear();
@@ -388,22 +368,17 @@ void CompositeFunction::checkFunction()
 size_t CompositeFunction::addFunction(IFunction_sptr f)
 {
   m_IFunction.insert(m_IFunction.end(),f->nParams(), m_functions.size());
-  //m_IFunctionActive.insert(m_IFunctionActive.end(),f->nActive(),m_functions.size());
   m_functions.push_back(f);
   //?f->init();
   if (m_paramOffsets.size() == 0)
   {
     m_paramOffsets.push_back(0);
-    //m_activeOffsets.push_back(0);
     m_nParams = f->nParams();
-    //m_nActive = f->nActive();
   }
   else
   {
     m_paramOffsets.push_back(m_nParams);
-    //m_activeOffsets.push_back(m_nActive);
     m_nParams += f->nParams();
-    //m_nActive += f->nActive();
   }
   return m_functions.size() - 1;
 }
@@ -419,7 +394,6 @@ void CompositeFunction::removeFunction(size_t i)
 
   IFunction_sptr fun = getFunction(i);
 
-  //size_t dna = fun->nActive();
   size_t dnp = fun->nParams();
 
   for(size_t j=0;j<nParams();)
@@ -452,31 +426,6 @@ void CompositeFunction::removeFunction(size_t i)
       ++it;
     }
   }
-
-  // Shift down the function indeces for active parameters
-  //for(std::vector<size_t>::iterator it=m_IFunctionActive.begin();it!=m_IFunctionActive.end();)
-  //{
-  //  if (*it == i)
-  //  {
-  //    it = m_IFunctionActive.erase(it);
-  //  }
-  //  else
-  //  {
-  //    if (*it > i)
-  //    {
-  //      *it -= 1;
-  //    }
-  //    ++it;
-  //  }
-  //}
-
-  //m_nActive -= dna;
-  //// Shift the active offsets down by the number of i-th function's active params
-  //for(size_t j=i+1;j<nFunctions();j++)
-  //{
-  //  m_activeOffsets[j] -= dna;
-  //}
-  //m_activeOffsets.erase(m_activeOffsets.begin()+i);
 
   m_nParams -= dnp;
   // Shift the parameter offsets down by the total number of i-th function's params
@@ -514,10 +463,8 @@ void CompositeFunction::replaceFunction(size_t i,IFunction_sptr f)
     throw std::out_of_range("Function index out of range.");
 
   IFunction_sptr fun = getFunction(i);
-  //size_t na_old = fun->nActive();
   size_t np_old = fun->nParams();
 
-  //size_t na_new = f->nActive();
   size_t np_new = f->nParams();
 
   // Modify function indeces: The new function may have different number of parameters
@@ -656,10 +603,6 @@ bool CompositeFunction::removeTie(size_t i)
 {
   size_t iFun = functionIndex(i);
   bool res = m_functions[ iFun ]->removeTie(i - m_paramOffsets[iFun]);
-  //if (res)
-  //{
-  //  m_nActive++;
-  //}
   return res;
 }
 
@@ -711,21 +654,40 @@ void CompositeFunction::addConstraint(IConstraint* ic)
 /**
  * Prepare the function for a fit.
  */
-void CompositeFunction::setUp()
+void CompositeFunction::setUpForFit()
 {
   // set up the member functions
   for(size_t i=0;i<nFunctions();i++)
   {
-    getFunction(i)->setUp();
+    getFunction(i)->setUpForFit();
   }
+  // unfortuately the code below breaks some system tests (IRISFuryAndFuryFit)
+  // it looks as if using numeric derivatives can give different fit results
+  // to fit with analytical ones
+  //
   // if parameters have non-constant ties enable numerical derivatives
-  for(size_t i = 0; i < nParams(); ++i)
+  //for(size_t i = 0; i < nParams(); ++i)
+  //{
+  //  ParameterTie* tie = getTie( i );
+  //  if ( tie && !tie->isConstant() )
+  //  {
+  //    useNumericDerivatives( true );
+  //    break;
+  //  }
+  //}
+
+  // instead of automatically switching to numeric derivatives
+  // log a warning about a danger of not using it
+  if ( !m_useNumericDerivatives ) 
   {
-    ParameterTie* tie = getTie( i );
-    if ( tie && !tie->isConstant() )
+    for(size_t i = 0; i < nParams(); ++i)
     {
-      useNumericDerivatives( true );
-      break;
+      ParameterTie* tie = getTie( i );
+      if ( tie && !tie->isConstant() )
+      {
+        g_log.warning() << "Numeric derivatives should be used when non-constant ties defined." << std::endl;
+        break;
+      }
     }
   }
 }

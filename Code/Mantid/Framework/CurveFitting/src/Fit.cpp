@@ -351,7 +351,7 @@ namespace CurveFitting
     }
     
     // prepare the function for a fit
-    m_function->setUp();
+    m_function->setUpForFit();
 
     API::FunctionDomain_sptr domain;
     API::IFunctionValues_sptr values;

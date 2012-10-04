@@ -59,14 +59,8 @@ class MANTID_API_DLL ParamFunction : public virtual IFunction
 public:
   /// Default constructor
   ParamFunction (){}
-  /// Copy contructor
-  //ParamFunction (const ParamFunction &);
-  /// Assignment operator
-  //ParamFunction & operator=(const ParamFunction &);
   /// Virtual destructor
   virtual ~ParamFunction ();
-  /// Virtual copy constructor
-  //virtual boost::shared_ptr<IFunction> clone() const;
 
   /// Set i-th parameter
   virtual void setParameter(size_t, const double& value, bool explicitlySet = true);
@@ -126,9 +120,7 @@ public:
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName);
   /// Set parameters to satisfy constraints
-  void setUp();
-
-  //using IFunction::removeTie;
+  void setUpForFit();
 
 protected:
 

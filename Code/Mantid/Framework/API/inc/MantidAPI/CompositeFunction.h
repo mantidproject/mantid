@@ -55,10 +55,6 @@ class MANTID_API_DLL CompositeFunction : public virtual IFunction
 public:
   /// Default constructor
   CompositeFunction(): m_nParams(0),m_useNumericDerivatives(false){}
-  /// Copy contructor
-  //CompositeFunction(const CompositeFunction&);
-  ///Assignment operator
-  //CompositeFunction& operator=(const CompositeFunction&);
   ///Destructor
   virtual ~CompositeFunction();
 
@@ -141,7 +137,8 @@ public:
   void addConstraint(IConstraint* ic);
   /// Get constraint of i-th parameter
   virtual IConstraint* getConstraint(size_t i)const;
-  void setUp();
+  /// Prepare function for a fit
+  void setUpForFit();
   /// Remove a constraint
   void removeConstraint(const std::string& parName);
 
