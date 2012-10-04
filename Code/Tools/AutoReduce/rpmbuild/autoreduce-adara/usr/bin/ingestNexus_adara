@@ -6,11 +6,10 @@ from suds.client import Client
 import nxs, os, numpy, sys, posixpath
 import xml.utils.iso8601, ConfigParser
 from datetime import datetime
-from nxs import NeXusError
 
 def usage():
-    print 'Usage: ingestNexus <infilename> <hostAndPort> <password>'
-    print 'Example: ingestNexus PG3_10678_event.nxs orion.sns.gov:8181 password'
+    print 'Usage: ingestNexus_adara <infilename>'
+    print 'Example: ingestNexus PG3_10678_event.nxs'
     sys.exit(-1)
 
 def ingestNexus(infilename, sessionId, service, factory):
@@ -21,32 +20,25 @@ def ingestNexus(infilename, sessionId, service, factory):
 
     #open nexus file
     file = nxs.open(infilename, 'r')
-    try:
-        file.opengroup('entry')
-    except NeXusError:
-        print "Couldn't open entry"
-        try:
-            file.opengroup('entry-Off_Off')
-            print "Opened entry-Off_Off"
-        except:
-            print "except"
-    except:
-        print('except')
+    file.opengroup('entry')
 
+    listing = file.getentries()
+     
     #investigation name 
-    file.opendata('experiment_identifier')
-    name = file.getdata()
-    file.closedata()
-
-    #investigation run number 
-    file.opendata('collection_identifier')
-    visitId = file.getdata()
-    file.closedata()
+    if listing.has_key('experiment_identifier'):
+        file.opendata('experiment_identifier')
+        name = file.getdata()
+        file.closedata()
+    else:
+        name = "IPTS-0000"
 
     #investigation title
-    file.opendata('title')
-    title = file.getdata()
-    file.closedata()
+    if listing.has_key('title'):
+        file.opendata('title')
+        title = file.getdata()
+        file.closedata()
+    else:
+        title = "NONE"
 
     #dataset run number
     file.opendata('run_number')
@@ -54,9 +46,10 @@ def ingestNexus(infilename, sessionId, service, factory):
     file.closedata()
 
     #dataset notes 
-    file.opendata('notes')
-    notes = file.getdata()
-    file.closedata()
+    if listing.has_key('notes'):
+        file.opendata('notes')
+        notes = file.getdata()
+        file.closedata()
 
     #dataset proton_charge 
     file.opendata('proton_charge')
@@ -78,13 +71,16 @@ def ingestNexus(infilename, sessionId, service, factory):
     file.opendata('name')
     for attr,value in file.attrs():
         if attr == 'short_name':
+            instrumentName = value
             instrument = factory.create("instrument")
             instrument.id = config.get('Instrument', value.lower())
     file.closedata()
     file.closegroup()
 
+    print "Instrument: ", instrumentName
+ 
     print "Search investigation: ", str(datetime.now()) 
-    investigations = service.search(sessionId, "Investigation INCLUDE Sample [name = '" + name + "' AND visitId = '" + visitId + "']")
+    investigations = service.search(sessionId, "Investigation INCLUDE Sample [name = '" + name + "'] <-> Instrument [name = '" + instrumentName + "']")
 
     if len(investigations) == 0:
         investigation = factory.create("investigation")
@@ -100,7 +96,6 @@ def ingestNexus(infilename, sessionId, service, factory):
         investigation.type = invType 
 
         investigation.name = name 
-        investigation.visitId = visitId 
         investigation.instrument = instrument 
         investigation.title = title 
     else:
@@ -126,10 +121,6 @@ def ingestNexus(infilename, sessionId, service, factory):
     file.opendata('end_time')
     dataset.endDate = file.getdata()
     file.closedata()
-
-    run_path = posixpath.abspath(posixpath.join(infilename, '../..'))
-    dataset.location = run_path
-    datafiles = []
 
     #set dataset parameters
     parameters = []
@@ -164,21 +155,30 @@ def ingestNexus(infilename, sessionId, service, factory):
         datasetParameter.numericValue = duration 
         parameters.append(datasetParameter)
 
-    #4) parameter notes
-    if notes:
-        parameterType = factory.create("parameterType")
-        parameterType.id = config.get('ParameterType', 'notes')
-        parameterType.applicableToDataset = config.getboolean('ParameterType', 'notes_applicable_to_dataset')
-        datasetParameter = factory.create("datasetParameter")
-        datasetParameter.type = parameterType 
-        datasetParameter.stringValue = notes 
-        parameters.append(datasetParameter)
-
     dataset.parameters = parameters
+    dataset.location = infilename 
 
-    for dirpath, dirnames, filenames in os.walk(run_path):
+    datafiles = []
+
+    filepath = os.path.dirname(infilename)
+    filename = os.path.basename(infilename)
+    datafile = factory.create("datafile")
+    extension = os.path.splitext(filename)[1][1:]
+    datafile.name = filename
+    datafile.location = infilename 
+    dfFormat = factory.create("datafileFormat")
+    dfFormat.id = config.get('DatafileFormat', extension)
+    datafile.datafileFormat = dfFormat
+    modTime = os.path.getmtime(filepath)
+    datafile.datafileCreateTime = xml.utils.iso8601.tostring(modTime)
+    datafile.fileSize = os.path.getsize(filepath)
+    datafiles.append(datafile)
+
+    runPath = posixpath.abspath(posixpath.join(infilename, '../../adara'))
+    print runPath
+    for dirpath, dirnames, filenames in os.walk(runPath):
         for filename in [f for f in filenames]:
-            if filename.startswith('.') != True:
+            if runNumber in filename:
                 datafile = factory.create("datafile")
                 filepath = os.path.join(dirpath,filename)
                 extension = os.path.splitext(filename)[1][1:]
@@ -196,19 +196,22 @@ def ingestNexus(infilename, sessionId, service, factory):
     dataset.datafiles = datafiles
 
     samples = []
-    investigationUsers = []
 
-    for a ,nxclass in file.entries():
+    sample = factory.create("sample")
+    sample.name = 'NONE'
 
-        if nxclass == "NXsample":
-            sample = factory.create("sample")
+    if listing.has_key('sample'):
+        file.opengroup('sample')
+        listSample = file.getentries()
+        if listSample.has_key('name'):
             file.opendata('name')
             sample.name = file.getdata()
             file.closedata()
 
-            sampleParameters = []
+        sampleParameters = []
 
-            #set sample nature
+        #set sample nature
+        if listSample.has_key('nature'):
             file.opendata('nature')
             nature = file.getdata()
             file.closedata()
@@ -221,6 +224,7 @@ def ingestNexus(infilename, sessionId, service, factory):
                 sampleParameter.stringValue = nature 
                 sampleParameters.append(sampleParameter)
         
+        if listSample.has_key('identifier'):
             file.opendata('identifier')
             identifier = file.getdata()
             file.closedata()
@@ -233,16 +237,11 @@ def ingestNexus(infilename, sessionId, service, factory):
                 sampleParameter.type = parameterType
                 sampleParameter.stringValue = identifier
                 sampleParameters.append(sampleParameter)
-        
+       
+        if len(sampleParameters): 
             sample.parameters = sampleParameters
-            samples.append(sample)
 
-        if nxclass == "NXuser":
-            a = "a"
-            #investigationUser = setInvestigationUser(file, sessionId, factory, service)
-            #investigationUsers.append(investigationUser)
-
-    #investigation.investigationUsers = investigationUsers
+    samples.append(sample)
 
     file.closegroup()
     file.close()
@@ -281,7 +280,7 @@ def ingestNexus(infilename, sessionId, service, factory):
     else:
         #Found investigation, may create new sample or add new dataset
         print "Searching investigation and dataset ", str(datetime.now()) 
-        investigations = service.search(sessionId, "Investigation [name = '" + investigation.name + "'] <-> Dataset [name = '" + dataset.name + "']")
+        investigations = service.search(sessionId, "Investigation [name = '" + investigation.name + "']  <-> Instrument [name = '" + instrumentName + "'] <-> Dataset [name = '" + dataset.name + "']")
         if len(investigations) == 0:
             createSample = True 
             for invSample in investigation.samples:
@@ -304,7 +303,7 @@ def ingestNexus(infilename, sessionId, service, factory):
             print "Run " + runNumber + " is already cataloged."
          
 
-    print "INVESTIGATION:"
+    '''print "INVESTIGATION:"
     print "  NAME: %s"%(str(investigation.name))
 
     print "DATASET:"
@@ -313,56 +312,23 @@ def ingestNexus(infilename, sessionId, service, factory):
     print "  START TIME: %s"%(str(dataset.startDate))
     print "  END TIME: %s"%(str(dataset.endDate))
 
-    '''for datafile in dataset.datafiles:
+    for datafile in dataset.datafiles:
         print "DATAFILE:"
         print "  NAME: %s"%(str(datafile.name))
-        print "  LOCATION: %s"%(str(datafile.location))'''
+        print "  LOCATION: %s"%(str(datafile.location))
 
     print "SAMPLE: "
-    print "  NAME: %s"%(str(sample.name))
+    print "  NAME: %s"%(str(sample.name))'''
 
+    #print investigation
     return investigation
 
+def usage():
+    print 'Usage: ingestNexus_adara <absolute file path> hostAndPort password'
+    print 'Example: ingestNexus_adara /SNS/HYSA/IPTS-8137/nexus/HYSA_930.nxs icat-testing.sns.gov:8181 password'
+    sys.exit(-1)
 
-def setInvestigationUser(file, sessionId, factory, service):
-    file.opendata('facility_user_id')
-    facility_user_id = file.getdata()
-    file.closedata()
-
-    user = factory.create("user")
-    user.name = "Hello" 
-    #service.create(sessionId, user)
-
-    investigationUser = factory.create("investigationUser")
-    investigationUser.user = user
-
-    '''print "facility_user_id: %s"%(facility_user_id)
-    searchKey = "User [name = '" + facility_user_id + "']"
-    users = service.search(sessionId, searchKey)
-
-    investigationUser = factory.create("investigationUser")
-
-    for user in users:
-        print user.name
-
-    if len(users) != 1:
-        print "Couldn't find user: %s"%(facility_user_id)
-        user = factory.create("user")
-        user.name = facility_user_id
-        file.opendata('name')
-        user.fullName = file.getdata()
-        file.closedata()
-        service.create(sessionId, user)
-        investigationUser.user = user 
-    else :
-        print "Found user: %s"%(facility_user_id)
-        #investigationUser.user = users[0]        
-        user = factory.create("user")
-        user.name = "Hello" 
-        investigationUser.user = user'''
-    return investigationUser
-
-def main(argv):
+def main(infilename):
     args = sys.argv[1:]
     if len(args) != 4:
         usage()
@@ -379,13 +345,13 @@ def main(argv):
     credentials = factory.create("credentials")
     entry = factory.create("credentials.entry")
     entry.key = "username"
-    entry.value = "root" 
+    entry.value = "root"
     credentials.entry.append(entry)
     entry = factory.create("credentials.entry")
     entry.key = "password"
     entry.value = password
     credentials.entry.append(entry)
-    
+
     print "Begin login at: ", str(datetime.now()) 
     sessionId = service.login(plugin, credentials)
     print "End login at: ", str(datetime.now()) 
@@ -399,4 +365,4 @@ def main(argv):
     print "End logout at: ", str(datetime.now()) 
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+    sys.exit(main(sys.argv[1:])) 

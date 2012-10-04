@@ -1,12 +1,13 @@
 #!/bin/bash
 
 #
-#post_process.sh 
+#processRun.sh 
 #
 
 function process {
 # Initialize Overall Return Code, define logfile
 export NEXUSLIB=/usr/lib64/libNeXus.so
+
 status=0
 logfile=/var/log/SNS_applications/autoreduce.log
 
@@ -14,6 +15,7 @@ nexusFile=$1
 # Pass input data
 echo 
 echo "=========Post Processing========="
+echo "=========Post Processing=========" | sed "s/^/$(date)  /" >> $logfile
 echo "nexusFile =" $nexusFile | sed "s/^/$(date)  /" >> $logfile
 
 # Parse nexus file path to get facility, instrument...
@@ -22,9 +24,15 @@ set -- $var
 facility=$1
 instrument=$2
 proposal=$3
-visit=$4
-runNumber=$5
-echo "facility="$facility",instrument="$instrument",proposal="$proposal",visit="$visit",runNumber="$runNumber | sed "s/^/$(date)  /" >> $logfile
+filename=$5
+var2=$(echo $filename | awk -F"." '{print $1}')                    
+set -- $var2
+run=$1
+var3=$(echo $run | awk -F"_" '{print $1, $2}')                    
+set -- $var3
+runNumber=$2
+
+echo "facility="$facility",instrument="$instrument",proposal="$proposal",runNumber="$runNumber | sed "s/^/$(date)  /" >> $logfile
 
 icatConfig=/etc/autoreduce/icatclient.properties
 if [ -f $icatConfig ]; then
@@ -44,25 +52,26 @@ status=$(( $status + $? ))
 
 # Catalog raw metadata
 echo "--------Catalogging raw data--------"
-ingestNexus=/usr/bin/ingestNexus
-echo $ingestNexus $nexusFile
+ingestNexus_adara=/usr/bin/ingestNexus_adara
+echo $ingestNexus_adara $nexusFile
 echo "--------Catalogging raw data--------" | sed "s/^/$(date)  /" >> $logfile
-echo $ingestNexus $nexusFile | sed "s/^/$(date)  /" >> $logfile
+echo $ingestNexus_adara $nexusFile | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
-$ingestNexus $nexusFile $plugin $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
+$ingestNexus_adara $nexusFile $plugin $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
 end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
+echo
 
-# Reduce raw data
-echo "--------Reducing data--------"
-sharedDir="/"$facility"/"$instrument"/"$proposal"/shared/"
+# Create staging directory for data reduction
 redOutDir="/"$facility"/"$instrument"/"$proposal"/shared/autoreduce/"
 echo "redOutDir= "$redOutDir | sed "s/^/$(date) /" >> $logfile
 if [ ! -d $redOutDir ]; then
-  mkdir "$redOutDir"
+  mkdir -p "$redOutDir"
   echo $redOutDir" is created" | sed "s/^/$(date) /" >> $logfile
 fi
 
+# Reduce raw data
+echo "--------Reducing data--------"
 reduce_script="/SNS/"$instrument"/shared/autoreduce/reduce_"$instrument".py"
 if [ ! -f $reduce_script ];
 then
@@ -71,19 +80,23 @@ then
 fi
 redCommand="python $reduce_script"
 echo $redCommand $nexusFile $redOutDir
+echo "--------Reducing data--------" | sed "s/^/$(date)  /" >> $logfile
 echo $redCommand $nexusFile $redOutDir  | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
 $redCommand $nexusFile $redOutDir &>> $logfile
 end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
+echo
+
 
 # Catalog reduced metadata
 echo "--------Catalogging reduced data--------"
-ingestReduced=/usr/bin/ingestReduced
-echo $ingestReduced $facility $instrument $proposal $runNumber
-echo $ingestReduced $facility $instrument $proposal $runNumber | sed "s/^/$(date)  /" >> $logfile
+ingestReduced_adara=/usr/bin/ingestReduced_adara
+echo $ingestReduced_adara $facility $instrument $proposal $runNumber
+echo "--------Catalogging reduced data--------" | sed "s/^/$(date)  /" >> $logfile
+echo $ingestReduced_adara $facility $instrument $proposal $runNumber | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
-$ingestReduced $facility $instrument $proposal $runNumber $plugin $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
+$ingestReduced_adara $facility $instrument $proposal $runNumber $plugin $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
 end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
 echo
@@ -93,23 +106,11 @@ status=$(( $status + $? ))
 #echo "status="$status
 }
 
-if [ -n "$1" ]; then
-  if ! [ -d $1 ] && [ -e $1 ]  && ! [ -h $1 ]; then
-    echo "Got nexus file: " $1
-    process "$1"
-  else
-    for nexusFile in `find $1 -name "*event.nxs" -print`
-    do
-      if [ -e $nexusFile ] && ! [ -h $nexusFile ]; then
-        process "$nexusFile"
-      fi
-    done
-  fi
+if [ -n "$1" ] && ! [ -d $1 ] && [ -e $1 ]  && ! [ -h $1 ]; then
+  echo "Got nexus file: " $1
+  process "$1"
 else
-  # null argument
   echo "--------processRun.sh takes one argument: an archived directory--------"
   echo "You may try one of the followings:"
-  echo "./post_process.sh /SNS/PG3/IPTS-6804/"
-  echo "./post_process.sh /SNS/PG3/IPTS-6804/0/6160"
-  echo "./post_process.sh /SNS/PG3/IPTS-6804/0/6160/NeXus/PG3_6160_event.nxs"
+  echo "./processRun.sh /SNS/HYSA/IPTS-6804/nexus/HYSA_363.nxs.h5"
 fi

@@ -9,29 +9,29 @@ from datetime import datetime
 
 def usage():
     print 'Usage: ingestReduced <facilityName> <instrumentName> <investigationName> <runNumber> <hostAndPort> <password>'
-    print 'Example: ingestReduced /SNS/PG3/IPTS-1234/shared 1000 orion.sns.gov:8181 password'
+    print 'Example: ingestReduced SNS PG3 IPTS-1234 1000 orion.sns.gov:8181 password'
     sys.exit(-1)
 
 def ingestReduced(facilityName, instrumentName, investigationName, runNumber, sessionId, service, factory):
 
+    print facilityName, instrumentName, investigationName, runNumber
     config = ConfigParser.RawConfigParser()
     config.read('/etc/autoreduce/icat4.cfg')
-
-
-    print "Begin getInvestigation at: ", str(datetime.now()) 
-    #investigation = getInvestigation(instrument, invName, runNumber, sessionId, service, factory)
-    print "End getInvestigation at: ", str(datetime.now()) 
 
     directory = "/" + facilityName + "/" + instrumentName + "/" +  investigationName + "/shared/autoreduce"
     print "reduction output directory: " + directory
 
     print "Search investigation: ", str(datetime.now()) 
-    investigations = service.search(sessionId, "Investigation INCLUDE Sample [name = '" + investigationName + "'] <-> Dataset [name = '" + runNumber + "']")
+    investigations = service.search(sessionId, "Investigation INCLUDE Sample [name = '" + investigationName + "'] <-> Dataset [name = '" + runNumber + "'] <-> Instrument [name = '" + instrumentName + "']")
 
     if len(investigations) == 1:
+        print "Investigation found", str(datetime.now()) 
         investigation = investigations[0]
     else:
+        print "Investigation not found", str(datetime.now()) 
         return 1
+
+    print "End getInvestigation at: ", str(datetime.now()) 
 
     #set dataset name 
     dataset = factory.create("dataset")

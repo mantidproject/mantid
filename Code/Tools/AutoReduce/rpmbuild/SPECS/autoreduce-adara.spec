@@ -1,7 +1,7 @@
 Summary: autoreduce-adara
 Name: autoreduce-adara
 Version: 1.0
-Release: 2 
+Release: 3 
 Group: Applications/Engineering
 prefix: /usr
 BuildRoot: %{_tmppath}/%{name}
