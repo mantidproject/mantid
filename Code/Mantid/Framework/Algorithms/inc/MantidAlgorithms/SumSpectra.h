@@ -79,7 +79,10 @@ private:
   void init();
   void exec();
   void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace, std::set<int> &indices);
+  specid_t getOutputSpecId(API::MatrixWorkspace_const_sptr localworkspace);
 
+  /// The output spectrum id
+  specid_t m_outSpecId;
   /// The spectrum to start the integration from
   int m_MinSpec;
   /// The spectrum to finish the integration at
