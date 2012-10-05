@@ -1,4 +1,4 @@
-#include "MantidGeometry/instrument/IDFObject.h"
+#include "MantidGeometry/Instrument/IDFObject.h"
 
 namespace Mantid
 {
