@@ -1344,7 +1344,7 @@ namespace Mantid
       if( minCount == maxCount)
         return;
 
-      int N2Av = std::min<int>( 10,( int )( N/10 ) );
+      int N2Av = std::min<int>( 10,std::max(10, N/10 ) );
       int nMax = 0;
       int nMin = 0;
       double TotMax = 0;
@@ -1352,18 +1352,23 @@ namespace Mantid
       double offset = std::max<double>(1, (maxCount - minCount) / 20);
 
       for (int i = 0; i < N && (nMax < N2Av || nMin < N2Av); i++)
+      {
         if (nMax < N2Av && C[i] > maxCount - offset)
         {
           TotMax += C[i];
           nMax++;
 
         }
-        else if (nMin < N2Av && C[i] < minCount + offset)
+        if (nMin < N2Av && C[i] < minCount + offset)
 
         {
           TotMin += C[i];
           nMin++;
         }
+      }
+
+      if( nMax + nMin == N)
+        return;
 
       double TotR = 0;
       int nR = 0;
@@ -1971,6 +1976,19 @@ namespace Mantid
     {
 
 
+      // Check if flat
+    /*  double Varx,Vary, Cov;  No Good. Eliminated too many peaks
+
+      std::vector<double>PP(ParameterValues, ParameterValues+IVXY);
+      CalcVariancesFromData( ParameterValues[IBACK],ParameterValues[IXMEAN],ParameterValues[IYMEAN],
+          Varx,Cov,Vary, PP);
+
+      if( Varx <4 || Vary < 4)//<--- This one especially
+         return false;
+
+      if( Cov*Cov < .75*Varx*Vary)//All data on a line
+        return false;
+     */
       double VIx0_num = StatBase[ISSIxx] - 2 * ParameterValues[IXMEAN] * StatBase[ISSIx]
           + ParameterValues[IXMEAN] * ParameterValues[IXMEAN] * StatBase[IIntensities];
 
@@ -2004,6 +2022,8 @@ namespace Mantid
       double Vx = ( VIx0_num - ParameterValues[IBACK] * Vx0_num ) / Denominator;
       double Vy = ( VIy0_num - ParameterValues[IBACK] * Vy0_num ) / Denominator;
       double Vxy = ( VIxy0_num - ParameterValues[IBACK] * Vxy0_num ) / Denominator;
+
+
 
       double Z = 4 * M_PI * M_PI * (Vx * Vy - Vxy * Vxy);
 
