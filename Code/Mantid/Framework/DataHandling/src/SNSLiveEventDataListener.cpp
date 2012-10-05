@@ -139,6 +139,7 @@ namespace DataHandling
 
   void SNSLiveEventDataListener::run()
   {
+    try {
     if (m_isConnected == false) // sanity check
     {
       throw std::runtime_error( std::string("SNSLiveEventDataListener::run(): No connection to SMS server."));
@@ -185,6 +186,24 @@ namespace DataHandling
         g_log.error() << "SMS server has sent no data for " << HEARTBEAT_TIMEOUT
                       << " seconds.  Is it still running?" << std::endl;
       }
+    }
+
+    } catch (...) {  // Default exception handler
+      // If we've gotten here, it's because the thread has thrown an otherwise
+      // uncaught exception.  In such a case, the thread will exit and there's
+      // nothing we can do about that.  The only thing we can do is log an error
+      // so hopefully the user will notice (instead of wonder why all the
+      // incoming data has just stopped...)
+      g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
+                    << "  Thread is exiting." << std::endl;
+      m_isConnected = false;
+
+      // The extractData() function is deliberately designed to block until the workspace is
+      // initialized so we have to ensure the flag is set or else the entire GUI will lock up.
+      // Note that if the workspace really hasn't been initialized, then the values in it are
+      // going to be completely bogus, but since the entire we're not going to be able to read
+      // any data, that's not really an issue.
+      m_workspaceInitialized = true;
     }
 
     return;
