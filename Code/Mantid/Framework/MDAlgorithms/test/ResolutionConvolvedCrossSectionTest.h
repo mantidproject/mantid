@@ -87,7 +87,7 @@ public:
     TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 4);
   }
 
-  void xtest_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()
+  void test_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()
   {
     // How this works -> The fake convolution's signal member is
     // set up to throw an exception if the attribute still has
@@ -102,13 +102,15 @@ public:
 
     Mantid::API::IMDWorkspace_sptr testWS = createTestMDWorkspace();
     Mantid::API::IMDIterator *box = testWS->createIterator();
-    FunctionDomainMD mdDomain(testWS,0,box->getDataSize());
-    FunctionValues output(mdDomain);
+    auto mdDomain = boost::shared_ptr<FunctionDomainMD>(new FunctionDomainMD(testWS));
+    FunctionValues output(*mdDomain);
     crossSection->setWorkspace(testWS);
     crossSection->setAttributeValue("ConvAtt0", 100.3);
-    // Fake function throws if attribute value has not changed
-    TS_ASSERT_THROWS_NOTHING(crossSection->function(mdDomain, output));
 
+    // Fake function throws if attribute value has not changed
+    TS_ASSERT_THROWS_NOTHING(crossSection->function(*mdDomain, output));
+
+    mdDomain.reset(); // Drop workspace ref
     delete crossSection;
   }
 
