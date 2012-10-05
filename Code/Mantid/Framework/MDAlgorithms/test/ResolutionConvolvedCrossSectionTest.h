@@ -101,7 +101,6 @@ public:
     IFunction * crossSection = createInitializedTestConvolution();
 
     Mantid::API::IMDWorkspace_sptr testWS = createTestMDWorkspace();
-    Mantid::API::IMDIterator *box = testWS->createIterator();
     auto mdDomain = boost::shared_ptr<FunctionDomainMD>(new FunctionDomainMD(testWS));
     FunctionValues output(*mdDomain);
     crossSection->setWorkspace(testWS);
