@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>ImageViewer</class>
+ <widget class="QMainWindow" name="ImageViewer">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -139,7 +139,7 @@
          </widget>
         </item>
         <item row="4" column="0">
-         <widget class="QLabel" name="color_scale" native="true"/>
+         <widget class="QLabel" name="color_scale"/>
         </item>
         <item row="5" column="0">
          <widget class="QLabel" name="table_label">
@@ -173,7 +173,7 @@
      <x>0</x>
      <y>0</y>
      <width>1251</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -326,6 +326,7 @@
    <class>QwtPlot</class>
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

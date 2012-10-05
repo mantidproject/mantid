@@ -27,7 +27,7 @@ namespace ImageView
  */
 ImageView::ImageView( ImageDataSource* data_source )
 {
-  Ui_MainWindow* ui = new Ui_MainWindow();
+  Ui_ImageViewer* ui = new Ui_ImageViewer();
   saved_ui          = ui; 
 
   QMainWindow* window = this;
@@ -86,7 +86,7 @@ ImageView::~ImageView()
                              static_cast<IVConnections*>(saved_iv_connections);
   delete  iv_connections;
 
-  Ui_MainWindow* ui = static_cast<Ui_MainWindow*>(saved_ui);
+  Ui_ImageViewer* ui = static_cast<Ui_ImageViewer*>(saved_ui);
   delete  ui;
 }
 

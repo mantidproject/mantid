@@ -26,7 +26,7 @@ namespace RefDetectorViewer
  */
 RefImageView::RefImageView( RefImageDataSource* data_source )
 {
-  Ui_MainWindow* ui = new Ui_MainWindow();
+  Ui_RefImageViewer* ui = new Ui_RefImageViewer();
   saved_ui          = ui; 
 
   QMainWindow* window = this;
@@ -102,7 +102,7 @@ RefImageView::~RefImageView()
                              static_cast<RefIVConnections*>(saved_iv_connections);
   delete  iv_connections;
 
-  Ui_MainWindow* ui = static_cast<Ui_MainWindow*>(saved_ui);
+  Ui_RefImageViewer* ui = static_cast<Ui_RefImageViewer*>(saved_ui);
   delete  ui;
 }
 

@@ -13,7 +13,7 @@ namespace RefDetectorViewer
  *  Construct a SliderHandler object to manage the image scrollbars from the 
  *  specified UI.
  */
-SliderHandler::SliderHandler( Ui_MainWindow* iv_ui )
+SliderHandler::SliderHandler( Ui_RefImageViewer* iv_ui )
 {
   this->iv_ui = iv_ui;
 }

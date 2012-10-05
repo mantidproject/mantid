@@ -29,7 +29,7 @@ namespace RefDetectorViewer
  *                         vertical cuts through the image
  *
  */
-RefIVConnections::RefIVConnections( Ui_MainWindow* ui, 
+RefIVConnections::RefIVConnections( Ui_RefImageViewer* ui, 
                               RefImageView*     iv_main_window,
                               RefImageDisplay*  image_display,
                               GraphDisplay*  h_graph_display,

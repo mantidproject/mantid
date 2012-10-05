@@ -46,7 +46,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RangeHandler
   public:
 
     /// Construct object to manage min, max and step controls in the UI
-    RangeHandler( Ui_MainWindow* iv_ui );
+    RangeHandler( Ui_RefImageViewer* iv_ui );
 
     /// Configure min, max and step controls for the specified data source
     void ConfigureRangeControls( RefImageDataSource* data_source );
@@ -58,7 +58,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RangeHandler
     void SetRange( double min, double max, double step, char type );
 
   private:
-    Ui_MainWindow* iv_ui;
+    Ui_RefImageViewer* iv_ui;
     double         total_min_x;
     double         total_max_x;
     double         total_max_y;

@@ -40,7 +40,7 @@ public:
 protected:
 
   /// view
-  Ui::Dialog ui; 
+  Ui::SlicingAlgorithmDialog ui; 
 
   /// Common slice md setup
   void commonSliceMDSetup(const bool);

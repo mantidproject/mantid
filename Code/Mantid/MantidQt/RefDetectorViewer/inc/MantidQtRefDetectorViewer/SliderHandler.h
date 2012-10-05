@@ -48,7 +48,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler
   public:
 
     /// Construct object to manage image scrollbars from the specified UI
-    SliderHandler( Ui_MainWindow* iv_ui );
+    SliderHandler( Ui_RefImageViewer* iv_ui );
 
     /// Configure the image scrollbars for the specified data and drawing area
     void ConfigureSliders( QRect            draw_area, 
@@ -77,7 +77,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler
                           int         n_pixels,
                           int         val );
 
-    Ui_MainWindow*   iv_ui;
+    Ui_RefImageViewer*   iv_ui;
 };
 
 } // namespace MantidQt 

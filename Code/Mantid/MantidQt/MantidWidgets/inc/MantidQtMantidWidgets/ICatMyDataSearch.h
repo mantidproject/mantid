@@ -31,7 +31,7 @@ namespace MantidQt
     void setparentWidget(QWidget* par);
 
     private:
-    Ui::MyData m_uiForm;
+    Ui::ICatMyDataSearch m_uiForm;
 
     ///parent widget
     QWidget* m_applicationWindow;

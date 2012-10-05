@@ -60,7 +60,7 @@ public:
 
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
-  IVConnections( Ui_MainWindow* ui, 
+  IVConnections( Ui_ImageViewer* ui, 
                  ImageView*     image_view,
                  ImageDisplay*  image_display,
                  GraphDisplay*  h_graph_display,
@@ -96,7 +96,7 @@ public slots:
 
 private:
 
-  Ui_MainWindow*   iv_ui;
+  Ui_ImageViewer*   iv_ui;
   ImageView*       iv_main_window;
   ImageDisplay*    image_display;
   GraphDisplay*    h_graph_display;

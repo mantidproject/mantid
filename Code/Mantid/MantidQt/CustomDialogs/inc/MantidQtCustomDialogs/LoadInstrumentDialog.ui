@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Dialog</class>
- <widget class="QDialog" name="Dialog">
+ <class>LoadInstrumentDialog</class>
+ <widget class="QDialog" name="LoadInstrumentDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -59,9 +59,9 @@
      </item>
      <item row="3" column="1">
       <layout class="QHBoxLayout" name="idf_validator_layout">
-      <item row="2" column="3">
-       <widget class="QLineEdit" name="txt_instrument_name"/>
-      </item>
+       <item>
+        <widget class="QLineEdit" name="txt_instrument_name"/>
+       </item>
       </layout>
      </item>
      <item row="4" column="1">
@@ -106,7 +106,7 @@
   <connection>
    <sender>controls</sender>
    <signal>accepted()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>LoadInstrumentDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -122,7 +122,7 @@
   <connection>
    <sender>controls</sender>
    <signal>rejected()</signal>
-   <receiver>Dialog</receiver>
+   <receiver>LoadInstrumentDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

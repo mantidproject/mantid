@@ -60,7 +60,7 @@ public:
 
   /// Construct the object that links the GUI components to the other specifed
   /// higher level objects.
-  RefIVConnections( Ui_MainWindow* ui, 
+  RefIVConnections( Ui_RefImageViewer* ui, 
                  RefImageView*     image_view,
                  RefImageDisplay*  image_display,
                  GraphDisplay*  h_graph_display,
@@ -98,7 +98,7 @@ public slots:
 
 private:
 
-  Ui_MainWindow*   iv_ui;
+  Ui_RefImageViewer*   iv_ui;
   RefImageView*       iv_main_window;
   RefImageDisplay*    image_display;
   GraphDisplay*    h_graph_display;

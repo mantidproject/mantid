@@ -62,7 +62,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageView : public QMainWindow
     // include ui_ImageView.h, which disappears by the time MantidPlot is
     // being built.  We need the pointers so we can delete them in the 
     // destructor.  
-    void*            saved_ui;               // Ui_MainWindow*
+    void*            saved_ui;               // Ui_RefImageViewer*
     void*            saved_slider_handler;   // SliderHandler*
     void*            saved_range_handler;    // RangeHandler*
     void*            saved_image_display;    // RefImageDisplay*

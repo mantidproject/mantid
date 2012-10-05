@@ -32,7 +32,7 @@ public:
 protected:
 
   /// view
-  Ui::Dialog ui; 
+  Ui::LoadInstrumentDialog ui; 
   
 protected slots:
 

@@ -26,7 +26,7 @@ namespace ImageView
  *                         vertical cuts through the image
  *
  */
-IVConnections::IVConnections( Ui_MainWindow* ui, 
+IVConnections::IVConnections( Ui_ImageViewer* ui, 
                               ImageView*     iv_main_window,
                               ImageDisplay*  image_display,
                               GraphDisplay*  h_graph_display,

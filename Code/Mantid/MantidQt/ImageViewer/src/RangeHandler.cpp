@@ -16,7 +16,7 @@ namespace ImageView
  *  Construct a RangeHandler object to manage min, max and step controls 
  *  in the specified UI
  */
-RangeHandler::RangeHandler( Ui_MainWindow* iv_ui )
+RangeHandler::RangeHandler( Ui_ImageViewer* iv_ui )
 {
   this->iv_ui = iv_ui;
 }
