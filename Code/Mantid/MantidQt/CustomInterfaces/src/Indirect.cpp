@@ -715,9 +715,6 @@ QString Indirect::validateCalib()
     double eWidth = m_calDblMng->value(m_calResProp["EWidth"]);
 
     uiv.checkBins(eLow, eWidth, eHigh);
-
-    uiv.checkRangeIsEnclosed("Background Range", backgroundRange, 
-                             "Energy Range", std::make_pair(eLow, eHigh));
   }
 
   return uiv.generateErrorMessage();
