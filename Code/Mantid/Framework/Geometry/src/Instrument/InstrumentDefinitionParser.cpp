@@ -1822,16 +1822,19 @@ namespace Geometry
   Write the cache file from the IDF file and apply it.
   @param fallBackCache : File location for a fallback cache if required.
   */
-  void InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr fallBackCache)
+  InstrumentDefinitionParser::CachingOption InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr fallBackCache)
   {
     IDFObject_const_sptr usedCache = m_cacheFile;
+    InstrumentDefinitionParser::CachingOption cachingOption = WroteCacheAdjacent;
+
     g_log.information("Geometry cache is not available");
     try
     {
       Poco::File dir = m_xmlFile->getParentDirectory();
-      if(dir.path().empty() || !dir.exists() || !dir.canWrite() )
+      if(!m_xmlFile->exists() || dir.path().empty() || !dir.exists() || !dir.canWrite() )
       {
         usedCache  = fallBackCache;
+        cachingOption = WroteCacheTemp;
         g_log.information() << "Instrument directory is read only, writing cache to system temp.\n";
       }
     }
@@ -1851,6 +1854,7 @@ namespace Geometry
       ((*objItr).second)->setVtkGeometryCacheWriter(writer);
     }
     writer->write();
+    return cachingOption;
   }
 
 
@@ -1875,8 +1879,7 @@ namespace Geometry
     }
     else
     {
-      writeAndApplyCache(fallBackCache);  
-      cachingOption = WroteCache;
+      cachingOption = writeAndApplyCache(fallBackCache);  
     }
     return cachingOption;
   }

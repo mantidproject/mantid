@@ -50,7 +50,7 @@ namespace Geometry
     ~InstrumentDefinitionParser();
 
     /// Caching 
-    enum CachingOption{NoneApplied, ReadAdjacent, ReadFallBack, WroteCache };
+    enum CachingOption{NoneApplied, ReadAdjacent, ReadFallBack, WroteCacheAdjacent, WroteCacheTemp };
 
     /// Set up parser
     void initialize(const std::string & filename, const std::string & instName, const std::string & xmlText);
@@ -168,7 +168,7 @@ private:
     void applyCache(IDFObject_const_sptr cacheToApply);
 
     /// Write out a cache file.
-    void writeAndApplyCache(IDFObject_const_sptr usedCache);
+    CachingOption writeAndApplyCache(IDFObject_const_sptr usedCache);
 
     /// This method returns the parent appended which its child components and also name of type of the last child component
     std::string getShapeCoorSysComp(Geometry::ICompAssembly* parent,
