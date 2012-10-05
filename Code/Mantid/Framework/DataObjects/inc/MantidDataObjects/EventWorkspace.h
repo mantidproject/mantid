@@ -32,8 +32,7 @@ namespace DataObjects
 {
 class EventWorkspaceMRU;
 
-///Map to EventList objects, with the detector ID as the index.
-typedef std::map<detid_t, EventList*> EventListMap;
+///EventList objects, with the detector ID as the index.
 typedef std::vector<EventList*> EventListVector;
 
 
