@@ -10,7 +10,7 @@ and so gains any manipulations such as calibration done to the instrument in the
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/TransferInstrument.h"
+#include "MantidAlgorithms/CopyInstrumentParameters.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <iostream>
 #include "MantidAPI/MemoryManager.h"
@@ -24,17 +24,17 @@ namespace Algorithms
 using std::size_t;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(TransferInstrument)
+DECLARE_ALGORITHM(CopyInstrumentParameters)
 
 /// Sets documentation strings for this algorithm
-void TransferInstrument::initDocs()
+void CopyInstrumentParameters::initDocs()
 {
   this->setWikiSummary("Transfers an instrument from on workspace to another workspace with same base instrument.");
   this->setOptionalMessage("Transfers an instrument from on workspace to another workspace with same base instrument.");
 }
 
 /// Get a reference to the logger. It is used to print out information, warning and error messages
-Mantid::Kernel::Logger& TransferInstrument::g_log = Mantid::Kernel::Logger::get("TransferInstrument");
+Mantid::Kernel::Logger& CopyInstrumentParameters::g_log = Mantid::Kernel::Logger::get("CopyInstrumentParameters");
 
 
 
@@ -44,14 +44,14 @@ using namespace Geometry;
 ///using namespace DataObjects;
 
 /// Default constructor
-TransferInstrument::TransferInstrument() : 
+CopyInstrumentParameters::CopyInstrumentParameters() : 
   Algorithm()
 {}
 
 /// Destructor
-TransferInstrument::~TransferInstrument() {}
+CopyInstrumentParameters::~CopyInstrumentParameters() {}
 
-void TransferInstrument::init()
+void CopyInstrumentParameters::init()
 {
   declareProperty(new WorkspaceProperty<>("GivingWorkspace","",Direction::Input),
     "Name of the workspace giving the instrument" );
@@ -62,7 +62,7 @@ void TransferInstrument::init()
 /** Executes the algorithm
  *  @throw std::out_of_range If a property is set to an invalid value for the input workspace
  */
-void TransferInstrument::exec()
+void CopyInstrumentParameters::exec()
 {
 
   // Get the giving workspace
@@ -86,7 +86,7 @@ void TransferInstrument::exec()
 /** Retrieves the properties and checks that they have valid values.
  *  @throw std::invalid_argument If either workspace has no instrument or the instruments have different base instruments.
  */
-void TransferInstrument::checkProperties()
+void CopyInstrumentParameters::checkProperties()
 {
 
   // Check that both workspaces have an instrument

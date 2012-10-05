@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_TRANSFERINSTRUMENT_H_
-#define MANTID_ALGORITHMS_TRANSFERINSTRUMENT_H_
+#ifndef MANTID_ALGORITHMS_COPYINSTRUMENTPARAMETERS_H_
+#define MANTID_ALGORITHMS_COPYINSTRUMENTPARAMETERS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -50,13 +50,13 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport TransferInstrument : public API::Algorithm
+class DLLExport CopyInstrumentParameters : public API::Algorithm
 {
 public:
-  TransferInstrument();
-  virtual ~TransferInstrument();
+  CopyInstrumentParameters();
+  virtual ~CopyInstrumentParameters();
   /// Algorithm's name
-  virtual const std::string name() const { return "TransferInstrument"; }
+  virtual const std::string name() const { return "CopyInstrumentParameters"; }
   /// Algorithm's version
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
@@ -86,4 +86,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_TRANSFERINSTRUMENT_H_*/
+#endif /*MANTID_ALGORITHMS_COPYINSTRUMENTPARAMETERS_H_ */
