@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/ConfigService.h"
-#include "MantidGeometry/instrument/IDFObject.h"
+#include "MantidGeometry/Instrument/IDFObject.h"
 #include <Poco/Path.h>
 
 using Mantid::Geometry::IDFObject;
