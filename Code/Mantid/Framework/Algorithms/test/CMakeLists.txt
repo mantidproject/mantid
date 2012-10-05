@@ -24,7 +24,9 @@ if ( CXXTEST_FOUND )
   set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp 
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../TestHelpers/src/SANSInstrumentCreationHelper.cpp
-                        ../../TestHelpers/src/MDEventsTestHelper.cpp )
+                        ../../TestHelpers/src/MDEventsTestHelper.cpp 
+                        ../../TestHelpers/src/ScopedFileHelper.cpp
+                        )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling MDEvents )
   add_dependencies ( FrameworkTests AlgorithmsTest )
