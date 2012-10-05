@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>963</width>
+    <width>834</width>
     <height>591</height>
    </rect>
   </property>
@@ -213,6 +213,16 @@
       </spacer>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="correct_kikf_cb">
+     <property name="text">
+      <string>Correct Ki/Kf</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QGroupBox" name="det_van_gb">

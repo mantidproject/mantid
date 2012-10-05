@@ -20,6 +20,7 @@ class DataCorrectionsScript(BaseScriptElement):
     tib_subtraction = False
     tib_tof_start = ''
     tib_tof_end = ''
+    correct_kikf = True
     detector_vanadium = ''
     det_van_integration = False
     det_van_int_range_low = ''
@@ -59,6 +60,8 @@ class DataCorrectionsScript(BaseScriptElement):
                 script += "TibTofRangeStart=%s,\n" % self.tib_tof_start
             if self.tib_tof_end != DataCorrectionsScript.tib_tof_end:
                 script += "TibTofRangeEnd=%s,\n" % self.tib_tof_end
+        if not self.correct_kikf:
+            script += "CorrectKiKf=%s,\n" % self.correct_kikf
         if self.detector_vanadium != '':
             script += "DetectorVanadiumInputFile=\"%s\",\n" % self.detector_vanadium
             if self.det_van_integration:
@@ -88,6 +91,7 @@ class DataCorrectionsScript(BaseScriptElement):
         xml += "  <timeindepbkg_sub>%s</timeindepbkg_sub>,\n" % self.tib_subtraction
         xml += "  <tib_tof_range_start>%s</tib_tof_range_start>\n" % self.tib_tof_start
         xml += "  <tib_tof_range_end>%s</tib_tof_range_end>\n" % self.tib_tof_end
+        xml += "  <correct_kikf>%s</correct_kikf>\n" % str(self.correct_kikf)
         xml += "  <detector_vanadium>%s</detector_vanadium>\n" % self.detector_vanadium
         xml += "  <use_bounds_detvan>%s</use_bounds_detvan>\n" % str(self.det_van_integration)
         xml += "  <detvan_range_low>%s</detvan_range_low>\n" % self.det_van_int_range_low
@@ -128,6 +132,9 @@ class DataCorrectionsScript(BaseScriptElement):
             self.tib_tof_end = BaseScriptElement.getStringElement(instrument_dom,
                                                                   "tib_tof_range_end",
                                                                   default=DataCorrectionsScript.tib_tof_end)
+            self.correct_kikf = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                 "correct_kikf",
+                                                                 default=DataCorrectionsScript.correct_kikf)
             self.detector_vanadium = BaseScriptElement.getStringElement(instrument_dom,
                                                                         "detector_vanadium",
                                                                         default=DataCorrectionsScript.detector_vanadium)
@@ -161,6 +168,7 @@ class DataCorrectionsScript(BaseScriptElement):
         self.tib_subtraction = DataCorrectionsScript.tib_subtraction
         self.tib_tof_start = DataCorrectionsScript.tib_tof_start
         self.tib_tof_end = DataCorrectionsScript.tib_tof_end
+        self.correct_kikf = DataCorrectionsScript.correct_kikf
         self.detector_vanadium = DataCorrectionsScript.detector_vanadium
         self.det_van_integration = DataCorrectionsScript.det_van_integration
         self.det_van_int_range_low = DataCorrectionsScript.det_van_int_range_low

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/inelastic/dgs_data_corrections.ui'
 #
-# Created: Thu Oct  4 13:37:50 2012
+# Created: Thu Oct  4 16:17:47 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -17,7 +17,7 @@ except AttributeError:
 class Ui_DataCorrsFrame(object):
     def setupUi(self, DataCorrsFrame):
         DataCorrsFrame.setObjectName(_fromUtf8("DataCorrsFrame"))
-        DataCorrsFrame.resize(963, 591)
+        DataCorrsFrame.resize(834, 591)
         DataCorrsFrame.setFrameShape(QtGui.QFrame.StyledPanel)
         DataCorrsFrame.setFrameShadow(QtGui.QFrame.Raised)
         self.verticalLayout_2 = QtGui.QVBoxLayout(DataCorrsFrame)
@@ -95,6 +95,10 @@ class Ui_DataCorrsFrame(object):
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem2)
         self.verticalLayout_2.addLayout(self.horizontalLayout_4)
+        self.correct_kikf_cb = QtGui.QCheckBox(DataCorrsFrame)
+        self.correct_kikf_cb.setChecked(True)
+        self.correct_kikf_cb.setObjectName(_fromUtf8("correct_kikf_cb"))
+        self.verticalLayout_2.addWidget(self.correct_kikf_cb)
         self.det_van_gb = QtGui.QGroupBox(DataCorrsFrame)
         self.det_van_gb.setObjectName(_fromUtf8("det_van_gb"))
         self.verticalLayout = QtGui.QVBoxLayout(self.det_van_gb)
@@ -189,6 +193,7 @@ class Ui_DataCorrsFrame(object):
         self.background_sub_gb.setTitle(QtGui.QApplication.translate("DataCorrsFrame", "Time-Independent Background Subtraction", None, QtGui.QApplication.UnicodeUTF8))
         self.tof_start_label.setText(QtGui.QApplication.translate("DataCorrsFrame", "TOF Start", None, QtGui.QApplication.UnicodeUTF8))
         self.tof_end_label.setText(QtGui.QApplication.translate("DataCorrsFrame", "TOF End", None, QtGui.QApplication.UnicodeUTF8))
+        self.correct_kikf_cb.setText(QtGui.QApplication.translate("DataCorrsFrame", "Correct Ki/Kf", None, QtGui.QApplication.UnicodeUTF8))
         self.det_van_gb.setTitle(QtGui.QApplication.translate("DataCorrsFrame", "Detector Vanadium", None, QtGui.QApplication.UnicodeUTF8))
         self.van_input_label.setText(QtGui.QApplication.translate("DataCorrsFrame", "Input", None, QtGui.QApplication.UnicodeUTF8))
         self.van_input_browse.setText(QtGui.QApplication.translate("DataCorrsFrame", "Browse", None, QtGui.QApplication.UnicodeUTF8))

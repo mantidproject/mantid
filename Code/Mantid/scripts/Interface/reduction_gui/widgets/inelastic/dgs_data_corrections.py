@@ -44,6 +44,8 @@ class DataCorrectionsWidget(BaseWidget):
         self._det_van_intrange_widgets_state(self._content.van_int_cb.isChecked())
         self.connect(self._content.van_int_cb, QtCore.SIGNAL("toggled(bool)"),
                      self._det_van_intrange_widgets_state)
+        self.connect(self._content.use_procdetvan_cb, QtCore.SIGNAL("toggled(bool)"),
+                     self._det_van_intrange_widgets_opp_state)        
         
         # Connections
         self.connect(self._content.van_input_browse, QtCore.SIGNAL("clicked()"), 
@@ -59,6 +61,12 @@ class DataCorrectionsWidget(BaseWidget):
         self._content.van_int_range_low_edit.setEnabled(state)
         self._content.van_int_range_high_edit.setEnabled(state)
         self._content.van_int_range_units_cb.setEnabled(state)
+        
+    def _det_van_intrange_widgets_opp_state(self, state=False):
+        self._content.van_int_cb.setEnabled(not state)
+        if self._content.van_int_cb.isChecked():
+            self._det_van_intrange_widgets_state(not state)
+            self._content.van_int_cb.setChecked(False)
     
     def _det_van_browse(self):
         fname = self.data_browse_dialog()
@@ -79,6 +87,7 @@ class DataCorrectionsWidget(BaseWidget):
         self._content.background_sub_gb.setChecked(state.tib_subtraction)
         self._content.tof_start_edit.setText(str(state.tib_tof_start))
         self._content.tof_end_edit.setText(str(state.tib_tof_end))
+        self._content.correct_kikf_cb.setChecked(state.correct_kikf)
         self._content.van_input_edit.setText(state.detector_vanadium)
         self._content.van_int_cb.setChecked(state.det_van_integration)
         self._content.van_int_range_low_edit.setText(str(state.det_van_int_range_low))
@@ -100,6 +109,7 @@ class DataCorrectionsWidget(BaseWidget):
         d.tib_subtraction = self._content.background_sub_gb.isChecked()
         d.tib_tof_start = util._check_and_get_float_line_edit(self._content.tof_start_edit)
         d.tib_tof_end = util._check_and_get_float_line_edit(self._content.tof_end_edit)
+        d.correct_kikf = self._content.correct_kikf_cb.isChecked()
         d.detector_vanadium = self._content.van_input_edit.text()
         d.det_van_integration = self._content.van_int_cb.isChecked()
         d.det_van_int_range_low = util._check_and_get_float_line_edit(self._content.van_int_range_low_edit)
