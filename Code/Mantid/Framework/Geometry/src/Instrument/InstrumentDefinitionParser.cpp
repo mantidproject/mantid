@@ -1861,7 +1861,7 @@ namespace Geometry
   {
     // Get cached file name
     // If the instrument directory is writable, put them there else use temporary directory.
-    IDFObject_const_sptr fallBackCache  = boost::make_shared<const IDFObject>( ConfigService::Instance().getTempDir() + "/" + m_instName + ".vtp");
+    IDFObject_const_sptr fallBackCache  = boost::make_shared<const IDFObject>( Poco::Path(ConfigService::Instance().getTempDir()).append( m_instName + ".vtp").toString());
     CachingOption cachingOption = NoneApplied;
     if (canUseProposedCacheFile(m_cacheFile))
     {

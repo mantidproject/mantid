@@ -19,7 +19,9 @@ namespace ScopedFileHelper
 
     ScopedFile(const std::string& fileContents, const std::string& fileName);
     ScopedFile(const std::string& fileContents, const std::string& fileName, const std::string& fileDirectory);
-
+    ScopedFile& operator=(const ScopedFile& other);
+    ScopedFile(const ScopedFile& other);
+    void release() const;
     std::string getFileName() const;
     ~ScopedFile();
 
@@ -27,7 +29,7 @@ namespace ScopedFileHelper
 
     void doCreateFile(const std::string& fileContents, const Poco::Path& fileNameAndPath);
 
-    std::string m_filename;
+    mutable std::string m_filename;
     std::ofstream m_file;
     // Following methods keeps us from being able to put objects of this type on the heap.
     void *operator new(size_t);

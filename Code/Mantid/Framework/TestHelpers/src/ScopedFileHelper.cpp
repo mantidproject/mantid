@@ -29,6 +29,33 @@ namespace ScopedFileHelper
     }
 
     /**
+    Release the resource from management.
+    */
+    void ScopedFile::release() const
+    {
+      this->m_filename.clear();
+    }
+
+    /// Assignement.
+    ScopedFile& ScopedFile::operator=(const ScopedFile& other)
+    {
+      if(this != &other)
+      {
+        this->m_file.close();
+        this->m_filename = other.m_filename;
+        other.release();
+      }
+      return *this;
+    };
+
+    /// Copy construction.
+    ScopedFile::ScopedFile(const ScopedFile& other)
+    {
+      this->m_filename = other.m_filename;
+      other.release();
+    };
+
+    /**
     Common method used by all constructors. Creates a file containing the ASCII file contents and 'remembers' the location of that file.
     */
     void ScopedFile::doCreateFile(const std::string& fileContents, const Poco::Path& fileNameAndPath)
@@ -55,8 +82,11 @@ namespace ScopedFileHelper
     /// Free up resources.
     ScopedFile::~ScopedFile()
     {
-      m_file.close();
-      if( remove( m_filename.c_str() ) != 0 )
-        throw std::runtime_error("cannot remove " + m_filename);
+      if(!m_filename.empty()) // check that file should be disposed.
+      {
+        m_file.close();
+        if( remove( m_filename.c_str() ) != 0 )
+          throw std::runtime_error("cannot remove " + m_filename);
+      }
     }
 }

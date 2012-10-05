@@ -13,8 +13,10 @@
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 
 #include <gmock/gmock.h>
+#include "boost/tuple/tuple.hpp"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -22,6 +24,7 @@ using namespace Mantid::Geometry;
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::Strings::loadFile;
 using namespace testing;
+using ScopedFileHelper::ScopedFile;
 
 class InstrumentDefinitionParserTest : public CxxTest::TestSuite
 {
@@ -36,6 +39,50 @@ private:
     MOCK_CONST_METHOD0(getLastModified, Poco::Timestamp());
     MOCK_CONST_METHOD0(exists, bool());
   };
+
+  /**
+  Helper method to create a pair of corresponding resource managed, IDF and VTP files.
+  */
+  boost::tuple<ScopedFile, ScopedFile, const std::string> create_idf_and_vtp_pair(bool put_vtp_next_to_IDF=true)
+  {
+    const std::string instrument_name = "MinimalForTesting";
+    const std::string idf_filename = instrument_name + "_Definition.xml";
+    const std::string vtp_filename= instrument_name + ".vtp";
+    const std::string idf_file_contents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+    "<instrument name=\"MinimalForTesting\" valid-from   =\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 23:59:59\" last-modified=\"2012-10-05 11:00:00\">"
+    "<defaults/>"
+    "<component type=\"cylinder-right\" idlist=\"cylinder-right\">"
+    "<location/>"
+    "</component>"
+    "<type name=\"cylinder-right\" is=\"detector\">"
+    "<cylinder id=\"some-shape\">"
+    "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
+    "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />" 
+    "  <radius val=\"0.01\" />"
+    "  <height val=\"0.03\" />"
+    "</cylinder>"    
+    "</type>"
+    "<idlist idname=\"cylinder-right\">"
+      "<id val=\"1\" />"
+     "</idlist>"
+    "</instrument>";
+
+    const std::string vtp_file_contents="<VTKFile byte_order=\"LittleEndian\" type=\"PolyData\" version=\"1.0\"><PolyData/></VTKFile>";
+
+    const std::string instrument_dir = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/";
+
+    if(put_vtp_next_to_IDF)
+    {
+      // both idf and vtp will go to the instrument sub directory.
+      return boost::make_tuple(ScopedFile(idf_file_contents, idf_filename, instrument_dir), ScopedFile(vtp_file_contents, vtp_filename, instrument_dir), instrument_name); // 
+    }
+    else
+    {
+      // idf will go to the instrument sub directory, vtp will go to temp directory.
+      return boost::make_tuple(ScopedFile(idf_file_contents, idf_filename, instrument_dir), ScopedFile(vtp_file_contents, vtp_filename), instrument_name); 
+    }
+    
+  }
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -445,10 +492,10 @@ public:
 
   void testUseAdjacentCacheFile()
   {
-    const std::string dir = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/";
+    boost::tuple<ScopedFile, ScopedFile, std::string> testFiles = create_idf_and_vtp_pair();
     
-    const std::string idfFileName = dir + "IDF_for_UNIT_TESTING.xml";
-    const std::string cacheFileName = dir + "IDF_for_UNIT_TESTING.vtp";
+    const std::string idfFileName = testFiles.get<0>().getFileName();
+    const std::string cacheFileName = testFiles.get<1>().getFileName();
 
     MockIDFObject* mockIDF = new MockIDFObject(idfFileName);
     MockIDFObject* mockCache = new MockIDFObject(cacheFileName);
@@ -478,10 +525,10 @@ public:
 
   void testWriteAdjacentCacheFileIfCacheIsOutOfDate()
   {
-    const std::string dir = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/";
+    boost::tuple<ScopedFile, ScopedFile, std::string> testFiles = create_idf_and_vtp_pair();
     
-    const std::string idfFileName = dir + "IDF_for_UNIT_TESTING.xml";
-    const std::string cacheFileName = dir + "IDF_for_UNIT_TESTING.vtp";
+    const std::string idfFileName = testFiles.get<0>().getFileName();
+    const std::string cacheFileName = testFiles.get<1>().getFileName();
 
     MockIDFObject* mockIDF = new MockIDFObject(idfFileName);
     MockIDFObject* mockCache = new MockIDFObject(cacheFileName);
@@ -500,7 +547,7 @@ public:
 
     InstrumentDefinitionParser parser;
     const std::string xmlText = Strings::loadFile(idfFileName);
-    const std::string instrumentName = "UseAjacentCache";
+    const std::string instrumentName = testFiles.get<2>();
     parser.initialize(idf, cache, instrumentName, xmlText);
     TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
 
@@ -509,14 +556,44 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockCache));
   }
 
+  void testReadFromCacheInTempDirectory()
+  {
+    const time_t tAtStart = std::time(NULL); // create an early timestamp for use later.
+    const bool put_vtp_in_instrument_directory = false;
+    boost::tuple<ScopedFile, ScopedFile, std::string> testFiles = create_idf_and_vtp_pair(put_vtp_in_instrument_directory);
+    
+    const std::string idfFileName = testFiles.get<0>().getFileName();
+    const std::string cacheFileName = "";
+    
+    MockIDFObject* mockIDF = new MockIDFObject(idfFileName);
+    MockIDFObject* mockCache = new MockIDFObject(cacheFileName); 
 
+    EXPECT_CALL(*mockIDF, exists()).WillRepeatedly(Return(true));
+    EXPECT_CALL(*mockCache, exists()).WillRepeatedly(Return(false)); // Mock expectation set such that adjacent Cache file does not exist, so should not be used.
+
+    EXPECT_CALL(*mockIDF, getLastModified()).WillOnce(Return(tAtStart)); 
+
+    IDFObject_const_sptr idf(mockIDF);
+    IDFObject_const_sptr cache(mockCache);
+
+    InstrumentDefinitionParser parser;
+    const std::string xmlText = Strings::loadFile(idfFileName);
+    const std::string instrumentName = testFiles.get<2>();
+    parser.initialize(idf, cache, instrumentName, xmlText);
+    TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
+
+    TS_ASSERT_EQUALS(InstrumentDefinitionParser::ReadFallBack, parser.getAppliedCachingOption()); // Check that the adjacent cache file was used.
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockIDF));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockCache));
+  }
+  
   void testWriteAdjacentCacheFileIfCacheDoestExist()
   {
-    const std::string dir = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/";
+    boost::tuple<ScopedFile, ScopedFile, std::string> testFiles = create_idf_and_vtp_pair();
     
-    const std::string idfFileName = dir + "IDF_for_UNIT_TESTING.xml";
+    const std::string idfFileName = testFiles.get<0>().getFileName();
     const std::string cacheFileName = "";
-
+    
     MockIDFObject* mockIDF = new MockIDFObject(idfFileName);
     MockIDFObject* mockCache = new MockIDFObject(cacheFileName); 
 
@@ -528,7 +605,7 @@ public:
 
     InstrumentDefinitionParser parser;
     const std::string xmlText = Strings::loadFile(idfFileName);
-    const std::string instrumentName = "UseAjacentCache";
+    const std::string instrumentName = testFiles.get<2>();
     parser.initialize(idf, cache, instrumentName, xmlText);
     TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
 
@@ -536,7 +613,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockIDF));
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockCache));
   }
-
 
 };
 
