@@ -120,8 +120,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         #alg = LoadEventNexus(Filename=filename, ChunkNumber=3, TotalChunks=3,  OutputWorkspace=name, **kwargs)
         wksp = alg.workspace()
         if str(self._instrument) == "NOM":
-            LoadInstrument(Workspace=wksp, Filename="NOMAD_Definition_20120701-20120731.xml",RewriteSpectraMap=True)
-
+            path=mantid.config["instrumentDefinition.directory"]
+            LoadInstrument(Workspace=wksp, Filename=path+'/'+"NOMAD_Definition_20120701-20120731.xml",RewriteSpectraMap=False)
         return wksp
 
     def _loadHistoNeXusData(self, runnumber, extension):
