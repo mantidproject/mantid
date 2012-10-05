@@ -64,7 +64,7 @@ void BackToBackExponential::functionDeriv1D(Jacobian* out, const double* xValues
     {
       double diff = xValues[i]-x0;
 
-      if ( fabs(diff) < 20*s )
+      if ( fabs(diff) < 100*s )
       {
 
         double e_a = 0.0;
