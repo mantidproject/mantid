@@ -214,16 +214,14 @@ namespace Mantid
 
             // Load the monitors
             IAlgorithm_sptr loadmon = this->createSubAlgorithm(loadAlgName);
-            loadmon->setAlwaysStoreInADS(true);
             loadmon->setProperty(fileProp, runFileName);
             loadmon->setProperty("OutputWorkspace", monWsName);
             loadmon->executeAsSubAlg();
-
-            reductionManager->declareProperty(new PropertyWithValue<std::string>("MonitorWorkspace", monWsName));
+            MatrixWorkspace_sptr monWS = loadmon->getProperty("OutputWorkspace");
 
             // Calculate Ei
             IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
-            getei->setProperty("InputWorkspace", monWsName);
+            getei->setProperty("InputWorkspace", monWS);
             getei->setProperty("Monitor1Spec", eiMon1Spec);
             getei->setProperty("Monitor2Spec", eiMon2Spec);
             getei->setProperty("EnergyEstimate", eiGuess);
