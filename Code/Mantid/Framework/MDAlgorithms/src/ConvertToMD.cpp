@@ -117,7 +117,10 @@ ConvertToMD::init()
      std::vector<std::string> QScales = QScl.getQScalings();
      declareProperty("QConversionScales",QScales[CnvrtToMD::NoScaling], boost::make_shared<StringListValidator>(QScales),
        "This property to normalize three momentums obtained in ""Q3D"" mode.\n"
-       " See [[MD Transformation factory]] for description and available scaling modes.");
+       " See [[MD Transformation factory]] for description and available scaling modes.\n"
+       " The value can be modified depending on the target coordinate system. (labFrame,CrystalFrame or Notional Coordinates||HKL frame ).\n"
+       " The target coordinate system is defined by Goniometer and UB matrix settings attached to the workspace.\n"
+       " See MD Transformation factory for more details about this.");
      
     declareProperty(new ArrayProperty<std::string>("OtherDimensions",Direction::Input),
         " List(comma separated) of additional to Q and DeltaE variables which form additional (orthogonal) to Q dimensions"
