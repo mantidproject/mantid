@@ -60,15 +60,29 @@ namespace
 void export_FrameworkManager()
 {
   class_<FrameworkManagerImpl,boost::noncopyable>("FrameworkManagerImpl", no_init)
+    .def("setNumOMPThreadsToConfigValue", &FrameworkManagerImpl::setNumOMPThreadsToConfigValue,
+         "Sets the number of OpenMP threads to the value specified in the config file")
+
+     .def("setNumOMPThreads", &FrameworkManagerImpl::setNumOMPThreads,
+         "Set the number of OpenMP threads to the given value")
+
+     .def("getNumOMPThreads", &FrameworkManagerImpl::getNumOMPThreads,
+         "Returns the number of OpenMP threads that will be used.")
+
     .def("clear", &FrameworkManagerImpl::clear, "Clear all memory held by Mantid")
+
     .def("clearAlgorithms", &FrameworkManagerImpl::clearAlgorithms, "Clear memory held by algorithms (does not include workspaces)")
+
     .def("clearData", &FrameworkManagerImpl::clearData, "Clear memory held by the data service (essentially all workspaces, including hidden)")
+
     .def("clearInstruments", &FrameworkManagerImpl::clearInstruments, "Clear memory held by the cached instruments")
+
     // NOTE: This differs from the C++ FrameworkManager::createAlgorithm to ensure consistency when called within Python
     .def("createAlgorithm", &createAlgorithm, 
          create_overloads((arg("name"), arg("version")), "Creates and initializes an algorithm of the "
                           "given name and version. If this called from within a Python algorithm "
                           "an unmanaged algorithm is created otherwise it will be a managed algorithm"))
+
     .def("Instance", &FrameworkManager::Instance, return_value_policy<reference_existing_object>(),
          "Returns a reference to the FrameworkManager singleton")
     .staticmethod("Instance")

@@ -205,8 +205,6 @@ public:
   /// True if the algorithm is running.
   bool isRunning(){return m_running;}
 
-  void getOpenMPCores();
-
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver& observer)const;
 

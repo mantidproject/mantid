@@ -11,6 +11,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/Memory.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <cstdarg>
 #include <napi.h>
 
@@ -58,34 +59,9 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
   _set_output_format(_TWO_DIGIT_EXPONENT);
 #endif
 
-  Kernel::ConfigServiceImpl& config = Kernel::ConfigService::Instance();
-  // Load plugin libraries if possible
-  std::string pluginDir = config.getString("plugins.directory");
-  if (pluginDir.length() > 0)
-  {
-    Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
-  }
-  // Load Paraview plugin libraries if possible
-  if(config.quickParaViewCheck())
-  {
-    const std::string pvPluginDir = config.getString("pvplugins.directory");
-    if (pvPluginDir.length() > 0)
-    {
-      this->g_log.debug("Loading PV plugin libraries");
-      Mantid::Kernel::LibraryManager::Instance().OpenAllLibraries(pvPluginDir, false);
-    }
-    else
-    {
-      this->g_log.notice("No PV plugin library directory");
-    }
-  }
-  else
-  {
-    this->g_log.debug("Cannot load paraview libraries");
-  }
-
-  // Disable reporting errors from Nexus (they clutter up the output).
-  NXMSetError(NULL, NexusErrorFunction);
+  loadAllPlugins();
+  disableNexusOutput();
+  setNumOMPThreadsToConfigValue();
 
   g_log.debug() << "FrameworkManager created." << std::endl;
 }
@@ -94,6 +70,7 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
 FrameworkManagerImpl::~FrameworkManagerImpl()
 {
 }
+
 
 /**
  * Set the global locale for all C++ stream operations to use simple ASCII characters.
@@ -108,6 +85,81 @@ void FrameworkManagerImpl::setGlobalLocaleToAscii()
   // translating from string->numeral values. One example is floating-point interpretation in 
   // German where a comma is used instead of a period.
   std::locale::global(std::locale::classic());
+}
+
+/**
+ * Attempts to load the dynamic library plugins
+ */
+void FrameworkManagerImpl::loadAllPlugins()
+{
+  loadPluginsUsingKey("plugins.directory");
+  // Load Paraview plugin libraries if possible
+  if(Kernel::ConfigService::Instance().quickParaViewCheck())
+  {
+    loadPluginsUsingKey("pvplugins.directory");
+  }
+  else
+  {
+    this->g_log.debug("Cannot load ParaView libraries");
+  }
+}
+
+/**
+ * Load a set of plugins from the path pointed to by the given config key
+ * @param key :: A string containing a key to lookup in the ConfigService
+ */
+void FrameworkManagerImpl::loadPluginsUsingKey(const std::string & key)
+{
+  Kernel::ConfigServiceImpl& config = Kernel::ConfigService::Instance();
+  std::string pluginDir = config.getString(key);
+  if (pluginDir.length() > 0)
+  {
+    this->g_log.debug("Loading libraries from \"" + pluginDir + "\"");
+    Kernel::LibraryManager::Instance().OpenAllLibraries(pluginDir, false);
+  }
+  else
+  {
+    this->g_log.debug("No library directory found in key \"" + key + "\"");
+  }
+}
+
+/// Silence NeXus output
+void FrameworkManagerImpl::disableNexusOutput()
+{
+  NXMSetError(NULL, NexusErrorFunction);
+}
+
+/**
+ * Set the number of OpenMP cores to use based on the config value
+ */
+void FrameworkManagerImpl::setNumOMPThreadsToConfigValue()
+{
+  // Set the number of threads to use for this process
+  int maxCores(0);
+  int retVal = Kernel::ConfigService::Instance().getValue("MultiThreaded.MaxCores", maxCores);
+  if(retVal > 0 && maxCores > 0)
+  {
+    setNumOMPThreads(maxCores);
+  }
+}
+
+/**
+ * Set the number of OpenMP cores to use based on the config value
+ * @param nthreads :: The maximum number of threads to use
+ */
+void FrameworkManagerImpl::setNumOMPThreads(const int nthreads)
+{
+  g_log.debug() << "Setting maximum number of threads to " << nthreads << "\n";
+  PARALLEL_SET_NUM_THREADS(nthreads);
+}
+
+/**
+ * Returns the number of OpenMP threads that will be used
+ * @returns The number of OpenMP threads that will be used in the next parallel call
+ */
+int FrameworkManagerImpl::getNumOMPThreads() const
+{
+  return PARALLEL_GET_MAX_THREADS;
 }
 
 /** Clears all memory associated with the AlgorithmManager
