@@ -59,7 +59,7 @@ namespace Geometry
   : pDoc(NULL), pRootElem(NULL),
       hasParameterElement_beenSet(false),
       m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0),
-      m_indirectPositions(false), m_xmlFile(boost::make_shared<IDFObject>("")), m_cacheFile(boost::make_shared<IDFObject>("")),
+       m_xmlFile(boost::make_shared<IDFObject>("")), m_indirectPositions(false), m_cacheFile(boost::make_shared<IDFObject>("")),
       m_cachingOption(NoneApplied)
   {
   }
