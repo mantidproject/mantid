@@ -518,8 +518,8 @@ public:
     EXPECT_CALL(*mockIDF, exists()).WillRepeatedly(Return(true));
     EXPECT_CALL(*mockCache, exists()).WillRepeatedly(Return(true));
 
-    const Poco::Timestamp smallerTime = Poco::Timestamp::fromFileTimeNP(0, 1);
-    const Poco::Timestamp largerTime = Poco::Timestamp::fromFileTimeNP(0, 2);
+    const Poco::Timestamp smallerTime = 0;
+    const Poco::Timestamp largerTime = smallerTime + 1;
 
     EXPECT_CALL(*mockIDF, getLastModified()).WillOnce(Return(smallerTime)); 
     EXPECT_CALL(*mockCache, getLastModified()).WillOnce(Return(largerTime)); // Mock expectation set such that Cache file modified created most recently, so SHOULD be used.
@@ -551,11 +551,11 @@ public:
     EXPECT_CALL(*mockIDF, exists()).WillRepeatedly(Return(true));
     EXPECT_CALL(*mockCache, exists()).WillRepeatedly(Return(true));
 
-    const Poco::Timestamp smallerTime = Poco::Timestamp::fromFileTimeNP(0, 1);
-    const Poco::Timestamp largerTime = Poco::Timestamp::fromFileTimeNP(0, 2);
+    const Poco::Timestamp smallerTime = 0;
+    const Poco::Timestamp largerTime = smallerTime + 1;
 
-    EXPECT_CALL(*mockIDF, getLastModified()).WillOnce(Return(largerTime)); // Mock expectation set up so that IDF will appear newer than cache file.
-    EXPECT_CALL(*mockCache, getLastModified()).WillOnce(Return(smallerTime)); 
+    EXPECT_CALL(*mockIDF, getLastModified()).WillRepeatedly(Return(largerTime)); // Mock expectation set up so that IDF will appear newer than cache file.
+    EXPECT_CALL(*mockCache, getLastModified()).WillRepeatedly(Return(smallerTime)); 
 
     IDFObject_const_sptr idf(mockIDF);
     IDFObject_const_sptr cache(mockCache);
@@ -571,7 +571,7 @@ public:
 
   void testReadFromCacheInTempDirectory()
   {
-    const time_t tAtStart = std::time(NULL); // create an early timestamp for use later.
+    const time_t tAtStart = 0; // create an early timestamp for use later.
     const bool put_vtp_in_instrument_directory = false;
     IDFEnvironment instrumentEnv = create_idf_and_vtp_pair(put_vtp_in_instrument_directory);
     
@@ -652,6 +652,11 @@ public:
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::WroteCacheTemp, parser.getAppliedCachingOption()); // Check that the TEMP cache file was used.
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockIDF));
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockCache));
+
+    Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
+    path.append(instrumentEnv._instName + ".vtp");
+   
+    remove( path.toString().c_str() );
   }
 
 };
