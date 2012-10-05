@@ -867,6 +867,26 @@ namespace DataObjects
     this->events.reserve(num);
   }
 
+
+  // ---------------------------------------------------------
+  /** Lock access to the data so that it does not get deleted while reading.
+   * Call this BEFORE readY() and readE().
+   */
+  void EventList::lockData() const
+  {
+    m_lockedMRU = true;
+  }
+
+  /** Unlock access to the data so that it can again get deleted.
+   * Call this once you are done with using the Y or E data.
+   */
+  void EventList::unlockData() const
+  {
+    m_lockedMRU = false;
+  }
+
+
+
   // ==============================================================================================
   // --- Sorting functions -----------------------------------------------------
   // ==============================================================================================

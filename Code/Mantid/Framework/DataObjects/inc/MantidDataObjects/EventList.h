@@ -218,6 +218,9 @@ public:
   void clear(const bool removeDetIDs=true);
   void clearUnused();
 
+  void lockData() const;
+  void unlockData() const;
+
   void setMRU(EventWorkspaceMRU * newMRU);
 
   EventWorkspaceMRU * getMRU();
