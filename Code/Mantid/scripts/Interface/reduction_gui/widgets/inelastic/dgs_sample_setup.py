@@ -122,6 +122,7 @@ class SampleSetupWidget(BaseWidget):
         self._content.et_is_distribution_cb.setChecked(state.et_is_distribution)
         self._content.hardmask_edit.setText(state.hardmask_file)
         self._content.grouping_edit.setText(state.grouping_file)
+        self._content.keep_workspaces_cb.setChecked(state.keep_workspaces)
     
     def get_state(self):
         """
@@ -142,5 +143,6 @@ class SampleSetupWidget(BaseWidget):
         s.et_range_high = self._content.etr_high_edit.text()
         s.et_is_distribution = self._content.et_is_distribution_cb.isChecked()
         s.hardmask_file = self._content.hardmask_edit.text()
-        s.grouping_file = self._content.grouping_edit.text()    
+        s.grouping_file = self._content.grouping_edit.text()   
+        s.keep_workspaces = self._content.keep_workspaces_cb.isChecked() 
         return s

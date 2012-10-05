@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/inelastic/dgs_sample_setup.ui'
 #
-# Created: Tue Sep 25 12:04:50 2012
+# Created: Fri Oct  5 16:28:23 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -252,8 +252,16 @@ class Ui_Frame(object):
         spacerItem10 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem10)
         self.verticalLayout_3.addLayout(self.horizontalLayout_5)
-        spacerItem11 = QtGui.QSpacerItem(20, 242, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_3.addItem(spacerItem11)
+        self.horizontalLayout_11 = QtGui.QHBoxLayout()
+        self.horizontalLayout_11.setObjectName(_fromUtf8("horizontalLayout_11"))
+        self.keep_workspaces_cb = QtGui.QCheckBox(Frame)
+        self.keep_workspaces_cb.setObjectName(_fromUtf8("keep_workspaces_cb"))
+        self.horizontalLayout_11.addWidget(self.keep_workspaces_cb)
+        spacerItem11 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_11.addItem(spacerItem11)
+        self.verticalLayout_3.addLayout(self.horizontalLayout_11)
+        spacerItem12 = QtGui.QSpacerItem(20, 242, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_3.addItem(spacerItem12)
 
         self.retranslateUi(Frame)
         QtCore.QMetaObject.connectSlotsByName(Frame)
@@ -284,4 +292,5 @@ class Ui_Frame(object):
         self.hardmask_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.grouping_label.setText(QtGui.QApplication.translate("Frame", "Grouping", None, QtGui.QApplication.UnicodeUTF8))
         self.grouping_browse.setText(QtGui.QApplication.translate("Frame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
+        self.keep_workspaces_cb.setText(QtGui.QApplication.translate("Frame", "Keep Intermediate Workspaces", None, QtGui.QApplication.UnicodeUTF8))
 

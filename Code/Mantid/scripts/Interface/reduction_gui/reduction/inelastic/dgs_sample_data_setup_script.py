@@ -27,6 +27,7 @@ class SampleSetupScript(BaseScriptElement):
     et_is_distribution = True
     hardmask_file = ""
     grouping_file = ""
+    keep_workspaces = False
     
     def __init__(self):
         super(SampleSetupScript, self).__init__()
@@ -67,6 +68,8 @@ class SampleSetupScript(BaseScriptElement):
             script += "HardMaskFile=\"%s\",\n" % self.hardmask_file
         if self.grouping_file != SampleSetupScript.grouping_file:
             script += "GroupingFile=\"%s\",\n" % self.grouping_file
+        if self.keep_workspaces:
+            script += "KeepIntermediateWorkspaces=%s,\n" % self.keep_workspaces
         return script
         
     def to_xml(self):
@@ -91,6 +94,7 @@ class SampleSetupScript(BaseScriptElement):
         xml += "  <sofphie_is_distribution>%s</sofphie_is_distribution>\n" % str(self.et_is_distribution)
         xml += "  <hardmask_file>%s</hardmask_file>\n" % self.hardmask_file
         xml += "  <grouping_file>%s</grouping_file>\n" % self.grouping_file
+        xml += "  <keep_workspaces>%s</keep_workspaces>\n" % self.keep_workspaces
         xml += "</SampleSetup>\n"
         return xml
     
@@ -148,6 +152,9 @@ class SampleSetupScript(BaseScriptElement):
             self.grouping_file = BaseScriptElement.getStringElement(instrument_dom,
                                                                     "grouping_file",
                                                                     default=SampleSetupScript.grouping_file)
+            self.keep_workspaces = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                    "keep_workspaces",
+                                                                    default=SampleSetupScript.keep_workspaces)
 
     def reset(self):
         """
@@ -169,4 +176,5 @@ class SampleSetupScript(BaseScriptElement):
         self.et_is_distribution = SampleSetupScript.et_is_distribution
         self.hardmask_file = SampleSetupScript.hardmask_file
         self.grouping_file = SampleSetupScript.grouping_file
+        self.keep_workspaces = SampleSetupScript.keep_workspaces
         
