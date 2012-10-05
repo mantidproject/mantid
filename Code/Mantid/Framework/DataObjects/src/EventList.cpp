@@ -26,6 +26,9 @@ namespace DataObjects
   using Kernel::DateAndTime;
   using namespace Mantid::API;
 
+  /// The number of events to split for parallel sorting.
+  const size_t NUM_EVENTS_PARALLEL_THRESHOLD(5e5);
+
   //==========================================================================
   /// --------------------- TofEvent Comparators ----------------------------------
   //==========================================================================
@@ -1952,10 +1955,10 @@ namespace DataObjects
     // All types of weights need to be sorted by TOF
 
     size_t numEvents = getNumberEvents();
-    if (numEvents > 5e5 && PARALLEL_GET_MAX_THREADS >= 4)
+    if (numEvents > NUM_EVENTS_PARALLEL_THRESHOLD && PARALLEL_GET_MAX_THREADS >= 4)
       // Four-core sort
       this->sortTof4();
-    else if (numEvents > 5e5 && PARALLEL_GET_MAX_THREADS >= 2)
+    else if (numEvents > NUM_EVENTS_PARALLEL_THRESHOLD && PARALLEL_GET_MAX_THREADS >= 2)
       // Two-core sort
       this->sortTof2();
     else
