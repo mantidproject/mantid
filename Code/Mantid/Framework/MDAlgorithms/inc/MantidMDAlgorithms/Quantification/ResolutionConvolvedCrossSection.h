@@ -71,10 +71,6 @@ namespace Mantid
 
       /// Evaluate the function across the domain
       void function(const API::FunctionDomain& domain, API::FunctionValues& values)const;
-
-      void evaluate(const API::IMDIterator & box, API::FunctionValues& resultValues, size_t & resultValueIndex)const;
-
-
       /// Return the signal contribution for the given box
       double functionMD(const API::IMDIterator & box) const;
 
@@ -86,6 +82,9 @@ namespace Mantid
 
       /// A pointer to the MD event workspace providing the data
       API::IMDEventWorkspace_const_sptr m_workspace;
+      /// Store the number of threads that will be used to ensure consistency across function calls
+      int m_nthreads;
+
       /// A reference to the logger
       static Kernel::Logger & g_log;
     };

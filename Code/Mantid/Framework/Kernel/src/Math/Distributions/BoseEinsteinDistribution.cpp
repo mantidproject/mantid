@@ -29,7 +29,7 @@ namespace Mantid {  namespace Kernel
      */
     double BoseEinsteinDistribution::n(const double energy, const double temperature)
     {
-      static const double kbT = PhysicalConstants::BoltzmannConstant*temperature;
+      const double kbT = PhysicalConstants::BoltzmannConstant*temperature;
       if(std::abs(temperature) < ZERO_EPS)
         throwDomainError("BoseEinsteinDistribution::n - Temperature very small, function not well behaved", temperature);
 
@@ -98,7 +98,7 @@ namespace Mantid {  namespace Kernel
         else
         {
           // Taylor series coefficients
-          static const double by2(0.5), by6(1.0/6.0), by60(1.0/60.0),
+          const double by2(0.5), by6(1.0/6.0), by60(1.0/60.0),
               by42(1.0/42.0), by40(1.0/40.0);
           const double ysqr = y*y;
           return 1.0 + by2*y*( 1.0 + by6*y*( 1.0 - by60*ysqr*(1.0-by42*ysqr*(1.0 - by40*ysqr ))));

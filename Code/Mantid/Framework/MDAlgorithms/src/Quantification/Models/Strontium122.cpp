@@ -34,7 +34,8 @@ namespace Mantid
 
     Strontium122::Strontium122()
       : m_formFactorTable(500, PhysicalConstants::getMagneticIon("Fe", 2), /*J*/0, /*L*/0)
-    {}
+    {
+    }
 
     /**
      * Declares the parameters that should participate in fitting
@@ -109,7 +110,7 @@ namespace Mantid
         ub21 += gr[2][i]*ub[i][1];
         ub22 += gr[2][i]*ub[i][2];
       }
-      static const double twoPi = 2.*M_PI;
+      const double twoPi = 2.*M_PI;
       // 2pi*determinant. The tobyFit definition of rl vector has extra 2pi factor in it
       const double twoPiDet= twoPi*(ub00*(ub11*ub22 - ub12*ub21) -
                                     ub01*(ub10*ub22 - ub12*ub20) +
@@ -123,7 +124,7 @@ namespace Mantid
       double bstar = twoPi*lattice.b2(); //arlu(2)
       double cstar = twoPi*lattice.b3(); //arlu(3)
       
-      // Transform from Mantidto TF coordinates
+      // Transform from Mantid to TF coordinates
       std::swap(qh,ql);
       std::swap(astar,cstar);
       std::swap(qk,ql);
@@ -143,6 +144,10 @@ namespace Mantid
       const double sk_c = sk_ab;
       const double gam = eps*getCurrentParameterValue(GammaSlope);
 
+      // Avoid doing some multiplication twice
+      const double fourGammaEpsSqr = 4.0*std::pow((gam*eps), 2);
+      const double fourGammaBose = 4.0*gam*boseFactor;
+
       double weight(0.0);
       if(m_twinType >= 0) // add weight of notional crystal orientation
       {
@@ -156,9 +161,8 @@ namespace Mantid
         const double wdisp2sqr = std::abs(a_qsqr - std::pow(d_q-c_anis,2));
         const double wdisp2 = std::sqrt(wdisp2sqr);
 
-        const double fourGammaEpsSqr = 4.0*std::pow((gam*eps), 2);
-        const double wt1 = boseFactor*(4.0*gam*wdisp1)/(M_PI*(std::pow(epssqr - wdisp1sqr,2) + fourGammaEpsSqr));
-        const double wt2 = boseFactor*(4.0*gam*wdisp2)/(M_PI*(std::pow(epssqr - wdisp2sqr,2) + fourGammaEpsSqr));
+        const double wt1 = fourGammaBose*wdisp1/(M_PI*(std::pow(epssqr - wdisp1sqr,2) + fourGammaEpsSqr));
+        const double wt2 = fourGammaBose*wdisp2/(M_PI*(std::pow(epssqr - wdisp2sqr,2) + fourGammaEpsSqr));
         const double s_yy = s_eff*((a_q-d_q-c_anis)/wdisp1)*wt1;
         const double s_zz = s_eff*((a_q-d_q+c_anis)/wdisp2)*wt2;
 
@@ -178,9 +182,8 @@ namespace Mantid
         const double wdisp2sqr = std::abs(a_qsqr - std::pow(d_q-c_anis,2));
         const double wdisp2 = std::sqrt(wdisp2sqr);
 
-        const double fourGammaEpsSqr = 4.0*std::pow((gam*eps), 2);
-        const double wt1 = boseFactor*(4.0*gam*wdisp1)/(M_PI*(std::pow(epssqr - wdisp1sqr,2) + fourGammaEpsSqr));
-        const double wt2 = boseFactor*(4.0*gam*wdisp2)/(M_PI*(std::pow(epssqr - wdisp2sqr,2) + fourGammaEpsSqr));
+        const double wt1 = fourGammaBose*wdisp1/(M_PI*(std::pow(epssqr - wdisp1sqr,2) + fourGammaEpsSqr));
+        const double wt2 = fourGammaBose*wdisp2/(M_PI*(std::pow(epssqr - wdisp2sqr,2) + fourGammaEpsSqr));
         const double s_yy = s_eff*((a_q-d_q-c_anis)/wdisp1)*wt1;
         const double s_zz = s_eff*((a_q-d_q+c_anis)/wdisp2)*wt2;
 
@@ -191,7 +194,6 @@ namespace Mantid
       {
         weight *= eps;
       }
-
       return weight;
     }
   }

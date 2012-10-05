@@ -3,6 +3,7 @@
 #include "MantidMDAlgorithms/Quantification/Resolution/ModeratorChopperResolution.h"
 #include "MantidMDAlgorithms/Quantification/CachedExperimentInfo.h"
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/SobolSequence.h"
@@ -34,12 +35,13 @@ namespace Mantid
      * Default constructor
      */
     TobyFitResolutionModel::TobyFitResolutionModel()
-      : MDResolutionConvolution(), m_randGen(new Kernel::SobolSequence(TobyFitYVector::requiredRandomNums() + 2)), // Extra 2 for mosaic
+      : MDResolutionConvolution(), m_randGen(),
         m_activeAttrValue(1),
         m_mcLoopMin(100), m_mcLoopMax(1000), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
         m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
         m_exptCache()
     {
+      setNThreads(API::FrameworkManager::Instance().getNumOMPThreads());
     }
 
     /**
@@ -49,12 +51,13 @@ namespace Mantid
      */
     TobyFitResolutionModel::TobyFitResolutionModel(const API::IFunctionMD & fittedFunction,
                                                                      const std::string & fgModel)
-      : MDResolutionConvolution(fittedFunction, fgModel), m_randGen(new Kernel::SobolSequence(TobyFitYVector::variableCount())),
+      : MDResolutionConvolution(fittedFunction, fgModel), m_randGen(),
         m_activeAttrValue(1),
         m_mcLoopMin(100), m_mcLoopMax(1000), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
         m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
         m_exptCache()
     {
+      setNThreads(API::FrameworkManager::Instance().getNumOMPThreads());
     }
 
     /**
@@ -89,8 +92,10 @@ namespace Mantid
       // Calculate the matrix of coefficients that contribute to the resolution function (the B matrix in TobyFit).
       calculateResolutionCoefficients(detCachedExperimentInfo, qOmega);
 
-      // Start MC loop and check the relative error every
-      // min steps
+      // Start MC loop and check the relative error every min steps
+      // The random number generator is restarted to ensure each pixel
+      // is computed using the same set of values
+      m_randGen[PARALLEL_THREAD_NUMBER]->restart();
       double sumSigma(0.0), sumSigmaSqr(0.0), avgSigma(0.0);
       for(int step = 1; step <= m_mcLoopMax; ++step)
       {
@@ -125,8 +130,14 @@ namespace Mantid
      * @param nthreads :: The maximum number of threads that will be used to evaluate the
      * function
      */
-    void TobyFitResolutionModel::useNumberOfThreads(const int nthreads)
+    void TobyFitResolutionModel::setNThreads(const int nthreads)
     {
+      m_randGen = std::vector<Kernel::NDRandomNumberGenerator*>(nthreads, NULL);
+      for(auto it = m_randGen.begin(); it != m_randGen.end(); ++it)
+      {
+        (*it) = new Kernel::SobolSequence(TobyFitYVector::requiredRandomNums() + 2); // Extra 2 for mosaic
+      }
+
       m_bmatrix = std::vector<TobyFitBMatrix>(nthreads, TobyFitBMatrix());
       m_yvector = std::vector<TobyFitYVector>(nthreads, TobyFitYVector());
       m_etaInPlane = std::vector<double>(nthreads, 0.0);
@@ -163,16 +174,6 @@ namespace Mantid
       while(iterator->next());
       g_log.debug() << "Done preprocessing loop:" << timer.elapsed() << " seconds\n";
       delete iterator;
-    }
-
-    /**
-     * Resets the random number generator ready for the next call.
-     * This ensures that each evaluation of the function during fitting gets the
-     * same set of random numbers
-     */
-    void TobyFitResolutionModel::functionEvalFinished() const
-    {
-      m_randGen->restart();
     }
 
     /**
@@ -252,7 +253,7 @@ namespace Mantid
     void TobyFitResolutionModel::generateIntegrationVariables(const CachedExperimentInfo & observation,
                                       const QOmegaPoint & eventPoint) const
     {
-      const std::vector<double> & randomNums = m_randGen->nextPoint();
+      const std::vector<double> & randomNums = m_randGen[PARALLEL_THREAD_NUMBER]->nextPoint();
       const size_t nvars = m_yvector[PARALLEL_THREAD_NUMBER].recalculate(randomNums, observation, eventPoint);
 
       // Calculate crystal mosaic contribution
@@ -260,8 +261,8 @@ namespace Mantid
       {
         const double & r1 = randomNums[nvars];
         const double & r2 = randomNums[nvars+1];
-        static const double small(1e-20);
-        static const double fwhhToStdDev = M_PI/180./std::sqrt(log(256.0)); // degrees FWHH -> st.dev. in radians
+        const double small(1e-20);
+        const double fwhhToStdDev = M_PI/180./std::sqrt(log(256.0)); // degrees FWHH -> st.dev. in radians
 
         const double prefactor = std::sqrt(-2.0*std::log(std::max(r1,small)));
         const double etaSig = observation.experimentInfo().run().getLogAsSingleValue("eta_sigma")*fwhhToStdDev;
@@ -340,7 +341,7 @@ namespace Mantid
         const double qx(qOmega.qx + deltaQE[1]),qy(qOmega.qy + deltaQE[2]),qz(qOmega.qz + deltaQE[0]);
         const double qipmodSq = qy*qy + qz*qz;
         const double qmod = std::sqrt(qx*qx + qipmodSq);
-        static const double small(1e-10);
+        const double small(1e-10);
         if(qmod > small)
         {
           const double qipmod = std::sqrt(qipmodSq);
@@ -392,7 +393,7 @@ namespace Mantid
     bool TobyFitResolutionModel::hasConverged(const int step, const double sumSigma,
                                                        const double sumSigmaSqr, const double avgSigma) const
     {
-      static const double smallValue(1e-10);
+      const double smallValue(1e-10);
       const double error = std::sqrt(std::fabs((sumSigmaSqr/step) - std::pow(sumSigma/step, 2))/step);
       if(std::fabs(avgSigma) > smallValue)
       {

@@ -24,7 +24,7 @@ m_currentIndex(0),
 m_justReset(true),
 m_workspace(ws)
 {
-  size_t dataSize = ws->getNPoints();
+  size_t dataSize = m_iterator->getDataSize();
   m_size = length == 0 ?  dataSize: length;
   if (start >= dataSize)
   {

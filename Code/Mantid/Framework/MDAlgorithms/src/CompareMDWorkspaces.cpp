@@ -93,7 +93,7 @@ namespace MDAlgorithms
   {
     declareProperty(new WorkspaceProperty<IMDWorkspace>("Workspace1","",Direction::Input),
         "First MDWorkspace to compare.");
-    declareProperty(new WorkspaceProperty<IMDWorkspace>("Workspace2","",Direction::Output),
+    declareProperty(new WorkspaceProperty<IMDWorkspace>("Workspace2","",Direction::Input),
         "Second MDWorkspace to compare.");
 
     declareProperty("Tolerance",0.0,

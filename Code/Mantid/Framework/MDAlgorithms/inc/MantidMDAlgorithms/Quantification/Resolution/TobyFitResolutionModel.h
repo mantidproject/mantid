@@ -84,12 +84,10 @@ namespace Mantid
     private:
       DISABLE_COPY_AND_ASSIGN(TobyFitResolutionModel);
 
-      /// Informs the function how many threads will be processing it
-      void useNumberOfThreads(const int nthreads);
-      /// Cache detector observations once when the workspac is set
+      /// Set up the calculator for the given number of threads
+      void setNThreads(const int nthreads);
+      /// Cache detector observations once when the workspace is set
       void preprocess(const API::IMDEventWorkspace_const_sptr & workspace);
-      /// Resets the random number generator ready for the next call
-      void functionEvalFinished() const;
 
       /// Declare function attributes
       void declareAttributes();
@@ -121,7 +119,7 @@ namespace Mantid
       void function(const Mantid::API::FunctionDomain&, Mantid::API::FunctionValues&) const {}
 
       /// A random number generator
-      mutable Kernel::NDRandomNumberGenerator *m_randGen;
+      mutable std::vector<Kernel::NDRandomNumberGenerator*> m_randGen;
       /// The value to mark an attribute as active
       int m_activeAttrValue;
       /// Check for convergence after loop min number of steps

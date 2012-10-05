@@ -6,20 +6,24 @@
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
 
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/CPUTimer.h"
 
 /// Parallel region start macro. Different to generic one as that is specific to algorithms
 /// Assumes boolean exceptionThrow has been declared
-#define PARALLEL_LOOP_BEGIN \
+#define OMP_FOR_NO_CHECK \
+  PRAGMA(omp parallel for)
+
+#define OMP_START_INTERRUPT \
     if (!exceptionThrown && !this->cancellationRequestReceived()) \
     { \
       try \
       {
 
 /// Parallel region end macro. Different to generic one as that is specific to algorithms
-#define PARALLEL_LOOP_END \
+#define OMP_END_INTERRUPT \
       } \
       catch(std::exception &ex) \
       { \
@@ -36,7 +40,7 @@
     }
 
 /// Check for exceptions in parallel region
-#define PARALLEL_LOOP_CHECK \
+#define OMP_INTERRUPT_CHECK \
   if (exceptionThrown) \
   { \
     g_log.debug("Exception thrown in parallel region"); \
@@ -66,7 +70,8 @@ namespace Mantid
      * Constructor
      */
     ResolutionConvolvedCrossSection::ResolutionConvolvedCrossSection()
-      : ParamFunctionAttributeHolder(), IFunctionMD(), m_convolution(NULL), m_workspace()
+      : ParamFunctionAttributeHolder(), IFunctionMD(), m_convolution(NULL), m_workspace(),
+        m_nthreads(API::FrameworkManager::Instance().getNumOMPThreads())
     {
     }
 
@@ -118,7 +123,7 @@ namespace Mantid
 
     /**
      * Override the call to set the workspace here to store it so we can access it throughout the evaluation
-     * @param workspace
+     * @param workspace :: A workspace containing the instrument definition
      */
     void ResolutionConvolvedCrossSection::setWorkspace(boost::shared_ptr<const API::Workspace> workspace)
     {
@@ -130,7 +135,6 @@ namespace Mantid
         throw std::invalid_argument("ResolutionConvolvedCrossSection can only be used with MD event workspaces");
       }
       IFunctionMD::setWorkspace(workspace);
-      m_convolution->useNumberOfThreads(PARALLEL_GET_MAX_THREADS);
       m_convolution->preprocess(m_workspace);
     }
 
@@ -149,46 +153,48 @@ namespace Mantid
     }
 
 
-    void ResolutionConvolvedCrossSection::function(const API::FunctionDomain&, API::FunctionValues& values) const
+    void ResolutionConvolvedCrossSection::function(const API::FunctionDomain& domain, API::FunctionValues& values) const
     {
-      m_convolution->functionEvalStarting();
-
-      auto iter = m_workspace->createIterator();
-      size_t resultValueIndex(0);
-      do
+      const API::FunctionDomainMD* domainMD = dynamic_cast<const API::FunctionDomainMD*>(&domain);
+      if (!domainMD)
       {
-        evaluate(*iter, values, resultValueIndex);
+        throw std::invalid_argument("Expected FunctionDomainMD in ResolutionConvolvedCrossSection");
       }
-      while(iter->next());
-      delete iter;
 
-      m_convolution->functionEvalFinished();
-    }
+      std::vector<API::IMDIterator*> iterators = m_workspace->createIterators(m_nthreads);
+      const int nthreads = static_cast<int>(iterators.size());
 
-    void ResolutionConvolvedCrossSection::evaluate(const API::IMDIterator & box, API::FunctionValues& resultValues, size_t & resultValueIndex)const
-    {
-      assert(m_convolution);
-      const int64_t numEvents = static_cast<int64_t>(box.getNumEvents());
-      if(numEvents == 0) return;
-
-      bool exceptionThrown(false);
-      PARALLEL_FOR_NO_WSP_CHECK()
-      for(int64_t j = 0; j < numEvents; ++j)
+      bool exceptionThrown = false;
+      OMP_FOR_NO_CHECK
+      for(int i = 0; i < nthreads; ++i)
       {
-        PARALLEL_LOOP_BEGIN
+        API::IMDIterator *boxIterator = iterators[i];
+        const size_t resultsOffset = i*(boxIterator->getDataSize());
 
-        const int64_t loopIndex = static_cast<int64_t>(j);
-        double contribution =  m_convolution->signal(box, box.getInnerRunIndex(loopIndex), loopIndex);
-        PARALLEL_CRITICAL(ResolutionConvolvedCrossSection_evaluate)
+        size_t boxIndex(0);
+        do
         {
-          resultValues.setCalculated(resultValueIndex, contribution);
-          ++resultValueIndex;
-        }
-        reportProgress();
+          OMP_START_INTERRUPT
 
-        PARALLEL_LOOP_END
+          const double avgSignal = functionMD(*boxIterator);
+          const size_t resultIndex = resultsOffset + boxIndex;
+          PARALLEL_CRITICAL(ResolutionConvolvedCrossSection_function)
+          {
+            values.setCalculated(resultIndex, avgSignal);
+          }
+          ++boxIndex;
+
+          OMP_END_INTERRUPT
+        }
+        while(boxIterator->next());
       }
-      PARALLEL_LOOP_CHECK
+      OMP_INTERRUPT_CHECK
+
+      for(auto it = iterators.begin(); it != iterators.end(); ++it)
+      {
+        API::IMDIterator *boxIterator = *it;
+        delete boxIterator;
+      }
     }
 
     /**
@@ -202,26 +208,16 @@ namespace Mantid
     double ResolutionConvolvedCrossSection::functionMD(const Mantid::API::IMDIterator& box) const
     {
       assert(m_convolution);
-      const int64_t numEvents = static_cast<int64_t>(box.getNumEvents());
+      const size_t numEvents = box.getNumEvents();
       if(numEvents == 0) return 0.0;
 
       double signal(0.0);
-      bool exceptionThrown(false);
-
-      PARALLEL_FOR_NO_WSP_CHECK()
-      for(int64_t j = 0; j < numEvents; ++j)
+      for(size_t j = 0; j < numEvents; ++j)
       {
-        PARALLEL_LOOP_BEGIN
-
-        const int64_t loopIndex = static_cast<int64_t>(j);
-        double contribution =  m_convolution->signal(box, box.getInnerRunIndex(loopIndex), loopIndex);
-        PARALLEL_ATOMIC
+        double contribution =  m_convolution->signal(box, box.getInnerRunIndex(j), j);
         signal += contribution;
         reportProgress();
-
-        PARALLEL_LOOP_END
       }
-      PARALLEL_LOOP_CHECK
 
       // Return the mean
       return signal/static_cast<double>(numEvents);

@@ -70,20 +70,7 @@ namespace Mantid
        */
       virtual void preprocess(const API::IMDEventWorkspace_const_sptr & workspace) { UNUSED_ARG(workspace); }
       /**
-       * Called once before any fit/simulation is started to tell the function how many threads will be used.
-       * Default does nothing.
-       */
-      virtual void useNumberOfThreads(const int) {}
-      /**
-       * Called immediately before the evaluation of the main function starts
-       */
-      virtual void functionEvalStarting() const {}
-      /**
-       * Called immediately after the evaluation of the main function finishes
-       */
-      virtual void functionEvalFinished() const {}
-      /**
-       * Returns the value of the cross-section convoluted with the resolution for an event
+       * Return the value of the cross-section convoluted with the resolution for an event
        * @param box :: An interator pointing at the current box under examination
        * @param innerRunIndex :: The index into the run for this workspace
        * @param eventIndex :: An index of the current pixel in the box
