@@ -87,7 +87,7 @@ public:
     TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 4);
   }
 
-  void test_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()
+  void xtest_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()
   {
     // How this works -> The fake convolution's signal member is
     // set up to throw an exception if the attribute still has
