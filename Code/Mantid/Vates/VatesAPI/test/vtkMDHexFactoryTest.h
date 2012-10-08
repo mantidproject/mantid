@@ -23,6 +23,7 @@ using namespace Mantid;
 using namespace Mantid::VATES;
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace testing;
 
 //=====================================================================================
