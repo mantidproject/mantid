@@ -85,7 +85,12 @@ from kernel import plugins as _plugins
 plugin_dirs = kernel.config['pythonalgorithms.directories'].split(";")
 plugin_files = []
 for directory in plugin_dirs:
-    plugin_files += _plugins.find_plugins(directory)
+    try:
+        if directory != '':
+            plugin_files += _plugins.find_plugins(directory)
+    except ValueError, exc:
+        logger.warning(str(exc))
+        continue
 
 # Mockup the full API first so that any Python algorithm module has something to import
 _simpleapi.mockup(plugin_files)

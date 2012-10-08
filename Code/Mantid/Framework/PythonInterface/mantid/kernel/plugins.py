@@ -40,9 +40,10 @@ class PluginLoader(object):
 def find_plugins(top_dir):
     """
        Searches recursively from the given directory to find the list of plugins that should be loaded
+       @param top_dir :: A string containing a path to a directory. Throws ValueError if it is not valid
     """
     if not _os.path.isdir(top_dir):
-        raise ValueError("Cannot search given path for plugins, path is not a directory: %s " % str(top_dir))
+        raise ValueError("Cannot search given path for plugins, path is not a directory: '%s' " % str(top_dir))
     plugins = []
     for root, dirs, files in _os.walk(top_dir):
         for f in files:
