@@ -207,6 +207,8 @@ public:
     explicit Attribute(const double& d):m_data(d){}
     /// Create bool attribute
     explicit Attribute(const bool& b):m_data(b){}
+    /// Create bool attribute
+    explicit Attribute(const char* c):m_data(std::string(c)), m_quoteValue(false){}
     /// Apply an attribute visitor
     template<typename T>
     T apply(AttributeVisitor<T>& v){return boost::apply_visitor(v,m_data);}
@@ -397,6 +399,7 @@ public:
   /// Set an attribute value
   template<typename T>
   void setAttributeValue(const std::string& attName,const T& value){setAttribute(attName,Attribute(value));}
+  void setAttributeValue(const std::string& attName,const char* value){setAttribute(attName,Attribute(std::string(value)));}
   //@}
 
   /// Set up the function for a fit.

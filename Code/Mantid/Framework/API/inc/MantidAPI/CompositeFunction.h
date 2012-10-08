@@ -190,6 +190,7 @@ public:
   virtual bool hasLocalAttribute(const std::string&)const {return false;}
   template<typename T>
   void setLocalAttributeValue(size_t i, const std::string& attName,const T& value){setLocalAttribute(i,attName,Attribute(value));}
+  void setLocalAttributeValue(size_t i, const std::string& attName,const char* value){setLocalAttribute(i,attName,Attribute(std::string(value)));}
 
 protected:
   /// Function initialization. Declare function parameters in this method.

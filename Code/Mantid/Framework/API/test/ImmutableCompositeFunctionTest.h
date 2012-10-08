@@ -303,7 +303,7 @@ public:
     icf.addTies("b2=b1,a2=a1/5");
     icf.applyTies();
 
-    TS_ASSERT_EQUALS( icf.asString(), "name=ImmutableCompositeFunctionTest_Function,a1=11,b1=12,a2=2.2,b2=12,ties=(a2=a1/5,b2=b1)" );
+    TS_ASSERT_EQUALS( icf.asString(), "name=ImmutableCompositeFunctionTest_Function,NumDeriv=false,a1=11,b1=12,a2=2.2,b2=12,ties=(a2=a1/5,b2=b1)" );
 
     auto fun = FunctionFactory::Instance().createInitialized( icf.asString() );
     TS_ASSERT( fun );
@@ -329,7 +329,7 @@ public:
     TS_ASSERT_EQUALS( icf.getParameter(2), 0.25 );
     TS_ASSERT_EQUALS( icf.getParameter(3), 1.0 );
 
-    TS_ASSERT_EQUALS( icf.asString(), "name=ImmutableCompositeFunctionTest_FunctionWithTies,a1=1,b1=2" );
+    TS_ASSERT_EQUALS( icf.asString(), "name=ImmutableCompositeFunctionTest_FunctionWithTies,NumDeriv=false,a1=1,b1=2" );
 
     auto fun = FunctionFactory::Instance().createInitialized( icf.asString() );
     TS_ASSERT( fun );
