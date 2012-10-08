@@ -40,7 +40,7 @@ namespace MDEvents
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
     this->setId( splitter->getNextId() );
-    data.reserve(splitter->getSplitThreshold()+1);
+    //data.reserve(splitter->getSplitThreshold()+1);
    }
 
   //-----------------------------------------------------------------------------------------------
@@ -61,7 +61,7 @@ namespace MDEvents
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
     this->setId( splitter->getNextId() );
-    data.reserve(splitter->getSplitThreshold()+1);
+    //data.reserve(splitter->getSplitThreshold()+1);
   }
 
 
