@@ -503,6 +503,7 @@ namespace Mantid
           if (box_type > 0)
           {
             MDBoxBase<MDE,nd> * ibox = NULL;
+            MDBox<MDE,nd> * box;
 
             // Extents of the box, as a vector
             std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector(nd);
@@ -515,38 +516,40 @@ namespace Mantid
             if (box_type == 1)
             {
               // --- Make a MDBox -----
-              MDBox<MDE,nd> * box = new MDBox<MDE,nd>(bc, depth[i], extentsVector);
-              ibox = box;
-
-              if (!BoxStructureOnly)
+              if(BoxStructureOnly)
               {
-                // Load the events now
-                uint64_t indexStart = box_event_index[i*2];
-                uint64_t numEvents = box_event_index[i*2+1];
-                // Save the index in the file in the box data
-                box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));
-
-                if (!FileBackEnd)
-                {
-                  // Load if NOT using the file as the back-end,
-                  box->loadNexus(file);
-                  box->setOnDisk(false);
-                  box->setInMemory(true);
-                }
-                else
-                {
-                  // Box is on disk and NOT in memory
-                  box->setOnDisk(true);
-                  box->setInMemory(false);
-                }
-              }
-              else
-              {
-                // Only the box structure is being loaded
+                box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,-1);
+               // Only the box structure is being loaded
                 box->setOnDisk(false);
                 box->setInMemory(true);
                 box->setFileIndex(0,0);
               }
+              else // !BoxStructureOnly)
+              {
+                // Load the events now
+                uint64_t indexStart = box_event_index[i*2];
+                uint64_t numEvents = box_event_index[i*2+1];
+
+                if(FileBackEnd)
+                {
+                  box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,-1);
+                  // Box is on disk and NOT in memory
+                  box->setOnDisk(true);
+                  box->setInMemory(false);
+
+                }
+                else
+                {
+                  box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,int64_t(numEvents));
+                  // Load if NOT using the file as the back-end,
+                  box->loadNexus(file);
+                  box->setOnDisk(false);
+                  box->setInMemory(true);
+                }           
+                // Save the index in the file in the box data
+                box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));                               
+              } // ifBoxStructureOnly
+              ibox = box;
             }
             else if (box_type == 2)
             {

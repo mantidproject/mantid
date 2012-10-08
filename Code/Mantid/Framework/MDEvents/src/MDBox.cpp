@@ -28,7 +28,7 @@ namespace MDEvents
    * @param splitter :: BoxController that controls how boxes split
    * @param depth :: splitting depth of the new box.
    */
-  TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth)
+  TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth,int64_t boxSize)
     : MDBoxBase<MDE, nd>(),
       m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
       m_fileIndexStart(0), m_fileNumEvents(0),
@@ -40,6 +40,9 @@ namespace MDEvents
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
     this->setId( splitter->getNextId() );
+    if(boxSize==0) data.reserve(splitter->getSplitThreshold()+1);
+    if(boxSize>0) data.reserve(boxSize);
+
     //data.reserve(splitter->getSplitThreshold()+1);
    }
 
@@ -49,7 +52,7 @@ namespace MDEvents
    * @param depth :: splitting depth of the new box.
    * @param extentsVector :: vector defining the extents
    */
-  TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+  TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector,int64_t boxSize)
       : MDBoxBase<MDE, nd>(extentsVector),
         m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
         m_fileIndexStart(0), m_fileNumEvents(0),
@@ -61,6 +64,8 @@ namespace MDEvents
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
     this->setId( splitter->getNextId() );
+    if(boxSize==0) data.reserve(splitter->getSplitThreshold()+1);
+    if(boxSize>0) data.reserve(boxSize);
     //data.reserve(splitter->getSplitThreshold()+1);
   }
 

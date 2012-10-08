@@ -41,9 +41,9 @@ namespace MDEvents
   public:
     MDBox();
 
-    MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth = 0);
+    MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth = 0,int64_t boxSize=0);
 
-    MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
+    MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector, int64_t boxSize=0);
 
     MDBox(const MDBox & other);
 
