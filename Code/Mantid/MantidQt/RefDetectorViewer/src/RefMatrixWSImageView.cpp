@@ -34,7 +34,7 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
     ws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wps_name.toStdString());
     
     double total_ymin = 0;
-    double total_ymax = 256;
+    double total_ymax = 255;
 
     std::vector<double> xaxis = ws->readX(0);
     int sz = xaxis.size();
@@ -42,11 +42,17 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
     double total_xmin = xaxis[0];
     double total_xmax = xaxis[sz-1];
     
-    //retrieve data now
-    std::vector<double> yaxis = ws->readY(256);
+    float *data = new float[total_ymax * sz];
     
-    std::cout << yaxis.size() << std::endl;
-    
+    for (int px=0; px<=total_xmax; px++)
+    {
+        //retrieve data now
+        std::vector<double> yaxis = ws->readY(px);
+        for (int tof=0; tof<=sz; tof++)
+        {
+            data[px*sz + tof] = yaxis[tof];
+        }
+    }
 
     
     
