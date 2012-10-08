@@ -331,6 +331,7 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
   {
     using namespace Mantid::API;
     using namespace Mantid::MDEvents;
+    using namespace Mantid::MDAlgorithms;
 
     Mantid::API::Workspace_sptr inputWs = createSimple3DWorkspace();
 

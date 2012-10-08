@@ -8,6 +8,7 @@ Framework/Geometry
 Framework/Kernel
 Framework/DataObjects
 Framework/MDEvents
+Framework/MDAlgorithms
 Framework/NexusCPP
 )
 
