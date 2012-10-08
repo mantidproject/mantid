@@ -1,10 +1,19 @@
 #include <iostream>
 #include "MantidQtRefDetectorViewer/RefMatrixWSImageView.h"
 #include "MantidQtRefDetectorViewer/RefMatrixWSDataSource.h"
+#include "MantidQtRefDetectorViewer/RefArrayDataSource.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
+#include "MantidAPI/IEventWorkspace.h"
 
 using Mantid::API::MatrixWorkspace_sptr;
 using namespace MantidQt;
 using namespace RefDetectorViewer;
+using Mantid::API::WorkspaceProperty;
+using Mantid::API::Algorithm;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 /**
  * Construct an ImageView for the specified matrix workspace
@@ -18,9 +27,35 @@ RefMatrixWSImageView::RefMatrixWSImageView( MatrixWorkspace_sptr mat_ws )
                                          // is closed
 }
 
-RefMatrixWSImageView::RefMatrixWSImageView( QString )
+RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
 {
-//    RefMatrixWSDataSource* source = new RefMatrixWSDataSource(wps_name);
+
+    IEventWorkspace_sptr ws;
+    ws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wps_name.toStdString());
+    
+    double total_ymin = 0;
+    double total_ymax = 256;
+
+    std::vector<double> xaxis = ws->readX(0);
+    int sz = xaxis.size();
+    
+    double total_xmin = xaxis[0];
+    double total_xmax = xaxis[sz-1];
+    
+    //retrieve data now
+    std::vector<double> yaxis = ws->readY(256);
+    
+    std::cout << yaxis.size() << std::endl;
+    
+
+    
+    
+    
+    //std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
+    
+    //    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
+    
+    RefArrayDataSource* source = new RefArrayDataSource(wps_name);
 //    image_view = new RefImageView( source );
 }
 

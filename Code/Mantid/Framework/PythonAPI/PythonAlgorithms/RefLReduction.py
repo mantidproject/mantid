@@ -59,9 +59,9 @@ class RefLReduction(PythonAlgorithm):
                                  Description="TOF range to use")
         self.declareProperty("TofRangeFlag", True,
                              Description="If true, the TOF will be cropped according to the TOFRange property")
-        self.declareProperty("QMin", 0.001, 
+        self.declareProperty("QMin", 0.005, 
                              Description="Minimum Q-value")
-        self.declareProperty("QStep", 0.001, 
+        self.declareProperty("QStep", 0.01, 
                              Description="Step-size in Q. Enter a negative value to get a log scale.")
         self.declareProperty("AngleOffset", 0.0, 
                              Description="Angle offset (degrees)")
