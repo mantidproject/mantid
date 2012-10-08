@@ -581,9 +581,9 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_11">
      <item>
-      <widget class="QCheckBox" name="keep_workspaces_cb">
+      <widget class="QCheckBox" name="show_workspaces_cb">
        <property name="text">
-        <string>Keep Intermediate Workspaces</string>
+        <string>Show Intermediate Workspaces</string>
        </property>
       </widget>
      </item>
