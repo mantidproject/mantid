@@ -6,7 +6,7 @@
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
 #include "MockObjects.h"
-#include "MantidMDEvents/SliceMD.h"
+#include "MantidMDAlgorithms/SliceMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "vtkCellType.h"
 #include "vtkUnstructuredGrid.h"

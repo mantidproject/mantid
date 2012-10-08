@@ -1,8 +1,8 @@
 #ifndef VATESAPI_TEST_MOCKOBJECTS_H
 #define VATESAPI_TEST_MOCKOBJECTS_H
 
-#include "MantidMDEvents/SliceMD.h"
-#include "MantidMDEvents/BinMD.h"
+#include "MantidMDAlgorithms/SliceMD.h"
+#include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDEvents/CreateMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
