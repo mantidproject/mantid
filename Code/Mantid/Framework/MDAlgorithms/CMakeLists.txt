@@ -3,6 +3,8 @@ set ( SRC_FILES
 	# src/CreateMDFitWorkspace.cpp
 	src/AndMD.cpp
 	src/BinaryOperationMD.cpp
+	src/BinMD.cpp		
+	src/BinToMDHistoWorkspace.cpp	
 	src/BooleanBinaryOperationMD.cpp
 	src/CobaltSpinWaveDSHO.cpp
 	src/CompareMDWorkspaces.cpp
@@ -48,18 +50,20 @@ set ( SRC_FILES
 	src/SetMDUsingMask.cpp
 	src/SimulateMDD.cpp
 	src/SimulateResolution.cpp
+	src/SliceMD.cpp	
 	src/TobyFitSimulate.cpp
 	src/TransformMD.cpp
 	src/UnaryOperationMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
-# Old TMP convertToMD code prepared for deprication:	
+# Old TMP convertToMD code prepared for deprecation:	
 	src/ConvertToMDEvents.cpp	
 	src/ConvertToMDEventsParams.cpp
 	src/ConvertToMDEventsSubalgFactory.cpp
 	src/ConvertToMDEventsWSBase.cpp
 #end TMP	
+	src/SlicingAlgorithm.cpp
 	src/StitchGroup1D.cpp
 )
 
@@ -70,6 +74,8 @@ set ( INC_FILES
 	# inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
 	inc/MantidMDAlgorithms/AndMD.h
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
+	inc/MantidMDAlgorithms/BinMD.h	
+	inc/MantidMDAlgorithms/BinToMDHistoWorkspace.h	
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
@@ -116,6 +122,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SimulateMDD.h
 	inc/MantidMDAlgorithms/SimulateResolution.h
+	inc/MantidMDAlgorithms/SliceMD.h	
 	inc/MantidMDAlgorithms/TobyFitSimulate.h
 	inc/MantidMDAlgorithms/TransformMD.h
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
@@ -139,6 +146,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDEventsWSInterface.h	
 	inc/MantidMDAlgorithms/ConvertToMDEventsWSBase.h	
 # END TMP	
+	inc/MantidMDAlgorithms/SlicingAlgorithm.h
     inc/MantidMDAlgorithms/StitchGroup1D.h
 )
 
@@ -149,6 +157,7 @@ set ( TEST_FILES
 	# these tests are as they test verify different parts of the CPR algorithms
 	#CreateMDFitWorkspaceTest.h
 	AndMDTest.h
+	BinToMDHistoWorkspaceTest.h	
 	BooleanBinaryOperationMDTest.h
 	CachedExperimentInfoTest.h
 	CobaltSWDTest.h
@@ -191,6 +200,7 @@ set ( TEST_FILES
 	SimulateMDDTest.h
 	SimulateResolutionConvolvedModelTest.h
 	SimulateResolutionTest.h
+	SliceMDTest.h	
 	Strontium122Test.h
 	TobyFitBMatrixTest.h
 	TobyFitResolutionModelTest.h
@@ -200,6 +210,7 @@ set ( TEST_FILES
 	UnaryOperationMDTest.h
 	WeightedMeanMDTest.h
 	XorMDTest.h
+    SlicingAlgorithmTest.h	
     StitchGroup1DTest.h
 # Old TMD convertToMD code prepared for deprication:
 #    ConvertToMDEventsUnitsConvTest.h 
@@ -207,6 +218,7 @@ set ( TEST_FILES
 
 set ( GMOCK_TEST_FILES
 	BinaryOperationMDTest.h
+	BinMDTest.h
 )
 
 if(UNITY_BUILD)

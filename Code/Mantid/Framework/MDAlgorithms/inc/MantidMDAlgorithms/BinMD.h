@@ -13,7 +13,7 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/SlicingAlgorithm.h"
+#include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
 using Mantid::API::IMDEventWorkspace_sptr;
 
@@ -25,7 +25,7 @@ namespace Mantid
     //Forward declaration
     class MDImplicitFunction;
   }
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** Take a MDEventWorkspace and bin it to a dense histogram
@@ -64,11 +64,11 @@ namespace MDEvents
 
     /// Helper method
     template<typename MDE, size_t nd>
-    void binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void binByIterating(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     /// Method to bin a single MDBox
     template<typename MDE, size_t nd>
-    void binMDBox(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax);
+    void binMDBox(MDEvents::MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax);
 
 
     /// The output MDHistoWorkspace

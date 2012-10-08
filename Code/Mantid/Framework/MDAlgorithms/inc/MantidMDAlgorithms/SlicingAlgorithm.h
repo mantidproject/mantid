@@ -15,12 +15,11 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/SlicingAlgorithm.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** Abstract Algorithm class that will be used by:

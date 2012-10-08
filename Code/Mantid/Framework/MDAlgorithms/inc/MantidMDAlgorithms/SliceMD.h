@@ -4,11 +4,11 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/SlicingAlgorithm.h"
+#include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** Algorithm that can take a slice out of an original MDEventWorkspace
@@ -60,11 +60,11 @@ namespace MDEvents
 
     /// Helper method
     template<typename MDE, size_t nd>
-    void doExec(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void doExec(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     /// Method to actually do the slice
     template<typename MDE, size_t nd, typename OMDE, size_t ond>
-    void slice(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void slice(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
 
   };

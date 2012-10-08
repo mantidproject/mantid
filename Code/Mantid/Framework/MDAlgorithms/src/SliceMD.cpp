@@ -46,7 +46,7 @@ Of course, your basis vectors can be aligned with the dimensions, which is equiv
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/SliceMD.h"
+#include "MantidMDAlgorithms/SliceMD.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadPool.h"
@@ -58,10 +58,11 @@ Of course, your basis vectors can be aligned with the dimensions, which is equiv
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   // Register the algorithm into the AlgorithmFactory

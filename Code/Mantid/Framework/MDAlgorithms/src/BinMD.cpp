@@ -80,7 +80,6 @@ For more details on the coordinate transformations applied in this case, please 
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
-#include "MantidMDEvents/BinMD.h"
 #include "MantidMDEvents/CoordTransformAffineParser.h"
 #include "MantidMDEvents/CoordTransformAligned.h"
 #include "MantidMDEvents/MDBoxBase.h"
@@ -88,6 +87,7 @@ For more details on the coordinate transformations applied in this case, please 
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDAlgorithms/BinMD.h"
 #include <boost/algorithm/string.hpp>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -100,7 +100,7 @@ using Mantid::Kernel::EnabledWhenProperty;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
@@ -109,6 +109,7 @@ namespace MDEvents
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
+  using namespace Mantid::MDEvents;
 
 
   //----------------------------------------------------------------------------------------------

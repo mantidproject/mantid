@@ -3,12 +3,12 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDEvents/BinMD.h"
+#include "MantidMDAlgorithms/BinMD.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** Deprecated -> BinMD

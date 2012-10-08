@@ -3,16 +3,14 @@ set ( SRC_FILES
 	#
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
-	src/BinMD.cpp
-	src/BinToMDHistoWorkspace.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/CentroidPeaksMD.cpp
 	src/CloneMDWorkspace.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
-	src/ConvToMDPreprocDet.cpp # for deprication
-	src/ConvToMDSelector.cpp   # for deprication
+	src/ConvToMDPreprocDet.cpp # for deprecation
+	src/ConvToMDSelector.cpp   # for deprecation
 	src/ConvertToDiffractionMDWorkspace.cpp
 	src/ConvertToReflectometryQ.cpp
 	src/CoordTransformAffine.cpp
@@ -58,8 +56,6 @@ set ( SRC_FILES
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
 	src/SaveMD.cpp
-	src/SliceMD.cpp
-	src/SlicingAlgorithm.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
 )
@@ -78,8 +74,6 @@ set ( INC_FILES
 	#
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
-	inc/MantidMDEvents/BinMD.h
-	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/CloneMDWorkspace.h
@@ -140,8 +134,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
 	inc/MantidMDEvents/SaveMD.h
 	inc/MantidMDEvents/SkippingPolicy.h
-	inc/MantidMDEvents/SliceMD.h
-	inc/MantidMDEvents/SlicingAlgorithm.h
 	inc/MantidMDEvents/UnitsConversionHelper.h
 	inc/MantidMDEvents/UserFunctionMD.h
 )
@@ -150,7 +142,6 @@ set ( INC_FILES
 set ( TEST_FILES
 	AffineMatrixParameterParserTest.h
 	AffineMatrixParameterTest.h
-	BinToMDHistoWorkspaceTest.h
 	BoxControllerSettingsAlgorithmTest.h
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
@@ -199,13 +190,8 @@ set ( TEST_FILES
 	ReflectometryTransformQxQzTest.h
 	SaveMDTest.h
 	SkippingPolicyTest.h
-	SliceMDTest.h
-	SlicingAlgorithmTest.h
 )
 
-set ( GMOCK_TEST_FILES
-	BinMDTest.h
-)
 
 if(UNITY_BUILD)
   include(UnityBuild)

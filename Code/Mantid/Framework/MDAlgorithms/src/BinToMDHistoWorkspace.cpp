@@ -1,4 +1,4 @@
-#include "MantidMDEvents/BinToMDHistoWorkspace.h"
+#include "MantidMDAlgorithms/BinToMDHistoWorkspace.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
@@ -6,7 +6,7 @@ using namespace Mantid::API;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(BinToMDHistoWorkspace)

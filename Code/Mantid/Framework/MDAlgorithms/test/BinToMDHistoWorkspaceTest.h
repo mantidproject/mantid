@@ -7,10 +7,10 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidMDEvents/BinToMDHistoWorkspace.h"
+#include "MantidMDAlgorithms/BinToMDHistoWorkspace.h"
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 
 class BinToMDHistoWorkspaceTest : public CxxTest::TestSuite

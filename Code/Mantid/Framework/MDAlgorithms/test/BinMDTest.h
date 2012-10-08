@@ -14,7 +14,7 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/BinMD.h"
+#include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -30,6 +30,7 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::coord_t;

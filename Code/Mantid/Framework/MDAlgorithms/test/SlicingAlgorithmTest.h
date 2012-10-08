@@ -7,7 +7,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidMDEvents/SlicingAlgorithm.h"
+#include "MantidMDAlgorithms/SlicingAlgorithm.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -15,6 +15,7 @@
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;

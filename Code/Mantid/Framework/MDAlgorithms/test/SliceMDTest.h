@@ -6,7 +6,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
-#include "MantidMDEvents/SliceMD.h"
+#include "MantidMDAlgorithms/SliceMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
@@ -16,6 +16,7 @@
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -170,7 +171,7 @@ public:
     AnalysisDataService::Instance().remove("SliceMDTest_ws");
     AnalysisDataService::Instance().remove("SliceMDTest_outWS");
     // Clean up file
-	out->getBoxController()->closeFile(true);
+  out->getBoxController()->closeFile(true);
   }
 
 
