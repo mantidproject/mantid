@@ -87,7 +87,7 @@ public:
     TS_ASSERT_EQUALS(crossSection.nAttributes(), startingNAttrs + 4);
   }
 
-  void xtest_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()
+  void test_ResolutionConvolution_Attributes_Are_Passed_On_Correctly()
   {
     // How this works -> The fake convolution's signal member is
     // set up to throw an exception if the attribute still has
@@ -109,7 +109,6 @@ public:
     // Fake function throws if attribute value has not changed
     TS_ASSERT_THROWS_NOTHING(crossSection->function(*mdDomain, output));
 
-    mdDomain.reset(); // Drop workspace ref
     delete crossSection;
   }
 
