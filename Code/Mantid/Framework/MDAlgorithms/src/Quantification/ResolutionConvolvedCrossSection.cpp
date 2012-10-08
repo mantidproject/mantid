@@ -70,7 +70,7 @@ namespace Mantid
      * Constructor
      */
     ResolutionConvolvedCrossSection::ResolutionConvolvedCrossSection()
-      : ParamFunctionAttributeHolder(), IFunctionMD(), m_convolution(NULL), m_workspace(),
+      : ParamFunction(), IFunctionMD(), m_convolution(NULL), m_workspace(),
         m_nthreads(API::FrameworkManager::Instance().getNumOMPThreads())
     {
     }

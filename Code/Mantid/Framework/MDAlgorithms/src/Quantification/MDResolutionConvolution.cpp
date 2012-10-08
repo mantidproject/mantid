@@ -11,7 +11,7 @@ namespace Mantid
   {
     /// Default constructor required by the factory
     MDResolutionConvolution::MDResolutionConvolution()
-      :  ParamFunctionAttributeHolder(), m_fittingFunction(NULL), m_foreground(NULL)
+      :  ParamFunction(), m_fittingFunction(NULL), m_foreground(NULL)
     {
     }
 
@@ -23,7 +23,7 @@ namespace Mantid
      */
     MDResolutionConvolution::MDResolutionConvolution(const API::IFunctionMD & fittingFunction,
                                                      const std::string & fgModelName)
-      : ParamFunctionAttributeHolder(), m_fittingFunction(NULL), m_foreground(NULL)
+      : ParamFunction(), m_fittingFunction(NULL), m_foreground(NULL)
     {
       setFittingFunction(fittingFunction);
       setForegroundModel(fgModelName);
@@ -81,7 +81,7 @@ namespace Mantid
     {
       if(this->hasAttribute(name))
       {
-        ParamFunctionAttributeHolder::setAttribute(name, value);
+        ParamFunction::setAttribute(name, value);
       }
       else
       {

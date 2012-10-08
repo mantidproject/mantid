@@ -22,7 +22,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidAPI/IFunctionMD.h"
-#include "MantidAPI/ParamFunctionAttributeHolder.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid
@@ -47,7 +47,7 @@ namespace Mantid
      * of a foreground model with a resolution calculation for an MD workspace.
      */
     class DLLExport ResolutionConvolvedCrossSection :
-      public virtual API::ParamFunctionAttributeHolder, public virtual API::IFunctionMD
+      public virtual API::ParamFunction, public virtual API::IFunctionMD
     {
     public:
       /// Constructor

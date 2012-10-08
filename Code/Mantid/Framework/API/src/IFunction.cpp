@@ -29,6 +29,7 @@
 #include <limits>
 #include <sstream>
 #include <iostream> 
+#include <algorithm>
 
 namespace Mantid
 {
@@ -293,19 +294,24 @@ std::ostream& operator<<(std::ostream& ostr,const IFunction& f)
   return ostr;
 }
 
-/**
- * Const attribute visitor returning the type of the attribute
- */
-class AttType: public IFunction::ConstAttributeVisitor<std::string>
+namespace
 {
-protected:
-  /// Apply if string
-  std::string apply(const std::string&)const{return "std::string";}
-  /// Apply if int
-  std::string apply(const int&)const{return "int";}
-  /// Apply if double
-  std::string apply(const double&)const{return "double";}
-};
+  /**
+   * Const attribute visitor returning the type of the attribute
+   */
+  class AttType: public IFunction::ConstAttributeVisitor<std::string>
+  {
+  protected:
+    /// Apply if string
+    std::string apply(const std::string&)const{return "std::string";}
+    /// Apply if int
+    std::string apply(const int&)const{return "int";}
+    /// Apply if double
+    std::string apply(const double&)const{return "double";}
+    /// Apply if bool
+    std::string apply(const bool&)const{return "bool";}
+  };
+}
 
 std::string IFunction::Attribute::type()const
 {
@@ -313,33 +319,38 @@ std::string IFunction::Attribute::type()const
   return apply(tmp);
 }
 
-/**
- * Const attribute visitor returning the type of the attribute
- */
-class AttValue: public IFunction::ConstAttributeVisitor<std::string>
+namespace
 {
-public:
-  AttValue(bool quoteString=false) : 
-    IFunction::ConstAttributeVisitor<std::string>(),
-    m_quoteString(quoteString) 
+  /**
+   * Const attribute visitor returning the type of the attribute
+   */
+  class AttValue: public IFunction::ConstAttributeVisitor<std::string>
   {
-  }
+  public:
+    AttValue(bool quoteString=false) : 
+      IFunction::ConstAttributeVisitor<std::string>(),
+      m_quoteString(quoteString) 
+    {
+    }
 
-protected:
-  /// Apply if string
-  std::string apply(const std::string& str)const
-  {
-    return (m_quoteString) ? std::string("\"" + str + "\"") : str;
-  }
-  /// Apply if int
-  std::string apply(const int& i)const{return boost::lexical_cast<std::string>(i);}
-  /// Apply if double
-  std::string apply(const double& d)const{return boost::lexical_cast<std::string>(d);}
+  protected:
+    /// Apply if string
+    std::string apply(const std::string& str)const
+    {
+      return (m_quoteString) ? std::string("\"" + str + "\"") : str;
+    }
+    /// Apply if int
+    std::string apply(const int& i)const{return boost::lexical_cast<std::string>(i);}
+    /// Apply if double
+    std::string apply(const double& d)const{return boost::lexical_cast<std::string>(d);}
+    /// Apply if bool
+    std::string apply(const bool& b)const{return b ? "true" : "false";}
 
-private:
-  /// Flag to quote a string value returned
-  bool m_quoteString;
-};
+  private:
+    /// Flag to quote a string value returned
+    bool m_quoteString;
+  };
+}
 
 std::string IFunction::Attribute::value()const
 {
@@ -444,6 +455,22 @@ double IFunction::Attribute::asDouble()const
   }
 }
 
+/**
+ * Return the attribute as a bool if it is a bool.
+ */
+bool IFunction::Attribute::asBool()const
+{
+  try
+  {
+    return boost::get<bool>(m_data);
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Trying to access a "+type()+" attribute "
+      "as bool");
+  }
+}
+
 /** Sets new value if attribute is a string. If the type is wrong 
  * throws an exception
  * @param str :: The new value
@@ -495,39 +522,64 @@ void IFunction::Attribute::setInt(const int& i)
   }
 }
 
-/**
- * Attribute visitor setting new value to an attribute
+/** Sets new value if attribute is an bool. If the type is wrong 
+ * throws an exception
+ * @param b :: The new value
  */
-class SetValue: public IFunction::AttributeVisitor<>
+void IFunction::Attribute::setBool(const bool& b)
 {
-public:
+  try
+  {
+    boost::get<bool>(m_data) = b;
+  }
+  catch(...)
+  {
+    throw std::runtime_error("Trying to access a "+type()+" attribute "
+      "as bool");
+  }
+}
+
+namespace
+{
   /**
-   * Constructor
-   * @param value :: The value to set
+   * Attribute visitor setting new value to an attribute
    */
-  SetValue(const std::string& value):m_value(value){}
-protected:
-  /// Apply if string
-  void apply(std::string& str)const{str = m_value;}
-  /// Apply if int
-  void apply(int& i)const
+  class SetValue: public IFunction::AttributeVisitor<>
   {
-    std::istringstream istr(m_value+" ");
-    istr >> i;
-    if (!istr.good()) throw std::invalid_argument("Failed to set int attribute "
-      "from string "+m_value);
-  }
-  /// Apply if double
-  void apply(double& d)const
-  {
-    std::istringstream istr(m_value+" ");
-    istr >> d;
-    if (!istr.good()) throw std::invalid_argument("Failed to set double attribute "
-      "from string "+m_value);
-  }
-private:
-  std::string m_value; ///<the value as a string
-};
+  public:
+    /**
+     * Constructor
+     * @param value :: The value to set
+     */
+    SetValue(const std::string& value):m_value(value){}
+  protected:
+    /// Apply if string
+    void apply(std::string& str)const{str = m_value;}
+    /// Apply if int
+    void apply(int& i)const
+    {
+      std::istringstream istr(m_value+" ");
+      istr >> i;
+      if (!istr.good()) throw std::invalid_argument("Failed to set int attribute "
+        "from string "+m_value);
+    }
+    /// Apply if double
+    void apply(double& d)const
+    {
+      std::istringstream istr(m_value+" ");
+      istr >> d;
+      if (!istr.good()) throw std::invalid_argument("Failed to set double attribute "
+        "from string "+m_value);
+    }
+    /// Apply if bool
+    void apply(bool& b)const
+    {
+      b = ( m_value == "true" || m_value == "TRUE" || m_value == "1" );
+    }
+  private:
+    std::string m_value; ///<the value as a string
+  };
+}
 
 /** Set value from a string. Throws exception if the string has wrong format
  * @param str :: String representation of the new value
@@ -558,7 +610,10 @@ void IFunction::setActiveParameter(size_t i, double value)
   setParameter(i,value);
 }
 
-/// Returns the name of active parameter i
+/**
+ * Returns the name of an active parameter.
+ * @param i :: Index of a parameter. The parameter must be active.
+ */
 std::string IFunction::nameOfActive(size_t i)const 
 {
   if ( !isActive(i) )
@@ -568,7 +623,10 @@ std::string IFunction::nameOfActive(size_t i)const
   return parameterName(i);
 }
 
-/// Returns the name of active parameter i
+/**
+ * Returns the description of an active parameter.
+ * @param i :: Index of a parameter. The parameter must be active.
+ */
 std::string IFunction::descriptionOfActive(size_t i)const 
 {
   if ( !isActive(i) )
@@ -584,56 +642,56 @@ std::string IFunction::descriptionOfActive(size_t i)const
  */
 void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobian)
 {
-    const double minDouble = std::numeric_limits<double>::min();
-    const double epsilon = std::numeric_limits<double>::epsilon() * 100;
-    double stepPercentage = 0.001; // step percentage
-    double step; // real step
-    double cutoff = 100.0*minDouble/stepPercentage;
-    size_t nParam = nParams();
-    size_t nData = domain.size();
+  const double minDouble = std::numeric_limits<double>::min();
+  const double epsilon = std::numeric_limits<double>::epsilon() * 100;
+  double stepPercentage = 0.001; // step percentage
+  double step; // real step
+  double cutoff = 100.0*minDouble/stepPercentage;
+  size_t nParam = nParams();
+  size_t nData = domain.size();
 
-    FunctionValues minusStep(domain);
-    FunctionValues plusStep(domain);
-    std::vector<double> params(nParam);
+  FunctionValues minusStep(domain);
+  FunctionValues plusStep(domain);
+  std::vector<double> params(nParam);
 
-    //PARALLEL_CRITICAL(numeric_deriv)
+  //PARALLEL_CRITICAL(numeric_deriv)
+  {
+    applyTies(); // just in case
+    function(domain,minusStep);
+  }
+
+  for (size_t iP = 0; iP < nParam; iP++)
+  {
+    if ( isActive(iP) )
     {
-      applyTies(); // just in case
-      function(domain,minusStep);
-    }
-
-    for (size_t iP = 0; iP < nParam; iP++)
-    {
-      if ( isActive(iP) )
+      const double& val = activeParameter(iP);
+      if (fabs(val) < cutoff)
       {
-        const double& val = activeParameter(iP);
-        if (fabs(val) < cutoff)
-        {
-          step = epsilon;
-        }
-        else
-        {
-          step = val*stepPercentage;
-        }
+        step = epsilon;
+      }
+      else
+      {
+        step = val*stepPercentage;
+      }
 
-        double paramPstep = val + step;
+      double paramPstep = val + step;
 
-        //PARALLEL_CRITICAL(numeric_deriv)
-        {
-          setActiveParameter(iP, paramPstep);
-          applyTies(); 
-          function(domain,plusStep);
-          setActiveParameter(iP, val);
-        }
+      //PARALLEL_CRITICAL(numeric_deriv)
+      {
+        setActiveParameter(iP, paramPstep);
+        applyTies(); 
+        function(domain,plusStep);
+        setActiveParameter(iP, val);
+      }
 
-        step = paramPstep - val;
-        for (size_t i = 0; i < nData; i++) 
-        {
-          jacobian.set(i,iP, 
-            (plusStep.getCalculated(i) - minusStep.getCalculated(i))/step);
-        }
+      step = paramPstep - val;
+      for (size_t i = 0; i < nData; i++) 
+      {
+        jacobian.set(i,iP, 
+          (plusStep.getCalculated(i) - minusStep.getCalculated(i))/step);
       }
     }
+  }
 }
 
 /** Initialize the function providing it the workspace
@@ -924,6 +982,98 @@ void IFunction::convertValue(std::vector<double>& values, Kernel::Unit_sptr& out
     }
   }  
 }
+
+/**
+* Returns the number of attributes associated with the function
+*/
+size_t IFunction::nAttributes() const
+{
+  return m_attrs.size();
+}
+
+/// Check if attribute named exists
+bool IFunction::hasAttribute(const std::string& name)const
+{
+  return m_attrs.find(name) != m_attrs.end();
+}
+
+/// Returns a list of attribute names
+std::vector<std::string> IFunction::getAttributeNames() const
+{
+  std::vector<std::string> names(nAttributes(),"");
+  size_t index(0);
+  for(auto iter = m_attrs.begin(); iter != m_attrs.end(); ++iter)
+  {
+    names[index] = iter->first;
+    ++index;
+  }
+  return names;
+}
+
+/**
+* Return a value of attribute attName
+* @param name :: Returns the named attribute
+*/
+API::IFunction::Attribute IFunction::getAttribute(const std::string& name) const
+{
+  if(hasAttribute(name))
+  {
+    return m_attrs.at(name);
+  }
+  else
+  {
+    throw std::invalid_argument("ParamFunctionAttributeHolder::getAttribute - Unknown attribute '" + name + "'");
+  }
+}
+
+/**
+*  Set a value to a named attribute. Can be overridden in the inheriting class, the default
+*  just stores the value
+*  @param name :: The name of the attribute
+*  @param value :: The value of the attribute
+*/
+void IFunction::setAttribute(const std::string& name,
+  const API::IFunction::Attribute & value)
+{
+  storeAttributeValue(name, value);
+}
+
+/**
+* Declares a single attribute
+* @param name :: The name of the attribute
+* @param defaultValue :: A default value
+*/
+void IFunction::declareAttribute(const std::string & name,
+  const API::IFunction::Attribute & defaultValue)
+{
+  m_attrs.insert(std::make_pair(name, defaultValue));
+}
+
+
+/// Initialize the function. Calls declareAttributes & declareParameters
+void IFunction::init()
+{
+  declareAttributes();
+  declareParameters();
+}
+
+/**
+*  Set a value to a named attribute
+*  @param name :: The name of the attribute
+*  @param value :: The value of the attribute
+*/
+void IFunction::storeAttributeValue(const std::string& name, const API::IFunction::Attribute & value)
+{
+  if(hasAttribute(name))
+  {
+    m_attrs[name] = value;
+  }
+  else
+  {
+    throw std::invalid_argument("ParamFunctionAttributeHolder::setAttribute - Unknown attribute '" + name + "'");
+  }
+}
+
 
 } // namespace API
 } // namespace Mantid

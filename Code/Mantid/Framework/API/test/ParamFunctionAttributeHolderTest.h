@@ -1,11 +1,11 @@
 #ifndef PARAMFUNCTIONATTRIBUTEHOLDERTEST_H_
 #define PARAMFUNCTIONATTRIBUTEHOLDERTEST_H_
 
-#include "MantidAPI/ParamFunctionAttributeHolder.h"
+#include "MantidAPI/ParamFunction.h"
 #include <cxxtest/TestSuite.h>
 
 class FakeParamFunctionAttributeHolder :
-  public Mantid::API::ParamFunctionAttributeHolder
+  public Mantid::API::ParamFunction
 {
 public:
     std::string name() const { return "FakeParamFunctionAttributeHolder"; }

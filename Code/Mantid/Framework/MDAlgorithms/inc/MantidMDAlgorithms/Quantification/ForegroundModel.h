@@ -22,7 +22,7 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/ParamFunctionAttributeHolder.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 
 namespace Mantid
@@ -38,7 +38,7 @@ namespace Mantid
      *  - scatteringIntensity() : Returns a value for the cross section with the
      *                            current parameters
      */
-    class DLLExport ForegroundModel: public API::ParamFunctionAttributeHolder
+    class DLLExport ForegroundModel: public API::ParamFunction
     {
     public:
       /// Type of model

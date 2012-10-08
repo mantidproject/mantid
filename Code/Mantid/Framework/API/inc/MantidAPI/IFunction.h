@@ -150,6 +150,8 @@ public:
     T operator()(double& d)const{return apply(d);}
     /// implements static_visitor's operator() for int
     T operator()(int& i)const{return apply(i);}
+    /// implements static_visitor's operator() for bool
+    T operator()(bool& b)const{return apply(b);}
   protected:
     /// Implement this mathod to access attribute as string
     virtual T apply(std::string&)const = 0;
@@ -157,6 +159,8 @@ public:
     virtual T apply(double&)const = 0;
     /// Implement this mathod to access attribute as int
     virtual T apply(int&)const = 0;
+    /// Implement this mathod to access attribute as bool
+    virtual T apply(bool&)const = 0;
   };
 
   /**
@@ -174,6 +178,8 @@ public:
     T operator()(double& d)const{return apply(d);}
     /// implements static_visitor's operator() for int
     T operator()(int& i)const{return apply(i);}
+    /// implements static_visitor's operator() for bool
+    T operator()(bool& b)const{return apply(b);}
   protected:
     /// Implement this mathod to access attribute as string
     virtual T apply(const std::string& str)const = 0;
@@ -181,6 +187,8 @@ public:
     virtual T apply(const double& d)const = 0;
     /// Implement this mathod to access attribute as int
     virtual T apply(const int& i)const = 0;
+    /// Implement this mathod to access attribute as bool
+    virtual T apply(const bool& i)const = 0;
   };
 
   /// Attribute is a non-fitting parameter.
@@ -190,13 +198,15 @@ public:
   {
   public:
     /// Create empty string attribute
-    explicit Attribute():m_data(""), m_quoteValue(false) {}
+    explicit Attribute():m_data(std::string()), m_quoteValue(false) {}
     /// Create string attribute
     explicit Attribute(const std::string& str, bool quoteValue=false):m_data(str), m_quoteValue(quoteValue) {}
     /// Create int attribute
     explicit Attribute(const int& i):m_data(i){}
     /// Create double attribute
     explicit Attribute(const double& d):m_data(d){}
+    /// Create bool attribute
+    explicit Attribute(const bool& b):m_data(b){}
     /// Apply an attribute visitor
     template<typename T>
     T apply(AttributeVisitor<T>& v){return boost::apply_visitor(v,m_data);}
@@ -217,17 +227,21 @@ public:
     int asInt()const;
     /// Returns double value if attribute is a double, throws exception otherwise
     double asDouble()const;
+    /// Returns bool value if attribute is a bool, throws exception otherwise
+    bool asBool()const;
     /// Sets new value if attribute is a string
     void setString(const std::string& str);
     /// Sets new value if attribute is a double
     void setDouble(const double&);
     /// Sets new value if attribute is a int
     void setInt(const int&);
+    /// Sets new value if attribute is a bool
+    void setBool(const bool&);
     /// Set value from a string.
     void fromString(const std::string& str);
   private:
     /// The data holder as boost variant
-    mutable boost::variant<std::string,int,double> m_data;
+    mutable boost::variant<std::string,int,double,bool> m_data;
     /// Flag indicating if the string value should be returned quoted
     bool m_quoteValue;
   };
@@ -337,6 +351,8 @@ public:
   //@}
 
 
+  /** @name Ties */
+  //@{
   /// Tie a parameter to other parameters (or a constant)
   virtual ParameterTie* tie(const std::string& parName, const std::string& expr, bool isDefault = false);
   /// Add several ties
@@ -351,8 +367,11 @@ public:
   virtual bool removeTie(size_t i) = 0;
   /// Get the tie of i-th parameter
   virtual ParameterTie* getTie(size_t i)const = 0;
+  //@}
 
 
+  /** @name Constraints */
+  //@{
   /// Add a list of conatraints from a string
   virtual void addConstraints(const std::string& str, bool isDefault = false);
   /// Add a constraint to function
@@ -361,28 +380,27 @@ public:
   virtual IConstraint* getConstraint(size_t i)const = 0;
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName) = 0;
+  //@}
+
+  /** @name Attributes */
+  //@{
+  /// Returns the number of attributes associated with the function
+  virtual size_t nAttributes()const;
+  /// Returns a list of attribute names
+  virtual std::vector<std::string> getAttributeNames()const;
+  /// Return a value of attribute attName
+  virtual Attribute getAttribute(const std::string& attName)const;
+  /// Set a value to attribute attName
+  virtual void setAttribute(const std::string& attName,const Attribute& );
+  /// Check if attribute attName exists
+  virtual bool hasAttribute(const std::string& attName)const;
+  /// Set an attribute value
+  template<typename T>
+  void setAttributeValue(const std::string& attName,const T& value){setAttribute(attName,Attribute(value));}
+  //@}
 
   /// Set up the function for a fit.
   virtual void setUpForFit() = 0;
-
-  /// Returns the number of attributes associated with the function
-  virtual size_t nAttributes()const{return 0;}
-  /// Returns a list of attribute names
-  virtual std::vector<std::string> getAttributeNames()const{return std::vector<std::string>();}
-  /// Return a value of attribute attName
-  virtual Attribute getAttribute(const std::string& attName)const
-  {
-    throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
-  }
-  /// Set a value to attribute attName
-  virtual void setAttribute(const std::string& attName,const Attribute& )
-  {
-    throw std::invalid_argument("Attribute "+attName+" not found in function "+this->name());
-  }
-  /// Check if attribute attName exists
-  virtual bool hasAttribute(const std::string& attName)const { (void)attName; return false;}
-  template<typename T>
-  void setAttributeValue(const std::string& attName,const T& value){setAttribute(attName,Attribute(value));}
 
   /// Calculate numerical derivatives
   void calNumericalDeriv(const FunctionDomain& domain, Jacobian& out);
@@ -400,7 +418,7 @@ public:
 protected:
 
   /// Function initialization. Declare function parameters in this method.
-  virtual void init(){};
+  virtual void init();
   /// Declare a new parameter
   virtual void declareParameter(const std::string& name, double initValue = 0, const std::string& description="") = 0;
 
@@ -416,13 +434,19 @@ protected:
   /// Add a new tie. Derived classes must provide storage for ties
   virtual void addTie(ParameterTie* tie) = 0;
 
+  /// Override to declare function attributes
+  virtual void declareAttributes() {}
+  /// Override to declare function parameters
+  virtual void declareParameters() {}
+
+  /// Declare a single attribute
+  void declareAttribute(const std::string & name, const API::IFunction::Attribute & defaultValue);
+  /// Store an attribute's value
+  void storeAttributeValue(const std::string& name, const API::IFunction::Attribute & value);
+
   friend class ParameterTie;
   friend class CompositeFunction;
 
-  /// Values storage for numeric derivatives
-  FunctionValues m_minusStep;
-  /// Values storage for numeric derivatives
-  FunctionValues m_plusStep;
   /// Flag to hint that the function is being used in parallel computations
   bool m_isParallel;
 
@@ -434,6 +458,10 @@ protected:
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
+
+private:
+  /// The declared attributes
+  std::map<std::string, API::IFunction::Attribute> m_attrs;
 };
 
 ///shared pointer to the function base class

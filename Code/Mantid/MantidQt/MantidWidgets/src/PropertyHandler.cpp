@@ -177,6 +177,13 @@ protected:
     m_browser->m_intManager->setValue(prop,i);
     return prop;
   }
+  /// Create bool property
+  QtProperty* apply(const bool& b)const
+  {
+    QtProperty* prop = m_browser->m_boolManager->addProperty(m_name);
+    m_browser->m_boolManager->setValue(prop,b);
+    return prop;
+  }
 private:
   FitPropertyBrowser* m_browser;
   QString m_name;
@@ -691,6 +698,11 @@ protected:
   {
     i = m_browser->m_intManager->value(m_prop);
   }
+  /// Create bool property
+  void apply(bool& b)const
+  {
+    b = m_browser->m_boolManager->value(m_prop);
+  }
 private:
   FitPropertyBrowser* m_browser;
   QtProperty* m_prop;
@@ -726,6 +738,13 @@ protected:
   {
     m_browser->m_changeSlotsEnabled = false;
     m_browser->m_intManager->setValue(m_prop,i);
+    m_browser->m_changeSlotsEnabled = true;
+  }
+  /// Set bool property
+  void apply(const bool& b)const
+  {
+    m_browser->m_changeSlotsEnabled = false;
+    m_browser->m_boolManager->setValue(m_prop,b);
     m_browser->m_changeSlotsEnabled = true;
   }
 private:

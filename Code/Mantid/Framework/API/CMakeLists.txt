@@ -87,7 +87,6 @@ set ( SRC_FILES
 	src/NullCoordTransform.cpp
 	src/NumericAxis.cpp
 	src/ParamFunction.cpp
-	src/ParamFunctionAttributeHolder.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
 	src/Progress.cpp
@@ -228,7 +227,6 @@ set ( INC_FILES
 	inc/MantidAPI/NullCoordTransform.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/ParamFunction.h
-	inc/MantidAPI/ParamFunctionAttributeHolder.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
 	inc/MantidAPI/Progress.h

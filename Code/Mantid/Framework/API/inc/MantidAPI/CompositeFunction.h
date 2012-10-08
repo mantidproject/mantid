@@ -54,7 +54,7 @@ class MANTID_API_DLL CompositeFunction : public virtual IFunction
 {
 public:
   /// Default constructor
-  CompositeFunction(): m_nParams(0),m_useNumericDerivatives(false){}
+  CompositeFunction();
   ///Destructor
   virtual ~CompositeFunction();
 
@@ -141,6 +141,9 @@ public:
   void setUpForFit();
   /// Remove a constraint
   void removeConstraint(const std::string& parName);
+
+  /// Set a value to attribute attName
+  virtual void setAttribute(const std::string& attName,const Attribute& );
 
              /* CompositeFunction own methods */
 

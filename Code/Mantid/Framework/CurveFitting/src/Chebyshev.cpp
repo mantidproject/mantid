@@ -20,6 +20,9 @@ DECLARE_FUNCTION(Chebyshev)
 Chebyshev::Chebyshev():m_n(0),m_StartX(-1.),m_EndX(1.) 
 {
   declareParameter("A0");
+  declareAttribute("n",Attribute( m_n ));
+  declareAttribute("StartX",Attribute( m_StartX ));
+  declareAttribute("EndX",Attribute( m_EndX ));
 };
 
 void Chebyshev::function1D(double* out, const double* xValues, const size_t nData)const
@@ -75,45 +78,14 @@ void Chebyshev::functionDeriv1D(Jacobian* out, const double* xValues, const size
   }
 }
 
-/** 
- * @return A list of attribute names
- */
-std::vector<std::string> Chebyshev::getAttributeNames()const
-{
-  std::vector<std::string> res;
-  res.push_back("n");
-  res.push_back("StartX");
-  res.push_back("EndX");
-  return res;
-}
-
-/**
- * @param attName :: Attribute name. If it is not "n" exception is thrown.
- * @return a value of attribute attName
- */
-API::IFunction::Attribute Chebyshev::getAttribute(const std::string& attName)const
-{
-  if (attName == "n")
-  {
-    return Attribute(m_n);
-  }
-  else if (attName == "StartX")
-  {
-    return Attribute(m_StartX);
-  }
-  else if (attName == "EndX")
-  {
-    return Attribute(m_EndX);
-  }
-  throw std::invalid_argument("Chebyshev: Unknown attribute " + attName);
-}
-
 /**
  * @param attName :: The attribute name. If it is not "n" exception is thrown.
  * @param att :: An int attribute containing the new value. The value cannot be negative.
  */
 void Chebyshev::setAttribute(const std::string& attName,const API::IFunction::Attribute& att)
 {
+  storeAttributeValue( attName, att );
+
   if (attName == "n")
   {// set the polynomial order
     if (m_n >= 0)
@@ -140,13 +112,6 @@ void Chebyshev::setAttribute(const std::string& attName,const API::IFunction::At
     m_EndX = att.asDouble();
   }
 }
-
-/// Check if attribute attName exists
-bool Chebyshev::hasAttribute(const std::string& attName)const
-{
-  return attName == "n" || attName == "StartX" || attName == "EndX";
-}
-
 
 } // namespace CurveFitting
 } // namespace Mantid

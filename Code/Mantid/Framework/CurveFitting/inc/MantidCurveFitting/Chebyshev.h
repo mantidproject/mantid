@@ -57,16 +57,8 @@ namespace Mantid
       void function1D(double* out, const double* xValues, const size_t nData)const;
       void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
 
-      /// Returns the number of attributes associated with the function
-      size_t nAttributes()const{return 1;}
-      /// Returns a list of attribute names
-      std::vector<std::string> getAttributeNames()const;
-      /// Return a value of attribute attName
-      Attribute getAttribute(const std::string& attName)const;
       /// Set a value to attribute attName
       void setAttribute(const std::string& attName,const Attribute& );
-      /// Check if attribute attName exists
-      bool hasAttribute(const std::string& attName)const;
 
     private:
 

@@ -202,6 +202,8 @@ protected:
   QtDoublePropertyManager *m_attributeDoubleManager;
   /// Manager for function int attribute properties
   QtIntPropertyManager *m_attributeIntManager;
+  /// Manager for function bool attribute properties
+  QtBoolPropertyManager *m_attributeBoolManager;
   /// Manager for function index properties
   QtStringPropertyManager *m_indexManager;
   /// Manager for function tie properties
