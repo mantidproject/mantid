@@ -37,12 +37,12 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
     double total_ymax = 255;
 
     std::vector<double> xaxis = ws->readX(0);
-    int sz = xaxis.size();
+    size_t sz = xaxis.size();
     
     double total_xmin = xaxis[0];
     double total_xmax = xaxis[sz-1];
     
-    float *data = new float[total_ymax * sz];
+    float *data = new float[size_t(total_ymax * sz)];
     
     for (int px=0; px<=total_xmax; px++)
     {
