@@ -172,17 +172,11 @@ def elwin(inputFiles, eRange, Save=False, Verbose=True, Plot=False):
     return eq1, eq2
 
 def elwinPlot(eq1,eq2):
-    nBins = mtd[eq1[0]].blocksize()
-    if nBins >= 10:
-        nBins = 10
-    lastXeq1 = mtd[eq1[0]].readX(0)[nBins-1]
+    lastXeq1 = mtd[eq1[0]].readX(0)[-1]
     graph1 = mp.plotSpectrum(eq1, 0)
     layer = graph1.activeLayer()
     layer.setScale(mp.Layer.Bottom, 0.0, lastXeq1)
-    nBins = mtd[eq2[0]].blocksize()
-    if nBins >= 10:
-        nBins = 10
-    lastXeq2 = mtd[eq2[0]].readX(0)[nBins-1]
+    lastXeq2 = mtd[eq2[0]].readX(0)[-1]
     graph2 = mp.plotSpectrum(eq2, 0)
     layer = graph2.activeLayer()
     layer.setScale(mp.Layer.Bottom, 0.0, lastXeq2)
