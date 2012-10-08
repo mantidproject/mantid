@@ -30,6 +30,7 @@
 #include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <boost/make_shared.hpp>
 #include <sstream>
 #include <cstdlib>
 
@@ -55,10 +56,11 @@ namespace Geometry
   /** Constructor
    */
   InstrumentDefinitionParser::InstrumentDefinitionParser()
-  : pDoc(NULL), pRootElem(NULL),
+  : m_xmlFile(boost::make_shared<IDFObject>("")), m_cacheFile(boost::make_shared<IDFObject>("")), pDoc(NULL), pRootElem(NULL),
       hasParameterElement_beenSet(false),
-      m_haveDefaultFacing(false), m_deltaOffsets(false), m_angleConvertConst(1.0),
-      m_indirectPositions(false)
+      m_haveDefaultFacing(false), m_deltaOffsets(false), 
+      m_angleConvertConst(1.0),m_indirectPositions(false),
+      m_cachingOption(NoneApplied)
   {
   }
 
@@ -74,9 +76,10 @@ namespace Geometry
     }
   }
 
-
   //----------------------------------------------------------------------------------------------
-  /** Initialize the XML parser
+  /** Initialize the XML parser based on an IDF xml file path.
+   *
+   *  Note that this convenience initialize method actually translates the inputs into the other initialize method.
    *
    * @param filename :: IDF .xml path (full). This is needed mostly to find the instrument geometry cache.
    * @param instName :: name of the instrument
@@ -84,9 +87,27 @@ namespace Geometry
    */
   void InstrumentDefinitionParser::initialize(const std::string & filename, const std::string & instName, const std::string & xmlText)
   {
+    IDFObject_const_sptr xmlFile = boost::make_shared<const IDFObject>(filename);
+    IDFObject_const_sptr vtpFile = boost::make_shared<const IDFObject>(xmlFile->getParentDirectory().toString() + instName + ".vtp");
+
+    this->initialize(xmlFile, vtpFile, instName, xmlText);
+  }
+
+   //----------------------------------------------------------------------------------------------
+  /** Initialize the XML parser based on an IDF xml and cached vtp file objects.
+   *
+   * @param filename :: IDF .xml path (full). This is needed mostly to find the instrument geometry cache.
+   * @param instName :: name of the instrument
+   * @param xmlText :: XML contents of IDF
+   */
+  void InstrumentDefinitionParser::initialize(const IDFObject_const_sptr xmlFile, const IDFObject_const_sptr expectedCacheFile, const std::string & instName, const std::string & xmlText)
+  {
+
     // Handle the parameters
-    m_filename = filename;
+    const std::string filename = xmlFile->getFileFullPath().toString();
     m_instName = instName;
+    m_xmlFile = xmlFile;
+    m_cacheFile = expectedCacheFile;
 
     // Set up the DOM parser and parse xml file
     DOMParser pParser;
@@ -96,18 +117,18 @@ namespace Geometry
     }
     catch(Poco::Exception& exc)
     {
-      throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse XML", m_filename);
+      throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse XML", filename);
     }
     catch(...)
     {
-      throw Kernel::Exception::FileError("Unable to parse XML" , m_filename);
+      throw Kernel::Exception::FileError("Unable to parse XML" , filename);
     }
     // Get pointer to root element
     pRootElem = pDoc->documentElement();
     if ( !pRootElem->hasChildNodes() )
     {
-      g_log.error("XML file: " + m_filename + "contains no root element.");
-      throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", m_filename);
+      g_log.error("XML file: " + filename + "contains no root element.");
+      throw Kernel::Exception::InstrumentDefinitionError("No root element in XML instrument file", filename);
     }
 
     // Create our new instrument
@@ -115,7 +136,7 @@ namespace Geometry
     m_instrument = boost::make_shared<Instrument>(m_instName);
 
     // Save the XML file path and contents
-    m_instrument->setFilename(m_filename);
+    m_instrument->setFilename(filename);
     m_instrument->setXmlText(xmlText);
   }
 
@@ -138,7 +159,7 @@ namespace Geometry
         g_log.warning() << "The IDF that you are using doesn't contain a 'last-modified' field. ";
         g_log.warning() << "You may not get the correct definition file loaded." << std::endl ;
     }
-    return Poco::Path(m_filename).getFileName() + lastModified;
+    return m_xmlFile->getFileNameOnly() + lastModified;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -157,11 +178,13 @@ namespace Geometry
     // create maps: isTypeAssembly and mapTypeNameToShape
     Geometry::ShapeFactory shapeCreator;
 
+    const std::string filename = m_xmlFile->getFileFullPath().toString();
+
     NodeList* pNL_type = pRootElem->getElementsByTagName("type");
     if ( pNL_type->length() == 0 )
     {
-      g_log.error("XML file: " + m_filename + "contains no type elements.");
-      throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);
+      g_log.error("XML file: " + filename + "contains no type elements.");
+      throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", filename);
     }
 
     // Collect some information about types for later use including:
@@ -187,8 +210,8 @@ namespace Geometry
       // has already been defined
       if ( getTypeElement.find(typeName) != getTypeElement.end() )
       {
-        g_log.error("XML file: " + m_filename + "contains more than one type element named " + typeName);
-        throw Kernel::Exception::InstrumentDefinitionError("XML instrument file contains more than one type element named " + typeName, m_filename);
+        g_log.error("XML file: " + filename + "contains more than one type element named " + typeName);
+        throw Kernel::Exception::InstrumentDefinitionError("XML instrument file contains more than one type element named " + typeName, filename);
       }
       getTypeElement[typeName] = pTypeElem;
 
@@ -232,8 +255,8 @@ namespace Geometry
       // has already been defined
       if ( getTypeElement.find(typeName) != getTypeElement.end() )
       {
-        g_log.error("XML file: " + m_filename + "contains more than one type element named " + typeName);
-        throw Kernel::Exception::InstrumentDefinitionError("XML instrument file contains more than one type element named " + typeName, m_filename);
+        g_log.error("XML file: " + filename + "contains more than one type element named " + typeName);
+        throw Kernel::Exception::InstrumentDefinitionError("XML instrument file contains more than one type element named " + typeName, filename);
       }
       getTypeElement[typeName] = pTypeElem;
 
@@ -300,7 +323,7 @@ namespace Geometry
               " even if it is just an empty location element of the form <location />");
           throw Kernel::Exception::InstrumentDefinitionError(
               std::string("A component element must contain at least one location element") +
-              " even if it is just an empty location element of the form <location />", m_filename);
+              " even if it is just an empty location element of the form <location />", filename);
         }
 
 
@@ -324,7 +347,7 @@ namespace Geometry
                 + pElem->getAttribute("type"));
             throw Kernel::Exception::InstrumentDefinitionError(
                 "Number of IDs listed in idlist (=" + ss1.str() + ") is larger than the number of detectors listed in type = "
-                + pElem->getAttribute("type") + " (=" + ss2.str() + ").", m_filename);
+                + pElem->getAttribute("type") + " (=" + ss2.str() + ").", filename);
           }
         }
         else
@@ -345,7 +368,7 @@ namespace Geometry
     m_tempPosHolder.clear();
 
     // Read in or create the geometry cache file
-    setupGeometryCache();
+    m_cachingOption = setupGeometryCache();
 
     // Add/overwrite any instrument params with values specified in <component-link> XML elements
     setComponentLinks(m_instrument, pRootElem);
@@ -640,10 +663,11 @@ namespace Geometry
    */
   void InstrumentDefinitionParser::setValidityRange(const Poco::XML::Element* pRootElem)
   {
+    const std::string filename = m_xmlFile->getFileFullPath().toString();
     // check if IDF has valid-from and valid-to tags defined
     if ( !pRootElem->hasAttribute("valid-from") )
     {
-      throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-from tag", m_filename);
+      throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-from tag", filename);
     }
     else
     {
@@ -654,7 +678,7 @@ namespace Geometry
       }
       catch(...)
       {
-        throw Kernel::Exception::InstrumentDefinitionError("The valid-from <instrument> tag must be a ISO8601 string", m_filename);
+        throw Kernel::Exception::InstrumentDefinitionError("The valid-from <instrument> tag must be a ISO8601 string", filename);
       }
     }
 
@@ -663,7 +687,7 @@ namespace Geometry
       DateAndTime d = DateAndTime::getCurrentTime();
       m_instrument->setValidToDate(d);
       // Ticket #2335: no required valid-to date.
-      //throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-to tag", m_filename);
+      //throw Kernel::Exception::InstrumentDefinitionError("<instrument> element must contain a valid-to tag", filename);
     }
     else
     {
@@ -674,7 +698,7 @@ namespace Geometry
       }
       catch(...)
       {
-        throw Kernel::Exception::InstrumentDefinitionError("The valid-to <instrument> tag must be a ISO8601 string", m_filename);
+        throw Kernel::Exception::InstrumentDefinitionError("The valid-to <instrument> tag must be a ISO8601 string", filename);
       }
     }
   }
@@ -822,6 +846,7 @@ namespace Geometry
   */
   void InstrumentDefinitionParser::appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
   {
+    const std::string filename = m_xmlFile->getFileFullPath().toString();
     // The location element is required to be a child of a component element. Get this component element
     Element* pCompElem = InstrumentDefinitionParser::getParentComponent(pLocElem);
 
@@ -840,7 +865,7 @@ namespace Geometry
         if ( pFound == NULL )
         {
           throw Kernel::Exception::InstrumentDefinitionError(
-            "No <idlist> with name idname=\"" + idlist + "\" present in instrument definition file.", m_filename);
+            "No <idlist> with name idname=\"" + idlist + "\" present in instrument definition file.", filename);
         }
         idList.reset();
         populateIdList(pFound, idList);
@@ -950,6 +975,7 @@ namespace Geometry
   */
   void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
   {
+    const std::string filename = m_xmlFile->getFileFullPath().toString();
     // The location element is required to be a child of a component element. Get this component element
     Element* pCompElem = InstrumentDefinitionParser::getParentComponent(pLocElem);
 
@@ -969,7 +995,7 @@ namespace Geometry
         if ( pFound == NULL )
         {
           throw Kernel::Exception::InstrumentDefinitionError(
-            "No <idlist> with name idname=\"" + idlist + "\" present in instrument definition file.", m_filename);
+            "No <idlist> with name idname=\"" + idlist + "\" present in instrument definition file.", filename);
         }
 
         idList.reset();
@@ -1065,7 +1091,7 @@ namespace Geometry
       catch(Kernel::Exception::ExistsError&)
       {
         throw Kernel::Exception::InstrumentDefinitionError(
-            "Duplicate detector ID found when adding RectangularDetector " + name + " in XML instrument file" + m_filename);
+            "Duplicate detector ID found when adding RectangularDetector " + name + " in XML instrument file" + filename);
       }
     }
     else if ( category.compare("detector") == 0 )
@@ -1082,7 +1108,7 @@ namespace Geometry
         g_log.error("The number of detector IDs listed in idlist named "
           + idList.idname + " is less then the number of detectors");
         throw Kernel::Exception::InstrumentDefinitionError(
-          "Number of IDs listed in idlist (=" + ss1.str() + ") is less than the number of detectors.", m_filename);
+          "Number of IDs listed in idlist (=" + ss1.str() + ") is less than the number of detectors.", filename);
       }
 
       // Create detector and increment id. Finally add the detector to the parent
@@ -1118,7 +1144,7 @@ namespace Geometry
         std::stringstream convert;
         convert << detector->getID();
         throw Kernel::Exception::InstrumentDefinitionError("Detector with ID = " + convert.str() +
-          " present more then once in XML instrument file", m_filename);
+          " present more then once in XML instrument file", filename);
       }
 
       // Add all monitors and detectors to 'facing component' container. This is only used if the
@@ -1169,6 +1195,8 @@ namespace Geometry
   */
   void InstrumentDefinitionParser::populateIdList(Poco::XML::Element* pE, IdList& idList)
   {
+    const std::string filename = m_xmlFile->getFileFullPath().toString();
+
     if ( (pE->tagName()).compare("idlist") )
     {
       g_log.error("Argument to function createIdList must be a pointer to an XML element with tag name idlist.");
@@ -1208,7 +1236,7 @@ namespace Geometry
 
       if ( pNL->length() == 0 )
       {
-        throw Kernel::Exception::InstrumentDefinitionError("No id subelement of idlist element in XML instrument file", m_filename);
+        throw Kernel::Exception::InstrumentDefinitionError("No id subelement of idlist element in XML instrument file", filename);
       }
       pNL->release();
 
@@ -1250,7 +1278,7 @@ namespace Geometry
           else
           {
             throw Kernel::Exception::InstrumentDefinitionError("id subelement of idlist " +
-              std::string("element wrongly specified in XML instrument file"), m_filename);
+              std::string("element wrongly specified in XML instrument file"), filename);
           }
         }
 
@@ -1269,12 +1297,13 @@ namespace Geometry
   */
   bool InstrumentDefinitionParser::isAssembly(std::string type) const
   {
+    const std::string filename = m_xmlFile->getFileFullPath().toString();
     std::map<std::string,bool>::const_iterator it = isTypeAssembly.find(type);
 
     if ( it == isTypeAssembly.end() )
     {
       throw Kernel::Exception::InstrumentDefinitionError("type with name = " + type +
-        " not defined.", m_filename);
+        " not defined.", filename);
     }
 
     return it->second;
@@ -1437,6 +1466,7 @@ namespace Geometry
   void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem,
     std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache)
   {
+    const std::string filename = m_xmlFile->getFileFullPath().toString();
     // check first if pElem contains any <parameter> child elements, however not if this method is called through
     // setComponentLinks() for example by the LoadParameter algorithm
 
@@ -1457,7 +1487,7 @@ namespace Geometry
 
         if ( !pParamElem->hasAttribute("name") )
           throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
-          " contain <parameter> element with no name attribute in XML instrument file", m_filename);
+          " contain <parameter> element with no name attribute in XML instrument file", filename);
 
         std::string paramName = pParamElem->getAttribute("name");
 
@@ -1516,7 +1546,7 @@ namespace Geometry
           if ( !pValueElem->hasAttribute("val") )
             throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
             " contains <parameter> element with invalid syntax for its subelement <value>." +
-            " Correct syntax is <value val=\"\"/>", m_filename);
+            " Correct syntax is <value val=\"\"/>", filename);
           value = pValueElem->getAttribute("val");
         }
         else if ( numberLogfileEle >= 1 )
@@ -1526,7 +1556,7 @@ namespace Geometry
           if ( !pLogfileElem->hasAttribute("id") )
             throw Kernel::Exception::InstrumentDefinitionError("XML element with name or type = " + comp->getName() +
             " contains <parameter> element with invalid syntax for its subelement logfile>." +
-            " Correct syntax is <logfile id=\"\"/>", m_filename);
+            " Correct syntax is <logfile id=\"\"/>", filename);
           logfileID = pLogfileElem->getAttribute("id");
 
           if ( pLogfileElem->hasAttribute("eq") )
@@ -1759,96 +1789,108 @@ namespace Geometry
     pNL_link->release();
   }
 
-  /// Reads in or creates the geometry cache ('vtp') file
-  void InstrumentDefinitionParser::setupGeometryCache()
+
+  /**
+  Check that the cache file does actually exist and that it was modified last after the last modification to the xml def file. i.e. the vtp file contains the
+  most recent set of changes.
+  @param cacheCandiate : candiate cache file object to use the the geometries.
+  */
+  bool InstrumentDefinitionParser::canUseProposedCacheFile(IDFObject_const_sptr cacheCandiate) const
   {
-    // Get cached file name
-    // If the instrument directory is writable, put them there else use temporary directory
-    std::string cacheFilename;
-    Poco::File defFile(m_filename);
-    Poco::File instrDir;
-    if ( defFile.exists() && m_filename.size() > 4 )
-    {
-      cacheFilename = std::string(m_filename.begin(),m_filename.end()-3);
-      instrDir = Poco::Path(defFile.path()).parent();
-    }
-    else
-    {
-      // If the IDF doesn't exist, the XML was probably passed directly into LoadInstrument
-      // (e.g. from a live data listener) and we should use the temp directory for the cache
-      // as we won't be able to tell when the definition has changed
-      instrDir = ConfigService::Instance().getTempDir();
-      cacheFilename = instrDir.path() + "/" + m_instName + ".";
-    }
+    return m_xmlFile->exists() && cacheCandiate->exists() &&  (m_xmlFile->getLastModified() < cacheCandiate->getLastModified());
+  }
 
-    cacheFilename += "vtp";
-    // check for the geometry cache
-    Poco::File vtkFile(cacheFilename);
-
-    bool cacheAvailable = true;
-    if ((!vtkFile.exists()) || (defFile.exists() && (defFile.getLastModified() > vtkFile.getLastModified())))
-    {
-      g_log.information() << "Cache not available at " << cacheFilename << "\n";
-
-      cacheAvailable = false;
-    }
-
-    std::string filestem = Poco::Path(cacheFilename).getFileName();
-    Poco::Path fallback_dir(Kernel::ConfigService::Instance().getTempDir());
-    Poco::File fallbackFile = Poco::File(fallback_dir.resolve(filestem));
-    if( cacheAvailable == false )
-    {
-      g_log.information() << "Trying fallback " << fallbackFile.path() << "\n";
-      if ((!fallbackFile.exists()) || (defFile.exists() && (defFile.getLastModified() > fallbackFile.getLastModified())))
-      {
-        cacheAvailable = false;
-      }
-      else
-      {
-        cacheAvailable = true;
-        cacheFilename = fallbackFile.path();
-      }
-    }
-
-    if (cacheAvailable)
-    {
-      g_log.information("Loading geometry cache from " + cacheFilename);
+  /**
+  Apply the cache.
+  @param cacheToApply : Cache file object to use the the geometries.
+  */
+  void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) 
+  {
+    const std::string cacheFullPath = cacheToApply->getFileFullPath().toString();
+      g_log.information("Loading geometry cache from " + cacheFullPath);
       // create a vtk reader
       std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
       boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheReader>
-        reader(new Mantid::Geometry::vtkGeometryCacheReader(cacheFilename));
+        reader(new Mantid::Geometry::vtkGeometryCacheReader(cacheFullPath));
       for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); ++objItr)
       {
         ((*objItr).second)->setVtkGeometryCacheReader(reader);
       }
+  }
+
+  /**
+  Write the cache file from the IDF file and apply it.
+  @param fallBackCache : File location for a fallback cache if required.
+  */
+  InstrumentDefinitionParser::CachingOption InstrumentDefinitionParser::writeAndApplyCache(IDFObject_const_sptr fallBackCache)
+  {
+    IDFObject_const_sptr usedCache = m_cacheFile;
+    InstrumentDefinitionParser::CachingOption cachingOption = WroteCacheAdjacent;
+
+    g_log.information("Geometry cache is not available");
+    try
+    {
+      Poco::File dir = m_xmlFile->getParentDirectory();
+      if(!m_xmlFile->exists() || dir.path().empty() || !dir.exists() || !dir.canWrite() )
+      {
+        usedCache  = fallBackCache;
+        cachingOption = WroteCacheTemp;
+        g_log.information() << "Instrument directory is read only, writing cache to system temp.\n";
+      }
+    }
+    catch(Poco::FileNotFoundException &)
+    {
+      g_log.error() << "Unable to find instrument definition while attempting to write cache.\n";
+      throw std::runtime_error("Unable to find instrument definition while attempting to write cache.\n");
+    }
+    const std::string cacheFullPath = usedCache->getFileFullPath().toString();
+    g_log.information() << "Creating cache in " << cacheFullPath << "\n";
+    // create a vtk writer
+    std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
+    boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter>
+      writer(new Mantid::Geometry::vtkGeometryCacheWriter(cacheFullPath));
+    for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); ++objItr)
+    {
+      ((*objItr).second)->setVtkGeometryCacheWriter(writer);
+    }
+    writer->write();
+    return cachingOption;
+  }
+
+
+  /** Reads in or creates the geometry cache ('vtp') file
+  @return CachingOption selected.
+  */
+  InstrumentDefinitionParser::CachingOption InstrumentDefinitionParser::setupGeometryCache()
+  {
+    // Get cached file name
+    // If the instrument directory is writable, put them there else use temporary directory.
+    IDFObject_const_sptr fallBackCache  = boost::make_shared<const IDFObject>( Poco::Path(ConfigService::Instance().getTempDir()).append( m_instName + ".vtp").toString());
+    CachingOption cachingOption = NoneApplied;
+    if (canUseProposedCacheFile(m_cacheFile))
+    {
+      applyCache(m_cacheFile);
+      cachingOption = ReadAdjacent;
+    }
+    else if(canUseProposedCacheFile(fallBackCache))
+    {
+      applyCache(fallBackCache);
+      cachingOption = ReadFallBack;
     }
     else
     {
-      g_log.information("Geometry cache is not available");
-      try
-      {
-        if( instrDir.exists() && !instrDir.canWrite() )
-        {
-          cacheFilename = fallbackFile.path();
-          g_log.information() << "Instrument directory is read only, writing cache to system temp.\n";
-        }
-      }
-      catch(Poco::FileNotFoundException &)
-      {
-        g_log.error() << "Unable to find instrument definition while attempting to write cache.\n";
-        throw std::runtime_error("Unable to find instrument definition while attempting to write cache.\n");
-      }
-      g_log.information() << "Creating cache in " << cacheFilename << "\n";
-      // create a vtk writer
-      std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
-      boost::shared_ptr<Mantid::Geometry::vtkGeometryCacheWriter>
-        writer(new Mantid::Geometry::vtkGeometryCacheWriter(cacheFilename));
-      for (objItr = mapTypeNameToShape.begin(); objItr != mapTypeNameToShape.end(); ++objItr)
-      {
-        ((*objItr).second)->setVtkGeometryCacheWriter(writer);
-      }
-      writer->write();
+      cachingOption = writeAndApplyCache(fallBackCache);  
     }
+    return cachingOption;
+  }
+
+  /**
+  Getter for the applied caching option.
+  @return selected caching.
+  */
+  InstrumentDefinitionParser::CachingOption InstrumentDefinitionParser::getAppliedCachingOption() const
+  {
+    return m_cachingOption;
   }
 
   void InstrumentDefinitionParser::createNeutronicInstrument()
@@ -1891,19 +1933,6 @@ namespace Geometry
       }
     }
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

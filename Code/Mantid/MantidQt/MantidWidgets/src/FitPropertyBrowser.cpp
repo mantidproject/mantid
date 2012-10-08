@@ -1103,14 +1103,23 @@ void FitPropertyBrowser::enumChanged(QtProperty* prop)
 /** Called when a bool property changed
  * @param prop :: A pointer to the property 
  */
-void FitPropertyBrowser::boolChanged(QtProperty*)
+void FitPropertyBrowser::boolChanged(QtProperty* prop)
 {
   if ( ! m_changeSlotsEnabled ) return;
 
-  QSettings settings;
-  settings.beginGroup("Mantid/FitBrowser");
-  bool plotDiff = m_boolManager->value(m_plotDiff);
-  settings.setValue("Plot Difference",plotDiff);
+  if ( prop == m_plotDiff )
+  {
+    QSettings settings;
+    settings.beginGroup("Mantid/FitBrowser");
+    bool plotDiff = m_boolManager->value(m_plotDiff);
+    settings.setValue("Plot Difference",plotDiff);
+  }
+  else
+  {// it could be an attribute
+    PropertyHandler* h = getHandler()->findHandler(prop);
+    if (!h) return;
+    h->setAttribute(prop);
+  }
 }
 
 /** Called when an int property changed

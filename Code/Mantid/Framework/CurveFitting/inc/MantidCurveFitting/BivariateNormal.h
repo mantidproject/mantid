@@ -112,10 +112,10 @@ namespace Mantid
         if( !hasAttribute( attName))
           throw std::invalid_argument("Not a valid attribute name");
 
-        if( CalcVariances)
-          return Attribute( 1);
+        //if( CalcVariances)
+        //  return Attribute( 1);
 
-        return Attribute(-1);
+        return Attribute(CalcVariances);
       }
 
       void  setAttribute (const std::string &attName, const Attribute & value)
@@ -124,16 +124,14 @@ namespace Mantid
         if( !hasAttribute( attName))
           throw std::invalid_argument("Not a valid attribute name");
 
-        int x = value.asInt();
+        CalcVariances = value.asBool();
 
-        if( x>0)
+        if( CalcVariances )
         {
-          CalcVariances = true;
           CalcVxx = CalcVyy = CalcVxy = true;
         }
         else
         {
-          CalcVariances = false;
           declareParameter("SScol", 0.00, "Variance of the column(x) values");
           declareParameter("SSrow", 0.00, "Variance of the row(y) values");
           declareParameter("SSrc" , 0.00, "Covariance of the column(x) and row(y) values");

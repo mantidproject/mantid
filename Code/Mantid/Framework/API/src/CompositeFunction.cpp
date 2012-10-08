@@ -22,6 +22,14 @@ using std::size_t;
 
 DECLARE_FUNCTION(CompositeFunction)
 
+/// Default constructor
+CompositeFunction::CompositeFunction(): 
+m_nParams(0),
+m_useNumericDerivatives(false)
+{
+  declareAttribute("NumDeriv", Attribute(false));
+}
+
 ///Destructor
 CompositeFunction::~CompositeFunction()
 {
@@ -55,9 +63,20 @@ std::string CompositeFunction::asString()const
     return "name=" + name();
   }
 
-  if (name() != "CompositeFunction")
+  if ( name() != "CompositeFunction" || nAttributes() > 1 || getAttribute("NumDeriv").asBool() == true )
   {
-    ostr << "composite=" <<name() << ";";
+    ostr << "composite=" <<name() ;
+    std::vector<std::string> attr = this->getAttributeNames();
+    for(size_t i=0;i<attr.size();i++)
+    {
+      std::string attName = attr[i];
+      std::string attValue = this->getAttribute(attr[i]).value();
+      if (!attValue.empty())
+      {
+        ostr<<','<<attName<<'='<<attValue;
+      }
+    }
+    ostr << ';';
   }
   for(size_t i=0;i<nFunctions();i++)
   {
@@ -771,6 +790,16 @@ void CompositeFunction::useNumericDerivatives( bool yes ) const
   m_useNumericDerivatives = yes;
 }
 
+/// Set a value to attribute attName
+void CompositeFunction::setAttribute(const std::string& attName,const Attribute& att)
+{
+  storeAttributeValue( attName, att );
+
+  if ( attName == "NumDeriv" )
+  {
+    useNumericDerivatives( att.asBool() );
+  }
+}
 
 } // namespace API
 } // namespace Mantid

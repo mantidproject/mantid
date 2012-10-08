@@ -126,43 +126,25 @@ namespace Mantid
       const double bleedPixels = static_cast<const double>(reductionManager->getProperty("IgnoredPixels"));
 
       // Make some internal names for workspaces
-      const std::string dvInternal = "_det_van";
-      const std::string dvCompInternal = "_det_van_comp";
-      const std::string sampleInternal = "_sample";
-      const std::string bkgInternal = "_background_int";
-      const std::string countsInternal = "_total_counts";
+      const std::string dvInternal = "__det_van";
+      const std::string dvCompInternal = "__det_van_comp";
+      const std::string sampleInternal = "__sample";
+      const std::string bkgInternal = "__background_int";
+      const std::string countsInternal = "__total_counts";
 
       // If we are running this standalone, the IncidentEnergyGuess property in
       // the reduction property manager does not exist. If that is true, then we
       // don't have to clone workspaces.
       bool isStandAlone = !reductionManager->existsProperty("IncidentEnergyGuess");
 
-      MatrixWorkspace_sptr dvWS;
-      if (!isStandAlone)
-      {
-        // Clone the incoming workspace
-        IAlgorithm_sptr cloneWs = this->createSubAlgorithm("CloneWorkspace");
-        cloneWs->setProperty("InputWorkspace", detVanWS);
-        cloneWs->setProperty("OutputWorkspace", dvInternal);
-        cloneWs->executeAsSubAlg();
-        // CloneWorkspace returns Workspace_sptr
-        Workspace_sptr tmp = cloneWs->getProperty("OutputWorkspace");
-        dvWS = boost::static_pointer_cast<MatrixWorkspace>(tmp);
-      }
-      else
-      {
-        dvWS = detVanWS;
-      }
-
       // Process the detector vanadium
       IAlgorithm_sptr detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
-      detVan->setProperty("InputWorkspace", dvWS);
-      detVan->setProperty("OutputWorkspace", dvWS);
+      detVan->setProperty("InputWorkspace", detVanWS);
+      detVan->setProperty("OutputWorkspace", dvInternal);
       detVan->setProperty("NoGrouping", true);
       detVan->setProperty("ReductionProperties", reductionManagerName);
       detVan->executeAsSubAlg();
-      dvWS.reset();
-      dvWS = detVan->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr dvWS = detVan->getProperty("OutputWorkspace");
 
       // Process the comparison detector vanadium workspace if present
       MatrixWorkspace_sptr dvCompWS;

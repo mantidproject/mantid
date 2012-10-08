@@ -14,6 +14,7 @@ void export_IComponent()
     .def("getPos", &IComponent::getPos, "Returns the absolute position of the component")
     .def("getDistance", &IComponent::getDistance, "Returns the distance, in metres, between this and the given component")
     .def("getName", &IComponent::getName, "Returns the name of the component")
+    .def("getFullName", &IComponent::getFullName,"Returns full path name of component")
     .def("type", &IComponent::type, "Returns the type of the component represented as a string")
     ;
   

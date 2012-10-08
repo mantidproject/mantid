@@ -140,6 +140,7 @@ void FunctionBrowser::createBrowser()
   m_attributeStringManager = new QtStringPropertyManager(this);
   m_attributeDoubleManager = new QtDoublePropertyManager(this);
   m_attributeIntManager = new QtIntPropertyManager(this);
+  m_attributeBoolManager = new QtBoolPropertyManager(this);
   m_indexManager = new QtStringPropertyManager(this);
   m_tieManager = new QtStringPropertyManager(this);
   m_constraintManager = new QtStringPropertyManager(this);
@@ -152,6 +153,7 @@ void FunctionBrowser::createBrowser()
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(this);
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
+  QtCheckBoxFactory *checkBoxFactory = new QtCheckBoxFactory(this);
   //StringDialogEditorFactory* stringDialogEditFactory = new StringDialogEditorFactory(this);
   FormulaDialogEditorFactory* formulaDialogEditFactory = new FormulaDialogEditorFactory(this);
 
@@ -161,6 +163,7 @@ void FunctionBrowser::createBrowser()
   m_browser->setFactoryForManager(m_attributeStringManager, lineEditFactory);
   m_browser->setFactoryForManager(m_attributeDoubleManager, doubleEditorFactory);
   m_browser->setFactoryForManager(m_attributeIntManager, spinBoxFactory);
+  m_browser->setFactoryForManager(m_attributeBoolManager, checkBoxFactory);
   m_browser->setFactoryForManager(m_indexManager, lineEditFactory);
   m_browser->setFactoryForManager(m_tieManager, lineEditFactory);
   m_browser->setFactoryForManager(m_constraintManager, lineEditFactory);
@@ -173,6 +176,7 @@ void FunctionBrowser::createBrowser()
   connect(m_attributeStringManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeDoubleManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_attributeIntManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
+  connect(m_attributeBoolManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
   connect(m_formulaManager,SIGNAL(propertyChanged(QtProperty*)),this,SLOT(attributeChanged(QtProperty*)));
 }
 
@@ -487,6 +491,13 @@ protected:
     m_browser->m_attributeIntManager->setValue(prop, i);
     return m_browser->addProperty(m_parent,prop);
   }
+  /// Create bool property
+  FunctionBrowser::AProperty apply(const bool& b)const
+  {
+    QtProperty* prop = m_browser->m_attributeBoolManager->addProperty(m_attName);
+    m_browser->m_attributeBoolManager->setValue(prop, b);
+    return m_browser->addProperty(m_parent,prop);
+  }
 private:
   FunctionBrowser* m_browser;
   QtProperty* m_parent;
@@ -527,6 +538,11 @@ protected:
   void apply(int& i)const
   {
     i = m_browser->m_attributeIntManager->value(m_prop);
+  }
+  /// Set bool attribute
+  void apply(bool& b)const
+  {
+    b = m_browser->m_attributeBoolManager->value(m_prop);
   }
 private:
   FunctionBrowser* m_browser;

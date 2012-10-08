@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -225,6 +226,20 @@ public:
 class CompositeFunctionTest : public CxxTest::TestSuite
 {
 public:
+
+  static CompositeFunctionTest *createSuite() { return new CompositeFunctionTest(); }
+  static void destroySuite( CompositeFunctionTest *suite ) { delete suite; }
+
+  CompositeFunctionTest()
+  {
+    FunctionFactory::Instance().subscribe<Linear>("Linear");
+  }
+
+  ~CompositeFunctionTest()
+  {
+    FunctionFactory::Instance().unsubscribe("Linear");
+  }
+
   void testAdd()
   {
     IFunction_sptr g1 = IFunction_sptr (new Gauss());
@@ -1207,6 +1222,23 @@ public:
     //TS_ASSERT_THROWS_NOTHING(mfun->setWorkspace(ws,std::string("WorkspaceIndex=3,StartX=0.2,EndX = 0.8")));
 
     delete mfun;
+  }
+
+  void test_ctreatingWithFactory()
+  {
+    std::string funStr = "composite=CompositeFunction,NumDeriv=true;name=Linear;name=Linear";
+    auto fun = FunctionFactory::Instance().createInitialized(funStr);
+    TS_ASSERT( fun );
+    TS_ASSERT( fun->hasAttribute("NumDeriv") );
+    bool b = fun->getAttribute("NumDeriv").asBool();
+    TS_ASSERT( b );
+    TS_ASSERT_EQUALS( fun->asString(), "composite=CompositeFunction,NumDeriv=true;name=Linear,a=0,b=0;name=Linear,a=0,b=0" );
+
+    fun = FunctionFactory::Instance().createInitialized("name=Linear;name=Linear");
+    TS_ASSERT( fun );
+    TS_ASSERT( fun->hasAttribute("NumDeriv") );
+    b = fun->getAttribute("NumDeriv").asBool();
+    TS_ASSERT( ! b );
   }
 };
 

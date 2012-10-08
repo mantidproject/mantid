@@ -62,9 +62,9 @@ namespace Mantid
      */
     void DgsProcessDetectorVanadium::init()
     {
-      auto wsValidator = boost::make_shared<CompositeValidator>();
-      wsValidator->add<WorkspaceUnitValidator>("TOF");
-      this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input, wsValidator),
+      //auto wsValidator = boost::make_shared<CompositeValidator>();
+      //wsValidator->add<WorkspaceUnitValidator>("TOF");
+      this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
           "An input workspace containing the detector vanadium data in TOF units.");
       this->declareProperty(new WorkspaceProperty<>("MaskWorkspace",
           "", Direction::Input, PropertyMode::Optional),
@@ -104,9 +104,10 @@ namespace Mantid
       // Normalise result workspace to incident beam parameter
       IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
       norm->setProperty("InputWorkspace", inputWS);
-      norm->setProperty("OutputWorkspace", outputWS);
+      norm->setProperty("OutputWorkspace", inputWS);
       norm->executeAsSubAlg();
-      outputWS = norm->getProperty("OutputWorkspace");
+      inputWS.reset();
+      inputWS = norm->getProperty("OutputWorkspace");
 
       double detVanIntRangeLow = reductionManager->getProperty("DetVanIntRangeLow");
       if (EMPTY_DBL() == detVanIntRangeLow)
@@ -124,12 +125,12 @@ namespace Mantid
       {
         // Convert the data to the appropriate units
         IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
-        cnvun->setProperty("InputWorkspace", outputWS);
-        cnvun->setProperty("OutputWorkspace", outputWS);
+        cnvun->setProperty("InputWorkspace", inputWS);
+        cnvun->setProperty("OutputWorkspace", inputWS);
         cnvun->setProperty("Target", detVanIntRangeUnits);
         cnvun->setProperty("EMode", "Elastic");
         cnvun->executeAsSubAlg();
-        outputWS = cnvun->getProperty("OutputWorkspace");
+        inputWS = cnvun->getProperty("OutputWorkspace");
       }
 
       // Rebin the data (not Integration !?!?!?)
@@ -139,7 +140,7 @@ namespace Mantid
       binning.push_back(detVanIntRangeHigh);
 
       IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
-      rebin->setProperty("InputWorkspace", outputWS);
+      rebin->setProperty("InputWorkspace", inputWS);
       rebin->setProperty("OutputWorkspace", outputWS);
       rebin->setProperty("PreserveEvents", false);
       rebin->setProperty("Params", binning);

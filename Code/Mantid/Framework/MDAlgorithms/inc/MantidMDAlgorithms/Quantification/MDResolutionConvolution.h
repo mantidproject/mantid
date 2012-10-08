@@ -23,7 +23,7 @@
 */
 #include "MantidKernel/System.h"
 #include "MantidKernel/ClassMacros.h"
-#include "MantidAPI/ParamFunctionAttributeHolder.h"
+#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -52,7 +52,7 @@ namespace Mantid
      *  - declareAttributes()  : Defines the attributes (non-fit parameters) within the resolution model to be fitted
      *  - signal() : Returns the cross section convoluted with the instrument resolution
      */
-    class DLLExport MDResolutionConvolution : public API::ParamFunctionAttributeHolder
+    class DLLExport MDResolutionConvolution : public API::ParamFunction
     {
     public:
       /// Default constructor required by the factory

@@ -70,7 +70,7 @@ namespace Mantid
      * Constructor
      */
     ResolutionConvolvedCrossSection::ResolutionConvolvedCrossSection()
-      : ParamFunctionAttributeHolder(), IFunctionMD(), m_convolution(NULL), m_workspace(),
+      : ParamFunction(), IFunctionMD(), m_convolution(NULL), m_workspace(),
         m_nthreads(API::FrameworkManager::Instance().getNumOMPThreads())
     {
     }
@@ -163,13 +163,29 @@ namespace Mantid
 
       std::vector<API::IMDIterator*> iterators = m_workspace->createIterators(m_nthreads);
       const int nthreads = static_cast<int>(iterators.size());
+      std::vector<size_t> resultOffsets(nthreads, 0);
+      // Each calculated result needs to be at the correct index in the according to its
+      // position. The order here is the same that would be if it were computed serially.
+      // The offsets vector sets the size of the offset into the calculated results for each
+      // thread
+      if(nthreads > 1 )
+      {
+        // The first result will have offset of 0 so skip it
+        size_t totalBoxes = iterators[0]->getDataSize();
+        for(int i = 1; i < nthreads; ++i)
+        {
+          // The offset is simply the total number of boxes before it
+          resultOffsets[i] = totalBoxes;
+          totalBoxes += iterators[i]->getDataSize();
+        }
+      }
 
       bool exceptionThrown = false;
       OMP_FOR_NO_CHECK
       for(int i = 0; i < nthreads; ++i)
       {
         API::IMDIterator *boxIterator = iterators[i];
-        const size_t resultsOffset = i*(boxIterator->getDataSize());
+        const size_t resultsOffset = resultOffsets[i];
 
         size_t boxIndex(0);
         do

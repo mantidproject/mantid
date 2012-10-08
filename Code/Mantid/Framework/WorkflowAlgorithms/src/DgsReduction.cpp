@@ -109,6 +109,9 @@ namespace Mantid
           "The final S(Phi, E) data is made to be a distribution.");
       this->declareProperty("HardMaskFile", "", "A file or workspace containing a hard mask.");
       this->declareProperty("GroupingFile", "", "A file containing grouping (mapping) information.");
+      this->declareProperty("ShowIntermediateWorkspaces", false,
+          "Flag to show the intermediate workspaces (diagnostic mask, integrated detector vanadium, "
+          "integrated absolute units) from the reduction.");
 
       this->setPropertyGroup("SampleInputFile", sampleSetup);
       this->setPropertyGroup("SampleInputWorkspace", sampleSetup);
@@ -123,6 +126,7 @@ namespace Mantid
       this->setPropertyGroup("SofPhiEIsDistribution", sampleSetup);
       this->setPropertyGroup("HardMaskFile", sampleSetup);
       this->setPropertyGroup("GroupingFile", sampleSetup);
+      this->setPropertyGroup("ShowIntermediateWorkspaces", sampleSetup);
 
       // Data corrections
       std::string dataCorr = "Data Corrections";
@@ -605,6 +609,8 @@ namespace Mantid
         throw std::runtime_error(mess.str());
       }
 
+      const bool showIntermedWS = this->getProperty("ShowIntermediateWorkspaces");
+
       // Get output workspace pointer
       MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
@@ -636,9 +642,12 @@ namespace Mantid
         diag->executeAsSubAlg();
         maskWS = diag->getProperty("OutputWorkspace");
 
-        this->declareProperty(new WorkspaceProperty<>("SampleDetVanDiagMask",
-            detVanMaskName, Direction::Output));
-        this->setProperty("SampleDetVanDiagMask", maskWS);
+        if (showIntermedWS)
+        {
+          this->declareProperty(new WorkspaceProperty<>("SampleDetVanDiagMask",
+              detVanMaskName, Direction::Output));
+          this->setProperty("SampleDetVanDiagMask", maskWS);
+        }
 
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
@@ -659,9 +668,13 @@ namespace Mantid
         detVan->executeAsSubAlg();
         MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
         idetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
-        this->declareProperty(new WorkspaceProperty<>("IntegratedNormWorkspace",
-            idetVanName, Direction::Output));
-        this->setProperty("IntegratedNormWorkspace", idetVanWS);
+
+        if (showIntermedWS)
+        {
+          this->declareProperty(new WorkspaceProperty<>("IntegratedNormWorkspace",
+              idetVanName, Direction::Output));
+          this->setProperty("IntegratedNormWorkspace", idetVanWS);
+        }
       }
       else
       {
@@ -842,9 +855,12 @@ namespace Mantid
         // Do absolute normalisation
         outputWS /= absUnitsWS;
 
-        this->declareProperty(new WorkspaceProperty<>("AbsUnitsWorkspace",
-            absUnitsName, Direction::Output));
-        this->setProperty("AbsUnitsWorkspace", absUnitsWS);
+        if (showIntermedWS)
+        {
+          this->declareProperty(new WorkspaceProperty<>("AbsUnitsWorkspace",
+              absUnitsName, Direction::Output));
+          this->setProperty("AbsUnitsWorkspace", absUnitsWS);
+        }
       }
 
       this->setProperty("OutputWorkspace", outputWS);

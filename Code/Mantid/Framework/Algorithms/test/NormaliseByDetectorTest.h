@@ -8,67 +8,26 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string.hpp"
-#include <iostream>
-#include <iomanip>
-#include <fstream>
+
 
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidAlgorithms/NormaliseByDetector.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 #include "MantidKernel/ConfigService.h"
-#include <Poco/Path.h>
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
-
-  /// File object type. Provides exception save file creation/destruction.
-  class FileObject
-  {
-  public:
-
-    /// Create a simple input file.
-    FileObject(const std::string& fileContents, const std::string& filename) 
-    {
-      Poco::Path path(Mantid::Kernel::ConfigService::Instance().getTempDir().c_str());
-      path.append(filename);
-      m_filename = path.toString();
-      m_file.open (m_filename.c_str(), std::ios_base::out);
-      if(!m_file.is_open())
-      {
-        throw std::runtime_error("Cannot open " + m_filename);
-      }
-      m_file << fileContents;
-      m_file.close();
-    }
-
-    std::string getFileName() const
-    {
-      return m_filename;
-    }
-
-    /// Free up resources.
-    ~FileObject()
-    {
-      m_file.close();
-      if( remove( m_filename.c_str() ) != 0 )
-        throw std::runtime_error("cannot remove " + m_filename);
-    }
-
-  private:
-    std::string m_filename;
-    std::ofstream m_file;
-    // Following methods keeps us from being able to put objects of this type on the heap.
-    void *operator new(size_t);
-    void *operator new[](size_t);
-  };
+using ScopedFileHelper::ScopedFile;
 
   /**
   Helper function. Runs LoadParameterAlg, to get an instrument parameter definition from a file onto a workspace.
   */
-  void apply_instrument_parameter_file_to_workspace(MatrixWorkspace_sptr ws, const FileObject& file)
+  void apply_instrument_parameter_file_to_workspace(MatrixWorkspace_sptr ws, const ScopedFile& file)
   {
     // Load the Instrument Parameter file over the existing test workspace + instrument.
     using DataHandling::LoadParameterFile;
@@ -154,7 +113,7 @@ private:
         </parameter-file>\n") % instrumentName % result_unit);
 
     // Create a temporary Instrument Parameter file.
-    FileObject file(parameterFileContents, instrumentName + "_Parameters.xml");
+    ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
     
     // Apply parameter file to workspace.
     apply_instrument_parameter_file_to_workspace(ws, file);
@@ -185,7 +144,7 @@ private:
         </parameter-file>\n") % instrumentName);
 
     // Create a temporary Instrument Parameter file.
-    FileObject file(parameterFileContents, instrumentName + "_Parameters.xml");
+    ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
     
     // Apply parameter file to workspace.
     apply_instrument_parameter_file_to_workspace(ws, file);
@@ -230,7 +189,7 @@ private:
     "</parameter-file>\n";
 
     // Create a temporary Instrument Parameter file.
-    FileObject file(parameterFileContents, instrumentName + "_Parameters.xml");
+    ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
     
     // Apply parameter file to workspace.
     apply_instrument_parameter_file_to_workspace(ws, file);
@@ -274,7 +233,7 @@ private:
     "</parameter-file>\n";
 
     // Create a temporary Instrument Parameter file.
-    FileObject file(parameterFileContents, instrumentName + "_Parameters.xml");
+    ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
     
     // Apply parameter file to workspace.
     apply_instrument_parameter_file_to_workspace(ws, file);
@@ -610,7 +569,7 @@ public:
         </parameter-file>\n") % instrumentName);
 
       // Create a temporary Instrument Parameter file.
-      FileObject file(parameterFileContents, instrumentName + "_Parameters.xml");
+      ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
 
       // Apply parameter file to workspace.
       apply_instrument_parameter_file_to_workspace(ws, file);

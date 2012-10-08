@@ -12,7 +12,7 @@ namespace Mantid
      * Default constructor only callable by the factory
      */
     ForegroundModel::ForegroundModel()
-      : API::ParamFunctionAttributeHolder(), m_fittingFunction(NULL), m_parOffset(0)
+      : API::ParamFunction(), m_fittingFunction(NULL), m_parOffset(0)
     {
     }
 
@@ -21,7 +21,7 @@ namespace Mantid
      * @param A reference to the fitting function
      */
     ForegroundModel::ForegroundModel(const API::IFunction & fittingFunction)
-      : API::ParamFunctionAttributeHolder(), m_fittingFunction(NULL), m_parOffset(0)
+      : API::ParamFunction(), m_fittingFunction(NULL), m_parOffset(0)
     {
       setFunctionUnderMinimization(fittingFunction);
     }
