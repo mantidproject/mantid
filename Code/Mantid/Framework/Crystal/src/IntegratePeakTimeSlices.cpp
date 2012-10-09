@@ -236,6 +236,8 @@ namespace Mantid
       this->EdgeY = handler.EdgeY;
       this->CalcVariance = handler.CalcVariance;
 
+      this->lastISAWIntensity=handler.lastISAWIntensity;
+      this->lastISAWVariance = handler.lastISAWIntensity;
       this->back_calc = handler.back_calc;
       this->Intensity_calc = handler.Intensity_calc;
       this->row_calc = handler.row_calc;
@@ -280,6 +282,7 @@ namespace Mantid
       double Variance = StatBase[IVariance];
       double TotBoundaryIntensities= StatBase[ITotBoundary ];
       double TotBoundaryVariances = StatBase[IVarBoundary];
+
       double nBoundaryCells=   StatBase[INBoundary];
       double back = TotBoundaryIntensities/nBoundaryCells;
       double backVar= TotBoundaryVariances/nBoundaryCells/nBoundaryCells;
@@ -299,6 +302,7 @@ namespace Mantid
       str<< max<double>(0.0, back_calc-(1+2*relError)*sqrt(backVar))<<"<Background<"<<(back+(1+2*relError)*sqrt(backVar))
          <<","<< max<double>(0.0, Intensity_calc-(1+2*relError)*sqrt(IntensVar))<<
          "<Intensity<"<<TotIntensity-ncells*back+(1+2*relError)*sqrt(IntensVar);
+
       double min =max<double>(0.0, back_calc-(1+2*relError)*sqrt(backVar));
       double maxx =back+(1+2*relError)*sqrt(backVar);
       Bounds.push_back( pair<double,double>(min,maxx ));
@@ -803,6 +807,9 @@ namespace Mantid
               lastRow = Row0;
               lastCol = Col0;
               lastAttributeList = origAttributeList;
+              if( TabWS->rowCount() >0 )
+                LastTableRow = 0;
+
             }
             else if( Chan+dir*chan <0 || Chan+dir*chan >= (int)X.size())
                done = true;
@@ -827,9 +834,7 @@ namespace Mantid
               MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
                   std::string("Workspace2D"), 3, NN,NN);//neighbors.size(), neighbors.size());
 
-             // sprintf(logInfo, string(
-             //                 " A:chan= %d  time=%7.2f  Radius=%7.3f  row= %5.2f  col=%5.2f \n").c_str(),
-              //                   xchan, time, Radius, lastRow, lastCol);//std::string(logInfo)
+
               g_log.debug()<<" A:chan="<< xchan<<"  time="<<time<<"   Radius="<<Radius
                   <<"row= "<<lastRow<<"  col="<<lastCol<<std::endl;
 
@@ -951,10 +956,10 @@ namespace Mantid
                       LastTableRow =UpdateOutputWS(TabWS, dir, (chanMin+chanMax)/2.0, params, errs,
                                       names, chisqOverDOF,  AttributeValues->time, spec_idList);
 
-                      if( lastAttributeList->CellHeight > 0 && lastAttributeList->StatBase.size()>=NAttributes)
+                      if( lastAttributeList->lastISAWVariance > 0 )
                       {
-                        TotIntensity -=lastAttributeList->StatBaseVals(IIntensities);
-                        TotVariance -= lastAttributeList->StatBaseVals(IVariance);
+                        TotIntensity -=lastAttributeList->lastISAWIntensity;
+                        TotVariance -= lastAttributeList->lastISAWVariance;
                       }
 
                       double TotSliceIntensity = AttributeValues->StatBaseVals(IIntensities);
@@ -1716,7 +1721,7 @@ namespace Mantid
 
       double x = params[IIntensity] / (AttributeValues->StatBaseVals(IIntensities) - params[Ibk] * ncells);
 
-      if ((x < .8 || x > 1.25)&& !EdgePeak)// The fitted intensity should be close to tot intensity - background
+      if ((x < .7 || x > 1.45)&& !EdgePeak)// The fitted intensity should be close to tot intensity - background
       {
         g_log.debug()<< "   Bad Slice. Fitted Intensity & Observed Intensity(-back) too different. ratio="
                                                <<x<<std::endl;
@@ -1761,14 +1766,13 @@ namespace Mantid
 
       GoodNums = true;
 
-     // std::cout<<"xxxx"<<params[Ibk]<<","<<(params[Ibk] < -.001)<<","<<(params[IIntensity]<0)<<std::endl;
+
       if (params[Ibk] < -.001)
         GoodNums = false;
 
       if (params[IIntensity] < 0)
         GoodNums = false;
 
-      //double sqrChi = SQRT(chisqOverDOF);
 
       double IsawIntensity= AttributeValues->CalcISAWIntensity( params.data());
       double IsawVariance = AttributeValues->CalcISAWIntensityVariance(params.data(), errs.data(),chisqOverDOF);
@@ -1895,11 +1899,15 @@ namespace Mantid
 
       TabWS->getRef<double> (std::string("TotIntensity"), TableRow) = AttributeValues->StatBaseVals(IIntensities);
       TabWS->getRef<double> (std::string("BackgroundError"), TableRow) = errs[Ibk] * SQRT(chisq);
-      TabWS->getRef<double> (std::string("ISAWIntensity"), TableRow) = AttributeValues->StatBaseVals(IIntensities)
-                                                                             - params[Ibk] * ncells;
+      TabWS->getRef<double> (std::string("ISAWIntensity"), TableRow) = AttributeValues->CalcISAWIntensity(params.data());
+          //AttributeValues->StatBaseVals(IIntensities)
+          //                                                                   - params[Ibk] * ncells;
 
-      TabWS->getRef<double> (std::string("ISAWIntensityError"), TableRow) = CalculateIsawIntegrateError(
-          params[Ibk], errs[Ibk], chisq, AttributeValues->StatBaseVals(IVariance), ncells);
+      TabWS->getRef<double> (std::string("ISAWIntensityError"), TableRow) = sqrt(AttributeValues->
+          CalcISAWIntensityVariance(params.data(),errs.data(), Chisq));
+
+          //CalculateIsawIntegrateError(
+          //params[Ibk], errs[Ibk], chisq, AttributeValues->StatBaseVals(IVariance), ncells);
       
       TabWS->getRef<double> (std::string("Time"), TableRow) = time;
 
@@ -1932,28 +1940,31 @@ namespace Mantid
                                                          double const                   chisqdivDOF,
                                                          const int ncells)
     {
-      int Ibk = find("Background", names);
+      UNUSED_ARG( TotSliceIntensity);
+      UNUSED_ARG( TotSliceVariance );
+      UNUSED_ARG( ncells);
+     // int Ibk = find("Background", names);
       double err =0;
-     // double intensty=0; //for debugging only
+
       if( !EdgePeak  )
       {
-        err = CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceVariance, ncells);
-      //  intensty =TotSliceIntensity - params[IBACK] * ncells;
-        TotIntensity += TotSliceIntensity - params[IBACK] * ncells;
+        err = AttributeValues->CalcISAWIntensityVariance(params.data(),errs.data(), chisqdivDOF);
+            //CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceVariance, ncells);
 
-        TotVariance += err * err;
+        TotIntensity += AttributeValues->CalcISAWIntensity( params.data());
+            //TotSliceIntensity - params[IBACK] * ncells;
+
+        TotVariance += err ;
 
       }else
       {
        int IInt = find("Intensity", names);
-     //  intensty = params[IInt];
+
        TotIntensity += params[IInt];
        err = errs[IInt];
        TotVariance += err * err;
 
       }
-     // std::cout<<EdgePeak<<"("<<intensty<<","<<AttributeValues->CalcISAWIntensity(params.data())<<")("
-     //       <<err*err<<","<< AttributeValues->CalcISAWIntensityVariance(params.data(),errs.data(), chisqdivDOF)<<")"<<std::endl;
 
     }
 
@@ -1972,24 +1983,31 @@ namespace Mantid
         return false;
     }
 
-   bool DataModeHandler::IsEnoughData( const double *ParameterValues, Kernel::Logger& g_log )
+   bool DataModeHandler::IsEnoughData( const double *ParameterValues, Kernel::Logger&  )
     {
 
 
       // Check if flat
-    /*  double Varx,Vary, Cov;  No Good. Eliminated too many peaks
+    double Varx,Vary, Cov;
 
       std::vector<double>PP(ParameterValues, ParameterValues+IVXY);
-      CalcVariancesFromData( ParameterValues[IBACK],ParameterValues[IXMEAN],ParameterValues[IYMEAN],
-          Varx,Cov,Vary, PP);
+      double ncells = (int)StatBase[IIntensities];
+      if( ncells <=0)
+        return false;
+      double meanx = StatBase[ISSIx]/ncells;
+      double meany= StatBase[ISSIy]/ncells;
 
-      if( Varx <4 || Vary < 4)//<--- This one especially
+      CalcVariancesFromData( 0, meanx,meany, Varx,Cov,Vary, PP);
+
+      if( Varx <.6 || Vary <.6)  //All data essentially the same.
          return false;
 
-      if( Cov*Cov < .75*Varx*Vary)//All data on a line
+      if( Cov*Cov > .90*Varx*Vary)//All data on a obtuse line
         return false;
-     */
-      double VIx0_num = StatBase[ISSIxx] - 2 * ParameterValues[IXMEAN] * StatBase[ISSIx]
+
+
+
+    /*  double VIx0_num = StatBase[ISSIxx] - 2 * ParameterValues[IXMEAN] * StatBase[ISSIx]
           + ParameterValues[IXMEAN] * ParameterValues[IXMEAN] * StatBase[IIntensities];
 
       double VIy0_num = StatBase[ISSIyy] - 2 * ParameterValues[IYMEAN] * StatBase[ISSIy]
@@ -2032,12 +2050,12 @@ namespace Mantid
         g_log.debug()<<"   Not Enough Data, Peak Heigh "<<Z <<" is too low"<<std::endl;
         return false;
       }
-
+    */
       return true;
 
     }
 
-   double DataModeHandler::CalcISAWIntensity(const double* params)const
+   double DataModeHandler::CalcISAWIntensity(const double* params)
    {
 
      double ExperimentalIntensity  = StatBase[IIntensities]-
@@ -2049,11 +2067,12 @@ namespace Mantid
      double alpha =(float)( 0+.5*( r-1 ) );
      alpha = std::min<double>( 1.0f , alpha );
 
-     return ExperimentalIntensity*r*( 1-alpha )+ alpha * FitIntensity;
+     lastISAWIntensity = ExperimentalIntensity*r*( 1-alpha )+ alpha * FitIntensity;
+     return lastISAWIntensity;
 
    }
 
-   double DataModeHandler::CalcISAWIntensityVariance( const double* params,const double* errs, double chiSqOvDOF)const
+   double DataModeHandler::CalcISAWIntensityVariance( const double* params,const double* errs, double chiSqOvDOF)
    {
 
      int ncells = (int)StatBase[ISS1];
@@ -2073,7 +2092,8 @@ namespace Mantid
      double alpha =(float)( 0+.5*( r - 1 ));
       alpha = std::min<double>( 1.0f , alpha );
 
-      return ExperimVar*r*r*( 1 - alpha ) + alpha * FitVar;
+     lastISAWVariance =  ExperimVar*r*r*( 1 - alpha ) + alpha * FitVar;
+     return lastISAWVariance;
    }
 
    double DataModeHandler::CalcSampleIntensityMultiplier( const double* params)const

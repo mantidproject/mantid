@@ -139,7 +139,7 @@ namespace Crystal
                            double col, double &Varx, double &Vary, double &Varxy,
                            std::vector<double>&ParameterValues);
 
-     bool IsEnoughData(const double *ParameterValues, Kernel::Logger& g_log);
+     bool IsEnoughData(const double *ParameterValues, Kernel::Logger& );
 
      double getNewRCRadius();
 
@@ -186,14 +186,16 @@ namespace Crystal
 
      bool CalcVariances( );
 
+
+
      double StatBaseVals( int index)
      {
        return StatBase[index];
      }
 
-     double CalcISAWIntensity( const double* params) const;
+     double CalcISAWIntensity( const double* params) ;
 
-     double CalcISAWIntensityVariance(  const double* params, const double* errs, double chiSqOvDOF) const;
+     double CalcISAWIntensityVariance(  const double* params, const double* errs, double chiSqOvDOF) ;
 
      double CalcSampleIntensityMultiplier( const double* params) const;
 
@@ -214,6 +216,7 @@ namespace Crystal
      std::vector<double> StatBase;
 
      double EdgeX,EdgeY;
+     double lastISAWIntensity, lastISAWVariance;
      bool CalcVariance;
      bool case4;//if true result of successful merge of dir =1 chan=0 and chan=1
      double back_calc,
@@ -238,7 +241,8 @@ namespace Crystal
         CalcVariance = true;
         CellWidth = CellHeight = 0;
         currentRadius = -1;
-
+        lastISAWIntensity = -1;
+        lastISAWVariance = -1;
         currentPosition = Kernel::V3D();
         HalfWidthAtHalfHeightRadius = -1;
         case4 = false;

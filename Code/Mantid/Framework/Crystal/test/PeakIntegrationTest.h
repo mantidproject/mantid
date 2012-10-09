@@ -202,12 +202,12 @@ public:
 
     double intensity =peak.getIntensity();
     double sigIntensity =peak.getSigmaIntensity();
-   // std::cout<<"Peak Intens,sig,slice="<<intensity;
-   // std::cout<<","<<sigIntensity<<","<<slices<<std::endl;
-    double intensity0=3141;
+    //std::cout<<"Peak Intens,sig,slice="<<intensity;
+    //std::cout<<","<<sigIntensity<<","<<IC<<std::endl;
+    double intensity0=2509;
     TS_ASSERT_DELTA(intensity,intensity0, 400.0);
   
-    double sig0=115;
+    double sig0=100;
 
 
     TS_ASSERT_DELTA( sigIntensity,sig0, 25.0);
