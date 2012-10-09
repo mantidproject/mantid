@@ -22,6 +22,8 @@ void export_Instrument()
     .def("getDetector", (boost::shared_ptr<IDetector> (Instrument::*)(const detid_t&)const)&Instrument::getDetector, 
          "Returns the dector with the given ID")
     .def("getReferenceFrame", (boost::shared_ptr<const ReferenceFrame> (Instrument::*)())&Instrument::getReferenceFrame )
+    .def("getValidFromDate", &Instrument::getValidFromDate, "Return the valid from date of the instrument")
+    .def("getValidToDate", &Instrument::getValidToDate, "Return the valid to date of the instrument")
       ;
     ;
     

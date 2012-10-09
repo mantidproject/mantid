@@ -178,6 +178,8 @@ namespace Mantid
       .def("getComponentByName", (boost::shared_ptr<Geometry::IComponent> (Geometry::Instrument::*)(const std::string&))&Geometry::Instrument::getComponentByName)
       .def("getDetector", (boost::shared_ptr<Geometry::IDetector> (Geometry::Instrument::*)(const detid_t&)const)&Geometry::Instrument::getDetector)
       .def("getReferenceFrame", (boost::shared_ptr<const Geometry::ReferenceFrame> (Geometry::Instrument::*)())&Geometry::Instrument::getReferenceFrame )
+      .def("getValidFromDate", &Geometry::Instrument::getValidFromDate, "Return the valid from date of the instrument")
+      .def("getValidToDate", &Geometry::Instrument::getValidToDate, "Return the valid to date of the instrument")
       ;
   }
 
