@@ -1679,6 +1679,28 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string& path)
 }
 
 /*
+Extracts the string from a poco pipe and returns the numerical part.
+@param pipe : input pipe.
+@return the numerical part of the version string contained inside the pipe.
+*/
+const std::string extractVersionNumberFromPipe(const Poco::Pipe& pipe)
+{
+  std::string versionString = "undetermined";
+  Poco::PipeInputStream pipeStream(pipe);
+  std::stringstream stringStream;
+  Poco::StreamCopier::copyStream(pipeStream, stringStream);
+  const std::string givenVersion = stringStream.str();
+  boost::smatch  match;
+  boost::regex expression("(\\d+)\\.(\\d+)$"); // Gets the version number part.
+  double givenVersionNumber;
+  if(boost::regex_search(givenVersion, match, expression))
+  {
+    versionString = match[0];
+  }
+  return versionString;
+}
+
+/*
 Checks to see whether paraview usage is explicitly ignored in the property file then, 
 quick check to determine if paraview is installed. We make the assumption 
 that if the executable paraview binary is on the path that the paraview libraries 
@@ -1713,23 +1735,12 @@ bool ConfigServiceImpl::quickParaViewCheck() const
     Poco::Pipe outPipe, errorPipe;
     Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
     const int rc = ph.wait();
+    // Only if the paraview query returned successfully.
     if(rc == 1)
     {
-      Poco::PipeInputStream stdErr(errorPipe);
-      std::stringstream errStream;
-      Poco::StreamCopier::copyStream(stdErr, errStream);
-      std::string givenVersion = errStream.str();
-      boost::smatch  match;
-      
-      boost::regex expression("(\\d+)\\.(\\d+)");
-      double givenVersionNumber;
-      if(boost::regex_search(givenVersion, match, expression))
-      {
-        Strings::convert(match[0], givenVersionNumber);
-      }
-
-      double targetVersionNumber;
-      Strings::convert(ParaViewVersion::targetVersion(), targetVersionNumber);
+      // Check the actual version numbers against what we expect they should be.
+      const std::string givenVersionNumber = extractVersionNumberFromPipe(errorPipe);
+      const std::string targetVersionNumber = ParaViewVersion::targetVersion();
       if (givenVersionNumber == targetVersionNumber)
       {
         isAvailable = true;
