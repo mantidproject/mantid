@@ -148,7 +148,8 @@ namespace API
    * Determine what kind of input data we have and load it
    * @param inputData :: File path or workspace name
    */
-  Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData)
+  Workspace_sptr DataProcessorAlgorithm::load(const std::string &inputData,
+      const bool loadQuiet)
   {
     Workspace_sptr inputWS;
 
@@ -175,7 +176,10 @@ namespace API
 
         IAlgorithm_sptr loadAlg = createSubAlgorithm(m_loadAlg);
         loadAlg->setProperty(m_loadAlgFileProp, foundFile);
-        loadAlg->setAlwaysStoreInADS(true);
+        if (!loadQuiet)
+        {
+          loadAlg->setAlwaysStoreInADS(true);
+        }
 
         // Set up MPI if available
 #ifdef MPI_BUILD
@@ -196,7 +200,14 @@ namespace API
 #endif
         loadAlg->execute();
 
-        inputWS = AnalysisDataService::Instance().retrieve(outputWSName);
+        if (loadQuiet)
+        {
+          inputWS = loadAlg->getProperty("OutputWorkspace");
+        }
+        else
+        {
+          inputWS = AnalysisDataService::Instance().retrieve(outputWSName);
+        }
       }
       else
         throw std::runtime_error("DataProcessorAlgorithm::load could process any data");

@@ -461,7 +461,7 @@ namespace Mantid
           this->reductionManager->declareProperty(new PropertyWithValue<std::string>(detCalFileProperty, detCalFilename));
         }
 
-        inputWS = this->load(inputData);
+        inputWS = this->load(inputData, true);
       }
       else
       {

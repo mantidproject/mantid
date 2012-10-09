@@ -51,7 +51,7 @@ protected:
   void setAccumAlg(const std::string & alg);
   ITableWorkspace_sptr determineChunk();
   void loadChunk();
-  Workspace_sptr load(const std::string &inputData);
+  Workspace_sptr load(const std::string &inputData, const bool loadQuiet = false);
   std::vector<std::string> splitInput(const std::string & input);
   void forwardProperties();
   boost::shared_ptr<Kernel::PropertyManager> getProcessProperties(const std::string &propertyManager);
