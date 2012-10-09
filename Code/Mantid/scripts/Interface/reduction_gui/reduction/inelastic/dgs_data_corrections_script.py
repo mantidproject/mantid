@@ -71,7 +71,7 @@ class DataCorrectionsScript(BaseScriptElement):
                         script += "DetVanIntRangeLow=%s,\n" % self.det_van_int_range_low
                     script += "DetVanIntRangeHigh=%s,\n" % self.det_van_int_range_high
                 if self.det_van_int_range_units != DataCorrectionsScript.det_van_int_range_units:
-                    script += "DetVanIntRangeUnits=%s,\n" % self.det_van_int_range_units
+                    script += "DetVanIntRangeUnits=\"%s\",\n" % self.det_van_int_range_units
             if self.save_proc_det_van:
                 script += "SaveProcessedDetVan=%s,\n" % self.save_proc_det_van
             if self.use_proc_det_van:
