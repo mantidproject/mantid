@@ -14,9 +14,13 @@ from mantidplotpy.proxies import threadsafe_call, new_proxy
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
+print _qti
+
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python
 from _qti import PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker
+
+print 'Import OK'
 
 #-------------------------- Mantid Python access functions----------------
 # Grab a few Mantid things so that we can recognise workspace variables
@@ -206,7 +210,14 @@ def plotSpectrum(source, indices, error_bars = False, type = -1):
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
         return graph
-    
+
+def fitBrowser():
+    """
+    Access the fit browser. 
+    """
+    import mantidqtpython
+    return proxies.FitBrowserProxy(_qti.app.mantidUI.fitFunctionBrowser())
+
 #-----------------------------------------------------------------------------
 def plotBin(source, indices, error_bars = False, type = 0):
     """Create a 1D Plot of bin count vs spectrum in a workspace.

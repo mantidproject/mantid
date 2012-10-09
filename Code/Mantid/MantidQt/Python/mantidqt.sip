@@ -1151,12 +1151,33 @@ public:
 
 
 
+namespace MantidQt
+{
+namespace MantidWidgets
+{
 
+//*WIKI* == Classes ==
+//*WIKI* Here follows a list of the classes exposed to python and the methods you can execute on them.
 
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
 
+class FitPropertyBrowser : QDockWidget
+{
+%TypeHeaderCode
+#include "MantidQtMantidWidgets/FitPropertyBrowser.h"
+%End
 
+public:
+	void fit();
+	const QStringList& registeredFunctions()const;
+	void setStartX(double);
+	void setEndX(double);
+	double centre()const;
+	void setCentre(double value);
+};
 
-
-
-
+}; // end namespace MantidWidgets
+}; // end namespace MantidQt
 

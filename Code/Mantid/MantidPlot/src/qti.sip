@@ -32,6 +32,7 @@
 %Module _qti
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
+/* %Import ../../MantidQt/Python/mantidqt.sip */
 
 class MdiSubWindow: QMdiSubWindow /PyName=MDIWindow/
 {
@@ -1289,6 +1290,14 @@ private:
 InstrumentWindow(const InstrumentWindow &);
 };
 
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+  class FitPropertyBrowser;
+};
+};
+
 class MantidUI: QObject
 {
 %TypeHeaderCode
@@ -1324,6 +1333,7 @@ public:
   void setIsRunning(bool running);
   bool createPropertyInputDialog(const QString &, const QString &, const QString&, const QStringList&, const QStringList&);
 
+   MantidQt::MantidWidgets::FitPropertyBrowser* fitFunctionBrowser();
 private:
   MantidUI(const MantidUI &);
 };

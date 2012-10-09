@@ -670,3 +670,10 @@ class LineViewerProxy(QtProxyObject):
                 "getFixedBinWidthMode", "getNumBins", "getBinWidth", "setPlotAxis", "getPlotAxis"]
     
     
+#-----------------------------------------------------------------------------
+class FitBrowserProxy(QtProxyObject):
+    """
+        Proxy for the FitPropertyBrowser object. 
+    """
+    def __init__(self, toproxy):
+        QtProxyObject.__init__(self,toproxy)
