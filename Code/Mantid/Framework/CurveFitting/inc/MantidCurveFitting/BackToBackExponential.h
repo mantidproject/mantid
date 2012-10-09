@@ -51,7 +51,7 @@ namespace Mantid
     class DLLExport BackToBackExponential : public API::IPeakFunction
     {
     public:
-      BackToBackExponential() : m_cutOff(10.0) {};
+      BackToBackExponential() : m_cutOff(100.0) {};
       /// Destructor
       virtual ~BackToBackExponential() {};
 

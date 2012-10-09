@@ -28,13 +28,110 @@ DECLARE_FUNCTION(DiffSphere);
 ElasticDiffSphere::ElasticDiffSphere(){
   //declareParameter("Height", 1.0); //parameter "Height" already declared in constructor of base class DeltaFunction
   declareParameter("Radius", 1.0, "Sphere radius");
-  declareParameter("Q",1.0, "Momentum transfer");
+
+  // Ensure positive values for Height and Radius
+  BoundaryConstraint* HeightConstraint = new BoundaryConstraint(this,"Height",0,true);
+  addConstraint(HeightConstraint);
+
+  BoundaryConstraint* RadiusConstraint = new BoundaryConstraint(this,"Radius",0,true);
+  addConstraint(RadiusConstraint);
+
 }
 
 double ElasticDiffSphere::HeightPrefactor() const{
   const double& R = getParameter("Radius");
-  const double& Q = getParameter("Q");
+  const double& Q = m_Q;
   return pow(3*boost::math::sph_bessel(1,Q*R)/(Q*R),2);
+}
+
+/**
+ * @return A list of Attribute names, containing attribute name "Q"
+ */
+std::vector<std::string> ElasticDiffSphere::getAttributeNames()const
+{
+  std::vector<std::string> res;
+  res.push_back("Q");
+  return res;
+}
+
+/**
+ * @param attName :: Attribute name. If it is not "Q" exception is thrown.
+ * @return a value of attribute attName
+ */
+API::IFunction::Attribute ElasticDiffSphere::getAttribute(const std::string& attName)const
+{
+  if (attName == "Q")
+  {
+    return Attribute(m_Q);
+  }
+
+  throw std::invalid_argument("ElasticDiffSphere: Unknown attribute " + attName);
+}
+
+/**
+ * @param attName :: The attribute name. If it is not "n" exception is thrown.
+ * @param att :: An int attribute containing the new value. The value cannot be negative.
+ * (identical to Polynomial)
+ */
+void ElasticDiffSphere::setAttribute(const std::string& attName,const API::IFunction::Attribute& att)
+{
+  if (attName == "Q")
+  {// set the polynomial order
+    m_Q = att.asDouble();
+    if (m_Q <= 0)
+      throw std::invalid_argument("ElasticDiffSphere: Q must be positive.");
+  }
+}
+
+/// Check if attribute attName exists
+bool ElasticDiffSphere::hasAttribute(const std::string& attName)const
+{
+  return attName == "Q";
+}
+
+/**
+ * @return A list of Attribute names, containing attribute name "Q"
+ */
+std::vector<std::string> InelasticDiffSphere::getAttributeNames()const
+{
+  std::vector<std::string> res;
+  res.push_back("Q");
+  return res;
+}
+
+/**
+ * @param attName :: Attribute name. If it is not "Q" exception is thrown.
+ * @return a value of attribute attName
+ */
+API::IFunction::Attribute InelasticDiffSphere::getAttribute(const std::string& attName)const
+{
+  if (attName == "Q")
+  {
+    return Attribute(m_Q);
+  }
+
+  throw std::invalid_argument("InelasticDiffSphere: Unknown attribute " + attName);
+}
+
+/**
+ * @param attName :: The attribute name. If it is not "n" exception is thrown.
+ * @param att :: An int attribute containing the new value. The value cannot be negative.
+ * (identical to Polynomial)
+ */
+void InelasticDiffSphere::setAttribute(const std::string& attName,const API::IFunction::Attribute& att)
+{
+  if (attName == "Q")
+  {// set the polynomial order
+    m_Q = att.asDouble();
+    if (m_Q <= 0)
+      throw std::invalid_argument("InelasticDiffSphere: Q must be positive.");
+  }
+}
+
+/// Check if attribute attName exists
+bool InelasticDiffSphere::hasAttribute(const std::string& attName)const
+{
+  return attName == "Q";
 }
 
 // initialize class attribute xnl with a list of coefficients in string format
@@ -104,11 +201,10 @@ void InelasticDiffSphere::initLinJlist(){
   }
 }
 
-InelasticDiffSphere::InelasticDiffSphere() : lmax(24), divZone(0.1) {
+InelasticDiffSphere::InelasticDiffSphere() : lmax(24), divZone(0.1), m_Q(1.0) {
   declareParameter("Intensity",1.0, "scaling factor");
   declareParameter("Radius", 1.0, "Sphere radius");
   declareParameter("Diffusion", 1.0, "Diffusion coefficient, in units of");
-  declareParameter("Q",1.0, "Momentum transfer");
 
   // Ensure positive values for Intensity, Radius, and Diffusion coefficient
   BoundaryConstraint* IntensityConstraint = new BoundaryConstraint(this,"Intensity",0,true);
@@ -171,7 +267,7 @@ void InelasticDiffSphere::function1D(double* out, const double* xValues, const s
   const double& I = getParameter("Intensity");
   const double& R = getParameter("Radius");
   const double& D = getParameter("Diffusion");
-  const double& Q = getParameter("Q");
+  const double& Q = m_Q;
 
   std::vector<double> YJ;
   YJ = LorentzianCoefficients( Q*R );
@@ -202,18 +298,18 @@ DiffSphere::DiffSphere(){
   addFunction( m_elastic );
   m_inelastic = boost::dynamic_pointer_cast<InelasticDiffSphere>(API::FunctionFactory::Instance().createFunction("InelasticDiffSphere"));
   addFunction( m_inelastic );
-  //Set the ties between Elastic and Inelastic parameters
-  API::ParameterTie* tie_H=new API::ParameterTie(this,"f0.Height");
-  tie_H->set("f0.Height=f1.Intensity");
-  addTie(tie_H);
-  API::ParameterTie* tie_R=new API::ParameterTie(this,"f0.Radius");
-  tie_R->set("f0.Radius=f1.Radius");
-  addTie(tie_R);
-  API::ParameterTie* tie_Q=new API::ParameterTie(this,"f0.Q");
-  tie_Q->set("f0.Q=f1.Q");
-  addTie(tie_Q);
 
-  applyTies();
+  //Set the aliases
+  this->setAlias("f0.Height","elasticHeight");
+  this->setAlias("f0.Radius","elasticRadius");
+  this->setAlias("f1.Intensity","inelasticIntensity");
+  this->setAlias("f1.Radius","inelasticRadius");
+  this->setAlias("f1.Diffusion","inelasticDiffusion");
+
+  //Set the ties between Elastic and Inelastic parameters
+  //this->addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius,f0.Q=f1.Q");
+  this->addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius");
+  this->applyTies();
 }
 
 } // namespace CurveFitting

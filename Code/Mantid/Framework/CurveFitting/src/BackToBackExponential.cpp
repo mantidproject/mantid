@@ -37,7 +37,7 @@ void BackToBackExponential::function1D(double* out, const double* xValues, const
     double s2 = s*s;
     for (size_t i = 0; i < nData; i++) {
       double diff=xValues[i]-x0;
-      if ( fabs(diff) < 20*s )
+      if ( fabs(diff) < 100*s )
       {
         double val = 0.0;
         double arg1 = a/2*(a*s2+2*diff);

@@ -167,7 +167,7 @@ set ( TEST_FILES
 	ConvolutionTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
-	DiffSphereTest.h
+	#DiffSphereTest.h
 	EndErfcTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
