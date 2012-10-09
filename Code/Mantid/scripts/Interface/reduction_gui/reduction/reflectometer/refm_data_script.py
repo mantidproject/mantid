@@ -62,8 +62,8 @@ class DataSets(BaseScriptElement):
         if for_automated_reduction:
             return self._automated_reduction()
         
-        script = "a = RefReduction(DataRun=%s,\n" % ','.join([str(i) for i in self.data_files])
-        script += "              NormalizationRun=%d,\n" % self.norm_file
+        script = "a = RefReduction(DataRun='%s',\n" % ','.join([str(i) for i in self.data_files])
+        script += "              NormalizationRun='%s',\n" % str(self.norm_file)
         script += "              Instrument='REF_M',\n"
         script += "              PolarizedData=True,\n"
         
@@ -104,7 +104,8 @@ class DataSets(BaseScriptElement):
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
-        script += "              OutputWorkspacePrefix='reflectivity_%s')\n" % str(self.data_files[0])
+        basename = os.path.basename(str(self.data_files[0]))
+        script += "              OutputWorkspacePrefix='reflectivity_%s')\n" % basename
         script += "\n"
         
         script += "output_msg = a.getPropertyValue('OutputMessage')\n"
@@ -113,10 +114,10 @@ class DataSets(BaseScriptElement):
         script += "reducer_log.log_text += output_msg\n\n"
 
         # Save the reduced data
-        script += "ws_list = ['reflectivity_%s-Off_Off',\n" % str(self.data_files[0])
-        script += "           'reflectivity_%s-On_Off',\n" % str(self.data_files[0])
-        script += "           'reflectivity_%s-Off_On',\n" % str(self.data_files[0])
-        script += "           'reflectivity_%s-On_On']\n" % str(self.data_files[0])
+        script += "ws_list = ['reflectivity_%s-Off_Off',\n" % basename
+        script += "           'reflectivity_%s-On_Off',\n" % basename
+        script += "           'reflectivity_%s-Off_On',\n" % basename
+        script += "           'reflectivity_%s-On_On']\n" % basename
         
         script += "outdir = '%s'\n" % self.output_dir
         script += "if not os.path.isdir(outdir):\n"
@@ -141,8 +142,8 @@ class DataSets(BaseScriptElement):
         script += "peak_min_norm = estimates.getProperty('PeakMin').value\n"
         script += "peak_max_norm = estimates.getProperty('PeakMax').value\n\n"
         
-        script += "RefReduction(DataRun=%s,\n" % ','.join([str(i) for i in self.data_files])
-        script += "              NormalizationRun=%d,\n" % self.norm_file
+        script += "RefReduction(DataRun='%s',\n" % ','.join([str(i) for i in self.data_files])
+        script += "              NormalizationRun='%s',\n" % str(self.norm_file)
         script += "              Instrument='REF_M',\n"
         script += "              PolarizedData=True,\n"
         script += "              SignalPeakPixelRange=[peak_min, peak_max],\n"
@@ -161,7 +162,8 @@ class DataSets(BaseScriptElement):
             
         # The output should be slightly different if we are generating
         # a script for the automated reduction
-        script += "              OutputWorkspacePrefix='reflectivity_'+%s)\n" % str(self.data_files[0])
+        basename = os.path.basename(str(self.data_files[0]))        
+        script += "              OutputWorkspacePrefix='reflectivity_'+%s)\n" % basename
 
         return script
 
@@ -281,7 +283,7 @@ class DataSets(BaseScriptElement):
         self.TOFstep = BaseScriptElement.getFloatElement(instrument_dom, "tof_step",
                                                          default = DataSets.TOFstep)
         
-        self.data_files = BaseScriptElement.getIntList(instrument_dom, "data_sets")
+        self.data_files = BaseScriptElement.getStringList(instrument_dom, "data_sets")
             
         #with or without norm 
         self.NormFlag = BaseScriptElement.getBoolElement(instrument_dom, "norm_flag",
@@ -300,7 +302,7 @@ class DataSets(BaseScriptElement):
         self.NormBackgroundRoi = [BaseScriptElement.getIntElement(instrument_dom, "norm_from_back_pixels"),
                                   BaseScriptElement.getIntElement(instrument_dom, "norm_to_back_pixels")]
         
-        self.norm_file = BaseScriptElement.getIntElement(instrument_dom, "norm_dataset")
+        self.norm_file = BaseScriptElement.getStringElement(instrument_dom, "norm_dataset")
     
         # Q cut
         self.q_min = BaseScriptElement.getFloatElement(instrument_dom, "q_min", default=DataSets.q_min)    

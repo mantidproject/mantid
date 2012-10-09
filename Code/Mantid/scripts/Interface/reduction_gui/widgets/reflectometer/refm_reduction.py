@@ -547,7 +547,15 @@ class DataReflWidget(BaseWidget):
         if not IS_IN_MANTIDPLOT:
             return
         
-        f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))
+        f = []
+        try:
+            f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))
+        except:
+            try:
+                f = FileFinder.findRuns(str(file_ctrl.text()))
+            except:
+                print "Could not find file for %s" % str(file_ctrl.text())
+                return
 
         range_min = int(min_ctrl.text())
         range_max = int(max_ctrl.text())
@@ -860,7 +868,7 @@ class DataReflWidget(BaseWidget):
         m.TOFstep = float(self._summary.tof_bin_width_edit.text())
     
         datafiles = str(self._summary.data_run_number_edit.text()).split(',')
-        m.data_files = [int(i) for i in datafiles]
+        m.data_files = [str(i) for i in datafiles]
     
         # Normalization flag
         m.NormFlag = self._summary.norm_switch.isChecked()

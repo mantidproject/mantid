@@ -86,7 +86,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                 
             if mtd[ws].getNumberEvents()==0:
                 #mtd.deleteWorkspace(ws)
-                print 'You are trying to load an empty event nexus file!!!!'
+                print 'No data in entry %s' % entry
                 return
     
             instr_dir = mtd.getSettings().getInstrumentDirectory()
