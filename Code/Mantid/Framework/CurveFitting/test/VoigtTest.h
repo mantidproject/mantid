@@ -25,7 +25,8 @@ public:
 
   VoigtTest()
   {
-    m_domain = boost::make_shared<Mantid::API::FunctionDomain1DVector>(-5.5,3.5, g_domainSize);
+    using namespace Mantid::API;
+    m_domain = boost::shared_ptr<FunctionDomain1DVector>(new FunctionDomain1DVector(-5.5,3.5, g_domainSize));
   }
 
   void test_intialized_function_has_4_parameters_with_expected_names()
