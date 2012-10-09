@@ -69,6 +69,7 @@ set ( SRC_FILES
 	src/ThermalNeutronDtoTOFFunction.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
+	src/Voigt.cpp
 )
                 
 set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
@@ -150,6 +151,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ThermalNeutronDtoTOFFunction.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
+	inc/MantidCurveFitting/Voigt.h
 )
               
 set ( TEST_FILES
@@ -214,6 +216,7 @@ set ( TEST_FILES
 	ThermalNeutronDtoTOFFunctionTest.h
 	UserFunction1DTest.h
 	UserFunctionTest.h
+	VoigtTest.h
 )
 
 
