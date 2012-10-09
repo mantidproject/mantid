@@ -19,7 +19,7 @@ namespace Mantid
       const double COEFFC[NLORENTZIANS] = {-0.3085, 0.5906, -0.3085, 0.5906};
       const double COEFFD[NLORENTZIANS] = {0.0210, -1.1858, -0.0210, 1.1858};
 
-      const double SQRTLN2 = std::sqrt(std::log(2));
+      const double SQRTLN2 = std::sqrt(std::log(2.0));
       const double SQRTPI = std::sqrt(M_PI);
       ///@endcond
     }
