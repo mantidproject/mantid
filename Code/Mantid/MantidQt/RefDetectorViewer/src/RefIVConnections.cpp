@@ -343,53 +343,71 @@ void RefIVConnections::graph_range_changed()
 void RefIVConnections::edit_manual_input()
 {
 
-    QLineEdit* peak_left_control = iv_ui->lineEdit_peakLeft;        
-    double peak_left = 100;
-    if (!IVUtils::StringToDouble(peak_left_control->text().toStdString(), peak_left))
+    QLineEdit* peak_left_control = iv_ui->lineEdit_peakLeft;
+    if (peak_left_control->text().toStdString() != "")
     {
-        ErrorHandler::Error("Peak Left is not a NUMBER! Value reset to 100.");
+        double peak_left = 100;
+        if (!IVUtils::StringToDouble(peak_left_control->text().toStdString(), peak_left))
+        {
+            ErrorHandler::Error("Peak Left is not a NUMBER! Value reset to 100.");
+        }
+        image_display->setPeakLeft(static_cast<int>(peak_left));
     }
-    image_display->setPeakLeft(static_cast<int>(peak_left));
 
     QLineEdit* peak_right_control = iv_ui->lineEdit_peakRight;
-    double peak_right = 200;
-    if (!IVUtils::StringToDouble(peak_right_control->text().toStdString(), peak_right))
+    if (peak_right_control->text().toStdString() != "")
     {
-        ErrorHandler::Error("Peak Right is not a NUMBER! Value reset to 200.");
+        double peak_right = 200;
+        if (!IVUtils::StringToDouble(peak_right_control->text().toStdString(), peak_right))
+        {
+            ErrorHandler::Error("Peak Right is not a NUMBER! Value reset to 200.");
+        }
+        image_display->setPeakRight(static_cast<int>(peak_right));
     }
-    image_display->setPeakRight(static_cast<int>(peak_right));
-
+        
     QLineEdit* back_left_control = iv_ui->lineEdit_backLeft;        
-    double back_left = 50;
-    if (!IVUtils::StringToDouble(back_left_control->text().toStdString(), back_left))
+    if (back_left_control->text().toStdString() != "")
     {
-        ErrorHandler::Error("Back. Left is not a NUMBER! Value reset to 50.");
+        double back_left = 50;
+        if (!IVUtils::StringToDouble(back_left_control->text().toStdString(), back_left))
+        {
+            ErrorHandler::Error("Back. Left is not a NUMBER! Value reset to 50.");
+        }
+        image_display->setBackLeft(static_cast<int>(back_left));
     }
-    image_display->setBackLeft(static_cast<int>(back_left));
 
     QLineEdit* back_right_control = iv_ui->lineEdit_backRight;
-    double back_right = 250;
-    if (!IVUtils::StringToDouble(back_right_control->text().toStdString(), back_right))
+    if (back_right_control->text().toStdString() != "")
     {
-        ErrorHandler::Error("Back. Right is not a NUMBER! Value reset to 250.");
+        double back_right = 250;
+        if (!IVUtils::StringToDouble(back_right_control->text().toStdString(), back_right))
+        {
+            ErrorHandler::Error("Back. Right is not a NUMBER! Value reset to 250.");
+        }
+        image_display->setBackRight(static_cast<int>(back_right));
     }
-    image_display->setBackRight(static_cast<int>(back_right));
 
     QLineEdit* tof_min_control = iv_ui->lineEdit_TOFmin;        
-    double tof_min = 50;
-    if (!IVUtils::StringToDouble(tof_min_control->text().toStdString(), tof_min))
+    if (tof_min_control->text().toStdString() != "")
     {
-        ErrorHandler::Error("TOF min is not a NUMBER! Value reset to 50.");
+        double tof_min = 50;
+        if (!IVUtils::StringToDouble(tof_min_control->text().toStdString(), tof_min))
+        {
+            ErrorHandler::Error("TOF min is not a NUMBER! Value reset to 50.");
+        }
+        image_display->setTOFmin(static_cast<int>(tof_min));
     }
-    image_display->setTOFmin(static_cast<int>(tof_min));
     
     QLineEdit* tof_max_control = iv_ui->lineEdit_TOFmax;        
-    double tof_max = 250;
-    if (!IVUtils::StringToDouble(tof_max_control->text().toStdString(), tof_max))
+    if (tof_max_control->text().toStdString() != "")
     {
-        ErrorHandler::Error("TOF max is not a NUMBER! Value reset to 250.");
+        double tof_max = 250;
+        if (!IVUtils::StringToDouble(tof_max_control->text().toStdString(), tof_max))
+        {
+            ErrorHandler::Error("TOF max is not a NUMBER! Value reset to 250.");
+        }
+        image_display->setTOFmax(static_cast<int>(tof_max));
     }
-    image_display->setTOFmax(static_cast<int>(tof_max));
     
     image_display->UpdateImage();
 

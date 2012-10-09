@@ -46,9 +46,9 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
     
     float *data = new float[size_t(total_ymax * sz)];
     
-    std::cout << "Starting the for loop " << std::endl;
-    std::cout << "total_xmax: " << total_xmax << std::endl;
-    std::cout << "sz is : " << sz << std::endl;
+//    std::cout << "Starting the for loop " << std::endl;
+//    std::cout << "total_xmax: " << total_xmax << std::endl;
+//    std::cout << "sz is : " << sz << std::endl;
     
     std::vector<double> yaxis;
     for (int px=0; px<total_ymax; px++)
@@ -61,17 +61,12 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
         }
     }
     
-    std::cout << "about to create RefArrayDataSource" << std::endl;
     RefArrayDataSource* source = new RefArrayDataSource(total_xmin, total_xmax,
                                                         total_ymin, total_ymax,
                                                         total_rows, total_cols,
                                                         data);
-    std::cout << "done with RefArrayDataSource" << std::endl;
     
     //std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
-    
-    
-//    RefArrayDataSource* source = new RefArrayDataSource(wps_name);
     image_view = new RefImageView( source );
 }
 
