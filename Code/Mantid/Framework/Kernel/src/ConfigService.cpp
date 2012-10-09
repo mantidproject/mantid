@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/ParaViewVersion.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
@@ -1709,13 +1710,39 @@ bool ConfigServiceImpl::quickParaViewCheck() const
     }
     std::vector<std::string> args;
     args.push_back("-V");
-    Poco::Pipe outPipe;
-    Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, &outPipe);
+    Poco::Pipe outPipe, errorPipe;
+    Poco::ProcessHandle ph = Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
     const int rc = ph.wait();
     if(rc == 1)
     {
-      isAvailable = true;
-      this->g_log.notice("ParaView is available");
+      Poco::PipeInputStream stdErr(errorPipe);
+      std::stringstream errStream;
+      Poco::StreamCopier::copyStream(stdErr, errStream);
+      std::string givenVersion = errStream.str();
+      boost::smatch  match;
+      
+      boost::regex expression("(\\d+)\\.(\\d+)");
+      double givenVersionNumber;
+      if(boost::regex_search(givenVersion, match, expression))
+      {
+        Strings::convert(match[0], givenVersionNumber);
+      }
+
+      double targetVersionNumber;
+      Strings::convert(ParaViewVersion::targetVersion(), targetVersionNumber);
+      if (givenVersionNumber == targetVersionNumber)
+      {
+        isAvailable = true;
+        this->g_log.notice("ParaView is available");
+      }
+      else
+      {
+        std::stringstream messageStream;
+        messageStream << "The compatible version of ParaView is " << targetVersionNumber << " but the installed version is " << givenVersionNumber;
+
+        this->g_log.notice(messageStream.str());
+        this->g_log.notice("ParaView is not available");
+      }
     }
     else
     {

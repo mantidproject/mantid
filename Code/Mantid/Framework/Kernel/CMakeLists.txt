@@ -52,6 +52,7 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusTestHelper.cpp
+    src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
 	src/ProgressText.cpp
 	src/Property.cpp
@@ -173,6 +174,7 @@ set ( INC_FILES
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
+    inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
 	inc/MantidKernel/ProgressBase.h
 	inc/MantidKernel/ProgressText.h
@@ -353,6 +355,9 @@ if ( NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersio
   )
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../Build/CMake/PatchVersionNumber.cmake.in
                    ${CMAKE_CURRENT_SOURCE_DIR}/../../Build/CMake/PatchVersionNumber.cmake
+  )
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
+                   ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp
   )
 endif ()
 
