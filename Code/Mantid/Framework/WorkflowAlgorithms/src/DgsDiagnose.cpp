@@ -141,7 +141,6 @@ namespace Mantid
       IAlgorithm_sptr detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
       detVan->setProperty("InputWorkspace", detVanWS);
       detVan->setProperty("OutputWorkspace", dvInternal);
-      detVan->setProperty("NoGrouping", true);
       detVan->setProperty("ReductionProperties", reductionManagerName);
       detVan->executeAsSubAlg();
       MatrixWorkspace_sptr dvWS = detVan->getProperty("OutputWorkspace");

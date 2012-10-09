@@ -503,30 +503,6 @@ namespace Mantid
         outputWS = kikf->getProperty("OutputWorkspace");
       }
 
-      // Mask and group workspace if necessary.
-      MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
-      MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
-      std::string oldGroupFile("");
-      std::string filePropMod = this->getProperty("AlternateGroupingTag");
-      std::string fileProp = filePropMod + "OldGroupingFilename";
-      if (reductionManager->existsProperty(fileProp))
-      {
-        oldGroupFile = reductionManager->getPropertyValue(fileProp);
-      }
-      IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
-      remap->setProperty("InputWorkspace", outputWS);
-      remap->setProperty("OutputWorkspace", outputWS);
-      remap->setProperty("MaskWorkspace", maskWS);
-      remap->setProperty("GroupingWorkspace", groupWS);
-      remap->setProperty("OldGroupingFile", oldGroupFile);
-      if (reductionManager->existsProperty("UseProcessedDetVan"))
-      {
-        bool runOpposite = reductionManager->getProperty("UseProcessedDetVan");
-        remap->setProperty("ExecuteOppositeOrder", runOpposite);
-      }
-      remap->executeAsSubAlg();
-      outputWS = remap->getProperty("OutputWorkspace");
-
       // Rebin to ensure consistency
       const bool sofphieIsDistribution = reductionManager->getProperty("SofPhiEIsDistribution");
 
@@ -560,6 +536,32 @@ namespace Mantid
         divide->executeAsSubAlg();
         outputWS = divide->getProperty("OutputWorkspace");
       }
+
+      // Mask and group workspace if necessary.
+      MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
+      MatrixWorkspace_sptr groupWS = this->getProperty("GroupingWorkspace");
+      std::string oldGroupFile("");
+      std::string filePropMod = this->getProperty("AlternateGroupingTag");
+      std::string fileProp = filePropMod + "OldGroupingFilename";
+      if (reductionManager->existsProperty(fileProp))
+      {
+        oldGroupFile = reductionManager->getPropertyValue(fileProp);
+      }
+      IAlgorithm_sptr remap = this->createSubAlgorithm("DgsRemap");
+      remap->setProperty("InputWorkspace", outputWS);
+      remap->setProperty("OutputWorkspace", outputWS);
+      remap->setProperty("MaskWorkspace", maskWS);
+      remap->setProperty("GroupingWorkspace", groupWS);
+      remap->setProperty("OldGroupingFile", oldGroupFile);
+      /*
+      if (reductionManager->existsProperty("UseProcessedDetVan"))
+      {
+        bool runOpposite = reductionManager->getProperty("UseProcessedDetVan");
+        remap->setProperty("ExecuteOppositeOrder", runOpposite);
+      }
+      */
+      remap->executeAsSubAlg();
+      outputWS = remap->getProperty("OutputWorkspace");
 
       // Correct for solid angle if grouping is requested, but detector vanadium
       // not used.

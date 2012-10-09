@@ -409,7 +409,7 @@ namespace Mantid
     Workspace_sptr DgsReduction::loadInputData(const std::string prop,
         const bool mustLoad)
     {
-      g_log.warning() << "MustLoad = " << mustLoad << std::endl;
+      g_log.debug() << "MustLoad = " << mustLoad << std::endl;
       Workspace_sptr inputWS;
 
       const std::string inFileProp = prop + "InputFile";
@@ -507,7 +507,6 @@ namespace Mantid
           loadMask->setProperty("InputFile", hardMask);
           castWorkspace = true;
         }
-        loadMask->setAlwaysStoreInADS(true);
         loadMask->setProperty("OutputWorkspace", hardMaskWsName);
         loadMask->execute();
         if (castWorkspace)
@@ -534,7 +533,6 @@ namespace Mantid
         {
           groupingWsName = prop + "Grouping";
           IAlgorithm_sptr loadGrpFile = this->createSubAlgorithm("LoadDetectorsGroupingFile");
-          loadGrpFile->setAlwaysStoreInADS(true);
           loadGrpFile->setProperty("InputFile", groupFile);
           loadGrpFile->setProperty("OutputWorkspace", groupingWsName);
           loadGrpFile->execute();
@@ -611,13 +609,28 @@ namespace Mantid
 
       const bool showIntermedWS = this->getProperty("ShowIntermediateWorkspaces");
 
-      // Get output workspace pointer
+      // Get output workspace pointer and name
       MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
+      std::string outputWsName = this->getPropertyValue("OutputWorkspace");
 
       // Load the hard mask if available
       MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
+      if (hardMaskWS && showIntermedWS)
+      {
+        std::string hardMaskName = outputWsName + "_hard_mask";
+        this->declareProperty(new WorkspaceProperty<>("ReductionHardMask",
+            hardMaskName, Direction::Output));
+        this->setProperty("ReductionHardMask", hardMaskWS);
+      }
       // Load the grouping file if available
       MatrixWorkspace_sptr groupingWS = this->loadGroupingFile("");
+      if (groupingWS && showIntermedWS)
+      {
+        std::string groupName = outputWsName + "_grouping";
+        this->declareProperty(new WorkspaceProperty<>("ReductionGrouping",
+            groupName, Direction::Output));
+        this->setProperty("ReductionGrouping", groupingWS);
+      }
 
       // This will be diagnostic mask if DgsDiagnose is run and hard mask if not.
       MatrixWorkspace_sptr maskWS;
@@ -631,7 +644,7 @@ namespace Mantid
       Workspace_sptr idetVanWS;
       if (detVanWS && !isProcessedDetVan)
       {
-        std::string detVanMaskName = detVanWS->getName() + "_diagmask";
+        std::string detVanMaskName = outputWsName + "_diagmask";
 
         IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
         diag->setProperty("DetVanWorkspace", detVanWS);
@@ -657,11 +670,7 @@ namespace Mantid
           hardMaskWS.reset();
         }
         detVan->setProperty("MaskWorkspace", maskWS);
-        if (groupingWS)
-        {
-          detVan->setProperty("GroupingWorkspace", groupingWS);
-        }
-        std::string idetVanName = detVanWS->getName() + "_idetvan";
+        std::string idetVanName = outputWsName + "_idetvan";
 
         detVan->setProperty("OutputWorkspace", idetVanName);
         detVan->setProperty("ReductionProperties", reductionManagerName);
@@ -705,7 +714,6 @@ namespace Mantid
       Workspace_sptr absSampleWS = this->loadInputData("AbsUnitsSample", false);
       if (absSampleWS)
       {
-        std::string absUnitsName = absSampleWS->getName() + "_absunits";
         MatrixWorkspace_sptr absUnitsWS;
         MatrixWorkspace_sptr absGroupingWS = this->loadGroupingFile("AbsUnits");
 
@@ -714,18 +722,13 @@ namespace Mantid
         Workspace_sptr absIdetVanWS;
         if (absDetVanWS)
         {
-          std::string idetVanName = absDetVanWS->getName() + "_idetvan";
+          std::string idetVanName = outputWsName + "_absunits_idetvan";
           detVan->setProperty("InputWorkspace", absDetVanWS);
           detVan->setProperty("OutputWorkspace", idetVanName);
           if (maskWS)
           {
             detVan->setProperty("MaskWorkspace", maskWS);
           }
-          if (absGroupingWS)
-          {
-            detVan->setProperty("GroupingWorkspace", absGroupingWS);
-          }
-          detVan->setProperty("AlternateGroupingTag", "AbsUnits");
           detVan->executeAsSubAlg();
           MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
           absIdetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
@@ -858,7 +861,7 @@ namespace Mantid
         if (showIntermedWS)
         {
           this->declareProperty(new WorkspaceProperty<>("AbsUnitsWorkspace",
-              absUnitsName, Direction::Output));
+              absWsName, Direction::Output));
           this->setProperty("AbsUnitsWorkspace", absUnitsWS);
         }
       }
