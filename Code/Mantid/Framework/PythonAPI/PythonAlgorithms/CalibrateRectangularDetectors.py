@@ -117,9 +117,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         filename = name + extension
 
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
-        #alg = LoadEventNexus(Filename=filename, ChunkNumber=3, TotalChunks=3,  OutputWorkspace=name, **kwargs)
         wksp = alg.workspace()
-        if str(self._instrument) == "NOM":
+        # For NOMAD data before Aug 2012, use the updated geometry
+        if str(mtd['NOM_5602'].getInstrument().getValidFromDate()) == "1900-01-31T23:59:59":
             path=mantid.config["instrumentDefinition.directory"]
             LoadInstrument(Workspace=wksp, Filename=path+'/'+"NOMAD_Definition_20120701-20120731.xml",RewriteSpectraMap=False)
         return wksp
