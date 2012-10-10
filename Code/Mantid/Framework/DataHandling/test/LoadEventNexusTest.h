@@ -113,7 +113,8 @@ public:
     //Check one event from one pixel - does it have a reasonable pulse time
     TS_ASSERT( WS->getEventListPtr(1000)->getEvents()[0].pulseTime() > DateAndTime(int64_t(1e9*365*10)) );
 
-
+    //Check filename
+    TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"),WS->run().getProperty("Filename")->value());
     //----- Now we re-load with precounting and compare memory use ----
     LoadEventNexus ld2;
     std::string outws_name2 = "cncs_precount";

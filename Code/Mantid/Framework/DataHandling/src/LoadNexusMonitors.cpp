@@ -243,7 +243,8 @@ void LoadNexusMonitors::exec()
   }
   WS->generateSpectraMap();
 
-
+  //add filename
+  WS->mutableRun().addProperty("Filename",this->filename);
   this->setProperty("OutputWorkspace", this->WS);
 }
 

@@ -30,6 +30,7 @@ public:
     ld.execute();
     TS_ASSERT( ld.isExecuted() );
 
+
     MatrixWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outws_name);
     //Valid WS and it is an MatrixWorkspace
     TS_ASSERT( WS );
@@ -51,6 +52,8 @@ public:
     TS_ASSERT_EQUALS( mon->getID(), -3 );
     boost::shared_ptr<const IComponent> sample = WS->getInstrument()->getSample();
     TS_ASSERT_DELTA( mon->getDistance(*sample), 1.426, 1e-6 );
+    //Check if filename is saved
+    TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"),WS->run().getProperty("Filename")->value());
   }
 };
 

@@ -1067,6 +1067,8 @@ void LoadEventNexus::exec()
   // Load the detector events
   WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
   loadEvents(&prog, false); // Do not load monitor blocks
+  //add filename
+  WS->mutableRun().addProperty("Filename",m_filename);
   //Save output
   this->setProperty<IEventWorkspace_sptr>("OutputWorkspace", WS);
   // Load the monitors
@@ -1077,7 +1079,8 @@ void LoadEventNexus::exec()
     if( eventMonitors && this->hasEventMonitors() )
     {
       WS = createEmptyEventWorkspace(); // Algorithm currently relies on an object-level workspace ptr
-
+      //add filename
+      WS->mutableRun().addProperty("Filename",m_filename);
       // Perform the load
       loadEvents(&prog, true);
       std::string mon_wsname = this->getProperty("OutputWorkspace");
