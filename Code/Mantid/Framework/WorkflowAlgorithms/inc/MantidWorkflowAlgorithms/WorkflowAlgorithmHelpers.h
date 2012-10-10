@@ -2,13 +2,15 @@
 #define WORKFLOWALGORITHMHELPERS_H_
 
 #include <string>
-#include "MantidAPI/Algorithm.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace WorkflowAlgorithmHelpers
 {
-  /// Function to get algorithm property or instrument parameter value
-  double getPropOrParam(Mantid::API::Algorithm_sptr alg,
-      const std::string algProp, Mantid::API::MatrixWorkspace_sptr ws,
+  using namespace Mantid;
+
+  /// Function to get property or instrument parameter value
+  double getDblPropOrParam(Kernel::PropertyManager_sptr pm,
+      const std::string algProp, API::MatrixWorkspace_sptr ws,
       const std::string instParam);
 }
 
