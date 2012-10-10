@@ -3,7 +3,7 @@
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-#include "MantidMDEvents/LoadSQW.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <boost/regex.hpp>
 
 namespace Mantid
@@ -58,22 +58,21 @@ namespace Mantid
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(loadingProgressUpdate, &ProgressAction::handler);
         AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
         
-        
+        IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadSQW");
 
-        Mantid::MDEvents::LoadSQW alg;
-        alg.initialize();
-        alg.setPropertyValue("Filename", this->m_filename);
-        alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
+        alg->initialize();
+        alg->setPropertyValue("Filename", this->m_filename);
+        alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
         //Default is not to load into memory and when this is the case, generate a nxs backend for output.
         if(!this->m_view->getLoadInMemory())
         {
           size_t pos = this->m_filename.find(".");
           std::string backEndFile = this->m_filename.substr(0, pos) + ".nxs";
-          alg.setPropertyValue("OutputFilename", backEndFile);
+          alg->setPropertyValue("OutputFilename", backEndFile);
         }
-        alg.addObserver(observer);
-        alg.execute();
-        alg.removeObserver(observer);
+        alg->addObserver(observer);
+        alg->execute();
+        alg->removeObserver(observer);
       }
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
@@ -146,12 +145,12 @@ namespace Mantid
 
       AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-      Mantid::MDEvents::LoadSQW alg;
-      alg.initialize();
-      alg.setPropertyValue("Filename", this->m_filename);
-      alg.setProperty("MetadataOnly", true); //Don't load the events.
-      alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
-      alg.execute();
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadSQW");
+      alg->initialize();
+      alg->setPropertyValue("Filename", this->m_filename);
+      alg->setProperty("MetadataOnly", true); //Don't load the events.
+      alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
+      alg->execute();
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
       Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);

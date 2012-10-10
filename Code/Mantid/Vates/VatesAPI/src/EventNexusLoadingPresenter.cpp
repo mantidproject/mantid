@@ -7,7 +7,7 @@
 
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
-#include "MantidMDEvents/OneStepMDEW.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include <vtkUnstructuredGrid.h>
 
@@ -99,14 +99,14 @@ namespace Mantid
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(loadingProgressUpdate, &ProgressAction::handler);
         AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-        Mantid::MDEvents::OneStepMDEW alg;
-        alg.initialize();
-        alg.setRethrows(true);
-        alg.setPropertyValue("Filename", this->m_filename);
-        alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
-        alg.addObserver(observer);
-        alg.execute();
-        alg.removeObserver(observer);
+        IAlgorithm_sptr alg = AlgorithmManager::Instance().create("OneStepMDEW");
+        alg->initialize();
+        alg->setRethrows(true);
+        alg->setPropertyValue("Filename", this->m_filename);
+        alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
+        alg->addObserver(observer);
+        alg->execute();
+        alg->removeObserver(observer);
       }
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");

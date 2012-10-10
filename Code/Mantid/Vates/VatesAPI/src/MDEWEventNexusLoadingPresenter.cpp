@@ -7,7 +7,7 @@
 
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
-#include "MantidMDEvents/LoadMD.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include <vtkUnstructuredGrid.h>
 
@@ -77,13 +77,15 @@ namespace Mantid
         Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(loadingProgressUpdate, &ProgressAction::handler);
         AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-        Mantid::MDEvents::LoadMD alg;
-        alg.initialize();
-        alg.setPropertyValue("Filename", this->m_filename);
-        alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
-        alg.setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
-        alg.setPropertyValue("Memory", "0");
-        alg.execute();
+        IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");
+        alg->initialize();
+        alg->setPropertyValue("Filename", this->m_filename);
+        alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
+        alg->setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
+        alg->setPropertyValue("Memory", "0");
+        alg->addObserver(observer);
+        alg->execute();
+        alg->removeObserver(observer);
       }
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
@@ -110,13 +112,14 @@ namespace Mantid
       using namespace Mantid::API;
       AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
 
-      Mantid::MDEvents::LoadMD alg;
-      alg.initialize();
-      alg.setPropertyValue("Filename", this->m_filename);
-      alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
-      alg.setProperty("MetadataOnly", true); //Don't load the events.
-      alg.setProperty("FileBackEnd", true); //Only require metadata, so do it in memory.
-      alg.execute();
+      IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");
+       
+      alg->initialize();
+      alg->setPropertyValue("Filename", this->m_filename);
+      alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
+      alg->setProperty("MetadataOnly", true); //Don't load the events.
+      alg->setProperty("FileBackEnd", true); //Only require metadata, so do it in memory.
+      alg->execute();
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
       IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
