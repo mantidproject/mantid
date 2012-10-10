@@ -96,7 +96,7 @@ public slots:
 
 private:
 
-  Ui_ImageViewer*   iv_ui;
+  Ui_ImageViewer*  iv_ui;
   ImageView*       iv_main_window;
   ImageDisplay*    image_display;
   GraphDisplay*    h_graph_display;

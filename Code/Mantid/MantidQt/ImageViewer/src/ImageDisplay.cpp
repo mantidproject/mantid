@@ -105,7 +105,7 @@ void ImageDisplay::SetDataSource( ImageDataSource* data_source )
                                           n_rows, n_cols,
                                           false );
 
-    image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
+  image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
                                               data_array->GetXMax() );
   image_plot->setAxisScale( QwtPlot::yLeft, data_array->GetYMin(),
                                             data_array->GetYMax() );
@@ -187,18 +187,12 @@ void ImageDisplay::UpdateImage()
   double scale_x_max  = total_x_max;
   double x_step = (total_x_max - total_x_min)/2000;
 
-    std::cout << "scale_x_min: " << scale_x_min << std::endl;  //changes
-
-    
-    range_handler->GetRange( scale_x_min, scale_x_max, x_step );
+  range_handler->GetRange( scale_x_min, scale_x_max, x_step );
 
   int n_rows = (int)data_source->GetNRows();
   int n_cols = IVUtils::NumSteps( scale_x_min, scale_x_max, x_step );
-                                     // This works for linear or log scales
 
-    std::cout << "scale_x_min: " << scale_x_min << std::endl;  //changes
-    
-    
+                                     // This works for linear or log scales
   if ( n_rows == 0 || n_cols == 0 )
   {
     return;                          // can't draw empty image
@@ -230,7 +224,7 @@ void ImageDisplay::UpdateImage()
                             // NOTE: The interval [xmin,xmax] is always
                             // found linearly.  For log_x, we need to adjust it
       
-      double new_x_min = 0;
+    double new_x_min = 0;
     double new_x_max = 0;
 
     if ( x_step > 0 )       // linear scale, so interpolate linearly
@@ -270,11 +264,11 @@ void ImageDisplay::UpdateImage()
                                           n_rows, n_cols,
                                           is_log_x );
 
-    is_log_x = data_array->IsLogX();       // Data source might not be able to
+  is_log_x = data_array->IsLogX();       // Data source might not be able to
                                          // provide log binned data, so check
                                          // if log binned data was returned.
 
-    image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
+  image_plot->setAxisScale( QwtPlot::xBottom, data_array->GetXMin(),
                                               data_array->GetXMax() );
   if ( is_log_x )
   {
