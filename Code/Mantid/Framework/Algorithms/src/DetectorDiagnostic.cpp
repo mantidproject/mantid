@@ -215,8 +215,7 @@ namespace Mantid
           numTests += 1;
         if (bkgWS)
           numTests += 1;
-        double temp = this->getProperty("MaxTubeFramerate");
-        if (temp > 0. && sampleWS)
+        if (sampleWS)
           numTests += 1;
         g_log.information() << "Number of tests requested: " << numTests << std::endl;
         m_progStepWidth = (1.-m_fracDone) / static_cast<double>(numTests);
@@ -322,10 +321,10 @@ namespace Mantid
       }
 
       // CreatePSDBleedMask (if selected)
-      double maxTubeFrameRate = this->getProperty("MaxTubeFramerate");
-      if (maxTubeFrameRate > 0. && sampleWS)
+      if (sampleWS)
       {
         // get the relevant inputs
+        double maxTubeFrameRate = this->getProperty("MaxTubeFramerate");
         int numIgnore = this->getProperty("NIgnoredCentralPixels");
 
         // run the subalgorithm
