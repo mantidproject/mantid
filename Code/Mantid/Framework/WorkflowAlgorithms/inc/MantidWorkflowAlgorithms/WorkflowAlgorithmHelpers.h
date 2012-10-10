@@ -10,9 +10,9 @@ namespace WorkflowAlgorithmHelpers
   using namespace Mantid;
 
   /// Function to get property or instrument parameter value
-  double getDblPropOrParam(Kernel::PropertyManager_sptr pm,
-      const std::string algProp, API::MatrixWorkspace_sptr ws,
-      const std::string instParam);
+  double getDblPropOrParam(const std::string algProp,
+      Kernel::PropertyManager_sptr pm, const std::string instParam,
+      API::MatrixWorkspace_sptr ws);
 }
 
 #endif /* WORKFLOWALGORITHMHELPERS_H_ */
