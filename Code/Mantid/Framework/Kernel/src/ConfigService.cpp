@@ -1692,7 +1692,6 @@ const std::string extractVersionNumberFromPipe(const Poco::Pipe& pipe)
   const std::string givenVersion = stringStream.str();
   boost::smatch  match;
   boost::regex expression("(\\d+)\\.(\\d+)$"); // Gets the version number part.
-  double givenVersionNumber;
   if(boost::regex_search(givenVersion, match, expression))
   {
     versionString = match[0];
