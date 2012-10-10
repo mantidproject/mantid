@@ -2,6 +2,8 @@
 #include <iostream>
 #include <qwt_plot_canvas.h>
 
+#include "MantidQtAPI/MantidColorMap.h"
+
 #include "MantidQtImageViewer/IVConnections.h"
 #include "MantidQtImageViewer/ColorMaps.h"
 
@@ -179,6 +181,7 @@ IVConnections::IVConnections( Ui_ImageViewer* ui,
   iv_ui->actionOptimal->setCheckable(true);
   iv_ui->actionMulti->setCheckable(true);
   iv_ui->actionSpectrum->setCheckable(true);
+  iv_ui->actionLoadColormap->setCheckable(true);
                                                     // set up initial color
                                                     // scale display
   iv_ui->color_scale->setScaledContents(true);
@@ -192,7 +195,6 @@ IVConnections::IVConnections( Ui_ImageViewer* ui,
 
   ShowColorScale( positive_color_table, negative_color_table );
 
-
   color_group = new QActionGroup(this);
   color_group->addAction(iv_ui->actionHeat);
   color_group->addAction(iv_ui->actionGray);
@@ -202,6 +204,7 @@ IVConnections::IVConnections( Ui_ImageViewer* ui,
   color_group->addAction(iv_ui->actionOptimal);
   color_group->addAction(iv_ui->actionMulti);
   color_group->addAction(iv_ui->actionSpectrum);
+  color_group->addAction(iv_ui->actionLoadColormap);
 
   QObject::connect(iv_ui->actionHeat, SIGNAL(triggered()),
                    this, SLOT(heat_color_scale()) );
@@ -226,6 +229,10 @@ IVConnections::IVConnections( Ui_ImageViewer* ui,
 
   QObject::connect(iv_ui->actionSpectrum, SIGNAL(triggered()),
                    this, SLOT(spectrum_color_scale()) );
+
+  QObject::connect(iv_ui->actionLoadColormap, SIGNAL(triggered()),
+                   this, SLOT(load_color_map()) );
+
 
   h_graph_picker = new TrackingPicker( iv_ui->h_graphPlot->canvas() );
   h_graph_picker->setMousePattern(QwtPicker::MouseSelect1, Qt::LeftButton);
@@ -463,6 +470,32 @@ void IVConnections::spectrum_color_scale()
 
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, 256, negative_color_table );
+
+  image_display->SetColorScales( positive_color_table, negative_color_table );
+  ShowColorScale( positive_color_table, negative_color_table );
+}
+
+
+void IVConnections::load_color_map()
+{
+  QString file_name = MantidColorMap::loadMapDialog( "", this->iv_main_window );
+
+  MantidColorMap* mantid_color_map = new MantidColorMap( file_name, GraphOptions::Linear );
+
+  QwtDoubleInterval interval( 0.0, 255.0 );
+  QVector<QRgb> mantid_color_table;
+  mantid_color_table = mantid_color_map->colorTable( interval );
+  std::vector<QRgb> positive_color_table;
+  for ( int i = 1; i < mantid_color_table.size(); i++ )     // NO NaN Color
+  {
+    positive_color_table.push_back( mantid_color_table[i] );
+  }
+
+  int n_colors = (int)positive_color_table.size();
+  std::cout << "Number of mantid colors = " << n_colors << std::endl;
+
+  std::vector<QRgb> negative_color_table;
+  ColorMaps::GetColorMap( ColorMaps::GRAY, n_colors, negative_color_table );
 
   image_display->SetColorScales( positive_color_table, negative_color_table );
   ShowColorScale( positive_color_table, negative_color_table );

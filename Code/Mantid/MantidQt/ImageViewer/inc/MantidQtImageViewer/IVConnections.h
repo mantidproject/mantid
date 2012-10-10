@@ -93,6 +93,7 @@ public slots:
   void optimal_color_scale();
   void multi_color_scale();
   void spectrum_color_scale();
+  void load_color_map();
 
 private:
 
