@@ -890,6 +890,9 @@ class BaseRefWidget(BaseWidget):
                                                        None) 
         ws_output_base = "Peak - " + basename + " - Y pixel _2D"
 
+        if mtd.workspaceExists(ws_output_base):
+            mtd.deleteWorkspace(ws_output_base)
+        
         import mantidqtpython 
         mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base)
     
