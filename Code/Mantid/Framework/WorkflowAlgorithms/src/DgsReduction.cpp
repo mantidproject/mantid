@@ -81,6 +81,9 @@ namespace Mantid
       this->declareProperty(new WorkspaceProperty<>("SampleInputWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "Workspace to be reduced");
+      this->declareProperty(new WorkspaceProperty<>("SampleInputMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the input sample workspace.");
       this->declareProperty(new FileProperty("DetCalFilename", "",
           FileProperty::OptionalLoad), "A detector calibration file.");
       this->declareProperty("RelocateDetectors", false,
@@ -115,6 +118,7 @@ namespace Mantid
 
       this->setPropertyGroup("SampleInputFile", sampleSetup);
       this->setPropertyGroup("SampleInputWorkspace", sampleSetup);
+      this->setPropertyGroup("SampleInputMonitorWorkspace", sampleSetup);
       this->setPropertyGroup("DetCalFilename", sampleSetup);
       this->setPropertyGroup("RelocateDetectors", sampleSetup);
       this->setPropertyGroup("IncidentEnergyGuess", sampleSetup);
@@ -163,6 +167,9 @@ namespace Mantid
       this->declareProperty(new WorkspaceProperty<>("DetectorVanadiumInputWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "Sample detector vanadium workspace to be reduced");
+      this->declareProperty(new WorkspaceProperty<>("DetectorVanadiumInputMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the input sample detector vanadium workspace.");
       this->declareProperty("SaveProcessedDetVan", false,
           "Save the processed detector vanadium workspace");
       this->declareProperty("UseProcessedDetVan", false, "If true, treat the detector vanadium as processed.\n"
@@ -197,6 +204,7 @@ namespace Mantid
       this->setPropertyGroup("CorrectKiKf", dataCorr);
       this->setPropertyGroup("DetectorVanadiumInputFile", dataCorr);
       this->setPropertyGroup("DetectorVanadiumInputWorkspace", dataCorr);
+      this->setPropertyGroup("DetectorVanadiumInputMonitorWorkspace", dataCorr);
       this->setPropertyGroup("SaveProcessedDetVan", dataCorr);
       this->setPropertyGroup("UseProcessedDetVan", dataCorr);
       this->setPropertyGroup("UseBoundsForDetVan", dataCorr);
@@ -244,6 +252,10 @@ namespace Mantid
       this->declareProperty(new WorkspaceProperty<>("DetectorVanadium2InputWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "Detector vanadium workspace to compare against");
+      this->declareProperty(new WorkspaceProperty<>("DetectorVanadium2InputMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the input comparison detector vanadium workspace.");
+
       this->declareProperty("DetVanRatioVariation", 1.1, mustBePositive,
           "Mask detectors if the time variation is above this threshold.");
       this->setPropertySettings("DetVanRatioVariation",
@@ -292,6 +304,7 @@ namespace Mantid
       this->setPropertyGroup("ErrorBarCriterion", findBadDets);
       this->setPropertyGroup("DetectorVanadium2InputFile", findBadDets);
       this->setPropertyGroup("DetectorVanadium2InputWorkspace", findBadDets);
+      this->setPropertyGroup("DetectorVanadium2InputMonitorWorkspace", findBadDets);
       this->setPropertyGroup("DetVanRatioVariation", findBadDets);
       this->setPropertyGroup("BackgroundCheck", findBadDets);
       this->setPropertyGroup("SamBkgMedianTestHigh", findBadDets);
@@ -318,6 +331,11 @@ namespace Mantid
           "The sample (vanadium) workspace for absolute units normalisation.");
       this->setPropertySettings("AbsUnitsSampleInputWorkspace",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      this->declareProperty(new WorkspaceProperty<>("AbsUnitsSampleInputMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the input absolute units sample workspace.");
+      this->setPropertySettings("AbsUnitsSampleInputMonitorWorkspace",
+          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
       this->declareProperty("AbsUnitsGroupingFile", "",
           "Grouping file for absolute units normalisation.");
       this->setPropertySettings("AbsUnitsGroupingFile",
@@ -331,6 +349,11 @@ namespace Mantid
           Direction::Input, PropertyMode::Optional),
           "The detector vanadium workspace for absolute units normalisation.");
       this->setPropertySettings("AbsUnitsDetectorVanadiumInputWorkspace",
+          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
+      this->declareProperty(new WorkspaceProperty<>("AbsUnitsDetectorVanadiumInputMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the input absolute units sample detector vanadium workspace.");
+      this->setPropertySettings("AbsUnitsDetectorVanadiumInputMonitorWorkspace",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
       this->declareProperty("AbsUnitsIncidentEnergy", EMPTY_DBL(), mustBePositive,
           "The incident energy for the vanadium sample.");
@@ -380,9 +403,11 @@ namespace Mantid
       this->setPropertyGroup("DoAbsoluteUnits", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsSampleInputFile", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsSampleInputWorkspace", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsSampleInputMonitorWorkspace", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsGroupingFile", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsDetectorVanadiumInputFile", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsDetectorVanadiumInputWorkspace", absUnitsCorr);
+      this->setPropertyGroup("AbsUnitsDetectorVanadiumInputMonitorWorkspace", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsIncidentEnergy", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsMinimumEnergy", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsMaximumEnergy", absUnitsCorr);
@@ -603,6 +628,8 @@ namespace Mantid
         throw std::runtime_error(mess.str());
       }
 
+      MatrixWorkspace_sptr sampleMonWS = this->getProperty("SampleInputMonitorWorkspace");
+
       const bool showIntermedWS = this->getProperty("ShowIntermediateWorkspaces");
 
       // Get output workspace pointer and name
@@ -633,9 +660,11 @@ namespace Mantid
 
       // Process the sample detector vanadium if present
       Workspace_sptr detVanWS = this->loadInputData("DetectorVanadium", false);
+      MatrixWorkspace_sptr detVanMonWS = this->getProperty("DetectorVanadiumInputMonitorWorkspace");
       bool isProcessedDetVan = this->getProperty("UseProcessedDetVan");
       // Process a comparison detector vanadium if present
       Workspace_sptr detVan2WS = this->loadInputData("DetectorVanadium2", false);
+      MatrixWorkspace_sptr detVan2MonWS = this->getProperty("DetectorVanadium2InputMonitorWorkspace");
       IAlgorithm_sptr detVan;
       Workspace_sptr idetVanWS;
       if (detVanWS && !isProcessedDetVan)
@@ -644,8 +673,11 @@ namespace Mantid
 
         IAlgorithm_sptr diag = this->createSubAlgorithm("DgsDiagnose");
         diag->setProperty("DetVanWorkspace", detVanWS);
+        diag->setProperty("DetVanMonitorWorkspace", detVanMonWS);
         diag->setProperty("DetVanCompWorkspace", detVan2WS);
+        diag->setProperty("DetVanCompMonitorWorkspace", detVan2MonWS);
         diag->setProperty("SampleWorkspace", sampleWS);
+        diag->setProperty("SampleMonitorWorkspace", sampleMonWS);
         diag->setProperty("OutputWorkspace", detVanMaskName);
         diag->setProperty("ReductionProperties", reductionManagerName);
         diag->executeAsSubAlg();
@@ -660,6 +692,7 @@ namespace Mantid
 
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
+        detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
         if (!maskWS)
         {
           maskWS = hardMaskWS;
@@ -690,6 +723,7 @@ namespace Mantid
 
       IAlgorithm_sptr etConv = this->createSubAlgorithm("DgsConvertToEnergyTransfer");
       etConv->setProperty("InputWorkspace", sampleWS);
+      etConv->setProperty("InputMonitorWorkspace", sampleMonWS);
       etConv->setProperty("IntegratedDetectorVanadium", idetVanWS);
       const double ei = this->getProperty("IncidentEnergyGuess");
       etConv->setProperty("IncidentEnergyGuess", ei);
@@ -710,16 +744,19 @@ namespace Mantid
       Workspace_sptr absSampleWS = this->loadInputData("AbsUnitsSample", false);
       if (absSampleWS)
       {
+        MatrixWorkspace_sptr absSampleMonWS = this->getProperty("AbsUnitsSampleInputMonitorWorkspace");
         MatrixWorkspace_sptr absUnitsWS;
         MatrixWorkspace_sptr absGroupingWS = this->loadGroupingFile("AbsUnits");
 
         // Process absolute units detector vanadium if necessary
         Workspace_sptr absDetVanWS = this->loadInputData("AbsUnitsDetectorVanadium", false);
+        MatrixWorkspace_sptr absDetVanMonWS = this->getProperty("AbsUnitsDetectorVanadiumInputMonitorWorkspace");
         Workspace_sptr absIdetVanWS;
         if (absDetVanWS)
         {
           std::string idetVanName = outputWsName + "_absunits_idetvan";
           detVan->setProperty("InputWorkspace", absDetVanWS);
+          detVan->setProperty("InputMonitorWorkspace", absDetVanMonWS);
           detVan->setProperty("OutputWorkspace", idetVanName);
           if (maskWS)
           {
@@ -736,6 +773,7 @@ namespace Mantid
 
         const std::string absWsName = absSampleWS->getName() + "_absunits";
         etConv->setProperty("InputWorkspace", absSampleWS);
+        etConv->setProperty("InputMonitorWorkspace", absSampleMonWS);
         etConv->setProperty("OutputWorkspace", absWsName);
         const double ei = this->getProperty("AbsUnitsIncidentEnergy");
         etConv->setProperty("IncidentEnergyGuess", ei);

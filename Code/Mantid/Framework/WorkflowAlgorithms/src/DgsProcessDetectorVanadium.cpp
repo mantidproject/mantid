@@ -66,6 +66,9 @@ namespace Mantid
       //wsValidator->add<WorkspaceUnitValidator>("TOF");
       this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
           "An input workspace containing the detector vanadium data in TOF units.");
+      this->declareProperty(new WorkspaceProperty<>("InputMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the input workspace.");
       this->declareProperty(new WorkspaceProperty<>("MaskWorkspace",
           "", Direction::Input, PropertyMode::Optional),
           "A mask workspace");
@@ -95,11 +98,13 @@ namespace Mantid
 
       MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
       MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr monWS = this->getProperty("InputMonitorWorkspace");
 
       // Normalise result workspace to incident beam parameter
       IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
       norm->setProperty("InputWorkspace", inputWS);
       norm->setProperty("OutputWorkspace", inputWS);
+      norm->setProperty("InputMonitorWorkspace", monWS);
       norm->executeAsSubAlg();
       inputWS.reset();
       inputWS = norm->getProperty("OutputWorkspace");

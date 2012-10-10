@@ -69,6 +69,9 @@ namespace Mantid
     {
       this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "",
           Direction::Input), "An input workspace.");
+      this->declareProperty(new WorkspaceProperty<>("InputMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the input workspace.");
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
           Direction::Output), "The name for the output workspace.");
       this->declareProperty("TofRangeOffset", 0.0,
@@ -143,7 +146,7 @@ namespace Mantid
           // Do SNS
           else
           {
-            MatrixWorkspace_const_sptr monitorWS = reductionManager->getProperty("MonitorWorkspace");
+            MatrixWorkspace_const_sptr monitorWS = this->getProperty("MonitorWorkspace");
             if (!monitorWS)
             {
               throw std::runtime_error("SNS instruments require monitor workspaces for monitor normalisation.");

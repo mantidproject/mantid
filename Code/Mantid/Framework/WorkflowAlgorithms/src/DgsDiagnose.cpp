@@ -64,12 +64,21 @@ namespace Mantid
     {
       this->declareProperty(new WorkspaceProperty<>("DetVanWorkspace", "",
           Direction::Input), "The detector vanadium workspace.");
+      this->declareProperty(new WorkspaceProperty<>("DetVanMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the detector vanadium workspace.");
       this->declareProperty(new WorkspaceProperty<>("DetVanCompWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "A detector vanadium workspace to compare against the primary one.");
+      this->declareProperty(new WorkspaceProperty<>("DetVanCompMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the comparison detector vanadium workspace.");
       this->declareProperty(new WorkspaceProperty<>("SampleWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "A sample workspace to run some diagnostics on.");
+      this->declareProperty(new WorkspaceProperty<>("SampleMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the sample workspace.");
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
           Direction::Output), "This is the resulting mask workspace.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
@@ -102,8 +111,11 @@ namespace Mantid
 
       // Gather all the necessary properties
       MatrixWorkspace_sptr detVanWS = this->getProperty("DetVanWorkspace");
+      MatrixWorkspace_sptr detVanMonWS = this->getProperty("DetVanMonitorWorkspace");
       MatrixWorkspace_sptr detVanCompWS = this->getProperty("DetVanCompWorkspace");
+      MatrixWorkspace_sptr detVanCompMonWS = this->getProperty("DetVanCompMonitorWorkspace");
       MatrixWorkspace_sptr sampleWS;
+      MatrixWorkspace_sptr sampleMonWS;
 
       // Boolean properties
       const bool checkBkg = reductionManager->getProperty("BackgroundCheck");
@@ -141,6 +153,7 @@ namespace Mantid
       IAlgorithm_sptr detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
       detVan->setProperty("InputWorkspace", detVanWS);
       detVan->setProperty("OutputWorkspace", dvInternal);
+      detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
       detVan->setProperty("ReductionProperties", reductionManagerName);
       detVan->executeAsSubAlg();
       MatrixWorkspace_sptr dvWS = detVan->getProperty("OutputWorkspace");
@@ -151,6 +164,7 @@ namespace Mantid
       {
         detVan->setProperty("InputWorkspace", detVanCompWS);
         detVan->setProperty("OutputWorkspace", dvCompInternal);
+        detVan->setProperty("InputMonitorWorkspace", detVanCompMonWS);
         detVan->executeAsSubAlg();
         dvCompWS = detVan->getProperty("OutputWorkspace");
         detVanCompWS.reset();
@@ -164,6 +178,7 @@ namespace Mantid
       if (checkBkg || rejectZeroBkg || createPsdBleed)
       {
         sampleWS = this->getProperty("SampleWorkspace");
+        sampleMonWS = this->getProperty("SampleMonitorWorkspace");
 
         Workspace_sptr tmp;
         if (!isStandAlone)
@@ -179,6 +194,7 @@ namespace Mantid
         IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
         norm->setProperty("InputWorkspace", sampleWS);
         norm->setProperty("OutputWorkspace", sampleWS);
+        norm->setProperty("InputMonitorWorkspace", sampleMonWS);
         norm->setProperty("ReductionProperties", reductionManagerName);
         norm->executeAsSubAlg();
         sampleWS = norm->getProperty("OutputWorkspace");

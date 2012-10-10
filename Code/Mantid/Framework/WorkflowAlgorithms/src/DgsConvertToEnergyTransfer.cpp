@@ -73,6 +73,9 @@ namespace Mantid
     {
       this->declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
           "A sample data workspace.");
+      this->declareProperty(new WorkspaceProperty<>("InputMonitorWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A monitor workspace associated with the sample workspace.");
       this->declareProperty("IncidentEnergyGuess", EMPTY_DBL(),
           "This is the starting point for the incident energy calculation.");
       this->declareProperty(new WorkspaceProperty<>("IntegratedDetectorVanadium", "",
@@ -109,6 +112,7 @@ namespace Mantid
 
       MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
       MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr monWS = this->getProperty("InputMonitorWorkspace");
 
       // Make a monitor workspace name for SNS data
       std::string monWsName = inputWS->getName() + "_monitors";
@@ -179,37 +183,40 @@ namespace Mantid
           }
           else
           {
-            g_log.notice() << "Trying to determine file name" << std::endl;
-            std::string runFileName = inputWS->run().getProperty("Filename")->value();
-            if (runFileName.empty())
+            if (!monWS)
             {
-              throw std::runtime_error("Cannot find run filename, therefore cannot find the initial energy");
-            }
+              g_log.notice() << "Trying to determine file name" << std::endl;
+              std::string runFileName = inputWS->run().getProperty("Filename")->value();
+              if (runFileName.empty())
+              {
+                throw std::runtime_error("Cannot find run filename, therefore cannot find the initial energy");
+              }
 
-            std::string loadAlgName("");
-            std::string fileProp("");
-            if (boost::ends_with(runFileName, "_event.nxs"))
-            {
-              g_log.notice() << "Loading NeXus monitors" << std::endl;
-              loadAlgName = "LoadNexusMonitors";
-              fileProp = "Filename";
-            }
+              std::string loadAlgName("");
+              std::string fileProp("");
+              if (boost::ends_with(runFileName, "_event.nxs"))
+              {
+                g_log.notice() << "Loading NeXus monitors" << std::endl;
+                loadAlgName = "LoadNexusMonitors";
+                fileProp = "Filename";
+              }
 
-            if (boost::ends_with(runFileName, "_neutron_event.dat"))
-            {
-              g_log.notice() << "Loading PreNeXus monitors" << std::endl;
-              loadAlgName = "LoadPreNexusMonitors";
-              boost::replace_first(runFileName, "_neutron_event.dat",
-                  "_runinfo.xml");
-              fileProp = "RunInfoFilename";
-            }
+              if (boost::ends_with(runFileName, "_neutron_event.dat"))
+              {
+                g_log.notice() << "Loading PreNeXus monitors" << std::endl;
+                loadAlgName = "LoadPreNexusMonitors";
+                boost::replace_first(runFileName, "_neutron_event.dat",
+                    "_runinfo.xml");
+                fileProp = "RunInfoFilename";
+              }
 
-            // Load the monitors
-            IAlgorithm_sptr loadmon = this->createSubAlgorithm(loadAlgName);
-            loadmon->setProperty(fileProp, runFileName);
-            loadmon->setProperty("OutputWorkspace", monWsName);
-            loadmon->executeAsSubAlg();
-            MatrixWorkspace_sptr monWS = loadmon->getProperty("OutputWorkspace");
+              // Load the monitors
+              IAlgorithm_sptr loadmon = this->createSubAlgorithm(loadAlgName);
+              loadmon->setProperty(fileProp, runFileName);
+              loadmon->setProperty("OutputWorkspace", monWsName);
+              loadmon->executeAsSubAlg();
+              monWS = loadmon->getProperty("OutputWorkspace");
+            }
 
             // Calculate Ei
             IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
@@ -425,6 +432,7 @@ namespace Mantid
       IAlgorithm_sptr norm = this->createSubAlgorithm("DgsPreprocessData");
       norm->setProperty("InputWorkspace", outputWS);
       norm->setProperty("OutputWorkspace", outputWS);
+      norm->setProperty("InputMonitorWorkspace", monWS);
       norm->setProperty("TofRangeOffset", binOffset);
       norm->executeAsSubAlg();
       outputWS = norm->getProperty("OutputWorkspace");
@@ -545,13 +553,6 @@ namespace Mantid
       remap->setProperty("MaskWorkspace", maskWS);
       remap->setProperty("GroupingWorkspace", groupWS);
       remap->setProperty("OldGroupingFile", oldGroupFile);
-      /*
-      if (reductionManager->existsProperty("UseProcessedDetVan"))
-      {
-        bool runOpposite = reductionManager->getProperty("UseProcessedDetVan");
-        remap->setProperty("ExecuteOppositeOrder", runOpposite);
-      }
-      */
       remap->executeAsSubAlg();
       outputWS = remap->getProperty("OutputWorkspace");
 
