@@ -1,6 +1,5 @@
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 #include "MantidKernel/EmptyValues.h"
-#include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -31,11 +30,7 @@ namespace WorkflowAlgorithmHelpers
       if (EMPTY_DBL() == param)
       {
         std::vector<double> params = ws->getInstrument()->getNumberParameter(instParam);
-        if (params.empty())
-        {
-          param = EMPTY_DBL();
-        }
-        else
+        if (!params.empty())
         {
           param = params[0];
         }
