@@ -1,5 +1,4 @@
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
-#include "MantidKernel/EmptyValues.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -21,13 +20,15 @@ namespace WorkflowAlgorithmHelpers
    * @return : Either the algorithm property or an instrument parameter.
    */
   double getDblPropOrParam(const std::string pmProp, PropertyManager_sptr pm,
-      const std::string instParam, MatrixWorkspace_sptr ws)
+      const std::string instParam, MatrixWorkspace_sptr ws,
+      const double overrideValue)
   {
-    double param = EMPTY_DBL();
+    double defaultValue = EMPTY_DBL();
+    double param = defaultValue;
     if (pm->existsProperty(pmProp))
     {
       param = pm->getProperty(pmProp);
-      if (EMPTY_DBL() == param)
+      if (defaultValue == param)
       {
         std::vector<double> params = ws->getInstrument()->getNumberParameter(instParam);
         if (!params.empty())
@@ -43,6 +44,10 @@ namespace WorkflowAlgorithmHelpers
       {
         param = params[0];
       }
+    }
+    if(defaultValue != overrideValue)
+    {
+      param = overrideValue;
     }
     return param;
   }
