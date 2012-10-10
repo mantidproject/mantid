@@ -259,8 +259,6 @@ IVConnections::IVConnections( Ui_ImageViewer* ui,
 
 IVConnections::~IVConnections()
 {
-  // std::cout << "IVConnections destructor called" << std::endl;
-
   delete image_picker;
   delete h_graph_picker;
   delete v_graph_picker;
@@ -492,7 +490,6 @@ void IVConnections::load_color_map()
   }
 
   int n_colors = (int)positive_color_table.size();
-  std::cout << "Number of mantid colors = " << n_colors << std::endl;
 
   std::vector<QRgb> negative_color_table;
   ColorMaps::GetColorMap( ColorMaps::GRAY, n_colors, negative_color_table );
