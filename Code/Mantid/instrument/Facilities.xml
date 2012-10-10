@@ -49,6 +49,11 @@
     <technique>Neutron Diffraction</technique>
     <livedata address="NDXINES:6789" />
   </instrument>
+  
+  <instrument name="INTER">
+    <technique>Reflectometry</technique>
+    <livedata address="NDXINTER:6789" />
+  </instrument>
 
   <instrument name="IRIS" shortname="IRS" beamline="N6">
     <zeropadding size="8" startRunNumber="54938" prefix="IRIS"/>
