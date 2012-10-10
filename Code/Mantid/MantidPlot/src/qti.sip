@@ -30,9 +30,10 @@
  ***************************************************************************/
 
 %Module _qti
+
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
-/* %Import ../../MantidQt/Python/mantidqt.sip */
+%Import mantidqt.sip
 
 class MdiSubWindow: QMdiSubWindow /PyName=MDIWindow/
 {
@@ -1168,7 +1169,7 @@ private:
 ApplicationWindow *sipqti_app()
 {
   int iserr = 0;
-  PyObject *me = PyImport_ImportModule("qti");
+  PyObject *me = PyImport_ImportModule("_qti");
   PyObject *mydict = PyModule_GetDict(me);
   PyObject *pyapp = PyDict_GetItemString(mydict,"app");
   Py_DECREF(me);
@@ -1288,14 +1289,6 @@ public:
   void setViewType(const QString &);
 private:
 InstrumentWindow(const InstrumentWindow &);
-};
-
-namespace MantidQt
-{
-namespace MantidWidgets
-{
-  class FitPropertyBrowser;
-};
 };
 
 class MantidUI: QObject

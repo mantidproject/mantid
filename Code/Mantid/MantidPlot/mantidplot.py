@@ -14,13 +14,9 @@ from mantidplotpy.proxies import threadsafe_call, new_proxy
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt
 
-print _qti
-
 # Import into the global namespace qti classes that:
 #   (a) don't need a proxy & (b) can be constructed from python
 from _qti import PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker
-
-print 'Import OK'
 
 #-------------------------- Mantid Python access functions----------------
 # Grab a few Mantid things so that we can recognise workspace variables
