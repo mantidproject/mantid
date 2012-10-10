@@ -8,6 +8,7 @@ hand off to the DetectorDiagnostic algorithm.
 #include "MantidWorkflowAlgorithms/DgsDiagnose.h"
 #include "MantidAPI/PropertyManagerDataService.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/pointer_cast.hpp>
@@ -16,6 +17,7 @@ hand off to the DetectorDiagnostic algorithm.
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace WorkflowAlgorithmHelpers;
 
 namespace Mantid
 {
@@ -123,19 +125,32 @@ namespace Mantid
       const bool createPsdBleed = reductionManager->getProperty("PsdBleed");
 
       // Numeric properties
-      const double huge = reductionManager->getProperty("HighCounts");
-      const double tiny = reductionManager->getProperty("LowCounts");
-      const double vanOutHi = reductionManager->getProperty("HighOutlier");
-      const double vanOutLo = reductionManager->getProperty("LowOutlier");
-      const double vanHi = reductionManager->getProperty("MedianTestHigh");
-      const double vanLo = reductionManager->getProperty("MedianTestLow");
-      const double vanSigma = reductionManager->getProperty("ErrorBarCriterion");
-      const double variation = reductionManager->getProperty("DetVanRatioVariation");
-      const double samHi = reductionManager->getProperty("SamBkgMedianTestHigh");
-      const double samLo = reductionManager->getProperty("SamBkgMedianTestLow");
-      const double samSigma = reductionManager->getProperty("SamBkgErrorBarCriterion");
-      const double bleedRate = reductionManager->getProperty("MaxFramerate");
-      const double bleedPixels = static_cast<const double>(reductionManager->getProperty("IgnoredPixels"));
+      const double huge = getDblPropOrParam("HighCounts",
+          reductionManager, "diag_huge", detVanWS);
+      const double tiny = getDblPropOrParam("LowCounts",
+          reductionManager, "diag_tiny", detVanWS);
+      const double vanOutHi = getDblPropOrParam("HighOutlier",
+          reductionManager, "diag_van_out_hi", detVanWS);
+      const double vanOutLo = getDblPropOrParam("LowOutlier",
+          reductionManager, "diag_van_out_lo", detVanWS);
+      const double vanHi = getDblPropOrParam("MedianTestHigh",
+          reductionManager, "diag_van_hi", detVanWS);
+      const double vanLo = getDblPropOrParam("MedianTestLow",
+          reductionManager, "diag_van_lo", detVanWS);
+      const double vanSigma = getDblPropOrParam("ErrorBarCriterion",
+          reductionManager, "diag_van_sig", detVanWS);
+      const double variation = getDblPropOrParam("DetVanRatioVariation",
+          reductionManager, "diag_variation", detVanWS);
+      const double samHi = getDblPropOrParam("SamBkgMedianTestHigh",
+          reductionManager, "diag_samp_hi", detVanWS);
+      const double samLo = getDblPropOrParam("SamBkgMedianTestLow",
+          reductionManager, "diag_samp_lo", detVanWS);
+      const double samSigma = getDblPropOrParam("SamBkgErrorBarCriterion",
+          reductionManager, "diag_samp_sig", detVanWS);
+      double bleedRate = getDblPropOrParam("MaxFramerate",
+          reductionManager, "diag_bleed_maxrate", detVanWS);
+      const double bleedPixels = getDblPropOrParam("IgnoredPixels",
+          reductionManager, "diag_bleed_pixels", detVanWS, 80.0);
 
       // Make some internal names for workspaces
       const std::string dvInternal = "__det_van";
@@ -220,16 +235,12 @@ namespace Mantid
       MatrixWorkspace_sptr backgroundIntWS;
       if (checkBkg)
       {
-        double rangeStart = reductionManager->getProperty("BackgroundTofStart");
-        if (EMPTY_DBL() == rangeStart)
-        {
-          rangeStart = sampleWS->getInstrument()->getNumberParameter("bkgd-range-min")[0];
-        }
-        double rangeEnd = reductionManager->getProperty("BackgroundTofEnd");
-        if (EMPTY_DBL() == rangeEnd)
-        {
-          rangeEnd = sampleWS->getInstrument()->getNumberParameter("bkgd-range-max")[0];
-        }
+        double rangeStart = getDblPropOrParam("BackgroundTofStart",
+            reductionManager, "bkgd-range-min", sampleWS);
+
+        double rangeEnd = getDblPropOrParam("BackgroundTofEnd",
+            reductionManager, "bkgd-range-max", sampleWS);
+
         IAlgorithm_sptr integrate = this->createSubAlgorithm("Integration");
         integrate->setProperty("InputWorkspace", sampleWS);
         integrate->setProperty("OutputWorkspace", bkgInternal);

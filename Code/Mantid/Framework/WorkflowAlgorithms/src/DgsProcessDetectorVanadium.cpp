@@ -11,11 +11,13 @@ process.
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace WorkflowAlgorithmHelpers;
 
 namespace Mantid
 {
@@ -109,16 +111,12 @@ namespace Mantid
       inputWS.reset();
       inputWS = norm->getProperty("OutputWorkspace");
 
-      double detVanIntRangeLow = reductionManager->getProperty("DetVanIntRangeLow");
-      if (EMPTY_DBL() == detVanIntRangeLow)
-      {
-        detVanIntRangeLow = inputWS->getInstrument()->getNumberParameter("wb-integr-min")[0];
-      }
-      double detVanIntRangeHigh = reductionManager->getProperty("DetVanIntRangeHigh");
-      if (EMPTY_DBL() == detVanIntRangeHigh)
-      {
-        detVanIntRangeHigh = inputWS->getInstrument()->getNumberParameter("wb-integr-max")[0];
-      }
+      double detVanIntRangeLow = getDblPropOrParam("DetVanIntRangeLow",
+          reductionManager, "wb-integr-min", inputWS);
+
+      double detVanIntRangeHigh = getDblPropOrParam("DetVanIntRangeHigh",
+          reductionManager, "wb-integr-max", inputWS);
+
       const std::string detVanIntRangeUnits = reductionManager->getProperty("DetVanIntRangeUnits");
 
       if ("TOF" != detVanIntRangeUnits)

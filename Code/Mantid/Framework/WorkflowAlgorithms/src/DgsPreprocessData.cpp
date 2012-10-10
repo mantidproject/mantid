@@ -17,10 +17,12 @@ parameter. For SNS, monitor workspaces need to be passed.
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 #include "Poco/Path.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace WorkflowAlgorithmHelpers;
 
 namespace Mantid
 {
@@ -126,18 +128,14 @@ namespace Mantid
         {
           // Perform extra setup for monitor normalisation
           double rangeOffset = this->getProperty("TofRangeOffset");
-          double rangeMin = reductionManager->getProperty("MonitorIntRangeLow");
-          if (EMPTY_DBL() == rangeMin)
-          {
-            rangeMin = inputWS->getInstrument()->getNumberParameter("norm-mon1-min")[0];
-          }
+          double rangeMin = getDblPropOrParam("MonitorIntRangeLow",
+              reductionManager, "norm-mon1-min", inputWS);
           rangeMin += rangeOffset;
-          double rangeMax = reductionManager->getProperty("MonitorIntRangeHigh");
-          if (EMPTY_DBL() == rangeMax)
-          {
-            rangeMax = inputWS->getInstrument()->getNumberParameter("norm-mon1-max")[0];
-          }
+
+          double rangeMax = getDblPropOrParam("MonitorIntRangeHigh",
+              reductionManager, "norm-mon1-max", inputWS);
           rangeMax += rangeOffset;
+
           specid_t monSpec = static_cast<specid_t>(inputWS->getInstrument()->getNumberParameter("norm-mon1-spec")[0]);
           if ("ISIS" == facility)
           {
