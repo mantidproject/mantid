@@ -32,6 +32,7 @@ DECLARE_FUNCTION(Convolution)
 Convolution::Convolution()
 :m_resolution(NULL),m_resolutionSize(0)
 {
+  this->useNumericDerivatives( true );
 }
 
 /// Destructor
