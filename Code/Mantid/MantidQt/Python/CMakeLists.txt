@@ -68,6 +68,10 @@ add_library ( mantidqtpython MODULE ${SIP_SRC} )
 if(WIN32)
 	# Windows: Python library name needs to end in .pyd for Windows
 	set_target_properties( mantidqtpython PROPERTIES PREFIX "" SUFFIX ".pyd" )
+	# Debug python library expects imported module names to end in _d
+	if ( PYTHON_DEBUG_LIBRARY )
+		set_target_properties ( mantidqtpython PROPERTIES DEBUG_OUTPUT_NAME mantidqtpython_d )
+	endif ()
 elseif ( APPLE )
 	# Mac: and in .so on the Mac, with no "lib" prefix either
   	set_target_properties ( mantidqtpython PROPERTIES PREFIX "" SUFFIX .so )

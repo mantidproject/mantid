@@ -29,6 +29,10 @@ def get_default_python_api():
         return api_version
 
 if __name__ == '__main__':
+    # Import MantidPlot python commands
+    import mantidplot
+    from mantidplot import *
+
     # Make Mantid available
     from MantidFramework import *
     # Initialize the Mantid framework
@@ -50,8 +54,6 @@ if __name__ == '__main__':
     else:
         pass
 
-    # Import MantidPlot python commands
-    from mantidplot import *
     
     # Define a helper class for the autocomplete
     import inspect
