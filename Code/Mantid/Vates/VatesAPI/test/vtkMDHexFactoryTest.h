@@ -5,7 +5,6 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDAlgorithms/SliceMD.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
@@ -23,7 +22,6 @@ using namespace Mantid;
 using namespace Mantid::VATES;
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
 using namespace testing;
 
 //=====================================================================================
@@ -37,14 +35,15 @@ private:
   {
     Mantid::MDEvents::MDEventWorkspace3Lean::sptr input_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
 
-    SliceMD slice;
-    slice.initialize();
-    slice.setProperty("InputWorkspace", input_ws);
-    slice.setPropertyValue("AlignedDim0", "Axis0, -10, 10, 1");
-    slice.setPropertyValue("AlignedDim0", "Axis1, -10, 10, 1");
-    slice.setPropertyValue("AlignedDim0", "Axis2, -10, 10, 1");
-    slice.setPropertyValue("OutputWorkspace", "binned");
-    slice.execute();
+    using namespace Mantid::API;
+    IAlgorithm_sptr slice = AlgorithmManager::Instance().createUnmanaged("SliceMD");
+    slice->initialize();
+    slice->setProperty("InputWorkspace", input_ws);
+    slice->setPropertyValue("AlignedDim0", "Axis0, -10, 10, 1");
+    slice->setPropertyValue("AlignedDim0", "Axis1, -10, 10, 1");
+    slice->setPropertyValue("AlignedDim0", "Axis2, -10, 10, 1");
+    slice->setPropertyValue("OutputWorkspace", "binned");
+    slice->execute();
 
     Workspace_sptr binned_ws = AnalysisDataService::Instance().retrieve("binned");
     FakeProgressAction progressUpdater;

@@ -6,7 +6,6 @@
 #include "MantidVatesAPI/vtkMDLineFactory.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
 #include "MockObjects.h"
-#include "MantidMDAlgorithms/SliceMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "vtkCellType.h"
 #include "vtkUnstructuredGrid.h"
@@ -15,7 +14,6 @@
 using namespace Mantid::VATES;
 using namespace Mantid::API;
 using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
 using namespace testing;
 
 //=====================================================================================
@@ -93,12 +91,13 @@ public:
             ws = MDEventsTestHelper::makeMDEWFull<1>(10, 10, 10, 10);
 
     //Rebin it to make it possible to compare cells to bins.
-    SliceMD slice;
-    slice.initialize();
-    slice.setProperty("InputWorkspace", ws);
-    slice.setPropertyValue("AlignedDim0", "Axis0, -10, 10, 100");
-    slice.setPropertyValue("OutputWorkspace", "binned");
-    slice.execute();
+    using namespace Mantid::API;
+    IAlgorithm_sptr slice = AlgorithmManager::Instance().createUnmanaged("SliceMD");
+    slice->initialize();
+    slice->setProperty("InputWorkspace", ws);
+    slice->setPropertyValue("AlignedDim0", "Axis0, -10, 10, 100");
+    slice->setPropertyValue("OutputWorkspace", "binned");
+    slice->execute();
 
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
@@ -132,12 +131,13 @@ public:
     boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<1>,1> > input 
       = MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
     //Rebin it to make it possible to compare cells to bins.
-    SliceMD slice;
-    slice.initialize();
-    slice.setProperty("InputWorkspace", input);
-    slice.setPropertyValue("AlignedDim0", "Axis0, -10, 10, 200000");
-    slice.setPropertyValue("OutputWorkspace", "binned");
-    slice.execute();
+    using namespace Mantid::API;
+    IAlgorithm_sptr slice = AlgorithmManager::Instance().createUnmanaged("SliceMD");
+    slice->initialize();
+    slice->setProperty("InputWorkspace", input);
+    slice->setPropertyValue("AlignedDim0", "Axis0, -10, 10, 200000");
+    slice->setPropertyValue("OutputWorkspace", "binned");
+    slice->execute();
   }
 
   void tearDown()

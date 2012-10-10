@@ -1,9 +1,8 @@
 #ifndef VATESAPI_TEST_MOCKOBJECTS_H
 #define VATESAPI_TEST_MOCKOBJECTS_H
 
-#include "MantidMDAlgorithms/SliceMD.h"
-#include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDEvents/CreateMDWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Workspace.h"
@@ -331,22 +330,20 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
   {
     using namespace Mantid::API;
     using namespace Mantid::MDEvents;
-    using namespace Mantid::MDAlgorithms;
 
     Mantid::API::Workspace_sptr inputWs = createSimple3DWorkspace();
 
     AnalysisDataService::Instance().remove("binned");
-
-    Mantid::API::Algorithm_sptr binningAlg;
+    std::string binningAlgName;
     if(sliceMD)
     {
-      binningAlg = Algorithm_sptr(new SliceMD);
+      binningAlgName = "SliceMD";
     }
     else
     {
-      binningAlg = Algorithm_sptr(new BinMD);
+      binningAlgName = "BinMD";
     }
-
+    IAlgorithm_sptr binningAlg = AlgorithmManager::Instance().createUnmanaged(binningAlgName);
     binningAlg->initialize();
     binningAlg->setProperty("InputWorkspace", inputWs);
     binningAlg->setPropertyValue("AlignedDim0","A,0,5,2");

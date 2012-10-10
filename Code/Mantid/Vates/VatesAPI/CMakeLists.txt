@@ -180,7 +180,8 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc)
   set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
                         ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-                        ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp )
+                        ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
+                        ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesAPITest ${TEST_FILES} )
   target_link_libraries( VatesAPITest VatesAPI DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   add_dependencies( AllTests VatesAPITest )
