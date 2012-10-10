@@ -55,7 +55,7 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
     {
         //retrieve data now
         yaxis = ws->readY(px);
-        for (int tof=0; tof<sz-1; tof++)
+        for (size_t tof=0; tof<sz-1; tof++)
         {
             data[px*sz + tof] = yaxis[tof];
         }
@@ -66,7 +66,7 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
                                                         total_rows, total_cols,
                                                         data);
     
-    //std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
+    std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
     image_view = new RefImageView( source );
 }
 
