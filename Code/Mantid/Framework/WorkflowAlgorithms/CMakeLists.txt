@@ -24,6 +24,7 @@ set ( SRC_FILES
 	src/SANSSolidAngleCorrection.cpp
 	src/SetupEQSANSReduction.cpp
 	src/SetupHFIRReduction.cpp
+	src/WorkflowAlgorithmHelpers.cpp
 )
                 
 set ( SRC_UNITY_IGNORE_FILES 
@@ -55,6 +56,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
 	inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
+	inc/MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h
 )
               
 set ( TEST_FILES SANSSolidAngleCorrectionTest.h )
