@@ -356,10 +356,14 @@ if ( NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersio
   configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/../../Build/CMake/PatchVersionNumber.cmake.in
                    ${CMAKE_CURRENT_SOURCE_DIR}/../../Build/CMake/PatchVersionNumber.cmake
   )
-  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
-                   ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp
-  )
 endif ()
+
+###########################################################################
+# This section deals with creating the ParaViewVersion implementation
+###########################################################################
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp.in
+                 ${CMAKE_CURRENT_SOURCE_DIR}/src/ParaViewVersion.cpp 
+)
 
 ###########################################################################
 # Manipulate the Mantid.properties file to work wherever you build to
