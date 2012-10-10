@@ -16,6 +16,7 @@ from mantidsimple import *
 import os
 import datetime
 from time import localtime, strftime
+from mantid import config
 
 COMPRESS_TOL_TOF = .01
 
@@ -120,7 +121,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         wksp = alg.workspace()
         # For NOMAD data before Aug 2012, use the updated geometry
         if str(wksp.getInstrument().getValidFromDate()) == "1900-01-31T23:59:59":
-            path=mantid.config["instrumentDefinition.directory"]
+            path=config["instrumentDefinition.directory"]
             LoadInstrument(Workspace=wksp, Filename=path+'/'+"NOMAD_Definition_20120701-20120731.xml",RewriteSpectraMap=False)
         return wksp
 
