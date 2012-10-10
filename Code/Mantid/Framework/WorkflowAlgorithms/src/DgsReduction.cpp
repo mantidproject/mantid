@@ -439,29 +439,25 @@ namespace Mantid
       {
         const std::string facility = ConfigService::Instance().getFacility().name();
         this->setLoadAlg("Load");
-        if ("SNS" == facility)
-        {
-          std::string monitorFilename = prop + "MonitorFilename";
-          this->reductionManager->declareProperty(new PropertyWithValue<std::string>(monitorFilename, inputData));
-        }
-        // Do ISIS
-        else
+        if ("ISIS" == facility)
         {
           std::string detCalFileFromAlg = this->getProperty("DetCalFilename");
           std::string detCalFileProperty = prop + "DetCalFilename";
-          std::string detCalFilename("");
           if (!detCalFileFromAlg.empty())
           {
-            detCalFilename = detCalFileFromAlg;
+            this->reductionManager->declareProperty(
+                new PropertyWithValue<std::string>(detCalFileProperty,
+                detCalFileFromAlg));
           }
-          else
-          {
-            detCalFilename = inputData;
-          }
-          this->reductionManager->declareProperty(new PropertyWithValue<std::string>(detCalFileProperty, detCalFilename));
         }
 
         inputWS = this->load(inputData, true);
+
+        IAlgorithm_sptr smlog = this->createSubAlgorithm("AddSampleLog");
+        smlog->setProperty("Workspace", inputWS);
+        smlog->setProperty("LogName", "Filename");
+        smlog->setProperty("LogText", inputData);
+        smlog->executeAsSubAlg();
       }
       else
       {

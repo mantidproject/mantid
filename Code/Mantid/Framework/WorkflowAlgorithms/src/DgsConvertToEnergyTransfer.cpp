@@ -180,18 +180,10 @@ namespace Mantid
           else
           {
             g_log.notice() << "Trying to determine file name" << std::endl;
-            std::string runFileName("");
-            if (reductionManager->existsProperty("SampleMonitorFilename"))
+            std::string runFileName = inputWS->run().getProperty("Filename")->value();
+            if (runFileName.empty())
             {
-              runFileName = reductionManager->getPropertyValue("SampleMonitorFilename");
-              if (runFileName.empty())
-              {
-                throw std::runtime_error("Cannot find run filename, therefore cannot find the initial energy");
-              }
-            }
-            else
-            {
-              throw std::runtime_error("Input workspaces are not handled, therefore cannot find the initial energy");
+              throw std::runtime_error("Cannot find run filename, therefore cannot find the initial energy");
             }
 
             std::string loadAlgName("");
