@@ -120,9 +120,12 @@ namespace Mantid
       MatrixWorkspace_sptr sampleMonWS;
 
       // Boolean properties
-      const bool checkBkg = reductionManager->getProperty("BackgroundCheck");
-      const bool rejectZeroBkg = reductionManager->getProperty("RejectZeroBackground");
-      const bool createPsdBleed = reductionManager->getProperty("PsdBleed");
+      const bool checkBkg = getBoolPropOrParam("BackgroundCheck",
+          reductionManager, "check_background", detVanWS);
+      const bool rejectZeroBkg = getBoolPropOrParam("RejectZeroBackground",
+          reductionManager, "diag_samp_zero", detVanWS);
+      const bool createPsdBleed = getBoolPropOrParam("PsdBleed",
+          reductionManager, "diag_bleed_test", detVanWS);
 
       // Numeric properties
       const double huge = getDblPropOrParam("HighCounts",
