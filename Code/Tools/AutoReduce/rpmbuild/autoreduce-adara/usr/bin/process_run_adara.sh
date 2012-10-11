@@ -51,10 +51,10 @@ status=$(( $status + $? ))
 
 
 # Catalog raw metadata
-echo "--------Catalogging raw data--------"
+echo "--------Cataloging raw data--------"
 ingestNexus_adara=/usr/bin/ingestNexus_adara
 echo $ingestNexus_adara $nexusFile
-echo "--------Catalogging raw data--------" | sed "s/^/$(date)  /" >> $logfile
+echo "--------Cataloging raw data--------" | sed "s/^/$(date)  /" >> $logfile
 echo $ingestNexus_adara $nexusFile | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
 $ingestNexus_adara $nexusFile $plugin $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
@@ -84,16 +84,22 @@ echo "--------Reducing data--------" | sed "s/^/$(date)  /" >> $logfile
 echo $redCommand $nexusFile $redOutDir  | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
 $redCommand $nexusFile $redOutDir &>> $logfile
+OUT=$?
+if [ $OUT -eq 1 ];then
+  errorLog=$redOutDir$instrument"_"$runNumber".error"
+  echo "Auto reduction failed, see error log at "$errorLog
+  echo "Auto reduction failed, see error log at "$errorLog >> $logfile
+  return 
+fi
 end=`date +%x-%T`
 echo "Started at $start --- Ended at $end"
 echo
 
-
 # Catalog reduced metadata
-echo "--------Catalogging reduced data--------"
+echo "--------Cataloging reduced data--------"
 ingestReduced_adara=/usr/bin/ingestReduced_adara
 echo $ingestReduced_adara $facility $instrument $proposal $runNumber
-echo "--------Catalogging reduced data--------" | sed "s/^/$(date)  /" >> $logfile
+echo "--------Cataloging reduced data--------" | sed "s/^/$(date)  /" >> $logfile
 echo $ingestReduced_adara $facility $instrument $proposal $runNumber | sed "s/^/$(date)  /" >> $logfile
 start=`date +%x-%T`
 $ingestReduced_adara $facility $instrument $proposal $runNumber $plugin $hostAndPort $password | sed "s/^/$(date)  /" >> $logfile
