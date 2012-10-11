@@ -315,7 +315,9 @@ def _setUpPeriod(i):
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, resetSetup=True):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics 
-        details to be adjusted, and optionally the old setup is reset at the end. 
+        details to be adjusted, and optionally the old setup is reset at the end. Note if FIT of RESCALE or SHIFT 
+        is selected then both REAR and FRONT detectors are both reduced EXCEPT if only the REAR detector is selected
+        to be reduced
         
         @param wav_start: the first wavelength to be in the output data
         @param wav_end: the last wavelength in the output data
@@ -372,30 +374,36 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         
         toRestoreOutputParts = ReductionSingleton().to_Q.outputParts     
            
-        if toParse.count('merged') == 1:
-            # if 'merged' set ensure that when cross section is calculated that the parts
-            # are also outputted            
+        # if 'merged' then when cross section is calculated have the two individual parts
+        # of the cross section outputted. These additional outputs are required to calculate
+        # the merged dataset           
+        if toParse.count('merged') == 1:           
             ReductionSingleton().to_Q.outputParts = True            
         
-        #retWSname_rear = None
+        # should a rear reduction be done?
         if toParse.count('rear') == 1 or toParse.count('merged') == 1 \
-          or toParse.count('both') == 1 or fitRequired:
+          or toParse.count('both') == 1:
             ReductionSingleton().instrument.setDetector('rear')
             retWSname_rear = _WavRangeReduction(name_suffix)
             
-        #retWSname_front = None
-        if toParse.count('front') == 1 or toParse.count('merged') == 1 or toParse.count('both') == 1:
+        # should a front reduction be done?
+        if toParse.count('front') == 1 or toParse.count('merged') == 1 \
+          or toParse.count('both') == 1:
             ReductionSingleton.replace(ReductionSingleton().settings())
             ReductionSingleton().instrument.setDetector('front')
             retWSname_front = _WavRangeReduction(name_suffix)            
             
-        if fitRequired:
+        # if combineDet='rear' do not do a fit even if fitRequired is true
+        if fitRequired and toParse != 'rear':
             scale, shift = _fitRescaleAndShift(rAnds, retWSname_front, retWSname_rear)
             ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift
             ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale                 
         
+        # in case of 'merged' for safety reset back this setting which may have been 
+        # temporarily changed above      
         ReductionSingleton().instrument.setDetector(toRestoreAfterAnalysis)
           
+        # get shift and scale to use for front and merge below  
         shift = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift
         scale = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale
                             
