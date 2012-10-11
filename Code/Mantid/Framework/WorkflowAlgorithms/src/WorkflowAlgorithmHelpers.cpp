@@ -51,4 +51,43 @@ namespace WorkflowAlgorithmHelpers
     }
     return param;
   }
+
+  /**
+   * This function tries to get a boolean value from a particular algorithm
+   * property. If that property does not exist, then the function tries to look
+   * up the parameter on the instrument in the given workspace for a given
+   * parameter name. If found, that value is returned. If not found,
+   * the default value (false) is returned. If the property exists, just use
+   * the value provided.
+   *
+   * @param pmProp : The name of the algorithm property to retrieve
+   * @param pm : The property manager pointer to retrieve a property value from
+   * @param instParam : The name of the instrument parameter to fetch from the workspace
+   * @param ws : A workspace that should house the alternate parameter
+   * @return : Either the algorithm property or an instrument parameter.
+   */
+  bool getBoolPropOrParam(const std::string pmProp, PropertyManager_sptr pm,
+      const std::string instParam, MatrixWorkspace_sptr ws,
+      const bool overrideValue)
+  {
+    bool defaultValue = false;
+    bool param = defaultValue;
+    if (pm->existsProperty(pmProp))
+    {
+      param = pm->getProperty(pmProp);
+    }
+    else
+    {
+      std::vector<double> params = ws->getInstrument()->getNumberParameter(instParam);
+      if (!params.empty())
+      {
+        param = static_cast<bool>(params[0]);
+      }
+    }
+    if(defaultValue != overrideValue)
+    {
+      param = overrideValue;
+    }
+    return param;
+  }
 }
