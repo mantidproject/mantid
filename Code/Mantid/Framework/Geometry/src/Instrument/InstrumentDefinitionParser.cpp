@@ -724,10 +724,13 @@ namespace Geometry
   //-----------------------------------------------------------------------------------------------------------------------
   /** Reads the contents of the \<defaults\> element to set member variables,
   *  requires m_instrument to be already set
-  *  @param defaults :: points to the data read from the \<defaults\> element
+  *  @param defaults :: points to the data read from the \<defaults\> element, can be null.
   */
   void InstrumentDefinitionParser::readDefaults(Poco::XML::Element* defaults)
   {
+    // Return without complaint, if there are no defaults
+    if(!defaults) return;
+
     // Check whether spherical coordinates should be treated as offsets to parents position
     std::string offsets;
     Element* offsetElement = defaults->getChildElement("offsets");
