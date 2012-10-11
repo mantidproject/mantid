@@ -218,31 +218,31 @@ namespace Mantid
           "The output mask file name used for the results of the detector tests.");
       this->setPropertySettings("OutputMaskFile",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
-      this->declareProperty("HighCounts", 1.0e+10, mustBePositive,
+      this->declareProperty("HighCounts", EMPTY_DBL(), mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("HighCounts",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
-      this->declareProperty("LowCounts", 1.e-10, mustBePositive,
+      this->declareProperty("LowCounts", EMPTY_DBL(), mustBePositive,
           "Mask detectors below this threshold.");
       this->setPropertySettings("LowCounts",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
-      this->declareProperty("LowOutlier", 0.01,
+      this->declareProperty("LowOutlier", EMPTY_DBL(),
           "Lower bound defining outliers as fraction of median value");
       this->setPropertySettings("LowOutlier",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
-      this->declareProperty("HighOutlier", 100.,
+      this->declareProperty("HighOutlier", EMPTY_DBL(),
           "Upper bound defining outliers as fraction of median value");
       this->setPropertySettings("HighOutlier",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
-      this->declareProperty("MedianTestHigh", 2.0, mustBePositive,
+      this->declareProperty("MedianTestHigh", EMPTY_DBL(), mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("MedianTestHigh",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
-      this->declareProperty("MedianTestLow", 0.1, mustBePositive,
+      this->declareProperty("MedianTestLow", EMPTY_DBL(), mustBePositive,
           "Mask detectors below this threshold.");
       this->setPropertySettings("MedianTestLow",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
-      this->declareProperty("ErrorBarCriterion", 0.0, mustBePositive,
+      this->declareProperty("ErrorBarCriterion", EMPTY_DBL(), mustBePositive,
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("ErrorBarCriterion",
           new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
@@ -256,22 +256,22 @@ namespace Mantid
           Direction::Input, PropertyMode::Optional),
           "A monitor workspace associated with the input comparison detector vanadium workspace.");
 
-      this->declareProperty("DetVanRatioVariation", 1.1, mustBePositive,
+      this->declareProperty("DetVanRatioVariation", EMPTY_DBL(), mustBePositive,
           "Mask detectors if the time variation is above this threshold.");
       this->setPropertySettings("DetVanRatioVariation",
           new VisibleWhenProperty("DetectorVanadium2InputFile", IS_NOT_EQUAL_TO, ""));
 
       this->declareProperty("BackgroundCheck", false,
           "If true, run a background check on detector vanadium.");
-      this->declareProperty("SamBkgMedianTestHigh", 1.5, mustBePositive,
+      this->declareProperty("SamBkgMedianTestHigh", EMPTY_DBL(), mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("SamBkgMedianTestHigh",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
-      this->declareProperty("SamBkgMedianTestLow", 0.0, mustBePositive,
+      this->declareProperty("SamBkgMedianTestLow", EMPTY_DBL(), mustBePositive,
           "Mask detectors below this threshold.");
       this->setPropertySettings("SamBkgMedianTestLow",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
-      this->declareProperty("SamBkgErrorBarCriterion", 3.3, mustBePositive,
+      this->declareProperty("SamBkgErrorBarCriterion", EMPTY_DBL(), mustBePositive,
           "Some selection criteria for the detector tests.");
       this->setPropertySettings("SamBkgErrorBarCriterion",
           new VisibleWhenProperty("BackgroundCheck", IS_EQUAL_TO, "1"));
@@ -286,10 +286,10 @@ namespace Mantid
       this->declareProperty("RejectZeroBackground", false,
           "If true, check the background region for anomolies.");
       this->declareProperty("PsdBleed", false, "If true, perform a PSD bleed test.");
-      this->declareProperty("MaxFramerate", 0.01, "The maximum framerate to check.");
+      this->declareProperty("MaxFramerate", EMPTY_DBL(), "The maximum framerate to check.");
       this->setPropertySettings("MaxFramerate",
           new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
-      this->declareProperty("IgnoredPixels", 80.0,
+      this->declareProperty("IgnoredPixels", EMPTY_DBL(),
           "A list of pixels to ignore in the calculations.");
       this->setPropertySettings("IgnoredPixels",
           new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
