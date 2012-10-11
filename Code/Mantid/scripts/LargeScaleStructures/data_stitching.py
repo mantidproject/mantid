@@ -4,7 +4,7 @@ import math
 from MantidFramework import *
 mtd.initialise(False)
 from mantidsimple import *
-import _qti
+import mantidplot
 import mantidplot
 from PyQt4 import QtGui, QtCore
 
@@ -22,7 +22,7 @@ class RangeSelector(object):
             self._graph = "Range Selector"
             
         def disconnect(self):
-            _qti.app.disconnect(_qti.app.mantidUI, 
+            mantidplot.app.disconnect(mantidplot.app.mantidUI, 
                                 QtCore.SIGNAL("x_range_update(double,double)"),
                                 self._call_back)
             
@@ -34,7 +34,7 @@ class RangeSelector(object):
             self._call_back = call_back
             self._ws_output_base = ws_output_base
             
-            _qti.app.connect(_qti.app.mantidUI,
+            mantidplot.app.connect(mantidplot.app.mantidUI,
                              QtCore.SIGNAL("x_range_update(double,double)"),
                              self._call_back)
             g = mantidplot.graph(self._graph)

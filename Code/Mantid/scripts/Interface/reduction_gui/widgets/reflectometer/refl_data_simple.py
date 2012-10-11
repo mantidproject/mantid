@@ -18,7 +18,6 @@ try:
     from MantidFramework import *
     mtd.initialise(False)
     from mantidsimple import *
-    import mantidplot
     from reduction.instruments.reflectometer import data_manipulation
 
     IS_IN_MANTIDPLOT = True

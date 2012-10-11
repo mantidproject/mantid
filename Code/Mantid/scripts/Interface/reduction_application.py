@@ -13,7 +13,7 @@ except:
 
 IS_IN_MANTIDPLOT = False
 try:
-    import _qti
+    import mantidplot
     IS_IN_MANTIDPLOT = True
 except:
     pass
@@ -396,11 +396,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.file_menu.setEnabled(False)
         self.tools_menu.setEnabled(False)
         if IS_IN_MANTIDPLOT:
-            _qti.app.mantidUI.setIsRunning(True)
+            mantidplot.app.mantidUI.setIsRunning(True)
         if self._interface is not None:
             self._interface.reduce()
         if IS_IN_MANTIDPLOT:
-            _qti.app.mantidUI.setIsRunning(False)
+            mantidplot.app.mantidUI.setIsRunning(False)
         self.reduce_button.setEnabled(True)   
         self.export_button.setEnabled(True)
         self.save_button.setEnabled(True)

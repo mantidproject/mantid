@@ -10,7 +10,7 @@ import ui.sans.ui_eqsans_info
 
 IS_IN_MANTIDPLOT = False
 try:
-    import _qti
+    import mantidplot
     from MantidFramework import *
     mtd.initialise(False)
     from mantidsimple import *

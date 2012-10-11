@@ -6,7 +6,7 @@ import math
 
 IS_IN_MANTIDPLOT = False
 try:
-    import _qti
+    import mantidplot
     from MantidFramework import *
     mtd.initialise()
     from mantidsimple import *

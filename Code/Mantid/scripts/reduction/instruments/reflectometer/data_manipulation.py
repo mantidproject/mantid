@@ -1,4 +1,4 @@
-import _qti
+import mantidplot
 import os
 from mantidsimple import *
 

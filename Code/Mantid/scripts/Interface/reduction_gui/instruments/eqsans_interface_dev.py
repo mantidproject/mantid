@@ -18,7 +18,7 @@ from reduction_gui.reduction.sans.eqsans_data_proxy import DataProxy
 
 IS_IN_MANTIDPLOT = False
 try:
-    import _qti
+    import mantidplot
     from reduction_gui.widgets.sans.stitcher import StitcherWidget
     IS_IN_MANTIDPLOT = True
 except:
