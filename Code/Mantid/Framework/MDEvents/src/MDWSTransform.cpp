@@ -114,8 +114,8 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
   g_Log.debug()<<" *********** Q-transformation matrix ***********************\n";
   g_Log.debug()<<"***     *qx         !     *qy         !     *qz           !\n";
   g_Log.debug()<<"q1= "<<rotMat[0]<<" ! "<<rotMat[1]<<" ! "<<rotMat[2]<<" !\n";
-  g_Log.debug()<<"q2= "<<rotMat[2]<<" ! "<<rotMat[3]<<" ! "<<rotMat[4]<<" !\n";
-  g_Log.debug()<<"q3= "<<rotMat[5]<<" ! "<<rotMat[6]<<" ! "<<rotMat[7]<<" !\n";
+  g_Log.debug()<<"q2= "<<rotMat[3]<<" ! "<<rotMat[4]<<" ! "<<rotMat[5]<<" !\n";
+  g_Log.debug()<<"q3= "<<rotMat[6]<<" ! "<<rotMat[7]<<" ! "<<rotMat[8]<<" !\n";
   g_Log.debug()<<" *********** *********************** ***********************\n";
   return rotMat;
 }

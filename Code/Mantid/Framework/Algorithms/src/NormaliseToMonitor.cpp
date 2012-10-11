@@ -237,7 +237,7 @@ void NormaliseToMonitor::init()
   setPropertySettings("MonitorWorkspace",new Kernel::EnabledWhenProperty("MonitorSpectrum",IS_DEFAULT));
 
   declareProperty("MonitorWorkspaceIndex",0,
-      "The index of the spectrum within the MonitorWorkspace(2 (0<=ind<=nHistohrams in MonitorWorkspace) you want to normalize by\n"
+      "The index of the spectrum within the MonitorWorkspace(2 (0<=ind<=nHistograms in MonitorWorkspace) you want to normalize by\n"
       "(usually related to the index, responsible for the monitor's data but can be any).\n"
       "If no value is provided in this field, '''InputWorkspace''' will be normalized by first spectra (with index 0)",
        Direction::InOut);

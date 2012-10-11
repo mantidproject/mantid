@@ -127,7 +127,7 @@ namespace Mantid
     and places the resutls into static cash to be used in subsequent calls to this algorithm */
     void PreprocessDetectorsToMD::processDetectorsPositions(const API::MatrixWorkspace_const_sptr &inputWS,DataObjects::TableWorkspace_sptr &targWS)
     {
-      g_log.information()<<" Preprocessing detectors locations in a target reciprocal space\n";
+      g_log.information() << "Preprocessing detector locations in a target reciprocal space\n";
       // 
       Geometry::Instrument_const_sptr instrument = inputWS->getInstrument();
       //this->pBaseInstr                = instrument->baseInstrument();
@@ -248,7 +248,7 @@ namespace Mantid
       targWS->logs()->addProperty<uint32_t>("ActualDetectorsNum",liveDetectorsCount,true);
 
       theProgress.report();
-      g_log.information()<<"finished preprocessing detectors locations, found: "<<liveDetectorsCount<<" detectors out of: "<<nHist<<" Histohrams\n";
+      g_log.information()<<"Finished preprocessing detector locations. Found: "<<liveDetectorsCount<<" detectors out of: "<<nHist<<" histograms\n";
     }
 
     /** method calculates fake detectors positions in the situation when real detector information has been lost  */

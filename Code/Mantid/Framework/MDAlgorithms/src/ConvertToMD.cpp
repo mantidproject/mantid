@@ -397,7 +397,7 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
     if(storeInDataService && API::AnalysisDataService::Instance().doesExist(OutWSName) ) 
     {
         TargTableWS = API::AnalysisDataService::Instance().retrieveWS<DataObjects::TableWorkspace>(OutWSName);
-        // get number of all histohrams (may be masked or invalid)
+        // get number of all histograms (may be masked or invalid)
         size_t nHist = InWS2D->getNumberHistograms();
         size_t nDetMap=TargTableWS->rowCount();
         if(nHist==nDetMap)
