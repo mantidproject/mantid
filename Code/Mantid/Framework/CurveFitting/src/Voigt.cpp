@@ -2,12 +2,17 @@
 // Includes
 //----------------------------------------------------------------------------------------------
 #include "MantidCurveFitting/Voigt.h"
+
+#include "MantidAPI/FunctionFactory.h"
+
 #include <cmath>
 
 namespace Mantid
 {
   namespace CurveFitting
   {
+    DECLARE_FUNCTION(Voigt);
+
     namespace
     {
       /// @cond
