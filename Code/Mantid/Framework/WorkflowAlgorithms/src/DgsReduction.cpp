@@ -640,7 +640,7 @@ namespace Mantid
       MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
       if (hardMaskWS && showIntermedWS)
       {
-        std::string hardMaskName = outputWsName + "_hard_mask";
+        std::string hardMaskName = outputWsName + "_hardmask";
         this->declareProperty(new WorkspaceProperty<>("ReductionHardMask",
             hardMaskName, Direction::Output));
         this->setProperty("ReductionHardMask", hardMaskWS);
@@ -745,7 +745,7 @@ namespace Mantid
       // Perform absolute normalisation if necessary
       if (absSampleWS)
       {
-        std::string absWsName = "absunits";
+        std::string absWsName = outputWsName + "_absunits";
 
         // Collect the other workspaces first.
         MatrixWorkspace_sptr absSampleMonWS = this->getProperty("AbsUnitsSampleInputMonitorWorkspace");
@@ -782,6 +782,9 @@ namespace Mantid
           this->declareProperty(new WorkspaceProperty<>("AbsUnitsWorkspace",
               absWsName, Direction::Output));
           this->setProperty("AbsUnitsWorkspace", absUnitsWS);
+          this->declareProperty(new WorkspaceProperty<>("AbsUnitsDiagMask",
+              outputWsName+"_absunits_diagmask", Direction::Output));
+          this->setProperty("AbsUnitsDiagMask", absMaskWS);
         }
       }
 
