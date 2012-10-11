@@ -408,6 +408,14 @@ namespace API
     //BoxCtrlChangesInterface *getChangesList(){return m_ChangesList;}
     //void setChangesList(BoxCtrlChangesInterface *pl){m_ChangesList=pl;}
     //-----------------------------------------------------------------------------------
+    // increase the counter, calculatinb events at max;
+    void rizeEventAtMax()
+    {++m_numEventsAtMax;}
+    /// return the numner of events, which are sitting at max depth and would be split if not due to the max depth of the box they are occupying
+    size_t getNumEventAtMax()const
+    {return m_numEventsAtMax;}
+    /// get range of id-s and increment box ID by this range;
+    size_t claimIDRange(size_t range);
   private:
     /// When you split a MDBox, it becomes this many sub-boxes
     void calcNumSplit()
@@ -444,8 +452,12 @@ namespace API
     /** Maximum splitting depth: don't go further than this many levels of recursion.
      * This avoids infinite recursion and should be set to a value that gives a smallest
      * box size that is a little smaller than the finest desired binning upon viewing.
+     *
+     *RE: In fact, max depth should not be higher then EPSILON(coord_t/(BIGGEST_BOX_SIZE))=max_split_size^m_maxDepth;
      */
     size_t m_maxDepth;
+   /// number of events sitting in the boxes which should be split but are already split up to the max depth
+    volatile size_t m_numEventsAtMax;
 
     /// Splitting # for all dimensions
     std::vector<size_t> m_splitInto;

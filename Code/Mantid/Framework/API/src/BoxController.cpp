@@ -48,8 +48,18 @@ namespace API
   {
     this->closeFile();
   }
-
-
+   /** reserve range of id-s for use on thread 
+     *@param range  --range number of box-id-s to lock
+     *@returns initial ID allowed to use in the range
+   */
+   size_t BoxController::claimIDRange(size_t range)
+   {
+     m_idMutex.lock();
+     size_t tmp=m_maxId;
+     m_maxId+=range; 
+     m_idMutex.unlock();
+     return tmp;
+   }
   /** Serialize to an XML string
    * @return XML string
    */

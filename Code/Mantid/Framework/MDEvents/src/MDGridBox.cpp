@@ -68,7 +68,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Constructor
    * @param box :: MDBox containing the events to split */
-  TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box)
+  TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box,bool splitRecursively)
    : MDBoxBase<MDE, nd>(*box),
      nPoints(0)
   {
@@ -101,20 +101,56 @@ namespace MDEvents
     boxes.reserve(tot);
     numBoxes = tot;
 
+    // Prepare to distribute the events that were in the box before
+    const std::vector<MDE> & events = box->getConstEvents();   
+    typename std::vector<MDE>::const_iterator it = events.begin();
+    typename std::vector<MDE>::const_iterator it_end = events.end();
+
+   // Splitting an input MDBox requires creating a bunch of children
+    fillBoxShell(tot,inverseVolume);
+    if(splitRecursively)
+    {
+ 
+      // Add all the events recursively, going through all adjacent boxes
+      for (; it != it_end; ++it)  addAndTraceEvent(*it);
+    }
+    else
+    {
+
+
+       for (; it != it_end; ++it)  addEvent(*it);
+
+    }
+
+
+    // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
+    this->nPoints = box->getNPoints();
+
+    // Clear the old box.
+    box->clear();
+    box->setDataBusy(false);
+  }
+
+  template<typename MDE,size_t nd>
+  void MDGridBox<MDE,nd>::fillBoxShell(const size_t tot,const coord_t inverseVolume)
+  {
     size_t indices[nd];
     for (size_t d=0; d<nd; d++) indices[d] = 0;
+    
+    // get inital free ID for the boxes, which would be created by this command
+    size_t ID0 = m_BoxController->claimIDRange(tot);
+    for (size_t i=0; i<tot; i++)
 
     // Splitting an input MDBox requires creating a bunch of children
     // But the IDs of these children MUST be sequential. Hence the critical block
     // to avoid interleaved IDs when splitting boxes in parallel.
-    bc->getIdMutex().lock();
     {
       for (size_t i=0; i<tot; i++)
       {
         // Create the box
         // (Increase the depth of this box to one more than the parent (this))
-        MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(bc, this->m_depth + 1);
-        // This MDGridBox is the parent of the new child.
+        MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(m_BoxController, this->m_depth + 1,-1,int64_t(ID0+i));
+       // This MDGridBox is the parent of the new child.
         myBox->setParent(this);
 
         // Set the extents of this box.
