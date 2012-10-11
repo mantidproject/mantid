@@ -93,5 +93,5 @@ target_link_libraries ( mantidqtpython
 # Installation settings
 ###########################################################################
 
-install ( TARGETS mantidqtpython DESTINATION ${LIB_DIR} )
+install ( TARGETS mantidqtpython DESTINATION ${BIN_DIR} )
 
