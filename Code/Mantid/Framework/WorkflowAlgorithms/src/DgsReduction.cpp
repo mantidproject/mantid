@@ -740,150 +740,35 @@ namespace Mantid
       etConv->executeAsSubAlg();
       outputWS = etConv->getProperty("OutputWorkspace");
 
-      // Perform absolute normalisation if necessary
       Workspace_sptr absSampleWS = this->loadInputData("AbsUnitsSample", false);
+
+      // Perform absolute normalisation if necessary
       if (absSampleWS)
       {
-        MatrixWorkspace_sptr absSampleMonWS = this->getProperty("AbsUnitsSampleInputMonitorWorkspace");
-        MatrixWorkspace_sptr absUnitsWS;
-        MatrixWorkspace_sptr absGroupingWS = this->loadGroupingFile("AbsUnits");
+        std::string absWsName = "absunits";
 
-        // Process absolute units detector vanadium if necessary
+        // Collect the other workspaces first.
+        MatrixWorkspace_sptr absSampleMonWS = this->getProperty("AbsUnitsSampleInputMonitorWorkspace");
         Workspace_sptr absDetVanWS = this->loadInputData("AbsUnitsDetectorVanadium", false);
         MatrixWorkspace_sptr absDetVanMonWS = this->getProperty("AbsUnitsDetectorVanadiumInputMonitorWorkspace");
-        Workspace_sptr absIdetVanWS;
-        if (absDetVanWS)
-        {
-          std::string idetVanName = outputWsName + "_absunits_idetvan";
-          detVan->setProperty("InputWorkspace", absDetVanWS);
-          detVan->setProperty("InputMonitorWorkspace", absDetVanMonWS);
-          detVan->setProperty("OutputWorkspace", idetVanName);
-          if (maskWS)
-          {
-            detVan->setProperty("MaskWorkspace", maskWS);
-          }
-          detVan->executeAsSubAlg();
-          MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
-          absIdetVanWS = boost::dynamic_pointer_cast<Workspace>(oWS);
-        }
-        else
-        {
-          absIdetVanWS = absDetVanWS;
-        }
+        MatrixWorkspace_sptr absGroupingWS = this->loadGroupingFile("AbsUnits");
 
-        const std::string absWsName = absSampleWS->getName() + "_absunits";
-        etConv->setProperty("InputWorkspace", absSampleWS);
-        etConv->setProperty("InputMonitorWorkspace", absSampleMonWS);
-        etConv->setProperty("OutputWorkspace", absWsName);
-        const double ei = this->getProperty("AbsUnitsIncidentEnergy");
-        etConv->setProperty("IncidentEnergyGuess", ei);
-        etConv->setProperty("IntegratedDetectorVanadium", absIdetVanWS);
-        if (maskWS)
-        {
-          etConv->setProperty("MaskWorkspace", maskWS);
-        }
-        if (absGroupingWS)
-        {
-          etConv->setProperty("GroupingWorkspace", absGroupingWS);
-        }
-        etConv->setProperty("AlternateGroupingTag", "AbsUnits");
-        etConv->executeAsSubAlg();
-        absUnitsWS = etConv->getProperty("OutputWorkspace");
-
-        const double vanadiumMass = this->getParameter("VanadiumMass",
-            absUnitsWS, "vanadium-mass");
-
-        const double vanadiumRmm = this->getParameter("VanadiumRmm",
-            absUnitsWS, "vanadium-rmm");
-
-        absUnitsWS /= (vanadiumMass / vanadiumRmm);
-
-        // Set integration range for absolute units sample
-        double eMin = this->getParameter("AbsUnitsMinimumEnergy", absUnitsWS,
-            "monovan-integr-min");
-        double eMax = this->getParameter("AbsUnitsMaximumEnergy", absUnitsWS,
-            "monovan-integr-max");
-        std::vector<double> params;
-        params.push_back(eMin);
-        params.push_back(eMax - eMin);
-        params.push_back(eMax);
-
-        IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
-        rebin->setProperty("InputWorkspace", absUnitsWS);
-        rebin->setProperty("OutputWorkspace", absUnitsWS);
-        rebin->setProperty("Params", params);
-        rebin->executeAsSubAlg();
-        absUnitsWS = rebin->getProperty("OutputWorkspace");
-
-        IAlgorithm_sptr cToMWs = this->createSubAlgorithm("ConvertToMatrixWorkspace");
-        cToMWs->setProperty("InputWorkspace", absUnitsWS);
-        cToMWs->setProperty("OutputWorkspace", absUnitsWS);
-        absUnitsWS = cToMWs->getProperty("OutputWorkspace");
-
-        // Run diagnostics
-        const double huge = reductionManager->getProperty("HighCounts");
-        const double tiny = reductionManager->getProperty("LowCounts");
-        const double vanOutLo = this->getParameter("AbsUnitsLowOutlier",
-            absUnitsWS, "monovan_lo_bound");
-        const double vanOutHi = this->getParameter("AbsUnitsHighOutlier",
-            absUnitsWS, "monovan_hi_bound");
-        const double vanLo = this->getParameter("AbsUnitsMedianTestLow",
-            absUnitsWS, "monovan_lo_frac");
-        const double vanHi = this->getParameter("AbsUnitsMedianTestHigh",
-            absUnitsWS, "monovan_hi_frac");
-        const double vanSigma = this->getParameter("AbsUnitsErrorBarCriterion",
-            absUnitsWS, "diag_samp_sig");
-
-        IAlgorithm_sptr diag = this->createSubAlgorithm("DetectorDiagnostic");
-        diag->setProperty("InputWorkspace", absUnitsWS);
-        diag->setProperty("OutputWorkspace", "absUnitsDiagMask");
-        diag->setProperty("LowThreshold", tiny);
-        diag->setProperty("HighThreshold", huge);
-        diag->setProperty("LowOutlier", vanOutLo);
-        diag->setProperty("HighOutlier", vanOutHi);
-        diag->setProperty("LowThresholdFraction", vanLo);
-        diag->setProperty("HighThresholdFraction", vanHi);
-        diag->setProperty("SignificanceTest", vanSigma);
-        diag->executeAsSubAlg();
-        MatrixWorkspace_sptr absMaskWS = diag->getProperty("OutputWorkspace");
+        // Run the absolute normalisation reduction
+        IAlgorithm_sptr absUnitsRed = this->createSubAlgorithm("DgsAbsoluteUnitsReduction");
+        absUnitsRed->setProperty("InputWorkspace", absSampleWS);
+        absUnitsRed->setProperty("InputMonitorWorkspace", absSampleMonWS);
+        absUnitsRed->setProperty("DetectorVanadiumWorkspace", absDetVanWS);
+        absUnitsRed->setProperty("DetectorVanadiumMonitorWorkspace",
+            absDetVanMonWS);
+        absUnitsRed->setProperty("GroupingWorkspace", absGroupingWS);
+        absUnitsRed->setProperty("MaskWorkspace", maskWS);
+        absUnitsRed->setProperty("ReductionProperties", reductionManagerName);
+        absUnitsRed->setProperty("OutputWorkspace", absWsName);
+        absUnitsRed->executeAsSubAlg();
+        MatrixWorkspace_sptr absUnitsWS = absUnitsRed->getProperty("OutputWorkspace");
+        MatrixWorkspace_sptr absMaskWS = absUnitsRed->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr mask = this->createSubAlgorithm("MaskDetectors");
-        mask->setProperty("Workspace", absUnitsWS);
-        mask->setProperty("MaskedWorkspace", absMaskWS);
-        mask->executeAsSubAlg();
-        absUnitsWS = mask->getProperty("Workspace");
-
-        IAlgorithm_sptr cFrmDist = this->createSubAlgorithm("ConvertFromDistribution");
-        cFrmDist->setProperty("Workspace", absUnitsWS);
-        cFrmDist->executeAsSubAlg();
-        absUnitsWS = cFrmDist->getProperty("Workspace");
-
-        IAlgorithm_sptr wMean = this->createSubAlgorithm("WeightedMeanOfWorkspace");
-        wMean->setProperty("InputWorkspace", absUnitsWS);
-        wMean->setProperty("OutputWorkspace", absUnitsWS);
-        wMean->executeAsSubAlg();
-        absUnitsWS = wMean->getProperty("OutputWorkspace");
-
-        // If the absolute units detector vanadium is used, do extra correction.
-        if (!absIdetVanWS)
-        {
-          Property *prop = absUnitsWS.get()->run().getProperty("Ei");
-          const double ei = boost::lexical_cast<double>(prop->value());
-          double xsection = 0.0;
-          if (200.0 <= ei)
-          {
-            xsection = 420.0;
-          }
-          else
-          {
-            xsection = 400.0 + (ei / 10.0);
-          }
-          absUnitsWS /= xsection;
-          const double sampleMass = this->getProperty("SampleMass");
-          const double sampleRmm = this->getProperty("SampleRmm");
-          absUnitsWS *= (sampleMass / sampleRmm);
-        }
-
         mask->setProperty("Workspace", outputWS);
         mask->setProperty("MaskedWorkspace", absMaskWS);
         mask->executeAsSubAlg();
