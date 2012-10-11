@@ -19,6 +19,10 @@
 #include <winsock2.h>
 #endif
 
+#ifdef MPI_BUILD
+#include <boost/mpi.hpp>
+#endif
+
 namespace Mantid
 {
 namespace API
@@ -62,6 +66,10 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
   loadAllPlugins();
   disableNexusOutput();
   setNumOMPThreadsToConfigValue();
+
+#ifdef MPI_BUILD
+  g_log.notice() << "This MPI process is rank: " << boost::mpi::communicator().rank() << std::endl;
+#endif
 
   g_log.debug() << "FrameworkManager created." << std::endl;
 }

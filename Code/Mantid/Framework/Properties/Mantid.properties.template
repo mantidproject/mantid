@@ -153,19 +153,19 @@ logging.loggers.root.channel.channel3 = signalChannel
 # output to the console - primarily for console based apps
 logging.channels.consoleChannel.class = ConsoleChannel
 logging.channels.consoleChannel.formatter = f1
-# specific filter for the file channel raising the level to warning (drop to debug for debugging)
+# specific filter for the file channel raising the level to notice (drop to debug for debugging)
 logging.channels.fileFilterChannel.class= FilterChannel
 logging.channels.fileFilterChannel.channel= fileChannel
 logging.channels.fileFilterChannel.level= notice
 # output to a file (For error capturing and debugging)
-logging.channels.fileChannel.class = FileChannel
+logging.channels.fileChannel.class = @FILECHANNEL@
 logging.channels.fileChannel.path =
 logging.channels.fileChannel.rotation = 1 M
 logging.channels.fileChannel.purgeCount = 9
 logging.channels.fileChannel.formatter.class = PatternFormatter
 logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t
 logging.formatters.f1.class = PatternFormatter
-logging.formatters.f1.pattern = %s-[%p] %t
+logging.formatters.f1.pattern = @CONSOLEPATTERN@
 logging.formatters.f1.times = local
 logging.channels.fileChannel.formatter.times = local
 # SignalChannel - Passes messages to the MantidPlot User interface

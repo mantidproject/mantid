@@ -263,7 +263,9 @@ ConfigServiceImpl::ConfigServiceImpl() :
   g_log.information() << "This is Mantid Version "
                       << MantidVersion::version() << "-" << MantidVersion::revision() << std::endl;
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList << std::endl;
+#ifndef MPI_BUILD  // There is no logging to file by default in MPI build
   g_log.information() << "Logging to: " << m_logFilePath << std::endl;
+#endif
 
   this->setParaViewPluginPath();
 }

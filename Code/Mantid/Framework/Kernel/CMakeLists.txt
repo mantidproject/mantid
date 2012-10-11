@@ -385,6 +385,16 @@ set ( PYTHONALGS ${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
 
+# For an mpi-enabled build, don't log to file and format console output (which winds up in a file) differently
+# These settings carry down to the installation configuration below
+if ( MPI_BUILD )
+  set ( FILECHANNEL NullChannel )
+  set ( CONSOLEPATTERN "%H:%M:%S,%i [%N:%P] %p %s - %t")
+else ()
+  set ( FILECHANNEL FileChannel )
+  set ( CONSOLEPATTERN "%s-[%p] %t" )
+endif ()
+
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
 )
