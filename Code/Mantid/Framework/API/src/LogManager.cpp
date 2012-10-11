@@ -151,15 +151,14 @@ Kernel::Logger& LogManager::g_log = Kernel::Logger::get("LogManager");
   void LogManager::splitByTime(TimeSplitterType& splitter, std::vector< LogManager * > outputs) const
   {
     //Make a vector of managers for the splitter. Fun!
-    std::vector< PropertyManager *> output_managers;
-    size_t n = outputs.size();
-    output_managers.reserve(n);
+    const size_t n = outputs.size();
+    std::vector< PropertyManager *> output_managers(outputs.size(),NULL);
     for (size_t i=0; i<n; i++)
     {
       if (outputs[i])
-        output_managers.push_back( &(outputs[i]->m_manager) );
-      else
-        output_managers.push_back( NULL );
+      {
+        output_managers[i] = &(outputs[i]->m_manager);
+      }
     }
 
     //Now that will do the split down here.
