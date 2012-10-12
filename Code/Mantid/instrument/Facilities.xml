@@ -128,7 +128,6 @@
 
   <instrument name="VESUVIO" shortname="EVS">
     <technique>Neutron Compton Scattering</technique>
-    <technique>TOF Indirect Geometry Spectroscopy</technique>
     <livedata address="NDXVESUVIO:6789" />
   </instrument>
   
