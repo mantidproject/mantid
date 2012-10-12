@@ -128,10 +128,10 @@ namespace MDEvents
     }
     else
     {
-		// Erase the file if it exists
-		Poco::File oldFile(filename);
-		if (oldFile.exists())
-			oldFile.remove();
+    // Erase the file if it exists
+    Poco::File oldFile(filename);
+    if (oldFile.exists())
+      oldFile.remove();
       // Create a new file in HDF5 mode.
       file = new ::NeXus::File(filename, NXACC_CREATE5);
     }
