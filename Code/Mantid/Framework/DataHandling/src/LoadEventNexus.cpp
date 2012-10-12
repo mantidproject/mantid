@@ -882,6 +882,7 @@ void LoadEventNexus::init()
 {
   std::vector<std::string> exts;
   exts.push_back("_event.nxs");
+  exts.push_back(".nxs.h5");
   exts.push_back(".nxs");
   this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
       "The name of the Event NeXus file to read, including its full or relative path. \n"
