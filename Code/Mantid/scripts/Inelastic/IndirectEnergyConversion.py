@@ -131,12 +131,14 @@ def useCalib(detectors):
     return detectors
     
 def getInstrumentDetails(instrument):
-    workspace = mtd['__empty_' + instrument]
-    if ( workspace == None ):
+    instr_name = '__empty_' + instrument
+    if mtd.doesExist(instr_name):
+        workspace = mtd[instr_name]
+    else:
         idf_dir = config['instrumentDefinition.directory']
         idf = idf_dir + instrument + '_Definition.xml'
-        LoadEmptyInstrument(Filename=idf, OutputWorkspace='__empty_'+instrument)
-        workspace = mtd['__empty_'+instrument]
+        LoadEmptyInstrument(Filename=idf, OutputWorkspace=instr_name)
+        workspace = mtd[instr_name]
     instrument = workspace.getInstrument()
     ana_list_split = instrument.getStringParameter('analysers')[0].split(',')
     reflections = []

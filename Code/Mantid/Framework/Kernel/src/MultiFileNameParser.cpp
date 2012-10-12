@@ -47,7 +47,7 @@ namespace Kernel
       const std::string MINUS = "(" + SPACE + "\\-" + SPACE + ")";
       const std::string COLON = "(" + SPACE + ":" + SPACE + ")";
 
-      const std::string SINGLE         = "([0-9]+)";
+      const std::string SINGLE         = "(" + INST + "*[0-9]+)";
       const std::string RANGE          = "(" + SINGLE + COLON + SINGLE + ")";
       const std::string STEP_RANGE     = "(" + SINGLE + COLON + SINGLE + COLON + SINGLE + ")";
       const std::string ADD_LIST       = "(" + SINGLE + "(" + PLUS + SINGLE + ")+" + ")";
@@ -116,8 +116,10 @@ namespace Kernel
 
       // Only numeric characters, or occurances of plus, minus, comma and colon are allowed.
       if(!matchesFully(runString,"([0-9]|\\+|\\-|,|:)+"))
+      {
         throw std::runtime_error(
           "Non-numeric or otherwise unaccetable character(s) detected.");
+      }
 
       // Tokenize on commas.
       std::vector<std::string> tokens;
@@ -210,7 +212,10 @@ namespace Kernel
         const std::vector<InstrumentInfo> instruments = facility.instruments();
 
         for( auto instrument = instruments.begin(); instrument != instruments.end(); ++instrument )
+        {
+          m_validInstNames.insert(instrument->name());
           m_validInstNames.insert(instrument->shortName());
+        }
       }
     }
     
@@ -339,8 +344,8 @@ namespace Kernel
         throw std::runtime_error("There does not appear to be any runs present.");
       
       InstrumentInfo instInfo = ConfigService::Instance().getInstrument(m_instString);
-      m_instString = instInfo.shortName(); // Make sure we're using the shortened form of the isntrument name.
-      //m_zeroPadding = instInfo.zeroPadding(0);
+      // why? 
+      //m_instString = instInfo.shortName(); // Make sure we're using the shortened form of the isntrument name.
 
       if(boost::starts_with(base, instInfo.delimiter()))
       {
@@ -353,7 +358,9 @@ namespace Kernel
       
       const std::string remainder = base.substr(m_runString.size(), base.size());
       if( ! remainder.empty() )
+      {
         throw std::runtime_error("There is an unparsable token present.");
+      }
 
     }
 

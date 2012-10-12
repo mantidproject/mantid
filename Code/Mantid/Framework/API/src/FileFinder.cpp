@@ -392,25 +392,6 @@ namespace Mantid
         }
       }
 
-
-      // ask the archive search for help
-      if (!hintPath.getExtension().empty())
-      {
-        g_log.debug() << "hintPath is not empty, try archive search" << "\n";
-        if (!archs.empty())
-        {
-          std::string path = getArchivePath(archs, hint);
-          if (!path.empty())
-          {
-            g_log.information() << "found path = " << path << '\n';
-            return path;
-          } else {
-            g_log.information() << "Unable to find files via archive search with the filename that looks like a full filename" << "\n";
-          }
-        }
-      }
-
-
       // Do we need to try and form a filename from our preset rules
       std::string filename(hint);
       std::string extension;
