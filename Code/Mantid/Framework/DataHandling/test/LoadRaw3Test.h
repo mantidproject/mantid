@@ -613,6 +613,64 @@ public:
 
   }
 
+  void testSeparateMonitorsFromMultiPeriodFileLimitingSpectraToOnlyMonitors()
+  {
+    LoadRaw3 loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "CSP79590.raw");
+    std::string outputWSName = "outputname";
+    loader.setPropertyValue("OutputWorkspace", outputWSName);
+    loader.setPropertyValue("LoadMonitors", "Separate");
+    loader.setPropertyValue("SpectrumList", "2");
+
+    TS_ASSERT_THROWS_NOTHING( loader.execute() )
+    TS_ASSERT( loader.isExecuted() )
+
+    /// ADS should only contain single group with given name as the spectrum list contains only monitors
+    AnalysisDataServiceImpl& ads = AnalysisDataService::Instance();
+    TSM_ASSERT("Expected workspace is not in the ADS", ads.doesExist(outputWSName));
+    TSM_ASSERT("A separate monitor workspace has been found when it should not be", !ads.doesExist(outputWSName + "_Monitors"))
+
+    // Check group is correct
+    const size_t nperiods(2);
+    WorkspaceGroup_sptr outputGroup = ads.retrieveWS<WorkspaceGroup>(outputWSName);
+    TSM_ASSERT("Expected main workspace to be a group", outputGroup);
+    TS_ASSERT_EQUALS(nperiods, outputGroup->size());
+
+    for(size_t i = 1; i <= nperiods; ++i)
+    {
+      std::ostringstream wsname;
+      wsname << outputWSName << "_" << i;
+      std::ostringstream msg;
+      msg << "Expected to find workspace '" << wsname.str() << "' in the ADS.";
+      TSM_ASSERT(msg.str(), ads.doesExist(wsname.str()));
+      msg.str("");
+      msg << "Expected to find workspace '" << wsname.str() << "' as member of output group.";
+      TSM_ASSERT(msg.str(),outputGroup->contains(wsname.str()));
+
+      wsname.str("");
+      wsname << outputWSName << "_Monitors_" << i;
+      msg.str("");
+      msg << "Expected NOT to find workspace '" << wsname.str() << "' in the ADS.";
+      TSM_ASSERT(msg.str(), !ads.doesExist(wsname.str()));
+    }
+
+    MatrixWorkspace_sptr output1 = ads.retrieveWS<MatrixWorkspace>(outputWSName + "_1");
+    TS_ASSERT_EQUALS(1, output1->getNumberHistograms());
+
+    ISpectrum *spectrum2(NULL);
+    TS_ASSERT_THROWS_NOTHING(spectrum2 = output1->getSpectrum(0));
+    if(spectrum2)
+    {
+      TS_ASSERT_EQUALS(2, spectrum2->getSpectrumNo());
+
+      const auto & detIDs = spectrum2->getDetectorIDs();
+      TS_ASSERT_EQUALS(1, detIDs.size());
+      TS_ASSERT(spectrum2->hasDetectorID(2));
+    }
+    ads.remove(outputWSName);
+  }
+
 
   //no monitors in the selected range 
   void testSeparateMonitorswithMixedLimits()

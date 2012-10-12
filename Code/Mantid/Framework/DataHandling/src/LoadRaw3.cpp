@@ -192,29 +192,24 @@ namespace Mantid
         }
 
         //now create a workspace of size normalwsSpecs and set it as outputworkspace
-        try
+        if(normalwsSpecs > 0)
         {
-          localWorkspace =createWorkspace(localWorkspace,normalwsSpecs,m_lengthIn,m_lengthIn-1);
+          localWorkspace = createWorkspace(localWorkspace,normalwsSpecs,m_lengthIn,m_lengthIn-1);
           setWorkspaceProperty("OutputWorkspace", title, ws_grp, localWorkspace,m_numberOfPeriods,false);
-        }
-        catch(std::out_of_range& )
-        {
-          g_log.information()<<"Error in creating one of the output workspaces."<<std::endl;
-          g_log.information()<<"Separate Monitors option is selected and all the specra selected are in the moniotors range"<<std::endl;
-          localWorkspace.reset();
-        }
-        catch(std::runtime_error& )
-        {
-          g_log.information()<<"Separate Monitors option is selected,Error in creating one of the output workspaces"<<std::endl;
-          localWorkspace.reset();
         }
         //now create monitor workspace if separateMonitors selected
         if (bseparateMonitors)
         {
           createMonitorWorkspace(monitorWorkspace,localWorkspace,monitorws_grp,monitorwsSpecs,
               normalwsSpecs,m_numberOfPeriods,m_lengthIn,title);
-
         }
+      }
+
+      if(bseparateMonitors && normalwsSpecs == 0)
+      {
+        // Ensure we fill the correct group as if we are only loading monitors then we essentially want normal behaviour
+        // with no extra _Monitors workspace
+        ws_grp = monitorws_grp;
       }
 
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
@@ -296,8 +291,15 @@ namespace Mantid
         {
           if (bseparateMonitors)
           {
-            // declare and set monitor workspace for each period
-            setWorkspaceProperty(monitorWorkspace, monitorws_grp, period, true);
+            if(normalwsSpecs > 0)
+            {
+              // declare and set monitor workspace for each period
+              setWorkspaceProperty(monitorWorkspace, monitorws_grp, period, true);
+            }
+            else
+            {
+              localWorkspace = monitorWorkspace;
+            }
             // declare and set output workspace for each period
             setWorkspaceProperty(localWorkspace, ws_grp, period, false);
           }
