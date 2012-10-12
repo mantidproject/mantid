@@ -876,27 +876,40 @@ class BaseRefWidget(BaseWidget):
 #            if is_pixel_y is False:
 #                ws_output_base = "Counts vs X pixel - %s" % basename
 #                x_title = "X pixel"
-        
-        range_min = int(self._summary.data_from_tof.text())
-        range_max = int(self._summary.data_to_tof.text())
 
-        ws_output_base = "Peak - " + basename + " - Y pixel _2D"
+                
+#        range_min = int(self._summary.data_from_tof.text())
+#        range_max = int(self._summary.data_to_tof.text())
+
+#        min_ctrl = self._summary.data_from_tof
+#        max_ctrl = self._summary.data_to_tof
+
+        ws_output_base = "Peak - " + basename + " - Y pixel "
+        ws_output_base_2d = ws_output_base + "_2D"
         if mtd.workspaceExists(ws_output_base):
             mtd.deleteWorkspace(ws_output_base)
-            ws_output_base_1 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs"
-            mtd.deleteWorkspace(ws_output_base_1)
-            ws_output_base_2 = "__" + self.instrument_name + "_" + str(run_number) + "_event.nxs_all"
-            mtd.deleteWorkspace(ws_output_base_2)
-            ws_output_base_3 = "Peak - " + self.instrument_name + "_" + str(run_number) + "_event.nxs - Y pixel "
-            mtd.deleteWorkspace(ws_output_base_3)
+            ws_output_base1 = "__" + basename
+            mtd.deleteWorkspace(ws_output_base1)
+            ws_output_base2 = ws_output_base1 + "_all"
+            mtd.deleteWorkspace(ws_output_base2)
+            mtd.deleteWorkspace(ws_output_base_2d)
 
-        call_back = None
         data_manipulation.counts_vs_pixel_distribution(file_path, 
                                                        True, 
-                                                       None)
+                                                       None) 
 
+        
+#        def call_back(xmin, xmax):
+#            min_ctrl.setText("%-d" % int(xmin))
+#            max_ctrl.setText("%-d" % int(xmax))
+
+#        _qti.app.connect(_qti.app.mantidUI,
+#                         QtCore.SIGNAL("x_range_update(double,double)"),
+#                         call_back)
         import mantidqtpython 
-        mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base)
+        mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base_2d)
+        
+        
     
     def _norm_count_vs_y(self):
         
