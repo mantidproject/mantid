@@ -134,7 +134,7 @@ namespace Mantid
 
       // Data corrections
       std::string dataCorr = "Data Corrections";
-      this->declareProperty("FilterBadPulses", false, "If true, filter bad pulses from data.");
+      //this->declareProperty("FilterBadPulses", false, "If true, filter bad pulses from data.");
       std::vector<std::string> incidentBeamNormOptions;
       incidentBeamNormOptions.push_back("None");
       incidentBeamNormOptions.push_back("ByCurrent");
@@ -172,6 +172,11 @@ namespace Mantid
           "A monitor workspace associated with the input sample detector vanadium workspace.");
       this->declareProperty("SaveProcessedDetVan", false,
           "Save the processed detector vanadium workspace");
+      this->setPropertySettings("SaveProcessedDetVan",
+          new VisibleWhenProperty("SaveProcessedDetVan", IS_EQUAL_TO, "1"));
+      this->declareProperty(new FileProperty("SaveProcDetVanFilename", "",
+          FileProperty::OptionalSave, ".nxs"),
+          "Provide a filename for saving the processed detector vanadium.");
       this->declareProperty("UseProcessedDetVan", false, "If true, treat the detector vanadium as processed.\n"
           "This includes not running diagnostics on the processed data.");
       this->declareProperty("UseBoundsForDetVan", false,
@@ -194,7 +199,7 @@ namespace Mantid
       this->setPropertySettings("DetVanIntRangeUnits",
           new VisibleWhenProperty("UseBoundsForDetVan", IS_EQUAL_TO, "1"));
 
-      this->setPropertyGroup("FilterBadPulses", dataCorr);
+      //this->setPropertyGroup("FilterBadPulses", dataCorr);
       this->setPropertyGroup("IncidentBeamNormalisation", dataCorr);
       this->setPropertyGroup("MonitorIntRangeLow", dataCorr);
       this->setPropertyGroup("MonitorIntRangeHigh", dataCorr);
@@ -206,6 +211,7 @@ namespace Mantid
       this->setPropertyGroup("DetectorVanadiumInputWorkspace", dataCorr);
       this->setPropertyGroup("DetectorVanadiumInputMonitorWorkspace", dataCorr);
       this->setPropertyGroup("SaveProcessedDetVan", dataCorr);
+      this->setPropertyGroup("SaveProcDetVanFilename", dataCorr);
       this->setPropertyGroup("UseProcessedDetVan", dataCorr);
       this->setPropertyGroup("UseBoundsForDetVan", dataCorr);
       this->setPropertyGroup("DetVanIntRangeLow", dataCorr);
@@ -214,10 +220,6 @@ namespace Mantid
 
       // Finding bad detectors
       std::string findBadDets = "Finding Bad Detectors";
-      this->declareProperty("OutputMaskFile", "",
-          "The output mask file name used for the results of the detector tests.");
-      this->setPropertySettings("OutputMaskFile",
-          new VisibleWhenProperty("DetectorVanadiumInputFile", IS_NOT_EQUAL_TO, ""));
       this->declareProperty("HighCounts", EMPTY_DBL(), mustBePositive,
           "Mask detectors above this threshold.");
       this->setPropertySettings("HighCounts",
@@ -294,7 +296,6 @@ namespace Mantid
       this->setPropertySettings("IgnoredPixels",
           new VisibleWhenProperty("PsdBleed", IS_EQUAL_TO, "1"));
 
-      this->setPropertyGroup("OutputMaskFile", findBadDets);
       this->setPropertyGroup("HighCounts", findBadDets);
       this->setPropertyGroup("LowCounts", findBadDets);
       this->setPropertyGroup("LowOutlier", findBadDets);
