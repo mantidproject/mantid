@@ -11,7 +11,6 @@ from reduction_gui.reduction.scripter import BaseScriptElement
 
 class DiagnoseDetectorsScript(BaseScriptElement):
 
-    output_mask_file = ''
     high_counts = 1.0e+10
     low_counts = 1.0e-10
     median_test_out_high = 100
@@ -61,8 +60,6 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         
     def to_script(self):
         script = ""
-        if self.output_mask_file != DiagnoseDetectorsScript.output_mask_file:
-            script += "OutputMaskFile=\"%s\",\n" % self.output_mask_file
         if self.high_counts != DiagnoseDetectorsScript.high_counts:
             script += "HighCounts=%s,\n" % str(self.high_counts)
         if self.low_counts != DiagnoseDetectorsScript.low_counts:
@@ -108,7 +105,6 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             Create XML from the current data.
         """
         xml =  "<DiagnoseDetectors>\n"
-        xml += "  <output_mask_file>%s</output_mask_file>\n" % self.output_mask_file
         xml += "  <high_counts>%s</high_counts>\n" % str(self.high_counts)
         xml += "  <low_counts>%s</low_counts>\n" % str(self.low_counts)
         xml += "  <median_test_outlier_low>%s</median_test_outlier_low>\n" % str(self.median_test_out_low)
@@ -140,9 +136,6 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         element_list = dom.getElementsByTagName("DiagnoseDetectors")
         if len(element_list)>0:
             instrument_dom = element_list[0]
-            self.output_mask_file = BaseScriptElement.getStringElement(instrument_dom,
-                                                                       "output_mask_file",
-                                                                       default=DiagnoseDetectorsScript.output_mask_file)
             self.high_counts = BaseScriptElement.getFloatElement(instrument_dom,
                                                                  "high_counts",
                                                                  default=DiagnoseDetectorsScript.high_counts)
@@ -205,7 +198,6 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         """
             Reset state
         """
-        self.output_mask_file = DiagnoseDetectorsScript.output_mask_file
         self.high_counts = DiagnoseDetectorsScript.high_counts
         self.low_counts = DiagnoseDetectorsScript.low_counts
         self.median_test_out_low = DiagnoseDetectorsScript.median_test_out_low

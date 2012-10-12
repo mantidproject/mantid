@@ -24,6 +24,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QCheckBox" name="filter_bad_pulses_chkbox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>Filter Bad Pulses</string>
        </property>
@@ -268,6 +271,30 @@
        </layout>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QCheckBox" name="use_procdetvan_cb">
+          <property name="text">
+           <string>Use Processed</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer_7">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
          <widget class="QCheckBox" name="van_int_cb">
@@ -375,27 +402,24 @@
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_2">
-          <property name="minimumSize">
-           <size>
-            <width>40</width>
-            <height>0</height>
-           </size>
-          </property>
+         <widget class="QLabel" name="save_procdetvan_label">
           <property name="text">
-           <string/>
+           <string>       Filename:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="use_procdetvan_cb">
+         <widget class="QLineEdit" name="save_procdetvan_edit"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="save_procdetvan_browse">
           <property name="text">
-           <string>Use Processed</string>
+           <string>Browse</string>
           </property>
          </widget>
         </item>
         <item>
-         <spacer name="horizontalSpacer_7">
+         <spacer name="horizontalSpacer_8">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>

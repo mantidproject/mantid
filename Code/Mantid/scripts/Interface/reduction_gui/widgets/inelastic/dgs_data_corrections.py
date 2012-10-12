@@ -41,37 +41,56 @@ class DataCorrectionsWidget(BaseWidget):
         self.connect(self._content.monitor1_rb, QtCore.SIGNAL("toggled(bool)"), 
                      self._monitor_intrange_widgets_state)
 
-        self._det_van_intrange_widgets_state(self._content.van_int_cb.isChecked())
+        self._detvan_intrange_widgets_state(self._content.van_int_cb.isChecked())
         self.connect(self._content.van_int_cb, QtCore.SIGNAL("toggled(bool)"),
-                     self._det_van_intrange_widgets_state)
+                     self._detvan_intrange_widgets_state)
         self.connect(self._content.use_procdetvan_cb, QtCore.SIGNAL("toggled(bool)"),
-                     self._det_van_intrange_widgets_opp_state)        
+                     self._detvan_widgets_opp_state)   
+        
+        self._save_detvan_widgets_state(self._content.save_procdetvan_cb.isChecked())  
+        self.connect(self._content.save_procdetvan_cb, QtCore.SIGNAL("toggled(bool)"),
+                     self._save_detvan_widgets_state)   
         
         # Connections
         self.connect(self._content.van_input_browse, QtCore.SIGNAL("clicked()"), 
-                     self._det_van_browse)
+                     self._detvan_browse)
+        self.connect(self._content.save_procdetvan_browse, QtCore.SIGNAL("clicked()"),
+                     self._save_procdetvan_browse)
 
     def _monitor_intrange_widgets_state(self, state=False):
         self._content.monint_label.setEnabled(state)
         self._content.monint_low_edit.setEnabled(state)
         self._content.monint_high_edit.setEnabled(state)
         
-    def _det_van_intrange_widgets_state(self, state=False):
+    def _detvan_intrange_widgets_state(self, state=False):
         self._content.van_int_range_label.setEnabled(state)
         self._content.van_int_range_low_edit.setEnabled(state)
         self._content.van_int_range_high_edit.setEnabled(state)
         self._content.van_int_range_units_cb.setEnabled(state)
         
-    def _det_van_intrange_widgets_opp_state(self, state=False):
+    def _detvan_widgets_opp_state(self, state=False):
         self._content.van_int_cb.setEnabled(not state)
         if self._content.van_int_cb.isChecked():
-            self._det_van_intrange_widgets_state(not state)
+            self._detvan_intrange_widgets_state(not state)
             self._content.van_int_cb.setChecked(False)
+        self._content.save_procdetvan_cb.setEnabled(not state)
+        if self._content.save_procdetvan_cb.isChecked():
+            self._content.save_procdetvan_cb.setChecked(False)
+            
+    def _save_detvan_widgets_state(self, state=False):
+        self._content.save_procdetvan_label.setEnabled(state)
+        self._content.save_procdetvan_edit.setEnabled(state)
+        self._content.save_procdetvan_browse.setEnabled(state)
     
-    def _det_van_browse(self):
+    def _detvan_browse(self):
         fname = self.data_browse_dialog()
         if fname:
             self._content.van_input_edit.setText(fname)   
+    
+    def _save_procdetvan_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.save_procdetvan_edit.setText(fname)   
     
     def set_state(self, state):
         """
@@ -89,13 +108,14 @@ class DataCorrectionsWidget(BaseWidget):
         self._content.tof_end_edit.setText(str(state.tib_tof_end))
         self._content.correct_kikf_cb.setChecked(state.correct_kikf)
         self._content.van_input_edit.setText(state.detector_vanadium)
-        self._content.van_int_cb.setChecked(state.det_van_integration)
-        self._content.van_int_range_low_edit.setText(str(state.det_van_int_range_low))
-        self._content.van_int_range_high_edit.setText(str(state.det_van_int_range_high))
-        entry_index = self._content.van_int_range_units_cb.findText(state.det_van_int_range_units)
+        self._content.van_int_cb.setChecked(state.detvan_integration)
+        self._content.van_int_range_low_edit.setText(str(state.detvan_int_range_low))
+        self._content.van_int_range_high_edit.setText(str(state.detvan_int_range_high))
+        entry_index = self._content.van_int_range_units_cb.findText(state.detvan_int_range_units)
         self._content.van_int_range_units_cb.setCurrentIndex(entry_index)
-        self._content.save_procdetvan_cb.setChecked(state.save_proc_det_van)
-        self._content.use_procdetvan_cb.setChecked(state.use_proc_det_van)
+        self._content.save_procdetvan_cb.setChecked(state.save_proc_detvan)
+        self._content.save_procdetvan_edit.setText(str(state.save_proc_detvan_file))
+        self._content.use_procdetvan_cb.setChecked(state.use_proc_detvan)
 
     def get_state(self):
         """
@@ -111,11 +131,12 @@ class DataCorrectionsWidget(BaseWidget):
         d.tib_tof_end = util._check_and_get_float_line_edit(self._content.tof_end_edit)
         d.correct_kikf = self._content.correct_kikf_cb.isChecked()
         d.detector_vanadium = self._content.van_input_edit.text()
-        d.det_van_integration = self._content.van_int_cb.isChecked()
-        d.det_van_int_range_low = util._check_and_get_float_line_edit(self._content.van_int_range_low_edit)
-        d.det_van_int_range_high = util._check_and_get_float_line_edit(self._content.van_int_range_high_edit)
-        d.det_van_int_range_units = self._content.van_int_range_units_cb.currentText()
-        d.save_proc_det_van = self._content.save_procdetvan_cb.isChecked()
-        d.use_proc_det_van = self._content.use_procdetvan_cb.isChecked()
+        d.detvan_integration = self._content.van_int_cb.isChecked()
+        d.detvan_int_range_low = util._check_and_get_float_line_edit(self._content.van_int_range_low_edit)
+        d.detvan_int_range_high = util._check_and_get_float_line_edit(self._content.van_int_range_high_edit)
+        d.detvan_int_range_units = self._content.van_int_range_units_cb.currentText()
+        d.save_proc_detvan = self._content.save_procdetvan_cb.isChecked()
+        d.save_proc_detvan_file = self._content.save_procdetvan_edit.text()
+        d.use_proc_detvan = self._content.use_procdetvan_cb.isChecked()
         return d
     

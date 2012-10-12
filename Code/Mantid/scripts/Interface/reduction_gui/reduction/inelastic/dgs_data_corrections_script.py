@@ -22,12 +22,13 @@ class DataCorrectionsScript(BaseScriptElement):
     tib_tof_end = ''
     correct_kikf = True
     detector_vanadium = ''
-    det_van_integration = False
-    det_van_int_range_low = ''
-    det_van_int_range_high = ''
-    det_van_int_range_units = 'Energy'
-    save_proc_det_van = False
-    use_proc_det_van = False    
+    detvan_integration = False
+    detvan_int_range_low = ''
+    detvan_int_range_high = ''
+    detvan_int_range_units = 'Energy'
+    save_proc_detvan = False
+    save_proc_detvan_file = ''
+    use_proc_detvan = False    
     
     def __init__(self, inst_name):
         super(DataCorrectionsScript, self).__init__()
@@ -41,8 +42,8 @@ class DataCorrectionsScript(BaseScriptElement):
         DataCorrectionsScript.monitor_int_high = ip.get_parameter("norm-mon1-max")
         DataCorrectionsScript.tib_tof_start = ip.get_parameter("bkgd-range-min")
         DataCorrectionsScript.tib_tof_end = ip.get_parameter("bkgd-range-max")
-        DataCorrectionsScript.det_van_int_range_low = ip.get_parameter("wb-integr-min")
-        DataCorrectionsScript.det_van_int_range_high = ip.get_parameter("wb-integr-max")
+        DataCorrectionsScript.detvan_int_range_low = ip.get_parameter("wb-integr-min")
+        DataCorrectionsScript.detvan_int_range_high = ip.get_parameter("wb-integr-max")
         
     def to_script(self):
         script = ""
@@ -64,18 +65,20 @@ class DataCorrectionsScript(BaseScriptElement):
             script += "CorrectKiKf=%s,\n" % self.correct_kikf
         if self.detector_vanadium != '':
             script += "DetectorVanadiumInputFile=\"%s\",\n" % self.detector_vanadium
-            if self.det_van_integration:
-                if self.det_van_integration:
-                    script += "UseBoundsForDetVan=%s,\n" % self.det_van_integration
-                    if self.det_van_int_range_low != DataCorrectionsScript.det_van_int_range_low:
-                        script += "DetVanIntRangeLow=%s,\n" % self.det_van_int_range_low
-                    script += "DetVanIntRangeHigh=%s,\n" % self.det_van_int_range_high
-                if self.det_van_int_range_units != DataCorrectionsScript.det_van_int_range_units:
-                    script += "DetVanIntRangeUnits=\"%s\",\n" % self.det_van_int_range_units
-            if self.save_proc_det_van:
-                script += "SaveProcessedDetVan=%s,\n" % self.save_proc_det_van
-            if self.use_proc_det_van:
-                script += "UseProcessedDetVan=%s,\n" % self.use_proc_det_van
+            if self.detvan_integration:
+                if self.detvan_integration:
+                    script += "UseBoundsForDetVan=%s,\n" % self.detvan_integration
+                    if self.detvan_int_range_low != DataCorrectionsScript.detvan_int_range_low:
+                        script += "DetVanIntRangeLow=%s,\n" % self.detvan_int_range_low
+                    script += "DetVanIntRangeHigh=%s,\n" % self.detvan_int_range_high
+                if self.detvan_int_range_units != DataCorrectionsScript.detvan_int_range_units:
+                    script += "DetVanIntRangeUnits=\"%s\",\n" % self.detvan_int_range_units
+            if self.save_proc_detvan:
+                script += "SaveProcessedDetVan=%s,\n" % self.save_proc_detvan
+                if self.save_proc_detvan_file != DataCorrectionsScript.save_proc_detvan_file:
+                    script += "SaveProcDetVanFilename=\"%s\",\n" % self.save_proc_detvan_file
+            if self.use_proc_detvan:
+                script += "UseProcessedDetVan=%s,\n" % self.use_proc_detvan
 
         return script
     
@@ -93,12 +96,13 @@ class DataCorrectionsScript(BaseScriptElement):
         xml += "  <tib_tof_range_end>%s</tib_tof_range_end>\n" % self.tib_tof_end
         xml += "  <correct_kikf>%s</correct_kikf>\n" % str(self.correct_kikf)
         xml += "  <detector_vanadium>%s</detector_vanadium>\n" % self.detector_vanadium
-        xml += "  <use_bounds_detvan>%s</use_bounds_detvan>\n" % str(self.det_van_integration)
-        xml += "  <detvan_range_low>%s</detvan_range_low>\n" % self.det_van_int_range_low
-        xml += "  <detvan_range_high>%s</detvan_range_high>\n" % self.det_van_int_range_high
-        xml += "  <detvan_range_units>%s</detvan_range_units>\n" % self.det_van_int_range_units
-        xml += "  <save_proc_detvan>%s</save_proc_detvan>\n" % str(self.save_proc_det_van)
-        xml += "  <use_proc_detvan>%s</use_proc_detvan>\n" % str(self.use_proc_det_van)
+        xml += "  <use_bounds_detvan>%s</use_bounds_detvan>\n" % str(self.detvan_integration)
+        xml += "  <detvan_range_low>%s</detvan_range_low>\n" % self.detvan_int_range_low
+        xml += "  <detvan_range_high>%s</detvan_range_high>\n" % self.detvan_int_range_high
+        xml += "  <detvan_range_units>%s</detvan_range_units>\n" % self.detvan_int_range_units
+        xml += "  <save_proc_detvan>%s</save_proc_detvan>\n" % str(self.save_proc_detvan)
+        xml += "  <save_proc_detvan_filename>%s</save_proc_detvan_filename>\n" % str(self.save_proc_detvan_file)
+        xml += "  <use_proc_detvan>%s</use_proc_detvan>\n" % str(self.use_proc_detvan)
         xml += "</DataCorrections>\n"
         return xml
     
@@ -138,24 +142,27 @@ class DataCorrectionsScript(BaseScriptElement):
             self.detector_vanadium = BaseScriptElement.getStringElement(instrument_dom,
                                                                         "detector_vanadium",
                                                                         default=DataCorrectionsScript.detector_vanadium)
-            self.det_van_integration = BaseScriptElement.getBoolElement(instrument_dom,
+            self.detvan_integration = BaseScriptElement.getBoolElement(instrument_dom,
                                                                         "use_bounds_detvan",
-                                                                        default=DataCorrectionsScript.det_van_integration)
-            self.det_van_int_range_low = BaseScriptElement.getStringElement(instrument_dom,
+                                                                        default=DataCorrectionsScript.detvan_integration)
+            self.detvan_int_range_low = BaseScriptElement.getStringElement(instrument_dom,
                                                                             "detvan_range_low",
-                                                                            default=DataCorrectionsScript.det_van_int_range_low)
-            self.det_van_int_range_high = BaseScriptElement.getStringElement(instrument_dom,
+                                                                            default=DataCorrectionsScript.detvan_int_range_low)
+            self.detvan_int_range_high = BaseScriptElement.getStringElement(instrument_dom,
                                                                              "detvan_range_high",
-                                                                             default=DataCorrectionsScript.det_van_int_range_high)
-            self.det_van_int_range_units = BaseScriptElement.getStringElement(instrument_dom,
+                                                                             default=DataCorrectionsScript.detvan_int_range_high)
+            self.detvan_int_range_units = BaseScriptElement.getStringElement(instrument_dom,
                                                                               "detvan_range_units",
-                                                                              default=DataCorrectionsScript.det_van_int_range_units)
-            self.save_proc_det_van = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                              default=DataCorrectionsScript.detvan_int_range_units)
+            self.save_proc_detvan = BaseScriptElement.getBoolElement(instrument_dom,
                                                                       "save_proc_detvan",
-                                                                      default=DataCorrectionsScript.save_proc_det_van)
-            self.use_proc_det_van = BaseScriptElement.getBoolElement(instrument_dom,
+                                                                      default=DataCorrectionsScript.save_proc_detvan)
+            self.save_proc_detvan_file = BaseScriptElement.getStringElement(instrument_dom,
+                                                                       "save_proc_detvan_filename",
+                                                                       default=DataCorrectionsScript.save_proc_detvan_file)
+            self.use_proc_detvan = BaseScriptElement.getBoolElement(instrument_dom,
                                                                      "use_proc_detvan",
-                                                                     default=DataCorrectionsScript.use_proc_det_van)
+                                                                     default=DataCorrectionsScript.use_proc_detvan)
 
     def reset(self):
         """
@@ -170,10 +177,11 @@ class DataCorrectionsScript(BaseScriptElement):
         self.tib_tof_end = DataCorrectionsScript.tib_tof_end
         self.correct_kikf = DataCorrectionsScript.correct_kikf
         self.detector_vanadium = DataCorrectionsScript.detector_vanadium
-        self.det_van_integration = DataCorrectionsScript.det_van_integration
-        self.det_van_int_range_low = DataCorrectionsScript.det_van_int_range_low
-        self.det_van_int_range_high = DataCorrectionsScript.det_van_int_range_high
-        self.det_van_int_range_units = DataCorrectionsScript.det_van_int_range_units
-        self.save_proc_det_van = DataCorrectionsScript.save_proc_det_van
-        self.use_proc_det_van = DataCorrectionsScript.use_proc_det_van
+        self.detvan_integration = DataCorrectionsScript.detvan_integration
+        self.detvan_int_range_low = DataCorrectionsScript.detvan_int_range_low
+        self.detvan_int_range_high = DataCorrectionsScript.detvan_int_range_high
+        self.detvan_int_range_units = DataCorrectionsScript.detvan_int_range_units
+        self.save_proc_detvan = DataCorrectionsScript.save_proc_detvan
+        self.save_proc_detvan_file = DataCorrectionsScript.save_proc_detvan_file
+        self.use_proc_detvan = DataCorrectionsScript.use_proc_detvan
         

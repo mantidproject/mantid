@@ -55,15 +55,8 @@ class DiagnoseDetectorsWidget(BaseWidget):
             widget.setValidator(ivp)
 
         # Connections
-        self.connect(self._content.output_mask_browse, QtCore.SIGNAL("clicked()"), 
-                     self._output_mask_browse)
         self.connect(self._content.det_van2_browse, QtCore.SIGNAL("clicked()"), 
-                     self._det_van2_browse)
-
-    def _output_mask_browse(self):
-        fname = self.data_browse_dialog()
-        if fname:
-            self._content.output_mask_edit.setText(fname)     
+                     self._det_van2_browse)   
 
     def _det_van2_browse(self):
         fname = self.data_browse_dialog()
@@ -75,7 +68,6 @@ class DiagnoseDetectorsWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: DiagnoseDetectorsScript object
         """
-        self._content.output_mask_edit.setText(state.output_mask_file)
         self._content.high_counts_edit.setText(QtCore.QString("%1.e" % state.high_counts))
         self._content.low_counts_edit.setText(QtCore.QString(str(state.low_counts)))
         self._content.median_test_high_edit.setText(QtCore.QString(str(state.median_test_high)))
@@ -101,7 +93,6 @@ class DiagnoseDetectorsWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         d = DiagnoseDetectorsScript(self._instrument_name)
-        d.output_mask_file = self._content.output_mask_edit.text()
         d.high_counts = util._check_and_get_float_line_edit(self._content.high_counts_edit)
         d.low_counts = util._check_and_get_float_line_edit(self._content.low_counts_edit)
         d.median_test_high = util._check_and_get_float_line_edit(self._content.median_test_high_edit)
