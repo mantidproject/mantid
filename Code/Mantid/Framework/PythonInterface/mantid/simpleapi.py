@@ -67,16 +67,16 @@ def Load(*args, **kwargs):
     
     Example:
       # Simple usage, ISIS NeXus file
-      Load('INSTR00001000.nxs', 'run_ws')
+      run_ws = Load('INSTR00001000.nxs')
       
-      # ISIS NeXus with SpectrumMin and SpectrumMax = 1
-      Load('INSTR00001000.nxs', 'run_ws', SpectrumMin=1,SpectrumMax=1)
+      # Historgram NeXus with SpectrumMin and SpectrumMax = 1
+      run_ws = Load('INSTR00001000.nxs', SpectrumMin=1,SpectrumMax=1)
       
-      # SNS Event NeXus with precount on
-      Load('INSTR_1000_event.nxs', 'event_ws', Precount=True)
+      # Event NeXus with precount on
+      event_ws = Load('INSTR_1000_event.nxs', Precount=True)
       
-      # A mix of keyword and non-keyword is also possible
-      Load('event_ws', Filename='INSTR_1000_event.nxs',Precount=True)
+      # The output workspace name is picked up from the LHS unless overridden
+      Load('INSTR00001000.nxs',OutputWorkspace='run_ws')
     """
     filename, = get_mandatory_args('Load', ["Filename"], *args, **kwargs)
     
