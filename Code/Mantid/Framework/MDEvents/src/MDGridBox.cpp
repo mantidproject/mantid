@@ -96,18 +96,15 @@ namespace MDEvents
       volume *= boxSize[d];
     coord_t inverseVolume = 1.0f / volume;
 
-    // Create the array of MDBox contents.
-    boxes.clear();
-    boxes.reserve(tot);
-    numBoxes = tot;
+  
+    // Splitting an input MDBox requires creating a bunch of children
+    fillBoxShell(tot,inverseVolume);
+
 
     // Prepare to distribute the events that were in the box before
     const std::vector<MDE> & events = box->getConstEvents();   
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
-
-   // Splitting an input MDBox requires creating a bunch of children
-    fillBoxShell(tot,inverseVolume);
     if(splitRecursively)
     {
       // Add all the events recursively, going through all internal boxes
@@ -129,13 +126,19 @@ namespace MDEvents
   template<typename MDE,size_t nd>
   void MDGridBox<MDE,nd>::fillBoxShell(const size_t tot,const coord_t inverseVolume)
   {
+  // Create the array of MDBox contents.
+    this->boxes.clear();
+    this->boxes.reserve(tot);
+    this->numBoxes = tot;
+
     size_t indices[nd];
     for (size_t d=0; d<nd; d++) indices[d] = 0;
     
    // get inital free ID for the boxes, which would be created by this command
    // Splitting an input MDBox requires creating a bunch of children
-   // But the IDs of these children MUST be sequential. Hence the critical block
+   // But the IDs of these children MUST be sequential. Hence the critical block within claimIDRange
     size_t ID0 = m_BoxController->claimIDRange(tot);
+
     for (size_t i=0; i<tot; i++)
     {
       // Create the box

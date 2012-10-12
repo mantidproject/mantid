@@ -39,10 +39,10 @@ namespace MDEvents
     this->m_BoxController = splitter;
     this->m_depth = depth;
 
-    if(boxID<0)
-      this->setId(boxID);
-    else      // Give it a fresh ID from the controller.
+    if(boxID<0)  // Give it a fresh ID from the controller.
       this->setId( splitter->getNextId() );
+    else         // somebody gives the ID on constructor
+      this->setId(boxID);
 
     if(boxSize>0) data.reserve(boxSize);
    }
@@ -64,10 +64,10 @@ namespace MDEvents
     this->m_BoxController = splitter;
     this->m_depth = depth;
     // Give it a fresh ID from the controller.
-    if(boxID<0)
-      this->setId(boxID);
-    else      // Give it a fresh ID from the controller.
+    if(boxID<0) // Give it a fresh ID from the controller.
       this->setId( splitter->getNextId() );
+    else     // somebody gives the ID on constructor
+      this->setId(boxID);
 
     if(boxSize>0) data.reserve(boxSize);
   }
