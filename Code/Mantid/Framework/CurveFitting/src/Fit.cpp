@@ -375,6 +375,8 @@ namespace CurveFitting
     costFunc->setFittingFunction(m_function,domain,values);
     minimizer->initialize(costFunc);
 
+    std::cout << "(Fit.cpp) " << m_function->asString() << std::endl;
+
     const int64_t nsteps = maxIterations*m_function->estimateNoProgressCalls();
     API::Progress prog(this,0.0,1.0,nsteps);
     m_function->setProgressReporter(&prog);

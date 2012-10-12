@@ -66,7 +66,7 @@ public:
 
 protected:
   mu::Parser* m_parser;         ///< math parser
-  /// Store for parameters used in the tie. The map's key is address used bu the mu::Parser
+  /// Store for parameters used in the tie. The map's key is address used by the mu::Parser
   std::map<double*,ParameterReference> m_varMap;
   /// Keep the function that was passed to the constructor
   IFunction* m_function1;

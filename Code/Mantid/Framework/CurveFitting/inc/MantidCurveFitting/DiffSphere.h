@@ -67,26 +67,6 @@ public:
   /// A rescaling of the peak intensity
   double HeightPrefactor() const;
 
-  /// Returns the number of attributes associated with the function
-  virtual size_t nAttributes()const{return 1;}
-
-  /// Returns a list of attribute names
-  virtual std::vector<std::string> getAttributeNames()const;
-
-  /// Return a value of attribute attName
-  virtual Attribute getAttribute(const std::string& attName)const;
-
-  /// Set a value to attribute attName
-  virtual void setAttribute(const std::string& attName,const Attribute& );
-
-  /// Check if attribute attName exists
-  virtual bool hasAttribute(const std::string& attName)const;
-
-private:
-
-  /// Q-value, modulus of the momentum transfer
-  double m_Q;
-
 };
 
 /* Class representing the inelastic portion of the DiffSphere algorithm.
@@ -106,21 +86,6 @@ public:
   virtual std::string name()const{return "InelasticDiffSphere";}
 
   virtual const std::string category() const { return "QuasiElastic";}
-
-  /// Returns the number of attributes associated with the function
-  virtual size_t nAttributes()const{return 1;}
-
-  /// Returns a list of attribute names
-  virtual std::vector<std::string> getAttributeNames()const;
-
-  /// Return a value of attribute attName
-  virtual Attribute getAttribute(const std::string& attName)const;
-
-  /// Set a value to attribute attName
-  virtual void setAttribute(const std::string& attName,const Attribute& );
-
-  /// Check if attribute attName exists
-  virtual bool hasAttribute(const std::string& attName)const;
 
 protected:
   void function1D(double* out, const double* xValues, const size_t nData)const;
@@ -155,8 +120,6 @@ private:
   /// list of linearized J values
   std::vector<linearJ> linearJlist;
 
-  /// Q-value, modulus of the momentum transfer
-  double m_Q;
 }; // end of class InelasticDiffSphere
 
 class DLLExport DiffSphere : public API::ImmutableCompositeFunction
@@ -164,13 +127,25 @@ class DLLExport DiffSphere : public API::ImmutableCompositeFunction
 public:
   /// Constructor
   DiffSphere();
+
   /// Destructor
   ~DiffSphere() {};
 
   /// overwrite IFunction base class methods
   std::string name()const{return "DiffSphere";}
+
   virtual const std::string category() const { return "QuasiElastic";}
+
   virtual int version() const { return 1;}
+
+  /// Propagate an attribute to member functions
+  virtual void trickleDownAttribute( const std::string& name );
+
+  /// Override parent definition
+  virtual void declareAttribute(const std::string & name,const API::IFunction::Attribute & defaultValue);
+
+  /// Override parent definition
+  virtual void setAttribute(const std::string& attName,const Attribute& att);
 
 private:
   //API::IFunctionMW* m_elastic;    //elastic intensity of the DiffSphere structure factor
