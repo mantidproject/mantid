@@ -40,10 +40,13 @@ namespace Geometry
   class DLLExport IDFObject 
   {
   public:
+    static const std::string expectedExtension();
+
     IDFObject(const std::string& fileName);
     Poco::Path getParentDirectory() const;
     Poco::Path getFileFullPath() const;
     std::string getFileNameOnly() const;
+    std::string getExtension() const;
     virtual Poco::Timestamp  getLastModified() const;
     virtual bool exists() const;
     virtual ~IDFObject();

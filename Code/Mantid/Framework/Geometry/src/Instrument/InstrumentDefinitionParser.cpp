@@ -31,6 +31,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/make_shared.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <sstream>
 #include <cstdlib>
 
@@ -88,7 +89,19 @@ namespace Geometry
   void InstrumentDefinitionParser::initialize(const std::string & filename, const std::string & instName, const std::string & xmlText)
   {
     IDFObject_const_sptr xmlFile = boost::make_shared<const IDFObject>(filename);
-    IDFObject_const_sptr vtpFile = boost::make_shared<const IDFObject>(xmlFile->getParentDirectory().toString() + instName + ".vtp");
+    // Use the filename to construct the cachefile name so that there is a 1:1 map between a definition file & cache
+    std::string idfExt = xmlFile->getExtension();
+    std::string vtpFilename = filename;
+    static const char * vtpExt = ".vtp";
+    if(idfExt.empty())
+    {
+      vtpFilename += vtpExt;
+    }
+    else
+    {
+      boost::replace_last(vtpFilename, idfExt, vtpExt);
+    }
+    IDFObject_const_sptr vtpFile = boost::make_shared<const IDFObject>(vtpFilename);
 
     this->initialize(xmlFile, vtpFile, instName, xmlText);
   }

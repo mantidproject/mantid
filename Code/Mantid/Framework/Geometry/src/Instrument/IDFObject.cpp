@@ -4,7 +4,15 @@ namespace Mantid
 {
   namespace Geometry
   {
-
+    //----------------------------------------------------------------------------------------------
+    /**
+     * Returns the expected extension of an IDF file
+     * @returns A string containing the expected extension of an IDF file, including the leading period (.)
+     */
+    const std::string IDFObject::expectedExtension()
+    {
+      return ".xml";
+    }
 
     //----------------------------------------------------------------------------------------------
     /** Constructor
@@ -45,6 +53,17 @@ namespace Mantid
     std::string IDFObject::getFileNameOnly() const
     {
       return Poco::Path(m_defFile.path()).getFileName();
+    }
+
+    /**
+     * Gets the extension of this IDF file, including the leading period
+     * @return A string containing the extension for this file
+     */
+    std::string IDFObject::getExtension() const
+    {
+      std::string ext = Poco::Path(m_defFile.path()).getExtension();
+      if(ext.empty()) return ext;
+      else return "." + ext;
     }
 
     /**
