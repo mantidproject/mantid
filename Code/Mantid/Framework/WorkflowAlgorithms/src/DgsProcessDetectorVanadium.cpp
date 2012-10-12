@@ -167,7 +167,16 @@ namespace Mantid
         bool saveProc = reductionManager->getProperty("SaveProcessedDetVan");
         if (saveProc)
         {
-          std::string outputFile = this->getPropertyValue("OutputWorkspace");
+          std::string outputFile("");
+          if (reductionManager->existsProperty("SaveProcDetVanFilename"))
+          {
+            outputFile = reductionManager->getPropertyValue("SaveProcDetVanFilename");
+          }
+          if (outputFile.empty())
+          {
+            outputFile = this->getPropertyValue("OutputWorkspace");
+            outputFile += ".nxs";
+          }
 
           // Don't save private calculation workspaces
           if (!outputFile.empty() && !boost::starts_with(outputFile, "ChildAlgOutput") &&
@@ -175,7 +184,6 @@ namespace Mantid
           {
             IAlgorithm_sptr save = this->createSubAlgorithm("SaveNexus");
             save->setProperty("InputWorkspace", outputWS);
-            outputFile += ".nxs";
             save->setProperty("FileName", outputFile);
             save->execute();
           }
