@@ -331,6 +331,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                             None                 (run one reduction for whatever detector has been set as the current detector 
                                                   before running this method. If front apply rescale+shift) 
         @param resetSetup: if true reset setup at the end
+        @return Name of one of the workspaces created
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ', ' + str(wav_end) + ', '+str(full_trans_wav)+')')
     
@@ -367,26 +368,28 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             RenameWorkspace(frontWS, retWSname)                                
     else:       
         toParse = combineDet.lower()
-        toRestoreAfterAnalysis = ReductionSingleton().instrument.cur_detector().name()
-
-        if name_suffix == None:
-            name_suffix =''
         
-        toRestoreOutputParts = ReductionSingleton().to_Q.outputParts     
+        # To backup value of singleton which are temporarily modified in this method
+        toRestoreAfterAnalysis = ReductionSingleton().instrument.cur_detector().name()
+        toRestoreOutputParts = ReductionSingleton().to_Q.outputParts 
            
-        # if 'merged' then when cross section is calculated have the two individual parts
-        # of the cross section outputted. These additional outputs are required to calculate
-        # the merged dataset           
+        # if 'merged' then when cross section is calculated output the two individual parts
+        # of the cross section. These additional outputs are required to calculate
+        # the merged workspace           
         if toParse.count('merged') == 1:           
             ReductionSingleton().to_Q.outputParts = True            
         
         # should a rear reduction be done?
+        # This should be done if 'rear', 'both' and 'merged' is selected
+        # and for now when 'front' & fitRequired==True (so basically all
+        # cases except when  'front' & fitRequired==False
         if toParse.count('rear') == 1 or toParse.count('merged') == 1 \
-          or toParse.count('both') == 1:
+          or toParse.count('both') == 1 or (toParse.count('front') and fitRequired):
             ReductionSingleton().instrument.setDetector('rear')
             retWSname_rear = _WavRangeReduction(name_suffix)
             
         # should a front reduction be done?
+        # All cases except when 'rear', and for now regardless of whether fitRequired==True
         if toParse.count('front') == 1 or toParse.count('merged') == 1 \
           or toParse.count('both') == 1:
             ReductionSingleton.replace(ReductionSingleton().settings())
@@ -398,18 +401,16 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             scale, shift = _fitRescaleAndShift(rAnds, retWSname_front, retWSname_rear)
             ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift
             ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale                 
-        
-        # in case of 'merged' for safety reset back this setting which may have been 
-        # temporarily changed above      
-        ReductionSingleton().instrument.setDetector(toRestoreAfterAnalysis)
+
           
         # get shift and scale to use for front and merge below  
         shift = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift
         scale = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale
                             
         if toParse.count('merged') == 1:
-            # finished calculating cross section so can restore this value
+            # finished calculating cross section so can restore these value
             ReductionSingleton().to_Q.outputParts = toRestoreOutputParts
+            ReductionSingleton().instrument.setDetector(toRestoreAfterAnalysis)
         
             retWSname_merged = retWSname_rear
             if retWSname_merged.count('rear') == 1:
@@ -508,14 +509,28 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     
     row1 = param.row(0).items()
     row2 = param.row(1).items()
+    row3 = param.row(2).items()
     scale = row1[1][1]
-    scaleTimesShift = row2[1][1]
+    chiSquared = row3[1][1]    
+    
+    fitSuccess = True
+    if not chiSquared > 0:
+        issueWarning("Can't fit front detector RESCALE or SHIFT. Use non fitted values")
+        fitSuccess = False
+    if scale == 0.0:
+        issueWarning("front detector RESCALE fitted to zero. Use non fitted values")
+        fitSuccess = False        
+        
+    if fitSuccess == False:
+        return rAnds.scale, rAnds.shift
+                    
+    shift = row2[1][1] / scale
     
     delete_workspaces('__fitRescaleAndShift_Parameters') 
     delete_workspaces('__fitRescaleAndShift_NormalisedCovarianceMatrix') 
     delete_workspaces('__fitRescaleAndShift_Workspace')     
             
-    return scale, scaleTimesShift / scale
+    return scale, shift
 
 def _WavRangeReduction(name_suffix=None):
     """
