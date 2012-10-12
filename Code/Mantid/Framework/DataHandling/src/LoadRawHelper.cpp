@@ -34,11 +34,11 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
 
-      /// Constructor
+    /// Constructor
     LoadRawHelper::LoadRawHelper() :
-    isisRaw(new ISISRAW2),
-      m_list(false),m_spec_list(),m_spec_min(0),
-      m_spec_max(EMPTY_INT()), m_numberOfPeriods(0), m_specTimeRegimes(),m_prog(0),m_bmspeclist(false)
+        isisRaw(new ISISRAW2),
+        m_list(false),m_spec_list(),m_spec_min(0),
+        m_spec_max(EMPTY_INT()), m_numberOfPeriods(0), m_specTimeRegimes(),m_prog(0),m_bmspeclist(false)
     {      
     }
 
@@ -54,14 +54,14 @@ namespace Mantid
       exts.push_back(".s*");
       exts.push_back(".add");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-        "The name of the RAW file to read, including its full or relative\n"
-        "path. (N.B. case sensitive if running on Linux).");
+          "The name of the RAW file to read, including its full or relative\n"
+          "path. (N.B. case sensitive if running on Linux).");
 
       declareProperty(new WorkspaceProperty<Workspace> ("OutputWorkspace", "", Direction::Output),
-        "The name of the workspace that will be created, filled with the\n"
-        "read-in data and stored in the Analysis Data Service.  If the input\n"
-        "RAW file contains multiple periods higher periods will be stored in\n"
-        "separate workspaces called OutputWorkspace_PeriodNo.");
+          "The name of the workspace that will be created, filled with the\n"
+          "read-in data and stored in the Analysis Data Service.  If the input\n"
+          "RAW file contains multiple periods higher periods will be stored in\n"
+          "separate workspaces called OutputWorkspace_PeriodNo.");
 
 
       m_cache_options.push_back("If Slow");
@@ -73,9 +73,9 @@ namespace Mantid
 
     }
     /**opens the raw file and returns the file pointer
-    *@param fileName :: name of the raw file
-    *@return file pointer 
-    */
+     *@param fileName :: name of the raw file
+     *@return file pointer
+     */
     FILE*  LoadRawHelper::openRawFile(const std::string & fileName)
     {
       FILE* file = fopen(fileName.c_str(), "rb");
@@ -97,9 +97,9 @@ namespace Mantid
 
     }
     /** Reads the run title and creates a string from it
-    * @param file :: pointer to the raw file
-    * @param title ::  An output parameter that will contain the workspace title 
-    */
+     * @param file :: pointer to the raw file
+     * @param title ::  An output parameter that will contain the workspace title
+     */
     void LoadRawHelper::readTitle(FILE* file,std::string & title)
     {
       ioRaw(file, true);
@@ -107,16 +107,16 @@ namespace Mantid
       g_log.information("*** Run title: " + title + " ***");
     }
     /**skips the histogram from raw file
-    *@param file :: pointer to the raw file
-    *@param hist :: postion in the file to skip
-    */
+     *@param file :: pointer to the raw file
+     *@param hist :: postion in the file to skip
+     */
     void LoadRawHelper::skipData(FILE* file,int hist)
     {
       isisRaw->skipData(file, hist);
     }
     void LoadRawHelper::skipData(FILE* file,int64_t hist)
     {
-     skipData(file, static_cast<int>(hist));
+      skipData(file, static_cast<int>(hist));
     }
     /// calls isisRaw ioRaw.
     /// @param file :: the file pointer
@@ -146,7 +146,7 @@ namespace Mantid
     }
     bool LoadRawHelper::readData(FILE* file,int64_t hist)
     {
-       return readData(file, static_cast<int>(hist));
+      return readData(file, static_cast<int>(hist));
     }
 
     float LoadRawHelper::getProtonCharge()const
@@ -155,16 +155,16 @@ namespace Mantid
     }
 
     /**
-    * Set the proton charge on the run object
-    * @param run :: The run object
-    */
+     * Set the proton charge on the run object
+     * @param run :: The run object
+     */
     void  LoadRawHelper::setProtonCharge(API::Run& run)
     {
       run.setProtonCharge(getProtonCharge());
     }
     /** Stores the run number in the run logs
-    *  @param run :: the workspace's run object
-    */
+     *  @param run :: the workspace's run object
+     */
     void LoadRawHelper::setRunNumber(API::Run& run)
     {
       std::string run_num = boost::lexical_cast<std::string>(isisRaw->r_number);
@@ -197,29 +197,29 @@ namespace Mantid
      * @return an empty workspace of the given parameters
      */
     DataObjects::Workspace2D_sptr LoadRawHelper::createWorkspace(DataObjects::Workspace2D_sptr ws_sptr,
-      int64_t nVectors,int64_t xLengthIn,int64_t yLengthIn)
+        int64_t nVectors,int64_t xLengthIn,int64_t yLengthIn)
     {
       DataObjects::Workspace2D_sptr empty;
       if(!ws_sptr)return empty;
       DataObjects::Workspace2D_sptr workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-        (WorkspaceFactory::Instance().create(ws_sptr,nVectors,xLengthIn,yLengthIn));
+      (WorkspaceFactory::Instance().create(ws_sptr,nVectors,xLengthIn,yLengthIn));
       return workspace;
     }
 
     /** This method creates pointer to workspace
-    *  @param nVectors :: The number of vectors/histograms in the workspace
-    *  @param xlengthIn :: The number of X data points/bin boundaries in each vector 
-    *  @param ylengthIn :: The number of Y data points/bin boundaries in each vector 
-    *  @param title :: title of the workspace
-    *  @return Workspace2D_sptr shared pointer to the workspace
-    */
+     *  @param nVectors :: The number of vectors/histograms in the workspace
+     *  @param xlengthIn :: The number of X data points/bin boundaries in each vector
+     *  @param ylengthIn :: The number of Y data points/bin boundaries in each vector
+     *  @param title :: title of the workspace
+     *  @return Workspace2D_sptr shared pointer to the workspace
+     */
     DataObjects::Workspace2D_sptr LoadRawHelper::createWorkspace(int64_t nVectors, int64_t xlengthIn,int64_t ylengthIn,const std::string& title)
     {
       DataObjects::Workspace2D_sptr workspace;
       if(nVectors>0)
       {
         workspace =boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(
-          "Workspace2D", nVectors, xlengthIn, ylengthIn));
+            "Workspace2D", nVectors, xlengthIn, ylengthIn));
         // Set the units
         workspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
         workspace->setYUnit("Counts");
@@ -230,19 +230,19 @@ namespace Mantid
     }
 
     /**creates monitor workspace 
-    *@param monws_sptr :: shared pointer to monitor workspace
-    *@param normalws_sptr :: shared pointer to output workspace
-    *@param mongrp_sptr :: shared pointer to monitor group workspace
-    *@param mwsSpecs :: number of spectra in the monitor workspace
-    *@param nwsSpecs :: number of spectra in the output workspace
-    *@param numberOfPeriods :: total number of periods from raw file
-    *@param lengthIn :: size of workspace vectors
-    *@param title :: title of the workspace
+     *@param monws_sptr :: shared pointer to monitor workspace
+     *@param normalws_sptr :: shared pointer to output workspace
+     *@param mongrp_sptr :: shared pointer to monitor group workspace
+     *@param mwsSpecs :: number of spectra in the monitor workspace
+     *@param nwsSpecs :: number of spectra in the output workspace
+     *@param numberOfPeriods :: total number of periods from raw file
+     *@param lengthIn :: size of workspace vectors
+     *@param title :: title of the workspace
 
-    */
+     */
     void LoadRawHelper::createMonitorWorkspace(DataObjects::Workspace2D_sptr& monws_sptr,DataObjects::Workspace2D_sptr& normalws_sptr,
-      WorkspaceGroup_sptr& mongrp_sptr,const int64_t mwsSpecs,const int64_t nwsSpecs,
-      const int64_t numberOfPeriods,const int64_t lengthIn,const std::string title)
+        WorkspaceGroup_sptr& mongrp_sptr,const int64_t mwsSpecs,const int64_t nwsSpecs,
+        const int64_t numberOfPeriods,const int64_t lengthIn,const std::string title)
     {
       try
       { 
@@ -270,7 +270,7 @@ namespace Mantid
         {               
           std::string monitorwsName = wsName + "_Monitors";
           declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorwsName,
-            Direction::Output));
+              Direction::Output));
           setWorkspaceProperty("MonitorWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, true);
         }
         else
@@ -278,7 +278,6 @@ namespace Mantid
           //if only monitors range selected
           //then set the monitor workspace as the outputworkspace
           setWorkspaceProperty("OutputWorkspace", title, mongrp_sptr, monws_sptr,numberOfPeriods, false);
-          //normalws_sptr = monws_sptr;
         }
 
       }
@@ -293,23 +292,23 @@ namespace Mantid
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
-    *  the output workspace
-    *
-    *  @throw Exception::FileError If the RAW file cannot be found/opened
-    *  @throw std::invalid_argument If the optional properties are set to invalid values
-    */
+     *  the output workspace
+     *
+     *  @throw Exception::FileError If the RAW file cannot be found/opened
+     *  @throw std::invalid_argument If the optional properties are set to invalid values
+     */
     void LoadRawHelper::exec()
     {
     }
 
     /** sets the workspace properties
-    *  @param ws_sptr ::  shared pointer to  workspace
-    *  @param grpws_sptr :: shared pointer to  group workspace
-    *  @param  period period number
-    *  @param bmonitors :: boolean flag to name  the workspaces
-    */
+     *  @param ws_sptr ::  shared pointer to  workspace
+     *  @param grpws_sptr :: shared pointer to  group workspace
+     *  @param  period period number
+     *  @param bmonitors :: boolean flag to name  the workspaces
+     */
     void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr, WorkspaceGroup_sptr grpws_sptr,
-      const int64_t period, bool bmonitors)
+        const int64_t period, bool bmonitors)
     {
       if(!ws_sptr) return;
       if(!grpws_sptr) return;
@@ -332,39 +331,29 @@ namespace Mantid
       outws = outputWorkspace + "_" + suffix.str();
       declareProperty(new WorkspaceProperty<Workspace> (outws, wsName, Direction::Output));
       setProperty(outws, boost::static_pointer_cast<Workspace>(ws_sptr));
-      //grpws_sptr->add(wsName);
       grpws_sptr->addWorkspace( ws_sptr );
     }
 
     /** This method sets the workspace property
-    *  @param propertyName :: property name for the workspace
-    *  @param title :: title of the workspace
-    *  @param grpws_sptr ::  shared pointer to group workspace
-    *  @param ws_sptr ::  shared pointer to workspace
-    *  @param numberOfPeriods :: numer periods in the raw file
-    *  @param  bMonitor to identify the workspace is an output workspace or monitor workspace
-    */
+     *  @param propertyName :: property name for the workspace
+     *  @param title :: title of the workspace
+     *  @param grpws_sptr ::  shared pointer to group workspace
+     *  @param ws_sptr ::  shared pointer to workspace
+     *  @param numberOfPeriods :: numer periods in the raw file
+     *  @param  bMonitor to identify the workspace is an output workspace or monitor workspace
+     */
     void LoadRawHelper::setWorkspaceProperty(const std::string& propertyName, const std::string& title,
-      WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor)
+        WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor)
     {
       UNUSED_ARG(bMonitor);
       Property *ws = getProperty("OutputWorkspace");
       if(!ws) return;
       if(!grpws_sptr) return;
       if(!ws_sptr)return;
-      // FIXME: This isn't used, so is it really necessary?
-      /*
-      std::string wsName = ws->value();
-      if (bMonitor)
-      {
-        wsName += "_Monitors";
-      }
-      */
       ws_sptr->setTitle(title);
       ws_sptr->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
       if (numberOfPeriods > 1)
       {
-        //grpws_sptr->add(wsName);
         setProperty(propertyName, boost::dynamic_pointer_cast<Workspace>(grpws_sptr));
       }
       else
@@ -374,16 +363,16 @@ namespace Mantid
     }
 
     /** This method sets the raw file data to workspace vectors
-    *  @param newWorkspace ::  shared pointer to the  workspace
-    *  @param timeChannelsVec ::  vector holding the X data
-    *  @param  wsIndex  variable used for indexing the ouputworkspace
-    *  @param  nspecNum  spectrum number
-    *  @param noTimeRegimes ::   regime no.
-    *  @param lengthIn :: length of the workspace
-    *  @param binStart :: start of bin
-    */
+     *  @param newWorkspace ::  shared pointer to the  workspace
+     *  @param timeChannelsVec ::  vector holding the X data
+     *  @param  wsIndex  variable used for indexing the ouputworkspace
+     *  @param  nspecNum  spectrum number
+     *  @param noTimeRegimes ::   regime no.
+     *  @param lengthIn :: length of the workspace
+     *  @param binStart :: start of bin
+     */
     void LoadRawHelper::setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace, const std::vector<
-      boost::shared_ptr<MantidVec> >& timeChannelsVec, int64_t wsIndex, specid_t nspecNum, int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart)
+        boost::shared_ptr<MantidVec> >& timeChannelsVec, int64_t wsIndex, specid_t nspecNum, int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart)
     {
       if(!newWorkspace)return;
       typedef double (*uf)(double);
@@ -421,11 +410,11 @@ namespace Mantid
     }
 
     /** This method returns the monitor spectrum list 
-    *  @param localWorkspace ::  shared pointer to  workspace 
-    *  @param monitorSpecList :: a list holding the spectrum indexes of the monitors
-    */
+     *  @param localWorkspace ::  shared pointer to  workspace
+     *  @param monitorSpecList :: a list holding the spectrum indexes of the monitors
+     */
     void LoadRawHelper::getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,
-      std::vector<specid_t>& monitorSpecList)
+        std::vector<specid_t>& monitorSpecList)
     {
       if (!m_monitordetectorList.empty())
       {
@@ -458,8 +447,8 @@ namespace Mantid
 
 
     /** This method creates pointer to group workspace
-    *  @return WorkspaceGroup_sptr shared pointer to the workspace
-    */
+     *  @return WorkspaceGroup_sptr shared pointer to the workspace
+     */
     WorkspaceGroup_sptr LoadRawHelper::createGroupWorkspace()
     {
       WorkspaceGroup_sptr workspacegrp(new WorkspaceGroup);
@@ -467,10 +456,10 @@ namespace Mantid
     }
 
     /**
-    * Check if a file is a text file
-    * @param file :: The file pointer
-    * @returns true if the file an ascii text file, false otherwise
-    */
+     * Check if a file is a text file
+     * @param file :: The file pointer
+     * @returns true if the file an ascii text file, false otherwise
+     */
     bool LoadRawHelper::isAscii(FILE* file) const
     {  
       return LoadAscii::isAscii(file);
@@ -479,12 +468,12 @@ namespace Mantid
 
 
     /** Constructs the time channel (X) vector(s)
-    *  @param regimes ::  The number of time regimes (if 1 regime, will actually contain 0)
-    *  @param lengthIn :: The number of time channels
-    *  @return The vector(s) containing the time channel boundaries, in a vector of shared ptrs
-    */
+     *  @param regimes ::  The number of time regimes (if 1 regime, will actually contain 0)
+     *  @param lengthIn :: The number of time channels
+     *  @return The vector(s) containing the time channel boundaries, in a vector of shared ptrs
+     */
     std::vector<boost::shared_ptr<MantidVec> > LoadRawHelper::getTimeChannels(const int64_t& regimes,
-      const int64_t& lengthIn)
+        const int64_t& lengthIn)
     {
       float* const timeChannels = new float[lengthIn];
       isisRaw->getTimeChannels(timeChannels, static_cast<int>(lengthIn));
@@ -502,7 +491,7 @@ namespace Mantid
           g_log.debug() << "Time regime " << i + 1 << " shifted by " << shift << " microseconds\n";
           // Add on the shift for this vector
           std::transform(channelsVec->begin(), channelsVec->end(), channelsVec->begin(), std::bind2nd(
-            std::plus<double>(), shift));
+              std::plus<double>(), shift));
           timeChannelsVec.push_back(channelsVec);
         }
         // In this case, also need to populate the map of spectrum-regime correspondence
@@ -567,8 +556,8 @@ namespace Mantid
       if (!executionSuccessful)
       {
         g_log.information() << "Instrument definition file " 
-          << " not found. Attempt to load information about \n"
-          << "the instrument from raw data file.\n";
+            << " not found. Attempt to load information about \n"
+            << "the instrument from raw data file.\n";
         runLoadInstrumentFromRaw(fileName,localWorkspace);
       }
       else
@@ -676,7 +665,7 @@ namespace Mantid
 
       g_log.debug("Loading the log files...");
       if( progStart < progEnd ) {
-         m_prog = progStart;
+        m_prog = progStart;
       }
       progress(m_prog, "Reading log files...");
       IAlgorithm_sptr loadLog = createSubAlgorithm("LoadLog");
@@ -716,7 +705,7 @@ namespace Mantid
      * Creates period log data in the workspace
      * @param period :: period number
      * @param local_workspace :: workspace to add period log data to.
-    */
+     */
     void LoadRawHelper::createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr local_workspace)
     {
       m_logCreator->addPeriodLogs(static_cast<int>(period), local_workspace->mutableRun());
@@ -724,11 +713,11 @@ namespace Mantid
 
 
     /**
-    * Pulls the run parameters from the ISIS Raw RPB structure and stores them as log entries on the 
-    * workspace run object
-    * @param localWorkspace :: The workspace to attach the information to
-    * @param rawFile :: The handle to an ISIS Raw file
-    */
+     * Pulls the run parameters from the ISIS Raw RPB structure and stores them as log entries on the
+     * workspace run object
+     * @param localWorkspace :: The workspace to attach the information to
+     * @param rawFile :: The handle to an ISIS Raw file
+     */
     void LoadRawHelper::loadRunParameters(API::MatrixWorkspace_sptr localWorkspace, ISISRAW * const rawFile) const
     {
       ISISRAW * localISISRaw(NULL);
@@ -780,16 +769,16 @@ namespace Mantid
       std::string isisDate = std::string(localISISRaw->rpb.r_enddate, 11);
       if ( isisDate[0] == ' ' ) isisDate[0] = '0';
       runDetails.addProperty("run_end", DateAndTime(isisDate.substr(7,4) + "-" + convertMonthLabelToIntStr(isisDate.substr(3,3)) 
-        + "-" + isisDate.substr(0,2) + "T" + std::string(localISISRaw->rpb.r_endtime, 8)).toISO8601String());
+          + "-" + isisDate.substr(0,2) + "T" + std::string(localISISRaw->rpb.r_endtime, 8)).toISO8601String());
       isisDate = std::string(localISISRaw->hdr.hd_date, 11);
       if ( isisDate[0] == ' ' ) isisDate[0] = '0';
       runDetails.addProperty("run_start", DateAndTime(isisDate.substr(7,4) + "-" + convertMonthLabelToIntStr(isisDate.substr(3,3)) 
-        + "-" + isisDate.substr(0,2) + "T" + std::string(localISISRaw->hdr.hd_time, 8)).toISO8601String());
+          + "-" + isisDate.substr(0,2) + "T" + std::string(localISISRaw->hdr.hd_time, 8)).toISO8601String());
     }
 
     /// To help transforming date stored in ISIS raw file into iso 8601
     /// @param month
-::     /// @return month as string integer e.g. 01
+    ::     /// @return month as string integer e.g. 01
     std::string LoadRawHelper::convertMonthLabelToIntStr(std::string month) const
     {
       std::transform(month.begin(), month.end(), month.begin(), toupper);
@@ -935,14 +924,14 @@ namespace Mantid
     /// @param normalwsSpecs :: the spectra for the detector workspace
     /// @param monitorwsSpecs :: the spectra for the monitor workspace
     void LoadRawHelper::calculateWorkspacesizes(const std::vector<specid_t>& monitorSpecList,
-      specid_t& normalwsSpecs, specid_t & monitorwsSpecs)
+        specid_t& normalwsSpecs, specid_t & monitorwsSpecs)
     {
       if (!m_interval && !m_bmspeclist)
       {
         monitorwsSpecs = static_cast<specid_t>(monitorSpecList.size());
         normalwsSpecs = m_total_specs - monitorwsSpecs;
         g_log.debug() << "normalwsSpecs   when m_interval  & m_bmspeclist are  false is  " << normalwsSpecs
-          << "  monitorwsSpecs is " << monitorwsSpecs << std::endl;
+            << "  monitorwsSpecs is " << monitorwsSpecs << std::endl;
       }
       else if (m_interval || m_bmspeclist)
       {
@@ -958,7 +947,7 @@ namespace Mantid
           monitorwsSpecs = msize;
           normalwsSpecs = m_total_specs - monitorwsSpecs;
           g_log.debug() << "normalwsSpecs when  m_interval true is  " << normalwsSpecs
-            << "  monitorwsSpecs is " << monitorwsSpecs << std::endl;
+              << "  monitorwsSpecs is " << monitorwsSpecs << std::endl;
         }
         if (m_bmspeclist)
         {
@@ -975,7 +964,7 @@ namespace Mantid
             if (m_spec_list.size() == 0)
             {
               g_log.debug() << "normalwsSpecs is " << normalwsSpecs << "  monitorwsSpecs is "
-                << monitorwsSpecs << std::endl;
+                  << monitorwsSpecs << std::endl;
             }
             else
             { //at this point there are monitors in the list which are not in the min& max range
@@ -992,7 +981,7 @@ namespace Mantid
               monitorwsSpecs += monCounter;
               normalwsSpecs = m_total_specs - monitorwsSpecs;
               g_log.debug() << "normalwsSpecs is  " << normalwsSpecs << "  monitorwsSpecs is "
-                << monitorwsSpecs << std::endl;
+                  << monitorwsSpecs << std::endl;
             }
           }//end if loop for m_interval  
           else
@@ -1018,7 +1007,7 @@ namespace Mantid
     }
 
     void LoadRawHelper::loadSpectra(FILE* file,const int& period,const int& total_specs,
-      DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec)
+        DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec)
     {
       double progStart = m_prog;
       double progEnd = 1.0; // Assume this function is called last
@@ -1035,7 +1024,7 @@ namespace Mantid
       {
         int64_t histToRead = i + period * (m_numberOfSpectra + 1);
         if ((i >= m_spec_min && i < m_spec_max) || 
-           (m_list && find(m_spec_list.begin(), m_spec_list.end(),i) != m_spec_list.end()))
+            (m_list && find(m_spec_list.begin(), m_spec_list.end(),i) != m_spec_list.end()))
         {
           progress(m_prog, "Reading raw file data...");
 
@@ -1062,7 +1051,7 @@ namespace Mantid
       }
 
     }
-    
+
 
     /** 
      * Check if the buffer looks like a RAW file header by looking at
@@ -1079,7 +1068,7 @@ namespace Mantid
       }
       else return false;
     }
-    
+
 
     /**This method does a quick file check by checking the no.of bytes read nread params and header buffer
      *  @param filePath- path of the file including name.
@@ -1093,11 +1082,11 @@ namespace Mantid
       bool braw = (!extn.compare("raw")||!extn.compare("add")||(extn.length() > 0 && extn[0]=='s')) ? true : false;
       if( isRawFileHeader(static_cast<int>(nread), header.full_hdr) || braw )
       {
-              return true;
+        return true;
       }
       else
       {
-              return false;
+        return false;
       }
     }
     /**Checks the file by opening it and reading few lines 
@@ -1117,13 +1106,13 @@ namespace Mantid
       }
       file_header header;
       int nread(static_cast<int>(fread(
-        &header,sizeof(unsigned char), IDataFileChecker::g_hdr_bytes, fp)));
+          &header,sizeof(unsigned char), IDataFileChecker::g_hdr_bytes, fp)));
       header.full_hdr[IDataFileChecker::g_hdr_bytes] = '\0';
 
       if (fclose(fp) != 0)
       {
       } 
-      
+
       if( isRawFileHeader(nread, header.full_hdr) )
       {
         bret=80;

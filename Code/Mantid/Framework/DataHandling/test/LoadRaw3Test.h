@@ -40,15 +40,15 @@ public:
 
   void testExec()
   {
-	 	 
-	if ( !loader.isInitialized() ) loader.initialize();
+
+    if ( !loader.isInitialized() ) loader.initialize();
 
     // Should fail because mandatory parameter has not been set
     TS_ASSERT_THROWS(loader.execute(),std::runtime_error);
 
     // Now set it...
     loader.setPropertyValue("Filename", inputFile);
-	loader.setPropertyValue("LoadMonitors", "Include");
+    loader.setPropertyValue("LoadMonitors", "Include");
 
     outputSpace = "outer";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
@@ -81,8 +81,8 @@ public:
     TS_ASSERT_DELTA( output2D->run().getProtonCharge(), 171.0353, 0.0001 )
 
     //----------------------------------------------------------------------
-     //Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
-  //  ----------------------------------------------------------------------
+    //Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
+    //  ----------------------------------------------------------------------
     boost::shared_ptr<const Instrument> i = output2D->getInstrument();
     boost::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();
 
@@ -102,7 +102,7 @@ public:
     //----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
-   // boost::shared_ptr<Sample> sample = output2D->getSample();
+    // boost::shared_ptr<Sample> sample = output2D->getSample();
     Property *l_property = output2D->run().getLogData( std::string("TEMP1") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
     std::string timeSeriesString = l_timeSeriesDouble->value();
@@ -128,12 +128,12 @@ public:
     for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
       TS_ASSERT_EQUALS(*it,pixnum++);
 
-	AnalysisDataService::Instance().remove(outputSpace);
+    AnalysisDataService::Instance().remove(outputSpace);
   }
 
- void testMixedLimits()
+  void testMixedLimits()
   {
-	 if ( !loader2.isInitialized() ) loader2.initialize();
+    if ( !loader2.isInitialized() ) loader2.initialize();
 
     loader2.setPropertyValue("Filename", inputFile);
     loader2.setPropertyValue("OutputWorkspace", "outWS");
@@ -240,7 +240,7 @@ public:
 
   void testListlimit()
   {
-	 LoadRaw3 alg;
+    LoadRaw3 alg;
     std::string outWS = "outWSLimitTest";
     if ( !alg.isInitialized() ) alg.initialize();
 
@@ -262,7 +262,7 @@ public:
 
   void testfail()
   {
-	  LoadRaw3 loader3;
+    LoadRaw3 loader3;
     if ( !loader3.isInitialized() ) loader3.initialize();
     std::string outWS="LoadRaw3-out2";
     loader3.setPropertyValue("Filename", inputFile);
@@ -277,7 +277,7 @@ public:
 
     loader3.setPropertyValue("SpectrumMin", "5");
     loader3.setPropertyValue("SpectrumMax", "1");
-     loader3.execute();
+    loader3.execute();
     TS_ASSERT_THROWS(output = AnalysisDataService::Instance().retrieve(outWS),std::runtime_error);
 
     loader3.setPropertyValue("SpectrumMin", "5");
@@ -304,7 +304,7 @@ public:
     loader3.setPropertyValue("SpectrumList", "999,2000");
     loader3.execute();
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outWS));
-	AnalysisDataService::Instance().remove(outWS);
+    AnalysisDataService::Instance().remove(outWS);
   }
 
   void testMultiPeriod()
@@ -314,13 +314,13 @@ public:
     loader5.setPropertyValue("Filename", "CSP78173.raw");
     loader5.setPropertyValue("OutputWorkspace", "multiperiod");
     // loader5.setPropertyValue("SpectrumList", "0,1,2,3");
-    
+
     TS_ASSERT_THROWS_NOTHING( loader5.execute() )
     TS_ASSERT( loader5.isExecuted() )
-	
+
     WorkspaceGroup_sptr work_out;
     TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("multiperiod"));
-	
+
     Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve("multiperiod");
     WorkspaceGroup_sptr sptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
     std::vector<std::string>wsNamevec;
@@ -329,10 +329,10 @@ public:
     std::vector<std::string>::const_iterator it=wsNamevec.begin();
     for (;it!=wsNamevec.end();it++)
     {	std::stringstream count;
-      count <<period;
-      std::string wsName="multiperiod_"+count.str();
-      TS_ASSERT_EQUALS(*it,wsName)
-      period++;
+    count <<period;
+    std::string wsName="multiperiod_"+count.str();
+    TS_ASSERT_EQUALS(*it,wsName)
+    period++;
     }
     std::vector<std::string>::const_iterator itr1=wsNamevec.begin();
     int periodNumber = 0;
@@ -349,7 +349,7 @@ public:
     MatrixWorkspace_sptr  outsptr2;
     TS_ASSERT_THROWS_NOTHING(outsptr2=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*++itr)));
 
-		
+
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
 
     // But the data should be different
@@ -359,19 +359,19 @@ public:
     TS_ASSERT_EQUALS( &(outsptr1->sample()), &(outsptr2->sample()) )
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run()))
 
-	itr1=wsNamevec.begin();
+    itr1=wsNamevec.begin();
     for (;itr1!=wsNamevec.end();++itr1)
     {	
       AnalysisDataService::Instance().remove(*itr);
 
     }
-	
+
   }
 
   // test if parameters set in instrument definition file are loaded properly
   void testIfParameterFromIDFLoaded()
   {
-	 LoadRaw3 loader4;
+    LoadRaw3 loader4;
     loader4.initialize();
     loader4.setPropertyValue("Filename", "TSC10076.raw");
     loader4.setPropertyValue("OutputWorkspace", "parameterIDF");
@@ -390,7 +390,7 @@ public:
 
     Mantid::Geometry::ParameterMap& pmap = output2D->instrumentParameters();
     TS_ASSERT_EQUALS( static_cast<int>(pmap.size()), 155);
-	AnalysisDataService::Instance().remove("parameterIDF");
+    AnalysisDataService::Instance().remove("parameterIDF");
   }
 
   void testTwoTimeRegimes()
@@ -406,7 +406,7 @@ public:
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT( output = boost::dynamic_pointer_cast<MatrixWorkspace>
-      (AnalysisDataService::Instance().retrieve("twoRegimes")) )
+    (AnalysisDataService::Instance().retrieve("twoRegimes")) )
     // Shift should be 3300 - check a couple of values
     TS_ASSERT_EQUALS( output->readX(0).front()+3300, output->readX(1).front() )
     TS_ASSERT_EQUALS( output->readX(0).back()+3300, output->readX(1).back() )
@@ -484,7 +484,7 @@ public:
     TS_ASSERT_DELTA( ptrDet103->getPos().X(), 0.4013,0.01);
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
 
-      ////----------------------------------------------------------------------
+    ////----------------------------------------------------------------------
     // Test code copied from LoadLogTest to check sub-algorithm is running properly
     //----------------------------------------------------------------------
     Property *l_property = output2D->run().getLogData( std::string("TEMP1") );
@@ -527,22 +527,22 @@ public:
     WorkspaceGroup_sptr work_out;
     TS_ASSERT_THROWS_NOTHING(work_out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("multiperiod"));
 
-	  WorkspaceGroup_sptr monitor_work_out;
-	  TS_ASSERT_THROWS_NOTHING(monitor_work_out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("multiperiod_Monitors"));
+    WorkspaceGroup_sptr monitor_work_out;
+    TS_ASSERT_THROWS_NOTHING(monitor_work_out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("multiperiod_Monitors"));
 
-	  Workspace_sptr monitorwsSptr=AnalysisDataService::Instance().retrieve("multiperiod_Monitors");
-	  WorkspaceGroup_sptr monitorsptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(monitorwsSptr);
+    Workspace_sptr monitorwsSptr=AnalysisDataService::Instance().retrieve("multiperiod_Monitors");
+    WorkspaceGroup_sptr monitorsptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(monitorwsSptr);
 
 
-	  const std::vector<std::string>monitorwsNamevec = monitorsptrWSGrp->getNames();
-	  int period=1;
+    const std::vector<std::string>monitorwsNamevec = monitorsptrWSGrp->getNames();
+    int period=1;
     std::vector<std::string>::const_iterator it=monitorwsNamevec.begin();
     for (;it!=monitorwsNamevec.end();it++)
     {	std::stringstream count;
-      count <<period;
-      std::string wsName="multiperiod_Monitors_"+count.str();
-      TS_ASSERT_EQUALS(*it,wsName)
-      period++;
+    count <<period;
+    std::string wsName="multiperiod_Monitors_"+count.str();
+    TS_ASSERT_EQUALS(*it,wsName)
+    period++;
     }
     std::vector<std::string>::const_iterator itr1=monitorwsNamevec.begin();
     for (;itr1!=monitorwsNamevec.end();itr1++)
@@ -552,31 +552,31 @@ public:
       TS_ASSERT_EQUALS( outsptr->getNumberHistograms(), 2)
 
     }
-	 std::vector<std::string>::const_iterator monitr=monitorwsNamevec.begin();
+    std::vector<std::string>::const_iterator monitr=monitorwsNamevec.begin();
     MatrixWorkspace_sptr  monoutsptr1;
     TS_ASSERT_THROWS_NOTHING(monoutsptr1=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*monitr)));
     MatrixWorkspace_sptr  monoutsptr2;
     TS_ASSERT_THROWS_NOTHING(monoutsptr2=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*++monitr)));
-		
+
     TS_ASSERT_EQUALS( monoutsptr1->dataX(0), monoutsptr2->dataX(0) )
 
     // But the data should be different
     TS_ASSERT_DIFFERS( monoutsptr1->dataY(1)[555], monoutsptr2->dataY(1)[555] )
 
     TS_ASSERT_EQUALS( &(monoutsptr1->run()), &(monoutsptr2->run()) )
-	
+
     Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve("multiperiod");
     WorkspaceGroup_sptr sptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
-   
+
     const  std::vector<std::string>wsNamevec=sptrWSGrp->getNames();
-     period=1;
-     it=wsNamevec.begin();
+    period=1;
+    it=wsNamevec.begin();
     for (;it!=wsNamevec.end();it++)
     {	std::stringstream count;
-      count <<period;
-      std::string wsName="multiperiod_"+count.str();
-      TS_ASSERT_EQUALS(*it,wsName)
-      period++;
+    count <<period;
+    std::string wsName="multiperiod_"+count.str();
+    TS_ASSERT_EQUALS(*it,wsName)
+    period++;
     }
     itr1=wsNamevec.begin();
     int periodNumber = 0;
@@ -592,32 +592,32 @@ public:
     TS_ASSERT_THROWS_NOTHING(outsptr1=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*itr)));
     MatrixWorkspace_sptr  outsptr2;
     TS_ASSERT_THROWS_NOTHING(outsptr2=AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>((*++itr)));
-		
+
     TS_ASSERT_EQUALS( outsptr1->dataX(0), outsptr2->dataX(0) )
     TS_ASSERT_EQUALS( outsptr1->dataY(1)[555], outsptr2->dataY(1)[555] )
 
-	// But the data should be different
+    // But the data should be different
     TS_ASSERT_DIFFERS( &(outsptr1->run()), &(outsptr2->run() ))
 
-	it=monitorwsNamevec.begin();
+    it=monitorwsNamevec.begin();
     for (;it!=monitorwsNamevec.end();++it)
-	{
-		AnalysisDataService::Instance().remove(*it);
-	}
-	it=wsNamevec.begin();
-	for (;it!=wsNamevec.end();++it)
-	{
-		AnalysisDataService::Instance().remove(*it);
-	}
-	
-	
+    {
+      AnalysisDataService::Instance().remove(*it);
+    }
+    it=wsNamevec.begin();
+    for (;it!=wsNamevec.end();++it)
+    {
+      AnalysisDataService::Instance().remove(*it);
+    }
+
+
   }
- 
-  
+
+
   //no monitors in the selected range 
   void testSeparateMonitorswithMixedLimits()
   {
-	LoadRaw3 loader9;
+    LoadRaw3 loader9;
     if ( !loader9.isInitialized() ) loader9.initialize();
 
     loader9.setPropertyValue("Filename", inputFile);
@@ -625,7 +625,7 @@ public:
     loader9.setPropertyValue("SpectrumList", "998,999,1000");
     loader9.setPropertyValue("SpectrumMin", "5");
     loader9.setPropertyValue("SpectrumMax", "10");
-	loader9.setPropertyValue("LoadMonitors", "Separate");
+    loader9.setPropertyValue("LoadMonitors", "Separate");
 
     TS_ASSERT_THROWS_NOTHING(loader9.execute());
     TS_ASSERT( loader9.isExecuted() );
@@ -650,7 +650,7 @@ public:
     TS_ASSERT_EQUALS( output2D->dataE(8)[777], 3);
     // Check that the error on that value is correct
     TS_ASSERT_EQUALS( output2D->dataX(8)[777], 554.1875);
-	AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("outWS");
   }
 
   // start and end spectra contains  monitors only  
@@ -688,19 +688,19 @@ public:
     // Check one particular value
     TS_ASSERT_EQUALS( output2D->dataY(1)[1], 192);
     AnalysisDataService::Instance().remove("outWS");
-    }
+  }
 
   //select start and end spectra a mix of monitors and normal workspace
   void testSeparateMonitorswithMaxMinimits2()
   {	
-	 LoadRaw3 loader10;
+    LoadRaw3 loader10;
     if ( !loader10.isInitialized() ) loader10.initialize();
 
     loader10.setPropertyValue("Filename", inputFile);
     loader10.setPropertyValue("OutputWorkspace", "outWS");
     loader10.setPropertyValue("SpectrumMin", "2");
     loader10.setPropertyValue("SpectrumMax", "100");
-	loader10.setPropertyValue("LoadMonitors", "Separate");
+    loader10.setPropertyValue("LoadMonitors", "Separate");
 
     TS_ASSERT_THROWS_NOTHING(loader10.execute());
     TS_ASSERT( loader10.isExecuted() );
@@ -710,30 +710,30 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("outWS"));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
-	Workspace_sptr monitoroutput;
-	TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_Monitors"));
+    Workspace_sptr monitoroutput;
+    TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_Monitors"));
     Workspace2D_sptr monitoroutput2D = boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
 
-   // Should be 6 for selected input
+    // Should be 6 for selected input
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(),96);
 
-	 TS_ASSERT_EQUALS( monitoroutput2D->getNumberHistograms(),3);
+    TS_ASSERT_EQUALS( monitoroutput2D->getNumberHistograms(),3);
 
     // Check two X vectors are the same
     TS_ASSERT( (monitoroutput2D->dataX(1)) == (output2D->dataX(1)) );
 
     // Check two Y arrays have the same number of elements
     TS_ASSERT_EQUALS( output2D->dataY(2).size(), output2D->dataY(3).size() );
-	AnalysisDataService::Instance().remove("outWS_Monitors");
-	AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("outWS_Monitors");
+    AnalysisDataService::Instance().remove("outWS");
 
     // Check one particular value
 
-    }
-   //no monitors in the selected range 
+  }
+  //no monitors in the selected range
   void testSeparateMonitorswithMixedLimits3()
   {
-	LoadRaw3 loader11;
+    LoadRaw3 loader11;
     if ( !loader11.isInitialized() ) loader11.initialize();
 
     loader11.setPropertyValue("Filename", inputFile);
@@ -741,7 +741,7 @@ public:
     loader11.setPropertyValue("SpectrumList", "2,3,1000,1001,1002");
     loader11.setPropertyValue("SpectrumMin", "2");
     loader11.setPropertyValue("SpectrumMax", "100");
-	loader11.setPropertyValue("LoadMonitors", "Separate");
+    loader11.setPropertyValue("LoadMonitors", "Separate");
 
     TS_ASSERT_THROWS_NOTHING(loader11.execute());
     TS_ASSERT( loader11.isExecuted() );
@@ -751,23 +751,23 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("outWS"));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
 
-	Workspace_sptr monitoroutput;
-	TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_Monitors"));
+    Workspace_sptr monitoroutput;
+    TS_ASSERT_THROWS_NOTHING(monitoroutput = AnalysisDataService::Instance().retrieve("outWS_Monitors"));
     Workspace2D_sptr monitoroutput2D = boost::dynamic_pointer_cast<Workspace2D>(monitoroutput);
 
 
     // Should be 6 for selected input
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 99);
 
-	TS_ASSERT_EQUALS( monitoroutput2D->getNumberHistograms(),3 );
+    TS_ASSERT_EQUALS( monitoroutput2D->getNumberHistograms(),3 );
 
-	AnalysisDataService::Instance().remove("outWS_Monitors");
-	AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("outWS_Monitors");
+    AnalysisDataService::Instance().remove("outWS");
   }
-   //no monitors in the selected range 
+  //no monitors in the selected range
   void testExcludeMonitors()
   {
-	 LoadRaw3 loader11;
+    LoadRaw3 loader11;
     if ( !loader11.isInitialized() ) loader11.initialize();
 
     loader11.setPropertyValue("Filename", inputFile);
@@ -789,17 +789,17 @@ public:
     TS_ASSERT_EQUALS( output2D->dataE(995)[777], 3);
     // Check that the error on that value is correct
     TS_ASSERT_EQUALS( output2D->dataX(995)[777], 554.1875);
-	AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("outWS");
   }
 
   void testExcludeMonitorswithMaxMinLimits()
   {
-	 LoadRaw3 loader11;
+    LoadRaw3 loader11;
     if ( !loader11.isInitialized() ) loader11.initialize();
 
     loader11.setPropertyValue("Filename", inputFile);
     loader11.setPropertyValue("OutputWorkspace", "outWS");
-	loader11.setPropertyValue("SpectrumList", "2,3,1000,1001,1002");
+    loader11.setPropertyValue("SpectrumList", "2,3,1000,1001,1002");
     loader11.setPropertyValue("SpectrumMin", "2");
     loader11.setPropertyValue("SpectrumMax", "100");
     loader11.setPropertyValue("LoadMonitors", "Exclude");
@@ -814,7 +814,7 @@ public:
     // Should be 6 for selected input
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 99);
     AnalysisDataService::Instance().remove("outWS");
-    
+
   }
 
   void testWithManagedWorkspace()
@@ -847,23 +847,23 @@ public:
     const std::string oldValue = conf.getString(managed);
     conf.setString(managed,"0");
 
-	  LoadRaw3 loader8;
-	  loader8.initialize();
-	  loader8.setPropertyValue("Filename", inputFile);
-	  loader8.setPropertyValue("OutputWorkspace", "managedws2");
-	  loader8.setPropertyValue("LoadMonitors", "Separate");
-	  TS_ASSERT_THROWS_NOTHING( loader8.execute() )
-	  TS_ASSERT( loader8.isExecuted() )
+    LoadRaw3 loader8;
+    loader8.initialize();
+    loader8.setPropertyValue("Filename", inputFile);
+    loader8.setPropertyValue("OutputWorkspace", "managedws2");
+    loader8.setPropertyValue("LoadMonitors", "Separate");
+    TS_ASSERT_THROWS_NOTHING( loader8.execute() )
+    TS_ASSERT( loader8.isExecuted() )
 
-	  // Get back workspace and check it really is a ManagedWorkspace2D
-	  Workspace_sptr output;
-	  TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
-	  TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
-		  Workspace_sptr output1;
-	  TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieve("managedws2_Monitors") );
-	 // TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output1.get()) )
-	  AnalysisDataService::Instance().remove("managedws2");
-	  AnalysisDataService::Instance().remove("managedws2_Monitors");
+    // Get back workspace and check it really is a ManagedWorkspace2D
+    Workspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieve("managedws2") );
+    TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output.get()) )
+    Workspace_sptr output1;
+    TS_ASSERT_THROWS_NOTHING( output1 = AnalysisDataService::Instance().retrieve("managedws2_Monitors") );
+    // TS_ASSERT( dynamic_cast<ManagedWorkspace2D*>(output1.get()) )
+    AnalysisDataService::Instance().remove("managedws2");
+    AnalysisDataService::Instance().remove("managedws2_Monitors");
     conf.setString(managed,oldValue);
   } 
 

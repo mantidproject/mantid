@@ -25,7 +25,7 @@ namespace Mantid
 
 	Helper class for LoadRaw algorithms.
 
-    
+
 	@author Sofia Antony, ISIS,RAL
 	@date 14/04/2010
 
@@ -48,7 +48,7 @@ namespace Mantid
 
 	File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
 	Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */
+     */
     class DLLExport LoadRawHelper: public API::IDataFileChecker 
     {
     public:
@@ -66,10 +66,10 @@ namespace Mantid
       void loadRunParameters(API::MatrixWorkspace_sptr localWorkspace, ISISRAW * const = NULL) const;
 
       /// do a quick check that this file can be loaded 
-     virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
+      virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
       /// check the structure of the file and if this file can be loaded return a value between 1 and 100
-     virtual int fileCheck(const std::string& filePath);
-      
+      virtual int fileCheck(const std::string& filePath);
+
     protected:
       /// Overwrites Algorithm method.
       void init();
@@ -79,7 +79,7 @@ namespace Mantid
       void readTitle(FILE* file,std::string & title);
       /// reads workspace parameters like number of histograms,size of vectors etc
       void readworkspaceParameters(specid_t &numberOfSpectra,int & numberOfPeriods,int64_t& lengthIn,int64_t& noTimeRegimes );
-      
+
       /// skips histrogram data from raw file.
       void skipData(FILE* file,int hist);
       void skipData(FILE* file,int64_t hist);
@@ -90,24 +90,24 @@ namespace Mantid
       /// reads data
       bool readData(FILE* file,int histToRead);
       bool readData(FILE* file,int64_t histToRead);
-      
+
       ///creates shared pointer to workspace from parent workspace
       DataObjects::Workspace2D_sptr createWorkspace(DataObjects::Workspace2D_sptr ws_sptr,
-						    int64_t nVectors=-1,int64_t xLengthIn=-1,int64_t yLengthIn=-1);
-          
+          int64_t nVectors=-1,int64_t xLengthIn=-1,int64_t yLengthIn=-1);
+
       /// overloaded method to create shared pointer to workspace
       DataObjects::Workspace2D_sptr createWorkspace(int64_t nVectors,int64_t xlengthIn,int64_t ylengthIn,const std::string& title);
       ///creates monitor workspace
       void createMonitorWorkspace(DataObjects::Workspace2D_sptr& monws_sptr,
-				  DataObjects::Workspace2D_sptr& ws_sptr,API::WorkspaceGroup_sptr& mongrp_sptr,
-				  const int64_t mwsSpecs,const int64_t nwsSpecs,const int64_t numberOfPeriods,const int64_t lenthIn,std::string title);
-      
+          DataObjects::Workspace2D_sptr& ws_sptr,API::WorkspaceGroup_sptr& mongrp_sptr,
+          const int64_t mwsSpecs,const int64_t nwsSpecs,const int64_t numberOfPeriods,const int64_t lenthIn,std::string title);
+
       /// creates  shared pointer to group workspace 
       API::WorkspaceGroup_sptr createGroupWorkspace();
-     
+
       //Constructs the time channel (X) vector(s)     
       std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes,
-                                                                 const int64_t& lengthIn);
+          const int64_t& lengthIn);
       /// loadinstrument sub algorithm
       void runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr, double, double );
       /// loadinstrumentfromraw algorithm
@@ -125,15 +125,15 @@ namespace Mantid
 
       /// sets the workspace property 
       void setWorkspaceProperty(const std::string & propertyName,const std::string& title,
-				API::WorkspaceGroup_sptr grpws_sptr,DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods,bool bMonitor);
+          API::WorkspaceGroup_sptr grpws_sptr,DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods,bool bMonitor);
 
       /// overloaded method to set the workspace property 
       void setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,API::WorkspaceGroup_sptr grpws_sptr,const int64_t period,bool bmonitors);
 
       /// This method sets the raw file data to workspace vectors
       void setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace,const std::vector<boost::shared_ptr<MantidVec> >& 
-			    timeChannelsVec,int64_t wsIndex,specid_t nspecNum,int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart);
-          
+          timeChannelsVec,int64_t wsIndex,specid_t nspecNum,int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart);
+
 
       /// ISISRAW class instance which does raw file reading. Shared pointer to prevent memory leak when an exception is thrown.
       boost::shared_ptr<ISISRAW2> isisRaw;
@@ -158,12 +158,12 @@ namespace Mantid
       specid_t  calculateWorkspaceSize();
       /// calculate workspace sizes if separate or exclude monitors are selected
       void calculateWorkspacesizes(const std::vector<specid_t>& monitorSpecList,
-				   specid_t& normalwsSpecs, specid_t& monitorwsSpecs);
+          specid_t& normalwsSpecs, specid_t& monitorwsSpecs);
       /// load the specra
       void loadSpectra(FILE* file,const int& period, const int& m_total_specs,
-		       DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >); 
-      
-      
+          DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >);
+
+
       /// Has the spectrum_list property been set?
       bool m_list;
       /// Have the spectrum_min/max properties been set?
@@ -178,14 +178,14 @@ namespace Mantid
       int m_numberOfPeriods;
 
     private:
-     
+
       /// Overwrites Algorithm method
       void exec();
       /// Check if the buffer looks like a RAW file header
       bool isRawFileHeader(const int nread, const unsigned char* buffer) const;
       /// convert month label to int string
       std::string convertMonthLabelToIntStr(std::string month) const;
-                
+
       /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
       /// A map for storing the time regime for each spectrum
@@ -193,13 +193,13 @@ namespace Mantid
       /// The current value of the progress counter
       double m_prog;
 
-        
+
       /// number of spectra
       specid_t m_numberOfSpectra;
 
       /// a vector holding the indexes of monitors
       std::vector<specid_t> m_monitordetectorList;
-      
+
 
 
       /// boolean for list spectra options
@@ -207,7 +207,7 @@ namespace Mantid
 
       ///the total nuumber of spectra
       specid_t m_total_specs;
-      
+
       /// A ptr to the log creator
       boost::scoped_ptr<ISISRunLogs> m_logCreator;
     };
