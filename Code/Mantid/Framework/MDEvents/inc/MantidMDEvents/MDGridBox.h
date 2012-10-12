@@ -42,7 +42,7 @@ namespace MDEvents
 
     MDGridBox(Mantid::API::BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
 
-    MDGridBox(MDBox<MDE, nd> * box);
+    MDGridBox(MDBox<MDE, nd> * box, bool splitRecursively=false);
 
     MDGridBox(const MDGridBox<MDE, nd> & box);
 
@@ -170,7 +170,7 @@ namespace MDEvents
 
 
 
-
+    void fillBoxShell(const size_t tot,const coord_t inverseVolume);
   public:
 
     //===============================================================================================

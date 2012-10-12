@@ -110,19 +110,14 @@ namespace MDEvents
     fillBoxShell(tot,inverseVolume);
     if(splitRecursively)
     {
- 
-      // Add all the events recursively, going through all adjacent boxes
-      for (; it != it_end; ++it)  addAndTraceEvent(*it);
+      // Add all the events recursively, going through all internal boxes
+      for (; it != it_end; ++it)  addAndTraceEvent(*it,0);
     }
     else
     {
-
-
+      // just add event to the existing internal box
        for (; it != it_end; ++it)  addEvent(*it);
-
     }
-
-
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
 
@@ -130,69 +125,46 @@ namespace MDEvents
     box->clear();
     box->setDataBusy(false);
   }
-
+  /**Internal function to do main job of filling in a GridBox contents  (par of the constructor) */
   template<typename MDE,size_t nd>
   void MDGridBox<MDE,nd>::fillBoxShell(const size_t tot,const coord_t inverseVolume)
   {
     size_t indices[nd];
     for (size_t d=0; d<nd; d++) indices[d] = 0;
     
-    // get inital free ID for the boxes, which would be created by this command
+   // get inital free ID for the boxes, which would be created by this command
+   // Splitting an input MDBox requires creating a bunch of children
+   // But the IDs of these children MUST be sequential. Hence the critical block
     size_t ID0 = m_BoxController->claimIDRange(tot);
     for (size_t i=0; i<tot; i++)
-
-    // Splitting an input MDBox requires creating a bunch of children
-    // But the IDs of these children MUST be sequential. Hence the critical block
-    // to avoid interleaved IDs when splitting boxes in parallel.
     {
-      for (size_t i=0; i<tot; i++)
-      {
-        // Create the box
-        // (Increase the depth of this box to one more than the parent (this))
-        MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(m_BoxController, this->m_depth + 1,-1,int64_t(ID0+i));
-       // This MDGridBox is the parent of the new child.
-        myBox->setParent(this);
+      // Create the box
+      // (Increase the depth of this box to one more than the parent (this))
+       MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(m_BoxController, this->m_depth + 1,-1,int64_t(ID0+i));
+      // This MDGridBox is the parent of the new child.
+       myBox->setParent(this);
 
         // Set the extents of this box.
-        for (size_t d=0; d<nd; d++)
-        {
+       for (size_t d=0; d<nd; d++)
+       {
           coord_t min = this->extents[d].min + boxSize[d] * static_cast<coord_t>(indices[d]);
           myBox->setExtents(d, min, min + boxSize[d]);
-        }
-        myBox->setInverseVolume(inverseVolume); // Set the cached inverse volume
-        boxes.push_back(myBox);
+       }
+       myBox->setInverseVolume(inverseVolume); // Set the cached inverse volume
+       boxes.push_back(myBox);
 
-        // Increment the indices, rolling back as needed
-        indices[0]++;
-        for (size_t d=0; d<nd-1; d++) //This is not run if nd=1; that's okay, you can ignore the warning
-        {
+       // Increment the indices, rolling back as needed
+       indices[0]++;
+       for (size_t d=0; d<nd-1; d++) //This is not run if nd=1; that's okay, you can ignore the warning
+       {
           if (indices[d] >= split[d])
           {
             indices[d] = 0;
             indices[d+1]++;
           }
-        }
-      } // for each box
-    }
-    bc->getIdMutex().unlock();
-
-    // Now distribute the events that were in the box before
-    const std::vector<MDE> & events = box->getConstEvents();
-
-    // Add all the events, with no bounds checking
-    typename std::vector<MDE>::const_iterator it = events.begin();
-    typename std::vector<MDE>::const_iterator it_end = events.end();
-    for (; it != it_end; ++it)
-        addEvent(*it);
-
-    // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
-    this->nPoints = box->getNPoints();
-
-    // Clear the old box.
-    box->clear();
-    box->setDataBusy(false);
+       }
+    } // for each box
   }
-
 
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor

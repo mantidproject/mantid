@@ -48,10 +48,11 @@ namespace API
   {
     this->closeFile();
   }
-   /** reserve range of id-s for use on thread 
-     *@param range  --range number of box-id-s to lock
-     *@returns initial ID allowed to use in the range
-   */
+   /**reserve range of id-s for use on set of adjacent boxes. 
+    * Needed to be thread safe as adjacent boxes have to have subsequent ID-s
+    * @param range  --range number of box-id-s to lock
+    * @returns initial ID to use in the range
+    */
    size_t BoxController::claimIDRange(size_t range)
    {
      m_idMutex.lock();
