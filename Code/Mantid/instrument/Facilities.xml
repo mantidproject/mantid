@@ -258,7 +258,7 @@
    
 </facility> 
 
-<facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs,.dat,_runinfo.xml,_histo.nxs">
+<facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs.h5,.nxs,.dat,_runinfo.xml,_histo.nxs">
 
   <archive>
     <archiveSearch plugin="SNSDataSearch" />
