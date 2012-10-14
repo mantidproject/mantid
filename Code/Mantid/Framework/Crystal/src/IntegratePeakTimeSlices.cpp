@@ -251,6 +251,7 @@ namespace Mantid
                                                         double &Varxx, double &Varxy, double &Varyy,
                                                         std::vector<double>&ParameterValues)
     {
+      UNUSED_ARG(ParameterValues);
       double Den = StatBase[IIntensities]-background*StatBase[ISS1];
       Varxx =(StatBase[ISSIxx]-2*meanx*StatBase[ISSIx]+meanx*meanx*StatBase[IIntensities]-
                background*(StatBase[ISSxx]-2*meanx*StatBase[ISSx]+meanx*meanx*StatBase[ISS1]))
@@ -264,12 +265,14 @@ namespace Mantid
           meanx*meany*StatBase[IIntensities]-
           background*(StatBase[ISSxy]-meanx*StatBase[ISSy]-meany*StatBase[ISSx]+meanx*meany*StatBase[ISS1]))
           /Den;
-      if( ParameterValues.size() >IVXX)
+
+      if( CalcVariances())
       {
-        Varxx =  std::min<double>(Varxx, 1.21*ParameterValues[IVXX]);//copied from BiVariateNormal
-        Varxx = std::max<double>(Varxx, .79*ParameterValues[IVXX]);
-        Varyy =  std::min<double>(Varyy, 1.21*ParameterValues[IVYY]);
-        Varyy = std::max<double>(Varyy, .79*ParameterValues[IVYY]);
+
+        Varxx =  std::min<double>(Varxx, 1.21*getInitVarx());//copied from BiVariateNormal
+        Varxx = std::max<double>(Varxx, .79*getInitVarx());
+        Varyy =  std::min<double>(Varyy, 1.21*getInitVary());
+        Varyy = std::max<double>(Varyy, .79*getInitVary());
       }
 
     };
@@ -288,25 +291,28 @@ namespace Mantid
       double backVar= TotBoundaryVariances/nBoundaryCells/nBoundaryCells;
       double IntensVar = Variance +ncells*ncells*backVar;
 
-      double relError = .15;
+      double relError = .25;
 
       if( back_calc != back )
-        relError = .35;
+        relError = .45;
 
       int N = NParameters;
       if( CalcVariances)
         N = N-3;
 
-
+      double NSigs=2;
+      if( back_calc >0)
+         NSigs = std::max<double>( 2,7-5*back_calc/back);//background too high
       ostringstream str;
-      str<< max<double>(0.0, back_calc-(1+2*relError)*sqrt(backVar))<<"<Background<"<<(back+(1+2*relError)*sqrt(backVar))
-         <<","<< max<double>(0.0, Intensity_calc-(1+2*relError)*sqrt(IntensVar))<<
-         "<Intensity<"<<TotIntensity-ncells*back+(1+2*relError)*sqrt(IntensVar);
+      str<< max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar))<<"<Background<"<<(back+NSigs*(1+relError)*sqrt(backVar))
+         <<","<< max<double>(0.0, Intensity_calc-NSigs*(1+relError)*sqrt(IntensVar))<<
+         "<Intensity<"<<TotIntensity-ncells*back+NSigs*(1+relError)*sqrt(IntensVar);
 
-      double min =max<double>(0.0, back_calc-(1+2*relError)*sqrt(backVar));
-      double maxx =back+(1+2*relError)*sqrt(backVar);
+      double min =max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar));
+      double maxx =back+NSigs*(1+relError)*sqrt(backVar);
       Bounds.push_back( pair<double,double>(min,maxx ));
-      Bounds.push_back( pair<double,double>(max<double>(0.0, Intensity_calc-(1+2*relError)*sqrt(IntensVar)),TotIntensity-ncells*back+(1+2*relError)*sqrt(IntensVar)));
+      Bounds.push_back( pair<double,double>(max<double>(0.0, Intensity_calc-NSigs*(1+relError)*sqrt(IntensVar)),
+                     TotIntensity-ncells*back+NSigs*(1+relError)*sqrt(IntensVar)));
      /* for( int i=2; i<N; i++ )
       {
         if( i>0)
@@ -324,7 +330,7 @@ namespace Mantid
      */
       double val =col_calc;
 
-      double relErr1=.75*relError;
+      double relErr1= relError*.75;
 
 
       str<<","<<(1-relErr1)*val <<"<"<<"Mcol"<<"<"<<(1+relErr1)*val;
@@ -344,9 +350,9 @@ namespace Mantid
       Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
 
 
-      val = Vxy_calc;
-      str<<","<<(1-relErr1)*val <<"<"<<"SSrc"<<"<"<<(1+relErr1)*val;
-      Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+     // val = Vxy_calc;
+     // str<<","<<(1-relErr1)*val <<"<"<<"SSrc"<<"<"<<(1+relErr1)*val;
+     // Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
 
       }
 
@@ -496,6 +502,8 @@ namespace Mantid
         fit_alg->executeAsSubAlg();
 
         chisqOverDOF = fit_alg->getProperty("OutputChi2overDoF");
+        std::string outputStatus = fit_alg->getProperty( "OutputStatus" );
+        g_log.debug()<<"Chisq/OutputStatus="<< chisqOverDOF<< "/"<< outputStatus<< std::endl;
 
         names.clear(); params.clear();errs.clear();
         ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
@@ -678,7 +686,7 @@ namespace Mantid
 
         R = min<double> (36*max<double>(CellWidth,CellHeight), R);
         R = max<double> (6*max<double>(CellWidth,CellHeight), R);
-        R=1.1*R;//Gets a few more background cells.
+        R=1.4*R;//Gets a few more background cells.
         int Chan;
 
         Mantid::MantidVec X = inpWkSpace->dataX(wsIndx);
@@ -721,12 +729,13 @@ namespace Mantid
         double MaxCounts = -1;
 
         for( int dir =1 ; dir >-2; dir -=2)
-        for( int t= 0; t < dChan && !done; t++)
+        {
+          done = false;
+          for( int t= 0; t < dChan && !done; t++)
           if( dir < 0 &&  t==0 )
            {
              Centy = Row0;
              Centx = Col0;
-             done = false;
             }
            else if( Chan+dir*t <0 || Chan+dir*t >= (int)X.size())
               done = true;
@@ -767,7 +776,7 @@ namespace Mantid
                  done = true;
 
            }
-
+        }
         if( MaxChan >0)
             Chan =  MaxChan ;
 
@@ -976,8 +985,8 @@ namespace Mantid
 
                       if( dir ==1 && (chan ==0||chan==1))
                       {
-                        lastAttributeList->case4 = true;
-                        origAttributeList =lastAttributeList;
+                        AttributeValues->case4 = true;
+                        origAttributeList =AttributeValues;
                       }else
                         LastTableRow = -1;
 
@@ -1304,16 +1313,16 @@ namespace Mantid
       double Vx,Vy;
       Vx = Vy =HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
 
-      if( EdgeX < 0)
+      if( EdgeX < .5*Vx )
       Vx = std::max<double>(HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius,
-              Vx_calc);
+                                      Vx_calc);
 
-      if( EdgeY < 0)
+      if( EdgeY < .5*Vy)
         Vy =std::max<double>(HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius,
-          Vy_calc);
+                                     Vy_calc);
 
       double  DD = max<double>( sqrt(Vy)*CellHeight, sqrt(Vx)*CellWidth);
-      double NewRadius= 1.4* max<double>( 5*max<double>(CellWidth,CellHeight), 4*DD);
+      double NewRadius= 1.4* max<double>( 5*max<double>(CellWidth,CellHeight), 4.5*DD);
       NewRadius = min<double>(baseRCRadius, NewRadius);
                //1.4 is needed to get more background cells. In rectangle the corners were background
 
@@ -1615,6 +1624,8 @@ namespace Mantid
 
             AttributeValues->updateEdgeYsize(abs(ROW-row));
             AttributeValues->updateEdgeXsize(abs(COL-col));
+            AttributeValues->updateEdgeYsize(abs(row));
+            AttributeValues->updateEdgeXsize(abs(col));
           }
         }
         }
@@ -1721,7 +1732,7 @@ namespace Mantid
 
       double x = params[IIntensity] / (AttributeValues->StatBaseVals(IIntensities) - params[Ibk] * ncells);
 
-      if ((x < .7 || x > 1.45)&& !EdgePeak)// The fitted intensity should be close to tot intensity - background
+      if ((x < .25 || x > 2.5)&& !EdgePeak)// The fitted intensity should be close to tot intensity - background
       {
         g_log.debug()<< "   Bad Slice. Fitted Intensity & Observed Intensity(-back) too different. ratio="
                                                <<x<<std::endl;
@@ -1791,8 +1802,8 @@ namespace Mantid
       if (!GoodNums)
 
       {   g_log.debug()<<
-            "   Bad Slice.Background or Intensity params or errs are out of bounds or relative errors are too high";
-
+            "   Bad Slice.Background or Intensity params or errs are out of bounds or relative errors are too high"
+           <<std::endl;
 
           return false;
       }
@@ -1813,8 +1824,8 @@ namespace Mantid
         return false;
       }
 
-      double Nrows = AttributeValues->getCurrentRadius();
-      if( maxPeakHeightTheoretical < 1 && (params[IVXX] > Nrows*Nrows/20 || params[IVYY] > Nrows*Nrows/20))
+      double Nrows = std::max<double>(AttributeValues->StatBase[INRows], AttributeValues->StatBase[INCol]);
+      if( maxPeakHeightTheoretical < 1 && (params[IVXX] > Nrows*Nrows/4 || params[IVYY] > Nrows*Nrows/4))
       {
         g_log.debug()<<"Peak is too flat "<<std::endl;
         return false;
@@ -1945,13 +1956,14 @@ namespace Mantid
       UNUSED_ARG( ncells);
      // int Ibk = find("Background", names);
       double err =0;
+      double intensity=0;
 
       if( !EdgePeak  )
       {
         err = AttributeValues->CalcISAWIntensityVariance(params.data(),errs.data(), chisqdivDOF);
             //CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceVariance, ncells);
-
-        TotIntensity += AttributeValues->CalcISAWIntensity( params.data());
+        intensity =AttributeValues->CalcISAWIntensity( params.data());
+        TotIntensity += intensity;
             //TotSliceIntensity - params[IBACK] * ncells;
 
         TotVariance += err ;
@@ -1959,13 +1971,13 @@ namespace Mantid
       }else
       {
        int IInt = find("Intensity", names);
-
-       TotIntensity += params[IInt];
+       intensity = params[IInt];
+       TotIntensity +=intensity;
        err = errs[IInt];
        TotVariance += err * err;
 
       }
-
+     g_log.debug()<<"Slice/Tot intensity;Var="<<intensity<<";"<<err*err<<"/"<<TotIntensity<<";"<<TotVariance<<std::endl;
     }
 
     bool DataModeHandler::CalcVariances( )

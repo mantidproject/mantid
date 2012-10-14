@@ -85,6 +85,10 @@ BivariateNormal::~BivariateNormal()
 
    initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells, Varxx,Varxy,Varyy);
 
+   bool badParams=false;
+   if( Varxx<=0 || Varyy <=0 || Varxy*Varxy >.9*Varxx*Varyy)
+     badParams = true;
+
    NCells = std::min<int>((int)nData, NCells);
 
    double Background = getParameter(IBACK);
@@ -110,7 +114,7 @@ BivariateNormal::~BivariateNormal()
      double pen =0;
      if( (i-1)%10==0)
        pen = penalty;
-     if (isNaNs)
+     if (isNaNs  )
        out[x] = 10000;
      else
      {
@@ -119,11 +123,12 @@ BivariateNormal::~BivariateNormal()
        out[x] = Background + coefNorm * Intensity * exp(expCoeffx2 * dx * dx + expCoeffxy * dx * dy
            + expCoeffy2 * dy * dy) + pen;
 
-       if (out[x] != out[x])
+       if (out[x] != out[x] )
        {
          out[x] = 100000;
          isNaNs = true;
-       }
+       }else if( badParams)
+         out[x] = 10000;
 
      }
      double diff = out[x]-D[x];
@@ -133,7 +138,14 @@ BivariateNormal::~BivariateNormal()
 
      x++;
    }
-
+   inf<<"Constr:";
+  for (size_t i=0;i< nParams(); i++)
+  {
+    IConstraint* constr = getConstraint( (size_t)i);
+    if( constr)
+      inf<<i<<"="<<constr->check()<<";";
+  }
+  inf << std::endl;
    inf << std::endl<<"    chiSq =" << chiSq <<"     nData "<<nData<<std::endl;
    g_log.debug(inf.str());
 
@@ -156,7 +168,8 @@ void BivariateNormal::functionDeriv1D(API::Jacobian *out, const double *xValues,
   inf << std::endl;
   g_log.debug( inf.str());
 
-
+ // std::vector<double>outf(nData,0.0);
+ // function1D( outf.data(), xValues, nData);
    double penDeriv =0;
    double uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
 
@@ -579,15 +592,16 @@ void BivariateNormal::initCommon()
     int NCells1;
     double Varxx, Varxy,Varyy;
 
-
+    Varxx = Varxy = Varyy=-1;
     initCoeff( D, X, Y, coefNorm,  expCoeffx2, expCoeffy2,  expCoeffxy,
                    NCells1, Varxx, Varxy,Varyy);
 
-  //  if( CalcVariances &&  nParams() < 5 && Varx0 < 0 && Vary0 < 0)
-         {
-           Varx0 = Varxx;
-           Vary0 = Varyy;
-         }
+    if( Varx0 < 0)
+    {
+      Varx0 = Varxx;
+      Vary0 = Varyy;
+    }
+
     LastParams[IVXX] = Varxx;
     LastParams[IVXY] = Varxy;
     LastParams[IVYY] = Varyy;
@@ -631,7 +645,7 @@ void BivariateNormal::initCoeff( const MantidVec &D,
                TotN) ;
 
        if( Varx0 > 0) Varxx = std::min<double>(Varxx, 1.21*Varx0);
-       if( Varx0 > 0) Varxx = std::max<double>(Varxx, .79*Varx0);
+       if( Varx0 > 0 ) Varxx = std::max<double>(Varxx, .79*Varx0);
 
      } else {
        Varxx = getParameter( IVXX);
@@ -642,13 +656,15 @@ void BivariateNormal::initCoeff( const MantidVec &D,
 
      if( CalcVyy||nParams() <6)
      {
-       Varyy = (SIyy +(getParameter("Mrow")- (mIy))*(getParameter("Mrow")- (mIy) )*
-               TotI -getParameter("Background")* (Syy) -getParameter("Background")*(getParameter("Mrow")- (my) )*
-               (getParameter("Mrow")-
-               (my) )* TotN )/( TotI -getParameter("Background")*
+       double Mrow = getParameter("Mrow");
+       double Background = getParameter("Background");
+       Varyy = (SIyy +(Mrow- (mIy))*(Mrow- (mIy) )*
+               TotI -getParameter("Background")* (Syy) -Background*(Mrow- (my) )*
+               (Mrow-
+               (my) )* TotN )/( TotI -Background*
                TotN );
-       if( Vary0 > 0) Varyy = std::min<double>(Varyy, 1.21*Vary0);
-       if( Vary0 > 0)Varyy = std::max<double>(Varyy, .79*Vary0);
+       if( Vary0 > 0 ) Varyy = std::min<double>(Varyy, 1.21*Vary0);
+       if( Vary0 > 0 )Varyy = std::max<double>(Varyy, .79*Vary0);
 
      } else {
        Varyy = getParameter( IVYY);
