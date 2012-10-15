@@ -262,7 +262,7 @@ namespace MDAlgorithms
     // If you get here, you could not determine that the entire box was in the same bin.
     // So you need to iterate through events.
 
-    const std::vector<MDE> & events = box->getConstEvents();
+    const std::vector<MDE> & events = box->getConstEvents(false);
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
     for (; it != it_end; it++)
