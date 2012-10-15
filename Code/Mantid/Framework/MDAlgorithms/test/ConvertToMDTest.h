@@ -10,6 +10,8 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidMDEvents/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -230,7 +232,7 @@ private:
 
 class ConvertToMDTestPerformance : public CxxTest::TestSuite
 {
-    Kernel::CPUTimer Clock;
+    //Kernel::CPUTimer Clock;
     time_t start,end;
 
     size_t numHist;
