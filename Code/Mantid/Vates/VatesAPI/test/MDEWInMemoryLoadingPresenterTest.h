@@ -33,7 +33,7 @@ private:
   static Mantid::API::Workspace_sptr getReal4DWorkspace()
   {
     AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
-    Mantid::MDEvents::LoadMD alg;
+    Mantid::MDAlgorithms::LoadMD alg;
     alg.initialize();
     alg.setRethrows(true);
     alg.setPropertyValue("Filename", Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs"));
