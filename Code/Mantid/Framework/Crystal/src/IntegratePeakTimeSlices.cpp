@@ -1742,7 +1742,7 @@ namespace Mantid
 
       bool GoodNums = true;
       bool paramBad=false;
-      size_t BadParamNum =-1;
+      size_t BadParamNum = 0;
       for (size_t i = 0; i < errs.size(); i++)
         if (errs[i] != errs[i])
         {
