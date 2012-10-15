@@ -128,7 +128,7 @@ private:
   /// returns the filename
   QString getFileName();
   /// run loadraw algorithm
-  bool runLoadAlgorithm(const QString& fileName,const QString& specMin,const QString& specMax);
+  bool runLoadAlgorithm(const QString& fileName,const QString& specMin="-1",const QString& specMax="-1");
   /// returns sumrowcolumn script
   bool runsumRowColumn(const QString ipwsName,const QString& opwsName,const QString& orientation,
                              const QString& hvMin,const QString& hvMax);
@@ -144,6 +144,11 @@ private:
   // This method executes loadraw and sumrow column algorithm
   void IntegralClicked(const QString& range,const QString& orientation,const QString& specMin,
                                           const QString& specMax,const QString& opws,bool bMask,bool time_pixel);
+
+  // This method executes sumspectra algorithm
+  void TimeIntegralClicked(const QString& range, const QString& specMin, const QString& specMax,
+							const QString& opws, bool pixel_mask);
+
   /// plot spectrum
   void plotSpectrum(const QString& wsName,int specNum);
 
@@ -172,6 +177,10 @@ private:
   ///This method returns name of the   workspace which is to be
   /// used as the i/p  for sumrowcolumn or sumspectra algorithm 
   QString getWorkspaceToProcess();
+  ///This method returns name of the whole workspace loaded from 
+  ///the data file, which will be further processed to separate the data from the
+  ///banks (Rear-Detector and Front-Detector)
+  QString getDataLoadedWorkspace();
 
   ///returns true if the spec min and max are in the valid range
   bool isValidSpectra(const QString& specMin,const QString& specMax);
