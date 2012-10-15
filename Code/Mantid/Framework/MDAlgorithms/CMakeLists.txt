@@ -175,7 +175,6 @@ set ( TEST_FILES
 	ConvertToDetectorFaceMDTest.h
 	ConvertToMDComponentsTest.h	
 	ConvertToMDTest.h
-	ConvertToMDTestPerformance.h
 	ConvertToQ3DdETest.h
 	DampedHisenbergFMSWTest.h
 	DivideMDTest.h
