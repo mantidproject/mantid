@@ -361,9 +361,9 @@ public:
   //=================================================================================================================
 
   /// Load directly to memory
-  void xest_exec_1D()
+  void test_exec_1D()
   {
- //   do_test_exec<1>(false);
+    do_test_exec<1>(false);
   }
 
   /// Run the loading but keep the events on file and load on demand
@@ -373,9 +373,9 @@ public:
   }
 
   /// Load directly to memory
-  void xest_exec_3D()
+  void test_exec_3D()
   {
-  //  do_test_exec<3>(false);
+    do_test_exec<3>(false);
   }
 
   /// Run the loading but keep the events on file and load on demand
@@ -394,7 +394,7 @@ public:
   /** Use the file back end,
    * then change it and save to update the file at the back end.
    */
-  void xest_exec_3D_with_FileBackEnd_then_update_SaveMDEW()
+  void test_exec_3D_with_FileBackEnd_then_update_SaveMDEW()
   {
     std::cout << "Starting the first step\n";
     do_test_exec<3>(true, false);

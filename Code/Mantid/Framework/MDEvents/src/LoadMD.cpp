@@ -526,13 +526,16 @@ namespace Mantid
               }
               else // !BoxStructureOnly)
               {
-                // Load the events now
+                //----> Load the events now
+                // specify initial and final file location of the events which belong to this box 
                 uint64_t indexStart = box_event_index[i*2];
                 uint64_t numEvents = box_event_index[i*2+1];
 
                 if(FileBackEnd)
                 {
                   box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,-1);
+                  // Set the index in the file in the box data
+                  box->setFileIndex(indexStart, numEvents);
                   // Box is on disk and NOT in memory
                   box->setOnDisk(true);
                   box->setInMemory(false);
@@ -541,13 +544,13 @@ namespace Mantid
                 else
                 {
                   box = new MDBox<MDE,nd>(bc, depth[i], extentsVector,int64_t(numEvents));
+                  // Set the index in the file in the box data
+                  box->setFileIndex(indexStart, numEvents);
                   // Load if NOT using the file as the back-end,
                   box->loadNexus(file);
                   box->setOnDisk(false);
                   box->setInMemory(true);
                 }           
-                // Save the index in the file in the box data
-                box->setFileIndex(uint64_t(indexStart), uint64_t(numEvents));                               
               } // ifBoxStructureOnly
               ibox = box;
             }
