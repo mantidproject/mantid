@@ -6,7 +6,6 @@
 #include "MantidAPI/FileFinder.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include <vtkUnstructuredGrid.h>
@@ -33,13 +32,13 @@ private:
   static Mantid::API::Workspace_sptr getReal4DWorkspace()
   {
     AnalysisDataService::Instance().remove("MD_EVENT_WS_ID");
-    Mantid::MDAlgorithms::LoadMD alg;
-    alg.initialize();
-    alg.setRethrows(true);
-    alg.setPropertyValue("Filename", Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs"));
-    alg.setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
-    alg.setProperty("FileBackEnd", false); 
-    alg.execute(); 
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("LoadMD");	
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setPropertyValue("Filename", Mantid::API::FileFinder::Instance().getFullPath("MAPS_MDEW.nxs"));
+    alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
+    alg->setProperty("FileBackEnd", false); 
+    alg->execute(); 
     return AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
   }
 
