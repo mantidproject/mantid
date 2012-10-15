@@ -19,6 +19,12 @@
 
 using Mantid::Kernel::ConfigService;
 
+namespace
+{
+  // Log(0) -> inf. Any values less than this cutoff will get set to 1 before the log is taken
+  const double LOG_ZERO_CUTOFF = 1e-15;
+}
+
 //--------------------------------------
 // Public member functions
 //--------------------------------------
@@ -246,7 +252,7 @@ double MantidColorMap::normalize(const QwtDoubleInterval &interval, double value
   {
     // Have to deal with the possibility that a user has entered 0 as a minimum
     double minValue = interval.minValue();
-    if( minValue < 1e-08 )
+    if( minValue < LOG_ZERO_CUTOFF )
     {
       minValue = 1.0;
     }
