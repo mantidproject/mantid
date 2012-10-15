@@ -13,7 +13,7 @@ public:
   boost::shared_ptr<ModeratorModel> clone() const { return boost::shared_ptr<MockModerator>(); }
   MOCK_CONST_METHOD0(emissionTimeMean, double());
   MOCK_CONST_METHOD0(emissionTimeVariance, double());
-  MOCK_CONST_METHOD1(sampleTimeDistribution, double(const double randNo));
+  MOCK_CONST_METHOD1(sampleTimeDistribution, double(const double));
   MOCK_METHOD2(setParameterValue, void(const std::string &, const std::string &));
 };
 

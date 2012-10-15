@@ -3,8 +3,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <gsl/gsl_sf_erf.h>
 
-#define PEAKRADIUS 8.0
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -12,6 +10,10 @@ namespace Mantid
 {
 namespace CurveFitting
 {
+  namespace
+  {
+    const int PEAKRADIUS = 8.0;
+  }
 
 //  DECLARE_FUNCTION(LeBailFunction)
 

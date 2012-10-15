@@ -44,6 +44,7 @@ RefArrayDataSource::RefArrayDataSource( double total_xmin, double total_xmax,
 
     RefArrayDataSource::RefArrayDataSource(QString wps_name):RefImageDataSource(10,10,20,20,10,20)
 {
+    Q_UNUSED(wps_name);
     std::cout << "Inside RefArrayDataSource" << std::endl;
 
     

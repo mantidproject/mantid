@@ -6,6 +6,10 @@
 #include "MantidKernel/TimeSplitter.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
+#ifdef _MSC_VER
+  #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance
+#endif
+
 namespace Mantid
 {
 namespace DataObjects

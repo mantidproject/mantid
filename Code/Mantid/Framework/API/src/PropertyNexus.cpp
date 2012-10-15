@@ -80,7 +80,7 @@ namespace PropertyNexus
     std::vector<bool> realValues(nvals);
     for(size_t i = 0; i < nvals; ++i)
     {
-      realValues[i] = static_cast<bool>(savedValues[i]);
+      realValues[i] = (savedValues[i] != 0);
     }
     TimeSeriesProperty<bool> * prop = new TimeSeriesProperty<bool>(name);
     prop->addValues(times, realValues);

@@ -81,7 +81,7 @@ namespace WorkflowAlgorithmHelpers
       std::vector<double> params = ws->getInstrument()->getNumberParameter(instParam);
       if (!params.empty())
       {
-        param = static_cast<bool>(params[0]);
+        param = (params[0] != 0.0);
       }
     }
     if(defaultValue != overrideValue)

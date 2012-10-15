@@ -26,9 +26,11 @@ namespace DataObjects
   using Kernel::DateAndTime;
   using namespace Mantid::API;
 
-  /// The number of events to split for parallel sorting.
-  const size_t NUM_EVENTS_PARALLEL_THRESHOLD(5e5);
-
+  namespace
+  {
+    /// The number of events to split for parallel sorting.
+    const size_t NUM_EVENTS_PARALLEL_THRESHOLD = 500000;
+  }
   //==========================================================================
   /// --------------------- TofEvent Comparators ----------------------------------
   //==========================================================================
