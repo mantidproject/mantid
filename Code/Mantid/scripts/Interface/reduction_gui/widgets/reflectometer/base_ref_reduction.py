@@ -904,7 +904,7 @@ class BaseRefWidget(BaseWidget):
 #            self._summary.x_max_edit.setText("%-d" % int(tofmax))
          
         import _qti    
-        _qti.app.connect(_qti.app.mantidUI, QtCore.SIGNAL("peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+        _qti.app.connect(_qti.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
         
         import mantidqtpython 
         mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base)
