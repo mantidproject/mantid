@@ -246,7 +246,7 @@ namespace MDAlgorithms
         // An array to hold the rotated/transformed coordinates
         coord_t outCenter[ond];
 
-        const std::vector<MDE> & events = box->getConstEvents();
+        const std::vector<MDE> & events = box->getConstEvents(false);
         typename std::vector<MDE>::const_iterator it = events.begin();
         typename std::vector<MDE>::const_iterator it_end = events.end();
         for (; it != it_end; it++)
