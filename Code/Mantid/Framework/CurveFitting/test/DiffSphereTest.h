@@ -244,23 +244,25 @@ void testInelasticDiffSphere()
 //assert the ties between the elastic and inelastic contributions
 void testDiffSphereTies()
 {
-  double I=2.9, R=2.3, D=0.45;
+  double I=2.9, R=2.3, D=0.45, Q=0.7;
   DiffSphere ds;
   ds.setParameter("f1.Intensity",I);
   ds.setParameter("f1.Radius",R);
   ds.setParameter("f1.Diffusion",D);
-
+  ds.setAttributeValue("Q",Q );
   auto ids = boost::dynamic_pointer_cast<InelasticDiffSphere>(ds.getFunction(1));
-  TS_ASSERT_EQUALS(ids->getParameter("Intensity"),I);
-  TS_ASSERT_EQUALS(ids->getParameter("Radius"),R);
-  TS_ASSERT_EQUALS(ids->getParameter("Diffusion"),D);
+  TS_ASSERT_EQUALS( ids->getParameter("Intensity"), I );
+  TS_ASSERT_EQUALS( ids->getParameter("Radius"), R );
+  TS_ASSERT_EQUALS( ids->getParameter("Diffusion"), D );
+  TS_ASSERT_EQUALS( ids->getAttribute("Q").asDouble(), Q );
 
   ds.applyTies(); //elastic parameters are tied to inelastic parameters
   //check the ties were applied correctly
   auto eds = boost::dynamic_pointer_cast<ElasticDiffSphere>( ds.getFunction(0) );
 
-  TS_ASSERT_EQUALS(eds->getParameter("Height"),I);
-  TS_ASSERT_EQUALS(eds->getParameter("Radius"),R);
+  TS_ASSERT_EQUALS( eds->getParameter("Height") , I );
+  TS_ASSERT_EQUALS( eds->getParameter("Radius") , R );
+  TS_ASSERT_EQUALS( eds->getAttribute("Q").asDouble(), Q );
 }
 
 //Internal consistency test.
@@ -279,14 +281,13 @@ void testDiffSphere(){
   //Structure factor is a DiffSphere model
   double I=2.9, Q=0.70, R=2.3, D=0.45;
   boost::shared_ptr<DiffSphere> ds(new DiffSphere);
-  ds->setParameter("f1.Intensity",I);  //f0==elastic, f1==inelastic
-  ds->setParameter("f1.Radius",R);
-  ds->setParameter("f1.Diffusion",D);
+  ds->setParameter("Intensity",I);  //f0==elastic, f1==inelastic
+  ds->setParameter("Radius",R);
+  ds->setParameter("Diffusion",D);
   ds->applyTies(); //elastic parameters are tied to inelastic parameters
+  ds->setAttributeValue("Q",Q);
 
-  ds->getFunction(0)->setAttributeValue("Q",Q);
-  ds->getFunction(1)->setAttributeValue("Q",Q);
-  std::cout << "\n(DiffSphereTest.cpp): " << ds->asString() << std::endl;
+  //std:: << "\n(DiffSphereTest.cpp): " << ds->asString() << std::endl;
 
   //set up some frequency values centered around zero
   const int N = 117;
@@ -321,9 +322,9 @@ void testDiffSphere(){
 
   //Reinitialize now parameters to some other values. The goal is to recover the original
   //parameters by means of a fit of the model to the histogram stored in the workspace
-  ds->setParameter("f1.Intensity",1.3);
-  ds->setParameter("f1.Radius",1.4);
-  ds->setParameter("f1.Diffusion",1.5);
+  ds->setParameter("Intensity",1.3); //target I=2.9
+  ds->setParameter("Radius",1.4);    //target R=2.3
+  ds->setParameter("Diffusion",1.5); //target D=0.45
 
   ds->applyTies();  //update the ties between elastic and inelastic parts
 
@@ -331,16 +332,24 @@ void testDiffSphere(){
   Fit alg;
   TS_ASSERT_THROWS_NOTHING(alg.initialize());
   TS_ASSERT( alg.isInitialized() );
+
   //alg.setProperty( "Function", boost::dynamic_pointer_cast<IFunction>(conv) );
-  std::cout << "(DiffSphereTest.h) " << conv->asString() << std::endl;
-  alg.setProperty( "Function", conv->asString() );
-  std::cout << "(DiffSphereTest.h)" << alg.getPropertyValue("Function") << std::endl;
+  //std::cout << "(DiffSphereTest.h) " << conv->asString() << std::endl;
+  alg.setProperty( "Function", conv->asString() ) ;
 
   //Set which spectrum to fit against and initial starting values
   alg.setPropertyValue("InputWorkspace", wsName);
   alg.setPropertyValue("WorkspaceIndex","0");
   alg.setPropertyValue( "StartX", boost::lexical_cast<std::string>(w[0]) );
   alg.setPropertyValue("EndX", boost::lexical_cast<std::string>(w[N-1]) );
+
+  //print the initial parameters. For debugging purposes only
+  /*IFunction_sptr algFz = alg.getProperty("Function");
+  auto fnConvz = boost::dynamic_pointer_cast<Convolution>( algFz ) ;
+  auto fnDiffSpherez = boost::dynamic_pointer_cast<DiffSphere>( fnConvz->getFunction(1) );
+  std::cout << fnDiffSpherez->getParameter("f0.Height") << " " << fnDiffSpherez->getParameter("f0.Height") << " " << fnDiffSpherez->getParameter("f0.Radius") << " " << fnDiffSpherez->getParameter("f1.Intensity") << " " << fnDiffSpherez->getParameter("f1.Radius") << " " << fnDiffSpherez->getParameter("f1.Diffusion") << "\n";
+  std::cout << "(DiffSphereTest.h)" << alg.getPropertyValue("Function") << std::endl;
+  */
 
   TS_ASSERT_THROWS_NOTHING( TS_ASSERT( alg.execute() ) ); //do the fit
 
@@ -353,11 +362,15 @@ void testDiffSphere(){
   TS_ASSERT_EQUALS(outGauss->getParameter("s"),a);
   auto fnDiffSphere = boost::dynamic_pointer_cast<DiffSphere>( fnConv->getFunction(1) );
   double tolerance = 1e-03;
+  //std::cout << fnDiffSphere->getParameter("f0.Height") << " " << fnDiffSphere->getParameter("f0.Height") << " " << fnDiffSphere->getParameter("f0.Radius") << " " << fnDiffSphere->getParameter("f1.Intensity") << " " << fnDiffSphere->getParameter("f1.Radius") << " " << fnDiffSphere->getParameter("f1.Diffusion") << " " << fnDiffSphere->getAttribute("Q").asDouble() << "\n";
   TS_ASSERT_DELTA( fnDiffSphere->getParameter("f0.Height"), I, I*tolerance);
   TS_ASSERT_DELTA( fnDiffSphere->getParameter("f0.Radius"), R, R*tolerance);
   TS_ASSERT_DELTA( fnDiffSphere->getParameter("f1.Intensity"), I, I*tolerance);
   TS_ASSERT_DELTA( fnDiffSphere->getParameter("f1.Radius"), R, R*tolerance);
   TS_ASSERT_DELTA( fnDiffSphere->getParameter("f1.Diffusion"), D, D*tolerance);
+  TS_ASSERT_DELTA( fnDiffSphere->getParameter("Intensity"), I, I*tolerance);
+  TS_ASSERT_DELTA( fnDiffSphere->getParameter("Radius"), R, R*tolerance);
+  TS_ASSERT_DELTA( fnDiffSphere->getParameter("Diffusion"), D, D*tolerance);
 
   double dummy = alg.getProperty("OutputChi2overDoF");
   TS_ASSERT_DELTA( dummy, tolerance, tolerance);
