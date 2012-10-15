@@ -22,6 +22,7 @@ class SampleSetupWidget(BaseWidget):
                 
         self._content = SamSetFrame(self)
         self._layout.addWidget(self._content)
+        self._facility_name = settings.facility_name
         self.initialize_content()
         
         if state is not None:
@@ -34,7 +35,8 @@ class SampleSetupWidget(BaseWidget):
         dv = QtGui.QDoubleValidator(self._content.ei_guess_edit)
         dv.setBottom(0.0)
         self._content.ei_guess_edit.setValidator(dv)
-        util.set_valid(self._content.ei_guess_edit, False)
+        if "SNS" != self._facility_name:
+            util.set_valid(self._content.ei_guess_edit, False)
         self._content.tzero_guess_edit.setValidator(QtGui.QDoubleValidator(self._content.tzero_guess_edit))
         self._content.etr_low_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_low_edit))
         self._content.etr_width_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_width_edit))
@@ -109,8 +111,9 @@ class SampleSetupWidget(BaseWidget):
                                              state.sample_file)
         self._content.output_ws_edit.setText(state.output_wsname)
         self._content.detcal_edit.setText(state.detcal_file)
-        self._check_and_set_lineedit_content(self._content.ei_guess_edit, 
-                                             state.incident_energy_guess)
+        if "SNS" != self._facility_name:
+            self._check_and_set_lineedit_content(self._content.ei_guess_edit, 
+                                                 state.incident_energy_guess)
         self._content.use_ei_guess_chkbox.setChecked(state.use_ei_guess)
         self._content.tzero_guess_edit.setText(QtCore.QString(str(state.tzero_guess)))
         self._content.monitor1_specid_edit.setText(state.monitor1_specid)

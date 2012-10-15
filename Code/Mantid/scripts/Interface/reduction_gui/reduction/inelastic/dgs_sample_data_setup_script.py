@@ -47,7 +47,8 @@ class SampleSetupScript(BaseScriptElement):
             script += "DetCalFilename=\"%s\",\n" % self.detcal_file
         if self.relocate_dets != SampleSetupScript.relocate_dets:
             script += "RelocateDetectors=%s,\n" % self.relocate_dets
-        script += "IncidentEnergyGuess=%s,\n" % float(self.incident_energy_guess)
+        if self.incident_energy_guess != SampleSetupScript.incident_energy_guess:
+            script += "IncidentEnergyGuess=%s,\n" % float(self.incident_energy_guess)
         if self.use_ei_guess != SampleSetupScript.use_ei_guess:
             script += "UseIncidentEnergyGuess=%s,\n" % self.use_ei_guess
             if self.tzero_guess != SampleSetupScript.tzero_guess:
