@@ -17,6 +17,7 @@ energy transfer for direct geometry spectrometers.
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string.hpp>
@@ -124,7 +125,17 @@ namespace Mantid
       double eiGuess = this->getProperty("IncidentEnergyGuess");
       if (EMPTY_DBL() == eiGuess)
       {
-        eiGuess = reductionManager->getProperty("IncidentEnergyGuess");
+        // SNS has a log called EnergyRequest that can be used to get the
+        // incident energy guess.
+        if ("SNS" == facility)
+        {
+          TimeSeriesProperty<double> *eiLog = dynamic_cast<TimeSeriesProperty<double> *>(inputWS->run().getProperty("EnergyRequest"));
+          eiGuess = eiLog->getStatistics().mean;
+        }
+        else
+        {
+          throw std::runtime_error("Incident energy guess MUST be given!");
+        }
       }
       const bool useEiGuess = reductionManager->getProperty("UseIncidentEnergyGuess");
       const double tZeroGuess = reductionManager->getProperty("TimeZeroGuess");
