@@ -129,7 +129,7 @@ namespace Mantid
         // incident energy guess.
         if ("SNS" == facility)
         {
-          TimeSeriesProperty<double> *eiLog = dynamic_cast<TimeSeriesProperty<double> *>(inputWS->run().getProperty("EnergyRequest"));
+          TimeSeriesProperty<double> *eiLog = inputWS->run().getTimeSeriesProperty<double>("EnergyRequest");
           eiGuess = eiLog->getStatistics().mean;
         }
         else
