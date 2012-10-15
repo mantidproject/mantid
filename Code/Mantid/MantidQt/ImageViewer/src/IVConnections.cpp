@@ -29,10 +29,10 @@ namespace ImageView
  *
  */
 IVConnections::IVConnections( Ui_ImageViewer* ui, 
-                              ImageView*     iv_main_window,
-                              ImageDisplay*  image_display,
-                              GraphDisplay*  h_graph_display,
-                              GraphDisplay*  v_graph_display )
+                              ImageView*      iv_main_window,
+                              ImageDisplay*   image_display,
+                              GraphDisplay*   h_graph_display,
+                              GraphDisplay*   v_graph_display )
 {
   iv_ui = ui;
                               // first disable a few un-implemented controls

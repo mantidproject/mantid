@@ -10,6 +10,7 @@ set ( SRC_FILES
        src/ImageView.cpp      
        src/SliderHandler.cpp
        src/RangeHandler.cpp
+       src/EModeHandler.cpp
        src/ImageDataSource.cpp  
        src/IVConnections.cpp 
        src/MatrixWSDataSource.cpp
@@ -33,6 +34,7 @@ set ( INC_FILES
        inc/MantidQtImageViewer/ImageDataSource.h
        inc/MantidQtImageViewer/SliderHandler.h
        inc/MantidQtImageViewer/RangeHandler.h
+       inc/MantidQtImageViewer/EModeHandler.h
        inc/MantidQtImageViewer/MatrixWSDataSource.h
        inc/MantidQtImageViewer/MatrixWSImageView.h
        inc/MantidQtImageViewer/ArrayDataSource.h

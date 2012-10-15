@@ -141,25 +141,58 @@
         <item row="4" column="0">
          <widget class="QLabel" name="color_scale"/>
         </item>
-        <item row="5" column="0">
+        <item row="7" column="0">
          <widget class="QLabel" name="table_label">
           <property name="text">
            <string>Image Info</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="0">
+        <item row="8" column="0">
          <widget class="QTableWidget" name="image_table"/>
         </item>
-        <item row="7" column="0">
+        <item row="9" column="0">
          <widget class="QLabel" name="label">
           <property name="text">
            <string>Horizontal Graph Info</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="0">
+        <item row="10" column="0">
          <widget class="QTableWidget" name="h_graph_table"/>
+        </item>
+        <item row="5" column="0">
+         <widget class="QComboBox" name="emode_combo_box">
+          <item>
+           <property name="text">
+            <string>Diffractometer</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Direct Geometry Spectrometer</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Indirect Geometry Spectrometer</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="6" column="0">
+         <layout class="QFormLayout" name="formLayout_2">
+          <item row="0" column="0">
+           <widget class="QLabel" name="efixed_label">
+            <property name="text">
+             <string>E Fixed</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="efixed_control"/>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
