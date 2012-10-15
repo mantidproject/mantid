@@ -96,6 +96,10 @@ public:
   boost::shared_ptr<const Mantid::API::IFunction> theFunction()const;
   /// Update the function parameters
   void updateParameters();
+  /// Get function parameter values
+  QList<double> getParameterValues() const;
+  /// Get function parameter names
+  QStringList getParameterNames() const;
 
   /// Create a new function
   PropertyHandler* addFunction(const std::string& fnName);

@@ -1301,6 +1301,8 @@ void FitPropertyBrowser::setCentre(double value)
   if (m_currentHandler)
   {
     m_currentHandler->setCentre(value);
+    m_currentHandler->updateParameters();
+    emit parameterChanged( m_currentHandler->function().get() );
   }
 }
 
@@ -1322,6 +1324,8 @@ void FitPropertyBrowser::setHeight(double value)
   if (m_currentHandler)
   {
     m_currentHandler->setHeight(value);
+    m_currentHandler->updateParameters();
+    emit parameterChanged( m_currentHandler->function().get() );
   }
 }
 
@@ -1343,6 +1347,8 @@ void FitPropertyBrowser::setFwhm(double value)
   if (m_currentHandler)
   {
     m_currentHandler->setFwhm(value);
+    m_currentHandler->updateParameters();
+    emit parameterChanged( m_currentHandler->function().get() );
   }
 }
 
@@ -2996,6 +3002,37 @@ void FitPropertyBrowser::minimizerChanged()
   }
 }
 
+/**=================================================================================================
+ * Get function parameter values
+ */
+QList<double> FitPropertyBrowser::getParameterValues() const
+{
+  auto fun = theFunction();
+  size_t np = fun->nParams();
+  QList<double> out;
+  for(size_t i = 0; i < np; ++i)
+  {
+    const double parValue = fun->getParameter( i );
+    out.append( parValue );
+  }
+  return out;
+}
+
+/**=================================================================================================
+ * Get parameter names
+ */
+QStringList FitPropertyBrowser::getParameterNames() const
+{
+  auto fun = theFunction();
+  size_t np = fun->nParams();
+  QStringList out;
+  for(size_t i = 0; i < np; ++i)
+  {
+    std::string parName = fun->parameterName( i );
+    out.append(QString::fromStdString( parName ));
+  }
+  return out;
+}
 
 } // MantidQt
 } // API

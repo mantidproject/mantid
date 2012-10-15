@@ -1168,6 +1168,14 @@ class FitPropertyBrowser : QDockWidget
 %TypeHeaderCode
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
 %End
+%Docstring
+
+FitPropertyBrowser
+=================
+
+    The FitPropertyBrowser is a control for performing curve fitting.
+
+%End
 
 public:
 	void fit();
@@ -1176,6 +1184,12 @@ public:
 	void setEndX(double);
 	double centre()const;
 	void setCentre(double value);
+	double height()const;
+	void setHeight(double value);
+	double fwhm()const;
+	void setFwhm(double value);
+	QList<double> getParameterValues() const;
+	QStringList getParameterNames() const;
 };
 
 }; // end namespace MantidWidgets
