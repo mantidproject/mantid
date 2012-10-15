@@ -6,7 +6,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
-
+#include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidDataHandling/SaveNexus.h"
 
 
@@ -127,6 +127,31 @@ public:
       alg.setRethrows(true);
       TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::invalid_argument &e, std::string(e.what()), "Could not find an energy guess" );
       AnalysisDataService::Instance().remove(outputName);
+  }
+
+  void testCNCS()
+  {
+      Mantid::DataHandling::LoadNexusMonitors ld;
+      std::string outws_name = "cncs";
+      ld.initialize();
+      ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
+      ld.setPropertyValue("OutputWorkspace", outws_name);
+
+      ld.execute();
+      TS_ASSERT( ld.isExecuted() );
+
+      GetEi2 alg;
+      alg.initialize();
+      alg.setPropertyValue("InputWorkspace", outws_name);
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+
+      // T0 value
+      const double tzero = alg.getProperty("Tzero");
+      const double expected_tzero = 61.7708;
+      TS_ASSERT_DELTA(tzero, expected_tzero, 1e-04);
+
+      AnalysisDataService::Instance().remove(outws_name);
   }
 
 private:

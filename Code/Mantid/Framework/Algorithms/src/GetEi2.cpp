@@ -33,6 +33,7 @@ The distances between the monitors are read from the instrument definition file.
 #include <algorithm>
 #include <sstream>
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidGeometry/muParser_Silent.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -154,12 +155,44 @@ double GetEi2::calculateEi(const double initial_guess)
   const specid_t monitor2_spec = getProperty("Monitor2Spec");
   specid_t mon1=monitor1_spec,mon2=monitor2_spec;
 
+  const ParameterMap& pmap = m_input_ws->constInstrumentParameters();
+  Instrument_const_sptr instrument=m_input_ws->getInstrument();
+
+  //If we have a t0 formula, calculate t0 and return the initial guess
+  Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(),"t0_formula");
+  if (par)
+  {
+      std::string formula=par->asString();
+      std::stringstream guess;
+      guess<<initial_guess;
+      // check if more than one 'value' in m_eq
+      size_t found;
+      while ( formula.find("incidentEnergy") != std::string::npos )
+      {
+        found = formula.find("incidentEnergy");
+        formula.replace(found, 14, guess.str());
+      }
+
+      try
+      {
+        mu::Parser p;
+        p.SetExpr(formula);
+        double tzero= p.Eval();
+        setProperty("Tzero", tzero);
+
+        g_log.debug() << "T0 = " << tzero << std::endl;
+        return initial_guess;
+      }
+      catch (mu::Parser::exception_type &e)
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("Equation attribute for t0 formula. Muparser error message is: " + e.GetMsg());
+      }
+  }
+
 
   if (mon1==EMPTY_INT())
   {
-      const ParameterMap& pmap = m_input_ws->constInstrumentParameters();
-      Instrument_const_sptr instrument=m_input_ws->getInstrument();
-      Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(),"ei-mon1-spec");
+      par = pmap.getRecursive(instrument->getChild(0).get(),"ei-mon1-spec");
       if (par)
       {
         mon1=boost::lexical_cast<specid_t>(par->asString());
@@ -167,9 +200,7 @@ double GetEi2::calculateEi(const double initial_guess)
   }
   if (mon2==EMPTY_INT())
   {
-      const ParameterMap& pmap = m_input_ws->constInstrumentParameters();
-      Instrument_const_sptr instrument=m_input_ws->getInstrument();
-      Parameter_sptr par = pmap.getRecursive(instrument->getChild(0).get(),"ei-mon2-spec");
+      par = pmap.getRecursive(instrument->getChild(0).get(),"ei-mon2-spec");
       if (par)
       {
         mon2=boost::lexical_cast<specid_t>(par->asString());

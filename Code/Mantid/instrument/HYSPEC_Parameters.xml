@@ -192,6 +192,10 @@
 		<parameter name="abs-median-signif">
 			<value val="3.3" />
 		</parameter>
-
+		
+		<!--   formula for t0 calculation. See http://muparser.sourceforge.net/mup_features.html#idDef2 for available operators-->
+		<parameter name="t0_formula" type="string">
+			<value val="25.0 + 85.0 / (1.0 + (incidentEnergy / 27.0)^4)" />
+		</parameter>
 	</component-link>
 </parameter-file>
