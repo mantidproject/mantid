@@ -137,13 +137,13 @@ namespace MDEvents
    // get inital free ID for the boxes, which would be created by this command
    // Splitting an input MDBox requires creating a bunch of children
    // But the IDs of these children MUST be sequential. Hence the critical block within claimIDRange
-    size_t ID0 = m_BoxController->claimIDRange(tot);
+    size_t ID0 = this->m_BoxController->claimIDRange(tot);
 
     for (size_t i=0; i<tot; i++)
     {
       // Create the box
       // (Increase the depth of this box to one more than the parent (this))
-       MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(m_BoxController, this->m_depth + 1,-1,int64_t(ID0+i));
+       MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(this->m_BoxController, this->m_depth + 1,-1,int64_t(ID0+i));
       // This MDGridBox is the parent of the new child.
        myBox->setParent(this);
 
