@@ -1,20 +1,22 @@
-#ifndef MANTID_MDEVENTS_CLONEMDWORKSPACE_H_
-#define MANTID_MDEVENTS_CLONEMDWORKSPACE_H_
-    
+#ifndef MANTID_MDEVENTS_LOADMD_H_
+#define MANTID_MDEVENTS_LOADMD_H_
+
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h" 
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
+#include "MantidAPI/IDataFileChecker.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
-  /** Algorithm to clone a MDEventWorkspace to a new one.
-   * Can also handle file-backed MDEventWorkspace's
+  /** Load a .nxs file into a MDEventWorkspace.
     
     @author Janik Zikovsky
-    @date 2011-08-15
+    @date 2011-07-12
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -36,19 +38,24 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport CloneMDWorkspace  : public API::Algorithm
+  class DLLExport LoadMD : public API::IDataFileChecker
   {
   public:
-    CloneMDWorkspace();
-    ~CloneMDWorkspace();
+    LoadMD();
+    ~LoadMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "CloneMDWorkspace";};
+    virtual const std::string name() const { return "LoadMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}
-    
+
+    /// do a quick check that this file can be loaded
+    bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
+    /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+    int fileCheck(const std::string& filePath);
+
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
@@ -57,8 +64,28 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
+    /// Helper method
     template<typename MDE, size_t nd>
-    void doClone(const typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void doLoad(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+
+    void loadExperimentInfos(boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
+
+    void loadSlab(std::string name, void * data, MDEvents::MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType);
+    void loadHisto();
+
+    void loadDimensions();
+
+    /// Open file handle
+    ::NeXus::File * file;
+
+    /// Name of that file
+    std::string m_filename;
+
+    /// Number of dimensions in loaded file
+    size_t m_numDims;
+
+    /// Each dimension object loaded.
+    std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
 
   };
 
@@ -66,4 +93,4 @@ namespace MDEvents
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_CLONEMDWORKSPACE_H_ */
+#endif  /* MANTID_MDEVENTS_LOADMD_H_ */

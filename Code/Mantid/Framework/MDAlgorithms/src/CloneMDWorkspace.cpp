@@ -14,19 +14,20 @@ followed by a simple LoadMD call to the file in question.
 *WIKI*/
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/CloneMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include "MantidAPI/FileProperty.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDAlgorithms/CloneMDWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   // Register the algorithm into the AlgorithmFactory

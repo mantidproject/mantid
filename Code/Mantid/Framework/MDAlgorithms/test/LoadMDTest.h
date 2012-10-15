@@ -5,7 +5,6 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/LoadMD.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDEventFactory.h"
@@ -15,9 +14,11 @@
 #include <iomanip>
 #include <iostream>
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidMDAlgorithms/LoadMD.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 

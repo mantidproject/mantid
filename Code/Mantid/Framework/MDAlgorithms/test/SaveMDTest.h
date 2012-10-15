@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/SaveMD.h"
+#include "MantidMDAlgorithms/SaveMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
@@ -14,6 +14,7 @@
 #include <Poco/File.h>
 
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using Mantid::Kernel::CPUTimer;
 

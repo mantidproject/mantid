@@ -30,7 +30,7 @@ and used by other algorithms, they should not be needed in daily use.
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/LoadMD.h"
+#include "MantidMDAlgorithms/LoadMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidNexusCPP/NeXusException.hpp"
 #include <boost/algorithm/string.hpp>
@@ -40,10 +40,11 @@ and used by other algorithms, they should not be needed in daily use.
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
-  namespace MDEvents
+  namespace MDAlgorithms
   {
 
     // Register the algorithm into the AlgorithmFactory

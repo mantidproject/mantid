@@ -19,7 +19,7 @@ If the OutputWorkspace does NOT already exist, a default one is created. This is
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
-#include "MantidMDEvents/LoadSQW.h"
+#include "MantidMDAlgorithms/LoadSQW.h"
 #include <iostream>
 #include "MantidMDEvents/MDBox.h"
 #include "MantidKernel/Memory.h"
@@ -27,10 +27,11 @@ If the OutputWorkspace does NOT already exist, a default one is created. This is
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Geometry::OrientedLattice;
+using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
-  namespace MDEvents
+  namespace MDAlgorithms
   {
 
     DECLARE_ALGORITHM(LoadSQW)

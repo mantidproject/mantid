@@ -4,7 +4,7 @@
 #include "LoadMDTest.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/CloneMDWorkspace.h"
+#include "MantidMDAlgorithms/CloneMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>

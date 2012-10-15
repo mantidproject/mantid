@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/BinaryOperationMD.cpp
 	src/BinMD.cpp		
 	src/BinToMDHistoWorkspace.cpp	
+	src/CloneMDWorkspace.cpp	
 	src/BooleanBinaryOperationMD.cpp
 	src/CobaltSpinWaveDSHO.cpp
 	src/CompareMDWorkspaces.cpp
@@ -19,6 +20,8 @@ set ( SRC_FILES
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
+	src/LoadMD.cpp
+	src/LoadSQW.cpp
 	src/LogarithmMD.cpp
 	src/MagneticFormFactor.cpp
 	src/MaskMD.cpp
@@ -62,7 +65,8 @@ set ( SRC_FILES
 	src/ConvertToMDEventsParams.cpp
 	src/ConvertToMDEventsSubalgFactory.cpp
 	src/ConvertToMDEventsWSBase.cpp
-#end TMP	
+#end TMP
+	src/SaveMD.cpp	
 	src/SlicingAlgorithm.cpp
 	src/StitchGroup1D.cpp
 )
@@ -77,6 +81,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BinMD.h	
 	inc/MantidMDAlgorithms/BinToMDHistoWorkspace.h	
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
+	inc/MantidMDAlgorithms/CloneMDWorkspace.h	
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
@@ -91,6 +96,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
+	inc/MantidMDAlgorithms/LoadMD.h
+	inc/MantidMDAlgorithms/LoadSQW.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
 	inc/MantidMDAlgorithms/MagneticFormFactor.h
 	inc/MantidMDAlgorithms/MaskMD.h
@@ -118,6 +125,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
 	inc/MantidMDAlgorithms/RunParam.h
+	inc/MantidMDAlgorithms/SaveMD.h	
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SimulateMDD.h
@@ -160,6 +168,7 @@ set ( TEST_FILES
 	BinToMDHistoWorkspaceTest.h	
 	BooleanBinaryOperationMDTest.h
 	CachedExperimentInfoTest.h
+	CloneMDWorkspaceTest.h	
 	CobaltSWDTest.h
 	CompareMDWorkspacesTest.h
 	ConvertEventsToMDTest.h
@@ -178,6 +187,8 @@ set ( TEST_FILES
 	InvalidParameterParserTest.h
 	InvalidParameterTest.h
 	LessThanMDTest.h
+	LoadMDTest.h
+	LoadSQWTest.h
 	LogarithmMDTest.h
 	MDResolutionConvolutionFactoryTest.h
 	MagneticFormFactorTest.h
@@ -195,6 +206,7 @@ set ( TEST_FILES
 	QuadEnBackgroundTest.h
 	ResolutionConvolvedCrossSectionTest.h
 	RunParamTest.h
+	SaveMDTest.h	
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h
 	SimulateMDDTest.h

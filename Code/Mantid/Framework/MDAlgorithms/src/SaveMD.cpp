@@ -15,7 +15,7 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 #include "MantidMDEvents/MDBoxIterator.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/SaveMD.h"
+#include "MantidMDAlgorithms/SaveMD.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidAPI/Progress.h"
@@ -25,10 +25,11 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   // Register the algorithm into the AlgorithmFactory

@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_SAVEMD_H_
-#define MANTID_MDEVENTS_SAVEMD_H_
+#ifndef MANTID_MDEVENTS_CLONEMDWORKSPACE_H_
+#define MANTID_MDEVENTS_CLONEMDWORKSPACE_H_
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
@@ -7,13 +7,14 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
-  /** Save a MDEventWorkspace to a .nxs file.
+  /** Algorithm to clone a MDEventWorkspace to a new one.
+   * Can also handle file-backed MDEventWorkspace's
     
     @author Janik Zikovsky
-    @date 2011-07-11
+    @date 2011-08-15
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -35,14 +36,14 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport SaveMD  : public API::Algorithm
+  class DLLExport CloneMDWorkspace  : public API::Algorithm
   {
   public:
-    SaveMD();
-    ~SaveMD();
+    CloneMDWorkspace();
+    ~CloneMDWorkspace();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "SaveMD";};
+    virtual const std::string name() const { return "CloneMDWorkspace";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -56,12 +57,8 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
-    /// Helper method
     template<typename MDE, size_t nd>
-    void doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws);
-
-    /// Save the MDHistoWorkspace.
-    void doSaveHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
+    void doClone(const typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
   };
 
@@ -69,4 +66,4 @@ namespace MDEvents
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_SAVEMD_H_ */
+#endif  /* MANTID_MDEVENTS_CLONEMDWORKSPACE_H_ */

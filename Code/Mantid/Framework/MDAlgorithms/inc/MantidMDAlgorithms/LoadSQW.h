@@ -9,7 +9,7 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** LoadSQW :
@@ -34,13 +34,13 @@ namespace MDEvents
   protected:
 
     /// Add events onto the workspace.
-    virtual void addEvents(Mantid::MDEvents::MDEventWorkspace<MDEvent<4>,4>* ws);
+    virtual void addEvents(Mantid::MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4>* ws);
 
     /// Add dimensions onto the workspace.
-    virtual void addDimensions(Mantid::MDEvents::MDEventWorkspace<MDEvent<4>,4>* ws);
+    virtual void addDimensions(Mantid::MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4>* ws);
 
     /// Extract lattice information
-    virtual void addLattice(Mantid::MDEvents::MDEventWorkspace<MDEvent<4>,4>* ws);
+    virtual void addLattice(Mantid::MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4>* ws);
 
     /// Parse metadata from file.
     void parseMetadata(); // New controlling function over legacy ones.

@@ -5,7 +5,6 @@ set ( SRC_FILES
 	src/AffineMatrixParameterParser.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
 	src/CentroidPeaksMD.cpp
-	src/CloneMDWorkspace.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
@@ -27,8 +26,6 @@ set ( SRC_FILES
 	src/ImportMDHistoWorkspace.cpp
 	src/ImportMDHistoWorkspaceBase.cpp
 	src/IntegratePeaksMD.cpp
-	src/LoadMD.cpp
-	src/LoadSQW.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
 	src/MDBoxToChange.cpp
@@ -55,7 +52,6 @@ set ( SRC_FILES
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
-	src/SaveMD.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
 )
@@ -76,7 +72,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDEvents/CentroidPeaksMD.h
-	inc/MantidMDEvents/CloneMDWorkspace.h
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h
@@ -98,8 +93,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/ImportMDHistoWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspaceBase.h
 	inc/MantidMDEvents/IntegratePeaksMD.h
-	inc/MantidMDEvents/LoadMD.h
-	inc/MantidMDEvents/LoadSQW.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
 	inc/MantidMDEvents/MDBoxToChange.h	
@@ -132,7 +125,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/ReflectometryTransformKiKf.h
 	inc/MantidMDEvents/ReflectometryTransformP.h
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
-	inc/MantidMDEvents/SaveMD.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/UnitsConversionHelper.h
 	inc/MantidMDEvents/UserFunctionMD.h
@@ -144,7 +136,6 @@ set ( TEST_FILES
 	AffineMatrixParameterTest.h
 	BoxControllerSettingsAlgorithmTest.h
 	CentroidPeaksMDTest.h
-	CloneMDWorkspaceTest.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToReflectometryQTest.h
 	ConvToMDBaseTest.h
@@ -163,8 +154,6 @@ set ( TEST_FILES
 	ImportMDEventWorkspaceTest.h
 	ImportMDHistoWorkspaceTest.h
 	IntegratePeaksMDTest.h
-	LoadMDTest.h
-	LoadSQWTest.h
 	MDBinTest.h
 	MDBoxBaseTest.h
 	MDBoxIteratorTest.h
@@ -188,7 +177,6 @@ set ( TEST_FILES
 	OneStepMDEWTest.h
 	QueryMDWorkspaceTest.h
 	ReflectometryTransformQxQzTest.h
-	SaveMDTest.h
 	SkippingPolicyTest.h
 )
 

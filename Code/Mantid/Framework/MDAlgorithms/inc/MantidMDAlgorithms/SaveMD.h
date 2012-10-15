@@ -1,22 +1,19 @@
-#ifndef MANTID_MDEVENTS_LOADMD_H_
-#define MANTID_MDEVENTS_LOADMD_H_
-
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#ifndef MANTID_MDEVENTS_SAVEMD_H_
+#define MANTID_MDEVENTS_SAVEMD_H_
+    
 #include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h" 
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
-#include "MantidAPI/IDataFileChecker.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
-  /** Load a .nxs file into a MDEventWorkspace.
+  /** Save a MDEventWorkspace to a .nxs file.
     
     @author Janik Zikovsky
-    @date 2011-07-12
+    @date 2011-07-11
 
     Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -38,24 +35,19 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadMD : public API::IDataFileChecker
+  class DLLExport SaveMD  : public API::Algorithm
   {
   public:
-    LoadMD();
-    ~LoadMD();
+    SaveMD();
+    ~SaveMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "LoadMD";};
+    virtual const std::string name() const { return "SaveMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}
-
-    /// do a quick check that this file can be loaded
-    bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-    /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
-    int fileCheck(const std::string& filePath);
-
+    
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
@@ -66,26 +58,10 @@ namespace MDEvents
 
     /// Helper method
     template<typename MDE, size_t nd>
-    void doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void doSaveEvents(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
-    void loadExperimentInfos(boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
-
-    void loadSlab(std::string name, void * data, MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType);
-    void loadHisto();
-
-    void loadDimensions();
-
-    /// Open file handle
-    ::NeXus::File * file;
-
-    /// Name of that file
-    std::string m_filename;
-
-    /// Number of dimensions in loaded file
-    size_t m_numDims;
-
-    /// Each dimension object loaded.
-    std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
+    /// Save the MDHistoWorkspace.
+    void doSaveHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
 
   };
 
@@ -93,4 +69,4 @@ namespace MDEvents
 } // namespace MDEvents
 } // namespace Mantid
 
-#endif  /* MANTID_MDEVENTS_LOADMD_H_ */
+#endif  /* MANTID_MDEVENTS_SAVEMD_H_ */
