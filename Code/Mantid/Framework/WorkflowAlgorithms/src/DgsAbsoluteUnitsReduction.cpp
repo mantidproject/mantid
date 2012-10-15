@@ -157,6 +157,9 @@ namespace Mantid
       etConv->executeAsSubAlg();
       outputWS = etConv->getProperty("OutputWorkspace");
 
+      Property *prop = outputWS.get()->run().getProperty("Ei");
+      const double calculatedEi = boost::lexical_cast<double>(prop->value());
+
       const double vanadiumMass = getDblPropOrParam("VanadiumMass",
           reductionManager, "vanadium-mass", outputWS);
 
@@ -234,22 +237,20 @@ namespace Mantid
       outputWS = wMean->getProperty("OutputWorkspace");
 
       // If the absolute units detector vanadium is used, do extra correction.
-      if (!absIdetVanWS)
+      if (absIdetVanWS)
       {
-        Property *prop = outputWS.get()->run().getProperty("Ei");
-        const double ei = boost::lexical_cast<double>(prop->value());
         double xsection = 0.0;
-        if (200.0 <= ei)
+        if (200.0 <= calculatedEi)
         {
-          xsection = 420.0;
+          xsection = 421.0;
         }
         else
         {
-          xsection = 400.0 + (ei / 10.0);
+          xsection = 400.0 + (calculatedEi / 10.0);
         }
         outputWS /= xsection;
-        const double sampleMass = this->getProperty("SampleMass");
-        const double sampleRmm = this->getProperty("SampleRmm");
+        const double sampleMass = reductionManager->getProperty("SampleMass");
+        const double sampleRmm = reductionManager->getProperty("SampleRmm");
         outputWS *= (sampleMass / sampleRmm);
       }
 
