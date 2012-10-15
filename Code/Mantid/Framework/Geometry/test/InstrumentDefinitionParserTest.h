@@ -680,6 +680,46 @@ public:
 
 };
 
+class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+void testLoadingAndParsing()
+{
+    std::string filenameNoExt = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING";
+    std::string filename = filenameNoExt + ".xml";
+    std::string xmlText = Strings::loadFile(filename);
+    boost::shared_ptr<const Instrument> i;
+
+    // Parse the XML (remove old vtp file if it exists)
+    std::string vtpFilename = filenameNoExt + ".vtp";
+    try
+    {
+      Poco::File vtpFile(vtpFilename);
+      vtpFile.remove();
+    }
+    catch(Poco::FileNotFoundException&) {}
+
+    InstrumentDefinitionParser parser;
+    TS_ASSERT_THROWS_NOTHING( parser.initialize(filename, "For Unit Testing", xmlText); );
+    TS_ASSERT_THROWS_NOTHING( i = parser.parseXML(NULL); );
+
+    // Check the mangled name
+    TS_ASSERT_EQUALS( parser.getMangledName(), "IDF_for_UNIT_TESTING.xmlHello!");
+    // Remove it for clean test
+    try
+    {
+      Poco::File vtpFile(vtpFilename);
+      vtpFile.remove();
+    }
+    catch(Poco::FileNotFoundException&)
+    {
+      TS_FAIL("Cannot find expected .vtp file next to " + filename);
+    }
+}
+
+}; 
+
 
 #endif /* MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_ */
 
