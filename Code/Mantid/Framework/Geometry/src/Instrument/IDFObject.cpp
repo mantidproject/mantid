@@ -32,7 +32,7 @@ namespace Mantid
     Gets the parent directory of the file.
     @return Parent directory path.
     */
-    Poco::Path IDFObject::getParentDirectory() const
+    const Poco::Path& IDFObject::getParentDirectory() const
     {
       return m_cacheParentDirectory;
     }
@@ -41,7 +41,7 @@ namespace Mantid
     Getter for the full file path.
     @return Full file path.
     */
-    Poco::Path IDFObject::getFileFullPath() const
+    const Poco::Path& IDFObject::getFileFullPath() const
     {
       return m_cachePath;
     }
