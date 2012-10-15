@@ -329,7 +329,8 @@ namespace Mantid
     {
       // If we have switch loaders then the concrete loader will have different properties
       // so take care of ensuring Load has the correct ones
-      const std::vector<Property*> existingProps = this->getProperties();      
+      // THIS IS A COPY as the properties are mutated as we move through them
+      const std::vector<Property*> existingProps = this->getProperties();
       for( size_t i = 0; i < existingProps.size(); ++i )
       {
         const std::string name = existingProps[i]->name();
@@ -455,83 +456,51 @@ namespace Mantid
 
     void Load::loadMultipleFiles()
     {
+      // allFilenames contains "rows" of filenames. If the row has more than 1 file in it
+      // then that row is to be summed across each file in the row
       const std::vector<std::vector<std::string> > allFilenames = getProperty("Filename");
       std::string outputWsName = getProperty("OutputWorkspace");
 
-      std::vector<std::string> wsNames;
-      wsNames.resize(allFilenames.size());
+      std::vector<std::string> wsNames(allFilenames.size());
+      std::transform(allFilenames.begin(), allFilenames.end(),
+                     wsNames.begin(), generateWsNameFromFileNames);
 
-      std::transform(
-          allFilenames.begin(), allFilenames.end(),
-          wsNames.begin(),
-          generateWsNameFromFileNames);
-
-      std::vector<API::Workspace_sptr> loadedWsList;
 
       std::vector<std::vector<std::string> >::const_iterator filenames = allFilenames.begin();
       std::vector<std::string >::const_iterator wsName = wsNames.begin();
       assert( allFilenames.size() == wsNames.size() );
 
+      std::vector<API::Workspace_sptr> loadedWsList;
+      loadedWsList.reserve(allFilenames.size());
+
       // Cycle through the filenames and wsNames.
       for(; filenames != allFilenames.end(); ++filenames, ++wsName)
       {
-        // If there is only one filename, then just load it to the given wsName.
-        if(filenames->size() == 1)
+        std::vector<std::string>::const_iterator filename = filenames->begin();
+        Workspace_sptr sumWS = loadFileToWs(*filename, *wsName);
+
+        ++filename;
+        for(; filename != filenames->end(); ++filename)
         {
-          Workspace_sptr loadedWs = loadFileToWs(filenames->at(0), *wsName);
-          loadedWs->setName(*wsName);
-          loadedWsList.push_back(loadedWs);
+          Workspace_sptr secondWS = loadFileToWs(*filename,  "__@loadsum_temp@");
+          sumWS = plusWs(sumWS, secondWS);
         }
-        // Else there is more than one filename.  Load them all, sum them, and rename the
-        // result to the given wsName.
-        else
+        sumWS->setName(*wsName);
+
+        API::WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(sumWS);
+        if(group)
         {
-          // Load all files and place the resulting workspaces in a vector.
-          std::vector<Workspace_sptr> loadedWs;
-          std::vector<std::string>::const_iterator filename = filenames->begin();
-
-          for(; filename != filenames->end(); ++filename)
+          std::vector<std::string> childWsNames = group->getNames();
+          auto childWsName = childWsNames.begin();
+          size_t count = 1;
+          for( ; childWsName != childWsNames.end(); ++childWsName, ++count )
           {
-            Workspace_sptr ws = loadFileToWs(*filename, (*filename) + "_temp");
-            loadedWs.push_back(ws);
+            Workspace_sptr childWs = group->getItem(*childWsName);
+            childWs->setName(group->getName() + "_" + boost::lexical_cast<std::string>(count));
           }
-
-          // Add all workspaces together, sticking the result in sum.
-          Workspace_sptr sum;
-          for( size_t i = 1; i < loadedWs.size(); i++ )
-          {
-            Workspace_sptr firstWsToAdd;
-            // If there have been no workspaces added yet, then the first workspace to add
-            // is the first workspace in the list.
-            if(sum == Workspace_sptr())
-              firstWsToAdd = loadedWs[i-1];
-            // Else the first workspace to add is "sum" itself.
-            else
-              firstWsToAdd = sum;
-            
-            Workspace_sptr secondWsToAdd = loadedWs[i];
-
-            sum = plusWs(firstWsToAdd, secondWsToAdd);
-          }
-
-          sum->setName(*wsName);
-
-          API::WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<WorkspaceGroup>(sum);
-          if(group)
-          {
-            std::vector<std::string> childWsNames = group->getNames();
-            auto childWsName = childWsNames.begin();
-            size_t count = 1;
-            for( ; childWsName != childWsNames.end(); ++childWsName, ++count )
-            {
-              Workspace_sptr childWs = group->getItem(*childWsName);
-              childWs->setName(group->getName() + "_" + boost::lexical_cast<std::string>(count));
-            }
-          }
-
-          // Add the sum to the list of loaded workspace names.
-          loadedWsList.push_back(sum);
         }
+        // Add the sum to the list of loaded workspace names.
+        loadedWsList.push_back(sumWS);
       }
 
       // If we only have one loaded ws, set it as the output.
@@ -559,11 +528,11 @@ namespace Mantid
 
         childWsNames = group->getNames();
         count = 1;
-        for(auto childWsName = childWsNames.begin(); childWsName != childWsNames.end(); ++childWsName, ++count )
+        for(auto childWsName = childWsNames.begin(); childWsName != childWsNames.end(); ++childWsName)
         {
           Workspace_sptr childWs = group->getItem(*childWsName);
           std::string outWsPropName = "OutputWorkspace_" + boost::lexical_cast<std::string>(count);
-          
+          ++count;
           declareProperty(new WorkspaceProperty<Workspace>(outWsPropName, *childWsName, Direction::Output));
           setProperty(outWsPropName, childWs);
         }
@@ -629,10 +598,10 @@ namespace Mantid
     * Set the output workspace(s) if the load's return workspace has type API::Workspace
     * @param loader :: Shared pointer to load algorithm
     */
-    void Load::setOutputWorkspace(const API::IDataFileChecker_sptr loader)
+    void Load::setOutputWorkspace(const API::IDataFileChecker_sptr & loader)
     {
       // Go through each OutputWorkspace property and check whether we need to make a counterpart here
-      const std::vector<Property*> loaderProps = loader->getProperties();
+      const std::vector<Property*> & loaderProps = loader->getProperties();
       const size_t count = loader->propertyCount();
       for( size_t i = 0; i < count; ++i )
       {
@@ -659,7 +628,7 @@ namespace Mantid
     * @returns A pointer to the OutputWorkspace property of the sub algorithm
     */
     API::Workspace_sptr Load::getOutputWorkspace(const std::string & propName,
-      const API::IDataFileChecker_sptr loader) const
+      const API::IDataFileChecker_sptr & loader) const
     {
       // @todo Need to try and find a better way using the getValue methods
       try
@@ -737,9 +706,7 @@ namespace Mantid
      *
      * @returns a pointer to the loaded workspace
      */
-    API::Workspace_sptr Load::loadFileToWs(
-      const std::string & fileName, 
-      const std::string & wsName)
+    API::Workspace_sptr Load::loadFileToWs(const std::string & fileName, const std::string & wsName)
     {
       Mantid::API::IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 1);
 
@@ -750,7 +717,7 @@ namespace Mantid
       std::vector<Kernel::Property*>::const_iterator prop = props.begin();
       for (; prop != props.end(); ++prop)
       {
-        const std::string propName = (*prop)->name();
+        const std::string & propName = (*prop)->name();
 
         if( this->existsProperty(propName) )
         {
@@ -771,7 +738,7 @@ namespace Mantid
 
       loadAlg->executeAsSubAlg();
 
-      API::Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
+      Workspace_sptr ws = loadAlg->getProperty("OutputWorkspace");
       ws->setName(wsName);
       return ws;
     }
@@ -797,10 +764,10 @@ namespace Mantid
         // wont work otherwise.
         std::vector<std::string> group1ChildWsNames = group1->getNames();
         std::vector<std::string> group2ChildWsNames = group2->getNames();
-        
+
         if( group1ChildWsNames.size() != group2ChildWsNames.size() )
           throw std::runtime_error("Unable to add group workspaces with different number of child workspaces.");
-        
+
         auto group1ChildWsName = group1ChildWsNames.begin();
         auto group2ChildWsName = group2ChildWsNames.begin();
 
@@ -839,7 +806,7 @@ namespace Mantid
      *
      * @param wsList :: the list of workspaces to group
      */
-    API::WorkspaceGroup_sptr Load::groupWsList(std::vector<API::Workspace_sptr> wsList)
+    API::WorkspaceGroup_sptr Load::groupWsList(const std::vector<API::Workspace_sptr> & wsList)
     {
       WorkspaceGroup_sptr group = WorkspaceGroup_sptr(new WorkspaceGroup);
 

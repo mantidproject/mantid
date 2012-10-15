@@ -87,17 +87,17 @@ namespace Mantid
       void setUpLoader(API::IDataFileChecker_sptr loader, const double startProgress = -1.0, 
 		       const double endProgress=-1.0,  const bool logging = true) const;
       /// Set the output workspace(s)
-      void setOutputWorkspace(const API::IDataFileChecker_sptr loader);
+      void setOutputWorkspace(const API::IDataFileChecker_sptr & loader);
       /// Retrieve a pointer to the output workspace from the sub algorithm
       API::Workspace_sptr getOutputWorkspace(const std::string & propName, 
-					     const API::IDataFileChecker_sptr loader) const;
+					     const API::IDataFileChecker_sptr & loader) const;
 
-      /// Load a file to into a hidden workspace.
+      /// Load a file to a given workspace name.
       API::Workspace_sptr loadFileToWs(const std::string & fileName, const std::string & wsName);
       /// Plus two workspaces together, "in place".
       API::Workspace_sptr plusWs(API::Workspace_sptr ws1, API::Workspace_sptr ws2);
       /// Manually group workspaces.
-      API::WorkspaceGroup_sptr groupWsList(std::vector<API::Workspace_sptr> wsList);
+      API::WorkspaceGroup_sptr groupWsList(const std::vector<API::Workspace_sptr> & wsList);
 
     private:
       /// The base properties
