@@ -52,8 +52,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageView : public QMainWindow
      /// Construct an ImageView to display data from the specified data source 
      RefImageView( RefImageDataSource* data_source );
 
-    ~RefImageView();
-
+    ~RefImageView();    
+    
   private:
     GraphDisplay*    h_graph;
     GraphDisplay*    v_graph;

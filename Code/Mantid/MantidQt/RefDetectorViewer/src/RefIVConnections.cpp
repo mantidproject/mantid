@@ -340,6 +340,19 @@ void RefIVConnections::graph_range_changed()
 //  v_graph_display->SetRangeScale( range_scale );
 }
 
+void RefImageView::peak_back_tof_range_update ()
+{
+    std::cout << "Inside RefImageView::peak_back_tof_range_update"<< std::endl;
+    double peakmin = iv_ui->lineEdit_peakLeft->text()->toDouble();
+    double peakmax = iv_ui->lineEdit_peakRight->text()->toDouble();
+    double backmin = iv_ui->lineEdit_backLeft->text()->toDouble();
+    double backmax = iv_ui->lineEdit_backright->text()->toDouble();
+    double tofmin = iv_ui->lineEdit_TOFmin->text()->toDouble();
+    double tofmax = iv_ui->lineEdit_TOFmax->text()->toDouble();
+    std::cout << "peakmin: " << peakmin << std::endl;
+    emit peak_back_tof_range_update(peakmin, peakmax, backmin, backmax, tofmin, tofmax);
+}
+
 void RefIVConnections::edit_manual_input()
 {
 

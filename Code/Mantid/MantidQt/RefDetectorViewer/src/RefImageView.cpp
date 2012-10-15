@@ -78,8 +78,7 @@ RefImageView::RefImageView( RefImageDataSource* data_source )
 
   image_display->SetDataSource( data_source );
 }
-
-
+    
 RefImageView::~RefImageView()
 {
 //  std::cout << "ImageView destructor called" << std::endl;

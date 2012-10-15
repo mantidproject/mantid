@@ -96,6 +96,10 @@ public slots:
   void spectrum_color_scale();
   void edit_manual_input();
 
+public signals:
+    void peak_back_tof_range_update();
+
+    
 private:
 
   Ui_RefImageViewer*   iv_ui;
