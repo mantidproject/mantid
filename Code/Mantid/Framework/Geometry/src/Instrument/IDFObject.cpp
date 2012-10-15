@@ -17,7 +17,7 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    IDFObject::IDFObject(const std::string& fileName) : m_defFile(fileName), m_hasFileName(!fileName.empty())
+    IDFObject::IDFObject(const std::string& fileName) : m_defFile(fileName), m_hasFileName(!fileName.empty()), m_cachePath(m_defFile.path()), m_cacheParentDirectory(m_cachePath.parent())
     {
     }
 
@@ -34,7 +34,7 @@ namespace Mantid
     */
     Poco::Path IDFObject::getParentDirectory() const
     {
-      return Poco::Path(m_defFile.path()).parent();
+      return m_cacheParentDirectory;
     }
 
     /**
@@ -43,7 +43,7 @@ namespace Mantid
     */
     Poco::Path IDFObject::getFileFullPath() const
     {
-      return m_defFile.path();
+      return m_cachePath;
     }
 
     /**
@@ -52,7 +52,7 @@ namespace Mantid
     */
     std::string IDFObject::getFileNameOnly() const
     {
-      return Poco::Path(m_defFile.path()).getFileName();
+      return m_cachePath.getFileName();
     }
 
     /**
@@ -61,7 +61,7 @@ namespace Mantid
      */
     std::string IDFObject::getExtension() const
     {
-      std::string ext = Poco::Path(m_defFile.path()).getExtension();
+      std::string ext = m_cachePath.getExtension();
       if(ext.empty()) return ext;
       else return "." + ext;
     }

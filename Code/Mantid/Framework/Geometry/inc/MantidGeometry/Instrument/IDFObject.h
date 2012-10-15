@@ -56,6 +56,8 @@ namespace Geometry
     IDFObject & operator=(const IDFObject&);
     const Poco::File m_defFile;
     const bool m_hasFileName;
+    const Poco::Path m_cachePath;
+    const Poco::Path m_cacheParentDirectory;
   };
 
   typedef boost::shared_ptr<IDFObject> IDFObject_sptr;
