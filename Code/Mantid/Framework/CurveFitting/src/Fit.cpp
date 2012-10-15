@@ -384,7 +384,8 @@ namespace CurveFitting
     bool success = false;
     std::string errorString;
     //double costFuncVal = 0;
-    do
+    //do
+    while (static_cast<int>(iter) < maxIterations)
     {
       iter++;
       if ( !minimizer->iterate() )
@@ -399,7 +400,7 @@ namespace CurveFitting
       }
       prog.report();
     }
-    while (static_cast<int>(iter) < maxIterations);
+    
 
     if (static_cast<int>(iter) >= maxIterations)
     {

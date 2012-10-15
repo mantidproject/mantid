@@ -212,7 +212,7 @@ public:
   Mantid::API::Workspace_sptr createMatrixFromTableWorkspace()const;
 
 public slots:
-  virtual void fit();
+  virtual void fit(){ doFit(500); }
   void sequentialFit();
   void undoFit();
   void clear();
@@ -330,6 +330,8 @@ protected:
   QtProperty* addDoubleProperty(const QString& name)const;
   /// Called when the minimizer changes. Creates minimizes's properties.
   void minimizerChanged();
+  /// Do the fitting
+  void doFit(int maxIterations);
 
   /// Property managers:
   QtGroupPropertyManager  *m_groupManager;
@@ -365,6 +367,7 @@ protected:
   QAction* m_fitActionUndoFit;
   QAction* m_fitActionSeqFit;
   QAction* m_fitActionFit;
+  QAction* m_fitActionEvaluate;
 
   /// Group for functions
   QtBrowserItem* m_functionsGroup;

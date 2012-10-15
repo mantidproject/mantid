@@ -279,16 +279,20 @@ void FitPropertyBrowser::initLayout(QWidget *w)
   m_fitActionFit = new QAction("Fit",this);
   m_fitActionSeqFit = new QAction("Sequential Fit",this);
   m_fitActionUndoFit = new QAction("Undo Fit",this);
+  m_fitActionEvaluate = new QAction("Evaluate function",this);
   m_fitMapper = new QSignalMapper(this);
   m_fitMapper->setMapping(m_fitActionFit,"Fit");
   m_fitMapper->setMapping(m_fitActionSeqFit,"SeqFit");
   m_fitMapper->setMapping(m_fitActionUndoFit,"UndoFit");
+  m_fitMapper->setMapping(m_fitActionEvaluate,"Evaluate");
   connect(m_fitActionFit,SIGNAL(activated()), m_fitMapper, SLOT(map()));
   connect(m_fitActionSeqFit,SIGNAL(activated()), m_fitMapper, SLOT(map()));
   connect(m_fitActionUndoFit,SIGNAL(activated()), m_fitMapper, SLOT(map()));
+  connect(m_fitActionEvaluate,SIGNAL(activated()), m_fitMapper, SLOT(map()));
   connect(m_fitMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeFitMenu(const QString&)));
   m_fitMenu->addAction(m_fitActionFit);
   m_fitMenu->addAction(m_fitActionSeqFit);
+  m_fitMenu->addAction(m_fitActionEvaluate);
   m_fitMenu->addSeparator();
   m_fitMenu->addAction(m_fitActionUndoFit);
   btnFit->setMenu(m_fitMenu);
@@ -466,11 +470,21 @@ void FitPropertyBrowser::executeCustomSetupRemove(const QString& name)
 void FitPropertyBrowser::executeFitMenu(const QString& item)
 {
   if (item == "Fit")
+  {
     fit();
-  if (item == "SeqFit")
+  }
+  else if (item == "SeqFit")
+  {
     sequentialFit();
-  if (item == "UndoFit")
+  }
+  else if (item == "UndoFit")
+  {
     undoFit();
+  }
+  else if (item == "Evaluate")
+  {
+    doFit( 0 );
+  }
 }
 
 void FitPropertyBrowser::executeDisplayMenu(const QString& item)
@@ -1422,7 +1436,7 @@ void FitPropertyBrowser::setCurrentFunction(Mantid::API::IFunction_const_sptr f)
 /**
  * Creates an instance of Fit algorithm, sets its properties and launches it.
  */
-void FitPropertyBrowser::fit()
+void FitPropertyBrowser::doFit(int maxIterations)
 {
   std::string wsName = workspaceName();
 
@@ -1481,6 +1495,7 @@ void FitPropertyBrowser::fit()
     alg->setPropertyValue("Output",outputName());
     alg->setPropertyValue("Minimizer",minimizer(true));
     alg->setPropertyValue("CostFunction",costFunction());
+    alg->setProperty( "MaxIterations", maxIterations );
     observeFinish(alg);
     alg->executeAsync();
 
