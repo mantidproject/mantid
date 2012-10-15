@@ -18,7 +18,7 @@ If the file contains mulitple SASentry elements a workspace group will be create
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
-
+#include "MantidDataObjects/Workspace2D.h"
 #include <Poco/Path.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -103,6 +103,7 @@ void LoadCanSAS1D::exec()
   NodeList* entryList = pRootElem->getElementsByTagName("SASentry");
   size_t numEntries = entryList->length();
   Workspace_sptr outputWork;
+  MatrixWorkspace_sptr WS;
   std::string runName;
   switch(numEntries)
   {
@@ -110,7 +111,9 @@ void LoadCanSAS1D::exec()
       Exception::NotFoundError("No <SASentry>s were found in the file", fileName);
     case 1:
       //the value of the string runName is unused in this case
-      outputWork = loadEntry(entryList->item(0), runName);
+      WS = loadEntry(entryList->item(0), runName);
+      WS->mutableRun().addProperty("Filename",fileName);
+      outputWork=WS;
       break;
     default:
       WorkspaceGroup_sptr group(new WorkspaceGroup);
@@ -118,6 +121,7 @@ void LoadCanSAS1D::exec()
       {
         std::string runName;
         MatrixWorkspace_sptr newWork = loadEntry(entryList->item(i), runName);
+        newWork->mutableRun().addProperty("Filename",fileName);
         appendDataToOutput(newWork, runName, group);
       }
       outputWork = group;

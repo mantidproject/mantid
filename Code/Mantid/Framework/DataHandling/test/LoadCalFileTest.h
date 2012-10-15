@@ -52,6 +52,8 @@ public:
     TS_ASSERT_EQUALS( groupWS->getTitle(), title);
     TS_ASSERT_EQUALS( int(groupWS->getValue(101001)), 2 );
     TS_ASSERT_EQUALS( int(groupWS->getValue(715079)), 7 );
+    //Check if filename is saved
+    TS_ASSERT_EQUALS(alg.getPropertyValue("CalFilename"),groupWS->run().getProperty("Filename")->value());
 
     OffsetsWorkspace_sptr offsetsWS;
     TS_ASSERT_THROWS_NOTHING( offsetsWS = AnalysisDataService::Instance().retrieveWS<OffsetsWorkspace>(outWSName+"_offsets") );
@@ -59,6 +61,8 @@ public:
     TS_ASSERT_EQUALS( offsetsWS->getTitle(), title);
     TS_ASSERT_DELTA( offsetsWS->getValue(101001), -0.0497075, 1e-7 );
     TS_ASSERT_DELTA( offsetsWS->getValue(714021), 0.0007437, 1e-7 );
+    //Check if filename is saved
+    TS_ASSERT_EQUALS(alg.getPropertyValue("CalFilename"),offsetsWS->run().getProperty("Filename")->value());
 
     SpecialWorkspace2D_sptr maskWS;
     TS_ASSERT_THROWS_NOTHING( maskWS = AnalysisDataService::Instance().retrieveWS<SpecialWorkspace2D>(outWSName+"_mask") );
@@ -78,9 +82,12 @@ public:
     TS_ASSERT( maskWS->getInstrument()->getDetector(101003)->isMasked() );
     TS_ASSERT( maskWS->getInstrument()->getDetector(101008)->isMasked() );
     TS_ASSERT( !maskWS->getInstrument()->getDetector(715079)->isMasked() );
-    
+    //Check if filename is saved
+    TS_ASSERT_EQUALS(alg.getPropertyValue("CalFilename"),maskWS->run().getProperty("Filename")->value());
     // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    AnalysisDataService::Instance().remove(outWSName+"_group");
+    AnalysisDataService::Instance().remove(outWSName+"_offsets");
+    AnalysisDataService::Instance().remove(outWSName+"_mask");
   }
 
 };

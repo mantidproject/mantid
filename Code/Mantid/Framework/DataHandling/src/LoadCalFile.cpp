@@ -189,6 +189,7 @@ namespace DataHandling
       groupWS->setTitle(title);
       declareProperty(new WorkspaceProperty<GroupingWorkspace>("OutputGroupingWorkspace", WorkspaceName + "_group", Direction::Output),
               "Set the the output GroupingWorkspace, if any.");
+      groupWS->mutableRun().addProperty("Filename",CalFilename);
       setProperty("OutputGroupingWorkspace", groupWS);
     }
 
@@ -198,6 +199,7 @@ namespace DataHandling
       offsetsWS->setTitle(title);
       declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputOffsetsWorkspace", WorkspaceName + "_offsets", Direction::Output),
               "Set the the output OffsetsWorkspace, if any.");
+      offsetsWS->mutableRun().addProperty("Filename",CalFilename);
       setProperty("OutputOffsetsWorkspace", offsetsWS);
     }
 
@@ -207,6 +209,7 @@ namespace DataHandling
       maskWS->setTitle(title);
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
               "Set the the output MaskWorkspace, if any.");
+      maskWS->mutableRun().addProperty("Filename",CalFilename);
       setProperty("OutputMaskWorkspace", maskWS);
     }
 

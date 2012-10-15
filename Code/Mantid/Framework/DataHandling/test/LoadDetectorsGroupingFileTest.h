@@ -55,6 +55,8 @@ public:
     TS_ASSERT_DELTA(gws->dataY(3695)[0], 1.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(3696)[0], 2.0, 1.0E-5);
     TS_ASSERT_DELTA(gws->dataY(7000)[0], 2.0, 1.0E-5);
+    //Check if filename is saved
+    TS_ASSERT_EQUALS(load.getPropertyValue("InputFile"),gws->run().getProperty("Filename")->value());
 
   }
 

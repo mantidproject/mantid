@@ -266,6 +266,8 @@ private:
         TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "meV");
         dataStore.remove(outputName);
       }
+      //Check if filename is saved
+      TS_ASSERT_EQUALS(loader.getPropertyValue("Filename"),outputWS->run().getProperty("Filename")->value());
     }
     else
     {

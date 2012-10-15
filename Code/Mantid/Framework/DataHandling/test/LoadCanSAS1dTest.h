@@ -54,6 +54,8 @@ public:
 	Mantid::API::Workspace_sptr ws;
 	TS_ASSERT_THROWS_NOTHING( ws = Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace) );
 	Mantid::DataObjects::Workspace2D_sptr ws2d = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+    //Check if filename is saved
+    TS_ASSERT_EQUALS(cansas1d.getPropertyValue("Filename"),ws2d->run().getProperty("Filename")->value());
 
   Mantid::Kernel::Property *logP = ws2d->run().getLogData("run_number");
   TS_ASSERT_EQUALS( logP->value(), "LOQ48097")

@@ -199,6 +199,7 @@ void LoadDaveGrp::exec()
   delete xAxis;
   delete yAxis;
 
+  outputWorkspace->mutableRun().addProperty("Filename",filename);
   this->setProperty("OutputWorkspace", outputWorkspace);
 }
 

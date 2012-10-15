@@ -49,6 +49,8 @@ public:
 
       TS_ASSERT_EQUALS(outputWS->isDistribution(), true);
 
+      //Check if filename is saved
+      TS_ASSERT_EQUALS(loader.getPropertyValue("Filename"),outputWS->run().getProperty("Filename")->value());
       dataStore.remove(outputWSName);
     }
   }

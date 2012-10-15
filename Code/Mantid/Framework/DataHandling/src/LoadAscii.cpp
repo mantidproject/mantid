@@ -453,7 +453,8 @@ namespace Mantid
       // Process the header information.
       processHeader(file);
       // Read the data
-      Workspace_sptr outputWS = readData(file);
+      MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(readData(file));
+      outputWS->mutableRun().addProperty("Filename",filename);
       setProperty("OutputWorkspace", outputWS);
     }
 

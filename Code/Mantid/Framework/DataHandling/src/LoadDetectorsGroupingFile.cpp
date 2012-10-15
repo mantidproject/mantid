@@ -106,6 +106,7 @@ namespace DataHandling
 
     // 3. Load Instrument and create output Mask workspace
     this->intializeGroupingWorkspace();
+    mGroupWS->mutableRun().addProperty("Filename",xmlfilename);
     setProperty("OutputWorkspace", mGroupWS);
 
     // 3. Translate and set geometry
