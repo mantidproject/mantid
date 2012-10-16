@@ -99,7 +99,12 @@ namespace Mantid
         outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
       }
       else
-      {
+      { 
+        // Check that we have some spectra for the workspace
+        if( number_spectra == 0){
+            g_log.error("Instrument has no detectors, unable to create workspace for it");
+            return;
+        }
         // Now create the outputworkspace and copy over the instrument object
         DataObjects::Workspace2D_sptr localWorkspace =
           boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(ws,number_spectra,2,1));
