@@ -121,7 +121,7 @@
          <widget class="QLabel" name="median_test_low_label">
           <property name="minimumSize">
            <size>
-            <width>110</width>
+            <width>135</width>
             <height>0</height>
            </size>
           </property>
@@ -162,6 +162,12 @@
        <layout class="QHBoxLayout" name="horizontalLayout_12">
         <item>
          <widget class="QLabel" name="median_test_out_high_label">
+          <property name="minimumSize">
+           <size>
+            <width>137</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="text">
            <string>Median high outliers</string>
           </property>
@@ -181,7 +187,7 @@
          <widget class="QLabel" name="median_test_out_low_label">
           <property name="minimumSize">
            <size>
-            <width>125</width>
+            <width>135</width>
             <height>0</height>
            </size>
           </property>
@@ -221,7 +227,7 @@
          <widget class="QLabel" name="errorbar_crit_label">
           <property name="minimumSize">
            <size>
-            <width>133</width>
+            <width>137</width>
             <height>0</height>
            </size>
           </property>
@@ -270,7 +276,7 @@
          <widget class="QLabel" name="det_van2_label">
           <property name="minimumSize">
            <size>
-            <width>133</width>
+            <width>160</width>
             <height>0</height>
            </size>
           </property>
@@ -313,7 +319,7 @@
          <widget class="QLabel" name="ratio_var_crit_label">
           <property name="minimumSize">
            <size>
-            <width>133</width>
+            <width>160</width>
             <height>0</height>
            </size>
           </property>

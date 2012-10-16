@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/inelastic/dgs_data_corrections.ui'
 #
-# Created: Fri Oct 12 16:19:15 2012
+# Created: Tue Oct 16 09:29:18 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -133,6 +133,8 @@ class Ui_DataCorrsFrame(object):
         self.van_int_cb.setObjectName(_fromUtf8("van_int_cb"))
         self.horizontalLayout_6.addWidget(self.van_int_cb)
         self.van_int_range_label = QtGui.QLabel(self.det_van_gb)
+        self.van_int_range_label.setMinimumSize(QtCore.QSize(78, 0))
+        self.van_int_range_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.van_int_range_label.setObjectName(_fromUtf8("van_int_range_label"))
         self.horizontalLayout_6.addWidget(self.van_int_range_label)
         self.van_int_range_low_edit = QtGui.QLineEdit(self.det_van_gb)
@@ -169,9 +171,11 @@ class Ui_DataCorrsFrame(object):
         self.horizontalLayout_7 = QtGui.QHBoxLayout()
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.save_procdetvan_cb = QtGui.QCheckBox(self.det_van_gb)
+        self.save_procdetvan_cb.setMinimumSize(QtCore.QSize(138, 0))
         self.save_procdetvan_cb.setObjectName(_fromUtf8("save_procdetvan_cb"))
         self.horizontalLayout_7.addWidget(self.save_procdetvan_cb)
         self.save_procdetvan_label = QtGui.QLabel(self.det_van_gb)
+        self.save_procdetvan_label.setMinimumSize(QtCore.QSize(78, 0))
         self.save_procdetvan_label.setObjectName(_fromUtf8("save_procdetvan_label"))
         self.horizontalLayout_7.addWidget(self.save_procdetvan_label)
         self.save_procdetvan_edit = QtGui.QLineEdit(self.det_van_gb)
@@ -215,6 +219,6 @@ class Ui_DataCorrsFrame(object):
         self.van_int_range_units_cb.setItemText(1, QtGui.QApplication.translate("DataCorrsFrame", "Wavelength", None, QtGui.QApplication.UnicodeUTF8))
         self.van_int_range_units_cb.setItemText(2, QtGui.QApplication.translate("DataCorrsFrame", "TOF", None, QtGui.QApplication.UnicodeUTF8))
         self.save_procdetvan_cb.setText(QtGui.QApplication.translate("DataCorrsFrame", "Save Processed", None, QtGui.QApplication.UnicodeUTF8))
-        self.save_procdetvan_label.setText(QtGui.QApplication.translate("DataCorrsFrame", "       Filename:", None, QtGui.QApplication.UnicodeUTF8))
+        self.save_procdetvan_label.setText(QtGui.QApplication.translate("DataCorrsFrame", "    Filename:", None, QtGui.QApplication.UnicodeUTF8))
         self.save_procdetvan_browse.setText(QtGui.QApplication.translate("DataCorrsFrame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
 

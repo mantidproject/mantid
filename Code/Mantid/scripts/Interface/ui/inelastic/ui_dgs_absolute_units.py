@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/inelastic/dgs_absolute_units.ui'
 #
-# Created: Wed Oct  3 15:57:47 2012
+# Created: Tue Oct 16 09:29:18 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -104,6 +104,7 @@ class Ui_AbsUnitsFrame(object):
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
         self.emin_label = QtGui.QLabel(self.integration_gb)
         self.emin_label.setMinimumSize(QtCore.QSize(225, 0))
+        self.emin_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.emin_label.setObjectName(_fromUtf8("emin_label"))
         self.horizontalLayout_5.addWidget(self.emin_label)
         self.emin_edit = QtGui.QLineEdit(self.integration_gb)
@@ -198,6 +199,7 @@ class Ui_AbsUnitsFrame(object):
         self.horizontalLayout_10 = QtGui.QHBoxLayout()
         self.horizontalLayout_10.setObjectName(_fromUtf8("horizontalLayout_10"))
         self.median_test_out_high_label = QtGui.QLabel(self.diag_gb)
+        self.median_test_out_high_label.setMinimumSize(QtCore.QSize(137, 0))
         self.median_test_out_high_label.setObjectName(_fromUtf8("median_test_out_high_label"))
         self.horizontalLayout_10.addWidget(self.median_test_out_high_label)
         self.median_test_out_high_edit = QtGui.QLineEdit(self.diag_gb)
@@ -205,6 +207,7 @@ class Ui_AbsUnitsFrame(object):
         self.median_test_out_high_edit.setObjectName(_fromUtf8("median_test_out_high_edit"))
         self.horizontalLayout_10.addWidget(self.median_test_out_high_edit)
         self.median_test_out_low_label = QtGui.QLabel(self.diag_gb)
+        self.median_test_out_low_label.setMinimumSize(QtCore.QSize(132, 0))
         self.median_test_out_low_label.setObjectName(_fromUtf8("median_test_out_low_label"))
         self.horizontalLayout_10.addWidget(self.median_test_out_low_label)
         self.median_test_out_low_edit = QtGui.QLineEdit(self.diag_gb)
@@ -268,7 +271,7 @@ class Ui_AbsUnitsFrame(object):
         self.absunits_detvan_browse.setText(QtGui.QApplication.translate("AbsUnitsFrame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
         self.integration_gb.setTitle(QtGui.QApplication.translate("AbsUnitsFrame", "Integration (meV)", None, QtGui.QApplication.UnicodeUTF8))
         self.ei_label.setText(QtGui.QApplication.translate("AbsUnitsFrame", "Incident Energy", None, QtGui.QApplication.UnicodeUTF8))
-        self.emin_label.setText(QtGui.QApplication.translate("AbsUnitsFrame", "Energy range                  E Min", None, QtGui.QApplication.UnicodeUTF8))
+        self.emin_label.setText(QtGui.QApplication.translate("AbsUnitsFrame", "Energy range                             E Min", None, QtGui.QApplication.UnicodeUTF8))
         self.emax_label.setText(QtGui.QApplication.translate("AbsUnitsFrame", "E Max", None, QtGui.QApplication.UnicodeUTF8))
         self.masses_gb.setTitle(QtGui.QApplication.translate("AbsUnitsFrame", "Masses for Absolute Units", None, QtGui.QApplication.UnicodeUTF8))
         self.van_mass_label.setText(QtGui.QApplication.translate("AbsUnitsFrame", "Vanadium Mass", None, QtGui.QApplication.UnicodeUTF8))

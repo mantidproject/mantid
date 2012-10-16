@@ -67,6 +67,12 @@
     <layout class="QHBoxLayout" name="horizontalLayout_9">
      <item>
       <widget class="QLabel" name="output_ws_label">
+       <property name="minimumSize">
+        <size>
+         <width>170</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="text">
         <string>Output Workspace Name</string>
        </property>
@@ -162,7 +168,7 @@
          <widget class="QLabel" name="ei_guess_label">
           <property name="minimumSize">
            <size>
-            <width>110</width>
+            <width>147</width>
             <height>0</height>
            </size>
           </property>
@@ -238,7 +244,7 @@
           </property>
           <property name="minimumSize">
            <size>
-            <width>146</width>
+            <width>147</width>
             <height>0</height>
            </size>
           </property>
@@ -250,14 +256,14 @@
         <item>
          <widget class="QLineEdit" name="tzero_guess_edit">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>15</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -289,6 +295,12 @@
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
          <widget class="QLabel" name="monitor_specid_label">
+          <property name="minimumSize">
+           <size>
+            <width>147</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="toolTip">
            <string>Override the default monitor spectrum IDs for Ei calculation.</string>
           </property>
@@ -300,14 +312,14 @@
         <item>
          <widget class="QLineEdit" name="monitor1_specid_edit">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>10</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>
@@ -323,14 +335,14 @@
         <item>
          <widget class="QLineEdit" name="monitor2_specid_edit">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="minimumSize">
            <size>
-            <width>10</width>
+            <width>0</width>
             <height>0</height>
            </size>
           </property>

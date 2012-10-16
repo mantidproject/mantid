@@ -224,7 +224,10 @@
               </size>
              </property>
              <property name="text">
-              <string>Energy range                  E Min</string>
+              <string>Energy range                             E Min</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -486,6 +489,12 @@
           <layout class="QHBoxLayout" name="horizontalLayout_10">
            <item>
             <widget class="QLabel" name="median_test_out_high_label">
+             <property name="minimumSize">
+              <size>
+               <width>137</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Median high outliers</string>
              </property>
@@ -503,6 +512,12 @@
            </item>
            <item>
             <widget class="QLabel" name="median_test_out_low_label">
+             <property name="minimumSize">
+              <size>
+               <width>132</width>
+               <height>0</height>
+              </size>
+             </property>
              <property name="text">
               <string>Median low outliers</string>
              </property>

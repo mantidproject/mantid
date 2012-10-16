@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/inelastic/dgs_diagnose_detectors.ui'
 #
-# Created: Fri Oct 12 16:19:15 2012
+# Created: Tue Oct 16 09:29:18 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -71,7 +71,7 @@ class Ui_DiagDetsFrame(object):
         self.median_test_high_edit.setObjectName(_fromUtf8("median_test_high_edit"))
         self.horizontalLayout_5.addWidget(self.median_test_high_edit)
         self.median_test_low_label = QtGui.QLabel(self.white_beam_tests_gb)
-        self.median_test_low_label.setMinimumSize(QtCore.QSize(110, 0))
+        self.median_test_low_label.setMinimumSize(QtCore.QSize(135, 0))
         self.median_test_low_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.median_test_low_label.setObjectName(_fromUtf8("median_test_low_label"))
         self.horizontalLayout_5.addWidget(self.median_test_low_label)
@@ -89,6 +89,7 @@ class Ui_DiagDetsFrame(object):
         self.horizontalLayout_12 = QtGui.QHBoxLayout()
         self.horizontalLayout_12.setObjectName(_fromUtf8("horizontalLayout_12"))
         self.median_test_out_high_label = QtGui.QLabel(self.white_beam_tests_gb)
+        self.median_test_out_high_label.setMinimumSize(QtCore.QSize(137, 0))
         self.median_test_out_high_label.setObjectName(_fromUtf8("median_test_out_high_label"))
         self.horizontalLayout_12.addWidget(self.median_test_out_high_label)
         self.median_test_out_high_edit = QtGui.QLineEdit(self.white_beam_tests_gb)
@@ -100,7 +101,7 @@ class Ui_DiagDetsFrame(object):
         self.median_test_out_high_edit.setObjectName(_fromUtf8("median_test_out_high_edit"))
         self.horizontalLayout_12.addWidget(self.median_test_out_high_edit)
         self.median_test_out_low_label = QtGui.QLabel(self.white_beam_tests_gb)
-        self.median_test_out_low_label.setMinimumSize(QtCore.QSize(125, 0))
+        self.median_test_out_low_label.setMinimumSize(QtCore.QSize(135, 0))
         self.median_test_out_low_label.setObjectName(_fromUtf8("median_test_out_low_label"))
         self.horizontalLayout_12.addWidget(self.median_test_out_low_label)
         self.median_test_out_low_edit = QtGui.QLineEdit(self.white_beam_tests_gb)
@@ -117,7 +118,7 @@ class Ui_DiagDetsFrame(object):
         self.horizontalLayout_10 = QtGui.QHBoxLayout()
         self.horizontalLayout_10.setObjectName(_fromUtf8("horizontalLayout_10"))
         self.errorbar_crit_label = QtGui.QLabel(self.white_beam_tests_gb)
-        self.errorbar_crit_label.setMinimumSize(QtCore.QSize(133, 0))
+        self.errorbar_crit_label.setMinimumSize(QtCore.QSize(137, 0))
         self.errorbar_crit_label.setObjectName(_fromUtf8("errorbar_crit_label"))
         self.horizontalLayout_10.addWidget(self.errorbar_crit_label)
         self.errorbar_crit_edit = QtGui.QLineEdit(self.white_beam_tests_gb)
@@ -139,7 +140,7 @@ class Ui_DiagDetsFrame(object):
         self.horizontalLayout_6 = QtGui.QHBoxLayout()
         self.horizontalLayout_6.setObjectName(_fromUtf8("horizontalLayout_6"))
         self.det_van2_label = QtGui.QLabel(self.eff_var_test_gb)
-        self.det_van2_label.setMinimumSize(QtCore.QSize(133, 0))
+        self.det_van2_label.setMinimumSize(QtCore.QSize(160, 0))
         self.det_van2_label.setObjectName(_fromUtf8("det_van2_label"))
         self.horizontalLayout_6.addWidget(self.det_van2_label)
         self.det_van2_edit = QtGui.QLineEdit(self.eff_var_test_gb)
@@ -154,7 +155,7 @@ class Ui_DiagDetsFrame(object):
         self.horizontalLayout_7 = QtGui.QHBoxLayout()
         self.horizontalLayout_7.setObjectName(_fromUtf8("horizontalLayout_7"))
         self.ratio_var_crit_label = QtGui.QLabel(self.eff_var_test_gb)
-        self.ratio_var_crit_label.setMinimumSize(QtCore.QSize(133, 0))
+        self.ratio_var_crit_label.setMinimumSize(QtCore.QSize(160, 0))
         self.ratio_var_crit_label.setObjectName(_fromUtf8("ratio_var_crit_label"))
         self.horizontalLayout_7.addWidget(self.ratio_var_crit_label)
         self.ratio_var_crit_edit = QtGui.QLineEdit(self.eff_var_test_gb)
