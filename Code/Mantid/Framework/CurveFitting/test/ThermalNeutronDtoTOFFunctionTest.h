@@ -66,7 +66,6 @@ public:
   }
 
   /** Test some math functions
-    */
   void P_test_math()
   {
     // 1. erfc() and its derivative
@@ -136,8 +135,8 @@ public:
     // 3. Epithermal neutron vs. Thermal neutron
     //    No need to worry... Thermal neutorn has some non-linear effect.
 
-
   }
+  */
 
 
 };
