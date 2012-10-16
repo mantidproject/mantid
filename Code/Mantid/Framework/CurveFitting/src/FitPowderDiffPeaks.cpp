@@ -258,11 +258,11 @@ namespace CurveFitting
           rightdev = temprightdev;
         }
 
-        if (rightdev < 0 && fabs(rightdev >= leftdev))
+        if ( rightdev < 0 && (std::fabs(rightdev) >= leftdev) )
         {
           stringstream errss;
           errss << "Peak [" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] << "] deviates from guessed value too much. "
-                << "I have no idea how to deal with this now!";
+                << "This situation is not dealt with now!";
           g_log.error() << errss.str() << endl;
           throw logic_error(errss.str());
         }
