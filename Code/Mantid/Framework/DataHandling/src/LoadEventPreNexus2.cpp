@@ -893,6 +893,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
   std::set<PixelType> local_wrongdetids;
 
   // process the individual events
+  size_t numwrongpid = 0;
   for (size_t i = 0; i < current_event_buffer_size; i++)
   {
     DasEvent & temp = *(event_buffer + i);
@@ -1004,7 +1005,9 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
 
         theindex = newindex;
 
-        g_log.warning() << "Find New Wrong Pixel ID = " << pid << std::endl;
+        ++ numwrongpid;
+
+        // g_log.debug() << "Find New Wrong Pixel ID = " << pid << std::endl;
       }
       else
       {
@@ -1019,6 +1022,8 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
     } // END-IF-ELSE: On Event's Pixel's Nature
 
   } // ENDFOR each event
+
+  g_log.notice() << "Number of wrong pixel ID = " << numwrongpid << std::endl;
 
   PARALLEL_CRITICAL( LoadEventPreNexus2_global_statistics )
   {

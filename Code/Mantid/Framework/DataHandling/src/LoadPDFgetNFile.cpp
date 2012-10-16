@@ -2,6 +2,9 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 
 #include <fstream>
 #include <boost/algorithm/string.hpp>
@@ -15,12 +18,18 @@ using namespace Mantid::DataObjects;
 using namespace std;
 using namespace boost;
 
+// FIXME  Add label and unit to output workspace
+// FIXME  Consider to output multiple workspaces if there are multiple column data (X, Y1, E1, Y2, E2)
+
 namespace Mantid
 {
 namespace DataHandling
 {
 
   DECLARE_ALGORITHM(LoadPDFgetNFile)
+
+  // register the algorithm into loadalgorithm factory
+  DECLARE_LOADALGORITHM(LoadPDFgetNFile)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -46,6 +55,78 @@ namespace DataHandling
   }
 
   //----------------------------------------------------------------------------------------------
+  /** This method does a quick file type check by checking the first 100 bytes of the file
+   *  @param filePath- path of the file including name.
+   *  @param nread :: no.of bytes read
+   *  @param header :: The first 100 bytes of the file as a union
+   *  @return true if the given file is of type which can be loaded by this algorithm
+   */
+  bool LoadPDFgetNFile::quickFileCheck(const std::string& filePath, size_t nread, const file_header& header)
+  {
+    UNUSED_ARG(nread);
+    UNUSED_ARG(header);
+
+    // check the file extension
+    std::string extn = extension(filePath);
+    bool bascii;
+    if (extn.compare("sq"))
+      bascii = true;
+    else if (extn.compare("sqa"))
+      bascii = true;
+    else if (extn.compare("sqb"))
+      bascii = true;
+    else if (extn.compare("gr"))
+      bascii = true;
+    else if (extn.compare("ain"))
+      bascii = true;
+    else if (extn.compare("braw"))
+      bascii = true;
+    else if (extn.compare("bsmo"))
+      bascii = true;
+    else
+      bascii = false;
+
+    /* check the bit of header
+    bool is_ascii(true);
+    for (size_t i = 0; i < nread; i++)
+    {
+      if (!isascii(header.full_hdr[i]))
+        is_ascii = false;
+    }
+     return (is_ascii || bascii);
+    */
+
+    return (bascii);
+  }
+
+  /** checks the file by opening it and reading few lines
+   *  @param filePath :: name of the file including its path
+   *  @return an integer value how much this algorithm can load the file
+   */
+  int LoadPDFgetNFile::fileCheck(const std::string& filePath)
+  {
+    std::ifstream file(filePath.c_str());
+    if (!file)
+    {
+      g_log.error("Unable to open file: " + filePath);
+      throw Exception::FileError("Unable to open file: ", filePath);
+    }
+    std::string str;
+    getline(file, str);//workspace title first line
+    while (!file.eof())
+    {
+      getline(file, str);
+      if (startsWith(str, "#L"))
+      {
+        return 80;
+      }
+    }
+
+    return 0;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Define input
     */
   void LoadPDFgetNFile::init()
@@ -59,11 +140,12 @@ namespace DataHandling
     exts.push_back(".braw");
     exts.push_back(".bsmo");
 
-    auto fileproperty = new FileProperty("InputFile", "", FileProperty::Load, exts, Kernel::Direction::Input);
+    auto fileproperty = new FileProperty("Filename", "", FileProperty::Load, exts, Kernel::Direction::Input);
     this->declareProperty(fileproperty, "Name of the PDFgetN file to load.");
 
-    auto wsproperty = new WorkspaceProperty<Workspace2D>("OutputWorkspace", "Anonymous", Kernel::Direction::Output);
-    this->declareProperty(wsproperty, "Name of output workspace. ");
+    // auto wsproperty = new WorkspaceProperty<Workspace2D>("OutputWorkspace", "Anonymous", Kernel::Direction::Output);
+    // this->declareProperty(wsproperty, "Name of output workspace. ");
+    declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -72,7 +154,7 @@ namespace DataHandling
   void LoadPDFgetNFile::exec()
   {
     // 1. Parse input file
-    std::string inpfilename = getProperty("InputFile");
+    std::string inpfilename = getProperty("Filename");
 
     parseDataFile(inpfilename);
 
@@ -208,11 +290,14 @@ namespace DataHandling
 
     // 3. Parse
     size_t numcols = terms.size()-1;
+    stringstream msgss;
+    msgss << "Column Names: ";
     for (size_t i = 0; i < numcols; ++i)
     {
       this->mColumnNames.push_back(terms[i+1]);
-      cout << "Column " << i << ": " << mColumnNames[i] << std::endl;
+      msgss << setw(-3) << i << ": " << setw(-10) << mColumnNames[i];
     }
+    g_log.information() << msgss.str() << endl;
 
     return;
   }
@@ -228,16 +313,17 @@ namespace DataHandling
 
     // 2. Validate
     size_t numcols = mData.size();
-    if (terms.size() != numcols)
+    if (line[0] == '#')
     {
-      g_log.warning() << "Line (" << line << ") has incorrect number of columns other than " << numcols << " as expected. " << std::endl;
-      /*
-      for (size_t i = 0; i < terms.size(); ++i)
-      {
-        cout << "Term " << i << " = " << terms[i] << "   Size = " << terms[i].size() << std::endl;
-      }
-      */
-      // throw std::runtime_error("Input data line has wrong number of columns.");
+      // Comment/information line to indicate the start of another section of data
+      return;
+    }
+    else if (terms.size() != numcols)
+    {
+      // Data line with incorrect number of columns
+      stringstream warnss;
+      warnss <<  "Line (" << line << ") has incorrect number of columns other than " << numcols << " as expected. ";
+      g_log.warning(warnss.str());
       return;
     }
 
@@ -266,19 +352,56 @@ namespace DataHandling
       mData[i].push_back(tempvalue);
     }
 
-    /*
-    if (mData[0].size() < 10)
-    {
-      cout << mData.size() << ", " << mData[0].size() << ", " << mData[1].size() << std::endl;
-      cout << mData[0].back() << ", " << mData[1].back() << endl;
-    }
-    */
-
     return;
   }
 
   //----------------------------------------------------------------------------------------------
+  void LoadPDFgetNFile::setUnit(Workspace2D_sptr ws)
+  {
+    // 1. Set X
+    string xcolname = mColumnNames[0];
+
+    if (xcolname.compare("Q") == 0)
+    {
+      string unit = "MomentumTransfer";
+      ws->getAxis(0)->setUnit(unit);
+    }
+    else if (xcolname.compare("r") == 0)
+    {
+      ws->getAxis(0)->unit() = UnitFactory::Instance().create("Label");
+      Unit_sptr unit = ws->getAxis(0)->unit();
+      boost::shared_ptr<Units::Label> label = boost::dynamic_pointer_cast<Units::Label>(unit);
+      label->setLabel("AtomicDistance", "Angstrom");
+    }
+    else
+    {
+      stringstream errss;
+      errss << "X axis " << xcolname << " is not supported for unit. " << endl;
+      g_log.warning() << errss.str() << endl;
+    }
+
+    // 2. Set Y
+    string ycolname = mColumnNames[1];
+    string ylabel("");
+    if (ycolname.compare("G(r)") == 0)
+    {
+      ylabel = "PDF";
+    }
+    else if (ycolname.compare("S") == 0)
+    {
+      ylabel = "S";
+    }
+    else
+    {
+      ylabel = "Intensity";
+    }
+    ws->setYUnitLabel(ylabel);
+
+    return;
+  }
+
   /** Generate output data workspace
+    * Assumption.  One data set must contain more than 1 element.
     */
   void LoadPDFgetNFile::generateDataWorkspace()
   {
@@ -288,13 +411,19 @@ namespace DataHandling
       throw runtime_error("Data set has not been initialized. Quit!");
     }
 
-    // 1. Figure out number of data set
+    // 1. Figure out direction of X and number of data set
+    bool xascend = true;
+    if (mData.size() >= 2 && mData[0][1] < mData[0][0])
+    {
+      xascend = false;
+    }
+
     size_t numsets = 0;
     vector<size_t> numptsvec;
     size_t arraysize = mData[0].size();
     if (arraysize <= 1)
     {
-      throw runtime_error("Data array size is less and equal to 1.  Unphysically too small.");
+      throw runtime_error("Number of columns in data is less and equal to 1.  It is unphysically too small.");
     }
 
     double prex = mData[0][0];
@@ -302,18 +431,24 @@ namespace DataHandling
     for (size_t i = 1; i < arraysize; ++i)
     {
       double curx = mData[0][i];
-      if (curx < prex)
+      if ( ((xascend) && (curx < prex)) || ((!xascend) && (curx > prex)) )
       {
+        // X in ascending order and hit the end of one set of data
+        // X in descending order and hit the end of one set of data
+        // Record the current data set information and start the next data set
         numsets += 1;
         numptsvec.push_back(vecsize);
         vecsize = 1;
       }
       else
       {
+        // In the middle of a set of data
         ++ vecsize;
       }
+      // Loop variable udpate
       prex = curx;
-    }
+    } // ENDFOR
+    // Record the last data set information
     ++ numsets;
     numptsvec.push_back(vecsize);
 
@@ -327,7 +462,7 @@ namespace DataHandling
           samesize = false;
         }
       }
-      std::cout << "Set " << i << ":  Number of Points = " << numptsvec[i] << std::endl;
+      g_log.information() << "Set " << i << ":  Number of Points = " << numptsvec[i] << std::endl;
     }
     if (!samesize)
     {
@@ -338,9 +473,11 @@ namespace DataHandling
     }
     size_t size = numptsvec[0];
 
-    // 2. Start the
+    // 2. Generate workspace2D object and set the unit
     outWS = boost::dynamic_pointer_cast<Workspace2D>(
           API::WorkspaceFactory::Instance().create("Workspace2D", numsets, size, size));
+
+    setUnit(outWS);
 
     // 3. Set number
     size_t numspec = outWS->getNumberHistograms();
@@ -353,9 +490,15 @@ namespace DataHandling
       size_t baseindex = i*size;
       for (size_t j = 0; j < size; ++j)
       {
-        X[j] = mData[0][baseindex+j];
-        Y[j] = mData[1][baseindex+j];
-        E[j] = mData[2][baseindex+j];
+        size_t index;
+        if (xascend)
+          index = j;
+        else
+          index = (size-1)-j;
+
+        X[index] = mData[0][baseindex+j];
+        Y[index] = mData[1][baseindex+j];
+        E[index] = mData[2][baseindex+j];
       }
     }
 

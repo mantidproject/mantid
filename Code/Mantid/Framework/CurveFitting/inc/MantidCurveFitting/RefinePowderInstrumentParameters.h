@@ -3,15 +3,22 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/BackgroundFunction.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidCurveFitting/Bk2BkExpConvPV.h"
 #include "MantidCurveFitting/Polynomial.h"
+#include "MantidCurveFitting/BackToBackExponential.h"
+#include "MantidCurveFitting/ThermalNeutronDtoTOFFunction.h"
+#include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/FunctionValues.h"
+
+using namespace std;
+using namespace Mantid;
+using namespace Mantid::DataObjects;
+using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -19,29 +26,13 @@ namespace CurveFitting
 {
 
   /** RefinePowderInstrumentParameters : Algorithm to refine instrument geometry parameters only.
-    How to use the algorithm to refine instrument geometry?
-  - Input includes
-  * Data workspace	dataWS
-  * Peak parameters	?????  Not sure which to use.  (1) ThermalNeutronBk2BkExpConvPV OR (2) Bk2BkExpConvPV
-  * List of peaks (H, K, L) to fit for Bk2BkExpConvPV
-  - Algorithm
-  * For each input peak:
-    1. Calculate TOF_h
-    2. Find a proper range of data including peak and background around each peak
-    3. For each peak
-      a) Remove peak and fit the background
-         Considering: 	get a linear function of two ends
-            only include certain range of data around this linear function
-            fit for all the points selected
-      b) Construct a composite function containing (1) Bk2BkExpConvPV and (2) background function
-      c) Fix background and fit the peak
-      d) If fitting result is acceptible, record TOF_h
-      e) Record the calcualed data as further refer.
-    4. Construct workspace peakpositionWS such that
-       dataGeometry.X = d-spacing value
-       dataGeometry.Y = Observed TOF_h
-    5. Fit zero, zerot, Dtt1, Dtt1t,and/or Dtt2t
+    This algorithm is the second part of the algorithm suite.
+    It must use the output from FitPowderDiffPeaks() as the inputs.
 
+
+
+    [ASSUMPTIONS]
+    1.   CYRSTAL LATTICE IS CORRECT!  AS FOR FITTING INSTRUMENT PARAMETER, IT IS A GIVEN VALUE.
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -86,75 +77,90 @@ namespace CurveFitting
     // Implement abstract Algorithm methods
     void exec();
 
-    void generatePeaksFromInput(DataObjects::TableWorkspace_sptr peakparamws,
-                                std::map<std::vector<int>, CurveFitting::Bk2BkExpConvPV_sptr>& peaks);
+    /// Generate peaks from table (workspace)
+    void genPeaksFromTable(DataObjects::TableWorkspace_sptr peakparamws);
 
+    /// Import instrument parameter from table (workspace)
     void importParametersFromTable(DataObjects::TableWorkspace_sptr parameterWS, std::map<std::string, double>& parameters);
 
-    void fitPeaks(int workspaceindex, std::vector<std::vector<int> >& goodfitpeaks, std::vector<double> &goodfitchi2);
-
-    /// Fit a single peak
-    bool fitSinglePeak(API::CompositeFunction_sptr compfunction, Bk2BkExpConvPV_sptr peak, BackgroundFunction_sptr background,
-                       double leftdev, double rightdev, size_t workspaceindex, double prog, double deltaprog,
-                       double &chi2, std::string &fitstatus);
-
-    bool fitSinglePeakSimple(API::CompositeFunction_sptr compfunction, CurveFitting::Bk2BkExpConvPV_sptr peak,
-                             CurveFitting::BackgroundFunction_sptr background, double leftdev, double rightdev,
-                             size_t workspaceindex, double prog, double deltaprog,
-                             double& chi2, std::string& fitstatus);
-
-    /// Find max height (peak center)
-    void findMaxHeight(API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                       double xmin, double xmax, double& center, double& centerleftbound, double& centerrightbound);
-
-    bool fitLinearBackground(CurveFitting::Bk2BkExpConvPV_sptr peak,
-                             size_t workspaceindex, BackgroundFunction_sptr, double xmin, double xmax);
-
-    /// Fit background by removing the peak analytically
-    bool fitBackground(CurveFitting::Bk2BkExpConvPV_sptr peak, size_t workspaceindex,
-                       CurveFitting::BackgroundFunction_sptr bkgdfunc, double xmin, double xmax);
+    /// Import the Monte Carlo related parameters from table
+    void importMonteCarloParametersFromTable(TableWorkspace_sptr tablews, vector<string> parameternames,
+                                             vector<double>& stepsizes, vector<double>& lowerbounds,
+                                             vector<double>& upperbounds);
 
     /// Generate (output) workspace of peak centers
-    void genPeakCentersWorkspace(std::map<std::vector<int>, CurveFitting::Bk2BkExpConvPV_sptr> peaks,
-                                      std::vector<std::vector<int> > goodpeaks, std::vector<double> goodfitchi2);
+    void genPeakCentersWorkspace();
 
-    /// Generate output peak parameters workspace
-    void generateOutputPeakParameterWorkspace(std::vector<std::vector<int> > goodfitpeaks);
+    /// Generate (output) table worksspace for instrument parameters
+    DataObjects::TableWorkspace_sptr genOutputInstrumentParameterTable();
 
     /// Fit instrument geometry parameters by ThermalNeutronDtoTOFFunction
     void fitInstrumentParameters();
 
+    /// Core Monte Carlo random walk on parameter-space
+    void doParameterSpaceRandomWalk(vector<string> parnames, vector<double> lowerbounds,
+                                    vector<double> upperbounds, vector<double> stepsizes, size_t maxsteps, double stepsizescalefactor);
+
+    /// Get the names of the parameters of D-TOF conversion function
+    void getD2TOFFuncParamNames(vector<string>& parnames);
+
+    /// Calculate the value and chi2
+    double calculateD2TOFFunction(FunctionDomain1DVector domain, FunctionValues& values, const MantidVec &rawY, const MantidVec& rawE);
+
     /// Calculate d-space value from peak's miller index for thermal neutron
-    double calculateDspaceValue(std::vector<int> hkl);
+    double calculateDspaceValue(std::vector<int> hkl, double lattice);
 
-    /// Create output of peak patterns
-    DataObjects::Workspace2D_sptr createPeakDataWorkspace(size_t workspaceindex);
+    /// Parse Fit() output parameter workspace
+    std::string parseFitParameterWorkspace(API::ITableWorkspace_sptr paramws);
 
-    /// Data
-    API::MatrixWorkspace_sptr dataWS;
+    /// Parse the fitting result
+    std::string parseFitResult(API::IAlgorithm_sptr fitalg, double& chi2);
 
-    /// Output Workspace
-    DataObjects::Workspace2D_sptr outWS;
+    /// Output Workspace containing the dspacing ~ TOF peak positions
+    DataObjects::Workspace2D_sptr dataWS;
 
     /// Map for all peaks to fit individually
-    std::map<std::vector<int>, CurveFitting::Bk2BkExpConvPV_sptr> mPeaks;
+    std::map<std::vector<int>, CurveFitting::BackToBackExponential_sptr> mPeaks;
+
+    /// Map for all peaks' error (fitted vs. experimental): [HKL]: Chi^2
+    std::map<std::vector<int>, double> mPeakErrors;
 
     /// Map for function (instrument parameter)
     std::map<std::string, double> mFuncParameters;
+    /// Map to store the original (input) parameters
+    std::map<std::string, double> mOrigParameters;
 
-    /// Map for input (original) function
-    std::map<std::string, double> mInputFuncParameters;
+    std::vector<std::pair<double, std::vector<double> > > mBestParameters;
 
-    /// Peak centers in d-spacing and TOF for final fitting
-    std::map<std::vector<int>, std::pair<double, double> > mPeakCenters;
+    /// Minimum allowed sigma of a peak
+    double mMinSigma;
 
-    /// Data for each individual peaks. (HKL)^2, vector index, function values
-    std::map<int, std::pair<std::vector<size_t>, API::FunctionValues> > mPeakData;
+    /// Minimum number of fitted peaks for refinement
+    size_t mMinNumFittedPeaks;
+
+    /// Maximum number of data stored
+    size_t mMaxNumberStoredParameters;
 
     ///
-    std::vector<std::string> mPeakParameterNames;
+    CurveFitting::ThermalNeutronDtoTOFFunction_sptr mFunction;
 
   };
+
+  /** Formular for linear iterpolation: X = [(xf-x0)*Y - (xf*y0-x0*yf)]/(yf-y0)
+    */
+  inline double linearInterpolateX(double x0, double xf, double y0, double yf, double y)
+  {
+    double x = ((xf-x0)*y - (xf*y0-x0*yf))/(yf-y0);
+    return x;
+  }
+
+  /** Formula for linear interpolation: Y = ( (xf*y0-x0*yf) + x*(yf-y0) )/(xf-x0)
+    */
+  inline double linearInterpolateY(double x0, double xf, double y0, double yf, double x)
+  {
+    double y = ((xf*y0-x0*yf) + x*(yf-y0))/(xf-x0);
+    return y;
+  }
 
 
 } // namespace CurveFitting

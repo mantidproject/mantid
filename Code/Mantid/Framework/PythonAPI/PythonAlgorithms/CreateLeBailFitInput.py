@@ -1,11 +1,8 @@
-# import mantid
-# import mantid.api
-# import mantid.simpleapi
-# import mantid.kernel
 from mantid.api import PythonAlgorithm, registerAlgorithm, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction
 from mantid.kernel import Direction, StringListValidator
 
-# Create an empty table workspace to be populated by a python script.
+_OUTPUTLEVEL = "NOOUTPUT"
+
 class CreateLeBailFitInput(PythonAlgorithm):
     """ Create the input TableWorkspaces for LeBail Fitting
     """
@@ -61,10 +58,10 @@ class CreateLeBailFitInput(PythonAlgorithm):
         # 3. Import reflections list
         hkldict = self.importFullProfHKLFile(reflectionfilename)
 
-        print "[Create LeBailFit Inputs]"
         hkllist = sorted(hkldict.keys())
-        for hkl in hkllist:
-            print "Import Peak (%d, %d, %d): FWHM = %f" % (hkl[0], hkl[1], hkl[2], hkldict[hkl]["FWHM"])
+        if _OUTPUTLEVEL == "INFORMATION":
+            for hkl in hkllist:
+                print "Import Peak (%d, %d, %d): FWHM = %f" % (hkl[0], hkl[1], hkl[2], hkldict[hkl]["FWHM"])
 
         # 4. Import parameter file (.irf)
         peakparamsdict = self.parseFullprofPeakProfileFile(irffilename)
@@ -116,12 +113,14 @@ class CreateLeBailFitInput(PythonAlgorithm):
             dkey = (h, k, l)
 
             if hkldict.has_key(dkey):
-                print "Warning! Duplicate HKL %d, %d, %d" (h, k, l)
+                if _OUTPUTLEVEL == "INFORMATION": 
+                    print "Warning! Duplicate HKL %d, %d, %d" (h, k, l)
                 continue
 
             if fwhm < 1.0E-5:
                 # Peak width is too small/annihilated peak
-                print "Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, l)
+                if _OUTPUTLEVEL == "INFORMATION": 
+                    print "Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, l)
                 continue
 
             hkldict[dkey] = {}
@@ -301,7 +300,8 @@ class CreateLeBailFitInput(PythonAlgorithm):
             raise NotImplementedError("Bank %s does not exist in input .irf file." % (bank))
 
         for parname in sorted(paramdict[bank].keys()):
-            print "Insert parameter %s , value = %f " % (parname, paramdict[bank][parname])
+            if _OUTPUTLEVEL == "INFORMATION": 
+                print "Insert parameter %s , value = %f " % (parname, paramdict[bank][parname])
             tablews.addRow([parname, paramdict[bank][parname], "f", -1.0E100, 1.0E100, 1.0])
         # ENDFOR
 

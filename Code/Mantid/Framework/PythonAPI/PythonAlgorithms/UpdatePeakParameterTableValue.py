@@ -30,7 +30,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
     def PyInit(self):
         """ Property definition
         """
-        tableprop = mantid.api.ITableWorkspaceProperty("PeakParameterWorkspace", "", mantid.kernel.Direction.Input)
+        tableprop = mantid.api.ITableWorkspaceProperty("InputWorkspace", "", mantid.kernel.Direction.InOut)
 	self.declareProperty(tableprop, "Name of Calibration Table Workspace")
 
         colchoices = ["Value", "FitOrTie", "Min", "Max", "StepSize"]
@@ -46,11 +46,13 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         self.declareProperty("NewStringValue", "", "New string value to set to the selected cell(s).")
 
+        return
+
     def PyExec(self):
         """ Main Execution Body
         """
         # 1. Process input parameter TableWorkspace
-        tableWS = self.getProperty("PeakParameterWorkspace").value
+        tableWS = self.getProperty("InputWorkspace").value
         result = self.parseTableWorkspace(tableWS)
         paramnamedict = result[0]
         colnamedict = result[1]
@@ -94,6 +96,9 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         for irow in rownumberlist:
             irow = int(irow)
             tableWS.setCell(irow, icolumn, value)
+
+        # 4. 
+        self.setProperty("InputWorkspace", tableWS)
 
         return
         

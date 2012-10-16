@@ -7,6 +7,7 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/Jacobian.h"
 
 namespace Mantid
 {
@@ -58,6 +59,18 @@ namespace CurveFitting
     /// Core function (inline) to calcualte TOF_h from d-spacing
     inline double corefunction(double dh, double dtt1, double dtt1t, double dtt2t,
                                double zero, double zerot, double width, double tcross) const;
+
+    /// Derivative
+    void functionDerivLocal(API::Jacobian* , const double* , const size_t );
+
+    /// Derivative
+    // void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
+
+    /// Derviate to overwritten
+    void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData);
+
+    // void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
+
     
   };
 

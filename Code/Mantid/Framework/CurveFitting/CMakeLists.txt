@@ -25,6 +25,7 @@ set ( SRC_FILES
 	src/Fit.cpp
 	src/Fit1D.cpp
 	src/FitMW.cpp
+	src/FitPowderDiffPeaks.cpp
 	src/FlatBackground.cpp
 	src/GSLFunctions.cpp
 	src/GSLMatrix.cpp
@@ -104,6 +105,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Fit.h
 	inc/MantidCurveFitting/Fit1D.h
 	inc/MantidCurveFitting/FitMW.h
+	inc/MantidCurveFitting/FitPowderDiffPeaks.h
 	inc/MantidCurveFitting/FlatBackground.h
 	inc/MantidCurveFitting/GSLFunctions.h
 	inc/MantidCurveFitting/GSLJacobian.h
@@ -174,6 +176,7 @@ set ( TEST_FILES
 	ExpDecayTest.h
 	FRConjugateGradientTest.h
 	FitMWTest.h
+	FitPowderDiffPeaksTest.h
 	FlatBackgroundTest.h
 	FunctionFactoryConstraintTest.h
 	GSLMatrixTest.h

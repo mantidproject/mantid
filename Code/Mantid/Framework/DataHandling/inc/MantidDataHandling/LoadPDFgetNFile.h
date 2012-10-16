@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IDataFileChecker.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 namespace Mantid
@@ -32,7 +33,7 @@ namespace DataHandling
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport LoadPDFgetNFile : public API::Algorithm
+  class DLLExport LoadPDFgetNFile : public API::IDataFileChecker
   {
   public:
     LoadPDFgetNFile();
@@ -54,6 +55,10 @@ namespace DataHandling
     void init();
     /// Implement abstract Algorithm methods
     void exec();
+    /// do a quick check that this file can be loaded
+    virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
+    /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+    virtual int fileCheck(const std::string& filePath);
 
     /// Parse PDFgetN data file
     void parseDataFile(std::string filename);
@@ -70,7 +75,7 @@ namespace DataHandling
     /// Output data workspace
     DataObjects::Workspace2D_sptr outWS;
 
-    /// Data structure to hold input
+    /// Data structure to hold input:  Size = Number of columns in input file
     std::vector<std::vector<double> > mData;
 
     /// Names of the columns of the data
@@ -78,6 +83,9 @@ namespace DataHandling
 
     /// Generate output workspace
     void generateDataWorkspace();
+
+    /// Set X and Y axis unit and lebel
+    void setUnit(DataObjects::Workspace2D_sptr ws);
     
   };
 

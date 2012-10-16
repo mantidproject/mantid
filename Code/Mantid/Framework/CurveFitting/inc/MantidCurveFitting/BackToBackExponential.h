@@ -90,6 +90,8 @@ namespace Mantid
       const double m_cutOff; //prevent overflow
     };
 
+    typedef boost::shared_ptr<BackToBackExponential> BackToBackExponential_sptr;
+
   } // namespace CurveFitting
 } // namespace Mantid
 

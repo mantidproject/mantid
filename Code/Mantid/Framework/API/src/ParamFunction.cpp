@@ -39,6 +39,16 @@ ParamFunction::~ParamFunction()
  */
 void ParamFunction::setParameter(size_t i, const double& value, bool explicitlySet)
 {
+  if (value != value || !(value > -DBL_MAX && value < DBL_MAX))
+  {
+    std::stringstream errmsg;
+    errmsg << "Trying to set a NaN or infinity value " << value << " to parameter " << this->parameterName(i)
+           << " Out of lower bound = " << -DBL_MAX << " is " << (value > -DBL_MAX)
+           << " Out of upper bound = " << DBL_MAX << " is " << (value < DBL_MAX);
+    g_log.warning() << errmsg.str() << std::endl;
+    throw std::runtime_error(errmsg.str());
+  }
+
   if (i >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
@@ -140,7 +150,15 @@ double ParamFunction::getParameter(const std::string& name)const
     msg << "ParamFunction parameter ("<<ucName<<") does not exist.";
     throw std::invalid_argument(msg.str());
   }
-  return m_parameters[it - m_parameterNames.begin()];
+
+  double parvalue = m_parameters[it - m_parameterNames.begin()];
+
+  if (parvalue != parvalue || !(parvalue > -DBL_MAX && parvalue < DBL_MAX))
+  {
+    g_log.warning() << "Parameter " << name << " has a NaN or infinity value " << std::endl;
+  }
+
+  return parvalue;
 }
 
 /**

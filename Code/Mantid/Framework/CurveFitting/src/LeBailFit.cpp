@@ -335,7 +335,7 @@ void LeBailFit::calculatePattern(size_t workspaceindex)
             CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak = mPeaks[hkl2];
             if (!peak)
             {
-                g_log.warning() << "There is no peak corresponding to (HKL)^2 = " << hkl2 << std::endl;
+                g_log.information() << "[Warning] There is no peak corresponding to (HKL)^2 = " << hkl2 << std::endl;
             }
             else
             {
@@ -1117,7 +1117,7 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> gro
         if (intensity != intensity)
         {
           // case of NaN
-          g_log.warning() << "Unphysical intensity.  Temp = " << temp << "  SumY = " << sumYs[j]
+          g_log.information() << "[Warning] Unphysical intensity.  Temp = " << temp << "  SumY = " << sumYs[j]
                           << "  Peak value = " << peakvalues[i][j] << " Data = " << datay[ileft+j]
                           << "  Background = " << bkgdvalues[i][j] << std::endl;
         }
@@ -1133,15 +1133,6 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> gro
     peakintensities.push_back(std::make_pair(peaks[i], intensity));
     g_log.debug() << "DBx406 Result Per Group: Peak " << peaks[i] << "  Height = " << intensity << std::endl;
   }
-
-  /*
-  std::stringstream msg;
-  for (size_t i = 0; i < peakintensities.size(); ++i)
-  {
-    msg << "P" << i << " = " << peakintensities[i].second << "; ";
-  }
-  g_log.information() << msg.str() << std::endl;
-  */
 
   return;
 }
@@ -1418,6 +1409,16 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
   g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 = " << mLeBaiLFitChi2
                  << " Fit Status = " << fitstatus << std::endl;
 
+  API::ITableWorkspace_sptr covarws = fitalg->getProperty("OutputNormalisedCovarianceMatrix");
+  if (covarws)
+  {
+    declareProperty(
+          new API::WorkspaceProperty<API::ITableWorkspace>("OutputNormalisedCovarianceMatrix","",Kernel::Direction::Output),
+          "The name of the TableWorkspace in which to store the final covariance matrix" );
+    setPropertyValue("OutputNormalisedCovarianceMatrix", "NormalisedCovarianceMatrix");
+    setProperty("OutputNormalisedCovarianceMatrix", covarws);
+  }
+
   API::ITableWorkspace_sptr fitvaluews
       = (fitalg->getProperty("OutputParameters"));
   if (fitvaluews)
@@ -1683,21 +1684,21 @@ bool LeBailFit::generatePeaksFromInput(size_t workspaceindex)
     // double alpha = speak->getParameter("Alpha");
     if (alpha != alpha || alpha <= 0)
     {
-      g_log.warning() << "Peak (" << h << ", " << k << ", " << l << ") Alpha = " <<
+      g_log.information() << "[Warning] Peak (" << h << ", " << k << ", " << l << ") Alpha = " <<
                          alpha << " is not physical!" << std::endl;
       peakparametererror = true;
     }
     // double beta = speak->getParameter("Beta");
     if (beta != beta || beta <= 0)
     {
-      g_log.warning() << "Peak (" << h << ", " << k << ", " << l << ") Beta = " <<
+      g_log.information() << "[Warning] Peak (" << h << ", " << k << ", " << l << ") Beta = " <<
                          beta << " is not physical!" << std::endl;
       peakparametererror = true;
     }
     // double sigma2 = speak->getParameter("Sigma2");
     if (sigma2 != sigma2 || sigma2 <= 0)
     {
-      g_log.warning() << "Peak (" << h << ", " << k << ", " << l << ") Sigma^2 = " <<
+      g_log.information() << "[Warning] Peak (" << h << ", " << k << ", " << l << ") Sigma^2 = " <<
                          sigma2 << " is not physical!" << std::endl;
       peakparametererror = true;
     }
@@ -2129,7 +2130,7 @@ API::MatrixWorkspace_sptr LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inp
     }
     else
     {
-        g_log.warning() << "Input FitRegion has more than 2 entries.  It is not accepted. " << std::endl;
+        g_log.warning() << "Input FitRegion has more than 2 entries.  Using default in stread." << std::endl;
 
         tof_min = inpws->readX(wsindex)[0];
         tof_max = inpws->readX(wsindex).back();

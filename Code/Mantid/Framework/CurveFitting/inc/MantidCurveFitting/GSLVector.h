@@ -4,6 +4,7 @@
 #include <gsl/gsl_vector.h>
 
 #include <stdexcept>
+#include <sstream>
 
 namespace Mantid
 {
@@ -113,7 +114,10 @@ namespace Mantid
       if (i < m_vector->size) gsl_vector_set(m_vector,i,value);
       else
       {
-        throw std::out_of_range("GSLVector index is out of range.");
+        std::stringstream errmsg;
+        errmsg << "GSLVector index = " << i << " is out of range = "
+               << m_vector->size << " in GSLVector.set()";
+        throw std::out_of_range(errmsg.str());
       }
     }
     /// get an element
@@ -121,7 +125,11 @@ namespace Mantid
     double get(size_t i) const
     {
       if (i < m_vector->size) return gsl_vector_get(m_vector,i);
-      throw std::out_of_range("GSLVector index is out of range.");
+
+      std::stringstream errmsg;
+      errmsg << "GSLVector index = " << i << " is out of range = "
+             << m_vector->size << " in GSLVector.get()";
+      throw std::out_of_range(errmsg.str());
     }
 
     // Set all elements to zero

@@ -1,36 +1,43 @@
 #include "MantidCurveFitting/RefinePowderInstrumentParameters.h"
 
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/ArrayProperty.h"
+
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidCurveFitting/Fit.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidCurveFitting/BackgroundFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/ParameterTie.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TextAxis.h"
-#include "MantidCurveFitting/ThermalNeutronDtoTOFFunction.h"
+
+#include "MantidCurveFitting/Fit.h"
+#include "MantidCurveFitting/BackgroundFunction.h"
 #include "MantidCurveFitting/Polynomial.h"
-#include "MantidAPI/ConstraintFactory.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Gaussian.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+#include <fstream>
+#include <iomanip>
+
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 
-#define PEAKRANGEFACTOR 20.0
+using namespace std;
 
 namespace Mantid
 {
 namespace CurveFitting
 {
 
-DECLARE_ALGORITHM(RefinePowderInstrumentParameters)
+  DECLARE_ALGORITHM(RefinePowderInstrumentParameters)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -46,1151 +53,750 @@ DECLARE_ALGORITHM(RefinePowderInstrumentParameters)
   {
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Set up documention
+    */
   void RefinePowderInstrumentParameters::initDocs()
   {
-
+    setWikiSummary("Refine the instrument geometry related parameters for powder diffractomer. ");
+    setOptionalMessage("Parameters include Dtt1, Dtt1t, Dtt2t, Zero, Zerot. ");
   }
 
-
+  //----------------------------------------------------------------------------------------------
   /** Parameter declaration
    */
   void RefinePowderInstrumentParameters::init()
   {
-      // Input data workspace
-      declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "Anonymous", Direction::Input),
-                      "Input workspace for data");
+    // Input/output peaks table workspace
+    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("InputPeakParameterWorkspace", "Anonymous", Direction::Input),
+                    "TableWorkspace containg all peaks' parameters.");
 
-      // Output workspace
-      declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace", "", Direction::Output),
-                      "Output Workspace2D for the fitted d-TOF curves. ");
+    // Input and output instrument parameters table workspace
+    declareProperty(
+          new API::WorkspaceProperty<DataObjects::TableWorkspace>
+          ("InputInstrumentParameterWorkspace", "AnonymousInstrument", Direction::InOut),
+          "TableWorkspace containg instrument's parameters.");
 
-      // Input/output peaks table workspace
-      declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("PeaksParametersWorkspace", "", Direction::Input),
-                      "TableWorkspace containg all peaks' parameters.");
+    // Output workspace
+    declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace", "AnonymousOut", Direction::Output),
+                    "Output Workspace2D for the d-TOF curves. ");
 
-      // Input and output instrument parameters table workspace
-      declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("InstrumentParametersWorkspace", "", Direction::InOut),
-                      "TableWorkspace containg instrument's parameters.");
+    // Workspace to output fitted peak parameters
+    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputInstrumentParameterWorkspace", "AnonymousOut2", Direction::Output),
+                    "Output TableWorkspace for the fitted peak parameters for each peak.");
 
-      // Parameters to fit
-      declareProperty(new Kernel::ArrayProperty<std::string>("ParametersToFit"), "Names of the parameters to fit. ");
+    // Lower limit on number of peaks for fitting
+    declareProperty("MinNumberFittedPeaks", 5,
+                    "Minimum number of fitted peaks for refining instrument parameters.");
 
-      // Workspace to plot pattern
-      declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputDataWorkspace", "", Direction::Output),
-                      "Output Workspace2D for the fitted data (peaks). ");
+    // Refinement algorithm
+    vector<string> algoptions;
+    algoptions.push_back("DirectFit");
+    algoptions.push_back("MonteCarlo");
+    auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
+    declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
+                    "Algorithm to refine the instrument parameters.");
 
-      // Workspace index of the
-      declareProperty("WorkspaceIndex", 0, "Worskpace index for the data to refine against.");
+    // Parameters to fit
+    declareProperty(new Kernel::ArrayProperty<std::string>("ParametersToFit"),
+                    "Names of the parameters to fit. ");
 
-      return;
+    // Mininum allowed peak's sigma (avoid wrong fitting peak with very narrow width)
+    declareProperty("MinSigma", 1.0, "Minimum allowed value for Sigma of a peak.");
+
+    // Method to calcualte the standard error of peaks
+    vector<string> stdoptions;
+    stdoptions.push_back("ConstantValue");
+    stdoptions.push_back("PeakFitting");
+    auto listvalidator = boost::make_shared<Kernel::StringListValidator>(stdoptions);
+    declareProperty("StandardError", "ConstantValue", listvalidator,
+                    "Algorithm to calculate the standard error of peak positions.");
+
+    return;
   }
 
+  //----------------------------------------------------------------------------------------------
   /** Main execution
    */
   void RefinePowderInstrumentParameters::exec()
   {
-      // 1. Get input
-      dataWS = this->getProperty("InputWorkspace");
-      int workspaceindex = this->getProperty("WorkspaceIndex");
+    // 1. Get input
+    DataObjects::TableWorkspace_sptr peakWS = this->getProperty("InputPeakParameterWorkspace");
+    DataObjects::TableWorkspace_sptr parameterWS = this->getProperty("InputInstrumentParameterWorkspace");
 
-      DataObjects::TableWorkspace_sptr peakWS = this->getProperty("PeaksParametersWorkspace");
+    mMinSigma = getProperty("MinSigma");
 
-      DataObjects::TableWorkspace_sptr parameterWS = this->getProperty("InstrumentParametersWorkspace");
+    int inttemp = getProperty("MinNumberFittedPeaks");
+    if (inttemp <= 1)
+    {
+      g_log.error() << "Input MinNumberFittedPeaks = " << inttemp
+                    << " is too small. " << endl;
+      throw std::invalid_argument("Input MinNumberFittedPeaks is too small.");
+    }
+    mMinNumFittedPeaks = static_cast<size_t>(inttemp);
 
-      // 2. Parse
-      generatePeaksFromInput(peakWS, mPeaks);
-      importParametersFromTable(parameterWS, mFuncParameters);
-      mInputFuncParameters = mFuncParameters;
+    string algoption = getProperty("RefinementAlgorithm");
 
-      // 3. Fit peaks & get peak centers
-      std::vector<std::vector<int> > goodfitpeaks;
-      std::vector<double> goodfitchi2;
-      fitPeaks(workspaceindex, goodfitpeaks, goodfitchi2);
+    // 2. Parse input table workspace
+    genPeaksFromTable(peakWS);
+    importParametersFromTable(parameterWS, mFuncParameters);
+    mOrigParameters = mFuncParameters;
 
-      if (goodfitpeaks.size() <= 2)
-      {
-          std::stringstream errmsg;
-          errmsg << "There are too few peaks (" << goodfitpeaks.size() << " peaks) that have good fitting. "
-                 << "Unable to construct a workspace to fit for instrument geometry parameters. ";
-          g_log.error(errmsg.str());
-          throw std::runtime_error(errmsg.str());
-      }
+    // 3. Generate a cener workspace as function of d-spacing.
+    genPeakCentersWorkspace();
 
-      genPeakCentersWorkspace(mPeaks, goodfitpeaks, goodfitchi2);
-
-      // 4. Fit instrument geometry function
+    // 4. Fit instrument geometry function
+    if (algoption.compare("DirectFit") == 0)
+    {
+      // a) Simple (directly) fit all parameters
       fitInstrumentParameters();
 
-      // 5. Set output workspace
-      this->setProperty("OutputWorkspace", outWS);
-
-      // 6. Set peak data output workspace
-      DataObjects::Workspace2D_sptr peakdataws = createPeakDataWorkspace(workspaceindex);
-
-      this->setProperty("OutputDataWorkspace", peakdataws);
-
-      // 7. Output new instrument parameters
-      //DataObjects::TableWorkspace rawtable; -->> TableWorkspace is not copyable (default CC is incorrect and no point in writing a non-default one)
-      DataObjects::TableWorkspace_sptr newtablews = boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
-      newtablews->addColumn("str", "Name");
-      newtablews->addColumn("double", "Value");
-      newtablews->addColumn("str", "FitOrTie");
-
-      std::map<std::string, double>::iterator pariter;
-      for (pariter = mFuncParameters.begin(); pariter != mFuncParameters.end(); ++pariter)
-      {
-          API::TableRow newrow = newtablews->appendRow();
-          std::string parname = pariter->first;
-          double parvalue = pariter->second;
-          newrow << parname << parvalue;
-      }
-
-      this->setProperty("InstrumentParametersWorkspace", newtablews);
-
-      /*
-      for (size_t i = 0; i < peakdataws->readX(0).size(); ++i)
-      {
-          std::cout << "++ " << peakdataws->readX(0)[i] << "\t\t" << peakdataws->readY(0)[i]
-                    << "\t\t" << peakdataws->readY(1)[i]  << "\t\t" << peakdataws->readY(2)[i] << std::endl;
-      }
-      */
-
-      return;
-  }
-
-  /** Create a workspace2D containing the peak patterns, including
-      (1) input data (2) fitted peak (single peak fitting) (3) difference
-   */
-  DataObjects::Workspace2D_sptr RefinePowderInstrumentParameters::createPeakDataWorkspace(size_t workspaceindex)
-  {
-      // 1. Get some information about the workspace to create
-      std::map<int, std::pair<std::vector<size_t>, API::FunctionValues> >::iterator diter;
-      std::vector<int> hkl2s;
-      size_t wssize  = 0;
-      for (diter = mPeakData.begin(); diter != mPeakData.end(); ++diter)
-      {
-          int hkl2 = diter->first;
-          hkl2s.push_back(hkl2);
-
-          wssize += diter->second.first.size();
-      }
-      g_log.debug() << "Workspace X-size = " << wssize << std::endl;
-
-      // 2. Create workspace
-      DataObjects::Workspace2D_sptr peakdataws =
-              boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (API::WorkspaceFactory::Instance().create("Workspace2D", 3, wssize, wssize));
-
-      // 3. Set data
-      std::sort(hkl2s.begin(), hkl2s.end());
-
-      size_t index = 0;
-      for (int i = int(hkl2s.size())-1; i >= 0; --i)
-      {
-          std::vector<size_t> itofs = mPeakData[hkl2s[i]].first;
-          API::FunctionValues values = mPeakData[hkl2s[i]].second;
-
-          for (size_t it = 0; it < itofs.size(); ++it)
-          {
-              // For X-axis
-              size_t idata = itofs[it];
-              size_t curindex = index+it;
-
-              for (size_t wsindex = 0; wsindex < 3; ++wsindex)
-              {
-                  peakdataws->dataX(wsindex)[curindex] = dataWS->readX(workspaceindex)[idata];
-              }
-
-              // For Y[0]
-              peakdataws->dataY(0)[curindex] = dataWS->readY(workspaceindex)[idata];
-
-              // For Y[1]
-              peakdataws->dataY(1)[curindex] = values[it];
-
-              // For Y[2]
-              peakdataws->dataY(2)[curindex] = peakdataws->dataY(0)[curindex] - peakdataws->dataY(1)[curindex];
-          }
-
-          index += itofs.size();
-      }
-
-      return peakdataws;
-
-  }
-
-  /** Fit each individual Bk2Bk-Exp-Conv-PV peaks
-    * This part is under heavy construction, and will be applied to "FindPeaks2"
-   */
-  void RefinePowderInstrumentParameters::fitPeaks(int workspaceindex, std::vector<std::vector<int> >& goodfitpeaks,
-                                                  std::vector<double>& goodfitchi2)
-  {
-      g_log.debug() << "Fit Every Individual Peak. " << std::endl;
-
-      // 1. Clear the output vector
-      goodfitpeaks.clear();
-
-      // 2. Fit all peaks
-      std::map<std::vector<int>, CurveFitting::Bk2BkExpConvPV_sptr>::iterator peakiter;
-
-      double prog = 0.0;
-      double deltaprog = 0.8/double(mPeaks.size());
-
-      for (peakiter = mPeaks.begin(); peakiter != mPeaks.end(); ++peakiter)
-      {
-          // a) Set up composite function including peak and background
-          // Peak
-          std::vector<int> hkl = peakiter->first;
-          CurveFitting::Bk2BkExpConvPV_sptr peak = peakiter->second;
-
-          std::cout << std::endl << "-----------   DBx315 Fit Peak @ " << peak->centre() <<
-                       " ------------------" << std::endl;
-
-          // Background (Polynomial)
-          CurveFitting::Polynomial_sptr background = boost::make_shared<CurveFitting::Polynomial>
-                  (CurveFitting::Polynomial());
-          background->setAttributeValue("n", 2);
-          background->initialize();
-
-          // Composite function
-          API::CompositeFunction tempfunc;
-          API::CompositeFunction_sptr compfunction = boost::make_shared<API::CompositeFunction>
-                  (tempfunc);
-          compfunction->addFunction(peak);
-          compfunction->addFunction(background);
-
-          // b) Determine the range of fitting: assuming the input is not far off
-          double fwhm = peak->fwhm();
-          double leftdev = PEAKRANGEFACTOR * fwhm * 0.5;
-          double rightdev = PEAKRANGEFACTOR * fwhm * 0.5;
-
-          double chi2;
-          std::string fitstatus;
-          bool fitpeakgood = this->fitSinglePeak(compfunction, peak, background, leftdev, rightdev, workspaceindex, prog, deltaprog,
-                                                 chi2, fitstatus);
-
-          // c) Work with the result of fitting
-          g_log.information() << "Fitting result: " << "  chi2 = " << chi2 << std::endl;
-          std::vector<std::string> peakparamnames = peak->getParameterNames();
-          for (size_t im = 0; im < peakparamnames.size(); ++im)
-          {
-              std::string parname = peakparamnames[im];
-              g_log.information() << "Parameter " << parname << " = " << peak->getParameter(parname) << std::endl;
-          }
-
-          if (!fitpeakgood || fitstatus.compare("success") || chi2 > 200.0)
-          {
-              // If not a good fit, ignore
-              g_log.warning() << "Peak @ " << peak->getParameter("TOF_h") << " is not selected due to one of the following reason. " << std::endl
-                              << "(1) Fit status = " << fitstatus << std::endl
-                              << "(2) Chi2 = " << chi2 << "  > 200.0" << std::endl
-                              << "(3) Fit peak good = " << fitpeakgood << std::endl;
-
-              continue;
-          }
-
-          goodfitpeaks.push_back(peakiter->first);
-          goodfitchi2.push_back(chi2);
-
-          // d) For output
-          fwhm = peak->fwhm();
-          double tof_h = peak->centre();
-          double leftbound = tof_h - PEAKRANGEFACTOR * fwhm;
-          double rightbound = tof_h + PEAKRANGEFACTOR * fwhm;
-
-          std::vector<double> tofs;
-          std::vector<size_t> itofs;
-          std::vector<double>::const_iterator vit;
-          vit = std::lower_bound(dataWS->readX(workspaceindex).begin(), dataWS->readX(workspaceindex).end(), leftbound);
-          size_t istart = size_t(vit-dataWS->readX(workspaceindex).begin());
-          vit = std::lower_bound(dataWS->readX(workspaceindex).begin(), dataWS->readX(workspaceindex).end(), rightbound);
-          size_t iend = size_t(vit-dataWS->readX(workspaceindex).begin());
-          for (size_t i = istart; i < iend; ++i)
-          {
-              itofs.push_back(i);
-              tofs.push_back(dataWS->readX(workspaceindex)[i]);
-          }
-
-          API::FunctionDomain1DVector domain(tofs);
-          API::FunctionValues values(domain);
-          compfunction->function(domain, values);
-
-          int hkl2 = hkl[0]*hkl[0] + hkl[1]*hkl[1] + hkl[2]*hkl[2];
-
-          mPeakData.insert(std::make_pair(hkl2, std::make_pair(itofs, values)));
-
-      } // FOR EACH PEAK
-
-      // 3. Create a new matrix workspace
-
-
-      return;
-  }
-
-
-  /** Generate a workspace2D for peak parameters such that
-    * X(0)[i] = d_h[i], Y(0)[i] = Alpha[i]; X(1)[i] = d_h[i], Y(1) = Beta[i]; ...
-    */
-void RefinePowderInstrumentParameters::generateOutputPeakParameterWorkspace(std::vector<std::vector<int> > goodfitpeaks)
-{
-    // 1. Calculate d-values (with whatever parmeters)
-    std::vector<std::pair<double, std::vector<int> > > dhkls;
-    std::vector<std::vector<int> >::iterator peakiter;
-    for (peakiter = goodfitpeaks.begin(); peakiter != goodfitpeaks.end(); ++peakiter)
+    }
+    else if (algoption.compare("MonteCarlo") == 0)
     {
-        std::vector<int> hkl = *peakiter;
-        double d_h = calculateDspaceValue(hkl);
-        dhkls.push_back(std::make_pair(d_h, hkl));
+      // b) Use Monte Carlo/Annealing method to search global minimum
+      vector<string> funparamnames;
+      getD2TOFFuncParamNames(funparamnames);
+
+      vector<double> stepsizes, lowerbounds, upperbounds;
+      importMonteCarloParametersFromTable(parameterWS, funparamnames, stepsizes, lowerbounds, upperbounds);
+
+      // FIXME :  maxstep and random seed should be user-input
+      size_t maxsteps = 10000;
+      srand(0);
+      double stepsizescalefactor = 1.1;
+      mMaxNumberStoredParameters = 10;
+
+      doParameterSpaceRandomWalk(funparamnames, lowerbounds, upperbounds, stepsizes, maxsteps, stepsizescalefactor);
+    }
+    else
+    {
+      // c) Unsupported
+      stringstream errss;
+      errss << "Refinement algorithm " << algoption << " is not supported.  Quit!";
+      g_log.error(errss.str());
+      throw invalid_argument(errss.str());
     }
 
-    // 2. Sort
-    std::sort(dhkls.begin(), dhkls.end());
+    // 5. Set output workspace
+    this->setProperty("OutputWorkspace", dataWS);
 
-    // 3. Create otuput workspace
-    throw std::runtime_error("You should have peak parameters names. ");
-    size_t nspec = mPeakParameterNames.size();
-    size_t datalen = goodfitpeaks.size();
-
-    DataObjects::Workspace2D_sptr peakparamws
-            = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-            (API::WorkspaceFactory::Instance().create("Workspace2D", nspec, datalen, datalen));
-
-    throw std::runtime_error("Implement add labels to spectrum according to LeBailFit.");
-
-    // 4. Insert data
-    std::vector<std::string>::iterator paramiter;
-    for (size_t i = 0; i < dhkls.size(); ++i)
-    {
-        CurveFitting::Bk2BkExpConvPV_sptr peak = mPeaks[dhkls[i].second];
-        for (size_t j = 0; j < mPeakParameterNames.size(); ++j)
-        {
-            std::string param = mPeakParameterNames[j];
-            double parvalue = peak->getParameter(param);
-            peakparamws->dataX(j)[i] = dhkls[i].first;
-            peakparamws->dataY(j)[i] = parvalue;
-        }
-    }
+    // 6. Output new instrument parameters
+    DataObjects::TableWorkspace_sptr fitparamws = genOutputInstrumentParameterTable();
+    this->setProperty("OutputInstrumentParameterWorkspace", fitparamws);
 
     return;
-}
-
-
-  /** Fit a single peak
-    * [NEW CODE: Under Construction Still]
-    * Return: chi2 ... all the other parameter should be just in peak
-    */
-  bool RefinePowderInstrumentParameters::fitSinglePeak(API::CompositeFunction_sptr compfunction, CurveFitting::Bk2BkExpConvPV_sptr peak,
-                                                       CurveFitting::BackgroundFunction_sptr background, double leftdev, double rightdev,
-                                                       size_t workspaceindex, double prog, double deltaprog,
-                                                       double& chi2, std::string& fitstatus)
-  {
-    // 1. Find the observed peak center
-    double tof_h_inp = peak->centre();
-
-    g_log.information() << "Find peak in range (" << tof_h_inp-leftdev << ", " <<
-                           tof_h_inp+rightdev << ")" << std::endl;
-
-    double tof_h_obs, tof_left, tof_right;
-    findMaxHeight(dataWS, workspaceindex, tof_h_inp-leftdev, tof_h_inp+rightdev,
-                  tof_h_obs, tof_left, tof_right);
-
-    g_log.information() << "Found peak @ " << tof_h_obs << "  +/- " << tof_left << ", " << tof_right << std::endl;
-
-      // 2) Find local background
-      /*
-      CurveFitting::Polynomial_sptr background = boost::make_shared<CurveFitting::Polynomial>
-              (CurveFitting::Polynomial());
-      background->setAttributeValue("n", 2);
-      background->initialize();
-      */
-
-      double fwhm_inp = peak->fwhm();
-      double leftbound = tof_h_obs - PEAKRANGEFACTOR * fwhm_inp * 0.5;
-      double rightbound = tof_h_obs + PEAKRANGEFACTOR * fwhm_inp * 0.5;
-      bool goodbkgdfit = fitLinearBackground(peak, workspaceindex, background, leftbound, rightbound);
-
-      // 3. Construct the composite function to fit the peak
-      /*
-      API::CompositeFunction tempfunc;
-      API::CompositeFunction_sptr compfunction = boost::make_shared<API::CompositeFunction>
-              (tempfunc);
-      compfunction->addFunction(peak);
-      compfunction->addFunction(background);
-      */
-
-      // 4. Set up parameter
-      peak->setParameter("TOF_h", tof_h_obs);
-      CurveFitting::BoundaryConstraint* tofbound =
-              new CurveFitting::BoundaryConstraint
-              (peak.get(),"TOF_h", tof_left, tof_right, false);
-      peak->addConstraint(tofbound);
-
-      // FIXME:  This is not right!  Release this later!
-      peak->tie("Gamma", "0.0");
-
-      if (goodbkgdfit)
-      {
-          std::vector<std::string> bkgdparnames;
-          bkgdparnames = background->getParameterNames();
-          for (size_t ipm = 0; ipm < bkgdparnames.size(); ++ipm)
-          {
-              std::string paramname = bkgdparnames[ipm];
-              double parvalue = background->getParameter(paramname);
-              std::stringstream ss;
-              ss << parvalue;
-              background->tie(paramname, ss.str());
-
-              g_log.debug() << "Tie Background Parameter " << paramname << " = " << parvalue << std::endl;
-          }
-      }
-
-      // 5. Redefine peak fit range
-      leftbound = tof_h_obs - 4.0*fwhm_inp;
-      rightbound = tof_h_obs + 4.0*fwhm_inp;
-
-      g_log.information() << "Single peak fitting range: Left bound = " << leftbound << "  Right bound = "
-                          << rightbound << std::endl;
-
-      // 6) Fit peak
-      g_log.information() << "FitSinglePeak + Background Function: " << compfunction->asString() << std::endl;
-
-      API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", prog, prog+deltaprog, true);
-      prog += deltaprog;
-      fitalg->initialize();
-
-      fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(compfunction));
-      fitalg->setProperty("InputWorkspace", dataWS);
-      fitalg->setProperty("WorkspaceIndex", int(workspaceindex));
-      fitalg->setProperty("StartX", leftbound);
-      fitalg->setProperty("EndX", rightbound);
-      fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
-      fitalg->setProperty("CostFunction", "Least squares");
-      fitalg->setProperty("MaxIterations", 1000);
-
-      // 7.  Result
-      bool successfulfit = fitalg->execute();
-
-      bool goodfit = false;
-
-      // a) good execution
-      if (!fitalg->isExecuted() || ! successfulfit)
-      {
-          // Early return due to bad fit & thus early return
-          g_log.warning() << "Fitting B2kBk-Exp-conv-PV + Background to Peak around "
-                          << peak->getParameter("TOF_h") << " failed during execution. " << std::endl;
-          goodfit = false;
-
-          chi2 = 1.0E10;
-      }
-      else
-      {
-          // Fit is good
-          goodfit = true;
-      }
-
-      if (goodfit)
-      {
-        chi2 = fitalg->getProperty("OutputChi2overDoF");
-        std::string fs = fitalg->getProperty("OutputStatus");
-        fitstatus = fs;
-
-        g_log.information() << "[FitSinglePeak] @ " << peak->getParameter("TOF_h")
-                            << " successful:  Chi^2 = " << chi2
-                            << "; Fit Status = " << fitstatus
-                            << "; Height = " << peak->getParameter("Height") << std::endl;
-
-        if (fitstatus.compare("success"))
-        {
-              goodfit = false;
-        }
-        else
-        {
-            goodfit = true;
-        }
-      }
-
-      if (!goodfit)
-      {
-          // Early return
-          return goodfit;
-      }
-
-      // 8. Fit background again
-      // FIXME : Continue to implement from here
-      // throw std::runtime_error("Continue to implement from here!");
-      // goodbkgdfit = fitBackground(peak, workspaceindex, background, leftbound, rightbound);
-
-
-      // 9. Fit peak again
-
-
-      // b) fit status is good
-      if (goodfit)
-      {
-        chi2 = fitalg->getProperty("OutputChi2overDoF");
-        std::string fs = fitalg->getProperty("OutputStatus");
-        fitstatus = fs;
-
-        g_log.information() << "[FitSinglePeak] @ " << peak->getParameter("TOF_h")
-                              << " successful:  Chi^2 = " << chi2
-                              << "; Fit Status = " << fitstatus
-                              << "; Height = " << peak->getParameter("Height") << std::endl;
-
-        if (fitstatus.compare("success"))
-        {
-              goodfit = false;
-        }
-        else
-        {
-            goodfit = true;
-        }
-      }
-
-      return goodfit;
   }
 
 
-  /** Fit a single peak w/o estimating original peak position
-    */
-  bool RefinePowderInstrumentParameters::fitSinglePeakSimple(API::CompositeFunction_sptr compfunction, CurveFitting::Bk2BkExpConvPV_sptr peak,
-                                                             CurveFitting::BackgroundFunction_sptr background, double leftdev, double rightdev,
-                                                             size_t workspaceindex, double prog, double deltaprog,
-                                                             double& chi2, std::string& fitstatus)
-  {
-      // 2. Fit the background
-      double tof_h = peak->centre();
-      double leftbound = tof_h - leftdev;
-      double rightbound = tof_h + rightdev;
+  //------- Related to Fitting Instrument Geometry Function  -------------------
 
-      g_log.debug() << "Single peak fitting range: Left bound = " << leftbound << "  Right bound = "
-                    << rightbound << std::endl;
-
-      bool goodfit = fitLinearBackground(peak, workspaceindex, background, leftbound, rightbound);
-
-      // 4. Set up fitting parameters.
-      // FIXME This may not be the case all the time!
-      peak->tie("Gamma", "0.0");
-
-      // ii.  Tie the background if background fitting is good
-      if (goodfit)
-      {
-          std::vector<std::string> bkgdparnames;
-          bkgdparnames = background->getParameterNames();
-          for (size_t ipm = 0; ipm < bkgdparnames.size(); ++ipm)
-          {
-              std::string paramname = bkgdparnames[ipm];
-              double parvalue = background->getParameter(paramname);
-              std::stringstream ss;
-              ss << parvalue;
-              background->tie(paramname, ss.str());
-
-              g_log.debug() << "Tie Background Parameter " << paramname << " = " << parvalue << std::endl;
-          }
-      }
-
-      // 5. Fit peak
-      std::cout << "Fit Peak + Background Function: " << compfunction->asString() << std::endl;
-
-      API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", prog, prog+deltaprog, true);
-      prog += deltaprog;
-      fitalg->initialize();
-
-      fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(compfunction));
-      fitalg->setProperty("InputWorkspace", dataWS);
-      fitalg->setProperty("WorkspaceIndex", workspaceindex);
-      fitalg->setProperty("StartX", leftbound);
-      fitalg->setProperty("EndX", rightbound);
-      fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
-      fitalg->setProperty("CostFunction", "Least squares");
-      fitalg->setProperty("MaxIterations", 1000);
-
-      // iv)  Result
-      goodfit = false;
-
-      bool successfulfit = fitalg->execute();
-      if (!fitalg->isExecuted() || ! successfulfit)
-      {
-          // Early return due to bad fit
-          g_log.warning() << "Fitting B2kBk-Exp-conv-PV + Background to Peak around "
-                          << peak->getParameter("TOF_h") << " Failed. " << std::endl;
-          goodfit = false;
-      }
-
-      if (goodfit)
-      {
-          chi2 = fitalg->getProperty("OutputChi2overDoF");
-          std::string ts = fitalg->getProperty("OutputStatus");
-          fitstatus = ts;
-
-          g_log.information() << "Fit single peak @ " << peak->getParameter("TOF_h")
-                          << " successful:  Chi^2 = " << chi2
-                          << "; Fit Status = " << fitstatus
-                          << "; Height = " << peak->getParameter("Height") << std::endl;
-
-          if (fitstatus.compare("success"))
-          {
-              goodfit = false;
-          }
-          else
-          {
-              goodfit = true;
-          }
-      }
-
-      return goodfit;
-  }
-
-  /** Search peak (max height) in the given range
-    * Give out the range of peak center for constaint later
-    */
-  void RefinePowderInstrumentParameters::findMaxHeight(API::MatrixWorkspace_sptr dataws, size_t wsindex,
-                                                       double xmin, double xmax, double& center, double& centerleftbound, double& centerrightbound)
-  {
-      // 1. Determine xmin, xmax range
-      std::vector<double>::const_iterator viter;
-      const MantidVec& X = dataws->readX(wsindex);
-      viter = std::lower_bound(X.begin(), X.end(), xmin);
-      size_t ixmin = size_t(viter-X.begin());
-      if (ixmin != 0)
-          -- ixmin;
-      viter = std::lower_bound(X.begin(), X.end(), xmax);
-      size_t ixmax = size_t(viter-X.begin());
-
-      // 2. Search imax
-      const MantidVec& Y = dataws->readY(wsindex);
-      size_t imax = ixmin;
-      double maxY = Y[ixmin];
-      for (size_t i = ixmin+1; i <= ixmax; ++i)
-      {
-          if (Y[i] > maxY)
-          {
-              maxY = Y[i];
-              imax = i;
-          }
-      }
-
-      std::cout << "Find Max :  iMax = " << imax << std::endl;
-
-      center = X[imax];
-
-      // 3. Determine the range of the peaks by +/-? data points
-      if (imax >= 1)
-      {
-          bool down3left = true;
-          int iend = int(imax)-4;
-          if (iend < 0)
-          {
-              iend = 0;
-          }
-          for (size_t i = imax; i > size_t(iend); --i)
-          {
-              if (Y[i] <= Y[i-1])
-              {
-                  down3left = false;
-                  break;
-              }
-          }
-          if (down3left)
-          {
-              centerleftbound = X[imax-1];
-          }
-          else
-          {
-              centerleftbound = X[iend];
-          }
-      }
-      else
-      {
-          std::stringstream errmsg;
-          errmsg << "A Peak Cannot Appear At The Low End of A Workspace. " << std::endl;
-          throw std::runtime_error(errmsg.str());
-      }
-
-      if (imax < X.size()-1)
-      {
-          bool down3right = true;
-          size_t iend = imax + 4;
-          if (iend >= X.size())
-          {
-              iend = X.size()-1;
-          }
-          for (size_t i = imax; i < iend; ++i)
-          {
-              if (Y[i] <= Y[i+1])
-              {
-                  down3right = false;
-                  break;
-              }
-          }
-          if (down3right)
-          {
-              centerrightbound = X[imax+1];
-          }
-          else
-          {
-              centerrightbound = X[iend];
-          }
-      }
-      else
-      {
-          std::stringstream errmsg;
-          errmsg << "A Peak Cannot Appear At The Upper End of A Workspace. " << std::endl;
-          throw std::runtime_error(errmsg.str());
-      }
-
-      return;
-  }
-
-
-  /** Fit linear background under a peak
-   */
-  bool RefinePowderInstrumentParameters::fitLinearBackground(CurveFitting::Bk2BkExpConvPV_sptr peak, size_t workspaceindex,
-                                                             CurveFitting::BackgroundFunction_sptr bkgdfunc, double xmin, double xmax)
-  {
-      // 1. Re-construct a workspace for fitting the background
-      double leftpeakbound = peak->centre() - 6.0*peak->fwhm();
-      double rightpeakbound = peak->centre() + 6.0*peak->fwhm();
-
-      std::vector<size_t> newxs;
-      for (size_t i = 0; i < dataWS->readX(workspaceindex).size(); ++i)
-      {
-          double x = dataWS->readX(workspaceindex)[i];
-          if ( (x > xmin && x < leftpeakbound) || (x > rightpeakbound && x < xmax) )
-          {
-              // region of peak
-              newxs.push_back(i);
-          }
-          else if (x > xmax)
-          {
-              // out to right boundary
-              break;
-          }
-      }
-
-      DataObjects::Workspace2D_sptr bkgdws =
-              boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (API::WorkspaceFactory::Instance().create("Workspace2D", 1, newxs.size(), newxs.size()));
-
-      for (size_t i = 0; i < newxs.size(); ++i)
-      {
-          bkgdws->dataX(0)[i] = dataWS->dataX(workspaceindex)[newxs[i]];
-          bkgdws->dataY(0)[i] = dataWS->dataY(workspaceindex)[newxs[i]];
-          bkgdws->dataE(0)[i] = dataWS->dataE(workspaceindex)[newxs[i]];
-          std::cout << bkgdws->dataX(0)[i] << "    " << bkgdws->dataY(0)[i] << std::endl;
-      }
-
-      // 2. Fit
-      API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
-      fitalg->initialize();
-
-      g_log.information() << "Function To Fit: " << bkgdfunc->asString()
-                          << ".  Number of points  to fit =  " << newxs.size() << std::endl;
-
-      // b) Set property
-      fitalg->setProperty("Function", boost::shared_ptr<API::IFunction>(bkgdfunc));
-      fitalg->setProperty("InputWorkspace", bkgdws);
-      fitalg->setProperty("WorkspaceIndex", 0);
-      fitalg->setProperty("StartX", xmin);
-      fitalg->setProperty("EndX", xmax);
-      fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
-      fitalg->setProperty("CostFunction", "Least squares");
-      fitalg->setProperty("MaxIterations", 1000);
-
-      // c) Execute
-      bool successfulfit = fitalg->execute();
-      if (!fitalg->isExecuted() || ! successfulfit)
-      {
-          // Early return due to bad fit
-          g_log.warning() << "Fitting background function failed. " << std::endl;
-          return false;
-      }
-
-      double chi2 = fitalg->getProperty("OutputChi2overDoF");
-      std::string fitstatus = fitalg->getProperty("OutputStatus");
-
-      g_log.information() << "Fit Linear Background: result:  Chi^2 = " << chi2
-                          << " Fit Status = " << fitstatus << std::endl;
-
-      return true;
-  }
-
-
-
-  /** Fit linear background under a peak
-    * with confidence on peak's profile parameters
-   */
-  bool RefinePowderInstrumentParameters::fitBackground(CurveFitting::Bk2BkExpConvPV_sptr peak, size_t workspaceindex,
-                                                       CurveFitting::BackgroundFunction_sptr bkgdfunc, double xmin, double xmax)
-  {
-    // 1. Re-construct a workspace for fitting the background
-    g_log.information() << "Fit Background For Peak @ " << peak->centre() << " of spectra " << workspaceindex
-                        << " Background function name = " << bkgdfunc->name() << " Range: " << xmin << xmax << std::endl;
-
-
-      /* FIXME This disabled section will be rewritten for faster speed
-      std::vector<size_t> newxs;
-      for (size_t i = 0; i < dataWS->readX(workspaceindex).size(); ++i)
-      {
-          double x = dataWS->readX(workspaceindex)[i];
-          if ( (x > xmin && x < leftpeakbound) || (x > rightpeakbound && x < xmax) )
-          {
-              // region of peak
-              newxs.push_back(i);
-          }
-          else if (x > xmax)
-          {
-              // out to right boundary
-              break;
-          }
-      }
-
-
-      DataObjects::Workspace2D_sptr bkgdws =
-              boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (API::WorkspaceFactory::Instance().create("Workspace2D", 1, newxs.size(), newxs.size()));
-
-      for (size_t i = 0; i < newxs.size(); ++i)
-      {
-          bkgdws->dataX(0)[i] = dataWS->dataX(workspaceindex)[newxs[i]];
-          bkgdws->dataY(0)[i] = dataWS->dataY(workspaceindex)[newxs[i]];
-          bkgdws->dataE(0)[i] = dataWS->dataE(workspaceindex)[newxs[i]];
-          std::cout << bkgdws->dataX(0)[i] << "    " << bkgdws->dataY(0)[i] << std::endl;
-      }
-
-      // 2. Fit
-      API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
-      fitalg->initialize();
-
-      g_log.information() << "Function To Fit: " << bkgdfunc->asString()
-                          << ".  Number of points  to fit =  " << newxs.size() << std::endl;
-
-      // b) Set property
-      fitalg->setProperty("Function", boost::shared_ptr<API::IFunction>(bkgdfunc));
-      fitalg->setProperty("InputWorkspace", bkgdws);
-      fitalg->setProperty("WorkspaceIndex", 0);
-      fitalg->setProperty("StartX", xmin);
-      fitalg->setProperty("EndX", xmax);
-      fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
-      fitalg->setProperty("CostFunction", "Least squares");
-      fitalg->setProperty("MaxIterations", 1000);
-
-      // c) Execute
-      bool successfulfit = fitalg->execute();
-      if (!fitalg->isExecuted() || ! successfulfit)
-      {
-          // Early return due to bad fit
-          g_log.warning() << "Fitting background function failed. " << std::endl;
-          return false;
-      }
-
-      double chi2 = fitalg->getProperty("OutputChi2overDoF");
-      std::string fitstatus = fitalg->getProperty("OutputStatus");
-
-      g_log.information() << "Fit Linear Background: result:  Chi^2 = " << chi2
-                          << " Fit Status = " << fitstatus << std::endl;
-
-                          */
-      return true;
-  }
-
-  /** Get peak positions from peak functions
-    * Output: outWS
-   */
-  void RefinePowderInstrumentParameters::genPeakCentersWorkspace(
-          std::map<std::vector<int>, CurveFitting::Bk2BkExpConvPV_sptr> peaks,
-          std::vector<std::vector<int> > goodpeaks, std::vector<double> goodfitchi2)
-  {
-      // 1. Create output workspace
-      size_t size = goodpeaks.size();
-      outWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-              (API::WorkspaceFactory::Instance().create("Workspace2D", 2, size, size));
-      outWS->getAxis(0)->setUnit("dSpacing");
-
-      // 2. Put values
-      double lattice = mFuncParameters["LatticeConstant"];
-      if (lattice < 1.0E-5)
-      {
-          std::stringstream errmsg;
-          errmsg << "Input Lattice constant = " << lattice << " is wrong or not set up right. ";
-          throw std::invalid_argument(errmsg.str());
-      }
-
-      std::map<std::vector<int>, CurveFitting::Bk2BkExpConvPV_sptr>::iterator peakiter;
-      std::vector<std::pair<double, std::pair<double, double> > > peakcenters;
-
-      for (size_t i = 0; i < goodpeaks.size(); ++i)
-      {
-          std::vector<int> peakhkl = goodpeaks[i];
-          double chi2 = goodfitchi2[i];
-          peakiter = peaks.find(peakhkl);
-          if (peakiter == peaks.end())
-          {
-              std::stringstream errormsg;
-              errormsg << "(Good fit) Peak [" << goodpeaks[i][0] << ", " << goodpeaks[i][1] << ", " << goodpeaks[i][2]
-                       << "] is not in the input peaks. ";
-              g_log.error() << errormsg.str() << std::endl;
-              throw std::runtime_error(errormsg.str());
-          }
-
-          // Calculate d-spacing of the peak center (X value)
-          int h, k, l;
-          h = peakiter->first[0];
-          k = peakiter->first[1];
-          l = peakiter->first[2];
-          double d_h = lattice/std::sqrt(static_cast<double>(h*h + k*k + l*l));
-
-          // TOF_h (Y value observed)
-          double tof_h = peakiter->second->centre();
-
-          peakcenters.push_back(std::make_pair(d_h, std::make_pair(tof_h, chi2)));
-      }
-
-      std::sort(peakcenters.begin(), peakcenters.end());
-
-      // 3. Put data to output workspace
-      for (size_t i = 0; i < peakcenters.size(); ++i)
-      {
-          outWS->dataX(0)[i] = peakcenters[i].first;
-          outWS->dataY(0)[i] = peakcenters[i].second.first;
-          // outWS->dataE(0)[i] = sqrt(peakcenters[i].second);
-          outWS->dataE(0)[i] = 1.0/peakcenters[i].second.second;
-      }
-
-      for (size_t i = 0; i < outWS->readX(0).size(); ++i)
-      {
-          g_log.debug() << "Peak-Index " << i << "  d = " << outWS->readX(0)[i]
-                        << ", TOF_h = " << outWS->readY(0)[i] << std::endl;
-      }
-
-      return;
-  }
-
-
-  /** Fit instrument parameters
+  /** Fit instrument parameters.  It is a straight forward fitting to
    */
   void RefinePowderInstrumentParameters::fitInstrumentParameters()
   {
-      // 1. Set up and (possibly) tie parameters
-      CurveFitting::ThermalNeutronDtoTOFFunction rawfunc;
-      CurveFitting::ThermalNeutronDtoTOFFunction_sptr mfunc =
-              boost::make_shared<CurveFitting::ThermalNeutronDtoTOFFunction>(rawfunc);
-      mfunc->initialize();
+    cout << "=========== Method [FitInstrumentParameters] is Under Heavy Construction! ===============" << endl;
+    cout << "            Read All FIXME Notes Inside This Method  " << endl;
 
-      std::vector<std::string> funparamnames = mfunc->getParameterNames();
-      std::vector<std::string> paramtofit = getProperty("ParametersToFit");
-      std::sort(paramtofit.begin(), paramtofit.end());
+    // 1. Initialize the fitting function
+    CurveFitting::ThermalNeutronDtoTOFFunction rawfunc;
+    CurveFitting::ThermalNeutronDtoTOFFunction_sptr mfunc =
+        boost::make_shared<CurveFitting::ThermalNeutronDtoTOFFunction>(rawfunc);
+    mfunc->initialize();
 
-      std::map<std::string, double>::iterator fiter;
-      for (size_t i = 0; i < funparamnames.size(); ++i)
+    // 2. Set up parameters values
+    std::vector<std::string> funparamnames = mfunc->getParameterNames();
+
+    std::vector<std::string> paramtofit = getProperty("ParametersToFit");
+    std::sort(paramtofit.begin(), paramtofit.end());
+
+    stringstream msgss;
+    msgss << "Set Instrument Function Parameter : " << endl;
+
+    std::map<std::string, double>::iterator paramiter;
+    for (size_t i = 0; i < funparamnames.size(); ++i)
+    {
+      string parname = funparamnames[i];
+      paramiter = mFuncParameters.find(parname);
+      if (paramiter == mFuncParameters.end())
       {
-          std::string parname = funparamnames[i];
-          fiter = mFuncParameters.find(parname);
-          if (fiter != mFuncParameters.end())
-          {
-              // Find the paramter in input parameters
-              g_log.debug() << "Set instrument geometry function parameter " << parname
-                            << " : " << fiter->second << std::endl;
-              double parvalue = fiter->second;
-              mfunc->setParameter(parname, parvalue);
-
-              // Check whether it is to tie
-              std::vector<std::string>::iterator viter;
-              viter = std::find(paramtofit.begin(), paramtofit.end(), parname);
-              if (viter == paramtofit.end())
-              {
-                  // Not in the fit list.  Tie it!
-                  std::stringstream valuestr;
-                  valuestr << parvalue;
-                  mfunc->tie(parname, valuestr.str());
-              }
-          }
-          else
-          {
-              // Cannot find the parameter in input parameters
-              std::stringstream ss;
-              ss << "Instrument Geometry function parameter " << parname << " is not initialized" << std::endl;
-              throw std::invalid_argument(ss.str());
-          }
+        // Not found and thus skip
+        continue;
       }
 
-      /*
-      mfunc->setParameter("Zero", mFuncParameters["Zero"]);
-      mfunc->setParameter("Zerot", mFuncParameters["Zerot"]);
-      mfunc->setParameter("Dtt1", mFuncParameters["Dtt1"]);
-      mfunc->setParameter("Dtt1t", mFuncParameters["Dtt1t"]);
-      mfunc->setParameter("Dtt2t", mFuncParameters["Dtt2t"]);
-      mfunc->setParameter("Width", mFuncParameters["Width"]);
-      mfunc->setParameter("Tcross", mFuncParameters["Tcross"]);
-      */
+      double parvalue = paramiter->second;
+      mfunc->setParameter(parname, parvalue);
+      msgss << setw(10) << parname << " = " << parvalue << endl;
+    }
 
-      // 2. Create and setup fit algorithm
-      std::cout << "Fit instrument geometry: " << mfunc->asString() << std::endl;
+    cout << msgss.str();
 
-      API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", 0.0, 0.2, true);
-      fitalg->initialize();
+    // 3. Fix parameters that are not listed in parameter-to-fit.  Unfix the rest
+    size_t numparams = funparamnames.size();
+    for (size_t i = 0; i < numparams; ++i)
+    {
+      string parname = funparamnames[i];
+      vector<string>::iterator vsiter;
+      vsiter = std::find(paramtofit.begin(), paramtofit.end(), parname);
 
-      fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(mfunc));
-      fitalg->setProperty("InputWorkspace", outWS);
-      fitalg->setProperty("WorkspaceIndex", 0);
-      fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
-      fitalg->setProperty("CostFunction", "Least squares");
-      fitalg->setProperty("MaxIterations", 1000);
+      if (vsiter == paramtofit.end())
+        mfunc->fix(i);
+      else
+        mfunc->unfix(i);
+    }
 
-      bool successfulfit = fitalg->execute();
-      if (!fitalg->isExecuted() || ! successfulfit)
-      {
-          // Early return due to bad fit
-          g_log.error() << "Fitting to instrument geometry function failed. " << std::endl;
-          throw std::runtime_error("Fitting failed.");
-      }
+    // 4. Create and setup fit algorithm
+    g_log.information() << "Fit instrument geometry: " << mfunc->asString() << std::endl;
 
-      double chi2 = fitalg->getProperty("OutputChi2overDoF");
-      std::string fitstatus = fitalg->getProperty("OutputStatus");
+    stringstream outss;
+    for (size_t i = 0; i < dataWS->readX(0).size(); ++i)
+      outss << dataWS->readX(0)[i] << "\t\t" << dataWS->readY(0)[i] << "\t\t" << dataWS->readE(0)[i] << endl;
+    cout << "Input Peak Position Workspace To Fit: " << endl << outss.str() << endl;
 
-      g_log.information() << "Fit geometry function result:  Chi^2 = " << chi2
-                          << "; Fit Status = " << fitstatus << std::endl;
+    API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", 0.0, 0.2, true);
+    fitalg->initialize();
 
-      API::IFunction_sptr fitfunc = fitalg->getProperty("Function");
-      std::cout << "--------->  Fitted Zero = " << fitfunc->getParameter("Zero")
-                << "  Zerot = " << fitfunc->getParameter("Zerot") << std::endl;
+    fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(mfunc));
+    fitalg->setProperty("InputWorkspace", dataWS);
+    fitalg->setProperty("WorkspaceIndex", 0);
+    fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+    fitalg->setProperty("CostFunction", "Least squares");
+    fitalg->setProperty("MaxIterations", 1000);
 
-      // 3. Set the output
-      API::FunctionDomain1DVector domain(outWS->readX(0));
-      API::FunctionValues values(domain);
-      mfunc->function(domain, values);
+    bool successfulfit = fitalg->execute();
+    if (!fitalg->isExecuted() || ! successfulfit)
+    {
+      // Early return due to bad fit
+      g_log.error() << "Fitting to instrument geometry function failed. " << std::endl;
+      throw std::runtime_error("Fitting failed.");
+    }
 
-      for (size_t i = 0; i < domain.size(); ++i)
-      {
-          outWS->dataX(1)[i] = domain[i];
-          outWS->dataY(1)[i] = values[i];
-      }
+    double chi2 = fitalg->getProperty("OutputChi2overDoF");
+    std::string fitstatus = fitalg->getProperty("OutputStatus");
 
-      // 4. Set up the output parameters
-      std::vector<std::string> parnames = mfunc->getParameterNames();
-      for (size_t i = 0; i < parnames.size(); ++i)
-      {
-          std::string parname = parnames[i];
-          double parvalue = mfunc->getParameter(parname);
-          mFuncParameters[parname] = parvalue;
-      }
+    cout << "Fit geometry function result:  Chi^2 = " << chi2
+         << "; Fit Status = " << fitstatus << std::endl;
 
-      // 5. Pretty screen output
-      std::map<std::string, double>::iterator par2iter;
+    API::IFunction_sptr fitfunc = fitalg->getProperty("Function");
 
-      g_log.notice() << "**************************************" << std::endl;
-      for (size_t i = 0; i < paramtofit.size(); ++i)
-      {
-          std::string parname = paramtofit[i];
-          par2iter = mFuncParameters.find(parname);
-          if (par2iter != mFuncParameters.end())
-          {
-              double parvalue = par2iter->second;
-              double oldparvalue = mInputFuncParameters[parname];
-              g_log.notice() << "Fit paramter:  " << parname << " = " << parvalue
-                             << "  <----- " << oldparvalue << std::endl;
-          }
-      }
-      g_log.notice() << "**************************************" << std::endl;
+    // 4. Set the output data (model and diff)
+    API::FunctionDomain1DVector domain(dataWS->readX(1));
+    API::FunctionValues values(domain);
+    mfunc->function(domain, values);
 
-      return;
+    for (size_t i = 0; i < domain.size(); ++i)
+    {
+      dataWS->dataY(1)[i] = values[i];
+      dataWS->dataY(2)[i] = dataWS->readY(0)[i] - values[i];
+    }
+
+    // 5. Update fitted parameters
+    for (size_t i = 0; i < funparamnames.size(); ++i)
+    {
+      std::string parname = funparamnames[i];
+      double parvalue = fitfunc->getParameter(parname);
+      mFuncParameters[parname] = parvalue;
+    }
+
+    // 6. Pretty screen output
+    stringstream dbss;
+    dbss << "************ Fit Parameter Result *************" << std::endl;
+    for (paramiter = mFuncParameters.begin(); paramiter != mFuncParameters.end(); ++paramiter)
+    {
+      std::string parname = paramiter->first;
+      double inpparvalue = mOrigParameters[parname];
+      double parvalue = paramiter->second;
+      dbss << setw(20) << parname << " = " << setw(15) << setprecision(6) << parvalue
+           << "\t\tFrom " << setw(15) << setprecision(6) << inpparvalue
+           << "\t\tDiff = " << inpparvalue-parvalue << endl;
+    }
+    dbss << "*********************************************" << std::endl;
+    cout << dbss.str();
+
+    return;
   }
 
-
-  /// =========================  Import TableWorkspace  ===================== ///
-  /** Genearte peaks from input workspace
+  /** Core Monte Carlo random walk on parameter-space
     */
-  void RefinePowderInstrumentParameters::generatePeaksFromInput(
-          DataObjects::TableWorkspace_sptr peakparamws, std::map<std::vector<int>, CurveFitting::Bk2BkExpConvPV_sptr>& peaks)
+  void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(vector<string> parnames, vector<double> lowerbounds,
+                                                                    vector<double> upperbounds, vector<double> stepsizes,
+                                                                    size_t maxsteps, double stepsizescalefactor)
   {
-      if (!peakparamws)
+    // 1. Set up starting values
+    size_t numparameters = parnames.size();
+    vector<double> paramvalues;
+    for (size_t i = 0; i < numparameters; ++i)
+    {
+      string parname = parnames[i];
+      double parvalue = mFuncParameters[parname];
+      paramvalues.push_back(parvalue);
+    }
+
+    const MantidVec& X = dataWS->readX(0);
+    const MantidVec& rawY = dataWS->readY(0);
+    const MantidVec& rawE = dataWS->readE(0);
+    FunctionDomain1DVector domain(X);
+    FunctionValues values(domain);
+
+    double curchi2 = calculateD2TOFFunction(domain, values, rawY, rawE);
+
+    // 2. Do MC loops
+    size_t paramindex = 0;
+    for (size_t istep = 0; istep < maxsteps; ++istep)
+    {
+      // a. Propose for a new value
+      double randomnumber = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+      double newvalue = paramvalues[paramindex] + (randomnumber-1.0)*stepsizes[paramindex];
+      if (newvalue > upperbounds[paramindex])
       {
-          g_log.error() << "Input tableworkspace for peak parameters is invalid!" << std::endl;
-          throw std::invalid_argument("Invalid input table workspace for peak parameters");
+        newvalue = lowerbounds[paramindex] + (newvalue-upperbounds[paramindex]);
+      }
+      else if (newvalue < lowerbounds[paramindex])
+      {
+        newvalue = upperbounds[paramindex] - (lowerbounds[paramindex]-newvalue);
       }
 
-      /// Clear output
-      peaks.clear();
+      mFunction->setParameter(parnames[paramindex], newvalue);
 
-      // FIXME Using fixed column name input table workspace now!
-      size_t numrows =  peakparamws->rowCount();
-      for (size_t ir = 0; ir < numrows; ++ir)
+      // b. Calcualte the new
+      double newchi2 = calculateD2TOFFunction(domain, values, rawY, rawE);
+
+      // c. Accept?
+      bool accept;
+      double prob = exp(-(newchi2-curchi2)/curchi2);
+      double randnumber = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+      if (randnumber < prob)
       {
-          // a) Parse row
-          API::TableRow paramrow = peakparamws->getRow(ir);
-          double height, tof, alpha, beta, gamma, sigma2;
-          int h, k, l;
-          paramrow >> h >> k >> l >> height >> tof >> alpha >> beta >> sigma2 >> gamma;
-
-          // b) Create function
-          CurveFitting::Bk2BkExpConvPV newpeak;
-          newpeak.initialize();
-          newpeak.setParameter("Alpha", alpha);
-          newpeak.setParameter("Beta", beta);
-          newpeak.setParameter("Sigma2", sigma2);
-          newpeak.setParameter("Gamma", gamma);
-
-          newpeak.setParameter("TOF_h", tof);
-          newpeak.setParameter("Height", height);
-
-          CurveFitting::Bk2BkExpConvPV_sptr newpeakptr = boost::make_shared<CurveFitting::Bk2BkExpConvPV>(newpeak);
-
-          // c) Create new entry in the map
-          std::vector<int> hkl;
-          hkl.push_back(h); hkl.push_back(k); hkl.push_back(l);
-
-          peaks.insert(std::make_pair(hkl, newpeakptr));
+        accept = true;
+      }
+      else
+      {
+        accept = false;
       }
 
-      return;
+      // d. Update step size
+      if (newchi2 < curchi2)
+      {
+        stepsizes[paramindex] = stepsizes[paramindex]/stepsizescalefactor;
+      }
+      else
+      {
+        stepsizes[paramindex] = stepsizes[paramindex]*stepsizescalefactor;
+      }
+
+      // e. Record the solution
+      if (accept)
+      {
+        // i.   Accept the new value
+        paramvalues[paramindex] = newvalue;
+        // ii.  Add the new values to vector
+        vector<double> parametervalues = paramvalues;
+        mBestParameters.push_back(make_pair(newchi2, parametervalues));
+        // iii. Sort and delete the last if necessary
+        sort(mBestParameters.begin(), mBestParameters.end());
+        if (mBestParameters.size() > mMaxNumberStoredParameters)
+          mBestParameters.pop_back();
+        // iv.  Update chi2
+        curchi2 = newchi2;
+      }
+
+      // z. Update the parameter index for next movement
+      paramindex += 1;
+      if (paramindex >= numparameters)
+        paramindex = 0;
+    }
+
+    return;
   }
 
-  /** Import TableWorkspace containing the parameters for fitting
+  /** Get the names of the parameters of D-TOF conversion function
+    */
+  void RefinePowderInstrumentParameters::getD2TOFFuncParamNames(vector<string>& parnames)
+  {
+    // 1. Clear output
+    parnames.clear();
+
+    // 2. Get the parameter names from function
+    CurveFitting::ThermalNeutronDtoTOFFunction d2toffunc;
+    d2toffunc.initialize();
+    std::vector<std::string> funparamnames = d2toffunc.getParameterNames();
+
+    mFunction = boost::make_shared<ThermalNeutronDtoTOFFunction>(d2toffunc);
+
+    // 3. Copy
+    parnames = funparamnames;
+
+    return;
+  }
+
+  /** Calcualte the function
+    */
+  double RefinePowderInstrumentParameters::calculateD2TOFFunction(FunctionDomain1DVector domain, FunctionValues &values,
+                                                                  const MantidVec& rawY, const MantidVec& rawE)
+  {
+    // 1. Check validity
+    if (!mFunction)
+    {
+      throw std::runtime_error("mFunction has not been initialized!");
+    }
+    if (domain.size() != values.size() || domain.size() != rawY.size() || rawY.size() != rawE.size())
+    {
+      throw std::runtime_error("Input domain, values and raw data have different sizes.");
+    }
+
+    // 2. Calculate vlaues
+    mFunction->function(domain, values);
+
+    // 3. Calculate the difference
+    double chi2 = 0;
+    for (size_t i = 0; i < domain.size(); ++i)
+    {
+      double temp =  (values[i]-rawY[i])/rawE[i];
+      chi2 += temp*temp;
+    }
+
+    return chi2;
+  }
+
+  //------------------------------- Processing Inputs ----------------------------------------
+  /** Genearte peaks from input workspace
+    * Peaks are stored in a map.  (HKL) is the key
+    */
+  void RefinePowderInstrumentParameters::genPeaksFromTable(DataObjects::TableWorkspace_sptr peakparamws)
+  {
+    // 1. Check and clear input and output
+    if (!peakparamws)
+    {
+      g_log.error() << "Input tableworkspace for peak parameters is invalid!" << std::endl;
+      throw std::invalid_argument("Invalid input table workspace for peak parameters");
+    }
+
+    mPeaks.clear();
+
+    // 2. Parse table workspace rows to generate peaks
+    vector<string> colnames = peakparamws->getColumnNames();
+    size_t numrows = peakparamws->rowCount();
+
+    for (size_t ir = 0; ir < numrows; ++ir)
+    {
+      // a) Generate peak
+      CurveFitting::BackToBackExponential newpeak;
+      newpeak.initialize();
+
+      // b) Parse parameters
+      int h, k, l;
+      double alpha, beta, tof_h, sigma, sigma2, chi2, height, dbtemp;
+      sigma2 = -1;
+
+      API::TableRow row = peakparamws->getRow(ir);
+      for (size_t ic = 0; ic < colnames.size(); ++ic)
+      {
+        if (colnames[ic].compare("H") == 0)
+          row >> h;
+        else if (colnames[ic].compare("K") == 0)
+          row >> k;
+        else if (colnames[ic].compare("L") == 0)
+          row >> l;
+        else if (colnames[ic].compare("Alpha") == 0)
+          row >> alpha;
+        else if (colnames[ic].compare("Beta") == 0)
+          row >> beta;
+        else if (colnames[ic].compare("Sigma2") == 0)
+          row >> sigma2;
+        else if (colnames[ic].compare("Sigma") == 0)
+          row >> sigma;
+        else if (colnames[ic].compare("Chi2") == 0)
+          row >> chi2;
+        else if (colnames[ic].compare("Height") == 0)
+          row >> height;
+        else if (colnames[ic].compare("TOF_h") == 0)
+          row >> tof_h;
+        else
+        {
+          // FIXME Try to set it to a wrong type and see whether it can go on or not!
+          row >> dbtemp;
+        }
+      }
+
+      if (sigma2 > 0)
+        sigma = sqrt(sigma2);
+
+      // c) Set peak parameters and etc.
+      newpeak.setParameter("A", alpha);
+      newpeak.setParameter("B", beta);
+      newpeak.setParameter("S", sigma);
+      newpeak.setParameter("X0", tof_h);
+      newpeak.setParameter("I", height);
+
+      // d) Make to share pointer and set to instance data structure (map)
+      CurveFitting::BackToBackExponential_sptr newpeakptr =
+          boost::make_shared<CurveFitting::BackToBackExponential>(newpeak);
+
+      std::vector<int> hkl;
+      hkl.push_back(h); hkl.push_back(k); hkl.push_back(l);
+
+      mPeaks.insert(std::make_pair(hkl, newpeakptr));
+
+      mPeakErrors.insert(make_pair(hkl, chi2));
+
+      g_log.information() << "[GeneratePeaks] Peak " << ir << " HKL = [" << hkl[0] << ", " << hkl[1] << ", "
+                          << hkl[2] << "], Input Center = " << setw(10) << setprecision(6) << newpeak.centre()
+                          << endl;
+
+    } // ENDFOR Each potential peak
+
+    return;
+  }
+
+  /** Import TableWorkspace containing the instrument parameters for fitting
    * the diffrotometer geometry parameters
    */
   void RefinePowderInstrumentParameters::importParametersFromTable(
           DataObjects::TableWorkspace_sptr parameterWS, std::map<std::string, double>& parameters)
   {
-      // 1. Check column orders
-      std::vector<std::string> colnames = parameterWS->getColumnNames();
-      if (colnames.size() < 2)
-      {
-          g_log.error() << "Input parameter table workspace does not have enough number of columns. "
-                        << " Number of columns = " << colnames.size() << " < 3 as required. " << std::endl;
-          throw std::runtime_error("Input parameter workspace is wrong. ");
-      }
+    // 1. Check column orders
+    std::vector<std::string> colnames = parameterWS->getColumnNames();
+    if (colnames.size() < 2)
+    {
+      g_log.error() << "Input parameter table workspace does not have enough number of columns. "
+                    << " Number of columns = " << colnames.size() << " < 3 as required. " << std::endl;
+      throw std::runtime_error("Input parameter workspace is wrong. ");
+    }
 
-      if (colnames[0].compare("Name") != 0 ||
-              colnames[1].compare("Value") != 0)
-      {
-          g_log.error() << "Input parameter table workspace does not have the columns in order.  "
-                        << " It must be Name, Value, FitOrTie." << std::endl;
-          throw std::runtime_error("Input parameter workspace is wrong. ");
-      }
+    if (colnames[0].compare("Name") != 0 ||
+        colnames[1].compare("Value") != 0)
+    {
+      g_log.error() << "Input parameter table workspace does not have the columns in order.  "
+                    << " It must be Name, Value, FitOrTie." << std::endl;
+      throw std::runtime_error("Input parameter workspace is wrong. ");
+    }
 
-      // 2. Import data to maps
-      std::string parname;
-      double value;
+    // 2. Import data to maps
+    std::string parname;
+    double value;
 
-      size_t numrows = parameterWS->rowCount();
+    size_t numrows = parameterWS->rowCount();
 
-      for (size_t ir = 0; ir < numrows; ++ir)
-      {
-          API::TableRow trow = parameterWS->getRow(ir);
-          trow >> parname >> value;
-          parameters.insert(std::make_pair(parname, value));
-      }
+    for (size_t ir = 0; ir < numrows; ++ir)
+    {
+      API::TableRow trow = parameterWS->getRow(ir);
+      trow >> parname >> value;
+      parameters.insert(std::make_pair(parname, value));
+    }
 
-      return;
+    return;
   }
+
+  /** Import the Monte Carlo related parameters from table
+    * Arguments
+    */
+  void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(
+      TableWorkspace_sptr tablews, vector<string> parameternames, vector<double>& stepsizes,
+      vector<double>& lowerbounds, vector<double>& upperbounds)
+  {
+    // 1. Get column information
+    vector<string> colnames = tablews->getColumnNames();
+    size_t imax, imin, istep;
+    imax = colnames.size()+1;
+    imin = imax;
+    istep = imax;
+
+    for (size_t i = 0; i < colnames.size(); ++i)
+    {
+      if (colnames[i].compare("Max") == 0)
+        imax = i;
+      else if (colnames[i].compare("Min") == 0)
+        imin = i;
+      else if (colnames[i].compare("StepSize") == 0)
+        istep = i;
+    }
+
+    if (imax > colnames.size() || imin > colnames.size() || istep > colnames.size())
+    {
+      stringstream errss;
+      errss << "Input parameter workspace misses information for Monte Carlo minimizer. "
+            << "One or more of the following columns are missing (Max, Min, StepSize).";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    // 2. Parse input to a map
+    stepsizes.clear();
+    lowerbounds.clear();
+    upperbounds.clear();
+
+    map<string, vector<double> > mcparameters;
+    size_t numrows = tablews->rowCount();
+    for (size_t ir = 0; ir < numrows; ++ir)
+    {
+      TableRow row = tablews->getRow(ir);
+      string parname;
+      double tmax, tmin, tstepsize;
+      row >> parname;
+      for (size_t ic = 1; ic < colnames.size(); ++ic)
+      {
+        double tmpdbl;
+        row >> tmpdbl;
+        if (ic == imax)
+          tmax = tmpdbl;
+        else if (ic == imin)
+          tmin = tmpdbl;
+        else if (ic == istep)
+          tstepsize = tmpdbl;
+      }
+      vector<double> tmpvec;
+      tmpvec.push_back(tmin);
+      tmpvec.push_back(tmax);
+      tmpvec.push_back(tstepsize);
+      mcparameters.insert(make_pair(parname, tmpvec));
+    }
+
+    // 3. Retrieve the information for geometry parameters
+    map<string, vector<double> >::iterator mit;
+    for (size_t i = 0; i < parameternames.size(); ++i)
+    {
+      // a) Get on hold of the MC parameter vector
+      string parname = parameternames[i];
+      mit = mcparameters.find(parname);
+      if (mit == mcparameters.end())
+      {
+        // Not found the parameter.  raise error!
+        stringstream errss;
+        errss << "Input instrument parameter workspace does not have parameter " << parname
+              << ".  Information is incomplete for Monte Carlo simulation." << endl;
+        g_log.error(errss.str());
+        throw runtime_error(errss.str());
+      }
+      vector<double> mcparvalues = mit->second;
+
+      // b) Build for the output
+      lowerbounds.push_back(mcparvalues[0]);
+      upperbounds.push_back(mcparvalues[1]);
+      stepsizes.push_back(mcparvalues[2]);
+    }
+
+    return;
+  }
+
 
   /** Calculate thermal neutron's d-spacing
     */
-  double RefinePowderInstrumentParameters::calculateDspaceValue(std::vector<int> hkl)
+  double RefinePowderInstrumentParameters::calculateDspaceValue(std::vector<int> hkl, double lattice)
   {    
-    g_log.information() << "HKL = " << hkl[0] << hkl[1] <<  hkl[2] << std::endl;
+    // FIXME  It only works for the assumption that the lattice is cubical
+    double h = static_cast<double>(hkl[0]);
+    double k = static_cast<double>(hkl[1]);
+    double l = static_cast<double>(hkl[2]);
 
-      throw std::runtime_error("To be implemented soon!");
+    double d = lattice/sqrt(h*h+k*k+l*l);
 
-      return -1.0;
+    return d;
+  }
+
+  //------- Related to Algorith's Output  -------------------------------------------------------------------
+
+  /** Get peak positions from peak functions
+    * Arguments:
+    * Output: outWS  1 spectrum .  dspacing - peak center
+   */
+  void RefinePowderInstrumentParameters::genPeakCentersWorkspace()
+  {
+    // 1. Collect values in a vector for sorting
+    double lattice = mFuncParameters["LatticeConstant"];
+    if (lattice < 1.0E-5)
+    {
+      std::stringstream errmsg;
+      errmsg << "Input Lattice constant = " << lattice << " is wrong or not set up right. ";
+      throw std::invalid_argument(errmsg.str());
+    }
+
+
+    string stdoption = getProperty("StandardError");
+    bool useconstanterror = false;
+    if (stdoption.compare("ConstantValue") == 0)
+    {
+      useconstanterror = true;
+    }
+
+    std::map<std::vector<int>, CurveFitting::BackToBackExponential_sptr>::iterator peakiter;
+    std::vector<std::pair<double, std::pair<double, double> > > peakcenters; // d_h [TOF_h, CHI2]
+
+    for (peakiter = mPeaks.begin(); peakiter != mPeaks.end(); ++peakiter)
+    {
+      vector<int> hkl = peakiter->first;
+      BackToBackExponential_sptr peak = peakiter->second;
+
+      double sigma = peak->getParameter("S");
+      if (sigma < mMinSigma)
+      {
+        g_log.information() << "Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
+                            << ") has unphysically small Sigma = " << sigma << ".  "
+                            << "It is thus excluded. " << endl;
+        continue;
+      }
+
+      double dh = calculateDspaceValue(hkl, lattice);
+      double center = peak->centre();
+      double height = peak->height();
+      double chi2;
+      if (useconstanterror)
+      {
+        chi2 = 1.0;
+      }
+      else
+      {
+        chi2 = sqrt(mPeakErrors[hkl])/height;
+      }
+
+      peakcenters.push_back(make_pair(dh, make_pair(center, chi2)));
+    }
+
+    // 2. Sort by d-spacing value
+    std::sort(peakcenters.begin(), peakcenters.end());
+
+
+    // 3. Create output workspace
+    size_t size = peakcenters.size();
+    size_t nspec = 3; // raw, refined, diff
+    dataWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (API::WorkspaceFactory::Instance().create("Workspace2D", nspec, size, size));
+    dataWS->getAxis(0)->setUnit("dSpacing");
+
+    // 4. Put data to output workspace
+    for (size_t i = 0; i < peakcenters.size(); ++i)
+    {
+      for (size_t j = 0; j < nspec; ++j)
+      {
+        dataWS->dataX(j)[i] = peakcenters[i].first;
+      }
+      dataWS->dataY(0)[i] = peakcenters[i].second.first;
+      dataWS->dataE(0)[i] = peakcenters[i].second.second;
+    }
+
+    return;
+  }
+
+  /** Generate an output table workspace containing the fitted instrument parameters
+    */
+  DataObjects::TableWorkspace_sptr RefinePowderInstrumentParameters::genOutputInstrumentParameterTable()
+  {
+    //  TableWorkspace is not copyable (default CC is incorrect and no point in writing a non-default one)
+    DataObjects::TableWorkspace_sptr newtablews =
+        boost::shared_ptr<DataObjects::TableWorkspace>(new DataObjects::TableWorkspace());
+    newtablews->addColumn("str", "Name");
+    newtablews->addColumn("double", "Value");
+    newtablews->addColumn("str", "FitOrTie");
+
+    std::map<std::string, double>::iterator pariter;
+    for (pariter = mFuncParameters.begin(); pariter != mFuncParameters.end(); ++pariter)
+    {
+      API::TableRow newrow = newtablews->appendRow();
+      std::string parname = pariter->first;
+      double parvalue = pariter->second;
+      newrow << parname << parvalue;
+    }
+
+    return newtablews;
   }
 
 } // namespace CurveFitting
