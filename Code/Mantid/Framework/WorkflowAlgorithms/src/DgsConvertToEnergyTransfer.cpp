@@ -357,7 +357,6 @@ namespace Mantid
 
           // Make result workspace a distribution
           IAlgorithm_sptr cnvToDist = this->createSubAlgorithm("ConvertToDistribution");
-          cnvToDist->setAlwaysStoreInADS(true);
           cnvToDist->setProperty("Workspace", outputWS);
           cnvToDist->executeAsSubAlg();
           outputWS = cnvToDist->getProperty("OutputWorkspace");
@@ -384,9 +383,8 @@ namespace Mantid
           cnvToDist->executeAsSubAlg();
           bkgWS = flatBg->getProperty("Workspace");
 
-          // Subtrac background from result workspace
+          // Subtract background from result workspace
           IAlgorithm_sptr minus = this->createSubAlgorithm("Minus");
-          minus->setAlwaysStoreInADS(true);
           minus->setProperty("LHSWorkspace", outputWS);
           minus->setProperty("RHSWorkspace", bkgWS);
           minus->setProperty("OutputWorkspace", outputWS);
