@@ -14,6 +14,7 @@ from hfir_command_interface import TransmissionDarkCurrent, BckTransmissionDarkC
 from hfir_command_interface import SetDirectBeamAbsoluteScale, SetAbsoluteScale
 from hfir_command_interface import SetSampleDetectorOffset, SetSampleDetectorDistance
 from hfir_command_interface import SetSensitivityBeamCenter, SensitivityScatteringBeamCenter
+from hfir_command_interface import Stitch
 from sns_reducer import EqSansReducer
 import sns_instrument
 import sans_reduction_steps
