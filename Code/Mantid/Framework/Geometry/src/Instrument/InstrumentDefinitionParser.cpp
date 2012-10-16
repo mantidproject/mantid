@@ -354,10 +354,21 @@ namespace Geometry
           {
             std::stringstream ss1, ss2;
             ss1 << idList.vec.size(); ss2 << idList.counted;
-            g_log.error("The number of detector IDs listed in idlist named "
-                + pElem->getAttribute("idlist") +
-                " is larger than the number of detectors listed in type = "
+            if( pElem->getAttribute("idList") == "") {
+              g_log.error("No detector ID list found for detectors of type "
                 + pElem->getAttribute("type"));
+            }
+            else if( idList.vec.size() == 0) {
+               g_log.error("No detector IDs found for detectors in list "
+                    + pElem->getAttribute("idlist") +
+                    "for detectors of type"
+                    + pElem->getAttribute("type"));
+            } else {
+               g_log.error("The number of detector IDs listed in idlist named "
+                   + pElem->getAttribute("idlist") +
+                   " is larger than the number of detectors listed in type = "
+                   + pElem->getAttribute("type"));
+            }
             throw Kernel::Exception::InstrumentDefinitionError(
                 "Number of IDs listed in idlist (=" + ss1.str() + ") is larger than the number of detectors listed in type = "
                 + pElem->getAttribute("type") + " (=" + ss2.str() + ").", filename);
@@ -1115,14 +1126,21 @@ namespace Geometry
       //-------------- Create a Detector ------------------------------------------------
       std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem);
 
-      // before setting detector ID check that the IDF satisfy the following
+      // before setting detector ID check that the IDF satisfies the following
 
       if (idList.counted >=  static_cast<int>(idList.vec.size()) )
       {
         std::stringstream ss1, ss2;
         ss1 << idList.vec.size(); ss2 << idList.counted;
-        g_log.error("The number of detector IDs listed in idlist named "
-          + idList.idname + " is less then the number of detectors");
+        if ( idList.idname == "") {
+          g_log.error("No list of detector IDs found for location element "+ name);
+        }
+        else if( idList.vec.size() == 0) {
+          g_log.error("No detector IDs found for detectors in list "+idList.idname);
+        } else {
+           g_log.error("The number of detector IDs listed in idlist named "
+             + idList.idname + " is less then the number of detectors");
+        }
         throw Kernel::Exception::InstrumentDefinitionError(
           "Number of IDs listed in idlist (=" + ss1.str() + ") is less than the number of detectors.", filename);
       }
