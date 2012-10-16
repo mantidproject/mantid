@@ -104,7 +104,7 @@ public:
 
     TS_ASSERT(outws);
 
-    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 6);
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 2);
 
     AnalysisDataService::Instance().remove("NOM_SmoothBackground");
 
