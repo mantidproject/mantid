@@ -162,83 +162,60 @@ namespace Mantid
         preserveEvents = true;
         const std::string instName = inputWS->getInstrument()->getName();
         double tZero = 0.0;
-        if ("CNCS" == instName || "HYSPEC" == instName)
+        if (useEiGuess)
         {
           incidentEnergy = eiGuess;
-          if ("HYSPEC" == instName)
-          {
-            double powVal = incidentEnergy / 27.0;
-            tZero = 25.0 + 85.0 / (1.0 + std::pow(powVal, 4));
-          }
-          // Do CNCS
-          else
-          {
-            double powVal = 1.0 + incidentEnergy;
-            tZero = (0.1982 * std::pow(powVal, -0.84098)) * 1000.0;
-          }
           if (EMPTY_DBL() != tZeroGuess)
           {
             tZero = tZeroGuess;
           }
         }
-        // Do ARCS and SEQUOIA
         else
         {
-          if (useEiGuess)
+          if (!monWS)
           {
-            incidentEnergy = eiGuess;
-            if (EMPTY_DBL() != tZeroGuess)
+            g_log.notice() << "Trying to determine file name" << std::endl;
+            std::string runFileName = inputWS->run().getProperty("Filename")->value();
+            if (runFileName.empty())
             {
-              tZero = tZeroGuess;
-            }
-          }
-          else
-          {
-            if (!monWS)
-            {
-              g_log.notice() << "Trying to determine file name" << std::endl;
-              std::string runFileName = inputWS->run().getProperty("Filename")->value();
-              if (runFileName.empty())
-              {
-                throw std::runtime_error("Cannot find run filename, therefore cannot find the initial energy");
-              }
-
-              std::string loadAlgName("");
-              std::string fileProp("");
-              if (boost::ends_with(runFileName, "_event.nxs"))
-              {
-                g_log.notice() << "Loading NeXus monitors" << std::endl;
-                loadAlgName = "LoadNexusMonitors";
-                fileProp = "Filename";
-              }
-
-              if (boost::ends_with(runFileName, "_neutron_event.dat"))
-              {
-                g_log.notice() << "Loading PreNeXus monitors" << std::endl;
-                loadAlgName = "LoadPreNexusMonitors";
-                boost::replace_first(runFileName, "_neutron_event.dat",
-                    "_runinfo.xml");
-                fileProp = "RunInfoFilename";
-              }
-
-              // Load the monitors
-              IAlgorithm_sptr loadmon = this->createSubAlgorithm(loadAlgName);
-              loadmon->setProperty(fileProp, runFileName);
-              loadmon->setProperty("OutputWorkspace", monWsName);
-              loadmon->executeAsSubAlg();
-              monWS = loadmon->getProperty("OutputWorkspace");
+              throw std::runtime_error("Cannot find run filename, therefore cannot find the initial energy");
             }
 
-            // Calculate Ei
-            IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
-            getei->setProperty("InputWorkspace", monWS);
-            getei->setProperty("Monitor1Spec", eiMon1Spec);
-            getei->setProperty("Monitor2Spec", eiMon2Spec);
-            getei->setProperty("EnergyEstimate", eiGuess);
-            getei->executeAsSubAlg();
-            incidentEnergy = getei->getProperty("IncidentEnergy");
-            tZero = getei->getProperty("Tzero");
+            std::string loadAlgName("");
+            std::string fileProp("");
+            if (boost::ends_with(runFileName, "_event.nxs"))
+            {
+              g_log.notice() << "Loading NeXus monitors" << std::endl;
+              loadAlgName = "LoadNexusMonitors";
+              fileProp = "Filename";
+            }
+
+            if (boost::ends_with(runFileName, "_neutron_event.dat"))
+            {
+              g_log.notice() << "Loading PreNeXus monitors" << std::endl;
+              loadAlgName = "LoadPreNexusMonitors";
+              boost::replace_first(runFileName, "_neutron_event.dat",
+                  "_runinfo.xml");
+              fileProp = "RunInfoFilename";
+            }
+
+            // Load the monitors
+            IAlgorithm_sptr loadmon = this->createSubAlgorithm(loadAlgName);
+            loadmon->setProperty(fileProp, runFileName);
+            loadmon->setProperty("OutputWorkspace", monWsName);
+            loadmon->executeAsSubAlg();
+            monWS = loadmon->getProperty("OutputWorkspace");
           }
+
+          // Calculate Ei
+          IAlgorithm_sptr getei = this->createSubAlgorithm("GetEi");
+          getei->setProperty("InputWorkspace", monWS);
+          getei->setProperty("Monitor1Spec", eiMon1Spec);
+          getei->setProperty("Monitor2Spec", eiMon2Spec);
+          getei->setProperty("EnergyEstimate", eiGuess);
+          getei->executeAsSubAlg();
+          incidentEnergy = getei->getProperty("IncidentEnergy");
+          tZero = getei->getProperty("Tzero");
         }
 
         g_log.notice() << "Adjusting for T0" << std::endl;
