@@ -22,6 +22,7 @@ parameters and generating calls to other workflow or standard algorithms.
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
+#include <boost/algorithm/string/erase.hpp>
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -636,6 +637,10 @@ namespace Mantid
       // Get output workspace pointer and name
       MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
       std::string outputWsName = this->getPropertyValue("OutputWorkspace");
+      if (boost::ends_with(outputWsName, "_spe"))
+      {
+        boost::erase_all(outputWsName, "_spe");
+      }
 
       // Load the hard mask if available
       MatrixWorkspace_sptr hardMaskWS = this->loadHardMask();
