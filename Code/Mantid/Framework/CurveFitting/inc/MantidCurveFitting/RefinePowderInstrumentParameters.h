@@ -53,9 +53,9 @@ namespace CurveFitting
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-  */
+  */  
   class DLLExport RefinePowderInstrumentParameters : public API::Algorithm
-  {
+  {    
   public:
     RefinePowderInstrumentParameters();
     virtual ~RefinePowderInstrumentParameters();
@@ -77,9 +77,7 @@ namespace CurveFitting
     // Implement abstract Algorithm methods
     void exec();
 
-    /// Generate peaks from table (workspace)
-    void genPeaksFromTable(DataObjects::TableWorkspace_sptr peakparamws);
-
+    //----------------  Processing Input ---------------------
     /// Import instrument parameter from table (workspace)
     void importParametersFromTable(DataObjects::TableWorkspace_sptr parameterWS, std::map<std::string, double>& parameters);
 
@@ -89,13 +87,30 @@ namespace CurveFitting
                                              vector<double>& upperbounds);
 
     /// Generate (output) workspace of peak centers
-    void genPeakCentersWorkspace();
+    void genPeakCentersWorkspace(bool montecarlo, size_t numbestfit);
 
+    /// Generate peaks from table (workspace)
+    void genPeaksFromTable(DataObjects::TableWorkspace_sptr peakparamws);
+
+    //---------------  Processing Output ------------------
     /// Generate (output) table worksspace for instrument parameters
     DataObjects::TableWorkspace_sptr genOutputInstrumentParameterTable();
 
+    /// Generate an output table workspace for N best fitting result
+    DataObjects::TableWorkspace_sptr genMCResultTable();
+
+    //--------------- Fit and MC methods -------------------
     /// Fit instrument geometry parameters by ThermalNeutronDtoTOFFunction
     void fitInstrumentParameters();
+
+    /// Parse Fit() output parameter workspace
+    std::string parseFitParameterWorkspace(API::ITableWorkspace_sptr paramws);
+
+    /// Parse the fitting result
+    std::string parseFitResult(API::IAlgorithm_sptr fitalg, double& chi2);
+
+    /// Set up and run a monte carlo simulation to refine the peak parameters
+    void refineInstrumentParametersMC(TableWorkspace_sptr parameterWS);
 
     /// Core Monte Carlo random walk on parameter-space
     void doParameterSpaceRandomWalk(vector<string> parnames, vector<double> lowerbounds,
@@ -109,12 +124,6 @@ namespace CurveFitting
 
     /// Calculate d-space value from peak's miller index for thermal neutron
     double calculateDspaceValue(std::vector<int> hkl, double lattice);
-
-    /// Parse Fit() output parameter workspace
-    std::string parseFitParameterWorkspace(API::ITableWorkspace_sptr paramws);
-
-    /// Parse the fitting result
-    std::string parseFitResult(API::IAlgorithm_sptr fitalg, double& chi2);
 
     /// Output Workspace containing the dspacing ~ TOF peak positions
     DataObjects::Workspace2D_sptr dataWS;
@@ -130,6 +139,9 @@ namespace CurveFitting
     /// Map to store the original (input) parameters
     std::map<std::string, double> mOrigParameters;
 
+    /// Peak function parameter names
+    vector<string> mPeakFunctionParameterNames;
+    /// N sets of the peak parameter values for the best N chi2.  It is paired with mPeakFunctionParameterNames
     std::vector<std::pair<double, std::vector<double> > > mBestParameters;
 
     /// Minimum allowed sigma of a peak
@@ -161,7 +173,6 @@ namespace CurveFitting
     double y = ((xf*y0-x0*yf) + x*(yf-y0))/(xf-x0);
     return y;
   }
-
 
 } // namespace CurveFitting
 } // namespace Mantid

@@ -85,6 +85,10 @@ namespace CurveFitting
     declareProperty(new WorkspaceProperty<TableWorkspace>("OutputInstrumentParameterWorkspace", "AnonymousOut2", Direction::Output),
                     "Output TableWorkspace for the fitted peak parameters for each peak.");
 
+    // Workspace to output N best MC parameters
+    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputBestResultsWorkspace", "", Direction::Output, PropertyMode::Optional),
+                    "Output TableWorkspace for the N best MC fitting results. ");
+
     // Lower limit on number of peaks for fitting
     declareProperty("MinNumberFittedPeaks", 5,
                     "Minimum number of fitted peaks for refining instrument parameters.");
@@ -96,6 +100,8 @@ namespace CurveFitting
     auto validator = boost::make_shared<Kernel::StringListValidator>(algoptions);
     declareProperty("RefinementAlgorithm", "MonteCarlo", validator,
                     "Algorithm to refine the instrument parameters.");
+
+    declareProperty("RandomWalkSteps", 10000, "Number of Monte Carlo random walk steps. ");
 
     // Parameters to fit
     declareProperty(new Kernel::ArrayProperty<std::string>("ParametersToFit"),
@@ -112,6 +118,10 @@ namespace CurveFitting
     declareProperty("StandardError", "ConstantValue", listvalidator,
                     "Algorithm to calculate the standard error of peak positions.");
 
+    declareProperty("NumberBestFitRecorded", 1, "Number of best fits (Monte Carlo) recorded and output. ");
+
+    declareProperty("MonteCarloRandomSeed", 0, "Random seed for Monte Carlo simulation. ");
+
     return;
   }
 
@@ -120,22 +130,35 @@ namespace CurveFitting
    */
   void RefinePowderInstrumentParameters::exec()
   {
+    enum {DirectFit, MonteCarlo} refinealgorithm;
+
     // 1. Get input
     DataObjects::TableWorkspace_sptr peakWS = this->getProperty("InputPeakParameterWorkspace");
     DataObjects::TableWorkspace_sptr parameterWS = this->getProperty("InputInstrumentParameterWorkspace");
 
     mMinSigma = getProperty("MinSigma");
 
-    int inttemp = getProperty("MinNumberFittedPeaks");
-    if (inttemp <= 1)
+    int tempint = getProperty("MinNumberFittedPeaks");
+    if (tempint <= 1)
     {
-      g_log.error() << "Input MinNumberFittedPeaks = " << inttemp
+      g_log.error() << "Input MinNumberFittedPeaks = " << tempint
                     << " is too small. " << endl;
       throw std::invalid_argument("Input MinNumberFittedPeaks is too small.");
     }
-    mMinNumFittedPeaks = static_cast<size_t>(inttemp);
+    mMinNumFittedPeaks = static_cast<size_t>(tempint);
+
+    tempint = getProperty("NumberBestFitRecorded");
+    if (tempint <= 0)
+      throw runtime_error("Input NumberBestFitRecorded cannot be less and equal to 0. ");
+    mMaxNumberStoredParameters = static_cast<size_t>(tempint);
 
     string algoption = getProperty("RefinementAlgorithm");
+    if (algoption.compare("DirectFit") == 0)
+      refinealgorithm = DirectFit;
+    else if (algoption.compare("MonteCarlo") == 0)
+      refinealgorithm = MonteCarlo;
+    else
+      throw runtime_error("RefinementAlgorithm other than DirectFit and MonteCarlo are not supported.");
 
     // 2. Parse input table workspace
     genPeaksFromTable(peakWS);
@@ -143,39 +166,35 @@ namespace CurveFitting
     mOrigParameters = mFuncParameters;
 
     // 3. Generate a cener workspace as function of d-spacing.
-    genPeakCentersWorkspace();
+    bool usemc = false;
+    if (refinealgorithm == MonteCarlo)
+      usemc = true;
+    genPeakCentersWorkspace(usemc, mMaxNumberStoredParameters);
 
     // 4. Fit instrument geometry function
-    if (algoption.compare("DirectFit") == 0)
+    stringstream errss;
+    TableWorkspace_sptr mcresultws;
+
+    switch (refinealgorithm)
     {
-      // a) Simple (directly) fit all parameters
-      fitInstrumentParameters();
+      case DirectFit:
+        // a) Simple (directly) fit all parameters
+        fitInstrumentParameters();
+        break;
 
-    }
-    else if (algoption.compare("MonteCarlo") == 0)
-    {
-      // b) Use Monte Carlo/Annealing method to search global minimum
-      vector<string> funparamnames;
-      getD2TOFFuncParamNames(funparamnames);
+      case MonteCarlo:
+        // b) Use Monte Carlo/Annealing method to search global minimum
+        refineInstrumentParametersMC(parameterWS);
+        mcresultws = genMCResultTable();
+        setProperty("OutputBestResultsWorkspace", mcresultws);
+        break;
 
-      vector<double> stepsizes, lowerbounds, upperbounds;
-      importMonteCarloParametersFromTable(parameterWS, funparamnames, stepsizes, lowerbounds, upperbounds);
-
-      // FIXME :  maxstep and random seed should be user-input
-      size_t maxsteps = 10000;
-      srand(0);
-      double stepsizescalefactor = 1.1;
-      mMaxNumberStoredParameters = 10;
-
-      doParameterSpaceRandomWalk(funparamnames, lowerbounds, upperbounds, stepsizes, maxsteps, stepsizescalefactor);
-    }
-    else
-    {
-      // c) Unsupported
-      stringstream errss;
-      errss << "Refinement algorithm " << algoption << " is not supported.  Quit!";
-      g_log.error(errss.str());
-      throw invalid_argument(errss.str());
+      default:
+        // c) Unsupported
+        errss << "Refinement algorithm " << algoption << " is not supported.  Quit!";
+        g_log.error(errss.str());
+        throw invalid_argument(errss.str());
+        break;
     }
 
     // 5. Set output workspace
@@ -316,13 +335,95 @@ namespace CurveFitting
     return;
   }
 
+
+  /** Refine instrument parameters by Monte Carlo method
+    */
+  void RefinePowderInstrumentParameters::refineInstrumentParametersMC(TableWorkspace_sptr parameterWS)
+  {
+    // 1. Get function's parameter names
+    getD2TOFFuncParamNames(mPeakFunctionParameterNames);
+
+    // 2. Parse parameter (table) workspace
+    vector<double> stepsizes, lowerbounds, upperbounds;
+    importMonteCarloParametersFromTable(parameterWS, mPeakFunctionParameterNames, stepsizes, lowerbounds, upperbounds);
+
+    stringstream dbss;
+    for (size_t i = 0; i < mPeakFunctionParameterNames.size(); ++i)
+    {
+      dbss << setw(20) << mPeakFunctionParameterNames[i] << ": Min = " << setw(15) << setprecision(6) << lowerbounds[i]
+           << ", Max = " << setw(15) << setprecision(6) << upperbounds[i]
+           << ", Step Size = " << setw(15) << setprecision(6) << stepsizes[i] << endl;
+    }
+    g_log.notice() << "Monte Carlo Parameters: " << endl << dbss.str();
+
+    // 3. Maximum step size
+    size_t maxsteps;
+    int tempint = getProperty("RandomWalkSteps");
+    if (tempint > 0)
+      maxsteps = static_cast<size_t>(tempint);
+    else
+      throw runtime_error("RandomwWalkSteps cannot be less than or equal to 0. ");
+
+    // 4. Random seed and step size rescale factor
+    //    FIXME Need to have random seed as an input for better statistic
+    int randomseed = getProperty("MonteCarloRandomSeed");
+    srand(randomseed);
+
+    double stepsizescalefactor = 1.1;
+
+    // 5. Monte Carlo simulation
+    doParameterSpaceRandomWalk(mPeakFunctionParameterNames, lowerbounds, upperbounds, stepsizes, maxsteps,
+                               stepsizescalefactor);
+
+    // 6. Record the result
+    const MantidVec& X = dataWS->readX(0);
+    const MantidVec& Y = dataWS->readY(0);
+    const MantidVec& E = dataWS->readE(0);
+    FunctionDomain1DVector domain(X);
+    FunctionValues values(domain);
+    for (size_t i = 0; i < mBestParameters.size(); ++i)
+    {
+      // a. Set the function with the
+      for (size_t j = 0; j < mPeakFunctionParameterNames.size(); ++j)
+      {
+        mFunction->setParameter(mPeakFunctionParameterNames[j], mBestParameters[i].second[j]);
+      }
+
+      // b. Calculate
+      calculateD2TOFFunction(domain, values, Y, E);
+
+      // c. Put the data to output workspace
+      MantidVec& newY = dataWS->dataY(2*i+1);
+      MantidVec& newD = dataWS->dataY(2*i+2);
+      for (size_t j = 0; j < newY.size(); ++j)
+      {
+        newY[j] = values[j];
+        newD[j] = Y[j] - values[j];
+      }
+    }
+
+    return;
+  }
+
   /** Core Monte Carlo random walk on parameter-space
     */
   void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(vector<string> parnames, vector<double> lowerbounds,
                                                                     vector<double> upperbounds, vector<double> stepsizes,
                                                                     size_t maxsteps, double stepsizescalefactor)
   {
-    // 1. Set up starting values
+    /* Input Check
+    stringstream inpinfo;
+    inpinfo << "Input Instrument Parameter Information. Maximum Step = " << maxsteps << endl;
+    inpinfo << setw(20) << "Name" << setw(20) << "Value" << setw(20) << "Lower Boundary"
+            << setw(20) << "Upper Boundary" << setw(20) << "Step Size" << endl;
+    for (size_t i = 0; i < parnames.size(); ++i)
+      inpinfo << setw(20) << parnames[i] << setw(20) << mFuncParameters[parnames[i]]
+              << setw(20) << lowerbounds[i]
+              << setw(20) << upperbounds[i] << setw(20) <<  stepsizes[i] << endl;
+    cout << inpinfo.str();
+    ------------*/
+
+    // 1. Set up starting values, esp. to mFunction
     size_t numparameters = parnames.size();
     vector<double> paramvalues;
     for (size_t i = 0; i < numparameters; ++i)
@@ -330,6 +431,7 @@ namespace CurveFitting
       string parname = parnames[i];
       double parvalue = mFuncParameters[parname];
       paramvalues.push_back(parvalue);
+      mFunction->setParameter(parname, parvalue);
     }
 
     const MantidVec& X = dataWS->readX(0);
@@ -338,13 +440,60 @@ namespace CurveFitting
     FunctionDomain1DVector domain(X);
     FunctionValues values(domain);
 
+    // 2. Determine the parameters to fit
+    vector<string> paramstofit = getProperty("ParametersToFit");
+    set<string> paramstofitset;
+    bool refineallparams;
+    if (paramstofit.size() == 0)
+    {
+      // Default case to refine all parameters
+      refineallparams = true;
+    }
+    else
+    {
+      // Refine part of the parameters
+      refineallparams = false;
+      vector<string>::iterator vsiter;
+      for (vsiter = paramstofit.begin(); vsiter != paramstofit.end(); ++vsiter)
+      {
+        paramstofitset.insert(*vsiter);
+      }
+    }
+
+    stringstream dbss;
+    set<string>::iterator setiter;
+    for (setiter = paramstofitset.begin(); setiter != paramstofitset.end(); ++setiter)
+    {
+      string name = *setiter;
+      dbss << setw(20) << name;
+    }
+    g_log.notice() << "Parameters to refine: " << dbss.str() << endl;
+
+    // 3. Do MC loops
     double curchi2 = calculateD2TOFFunction(domain, values, rawY, rawE);
 
-    // 2. Do MC loops
+    g_log.notice() << "Monte Carlo Random Walk Starting Chi^2 = " << curchi2 << endl;
+
     size_t paramindex = 0;
+    size_t numacceptance = 0;
     for (size_t istep = 0; istep < maxsteps; ++istep)
     {
-      // a. Propose for a new value
+      // a. Determine whether to refine this parameter
+      if (!refineallparams)
+      {
+        if (paramstofitset.count(parnames[paramindex]) == 0)
+        {
+          // This parameter is not to be refined...
+          // cout << "MC Step " << istep << ":  Refine " << parnames[paramindex] << " Denied!" << endl;
+          ++ paramindex;
+          if (paramindex >= parnames.size())
+            paramindex = 0;
+          continue;
+        }
+      }
+      // cout << "MC Step " << istep << ":  Refine " << parnames[paramindex] << endl;
+
+      // b. Propose for a new value
       double randomnumber = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
       double newvalue = paramvalues[paramindex] + (randomnumber-1.0)*stepsizes[paramindex];
       if (newvalue > upperbounds[paramindex])
@@ -356,7 +505,18 @@ namespace CurveFitting
         newvalue = upperbounds[paramindex] - (lowerbounds[paramindex]-newvalue);
       }
 
-      mFunction->setParameter(parnames[paramindex], newvalue);
+      try
+      {
+        mFunction->setParameter(parnames[paramindex], newvalue);
+      }
+      catch (runtime_error err)
+      {
+        stringstream errss;
+        errss << "New Value = " << newvalue << ", Random Number = " << randomnumber << "Step Size = " << stepsizes[paramindex]
+              << ", Step size rescale factor = " << stepsizescalefactor;
+        g_log.error(errss.str());
+        throw err;
+      }
 
       // b. Calcualte the new
       double newchi2 = calculateD2TOFFunction(domain, values, rawY, rawE);
@@ -365,6 +525,10 @@ namespace CurveFitting
       bool accept;
       double prob = exp(-(newchi2-curchi2)/curchi2);
       double randnumber = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+
+      // cout << "MC Step " << istep << ": New Chi^2 = " << newchi2 << "; Old Chi^2 = " << curchi2
+      //      << ".  Acceptance Prob. = " << prob << "; Random = " << randnumber << endl;
+
       if (randnumber < prob)
       {
         accept = true;
@@ -374,14 +538,25 @@ namespace CurveFitting
         accept = false;
       }
 
-      // d. Update step size
-      if (newchi2 < curchi2)
+      // d. Adjust step size
+      if (false)
       {
-        stepsizes[paramindex] = stepsizes[paramindex]/stepsizescalefactor;
-      }
-      else
-      {
-        stepsizes[paramindex] = stepsizes[paramindex]*stepsizescalefactor;
+        if (newchi2 < curchi2)
+        {
+          // Decrease step size if it approaches a minima
+          stepsizes[paramindex] = stepsizes[paramindex]/stepsizescalefactor;
+        }
+        else
+        {
+          // Increase step size if it diverges
+          double newstepsize = stepsizes[paramindex]*stepsizescalefactor;
+          double maxstepsize = upperbounds[paramindex]-lowerbounds[paramindex];
+          if (newstepsize >= maxstepsize)
+          {
+            newstepsize = maxstepsize;
+          }
+          stepsizes[paramindex] = newstepsize;
+        }
       }
 
       // e. Record the solution
@@ -389,22 +564,38 @@ namespace CurveFitting
       {
         // i.   Accept the new value
         paramvalues[paramindex] = newvalue;
+
         // ii.  Add the new values to vector
         vector<double> parametervalues = paramvalues;
         mBestParameters.push_back(make_pair(newchi2, parametervalues));
+
         // iii. Sort and delete the last if necessary
         sort(mBestParameters.begin(), mBestParameters.end());
         if (mBestParameters.size() > mMaxNumberStoredParameters)
           mBestParameters.pop_back();
-        // iv.  Update chi2
+
+        // iv.  Update chi2 and ...
         curchi2 = newchi2;
+        ++ numacceptance;
       }
 
       // z. Update the parameter index for next movement
-      paramindex += 1;
+      ++ paramindex;
       if (paramindex >= numparameters)
         paramindex = 0;
+
+    } // FOREACH MC Step
+
+    // 3. Debug output
+    stringstream mcresult;
+    mcresult << "Monte Carlo Result for " << mBestParameters.size() << " Best Results" << endl;
+    mcresult << "Number of acceptance = " << numacceptance << ", out of " << maxsteps << " MC steps."
+             << "Accept ratio = " << static_cast<double>(numacceptance)/static_cast<double>(maxsteps) << endl;
+    for (size_t i = 0; i < mBestParameters.size(); ++i)
+    {
+      mcresult << setw(3) << i << ":  Chi^2 = " << mBestParameters[i].first << endl;
     }
+    g_log.notice() << mcresult.str();
 
     return;
   }
@@ -439,6 +630,18 @@ namespace CurveFitting
     {
       throw std::runtime_error("mFunction has not been initialized!");
     }
+    else
+    {
+      /*
+      vector<string> parnames = mFunction->getParameterNames();
+      for (size_t i = 0; i < parnames.size(); ++i)
+      {
+        cout << "DBx1125  " << parnames[i] << " = " << mFunction->getParameter(parnames[i]) << endl;
+      }
+      */
+      ;
+    }
+
     if (domain.size() != values.size() || domain.size() != rawY.size() || rawY.size() != rawE.size())
     {
       throw std::runtime_error("Input domain, values and raw data have different sizes.");
@@ -453,6 +656,7 @@ namespace CurveFitting
     {
       double temp =  (values[i]-rawY[i])/rawE[i];
       chi2 += temp*temp;
+      // cout << "Peak " << i << ": Model = " << values[i] << ", Data = " << rawY[i] << ".  Standard Error = " << rawE[i] << endl;
     }
 
     return chi2;
@@ -579,9 +783,18 @@ namespace CurveFitting
 
     for (size_t ir = 0; ir < numrows; ++ir)
     {
-      API::TableRow trow = parameterWS->getRow(ir);
-      trow >> parname >> value;
-      parameters.insert(std::make_pair(parname, value));
+      try
+      {
+        API::TableRow trow = parameterWS->getRow(ir);
+        trow >> parname >> value;
+        parameters.insert(std::make_pair(parname, value));
+      }
+      catch (runtime_error err)
+      {
+        g_log.error() << "Import table workspace " << parameterWS->name() << " error in line " << ir << ".  "
+                      << " Requires [string, double] in the first 2 columns." << endl;
+        throw err;
+      }
     }
 
     return;
@@ -636,7 +849,19 @@ namespace CurveFitting
       for (size_t ic = 1; ic < colnames.size(); ++ic)
       {
         double tmpdbl;
-        row >> tmpdbl;
+        string tmpstr;
+        try
+        {
+          row >> tmpdbl;
+        }
+        catch (runtime_error err)
+        {
+          g_log.error() << "Import MC parameter " << colnames[ic] << " error in row " << ir
+                        << " of workspace " << tablews->name() << endl;
+          row >> tmpstr;
+          g_log.error() << "Should be " << tmpstr << endl;
+        }
+
         if (ic == imax)
           tmax = tmpdbl;
         else if (ic == imin)
@@ -699,7 +924,7 @@ namespace CurveFitting
     * Arguments:
     * Output: outWS  1 spectrum .  dspacing - peak center
    */
-  void RefinePowderInstrumentParameters::genPeakCentersWorkspace()
+  void RefinePowderInstrumentParameters::genPeakCentersWorkspace(bool montecarlo, size_t numbestfit)
   {
     // 1. Collect values in a vector for sorting
     double lattice = mFuncParameters["LatticeConstant"];
@@ -709,7 +934,6 @@ namespace CurveFitting
       errmsg << "Input Lattice constant = " << lattice << " is wrong or not set up right. ";
       throw std::invalid_argument(errmsg.str());
     }
-
 
     string stdoption = getProperty("StandardError");
     bool useconstanterror = false;
@@ -754,10 +978,20 @@ namespace CurveFitting
     // 2. Sort by d-spacing value
     std::sort(peakcenters.begin(), peakcenters.end());
 
-
     // 3. Create output workspace
     size_t size = peakcenters.size();
-    size_t nspec = 3; // raw, refined, diff
+    size_t nspec;
+    if (montecarlo)
+    {
+      // Monte Carlo, 1 + 2*N spectra:  raw, N x (refined, diff)
+      nspec = 1+2*numbestfit;
+    }
+    else
+    {
+      // Regular fit, 3 spectra:  raw, refined, diff
+      nspec = 3;
+    }
+
     dataWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
         (API::WorkspaceFactory::Instance().create("Workspace2D", nspec, size, size));
     dataWS->getAxis(0)->setUnit("dSpacing");
@@ -776,7 +1010,39 @@ namespace CurveFitting
     return;
   }
 
-  /** Generate an output table workspace containing the fitted instrument parameters
+  /** Generate a Monte Carlo result table containing the N best results
+    * Column: chi2, parameter1, parameter2, ... ...
+    */
+  DataObjects::TableWorkspace_sptr RefinePowderInstrumentParameters::genMCResultTable()
+  {
+    // 1. Create table workspace
+    DataObjects::TableWorkspace_sptr tablews =
+        boost::shared_ptr<TableWorkspace>(new TableWorkspace());
+
+    tablews->addColumn("double", "Chi2");
+    for (size_t i = 0; i < mPeakFunctionParameterNames.size(); ++i)
+    {
+      tablews->addColumn("double", mPeakFunctionParameterNames[i]);
+    }
+
+    // 2. Put values in
+    for (size_t ib = 0; ib < mBestParameters.size(); ++ib)
+    {
+      TableRow newrow = tablews->appendRow();
+      double chi2 = mBestParameters[ib].first;
+      newrow << chi2;
+      for (size_t ip = 0; ip < mPeakFunctionParameterNames.size(); ++ip)
+      {
+        double tempdbl = mBestParameters[ib].second[ip];
+        newrow << tempdbl;
+      }
+    } // ENDFOR 1 Best Answer
+
+    return tablews;
+  }
+
+  /** Generate an output table workspace containing the fitted instrument parameters.
+    * Requirement (1): The output table workspace should be usable by Le Bail Fitting
     */
   DataObjects::TableWorkspace_sptr RefinePowderInstrumentParameters::genOutputInstrumentParameterTable()
   {
@@ -788,6 +1054,7 @@ namespace CurveFitting
     newtablews->addColumn("str", "FitOrTie");
 
     std::map<std::string, double>::iterator pariter;
+
     for (pariter = mFuncParameters.begin(); pariter != mFuncParameters.end(); ++pariter)
     {
       API::TableRow newrow = newtablews->appendRow();
