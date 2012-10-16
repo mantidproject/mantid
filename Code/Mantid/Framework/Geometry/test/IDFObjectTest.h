@@ -81,6 +81,14 @@ public:
     TS_ASSERT_EQUALS(file.getLastModified(), obj.getLastModified());
   }
 
+  void testGetFileFullPathStr()
+  {
+    const std::string filename = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
+	IDFObject obj(filename);
+	TS_ASSERT_EQUALS(Poco::Path(filename).toString(), obj.getFileFullPathStr());
+
+  }
+
 };
 
 

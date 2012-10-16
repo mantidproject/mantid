@@ -57,7 +57,7 @@ namespace Geometry
   /** Constructor
    */
   InstrumentDefinitionParser::InstrumentDefinitionParser()
-  : m_xmlFile(boost::make_shared<IDFObject>("")), m_cacheFile(boost::make_shared<IDFObject>("")), pDoc(NULL), pRootElem(NULL),
+  : m_xmlFile(boost::make_shared<NullIDFObject>()), m_cacheFile(boost::make_shared<NullIDFObject>()), pDoc(NULL), pRootElem(NULL),
       hasParameterElement_beenSet(false),
       m_haveDefaultFacing(false), m_deltaOffsets(false), 
       m_angleConvertConst(1.0),m_indirectPositions(false),
@@ -117,7 +117,7 @@ namespace Geometry
   {
 
     // Handle the parameters
-    const std::string filename = xmlFile->getFileFullPath().toString();
+    const std::string filename = xmlFile->getFileFullPathStr();
     m_instName = instName;
     m_xmlFile = xmlFile;
     m_cacheFile = expectedCacheFile;
@@ -191,7 +191,7 @@ namespace Geometry
     // create maps: isTypeAssembly and mapTypeNameToShape
     Geometry::ShapeFactory shapeCreator;
 
-    const std::string filename = m_xmlFile->getFileFullPath().toString();
+    const std::string filename = m_xmlFile->getFileFullPathStr();
 
     NodeList* pNL_type = pRootElem->getElementsByTagName("type");
     if ( pNL_type->length() == 0 )
@@ -676,7 +676,7 @@ namespace Geometry
    */
   void InstrumentDefinitionParser::setValidityRange(const Poco::XML::Element* pRootElem)
   {
-    const std::string filename = m_xmlFile->getFileFullPath().toString();
+    const std::string filename = m_xmlFile->getFileFullPathStr();
     // check if IDF has valid-from and valid-to tags defined
     if ( !pRootElem->hasAttribute("valid-from") )
     {
@@ -862,7 +862,7 @@ namespace Geometry
   */
   void InstrumentDefinitionParser::appendAssembly(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
   {
-    const std::string filename = m_xmlFile->getFileFullPath().toString();
+    const std::string filename = m_xmlFile->getFileFullPathStr();
     // The location element is required to be a child of a component element. Get this component element
     Element* pCompElem = InstrumentDefinitionParser::getParentComponent(pLocElem);
 
@@ -991,7 +991,7 @@ namespace Geometry
   */
   void InstrumentDefinitionParser::appendLeaf(Geometry::ICompAssembly* parent, Poco::XML::Element* pLocElem, IdList& idList)
   {
-    const std::string filename = m_xmlFile->getFileFullPath().toString();
+    const std::string filename = m_xmlFile->getFileFullPathStr();
     // The location element is required to be a child of a component element. Get this component element
     Element* pCompElem = InstrumentDefinitionParser::getParentComponent(pLocElem);
 
@@ -1211,7 +1211,7 @@ namespace Geometry
   */
   void InstrumentDefinitionParser::populateIdList(Poco::XML::Element* pE, IdList& idList)
   {
-    const std::string filename = m_xmlFile->getFileFullPath().toString();
+    const std::string filename = m_xmlFile->getFileFullPathStr();
 
     if ( (pE->tagName()).compare("idlist") )
     {
@@ -1313,7 +1313,7 @@ namespace Geometry
   */
   bool InstrumentDefinitionParser::isAssembly(std::string type) const
   {
-    const std::string filename = m_xmlFile->getFileFullPath().toString();
+    const std::string filename = m_xmlFile->getFileFullPathStr();
     std::map<std::string,bool>::const_iterator it = isTypeAssembly.find(type);
 
     if ( it == isTypeAssembly.end() )
@@ -1482,7 +1482,7 @@ namespace Geometry
   void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent* comp, Poco::XML::Element* pElem,
     std::multimap<std::string, boost::shared_ptr<Geometry::XMLlogfile> >& logfileCache)
   {
-    const std::string filename = m_xmlFile->getFileFullPath().toString();
+    const std::string filename = m_xmlFile->getFileFullPathStr();
     // check first if pElem contains any <parameter> child elements, however not if this method is called through
     // setComponentLinks() for example by the LoadParameter algorithm
 
@@ -1822,7 +1822,7 @@ namespace Geometry
   */
   void InstrumentDefinitionParser::applyCache(IDFObject_const_sptr cacheToApply) 
   {
-    const std::string cacheFullPath = cacheToApply->getFileFullPath().toString();
+    const std::string cacheFullPath = cacheToApply->getFileFullPathStr();
       g_log.information("Loading geometry cache from " + cacheFullPath);
       // create a vtk reader
       std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;
@@ -1859,7 +1859,7 @@ namespace Geometry
       g_log.error() << "Unable to find instrument definition while attempting to write cache.\n";
       throw std::runtime_error("Unable to find instrument definition while attempting to write cache.\n");
     }
-    const std::string cacheFullPath = usedCache->getFileFullPath().toString();
+    const std::string cacheFullPath = usedCache->getFileFullPathStr();
     g_log.information() << "Creating cache in " << cacheFullPath << "\n";
     // create a vtk writer
     std::map<std::string, boost::shared_ptr<Geometry::Object> >::iterator objItr;

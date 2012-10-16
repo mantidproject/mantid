@@ -6,6 +6,7 @@
 #include <Poco/Timestamp.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -37,16 +38,41 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport IDFObject 
+
+/**
+ * Abstract IDF Object
+ */
+class DLLExport AbstractIDFObject
+{
+public:
+  AbstractIDFObject(){}
+  static const std::string expectedExtension();
+  virtual const Poco::Path& getParentDirectory() const = 0;
+  virtual const Poco::Path& getFileFullPath() const = 0;
+  virtual const std::string& getFileFullPathStr() const = 0;
+  virtual std::string getFileNameOnly() const = 0;
+  virtual std::string getExtension() const = 0;
+  virtual Poco::Timestamp  getLastModified() const = 0;
+  virtual bool exists() const = 0;
+  virtual ~AbstractIDFObject(){};
+private:
+  AbstractIDFObject(const AbstractIDFObject&);
+  AbstractIDFObject & operator=(const AbstractIDFObject&);
+};
+
+/**
+ * Concrete IDF Object.
+ */
+  class DLLExport IDFObject : public AbstractIDFObject
   {
   public:
-    static const std::string expectedExtension();
 
     IDFObject(const std::string& fileName);
-    const Poco::Path& getParentDirectory() const;
-    const Poco::Path& getFileFullPath() const;
-    std::string getFileNameOnly() const;
-    std::string getExtension() const;
+    virtual const Poco::Path& getParentDirectory() const;
+    virtual const Poco::Path& getFileFullPath() const;
+    virtual const std::string& getFileFullPathStr() const;
+    virtual std::string getFileNameOnly() const;
+    virtual std::string getExtension() const;
     virtual Poco::Timestamp  getLastModified() const;
     virtual bool exists() const;
     virtual ~IDFObject();
@@ -58,10 +84,30 @@ namespace Geometry
     const bool m_hasFileName;
     const Poco::Path m_cachePath;
     const Poco::Path m_cacheParentDirectory;
+    const std::string m_cachePathStr;
   };
 
-  typedef boost::shared_ptr<IDFObject> IDFObject_sptr;
-  typedef boost::shared_ptr<const IDFObject> IDFObject_const_sptr;
+  /*
+   * NULL IDFObject
+   */
+  class DLLExport NullIDFObject : public AbstractIDFObject
+  {
+  private:
+	  std::string m_emptyResponse;
+  public:
+	NullIDFObject() : m_emptyResponse(""){}
+    virtual const Poco::Path& getParentDirectory() const { throw std::runtime_error("Not implemented on NullIDFObject");}
+    virtual const Poco::Path& getFileFullPath() const { throw std::runtime_error("Not implemented on NullIDFObject");}
+    virtual const std::string& getFileFullPathStr() const { return m_emptyResponse;}
+    virtual std::string getFileNameOnly() const { return m_emptyResponse;}
+    virtual std::string getExtension() const { return m_emptyResponse;}
+    virtual Poco::Timestamp  getLastModified() const { throw std::runtime_error("Not implemented on NullIDFObject");}
+    virtual bool exists() const { return false;}
+    virtual ~NullIDFObject(){};
+  };
+
+  typedef boost::shared_ptr<AbstractIDFObject> IDFObject_sptr;
+  typedef boost::shared_ptr<const AbstractIDFObject> IDFObject_const_sptr;
 
 
 } // namespace Geometry

@@ -9,7 +9,7 @@ namespace Mantid
      * Returns the expected extension of an IDF file
      * @returns A string containing the expected extension of an IDF file, including the leading period (.)
      */
-    const std::string IDFObject::expectedExtension()
+    const std::string AbstractIDFObject::expectedExtension()
     {
       return ".xml";
     }
@@ -17,7 +17,13 @@ namespace Mantid
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    IDFObject::IDFObject(const std::string& fileName) : m_defFile(fileName), m_hasFileName(!fileName.empty()), m_cachePath(m_defFile.path()), m_cacheParentDirectory(m_cachePath.parent())
+    IDFObject::IDFObject(const std::string& fileName) :
+    		m_defFile(fileName),
+    		m_hasFileName(!fileName.empty()),
+    		m_cachePath(m_defFile.path()),
+    		m_cacheParentDirectory(m_cachePath.parent()),
+    		m_cachePathStr(m_cachePath.toString())
+
     {
     }
 
@@ -44,6 +50,11 @@ namespace Mantid
     const Poco::Path& IDFObject::getFileFullPath() const
     {
       return m_cachePath;
+    }
+
+    const std::string& IDFObject::getFileFullPathStr() const
+    {
+      return m_cachePathStr;
     }
 
     /**
