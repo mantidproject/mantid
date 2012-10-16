@@ -292,11 +292,14 @@ public:
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","gss.txt");
-    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("LoadTest_Output");
-    TS_ASSERT(ws);
-    AnalysisDataService::Instance().remove("LoadTest_Output");
+    // Check correct loader identified
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadGSS");
+
+    Load loader2;
+    loader2.initialize();
+    loader2.setPropertyValue("Filename","gss-ExtendedHeader.gsa");
+    // Check correct loader identified
+    TS_ASSERT_EQUALS(loader2.getPropertyValue("LoaderName"), "LoadGSS");
   }
 
    void testRKH()
