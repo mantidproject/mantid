@@ -988,7 +988,7 @@ Spectrogram* MantidMatrix::plotSpectrogram(Graph* plot,ApplicationWindow* app,Gr
       plot->setYAxisTitle(tr("Spectrum"));
   }
 
-  // Set the range on the thirs, colour axis
+  // Set the range on the third, colour axis
   double minz, maxz;
   m_funct.init();
   range(&minz,&maxz);
