@@ -114,7 +114,7 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         xml += "  <errorbar_criterion>%s</errorbar_criterion>\n" % str(self.errorbar_criterion)
         xml += "  <det_van2>%s</det_van2>\n" % self.det_van2
         xml += "  <detvan_ratio_var>%s</detvan_ratio_var>\n" % str(self.detvan_ratio_var)
-        xml += "  <background_check>%s</backgound_check>\n" % self.background_check
+        xml += "  <background_check>%s</background_check>\n" % self.background_check
         xml += "  <sambkg_median_test_low>%s</sambkg_median_test_low>\n" % str(self.sambkg_median_test_low)
         xml += "  <sambkg_median_test_high>%s</sambkg_median_test_high>\n" % str(self.sambkg_median_test_high)
         xml += "  <sambkg_errorbar_criterion>%s</sambkg_errorbar_criterion>\n" % str(self.sambkg_errorbar_criterion)
@@ -175,12 +175,12 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             self.sambkg_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
                                                                                "sambkg_errorbar_criterion",
                                                                                default=DiagnoseDetectorsScript.sambkg_errorbar_criterion)        
-            self.tof_start = BaseScriptElement.getIntElement(instrument_dom,
-                                                             "background_tof_start",
-                                                             default=DiagnoseDetectorsScript.tof_start)
-            self.tof_end = BaseScriptElement.getIntElement(instrument_dom,
-                                                           "background_tof_end",
-                                                           default=DiagnoseDetectorsScript.tof_end)
+            self.tof_start = BaseScriptElement.getFloatElement(instrument_dom,
+                                                               "background_tof_start",
+                                                               default=DiagnoseDetectorsScript.tof_start)
+            self.tof_end = BaseScriptElement.getFloatElement(instrument_dom,
+                                                             "background_tof_end",
+                                                             default=DiagnoseDetectorsScript.tof_end)
             self.reject_zero_bkg = BaseScriptElement.getBoolElement(instrument_dom,
                                                                     "reject_zero_bkg",
                                                                     default=DiagnoseDetectorsScript.reject_zero_bkg)
