@@ -423,10 +423,10 @@ namespace Mantid
       this->setPropertyGroup("AbsUnitsMedianTestLow", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsErrorBarCriterion", absUnitsCorr);
 
-      this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
-          Direction::Output);
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
           Direction::Output), "Provide a name for the output workspace.");
+      this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
+          Direction::Output);
     }
 
     /**
