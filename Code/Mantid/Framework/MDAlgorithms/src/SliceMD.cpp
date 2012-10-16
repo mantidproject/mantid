@@ -354,7 +354,7 @@ namespace MDAlgorithms
         }
         if(fileBackedWS)
         {
-          if(!(i%100))prog->report(i);
+          if(!(i%10))prog->report(i);
         }
       } // is box
 
