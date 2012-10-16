@@ -500,7 +500,7 @@ namespace Mantid
       // 0. Check Input
       g_log.information() << "L1 = " << primaryflightpath << std::endl;
       if (detectorids.size() != totalflightpaths.size() || totalflightpaths.size() != twothetas.size()){
-        g_log.error() << "Input error!  Cannot create geometry due to number of L2, Polar are not same.  Quit!" << std::endl;
+        g_log.warning() << "Cannot create geometry due to number of L2, Polar are not same." << std::endl;
         return;
       }
       for (size_t i = 0; i < detectorids.size(); i ++){
