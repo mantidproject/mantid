@@ -129,65 +129,6 @@ namespace MDAlgorithms
     setPropertyGroup("OutputFilename", "File Back-End");
     setPropertyGroup("Memory", "File Back-End");
   }
-//----------------------------------------------------------------------------------------------
-  /** check if the contents of a MDBox is out of 
-   *
-   * @param box :: pointer to the MDBox to bin
-   * @param chunkMin :: the minimum index in each dimension to consider "valid" (inclusive)
-   * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)
-   */
-
-
-  //template<typename MDE, size_t nd, typename OMDE, size_t ond>
-  //inline bool SliceMD::foundBoxState(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax)
-  //{
-
-  //  if ((box->getNPoints() < (1 << nd) * 2) || !box->getOnDisk() )return boxTooSmall;
-
-  //   // An array to hold the rotated/transformed coordinates
-  //   coord_t outCenter[ond];
-
-
-  //    // There is a check that the number of events is enough for it to make sense to do all this processing.
-  //    size_t numVertexes = 0;
-  //    coord_t * vertexes = box->getVertexesArray(numVertexes);
-
-  //    size_t outOfRange = 0;
-
-  //    for (size_t i=0; i<numVertexes; i++)
-  //    {
-  //      // Cache the center of the event (again for speed)
-  //      const coord_t * inCenter = vertexes + i * nd;
-
-  //      // Now transform to the output dimensions
-  //      m_transform->apply(inCenter, outCenter);
-  //      //std::cout << "Input coord " << VMD(nd,inCenter) << " transformed to " <<  VMD(nd,outCenter) << std::endl;
-
-  //      /// Loop through the dimensions on which we bin
-  //      for (size_t bd=0; bd<; bd++)
-  //      {
-  //        // What is the bin index in that dimension
-  //        coord_t x = outCenter[bd];
-  //        size_t ix = size_t(x);
-  //        // Within range (for this chunk)?
-  //        if ((x < 0) && (ix < chunkMin[bd]) && (ix >= chunkMax[bd]))
-  //        {
-  //          // Outside the range
-  //          outOfRange++;
-  //        }
-  //      } // (for each dim in MDHisto)
-
-  //      // Is the vertex at the same place as the last one?
-  //      if (outOfRange==ond) // well, the whole box is completely out of range
-  //        return boxOutside;
-  //      else
-  //        return boxWorthConsidering;
-  //    } // (for each vertex)
-
-  //    delete [] vertexes;
-
-
-  //}
 
   //----------------------------------------------------------------------------------------------
   /** Copy the extra data (not signal, error or coordinates) from one event to another
