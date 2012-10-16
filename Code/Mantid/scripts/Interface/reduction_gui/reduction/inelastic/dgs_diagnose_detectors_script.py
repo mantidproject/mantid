@@ -51,8 +51,8 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         DiagnoseDetectorsScript.sambkg_median_test_high = ip.get_parameter("diag_samp_hi")
         DiagnoseDetectorsScript.sambkg_median_test_low = ip.get_parameter("diag_samp_lo")
         DiagnoseDetectorsScript.sambkg_errorbar_criterion = ip.get_parameter("diag_samp_sig")
-        DiagnoseDetectorsScript.tof_start = ip.get_parameter("bkgd-range-min")
-        DiagnoseDetectorsScript.tof_end = ip.get_parameter("bkgd-range-max")
+        DiagnoseDetectorsScript.tof_start = int(ip.get_parameter("bkgd-range-min"))
+        DiagnoseDetectorsScript.tof_end = int(ip.get_parameter("bkgd-range-max"))
         DiagnoseDetectorsScript.reject_zero_bkg = ip.get_bool_param("diag_samp_zero")
         DiagnoseDetectorsScript.psd_bleed = ip.get_bool_param("diag_bleed_test")
         DiagnoseDetectorsScript.max_framerate = ip.get_parameter("diag_bleed_maxrate")
@@ -118,8 +118,8 @@ class DiagnoseDetectorsScript(BaseScriptElement):
         xml += "  <sambkg_median_test_low>%s</sambkg_median_test_low>\n" % str(self.sambkg_median_test_low)
         xml += "  <sambkg_median_test_high>%s</sambkg_median_test_high>\n" % str(self.sambkg_median_test_high)
         xml += "  <sambkg_errorbar_criterion>%s</sambkg_errorbar_criterion>\n" % str(self.sambkg_errorbar_criterion)
-        xml += "  <background_tof_start>%s</background_tof_start>\n" % str(self.tof_start)
-        xml += "  <background_tof_end>%s</background_tof_end>\n" % str(self.tof_end)
+        xml += "  <background_tof_start>%d</background_tof_start>\n" % self.tof_start
+        xml += "  <background_tof_end>%d</background_tof_end>\n" % self.tof_end
         xml += "  <reject_zero_bkg>%s</reject_zero_bkg>\n" % self.reject_zero_bkg
         xml += "  <psd_bleed>%s</psd_bleed>\n" % self.psd_bleed
         xml += "  <max_framerate>%s</max_framerate>\n" % self.max_framerate
@@ -175,12 +175,12 @@ class DiagnoseDetectorsScript(BaseScriptElement):
             self.sambkg_errorbar_criterion = BaseScriptElement.getFloatElement(instrument_dom,
                                                                                "sambkg_errorbar_criterion",
                                                                                default=DiagnoseDetectorsScript.sambkg_errorbar_criterion)        
-            self.tof_start = BaseScriptElement.getFloatElement(instrument_dom,
-                                                               "background_tof_start",
-                                                               default=DiagnoseDetectorsScript.tof_start)
-            self.tof_end = BaseScriptElement.getFloatElement(instrument_dom,
-                                                             "background_tof_end",
-                                                             default=DiagnoseDetectorsScript.tof_end)
+            self.tof_start = BaseScriptElement.getIntElement(instrument_dom,
+                                                              "background_tof_start",
+                                                              default=DiagnoseDetectorsScript.tof_start)
+            self.tof_end = BaseScriptElement.getIntElement(instrument_dom,
+                                                           "background_tof_end",
+                                                           default=DiagnoseDetectorsScript.tof_end)
             self.reject_zero_bkg = BaseScriptElement.getBoolElement(instrument_dom,
                                                                     "reject_zero_bkg",
                                                                     default=DiagnoseDetectorsScript.reject_zero_bkg)

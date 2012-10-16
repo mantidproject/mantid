@@ -38,10 +38,10 @@ class DataCorrectionsScript(BaseScriptElement):
     def set_default_pars(self, inst_name):
         import dgs_utils
         ip = dgs_utils.InstrumentParameters(inst_name)
-        DataCorrectionsScript.monitor_int_low = ip.get_parameter("norm-mon1-min")
-        DataCorrectionsScript.monitor_int_high = ip.get_parameter("norm-mon1-max")
-        DataCorrectionsScript.tib_tof_start = ip.get_parameter("bkgd-range-min")
-        DataCorrectionsScript.tib_tof_end = ip.get_parameter("bkgd-range-max")
+        DataCorrectionsScript.monitor_int_low = int(ip.get_parameter("norm-mon1-min"))
+        DataCorrectionsScript.monitor_int_high = int(ip.get_parameter("norm-mon1-max"))
+        DataCorrectionsScript.tib_tof_start = int(ip.get_parameter("bkgd-range-min"))
+        DataCorrectionsScript.tib_tof_end = int(ip.get_parameter("bkgd-range-max"))
         DataCorrectionsScript.detvan_int_range_low = ip.get_parameter("wb-integr-min")
         DataCorrectionsScript.detvan_int_range_high = ip.get_parameter("wb-integr-max")
         
@@ -89,11 +89,11 @@ class DataCorrectionsScript(BaseScriptElement):
         xml =  "<DataCorrections>\n"
         xml += "  <filter_bad_pulses>%s</filter_bad_pulses>\n" % str(self.filter_bad_pulses)
         xml += "  <incident_beam_norm>%s</incident_beam_norm>\n" % self.incident_beam_norm
-        xml += "  <monint_range_low>%s</monint_range_low>\n" % self.monitor_int_low
-        xml += "  <monint_range_high>%s</monint_range_high>\n" % self.monitor_int_high
+        xml += "  <monint_range_low>%d</monint_range_low>\n" % self.monitor_int_low
+        xml += "  <monint_range_high>%d</monint_range_high>\n" % self.monitor_int_high
         xml += "  <timeindepbkg_sub>%s</timeindepbkg_sub>,\n" % self.tib_subtraction
-        xml += "  <tib_tof_range_start>%s</tib_tof_range_start>\n" % self.tib_tof_start
-        xml += "  <tib_tof_range_end>%s</tib_tof_range_end>\n" % self.tib_tof_end
+        xml += "  <tib_tof_range_start>%d</tib_tof_range_start>\n" % self.tib_tof_start
+        xml += "  <tib_tof_range_end>%d</tib_tof_range_end>\n" % self.tib_tof_end
         xml += "  <correct_kikf>%s</correct_kikf>\n" % str(self.correct_kikf)
         xml += "  <detector_vanadium>%s</detector_vanadium>\n" % self.detector_vanadium
         xml += "  <use_bounds_detvan>%s</use_bounds_detvan>\n" % str(self.detvan_integration)
@@ -121,19 +121,19 @@ class DataCorrectionsScript(BaseScriptElement):
             self.incident_beam_norm = BaseScriptElement.getStringElement(instrument_dom, 
                                                                          "incident_beam_norm",
                                                                          default=DataCorrectionsScript.incident_beam_norm)
-            self.monitor_int_low = BaseScriptElement.getStringElement(instrument_dom,
+            self.monitor_int_low = BaseScriptElement.getIntElement(instrument_dom,
                                                                       "monint_range_low",
                                                                       default=DataCorrectionsScript.monitor_int_low)
-            self.monitor_int_high = BaseScriptElement.getStringElement(instrument_dom,
+            self.monitor_int_high = BaseScriptElement.getIntElement(instrument_dom,
                                                                        "monint_range_high",
                                                                        default=DataCorrectionsScript.monitor_int_high)
             self.tib_subtraction = BaseScriptElement.getBoolElement(instrument_dom,
                                                                     "timeindepbkg_sub",
                                                                     default=DataCorrectionsScript.tib_subtraction)
-            self.tib_tof_start = BaseScriptElement.getStringElement(instrument_dom,
+            self.tib_tof_start = BaseScriptElement.getIntElement(instrument_dom,
                                                                     "tib_tof_range_start",
                                                                     default=DataCorrectionsScript.tib_tof_start)
-            self.tib_tof_end = BaseScriptElement.getStringElement(instrument_dom,
+            self.tib_tof_end = BaseScriptElement.getIntElement(instrument_dom,
                                                                   "tib_tof_range_end",
                                                                   default=DataCorrectionsScript.tib_tof_end)
             self.correct_kikf = BaseScriptElement.getBoolElement(instrument_dom,

@@ -31,6 +31,12 @@ class DataCorrectionsWidget(BaseWidget):
             self.set_state(DataCorrectionsScript(self._instrument_name))
 
     def initialize_content(self):
+        # Set some validators
+        self._content.monint_low_edit.setValidator(QtGui.QIntValidator(self._content.monint_low_edit))
+        self._content.monint_high_edit.setValidator(QtGui.QIntValidator(self._content.monint_high_edit))
+        self._content.tof_start_edit.setValidator(QtGui.QIntValidator(self._content.tof_start_edit))
+        self._content.tof_end_edit.setValidator(QtGui.QIntValidator(self._content.tof_end_edit))
+        
         # Make group for incident beam normalisation radio buttons
         self.incident_beam_norm_grp = QtGui.QButtonGroup()
         self.incident_beam_norm_grp.addButton(self._content.none_rb, 0)
