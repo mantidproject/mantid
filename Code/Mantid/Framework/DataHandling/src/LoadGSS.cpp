@@ -256,9 +256,8 @@ namespace Mantid
             }
             else
             {
-              std::cout << "Unsupported File Type: " << filetypestring << std::endl;
-              std::cout << "Returned with error!\n";
-              return;
+              g_log.error() << "Unsupported File Type: " << filetypestring << std::endl;
+              throw Exception::FileError("Not a GSAS file", filename);
             }
 
             // Determine x0
