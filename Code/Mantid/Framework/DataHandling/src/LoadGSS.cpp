@@ -475,7 +475,8 @@ namespace Mantid
       while (!file.eof())
       {
         getline(file, str);
-        if (str.empty() || str[0] == '#')
+        // Skip over empty and comment lines, as well as those coming from files saved with the 'ExtendedHeader' option
+        if (str.empty() || str[0] == '#' || !str.substr(0,8).compare("Monitor:") )
         {
           continue;
         }
