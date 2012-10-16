@@ -76,18 +76,18 @@ namespace Mantid
      */
     void ScaleX::exec()
     {
-	    //Get input workspace and offset
-	    const MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
+      //Get input workspace and offset
+      const MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
-	    factor = getProperty("Factor");
-	    
-	    API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);	    
-	    
-	    //Get number of histograms
+      factor = getProperty("Factor");
+
+      API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);
+
+      //Get number of histograms
       int histnumber = static_cast<int>(inputW->getNumberHistograms());
-	    
-	    m_progress = new API::Progress(this, 0.0, 1.0, histnumber+1);
-	    m_progress->report("Scaling X");
+
+      m_progress = new API::Progress(this, 0.0, 1.0, histnumber+1);
+      m_progress->report("Scaling X");
 
 	    wi_min = 0;
       wi_max = histnumber-1;
@@ -118,26 +118,26 @@ namespace Mantid
       }
 
       // do the shift in X
-	    PARALLEL_FOR2(inputW, outputW)
+      PARALLEL_FOR2(inputW, outputW)
       for (int i=0; i < histnumber; ++i)
-	    {		    
-				PARALLEL_START_INTERUPT_REGION
-		    //Do the offsetting
-		    for (int j=0; j <  static_cast<int>(inputW->readX(i).size()); ++j)
-		    {
-			    //Change bin value by offset
-			    if ((i >= wi_min) && (i <= wi_max)) outputW->dataX(i)[j] = inputW->readX(i)[j] * factor;
+      {
+        PARALLEL_START_INTERUPT_REGION
+        //Do the offsetting
+        for (int j=0; j <  static_cast<int>(inputW->readX(i).size()); ++j)
+        {
+          //Change bin value by offset
+          if ((i >= wi_min) && (i <= wi_max)) outputW->dataX(i)[j] = inputW->readX(i)[j] * factor;
           else outputW->dataX(i)[j] = inputW->readX(i)[j];
-		    }
-		    //Copy y and e data
-		    outputW->dataY(i) = inputW->dataY(i);
-		    outputW->dataE(i) = inputW->dataE(i);
-		    m_progress->report("Scaling X");
-				PARALLEL_END_INTERUPT_REGION
-	    }
-			PARALLEL_CHECK_INTERUPT_REGION
-	    
-	    // Copy units
+        }
+        //Copy y and e data
+        outputW->dataY(i) = inputW->dataY(i);
+        outputW->dataE(i) = inputW->dataE(i);
+        m_progress->report("Scaling X");
+        PARALLEL_END_INTERUPT_REGION
+      }
+      PARALLEL_CHECK_INTERUPT_REGION
+
+      // Copy units
       if (outputW->getAxis(0)->unit().get())
           outputW->getAxis(0)->unit() = inputW->getAxis(0)->unit();
       try
@@ -149,8 +149,8 @@ namespace Mantid
           // OK, so this isn't a Workspace2D
       }
 
-	    // Assign it to the output workspace property
-	    setProperty("OutputWorkspace",outputW);
+      // Assign it to the output workspace property
+      setProperty("OutputWorkspace",outputW);
     }
     
     API::MatrixWorkspace_sptr ScaleX::createOutputWS(API::MatrixWorkspace_sptr input)
@@ -204,7 +204,7 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
         //Do the offsetting
-		    if ((i >= wi_min) && (i <= wi_max)) outputWS->getEventList(i).scaleTof(factor);
+        if ((i >= wi_min) && (i <= wi_max)) outputWS->getEventList(i).scaleTof(factor);
         m_progress->report("Scaling X");
         PARALLEL_END_INTERUPT_REGION
       }
