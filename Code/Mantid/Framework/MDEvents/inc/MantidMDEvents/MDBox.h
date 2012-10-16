@@ -160,7 +160,7 @@ namespace MDEvents
 
     std::vector< MDE > & getEvents();
 
-    const std::vector<MDE> & getConstEvents(bool markForWriting=true) const;
+    const std::vector<MDE> & getConstEvents() const;
 
     void releaseEvents() const;
 

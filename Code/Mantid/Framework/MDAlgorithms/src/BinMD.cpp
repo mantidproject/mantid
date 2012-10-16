@@ -262,7 +262,7 @@ namespace MDAlgorithms
     // If you get here, you could not determine that the entire box was in the same bin.
     // So you need to iterate through events.
 
-    const std::vector<MDE> & events = box->getConstEvents(false);
+    const std::vector<MDE> & events = box->getConstEvents();
     typename std::vector<MDE>::const_iterator it = events.begin();
     typename std::vector<MDE>::const_iterator it_end = events.end();
     for (; it != it_end; it++)
@@ -323,6 +323,11 @@ namespace MDAlgorithms
   void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     BoxController_sptr bc = ws->getBoxController();
+    // store exisiting write buffer size for the future 
+    uint64_t writeBufSize =bc->getDiskBuffer().getWriteBufferSize();
+    // and disable write buffer (if any) for input MD Events for this algorithm purposes;
+    bc->setCacheParameters(1,0);
+
 
     // Cache some data to speed up accessing them a bit
     indexMultiplier = new size_t[m_outD];
@@ -426,7 +431,6 @@ namespace MDAlgorithms
     PARALLEL_CHECK_INTERUPT_REGION
 
 
-
     // Now the implicit function
     if (implicitFunction)
     {
@@ -434,6 +438,10 @@ namespace MDAlgorithms
       signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
       outWS->applyImplicitFunction(implicitFunction, nan, nan);
     }
+
+    // return the size of the input workspace write buffer to its initial value
+    bc->setCacheParameters(sizeof(MDE),writeBufSize);
+
   }
 //
 //  //----------------------------------------------------------------------------------------------
@@ -548,13 +556,6 @@ namespace MDAlgorithms
 
 
 
-
-
-
-
-
-
-
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
@@ -572,6 +573,7 @@ namespace MDAlgorithms
     if (!ImplicitFunctionXML.empty())
       implicitFunction = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(ImplicitFunctionXML);
 
+  
     prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool; don't delete it in here.
 
     // Create the dense histogram. This allocates the memory

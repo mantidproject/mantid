@@ -129,7 +129,65 @@ namespace MDAlgorithms
     setPropertyGroup("OutputFilename", "File Back-End");
     setPropertyGroup("Memory", "File Back-End");
   }
+//----------------------------------------------------------------------------------------------
+  /** check if the contents of a MDBox is out of 
+   *
+   * @param box :: pointer to the MDBox to bin
+   * @param chunkMin :: the minimum index in each dimension to consider "valid" (inclusive)
+   * @param chunkMax :: the maximum index in each dimension to consider "valid" (exclusive)
+   */
 
+
+  //template<typename MDE, size_t nd, typename OMDE, size_t ond>
+  //inline bool SliceMD::foundBoxState(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax)
+  //{
+
+  //  if ((box->getNPoints() < (1 << nd) * 2) || !box->getOnDisk() )return boxTooSmall;
+
+  //   // An array to hold the rotated/transformed coordinates
+  //   coord_t outCenter[ond];
+
+
+  //    // There is a check that the number of events is enough for it to make sense to do all this processing.
+  //    size_t numVertexes = 0;
+  //    coord_t * vertexes = box->getVertexesArray(numVertexes);
+
+  //    size_t outOfRange = 0;
+
+  //    for (size_t i=0; i<numVertexes; i++)
+  //    {
+  //      // Cache the center of the event (again for speed)
+  //      const coord_t * inCenter = vertexes + i * nd;
+
+  //      // Now transform to the output dimensions
+  //      m_transform->apply(inCenter, outCenter);
+  //      //std::cout << "Input coord " << VMD(nd,inCenter) << " transformed to " <<  VMD(nd,outCenter) << std::endl;
+
+  //      /// Loop through the dimensions on which we bin
+  //      for (size_t bd=0; bd<; bd++)
+  //      {
+  //        // What is the bin index in that dimension
+  //        coord_t x = outCenter[bd];
+  //        size_t ix = size_t(x);
+  //        // Within range (for this chunk)?
+  //        if ((x < 0) && (ix < chunkMin[bd]) && (ix >= chunkMax[bd]))
+  //        {
+  //          // Outside the range
+  //          outOfRange++;
+  //        }
+  //      } // (for each dim in MDHisto)
+
+  //      // Is the vertex at the same place as the last one?
+  //      if (outOfRange==ond) // well, the whole box is completely out of range
+  //        return boxOutside;
+  //      else
+  //        return boxWorthConsidering;
+  //    } // (for each vertex)
+
+  //    delete [] vertexes;
+
+
+  //}
 
   //----------------------------------------------------------------------------------------------
   /** Copy the extra data (not signal, error or coordinates) from one event to another
@@ -178,6 +236,12 @@ namespace MDAlgorithms
     outWS->initialize();
     // Copy settings from the original box controller
     BoxController_sptr bc = ws->getBoxController();
+
+    // store wrute buffer size for the future 
+    uint64_t writeBufSize = bc->getDiskBuffer().getWriteBufferSize();
+    // and disable write buffer (if any) for input MD Events for this algorithm purposes;
+    bc->setCacheParameters(1,0);
+
     BoxController_sptr obc = outWS->getBoxController();
     // Use the "number of bins" as the "split into" parameter
     for (size_t od=0; od < m_binDimensions.size(); od++)
@@ -224,7 +288,8 @@ namespace MDAlgorithms
     // Leaf-only; no depth limit; with the implicit function passed to it.
     ws->getBox()->getBoxes(boxes, 1000, true, function);
     // Sort boxes by file position IF file backed. This reduces seeking time, hopefully.
-    if (bc->isFileBacked())
+    bool fileBackedWS = bc->isFileBacked();
+    if (fileBackedWS)
       MDBoxBase<MDE, nd>::sortBoxesByFilePos(boxes);
 
     Progress * prog = new Progress(this, 0.0, 1.0, boxes.size());
@@ -240,13 +305,14 @@ namespace MDAlgorithms
     for (int i=0; i<int(boxes.size()); i++)
     {
       MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
+      bool clearBox = box->getOnDisk(); 
       // Perform the binning in this separate method.
       if (box)
       {
         // An array to hold the rotated/transformed coordinates
         coord_t outCenter[ond];
 
-        const std::vector<MDE> & events = box->getConstEvents(false);
+        const std::vector<MDE> & events = box->getConstEvents();
         typename std::vector<MDE>::const_iterator it = events.begin();
         typename std::vector<MDE>::const_iterator it_end = events.end();
         for (; it != it_end; it++)
@@ -269,6 +335,7 @@ namespace MDAlgorithms
             numSinceSplit++;
           }
         }
+        if(clearBox)box->releaseEvents();
 
         // Every 20 million events, or at the last box: do splitting
         if (numSinceSplit > 20000000 || (i == int(boxes.size()-1)))
@@ -281,14 +348,18 @@ namespace MDAlgorithms
           // Accumulate stats
           totalAdded += numSinceSplit;
           numSinceSplit = 0;
-        }
-      }
+          // Progress reporting
+          if(!fileBackedWS)prog->report(i);
 
-      // Progress reporting
-      prog->report();
+        }
+        if(fileBackedWS)
+        {
+          if(!(i%100))prog->report(i);
+        }
+      } // is box
 
     }// for each box in the vector
-
+    prog->report();
     // Refresh all cache.
     outWS->refreshCache();
 
@@ -303,7 +374,8 @@ namespace MDAlgorithms
       alg->setProperty("InputWorkspace", outWS);
       alg->executeAsSubAlg();
     }
-
+    // return the size of the input workspace write buffer to its initial value
+    bc->setCacheParameters(sizeof(MDE),writeBufSize);
     this->setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS));
     delete prog;
   }

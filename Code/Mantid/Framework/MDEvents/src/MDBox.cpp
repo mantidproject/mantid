@@ -238,7 +238,7 @@ namespace MDEvents
    * VERY IMPORTANT: call MDBox::releaseEvents() when you are done accessing that data.
    */
   TMDE(
-  const std::vector<MDE> & MDBox)::getConstEvents(bool markForWriting) const
+  const std::vector<MDE> & MDBox)::getConstEvents() const
   {
     if (m_onDisk)
     {
@@ -249,7 +249,7 @@ namespace MDEvents
       // This access to data was const. Don't change the m_dataModified flag.
 
       // Tell the to-write buffer to write out the object (when no longer busy)
-      if(markForWriting)this->m_BoxController->getDiskBuffer().toWrite(this);
+      this->m_BoxController->getDiskBuffer().toWrite(this);
     }
     // else: do nothing if the events are already in memory.
     return data;

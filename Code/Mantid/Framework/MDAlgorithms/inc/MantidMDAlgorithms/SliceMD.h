@@ -39,7 +39,16 @@ namespace MDAlgorithms
   */
   class DLLExport SliceMD  : public SlicingAlgorithm
   {
-  public:
+  public:   
+    //// enum describes situations, which could happen for input Box binning
+    //enum BoxState
+    //{
+    //  boxTooSmall,  // too few events in the box worth considering its vertices
+    //  boxOutside,   // box is not small but is completely out of slice
+    //  boxWorthConsidering // box belongs to slice and its events worth considering for slicing
+    //};
+
+
     SliceMD();
     ~SliceMD();
     
@@ -65,8 +74,13 @@ namespace MDAlgorithms
     /// Method to actually do the slice
     template<typename MDE, size_t nd, typename OMDE, size_t ond>
     void slice(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  protected: // for testing
+  /*  /// Method to slice box's events if the box itself belongs to the slice
+    template<typename MDE, size_t nd, typename OMDE, size_t ond>
+    void sliceMDBox(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax);
 
-
+    template<typename MDE, size_t nd, typename OMDE, size_t ond>
+    BoxState foundBoxState(MDBox<MDE, nd> * box, size_t * chunkMin, size_t * chunkMax);*/
   };
 
 
