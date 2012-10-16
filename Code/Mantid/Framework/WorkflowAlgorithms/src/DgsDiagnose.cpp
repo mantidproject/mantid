@@ -260,9 +260,6 @@ namespace Mantid
         cvu->executeAsSubAlg();
         backgroundIntWS = cvu->getProperty("OutputWorkspace");
 
-        // What is this magic value !?!?!?!?
-        backgroundIntWS *= 1.7016e8;
-
         // Normalise the background integral workspace
         if (dvCompWS)
         {
