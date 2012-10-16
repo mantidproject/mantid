@@ -3,6 +3,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include <gsl/gsl_sf_erf.h>
+#include <math.h>
 
 #define PI 3.14159265358979323846264338327950288419716939937510
 
@@ -114,8 +115,8 @@ void ThermalNeutronDtoTOFFunction::functionDeriv1D(Jacobian *out, const double *
     double deriv_dtt2t = (n-1)/x;
     double deriv_zero = n;
     double deriv_zerot = (1-n);
-    double deriv_width = -(zero+dtt1*x-zerot-dtt1t*x+dtt2t/x)*exp(-u*u)/sqrt(PI)*(tcross-1/x);
-    double deriv_tcross = -(zero+dtt1*x-zerot-dtt1t*x+dtt2t/x)*exp(-u*u)/sqrt(PI)*width;
+    double deriv_width = -(zero+dtt1*x-zerot-dtt1t*x+dtt2t/x)*std::exp(-u*u)/std::sqrt(PI)*(tcross-1/x);
+    double deriv_tcross = -(zero+dtt1*x-zerot-dtt1t*x+dtt2t/x)*std::exp(-u*u)/std::sqrt(PI)*width;
 
     // b) Set
     out->set(i, 0, deriv_dtt1);
