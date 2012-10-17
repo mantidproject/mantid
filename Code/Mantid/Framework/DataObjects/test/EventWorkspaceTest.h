@@ -78,17 +78,21 @@ public:
     {
       for (int i=0; i<NUMBINS-1; i++)
       {
+        double tof = 0;
+        size_t pulse_time = 0;
         if (evenTOFs)
         {
-          retVal->getEventList(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
-          retVal->getEventList(pix) += TofEvent((i+0.5)*BIN_DELTA, 1);
+          tof = (i+0.5)*BIN_DELTA;
+          pulse_time = tof;
         }
         else
         {
           //Two events per bin
-          retVal->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
-          retVal->getEventList(pix) += TofEvent((pix+i+0.5)*BIN_DELTA, 1);
+          tof = (pix+i+0.5)*BIN_DELTA;
+          pulse_time = tof;
         }
+        retVal->getEventList(pix) += TofEvent(tof, pulse_time);
+        retVal->getEventList(pix) += TofEvent(tof, pulse_time);
       }
       retVal->getEventList(pix).addDetectorID(pix);
       retVal->getEventList(pix).setSpectrumNo(pix);
@@ -583,6 +587,70 @@ public:
     last=200;
     for (int i=last; i<last+100;i++)
       data1 = ew2->dataE(i);
+  }
+
+  void test_histogram_pulse_time_throws_if_index_too_large()
+  {
+    const size_t nHistos = 10;
+    EventWorkspace_sptr ws = boost::make_shared<EventWorkspace>(); 
+    ws->initialize(nHistos, 1, 1);
+
+    MantidVec X, Y, E;
+    TSM_ASSERT_THROWS("Number of histograms is out of range, should throw", ws->generateHistogramPulseTime(nHistos+1, X, Y, E), std::range_error);
+  }
+
+  void do_test_binning(EventWorkspace_sptr ws, const MantidVec& X, cow_ptr<MantidVec> axis, size_t expected_occupancy_per_bin)
+  {
+    MantidVec Y(NUMBINS-1);
+    MantidVec E(NUMBINS-1);
+    // Required since we are rebinning in place.
+    ws->setAllX(axis);
+    // perform binning 
+    ws->generateHistogramPulseTime(0, X, Y, E);
+    // Check results
+    for(size_t j = 0; j < Y.size(); ++j)
+    {
+      TS_ASSERT_EQUALS(expected_occupancy_per_bin, Y[j]); 
+    }
+  }
+
+  void test_histogram_pulse_time()
+  {
+    const size_t nHistos = 1;
+    const bool setXAxis = false;
+    EventWorkspace_sptr ws = createEventWorkspace(nHistos, setXAxis); // Creates TOF events with pulse_time intervals of BIN_DELTA/2
+
+    Mantid::Kernel::cow_ptr<MantidVec> axis;
+    MantidVec& X = axis.access();
+    
+    // Create bin steps = 4*BIN_DELTA.
+    X.resize(NUMBINS/4);
+    for (size_t i = 0; i < X.size(); ++i)
+    {
+      X[i] = i*BIN_DELTA*4;
+    }
+    size_t expected_occupancy = 8; // Because there are two events with pulse_time in each BIN_DELTA interval. 
+    do_test_binning(ws, X, axis, expected_occupancy);
+   
+    // Create bin steps = 2*BIN_DELTA.
+    X.clear();
+    X.resize(NUMBINS/2);
+    for (size_t i = 0; i < X.size(); ++i)
+    {
+      X[i] = i*BIN_DELTA*2;
+    }
+    expected_occupancy = 4; // Because there are two events with pulse_time in each BIN_DELTA interval. 
+    do_test_binning(ws, X, axis, expected_occupancy);
+
+    // Create bin steps = BIN_DELTA.
+    X.clear();
+    X.resize(NUMBINS);
+    for (size_t i = 0; i < X.size(); ++i)
+    {
+      X[i] = i*BIN_DELTA;
+    }
+    expected_occupancy = 2; // Because there are two events with pulse_time in each BIN_DELTA interval. 
+    do_test_binning(ws, X, axis, expected_occupancy);
 
   }
 

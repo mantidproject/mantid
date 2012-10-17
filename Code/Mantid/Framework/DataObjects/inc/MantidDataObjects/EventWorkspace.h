@@ -127,6 +127,9 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Generate a new histogram from specified event list at the given index.
   void generateHistogram(const std::size_t index, const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
 
+  /// Generate a new histogram from specified event list at the given index.
+  void generateHistogramPulseTime(const std::size_t index, const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
+
   //------------------------------------------------------------
   // Set the x-axis data (histogram bins) for all pixels
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
