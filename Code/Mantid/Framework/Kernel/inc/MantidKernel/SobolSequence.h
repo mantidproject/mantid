@@ -52,6 +52,10 @@ namespace Mantid
       void generateNextPoint();
       /// Reset the sequence
       void restart();
+      /// Saves the current state of the generator
+      void save();
+      /// Restores the generator to the last saved point, or the beginning if nothing has been saved
+      void restore();
 
     private:
       DISABLE_DEFAULT_CONSTRUCT(SobolSequence);
@@ -62,8 +66,10 @@ namespace Mantid
       /// Frees resources allocated by current generator
       void deleteCurrentGenerator();
 
-      /// GSL quasi-random number state
+      /// GSL quasi-random number state generator
       gsl_qrng *m_gslGenerator;
+      /// Allocated object for save state calls
+      gsl_qrng *m_savedGenerator;
     };
   }
 }

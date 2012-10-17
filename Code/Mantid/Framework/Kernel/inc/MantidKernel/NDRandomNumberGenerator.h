@@ -53,8 +53,12 @@ namespace Mantid
       /// Generate the next set of values that form a point in ND space
       const std::vector<double> & nextPoint();
 
-      /// Resets the generator
+      /// Restarts the generator from the beginning of the sequence
       virtual void restart() = 0;
+      /// Saves the current state of the generator
+      virtual void save() = 0;
+      /// Restores the generator to the last saved point, or the beginning if nothing has been saved
+      virtual void restore() = 0;
 
     protected:
       /// Generate the next point. Override this in you concrete implementation
@@ -69,6 +73,7 @@ namespace Mantid
 
     private:
       DISABLE_DEFAULT_CONSTRUCT(NDRandomNumberGenerator);
+      DISABLE_COPY_AND_ASSIGN(NDRandomNumberGenerator);
 
       /// The number of dimensions
       const unsigned int m_ndims;

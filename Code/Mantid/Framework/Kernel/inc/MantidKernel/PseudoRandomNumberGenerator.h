@@ -25,6 +25,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/NDRandomNumberGenerator.h"
+#include "MantidKernel/ClassMacros.h"
 
 namespace Mantid
 {
@@ -49,6 +50,8 @@ namespace Mantid
       virtual double nextValue() = 0;
       /// Generates the next point
       virtual void generateNextPoint();
+    private:
+      DISABLE_COPY_AND_ASSIGN(PseudoRandomNumberGenerator);
     };
   }
 }

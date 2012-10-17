@@ -3,7 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/NDRandomNumberGenerator.h"
+
+#include <boost/scoped_ptr.hpp>
 #include <gmock/gmock.h>
+
 
 class NDRandomNumberGeneratorTest : public CxxTest::TestSuite
 {
@@ -18,32 +21,30 @@ private:
     {}
     MOCK_METHOD0(generateNextPoint, void());
     MOCK_METHOD0(restart, void());
+    MOCK_METHOD0(save, void());
+    MOCK_METHOD0(restore, void());
   };
 
 public:
 
   void test_That_nextPoint_Calls_generateNextPoint_Exactly_Once()
   {
-    Mock3DRandomNumberGenerator randGen;
-    EXPECT_CALL(randGen, generateNextPoint()).Times(1);
+    using namespace Mantid::Kernel;
+    Mock3DRandomNumberGenerator randImpl;
+    NDRandomNumberGenerator & randGen = randImpl;
+
+    EXPECT_CALL(randImpl, generateNextPoint()).Times(1);
     randGen.nextPoint();
     TSM_ASSERT("nextPoint was called an unexpected number of times",
-              ::testing::Mock::VerifyAndClearExpectations(&randGen));
-  }
-
-  void test_That_Reset_Does_Nothing()
-  {
-    Mock3DRandomNumberGenerator randGen;
-    EXPECT_CALL(randGen, restart()).Times(1);
-    randGen.restart();
-    TSM_ASSERT("restart was called an unexpected number of times",
-               ::testing::Mock::VerifyAndClearExpectations(&randGen));
-
+              ::testing::Mock::VerifyAndClearExpectations(&randImpl));
   }
 
   void test_That_nextPoint_Vector_Is_Same_Size_As_Number_Of_Dimenions()
   {
-    Mock3DRandomNumberGenerator randGen;
+    using namespace Mantid::Kernel;
+    Mock3DRandomNumberGenerator randImpl;
+    NDRandomNumberGenerator & randGen = randImpl;
+
     TS_ASSERT_EQUALS(randGen.nextPoint().size(), randGen.numberOfDimensions());
   }
 
