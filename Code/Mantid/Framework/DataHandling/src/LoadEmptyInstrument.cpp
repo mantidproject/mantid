@@ -80,9 +80,15 @@ namespace Mantid
       // of calling method of SpectraDetectorMap 
       std::map<detid_t, IDetector_const_sptr> detCache;
 
-      //FIXME: Use GetDetectorID's here since it'll be way faster.
+      // Use GetDetectorID's here since it'll be way faster.
       instrument->getDetectors(detCache);
       const int64_t number_spectra = static_cast<int64_t>(detCache.size());
+
+      // Check that we have some spectra for the workspace
+      if( number_spectra == 0){
+            g_log.error("Instrument has no detectors, unable to create workspace for it");
+            throw Kernel::Exception::InstrumentDefinitionError("No detectors found in instrument");
+      }
       
       bool MakeEventWorkspace = getProperty("MakeEventWorkspace");
       
@@ -101,11 +107,6 @@ namespace Mantid
       }
       else
       { 
-        // Check that we have some spectra for the workspace
-        if( number_spectra == 0){
-            g_log.error("Instrument has no detectors, unable to create workspace for it");
-            throw Kernel::Exception::InstrumentDefinitionError("No detectors found in instrument");
-        }
         // Now create the outputworkspace and copy over the instrument object
         DataObjects::Workspace2D_sptr localWorkspace =
           boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(ws,number_spectra,2,1));
