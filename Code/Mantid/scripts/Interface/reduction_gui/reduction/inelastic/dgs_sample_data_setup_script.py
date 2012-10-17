@@ -29,9 +29,16 @@ class SampleSetupScript(BaseScriptElement):
     grouping_file = ""
     show_workspaces = False
     
-    def __init__(self):
+    def __init__(self, inst_name):
         super(SampleSetupScript, self).__init__()
+        self.set_default_pars(inst_name)
         self.reset()
+        
+    def set_default_pars(self, inst_name):
+        import dgs_utils
+        ip = dgs_utils.InstrumentParameters(inst_name)
+        SampleSetupScript.monitor1_specid = int(ip.get_parameter("ei-mon1-spec"))
+        SampleSetupScript.monitor2_specid = int(ip.get_parameter("ei-mon2-spec"))
         
     def to_script(self):
         script =  "SampleInputFile=\"%s\",\n" % self.sample_file
@@ -54,9 +61,9 @@ class SampleSetupScript(BaseScriptElement):
             if self.tzero_guess != SampleSetupScript.tzero_guess:
                 script += "TimeZeroGuess=%s,\n" % str(self.tzero_guess)
         if self.monitor1_specid != SampleSetupScript.monitor1_specid:
-            script += "Monitor1SpecId=\"%s\",\n" % self.monitor1_specid
+            script += "Monitor1SpecId=%s,\n" % self.monitor1_specid
         if self.monitor2_specid != SampleSetupScript.monitor2_specid:
-            script += "Monitor2SpecId=\"%s\",\n" % self.monitor2_specid
+            script += "Monitor2SpecId=%s,\n" % self.monitor2_specid
         if self.et_range_low != SampleSetupScript.et_range_low or \
            self.et_range_width != SampleSetupScript.et_range_width or \
            self.et_range_high != SampleSetupScript.et_range_high:

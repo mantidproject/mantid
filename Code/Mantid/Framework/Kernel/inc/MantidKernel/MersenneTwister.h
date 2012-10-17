@@ -61,6 +61,8 @@ namespace Mantid
       explicit MersenneTwister(const size_t seedValue);
       /// Construct the generator with an initial seed and range.
       MersenneTwister(const size_t seedValue, const double start, const double end);
+      /// Destructor
+      ~MersenneTwister();
       /// Set the random number seed
       virtual void setSeed(const size_t seed);
       /// Sets the range of the subsequent calls to next 
@@ -69,6 +71,10 @@ namespace Mantid
       virtual double nextValue();
       /// Resets the generator
       virtual void restart();
+      /// Saves the current state of the generator
+      virtual void save();
+      /// Restores the generator to the last saved point, or the beginning if nothing has been saved
+      virtual void restore();
 
     private:
       DISABLE_DEFAULT_CONSTRUCT(MersenneTwister);
@@ -80,6 +86,9 @@ namespace Mantid
       uniform_double m_uniform_dist;
       /// The current seed
       boost::mt19937::result_type m_currentSeed;
+      /// A generator that will take the value when save is requested. Pointer so that
+      /// it is only instantiated when required
+      boost::mt19937 *m_savedStateGenerator;
     };
 
   }

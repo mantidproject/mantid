@@ -48,7 +48,6 @@ set ( SRC_FILES
 	src/MersenneTwister.cpp
 	src/MultiFileNameParser.cpp
 	src/MultiFileValidator.cpp
-	src/NDPseudoRandomNumberGenerator.cpp
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusTestHelper.cpp

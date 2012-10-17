@@ -1150,6 +1150,7 @@ private:
   void hideSelectedColumns();
   void showAllColumns();
   void closedLastCopiedLayer(){lastCopiedLayer = NULL;};
+  void cleanTextEditor();
 
   /// context menu for log window
   void showLogWindowContextMenu(const QPoint &p);

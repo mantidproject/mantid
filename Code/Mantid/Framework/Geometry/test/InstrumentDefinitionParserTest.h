@@ -677,7 +677,6 @@ public:
     path.append(instrumentEnv._instName + ".vtp");
     remove( path.toString().c_str() );
   }
-
 };
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite

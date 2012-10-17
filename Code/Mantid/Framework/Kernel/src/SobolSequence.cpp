@@ -12,7 +12,7 @@ namespace Mantid
      * Constructor taking the number of dimensions for the sequence
      */
     SobolSequence::SobolSequence(const unsigned int ndims) :
-      QuasiRandomNumberSequence(ndims), m_gslGenerator(NULL)
+      QuasiRandomNumberSequence(ndims), m_gslGenerator(NULL), m_savedGenerator(NULL)
     {
       setNumberOfDimensions(ndims);
     }
@@ -40,15 +40,31 @@ namespace Mantid
      */
     void SobolSequence::restart()
     {
-      if(m_gslGenerator)
+      gsl_qrng_init(m_gslGenerator);
+    }
+
+    /// Saves the current state of the generator
+    void SobolSequence::save()
+    {
+      m_savedGenerator = gsl_qrng_clone(m_gslGenerator);
+    }
+
+    /// Restores the generator to the last saved point, or the beginning if nothing has been saved
+    void SobolSequence::restore()
+    {
+      if(m_savedGenerator)
       {
-        gsl_qrng_init(m_gslGenerator);
+        gsl_qrng_memcpy(m_gslGenerator, m_savedGenerator);
+      }
+      else
+      {
+        restart();
       }
     }
 
     /**
      * Sets the number of dimensions for the generator. Note this destroys
-     * any previous state information
+     * any previous state information including any saved state
      */
     void SobolSequence::setNumberOfDimensions(const unsigned int ndims)
     {
@@ -70,11 +86,11 @@ namespace Mantid
      */
     void SobolSequence::deleteCurrentGenerator()
     {
-      if(m_gslGenerator)
+      gsl_qrng_free(m_gslGenerator);
+      if(m_savedGenerator)
       {
-        gsl_qrng_free(m_gslGenerator);
+        gsl_qrng_free(m_savedGenerator);
       }
-      m_gslGenerator = NULL;
     }
 
   }

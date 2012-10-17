@@ -62,7 +62,8 @@ namespace Mantid
     /** Executes the algorithm. Reading in the file and creating and populating
      *  the output workspace
      * 
-     *  @throw Exception::FileError If the RAW file cannot be found/opened
+     *  @throw std::runtime_error If the instrument cannot be loaded by the LoadInstrument subalgorithm
+     *  @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file not covered by LoadInstrument
      *  @throw std::invalid_argument If the optional properties are set to invalid values
      */
     void LoadEmptyInstrument::exec()
@@ -79,9 +80,15 @@ namespace Mantid
       // of calling method of SpectraDetectorMap 
       std::map<detid_t, IDetector_const_sptr> detCache;
 
-      //FIXME: Use GetDetectorID's here since it'll be way faster.
+      // Use GetDetectorID's here since it'll be way faster.
       instrument->getDetectors(detCache);
       const int64_t number_spectra = static_cast<int64_t>(detCache.size());
+
+      // Check that we have some spectra for the workspace
+      if( number_spectra == 0){
+            g_log.error("Instrument has no detectors, unable to create workspace for it");
+            throw Kernel::Exception::InstrumentDefinitionError("No detectors found in instrument");
+      }
       
       bool MakeEventWorkspace = getProperty("MakeEventWorkspace");
       
@@ -99,7 +106,7 @@ namespace Mantid
         outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
       }
       else
-      {
+      { 
         // Now create the outputworkspace and copy over the instrument object
         DataObjects::Workspace2D_sptr localWorkspace =
           boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(ws,number_spectra,2,1));
@@ -156,14 +163,16 @@ namespace Mantid
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",ws);
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the sub-algorithm. Catch and log any error and stop,
+      // because there is no point in continuing without a valid instrument.
       try
       {
         loadInst->execute();
       }
-      catch (std::runtime_error&)
+      catch (std::runtime_error& )
       {
         g_log.error("Unable to successfully run LoadInstrument sub-algorithm");
+        throw std::runtime_error("Unable to obtain valid instrument.");
       }
       
       return ws;

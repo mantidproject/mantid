@@ -3,8 +3,19 @@
 Creates a cal file from a mask workspace: the masked out detectors (Y == 0 in mask workspace) will be combined into group 0.
 
 *WIKI*"""
-
+import sys
 from MantidFramework import *
+from mantid.simpleapi import *
+from mantid.api import *
+#from mantid.kernel import *
+
+class QueryFlag:
+        def isMasked(self, detector, yValue):
+	        return detector.isMasked()
+		
+class QueryValue:
+        def isMasked(self, detector, yValue):
+	        return yValue == 1
 
 class MaskWorkspaceToCalFile(PythonAlgorithm):
 
@@ -16,20 +27,22 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 
 
 	def PyInit(self):
-		self.declareWorkspaceProperty("InputWorkspace", "", Direction = Direction.Input, Description = 'Input mask workspace')
-		self.declareFileProperty("OutputFile","", FileAction.Save, ['cal'],Description="The file to contain the results")
+		self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input), "Input mask workspace")
+		self.declareProperty(FileProperty(name="OutputFile",defaultValue="",action=FileAction.Save,extensions=['cal']), "The file to contain the results")
 
-		self.declareProperty("Invert", False, Description="If True, masking is inverted in the input workspace. Default: False")
-        
+		self.declareProperty("Invert", False, "If True, masking is inverted in the input workspace. Default: False")
 		
 	def PyExec(self):
 		#extract settings
-		inputWorkspace = self.getProperty("InputWorkspace")
-		outputFileName = self.getProperty("OutputFile")
-		invert = self.getProperty("Invert")
-        
+		inputWorkspace = mtd[self.getPropertyValue("InputWorkspace")]
+		outputFileName = self.getProperty("OutputFile").value
+		invert = self.getProperty("Invert").value
+		mask_query = QueryFlag()
+		if inputWorkspace.id() == "MaskWorkspace":
+		        mask_query = QueryValue()
+		
         #check for consistency
-		if inputWorkspace.getNumberBins() < 1:
+		if len(inputWorkspace.readX(0)) < 1:
 			raise RuntimeError('The input workspace is empty.')
 		
 		#define flags for masking and not-masking
@@ -48,7 +61,8 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 		for i in range(inputWorkspace.getNumberHistograms()):
 			try:
 				det = inputWorkspace.getDetector(i)
-				if (det.isMasked()): #check if masked
+				y_value = inputWorkspace.readY(i)[0]
+				if (mask_query.isMasked(det, y_value)): #check if masked
 					group = masking_flag
 				else:
 					group = not_masking_flag
@@ -70,4 +84,4 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 
 #############################################################################################
 
-mtd.registerPyAlgorithm(MaskWorkspaceToCalFile())
+registerAlgorithm(MaskWorkspaceToCalFile())

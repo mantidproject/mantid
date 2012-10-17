@@ -68,19 +68,13 @@ namespace Mantid
           try
           {
             m_NumThreads = boost::lexical_cast<int>(nDThrheads);
-            g_Log.information()<<"***--> NUM_THREADS property is set changing number of running threads to "<<m_NumThreads<<std::endl;
+            g_Log.information()<<"***--> NUM_THREADS property set to: "<<m_NumThreads<<std::endl;
             if(m_NumThreads<0)
-            {
-                g_Log.information()<<"***--> This resets number of threads to number of physical cores\n ";
-            }
+                g_Log.information()<<"***--> This resets number of threads to the number of physical cores\n ";
             else if(m_NumThreads==0)
-            {
                 g_Log.information()<<"***--> This disables multithreading\n ";
-            }
             else if(m_NumThreads>0)
-            {
                 g_Log.information()<<"***--> Multithreading processing will launch "<<m_NumThreads<<" Threads\n";
-            }
           }
           catch(...){};
         }

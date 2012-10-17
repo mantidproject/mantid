@@ -104,7 +104,8 @@ public:
     // Load the empty instrument
     Mantid::DataHandling::LoadEmptyInstrument loader;
     loader.initialize();
-    std::string inputFile = "ARCS_Definition.xml";
+    // TODO: (ticket #5973) Update the next line to not have a hard coded value for the filename 
+    std::string inputFile = "ARCS_Definition_20121011-.xml";
     loader.setPropertyValue("Filename", inputFile);
     loader.setPropertyValue("OutputWorkspace", "SolidAngle");
     loader.execute();
@@ -141,7 +142,8 @@ public:
       // Load the empty instrument
       Mantid::DataHandling::LoadEmptyInstrument loader;
       loader.initialize();
-      std::string inputFile = "ARCS_Definition.xml";
+      // TODO: (ticket #5973) Update the next line to not have a hard coded value for the filename 
+      std::string inputFile = "ARCS_Definition_20121011-.xml";
       loader.setPropertyValue("Filename", inputFile);
       loader.setPropertyValue("OutputWorkspace", "SolidAngle");
       loader.execute();

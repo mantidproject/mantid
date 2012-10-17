@@ -1494,7 +1494,6 @@ namespace DataObjects
     return Y;
   }
 
-
   /** Calculates and returns a pointer to the E histogrammed data.
    * Remember to delete your pointer after use!
    *
@@ -1846,6 +1845,29 @@ namespace DataObjects
   // --------------------------------------------------------------------------
   /** Utility function:
    * Returns the iterator into events of the first TofEvent with
+   * pulsetime() > seek_pulsetime
+   * Will return events.end() if nothing is found!
+   *
+   * @param events :: event vector in which to look.
+   * @param seek_pulsetime :: tof to find (typically the first bin X[0])
+   * @return iterator where the first event matching it is.
+   */
+  template<class T>
+  typename std::vector<T>::const_iterator EventList::findFirstPulseEvent(const std::vector<T> & events, const double seek_pulsetime)
+  {
+    typename std::vector<T>::const_iterator itev = events.begin();
+    typename std::vector<T>::const_iterator itev_end = events.end(); //cache for speed
+
+    //if tof < X[0], that means that you need to skip some events
+    while ((itev != itev_end) && (itev->pulseTime().nanoseconds() < seek_pulsetime))
+      itev++;
+    // Better fix would be to use a binary search instead of the linear one used here.
+    return itev;
+  }
+
+  // --------------------------------------------------------------------------
+  /** Utility function:
+   * Returns the iterator into events of the first TofEvent with
    * tof() > seek_tof
    * Will return events.end() if nothing is found!
    *
@@ -1960,10 +1982,40 @@ namespace DataObjects
                    static_cast<double (*)(double)>(std::sqrt));
   }
 
+    // --------------------------------------------------------------------------
+  /** Generates both the Y and E (error) histograms w.r.t Pulse Time
+   * for an EventList with or without WeightedEvents.
+   *
+   * @param X: x-bins supplied
+   * @param Y: counts returned
+   * @param E: errors returned
+   * @param skipError: skip calculating the error. This has no effect for weighted
+   *        events; you can just ignore the returned E vector.
+   */
+  void EventList::generateHistogramPulseTime(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError) const
+  {
+    // All types of weights need to be sorted by TOF
+    this->sortPulseTime(); // TODO
 
+    switch (eventType)
+    {
+    case TOF:
+      // Make the single ones
+      this->generateCountsHistogramPulseTime(X, Y);
+      if (!skipError)
+        this->generateErrorsHistogram(Y, E);
+      break;
+
+    case WEIGHTED:
+      throw std::runtime_error("Cannot histogram by pulse time on Weighted Events currently"); // This could be supported.
+
+    case WEIGHTED_NOTIME:
+      throw std::runtime_error("Cannot histogram by pulse time on Weighted Events NoTime");
+    }
+  }
 
   // --------------------------------------------------------------------------
-  /** Generates both the Y and E (error) histograms
+  /** Generates both the Y and E (error) histograms w.r.t TOF
    * for an EventList with or without WeightedEvents.
    *
    * @param X: x-bins supplied
@@ -2006,7 +2058,75 @@ namespace DataObjects
     }
   }
 
+  // --------------------------------------------------------------------------
+  /** With respect to PulseTime Fill a histogram given specified histogram bounds. Does not modify
+   * the eventlist (const method).
+   * @param X :: The x bins
+   * @param Y :: The generated counts histogram
+   */
+  void EventList::generateCountsHistogramPulseTime(const MantidVec& X, MantidVec& Y) const
+  {
+    //For slight speed=up.
+    size_t x_size = X.size();
 
+    if (x_size <= 1)
+    {
+      //X was not set. Return an empty array.
+      Y.resize(0, 0);
+      return;
+    }
+
+    //Sort the events by pulsetime
+    this->sortPulseTime();
+    //Clear the Y data, assign all to 0.
+    Y.resize(x_size-1, 0);
+
+    //---------------------- Histogram without weights ---------------------------------
+
+    if (this->events.size() > 0)
+    {
+      //Iterate through all events (sorted by pulse time)
+      std::vector<TofEvent>::const_iterator itev = findFirstPulseEvent(this->events, X[0]);
+      std::vector<TofEvent>::const_iterator itev_end = events.end(); //cache for speed
+      // The above can still take you to end() if no events above X[0], so check again.
+      if (itev == itev_end) return;
+
+      //Find the first bin
+      size_t bin=0;
+
+      //The tof is greater the first bin boundary, so we need to find the first bin
+      double pulsetime = itev->pulseTime().nanoseconds();
+      while (bin < x_size-1)
+      {
+        //Within range?
+        if ((pulsetime >= X[bin]) && (pulsetime < X[bin+1]))
+        {
+          Y[bin]++;
+          break;
+        }
+        ++bin;
+      }
+      //Go to the next event, we've already binned this first one.
+      ++itev;
+
+      //Keep going through all the events
+      while ((itev != itev_end) && (bin < x_size-1))
+      {
+        pulsetime = itev->pulseTime().nanoseconds();
+        while (bin < x_size-1)
+        {
+          //Within range?
+          if ((pulsetime >= X[bin]) && (pulsetime < X[bin+1]))
+          {
+            Y[bin]++;
+            break;
+          }
+          ++bin;
+        }
+        ++itev;
+      }
+    } // end if (there are any events to histogram)
+  }
 
 
   // --------------------------------------------------------------------------

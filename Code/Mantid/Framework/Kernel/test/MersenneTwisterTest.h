@@ -3,8 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidKernel/MersenneTwister.h"
-#include <iostream>
-#include <iomanip>
 
 using Mantid::Kernel::MersenneTwister;
 
@@ -31,7 +29,7 @@ public:
     long seed_1(212437999), seed_2(247021340);
     MersenneTwister gen_1(seed_1), gen_2(seed_2);
 
-    TS_ASSERT_DIFFERS(gen_1.nextValue(), gen_2.nextValue());    
+    TS_ASSERT_DIFFERS(gen_1.nextValue(), gen_2.nextValue());
   }
 
   void test_That_A_Given_Seed_Produces_Expected_Sequence()
@@ -41,7 +39,7 @@ public:
     assertSequenceCorrectForSeed_39857239(randGen);
   }
 
-  void test_That_A_Reset_Gives_Same_Sequence_Again_From_Start()
+  void test_That_A_Restart_Gives_Same_Sequence_Again_From_Start()
   {
     MersenneTwister randGen(1);
     randGen.setSeed(39857239);
@@ -50,7 +48,51 @@ public:
     assertSequenceCorrectForSeed_39857239(randGen);
   }
 
+  void test_That_A_Restore_Without_Save_Does_The_Same_As_Restart()
+  {
+    MersenneTwister randGen(39857239);
+    assertSequenceCorrectForSeed_39857239(randGen);
+    randGen.restore();
+    assertSequenceCorrectForSeed_39857239(randGen);
+  }
+
+  void test_That_Save_Then_Call_Next_Value_And_Restore_Gives_Sequence_From_Saved_Point()
+  {
+    MersenneTwister randGen(1);
+    doNextValueCalls(10, randGen); // Move away from start so not the same as reset
+
+    const unsigned int ncheck(50);
+    randGen.save();
+    std::vector<double> firstValues = doNextValueCalls(50, randGen);
+    randGen.restore();
+    std::vector<double> secondValues = doNextValueCalls(50, randGen);
+
+    for(unsigned int i = 0; i < ncheck; ++i)
+    {
+      TS_ASSERT_EQUALS(firstValues[i], secondValues[i]);
+    }
+  }
   
+  void test_Second_Restore_Without_A_Save_In_Between_Takes_Generator_Back_To_Saved_Point()
+  {
+    MersenneTwister randGen(1);
+    doNextValueCalls(10, randGen); // Move away from start so not the same as reset
+
+    const unsigned int ncheck(50);
+    randGen.save();
+    std::vector<double> firstValues = doNextValueCalls(50, randGen);
+    randGen.restore();
+    doNextValueCalls(50, randGen);
+    randGen.restore();
+    std::vector<double> thirdValues = doNextValueCalls(50, randGen);
+
+    for(unsigned int i = 0; i < ncheck; ++i)
+    {
+      TS_ASSERT_EQUALS(firstValues[i], thirdValues[i]);
+    }
+
+  }
+
   void test_That_Default_Range_Produces_Numbers_Between_Zero_And_One()
   {
     MersenneTwister randGen(12345);
@@ -97,6 +139,16 @@ private:
     {
       TS_ASSERT_DELTA(randGen.nextValue(), expectedValues[i], 1e-12);
     }
+  }
+
+  std::vector<double> doNextValueCalls(const unsigned int ncalls, MersenneTwister &randGen)
+  {
+    std::vector<double> values(ncalls,0.0);
+    for(unsigned int i = 0; i < ncalls; ++i)
+    {
+      values[i] = randGen.nextValue();
+    }
+    return values;
   }
 
 };

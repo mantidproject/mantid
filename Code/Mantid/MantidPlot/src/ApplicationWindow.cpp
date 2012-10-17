@@ -17080,6 +17080,7 @@ void ApplicationWindow::enableTextEditor(Graph *g)
     }
   } else if (g) {
     d_text_editor = new TextEditor(g);
+    connect(d_text_editor,SIGNAL(textEditorDeleted()),this,SLOT(cleanTextEditor()));
 
     formatToolBar->setEnabled(true);
     actionSubscript->setEnabled(true);
@@ -17089,6 +17090,11 @@ void ApplicationWindow::enableTextEditor(Graph *g)
     actionGreekMajSymbol->setEnabled(true);
     actionMathSymbol->setEnabled(true);
   }
+}
+
+void ApplicationWindow::cleanTextEditor()
+{
+  d_text_editor = NULL;
 }
 
 void ApplicationWindow::insertSuperscript()

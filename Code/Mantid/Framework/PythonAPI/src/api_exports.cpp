@@ -7,6 +7,8 @@
 #include <string>
 #include <ostream>
 
+// Kernel
+#include "MantidKernel/DataItem.h"
 // API
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/FileFinder.h"
@@ -275,13 +277,26 @@ using namespace boost::python;
   // Overloads for createSubAlgorithm function which has 1 optional argument
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloader, API::Workspace::isDirty, 0, 1)
 
+void export_dataitem()
+{
+  REGISTER_SHARED_PTR_TO_PYTHON(Kernel::DataItem);
+
+  class_<Kernel::DataItem,boost::noncopyable>("DataItem", no_init)
+    .def("id", &Kernel::DataItem::id, "The string ID of the class")
+    .def("name", &Kernel::DataItem::name, "The name of the object")
+    .def("threadSafe", &Kernel::DataItem::threadSafe, "Returns true if the object can be accessed safely from multiple threads")
+    .def("__str__", &Kernel::DataItem::toString, "Returns a serialised version of the object")
+  ;
+}
+  
+  
   //-----------------------------------------------------------------------------------------------
   void export_workspace()
   {
     /// Shared pointer registration
     register_ptr_to_python<boost::shared_ptr<Workspace> >();
     
-    class_<API::Workspace, boost::noncopyable>("Workspace", no_init)
+    class_<API::Workspace, bases<Kernel::DataItem>, boost::noncopyable>("Workspace", no_init)
       .def("getTitle", &API::Workspace::getTitle, 
          return_value_policy< return_by_value >())
       .def("setTitle", &API::Workspace::setTitle)
@@ -292,6 +307,7 @@ using namespace boost::python;
       .def("getName", &API::Workspace::getName, return_value_policy< copy_const_reference >())
       .def("__str__", &API::Workspace::getName, return_value_policy< copy_const_reference >())
       .def("getHistory", &API::Workspace::getHistory, return_internal_reference<>())
+      .def("id", &API::Workspace::id)
       ;
   }
 
@@ -964,6 +980,7 @@ using namespace boost::python;
   {
     export_frameworkmanager();
     export_ialgorithm();
+    export_dataitem();
     export_workspace();
     export_matrixworkspace();
     export_eventworkspace();

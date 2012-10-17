@@ -22,13 +22,14 @@ class SampleSetupWidget(BaseWidget):
                 
         self._content = SamSetFrame(self)
         self._layout.addWidget(self._content)
+        self._instrument_name = settings.instrument_name
         self._facility_name = settings.facility_name
         self.initialize_content()
         
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(SampleSetupScript())
+            self.set_state(SampleSetupScript(self._instrument_name))
         
     def initialize_content(self):
         # Constraints
@@ -41,6 +42,8 @@ class SampleSetupWidget(BaseWidget):
         self._content.etr_low_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_low_edit))
         self._content.etr_width_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_width_edit))
         self._content.etr_high_edit.setValidator(QtGui.QDoubleValidator(self._content.etr_high_edit))
+        self._content.monitor1_specid_edit.setValidator(QtGui.QIntValidator(self._content.monitor1_specid_edit))
+        self._content.monitor2_specid_edit.setValidator(QtGui.QIntValidator(self._content.monitor2_specid_edit))
         
         # Default states
         self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
@@ -116,8 +119,8 @@ class SampleSetupWidget(BaseWidget):
                                                  state.incident_energy_guess)
         self._content.use_ei_guess_chkbox.setChecked(state.use_ei_guess)
         self._content.tzero_guess_edit.setText(QtCore.QString(str(state.tzero_guess)))
-        self._content.monitor1_specid_edit.setText(state.monitor1_specid)
-        self._content.monitor2_specid_edit.setText(state.monitor2_specid)
+        self._content.monitor1_specid_edit.setText(QtCore.QString(str(state.monitor1_specid)))
+        self._content.monitor2_specid_edit.setText(QtCore.QString(str(state.monitor2_specid)))
         self._content.et_range_box.setChecked(state.rebin_et)
         self._content.etr_low_edit.setText(state.et_range_low)
         self._content.etr_width_edit.setText(state.et_range_width)
@@ -131,15 +134,15 @@ class SampleSetupWidget(BaseWidget):
         """
             Returns an object with the state of the interface
         """
-        s = SampleSetupScript()
+        s = SampleSetupScript(self._instrument_name)
         s.sample_file = self._content.sample_edit.text()
         s.output_wsname = self._content.output_ws_edit.text()
         s.detcal_file = self._content.detcal_edit.text()
         s.incident_energy_guess = self._content.ei_guess_edit.text()
         s.use_ei_guess = self._content.use_ei_guess_chkbox.isChecked()
         s.tzero_guess = util._check_and_get_float_line_edit(self._content.tzero_guess_edit)
-        s.monitor1_specid = self._content.monitor1_specid_edit.text()
-        s.monitor2_specid = self._content.monitor2_specid_edit.text()
+        s.monitor1_specid = int(self._content.monitor1_specid_edit.text())
+        s.monitor2_specid = int(self._content.monitor2_specid_edit.text())
         s.rebin_et = self._content.et_range_box.isChecked()
         s.et_range_low = self._content.etr_low_edit.text()
         s.et_range_width = self._content.etr_width_edit.text()

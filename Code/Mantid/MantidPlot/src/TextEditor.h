@@ -40,8 +40,11 @@ class TextEditor: public QTextEdit
 
 public:
     TextEditor(Graph *g);
+    ~TextEditor();
     void formatText(const QString & prefix, const QString & postfix);
 
+signals:
+    void textEditorDeleted();
 public slots:
     void addSymbol(const QString & letter);
 
