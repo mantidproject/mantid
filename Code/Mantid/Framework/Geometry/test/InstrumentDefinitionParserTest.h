@@ -56,13 +56,6 @@ private:
     std::string _instName;
   };
 
-  ScopedFile createIDFFileObject(const std::string& idf_filename, const std::string& idf_file_contents)
-  {
-    const std::string instrument_dir = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/";
-
-    return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
-  }
-
   /**
   Helper method to create a pair of corresponding resource managed, IDF and VTP files.
   */
@@ -684,42 +677,6 @@ public:
     path.append(instrumentEnv._instName + ".vtp");
     remove( path.toString().c_str() );
   }
-
-  
-void testIDFFile()
-{
-  const std::string instrumentName = "Minimal_Definition";
-  const std::string idfFilename = instrumentName + ".xml";
-
-  const std::string idfFileContents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-    "<instrument name=\"" + instrumentName + "\" valid-from   =\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 23:59:59\" last-modified=\"2012-10-05 11:00:00\">"
-    "<defaults/>"
-    "<component type=\"cylinder-right\" idlist=\"cylinder-right\">"
-    "<location/>"
-    "</component>"
-    "<type name=\"cylinder-right\" is=\"detector\">"
-    "<cylinder id=\"some-shape\">"
-    "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
-    "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />" 
-    "  <radius val=\"0.01\" />"
-    "  <height val=\"0.03\" />"
-    "</cylinder>"    
-    "</type>"
-    "<idlist idname=\"cylinder-right\">"
-      "<id val=\"1\" />"
-     "</idlist>"
-    "</instrument>";
-
-  ScopedFile idfFile = createIDFFileObject(idfFilename, idfFileContents);
-
-
-  InstrumentDefinitionParser parser;
-  parser.initialize(idfFile.getFileName(), instrumentName, idfFileContents);
-  parser.parseXML(NULL);
-
-  // Do your tests here.
-}
-
 };
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite

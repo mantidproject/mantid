@@ -109,6 +109,7 @@ set ( TEST_PY_FILES
   test/python/LoggerTest.py
   test/python/MatrixWorkspaceTest.py
   test/python/MandatoryValidatorTest.py
+  test/python/MaskWorkspaceToCalFileTest.py
   test/python/MDHistoWorkspaceTest.py
   test/python/MultipleFilePropertyTest.py
   test/python/NullValidatorTest.py
