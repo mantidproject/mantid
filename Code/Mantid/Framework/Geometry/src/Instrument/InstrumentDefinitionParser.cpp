@@ -1134,12 +1134,14 @@ namespace Geometry
         ss1 << idList.vec.size(); ss2 << idList.counted;
         if ( idList.idname == "") {
           g_log.error("No list of detector IDs found for location element "+ name);
+          throw Kernel::Exception::InstrumentDefinitionError(
+            "Detector location element "+name+" has no idlist.", filename);
         }
         else if( idList.vec.size() == 0) {
           g_log.error("No detector IDs found for detectors in list "+idList.idname);
         } else {
-           g_log.error("The number of detector IDs listed in idlist named "
-             + idList.idname + " is less then the number of detectors");
+          g_log.error("The number of detector IDs listed in idlist named "
+            + idList.idname + " is less then the number of detectors");
         }
         throw Kernel::Exception::InstrumentDefinitionError(
           "Number of IDs listed in idlist (=" + ss1.str() + ") is less than the number of detectors.", filename);
