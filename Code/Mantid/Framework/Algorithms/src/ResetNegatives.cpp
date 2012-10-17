@@ -78,10 +78,12 @@ namespace Algorithms
   /// @copydoc Mantid::API::Algorithm::exec()
   void ResetNegatives::exec()
   {
+    MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+    MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
     // get the minimum for each spectrum
     IAlgorithm_sptr alg = this->createSubAlgorithm("Min", 0., .1);
-    alg->setPropertyValue("InputWorkspace", this->getPropertyValue("InputWorkspace"));
+    alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     alg->executeAsSubAlg();
     MatrixWorkspace_const_sptr minWS = alg->getProperty("OutputWorkspace");
 
@@ -101,15 +103,10 @@ namespace Algorithms
     if (!hasNegative)
     {
       g_log.information() << "No values are negative. Copying InputWorkspace to OutputWorkspace\n";
-      if (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"))
-      {
-        setPropertyValue("OutputWorkspace", this->getPropertyValue("InputWorkspace"));
-      }
-      else
+      if (inputWS != outputWS)
       {
         IAlgorithm_sptr alg = this->createSubAlgorithm("CloneWorkspace", .1, 1.);
-        alg->setPropertyValue("InputWorkspace", this->getPropertyValue("InputWorkspace"));
-        alg->setPropertyValue("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+        alg->setProperty<Workspace_sptr>("InputWorkspace", inputWS);
         alg->executeAsSubAlg();
 
         Workspace_sptr temp = alg->getProperty("OutputWorkspace");
@@ -117,9 +114,6 @@ namespace Algorithms
       }
       return;
     }
-
-    // get input workspace and parameters
-    MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
     // sort the event list to make it fast and thread safe
     DataObjects::EventWorkspace_const_sptr eventWS
@@ -130,7 +124,7 @@ namespace Algorithms
     Progress prog(this, .1, 1., 2*nHist);
 
     // generate output workspace - copy X and dY
-    MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
     PARALLEL_FOR2(inputWS,outputWS)
     for (int64_t i = 0; i < nHist; i++)
     {

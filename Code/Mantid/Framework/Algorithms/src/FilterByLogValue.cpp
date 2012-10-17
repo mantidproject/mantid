@@ -230,8 +230,8 @@ void FilterByLogValue::exec()
 
 
 
-  EventWorkspace_sptr outputWS;
-  if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
+  EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if (inputWS == outputWS)
   {
     // Filtering in place! -------------------------------------------------------------
     PARALLEL_FOR_NO_WSP_CHECK()

@@ -55,7 +55,11 @@ void MuonRemoveExpDecay::exec()
   int numSpectra = static_cast<int>(inputWS->size() / inputWS->blocksize());
 
   //Create output workspace with same dimensions as input
-  API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+  API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if ( inputWS != outputWS )
+  {
+    outputWS = API::WorkspaceFactory::Instance().create(inputWS);
+  }
   //Copy over the X vaules to avoid a race-condition in main the loop
   PARALLEL_FOR2(inputWS,outputWS)
   for (int i = 0; i < numSpectra; ++i)
@@ -106,7 +110,7 @@ void MuonRemoveExpDecay::exec()
   else
   {
     Progress prog(this, 0.0, 1.0, numSpectra + spectra.size());
-    if (getPropertyValue("InputWorkspace") != getPropertyValue("OutputWorkspace"))
+    if (inputWS != outputWS)
     {
 
       //Copy all the Y and E data

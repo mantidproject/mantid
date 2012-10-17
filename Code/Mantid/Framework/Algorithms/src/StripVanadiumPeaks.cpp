@@ -74,7 +74,8 @@ void StripVanadiumPeaks::exec()
 
   // Check for trying to rewrite an EventWorkspace
   EventWorkspace_sptr inputEvent = boost::dynamic_pointer_cast<EventWorkspace>(inputWS);
-  if (inputEvent && (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace")))
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  if (inputEvent && (inputWS == outputWS))
   {
     throw std::invalid_argument("Cannot strip vanadium peaks in-place for an EventWorkspace. Please specify a different output workspace name, which will be a Workspace2D copy of the input EventWorkspace.");
   }
@@ -93,7 +94,7 @@ void StripVanadiumPeaks::exec()
   }
 
   // Create an output workspace - same size as input one
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
+  outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Copy the data over from the input to the output workspace
   const int nhists = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this,0.0,1.0,nhists*2);

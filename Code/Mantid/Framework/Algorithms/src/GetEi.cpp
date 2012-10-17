@@ -302,8 +302,7 @@ void GetEi::extractSpec(int64_t specInd, double start, double end)
     createSubAlgorithm("CropWorkspace", 100*m_fracCompl, 100*(m_fracCompl+CROP) );
   m_fracCompl += CROP;
   
-  childAlg->setPropertyValue( "InputWorkspace",
-                              getPropertyValue("InputWorkspace") );
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",getProperty("InputWorkspace") );
   childAlg->setProperty( "XMin", start);
   childAlg->setProperty( "XMax", end);
   childAlg->setProperty( "StartWorkspaceIndex", specInd);

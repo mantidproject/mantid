@@ -79,7 +79,7 @@ namespace Mantid
       void init();
       void exec();
 
-      API::MatrixWorkspace_sptr integrateWorkspace(std::string outputWorkspaceName);
+      API::MatrixWorkspace_sptr integrateWorkspace();
       
     };
 

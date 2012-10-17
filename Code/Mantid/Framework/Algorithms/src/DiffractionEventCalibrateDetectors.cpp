@@ -316,7 +316,7 @@ namespace Algorithms
     const double peakOpt = getProperty("LocationOfPeakToOptimize");
 
     // Get the input workspace
-    EventWorkspace_const_sptr inputW = getProperty("InputWorkspace");
+    EventWorkspace_sptr inputW = getProperty("InputWorkspace");
 
      // retrieve the properties
     const std::string rb_params=getProperty("Params");
@@ -387,10 +387,9 @@ namespace Algorithms
     std::string outname = inname+"2"; //getProperty("OutputWorkspace");
 
     IAlgorithm_sptr algS = createSubAlgorithm("SortEvents");
-    algS->setPropertyValue("InputWorkspace",inname);
+    algS->setProperty("InputWorkspace",inputW);
     algS->setPropertyValue("SortBy", "X Value");
     algS->executeAsSubAlg();
-    inputW=algS->getProperty("InputWorkspace");
 
     //Write DetCal File
     double baseX,baseY,baseZ,upX,upY,upZ;
@@ -437,7 +436,7 @@ namespace Algorithms
       CPUTimer tim;
       IAlgorithm_sptr alg2 = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
       alg2->initialize();
-      alg2->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
+      alg2->setProperty("InputWorkspace", inputW);
       alg2->setPropertyValue("GroupNames", detList[det]->getName());
       std::string groupWSName = "group_" + detList[det]->getName();
       alg2->setPropertyValue("OutputWorkspace", groupWSName);

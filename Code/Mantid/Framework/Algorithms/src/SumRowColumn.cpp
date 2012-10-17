@@ -128,9 +128,9 @@ MatrixWorkspace_sptr SumRowColumn::integrateWorkspace()
 
   IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
   //pass inputed values straight to this sub-algorithm, checking must be done there
-  childAlg->setPropertyValue( "InputWorkspace", getPropertyValue("InputWorkspace") );
-  childAlg->setPropertyValue( "RangeLower",  getPropertyValue("XMin") );
-  childAlg->setPropertyValue( "RangeUpper", getPropertyValue("XMax") );
+  childAlg->setProperty<MatrixWorkspace_sptr>( "InputWorkspace", getProperty("InputWorkspace") );
+  childAlg->setProperty<double>( "RangeLower",  getProperty("XMin") );
+  childAlg->setProperty<double>( "RangeUpper", getProperty("XMax") );
   childAlg->executeAsSubAlg();
   return childAlg->getProperty("OutputWorkspace");
 }

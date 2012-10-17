@@ -49,7 +49,7 @@ namespace Algorithms
 
   void MaskBinsFromTable::exec()
   {
-    MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+    MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
     DataObjects::TableWorkspace_sptr paramWS = getProperty("MaskingInformation");
 
     // 1. Check input table workspace and column order
@@ -98,7 +98,7 @@ namespace Algorithms
 
     // 2. Loop over all rows
     bool firstloop = true;
-    API::MatrixWorkspace_sptr outputws;
+    API::MatrixWorkspace_sptr outputws = this->getProperty("OutputWorkspace");
 
     for (size_t ib = 0; ib < paramWS->rowCount(); ++ib)
     {
@@ -120,14 +120,14 @@ namespace Algorithms
       maskbins->initialize();
       if (firstloop)
       {
-        maskbins->setPropertyValue("InputWorkspace", this->getPropertyValue("InputWorkspace"));
+        maskbins->setProperty("InputWorkspace", inputWS);
         firstloop = false;
       }
       else
       {
         maskbins->setProperty("InputWorkspace", outputws);
       }
-      maskbins->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+      maskbins->setProperty("OutputWorkspace", outputws);
       maskbins->setPropertyValue("SpectraList", speclist);
       maskbins->setProperty("XMin", xmin);
       maskbins->setProperty("XMax", xmax);

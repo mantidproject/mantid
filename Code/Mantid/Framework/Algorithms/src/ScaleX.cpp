@@ -41,10 +41,7 @@ namespace Mantid
      */
     ScaleX::~ScaleX()
     {
-      if( m_progress )
-      {
-        delete m_progress;
-      }
+      delete m_progress;
     }
 
     /**
@@ -156,19 +153,15 @@ namespace Mantid
     API::MatrixWorkspace_sptr ScaleX::createOutputWS(API::MatrixWorkspace_sptr input)
     {
       //Check whether input = output to see whether a new workspace is required.
-      if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
-      {
-        //Overwrite the original
-        return input;
-      }
-      else
+      MatrixWorkspace_sptr output = getProperty("OutputWorkspace");
+      if ( input != output )
       {
         //Create new workspace for output from old
-        API::MatrixWorkspace_sptr output = API::WorkspaceFactory::Instance().create(input);
-        output->isDistribution(input->isDistribution());
-        return output;
+        output = API::WorkspaceFactory::Instance().create(input);
       }
-    }	
+
+      return output;
+    }
     
     void ScaleX::execEvent()
     {

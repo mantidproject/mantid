@@ -46,7 +46,7 @@ namespace Mantid
         new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
         "Name of the input workspace" );
       declareProperty(
-        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+        new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
         "Each histogram from the input workspace maps to a histogram in this\n"
         "workspace with one value that indicates if there was a dead detector" );
 
@@ -93,7 +93,7 @@ namespace Mantid
       file << "Index Spectrum UDET(S)" << std::endl;
 
       // Get the integrated input workspace
-      MatrixWorkspace_sptr integratedWorkspace = integrateWorkspace(getPropertyValue("OutputWorkspace"));
+      MatrixWorkspace_sptr integratedWorkspace = integrateWorkspace();
 
       // Get hold of the spectraDetectorMap and axis
       std::vector<detid_t> deadDets;
@@ -154,32 +154,20 @@ namespace Mantid
     }
 
     /// Run Integration as a sub-algorithm
-    MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace(std::string outputWorkspaceName)
+    MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace()
     {
       g_log.information() << "Integrating input workspace" << std::endl;
 
       API::IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
-      // Now execute integration. Catch and log any error
-      try
-      {
-        //pass inputed values straight to Integration, checking must be done there
-        childAlg->setPropertyValue( "InputWorkspace", getPropertyValue("InputWorkspace") );
-        childAlg->setPropertyValue( "OutputWorkspace", outputWorkspaceName);
-        childAlg->setPropertyValue( "RangeLower",  getPropertyValue("RangeLower") );
-        childAlg->setPropertyValue( "RangeUpper", getPropertyValue("RangeUpper") );
-        childAlg->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Unable to successfully run Integration sub-algorithm");
-        throw;
-      }
+      // Now execute integration.
+      //pass inputed values straight to Integration, checking must be done there
+      childAlg->setProperty<MatrixWorkspace_sptr>( "InputWorkspace", getProperty("InputWorkspace") );
+      childAlg->setProperty<MatrixWorkspace_sptr>( "OutputWorkspace", getProperty("OutputWorkspace") );
+      childAlg->setProperty<double>( "RangeLower",  getProperty("RangeLower") );
+      childAlg->setProperty<double>( "RangeUpper", getProperty("RangeUpper") );
+      childAlg->executeAsSubAlg();
 
-      if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run Integration sub-algorithm");
-
-      MatrixWorkspace_sptr retVal = childAlg->getProperty("OutputWorkspace");
-
-      return retVal;
+      return childAlg->getProperty("OutputWorkspace");
     }
 
   } // namespace Algorithm
