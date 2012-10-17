@@ -94,6 +94,11 @@ TextEditor::TextEditor(Graph *g): QTextEdit(g), d_target(NULL)
 	setFocus();
 }
 
+TextEditor::~TextEditor()
+{
+  emit textEditorDeleted();
+}
+
 void TextEditor::closeEvent(QCloseEvent *e)
 {
   if(d_target != NULL)
