@@ -27,6 +27,7 @@ private:
   int MAX_TOF;
   int NUMBINS;
   int BIN_DELTA;
+  int MAX_PULSE_TIME;
 
 
 public:
@@ -40,6 +41,7 @@ public:
     BIN_DELTA = 10000;
     NUMBINS = 160;
     MAX_TOF = 10000000;
+    MAX_PULSE_TIME = 10000000;
     NUMEVENTS = 100;
   }
 
@@ -917,6 +919,57 @@ public:
     }
   }
 
+  void test_histogram_tof_event_by_pulse_time()
+  {
+    // Generate TOF events with Pulse times uniformly distributed.
+    EventList eList = this->fake_uniform_pulse_data();
+
+    //Generate the histrogram bins
+    MantidVec shared_x;
+    for (double pulse_time=0; pulse_time < BIN_DELTA*(NUMBINS+1); pulse_time += BIN_DELTA) 
+    {
+      shared_x.push_back(pulse_time);
+    }
+
+    eList.setX(shared_x);
+    //Do we have the same data in X?
+    TS_ASSERT(eList.constDataX()==shared_x);
+
+    MantidVec X = eList.constDataX();
+    MantidVec Y;
+    MantidVec E; 
+
+    eList.generateHistogramPulseTime(X, Y, E);
+
+    for (std::size_t i=0; i<Y.size(); i++)
+    {
+      TS_ASSERT_EQUALS(Y[i], 2.0);
+      TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
+    }
+  }
+
+  void test_histogram_weighed_event_by_pulse_time_throws()
+  {
+    EventList eList = this->fake_uniform_pulse_data(WEIGHTED);
+
+    //Generate the histrogram bins
+    MantidVec shared_x;
+    for (double pulse_time=0; pulse_time < BIN_DELTA*(NUMBINS+1); pulse_time += BIN_DELTA) 
+    {
+      shared_x.push_back(pulse_time);
+    }
+
+    eList.setX(shared_x);
+    //Do we have the same data in X?
+    TS_ASSERT(eList.constDataX()==shared_x);
+
+    MantidVec X = eList.constDataX();
+    MantidVec Y;
+    MantidVec E; 
+
+    TSM_ASSERT_THROWS("We don't support WeightedEvents with this feature at present.", eList.generateHistogramPulseTime(X, Y, E), std::runtime_error);
+  }
+
   void test_histogram_weights_simple()
   {
     // 5 events per bin, simple non-weighted
@@ -1732,6 +1785,29 @@ public:
       //Random pulse time up to 1000
       el += TofEvent( 1e7*(rand()*1.0/RAND_MAX), rand()%1000);
     }
+  }
+
+  /*
+  Make some uniformly distributed fake event data distributed by pulse time, WITH A CONSTANT TOF.
+  */
+  EventList fake_uniform_pulse_data(EventType eventType = TOF, double events_per_bin = 2)
+  {
+    EventList el;
+    if(eventType == TOF)
+    {
+      for (double pulse_time=0; pulse_time < MAX_PULSE_TIME; pulse_time += BIN_DELTA/events_per_bin) 
+      {
+        el += TofEvent( 100, pulse_time);
+      }
+    }
+    else if(eventType = WEIGHTED)
+    {
+      for (double pulse_time=0; pulse_time < MAX_PULSE_TIME; pulse_time += BIN_DELTA/events_per_bin) 
+      {
+        el += WeightedEvent(TofEvent( 100, pulse_time));
+      }
+    }
+    return el;
   }
 
   /** Create a uniform event list with no weights*/

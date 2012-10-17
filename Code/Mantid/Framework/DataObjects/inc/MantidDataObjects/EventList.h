@@ -301,6 +301,7 @@ public:
   template<class T>
   static void histogramForWeightsHelper(const std::vector<T> & events, const MantidVec & X, MantidVec & Y, MantidVec & E);
   void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
+  void generateHistogramPulseTime(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
 
   template<class T>
   static void integrateHelper(std::vector<T> & events, const double minX, const double maxX, const bool entireRange, double & sum, double & error);
@@ -415,9 +416,14 @@ private:
   static typename std::vector<T>::const_iterator findFirstEvent(const std::vector<T> & events, const double seek_tof);
 
   template<class T>
+  static typename std::vector<T>::const_iterator findFirstPulseEvent(const std::vector<T> & events, const double seek_tof);
+
+  template<class T>
   static typename std::vector<T>::iterator findFirstEvent(std::vector<T> & events, const double seek_tof);
 
   void generateCountsHistogram(const MantidVec& X, MantidVec& Y) const;
+
+  void generateCountsHistogramPulseTime(const MantidVec& X, MantidVec& Y) const;
 
   void generateErrorsHistogram(const MantidVec& Y, MantidVec& E) const;
 
