@@ -84,8 +84,6 @@ namespace Mantid
       std::string m_inputFilename;
       /// Pointer to the local workspace
       API::MatrixWorkspace_const_sptr inputWorkspace;
-      // Input workspace name.
-      std::string m_inputWorkspaceName;
 
       // Map from detector ID to WS index
       detid2index_map * map;

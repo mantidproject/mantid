@@ -122,7 +122,7 @@ namespace DataHandling
                  double start_progress, double end_progress)
   {
     IAlgorithm_sptr alg = createSubAlgorithm("MoveInstrumentComponent", start_progress, end_progress);
-    alg->setPropertyValue("Workspace", getPropertyValue("InputWorkspace"));
+    alg->setProperty<MatrixWorkspace_sptr>("Workspace", getProperty("InputWorkspace"));
     alg->setPropertyValue("ComponentName", comp_name);
     alg->setProperty("Z", zshift);
     alg->setPropertyValue("RelativePosition", "1");

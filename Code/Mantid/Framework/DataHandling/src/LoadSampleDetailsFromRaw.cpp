@@ -77,11 +77,6 @@ void LoadSampleDetailsFromRaw::init()
 void LoadSampleDetailsFromRaw::exec()
 {
   MatrixWorkspace_sptr data_ws = getProperty("InputWorkspace");
-  if( !data_ws.get() )
-  {
-    g_log.error() << "Cannot retrieve InputWorkspace " << getPropertyValue("InputWorkspace");
-    throw Exception::NotFoundError("Cannot retrieve InputWorkspace", getPropertyValue("InputWorkspace"));
-  }
   
   std::string filename = getPropertyValue("Filename");
   FILE* file = fopen(filename.c_str(), "rb");

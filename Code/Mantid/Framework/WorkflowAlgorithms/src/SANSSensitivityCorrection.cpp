@@ -337,10 +337,9 @@ void SANSSensitivityCorrection::exec()
   progress.report(3, "Loaded flood field");
 
   // Check whether we need to apply the correction to a workspace
-  const std::string inputWSName = getPropertyValue("InputWorkspace");
-  if (inputWSName.size()>0)
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  if ( inputWS )
   {
-    MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
     // Divide sample data by detector efficiency
     IAlgorithm_sptr divideAlg = createSubAlgorithm("Divide", 0.6, 0.7);
     divideAlg->setProperty("LHSWorkspace", inputWS);

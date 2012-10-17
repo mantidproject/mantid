@@ -691,7 +691,6 @@ namespace DataHandling
 
     // Retrieve the filename from the properties
     m_inputFilename = getPropertyValue("InputFileName");
-    m_inputWorkspaceName = getPropertyValue("InputWorkspace");
     m_outputFilename = getPropertyValue("OutputFileName");
     m_compress = getProperty("Compress");
 
