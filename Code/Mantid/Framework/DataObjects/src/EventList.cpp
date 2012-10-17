@@ -1859,7 +1859,7 @@ namespace DataObjects
     typename std::vector<T>::const_iterator itev_end = events.end(); //cache for speed
 
     //if tof < X[0], that means that you need to skip some events
-    while ((itev != itev_end) && (itev->pulseTime() < seek_pulsetime))
+    while ((itev != itev_end) && (itev->pulseTime().nanoseconds() < seek_pulsetime))
       itev++;
     // Better fix would be to use a binary search instead of the linear one used here.
     return itev;
@@ -1995,8 +1995,6 @@ namespace DataObjects
   void EventList::generateHistogramPulseTime(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError) const
   {
     // All types of weights need to be sorted by TOF
-
-    size_t numEvents = getNumberEvents();
     this->sortPulseTime(); // TODO
 
     switch (eventType)

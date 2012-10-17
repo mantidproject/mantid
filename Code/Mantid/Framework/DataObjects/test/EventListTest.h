@@ -926,7 +926,7 @@ public:
 
     //Generate the histrogram bins
     MantidVec shared_x;
-    for (double pulse_time=0; pulse_time < BIN_DELTA*(NUMBINS+1); pulse_time += BIN_DELTA) 
+    for (size_t pulse_time=0; pulse_time < BIN_DELTA*(NUMBINS+1); pulse_time += BIN_DELTA) 
     {
       shared_x.push_back(pulse_time);
     }
@@ -954,7 +954,7 @@ public:
 
     //Generate the histrogram bins
     MantidVec shared_x;
-    for (double pulse_time=0; pulse_time < BIN_DELTA*(NUMBINS+1); pulse_time += BIN_DELTA) 
+    for (size_t pulse_time=0; pulse_time < BIN_DELTA*(NUMBINS+1); pulse_time += BIN_DELTA) 
     {
       shared_x.push_back(pulse_time);
     }
@@ -1795,14 +1795,14 @@ public:
     EventList el;
     if(eventType == TOF)
     {
-      for (double pulse_time=0; pulse_time < MAX_PULSE_TIME; pulse_time += BIN_DELTA/events_per_bin) 
+      for (size_t pulse_time=0; pulse_time < MAX_PULSE_TIME; pulse_time += BIN_DELTA/events_per_bin) 
       {
         el += TofEvent( 100, pulse_time);
       }
     }
     else if(eventType = WEIGHTED)
     {
-      for (double pulse_time=0; pulse_time < MAX_PULSE_TIME; pulse_time += BIN_DELTA/events_per_bin) 
+      for (size_t pulse_time=0; pulse_time < MAX_PULSE_TIME; pulse_time += BIN_DELTA/events_per_bin) 
       {
         el += WeightedEvent(TofEvent( 100, pulse_time));
       }
