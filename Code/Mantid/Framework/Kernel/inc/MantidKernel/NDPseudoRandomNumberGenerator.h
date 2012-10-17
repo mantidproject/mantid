@@ -41,7 +41,7 @@ namespace Mantid
      *
      */
     template<typename SingleValueGenerator>
-    class MANTID_KERNEL_DLL NDPseudoRandomNumberGenerator : public NDRandomNumberGenerator
+    class DLLExport NDPseudoRandomNumberGenerator : public NDRandomNumberGenerator
     {
     public:
       /// Constructor
