@@ -34,7 +34,10 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
 }
 /** Method analyzes the state of UB matrix and goniometer attached to the workspace and desides, which target 
   * coordinate system these variables identify. 
-   */ 
+  *Crystal Frame decided in case if there is UB matrix is present and is not unit matrix
+  *Lab frame -- if goniometer is Unit and UB is unit matrix or not present
+  *Sample frame -- otherwise
+  */ 
 CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription &TargWSDescription)const
 {
 
@@ -155,7 +158,9 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
       for (size_t j=0;j<3;++j)
         Wmat[i][j]=dim_directions[j][i];
   }
+  // Now define lab frame to target frame transformation
   Kernel::DblMatrix Scale(3,3,true);
+  Kernel::DblMatrix Transf(3,3,true);
   boost::shared_ptr<Geometry::OrientedLattice> spLatt;
   if(UnitUB)
     spLatt = boost::shared_ptr<Geometry::OrientedLattice>(new Geometry::OrientedLattice(1,1,1));
@@ -166,6 +171,7 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
   {
   case NoScaling:    //< momentums in A^-1
     {
+      Transf = spLatt->getU();
       break;
     }
   case SingleScale: //< momentuns divided by  2*Pi/Lattice -- equivalend to d-spacing in some sense
@@ -173,13 +179,14 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
       double dMax(-1.e+32);
       for(int i=0;i<3;i++)  dMax =(dMax>spLatt->a(i))?(dMax):(spLatt->a(i));
       for(int i=0;i<3;i++)  Scale[i][i] = (2*M_PI)/dMax;
-
+      Transf = spLatt->getU();
       break;
     }
   case OrthogonalHKLScale://< each momentum component divided by appropriate lattice parameter; equivalent to hkl for orthogonal axis
     {
       if(spLatt)
         for(int i=0;i<3;i++){ Scale[i][i] = (2*M_PI)/spLatt->a(i);}             
+        Transf = spLatt->getU();
         break;
     }
   case HKLScale:   //< non-orthogonal system for non-orthogonal lattice
@@ -192,7 +199,7 @@ Kernel::DblMatrix MDWSTransform::buildQTrahsf(MDEvents::MDWSDescription &TargWSD
 
   }
 
-  return Scale*Wmat;
+  return Transf*Scale*Wmat;
 }
 
 /** Build meaningful dimension names for different conversion modes
