@@ -29,6 +29,39 @@ public:
     TS_ASSERT_EQUALS(stats.minimum, 12.6);
     TS_ASSERT_EQUALS(stats.maximum, 18.3);
     TS_ASSERT_EQUALS(stats.median, 17.2);
+
+  }
+  void testZscores()
+  {
+    vector<double> data;
+    data.push_back(12);
+    data.push_back(13);
+    data.push_back(9);
+    data.push_back(18);
+    data.push_back(7);
+    data.push_back(9);
+    data.push_back(14);
+    data.push_back(16);
+    data.push_back(10);
+    data.push_back(12);
+    data.push_back(7);
+    data.push_back(13);
+    data.push_back(14);
+    data.push_back(19);
+    data.push_back(10);
+    data.push_back(16);
+    data.push_back(12);
+    data.push_back(16);
+    data.push_back(19);
+    data.push_back(11);
+
+    std::vector<double> Zscore = getZscore(data);
+    TS_ASSERT_DELTA(Zscore[4], 1.6397, 0.0001);
+    TS_ASSERT_DELTA(Zscore[6], 0.3223, 0.0001);
+    std::vector<double> ZModscore = getModifiedZscore(data);
+    TS_ASSERT_DELTA(ZModscore[4], 1.2365, 0.0001);
+    TS_ASSERT_DELTA(ZModscore[6], 0.3372, 0.0001);
+    
   }
 
   void testDoubleSingle()
