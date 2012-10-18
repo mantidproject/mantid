@@ -8,12 +8,14 @@ vanadium can be used in conjunction with the data reduction.
 
 #include "MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/Atom.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::PhysicalConstants;
 using namespace WorkflowAlgorithmHelpers;
 
 namespace Mantid
@@ -163,8 +165,9 @@ namespace Mantid
       const double vanadiumMass = getDblPropOrParam("VanadiumMass",
           reductionManager, "vanadium-mass", outputWS);
 
-      const double vanadiumRmm = getDblPropOrParam("VanadiumRmm",
-          reductionManager, "vanadium-rmm", outputWS);
+      // Get the vanadium mass from the Mantid physical constants
+      Atom vanadium = getAtom("V");
+      const double vanadiumRmm = vanadium.mass;
 
       outputWS /= (vanadiumMass / vanadiumRmm);
 

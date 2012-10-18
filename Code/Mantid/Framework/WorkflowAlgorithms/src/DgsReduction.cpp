@@ -372,9 +372,6 @@ namespace Mantid
       this->declareProperty("VanadiumMass", EMPTY_DBL(), "The mass of vanadium.");
       this->setPropertySettings("VanadiumMass",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
-      this->declareProperty("VanadiumRmm", EMPTY_DBL(), "The mass of vanadium.");
-      this->setPropertySettings("VanadiumRmm",
-          new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
       this->declareProperty("SampleMass", 1.0, "The mass of sample.");
       this->setPropertySettings("SampleMass",
           new VisibleWhenProperty("DoAbsoluteUnits", IS_EQUAL_TO, "1"));
@@ -414,7 +411,6 @@ namespace Mantid
       this->setPropertyGroup("AbsUnitsMinimumEnergy", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsMaximumEnergy", absUnitsCorr);
       this->setPropertyGroup("VanadiumMass", absUnitsCorr);
-      this->setPropertyGroup("VanadiumRmm", absUnitsCorr);
       this->setPropertyGroup("SampleMass", absUnitsCorr);
       this->setPropertyGroup("SampleRmm", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsLowOutlier", absUnitsCorr);
