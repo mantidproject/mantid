@@ -140,6 +140,7 @@ set ( SRC_FILES
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
+    src/QueryPulseTimes.cpp
 	src/Q1D.cpp
 	src/Q1D2.cpp
 	src/Q1DWeighted.cpp
@@ -341,6 +342,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
+    inc/MantidAlgorithms/QueryPulseTimes.h
 	inc/MantidAlgorithms/Q1D.h
 	inc/MantidAlgorithms/Q1D2.h
 	inc/MantidAlgorithms/Q1DWeighted.h
@@ -523,6 +525,7 @@ set ( TEST_FILES
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h
+    QueryPulseTimesTest.h
 	Q1D2Test.h
 	Q1DTest.h
 	Q1DWeightedTest.h

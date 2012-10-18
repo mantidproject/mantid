@@ -1859,7 +1859,7 @@ namespace DataObjects
     typename std::vector<T>::const_iterator itev_end = events.end(); //cache for speed
 
     //if tof < X[0], that means that you need to skip some events
-    while ((itev != itev_end) && (itev->pulseTime().nanoseconds() < seek_pulsetime))
+    while ((itev != itev_end) && (itev->pulseTime().totalNanoseconds() < seek_pulsetime))
       itev++;
     // Better fix would be to use a binary search instead of the linear one used here.
     return itev;
@@ -2095,7 +2095,7 @@ namespace DataObjects
       size_t bin=0;
 
       //The tof is greater the first bin boundary, so we need to find the first bin
-      double pulsetime = itev->pulseTime().nanoseconds();
+      double pulsetime = itev->pulseTime().totalNanoseconds();
       while (bin < x_size-1)
       {
         //Within range?
@@ -2112,7 +2112,7 @@ namespace DataObjects
       //Keep going through all the events
       while ((itev != itev_end) && (bin < x_size-1))
       {
-        pulsetime = itev->pulseTime().nanoseconds();
+        pulsetime = itev->pulseTime().totalNanoseconds();
         while (bin < x_size-1)
         {
           //Within range?
@@ -2738,6 +2738,104 @@ namespace DataObjects
         break;
       case WEIGHTED_NOTIME:
         temp = this->weightedEventsNoTime[i].tof();
+        break;
+      }
+      if (temp > tMax)
+        tMax = temp;
+    }
+    return tMax;
+  }
+
+  
+  // --------------------------------------------------------------------------
+  /**
+   * @return The minimum tof value for the list of the events.
+   */
+  DateAndTime EventList::getPulseTimeMin() const
+  {
+    // set up as the maximum available date time.
+    DateAndTime tMin = DateAndTime::maximum();
+
+    // no events is a soft error
+    if (this->empty())
+      return tMin;
+
+    // when events are ordered by tof just need the first value
+    if (this->order == PULSETIME_SORT) {
+      switch (eventType)
+      {
+      case TOF:
+        return this->events.begin()->pulseTime();
+      case WEIGHTED:
+        return this->weightedEvents.begin()->pulseTime();
+      case WEIGHTED_NOTIME:
+        return this->weightedEventsNoTime.begin()->pulseTime();
+      }
+    }
+
+    // now we are stuck with a linear search
+    DateAndTime temp = tMin; // start with the largest possible value
+    size_t numEvents = this->getNumberEvents();
+    for (size_t i = 0; i < numEvents; i++)
+    {
+      switch (eventType)
+      {
+      case TOF:
+        temp = this->events[i].pulseTime();
+        break;
+      case WEIGHTED:
+        temp = this->weightedEvents[i].pulseTime();
+        break;
+      case WEIGHTED_NOTIME:
+        temp = this->weightedEventsNoTime[i].pulseTime();
+        break;
+      }
+      if (temp < tMin)
+        tMin = temp;
+    }
+    return tMin;
+  }
+
+  /**
+   * @return The maximum tof value for the list of events.
+   */
+  DateAndTime EventList::getPulseTimeMax() const
+  {
+    // set up as the minimum available date time.
+    DateAndTime tMax = DateAndTime::minimum();
+
+    // no events is a soft error
+    if (this->empty())
+      return tMax;
+
+    // when events are ordered by tof just need the first value
+    if (this->order == TOF_SORT) {
+      switch (eventType)
+      {
+      case TOF:
+        return this->events.rbegin()->pulseTime();
+      case WEIGHTED:
+        return this->weightedEvents.rbegin()->pulseTime();
+      case WEIGHTED_NOTIME:
+        return this->weightedEventsNoTime.rbegin()->pulseTime();
+      }
+    }
+
+    // now we are stuck with a linear search
+    size_t numEvents = this->getNumberEvents();
+    DateAndTime temp = tMax; // start with the smallest possible value
+    for (size_t i = 0; i < numEvents; i++)
+    {
+      switch (eventType)
+      {
+      case TOF:
+        temp = this->events[i].pulseTime();
+        break;
+      case WEIGHTED:
+        temp = this->weightedEvents[i].pulseTime();
+        break;
+      case WEIGHTED_NOTIME:
+        temp = this->weightedEventsNoTime[i].pulseTime();
         break;
       }
       if (temp > tMax)

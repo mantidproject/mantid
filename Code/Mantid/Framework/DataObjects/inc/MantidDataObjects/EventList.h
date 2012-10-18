@@ -332,6 +332,8 @@ public:
   void getTofs(std::vector<double>& tofs) const;
   double getTofMin() const;
   double getTofMax() const;
+  Mantid::Kernel::DateAndTime getPulseTimeMax() const;
+  Mantid::Kernel::DateAndTime getPulseTimeMin() const;
 
   std::vector<double> getTofs() const;
 

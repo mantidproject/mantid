@@ -71,6 +71,10 @@ namespace API
     virtual double getTofMin() const = 0;
     /// Get the maximum TOF from the list
     virtual double getTofMax() const = 0;
+    /// Get the minimum pulse time from the list
+    virtual Mantid::Kernel::DateAndTime getPulseTimeMin() const = 0;
+    /// Get the maximum pulse time from the list
+    virtual Mantid::Kernel::DateAndTime getPulseTimeMax() const = 0;
     /// Set the TOFs from the given list
     virtual void setTofs(const MantidVec& tofs) = 0;
     /// Multiply event list by a constant with error
