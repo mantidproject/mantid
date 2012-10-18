@@ -6,8 +6,12 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/MersenneTwister.h"
+#include "MantidKernel/NDPseudoRandomNumberGenerator.h"
 #include "MantidKernel/SobolSequence.h"
 #include "MantidKernel/Timer.h"
+
+#include <Poco/Timestamp.h>
 
 namespace Mantid
 {
@@ -28,6 +32,7 @@ namespace Mantid
       const char * MC_MIN_NAME = "MCLoopMin";
       const char * MC_MAX_NAME = "MCLoopMax";
       const char * MC_LOOP_TOL = "MCTolerance";
+      const char * MC_TYPE = "MCType";
       const char * CRYSTAL_MOSAIC = "CrystalMosaic";
     }
 
@@ -35,13 +40,13 @@ namespace Mantid
      * Default constructor
      */
     TobyFitResolutionModel::TobyFitResolutionModel()
-      : MDResolutionConvolution(), m_randGen(),
+      : MDResolutionConvolution(), m_randomNumbers(),
         m_activeAttrValue(1),
-        m_mcLoopMin(100), m_mcLoopMax(1000), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
+        m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4),m_mcRelErrorTol(1e-5),
+        m_mosaicActive(1),
         m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
         m_exptCache()
     {
-      setNThreads(API::FrameworkManager::Instance().getNumOMPThreads());
     }
 
     /**
@@ -51,13 +56,12 @@ namespace Mantid
      */
     TobyFitResolutionModel::TobyFitResolutionModel(const API::IFunctionMD & fittedFunction,
                                                                      const std::string & fgModel)
-      : MDResolutionConvolution(fittedFunction, fgModel), m_randGen(),
+      : MDResolutionConvolution(fittedFunction, fgModel), m_randomNumbers(),
         m_activeAttrValue(1),
-        m_mcLoopMin(100), m_mcLoopMax(1000), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
+        m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
         m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
         m_exptCache()
     {
-      setNThreads(API::FrameworkManager::Instance().getNumOMPThreads());
     }
 
     /**
@@ -93,9 +97,7 @@ namespace Mantid
       calculateResolutionCoefficients(detCachedExperimentInfo, qOmega);
 
       // Start MC loop and check the relative error every min steps
-      // The random number generator is restarted to ensure each pixel
-      // is computed using the same set of values
-      m_randGen[PARALLEL_THREAD_NUMBER]->restart();
+      monteCarloLoopStarting();
       double sumSigma(0.0), sumSigmaSqr(0.0), avgSigma(0.0);
       for(int step = 1; step <= m_mcLoopMax; ++step)
       {
@@ -125,56 +127,6 @@ namespace Mantid
     //---------------------------------------------------------------------------------
     // Private members
     //---------------------------------------------------------------------------------
-    /**
-     * Sets up the function to cope with the given number of threads processing it at once
-     * @param nthreads :: The maximum number of threads that will be used to evaluate the
-     * function
-     */
-    void TobyFitResolutionModel::setNThreads(const int nthreads)
-    {
-      m_randGen = std::vector<Kernel::NDRandomNumberGenerator*>(nthreads, NULL);
-      for(auto it = m_randGen.begin(); it != m_randGen.end(); ++it)
-      {
-        (*it) = new Kernel::SobolSequence(TobyFitYVector::requiredRandomNums() + 2); // Extra 2 for mosaic
-      }
-
-      m_bmatrix = std::vector<TobyFitBMatrix>(nthreads, TobyFitBMatrix());
-      m_yvector = std::vector<TobyFitYVector>(nthreads, TobyFitYVector());
-      m_etaInPlane = std::vector<double>(nthreads, 0.0);
-      m_etaOutPlane = std::vector<double>(nthreads, 0.0);
-      m_deltaQE = std::vector<std::vector<double>>(nthreads, std::vector<double>(4, 0.0));
-    }
-
-    /**
-     * Called before any fit/simulation is started to allow caching of
-     * frequently used parameters
-     * @param workspace :: The MD that will be used for the fit
-     */
-    void TobyFitResolutionModel::preprocess(const API::IMDEventWorkspace_const_sptr & workspace)
-    {
-      Kernel::Timer timer;
-      // Fill the observation cache
-      auto iterator = workspace->createIterator();
-      g_log.debug() << "Starting preprocessing loop\n";
-      do
-      {
-        const size_t nevents = iterator->getNumEvents();
-        for(size_t i = 0; i < nevents; ++i)
-        {
-          uint16_t innerRunIndex = iterator->getInnerRunIndex(i);
-          detid_t detID = iterator->getInnerDetectorID(i);
-          const auto key = std::make_pair(innerRunIndex, detID);
-          if(m_exptCache.find(key) == m_exptCache.end())
-          {
-            API::ExperimentInfo_const_sptr expt = workspace->getExperimentInfo(innerRunIndex);
-            m_exptCache.insert(std::make_pair(key, new CachedExperimentInfo(*expt, detID)));
-          }
-        }
-      }
-      while(iterator->next());
-      g_log.debug() << "Done preprocessing loop:" << timer.elapsed() << " seconds\n";
-      delete iterator;
-    }
 
     /**
      * Declare function attributes
@@ -182,15 +134,15 @@ namespace Mantid
     void TobyFitResolutionModel::declareAttributes()
     {
       // Resolution attributes, all on by default
-      for(unsigned int i = 0; i < TobyFitYVector::variableCount(); ++i)
-      {
-        declareAttribute(TobyFitYVector::identifier(i), IFunction::Attribute(m_activeAttrValue));
-      }
+      TobyFitYVector resolutionVector;
+      resolutionVector.addAttributes(*this);
+
       // Crystal mosaic
       declareAttribute(CRYSTAL_MOSAIC, IFunction::Attribute(m_activeAttrValue));
 
       declareAttribute(MC_MIN_NAME, API::IFunction::Attribute(m_mcLoopMin));
       declareAttribute(MC_MAX_NAME, API::IFunction::Attribute(m_mcLoopMax));
+      declareAttribute(MC_TYPE, API::IFunction::Attribute(m_mcType));
       declareAttribute(MC_LOOP_TOL, API::IFunction::Attribute(m_mcRelErrorTol));
     }
 
@@ -213,6 +165,15 @@ namespace Mantid
       if(name == MC_MIN_NAME) m_mcLoopMin = value.asInt();
       else if(name == MC_MAX_NAME) m_mcLoopMax = value.asInt();
       else if(name == MC_LOOP_TOL) m_mcRelErrorTol = value.asDouble();
+      else if(name == MC_TYPE)
+      {
+        m_mcType = value.asInt();
+        if(m_mcType > 4 || m_mcType < 0)
+        {
+          throw std::invalid_argument("TobyFitResolutionModel: Invalid MCType argument, valid values are 0-4. Current value="
+                                       + boost::lexical_cast<std::string>(m_mcType));
+        }
+      }
       else if(name == CRYSTAL_MOSAIC) m_mosaicActive = value.asInt();
       else
       {
@@ -221,16 +182,6 @@ namespace Mantid
           iter->setAttribute(name, value.asInt());
         }
       }
-    }
-
-    /**
-     * Ensure the run parameters are up to date. Gets the values of the current parameters
-     * from the fit
-     * @param observation :: A reference to the current observation
-     */
-    void TobyFitResolutionModel::updateRunParameters(const CachedExperimentInfo & observation) const
-    {
-      UNUSED_ARG(observation);
     }
 
     /**
@@ -253,7 +204,7 @@ namespace Mantid
     void TobyFitResolutionModel::generateIntegrationVariables(const CachedExperimentInfo & observation,
                                       const QOmegaPoint & eventPoint) const
     {
-      const std::vector<double> & randomNums = m_randGen[PARALLEL_THREAD_NUMBER]->nextPoint();
+      const std::vector<double> & randomNums = generateRandomNumbers();
       const size_t nvars = m_yvector[PARALLEL_THREAD_NUMBER].recalculate(randomNums, observation, eventPoint);
 
       // Calculate crystal mosaic contribution
@@ -277,6 +228,14 @@ namespace Mantid
     }
 
     /**
+     * Returns the next set of random numbers
+     */
+    const std::vector<double> & TobyFitResolutionModel::generateRandomNumbers() const
+    {
+      return m_randomNumbers[PARALLEL_THREAD_NUMBER]->nextPoint();
+    }
+
+    /**
      * Calculates the point in Q-E space where the foreground model will be evaluated.
      * @param observation :: The current observation defining the point experimental setup
      * @param eventPoint :: The point in QE space that this refers to
@@ -297,7 +256,7 @@ namespace Mantid
           xVec3(0.0), xVec4(0.0), xVec5(0.0);
       const std::vector<double> & yvalues = m_yvector[PARALLEL_THREAD_NUMBER].values();
       const TobyFitBMatrix & bmatrix = m_bmatrix[PARALLEL_THREAD_NUMBER];
-      for(unsigned int i = 0; i < TobyFitYVector::variableCount(); ++i)
+      for(unsigned int i = 0; i < TobyFitYVector::length(); ++i)
       {
         const double & yi = yvalues[i];
         xVec0 += bmatrix[0][i] * yi;
@@ -410,6 +369,139 @@ namespace Mantid
         return true;
       }
       return false;
+    }
+
+    /// Called before a function evaluation begins
+    void TobyFitResolutionModel::functionEvalStarting()
+    {
+      // Ensure the random number generators are in the correct state
+      // for future calls. This depends on the requested MCType.
+      // See comments in setupRandomNumberGenerator for the reason why
+      // there are two sets of generators
+    }
+
+    /// Called after a function evaluation is finished
+    void TobyFitResolutionModel::functionEvalFinished()
+    {
+      // See comments in TobyFitResolutionModel::functionEvalStarting()
+
+    }
+
+    /**
+     * Called just before the Monte Carlo evaluation starts
+     */
+    void TobyFitResolutionModel::monteCarloLoopStarting() const
+    {
+      if( m_mcType == 1 )
+      {
+        m_randomNumbers[PARALLEL_THREAD_NUMBER]->restart();
+      }
+    }
+
+    /**
+     * Called before any fit/simulation is started to allow caching of
+     * frequently used parameters
+     * @param workspace :: The MD that will be used for the fit
+     */
+    void TobyFitResolutionModel::preprocess(const API::IMDEventWorkspace_const_sptr & workspace)
+    {
+      Kernel::Timer timer;
+      // Fill the observation cache
+      auto iterator = workspace->createIterator();
+      g_log.debug() << "Starting preprocessing loop\n";
+      do
+      {
+        const size_t nevents = iterator->getNumEvents();
+        for(size_t i = 0; i < nevents; ++i)
+        {
+          uint16_t innerRunIndex = iterator->getInnerRunIndex(i);
+          detid_t detID = iterator->getInnerDetectorID(i);
+          const auto key = std::make_pair(innerRunIndex, detID);
+          if(m_exptCache.find(key) == m_exptCache.end())
+          {
+            API::ExperimentInfo_const_sptr expt = workspace->getExperimentInfo(innerRunIndex);
+            m_exptCache.insert(std::make_pair(key, new CachedExperimentInfo(*expt, detID)));
+          }
+        }
+      }
+      while(iterator->next());
+      g_log.debug() << "Done preprocessing loop:" << timer.elapsed() << " seconds\n";
+      delete iterator;
+    }
+
+    /**
+     *  Called just before the fitting job starts. Sets up the
+     *  random number generator
+     */
+    void TobyFitResolutionModel::setUpForFit()
+    {
+      setNThreads(API::FrameworkManager::Instance().getNumOMPThreads());
+      setupRandomNumberGenerator();
+    }
+
+    /**
+     * Sets up the function to cope with the given number of threads processing it at once
+     * @param nthreads :: The maximum number of threads that will be used to evaluate the
+     * function
+     */
+    void TobyFitResolutionModel::setNThreads(int nthreads)
+    {
+      if(nthreads <= 0) nthreads = 1; // Ensure we have a sensible number
+
+      m_randomNumbers = std::vector<Kernel::NDRandomNumberGenerator*>(nthreads, NULL);
+      m_bmatrix = std::vector<TobyFitBMatrix>(nthreads, TobyFitBMatrix());
+      m_yvector = std::vector<TobyFitYVector>(nthreads, TobyFitYVector());
+      m_etaInPlane = std::vector<double>(nthreads, 0.0);
+      m_etaOutPlane = std::vector<double>(nthreads, 0.0);
+      m_deltaQE = std::vector<std::vector<double>>(nthreads, std::vector<double>(4, 0.0));
+    }
+
+    /**
+     * Setup the random number generator based on the selected type
+     */
+    void TobyFitResolutionModel::setupRandomNumberGenerator()
+    {
+      using namespace Mantid::Kernel;
+      /**
+       * As in TobyFit:
+       *   mcType=0,2,4 -> pseudo-random number generator (we use MersenneTwister)
+       *   mcType=1,3 -> quasi-random number generator (we use SobolSequence)
+       *
+       * Pseudo-Random:
+       *   0 - Generator is restarted for each iteration
+       *   2, 4 - Generator is NOT restarted at all throughout job
+       *       but the partial derivatives need to use the same set
+       *       of random numbers as the function evaluation so two
+       *       sets of generators are used. At the end of the function
+       *       evaluation the derivative one is swapped, which is precisely
+       *       ncalls behind the first so will use the same set of numbers
+       * Quasi-Random:
+       *  1 - Generator is restarted for each pixel (handled in monteCarloLoopStarting() callback)
+       *  3 - As above for 2,4. Generator is NOT restarted but two sets must
+       *      be used to ensure partial derivatives use the same set of deviates
+       */
+      const unsigned int nrand = m_yvector[0].requiredRandomNums() + 2; // Extra 2 for mosaic
+
+      const size_t nthreads(m_randomNumbers.size());
+      if(m_mcType % 2 == 0)// Pseudo-random
+      {
+        size_t seed(0);
+        if(m_mcType == 0 || m_mcType == 2) seed = 1;
+        else if(m_mcType == 4) seed = static_cast<size_t>(Poco::Timestamp().epochMicroseconds());
+
+        typedef NDPseudoRandomNumberGenerator<MersenneTwister> NDMersenneTwister;
+        for(size_t i = 0; i < nthreads; ++i)
+        {
+          m_randomNumbers[i] = new NDMersenneTwister(nrand, seed, 0.0, 1.0);
+        }
+      }
+      else //Quasi-random
+      {
+        for(size_t i = 0; i < nthreads; ++i)
+        {
+          m_randomNumbers[i] = new Kernel::SobolSequence(nrand);
+        }
+      }
     }
 
   }

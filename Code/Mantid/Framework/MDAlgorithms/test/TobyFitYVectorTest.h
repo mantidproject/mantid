@@ -31,32 +31,34 @@ public:
     delete yVector;
   }
 
-  void test_Values_Vector_Is_Same_Size_As_Number_Of_Variables()
+  void test_Values_Vector_Is_Same_Size_As_Number_Of_Attributes()
   {
     using namespace Mantid::MDAlgorithms;
     TobyFitYVector yVector;
 
-    TS_ASSERT_EQUALS(yVector.values().size(), TobyFitYVector::variableCount());
+    TS_ASSERT_EQUALS(yVector.values().size(), TobyFitYVector::length());
   }
 
   void test_Values_Are_Not_Used_If_Inactive()
   {
     using namespace Mantid::MDAlgorithms;
 
+    const char * attrs[8] = {"Moderator", "Aperture", "Chopper", "ChopperJitter", "SampleVolume", "DetectorDepth", "DetectorArea", "DetectionTime"};
+
     TobyFitYVector yVector;
-    for(unsigned int i = 0; i < TobyFitYVector::variableCount(); ++i)
+    for(unsigned int i = 0; i < 8; ++i)
     {
-      yVector.setAttribute(yVector.identifier(i), 0);
+      yVector.setAttribute(attrs[i], 0);
     }
 
-    std::vector<double> randNums(TobyFitYVector::variableCount(), 0.5);
+    std::vector<double> randNums(yVector.requiredRandomNums(), 0.5);
     auto testObs = createTestCachedExperimentInfo();
     const double deltaE = 300.0;
     QOmegaPoint qOmega(1.0,2.0,3.0,deltaE);
     yVector.recalculate(randNums, *testObs, qOmega);
 
     const std::vector<double> & values = yVector.values();
-    for(size_t i = 0; i < TobyFitYVector::variableCount(); ++i)
+    for(size_t i = 0; i < TobyFitYVector::length(); ++i)
     {
       TSM_ASSERT_DELTA(std::string("Value at index ") + boost::lexical_cast<std::string>(i) + " should be zero.", values[i], 0.0, 1e-10);
     }

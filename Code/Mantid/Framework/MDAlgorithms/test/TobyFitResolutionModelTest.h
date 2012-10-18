@@ -59,13 +59,13 @@ class TobyFitResolutionModelTest : public CxxTest::TestSuite
 
     }
 
-    void test_initialized_object_has_correct_number_of_attributes()
+    void test_initialized_object_has_expected_number_of_attributes()
     {
       using namespace Mantid::MDAlgorithms;
       TobyFitResolutionModel mdconvolution;
       mdconvolution.initialize();
 
-      TS_ASSERT_EQUALS(mdconvolution.nAttributes(), 11);
+      TS_ASSERT_EQUALS(mdconvolution.nAttributes(), 13);
     }
 
     void test_crossSection_Returns_Expected_Value_For_Specific_Parameters()

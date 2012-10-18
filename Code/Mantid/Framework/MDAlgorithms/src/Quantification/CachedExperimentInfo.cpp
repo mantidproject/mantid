@@ -104,26 +104,19 @@ namespace Mantid
       return m_sampleWidths;
     }
 
-    /**
-     * Returns a V3D for a randomly sampled point within the detector volume
-     * @param randInBeamDir :: A flat random number
-     * @param randInPerpDir :: A flat random number
-     * @param randInUpDir :: A flat random number
-     * @return A random point of detector in the detector volume. The returned vector is oriented with the instrument's
-     * reference frame
-     */
-    const Kernel::V3D CachedExperimentInfo::sampleOverDetectorVolume(const double randInBeamDir, const double randInPerpDir, const double randInUpDir) const
+    /// Returns a V3D that defines the detector volume.
+    const Kernel::V3D CachedExperimentInfo::detectorVolume() const
     {
       const Kernel::V3D & minPoint = m_detBox.minPoint();
       const Kernel::V3D & maxPoint = m_detBox.maxPoint();
 
-      Kernel::V3D detectionPoint;
-      detectionPoint[0] = (randInBeamDir - 0.5)*(maxPoint[2] - minPoint[2]);
-      detectionPoint[1] = (randInPerpDir - 0.5)*(maxPoint[0] - minPoint[0]);
-      detectionPoint[2] = (randInUpDir - 0.5)*(maxPoint[1] - minPoint[1]);
-
-      return detectionPoint;
+      Kernel::V3D volume;
+      volume[0] = (maxPoint[0] - minPoint[0]);
+      volume[1] = (maxPoint[1] - minPoint[1]);
+      volume[2] = (maxPoint[2] - minPoint[2]);
+      return volume;
     }
+
 
     /**
      * Computes the matrix required to transform from lab coordinates to detector coordinates

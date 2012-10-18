@@ -18,6 +18,8 @@ Runs a simulation of a model with a selected resolution function.
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
 #include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
+#include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
+
 
 namespace Mantid
 {
@@ -116,7 +118,8 @@ namespace Mantid
       {
         m_outputWS = boost::dynamic_pointer_cast<QOmegaWorkspace>(existingWS);
       }
-      addSimulatedEvents();
+      auto functionMD = boost::dynamic_pointer_cast<ResolutionConvolvedCrossSection>(resolution);
+      functionMD->storeSimulatedEvents(m_outputWS);
 
       this->setProperty<IMDEventWorkspace_sptr>(SIMULATED_NAME, m_outputWS);
     }
@@ -130,12 +133,14 @@ namespace Mantid
     {
       const std::string functionStr = this->createFunctionString();
       auto ifunction = FunctionFactory::Instance().createInitialized(functionStr);
-      auto functionMD = boost::dynamic_pointer_cast<IFunctionMD>(ifunction);
+      auto functionMD = boost::dynamic_pointer_cast<ResolutionConvolvedCrossSection>(ifunction);
       if(!functionMD)
       {
-        throw std::invalid_argument("Function provided is not an MD function");
+        throw std::invalid_argument("Function created is not the expected ResolutionConvolvedCrossSection function. Contact support.");
       }
+      ifunction->setAttribute("Simulation", IFunction::Attribute(true));
       ifunction->setWorkspace(m_inputWS);
+      ifunction->setUpForFit();
       return ifunction;
     }
 

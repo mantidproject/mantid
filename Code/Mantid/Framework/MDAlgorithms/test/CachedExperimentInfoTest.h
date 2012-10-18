@@ -127,17 +127,18 @@ public:
 
   }
 
-  void test_sample_over_detector_volume_throws_gives_expected_pos_with_valid_random_numbers()
+  void test_detector_volume_gives_expected_pos()
   {
     boost::shared_ptr<CachedExperimentInfo> event = createTestCachedExperimentInfo(WithChopper, WithAperture,DeltaEMode::Direct, V3D(1,1,1));
 
-    Mantid::Kernel::V3D detectionPoint;
-    TS_ASSERT_THROWS_NOTHING(detectionPoint = event->sampleOverDetectorVolume(0.2, 0.15, 0.75));
+    Mantid::Kernel::V3D volume;
+    TS_ASSERT_THROWS_NOTHING(volume = event->detectorVolume());
 
-    TS_ASSERT_DELTA(detectionPoint[0], -0.0072, 1e-8); // Beam
-    TS_ASSERT_DELTA(detectionPoint[1], -0.0084, 1e-8); // Perp
-    TS_ASSERT_DELTA(detectionPoint[2], 0.00250006, 1e-8); // Up
+    TS_ASSERT_DELTA(volume[0], 0.0240, 1e-6);
+    TS_ASSERT_DELTA(volume[1], 0.0100, 1e-6);
+    TS_ASSERT_DELTA(volume[2], 0.0240, 1e-6);
   }
+
   void test_labToDetTransformation_Yields_Expected_Matrix()
   {
     boost::shared_ptr<CachedExperimentInfo> event = createTestCachedExperimentInfo(WithChopper, WithAperture, DeltaEMode::Direct, V3D(1,1,1));

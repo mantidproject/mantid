@@ -84,10 +84,7 @@ namespace Mantid
     private:
       DISABLE_COPY_AND_ASSIGN(TobyFitResolutionModel);
 
-      /// Set up the calculator for the given number of threads
-      void setNThreads(const int nthreads);
-      /// Cache detector observations once when the workspace is set
-      void preprocess(const API::IMDEventWorkspace_const_sptr & workspace);
+      friend class TobyFitYVector;      
 
       /// Declare function attributes
       void declareAttributes();
@@ -96,18 +93,17 @@ namespace Mantid
       /// Cache some frequently used attributes
       void setAttribute(const std::string& name, const API::IFunction::Attribute & value);
 
-      /// Ensure the run parameters are up to date
-      void updateRunParameters(const CachedExperimentInfo & exptInfo) const;
-
       /// Calculate resolution coefficients
       void calculateResolutionCoefficients(const CachedExperimentInfo & observation,
                                            const QOmegaPoint & eventPoint) const;
       /// Generates the vector of random points
       void generateIntegrationVariables(const CachedExperimentInfo & observation,
                                         const QOmegaPoint & eventPoint) const;
+      /// Returns the next set of random numbers
+      const std::vector<double> & generateRandomNumbers() const;
+
       /// Map integration variables to perturbed values in Q-E space
       void calculatePerturbedQE(const CachedExperimentInfo & observation,const QOmegaPoint & eventPoint) const;
-
       /// Return true if it is time to check for convergence of the
       /// current sigma value
       bool checkForConvergence(const int step) const;
@@ -115,17 +111,35 @@ namespace Mantid
       bool hasConverged(const int step, const double sumSigma,
                         const double sumSigmaSqr, const double avgSigma) const;
 
-      /// Required by the interface
+      /// Called before a function evaluation begins
+      void functionEvalStarting();
+      /// Called after a function evaluation is finished
+      void functionEvalFinished();
+      /// Called just before the monte carlo loop starts
+      void monteCarloLoopStarting() const;
+
+      /// Cache detector observations once when the workspace is set
+      void preprocess(const API::IMDEventWorkspace_const_sptr & workspace);
+      /// Called just before the fitting job starts
+      void setUpForFit();
+      /// Set up the calculator for the given number of threads
+      void setNThreads(int nthreads);
+      /// Setup the random number generator based on the given type
+      void setupRandomNumberGenerator();
+
+      /// Required by the interface. Does nothing
       void function(const Mantid::API::FunctionDomain&, Mantid::API::FunctionValues&) const {}
 
-      /// A random number generator
-      mutable std::vector<Kernel::NDRandomNumberGenerator*> m_randGen;
+      /// Storage for currently in use random number generators
+      mutable std::vector<Kernel::NDRandomNumberGenerator*> m_randomNumbers;
       /// The value to mark an attribute as active
       int m_activeAttrValue;
       /// Check for convergence after loop min number of steps
       int m_mcLoopMin;
       /// Maximum number of Monte Carlo evaluations
       int m_mcLoopMax;
+      /// Store the MC type attribute
+      int m_mcType;
       /// Tolerance for relative error. Loop breaks out when this is reached
       double m_mcRelErrorTol;
       /// Flag for including crystal mosaic

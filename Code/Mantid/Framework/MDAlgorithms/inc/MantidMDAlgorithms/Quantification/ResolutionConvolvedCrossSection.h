@@ -33,6 +33,10 @@ namespace Mantid
     class ExperimentInfo;
   }
 
+  namespace MDEvents
+  {
+    template<size_t nd> class  MDEvent;
+  }
 
   namespace MDAlgorithms
   {
@@ -54,36 +58,43 @@ namespace Mantid
       ResolutionConvolvedCrossSection();
       /// Destructor
       ~ResolutionConvolvedCrossSection();
+      /// Name for the function
+      std::string name() const { return "ResolutionConvolvedCrossSection"; }
+
       /// Declare the attributes associated with this function
       void declareAttributes();
       /// Declare model parameters.
       void declareParameters();
-      /// Name for the function
-      std::string name() const { return "ResolutionConvolvedCrossSection"; }
-      /// Set a value to a named attribute. Ensures additional parameters are set when foreground is set
-      void setAttribute(const std::string& name, const API::IFunction::Attribute & value);
-
-    private:
-      /// Override the call to set the workspace here
-      void setWorkspace(boost::shared_ptr<const API::Workspace> workspace);
-      /// Returns an estimate of the number of progress reports a single evaluation of the function will have.
-      int64_t estimateNoProgressCalls() const;
 
       /// Evaluate the function across the domain
       void function(const API::FunctionDomain& domain, API::FunctionValues& values)const;
       /// Return the signal contribution for the given box
       double functionMD(const API::IMDIterator & box) const;
+      /// Store the simulated events in the given workspace
+      void storeSimulatedEvents(const API::IMDEventWorkspace_sptr & resultWS);
 
+    private:
+      /// Override the call to set the workspace here
+      void setWorkspace(boost::shared_ptr<const API::Workspace> workspace);
+      /// Fit is about to start
+      void setUpForFit();
+      /// Returns an estimate of the number of progress reports a single evaluation of the function will have.
+      int64_t estimateNoProgressCalls() const;
+      /// Set a value to a named attribute. Ensures additional parameters are set when foreground is set
+      void setAttribute(const std::string& name, const API::IFunction::Attribute & value);
       /// Set a pointer to the concrete convolution object
       void setupResolutionFunction(const std::string & name, const std::string & fgModelName);
 
+      /// Flag that marks if this is a simulation store each event
+      bool m_simulation;
       /// The meat of the calculation for each MD point
       MDResolutionConvolution *m_convolution;
 
       /// A pointer to the MD event workspace providing the data
-      API::IMDEventWorkspace_const_sptr m_workspace;
-      /// Store the number of threads that will be used to ensure consistency across function calls
-      int m_nthreads;
+      API::IMDEventWorkspace_const_sptr m_inputWS;
+
+      /// Output events. Need to find a better way to handle other dimensions
+      mutable std::list<MDEvents::MDEvent<4>> m_simulatedEvents;
 
       /// A reference to the logger
       static Kernel::Logger & g_log;

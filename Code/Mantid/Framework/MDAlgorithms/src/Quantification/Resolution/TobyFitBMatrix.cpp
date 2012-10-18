@@ -19,7 +19,7 @@ namespace Mantid
      * two can be multiplied to find the integration variables
      */
     TobyFitBMatrix::TobyFitBMatrix()
-      : Kernel::DblMatrix(6, TobyFitYVector::variableCount())
+      : Kernel::DblMatrix(6, TobyFitYVector::length())
     {
     }
 

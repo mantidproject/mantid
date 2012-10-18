@@ -69,6 +69,15 @@ namespace Mantid
        * @param workspace :: The MD that will be used for the fit
        */
       virtual void preprocess(const API::IMDEventWorkspace_const_sptr & workspace) { UNUSED_ARG(workspace); }
+      /// Called before a function evaluation begins
+      virtual void functionEvalStarting() {}
+      /// Called after a function evaluation is finished
+      virtual void functionEvalFinished() {}
+      /// Called before a partial derivative evaluation begins
+      virtual void partialDerivStarting() {}
+      /// Called after a partial derivative evaluation is finished
+      virtual void partialDerivFinished() {}
+      
       /**
        * Return the value of the cross-section convoluted with the resolution for an event
        * @param box :: An interator pointing at the current box under examination

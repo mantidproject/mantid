@@ -33,7 +33,7 @@ public:
     using namespace Mantid::MDAlgorithms;
     TobyFitBMatrix bMatrix;
 
-    TS_ASSERT_EQUALS(bMatrix.numCols(), TobyFitYVector::variableCount());
+    TS_ASSERT_EQUALS(bMatrix.numCols(), TobyFitYVector::length());
   }
 
   void test_Number_Of_Rows_Equals_Six()

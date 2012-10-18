@@ -65,8 +65,8 @@ namespace Mantid
       const std::pair<double,double> & apertureSize() const;
       /// Returns the widths of a cuboid that encloses the sample
       const Kernel::V3D & sampleCuboid() const;
-      /// Returns a V3D for a randomly sampled point within the detector volume
-      const Kernel::V3D sampleOverDetectorVolume(const double rand1, const double rand2, const double rand3) const;
+      /// Returns a V3D that defines the detector volume
+      const Kernel::V3D detectorVolume() const;
 
       /// Returns the D Matrix. Converts from lab coordindates -> detector coordinates
       const Kernel::DblMatrix & labToDetectorTransform() const;

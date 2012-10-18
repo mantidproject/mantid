@@ -10,6 +10,8 @@
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidKernel/CPUTimer.h"
+#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDEventFactory.h"
 
 /// Parallel region start macro. Different to generic one as that is specific to algorithms
 /// Assumes boolean exceptionThrow has been declared
@@ -62,6 +64,7 @@ namespace Mantid
       // Attribute names
       const char * RESOLUTION_ATTR = "ResolutionFunction";
       const char * FOREGROUND_ATTR = "ForegroundModel";
+      const char * SIMULATION_ATTR = "Simulation";
     }
 
     Kernel::Logger & ResolutionConvolvedCrossSection::g_log = Kernel::Logger::get("ResolutionConvolvedCrossSection");
@@ -70,8 +73,7 @@ namespace Mantid
      * Constructor
      */
     ResolutionConvolvedCrossSection::ResolutionConvolvedCrossSection()
-      : ParamFunction(), IFunctionMD(), m_convolution(NULL), m_workspace(),
-        m_nthreads(API::FrameworkManager::Instance().getNumOMPThreads())
+      : ParamFunction(), IFunctionMD(), m_simulation(false), m_convolution(NULL), m_inputWS()
     {
     }
 
@@ -90,6 +92,8 @@ namespace Mantid
     {
       declareAttribute(RESOLUTION_ATTR, IFunction::Attribute(""));
       declareAttribute(FOREGROUND_ATTR, IFunction::Attribute(""));
+
+      declareAttribute(SIMULATION_ATTR, IFunction::Attribute(m_simulation));
     }
 
     /**
@@ -99,60 +103,6 @@ namespace Mantid
     {
     }
 
-    /**
-     *  Set a value to a named attribute
-     *  @param name :: The name of the attribute
-     *  @param value :: The value of the attribute
-     */
-    void ResolutionConvolvedCrossSection::setAttribute(const std::string& name,
-                                                       const API::IFunction::Attribute & value)
-    {
-      storeAttributeValue(name, value);
-
-      const std::string fgModelName = getAttribute(FOREGROUND_ATTR).asString();
-      const std::string convolutionType = getAttribute(RESOLUTION_ATTR).asString();
-      if(!convolutionType.empty() && !fgModelName.empty())
-      {
-        setupResolutionFunction(convolutionType, fgModelName);
-      }
-      if(name != FOREGROUND_ATTR && name != RESOLUTION_ATTR)
-      {
-        m_convolution->setAttribute(name, value);
-      }
-    }
-
-    /**
-     * Override the call to set the workspace here to store it so we can access it throughout the evaluation
-     * @param workspace :: A workspace containing the instrument definition
-     */
-    void ResolutionConvolvedCrossSection::setWorkspace(boost::shared_ptr<const API::Workspace> workspace)
-    {
-      assert(m_convolution);
-
-      m_workspace = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(workspace);
-      if(!m_workspace)
-      {
-        throw std::invalid_argument("ResolutionConvolvedCrossSection can only be used with MD event workspaces");
-      }
-      IFunctionMD::setWorkspace(workspace);
-      m_convolution->preprocess(m_workspace);
-    }
-
-    /**
-     * Returns an estimate of the number of progress reports a single evaluation of the function will have.
-     * @return
-     */
-    int64_t ResolutionConvolvedCrossSection::estimateNoProgressCalls() const
-    {
-      int64_t ncalls(1);
-      if(m_workspace)
-      {
-        ncalls = static_cast<int64_t>(m_workspace->getNPoints());
-      }
-      return ncalls;
-    }
-
-
     void ResolutionConvolvedCrossSection::function(const API::FunctionDomain& domain, API::FunctionValues& values) const
     {
       const API::FunctionDomainMD* domainMD = dynamic_cast<const API::FunctionDomainMD*>(&domain);
@@ -161,16 +111,17 @@ namespace Mantid
         throw std::invalid_argument("Expected FunctionDomainMD in ResolutionConvolvedCrossSection");
       }
 
-      std::vector<API::IMDIterator*> iterators = m_workspace->createIterators(m_nthreads);
+      std::vector<API::IMDIterator*> iterators = m_inputWS->createIterators(API::FrameworkManager::Instance().getNumOMPThreads());
       const int nthreads = static_cast<int>(iterators.size());
       std::vector<size_t> resultOffsets(nthreads, 0);
+
       // Each calculated result needs to be at the correct index in the according to its
       // position. The order here is the same that would be if it were computed serially.
       // The offsets vector sets the size of the offset into the calculated results for each
       // thread
       if(nthreads > 1 )
       {
-        // The first result will have offset of 0 so skip it
+        // The first result will have offset of 0 so that is already correct
         size_t totalBoxes = iterators[0]->getDataSize();
         for(int i = 1; i < nthreads; ++i)
         {
@@ -227,16 +178,123 @@ namespace Mantid
       const size_t numEvents = box.getNumEvents();
       if(numEvents == 0) return 0.0;
 
-      double signal(0.0);
+      double totalBoxSignal(0.0);
       for(size_t j = 0; j < numEvents; ++j)
       {
-        double contribution =  m_convolution->signal(box, box.getInnerRunIndex(j), j);
-        signal += contribution;
+        const uint16_t innerRun = box.getInnerRunIndex(j);
+        double contribution =  m_convolution->signal(box, innerRun, j);
+        if(m_simulation)
+        {
+          coord_t centers[4] = { box.getInnerPosition(j,0), box.getInnerPosition(j,1),
+                                 box.getInnerPosition(j,2), box.getInnerPosition(j,3) };
+          PARALLEL_CRITICAL(ResolutionConvolvedCrossSection_functionMD)
+          {
+            m_simulatedEvents.insert(m_simulatedEvents.end(),
+                MDEvents::MDEvent<4>(static_cast<float>(contribution), 0.0, innerRun, box.getInnerDetectorID(j), centers));
+          }
+        }
+
+        totalBoxSignal += contribution;
         reportProgress();
       }
 
       // Return the mean
-      return signal/static_cast<double>(numEvents);
+      return totalBoxSignal/static_cast<double>(numEvents);
+    }
+
+    /**
+     * Store the simulated events in the given workspace. This clears the calculated values
+     * @param resultWS :: An output workspace that has all of its meta-data set up and just needs to
+     * be filled with events.
+     */
+    void ResolutionConvolvedCrossSection::storeSimulatedEvents(const API::IMDEventWorkspace_sptr & resultWS)
+    {
+      auto outputWS = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace4>(resultWS);
+      if(!outputWS)
+      {
+        throw std::invalid_argument("ResolutionConvolvedCrossSection currently only supports 4 dimensions");
+      }
+
+      auto iterEnd = m_simulatedEvents.end();
+      for(auto iter = m_simulatedEvents.begin(); iter != iterEnd; ++iter)
+      {
+        outputWS->addEvent(*iter);
+      }
+
+      m_simulatedEvents.clear();
+    }
+
+    /**
+     * Override the call to set the workspace here to store it so we can access it throughout the evaluation
+     * @param workspace :: A workspace containing the instrument definition
+     */
+    void ResolutionConvolvedCrossSection::setWorkspace(boost::shared_ptr<const API::Workspace> workspace)
+    {
+      if(!m_convolution) return;
+
+      m_inputWS = boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(workspace);
+      if(!m_inputWS)
+      {
+        throw std::invalid_argument("ResolutionConvolvedCrossSection can only be used with MD event workspaces");
+      }
+      IFunctionMD::setWorkspace(workspace);
+      m_convolution->preprocess(m_inputWS);
+    }
+
+    /**
+     * Do any final setup before fitting starts
+     */
+    void ResolutionConvolvedCrossSection::setUpForFit()
+    {
+      // Consistency check
+      const std::string fgModelName = getAttribute(FOREGROUND_ATTR).asString();
+      if(fgModelName.empty())
+      {
+        throw std::invalid_argument("ResolutionConvolvedCrossSection - No foreground model has been set.");
+      }
+      const std::string convolutionType = getAttribute(RESOLUTION_ATTR).asString();
+      if(convolutionType.empty())
+      {
+        throw std::invalid_argument("ResolutionConvolvedCrossSection - No convolution type has been set.");
+      }
+      m_convolution->setUpForFit();
+    }
+
+    /**
+     * Returns an estimate of the number of progress reports a single evaluation of the function will have.
+     * @return
+     */
+    int64_t ResolutionConvolvedCrossSection::estimateNoProgressCalls() const
+    {
+      int64_t ncalls(1);
+      if(m_inputWS)
+      {
+        ncalls = static_cast<int64_t>(m_inputWS->getNPoints());
+      }
+      return ncalls;
+    }
+
+    /**
+     *  Set a value to a named attribute
+     *  @param name :: The name of the attribute
+     *  @param value :: The value of the attribute
+     */
+    void ResolutionConvolvedCrossSection::setAttribute(const std::string& name,
+                                                       const API::IFunction::Attribute & value)
+    {
+      storeAttributeValue(name, value);
+      const std::string fgModelName = getAttribute(FOREGROUND_ATTR).asString();
+      const std::string convolutionType = getAttribute(RESOLUTION_ATTR).asString();
+
+      if(!convolutionType.empty() && !fgModelName.empty())
+      {
+        setupResolutionFunction(convolutionType, fgModelName);
+      }
+      if(name == SIMULATION_ATTR) m_simulation = value.asBool();
+      else if(name != FOREGROUND_ATTR && name != RESOLUTION_ATTR)
+      {
+        m_convolution->setAttribute(name, value);
+      }
     }
 
     /**

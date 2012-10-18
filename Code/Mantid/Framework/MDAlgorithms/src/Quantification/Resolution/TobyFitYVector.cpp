@@ -2,6 +2,7 @@
 #include "MantidMDAlgorithms/Quantification/Resolution/TobyFitResolutionModel.h"
 
 #include "MantidAPI/ChopperModel.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/ModeratorModel.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 
@@ -10,45 +11,23 @@ namespace Mantid
   namespace MDAlgorithms
   {
 
-    /// Define the static member
-    const char * TobyFitYVector::IDENTIFIERS[NUM_OF_VARS] = {
-        "ModeratorDepartureTime",
-        "Aperture",
-        "Aperture",
-        "ChopperArrivalTime",
-        "SampleVolume",
-        "SampleVolume",
-        "SampleVolume",
-        "DetectorDepth",
-        "DetectorArea",
-        "DetectorArea",
-        "DetectionTime",
-    };
-
-    //@todo Need to generalise to better account for 1:many mapping of variables to random number requirements
-
-    /// Returns the number of parameters
-    unsigned int TobyFitYVector::variableCount()
+    namespace
     {
-      return NUM_OF_VARS;
+      // Identifiers for contributions
+      const char * MODERATOR = "Moderator";
+      const char * APERTURE = "Aperture";
+      const char * CHOPPER_ARRIVAL = "Chopper";
+      const char * CHOPPER_JITTER = "ChopperJitter";
+      const char * SAMPLE_VOLUME = "SampleVolume";
+      const char * DETECTOR_DEPTH = "DetectorDepth";
+      const char * DETECTOR_AREA = "DetectorArea";
+      const char * DETECTION_TIME = "DetectionTime";
     }
 
-    /// Returns the length of random numbers required
-    unsigned int TobyFitYVector::requiredRandomNums()
+    /// Returns the number length of the Y vector
+    unsigned int TobyFitYVector::length()
     {
-      return NUM_OF_VARS + 1; // An extra one for the jitter that is not counted as a separate variable
-    }
-
-    /**
-     *  Return a string identifier for the given attribute
-     * @param An enumerated variable. Note that two variables can have the same
-     * identifier if each forms part of an attribute,
-     * e.g. 1 attribute SampleVolume maps to 3 variables: {X,Y,Z}
-     */
-    const char * TobyFitYVector::identifier(const unsigned int variable)
-    {
-      assert(variable < NUM_OF_VARS);
-      return IDENTIFIERS[variable];
+      return 11;
     }
 
     /**
@@ -56,9 +35,29 @@ namespace Mantid
      * @param tfResModel :: A reference to the current TobyFit model object to check
      * which parameters are active in this run
      */
-    TobyFitYVector::TobyFitYVector() : m_yvector(variableCount(), 0.0), m_attrStates(variableCount(), true),
-      m_curRandNums(NULL), m_curObs(NULL), m_curQOmega(NULL)
+    TobyFitYVector::TobyFitYVector() 
+      : m_yvector(length(), 0.0),
+        m_curRandNums(NULL), m_randIndex(-1), m_curObs(NULL), m_curQOmega(NULL),
+        m_moderator(true), m_aperture(true), m_chopper(true), m_chopperJitter(true), 
+        m_sampleVolume(true), m_detectorDepth(true), m_detectorArea(true), m_detectionTime(true)
     {
+    }
+
+    /**
+     * Adds the attributes from the vector to the given model
+     * @param model :: A reference to the model that will take on the attributes
+     */
+    void TobyFitYVector::addAttributes(TobyFitResolutionModel &model)
+    {
+      using API::IFunction;
+      model.declareAttribute(MODERATOR, IFunction::Attribute(m_moderator));
+      model.declareAttribute(APERTURE, IFunction::Attribute(m_aperture));
+      model.declareAttribute(CHOPPER_ARRIVAL, IFunction::Attribute(m_chopper));
+      model.declareAttribute(CHOPPER_JITTER, IFunction::Attribute(m_chopperJitter));
+      model.declareAttribute(SAMPLE_VOLUME, IFunction::Attribute(m_sampleVolume));
+      model.declareAttribute(DETECTOR_DEPTH, IFunction::Attribute(m_detectorDepth));
+      model.declareAttribute(DETECTOR_AREA, IFunction::Attribute(m_detectorArea));
+      model.declareAttribute(DETECTION_TIME, IFunction::Attribute(m_detectionTime));
     }
 
     /**
@@ -68,15 +67,38 @@ namespace Mantid
      */
     void TobyFitYVector::setAttribute(const std::string & name, const int active)
     {
-      for(unsigned int i = 0; i < variableCount(); ++i)
+      const bool isOn(active != 0);
+
+      if(name == MODERATOR) m_moderator = isOn;
+      else if(name == APERTURE) m_aperture = isOn;
+      else if(name == CHOPPER_ARRIVAL) m_chopper = isOn;
+      else if(name == CHOPPER_JITTER) m_chopperJitter = isOn;
+      else if(name == SAMPLE_VOLUME) m_sampleVolume = isOn;
+      else if(name == DETECTOR_DEPTH) m_detectorDepth = isOn;
+      else if(name == DETECTOR_AREA) m_detectorArea = isOn;
+      else if(name == DETECTION_TIME) m_detectionTime = isOn;
+      else
       {
-        if(name == identifier(i))
-        {
-          m_attrStates[i] = active > 0; // Active if greater than zero
-        }
+        throw std::invalid_argument("TobyFitYVector - Unknown attribute: " + name);
       }
     }
 
+    /// Returns the length of random numbers required
+    unsigned int TobyFitYVector::requiredRandomNums() const
+    {
+      unsigned int nrand(0);
+
+      if(m_moderator) nrand += 1;
+      if(m_aperture) nrand += 2;
+      if(m_chopper) nrand += 1;
+      if(m_chopperJitter) nrand += 1;
+      if(m_sampleVolume) nrand += 3;
+      if(m_detectorDepth) nrand += 1;
+      if(m_detectorArea) nrand += 2;
+      if(m_detectionTime) nrand += 1;
+
+      return nrand;
+    }
 
     /**
      * Access a the current vector index in the vector (in order to be able to multiply it with the b matrix)
@@ -89,7 +111,8 @@ namespace Mantid
 
     /**
      * Calculate the values of the integration variables
-     * @param randomNums :: A set of at least variableCount() random numbers
+     * @param randomNums :: A set of random numbers. The size should be atleast the size
+     *                      of the number of active attributes
      * @param observation :: The current observation
      * @param qOmega :: The energy change for this point
      * @returns The number of random deviates used
@@ -99,6 +122,7 @@ namespace Mantid
         const QOmegaPoint & qOmega)
     {
       m_curRandNums = &randomNums;
+      m_randIndex = 0;
       m_curObs = &observation;
       m_curQOmega = &qOmega;
 
@@ -110,10 +134,11 @@ namespace Mantid
       calculateTimeBinContribution();
 
       m_curRandNums = NULL;
+      m_randIndex = -1;
       m_curObs = NULL;
       m_curQOmega = NULL;
 
-      return variableCount();
+      return length();
     }
 
     //-----------------------------------------------------------------------
@@ -124,11 +149,12 @@ namespace Mantid
      */
     void TobyFitYVector::calculateModeratorTime()
     {
-      const Variable vecPos = TobyFitYVector::ModeratorTime;
-      if(setToZeroIfInactive(vecPos)) return;
-
-      const API::ModeratorModel & moderator = m_curObs->experimentInfo().moderatorModel();
-      m_yvector[vecPos] = moderator.sampleTimeDistribution(m_curRandNums->at(vecPos))*1e-06;
+      m_yvector[TobyFitYVector::ModeratorTime] = 0.0;
+      if(m_moderator)
+      {
+        const API::ModeratorModel & moderator = m_curObs->experimentInfo().moderatorModel();
+        m_yvector[TobyFitYVector::ModeratorTime] = moderator.sampleTimeDistribution(nextRandomNumber())*1e-06;
+      }
     }
 
     /**
@@ -136,18 +162,16 @@ namespace Mantid
      */
     void TobyFitYVector::calculateAperatureSpread()
     {
-      const Variable vecPos1 = TobyFitYVector::ApertureWidthCoord;
-      const Variable vecPos2 = TobyFitYVector::ApertureHeightCoord;
-      // Inactive if any is inactive
-      bool inactive = setToZeroIfInactive(vecPos1);
-      inactive |= setToZeroIfInactive(vecPos2);
-
-      if(inactive) return;
-
-      const std::pair<double,double> & apSize = m_curObs->apertureSize();
-
-      m_yvector[vecPos1] = apSize.first * (m_curRandNums->at(vecPos1) - 0.5);
-      m_yvector[vecPos2] = apSize.second * (m_curRandNums->at(vecPos2) - 0.5);
+      double & apertureWidth = m_yvector[TobyFitYVector::ApertureWidthCoord]; // Reference
+      double & apertureHeight = m_yvector[TobyFitYVector::ApertureHeightCoord]; // Reference
+      apertureWidth = 0.0;
+      apertureHeight = 0.0;
+      if(m_aperture)
+      {
+        const std::pair<double,double> & apSize = m_curObs->apertureSize();
+        apertureWidth = apSize.first * (nextRandomNumber() - 0.5);
+        apertureHeight = apSize.second * (nextRandomNumber() - 0.5);
+      }
     }
 
     /**
@@ -155,13 +179,18 @@ namespace Mantid
      */
     void TobyFitYVector::calculateChopperTime()
     {
-      const Variable vecPos = TobyFitYVector::ChopperTime;
-      if(setToZeroIfInactive(vecPos)) return;
-
       const API::ChopperModel & chopper = m_curObs->experimentInfo().chopperModel(0);
-      double & chopTime = m_yvector[vecPos]; // Note the reference
-      chopTime = chopper.sampleTimeDistribution(m_curRandNums->at(vecPos));
-      chopTime += chopper.sampleJitterDistribution(m_curRandNums->at(vecPos + 1));
+      double & chopTime = m_yvector[TobyFitYVector::ChopperTime]; // Note the reference
+      chopTime = 0.0;
+
+      if(m_chopper)
+      {
+        chopTime = chopper.sampleTimeDistribution(nextRandomNumber());
+      }
+      if(m_chopperJitter)
+      {
+        chopTime += chopper.sampleJitterDistribution(nextRandomNumber());
+      }
     }
 
     /**
@@ -169,21 +198,17 @@ namespace Mantid
      */
     void TobyFitYVector::calculateSampleContribution()
     {
-      const Variable vecPos1 = TobyFitYVector::ScatterPointBeam;
-      const Variable vecPos2 = TobyFitYVector::ScatterPointPerp;
-      const Variable vecPos3 = TobyFitYVector::ScatterPointUp;
+      double & sampleBeamDir = m_yvector[TobyFitYVector::ScatterPointBeam];
+      double & samplePerpDir = m_yvector[TobyFitYVector::ScatterPointPerp];
+      double & sampleUpDir = m_yvector[TobyFitYVector::ScatterPointUp];
 
-      // Inactive if any is inactive
-      bool inactive = setToZeroIfInactive(vecPos1);
-      inactive |= setToZeroIfInactive(vecPos2);
-      inactive |= setToZeroIfInactive(vecPos3);
-
-      if(inactive) return;
-
-      const Kernel::V3D & boxSize = m_curObs->sampleCuboid();
-      m_yvector[vecPos1] = boxSize[2]*(m_curRandNums->at(vecPos1) - 0.5);
-      m_yvector[vecPos2] = boxSize[0]*(m_curRandNums->at(vecPos2) - 0.5);
-      m_yvector[vecPos3] = boxSize[1]*(m_curRandNums->at(vecPos3) - 0.5);
+      if(m_sampleVolume)
+      {
+        const Kernel::V3D & boxSize = m_curObs->sampleCuboid();
+        sampleBeamDir = boxSize[2]*(nextRandomNumber() - 0.5);
+        samplePerpDir = boxSize[0]*(nextRandomNumber() - 0.5);
+        sampleUpDir = boxSize[1]*(nextRandomNumber() - 0.5);
+      }
     }
 
     /**
@@ -191,43 +216,32 @@ namespace Mantid
      */
     void TobyFitYVector::calculateDetectorContribution()
     {
-      const Kernel::V3D detectionPoint =
-          m_curObs->sampleOverDetectorVolume(m_curRandNums->at(TobyFitYVector::DetectorDepth),
-                                             m_curRandNums->at(TobyFitYVector::DetectorWidthCoord),
-                                             m_curRandNums->at(TobyFitYVector::DetectorHeightCoord));
+      const Kernel::V3D detectorVolume = m_curObs->detectorVolume();
 
-      calculateDetectorDepthContribution(detectionPoint);
-      calculateDetectorSpreadContribution(detectionPoint);
-    }
+      double & depth = m_yvector[TobyFitYVector::DetectorDepth]; //reference
+      double & width = m_yvector[TobyFitYVector::DetectorWidthCoord]; //reference
+      double & height = m_yvector[TobyFitYVector::DetectorHeightCoord]; //reference
 
-    /**
-     * Sample over the depth coordinate
-     * @param detectionPoint :: A reference to the randomly sampled detection point within the detector
-     */
-    void TobyFitYVector::calculateDetectorDepthContribution(const Kernel::V3D & detectionPoint)
-    {
-      const Variable vecPos = TobyFitYVector::DetectorDepth;
-      if(setToZeroIfInactive(vecPos)) return;
+      if(m_detectorDepth)
+      {
+        depth = detectorVolume[2]*(nextRandomNumber() - 0.5); // Beam
+      }
+      else
+      {
+        depth = 0.0;
+      }
 
-      m_yvector[vecPos] = 0.5*detectionPoint[2]; // beam
-    }
+      if(m_detectorArea)
+      {
 
-    /**
-     * Sample over the detector face area
-     * @param detectionPoint :: A reference to the randomly sampled detection point within the detector
-     */
-    void TobyFitYVector::calculateDetectorSpreadContribution(const Kernel::V3D & detectionPoint)
-    {
-      const Variable vecPos1 = TobyFitYVector::DetectorWidthCoord;
-      const Variable vecPos2 = TobyFitYVector::DetectorHeightCoord;
-
-      // Inactive if any is inactive
-      bool inactive = setToZeroIfInactive(vecPos1);
-      inactive |= setToZeroIfInactive(vecPos2);
-      if(inactive) return;
-
-      m_yvector[vecPos1] = 0.5*detectionPoint[0]; // perp
-      m_yvector[vecPos2] = 0.5*detectionPoint[1]; // up
+        width = detectorVolume[0]*(nextRandomNumber() - 0.5); // Perp
+        height = detectorVolume[1]*(nextRandomNumber() - 0.5); // Up
+      }
+      else
+      {
+        width = 0.0;
+        height = 0.0;
+      }
     }
 
     /**
@@ -235,30 +249,29 @@ namespace Mantid
      */
     void TobyFitYVector::calculateTimeBinContribution()
     {
-      const Variable vecPos = TobyFitYVector::DetectionTime;
-      if(setToZeroIfInactive(vecPos)) return;
+      double & detectorTime = m_yvector[TobyFitYVector::DetectionTime];
+      if(m_detectionTime)
+      {
 
-      const API::ExperimentInfo & exptInfo = m_curObs->experimentInfo();
-      const std::pair<double, double> binEdges = exptInfo.run().histogramBinBoundaries(m_curQOmega->deltaE);
-      const double energyWidth = binEdges.second - binEdges.first;
-      const double efixed = m_curObs->getEFixed();
-      const double wf = std::sqrt((efixed - m_curQOmega->deltaE)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
-      const double factor(3.8323960e-4);
-      const double detTimeBin = energyWidth * factor * m_curObs->sampleToDetectorDistance() / std::pow(wf, 3.0);
+        const API::ExperimentInfo & exptInfo = m_curObs->experimentInfo();
+        const std::pair<double, double> binEdges = exptInfo.run().histogramBinBoundaries(m_curQOmega->deltaE);
+        const double energyWidth = binEdges.second - binEdges.first;
+        const double efixed = m_curObs->getEFixed();
+        const double wf = std::sqrt((efixed - m_curQOmega->deltaE)/PhysicalConstants::E_mev_toNeutronWavenumberSq);
+        const double factor(3.8323960e-4);
+        const double detTimeBin = energyWidth * factor * m_curObs->sampleToDetectorDistance() / std::pow(wf, 3.0);
 
-      m_yvector[vecPos] = detTimeBin * (m_curRandNums->at(vecPos) - 0.5);
+        detectorTime = detTimeBin * (nextRandomNumber() - 0.5);
+      }
+      else detectorTime = 0.0;
     }
 
     /**
-     * If the variable is in active then set its contribution to zero and return true
-     * @param attr :: An enumerated variable
-     * @returns True if the variable's contribution has been zeroed
+     * Return the next random number and increment the internal used index
      */
-    bool TobyFitYVector::setToZeroIfInactive(const Variable & attr)
+    const double & TobyFitYVector::nextRandomNumber()
     {
-      if(m_attrStates[attr]) return false;
-      m_yvector[attr] = 0.0;
-      return true;
+      return m_curRandNums->at(m_randIndex++); // Post-fix increments then returns previous value
     }
 
   }
