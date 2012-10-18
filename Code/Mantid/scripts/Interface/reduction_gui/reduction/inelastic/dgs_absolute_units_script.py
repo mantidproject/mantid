@@ -19,7 +19,6 @@ class AbsoluteUnitsScript(BaseScriptElement):
     emin = -1.0
     emax = 1.0
     vanadium_mass = 32.58
-    vanadium_rmm = 50.9415
     sample_mass = 1.0
     sample_rmm = 1.0
     absunits_median_test_high = 1.2
@@ -39,7 +38,6 @@ class AbsoluteUnitsScript(BaseScriptElement):
         AbsoluteUnitsScript.emin = ip.get_parameter("monovan-integr-min")
         AbsoluteUnitsScript.emax = ip.get_parameter("monovan-integr-max")
         AbsoluteUnitsScript.vanadium_mass = ip.get_parameter("vanadium-mass")
-        AbsoluteUnitsScript.vanadium_rmm = ip.get_parameter("vanadium-rmm")
         AbsoluteUnitsScript.absunits_median_test_out_high = ip.get_parameter("monovan_hi_bound")
         AbsoluteUnitsScript.absunits_median_test_out_low = ip.get_parameter("monovan_lo_bound")
         AbsoluteUnitsScript.absunits_median_test_high = ip.get_parameter("monovan_hi_frac")
@@ -63,8 +61,6 @@ class AbsoluteUnitsScript(BaseScriptElement):
                 script += "AbsUnitsMaximumEnergy=%s,\n" % str(self.emax)
             if self.vanadium_mass != AbsoluteUnitsScript.vanadium_mass:
                 script += "VanadiumMass=%s,\n" % str(self.vanadium_mass)
-            if self.vanadium_rmm != AbsoluteUnitsScript.vanadium_rmm:
-                script += "VanadiumRmm=%s,\n" % str(self.vanadium_rmm)
             if self.sample_mass != AbsoluteUnitsScript.sample_mass:
                 script += "SampleMass=%s,\n" % str(self.sample_mass)
             if self.sample_rmm != AbsoluteUnitsScript.sample_rmm:
@@ -94,7 +90,6 @@ class AbsoluteUnitsScript(BaseScriptElement):
         xml += "  <minimum_energy>%s</minimum_energy>\n" % str(self.emin)
         xml += "  <maximum_energy>%s</maximum_energy>\n" % str(self.emax)
         xml += "  <vanadium_mass>%s</vanadium_mass>\n" % str(self.vanadium_mass)
-        xml += "  <vanadium_rmm>%s</vanadium_rmm>\n" % str(self.vanadium_rmm)
         xml += "  <sample_mass>%s</sample_mass>\n" % str(self.sample_mass)
         xml += "  <sample_rmm>%s</sample_rmm>\n" % str(self.sample_rmm)
         xml += "  <median_test_outlier_low>%s</median_test_outlier_low>\n" % str(self.absunits_median_test_out_low)
@@ -138,9 +133,6 @@ class AbsoluteUnitsScript(BaseScriptElement):
             self.vanadium_mass = BaseScriptElement.getFloatElement(instrument_dom,
                                                                    "vanadium_mass",
                                                                    default=AbsoluteUnitsScript.vanadium_mass)
-            self.vanadium_rmm = BaseScriptElement.getFloatElement(instrument_dom,
-                                                                  "vanadium_rmm",
-                                                                  default=AbsoluteUnitsScript.vanadium_rmm)
             self.sample_mass = BaseScriptElement.getFloatElement(instrument_dom,
                                                                  "sample_mass",
                                                                  default=AbsoluteUnitsScript.sample_mass)
@@ -175,7 +167,6 @@ class AbsoluteUnitsScript(BaseScriptElement):
         self.emin = AbsoluteUnitsScript.emin
         self.emax = AbsoluteUnitsScript.emax
         self.vanadium_mass = AbsoluteUnitsScript.vanadium_mass
-        self.vanadium_rmm = AbsoluteUnitsScript.vanadium_rmm
         self.sample_mass = AbsoluteUnitsScript.sample_mass
         self.sample_rmm = AbsoluteUnitsScript.sample_rmm
         self.absunits_median_test_out_low = AbsoluteUnitsScript.absunits_median_test_out_low

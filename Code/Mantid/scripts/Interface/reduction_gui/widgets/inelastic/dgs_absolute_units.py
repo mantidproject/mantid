@@ -34,7 +34,7 @@ class AbsoluteUnitsWidget(BaseWidget):
         # Constraints
         for widget in [
                        self._content.ei_edit,
-                       self._content.van_rmm_edit,
+                       self._content.van_mass_edit,
                        self._content.sample_mass_edit,
                        self._content.sample_rmm_edit,
                        self._content.median_test_high_edit,
@@ -84,7 +84,6 @@ class AbsoluteUnitsWidget(BaseWidget):
         self._content.emin_edit.setText(QtCore.QString(str(state.emin)))
         self._content.emax_edit.setText(QtCore.QString(str(state.emax)))
         self._content.van_mass_edit.setText(QtCore.QString(str(state.vanadium_mass)))
-        self._content.van_rmm_edit.setText(QtCore.QString(str(state.vanadium_rmm)))
         self._content.sample_mass_edit.setText(QtCore.QString(str(state.sample_mass)))
         self._content.sample_rmm_edit.setText(QtCore.QString(str(state.sample_rmm)))
         self._content.median_test_high_edit.setText(QtCore.QString(str(state.absunits_median_test_high)))
@@ -106,7 +105,6 @@ class AbsoluteUnitsWidget(BaseWidget):
         a.emin = util._check_and_get_float_line_edit(self._content.emin_edit)
         a.emax = util._check_and_get_float_line_edit(self._content.emax_edit)
         a.vanadium_mass = util._check_and_get_float_line_edit(self._content.van_mass_edit)
-        a.vanadium_rmm = util._check_and_get_float_line_edit(self._content.van_rmm_edit)
         a.sample_mass = util._check_and_get_float_line_edit(self._content.sample_mass_edit)
         a.sample_rmm = util._check_and_get_float_line_edit(self._content.sample_rmm_edit)
         a.absunits_median_test_high = util._check_and_get_float_line_edit(self._content.median_test_high_edit)
