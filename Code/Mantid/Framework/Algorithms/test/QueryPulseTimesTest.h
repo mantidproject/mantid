@@ -19,11 +19,14 @@ class QueryPulseTimesTest : public CxxTest::TestSuite
 
 private:
 
+  /**
+  Helper method to create an event workspace with a set number of distributed events between pulseTimeMax and pulseTimeMin.
+  */
   IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMin, const int pulseTimeMax)
   {
     EventWorkspace_sptr retVal(new EventWorkspace);
     retVal->initialize(numberspectra,1,1);
-    double binWidth = double(pulseTimeMax - pulseTimeMin)/nDistrubutedEvents;
+    double binWidth = std::abs(double(pulseTimeMax - pulseTimeMin)/nDistrubutedEvents);
 
     //Make fake events
     for (int pix=0; pix<numberspectra; pix++)
@@ -31,7 +34,7 @@ private:
       for (int i=0; i<nDistrubutedEvents; i++)
       {
         double tof = 0;
-        int pulseTime = (i+0.5)*binWidth; // Stick an event with a pulse_time in the middle of each pulse_time bin.
+        int pulseTime = static_cast<int>(((double)i+0.5)*binWidth); // Stick an event with a pulse_time in the middle of each pulse_time bin.
         retVal->getEventList(pix) += TofEvent(tof, pulseTime);
       }
       retVal->getEventList(pix).addDetectorID(pix);
@@ -42,33 +45,11 @@ private:
     return retVal;
   }
 
-public:
-  // This pair of boilerplate methods prevent the suite being created statically
-  // This means the constructor isn't called when running other tests
-  static QueryPulseTimesTest *createSuite() { return new QueryPulseTimesTest(); }
-  static void destroySuite( QueryPulseTimesTest *suite ) { delete suite; }
+  /**
+  Test execution method.
 
-
-  void test_Init()
-  {
-    QueryPulseTimes alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-  }
-
-  /*
-  Test that the input workspace must be an event workspace, other types of matrix workspace will not do.
+  Sets up the algorithm for rebinning and executes it. Also verifies the results.
   */
-  void test_input_workspace2D_throws()
-  {
-    using Mantid::DataObjects::Workspace2D;
-    Workspace_sptr workspace2D = boost::make_shared<Workspace2D>();
-
-    QueryPulseTimes alg;
-    alg.initialize();
-    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", workspace2D), std::invalid_argument);
-  }
-
   void do_execute_and_check_binning(const int nSpectra, const int pulseTimeMin, const int pulseTimeMax, const int nUniformDistributedEvents, const int nBinsToBinTo)
   {
     IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
@@ -109,6 +90,33 @@ public:
     }
   }
 
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static QueryPulseTimesTest *createSuite() { return new QueryPulseTimesTest(); }
+  static void destroySuite( QueryPulseTimesTest *suite ) { delete suite; }
+
+
+  void test_Init()
+  {
+    QueryPulseTimes alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+  }
+
+  /*
+  Test that the input workspace must be an event workspace, other types of matrix workspace will not do.
+  */
+  void test_input_workspace2D_throws()
+  {
+    using Mantid::DataObjects::Workspace2D;
+    Workspace_sptr workspace2D = boost::make_shared<Workspace2D>();
+
+    QueryPulseTimes alg;
+    alg.initialize();
+    TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", workspace2D), std::invalid_argument);
+  }
+
   void test_execute_with_original_binning()
   {
     const int nSpectra = 1;
@@ -140,6 +148,62 @@ public:
     
     const int numberOfBinsToBinTo = 5; // The bins are now four times as big.
     do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
+  }
+
+  void test_execute_with_multiple_spectra()
+  {
+    const int nSpectra = 10; // multipe spectra created in input workspace.
+    const int pulseTimeMin = 0;
+    const int pulseTimeMax = 20;
+    const int nUninformDistributedEvents = 20;
+    
+    const int numberOfBinsToBinTo = 5; 
+    do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
+  }
+
+  void test_execute_with_xmin_larger_than_xmax_throws()
+  {
+    // Rebin pameters require the step.
+    const int step = 1;
+    const double pulseTimeMin = 10;
+    const double pulseTimeMax = 0;
+
+    QueryPulseTimes alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(step)(pulseTimeMax); // Provide rebin arguments.
+    TSM_ASSERT_THROWS("Shouldnt be able to have xmin > xmax", alg.setProperty("Params", rebinArgs), std::invalid_argument);
+  }
+
+  void test_calculate_xmin_xmax()
+  {
+    const int pulseTimeMin = 0;
+    const int pulseTimeMax = 10;
+    const int nUniformDistributedEvents = 10;
+    const int nSpectra = 1;
+    const int nBinsToBinTo = 10;
+
+    IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
+
+    // Rebin pameters require the step.
+    const int step = static_cast<int>((pulseTimeMax - pulseTimeMin)/(nBinsToBinTo)); 
+
+    QueryPulseTimes alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(step)(pulseTimeMax); // Provide rebin arguments.
+    alg.setProperty("Params", rebinArgs);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.execute();
+
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
+    const Mantid::MantidVec& X = outWS->readX(0);
+
+    // Check that xmin and xmax have been caclulated correctly.
+    TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
+    TS_ASSERT_EQUALS(pulseTimeMin, X.front());
+    TS_ASSERT_EQUALS(pulseTimeMax, X.back());
   }
 
 };
