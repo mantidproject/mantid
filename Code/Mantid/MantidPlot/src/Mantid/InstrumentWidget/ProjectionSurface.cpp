@@ -37,7 +37,8 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
     m_selectRect(),
     m_interactionMode(MoveMode),
     m_leftButtonDown(false),
-    m_peakLabelPrecision(6)
+    m_peakLabelPrecision(6),
+    m_peakShapesStyle(0)
 {
   connect(rootActor,SIGNAL(colorMapChanged()),this,SLOT(colorMapChanged()));
   connect(&m_maskShapes,SIGNAL(shapeCreated()),this,SLOT(catchShapeCreated()));
@@ -437,6 +438,12 @@ void ProjectionSurface::updateDetectors()
   this->init();
 }
 
+/// Send a redraw request to the surface owner
+void ProjectionSurface::requestRedraw()
+{
+  emit redrawRequired();
+}
+
 QRect ProjectionSurface::selectionRect()const
 {
   if (m_selectRect.width() <= 1 || m_selectRect.height() <= 1) return QRect();
@@ -652,6 +659,7 @@ void ProjectionSurface::clearPeakOverlays()
       delete m_peakShapes[i];
   }
   m_peakShapes.clear();
+  m_peakShapesStyle = 0;
 }
 
 /**

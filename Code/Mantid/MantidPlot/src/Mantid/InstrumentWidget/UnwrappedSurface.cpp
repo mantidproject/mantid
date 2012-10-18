@@ -826,7 +826,7 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
   {
     return;
   }
-  PeakOverlay* po = new PeakOverlay(pws);
+  PeakOverlay* po = new PeakOverlay( this, pws );
   po->setPrecision(m_peakLabelPrecision);
   po->setShowRowsFlag(m_showPeakRow);
   m_peakShapes.append(po);
@@ -843,23 +843,10 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   PeakOverlay& peakShapes = *m_peakShapes.last();
-  PeakMarker2D::Style style = m_peakShapes.first()->getNextDefaultStyle();
+  PeakMarker2D::Style style = peakShapes.getDefaultStyle(m_peakShapesStyle);
+  m_peakShapesStyle++;
   peakShapes.setWindow(getSurfaceBounds(),window);
-  int nPeaks = peakShapes.getNumberPeaks();
-  for(int i = 0; i < nPeaks; ++i)
-  {
-    Mantid::API::IPeak& peak = peakShapes.getPeak(i);
-    const Mantid::Kernel::V3D & pos = peak.getDetPos();
-    // Project the peak (detector) position onto u,v coords
-    double u,v, uscale, vscale;
-    this->project(u,v,uscale,vscale, pos);
-
-    // Create a peak marker at this position
-    PeakMarker2D* r = new PeakMarker2D(peakShapes,u,v,style);
-    r->setPeak(peak,i);
-    peakShapes.addMarker(r);
-  }
-  peakShapes.deselectAll();
+  peakShapes.createMarkers( style );
   m_startPeakShapes = false;
   QApplication::restoreOverrideCursor();
 }

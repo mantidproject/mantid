@@ -1,4 +1,5 @@
 #include "PeakOverlay.h"
+#include "UnwrappedSurface.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 
 #include <QPainter>
@@ -99,13 +100,13 @@ void PeakHKL::print()const
   std::cerr << "     " << p.x() << ' ' << p.y() << '('<<h<<','<<k<<','<<l<<")("<<nh<<','<<nk<<','<<nl<<')' << std::endl;
 }
 
-/**
+/**---------------------------------------------------------------------
  * Constructor
  */
-PeakOverlay::PeakOverlay(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws):
+PeakOverlay::PeakOverlay(UnwrappedSurface* surface, boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws):
 Shape2DCollection(),
 m_peaksWorkspace(pws),
-m_currentDefaultStyle(0),
+m_surface(surface),
 m_precision(6),
 m_showRows(true)
 {
@@ -125,14 +126,15 @@ void PeakOverlay::removeShape(Shape2D*)
 {
 }
 
-/**
+/**---------------------------------------------------------------------
  * Not implemented yet.
  */
 void PeakOverlay::clear()
 {
+  Shape2DCollection::clear();
 }
 
-/**
+/**---------------------------------------------------------------------
  * Add new marker to the overlay.
  * @param m :: Pointer to the new marker
  */
@@ -142,7 +144,33 @@ void PeakOverlay::addMarker(PeakMarker2D* m)
   m_det2marker.insert(m->getDetectorID(),m);
 }
 
-/**
+/**---------------------------------------------------------------------
+ * Create the markers which graphically represent the peaks on the surface.
+ * The coordinates of the Shape2DCollection must be set (calling setWindow())
+ * prior calling this method.
+ * @param surface :: The surface where the markers will be drawn.
+ * @param style :: A style of drawing the markers.
+ */
+void PeakOverlay::createMarkers(const PeakMarker2D::Style& style)
+{
+  int nPeaks = getNumberPeaks();
+  for(int i = 0; i < nPeaks; ++i)
+  {
+    Mantid::API::IPeak& peak = getPeak(i);
+    const Mantid::Kernel::V3D & pos = peak.getDetPos();
+    // Project the peak (detector) position onto u,v coords
+    double u,v, uscale, vscale;
+    m_surface->project(u,v,uscale,vscale, pos);
+
+    // Create a peak marker at this position
+    PeakMarker2D* r = new PeakMarker2D(*this,u,v,style);
+    r->setPeak(peak,i);
+    addMarker(r);
+  }
+  deselectAll();
+}
+
+/**---------------------------------------------------------------------
  * Draw peaks on screen.
  * @param painter :: The QPainter to draw with.
  */
@@ -195,7 +223,7 @@ void PeakOverlay::draw(QPainter& painter) const
   }
 }
 
-/**
+/**---------------------------------------------------------------------
  * Return a list of markers put onto a detector
  * @param detID :: A detector ID for which markers are to be returned.
  * @return :: A list of zero ot more markers.
@@ -205,7 +233,7 @@ QList<PeakMarker2D*> PeakOverlay::getMarkersWithID(int detID)const
   return m_det2marker.values(detID);
 }
 
-/**
+/**---------------------------------------------------------------------
  * Return the total number of peaks.
  */
 int PeakOverlay::getNumberPeaks()const
@@ -213,7 +241,7 @@ int PeakOverlay::getNumberPeaks()const
   return m_peaksWorkspace->getNumberPeaks();
 }
 
-/**
+/**---------------------------------------------------------------------
  * Return the i-th peak.
  * @param i :: Peak index.
  * @return A reference to the peak.
@@ -223,27 +251,32 @@ Mantid::API::IPeak& PeakOverlay::getPeak(int i)
   return m_peaksWorkspace->getPeak(i);
 }
 
-/** Handler of the AfterReplace notifications. 
-@param wsName :: The name of the modified workspace.
-@param ws :: The shared pointer to the modified workspace.
-*/
+/**--------------------------------------------------------------------- 
+ * Handler of the AfterReplace notifications. Updates the markers.
+ * @param wsName :: The name of the modified workspace.
+ * @param ws :: The shared pointer to the modified workspace.
+ */
 void PeakOverlay::afterReplaceHandle(const std::string& wsName,
   const Mantid::API::Workspace_sptr ws)
 {
   Q_UNUSED(wsName);
-  Q_UNUSED(ws);
-  std::cerr << "modified " << wsName << std::endl;
+  auto peaksWS = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>( ws );
+  if ( peaksWS && peaksWS == m_peaksWorkspace && m_surface )
+  {
+    auto style = isEmpty() ? getDefaultStyle(0) : m_det2marker.begin().value()->getStyle();
+    clear();
+    createMarkers( style );
+    m_surface->requestRedraw();
+  }
 }
 
-/**
- * Return a default style for creating markers and increment the style index. 
+/**---------------------------------------------------------------------
+ * Return a default style for creating markers by index. 
  * Styles are taken form g_defaultStyles
  */
-PeakMarker2D::Style PeakOverlay::getNextDefaultStyle()const
+PeakMarker2D::Style PeakOverlay::getDefaultStyle(int index)
 {
-  int i = m_currentDefaultStyle;
-  ++m_currentDefaultStyle;
-  m_currentDefaultStyle %= g_defaultStyles.size();
-  return g_defaultStyles[i];
+  index %= g_defaultStyles.size();
+  return g_defaultStyles[index];
 }
 

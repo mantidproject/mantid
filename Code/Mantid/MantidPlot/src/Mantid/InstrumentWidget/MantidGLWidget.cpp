@@ -60,6 +60,7 @@ void MantidGLWidget::setSurface(ProjectionSurface* surface)
   if (m_surface)
     delete m_surface;
   m_surface = surface;
+  connect(m_surface,SIGNAL(redrawRequired()),this,SLOT(repaint()),Qt::QueuedConnection);
   m_firstFrame = true;
   initializeGL();
 }

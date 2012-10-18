@@ -78,6 +78,8 @@ public:
   virtual QRectF getSurfaceBounds()const;
   void setFlippedView(bool on);
   bool isFlippedView() const {return m_flippedView;}
+  /// calculate and assign udet.u and udet.v
+  virtual void project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const = 0;
 
 protected:
   virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const;
@@ -89,8 +91,6 @@ protected:
   virtual void mouseReleaseEventMove(QMouseEvent*);
   virtual void wheelEventMove(QWheelEvent*);
 
-  /// calculate and assign udet.u and udet.v
-  virtual void project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const = 0;
   virtual void calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos);
 
   /// calculate rotation R for a udet

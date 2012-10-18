@@ -9,6 +9,9 @@
 #include <QHash>
 #include <QList>
 
+///////////////////////////////////////////////////////////////////////////////
+//     Forward declarations
+///////////////////////////////////////////////////////////////////////////////
 namespace Mantid{
   namespace API{
     class IPeak;
@@ -16,7 +19,7 @@ namespace Mantid{
   }
 }
 
-class PeakMarker2D;
+class UnwrappedSurface;
 
 /**
  * Class for managing overlapping peak labels and drawing them on screen.
@@ -42,42 +45,45 @@ private:
 };
 
 /**
- * Class for managing peak markers.
+ * Class for managing peak markers on an unwrapped instrument surface.
  */
 class PeakOverlay: public Shape2DCollection, public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 public:
-  PeakOverlay(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
+  PeakOverlay(UnwrappedSurface* surface, boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
   ~PeakOverlay(){}
   /// Override the drawing method
   void draw(QPainter& painter) const;
   virtual void removeShape(Shape2D*);
   virtual void clear();
 
+  /// Create the markers
+  void createMarkers(const PeakMarker2D::Style& style);
   void addMarker(PeakMarker2D* m);
   QList<PeakMarker2D*> getMarkersWithID(int detID)const;
   int getNumberPeaks()const;
   Mantid::API::IPeak& getPeak(int);
-  PeakMarker2D::Style getNextDefaultStyle()const;
   /// Return PeaksWorkspace associated with this overlay.
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {return m_peaksWorkspace;}
   /// set HKL precision
   void setPrecision(int prec) const {m_precision = prec;}
   void setShowRowsFlag(bool yes) {m_showRows = yes;}
+  static PeakMarker2D::Style getDefaultStyle(int index);
 
 private:
-
+  /// A WorkspaceObserver handle implemented.
   virtual void afterReplaceHandle(const std::string& wsName,
     const Mantid::API::Workspace_sptr ws);
 
   QMultiHash<int,PeakMarker2D*> m_det2marker; ///< detector ID to PeakMarker2D map
   mutable QList<PeakHKL> m_labels;
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface
-  static QList<PeakMarker2D::Style> g_defaultStyles; ///< default marker styles
-  mutable int m_currentDefaultStyle; ///< default style index
+  UnwrappedSurface* m_surface; ///< pointer to the surface this overlay is applied to
   mutable int m_precision;
   mutable bool m_showRows; ///< flag to show peak row index
+
+  static QList<PeakMarker2D::Style> g_defaultStyles; ///< default marker styles
 };
 
 #endif /*MANTIDPLOT_PEAKOVERLAY_H_*/

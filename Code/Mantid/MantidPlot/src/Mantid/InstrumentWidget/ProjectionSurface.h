@@ -112,6 +112,8 @@ public:
   void setBackgroundColor(const QColor& color) {m_backgroundColor = color;}
   /// Get background colour
   QColor getBackgroundColor() const {return m_backgroundColor;}
+  /// Send a redraw request to the surface owner
+  void requestRedraw();
 
   //-----------------------------------
   //    Shape2D manipulation
@@ -153,6 +155,8 @@ signals:
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
+
+  void redrawRequired();
 
 protected slots:
 
@@ -224,6 +228,7 @@ protected:
   mutable QList<PeakOverlay*> m_peakShapes; ///< to draw peak labels
   mutable int m_peakLabelPrecision;
   mutable bool m_showPeakRow;        ///< flag to show peak row index
+  mutable int m_peakShapesStyle;     ///< index of a default PeakMarker2D style to use with a new PeakOverlay.
 
 };
 

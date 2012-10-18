@@ -40,6 +40,14 @@ m_row(-1)
   setScalable(false);
 }
 
+/**
+ * Return the style of the marker.
+ */
+PeakMarker2D::Style PeakMarker2D::getStyle() const
+{
+  return Style(m_symbol, getColor(), m_markerSize);
+}
+
 bool PeakMarker2D::selectAt(const QPointF& p)const
 {
     return contains(p);

@@ -38,6 +38,7 @@ public:
   static int getDefaultMarkerSize(){return g_defaultMarkerSize;}
   Symbol getSymbol()const{return m_symbol;}
   void setSymbol(Symbol s){m_symbol=s;}
+  Style getStyle() const;
   void setPeak(const Mantid::API::IPeak& peak, int row = -1);
   const Mantid::API::IPeak& getPeak() const;
   double getH()const{return m_h;}
