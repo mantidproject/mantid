@@ -459,6 +459,7 @@ class SNSPowderReduction(PythonAlgorithm):
                         canRun = api.Load(Filename=canFile, OutputWorkspace=canRun)
                 elif ("%s_%d" % (self._instrument, canRun)) in mtd:
                     canRun = mtd["%s_%d" % (self._instrument, canRun)]
+                    canRun = api.ConvertUnits(InputWorkspace=canRun, OutputWorkspace=canRun, Target="TOF")
                 else:
                     if self.getProperty("FilterCharacterizations").value:
                         canRun = self._focusChunks(canRun, SUFFIX, filterWall, calib,
@@ -488,6 +489,7 @@ class SNSPowderReduction(PythonAlgorithm):
                         vanRun = api.Load(Filename=vanFile, OutputWorkspace=vanRun)
                 elif ("%s_%d" % (self._instrument, vanRun)) in mtd:
                     vanRun = mtd["%s_%d" % (self._instrument, vanRun)]
+                    vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
                 else:
                     if samRun == 0:
                         vnoiseRun = 0
