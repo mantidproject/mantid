@@ -94,10 +94,19 @@ private:
     {
       vtp = ScopedFile(vtp_file_contents, vtp_filename); // Overwrite to put vtp file in the temp dir
     }
-    
+
     return IDFEnvironment(idf, vtp, idf_file_contents, instrument_name); 
-    
+
   }
+
+  // Helper method to create the IDF File.  
+  ScopedFile createIDFFileObject(const std::string& idf_filename, const std::string& idf_file_contents)
+  {
+    const std::string instrument_dir = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/";
+
+    return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
+  }
+
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -651,10 +660,10 @@ public:
   void testWriteCacheFileToTempDirectoryIfNoIDF()
   {
     IDFEnvironment instrumentEnv = create_idf_and_vtp_pair();
-    
+
     const std::string idfFileName = ""; // We provide no IDF
     const std::string cacheFileName = instrumentEnv._vtp.getFileName(); // We do provide a cache file, but this shouldn't be used.
-    
+
     MockIDFObject* mockIDF = new MockIDFObject(idfFileName);
     MockIDFObject* mockCache = new MockIDFObject(cacheFileName); 
 
@@ -677,6 +686,56 @@ public:
     path.append(instrumentEnv._instName + ".vtp");
     remove( path.toString().c_str() );
   }
+
+  /**
+   Here we test that the correct exception is thrown if a detector location element is missing its detector ID list
+  */
+  void testIDFFileWithMissingDetectorIDList()
+  {
+    const std::string instrumentName = "Minimal_Definition";
+    const std::string idfFilename = instrumentName + "_MissingDetectorIDs.xml";
+
+    const std::string idfFileContents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<instrument name=\"" + instrumentName + "\" valid-from   =\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 23:59:59\" last-modified=\"2012-10-05 11:00:00\">"
+      "<defaults/>"
+      "<component type=\"cylinder-right\" >" // Missing idlist here
+      "<location/>"
+      "</component>"
+      "<type name=\"cylinder-right\" is=\"detector\">"
+      "<cylinder id=\"some-shape\">"
+      "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
+      "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />" 
+      "  <radius val=\"0.01\" />"
+      "  <height val=\"0.03\" />"
+      "</cylinder>"    
+      "</type>"
+      "<idlist idname=\"cylinder-right\">"
+      "<id val=\"1\" />"
+      "</idlist>"
+      "</instrument>";
+
+    ScopedFile idfFile = createIDFFileObject(idfFilename, idfFileContents);
+
+    InstrumentDefinitionParser parser;
+    TS_ASSERT_THROWS_NOTHING( parser.initialize(idfFilename, "For Unit Testing", idfFileContents); );
+
+    std::string errorMsg("");
+    try
+    {
+       parser.parseXML(NULL);
+       errorMsg = "Exception not thrown";
+    }
+    catch(Kernel::Exception::InstrumentDefinitionError & e)
+    {
+      errorMsg = e.what();
+    }
+    catch(...)
+    {
+      errorMsg = "Unexpected exception";
+    }
+    TS_ASSERT_EQUALS( errorMsg.substr(0,25), "Detector location element");
+  }
+
 };
 
 class InstrumentDefinitionParserTestPerformance : public CxxTest::TestSuite
