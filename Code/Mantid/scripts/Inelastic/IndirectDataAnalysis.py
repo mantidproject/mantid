@@ -480,6 +480,7 @@ def msdfitPlotFits(lniWS, fitWS, n):
     mp.mergePlots(mfit_plot,mp.plotSpectrum(fitWS+'_line',n,False))
 
 def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
+    import re
     StartTime('msdFit')
     workdir = config['defaultsave.directory']
     log_type = 'sample'
@@ -514,28 +515,32 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
         lnWS = root[:-3] + 'lnI'
         CreateWorkspace(OutputWorkspace=lnWS, DataX=inX, DataY=logy, DataE=loge,
             Nspec=1)
-        log_name = root[0:8]+'_'+log_type
+        mo = re.match('([a-zA-Z]+)([0-9]+)',root)
+        log_name_root = mo.group(0) # instr name + run number
+        run_number = mo.group(2)    # run number as string
+        log_name = log_name_root+'_'+log_type
         log_file = log_name+'.txt'
         log_path = FileFinder.getFullPath(log_file)
         if (log_path == ''):
-            logger.notice(' Run : '+root[0:8] +' ; Temperature file not found')
-            xval = int(root[5:8])
+            logger.notice(' Run : '+log_name_root +' ; Temperature file not found')
+            #xval = int(root[5:8])
+            xval = int(run_number[-3:]) # take 3 last digits of the run number
             xlabel = 'Run'
-        else:			
+        else:
             logger.notice('Found '+log_path)
             LoadLog(Workspace=root, Filename=log_path)
             run_logs = mtd[root].getRun()
             tmp = run_logs[log_name].value
             temp = tmp[len(tmp)-1]
-            logger.notice(' Run : '+root[0:8] +' ; Temperature = '+str(temp))
+            logger.notice(' Run : '+log_name_root +' ; Temperature = '+str(temp))
             xval = temp
             xlabel = 'Temp'
         if (np == 0):
-            first = root[0:8]
-            last = root[0:8]
+            first = log_name_root
+            last = log_name_root
             run_list = lnWS
         else:
-            last = root[0:8]
+            last = log_name_root
             run_list += ';'+lnWS
         x_list.append(xval)
         DeleteWorkspace(root)
@@ -544,7 +549,11 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
        logger.notice('Fitting Runs '+first+' to '+last)
        logger.notice('Q-range from '+str(startX)+' to '+str(endX))
     function = 'name=LinearBackground, A0=0, A1=0'
-    mname = first[0:8]+'_to_'+last[3:8]
+    #mname = first[0:8]+'_to_'+last[3:8]
+    mo = re.match('[a-zA-Z]+[0-9]+',first)
+    mname = mo.group(0)+'_to_'
+    mo = re.match('[a-zA-Z]+([0-9]+)',last)
+    mname += mo.group(1)
     msdWS = mname+'_msd'
     PlotPeakByLogValue(Input=run_list, OutputWorkspace=msdWS+'_Table', Function=function,
         StartX=startX, EndX=endX, FitType = 'Sequential')
