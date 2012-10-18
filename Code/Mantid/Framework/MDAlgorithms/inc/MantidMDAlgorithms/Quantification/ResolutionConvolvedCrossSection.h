@@ -24,6 +24,7 @@
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidMDEvents/MDEvent.h"
 
 namespace Mantid
 {
@@ -31,11 +32,6 @@ namespace Mantid
   {
     /// Forward declarations
     class ExperimentInfo;
-  }
-
-  namespace MDEvents
-  {
-    template<size_t nd> class  MDEvent;
   }
 
   namespace MDAlgorithms
