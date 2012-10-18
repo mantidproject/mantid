@@ -179,7 +179,7 @@ namespace Mantid
      */
     double FermiChopperModel::calculatePulseTimeVariance() const
     {
-      const static double mevToSpeedSq = 2.0*PhysicalConstants::meV/PhysicalConstants::NeutronMass;
+      const double mevToSpeedSq = 2.0*PhysicalConstants::meV/PhysicalConstants::NeutronMass;
 
       const double omega = getAngularVelocity();
       const double ei = getIncidentEnergy();
