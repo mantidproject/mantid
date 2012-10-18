@@ -22,6 +22,9 @@ void export_InstrumentInfo()
     .def("zeroPadding", &InstrumentInfo::zeroPadding,
           "Returns zero padding for this instrument")
 
+    .def("filePrefix", &InstrumentInfo::filePrefix,
+          "Returns file prefix for this instrument")
+
     .def("delimiter", &InstrumentInfo::delimiter,
          "Returns the delimiter between the instrument name and the run number.")
 

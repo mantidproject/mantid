@@ -360,6 +360,7 @@ namespace PythonAPI
       //standard methods
       .def("name", &InstrumentInfo::name)
       .def("shortName", &InstrumentInfo::shortName)
+      .def("filePrefix", &InstrumentInfo::filePrefix)
       .def("zeroPadding", &InstrumentInfo::zeroPadding)
       .def("techniques", &InstrumentInfo::techniques, return_value_policy<copy_const_reference>())
       ;
