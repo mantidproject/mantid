@@ -115,6 +115,7 @@ m_showRows(true)
     g_defaultStyles << PeakMarker2D::Style(PeakMarker2D::Diamond,Qt::green);
     g_defaultStyles << PeakMarker2D::Style(PeakMarker2D::Square,Qt::magenta);
   }
+  observeAfterReplace();
 }
 
 /**
@@ -222,6 +223,18 @@ Mantid::API::IPeak& PeakOverlay::getPeak(int i)
   return m_peaksWorkspace->getPeak(i);
 }
 
+/** Handler of the AfterReplace notifications. 
+@param wsName :: The name of the modified workspace.
+@param ws :: The shared pointer to the modified workspace.
+*/
+void PeakOverlay::afterReplaceHandle(const std::string& wsName,
+  const Mantid::API::Workspace_sptr ws)
+{
+  Q_UNUSED(wsName);
+  Q_UNUSED(ws);
+  std::cerr << "modified " << wsName << std::endl;
+}
+
 /**
  * Return a default style for creating markers and increment the style index. 
  * Styles are taken form g_defaultStyles
@@ -233,3 +246,4 @@ PeakMarker2D::Style PeakOverlay::getNextDefaultStyle()const
   m_currentDefaultStyle %= g_defaultStyles.size();
   return g_defaultStyles[i];
 }
+

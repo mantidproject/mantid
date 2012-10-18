@@ -14,7 +14,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
@@ -709,19 +709,11 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
     // This does need to get the instrument from the workspace as it's doing calculations
     // .....and this method should be an algorithm! Or at least somewhere different to here.
     Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
-    Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
-    Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
-    Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(m_currentDetID);
-
-    Mantid::Kernel::Unit_sptr unit = ws->getAxis(0)->unit();
 
     if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
     {
       tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
       tw->setInstrument(instr);
-      //tw->addColumn("double","Qx");
-      //tw->addColumn("double","Qy");
-      //tw->addColumn("double","Qz");
       Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
     }
     else
@@ -733,84 +725,17 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
         return;
       }
     }
-    const Mantid::Kernel::V3D samplePos = sample->getPos();
-    const Mantid::Kernel::V3D beamLine = samplePos - source->getPos();
-    double theta2 = det->getTwoTheta(samplePos,beamLine);
-    double phi = det->getPhi();
 
-    // In the inelastic convention, Q = ki - kf.
-    double Qx=-sin(theta2)*cos(phi);
-    double Qy=-sin(theta2)*sin(phi);
-    double Qz=1.0-cos(theta2);
-    double l1 = source->getDistance(*sample);
-    double l2 = det->getDistance(*sample);
+    // Run the AddPeak algorithm
+    auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
+    alg->setPropertyValue( "RunWorkspace", ws->name() );
+    alg->setPropertyValue( "PeaksWorkspace", peakTableName );
+    alg->setProperty( "DetectorID", m_currentDetID );
+    alg->setProperty( "TOF", x );
+    alg->setProperty( "Height", instrActor->getIntegratedCounts(m_currentDetID) );
+    alg->setProperty( "BinCount", y );
+    alg->execute();
 
-    double tof = x;
-    double count = y;
-    if (unit->unitID() != "TOF")
-    {
-      if (m_emode < 0)
-      {
-        const Mantid::API::Run & run = ws->run();
-        if (run.hasProperty("Ei"))
-        {
-          m_emode = 1; // direct
-          if ( run.hasProperty("Ei") )
-          {
-            Mantid::Kernel::Property* prop = run.getProperty("Ei");
-            m_efixed = boost::lexical_cast<double,std::string>(prop->value());
-          }
-        }
-        else if (det->hasParameter("Efixed"))
-        {
-          m_emode = 2; // indirect
-          try
-          {
-            const Mantid::Geometry::ParameterMap& pmap = ws->constInstrumentParameters();
-            Mantid::Geometry::Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
-            if (par) 
-            {
-              m_efixed = par->value<double>();
-              //g_log.debug() << "Detector: " << det->getID() << " EFixed: " << m_efixed << "\n";
-            }
-          }
-          catch (std::runtime_error&) { /* Throws if a DetectorGroup, use single provided value */ }
-        }
-        else
-        {
-          //m_emode = 0; // Elastic
-          //This should be elastic if Ei and Efixed are not set
-          InputConvertUnitsParametersDialog* dlg = new InputConvertUnitsParametersDialog(this);
-          dlg->exec();
-          m_emode = dlg->getEMode();
-          m_efixed = dlg->getEFixed();
-          m_delta = dlg->getDelta();
-        }
-      }
-      std::vector<double> xdata(1,x);
-      std::vector<double> ydata;
-      unit->toTOF(xdata, ydata, l1, l2, theta2, m_emode, m_efixed, m_delta);
-      tof = xdata[0];
-    }
-
-    double knorm=NeutronMass*(l1 + l2)/(h_bar*tof*1e-6)/1e10;
-    Qx *= knorm;
-    Qy *= knorm;
-    Qz *= knorm;
-
-
-    Mantid::API::IPeak* peak = tw->createPeak(Mantid::Kernel::V3D(Qx,Qy,Qz),l2);
-    peak->setDetectorID(m_currentDetID);
-    peak->setGoniometerMatrix(ws->run().getGoniometer().getR());
-    peak->setBinCount(count);
-    peak->setRunNumber(ws->getRunNumber());
-    const double counts = instrActor->getIntegratedCounts(m_currentDetID);
-    peak->setIntensity(counts);
-    if(counts > 0.) peak->setSigmaIntensity(std::sqrt(counts));
-    
-    tw->addPeak(*peak);
-    delete peak;
-    tw->modified();
   }
   catch(std::exception& e)
   {

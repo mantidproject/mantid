@@ -4,6 +4,8 @@
 #include "Shape2DCollection.h"
 #include "PeakMarker2D.h"
 
+#include "MantidQtAPI/WorkspaceObserver.h"
+
 #include <QHash>
 #include <QList>
 
@@ -42,7 +44,7 @@ private:
 /**
  * Class for managing peak markers.
  */
-class PeakOverlay: public Shape2DCollection
+class PeakOverlay: public Shape2DCollection, public MantidQt::API::WorkspaceObserver
 {
   Q_OBJECT
 public:
@@ -65,6 +67,10 @@ public:
   void setShowRowsFlag(bool yes) {m_showRows = yes;}
 
 private:
+
+  virtual void afterReplaceHandle(const std::string& wsName,
+    const Mantid::API::Workspace_sptr ws);
+
   QMultiHash<int,PeakMarker2D*> m_det2marker; ///< detector ID to PeakMarker2D map
   mutable QList<PeakHKL> m_labels;
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> m_peaksWorkspace; ///< peaks to be drawn ontop of the surface

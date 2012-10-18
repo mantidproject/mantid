@@ -2,6 +2,7 @@ set ( SRC_FILES
 	#	src/Q1DTOF.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
+	src/AddPeak.cpp
 	src/AddSampleLog.cpp
 	src/AlignDetectors.cpp
 	src/AlphaCalc.cpp
@@ -201,6 +202,7 @@ set ( INC_FILES
 	#	inc/MantidAlgorithms/Q1DTOF.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
+	inc/MantidAlgorithms/AddPeak.h
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AlphaCalc.h
@@ -400,6 +402,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	#	CalMuonDeadTimeTest.h
 	AddLogDerivativeTest.h
+	AddPeakTest.h
 	AddSampleLogTest.h
 	AlignDetectorsTest.h
 	AlphaCalcTest.h
