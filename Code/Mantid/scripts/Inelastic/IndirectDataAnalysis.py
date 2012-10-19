@@ -3,7 +3,7 @@ from IndirectImport import import_mantidplot
 mp = import_mantidplot()
 from IndirectCommon import *
 from mantid import config, logger
-import math, re, os.path
+import math, re, os.path, numpy as np
 
 ##############################################################################
 # Misc. Helper Functions
@@ -143,11 +143,13 @@ def elwin(inputFiles, eRange, Save=False, Verbose=True, Plot=False):
         elif ( len(eRange) == 2 ):
             logger.notice('Using 1 energy range from '+range1)
     for file in inputFiles:
+        (direct, file) = os.path.split(file)
+        (root, ext) = os.path.splitext(file)
+        savefile = root[:-3]
         LoadNexus(Filename=file, OutputWorkspace=tempWS)
         if Verbose:
             logger.notice('Reading file : '+file)
         nsam,ntc = CheckHistZero(tempWS)
-        savefile = getWSprefix(tempWS)
         if ( len(eRange) == 4 ):
             ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1], 
                 Range2Start=eRange[2], Range2End=eRange[3],
@@ -172,11 +174,17 @@ def elwin(inputFiles, eRange, Save=False, Verbose=True, Plot=False):
     return eq1, eq2
 
 def elwinPlot(eq1,eq2):
-    lastXeq1 = mtd[eq1[0]].readX(0)[-1]
+    nBins = mtd[eq1[0]].blocksize()
+    if nBins >= 10:
+        nBins = 10
+    lastXeq1 = mtd[eq1[0]].readX(0)[nBins-1]
     graph1 = mp.plotSpectrum(eq1, 0)
     layer = graph1.activeLayer()
     layer.setScale(mp.Layer.Bottom, 0.0, lastXeq1)
-    lastXeq2 = mtd[eq2[0]].readX(0)[-1]
+    nBins = mtd[eq2[0]].blocksize()
+    if nBins >= 10:
+        nBins = 10
+    lastXeq2 = mtd[eq2[0]].readX(0)[nBins-1]
     graph2 = mp.plotSpectrum(eq2, 0)
     layer = graph2.activeLayer()
     layer.setScale(mp.Layer.Bottom, 0.0, lastXeq2)
@@ -270,43 +278,67 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
 # FuryFit
 ##############################################################################
 
-def furyfitParsToWS(Table, Data):
-    dataX = createQaxis(Data)
-    dataY = []
-    dataE = []
-    names = ""
-    xAxisVals = []
+def furyfitParsToWS(Table, Data, option):
+    nopt = len(option)
+    if nopt == 2:
+        npeak = option[0]
+        type = option[1]
+    elif nopt == 4:
+        npeak = 2
+        type = 'SE'
+    else:
+        logger.notice('Bad option : ' +option)	    
+    Q = createQaxis(Data)
+    nQ = len(Q)
+    Q.append(2*Q[nQ-1]-Q[nQ-2])
     ws = mtd[Table]
-    cCount = ws.columnCount()
     rCount = ws.rowCount()
+    cCount = ws.columnCount()
     cName =  ws.getColumnNames()
-    nSpec = ( cCount - 1 ) / 2
-    yA0 = ws.column(1)
-    eA0 = ws.column(2)
-    logger.notice(str(yA0))
-    logger.notice(str(eA0))
-    xAxis = cName[0]
-    stretched = 0
-    for spec in range(0,nSpec):
-        yCol = (spec*2)+1
-        yAxis = cName[(spec*2)+1]
-        if ( re.search('Intensity$', yAxis) or re.search('Tau$', yAxis) or
-            re.search('Beta$', yAxis) ):
-            xAxisVals += dataX
-            if (len(names) > 0):
-                names += ","
-            names += yAxis
-            eCol = (spec*2)+2
-            eAxis = cName[(spec*2)+2]
-            for row in range(0, rCount):
-                dataY.append(ws.cell(row,yCol))
-                dataE.append(ws.cell(row,eCol))
-            if ( re.search('Beta$', yAxis) ): # need to know how many of curves
-                stretched += 1                # are stretched exponentials
-        else:
-            nSpec -= 1
+    Qa = np.array(Q)
+    A0v = ws.column(1)     #bgd value
+    A0e = ws.column(2)     #bgd error
+    Iy1 = ws.column(5)      #intensity1 value
+    Ie1 = ws.column(2)      #intensity1 error = bgd
+    dataX = Qa
+    dataY = np.array(Iy1)
+    dataE = np.array(Ie1)
+    names = cName[5]
+    Ty1 = ws.column(7)      #tau1 value
+    Te1 = ws.column(8)      #tau1 error
+    dataX = np.append(dataX,Qa)
+    dataY = np.append(dataY,np.array(Ty1))
+    dataE = np.append(dataE,np.array(Te1))
+    names += ","+cName[7]
+    nSpec = 2
+    logger.notice(' Option : '+str(npeak)+' '+type)
+    if npeak == 1:
+        By1 = ws.column(9)  #beta1 value
+        Be1 = ws.column(10) #beta2 error
+        dataX = np.append(dataX,Qa)
+        dataY = np.append(dataY,np.array(By1))
+        dataE = np.append(dataE,np.array(Be1))
+        names += ","+cName[9]
+        nSpec += 1
+        logger.notice(' Nspec : '+str(nSpec)+' '+names)
+    if npeak == 2:
+        Iy2 = ws.column(9)  #intensity2 value
+        Ie2 = ws.column(10) #intensity2 error
+        dataX = np.append(dataX,Qa)
+        dataY = np.append(dataY,np.array(Iy2))
+        dataE = np.append(dataE,np.array(Ie2))
+        names += ","+cName[9]
+        nSpec += 1
+        Ty2 = ws.column(11)  #tau2 value
+        Te2 = ws.column(12) #tau2 error
+        dataX = np.append(dataX,Qa)
+        dataY = np.append(dataY,np.array(Ty2))
+        dataE = np.append(dataE,np.array(Te2))
+        names += ","+cName[11]
+        nSpec += 1
+    logger.notice(' Ns : '+str(nSpec)+' '+names)
     wsname = Table + "_Workspace"
-    CreateWorkspace(OutputWorkspace=wsname, DataX=xAxisVals, DataY=dataY, DataE=dataE, 
+    CreateWorkspace(OutputWorkspace=wsname, DataX=dataX, DataY=dataY, DataE=dataE, 
         Nspec=nSpec, UnitX='MomentumTransfer', VerticalAxisUnit='Text',
         VerticalAxisValues=names)
     return wsname
@@ -337,11 +369,13 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose = True):
     for i in range(1,nHist):
         input += ';'+inputWS+',i'+str(i)
     outNm = getWSprefix(inputWS) + 'fury_' + ftype + "0_to_" + str(nHist-1)
+    option = ftype[:-2]
     if Verbose:
+        logger.notice('Option: '+option)  
         logger.notice(func)  
     PlotPeakByLogValue(Input=input, OutputWorkspace=outNm, Function=func, 
         StartX=startx, EndX=endx, FitType='Sequential')
-    wsname = furyfitParsToWS(outNm, inputWS)
+    wsname = furyfitParsToWS(outNm, inputWS, option)
     RenameWorkspace(InputWorkspace=outNm, OutputWorkspace=outNm+"_Parameters")
     if Save:
         opath = os.path.join(workdir, wsname+'.nxs')					# path name for nxs file
@@ -355,6 +389,8 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, Save, Plot, Verbose = True):
 
 def furyfitMultParsToWS(Table, Data):
     dataX = []
+    dataA0v = []
+    dataA0e = []
     dataY1 = []
     dataE1 = []
     dataY2 = []
@@ -363,21 +399,24 @@ def furyfitMultParsToWS(Table, Data):
     dataE3 = []
     ws = mtd[Table+'_Parameters']
     rCount = ws.rowCount()
+    cCount = ws.columnCount()
+    logger.notice(' Cols : '+str(cCount))
     nSpec = ( rCount - 1 ) / 5
     for spec in range(0,nSpec):
-        n1 = spec*5
-        rowi = n1 + 2                   #intensity
+        A0val = 1
+        A0err = 2
         ival = 5                   #intensity value
         ierr = 6                   #intensity error
         tval = 7                   #tau value
         terr = 8                   #tau error
-        rowt = n1 + 3                   #tau
         rowb = 4                        #beta
         bval = 9                   #beta value
         bval = 10                   #beta error
         dataX.append(spec)
+        dataA0v.append(ws.cell(spec,A0val))
+        dataA0e.append(ws.cell(spec,A0err))
         dataY1.append(ws.cell(spec,ival))
-        dataE1.append(ws.cell(spec,ierr))
+        dataE1.append(ws.cell(spec,A0err))
         dataY2.append(ws.cell(spec,tval))
         dataE2.append(ws.cell(spec,terr))
         dataY3.append(ws.cell(spec,bval))
@@ -479,8 +518,14 @@ def msdfitPlotFits(lniWS, fitWS, n):
     mfit_plot = mp.plotSpectrum(lniWS,n,True)
     mp.mergePlots(mfit_plot,mp.plotSpectrum(fitWS+'_line',n,False))
 
+def getInstrRun(file):
+    mo = re.match('([a-zA-Z]+)([0-9]+)',file)
+    instr_and_run = mo.group(0)          # instr name + run number
+    instr = mo.group(1)                  # instrument prefix
+    run = mo.group(2)                    # run number as string
+    return instr,run
+
 def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
-    import re
     StartTime('msdFit')
     workdir = config['defaultsave.directory']
     log_type = 'sample'
@@ -495,6 +540,10 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
         if Verbose:
             logger.notice('Reading Run : '+file)
         LoadNexusProcessed(FileName=file, OutputWorkspace=root)
+        eiq = root[:-1]+'1'
+        LoadNexusProcessed(FileName=eiq+'.nxs', OutputWorkspace='__eiq')
+        (instr, run) = getInstrRun(root)
+        run_name = instr + run
         nsam,ntc = CheckHistZero(root)
         inX = mtd[root].readX(0)
         inY = mtd[root].readY(0)
@@ -515,32 +564,30 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
         lnWS = root[:-3] + 'lnI'
         CreateWorkspace(OutputWorkspace=lnWS, DataX=inX, DataY=logy, DataE=loge,
             Nspec=1)
-        mo = re.match('([a-zA-Z]+)([0-9]+)',root)
-        log_name_root = mo.group(0) # instr name + run number
-        run_number = mo.group(2)    # run number as string
-        log_name = log_name_root+'_'+log_type
+        log_name = run_name+'_'+log_type
         log_file = log_name+'.txt'
         log_path = FileFinder.getFullPath(log_file)
         if (log_path == ''):
-            logger.notice(' Run : '+log_name_root +' ; Temperature file not found')
-            #xval = int(root[5:8])
-            xval = int(run_number[-3:]) # take 3 last digits of the run number
+            logger.notice(' Run : '+run_name +' ; Temperature file not found')
+            xval = int(run[-3:])
             xlabel = 'Run'
-        else:
+        else:			
             logger.notice('Found '+log_path)
             LoadLog(Workspace=root, Filename=log_path)
             run_logs = mtd[root].getRun()
             tmp = run_logs[log_name].value
             temp = tmp[len(tmp)-1]
-            logger.notice(' Run : '+log_name_root +' ; Temperature = '+str(temp))
+            logger.notice(' Run : '+run_name+' ; Temperature = '+str(temp))
             xval = temp
             xlabel = 'Temp'
         if (np == 0):
-            first = log_name_root
-            last = log_name_root
+            RenameWorkspace(InputWorkspace='__eiq',OutputWorkspace='eiq')
+            first = run_name
+            last = run
             run_list = lnWS
         else:
-            last = log_name_root
+            ConjoinWorkspaces(InputWorkspace1='eiq', InputWorkspace2='__eiq', CheckOverlapping=False)
+            last = run
             run_list += ';'+lnWS
         x_list.append(xval)
         DeleteWorkspace(root)
@@ -549,16 +596,13 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
        logger.notice('Fitting Runs '+first+' to '+last)
        logger.notice('Q-range from '+str(startX)+' to '+str(endX))
     function = 'name=LinearBackground, A0=0, A1=0'
-    #mname = first[0:8]+'_to_'+last[3:8]
-    mo = re.match('[a-zA-Z]+[0-9]+',first)
-    mname = mo.group(0)+'_to_'
-    mo = re.match('[a-zA-Z]+([0-9]+)',last)
-    mname += mo.group(1)
+    mname = first+'_to_'+last
     msdWS = mname+'_msd'
     PlotPeakByLogValue(Input=run_list, OutputWorkspace=msdWS+'_Table', Function=function,
         StartX=startX, EndX=endX, FitType = 'Sequential')
     msdfitParsToWS(msdWS, x_list)
     np = 0
+    eiqWS = mname+'_eiq'
     lniWS = mname+'_lnI'
     fitWS = mname+'_Fit'
     a0 = mtd[msdWS+'_a0'].readY(0)
@@ -589,13 +633,20 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
         np += 1
         group = fitWS+'_data,'+ fitWS+'_line'
         GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
+    RenameWorkspace(InputWorkspace='eiq',OutputWorkspace=eiqWS)
     if Plot:
         msdfitPlotSeq(msdWS, xlabel)
         msdfitPlotFits(lniWS, fitWS, 0)
     if Save:
+        eiq_path = os.path.join(workdir, eiqWS+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=eiqWS, Filename=eiq_path, Title=eiqWS)
+        lni_path = os.path.join(workdir, lniWS+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=lniWS, Filename=lni_path, Title=lniWS)
         msd_path = os.path.join(workdir, msdWS+'.nxs')					# path name for nxs file
         SaveNexusProcessed(InputWorkspace=msdWS, Filename=msd_path, Title=msdWS)
         if Verbose:
+            logger.notice('Output eiq file : '+eiq_path)  
+            logger.notice('Output lnI file : '+lni_path)  
             logger.notice('Output msd file : '+msd_path)  
     EndTime('msdFit')
     return msdWS
