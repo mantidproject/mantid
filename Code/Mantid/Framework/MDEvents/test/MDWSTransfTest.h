@@ -122,7 +122,7 @@ void testTransfMat1()
      MDWSTransformTestHelper MsliceTransf;
      MsliceTransf.setUVvectors(u,v,w);
 
-
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      CnvrtToMD::CoordScaling scales = CnvrtToMD::HKLScale;
      TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::HKLScale));
@@ -135,9 +135,9 @@ void testTransfMat1()
 
 
       std::vector<double> rot1;
-      scales = CnvrtToMD::HKLScale;
+      scales = CnvrtToMD::OrthogonalHKLScale;
       TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,scales));
-      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::HKLScale));
+      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,scales));
 
       dimNames = TWS.getDimNames();
       TS_ASSERT_EQUALS("[H,0,0]",dimNames[0]);
@@ -145,14 +145,27 @@ void testTransfMat1()
       TS_ASSERT_EQUALS("[0,-K,0]",dimNames[2]);
       TS_ASSERT_EQUALS("DeltaE",dimNames[3]);
 
-      //TODO ->>> possible problem with orthogonal hkl == this dest does not holds
-      //TSM_ASSERT_DELTA(" element 1 should be a/2Pi",pLattice->a1()/(2*M_PI),rot[0],1.e-6);
-      //TSM_ASSERT_DELTA(" element 2 should be -b/2Pi",-pLattice->a2()/(2*M_PI),rot[7],1.e-6);
-      //TSM_ASSERT_DELTA(" element 3 should be c/2Pi",pLattice->a3()/(2*M_PI),rot[5],1.e-6);
+    
+      TSM_ASSERT_DELTA(" element 1 should be a/2Pi",pLattice->a1()/(2*M_PI),rot[0],1.e-6);
+      TSM_ASSERT_DELTA(" element 2 should be -b/2Pi",-pLattice->a2()/(2*M_PI),rot[7],1.e-6);
+      TSM_ASSERT_DELTA(" element 3 should be c/2Pi",pLattice->a3()/(2*M_PI),rot[5],1.e-6);
 
+      // Orthogonal HKL and HKL are equivalent for cubic lattice
       for(int i=0;i<9;i++){
           TSM_ASSERT_DELTA(" element: "+boost::lexical_cast<std::string>(i)+" wrong",rot[i],rot1[i],1.e-6);
       }
+      // Orthogonal HKL and HKL are equivalent for cubic lattice for any goniometer
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,60);
+     scales = CnvrtToMD::HKLScale;
+     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+     scales = CnvrtToMD::OrthogonalHKLScale;
+     TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,scales));
+     for(int i=0;i<9;i++)
+     {
+          TSM_ASSERT_DELTA(" element: "+boost::lexical_cast<std::string>(i)+" wrong",rot[i],rot1[i],1.e-6);
+     }
+
+
 }
 
 void testTransf2HoraceQinA()
@@ -259,11 +272,13 @@ void testTransf2HoraceOrthogonal()
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
      // this is Wollastonite
      ws2D->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(7.9250,7.3200,7.0650,90.0550,95.2170,103.4200));
+     // 
+     //[transf,u_to_rlu]=calc_proj_matrix([7.9250,7.3200,7.0650], 90.0550,95.2170,103.4200, u, v, 0, omega, dpsi, gl, gs)
      // u to rlu
      //1.2215   -0.2928  -0.1147
      //    0    1.1650   -0.0011
      //    0         0    1.1244
-     Kernel::Matrix<double> U2RLU(3,3);  // 0 deg rotation
+     Kernel::Matrix<double> U2RLU(3,3);  // 0 deg rotation, these settins results in inverse B-matrix:
      U2RLU[0][0] = 1.2215;      U2RLU[0][1] = -0.2928; U2RLU[0][2]  = -0.1147;
      U2RLU[1][0] = 0;           U2RLU[1][1] = 1.1650;  U2RLU[1][2]  = -0.0011;
      U2RLU[2][0] = 0.;          U2RLU[2][1] = 0.;      U2RLU[2][2]   = 1.1244;

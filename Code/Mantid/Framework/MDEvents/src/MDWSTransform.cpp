@@ -42,7 +42,7 @@ CnvrtToMD::TargetFrame MDWSTransform::findTargetFrame(MDEvents::MDWSDescription 
 {
 
   Kernel::Matrix<double> IMat(3,3,true);
-  bool isGonUnitMat   = IMat.equals(TargWSDescription.m_GoniomMatr);
+  bool isGonUnitMat   = IMat.equals(TargWSDescription.getGoniometerMatr());
 
   bool isLatticeUnitMat;
   if(TargWSDescription.hasLattice())
@@ -96,14 +96,14 @@ std::vector<double> MDWSTransform::getTransfMatrix(MDEvents::MDWSDescription &Ta
       ScaleID = NoScaling;
       TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID,true);
     // Obtain the transformation matrix to Cartezian related to Crystal
-      mat = TargWSDescription.m_GoniomMatr*TargWSDescription.m_Wtransf;
+      mat = TargWSDescription.getGoniometerMatr()*TargWSDescription.m_Wtransf;
       break;
     }
   case(CnvrtToMD::HKLFrame):
     {
       TargWSDescription.m_Wtransf = buildQTrahsf(TargWSDescription,ScaleID);
    // Obtain the transformation matrix to Cartezian related to Crystal
-      mat = TargWSDescription.m_GoniomMatr*TargWSDescription.m_Wtransf;
+      mat = TargWSDescription.getGoniometerMatr()*TargWSDescription.m_Wtransf;
      break;
     }
  default:
