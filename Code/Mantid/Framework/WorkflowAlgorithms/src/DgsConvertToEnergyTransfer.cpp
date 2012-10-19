@@ -305,6 +305,9 @@ namespace Mantid
       const bool doTibSub = reductionManager->getProperty("TimeIndepBackgroundSub");
       if (doTibSub)
       {
+        // Setup for later use
+        IAlgorithm_sptr cnvToDist = this->createSubAlgorithm("ConvertToDistribution");
+
         // Set the binning parameters for the background region
         double tibTofStart = reductionManager->getProperty("TibTofRangeStart");
         tibTofStart += binOffset;
@@ -356,10 +359,9 @@ namespace Mantid
           outputWS = cnvun->getProperty("OutputWorkspace");
 
           // Make result workspace a distribution
-          IAlgorithm_sptr cnvToDist = this->createSubAlgorithm("ConvertToDistribution");
           cnvToDist->setProperty("Workspace", outputWS);
           cnvToDist->executeAsSubAlg();
-          outputWS = cnvToDist->getProperty("OutputWorkspace");
+          outputWS = cnvToDist->getProperty("Workspace");
 
           // Calculate the background
           std::string bkgWsName = "background_ws";
@@ -397,6 +399,11 @@ namespace Mantid
         // Do ISIS
         else
         {
+          // Make result workspace a distribution
+          cnvToDist->setProperty("Workspace", outputWS);
+          cnvToDist->executeAsSubAlg();
+          outputWS = cnvToDist->getProperty("Workspace");
+
           IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
           flatBg->setProperty("InputWorkspace", outputWS);
           flatBg->setProperty("OutputWorkspace", outputWS);
