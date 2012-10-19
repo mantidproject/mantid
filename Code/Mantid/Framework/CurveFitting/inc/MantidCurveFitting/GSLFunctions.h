@@ -63,7 +63,7 @@ namespace Mantid
         // add penalty to first and last point and every 10th point in between
         m_J->data[iActiveP] += value;
         m_J->data[(m_J->size1-1)*m_J->size2 + iActiveP] += value;
-        for (size_t iY = 9; iY < m_J->size1-1; iY++) 
+        for (size_t iY = 9; iY < m_J->size1-1; iY+=10)
           m_J->data[iY*m_J->size2 + iActiveP] += value;
       }
       else
