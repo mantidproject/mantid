@@ -714,7 +714,6 @@ void IFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>
 
     const Geometry::ParameterMap& paramMap = workspace->instrumentParameters();
 
-
     Geometry::IDetector_const_sptr det;
     size_t numDetectors = workspace->getSpectrum(wi)->getDetectorIDs().size() ;
     if (numDetectors > 1)
@@ -772,17 +771,28 @@ void IFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>
 
               // if unit specified convert centre value to unit required by formula or look-up-table
               if (centreUnit)
+              {
+                g_log.debug() << "For FitParameter " << parameterName(i) 
+                            << " centre of peak before any unit convertion is " << centreValue << std::endl; 
                 centreValue = convertValue(centreValue, centreUnit, workspace, wi);
+                g_log.debug() << "For FitParameter " << parameterName(i) 
+                            << " centre of peak after any unit convertion is " << centreValue << std::endl;
+              }
 
               double paramValue = fitParam.getValue(centreValue);
 
-              // this returned param value by say a formula or a look-up-table may have
-              // a unit of its own. If this is specified, try the following
+              // this returned param value by a formula or a look-up-table may have
+              // a unit of its own. If set convert param value
+              // See section 'Using fitting parameters in www.mantidproject.org/IDF
               if ( fitParam.getFormula().compare("") == 0 )
               {
                 // so from look up table
                 Kernel::Unit_sptr resultUnit = fitParam.getLookUpTable().getYUnit();  // from table
+                g_log.debug() << "The FitParameter " << parameterName(i) 
+                            << " = " << paramValue << " before y-unit convertion" << std::endl;
                 paramValue /= convertValue(1.0, resultUnit, workspace, wi);
+                g_log.debug() << "The FitParameter " << parameterName(i) 
+                            << " = " << paramValue << " after y-unit convertion" << std::endl;
               }
               else
               {
@@ -811,7 +821,12 @@ void IFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>
                   {
                     mu::Parser p;
                     p.SetExpr(resultUnitStr);
+                    g_log.debug() << "The FitParameter " << parameterName(i) 
+                            << " = " << paramValue << " before result-unit convertion (using " 
+                            << resultUnitStr << ")" << std::endl;
                     paramValue *= p.Eval();
+                    g_log.debug() << "The FitParameter " << parameterName(i) 
+                            << " = " << paramValue << " after result-unit convertion" << std::endl;
                   }
                   catch (mu::Parser::exception_type &e)
                   {
@@ -820,7 +835,7 @@ void IFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>
                       << ". Muparser error message is: " << e.GetMsg() << std::endl;
                   }
                 } // end if
-              } // end else
+              } // end trying to convert result-unit from formula or y-unit for lookuptable
               
 
               setParameter(i, paramValue);
