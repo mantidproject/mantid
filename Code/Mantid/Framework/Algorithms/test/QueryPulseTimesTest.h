@@ -8,6 +8,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
+#include <boost/make_shared.hpp>
 #include <boost/assign/list_of.hpp>
 #include <gmock/gmock.h>
 
