@@ -117,16 +117,7 @@ public:
     TS_ASSERT_EQUALS( space.size[1], 2 );
     TS_ASSERT_EQUALS( space.size[2], 3 );
 
-    // ManagedWorkspace.LowerMemoryLimit should be set to 1 in MantidTest.properties file
-    MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
-    size_t nHist = mi.availMemory / 50 / 100 / 3 * 1024 / 8;// this shoulf fill about 2% of free memory
-    //TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",nHist,100,100) )
-    //TS_ASSERT_EQUALS( ws->id(), "Workspace2D")
-
     TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",1,1,1) );
-    TS_ASSERT( ! ws->id().compare("Workspace1DTest") );
-
-    TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace1DTest",nHist,100,100) );
     TS_ASSERT( ! ws->id().compare("Workspace1DTest") );
 
     TS_ASSERT_THROWS( WorkspaceFactory::Instance().create("NotInFactory",1,1,1), std::runtime_error );
