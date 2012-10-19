@@ -119,7 +119,7 @@ private:
       // Check that the x-axis has been set-up properly. It should mirror the original rebin parameters.
       const Mantid::MantidVec& X = outWS->readX(i);
       TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
-      for(int j = 0; j < X.size(); ++j)
+      for(size_t j = 0; j < X.size(); ++j)
       {
         TS_ASSERT_EQUALS(static_cast<int>(step*j), static_cast<int>(X[j]));
       }
@@ -128,7 +128,7 @@ private:
       
       const Mantid::MantidVec& Y = outWS->readY(i);
       TS_ASSERT_EQUALS(nBinsToBinTo, Y.size());
-      for(int j = 0; j < Y.size(); ++j)
+      for(size_t j = 0; j < Y.size(); ++j)
       {
         TS_ASSERT_EQUALS(nUniformDistributedEvents/nBinsToBinTo, Y[j]); // Should have 1 event per bin, because that's what the createEventWorkspace() provides and our rebinning params are based on our original creation parameters.
       }
@@ -372,8 +372,8 @@ class QueryPulseTimesTestPerformance : public CxxTest::TestSuite
 private:
 
   IEventWorkspace_sptr m_ws;
-  const double pulseTimeMin;
-  const double pulseTimeMax;
+  const int pulseTimeMin;
+  const int pulseTimeMax;
   const int nUniformDistributedEvents;
   const int nSpectra;
   const int nBinsToBinTo;
@@ -397,13 +397,15 @@ public:
 
   void testExecution()
   {
-    const double step = double(pulseTimeMax - pulseTimeMin)/(nBinsToBinTo); 
+    const double dPulseTimeMax = pulseTimeMax;
+    const double dPulseTimeMin = pulseTimeMin;
+    const double step = (dPulseTimeMax - dPulseTimeMin)/(nBinsToBinTo); 
 
     QueryPulseTimes alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", m_ws);
-    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(step)(pulseTimeMax); // Provide rebin arguments.
+    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(dPulseTimeMin)(step)(dPulseTimeMax); // Provide rebin arguments.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
     TS_ASSERT_THROWS_NOTHING(alg.execute());

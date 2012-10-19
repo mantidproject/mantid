@@ -79,18 +79,16 @@ public:
       for (int i=0; i<NUMBINS-1; i++)
       {
         double tof = 0;
-        size_t pulse_time = 0;
         if (evenTOFs)
         {
-          tof = (i+0.5)*BIN_DELTA;
-          pulse_time = tof;
+          tof = (i+0.5)*BIN_DELTA; 
         }
         else
         {
           //Two events per bin
           tof = (pix+i+0.5)*BIN_DELTA;
-          pulse_time = tof;
         }
+        size_t pulse_time = static_cast<size_t>(tof);
         retVal->getEventList(pix) += TofEvent(tof, pulse_time);
         retVal->getEventList(pix) += TofEvent(tof, pulse_time);
       }
@@ -627,7 +625,7 @@ public:
     X.resize(NUMBINS/4);
     for (size_t i = 0; i < X.size(); ++i)
     {
-      X[i] = i*BIN_DELTA*4;
+      X[i] = double(i)*BIN_DELTA*4;
     }
     size_t expected_occupancy = 8; // Because there are two events with pulse_time in each BIN_DELTA interval. 
     do_test_binning(ws, X, axis, expected_occupancy);
@@ -637,7 +635,7 @@ public:
     X.resize(NUMBINS/2);
     for (size_t i = 0; i < X.size(); ++i)
     {
-      X[i] = i*BIN_DELTA*2;
+      X[i] = double(i)*BIN_DELTA*2;
     }
     expected_occupancy = 4; // Because there are two events with pulse_time in each BIN_DELTA interval. 
     do_test_binning(ws, X, axis, expected_occupancy);
@@ -647,7 +645,7 @@ public:
     X.resize(NUMBINS);
     for (size_t i = 0; i < X.size(); ++i)
     {
-      X[i] = i*BIN_DELTA;
+      X[i] = double(i)*BIN_DELTA;
     }
     expected_occupancy = 2; // Because there are two events with pulse_time in each BIN_DELTA interval. 
     do_test_binning(ws, X, axis, expected_occupancy);
