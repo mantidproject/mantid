@@ -152,7 +152,7 @@ public:
       virtual ~MockIEventWorkspace(){}
     };
 
-    IEventWorkspace_sptr ws = boost::make_shared<MockIEventWorkspace>();
+    IEventWorkspace_sptr ws(new MockIEventWorkspace);
 
     QueryPulseTimes alg;
     alg.setRethrows(true);
