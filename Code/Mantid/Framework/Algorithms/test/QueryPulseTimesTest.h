@@ -25,8 +25,8 @@ private:
   */
   IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMinSecs, const int pulseTimeMaxSecs, const DateAndTime runStart=DateAndTime(int(0)))
   {
-    size_t pulseTimeMin = 1e9 * pulseTimeMinSecs;
-    size_t pulseTimeMax = 1e9 * pulseTimeMaxSecs;
+    size_t pulseTimeMin = size_t(1e9) * pulseTimeMinSecs;
+    size_t pulseTimeMax = size_t(1e9) * pulseTimeMaxSecs;
 
     EventWorkspace_sptr retVal(new EventWorkspace);
     retVal->initialize(numberspectra,1,1);
@@ -38,7 +38,7 @@ private:
       for (int i=0; i<nDistrubutedEvents; i++)
       {
         double tof = 0;
-        double pulseTime = ((double)i+0.5)*binWidth; // Stick an event with a pulse_time in the middle of each pulse_time bin.
+        size_t pulseTime = size_t(((double)i+0.5)*binWidth); // Stick an event with a pulse_time in the middle of each pulse_time bin.
         retVal->getEventList(pix) += TofEvent(tof, pulseTime);
       }
       retVal->getEventList(pix).addDetectorID(pix);
@@ -134,6 +134,20 @@ public:
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", workspace2D), std::invalid_argument);
   }
 
+    /**
+    Test setup description.
+    
+    Bins set up with no offset and a spacing of 1e9 according to the rebin parameters.
+    The events in the workspace are created such that they sit in the middle of each bin. They are uniformly distributed from 0.5e9 to 19.5e9, so binning should occur as follows:
+
+      0      1e9   2e9   3e9   4e9   5e9 .... 20e9
+      |     |     |     |     |                 X array
+        ^      ^      ^     ^
+        |      |      |     |                   TOF pulse times
+        0.5e9  1.5e9  2.5e9 3.5e9 ... 19e9
+
+        so Y array should work out to be [1, 1, 1, ...] counts.
+    */
   void test_execute_with_original_binning()
   {
     const int nSpectra = 1;
@@ -145,6 +159,20 @@ public:
     do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
   }
 
+    /**
+    Test setup description.
+    
+    Bins set up with no offset and a spacing of 2*e9 according to the rebin parameters.
+    The events in the workspace are created such that they sit in the middle of each bin. They are uniformly distributed from 0.5e9 to 19.5e9, so binning should occur as follows:
+
+      0          2e9            4e9   .... 20e9
+      |           |              |                 X array
+        ^      ^      ^     ^
+        |      |      |     |                      TOF pulse times
+        0.5e9  1.5e9  2.5e9 3.5e9 ... 19e9
+
+        so Y array should work out to be [2, 2, 2, ...] counts.
+    */
   void test_execute_with_double_sized_bins_binning()
   {
     const int nSpectra = 1;
@@ -152,10 +180,24 @@ public:
     const int pulseTimeMax = 20;
     const int nUninformDistributedEvents = 20;
     
-    const int numberOfBinsToBinTo = 10; // The bins are now twice as big.
+    const int numberOfBinsToBinTo = 10; // The bins are now twice as big!
     do_execute_and_check_binning(nSpectra, pulseTimeMin, pulseTimeMax, nUninformDistributedEvents, numberOfBinsToBinTo);
   }
 
+    /**
+    Test setup description.
+    
+    Bins set up with no offset and a spacing of 4*e9 according to the rebin parameters.
+    The events in the workspace are created such that they sit in the middle of each bin. They are uniformly distributed from 0.5e9 to 19.5e9, so binning should occur as follows:
+
+      0                     4e9   .... 20e9
+      |                        |                 X array
+        ^      ^      ^     ^
+        |      |      |     |                      TOF pulse times
+        0.5e9  1.5e9  2.5e9 3.5e9 ... 19e9
+
+        so Y array should work out to be [4, 4, 4, ...] counts.
+    */
   void test_execute_with_quadruple_sized_bins_binning()
   {
     const int nSpectra = 1;
@@ -209,6 +251,53 @@ public:
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
+    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(step); // Provide rebin arguments. Note we are only providing the step, xmin and xmax are calculated internally!
+    alg.setProperty("Params", rebinArgs);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.execute();
+
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
+    const Mantid::MantidVec& X = outWS->readX(0);
+
+    // Check that xmin and xmax have been caclulated correctly.
+    TS_ASSERT_EQUALS(nBinsToBinTo, X.size());
+    TS_ASSERT_EQUALS(pulseTimeMin + double(step)/2, X.front());
+    TS_ASSERT_EQUALS(pulseTimeMax - double(step)/2, X.back());
+  }
+
+
+  /*
+    Test setup description.
+    
+    Bins set up with 1e9 offset according to the rebin parameters. 
+    But the events in the workspace are created without the offset, they have uniformly distributed pulse times from 0.5e9 to 3.5e9, so binning should occur as follows:
+
+            1e9   2e9   3e9   4e9   5e9
+            |     |     |     |     |         X array
+        ^      ^      ^     ^
+        |      |      |     |           TOF pulse times
+        0.5e9  1.5e9  2.5e9 3.5e9
+
+        so Y array should work out to be [1, 1, 1, 0] counts.
+    */
+  void test_calculate_non_zero_offset()
+  {
+    const int pulseTimeMin = 0;
+    const int pulseTimeMax = 4;
+    const int nUniformDistributedEvents = 4;
+    const int nSpectra = 1;
+    const int nBinsToBinTo = 4;
+    DateAndTime offSet(size_t(1e9)); // Offset (start_time).
+
+    IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax, offSet);
+
+    // Rebin pameters require the step.
+    const int step = static_cast<int>((pulseTimeMax - pulseTimeMin)/(nBinsToBinTo)); 
+
+    QueryPulseTimes alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
     Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(step)(pulseTimeMax); // Provide rebin arguments.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
@@ -221,7 +310,17 @@ public:
     TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
     TS_ASSERT_EQUALS(pulseTimeMin, X.front());
     TS_ASSERT_EQUALS(pulseTimeMax, X.back());
+
+    const Mantid::MantidVec& Y = outWS->readY(0);
+    TS_ASSERT_EQUALS(nBinsToBinTo, Y.size());
+
+    TS_ASSERT_EQUALS(nUniformDistributedEvents/nBinsToBinTo, Y[0]);
+    TS_ASSERT_EQUALS(nUniformDistributedEvents/nBinsToBinTo, Y[1]);
+    TS_ASSERT_EQUALS(nUniformDistributedEvents/nBinsToBinTo, Y[2]);
+    TS_ASSERT_EQUALS(0, Y[3]);
+    
   }
+
 
 };
 

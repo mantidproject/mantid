@@ -153,7 +153,7 @@ namespace Algorithms
       g_log.information() << "Using the current min and max as default " << xmin << ", " << xmax << std::endl;
 
       rebinningParams.push_back(static_cast<double>(xmin));
-      rebinningParams.push_back(inParams[1] * nanoSecondsInASecond);
+      rebinningParams.push_back(inParams[0] * nanoSecondsInASecond);
       rebinningParams.push_back(static_cast<double>(xmax));
     }
 
