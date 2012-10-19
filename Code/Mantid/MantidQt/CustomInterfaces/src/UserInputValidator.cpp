@@ -132,7 +132,11 @@ namespace MantidQt
       sortPair(rangeB);
 
       if( !(rangeA.second < rangeB.first || rangeB.second < rangeA.first) )
-        m_errorMessages.append("The ranges must not overlap.");
+      {
+        QString message = QString("The ranges must not overlap: [%1,%2], [%3,%4].")
+          .arg(rangeA.first).arg(rangeA.second).arg(rangeB.first).arg(rangeB.second);
+        m_errorMessages.append( message );
+      }
     }
 
     /**
