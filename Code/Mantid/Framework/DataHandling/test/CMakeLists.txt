@@ -6,8 +6,9 @@ if ( CXXTEST_FOUND )
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
-                        TestDataListener.cpp 
-                        )
+                        TestDataListener.cpp
+						../../TestHelpers/src/ScopedFileHelper.cpp )
+
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
   target_link_libraries( DataHandlingTest DataHandling )
   add_dependencies ( FrameworkTests DataHandlingTest )

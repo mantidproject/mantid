@@ -17,12 +17,14 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include <vector>
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
+using ScopedFileHelper::ScopedFile;
 
 class LoadEmptyInstrumentTest : public CxxTest::TestSuite
 {
@@ -37,6 +39,15 @@ public:
       TS_ASSERT_EQUALS(output->getSpectrum(i)->getDetectorIDs().size(), 1);
     }
   }
+
+  // Helper method to create the IDF File.  
+  ScopedFile createIDFFileObject(const std::string& idf_filename, const std::string& idf_file_contents)
+  {
+    const std::string instrument_dir = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/";
+
+    return ScopedFile(idf_file_contents, idf_filename, instrument_dir);
+  }
+
 
   void testExecSLS()
   {
@@ -63,7 +74,7 @@ public:
 
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-    
+
     // Check the total number of elements in the map for SLS
     check_workspace_detectors(output, 683);
     AnalysisDataService::Instance().remove(wsName);
@@ -94,7 +105,7 @@ public:
 
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-    
+
     // Check the total number of elements in the map for SLS
     check_workspace_detectors(output, 2502);
   }
@@ -124,7 +135,7 @@ public:
 
     MatrixWorkspace_sptr output;
     output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-    
+
     // Check the total number of elements in the map for SLS
     check_workspace_detectors(output, 64);
   }
@@ -719,7 +730,7 @@ public:
     if (asEvent)
     {
       EventWorkspace_sptr eventWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(ws);
+        boost::dynamic_pointer_cast<EventWorkspace>(ws);
       TS_ASSERT(eventWS);
     }
 
@@ -796,8 +807,8 @@ public:
   }
 
 
-void testSANS2D()
-{
+  void testSANS2D()
+  {
     LoadEmptyInstrument loader;
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
@@ -847,10 +858,10 @@ void testSANS2D()
     TS_ASSERT_DELTA( 10E5*solidAngle, 6.23454, 0.00001);
 
     AnalysisDataService::Instance().remove(wsName);
-}
+  }
 
 
-void testCheckIfVariousInstrumentsLoad()
+  void testCheckIfVariousInstrumentsLoad()
   {
     LoadEmptyInstrument loaderPolRef;
     loaderPolRef.initialize();
@@ -940,6 +951,59 @@ void testCheckIfVariousInstrumentsLoad()
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  /**
+   Here we test that the correct exception is thrown, if the instrument has no detector
+  */
+  void testIDFFileWithNoDetector()
+  {
+    const std::string instrumentName = "Minimal_Definition";
+    const std::string idfFilename = instrumentName + "_MissingDetectorIDs.xml";
+
+    const std::string idfFileContents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+      "<instrument name=\"" + instrumentName + "\" valid-from   =\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 23:59:59\" last-modified=\"2012-10-05 11:00:00\">"
+      "<defaults/>"
+      "<component type=\"cylinder-right\"  idlist=\"cylinder-right\" >" 
+      "<location/>"
+      "</component>"
+      "<type name=\"cylinder-right\" >" // is=\"detector\" missing
+      "<cylinder id=\"some-shape\">"
+      "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
+      "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />" 
+      "  <radius val=\"0.01\" />"
+      "  <height val=\"0.03\" />"
+      "</cylinder>"    
+      "</type>"
+      "<idlist idname=\"cylinder-right\">"
+      "<id val=\"1\" />"
+      "</idlist>"
+      "</instrument>";
+
+    ScopedFile idfFile = createIDFFileObject(idfFilename, idfFileContents);
+
+    LoadEmptyInstrument loader;
+    loader.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+    TS_ASSERT( loader.isInitialized() );
+    loader.setPropertyValue("Filename", idfFile.getFileName() ); 
+    wsName = "LoadEmptyInstrumentNoDetectorsTest";
+    loader.setPropertyValue("OutputWorkspace", wsName);
+
+    std::string errorMsg("");
+    try
+    {
+       loader.execute();
+       errorMsg = "Exception not thrown";
+    }
+    catch(Exception::InstrumentDefinitionError & e)
+    {
+      errorMsg = e.what();
+    }
+    catch(...)
+    {
+      errorMsg = "Unexpected exception";
+    }
+    TS_ASSERT_EQUALS( errorMsg, "No detectors found in instrument");
+  }
 
 
 private:
