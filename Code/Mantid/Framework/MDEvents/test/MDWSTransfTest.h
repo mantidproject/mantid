@@ -150,11 +150,11 @@ void testTransfMat1()
       TSM_ASSERT_DELTA(" element 2 should be -b/2Pi",-pLattice->a2()/(2*M_PI),rot[7],1.e-6);
       TSM_ASSERT_DELTA(" element 3 should be c/2Pi",pLattice->a3()/(2*M_PI),rot[5],1.e-6);
 
-      // Orthogonal HKL and HKL are equivalent for cubic lattice
+      // Orthogonal HKL and HKL are equivalent for rectilinear lattice
       for(int i=0;i<9;i++){
           TSM_ASSERT_DELTA(" element: "+boost::lexical_cast<std::string>(i)+" wrong",rot[i],rot1[i],1.e-6);
       }
-      // Orthogonal HKL and HKL are equivalent for cubic lattice for any goniometer
+      // Orthogonal HKL and HKL are equivalent for rectilinear lattice for any goniometer position
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,60);
      scales = CnvrtToMD::HKLScale;
      TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
@@ -222,40 +222,43 @@ void testTransf2HoraceQinA()
      
 
 //     // crystal misalighned
-//     Mantid::Kernel::Matrix<double> Umat(3,3,true);
-////     Umatrix build on the coordinate system, constructed aroung two vectors u=[0.9,0.1,0] and v=[0.1,0.9,0.1]
+//     Mantid::Kernel::Matrix<double> Uhor(3,3,true);
+////    Horace Umatrix build on the coordinate system, constructed aroung two vectors u=[0.9,0.1,0] and v=[0.1,0.9,0.1]
 //     // 0.9939   0.1104  0.00
 //     //-0.1097   0.9876  0.1125
 //    //  0.0124  -0.1118  0.9937
-//     Umat[0][0]= 0.9938837;  Umat[0][1]= 0.11043152607;  Umat[0][2]= 0.;
-//     Umat[1][0]=-0.1097308;  Umat[1][1]= 0.9875772045;   Umat[1][2]= 0.1124740705;
-//     Umat[2][0]= 0.01242068; Umat[2][1]=-0.111786149;   Umat[2][2]= 0.99365466;
+//     Uhor[0][0]= 0.9938837;  Uhor[0][1]= 0.11043152607;  Uhor[0][2]= 0.;
+//     Uhor[1][0]=-0.1097308;  Uhor[1][1]= 0.9875772045;   Uhor[1][2]= 0.1124740705;
+//     Uhor[2][0]= 0.01242068; Uhor[2][1]=-0.111786149;    Uhor[2][2]= 0.99365466;
 //
 //     auto ol = new Geometry::OrientedLattice(2.73,2.73,2.73, 90., 90., 90.);
 //     ol->setUFromVectors(Kernel::V3D(0.9,0.1,0),Kernel::V3D(0.1,0.9,0.1));
 //     auto Uman = ol->getU();
 //     auto U0vec = Uman.getVector();
-//     auto UmVec = (Uman*PermMH).getVector();
-//     auto Um1Vec = (PermHM*Uman*PermMH).getVector();
+//     // this gives us Umat in the form
+//     Uman[1][0]==-0.1097308;  Uman[1][1]== 0.9875772045;   Uman[1][2]== 0.1124740705; // -> row2 in Uhor
+//     Uman[2][0]== 0.01242068; Uman[2][1]==-0.111786149;    Uman[2][2]== 0.99365466;   // -> row3 in Uhor
+//     Uman[0][0]== 0.9938837;  Uman[0][1]== 0.11043152607;  Uman[0][2]== 0.;           // -> row1 in Uhor
 //
 //
-//
-//     ws2D->mutableSample().setOrientedLattice(ol);
-//     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,40);
-//     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
-//     // 40 degree rotation: [transf,u_to_rlu]=calc_proj_matrix(alat, angldeg, u, v, 40*deg2rad, omega, dpsi, gl, gs), u,v as above
-//      //  0.8319    0.5548    0.0124
-//    //  -0.5502    0.8275   -0.1118
-//    //  -0.0723    0.0862    0.9937
-//     Transf[0][0] = 0.8319;      Transf[0][1] = 0.5548; Transf[0][2] = 0.0124;
-//     Transf[1][0] =-0.5502;      Transf[1][1] = 0.8275; Transf[1][2] =-0.1118;
-//     Transf[2][0] = -0.0723;     Transf[2][1] = 0.0862; Transf[2][2] = 0.9937;
-//
-//     sample = (PermHM*Transf*PermMH).getVector();
-//     for(size_t i=0;i<9;i++)
-//     {
-//       TS_ASSERT_DELTA(sample[i],rot[i],1.e-4);
-//     }
+// and the rotation around this matrix is different!
+
+    // ws2D->mutableSample().setOrientedLattice(ol);
+    // ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,40);
+    // TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+    // // 40 degree rotation: [transf,u_to_rlu]=calc_proj_matrix(alat, angldeg, u, v, 40*deg2rad, omega, dpsi, gl, gs), u,v as above
+    //  //  0.8319    0.5548    0.0124
+    ////  -0.5502    0.8275   -0.1118
+    ////  -0.0723    0.0862    0.9937
+    // Transf[0][0] = 0.8319;      Transf[0][1] = 0.5548; Transf[0][2] = 0.0124;
+    // Transf[1][0] =-0.5502;      Transf[1][1] = 0.8275; Transf[1][2] =-0.1118;
+    // Transf[2][0] = -0.0723;     Transf[2][1] = 0.0862; Transf[2][2] = 0.9937;
+
+    // sample = (PermHM*Transf*PermMH).getVector();
+    // for(size_t i=0;i<9;i++)
+    // {
+    //   TS_ASSERT_DELTA(sample[i],rot[i],1.e-4);
+    // }
 }
 void testTransf2HoraceOrthogonal()
 {
