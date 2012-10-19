@@ -9,49 +9,54 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include <boost/assign/list_of.hpp>
+#include <gmock/gmock.h>
 
 using Mantid::Algorithms::QueryPulseTimes;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
+/**
+Helper method to create an event workspace with a set number of distributed events between pulseTimeMax and pulseTimeMin.
+*/
+IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMinSecs, const int pulseTimeMaxSecs, const DateAndTime runStart=DateAndTime(int(0)))
+{
+  size_t pulseTimeMin = size_t(1e9) * pulseTimeMinSecs;
+  size_t pulseTimeMax = size_t(1e9) * pulseTimeMaxSecs;
+
+  EventWorkspace_sptr retVal(new EventWorkspace);
+  retVal->initialize(numberspectra,1,1);
+  double binWidth = std::abs(double(pulseTimeMax - pulseTimeMin)/nDistrubutedEvents);
+
+  //Make fake events
+  for (int pix=0; pix<numberspectra; pix++)
+  {
+    for (int i=0; i<nDistrubutedEvents; i++)
+    {
+      double tof = 0;
+      size_t pulseTime = size_t(((double)i+0.5)*binWidth); // Stick an event with a pulse_time in the middle of each pulse_time bin.
+      retVal->getEventList(pix) += TofEvent(tof, pulseTime);
+    }
+    retVal->getEventList(pix).addDetectorID(pix);
+    retVal->getEventList(pix).setSpectrumNo(pix);
+  }
+  retVal->doneAddingEventLists();
+
+  // Add the required start time.
+  PropertyWithValue<std::string>* testProperty = new PropertyWithValue<std::string>("start_time", runStart.toSimpleString(), Direction::Input);
+  retVal->mutableRun().addLogData(testProperty);
+
+  return retVal;
+}
+
+
+//=====================================================================================
+// Functional Tests
+//=====================================================================================
 class QueryPulseTimesTest : public CxxTest::TestSuite
 {
 
 private:
-
-  /**
-  Helper method to create an event workspace with a set number of distributed events between pulseTimeMax and pulseTimeMin.
-  */
-  IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMinSecs, const int pulseTimeMaxSecs, const DateAndTime runStart=DateAndTime(int(0)))
-  {
-    size_t pulseTimeMin = size_t(1e9) * pulseTimeMinSecs;
-    size_t pulseTimeMax = size_t(1e9) * pulseTimeMaxSecs;
-
-    EventWorkspace_sptr retVal(new EventWorkspace);
-    retVal->initialize(numberspectra,1,1);
-    double binWidth = std::abs(double(pulseTimeMax - pulseTimeMin)/nDistrubutedEvents);
-
-    //Make fake events
-    for (int pix=0; pix<numberspectra; pix++)
-    {
-      for (int i=0; i<nDistrubutedEvents; i++)
-      {
-        double tof = 0;
-        size_t pulseTime = size_t(((double)i+0.5)*binWidth); // Stick an event with a pulse_time in the middle of each pulse_time bin.
-        retVal->getEventList(pix) += TofEvent(tof, pulseTime);
-      }
-      retVal->getEventList(pix).addDetectorID(pix);
-      retVal->getEventList(pix).setSpectrumNo(pix);
-    }
-    retVal->doneAddingEventLists();
-
-    // Add the required start time.
-    PropertyWithValue<std::string>* testProperty = new PropertyWithValue<std::string>("start_time", runStart.toSimpleString(), Direction::Input);
-    retVal->mutableRun().addLogData(testProperty);
-
-    return retVal;
-  }
 
   /**
   Test execution method.
@@ -119,6 +124,43 @@ public:
     QueryPulseTimes alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
+  }
+
+  void test_not_a_event_workspace_throws()
+  {
+    /*
+    This type is an IEventWorkspace, but not an EventWorkspace.
+    */
+    class MockIEventWorkspace : public Mantid::API::IEventWorkspace
+    {
+    public:
+      MOCK_CONST_METHOD0(getNumberEvents, std::size_t());
+      MOCK_CONST_METHOD0(getTofMin, double());
+      MOCK_CONST_METHOD0(getTofMax, double());
+      MOCK_CONST_METHOD0(getEventType, EventType());
+      MOCK_METHOD1(getEventListPtr, IEventList*(const std::size_t));
+      MOCK_CONST_METHOD5(generateHistogram, void(const std::size_t, const Mantid::MantidVec&,  Mantid::MantidVec&,  Mantid::MantidVec&, bool));
+      MOCK_METHOD0(clearMRU, void());
+      MOCK_CONST_METHOD0(clearMRU, void());
+      MOCK_CONST_METHOD0(blocksize, std::size_t());
+      MOCK_CONST_METHOD0(size, std::size_t());
+      MOCK_CONST_METHOD0(getNumberHistograms, std::size_t());
+      MOCK_METHOD1(getSpectrum, Mantid::API::ISpectrum*(const std::size_t));
+      MOCK_CONST_METHOD1(getSpectrum, const Mantid::API::ISpectrum*(const std::size_t));
+      MOCK_METHOD3(init, void(const size_t&, const size_t&, const size_t&));
+      virtual ~MockIEventWorkspace(){}
+    };
+
+    IEventWorkspace_sptr ws = boost::make_shared<MockIEventWorkspace>();
+
+    QueryPulseTimes alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(1); 
+    alg.setProperty("Params", rebinArgs);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS( alg.execute(), std::invalid_argument);
   }
 
   /*
@@ -320,8 +362,56 @@ public:
     TS_ASSERT_EQUALS(0, Y[3]);
     
   }
+};
 
+//=====================================================================================
+// Performance Tests
+//=====================================================================================
+class QueryPulseTimesTestPerformance : public CxxTest::TestSuite
+{
+private:
 
+  IEventWorkspace_sptr m_ws;
+  const double pulseTimeMin;
+  const double pulseTimeMax;
+  const int nUniformDistributedEvents;
+  const int nSpectra;
+  const int nBinsToBinTo;
+
+public:
+
+  QueryPulseTimesTestPerformance() : 
+    pulseTimeMin(0),
+    pulseTimeMax(4),
+    nUniformDistributedEvents(10000),
+    nSpectra(1000),
+    nBinsToBinTo(100)
+  {
+  }
+
+  void setUp()
+  {
+    // Make a reasonably sized workspace to rebin.
+    m_ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
+  }
+
+  void testExecution()
+  {
+    const double step = double(pulseTimeMax - pulseTimeMin)/(nBinsToBinTo); 
+
+    QueryPulseTimes alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_ws);
+    Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(step)(pulseTimeMax); // Provide rebin arguments.
+    alg.setProperty("Params", rebinArgs);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    // Simple tests. Functionality tests cover this much better.
+    MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
+    TS_ASSERT(outWS != NULL);
+  }
 };
 
 

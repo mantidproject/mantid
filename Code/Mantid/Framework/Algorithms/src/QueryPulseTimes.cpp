@@ -35,16 +35,8 @@ namespace Algorithms
      }
   };
 
-
-  MantidVec::value_type nanosecondsToSeconds(const MantidVec::value_type& nanoSecs)
-  {
-    return nanoSecs * 1e-9;
-  }
-
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(QueryPulseTimes)
-  
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -75,8 +67,8 @@ namespace Algorithms
   /// Sets documentation strings for this algorithm
   void QueryPulseTimes::initDocs()
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    this->setWikiSummary("Bins events according to pulse time. Binning parameters are specified relative to the start of the run.");
+    this->setOptionalMessage("Bins events according to pulse time. Binning parameters are specified relative to the start of the run.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -101,6 +93,10 @@ namespace Algorithms
     using Mantid::DataObjects::EventWorkspace;
     IEventWorkspace_sptr temp = getProperty("InputWorkspace");
     boost::shared_ptr<EventWorkspace> inWS = boost::dynamic_pointer_cast<EventWorkspace>(temp);
+    if(inWS == NULL)
+    {
+      throw std::invalid_argument("QueryPulseTimes requires an EventWorkspace as an input.");
+    }
 
     MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace"); // TODO: MUST BE A HISTOGRAM WORKSPACE!
 
