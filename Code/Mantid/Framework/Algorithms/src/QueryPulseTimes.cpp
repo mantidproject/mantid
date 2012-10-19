@@ -117,7 +117,9 @@ namespace Algorithms
       const DateAndTime endTime = runStartTime + inParams[2] ;
       const double tStep = inParams[1] * nanoSecondsInASecond;
       // Rebinning params in nanoseconds.
-      rebinningParams = boost::assign::list_of(static_cast<double>(startTime.totalNanoseconds()))(tStep)(static_cast<double>(endTime.totalNanoseconds())) ;
+      rebinningParams.push_back(static_cast<double>(startTime.totalNanoseconds()));
+      rebinningParams.push_back(tStep);
+      rebinningParams.push_back(static_cast<double>(endTime.totalNanoseconds()));
     } 
     else if (inParams.size() == 1)
     {
