@@ -123,7 +123,7 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy, double a
 }
 
 /** Set rotation angle for an axis using motor name
-  @param name :: GoniometerAxis name
+  @param name :: GoniometerAxis name 
   @param value :: value in the units that the axis is set
 */
 void Goniometer::setRotationAngle( std::string name, double value)

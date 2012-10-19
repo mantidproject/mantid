@@ -95,10 +95,16 @@ void MDWSDescription::buildFromMatrixWS(const API::MatrixWorkspace_const_sptr &p
 
 
   //Set up goniometer. Empty ws's goniometer returns unit transformation matrix
-  m_GoniomMatr = m_InWS->run().getGoniometer().getR();
+
 
 } 
-
+Kernel::Matrix<double> MDWSDescription::getGoniometerMatr()const
+{
+  if(m_InWS) 
+    return m_InWS->run().getGoniometer().getR();  
+  else
+    return Kernel::Matrix<double>(3,3,true);
+};
 
 /** the function builds MD event WS description from existing workspace. 
 * Primary used to obtain existing ws parameters 
@@ -148,7 +154,6 @@ void MDWSDescription::setUpMissingParameters(const MDEvents::MDWSDescription &So
 
   m_AddCoord.assign(SourceMatrWS.m_AddCoord.begin(),SourceMatrWS.m_AddCoord.end());
 
-  m_GoniomMatr = SourceMatrWS.m_GoniomMatr;
 
 }
 
@@ -182,7 +187,6 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
 /// empty constructor
 MDWSDescription::MDWSDescription(unsigned int nDimensions):
   m_Wtransf(3,3,true),
-  m_GoniomMatr(3,3,true),
   m_RotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
   m_Emode(CnvrtToMD::Undef),
   m_LorentzCorr(false)

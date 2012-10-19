@@ -59,9 +59,6 @@ public:  // for the time being
     std::string AlgID; 
     // the matrix which describes target coordiante system of the workpsace and connected with convert_to_factor;
     Kernel::DblMatrix m_Wtransf; 
-    // UB matrix components:
-    // Goniometer is always present in a workspace but can be a unit matrix
-    Kernel::DblMatrix m_GoniomMatr;
     // the vector which represent linear form of momentun transformation 
     std::vector<double> m_RotMatrix;
 
@@ -82,6 +79,7 @@ public:  // for the time being
     CnvrtToMD::EModes        getEMode()const{return m_Emode;}
     std::string              getQMode()const{return AlgID;}
 
+
     /**check if one needs to perform Lorentz corrections */
     bool isLorentsCorrections()const{return m_LorentzCorr;}
     void getMinMax(std::vector<double> &min,std::vector<double> &max)const;
@@ -92,7 +90,9 @@ public:  // for the time being
     std::string getWSName()const{return m_InWS->name();}
     bool isPowder()const{return !m_InWS->sample().hasOrientedLattice();}
     bool hasLattice()const{return m_InWS->sample().hasOrientedLattice();}
+
     boost::shared_ptr<Geometry::OrientedLattice> getLattice()const{return getOrientedLattice(m_InWS);}
+    Kernel::Matrix<double> getGoniometerMatr()const;
 
   /// constructor
   MDWSDescription(unsigned int nDimensions=0);

@@ -105,9 +105,9 @@ namespace Geometry
       std::string axesInfo();
       // Add axis to goniometer
       void pushAxis(std::string name, double axisx, double axisy, double axisz, double angle=0., int sense=CCW, int angUnit=angDegrees);
-      // Set rotation angle for an axis
+      // Set rotation angle for an axis in the units the angle is set (default -- degrees)
       void setRotationAngle( std::string name, double value);
-      // Set rotation angle for an axis
+      // Set rotation angle for an axis in the units the angle is set (default -- degrees)
       void setRotationAngle( size_t axisnumber, double value);
       // Get axis object
       const GoniometerAxis & getAxis(size_t axisnumber) const;

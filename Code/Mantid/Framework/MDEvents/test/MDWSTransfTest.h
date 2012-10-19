@@ -31,6 +31,13 @@ class MDWSTransfTest : public CxxTest::TestSuite
 {
     Mantid::API::MatrixWorkspace_sptr ws2D;
     Geometry::OrientedLattice *pLattice;
+  // this is permutation matrix which transforms Mantid coordinate system (beam along Z-axis)
+   // to Horace coordinate system (beam along X-axis);
+  //  Horace transformation matrix and Mantid Transformation matrix are connected by ration T_mantid  = T_hor*PermMH;
+   Kernel::Matrix<double> PermMH,PermHM;
+
+  
+
     //MDWSSliceTest slice;
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -52,7 +59,6 @@ void testFindTargetFrame()
    TS_ASSERT_EQUALS(CnvrtToMD::LabFrame,Transf.findTargetFrame(TargWSDescription));
 
    spws->mutableRun().mutableGoniometer().setRotationAngle(0,20);
-   TargWSDescription.m_GoniomMatr = spws->run().getGoniometer().getR();
 
    TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame,Transf.findTargetFrame(TargWSDescription));
 
@@ -129,9 +135,9 @@ void testTransfMat1()
 
 
       std::vector<double> rot1;
-      scales = CnvrtToMD::OrthogonalHKLScale;
+      scales = CnvrtToMD::HKLScale;
       TS_ASSERT_THROWS_NOTHING(rot1=MsliceTransf.getTransfMatrix(TWS,scales));
-      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::OrthogonalHKLScale));
+      TS_ASSERT_THROWS_NOTHING(MsliceTransf.setQ3DDimensionsNames(TWS,CnvrtToMD::HKLScale));
 
       dimNames = TWS.getDimNames();
       TS_ASSERT_EQUALS("[H,0,0]",dimNames[0]);
@@ -149,17 +155,157 @@ void testTransfMat1()
       }
 }
 
+void testTransf2HoraceQinA()
+{
+     MDEvents::MDWSDescription TWS;
+     std::vector<double> minVal(4,-3),maxVal(4,3);
+     TWS.setMinMax(minVal,maxVal);
 
-MDWSTransfTest()
+     ws2D->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(5*M_PI,M_PI,2*M_PI, 90., 90., 90.));
+     TWS.buildFromMatrixWS(ws2D,"Q3D","Direct");
+
+     std::vector<double> u(3,0);
+     std::vector<double> v(3,0);
+     std::vector<double> w(3,0);
+     u[0]=1;
+     v[1]=1;
+     w[2]=1;
+     std::vector<double> rot;
+
+     MDWSTransformTestHelper MsliceTransf;
+     MsliceTransf.setUVvectors(u,v,w);
+
+
+     CnvrtToMD::CoordScaling scales = CnvrtToMD::NoScaling;
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);
+     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+
+    // and this is Horace transformation matrix obtained from   [transf,u_to_rlu]=calc_proj_matrix(alat, angldeg, u, v, 20*deg2rad, omega, dpsi, gl, gs) (private folder in sqw)
+    //    0.9397    0.3420      0
+    //   -0.3420    0.9397      0
+    //      0         0       1.0000   
+     Kernel::Matrix<double> Transf(3,3);  // 20 deg rotation
+     Transf[0][0] = 0.9397;      Transf[0][1] = 0.3420; Transf[0][2] = 0.;
+     Transf[1][0] =-0.3420;      Transf[1][1] = 0.9397; Transf[1][2] = 0.;
+     Transf[2][0] = 0.;          Transf[2][1] = 0.;     Transf[2][2] = 1;
+
+     std::vector<double> sample = (PermHM*Transf*PermMH).getVector();
+     for(size_t i=0;i<9;i++)
+     {
+       TS_ASSERT_DELTA(sample[i],rot[i],1.e-4);
+     }
+     // 40 degree rotation: [transf,u_to_rlu]=calc_proj_matrix(alat, angldeg, u, v, 40*deg2rad, omega, dpsi, gl, gs)
+     Transf[0][0] = 0.7660;      Transf[0][1] = 0.6428; Transf[0][2] = 0.;
+     Transf[1][0] =-0.6428;      Transf[1][1] = 0.7660; Transf[1][2] = 0.;
+     Transf[2][0] = 0.;          Transf[2][1] = 0.;     Transf[2][2] = 1;
+
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,40);
+     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+     sample = (PermHM*Transf*PermMH).getVector();
+     for(size_t i=0;i<9;i++)
+     {
+       TS_ASSERT_DELTA(sample[i],rot[i],1.e-4);
+     }
+     
+
+//     // crystal misalighned
+//     Mantid::Kernel::Matrix<double> Umat(3,3,true);
+////     Umatrix build on the coordinate system, constructed aroung two vectors u=[0.9,0.1,0] and v=[0.1,0.9,0.1]
+//     // 0.9939   0.1104  0.00
+//     //-0.1097   0.9876  0.1125
+//    //  0.0124  -0.1118  0.9937
+//     Umat[0][0]= 0.9938837;  Umat[0][1]= 0.11043152607;  Umat[0][2]= 0.;
+//     Umat[1][0]=-0.1097308;  Umat[1][1]= 0.9875772045;   Umat[1][2]= 0.1124740705;
+//     Umat[2][0]= 0.01242068; Umat[2][1]=-0.111786149;   Umat[2][2]= 0.99365466;
+//
+//     auto ol = new Geometry::OrientedLattice(2.73,2.73,2.73, 90., 90., 90.);
+//     ol->setUFromVectors(Kernel::V3D(0.9,0.1,0),Kernel::V3D(0.1,0.9,0.1));
+//     auto Uman = ol->getU();
+//     auto U0vec = Uman.getVector();
+//     auto UmVec = (Uman*PermMH).getVector();
+//     auto Um1Vec = (PermHM*Uman*PermMH).getVector();
+//
+//
+//
+//     ws2D->mutableSample().setOrientedLattice(ol);
+//     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,40);
+//     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+//     // 40 degree rotation: [transf,u_to_rlu]=calc_proj_matrix(alat, angldeg, u, v, 40*deg2rad, omega, dpsi, gl, gs), u,v as above
+//      //  0.8319    0.5548    0.0124
+//    //  -0.5502    0.8275   -0.1118
+//    //  -0.0723    0.0862    0.9937
+//     Transf[0][0] = 0.8319;      Transf[0][1] = 0.5548; Transf[0][2] = 0.0124;
+//     Transf[1][0] =-0.5502;      Transf[1][1] = 0.8275; Transf[1][2] =-0.1118;
+//     Transf[2][0] = -0.0723;     Transf[2][1] = 0.0862; Transf[2][2] = 0.9937;
+//
+//     sample = (PermHM*Transf*PermMH).getVector();
+//     for(size_t i=0;i<9;i++)
+//     {
+//       TS_ASSERT_DELTA(sample[i],rot[i],1.e-4);
+//     }
+}
+void testTransf2HoraceOrthogonal()
+{
+     MDEvents::MDWSDescription TWS;
+     std::vector<double> minVal(4,-3),maxVal(4,3);
+     TWS.setMinMax(minVal,maxVal);
+
+     TWS.buildFromMatrixWS(ws2D,"Q3D","Direct");
+
+     std::vector<double> rot;
+
+     MDWSTransformTestHelper MsliceTransf;
+ 
+     ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,0);
+     // this is Wollastonite
+     ws2D->mutableSample().setOrientedLattice(new Geometry::OrientedLattice(7.9250,7.3200,7.0650,90.0550,95.2170,103.4200));
+     // u to rlu
+     //1.2215   -0.2928  -0.1147
+     //    0    1.1650   -0.0011
+     //    0         0    1.1244
+     Kernel::Matrix<double> U2RLU(3,3);  // 0 deg rotation
+     U2RLU[0][0] = 1.2215;      U2RLU[0][1] = -0.2928; U2RLU[0][2]  = -0.1147;
+     U2RLU[1][0] = 0;           U2RLU[1][1] = 1.1650;  U2RLU[1][2]  = -0.0011;
+     U2RLU[2][0] = 0.;          U2RLU[2][1] = 0.;      U2RLU[2][2]   = 1.1244;
+
+     CnvrtToMD::CoordScaling scales = CnvrtToMD::HKLScale;
+     TS_ASSERT_THROWS_NOTHING(rot=MsliceTransf.getTransfMatrix(TWS,scales));
+
+     auto sample = U2RLU.getVector();
+     for(size_t i=0;i<9;i++)
+     {
+       TS_ASSERT_DELTA(sample[i],rot[i],1.e-4);
+     }
+
+}
+
+
+
+
+MDWSTransfTest():
+PermMH(3,3)
 {
      ws2D =WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(4,10,true);
-    // rotate the crystal by twenty degrees back;
+    // rotate the crystal by twenty degrees back around y-axis;
      ws2D->mutableRun().mutableGoniometer().setRotationAngle(0,20);
      // add workspace energy
      ws2D->mutableRun().addProperty("Ei",13.,"meV",true);
 
      pLattice = new Geometry::OrientedLattice(3,3,2,90,90,90);
      ws2D->mutableSample().setOrientedLattice(pLattice);
+
+    // S_mantid*k_mantid = S_hor*k_hor; -- both Mantid and Horace produce the same kind of crystal frame
+    // Define the permutation matrix which transforms Mantid coordinate system (beam along Z-axis)
+    // to Horace  coordinate system (beam along X-axis) 
+    // k_horace = PermHM*k_mantid
+  //  Horace transformation matrix and Mantid Transformation matrix are connected by ration T_mantid  = T_hor*PermMH;
+//     0     0     1
+//     1     0     0
+//     0     1     0
+     PermMH[0][2]=1; PermMH[1][0]=1; PermMH[2][1]=1;
+     PermHM = PermMH;
+     PermHM.Invert();
+ 
 
 }
 
