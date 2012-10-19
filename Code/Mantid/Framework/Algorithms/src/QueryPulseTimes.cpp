@@ -7,6 +7,10 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/Unit.h"
+#include <boost/make_shared.hpp>
+#include <boost/assign/list_of.hpp>
+#include <algorithm>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -15,6 +19,27 @@ namespace Mantid
 {
 namespace Algorithms
 {
+
+  /**
+  Helper method to transform a MantidVector containing absolute times in nanoseconds to relative times in seconds given an offset.
+  */
+  class ConvertToRelativeTime : public std::unary_function<const MantidVec::value_type&, MantidVec::value_type>
+  {
+  private:
+    double m_offSet;
+  public: 
+     ConvertToRelativeTime(const DateAndTime& offSet) : m_offSet(static_cast<double>(offSet.totalNanoseconds())*1e-9){}
+     MantidVec::value_type operator()(const MantidVec::value_type& absTNanoSec)
+     {
+       return (absTNanoSec * 1e-9) - m_offSet;
+     }
+  };
+
+
+  MantidVec::value_type nanosecondsToSeconds(const MantidVec::value_type& nanoSecs)
+  {
+    return nanoSecs * 1e-9;
+  }
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(QueryPulseTimes)
@@ -80,23 +105,28 @@ namespace Algorithms
     MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace"); // TODO: MUST BE A HISTOGRAM WORKSPACE!
 
     // retrieve the properties
-    const std::vector<double> in_params=getProperty("Params");
-    std::vector<double> rb_params;
+    const std::vector<double> inParams =getProperty("Params");
+    std::vector<double> rebinningParams;
 
     // workspace independent determination of length
     const int histnumber = static_cast<int>(inWS->getNumberHistograms());
-
-    // The validator only passes parameters with size 1, or 3xn.  No need to check again here
-    if (in_params.size() >= 3)
+    
+    const size_t nanoSecondsInASecond = static_cast<size_t>(1e9);
+    const DateAndTime runStartTime = inWS->run().startTime();
+    // The validator only passes parameters with size 1, or 3xn.  
+    if (inParams.size() >= 3)
     {
-      // Input are min, delta, max
-      rb_params = in_params;
-
+      // Use the start of the run to offset the times provided by the user. pulse time of the events are absolute.
+      const DateAndTime startTime = runStartTime + inParams[0] ;
+      const DateAndTime endTime = runStartTime + inParams[2] ;
+      const double tStep = inParams[1] * nanoSecondsInASecond;
+      // Rebinning params in nanoseconds.
+      rebinningParams = boost::assign::list_of(static_cast<double>(startTime.totalNanoseconds()))(tStep)(static_cast<double>(endTime.totalNanoseconds())) ;
     } 
-    else if (in_params.size() == 1)
+    else if (inParams.size() == 1)
     {
-      double xmin = 0.;
-      double xmax = 0.;
+      size_t xmin = 0;
+      size_t xmax = 0;
       
       Progress sortProg(this,0.0,1.0, histnumber);
       inWS->sortAll(DataObjects::PULSETIME_SORT, &sortProg); 
@@ -104,11 +134,11 @@ namespace Algorithms
       for(int i = 0; i < histnumber; ++i)
       {
         const IEventList* el = inWS->getEventListPtr(i);
-        const int nEvents = el->getNumberEvents();
+        const size_t nEvents = el->getNumberEvents();
         if(nEvents > 0)
         {
-          double tempMin = el->getPulseTimeMin().totalNanoseconds();
-          double tempMax = el->getPulseTimeMax().totalNanoseconds();
+          size_t tempMin = el->getPulseTimeMin().totalNanoseconds();
+          size_t tempMax = el->getPulseTimeMax().totalNanoseconds();
           if(firstRun)
           {
             xmin = tempMin;
@@ -116,28 +146,29 @@ namespace Algorithms
             firstRun = false;
           }
           
-          xmin = tempMin < xmin ? tempMin : xmin;
-          xmax = tempMax > xmax ? tempMax : xmax;
+          xmin = std::min(tempMin, xmin);
+          xmax = std::max(tempMax, xmax);
         }
       }
       g_log.information() << "Using the current min and max as default " << xmin << ", " << xmax << std::endl;
 
-      rb_params.push_back(xmin);
-      rb_params.push_back(in_params[0]);
-      rb_params.push_back(xmax);
-
+      rebinningParams.push_back(static_cast<double>(xmin));
+      rebinningParams.push_back(inParams[1] * nanoSecondsInASecond);
+      rebinningParams.push_back(static_cast<double>(xmax));
     }
-
-    const bool dist = inWS->isDistribution();
-
-    const bool isHist = inWS->isHistogramData();
 
     //Initialize progress reporting.
     Progress prog(this,0.0,1.0, histnumber);
     
     MantidVecPtr XValues_new;
-    // create new output X axis
-    const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());
+    // create new X axis, with absolute times in seconds.
+    const int ntcnew = VectorHelper::createAxisFromRebinParams(rebinningParams, XValues_new.access());
+
+    ConvertToRelativeTime transformToRelativeT(runStartTime);
+
+    // Transform the output into relative times in seconds.
+    MantidVec OutXValues_scaled(XValues_new->size());
+    std::transform(XValues_new->begin(), XValues_new->end(), OutXValues_scaled.begin(), transformToRelativeT);
 
     outputWS = WorkspaceFactory::Instance().create("Workspace2D",histnumber,ntcnew,ntcnew-1);
     WorkspaceFactory::Instance().initializeFromParent(inWS, outputWS, true);
@@ -148,13 +179,13 @@ namespace Algorithms
     {
       //PARALLEL_START_INTERUPT_REGION
 
-      //Set the X axis for each output histogram
-      outputWS->setX(i, XValues_new);
-
       const IEventList* el = inWS->getEventListPtr(i);
       MantidVec y_data, e_data;
       // The EventList takes care of histogramming.
       el->generateHistogramPulseTime(*XValues_new, y_data, e_data);
+
+      //Set the X axis for each output histogram
+      outputWS->setX(i, OutXValues_scaled);
 
       //Copy the data over.
       outputWS->dataY(i).assign(y_data.begin(), y_data.end());
@@ -173,8 +204,11 @@ namespace Algorithms
       outputWS->getAxis(i)->unit() = inWS->getAxis(i)->unit();
     }
 
+    // X-unit is relative time since the start of the run.
+    outputWS->getAxis(0)->unit() = boost::make_shared<Units::Time>();
+
     //Copy the units over too.
-    for (int i=0; i < outputWS->axes(); ++i)
+    for (int i=1; i < outputWS->axes(); ++i)
     {
       outputWS->getAxis(i)->unit() = inWS->getAxis(i)->unit();
     }

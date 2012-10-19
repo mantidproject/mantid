@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/DateAndTime.h"
 #include "MantidAlgorithms/QueryPulseTimes.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -22,8 +23,11 @@ private:
   /**
   Helper method to create an event workspace with a set number of distributed events between pulseTimeMax and pulseTimeMin.
   */
-  IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMin, const int pulseTimeMax)
+  IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMinSecs, const int pulseTimeMaxSecs, const DateAndTime runStart=DateAndTime(int(0)))
   {
+    size_t pulseTimeMin = 1e9 * pulseTimeMinSecs;
+    size_t pulseTimeMax = 1e9 * pulseTimeMaxSecs;
+
     EventWorkspace_sptr retVal(new EventWorkspace);
     retVal->initialize(numberspectra,1,1);
     double binWidth = std::abs(double(pulseTimeMax - pulseTimeMin)/nDistrubutedEvents);
@@ -34,13 +38,17 @@ private:
       for (int i=0; i<nDistrubutedEvents; i++)
       {
         double tof = 0;
-        int pulseTime = static_cast<int>(((double)i+0.5)*binWidth); // Stick an event with a pulse_time in the middle of each pulse_time bin.
+        double pulseTime = ((double)i+0.5)*binWidth; // Stick an event with a pulse_time in the middle of each pulse_time bin.
         retVal->getEventList(pix) += TofEvent(tof, pulseTime);
       }
       retVal->getEventList(pix).addDetectorID(pix);
       retVal->getEventList(pix).setSpectrumNo(pix);
     }
     retVal->doneAddingEventLists();
+
+    // Add the required start time.
+    PropertyWithValue<std::string>* testProperty = new PropertyWithValue<std::string>("start_time", runStart.toSimpleString(), Direction::Input);
+    retVal->mutableRun().addLogData(testProperty);
 
     return retVal;
   }
@@ -52,7 +60,7 @@ private:
   */
   void do_execute_and_check_binning(const int nSpectra, const int pulseTimeMin, const int pulseTimeMax, const int nUniformDistributedEvents, const int nBinsToBinTo)
   {
-    IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
+    IEventWorkspace_sptr inWS = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax);
 
     // Rebin pameters require the step.
     const int step = (pulseTimeMax - pulseTimeMin)/(nBinsToBinTo); 
@@ -60,7 +68,7 @@ private:
     QueryPulseTimes alg;
     alg.setRethrows(true);
     alg.initialize();
-    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("InputWorkspace", inWS);
     Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(step)(pulseTimeMax); // Provide rebin arguments.
     alg.setProperty("Params", rebinArgs);
     alg.setPropertyValue("OutputWorkspace", "outWS");
@@ -68,6 +76,15 @@ private:
 
     
     MatrixWorkspace_sptr outWS = AnalysisDataService::Instance().retrieveWS<Workspace2D>("outWS");
+
+    // Check the units of the output workspace.
+    Unit_const_sptr expectedUnit(new Units::Time()); 
+    TSM_ASSERT_EQUALS("X unit should be Time/s", expectedUnit->unitID(), outWS->getAxis(0)->unit()->unitID());
+    for (int i=1; i < outWS->axes(); ++i)
+    {
+      TSM_ASSERT_EQUALS("Axis units do not match.", inWS->getAxis(i)->unit()->unitID(), outWS->getAxis(i)->unit()->unitID());
+    }
+
     //Validate each spectra
     for(int i = 0; i < nSpectra; ++i)
     {
@@ -76,7 +93,7 @@ private:
       TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
       for(int j = 0; j < X.size(); ++j)
       {
-        TS_ASSERT_EQUALS(step*j, X[j]);
+        TS_ASSERT_EQUALS(static_cast<int>(step*j), static_cast<int>(X[j]));
       }
 
       // Check that the y-axis has been set-up properly.
