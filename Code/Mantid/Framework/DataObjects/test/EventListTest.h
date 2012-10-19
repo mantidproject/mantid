@@ -1797,14 +1797,14 @@ public:
     {
       for (double pulse_time=0; pulse_time < MAX_PULSE_TIME; pulse_time += BIN_DELTA/events_per_bin) 
       {
-        el += TofEvent( 100, pulse_time);
+        el += TofEvent( 100, static_cast<size_t>(pulse_time));
       }
     }
     else if(eventType == WEIGHTED)
     {
       for (double pulse_time=0; pulse_time < MAX_PULSE_TIME; pulse_time += BIN_DELTA/events_per_bin) 
       {
-        el += WeightedEvent(TofEvent( 100, pulse_time));
+        el += WeightedEvent(TofEvent( 100, static_cast<size_t>(pulse_time)));
       }
     }
     return el;
