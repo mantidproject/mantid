@@ -253,17 +253,18 @@ namespace Mantid
         integrate->executeAsSubAlg();
         backgroundIntWS = integrate->getProperty("OutputWorkspace");
 
+        // Need to match the units between background and detector vanadium
+        const std::string detVanIntRangeUnits = reductionManager->getProperty("DetVanIntRangeUnits");
         IAlgorithm_sptr cvu = this->createSubAlgorithm("ConvertUnits");
         cvu->setProperty("InputWorkspace", backgroundIntWS);
         cvu->setProperty("OutputWorkspace", backgroundIntWS);
-        cvu->setProperty("Target", "Energy");
+        cvu->setProperty("Target", detVanIntRangeUnits);
         cvu->executeAsSubAlg();
         backgroundIntWS = cvu->getProperty("OutputWorkspace");
 
         // Normalise the background integral workspace
         if (dvCompWS)
         {
-
           MatrixWorkspace_sptr hmean = 2.0 * dvWS * dvCompWS;
           hmean /= (dvWS + dvCompWS);
           backgroundIntWS /= hmean;
