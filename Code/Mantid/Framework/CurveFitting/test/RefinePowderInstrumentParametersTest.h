@@ -117,7 +117,7 @@ public:
   /** Test fit by Monte Carlo random walk
     * Using the data from calibration of PG3 in August 2012 for bank 1
    */
-  void test_MonteCarloRandomWalk()
+  void Passed_test_MonteCarloRandomWalk()
   {
     // 0. Init
     map<string, double> newparamvalues;
@@ -195,7 +195,7 @@ public:
   /** Test fit by Simplex
     * Using the data from calibration of PG3 in August 2012 for bank 1
    */
-  void test_FitSimplex()
+  void Passed_test_FitSimplex()
   {
     // 0. Init
     map<string, double> newparamvalues;

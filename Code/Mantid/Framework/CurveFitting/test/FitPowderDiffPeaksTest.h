@@ -40,7 +40,7 @@ public:
 
   /** Fit with one shifted parmeter 'Zero'
    */
-  void test_FitZero()
+  void Passed_test_FitZero()
   {
     // 1. Generate testing workspace
     std::map<std::string, double> newparamvalues;
