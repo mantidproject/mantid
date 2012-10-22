@@ -3,16 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include <boost/tuple/tuple.hpp>
-#include <boost/shared_ptr.hpp>
-
 
 namespace Mantid
 {
-  namespace DataObjects
-  {
-    class EventWorkspace;
-  }
 namespace Algorithms
 {
 
@@ -49,12 +42,9 @@ namespace Algorithms
     virtual const std::string category() const;
 
   private:
-    boost::tuple<uint64_t, uint64_t> determineXRange(boost::shared_ptr<Mantid::DataObjects::EventWorkspace> inWS);
     virtual void initDocs();
     void init();
     void exec();
-
-
   };
 
 
