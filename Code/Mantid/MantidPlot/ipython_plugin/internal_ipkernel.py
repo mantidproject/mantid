@@ -15,13 +15,31 @@ from IPython.zmq.ipkernel import IPKernelApp
 # Functions and classes
 #-----------------------------------------------------------------------------
 
+def get_executable():
+    """Returns a string giving the executable to run when starting the IPython kernel
+    """
+    # We have to make sure we can actually call the Python executable as this script will
+    # have probably been called from MantidPlot and in that instance MantidPlot will
+    # be the sys.executable file. Assume that Linux & OS X can just call Python but
+    # on Windows we will have to assume that python.exe is next to MantidPlot.exe
+    # but not necessarily in the PATH variable
+    import sys
+    if sys.platform == "win32":
+        import os
+        # pythonw avoids a new terminal window when the new process starts (only applicable
+        # on the packaged build
+        return os.path.join(sys.exec_prefix, "pythonw.exe")
+    else:
+        return "python"
+
 def pylab_kernel(gui):
     """Launch and return an IPython kernel with pylab support for the desired gui
     """
     kernel = IPKernelApp.instance()
     # Note: pylab command seems to be needed for event loop to behave nicely
-    kernel.initialize(['python', '--pylab=%s' % gui,
-        "--c='%run -m mantidplotrc'"])
+    kernel.initialize([get_executable(), '--pylab=%s' % gui,
+            "--c='%run -m mantidplotrc'"])
+    
     return kernel
 
 
@@ -58,7 +76,7 @@ class InternalIPKernel(object):
                 "qtconsoleapp.main()"
             ])
             from subprocess import Popen, PIPE
-            return Popen([sys.exec_prefix+'\pythonw.exe', '-c', cmd, '--existing', cf] + argv, stdout=PIPE, stderr=PIPE)
+            return Popen([get_executable(), '-c', cmd, '--existing', cf] + argv, stdout=PIPE, stderr=PIPE)
         
         return connect_qtconsole()
 
