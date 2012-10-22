@@ -2095,7 +2095,7 @@ namespace DataObjects
       size_t bin=0;
 
       //The tof is greater the first bin boundary, so we need to find the first bin
-      double pulsetime = itev->pulseTime().totalNanoseconds();
+      double pulsetime = static_cast<double>(itev->pulseTime().totalNanoseconds());
       while (bin < x_size-1)
       {
         //Within range?
@@ -2112,7 +2112,7 @@ namespace DataObjects
       //Keep going through all the events
       while ((itev != itev_end) && (bin < x_size-1))
       {
-        pulsetime = itev->pulseTime().totalNanoseconds();
+        pulsetime = static_cast<double>(itev->pulseTime().totalNanoseconds());
         while (bin < x_size-1)
         {
           //Within range?
