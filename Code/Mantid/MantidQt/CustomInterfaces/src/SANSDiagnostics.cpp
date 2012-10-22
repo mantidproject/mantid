@@ -414,6 +414,8 @@ namespace MantidQt
     */
     void SANSDiagnostics::getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const detid_t detNum,std::vector<specid_t>&specList)
     {
+      // This metod was wrong ticket #2470. The solution here will cause the system not to perform very well. 
+      // The best option would be put this information inside the DetectorDetails
       boost::shared_ptr<RectDetectorDetails> rectDet;
       try
       {
@@ -436,15 +438,34 @@ namespace MantidQt
         g_log.error()<<"Error when accessing the details of rectangular detector"<<std::endl;
         return;
       }
-      std::vector<detid_t> detIdList;
-      detIdList.push_back(rectDet->getMinimumDetectorId());
-      detIdList.push_back(rectDet->getMaximumDetectorId());
-      // Convert from list of workspace indices to list of spectrum numbers
+      
+      size_t min_spec_index= ULONG_MAX;
+      size_t max_spec_index=0; 
+      size_t aux; 
+      // this is a costly opperation and should be done just once for each file
+      Mantid::index2detid_map * map =  mws_sptr->getWorkspaceIndexToDetectorIDMap();
+      Mantid::index2detid_map::iterator it; 
+      for (it=map->begin(); it!= map->end(); it++)
+      {
+        // if detector id inside the range
+        if (it->second >= rectDet->getMinimumDetectorId() && it->second <= rectDet->getMaximumDetectorId()){
+          aux = it->first; 
+          if (aux > max_spec_index)
+            max_spec_index = aux; 
+          if (aux < min_spec_index)
+            min_spec_index = aux;
+        }
+      }
+
+      if ( min_spec_index == ULONG_MAX || max_spec_index == 0){
+        g_log.error()<<"Error : The instrument does not have data associated to the RectangularDetector " << rectDet->getDetectorName().toStdString()<<std::endl;
+      }
+      // as long the spectrum index is the workspace index + 1
       std::vector<size_t> indices;
-      mws_sptr->getIndicesFromDetectorIDs(detIdList,indices);
       specList.clear();
-      for (size_t i=0; i<indices.size(); i++)
-        specList.push_back( mws_sptr->getSpectrum(indices[i])->getSpectrumNo());
+      // it is not really required, it could stay with the workspace id, just for compatibility
+      specList.push_back(mws_sptr->getSpectrum(min_spec_index)->getSpectrumNo());
+      specList.push_back(mws_sptr->getSpectrum(max_spec_index)->getSpectrumNo());                          
     }
   /** This method returns the minimum and maximum spectrum ids
     * @param specList - list of spectra.
