@@ -135,6 +135,23 @@ def get3pointsFor3pointMethod ( IntegratedWorkspace, whichTube, fitParams):
         C = g[1][1]
     else:
         C = (A+B)/2.0  # If we haven't got a centre peak, we put one half way between the end points.
+    
+    # Delete temporary workspaces
+    DeleteWorkspace( 'get3pointsFor3pointMethod')
+    DeleteWorkspace('Z1_NormalisedCovarianceMatrix')
+    DeleteWorkspace('Z1_Parameters')
+    DeleteWorkspace('Z1_Workspace')
+    DeleteWorkspace('CentrePoint_NormalisedCovarianceMatrix')
+    DeleteWorkspace('CentrePoint_Parameters')
+    DeleteWorkspace('CentrePoint_Workspace')
+    DeleteWorkspace('LeftPoint_NormalisedCovarianceMatrix')
+    DeleteWorkspace('LeftPoint_Parameters')
+    DeleteWorkspace('LeftPoint_Workspace')
+    DeleteWorkspace('RightPoint_NormalisedCovarianceMatrix')
+    DeleteWorkspace('RightPoint_Parameters')
+    DeleteWorkspace('RightPoint_Workspace')
+    
+        
     return A, B, C 
     
 def getPeaksForNSlitsMethod ( IntegratedWorkspace, eP, eHeight, eWidth, whichTube):
@@ -304,6 +321,14 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False )
         for i in range( len(usedTubePoints) ):
            #print "used point",i,"shoving pixel",int(usedTubePoints[i]+0.5)
            xResult[ int(usedTubePoints[i]+0.5) ] = xResult[0]
+           
+           
+    # Delete temporary workspaces
+    DeleteWorkspace('QuadraticFittingWorkspace')
+    DeleteWorkspace('QF_NormalisedCovarianceMatrix')
+    DeleteWorkspace('QF_Parameters')
+    DeleteWorkspace('QF_Workspace')
+
          
     # print xResult	 
     return xResult
