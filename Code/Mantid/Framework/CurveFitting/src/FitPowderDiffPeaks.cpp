@@ -2,6 +2,8 @@
 
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Statistics.h"
+#include "MantidKernel/Statistics.h"
 
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -82,16 +84,20 @@ namespace CurveFitting
                     "Output Workspace2D for the fitted peaks. ");
 
     // Input/output peaks table workspace
-    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("PeaksParametersWorkspace", "AnonymousPeak", Direction::Input),
+    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("BraggPeakParameterWorkspace", "AnonymousPeak", Direction::Input),
                     "TableWorkspace containg all peaks' parameters.");
 
     // Input and output instrument parameters table workspace
-    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("InstrumentParametersWorkspace", "AnonymousInstrument", Direction::InOut),
+    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("InstrumentParameterWorkspace", "AnonymousInstrument", Direction::InOut),
                     "TableWorkspace containg instrument's parameters.");
 
     // Workspace to output fitted peak parameters
-    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputPeaksParameterWorkspace", "AnonymousOut2", Direction::Output),
+    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputBraggPeakParameterWorkspace", "AnonymousOut2", Direction::Output),
                     "Output TableWorkspace containing the fitted peak parameters for each peak.");
+
+    // Zscore table workspace
+    declareProperty(new WorkspaceProperty<TableWorkspace>("OutputZscoreWorkspace", "ZscoreTable", Direction::Output),
+                    "Output TableWorkspace containing the Zscore of the fitted peak parameters. ");
 
     // Workspace index of the
     declareProperty("WorkspaceIndex", 0, "Worskpace index for the data to refine against.");
@@ -120,8 +126,8 @@ namespace CurveFitting
       throw std::invalid_argument("Input workspaceindex is out of range.");
     }
 
-    DataObjects::TableWorkspace_sptr peakWS = this->getProperty("PeaksParametersWorkspace");
-    DataObjects::TableWorkspace_sptr parameterWS = this->getProperty("InstrumentParametersWorkspace");
+    DataObjects::TableWorkspace_sptr peakWS = this->getProperty("BraggPeakParameterWorkspace");
+    DataObjects::TableWorkspace_sptr parameterWS = this->getProperty("InstrumentParameterWorkspace");
 
     double tofmin = getProperty("MinTOF");
     double tofmax = getProperty("MaxTOF");
@@ -158,8 +164,11 @@ namespace CurveFitting
     // 5. Create Output
 
     // a) Create a Table workspace for peak profile
-    TableWorkspace_sptr outputpeaksws = genPeakParametersWorkspace(goodfitpeaks, goodfitchi2);
-    setProperty("OutputPeaksParameterWorkspace", outputpeaksws);
+    pair<TableWorkspace_sptr, TableWorkspace_sptr> tables = genPeakParametersWorkspace(goodfitpeaks, goodfitchi2);
+    TableWorkspace_sptr outputpeaksws = tables.first;
+    TableWorkspace_sptr ztablews = tables.second;
+    setProperty("OutputBraggPeakParameterWorkspace", outputpeaksws);
+    setProperty("OutputZscoreWorkspace", ztablews);
 
     // b) Create output data workspace (as a middle stage product)
     Workspace2D_sptr outdataws = genOutputFittedPatternWorkspace(mPeakData, workspaceindex);
@@ -1168,7 +1177,7 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
 
-  /** Create a Workspace2D for fitted peaks (pattern)
+  /** Create a Workspace2D for fitted peaks (pattern) and also the workspace for Zscores!
     */
   Workspace2D_sptr FitPowderDiffPeaks::genOutputFittedPatternWorkspace(std::vector<double> pattern, int workspaceindex)
   {
@@ -1286,7 +1295,7 @@ namespace CurveFitting
     * Table has column as H, K, L, d_h, X0, A(lpha), B(eta), S(igma), Chi2
     * Each row is a peak
     */
-  TableWorkspace_sptr FitPowderDiffPeaks::genPeakParametersWorkspace(
+  pair<TableWorkspace_sptr, TableWorkspace_sptr> FitPowderDiffPeaks::genPeakParametersWorkspace(
       std::vector<std::vector<int> > goodfitpeaks, std::vector<double> goodfitchi2s)
   {
     // 1. Generate the TableWorkspace
@@ -1325,6 +1334,7 @@ namespace CurveFitting
     std::sort(dhkls.begin(), dhkls.end());
 
     // 4. Add the peak data to each row
+    vector<double> vectofh, vecalpha, vecbeta, vecsigma;
     for (size_t i = 0; i < dhkls.size(); ++i)
     {
       CurveFitting::BackToBackExponential_sptr peak = mPeaks[dhkls[i].second];
@@ -1347,6 +1357,11 @@ namespace CurveFitting
       double p_x = peak->getParameter("X0");
       double p_s = peak->getParameter("S");
 
+      vectofh.push_back(p_x);
+      vecalpha.push_back(p_a);
+      vecbeta.push_back(p_b);
+      vecsigma.push_back(p_s);
+
       newrow << p_x << p_i << p_a << p_b << p_s;
 
       outbuf << setw(10) << setprecision(5) << p_x
@@ -1357,9 +1372,7 @@ namespace CurveFitting
 
       // iii. chi2
       double chi2 = goodfitchi2s[i];
-
       newrow << chi2;
-
       outbuf << setw(10) << setprecision(5) << chi2 << endl;
 
     } // FOREACH Peak
@@ -1371,7 +1384,47 @@ namespace CurveFitting
     ofile << outbuf.str();
     ofile.close();
 
-    return tablews;
+    // 6. Start to calculate Z-scores
+    vector<double> zcentres = Kernel::getZscore(vectofh);
+    vector<double> zalphas = Kernel::getZscore(vecalpha);
+    vector<double> zbetas = Kernel::getZscore(vecbeta);
+    vector<double> zsigma = Kernel::getZscore(vecsigma);
+
+    // 7. Build table workspace for Z scores
+    TableWorkspace* ztablewsptr = new TableWorkspace();
+    TableWorkspace_sptr ztablews = TableWorkspace_sptr(ztablewsptr);
+
+    ztablews->addColumn("int", "H");
+    ztablews->addColumn("int", "K");
+    ztablews->addColumn("int", "L");
+
+    ztablews->addColumn("double", "d_h");
+    ztablews->addColumn("double", "Z_TOF_h");
+    ztablews->addColumn("double", "Z_Alpha");
+    ztablews->addColumn("double", "Z_Beta");
+    ztablews->addColumn("double", "Z_Sigma");
+
+    // 8. Set values
+    for (size_t i = 0; i < dhkls.size(); ++i)
+    {
+      TableRow newrow = ztablews->appendRow();
+
+      // i. H, K, L, d_h
+      double dh = dhkls[i].first;
+      std::vector<int> hkl = dhkls[i].second;
+
+      newrow << hkl[0] << hkl[1] << hkl[2] << dh;
+
+      // ii. Z scores
+      double p_x = zcentres[i];
+      double p_a = zalphas[i];
+      double p_b = zbetas[i];
+      double p_s = zsigma[i];
+
+      newrow << p_x << p_a << p_b << p_s;
+    }
+
+    return make_pair(tablews, ztablews);
   }
 
  //----------------------------------------------------------------------------------------------
