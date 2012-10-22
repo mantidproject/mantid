@@ -409,7 +409,10 @@ namespace Mantid
         }
         catch(std::invalid_argument&)
         {
-          g_log.error() << "Could not find file" << filename << "'\n";
+          if (filename.length() >= hint.length())
+          {
+            g_log.error() << "Could not find file '" << filename << "'\n";
+          }
         }
       }
 
