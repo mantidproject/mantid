@@ -1,10 +1,10 @@
-#ifndef MANTID_ALGORITHMS_QUERYPULSETIMESTEST_H_
-#define MANTID_ALGORITHMS_QUERYPULSETIMESTEST_H_
+#ifndef MANTID_ALGORITHMS_REBINBYPULSETIMESTEST_H_
+#define MANTID_ALGORITHMS_REBINBYPULSETIMESTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/DateAndTime.h"
-#include "MantidAlgorithms/QueryPulseTimes.h"
+#include "MantidAlgorithms/RebinByPulseTimes.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
@@ -12,7 +12,7 @@
 #include <boost/assign/list_of.hpp>
 #include <gmock/gmock.h>
 
-using Mantid::Algorithms::QueryPulseTimes;
+using Mantid::Algorithms::RebinByPulseTimes;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -78,7 +78,7 @@ public:
 //=====================================================================================
 // Functional Tests
 //=====================================================================================
-class QueryPulseTimesTest : public CxxTest::TestSuite
+class RebinByPulseTimesTest : public CxxTest::TestSuite
 {
 
 private:
@@ -95,7 +95,7 @@ private:
     // Rebin pameters require the step.
     const int step = (pulseTimeMax - pulseTimeMin)/(nBinsToBinTo); 
 
-    QueryPulseTimes alg;
+    RebinByPulseTimes alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", inWS);
@@ -140,13 +140,13 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static QueryPulseTimesTest *createSuite() { return new QueryPulseTimesTest(); }
-  static void destroySuite( QueryPulseTimesTest *suite ) { delete suite; }
+  static RebinByPulseTimesTest *createSuite() { return new RebinByPulseTimesTest(); }
+  static void destroySuite( RebinByPulseTimesTest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    QueryPulseTimes alg;
+    RebinByPulseTimes alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -155,7 +155,7 @@ public:
   {
     IEventWorkspace_sptr ws(new MockIEventWorkspace);
 
-    QueryPulseTimes alg;
+    RebinByPulseTimes alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
@@ -173,7 +173,7 @@ public:
     using Mantid::DataObjects::Workspace2D;
     Workspace_sptr workspace2D = boost::make_shared<Workspace2D>();
 
-    QueryPulseTimes alg;
+    RebinByPulseTimes alg;
     alg.initialize();
     TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", workspace2D), std::invalid_argument);
   }
@@ -271,7 +271,7 @@ public:
     const double pulseTimeMin = 10;
     const double pulseTimeMax = 0;
 
-    QueryPulseTimes alg;
+    RebinByPulseTimes alg;
     alg.setRethrows(true);
     alg.initialize();
     Mantid::MantidVec rebinArgs = boost::assign::list_of<double>(pulseTimeMin)(step)(pulseTimeMax); // Provide rebin arguments.
@@ -291,7 +291,7 @@ public:
     // Rebin pameters require the step.
     const int step = static_cast<int>((pulseTimeMax - pulseTimeMin)/(nBinsToBinTo)); 
 
-    QueryPulseTimes alg;
+    RebinByPulseTimes alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
@@ -338,7 +338,7 @@ public:
     // Rebin pameters require the step.
     const int step = static_cast<int>((pulseTimeMax - pulseTimeMin)/(nBinsToBinTo)); 
 
-    QueryPulseTimes alg;
+    RebinByPulseTimes alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
@@ -369,7 +369,7 @@ public:
 //=====================================================================================
 // Performance Tests
 //=====================================================================================
-class QueryPulseTimesTestPerformance : public CxxTest::TestSuite
+class RebinByPulseTimesTestPerformance : public CxxTest::TestSuite
 {
 private:
 
@@ -382,7 +382,7 @@ private:
 
 public:
 
-  QueryPulseTimesTestPerformance() : 
+  RebinByPulseTimesTestPerformance() : 
     pulseTimeMin(0),
     pulseTimeMax(4),
     nUniformDistributedEvents(10000),
@@ -403,7 +403,7 @@ public:
     const double dPulseTimeMin = pulseTimeMin;
     const double step = (dPulseTimeMax - dPulseTimeMin)/(nBinsToBinTo); 
 
-    QueryPulseTimes alg;
+    RebinByPulseTimes alg;
     alg.setRethrows(true);
     alg.initialize();
     alg.setProperty("InputWorkspace", m_ws);
@@ -419,4 +419,4 @@ public:
 };
 
 
-#endif /* MANTID_ALGORITHMS_QUERYPULSETIMESTEST_H_ */
+#endif /* MANTID_ALGORITHMS_RebinByPulseTimesTEST_H_ */

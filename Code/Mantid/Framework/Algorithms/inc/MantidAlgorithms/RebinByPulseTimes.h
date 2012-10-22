@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_QUERYPULSETIMES_H_
-#define MANTID_ALGORITHMS_QUERYPULSETIMES_H_
+#ifndef MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
+#define MANTID_ALGORITHMS_REBINBYPULSETIMES_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
@@ -9,7 +9,7 @@ namespace Mantid
 namespace Algorithms
 {
 
-  /** QueryPulseTimes : TODO: DESCRIPTION
+  /** RebinByPulseTimes : Rebin an input EventWorkspace according to the pulse times of the events.
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,11 +31,11 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport QueryPulseTimes  : public API::Algorithm
+  class DLLExport RebinByPulseTimes  : public API::Algorithm
   {
   public:
-    QueryPulseTimes();
-    virtual ~QueryPulseTimes();
+    RebinByPulseTimes();
+    virtual ~RebinByPulseTimes();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -51,4 +51,4 @@ namespace Algorithms
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif  /* MANTID_ALGORITHMS_QUERYPULSETIMES_H_ */
+#endif  /* MANTID_ALGORITHMS_REBINBYPULSETIMES_H_ */

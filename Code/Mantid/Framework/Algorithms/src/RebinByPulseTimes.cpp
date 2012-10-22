@@ -2,7 +2,7 @@
 TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
 *WIKI*/
 
-#include "MantidAlgorithms/QueryPulseTimes.h"
+#include "MantidAlgorithms/RebinByPulseTimes.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -36,36 +36,36 @@ namespace Algorithms
   };
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(QueryPulseTimes)
+  DECLARE_ALGORITHM(RebinByPulseTimes)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  QueryPulseTimes::QueryPulseTimes()
+  RebinByPulseTimes::RebinByPulseTimes()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  QueryPulseTimes::~QueryPulseTimes()
+  RebinByPulseTimes::~RebinByPulseTimes()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string QueryPulseTimes::name() const { return "QueryPulseTimes";};
+  const std::string RebinByPulseTimes::name() const { return "RebinByPulseTimes";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int QueryPulseTimes::version() const { return 1;};
+  int RebinByPulseTimes::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string QueryPulseTimes::category() const { return "General";}
+  const std::string RebinByPulseTimes::category() const { return "General";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void QueryPulseTimes::initDocs()
+  void RebinByPulseTimes::initDocs()
   {
     this->setWikiSummary("Bins events according to pulse time. Binning parameters are specified relative to the start of the run.");
     this->setOptionalMessage("Bins events according to pulse time. Binning parameters are specified relative to the start of the run.");
@@ -74,7 +74,7 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
   */
-  void QueryPulseTimes::init()
+  void RebinByPulseTimes::init()
   {
     declareProperty(new API::WorkspaceProperty<API::IEventWorkspace>("InputWorkspace","",Direction::Input), "An input workspace.");
     declareProperty(
@@ -88,13 +88,13 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
   */
-  void QueryPulseTimes::exec()
+  void RebinByPulseTimes::exec()
   {
     using Mantid::DataObjects::EventWorkspace;
     IEventWorkspace_sptr inWS = getProperty("InputWorkspace");
     if(!boost::dynamic_pointer_cast<EventWorkspace>(inWS))
     {
-      throw std::invalid_argument("QueryPulseTimes requires an EventWorkspace as an input.");
+      throw std::invalid_argument("RebinByPulseTimes requires an EventWorkspace as an input.");
     }
 
     MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace"); // TODO: MUST BE A HISTOGRAM WORKSPACE!
