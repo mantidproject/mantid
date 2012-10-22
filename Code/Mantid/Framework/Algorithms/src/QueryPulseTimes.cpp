@@ -123,32 +123,9 @@ namespace Algorithms
     } 
     else if (inParams.size() == 1)
     {
-      uint64_t xmin = 0;
-      uint64_t xmax = 0;
-      
-      Progress sortProg(this,0.0,1.0, histnumber);
-      inWS->sortAll(DataObjects::PULSETIME_SORT, &sortProg); 
-      bool firstRun = true;
-      for(int i = 0; i < histnumber; ++i)
-      {
-        const IEventList* el = inWS->getEventListPtr(i);
-        const uint64_t nEvents = el->getNumberEvents();
-        if(nEvents > 0)
-        {
-          uint64_t tempMin = el->getPulseTimeMin().totalNanoseconds();
-          uint64_t tempMax = el->getPulseTimeMax().totalNanoseconds();
-          if(firstRun)
-          {
-            xmin = tempMin;
-            xmax = tempMax;
-            firstRun = false;
-          }
-          
-          xmin = std::min(tempMin, xmin);
-          xmax = std::max(tempMax, xmax);
-        }
-      }
-      g_log.information() << "Using the current min and max as default " << xmin << ", " << xmax << std::endl;
+      boost::tuple<uint64_t, uint64_t> xRange = determineXRange(inWS);
+      const uint64_t xmin = xRange.get<0>();
+      const uint64_t xmax = xRange.get<1>();
 
       rebinningParams.push_back(static_cast<double>(xmin));
       rebinningParams.push_back(inParams[0] * nanoSecondsInASecond);
@@ -217,6 +194,43 @@ namespace Algorithms
     setProperty("OutputWorkspace", outputWS);
 
     return;
+  }
+
+  /**
+  Determine the X range by looking through the events and finding the minimum and maxium pulse times.
+  @ param inWS : input workspace
+  @ return tuple of min an max pulse times.
+  */
+  boost::tuple<uint64_t, uint64_t> QueryPulseTimes::determineXRange(boost::shared_ptr<Mantid::DataObjects::EventWorkspace> inWS)
+  {
+    uint64_t xmin = 0;
+    uint64_t xmax = 0;
+    const int histnumber = inWS->getNumberHistograms();
+
+    Progress sortProg(this,0.0,1.0, histnumber);
+    inWS->sortAll(DataObjects::PULSETIME_SORT, &sortProg); 
+    bool firstRun = true;
+    for(int i = 0; i < histnumber; ++i)
+    {
+      const IEventList* el = inWS->getEventListPtr(i);
+      const uint64_t nEvents = el->getNumberEvents();
+      if(nEvents > 0)
+      {
+        uint64_t tempMin = el->getPulseTimeMin().totalNanoseconds();
+        uint64_t tempMax = el->getPulseTimeMax().totalNanoseconds();
+        if(firstRun)
+        {
+          xmin = tempMin;
+          xmax = tempMax;
+          firstRun = false;
+        }
+
+        xmin = std::min(tempMin, xmin);
+        xmax = std::max(tempMax, xmax);
+      }
+    }
+    g_log.information() << "Using the current min and max as default " << xmin << ", " << xmax << std::endl;
+    return boost::make_tuple(xmin, xmax);
   }
 
 
