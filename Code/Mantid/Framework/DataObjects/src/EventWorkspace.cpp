@@ -13,6 +13,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/DateAndTime.h"
 #include <limits>
 #include <numeric>
 #include "MantidAPI/ISpectrum.h"
@@ -20,6 +21,7 @@
 
 using namespace boost::posix_time;
 using Mantid::API::ISpectrum;
+using Mantid::Kernel::DateAndTime;
 
 namespace Mantid
 {
@@ -229,6 +231,46 @@ namespace DataObjects
   double EventWorkspace::getTofMax() const
   {
     return this->getEventXMax();
+  }
+
+  /**
+  Get the minimum pulse time for events accross the entire workspace.
+  @return minimum pulse time as a DateAndTime.
+  */
+  DateAndTime EventWorkspace::getPulseTimeMin() const
+  {
+    // set to crazy values to start
+    Mantid::Kernel::DateAndTime tMin = DateAndTime::maximum();
+    size_t numWorkspace = this->data.size();
+    DateAndTime temp;
+    for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
+    {
+      const EventList &evList = this->getEventList(workspaceIndex);
+      temp = evList.getPulseTimeMin();
+      if (temp < tMin)
+        tMin = temp;
+    }
+    return tMin;
+  }
+
+  /**
+  Get the maximum pulse time for events accross the entire workspace.
+  @return maximum pulse time as a DateAndTime.
+  */
+  DateAndTime EventWorkspace::getPulseTimeMax() const
+  {
+    // set to crazy values to start
+    Mantid::Kernel::DateAndTime tMax = DateAndTime::minimum();
+    size_t numWorkspace = this->data.size();
+    DateAndTime temp;
+    for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
+    {
+      const EventList &evList = this->getEventList(workspaceIndex);
+      temp = evList.getPulseTimeMax();
+      if (temp > tMax)
+        tMax = temp;
+    }
+    return tMax;
   }
 
   /**

@@ -652,6 +652,32 @@ public:
 
   }
 
+  void test_get_pulse_time_max()
+  {
+    DateAndTime min = DateAndTime(0);
+    DateAndTime max = DateAndTime(1);
+
+    EventWorkspace_sptr ws(new EventWorkspace);
+    ws->initialize(1,2,1);
+    ws->getEventList(0) += TofEvent(0, min); // min
+    ws->getEventList(0) += TofEvent(0, max); // max;
+
+    TS_ASSERT_EQUALS(max, ws->getPulseTimeMax());
+  }
+
+  void test_get_pulse_time_min()
+  {
+    DateAndTime min = DateAndTime(0);
+    DateAndTime max = DateAndTime(1);
+
+    EventWorkspace_sptr ws(new EventWorkspace);
+    ws->initialize(1,2,1);
+    ws->getEventList(0) += TofEvent(0, min); // min
+    ws->getEventList(0) += TofEvent(0, max); // max;
+
+    TS_ASSERT_EQUALS(min, ws->getPulseTimeMin());
+  }
+
 
   //------------------------------------------------------------------------------
   void test_droppingOffMRU()

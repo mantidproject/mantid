@@ -970,6 +970,22 @@ public:
     TSM_ASSERT_THROWS("We don't support WeightedEvents with this feature at present.", eList.generateHistogramPulseTime(X, Y, E), std::runtime_error);
   }
 
+  void test_get_min_pulse_time()
+  {
+    EventList eList = this->fake_uniform_pulse_data();
+    auto vec = eList.getPulseTimes();
+    int64_t expectedResult = std::min_element(vec.begin(), vec.end())->totalNanoseconds();
+    TS_ASSERT_EQUALS(expectedResult, eList.getPulseTimeMin().totalNanoseconds());
+  }
+
+  void test_get_max_pulse_time()
+  {
+    EventList eList = this->fake_uniform_pulse_data();
+    auto vec = eList.getPulseTimes();
+    int64_t expectedResult = std::max_element(vec.begin(), vec.end())->totalNanoseconds();
+    TS_ASSERT_EQUALS(expectedResult, eList.getPulseTimeMax().totalNanoseconds());
+  }
+
   void test_histogram_weights_simple()
   {
     // 5 events per bin, simple non-weighted

@@ -59,6 +59,8 @@ public:
   MOCK_CONST_METHOD0(getNumberEvents, std::size_t());
   MOCK_CONST_METHOD0(getTofMin, double());
   MOCK_CONST_METHOD0(getTofMax, double());
+  MOCK_CONST_METHOD0(getPulseTimeMin, DateAndTime());
+  MOCK_CONST_METHOD0(getPulseTimeMax, DateAndTime());
   MOCK_CONST_METHOD0(getEventType, EventType());
   MOCK_METHOD1(getEventListPtr, IEventList*(const std::size_t));
   MOCK_CONST_METHOD5(generateHistogram, void(const std::size_t, const Mantid::MantidVec&,  Mantid::MantidVec&,  Mantid::MantidVec&, bool));

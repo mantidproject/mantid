@@ -6,6 +6,7 @@
 
 namespace Mantid
 {
+
 namespace API
 {
 
@@ -43,6 +44,8 @@ namespace API
     virtual std::size_t getNumberEvents() const = 0;
     virtual double getTofMin() const = 0;
     virtual double getTofMax() const = 0;
+    virtual Mantid::Kernel::DateAndTime getPulseTimeMax() const = 0;
+    virtual Mantid::Kernel::DateAndTime getPulseTimeMin() const = 0;
     virtual EventType getEventType() const = 0;
     virtual IEventList * getEventListPtr(const std::size_t workspace_index) = 0;
     virtual void generateHistogram(const std::size_t index, 
