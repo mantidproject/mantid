@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/inelastic/dgs_data_corrections.ui'
 #
-# Created: Tue Oct 16 09:29:18 2012
+# Created: Mon Oct 22 16:27:15 2012
 #      by: PyQt4 UI code generator 4.9.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -181,9 +181,9 @@ class Ui_DataCorrsFrame(object):
         self.save_procdetvan_edit = QtGui.QLineEdit(self.det_van_gb)
         self.save_procdetvan_edit.setObjectName(_fromUtf8("save_procdetvan_edit"))
         self.horizontalLayout_7.addWidget(self.save_procdetvan_edit)
-        self.save_procdetvan_browse = QtGui.QPushButton(self.det_van_gb)
-        self.save_procdetvan_browse.setObjectName(_fromUtf8("save_procdetvan_browse"))
-        self.horizontalLayout_7.addWidget(self.save_procdetvan_browse)
+        self.save_procdetvan_save = QtGui.QPushButton(self.det_van_gb)
+        self.save_procdetvan_save.setObjectName(_fromUtf8("save_procdetvan_save"))
+        self.horizontalLayout_7.addWidget(self.save_procdetvan_save)
         spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem6)
         self.verticalLayout.addLayout(self.horizontalLayout_7)
@@ -220,5 +220,5 @@ class Ui_DataCorrsFrame(object):
         self.van_int_range_units_cb.setItemText(2, QtGui.QApplication.translate("DataCorrsFrame", "TOF", None, QtGui.QApplication.UnicodeUTF8))
         self.save_procdetvan_cb.setText(QtGui.QApplication.translate("DataCorrsFrame", "Save Processed", None, QtGui.QApplication.UnicodeUTF8))
         self.save_procdetvan_label.setText(QtGui.QApplication.translate("DataCorrsFrame", "    Filename:", None, QtGui.QApplication.UnicodeUTF8))
-        self.save_procdetvan_browse.setText(QtGui.QApplication.translate("DataCorrsFrame", "Browse", None, QtGui.QApplication.UnicodeUTF8))
+        self.save_procdetvan_save.setText(QtGui.QApplication.translate("DataCorrsFrame", "Save", None, QtGui.QApplication.UnicodeUTF8))
 

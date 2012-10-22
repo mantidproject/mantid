@@ -60,8 +60,8 @@ class DataCorrectionsWidget(BaseWidget):
         # Connections
         self.connect(self._content.van_input_browse, QtCore.SIGNAL("clicked()"), 
                      self._detvan_browse)
-        self.connect(self._content.save_procdetvan_browse, QtCore.SIGNAL("clicked()"),
-                     self._save_procdetvan_browse)
+        self.connect(self._content.save_procdetvan_save, QtCore.SIGNAL("clicked()"),
+                     self._save_procdetvan_save)
 
     def _monitor_intrange_widgets_state(self, state=False):
         self._content.monint_label.setEnabled(state)
@@ -86,14 +86,14 @@ class DataCorrectionsWidget(BaseWidget):
     def _save_detvan_widgets_state(self, state=False):
         self._content.save_procdetvan_label.setEnabled(state)
         self._content.save_procdetvan_edit.setEnabled(state)
-        self._content.save_procdetvan_browse.setEnabled(state)
+        self._content.save_procdetvan_save.setEnabled(state)
     
     def _detvan_browse(self):
         fname = self.data_browse_dialog()
         if fname:
             self._content.van_input_edit.setText(fname)   
     
-    def _save_procdetvan_browse(self):
+    def _save_procdetvan_save(self):
         fname = self.data_save_dialog("*.nxs")
         if fname:
             self._content.save_procdetvan_edit.setText(fname)   

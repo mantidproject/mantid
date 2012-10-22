@@ -433,9 +433,9 @@
          <widget class="QLineEdit" name="save_procdetvan_edit"/>
         </item>
         <item>
-         <widget class="QPushButton" name="save_procdetvan_browse">
+         <widget class="QPushButton" name="save_procdetvan_save">
           <property name="text">
-           <string>Browse</string>
+           <string>Save</string>
           </property>
          </widget>
         </item>
