@@ -926,6 +926,7 @@ void MantidDockWidget::findAbandonedWorkspaces()
   // find all groups, remove their members from workspaces
   for( auto wsName = workspaces.begin(); wsName != workspaces.end(); ++wsName )
   {
+    if ( wsName->empty() ) continue;
     try
     {
       auto ws = Mantid::API::AnalysisDataService::Instance().retrieve( *wsName );
