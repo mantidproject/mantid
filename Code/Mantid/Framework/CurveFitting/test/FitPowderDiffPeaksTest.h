@@ -40,7 +40,7 @@ public:
 
   /** Fit with one shifted parmeter 'Zero'
    */
-  void Passed_test_FitZero()
+  void test_FitZero()
   {
     // 1. Generate testing workspace
     std::map<std::string, double> newparamvalues;
@@ -70,9 +70,10 @@ public:
 
     alg.setProperty("InputWorkspace", dataws);
     alg.setProperty("OutputWorkspace", "FittedPeaks");
-    alg.setProperty("PeaksParametersWorkspace", peakparamws);
-    alg.setProperty("InstrumentParametersWorkspace", geomparamws);
-    alg.setProperty("OutputPeaksParameterWorkspace", "PeaksParameterTable");
+    alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
+    alg.setProperty("InstrumentParameterWorkspace", geomparamws);
+    alg.setProperty("OutputBraggPeakParameterWorkspace", "PeaksParameterTable");
+    alg.setProperty("OutputZscoreWorkspace", "ZscoreTable");
     alg.setProperty("WorkspaceIndex", 0);
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -115,7 +116,7 @@ public:
 
   /** Fit the parameters for PG3's bank 1 with quite-off starting peak parameters.
     */
-  void Passed_test_FitPG3Bank1()
+  void OutDated_test_FitPG3Bank1()
   {
     // 1. Generate testing workspace
     std::map<std::string, double> newparamvalues;
@@ -144,10 +145,10 @@ public:
 
     alg.setProperty("InputWorkspace", dataws);
     alg.setProperty("OutputWorkspace", "FittedCurve");
-    alg.setProperty("PeaksParametersWorkspace", peakparamws);
-    alg.setProperty("InstrumentParametersWorkspace", geomparamws);
+    alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
+    alg.setProperty("InstrumentParameterWorkspace", geomparamws);
     alg.setProperty("OutputDataWorkspace", "FittedData");
-    alg.setProperty("OutputPeaksParameterWorkspace", "FittedPeakParameters");
+    alg.setProperty("OutputBraggPeakParameterWorkspace", "FittedPeakParameters");
     alg.setProperty("ParametersToFit", "Zero");
     alg.setProperty("WorkspaceIndex", 0);
 

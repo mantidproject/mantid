@@ -66,8 +66,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    alg.setProperty("InputPeakParameterWorkspace", peakparamws);
-    alg.setProperty("InputInstrumentParameterWorkspace", geomparamws);
+    alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
+    alg.setProperty("InstrumentParameterWorkspace", geomparamws);
     alg.setProperty("OutputWorkspace", "FittedCurve");
     alg.setProperty("OutputInstrumentParameterWorkspace", "InstrumentParameterTable");
     alg.setProperty("MinNumberFittedPeaks", 3);
@@ -78,8 +78,8 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Fit
-    alg.setProperty("InputPeakParameterWorkspace", peakparamws);
-    alg.setProperty("InputInstrumentParameterWorkspace", geomparamws);
+    alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
+    alg.setProperty("InstrumentParameterWorkspace", geomparamws);
     alg.setProperty("OutputWorkspace", "FittedCurve");
     alg.setProperty("OutputInstrumentParameterWorkspace", "InstrumentParameterTable");
     alg.setProperty("MinNumberFittedPeaks", 3);
@@ -99,7 +99,8 @@ public:
     double zero = fitparamvalues["Zero"];
 
     TS_ASSERT_DELTA(zero, 0.0, 1.0);
-    TS_ASSERT(false);
+
+    // TS_ASSERT_EQUALS(1, 231);
 
     // 4. Clean
     AnalysisDataService::Instance().remove("DataWorkspace");
@@ -116,7 +117,7 @@ public:
   /** Test fit by Monte Carlo random walk
     * Using the data from calibration of PG3 in August 2012 for bank 1
    */
-  void Passed_test_MonteCarloRandomWalk()
+  void test_MonteCarloRandomWalk()
   {
     // 0. Init
     map<string, double> newparamvalues;
@@ -143,13 +144,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
 
-    alg.setProperty("InputPeakParameterWorkspace", peakparamws);
-    alg.setProperty("InputInstrumentParameterWorkspace", geomparamws);
+    alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
+    alg.setProperty("InstrumentParameterWorkspace", geomparamws);
     alg.setProperty("OutputWorkspace", "FittedPeakPositions");
     alg.setProperty("OutputInstrumentParameterWorkspace", "FittedParameters");
     alg.setProperty("OutputBestResultsWorkspace", "BestMCResults");
     alg.setProperty("RefinementAlgorithm", "MonteCarlo");
-    alg.setProperty("RandomWalkSteps", 1000000);
+    alg.setProperty("RandomWalkSteps", 2000);
     alg.setProperty("MinSigma", 1.0);
     alg.setProperty("StandardError", "ConstantValue");
     alg.setProperty("ParametersToFit", "Dtt1, Dtt1t, Dtt2t, Zerot, Width");
@@ -169,9 +170,11 @@ public:
         (AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
     TS_ASSERT(dataws);
     TS_ASSERT_EQUALS(dataws->getNumberHistograms(), 21);
+    /*
     cout << "Number of peak positions = " << dataws->readX(0).size() << endl;
     for (size_t i = 0; i < dataws->readX(0).size(); ++i)
       cout << i << "\t\t" << dataws->readX(0)[i] << endl;
+      */
 
     DataObjects::TableWorkspace_sptr mcresultws =
         boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
@@ -188,6 +191,73 @@ public:
 
     return;
   }
+
+  /** Test fit by Simplex
+    * Using the data from calibration of PG3 in August 2012 for bank 1
+   */
+  void test_FitSimplex()
+  {
+    // 0. Init
+    map<string, double> newparamvalues;
+
+    // 1. Generate testing workspace
+    //    This is the output from FitPowderDiffPeaks()
+    std::string peakfilename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1FittedPeaksParameters.txt");
+    std::vector<std::vector<int> > hkls;
+    std::vector<std::vector<double> > peakparameters;
+    importPeakParametersFile(peakfilename, hkls, peakparameters);
+    DataObjects::TableWorkspace_sptr peakparamws = createReflectionWorkspace(hkls, peakparameters);
+
+    std::string insfilename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentParameters.txt");
+    std::map<std::string, double> instrparameters;
+    map<string, vector<double> > mcparameters;
+    importInstrumentTxtFile(insfilename, instrparameters, mcparameters);
+    DataObjects::TableWorkspace_sptr geomparamws = createInstrumentParameterWorkspace(instrparameters, newparamvalues, mcparameters);
+
+    AnalysisDataService::Instance().addOrReplace("PeakParameters", peakparamws);
+    AnalysisDataService::Instance().addOrReplace("InstrumentParameters", geomparamws);
+
+    // 2. Set up algorithm parameters
+    CurveFitting::RefinePowderInstrumentParameters alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
+    alg.setProperty("InstrumentParameterWorkspace", geomparamws);
+    alg.setProperty("OutputWorkspace", "FittedPeakPositions");
+    alg.setProperty("OutputInstrumentParameterWorkspace", "FittedParameters");
+    alg.setProperty("RefinementAlgorithm", "DirectFit");
+    alg.setProperty("MinSigma", 1.0);
+    alg.setProperty("StandardError", "ConstantValue");
+    alg.setProperty("ParametersToFit", "Dtt1, Dtt1t, Dtt2t, Zerot, Width");
+    alg.setProperty("NumberBestFitRecorded", 10);
+
+    // 3. Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // 4. Check result
+    DataObjects::TableWorkspace_sptr newgeomparamws =
+        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
+        (AnalysisDataService::Instance().retrieve("FittedParameters"));
+
+    DataObjects::Workspace2D_sptr dataws =
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
+    TS_ASSERT(dataws);
+    TS_ASSERT_EQUALS(dataws->getNumberHistograms(), 3);
+
+    std::map<std::string, double> fitparamvalues;
+    parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
+    double zero = fitparamvalues["Zero"];
+
+    TS_ASSERT_DELTA(zero, 0.0, 1.0);
+
+    TS_ASSERT_EQUALS(123, 345);
+
+    return;
+  }
+
 
   // ==========================  Methods To Create Input Workspaces ======================== //
 

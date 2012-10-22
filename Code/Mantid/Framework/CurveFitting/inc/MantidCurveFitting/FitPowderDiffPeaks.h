@@ -84,8 +84,8 @@ namespace CurveFitting
                        double xmin, double xmax, double& center, double& centerleftbound, double& centerrightbound, int &errordirection);
 
     /// Generate output peak parameters workspace
-    DataObjects::TableWorkspace_sptr genPeakParametersWorkspace(std::vector<std::vector<int> > goodfitpeaks,
-                                                                std::vector<double> goodfitchi2s);
+    std::pair<DataObjects::TableWorkspace_sptr, DataObjects::TableWorkspace_sptr> genPeakParametersWorkspace(
+        std::vector<std::vector<int> > goodfitpeaks, std::vector<double> goodfitchi2s);
 
     /// Crop data workspace
     void cropWorkspace(double tofmin, double tofmax);

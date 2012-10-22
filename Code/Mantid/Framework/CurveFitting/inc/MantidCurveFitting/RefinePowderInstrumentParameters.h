@@ -103,6 +103,12 @@ namespace CurveFitting
     /// Fit instrument geometry parameters by ThermalNeutronDtoTOFFunction
     void fitInstrumentParameters();
 
+    /// Calculate function's statistic
+    double calculateFunctionStatistic(IFunction_sptr func, MatrixWorkspace_sptr dataws, size_t workspaceindex);
+
+    /// Fit function to data
+    bool fitFunction(IFunction_sptr func, double &gslchi2);
+
     /// Parse Fit() output parameter workspace
     std::string parseFitParameterWorkspace(API::ITableWorkspace_sptr paramws);
 
@@ -110,21 +116,27 @@ namespace CurveFitting
     std::string parseFitResult(API::IAlgorithm_sptr fitalg, double& chi2);
 
     /// Set up and run a monte carlo simulation to refine the peak parameters
-    void refineInstrumentParametersMC(TableWorkspace_sptr parameterWS);
+    void refineInstrumentParametersMC(TableWorkspace_sptr parameterWS, bool fit2=false);
 
     /// Core Monte Carlo random walk on parameter-space
     void doParameterSpaceRandomWalk(vector<string> parnames, vector<double> lowerbounds,
-                                    vector<double> upperbounds, vector<double> stepsizes, size_t maxsteps, double stepsizescalefactor);
+                                    vector<double> upperbounds, vector<double> stepsizes, size_t maxsteps,
+                                    double stepsizescalefactor, bool fit2);
 
     /// Get the names of the parameters of D-TOF conversion function
     void getD2TOFFuncParamNames(vector<string>& parnames);
 
     /// Calculate the value and chi2
-    double calculateD2TOFFunction(FunctionDomain1DVector domain, FunctionValues& values, const MantidVec &rawY, const MantidVec& rawE);
+    double calculateD2TOFFunction(IFunction_sptr func, FunctionDomain1DVector domain, FunctionValues& values,
+                                  const MantidVec &rawY, const MantidVec& rawE);
 
     /// Calculate d-space value from peak's miller index for thermal neutron
     double calculateDspaceValue(std::vector<int> hkl, double lattice);
 
+    /// Calcualte value n for thermal neutron peak profile
+    void calculateThermalNeutronSpecial(IFunction_sptr mFunction, vector<double> vec_d, vector<double>& vec_n);
+
+    //--------------- Class Variables -------------------
     /// Output Workspace containing the dspacing ~ TOF peak positions
     DataObjects::Workspace2D_sptr dataWS;
 
@@ -141,8 +153,14 @@ namespace CurveFitting
 
     /// Peak function parameter names
     vector<string> mPeakFunctionParameterNames;
-    /// N sets of the peak parameter values for the best N chi2.  It is paired with mPeakFunctionParameterNames
-    std::vector<std::pair<double, std::vector<double> > > mBestParameters;
+    /// N sets of the peak parameter values for the best N chi2 for MC.  It is paired with mPeakFunctionParameterNames
+    std::vector<std::pair<double, std::vector<double> > > mBestMCParameters;
+    /// N sets of the peak parameter values for the best N chi2 for MC.  It is paired with mPeakFunctionParameterNames
+    std::vector<std::pair<double, std::vector<double> > > mBestFitParameters;
+    /// N sets of the homemade chi2 and gsl chi2
+    std::vector<std::pair<double, double> > mBestFitChi2s;
+    /// Best Chi2 ever
+    double mBestGSLChi2;
 
     /// Minimum allowed sigma of a peak
     double mMinSigma;
@@ -153,7 +171,7 @@ namespace CurveFitting
     /// Maximum number of data stored
     size_t mMaxNumberStoredParameters;
 
-    ///
+    /// Modelling function
     CurveFitting::ThermalNeutronDtoTOFFunction_sptr mFunction;
 
   };

@@ -2,6 +2,7 @@
 
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Statistics.h"
 
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -24,6 +25,8 @@
 
 #include <fstream>
 #include <iomanip>
+
+#include <gsl/gsl_sf_erf.h>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -68,13 +71,13 @@ namespace CurveFitting
   void RefinePowderInstrumentParameters::init()
   {
     // Input/output peaks table workspace
-    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("InputPeakParameterWorkspace", "Anonymous", Direction::Input),
+    declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("BraggPeakParameterWorkspace", "Anonymous", Direction::Input),
                     "TableWorkspace containg all peaks' parameters.");
 
     // Input and output instrument parameters table workspace
     declareProperty(
           new API::WorkspaceProperty<DataObjects::TableWorkspace>
-          ("InputInstrumentParameterWorkspace", "AnonymousInstrument", Direction::InOut),
+          ("InstrumentParameterWorkspace", "AnonymousInstrument", Direction::InOut),
           "TableWorkspace containg instrument's parameters.");
 
     // Output workspace
@@ -113,7 +116,7 @@ namespace CurveFitting
     // Method to calcualte the standard error of peaks
     vector<string> stdoptions;
     stdoptions.push_back("ConstantValue");
-    stdoptions.push_back("PeakFitting");
+    stdoptions.push_back("InvertedPeakHeight");
     auto listvalidator = boost::make_shared<Kernel::StringListValidator>(stdoptions);
     declareProperty("StandardError", "ConstantValue", listvalidator,
                     "Algorithm to calculate the standard error of peak positions.");
@@ -133,8 +136,8 @@ namespace CurveFitting
     enum {DirectFit, MonteCarlo} refinealgorithm;
 
     // 1. Get input
-    DataObjects::TableWorkspace_sptr peakWS = this->getProperty("InputPeakParameterWorkspace");
-    DataObjects::TableWorkspace_sptr parameterWS = this->getProperty("InputInstrumentParameterWorkspace");
+    DataObjects::TableWorkspace_sptr peakWS = this->getProperty("BraggPeakParameterWorkspace");
+    DataObjects::TableWorkspace_sptr parameterWS = this->getProperty("InstrumentParameterWorkspace");
 
     mMinSigma = getProperty("MinSigma");
 
@@ -184,7 +187,7 @@ namespace CurveFitting
 
       case MonteCarlo:
         // b) Use Monte Carlo/Annealing method to search global minimum
-        refineInstrumentParametersMC(parameterWS);
+        refineInstrumentParametersMC(parameterWS, true);
         mcresultws = genMCResultTable();
         setProperty("OutputBestResultsWorkspace", mcresultws);
         break;
@@ -214,24 +217,26 @@ namespace CurveFitting
    */
   void RefinePowderInstrumentParameters::fitInstrumentParameters()
   {
-    cout << "=========== Method [FitInstrumentParameters] is Under Heavy Construction! ===============" << endl;
-    cout << "            Read All FIXME Notes Inside This Method  " << endl;
+    cout << "=========== Method [FitInstrumentParameters] ===============" << endl;
 
     // 1. Initialize the fitting function
     CurveFitting::ThermalNeutronDtoTOFFunction rawfunc;
-    CurveFitting::ThermalNeutronDtoTOFFunction_sptr mfunc =
-        boost::make_shared<CurveFitting::ThermalNeutronDtoTOFFunction>(rawfunc);
-    mfunc->initialize();
+    mFunction = boost::make_shared<CurveFitting::ThermalNeutronDtoTOFFunction>(rawfunc);
+    mFunction->initialize();
+
+    API::FunctionDomain1DVector domain(dataWS->readX(1));
+    API::FunctionValues values(domain);
+    const MantidVec& rawY = dataWS->readY(0);
+    const MantidVec& rawE = dataWS->readE(0);
 
     // 2. Set up parameters values
-    std::vector<std::string> funparamnames = mfunc->getParameterNames();
+    std::vector<std::string> funparamnames = mFunction->getParameterNames();
 
     std::vector<std::string> paramtofit = getProperty("ParametersToFit");
     std::sort(paramtofit.begin(), paramtofit.end());
 
     stringstream msgss;
     msgss << "Set Instrument Function Parameter : " << endl;
-
     std::map<std::string, double>::iterator paramiter;
     for (size_t i = 0; i < funparamnames.size(); ++i)
     {
@@ -244,11 +249,15 @@ namespace CurveFitting
       }
 
       double parvalue = paramiter->second;
-      mfunc->setParameter(parname, parvalue);
+      mFunction->setParameter(parname, parvalue);
       msgss << setw(10) << parname << " = " << parvalue << endl;
     }
-
     cout << msgss.str();
+
+    // 2b. Calculate the statistic of the starting values
+    double gslchi2 = calculateFunctionStatistic(mFunction, dataWS, 0);
+    double homchi2 = calculateD2TOFFunction(mFunction, domain, values, rawY, rawE);
+    cout << "Fit Starting Value:  Chi^2 (GSL) = " << gslchi2 << ",  Chi2^2 (Home) = " << homchi2 << endl;
 
     // 3. Fix parameters that are not listed in parameter-to-fit.  Unfix the rest
     size_t numparams = funparamnames.size();
@@ -259,13 +268,21 @@ namespace CurveFitting
       vsiter = std::find(paramtofit.begin(), paramtofit.end(), parname);
 
       if (vsiter == paramtofit.end())
-        mfunc->fix(i);
+        mFunction->fix(i);
       else
-        mfunc->unfix(i);
+        mFunction->unfix(i);
     }
 
-    // 4. Create and setup fit algorithm
-    g_log.information() << "Fit instrument geometry: " << mfunc->asString() << std::endl;
+    // 4. Select minimizer.  Use Simplex for more than 1 parameters to fit.  Levenberg-MarquardtMD otherwise
+    string minimizer("Levenberg-MarquardtMD");
+    if (paramtofit.size() > 1)
+    {
+      minimizer = "Simplex";
+    }
+    g_log.information() << "Fit use minizer: " << minimizer << endl;
+
+    // 5. Create and setup fit algorithm
+    g_log.information() << "Fit instrument geometry: " << mFunction->asString() << std::endl;
 
     stringstream outss;
     for (size_t i = 0; i < dataWS->readX(0).size(); ++i)
@@ -275,10 +292,10 @@ namespace CurveFitting
     API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", 0.0, 0.2, true);
     fitalg->initialize();
 
-    fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(mfunc));
+    fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(mFunction));
     fitalg->setProperty("InputWorkspace", dataWS);
     fitalg->setProperty("WorkspaceIndex", 0);
-    fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+    fitalg->setProperty("Minimizer", minimizer);
     fitalg->setProperty("CostFunction", "Least squares");
     fitalg->setProperty("MaxIterations", 1000);
 
@@ -293,21 +310,22 @@ namespace CurveFitting
     double chi2 = fitalg->getProperty("OutputChi2overDoF");
     std::string fitstatus = fitalg->getProperty("OutputStatus");
 
-    cout << "Fit geometry function result:  Chi^2 = " << chi2
+    cout << "Fit Result (GSL):  Chi^2 = " << chi2
          << "; Fit Status = " << fitstatus << std::endl;
 
     API::IFunction_sptr fitfunc = fitalg->getProperty("Function");
 
     // 4. Set the output data (model and diff)
-    API::FunctionDomain1DVector domain(dataWS->readX(1));
-    API::FunctionValues values(domain);
-    mfunc->function(domain, values);
+    mFunction->function(domain, values);
 
     for (size_t i = 0; i < domain.size(); ++i)
     {
       dataWS->dataY(1)[i] = values[i];
       dataWS->dataY(2)[i] = dataWS->readY(0)[i] - values[i];
     }
+
+    double selfchi2 = calculateD2TOFFunction(mFunction, domain, values, rawY, rawE);
+    cout << "Homemade Chi^2 = " << selfchi2 << endl;
 
     // 5. Update fitted parameters
     for (size_t i = 0; i < funparamnames.size(); ++i)
@@ -332,13 +350,107 @@ namespace CurveFitting
     dbss << "*********************************************" << std::endl;
     cout << dbss.str();
 
+    // 7. Play with Zscore:     template<typename TYPE>
+    //    std::vector<double> getZscore(const std::vector<TYPE>& data, const bool sorted=false);
+    vector<double> z0 = Kernel::getZscore(dataWS->readY(0));
+    vector<double> z1 = Kernel::getZscore(dataWS->readY(1));
+    vector<double> z2 = Kernel::getZscore(dataWS->readY(2));
+    stringstream zss;
+    zss << setw(20) << "d_h" << setw(20) << "Z DataY" << setw(20) << "Z ModelY" << setw(20) << "Z DiffY"
+        << setw(20) << "DiffY" << endl;
+    for (size_t i = 0; i < z0.size(); ++i)
+    {
+      double d_h = dataWS->readX(0)[i];
+      double zdatay = z0[i];
+      double zmodely = z1[i];
+      double zdiffy = z2[i];
+      double diffy = dataWS->readY(2)[i];
+      zss << setw(20) << d_h << setw(20) << zdatay << setw(20) << zmodely << setw(20) << zdiffy
+          << setw(20) << diffy << endl;
+    }
+    cout << "Zscore Survey: " << endl << zss.str();
+
     return;
+  }
+
+  /** Fit function to data
+    */
+  bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func, double& gslchi2)
+  {
+    API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", 0.0, 0.2, true);
+    fitalg->initialize();
+
+    fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(func));
+    fitalg->setProperty("InputWorkspace", dataWS);
+    fitalg->setProperty("WorkspaceIndex", 0);
+    fitalg->setProperty("Minimizer", "Simplex");
+    fitalg->setProperty("CostFunction", "Least squares");
+    fitalg->setProperty("MaxIterations", 1000);
+
+    bool successfulfit = fitalg->execute();
+    if (!fitalg->isExecuted() || ! successfulfit)
+    {
+      // Early return due to bad fit
+      g_log.error() << "Fitting to instrument geometry function failed. " << std::endl;
+      throw std::runtime_error("Fitting failed.");
+    }
+
+    gslchi2 = fitalg->getProperty("OutputChi2overDoF");
+    std::string fitstatus = fitalg->getProperty("OutputStatus");
+
+    g_log.debug() << "Function Fit:  Chi^2 = " << gslchi2
+                  << "; Fit Status = " << fitstatus << std::endl;
+
+    bool fitgood = (fitstatus.compare("success") == 0);
+
+    return fitgood;
+  }
+
+  /** Calculate function's statistic
+    */
+  double RefinePowderInstrumentParameters::calculateFunctionStatistic(IFunction_sptr func, MatrixWorkspace_sptr dataws,
+                                                                      size_t workspaceindex)
+  {
+    // 1. Fix all parameters of the function
+    vector<string> funcparameters = func->getParameterNames();
+    size_t numparams = funcparameters.size();
+    for (size_t i = 0; i < numparams; ++i)
+    {
+      func->fix(i);
+    }
+
+    // 2. Call a non fit refine
+    API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", 0.0, 0.2, true);
+    fitalg->initialize();
+
+    fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(func));
+    fitalg->setProperty("InputWorkspace",dataws);
+    fitalg->setProperty("WorkspaceIndex", static_cast<int>(workspaceindex));
+    fitalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+    fitalg->setProperty("CostFunction", "Least squares");
+    fitalg->setProperty("MaxIterations", 2);
+
+    bool successfulfit = fitalg->execute();
+    if (!fitalg->isExecuted() || ! successfulfit)
+    {
+      // Early return due to bad fit
+      g_log.error() << "Fitting to instrument geometry function failed. " << std::endl;
+      throw std::runtime_error("Fitting failed.");
+    }
+
+    double chi2 = fitalg->getProperty("OutputChi2overDoF");
+    std::string fitstatus = fitalg->getProperty("OutputStatus");
+
+    cout << "Function calculation [L.M]:  Chi^2 = " << chi2
+         << "; Fit Status = " << fitstatus << std::endl;
+
+    return chi2;
   }
 
 
   /** Refine instrument parameters by Monte Carlo method
     */
-  void RefinePowderInstrumentParameters::refineInstrumentParametersMC(TableWorkspace_sptr parameterWS)
+  void RefinePowderInstrumentParameters::refineInstrumentParametersMC(TableWorkspace_sptr parameterWS, bool fit2)
   {
     // 1. Get function's parameter names
     getD2TOFFuncParamNames(mPeakFunctionParameterNames);
@@ -365,7 +477,6 @@ namespace CurveFitting
       throw runtime_error("RandomwWalkSteps cannot be less than or equal to 0. ");
 
     // 4. Random seed and step size rescale factor
-    //    FIXME Need to have random seed as an input for better statistic
     int randomseed = getProperty("MonteCarloRandomSeed");
     srand(randomseed);
 
@@ -373,7 +484,7 @@ namespace CurveFitting
 
     // 5. Monte Carlo simulation
     doParameterSpaceRandomWalk(mPeakFunctionParameterNames, lowerbounds, upperbounds, stepsizes, maxsteps,
-                               stepsizescalefactor);
+                               stepsizescalefactor, fit2);
 
     // 6. Record the result
     const MantidVec& X = dataWS->readX(0);
@@ -381,24 +492,29 @@ namespace CurveFitting
     const MantidVec& E = dataWS->readE(0);
     FunctionDomain1DVector domain(X);
     FunctionValues values(domain);
-    for (size_t i = 0; i < mBestParameters.size(); ++i)
+    for (size_t i = 0; i < mBestFitParameters.size(); ++i)
     {
       // a. Set the function with the
       for (size_t j = 0; j < mPeakFunctionParameterNames.size(); ++j)
       {
-        mFunction->setParameter(mPeakFunctionParameterNames[j], mBestParameters[i].second[j]);
+        mFunction->setParameter(mPeakFunctionParameterNames[j], mBestFitParameters[i].second[j]);
       }
 
       // b. Calculate
-      calculateD2TOFFunction(domain, values, Y, E);
+      calculateD2TOFFunction(mFunction, domain, values, Y, E);
+
+      vector<double> vec_n;
+      calculateThermalNeutronSpecial(mFunction, X, vec_n);
 
       // c. Put the data to output workspace
-      MantidVec& newY = dataWS->dataY(2*i+1);
-      MantidVec& newD = dataWS->dataY(2*i+2);
+      MantidVec& newY = dataWS->dataY(3*i+1);
+      MantidVec& newD = dataWS->dataY(3*i+2);
+      MantidVec& newN = dataWS->dataY(3*i+3);
       for (size_t j = 0; j < newY.size(); ++j)
       {
         newY[j] = values[j];
         newD[j] = Y[j] - values[j];
+        newN[j] = vec_n[j];
       }
     }
 
@@ -406,10 +522,12 @@ namespace CurveFitting
   }
 
   /** Core Monte Carlo random walk on parameter-space
+    * Arguments
+    * - fit2: boolean.  if True,then do Simplex fit for each step
     */
   void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(vector<string> parnames, vector<double> lowerbounds,
                                                                     vector<double> upperbounds, vector<double> stepsizes,
-                                                                    size_t maxsteps, double stepsizescalefactor)
+                                                                    size_t maxsteps, double stepsizescalefactor, bool fit2)
   {
     /* Input Check
     stringstream inpinfo;
@@ -433,6 +551,10 @@ namespace CurveFitting
       paramvalues.push_back(parvalue);
       mFunction->setParameter(parname, parvalue);
     }
+
+    // Calcualte the function's initial statistic
+    mBestGSLChi2 = calculateFunctionStatistic(mFunction, dataWS, 0);
+    cout << "Function with starting values has Chi2 = " << mBestGSLChi2 << " (GSL L.M) " << endl;
 
     const MantidVec& X = dataWS->readX(0);
     const MantidVec& rawY = dataWS->readY(0);
@@ -469,8 +591,28 @@ namespace CurveFitting
     }
     g_log.notice() << "Parameters to refine: " << dbss.str() << endl;
 
-    // 3. Do MC loops
-    double curchi2 = calculateD2TOFFunction(domain, values, rawY, rawE);
+    // 3. Create a local function for fit and set the parameters unfixed
+    ThermalNeutronDtoTOFFunction_sptr func4fit =
+        boost::shared_ptr<ThermalNeutronDtoTOFFunction>(new ThermalNeutronDtoTOFFunction());
+    func4fit->initialize();
+    for (size_t i = 0; i < numparameters; ++i)
+    {
+      string parname = parnames[i];
+      // Fit or fix
+      if (paramstofitset.count(parname) > 0)
+        func4fit->unfix(i);
+      else
+        func4fit->fix(i);
+      // Constraint
+      double lowerb = lowerbounds[i];
+      double upperb = upperbounds[i];
+      BoundaryConstraint* newconstraint = new BoundaryConstraint(func4fit.get(), parname, lowerb, upperb);
+      func4fit->addConstraint(newconstraint);
+    }
+    cout << "Function for fitting in MC: " << func4fit->asString() << endl;
+
+    // 4. Do MC loops
+    double curchi2 = calculateD2TOFFunction(mFunction, domain, values, rawY, rawE);
 
     g_log.notice() << "Monte Carlo Random Walk Starting Chi^2 = " << curchi2 << endl;
 
@@ -491,7 +633,6 @@ namespace CurveFitting
           continue;
         }
       }
-      // cout << "MC Step " << istep << ":  Refine " << parnames[paramindex] << endl;
 
       // b. Propose for a new value
       double randomnumber = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
@@ -519,7 +660,52 @@ namespace CurveFitting
       }
 
       // b. Calcualte the new
-      double newchi2 = calculateD2TOFFunction(domain, values, rawY, rawE);
+      double newchi2 = calculateD2TOFFunction(mFunction, domain, values, rawY, rawE);
+
+      // Optionally fit
+      if (fit2)
+      {
+        // i.   Copy the parameters
+        for (size_t i = 0; i < numparameters; ++i)
+        {
+          double parvalue = mFunction->getParameter(i);
+          func4fit->setParameter(i, parvalue);
+        }
+
+        // ii.  Fit function
+        double gslchi2;
+        bool fitgood = fitFunction(func4fit, gslchi2);
+
+        if (fitgood)
+        {
+          // iii. Caculate
+          double homchi2 = calculateD2TOFFunction(func4fit, domain, values, rawY, rawE);
+
+          if (gslchi2 < mBestGSLChi2)
+            mBestGSLChi2 = gslchi2;
+
+          // iv.  Archive
+          vector<double> newparvalues;
+          for (size_t i = 0; i < numparameters; ++i)
+          {
+            double parvalue = func4fit->getParameter(i);
+            newparvalues.push_back(parvalue);
+          }
+          mBestFitParameters.push_back(make_pair(homchi2, newparvalues));
+          mBestFitChi2s.push_back(make_pair(homchi2, gslchi2));
+
+          // v.  Sort and keep in size
+          sort(mBestFitParameters.begin(), mBestFitParameters.end());
+          sort(mBestFitChi2s.begin(), mBestFitChi2s.end());
+          if (mBestFitParameters.size() > mMaxNumberStoredParameters)
+          {
+            mBestFitParameters.pop_back();
+            mBestFitChi2s.pop_back();
+          }
+
+          // cout << "\tHomemade Chi^2 = " << homchi2 << endl;
+        }
+      }
 
       // c. Accept?
       bool accept;
@@ -567,12 +753,12 @@ namespace CurveFitting
 
         // ii.  Add the new values to vector
         vector<double> parametervalues = paramvalues;
-        mBestParameters.push_back(make_pair(newchi2, parametervalues));
+        mBestMCParameters.push_back(make_pair(newchi2, parametervalues));
 
         // iii. Sort and delete the last if necessary
-        sort(mBestParameters.begin(), mBestParameters.end());
-        if (mBestParameters.size() > mMaxNumberStoredParameters)
-          mBestParameters.pop_back();
+        sort(mBestMCParameters.begin(), mBestMCParameters.end());
+        if (mBestMCParameters.size() > mMaxNumberStoredParameters)
+          mBestMCParameters.pop_back();
 
         // iv.  Update chi2 and ...
         curchi2 = newchi2;
@@ -588,12 +774,19 @@ namespace CurveFitting
 
     // 3. Debug output
     stringstream mcresult;
-    mcresult << "Monte Carlo Result for " << mBestParameters.size() << " Best Results" << endl;
+    mcresult << "Monte Carlo Result for " << mBestMCParameters.size() << " Best Results" << endl;
     mcresult << "Number of acceptance = " << numacceptance << ", out of " << maxsteps << " MC steps."
              << "Accept ratio = " << static_cast<double>(numacceptance)/static_cast<double>(maxsteps) << endl;
-    for (size_t i = 0; i < mBestParameters.size(); ++i)
+    mcresult << "Best " << mBestMCParameters.size() << " Monte Carlo (no fit) results: " << endl;
+    for (size_t i = 0; i < mBestMCParameters.size(); ++i)
     {
-      mcresult << setw(3) << i << ":  Chi^2 = " << mBestParameters[i].first << endl;
+      mcresult << setw(3) << i << ":  Chi^2 = " << mBestMCParameters[i].first << endl;
+    }
+    mcresult << "Best " << mBestMCParameters.size() << " fitting results.  Best Chi^2 =  " << mBestGSLChi2 << endl;
+    for (size_t i = 0; i < mBestFitParameters.size(); ++i)
+    {
+      mcresult << setw(3) << i << ":  Chi^2 = " << mBestFitParameters[i].first
+               << ", GSL Chi^2 = " << mBestFitChi2s[i].second << endl;
     }
     g_log.notice() << mcresult.str();
 
@@ -622,11 +815,12 @@ namespace CurveFitting
 
   /** Calcualte the function
     */
-  double RefinePowderInstrumentParameters::calculateD2TOFFunction(FunctionDomain1DVector domain, FunctionValues &values,
+  double RefinePowderInstrumentParameters::calculateD2TOFFunction(IFunction_sptr func,
+                                                                  FunctionDomain1DVector domain, FunctionValues &values,
                                                                   const MantidVec& rawY, const MantidVec& rawE)
   {
     // 1. Check validity
-    if (!mFunction)
+    if (!func)
     {
       throw std::runtime_error("mFunction has not been initialized!");
     }
@@ -648,7 +842,7 @@ namespace CurveFitting
     }
 
     // 2. Calculate vlaues
-    mFunction->function(domain, values);
+    func->function(domain, values);
 
     // 3. Calculate the difference
     double chi2 = 0;
@@ -690,6 +884,7 @@ namespace CurveFitting
       // b) Parse parameters
       int h, k, l;
       double alpha, beta, tof_h, sigma, sigma2, chi2, height, dbtemp;
+      string strtemp;
       sigma2 = -1;
 
       API::TableRow row = peakparamws->getRow(ir);
@@ -717,8 +912,14 @@ namespace CurveFitting
           row >> tof_h;
         else
         {
-          // FIXME Try to set it to a wrong type and see whether it can go on or not!
-          row >> dbtemp;
+          try
+          {
+            row >> dbtemp;
+          }
+          catch (runtime_error err)
+          {
+            row >> strtemp;
+          }
         }
       }
 
@@ -918,6 +1119,32 @@ namespace CurveFitting
     return d;
   }
 
+  /** Calcualte value n for thermal neutron peak profile
+    */
+  void RefinePowderInstrumentParameters::calculateThermalNeutronSpecial(IFunction_sptr mFunction, vector<double> vec_d,
+                                                                        vector<double>& vec_n)
+  {
+    if (mFunction->name().compare("ThermalNeutronDtoTOFFunction") != 0)
+    {
+      g_log.warning() << "Function (" << mFunction->name()
+                      << " is not ThermalNeutronDtoTOFFunction.  And it is not required to calculate n." << endl;
+      for (size_t i = 0; i < vec_d.size(); ++i)
+        vec_n.push_back(0);
+    }
+
+    double width = mFunction->getParameter("Width");
+    double tcross = mFunction->getParameter("Tcross");
+
+    for (size_t i = 0; i < vec_d.size(); ++i)
+    {
+      double dh = vec_d[i];
+      double n = 0.5*gsl_sf_erfc(width*(tcross-1/dh));
+      vec_n.push_back(n);
+    }
+
+    return;
+  }
+
   //------- Related to Algorith's Output  -------------------------------------------------------------------
 
   /** Get peak positions from peak functions
@@ -936,10 +1163,21 @@ namespace CurveFitting
     }
 
     string stdoption = getProperty("StandardError");
-    bool useconstanterror = false;
+    enum{ConstantValue, InvertedPeakHeight} stderroroption;
     if (stdoption.compare("ConstantValue") == 0)
     {
-      useconstanterror = true;
+      stderroroption = ConstantValue;
+    }
+    else if (stdoption.compare("InvertedPeakHeight") == 0)
+    {
+      stderroroption = InvertedPeakHeight;
+    }
+    else
+    {
+      stringstream errss;
+      errss << "Input StandardError (" << stdoption << ") is not supported. ";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
     }
 
     std::map<std::vector<int>, CurveFitting::BackToBackExponential_sptr>::iterator peakiter;
@@ -963,13 +1201,17 @@ namespace CurveFitting
       double center = peak->centre();
       double height = peak->height();
       double chi2;
-      if (useconstanterror)
+      if (stderroroption == ConstantValue)
       {
         chi2 = 1.0;
       }
+      else if (stderroroption == InvertedPeakHeight)
+      {
+        chi2 = sqrt(1.0/height);
+      }
       else
       {
-        chi2 = sqrt(mPeakErrors[hkl])/height;
+        throw runtime_error("Standard error option is not supported. ");
       }
 
       peakcenters.push_back(make_pair(dh, make_pair(center, chi2)));
@@ -983,13 +1225,13 @@ namespace CurveFitting
     size_t nspec;
     if (montecarlo)
     {
-      // Monte Carlo, 1 + 2*N spectra:  raw, N x (refined, diff)
-      nspec = 1+2*numbestfit;
+      // Monte Carlo, 1 + 2*N spectra:  raw, N x (refined, diff, n)
+      nspec = 1+3*numbestfit;
     }
     else
     {
-      // Regular fit, 3 spectra:  raw, refined, diff
-      nspec = 3;
+      // Regular fit, 3 spectra:  raw, refined, diff, n
+      nspec = 1+3;
     }
 
     dataWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
@@ -1020,20 +1262,22 @@ namespace CurveFitting
         boost::shared_ptr<TableWorkspace>(new TableWorkspace());
 
     tablews->addColumn("double", "Chi2");
+    tablews->addColumn("double", "GSLChi2");
     for (size_t i = 0; i < mPeakFunctionParameterNames.size(); ++i)
     {
       tablews->addColumn("double", mPeakFunctionParameterNames[i]);
     }
 
     // 2. Put values in
-    for (size_t ib = 0; ib < mBestParameters.size(); ++ib)
+    for (size_t ib = 0; ib < mBestFitParameters.size(); ++ib)
     {
       TableRow newrow = tablews->appendRow();
-      double chi2 = mBestParameters[ib].first;
-      newrow << chi2;
+      double chi2 = mBestFitParameters[ib].first;
+      double gslchi2 = mBestFitChi2s[ib].second;
+      newrow << chi2 << gslchi2;
       for (size_t ip = 0; ip < mPeakFunctionParameterNames.size(); ++ip)
       {
-        double tempdbl = mBestParameters[ib].second[ip];
+        double tempdbl = mBestFitParameters[ib].second[ip];
         newrow << tempdbl;
       }
     } // ENDFOR 1 Best Answer
@@ -1052,6 +1296,9 @@ namespace CurveFitting
     newtablews->addColumn("str", "Name");
     newtablews->addColumn("double", "Value");
     newtablews->addColumn("str", "FitOrTie");
+    newtablews->addColumn("double", "Min");
+    newtablews->addColumn("double", "Max");
+    newtablews->addColumn("double", "StepSize");
 
     std::map<std::string, double>::iterator pariter;
 
