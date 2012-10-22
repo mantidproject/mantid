@@ -125,6 +125,21 @@ class BaseWidget(QtGui.QWidget):
                 self._settings.data_path = str(QtCore.QFileInfo(fname).path())
             return str(fname)     
     
+    def data_save_dialog(self, data_type=None, title=None):
+        """
+            Pop up a save file dialog box.
+            @param data_type: string used to filter the files
+            @param title: string to use as title
+        """
+        if data_type is None:
+            data_type = self._data_type
+        if title is None:
+            title = "Save file - Set a location and name"
+        fname = QtCore.QFileInfo(QtGui.QFileDialog.getSaveFileName(self, title,
+                                                                   self._settings.data_path, 
+                                                                   data_type)).filePath()
+        return str(fname)
+    
     @process_file_parameter
     def show_instrument(self, file_name=None, workspace=None, tab=-1, reload=False, mask=None, data_proxy=None):
         """

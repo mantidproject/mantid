@@ -94,7 +94,7 @@ class DataCorrectionsWidget(BaseWidget):
             self._content.van_input_edit.setText(fname)   
     
     def _save_procdetvan_browse(self):
-        fname = self.data_browse_dialog()
+        fname = self.data_save_dialog("*.nxs")
         if fname:
             self._content.save_procdetvan_edit.setText(fname)   
     
