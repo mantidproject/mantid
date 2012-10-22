@@ -30,6 +30,9 @@ namespace Mantid
       const unsigned int NATTS = 2;
       /// Attribute names
       const char * ATTR_NAMES[NATTS] = { "MultEps", "TwinType" };
+
+      /// 2 \pi
+      const double TWO_PI = 2.*M_PI;
     }
 
     Strontium122::Strontium122()
@@ -80,7 +83,8 @@ namespace Mantid
     /**
      * Calculates the scattering intensity
      * @param exptSetup :: Details of the current experiment
-     * @param point :: The axis values for the current point in Q-W space: Qx, Qy, Qz, DeltaE
+     * @param point :: The axis values for the current point in Q-W space: Qx, Qy, Qz, DeltaE. These contain the U matrix
+     * rotation already.
      * @return The weight contributing from this point
      */
     double Strontium122::scatteringIntensity(const API::ExperimentInfo & exptSetup, const std::vector<double> & point) const
@@ -89,47 +93,54 @@ namespace Mantid
       const double qsqr = qx*qx + qy*qy + qz*qz;
       const double epssqr = eps*eps;
 
+      // Transform the HKL only requires B matrix & goniometer (R) as ConvertToMD should have already
+      // handled addition of U matrix
+      // qhkl = (1/2pi)(RB)^-1(qxyz)
       const Geometry::OrientedLattice & lattice = exptSetup.sample().getOrientedLattice();
       const Kernel::DblMatrix & gr = exptSetup.run().getGoniometerMatrix();
-      const Kernel::DblMatrix & ub = lattice.getUB();
+      const Kernel::DblMatrix & bmat = lattice.getB();
 
-      double ub00(0.0), ub01(0.0), ub02(0.0),
-             ub10(0.0), ub11(0.0), ub12(0.0),
-             ub20(0.0), ub21(0.0), ub22(0.0);
+      // Avoid doing inversion with Matrix class as it forces memory allocations
+      // M^-1 = (1/|M|)*M^T
+      double rb00(0.0), rb01(0.0), rb02(0.0),
+             rb10(0.0), rb11(0.0), rb12(0.0),
+             rb20(0.0), rb21(0.0), rb22(0.0);
       for(unsigned int i = 0; i < 3; ++i)
       {
-        ub00 += gr[0][i]*ub[i][0];
-        ub01 += gr[0][i]*ub[i][1];
-        ub02 += gr[0][i]*ub[i][2];
+        rb00 += gr[0][i]*bmat[i][0];
+        rb01 += gr[0][i]*bmat[i][1];
+        rb02 += gr[0][i]*bmat[i][2];
 
-        ub10 += gr[1][i]*ub[i][0];
-        ub11 += gr[1][i]*ub[i][1];
-        ub12 += gr[1][i]*ub[i][2];
+        rb10 += gr[1][i]*bmat[i][0];
+        rb11 += gr[1][i]*bmat[i][1];
+        rb12 += gr[1][i]*bmat[i][2];
 
-        ub20 += gr[2][i]*ub[i][0];
-        ub21 += gr[2][i]*ub[i][1];
-        ub22 += gr[2][i]*ub[i][2];
+        rb20 += gr[2][i]*bmat[i][0];
+        rb21 += gr[2][i]*bmat[i][1];
+        rb22 += gr[2][i]*bmat[i][2];
       }
-      const double twoPi = 2.*M_PI;
       // 2pi*determinant. The tobyFit definition of rl vector has extra 2pi factor in it
-      const double twoPiDet= twoPi*(ub00*(ub11*ub22 - ub12*ub21) -
-                                    ub01*(ub10*ub22 - ub12*ub20) +
-                                    ub02*(ub10*ub21 - ub11*ub20));
+      const double twoPiDet= TWO_PI*(rb00*(rb11*rb22 - rb12*rb21) -
+                                     rb01*(rb10*rb22 - rb12*rb20) +
+                                     rb02*(rb10*rb21 - rb11*rb20));
 
-      double qh = ((ub11*ub22 - ub12*ub21)*qx + (ub02*ub21 - ub01*ub22)*qy + (ub01*ub12 - ub02*ub11)*qz)/twoPiDet;
-      double qk = ((ub12*ub20 - ub10*ub22)*qx + (ub00*ub22 - ub02*ub20)*qy + (ub02*ub10 - ub00*ub12)*qz)/twoPiDet;
-      double ql = ((ub10*ub21 - ub11*ub20)*qx + (ub01*ub20 - ub00*ub21)*qy + (ub00*ub11 - ub01*ub10)*qz)/twoPiDet;
+      const double qh = ((rb11*rb22 - rb12*rb21)*qx + (rb02*rb21 - rb01*rb22)*qy + (rb01*rb12 - rb02*rb11)*qz)/twoPiDet;
+      const double qk = ((rb12*rb20 - rb10*rb22)*qx + (rb00*rb22 - rb02*rb20)*qy + (rb02*rb10 - rb00*rb12)*qz)/twoPiDet;
+      const double ql = ((rb10*rb21 - rb11*rb20)*qx + (rb01*rb20 - rb00*rb21)*qy + (rb00*rb11 - rb01*rb10)*qz)/twoPiDet;
 
-      double astar = twoPi*lattice.b1(); //arlu(1)
-      double bstar = twoPi*lattice.b2(); //arlu(2)
-      double cstar = twoPi*lattice.b3(); //arlu(3)
-      
-      // Transform from Mantid to TF coordinates
-      std::swap(qh,ql);
-      std::swap(astar,cstar);
-      std::swap(qk,ql);
-      std::swap(bstar,cstar);
-      
+      // Lattice parameters
+      double ca1 = std::cos(lattice.beta1());
+      double ca2 = std::cos(lattice.beta2());
+      double ca3 = std::cos(lattice.beta3());
+      double sa1 = std::abs(std::sin(lattice.beta1()));
+      double sa2 = std::abs(std::sin(lattice.beta2()));
+      double sa3 = std::abs(std::sin(lattice.beta3()));
+
+      const double factor = std::sqrt(1.0 + 2.0*(ca1*ca2*ca3) - (ca1*ca1 + ca2*ca2 + ca3*ca3));
+      const double arlu1 = (TWO_PI/lattice.a())*(sa1/factor); // Lattice parameters in r.l.u
+      const double arlu2 = (TWO_PI/lattice.b())*(sa2/factor);
+      const double arlu3 = (TWO_PI/lattice.c())*(sa3/factor);
+
       const double tempInK = exptSetup.getLogAsSingleValue("temperature_log");
       const double boseFactor = BoseEinsteinDistribution::np1Eps(eps,tempInK);
       const double magFormFactorSqr = std::pow(m_formFactorTable.value(qsqr), 2);
@@ -166,12 +177,12 @@ namespace Mantid
         const double s_yy = s_eff*((a_q-d_q-c_anis)/wdisp1)*wt1;
         const double s_zz = s_eff*((a_q-d_q+c_anis)/wdisp2)*wt2;
 
-        weight += 291.2 * magFormFactorSqr*((1.0 - std::pow(qk*bstar, 2)/qsqr)*s_yy + (1.0 - std::pow(ql*cstar,2)/qsqr)*s_zz);
+        weight += 291.2 * magFormFactorSqr*((1.0 - std::pow(qk*arlu2, 2)/qsqr)*s_yy + (1.0 - std::pow(ql*arlu3,2)/qsqr)*s_zz);
       }
       if(m_twinType <= 0)
       {
-        const double th =-qk*bstar/astar;   // actual qk (rlu) in the twin
-        const double tk = qh*astar/bstar;   // actual qk (rlu) in the twin
+        const double th =-qk*arlu2/arlu1;   // actual qk (rlu) in the twin
+        const double tk = qh*arlu1/arlu2;   // actual qk (rlu) in the twin
         const double a_q = 2.0*( sj_1b*(std::cos(M_PI*tk)-1.0) + sj_1a + 2.0*sj_2 + sj_c ) + (3.0*sk_ab + sk_c);
         const double a_qsqr = a_q*a_q;
         const double d_q = 2.0*( sj_1a*std::cos(M_PI*th) + 2.0*sj_2*std::cos(M_PI*th)*std::cos(M_PI*tk) + sj_c*std::cos(M_PI*ql) );
@@ -187,7 +198,7 @@ namespace Mantid
         const double s_yy = s_eff*((a_q-d_q-c_anis)/wdisp1)*wt1;
         const double s_zz = s_eff*((a_q-d_q+c_anis)/wdisp2)*wt2;
 
-        weight += 291.2 * magFormFactorSqr*((1.0 - std::pow(tk*bstar,2)/qsqr)*s_yy + (1.0 - std::pow(ql*cstar, 2)/qsqr)*s_zz);
+        weight += 291.2 * magFormFactorSqr*((1.0 - std::pow(tk*arlu2,2)/qsqr)*s_yy + (1.0 - std::pow(ql*arlu3, 2)/qsqr)*s_zz);
       }
 
       if(m_multEps)

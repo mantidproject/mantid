@@ -448,7 +448,7 @@ namespace Mantid
     {
       if(nthreads <= 0) nthreads = 1; // Ensure we have a sensible number
 
-      m_randomNumbers = std::vector<Kernel::NDRandomNumberGenerator*>(nthreads, NULL);
+      m_randomNumbers = std::vector<Kernel::NDRandomNumberGenerator*>(nthreads);
       m_bmatrix = std::vector<TobyFitBMatrix>(nthreads, TobyFitBMatrix());
       m_yvector = std::vector<TobyFitYVector>(nthreads, TobyFitYVector());
       m_etaInPlane = std::vector<double>(nthreads, 0.0);

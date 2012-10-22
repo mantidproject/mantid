@@ -9,6 +9,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventFactory.h"
@@ -182,7 +183,7 @@ namespace Mantid
       for(size_t j = 0; j < numEvents; ++j)
       {
         const uint16_t innerRun = box.getInnerRunIndex(j);
-        double contribution =  m_convolution->signal(box, innerRun, j);
+        const double contribution =  m_convolution->signal(box, innerRun, j);
         if(m_simulation)
         {
           coord_t centers[4] = { box.getInnerPosition(j,0), box.getInnerPosition(j,1),
@@ -220,8 +221,18 @@ namespace Mantid
       {
         outputWS->addEvent(*iter);
       }
-
       m_simulatedEvents.clear();
+
+      API::MemoryManager::Instance().releaseFreeMemory();
+      // This splits up all the boxes according to split thresholds and sizes.
+      auto threadScheduler = new Kernel::ThreadSchedulerFIFO();
+      Kernel::ThreadPool threadPool(threadScheduler);
+      outputWS->splitAllIfNeeded(threadScheduler);
+      threadPool.joinAll();
+      outputWS->refreshCache();
+
+      // Flush memory
+      API::MemoryManager::Instance().releaseFreeMemory();
     }
 
     /**

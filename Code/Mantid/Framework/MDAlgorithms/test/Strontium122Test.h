@@ -74,7 +74,7 @@ public:
 
     FakeFGModelFitFunction fakeFitFunction(sr122); // Use fit function to access current fit values
 
-    const double qx(-1.7), qy(0.0), qz(1.05), deltaE(300);
+    const double qx(7.7), qy(6.5), qz(4.3), deltaE(300);
     const double qOmega[4] = {qx, qy, qz, deltaE};
     Mantid::API::ExperimentInfo experimentDescr;
     auto lattice = new Mantid::Geometry::OrientedLattice(5.51,12.298,5.57);
@@ -88,8 +88,7 @@ public:
     double weight(-1.0);
     const ForegroundModel & sr122Function = sr122; // scatteringIntensity is private concrete model
     TS_ASSERT_THROWS_NOTHING( weight = sr122Function.scatteringIntensity(experimentDescr, std::vector<double>(qOmega, qOmega + 4)) );
-    std::cerr << std::setiosflags(std::ios_base::fixed) << std::setprecision(8) << weight << "\n";
-    TS_ASSERT_DELTA(0.21372221, weight, 1e-8);
+    TS_ASSERT_DELTA(0.0000062768, weight, 1e-10);
   }
 
 };
