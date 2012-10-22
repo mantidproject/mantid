@@ -161,10 +161,10 @@ namespace Algorithms
     WorkspaceFactory::Instance().initializeFromParent(inWS, outputWS, true);
 
     //Go through all the histograms and set the data
-    //PARALLEL_FOR2(inWS, outputWS)
+    PARALLEL_FOR2(inWS, outputWS)
     for (int i=0; i < histnumber; ++i)
     {
-      //PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERUPT_REGION
 
       const IEventList* el = inWS->getEventListPtr(i);
       MantidVec y_data, e_data;
@@ -180,9 +180,9 @@ namespace Algorithms
 
       //Report progress
       prog.report(name());
-      //PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERUPT_REGION
     }
-    //PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERUPT_REGION
 
     //Copy all the axes
     for (int i=1; i<inWS->axes(); i++)
