@@ -22,8 +22,8 @@ Helper method to create an event workspace with a set number of distributed even
 */
 IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMinSecs, const int pulseTimeMaxSecs, const DateAndTime runStart=DateAndTime(int(0)))
 {
-  size_t pulseTimeMin = size_t(1e9) * pulseTimeMinSecs;
-  size_t pulseTimeMax = size_t(1e9) * pulseTimeMaxSecs;
+  uint64_t pulseTimeMin = uint64_t(1e9) * pulseTimeMinSecs;
+  uint64_t pulseTimeMax = uint64_t(1e9) * pulseTimeMaxSecs;
 
   EventWorkspace_sptr retVal(new EventWorkspace);
   retVal->initialize(numberspectra,1,1);
@@ -35,7 +35,7 @@ IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDi
     for (int i=0; i<nDistrubutedEvents; i++)
     {
       double tof = 0;
-      size_t pulseTime = size_t(((double)i+0.5)*binWidth); // Stick an event with a pulse_time in the middle of each pulse_time bin.
+      uint64_t pulseTime = uint64_t(((double)i+0.5)*binWidth); // Stick an event with a pulse_time in the middle of each pulse_time bin.
       retVal->getEventList(pix) += TofEvent(tof, pulseTime);
     }
     retVal->getEventList(pix).addDetectorID(pix);
@@ -119,7 +119,7 @@ private:
       // Check that the x-axis has been set-up properly. It should mirror the original rebin parameters.
       const Mantid::MantidVec& X = outWS->readX(i);
       TS_ASSERT_EQUALS(nBinsToBinTo + 1, X.size());
-      for(size_t j = 0; j < X.size(); ++j)
+      for(uint64_t j = 0; j < X.size(); ++j)
       {
         TS_ASSERT_EQUALS(static_cast<int>(step*j), static_cast<int>(X[j]));
       }
@@ -128,7 +128,7 @@ private:
       
       const Mantid::MantidVec& Y = outWS->readY(i);
       TS_ASSERT_EQUALS(nBinsToBinTo, Y.size());
-      for(size_t j = 0; j < Y.size(); ++j)
+      for(uint64_t j = 0; j < Y.size(); ++j)
       {
         TS_ASSERT_EQUALS(nUniformDistributedEvents/nBinsToBinTo, Y[j]); // Should have 1 event per bin, because that's what the createEventWorkspace() provides and our rebinning params are based on our original creation parameters.
       }

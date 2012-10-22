@@ -107,7 +107,7 @@ namespace Algorithms
     // workspace independent determination of length
     const int histnumber = static_cast<int>(inWS->getNumberHistograms());
     
-    const size_t nanoSecondsInASecond = static_cast<size_t>(1e9);
+    const uint64_t nanoSecondsInASecond = static_cast<uint64_t>(1e9);
     const DateAndTime runStartTime = inWS->run().startTime();
     // The validator only passes parameters with size 1, or 3xn.  
     if (inParams.size() >= 3)
@@ -123,8 +123,8 @@ namespace Algorithms
     } 
     else if (inParams.size() == 1)
     {
-      size_t xmin = 0;
-      size_t xmax = 0;
+      uint64_t xmin = 0;
+      uint64_t xmax = 0;
       
       Progress sortProg(this,0.0,1.0, histnumber);
       inWS->sortAll(DataObjects::PULSETIME_SORT, &sortProg); 
@@ -132,11 +132,11 @@ namespace Algorithms
       for(int i = 0; i < histnumber; ++i)
       {
         const IEventList* el = inWS->getEventListPtr(i);
-        const size_t nEvents = el->getNumberEvents();
+        const uint64_t nEvents = el->getNumberEvents();
         if(nEvents > 0)
         {
-          size_t tempMin = el->getPulseTimeMin().totalNanoseconds();
-          size_t tempMax = el->getPulseTimeMax().totalNanoseconds();
+          uint64_t tempMin = el->getPulseTimeMin().totalNanoseconds();
+          uint64_t tempMax = el->getPulseTimeMax().totalNanoseconds();
           if(firstRun)
           {
             xmin = tempMin;
