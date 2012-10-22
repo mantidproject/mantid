@@ -1,5 +1,11 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+Rebins an EventWorkspace according to the pulse times of each event rather than the time of flight [[Rebin]]. The Params inputs may be expressed in an identical manner to the [[Rebin]] algorithm. 
+Users may either provide a single value, which is interpreted as the ''step'' (in seconds), or three comma separated values ''start'', ''step'', ''end'', where all units are in seconds, and start and end are relative to the start of the run.
+
+The x-axis is expressed in relative time to the start of the run in seconds.
+
+This algorithm may be used to diagnose problems with the electronics or data collection. Typically, detectors should see a uniform distribution of the events 
+generated between the start and end of the run. This algorithm allows anomalies to be detected.
 *WIKI*/
 
 #include "MantidAlgorithms/RebinByPulseTimes.h"
@@ -76,12 +82,11 @@ namespace Algorithms
   */
   void RebinByPulseTimes::init()
   {
-    declareProperty(new API::WorkspaceProperty<API::IEventWorkspace>("InputWorkspace","",Direction::Input), "An input workspace.");
+    declareProperty(new API::WorkspaceProperty<API::IEventWorkspace>("InputWorkspace","",Direction::Input), "An input workspace containing TOF events.");
     declareProperty(
       new ArrayProperty<double>("Params", boost::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
-      "this can be followed by a comma and more widths and last boundary pairs.\n"
-      "Negative width values indicate logarithmic binning.");
+      "this can be followed by a comma and more widths and last boundary pairs.");
     declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
 
@@ -109,14 +114,16 @@ namespace Algorithms
     const uint64_t nanoSecondsInASecond = static_cast<uint64_t>(1e9);
     const DateAndTime runStartTime = inWS->run().startTime();
     // The validator only passes parameters with size 1, or 3xn.  
+
+    double tStep = 0; 
     if (inParams.size() >= 3)
     {
       // Use the start of the run to offset the times provided by the user. pulse time of the events are absolute.
       const DateAndTime startTime = runStartTime + inParams[0] ;
       const DateAndTime endTime = runStartTime + inParams[2] ;
-      const double tStep = inParams[1] * nanoSecondsInASecond;
       // Rebinning params in nanoseconds.
       rebinningParams.push_back(static_cast<double>(startTime.totalNanoseconds()));
+      tStep = inParams[1] * nanoSecondsInASecond;
       rebinningParams.push_back(tStep);
       rebinningParams.push_back(static_cast<double>(endTime.totalNanoseconds()));
     } 
@@ -126,8 +133,15 @@ namespace Algorithms
       const uint64_t xmax = inWS->getPulseTimeMax().totalNanoseconds();
 
       rebinningParams.push_back(static_cast<double>(xmin));
-      rebinningParams.push_back(inParams[0] * nanoSecondsInASecond);
+      tStep = inParams[0] * nanoSecondsInASecond;
+      rebinningParams.push_back(tStep);
       rebinningParams.push_back(static_cast<double>(xmax));
+    }
+
+    // Validate the timestep.
+    if(tStep <= 0)
+    {
+      throw std::invalid_argument("Cannot have a timestep less than or equal to zero.");
     }
 
     //Initialize progress reporting.

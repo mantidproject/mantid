@@ -165,6 +165,36 @@ public:
     TS_ASSERT_THROWS( alg.execute(), std::invalid_argument);
   }
 
+  void do_test_bad_step_throws(const double& badStep)
+  {
+    const int pulseTimeMin = 0;
+    const int pulseTimeMax = 4;
+    const int nUniformDistributedEvents = 4;
+    const int nSpectra = 1;
+    const int nBinsToBinTo = 4;
+
+    IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax); // Create an otherwise valid input workspace.
+
+    RebinByPulseTimes alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    Mantid::MantidVec rebinArgs1 = boost::assign::list_of<double>(badStep);  // Step is zero!.
+    alg.setProperty("Params", rebinArgs1);
+    alg.setPropertyValue("OutputWorkspace", "outWS");
+    TS_ASSERT_THROWS( alg.execute(), std::invalid_argument);
+  }
+
+  void test_zero_step_throws()
+  {
+    do_test_bad_step_throws(0);
+  }
+
+  void test_less_than_zero_step_throws()
+  {
+    do_test_bad_step_throws(-1);
+  }
+
   /*
   Test that the input workspace must be an event workspace, other types of matrix workspace will not do.
   */
