@@ -174,56 +174,6 @@ namespace MDEvents
     // Continue with the vertexes array
     this->initVertexesArray();
   }
-
-  //----------------------------------------------------------------------------------------------
-  /** Sets all signals/errors in the workspace to the given values
-   *
-   * @param signal :: signal value to set
-   * @param errorSquared :: error (squared) value to set
-   * @param numEvents :: the number of events in each bin.
-   */
-  void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared, signal_t numEvents)
-  {
-    for (size_t i=0; i < m_length; i++)
-    {
-      m_signals[i] = signal;
-      m_errorsSquared[i] = errorSquared;
-      m_numEvents[i] = numEvents;
-      m_masks[i] = false; //Not masked by default;
-    }
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Apply an implicit function to each point; if false, set to the given value.
-   *
-  * @param function :: the implicit function to apply
-  * @param signal :: signal value to set when function evaluates to false
-  * @param errorSquared :: error value to set when function evaluates to false
-  */
-  void MDHistoWorkspace::applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared)
-  {
-    if (numDimensions<3) throw std::invalid_argument("Need 3 dimensions for ImplicitFunction.");
-    Mantid::coord_t coord[3];
-    for (size_t x=0; x<m_dimensions[0]->getNBins(); x++)
-    {
-      coord[0] = m_dimensions[0]->getX(x);
-      for (size_t y=0; y<m_dimensions[1]->getNBins(); y++)
-      {
-        coord[1] = m_dimensions[1]->getX(y);
-        for (size_t z=0; z<m_dimensions[2]->getNBins(); z++)
-        {
-          coord[2] = m_dimensions[2]->getX(z);
-          
-          if (!function->isPointContained(coord))
-          {
-            m_signals[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = signal;
-            m_errorsSquared[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = errorSquared;
-          }
-        }
-      }
-    }
-  }
-
   //----------------------------------------------------------------------------------------------
   /** After initialization, call this to initialize the vertexes array
    * to the vertexes of the 0th box.
@@ -277,6 +227,57 @@ namespace MDEvents
       m_indexMax[d] = m_dimensions[d]->getNBins();
     m_indexMaker = new size_t[numDimensions];
     Utils::NestedForLoop::SetUpIndexMaker(numDimensions, m_indexMaker, m_indexMax);
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Sets all signals/errors in the workspace to the given values
+   *
+   * @param signal :: signal value to set
+   * @param errorSquared :: error (squared) value to set
+   * @param numEvents :: the number of events in each bin.
+   */
+  void MDHistoWorkspace::setTo(signal_t signal, signal_t errorSquared, signal_t numEvents)
+  {
+    for (size_t i=0; i < m_length; i++)
+    {
+      m_signals[i] = signal;
+      m_errorsSquared[i] = errorSquared;
+      m_numEvents[i] = numEvents;
+      m_masks[i] = false; //Not masked by default;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Apply an implicit function to each point; if false, set to the given value.
+   *
+  * @param function :: the implicit function to apply
+  * @param signal :: signal value to set when function evaluates to false
+  * @param errorSquared :: error value to set when function evaluates to false
+  */
+  void MDHistoWorkspace::applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared)
+  {
+    if (numDimensions<3) throw std::invalid_argument("Need 3 dimensions for ImplicitFunction.");
+    Mantid::coord_t coord[3];
+    for (size_t x=0; x<m_dimensions[0]->getNBins(); x++)
+    {
+      coord[0] = m_dimensions[0]->getX(x);
+      for (size_t y=0; y<m_dimensions[1]->getNBins(); y++)
+      {
+        coord[1] = m_dimensions[1]->getX(y);
+        for (size_t z=0; z<m_dimensions[2]->getNBins(); z++)
+        {
+          coord[2] = m_dimensions[2]->getX(z);
+          
+          if (!function->isPointContained(coord))
+          {
+            m_signals[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = signal;
+            m_errorsSquared[x + indexMultiplier[0]*y + indexMultiplier[1]*z] = errorSquared;
+          }
+        }
+      }
+    }
   }
 
   //----------------------------------------------------------------------------------------------

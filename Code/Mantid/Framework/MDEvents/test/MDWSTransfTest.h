@@ -221,7 +221,7 @@ void testTransf2HoraceQinA()
      }
      
 
-//     // crystal misalighned
+//     // crystal misalighned -- this test does not fully holds
 //     Mantid::Kernel::Matrix<double> Uhor(3,3,true);
 ////    Horace Umatrix build on the coordinate system, constructed aroung two vectors u=[0.9,0.1,0] and v=[0.1,0.9,0.1]
 //     // 0.9939   0.1104  0.00
@@ -260,7 +260,7 @@ void testTransf2HoraceQinA()
     //   TS_ASSERT_DELTA(sample[i],rot[i],1.e-4);
     // }
 }
-void testTransf2HoraceOrthogonal()
+void testTransf2HKL()
 {
      MDEvents::MDWSDescription TWS;
      std::vector<double> minVal(4,-3),maxVal(4,3);

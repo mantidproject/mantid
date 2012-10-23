@@ -154,6 +154,12 @@ namespace MDEvents
       return m_masks;
     }
 
+    /** Return the aray of bin withs  (the linear length of a box) for each dimension */
+    const coord_t * getBinWidths()const
+    {
+      return m_boxLength;
+    }
+
     void setTo(signal_t signal, signal_t errorSquared, signal_t numEvents);
 
     void applyImplicitFunction(Mantid::Geometry::MDImplicitFunction * function, signal_t signal, signal_t errorSquared);
@@ -403,6 +409,10 @@ namespace MDEvents
 
     /// To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 + ...
     size_t * indexMultiplier;
+    /// For converting to/from linear index to tdimensions
+    size_t * m_indexMaker;
+    /// Max index into each dimension
+    size_t * m_indexMax;
 
     /// Inverse of the volume of EACH cell
     coord_t m_inverseVolume;
@@ -416,10 +426,6 @@ namespace MDEvents
     /// Vector of the origin in each dimension
     coord_t * m_origin;
 
-    /// For converting to/from linear index to tdimensions
-    size_t * m_indexMaker;
-    /// Max index into each dimension
-    size_t * m_indexMax;
 
   protected:
   

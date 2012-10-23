@@ -321,6 +321,18 @@ public:
     // Getter with all indices
     TS_ASSERT_DELTA( ws.getSignalAt(4,9,19,9), 2.3456, 1e-5);
 
+    // check shapes
+    TS_ASSERT_EQUALS( 5,ws.getDimension(0)->getNBins());
+    TS_ASSERT_EQUALS(10,ws.getDimension(1)->getNBins());
+    TS_ASSERT_EQUALS(20,ws.getDimension(2)->getNBins());
+    TS_ASSERT_EQUALS(10,ws.getDimension(3)->getNBins());
+
+    auto *binWidth = ws.getBinWidths();
+    TS_ASSERT_DELTA(20./5,*(binWidth+0),1.e-5);
+    TS_ASSERT_DELTA(20./10,*(binWidth+1),1.e-5);
+    TS_ASSERT_DELTA(20./20,*(binWidth+2),1.e-5);
+    TS_ASSERT_DELTA(20./10,*(binWidth+3),1.e-5);
+
   }
 
   //---------------------------------------------------------------------------------------------------
