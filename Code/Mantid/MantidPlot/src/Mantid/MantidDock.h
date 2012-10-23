@@ -106,6 +106,7 @@ private:
   void addTableWorkspaceMenuItems(QMenu * menu) const;
 
   void excludeItemFromSort(MantidTreeWidgetItem *item);
+  void scheduleFindAbandonedWorkspaces();
   
 protected:
   MantidTreeWidget * m_tree;
@@ -136,6 +137,8 @@ private:
   *m_descendingSortAction, *m_byNameChoice, *m_byLastModifiedChoice, *m_showTransposed,
   *m_convertToMatrixWorkspace,
   *m_convertMDHistoToMatrixWorkspace;
+
+  bool m_rerunRequested;
 
   static Mantid::Kernel::Logger& logObject;
 };

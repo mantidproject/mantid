@@ -53,7 +53,7 @@ Mantid::Kernel::Logger& MantidDockWidget::logObject=Mantid::Kernel::Logger::get(
 Mantid::Kernel::Logger& MantidTreeWidget::logObject=Mantid::Kernel::Logger::get("MantidTreeWidget");
 
 MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
-QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups()
+QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups(), m_rerunRequested( false )
 {
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -216,7 +216,7 @@ Mantid::API::Workspace_sptr MantidDockWidget::getSelectedWorkspace() const
 void MantidDockWidget::addWorkspace(const QString & ws_name, Mantid::API::Workspace_sptr workspace)
 {
   addTreeEntry( ws_name, workspace );
-  findAbandonedWorkspaces();
+  scheduleFindAbandonedWorkspaces();
 }
 
 /**
@@ -868,7 +868,7 @@ void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QStri
   catch( ... )
   {
   }
-  findAbandonedWorkspaces();
+  scheduleFindAbandonedWorkspaces();
 }
 
 /**
@@ -905,7 +905,7 @@ void MantidDockWidget::updateWorkspaceGroup(const QString & group_name)
     addTreeEntry( group_name, group );
   }
   // clean up
-  findAbandonedWorkspaces();
+  scheduleFindAbandonedWorkspaces();
 }
 
 /**
@@ -937,7 +937,7 @@ void MantidDockWidget::findAbandonedWorkspaces()
         {
           if ( i >= group->getNumberOfEntries() )
           {
-            emit rerunFindAbandonedWorkspaces();
+            scheduleFindAbandonedWorkspaces();
             return;
           }
           const std::string name = group->getItem(i)->name();
@@ -951,7 +951,7 @@ void MantidDockWidget::findAbandonedWorkspaces()
     }
     catch(...) 
     {
-      emit rerunFindAbandonedWorkspaces();
+      scheduleFindAbandonedWorkspaces();
       return;
     }
   }
@@ -970,7 +970,7 @@ void MantidDockWidget::findAbandonedWorkspaces()
       }
       catch(...)
       {
-        emit rerunFindAbandonedWorkspaces();
+        scheduleFindAbandonedWorkspaces();
         return;
       }
     }
@@ -987,6 +987,19 @@ void MantidDockWidget::findAbandonedWorkspaces()
   foreach( QString qName, topItems )
   {
     removeWorkspaceEntry( qName );
+  }
+  m_rerunRequested = false;
+}
+
+/**
+ * Schedule a re-run of findAbandonedWorkspaces().
+ */
+void MantidDockWidget::scheduleFindAbandonedWorkspaces()
+{
+  if ( !m_rerunRequested )
+  {
+    m_rerunRequested = true;
+    emit rerunFindAbandonedWorkspaces();
   }
 }
 
