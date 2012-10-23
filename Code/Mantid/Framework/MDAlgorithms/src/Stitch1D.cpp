@@ -6,7 +6,7 @@ Scales either the LHS or RHS workspace by some scale factor which, can be manual
 Calculates the weighted mean values in the overlap region and then combines the overlap region with the difference of the LHS and RHS workspaces
 *WIKI*/
 
-#include "MantidMDAlgorithms/StitchGroup1D.h"
+#include "MantidMDAlgorithms/Stitch1D.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"

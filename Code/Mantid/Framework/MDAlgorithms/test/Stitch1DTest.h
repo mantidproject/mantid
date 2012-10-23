@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/StitchGroup1D.h"
+#include "MantidMDAlgorithms/Stitch1D.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include <boost/assign.hpp>
