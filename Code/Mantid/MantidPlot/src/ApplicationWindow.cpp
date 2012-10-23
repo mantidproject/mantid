@@ -16389,7 +16389,11 @@ void ApplicationWindow::showScriptInterpreter()
 
 bool ApplicationWindow::testForIPython()
 {
+#ifdef _WIN32
+  return true;
+#else
   return runPythonScript("from ipython_plugin import MantidPlot_IPython",false, true,false);
+#endif
 }
 
 void ApplicationWindow::launchIPythonConsole()
