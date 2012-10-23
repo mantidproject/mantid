@@ -549,27 +549,6 @@ namespace Mantid
       remap->executeAsSubAlg();
       outputWS = remap->getProperty("OutputWorkspace");
 
-      // Correct for solid angle if grouping is requested, but detector vanadium
-      // not used.
-      if (groupWS && !detVanWS)
-      {
-        std::string solidAngWsName = "SolidAngle";
-        IAlgorithm_sptr solidAngle = this->createSubAlgorithm("SolidAngle");
-        solidAngle->setProperty("InputWorkspace", outputWS);
-        solidAngle->setProperty("OutputWorkspace", solidAngWsName);
-        solidAngle->executeAsSubAlg();
-        MatrixWorkspace_sptr solidAngWS = solidAngle->getProperty("OutputWorkspace");
-
-        IAlgorithm_sptr divide = this->createSubAlgorithm("Divide");
-        divide->setProperty("LHSWorkspace", outputWS);
-        divide->setProperty("RHSWorkspace", solidAngWS);
-        divide->setProperty("OutputWorkspace", outputWS);
-        divide->executeAsSubAlg();
-        outputWS = divide->getProperty("OutputWorkspace");
-
-        solidAngWS.reset();
-      }
-
       if ("ISIS" == facility)
       {
         double scaleFactor = inputWS->getInstrument()->getNumberParameter("scale-factor")[0];
