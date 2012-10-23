@@ -81,6 +81,9 @@ namespace Mantid
       this->declareProperty(new WorkspaceProperty<>("SampleMonitorWorkspace", "",
           Direction::Input, PropertyMode::Optional),
           "A monitor workspace associated with the sample workspace.");
+      this->declareProperty(new WorkspaceProperty<>("HardMaskWorkspace", "",
+          Direction::Input, PropertyMode::Optional),
+          "A hard mask workspace to apply.");
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
           Direction::Output), "This is the resulting mask workspace.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
@@ -116,6 +119,7 @@ namespace Mantid
       MatrixWorkspace_sptr detVanMonWS = this->getProperty("DetVanMonitorWorkspace");
       MatrixWorkspace_sptr detVanCompWS = this->getProperty("DetVanCompWorkspace");
       MatrixWorkspace_sptr detVanCompMonWS = this->getProperty("DetVanCompMonitorWorkspace");
+      MatrixWorkspace_sptr hardMaskWS = this->getProperty("HardMaskWorkspace");
       MatrixWorkspace_sptr sampleWS;
       MatrixWorkspace_sptr sampleMonWS;
 
@@ -292,6 +296,7 @@ namespace Mantid
       diag->setProperty("SampleWorkspace", sampleWS);
       diag->setProperty("SampleTotalCountsWorkspace", totalCountsWS);
       diag->setProperty("SampleBackgroundWorkspace", backgroundIntWS);
+      diag->setProperty("HardMaskWorkspace", hardMaskWS);
       diag->setProperty("LowThreshold", tiny);
       diag->setProperty("HighThreshold", huge);
       diag->setProperty("LowOutlier", vanOutLo);

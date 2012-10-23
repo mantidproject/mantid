@@ -680,6 +680,7 @@ namespace Mantid
         diag->setProperty("DetVanCompMonitorWorkspace", detVan2MonWS);
         diag->setProperty("SampleWorkspace", sampleWS);
         diag->setProperty("SampleMonitorWorkspace", sampleMonWS);
+        diag->setProperty("HardMaskWorkspace", hardMaskWS);
         diag->setProperty("OutputWorkspace", detVanMaskName);
         diag->setProperty("ReductionProperties", reductionManagerName);
         diag->executeAsSubAlg();
@@ -695,11 +696,6 @@ namespace Mantid
         detVan = this->createSubAlgorithm("DgsProcessDetectorVanadium");
         detVan->setProperty("InputWorkspace", detVanWS);
         detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
-        if (!maskWS)
-        {
-          maskWS = hardMaskWS;
-          hardMaskWS.reset();
-        }
         detVan->setProperty("MaskWorkspace", maskWS);
         std::string idetVanName = outputWsName + "_idetvan";
 
@@ -729,10 +725,11 @@ namespace Mantid
       etConv->setProperty("IntegratedDetectorVanadium", idetVanWS);
       const double ei = this->getProperty("IncidentEnergyGuess");
       etConv->setProperty("IncidentEnergyGuess", ei);
-      if (maskWS)
+      if (!maskWS && hardMaskWS)
       {
-        etConv->setProperty("MaskWorkspace", maskWS);
+        maskWS = hardMaskWS;
       }
+      etConv->setProperty("MaskWorkspace", maskWS);
       if (groupingWS)
       {
         etConv->setProperty("GroupingWorkspace", groupingWS);
