@@ -61,6 +61,12 @@ set ( PY_EXE_SUFFIX_RELEASE ".exe" )
 set ( PY_EXE_SUFFIX_RELWITHDEBINFO ${PY_EXE_SUFFIX_RELEASE} )
 set ( PY_EXE_SUFFIX_MINSIZEREL ${PY_EXE_SUFFIX_RELEASE}  )
 set ( PY_EXE_SUFFIX_DEBUG "_d.exe" )
+# No terminal version
+set ( PY_EXEW_PREFIX  "${CMAKE_LIBRARY_PATH}/Python27/pythonw" )
+set ( PY_EXEW_SUFFIX_RELEASE ".exe" )
+set ( PY_EXEW_SUFFIX_RELWITHDEBINFO ${PY_EXE_SUFFIX_RELEASE} )
+set ( PY_EXEW_SUFFIX_MINSIZEREL ${PY_EXE_SUFFIX_RELEASE}  )
+set ( PY_EXEW_SUFFIX_DEBUG "_d.exe" )
 
 
 ###########################################################################

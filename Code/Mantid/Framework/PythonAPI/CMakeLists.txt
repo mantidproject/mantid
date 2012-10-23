@@ -145,7 +145,7 @@ if( WIN32 )
   
   # Now the binary files
   if ( MSVC_IDE )
-    foreach ( TYPE DLL EXE )
+    foreach ( TYPE DLL EXE EXEW )
       add_custom_command( TARGET PythonAPI POST_BUILD 
                           COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELEASE=${PY_${TYPE}_SUFFIX_RELEASE}
                           COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELWITHDEBINFO=${PY_${TYPE}_SUFFIX_RELWITHDEBINFO}
@@ -156,7 +156,7 @@ if( WIN32 )
                         )
     endforeach ( TYPE )
   else () # Need to do things slightly differently for nmake
-    foreach ( TYPE DLL EXE )
+    foreach ( TYPE DLL EXE EXEW )
       add_custom_command( TARGET PythonAPI POST_BUILD 
                           COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELEASE=${PY_${TYPE}_SUFFIX_RELEASE}
                           COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELWITHDEBINFO=${PY_${TYPE}_SUFFIX_RELWITHDEBINFO}
