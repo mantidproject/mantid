@@ -41,7 +41,7 @@ class InstrumentParameters(object):
             raise ValueError("Instrument was not loaded, cannot retrieve parameters.")
 
     def get_parameter(self, parname):
-        default = ''
+        default = -1
         try:
             self._self_check()
         except ValueError:
