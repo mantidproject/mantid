@@ -171,7 +171,6 @@ public:
     const int pulseTimeMax = 4;
     const int nUniformDistributedEvents = 4;
     const int nSpectra = 1;
-    const int nBinsToBinTo = 4;
 
     IEventWorkspace_sptr ws = createEventWorkspace(nSpectra, nUniformDistributedEvents, pulseTimeMin, pulseTimeMax); // Create an otherwise valid input workspace.
 
