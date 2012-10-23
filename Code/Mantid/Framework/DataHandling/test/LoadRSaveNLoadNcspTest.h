@@ -144,15 +144,15 @@ void testExecOnLoadraw()
 
        boost::shared_ptr<const IComponent> samplepos = i->getSample();
         TS_ASSERT_EQUALS( samplepos->getName(), "some-surface-holder");
-        TS_ASSERT_DELTA( samplepos->getPos().Z(), 0.0,0.01);
+        TS_ASSERT_DELTA( samplepos->getPos().X(), 0.0,0.01);
 
       boost::shared_ptr<const Detector> ptrDet103 = boost::dynamic_pointer_cast<const Detector>(i->getDetector(103));
 	  if(ptrDet103!=NULL)
 	  {
         TS_ASSERT_EQUALS( ptrDet103->getID(), 103);
         TS_ASSERT_EQUALS( ptrDet103->getName(), "linear-detector-pixel");
-        TS_ASSERT_DELTA( ptrDet103->getPos().X(), 12.403,0.01);
-        TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 0.1164,0.01);
+        TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 12.403,0.01);
+        TS_ASSERT_DELTA( ptrDet103->getPos().Y(), 0.1164,0.01);
         double d = ptrDet103->getPos().distance(samplepos->getPos());
         TS_ASSERT_DELTA(d,2.1561,0.0001);
         double cmpDistance = ptrDet103->getDistance(*samplepos);
