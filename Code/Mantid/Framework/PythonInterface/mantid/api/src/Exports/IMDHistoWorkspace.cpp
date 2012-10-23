@@ -28,12 +28,22 @@ namespace
    */
   std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self)
   {
-    const size_t ndims = self.getNumDims();
-    std::vector<Py_intptr_t> dims(ndims);
+    size_t ndims = self.getNumDims();
+    std::vector<size_t> nd;
+    nd.reserve(ndims);
+
+    // invert dimensions in C way, e.g. slowest changing ndim goes first 
     for(size_t i = 0; i < ndims; ++i)
     {
-      dims[i] = static_cast<Py_intptr_t>(self.getDimension(i)->getNBins());
+      if(self.getDimension(ndims-i-1)->getNBins()>1)    // drop empty (integrated) dimesnions
+        nd.push_back(self.getDimension(ndims-i-1)->getNBins());
     }
+
+    ndims = nd.size();
+    std::vector<Py_intptr_t> dims(ndims);
+    for(size_t i=0;i<ndims ;++i)
+      dims[i]=static_cast<Py_intptr_t>(nd[i]);
+    
     return dims;
   }
 

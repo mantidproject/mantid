@@ -182,7 +182,8 @@ public:
   }
 
   void test_exec_3D_unevenSizes()
-  { do_test_exec("", "Axis0,2.0,8.0, 6", "Axis1,2.0,8.0, 3", "Axis2,2.0,8.0, 6", "", 2.0 /*signal*/, 6*6*3 /*# of bins*/, true /*IterateEvents*/ );
+  { 
+    do_test_exec("", "Axis0,2.0,8.0, 3", "Axis1,2.0,8.0, 6", "Axis2,2.0,8.0, 6", "", 2.0 /*signal*/, 6*6*3 /*# of bins*/, true /*IterateEvents*/ );
   }
 
 
