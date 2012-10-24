@@ -179,7 +179,6 @@ void WorkspaceGroup::print() const
   for (auto itr = m_workspaces.begin(); itr != m_workspaces.end(); ++itr)
   {
     g_log.debug() << "Workspace name in group vector =  " << (**itr).name() << std::endl;
-    //std::cerr << "Workspace name in group vector =  " << (**itr).name() << std::endl;
   }
 }
 
@@ -200,6 +199,8 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
     this->remove(deletedName);
     if(isEmpty())
     {
+      //We are about to get deleted so we don't want to recieve any notifications
+      observeADSNotifications(false);
       AnalysisDataService::Instance().remove(this->getName());
     }
   }
