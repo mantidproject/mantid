@@ -143,7 +143,7 @@ namespace Mantid
       const double tZeroGuess = reductionManager->getProperty("TimeZeroGuess");
       std::vector<double> etBinning = reductionManager->getProperty("EnergyTransferRange");
 
-      // Create a default set of binning parameters: (-0.5Ei, 0.01Ei, Ei)
+      // Create a default set of binning parameters: (-0.5Ei, 0.01Ei, 0.99Ei)
       if (etBinning.empty())
       {
         double emin = -0.5 * eiGuess;
