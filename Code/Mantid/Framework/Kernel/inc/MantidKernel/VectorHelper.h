@@ -86,6 +86,31 @@ namespace VectorHelper
     total = sqrt(total);
     return total;
   }
+   // Scalar product of two vectors
+  template<typename T>
+  T scalar_prod(const std::vector<T> &v1,const std::vector<T> &v2)
+  {
+    if(v1.size()!=v2.size())
+      throw std::invalid_argument(" scalar product is defined only for the vectors of the equivalient length");
+    T total = 0;
+    for (size_t i=0; i<v1.size(); i++)
+      total += v1[i] * v2[i];
+
+    return total;
+  }
+   // Scalar product of two different type vectors which allow static cast to double
+  template<typename T,typename U>
+  double scalar_prod(const std::vector<T> &v1,const std::vector<U> &v2)
+  {
+    if(v1.size()!=v2.size())
+      throw std::invalid_argument(" scalar product is defined only for the vectors of the equivalient length");
+    double total = 0;
+    for (size_t i=0; i<v1.size(); i++)
+      total +=double(v1[i]) * double(v2[i]);
+
+    return total;
+  }
+ 
 
   //-------------------------------------------------------------------------------------
   /** Normalize a vector of any size to unity, using the sum of the squares of the components

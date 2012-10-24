@@ -156,6 +156,32 @@ public:
   }
 
 
+  void test_nestedLinearIndexes()
+  {
+    std::vector<size_t> numBins(3,10);
+    numBins[1]=20;
+    numBins[2]=5;
+
+    std::vector<size_t> indexes;
+    size_t ic(0);
+
+    for(size_t k=0;k<numBins[2];k++)
+    {
+          for(size_t j=0;j<numBins[1];j++)
+          {
+            for(size_t i=0;i<numBins[0];i++)
+            {
+              Utils::getIndicesFromLinearIndex(ic,numBins,indexes);
+              ic++;
+
+              TS_ASSERT_EQUALS(indexes[0],i);
+              TS_ASSERT_EQUALS(indexes[1],j);
+              TS_ASSERT_EQUALS(indexes[2],k);
+            }
+          }
+    }
+  }
+
 };
 
 

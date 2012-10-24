@@ -3,7 +3,8 @@
 
 
 
-For testing MDEventWorkspaces, this algorithm either creates a uniform, random distribution of events, or fills peaks around given points with a given number of events.
+For testing MDEventWorkspaces, this algorithm either creates a uniform, random distribution of events, 
+or generate regular events placed in boxes, or fills peaks around given points with a given number of events.
 
 
 
@@ -26,6 +27,8 @@ For testing MDEventWorkspaces, this algorithm either creates a uniform, random d
 #include <math.h>
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/Utils.h"
 
 namespace Mantid
 {
@@ -182,25 +185,16 @@ namespace MDAlgorithms
   template<typename MDE, size_t nd>
   void FakeMDEventData::addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    std::vector<double> minPar(nd),maxPar(nd),delta(nd);
     std::vector<double> params = getProperty("UniformParams");
-    bool RandomizeSignal = getProperty("RandomizeSignal");
     if (params.size() == 0)
       return;
 
     bool randomEvents=true;
-    size_t num = size_t(params[0]);
     if (params[0] < 0)
     {
       randomEvents=false;
-      num = size_t(-params[0]);
+      params[0] = -params[0];
     }
-    if(num==0)
-      throw std::invalid_argument(" number of distributed events can not be equal to 0");
-
-
-    Progress prog(this, 0.0, 1.0, 100);
-    size_t progIncrement = num / 100; if (progIncrement == 0) progIncrement = 1;
 
     if (params.size() == 1)
     {
@@ -213,13 +207,39 @@ namespace MDAlgorithms
     if (params.size() != 1 + nd*2)
       throw std::invalid_argument("UniformParams: needs to have ndims*2+1 arguments.");
 
-    boost::mt19937 rng;
-    if(randomEvents)
-    {
-      int randomSeed = getProperty("RandomSeed");
-      rng.seed((unsigned int)(randomSeed));
-    }
 
+    if(randomEvents)
+      addFakeRandomData<MDE,nd>(params,ws);
+    else
+      addFakeRegularData<MDE,nd>(params,ws);
+
+    ws->splitBox();
+    Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts);
+    ws->splitAllIfNeeded(ts);
+    tp.joinAll();
+    ws->refreshCache();
+
+  }
+
+  template<typename MDE, size_t nd>
+  void FakeMDEventData::addFakeRandomData(const std::vector<double> &params,typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+
+    bool RandomizeSignal = getProperty("RandomizeSignal");
+
+    size_t num = size_t(params[0]);
+    if(num==0) throw std::invalid_argument(" number of distributed events can not be equal to 0");
+
+
+    Progress prog(this, 0.0, 1.0, 100);
+    size_t progIncrement = num / 100; if (progIncrement == 0) progIncrement = 1;
+
+
+    boost::mt19937 rng;
+    int randomSeed = getProperty("RandomSeed");
+    rng.seed((unsigned int)(randomSeed));
+ 
     // Unit-size randomizer
     boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
     boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > genUnit(rng, u2);
@@ -233,19 +253,12 @@ namespace MDAlgorithms
       double min = params[d*2+1];
       double max = params[d*2+2];
       if (max <= min) throw std::invalid_argument("UniformParams: min must be < max for all dimensions.");
-      if(randomEvents)
-      {
-        boost::uniform_real<double> u(min,max); // Range
-        gen_t * gen = new gen_t(rng, u);
-        gens[d] = gen;
-      }
-      else
-      {
-        minPar[d] = min;
-        maxPar[d] = max;
-//        delta[d]  = (max-min)/ws->getDimension(d)->getNumBins();
-      }
+
+      boost::uniform_real<double> u(min,max); // Range
+      gen_t * gen = new gen_t(rng, u);
+      gens[d] = gen;
     }
+ 
 
     // Create all the requested events
     for (size_t i=0; i<num; ++i)
@@ -253,10 +266,7 @@ namespace MDAlgorithms
       coord_t centers[nd];
       for (size_t d=0; d<nd; d++)
       {
-        if(randomEvents)
           centers[d] = static_cast<coord_t>((*gens[d])()); // use a different generator for each dimension
-        else
-          centers[d]= coord_t(0.5*(minPar[d]+maxPar[d]));
       }
 
 
@@ -279,12 +289,71 @@ namespace MDAlgorithms
     for (size_t d=0; d<nd; ++d)
       delete gens[d];
 
-    ws->splitBox();
-    Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
-    ThreadPool tp(ts);
-    ws->splitAllIfNeeded(ts);
-    tp.joinAll();
-    ws->refreshCache();
+  }
+
+  template<typename MDE, size_t nd>
+  void FakeMDEventData::addFakeRegularData(const std::vector<double> &params,typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    // the parameters for regular distribution of events over the box
+    std::vector<double> minPar(nd),maxPar(nd),delta(nd);
+    std::vector<size_t> nBins(nd);
+    size_t gridSize(0);
+
+    //bool RandomizeSignal = getProperty("RandomizeSignal");
+
+    size_t num = size_t(params[0]);
+    if(num==0)
+      throw std::invalid_argument(" number of distributed events can not be equal to 0");
+
+
+    Progress prog(this, 0.0, 1.0, 100);
+    size_t progIncrement = num / 100; if (progIncrement == 0) progIncrement = 1;
+
+    for (size_t d=0; d<nd; ++d)
+    {
+      double min = params[d*2+1];
+      double max = params[d*2+2];
+      if (max <= min) throw std::invalid_argument("UniformParams: min must be < max for all dimensions.");
+      minPar[d] = min;
+      maxPar[d] = max;
+      nBins[d]  = ws->getDimension(d)->getNBins();
+      delta[d]  = (max-min)/nBins[d];
+    }
+    gridSize = Kernel::VectorHelper::scalar_prod(nBins,nBins);
+
+    // Create all the requested events
+    std::vector<size_t> indexes;
+    size_t cellCount(0);
+    for (size_t i=0; i<num; ++i)
+    {
+      coord_t centers[nd];
+
+      Kernel::Utils::getIndicesFromLinearIndex(cellCount,nBins,indexes);
+      ++cellCount;
+      if(cellCount>=gridSize)cellCount=0;
+
+      for (size_t d=0; d<nd; d++)
+      {
+        // put event into cell centers;
+         for (size_t d=0; d<nd; ++d)            // 0.50001 0001 -- is "kind of" epsilon to avoid randomization error at cell ecntre 
+             centers[d]= coord_t(minPar[d]+0.50001*(delta[d]*indexes[d]));
+      }
+
+      // Default or randomized error/signal
+      float signal = 1.0;
+      float errorSquared = 1.0;
+      //if (RandomizeSignal)
+      //{
+      //  signal = float(0.5 + genUnit());
+      //  errorSquared = float(0.5 + genUnit());
+      //}
+
+      // Create and add the event.
+      ws->addEvent( MDE( signal, errorSquared, centers) );
+      // Progress report
+      if ((i % progIncrement) == 0) prog.report();
+    }
+
   }
 
 

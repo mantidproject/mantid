@@ -45,6 +45,10 @@ namespace MDAlgorithms
     template<typename MDE, size_t nd>
     void addFakeUniformData(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
+   template<typename MDE, size_t nd>
+   void addFakeRandomData(const std::vector<double> &params,typename  MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+   template<typename MDE, size_t nd>
+   void addFakeRegularData(const std::vector<double> &params,typename  MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
   };
 

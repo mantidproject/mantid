@@ -3,6 +3,7 @@
     
 #include "MantidKernel/DllConfig.h"
 #include <cmath>
+#include <vector>
 
 namespace Mantid
 {
@@ -133,8 +134,6 @@ namespace Utils
       out_indices[d] = (linear_index / index_maker[d]) % index_max[d];
     }
   }
-
-
   //------------------------------------------------------------------------------------------------
   /** Utility function for performing arbitrarily nested for loops in a serial way.
    *
@@ -201,6 +200,62 @@ namespace Utils
 
 
 } // namespace NestedForLoop
+  //------------------------------------------------------------------------------------------------
+  /** Convert an linear index in nDim workspace into vector of loop indexes of nDim depth loop
+   *  Unsafe (pointers) version, used by safe vectors version
+   *
+   * @param linear_index :: linear index into the nested for loop.
+   * @param numBins    :: an array[numDims], with number of bins in each dimension
+   * @param numDims :: how many levels of nesting do the for loops have and the size of the numBins array above
+   *
+   * @param[out] out_indices :: an array, sized numDims, which will be
+   *             filled with the index for each dimension, given the linear index
+   */
+  inline void getIndicesFromLinearIndex(const size_t linear_index,
+      size_t const * const numBins, const size_t numDims, size_t * const out_indices)
+  {
+    // number of bins in first dimension
+    size_t nBins  = *(numBins+0);
+    // first index
+    size_t ind    = linear_index%nBins;
+    *(out_indices+0)= ind;
+    // what left in linear index after first was removed;
+    size_t rest = linear_index/nBins;
+    for (size_t d=1; d<numDims; d++)
+    {
+      nBins = *(numBins+d);
+      ind  = rest%nBins;
+      *(out_indices+d)= ind;
+      rest = rest/nBins;
+    }
+  }
+  //------------------------------------------------------------------------------------------------
+  /** Convert an linear index in nDim workspace into vector of loop indexes of nDim depth loop
+   * 
+   * @param linear_index :: linear index into the nested for loop.
+   * @param num_bins :: a vector of [numDims] size, where numDims is the loop depth and each element equal to number of bins in the correspondent dimension
+   *
+   * @param[out] out_indices :: the vector, sized numDims, which will be
+   *             filled with the index for each dimension, given the linear index
+   */
+  inline void getIndicesFromLinearIndex(const size_t linear_index,
+      const std::vector<size_t> & num_bins, std::vector<size_t> & out_indices)
+  {
+    if(num_bins.empty())
+    {
+      out_indices.clear();
+      return;
+    }
+    else
+    {
+      size_t nBins = num_bins.size();
+      out_indices.resize(nBins);
+      getIndicesFromLinearIndex(linear_index,&num_bins[0],nBins,&out_indices[0]);
+    }
+
+  }
+
+
 
 } // namespace Utils
 

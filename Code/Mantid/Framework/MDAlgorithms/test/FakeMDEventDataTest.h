@@ -89,6 +89,40 @@ public:
     AnalysisDataService::Instance().remove("FakeMDEventDataTest_ws");
   }
 
+  void testExecRegularSignal()
+  {
+    FakeMDEventData alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
+    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws", in_ws);
+
+    // No events
+    TS_ASSERT_EQUALS( in_ws->getNPoints(), 0);
+    TS_ASSERT_DELTA( in_ws->getBox()->getSignal(), 0.0, 1e-5);
+
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws") );
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakParams", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UniformParams", "-1000"));
+//    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("RandomizeSignal", ""));
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() );
+
+    // Now there are 1000 more points.
+    TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
+    TS_ASSERT_DELTA( in_ws->getBox()->getSignal(), 1000.0, 1.e-6);
+    TS_ASSERT_DELTA( in_ws->getBox()->getErrorSquared(), 1000.0, 1.e-6);
+
+
+
+    TSM_ASSERT("If the workspace is file-backed, then it needs updating.", in_ws->fileNeedsUpdating() );
+
+    AnalysisDataService::Instance().remove("FakeMDEventDataTest_ws");
+  }
+
+
 
 };
 
