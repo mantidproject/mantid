@@ -279,6 +279,7 @@ namespace Mantid
       // ---------------- IMDWorkspace Methods --------------------------------
       /// Gets the number of points available on the workspace.
       virtual uint64_t getNPoints() const;
+      virtual uint64_t getNEvents() const{return this->getNPoints();}
       /// Dimension id for x-dimension.
       static const std::string xDimensionId;
       /// Dimensin id for y-dimension.

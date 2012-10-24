@@ -52,6 +52,7 @@ namespace MDEvents
 
     /** @returns the total number of points (events) in this workspace */
     virtual uint64_t getNPoints() const;
+    virtual uint64_t getNEvents() const{return getNPoints();}
 
     /// Creates a new iterator pointing to the first cell (box) in the workspace
     virtual std::vector<Mantid::API::IMDIterator*> createIterators(size_t suggestedNumCores = 1,

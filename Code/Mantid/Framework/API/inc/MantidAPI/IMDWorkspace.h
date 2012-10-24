@@ -82,6 +82,11 @@ namespace Mantid
       /// For regularly gridded workspace (MDHistoWorkspace and MatrixWorkspace), it is
       /// the number of bins.
       virtual uint64_t getNPoints() const = 0;
+      /*** Get the number of events, associated with the workspace 
+         * For MDEvenWorkspace it is equal to the number of points
+         * For regularly gridded workspace (MDHistoWorkspace and MatrixWorkspace), it is the number of contributed non-zero events. 
+      */
+      virtual uint64_t getNEvents() const = 0;
 
       /// Creates a new iterator pointing to the first cell in the workspace
       virtual std::vector<IMDIterator*> createIterators(size_t suggestedNumCores = 1,

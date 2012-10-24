@@ -75,6 +75,7 @@ public:
   MOCK_CONST_METHOD0(getMemorySize, size_t());
   MOCK_CONST_METHOD0(getGeometryXML,std::string());
   MOCK_CONST_METHOD0(getNPoints, uint64_t());
+  MOCK_CONST_METHOD0(getNEvents, uint64_t());  
   MOCK_CONST_METHOD1(getSignalNormalizedAt, Mantid::signal_t(size_t index1));
   MOCK_CONST_METHOD2(getSignalNormalizedAt, double(size_t index1, size_t index2));
   MOCK_CONST_METHOD3(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3));

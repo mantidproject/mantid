@@ -65,7 +65,8 @@ namespace MDEvents
     {
       return m_length;
     }
-
+    /// get number of contributed events
+    uint64_t getNEvents() const;
     virtual std::vector<Mantid::API::IMDIterator*> createIterators(size_t suggestedNumCores = 1,
         Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
@@ -425,8 +426,8 @@ namespace MDEvents
 
     /// Vector of the origin in each dimension
     coord_t * m_origin;
-
-
+    /// the number of events, contributed into the workspace;
+    mutable uint64_t m_nEventsContributed;
   protected:
   
     /// Linear array of masks for each bin

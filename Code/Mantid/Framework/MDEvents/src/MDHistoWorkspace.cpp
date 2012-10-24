@@ -30,7 +30,8 @@ namespace MDEvents
   MDHistoWorkspace::MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
       Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT)
   : IMDHistoWorkspace(),
-    numDimensions(0)
+    numDimensions(0),
+    m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN())
   {
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
     if (dimX) dimensions.push_back(dimX);
@@ -46,7 +47,9 @@ namespace MDEvents
    */
   MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions)
   : IMDHistoWorkspace(),
-    numDimensions(0)
+    m_numEvents(NULL),
+    numDimensions(0),
+    m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN())
   {
     this->init(dimensions);
   }
@@ -57,7 +60,9 @@ namespace MDEvents
    */
   MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions)
   : IMDHistoWorkspace(),
-    numDimensions(0)
+    m_numEvents(NULL),
+    numDimensions(0),
+    m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN())
   {
     this->init(dimensions);
   }
@@ -77,6 +82,7 @@ namespace MDEvents
     m_errorsSquared = new signal_t[m_length];
     m_numEvents = new signal_t[m_length];
     m_masks = new bool[m_length];
+    m_nEventsContributed = other.m_nEventsContributed;
     // Now copy all the data
     for (size_t i=0; i<m_length; ++i)
     {
@@ -115,6 +121,7 @@ namespace MDEvents
     for (size_t i=0; i<dimensions.size(); i++)
       dim2.push_back(boost::dynamic_pointer_cast<IMDDimension>(dimensions[i]));
     this->init(dim2);
+    m_nEventsContributed=0;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -131,10 +138,10 @@ namespace MDEvents
     m_errorsSquared = new signal_t[m_length];
     m_numEvents = new signal_t[m_length];
     m_masks = new bool[m_length];
-
     // Initialize them to NAN (quickly)
     signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
     this->setTo(nan, nan, nan);
+    m_nEventsContributed = 0;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -173,6 +180,7 @@ namespace MDEvents
 
     // Continue with the vertexes array
     this->initVertexesArray();
+    m_nEventsContributed = 0;
   }
   //----------------------------------------------------------------------------------------------
   /** After initialization, call this to initialize the vertexes array
@@ -246,6 +254,7 @@ namespace MDEvents
       m_errorsSquared[i] = errorSquared;
       m_numEvents[i] = numEvents;
       m_masks[i] = false; //Not masked by default;
+      m_nEventsContributed+=uint64_t(numEvents);
     }
   }
 
@@ -666,6 +675,7 @@ namespace MDEvents
       m_errorsSquared[i] += b.m_errorsSquared[i];
       m_numEvents[i] += b.m_numEvents[i];
     }
+    m_nEventsContributed+=b.m_nEventsContributed;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -710,6 +720,7 @@ namespace MDEvents
       m_errorsSquared[i] += b.m_errorsSquared[i];
       m_numEvents[i] += b.m_numEvents[i];
     }
+    m_nEventsContributed += b.m_nEventsContributed;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -1226,6 +1237,25 @@ namespace MDEvents
     }
   }
 
+  uint64_t MDHistoWorkspace::getNEvents()const
+  {
+    volatile uint64_t cach = this->m_nEventsContributed;
+    if(cach!=this->m_nEventsContributed)
+    {
+      if(!m_numEvents)
+      {
+        m_nEventsContributed = std::numeric_limits<uint64_t>::quiet_NaN();
+      }
+      else
+      {
+        m_nEventsContributed=0;
+        for(size_t i=0;i<m_length;++i)
+          m_nEventsContributed+=uint64_t(m_numEvents[i]);
+
+      }
+    }
+    return m_nEventsContributed;
+  }
 
 } // namespace Mantid
 } // namespace MDEvents
