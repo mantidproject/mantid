@@ -34,7 +34,7 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  void test_SaveFile()
+  void Passsed_test_SaveFile()
   {
     // 1. Create input workspace
     string filename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentTable.dat");
