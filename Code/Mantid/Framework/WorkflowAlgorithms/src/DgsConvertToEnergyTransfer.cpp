@@ -518,6 +518,17 @@ namespace Mantid
         distrib->executeAsSubAlg();
         outputWS = distrib->getProperty("Workspace");
       }
+      else
+      {
+        // Discard events outside nominal bounds
+        IAlgorithm_sptr crop = this->createSubAlgorithm("CropWorkspace");
+        crop->setProperty("InputWorkspace", outputWS);
+        crop->setProperty("OutputWorkspace", outputWS);
+        crop->setProperty("XMin", etBinning[0]);
+        crop->setProperty("XMax", etBinning[2]);
+        crop->executeAsSubAlg();
+        outputWS = crop->getProperty("OutputWorkspace");
+      }
 
       // Normalise by the detector vanadium if necessary
       MatrixWorkspace_sptr detVanWS = this->getProperty("IntegratedDetectorVanadium");
