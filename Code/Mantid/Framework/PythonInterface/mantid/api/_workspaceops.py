@@ -86,10 +86,7 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
                 del AnalysisDataService[name]
         _workspace_op_tmps = []
         
-    if inplace:
-        return self
-    else:
-        return resultws
+    return resultws # For self-assignment this will be set to the same workspace
 
 #------------------------------------------------------------------------------
 # Unary Ops
