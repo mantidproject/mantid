@@ -22,7 +22,7 @@ def _issueWarning(msg):
         @param msg: message to be issued
     """
     print msg
-    mantid.sendLogMessage('::SANS::Warning: ' + msg)
+    mantid.sendWarningMessage('::SANS::Warning: ' + msg)
 
 def _issueInfo(msg):
     """
