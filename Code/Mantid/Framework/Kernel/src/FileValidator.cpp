@@ -76,7 +76,8 @@ std::string FileValidator::checkValidity(const std::string &value) const
   {
     if (!(this->endswith(value)))
     {
-      g_log.warning() << "Unrecognised extension in file \"" << value << "\"";
+      //Dropped from warning to information level as it was printing out on every search of the archive, even when successful. re #5998
+      g_log.information() << "Unrecognised extension in file \"" << value << "\"";
       if (!this->m_extensions.empty()) {
         this->g_log.warning() << " [ ";
         for (std::set<std::string>::const_iterator it = this->m_extensions.begin(); it != this->m_extensions.end(); ++it)
