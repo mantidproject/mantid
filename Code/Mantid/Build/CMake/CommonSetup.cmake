@@ -128,6 +128,12 @@ if ( GIT_FOUND )
                                                                    ${GIT_TOP_LEVEL}/.git/hooks/commit-msg )
     endif ()
 
+    ###########################################################################
+    # Create the file containing the patch version number for use by cpack
+    ###########################################################################
+    configure_file ( ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake.in
+                     ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake
+    )
   endif()
 
 else()
