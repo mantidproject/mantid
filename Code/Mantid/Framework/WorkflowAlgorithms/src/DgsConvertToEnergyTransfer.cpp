@@ -384,7 +384,7 @@ namespace Mantid
           // Make background workspace a distribution
           cnvToDist->setProperty("Workspace", bkgWS);
           cnvToDist->executeAsSubAlg();
-          bkgWS = flatBg->getProperty("Workspace");
+          bkgWS = cnvToDist->getProperty("Workspace");
 
           // Subtract background from result workspace
           IAlgorithm_sptr minus = this->createSubAlgorithm("Minus");
