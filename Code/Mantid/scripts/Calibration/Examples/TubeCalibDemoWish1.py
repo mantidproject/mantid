@@ -15,6 +15,7 @@ path = r"C:/Temp/" # Path name of folder containing input and output files
 filename = 'WISH00017701.raw' # Name of calibration run    
 rawMapWS = Load(path+filename)  #'raw' in 'rawMapWS' means unintegrated.
 mapWS = Integration( rawMapWS, RangeLower=1, RangeUpper=20000 )
+DeleteWorkspace(rawMapWS)
 
 #Create Calibration Table
 calibrationTable = CreateEmptyTableWorkspace(OutputWorkspace="CalibTable")

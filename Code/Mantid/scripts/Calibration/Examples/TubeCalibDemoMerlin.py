@@ -38,6 +38,7 @@ CalibratedComponent = 'MERLIN'  # Calibrate whole instrument
 # Get calibration raw file and integrate it    
 rawMapWS = Load(path+filename)  #'raw' in 'rawMapWS' means unintegrated.
 mapWS = Integration( rawMapWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
+DeleteWorkspace(rawMapWS)
 
 
 # == Create Objects needed for calibration ==

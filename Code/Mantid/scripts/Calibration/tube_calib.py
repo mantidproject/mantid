@@ -25,6 +25,7 @@ def createTubeCalibtationWorkspaceByWorkspaceIndexList ( integratedWorkspace, ou
        Return Value: Workspace created  
        
     """	
+
     nSpectra = len(workspaceIndexList)
     if( nSpectra < 1):
         return
@@ -72,7 +73,7 @@ def fitEndErfcParams ( B, C ): # Compose string argument for fit
     #print "name=EndErfc, B="+str(B)+", C="+str(C)
     return "name=EndErfc, B="+str(B)+", C="+str(C)
     
-def get3pointsFor3pointMethod ( IntegratedWorkspace, whichTube, fitParams):
+def get3pointsFor3pointMethod ( IntegratedWorkspace, whichTube, fitParams ):
     """     
        Get the three points for the three point calibration method
        from a centre peak, the left rise and right fall of the function.
@@ -135,26 +136,10 @@ def get3pointsFor3pointMethod ( IntegratedWorkspace, whichTube, fitParams):
         C = g[1][1]
     else:
         C = (A+B)/2.0  # If we haven't got a centre peak, we put one half way between the end points.
-    
-    # Delete temporary workspaces
-    DeleteWorkspace( 'get3pointsFor3pointMethod')
-    DeleteWorkspace('Z1_NormalisedCovarianceMatrix')
-    DeleteWorkspace('Z1_Parameters')
-    DeleteWorkspace('Z1_Workspace')
-    DeleteWorkspace('CentrePoint_NormalisedCovarianceMatrix')
-    DeleteWorkspace('CentrePoint_Parameters')
-    DeleteWorkspace('CentrePoint_Workspace')
-    DeleteWorkspace('LeftPoint_NormalisedCovarianceMatrix')
-    DeleteWorkspace('LeftPoint_Parameters')
-    DeleteWorkspace('LeftPoint_Workspace')
-    DeleteWorkspace('RightPoint_NormalisedCovarianceMatrix')
-    DeleteWorkspace('RightPoint_Parameters')
-    DeleteWorkspace('RightPoint_Workspace')
-    
-        
+            
     return A, B, C 
     
-def getPeaksForNSlitsMethod ( IntegratedWorkspace, eP, eHeight, eWidth, whichTube):
+def getPeaksForNSlitsMethod ( IntegratedWorkspace, eP, eHeight, eWidth, whichTube ):
     """     
        Get the centres of N slits for calibration 
        This N slit method is suited for WISH or the five sharp peaks of MERLIN .
@@ -321,14 +306,6 @@ def correctTubeToIdealTube( tubePoints, idealTubePoints, nDets, TestMode=False )
         for i in range( len(usedTubePoints) ):
            #print "used point",i,"shoving pixel",int(usedTubePoints[i]+0.5)
            xResult[ int(usedTubePoints[i]+0.5) ] = xResult[0]
-           
-           
-    # Delete temporary workspaces
-    DeleteWorkspace('QuadraticFittingWorkspace')
-    DeleteWorkspace('QF_NormalisedCovarianceMatrix')
-    DeleteWorkspace('QF_Parameters')
-    DeleteWorkspace('QF_Workspace')
-
          
     # print xResult	 
     return xResult
@@ -425,12 +402,12 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
                 actualTube = OverridePeaks
             elif( fitPar.isThreePointMethod() ):
                 # Find the three peaks in the tube
-                AP, BP, CP =  get3pointsFor3pointMethod( ws, wht, fitPar ) 
+                AP, BP, CP =  get3pointsFor3pointMethod( ws, wht, fitPar)
                 #print i+1, AP, BP, CP
                 actualTube = [AP, CP, BP] 
             else:
                 ht, wd = fitPar.getHeightAndWidth()   
-                actualTube = getPeaksForNSlitsMethod ( ws, eP, ht, wd, wht)
+                actualTube = getPeaksForNSlitsMethod ( ws, eP, ht, wd, wht )
                 print actualTube
                 
             if( len(actualTube) == 0):
@@ -453,3 +430,30 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
     if(PeakFile != ""):
        pFile.close()
 
+    # Delete temporary workspaces for obtaioning slit points
+    if( fitPar.isThreePointMethod() ):
+       DeleteWorkspace( 'get3pointsFor3pointMethod')
+       DeleteWorkspace('Z1_NormalisedCovarianceMatrix')
+       DeleteWorkspace('Z1_Parameters')
+       DeleteWorkspace('Z1_Workspace')
+       DeleteWorkspace('CentrePoint_NormalisedCovarianceMatrix')
+       DeleteWorkspace('CentrePoint_Parameters')
+       DeleteWorkspace('CentrePoint_Workspace')
+       DeleteWorkspace('LeftPoint_NormalisedCovarianceMatrix')
+       DeleteWorkspace('LeftPoint_Parameters')
+       DeleteWorkspace('LeftPoint_Workspace')
+       DeleteWorkspace('RightPoint_NormalisedCovarianceMatrix')
+       DeleteWorkspace('RightPoint_Parameters')
+       DeleteWorkspace('RightPoint_Workspace')
+    else:
+       DeleteWorkspace('getPeaksForNSlitsMethod')
+       DeleteWorkspace('CalibPeak_NormalisedCovarianceMatrix')
+       DeleteWorkspace('CalibPeak_Parameters')
+       DeleteWorkspace('CalibPeak_Workspace')
+    
+    # Delete temporary workspaces for getting new detector positions
+    DeleteWorkspace('QuadraticFittingWorkspace')
+    DeleteWorkspace('QF_NormalisedCovarianceMatrix')
+    DeleteWorkspace('QF_Parameters')
+    DeleteWorkspace('QF_Workspace')
+    
