@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
@@ -35,15 +36,15 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport FilterEventsHighFrequency : public API::Algorithm
+  class DLLExport FilterEventsHighFrequency : public API::Algorithm, public API::DeprecatedAlgorithm
   {
   public:
     FilterEventsHighFrequency();
     virtual ~FilterEventsHighFrequency();
     
-    virtual const std::string name() const {return "FilterEventsHighFrequency"; };
-    virtual int version() const {return 1; };
-    virtual const std::string category() const {return "Diffraction;Events\\EventFiltering"; };
+    virtual const std::string name() const {return "FilterEventsHighFrequency"; }
+    virtual int version() const {return 1; }
+    virtual const std::string category() const {return "Diffraction;Events\\EventFiltering"; }
 
   private:
 

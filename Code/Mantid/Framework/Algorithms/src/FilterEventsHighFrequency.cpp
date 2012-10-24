@@ -37,6 +37,7 @@ namespace Algorithms
    */
   FilterEventsHighFrequency::FilterEventsHighFrequency()
   {
+    this->deprecatedDate("2012-10-24");
   }
     
   //----------------------------------------------------------------------------------------------
@@ -46,7 +47,10 @@ namespace Algorithms
   {
   }
 
-  void FilterEventsHighFrequency::initDocs(){
+  void FilterEventsHighFrequency::initDocs()
+  {
+    setWikiSummary("Filter events by log values changed in high frequency.  Deprecated as it is a prototype.");
+    setOptionalMessage("Filter events by log values changed in high frequency.  Deprecated as it is a prototype.");
 
     return;
   }
