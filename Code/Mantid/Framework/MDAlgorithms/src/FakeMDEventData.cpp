@@ -12,7 +12,7 @@ For testing MDEventWorkspaces, this algorithm either creates a uniform, random d
 *WIKI*/
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/FakeMDEventData.h"
+#include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include <boost/math/distributions/normal.hpp>
@@ -29,7 +29,7 @@ For testing MDEventWorkspaces, this algorithm either creates a uniform, random d
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
@@ -37,6 +37,7 @@ namespace MDEvents
   
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
+  using namespace Mantid::MDEvents;
 
 
   //----------------------------------------------------------------------------------------------
@@ -242,7 +243,7 @@ namespace MDEvents
       {
         minPar[d] = min;
         maxPar[d] = max;
-        delta[d]  = (max-min)/ws->getDimension(d)->getNumBins();
+//        delta[d]  = (max-min)/ws->getDimension(d)->getNumBins();
       }
     }
 

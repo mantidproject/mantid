@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
+	src/FakeMDEventData.cpp    
 	src/GreaterThanMD.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
@@ -91,6 +92,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/DllConfig.h
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
+	inc/MantidMDAlgorithms/FakeMDEventData.h    
 	inc/MantidMDAlgorithms/GreaterThanMD.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
@@ -180,6 +182,7 @@ set ( TEST_FILES
 	DivideMDTest.h
 	EqualToMDTest.h
 	ExponentialMDTest.h
+	FakeMDEventDataTest.h    
 	FitResolutionConvolvedModelTest.h
 	ForegroundModelTest.h
 	GreaterThanMDTest.h

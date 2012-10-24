@@ -19,7 +19,6 @@ set ( SRC_FILES
 	src/CoordTransformDistanceParser.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
-	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
 	src/FitMD.cpp
 	src/ImportMDEventWorkspace.cpp
@@ -86,7 +85,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/CoordTransformDistanceParser.h
 	inc/MantidMDEvents/CreateMDHistoWorkspace.h
 	inc/MantidMDEvents/CreateMDWorkspace.h
-	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/FindPeaksMD.h
 	inc/MantidMDEvents/FitMD.h
 	inc/MantidMDEvents/ImportMDEventWorkspace.h
@@ -148,7 +146,6 @@ set ( TEST_FILES
 	CoordTransformDistanceTest.h
 	CreateMDHistoWorkspaceTest.h
 	CreateMDWorkspaceTest.h
-	FakeMDEventDataTest.h
 	FindPeaksMDTest.h
 	FitMDTest.h
 	ImportMDEventWorkspaceTest.h

@@ -10,7 +10,7 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** FakeMDEventData : Algorithm to create fake multi-dimensional event
@@ -41,9 +41,9 @@ namespace MDEvents
     void exec();
 
     template<typename MDE, size_t nd>
-    void addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void addFakePeak(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
     template<typename MDE, size_t nd>
-    void addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void addFakeUniformData(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
 
   };
