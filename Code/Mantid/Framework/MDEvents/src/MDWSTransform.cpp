@@ -215,9 +215,9 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
 void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescription,CnvrtToMD::CoordScaling ScaleID)const
 {
 
-  std::vector<Kernel::V3D> dim_directions;
+  std::vector<Kernel::V3D> dimDirections;
   // set default dimension names:
-  std::vector<std::string> dim_names = TargWSDescription.getDimNames();
+  std::vector<std::string> dimNames = TargWSDescription.getDimNames();
 
   // define B-matrix and Lattice parameters to one in case if no OrientedLattice is there
   Kernel::DblMatrix Bm(3,3,true);
@@ -235,42 +235,45 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
   {
   case(CnvrtToMD::LabFrame):
     {
-      dim_names[0]="Q_lab_x";
-      dim_names[1]="Q_lab_y";
-      dim_names[2]="Q_lab_z";
+      dimNames[0]="Q_lab_x";
+      dimNames[1]="Q_lab_y";
+      dimNames[2]="Q_lab_z";
       break;
     }
   case(CnvrtToMD::SampleFrame):
     {
-      dim_names[0]="Q_sample_x";
-      dim_names[1]="Q_sample_y";
-      dim_names[2]="Q_sqmple_z";
+      dimNames[0]="Q_sample_x";
+      dimNames[1]="Q_sample_y";
+      dimNames[2]="Q_sqmple_z";
       break;
     }
   case(CnvrtToMD::HKLFrame):
     {
-      dim_names[0]="H";
-      dim_names[1]="K";
-      dim_names[2]="L";
+      dimNames[0]="H";
+      dimNames[1]="K";
+      dimNames[2]="L";
       break;
     }
   default:
     throw(std::invalid_argument(" Unknow or undefined Target Frame ID"));
   }
 
-  dim_directions.resize(3);
-  dim_directions[0]=m_UProj;
-  dim_directions[1]=m_VProj;
-  dim_directions[2]=m_WProj;
+  dimDirections.resize(3);
+  dimDirections[0]=m_UProj;
+  dimDirections[1]=m_VProj;
+  dimDirections[2]=m_WProj;
   if(ScaleID==OrthogonalHKLScale)
   {
     std::vector<Kernel::V3D> uv(2);
     uv[0]=m_UProj;
     uv[1]=m_VProj;
-    dim_directions = Kernel::V3D::makeVectorsOrthogonal(uv);
+    dimDirections = Kernel::V3D::makeVectorsOrthogonal(uv);
   }
   // axis names:
-  for(int i=0;i<3;i++)TargWSDescription.setDimName(i,MDEvents::makeAxisName(dim_directions[i],dim_names));
+  if((TargFrameID==CnvrtToMD::LabFrame)||(TargFrameID==CnvrtToMD::SampleFrame))
+      for(int i=0;i<3;i++)TargWSDescription.setDimName(i,dimNames[i]);
+  else
+      for(int i=0;i<3;i++)TargWSDescription.setDimName(i,MDEvents::makeAxisName(dimDirections[i],dimNames));
 
   if (ScaleID == NoScaling)
   {
@@ -287,11 +290,11 @@ void MDWSTransform::setQ3DDimensionsNames(MDEvents::MDWSDescription &TargWSDescr
     //get the length along each of the axes
     std::vector<double> len;
     Kernel::V3D x;
-    x=Bm*dim_directions[0];
+    x=Bm*dimDirections[0];
     len.push_back(2*M_PI*x.norm());
-    x=Bm*dim_directions[1];
+    x=Bm*dimDirections[1];
     len.push_back(2*M_PI*x.norm());
-    x=Bm*dim_directions[2];
+    x=Bm*dimDirections[2];
     len.push_back(2*M_PI*x.norm());
     for(int i=0;i<3;i++)TargWSDescription.setDimUnit(i,"in "+MDEvents::sprintfd(len[i],1.e-3)+" A^-1");
   }
