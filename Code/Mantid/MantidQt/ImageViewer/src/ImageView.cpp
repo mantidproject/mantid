@@ -47,6 +47,7 @@ ImageView::ImageView( ImageDataSource* data_source )
   {
     EModeHandler* emode_handler = new EModeHandler( ui );
     saved_emode_handler = emode_handler;
+    matrix_ws_data_source -> SetEModeHandler( emode_handler );
   }
   else
   {

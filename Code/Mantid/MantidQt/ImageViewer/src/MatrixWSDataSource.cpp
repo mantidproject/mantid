@@ -256,15 +256,16 @@ void MatrixWSDataSource::GetInfoList( double x,
     IVUtils::PushNameValue( x_label, 8, 3, x, list );
   }
 
+  double d_id = 0;
   std::set<detid_t> ids = spec->getDetectorIDs();
   if ( !ids.empty() )
   {
     std::set<detid_t>::iterator it = ids.begin();
-    double d_id = (double)*it;
+    d_id = (double)*it;
     IVUtils::PushNameValue( "Det ID", 8, 0, d_id, list );
   }
 
-                                     // now try to do various unit conversions
+  IDetector_const_sptr det;          // now try to do various unit conversions
   try                                // to get equivalent info
   {                                  // first make sure we can get the needed
                                      // information
@@ -295,7 +296,7 @@ void MatrixWSDataSource::GetInfoList( double x,
       return;
     }
 
-    IDetector_const_sptr det = mat_ws->getDetector( row );
+    det = mat_ws->getDetector( row );
     if ( det == 0 )
     {
       std::ostringstream message;
@@ -323,33 +324,96 @@ void MatrixWSDataSource::GetInfoList( double x,
     int    emode  = 0;
     double efixed = 0;
     double delta  = 0;
+
+//  std::cout << "Start of checks for emode" << std::endl;
+
                         // First try to get emode & efixed from the user
-    efixed = saved_emode_handler->GetEFixed();
-    if ( efixed != 0 )
+    if ( saved_emode_handler != 0 )
     {
-      emode = saved_emode_handler->GetEMode();
-      if ( emode == 0 )
+      efixed = saved_emode_handler->GetEFixed();
+      if ( efixed != 0 )
       {
-        ErrorHandler::Error("EMode invalid, spectrometer needed if emode != 0");
-        ErrorHandler::Error("Assuming Direct Geometry Spectrometer....");
-        emode = 1;
+        emode = saved_emode_handler->GetEMode();
+        if ( emode == 0 )
+        {
+          ErrorHandler::Error("EMode invalid, spectrometer needed if emode != 0");
+          ErrorHandler::Error("Assuming Direct Geometry Spectrometer....");
+          emode = 1;
+        }
       }
     }
 
-    if ( efixed == 0 )    // Did NOT get emode & efixed from user, trying WS
-    {
+//  std::cout << "Done with calls to GetEFixed and GetEMode" << std::endl;
+//  std::cout << "EMode  = " << emode  << std::endl;
+//  std::cout << "EFixed = " << efixed << std::endl;
 
+    if ( efixed == 0 )    // Did NOT get emode & efixed from user, try getting 
+    {                     // direct geometry information from the run object
+      const API::Run & run = mat_ws->run(); 
+      if ( run.hasProperty("Ei") )              
+      {
+        Kernel::Property* prop = run.getProperty("Ei");
+        efixed = boost::lexical_cast<double,std::string>(prop->value());
+        emode  = 1;                         // only correct if direct geometry 
+      }
+      else if ( run.hasProperty("EnergyRequested") )
+      {
+        Kernel::Property* prop = run.getProperty("EnergyRequested");
+        efixed = boost::lexical_cast<double,std::string>(prop->value());
+        emode  = 1;     
+      }
+      else if ( run.hasProperty("EnergyEstimate") )
+      {
+        Kernel::Property* prop = run.getProperty("EnergyEstimate");
+        efixed = boost::lexical_cast<double,std::string>(prop->value());
+        emode  = 1;     
+      }
     }
 
+//  std::cout << "Done with getting info from run" << std::endl;
+//  std::cout << "EMode  = " << emode  << std::endl;
+//  std::cout << "EFixed = " << efixed << std::endl;
 
-    const API::Run & run = mat_ws->run();  // cases I checked don't have Ei :-(
-    if ( run.hasProperty("Ei") )              
+    if ( efixed == 0 )    // finally, try getting indirect geometry information 
+    {                     // from the detector object
+      if ( !(det->isMonitor() && det->hasParameter("Efixed")))
+      {
+        try
+        {
+          const ParameterMap& pmap = mat_ws->constInstrumentParameters();
+          Parameter_sptr par = pmap.getRecursive(det.get(),"Efixed");
+          if (par)
+          {
+            efixed = par->value<double>();
+            emode = 2;
+          }
+        }
+        catch ( std::runtime_error& )
+        {
+          std::ostringstream message;
+          message << "Failed to get Efixed from detector ID: " 
+                  << det->getID() << " in MatrixWSDataSource";
+          ErrorHandler::Error( message.str() );
+          efixed = 0;
+        }
+      } 
+    }
+
+//  std::cout << "Done with getting info from detector" << std::endl;
+//  std::cout << "EMode  = " << emode  << std::endl;
+//  std::cout << "EFixed = " << efixed << std::endl;
+ 
+    if ( efixed == 0 )
     {
-      Kernel::Property* prop = run.getProperty("Ei");
-      efixed = boost::lexical_cast<double,std::string>(prop->value());
-      emode  = 1;                         // only correct for direct geometry 
-    }                                     // instruments
-  
+      emode = 0;
+    }
+    
+    if ( saved_emode_handler != 0 )
+    {
+      saved_emode_handler -> SetEFixed( efixed );  
+      saved_emode_handler -> SetEMode ( emode );  
+    }
+
     double tof = old_unit->convertSingleToTOF( x, l1, l2, two_theta, 
                                                emode, efixed, delta );
     if ( ! (x_label == "Time-of-flight") )
