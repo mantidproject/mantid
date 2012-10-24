@@ -4,9 +4,9 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/FakeMDEventData.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidMDAlgorithms/FakeMDEventData.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -15,6 +15,7 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 
 class FakeMDEventDataTest : public CxxTest::TestSuite
 {

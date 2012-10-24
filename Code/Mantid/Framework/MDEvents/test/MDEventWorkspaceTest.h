@@ -16,7 +16,7 @@
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidMDEvents/CreateMDWorkspace.h"
-#include "MantidMDEvents/FakeMDEventData.h"
+//#include "MantidMDEvents/FakeMDEventData.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
