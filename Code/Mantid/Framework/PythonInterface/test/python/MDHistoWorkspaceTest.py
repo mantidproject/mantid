@@ -213,14 +213,29 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         self.assertEqual(shape,expected)
         mtd.remove('BH')        
 
+    def test_composed_bin(self):
+        run_algorithm('BinMD',InputWorkspace="mdw", OutputWorkspace="BH", AxisAligned=True, AlignedDim0="x,0,10,20", AlignedDim1="y,0,10,1", 
+                       IterateEvents="1", Parallel="0")
+        BH = mtd['BH']
+        signal = BH.getSignalArray()
+        expected =(20L,)
+        shape = signal.shape
+        self.assertEqual(shape,expected)
+        mtd.remove('BH')        
+        
                              
     def test_heterogeneous_bin(self):
         run_algorithm('CreateMDWorkspace', Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',
-                      MaxRecursionDepth='20',OutputWorkspace='mdw')
-        run_algorithm('FakeMDEventData', InputWorkspace="mdw",  UniformParams="-1000.")
-        run_algorithm('BinMD',InputWorkspace="mdw", OutputWorkspace="BH", AxisAligned=True, AlignedDim0="x,0,10,20", AlignedDim1="y,0,10,5", 
+                      MaxRecursionDepth='20',OutputWorkspace='mdwHW')
+        run_algorithm('FakeMDEventData', InputWorkspace="mdwHW",  UniformParams="-1000")
+        SH = mtd['mdwHW']
+        nEvents = SH.getNPoints();
+        self.assertEqual(nEvents,1000);
+        run_algorithm('BinMD',InputWorkspace="mdwHW", OutputWorkspace="BH", AxisAligned=True, AlignedDim0="x,0,10,20", AlignedDim1="y,0,10,5", 
                       AlignedDim2="z,0,10,40", IterateEvents="1", Parallel="0")                      
         BH = mtd['BH']
+        nEvents = BH.getNPoints();
+        self.assertEqual(nEvents,1000);
         signal = BH.getSignalArray()
         expected =(40L,5L,20L)       
         shape = signal.shape

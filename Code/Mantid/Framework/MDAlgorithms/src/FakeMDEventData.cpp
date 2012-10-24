@@ -309,6 +309,7 @@ namespace MDAlgorithms
     Progress prog(this, 0.0, 1.0, 100);
     size_t progIncrement = num / 100; if (progIncrement == 0) progIncrement = 1;
 
+    gridSize=1;
     for (size_t d=0; d<nd; ++d)
     {
       double min = params[d*2+1];
@@ -317,10 +318,9 @@ namespace MDAlgorithms
       minPar[d] = min;
       maxPar[d] = max;
       nBins[d]  = ws->getDimension(d)->getNBins();
+      gridSize*=nBins[d];
       delta[d]  = (max-min)/nBins[d];
     }
-    gridSize = Kernel::VectorHelper::scalar_prod(nBins,nBins);
-
     // Create all the requested events
     std::vector<size_t> indexes;
     size_t cellCount(0);
@@ -334,9 +334,8 @@ namespace MDAlgorithms
 
       for (size_t d=0; d<nd; d++)
       {
-        // put event into cell centers;
-         for (size_t d=0; d<nd; ++d)            // 0.50001 0001 -- is "kind of" epsilon to avoid randomization error at cell ecntre 
-             centers[d]= coord_t(minPar[d]+0.50001*(delta[d]*indexes[d]));
+        // put events into cell centers;     // 0.50001 0001 -- is "kind of" epsilon to avoid randomization error at cell ecntre 
+         centers[d]= coord_t(minPar[d]+delta[d]*(indexes[d]+0.50001));
       }
 
       // Default or randomized error/signal

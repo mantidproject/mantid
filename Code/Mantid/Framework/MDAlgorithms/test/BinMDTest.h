@@ -15,6 +15,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/BinMD.h"
+#include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDEvents/CoordTransformAffine.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -212,6 +213,66 @@ public:
   { do_test_exec("", "Axis2,2.0,8.0, 1", "", "", "", 20*6.0*100.0 /*signal*/, 1 /*# of bins*/, true /*IterateEvents*/, 20 /*numEventsPerBox*/,
       VMD(0,0,1) );
   }
+  void testExecLagreReglarSignal()
+  {
+    FakeMDEventData FakeDat;
+    TS_ASSERT_THROWS_NOTHING( FakeDat.initialize() )
+    TS_ASSERT( FakeDat.isInitialized() )
+
+    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(3, 0.0, 10.0, 0);
+    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws", in_ws);
+
+
+    TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws") );
+    TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue("PeakParams", ""));
+    TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue("UniformParams", "-1000"));
+
+    TS_ASSERT_THROWS_NOTHING( FakeDat.execute(); )
+    TS_ASSERT( FakeDat.isExecuted() );
+
+    // Now there are at 1000 points.
+    TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
+    TS_ASSERT_DELTA( in_ws->getBox()->getSignal(), 1000.0, 1.e-6);
+    TS_ASSERT_DELTA( in_ws->getBox()->getErrorSquared(), 1000.0, 1.e-6);
+
+
+
+    BinMD BinAlg;
+    TS_ASSERT_THROWS_NOTHING( BinAlg.initialize() )
+    TS_ASSERT( BinAlg.isInitialized() )
+
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws") );
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim0", "Axis0,0,10,20"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim1", "Axis1,0,10,5"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim2", "Axis2,0,10,40"));
+
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
+
+    TS_ASSERT_THROWS_NOTHING( BinAlg.execute(); )
+
+    TS_ASSERT( BinAlg.isExecuted() );
+
+    MDHistoWorkspace_sptr out ;
+    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
+        AnalysisDataService::Instance().retrieve("BinMDTest_ws")); )
+    TSM_ASSERT("can not retrieve binned workspace from analysis data service",out);
+    if(!out) return;
+
+    TS_ASSERT_EQUALS( out->getNPoints(), 9);    
+
+    double expected_signal(1.);
+    for (size_t i=0; i < in_ws->getNPoints(); i++)
+    {
+        // Nothing rejected
+        TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
+        TS_ASSERT_DELTA(out->getNumEventsAt(i), expected_signal, 1e-5);
+        TS_ASSERT_DELTA(out->getErrorAt(i), sqrt(expected_signal), 1e-5);
+    }
+    
+    AnalysisDataService::Instance().remove("FakeMDEventDataTest_ws");
+    AnalysisDataService::Instance().remove("BinMDTest_ws");
+  }
+
 
 
 

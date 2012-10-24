@@ -7,6 +7,7 @@
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
+#include "MantidMDAlgorithms/BinMD.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -116,10 +117,41 @@ public:
     TS_ASSERT_DELTA( in_ws->getBox()->getErrorSquared(), 1000.0, 1.e-6);
 
 
-
     TSM_ASSERT("If the workspace is file-backed, then it needs updating.", in_ws->fileNeedsUpdating() );
 
+    BinMD BinAlg;
+    TS_ASSERT_THROWS_NOTHING( BinAlg.initialize() )
+    TS_ASSERT( BinAlg.isInitialized() )
+
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws") );
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim0", "Axis0,0,10,10"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim1", "Axis1,0,10,10"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim2", "Axis2,0,10,10"));
+
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
+
+    TS_ASSERT_THROWS_NOTHING( BinAlg.execute(); )
+
+    TS_ASSERT( BinAlg.isExecuted() );
+
+    MDHistoWorkspace_sptr out ;
+    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
+        AnalysisDataService::Instance().retrieve("BinMDTest_ws")); )
+    TSM_ASSERT("can not retrieve binned workspace from analysis data service",out);
+    if(!out) return;
+
+    
+    double expected_signal(1.);
+    for (size_t i=0; i < in_ws->getNPoints(); i++)
+    {
+        // Nothing rejected
+        TS_ASSERT_DELTA(out->getSignalAt(i), expected_signal, 1e-5);
+        TS_ASSERT_DELTA(out->getNumEventsAt(i), expected_signal, 1e-5);
+        TS_ASSERT_DELTA(out->getErrorAt(i), sqrt(expected_signal), 1e-5);
+    }
+    
     AnalysisDataService::Instance().remove("FakeMDEventDataTest_ws");
+    AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 
 
