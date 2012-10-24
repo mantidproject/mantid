@@ -1840,66 +1840,36 @@ void MuonAnalysis::clearTablesAndCombo()
  * Take the MuonAnalysisGrouped WS and reduce(crop) histograms according to Plot Options.
  * If period data then the resulting cropped WS is on for the period, or sum/difference of, selected
  * by the user on the front panel. Also create raw workspace for fitting against if the user wants.
- * @param groupName  Group to add created workspace to
- * @param wsname
+ * @param groupName  WorkspaceGroup name to add created workspace to
+ * @param inputWS Name of the input workspace equal unprocessed data, but which have been groupped  
+ * @param outWS Name of output workspace created by this method
  */
-void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string& wsname)
+void MuonAnalysis::createPlotWS(const std::string& groupName, 
+                                const std::string& inputWS, const std::string& outWS)
 {
   m_loaded = true;
 
-  QString inputWS = m_workspace_name.c_str() + QString("Grouped");
-
-  if ( m_uiForm.homePeriodBox2->isEnabled() && m_uiForm.homePeriodBox2->currentText()!="None" )
-  {
-    QString pyS;
-    if ( m_uiForm.homePeriodBoxMath->currentText()=="+" )
-    {
-      pyS += "Plus(\"" + inputWS + "_" + m_uiForm.homePeriodBox1->currentText()
-        + "\",\"" + inputWS + "_" + m_uiForm.homePeriodBox2->currentText() + "\",\""
-        + wsname.c_str() + "\")";
-    }
-    else
-    {
-      pyS += "Minus(\"" + inputWS + "_" + m_uiForm.homePeriodBox1->currentText()
-        + "\",\"" + inputWS + "_" + m_uiForm.homePeriodBox2->currentText() + "\",\""
-        + wsname.c_str() + "\")";
-    }
-    runPythonCode( pyS ).trimmed();
-    inputWS = wsname.c_str();
-  }
-  else
-  {
-    if ( m_uiForm.homePeriodBox2->isEnabled() )
-      inputWS += "_" + m_uiForm.homePeriodBox1->currentText();
-  }
 
   QString cropStr = "CropWorkspace(\"";
-  cropStr += inputWS;
+  cropStr += inputWS.c_str();
   cropStr += "\",\"";
-  cropStr += wsname.c_str();
+  cropStr += outWS.c_str();
   cropStr += QString("\",") + boost::lexical_cast<std::string>(plotFromTime()).c_str();
   if ( !m_uiForm.timeAxisFinishAtInput->text().isEmpty() )
     cropStr += QString(",") + boost::lexical_cast<std::string>(plotToTime()).c_str();
   cropStr += ");";
   runPythonCode( cropStr ).trimmed();
 
-  // Copy the data and keep as raw for later
-  bool newRaw = (!(AnalysisDataService::Instance().doesExist(wsname + "_Raw") ) );
-  if (newRaw)
-  {
-    m_fitDataTab->makeRawWorkspace(wsname);
-  }
-
   // adjust for time zero if necessary
   if ( m_nexusTimeZero != boost::lexical_cast<double>(timeZero().toStdString()) )
   {
     try {
-      Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(outWS));
 
       double shift = m_nexusTimeZero - boost::lexical_cast<double>(timeZero().toStdString());
       Mantid::API::IAlgorithm_sptr rebinAlg = Mantid::API::AlgorithmManager::Instance().create("ChangeBinOffset");
-      rebinAlg->setPropertyValue("InputWorkspace", wsname);
-      rebinAlg->setPropertyValue("OutputWorkspace", wsname);
+      rebinAlg->setPropertyValue("InputWorkspace", outWS);
+      rebinAlg->setPropertyValue("OutputWorkspace", outWS);
       rebinAlg->setProperty("Offset", shift);
       rebinAlg->execute();    
     }
@@ -1908,12 +1878,15 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
     }
   }
 
+  // Copy the data and keep as raw for later
+  m_fitDataTab->makeRawWorkspace(outWS);
+
   // rebin data if option set in Plot Options
   if (m_uiForm.rebinComboBox->currentIndex() != 0)
   {
     try
     {
-      Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      Mantid::API::MatrixWorkspace_sptr tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(outWS));
       std::string rebinParams("");
       double binSize = tempWs->dataX(0)[1]-tempWs->dataX(0)[0];
       if(m_uiForm.rebinComboBox->currentIndex() == 1) // Fixed
@@ -1927,13 +1900,13 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
       }
       // bunch data
       Mantid::API::IAlgorithm_sptr rebinAlg = Mantid::API::AlgorithmManager::Instance().create("Rebin");
-      rebinAlg->setPropertyValue("InputWorkspace", wsname);
-      rebinAlg->setPropertyValue("OutputWorkspace", wsname);
+      rebinAlg->setPropertyValue("InputWorkspace", outWS);
+      rebinAlg->setPropertyValue("OutputWorkspace", outWS);
       rebinAlg->setPropertyValue("Params", rebinParams);
       rebinAlg->execute();
 
       // however muon group don't want last bin if shorter than previous bins
-      tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
+      tempWs =  boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(outWS));
       binSize = tempWs->dataX(0)[1]-tempWs->dataX(0)[0]; 
       double firstX = tempWs->dataX(0)[0];
       double lastX = tempWs->dataX(0)[tempWs->dataX(0).size()-1];
@@ -1944,8 +1917,8 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
         lastX = firstX + numberOfFullBunchedBins*binSize;
 
         Mantid::API::IAlgorithm_sptr cropAlg = Mantid::API::AlgorithmManager::Instance().create("CropWorkspace");
-        cropAlg->setPropertyValue("InputWorkspace", wsname);
-        cropAlg->setPropertyValue("OutputWorkspace", wsname);
+        cropAlg->setPropertyValue("InputWorkspace", outWS);
+        cropAlg->setPropertyValue("OutputWorkspace", outWS);
         cropAlg->setPropertyValue("Xmax", boost::lexical_cast<std::string>(lastX));
         cropAlg->setProperty("Xmax", lastX);
         cropAlg->execute();
@@ -1962,96 +1935,160 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   if ( !AnalysisDataService::Instance().doesExist(groupName) )
   {
     QString rubbish = "boevsMoreBoevs";
-    QString groupStr = QString("CloneWorkspace('") + wsname.c_str() + "','"+rubbish+"')\n";
-    groupStr += QString("GroupWorkspaces(InputWorkspaces='") + wsname.c_str() + "," + rubbish
+    QString groupStr = QString("CloneWorkspace('") + outWS.c_str() + "','"+rubbish+"')\n";
+    groupStr += QString("GroupWorkspaces(InputWorkspaces='") + outWS.c_str() + "," + rubbish
       + "',OutputWorkspace='"+groupName.c_str()+"')\n";
     runPythonCode( groupStr ).trimmed();
     AnalysisDataService::Instance().remove(rubbish.toStdString());
   }
   else
   {
-    QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsname.c_str() + "," + groupName.c_str()
+    QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + outWS.c_str() + "," + groupName.c_str()
       + "',OutputWorkspace='" + groupName.c_str() + "')\n";
     runPythonCode( groupStr ).trimmed();
   }
 
-  if(newRaw)
-  {
-    // Group the raw workspace
-    std::vector<std::string> groupWorkspaces;
-    groupWorkspaces.push_back(groupName);
-    groupWorkspaces.push_back(wsname + "_Raw");
-    m_fitDataTab->groupWorkspaces(groupWorkspaces, groupName);
-  }
+
+  // Group the raw workspace
+  std::vector<std::string> groupWorkspaces;
+  groupWorkspaces.push_back(groupName);
+  groupWorkspaces.push_back(outWS + "_Raw");
+  m_fitDataTab->groupWorkspaces(groupWorkspaces, groupName);
 }
 
 
 /**
- * Plot group
+ * Used by plotGroup and plotPair. 
  */
-void MuonAnalysis::plotGroup(const std::string& plotType)
+void MuonAnalysis::handlePeriodChoice(const QString wsName, const QStringList& periodLabel, const QString& groupName)
 {
-  if (plotToTime() <= plotFromTime())
-    return;
-
-  m_updating = true;
-
-  QString plotTypeTitle("");
-  if (plotType == "Asymmetry")
+  if ( periodLabel.size() == 2 )
   {
-    plotTypeTitle = "Asym";
+    QString pyS;
+    if ( m_uiForm.homePeriodBoxMath->currentText()=="+" )
+    {
+      pyS += "Plus(\"" + wsName + periodLabel.at(0)
+        + "\",\"" + wsName + periodLabel.at(1) + "\",\""
+        + wsName + periodLabel.at(0) + "\")\n";
+      pyS += "Plus(\"" + wsName + periodLabel.at(0) + "_Raw"
+        + "\",\"" + wsName + periodLabel.at(1) + "_Raw" + "\",\""
+        + wsName + periodLabel.at(0) + "_Raw\")\n";
+    }
+    else
+    {
+      pyS += "Minus(\"" + wsName + periodLabel.at(0)
+        + "\",\"" + wsName + periodLabel.at(1) + "\",\""
+        + wsName + periodLabel.at(0) + "\")\n";
+      pyS += "Minus(\"" + wsName + periodLabel.at(0) + "_Raw"
+        + "\",\"" + wsName + periodLabel.at(1) + "_Raw" + "\",\""
+        + wsName + periodLabel.at(0) + "_Raw\")\n";
+    }
+    runPythonCode( pyS );
+
+    Mantid::API::AnalysisDataService::Instance().remove((wsName + periodLabel.at(1)).toStdString() );
+    Mantid::API::AnalysisDataService::Instance().remove((wsName + periodLabel.at(1) + "_Raw").toStdString() ); 
+
+    Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)).toStdString(), wsName.toStdString());
+    Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)+"_Raw").toStdString(), (wsName+"_Raw").toStdString()); 
+
+    // when a workspace is renamed it appears to have forgot which WorkspaceGroup it belonged to 
+    QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsName + "," + groupName
+      + "," + wsName+"_Raw" + "',OutputWorkspace='" + groupName + "')\n";
+    runPythonCode( groupStr ).trimmed();
   }
   else
   {
-    if(plotType == "Counts")
-      plotTypeTitle = "Counts";
-    else
-      plotTypeTitle = "Logs";
+    if ( periodLabel.at(0) != "" )
+    {
+      //Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)).toStdString(), wsName.toStdString());
+      //Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)+"_Raw").toStdString(), (wsName+"_Raw").toStdString());      
+
+
+      Mantid::API::IAlgorithm_sptr alg1 = Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
+      alg1->setPropertyValue("InputWorkspace", (wsName + periodLabel.at(0)).toStdString());
+      alg1->setPropertyValue("OutputWorkspace", wsName.toStdString());
+      alg1->execute();
+      Mantid::API::IAlgorithm_sptr alg2 = Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
+      alg2->setPropertyValue("InputWorkspace", (wsName + periodLabel.at(0)+"_Raw").toStdString());
+      alg2->setPropertyValue("OutputWorkspace", (wsName+"_Raw").toStdString());
+      alg2->execute();
+      /*std::string forDebug = (wsName + periodLabel.at(0)).toStdString();
+
+      Mantid::API::IAlgorithm_sptr alg1 = Mantid::API::AlgorithmManager::Instance().create("RenameWorkspace");
+      alg1->setPropertyValue("InputWorkspace", (wsName + periodLabel.at(0)).toStdString());
+      alg1->setPropertyValue("OutputWorkspace", wsName.toStdString());
+      alg1->execute();
+      Mantid::API::IAlgorithm_sptr alg2 = Mantid::API::AlgorithmManager::Instance().create("RenameWorkspace");
+      alg2->setPropertyValue("InputWorkspace", (wsName + periodLabel.at(0)+"_Raw").toStdString());
+      alg2->setPropertyValue("OutputWorkspace", (wsName+"_Raw").toStdString());
+      alg2->execute();*/
+
+      // when a workspace is renamed it appears to have forgot which WorkspaceGroup it belonged to 
+      //QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsName + "," + groupName
+      //  + "," + wsName+"_Raw" + "',OutputWorkspace='" + groupName + "')\n";
+      //runPythonCode( groupStr ).trimmed();
+
+      //QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsName + "," + wsName+"_Raw" 
+      //  + "," + groupName + "',OutputWorkspace='" + groupName + "')\n";
+      //runPythonCode( groupStr ).trimmed();
+      //QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsName
+      //  + "," + groupName + "',OutputWorkspace='" + groupName + "')\n";
+      //runPythonCode( groupStr ).trimmed();
+    }
   }
+}
 
-  int groupNum = getGroupNumberFromRow(m_groupTableRowInFocus);
-  if ( groupNum >= 0 )
+
+
+
+/**
+ * Get period labels for the periods selected in the GUI
+ * @return Return empty string if no periods (well just one period). If more 
+ *         one period then return "_#" string for the periods selected by user
+ */
+QStringList MuonAnalysis::getPeriodLabels() const
+{
+  QStringList retVal;
+  if ( m_uiForm.homePeriodBox2->isEnabled() && m_uiForm.homePeriodBox2->currentText()!="None" )
   {
-    QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
-    QString groupName = itemName->text();
-    QString wsGroupName(getGroupName());
+    retVal.append( "_" + m_uiForm.homePeriodBox1->currentText());
+    retVal.append( "_" + m_uiForm.homePeriodBox2->currentText());
+  }
+  else if ( m_uiForm.homePeriodBox2->isEnabled() )
+  {
+    retVal.append( "_" + m_uiForm.homePeriodBox1->currentText());
+  }
+  else
+    retVal.append("");
 
-    QString cropWSfirstPart = wsGroupName + "; Group="
-      + groupName + "; " + plotTypeTitle + "";
+  return retVal;
+}
 
-    // decide on name for workspace to be plotted
-    QString cropWS(getNewPlotName(cropWSfirstPart));
-    
-    // curve plot label
-    QString titleLabel = cropWS;
-
-    if (m_uiForm.hideGraphs->isChecked() )
-      emit hideGraphs(titleLabel + "-1"); //exception is the new graph
-
-    // Find out whether raw file has been created yet
-    bool rawExists = Mantid::API::AnalysisDataService::Instance().doesExist(titleLabel.toStdString() + "_Raw");
-
-    // create the plot workspace
-    createPlotWS(wsGroupName.toStdString(),cropWS.toStdString());
-
+/**
+ * plots specific WS spectrum (used by plotPair and plotGroup)
+ * @param wsName workspace name
+ * @param wsIndex workspace index
+ */
+void MuonAnalysis::plotSpectrum(const QString& wsName, const int wsIndex)
+{
     // create first part of plotting Python string
-    QString gNum = QString::number(groupNum);
+    QString gNum = QString::number(wsIndex);
     QString pyS;
     if ( m_uiForm.showErrorBars->isChecked() )
-      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ",True)\n";
+      pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ",True)\n";
     else
-      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n";
+      pyS = "gs = plotSpectrum(\"" + wsName + "\"," + gNum + ")\n";
     // Add the objectName for the peakPickerTool to find
-    pyS += "gs.setObjectName(\"" + titleLabel + "\")\n"
+    pyS += "gs.setObjectName(\"" + wsName + "\")\n"
            "l = gs.activeLayer()\n"
-           "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
+           "l.setCurveTitle(0, \"" + wsName + "\")\n"
            "l.setTitle(\"" + m_title.c_str() + "\")\n";
       
-    Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
+    Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(wsName.toStdString());
     MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
     if ( !m_uiForm.yAxisAutoscale->isChecked() )
     {
-      const Mantid::MantidVec& dataY = matrix_workspace->readY(groupNum);
+      const Mantid::MantidVec& dataY = matrix_workspace->readY(wsIndex);
       double min = 0.0; double max = 0.0;
 
       if (m_uiForm.yAxisMinimumInput->text().isEmpty())
@@ -2075,58 +2112,125 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ")\n";
     }
 
+    // plot the spectrum
+    runPythonCode( pyS );
+}
+
+
+/**
+ * Plot group
+ */
+void MuonAnalysis::plotGroup(const std::string& plotType)
+{
+  if (plotToTime() <= plotFromTime())
+    return;
+
+  m_updating = true;
+
+  int groupNum = getGroupNumberFromRow(m_groupTableRowInFocus);
+  if ( groupNum >= 0 )
+  {
+    QTableWidgetItem *itemName = m_uiForm.groupTable->item(m_groupTableRowInFocus,0);
+    QString groupName = itemName->text();
+    QString wsGroupName(getGroupName());
+
+    // create plot workspace name
+    QString plotTypeTitle("");
+    if (plotType == "Asymmetry")
+    {
+      plotTypeTitle = "Asym";
+    }
+    else
+    {
+      if(plotType == "Counts")
+        plotTypeTitle = "Counts";
+      else
+        plotTypeTitle = "Logs";
+    }
+    QString cropWSfirstPart = wsGroupName + "; Group="
+      + groupName + "; " + plotTypeTitle + "";
+
+    // decide on name for workspace to be plotted
+    QString cropWS(getNewPlotName(cropWSfirstPart));
+    
+    // curve plot label
+    QString titleLabel = cropWS;
+
+    // Should we hide all graphs except for the one specified
+    // Note the "-1" is added when a new graph for a WS is created
+    // for the first time. The 2nd time a plot is created for the 
+    // same WS I believe this number is "-2". Currently do not 
+    // fully understand the purpose of this exception here. 
+    if (m_uiForm.hideGraphs->isChecked() )
+      emit hideGraphs(titleLabel + "-1"); 
+
+    // check if user specified periods - if multiple period data 
+    QStringList periodLabel = getPeriodLabels();
+
+    // create the binned etc plot workspace for the first period
+    QString cropWS_1 = cropWS + periodLabel.at(0);
+    QString cropWS_2 = ""; // user may not have selected a 2nd period in GUI
+    createPlotWS(wsGroupName.toStdString(), 
+                 m_workspace_name + "Grouped" + periodLabel.at(0).toStdString(), 
+                 cropWS_1.toStdString());
+    // and the binned etc plot workspace for the second period
+    if (periodLabel.size() == 2)
+    {
+      cropWS_2 = cropWS + periodLabel.at(1);
+      createPlotWS(wsGroupName.toStdString(),
+                   m_workspace_name + "Grouped" + periodLabel.at(1).toStdString(), 
+                   cropWS_2.toStdString());
+    }
+
     QString pyString;
     if (plotType.compare("Counts") == 0)
     {
-      pyString = pyS;
+      pyString = "";
     }
     else if (plotType.compare("Asymmetry") == 0)
     {
-      matrix_workspace->setYUnitLabel("Asymmetry");
-
-      pyString = "RemoveExpDecay(\"" + cropWS + "\",\""
-        + cropWS + "\")\n" + pyS;
-
-      // Change the raw data to Asymmetry.
-      if (!rawExists)
-      {
-        ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString() + "_Raw");
-        matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-
-        matrix_workspace->setYUnitLabel("Asymmetry");
-
-        pyString += "RemoveExpDecay(\"" + cropWS + "_Raw\",\""
-        + cropWS + "_Raw\")\n";
+      pyString = "RemoveExpDecay(\"" + cropWS_1 + "\",\"" + cropWS_1 + "\")\n";
+      pyString += "RemoveExpDecay(\"" + cropWS_1 + "_Raw\",\"" + cropWS_1 + "_Raw\")\n";
+      if (periodLabel.size() == 2)  
+      {    
+        pyString += "RemoveExpDecay(\"" + cropWS_2 + "\",\"" + cropWS_2 + "\")\n";
+        pyString += "RemoveExpDecay(\"" + cropWS_2 + "_Raw\",\"" + cropWS_2 + "_Raw\")\n";
       }
     }
     else if (plotType.compare("Logorithm") == 0)
     {
-      matrix_workspace->setYUnitLabel("Logorithm");
-      pyString += "Logarithm(\"" + cropWS + "\",\""
-        + cropWS + "\")\n" + pyS;
-
-      // Change the raw data to Logorithm.
-      if (!rawExists)
+      pyString = "Logarithm(\"" + cropWS_1 + "\",\"" + cropWS_1 + "\")\n";
+      pyString += "Logarithm(\"" + cropWS_1 + "_Raw\",\"" + cropWS_1 + "_Raw\")\n";
+      if (periodLabel.size() == 2)      
       {
-        ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString() + "_Raw");
-        matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-
-        matrix_workspace->setYUnitLabel("Logorithm");
-        pyString += "Logarithm(\"" + cropWS + "_Raw\",\""
-        + cropWS + "_Raw\")\n";
+        pyString += "Logarithm(\"" + cropWS_2 + "\",\"" + cropWS_2 + "\")\n";
+        pyString += "Logarithm(\"" + cropWS_2 + "_Raw\",\"" + cropWS_2 + "_Raw\")\n";
       }
     }
     else
     {
-      if (!rawExists)
-        Mantid::API::AnalysisDataService::Instance().remove(cropWS.toStdString() + "_Raw");
       g_log.error("Unknown group table plot function");
       m_updating = false;
       return;
     }
 
-    // run python script
-    QString pyOutput = runPythonCode( pyString ).trimmed();
+    // Any treatment to the cropWS before plotting?
+    runPythonCode( pyString );
+    
+    // If user has specified this do algebra on periods
+    // note after running this method you are just left with the processed cropWS (and curresponding _Raw)
+    handlePeriodChoice(cropWS, periodLabel, wsGroupName);
+
+    // set the workspace Y Unit label
+    Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
+    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+    matrix_workspace->setYUnitLabel(plotType);
+    ws_ptr = AnalysisDataService::Instance().retrieve((cropWS+"_Raw").toStdString());
+    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+    matrix_workspace->setYUnitLabel(plotType);
+
+    // plot the spectrum
+    plotSpectrum(cropWS, groupNum);
 
     // Change the plot style of the graph so that it matches what is selected on
     // the plot options tab.
@@ -2151,19 +2255,6 @@ void MuonAnalysis::plotPair(const std::string& plotType)
 
   m_updating = true;
 
-  QString plotTypeTitle("");
-  if (plotType == "Asymmetry")
-  {
-    plotTypeTitle = "Asym";
-  }
-  else
-  {
-    if(plotType == "Counts")
-      plotTypeTitle = "Counts";
-    else
-      plotTypeTitle = "Logs";
-  }
-
   int pairNum = getPairNumberFromRow(m_pairTableRowInFocus);
   if ( pairNum >= 0 )
   {
@@ -2172,6 +2263,12 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     QString pairName = itemName->text();
     QString wsGroupName(getGroupName());
 
+    // create plot workspace name
+    QString plotTypeTitle("");
+    if (plotType == "Asymmetry")
+    {
+      plotTypeTitle = "Asym";
+    }    
     QString cropWSfirstPart = wsGroupName + "; Group=" + pairName + "; " + plotTypeTitle + "";
     
     // decide on name for workspace to be plotted
@@ -2180,94 +2277,74 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     // curve plot label
     QString titleLabel = cropWS;
 
+    // Should we hide all graphs except for the one specified
+    // Note the "-1" is added when a new graph for a WS is created
+    // for the first time. The 2nd time a plot is created for the 
+    // same WS I believe this number is "-2". Currently do not 
+    // fully understand the purpose of this exception here. 
     if (m_uiForm.hideGraphs->isChecked() )
-      emit hideGraphs(titleLabel + "-1"); //exception is the new graph
+      emit hideGraphs(titleLabel + "-1"); 
 
-    // Find out whether raw file has been created yet
-    bool rawExists = Mantid::API::AnalysisDataService::Instance().doesExist(titleLabel.toStdString() + "_Raw");
-
-    // Create the workspace and raw workspace if there isn't one already.
-    createPlotWS(wsGroupName.toStdString(),cropWS.toStdString());
-
-    // create first part of plotting Python string
-    QString gNum = QString::number(pairNum);
-    QString pyS;
-    if ( m_uiForm.showErrorBars->isChecked() )
-      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + "0" + ",True)\n";
-    else
-      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + "0" + ")\n";
-    //add the objectName for the peakPickerTool to find
-    pyS +=  "gs.setObjectName(\"" + titleLabel + "\")\n"
-            "l = gs.activeLayer()\n"
-            "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
-            "l.setTitle(\"" + m_title.c_str() + "\")\n";
+    // check if user specified periods - if multiple period data 
+    QStringList periodLabel = getPeriodLabels();
     
-    Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
-    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-    if ( !m_uiForm.yAxisAutoscale->isChecked() )
+    // create the binned etc plot workspace for the first period
+    QString cropWS_1 = cropWS + periodLabel.at(0);
+    QString cropWS_2 = ""; // user may not have selected a 2nd period in GUI
+    createPlotWS(wsGroupName.toStdString(), 
+                 m_workspace_name + "Grouped" + periodLabel.at(0).toStdString(), 
+                 cropWS_1.toStdString());
+    // and the binned etc plot workspace for the second period
+    if (periodLabel.size() == 2)
     {
-      const Mantid::MantidVec& dataY = matrix_workspace->readY(pairNum);
-      double min = 0.0; double max = 0.0;
-
-      if (m_uiForm.yAxisMinimumInput->text().isEmpty())
-      {
-        min = *min_element(dataY.begin(), dataY.end());
-      }
-      else
-      {
-        min = boost::lexical_cast<double>(m_uiForm.yAxisMinimumInput->text().toStdString());
-      }
-
-      if (m_uiForm.yAxisMaximumInput->text().isEmpty())
-      {
-        max = *max_element(dataY.begin(), dataY.end());
-      }
-      else
-      {
-        max = boost::lexical_cast<double>(m_uiForm.yAxisMaximumInput->text().toStdString());
-      }
-
-      pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ")\n";
+      cropWS_2 = cropWS + periodLabel.at(1);
+      createPlotWS(wsGroupName.toStdString(),
+                   m_workspace_name + "Grouped" + periodLabel.at(1).toStdString(), 
+                   cropWS_2.toStdString());
     }
 
     QString pyString;
     if (plotType.compare("Asymmetry") == 0)
     {
-      matrix_workspace->setYUnitLabel("Asymmetry");
       QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
       QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,2));
 
-      pyString = "AsymmetryCalc(\"" + cropWS + "\",\""
-        + cropWS + "\","
-        + QString::number(qw1->currentIndex()) + ","
-        + QString::number(qw2->currentIndex()) + ","
-        + item->text() + ")\n" + pyS;
-
-      // Change the raw file to Asymmetry.
-      if (!rawExists)
-      {
-        ws_ptr = AnalysisDataService::Instance().retrieve(titleLabel.toStdString() + "_Raw");
-        matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
-
-        matrix_workspace->setYUnitLabel("Asymmetry");
-
-        pyString += "AsymmetryCalc(\"" + cropWS + "_Raw\",\""
-        + cropWS + "_Raw\","
-        + QString::number(qw1->currentIndex()) + ","
-        + QString::number(qw2->currentIndex()) + ","
-        + item->text() + ")\n";
-      }
+      pyString = "AsymmetryCalc(\"" + cropWS_1 + "\",\"" + cropWS_1 + "\","
+        + QString::number(qw1->currentIndex()) + "," + QString::number(qw2->currentIndex()) + "," + item->text() + ")\n";
+      pyString += "AsymmetryCalc(\"" + cropWS_1 + "_Raw\",\"" + cropWS_1 + "_Raw\","
+        + QString::number(qw1->currentIndex()) + "," + QString::number(qw2->currentIndex()) + "," + item->text() + ")\n";
+      if (periodLabel.size() == 2) 
+      {        
+        pyString += "AsymmetryCalc(\"" + cropWS_2 + "\",\"" + cropWS_2 + "\","
+          + QString::number(qw1->currentIndex()) + "," + QString::number(qw2->currentIndex()) + "," + item->text() + ")\n";
+        pyString += "AsymmetryCalc(\"" + cropWS_2 + "_Raw\",\"" + cropWS_2 + "_Raw\","
+          + QString::number(qw1->currentIndex()) + "," + QString::number(qw2->currentIndex()) + "," + item->text() + ")\n"; 
+      }       
     }
     else
     {
-      if (!rawExists)
-        Mantid::API::AnalysisDataService::Instance().remove(cropWS.toStdString() + "_Raw");
       g_log.error("Unknown pair table plot function");
       m_updating = false;
       return;
     }
     
-    QString pyOutput = runPythonCode( pyString ).trimmed();
+    // Any treatment to the cropWS before plotting?
+    runPythonCode( pyString );
+
+    // If user has specified this do algebra on periods
+    // note after running this method you are just left with the processed cropWS (and curresponding _Raw)
+    handlePeriodChoice(cropWS, periodLabel, wsGroupName);
+
+    // set the workspace Y Unit label
+    Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
+    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+    matrix_workspace->setYUnitLabel(plotType);
+    ws_ptr = AnalysisDataService::Instance().retrieve((cropWS+"_Raw").toStdString());
+    matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+    matrix_workspace->setYUnitLabel(plotType);
+    
+    // plot the spectrum
+    plotSpectrum(cropWS, 0);
 
     // Change the plot style of the graph so that it matches what is selected on
     // the plot options tab. Default is set to line (0).
