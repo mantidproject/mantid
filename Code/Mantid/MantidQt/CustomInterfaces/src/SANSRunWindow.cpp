@@ -747,8 +747,8 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.frontDetShift->setText(runReduceScriptFunction(
      "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift").trimmed());
 
-  QString fitScale = runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.fitScale");
-  QString fitShift = runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.fitShift");
+  QString fitScale = runReduceScriptFunction("print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.fitScale").trimmed();
+  QString fitShift = runReduceScriptFunction("print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.fitShift").trimmed();
 
   if ( fitScale == "True" )
     m_uiForm.frontDetRescaleCB->setChecked(true);
@@ -760,13 +760,13 @@ bool SANSRunWindow::loadUserFile()
   else
     m_uiForm.frontDetShiftCB->setChecked(false);
 
-  QString qRangeUserSelected = runReduceScriptFunction("i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qRangeUserSelected");
+  QString qRangeUserSelected = runReduceScriptFunction("print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qRangeUserSelected").trimmed();
   if ( qRangeUserSelected == "True" )
   {
      m_uiForm.frontDetQrangeOnOff->setChecked(true); 
      m_uiForm.frontDetQmin->setText(runReduceScriptFunction(
       "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qMin").trimmed());
-     m_uiForm.frontDetQmin->setText(runReduceScriptFunction(
+     m_uiForm.frontDetQmax->setText(runReduceScriptFunction(
       "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.qMax").trimmed());   
   }
   else
@@ -828,13 +828,17 @@ bool SANSRunWindow::loadUserFile()
     m_uiForm.gravity_check->setChecked(false);
   }
   
-  ////Detector bank
+  ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED options
   QString detName = runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.cur_detector().name()").trimmed();
-  index = m_uiForm.detbank_sel->findText(detName);  
-  if( index != -1 )
-  {
-    m_uiForm.detbank_sel->setCurrentIndex(index);
+    "print i.ReductionSingleton().instrument.det_selection").trimmed();
+  if (detName == "REAR"){
+     m_uiForm.detbank_sel->setCurrentIndex(0);
+  }else if (detName == "FRONT" || detName == "HAB"){
+     m_uiForm.detbank_sel->setCurrentIndex(1);
+  }else if (detName == "BOTH"){
+     m_uiForm.detbank_sel->setCurrentIndex(2);
+  }else if (detName == "MERGED"){
+     m_uiForm.detbank_sel->setCurrentIndex(3);
   }
  
   // Phi values 
@@ -1773,7 +1777,9 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
 
   QString error;
-
+  // set the detector just before loading so to correctly move the instrument
+  runReduceScriptFunction("\ni.ReductionSingleton().instrument.setDetector('" +
+    m_uiForm.detbank_sel->currentText() + "')");
   QString sample_logs, can_logs;  
   QString sample = m_uiForm.scatterSample->getFirstFilename();
   try
@@ -2096,6 +2102,21 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
       return;
     }
 
+    // check for the detectors combination option
+    // transform the SANS Diagnostic gui option in: 'rear', 'front' , 'both', 'merged', None WavRangeReduction option
+    QString combineDetOption, combineDetGuiOption;
+    combineDetGuiOption = m_uiForm.detbank_sel->currentText();
+    if (combineDetGuiOption == "main-detector-bank" || combineDetGuiOption == "rear-detector")
+      combineDetOption = "'rear'";
+    else if (combineDetGuiOption == "HAB" || combineDetGuiOption=="front-detector")
+      combineDetOption = "'front'";
+    else if (combineDetGuiOption == "both")
+      combineDetOption = "'both'";
+    else if (combineDetGuiOption == "merged")
+      combineDetOption = "'merged'";
+    else
+      combineDetOption = "None";
+
     QString csv_file(m_uiForm.csv_filename->text());
     if( m_dirty_batch_grid )
     {
@@ -2104,7 +2125,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     }
     py_code.prepend("import SANSBatchMode as batch\n");
     const int fileFormat = m_uiForm.file_opt->currentIndex();
-    py_code += "\nbatch.BatchReduce('" + csv_file + "','" +
+    py_code += "\nfit_settings = batch.BatchReduce('" + csv_file + "','" +
       m_uiForm.file_opt->itemData(fileFormat).toString() + "'";
     if( m_uiForm.plot_check->isChecked() )
     {
@@ -2123,7 +2144,12 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     {
       py_code += ", verbose=True";
     }
-    py_code += ", reducer=i.ReductionSingleton().reference())";
+    py_code += ", reducer=i.ReductionSingleton().reference(),";
+
+
+    py_code += "combineDet=";
+    py_code += combineDetOption;
+    py_code += ")";
   }
 
   //Disable buttons so that interaction is limited while processing data
@@ -2133,24 +2159,30 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   QString pythonStdOut = runReduceScriptFunction(py_code);
 
   // update fields in GUI as a consequence of results obtained during reduction
-  if ( runMode == SingleMode )
+  double scale, shift;
+  if (runMode == SingleMode) 
   {
     // update front rescale and fit values
-    double scale = runReduceScriptFunction(
+    scale = runReduceScriptFunction(
       "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale").trimmed().toDouble();
-    m_uiForm.frontDetRescale->setText(QString::number(scale, 'f', 3));
-    double shift = runReduceScriptFunction(
-      "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift").trimmed().toDouble();
-    m_uiForm.frontDetShift->setText(QString::number(shift, 'f', 3));
 
-    // first process pythonStdOut
-    QStringList pythonDiag = pythonStdOut.split(PYTHON_SEP);
-    if ( pythonDiag.count() > 1 )
-    {
-      QString reducedWS = pythonDiag[1];
-      reducedWS = reducedWS.split("\n")[0];
-      resetDefaultOutput(reducedWS);
-    }
+    shift = runReduceScriptFunction(
+      "print i.ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift").trimmed().toDouble();
+
+  }else{
+    scale = runReduceScriptFunction("print fit_settings['scale']").trimmed().toDouble();
+    shift = runReduceScriptFunction("print fit_settings['shift']").trimmed().toDouble();
+  }
+  // update gui
+  m_uiForm.frontDetRescale->setText(QString::number(scale, 'f', 3));
+  m_uiForm.frontDetShift->setText(QString::number(shift, 'f', 3));
+  // first process pythonStdOut
+  QStringList pythonDiag = pythonStdOut.split(PYTHON_SEP);
+  if ( pythonDiag.count() > 1 )
+  {
+    QString reducedWS = pythonDiag[1];
+    reducedWS = reducedWS.split("\n")[0];
+    resetDefaultOutput(reducedWS);
   }
 
   //Reset the objects by initialising a new reducer object

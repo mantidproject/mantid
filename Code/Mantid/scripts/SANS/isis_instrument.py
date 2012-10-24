@@ -336,6 +336,8 @@ class ISISInstrument(instrument.Instrument):
         firstDetect.disable_y_and_rot_corrs()
         secondDetect = DetectorBank(self.definition, 'high-angle')
         secondDetect.place_after(firstDetect)
+        #add det_selection variable that will receive the DET/ REAR/FRONT/BOTH/MERGED
+        self.det_selection = 'REAR'
         self.DETECTORS = {'low-angle' : firstDetect}
         self.DETECTORS['high-angle'] = secondDetect
 
@@ -454,6 +456,7 @@ class ISISInstrument(instrument.Instrument):
         return self.cur_detector().isAlias(detName)
 
     def setDetector(self, detName) :
+        self.det_selection = detName
         if self.other_detector().isAlias(detName) :
             self.lowAngDetSet = not self.lowAngDetSet
             return True

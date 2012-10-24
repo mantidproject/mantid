@@ -94,7 +94,7 @@ def addRunToStore(parts, run_store):
     run_store.append(inputdata)
     return 0
 
-def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, centreit=False, reducer=None):
+def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, centreit=False, reducer=None, combineDet=None):
     """
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
@@ -103,6 +103,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         @param verbose: set to true to write more information to the log (default=False)
         @param centreit: do centre finding (default=False)
         @param reducer: if to use the command line (default) or GUI reducer object
+        @param combineDet: that will be forward to WavRangeReduction (rear, front, both, merged, None)
+        @return final_setings: A dictionary with some values of the Reduction - Right Now:(scale, shift)
     """     
     if not format.startswith('.'):
         format = '.' + format
@@ -120,6 +122,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
     if reducer:
         ReductionSingleton().replace(reducer)
 
+    scale_shift = {'scale':1.0000, 'shift':0.0000}
     #first copy the user settings in case running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
 
@@ -145,7 +148,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                     
             
             # WavRangeReduction runs the reduction for the specified wavelength range where the final argument can either be DefaultTrans or CalcTrans:
-            reduced = WavRangeReduction()
+            reduced = WavRangeReduction(combineDet=combineDet, out_fit_settings=scale_shift)
 
         except SkipEntry, reason:
             #this means that a load step failed, the warning and the fact that the results aren't there is enough for the user
@@ -186,6 +189,9 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
 
         #the call to WaveRang... killed the reducer so copy back over the settings
         ReductionSingleton().replace(copy.deepcopy(settings))
+
+    #end of reduction of all entries of batch file
+    return scale_shift
 
 def parse_run(run_num, ext):
     """

@@ -312,7 +312,7 @@ def _setUpPeriod(i):
 
     return new_sample_workspaces
 
-def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, resetSetup=True):
+def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None, combineDet=None, resetSetup=True, out_fit_settings = dict()):
     """
         Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics 
         details to be adjusted, and optionally the old setup is reset at the end. Note if FIT of RESCALE or SHIFT 
@@ -331,9 +331,21 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
                             None                 (run one reduction for whatever detector has been set as the current detector 
                                                   before running this method. If front apply rescale+shift) 
         @param resetSetup: if true reset setup at the end
+        @param out_fit_settings: An output parameter. It is used, specially when resetSetup is True, in order to remember the 'scale and fit' of the fitting algorithm. 
         @return Name of one of the workspaces created
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ', ' + str(wav_end) + ', '+str(full_trans_wav)+')')
+    # these flags indicate if it is necessary to reduce the front bank, the rear bank and if it is supposed to merge them
+    reduce_rear_flag = False
+    reduce_front_flag = False
+    merge_flag = False
+    
+    # combineDet from None to 'rear' or 'front'
+    if combineDet is None:
+        if ReductionSingleton().instrument.cur_detector().isAlias('FRONT'):
+            combineDet = 'front'
+        else:
+            combineDet = 'rear'
     
     if not full_trans_wav is None:
         ReductionSingleton().full_trans_wav = full_trans_wav
@@ -345,120 +357,136 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     fitRequired = False 
     if rAnds.fitScale or rAnds.fitShift:
         fitRequired = True
-            
-    retWSname = ''
-    if combineDet == None:
-        retWSname = _WavRangeReduction(name_suffix)   
-        if ReductionSingleton().instrument.cur_detector().isAlias('FRONT'):
-            if fitRequired:
-                # first then generate rear reduced data
-                ReductionSingleton.replace(ReductionSingleton().settings())
-                ReductionSingleton().instrument.setDetector('rear')
-                retWSname_rear = _WavRangeReduction(name_suffix)               
-                ReductionSingleton().instrument.setDetector('front')
-                # then ready to fit rescale and shift for front data                  
-                scale, shift = _fitRescaleAndShift(rAnds, retWSname, retWSname_rear)
-                ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift
-                ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale                 
-            rAnds = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift             
-            shift = rAnds.shift
-            scale = rAnds.scale            
-            frontWS = mtd[retWSname]
-            frontWS = (frontWS+shift)*scale
-            RenameWorkspace(frontWS, retWSname)                                
-    else:       
-        toParse = combineDet.lower()
-        
-        # To backup value of singleton which are temporarily modified in this method
-        toRestoreAfterAnalysis = ReductionSingleton().instrument.cur_detector().name()
-        toRestoreOutputParts = ReductionSingleton().to_Q.outputParts 
-           
-        # if 'merged' then when cross section is calculated output the two individual parts
-        # of the cross section. These additional outputs are required to calculate
-        # the merged workspace           
-        if toParse.count('merged') == 1:           
-            ReductionSingleton().to_Q.outputParts = True            
-        
-        # should a rear reduction be done?
-        # This should be done if 'rear', 'both' and 'merged' is selected
-        # and for now when 'front' & fitRequired==True (so basically all
-        # cases except when  'front' & fitRequired==False
-        if toParse.count('rear') == 1 or toParse.count('merged') == 1 \
-          or toParse.count('both') == 1 or (toParse.count('front') and fitRequired):
-            ReductionSingleton().instrument.setDetector('rear')
-            retWSname_rear = _WavRangeReduction(name_suffix)
-            
-        # should a front reduction be done?
-        # All cases except when 'rear', and for now regardless of whether fitRequired==True
-        if toParse.count('front') == 1 or toParse.count('merged') == 1 \
-          or toParse.count('both') == 1:
+
+    com_det_option = combineDet.lower()
+    
+    # the only special case where reduce rear is not required is
+    # if the user chose to reduce front and does not require fit 
+    if not (com_det_option == 'front' and not fitRequired):
+        reduce_rear_flag = True
+    if (com_det_option != 'rear'):
+        reduce_front_flag = True
+    if (com_det_option == 'merged'):
+        merge_flag = True
+    
+    #The shift and scale is always on the front detector.
+    if not reduce_front_flag:
+        fitRequired = False
+
+    #To backup value of singleton which are temporarily modified in this method
+    toRestoreAfterAnalysis = ReductionSingleton().instrument.cur_detector().name()
+    toRestoreOutputParts = ReductionSingleton().to_Q.outputParts
+
+    # if 'merged' then when cross section is calculated output the two individual parts
+    # of the cross section. These additional outputs are required to calculate
+    # the merged workspace
+    if merge_flag:           
+        ReductionSingleton().to_Q.outputParts = True
+
+    # do reduce rear bank data
+    if reduce_rear_flag:
+        ReductionSingleton().instrument.setDetector('rear')
+        retWSname_rear = _WavRangeReduction(name_suffix)
+        retWSname = retWSname_rear
+    
+    # do reduce front bank
+    if reduce_front_flag:
+        # it is necessary to replace the Singleton if a reduction was done before
+        if (reduce_rear_flag):
             ReductionSingleton.replace(ReductionSingleton().settings())
-            ReductionSingleton().instrument.setDetector('front')
-            retWSname_front = _WavRangeReduction(name_suffix)            
-            
-        # if combineDet='rear' do not do a fit even if fitRequired is true
-        if fitRequired and toParse != 'rear':
-            scale, shift = _fitRescaleAndShift(rAnds, retWSname_front, retWSname_rear)
-            ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift
-            ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale                 
-
-          
-        # get shift and scale to use for front and merge below  
-        shift = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift
-        scale = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale
-                            
-        if toParse.count('merged') == 1:
-            # finished calculating cross section so can restore these value
-            ReductionSingleton().to_Q.outputParts = toRestoreOutputParts
-            ReductionSingleton().instrument.setDetector(toRestoreAfterAnalysis)
         
-            retWSname_merged = retWSname_rear
-            if retWSname_merged.count('rear') == 1:
-                retWSname_merged = retWSname_merged.replace('rear', 'merged')
-            else:
-                retWSname_merged = retWSname_merged + "_merged"
+        ReductionSingleton().instrument.setDetector('front')
+        retWSname_front = _WavRangeReduction(name_suffix)
+        retWSname = retWSname_front
 
-            Nf = mtd[retWSname_front+"_sumOfNormFactors"]
-            Nr = mtd[retWSname_rear+"_sumOfNormFactors"]
-            Cf = mtd[retWSname_front+"_sumOfCounts"]
-            Cr = mtd[retWSname_rear+"_sumOfCounts"]
+    # do fit and scale if required
+    if fitRequired:
+        scale, shift = _fitRescaleAndShift(rAnds, retWSname_front, retWSname_rear)
+        ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift
+        ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale
+    
+    shift = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift
+    scale = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale
 
-            fisF = mtd[retWSname_front]
-            fisR = mtd[retWSname_rear]
+    # apply the merge algorithm
+    if merge_flag:
+        retWSname_merged = retWSname_rear
+        if retWSname_merged.count('rear') == 1:
+          retWSname_merged = retWSname_merged.replace('rear', 'merged')
+        else:
+          retWSname_merged = retWSname_merged + "_merged"
+
+        Nf = mtd[retWSname_front+"_sumOfNormFactors"]
+        Nr = mtd[retWSname_rear+"_sumOfNormFactors"]
+        Cf = mtd[retWSname_front+"_sumOfCounts"]
+        Cr = mtd[retWSname_rear+"_sumOfCounts"]
+        consider_can = True
+        try:
+            Nf_can = mtd[retWSname_front+"_can_tmp_sumOfNormFactors"]
+            Nr_can = mtd[retWSname_rear+"_can_tmp_sumOfNormFactors"]
+            Cf_can = mtd[retWSname_front+"_can_tmp_sumOfCounts"]
+            Cr_can = mtd[retWSname_rear+"_can_tmp_sumOfCounts"]
+        except KeyError :
+            #The CAN was not specified
+            consider_can = False
             
-            minQ = min(min(fisF.dataX(0)), min(fisR.dataX(0)))
-            maxQ = max(max(fisF.dataX(0)), max(fisR.dataX(0)))
             
-            if maxQ > minQ:
-                CropWorkspace(InputWorkspace=Nf, OutputWorkspace=Nf, XMin=minQ, XMax=maxQ)
-                CropWorkspace(InputWorkspace=Nr, OutputWorkspace=Nr, XMin=minQ, XMax=maxQ)
-                CropWorkspace(InputWorkspace=Cf, OutputWorkspace=Cf, XMin=minQ, XMax=maxQ)
-                CropWorkspace(InputWorkspace=Cr, OutputWorkspace=Cr, XMin=minQ, XMax=maxQ)
-                mergedQ = (Cf+shift*Nf+Cr)/(Nf/scale + Nr)
-                RenameWorkspace(mergedQ, retWSname_merged)
-            else:
-                issueWarning('rear and front data has no overlapping q-region. Merged workspace no calculated')
+        fisF = mtd[retWSname_front]
+        fisR = mtd[retWSname_rear]
+            
+        minQ = min(min(fisF.dataX(0)), min(fisR.dataX(0)))
+        maxQ = max(max(fisF.dataX(0)), max(fisR.dataX(0)))
+
+        if maxQ > minQ:
+            #preparing the sample
+            CropWorkspace(InputWorkspace=Nf, OutputWorkspace=Nf, XMin=minQ, XMax=maxQ)
+            CropWorkspace(InputWorkspace=Nr, OutputWorkspace=Nr, XMin=minQ, XMax=maxQ)
+            CropWorkspace(InputWorkspace=Cf, OutputWorkspace=Cf, XMin=minQ, XMax=maxQ)
+            CropWorkspace(InputWorkspace=Cr, OutputWorkspace=Cr, XMin=minQ, XMax=maxQ)
+            if consider_can:
+                #preparing the can
+                CropWorkspace(InputWorkspace=Nf_can, OutputWorkspace=Nf_can, XMin=minQ, XMax=maxQ)
+                CropWorkspace(InputWorkspace=Nr_can, OutputWorkspace=Nr_can, XMin=minQ, XMax=maxQ)
+                CropWorkspace(InputWorkspace=Cf_can, OutputWorkspace=Cf_can, XMin=minQ, XMax=maxQ)
+                CropWorkspace(InputWorkspace=Cr_can, OutputWorkspace=Cr_can, XMin=minQ, XMax=maxQ)
+            
+            mergedQ = (Cf+shift*Nf+Cr)/(Nf/scale + Nr)        
+            if consider_can:
+                mergedQ -= (Cf_can+Cr_can)/(Nf_can/scale + Nr_can)
+            
+            RenameWorkspace(mergedQ, retWSname_merged)
+        else:
+            issueWarning('rear and front data has no overlapping q-region. Merged workspace no calculated')
         
-            delete_workspaces(retWSname_rear+"_sumOfCounts")
-            delete_workspaces(retWSname_rear+"_sumOfNormFactors")
-            delete_workspaces(retWSname_front+"_sumOfCounts")
-            delete_workspaces(retWSname_front+"_sumOfNormFactors")   
-            
-            retWSname = retWSname_merged
-        elif toParse.count('rear') == 1:
-            retWSname = retWSname_rear
-        else: 
-            retWSname = retWSname_front              
-        
-        # if front ws calculuated rescale and shift it
-        if toParse.count('front') == 1 or toParse.count('merged') == 1 or toParse.count('both') == 1:
-            frontWS = mtd[retWSname_front]
-            frontWS = (frontWS+shift)*scale
-            RenameWorkspace(frontWS, retWSname_front)    
-             
+        delete_workspaces(retWSname_rear+"_sumOfCounts")
+        delete_workspaces(retWSname_rear+"_sumOfNormFactors")
+        delete_workspaces(retWSname_front+"_sumOfCounts")
+        delete_workspaces(retWSname_front+"_sumOfNormFactors")
+        if consider_can:
+            delete_workspaces(retWSname_front+"_can_tmp_sumOfNormFactors")
+            delete_workspaces(retWSname_rear+"_can_tmp_sumOfNormFactors")
+            delete_workspaces(retWSname_front+"_can_tmp_sumOfCounts")
+            delete_workspaces(retWSname_rear+"_can_tmp_sumOfCounts")
+
+        retWSname = retWSname_merged
+
+    #applying scale and shift on the front detector reduced data
+    if reduce_front_flag:
+        frontWS = mtd[retWSname_front]
+        frontWS = (frontWS+shift)*scale
+        RenameWorkspace(frontWS, retWSname_front)
+
+    # finished calculating cross section so can restore these value
+    ReductionSingleton().to_Q.outputParts = toRestoreOutputParts
+    ReductionSingleton().instrument.setDetector(toRestoreAfterAnalysis)
+    
+    # update the scale and shift values of out_fit_settings
+    out_fit_settings['scale'] = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale
+    out_fit_settings['shift'] = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift
+
     if resetSetup:
-        _refresh_singleton()        
-        
+        _refresh_singleton()
+    
     return retWSname
 
 def _fitRescaleAndShift(rAnds, frontData, rearData):
@@ -472,7 +500,7 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     """ 
     if rAnds.fitScale==False and rAnds.fitShift==False:
         return rAnds.scale, rAnds.shift
-    
+    #TODO: we should allow the user to add constraints?
     if rAnds.fitScale==False:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData, 
