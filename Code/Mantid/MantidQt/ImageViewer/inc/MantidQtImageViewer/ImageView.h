@@ -67,6 +67,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageView : public QMainWindow
     void*            saved_range_handler;    // RangeHandler*
     void*            saved_image_display;    // ImageDisplay*
     void*            saved_iv_connections;   // IVConnections*
+    void*            saved_emode_handler;    // EModeHandler*
 };
 
 } // namespace MantidQt 

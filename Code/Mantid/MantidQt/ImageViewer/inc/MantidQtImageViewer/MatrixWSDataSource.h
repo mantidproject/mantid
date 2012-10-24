@@ -5,6 +5,7 @@
 
 #include "MantidQtImageViewer/DataArray.h"
 #include "MantidQtImageViewer/ImageDataSource.h"
+#include "MantidQtImageViewer/EModeHandler.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -77,13 +78,18 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSDataSource: public ImageDataSource
                               size_t  n_cols,
                               bool    is_log_x );
 
+    /// Set the class that gets the emode & efixed info from the user.
+    void SetEModeHandler( EModeHandler* emode_handler );
+
     /// Get a list containing pairs of strings with information about x,y
     void GetInfoList( double x,
                       double y,
                       std::vector<std::string> &list );
+
+
   private:
     Mantid::API::MatrixWorkspace_sptr  mat_ws;
-
+    EModeHandler* saved_emode_handler;
 };
 
 } // namespace MantidQt 

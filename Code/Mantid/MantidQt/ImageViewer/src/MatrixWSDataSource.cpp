@@ -3,6 +3,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 #include <math.h>
 
 #include <QThread>
@@ -45,6 +46,8 @@ MatrixWSDataSource::MatrixWSDataSource( MatrixWorkspace_sptr mat_ws )
   total_rows = mat_ws->getNumberHistograms();
 
   total_cols = 1000000;              // Default data resolution
+
+  saved_emode_handler = 0;
 }
 
 
@@ -207,6 +210,19 @@ DataArray * MatrixWSDataSource::GetDataArray( bool is_log_x )
                        total_rows, total_cols, is_log_x );
 }
 
+
+/**
+ * Set the class that gets the emode & efixed info from the user.
+ *
+ * @param emode_handler  Pointer to the user interface handler that
+ *                       can provide user values for emode and efixed.
+ */
+void MatrixWSDataSource::SetEModeHandler( EModeHandler* emode_handler )
+{
+  saved_emode_handler = emode_handler;
+}
+
+
 /**
  * Clear the vector of strings and then add pairs of strings giving information
  * about the specified point, x, y.  The first string in a pair should 
@@ -254,30 +270,37 @@ void MatrixWSDataSource::GetInfoList( double x,
                                      // information
     if ( old_unit == 0 )
     {
+      ErrorHandler::Error("No UNITS on MatrixWorkspace X-axis");
       return;
     }
 
     Instrument_const_sptr instrument = mat_ws->getInstrument();
     if ( instrument == 0 )
     {
+      ErrorHandler::Error("No INSTRUMENT on MatrixWorkspace");
       return;
     }
 
     IObjComponent_const_sptr source = instrument->getSource();
     if ( source == 0 )
     {
+      ErrorHandler::Error("No SOURCE on instrument in MatrixWorkspace");
       return;
     }
 
     IObjComponent_const_sptr sample = instrument->getSample();
     if ( sample == 0 )
     {
+      ErrorHandler::Error("No SAMPLE on instrument in MatrixWorkspace");
       return;
     }
 
     IDetector_const_sptr det = mat_ws->getDetector( row );
     if ( det == 0 )
     {
+      std::ostringstream message;
+      message << "No DETECTOR for row " << row << " in MatrixWorkspace";
+      ErrorHandler::Error( message.str() );
       return;
     }
 
@@ -300,6 +323,24 @@ void MatrixWSDataSource::GetInfoList( double x,
     int    emode  = 0;
     double efixed = 0;
     double delta  = 0;
+                        // First try to get emode & efixed from the user
+    efixed = saved_emode_handler->GetEFixed();
+    if ( efixed != 0 )
+    {
+      emode = saved_emode_handler->GetEMode();
+      if ( emode == 0 )
+      {
+        ErrorHandler::Error("EMode invalid, spectrometer needed if emode != 0");
+        ErrorHandler::Error("Assuming Direct Geometry Spectrometer....");
+        emode = 1;
+      }
+    }
+
+    if ( efixed == 0 )    // Did NOT get emode & efixed from user, trying WS
+    {
+
+    }
+
 
     const API::Run & run = mat_ws->run();  // cases I checked don't have Ei :-(
     if ( run.hasProperty("Ei") )              

@@ -8,6 +8,8 @@
 #include "MantidQtImageViewer/ImageDisplay.h"
 #include "MantidQtImageViewer/SliderHandler.h"
 #include "MantidQtImageViewer/RangeHandler.h"
+#include "MantidQtImageViewer/EModeHandler.h"
+#include "MantidQtImageViewer/MatrixWSDataSource.h"
 
 namespace MantidQt
 {
@@ -29,6 +31,27 @@ ImageView::ImageView( ImageDataSource* data_source )
 {
   Ui_ImageViewer* ui = new Ui_ImageViewer();
   saved_ui          = ui; 
+
+                                          // IF we have a MatrixWSDataSource
+                                          // give it the handler for the
+                                          // EMode, so the user can set EMode
+                                          // and EFixed.  NOTE: we could avoid
+                                          // this type checking if we made the
+                                          // ui in the calling code and passed
+                                          // it in.  We would need a common
+                                          // base class for this class and
+                                          // the ref-viewer UI.
+  MatrixWSDataSource* matrix_ws_data_source = 
+                      dynamic_cast<MatrixWSDataSource*>( data_source );
+  if ( matrix_ws_data_source != 0 )
+  {
+    EModeHandler* emode_handler = new EModeHandler( ui );
+    saved_emode_handler = emode_handler;
+  }
+  else
+  {
+    saved_emode_handler = 0;
+  }
 
   QMainWindow* window = this;
 
@@ -88,6 +111,13 @@ ImageView::~ImageView()
 
   Ui_ImageViewer* ui = static_cast<Ui_ImageViewer*>(saved_ui);
   delete  ui;
+
+  if ( saved_emode_handler != 0 )
+  {
+    EModeHandler* emode_handler = 
+                             static_cast<EModeHandler*>(saved_emode_handler);
+    delete emode_handler;
+  }
 }
 
 
