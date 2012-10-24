@@ -147,10 +147,11 @@ namespace Mantid
       if (etBinning.empty())
       {
         double emin = -0.5 * eiGuess;
-        double deltaE = eiGuess / 100.0;
+        double deltaE = 0.01 * eiGuess;
+        double emax = 0.99 * eiGuess;
         etBinning.push_back(emin);
         etBinning.push_back(deltaE);
-        etBinning.push_back(eiGuess);
+        etBinning.push_back(emax);
       }
 
       double incidentEnergy = 0.0;
