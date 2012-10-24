@@ -283,10 +283,10 @@ namespace Mantid
   /**
   * Get a list of descriptor objects used to order the algorithms in the stored map 
   * where an algorithm has multiple categories it will be represented using multiple descriptors.
-  * Hidden categories will not be included.
+  * @param includeHidden true includes the hidden algorithm names and is faster, the default is false
   * @returns A vector of descriptor objects
   */
-  std::vector<Algorithm_descriptor> AlgorithmFactoryImpl::getDescriptors() const
+  std::vector<Algorithm_descriptor> AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const
   {
     //algorithm names
     std::vector<std::string> sv;
@@ -294,7 +294,10 @@ namespace Mantid
 
     //hidden categories
     std::set<std::string> hiddenCategories;
-    fillHiddenCategories(&hiddenCategories);
+    if (includeHidden == false)
+    {
+      fillHiddenCategories(&hiddenCategories);
+    }
 
     //results vector
     std::vector<Algorithm_descriptor> res;

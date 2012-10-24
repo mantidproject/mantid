@@ -128,7 +128,7 @@ public:
   const std::map<std::string,bool> getCategoriesWithState() const;
 
   /// Returns algorithm descriptors.
-  std::vector<Algorithm_descriptor> getDescriptors() const;
+  std::vector<Algorithm_descriptor> getDescriptors(bool includeHidden=false) const;
 
   ///unmangles the names used as keys into the name and version
   std::pair<std::string,int> decodeName(const std::string& mangledName)const;

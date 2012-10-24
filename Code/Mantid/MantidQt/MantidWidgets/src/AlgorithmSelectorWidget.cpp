@@ -373,7 +373,8 @@ namespace MantidWidgets
   void FindAlgComboBox::update()
   {
     typedef std::vector<Algorithm_descriptor> AlgNamesType;
-    AlgNamesType names = AlgorithmFactory::Instance().getDescriptors();
+    //include hidden categories in the combo list box
+    AlgNamesType names = AlgorithmFactory::Instance().getDescriptors(true);
 
     // sort by algorithm names only to fill this combobox
     sort(names.begin(),names.end(),Algorithm_descriptor_name_less);
