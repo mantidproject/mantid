@@ -213,7 +213,7 @@ public:
   { do_test_exec("", "Axis2,2.0,8.0, 1", "", "", "", 20*6.0*100.0 /*signal*/, 1 /*# of bins*/, true /*IterateEvents*/, 20 /*numEventsPerBox*/,
       VMD(0,0,1) );
   }
-  void testExecLagreReglarSignal()
+  void xestExecLagreReglarSignal()
   {
     FakeMDEventData FakeDat;
     TS_ASSERT_THROWS_NOTHING( FakeDat.initialize() )
