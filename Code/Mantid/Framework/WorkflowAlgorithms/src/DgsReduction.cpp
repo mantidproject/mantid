@@ -736,8 +736,18 @@ namespace Mantid
       }
       etConv->setProperty("ReductionProperties", reductionManagerName);
       etConv->setProperty("OutputWorkspace", this->getPropertyValue("OutputWorkspace"));
+      std::string tibWsName = this->getPropertyValue("OutputWorkspace") + "_tib";
+      etConv->setProperty("OutputTibWorkspace", tibWsName);
       etConv->executeAsSubAlg();
       outputWS = etConv->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr tibWS = etConv->getProperty("OutputTibWorkspace");
+
+      if (tibWS && showIntermedWS)
+      {
+        this->declareProperty(new WorkspaceProperty<>("SampleTibWorkspace",
+            tibWsName, Direction::Output));
+        this->setProperty("SampleTibWorkspace", idetVanWS);
+      }
 
       Workspace_sptr absSampleWS = this->loadInputData("AbsUnitsSample", false);
 

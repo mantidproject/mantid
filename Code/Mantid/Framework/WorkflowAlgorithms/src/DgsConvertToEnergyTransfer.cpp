@@ -90,6 +90,8 @@ namespace Mantid
           "Allows modification to the OldGroupingFile property name");
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
           Direction::Output), "The name for the output workspace.");
+      this->declareProperty(new WorkspaceProperty<>("OutputTibWorkspace", "",
+          Direction::Output), "The name for the output TIB workspace.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties", Direction::Input);
     }
 
@@ -364,8 +366,12 @@ namespace Mantid
           cnvToDist->executeAsSubAlg();
           outputWS = cnvToDist->getProperty("Workspace");
 
+          std::string bkgWsName = this->getPropertyValue("OutputTibWorkspace");
+          if (bkgWsName.empty())
+          {
+            bkgWsName = "background_ws";
+          }
           // Calculate the background
-          std::string bkgWsName = "background_ws";
           IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
           flatBg->setProperty("InputWorkspace", origBkgWS);
           flatBg->setProperty("OutputWorkspace", bkgWsName);
@@ -377,9 +383,7 @@ namespace Mantid
           MatrixWorkspace_sptr bkgWS = flatBg->getProperty("OutputWorkspace");
 
           // Remove unneeded original background workspace
-          IAlgorithm_sptr delWs = this->createSubAlgorithm("DeleteWorkspace");
-          delWs->setProperty("Workspace", origBkgWS);
-          delWs->executeAsSubAlg();
+          origBkgWS.reset();
 
           // Make background workspace a distribution
           cnvToDist->setProperty("Workspace", bkgWS);
@@ -393,9 +397,7 @@ namespace Mantid
           minus->setProperty("OutputWorkspace", outputWS);
           minus->executeAsSubAlg();
 
-          // Remove unneeded background workspace
-          delWs->setProperty("Workspace", bkgWS);
-          delWs->executeAsSubAlg();
+          this->setProperty("OutputTibWorkspace", bkgWS);
         }
         // Do ISIS
         else
