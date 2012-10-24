@@ -133,6 +133,8 @@ class CreateLeBailFitInput(PythonAlgorithm):
             hkldict[dkey]["FWHM"] = fwhm
         # ENDFOR: line
 
+        print "[CreateLeBailFit] Import Fullprof reflection file %s successfully. " % (hklfilename)
+
         return hkldict
 
     def parseFullprofPeakProfileFile(self, irffilename):
@@ -185,8 +187,6 @@ class CreateLeBailFitInput(PythonAlgorithm):
                     # Profile Type
                     profiletype = int(line.split("NPROF")[1])
     
-                    print "Import .irf File.  Bank = %d" % (bank)
-
                     mdict[bank]["Profile"] = profiletype
     
                 elif line.startswith("TOFRG"):
@@ -277,7 +277,11 @@ class CreateLeBailFitInput(PythonAlgorithm):
         # ENDFOR
 
         self.mdict = mdict
-    
+        
+        print "[CreateLeBailFit] Import Fullprof resolution file %s for bank %d successfully. " % (irffilename, bank)
+        #            print "Import .irf File.  Bank = %d" % (bank)
+
+   
         return mdict
 
 
