@@ -319,7 +319,7 @@ namespace MDAlgorithms
       maxPar[d] = max;
       nBins[d]  = ws->getDimension(d)->getNBins();
       gridSize*=nBins[d];
-      delta[d]  = (max-min)/nBins[d];
+      delta[d]  = (max-min)/double(nBins[d]);
     }
     // Create all the requested events
     std::vector<size_t> indexes;
@@ -335,7 +335,7 @@ namespace MDAlgorithms
       for (size_t d=0; d<nd; d++)
       {
         // put events into cell centers;     // 0.50001 0001 -- is "kind of" epsilon to avoid randomization error at cell ecntre 
-         centers[d]= coord_t(minPar[d]+delta[d]*(indexes[d]+0.50001));
+         centers[d]= coord_t(minPar[d]+delta[d]*(double(indexes[d])+0.50001));
       }
 
       // Default or randomized error/signal
