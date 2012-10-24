@@ -2454,6 +2454,12 @@ bool AxesDialog::updatePlot()
       end = boxEnd->value();
     }
 
+    if (start >= end){
+      QMessageBox::warning(this,tr("MantidPlot - Error"),
+                           "Invalid option to set the 'From' greater than 'To' for the scale settings.\nOperation aborted! ");
+      return false;
+    }
+
     double step = 0.0;
     if (btnStep->isChecked()){
       step = boxStep->value();
