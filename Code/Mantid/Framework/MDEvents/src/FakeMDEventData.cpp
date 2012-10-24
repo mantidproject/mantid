@@ -72,7 +72,8 @@ namespace MDEvents
     declareProperty(new ArrayProperty<double>("UniformParams", ""),
         "Add a uniform, randomized distribution of events.\n"
         "1 parameter: number_of_events; they will be distributed across the size of the workspace.\n"
-        "Multiple parameters: number_of_events, min,max (for each dimension); distribute the events inside the range given.\n");
+        "Multiple parameters: number_of_events, min,max (for each dimension); distribute the events inside the range given.\n"
+        "if first parameter(number of events) is negative, all events are not distributed randomly but uniformly placed into the centers of cells\n");
 
     declareProperty(new ArrayProperty<double>("PeakParams", ""),
         "Add a peak with a normal distribution around a central point.\n"
@@ -180,14 +181,22 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void FakeMDEventData::addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
+    std::vector<double> minPar(nd),maxPar(nd),delta(nd);
     std::vector<double> params = getProperty("UniformParams");
     bool RandomizeSignal = getProperty("RandomizeSignal");
     if (params.size() == 0)
       return;
 
-    if (params[0] <= 0)
-      throw std::invalid_argument("UniformParams: number_of_events needs to be > 0");
+    bool randomEvents=true;
     size_t num = size_t(params[0]);
+    if (params[0] < 0)
+    {
+      randomEvents=false;
+      num = size_t(-params[0]);
+    }
+    if(num==0)
+      throw std::invalid_argument(" number of distributed events can not be equal to 0");
+
 
     Progress prog(this, 0.0, 1.0, 100);
     size_t progIncrement = num / 100; if (progIncrement == 0) progIncrement = 1;
@@ -204,8 +213,11 @@ namespace MDEvents
       throw std::invalid_argument("UniformParams: needs to have ndims*2+1 arguments.");
 
     boost::mt19937 rng;
-    int randomSeed = getProperty("RandomSeed");
-    rng.seed((unsigned int)(randomSeed));
+    if(randomEvents)
+    {
+      int randomSeed = getProperty("RandomSeed");
+      rng.seed((unsigned int)(randomSeed));
+    }
 
     // Unit-size randomizer
     boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
@@ -220,9 +232,18 @@ namespace MDEvents
       double min = params[d*2+1];
       double max = params[d*2+2];
       if (max <= min) throw std::invalid_argument("UniformParams: min must be < max for all dimensions.");
-      boost::uniform_real<double> u(min,max); // Range
-      gen_t * gen = new gen_t(rng, u);
-      gens[d] = gen;
+      if(randomEvents)
+      {
+        boost::uniform_real<double> u(min,max); // Range
+        gen_t * gen = new gen_t(rng, u);
+        gens[d] = gen;
+      }
+      else
+      {
+        minPar[d] = min;
+        maxPar[d] = max;
+        delta[d]  = (max-min)/ws->getDimension(d)->getNumBins();
+      }
     }
 
     // Create all the requested events
@@ -230,7 +251,13 @@ namespace MDEvents
     {
       coord_t centers[nd];
       for (size_t d=0; d<nd; d++)
-        centers[d] = static_cast<coord_t>((*gens[d])()); // use a different generator for each dimension
+      {
+        if(randomEvents)
+          centers[d] = static_cast<coord_t>((*gens[d])()); // use a different generator for each dimension
+        else
+          centers[d]= coord_t(0.5*(minPar[d]+maxPar[d]));
+      }
+
 
       // Default or randomized error/signal
       float signal = 1.0;

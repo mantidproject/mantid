@@ -41,7 +41,7 @@ namespace
 
     ndims = nd.size();
     std::vector<Py_intptr_t> dims(ndims);
-    for(size_t i=0;i<ndims ;++i)
+    for(size_t i=0; i<ndims; ++i)
       dims[i]=static_cast<Py_intptr_t>(nd[i]);
     
     return dims;
