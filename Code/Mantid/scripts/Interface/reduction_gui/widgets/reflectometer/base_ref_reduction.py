@@ -894,8 +894,8 @@ class BaseRefWidget(BaseWidget):
                                                        True, 
                                                        None)
 
-        def call_back(peakmin, peakmax, backmin, backmax, tofmin, tofmax):
-            print 'Inside the call_back on the python side'
+#        def call_back(peakmin, peakmax, backmin, backmax, tofmin, tofmax):
+#            print 'Inside the call_back on the python side'
 #            self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
 #            self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
 #            self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
@@ -904,11 +904,23 @@ class BaseRefWidget(BaseWidget):
 #            self._summary.x_max_edit.setText("%-d" % int(tofmax))
          
         import _qti    
-        _qti.app.connect(_qti.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+        #_qti.app.connect(_qti.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+        #_qti.app.connect(_qti.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
         
         import mantidqtpython 
-        mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base)
-    
+        self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base)
+        QtCore.QObject.connect(self.ref_det_view, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double, double,double,double,double)"), self.call_back)
+
+
+    def call_back(self, peakmin, peakmax, backmin, backmax, tofmin, tofmax):
+         print 'Inside the call_back on the python side'
+#            self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
+#            self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
+#            self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
+#            self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
+#            self._summary.x_min_edit.setText("%-d" % int(tofmin))
+#            self._summary.x_max_edit.setText("%-d" % int(tofmax))
+
     def _norm_count_vs_y(self):
         
 #        run_number = self._summary.norm_run_number_edit.text()

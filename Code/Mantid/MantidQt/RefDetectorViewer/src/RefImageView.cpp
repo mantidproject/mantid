@@ -70,7 +70,7 @@ RefImageView::RefImageView( RefImageDataSource* data_source )
                                                   ui->lineEdit_TOFmax);
   saved_image_display = image_display;
 
-  RefIVConnections* iv_connections = new RefIVConnections( ui, this, 
+  RefIVConnections * iv_connections = new RefIVConnections( ui, this, 
                                                      image_display, 
                                                      h_graph, v_graph );
     
@@ -79,6 +79,11 @@ RefImageView::RefImageView( RefImageDataSource* data_source )
   image_display->SetDataSource( data_source );
 }
     
+  void* RefImageView::getIVConnections()
+  {
+    return saved_iv_connections;
+  }
+
 RefImageView::~RefImageView()
 {
 //  std::cout << "ImageView destructor called" << std::endl;

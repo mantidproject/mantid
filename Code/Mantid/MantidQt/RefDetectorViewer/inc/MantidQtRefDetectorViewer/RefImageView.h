@@ -54,6 +54,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageView : public QMainWindow
 
     ~RefImageView();    
     
+    void*  getIVConnections();
+
   private:
     GraphDisplay*    h_graph;
     GraphDisplay*    v_graph;

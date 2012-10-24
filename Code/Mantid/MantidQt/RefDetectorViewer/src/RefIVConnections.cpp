@@ -342,10 +342,10 @@ void RefIVConnections::graph_range_changed()
 
 void RefIVConnections::peak_back_tof_range_update()
 {
-    std::cout << "Inside RefImageView::peak_back_tof_range_update"<< std::endl;
+  std::cout << "Inside RefImageView::peak_back_tof_range_update: ";
 
     QLineEdit * peak_left_control = iv_ui->lineEdit_peakLeft;
-    std::cout << peak_left_control->text().toStdString();
+    std::cout << peak_left_control->text().toStdString() << std::endl;
     
 //    double peakmin = iv_ui->lineEdit_peakLeft->text()->toDouble();
 //    double peakmax = iv_ui->lineEdit_peakRight->text()->toDouble();
@@ -464,6 +464,7 @@ void RefIVConnections::imageSplitter_moved()
 }
 
 
+  //Right click
 void RefIVConnections::imagePicker_moved()
 {
   QwtPolygon selected_points = image_picker->selection();
@@ -474,13 +475,15 @@ void RefIVConnections::imagePicker_moved()
   }
 }
 
+  //Left click
 void RefIVConnections::imagePicker2_moved()
 {
-    QwtPolygon selected_points = image_picker2->selection();
+  QwtPolygon selected_points = image_picker2->selection();
     if ( selected_points.size() >= 1 )
     {
+      peak_back_tof_range_update();
         int index = selected_points.size() - 1;
-        int mouseClick = 1;  //left click
+        int mouseClick = 1; 
         image_display->SetPointedAtPoint( selected_points[index], mouseClick );
     }
 }

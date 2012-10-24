@@ -68,6 +68,9 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
     
     std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
     image_view = new RefImageView( source );
+
+    void* iv_connections = image_view->getIVConnections();    
+
 }
 
 RefMatrixWSImageView::~RefMatrixWSImageView()
