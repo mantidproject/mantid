@@ -162,11 +162,11 @@ if ( WIN32 ) # General windows environment
   if ( CMAKE_SIZEOF_VOID_P EQUAL 8 ) # Recommended way of detecting 64- vs 32-bit build
     # Excludes .so files & _win32 binaries
     install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE )
-  elseif()
+  else ()
     # Excludes so files & _win64 binaries
     install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN ".so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE )
-  endif()
-elseif ()
+  endif ()
+else ()
   # These don't work correctly and the linux ones are in no way general. They really need to be part of the build
   install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE )
 endif ()
