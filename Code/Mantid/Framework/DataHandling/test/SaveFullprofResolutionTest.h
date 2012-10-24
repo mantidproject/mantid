@@ -4,6 +4,17 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/SaveFullprofResolution.h"
+#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+
+#include <fstream>
+#include <iostream>
+
+using namespace std;
+using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 
 using Mantid::DataHandling::SaveFullprofResolution;
 
@@ -21,6 +32,151 @@ public:
     Mantid::DataHandling::SaveFullprofResolution alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+  }
+
+  void test_SaveFile()
+  {
+    // 1. Create input workspace
+    string filename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentTable.dat");
+    map<std::string, double> parameters, newvalueparameters;
+    map<string, vector<double> > parametermcs;
+    importInstrumentTxtFile(filename, parameters, parametermcs);
+    TableWorkspace_sptr itablews = createInstrumentParameterWorkspace(parameters, newvalueparameters, parametermcs);
+
+    AnalysisDataService::Instance().addOrReplace("Bank1InstrumentParameterTable", itablews);
+
+    // 2. Init the algorithm
+    Mantid::DataHandling::SaveFullprofResolution alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    // 3. Set up
+    alg.setProperty("InputWorkspace", "Bank1InstrumentParameterTable");
+    alg.setProperty("OutputFile", "bank1.irf");
+    alg.setProperty("Bank", 1);
+
+    // 4. Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_EQUALS(1, 212);
+
+  }
+
+
+
+  //----------------  Helpers To Create Input Workspaces --------------------------
+
+  /** Create instrument geometry parameter/LeBail parameter workspaces
+   */
+  DataObjects::TableWorkspace_sptr createInstrumentParameterWorkspace(std::map<std::string, double> parameters,
+                                                                      std::map<std::string, double> newvalueparameters,
+                                                                      map<string, vector<double> > mcparameters)
+  {
+    UNUSED_ARG(mcparameters);
+
+    // 1. Combine 2 inputs
+    std::map<std::string, double>::iterator nvit;
+    std::stringstream infoss;
+    infoss << "Modifying parameters: " << std::endl;
+    for (nvit = newvalueparameters.begin(); nvit != newvalueparameters.end(); ++nvit)
+    {
+      std::map<std::string, double>::iterator fdit;
+      fdit = parameters.find(nvit->first);
+      if (fdit != parameters.end())
+      {
+        fdit->second = nvit->second;
+        infoss << "Name: " << std::setw(15) << fdit->first << ", Value: " << fdit->second << std::endl;
+      }
+    }
+    std::cout << infoss.str();
+
+    // 2. Crate table workspace
+    DataObjects::TableWorkspace* tablews = new DataObjects::TableWorkspace();
+    DataObjects::TableWorkspace_sptr geomws = DataObjects::TableWorkspace_sptr(tablews);
+
+    tablews->addColumn("str", "Name");
+    tablews->addColumn("double", "Value");
+    tablews->addColumn("str", "FitOrTie");
+    tablews->addColumn("double", "Chi2");
+    tablews->addColumn("double", "Min");
+    tablews->addColumn("double", "Max");
+    tablews->addColumn("double", "StepSize");
+
+    // 2. Add peak parameters' name and values
+    map<string, double>::iterator mit;
+    string fitortie("f");
+    double minvalue = 0.0;
+    double maxvalue = 0.0;
+    double stepsize = 0.0;
+    for (mit = parameters.begin(); mit != parameters.end(); ++mit)
+    {
+      string parname = mit->first;
+      double parvalue = mit->second;
+
+      API::TableRow newrow = geomws->appendRow();
+      newrow << parname << parvalue << fitortie << 1.234 << minvalue << maxvalue << stepsize;
+    }
+
+    return geomws;
+  }
+
+  /** Import text file containing the instrument parameters
+    * Format: name, value, min, max, step-size
+    * Input:  a text based file
+    * Output: a map for (parameter name, parameter value)
+    */
+  void importInstrumentTxtFile(std::string filename, std::map<std::string, double>& parameters,
+                               std::map<string, vector<double> >& parametermcs)
+  {
+    // 1. Open file
+    std::ifstream ins;
+    ins.open(filename.c_str());
+    if (!ins.is_open())
+    {
+      std::cout << "File " << filename << " cannot be opened. " << std::endl;
+      throw std::invalid_argument("Cannot open Reflection-Text-File.");
+    }
+    else
+    {
+      std::cout << "Importing instrument parameter file " << filename << std::endl;
+    }
+
+    // 2. Parse
+    parameters.clear();
+    parametermcs.clear();
+
+    char line[256];
+    while(ins.getline(line, 256))
+    {
+      if (line[0] != '#')
+      {
+        std::string parname;
+        double parvalue, parmin, parmax, parstepsize;
+
+        std::stringstream ss;
+        ss.str(line);
+        ss >> parname >> parvalue;
+        parameters.insert(std::make_pair(parname, parvalue));
+
+        try
+        {
+          ss >> parmin >> parmax >> parstepsize;
+          vector<double> mcpars;
+          mcpars.push_back(parmin);
+          mcpars.push_back(parmax);
+          mcpars.push_back(parstepsize);
+          parametermcs.insert(make_pair(parname, mcpars));
+        }
+        catch (runtime_error err)
+        {
+          ;
+        }
+      }
+    }
+
+    ins.close();
+
+    return;
   }
 
 
