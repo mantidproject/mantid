@@ -328,6 +328,7 @@ namespace Mantid
           rebin->setProperty("InputWorkspace", outputWS);
           rebin->setProperty("OutputWorkspace", origBkgWsName);
           rebin->setProperty("Params", params);
+          rebin->setProperty("PreserveEvents", false);
           rebin->executeAsSubAlg();
           MatrixWorkspace_sptr origBkgWS = rebin->getProperty("OutputWorkspace");
 
