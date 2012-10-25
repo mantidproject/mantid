@@ -60,7 +60,11 @@ public:
     setMouseTracking( true );
   }
   /// Assign a surface to draw on
-  void setSurface(ProjectionSurface* surface){m_surface = surface;}
+  void setSurface(ProjectionSurface* surface)
+  {
+    m_surface = surface;
+    connect(m_surface,SIGNAL(redrawRequired()),this,SLOT(repaint()),Qt::QueuedConnection);
+  }
   /// Return the surface 
   ProjectionSurface* getSurface(){return m_surface;}
   /// Redraw the view
@@ -138,6 +142,18 @@ protected:
     if (m_surface)
     {
       m_surface->wheelEvent(event);
+    }
+    update();
+  }
+  /**
+  * Key press event
+  * @param event :: This is the event variable which has the status of the keyboard
+  */
+  void keyPressEvent(QKeyEvent *event)
+  {
+    if (m_surface)
+    {
+      m_surface->keyPressEvent(event);
     }
     update();
   }

@@ -342,17 +342,41 @@ void ProjectionSurface::wheelEventPick(QWheelEvent*)
 
 void ProjectionSurface::mousePressEventDraw(QMouseEvent* e)
 {
-  m_maskShapes.mousePressEvent(e);
+  if ( m_maskShapes.mousePressEvent(e) ) return;
+
+  foreach(PeakOverlay* po, m_peakShapes)
+  {
+    if ( po->mousePressEvent(e) ) return;
+  }
+  startSelection( e->x(), e->y() );
 }
 
 void ProjectionSurface::mouseMoveEventDraw(QMouseEvent* e)
 {
-  m_maskShapes.mouseMoveEvent(e);
+  if ( hasSelection() )
+  {
+    moveSelection( e->x(), e->y() );
+  }
+  else
+  {
+    m_maskShapes.mouseMoveEvent(e);
+  }
 }
 
 void ProjectionSurface::mouseReleaseEventDraw(QMouseEvent* e)
 {
-  m_maskShapes.mouseReleaseEvent(e);
+  if ( hasSelection() )
+  {
+    foreach(PeakOverlay* po, m_peakShapes)
+    {
+      po->selectIn( m_selectRect );
+    }
+    endSelection( e->x(), e->y() );
+  }
+  else
+  {
+    m_maskShapes.mouseReleaseEvent(e);
+  }
 }
 
 void ProjectionSurface::wheelEventDraw(QWheelEvent* e)
@@ -363,6 +387,10 @@ void ProjectionSurface::wheelEventDraw(QWheelEvent* e)
 void ProjectionSurface::keyPressEventDraw(QKeyEvent* e)
 {
   m_maskShapes.keyPressEvent(e);
+  foreach(PeakOverlay* po, m_peakShapes)
+  {
+    po->keyPressEvent(e);
+  }
 }
 
 
@@ -507,7 +535,7 @@ QRectF ProjectionSurface::selectionRectUV()const
 
 bool ProjectionSurface::hasSelection()const
 {
-  return ! m_selectRect.isNull() && m_selectRect.width() > 1;
+  return ! m_selectRect.isNull() && m_selectRect.width() > 0;
 }
 
 void ProjectionSurface::colorMapChanged()

@@ -106,6 +106,23 @@ void Shape2DCollection::removeShape(Shape2D* shape)
   if (shape && m_shapes.contains(shape))
   {
     m_shapes.removeOne(shape);
+    delete shape;
+  }
+}
+
+/**
+ * Remove a list of shapes.
+ * @param shapeList :: A list of pointers to the shapes to be removed
+ */
+void Shape2DCollection::removeShapes(const QList<Shape2D*>& shapeList)
+{
+  foreach(Shape2D* shape, shapeList)
+  {
+    if ( shape == m_currentShape )
+    {
+      m_currentShape = NULL;
+    }
+    removeShape( shape );
   }
 }
 
@@ -151,7 +168,12 @@ void Shape2DCollection::resetBoundingRect()
   }
 }
 
-void Shape2DCollection::mousePressEvent(QMouseEvent* e)
+/**
+ * Reacts on a mouse press event. 
+ * @param e :: Mouse press event object.
+ * @return :: True if any shape in the collection ends up selected and false otherwise.
+ */
+bool Shape2DCollection::mousePressEvent(QMouseEvent* e)
 {
   if (e->button() == Qt::LeftButton)
   {
@@ -160,7 +182,7 @@ void Shape2DCollection::mousePressEvent(QMouseEvent* e)
     {
       deselectAll();
       addShape(m_shapeType,e->x(),e->y());
-      if (!m_currentShape) return;
+      if (!m_currentShape) return false;
       m_currentShape->edit(true);
       m_currentCP = 2;
       m_editing = true;
@@ -180,6 +202,7 @@ void Shape2DCollection::mousePressEvent(QMouseEvent* e)
       deselectAll();
     }
   }
+  return m_currentShape != NULL;
 }
 
 void Shape2DCollection::mouseMoveEvent(QMouseEvent* e)
@@ -237,7 +260,7 @@ void Shape2DCollection::keyPressEvent(QKeyEvent* e)
   switch(e->key())
   {
   case Qt::Key_Delete:
-  case Qt::Key_Backspace: removeCurrentShape(); break;
+  case Qt::Key_Backspace: removeSelectedShapes(); break;
   }
 }
 
@@ -322,6 +345,27 @@ bool Shape2DCollection::selectAtXY(int x,int y)
 }
 
 /**
+ * Select all shapes included in a rectangle.
+ * @param rect :: Rectangle in current screen coordinates containing selected shapes.
+ * @return :: True if any of the shapes is selected.
+ */
+bool Shape2DCollection::selectIn(const QRect& rect)
+{
+  QRectF r = m_transform.inverted().mapRect( rect );
+  bool selected = false;
+  deselectAll();
+  foreach(Shape2D* shape,m_shapes)
+  {
+    if ( r.contains( shape->getBoundingRect() ) )
+    {
+      shape->edit( true );
+      selected = true;
+    }
+  }
+  return selected;
+}
+
+/**
  * Select a shape with index i.
  */
 void Shape2DCollection::select(int i)
@@ -382,6 +426,19 @@ void Shape2DCollection::removeCurrentShape()
   {
     this->removeShape(m_currentShape);
     m_currentShape = NULL;
+    emit shapesDeselected();
+  }
+}
+
+/**
+ * Removes the selected shapes from this collection.
+ */
+void Shape2DCollection::removeSelectedShapes()
+{
+  auto shapeList = getSelectedShapes();
+  if ( !shapeList.isEmpty() )
+  {
+    removeShapes( shapeList );
     emit shapesDeselected();
   }
 }
@@ -525,4 +582,20 @@ QPointF Shape2DCollection::realToUntransformed(const QPointF& point)const
   qreal y = m_h - (point.y() - m_windowRect.y()) * m_wy;
   //std::cerr << "realToUntransformed: " << x << ' ' << y << std::endl;
   return QPointF(x,y);
+}
+
+/**
+ * Return a list of selected shapes.
+ */
+QList<Shape2D*> Shape2DCollection::getSelectedShapes() const
+{
+  QList<Shape2D*> res;
+  foreach(Shape2D* shape,m_shapes)
+  {
+    if ( shape->isEditing() )
+    {
+      res.append( shape );
+    }
+  }
+  return res;
 }

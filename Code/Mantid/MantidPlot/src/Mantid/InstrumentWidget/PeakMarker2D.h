@@ -45,8 +45,8 @@ public:
   double getK()const{return m_k;}
   double getL()const{return m_l;}
   int getDetectorID()const{return m_detID;}
-  //double getTOF()const{return m_tof;}
   int getRow()const{return m_row;}
+  void setRow(int row) { m_row = row; }
   /// Get label's area on the screen
   const QRectF& getLabelRect()const{return m_labelRect;}
   /// Allows PeakOverlay to move the label to avoid overlapping
@@ -63,15 +63,14 @@ protected:
 private:
 
   PeakOverlay& m_peakOverlay; ///< Parent PeakOverlay
-  int m_markerSize;
+  int m_markerSize;           ///< Size of the marker
   static const int g_defaultMarkerSize;
-  Symbol m_symbol; ///< Shape of the marker
-  double m_h, m_k, m_l; ///< Peak's h,k,l
-  int m_detID;
-  //double m_tof;
-  QString m_label;
+  Symbol m_symbol;            ///< Shape of the marker
+  double m_h, m_k, m_l;       ///< Peak's h,k,l
+  int m_detID;                ///< Peak's detector ID
+  QString m_label;            ///< Label string
   mutable QRectF m_labelRect; ///< label's area on the screen
-  int m_row; ///< peaks row number in PeaksWorkspace
+  int m_row;                  ///< peaks row number in PeaksWorkspace
 };
 
 #endif /*MANTIDPLOT_PEAKMARKER2D_H_*/

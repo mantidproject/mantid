@@ -1,11 +1,13 @@
 #include "PeakOverlay.h"
 #include "UnwrappedSurface.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include <QPainter>
 #include <QList>
 #include <cmath>
 #include <algorithm>
+#include <stdexcept>
 
 QList<PeakMarker2D::Style> PeakOverlay::g_defaultStyles;
 
@@ -119,11 +121,36 @@ m_showRows(true)
   observeAfterReplace();
 }
 
-/**
- * Not implemented yet.
+/**---------------------------------------------------------------------
+ * Overridden virtual function to remove peaks from the workspace along with 
+ * the shapes.
+ * @param shapeList :: Shapes to remove.
  */
-void PeakOverlay::removeShape(Shape2D*)
+void PeakOverlay::removeShapes(const QList<Shape2D*>& shapeList)
 {
+  std::cerr <<"ws " << m_peaksWorkspace->name() << std::endl;
+  std::cerr << "deleting:" << std::endl;
+  // vectors of rows to delete from the peaks workspace.
+  std::vector<size_t> rows;
+  foreach(Shape2D* shape, shapeList)
+  {
+    PeakMarker2D* marker = dynamic_cast<PeakMarker2D*>(shape);
+    if ( !marker ) throw std::logic_error("Wrong shape type found.");
+    int row = marker->getRow();
+    std::cerr << "     " << row << std::endl;
+    rows.push_back( static_cast<size_t>( row ) );
+    if ( shape == m_currentShape )
+    {
+      m_currentShape = NULL;
+    }
+    removeShape( shape );
+  }
+
+  // Run the DeleteTableRows algorithm to delete the peak.
+  auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("DeleteTableRows");
+  alg->setPropertyValue("TableWorkspace", m_peaksWorkspace->name());
+  alg->setProperty("Rows",rows);
+  alg->execute();
 }
 
 /**---------------------------------------------------------------------

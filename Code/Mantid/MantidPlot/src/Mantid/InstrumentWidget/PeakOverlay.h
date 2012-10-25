@@ -55,7 +55,7 @@ public:
   ~PeakOverlay(){}
   /// Override the drawing method
   void draw(QPainter& painter) const;
-  virtual void removeShape(Shape2D*);
+  virtual void removeShapes(const QList<Shape2D*>&);
   virtual void clear();
 
   /// Create the markers
