@@ -404,6 +404,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         scale, shift = _fitRescaleAndShift(rAnds, retWSname_front, retWSname_rear)
         ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift = shift
         ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale = scale
+        if scale < 0:
+            issueWarning("Fit returned SCALE negative")
     
     shift = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.shift
     scale = ReductionSingleton().instrument.getDetector('FRONT').rescaleAndShift.scale
