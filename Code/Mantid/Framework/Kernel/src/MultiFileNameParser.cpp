@@ -15,6 +15,7 @@
 
 #include <ctype.h>
 #include <cctype>
+#include <sstream>
 
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
@@ -604,6 +605,21 @@ namespace Kernel
         if(stepSize == 0)
           throw std::runtime_error(
             "Unable to generate a range with a step size of zero.");
+
+        int limit = 100;
+        int success = ConfigService::Instance().getValue("loading.multifilelimit",limit);
+        unsigned int orderedTo = from>to?from:to; 
+        unsigned int orderedFrom = from>to?to:from; 
+        unsigned int numberOfFiles = orderedTo-orderedFrom/stepSize;
+        if (numberOfFiles>limit)
+        {
+          std::stringstream sstream;
+          sstream << "The range from " << orderedFrom << " to " << orderedTo
+             << " step " << stepSize << ", would genetate " << numberOfFiles << " files.  "
+             << "This is greater then the current limit of " << limit << ".  "
+             << "This limit can be configured in the Mantid.user.properties file using the key loading.multifilelimit=200.";
+          throw std::range_error(sstream.str());
+        }
 
         unsigned int currentRun = from;
         std::vector<std::vector<unsigned int> > runs;

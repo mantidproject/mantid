@@ -188,3 +188,9 @@ instrument.view.geometry=Default
 # in their path, but at the cost of no longer being able to load multiple 
 # files with a single call to Load.
 loading.multifile=On
+
+# Limits the maximum nuber of files Mantid will attempt to load as part of a range
+# set to a very high number to disbale
+# however this limit is in place to protect you and your computer from simple formatting mistakes
+loading.multifilelimit=100
+

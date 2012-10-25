@@ -99,6 +99,11 @@ namespace API
       // Else try and set the value, assuming it could be one or more files.
       return setValueAsMultipleFiles(propValue);
     }
+    catch(const std::range_error & re)
+    {    
+      //it was a valid multi file string but for too many files.
+      return std::string(re.what());
+    }
     catch(const std::runtime_error & re)
     {
       g_log.debug("MultiFile loading has failed. Acting as standard FileProperty.");
@@ -255,6 +260,11 @@ namespace API
         try
         {
           m_parser.parse(*plusTokenString);
+        }
+        catch(const std::range_error & re)
+        {
+            g_log.error(re.what());
+            throw re;
         }
         catch(const std::runtime_error & re)
         {
