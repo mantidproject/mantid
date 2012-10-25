@@ -40,7 +40,7 @@ namespace MDAlgorithms
     void exec();
 
     template<typename MDE, size_t nd>
-    void finish(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void finish(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
 
   };

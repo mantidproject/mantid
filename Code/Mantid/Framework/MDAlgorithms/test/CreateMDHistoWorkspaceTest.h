@@ -11,6 +11,7 @@
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 
 class CreateMDHistoWorkspaceTest : public CxxTest::TestSuite

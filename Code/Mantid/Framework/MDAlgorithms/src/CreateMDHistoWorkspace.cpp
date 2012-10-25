@@ -37,6 +37,7 @@ A very similar algorithm to this is [[ImportMDHistoWorkspace]], which takes it's
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::MDEvents;
 
 namespace Mantid
 {

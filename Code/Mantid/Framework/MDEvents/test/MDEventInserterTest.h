@@ -7,9 +7,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IAlgorithm.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/CreateMDWorkspace.h"
 #include <iostream>
 #include <iomanip>
 
@@ -36,16 +36,16 @@ private:
     {
       ADS.remove(outWSName);
     }
-
-    CreateMDWorkspace createAlg;
-    createAlg.initialize();
-    createAlg.setProperty("Dimensions", 2);
-    createAlg.setPropertyValue("Extents", "-10,10,-10,10");
-    createAlg.setPropertyValue("Names", "A, B");
-    createAlg.setPropertyValue("Units", "m, m");
-    createAlg.setPropertyValue("EventType", eventType);
-    createAlg.setPropertyValue("OutputWorkspace", outWSName);
-    createAlg.execute();
+    
+    IAlgorithm* createAlg = FrameworkManager::Instance().createAlgorithm("CreateMDWorkspace");
+    createAlg->initialize();
+    createAlg->setProperty("Dimensions", 2);
+    createAlg->setPropertyValue("Extents", "-10,10,-10,10");
+    createAlg->setPropertyValue("Names", "A, B");
+    createAlg->setPropertyValue("Units", "m, m");
+    createAlg->setPropertyValue("EventType", eventType);
+    createAlg->setPropertyValue("OutputWorkspace", outWSName);
+    createAlg->execute();
 
     return ADS.retrieveWS<IMDEventWorkspace>(outWSName);
   }

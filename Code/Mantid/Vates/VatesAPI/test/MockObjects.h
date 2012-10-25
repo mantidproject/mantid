@@ -1,7 +1,7 @@
 #ifndef VATESAPI_TEST_MOCKOBJECTS_H
 #define VATESAPI_TEST_MOCKOBJECTS_H
 
-#include "MantidMDEvents/CreateMDWorkspace.h"
+//#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -22,6 +22,7 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidAPI/NullCoordTransform.h"
+#include "MantidAPI/FrameworkManager.h"
 #include <gmock/gmock.h>
 #include <vtkFieldData.h>
 #include <vtkCharArray.h>
@@ -316,14 +317,15 @@ class FakeProgressAction : public Mantid::VATES::ProgressAction
   {
     using namespace Mantid::API;
     AnalysisDataService::Instance().remove("3D_Workspace");
-    Mantid::MDEvents::CreateMDWorkspace create;
-    create.initialize();
-    create.setProperty("Dimensions", 4);
-    create.setPropertyValue("Extents","0,5,0,5,0,5,0,5");
-    create.setPropertyValue("Names","A,B,C,D");
-    create.setPropertyValue("Units","A,A,A,A");
-    create.setPropertyValue("OutputWorkspace", "3D_Workspace");
-    create.execute();
+    IAlgorithm* create = FrameworkManager::Instance().createAlgorithm("CreateMDWorkspace");
+
+    create->initialize();
+    create->setProperty("Dimensions", 4);
+    create->setPropertyValue("Extents","0,5,0,5,0,5,0,5");
+    create->setPropertyValue("Names","A,B,C,D");
+    create->setPropertyValue("Units","A,A,A,A");
+    create->setPropertyValue("OutputWorkspace", "3D_Workspace");
+    create->execute();
     return AnalysisDataService::Instance().retrieve("3D_Workspace");
   }
 

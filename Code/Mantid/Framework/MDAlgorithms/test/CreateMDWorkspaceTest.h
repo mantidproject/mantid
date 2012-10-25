@@ -13,9 +13,10 @@
 #include <iostream>
 #include <Poco/File.h>
 
-using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 
 class CreateMDWorkspaceTest : public CxxTest::TestSuite
 {

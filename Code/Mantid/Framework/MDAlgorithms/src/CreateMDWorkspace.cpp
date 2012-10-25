@@ -34,6 +34,7 @@ namespace MDAlgorithms
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
   using namespace Mantid::Geometry;
+  using namespace Mantid::MDEvents;
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(CreateMDWorkspace)
