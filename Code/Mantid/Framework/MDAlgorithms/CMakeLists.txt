@@ -11,6 +11,8 @@ set ( SRC_FILES
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToMD.cpp
+	src/CreateMDHistoWorkspace.cpp
+	src/CreateMDWorkspace.cpp	
 	src/DampedHisenbergFMSW.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
@@ -87,6 +89,8 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToMD.h
+	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
+	inc/MantidMDAlgorithms/CreateMDWorkspace.h	
 	inc/MantidMDAlgorithms/DampedHisenbergFMSW.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
@@ -178,6 +182,8 @@ set ( TEST_FILES
 	ConvertToMDComponentsTest.h	
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
+	CreateMDHistoWorkspaceTest.h
+	CreateMDWorkspaceTest.h
 	DampedHisenbergFMSWTest.h
 	DivideMDTest.h
 	EqualToMDTest.h

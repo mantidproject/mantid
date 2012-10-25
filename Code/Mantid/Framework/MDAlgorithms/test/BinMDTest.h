@@ -225,6 +225,8 @@ public:
 
   void testExecLagreRegularSignal()
   {
+
+
     FakeMDEventData FakeDat;
     TS_ASSERT_THROWS_NOTHING( FakeDat.initialize() )
     TS_ASSERT( FakeDat.isInitialized() )

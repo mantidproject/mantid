@@ -5,8 +5,8 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/CreateMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
 #include <cxxtest/TestSuite.h>
 #include <iomanip>

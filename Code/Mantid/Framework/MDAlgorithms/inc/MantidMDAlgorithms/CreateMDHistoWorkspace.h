@@ -6,7 +6,7 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** CreateMDHistoWorkspace : TODO: DESCRIPTION
@@ -33,7 +33,7 @@ namespace MDEvents
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport CreateMDHistoWorkspace  : public ImportMDHistoWorkspaceBase
+  class DLLExport CreateMDHistoWorkspace  : public MDEvents::ImportMDHistoWorkspaceBase
   {
   public:
     CreateMDHistoWorkspace();

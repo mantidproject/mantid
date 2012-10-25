@@ -9,7 +9,7 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** CreateMDWorkspace :
@@ -20,7 +20,7 @@ namespace MDEvents
    * @author Janik Zikovsky
    * @date 2011-02-25 11:54:52.003137
    */
-  class DLLExport CreateMDWorkspace  : public BoxControllerSettingsAlgorithm
+  class DLLExport CreateMDWorkspace  : public MDEvents::BoxControllerSettingsAlgorithm
   {
   public:
     CreateMDWorkspace();

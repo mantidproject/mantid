@@ -7,7 +7,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "MantidMDEvents/CreateMDHistoWorkspace.h"
+#include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;

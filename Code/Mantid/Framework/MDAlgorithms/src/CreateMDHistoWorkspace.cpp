@@ -31,7 +31,7 @@ A very similar algorithm to this is [[ImportMDHistoWorkspace]], which takes it's
 
 *WIKI*/
 
-#include "MantidMDEvents/CreateMDHistoWorkspace.h"
+#include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include <algorithm>
 
@@ -40,7 +40,7 @@ using namespace Mantid::API;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
   /**
   Helper type to compute the square in-place.

@@ -20,7 +20,7 @@ You can create a file-backed MDEventWorkspace by specifying the Filename and Mem
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/CreateMDWorkspace.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidKernel/Memory.h"
 #include <math.h>
@@ -29,7 +29,7 @@ You can create a file-backed MDEventWorkspace by specifying the Filename and Mem
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
