@@ -224,57 +224,57 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         mtd.remove('BH')        
         
                              
-#   def test_heterogeneous_bin(self):
-#        run_algorithm('CreateMDWorkspace', Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',
-#                      MaxRecursionDepth='20',OutputWorkspace='mdwHW')
-#        run_algorithm('FakeMDEventData', InputWorkspace="mdwHW",  UniformParams="-1000")
-#        SH = mtd['mdwHW']
-#        nEvents = SH.getNPoints();
-#        self.assertEqual(nEvents,1000);
-#        run_algorithm('BinMD',InputWorkspace="mdwHW", OutputWorkspace="BH", AxisAligned=True, AlignedDim0="x,0,10,20", AlignedDim1="y,0,10,5", 
-#                      AlignedDim2="z,0,10,40", IterateEvents="1", Parallel="0")                      
-#        BH = mtd['BH']
-#        nEvents = BH.getNPoints();
-#        self.assertEqual(nEvents,1000);
-#        signal = BH.getSignalArray()
-#        expected =(40L,5L,20L)       
-#        shape = signal.shape
-#        self.assertEqual(shape,expected)
-#        f = open('test.dat','w')
-#        for k in range(0,shape[0]):
-#            for j in range(0,shape[1]):
-#                for i in range(0,shape[2]):
-#                     f.write('%10g ' % signal[k,j,i]);
-#                f.write('\n');
-#            f.write('----------------------------\n')
-#            
-#        print signal[0,0,0],signal[0,0,1],signal[0,0,2],signal[0,0,3]
-#        print signal[0,1,0],signal[0,1,1],signal[0,1,2],signal[0,1,3]        
-#        print signal[0,2,0],signal[0,2,1],signal[0,2,2],signal[0,2,3]        
-#        print signal[0,3,0],signal[0,3,1],signal[0,3,2],signal[0,3,3]
-#        print '\n'
-#        print signal[1,0,0],signal[1,0,1],signal[1,0,2],signal[1,0,3]
-#        print signal[1,1,0],signal[1,1,1],signal[1,1,2],signal[1,1,3]        
-#        print signal[1,2,0],signal[1,2,1],signal[1,2,2],signal[1,2,3]        
-#        print signal[1,3,0],signal[1,3,1],signal[1,3,2],signal[1,3,3]
-#        print '\n'
-#        print signal[2,0,0],signal[2,0,1],signal[2,0,2],signal[2,0,3]
-#        print signal[2,1,0],signal[2,1,1],signal[2,1,2],signal[2,1,3]        
-#        print signal[2,2,0],signal[2,2,1],signal[2,2,2],signal[2,2,3]        
-#        print signal[2,3,0],signal[2,3,1],signal[2,3,2],signal[2,3,3]
-#        print '\n'
-#        print signal[3,0,0],signal[3,0,1],signal[3,0,2],signal[3,0,3]
-#        print signal[3,1,0],signal[3,1,1],signal[3,1,2],signal[3,1,3]        
-#        print signal[3,2,0],signal[3,2,1],signal[3,2,2],signal[3,2,3]        
-#        print signal[3,3,0],signal[3,3,1],signal[3,3,2],signal[3,3,3]
-#        print '\n'
-#
-#        
-#        self.assertEqual(signal[1,0,3],1)
-#        self.assertEqual(signal[1,0,2],0)  
-#        self.assertEqual(BH.signalAt(3+20*(2+5*1)),signal[1,2,3])
-#        self.assertEqual(BH.signalAt(4+20*(3+5*2)),signal[2,3,4])  
-#        mtd.remove('BH')
+    def test_heterogeneous_bin(self):
+        run_algorithm('CreateMDWorkspace', Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',
+                      MaxRecursionDepth='20',OutputWorkspace='mdwHW')
+        run_algorithm('FakeMDEventData', InputWorkspace="mdwHW",  UniformParams="-1000")
+        SH = mtd['mdwHW']
+        nEvents = SH.getNPoints();
+        self.assertEqual(nEvents,1000);
+        run_algorithm('BinMD',InputWorkspace="mdwHW", OutputWorkspace="BH", AxisAligned=True, AlignedDim0="x,0,10,20", AlignedDim1="y,0,10,5", 
+                      AlignedDim2="z,0,10,40", IterateEvents="1", Parallel="0")                      
+        BH = mtd['BH']
+        nEvents = BH.getNEvents();
+        self.assertEqual(nEvents,1000);
+        signal = BH.getSignalArray()
+        expected =(40L,5L,20L)       
+        shape = signal.shape
+        self.assertEqual(shape,expected)
+        f = open('test.dat','w')
+        for k in range(0,shape[0]):
+            for j in range(0,shape[1]):
+                for i in range(0,shape[2]):
+                     f.write('%10g ' % signal[k,j,i]);
+                f.write('\n');
+            f.write('----------------------------\n')
+            
+        print signal[0,0,0],signal[0,0,1],signal[0,0,2],signal[0,0,3]
+        print signal[0,1,0],signal[0,1,1],signal[0,1,2],signal[0,1,3]        
+        print signal[0,2,0],signal[0,2,1],signal[0,2,2],signal[0,2,3]        
+        print signal[0,3,0],signal[0,3,1],signal[0,3,2],signal[0,3,3]
+        print '\n'
+        print signal[1,0,0],signal[1,0,1],signal[1,0,2],signal[1,0,3]
+        print signal[1,1,0],signal[1,1,1],signal[1,1,2],signal[1,1,3]        
+        print signal[1,2,0],signal[1,2,1],signal[1,2,2],signal[1,2,3]        
+        print signal[1,3,0],signal[1,3,1],signal[1,3,2],signal[1,3,3]
+        print '\n'
+        print signal[2,0,0],signal[2,0,1],signal[2,0,2],signal[2,0,3]
+        print signal[2,1,0],signal[2,1,1],signal[2,1,2],signal[2,1,3]        
+        print signal[2,2,0],signal[2,2,1],signal[2,2,2],signal[2,2,3]        
+        print signal[2,3,0],signal[2,3,1],signal[2,3,2],signal[2,3,3]
+        print '\n'
+        print signal[3,0,0],signal[3,0,1],signal[3,0,2],signal[3,0,3]
+        print signal[3,1,0],signal[3,1,1],signal[3,1,2],signal[3,1,3]        
+        print signal[3,2,0],signal[3,2,1],signal[3,2,2],signal[3,2,3]        
+        print signal[3,3,0],signal[3,3,1],signal[3,3,2],signal[3,3,3]
+        print '\n'
+
+        
+        self.assertEqual(signal[1,0,3],1)
+        self.assertEqual(signal[1,0,2],0)  
+        self.assertEqual(BH.signalAt(3+20*(2+5*1)),signal[1,2,3])
+        self.assertEqual(BH.signalAt(4+20*(3+5*2)),signal[2,3,4])  
+        mtd.remove('BH')
 
         
 if __name__ == '__main__':

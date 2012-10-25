@@ -1243,18 +1243,20 @@ namespace MDEvents
     if(cach!=this->m_nEventsContributed)
     {
       if(!m_numEvents)
-      {
-        m_nEventsContributed = std::numeric_limits<uint64_t>::quiet_NaN();
-      }
-      else
-      {
-        m_nEventsContributed=0;
-        for(size_t i=0;i<m_length;++i)
-          m_nEventsContributed+=uint64_t(m_numEvents[i]);
-
-      }
+         m_nEventsContributed = std::numeric_limits<uint64_t>::quiet_NaN();
+      else   
+        m_nEventsContributed=sumNContribEvents();
     }
     return m_nEventsContributed;
+  }
+
+  uint64_t MDHistoWorkspace::sumNContribEvents()const
+  {
+    uint64_t sum(0);
+    for(size_t i=0;i<m_length;++i)
+          sum+=uint64_t(m_numEvents[i]);
+
+    return sum;
   }
 
 } // namespace Mantid

@@ -388,7 +388,9 @@ namespace MDEvents
 
     /// Clear masking.
     void clearMDMasking();
-
+    /// sum the array of contributing events m_numEvents array
+    uint64_t sumNContribEvents()const;
+    void updateSum(){m_nEventsContributed = sumNContribEvents();}
   private:
 
     void initVertexesArray();

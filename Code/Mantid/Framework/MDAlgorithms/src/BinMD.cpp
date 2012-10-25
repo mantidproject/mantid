@@ -610,6 +610,7 @@ namespace MDAlgorithms
     if (inEWS)
       outWS->copyExperimentInfos( *inEWS );
 
+    outWS->updateSum();
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outWS));
   }
