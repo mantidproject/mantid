@@ -175,5 +175,5 @@ endif()
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py DESTINATION
           ${BIN_DIR}/mantid/kernel RENAME ${NEXUSLIB_PY}.py )
 # .pyc file
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.pyc DESTINATION
-          ${BIN_DIR}/mantid/kernel RENAME ${NEXUSLIB_PY}.pyc )
+#install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.pyc DESTINATION
+#          ${BIN_DIR}/mantid/kernel RENAME ${NEXUSLIB_PY}.pyc )
