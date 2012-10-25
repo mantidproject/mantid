@@ -1,0 +1,23 @@
+"""
+    ===== AUTO-GENERATED MODULE ====
+
+    Defines a function that sets the NEXUSLIB environment variable required 
+    by the nxs package. The variable  value is set by CMake
+"""
+
+def set_NEXUSLIB_var():
+    """
+        Sets the NEXUSLIB environment variable to point to the NeXus shared library
+    """
+    import os as _os
+    _nexuslib = r"@NEXUSLIB@"
+    if _nexuslib == "": 
+        return
+
+    if not _os.path.isabs(_nexuslib):
+        # Assume relative to this file
+        thisdir = _os.path.dirname(__file__)
+        _nexuslib = _os.path.normpath(_os.path.join(thisdir, _nexuslib))
+
+    # Add to current environment
+    _os.environ['NEXUSLIB'] = _nexuslib

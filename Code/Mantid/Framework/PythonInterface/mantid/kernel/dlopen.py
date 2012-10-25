@@ -7,20 +7,20 @@ For Mantid this ensures the singleton symbols are wired up correctly
 """
 import sys
 import os
-import platform
+import environment
 
 #######################################################################
 # Ensure the correct Mantid shared libaries are found when loading the
 # python shared libraries
 #######################################################################
-if sys.platform.startswith('win32'):
+if environment.is_windows():
     _var = 'PATH'
     _sep = ';'
 else:
     _sep = ':'
-    if sys.platform.startswith('linux'):
+    if environment.is_linux():
         _var = 'LD_LIBRARY_PATH'
-    elif sys.platform.startswith('darwin'):
+    elif environment.is_mac():
         _var = 'DYLD_LIBRARY_PATH'
     else: # Give it a go how it is
         _var = ''
@@ -54,7 +54,8 @@ def setup_dlopen(library, depends=[]):
     
     Returns the original flags
     """
-    if os.name == 'nt': return None
+    if environment.is_windows():
+      return None
     old_flags = sys.getdlopenflags()
 
     import _dlopen
@@ -64,7 +65,7 @@ def setup_dlopen(library, depends=[]):
     _bin = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../../')
     
     def get_libpath(mainlib, dependency):
-        if platform.system() == 'Linux':
+        if environment.is_linux():
             cmd = 'ldd %s | grep %s' % (mainlib, dependency)
             subp = subprocess.Popen(cmd,stdout=subprocess.PIPE,
                                     stderr=subprocess.STDOUT,shell=True)
@@ -77,14 +78,14 @@ def setup_dlopen(library, depends=[]):
         return libpath
 
     library_var = "LD_LIBRARY_PATH"
-    if platform.system() == 'Darwin':
+    if environment.is_mac():
         library_var = 'DY' + library_var
     ldpath = os.environ.get(library_var, "")
     ldpath += ":" + _bin
     os.environ[library_var] = ldpath
 
     pythonlib = library
-    if platform.system() == "Linux":
+    if environment.is_linux():
         # stdc++ has to be loaded first or exceptions don't get translated 
         # properly across bounadries
         # NeXus has to be loaded as well as there seems to be an issue with
@@ -97,7 +98,7 @@ def setup_dlopen(library, depends=[]):
         dlloader(get_libpath(pythonlib, dep))
 
     oldflags = sys.getdlopenflags()
-    if platform.system() == "Darwin":
+    if environment.is_mac():
         try:
             import dl
             RTLD_LOCAL = dl.RTLD_LOCAL
@@ -113,5 +114,6 @@ def restore_flags(flags):
     """Restores the dlopen flags to those provided,
     usually with the results from a call to setup_dlopen
     """
-    if flags is None: return
+    if flags is None:
+        return
     sys.setdlopenflags(flags)

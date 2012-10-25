@@ -94,6 +94,7 @@ set ( PY_FILES
   __init__.py
   _aliases.py
   dlopen.py
+  environment.py
   funcreturns.py
   plugins.py
 )
@@ -105,11 +106,9 @@ create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp EXPORT
                 SRC_FILES )
 
 #############################################################################################
-# Copy over the pure Python files for the module
+# Add rule to copy over the pure Python files for the module
 #############################################################################################
-# Set the destination directory
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/kernel )
-
 copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
                            PYTHON_INSTALL_FILES )
 
@@ -137,12 +136,44 @@ endif()
   add_dependencies( PythonKernelModule _dlopen )
 endif()
 
+#############################################################################################
+# Generate the nexuslib module for the build
+#############################################################################################
+set ( NEXUSLIB_PY nexuslib )
+set ( NEXUSLIB ${NEXUS_C_LIBRARIES} )
+if ( WIN32 ) #.lib -> .dll
+  string ( REPLACE ".lib" ".dll" NEXUSLIB ${NEXUSLIB} )
+endif()
+
+# Build version
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${NEXUSLIB_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.py )
+if ( WIN32 OR APPLE )
+  # NeXus library is in the same place relative to the Python library
+  get_filename_component ( NEXUSLIB_FILE ${NEXUSLIB} NAME )
+  set ( NEXUSLIB ../../${NEXUSLIB_FILE} )
+endif()
+# Install version
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${NEXUSLIB_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py )
+
+# Copy over in post-build so that it is not automatically included for installation. We need
+# to use a different file for install, which is handled below
+add_custom_command ( TARGET PythonKernelModule POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                     ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantid/kernel 
+                     COMMAND ${PYTHON_EXECUTABLE} ARGS -m compileall ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py )
 
 ###########################################################################
 # Installation settings
 ###########################################################################
-install ( TARGETS PythonKernelModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/kernel )
+install ( TARGETS PythonKernelModule ${SYSTEM_PACKAGE_TARGET} DESTINATION 
+          ${BIN_DIR}/mantid/kernel )
 if ( UNIX )
-install ( TARGETS _dlopen DESTINATION ${BIN_DIR}/mantid/kernel )
+  install ( TARGETS _dlopen DESTINATION ${BIN_DIR}/mantid/kernel )
 endif()
 
+# nexuslib.py & nexuslib.pyc
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py DESTINATION
+          ${BIN_DIR}/mantid/kernel RENAME ${NEXUSLIB_PY}.py )
+# .pyc file
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.pyc DESTINATION
+          ${BIN_DIR}/mantid/kernel RENAME ${NEXUSLIB_PY}.pyc )

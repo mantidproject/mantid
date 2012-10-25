@@ -72,6 +72,7 @@ endfunction( ADD_COMPILE_PY_TARGET )
 #   - INSTALLED_FILES :: An output variable containing the list of copied
 #                        files including their full paths
 function( COPY_PYTHON_FILES_TO_DIR PY_FILES SRC_DIR DEST_DIR INSTALLED_FILES )
+    set ( COPIED_FILES ${${INSTALLED_FILES}} )
     foreach ( PYFILE ${PY_FILES} )
         get_filename_component( _basefilename ${PYFILE} NAME_WE )
         set( _py_src ${SRC_DIR}/${PYFILE} )
