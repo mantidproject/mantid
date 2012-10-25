@@ -426,6 +426,8 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             Nr_can = mtd[retWSname_rear+"_can_tmp_sumOfNormFactors"]
             Cf_can = mtd[retWSname_front+"_can_tmp_sumOfCounts"]
             Cr_can = mtd[retWSname_rear+"_can_tmp_sumOfCounts"]
+            if Cr_can is None:
+                consider_can = False
         except KeyError :
             #The CAN was not specified
             consider_can = False

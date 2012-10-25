@@ -121,7 +121,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
 
     if reducer:
         ReductionSingleton().replace(reducer)
-
+    ins_name = ReductionSingleton().instrument.name()
     scale_shift = {'scale':1.0000, 'shift':0.0000}
     #first copy the user settings in case running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
@@ -183,9 +183,40 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
         final_name = run['output_as']
         if final_name == '':
             final_name = reduced
-        RenameWorkspace(reduced,final_name)
+        
+        #convert the names from the default one, to the agreement
+        names = [final_name]
+        if combineDet == 'rear':
+            names = [final_name+'_rear']
+            RenameWorkspace(reduced, final_name+'_rear')
+        elif combineDet == 'front':
+            names = [final_name+'_front']
+            RenameWorkspace(reduced, final_name+'_front')
+        elif combineDet == 'both':
+            names = [final_name+'_front', final_name+'_rear']
+            if ins_name == 'SANS2D':
+                rear_reduced = reduced.replace('front','rear')
+            else: #if ins_name == 'lOQ':
+                rear_reduced = reduced.replace('HAB','main')
+            RenameWorkspace(reduced,final_name+'_front')
+            RenameWorkspace(rear_reduced,final_name+'_rear')
+        elif combineDet == 'merged':            
+            names = [final_name + '_merged', final_name + '_rear',  final_name+'_front']
+            if ins_name == 'SANS2D':
+                rear_reduced = reduced.replace('merged','rear')
+                front_reduced = reduced.replace('merged','front')
+            else:
+                rear_reduced = reduced.replace('_merged','')
+                front_reduced = rear_reduced.replace('main','HAB')
+            RenameWorkspace(reduced, final_name + '_merged')
+            RenameWorkspace(rear_reduced, final_name + '_rear')
+            RenameWorkspace(front_reduced, final_name+'_front')            
+        else:            
+            RenameWorkspace(reduced,final_name)
+
         if plotresults == 1:
-            PlotResult(final_name)
+            for final_name in names:
+                PlotResult(final_name)
 
         #the call to WaveRang... killed the reducer so copy back over the settings
         ReductionSingleton().replace(copy.deepcopy(settings))
