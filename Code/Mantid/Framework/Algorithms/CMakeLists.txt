@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	#	src/Q1DTOF.cpp
+	# src/UpdatePeakParameterTable.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
 	src/AddPeak.cpp
@@ -37,13 +38,14 @@ set ( SRC_FILES
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
-        src/CopyInstrumentParameters.cpp
+	src/CopyInstrumentParameters.cpp
 	src/CopySample.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
 	src/CountEventsInPulses.cpp
 	src/CreateCalFileByNames.cpp
 	src/CreateDummyCalFile.cpp
+	src/CreateFlatEventWorkspace.cpp
 	src/CreateGroupingWorkspace.cpp
 	src/CreateLogPropertyTable.cpp
 	src/CreatePSDBleedMask.cpp
@@ -140,7 +142,6 @@ set ( SRC_FILES
 	src/PolynomialCorrection.cpp
 	src/Power.cpp
 	src/PowerLawCorrection.cpp
-    src/RebinByPulseTimes.cpp
 	src/Q1D.cpp
 	src/Q1D2.cpp
 	src/Q1DWeighted.cpp
@@ -151,6 +152,7 @@ set ( SRC_FILES
 	src/RealFFT.cpp
 	src/Rebin.cpp
 	src/Rebin2D.cpp
+	src/RebinByPulseTimes.cpp
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
@@ -192,7 +194,6 @@ set ( SRC_FILES
 	src/Unwrap.cpp
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
-	# src/UpdatePeakParameterTable.cpp
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
@@ -201,6 +202,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	#	inc/MantidAlgorithms/Q1DTOF.h
+	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
 	inc/MantidAlgorithms/AddPeak.h
@@ -245,6 +247,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CountEventsInPulses.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
+	inc/MantidAlgorithms/CreateFlatEventWorkspace.h
 	inc/MantidAlgorithms/CreateGroupingWorkspace.h
 	inc/MantidAlgorithms/CreateLogPropertyTable.h
 	inc/MantidAlgorithms/CreatePSDBleedMask.h
@@ -342,7 +345,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/PolynomialCorrection.h
 	inc/MantidAlgorithms/Power.h
 	inc/MantidAlgorithms/PowerLawCorrection.h
-    inc/MantidAlgorithms/RebinByPulseTimes.h
 	inc/MantidAlgorithms/Q1D.h
 	inc/MantidAlgorithms/Q1D2.h
 	inc/MantidAlgorithms/Q1DWeighted.h
@@ -353,6 +355,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RealFFT.h
 	inc/MantidAlgorithms/Rebin.h
 	inc/MantidAlgorithms/Rebin2D.h
+	inc/MantidAlgorithms/RebinByPulseTimes.h
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
@@ -394,7 +397,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Unwrap.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
-	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
@@ -403,6 +405,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	CalMuonDeadTimeTest.h
+	# UpdatePeakParameterTableTest.h
 	AddLogDerivativeTest.h
 	AddPeakTest.h
 	AddSampleLogTest.h
@@ -443,6 +446,7 @@ set ( TEST_FILES
 	CountEventsInPulsesTest.h
 	CreateCalFileByNamesTest.h
 	CreateDummyCalFileTest.h
+	CreateFlatEventWorkspaceTest.h
 	CreateGroupingWorkspaceTest.h
 	CreateLogPropertyTableTest.h
 	CreatePSDBleedMaskTest.h
@@ -525,7 +529,6 @@ set ( TEST_FILES
 	PolynomialCorrectionTest.h
 	PowerLawCorrectionTest.h
 	PowerTest.h
-    RebinByPulseTimesTest.h
 	Q1D2Test.h
 	Q1DTest.h
 	Q1DWeightedTest.h
@@ -534,6 +537,7 @@ set ( TEST_FILES
 	ReadGroupsFromFileTest.h
 	RealFFTTest.h
 	Rebin2DTest.h
+	RebinByPulseTimesTest.h
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h
@@ -571,7 +575,6 @@ set ( TEST_FILES
 	UnwrapSNSTest.h
 	UnwrapTest.h
 	WeightedMeanOfWorkspaceTest.h
-	# UpdatePeakParameterTableTest.h
 	WeightedMeanTest.h
 	WeightingStrategyTest.h
 	WorkspaceCreationHelperTest.h
