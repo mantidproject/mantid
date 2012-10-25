@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_STITCHGROUP1DTEST_H_
-#define MANTID_MDALGORITHMS_STITCHGROUP1DTEST_H_
+#ifndef MANTID_MDALGORITHMS_STITCH1DTEST_H_
+#define MANTID_MDALGORITHMS_STITCH1DTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
@@ -9,12 +9,12 @@
 #include <boost/assign.hpp>
 #include <boost/make_shared.hpp>
 
-using Mantid::MDAlgorithms::StitchGroup1D;
+using Mantid::MDAlgorithms::Stitch1D;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class StitchGroup1DTest : public CxxTest::TestSuite
+class Stitch1DTest : public CxxTest::TestSuite
 {
 
 private:
@@ -37,7 +37,7 @@ private:
   // Helper method to make the stitch group 1D algorithm
   IAlgorithm_sptr make_algorithm(Workspace_sptr lhsWorkspace, Workspace_sptr rhsWorkspace, const std::string& outputWorkspaceName, const double& startOverlap, const double& endOverlap, const bool scaleRHSWS = true)
   {
-      IAlgorithm_sptr alg = boost::make_shared<StitchGroup1D>();
+      IAlgorithm_sptr alg = boost::make_shared<Stitch1D>();
       alg->setRethrows(true);
       alg->initialize();
 
@@ -62,8 +62,8 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static StitchGroup1DTest *createSuite() { return new StitchGroup1DTest(); }
-  static void destroySuite( StitchGroup1DTest *suite ) { delete suite; }
+  static Stitch1DTest *createSuite() { return new Stitch1DTest(); }
+  static void destroySuite( Stitch1DTest *suite ) { delete suite; }
 
     std::string __good_workspace_name;
     std::string __bad_type_of_workspace_name;
@@ -71,7 +71,7 @@ public:
     std::string __integrated_two_dim_workspace_name;
     std::string __unintegrated_two_dim_workspace_name;
 
-    StitchGroup1DTest()
+    Stitch1DTest()
     {
       Mantid::API::FrameworkManagerImpl& frameworkManager = Mantid::API::FrameworkManager::Instance();
 
@@ -96,21 +96,21 @@ public:
       this->__unintegrated_two_dim_workspace_name = unintegrated_two_dim_alg->getPropertyValue("OutputWorkspace");
     }
 
-    virtual ~StitchGroup1DTest()
+    virtual ~Stitch1DTest()
     {
       Mantid::API::AnalysisDataService::Instance().clear();
     }
 
     void test_Init()
     {
-      StitchGroup1D alg;
+      Stitch1D alg;
       TS_ASSERT_THROWS_NOTHING( alg.initialize() )
       TS_ASSERT( alg.isInitialized() )
     }
 
     void test_does_not_accept_mdeventworkspaces_for_lhsworkspace()
     {
-      StitchGroup1D alg;
+      Stitch1D alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -119,7 +119,7 @@ public:
 
     void test_does_not_accept_mdeventworkspaces_for_rhsworkspace()
     {
-      StitchGroup1D alg;
+      Stitch1D alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -269,7 +269,7 @@ public:
 
     void test_start_overlap_too_low()
     {
-      StitchGroup1D alg;
+      Stitch1D alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -278,7 +278,7 @@ public:
 
     void test_start_overlap_too_high()
     {
-      StitchGroup1D alg;
+      Stitch1D alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -287,7 +287,7 @@ public:
 
     void test_end_overlap_too_low()
     {
-      StitchGroup1D alg;
+      Stitch1D alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -296,7 +296,7 @@ public:
 
     void test_end_overlap_too_high()
     {
-      StitchGroup1D alg;
+      Stitch1D alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -375,7 +375,7 @@ public:
 
       auto a = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(this->__good_workspace_name);
 
-      StitchGroup1D alg;
+      Stitch1D alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -432,7 +432,7 @@ public:
       IMDHistoWorkspace_sptr a = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr b = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
 
-      StitchGroup1D alg;
+      Stitch1D alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -486,7 +486,7 @@ public:
       AnalysisDataService::Instance().addOrReplace("lhs", lhs);
       AnalysisDataService::Instance().addOrReplace("rhs", rhs);
 
-      IAlgorithm_sptr alg = boost::make_shared<StitchGroup1D>();
+      IAlgorithm_sptr alg = boost::make_shared<Stitch1D>();
       alg->setRethrows(true);
       alg->initialize();
 
@@ -516,4 +516,4 @@ public:
 };
 
 
-#endif /* MANTID_MDALGORITHMS_STITCHGROUP1DTEST_H_ */
+#endif /* MANTID_MDALGORITHMS_STITCH1DTEST_H_ */

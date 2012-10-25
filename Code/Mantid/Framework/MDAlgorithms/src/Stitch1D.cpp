@@ -42,36 +42,36 @@ namespace MDAlgorithms
   }
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(StitchGroup1D)
+  DECLARE_ALGORITHM(Stitch1D)
   
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  StitchGroup1D::StitchGroup1D()
+  Stitch1D::Stitch1D()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  StitchGroup1D::~StitchGroup1D()
+  Stitch1D::~Stitch1D()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string StitchGroup1D::name() const { return "StitchGroup1D";};
+  const std::string Stitch1D::name() const { return "Stitch1D";};
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int StitchGroup1D::version() const { return 1;};
+  int Stitch1D::version() const { return 1;};
   
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string StitchGroup1D::category() const { return "Reflectometry\\ISIS";}
+  const std::string Stitch1D::category() const { return "Reflectometry\\ISIS";}
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void StitchGroup1D::initDocs()
+  void Stitch1D::initDocs()
   {
     this->setWikiSummary("Stitch two MD ReflectometryQ group workspaces together");
     this->setOptionalMessage("Sticch two MD ReflectometryQ group workspaces together.");
@@ -80,7 +80,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void StitchGroup1D::init()
+  void Stitch1D::init()
   {
     declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("RHSWorkspace", "", Direction::Input), "Input MD Histo Workspace");
     declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("LHSWorkspace", "", Direction::Input), "Input MD Histo Workspace");
@@ -98,7 +98,7 @@ namespace MDAlgorithms
     declareProperty("OutScaleFactor", -2.0, "The actual used value for the scaling factor.", Direction::Output); 
   }
 
-  std::string StitchGroup1D::fetchInputPropertyName() const
+  std::string Stitch1D::fetchInputPropertyName() const
   {
     return "RHSWorkspace";
   }
@@ -108,7 +108,7 @@ namespace MDAlgorithms
   @param ws : The input workspace to check.
   @throws if the workspace is not suitable.
   */
-  void StitchGroup1D::checkIndividualWorkspace(IMDHistoWorkspace_const_sptr ws) const
+  void Stitch1D::checkIndividualWorkspace(IMDHistoWorkspace_const_sptr ws) const
   {
     size_t ndims = ws->getNumDims();
     if ((ndims < 1) || (ndims > 2))
@@ -140,7 +140,7 @@ namespace MDAlgorithms
   @param rhsworkspace : workspace 2 input.
   @throws if there are any inconsistencies between the two input workspaces.
   */
-  void StitchGroup1D::checkBothWorkspaces(IMDHistoWorkspace_const_sptr lhsWorkspace, IMDHistoWorkspace_const_sptr rhsWorkspace) const
+  void Stitch1D::checkBothWorkspaces(IMDHistoWorkspace_const_sptr lhsWorkspace, IMDHistoWorkspace_const_sptr rhsWorkspace) const
   {
     size_t ndims = std::min(lhsWorkspace->getNumDims(), rhsWorkspace->getNumDims());
     for(size_t i = 0; i < ndims; ++i)
@@ -177,7 +177,7 @@ namespace MDAlgorithms
   @param ws : input workspace to flatten.
   @retrun flattened 1D Histo workspace.
   */
-  MDHistoWorkspace_sptr StitchGroup1D::trimOutIntegratedDimension(IMDHistoWorkspace_sptr ws)
+  MDHistoWorkspace_sptr Stitch1D::trimOutIntegratedDimension(IMDHistoWorkspace_sptr ws)
   {
     auto dim = getFirstNonIntegratedDimension(ws);
     auto nbins = dim->getNBins();
@@ -210,7 +210,7 @@ namespace MDAlgorithms
   @param names: names collection
   @param units: units collection
   */
-  MDHistoWorkspace_sptr StitchGroup1D::create1DHistoWorkspace(const MantidVec& signals,const MantidVec& errors, const MantidVec& extents, const std::vector<int>& vecNBins, const std::vector<std::string> names, const std::vector<std::string>& units)
+  MDHistoWorkspace_sptr Stitch1D::create1DHistoWorkspace(const MantidVec& signals,const MantidVec& errors, const MantidVec& extents, const std::vector<int>& vecNBins, const std::vector<std::string> names, const std::vector<std::string>& units)
   {
     IAlgorithm_sptr createMDHistoWorkspace = this->createSubAlgorithm("CreateMDHistoWorkspace");
     createMDHistoWorkspace->initialize();
@@ -233,7 +233,7 @@ namespace MDAlgorithms
   @param fractionHigh : High fraction along the 1D axis to stop integration at.
   @return the integrated/summed value.
   */
-  double StitchGroup1D::integrateOver(IMDHistoWorkspace_sptr ws, const double& fractionLow, const double& fractionHigh)
+  double Stitch1D::integrateOver(IMDHistoWorkspace_sptr ws, const double& fractionLow, const double& fractionHigh)
   {
     auto dim = getFirstNonIntegratedDimension(ws);
     size_t nbins = dim->getNBins();
@@ -252,7 +252,7 @@ namespace MDAlgorithms
   @param original : Original 1D workspace to be overwritten only in the region of the overlap.
   @param overlap : Overlap 1D workspace to overwrite with
   */
-  void StitchGroup1D::overlayOverlap(MDHistoWorkspace_sptr original, IMDHistoWorkspace_sptr overlap)
+  void Stitch1D::overlayOverlap(MDHistoWorkspace_sptr original, IMDHistoWorkspace_sptr overlap)
   {
     const auto targetDim = original->getDimension(0);
     const double targetQMax = targetDim->getMaximum();
@@ -287,7 +287,7 @@ namespace MDAlgorithms
   @param fractionHigh : High fraction to stop slicing from
   @return MDHistoWorkspace encompasing the overlap region only.
   */
-  MDHistoWorkspace_sptr StitchGroup1D::extractOverlapAsWorkspace(IMDHistoWorkspace_sptr ws, const double& fractionLow, const double& fractionHigh)
+  MDHistoWorkspace_sptr Stitch1D::extractOverlapAsWorkspace(IMDHistoWorkspace_sptr ws, const double& fractionLow, const double& fractionHigh)
   {
     auto dim = getFirstNonIntegratedDimension(ws);
     auto nbins = dim->getNBins();
@@ -319,7 +319,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
   */
-  void StitchGroup1D::exec()
+  void Stitch1D::exec()
   {
     MDHistoWorkspace_sptr workspace1;
     MDHistoWorkspace_sptr workspace2;

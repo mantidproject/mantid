@@ -1,5 +1,5 @@
-#ifndef MANTID_MDALGORITHMS_STITCHGROUP1D_H_
-#define MANTID_MDALGORITHMS_STITCHGROUP1D_H_
+#ifndef MANTID_MDALGORITHMS_STITCH1D_H_
+#define MANTID_MDALGORITHMS_STITCH1D_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
@@ -40,11 +40,11 @@ namespace MDAlgorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport StitchGroup1D  : public API::MultiPeriodGroupAlgorithm
+  class DLLExport Stitch1D  : public API::MultiPeriodGroupAlgorithm
   {
   public:
-    StitchGroup1D();
-    virtual ~StitchGroup1D();
+    Stitch1D();
+    virtual ~Stitch1D();
     
     virtual const std::string name() const;
     virtual int version() const;
@@ -72,4 +72,4 @@ namespace MDAlgorithms
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_STITCHGROUP1D_H_ */
+#endif  /* MANTID_MDALGORITHMS_STITCH1D_H_ */
