@@ -1104,7 +1104,7 @@ namespace API
     for( Poco::StringTokenizer::Iterator itr = splitter.begin(); itr != iend; ++itr )
     {
       Poco::StringTokenizer tokens(*itr, ";");
-      if( tokens.count() != 4 ) continue;
+      if( tokens.count() < 4 ) continue;
       std::string comp_name = tokens[0];
       //if( comp_name == prev_name ) continue; this blocks reading in different parameters of the same component. RNT
       //prev_name = comp_name;
@@ -1129,7 +1129,12 @@ namespace API
         }
       }
       if( !comp ) continue;
-      pmap.add(tokens[1], comp, tokens[2], tokens[3]);
+      // create parameter's value as a sum of all tokens with index 3 or larger
+      // this allow a parameter's value to contain ";" 
+      std::string paramValue = tokens[3];
+      for (int i = 4; i < tokens.count(); i++ )
+        paramValue += ";" + tokens[4];
+      pmap.add(tokens[1], comp, tokens[2], paramValue);
     }
   }
 

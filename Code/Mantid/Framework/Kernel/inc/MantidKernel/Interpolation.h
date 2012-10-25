@@ -56,7 +56,7 @@ private:
   std::vector<double> m_y;
 
   /// method used for doing the interpolation
-  std::string m_name; 
+  std::string m_method; 
 
   /// unit of x-axis
   Unit_sptr m_xUnit;
@@ -76,10 +76,10 @@ public:
   double value(const double& at) const;
 
   /// set interpolation method
-  void setMethod(const std::string& method) { m_name=method; }
+  void setMethod(const std::string& method) { m_method=method; }
 
   /// get interpolation method
-  std::string getMethod() const { return m_name; };
+  std::string getMethod() const { return m_method; };
 
   /// set x-axis unit
   void setXUnit(const std::string& unit);

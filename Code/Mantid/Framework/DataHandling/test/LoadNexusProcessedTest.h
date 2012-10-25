@@ -405,6 +405,28 @@ public:
 
    }
 
+   void test_load_fit_parameters()
+   {
+     LoadNexusProcessed alg;
+     TS_ASSERT_THROWS_NOTHING(alg.initialize());
+     TS_ASSERT( alg.isInitialized() );
+     alg.setPropertyValue("Filename", "HRP38692a.nxs");
+     alg.setPropertyValue("OutputWorkspace", "HRPDparameters");
+
+     TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    MatrixWorkspace_sptr ws;
+    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("HRPDparameters");
+
+    // test to see if parameters are loaded
+    std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent> > bankComp = ws->getInstrument()->getAllComponentsWithName("bank_bsk");
+
+    //std::cout << "kkkkkkkkkkkkkkkk " << bankComp.size() << " " << bankComp[0]->getParameterNames().size() << std::endl;
+
+    TS_ASSERT( bankComp[0]->getParameterNames().size() == 3 );
+    //TS_ASSERT_DELTA( bankComp->getNumberParameter("A")[0], 32.0, 0.0001);
+   }
+
 private:
   void doHistoryTest(MatrixWorkspace_sptr matrix_ws)
   {

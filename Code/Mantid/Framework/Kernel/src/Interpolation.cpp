@@ -11,7 +11,7 @@ namespace Kernel
 
   /** Constructor default to linear interpolation and x-unit set to TOF
    */
-  Interpolation::Interpolation() : m_name("linear")
+  Interpolation::Interpolation() : m_method("linear")
   {
     m_xUnit = UnitFactory::Instance().create("TOF");
     m_yUnit = UnitFactory::Instance().create("TOF");
@@ -120,7 +120,7 @@ namespace Kernel
   */
   void Interpolation::printSelf(std::ostream& os) const
   {
-    os << m_name << " ; " << m_xUnit->unitID() << " ; " << m_yUnit->unitID();
+    os << m_method << " ; " << m_xUnit->unitID() << " ; " << m_yUnit->unitID();
 
     for ( unsigned int i = 0; i < m_x.size(); i++)
     {
