@@ -610,7 +610,7 @@ namespace Kernel
         int success = ConfigService::Instance().getValue("loading.multifilelimit",limit);
         unsigned int orderedTo = from>to?from:to; 
         unsigned int orderedFrom = from>to?to:from; 
-        unsigned int numberOfFiles = orderedTo-orderedFrom/stepSize;
+        unsigned int numberOfFiles = (orderedTo-orderedFrom)/stepSize;
         if (numberOfFiles>limit)
         {
           std::stringstream sstream;
