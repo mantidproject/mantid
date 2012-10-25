@@ -10,15 +10,18 @@ Defines Python objects that wrap the C++ API namespace.
 # The _api C extension depends on exports defined in the _kernel extension
 ###############################################################################
 # The fully-qualified package path allows it to be found with path manipulation
-from mantid.kernel import dlopen as _dlopen
+from mantid.kernel import dlopen as _pydlopen
 import os as _os
 clib = _os.path.join(_os.path.dirname(__file__), '_api.so')
-flags = _dlopen.setup_dlopen(clib, ['libMantidKernel', 'libMantidGeometry', 'libMantidAPI']) # Ensure the library is open with the correct flags
+flags = _pydlopen.setup_dlopen(clib, ['libMantidKernel', 'libMantidGeometry', 'libMantidAPI']) # Ensure the library is open with the correct flags
 from mantid.kernel import _kernel
 from _api import *
-_dlopen.restore_flags(flags)
+_pydlopen.restore_flags(flags)
 ###############################################################################
 
+###############################################################################
+# Make aliases accessible in this namespace
+###############################################################################
 from _aliases import *
 
 ###############################################################################

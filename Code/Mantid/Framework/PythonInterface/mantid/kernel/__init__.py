@@ -9,12 +9,12 @@ Defines Python objects that wrap the C++ Kernel namespace.
 ###############################################################################
 # Loads the C library with the correct flags
 ###############################################################################
-import dlopen as _dlopen
+import dlopen as _pydlopen
 import os as _os
 clib = _os.path.join(_os.path.dirname(__file__), '_kernel.so')
-flags = _dlopen.setup_dlopen(clib, ['libMantidKernel']) 
+flags = _pydlopen.setup_dlopen(clib, ['libMantidKernel']) 
 from _kernel import *
-_dlopen.restore_flags(flags)
+_pydlopen.restore_flags(flags)
 ###############################################################################
 
 ###############################################################################
