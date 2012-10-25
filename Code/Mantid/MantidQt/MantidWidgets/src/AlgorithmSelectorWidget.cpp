@@ -93,7 +93,10 @@ namespace MantidWidgets
     QString algName;
     int version;
     this->getSelectedAlgorithm(algName,version);
-    emit executeAlgorithm(algName, version);
+    if (!algName.isEmpty())
+    {
+      emit executeAlgorithm(algName, version);
+    }
   }
 
 
@@ -396,20 +399,19 @@ namespace MantidWidgets
   void FindAlgComboBox::getSelectedAlgorithm(QString& algName, int& version)
   {
     //typed selection
-    int i = this->currentIndex(); //selected index in the combobox, could be from an old selection
-    QString itemText = this->itemText(i); //text in the combobox at the selected index
-    QString typedText = this->currentText(); //text as typed in the combobox
-    if (i < 0 || itemText != typedText)
+    QString typedText = this->currentText().stripWhiteSpace(); //text as typed in the combobox
+    if (!typedText.isEmpty()) // if the text is not empty
     {
-      // Typed text has priority over selected item
-      algName = typedText;
-      version = -1;
+      //find the closest matching entry
+      int matchedIndex = this->findText(typedText,Qt::MatchStartsWith);
+      if (matchedIndex > -1)
+      {
+        typedText = this->itemText(matchedIndex); //text in the combobox at the matched index
+      }
     }
-    else
-    {
-      algName = itemText;
-      version = -1;
-    }
+    //set return values
+    algName = typedText;
+    version = -1;
   }
 
 
