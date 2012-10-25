@@ -36,10 +36,11 @@ CalibratedComponent = 'MERLIN'  # Calibrate whole instrument
 #CalibratedComponent = 'door3'  # Calibrate door3. 
     
 # Get calibration raw file and integrate it    
-rawMapWS = Load(path+filename)  #'raw' in 'rawMapWS' means unintegrated.
-mapWS = Integration( rawMapWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
-DeleteWorkspace(rawMapWS)
-
+rawCalibInstWS = Load(path+filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
+print "Integrating Workspace"
+CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
+DeleteWorkspace(rawCalibInstWS)
+print "Created workspace (CalibInstWS) with integrated data from run and instrument to calibrate" 
 
 # == Create Objects needed for calibration ==
 
@@ -49,7 +50,7 @@ calibrationTable.addColumn(type="int",name="Detector ID")  # "Detector ID" colum
 calibrationTable.addColumn(type="V3D",name="Detector Position")  # "Detector Position" column required by ApplyCalbration
 
 # Specify component to calibrate
-thisTubeSet = TubeSpec(mapWS)
+thisTubeSet = TubeSpec(CalibInstWS)
 thisTubeSet.setTubeSpecByString(CalibratedComponent)
 
 # Get ideal tube
@@ -59,15 +60,16 @@ iTube.constructTubeFor3PointsMethod ( Left, Right, Centre, ActiveLength )
 # Get fitting parameters
 fitPar = TubeCalibFitParams( [], ExpectedHeight, ExpectedWidth, ThreePointMethod=True )
 
+print "Created objects needed for calibration."
 
 # == Get the calibration and put results into calibration table ==
 # also put peaks into PeakFile
-getCalibration( mapWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength, PeakFile=path+'TubeDemoMerlin01.txt' )
-
+getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength, PeakFile=path+'TubeDemoMerlin01.txt' )
+print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
 
 # == Apply the Calibation ==
-ApplyCalibration( Workspace=mapWS, PositionTable=calibrationTable)
-
+ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
+print "Applied calibration"
 
 # == Override Selected Tubes ==
 # Now we may override selected tubes
@@ -79,15 +81,15 @@ if( Overriding ):
    # PeakFile created by the previous call of getCalibration.
    
    #Specify tube_3_1 and its override
-   tube31 = TubeSpec( mapWS)
+   tube31 = TubeSpec( CalibInstWS)
    tube31.setTubeSpecByString('MERLIN/door3/tube_3_1')
    override31 = [28.821573928922724, 520.0, 997.359428534161]
    #Specify tube_3_2 and its override
-   tube32 = TubeSpec( mapWS)
+   tube32 = TubeSpec( CalibInstWS)
    tube32.setTubeSpecByString('MERLIN/door3/tube_3_2')
    override32 = [29.088837989024192, 510.0, 997.729400488547]
    #Specify tube_3_3 and its override
-   tube33 = TubeSpec( mapWS)
+   tube33 = TubeSpec( CalibInstWS)
    tube33.setTubeSpecByString('MERLIN/door3/tube_3_3')
    override33 = [28.60189163158781, 510.0, 997.4536392249629]
    
@@ -97,14 +99,15 @@ if( Overriding ):
    ovrCalibrationTable.addColumn(type="V3D",name="Detector Position")  # "Detector Position" column required by ApplyCalbration   
    
    # Put the calibrations of the overrides into the calibration table
-   getCalibration( mapWS, tube31, ovrCalibrationTable,  fitPar, iTube, OverridePeaks=override31 )
-   getCalibration( mapWS, tube32, ovrCalibrationTable,  fitPar, iTube, OverridePeaks=override32 )
-   getCalibration( mapWS, tube33, ovrCalibrationTable,  fitPar, iTube, OverridePeaks=override33 )
+   getCalibration( CalibInstWS, tube31, ovrCalibrationTable,  fitPar, iTube, OverridePeaks=override31 )
+   getCalibration( CalibInstWS, tube32, ovrCalibrationTable,  fitPar, iTube, OverridePeaks=override32 )
+   getCalibration( CalibInstWS, tube33, ovrCalibrationTable,  fitPar, iTube, OverridePeaks=override33 )
    
    #Apply the calibration
-   ApplyCalibration( Workspace=mapWS, PositionTable=ovrCalibrationTable)
-
+   ApplyCalibration( Workspace=CalibInstWS, PositionTable=ovrCalibrationTable)
+   print "got and applied override calibrations"
 
 # == Save workspace ==
-SaveNexusProcessed( mapWS, path+'TCDemoMerlinResult.nxs',"Result of Running TCDemoMerlin.py")
+SaveNexusProcessed( CalibInstWS, path+'TubeCalibDemoMerlinResult.nxs',"Result of Running TCDemoMerlin.py")
+print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
 

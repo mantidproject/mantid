@@ -107,7 +107,7 @@ class TubeSpec:
             return self.component
         
         # We look for the component    
-        print self.specString, 
+        #print self.specString, 
         
         comp = self.inst.getComponentByName(self.specString)
 
@@ -212,7 +212,7 @@ class TubeSpec:
         """
 	firstDet, numDet = self.getDetectorInfoFromTube( tubeIx )			   
         wkIds = []
-        print " First dectector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
+        #print " First dectector", firstDet," Last detector", firstDet+numDet-1, "Number of detectors", numDet
         #print "Histograms", self.ws.getNumberHistograms()
         
         # First check we have one detector per histogram/workpsaceID/spectrum
@@ -233,8 +233,7 @@ class TubeSpec:
 	             if (detID  >= firstDet and detID < firstDet+numDet):
 	                 iPixel = detID - firstDet
 	                 wkIds = range( i - iPixel, i - iPixel + numDet)
-	                 #print detID, iPixel, i-iPixel, i-iPixel+numDet
-	                 print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
+	                 #print "Workspace indices",i-iPixel,"to",i-iPixel+numDet-1
 
         else: #We can't assume continuous indices within tube, must loop over all indices (there are many). 
             if( numDet > 0):

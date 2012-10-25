@@ -196,12 +196,12 @@ def getIdealTubeFromNSlits ( IntegratedWorkspace, slits ):
        
     """	
     ideal = []
-    print "slits for ideal tube", slits
+    # print "slits for ideal tube", slits
     for i in range(len(slits)):
-        print slits[i]
+        # print slits[i]
         ideal.append( get_ypos( IntegratedWorkspace, slits[i] )) # Use Pascal Manuel's Y conversion.
     
-    print "Ideal Tube",ideal   
+    # print "Ideal Tube",ideal   
     return ideal
     
     
@@ -391,7 +391,7 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
 
         # Deal with (i+1)st tube specified
         wht = tubeSet.getTube(i)
-        print "tube listed", i+1, tubeSet.getTubeName(i), " length", tubeSet.getTubeLength(i) 
+        print "tube listed", i+1, tubeSet.getTubeName(i) #, " length", tubeSet.getTubeLength(i) 
         if ( len(wht) < 1 ):
             print "Unable to get any workspace indices for this tube. Calibration abandoned."
             return
@@ -408,7 +408,7 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
             else:
                 ht, wd = fitPar.getHeightAndWidth()   
                 actualTube = getPeaksForNSlitsMethod ( ws, eP, ht, wd, wht )
-                print actualTube
+                # print actualTube
                 
             if( len(actualTube) == 0):
                 print "getPeaksForNSlitMethod failed"
@@ -421,7 +421,7 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
             #detIDList, detPosList = get3pointsMethodResults( ws, AP, BP, CP, wht, 2900 ) 
             detIDList, detPosList = getCalibratedPixelPositions( ws, actualTube, idealTube, wht, PeakTestMode )
         
-            print len(wht)
+            #print len(wht)
             if( len(detIDList) == len(wht)): # We have corrected positions
                 for j in range(len(wht)):
 	            nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
