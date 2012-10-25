@@ -225,8 +225,8 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         
                              
     def test_heterogeneous_bin(self):
-        run_algorithm('CreateMDWorkspace', Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='5',
-                      MaxRecursionDepth='20',OutputWorkspace='mdwHW')
+        run_algorithm('CreateMDWorkspace', Dimensions='3',Extents='0,10,0,10,0,10',Names='x,y,z',Units='m,m,m',SplitInto='10',
+                      MaxRecursionDepth='1',OutputWorkspace='mdwHW')
         run_algorithm('FakeMDEventData', InputWorkspace="mdwHW",  UniformParams="-1000")
         SH = mtd['mdwHW']
         nEvents = SH.getNPoints();
