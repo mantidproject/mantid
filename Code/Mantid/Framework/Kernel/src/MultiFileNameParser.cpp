@@ -606,8 +606,13 @@ namespace Kernel
           throw std::runtime_error(
             "Unable to generate a range with a step size of zero.");
 
-        int limit = 100;
+        size_t limit = 100;
         int success = ConfigService::Instance().getValue("loading.multifilelimit",limit);
+        if (!success)
+        {
+          limit = 100;
+        }
+
         unsigned int orderedTo = from>to?from:to; 
         unsigned int orderedFrom = from>to?to:from; 
         unsigned int numberOfFiles = (orderedTo-orderedFrom)/stepSize;
