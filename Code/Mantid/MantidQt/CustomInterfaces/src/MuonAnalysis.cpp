@@ -1256,7 +1256,7 @@ void MuonAnalysis::inputFileChanged(const QStringList& files)
   std::ostringstream ss;
   ss << std::fixed << std::setprecision(12) << counts/1000000;
   infoStr += ss.str();
-  infoStr += " MeV";
+  infoStr += " MEv";
 
   // Add average temperature.
   infoStr += "\nAverage Temperature: ";
