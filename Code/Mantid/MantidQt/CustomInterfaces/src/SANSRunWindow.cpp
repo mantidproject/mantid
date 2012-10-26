@@ -2125,6 +2125,10 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
     }
     py_code.prepend("import SANSBatchMode as batch\n");
     const int fileFormat = m_uiForm.file_opt->currentIndex();
+    // create a instance of fit_settings, so it will not complain if the reduction fails
+    // when restoring the scale and fit.
+    QString fit = QString("\nfit_settings={'scale':%1,'shift':%2}").arg(m_uiForm.frontDetRescale->text()).arg(m_uiForm.frontDetShift->text());
+    py_code += fit;
     py_code += "\nfit_settings = batch.BatchReduce('" + csv_file + "','" +
       m_uiForm.file_opt->itemData(fileFormat).toString() + "'";
     if( m_uiForm.plot_check->isChecked() )
