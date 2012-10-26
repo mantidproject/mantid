@@ -627,12 +627,12 @@ bool SmoothNeighbours::isRectangularDetectorInstrument() const
     {
       if(detector->type() == "RectangularDetectorPixel")
       {
-        g_log.information("Assuming Rectangular Detectors for SmoothNeighbours on this data.");
+        g_log.debug("Assuming Rectangular Detectors for SmoothNeighbours on this data.");
         isRectangularDetectorInstrument =  true;
       }
       else
       {
-        g_log.information("Assuming Non-Rectangular Detectors for SmoothNeighbours on this data.");
+        g_log.debug("Assuming Non-Rectangular Detectors for SmoothNeighbours on this data.");
         isRectangularDetectorInstrument =  false;
       }
     }
