@@ -7,6 +7,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
 
+#include <Poco/ScopedLock.h>
+
 namespace Mantid
 {
 namespace API
@@ -15,7 +17,9 @@ namespace API
 Kernel::Logger& WorkspaceGroup::g_log = Kernel::Logger::get("WorkspaceGroup");
 
 WorkspaceGroup::WorkspaceGroup(const bool observeADS) :
-  Workspace(), m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
+  Workspace(), 
+  m_deleteObserver(*this, &WorkspaceGroup::workspaceDeleteHandle),
+  m_replaceObserver(*this, &WorkspaceGroup::workspaceReplaceHandle),
   m_workspaces(), m_observingADS(false)
 {
   observeADSNotifications(observeADS);
@@ -38,6 +42,7 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
     if(!m_observingADS)
     {
       AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
+      AnalysisDataService::Instance().notificationCenter.addObserver(m_replaceObserver);
       m_observingADS = true;
     }
   }
@@ -46,6 +51,7 @@ void WorkspaceGroup::observeADSNotifications(const bool observeADS)
     if(m_observingADS)
     {
       AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
+      AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
       m_observingADS = false;
     }
   }
@@ -67,6 +73,7 @@ void WorkspaceGroup::add(const std::string& name)
  */
 void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   // check it's not there already
   auto it = std::find(m_workspaces.begin(), m_workspaces.end(), workspace);
   if ( it == m_workspaces.end() )
@@ -87,6 +94,7 @@ void WorkspaceGroup::addWorkspace(Workspace_sptr workspace)
  */
 bool WorkspaceGroup::contains(const std::string & wsName) const
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
   {
     if ( (**it).name() == wsName ) return true;
@@ -100,6 +108,7 @@ bool WorkspaceGroup::contains(const std::string & wsName) const
  */
 std::vector<std::string> WorkspaceGroup::getNames() const
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   std::vector<std::string> out;
   for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
   {
@@ -115,6 +124,7 @@ std::vector<std::string> WorkspaceGroup::getNames() const
  */
 Workspace_sptr WorkspaceGroup::getItem(const size_t index) const
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   if( index >= this->size() )
   {
     std::ostringstream os;
@@ -131,6 +141,7 @@ Workspace_sptr WorkspaceGroup::getItem(const size_t index) const
  */
 Workspace_sptr WorkspaceGroup::getItem(const std::string wsName) const
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   for(auto it = m_workspaces.begin(); it != m_workspaces.end(); ++it)
   {
     if ( (**it).name() == wsName ) return *it;
@@ -149,6 +160,7 @@ void WorkspaceGroup::removeAll()
  */
 void WorkspaceGroup::remove(const std::string& wsName)
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   auto it = m_workspaces.begin();
   for(; it != m_workspaces.end(); ++it)
   {
@@ -164,6 +176,7 @@ void WorkspaceGroup::remove(const std::string& wsName)
 /// Removes all members of the group from the group AND from the AnalysisDataService
 void WorkspaceGroup::deepRemoveAll()
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   if( m_observingADS ) AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   while (!m_workspaces.empty())
   {
@@ -176,6 +189,7 @@ void WorkspaceGroup::deepRemoveAll()
 /// Print the names of all the workspaces in this group to the logger (at debug level)
 void WorkspaceGroup::print() const
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   for (auto itr = m_workspaces.begin(); itr != m_workspaces.end(); ++itr)
   {
     g_log.debug() << "Workspace name in group vector =  " << (**itr).name() << std::endl;
@@ -204,6 +218,27 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
       AnalysisDataService::Instance().remove(this->getName());
     }
   }
+}
+
+/**
+ * Callback when a after-replace notification is received
+ * Replaces a member if it was replaced in the ADS.
+ * @param notice :: A pointer to a workspace after-replace notificiation object
+ */
+void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice)
+{
+  Poco::Mutex::ScopedLock _lock(m_mutex);
+  observeADSNotifications(false);
+  const std::string replacedName = notice->object_name();
+  for(auto citr=m_workspaces.begin(); citr!=m_workspaces.end(); ++citr)
+  {
+    if ( (**citr).name() == replacedName )
+    {
+      *citr = notice->object();
+      break;
+    }
+  }
+  observeADSNotifications(true);
 }
 
 /**
@@ -271,6 +306,7 @@ Determine in the WorkspaceGroup is multiperiod.
 */
 bool WorkspaceGroup::isMultiperiod() const
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   if(m_workspaces.size() < 1)
   {
     g_log.debug("Not a multiperiod-group with < 1 nested workspace.");

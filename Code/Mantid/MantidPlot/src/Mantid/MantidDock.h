@@ -138,7 +138,7 @@ private:
   *m_convertToMatrixWorkspace,
   *m_convertMDHistoToMatrixWorkspace;
 
-  bool m_rerunRequested;
+  size_t m_rerunStackSize;
 
   static Mantid::Kernel::Logger& logObject;
 };

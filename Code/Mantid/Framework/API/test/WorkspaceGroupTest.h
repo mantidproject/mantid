@@ -103,6 +103,39 @@ public:
     TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 0 );
     AnalysisDataService::Instance().add("group", group);
     TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 3 );
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_addWorkspace_when_group_in_ADS()
+  {
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    Workspace_sptr ws1(new WorkspaceTester());
+    Workspace_sptr ws2(new WorkspaceTester());
+
+    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 0 );
+    AnalysisDataService::Instance().add("group", group);
+
+    group->addWorkspace( ws1 );
+    TS_ASSERT_EQUALS( group->size(), 1 );
+    group->addWorkspace( ws2 );
+    TS_ASSERT_EQUALS( group->size(), 2 );
+
+    TS_ASSERT_EQUALS( AnalysisDataService::Instance().size(), 1 );
+    AnalysisDataService::Instance().clear();
+  }
+
+  void test_getNames()
+  {
+    WorkspaceGroup_sptr group(new WorkspaceGroup());
+    Workspace_sptr ws1(new WorkspaceTester());
+    group->addWorkspace( ws1 );
+    Workspace_sptr ws2(new WorkspaceTester());
+    group->addWorkspace( ws2 );
+    AnalysisDataService::Instance().add("Workspace2", ws2);
+    auto names = group->getNames();
+    TS_ASSERT_EQUALS(names.size(), 2);
+    TS_ASSERT_EQUALS(names[0], "");
+    TS_ASSERT_EQUALS(names[1], "Workspace2");
   }
 
   void test_getItem()

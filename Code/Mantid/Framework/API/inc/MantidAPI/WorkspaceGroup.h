@@ -6,7 +6,9 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+
 #include <Poco/NObserver.h>
+#include <Poco/Mutex.h>
 
 namespace Mantid
 {
@@ -104,10 +106,16 @@ private:
   void workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice);
   /// Observer for workspace delete notfications
   Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspacePostDeleteNotification> m_deleteObserver;
+  /// Callback when a after-replace notification is received
+  void workspaceReplaceHandle(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice);
+  /// Observer for workspace after-replace notfications
+  Poco::NObserver<WorkspaceGroup, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
   /// The list of workspace pointers in the group
   std::vector<Workspace_sptr> m_workspaces;
   /// Flag as to whether the observers have been added to the ADS
   bool m_observingADS;
+  /// Recursive mutex to avoid simultaneous access
+  mutable Poco::Mutex m_mutex;
   /// Static reference to the logger
   static Kernel::Logger& g_log;
 };

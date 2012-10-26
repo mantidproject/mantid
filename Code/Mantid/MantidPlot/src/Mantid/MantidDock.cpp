@@ -53,7 +53,7 @@ Mantid::Kernel::Logger& MantidDockWidget::logObject=Mantid::Kernel::Logger::get(
 Mantid::Kernel::Logger& MantidTreeWidget::logObject=Mantid::Kernel::Logger::get("MantidTreeWidget");
 
 MantidDockWidget::MantidDockWidget(MantidUI *mui, ApplicationWindow *parent) :
-QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups(), m_rerunRequested( false )
+QDockWidget(tr("Workspaces"),parent), m_mantidUI(mui), m_known_groups(), m_rerunStackSize( 0 )
 {
   setObjectName("exploreMantid"); // this is needed for QMainWindow::restoreState()
   setMinimumHeight(150);
@@ -762,23 +762,33 @@ void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sp
 {
   const std::vector<std::string> group_names = workspace->getNames();
   if (group_names.size() < 1) return;
+  size_t unnamedCount = 0;
   std::vector<std::string>::const_iterator sitr = group_names.begin();
   std::vector<std::string>::const_iterator send = group_names.end();
   for( ; sitr != send; ++sitr )
   {
-    std::string name = *sitr;
+    const std::string& name = *sitr;
     Workspace_sptr member_ws;
-    try
+    if ( !name.empty() )
     {
-      member_ws = AnalysisDataService::Instance().retrieve(name);
+      try
+      {
+        member_ws = AnalysisDataService::Instance().retrieve(name);
+      }
+      catch(Exception::NotFoundError&)
+      {
+        continue;
+      }
+      MantidTreeWidgetItem *item = createEntry(QString::fromStdString(name), member_ws);
+      setItemIcon(item, member_ws);
+      ws_item->addChild(item);
     }
-    catch(Exception::NotFoundError&)
+    else
     {
-      continue;
+      QString itemName = QString("Unnamed_%1").arg(unnamedCount);
+      MantidTreeWidgetItem *ws_item = new MantidTreeWidgetItem(QStringList(itemName), m_tree);
+      ++unnamedCount;
     }
-    MantidTreeWidgetItem *item = createEntry(QString::fromStdString(name), member_ws);
-    setItemIcon(item, member_ws);
-    ws_item->addChild(item);
   }
 }
 
@@ -859,15 +869,6 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
  */
 void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QString& new_name)
 {
-  removeWorkspaceEntry( ws_name );
-  try
-  {
-    auto workspace = Mantid::API::AnalysisDataService::Instance().retrieve(new_name.toStdString());
-    addTreeEntry( new_name, workspace );
-  }
-  catch( ... )
-  {
-  }
   scheduleFindAbandonedWorkspaces();
 }
 
@@ -877,34 +878,6 @@ void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QStri
  */
 void MantidDockWidget::updateWorkspaceGroup(const QString & group_name)
 {
-  auto group_item = m_tree->findItems( group_name, Qt::MatchFixedString );
-  auto group = Mantid::API::WorkspaceGroup_sptr();
-  if ( Mantid::API::AnalysisDataService::Instance().doesExist( group_name.toStdString() ) )
-  {
-    group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(
-      Mantid::API::AnalysisDataService::Instance().retrieve(group_name.toStdString()));
-  }
-  if ( !group_item.isEmpty() )
-  {
-    auto item = group_item[0];
-    if ( !group )
-    {
-      // group isn't in the ADS, remove its item from the widget
-      m_tree->takeTopLevelItem( m_tree->indexOfTopLevelItem( item ) );
-    }
-    else
-    {
-      // remove and re-insert the group item
-      removeWorkspaceEntry( group_name );
-      addTreeEntry( group_name, group );
-    }
-  }
-  else if ( group )
-  {
-    // we missed it
-    addTreeEntry( group_name, group );
-  }
-  // clean up
   scheduleFindAbandonedWorkspaces();
 }
 
@@ -913,6 +886,15 @@ void MantidDockWidget::updateWorkspaceGroup(const QString & group_name)
  */
 void MantidDockWidget::findAbandonedWorkspaces()
 {
+  if ( m_rerunStackSize > 1 )
+  {
+    --m_rerunStackSize;
+    return;
+  }
+  else
+  {
+    m_rerunStackSize = 0;
+  }
   // find all top-level item names in the widget
   QStringList topItems;
   int n = m_tree->topLevelItemCount();
@@ -923,6 +905,7 @@ void MantidDockWidget::findAbandonedWorkspaces()
   // list of all workspaces in the ADS
   auto wsSet = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   std::vector<std::string> workspaces( wsSet.begin(), wsSet.end() );
+  QList<QTreeWidgetItem*> groupItemsToExpand;
   // find all groups, remove their members from workspaces
   for( auto wsName = workspaces.begin(); wsName != workspaces.end(); ++wsName )
   {
@@ -932,16 +915,16 @@ void MantidDockWidget::findAbandonedWorkspaces()
       auto ws = Mantid::API::AnalysisDataService::Instance().retrieve( *wsName );
       if ( auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>( ws ) )
       {
-        int n = group->getNumberOfEntries();
-        for(int i = 0; i < n; ++i)
+        auto groupItems = m_tree->findItems( QString::fromStdString( *wsName ), Qt::MatchExactly );
+        if ( !groupItems.isEmpty() && groupItems[0]->isExpanded() )
         {
-          if ( i >= group->getNumberOfEntries() )
-          {
-            scheduleFindAbandonedWorkspaces();
-            return;
-          }
-          const std::string name = group->getItem(i)->name();
-          auto it = std::find( workspaces.begin(), workspaces.end(), name );
+          groupItemsToExpand.append( groupItems[0] );
+        }
+        auto groupMembers = group->getNames();
+        for(auto name = groupMembers.begin(); name != groupMembers.end(); ++name)
+        {
+          if ( name->empty() ) continue; // unnamed workspace
+          auto it = std::find( workspaces.begin(), workspaces.end(), *name );
           if ( it != workspaces.end() )
           {
             it->clear();
@@ -988,7 +971,11 @@ void MantidDockWidget::findAbandonedWorkspaces()
   {
     removeWorkspaceEntry( qName );
   }
-  m_rerunRequested = false;
+  foreach(QTreeWidgetItem* item, groupItemsToExpand)
+  {
+    m_tree->collapseItem( item );
+    m_tree->expandItem( item );
+  }
 }
 
 /**
@@ -996,9 +983,9 @@ void MantidDockWidget::findAbandonedWorkspaces()
  */
 void MantidDockWidget::scheduleFindAbandonedWorkspaces()
 {
-  if ( !m_rerunRequested )
+  if ( m_rerunStackSize == 0 )
   {
-    m_rerunRequested = true;
+    ++m_rerunStackSize;
     emit rerunFindAbandonedWorkspaces();
   }
 }
