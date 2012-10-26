@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="WISH" valid-from   ="1900-01-31 23:59:59"
-                        valid-to     ="2012-09-26 17:24:36"
+<instrument name="WISH" valid-from   ="2012-09-26 17:24:36"
+                        valid-to     ="2100-01-31 23:59:59"
 		        last-modified="2009-01-15 00:00:00">
  
    <defaults>
@@ -42,6 +42,9 @@
  <location />
  </component>
  <component type="panel05" idlist="panel05"> 
+ <location />
+ </component>
+ <component type="panel10" idlist="panel10"> 
  <location />
  </component>
  <!-- source and sample-position components -->
@@ -110,6 +113,11 @@
 <type name="panel05">
  <component type="WISHpanel">
 <location  x="-0.96521    " z=" -1.9790    " name="WISHpanel05" > <facing x="0" y="0" z="0"/> </location>
+ </component>
+ </type>
+<type name="panel10">
+ <component type="WISHpanel">
+<location  x="0.96521    " z=" -1.9790    " name="WISHpanel10" > <facing x="0" y="0" z="0"/> </location>
  </component>
  </type>
  <type name="WISHpanel">
@@ -2102,4 +2110,159 @@
    <id start="05102000" end="05102511" />
    <id start="05100000" end="05100511" />
    </idlist>
+  <idlist idname="panel10">
+   <id start="10707000" end="10707511" />
+   <id start="10705000" end="10705511" />
+   <id start="10703000" end="10703511" />
+   <id start="10701000" end="10701511" />
+   <id start="10623000" end="10623511" />
+   <id start="10621000" end="10621511" />
+   <id start="10619000" end="10619511" />
+   <id start="10617000" end="10617511" />
+   <id start="10615000" end="10615511" />
+   <id start="10613000" end="10613511" />
+   <id start="10611000" end="10611511" />
+   <id start="10609000" end="10609511" />
+   <id start="10607000" end="10607511" />
+   <id start="10605000" end="10605511" />
+   <id start="10603000" end="10603511" />
+   <id start="10601000" end="10601511" />
+   <id start="10523000" end="10523511" />
+   <id start="10521000" end="10521511" />
+   <id start="10519000" end="10519511" />
+   <id start="10517000" end="10517511" />
+   <id start="10515000" end="10515511" />
+   <id start="10513000" end="10513511" />
+   <id start="10511000" end="10511511" />
+   <id start="10509000" end="10509511" />
+   <id start="10507000" end="10507511" />
+   <id start="10505000" end="10505511" />
+   <id start="10503000" end="10503511" />
+   <id start="10501000" end="10501511" />
+   <id start="10423000" end="10423511" />
+   <id start="10421000" end="10421511" />
+   <id start="10419000" end="10419511" />
+   <id start="10417000" end="10417511" />
+   <id start="10415000" end="10415511" />
+   <id start="10413000" end="10413511" />
+   <id start="10411000" end="10411511" />
+   <id start="10409000" end="10409511" />
+   <id start="10407000" end="10407511" />
+   <id start="10405000" end="10405511" />
+   <id start="10403000" end="10403511" />
+   <id start="10401000" end="10401511" />
+   <id start="10323000" end="10323511" />
+   <id start="10321000" end="10321511" />
+   <id start="10319000" end="10319511" />
+   <id start="10317000" end="10317511" />
+   <id start="10315000" end="10315511" />
+   <id start="10313000" end="10313511" />
+   <id start="10311000" end="10311511" />
+   <id start="10309000" end="10309511" />
+   <id start="10307000" end="10307511" />
+   <id start="10305000" end="10305511" />
+   <id start="10303000" end="10303511" />
+   <id start="10301000" end="10301511" />
+   <id start="10223000" end="10223511" />
+   <id start="10221000" end="10221511" />
+   <id start="10219000" end="10219511" />
+   <id start="10217000" end="10217511" />
+   <id start="10215000" end="10215511" />
+   <id start="10213000" end="10213511" />
+   <id start="10211000" end="10211511" />
+   <id start="10209000" end="10209511" />
+   <id start="10207000" end="10207511" />
+   <id start="10205000" end="10205511" />
+   <id start="10203000" end="10203511" />
+   <id start="10201000" end="10201511" />
+   <id start="10123000" end="10123511" />
+   <id start="10121000" end="10121511" />
+   <id start="10119000" end="10119511" />
+   <id start="10117000" end="10117511" />
+   <id start="10115000" end="10115511" />
+   <id start="10113000" end="10113511" />
+   <id start="10111000" end="10111511" />
+   <id start="10109000" end="10109511" />
+   <id start="10107000" end="10107511" />
+   <id start="10105000" end="10105511" />
+   <id start="10103000" end="10103511" />
+   <id start="10101000" end="10101511" />
+   <id start="10706000" end="10706511" />
+   <id start="10704000" end="10704511" />
+   <id start="10702000" end="10702511" />
+   <id start="10700000" end="10700511" />
+   <id start="10622000" end="10622511" />
+   <id start="10620000" end="10620511" />
+   <id start="10618000" end="10618511" />
+   <id start="10616000" end="10616511" />
+   <id start="10614000" end="10614511" />
+   <id start="10612000" end="10612511" />
+   <id start="10610000" end="10610511" />
+   <id start="10608000" end="10608511" />
+   <id start="10606000" end="10606511" />
+   <id start="10604000" end="10604511" />
+   <id start="10602000" end="10602511" />
+   <id start="10600000" end="10600511" />
+   <id start="10522000" end="10522511" />
+   <id start="10520000" end="10520511" />
+   <id start="10518000" end="10518511" />
+   <id start="10516000" end="10516511" />
+   <id start="10514000" end="10514511" />
+   <id start="10512000" end="10512511" />
+   <id start="10510000" end="10510511" />
+   <id start="10508000" end="10508511" />
+   <id start="10506000" end="10506511" />
+   <id start="10504000" end="10504511" />
+   <id start="10502000" end="10502511" />
+   <id start="10500000" end="10500511" />
+   <id start="10422000" end="10422511" />
+   <id start="10420000" end="10420511" />
+   <id start="10418000" end="10418511" />
+   <id start="10416000" end="10416511" />
+   <id start="10414000" end="10414511" />
+   <id start="10412000" end="10412511" />
+   <id start="10410000" end="10410511" />
+   <id start="10408000" end="10408511" />
+   <id start="10406000" end="10406511" />
+   <id start="10404000" end="10404511" />
+   <id start="10402000" end="10402511" />
+   <id start="10400000" end="10400511" />
+   <id start="10322000" end="10322511" />
+   <id start="10320000" end="10320511" />
+   <id start="10318000" end="10318511" />
+   <id start="10316000" end="10316511" />
+   <id start="10314000" end="10314511" />
+   <id start="10312000" end="10312511" />
+   <id start="10310000" end="10310511" />
+   <id start="10308000" end="10308511" />
+   <id start="10306000" end="10306511" />
+   <id start="10304000" end="10304511" />
+   <id start="10302000" end="10302511" />
+   <id start="10300000" end="10300511" />
+   <id start="10222000" end="10222511" />
+   <id start="10220000" end="10220511" />
+   <id start="10218000" end="10218511" />
+   <id start="10216000" end="10216511" />
+   <id start="10214000" end="10214511" />
+   <id start="10212000" end="10212511" />
+   <id start="10210000" end="10210511" />
+   <id start="10208000" end="10208511" />
+   <id start="10206000" end="10206511" />
+   <id start="10204000" end="10204511" />
+   <id start="10202000" end="10202511" />
+   <id start="10200000" end="10200511" />
+   <id start="10122000" end="10122511" />
+   <id start="10120000" end="10120511" />
+   <id start="10118000" end="10118511" />
+   <id start="10116000" end="10116511" />
+   <id start="10114000" end="10114511" />
+   <id start="10112000" end="10112511" />
+   <id start="10110000" end="10110511" />
+   <id start="10108000" end="10108511" />
+   <id start="10106000" end="10106511" />
+   <id start="10104000" end="10104511" />
+   <id start="10102000" end="10102511" />
+   <id start="10100000" end="10100511" />
+   </idlist>
+
  </instrument>
