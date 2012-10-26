@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include "MantidAPI/IDataFileChecker.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
@@ -53,7 +52,7 @@ struct DasEvent
 };
 #pragma pack(pop)
 
-  class DLLExport DetermineChunking  :  public API::IDataFileChecker
+  class DLLExport DetermineChunking : public API::Algorithm
   {
   public:
     DetermineChunking();
@@ -62,14 +61,12 @@ struct DasEvent
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
-    virtual const char * filePropertyName() const;
-    bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-    int fileCheck(const std::string& filePath);
   private:
     virtual void initDocs();
     void init();
     void exec();
     std::string setTopEntryName(std::string m_filename);
+    std::string extension(const std::string& fileName);
 
   };
 

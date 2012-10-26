@@ -59,23 +59,23 @@ public:
     if (!ws) return;
     
     // Check the results
-    TS_ASSERT_EQUALS( ws->rowCount(), 6 );
+    TS_ASSERT_EQUALS( ws->rowCount(), 11 );
     TableRow r = ws->getFirstRow();
     int s;
     int n;
     r >> s >> n;
     TS_ASSERT_EQUALS( s, 1 );
-    TS_ASSERT_EQUALS( n, 6 );
+    TS_ASSERT_EQUALS( n, 11 );
     r.next();
     r >> s >> n;
     TS_ASSERT_EQUALS( s, 2 );
-    TS_ASSERT_EQUALS( n, 6 );
+    TS_ASSERT_EQUALS( n, 11 );
 
     
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
-  void xtest_CNCS()
+  void test_CNCS()
   {
     do_test_CNCS(true);
     do_test_CNCS(false);

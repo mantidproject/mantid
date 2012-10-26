@@ -14,9 +14,7 @@ Workflow algorithm to determine chunking strategy.
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/SAX/InputSource.h>
-#include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidDataHandling/DetermineChunking.h"
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidDataHandling/LoadEventNexus.h"
@@ -25,6 +23,7 @@ Workflow algorithm to determine chunking strategy.
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/BinaryFile.h"
+#include "MantidKernel/BoundedValidator.h"
 #ifdef MPI_BUILD
     #include <boost/mpi.hpp>
     namespace mpi = boost::mpi;
@@ -43,11 +42,9 @@ namespace Mantid
 namespace DataHandling
 {
 
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(DetermineChunking)
-  DECLARE_LOADALGORITHM(DetermineChunking)
-
-  static const string RUNINFO_PARAM("Filename");
+  	// Register the algorithm into the AlgorithmFactory
+	// Register the algorithm into the AlgorithmFactory
+	DECLARE_ALGORITHM(DetermineChunking)
 
 
   //----------------------------------------------------------------------------------------------
@@ -90,33 +87,7 @@ namespace DataHandling
     this->setOptionalMessage("Determine chunking strategy for event nexus or runinfo.xml files.");
   }
 
-  //----------------------------------------------------------------------------------------------
-  /// @copydoc Mantid::API::IDataFileChecker::filePropertyName()
-  const char * DetermineChunking::filePropertyName() const
-  {
-    return RUNINFO_PARAM.c_str();
-  }
 
-  /// @copydoc Mantid::API::IDataFileChecker::quickFileCheck
-  bool DetermineChunking::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
-  {
-    UNUSED_ARG(nread);
-    UNUSED_ARG(header);
-
-    std::string ext = extension(filePath);
-    return (ext.rfind("_runinfo.xml") != std::string::npos);
-  }
-
-  /// @copydoc Mantid::API::IDataFileChecker::fileCheck
-  int DetermineChunking::fileCheck(const std::string& filePath)
-  {
-    std::string ext = extension(filePath);
-
-    if (ext.rfind("_runinfo.xml") != std::string::npos)
-      return 80;
-    else
-      return 0;
-  }
 
   //----------------------------------------------------------------------------------------------
   /// @copydoc Mantid::API::Algorithm::init()
@@ -127,12 +98,14 @@ namespace DataHandling
     exts.push_back("_runinfo.xml");
     exts.push_back("_event.nxs");
     exts.push_back(".nxs");
-    this->declareProperty(new FileProperty(RUNINFO_PARAM, "", FileProperty::Load, exts),
+    this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the runinfo file to read, including its full or relative path. \n"
         "Or the name of the Event NeXus file to read, including its full or relative path. \n"
         "The Event NeXus file name is typically of the form INST_####_event.nxs (N.B. case sensitive if running on Linux)." );
 
-    declareProperty("MaxChunkSize", EMPTY_DBL(),
+    auto mustBePositive = boost::make_shared<BoundedValidator<double> >();
+    mustBePositive->setLower(0.0);
+    declareProperty("MaxChunkSize", EMPTY_DBL(), mustBePositive,
         "Get chunking strategy for chunks with this number of Gbytes. File will not be loaded if this option is set.");
 
     declareProperty(new WorkspaceProperty<API::ITableWorkspace>("OutputWorkspace","",Direction::Output), "An output workspace.");
@@ -144,8 +117,8 @@ namespace DataHandling
   {
     double maxChunk = this->getProperty("MaxChunkSize");
     double filesize = 0;
-    string runinfo = this->getPropertyValue(RUNINFO_PARAM);
-    std::string ext = this->extension(runinfo);
+    string runinfo = this->getPropertyValue("Filename");
+    std::string ext = extension(runinfo);
     Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
     strategy->addColumn("int","ChunkNumber");
     strategy->addColumn("int","TotalChunks");
@@ -289,6 +262,20 @@ namespace DataHandling
     return m_top_entry_name;
   }
 
+  /** returns the extension of the given file
+   *  @param fileName :: name of the file.
+   */
+  std::string DetermineChunking::extension(const std::string& fileName)
+  {
+    std::size_t pos=fileName.find_last_of(".");
+    if(pos==std::string::npos)
+    {
+      return"" ;
+    }
+    std::string extn=fileName.substr(pos+1,fileName.length()-pos);
+    std::transform(extn.begin(),extn.end(),extn.begin(),tolower);
+    return extn;
+  }
 
 
 } // namespace Mantid
