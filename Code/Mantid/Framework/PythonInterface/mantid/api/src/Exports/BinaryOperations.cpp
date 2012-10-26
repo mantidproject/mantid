@@ -1,4 +1,6 @@
 #include "MantidPythonInterface/api/BinaryOperations.h"
+#include "MantidPythonInterface/kernel/Policies/upcast_returned_value.h"
+
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -8,10 +10,14 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 
 #include <boost/python/def.hpp>
+#include <boost/python/return_value_policy.hpp>
+
+namespace Policies = Mantid::PythonInterface::Policies;
 
 void export_BinaryOperations()
 {
   using namespace Mantid::API;
+  using boost::python::return_value_policy;
 
   //Operator overloads dispatch through the above structure. The typedefs save some typing
   typedef IMDWorkspace_sptr(*binary_fn_md_md)(const IMDWorkspace_sptr, const IMDWorkspace_sptr, const std::string &,const std::string &,bool, bool);
@@ -30,15 +36,15 @@ void export_BinaryOperations()
   using Mantid::PythonInterface::performBinaryOp;
   using Mantid::PythonInterface::performBinaryOpWithDouble;
 
-  def("performBinaryOp", (binary_fn_md_md)&performBinaryOp);
-  def("performBinaryOp", (binary_fn_md_gp)&performBinaryOp);
-  def("performBinaryOp", (binary_fn_gp_md)&performBinaryOp);
-  def("performBinaryOp", (binary_fn_gp_gp)&performBinaryOp);
-  def("performBinaryOp", (binary_fn_mh_mh)&performBinaryOp);
+  def("performBinaryOp", (binary_fn_md_md)&performBinaryOp, return_value_policy<Policies::upcast_returned_value>());
+  def("performBinaryOp", (binary_fn_md_gp)&performBinaryOp, return_value_policy<Policies::upcast_returned_value>());
+  def("performBinaryOp", (binary_fn_gp_md)&performBinaryOp, return_value_policy<Policies::upcast_returned_value>());
+  def("performBinaryOp", (binary_fn_gp_gp)&performBinaryOp, return_value_policy<Policies::upcast_returned_value>());
+  def("performBinaryOp", (binary_fn_mh_mh)&performBinaryOp, return_value_policy<Policies::upcast_returned_value>());
 
-  def("performBinaryOp", (binary_fn_md_db)&performBinaryOpWithDouble);
-  def("performBinaryOp", (binary_fn_mh_db)&performBinaryOpWithDouble);
-  def("performBinaryOp", (binary_fn_gp_db)&performBinaryOpWithDouble);
+  def("performBinaryOp", (binary_fn_md_db)&performBinaryOpWithDouble, return_value_policy<Policies::upcast_returned_value>());
+  def("performBinaryOp", (binary_fn_mh_db)&performBinaryOpWithDouble, return_value_policy<Policies::upcast_returned_value>());
+  def("performBinaryOp", (binary_fn_gp_db)&performBinaryOpWithDouble, return_value_policy<Policies::upcast_returned_value>());
 
 }
 

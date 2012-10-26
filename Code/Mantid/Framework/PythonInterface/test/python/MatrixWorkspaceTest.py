@@ -192,10 +192,15 @@ class MatrixWorkspaceTest(unittest.TestCase):
         C = A - B
         C = A * B
         C = A / B
+        
         C -= B
+        self.assertTrue(isinstance(C, MatrixWorkspace))
         C += B
+        self.assertTrue(isinstance(C, MatrixWorkspace))
         C *= B
+        self.assertTrue(isinstance(C, MatrixWorkspace))
         C /= B
+        self.assertTrue(isinstance(C, MatrixWorkspace))
         
         # Workspace + double
         B = 123.456
