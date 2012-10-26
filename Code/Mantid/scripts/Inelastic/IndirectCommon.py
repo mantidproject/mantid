@@ -1,6 +1,6 @@
 from mantid.simpleapi import *
 from mantid import config, logger
-import sys, platform, os.path, math, datetime
+import sys, platform, os.path, math, datetime, re
     
 def StartTime(prog):
     logger.notice('----------')
@@ -27,6 +27,13 @@ def loadNexus(filename):
     LoadNexus(Filename=filename, OutputWorkspace=name)
     return name
     
+def getInstrRun(file):
+    mo = re.match('([a-zA-Z]+)([0-9]+)',file)
+    instr_and_run = mo.group(0)          # instr name + run number
+    instr = mo.group(1)                  # instrument prefix
+    run = mo.group(2)                    # run number as string
+    return instr,run
+
 def getWSprefix(workspace):
     '''Returns a string of the form '<ins><run>_<analyser><refl>_' on which
     all of our other naming conventions are built.'''
@@ -34,20 +41,20 @@ def getWSprefix(workspace):
         return ''
     ws = mtd[workspace]
     facility = config['default.facility']
-    ins = ws.getInstrument().getName()
     if facility == 'ILL':
+        instr = ws.getInstrument().getName()
         logger.notice('Facility is '+facility)
-        prefix = ins + '_' + workspace[:-3]
+        prefix = instr + '_' + workspace[:-3]
     else:		
-        ins = config.getFacility().instrument(ins).shortName().lower()
-        run = ws.getRun().getLogData('run_number').value
+        (instr, run) = getInstrRun(workspace)
+        run_name = instr + run
         try:
             analyser = ws.getInstrument().getStringParameter('analyser')[0]
             reflection = ws.getInstrument().getStringParameter('reflection')[0]
         except IndexError:
             analyser = ''
             reflection = ''
-        prefix = ins + run + '_' + analyser + reflection + '_'
+        prefix = run_name + '_' + analyser + reflection + '_'
     return prefix
 
 def getEfixed(workspace, detIndex=0):

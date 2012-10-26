@@ -3,6 +3,7 @@
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd
+from mantid.kernel import V3D
 import sys, math, os.path
 from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
 mp = import_mantidplot()
@@ -89,6 +90,7 @@ def ReadIbackGroup(a,first):                           #read Ascii block of spec
 
 def IbackStart(instr,run,rejectZ,useM,Verbose,Plot,Save):      #Ascii start routine
 	StartTime('Iback')
+	config['default.facility'] = "ILL"
 	workdir = config['defaultsave.directory']
 	idf_dir = config['instrumentDefinition.directory']
 	idf = idf_dir + instr + '_Definition.xml'
@@ -211,6 +213,7 @@ def IbackStart(instr,run,rejectZ,useM,Verbose,Plot,Save):      #Ascii start rout
 		AllowDifferentNumberSpectra=True)
 	DeleteWorkspace(monWS)								# delete monitor WS
 	LoadInstrument(Workspace=ascWS, Filename=idf, RewriteSpectraMap=False)
+	ChangeAngles(ascWS,theta,Verbose)
 	if useM:
 		map = ReadMap(instr,Verbose)
 		UseMap(ascWS,map,Verbose)
@@ -247,6 +250,7 @@ def ReadInxGroup(asc,n,lgrp):                  # read ascii x,y,e
 
 def InxStart(instr,run,rejectZ,useM,Verbose,Plot,Save):
 	StartTime('Inx')
+	config['default.facility'] = "ILL"
 	workdir = config['defaultsave.directory']
 	idf_dir = config['instrumentDefinition.directory']
 	idf = idf_dir + instr + '_Definition.xml'
@@ -389,5 +393,34 @@ def plotForce(inWS,Plot):
 	if (Plot == 'Contour' or Plot == 'Both'):
 		cont_plot=mp.importMatrixWorkspace(inWS).plotGraph2D()
 
+def ChangeAngles(inWS,theta,Verbose):
+	ngrp = len(theta)
+	SpectrumIDs = []
+	L2 = []
+	Polar = theta
+	Azimuthal = []
+	for n in range(0,ngrp):
+		SpectrumIDs.append(n+1)
+		L2.append(1.0)
+		Azimuthal.append(0.0)
+	if Verbose:
+		logger.notice('SpectrumIDs = '+str(SpectrumIDs))
+		logger.notice('Polar = '+str(Polar))
+	for i in range(len(SpectrumIDs)):
+		spec_num = SpectrumIDs[i]
+		ws_index = spec_num - 1
+		move_spectrum(mtd[inWS], ws_index, L2[i],Polar[i],Azimuthal[i])
 
+def get_pos(R,theta,phi):
+	deg2rad=math.pi/180.0
+	z = R*math.cos(theta*deg2rad)
+	st=math.sin(theta*deg2rad)
+	x=R*st*math.cos(phi*deg2rad)
+	y=R*st*math.sin(phi*deg2rad)
+	return V3D(x,y,z)
+	
+def move_spectrum(wkspace, ws_index, l2, polar, azimuth):
+	det = wkspace.getDetector(ws_index)
+	new_pos = get_pos(l2,polar, azimuth)
+	MoveInstrumentComponent(Workspace=wkspace,DetectorID=det.getID(),X=new_pos.X(),Y=new_pos.Y(),Z=new_pos.Z(),RelativePosition=False)
 

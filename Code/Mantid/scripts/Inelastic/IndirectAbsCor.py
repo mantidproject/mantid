@@ -101,6 +101,7 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
     nw = len(waves)
     CheckSize(size,geom,ncan,Verbose)
     CheckDensity(density,ncan)
+    run_name = getWSprefix(inputWS)
     if Verbose:
         message = 'Sam : sigt = '+str(sigs[0])+' ; siga = '+str(siga[0])+' ; rho = '+str(density[0])
         logger.notice(message)
@@ -113,13 +114,13 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Verbose, 
         message = 'Detector angles : '+str(ndet)+' from '+str(det[0])+' to '+str(det[ndet-1])
         logger.notice(message)
 	eZ = np.zeros(nw)                  # set errors to zero
-    name = inputWS[:-3] + geom
+    name = run_name + geom
     assWS = name + '_ass'
     asscWS = name + '_assc'
     acscWS = name + '_acsc'
     accWS = name + '_acc'
     fname = name +'_Abs'
-    wrk = workdir + inputWS[:-4]
+    wrk = workdir + run_name
     wrk.ljust(120,' ')
     for n in range(0,ndet):
         if geom == 'flt':
