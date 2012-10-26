@@ -260,7 +260,7 @@ void LabelTool::graphAreaClicked(const QwtPolygon &c)
   std::string errorSigFigs = error.str();
 
   m_dataCoords = "(" + m_xPosSigFigs + ", " + m_yPosSigFigs + ")";
-  m_error = m_yPosSigFigs + " ±" + errorSigFigs;  
+  m_error = m_yPosSigFigs + "+/-" + errorSigFigs;
 
   // Gets the workspace name for which the curve with the datapoint belongs to.
   QString workspaceNameOfCurve = mantidMatrixCurve->workspaceName();
@@ -421,7 +421,6 @@ QSet<QString> LabelTool::logValues()
 
       if(timeSeriesProp)
       {
-        Mantid::Kernel::TimeSeriesPropertyStatistics;
         double medianValue = timeSeriesProp->getStatistics().median;
         std::string medianValue_str = boost::lexical_cast<std::string>(medianValue);
         logProperties.insert(QString::fromStdString((*prop)->name() + " : " + medianValue_str));
