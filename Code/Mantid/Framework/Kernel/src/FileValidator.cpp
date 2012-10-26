@@ -76,15 +76,15 @@ std::string FileValidator::checkValidity(const std::string &value) const
   {
     if (!(this->endswith(value)))
     {
-      //Dropped from warning to information level as it was printing out on every search of the archive, even when successful. re #5998
-      g_log.information() << "Unrecognised extension in file \"" << value << "\"";
+      //Dropped from warning to debug level as it was printing out on every search of the archive, even when successful. re #5998
+      g_log.debug() << "Unrecognised extension in file \"" << value << "\"";
       if (!this->m_extensions.empty()) {
-        this->g_log.warning() << " [ ";
+        this->g_log.debug() << " [ ";
         for (std::set<std::string>::const_iterator it = this->m_extensions.begin(); it != this->m_extensions.end(); ++it)
-          g_log.warning() << *it << " ";
-        this->g_log.warning() << "]";
+          g_log.debug() << *it << " ";
+        this->g_log.debug() << "]";
       }
-      g_log.warning() << "\"."  << std::endl;
+      g_log.debug() << "\"."  << std::endl;
     }
   }
 
