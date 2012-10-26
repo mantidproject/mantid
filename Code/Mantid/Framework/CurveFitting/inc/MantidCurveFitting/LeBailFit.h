@@ -227,6 +227,7 @@ namespace CurveFitting
 
     /// Fit Chi^2
     double mLeBaiLFitChi2;
+    double mLeBailCalChi2;
 
     /// Minimizer
     std::string mMinimizer;

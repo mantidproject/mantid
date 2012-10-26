@@ -93,7 +93,8 @@ void LeBailFit::init()
     std::vector<std::string> functions;
     functions.push_back("LeBailFit");
     functions.push_back("Calculation");
-    functions.push_back("CalculateBackground");
+    //  TODO: This option is temporarily turned off for release 2.3
+    //  functions.push_back("CalculateBackground");
     auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
     this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
@@ -193,12 +194,12 @@ void LeBailFit::exec()
   DataObjects::TableWorkspace_sptr bkgdparamws = this->getProperty("BackgroundParametersWorkspace");
   if (!bkgdparamws)
   {
-    g_log.notice() << "[Input] Use background specified with vector with input vector sized "
+    g_log.information() << "[Input] Use background specified with vector with input vector sized "
                    << bkgdorderparams.size() << "." << std::endl;
   }
   else
   {
-    g_log.notice() << "[Input] Use background specified by table workspace. " << std::endl;
+    g_log.information() << "[Input] Use background specified by table workspace. " << std::endl;
     parseBackgroundTableWorkspace(bkgdparamws, bkgdorderparams);
   }
   mBackgroundFunction = generateBackgroundFunction(backgroundtype, bkgdorderparams);
@@ -222,6 +223,7 @@ void LeBailFit::exec()
 
   // 6. Real work
   mLeBaiLFitChi2 = -1; // Initialize
+  mLeBailCalChi2 = -1;
 
   switch (functionmode)
   {
@@ -356,7 +358,7 @@ void LeBailFit::calculatePattern(size_t workspaceindex)
 }
 
 
-/** Fake calculated pattern
+/** Make output workspace valid if there is some error.
   */
 void LeBailFit::fakeOutputData(size_t workspaceindex, int functionmode)
 {
@@ -1406,9 +1408,6 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
   mLeBaiLFitChi2 = fitalg->getProperty("OutputChi2overDoF");
   std::string fitstatus = fitalg->getProperty("OutputStatus");
 
-  g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 = " << mLeBaiLFitChi2
-                 << " Fit Status = " << fitstatus << std::endl;
-
   API::ITableWorkspace_sptr covarws = fitalg->getProperty("OutputNormalisedCovarianceMatrix");
   if (covarws)
   {
@@ -1433,7 +1432,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
     }
   }
 
-  // b) Get parameters
+  // d) Get parameters
   API::IFunction_sptr fitout = fitalg->getProperty("Function");
 
   std::vector<std::string> parnames = fitout->getParameterNames();
@@ -1472,7 +1471,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
         parammap[parnamex].fit = true;
 
         rmsg << std::setw(10) << parnamex << " = " << setw(7) << setprecision(5) << curvalue
-             << ",    chi^2 = " << setw(7) << setprecision(5) << error << std::endl;
+             << ",    Error = " << setw(7) << setprecision(5) << error << std::endl;
       }
       else
       {
@@ -1483,9 +1482,8 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
   }
 
   g_log.information() << rmsg.str();
-  std::cout << rmsg.str() << std::endl;
 
-  // c) Get parameter output workspace from it for error
+  // e) Get parameter output workspace from it for error
   if (fitvaluews)
   {
     for (size_t ir = 0; ir < fitvaluews->rowCount(); ++ir)
@@ -1514,6 +1512,38 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
       }
     }
   }
+
+  // 3. Calculate Chi^2 wih all parmeters fixed
+  vector<string> lbparnames = mLeBailFunction->getParameterNames();
+  for (size_t i = 0; i < lbparnames.size(); ++i)
+  {
+    mLeBailFunction->fix(i);
+  }
+
+  API::IAlgorithm_sptr calalg = this->createSubAlgorithm("Fit", 0.0, 0.2, true);
+  calalg->initialize();
+  calalg->setProperty("Function", boost::shared_ptr<API::IFunction>(mLeBailFunction));
+  calalg->setProperty("InputWorkspace", dataWS);
+  calalg->setProperty("WorkspaceIndex", int(workspaceindex));
+  calalg->setProperty("StartX", tof_min);
+  calalg->setProperty("EndX", tof_max);
+  calalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+  calalg->setProperty("CostFunction", "Least squares");
+  calalg->setProperty("MaxIterations", 2);
+  calalg->setProperty("CreateOutput", false);
+
+  successfulfit = calalg->execute();
+  if (!calalg->isExecuted() || ! successfulfit)
+  {
+    // Early return due to bad fit
+    g_log.error() << "Fitting to LeBail function failed. " << std::endl;
+    throw runtime_error("DBx457 This is not possible!");
+  }
+
+  mLeBailCalChi2 = calalg->getProperty("OutputChi2overDoF");
+  g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 (Fit) = " << mLeBaiLFitChi2
+                 << ", Chi^2 (Cal) = " << mLeBailCalChi2
+                 << ", Fit Status = " << fitstatus << std::endl;
 
   return true;
 }
@@ -1647,7 +1677,12 @@ bool LeBailFit::generatePeaksFromInput(size_t workspaceindex)
 
   //1. Generate peaks
   size_t numpeaksoutofrange = 0;
+  size_t numpeaksparamerror = 0;
   bool peakparametererror = false;
+
+  double tofmin = dataWS->readX(workspaceindex)[0];
+  double tofmax =  dataWS->readX(workspaceindex).back();
+
   for (size_t ipk = 0; ipk < mPeakHKLs.size(); ++ipk)
   {
     // 1. Generate peak
@@ -1671,12 +1706,11 @@ bool LeBailFit::generatePeaksFromInput(size_t workspaceindex)
     speak->setPeakRadius(mPeakRadius);
 
     // 4. Exclude peak out of range
-    if (tof_h < dataWS->readX(workspaceindex)[0] || tof_h > dataWS->readX(workspaceindex).back())
+    if (tof_h < tofmin || tof_h > tofmax)
     {
       g_log.debug() << "Input peak (" << h << ", " << k << ", " << l << ") is out of range. "
                     << "TOF_h = " << tof_h << std::endl;
       numpeaksoutofrange ++;
-
       continue;
     }
 
@@ -1703,6 +1737,11 @@ bool LeBailFit::generatePeaksFromInput(size_t workspaceindex)
       peakparametererror = true;
     }
 
+    if (peakparametererror)
+    {
+      ++ numpeaksparamerror;
+    }
+
     // 6. Add peak to peak map
     mPeaks.insert(std::make_pair(hkl2, speak));
     std::vector<int>::iterator fit = std::find(mPeakHKL2.begin(), mPeakHKL2.end(), hkl2);
@@ -1720,8 +1759,10 @@ bool LeBailFit::generatePeaksFromInput(size_t workspaceindex)
 
   }
 
-  g_log.notice() << "[LeBailFit] Input peaks: " << mPeakHKLs.size() << "; Peaks within range: " << mPeakHKL2.size()
-                 << " Peaks outside of range: " <<  numpeaksoutofrange << std::endl;
+  g_log.information() << "Number of ... Input Peaks = " << mPeakHKLs.size() << "; Peaks Generated: " << mPeakHKL2.size()
+                 << "; Peaks With Error Parameters = " << numpeaksparamerror
+                 << "; Peaks Outside Range = " <<  numpeaksoutofrange
+                 << "; Range: " << setprecision(5) << tofmin << ", " << setprecision(5) << tofmax <<  std::endl;
 
   // 4. Set the parameters' names
   mPeakParameterNames.clear();
@@ -2265,8 +2306,10 @@ void LeBailFit::exportParametersWorkspace(std::map<std::string, Parameter> param
     }
 
     // 3b. Chi^2
+    API::TableRow fitchi2row = tablews->appendRow();
+    fitchi2row << "FitChi2" << mLeBaiLFitChi2 << "t" << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
     API::TableRow chi2row = tablews->appendRow();
-    chi2row << "Chi2" << mLeBaiLFitChi2 << "t" << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
+    chi2row << "Chi2" << mLeBailCalChi2 << "t" << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
 
     // 4. Add to output peroperty
     this->setProperty("OutputParameterWorkspace", parameterws);
