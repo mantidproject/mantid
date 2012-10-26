@@ -7,6 +7,8 @@ class TubeSpec:
 # and then provide a list of workspace index ranges corresponding to each of the specified tubes
 # to be used the the tube calibration code
 
+# Author: Karl Palmen ISIS
+
     def __init__(self,ws):
         """     
         Creates empty tube specification for specified instrument.

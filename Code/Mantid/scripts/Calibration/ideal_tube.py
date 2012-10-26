@@ -7,6 +7,8 @@ import math
 
 # This class is the ideal tube, which specifies where the peaks formed by slits or edges should occur
 
+# Author: Karl Palmen ISIS
+
 class IdealTube:
 
    def __init__( self ):
@@ -61,7 +63,7 @@ class IdealTube:
           print "Specification has several tubes. The ideal tube will be based on the first tube",tube.getTubeName(0)
     
        wht = tube.getTube(0)
-       print wht
+       # print wht
     
        # Check tube
        if ( len(wht) < 1 ):

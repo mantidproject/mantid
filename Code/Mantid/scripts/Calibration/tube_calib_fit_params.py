@@ -6,6 +6,8 @@ class TubeCalibFitParams:
 # This class is to take the fitting method and parameters for fitting the peaks crated by the calibration slits etc
 # and to deliver them to TubeCalib, so it can fit the peaks appropriately
 
+# Author: Karl Palmen ISIS
+
     def __init__(self, peaks, Height=1000.0, Width=30.0, ThreePointMethod=False):
         """     
         Creates an instance

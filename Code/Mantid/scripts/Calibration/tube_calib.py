@@ -7,9 +7,13 @@
 #
 #  Users should not need to directly call any other function other than getCaibration(....) from this file.
 #
+#  Author: Karl palmen ISIS and for readPeakFile Gesner Passos ISIS
+#
 from mantid.simpleapi import *
 from mantid.kernel import *
+from tube_spec import * # For tube specification class
 import math
+import re
 
 
 def createTubeCalibtationWorkspaceByWorkspaceIndexList ( integratedWorkspace, outputWorkspace, workspaceIndexList, xUnit='Pixel', showPlot=False):
@@ -352,11 +356,53 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
 
     return detIDs, detPositions
     
+
+def readPeakFile(file_path):
+    """Load the file calibration
+    
+    It returns a list of tuples, where the first value is the detector identification 
+    and the second value is its calibration values. 
+    
+    Example of usage: 
+        for (det_code, cal_values) in readPeakFile('pathname/TubeDemo'):
+            print det_code
+            print cal_values
+    
+    """
+    loaded_file = []
+    #split the entries to the main values: 
+    # For example: 
+    # MERLIN/door1/tube_1_1 [34.199347724575574, 525.5864438725401, 1001.7456248836971]
+    # Will be splited as: 
+    # ['MERLIN/door1/tube_1_1', '', '34.199347724575574', '', '525.5864438725401', '', '1001.7456248836971', '', '', '']    
+    pattern = re.compile('[\[\],\s\r]')
+    for line in open(file_path,'r'):
+        #check if the entry is a comment line
+        if line.startswith('#'):
+            continue 
+        #split all values        
+        line_vals = re.split(pattern,line)
+        id_ = line_vals[0]
+        if id_ == '':
+            continue
+        try:
+            f_values = [float(v) for v in line_vals[1:] if v!='']
+        except ValueError:
+            #print 'Wrong format: we expected only numbers, but receive this line ',str(line_vals[1:])
+            continue
+            
+        loaded_file.append((id_,f_values))
+    return loaded_file
+    
+    
+    
+""" THESE FUNCTIONS NEXT SHOULD BE THE ONLY FUNCTIONS THE USER CALLS FROM THIS FILE
+"""
+    
+    
 def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False, OverridePeaks=[], PeakFile="", ExcludeShortTubes=0.0):
     """     
        Get the results the calibration and put them in the calibration table provided.
-       
-       THIS SHOULD BE THE ONLY FUNCTION THE USER CALLS FROM THIS FILE
              
        @param ws: Integrated Workspace with tubes to be calibrated 
        @param tubeSet: Specification of Set of tubes to be calibrated
@@ -391,7 +437,7 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
 
         # Deal with (i+1)st tube specified
         wht = tubeSet.getTube(i)
-        print "tube listed", i+1, tubeSet.getTubeName(i) #, " length", tubeSet.getTubeLength(i) 
+        print "Calibrating tube", i+1,"of",nTubes, tubeSet.getTubeName(i) #, " length", tubeSet.getTubeLength(i) 
         if ( len(wht) < 1 ):
             print "Unable to get any workspace indices for this tube. Calibration abandoned."
             return
@@ -429,8 +475,11 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
                         
     if(PeakFile != ""):
        pFile.close()
+       
+    if(nTubes == 0):
+       return
 
-    # Delete temporary workspaces for obtaioning slit points
+    # Delete temporary workspaces for obtaining slit points
     if( fitPar.isThreePointMethod() ):
        DeleteWorkspace( 'get3pointsFor3pointMethod')
        DeleteWorkspace('Z1_NormalisedCovarianceMatrix')
@@ -457,3 +506,54 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
     DeleteWorkspace('QF_Parameters')
     DeleteWorkspace('QF_Workspace')
     
+    
+    
+def getCalibrationFromPeakFile ( ws, calibTable, iTube,  PeakFile ):
+    """     
+       Get the results the calibration and put them in the calibration table provided.
+             
+       @param ws: Integrated Workspace with tubes to be calibrated 
+       @param calibTable: Calibration table into which the calibration results are placed
+       @param  iTube: The ideal tube
+       @param PeakFile: File of peaks for calibtation 
+       
+    """	
+  
+    # Get Ideal Tube 
+    idealTube = iTube.getArray()
+    
+    # Read Peak File
+    PeakArray = readPeakFile( PeakFile )
+    nTubes = len(PeakArray)
+    print "Number of tubes read from file =",nTubes
+
+    for i in range(nTubes):
+    
+        # Deal with (i+1)st tube got from file
+        TubeName = PeakArray[i][0] # e.g. 'MERLIN/door3/tube_3_1'
+        tube = TubeSpec(ws)
+        tube.setTubeSpecByString(TubeName)
+        actualTube = PeakArray[i][1] # e.g.  [2.0, 512.5, 1022.0]  
+
+        wht = tube.getTube(0)
+        print "Calibrating tube", i+1 ,"of", nTubes, TubeName #, " length", tubeSet.getTubeLength(i) 
+        if ( len(wht) < 1 ):
+            print "Unable to get any workspace indices for this tube. Calibration abandoned."
+            return                         
+                
+        detIDList, detPosList = getCalibratedPixelPositions( ws, actualTube, idealTube, wht, False )
+        
+        #print len(wht)
+        if( len(detIDList) == len(wht)): # We have corrected positions
+            for j in range(len(wht)):
+	        nextRow = {'Detector ID': detIDList[j], 'Detector Position': detPosList[j] }
+	        calibTable.addRow ( nextRow )
+     
+    if(nTubes == 0):
+       return                
+    
+    # Delete temporary workspaces for getting new detector positions
+    DeleteWorkspace('QuadraticFittingWorkspace')
+    DeleteWorkspace('QF_NormalisedCovarianceMatrix')
+    DeleteWorkspace('QF_Parameters')
+    DeleteWorkspace('QF_Workspace')
