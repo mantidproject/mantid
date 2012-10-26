@@ -468,17 +468,43 @@ class StitcherWidget(BaseWidget):
         """
             Plot the scaled data sets
         """
+        low_first = util._check_and_get_int_line_edit(self._content.low_first_spin)
+        low_last = util._check_and_get_int_line_edit(self._content.low_last_spin)
+        med_first = util._check_and_get_int_line_edit(self._content.medium_first_spin)
+        med_last = util._check_and_get_int_line_edit(self._content.medium_last_spin)
+        high_first = util._check_and_get_int_line_edit(self._content.high_first_spin)
+        high_last = util._check_and_get_int_line_edit(self._content.high_last_spin)
+        auto_cut = True
+        if low_first>0 or low_last>0 or med_first>0 or med_last>0 or high_first>0 or high_last>0:
+            auto_cut = False
+        
+        low_xmin = util._check_and_get_float_line_edit(self._content.low_min_edit)
+        low_xmax = util._check_and_get_float_line_edit(self._content.low_max_edit)
+        med_xmin = util._check_and_get_float_line_edit(self._content.medium_min_edit)
+        med_xmax = util._check_and_get_float_line_edit(self._content.medium_max_edit)
+
         ws_list = []
         if self._low_q_data is not None:
-            self._low_q_data.apply_scale()
+            xmin,_ = self._low_q_data.get_skipped_range()
+            if not auto_cut:
+                xmin=None
+                low_xmax=None
+            self._low_q_data.apply_scale(xmin, low_xmax)
             ws_list.append(self._low_q_data.get_scaled_ws())
         
         if self._medium_q_data is not None:
-            self._medium_q_data.apply_scale()
+            if not auto_cut:
+                med_xmax=None
+                low_xmin=None
+            self._medium_q_data.apply_scale(low_xmin, med_xmax)
             ws_list.append(self._medium_q_data.get_scaled_ws())
         
         if self._high_q_data is not None:
-            self._high_q_data.apply_scale()
+            _,xmax = self._high_q_data.get_skipped_range()
+            if not auto_cut:
+                med_xmin=None
+                xmax=None
+            self._high_q_data.apply_scale(med_xmin, xmax)
             ws_list.append(self._high_q_data.get_scaled_ws())
         
         if len(ws_list)>0:
