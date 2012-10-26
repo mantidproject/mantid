@@ -2,7 +2,6 @@
 
 
 
-
 For testing MDEventWorkspaces, this algorithm either creates a uniform, random distribution of events, 
 or generate regular events placed in boxes, or fills peaks around given points with a given number of events.
 
@@ -29,6 +28,7 @@ or generate regular events placed in boxes, or fills peaks around given points w
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/Utils.h"
+#include <cfloat>
 
 namespace Mantid
 {
@@ -76,8 +76,11 @@ namespace MDAlgorithms
     declareProperty(new ArrayProperty<double>("UniformParams", ""),
         "Add a uniform, randomized distribution of events.\n"
         "1 parameter: number_of_events; they will be distributed across the size of the workspace.\n"
-        "Multiple parameters: number_of_events, min,max (for each dimension); distribute the events inside the range given.\n"
-        "if first parameter(number of events) is negative, all events are not distributed randomly but uniformly placed into the centers of cells\n");
+        "Depending on the sighn of this parameter, the events are either distributed randomly around the box \n"
+        "(Case 1, positive) or placed on the regular grid through the box (Case 2, negative)\n"
+        "Treatmetn of Multiple parameters: depends on the Case\n"
+        "Case 1: number_of_events, min,max (for each dimension); distribute the events inside the range given.\n"
+        "Case 2: Additional parameters describe initial location and steps of the regular grid in each dimension\n");
 
     declareProperty(new ArrayProperty<double>("PeakParams", ""),
         "Add a peak with a normal distribution around a central point.\n"
@@ -198,20 +201,34 @@ namespace MDAlgorithms
 
     if (params.size() == 1)
     {
-      for (size_t d=0; d<nd; ++d)
+      if(randomEvents)
       {
-        params.push_back( ws->getDimension(d)->getMinimum() );
-        params.push_back( ws->getDimension(d)->getMaximum() );
+        for (size_t d=0; d<nd; ++d)
+        {
+            params.push_back( ws->getDimension(d)->getMinimum() );
+            params.push_back( ws->getDimension(d)->getMaximum() );
+        }
+      }
+      else   // regular events
+      {
+        for (size_t d=0; d<nd; ++d)
+        {
+            params.push_back( ws->getDimension(d)->getMinimum() );
+            size_t nStrides = ws->getDimension(d)->getNBins();
+            if(nStrides<1 || nStrides>=size_t(-1))nStrides = 1;            
+            params.push_back((ws->getDimension(d)->getMaximum()-ws->getDimension(d)->getMinimum())/nStrides);
+        }
       }
     }
-    if (params.size() != 1 + nd*2)
-      throw std::invalid_argument("UniformParams: needs to have ndims*2+1 arguments.");
+    if ((params.size() != 1 + nd*2))
+      throw std::invalid_argument("UniformParams: needs to have ndims*2+1 arguments ");
 
 
     if(randomEvents)
       addFakeRandomData<MDE,nd>(params,ws);
-    else
+    else      
       addFakeRegularData<MDE,nd>(params,ws);
+  
 
     ws->splitBox();
     Kernel::ThreadScheduler * ts = new ThreadSchedulerFIFO();
@@ -295,8 +312,8 @@ namespace MDAlgorithms
   void FakeMDEventData::addFakeRegularData(const std::vector<double> &params,typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     // the parameters for regular distribution of events over the box
-    std::vector<double> minPar(nd),maxPar(nd),delta(nd);
-    std::vector<size_t> nBins(nd);
+    std::vector<double> minPar(nd),delta(nd);
+    std::vector<size_t> nStrides(nd);
     size_t gridSize(0);
 
     //bool RandomizeSignal = getProperty("RandomizeSignal");
@@ -312,14 +329,28 @@ namespace MDAlgorithms
     gridSize=1;
     for (size_t d=0; d<nd; ++d)
     {
-      double min = params[d*2+1];
-      double max = params[d*2+2];
-      if (max <= min) throw std::invalid_argument("UniformParams: min must be < max for all dimensions.");
-      minPar[d] = min;
-      maxPar[d] = max;
-      nBins[d]  = ws->getDimension(d)->getNBins();
-      gridSize*=nBins[d];
-      delta[d]  = (max-min)/double(nBins[d]);
+      double min  = ws->getDimension(d)->getMinimum(); 
+      double max  = ws->getDimension(d)->getMaximum();
+      minPar[d]   = params[d*2+1];
+      double step = params[d*2+2];
+      if ((minPar[d] < min)||(minPar[d] >= max)) throw std::invalid_argument("RegularData: starting point must be within the box for all dimensions.");
+      if ((minPar[d]<0) ||(minPar[d]>step))throw  std::invalid_argument("RegularData: initial point must be within the sep and be positive for all dimensions.");
+      if(minPar[d]==step)minPar[d]=step*(1-FLT_EPSILON);
+
+      delta[d]  = step;
+      if(step<=0)
+        throw(std::invalid_argument("Step of the regular grid is less or equal to 0"));
+
+      nStrides[d] = size_t((max-min)/step);
+      if(nStrides[d]<1)
+      {
+        minPar[d]=min;
+        delta[d] = (max-min);
+        nStrides[d]=1;
+      }
+
+      gridSize*=(nStrides[d]+1);
+
     }
     // Create all the requested events
     std::vector<size_t> indexes;
@@ -328,14 +359,13 @@ namespace MDAlgorithms
     {
       coord_t centers[nd];
 
-      Kernel::Utils::getIndicesFromLinearIndex(cellCount,nBins,indexes);
+      Kernel::Utils::getIndicesFromLinearIndex(cellCount,nStrides,indexes);
       ++cellCount;
       if(cellCount>=gridSize)cellCount=0;
 
       for (size_t d=0; d<nd; d++)
       {
-        // put events into cell centers;     // 0.50001 0001 -- is "kind of" epsilon to avoid randomization error at cell ecntre 
-         centers[d]= coord_t(minPar[d]+delta[d]*(double(indexes[d])+0.50001));
+         centers[d]= coord_t(minPar[d]+delta[d]*double(indexes[d]));
       }
 
       // Default or randomized error/signal

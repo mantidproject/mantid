@@ -30,6 +30,7 @@
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/Utils.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
@@ -82,6 +83,23 @@ private:
     void setSuccessorParser(Mantid::API::ImplicitFunctionParser* /*successor*/){}
     void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* /*parser*/){}
   };
+  // helper ws creator
+  Mantid::API::Workspace_sptr createSimple3DWorkspace()
+  {
+    using namespace Mantid::API;
+    AnalysisDataService::Instance().remove("3D_Workspace");
+    IAlgorithm* create = FrameworkManager::Instance().createAlgorithm("CreateMDWorkspace");
+
+    create->initialize();
+    create->setProperty("Dimensions", 3);
+    create->setPropertyValue("Extents","0,10,0,10,0,10");
+    create->setPropertyValue("Names","x,y,z");
+    create->setPropertyValue("Units","m,m,m");
+    create->setPropertyValue("SplitInto","10");
+    create->setPropertyValue("OutputWorkspace", "3D_Workspace");
+    create->execute();
+    return AnalysisDataService::Instance().retrieve("3D_Workspace");
+  }
 
 
 public:
@@ -226,18 +244,24 @@ public:
   void testExecLagreRegularSignal()
   {
 
+    CreateMDWorkspace creator;
 
     FakeMDEventData FakeDat;
     TS_ASSERT_THROWS_NOTHING( FakeDat.initialize() )
     TS_ASSERT( FakeDat.isInitialized() )
 
-    MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(3, 0.0, 10.0, 0);
+    //MDEventWorkspace3Lean::sptr in_ws = MDEventsTestHelper::makeMDEW<3>(3, 0.0, 10.0, 0);
+    auto a_ws  = createSimple3DWorkspace();
+    MDEventWorkspace3Lean::sptr in_ws = boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(a_ws);
+    TS_ASSERT(in_ws);
+    if(!in_ws)return;
+
     AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws", in_ws);
 
 
     TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws") );
     TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue("PeakParams", ""));
-    TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue("UniformParams", "-1000"));
+    TS_ASSERT_THROWS_NOTHING(FakeDat.setPropertyValue("UniformParams", "-1000,0.50001,1,0.50001,1,0.50001,1"));
 
     TS_ASSERT_THROWS_NOTHING( FakeDat.execute(); )
     TS_ASSERT( FakeDat.isExecuted() );
@@ -254,9 +278,9 @@ public:
     TS_ASSERT( BinAlg.isInitialized() )
 
     TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws") );
-    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim0", "Axis0,0,10,40"));
-    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim1", "Axis1,0,10,5"));
-    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim2", "Axis2,0,10,20"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim0", "x,0,10,40"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim1", "y,0,10,5"));
+    TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("AlignedDim2", "z,0,10,20"));
 
     TS_ASSERT_THROWS_NOTHING(BinAlg.setPropertyValue("OutputWorkspace", "BinMDTest_ws"));
 
@@ -1039,6 +1063,7 @@ public:
     for (size_t i=0; i<1; i++)
       do_test("2.0,8.0, 1", true);
   }
+private: 
 
 };
 
