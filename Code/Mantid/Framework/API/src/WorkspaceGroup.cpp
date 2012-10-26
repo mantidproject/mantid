@@ -205,6 +205,7 @@ void WorkspaceGroup::print() const
  */
 void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotification_ptr notice)
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   const std::string deletedName = notice->object_name();
   if( !this->contains(deletedName)) return;
 
@@ -225,20 +226,23 @@ void WorkspaceGroup::workspaceDeleteHandle(Mantid::API::WorkspacePostDeleteNotif
  * Replaces a member if it was replaced in the ADS.
  * @param notice :: A pointer to a workspace after-replace notificiation object
  */
-void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice)
+void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceBeforeReplaceNotification_ptr notice)
 {
   Poco::Mutex::ScopedLock _lock(m_mutex);
-  observeADSNotifications(false);
+  bool isObserving = m_observingADS;
+  if ( isObserving )
+    observeADSNotifications( false );
   const std::string replacedName = notice->object_name();
   for(auto citr=m_workspaces.begin(); citr!=m_workspaces.end(); ++citr)
   {
     if ( (**citr).name() == replacedName )
     {
-      *citr = notice->object();
+      *citr = notice->new_object();
       break;
     }
   }
-  observeADSNotifications(true);
+  if ( isObserving )
+    observeADSNotifications( true );
 }
 
 /**
@@ -247,6 +251,7 @@ void WorkspaceGroup::workspaceReplaceHandle(Mantid::API::WorkspaceAfterReplaceNo
  */
 bool WorkspaceGroup::isEmpty() const
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
 	return m_workspaces.empty();
 }
 
@@ -259,6 +264,7 @@ bool WorkspaceGroup::isEmpty() const
  */
 bool WorkspaceGroup::areNamesSimilar() const
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   if(m_workspaces.empty()) return false;
 
   //Check all the members are of similar names
@@ -285,6 +291,7 @@ bool WorkspaceGroup::areNamesSimilar() const
  */
 void WorkspaceGroup::updated() const
 {
+  Poco::Mutex::ScopedLock _lock(m_mutex);
   if ( m_observingADS )
   {
     try

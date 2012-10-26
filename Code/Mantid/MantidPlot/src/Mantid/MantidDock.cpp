@@ -786,7 +786,9 @@ void MantidDockWidget::populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sp
     else
     {
       QString itemName = QString("Unnamed_%1").arg(unnamedCount);
-      MantidTreeWidgetItem *ws_item = new MantidTreeWidgetItem(QStringList(itemName), m_tree);
+      MantidTreeWidgetItem *item = new MantidTreeWidgetItem(QStringList(itemName), m_tree);
+      setItemIcon(item, member_ws);
+      ws_item->addChild(item);
       ++unnamedCount;
     }
   }
@@ -869,6 +871,8 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
  */
 void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QString& new_name)
 {
+  (void)ws_name;
+  (void)new_name;
   scheduleFindAbandonedWorkspaces();
 }
 
@@ -878,6 +882,7 @@ void MantidDockWidget::renameWorkspaceEntry(const QString & ws_name, const QStri
  */
 void MantidDockWidget::updateWorkspaceGroup(const QString & group_name)
 {
+  (void)group_name;
   scheduleFindAbandonedWorkspaces();
 }
 
