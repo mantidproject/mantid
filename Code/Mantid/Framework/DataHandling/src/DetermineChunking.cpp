@@ -127,8 +127,6 @@ namespace DataHandling
     // mpi needs work for every core, so don't do this
     if (maxChunk == 0 || maxChunk == EMPTY_DBL())
     {
-      Mantid::API::TableRow row = strategy->appendRow();
-      row << EMPTY_INT() << EMPTY_INT();
       return;
     }
 #endif
@@ -207,8 +205,6 @@ namespace DataHandling
     //Histo Nexus
     else
     {
-      Mantid::API::TableRow row = strategy->appendRow();
-      row << EMPTY_INT() << EMPTY_INT();
       return;
     }
 

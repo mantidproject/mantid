@@ -242,10 +242,10 @@ class SNSPowderReduction(PythonAlgorithm):
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
         # EMPTY_INT() from C++
-        if int(chunk["ChunkNumber"]) < 2147483647:
-            name += "_%02d" % (int(chunk["ChunkNumber"]))        
+        if chunk:
+            name += "_%d" % (int(chunk["ChunkNumber"]))        
         else:
-            name += "_%02d" % 0
+            name += "_%d" % 0
 
         if extension.endswith("_event.nxs"):
             chunk["Precount"] = True
@@ -268,7 +268,9 @@ class SNSPowderReduction(PythonAlgorithm):
         strategy = []
         Chunks = api.DetermineChunking(Filename=wksp+extension,MaxChunkSize=self._chunks,OutputWorkspace='Chunks')
         for row in Chunks: strategy.append(row)
-
+        #For table with no rows
+        if not strategy:
+            strategy.append({})
         return strategy
 
     def _focusChunks(self, runnumber, extension, filterWall, calib, filterLogs=["", 0.0, 0.0], preserveEvents=True,
