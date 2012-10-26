@@ -96,6 +96,11 @@ class MantidPlot1DPlotTest(unittest.TestCase):
         self.assertTrue(g is not None)
         self.g = g
 
+    def test_plotBin_command_with_tuple(self):
+        g = plotBin("fake", (0,1))
+        self.assertTrue(g is not None)
+        self.g = g
+
 # Run the unit tests
 mantidplottests.runTests(MantidPlot1DPlotTest)
 

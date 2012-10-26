@@ -1306,7 +1306,7 @@ sipClass=sipFindClass(sipCpp->className());
 public:
   // Plotting methods
   MultiLayer* plotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false, Graph::CurveType style = Graph::Unspecified);
-  MultiLayer* plotBin(const QString&,int,bool = false,Graph::CurveType style = Graph::Unspecified);
+  MultiLayer* plotBin(const QString&,const QList<int>&,bool = false,Graph::CurveType style = Graph::Unspecified);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
   void convertToWaterfall(MultiLayer*);
 

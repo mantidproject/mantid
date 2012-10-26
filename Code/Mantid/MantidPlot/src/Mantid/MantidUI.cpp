@@ -2117,45 +2117,42 @@ MultiLayer* MantidUI::plotInstrumentSpectrumList(const QString& wsName, std::set
   return plotSpectraList(wsName, spec, false);
 }
 
-MultiLayer* MantidUI::plotBin(const QString& wsName, int bin, bool errors, Graph::CurveType style)
+MultiLayer* MantidUI::plotBin(const QString& wsName, const QList<int> & binsList, bool errors, Graph::CurveType style)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  MantidMatrix* m = getMantidMatrix(wsName);
-  if( !m )
-  {
-    m = importMatrixWorkspace(wsName, -1, -1, false, false);
-  }
-  MatrixWorkspace_sptr ws;
-  if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
-  {
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
-  }
-  if( !ws.get() )
-  {
-    QApplication::restoreOverrideCursor();
-    return NULL;
-  }
+   MantidMatrix* m = getMantidMatrix(wsName);
+   if( !m )
+   {
+     m = importMatrixWorkspace(wsName, -1, -1, false, false);
+   }
+   MatrixWorkspace_sptr ws;
+   if (AnalysisDataService::Instance().doesExist(wsName.toStdString()))
+   {
+     ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
+   }
+   if( !ws.get() )
+   {
+     QApplication::restoreOverrideCursor();
+     return NULL;
+   }
 
-  QList<int> binAsList;
-  binAsList.append(bin);
-  Table *t = createTableFromBins(wsName, ws, binAsList, errors);
-  t->confirmClose(false);
-  t->setAttribute(Qt::WA_QuitOnClose);
-  MultiLayer* ml(NULL);
-  if( !t )
-  {
-    QApplication::restoreOverrideCursor();
-    return ml;
-  }
+   Table *t = createTableFromBins(wsName, ws, binsList, errors);
+   t->confirmClose(false);
+   t->setAttribute(Qt::WA_QuitOnClose);
+   MultiLayer* ml(NULL);
+   if( !t )
+   {
+     QApplication::restoreOverrideCursor();
+     return ml;
+   }
 
-  // TODO: Use the default style instead of a line if nothing is passed into this method
-  ml = appWindow()->multilayerPlot(t,t->colNames(),style);
-  m->setBinGraph(ml,t);
-  ml->confirmClose(false);
-  QApplication::restoreOverrideCursor();
-  return ml;
+   // TODO: Use the default style instead of a line if nothing is passed into this method
+   ml = appWindow()->multilayerPlot(t,t->colNames(),style);
+   m->setBinGraph(ml,t);
+   ml->confirmClose(false);
+   QApplication::restoreOverrideCursor();
+   return ml;
 }
-
 
 /**
 * Sets the flag that tells the scripting environment that

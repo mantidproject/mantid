@@ -218,7 +218,7 @@ def fitBrowser():
     return proxies.FitBrowserProxy(_qti.app.mantidUI.fitFunctionBrowser())
 
 #-----------------------------------------------------------------------------
-def plotBin(source, indices, error_bars = False, type = 0):
+def plotBin(source, indices, error_bars = False, graph_type = 0):
     """Create a 1D Plot of bin count vs spectrum in a workspace.
     
     This puts the spectrum number as the X variable, and the
@@ -235,7 +235,19 @@ def plotBin(source, indices, error_bars = False, type = 0):
     Returns:
         A handle to the created Graph widget.
     """
-    return __doBinPlot(source,indices,error_bars,type)
+    def _callPlotBin(workspace, indexes, errors, graph_type):
+        if isinstance(workspace, str):
+            wkspname = workspace
+        else:
+            wkspname = workspace.getName()
+        if type(indexes) == int:
+            indexes = [indexes]
+        return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, indexes, errors,graph_type)
+
+    if isinstance(source, list) or isinstance(source, tuple):
+        raise RuntimeError("Currently unable to handle multiple sources for bin plotting. Merging must be done by hand.")
+    else:
+        return _callPlotBin(source, indices, error_bars, graph_type)
 
 #-----------------------------------------------------------------------------
 def stemPlot(source, index, power=None, startPoint=None, endPoint=None):
@@ -731,52 +743,3 @@ def __getWorkspaceIndices(source):
     return index_list
 
 #-----------------------------------------------------------------------------
-
-def __doBinPlot(source, indices, error_bars,type):
-    """
-       Runs plotBin in the manner most suited to the input
-       
-       If the source is a list/tuple then a plot of all of the 
-       bins merged together is created.
-       If the source is a single str or workspace then a single
-       bin plot is produced
-    """
-    if isinstance(source, list) or isinstance(source, tuple):
-        return __plotBinList(source, indices, error_bars,type)
-    elif isinstance(source, str) or hasattr(source, 'getName'):
-        return __plotBinSingle(source, indices, error_bars,type)
-    else:
-        raise TypeError("Source is not a workspace name or a workspace variable")
-    
-def __plotBinSingle(workspace, indices, error_bars,type):
-    if isinstance(indices, list) or isinstance(indices, tuple):
-        master_graph = __callPlotBin(workspace, indices[0], error_bars,type)
-        for index in indices[1:]:
-            mergePlots(master_graph, __callPlotBin(workspace, index, error_bars,type))
-        return master_graph
-    else:
-        return __callPlotBin(workspace, indices, error_bars,type)
-    
-def __plotBinList(workspace_list, indices, error_bars,type):
-    if isinstance(indices, list) or isinstance(indices, tuple):
-        master_graph = __callPlotBin(workspace_list[0], indices[0], error_bars,type)
-        start = 1
-        for workspace in workspace_list:
-            for index in indices[start:]:
-                mergePlots(master_graph, __callPlotBin(workspace, index, error_bars,type))
-                start = 0
-                
-        return master_graph
-    else:
-        master_graph = __callPlotBin(workspace_list[0], indices, error_bars,type)
-        for workspace in workspace_list[1:]:
-            mergePlots(master_graph, __callPlotBin(workspace, indices, error_bars,type))
-        return master_graph
-
-def __callPlotBin(workspace, index, error_bars,type):
-    if isinstance(workspace, str):
-        wkspname = workspace
-    else:
-        wkspname = workspace.getName()
-    return new_proxy(proxies.Graph,_qti.app.mantidUI.plotBin,wkspname, index, error_bars,type)
-#------------------------------------------------------------------------------------------
