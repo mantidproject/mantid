@@ -34,19 +34,26 @@ def getInstrRun(file):
     run = mo.group(2)                    # run number as string
     return instr,run
 
-def getWSprefix(workspace):
+def getWSprefix(wsname,runfile=None):
     '''Returns a string of the form '<ins><run>_<analyser><refl>_' on which
-    all of our other naming conventions are built.'''
-    if workspace == '':
+    all of our other naming conventions are built.
+    The workspace is used to get the instrument parameters. If the runfile
+    string is given it is expected to be a string with instrument prefix
+    and run number. If it is empty then the workspace name is assumed to
+    contain this information
+    '''
+    if wsname == '':
         return ''
-    ws = mtd[workspace]
+    if runfile is None:
+        runfile = wsname
+    ws = mtd[wsname]
     facility = config['default.facility']
     if facility == 'ILL':
         instr = ws.getInstrument().getName()
         logger.notice('Facility is '+facility)
-        prefix = instr + '_' + workspace[:-3]
+        prefix = instr + '_' + wsname[:-3]
     else:		
-        (instr, run) = getInstrRun(workspace)
+        (instr, run) = getInstrRun(runfile)
         run_name = instr + run
         try:
             analyser = ws.getInstrument().getStringParameter('analyser')[0]

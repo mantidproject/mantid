@@ -248,7 +248,7 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         Integration(InputWorkspace='sam_data', OutputWorkspace='sam_int')
         Divide(LHSWorkspace='sam_fft', RHSWorkspace='sam_int', OutputWorkspace='sam')
         # Create save file name
-        savefile = getWSprefix(root) + 'iqt'
+        savefile = getWSprefix('sam_data', root) + 'iqt'
         outWSlist.append(savefile)
         Divide(LHSWorkspace='sam', RHSWorkspace='res', OutputWorkspace=savefile)
         #Cleanup Sample Files
