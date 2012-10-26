@@ -134,8 +134,9 @@ if ( WIN32 OR APPLE )
   set ( NEXUSLIB ../../${NEXUSLIB_FILE} )
 endif()
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${NEXUSLIB_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py )
-# Generate pyc for the packaged version here as we can't hang things off install targets
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -m compileall ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py OUTPUT_QUIET )
+# Generate pyc for the packaged version here as we can't hang things off install targets. compileall can't do single files
+# so mimic it with the -x regex exclude of the one we don't want to compile. -l turns of directory recursion
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -m compileall -l -x "${NEXUSLIB_PY}.py" ${CMAKE_CURRENT_BINARY_DIR}/ OUTPUT_QUIET )
 
 #############################################################################################
 # Create the target for this directory
