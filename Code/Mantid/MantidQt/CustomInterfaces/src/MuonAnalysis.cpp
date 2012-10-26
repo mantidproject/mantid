@@ -1990,50 +1990,13 @@ void MuonAnalysis::handlePeriodChoice(const QString wsName, const QStringList& p
 
     Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)).toStdString(), wsName.toStdString());
     Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)+"_Raw").toStdString(), (wsName+"_Raw").toStdString()); 
-
-    // when a workspace is renamed it appears to have forgot which WorkspaceGroup it belonged to 
-    QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsName + "," + groupName
-      + "," + wsName+"_Raw" + "',OutputWorkspace='" + groupName + "')\n";
-    runPythonCode( groupStr ).trimmed();
   }
   else
   {
     if ( periodLabel.at(0) != "" )
     {
-      //Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)).toStdString(), wsName.toStdString());
-      //Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)+"_Raw").toStdString(), (wsName+"_Raw").toStdString());      
-
-
-      Mantid::API::IAlgorithm_sptr alg1 = Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
-      alg1->setPropertyValue("InputWorkspace", (wsName + periodLabel.at(0)).toStdString());
-      alg1->setPropertyValue("OutputWorkspace", wsName.toStdString());
-      alg1->execute();
-      Mantid::API::IAlgorithm_sptr alg2 = Mantid::API::AlgorithmManager::Instance().create("CloneWorkspace");
-      alg2->setPropertyValue("InputWorkspace", (wsName + periodLabel.at(0)+"_Raw").toStdString());
-      alg2->setPropertyValue("OutputWorkspace", (wsName+"_Raw").toStdString());
-      alg2->execute();
-      /*std::string forDebug = (wsName + periodLabel.at(0)).toStdString();
-
-      Mantid::API::IAlgorithm_sptr alg1 = Mantid::API::AlgorithmManager::Instance().create("RenameWorkspace");
-      alg1->setPropertyValue("InputWorkspace", (wsName + periodLabel.at(0)).toStdString());
-      alg1->setPropertyValue("OutputWorkspace", wsName.toStdString());
-      alg1->execute();
-      Mantid::API::IAlgorithm_sptr alg2 = Mantid::API::AlgorithmManager::Instance().create("RenameWorkspace");
-      alg2->setPropertyValue("InputWorkspace", (wsName + periodLabel.at(0)+"_Raw").toStdString());
-      alg2->setPropertyValue("OutputWorkspace", (wsName+"_Raw").toStdString());
-      alg2->execute();*/
-
-      // when a workspace is renamed it appears to have forgot which WorkspaceGroup it belonged to 
-      //QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsName + "," + groupName
-      //  + "," + wsName+"_Raw" + "',OutputWorkspace='" + groupName + "')\n";
-      //runPythonCode( groupStr ).trimmed();
-
-      //QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsName + "," + wsName+"_Raw" 
-      //  + "," + groupName + "',OutputWorkspace='" + groupName + "')\n";
-      //runPythonCode( groupStr ).trimmed();
-      //QString groupStr = QString("GroupWorkspaces(InputWorkspaces='") + wsName
-      //  + "," + groupName + "',OutputWorkspace='" + groupName + "')\n";
-      //runPythonCode( groupStr ).trimmed();
+      Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)).toStdString(), wsName.toStdString());
+      Mantid::API::AnalysisDataService::Instance().rename((wsName + periodLabel.at(0)+"_Raw").toStdString(), (wsName+"_Raw").toStdString());      
     }
   }
 }
