@@ -831,7 +831,7 @@ bool SANSRunWindow::loadUserFile()
   ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED options
   QString detName = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.det_selection").trimmed();
-  if (detName == "REAR"){
+  if (detName == "REAR" || detName == "MAIN"){
      m_uiForm.detbank_sel->setCurrentIndex(0);
   }else if (detName == "FRONT" || detName == "HAB"){
      m_uiForm.detbank_sel->setCurrentIndex(1);
