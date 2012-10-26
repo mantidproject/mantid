@@ -250,6 +250,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         self.assertEqual(BH.signalAt(3+20*(2+5*1)),signal[1,2,3])
         self.assertEqual(BH.signalAt(4+20*(3+5*2)),signal[2,3,4])  
         mtd.remove('BH')
+        mtd.remove('mdwHW')		
 
         
 if __name__ == '__main__':
