@@ -113,18 +113,18 @@ copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DI
                            PYTHON_INSTALL_FILES )
 
 #############################################################################################
-# Generate the nexuslib module for the build & install package
+# Generate the packagesetup module for the build & install package
 #############################################################################################
-set ( NEXUSLIB_PY nexuslib )
+set ( PACKAGESETUP_PY packagesetup )
 set ( NEXUSLIB ${NEXUS_C_LIBRARIES} )
 if ( WIN32 ) #.lib -> .dll
   string ( REPLACE ".lib" ".dll" NEXUSLIB ${NEXUSLIB} )
 endif()
 
 # Build version
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${NEXUSLIB_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.py )
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.py )
 # Copy py & generate pyc in build directory, taking care of multi-config (MSVC) builds
-copy_python_files_to_dir ( ${NEXUSLIB_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR} 
+copy_python_files_to_dir ( ${PACKAGESETUP_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR} 
                            PYTHON_INSTALL_FILES )
 
 # Package version
@@ -133,10 +133,10 @@ if ( WIN32 OR APPLE )
   get_filename_component ( NEXUSLIB_FILE ${NEXUSLIB} NAME )
   set ( NEXUSLIB ../../${NEXUSLIB_FILE} )
 endif()
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${NEXUSLIB_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py )
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py )
 # Generate pyc for the packaged version here as we can't hang things off install targets. compileall can't do single files
 # so mimic it with the -x regex exclude of the one we don't want to compile. -l turns of directory recursion
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -m compileall -l -x "${NEXUSLIB_PY}.py" ${CMAKE_CURRENT_BINARY_DIR}/ OUTPUT_QUIET )
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -m compileall -l -x "${PACKAGESETUP_PY}.py" ${CMAKE_CURRENT_BINARY_DIR}/ OUTPUT_QUIET )
 
 #############################################################################################
 # Create the target for this directory
@@ -171,8 +171,8 @@ if ( UNIX )
   install ( TARGETS _dlopen DESTINATION ${BIN_DIR}/mantid/kernel )
 endif()
 
-# nexuslib.py & nexuslib.pyc that will overwrite the ones from the built target
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py DESTINATION
-          ${BIN_DIR}/mantid/kernel RENAME ${NEXUSLIB_PY}.py )
-install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.pyc DESTINATION
-          ${BIN_DIR}/mantid/kernel RENAME ${NEXUSLIB_PY}.pyc )
+# packagesetup.py & packagesetup.pyc that will overwrite the ones from the built target
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py DESTINATION
+          ${BIN_DIR}/mantid/kernel RENAME ${PACKAGESETUP_PY}.py )
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.pyc DESTINATION
+          ${BIN_DIR}/mantid/kernel RENAME ${PACKAGESETUP_PY}.pyc )

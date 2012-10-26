@@ -1,9 +1,13 @@
 """
     ===== AUTO-GENERATED MODULE ====
 
-    Defines a function that sets the NEXUSLIB environment variable required 
-    by the nxs package. The variable  value is set by CMake
+    Handles set up of aspects related to extra Python packages e.g. adding
+    any required paths to sys.path, setting environment variables etc.
+    
+    @todo: Add script directories here when old API is removed
 """
+
+########################################################################################
 
 def set_NEXUSLIB_var():
     """
@@ -19,5 +23,9 @@ def set_NEXUSLIB_var():
         thisdir = _os.path.dirname(__file__)
         _nexuslib = _os.path.normpath(_os.path.join(thisdir, _nexuslib))
 
-    # Add to current environment
     _os.environ['NEXUSLIB'] = _nexuslib
+
+#########################################################################################
+
+# On import run the setup
+set_NEXUSLIB_var()

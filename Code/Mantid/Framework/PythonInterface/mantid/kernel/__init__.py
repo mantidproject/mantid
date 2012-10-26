@@ -18,11 +18,9 @@ _pydlopen.restore_flags(flags)
 ###############################################################################
 
 ###############################################################################
-# Set the path to the NeXus C library. It is required by the nxs package so
-# make it a little bit easier for our users
+# Do any site-specific setup for packages
 ###############################################################################
-import nexuslib as _nexuslib
-_nexuslib.set_NEXUSLIB_var()
+import packagesetup as _packagesetup
 
 ###############################################################################
 # Make modules available in this namespace
