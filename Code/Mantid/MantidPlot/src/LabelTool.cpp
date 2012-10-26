@@ -7,16 +7,16 @@ LabelTool::LabelTool(Graph *graph)
     m_canvasPicker(new QwtPicker(graph->plotWidget()->canvas())),
     m_xAxisPicker(new QwtPicker(graph->plotWidget()->axisWidget(Plot::xBottom))),   
     m_yAxisPicker(new QwtPicker(graph->plotWidget()->axisWidget(Plot::yLeft))),
-    m_xPos(), m_yPos(), m_axisX(), m_axisY(), m_axisCoordsX(), m_axisCoordsY(), m_error(), m_dataCoords()
+    m_xPos(), m_yPos(), m_axisCoordsX(), m_axisCoordsY(), m_xPosSigFigs(), m_yPosSigFigs(), m_error(), m_dataCoords(), m_curveWsName()
 {
     connect(m_xAxisPicker, SIGNAL(selected(const QwtPolygon &)), this, SLOT(xAxisClicked(const QwtPolygon &)));
     connect(m_yAxisPicker, SIGNAL(selected(const QwtPolygon &)), this, SLOT(yAxisClicked(const QwtPolygon &)));
-    connect(m_canvasPicker, SIGNAL(selected(const QwtPolygon &)), this, SLOT(canvasClicked(const QwtPolygon &)));
+    connect(m_canvasPicker, SIGNAL(selected(const QwtPolygon &)), this, SLOT(graphAreaClicked(const QwtPolygon &)));
   
     m_xAxisPicker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
     m_yAxisPicker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
     m_canvasPicker->setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
-  }
+}
 
 /// Destructor for the tool.
   LabelTool::~LabelTool()
@@ -24,8 +24,7 @@ LabelTool::LabelTool(Graph *graph)
 	  d_graph->plotWidget()->canvas()->unsetCursor();
 	  d_graph->plotWidget()->replot();
   }
-
-
+  
 /**
  * When x-axis is clicked, the pixel coordinates are converted to graph coordinates, and displayed in a pop-up menu.
  * @param &x :: A reference to a click on the x-axis.
@@ -38,7 +37,7 @@ void LabelTool::xAxisClicked(const QwtPolygon &x)
   QPoint xx = x.point(0);
   int xPosition = xx.x();
   
-  // Obtains the origins of the canvas and of the axis.
+  // Obtains the origins of the graph area and of the axis.
   QPoint canvasOrigin = d_graph->plotWidget()->canvas()->pos();
   int canvasOriginX = canvasOrigin.x();
 
@@ -60,12 +59,16 @@ void LabelTool::xAxisClicked(const QwtPolygon &x)
     return;
   }
 
-  m_axisX = boost::lexical_cast<std::string>(xPos);
-  m_axisCoordsX = "(" + m_axisX + ", 0)";
+  std::stringstream precisionValue;
+  precisionValue.precision(6);
+  precisionValue << xPos;
+  m_xPosSigFigs = precisionValue.str();
 
-  QMenu * clickMenu = new QMenu(d_graph);
-  
-  clickMenu->addAction(new QAction(tr(m_axisCoordsX.c_str()), this));
+  QMenu * clickMenu = new QMenu(d_graph);  
+
+  QAction * addXAxisLabel = new QAction(tr(QString::fromStdString(m_xPosSigFigs.c_str())), this);
+  clickMenu->addAction(addXAxisLabel);
+  connect(addXAxisLabel,SIGNAL(triggered()), this, SLOT(insertXCoord()));
   clickMenu->insertSeparator();
 
   clickMenu->exec(QCursor::pos());
@@ -83,7 +86,7 @@ void LabelTool::yAxisClicked(const QwtPolygon &y)
   QPoint yy = y.point(0);
   int yPosition = yy.y();
 
-  // Obtains the origins of the canvas and of the axis.
+  // Obtains the origins of the graph area and of the axis.
   QPoint canvasOrigin = d_graph->plotWidget()->canvas()->pos();
   int canvasOriginY = canvasOrigin.y();
 
@@ -105,12 +108,16 @@ void LabelTool::yAxisClicked(const QwtPolygon &y)
     return;
   }
 
-  m_axisY = boost::lexical_cast<std::string>(yPos);
-  m_axisCoordsY = "(0, " + m_axisY + ")";
+  std::stringstream precisionValue;
+  precisionValue.precision(6);
+  precisionValue << yPos;
+  m_yPosSigFigs = precisionValue.str();
 
   QMenu * clickMenu = new QMenu(d_graph);
   
-  clickMenu->addAction(new QAction(tr(m_axisCoordsY.c_str()), this));
+  QAction * addYAxisLabel = new QAction(tr(QString::fromStdString(m_yPosSigFigs.c_str())), this);
+  clickMenu->addAction(addYAxisLabel);
+  connect(addYAxisLabel,SIGNAL(triggered()), this, SLOT(insertYCoord()));
   clickMenu->insertSeparator();
 
   clickMenu->exec(QCursor::pos());
@@ -139,20 +146,22 @@ void LabelTool::populateMantidCurves()
 }
 
 /** 
- * When the canvas is clicked, pixel coordinates are found and used to determine graph coordinates.
+ * When the graph area is clicked, pixel coordinates are found and used to determine graph coordinates.
  * Determines the number of MMCs from the list in populateMantidCurves().
- * For each MMC, determines whether a click on the canvas is within close proximity to a data point.
+ * For each MMC, determines whether a click on the graph area is within close proximity to a data point.
  * If it is, the coordinates of the data point are stored for display.
- * @param &c :: A reference to a click on the canvas; it is bound by the x and y-axis.
+ * @param &c :: A reference to a click on the graph area; it is bound by the x and y-axis.
  */
-void LabelTool::canvasClicked(const QwtPolygon &c)
+void LabelTool::graphAreaClicked(const QwtPolygon &c)
 { 
   populateMantidCurves();
 
   QPoint cc = c.point(0);
   int xPosition = cc.x();
   int yPosition = cc.y();
-  
+
+  // std::cout << "xPosition: " << xPosition << " " << "yPosition: " << yPosition << std::endl;
+
   m_xPos = d_graph->plotWidget()->invTransform(QwtPlot::xBottom, xPosition);
   m_yPos = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, yPosition);
 
@@ -166,7 +175,12 @@ void LabelTool::canvasClicked(const QwtPolygon &c)
   int lowerLimitX = xPosition - tolerance;
   int upperLimitY = yPosition + tolerance;
   int lowerLimitY = yPosition - tolerance;
-    
+  
+  /*
+  // Gets the workspace name for which the curve belongs to.
+  QString workspaceNameOfCurve = mantidMatrixCurve->workspaceName();
+  */
+
   // Gets the number of data points on the curve.
   MantidQwtMatrixWorkspaceData *mwd = mantidMatrixCurve->mantidData();
   size_t numberOfDataPoints = mwd->size();
@@ -192,10 +206,10 @@ void LabelTool::canvasClicked(const QwtPolygon &c)
     }
   }
 
-  // Calls the function for when a blank canvas is clicked if there are no points within the specified ranges.
+  // Calls the function for when a blank graph area is clicked if there are no points within the specified ranges.
   if( pointsWithinRange.isEmpty() )
   {
-    blankCanvasClick();
+    blankRegionClicked();
     break;
   }
 
@@ -230,23 +244,38 @@ void LabelTool::canvasClicked(const QwtPolygon &c)
   double nearestPointYCoord = mwd->y(nearestPointIndex);
   double errorOfNearestPoint = mwd->e(nearestPointIndex);
 
-  std::string x_str = boost::lexical_cast<std::string>(nearestPointXCoord);
-  std::string y_str = boost::lexical_cast<std::string>(nearestPointYCoord);
-  std::string error = boost::lexical_cast<std::string>(errorOfNearestPoint);
+  std::stringstream precisionValueX;
+  precisionValueX.precision(6);
+  precisionValueX << nearestPointXCoord;
+  m_xPosSigFigs = precisionValueX.str();
 
-  m_error = "Error: ± " + error;
-  m_dataCoords = "(" + x_str + ", " + y_str +")";
-    
+  std::stringstream precisionValueY;
+  precisionValueY.precision(6);
+  precisionValueY << nearestPointYCoord;
+  m_yPosSigFigs = precisionValueY.str();
+
+  std::stringstream error;
+  error.precision(6);
+  error << errorOfNearestPoint;
+  std::string errorSigFigs = error.str();
+
+  m_dataCoords = "(" + m_xPosSigFigs + ", " + m_yPosSigFigs + ")";
+  m_error = m_yPosSigFigs + " ±" + errorSigFigs;  
+
+  // Gets the workspace name for which the curve with the datapoint belongs to.
+  QString workspaceNameOfCurve = mantidMatrixCurve->workspaceName();
+  m_curveWsName = workspaceNameOfCurve;
+  
   dataPointClicked();
   }
 }
 
 /**
- * Pops up a menu when a click on a canvas is not within close proximity to a data point.
+ * Pops up a menu when a click on the graph area is not within close proximity to a data point.
  * Has option to add a label. Also displays info about the workspace.
  * One can also view the log values present.
  */
-void LabelTool::blankCanvasClick()
+void LabelTool::blankRegionClicked()
 {
   QMenu * clickMenu = new QMenu(d_graph);
 
@@ -275,15 +304,23 @@ void LabelTool::blankCanvasClick()
   clickMenu->exec(QCursor::pos());
 }
 
-/// If the click is within close proximity of a click, then a different menu is displayed.
+/// If the click is within close proximity of a data point, then a different menu is displayed.
 void LabelTool::dataPointClicked()
 {
   QMenu * clickMenu = new QMenu(d_graph);
   
   // For displaying data coordinates.
-  clickMenu->addAction(new QAction(tr(QString::fromStdString(m_dataCoords.c_str())), this));
+
+  QAction * addCoordinateLabel = new QAction(tr(QString::fromStdString(m_dataCoords.c_str())), this);
+  clickMenu->addAction(addCoordinateLabel);
+  connect(addCoordinateLabel,SIGNAL(triggered()), this, SLOT(insertDataCoord()));
+
   clickMenu->insertSeparator();
-  clickMenu->addAction(new QAction(tr(QString::fromStdString(m_error.c_str())), this));
+
+  QAction * addErrorLabel = new QAction(tr(QString::fromStdString(m_error.c_str())), this);
+  clickMenu->addAction(addErrorLabel);
+  connect(addErrorLabel,SIGNAL(triggered()), this, SLOT(insertErrorValue()));
+
   clickMenu->insertSeparator();
   
   // For adding labels onto workspace.
@@ -293,11 +330,30 @@ void LabelTool::dataPointClicked()
  
   // For workspace information.
   QMenu * info = clickMenu->addMenu(tr("More info..."));
-  QMenu * workspaces = info->addMenu(tr("Workspaces"));
+  QMenu * workspaces = info->addMenu(tr("Workspace"));
+  
+  QAction * wsNameToDisplay = new QAction((tr(m_curveWsName)), this);
+  workspaces->addAction(wsNameToDisplay);
+
+  
+  /*
+
+  // Before final testing, make sure that when you select a datapoint, its respective Ws name is displayed
+
   foreach(QString wsName, workspaceNames())
   {
-    workspaces->addAction(new QAction(tr(wsName), this));
+    QAction * wsNameToDisplay = new QAction((tr(wsName)), this);
+    workspaces->addAction(wsNameToDisplay);
   }
+
+  
+  // For displaying workspace title.
+  Mantid::API::Workspace *name; 
+  std::string wsTitle = name->getTitle();
+  
+  QMenu * workspaceTitle = workspaces->addMenu(tr(wsTitle), this);
+  */
+
 
   // For viewing log values.
   QMenu * logVals = info->addMenu(tr("Log values"));
@@ -344,6 +400,7 @@ QSet<QString> LabelTool::workspaceNames()
   return workspaceNames;
 }
 
+
 /**
  * Gets the log values for display in the menu when a click is made whilst using the label tool.
  * Accounts for the fact that for each workspace, the properties available may differ.
@@ -360,8 +417,144 @@ QSet<QString> LabelTool::logValues()
 
     for(std::vector<Mantid::Kernel::Property *>::iterator prop = properties.begin(); prop != properties.end(); ++prop)
     {
-      logProperties.insert(QString::fromStdString((*prop)->name() + " : " + (*prop)->value()));
+      auto timeSeriesProp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double>*>(*prop);
+
+      if(timeSeriesProp)
+      {
+        Mantid::Kernel::TimeSeriesPropertyStatistics;
+        double medianValue = timeSeriesProp->getStatistics().median;
+        std::string medianValue_str = boost::lexical_cast<std::string>(medianValue);
+        logProperties.insert(QString::fromStdString((*prop)->name() + " : " + medianValue_str));
+      }
+
+      else
+      
+        logProperties.insert(QString::fromStdString((*prop)->name() + " : " + (*prop)->value()));
     }
   }
   return logProperties;
+}
+
+/// Sets the coordinates for where the label showing the x-position value is to be located.
+void LabelTool::insertXCoord()
+{
+  LegendWidget *xCoordLabel = new LegendWidget(d_graph->plotWidget());
+
+  // Calculates the value, in pixel coordinates, where the y-axis intersects the x-axis.
+  int yAxisOriginInPixCoords = d_graph->plotWidget()->transform(QwtPlot::yLeft, 0.0);
+    
+  double yAxisLabelPosition = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, (yAxisOriginInPixCoords - 30));
+  double xPosSigFigs = boost::lexical_cast<double>(m_xPosSigFigs);
+    
+  xCoordLabel->setOriginCoord(xPosSigFigs, yAxisLabelPosition);
+  xCoordLabel->setText(QString::fromStdString(m_xPosSigFigs));
+    
+  /*
+      
+  QwtText *xCoordLabel = new QwtText();
+  xCoordLabel->draw();
+    (d_graph->plotWidget());
+  */
+
+}
+
+/// Sets the coordinates for where the label showing the y-position value is to be located.
+void LabelTool::insertYCoord()
+{
+  LegendWidget *yCoordLabel = new LegendWidget(d_graph->plotWidget());
+
+  // Calculates the value, in pixel coordinates, where the x-axis intersects the y-axis.
+  int xAxisOriginInPixCoords = d_graph->plotWidget()->transform(QwtPlot::xBottom, 0.0);
+    
+  double xAxisLabelPosition = d_graph->plotWidget()->invTransform(QwtPlot::xBottom, (xAxisOriginInPixCoords + 2));
+  double yPosSigFigs = boost::lexical_cast<double>(m_yPosSigFigs);
+
+  yCoordLabel->setOriginCoord(xAxisLabelPosition, yPosSigFigs);
+  yCoordLabel->setText(QString::fromStdString(m_yPosSigFigs));
+}
+
+/// Sets the coordinates for where the label showing the coordinates of the data point is to be located.
+void LabelTool::insertDataCoord()
+{
+  LegendWidget *dataPointLabel = new LegendWidget(d_graph->plotWidget());
+
+  // x and y pixel coordinates.
+  double xGraphCoordOfDataPoint = boost::lexical_cast<double>(m_xPosSigFigs);
+  double yGraphCoordOfDataPoint = boost::lexical_cast<double>(m_yPosSigFigs);
+
+  int xPixCoordOfDataPoint = d_graph->plotWidget()->transform(QwtPlot::xBottom, xGraphCoordOfDataPoint);
+  int yPixCoordOfDataPoint = d_graph->plotWidget()->transform(QwtPlot::yLeft, yGraphCoordOfDataPoint);
+    
+  // The value to shift the x-coordinate of the label by to avoid an overlap with its corresponding data point.
+  int shiftValueX = 10;
+
+  double labelCoordinateX = d_graph->plotWidget()->invTransform(QwtPlot::xBottom, (xPixCoordOfDataPoint + shiftValueX));
+  int xAxisOriginInPixCoords = d_graph->plotWidget()->transform(QwtPlot::yLeft, 0.0);    
+  
+  double labelCoordinateY;
+
+  // Minimum pixel difference allowed between the y-coordinate of click and the x-axis.
+  int minDistFromAxis = 25; 
+
+  if((xAxisOriginInPixCoords - yPixCoordOfDataPoint) < minDistFromAxis)
+  {
+    int deltaPositionFromAxis = xAxisOriginInPixCoords - yPixCoordOfDataPoint;
+    int shiftValueY = minDistFromAxis - deltaPositionFromAxis;
+
+    // Remember, pixel values in the y direction increase downward from the top of the screen.
+    int labelYPixCoord = yPixCoordOfDataPoint - shiftValueY;
+
+    labelCoordinateY = d_graph->plotWidget()->invTransform(QwtPlot::yLeft,labelYPixCoord);
+  }
+    
+  else
+  {
+  labelCoordinateY = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, (yPixCoordOfDataPoint));
+  }
+    
+  dataPointLabel->setOriginCoord(labelCoordinateX,labelCoordinateY);
+  dataPointLabel->setText(QString::fromStdString(m_dataCoords));
+}
+
+/// Attaches a label close to a data point, showing the error associated with the y-value.
+void LabelTool::insertErrorValue()
+{  
+  LegendWidget *errorPointLabel = new LegendWidget(d_graph->plotWidget());
+
+  // x and y pixel coordinates.
+  double xGraphCoordOfDataPoint = boost::lexical_cast<double>(m_xPosSigFigs);
+  double yGraphCoordOfDataPoint = boost::lexical_cast<double>(m_yPosSigFigs);
+
+  int xPixCoordOfDataPoint = d_graph->plotWidget()->transform(QwtPlot::xBottom, xGraphCoordOfDataPoint);
+  int yPixCoordOfDataPoint = d_graph->plotWidget()->transform(QwtPlot::yLeft, yGraphCoordOfDataPoint);
+    
+  // The value to shift the x-coordinate of the label by to avoid an overlap with its corresponding data point.
+  int shiftValueX = 10;
+
+  double labelCoordinateX = d_graph->plotWidget()->invTransform(QwtPlot::xBottom, (xPixCoordOfDataPoint + shiftValueX));
+  int xAxisOriginInPixCoords = d_graph->plotWidget()->transform(QwtPlot::yLeft, 0.0);    
+  
+  double labelCoordinateY;
+
+  // Minimum pixel difference allowed between the y-coordinate of click and the x-axis.
+  int minDistFromAxis = 25; 
+
+  if((xAxisOriginInPixCoords - yPixCoordOfDataPoint) < minDistFromAxis)
+  {
+    int deltaPositionFromAxis = xAxisOriginInPixCoords - yPixCoordOfDataPoint;
+    int shiftValueY = minDistFromAxis - deltaPositionFromAxis;
+
+    // Remember, pixel values in the y direction increase downward from the top of the screen.
+    int labelYPixCoord = yPixCoordOfDataPoint - shiftValueY;
+
+    labelCoordinateY = d_graph->plotWidget()->invTransform(QwtPlot::yLeft,labelYPixCoord);
+  }
+    
+  else
+  {
+  labelCoordinateY = d_graph->plotWidget()->invTransform(QwtPlot::yLeft, (yPixCoordOfDataPoint));
+  }
+    
+  errorPointLabel->setOriginCoord(labelCoordinateX,labelCoordinateY);
+  errorPointLabel->setText(QString::fromStdString(m_error));
 }

@@ -5,6 +5,7 @@
 #include "Graph.h"
 #include "LegendWidget.h"
 #include "TextDialog.h"
+#include "DataPointMarker.h"
 
 #include "Plot.h"
 #include "PlotCurve.h"
@@ -13,20 +14,27 @@
 #include "Mantid/MantidMatrixCurve.h" 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/Workspace.h"
 
 #include <QList>
 #include <QMenu>
 #include <QSet>
 
 #include "QwtErrorPlotCurve.h"
-#include <qwt_plot_marker.h>
-#include <qwt_picker.h>
 #include <qwt_scale_widget.h>
 #include <qpoint.h>
 #include <qpolygon.h>
+#include <qwt_picker.h>
 #include <qwt_plot.h>
+#include <qwt_plot_marker.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_plot_curve.h>
+#include <qwt_text_label.h>
+#include <qwt_symbol.h>
+#include <qwt_text.h>
+
+#include <iomanip>
 
 class ApplicationWindow;
 class QwtPlotCurve;
@@ -54,30 +62,42 @@ private:
   QwtPicker *m_yAxisPicker;
   
   QSet<QString> workspaceNames();
+  // Future idea to display in the drop-down menu: QString workspaceTitle();
+  // Future idea to display in the drop-down menu: QString workspaceInstrument();
   QSet<QString> logValues();
-  QList<MantidMatrixCurve *> m_mantidMatrixCurves;
-
+  
   void populateMantidCurves();
-  void blankCanvasClick();
-  void dataPointClicked();  
+  void blankRegionClicked();
+  void dataPointClicked(); 
 
-  /// Relating to the point where the canvas is clicked.
+  /// Member variables relating to the point where the canvas is clicked.
   double m_xPos;
   double m_yPos;
-  std::string m_axisX;
-  std::string m_axisY;
   std::string m_axisCoordsX;
   std::string m_axisCoordsY;
+  std::string m_xPosSigFigs;
+  std::string m_yPosSigFigs;
   std::string m_error;
   std::string m_dataCoords;
+  QString m_curveWsName;
+
+  /// List of curves of type MantidCurve.
+  QList<MantidMatrixCurve *> m_mantidMatrixCurves;
+
+  /// List of symbols on the plot.
+  QList<QwtSymbol *> m_symbols;
 
 private slots:
 
-  void canvasClicked(const QwtPolygon &);
+  void graphAreaClicked(const QwtPolygon &);
   void xAxisClicked(const QwtPolygon &);
   void yAxisClicked(const QwtPolygon &);
 
   void insertTextBox();
+  void insertXCoord();
+  void insertYCoord();
+  void insertDataCoord();
+  void insertErrorValue();
 };
 
 
