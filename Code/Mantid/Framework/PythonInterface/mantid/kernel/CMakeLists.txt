@@ -113,6 +113,31 @@ copy_python_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DI
                            PYTHON_INSTALL_FILES )
 
 #############################################################################################
+# Generate the nexuslib module for the build & install package
+#############################################################################################
+set ( NEXUSLIB_PY nexuslib )
+set ( NEXUSLIB ${NEXUS_C_LIBRARIES} )
+if ( WIN32 ) #.lib -> .dll
+  string ( REPLACE ".lib" ".dll" NEXUSLIB ${NEXUSLIB} )
+endif()
+
+# Build version
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${NEXUSLIB_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.py )
+# Copy py & generate pyc in build directory, taking care of multi-config (MSVC) builds
+copy_python_files_to_dir ( ${NEXUSLIB_PY}.py ${CMAKE_CURRENT_BINARY_DIR} ${OUTPUT_DIR} 
+                           PYTHON_INSTALL_FILES )
+
+# Package version
+if ( WIN32 OR APPLE )
+  # NeXus library is in the same place relative to the Python library
+  get_filename_component ( NEXUSLIB_FILE ${NEXUSLIB} NAME )
+  set ( NEXUSLIB ../../${NEXUSLIB_FILE} )
+endif()
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${NEXUSLIB_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py )
+# Generate pyc for the packaged version here as we can't hang things off install targets
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -m compileall ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py OUTPUT_QUIET )
+
+#############################################################################################
 # Create the target for this directory
 #############################################################################################
 
@@ -136,32 +161,6 @@ endif()
   add_dependencies( PythonKernelModule _dlopen )
 endif()
 
-#############################################################################################
-# Generate the nexuslib module for the build
-#############################################################################################
-set ( NEXUSLIB_PY nexuslib )
-set ( NEXUSLIB ${NEXUS_C_LIBRARIES} )
-if ( WIN32 ) #.lib -> .dll
-  string ( REPLACE ".lib" ".dll" NEXUSLIB ${NEXUSLIB} )
-endif()
-
-# Build version
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${NEXUSLIB_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.py )
-if ( WIN32 OR APPLE )
-  # NeXus library is in the same place relative to the Python library
-  get_filename_component ( NEXUSLIB_FILE ${NEXUSLIB} NAME )
-  set ( NEXUSLIB ../../${NEXUSLIB_FILE} )
-endif()
-# Install version
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${NEXUSLIB_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py )
-
-# Copy over in post-build so that it is not automatically included for installation. We need
-# to use a different file for install, which is handled below
-add_custom_command ( TARGET PythonKernelModule POST_BUILD
-                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                     ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.py ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantid/kernel 
-                     COMMAND ${PYTHON_EXECUTABLE} ARGS -m compileall ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py )
-
 ###########################################################################
 # Installation settings
 ###########################################################################
@@ -171,9 +170,8 @@ if ( UNIX )
   install ( TARGETS _dlopen DESTINATION ${BIN_DIR}/mantid/kernel )
 endif()
 
-# nexuslib.py & nexuslib.pyc
+# nexuslib.py & nexuslib.pyc that will overwrite the ones from the built target
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.py DESTINATION
           ${BIN_DIR}/mantid/kernel RENAME ${NEXUSLIB_PY}.py )
-# .pyc file
-#install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.pyc DESTINATION
-#          ${BIN_DIR}/mantid/kernel RENAME ${NEXUSLIB_PY}.pyc )
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/${NEXUSLIB_PY}.install.pyc DESTINATION
+          ${BIN_DIR}/mantid/kernel RENAME ${NEXUSLIB_PY}.pyc )
