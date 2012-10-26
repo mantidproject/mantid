@@ -19,10 +19,6 @@
 			<value val="ARCS_TS_2007_10_10.dat" />
 		</parameter>
 
-		<parameter name="vanadium-rmm">
-			<value val="50.9415" />
-		</parameter>
-
 		<parameter name="monovan-integr-min">
 			<value val="-1" />
 		</parameter>

@@ -24,10 +24,6 @@
 			<value val="-1" />
 		</parameter>
 
-		<parameter name="vanadium-rmm">
-			<value val="50.9415" />
-		</parameter>
-
 		<parameter name="bkgd-range-min">
 			<value val="30000" />
 		</parameter>

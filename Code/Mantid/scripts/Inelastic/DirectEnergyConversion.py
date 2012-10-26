@@ -779,7 +779,8 @@ class DirectEnergyConversion(object):
         self.background_range = [self.get_default_parameter("bkgd-range-min"), self.get_default_parameter("bkgd-range-max")]
         self.monovan_integr_range = [self.get_default_parameter("monovan-integr-min"), self.get_default_parameter("monovan-integr-max")]
         self.van_mass = self.get_default_parameter("vanadium-mass")
-        self.van_rmm = self.get_default_parameter("vanadium-rmm")
+        #The rmm of Vanadium is a constant, should not be instrument parameter. Atom not exposed to python :(
+        self.van_rmm = 50.9415#self.get_default_parameter("vanadium-rmm") 
 
         # Diag 
         self.diag_params = ['diag_tiny', 'diag_huge', 'diag_samp_zero', 'diag_samp_lo', 'diag_samp_hi','diag_samp_sig',\

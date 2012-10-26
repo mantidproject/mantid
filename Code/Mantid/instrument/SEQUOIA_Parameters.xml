@@ -19,10 +19,6 @@
 			<value val="SEQ_TS_2009_01_06.dat" />
 		</parameter>
 
-		<parameter name="vanadium-rmm">
-			<value val="50.9415" />
-		</parameter>
-
 		<!-- Overall Scale Factor -->
 		<parameter name="scale-factor">
 			<value val="1.0" />
