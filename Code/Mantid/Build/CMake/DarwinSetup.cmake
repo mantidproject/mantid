@@ -58,6 +58,9 @@ set ( PLUGINS_DIR MantidPlot.app/plugins )
 set ( PVPLUGINS_DIR MantidPlot.app/pvplugins )
 set ( PVPLUGINS_SUBDIR pvplugins ) # Need to tidy these things up!
 
+# Python packages
+set ( PYTHON_PACKAGES_DIR ${CMAKE_LIBRARY_PATH}/Python )
+
 install ( PROGRAMS /Library/Python/${PY_VER}/site-packages/sip.so DESTINATION ${BIN_DIR} )
 # Explicitly specify which PyQt libraries we want because just taking the whole
 # directory will swell the install kit unnecessarily.
@@ -71,6 +74,8 @@ install ( FILES /Library/Python/${PY_VER}/site-packages/PyQt4/Qt.so
                 /Library/Python/${PY_VER}/site-packages/PyQt4/__init__.py
           DESTINATION ${BIN_DIR}/PyQt4 )
 install ( DIRECTORY /Library/Python/${PY_VER}/site-packages/PyQt4/uic DESTINATION ${BIN_DIR}/PyQt4 )
+# nxs package
+install ( DIRECTORY ${PYTHON_PACKAGES_DIR}/nxs DESTINATION ${BIN_DIR} )
 
 install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 
