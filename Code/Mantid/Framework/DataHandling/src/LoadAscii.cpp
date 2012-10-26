@@ -191,6 +191,12 @@ namespace Mantid
             matchingRows = 1;
           }
         }
+        // if the file does not have more than rowsToMatch + skipped lines, it will stop 
+        // and raise the EndOfFile, this may cause problems for small workspaces.
+        // In this case clear the flag
+        if (file.eof()){
+          file.clear(file.eofbit);
+        }
         // Seek the file pointer back to the start.
         // NOTE: Originally had this as finding the stream position of the data and then moving the file pointer
         // back to the start of the data. This worked when a file was read on the same platform it was written
