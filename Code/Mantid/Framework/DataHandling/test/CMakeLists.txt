@@ -7,7 +7,9 @@ if ( CXXTEST_FOUND )
   set ( TESTHELPER_SRCS ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                         TestDataListener.cpp
-						../../TestHelpers/src/ScopedFileHelper.cpp )
+                         ../../TestHelpers/src/ScopedFileHelper.cpp
+                         ../../TestHelpers/src/StartFrameworkManager.cpp
+      )
 
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
   target_link_libraries( DataHandlingTest DataHandling )
