@@ -598,6 +598,50 @@ double SmoothNeighbours::translateToMeters(const std::string radiusUnits, const 
   return translatedRadius;
 }
 
+/**
+Determine whether we can assume that the instrument is made up of rectangular detectors.
+
+Looks at the first detector and makes the decision for the whole instrument based on whether this is rectangular or not.
+
+It would be best if this sort of functionality could be put onto the instrument.
+
+@return True if it has rectangular detectors.
+*/
+bool SmoothNeighbours::isRectangularDetectorInstrument() const
+{
+  bool isRectangularDetectorInstrument;
+  if(!inWS)
+  {
+    throw std::runtime_error("InputWorkspace has not been provided.");
+  }
+
+  size_t nHistograms = inWS->getNumberHistograms();
+  for(size_t i = 0; i < nHistograms; ++i)
+  {
+    auto detector = inWS->getDetector(i);
+    if(detector->isMonitor())
+    {
+      continue;
+    }
+    else
+    {
+      if(detector->type() == "RectangularDetectorPixel")
+      {
+        g_log.information("Assuming Rectangular Detectors for SmoothNeighbours on this data.");
+        isRectangularDetectorInstrument =  true;
+      }
+      else
+      {
+        g_log.information("Assuming Non-Rectangular Detectors for SmoothNeighbours on this data.");
+        isRectangularDetectorInstrument =  false;
+      }
+    }
+  }
+
+  // If the radius is non-zero, then we don't want to treat this as a rectangular detector instrument.
+  return isRectangularDetectorInstrument && (Radius <= 0);
+}
+
 
 //--------------------------------------------------------------------------------------------
 /** Executes the algorithm
@@ -628,8 +672,7 @@ void SmoothNeighbours::exec()
   m_prog = new Progress(this, 0.0, 0.2, inWS->getNumberHistograms());
 
   // Collect the neighbours with either method.
-
-  if (Radius <= 0.0)
+  if (isRectangularDetectorInstrument())
     findNeighboursRectangular();
   else
     findNeighboursUbiqutious();
@@ -646,7 +689,6 @@ void SmoothNeighbours::exec()
   else
     throw std::runtime_error("This algorithm requires a Workspace2D or EventWorkspace as its input.");
 }
-
 
 //--------------------------------------------------------------------------------------------
 /** Execute the algorithm for a Workspace2D/don't preserve events input */

@@ -76,7 +76,7 @@ public:
       double Radius = 0.0,
       bool ConvertTo2D = false, int numberOfNeighbours=8)
   {
-    // Pixels will be spaced 0.008 apart
+    // Pixels will be spaced 0.008 apart. 
     EventWorkspace_sptr in_ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 20, false);
 
     if (type == WEIGHTED)
@@ -300,6 +300,57 @@ public:
         true /*Convert2D*/);
   }
 
+  void doTestTreatAsRectangular(MatrixWorkspace_sptr inWS, const bool expectedToTreatAsRectangular, const double radius)
+  {
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "testMW");
+    alg.setProperty("PreserveEvents", false);
+    alg.setProperty("WeightedSum", "Flat");
+    alg.setProperty("NumberOfNeighbours", 8);
+    alg.setProperty("IgnoreMaskedDetectors", true);
+    alg.setProperty("Radius", radius);
+    alg.setProperty("RadiusUnits", "NumberOfPixels");
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+
+    TS_ASSERT_EQUALS(expectedToTreatAsRectangular, alg.executionUsedRectangularDetectorInstrument());
+  }
+
+  void test_is_rectangular_detector_instrument()
+  {
+    // Creates a Rectangular detector instrument 
+    EventWorkspace_sptr inWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 20, false);
+
+    const bool treatAsRectangular = true;
+    const double radius = 0;
+
+    doTestTreatAsRectangular(inWS, treatAsRectangular, radius);
+  }
+
+  void test_is_rectangular_detector_instrument_but_treat_as_non_rectangular_as_positive_radius_used()
+  {
+    // Creates a Rectangular detector instrument 
+    EventWorkspace_sptr inWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 20, false);
+
+    
+    const double radius = 1; // Positive radius value.
+    const bool treatAsRectangular = false; // since the radius value will be > 0
+
+    doTestTreatAsRectangular(inWS, treatAsRectangular, radius);
+  }
+
+  void test_isNotRectangularDetectorInstrument()
+  {
+    // Creates a Non-Rectangular detector instrument.
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(100, 10);
+
+    const bool treatAsRectangular = false; // This is a non-rectangular instrument.
+    const double radius = 0; // This would have crashed Mantid previously.
+
+    doTestTreatAsRectangular(inWS, treatAsRectangular, radius);
+  }
 
 };
 
