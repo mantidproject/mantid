@@ -214,14 +214,20 @@ namespace DataHandling
 
 #ifdef MPI_BUILD
       // use all cores so number of chunks should be a multiple of cores
+    if (mpi::communicator().size() > 1)
+    {
       int imult = numChunks/mpi::communicator().size() + 1;
       numChunks = imult * mpi::communicator().size();
+    }
 #endif
     for (int i = 1; i <= numChunks; i++) 
     {
 #ifdef MPI_BUILD
+	if (mpi::communicator().size() > 1)
+	{
       // chunk 1 should go to rank=0, chunk 2 to rank=1, etc.
       if((i-1)%mpi::communicator().size() != mpi::communicator().rank()) continue;
+	}
 #endif
       Mantid::API::TableRow row = strategy->appendRow();
       row << i << numChunks;
