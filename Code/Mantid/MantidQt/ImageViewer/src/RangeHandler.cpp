@@ -165,7 +165,7 @@ void RangeHandler::SetRange( double min, double max, double step )
 
   QtUtils::SetText( 8, 2, min, iv_ui->x_min_input );
   QtUtils::SetText( 8, 2, max, iv_ui->x_max_input );
-  QtUtils::SetText( 8, 4, step, iv_ui->step_input );
+  QtUtils::SetText( 8, 6, step, iv_ui->step_input );
 }
 
 
