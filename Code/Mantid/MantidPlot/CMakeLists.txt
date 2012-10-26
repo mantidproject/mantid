@@ -927,6 +927,8 @@ else ()
 		# Set the previously-built environment
 		set_tests_properties( ${PYFILE} PROPERTIES ENVIRONMENT "${TEST_ENVIRONMENT}")
 	endforeach ()
+
+    add_dependencies( GUITests MantidPlot )
 endif()
 
 ###########################################################################
