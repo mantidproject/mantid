@@ -609,7 +609,7 @@ It would be best if this sort of functionality could be put onto the instrument.
 */
 bool SmoothNeighbours::isRectangularDetectorInstrument() const
 {
-  bool isRectangularDetectorInstrument;
+  bool isRectangularDetectorInstrument = false;
   if(!inWS)
   {
     throw std::runtime_error("InputWorkspace has not been provided.");
@@ -633,7 +633,6 @@ bool SmoothNeighbours::isRectangularDetectorInstrument() const
       else
       {
         g_log.debug("Assuming Non-Rectangular Detectors for SmoothNeighbours on this data.");
-        isRectangularDetectorInstrument =  false;
       }
     }
   }
