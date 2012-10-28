@@ -32,11 +32,11 @@
 		</parameter>
 
 		<parameter name="wb-integr-min">
-			<value val="182" />
+			<value val="145" /><!--lam=0.75 -->
 		</parameter>
 
 		<parameter name="wb-integr-max">
-			<value val="598" />
+			<value val="668" /><!-- lam=0.35 -->
 		</parameter>
 
 		<!-- Overall Scale Factor -->
@@ -93,7 +93,7 @@
 
 		<!-- Fraction of median to consider counting high for the white beam diag (vv_hi)-->
 		<parameter name="diag_van_hi">
-		  <value val="3.0"/>
+		  <value val="1.5"/>
 		</parameter>
 
 		<!-- Error criterion as a multiple of error bar for background (vv_sig) -->
@@ -140,11 +140,11 @@
 
 
 		<parameter name="bkgd-range-min">
-			<value val="18000" />
+			<value val="15000" />
 		</parameter>
 
 		<parameter name="bkgd-range-max">
-			<value val="19500" />
+			<value val="16500" />
 		</parameter>
 
 

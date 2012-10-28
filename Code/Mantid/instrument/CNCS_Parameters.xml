@@ -93,7 +93,7 @@
 
 		<!-- Fraction of median to consider counting high for the white beam diag (vv_hi)-->
 		<parameter name="diag_van_hi">
-		  <value val="3.0"/>
+		  <value val="1.5"/>
 		</parameter>
 
 		<!-- Error criterion as a multiple of error bar for background (vv_sig) -->
@@ -141,12 +141,12 @@
 			<value val="1.0" />
 		</parameter>
 
-		<parameter name="wb-integr-min">
-			<value val="0.5" />
+		<parameter name="wb-integr-min"><!-- tof=53000 -->
+			<value val="2.93" />
 		</parameter>
 
-		<parameter name="wb-integr-max">
-			<value val="80" />
+		<parameter name="wb-integr-max"><!-- tof=52000 -->
+			<value val="3.07" />
 		</parameter>
 
 		<parameter name="norm-mon1-spec">

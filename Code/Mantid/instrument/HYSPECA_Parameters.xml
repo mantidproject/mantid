@@ -8,11 +8,11 @@
 		</parameter>
 
 		<parameter name="ei-mon1-spec">
-			<value val="1" />
+			<value val="2" />
 		</parameter>
 
 		<parameter name="ei-mon2-spec">
-			<value val="2" />
+			<value val="3" />
 		</parameter>
 
 		<parameter name="TS_mapping_file" type="string">
@@ -94,7 +94,7 @@
 
 		<!-- Fraction of median to consider counting high for the white beam diag (vv_hi)-->
 		<parameter name="diag_van_hi">
-		  <value val="3.0"/>
+		  <value val="1.5"/>
 		</parameter>
 
 		<!-- Error criterion as a multiple of error bar for background (vv_sig) -->
