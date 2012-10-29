@@ -336,41 +336,5 @@ def BckDivideByThickness(thickness=1.0):
     print "Background thickness can no longer be set: only the final sample-minus-data workspace can be divided by the sample thickness."
 
 def Stitch(data_list=[], q_min=None, q_max=None, scale=None, save_output=False):
-    from LargeScaleStructures.data_stitching import DataSet, Stitcher
-    
-    # Sanity check
-    if q_min is not None or q_max is not None:
-         print "Both q_min and q_max parameters should be provided, not just one"
-
-    # Prepare the data sets
-    data_objects = []
-    
-    for i in range(len(data_list)):
-    
-        d = DataSet(data_list[i])
-        # Set the Q range to be used to stitch
-        if q_min is not None and q_max is not None:
-            d.set_range(q_min,q_max)
-            
-        # Set the scale of the reference data as needed
-        if scale is not None:
-            d.set_scale(scale)
-        
-        data_objects.append(d)
-    
-    s = Stitcher()
-    
-    for d in data_objects:
-        s.append(d)
-                            
-    # Set the reference data (index of the data set in the workspace list)
-    s.set_reference(0)
-    s.compute()
-    
-    # Now that we have the scaling factors computed, simply apply them (not very pretty...)
-    for d in data_objects:
-        d.apply_scale()
-    
-    # Save output to a file
-    if save_output:
-        s.save_combined("combined_output.xml", as_canSAS=True)
+    from LargeScaleStructures.data_stitching import stitch
+    stitch(data_list, q_min=q_min, q_max=q_max, scale=scale, save_output=save_output)

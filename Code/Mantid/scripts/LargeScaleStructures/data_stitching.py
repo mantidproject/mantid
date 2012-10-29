@@ -4,9 +4,13 @@ import math
 from MantidFramework import *
 mtd.initialise(False)
 from mantidsimple import *
-import mantidplot
-import mantidplot
-from PyQt4 import QtGui, QtCore
+
+IS_IN_MANTIDPLOT = True
+try:
+    import mantidplot
+    from PyQt4 import QtGui, QtCore
+except:
+    IS_IN_MANTIDPLOT = False
 
 class RangeSelector(object):
     """
@@ -22,15 +26,19 @@ class RangeSelector(object):
             self._graph = "Range Selector"
             
         def disconnect(self):
-            mantidplot.app.disconnect(mantidplot.app.mantidUI, 
-                                QtCore.SIGNAL("x_range_update(double,double)"),
-                                self._call_back)
+            if IS_IN_MANTIDPLOT:
+                mantidplot.app.disconnect(mantidplot.app.mantidUI, 
+                                    QtCore.SIGNAL("x_range_update(double,double)"),
+                                    self._call_back)
             
         def connect(self, ws, call_back, xmin=None, xmax=None, 
                     range_min=None, range_max=None, x_title=None,
                     log_scale=False,
                     ws_output_base=None):
-                        
+            if not IS_IN_MANTIDPLOT:
+                print "RangeSelector cannot be used output MantidPlot"
+                return
+            
             self._call_back = call_back
             self._ws_output_base = ws_output_base
             
@@ -96,7 +104,8 @@ class DataSet(object):
         self._restricted_range = False
         
     def __str__(self):
-        return self._ws_name
+        output_str = str(self._ws_name) + ": scale=%g" % self._scale
+        return output_str
     
     def get_number_of_points(self):
         return self._npts
@@ -356,6 +365,15 @@ class Stitcher(object):
         ## List of data sets to process
         self._data_sets = []
         
+    def get_data_set(self, id):
+        """
+            Returns a particular data set
+            @param id: position of the data set in the list
+        """
+        if id<0 or id>len(self._data_sets)-1:
+            raise "Stitcher has not data set number %s" % str(id)
+        return self._data_sets[id]
+    
     def size(self):
         """
             Return the number of data sets
@@ -520,3 +538,80 @@ class Stitcher(object):
             
         return ws_combined
         
+def stitch(data_list=[], q_min=None, q_max=None, scale=None, save_output=False):
+    """
+    """
+    
+    # Sanity check: q_min and q_max can either both be None or both be
+    # of length N-1 where N is the length of data_list
+    if (q_min is not None and q_max is None) or \
+       (q_max is not None and q_min is None):
+         raise RuntimeError, "Both q_min and q_max parameters should be provided, not just one"
+        
+    if not type(data_list)==list:
+        raise RuntimeError, "The data_list parameter should be a list"
+    
+    n_data_sets = len(data_list)
+    if n_data_sets<2:
+        raise RuntimeError, "The data_list parameter should contain at least two data sets"
+    
+    is_q_range_limited = False
+    if q_min is not None and q_max is not None:
+        is_q_range_limited = True
+        if n_data_sets==2: 
+            if type(q_min) in [int, float]:
+                q_min = [q_min]
+            if type(q_max) in [int, float]:
+                q_max = [q_max]
+                
+        if n_data_sets>=2:
+            if not type(q_min)==list and len(q_min)==n_data_sets-1:
+                raise RuntimeError, "The length of q_min must be 1 shorter than the length of data_list"
+            if not type(q_max)==list and len(q_max)==n_data_sets-1:
+                raise RuntimeError, "The length of q_max must be 1 shorter than the length of data_list"
+    
+    # Prepare the data sets
+    s = Stitcher()
+    
+    for i in range(n_data_sets):
+        d = DataSet(data_list[i])        
+        d.load(True)
+        # Set the Q range to be used to stitch
+        xmin, xmax = d.get_range()
+        if is_q_range_limited:
+            if i==0:
+                xmax = q_max[i]
+            elif i<n_data_sets-1:
+                xmin = q_min[i-1]
+                xmax = q_max[i] 
+            elif i==n_data_sets-1:
+                xmin = q_min[i-1]
+        
+        d.set_range(xmin, xmax)
+            
+        # Set the scale of the reference data as needed
+        if i==0 and scale is not None:
+            d.set_scale(float(scale))
+        
+        s.append(d)
+                                
+    # Set the reference data (index of the data set in the workspace list)
+    s.set_reference(0)
+    s.compute()
+    
+    # Now that we have the scaling factors computed, simply apply them (not very pretty...)
+    for i in range(n_data_sets):
+        d = s.get_data_set(i)
+        print d
+        xmin, xmax = d.get_range()
+        if i>0:
+            xmin = q_min[i-1]
+        if i<n_data_sets-1:
+            xmax = q_max[i]
+        
+        d.apply_scale(xmin, xmax)
+    
+    # Save output to a file
+    if save_output:
+        s.save_combined("combined_output.xml", as_canSAS=True)
+          
