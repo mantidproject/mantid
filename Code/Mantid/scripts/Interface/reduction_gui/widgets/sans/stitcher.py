@@ -231,7 +231,7 @@ class StitcherWidget(BaseWidget):
         self._referenceID = 2
         
     def update_data(self, dataset_control, min_control, max_control,
-                    scale_control, first_spin_control, last_spin_control):
+                    scale_control):
         """
             Update a data set
             
@@ -239,8 +239,6 @@ class StitcherWidget(BaseWidget):
             @param min_control: text widget containing the minimum Q of the overlap region
             @param max_control: text widget containing the maximum Q of the overlap region
             @param scale_control: text widget containing the scale (can be input or output)
-            @param first_spin_control: spinner widget containing the number of points to skip at the beginning
-            @param last_spin_control: spinner widget containing the number of points to skip at the end 
         """
         data_object = None
         
@@ -270,8 +268,6 @@ class StitcherWidget(BaseWidget):
                 data_object.set_scale(scale)
                 
             npts = data_object.get_number_of_points()
-            first_spin_control.setMaximum(npts)
-            last_spin_control.setMaximum(npts)
             util.set_valid(dataset_control.lineEdit(), True)
         else:
             data_object = None
@@ -287,9 +283,7 @@ class StitcherWidget(BaseWidget):
         self._low_q_data = self.update_data(self._content.low_q_combo,
                                             self._content.low_min_edit,
                                             self._content.low_max_edit,
-                                            self._content.low_scale_edit,
-                                            self._content.low_first_spin,
-                                            self._content.low_last_spin)
+                                            self._content.low_scale_edit)
         self._low_q_modified = False
 
     def _update_medium_q(self, ws=None):
@@ -299,9 +293,7 @@ class StitcherWidget(BaseWidget):
         self._medium_q_data = self.update_data(self._content.medium_q_combo,
                                                self._content.medium_min_edit,
                                                self._content.medium_max_edit,
-                                               self._content.medium_scale_edit,
-                                               self._content.medium_first_spin,
-                                               self._content.medium_last_spin)
+                                               self._content.medium_scale_edit)
         self._medium_q_modified = False
 
     def _update_high_q(self, ws=None):
@@ -311,9 +303,7 @@ class StitcherWidget(BaseWidget):
         self._high_q_data = self.update_data(self._content.high_q_combo,
                                              None,
                                              None,
-                                             self._content.high_scale_edit,
-                                             self._content.high_first_spin,
-                                             self._content.high_last_spin)
+                                             self._content.high_scale_edit)
         self._high_q_modified = False
 
         file = str(self._content.high_q_combo.lineEdit().text())
@@ -330,8 +320,6 @@ class StitcherWidget(BaseWidget):
                 return                
             self._content.high_scale_edit.setText("1.0")
             npts = self._high_q_data.get_number_of_points()
-            self._content.high_first_spin.setMaximum(npts)
-            self._content.high_last_spin.setMaximum(npts)
             util.set_valid(self._content.high_q_combo.lineEdit(), True)
         else:
             self._high_q_data = None
@@ -446,19 +434,10 @@ class StitcherWidget(BaseWidget):
         # Update scaling factor
         if self._low_q_data is not None:
             self._content.low_scale_edit.setText(str(self._low_q_data.get_scale()))
-            n_first = util._check_and_get_int_line_edit(self._content.low_first_spin)
-            n_last = util._check_and_get_int_line_edit(self._content.low_last_spin)
-            self._low_q_data.set_skipped_points(n_first, n_last)
         if self._medium_q_data is not None:
             self._content.medium_scale_edit.setText(str(self._medium_q_data.get_scale()))
-            n_first = util._check_and_get_int_line_edit(self._content.medium_first_spin)
-            n_last = util._check_and_get_int_line_edit(self._content.medium_last_spin)
-            self._medium_q_data.set_skipped_points(n_first, n_last)
         if self._high_q_data is not None:
             self._content.high_scale_edit.setText(str(self._high_q_data.get_scale()))
-            n_first = util._check_and_get_int_line_edit(self._content.high_first_spin)
-            n_last = util._check_and_get_int_line_edit(self._content.high_last_spin)
-            self._high_q_data.set_skipped_points(n_first, n_last)
         
         self._stitcher = s
         
@@ -468,16 +447,6 @@ class StitcherWidget(BaseWidget):
         """
             Plot the scaled data sets
         """
-        low_first = util._check_and_get_int_line_edit(self._content.low_first_spin)
-        low_last = util._check_and_get_int_line_edit(self._content.low_last_spin)
-        med_first = util._check_and_get_int_line_edit(self._content.medium_first_spin)
-        med_last = util._check_and_get_int_line_edit(self._content.medium_last_spin)
-        high_first = util._check_and_get_int_line_edit(self._content.high_first_spin)
-        high_last = util._check_and_get_int_line_edit(self._content.high_last_spin)
-        auto_cut = True
-        if low_first>0 or low_last>0 or med_first>0 or med_last>0 or high_first>0 or high_last>0:
-            auto_cut = False
-        
         low_xmin = util._check_and_get_float_line_edit(self._content.low_min_edit)
         low_xmax = util._check_and_get_float_line_edit(self._content.low_max_edit)
         med_xmin = util._check_and_get_float_line_edit(self._content.medium_min_edit)
@@ -486,24 +455,15 @@ class StitcherWidget(BaseWidget):
         ws_list = []
         if self._low_q_data is not None:
             xmin,_ = self._low_q_data.get_skipped_range()
-            if not auto_cut:
-                xmin=None
-                low_xmax=None
             self._low_q_data.apply_scale(xmin, low_xmax)
             ws_list.append(self._low_q_data.get_scaled_ws())
         
         if self._medium_q_data is not None:
-            if not auto_cut:
-                med_xmax=None
-                low_xmin=None
             self._medium_q_data.apply_scale(low_xmin, med_xmax)
             ws_list.append(self._medium_q_data.get_scaled_ws())
         
         if self._high_q_data is not None:
             _,xmax = self._high_q_data.get_skipped_range()
-            if not auto_cut:
-                med_xmin=None
-                xmax=None
             self._high_q_data.apply_scale(med_xmin, xmax)
             ws_list.append(self._high_q_data.get_scaled_ws())
         
