@@ -79,6 +79,7 @@ void SmoothData::exec()
   const int vecSize = static_cast<int>(inputWorkspace->blocksize());
   if ( npts >= vecSize )
   {
+    std::cout << npts <<"  "<<vecSize<<"\n";
     g_log.error("The number of averaging points requested is larger than the spectrum length");
     throw std::out_of_range("The number of averaging points requested is larger than the spectrum length");
   }
@@ -98,6 +99,7 @@ void SmoothData::exec()
 		npts = nptsGroup[group];
 		if ( npts >= vecSize )
 		{
+                    std::cout << i<<"  "<<npts <<"  "<<vecSize<<"\n";
 		    g_log.error("The number of averaging points requested is larger than the spectrum length");
 		    throw std::out_of_range("The number of averaging points requested is larger than the spectrum length");
 		}

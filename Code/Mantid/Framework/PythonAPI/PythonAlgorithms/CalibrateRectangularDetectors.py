@@ -119,7 +119,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
 
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, TotalChunks=6, ChunkNumber=6, **kwargs)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
         wksp = alg.workspace()
         # For NOMAD data before Aug 2012, use the updated geometry
         if str(wksp.getInstrument().getValidFromDate()) == "1900-01-31T23:59:59":
