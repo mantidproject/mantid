@@ -53,7 +53,7 @@ namespace Mantid
            */
           static PyObject * create1D(const std::vector<ElementType> & cvector)
           {
-            Py_intptr_t dims[1] = { cvector.size() };
+            Py_intptr_t dims[1] = { static_cast<int>(cvector.size()) };
             return createFromArray(cvector.data(), 1, dims);
           }
           /**
