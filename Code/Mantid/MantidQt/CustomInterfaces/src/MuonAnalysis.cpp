@@ -3432,7 +3432,7 @@ void MuonAnalysis::connectAutoUpdate()
   connect(m_uiForm.firstGoodBinFront, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBox1, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
   connect(m_uiForm.homePeriodBoxMath, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
-  connect(m_uiForm.homePeriodBox2, SIGNAL(currentIndexChanged(int)), this, SLOT(homeTabUpdatePlot()));
+  connect(m_uiForm.homePeriodBox2, SIGNAL(currentIndexChanged(int)), this, SLOT(secondPeriodSelectionChanged()));
   connect(m_uiForm.frontPlotFuncs, SIGNAL(currentIndexChanged(int)), this, SLOT(changeHomeFunction()));
   connect(m_uiForm.frontAlphaNumber, SIGNAL(returnPressed ()), this, SLOT(homeTabUpdatePlot()));
 
@@ -3457,6 +3457,26 @@ void MuonAnalysis::changeHomeFunction()
     homeTabUpdatePlot();
   }
 }
+
+
+void MuonAnalysis::secondPeriodSelectionChanged()
+{
+  if ( m_uiForm.homePeriodBox2->currentText() == m_uiForm.homePeriodBox1->currentText() )
+  {
+    //int currentIndex = m_uiForm.homePeriodBox2->currentIndex();
+    //int numIndex = m_uiForm.homePeriodBox2->count();
+    //if (numIndex > 1)
+    //{
+    //  if (currentIndex < numIndex - 1)
+    //    m_uiForm.homePeriodBox2->currentIndexChanged(currentIndex+1);
+
+    //}
+    m_uiForm.homePeriodBox2->setCurrentIndex(0);
+  }
+
+  homeTabUpdatePlot();
+}
+
 
 void MuonAnalysis::homeTabUpdatePlot()
 {
