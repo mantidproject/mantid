@@ -16,7 +16,6 @@ If you specify UpdateFileBackEnd, then any changes (e.g. events added using the 
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/SaveMD.h"
-#include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -85,6 +84,48 @@ namespace MDAlgorithms
     setPropertySettings("MakeFileBacked", new EnabledWhenProperty("UpdateFileBackEnd", IS_EQUAL_TO, "0"));
   }
 
+ /// Save each NEW ExperimentInfo to a spot in the file
+ void SaveMD::saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws)
+ {
+
+    std::map<std::string,std::string> entries;
+    file->getEntries(entries);
+    for (uint16_t i=0; i < ws->getNumExperimentInfo(); i++)
+    {
+      ExperimentInfo_const_sptr ei = ws->getExperimentInfo(i);
+      std::string groupName = "experiment" + Strings::toString(i);
+      if (entries.find(groupName) == entries.end())
+      {
+        // Can't overwrite entries. Just add the new ones
+        file->makeGroup(groupName, "NXgroup", true);
+        file->putAttr("version", 1);
+        ei->saveExperimentInfoNexus(file);
+        file->closeGroup();
+
+        // Warning for high detector IDs.
+        // The routine in MDEvent::saveVectorToNexusSlab() converts detector IDs to single-precision floats
+        // Floats only have 24 bits of int precision = 16777216 as the max, precise detector ID
+        detid_t min = 0;
+        detid_t max = 0;
+        try
+        {
+          ei->getInstrument()->getMinMaxDetectorIDs(min, max);
+        }
+        catch (std::runtime_error &)
+        { /* Ignore error. Min/max will be 0 */ }
+
+        if (max > 16777216)
+        {
+          g_log.warning() << "This instrument (" << ei->getInstrument()->getName() <<
+              ") has detector IDs that are higher than can be saved in the .NXS file as single-precision floats." << std::endl;
+          g_log.warning() << "Detector IDs above 16777216 will not be precise. Please contact the developers." << std::endl;
+        }
+      }
+    }
+
+
+
+ }
   //----------------------------------------------------------------------------------------------
   /** Save the MDEventWorskpace to a file.
    * Based on the Intermediate Data Format Detailed Design Document, v.1.R3 found in SVN.
@@ -154,40 +195,7 @@ namespace MDAlgorithms
     }
 
     // Save each NEW ExperimentInfo to a spot in the file
-    std::map<std::string,std::string> entries;
-    file->getEntries(entries);
-    for (uint16_t i=0; i < ws->getNumExperimentInfo(); i++)
-    {
-      ExperimentInfo_sptr ei = ws->getExperimentInfo(i);
-      std::string groupName = "experiment" + Strings::toString(i);
-      if (entries.find(groupName) == entries.end())
-      {
-        // Can't overwrite entries. Just add the new ones
-        file->makeGroup(groupName, "NXgroup", true);
-        file->putAttr("version", 1);
-        ei->saveExperimentInfoNexus(file);
-        file->closeGroup();
-
-        // Warning for high detector IDs.
-        // The routine in MDEvent::saveVectorToNexusSlab() converts detector IDs to single-precision floats
-        // Floats only have 24 bits of int precision = 16777216 as the max, precise detector ID
-        detid_t min = 0;
-        detid_t max = 0;
-        try
-        {
-          ei->getInstrument()->getMinMaxDetectorIDs(min, max);
-        }
-        catch (std::runtime_error &)
-        { /* Ignore error. Min/max will be 0 */ }
-
-        if (max > 16777216)
-        {
-          g_log.warning() << "This instrument (" << ei->getInstrument()->getName() <<
-              ") has detector IDs that are higher than can be saved in the .NXS file as single-precision floats." << std::endl;
-          g_log.warning() << "Detector IDs above 16777216 will not be precise. Please contact the developers." << std::endl;
-        }
-      }
-    }
+    this->saveExperimentInfos(file,ws);
 
     // Save some info as attributes. (Note: need to use attributes, not data sets because those cannot be resized).
     file->putAttr("definition",  ws->id());

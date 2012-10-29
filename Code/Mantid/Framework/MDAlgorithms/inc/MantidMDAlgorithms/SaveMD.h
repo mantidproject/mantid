@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidNexusCPP/NeXusFile.hpp"
 
 namespace Mantid
 {
@@ -48,6 +49,8 @@ namespace MDAlgorithms
     /// Algorithm's category for identification
     virtual const std::string category() const { return "MDAlgorithms";}
     
+  protected: // for testing
+    void saveExperimentInfos(::NeXus::File * const file, API::IMDEventWorkspace_const_sptr ws);
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
