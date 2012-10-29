@@ -52,6 +52,7 @@
   
   <instrument name="INTER">
     <technique>Reflectometry</technique>
+    <zeropadding size="8"/>
     <livedata address="NDXINTER:6789" />
   </instrument>
 
