@@ -51,15 +51,15 @@ private:
     auto outWs = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName); 
 
     Property* prop = outWs->run().getLogData("SampleTemp");
-    TSM_ASSERT_EQUALS("Should have 14 elements after filtering.", 14, prop->size());
-    if(prop->size() != 14)
+    TSM_ASSERT_EQUALS("Should have 16 elements after filtering.", 16, prop->size());
+    if(prop->size() != 16)
       return;
     //Further tests
     TimeSeriesProperty<double>* sampleTemps = dynamic_cast<TimeSeriesProperty<double>* >(prop);
     auto filteredLogStartTime = sampleTemps->nthTime(0);
     auto filteredLogEndTime = sampleTemps->nthTime(sampleTemps->size()-1);
-    TS_ASSERT_EQUALS("2010-Mar-25 16:09:31.511000032",filteredLogStartTime.toSimpleString());
-    TS_ASSERT_EQUALS("2010-Mar-25 16:11:41.558003540",filteredLogEndTime.toSimpleString());
+    TS_ASSERT_EQUALS("2010-Mar-25 16:09:27.620000000",filteredLogStartTime.toSimpleString());
+    TS_ASSERT_EQUALS("2010-Mar-25 16:11:51.558003540",filteredLogEndTime.toSimpleString());
   }
 
 public:
