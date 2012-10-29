@@ -1,7 +1,9 @@
-//
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Exception.h"
 
+#include <sstream>
+
+using namespace std;
 
 namespace Mantid
 {
@@ -169,23 +171,36 @@ namespace Mantid
         return;
 
       // 2. Determine index for start and remove  Note erase is [...)
-      int istart = this->findIndex(start);
-      if (m_values[istart].time() != start)
-      {
-        // increment by 1 to insure mP[istart] be deleted
-        istart ++;
-      }
       typename std::vector<TimeValueUnit<TYPE> >::iterator iterhead;
-      iterhead = m_values.begin()+istart;
-      m_values.erase(m_values.begin(), iterhead);
+      int istart = this->findIndex(start);
+      if (istart >= 0)
+      {
+        // "start time" is behind time-series's starting time
+        if (m_values[istart].time() != start)
+        {
+          // increment by 1 to insure mP[istart] be deleted
+          istart ++;
+        }
+        iterhead = m_values.begin()+istart;
+        m_values.erase(m_values.begin(), iterhead);
+      }
+      else
+      {
+        // "start time" is before time-series's starting time: do nothing
+        ;
+      }
 
       // 3. Determine index for end and remove  Note erase is [...)
-      int iend = this->findIndex(stop);
+      int iend = this->findIndex(stop);    
       if (static_cast<size_t>(iend) < m_values.size())
       {
-        // Delete from [iend to mp.end)
+        // If "end time" is earlier than series's end time, delete from [iend to mp.end)
         iterhead = m_values.begin() + iend;
         m_values.erase(iterhead, m_values.end());
+      }
+      else
+      {
+        // If "end time" is later than series's end time, do nothing
       }
 
       m_size = static_cast<int>(m_values.size());
@@ -907,8 +922,23 @@ namespace Mantid
         // 3. Within boundary
         int index = this->findIndex(t);
 
-        if (index < 0 || index >= int(m_values.size()))
-          throw std::logic_error("findIndex() returns index outside range. It is not supposed to be. ");
+        if (index < 0)
+        {
+          // If query time "t" is earlier than the begin time of the series
+          index = 0;
+        }
+        else if (index == int(m_values.size()))
+        {
+          // If query time "t" is later than the end time of the  series
+          index = static_cast<int>(m_values.size())-1;
+        }
+        else if (index > int(m_values.size()))
+        {
+          stringstream errss;
+          errss << "TimeSeriesProperty.findIndex() returns index (" << index
+                << " ) > maximum defined value " << m_values.size();
+          throw std::logic_error(errss.str());
+        }
 
         value = m_values[static_cast<size_t>(index)].value();
       }
@@ -948,8 +978,23 @@ namespace Mantid
         // 3. Within boundary
         index = this->findIndex(t);
 
-        if (index < 0 || index >= int(m_values.size()))
-          throw std::logic_error("findIndex() returns index outside range. It is not supposed to be. ");
+        if (index < 0)
+        {
+          // If query time "t" is earlier than the begin time of the series
+          index = 0;
+        }
+        else if (index == int(m_values.size()))
+        {
+          // If query time "t" is later than the end time of the  series
+          index = static_cast<int>(m_values.size())-1;
+        }
+        else if (index > int(m_values.size()))
+        {
+          stringstream errss;
+          errss << "TimeSeriesProperty.findIndex() returns index (" << index
+                << " ) > maximum defined value " << m_values.size();
+          throw std::logic_error(errss.str());
+        }
 
         value = m_values[static_cast<size_t>(index)].value();
       }
@@ -1446,9 +1491,10 @@ namespace Mantid
       }
     }
 
-    /*
-     * Find the index of the entry of time t in the mP vector (sorted)
-     * Return @ if t is within log.begin and log.end, then the value equal or just smaller than t
+    /** Find the index of the entry of time t in the mP vector (sorted)
+     *  Return @ if t is within log.begin and log.end, then the value equal or just smaller than t
+     *           if t is earlier (less) than the starting time, return -1
+     *           if t is later (larger) than the ending time, return m_value.size
      */
     template <typename TYPE>
     int TimeSeriesProperty<TYPE>::findIndex(Kernel::DateAndTime t) const
@@ -1462,9 +1508,13 @@ namespace Mantid
 
       // 2. Extreme value
       if (t <= m_values[0].time())
-        return 0;
+      {
+        return -1;
+      }
       else if (t >= m_values.back().time())
-        return (int(m_values.size()-1));
+      {
+        return (int(m_values.size()));
+      }
 
       // 3. Find by lower_bound()
       typename std::vector<TimeValueUnit<TYPE> >::const_iterator fid;
@@ -1478,8 +1528,7 @@ namespace Mantid
       return newindex;
     }
 
-    /*
-     * Find the upper_bound of time t in container.
+    /** Find the upper_bound of time t in container.
      * Search range:  begin+istart to begin+iend
      * Return C[ir] == t or C[ir] > t and C[ir-1] < t
      *        -1:          exceeding lower bound
