@@ -903,9 +903,9 @@ class BaseRefWidget(BaseWidget):
 #            self._summary.x_min_edit.setText("%-d" % int(tofmin))
 #            self._summary.x_max_edit.setText("%-d" % int(tofmax))
          
-        import _qti    
-        #_qti.app.connect(_qti.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
-        #_qti.app.connect(_qti.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+        # mantidplot.app should be used instead of _qti.app (it's just an alias)
+        #mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+        #mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
         
         import mantidqtpython 
         self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base)
