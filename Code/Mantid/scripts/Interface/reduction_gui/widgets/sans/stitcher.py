@@ -459,7 +459,10 @@ class StitcherWidget(BaseWidget):
             ws_list.append(self._low_q_data.get_scaled_ws())
         
         if self._medium_q_data is not None:
-            self._medium_q_data.apply_scale(low_xmin, med_xmax)
+            _,xmax = self._medium_q_data.get_skipped_range()
+            if self._high_q_data is not None:
+                xmax = med_xmax
+            self._medium_q_data.apply_scale(low_xmin, xmax)
             ws_list.append(self._medium_q_data.get_scaled_ws())
         
         if self._high_q_data is not None:
