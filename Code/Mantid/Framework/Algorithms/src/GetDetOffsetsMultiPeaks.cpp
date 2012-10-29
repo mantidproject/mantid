@@ -40,6 +40,8 @@ namespace Mantid
 {
   namespace Algorithms
   {
+    /// Factor to convert full width half max to sigma for calculations of I/sigma.
+    const double FWHM_TO_SIGMA = 2.0*sqrt(2.0*std::log(2.0));
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(GetDetOffsetsMultiPeaks)
@@ -455,17 +457,29 @@ namespace Mantid
       std::vector<size_t> banned;
       std::vector<double> peakWidFitted;
       std::vector<double> peakHighFitted;
+      std::vector<double> peakBackground;
       for (size_t i = 0; i < peakslist->rowCount(); ++i)
       {
+        // peak value
         double centre = peakslist->getRef<double>("centre",i);
         double width = peakslist->getRef<double>("width",i);
         double height = peakslist->getRef<double>("height", i);
+
+        // background value
+        double back_intercept = peakslist->getRef<double>("backgroundintercept", i);
+        double back_slope = peakslist->getRef<double>("backgroundslope", i);
+        double back_quad = peakslist->getRef<double>("A2", i);
+        double background = back_intercept + back_slope * centre
+            + back_quad * centre * centre;
+
+        // goodness of fit
         double chi2 = peakslist->getRef<double>("chi2",i);
 
         // Get references to the data
         peakPosFitted.push_back(centre);
         peakWidFitted.push_back(width);
         peakHighFitted.push_back(height);
+        peakBackground.push_back(background);
         chisq.push_back(chi2);
       }
 
@@ -499,6 +513,7 @@ namespace Mantid
           peakPosFitted.erase(peakPosFitted.begin() + (*it));
           peakWidFitted.erase(peakWidFitted.begin() + (*it));
           peakHighFitted.erase(peakHighFitted.begin() + (*it));
+          peakBackground.erase(peakBackground.begin() + (*it));
           chisq.erase(chisq.begin() + (*it));
       }
       banned.clear();
@@ -506,10 +521,10 @@ namespace Mantid
       // ban peaks that are low intensity compared to their widths
       for (size_t i = 0; i < peakWidFitted.size(); ++i)
       {
-        if (peakHighFitted[i] / peakWidFitted[i] < 5.)
+        if (peakHighFitted[i]  * FWHM_TO_SIGMA / peakWidFitted[i] < 5.)
         {
           g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << s
-                         << " I/sigma = " << (peakHighFitted[i] / peakWidFitted[i]) << "\n";
+                         << " I/sigma = " << (peakHighFitted[i] * FWHM_TO_SIGMA / peakWidFitted[i]) << "\n";
           banned.push_back(i);
           continue;
         }
@@ -521,6 +536,7 @@ namespace Mantid
           peakPosFitted.erase(peakPosFitted.begin() + (*it));
           peakWidFitted.erase(peakWidFitted.begin() + (*it));
           peakHighFitted.erase(peakHighFitted.begin() + (*it));
+          peakBackground.erase(peakBackground.begin() + (*it));
           chisq.erase(chisq.begin() + (*it));
       }
       banned.clear();
@@ -549,8 +565,33 @@ namespace Mantid
           peakPosFitted.erase(peakPosFitted.begin() + (*it));
           peakWidFitted.erase(peakWidFitted.begin() + (*it));
           peakHighFitted.erase(peakHighFitted.begin() + (*it));
+          peakBackground.erase(peakBackground.begin() + (*it));
           chisq.erase(chisq.begin() + (*it));
       }
+
+      // ban peaks that are not outside of error bars for the background
+      for (size_t i = 0; i < peakWidFitted.size(); ++i)
+      {
+        if (peakHighFitted[i] < 0.5 * std::sqrt(peakHighFitted[i] + peakBackground[i]))
+        {
+          g_log.notice() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << s
+                         << " " << peakHighFitted[i] << " < "
+                         << 0.5 * std::sqrt(peakHighFitted[i] + peakBackground[i]) << "\n";
+          banned.push_back(i);
+          continue;
+        }
+      }
+      // delete banned peaks
+      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
+      {
+          peakPosToFit.erase(peakPosToFit.begin() + (*it));
+          peakPosFitted.erase(peakPosFitted.begin() + (*it));
+          peakWidFitted.erase(peakWidFitted.begin() + (*it));
+          peakHighFitted.erase(peakHighFitted.begin() + (*it));
+          peakBackground.erase(peakBackground.begin() + (*it));
+          chisq.erase(chisq.begin() + (*it));
+      }
+
       nparams = peakPosFitted.size();
       return;
     }
