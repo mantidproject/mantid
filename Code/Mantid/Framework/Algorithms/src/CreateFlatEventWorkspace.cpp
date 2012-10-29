@@ -64,7 +64,7 @@ namespace Algorithms
       this->declareProperty("RangeStart", EMPTY_DBL(), "Set the lower bound for sampling the background.");
       this->declareProperty("RangeEnd", EMPTY_DBL(), "Set the upper bound for sampling the background.");
 
-      this->declareProperty(new Mantid::API::WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Mantid::Kernel::Direction::Output),
+      this->declareProperty(new Mantid::API::WorkspaceProperty<>("OutputWorkspace","",Mantid::Kernel::Direction::Output),
                       "Output event workspace containing a flat background.");
   }
 
@@ -75,9 +75,9 @@ namespace Algorithms
   {
       // Get the workspaces
       EventWorkspace_sptr inputWS = getProperty("InputWorkspace");
-      EventWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr outputWS;
 
-      std::string outputWsName = this->getPropertyValue("OutputWorkspace");
+     // std::string outputWsName = this->getPropertyValue("OutputWorkspace");
 
       // Get the background region start/end
       double start = getProperty("RangeStart");
@@ -100,55 +100,58 @@ namespace Algorithms
 
       // Extract the region we are using for the background
       IAlgorithm_sptr crop_alg = this->createSubAlgorithm("CropWorkspace");
-      crop_alg->setAlwaysStoreInADS(true);
       crop_alg->setProperty("InputWorkspace", inputWS);
       crop_alg->setProperty("XMin", start);
       crop_alg->setProperty("XMax", end);
       crop_alg->setPropertyValue("OutputWorkspace", "__extracted_chunk");
       crop_alg->execute();
+      MatrixWorkspace_sptr chunkws = crop_alg->getProperty("OutputWorkspace");
 
       // Now lets shift the region to the start of the data.
       IAlgorithm_sptr shift_alg = this->createSubAlgorithm("ChangeBinOffset");
-      shift_alg->setAlwaysStoreInADS(true);
-      shift_alg->setPropertyValue("InputWorkspace", "__extracted_chunk");
-      shift_alg->setPropertyValue("OutputWorkspace", outputWsName);
+      shift_alg->setProperty("InputWorkspace", chunkws);
+      //shift_alg->setPropertyValue("OutputWorkspace", outputWsName);
       shift_alg->setProperty("Offset", -(start - dataMin));
       shift_alg->executeAsSubAlg();
+      outputWS = shift_alg->getProperty("OutputWorkspace");
 
       IAlgorithm_sptr clone = this->createSubAlgorithm("CloneWorkspace");
-      clone->setAlwaysStoreInADS(true);
-      clone->setPropertyValue("InputWorkspace", outputWsName);
+      clone->setProperty("InputWorkspace", outputWS);
       clone->setPropertyValue("OutputWorkspace", "__background_chunk");
       clone->executeAsSubAlg();
+      Workspace_sptr tmp = clone->getProperty("OutputWorkspace");
+      MatrixWorkspace_sptr tmpChunkWs = boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
+      //outputWS = clone->getProperty("InputWorkspace");
 
       for (int i = 0; i < nRegions; ++i) {
 
           IAlgorithm_sptr shiftchunk = this->createSubAlgorithm("ChangeBinOffset");
-          shiftchunk->setAlwaysStoreInADS(true);
-          shiftchunk->setPropertyValue("InputWorkspace", "__background_chunk");
-          shiftchunk->setPropertyValue("OutputWorkspace", "__background_chunk");
+          shiftchunk->setProperty("InputWorkspace", tmpChunkWs);
+          shiftchunk->setProperty("OutputWorkspace", tmpChunkWs);
           shiftchunk->setProperty("Offset", sampleRange);
           shiftchunk->executeAsSubAlg();
+          tmpChunkWs = shiftchunk->getProperty("OutputWorkspace");
 
           // Now add this chunk onto the output
           IAlgorithm_sptr plus_alg = this->createSubAlgorithm("Plus");
-          plus_alg->setAlwaysStoreInADS(true);
-          plus_alg->setPropertyValue("LHSWorkspace", outputWsName);
-          plus_alg->setPropertyValue("RHSWorkspace", "__background_chunk");
-          plus_alg->setPropertyValue("OutputWorkspace", outputWsName);
+          plus_alg->setProperty("LHSWorkspace", outputWS);
+          plus_alg->setProperty("RHSWorkspace", tmpChunkWs);
+          plus_alg->setProperty("OutputWorkspace", outputWS);
           plus_alg->executeAsSubAlg();
+          outputWS = plus_alg->getProperty("OutputWorkspace");
+          tmpChunkWs = plus_alg->getProperty("RHSWorkspace");
+
       }
 
       // Crop the output workspace to be the same range as the input data
       IAlgorithm_sptr finalcrop_alg = this->createSubAlgorithm("CropWorkspace");
-      finalcrop_alg->setAlwaysStoreInADS(true);
-      finalcrop_alg->setProperty("InputWorkspace", outputWsName);
+      finalcrop_alg->setProperty("InputWorkspace", outputWS);
       finalcrop_alg->setProperty("XMin", dataMin);
       finalcrop_alg->setProperty("XMax", dataMax);
-      finalcrop_alg->setPropertyValue("OutputWorkspace", outputWsName);
       finalcrop_alg->execute();
+      outputWS = finalcrop_alg->getProperty("OutputWorkspace");
 
-      this->setProperty("OutputWorkspace", outputWsName);
+      this->setProperty("OutputWorkspace", outputWS);
   }
 
 
