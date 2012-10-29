@@ -150,7 +150,7 @@ void PeakOverlay::removeShapes(const QList<Shape2D*>& shapeList)
   auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("DeleteTableRows");
   alg->setPropertyValue("TableWorkspace", m_peaksWorkspace->name());
   alg->setProperty("Rows",rows);
-  alg->execute();
+  alg->executeAsync();
 }
 
 /**---------------------------------------------------------------------
@@ -206,7 +206,11 @@ void PeakOverlay::draw(QPainter& painter) const
   // Draw symbols
   Shape2DCollection::draw(painter);
   // Sort the labels to avoid overlapping
-  QColor color;
+  QColor color(Qt::red);
+  if ( !m_shapes.isEmpty() )
+  {
+    color = m_shapes[0]->getColor();
+  }
   QRectF clipRect(painter.viewport());
   m_labels.clear();
   foreach(Shape2D* shape,m_shapes)
@@ -214,16 +218,13 @@ void PeakOverlay::draw(QPainter& painter) const
     if (!clipRect.contains(m_transform.map(shape->origin()))) continue;
     PeakMarker2D* marker = dynamic_cast<PeakMarker2D*>(shape);
     if (!marker) continue;
-    color = marker->getColor();
+
     QPointF p0 = marker->origin();
     QPointF p1 = m_transform.map(p0);
     QRectF rect = marker->getLabelRect();
     QPointF dp = rect.topLeft() - p0;
     p1 += dp;
     rect.moveTo(p1);
-
-    //painter.setPen(color);
-    //painter.drawRect(rect);
 
     bool overlap = false;
     // if current label overlaps with another
@@ -240,7 +241,7 @@ void PeakOverlay::draw(QPainter& painter) const
       m_labels.append(hkl);
     }
   }
-  //std::cerr << m_labels.size() << " labels\n";
+  //std::cerr << m_labels.size() << " labels " << color.red() << ' ' << color.green() << ' ' << color.blue() << "\n";
   painter.setPen(color);
   for(int i = 0; i < m_labels.size(); ++i)
   {

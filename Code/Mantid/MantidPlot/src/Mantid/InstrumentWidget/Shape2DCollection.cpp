@@ -63,7 +63,9 @@ void Shape2DCollection::draw(QPainter& painter) const
   painter.setTransform(m_transform);
   foreach(const Shape2D* shape,scalable)
   {
+    painter.save();
     shape->draw(painter);
+    painter.restore();
   }
   painter.restore();
 

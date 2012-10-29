@@ -49,7 +49,12 @@ public:
 
   // --- Public methods --- //
 
-  void setColor(const QColor& color){m_color = color;}
+  void setColor(const QColor& color)
+  {
+    m_color.setRed(color.red());
+    m_color.setGreen(color.green());
+    m_color.setBlue(color.blue());
+  }
   QColor getColor()const{return m_color;}
   void setFillColor(const QColor& color){m_fill_color = color;}
   void setScalable(bool on){m_scalable = on;}

@@ -38,6 +38,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QStackedLayout>
+#include <QKeyEvent>
 
 #include <numeric>
 #include <fstream>
@@ -58,6 +59,8 @@ public:
   {
     // Receive mouse move events
     setMouseTracking( true );
+    // Receive keyboard events
+    setFocusPolicy(Qt::StrongFocus);
   }
   /// Assign a surface to draw on
   void setSurface(ProjectionSurface* surface)
