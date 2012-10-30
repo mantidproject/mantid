@@ -111,7 +111,7 @@ public:
     auto peakFn = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
 
     TS_ASSERT_DELTA(peakFn->centre(), pos, 1e-12);
-    TS_ASSERT_DELTA(peakFn->height(), 2.0*a_L, 1e-12);
+    TS_ASSERT_DELTA(peakFn->height(), 2.0*a_L/3.0, 1e-12);
     TS_ASSERT_DELTA(peakFn->fwhm(), (gamma_L+gamma_G), 1e-12);
   }
 
@@ -125,9 +125,9 @@ public:
     peakFn->setCentre(pos);
     TS_ASSERT_DELTA(peakFn->centre(), pos, 1e-12);
 
-    a_L = 3.5;
-    peakFn->setHeight(a_L);
-    TS_ASSERT_DELTA(peakFn->height(), a_L, 1e-12);
+    const double height = 3.5;
+    peakFn->setHeight(height);
+    TS_ASSERT_DELTA(peakFn->height(), height, 1e-12);
 
     gamma_L = 1.2;
     gamma_G = 0.4;

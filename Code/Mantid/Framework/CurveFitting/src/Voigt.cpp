@@ -133,7 +133,7 @@ namespace Mantid
      */
     double Voigt::height()const
     {
-      return 2.0*getParameter(LORENTZ_AMP);
+      return 2.0*getParameter(LORENTZ_AMP)/3.0;
     }
 
     /**
@@ -156,12 +156,12 @@ namespace Mantid
     }
     
     /**
-     * Set the height of the peak, the LorentzAmp parameter
+     * Set the height of the peak. Sets LorentzAmp parameter to 1.5*value
      * @param value :: The new value for the centre of the peak
      */
     void Voigt::setHeight(const double value)
     {
-      this->setParameter(LORENTZ_AMP, 0.5*value);
+      this->setParameter(LORENTZ_AMP, 1.5*value);
     }
 
     /**
