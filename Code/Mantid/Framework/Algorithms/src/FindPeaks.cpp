@@ -586,7 +586,9 @@ void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w)
   IAlgorithm_sptr smooth = createSubAlgorithm("SmoothData");
   smooth->setProperty("InputWorkspace", WS);
   // The number of points which contribute to each smoothed point
-  smooth->setProperty("NPoints",w);
+  std::vector<int> wvec;
+  wvec.push_back(w);
+  smooth->setProperty("NPoints",wvec);
   smooth->executeAsSubAlg();
   // Get back the result
   WS = smooth->getProperty("OutputWorkspace");
