@@ -33,15 +33,15 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 
-Mantid::Kernel::Logger& RemoteTaskDockWidget::logObject=Mantid::Kernel::Logger::get("remoteTaskDockWidget");
+Mantid::Kernel::Logger& RemoteClusterDockWidget::logObject=Mantid::Kernel::Logger::get("remoteClusterDockWidget");
 
-//----------------- RemoteTaskDockWidget --------------------//
-RemoteTaskDockWidget::RemoteTaskDockWidget(MantidUI *mui, ApplicationWindow *w):
+//----------------- RemoteClusterDockWidget --------------------//
+RemoteClusterDockWidget::RemoteClusterDockWidget(MantidUI *mui, ApplicationWindow *w):
 QDockWidget(w),m_mantidUI(mui)
 {
     logObject.warning("Inside RemoteTaskDockWidget constructor");
 
-    setWindowTitle(tr("Remote Tasks"));
+    setWindowTitle(tr("Remote Clusters"));
     setObjectName("exploreRemoteTasks"); // this is needed for QMainWindow::restoreState()
     setMinimumHeight(150);
     setMinimumWidth(200);
@@ -95,7 +95,7 @@ QDockWidget(w),m_mantidUI(mui)
     setWidget(f);
 }
 
-RemoteTaskDockWidget::~RemoteTaskDockWidget()
+RemoteClusterDockWidget::~RemoteClusterDockWidget()
 {
     // save the cluster info in the combo box to the user config file
     // (Replace the values in the config file with what's in the combo box.)
@@ -120,7 +120,7 @@ RemoteTaskDockWidget::~RemoteTaskDockWidget()
    delete m_netManager;
 }
 
-void RemoteTaskDockWidget::update()
+void RemoteClusterDockWidget::update()
 {
 
     if (m_configReply)
@@ -184,7 +184,7 @@ void RemoteTaskDockWidget::update()
 
 // Shows a dialog box for the user to enter info about a cluster.  Adds that cluster to the
 // combo box.
-void RemoteTaskDockWidget::addNewCluster()
+void RemoteClusterDockWidget::addNewCluster()
 {
   NewClusterDialog *theDialog = new NewClusterDialog();
   if (theDialog->exec() == QDialog::Accepted)
@@ -204,7 +204,7 @@ void RemoteTaskDockWidget::addNewCluster()
   
 }
 
-void RemoteTaskDockWidget::clusterChoiceChanged(int index)
+void RemoteClusterDockWidget::clusterChoiceChanged(int index)
 {
     // connect to the cluster and download the XML config file
     QNetworkRequest request;
@@ -231,7 +231,7 @@ void RemoteTaskDockWidget::clusterChoiceChanged(int index)
 
 
 // Someone clicked the "Show Jobs" button.  Pop up the dialog.
-void RemoteTaskDockWidget::showJobs()
+void RemoteClusterDockWidget::showJobs()
 {
   JobStatusDialog jsd( m_clusterList[ m_clusterCombo->currentIndex()], m_mantidUI);
   if (jsd.readyToDisplay())
@@ -247,11 +247,11 @@ void RemoteTaskDockWidget::showJobs()
 // the submitJob function with a no-op just so I can get things compiling.
 // Very shortly, I expect all of this will be deleted (with job submission
 // moved into the algorithm class or similar...)
-void RemoteTaskDockWidget::submitJob() { return; }
+void RemoteClusterDockWidget::submitJob() { return; }
 /***********************************************************
 // Someone clicked the "Submit Job" button.  Pop up a dialog to grab any needed inputs
 // then hand everything over to the job manager.
-void RemoteTaskDockWidget::submitJob()
+void RemoteClusterDockWidget::submitJob()
 {
     QDialog *d = new QDialog;
     
@@ -412,7 +412,7 @@ void RemoteTaskDockWidget::submitJob()
 ***********************************************************/
 
 
-void RemoteTaskDockWidget::xmlParseServerAttributes( QDomElement &elm)
+void RemoteClusterDockWidget::xmlParseServerAttributes( QDomElement &elm)
 {
     // At the moment, the only tag we recognize is the outfile prefix
 
@@ -438,7 +438,7 @@ void RemoteTaskDockWidget::xmlParseServerAttributes( QDomElement &elm)
   This function is now obsolete and will be deleted once I'm sure there's
   nothing in it I want to save
 
-void RemoteTaskDockWidget::xmlParseTask( QDomElement &elm)
+void RemoteClusterDockWidget::xmlParseTask( QDomElement &elm)
 {
 
     RemoteTask task;

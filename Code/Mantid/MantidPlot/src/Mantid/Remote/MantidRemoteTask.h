@@ -29,12 +29,12 @@ class RemoteTask;
 
 // Note: This supposed to look and feel like the AlgorithmDockWidget.  It doesn't have
 // enough in common with it to make inheriting from it useful, though.
-class RemoteTaskDockWidget: public QDockWidget
+class RemoteClusterDockWidget: public QDockWidget
 {
     Q_OBJECT
 public:
-    RemoteTaskDockWidget(MantidUI *mui, ApplicationWindow *w);
-    ~RemoteTaskDockWidget();
+    RemoteClusterDockWidget(MantidUI *mui, ApplicationWindow *w);
+    ~RemoteClusterDockWidget();
 public slots:
     void update();
     void addNewCluster();

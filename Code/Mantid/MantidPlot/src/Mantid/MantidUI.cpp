@@ -111,7 +111,7 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
 
   m_exploreMantid = new MantidDockWidget(this,aw);
   m_exploreAlgorithms = new AlgorithmDockWidget(this,aw);
-  m_exploreRemoteTasks = new RemoteTaskDockWidget(this,aw);
+  m_exploreRemoteTasks = new RemoteClusterDockWidget(this,aw);
 
   actionCopyRowToTable = new QAction(this);
   actionCopyRowToTable->setIcon(QIcon(getQPixmap("table_xpm")));
