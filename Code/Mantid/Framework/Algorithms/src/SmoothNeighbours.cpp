@@ -633,8 +633,10 @@ bool SmoothNeighbours::isRectangularDetectorInstrument() const
       else
       {
         g_log.debug("Assuming Non-Rectangular Detectors for SmoothNeighbours on this data.");
-      }
+      } 
+      break;
     }
+   
   }
 
   // If the radius is non-zero, then we don't want to treat this as a rectangular detector instrument.
