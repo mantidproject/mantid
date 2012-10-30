@@ -70,12 +70,11 @@ def CalibrateMerlin( RunNumber, UsePeakFile=False ):
 
    # == Get the calibration and put results into calibration table ==
    # also put peaks into PeakFile
+   saveDirectory = config['defaultsave.directory']
    peakFileName = "TubeCalibDemoMerlin_Peaks.txt"
    if(not UsePeakFile):
       getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength, PeakFile=peakFileName )
-      saveDirectory = config['defaultsave.directory']
-      fullPeakFileName = os.path.join(saveDirectory, peakFileName)
-      print " Put slit peaks into file",fullPeakFileName 
+      print " Put slit peaks into file",peakFileName, "in save directory",saveDirectory,"." 
    else:
       getCalibrationFromPeakFile( CalibInstWS, calibrationTable, iTube, peakFileName )
      
@@ -87,7 +86,7 @@ def CalibrateMerlin( RunNumber, UsePeakFile=False ):
 
    # == Save workspace ==
    SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Adjustable.py")
-   print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
+   print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs in save directory",saveDirectory,"."
    
    # ==== End of CalibrateMerlin() ====
    # INITIALLY EXECUTE THE CODE FROM THE BEGINNING TO HERE, THEN EACH OF THE TWO CALLS BELOW IN ORDER SEPARATELY
