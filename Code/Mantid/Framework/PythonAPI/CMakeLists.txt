@@ -69,6 +69,11 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 ###########################################################################
+# Clear stale pyc files
+###########################################################################
+clean_orphaned_pyc_files ( ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
+
+###########################################################################
 # Add local dependencies
 ###########################################################################
 add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB -DBOOST_PYTHON_STATIC_LIB -DBOOST_PYTHON_SOURCE )

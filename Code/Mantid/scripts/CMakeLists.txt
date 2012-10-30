@@ -8,3 +8,6 @@ if (PYUNITTEST_FOUND)
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET PythonReductionTest.py PROPERTY FOLDER "UnitTests" )
 endif ()
+
+# Ensure we don't get stale pyc files around
+clean_orphaned_pyc_files ( ${CMAKE_CURRENT_SOURCE_DIR} )
