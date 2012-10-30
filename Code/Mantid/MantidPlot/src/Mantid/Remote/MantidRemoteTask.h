@@ -46,31 +46,30 @@ protected:
 //    void showProgressBar();
     //void hideProgressBar();
     
-
     void xmlParseServerAttributes( QDomElement &elm);
-    void xmlParseTask( QDomElement &elm);
     
     QComboBox *m_clusterCombo;
-    QListWidget *m_taskList;  // Lists the tasks that can be launched on the cluster
 
     QNetworkAccessManager *m_netManager;
     QNetworkReply * m_configReply;
     
     QList <RemoteJobManager *> m_clusterList;  // these are in the same order as they're listed in the combo box
-    
-    // Maps item pointers from m_taskList to their associated RemoteTask objects
-    QHash <QListWidgetItem *, RemoteTask> m_taskHash;
-
-    // List of all the jobs we've submitted to any cluster
-    // HACK: I don't think we need this any more
-    QList <RemoteJob> m_jobList;
 
     // Server Attributes. These are specified in the config.xml file for each cluster and
     // are updated when we parse that file.  (ie: every time the user selects a cluster
     // from m_clusterCombo)
     std::string m_outfilePrefix;
 
+    /***************************
+    HACK: members I don't think we need now that we're switching to the new job submission design
+    //QListWidget *m_taskList;  // Lists the tasks that can be launched on the cluster
+    // Maps item pointers from m_taskList to their associated RemoteTask objects
+    // QHash <QListWidgetItem *, RemoteTask> m_taskHash;
 
+    // List of all the jobs we've submitted to any cluster
+    // HACK: I don't think we need this any more
+    //QList <RemoteJob> m_jobList;
+    ***********************************************/
 
     friend class MantidUI;
 private:

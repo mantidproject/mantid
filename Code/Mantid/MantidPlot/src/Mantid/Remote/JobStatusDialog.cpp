@@ -15,12 +15,10 @@
 #include <vector>
 using namespace std;
 
-JobStatusDialog::JobStatusDialog(const QList <RemoteJob> &jobList, RemoteJobManager *manager, MantidUI *mantidui, QWidget *parent) :
+JobStatusDialog::JobStatusDialog( RemoteJobManager *manager, MantidUI *mantidui, QWidget *parent) :
     QDialog(parent),
     m_mantidUI(mantidui),
     ui(new Ui::JobStatusDialog),
-    m_jobList( jobList),
-
     m_manager( manager),
     m_displayReady( false)
 {

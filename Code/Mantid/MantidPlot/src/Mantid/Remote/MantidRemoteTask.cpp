@@ -48,44 +48,29 @@ QDockWidget(w),m_mantidUI(mui)
     w->addDockWidget( Qt::RightDockWidgetArea, this );//*/
 
     QFrame *f = new QFrame(this);
-    QLabel *chooseLabel = new QLabel( tr("Choose cluster:"), f);
+    QLabel *clusterLabel = new QLabel( tr("Known clusters:"), f);
     m_clusterCombo = new QComboBox( f);
     m_clusterCombo->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-    QPushButton *newCluster = new QPushButton( tr("New Cluster"), f);
-    QLabel *statusLabel = new QLabel( tr(""), f);  // Status is blank until user chooses a cluster
-    m_taskList = new QListWidget();
-    m_taskList->setSelectionMode( QAbstractItemView::SingleSelection);
+    QPushButton *newCluster = new QPushButton( tr("New Cluster"), f);       
     
-    
-    QPushButton *submitJob = new QPushButton( tr("Submit Job"), f);
     QPushButton *showJobs= new QPushButton( tr("Show Jobs"), f);
     QVBoxLayout *vbLayout = new QVBoxLayout();
     QHBoxLayout *hbLayout = new QHBoxLayout();
-    QHBoxLayout *hbLayoutForButtons = new QHBoxLayout(); 
 
     hbLayout->addWidget(m_clusterCombo);
-    hbLayout->addWidget( newCluster);
-    
-    hbLayoutForButtons->addWidget( submitJob);
-    hbLayoutForButtons->addWidget( showJobs);
-    
-    vbLayout->addWidget(chooseLabel);
-    vbLayout->addLayout(hbLayout);
-    vbLayout->addWidget(statusLabel);
-    vbLayout->addWidget(m_taskList);
-    vbLayout->addLayout(hbLayoutForButtons);
-    
-    f->setLayout(vbLayout);
+    hbLayout->addWidget( newCluster);  
 
-    m_taskList->addItem( new QListWidgetItem( tr("Update() hasn't been called yet.")));
+    vbLayout->addWidget(clusterLabel);
+    vbLayout->addLayout(hbLayout);
+    vbLayout->addWidget( showJobs);
+
+    f->setLayout(vbLayout);
 
     m_netManager = new QNetworkAccessManager();
 
     QObject::connect( newCluster, SIGNAL( clicked()), this, SLOT( addNewCluster()));
-    QObject::connect( submitJob, SIGNAL( clicked()), this, SLOT( submitJob()));
     QObject::connect( showJobs, SIGNAL( clicked()), this, SLOT( showJobs()));
     QObject::connect( m_clusterCombo, SIGNAL( currentIndexChanged(int)), this, SLOT( clusterChoiceChanged(int)));
-
 
     // Load the cluster info from the properties files
     Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
@@ -108,7 +93,6 @@ QDockWidget(w),m_mantidUI(mui)
     config.setString( std::string("Cluster.NumClusters"), tempStr.str());
 
     setWidget(f);
-
 }
 
 RemoteTaskDockWidget::~RemoteTaskDockWidget()
@@ -138,8 +122,6 @@ RemoteTaskDockWidget::~RemoteTaskDockWidget()
 
 void RemoteTaskDockWidget::update()
 {
-    m_taskList->clear();
-    m_taskHash.clear();
 
     if (m_configReply)
     {
@@ -173,7 +155,12 @@ void RemoteTaskDockWidget::update()
             if (e.tagName() == "server_attributes" )
                 xmlParseServerAttributes( e);
             else if (e.tagName() == "task")
-                xmlParseTask( e);
+            {
+              // HACK!  For now, do nothing.  The new style config files don't explicitly list every
+              // task, but until I get rid of the config files, I don't want us throwing parse errors.
+              // Once all the config files are converted to the new style (which implies that we've
+              // actually decided what that new style is....), we need to delete this else if test.
+            }
             else
             {
                 QMessageBox msgBox;
@@ -246,7 +233,7 @@ void RemoteTaskDockWidget::clusterChoiceChanged(int index)
 // Someone clicked the "Show Jobs" button.  Pop up the dialog.
 void RemoteTaskDockWidget::showJobs()
 {
-  JobStatusDialog jsd( m_jobList, m_clusterList[ m_clusterCombo->currentIndex()], m_mantidUI);
+  JobStatusDialog jsd( m_clusterList[ m_clusterCombo->currentIndex()], m_mantidUI);
   if (jsd.readyToDisplay())
   {
     // If there was an error creating the dialog box (couldn't connect to the server,
@@ -256,6 +243,12 @@ void RemoteTaskDockWidget::showJobs()
 
 }
 
+// HACK!  Job submission is changing radically.  For now, I'm replacing
+// the submitJob function with a no-op just so I can get things compiling.
+// Very shortly, I expect all of this will be deleted (with job submission
+// moved into the algorithm class or similar...)
+void RemoteTaskDockWidget::submitJob() { return; }
+/***********************************************************
 // Someone clicked the "Submit Job" button.  Pop up a dialog to grab any needed inputs
 // then hand everything over to the job manager.
 void RemoteTaskDockWidget::submitJob()
@@ -416,6 +409,8 @@ void RemoteTaskDockWidget::submitJob()
         
     delete d;
 }
+***********************************************************/
+
 
 void RemoteTaskDockWidget::xmlParseServerAttributes( QDomElement &elm)
 {
@@ -439,6 +434,9 @@ void RemoteTaskDockWidget::xmlParseServerAttributes( QDomElement &elm)
     return;
 }
 
+/******************************
+  This function is now obsolete and will be deleted once I'm sure there's
+  nothing in it I want to save
 
 void RemoteTaskDockWidget::xmlParseTask( QDomElement &elm)
 {
@@ -658,4 +656,6 @@ void RemoteTaskDockWidget::xmlParseTask( QDomElement &elm)
         }
     }
 }
+******************************/
+
 
