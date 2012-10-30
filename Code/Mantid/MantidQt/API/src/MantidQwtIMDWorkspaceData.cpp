@@ -3,6 +3,7 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -309,7 +310,25 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
       m_currentPlotAxis = 0;
       IMDWorkspace_const_sptr originalWS = m_originalWorkspace.lock();
 
-      if(boost::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(originalWS))
+      bool regularBinnedMDWorkspace = false;
+      if(auto mdew = boost::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(m_workspace))
+      {
+        Mantid::API::BoxController_const_sptr controller = mdew->getBoxController();
+        bool atLeastOneDimNotIntegrated = false;
+        for(size_t i = 0; i < mdew->getNumDims(); ++i)
+        {
+          if( mdew->getDimension(i)->getNBins() ==  controller->getSplitInto(i))
+          {
+            if(!mdew->getDimension(i)->getIsIntegrated())
+            {
+              atLeastOneDimNotIntegrated = true;
+            }
+          }
+        }
+        regularBinnedMDWorkspace = atLeastOneDimNotIntegrated;
+      }
+
+      if(NULL != boost::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(originalWS) || regularBinnedMDWorkspace)
       {
         for (size_t d=0; d<diff.getNumDims(); d++)
         {

@@ -434,7 +434,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         #should toggle to 'B' axis as that is now the longest.
         lv.setStartXY(0, 0)
         lv.setEndXY(5,10)
-        self.assertEquals("C", self._getPlotXAxisName(lv, original))
+        self.assertEquals("B", self._getPlotXAxisName(lv, original))
         
     #==========================================================================
     #======================= Dynamic Rebinning ================================
