@@ -2,6 +2,7 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -307,12 +308,27 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
       // Default to 0
       m_currentPlotAxis = 0;
       IMDWorkspace_const_sptr originalWS = m_originalWorkspace.lock();
-      for (size_t d=0; d<diff.getNumDims(); d++)
+
+      if(boost::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(originalWS))
       {
-        if (fabs(diff[d]) > largest || ( originalWS && originalWS->getDimension(m_currentPlotAxis)->getIsIntegrated() ) )
+        for (size_t d=0; d<diff.getNumDims(); d++)
         {
-          //Skip over any integrated dimensions
-          if( originalWS && !originalWS->getDimension(d)->getIsIntegrated() )
+          if (fabs(diff[d]) > largest || ( originalWS && originalWS->getDimension(m_currentPlotAxis)->getIsIntegrated() ) )
+          {
+            //Skip over any integrated dimensions
+            if( originalWS && !originalWS->getDimension(d)->getIsIntegrated() )
+            {
+              largest = fabs(diff[d]);
+              m_currentPlotAxis = int(d);
+            }
+          }
+        }
+      }
+      else
+      {
+        for (size_t d=0; d<diff.getNumDims(); d++)
+        {
+          if (fabs(diff[d]) > largest)
           {
             largest = fabs(diff[d]);
             m_currentPlotAxis = int(d);
