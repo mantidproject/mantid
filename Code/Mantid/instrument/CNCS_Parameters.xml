@@ -194,5 +194,9 @@
 			<value val="198.2 * (1.0 + incidentEnergy)^(-0.84098)" />
 		</parameter>
 
+		<parameter name="treat-background-as-events" type="string">
+			<value val="no" />
+		</parameter>
+
 	</component-link>
 </parameter-file>
