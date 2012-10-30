@@ -396,6 +396,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
             ReductionSingleton.replace(ReductionSingleton().settings())
         
         ReductionSingleton().instrument.setDetector('front')
+        SetDetectorFloodFile('') #FIXME: now the FloodFile does not refer to FRONT/HAB detectors. But, in the future, this line must be erased.
         retWSname_front = _WavRangeReduction(name_suffix)
         retWSname = retWSname_front
 
