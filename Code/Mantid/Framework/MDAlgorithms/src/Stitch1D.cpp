@@ -61,7 +61,7 @@ namespace MDAlgorithms
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string Stitch1D::name() const { return "Stitch1D";};
+  const std::string Stitch1D::name() const { return "Stitch1DMD";};
   
   /// Algorithm's version for identification. @see Algorithm::version
   int Stitch1D::version() const { return 1;};
