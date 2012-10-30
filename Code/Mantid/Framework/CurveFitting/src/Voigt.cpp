@@ -24,6 +24,11 @@ namespace Mantid
       const double COEFFC[NLORENTZIANS] = {-0.3085, 0.5906, -0.3085, 0.5906};
       const double COEFFD[NLORENTZIANS] = {0.0210, -1.1858, -0.0210, 1.1858};
 
+      const char * LORENTZ_AMP = "LorentzAmp";
+      const char * LORENTZ_POS = "LorentzPos";
+      const char * LORENTZ_FWHM = "LorentzFWHM";
+      const char * GAUSSIAN_FWHM = "GaussianFWHM";
+
       const double SQRTLN2 = std::sqrt(std::log(2.0));
       const double SQRTPI = std::sqrt(M_PI);
       ///@endcond
@@ -34,10 +39,10 @@ namespace Mantid
      */
     void Voigt::declareParameters()
     {
-      declareParameter("LorentzAmp", 0.0, "Value of the Lorentzian amplitude");
-      declareParameter("LorentzPos", 0.0, "Position of the Lorentzian peak");
-      declareParameter("LorentzFWHM", 0.0, "Value of the full-width half-maximum for the Lorentzian");
-      declareParameter("GaussianFWHM", 0.0, "Value of the full-width half-maximum for the Gaussian");
+      declareParameter(LORENTZ_AMP, 0.0, "Value of the Lorentzian amplitude");
+      declareParameter(LORENTZ_POS, 0.0, "Position of the Lorentzian peak");
+      declareParameter(LORENTZ_FWHM, 0.0, "Value of the full-width half-maximum for the Lorentzian");
+      declareParameter(GAUSSIAN_FWHM, 0.0, "Value of the full-width half-maximum for the Gaussian");
     }
 
     /**
@@ -46,7 +51,7 @@ namespace Mantid
      * @param xValues :: The X values
      * @param nData :: The number of X values to evaluate
      */
-    void Voigt::function1D(double *out, const double *xValues, const size_t nData) const
+    void Voigt::functionLocal(double *out, const double *xValues, const size_t nData) const
     {
       calculateFunctionAndDerivative(xValues,nData,out,NULL);
     }
@@ -57,7 +62,7 @@ namespace Mantid
      * @param xValues :: The X values
      * @param nData :: The number of X values to evaluate
      */
-    void Voigt::functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData)
+    void Voigt::functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData)
     {
       calculateFunctionAndDerivative(xValues, nData, NULL, out);
     }
@@ -72,10 +77,10 @@ namespace Mantid
     void Voigt::calculateFunctionAndDerivative(const double *xValues, const size_t nData,
                                                double *functionValues, API::Jacobian * derivatives) const
     {
-      const double a_L = getParameter("LorentzAmp");
-      const double lorentzPos = getParameter("LorentzPos");
-      const double gamma_L = getParameter("LorentzFWHM");
-      const double gamma_G = getParameter("GaussianFWHM");
+      const double a_L = getParameter(LORENTZ_AMP);
+      const double lorentzPos = getParameter(LORENTZ_POS);
+      const double gamma_L = getParameter(LORENTZ_FWHM);
+      const double gamma_G = getParameter(GAUSSIAN_FWHM);
 
       const double rtln2oGammaG = SQRTLN2/gamma_G;
       const double prefactor = (a_L*SQRTPI*gamma_L*SQRTLN2/gamma_G);
@@ -113,6 +118,61 @@ namespace Mantid
       }
     }
 
+    /**
+     * Returns the value of the "LorentzPos" parameter.
+     * @return value of centre of peak
+     */
+    double Voigt::centre()const
+    {
+      return getParameter(LORENTZ_POS);
+    }
+
+    /**
+     * Return the value of the "LorentzAmp" parameter
+     * @return value of height of peak
+     */
+    double Voigt::height()const
+    {
+      return 2.0*getParameter(LORENTZ_AMP);
+    }
+
+    /**
+     * Gives the FWHM of the peak. This is estimated as 
+     * 0.5*(LorentzFWHM + GaussianFWHM)
+     * @return value of FWHM of peak
+     */
+    double Voigt::fwhm()const
+    {
+      return (getParameter(LORENTZ_FWHM) + getParameter(GAUSSIAN_FWHM));
+    }
+
+    /**
+     * Set the centre of the peak, the LorentzPos parameter
+     * @param value :: The new value for the centre of the peak
+     */
+    void Voigt::setCentre(const double value)
+    {
+      this->setParameter(LORENTZ_POS, value);
+    }
+    
+    /**
+     * Set the height of the peak, the LorentzAmp parameter
+     * @param value :: The new value for the centre of the peak
+     */
+    void Voigt::setHeight(const double value)
+    {
+      this->setParameter(LORENTZ_AMP, 0.5*value);
+    }
+
+    /**
+     * Set the FWHM of the peak
+     * @param value :: The new value for the FWHM of the peak
+     */
+    void Voigt::setFwhm(const double value)
+    {
+      this->setParameter(LORENTZ_FWHM, 0.5*value);
+      this->setParameter(GAUSSIAN_FWHM, 0.5*value);
+    }
 
   } // namespace CurveFitting
 } // namespace Mantid

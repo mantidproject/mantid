@@ -51,6 +51,7 @@ public:
   {
     const double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
     auto voigtFn = createFunction(a_L,pos,gamma_L,gamma_G);
+    
 
     Mantid::API::FunctionValues outputs(*m_domain);
     voigtFn->function(*m_domain, outputs);
@@ -92,7 +93,46 @@ public:
         TS_ASSERT_DELTA(dxDa[i][j], jacobian.get(i,j), 1e-10);
       }
     }
+  }
 
+  void test_function_is_a_peak_function()
+  {
+    const double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
+    auto voigtFn = createFunction(a_L,pos,gamma_L,gamma_G);
+
+    auto peakFn = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+    TSM_ASSERT("Voigt function should be a PeakFunction", peakFn);
+  }
+
+  void test_peak_functions_return_expected_results()
+  {
+    const double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
+    auto voigtFn = createFunction(a_L,pos,gamma_L,gamma_G);
+    auto peakFn = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+
+    TS_ASSERT_DELTA(peakFn->centre(), pos, 1e-12);
+    TS_ASSERT_DELTA(peakFn->height(), 2.0*a_L, 1e-12);
+    TS_ASSERT_DELTA(peakFn->fwhm(), (gamma_L+gamma_G), 1e-12);
+  }
+
+  void test_setting_peak_functions_set_expected_parameters()
+  {
+    double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
+    auto voigtFn = createFunction(a_L,pos,gamma_L,gamma_G);
+    auto peakFn = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+
+    pos = 1.2;
+    peakFn->setCentre(pos);
+    TS_ASSERT_DELTA(peakFn->centre(), pos, 1e-12);
+
+    a_L = 3.5;
+    peakFn->setHeight(a_L);
+    TS_ASSERT_DELTA(peakFn->height(), a_L, 1e-12);
+
+    gamma_L = 1.2;
+    gamma_G = 0.4;
+    peakFn->setFwhm(gamma_L+gamma_G);
+    TS_ASSERT_DELTA(peakFn->fwhm(), (gamma_L+gamma_G), 1e-12);
   }
 
 private:
@@ -101,6 +141,9 @@ private:
                                               const double gamma_L, const double gamma_G)
   {
     boost::shared_ptr<IFunction> voigtFn = boost::make_shared<Voigt>();
+    auto peakFn = boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+    // Set a fairly wide radius for simple tests
+    peakFn->setPeakRadius(10);
     voigtFn->initialize();
 
     voigtFn->setParameter("LorentzAmp", a_L);
