@@ -16,6 +16,7 @@ from tube_calib_fit_params import * # To handle fit parameters
 from ideal_tube import * # For ideal tube
 from tube_calib import *  # For tube calibration functions
 from tube_spec import * # For tube specification class
+import os
 
 def CalibrateMerlin( RunNumber, UsePeakFile=False ):
 # Run number must include any leading zeros that appear in the file name of the run.
@@ -69,11 +70,16 @@ def CalibrateMerlin( RunNumber, UsePeakFile=False ):
 
    # == Get the calibration and put results into calibration table ==
    # also put peaks into PeakFile
+   peakFileName = "TubeCalibDemoMerlin_Peaks.txt"
    if(not UsePeakFile):
-      getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength, PeakFile='TubeCalibDemoMerlin_Peaks.txt' )
+      getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength, PeakFile=peakFileName )
+      saveDirectory = config['defaultsave.directory']
+      fullPeakFileName = os.path.join(saveDirectory, peakFileName)
+      print " Put slit peaks into file",fullPeakFileName 
    else:
-      getCalibrationFromPeakFile( CalibInstWS, calibrationTable, iTube, 'TubeCalibDemoMerlin_Peaks.txt' )
-   print "Got calibration (new positions of detectors) and put slit peaks into file TubeCalibDemoMerlin_Peaks.txt"
+      getCalibrationFromPeakFile( CalibInstWS, calibrationTable, iTube, peakFileName )
+     
+   print "Got calibration (new positions of detectors)"
 
    # == Apply the Calibation ==
    ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
