@@ -165,6 +165,8 @@ if ( WIN32 ) # General windows environment
   else ()
     # Excludes so files & _win64 binaries
     install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN ".so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE )
+    # Also ship mingw libraries
+    install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/mingw DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE )
   endif ()
 else ()
   # These don't work correctly and the linux ones are in no way general. They really need to be part of the build
