@@ -69,12 +69,6 @@ private:
   void init();
   ///Execution code
   void exec();
-  int validateSpectrumInGroup(size_t wi);
-  // This map does not need to be ordered, just a lookup for udet
-  /// typedef for the storage of the UDET-group mapping
-  typedef std::map<detid_t, int> udet2groupmap;
-  std::vector<int> udet2group;
-  API::MatrixWorkspace_const_sptr inputWorkspace;
 
 };
 

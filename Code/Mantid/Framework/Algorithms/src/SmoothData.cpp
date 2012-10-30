@@ -10,10 +10,7 @@ one or more points lying symmetrically either side of it. The statistical error 
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SmoothData.h"
-#include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/BoundedValidator.h"
 
 namespace Mantid
 {
@@ -42,32 +39,21 @@ void SmoothData::init()
   declareProperty(
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm" );
-  std::vector<int>  npts0;
-  npts0.push_back(3);
-  auto min = boost::make_shared<Kernel::ArrayBoundedValidator<int> >();
+
+  auto min = boost::make_shared<BoundedValidator<int> >();
   min->setLower(3);
   // The number of points to use in the smoothing.
-  declareProperty(new ArrayProperty<int>("NPoints",npts0,min,Direction::Input),
+  declareProperty("NPoints", 3, min,
     "The number of points to average over (minimum 3). If an even number is\n"
     "given, it will be incremented by 1 to make it odd (default value 3)" );
-  declareProperty(new WorkspaceProperty<Mantid::DataObjects::GroupingWorkspace>("GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: GroupingWorkspace to use for vector of NPoints." );
 }
 
 void SmoothData::exec()
 {
   // Get the input properties
-  inputWorkspace = getProperty("InputWorkspace");
+  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
 
-  std::vector<int> nptsGroup = getProperty("NPoints");
-  int npts =nptsGroup[0];
-  Mantid::DataObjects::GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
-  if (groupWS)
-  {
-	  udet2group.clear();
-	  int64_t nGroups;
-	  groupWS->makeDetectorIDToGroupVector(udet2group, nGroups);
-  }
+  int npts = getProperty("NPoints");
   // Number of smoothing points must always be an odd number, so add 1 if it isn't.
   if (!(npts%2))
   {
@@ -82,7 +68,7 @@ void SmoothData::exec()
     g_log.error("The number of averaging points requested is larger than the spectrum length");
     throw std::out_of_range("The number of averaging points requested is larger than the spectrum length");
   }
-  int halfWidth = (npts-1)/2;
+  const int halfWidth = (npts-1)/2;
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
@@ -92,24 +78,6 @@ void SmoothData::exec()
   // Loop over all the spectra in the workspace
   for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms()); ++i)
   {
-	if (groupWS)
-	{
-		const int group = validateSpectrumInGroup(static_cast<size_t>(i));
-                if (group < 0)npts = 3;
-                else npts = nptsGroup[group-1];
-		if ( npts >= vecSize )
-		{
-		    g_log.error("The number of averaging points requested is larger than the spectrum length");
-		    throw std::out_of_range("The number of averaging points requested is larger than the spectrum length");
-		}
-		halfWidth = (npts-1)/2;
-		if (!(npts%2))
-		{
-		    g_log.information("Adding 1 to number of smoothing points, since it must always be odd");
-		    ++npts;
-		}
-	}
-
     PARALLEL_START_INTERUPT_REGION
     // Copy the X data over. Preserves data sharing if present in input workspace.
     outputWorkspace->setX(i,inputWorkspace->refX(i));
@@ -119,12 +87,7 @@ void SmoothData::exec()
     const MantidVec &E = inputWorkspace->readE(i);
     MantidVec &newY = outputWorkspace->dataY(i);
     MantidVec &newE = outputWorkspace->dataE(i);
-	if (npts == 0)
-	{
-		newY = Y;
-		newE = E;
-		continue;
-	}
+
     // Use total to help hold our moving average
     double total = 0.0, totalE = 0.0;
     // First push the values ahead of the current point onto total
@@ -174,41 +137,6 @@ void SmoothData::exec()
   // Set the output workspace to its property
   setProperty("OutputWorkspace", outputWorkspace);
 }
-//=============================================================================
-/** Verify that all the contributing detectors to a spectrum belongs to the same group
- *  @param wi :: The workspace index in the workspace
- *  @return Group number if successful otherwise return -1
- */
-int SmoothData::validateSpectrumInGroup(size_t wi)
-{
-  const std::set<detid_t> & dets = inputWorkspace->getSpectrum(wi)->getDetectorIDs();
-  if (dets.empty()) // Not in group
-  {
-    g_log.debug() << wi << " <- this workspace index is empty!\n";
-    return -1;
-  }
 
-  std::set<detid_t>::const_iterator it = dets.begin();
-  if (*it < 0) // bad pixel id
-    return -1;
-
-  try
-  {// what if index out of range?
-    const int group = udet2group.at(*it);
-    if (group <= 0)
-      return -1;
-    it++;
-    for (; it != dets.end(); ++it) // Loop other all other udets
-    {
-      if (udet2group.at(*it) != group)
-        return -1;
-    }
-    return group;
-  }
-  catch(...)
-  {}
-
-  return -1;
-}
 } // namespace Algorithms
 } // namespace Mantid
