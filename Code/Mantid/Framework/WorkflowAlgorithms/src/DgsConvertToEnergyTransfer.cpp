@@ -322,74 +322,109 @@ namespace Mantid
         params.push_back(tibTofWidth);
         params.push_back(tibTofEnd);
 
+        bool treatTibAsEvents = false;
+
+        // Do we want to treat the TIB as events
+        std::vector<std::string> backgroundType = inputWS->getInstrument()->getStringParameter("treat-background-as-events");
+        if (backgroundType.empty())
+        {
+            // Set the default behaviour.
+            treatTibAsEvents = false;
+        }
+        else
+        {
+            if ("yes" == backgroundType[0] || "true" == backgroundType[0])
+            {
+                treatTibAsEvents = true;
+            }
+        }
+
         if ("SNS" == facility)
         {
-          // Create an original background workspace from a portion of the
-          // result workspace.
-          std::string origBkgWsName = "background_origin_ws";
-          IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
-          rebin->setProperty("InputWorkspace", outputWS);
-          rebin->setProperty("OutputWorkspace", origBkgWsName);
-          rebin->setProperty("Params", params);
-          rebin->setProperty("PreserveEvents", false);
-          rebin->executeAsSubAlg();
-          MatrixWorkspace_sptr origBkgWS = rebin->getProperty("OutputWorkspace");
+          MatrixWorkspace_sptr bkgWS;
 
-          // Convert result workspace to DeltaE since we have Et binning
-          IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
-          cnvun->setProperty("InputWorkspace", outputWS);
-          cnvun->setProperty("OutputWorkspace", outputWS);
-          cnvun->setProperty("Target", "DeltaE");
-          cnvun->setProperty("EMode", "Direct");
-          cnvun->setProperty("EFixed", incidentEnergy);
-          cnvun->executeAsSubAlg();
-          outputWS = cnvun->getProperty("OutputWorkspace");
-
-          // Rebin to Et
-          rebin->setProperty("InputWorkspace", outputWS);
-          rebin->setProperty("OutputWorkspace", outputWS);
-          rebin->setProperty("Params", etBinning);
-          rebin->setProperty("PreserveEvents", false);
-          rebin->executeAsSubAlg();
-          outputWS = rebin->getProperty("OutputWorkspace");
-
-          // Convert result workspace to TOF
-          cnvun->setProperty("InputWorkspace", outputWS);
-          cnvun->setProperty("OutputWorkspace", outputWS);
-          cnvun->setProperty("Target", "TOF");
-          cnvun->setProperty("EMode", "Direct");
-          cnvun->setProperty("EFixed", incidentEnergy);
-          cnvun->executeAsSubAlg();
-          outputWS = cnvun->getProperty("OutputWorkspace");
-
-          // Make result workspace a distribution
-          cnvToDist->setProperty("Workspace", outputWS);
-          cnvToDist->executeAsSubAlg();
-          outputWS = cnvToDist->getProperty("Workspace");
-
-          std::string bkgWsName = this->getPropertyValue("OutputTibWorkspace");
-          if (bkgWsName.empty())
+          // Do we want to treat the constant background as events ?
+          if (treatTibAsEvents)
           {
-            bkgWsName = "background_ws";
+              g_log.notice("TIB removal using event mode.");
+              // Treat background as events
+              IAlgorithm_sptr createBkg = this->createSubAlgorithm("CreateFlatEventWorkspace");
+              createBkg->setProperty("InputWorkspace", outputWS);
+              createBkg->setProperty("RangeStart", tibTofStart);
+              createBkg->setProperty("RangeEnd", tibTofEnd);
+              createBkg->executeAsSubAlg();
+              bkgWS = createBkg->getProperty("OutputWorkspace");
           }
-          // Calculate the background
-          IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
-          flatBg->setProperty("InputWorkspace", origBkgWS);
-          flatBg->setProperty("OutputWorkspace", bkgWsName);
-          flatBg->setProperty("StartX", tibTofStart);
-          flatBg->setProperty("EndX", tibTofEnd);
-          flatBg->setProperty("Mode", "Mean");
-          flatBg->setProperty("OutputMode", "Return Background");
-          flatBg->executeAsSubAlg();
-          MatrixWorkspace_sptr bkgWS = flatBg->getProperty("OutputWorkspace");
+          else
+          {
+              g_log.notice("TIB removal using legacy mode.");
+              // Create an original background workspace from a portion of the
+              // result workspace.
+              std::string origBkgWsName = "background_origin_ws";
+              IAlgorithm_sptr rebin = this->createSubAlgorithm("Rebin");
+              rebin->setProperty("InputWorkspace", outputWS);
+              rebin->setProperty("OutputWorkspace", origBkgWsName);
+              rebin->setProperty("Params", params);
+              rebin->setProperty("PreserveEvents", false);
+              rebin->executeAsSubAlg();
+              MatrixWorkspace_sptr origBkgWS = rebin->getProperty("OutputWorkspace");
 
-          // Remove unneeded original background workspace
-          origBkgWS.reset();
+              // Convert result workspace to DeltaE since we have Et binning
+              IAlgorithm_sptr cnvun = this->createSubAlgorithm("ConvertUnits");
+              cnvun->setProperty("InputWorkspace", outputWS);
+              cnvun->setProperty("OutputWorkspace", outputWS);
+              cnvun->setProperty("Target", "DeltaE");
+              cnvun->setProperty("EMode", "Direct");
+              cnvun->setProperty("EFixed", incidentEnergy);
+              cnvun->executeAsSubAlg();
+              outputWS = cnvun->getProperty("OutputWorkspace");
 
-          // Make background workspace a distribution
-          cnvToDist->setProperty("Workspace", bkgWS);
-          cnvToDist->executeAsSubAlg();
-          bkgWS = cnvToDist->getProperty("Workspace");
+              // Rebin to Et
+              rebin->setProperty("InputWorkspace", outputWS);
+              rebin->setProperty("OutputWorkspace", outputWS);
+              rebin->setProperty("Params", etBinning);
+              rebin->setProperty("PreserveEvents", false);
+              rebin->executeAsSubAlg();
+              outputWS = rebin->getProperty("OutputWorkspace");
+
+              // Convert result workspace to TOF
+              cnvun->setProperty("InputWorkspace", outputWS);
+              cnvun->setProperty("OutputWorkspace", outputWS);
+              cnvun->setProperty("Target", "TOF");
+              cnvun->setProperty("EMode", "Direct");
+              cnvun->setProperty("EFixed", incidentEnergy);
+              cnvun->executeAsSubAlg();
+              outputWS = cnvun->getProperty("OutputWorkspace");
+
+              // Make result workspace a distribution
+              cnvToDist->setProperty("Workspace", outputWS);
+              cnvToDist->executeAsSubAlg();
+              outputWS = cnvToDist->getProperty("Workspace");
+
+              std::string bkgWsName = this->getPropertyValue("OutputTibWorkspace");
+              if (bkgWsName.empty())
+              {
+                  bkgWsName = "background_ws";
+              }
+              // Calculate the background
+              IAlgorithm_sptr flatBg = this->createSubAlgorithm("FlatBackground");
+              flatBg->setProperty("InputWorkspace", origBkgWS);
+              flatBg->setProperty("OutputWorkspace", bkgWsName);
+              flatBg->setProperty("StartX", tibTofStart);
+              flatBg->setProperty("EndX", tibTofEnd);
+              flatBg->setProperty("Mode", "Mean");
+              flatBg->setProperty("OutputMode", "Return Background");
+              flatBg->executeAsSubAlg();
+              bkgWS = flatBg->getProperty("OutputWorkspace");
+
+              // Remove unneeded original background workspace
+              origBkgWS.reset();
+
+              // Make background workspace a distribution
+              cnvToDist->setProperty("Workspace", bkgWS);
+              cnvToDist->executeAsSubAlg();
+              bkgWS = cnvToDist->getProperty("Workspace");
+          }
 
           // Subtract background from result workspace
           IAlgorithm_sptr minus = this->createSubAlgorithm("Minus");
@@ -418,11 +453,14 @@ namespace Mantid
           outputWS = flatBg->getProperty("OutputWorkspace");
         }
 
-        // Convert result workspace back to histogram
-        IAlgorithm_sptr cnvFrDist = this->createSubAlgorithm("ConvertFromDistribution");
-        cnvFrDist->setProperty("Workspace", outputWS);
-        cnvFrDist->executeAsSubAlg();
-        outputWS = cnvFrDist->getProperty("Workspace");
+        if (!treatTibAsEvents)
+        {
+            // Convert result workspace back to histogram
+            IAlgorithm_sptr cnvFrDist = this->createSubAlgorithm("ConvertFromDistribution");
+            cnvFrDist->setProperty("Workspace", outputWS);
+            cnvFrDist->executeAsSubAlg();
+            outputWS = cnvFrDist->getProperty("Workspace");
+        }
       }
 
       // Normalise result workspace to incident beam parameter
