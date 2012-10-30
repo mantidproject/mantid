@@ -210,6 +210,7 @@ namespace Mantid
       detid2index_map * pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
       // the peak positions and where to fit
       std::vector<double> peakPositions = getProperty("DReference");
+      std::sort(peakPositions.begin(), peakPositions.end());
       std::vector<double> fitWindows = generateWindows(wkspDmin, wkspDmax, peakPositions, this->getProperty("FitWindowMaxWidth"));
       g_log.information() << "windows : ";
       if (fitWindows.empty())
