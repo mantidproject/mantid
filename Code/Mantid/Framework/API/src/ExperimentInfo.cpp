@@ -772,6 +772,15 @@ namespace API
   */
   std::string ExperimentInfo::getInstrumentFilename(const std::string& instrumentName, const std::string& date)
   {
+      if (date.empty())
+      {
+          // Just use the current date
+          g_log.debug() << "No date specified, using current date and time." << std::endl;
+          const std::string now = Kernel::DateAndTime::getCurrentTime().toISO8601String();
+          // Recursively call this method, but with both parameters.
+          return ExperimentInfo::getInstrumentFilename(instrumentName, now);
+      }
+
     g_log.debug() << "Looking for instrument XML file for " << instrumentName << " that is valid on '" << date << "'\n";
     // Lookup the instrument (long) name
     std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
@@ -821,23 +830,8 @@ namespace API
         }
       }
     }
-
+    g_log.debug() << "IDF selected is " << mostRecentIDF << std::endl;
     return mostRecentIDF;
-  }
-
-  /** A given instrument may have multiple IDFs associated with it. This method return an
-  *  identifier which identify a given IDF for a given instrument. An IDF filename is
-  *  required to be of the form IDFname + _Definition + Identifier + .xml, the identifier
-  *  then is the part of a filename that identifies the IDF valid at the current date.
-  *
-  *  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
-  *  @return full path of IDF
-  */
-  std::string ExperimentInfo::getInstrumentFilename(const std::string &instrumentName)
-  {
-      // Just use the current date
-      const std::string date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
-      return ExperimentInfo::getInstrumentFilename(instrumentName, date);
   }
 
   /**

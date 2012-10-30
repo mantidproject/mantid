@@ -124,9 +124,7 @@ namespace API
     /// Utility to retrieve the validity dates for the given IDF
     static void getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom, std::string& outValidTo);
     /// Get the IDF using the instrument name and date
-    static std::string getInstrumentFilename(const std::string& instrumentName, const std::string& date);
-    /// Get the IDF using the instrument name
-    static std::string getInstrumentFilename(const std::string& instrumentName);
+    static std::string getInstrumentFilename(const std::string& instrumentName, const std::string& date="");
 
     /// Set the default Nexus File Instrument section Version Number
     void setdefaultNexusInstrumentVersionNumber( int vn );
