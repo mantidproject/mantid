@@ -518,7 +518,7 @@ namespace DataObjects
     beam.normalize();
 
     // Create a ray tracer
-    InstrumentRayTracer tracker( boost::const_pointer_cast<Instrument>(m_inst) );
+    InstrumentRayTracer tracker( m_inst );
     tracker.traceFromSample(beam);
     IDetector_const_sptr det = tracker.getDetectorResult();
     if (det)
