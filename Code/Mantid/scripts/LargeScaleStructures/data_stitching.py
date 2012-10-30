@@ -104,8 +104,7 @@ class DataSet(object):
         self._restricted_range = False
         
     def __str__(self):
-        output_str = str(self._ws_name) + ": scale=%g" % self._scale
-        return output_str
+        return str(self._ws_name)
     
     def get_number_of_points(self):
         return self._npts
