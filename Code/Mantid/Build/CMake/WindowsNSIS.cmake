@@ -62,9 +62,13 @@
     install ( FILES "${CMAKE_CURRENT_BINARY_DIR}/bin/${WINDOWS_DEPLOYMENT_TYPE}/MantidCurveFitting.lib" DESTINATION UserAlgorithms)
     install ( FILES ${CMAKE_LIBRARY_PATH}/PocoFoundation.lib ${CMAKE_LIBRARY_PATH}/PocoXML.lib ${CMAKE_LIBRARY_PATH}/boost_date_time-vc100-mt-1_43.lib DESTINATION UserAlgorithms)
     
-    # Copy runtime libraries
+    # Copy MSVC runtime libraries
     install (FILES ${CMAKE_LIBRARY_PATH}/CRT/msvcp100.dll ${CMAKE_LIBRARY_PATH}/CRT/msvcr100.dll ${CMAKE_LIBRARY_PATH}/CRT/vcomp100.dll DESTINATION bin)
-    
+    # Copy Intel fortran libraries from numpy to general bin directory. Both numpy & scipy are compiled with intel compiler as it is the only way to get 64-bit libs at the moment.
+    # This means scipy requires the intel libraries that are stuck in numpy/core.
+    file ( GLOB INTEL_DLLS "${CMAKE_LIBRARY_PATH}/Python27/Lib/site-packages/numpy/core/*.dll" )
+    install ( FILES ${INTEL_DLLS} DESTINATION ${INBUNDLE}bin )
+
     # Copy third party dlls excluding selected Qt ones and debug ones
     install ( DIRECTORY ${CMAKE_LIBRARY_PATH}/ DESTINATION bin FILES_MATCHING PATTERN "*.dll" 
     REGEX "${CMAKE_LIBRARY_PATH}/CRT/*" EXCLUDE 
