@@ -177,8 +177,9 @@ namespace Mantid
       if (m_values.size() <= 1)
         return;
 
+      typename std::vector<TimeValueUnit<TYPE> >::iterator iterhead, iterend;
+
       // 2. Determine index for start and remove  Note erase is [...)
-      typename std::vector<TimeValueUnit<TYPE> >::iterator iterhead;
       int istart = this->findIndex(start);
       if (istart >= 0)
       {
@@ -213,19 +214,27 @@ namespace Mantid
       }
 
       // 3. Determine index for end and remove  Note erase is [...)
-      int iend = this->findIndex(stop);    
+      int iend = this->findIndex(stop);
       if (static_cast<size_t>(iend) < m_values.size())
       {
-        // If "end time" is earlier than series's end time, delete from [iend to mp.end)
-        iterhead = m_values.begin() + iend;
-        m_values.erase(iterhead, m_values.end());
-      }
-      else
-      {
-        // If "end time" is later than series's end time, do nothing
+        if (m_values[iend].time() == stop)
+        {
+          // Filter stop is on a log.  Delete that log
+          iterend = m_values.begin()+iend;
+        }
+        else
+        {
+          // Filter stop is behind iend. Keep iend
+          iterend = m_values.begin()+iend+1;
+        }
+        // Delete from [iend to mp.end)
+        m_values.erase(iterend, m_values.end());
       }
 
+      // 4. Make size consistent
       m_size = static_cast<int>(m_values.size());
+
+      return;
     }
 
 
