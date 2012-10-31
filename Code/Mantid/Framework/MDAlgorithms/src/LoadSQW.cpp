@@ -482,6 +482,11 @@ namespace Mantid
       m_fileStream.read(&data_buffer[0],2*4);
       this->m_nDims = *((uint32_t*)(&data_buffer[4]));
 
+      if ( m_nDims != 4 )
+      {
+        throw Kernel::Exception::NotImplementedError("Reading SQW files of dimension other than 4 is not implemented.");
+      }
+
       parse_sqw_main_header();
 
       // go through all component headers and read them (or calculate their length)
