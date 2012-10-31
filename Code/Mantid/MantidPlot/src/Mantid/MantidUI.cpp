@@ -2412,6 +2412,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
         if (f) flt.addFilter(*f);
         else
         {
+          t->setconfirmcloseFlag(false);
           t->setAttribute(Qt::WA_DeleteOnClose);
           t->close();
           importNumSeriesLog(wsName,logname,0);
@@ -2420,6 +2421,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
       }
       catch(...)
       {
+        t->setconfirmcloseFlag(false);
         t->setAttribute(Qt::WA_DeleteOnClose);
         t->close();
         importNumSeriesLog(wsName,logname,0);
