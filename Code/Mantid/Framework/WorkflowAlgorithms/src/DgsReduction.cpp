@@ -746,7 +746,7 @@ namespace Mantid
       {
         this->declareProperty(new WorkspaceProperty<>("SampleTibWorkspace",
             tibWsName, Direction::Output));
-        this->setProperty("SampleTibWorkspace", idetVanWS);
+        this->setProperty("SampleTibWorkspace", tibWS);
       }
 
       Workspace_sptr absSampleWS = this->loadInputData("AbsUnitsSample", false);
