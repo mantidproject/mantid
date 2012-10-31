@@ -151,9 +151,16 @@ namespace Mantid
       m_name = name;
     }
 
-    /**
-     * Filter out a run by time. Takes out any TimeSeriesProperty log entries outside of the given
+    /** Filter out a run by time. Takes out any TimeSeriesProperty log entries outside of the given
      *  absolute time range.
+     *  Be noticed that this operation is not reversible.
+     *
+     *  Use case 1: if start time of the filter fstart is in between t1 and t2 of the TimeSeriesProperty,
+     *              then, the new start time is fstart and the value of the log is the log value @ t1
+     *
+     *  Use case 2: if the start time of the filter in on t1 or before log start time t0, then
+     *              the new start time is t1/t0/filter start time.
+     *
      * EXCEPTION: If there is only one entry in the list, it is considered to mean
      * "constant" so the value is kept even if the time is outside the range.
      *
@@ -176,13 +183,28 @@ namespace Mantid
       if (istart >= 0)
       {
         // "start time" is behind time-series's starting time
-        if (m_values[istart].time() != start)
-        {
-          // increment by 1 to insure mP[istart] be deleted
-          istart ++;
-        }
         iterhead = m_values.begin()+istart;
+
+        bool useprefiltertime;
+        if (m_values[istart].time() == start)
+        {
+          // The filter time is on the mark.  Erase [begin(),  istart)
+          useprefiltertime = false;
+        }
+        else
+        {
+          // The filter time is larger than T[istart]. Erase[begin(), istart) ... filter start(time)
+          // and move istart to filter startime
+          useprefiltertime = true;
+        }
+
+        // Remove the series
         m_values.erase(m_values.begin(), iterhead);
+
+        if (useprefiltertime)
+        {
+          m_values[0].setTime(start);
+        }
       }
       else
       {
@@ -1492,7 +1514,7 @@ namespace Mantid
     }
 
     /** Find the index of the entry of time t in the mP vector (sorted)
-     *  Return @ if t is within log.begin and log.end, then the value equal or just smaller than t
+     *  Return @ if t is within log.begin and log.end, then the index of the log equal or just smaller than t
      *           if t is earlier (less) than the starting time, return -1
      *           if t is later (larger) than the ending time, return m_value.size
      */
