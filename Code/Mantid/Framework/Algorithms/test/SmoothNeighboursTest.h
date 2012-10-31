@@ -72,8 +72,8 @@ public:
 
   }
 
-  void do_test(EventType type, double * expectedY, std::string WeightedSum = "Parabolic",  bool PreserveEvents = true,
-      double Radius = 0.0,
+    void do_test(EventType type, double * expectedY, std::string WeightedSum = "Parabolic",  bool PreserveEvents = true,
+      double Radius = 0.001,
       bool ConvertTo2D = false, int numberOfNeighbours=8)
   {
     // Pixels will be spaced 0.008 apart. 
@@ -109,18 +109,98 @@ public:
 
 
     // Register the workspace in the data service
-
     SmoothNeighbours alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
+    alg.setRethrows(true);
     alg.setPropertyValue("InputWorkspace", "SmoothNeighboursTest_input");
     alg.setProperty("OutputWorkspace", "testEW");
-    alg.setProperty("AdjX", 1);
-    alg.setProperty("AdjY", 1);
     alg.setProperty("PreserveEvents", PreserveEvents);
     alg.setProperty("WeightedSum", WeightedSum);
     alg.setProperty("Radius", Radius);
     alg.setProperty("NumberOfNeighbours", numberOfNeighbours);
+    alg.execute(); 
+    TS_ASSERT( alg.isExecuted() );
+
+    if (PreserveEvents)
+    {
+      EventWorkspace_sptr ws;
+      TS_ASSERT_THROWS_NOTHING(
+          ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("testEW") );
+      TS_ASSERT(ws);
+      if (!ws) return;
+      size_t nevents = ws->getNumberEvents();
+      TS_ASSERT_LESS_THAN( nevents0, nevents);
+    }
+
+    // Check the values
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testEW");
+    TS_ASSERT(ws);
+    if (!ws) return;
+
+    // Compare to expected values
+    TS_ASSERT_DELTA(  ws->readY(0)[0], expectedY[0], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(1)[0], expectedY[1], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(2)[0], expectedY[2], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(3)[0], expectedY[3], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(4)[0], expectedY[4], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(5)[0], expectedY[5], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(6)[0], expectedY[6], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(7)[0], expectedY[7], 1e-4);
+    TS_ASSERT_DELTA(  ws->readY(8)[0], expectedY[8], 1e-4);
+
+
+    AnalysisDataService::Instance().remove("testEW");
+  }
+
+
+
+  void do_test_rectangular(EventType type, double * expectedY, std::string WeightedSum = "Parabolic",  bool PreserveEvents = true, bool ConvertTo2D = false)
+  {
+    // Pixels will be spaced 0.008 apart. 
+    EventWorkspace_sptr in_ws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 20, false);
+
+    if (type == WEIGHTED)
+    {
+      in_ws *= 2.0;
+      in_ws *= 0.5;
+    }
+    if (type == WEIGHTED_NOTIME)
+    {
+      for (size_t i = 0; i<in_ws->getNumberHistograms(); i++)
+      {
+        EventList & el = in_ws->getEventList(i);
+        el.compressEvents(0.0, &el);
+      }
+    }
+
+    // Multiply by 2 the workspace at index 4
+    EventList & el = in_ws->getEventList(4);
+    el += el;
+
+    size_t nevents0 = in_ws->getNumberEvents();
+
+    AnalysisDataService::Instance().addOrReplace("SmoothNeighboursTest_input", in_ws);
+    if (ConvertTo2D)
+    {
+      FrameworkManager::Instance().exec("ConvertToMatrixWorkspace", 4,
+          "InputWorkspace", "SmoothNeighboursTest_input",
+          "OutputWorkspace", "SmoothNeighboursTest_input");
+    }
+
+
+    // Register the workspace in the data service
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+    alg.setRethrows(true);
+    alg.setPropertyValue("InputWorkspace", "SmoothNeighboursTest_input");
+    alg.setProperty("OutputWorkspace", "testEW");
+    alg.setProperty("PreserveEvents", PreserveEvents);
+    alg.setProperty("WeightedSum", WeightedSum);
+    alg.setProperty("AdjX", 1);
+    alg.setProperty("AdjY", 1);
+    alg.setProperty("ForceEvaluationAsRectangularDetectors", true);
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -228,32 +308,32 @@ public:
   void test_event_WEIGHTED()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(WEIGHTED, expectedY);
+    do_test_rectangular(WEIGHTED, expectedY);
   }
 
   void test_event_WEIGHTED_NOTIME()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(WEIGHTED_NOTIME, expectedY);
+    do_test_rectangular(WEIGHTED_NOTIME, expectedY);
   }
 
   void test_event_dont_PreserveEvents()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(TOF, expectedY, "Parabolic");
+    do_test_rectangular(TOF, expectedY, "Parabolic");
   }
 
 
   void test_event()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(TOF, expectedY);
+    do_test_rectangular(TOF, expectedY);
   }
 
   void test_event_no_WeightedSum()
   {
     double expectedY[9] = {2, 2, 2, 2.3333, 2.3333, 2.3333, 2, 2, 2};
-    do_test(TOF, expectedY, "Flat",  true /*PreserveEvents*/);
+    do_test_rectangular(TOF, expectedY, "Flat",  true /*PreserveEvents*/);
   }
 
   void test_event_Radius_no_WeightedSum()
@@ -273,15 +353,14 @@ public:
   void test_workspace2D()
   {
     double expectedY[9] = {2, 2, 2, 2.3636, 2.5454, 2.3636, 2, 2, 2};
-    do_test(TOF, expectedY, "Parabolic", false /*PreserveEvents*/,
-        0.0 /* Radius*/, true /*Convert2D*/);
+    do_test_rectangular(TOF, expectedY, "Parabolic", false /*PreserveEvents*/
+        , true /*Convert2D*/);
   }
 
   void test_workspace2D_no_WeightedSum()
   {
     double expectedY[9] = {2, 2, 2, 2.3333, 2.3333, 2.3333, 2, 2, 2};
-    do_test(TOF, expectedY, "Flat", false /*PreserveEvents*/, 
-        0.0 /* Radius*/, true /*Convert2D*/);
+    do_test_rectangular(TOF, expectedY, "Flat", false /*PreserveEvents*/,  true /*Convert2D*/);
   }
 
   void test_workspace2D_Radius_no_WeightedSum()
@@ -298,58 +377,6 @@ public:
     double expectedY[9] = {2, 2, 2, 2, (2. + 4.*9)/10., 2, 2, 2, 2};
     do_test(TOF, expectedY, "Linear", false /*PreserveEvents*/, 0.009 /* Radius */,
         true /*Convert2D*/);
-  }
-
-  void doTestTreatAsRectangular(MatrixWorkspace_sptr inWS, const bool expectedToTreatAsRectangular, const double radius)
-  {
-    SmoothNeighbours alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT( alg.isInitialized() );
-    alg.setProperty("InputWorkspace", inWS);
-    alg.setProperty("OutputWorkspace", "testMW");
-    alg.setProperty("PreserveEvents", false);
-    alg.setProperty("WeightedSum", "Flat");
-    alg.setProperty("NumberOfNeighbours", 8);
-    alg.setProperty("IgnoreMaskedDetectors", true);
-    alg.setProperty("Radius", radius);
-    alg.setProperty("RadiusUnits", "NumberOfPixels");
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-
-    TS_ASSERT_EQUALS(expectedToTreatAsRectangular, alg.executionUsedRectangularDetectorInstrument());
-  }
-
-  void test_is_rectangular_detector_instrument()
-  {
-    // Creates a Rectangular detector instrument 
-    EventWorkspace_sptr inWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 20, false);
-
-    const bool treatAsRectangular = true;
-    const double radius = 0;
-
-    doTestTreatAsRectangular(inWS, treatAsRectangular, radius);
-  }
-
-  void test_is_rectangular_detector_instrument_but_treat_as_non_rectangular_as_positive_radius_used()
-  {
-    // Creates a Rectangular detector instrument 
-    EventWorkspace_sptr inWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 20, false);
-
-    
-    const double radius = 1; // Positive radius value.
-    const bool treatAsRectangular = false; // since the radius value will be > 0
-
-    doTestTreatAsRectangular(inWS, treatAsRectangular, radius);
-  }
-
-  void test_isNotRectangularDetectorInstrument()
-  {
-    // Creates a Non-Rectangular detector instrument.
-    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(100, 10);
-
-    const bool treatAsRectangular = false; // This is a non-rectangular instrument.
-    const double radius = 0; // This would have crashed Mantid previously.
-
-    doTestTreatAsRectangular(inWS, treatAsRectangular, radius);
   }
 
   void test_properties_in_no_group()
@@ -405,6 +432,21 @@ public:
     TS_ASSERT_EQUALS("Rectangular Detectors", propSumPixelsY->getGroup());
     TS_ASSERT_EQUALS("Rectangular Detectors", propZeroEdgePixels->getGroup());
   }
+
+  void test_throw_if_mix_rectangular_and_nonrectangular_properties()
+  {
+    MatrixWorkspace_sptr inWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(100, 10);
+    SmoothNeighbours alg;
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+    alg.setProperty("InputWorkspace", inWS);
+    alg.setProperty("OutputWorkspace", "testMW");
+    alg.setProperty("Radius", 1.0); // This is a 'NonUniform Detector' group property that is now non default.
+    alg.setProperty("AdjX", 3); // This is a 'Rectangular Dectector' group property that is now non default.
+    TSM_ASSERT_THROWS("Either setup the algorithm for rectangular detectors or non-rectangular detectors, not both.", alg.execute(), std::invalid_argument );
+  }
+
 
 };
 
