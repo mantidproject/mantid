@@ -53,9 +53,9 @@ CopyInstrumentParameters::~CopyInstrumentParameters() {}
 
 void CopyInstrumentParameters::init()
 {
-  declareProperty(new WorkspaceProperty<>("GivingWorkspace","",Direction::Input),
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
     "Name of the workspace giving the instrument" );
-  declareProperty(new WorkspaceProperty<>("ReceivingWorkspace","",Direction::InOut),
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::InOut),
     "Name of the workspace receiving the instrument" );
 }
 
@@ -66,10 +66,10 @@ void CopyInstrumentParameters::exec()
 {
 
   // Get the giving workspace
-  m_givingWorkspace = getProperty("GivingWorkspace");
+  m_givingWorkspace = getProperty("InputWorkspace");
 
   // Get the receiving workspace
-  m_receivingWorkspace = getProperty("ReceivingWorkspace"); 
+  m_receivingWorkspace = getProperty("OutputWorkspace"); 
 
   // Retrieve and validate the input properties
   this->checkProperties();
@@ -93,12 +93,12 @@ void CopyInstrumentParameters::checkProperties()
   Instrument_const_sptr inst = m_givingWorkspace->getInstrument();
   if( !inst )
   {
-      throw std::invalid_argument("Giving workspace has no instrument");
+      throw std::invalid_argument("Input workspace has no instrument");
   }
   Instrument_const_sptr inst2 = m_receivingWorkspace->getInstrument();
   if( !inst2 )
   {
-      throw std::invalid_argument("Receiving workspace has no instrument");
+      throw std::invalid_argument("Output workspace has no instrument");
   }
 
   Instrument_const_sptr baseInstGiv = inst->baseInstrument();
@@ -107,7 +107,7 @@ void CopyInstrumentParameters::checkProperties()
   // Check that both workspaces have the same instrument name
   if( baseInstRec != baseInstGiv )
   {
-      throw std::invalid_argument("The base instrument in the receiving workspace if not the same as the base instrument in the giving workspace.");
+      throw std::invalid_argument("The base instrument in the output workspace is not the same as the base instrument in the input workspace.");
   }
 
 }
