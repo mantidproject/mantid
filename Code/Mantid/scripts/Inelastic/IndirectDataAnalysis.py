@@ -148,7 +148,7 @@ def elwin(inputFiles, eRange, Save=False, Verbose=True, Plot=False):
         (direct, file_name) = os.path.split(file)
         (root, ext) = os.path.splitext(file_name)
         savefile = root[:-3]
-        LoadNexus(Filename=file_name, OutputWorkspace=tempWS)
+        LoadNexus(Filename=file, OutputWorkspace=tempWS)
         if Verbose:
             logger.notice('Reading file : '+file)
         nsam,ntc = CheckHistZero(tempWS)
