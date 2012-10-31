@@ -1,4 +1,4 @@
-#include "MantidRemoteTask.h"
+#include "MantidRemoteCluster.h"
 #include "JobStatusDialog.h"
 #include "../MantidDock.h"
 #include "NewClusterDialog.h"

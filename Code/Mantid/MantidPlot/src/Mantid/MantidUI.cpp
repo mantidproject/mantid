@@ -2,7 +2,7 @@
 #include "MantidUI.h"
 #include "MantidMatrix.h"
 #include "MantidDock.h"
-#include "Remote/MantidRemoteTask.h"
+#include "Remote/MantidRemoteCluster.h"
 #include "ImportWorkspaceDlg.h"
 #include "AlgorithmMonitor.h"
 #include "MantidSampleLogDialog.h"
