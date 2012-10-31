@@ -458,6 +458,24 @@ public:
       Mantid::API::AnalysisDataService::Instance().remove(algB->getPropertyValue("OutputWorkspace"));  
     }
 
+    void test_no_overlap_bins_throws()
+    {
+      Mantid::API::FrameworkManagerImpl& frameworkManager = Mantid::API::FrameworkManager::Instance();
+      auto algA = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=0,0;ErrorInput=1,1;Dimensionality=1;Extents=-1,1;NumberOfBins=2;Names=A;Units=U1;OutputWorkspace=mdhw");
+      IMDHistoWorkspace_sptr mdhw = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
+
+      IAlgorithm_sptr alg = boost::make_shared<Stitch1D>();
+      alg->setRethrows(true);
+      alg->initialize();
+
+      alg->setProperty("LHSWorkspace", mdhw);
+      alg->setProperty("RHSWorkspace", mdhw);
+      alg->setPropertyValue("OutputWorkspace", "converted");
+      alg->setProperty("StartOverlap", 0.001); // The overlap region would correspond to zero bins with these inputs!
+      alg->setProperty("EndOverlap", 0.002);
+      TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
+    }
+
     void test_on_multi_period_group()
     {
       Mantid::API::FrameworkManagerImpl& frameworkManager = Mantid::API::FrameworkManager::Instance();
