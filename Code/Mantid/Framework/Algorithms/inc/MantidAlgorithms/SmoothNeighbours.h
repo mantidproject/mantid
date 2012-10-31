@@ -154,6 +154,12 @@ private:
   /// Progress reporter
   Mantid::API::Progress * m_prog;
 
+  /// Non rectangular detector group
+  const std::string m_NonUniformDetectorGroupProperty; 
+  
+  /// Rectuangular detector group
+  const std::string m_RectangularDetectorGroupProperty;
+
 };
 
 } // namespace Algorithm

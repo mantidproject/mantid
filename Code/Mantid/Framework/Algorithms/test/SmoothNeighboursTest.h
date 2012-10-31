@@ -352,6 +352,60 @@ public:
     doTestTreatAsRectangular(inWS, treatAsRectangular, radius);
   }
 
+  void test_properties_in_no_group()
+  {
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+   
+    // No Group
+    Property* propWeightedSum = alg.getProperty("WeightedSum");
+    Property* propIgnoreMaskedDetectors = alg.getProperty("IgnoreMaskedDetectors");
+    Property* propSigma = alg.getProperty("Sigma");
+
+    TS_ASSERT_EQUALS("", propWeightedSum->getGroup());
+    TS_ASSERT_EQUALS("", propIgnoreMaskedDetectors->getGroup());
+    TS_ASSERT_EQUALS("", propSigma->getGroup());
+  }
+
+  void test_properties_in_nonuniform_group()
+  {
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+    // NonUniform detector arrangement group
+    Property* propNumberOfNeighbours = alg.getProperty("NumberOfNeighbours");
+    Property* propRadius = alg.getProperty("Radius");
+    Property* propRadiusUnits = alg.getProperty("RadiusUnits");
+    Property* propSumNumberOfNeighbours = alg.getProperty("SumNumberOfNeighbours");
+
+    TS_ASSERT_EQUALS("NonUniform Detectors", propNumberOfNeighbours->getGroup());
+    TS_ASSERT_EQUALS("NonUniform Detectors", propRadius->getGroup());
+    TS_ASSERT_EQUALS("NonUniform Detectors", propRadiusUnits->getGroup());
+    TS_ASSERT_EQUALS("NonUniform Detectors", propSumNumberOfNeighbours->getGroup());
+  }
+
+  void test_properties_in_rectangular_group()
+  {
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+     // Uniform detector arrangement group
+    Property* propAdjX = alg.getProperty("AdjX");
+    Property* propAdjY = alg.getProperty("AdjY");
+    Property* propSumPixelsX = alg.getProperty("SumPixelsX");
+    Property* propSumPixelsY = alg.getProperty("SumPixelsY");
+    Property* propZeroEdgePixels = alg.getProperty("ZeroEdgePixels");
+
+    TS_ASSERT_EQUALS("Rectangular Detectors", propAdjX->getGroup());
+    TS_ASSERT_EQUALS("Rectangular Detectors", propAdjY->getGroup());
+    TS_ASSERT_EQUALS("Rectangular Detectors", propSumPixelsX->getGroup());
+    TS_ASSERT_EQUALS("Rectangular Detectors", propSumPixelsY->getGroup());
+    TS_ASSERT_EQUALS("Rectangular Detectors", propZeroEdgePixels->getGroup());
+  }
+
 };
 
 #endif /*SmoothNeighboursTEST_H_*/

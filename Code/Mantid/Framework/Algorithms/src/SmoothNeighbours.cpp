@@ -119,7 +119,7 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SmoothNeighbours)
 
-SmoothNeighbours::SmoothNeighbours() : API::Algorithm() , WeightedSum(new NullWeighting)
+SmoothNeighbours::SmoothNeighbours() : API::Algorithm() , WeightedSum(new NullWeighting), m_NonUniformDetectorGroupProperty("NonUniform Detectors"), m_RectangularDetectorGroupProperty("Rectangular Detectors")
 {
 }
 
@@ -184,7 +184,7 @@ void SmoothNeighbours::init()
       "  Gaussian : Uses the absolute distance x^2 + y^2 ... normalised by the cutoff^2"
        );
 
-  declareProperty("Sigma", 0.5, mustBePositiveDouble, "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
+ declareProperty("Sigma", 0.5, mustBePositiveDouble, "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
   setPropertySettings("Sigma", new EnabledWhenProperty("WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
   declareProperty("AdjX", 1, mustBePositive,
@@ -207,11 +207,18 @@ void SmoothNeighbours::init()
     "The number of pixels to zero at edges. Only for instruments with RectangularDetectors. " );
   setPropertySettings("ZeroEdgePixels", new EnabledWhenProperty("Radius", IS_DEFAULT) );
 
-  setPropertyGroup("AdjX", "Rectangular Detectors Only");
-  setPropertyGroup("AdjY", "Rectangular Detectors Only");
-  setPropertyGroup("SumPixelsX", "Rectangular Detectors Only");
-  setPropertyGroup("SumPixelsY", "Rectangular Detectors Only");
-  setPropertyGroup("ZeroEdgePixels", "Rectangular Detectors Only");
+  // Perform Group Asssociations.
+  setPropertyGroup("RadiusUnits", m_NonUniformDetectorGroupProperty);
+  setPropertyGroup("Radius", m_NonUniformDetectorGroupProperty);
+  setPropertyGroup("NumberOfNeighbours", m_NonUniformDetectorGroupProperty);
+  setPropertyGroup("SumNumberOfNeighbours", m_NonUniformDetectorGroupProperty);
+
+  // Perform Group Associations.
+  setPropertyGroup("AdjX", m_RectangularDetectorGroupProperty);
+  setPropertyGroup("AdjY", m_RectangularDetectorGroupProperty);
+  setPropertyGroup("SumPixelsX", m_RectangularDetectorGroupProperty);
+  setPropertyGroup("SumPixelsY", m_RectangularDetectorGroupProperty);
+  setPropertyGroup("ZeroEdgePixels", m_RectangularDetectorGroupProperty);
 
   declareProperty("PreserveEvents", true,
     "If the InputWorkspace is an EventWorkspace, this will preserve the full event list (warning: this will use much more memory!).");
