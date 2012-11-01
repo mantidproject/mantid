@@ -1,12 +1,13 @@
 # Algorithm to start Bayes programs
 from MantidFramework import *
 from mantidsimple import *
+from mantidplotpy import *
 import IndirectTrans as Main
 
 class IDAtransmission(PythonAlgorithm):
  
 	def PyInit(self):
-		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']))
+		self.declareProperty(Name='Instrument',DefaultValue='iris',Validator=ListValidator(['irs','iris','osi','osiris']),Description = 'Instrument')
 		self.declareProperty(Name='SamNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
 		self.declareProperty(Name='CanNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Resolution run number')
 		self.declareProperty('Verbose',DefaultValue='Yes',Validator=ListValidator(['Yes','No']))
@@ -15,11 +16,7 @@ class IDAtransmission(PythonAlgorithm):
 	def PyExec(self):
 
 		self.log().information('IDA transmission input')
-		instr = self.getPropertyValue('Instrument')
-		if instr == 'IRIS':
-			prefix = 'irs'
-		if instr == 'OSIRIS':
-			prefix = 'osi'
+		prefix = self.getPropertyValue('Instrument')
 		sn = self.getPropertyValue('SamNumber')
 		cn = self.getPropertyValue('CanNumber')
 

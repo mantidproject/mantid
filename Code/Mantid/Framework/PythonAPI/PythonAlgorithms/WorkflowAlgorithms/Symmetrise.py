@@ -9,7 +9,7 @@ class Symmetrise(PythonAlgorithm):
 
 	def PyInit(self):
 		self.declareProperty(Name='InputType',DefaultValue='File',Validator=ListValidator(['File','Workspace']),Description = 'Origin of data input - File (_red.nxs) or Workspace')
-		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']),Description = 'Instrument')
+		self.declareProperty(Name='Instrument',DefaultValue='iris',Validator=ListValidator(['irs','iris','osi','osiris']),Description = 'Instrument')
 		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']),Description = 'Analyser & reflection')
 		self.declareProperty(Name='SamNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
 		self.declareProperty(Name='Xcut',DefaultValue='',Validator=MandatoryValidator(),Description = 'X cutoff value')
@@ -21,11 +21,7 @@ class Symmetrise(PythonAlgorithm):
 
 		self.log().information('Symmetrise')
 		inType = self.getPropertyValue('InputType')
-		instr = self.getPropertyValue('Instrument')
-		if instr == 'IRIS':
-			prefix = 'irs'
-		if instr == 'OSIRIS':
-			prefix = 'osi'
+		prefix = self.getPropertyValue('Instrument')
 		ana = self.getPropertyValue('Analyser')
 		sn = self.getPropertyValue('SamNumber')
 		sam = prefix+sn+'_'+ana+'_red'

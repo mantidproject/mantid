@@ -12,7 +12,7 @@ class JumpFit(PythonAlgorithm):
 
 	def PyInit(self):
 		self.declareProperty(Name='InputType',DefaultValue='File',Validator=ListValidator(['File','Workspace']),Description = 'Origin of data input - File (*.nxs) or Workspace')
-		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']),Description = 'Instrument name')
+		self.declareProperty(Name='Instrument',DefaultValue='iris',Validator=ListValidator(['irs','iris','osi','osiris']),Description = 'Instrument')
 		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']),Description = 'Analyser & reflection')
 		self.declareProperty(Name='QLprogram',DefaultValue='QLr',Validator=ListValidator(['QLr','QLd']),Description = 'QL output from Res or Data')
 		self.declareProperty(Name='Fit',DefaultValue='CE',Validator=ListValidator(['CE','SS']),Description = 'Chudley-Elliott or Singwi-Sjolander')
@@ -27,11 +27,7 @@ class JumpFit(PythonAlgorithm):
 		
 		self.log().information('Jump input')
 		inType = self.getPropertyValue('InputType')
-		instr = self.getPropertyValue('Instrument')
-		if instr == 'IRIS':
-			prefix = 'irs'
-		if instr == 'OSIRIS':
-			prefix = 'osi'
+		prefix = self.getPropertyValue('Instrument')
 		ana = self.getPropertyValue('Analyser')
 		prog = self.getPropertyValue('QLprogram')
 		jump = self.getPropertyValue('Fit')
