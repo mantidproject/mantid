@@ -17,6 +17,11 @@
 #include <boost/algorithm/string/split.hpp>
 #include <iomanip>
 
+using namespace Mantid;
+using namespace Mantid::CurveFitting;
+using namespace Mantid::DataObjects;
+using namespace Mantid::API;
+
 using namespace std;
 
 namespace Mantid
@@ -59,79 +64,87 @@ void LeBailFit::initDocs()
  */
 void LeBailFit::init()
 {
-    // --------------  Input and output Workspaces  -----------------
+  // --------------  Input and output Workspaces  -----------------
 
-    // Data
-    this->declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace", "", Direction::Input),
-      "Input workspace containing the data to fit by LeBail algorithm.");
+  // Input Data Workspace
+  this->declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "", Direction::Input),
+                          "Input workspace containing the data to fit by LeBail algorithm.");
 
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace", "", Direction::Output),
-                          "Output workspace containing calculated pattern or calculated background. ");
+  // Output Result Data/Model Workspace
+  this->declareProperty(new WorkspaceProperty<Workspace2D>("OutputWorkspace", "", Direction::Output),
+                        "Output workspace containing calculated pattern or calculated background. ");
 
-    // Parameters
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("InputParameterWorkspace", "", Direction::Input),
-      "Input table workspace containing the parameters required by LeBail fit. ");
+  // Instrument profile Parameters
+  this->declareProperty(new WorkspaceProperty<TableWorkspace>("InputParameterWorkspace", "", Direction::Input),
+                        "Input table workspace containing the parameters required by LeBail fit. ");
 
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("OutputParameterWorkspace", "", Direction::Output, API::PropertyMode::Optional),
-      "Input table workspace containing the parameters required by LeBail fit. ");
+  // Output instrument profile parameters
+  auto tablewsprop1 =  new WorkspaceProperty<TableWorkspace>("OutputParameterWorkspace", "", Direction::Output,
+                                                             API::PropertyMode::Optional);
+  this->declareProperty(tablewsprop1, "Input table workspace containing the parameters required by LeBail fit. ");
 
-    // Single peak: Reflection (HKL) Workspace, PeaksWorkspace
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("InputHKLWorkspace", "", Direction::InOut),
-      "Input table workspace containing the list of reflections (HKL). ");
+  // Single peak: Reflection (HKL) Workspace, PeaksWorkspace
+  this->declareProperty(new WorkspaceProperty<TableWorkspace>("InputHKLWorkspace", "", Direction::InOut),
+                        "Input table workspace containing the list of reflections (HKL). ");
 
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("OutputPeaksWorkspace", "", Direction::Output, API::PropertyMode::Optional),
-                        "Optional output table workspace containing all peaks' peak parameters. ");
+  // Bragg peaks profile parameter output table workspace
+  auto tablewsprop2 = new WorkspaceProperty<TableWorkspace>("OutputPeaksWorkspace", "", Direction::Output,
+                                                           API::PropertyMode::Optional);
+  this->declareProperty(tablewsprop2, "Optional output table workspace containing all peaks' peak parameters. ");
 
-    // WorkspaceIndex
-    this->declareProperty("WorkspaceIndex", 0, "Workspace index of the spectrum to fit by LeBail.");
+  // WorkspaceIndex
+  this->declareProperty("WorkspaceIndex", 0, "Workspace index of the spectrum to fit by LeBail.");
 
-    // Interested region
-    this->declareProperty(new Kernel::ArrayProperty<double>("FitRegion"),
+  // Interested region
+  this->declareProperty(new Kernel::ArrayProperty<double>("FitRegion"),
                           "Region of data (TOF) for LeBail fit.  Default is whole range. ");
 
-    // Functionality: Fit/Calculation/Background
-    std::vector<std::string> functions;
-    functions.push_back("LeBailFit");
-    functions.push_back("Calculation");
-    //  TODO: This option is temporarily turned off for release 2.3
-    //  functions.push_back("CalculateBackground");
-    auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
-    this->declareProperty("Function", "LeBailFit", validator, "Functionality");
+  // Functionality: Fit/Calculation/Background
+  std::vector<std::string> functions;
+  functions.push_back("LeBailFit");
+  functions.push_back("Calculation");
+  //  TODO: Turn on this option in release 2.4
+  //  functions.push_back("CalculateBackground");
+  auto validator = boost::make_shared<Kernel::StringListValidator>(functions);
+  this->declareProperty("Function", "LeBailFit", validator, "Functionality");
 
-    // About background:  Background type, input (table workspace or array)
-    std::vector<std::string> bkgdtype;
-    bkgdtype.push_back("Polynomial");
-    bkgdtype.push_back("Chebyshev");
-    auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
-    this->declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
+  //------------------  Background Related Properties  -------------------------
+  // About background:  Background type, input (table workspace or array)
+  std::vector<std::string> bkgdtype;
+  bkgdtype.push_back("Polynomial");
+  bkgdtype.push_back("Chebyshev");
+  auto bkgdvalidator = boost::make_shared<Kernel::StringListValidator>(bkgdtype);
+  this->declareProperty("BackgroundType", "Polynomial", bkgdvalidator, "Background type");
 
-    this->declareProperty("BackgroundFunctionOrder", 12, "Order of background function.");
+  // Background function order
+  this->declareProperty("BackgroundFunctionOrder", 12, "Order of background function.");
 
-    // Input background parameters (array)
-    this->declareProperty(new Kernel::ArrayProperty<double>("BackgroundParameters"),
-                          "Optional: enter a comma-separated list of background order parameters from order 0. ");
+  // Input background parameters (array)
+  this->declareProperty(new Kernel::ArrayProperty<double>("BackgroundParameters"),
+                        "Optional: enter a comma-separated list of background order parameters from order 0. ");
 
-    // Input background parameters (tableworkspace)
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("BackgroundParametersWorkspace", "", Direction::InOut, API::PropertyMode::Optional),
-            "Optional table workspace containing the fit result for background.");
+  // Input background parameters (tableworkspace)
+  auto tablewsprop3 = new WorkspaceProperty<TableWorkspace>("BackgroundParametersWorkspace", "", Direction::InOut,
+                                                            API::PropertyMode::Optional);
+  this->declareProperty(tablewsprop3, "Optional table workspace containing the fit result for background.");
 
-    // UseInputPeakHeights
-    this->declareProperty("UseInputPeakHeights", true,
+  // UseInputPeakHeights
+  this->declareProperty("UseInputPeakHeights", true,
                         "For function Calculation, use peak heights specified in ReflectionWorkspace.  Otherwise, calcualte peaks' heights. ");
 
-    // Peak Radius
-    this->declareProperty("PeakRadius", 5, "Range (multiplier relative to FWHM) for a full peak. ");
+  // Peak Radius
+  this->declareProperty("PeakRadius", 5, "Range (multiplier relative to FWHM) for a full peak. ");
 
-    // Pattern calcualtion
-    this->declareProperty("PlotIndividualPeaks", false, "Option to output each individual peak in mode Calculation.");
+  // Pattern calcualtion
+  this->declareProperty("PlotIndividualPeaks", false, "Option to output each individual peak in mode Calculation.");
 
-    // Minimizer
-    std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys(); // :Instance().getKeys();
-    declareProperty("Minimizer","Levenberg-MarquardtMD",
-                    Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(minimizerOptions)),
-                    "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Kernel::Direction::InOut);
+  // Minimizer
+  std::vector<std::string> minimizerOptions = API::FuncMinimizerFactory::Instance().getKeys(); // :Instance().getKeys();
+  declareProperty("Minimizer","Levenberg-MarquardtMD",
+                  Kernel::IValidator_sptr(new Kernel::ListValidator<std::string>(minimizerOptions)),
+                  "The minimizer method applied to do the fit, default is Levenberg-Marquardt", Kernel::Direction::InOut);
 
-    return;
+  return;
 }
 
 /** Implement abstract Algorithm methods
@@ -207,6 +220,7 @@ void LeBailFit::exec()
   // c. Create CompositeFunction
   API::CompositeFunction compfunction;
   mLeBailFunction = boost::make_shared<API::CompositeFunction>(compfunction);
+  mLeBailFunction->useNumericDerivatives(true);
 
   std::map<int, CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr>::iterator mit;
   for (mit = mPeaks.begin(); mit != mPeaks.end(); ++ mit)
@@ -293,8 +307,7 @@ void LeBailFit::exec()
  */
 void LeBailFit::calculatePattern(size_t workspaceindex)
 {
-
-
+  // FIXME Refactor this function such that some other functions in the algorithm can call calculatePattern without
   // 1. Generate domain and value
   const std::vector<double> x = dataWS->readX(workspaceindex);
   API::FunctionDomain1DVector domain(x);
@@ -671,6 +684,7 @@ void LeBailFit::calculateDiffractionPattern(
   }
 
   // 2. Calculate peak intensities
+  // FIXME: Refactor section to a single function named: calculatePeakHeightLB() and output the result to each peak.
   if (recalpeakintesity)
   {
     // Re-calcualte peak intensity
@@ -715,8 +729,8 @@ void LeBailFit::calculateDiffractionPattern(
   return;
 }
 
-/*
- * Split peaks to peak groups.  Peaks in same peak group are connected.
+// FIXME Standardize the procedure to split peak to groups... such that it can be reused in FitPowderDiffPeaks()
+/** Split peaks to peak groups.  Peaks in same peak group are connected.
  * The codes here are refactored from method calPeakIntensities()
  */
 std::vector<std::set<size_t> > LeBailFit::splitPeaksToGroups()
@@ -943,7 +957,8 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> gro
   if (groupedpeaksindexes.size() == 0)
   {
     std::stringstream errmsg;
-    errmsg << "DB252 Group Size = " << groupedpeaksindexes.size() << " is not allowed. " << std::endl;
+    errmsg << "DB252 Group Size = (i.e.," << groupedpeaksindexes.size()
+           << ") is not allowed to be zero. " << std::endl;
     throw std::runtime_error(errmsg.str());
   }
   else
@@ -1139,46 +1154,49 @@ void LeBailFit::calPerGroupPeaksIntensities(size_t wsindex, std::set<size_t> gro
   return;
 }
 
-/*
- * From table/map to set parameters to an individual peak
+/** From table/map to set parameters to an individual peak.
+  * It mostly is called by function in calculation.
+  *
  */
-void LeBailFit::setPeakParameters(
-        CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak,
-        std::map<std::string, Parameter> parammap, double peakheight)
+void LeBailFit::setPeakParameters(ThermalNeutronBk2BkExpConvPV_sptr peak, map<std::string, Parameter> parammap,
+                                  double peakheight, bool setpeakheight)
 {
-    // 1. Set parameters ...
-    std::map<std::string, Parameter>::iterator pit;
+  // 1. Prepare, sort parameters by name
+  std::map<std::string, Parameter>::iterator pit;
+  // TODO Check how many times is getParameterNames() called.  Refactor it?
+  std::vector<std::string> peakparamnames = peak->getParameterNames();
+  std::sort(peakparamnames.begin(), peakparamnames.end());
 
-    std::vector<std::string> lebailparnames = peak->getParameterNames();
-    std::sort(lebailparnames.begin(), lebailparnames.end());
+  // 2. Apply parameters values to peak function
+  for (pit = parammap.begin(); pit != parammap.end(); ++pit)
+  {
+    // a) Check whether the parameter is a peak parameter
+    std::string parname = pit->first;
+    std::vector<std::string>::iterator ifind =
+        std::find(peakparamnames.begin(), peakparamnames.end(), parname);
 
-    // 2. Apply parameters values to peak function
-    for (pit = parammap.begin(); pit != parammap.end(); ++pit)
+    // b) Set parameter value
+    if (ifind == peakparamnames.end())
     {
-        std::string parname = pit->first;
-        double value = pit->second.value;
+      // If not a peak profile parameter, skip
+      g_log.debug() << "Parameter " << parname
+                    << " in input parameter table workspace is not for peak function. " << std::endl;
+    }
+    else
+    {
+      // Set value
+      double value = pit->second.value;
+      peak->setParameter(parname, value);
+      g_log.debug() << "LeBailFit Set " << parname << "= " << value << std::endl;
+    }
 
-        // char fitortie = pit->second.second;
+  } // ENDFOR: parameter iterator
 
-        g_log.debug() << "LeBailFit Set " << parname << "= " << value << std::endl;
-
-        std::vector<std::string>::iterator ifind =
-                std::find(lebailparnames.begin(), lebailparnames.end(), parname);
-        if (ifind == lebailparnames.end())
-        {
-            g_log.debug() << "Parameter " << parname
-                          << " in input parameter table workspace is not for peak function. " << std::endl;
-            continue;
-        }
-
-        peak->setParameter(parname, value);
-
-    } // ENDFOR: parameter iterator
-
-    // 3. Peak height
+  // 3. Peak height
+  if (setpeakheight)
     peak->setParameter("Height", peakheight);
 
-    return;
+  return;
 }
 
 /// =================================== Le Bail Fit (Fit Only) ================================================ ///
@@ -1189,6 +1207,7 @@ void LeBailFit::setPeakParameters(
  * a) Calculate pattern for peak intensities
  * b) Set peak intensities
  */
+// TODO Release 2.4: Arguments: size_t workspaceindex, std::map<std::string, Parameter>& paramma, size_t istep
 bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, Parameter>& parammap)
 {
     // 1. Generate domain and value
@@ -1197,6 +1216,8 @@ bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, Param
     API::FunctionValues values(domain);
 
     // 2. Calculate peak intensity and etc.
+    // FIXME Release 2.4 Single out the process to calculate intensity.
+    // FIXME Move calculation of peak out of UnitLeBailFit
     bool calpeakintensity = true;
     this->calculateDiffractionPattern(workspaceindex, domain, values, parammap, calpeakintensity);
 
@@ -1210,12 +1231,16 @@ bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, Param
     writeToOutputWorkspace(domain, values);
 
     // 3. Construct the tie.  2-level loop. (1) peak parameter (2) peak
+    // TODO Release 2.4: setLeBailFitParameters(istep)
     this->setLeBailFitParameters();
 
     // 4. Construct the Fit
     this->fitLeBailFunction(workspaceindex, parammap);
 
+    // TODO (1) Calculate Rwp, Chi^2, .... for the fitted pattern.
+
     // 5. Do calculation again and set the output
+    // FIXME Move this part our of UnitLeBailFit
     calpeakintensity = true;
     API::FunctionValues newvalues(domain);
     this->calculateDiffractionPattern(workspaceindex, domain, newvalues, parammap, calpeakintensity);
@@ -1370,6 +1395,7 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
   }
 
   // 2. Call Fit to fit LeBail function.
+  // FIXME: Single out set up Fit() and processing to a separate function.  as minimizerLeBailFunction(....)
   // a) Initialize
   std::string fitoutputwsrootname("xLeBailOutput");
 
@@ -1544,6 +1570,9 @@ bool LeBailFit::fitLeBailFunction(size_t workspaceindex, std::map<std::string, P
   g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 (Fit) = " << mLeBaiLFitChi2
                  << ", Chi^2 (Cal) = " << mLeBailCalChi2
                  << ", Fit Status = " << fitstatus << std::endl;
+
+  // TODO: Check the covariant matrix to see whether any NaN or Infty.  If so, return false with reason
+  // TODO: (continue).  Code should fit again with Simplex and extends MaxIteration if not enough... ...
 
   return true;
 }
