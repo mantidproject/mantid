@@ -42,7 +42,7 @@ set ( SRC_FILES
 	src/CopySample.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
-	src/CountEventsInPulses.cpp
+	# src/CountEventsInPulses.cpp
 	src/CreateCalFileByNames.cpp
 	src/CreateDummyCalFile.cpp
 	src/CreateFlatEventWorkspace.cpp
@@ -244,7 +244,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CopySample.h
 	inc/MantidAlgorithms/CorrectKiKf.h
 	inc/MantidAlgorithms/CorrectToFile.h
-	inc/MantidAlgorithms/CountEventsInPulses.h
+	# inc/MantidAlgorithms/CountEventsInPulses.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
 	inc/MantidAlgorithms/CreateFlatEventWorkspace.h
@@ -443,7 +443,7 @@ set ( TEST_FILES
 	CopySampleTest.h
 	CorrectKiKfTest.h
 	CorrectToFileTest.h
-	CountEventsInPulsesTest.h
+	# CountEventsInPulsesTest.h
 	CreateCalFileByNamesTest.h
 	CreateDummyCalFileTest.h
 	CreateFlatEventWorkspaceTest.h
