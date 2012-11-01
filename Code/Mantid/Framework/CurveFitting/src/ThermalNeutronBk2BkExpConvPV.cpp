@@ -33,93 +33,91 @@ ThermalNeutronBk2BkExpConvPV::~ThermalNeutronBk2BkExpConvPV()
 {
 }
   
-/*
- * Define the fittable parameters
+/** Define the fittable parameters
+  * Notice that Sig0, Sig1 and Sig2 are NOT the squared value recorded in Fullprof
  */
 void ThermalNeutronBk2BkExpConvPV::init()
 {
-    /// Peak height
-    declareParameter("Height", 1.0);
+  // Peak height
+  declareParameter("Height", 1.0);
 
-    /// Instrument geometry related
-    declareParameter("Dtt1", 1.0);
-    declareParameter("Dtt2", 1.0);
-    declareParameter("Dtt1t", 1.0);
-    declareParameter("Dtt2t", 1.0);
-    declareParameter("Zero", 0.0);
-    declareParameter("Zerot", 0.0);
+  // Instrument geometry related
+  declareParameter("Dtt1", 1.0);
+  declareParameter("Dtt2", 1.0);
+  declareParameter("Dtt1t", 1.0);
+  declareParameter("Dtt2t", 1.0);
+  declareParameter("Zero", 0.0);
+  declareParameter("Zerot", 0.0);
 
-    /// Peak profile related
-    declareParameter("Width", 1.0);
-    declareParameter("Tcross", 1.0);
-    declareParameter("Alph0",1.6);
-    declareParameter("Alph1",1.5);
-    declareParameter("Beta0",1.6);
-    declareParameter("Beta1",1.5);
-    declareParameter("Alph0t",1.6);
-    declareParameter("Alph1t",1.5);
-    declareParameter("Beta0t",1.6);
-    declareParameter("Beta1t",1.5);
+  // Peak profile related
+  declareParameter("Width", 1.0);
+  declareParameter("Tcross", 1.0);
+  declareParameter("Alph0",1.6);
+  declareParameter("Alph1",1.5);
+  declareParameter("Beta0",1.6);
+  declareParameter("Beta1",1.5);
+  declareParameter("Alph0t",1.6);
+  declareParameter("Alph1t",1.5);
+  declareParameter("Beta0t",1.6);
+  declareParameter("Beta1t",1.5);
 
-    declareParameter("Sig0", 1.0);
-    declareParameter("Sig1", 1.0);
-    declareParameter("Sig2", 1.0);
+  declareParameter("Sig0", 1.0);
+  declareParameter("Sig1", 1.0);
+  declareParameter("Sig2", 1.0);
 
-    declareParameter("Gam0", 0.0);
-    declareParameter("Gam1", 0.0);
-    declareParameter("Gam2", 0.0);
+  declareParameter("Gam0", 0.0);
+  declareParameter("Gam1", 0.0);
+  declareParameter("Gam2", 0.0);
 
-    /// Lattice parameter
-    declareParameter("LatticeConstant", 10.0);
+  // Lattice parameter
+  declareParameter("LatticeConstant", 10.0);
 
-    /// Initialize parameters
-    mParameters.insert(std::make_pair("Alpha", 1.0));
-    mParameters.insert(std::make_pair("Beta", 1.0));
-    mParameters.insert(std::make_pair("Gamma", 1.0));
-    mParameters.insert(std::make_pair("Sigma2", 1.0));
-    mParameters.insert(std::make_pair("FWHM", 1.0));
+  // Initialize parameters
+  mParameters.insert(std::make_pair("Alpha", 1.0));
+  mParameters.insert(std::make_pair("Beta", 1.0));
+  mParameters.insert(std::make_pair("Gamma", 1.0));
+  mParameters.insert(std::make_pair("Sigma2", 1.0));
+  mParameters.insert(std::make_pair("FWHM", 1.0));
 
-    return;
+  return;
 }
 
-/*
- * Set Miller Indices for this peak
+/** Set Miller Indices for this peak
  */
 void ThermalNeutronBk2BkExpConvPV::setMillerIndex(int h, int k, int l)
 {
-    if (mHKLSet)
-    {
-        g_log.error() << "ThermalNeutronBk2BkExpConvPV Peak cannot have (HKL) reset.";
-        throw std::logic_error("ThermalNeutronBk2BkExpConvPV Peak cannot have (HKL) reset.");
-    }
-    else
-    {
-        mHKLSet = true;
-    }
+  if (mHKLSet)
+  {
+    g_log.error() << "ThermalNeutronBk2BkExpConvPV Peak cannot have (HKL) reset.";
+    throw std::logic_error("ThermalNeutronBk2BkExpConvPV Peak cannot have (HKL) reset.");
+  }
+  else
+  {
+    mHKLSet = true;
+  }
 
-    mH = h;
-    mK = k;
-    mL = l;
+  mH = h;
+  mK = k;
+  mL = l;
 
-    if (mH*mH + mK*mK + mL*mL < 1.0E-8)
-    {
-        g_log.error() << "H = K = L = 0 is not allowed" << std::endl;
-        throw std::invalid_argument("H=K=L=0 is not allowed for a peak.");
-    }
+  if (mH*mH + mK*mK + mL*mL < 1.0E-8)
+  {
+    g_log.error() << "H = K = L = 0 is not allowed" << std::endl;
+    throw std::invalid_argument("H=K=L=0 is not allowed for a peak.");
+  }
 
-    return;
+  return;
 }
 
-/*
- * Get Miller Index from this peak
+/** Get Miller Index from this peak
  */
 void ThermalNeutronBk2BkExpConvPV::getMillerIndex(int& h, int &k, int &l)
 {
-    h = mH;
-    k = mK;
-    l = mL;
+  h = mH;
+  k = mK;
+  l = mL;
 
-    return;
+  return;
 }
 
 /** Calculate peak parameters (fundamential Back-to-back PV),including
@@ -171,7 +169,7 @@ void ThermalNeutronBk2BkExpConvPV::calculateParameters(double& tof_h, double& et
   double Th_t = zerot + dtt1t*dh - dtt2t/dh;
   tof_h = n*Th_e + (1-n)*Th_t;
 
-  sigma2 = sig0 + sig1*std::pow(dh, 2) + sig2*std::pow(dh, 4);
+  sigma2 = sig0*sig0 + sig1*sig1*std::pow(dh, 2) + sig2*sig2*std::pow(dh, 4);
   gamma = gam0 + gam1*dh + gam2*std::pow(dh, 2);
 
   // 3. Calcualte H for the peak
@@ -201,8 +199,7 @@ void ThermalNeutronBk2BkExpConvPV::calculateParameters(double& tof_h, double& et
   return;
 }
 
-/*
- * Override function1D
+/** Override function1D
  */
 void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xValues, size_t nData) const
 {  
@@ -211,6 +208,8 @@ void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xVal
 
   double tof_h, alpha, beta, H, sigma2, eta, N, gamma;
   this->calculateParameters(tof_h, eta, alpha, beta, H, sigma2, gamma, N, false);
+
+  // cout << "DBx212:  eta = " << eta << ", gamma = " << gamma << endl;
 
   double invert_sqrt2sigma = 1.0/sqrt(2.0*sigma2);
 
@@ -239,8 +238,7 @@ void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xVal
   return;
 }
 
-/*
- * Calculate d = a/sqrt(h**2+k**2+l**2)
+/** Calculate d = a/sqrt(h**2+k**2+l**2)
  */
 double ThermalNeutronBk2BkExpConvPV::calCubicDSpace(double a, int h, int k, int l) const
 {
@@ -252,14 +250,13 @@ double ThermalNeutronBk2BkExpConvPV::calCubicDSpace(double a, int h, int k, int 
     return d;
 }
 
-/*
- * Calcualte H and eta for the peak
+/** Calcualte H and eta for the peak
  */
 void ThermalNeutronBk2BkExpConvPV::calHandEta(double sigma2, double gamma, double& H, double& eta) const
 {
   // 1. Calculate H
-    // FIXME
-    // LOOK@ WHY NO CHANGE IN PLOT WITH DIFFERENT H AND SIMGA?
+  // FIXME
+  // LOOK@ WHY NO CHANGE IN PLOT WITH DIFFERENT H AND SIMGA?
 
   double H_G = sqrt(8.0 * sigma2 * log(2.0));
   double H_L = gamma;
@@ -281,51 +278,45 @@ void ThermalNeutronBk2BkExpConvPV::calHandEta(double sigma2, double gamma, doubl
   return;
 }
 
+/** Disabled derivative
+  */
 void ThermalNeutronBk2BkExpConvPV::functionDerivLocal(API::Jacobian* , const double* , const size_t )
 {
   throw Mantid::Kernel::Exception::NotImplementedError("functionDerivLocal is not implemented for IkedaCarpenterPV.");
 }
 
-/*
- * Calculate derivative of this peak function
+/** Calculate derivative of this peak function
  */
 void ThermalNeutronBk2BkExpConvPV::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
 {
   calNumericalDeriv(domain, jacobian);
 }
 
-/*
- * Get the center of the peak
+/** Get the center of the peak
  */
 double ThermalNeutronBk2BkExpConvPV::centre()const
 {
-
-    double tof_h = calPeakCenter();
-
-    return tof_h;
+  double tof_h = calPeakCenter();
+  return tof_h;
 }
 
-/*
- * Set peak center.  Not allowed
+/** Set peak center.  Not allowed
  */
 void ThermalNeutronBk2BkExpConvPV::setCentre(const double c)
 {
-    UNUSED_ARG(c);
-    throw std::invalid_argument("ThermalNuetronBk2BkExpConvPV: do not allow to set peak's centre");
+  UNUSED_ARG(c);
+  throw std::invalid_argument("ThermalNuetronBk2BkExpConvPV: do not allow to set peak's centre");
 }
 
-/*
- * Set peak height
+/** Set peak height
  */
 void ThermalNeutronBk2BkExpConvPV::setHeight(const double h)
 {
   setParameter("Height", h);
-
   return;
 }
 
-/*
- * Get peak's height
+/** Get peak's height
  */
 double ThermalNeutronBk2BkExpConvPV::height() const
 {
@@ -333,35 +324,33 @@ double ThermalNeutronBk2BkExpConvPV::height() const
   return height;
 }
 
-/*
- * Get peak's FWHM
+/** Get peak's FWHM
  */
 double ThermalNeutronBk2BkExpConvPV::fwhm() const
 {
-    // 1. Get peak parameter
-    double sig0 = getParameter("Sig0");
-    double sig1 = getParameter("Sig1");
-    double sig2 = getParameter("Sig2");
-    double gam0 = getParameter("Gam0");
-    double gam1 = getParameter("Gam1");
-    double gam2 = getParameter("Gam2");
-    double latticeconstant = getParameter("LatticeConstant");
+  // 1. Get peak parameter
+  double sig0 = getParameter("Sig0");
+  double sig1 = getParameter("Sig1");
+  double sig2 = getParameter("Sig2");
+  double gam0 = getParameter("Gam0");
+  double gam1 = getParameter("Gam1");
+  double gam2 = getParameter("Gam2");
+  double latticeconstant = getParameter("LatticeConstant");
 
-    // 2. Calcualte d-space of the peak center
-    double dh = calCubicDSpace(latticeconstant, mH, mK, mL);
+  // 2. Calcualte d-space of the peak center
+  double dh = calCubicDSpace(latticeconstant, mH, mK, mL);
 
-    // 3. Calculate Sigma2 and Gamma and thus H & Eta
-    double H, eta;
-    double sigma2 = sig0 + sig1*std::pow(dh, 2) + sig2*std::pow(dh, 4);
-    double gamma = gam0 + gam1*dh + gam2*std::pow(dh, 2);
+  // 3. Calculate Sigma2 and Gamma and thus H & Eta
+  double H, eta;
+  double sigma2 = sig0*sig0 + sig1*sig1*std::pow(dh, 2) + sig2*sig2*std::pow(dh, 4);
+  double gamma = gam0 + gam1*dh + gam2*std::pow(dh, 2);
 
-    calHandEta(sigma2, gamma, H, eta);
+  calHandEta(sigma2, gamma, H, eta);
 
-    return H;
+  return H;
 }
 
-/*
- * Set peak's FWHM
+/** Set peak's FWHM
  */
 void ThermalNeutronBk2BkExpConvPV::setFwhm(const double w)
 {
@@ -369,55 +358,53 @@ void ThermalNeutronBk2BkExpConvPV::setFwhm(const double w)
   throw std::invalid_argument("Unable to set FWHM");
 }
 
-/*
- * Calculate peak's center
+/** Calculate peak's center
  */
 double ThermalNeutronBk2BkExpConvPV::calPeakCenter() const
 {
-    // 1. Get parameters
-    double latticeconstant = getParameter("LatticeConstant");
-    double wcross = getParameter("Width");
-    double Tcross = getParameter("Tcross");
-    double zero = getParameter("Zero");
-    double dtt1 = getParameter("Dtt1");
-    double zerot = getParameter("Zerot");
-    double dtt1t = getParameter("Dtt1t");
-    double dtt2t = getParameter("Dtt2t");
+  // 1. Get parameters
+  double latticeconstant = getParameter("LatticeConstant");
+  double wcross = getParameter("Width");
+  double Tcross = getParameter("Tcross");
+  double zero = getParameter("Zero");
+  double dtt1 = getParameter("Dtt1");
+  double zerot = getParameter("Zerot");
+  double dtt1t = getParameter("Dtt1t");
+  double dtt2t = getParameter("Dtt2t");
 
-    // std::cout << "Lattice = " << latticeconstant << ", Dtt1 = " << dtt1 << ", Dtt1t = " << dtt1t << std::endl;
+  // std::cout << "Lattice = " << latticeconstant << ", Dtt1 = " << dtt1 << ", Dtt1t = " << dtt1t << std::endl;
 
-    // 2. Calcualte center of d-space
-    double dh = calCubicDSpace(latticeconstant, mH, mK, mL);
+  // 2. Calcualte center of d-space
+  double dh = calCubicDSpace(latticeconstant, mH, mK, mL);
 
-    double n = 0.5*gsl_sf_erfc(wcross*(Tcross-1/dh));
+  double n = 0.5*gsl_sf_erfc(wcross*(Tcross-1/dh));
 
-    double Th_e = zero + dtt1*dh;
-    double Th_t = zerot + dtt1t*dh - dtt2t/dh;
-    double tof_h = n*Th_e + (1-n)*Th_t;
+  double Th_e = zero + dtt1*dh;
+  double Th_t = zerot + dtt1t*dh - dtt2t/dh;
+  double tof_h = n*Th_e + (1-n)*Th_t;
 
-    if (tof_h < 0)
-    {
-        g_log.error() << "Peak " << mH << ", " << mH << ", " << mL << ": TOF-h cannot be negative! "
-                      << "Lattice = " << latticeconstant << ", d-spacing = " << dh << std::endl
-                      << "Zero    = " << zero << ", Zerot = " << zerot << std::endl
-                      << "Dtt1    = " << dtt1 << ", Dtt1t = " << dtt1t << ", Dtt2t   = " << dtt2t << std::endl
-                      << "Width   = " << wcross << ", Tcross = " << Tcross << ", n = " << n << std::endl;
-    }
+  if (tof_h < 0)
+  {
+    g_log.error() << "Peak " << mH << ", " << mH << ", " << mL << ": TOF-h cannot be negative! "
+                  << "Lattice = " << latticeconstant << ", d-spacing = " << dh << std::endl
+                  << "Zero    = " << zero << ", Zerot = " << zerot << std::endl
+                  << "Dtt1    = " << dtt1 << ", Dtt1t = " << dtt1t << ", Dtt2t   = " << dtt2t << std::endl
+                  << "Width   = " << wcross << ", Tcross = " << Tcross << ", n = " << n << std::endl;
+  }
 
-    return tof_h;
+  return tof_h;
 }
 
 
-/*
- * Calculate Omega(x) = ... ...
- * This is the core component to calcualte peak profile
+/** Calculate Omega(x) = ... ...
+ *  This is the core component to calcualte peak profile
  */
 double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, double beta, double H,
-    double sigma2, double invert_sqrt2sigma, bool explicitoutput) const
+                                              double sigma2, double invert_sqrt2sigma, bool explicitoutput) const
 {
   // 1. Prepare
-  std::complex<double> p(alpha*x, alpha*H*0.5);
-  std::complex<double> q(-beta*x, beta*H*0.5);
+  std::complex<double> p(alpha*x, alpha*sqrt(H)*0.5);
+  std::complex<double> q(-beta*x, beta*sqrt(H)*0.5);
 
   double u = 0.5*alpha*(alpha*sigma2+2*x);
   double y = (alpha*sigma2 + x)*invert_sqrt2sigma;
@@ -441,14 +428,19 @@ double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, do
     part2 = 0.0;
 
   double omega1 = (1-eta)*N*(part1 + part2);
-  double omega2;
+  double omega2, omega2a, omega2b;
   if (eta < 1.0E-8)
   {
+    omega2a = 0.0;
+    omega2b = 0.0;
     omega2 = 0.0;
   }
   else
   {
-    omega2 = 2*N*eta/PI*(imag(exp(p)*E1(p)) + imag(exp(q)*E1(q)));
+    omega2a = imag(exp(p)*E1(p));
+    omega2b = imag(exp(q)*E1(q));
+    omega2 = 2*N*eta/PI*(omega2a + omega2b);
+    // omega2 = 2*N*eta/PI*(imag(exp(p)*E1(p)) + imag(exp(q)*E1(q)));
   }
   double omega = omega1+omega2;
 
@@ -461,66 +453,78 @@ double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, do
                   << ", N = " << N << std::endl;
   }
 
+  /* Debug output to understand E1()
+  cout << setw(15) << p.real() << setw(15) << p.imag() << "\t\t" << omega2a << endl;
+  cout << setw(15) << p.real() << setw(15) << p.imag() << setw(15) << exp(p).real() << setw(15) << exp(p).imag()
+       << setw(15) << E1(p).real() << setw(15) << E1(p).imag() << endl;
+
+  cout << q.real() << "\t\t" << q.imag() << "\t\t" << omega2b << endl;
+  cout << setw(15) << q.real() << setw(15) << q.imag() << setw(15) << exp(q).real() << setw(15) << exp(q).imag()
+       << setw(15) << E1(q).real() << setw(15) << E1(q).imag() << endl;
+  cout << p.real() << "\t\t" << p.imag() << "\t\t" << E1(p).real() << "\t\t" << E1(p).imag() << endl;
+  cout << exp(p) << "\t\t" << exp(q) << endl;
+  cout << q.real() << "\t\t" << q.imag() << "\t\t" << E1(q).real() << "\t\t" << E1(q).imag() << endl;
+  */
+
   return omega;
 }
 
-/*
- * Implementation of complex integral E_1
+/** Implementation of complex integral E_1
  */
 std::complex<double> ThermalNeutronBk2BkExpConvPV::E1(std::complex<double> z) const
 {
-    std::complex<double> e1;
+  std::complex<double> e1;
 
-    double rz = real(z);
-    double az = abs(z);
+  double rz = real(z);
+  double az = abs(z);
 
-    if (fabs(az) < 1.0E-8)
+  if (fabs(az) < 1.0E-8)
+  {
+    // If z = 0, then the result is infinity... diverge!
+    complex<double> r(1.0E300, 0.0);
+    e1 = r;
+  }
+  else if (az <= 10.0 || (rz < 0.0 && az < 20.0))
+  {
+    // Some interesting region, equal to integrate to infinity, converged
+    complex<double> r(1.0, 0.0);
+    e1 = r;
+    complex<double> cr = r;
+
+    for (size_t k = 1; k <= 150; ++k)
     {
-        // If z = 0, then the result is infinity... diverge!
-        complex<double> r(1.0E300, 0.0);
-        e1 = r;
-    }
-    else if (az > 10.0 || (rz < 0.0 && az < 20.0))
+      double dk = double(k);
+      cr = -cr * dk * z / ( (dk+1.0)*(dk+1.0) );
+      e1 += cr;
+      if (abs(cr) < abs(e1)*1.0E-15)
+      {
+        // cr is converged to zero
+        break;
+      }
+    } // ENDFOR k
+
+    e1 = -e1 - log(z) + (z*e1);
+  }
+  else
+  {
+    // Rest of the region
+    complex<double> ct0(0.0, 0.0);
+    for (int k = 120; k > 0; --k)
     {
-        // Some interesting region, equal to integrate to infinity, converged
-        complex<double> r(1.0, 0.0);
-        e1 = r;
-        complex<double> cr = r;
+      complex<double> dk(double(k), 0.0);
+      ct0 = dk / (10.0 + dk / (z + ct0));
+    } // ENDFOR k
 
-        for (size_t k = 0; k < 150; ++k)
-        {
-            double dk = double(k);
-            cr = -cr * dk * z / ( (dk + 2.0)*(dk+2.0) );
-            e1 += cr;
-            if (abs(cr) < abs(e1)*1.0E-15)
-            {
-                // cr is converged to zero
-                break;
-            }
-        } // ENDFOR k
-
-        e1 = -e1 - log(z) + (z*e1);
-    }
-    else
+    e1 = 1.0 / (z + ct0);
+    e1 = e1 * exp(-z);
+    if (rz < 0.0 && fabs(imag(z)) < 1.0E-10 )
     {
-        complex<double> ct0(0.0, 0.0);
-        for (int k = 120; k > 0; --k)
-        {
-            complex<double> dk(double(k), 0.0);
-            ct0 = dk / (10.0 + dk / (z + ct0));
-        } // ENDFOR k
-
-        e1 = 1.0 / (z + ct0);
-        e1 = e1 * exp(-z);
-        if (rz < 0.0 && fabs(imag(z)) < 1.0E-10 )
-        {
-            complex<double> u(0.0, 1.0);
-            e1 = e1 - (PI * u);
-        }
+      complex<double> u(0.0, 1.0);
+      e1 = e1 - (PI * u);
     }
+  }
 
-    return e1;
-
+  return e1;
 }
 
 

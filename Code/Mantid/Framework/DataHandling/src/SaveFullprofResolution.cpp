@@ -176,7 +176,9 @@ namespace DataHandling
     content << "!     TOF-TWOTH of the bank" << std::endl;
     content << "TWOTH    " << twotheta << std::endl;
     content << "!       Sig-2     Sig-1     Sig-0" << std::endl;
-    content << "SIGMA  " << setw(10) << sig2 << setw(10) << sig1 << setw(10) << sig0 << std::endl;
+    // Note that sig0, sig1 and sig2 used in LeBail/Mantid framework are of the definition in manual.
+    // In .irf file, Sig-0, Sig-1 and Sig-2 are the squared values;
+    content << "SIGMA  " << setw(10) << sig2*sig2 << setw(10) << sig1*sig1 << setw(10) << sig0*sig0 << std::endl;
     content << "!       Gam-2     Gam-1     Gam-0" << std::endl;
     content << "GAMMA  " << setw(10) << gam2 << setw(10) << gam1 << setw(10) << gam0 << std::endl;
     content << "!          alph0       beta0       alph1       beta1" << std::endl;

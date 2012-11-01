@@ -141,6 +141,10 @@ class CreateLeBailFitInput(PythonAlgorithm):
         """ Parse Fullprof resolution .irf file
         (It is the same function as what in ConvertInstrumentFile(),
          except the key word in the output dictionary.)
+
+        Note:
+        1. Sig-0, Sig-1 and Sig-2 in .irf file are actually the square of sig0, sig1 and sig2
+           defined in the manual
     
         Input:
          - irffilename:  Resolution file (.irf)  Can be single bank or multiple bank
@@ -148,6 +152,8 @@ class CreateLeBailFitInput(PythonAlgorithm):
         Output:
          - dictionary: [bank][parameter name][value]
         """
+        import math
+
         # 1. Import data
         try:
             irffile = open(irffilename, "r")
@@ -240,9 +246,9 @@ class CreateLeBailFitInput(PythonAlgorithm):
                 elif line.startswith("SIGMA"):
                     # Gam-2     Gam-1     Gam-0 
                     terms = line.split()
-                    mdict[bank]["Sig2"] = float(terms[1])
-                    mdict[bank]["Sig1"] = float(terms[2])
-                    mdict[bank]["Sig0"] = float(terms[3])
+                    mdict[bank]["Sig2"] = math.sqrt(abs(float(terms[1])))
+                    mdict[bank]["Sig1"] = math.sqrt(abs(float(terms[2])))
+                    mdict[bank]["Sig0"] = math.sqrt(abs(float(terms[3])))
     
                 elif line.startswith("GAMMA"):
                     # Gam-2     Gam-1     Gam-0 
