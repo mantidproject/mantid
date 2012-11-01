@@ -143,7 +143,23 @@ void HFIRLoad::exec()
     loadAlg->setProperty("Wavelength", wavelength_input);
     loadAlg->setProperty("WavelengthSpread", wavelength_spread_input);
   }
-  loadAlg->executeAsSubAlg();
+  try
+  {
+    loadAlg->executeAsSubAlg();
+  }
+  catch(...)
+  {
+    g_log.warning() << "Unable to load file as a SPICE file. Trying to load as a Nexus file." << std::endl;
+    loadAlg = createSubAlgorithm("Load", 0, 0.2);
+    loadAlg->setProperty("Filename", fileName);
+    loadAlg->executeAsSubAlg();
+    Workspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
+    dataWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
+    setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWS);
+    g_log.notice() << "Successfully loaded " << fileName << " and setting sensitivity flag to True" << std::endl;
+    return;
+  }
   Workspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
   dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
 

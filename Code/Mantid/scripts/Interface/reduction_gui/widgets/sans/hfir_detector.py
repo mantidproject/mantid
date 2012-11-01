@@ -357,7 +357,7 @@ class DetectorWidget(BaseWidget):
 
         
     def _sensitivity_browse(self):
-        fname = self.data_browse_dialog()
+        fname = self.data_browse_dialog(data_type="Sensitivity files *.xml *.nxs (*.xml *.nxs)")
         if fname:
             self._content.sensitivity_file_edit.setText(fname)      
 
