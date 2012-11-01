@@ -186,6 +186,8 @@ if ( ENABLE_CPACK )
       # rhel requirements
       set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,nexus-python,qwt,gsl,glibc,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
       set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,PyQt4,sip" )
+      # scipy & matplotlib (ipython is too low a version to be used)
+      set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scipy,python-matplotlib" )
       # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
       if( ${UNIX_CODENAME} STREQUAL "Santiago" )
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6" )
@@ -199,8 +201,8 @@ if ( ENABLE_CPACK )
         elseif( ${UNIX_CODENAME} STREQUAL "precise" )
           set ( CPACK_DEBIAN_PACKAGE_DEPENDS "libboost-date-time1.46.1,libboost-regex1.46.1,libboost-signals1.46.1,libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9,libnexus0 (>= 4.2),libnexus0-python (>= 4.2),libgsl0ldbl,libqtcore4 (>= 4.2),libqtgui4 (>= 4.2),libqt4-opengl (>= 4.2),libqt4-xml (>= 4.2),libqt4-svg (>= 4.2),libqt4-qt3support (>= 4.2),libqscintilla2-8,libqwt5-qt4,libqwtplot3d-qt4-0" )
           set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},libopencascade-foundation-6.5.0 (>= 6.5.0),libopencascade-modeling-6.5.0 (>= 6.5.0),libmuparser0debian1,python-numpy,python-sip,python-qt4,libboost-python${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}" )
-          # IPython requirements
-          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},ipython-qtconsole,python-matplotlib" )
+          # scipy, matploitlib & ipython
+          set ( CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS},ipython-qtconsole,python-matplotlib,python-scipy" )
         else()
           message( WARNING "Mantid does not support packaging of this Ubuntu version: ${UNIX_CODENAME}")
         endif()
