@@ -690,7 +690,7 @@ void Table::updateValues(Table* t, const QString& columnName)
     if (cmd.isEmpty() || colTypes[i] != Numeric || !cmd.contains("\"" + colLabel + "\""))
       continue;
 
-    calculate(i, 0, endRow, false, false);
+    calculate(i, 0, endRow, true, false);
   }
 }
 

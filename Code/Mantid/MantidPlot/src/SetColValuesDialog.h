@@ -87,9 +87,6 @@ private:
     QTextEdit* explain;
 	QSpinBox* start, *end;
 	QLabel *colNameLabel;
-#ifdef SCRIPTING_PYTHON
-	QCheckBox *boxMuParser;
-#endif
 };
 
 #endif //
