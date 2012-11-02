@@ -40,7 +40,6 @@ The fourth dimension will be equal to the bank number, allowing you to easily pi
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidDataObjects/EventWorkspace.h"
-//#include "MantidMDAlgorithms/ConvertToMDEvents.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
