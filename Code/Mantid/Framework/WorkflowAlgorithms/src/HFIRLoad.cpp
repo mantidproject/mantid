@@ -149,6 +149,11 @@ void HFIRLoad::exec()
   }
   catch(...)
   {
+    // The only way HFIR SANS can load Nexus files is if it's loading data that has already
+    // been processed. This will only happen with sensitivity data.
+    // So if we make it here and are still unable to load the file, assume it's a sensitivity file.
+    // This will cover the special case where the instrument scientist uses a reduced data set
+    // as a sensitivity data set.
     g_log.warning() << "Unable to load file as a SPICE file. Trying to load as a Nexus file." << std::endl;
     loadAlg = createSubAlgorithm("Load", 0, 0.2);
     loadAlg->setProperty("Filename", fileName);
