@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <Poco/Net/HTTPCookie.h>
+#include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/NameValueCollection.h>
 
 class RemoteJobManager;         // Top-level abstract class
@@ -34,7 +35,36 @@ public:
 
     virtual ~RemoteJobManager() { }
 
-    // The basic API: submit a job, abort a job and check on the status of a job
+    // This is intended to be a single enum for all of the errors that any function
+    // (public or private) can return
+    enum JobManagerErrorCode {
+      JM_OK = 0,
+      JM_HTTP_SERVER_ERR,       // The HTTP server returned something other than code 200.
+                                // In cases where this can happen, there's proably a string
+                                // with the exact message the server sent back.
+      JM_CLEARTEXT_DISALLOWED   // In cases where we're using HTTP Basic Authentication, we
+                                // send the password in (obfuscated) cleartext.  As such,
+                                // we have to insist on using HTTPS rather than HTTP.
+
+    };
+
+    // The basic API: start/stop a transaction, upload/download files, submit/abort and
+    // check the status of jobs
+    virtual JobManagerErrorCode startTransaction( std::string &transId, std::string &directory, std::string &serverErr) = 0;
+    virtual JobManagerErrorCode stopTransaction( std::string &transId, std::string &serverErr) = 0;
+
+    /*************
+      TODO: Uncomment these when I'm ready to implement them
+
+    // returns the ID's of all the user's open transactions
+    virtual bool openTransactions(std::vector<std::string> &transIds) = 0;
+    **********/
+
+    // NOTE: I haven't decided on the function signatures for upload/download yet.
+    // Probably ought to use std::istream and std::ostream....
+    //virtual bool uploadFile( std::string & TransId, ???? ) = 0;
+    //virtual bool downloadFile( std::string & TransId, ???? ) = 0;
+
     virtual bool submitJob( const RemoteTask &remoteTask, std::string &retString) = 0;
     virtual bool jobStatus( const std::string &jobId,
                             RemoteJob::JobStatus &retStatus,
@@ -63,6 +93,8 @@ public:
     // Save the necessary properties so the factory class can re-create the object
     virtual void saveProperties( int itemNum);
 
+
+
 protected:
     std::string m_displayName;      // This will show up in the list of configured clusters
     std::string m_configFileUrl;    // A URL for a file that describes the jobs that are available
@@ -77,25 +109,67 @@ private:
 
 };
 
+// Lots of HTTP-related stuff, including implementations for the
+// transaction and file transfer functions (because these are all
+// via HTTP and don't actually involve the particular job manager
+// that we use.
+// Note that getPassword() is new (it's not declared in RemoteJobManager)
+// and is protected.  I expect the final child class to implement it
+// in whatever makes sense (presumably using a Qt dialog box if we're
+// in MantidPlot).
 class HttpRemoteJobManager : public RemoteJobManager
 {
-    // Currently, we don't actually need anything here.
-    // Makes me wonder if we need this class at all...
 public:
-    HttpRemoteJobManager( std::string displayName, std::string configFileUrl) :
-        RemoteJobManager( displayName, configFileUrl) { }
+    HttpRemoteJobManager( std::string displayName, std::string configFileUrl,
+                          std::string serviceBaseUrl, std::string userName) :
+        RemoteJobManager( displayName, configFileUrl),
+        m_userName( userName), m_serviceBaseUrl( serviceBaseUrl){ }
     ~HttpRemoteJobManager() { }
 
+    virtual JobManagerErrorCode startTransaction( std::string &transId, std::string &directory, std::string &serverErr);
+    virtual JobManagerErrorCode stopTransaction( std::string &transId, std::string &serverErr);
+
+
     virtual void saveProperties(int itemNum) { RemoteJobManager::saveProperties( itemNum); }
+
+
+protected:
+    // Wraps up some of the boilerplate code needed to execute an HTTP GET request
+    JobManagerErrorCode initGetRequest( Poco::Net::HTTPRequest &req, std::string extraPath, std::string queryString);
+
+    virtual bool getPassword() = 0; // This needs to be implemented in whatever way makes sense
+                                    // for the environment where it's being used...
+
+    // Username and password for HTTP Basic Auth
+    std::string m_userName;
+    std::string m_password; // This does  **NOT** get saved in the properties file.  It's merely
+                            // a convenient place to hold the password in memory (and I don't
+                            // even like doing that, but the alternative is for the user to enter
+                            // it every time and that would be way too tedious).  I'm expecting
+                            // the GUI to pop up a dialog box asking for it before it's needed.
+
+    std::string m_serviceBaseUrl; // What we're going to connect to.  The full URL will be
+                                  // built by appending a path (and possibly a query string)
+                                  // to this string.
+
+    // Store any cookies that the HTTP server sends us so we can send them back
+    // on future requests.  (In particular, the ORNL servers use session cookies
+    // so we don't have to authenticate to the LDAP server on every single request.)
+    //
+    // NOTE: For reasons that are unclear, Poco's HTTPResponse class returns cookies
+    // in a vector of HTTPCookie objects, but its HTTPRequest::setCookies() function
+    // takes a NameValueCollection object, so we have to convert.  (WTF Poco devs?!?)
+    std::vector<Poco::Net::HTTPCookie> m_cookies;
+    Poco::Net::NameValueCollection getCookies();
 
 };
 
 /*
- * Note: MwsRemoteJobManager is abstract!  (getPassword is a pure virtual function).
- * I don't really like doing this, but I need to ask for a password somehow.  In
- * MantidPlot, the best way to do that is to use a Qt dialog box.  However,
- * I really wanted to keep the Qt specific stuff separated.  (There's been some talk
- * about using MWS in other contexts where Qt may not be available.)
+ * Note: MwsRemoteJobManager is abstract!  (getPassword is still a pure virtual
+ * function).  I don't really like doing this, but I need to ask for a password
+ * somehow.  In MantidPlot, the best way to do that is to use a Qt dialog box.
+ * However, I really wanted to keep the Qt specific stuff separated.  (There's
+ * been some talk about using MWS in other contexts where Qt may not be available.)
  * So, my solution is to have most of the implementation here, but create a child
  * class that implements the getPassword function.  If I ever need to use this
  * code someplace where Qt is unavailable, I'll have to create another child class
@@ -129,19 +203,10 @@ public:
     virtual void saveProperties( int itemNum);
 
 protected:
-    virtual bool getPassword() = 0; // This needs to be implemented in whatever way makes sense
-                                    // for the environment where it's being used...
+
 
     std::string escapeQuoteChars( const std::string & str); // puts a \ char in front of any " chars it finds
-                                                            // (needed for the JSON stuff)
-    std::string m_password; // This does  **NOT** get saved in the properties file.  It's merely
-                            // a convenient place to hold the password in memory (and I don't
-                            // even like doing that, but the alternative is for the user to enter
-                            // it every time and that would be way too tedious).  I'm expecting
-                            // the GUI to pop up a dialog box asking for it before it's needed.
-
-    std::string m_serviceBaseUrl;
-    std::string m_userName;
+                                                            // (needed for the JSON stuff
 
 private:
     bool convertToISO8601( std::string &time);
@@ -150,17 +215,6 @@ private:
     std::map<std::string, std::string> m_tzOffset;  // Maps timezone abbreviations to their offsets
                                                     // (See the comments in the constructor and in
                                                     // convertToISO8601()
-
-    // Store any cookies that the HTTP server sends us so we can send them back
-    // on future requests.  (In particular, the ORNL servers use session cookies
-    // so we don't have to authenticate to the LDAP server on every single request.)
-    //
-    // NOTE: For reasons that are unclear, Poco's HTTPResponse class returns cookies
-    // in a vector of HTTPCookie objects, but its HTTPRequest::setCookies() function
-    // takes a NameValueCollection object, so we have to convert.  (WTF Poco devs?!?)
-    std::vector<Poco::Net::HTTPCookie> m_cookies;
-    Poco::Net::NameValueCollection getCookies();
-
 };
 
 

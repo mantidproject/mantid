@@ -33,11 +33,225 @@ void RemoteJobManager::saveProperties( int itemNum)
 }
 
 
+
+/* ************* HTTPRemoteJobManagaer member functions ****************** */
+
+// Notifiy the cluster that we want to start a new transaction
+// On success, transId and directory will contain the transaction ID and the name
+// of the directory that's been created for this transaction
+// If we get an error message back from the server, it will be returned in the
+// serverErr string.
+RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::startTransaction( string &transId, string &directory, string &serverErr)
+{
+  JobManagerErrorCode reqErr = JM_OK;
+
+  // Create an HTTPS session
+  // TODO: Notice that we've set the context to VERIFY_NONE.  I think that means we're not checking the SSL certificate that the server
+  // sends to us.  That's BAD!!
+  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  Poco::Net::HTTPSClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
+  // We need to send a GET request to the server with a query string of "action=start"
+  Poco::Net::HTTPRequest req;
+  reqErr = initGetRequest( req, "/transaction", "action=start");
+  if ( reqErr != JM_OK)
+  {
+    return reqErr;
+  }
+
+  session.sendRequest( req);
+
+  Poco::Net::HTTPResponse response;
+
+  // Note: If we wanted to, we could call response.getStatus() at this point
+  // and verify that we got a 200 code back from the server
+  // anyway.
+
+  std::istream &responseStream = session.receiveResponse( response);
+  std::vector<Poco::Net::HTTPCookie> newCookies;
+  // For as yet unknown reasons, we don't always get a session cookie back from the
+  // server.  In that case, we don't want to overwrite the cookie we're currently
+  // using...
+  response.getCookies( newCookies);
+  if (newCookies.size() > 0)
+  {
+    m_cookies = newCookies;
+  }
+
+  if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_OK)
+  {
+    // D'oh!  The server didn't like our request.
+    std::ostringstream respStatus;
+    respStatus << "Status: " << response.getStatus() << "\nReason: " << response.getReasonForStatus( response.getStatus());
+    respStatus << "\n\nReply text:\n";
+    respStatus << responseStream.rdbuf();
+    serverErr = respStatus.str();
+
+    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
+    {
+      // Probably some kind of username/password mismatch.  Clear the password so that
+      // the user can enter it again
+      m_password.clear();
+    }
+
+    reqErr = JM_HTTP_SERVER_ERR;
+  }
+  else
+  {
+    // Success!
+    reqErr = JM_OK;  // This should already be set, but just in case....
+
+    // Parse the response body for the transaction ID and directory name.  The response should
+    // be a single object with 2 string values.  Something like
+    // JSON element that looks something like: {"transId":"21", "dirName":"/apachefiles/xmr-1234567"}
+    JSONObject results;
+
+    initFromStream( results, responseStream);
+    JSONObject::const_iterator itResults = results.find( "transId");
+    (*itResults).second.getValue(transId);
+    itResults = results.find( "dirName");
+    (*itResults).second.getValue(directory);
+  }
+
+  return reqErr;
+}
+
+
+// Notify the cluster that we want to stop the specified transaction
+// If we get an error message back from the server, it will be returned in the
+// serverErr string.
+RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::stopTransaction( string &transId, string &serverErr)
+{
+  JobManagerErrorCode reqErr = JM_OK;
+
+  // Create an HTTPS session
+  // TODO: Notice that we've set the context to VERIFY_NONE.  I think that means we're not checking the SSL certificate that the server
+  // sends to us.  That's BAD!!
+  Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+  Poco::Net::HTTPSClientSession session( Poco::URI(m_serviceBaseUrl).getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
+  // We need to send a GET request to the server with a query string of "action=start"
+  Poco::Net::HTTPRequest req;
+  string queryString = "action=stop&transid=" + transId;
+  reqErr = initGetRequest( req, "/transaction", queryString);
+  if ( reqErr != JM_OK)
+  {
+    return reqErr;
+  }
+
+  session.sendRequest( req);
+
+  Poco::Net::HTTPResponse response;
+
+  // Note: If we wanted to, we could call response.getStatus() at this point
+  // and verify that we got a 200 code back from the server
+  // anyway.
+
+  std::istream &responseStream = session.receiveResponse( response);
+  std::vector<Poco::Net::HTTPCookie> newCookies;
+  // For as yet unknown reasons, we don't always get a session cookie back from the
+  // server.  In that case, we don't want to overwrite the cookie we're currently
+  // using...
+  response.getCookies( newCookies);
+  if (newCookies.size() > 0)
+  {
+    m_cookies = newCookies;
+  }
+
+
+  // All we should get back is an HTTP_OK code...
+  if (response.getStatus() != Poco::Net::HTTPResponse::HTTP_OK)
+  {
+    // D'oh!  The server didn't like our request.
+    std::ostringstream respStatus;
+    respStatus << "Status: " << response.getStatus() << "\nReason: " << response.getReasonForStatus( response.getStatus());
+    respStatus << "\n\nReply text:\n";
+    respStatus << responseStream.rdbuf();
+    serverErr = respStatus.str();
+
+    if (response.getStatus() == Poco::Net::HTTPResponse::HTTP_UNAUTHORIZED)
+    {
+      // Probably some kind of username/password mismatch.  Clear the password so that
+      // the user can enter it again
+      m_password.clear();
+    }
+
+    reqErr = JM_HTTP_SERVER_ERR;
+  }
+  else
+  {
+    // Success!
+    reqErr = JM_OK;  // This should already be set, but just in case....
+  }
+
+  return reqErr;
+}
+
+
+// Wrapper for a lot of the boilerplate code needed to perform an HTTPS GET
+RemoteJobManager::JobManagerErrorCode HttpRemoteJobManager::initGetRequest( Poco::Net::HTTPRequest &req, string extraPath, string queryString)
+{
+  // Open an HTTP connection to the cluster
+  Poco::URI uri(m_serviceBaseUrl);
+
+  if (uri.getScheme() != "https")
+  {
+    // Disallow unencrypted channels (because we're sending the password in the
+    // HTTP auth header)
+    return JM_CLEARTEXT_DISALLOWED;
+  }
+
+  std::string path = uri.getPath();
+  // Path should be something like "/mws/rest", append extraPath to it.
+  path += extraPath;
+
+  uri.setPath( path);
+  uri.setQuery(queryString);
+
+  req.setVersion(Poco::Net::HTTPRequest::HTTP_1_1);
+  req.setMethod( Poco::Net::HTTPRequest::HTTP_GET);
+  req.setURI(uri.toString());
+
+  // Set the Authorization header (base64 encoded)
+  ostringstream encodedAuth;
+  Poco::Base64Encoder encoder( encodedAuth);
+
+  if (m_password.empty())
+  {
+    getPassword();
+  }
+
+  encoder << m_userName << ":" << m_password;
+  encoder.close();
+
+  req.setCredentials( "Basic", encodedAuth.str());
+
+  // Attach any cookies we've got from previous responses
+  req.setCookies( getCookies());
+
+  return JM_OK;
+}
+
+// Converts the vector of HTTPCookie objects into a NameValueCollection
+Poco::Net::NameValueCollection HttpRemoteJobManager::getCookies()
+{
+  Poco::Net::NameValueCollection nvc;
+  std::vector<Poco::Net::HTTPCookie>::const_iterator it = m_cookies.begin();
+  while (it != m_cookies.end())
+  {
+    nvc.add( (*it).getName(), (*it).getValue());
+    it++;
+  }
+  return nvc;
+}
+
+
+
+
+/* ************* MWSRemoteJobManagaer member functions ****************** */
+
 MwsRemoteJobManager::MwsRemoteJobManager( std::string displayName, std::string configFileUrl,
                                           std::string serviceBaseUrl, std::string userName) :
-    HttpRemoteJobManager( displayName, configFileUrl),
-    m_serviceBaseUrl( serviceBaseUrl),
-    m_userName( userName)
+    HttpRemoteJobManager( displayName, configFileUrl, serviceBaseUrl, userName)
+
 {
 
   // MWS rather annoyingly uses its own format for date/time strings.  One of the main
@@ -740,20 +954,6 @@ std::string MwsRemoteJobManager::escapeQuoteChars( const std::string & str)
   } while (end != std::string::npos && start < str.length());
 
   return out;
-}
-
-
-// Converts the vector of HTTPCookie objects into a NameValueCollection
-Poco::Net::NameValueCollection MwsRemoteJobManager::getCookies()
-{
-  Poco::Net::NameValueCollection nvc;
-  std::vector<Poco::Net::HTTPCookie>::const_iterator it = m_cookies.begin();
-  while (it != m_cookies.end())
-  {
-    nvc.add( (*it).getName(), (*it).getValue());
-    it++;
-  }
-  return nvc;
 }
 
 
