@@ -64,8 +64,9 @@ def DarkCurrent(datafile):
 def NoDarkCurrent():
     ReductionSingleton().set_dark_current_subtracter(None)
     
-def SolidAngle():
+def SolidAngle(detector_tubes=False):
     ReductionSingleton().set_solid_angle_correcter(mantidsimple.SANSSolidAngleCorrection, InputWorkspace=None, OutputWorkspace=None,
+                                                   DetectorTubes=detector_tubes,
                                                    ReductionProperties=ReductionSingleton().get_reduction_table_name())
     
 def NoSolidAngle():

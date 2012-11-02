@@ -92,7 +92,7 @@ class ReductionOptions(BaseScriptElement):
             script += "SetWavelength(%g, %g)\n" % (self.wavelength, self.wavelength_spread)
         
         if self.solid_angle_corr:
-            script += "SolidAngle()\n"
+            script += "SolidAngle(detector_tubes=True)\n"
         else:
             script += "NoSolidAngle()\n"
         

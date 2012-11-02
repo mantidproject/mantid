@@ -24,8 +24,41 @@ namespace Mantid
 namespace WorkflowAlgorithms
 {
 
+using namespace Kernel;
+using namespace API;
+using namespace Geometry;
+using namespace DataObjects;
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSSolidAngleCorrection)
+
+/// Returns the angle between the projection of the sample-to-pixel vector on
+/// the plane defined by the beam (Z) axis and the Y-axis.
+static double getYTubeAngle(IDetector_const_sptr det,
+					 MatrixWorkspace_const_sptr workspace)
+{
+	Geometry::IObjComponent_const_sptr source = workspace->getInstrument()->getSource();
+	Geometry::IObjComponent_const_sptr sample = workspace->getInstrument()->getSample();
+	if ( source == NULL || sample == NULL )
+	{
+		throw std::invalid_argument("Instrument not sufficiently defined: failed to get source and/or sample");
+	}
+
+	const Kernel::V3D samplePos = sample->getPos();
+	const Kernel::V3D beamLine  = samplePos - source->getPos();
+
+	if ( beamLine.nullVector() )
+	{
+		throw std::invalid_argument("Source and sample are at same position!");
+	}
+
+	V3D sampleDetVec = det->getPos() - samplePos;
+
+	// We are only interested in the component long the detector tubes
+	sampleDetVec.setX(0.0);
+
+	return sampleDetVec.angle(beamLine);
+}
 
 /// Sets documentation strings for this algorithm
 void SANSSolidAngleCorrection::initDocs()
@@ -34,11 +67,6 @@ void SANSSolidAngleCorrection::initDocs()
   this->setOptionalMessage("Performs solid angle correction on SANS 2D data.");
 }
 
-using namespace Kernel;
-using namespace API;
-using namespace Geometry;
-using namespace DataObjects;
-
 void SANSSolidAngleCorrection::init()
 {
   auto wsValidator = boost::make_shared<CompositeValidator>();
@@ -46,6 +74,8 @@ void SANSSolidAngleCorrection::init()
   wsValidator->add<HistogramValidator>();
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty("DetectorTubes", false,
+      "If true, the algorithm will assume that the detectors are tubes in the Y direction.");
   declareProperty("OutputMessage","",Direction::Output);
   declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 }
@@ -123,7 +153,14 @@ void SANSSolidAngleCorrection::exec()
     MantidVec& EOut = outputWS->dataE(i);
 
     // Compute solid angle correction factor
-    const double tanTheta = tan( inputWS->detectorTwoTheta(det) );
+    const bool is_tube = getProperty("DetectorTubes");
+    double tanTheta;
+    if (is_tube)
+    {
+    	tanTheta = tan( getYTubeAngle(det, inputWS) );
+    } else {
+        tanTheta = tan( inputWS->detectorTwoTheta(det) );
+    }
     const double term = sqrt(tanTheta*tanTheta + 1.0);
     const double corr = term*term*term;
 
