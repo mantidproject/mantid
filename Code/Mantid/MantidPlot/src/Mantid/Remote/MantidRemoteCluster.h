@@ -9,6 +9,7 @@
 //#include "MantidAPI/MatrixWorkspace.h"
 //#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/SingletonHolder.h"
 
 #include "RemoteJob.h"
 #include <QDockWidget>
@@ -26,6 +27,14 @@ class QNetworkReply;
 
 class RemoteJobManager;
 class RemoteTask;
+
+// Note: These two typedefs should perhaps be moved to a different header.  I expect
+// all the algorithms that implement remote job submission will need them, and we
+// probably don't want to make them import this entire header
+// Note 2: We might need to change QList to an STL deque or similar so we don't
+// bring Qt-specific stuff into the non-gui classes
+typedef QList <RemoteJobManager *> RemoteJobManagerList;
+typedef Mantid::Kernel::SingletonHolder< RemoteJobManagerList > RemoteJobManagerListSingleton;
 
 // Note: This supposed to look and feel like the AlgorithmDockWidget.  It doesn't have
 // enough in common with it to make inheriting from it useful, though.
@@ -53,7 +62,7 @@ protected:
     QNetworkAccessManager *m_netManager;
     QNetworkReply * m_configReply;
     
-    QList <RemoteJobManager *> m_clusterList;  // these are in the same order as they're listed in the combo box
+    RemoteJobManagerList &m_clusterList;  // these are in the same order as they're listed in the combo box
 
     // Server Attributes. These are specified in the config.xml file for each cluster and
     // are updated when we parse that file.  (ie: every time the user selects a cluster

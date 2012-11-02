@@ -37,7 +37,7 @@ Mantid::Kernel::Logger& RemoteClusterDockWidget::logObject=Mantid::Kernel::Logge
 
 //----------------- RemoteClusterDockWidget --------------------//
 RemoteClusterDockWidget::RemoteClusterDockWidget(MantidUI *mui, ApplicationWindow *w):
-QDockWidget(w),m_mantidUI(mui)
+  QDockWidget(w), m_clusterList( RemoteJobManagerListSingleton::Instance()), m_mantidUI(mui)
 {
     logObject.warning("Inside RemoteTaskDockWidget constructor");
 
@@ -74,7 +74,6 @@ QDockWidget(w),m_mantidUI(mui)
 
     // Load the cluster info from the properties files
     Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
-
     int numClusters;
     if ( config.getValue( std::string("Cluster.NumClusters"), numClusters) )
     {
@@ -111,13 +110,14 @@ RemoteClusterDockWidget::~RemoteClusterDockWidget()
     config.saveConfig( config.getUserFilename());
 
     // The cluster list only contains pointers.  We have to delete the objects they point to manually
-    QList <RemoteJobManager *>::Iterator it = m_clusterList.begin();
+    RemoteJobManagerList::Iterator it = m_clusterList.begin();
     while (it != m_clusterList.end())
     {
         delete (*it);
         it++;
     }
-   delete m_netManager;
+
+    delete m_netManager;
 }
 
 void RemoteClusterDockWidget::update()
