@@ -32,7 +32,7 @@ namespace Algorithms
     <LI> TransmissionError - The error on the transmission value (default 0.0) </LI>
     </UL>
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ApplyTransmissionCorrection : public API::Algorithm

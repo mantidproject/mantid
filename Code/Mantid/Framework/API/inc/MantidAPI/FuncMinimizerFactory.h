@@ -46,7 +46,7 @@ namespace API
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
+    File change history is stored at: <https://github.com/mantidproject/mantid>    
 */
 
   class MANTID_API_DLL FuncMinimizerFactoryImpl : public Kernel::DynamicFactory<IFuncMinimizer>

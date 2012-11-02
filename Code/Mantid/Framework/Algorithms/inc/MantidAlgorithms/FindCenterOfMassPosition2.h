@@ -28,7 +28,7 @@ namespace Algorithms
                              the center of mass of the scattering pattern. Default: 20 pixels</LI>
     </UL>
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport FindCenterOfMassPosition2 : public API::Algorithm

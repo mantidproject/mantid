@@ -18,7 +18,7 @@ namespace Algorithms
     Apply correction to EQSANS data to account for its TOF structure. The algorithm modifies the
     TOF values to correct for the fact that T_0 is not properly recorded by the DAS.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 // Pulse widge (micro sec per angstrom)

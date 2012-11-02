@@ -13,7 +13,7 @@ namespace WorkflowAlgorithms
 namespace EQSANSInstrument
 {
 /**
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 const double default_slit_positions[3][8] = {{5.0, 10.0, 10.0, 15.0, 20.0, 20.0, 25.0, 40.0},

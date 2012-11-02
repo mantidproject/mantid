@@ -62,7 +62,7 @@ enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT, PULSETIMETOF_SORT};
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://github.com/mantidproject/mantid>
 */
 
 class DLLExport EventList :  public Mantid::API::IEventList

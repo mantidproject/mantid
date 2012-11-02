@@ -34,7 +34,7 @@ namespace Mantid
      You should have received a copy of the GNU General Public License
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
      
-     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
     class MANTID_KERNEL_DLL EnvironmentHistory

@@ -29,7 +29,7 @@ namespace Algorithms
     <LI> ScaleFactor   - Scale factor value and uncertainty [n/(monitor count)/(cm^2)/steradian].</LI>
     </UL>
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport SANSDirectBeamScaling : public API::Algorithm

@@ -34,7 +34,7 @@ namespace Algorithms
     <LI> MaxEfficiency - Maximum efficiency for a pixel to be considered (default: no maximum)</LI>
     </UL>
 
-    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+    File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 class DLLExport CalculateEfficiency : public API::Algorithm

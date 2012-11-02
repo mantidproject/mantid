@@ -44,7 +44,7 @@ namespace Geometry
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
     File change history is stored at: 
-                 <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+                 <https://github.com/mantidproject/mantid>
 
     Code Documentation is available at 
                  <http://doxygen.mantidproject.org>
