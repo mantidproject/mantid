@@ -58,12 +58,12 @@ public:
 
     // returns the ID's of all the user's open transactions
     virtual bool openTransactions(std::vector<std::string> &transIds) = 0;
-    **********/
 
     // NOTE: I haven't decided on the function signatures for upload/download yet.
     // Probably ought to use std::istream and std::ostream....
     //virtual bool uploadFile( std::string & TransId, ???? ) = 0;
     //virtual bool downloadFile( std::string & TransId, ???? ) = 0;
+    **********/
 
     virtual bool submitJob( const RemoteTask &remoteTask, std::string &retString) = 0;
     virtual bool jobStatus( const std::string &jobId,
@@ -71,11 +71,14 @@ public:
                             std::string &errMsg) = 0;
     virtual bool jobStatusAll( std::vector<RemoteJob> &jobList, std::string &errMsg) = 0;
 
+
     // returns true if there's an output file associated with the specified job ID and the file is readable
     virtual bool jobOutputReady( const std::string &jobId) = 0;
 
     // Fetches the job's output file from the remote cluster
     virtual bool getJobOutput( const std::string &jobId, std::ostream &outstream) = 0;
+
+
 /************
     TODO: Uncomment these when we're ready to implement
     virtual int abortJob( std::string jobId) = 0;
