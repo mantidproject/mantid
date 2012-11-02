@@ -111,6 +111,9 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using std::map;
 
+typedef std::vector<Mantid::Kernel::Property*> VecProperties;
+typedef const VecProperties ConstVecProperties;
+
 namespace Mantid
 {
 namespace Algorithms
@@ -119,7 +122,7 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SmoothNeighbours)
 
-SmoothNeighbours::SmoothNeighbours() : API::Algorithm() , WeightedSum(new NullWeighting)
+SmoothNeighbours::SmoothNeighbours() : API::Algorithm() , WeightedSum(new NullWeighting), m_NonUniformDetectorGroupProperty("NonUniform Detectors"), m_RectangularDetectorGroupProperty("Rectangular Detectors")
 {
 }
 
@@ -184,7 +187,7 @@ void SmoothNeighbours::init()
       "  Gaussian : Uses the absolute distance x^2 + y^2 ... normalised by the cutoff^2"
        );
 
-  declareProperty("Sigma", 0.5, mustBePositiveDouble, "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
+ declareProperty("Sigma", 0.5, mustBePositiveDouble, "Sigma value for gaussian weighting schemes. Defaults to 0.5. ");
   setPropertySettings("Sigma", new EnabledWhenProperty("WeightedSum", IS_EQUAL_TO, "Gaussian"));
 
   declareProperty("AdjX", 1, mustBePositive,
@@ -207,11 +210,20 @@ void SmoothNeighbours::init()
     "The number of pixels to zero at edges. Only for instruments with RectangularDetectors. " );
   setPropertySettings("ZeroEdgePixels", new EnabledWhenProperty("Radius", IS_DEFAULT) );
 
-  setPropertyGroup("AdjX", "Rectangular Detectors Only");
-  setPropertyGroup("AdjY", "Rectangular Detectors Only");
-  setPropertyGroup("SumPixelsX", "Rectangular Detectors Only");
-  setPropertyGroup("SumPixelsY", "Rectangular Detectors Only");
-  setPropertyGroup("ZeroEdgePixels", "Rectangular Detectors Only");
+  declareProperty("ForceEvaluationAsRectangularDetectors", false, "Force the algorithm to evaluate the instrument as a rectangular detector instrument.");
+
+  // Perform Group Asssociations.
+  setPropertyGroup("RadiusUnits", m_NonUniformDetectorGroupProperty);
+  setPropertyGroup("Radius", m_NonUniformDetectorGroupProperty);
+  setPropertyGroup("NumberOfNeighbours", m_NonUniformDetectorGroupProperty);
+  setPropertyGroup("SumNumberOfNeighbours", m_NonUniformDetectorGroupProperty);
+
+  // Perform Group Associations.
+  setPropertyGroup("AdjX", m_RectangularDetectorGroupProperty);
+  setPropertyGroup("AdjY", m_RectangularDetectorGroupProperty);
+  setPropertyGroup("SumPixelsX", m_RectangularDetectorGroupProperty);
+  setPropertyGroup("SumPixelsY", m_RectangularDetectorGroupProperty);
+  setPropertyGroup("ZeroEdgePixels", m_RectangularDetectorGroupProperty);
 
   declareProperty("PreserveEvents", true,
     "If the InputWorkspace is an EventWorkspace, this will preserve the full event list (warning: this will use much more memory!).");
@@ -225,6 +237,8 @@ void SmoothNeighbours::init()
  */
 void SmoothNeighbours::findNeighboursRectangular()
 {
+  g_log.debug("SmoothNeighbours processing assuming rectangular detectors.");
+
   m_prog->resetNumSteps(inWS->getNumberHistograms(), 0.2, 0.5);
 
   Instrument_const_sptr inst = inWS->getInstrument();
@@ -386,6 +400,7 @@ void SmoothNeighbours::findNeighboursRectangular()
  */
 void SmoothNeighbours::findNeighboursUbiqutious()
 {
+   g_log.debug("SmoothNeighbours processing NOT assuming rectangular detectors.");
   /*
     This will cause the Workspace to rebuild the nearest neighbours map, so that we can pick-up any of the properties specified
     for this algorithm in the constructor for the NearestNeighboursObject.
@@ -598,49 +613,24 @@ double SmoothNeighbours::translateToMeters(const std::string radiusUnits, const 
   return translatedRadius;
 }
 
-/**
-Determine whether we can assume that the instrument is made up of rectangular detectors.
-
-Looks at the first detector and makes the decision for the whole instrument based on whether this is rectangular or not.
-
-It would be best if this sort of functionality could be put onto the instrument.
-
-@return True if it has rectangular detectors.
+/*
+Check whether the properties provided are all in their default state.
+@param properties : Vector of mantid property pointers
+@return True only if they are all default, otherwise False.
 */
-bool SmoothNeighbours::isRectangularDetectorInstrument() const
+bool areAllDefault(ConstVecProperties properties)
 {
-  bool isRectangularDetectorInstrument = false;
-  if(!inWS)
+  bool areAllDefault = false;
+  for(ConstVecProperties::const_iterator it = properties.begin(); it != properties.end(); ++it)
   {
-    throw std::runtime_error("InputWorkspace has not been provided.");
-  }
-
-  size_t nHistograms = inWS->getNumberHistograms();
-  for(size_t i = 0; i < nHistograms; ++i)
-  {
-    auto detector = inWS->getDetector(i);
-    if(detector->isMonitor())
+    if(!(*it)->isDefault())
     {
-      continue;
-    }
-    else
-    {
-      if(detector->type() == "RectangularDetectorPixel")
-      {
-        g_log.debug("Assuming Rectangular Detectors for SmoothNeighbours on this data.");
-        isRectangularDetectorInstrument =  true;
-      }
-      else
-      {
-        g_log.debug("Assuming Non-Rectangular Detectors for SmoothNeighbours on this data.");
-      }
+      return areAllDefault;
     }
   }
-
-  // If the radius is non-zero, then we don't want to treat this as a rectangular detector instrument.
-  return isRectangularDetectorInstrument && (Radius <= 0);
+  areAllDefault = true;
+  return areAllDefault;
 }
-
 
 //--------------------------------------------------------------------------------------------
 /** Executes the algorithm
@@ -648,9 +638,42 @@ bool SmoothNeighbours::isRectangularDetectorInstrument() const
  */
 void SmoothNeighbours::exec()
 {
+  // Sort the properies according to the two internal groupings.
+  ConstVecProperties properties = this->getProperties();
+  VecProperties rectangularDetectorProperties;
+  VecProperties nonRectangularDetectorProperties;
+  for(ConstVecProperties::const_iterator it = properties.begin(); it != properties.end(); ++it)
+  {
+    if((*it)->getGroup() == m_RectangularDetectorGroupProperty)
+    {
+      rectangularDetectorProperties.push_back(*it);
+    }
+    else if((*it)->getGroup() == m_NonUniformDetectorGroupProperty)
+    {
+      nonRectangularDetectorProperties.push_back(*it);
+    }
+  }
+  
+  // Decide how the algorithm should process the instrument according the the defaults in the groupings.
+  bool processAsRectangularDetectorInstrument = false;
+  bool forceAsRectangularDetecorInstrument = getProperty("ForceEvaluationAsRectangularDetectors");
+  if(forceAsRectangularDetecorInstrument)
+  {
+    processAsRectangularDetectorInstrument = forceAsRectangularDetecorInstrument;
+  }
+  else if(areAllDefault(rectangularDetectorProperties) ^ areAllDefault(nonRectangularDetectorProperties))
+  {
+    processAsRectangularDetectorInstrument = areAllDefault(nonRectangularDetectorProperties);
+  }
+  else
+  {
+    throw std::invalid_argument("Either fully specify Rectangular Detector properties or NonUniform Detector properties, but do not partially specify both.");
+  }
+  
+
   // Get the input workspace
   inWS = getProperty("InputWorkspace");
-
+  
   // Retrieve the optional properties
   double enteredRadius = getProperty("Radius");
   nNeighbours = getProperty("NumberOfNeighbours");
@@ -671,7 +694,7 @@ void SmoothNeighbours::exec()
   m_prog = new Progress(this, 0.0, 0.2, inWS->getNumberHistograms());
 
   // Collect the neighbours with either method.
-  if (isRectangularDetectorInstrument())
+  if (processAsRectangularDetectorInstrument)
     findNeighboursRectangular();
   else
     findNeighboursUbiqutious();

@@ -95,6 +95,11 @@ namespace Mantid
         return mtime;
       }
 
+      void setTime(Kernel::DateAndTime newtime)
+      {
+        mtime = newtime;
+      }
+
       TYPE value() const
       {
         return mvalue;

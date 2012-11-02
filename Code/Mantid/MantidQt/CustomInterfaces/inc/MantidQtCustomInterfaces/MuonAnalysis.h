@@ -73,6 +73,12 @@ private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
 
+  /// When second period selection combobox changed
+  void firstPeriodSelectionChanged();
+
+  /// When second period selection combobox changed
+  void secondPeriodSelectionChanged();
+
   /// Input file changed in MWRunFiles widget
   void inputFileChanged_MWRunFiles();
 

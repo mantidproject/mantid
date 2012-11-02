@@ -45,7 +45,7 @@ namespace Mantid { namespace PythonInterface
           }
         }
         void *arrayData = PyArray_DATA(nparray);
-        const void *data = (void*)carray;
+        const void *data = static_cast<void*>(const_cast<ElementType *>(carray));
         std::memcpy(arrayData, data, PyArray_ITEMSIZE(nparray) * length);
         return (PyObject*)nparray;
       }

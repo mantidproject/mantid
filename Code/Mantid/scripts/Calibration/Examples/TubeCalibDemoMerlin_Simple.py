@@ -22,8 +22,7 @@ def CalibrateMerlin( RunNumber ):
 
    # == Set parameters for calibration ==
 
-   path = r"C:/Temp/" # Path name of folder containing input and output files
-   filename = 'MER'+RunNumber+'.raw' # Name of calibration run. 
+   filename = 'MER'+str(RunNumber) # Name of calibration run. 
    rangeLower = 3000 # Integrate counts in each spectra from rangeLower to rangeUpper 
    rangeUpper = 20000 #
 
@@ -69,7 +68,7 @@ def CalibrateMerlin( RunNumber ):
 
    # == Get the calibration and put results into calibration table ==
    # also put peaks into PeakFile
-   getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength, PeakFile=path+'TubeDemoMerlin01.txt' )
+   getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength )
    print "Got calibration (new positions of detectors) and put slit peaks into file TubeDemoMerlin01.txt"
 
    # == Apply the Calibation ==
@@ -77,9 +76,9 @@ def CalibrateMerlin( RunNumber ):
    print "Applied calibration"
 
    # == Save workspace ==
-   SaveNexusProcessed( CalibInstWS, path+'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Simple.py")
+   SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Simple.py")
    print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
    
    # ==== End of CalibrateMerlin() ====
 
-CalibrateMerlin( '12024' )
+CalibrateMerlin( 12024 )

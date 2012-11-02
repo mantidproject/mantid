@@ -1573,6 +1573,36 @@ public:
     TSM_ASSERT_EQUALS("Filtering by Median Time is not working.", expectedFilteredValue, actualFilteredValue);
   }
 
+  //----------------------------------------------------------------------------
+
+  /** A test for filter nothing
+    */
+  void test_filterByTime_out_of_range_filters_nothing()
+  {
+    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
+
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:40",5) );
+    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:50",6) );
+
+    size_t original_size = log->realSize();
+
+    TS_ASSERT_EQUALS(original_size, 6);
+
+    DateAndTime start = DateAndTime("2007-11-30T15:00:00"); // Much earlier than first time series value
+    DateAndTime stop = DateAndTime("2007-11-30T17:00:00"); // Much later than last time series value
+
+    log->filterByTime(start, stop);
+
+    TSM_ASSERT_EQUALS("Shouldn't be filtering anything!", original_size, log->realSize());
+
+    delete log;
+  }
+
+
 private:
   TimeSeriesProperty<int> *iProp;
   TimeSeriesProperty<double> *dProp;

@@ -44,7 +44,7 @@ namespace DataHandling
     */
   void SaveFullprofResolution::init()
   {
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("InputWorkspace", "Anonymous", Direction::InOut),
+    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("InputWorkspace", "Anonymous", Direction::Input),
                           "Input TableWorkspace containing the parameters for .irf file.");
 
     std::vector<std::string> exts;

@@ -2351,10 +2351,9 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   std::map<DateAndTime, double> time_value_map = flt.data()->valueAsCorrectMap();
   int rowcount = static_cast<int>(time_value_map.size());
   int colCount = 2;
-  Table* t = new Table(appWindow()->scriptingEnv(), rowcount, colCount, "", appWindow(), 0);
 
+  Table* t = new Table(appWindow()->scriptingEnv(), rowcount, colCount, "", appWindow(), 0);
   if( !t ) return;
-  // t->askOnCloseEvent(false);
   //Have to replace "_" since the legend widget uses them to separate things
   QString label = logname;
   label.replace("_","-");
@@ -2413,12 +2412,18 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
         if (f) flt.addFilter(*f);
         else
         {
+          t->setconfirmcloseFlag(false);
+          t->setAttribute(Qt::WA_DeleteOnClose);
+          t->close();
           importNumSeriesLog(wsName,logname,0);
           return;
         }
       }
       catch(...)
       {
+        t->setconfirmcloseFlag(false);
+        t->setAttribute(Qt::WA_DeleteOnClose);
+        t->close();
         importNumSeriesLog(wsName,logname,0);
         return;
       }

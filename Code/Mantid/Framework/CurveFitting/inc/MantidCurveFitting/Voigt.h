@@ -2,8 +2,8 @@
 #define MANTID_CURVEFITTING_VOIGT_H_
 
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/ParamFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+
 
 namespace Mantid
 {
@@ -34,23 +34,35 @@ namespace Mantid
       File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
       Code Documentation is available at: <http://doxygen.mantidproject.org>
      */
-    class MANTID_CURVEFITTING_DLL Voigt :
-      public virtual API::ParamFunction, public virtual API::IFunction1D
+    class MANTID_CURVEFITTING_DLL Voigt : public API::IPeakFunction
     {
     private:
       /// Return a string identifier for the function
       std::string name() const { return "Voigt"; }
       /// Declare parameters
       void declareParameters();
-
+      
       /// Fill out with function values at given x points
-      void function1D(double *out, const double *xValues, const size_t nData) const;
+      void functionLocal(double *out, const double *xValues, const size_t nData) const;
       /// Derivatives of function with respect to active parameters
-      void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
+      void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);
 
       /// Calculate both function & derivative together
       void calculateFunctionAndDerivative(const double *xValues, const size_t nData,
           double *functionValues, API::Jacobian * derivatives) const;
+
+      /// Return value of centre of peak
+      double centre()const;
+      /// Return value of height of peak
+      double height()const;
+      /// Return value of FWHM of peak
+      double fwhm()const;
+      /// Set the centre of the peak
+      void setCentre(const double value);
+      /// Set the height of the peak
+      void setHeight(const double value);
+      /// Set the FWHM of the peak
+      void setFwhm(const double value);
     };
 
 

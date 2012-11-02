@@ -29,7 +29,7 @@ class InstrumentParameters(object):
         ws_name = "__emptyInst_" + inst_name
         if IS_IN_MANTIDPLOT:
             idf_loc = ConfigService().getInstrumentDirectory()
-            idf_pattern = os.path.join(idf_loc, "%s*_Definition.xml") % inst_name
+            idf_pattern = os.path.join(idf_loc, "%s_Definition*.xml") % inst_name
             import glob
             idf_files = glob.glob(idf_pattern)
             output = LoadEmptyInstrument(Filename=idf_files[0], 

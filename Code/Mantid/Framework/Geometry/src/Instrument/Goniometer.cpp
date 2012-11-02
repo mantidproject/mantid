@@ -19,6 +19,38 @@ namespace Geometry
   using Kernel::V3D;
   using Kernel::Quat;
 
+
+    void GoniometerAxis::saveNexus(::NeXus::File * file, const std::string & group) const
+    {
+      file->makeGroup(group, "NXmotor", true);
+      file->writeData("name", name);
+      file->writeData("angle", angle);
+      file->openData("angle");
+      std::string unit =(angleunit==angDegrees)?"deg":"rad";
+      file->putAttr("unit", unit);
+      std::string sen = (sense==CW)?"CW":"CCW";
+      file->putAttr("sense", sen);
+      file->closeData();
+      rotationaxis.saveNexus(file, "rotationaxis");
+      file->closeGroup();
+    }
+
+    void GoniometerAxis::loadNexus(::NeXus::File * file, const std::string & group)
+    {
+      file->openGroup(group, "NXmotor");
+      file->readData("name", name);
+      file->readData("angle", angle);
+      file->openData("angle");
+      std::string s;
+      file->getAttr("sense", s);
+      sense = (s == "CW") ? CW : CCW;
+      file->getAttr("unit", s);
+      angleunit = (s == "rad") ? angRadians : angDegrees;
+      file->closeData();
+      rotationaxis.loadNexus(file, "rotationaxis");
+      file->closeGroup();
+    }
+
 /// Default constructor
 /// The rotation matrix is initialized to identity
 Goniometer::Goniometer():R(3,3,true),initFromR(false)

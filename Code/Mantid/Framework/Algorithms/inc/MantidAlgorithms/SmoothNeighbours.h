@@ -96,11 +96,6 @@ public:
   virtual int version() const { return (1);}
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Transforms\\Smoothing";}
-  /// Determine wheter to treat the instrument as contianinng rectangular detectors or not.
-  bool executionUsedRectangularDetectorInstrument() const
-  {
-    return this->isRectangularDetectorInstrument();
-  }
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
@@ -110,7 +105,6 @@ private:
 
   void execWorkspace2D(Mantid::API::MatrixWorkspace_sptr ws);
   void execEvent(Mantid::DataObjects::EventWorkspace_sptr ws);
-  bool isRectangularDetectorInstrument() const;
   void findNeighboursRectangular();
   void findNeighboursUbiqutious();
   Mantid::Geometry::Instrument_const_sptr fetchInstrument() const;
@@ -153,6 +147,12 @@ private:
 
   /// Progress reporter
   Mantid::API::Progress * m_prog;
+
+  /// Non rectangular detector group
+  const std::string m_NonUniformDetectorGroupProperty; 
+  
+  /// Rectuangular detector group
+  const std::string m_RectangularDetectorGroupProperty;
 
 };
 

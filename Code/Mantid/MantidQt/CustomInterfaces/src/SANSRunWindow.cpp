@@ -828,7 +828,7 @@ bool SANSRunWindow::loadUserFile()
     m_uiForm.gravity_check->setChecked(false);
   }
   
-  ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED options
+  ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED, MERGE options
   QString detName = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.det_selection").trimmed();
   if (detName == "REAR" || detName == "MAIN"){
@@ -837,7 +837,7 @@ bool SANSRunWindow::loadUserFile()
      m_uiForm.detbank_sel->setCurrentIndex(1);
   }else if (detName == "BOTH"){
      m_uiForm.detbank_sel->setCurrentIndex(2);
-  }else if (detName == "MERGED"){
+  }else if (detName == "MERGED" || detName== "MERGE"){
      m_uiForm.detbank_sel->setCurrentIndex(3);
   }
  
@@ -1960,7 +1960,7 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
 
   if ( ( ! floodFile.isEmpty() ) && ( m_uiForm.detbank_sel->currentText() == "HAB" ) )
   {
-    issueWarning("Flood file may not work", "Flood files have not always been compatible with the HAB detector you might want to check '"+floodFile+"'.\nThe reduction will continue");
+    g_log.warning() << "::SANS::Warning: Flood files will be ignored for the HAB/FRONT detector" <<std::endl; 
   }
   // Set the wavelength ranges, equal to those for the sample unless this box is checked
   // Also check if the Trans Fit on/off tick is on or off. If Off then set the trans_opt to off
@@ -2191,6 +2191,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
 
   //Reset the objects by initialising a new reducer object
   //py_code = "i._refresh_singleton()";
+  if (runMode == SingleMode) // TODO: test if it is really necessary to reload the file settings.
+  {
   py_code = "\ni.ReductionSingleton().set_instrument(isis_instrument."+getInstrumentClass()+")";
   //restore the settings from the user file
   py_code += "\ni.ReductionSingleton().user_file_path='"+
@@ -2200,7 +2202,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
 
   std::cout << "\n\n" << py_code.toStdString() << "\n\n";
   runReduceScriptFunction(py_code);
-
+  }
   // Mark that a reload is necessary to rerun the same reduction
   forceDataReload();
   //Reenable stuff

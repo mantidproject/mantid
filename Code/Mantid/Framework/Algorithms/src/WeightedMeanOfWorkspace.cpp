@@ -15,6 +15,7 @@ and the variance is calculated by:
 
 #include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 
@@ -93,10 +94,18 @@ namespace Mantid
       double weightSum = 0.0;
       for (std::size_t i = 0; i < numHists; ++i)
       {
-        IDetector_const_sptr det = inputWS->getDetector(i);
-        if( det->isMonitor() || det->isMasked() )
+        try
         {
-          continue;
+          IDetector_const_sptr det = inputWS->getDetector(i);
+          if( det->isMonitor() || det->isMasked() )
+          {
+            continue;
+          }
+        }
+        catch (...)
+        {
+          // Swallow these if no instrument is found
+          ;
         }
         MantidVec y = inputWS->dataY(i);
         MantidVec e = inputWS->dataE(i);

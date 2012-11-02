@@ -2,6 +2,8 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
@@ -307,12 +309,45 @@ void MantidQwtIMDWorkspaceData::choosePlotAxis()
       // Default to 0
       m_currentPlotAxis = 0;
       IMDWorkspace_const_sptr originalWS = m_originalWorkspace.lock();
-      for (size_t d=0; d<diff.getNumDims(); d++)
+
+      bool regularBinnedMDWorkspace = false;
+      if(auto mdew = boost::dynamic_pointer_cast<const Mantid::API::IMDEventWorkspace>(m_workspace))
       {
-        if (fabs(diff[d]) > largest || ( originalWS && originalWS->getDimension(m_currentPlotAxis)->getIsIntegrated() ) )
+        Mantid::API::BoxController_const_sptr controller = mdew->getBoxController();
+        bool atLeastOneDimNotIntegrated = false;
+        for(size_t i = 0; i < mdew->getNumDims(); ++i)
         {
-          //Skip over any integrated dimensions
-          if( originalWS && !originalWS->getDimension(d)->getIsIntegrated() )
+          if( mdew->getDimension(i)->getNBins() ==  controller->getSplitInto(i))
+          {
+            if(!mdew->getDimension(i)->getIsIntegrated())
+            {
+              atLeastOneDimNotIntegrated = true;
+            }
+          }
+        }
+        regularBinnedMDWorkspace = atLeastOneDimNotIntegrated;
+      }
+
+      if(NULL != boost::dynamic_pointer_cast<const Mantid::API::IMDHistoWorkspace>(originalWS) || regularBinnedMDWorkspace)
+      {
+        for (size_t d=0; d<diff.getNumDims(); d++)
+        {
+          if (fabs(diff[d]) > largest || ( originalWS && originalWS->getDimension(m_currentPlotAxis)->getIsIntegrated() ) )
+          {
+            //Skip over any integrated dimensions
+            if( originalWS && !originalWS->getDimension(d)->getIsIntegrated() )
+            {
+              largest = fabs(diff[d]);
+              m_currentPlotAxis = int(d);
+            }
+          }
+        }
+      }
+      else
+      {
+        for (size_t d=0; d<diff.getNumDims(); d++)
+        {
+          if (fabs(diff[d]) > largest)
           {
             largest = fabs(diff[d]);
             m_currentPlotAxis = int(d);

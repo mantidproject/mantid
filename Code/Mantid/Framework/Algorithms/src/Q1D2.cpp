@@ -12,6 +12,7 @@
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidAlgorithms/Qhelper.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidAPI/ISpectrum.h"
 
 namespace Mantid
 {
@@ -120,7 +121,7 @@ void Q1D2::exec()
     try {
       det = m_dataWS->getDetector(i);
     } catch (Exception::NotFoundError&) {
-      g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
+      g_log.warning() << "Workspace index " << i << " (SpectrumIndex = " << m_dataWS->getSpectrum(i)->getSpectrumNo() << ") has no detector assigned to it - discarding" << std::endl;
       // Catch if no detector. Next line tests whether this happened - test placed
       // outside here because Mac Intel compiler doesn't like 'continue' in a catch
       // in an openmp block.

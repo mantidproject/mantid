@@ -16,14 +16,15 @@ from tube_calib_fit_params import * # To handle fit parameters
 from ideal_tube import * # For ideal tube
 from tube_calib import *  # For tube calibration functions
 from tube_spec import * # For tube specification class
+import os
 
 def CalibrateMerlin( RunNumber, UsePeakFile=False ):
 # Run number must include any leading zeros that appear in the file name of the run.
 
    # == Set parameters for calibration ==
 
-   path = r"C:/Temp/" # Path name of folder containing input and output files
-   filename = 'MER'+RunNumber+'.raw' # Name of calibration run
+   # File details
+   filename = 'MER'+str(RunNumber) # Name of calibration run
    rangeLower = 3000 # Integrate counts in each spectra from rangeLower to rangeUpper 
    rangeUpper = 20000 #
 
@@ -41,7 +42,7 @@ def CalibrateMerlin( RunNumber, UsePeakFile=False ):
    CalibratedComponent = 'MERLIN'  # Calibrate whole instrument 
     
    # Get calibration raw file and integrate it    
-   rawCalibInstWS = Load(path+filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
+   rawCalibInstWS = Load(filename)  #'raw' in 'rawCalibInstWS' means unintegrated.
    print "Integrating Workspace"
    CalibInstWS = Integration( rawCalibInstWS, RangeLower=rangeLower, RangeUpper=rangeUpper )
    DeleteWorkspace(rawCalibInstWS)
@@ -69,25 +70,29 @@ def CalibrateMerlin( RunNumber, UsePeakFile=False ):
 
    # == Get the calibration and put results into calibration table ==
    # also put peaks into PeakFile
+   saveDirectory = config['defaultsave.directory']
+   peakFileName = "TubeCalibDemoMerlin_Peaks.txt"
    if(not UsePeakFile):
-      getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength, PeakFile=path+'TubeCalibDemoMerlin_Peaks.txt' )
+      getCalibration( CalibInstWS, thisTubeSet, calibrationTable,  fitPar, iTube, ExcludeShortTubes=ActiveLength, PeakFile=peakFileName )
+      print " Put slit peaks into file",peakFileName, "in save directory",saveDirectory,"." 
    else:
-      getCalibrationFromPeakFile( CalibInstWS, calibrationTable, iTube, path+'TubeCalibDemoMerlin_Peaks.txt' )
-   print "Got calibration (new positions of detectors) and put slit peaks into file TubeCalibDemoMerlin_Peaks.txt"
+      getCalibrationFromPeakFile( CalibInstWS, calibrationTable, iTube, peakFileName )
+     
+   print "Got calibration (new positions of detectors)"
 
    # == Apply the Calibation ==
    ApplyCalibration( Workspace=CalibInstWS, PositionTable=calibrationTable)
    print "Applied calibration"
 
    # == Save workspace ==
-   SaveNexusProcessed( CalibInstWS, path+'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Adjustable.py")
-   print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs"
+   SaveNexusProcessed( CalibInstWS, 'TubeCalibDemoMerlinResult.nxs',"Result of Running TubeCalibDemoMerlin_Adjustable.py")
+   print "saved calibrated workspace (CalibInstWS) into Nexus file TubeCalibDemoMerlinResult.nxs in save directory",saveDirectory,"."
    
    # ==== End of CalibrateMerlin() ====
    # INITIALLY EXECUTE THE CODE FROM THE BEGINNING TO HERE, THEN EACH OF THE TWO CALLS BELOW IN ORDER SEPARATELY
 
 # Run this one first
-CalibrateMerlin( '12024' )  
+CalibrateMerlin( 12024 )  
 
-#Then edit the path+'TubeCalibDemoMerlin_Peaks.txt' file, then run 
-CalibrateMerlin( '12024', True)
+#Then edit the'TubeCalibDemoMerlin_Peaks.txt' file, then run 
+CalibrateMerlin( 12024, True)

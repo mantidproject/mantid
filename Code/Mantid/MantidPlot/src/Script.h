@@ -107,11 +107,13 @@ public slots:
   /// Execute the code asynchronously, returning immediately after the execution has started
   QFuture<bool> executeAsync(const ScriptCode & code);
 
+  /// Asks Mantid to release all free memory
+  void releaseFreeMemory();
   /// Sets the execution mode to NotExecuting
   void setNotExecuting();
   /// Sets the execution mode to Running to indicate something is running
   void setIsRunning();
-
+ 
   // local variables
   virtual bool setQObject(QObject*, const char*) { return false; }
   virtual bool setInt(int, const char*) { return false; }

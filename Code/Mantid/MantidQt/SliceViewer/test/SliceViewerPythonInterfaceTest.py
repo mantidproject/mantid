@@ -372,7 +372,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         dim = ws.getDimension(index)
         return dim.getName()
  
-    def test_autoAxisAssignmentWhenNoIntegration(self):
+    def test_mdhistoAutoAxisAssignmentWhenNoIntegration(self):
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='A,B,C',Units='A,A,A',OutputWorkspace='original')
         FakeMDEventData(InputWorkspace='original',UniformParams='10000',PeakParams='10000,2,2,2,1',RandomizeSignal='1')
         #Note that all axis have 10 bins below.
@@ -395,7 +395,7 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         self.assertEquals("B", self._getPlotXAxisName(lv, binned_ws))
 
         
-    def test_autoAxisAssignmentWhenAnAxisIsIntegrated(self):
+    def test_mdhistoAutoAxisAssignmentWhenAnAxisIsIntegrated(self):
         CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='A,B,C',Units='A,A,A',OutputWorkspace='original')
         FakeMDEventData(InputWorkspace='original',UniformParams='10000',PeakParams='10000,2,2,2,1',RandomizeSignal='1')
         #Note that the 'A' axis is now integrated (see call below)
@@ -415,6 +415,26 @@ class SliceViewerPythonInterfaceTest(unittest.TestCase):
         lv.setStartXY(0, 0)
         lv.setEndXY(5,10)
         self.assertEquals("B", self._getPlotXAxisName(lv, binned_ws))
+
+    def test_mdAutoAxisAssignment(self):
+        CreateMDWorkspace(Dimensions='3',Extents='0,10,0,10,0,10',Names='A,B,C',Units='A,A,A',OutputWorkspace='original')
+        FakeMDEventData(InputWorkspace='original',UniformParams='10000',PeakParams='10000,2,2,2,1',RandomizeSignal='1')
+        #Effectively all axis will be 'integrated', nbins = 1 because this workspace is not histogrammed. Plotting functionality should now ignore integration checking on axis to autoplot.
+        original = mtd['original']
+        
+        sv = self.sv
+        sv.setWorkspace('original')
+        sv.setXYDim("A","B")
+        #should toggle to 'A' axis as the 'A' axis is the longest.
+        lv = self.svw.getLiner()
+        lv.setStartXY(0, 0)
+        lv.setEndXY(10,5)
+        self.assertEquals("A", self._getPlotXAxisName(lv, original))
+        
+        #should toggle to 'B' axis as that is now the longest.
+        lv.setStartXY(0, 0)
+        lv.setEndXY(5,10)
+        self.assertEquals("B", self._getPlotXAxisName(lv, original))
         
     #==========================================================================
     #======================= Dynamic Rebinning ================================

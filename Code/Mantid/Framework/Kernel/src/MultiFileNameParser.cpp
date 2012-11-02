@@ -772,7 +772,7 @@ namespace Kernel
         std::string runStr = boost::lexical_cast<std::string>( run );
         if(runStr.size() < padLength)
           runStr.insert(0, padLength - runStr.size(), '0');
-        else if(runStr.size() > padLength)
+        else if(padLength > 0 && runStr.size() > padLength)
           throw std::runtime_error("Could not parse run number \"" + runStr + 
             "\" since the instrument run number length required is " + boost::lexical_cast<std::string>(padLength));
         runStr.insert(0, prefix);

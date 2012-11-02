@@ -61,7 +61,7 @@ namespace MDAlgorithms
 
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string Stitch1D::name() const { return "Stitch1D";};
+  const std::string Stitch1D::name() const { return "Stitch1DMD";};
   
   /// Algorithm's version for identification. @see Algorithm::version
   int Stitch1D::version() const { return 1;};
@@ -293,6 +293,10 @@ namespace MDAlgorithms
     auto nbins = dim->getNBins();
     int binLow = int(double(nbins) * fractionLow);
     int binHigh = int(double(nbins) * fractionHigh);
+    if(binLow == binHigh)
+    {
+      throw std::invalid_argument("There are no complete bins in the overlap region specified by fraction low, fraction high");
+    }
     double step = ( dim->getMaximum() - dim->getMinimum() )/ double(nbins);
     double qLow = (double(binLow) * step) + dim->getMinimum();
     double qHigh = (double(binHigh) * step) + dim->getMinimum();

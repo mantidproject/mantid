@@ -40,6 +40,8 @@ namespace Mantid
 {
   namespace Algorithms
   {
+    /// Factor to convert full width half max to sigma for calculations of I/sigma.
+    const double FWHM_TO_SIGMA = 2.0*sqrt(2.0*std::log(2.0));
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(GetDetOffsetsMultiPeaks)
@@ -93,9 +95,9 @@ namespace Mantid
       {
         // Get references to the data
         //See formula in AlignDetectors
-        double offsetAD = offset*peakPosToFit[i]/(1.+offset);
+        double peakPosMeas = (1.+offset)*peakPosFitted[i];
         if(peakPosFitted[i] > minD && peakPosFitted[i] < maxD)
-          errsum += std::fabs(peakPosToFit[i]-(peakPosFitted[i]+offsetAD))/chisq[i];
+          errsum += std::fabs(peakPosToFit[i]-peakPosMeas)/chisq[i];
       }
       return errsum;
     }
@@ -174,8 +176,8 @@ namespace Mantid
 
         if (maxWidth > 0)
         {
-          widthLeft  = maxWidth;
-          widthRight = maxWidth;
+          widthLeft  = std::min(widthLeft, maxWidth);
+          widthRight = std::min(widthRight, maxWidth);
         }
 
         windows[2*i]   = peaks[i] - widthLeft;
@@ -208,6 +210,7 @@ namespace Mantid
       detid2index_map * pixel_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap(true);
       // the peak positions and where to fit
       std::vector<double> peakPositions = getProperty("DReference");
+      std::sort(peakPositions.begin(), peakPositions.end());
       std::vector<double> fitWindows = generateWindows(wkspDmin, wkspDmax, peakPositions, this->getProperty("FitWindowMaxWidth"));
       g_log.information() << "windows : ";
       if (fitWindows.empty())
@@ -454,23 +457,49 @@ namespace Mantid
       ITableWorkspace_sptr peakslist = findpeaks->getProperty("PeaksList");
       std::vector<size_t> banned;
       std::vector<double> peakWidFitted;
+      std::vector<double> peakHighFitted;
+      std::vector<double> peakBackground;
       for (size_t i = 0; i < peakslist->rowCount(); ++i)
       {
+        // peak value
         double centre = peakslist->getRef<double>("centre",i);
         double width = peakslist->getRef<double>("width",i);
+        double height = peakslist->getRef<double>("height", i);
+
+        // background value
+        double back_intercept = peakslist->getRef<double>("backgroundintercept", i);
+        double back_slope = peakslist->getRef<double>("backgroundslope", i);
+        double back_quad = peakslist->getRef<double>("A2", i);
+        double background = back_intercept + back_slope * centre
+            + back_quad * centre * centre;
+
+        // goodness of fit
         double chi2 = peakslist->getRef<double>("chi2",i);
 
         // Get references to the data
         peakPosFitted.push_back(centre);
         peakWidFitted.push_back(width);
+        peakHighFitted.push_back(height);
+        peakBackground.push_back(background);
         chisq.push_back(chi2);
       }
+
+      // first remove things that just didn't fit (center outside of window, bad chisq, ...)
       for (size_t i = 0; i < peakslist->rowCount(); ++i)
       {
         if (peakPosFitted[i] <= minD || peakPosFitted[i] >= maxD)
         {
             banned.push_back(i);
             continue;
+        }
+        else if (useFitWindows) // be more restrictive if fit windows were specified
+        {
+          if (peakPosFitted[i] <= fitWindowsToUse[2*i]
+              || peakPosFitted[i] >= fitWindowsToUse[2*i+1])
+          {
+            banned.push_back(i);
+            continue;
+          }
         }
         if (chisq[i] > m_maxChiSq)
         {
@@ -484,14 +513,19 @@ namespace Mantid
           peakPosToFit.erase(peakPosToFit.begin() + (*it));
           peakPosFitted.erase(peakPosFitted.begin() + (*it));
           peakWidFitted.erase(peakWidFitted.begin() + (*it));
+          peakHighFitted.erase(peakHighFitted.begin() + (*it));
+          peakBackground.erase(peakBackground.begin() + (*it));
           chisq.erase(chisq.begin() + (*it));
       }
       banned.clear();
-      std::vector<double> Zscore = getZscore(peakWidFitted);
+
+      // ban peaks that are low intensity compared to their widths
       for (size_t i = 0; i < peakWidFitted.size(); ++i)
       {
-        if (Zscore[i] > 1.0)
+        if (peakHighFitted[i]  * FWHM_TO_SIGMA / peakWidFitted[i] < 5.)
         {
+          g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << s
+                         << " I/sigma = " << (peakHighFitted[i] * FWHM_TO_SIGMA / peakWidFitted[i]) << "\n";
           banned.push_back(i);
           continue;
         }
@@ -502,8 +536,63 @@ namespace Mantid
           peakPosToFit.erase(peakPosToFit.begin() + (*it));
           peakPosFitted.erase(peakPosFitted.begin() + (*it));
           peakWidFitted.erase(peakWidFitted.begin() + (*it));
+          peakHighFitted.erase(peakHighFitted.begin() + (*it));
+          peakBackground.erase(peakBackground.begin() + (*it));
           chisq.erase(chisq.begin() + (*it));
       }
+      banned.clear();
+
+      // determine the (z-value) for constant "width" - (delta d)/d
+      std::vector<double> widthDivPos(peakWidFitted.size(), 0.); // DELETEME
+      for (size_t i = 0; i < peakWidFitted.size(); ++i)
+      {
+        widthDivPos[i] = peakWidFitted[i] / peakPosFitted[i]; // DELETEME
+      }
+      std::vector<double> Zscore = getZscore(widthDivPos);
+      for (size_t i = 0; i < peakWidFitted.size(); ++i)
+      {
+        if (Zscore[i] > 2.0)
+        {
+          g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << s
+                         << " sigma/d = " << widthDivPos[i] << "\n";
+          banned.push_back(i);
+          continue;
+        }
+      }
+      // delete banned peaks
+      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
+      {
+          peakPosToFit.erase(peakPosToFit.begin() + (*it));
+          peakPosFitted.erase(peakPosFitted.begin() + (*it));
+          peakWidFitted.erase(peakWidFitted.begin() + (*it));
+          peakHighFitted.erase(peakHighFitted.begin() + (*it));
+          peakBackground.erase(peakBackground.begin() + (*it));
+          chisq.erase(chisq.begin() + (*it));
+      }
+
+      // ban peaks that are not outside of error bars for the background
+      for (size_t i = 0; i < peakWidFitted.size(); ++i)
+      {
+        if (peakHighFitted[i] < 0.5 * std::sqrt(peakHighFitted[i] + peakBackground[i]))
+        {
+          g_log.notice() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << s
+                         << " " << peakHighFitted[i] << " < "
+                         << 0.5 * std::sqrt(peakHighFitted[i] + peakBackground[i]) << "\n";
+          banned.push_back(i);
+          continue;
+        }
+      }
+      // delete banned peaks
+      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
+      {
+          peakPosToFit.erase(peakPosToFit.begin() + (*it));
+          peakPosFitted.erase(peakPosFitted.begin() + (*it));
+          peakWidFitted.erase(peakWidFitted.begin() + (*it));
+          peakHighFitted.erase(peakHighFitted.begin() + (*it));
+          peakBackground.erase(peakBackground.begin() + (*it));
+          chisq.erase(chisq.begin() + (*it));
+      }
+
       nparams = peakPosFitted.size();
       return;
     }

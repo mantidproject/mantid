@@ -14,6 +14,7 @@ from mantid.kernel import *
 from tube_spec import * # For tube specification class
 import math
 import re
+import os
 
 
 def createTubeCalibtationWorkspaceByWorkspaceIndexList ( integratedWorkspace, outputWorkspace, workspaceIndexList, xUnit='Pixel', showPlot=False):
@@ -357,7 +358,7 @@ def getCalibratedPixelPositions( ws, tubePts, idealTubePts, whichTube, peakTestM
     return detIDs, detPositions
     
 
-def readPeakFile(file_path):
+def readPeakFile(file_name):
     """Load the file calibration
     
     It returns a list of tuples, where the first value is the detector identification 
@@ -376,7 +377,9 @@ def readPeakFile(file_path):
     # Will be splited as: 
     # ['MERLIN/door1/tube_1_1', '', '34.199347724575574', '', '525.5864438725401', '', '1001.7456248836971', '', '', '']    
     pattern = re.compile('[\[\],\s\r]')
-    for line in open(file_path,'r'):
+    saveDirectory = config['defaultsave.directory']
+    pfile = os.path.join(saveDirectory, file_name)
+    for line in open(pfile,'r'):
         #check if the entry is a comment line
         if line.startswith('#'):
             continue 
@@ -431,7 +434,8 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
     
     # Open Peaks File if specificed
     if( PeakFile != ""):
-       pFile = open(PeakFile,'w')
+       saveDirectory = config['defaultsave.directory']
+       pFile = open(os.path.join(saveDirectory, PeakFile),'w')
 
     for i in range(nTubes):
 
@@ -480,25 +484,26 @@ def getCalibration ( ws, tubeSet, calibTable, fitPar, iTube, PeakTestMode=False,
        return
 
     # Delete temporary workspaces for obtaining slit points
-    if( fitPar.isThreePointMethod() ):
-       DeleteWorkspace( 'get3pointsFor3pointMethod')
-       DeleteWorkspace('Z1_NormalisedCovarianceMatrix')
-       DeleteWorkspace('Z1_Parameters')
-       DeleteWorkspace('Z1_Workspace')
-       DeleteWorkspace('CentrePoint_NormalisedCovarianceMatrix')
-       DeleteWorkspace('CentrePoint_Parameters')
-       DeleteWorkspace('CentrePoint_Workspace')
-       DeleteWorkspace('LeftPoint_NormalisedCovarianceMatrix')
-       DeleteWorkspace('LeftPoint_Parameters')
-       DeleteWorkspace('LeftPoint_Workspace')
-       DeleteWorkspace('RightPoint_NormalisedCovarianceMatrix')
-       DeleteWorkspace('RightPoint_Parameters')
-       DeleteWorkspace('RightPoint_Workspace')
-    else:
-       DeleteWorkspace('getPeaksForNSlitsMethod')
-       DeleteWorkspace('CalibPeak_NormalisedCovarianceMatrix')
-       DeleteWorkspace('CalibPeak_Parameters')
-       DeleteWorkspace('CalibPeak_Workspace')
+    if( OverridePeaks == []):
+       if( fitPar.isThreePointMethod() ):
+          DeleteWorkspace( 'get3pointsFor3pointMethod')
+          DeleteWorkspace('Z1_NormalisedCovarianceMatrix')
+          DeleteWorkspace('Z1_Parameters')
+          DeleteWorkspace('Z1_Workspace')
+          DeleteWorkspace('CentrePoint_NormalisedCovarianceMatrix')
+          DeleteWorkspace('CentrePoint_Parameters')
+          DeleteWorkspace('CentrePoint_Workspace')
+          DeleteWorkspace('LeftPoint_NormalisedCovarianceMatrix')
+          DeleteWorkspace('LeftPoint_Parameters')
+          DeleteWorkspace('LeftPoint_Workspace')
+          DeleteWorkspace('RightPoint_NormalisedCovarianceMatrix')
+          DeleteWorkspace('RightPoint_Parameters')
+          DeleteWorkspace('RightPoint_Workspace')
+       else:
+          DeleteWorkspace('getPeaksForNSlitsMethod')
+          DeleteWorkspace('CalibPeak_NormalisedCovarianceMatrix')
+          DeleteWorkspace('CalibPeak_Parameters')
+          DeleteWorkspace('CalibPeak_Workspace')
     
     # Delete temporary workspaces for getting new detector positions
     DeleteWorkspace('QuadraticFittingWorkspace')

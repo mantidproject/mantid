@@ -52,6 +52,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              Description="Sum detector pixels in X direction.  Must be a factor of X total pixels.  Default is 1.")
         self.declareProperty("YPixelSum", 1,
                              Description="Sum detector pixels in Y direction.  Must be a factor of Y total pixels.  Default is 1.")
+        self.declareProperty("SmoothSummedOffsets", False,
+                             Description="If the data was summed for calibration, smooth the resulting offsets workspace.")
+        self.declareProperty("SmoothGroups", "", 
+                             Description="Comma delimited number of points for smoothing pixels in each group.  Default is no Smoothing.")
         self.declareProperty("UnwrapRef", 0.,
                              Description="Reference total flight path for frame unwrapping. Zero skips the correction")
         self.declareProperty("LowResRef", 0.,
@@ -296,6 +300,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         # Bin events in d-Spacing
         if not "histo" in self.getProperty("Extension"):
         	Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
+        CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
+        if len(self._smoothGroups) > 0:
+            SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp, NPoints=self._smoothGroups, GroupingWorkspace=str(wksp)+"group")
         # Remove old calibration files
         cmd = "rm "+calib
         os.system(cmd)
@@ -304,11 +311,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             DReference=self._peakpos, FitWindowMaxWidth=self.getProperty("PeakWindowMax"), BackgroundType=self.getProperty("BackgroundType"),
             MaxOffset=self._maxoffset, MaskWorkspace=str(wksp)+"mask")
         #Fixed SmoothNeighbours for non-rectangular and rectangular
-        if self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
+        if self._smoothoffsets and self._xpixelbin*self._ypixelbin>1: # Smooth data if it was summed
                 SmoothNeighbours(InputWorkspace=str(wksp)+"offset", OutputWorkspace=str(wksp)+"offset", WeightedSum="Flat",
                                  AdjX=self._xpixelbin, AdjY=self._ypixelbin)
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping, OutputWorkspace=str(wksp)+"group")
         lcinst = str(self._instrument)
         
         if "dspacemap" in self._outTypes:
@@ -348,6 +354,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._grouping = self.getProperty("GroupDetectorsBy")
         self._xpixelbin = self.getProperty("XPixelSum")
         self._ypixelbin = self.getProperty("YPixelSum")
+        self._smoothoffsets = self.getProperty("SmoothSummedOffsets")
+        self._smoothGroups = self.getProperty("SmoothGroups")
         self._peakpos = self.getProperty("PeakPositions")
         positions = self._peakpos.strip().split(',')
         if self.getProperty("CrossCorrelation"):

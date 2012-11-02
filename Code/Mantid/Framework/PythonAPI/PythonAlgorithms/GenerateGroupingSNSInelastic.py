@@ -53,8 +53,8 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         instrument = self.getProperty("Instrument").value
         filename = self.getProperty("Filename").value
         
-        path=mantid.config["instrumentDefinition.directory"]
-        __w = mantid.simpleapi.LoadEmptyInstrument(Filename=path+'/'+instrument+"_Definition.xml")
+        IDF=mantid.api.ExperimentInfo.getInstrumentFilename(instrument)
+        __w = mantid.simpleapi.LoadEmptyInstrument(Filename=IDF)
 
         i=0
         while(__w.getDetector(i).isMonitor()):

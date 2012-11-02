@@ -7,17 +7,28 @@
 #include "MantidMDAlgorithms/SaveMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
 #include "MantidKernel/CPUTimer.h"
 #include <Poco/File.h>
 
+
 using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using Mantid::Kernel::CPUTimer;
 
+class SaveMDTester: public SaveMD
+{
+public:
+  void saveExperimentInfos(::NeXus::File * const file, IMDEventWorkspace_const_sptr ws)
+  {
+    this->saveExperimentInfos(file, ws);
+  }
+};
 
 /** Note: See the LoadMDTest class
  * for a more thorough test that does
@@ -145,6 +156,51 @@ public:
     //if (Poco::File(fullPath).exists()) Poco::File(fullPath).remove();
   }
 
+  void test_saveExpInfo()
+  {
+    std::string filename("MultiExperSaveTest.nxs");
+    // Make a 1D MDEventWorkspace
+    MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
+    // Make sure it is split
+    ws->splitBox();
+
+    Mantid::Geometry::Goniometer gon;
+    gon.pushAxis("Psi",0,1,0);
+    // add experiment infos 
+    for(int i=0;i<80;i++)
+    {
+      ExperimentInfo_sptr ei = boost::shared_ptr<ExperimentInfo>(new ExperimentInfo());
+      ei->mutableRun().addProperty("Psi",double(i));
+      ei->mutableRun().addProperty("Ei",400.);
+      ei->mutableRun().setGoniometer(gon,true);
+      ws->addExperimentInfo(ei);
+    }
+
+    AnalysisDataService::Instance().addOrReplace("SaveMDTest_ws", ws);
+
+    ws->refreshCache();
+
+    // There are this many boxes, so this is the max ID.
+    TS_ASSERT_EQUALS( ws->getBoxController()->getMaxId(), 11);
+
+    IMDEventWorkspace_sptr iws = ws;
+
+    CPUTimer tim;
+
+    SaveMD alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InputWorkspace", "SaveMDTest_ws") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", filename) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeFileBacked","0") );
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
+
+    ws->getBoxController()->closeFile(true);
+  //  if (Poco::File(filename).exists()) Poco::File(filename).remove();
+
+  }
+
 
   /** Run SaveMD with the MDHistoWorkspace */
   void doTestHisto(MDHistoWorkspace_sptr ws)
@@ -170,6 +226,7 @@ public:
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(2.5, 2, 10, 10.0, 3.5, "histo2", 4.5);
     doTestHisto(ws);
   }
+
 
 
 };

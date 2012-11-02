@@ -32,7 +32,9 @@ namespace Mantid { namespace PythonInterface
                                 Py_intptr_t *dims, const NumpyWrapMode mode)
       {
         int datatype = NDArrayTypeIndex<ElementType>::typenum;
-        PyObject *nparray = PyArray_SimpleNewFromData(ndims, dims, datatype,(void*)carray);
+        PyObject *nparray
+            = PyArray_SimpleNewFromData(ndims, dims, datatype,
+                                        static_cast<void*>(const_cast<ElementType *>(carray)));
         if( mode == ReadOnly )
         {
           PyArrayObject * np = (PyArrayObject *)nparray;

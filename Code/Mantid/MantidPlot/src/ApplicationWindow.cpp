@@ -16390,6 +16390,11 @@ void ApplicationWindow::showScriptInterpreter()
 bool ApplicationWindow::testForIPython()
 {
 #ifdef _WIN32
+  // We have an issue with clashing MSVCR90 libraries on 32-bit windows. When this method
+  // is run at startup it raises a dialog box warning about an invalid load of the C runtime library.
+  // It seems to have picked up MSCRV90 from the CMake bin directory. Clicking OK allows
+  // Mantid to load and then running IPython seesm fine, also without CMake in the PATH it is okay.
+  // We will have to assume that this is always here on Windows.
   return true;
 #else
   return runPythonScript("from ipython_plugin import MantidPlot_IPython",false, true,false);
@@ -16398,8 +16403,7 @@ bool ApplicationWindow::testForIPython()
 
 void ApplicationWindow::launchIPythonConsole()
 {
-  // MantidPlot_IPython will already be imported in the testForIPython method
-  runPythonScript("MantidPlot_IPython().launch_console()",false, true,false);
+  runPythonScript("from ipython_plugin import MantidPlot_IPython\nMantidPlot_IPython().launch_console()",false, true,false);
 }
 
 /**

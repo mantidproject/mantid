@@ -9,7 +9,7 @@ class Moments(PythonAlgorithm):
 
 	def PyInit(self):
 		self.declareProperty(Name='InputType',DefaultValue='File',Validator=ListValidator(['File','Workspace']),Description = 'Origin of data input - File or Workspace')
-		self.declareProperty(Name='Instrument',DefaultValue='IRIS',Validator=ListValidator(['IRIS','OSIRIS']),Description = 'Instrument')
+		self.declareProperty(Name='Instrument',DefaultValue='iris',Validator=ListValidator(['irs','iris','osi','osiris']),Description = 'Instrument')
 		self.declareProperty(Name='Analyser',DefaultValue='graphite002',Validator=ListValidator(['graphite002','graphite004']),Description = 'Analyser & reflection')
 		self.declareProperty(Name='SamNumber',DefaultValue='',Validator=MandatoryValidator(),Description = 'Sample run number')
 		self.declareProperty(Name='EnergyMin', DefaultValue=-0.5,Description = 'Minimum energy for fit. Default=-0.5')
@@ -23,11 +23,7 @@ class Moments(PythonAlgorithm):
 
 		self.log().information('Moments calculation')
 		inType = self.getPropertyValue('InputType')
-		instr = self.getPropertyValue('Instrument')
-		if instr == 'IRIS':
-			prefix = 'irs'
-		if instr == 'OSIRIS':
-			prefix = 'osi'
+		prefix = self.getPropertyValue('Instrument')
 		ana = self.getPropertyValue('Analyser')
 		sn = self.getPropertyValue('SamNumber')
 		sam = prefix+sn+'_'+ana+'_sqw'

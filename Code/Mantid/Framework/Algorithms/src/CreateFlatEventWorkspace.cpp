@@ -121,7 +121,6 @@ namespace Algorithms
       clone->executeAsSubAlg();
       Workspace_sptr tmp = clone->getProperty("OutputWorkspace");
       MatrixWorkspace_sptr tmpChunkWs = boost::dynamic_pointer_cast<MatrixWorkspace>(tmp);
-      //outputWS = clone->getProperty("InputWorkspace");
 
       for (int i = 0; i < nRegions; ++i) {
 
@@ -150,6 +149,17 @@ namespace Algorithms
       finalcrop_alg->setProperty("XMax", dataMax);
       finalcrop_alg->execute();
       outputWS = finalcrop_alg->getProperty("OutputWorkspace");
+
+      EventWorkspace_sptr outputEWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      outputEWS->clearMRU();
+
+      // Need to reset the matrixworkspace/histogram representation to be the
+      // whole xrange (rather than just the extracted chunk).
+      MantidVecPtr xnew;
+      outputEWS->getEventXMinMax(dataMin, dataMax);
+      xnew.access().push_back(dataMin);
+      xnew.access().push_back(dataMax);
+      outputEWS->setAllX(xnew);
 
       this->setProperty("OutputWorkspace", outputWS);
   }

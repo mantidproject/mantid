@@ -132,14 +132,6 @@ SetColValuesDialog::SetColValuesDialog( ScriptingEnv *env, Table* t, Qt::WFlags 
 
 	QVBoxLayout* vbox3 = new QVBoxLayout();
 	vbox3->addLayout(hbox2);
-#ifdef SCRIPTING_PYTHON
-	boxMuParser = NULL;
-	if (env->name() != QString("muParser")){
-		boxMuParser = new QCheckBox(tr("Use built-in muParser (much faster)"));
-		boxMuParser->setChecked(true);
-		vbox3->addWidget(boxMuParser);
-	}
-#endif
 
 	colNameLabel = new QLabel();
 	vbox3->addWidget(colNameLabel);
@@ -226,10 +218,6 @@ bool SetColValuesDialog::apply()
 
 	table->setCommand(col,formula);
 	bool useMuParser = true;
-#ifdef SCRIPTING_PYTHON
-	if(boxMuParser)
-		useMuParser = boxMuParser->isChecked();
-#endif
 	if(table->calculate(col, start->value()-1, end->value()-1, useMuParser))
 		return true;
 	

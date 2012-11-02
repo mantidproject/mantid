@@ -21,6 +21,9 @@ from _qti import PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker
 # Make the ApplicationWindow instance accessible from the mantidplot namespace
 from _qti import app
 
+# Alias threadsafe_call so users have a more understandable name
+gui_cmd = threadsafe_call
+
 #-------------------------- Mantid Python access functions----------------
 # Grab a few Mantid things so that we can recognise workspace variables
 # While we have 2 APIs we need to figure out which to use so add a little bit of indirection

@@ -337,6 +337,40 @@ public:
     TS_ASSERT_EQUALS(filenames[1][1], "TST00000000300" );
     TS_ASSERT_EQUALS(filenames[1][2], "TST00000000301" );
   }
+
+  void test_complexFileNameString_SNS()
+  {
+    Parser parser;
+
+    parser.parse("CNCS10-15, 30:40:2, 50+51+52.nxs");
+    
+    TS_ASSERT_EQUALS(parser.dirString(), "");
+    TS_ASSERT_EQUALS(parser.instString(), "CNCS");
+    TS_ASSERT_EQUALS(parser.underscoreString(), "");
+    TS_ASSERT_EQUALS(parser.runString(), "10-15, 30:40:2, 50+51+52");
+    TS_ASSERT_EQUALS(parser.extString(), ".nxs");
+
+    std::vector<std::vector<std::string> > filenames = parser.fileNames();
+    
+    TS_ASSERT_EQUALS(filenames[0][0], "CNCS_10.nxs");
+    TS_ASSERT_EQUALS(filenames[0][1], "CNCS_11.nxs");
+    TS_ASSERT_EQUALS(filenames[0][2], "CNCS_12.nxs");
+    TS_ASSERT_EQUALS(filenames[0][3], "CNCS_13.nxs");
+    TS_ASSERT_EQUALS(filenames[0][4], "CNCS_14.nxs");
+    TS_ASSERT_EQUALS(filenames[0][5], "CNCS_15.nxs");
+
+    TS_ASSERT_EQUALS(filenames[1][0], "CNCS_30.nxs");
+    TS_ASSERT_EQUALS(filenames[2][0], "CNCS_32.nxs");
+    TS_ASSERT_EQUALS(filenames[3][0], "CNCS_34.nxs");
+    TS_ASSERT_EQUALS(filenames[4][0], "CNCS_36.nxs");
+    TS_ASSERT_EQUALS(filenames[5][0], "CNCS_38.nxs");
+    TS_ASSERT_EQUALS(filenames[6][0], "CNCS_40.nxs");
+
+    TS_ASSERT_EQUALS(filenames[7][0], "CNCS_50.nxs");
+    TS_ASSERT_EQUALS(filenames[7][1], "CNCS_51.nxs");
+    TS_ASSERT_EQUALS(filenames[7][2], "CNCS_52.nxs");
+  }
+
 };
 
 #endif /* MANTID_KERNEL_MULTIFILENAMEPARSERTEST_H_ */
