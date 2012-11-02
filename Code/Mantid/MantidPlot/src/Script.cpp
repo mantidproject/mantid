@@ -28,8 +28,10 @@
  ***************************************************************************/
 #include "Script.h"
 #include "ScriptingEnv.h"
-#include <QRegExp>
 
+#include "MantidAPI/MemoryManager.h"
+
+#include <QRegExp>
 #include <stdexcept>
 
 //--------------------------------------------------------------------------------------------------
@@ -92,6 +94,16 @@ Script::Script(ScriptingEnv *env, const QString &name,
   setName(name);
 
   connect(this, SIGNAL(started(const QString &)), this, SLOT(setIsRunning()));
+  /** On some systems it has been observed that 
+   * after a script has run that has created & deleted
+   * workspaces the OS does not report all of the
+   * memory as freed. In actual fact the next allocation will
+   * NOT use more memory but take it from what had been deleted.
+   * This can be very confusing to users so force a call to release
+   * the memory.
+   */
+  connect(this, SIGNAL(finished(const QString &)), this, SLOT(releaseFreeMemory()));
+  connect(this, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(releaseFreeMemory()));
   connect(this, SIGNAL(finished(const QString &)), this, SLOT(setNotExecuting()));
   connect(this, SIGNAL(error(const QString &, const QString &, int)), this, SLOT(setNotExecuting()));
 }
@@ -145,41 +157,15 @@ QFuture<bool> Script::executeAsync(const ScriptCode & code)
   setupCode(code);
   ScriptTask *asyncScript = new ScriptTask(*this);
   return asyncScript->start();
-//  if(m_scriptTask)
-//  {
-//    throw std::runtime_error("Cannot run two copies of the same script at the same time!");
-//  }
-//  std::cerr << "execute async\n";
-//  setupCode(code);
-//
-//  m_execThread = new QThread;
-//  connect(m_scriptTask, SIGNAL(finished()), this, SLOT(asyncRunCleanup()));
-//  m_scriptTask->moveToThread(m_execThread);
-//  connect(m_execThread, SIGNAL(started()), m_scriptTask, SLOT(run()));
-//  connect(m_execThread, SIGNAL(finished()), m_execThread, SLOT(quit()));
-//
-//  // Ensures that the job will report bask as running as soon as we return from here
-//  m_scriptTask->reportStarted();
-//  m_execThread->start();
-//  return m_scriptTask->future();
-//  setupCode(code);
-//  m_scriptTask = new ScriptTask(*this);
-//  connect(m_scriptTask, SIGNAL(finished()), this, SLOT(asyncRunCleanup()));
-//  m_scriptTask->moveToThread(m_execThread);
-//  //connect(m_execThread, SIGNAL(started()), m_scriptTask, SLOT(run()));
-//  m_scriptTask->reportStarted();
-//
-//  if(!m_execThread->isRunning())
-//  {
-//    m_execThread->start();
-//  }
-//  m_mutex.unlock();
-//  m_scriptTask->run();
-//  m_mutex.lock();
-//
-//  //m_taskReady.wait(&m_mutex);
 }
 
+/**
+ * Asks Mantid to release all free memory.
+ */ 
+void Script::releaseFreeMemory()
+{
+  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+}
 
 /// Sets the execution mode to NotExecuting
 void Script::setNotExecuting()
