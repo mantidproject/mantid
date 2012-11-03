@@ -41,7 +41,7 @@ typedef std::vector<EventList*> EventListVector;
 /** \class EventWorkspace
 
     This class is intended to fulfill the design specified in 
-    <https://svn.mantidproject.org/mantid/trunk/Documents/Design/Event WorkspaceDetailed Design Document.doc>
+    <https://github.com/mantidproject/documents/tree/master/Design/Event WorkspaceDetailed Design Document.doc>
  */
 
 class DLLExport EventWorkspace : public API::IEventWorkspace

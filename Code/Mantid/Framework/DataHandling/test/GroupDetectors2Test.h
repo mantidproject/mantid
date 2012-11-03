@@ -547,7 +547,7 @@ public:
     void writeFileList()
     {
       std::ofstream file(inputFile.c_str());
-      file << " 2		#file format is in http://svn.mantidproject.org/mantid/trunk/Code/Mantid/Framework/DataHandling/inc/MantidDataHandling/GroupDetectors2.h \n"
+      file << " 2		#file format is in http://www.mantidproject.org/GroupDetectors \n"
         << "888 "            << std::endl // unused number 2
         << "2"              << std::endl // number of spectra
         << "1   3"          << std::endl // the list of spectra
@@ -561,7 +561,7 @@ public:
     void writeFileRanges()
     {
       std::ofstream file(inputFile.c_str());
-      file << "3		#file format is in http://svn.mantidproject.org/mantid/trunk/mantid/Code/Mantid/DataHandling/inc/MantidDataHandling/GroupDetectors3.h \n"
+      file << "3		#file format is in http://www.mantidproject.org/GroupDetectors, using ranges \n"
         << "0 "            << std::endl
         << "3"              << std::endl
         << "  1-  3"          << std::endl
