@@ -101,9 +101,9 @@ namespace CurveFitting
     void exportEachPeaksParameters();
 
     /// Set parameters to each peak
-    void setPeakParameters(
-            CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak,
-            std::map<std::string, Parameter> parammap, double peakheight);
+    void setPeakParameters(CurveFitting::ThermalNeutronBk2BkExpConvPV_sptr peak,
+                           std::map<std::string, Parameter> parammap, double peakheight,
+                           bool setpeakheight=true);
 
     /// Calcualte peak heights from model to data
     void calPeaksIntensities(std::vector<std::pair<int, double> >& peakheights, size_t workspaceindex);
