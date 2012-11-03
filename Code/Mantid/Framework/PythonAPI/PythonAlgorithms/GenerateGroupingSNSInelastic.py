@@ -74,7 +74,7 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         
         f = open(filename,'w')
 
-        f.write('<?xml version="1.0" encoding="UTF-8" ?>\n<detector-grouping>\n')
+        f.write('<?xml version="1.0" encoding="UTF-8" ?>\n<detector-grouping instrument="'+instrument+'">\n')
 
 
         groupnum = 0
