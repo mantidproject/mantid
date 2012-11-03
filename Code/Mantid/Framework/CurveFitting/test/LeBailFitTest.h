@@ -17,6 +17,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
+#include <cmath>
+
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;
@@ -534,9 +536,9 @@ public:
       else if (testplan.compare("sigma") == 0)
       {
           double sig0 = paramvalues["Sig0"];
-          TS_ASSERT_DELTA(sig0, 17.37, 0.01);
+          TS_ASSERT_DELTA(sig0, sqrt(17.37), 0.01);
           double sig1 = paramvalues["Sig1"];
-          TS_ASSERT_DELTA(sig1, 9.901, 0.01);
+          TS_ASSERT_DELTA(sig1, sqrt(9.901), 0.01);
       }
 
       return;
@@ -589,9 +591,9 @@ public:
       else if (testplan.compare("sigma") == 0)
       {
           /// Sig0 and Sig1 has very large range to output good result
-          double sig1 = 9.901;
+          double sig1 = sqrt(9.901);
           double newsig1 = sig1*0.1;
-          double sig0 = 127.37;
+          double sig0 = sqrt(127.37);
           double newsig0 = sig0*0.1;
           parammodifymap.insert(std::make_pair("Sig0", newsig0));
           parammodifymap.insert(std::make_pair("Sig1", newsig1));
@@ -683,9 +685,9 @@ public:
       else if (testplan.compare("sigma") == 0)
       {
           double sig0 = paramvalues["Sig0"];
-          TS_ASSERT_DELTA(sig0, 17.37, 0.01);
+          TS_ASSERT_DELTA(sig0, sqrt(17.37), 0.01);
           double sig1 = paramvalues["Sig1"];
-          TS_ASSERT_DELTA(sig1, 9.901, 0.01);
+          TS_ASSERT_DELTA(sig1, sqrt(9.901), 0.01);
       }
 
       return;
@@ -797,9 +799,9 @@ public:
       else if (testplan.compare("sigma") == 0)
       {
           double sig0 = paramvalues["Sig0"];
-          TS_ASSERT_DELTA(sig0, 17.37, 0.01);
+          TS_ASSERT_DELTA(sig0, sqrt(17.37), 0.01);
           double sig1 = paramvalues["Sig1"];
-          TS_ASSERT_DELTA(sig1, 9.901, 0.01);
+          TS_ASSERT_DELTA(sig1, sqrt(9.901), 0.01);
       }
 
 
@@ -956,11 +958,11 @@ public:
     newparam = parameterws->appendRow();
     newparam << "Beta1t"<< 96.864 << "t";
     newparam = parameterws->appendRow();
-    newparam << "Sig2"  <<  11.380 << "t";
+    newparam << "Sig2"  <<  sqrt(11.380) << "t";
     newparam = parameterws->appendRow();
-    newparam << "Sig1"  <<   9.901 << "t";
+    newparam << "Sig1"  <<   sqrt(9.901) << "t";
     newparam = parameterws->appendRow();
-    newparam << "Sig0"  <<  17.370 << "t";
+    newparam << "Sig0"  <<  sqrt(17.370) << "t";
     newparam = parameterws->appendRow();
     newparam << "Width" << 1.0055 << "t";
     newparam = parameterws->appendRow();
@@ -1086,9 +1088,9 @@ public:
     paramvaluemap.insert(std::make_pair("Alph1t", 39.730 ));
     paramvaluemap.insert(std::make_pair("Beta0t", 96.864 ));
     paramvaluemap.insert(std::make_pair("Beta1t", 96.864 ));
-    paramvaluemap.insert(std::make_pair("Sig2" ,   11.380 ));
-    paramvaluemap.insert(std::make_pair("Sig1" ,    9.901 ));
-    paramvaluemap.insert(std::make_pair("Sig0" ,   17.370 ));
+    paramvaluemap.insert(std::make_pair("Sig2" ,   sqrt(11.380) ));
+    paramvaluemap.insert(std::make_pair("Sig1" ,   sqrt(9.901)  ));
+    paramvaluemap.insert(std::make_pair("Sig0" ,   sqrt(17.370) ));
     paramvaluemap.insert(std::make_pair("Width",  1.0055 ));
     paramvaluemap.insert(std::make_pair("Tcross", 0.4700 ));
     paramvaluemap.insert(std::make_pair("Gam0" ,  0.0 ));
@@ -1151,8 +1153,8 @@ public:
     paramvaluemap.insert(std::make_pair("Gam2",	  0       ));
     paramvaluemap.insert(std::make_pair("Profile",	    10      ));
     paramvaluemap.insert(std::make_pair("Sig0",	    0       ));
-    paramvaluemap.insert(std::make_pair("Sig1",	    10      ));
-    paramvaluemap.insert(std::make_pair("Sig2",	    15.48   ));
+    paramvaluemap.insert(std::make_pair("Sig1",	    sqrt(10)    ));
+    paramvaluemap.insert(std::make_pair("Sig2",	    sqrt(15.48) ));
     paramvaluemap.insert(std::make_pair("Tcross",	    0.25    ));
     paramvaluemap.insert(std::make_pair("Width",	    5.8675  ));
     paramvaluemap.insert(std::make_pair("Zero",	    0       ));
