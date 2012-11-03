@@ -1153,7 +1153,7 @@ public:
     paramvaluemap.insert(std::make_pair("Gam2",	  0       ));
     paramvaluemap.insert(std::make_pair("Profile",	    10      ));
     paramvaluemap.insert(std::make_pair("Sig0",	    0       ));
-    paramvaluemap.insert(std::make_pair("Sig1",	    sqrt(10)    ));
+    paramvaluemap.insert(std::make_pair("Sig1",	    sqrt(10.0)    ));
     paramvaluemap.insert(std::make_pair("Sig2",	    sqrt(15.48) ));
     paramvaluemap.insert(std::make_pair("Tcross",	    0.25    ));
     paramvaluemap.insert(std::make_pair("Width",	    5.8675  ));
