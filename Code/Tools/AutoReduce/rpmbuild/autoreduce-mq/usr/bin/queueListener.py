@@ -1,5 +1,5 @@
 import time, sys, stomp, json
-ingest_root = "/usr/bin"
+post_processing_bin = sys.path.append("/usr/bin") 
 from ingestNexus_mq import IngestNexus
 from ingestReduced_mq import IngestReduced
 from reduce_HYSA import AutoReduction
