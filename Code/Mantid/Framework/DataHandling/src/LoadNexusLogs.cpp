@@ -94,7 +94,7 @@ namespace Mantid
       ///Use frequency start for Monitor19 and Special1_19 logs with "No Time" for SNAP
       try
       {
-          file.openGroup("DASlogs", "NXgroup");
+          file.openPath("DASlogs");
           try
           {
 			  file.openGroup("frequency", "NXlog");
