@@ -825,8 +825,13 @@ LoadEventNexus::~LoadEventNexus()
 bool LoadEventNexus::quickFileCheck(const std::string& filePath,size_t nread, const file_header& header)
 {
   std::string ext = this->extension(filePath);
+  g_log.debug() << "LoadEventNexus::quickFileCheck() - File extension is: " << ext << std::endl;
+
   // If the extension is nxs then give it a go
   if( ext.compare("nxs") == 0 ) return true;
+  // If the extension is h5 then give it a go
+  if( ext.compare("h5") == 0 ) return true;
+
 
   // If not then let's see if it is a HDF file by checking for the magic cookie
   if ( nread >= sizeof(int32_t) && (ntohl(header.four_bytes) == g_hdf_cookie) ) return true;
