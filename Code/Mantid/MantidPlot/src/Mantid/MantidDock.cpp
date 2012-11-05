@@ -1668,6 +1668,11 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
   // Need to look for workspace groups and add all children if found
   for (it = items.constBegin(); it != items.constEnd(); ++it)
   {
+    /// This relies on the item descriptions being up-to-date
+    /// so ensure that they are or if something was
+    /// replaced then it might not be correct.
+    static_cast<MantidDockWidget*>(parentWidget())->populateChildData(*it);
+
     // Look for children (workspace groups)
     if ( (*it)->child(0)->text(0) == "WorkspaceGroup" )
     {
