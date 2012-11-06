@@ -79,7 +79,7 @@ namespace Mantid
       const std::string alias() const {return m_alias;}
 
       /// The algorithmID
-      AlgorithmID getAlgorithmID() const {return AlgorithmID(this);}
+      AlgorithmID getAlgorithmID() const;
 
       virtual const std::string getOptionalMessage() const { return m_OptionalMessage; }
       virtual const std::string getWikiSummary() const { return m_WikiSummary; }

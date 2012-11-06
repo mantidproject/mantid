@@ -211,12 +211,14 @@ namespace MDAlgorithms
       }
       else   // regular events
       {
+        double delta; // declare outside loop to reduce heap thrash
         for (size_t d=0; d<nd; ++d)
         {
             params.push_back( ws->getDimension(d)->getMinimum() );
             size_t nStrides = ws->getDimension(d)->getNBins();
-            if(nStrides<1 || nStrides>=size_t(-1))nStrides = 1;            
-            params.push_back((ws->getDimension(d)->getMaximum()-ws->getDimension(d)->getMinimum())/nStrides);
+            if(nStrides<1 || nStrides>=size_t(-1))nStrides = 1;
+            delta = ws->getDimension(d)->getMaximum()-ws->getDimension(d)->getMinimum();
+            params.push_back(delta/static_cast<double>(nStrides));
         }
       }
     }

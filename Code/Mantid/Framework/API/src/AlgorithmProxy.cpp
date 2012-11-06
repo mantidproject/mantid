@@ -53,6 +53,11 @@ namespace Mantid
       return;
     }
 
+    AlgorithmID AlgorithmProxy::getAlgorithmID() const
+    {
+      return AlgorithmID(const_cast<AlgorithmProxy*>(this));
+    }
+
     /** Perform whole-input validation */
     std::map<std::string, std::string> AlgorithmProxy::validateInputs()
     {
