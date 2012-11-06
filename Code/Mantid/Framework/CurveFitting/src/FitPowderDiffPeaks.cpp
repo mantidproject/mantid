@@ -1493,7 +1493,7 @@ namespace CurveFitting
             temparameters.insert(make_pair(parname, tempvalue));
           }
         }
-        catch (std::runtime_error err)
+        catch (std::runtime_error &err)
         {
           g_log.error() << "TableRow " << ir << " Column " << i << " (" << peakparamws->getColumnNames()[i]
                         << ") Type mismatch." << endl;

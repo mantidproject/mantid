@@ -650,13 +650,13 @@ namespace CurveFitting
       {
         mFunction->setParameter(parnames[paramindex], newvalue);
       }
-      catch (runtime_error err)
+      catch (runtime_error &err)
       {
         stringstream errss;
         errss << "New Value = " << newvalue << ", Random Number = " << randomnumber << "Step Size = " << stepsizes[paramindex]
               << ", Step size rescale factor = " << stepsizescalefactor;
         g_log.error(errss.str());
-        throw err;
+        throw;
       }
 
       // b. Calcualte the new
@@ -916,7 +916,7 @@ namespace CurveFitting
           {
             row >> dbtemp;
           }
-          catch (runtime_error err)
+          catch (runtime_error &err)
           {
             row >> strtemp;
           }
@@ -990,11 +990,11 @@ namespace CurveFitting
         trow >> parname >> value;
         parameters.insert(std::make_pair(parname, value));
       }
-      catch (runtime_error err)
+      catch (runtime_error &err)
       {
         g_log.error() << "Import table workspace " << parameterWS->name() << " error in line " << ir << ".  "
                       << " Requires [string, double] in the first 2 columns." << endl;
-        throw err;
+        throw;
       }
     }
 
@@ -1055,7 +1055,7 @@ namespace CurveFitting
         {
           row >> tmpdbl;
         }
-        catch (runtime_error err)
+        catch (runtime_error &err)
         {
           g_log.error() << "Import MC parameter " << colnames[ic] << " error in row " << ir
                         << " of workspace " << tablews->name() << endl;

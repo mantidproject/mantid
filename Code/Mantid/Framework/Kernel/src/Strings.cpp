@@ -873,8 +873,8 @@ namespace Mantid
         std::string dump;
         while(sc!=sIndex.end() && *sc<0)
         {
-          sc++;
-          oc++;
+          ++sc;
+          ++oc;
         }
 
         while(sc!=sIndex.end())
@@ -887,8 +887,8 @@ namespace Mantid
             do
             {
               Out[*oc]=value;
-              sc++;
-              oc++;
+              ++sc;
+              ++oc;
             } while (sc!=sIndex.end() && *sc==cnt);
           }
           else

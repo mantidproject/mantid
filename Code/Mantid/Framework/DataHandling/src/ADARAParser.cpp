@@ -77,9 +77,9 @@ bool Parser::read(Poco::Net::StreamSocket &stream, unsigned int max_read)
         while (!max_read || bytes_read < max_read) {
                 try {
                   rc = stream.receiveBytes(m_buffer + m_len, m_size - m_len);
-                } catch (Poco::TimeoutException) {
+                } catch (Poco::TimeoutException &e) {
                   return true;
-                } catch (Poco::Net::NetException e) {
+                } catch (Poco::Net::NetException &e) {
                   std::string msg("Parser::read(): ");
                   msg += e.name();
                   throw std::runtime_error(msg);

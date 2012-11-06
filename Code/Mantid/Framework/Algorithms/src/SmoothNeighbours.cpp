@@ -618,7 +618,7 @@ Check whether the properties provided are all in their default state.
 @param properties : Vector of mantid property pointers
 @return True only if they are all default, otherwise False.
 */
-bool areAllDefault(ConstVecProperties properties)
+bool areAllDefault(ConstVecProperties &properties)
 {
   bool areAllDefault = false;
   for(ConstVecProperties::const_iterator it = properties.begin(); it != properties.end(); ++it)

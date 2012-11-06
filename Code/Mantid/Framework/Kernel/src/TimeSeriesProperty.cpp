@@ -416,7 +416,7 @@ namespace Mantid
         }
 
         //Go to the next interval
-        itspl++;
+        ++itspl;
         //But if we reached the end, then we are done.
         if (itspl==splitter.end())
           break;

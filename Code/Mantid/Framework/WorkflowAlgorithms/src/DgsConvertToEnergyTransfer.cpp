@@ -163,7 +163,6 @@ namespace Mantid
       {
         // SNS wants to preserve events until the last
         preserveEvents = true;
-        const std::string instName = inputWS->getInstrument()->getName();
         double tZero = 0.0;
         if (useEiGuess)
         {

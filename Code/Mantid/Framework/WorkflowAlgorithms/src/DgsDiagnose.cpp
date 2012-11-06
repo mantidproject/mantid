@@ -313,13 +313,11 @@ namespace Mantid
       diag->setProperty("OutputWorkspace", maskName);
 
       MatrixWorkspace_sptr maskWS;
-      int numMasked(0);
       std::vector<std::string> diag_spectra = dvWS->getInstrument()->getStringParameter("diag_spectra");
       if (diag_spectra.empty())
       {
         diag->execute();
         maskWS = diag->getProperty("OutputWorkspace");
-        numMasked = diag->getProperty("NumberOfFailures");
       }
       else
       {
@@ -352,7 +350,6 @@ namespace Mantid
           {
             maskWS = diag->getProperty("OutputWorkspace");
           }
-          numMasked += static_cast<int>(diag->getProperty("NumberOfFailures"));
           ++tok_iter;
         }
       }

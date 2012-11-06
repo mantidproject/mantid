@@ -24,7 +24,7 @@ namespace MantidWidgets
   private:
     const std::string m_type;
   public:
-    WorkspaceIsOfType(const std::string type) : m_type(type)
+    WorkspaceIsOfType(const std::string &type) : m_type(type)
     {
     }
     bool operator()(Mantid::API::Workspace_sptr ws) const

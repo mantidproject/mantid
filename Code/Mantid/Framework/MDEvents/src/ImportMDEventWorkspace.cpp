@@ -321,7 +321,7 @@ namespace MDEvents
     catch (std::ifstream::failure& e) 
     {
       g_log.error() << "Cannot open file: " << filename;
-      throw e;
+      throw;
     }
 
     // Extract data from the file, excluding comment lines.
