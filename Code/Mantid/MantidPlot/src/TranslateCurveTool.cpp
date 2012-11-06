@@ -36,6 +36,7 @@
 #include "cursors.h"
 #include "DataPickerTool.h"
 #include "ScreenPickerTool.h"
+#include <limits>
 #include <QMessageBox>
 #include <QLocale>
 #include <qwt_plot_curve.h>
