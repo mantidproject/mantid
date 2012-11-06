@@ -186,6 +186,52 @@ public:
     ads.clear();
   }
 
+  /** Test cloning a TableWorkspace
+  */
+  void test_exec_TableWorkspace()
+  {
+    // 1. Create input table workspace
+    TableWorkspace_sptr inpWS(new TableWorkspace());
+
+    inpWS->addColumn("str", "Name");
+    inpWS->addColumn("double", "Value");
+    inpWS->addColumn("int", "Step");
+
+    TableRow row0 = inpWS->appendRow();
+    row0 << "S1" << 12.34 << 0;
+    TableRow row1 = inpWS->appendRow();
+    row1 << "S2" << 23.45 << 1;
+    TableRow row2 = inpWS->appendRow();
+    row2 << "S3" << 34.56 << 2;
+
+    AnalysisDataService::Instance().addOrReplace("TestTableIn", inpWS);
+
+    // 2. Execute
+    Algorithms::CloneWorkspace alg;
+
+    alg.initialize();
+
+    alg.setProperty("InputWorkspace", "TestTableIn");
+    alg.setProperty("OutputWorkspace", "TestTableOut");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    TableWorkspace_sptr outWS = boost::dynamic_pointer_cast<TableWorkspace>
+        (  AnalysisDataService::Instance().retrieve("TestTableOut") );
+    TS_ASSERT(outWS);
+
+    TS_ASSERT_EQUALS(inpWS->columnCount(), outWS->columnCount());
+    TS_ASSERT_EQUALS(inpWS->rowCount(), outWS->rowCount());
+
+
+    TS_ASSERT_EQUALS(inpWS->cell<std::string>(0, 0), "S1");
+    TS_ASSERT_DELTA(inpWS->cell<double>(1, 1), 23.45, 0.000001);
+    TS_ASSERT_EQUALS(inpWS->cell<int>(2, 2), 2);
+
+    return;
+  }
+
 private:
   Mantid::Algorithms::CloneWorkspace cloner;
 };

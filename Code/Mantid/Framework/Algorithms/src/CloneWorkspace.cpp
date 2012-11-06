@@ -48,6 +48,7 @@ void CloneWorkspace::exec()
   EventWorkspace_const_sptr inputEvent = boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace);
   IMDWorkspace_sptr inputMD = boost::dynamic_pointer_cast<IMDWorkspace>(inputWorkspace);
   PeaksWorkspace_const_sptr inputPeaks = boost::dynamic_pointer_cast<const PeaksWorkspace>(inputWorkspace);
+  TableWorkspace_const_sptr tableWS = boost::dynamic_pointer_cast<const TableWorkspace>(inputWorkspace);
   
   if (inputEvent)
   {
@@ -106,6 +107,11 @@ void CloneWorkspace::exec()
   else if (inputPeaks)
   {
     PeaksWorkspace_sptr outputWS(inputPeaks->clone());
+    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outputWS));
+  }
+  else if (tableWS)
+  {
+    TableWorkspace_sptr outputWS(tableWS->clone());
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(outputWS));
   }
   else
