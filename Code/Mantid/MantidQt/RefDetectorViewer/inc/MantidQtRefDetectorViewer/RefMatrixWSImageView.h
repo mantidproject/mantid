@@ -41,7 +41,8 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-    class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSImageView
+  class RefIVConnections;
+   class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSImageView
 {
   public:
 
@@ -49,7 +50,8 @@ namespace RefDetectorViewer
     RefMatrixWSImageView ( Mantid::API::MatrixWorkspace_sptr mat_ws );
 
     RefMatrixWSImageView( QString wps_name);
-    
+    RefIVConnections* getConnections();
+
     ~RefMatrixWSImageView();
 
 private:

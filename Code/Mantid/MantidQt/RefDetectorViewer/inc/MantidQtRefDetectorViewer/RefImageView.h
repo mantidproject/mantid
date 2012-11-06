@@ -44,7 +44,7 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-
+  class RefIVConnections;
 class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageView : public QMainWindow
 {
   public:
@@ -54,7 +54,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageView : public QMainWindow
 
     ~RefImageView();    
     
-    void*  getIVConnections();
+    RefIVConnections* getIVConnections();
 
   private:
     GraphDisplay*    h_graph;
@@ -68,7 +68,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageView : public QMainWindow
     void*            saved_slider_handler;   // SliderHandler*
     void*            saved_range_handler;    // RangeHandler*
     void*            saved_image_display;    // RefImageDisplay*
-    void*            saved_iv_connections;   // IVConnections*
+    //    void*            saved_iv_connections;   // IVConnections*
+    RefIVConnections*            saved_iv_connections;   // IVConnections*
 };
 
 } // namespace MantidQt 

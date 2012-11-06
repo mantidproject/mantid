@@ -1133,6 +1133,27 @@ namespace RefDetectorViewer
 //*WIKI* Here follows a list of the classes exposed to python and the methods you can execute on them.
 
 
+
+/***************************************************************************/
+/***************************************************************************/
+/***************************************************************************/
+
+/*
+
+class RefIVConnections: QWidget
+{
+%TypeHeaderCode
+#include "MantidQtRefDetectorViewer/RefIVConnections.h"
+%end
+
+private:
+	RefIVConnections();
+
+};
+
+
+*/
+
 /***************************************************************************/
 /***************************************************************************/
 /***************************************************************************/
@@ -1144,10 +1165,16 @@ class RefMatrixWSImageView
 
 public:
 	RefMatrixWSImageView (QString wps_name);
+/*	MantidQt::RefDetectorViewer::RefIVConnections* getConnections(); */
+
 };
 
 }; // end namespace
 }; // end namespace
+
+
+
+
 
 
 

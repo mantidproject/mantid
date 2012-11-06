@@ -79,7 +79,7 @@ RefImageView::RefImageView( RefImageDataSource* data_source )
   image_display->SetDataSource( data_source );
 }
     
-  void* RefImageView::getIVConnections()
+  RefIVConnections* RefImageView::getIVConnections()
   {
     return saved_iv_connections;
   }

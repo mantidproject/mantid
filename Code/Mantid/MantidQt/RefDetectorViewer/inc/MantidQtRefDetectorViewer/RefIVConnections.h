@@ -101,6 +101,8 @@ public:
     signals:
     void python_peak_back_tof_range_update(double, double, double, double, double, double);
 
+ private:
+    RefIVConnections() {}
     
 private:
 

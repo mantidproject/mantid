@@ -2,6 +2,7 @@
 #include "MantidQtRefDetectorViewer/RefMatrixWSImageView.h"
 #include "MantidQtRefDetectorViewer/RefMatrixWSDataSource.h"
 #include "MantidQtRefDetectorViewer/RefArrayDataSource.h"
+#include "MantidQtRefDetectorViewer/RefIVConnections.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
@@ -66,12 +67,18 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
                                                         total_rows, total_cols,
                                                         data);
     
-    std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
+    //    std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
     image_view = new RefImageView( source );
 
-    //void* iv_connections = image_view->getIVConnections();    
+}
+
+
+RefIVConnections* RefMatrixWSImageView::getConnections()
+{
+  return image_view->getIVConnections();
 
 }
+
 
 RefMatrixWSImageView::~RefMatrixWSImageView()
 {
