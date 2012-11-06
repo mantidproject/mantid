@@ -120,7 +120,7 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point)
 	    return;
     } else {
       DataCurve *c = dynamic_cast<DataCurve *>(d_selected_curve);
-		double d;
+        double d;
 		QString col_name;
 		switch(d_dir) {
 			case Vertical:
@@ -135,6 +135,10 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point)
 				d = point.x() - d_curve_point.x();
 				break;
 			}
+            default: // this should never happen
+            {
+                d = std::numeric_limits<float>::quiet_NaN();
+            }
 	}
 	Table *tab = d_app->table(col_name);
 	if (!tab) return;
