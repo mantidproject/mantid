@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<QHelpCollectionProject version="1.0">
+     <assistant>
+         <title>Mantid Help</title>
+         <startPage>qthelp://org.mantidproject/doc/index.html</startPage>
+         <applicationIcon>img/MantidPlot_Icon_32offset.png</applicationIcon>
+         <enableFilterFunctionality>false</enableFilterFunctionality>
+         <enableDocumentationManager>true</enableDocumentationManager>
+         <enableAddressBar visible="true">false</enableAddressBar>
+         <cacheDirectory>mantidproject/mantid</cacheDirectory>
+         <aboutMenuText>
+             <text>About Mantid</text>
+         </aboutMenuText>
+         <aboutDialog>
+             <file>src/about.txt</file>
+             <icon>img/Mantid_Logo_Transparent.png</icon>
+         </aboutDialog>
+     </assistant>
+     <docFiles>
+         <generate>
+             <file>
+                 <input>src/mantidgeneral.qhp</input>
+                 <output>mantidgeneral.qch</output>
+             </file>
+             <file>
+                 <input>src/algorithms.qhp</input>
+                 <output>algorithms.qch</output>
+             </file>
+         </generate>
+         <register>
+             <file>mantidgeneral.qch</file>
+             <file>algorithms.qch</file>
+         </register>
+     </docFiles>
+</QHelpCollectionProject>
