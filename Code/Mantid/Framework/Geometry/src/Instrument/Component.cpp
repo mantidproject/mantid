@@ -100,9 +100,9 @@ namespace Geometry
   ComponentID Component::getComponentID()const
   {
     if (m_isParametrized)
-      return ComponentID(m_base);
+      return ComponentID(const_cast<Component*>(m_base));
     else
-      return ComponentID(this);
+      return ComponentID(const_cast<Component*>(this));
   }
 
   //-------------------------------------------------------------------------------

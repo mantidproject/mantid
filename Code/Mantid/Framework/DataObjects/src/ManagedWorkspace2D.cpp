@@ -255,9 +255,12 @@ void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
 
       //std::cerr << "Zeroes to " << fi << ' ' << m_indexWrittenTo + i << ' ' << m_datafile[fileIndex]->tellg() << std::endl;
 
-      m_datafile[fileIndex]->write((char *) &*xzeroes.begin(), m_XLength * sizeof(double));
-      m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
-      m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
+      m_datafile[fileIndex]->write(reinterpret_cast<char *>(const_cast<double*>(&*xzeroes.begin())),
+                                   m_XLength * sizeof(double));
+      m_datafile[fileIndex]->write(reinterpret_cast<char *>(const_cast<double*>(&*yzeroes.begin())),
+                                   m_YLength * sizeof(double));
+      m_datafile[fileIndex]->write(reinterpret_cast<char *>(const_cast<double*>(&*yzeroes.begin())),
+                                   m_YLength * sizeof(double));
       // these don't match the ManagedWorkspace2D file stream operators.
       //m_datafile[fileIndex]->write((char *) &*yzeroes.begin(), m_YLength * sizeof(double));
       //m_datafile[fileIndex]->write((char *) &speczero, sizeof(int) );
