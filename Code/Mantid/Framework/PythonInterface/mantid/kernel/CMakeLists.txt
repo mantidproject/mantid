@@ -50,7 +50,7 @@ set ( SRC_FILES
   src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
   src/Registry/TypeRegistry.cpp
-  src/Registry/UpcastRegistry.cpp
+  src/Registry/DowncastRegistry.cpp
   src/Environment/CallStack.cpp
   src/Environment/CallMethod.cpp
   src/Environment/Threading.cpp
@@ -74,7 +74,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
   ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
-  ${HEADER_DIR}/kernel/Policies/upcast_returned_value.h
+  ${HEADER_DIR}/kernel/Policies/downcast_returned_value.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
   ${HEADER_DIR}/kernel/Registry/RegisterSingleValueHandler.h
@@ -82,7 +82,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Registry/SingleValueTypeHandler.h
   ${HEADER_DIR}/kernel/Registry/TypedPropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/TypeRegistry.h  
-  ${HEADER_DIR}/kernel/Registry/UpcastRegistry.h
+  ${HEADER_DIR}/kernel/Registry/DowncastRegistry.h
   ${HEADER_DIR}/kernel/PropertyWithValue.h
   ${HEADER_DIR}/kernel/PythonObjectInstantiator.h
   ${HEADER_DIR}/kernel/SharedPtrToPythonMacro.h

@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidPythonInterface/kernel/Registry/UpcastRegistry.h"
+#include "MantidPythonInterface/kernel/Registry/DowncastRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include <boost/python/extract.hpp>
 #include <map>
@@ -22,7 +22,7 @@ namespace Mantid
          * Returns a reference to the static type map
          * @return A reference to the type map
          */
-        PyTypeMap & upcastRegistry()
+        PyTypeMap & downcastRegistry()
         {
           static PyTypeMap registry;
           return registry;
@@ -31,12 +31,12 @@ namespace Mantid
         /**
          * Returns a registered converter
          * @param id :: The string id of class
-         * @return A pointer to a UpcastToPython struct
+         * @return A pointer to a downcastToPython struct
          * @throws std::invalid_argument if none exists
          */
-        const PyTypeObject * queryUpcastRegistry(const std::string & id)
+        const PyTypeObject * queryDowncastRegistry(const std::string & id)
         {
-          PyTypeMap & converters = upcastRegistry();
+          PyTypeMap & converters = downcastRegistry();
           PyTypeMap::const_iterator it = converters.find(id);
           if(it != converters.end())
           {
@@ -44,7 +44,7 @@ namespace Mantid
           }
           else
           {
-            throw std::runtime_error(std::string("An upcasted type cannot be found for \"") + id + "\".");
+            throw std::runtime_error(std::string("An downcasted type cannot be found for \"") + id + "\".");
           }
         }
 
@@ -57,9 +57,9 @@ namespace Mantid
        * @param type:: A pointer to a converter type
        * @throws std::runtime_error if a converter for this id already exists
        */
-      void registerIDForUpcasting(const std::string & id, const PyTypeObject * type)
+      void registerIDForDowncasting(const std::string & id, const PyTypeObject * type)
       {
-        PyTypeMap & converters = upcastRegistry();
+        PyTypeMap & converters = downcastRegistry();
         PyTypeMap::const_iterator it = converters.find(id);
         if(it == converters.end())
         {
@@ -73,10 +73,10 @@ namespace Mantid
 
 
       /**
-       * Attempts to find an upcasted PyTypeObject type for the given object from
+       * Attempts to find an downcasted PyTypeObject type for the given object from
        * all of the types registered.
        * @param value :: An object derived from DataItem
-       * @return A pointer to an upcasted type or NULL if one cannot be found
+       * @return A pointer to an downcasted type or NULL if one cannot be found
        */
       const PyTypeObject * getDerivedType(boost::python::object value)
       {
@@ -98,21 +98,21 @@ namespace Mantid
         const PyTypeObject *result(NULL);
         try
         {
-          result = queryUpcastRegistry(id);
+          result = queryDowncastRegistry(id);
         }
         catch(std::runtime_error&)
         {
           result = findDerivedType(value);
-          if( result ) registerIDForUpcasting(id, result);
+          if( result ) registerIDForDowncasting(id, result);
         }
         return result;
       }
 
       /**
-       * Attempts to find an upcasted PyTypeObject type for the given object from
+       * Attempts to find an downcasted PyTypeObject type for the given object from
        * all of the types registered, overloaded for bare PyObject pointer.
        * @param value :: An object derived from DataItem
-       * @return A pointer to an upcasted type or NULL if one cannot be found
+       * @return A pointer to an downcasted type or NULL if one cannot be found
        */
       const PyTypeObject * getDerivedType(PyObject *value)
       {

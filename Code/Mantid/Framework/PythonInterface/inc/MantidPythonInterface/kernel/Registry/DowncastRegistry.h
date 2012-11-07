@@ -1,5 +1,5 @@
-#ifndef MANTID_PYTHONINTERFACE_UPCASTREGISTRY_H_
-#define MANTID_PYTHONINTERFACE_UPCASTREGISTRY_H_
+#ifndef MANTID_PYTHONINTERFACE_DOWNCASTREGISTRY_H_
+#define MANTID_PYTHONINTERFACE_DOWNCASTREGISTRY_H_
 /**
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,11 +31,11 @@ namespace Mantid
   {
     namespace Registry
     {
-      /// Returns an upcasting converter
-      DLLExport void registerIDForUpcasting(const std::string & id, const PyTypeObject * type);
-      /// Get an upcasted type object for the given object
+      /// Returns an downcasting converter
+      DLLExport void registerIDForDowncasting(const std::string & id, const PyTypeObject * type);
+      /// Get an downcasted type object for the given object
       DLLExport const PyTypeObject * getDerivedType(boost::python::object value);
-      /// Overload. Get an upcasted type object for the given object
+      /// Overload. Get an downcasted type object for the given object
       DLLExport const PyTypeObject * getDerivedType(PyObject *value);
 
     }
@@ -45,4 +45,4 @@ namespace Mantid
 
 
 
-#endif /* MANTID_PYTHONINTERFACE_UPCASTREGISTRY_H_ */
+#endif /* MANTID_PYTHONINTERFACE_DOWNCASTREGISTRY_H_ */

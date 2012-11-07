@@ -3,7 +3,7 @@
 
 #include "MantidPythonInterface/kernel/SharedPtrToPythonMacro.h"
 #include "MantidPythonInterface/kernel/WeakPtr.h"
-#include "MantidPythonInterface/kernel/Policies/upcast_returned_value.h"
+#include "MantidPythonInterface/kernel/Policies/downcast_returned_value.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
@@ -77,7 +77,7 @@ void export_AnalysisDataService()
 
   class_<AnalysisDataServiceImpl,boost::noncopyable>("AnalysisDataServiceImpl", no_init)
     .def("doesExist", &AnalysisDataServiceImpl::doesExist, "Returns True if the object is found in the service.")
-    .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::upcast_returned_value>(),
+    .def("retrieve", &retrieveAsWeakPtr, return_value_policy<Policies::downcast_returned_value>(),
          "Retrieve the named object. Raises an exception if the name does not exist")
     .def("remove", &AnalysisDataServiceImpl::remove, "Remove a named object")
     .def("clear", &AnalysisDataServiceImpl::clear, "Removes all objects managed by the service.")
@@ -88,7 +88,7 @@ void export_AnalysisDataService()
     .staticmethod("Instance")
     // Make it act like a dictionary
     .def("__len__", &AnalysisDataServiceImpl::size)
-    .def("__getitem__", &retrieveAsWeakPtr, return_value_policy<Policies::upcast_returned_value>())
+    .def("__getitem__", &retrieveAsWeakPtr, return_value_policy<Policies::downcast_returned_value>())
     .def("__contains__", &AnalysisDataServiceImpl::doesExist)
     .def("__delitem__", &AnalysisDataServiceImpl::remove)
     ;

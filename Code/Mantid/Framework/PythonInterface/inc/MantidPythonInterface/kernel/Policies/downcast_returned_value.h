@@ -1,5 +1,5 @@
-#ifndef MANITD_PYTHONINTERFACE_UPCASTRETURNEDVALUE_H_
-#define MANITD_PYTHONINTERFACE_UPCASTRETURNEDVALUE_H_
+#ifndef MANITD_PYTHONINTERFACE_DOWNCASTRETURNEDVALUE_H_
+#define MANITD_PYTHONINTERFACE_DOWNCASTRETURNEDVALUE_H_
 /**
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -21,7 +21,7 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-#include "MantidPythonInterface/kernel/Registry/UpcastRegistry.h"
+#include "MantidPythonInterface/kernel/Registry/DowncastRegistry.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -48,11 +48,11 @@ namespace Mantid
     namespace
     {
       /**
-       * Converts a T object to a Python object and performs an upcast if it can.
+       * Converts a T object to a Python object and performs an downcast if it can.
        * Only used for DataItem's at the moment
        */
       template<class T>
-      struct to_python_value_with_upcast
+      struct to_python_value_with_downcast
       {
         inline PyObject* operator()(const T & p) const
         {
@@ -78,11 +78,11 @@ namespace Mantid
     namespace Policies
     {
       /**
-       * Implements the upcast_shared_ptr return_value_policy.
+       * Implements the downcast_shared_ptr return_value_policy.
        * This defines the required an internal type apply::type
        * used by the return_value_policy mechanism
        */
-      struct upcast_returned_value
+      struct downcast_returned_value
       {
         template <class T>
         struct apply
@@ -90,7 +90,7 @@ namespace Mantid
           typedef typename boost::mpl::if_c<
               boost::mpl::or_<boost::is_convertible<T, boost::shared_ptr<Kernel::DataItem> >,
                               boost::is_convertible<T, boost::weak_ptr<Kernel::DataItem> > >::value
-              , to_python_value_with_upcast<T>
+              , to_python_value_with_downcast<T>
               , boost::python::to_python_value<T>
               >::type type;
         };
@@ -100,4 +100,4 @@ namespace Mantid
   }
 } // namespace Mantid::PythonInterface
 
-#endif /* MANITD_PYTHONINTERFACE_UPCASTRETURNEDVALUE_H_ */
+#endif /* MANITD_PYTHONINTERFACE_DOWNCASTRETURNEDVALUE_H_ */
