@@ -7,11 +7,12 @@ The SassenaFFT algorithm performs the discrete Fourier transform on the intermed
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/SassenaFFT.h"
-#include "MantidAPI/FileProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidAPI/FileProperty.h"
 
 namespace Mantid
 {
@@ -102,6 +103,9 @@ void SassenaFFT::exec()
     ec->setPropertyValue("Operation","Multiply");
     ec->executeAsSubAlg();
   }
+
+  // Set the Energy unit for the X-axis
+  sqw->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Energy");
 
   // Add to group workspace
   gws->add( sqwName );

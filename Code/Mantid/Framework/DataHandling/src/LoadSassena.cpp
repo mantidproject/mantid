@@ -8,9 +8,14 @@ It will create a workspace for each scattering intensity and one workspace for t
 #include "MantidDataHandling/LoadSassena.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Axis.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
-//#include <hdf5.h>
+#include "MantidKernel/Unit.h"
+#include "MantidKernel/UnitFactory.h"
+
+
 #include <hdf5_hl.h>
 
 namespace Mantid
@@ -61,8 +66,11 @@ int LoadSassena::fileCheck(const std::string &filePath)
   hid_t h5file = H5Fopen(filePath.c_str(),H5F_ACC_RDONLY,H5P_DEFAULT);
   if (H5LTfind_attribute(h5file,"sassena_version")==1)
     confidence = 99;
-  //else
-  //log.debug("no version attribute found");
+  else
+  {
+    this->g_log.error("no version attribute found");
+    confidence = 99;
+  }
   return confidence;
 }
 
@@ -145,6 +153,10 @@ const MantidVec LoadSassena::loadQvectors(const hid_t& h5file, API::WorkspaceGro
     curr += 3;
   }
   delete[] buf;
+
+  // Set the Units
+  ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+
   this->registerWorkspace(gws,wsName,ws, "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
   return qvmod;
 }
@@ -179,6 +191,10 @@ void LoadSassena::loadFQ(const hid_t& h5file, API::WorkspaceGroup_sptr gws, cons
     curr += 2;
   }
   delete[] buf;
+
+  // Set the Units
+  ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+
   this->registerWorkspace(gws,wsName,ws, "X-axis: Q-vector modulus; Y-axis: intermediate structure factor");
 }
 
@@ -196,7 +212,7 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
 {
   const std::string gwsName = this->getPropertyValue("OutputWorkspace");
   int nq = static_cast<int>( qvmod.size() ); //number of q-vectors
-  double dt = 1.0; //time unit increment;
+  const double dt = getProperty("TimeUnit"); //time unit increment, in picoseconds;
   hsize_t dims[3];
   this->dataSetInfo(h5file, setName, dims);
   int nnt = static_cast<int>( dims[1] ); //number of non-negative time points
@@ -236,8 +252,43 @@ void LoadSassena::loadFQT(const hid_t& h5file, API::WorkspaceGroup_sptr gws, con
     }
   }
   delete[] buf;
-  this->registerWorkspace(gws,wsReName,wsRe, "X-axis: time; Y-axis: real part of intermediate structure factor");
-  this->registerWorkspace(gws,wsImName,wsIm, "X-axis: time; Y-axis: imaginary part of intermediate structure factor");
+
+  // Set the Time unit for the X-axis
+  wsRe->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Label");
+  auto unitPtr = boost::dynamic_pointer_cast<Kernel::Units::Label>( wsRe->getAxis(0)->unit() );
+  unitPtr->setLabel("Time", "picoseconds");
+
+  wsIm->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("Label");
+  unitPtr = boost::dynamic_pointer_cast<Kernel::Units::Label>( wsIm->getAxis(0)->unit() );
+  unitPtr->setLabel("Time", "picoseconds");
+
+  // Create a numeric axis to replace the default vertical one
+  API::Axis* const verticalAxisRe = new API::NumericAxis( nq );
+  API::Axis* const verticalAxisIm = new API::NumericAxis( nq );
+
+  wsRe->replaceAxis(1,verticalAxisRe);
+  wsIm->replaceAxis(1,verticalAxisIm);
+
+  // Now set the axis values
+  for (int i=0; i < nq; ++i)
+  {
+    verticalAxisRe->setValue(i,qvmod[i]);
+    verticalAxisIm->setValue(i,qvmod[i]);
+  }
+
+  // Set the axis units
+  verticalAxisRe->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+  verticalAxisRe->title() = "|Q|";
+  verticalAxisIm->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+  verticalAxisIm->title() = "|Q|";
+
+  // Set the X axis title (for conversion to MD)
+  wsRe->getAxis(0)->title() = "Energy transfer";
+  wsIm->getAxis(0)->title() = "Energy transfer";
+
+  // Register the workspaces
+  registerWorkspace(gws,wsReName,wsRe, "X-axis: time; Y-axis: real part of intermediate structure factor");
+  registerWorkspace(gws,wsImName,wsIm, "X-axis: time; Y-axis: imaginary part of intermediate structure factor");
 }
 
 /**
@@ -251,9 +302,10 @@ void LoadSassena::init()
   exts.push_back(".hd5");
 
   // Declare the Filename algorithm property. Mandatory. Sets the path to the file to load.
-  this->declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),"A Sassena file");
+  declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, exts),"A Sassena file");
   // Declare the OutputWorkspace property
-  this->declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("OutputWorkspace","",Kernel::Direction::Output), "The name of the group workspace to be created.");
+  declareProperty(new API::WorkspaceProperty<API::WorkspaceGroup>("OutputWorkspace","",Kernel::Direction::Output), "The name of the group workspace to be created.");
+  declareProperty(new Kernel::PropertyWithValue<double>("TimeUnit", 1.0, Kernel::Direction::Input),"The time unit in between data points, in picoseconds");
 }
 
 /**
@@ -282,8 +334,8 @@ void LoadSassena::exec()
   char cversion[16];
   if ( H5LTget_attribute_string( h5file, "/", "sassena_version", cversion ) < 0 )
   {
-    this->g_log.error("Cannot read version string");
-    throw Kernel::Exception::FileError("Unable to read version string:" , m_filename);
+    this->g_log.error("Unable to read version string:"+m_filename);
+    //throw Kernel::Exception::FileError("Unable to read version string:" , m_filename);
   }
   const std::string version(cversion);
   //determine which loader protocol to use based on the version
