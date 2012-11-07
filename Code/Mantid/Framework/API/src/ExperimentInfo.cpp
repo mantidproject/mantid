@@ -1126,8 +1126,7 @@ namespace API
       // create parameter's value as a sum of all tokens with index 3 or larger
       // this allow a parameter's value to contain ";" 
       std::string paramValue = tokens[3];
-      int size = static_cast<int>(tokens.count());
-      for (int i = 4; i < size; i++ )
+      for (int i = 4; i < tokens.count(); i++ )
         paramValue += ";" + tokens[4];
       pmap.add(tokens[1], comp, tokens[2], paramValue);
     }
