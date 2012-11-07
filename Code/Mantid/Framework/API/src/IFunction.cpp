@@ -687,8 +687,7 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
       step = paramPstep - val;
       for (size_t i = 0; i < nData; i++) 
       {
-        jacobian.set(i,iP, 
-          (plusStep.getCalculated(i) - minusStep.getCalculated(i))/step);
+        jacobian.set(i,iP, (plusStep.getCalculated(i) - minusStep.getCalculated(i))/step );
       }
     }
   }

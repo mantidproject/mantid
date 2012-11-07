@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunction1D.h"
+#include "MantidAPI/FunctionDomain.h"
+#include "MantidAPI/Jacobian.h"
 #include "MantidAPI/ImmutableCompositeFunction.h"
 #include "DeltaFunction.h"
 
@@ -76,19 +78,18 @@ class DLLExport InelasticDiffSphere : public API::ParamFunction, public API::IFu
 {
 public:
 
-  /// Constructor
   InelasticDiffSphere();
-
-  /// Destructor
   virtual ~InelasticDiffSphere() {}
 
-  /// overwrite IFunction base class methods
   virtual std::string name()const{return "InelasticDiffSphere";}
-
   virtual const std::string category() const { return "QuasiElastic";}
 
+  void calNumericalDeriv2(const API::FunctionDomain& domain, API::Jacobian& out);
+
 protected:
-  void function1D(double* out, const double* xValues, const size_t nData)const;
+  virtual void function1D(double* out, const double* xValues, const size_t nData)const;
+  virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
+  virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
   std::vector<double> LorentzianCoefficients(double a) const;
 
 private:
@@ -115,7 +116,7 @@ private:
   unsigned int ncoeff;
 
   /// linear interpolation zone around the numerical divergence of factor J
-  double divZone;
+  double m_divZone;
 
   /// list of linearized J values
   std::vector<linearJ> linearJlist;

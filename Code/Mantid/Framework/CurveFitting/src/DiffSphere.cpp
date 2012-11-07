@@ -99,21 +99,21 @@ void InelasticDiffSphere::initAlphaCoeff(){
 
 //initialize linear interpolation of factor J around its numerical divergence point a = it->x
 void InelasticDiffSphere::initLinJlist(){
-  for(std::vector<xnlc>::const_iterator it=xnl.begin(); it!=xnl.end(); ++it){
+  for(std::vector<xnlc>::const_iterator it = xnl.begin(); it != xnl.end(); ++it){
     linearJ abJ;
     double x = it->x;
     unsigned int l = it->l;
-    double a = x-divZone; //left of the numerical divergence point
-    double J0 = ( a*boost::math::sph_bessel(l+1,a)-l*boost::math::sph_bessel(l,a) ) / (a*a - x*x);
-        a = x+divZone; //right of the numerical divergence point
-        double J1 = ( a*boost::math::sph_bessel(l+1,a)-l*boost::math::sph_bessel(l,a) ) / (a*a - x*x);
-        abJ.slope = (J1-J0)/(2*divZone);  //slope of the linear interpolation
-        abJ.intercept = J0 - abJ.slope * (x-divZone); //intercept of the linear interpolation
-        linearJlist.push_back(abJ); //store the parameters of the linear interpolation for this it->x
+    double a = x - m_divZone; //left of the numerical divergence point
+    double J0 = ( a * boost::math::sph_bessel(l+1,a) - l * boost::math::sph_bessel(l,a) ) / (a*a - x*x);
+    a = x + m_divZone; //right of the numerical divergence point
+    double J1 = ( a * boost::math::sph_bessel(l+1,a) - l * boost::math::sph_bessel(l,a) ) / (a*a - x*x);
+    abJ.slope = (J1 - J0) / (2 * m_divZone);  //slope of the linear interpolation
+    abJ.intercept = J0 - abJ.slope * (x - m_divZone); //intercept of the linear interpolation
+    linearJlist.push_back(abJ); //store the parameters of the linear interpolation for this it->x
   }
 }
 
-InelasticDiffSphere::InelasticDiffSphere() : lmax(24), divZone(0.1) {
+InelasticDiffSphere::InelasticDiffSphere() : lmax(24), m_divZone(0.1) {
   declareParameter("Intensity",1.0, "scaling factor");
   declareParameter("Radius", 1.0, "Sphere radius");
   declareParameter("Diffusion", 1.0, "Diffusion coefficient, in units of");
@@ -157,11 +157,11 @@ std::vector<double> InelasticDiffSphere::LorentzianCoefficients(double a)const{
     //compute  factors Y and J
     double Y = *italpha; //Y is independent of parameters a and w, and independent of data x
     /* J is dependent on parameter a, cannot be computed when active parameter a obeys a*a=c.
-     * Thus for each it->x we stored J(it->x-divZone) and J(it->x_divZone), and use linear
+     * Thus for each it->x we stored J(it->x-m_divZone) and J(it->x_m_divZone), and use linear
      * interpolation
      */
     double J;
-    if(fabs(a-x) > divZone ){
+    if(fabs(a-x) > m_divZone ){
       J = ( a*jl[l+1]-l*jl[l] ) / (a*a - x*x);
     }else{
       J = itlinJ->slope*a + itlinJ->intercept; //linear interpolation
@@ -178,13 +178,13 @@ std::vector<double> InelasticDiffSphere::LorentzianCoefficients(double a)const{
 
 
 void InelasticDiffSphere::function1D(double* out, const double* xValues, const size_t nData)const{
-  const double& I = getParameter("Intensity");
-  const double& R = getParameter("Radius");
-  const double& D = getParameter("Diffusion");
-  const double& Q = getAttribute("Q").asDouble();
+  const double I = getParameter("Intensity");
+  const double R = getParameter("Radius");
+  const double D = getParameter("Diffusion");
+  const double Q = getAttribute("Q").asDouble();
 
   std::vector<double> YJ;
-  YJ = LorentzianCoefficients( Q*R );
+  YJ = LorentzianCoefficients( Q * R );
   for (unsigned int i = 0; i < nData; i++){
     double x = xValues[i];
     //loop over all coefficients
@@ -200,12 +200,75 @@ void InelasticDiffSphere::function1D(double* out, const double* xValues, const s
   } // end of for (unsigned int i...
 } // end of void DiffSphere::functionMW
 
-/* calNumericalDeriv requires evaluation of four extra functionMW. We can avoid by requiring
- *  the 'Simplex' algorithm, which does not require derivative. Simplex is called if no functionDerivMW is coded
- *  */
-//void InelasticDiffSphere::functionDerivMW(API::Jacobian* out, const double* xValues, const size_t nData){
-//  calNumericalDeriv(out, xValues, nData);
-//}
+/** Calculate numerical derivatives.
+ * @param domain :: The domain of the function
+ * @param jacobian :: A Jacobian matrix. It is expected to have dimensions of domain.size() by nParams().
+ */
+void InelasticDiffSphere::calNumericalDeriv2(const API::FunctionDomain& domain, API::Jacobian& jacobian)
+{
+  const double minDouble = std::numeric_limits<double>::min();
+  const double epsilon = std::numeric_limits<double>::epsilon() * 100;
+  double stepPercentage = 0.001; // step percentage
+  double step; // real step
+  double cutoff = 100.0*minDouble/stepPercentage;
+  size_t nParam = nParams();
+  size_t nData = domain.size();
+
+  FunctionValues minusStep(domain);
+  FunctionValues plusStep(domain);
+  std::vector<double> params(nParam);
+
+  //PARALLEL_CRITICAL(numeric_deriv)
+  {
+    applyTies(); // just in case
+    function(domain,minusStep);
+  }
+
+  for (size_t iP = 0; iP < nParam; iP++)
+  {
+    if ( isActive(iP) )
+    {
+      const double& val = activeParameter(iP);
+      if (fabs(val) < cutoff)
+      {
+        step = epsilon;
+      }
+      else
+      {
+        step = val*stepPercentage;
+      }
+
+      double paramPstep = val + step;
+      //PARALLEL_CRITICAL(numeric_deriv)
+      {
+        setActiveParameter(iP, paramPstep);
+        applyTies();
+        function(domain,plusStep);
+        setActiveParameter(iP, val);
+      }
+
+      step = paramPstep - val;
+      for (size_t i = 0; i < nData; i++)
+      {
+        jacobian.set(i, iP, (plusStep.getCalculated(i) - minusStep.getCalculated(i)) / step);
+      }
+    }
+  }
+} // calNumericalDeriv()
+
+/// Using numerical derivative
+void InelasticDiffSphere::functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian)
+{
+  this->calNumericalDeriv(domain, jacobian);
+  return;
+}
+
+/// Using numerical derivative
+void InelasticDiffSphere::functionDeriv1D(Jacobian* jacobian, const double* xValues, const size_t nData)
+{
+  FunctionDomain1DView domain(xValues,nData);
+  this->calNumericalDeriv(domain,*jacobian);
+}
 
 /* Propagate the attribute to its member functions.
  * NOTE: we pass this->getAttribute(name) by reference, thus the same

@@ -272,7 +272,7 @@ void testDiffSphere(){
 
   //Resolution function is a gaussian
   double h = 3.0;  // height
-  double a = 1.3;  // 1/(2*sigma^2)
+  double a = 1.3;  // 1/(2*sigma^2), sigma=0.62
   boost::shared_ptr<DiffSphereTest_Gauss> res(new DiffSphereTest_Gauss);
   res->setParameter("c",0);
   res->setParameter("h",h);
@@ -335,7 +335,10 @@ void testDiffSphere(){
 
   //alg.setProperty( "Function", boost::dynamic_pointer_cast<IFunction>(conv) );
   //std::cout << "(DiffSphereTest.h) " << conv->asString() << std::endl;
-  alg.setProperty( "Function", conv->asString() ) ;
+  //alg.setProperty( "Function", conv->asString() ) ;
+  std::string problematic = "composite=Convolution;name=DiffSphereTest_Gauss,c=0,h=3,s=1.3,ties=(c=0,h=3,s=1.3);(name=DiffSphere,NumDeriv=true,Q=0.7,Intensity=2.044325,Radius=3.285822,Diffusion=0.338958)";
+  alg.setProperty( "Function", problematic );
+  //alg.setProperty( "Minimizer", "Simplex");
 
   //Set which spectrum to fit against and initial starting values
   alg.setPropertyValue("InputWorkspace", wsName);
@@ -344,12 +347,12 @@ void testDiffSphere(){
   alg.setPropertyValue("EndX", boost::lexical_cast<std::string>(w[N-1]) );
 
   //print the initial parameters. For debugging purposes only
-  /*IFunction_sptr algFz = alg.getProperty("Function");
+  IFunction_sptr algFz = alg.getProperty("Function");
   auto fnConvz = boost::dynamic_pointer_cast<Convolution>( algFz ) ;
   auto fnDiffSpherez = boost::dynamic_pointer_cast<DiffSphere>( fnConvz->getFunction(1) );
-  std::cout << fnDiffSpherez->getParameter("f0.Height") << " " << fnDiffSpherez->getParameter("f0.Height") << " " << fnDiffSpherez->getParameter("f0.Radius") << " " << fnDiffSpherez->getParameter("f1.Intensity") << " " << fnDiffSpherez->getParameter("f1.Radius") << " " << fnDiffSpherez->getParameter("f1.Diffusion") << "\n";
-  std::cout << "(DiffSphereTest.h)" << alg.getPropertyValue("Function") << std::endl;
-  */
+  //std::cout << fnDiffSpherez->getParameter("f0.Height") << " " << fnDiffSpherez->getParameter("f0.Height") << " " << fnDiffSpherez->getParameter("f0.Radius") << " " << fnDiffSpherez->getParameter("f1.Intensity") << " " << fnDiffSpherez->getParameter("f1.Radius") << " " << fnDiffSpherez->getParameter("f1.Diffusion") << "\n";
+  //std::cout << "(DiffSphereTest.h)" << alg.getPropertyValue("Function") << std::endl;
+
 
   TS_ASSERT_THROWS_NOTHING( TS_ASSERT( alg.execute() ) ); //do the fit
 
