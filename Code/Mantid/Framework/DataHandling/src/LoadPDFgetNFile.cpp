@@ -273,7 +273,7 @@ namespace DataHandling
     boost::split(terms, line, is_any_of(" \t\n"), token_compress_on);
 
     // 2. Validate
-    if (terms.size() == 0)
+    if (terms.empty())
     {
       throw std::runtime_error("There is nothing in the input line!");
     }

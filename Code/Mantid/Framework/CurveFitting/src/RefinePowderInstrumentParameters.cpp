@@ -566,7 +566,7 @@ namespace CurveFitting
     vector<string> paramstofit = getProperty("ParametersToFit");
     set<string> paramstofitset;
     bool refineallparams;
-    if (paramstofit.size() == 0)
+    if (paramstofit.empty())
     {
       // Default case to refine all parameters
       refineallparams = true;

@@ -358,7 +358,7 @@ namespace MDAlgorithms
     // Get a vector of the free space blocks to save to the file
     std::vector<uint64_t> freeSpaceBlocks;
     bc->getDiskBuffer().getFreeSpaceVector(freeSpaceBlocks);
-    if (freeSpaceBlocks.size() == 0)
+    if (freeSpaceBlocks.empty())
       freeSpaceBlocks.resize(2, 0); // Needs a minimum size
     std::vector<int> free_dims(2,2); free_dims[0] = int(freeSpaceBlocks.size()/2);
     std::vector<int> free_chunk(2,2); free_chunk[0] = 1000;

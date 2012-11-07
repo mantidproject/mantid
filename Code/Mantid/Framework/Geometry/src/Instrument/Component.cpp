@@ -214,7 +214,7 @@ namespace Geometry
   std::string Component::getFullName() const
   {
     std::vector<boost::shared_ptr<const IComponent> > ancestors = this->getAncestors();
-    if( ancestors.size() == 0) {
+    if( ancestors.empty() ) {
       return this->getName();
     } else {
       std::ostringstream oss;

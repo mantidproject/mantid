@@ -188,7 +188,6 @@ namespace MDEvents
     if (BackgroundInnerRadius < PeakRadius)
       BackgroundInnerRadius = PeakRadius;
 
-    // cppcheck-suppress syntaxError
 //
 // If the following OMP pragma is included, this algorithm seg faults
 // sporadically when processing multiple TOPAZ runs in a script, on 
@@ -199,7 +198,7 @@ namespace MDEvents
 // 5-10% speedup.  Perhaps is should just be removed permanantly, but for 
 // now it is commented out to avoid the seg faults.  Refs #5533
 //PRAGMA_OMP(parallel for schedule(dynamic, 10) )
-    for (int i=0; i < int(peakWS->getNumberPeaks()); ++i)
+    for (int i=0; i < peakWS->getNumberPeaks(); ++i)
     {
       // Get a direct ref to that peak.
       IPeak & p = peakWS->getPeak(i);

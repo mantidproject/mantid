@@ -106,7 +106,7 @@ namespace MDAlgorithms
   {
     std::vector<double> params = getProperty("PeakParams");
     bool RandomizeSignal = getProperty("RandomizeSignal");
-    if (params.size() == 0)
+    if (params.empty())
       return;
 
     if (params.size() != nd + 2)
@@ -189,7 +189,7 @@ namespace MDAlgorithms
   void FakeMDEventData::addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
     std::vector<double> params = getProperty("UniformParams");
-    if (params.size() == 0)
+    if (params.empty())
       return;
 
     bool randomEvents=true;

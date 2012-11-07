@@ -240,7 +240,7 @@ namespace MDEvents
 
     // Get the position of the detector there.
     const std::set<detid_t>& detectors = el.getDetectorIDs();
-    if (detectors.size() > 0)
+    if (!detectors.empty())
     {
       // Get the detector (might be a detectorGroup for multiple detectors)
       // or might return an exception if the detector is not in the instrument definition

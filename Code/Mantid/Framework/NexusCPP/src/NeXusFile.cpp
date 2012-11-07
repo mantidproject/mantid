@@ -758,7 +758,7 @@ void File::readData(const std::string & dataName, NumT & data)
   std::vector<NumT> dataVector;
   this->openData(dataName);
   this->getData(dataVector);
-  if (dataVector.size() > 0)
+  if (!dataVector.empty())
     data = dataVector[0];
   this->closeData();
 }

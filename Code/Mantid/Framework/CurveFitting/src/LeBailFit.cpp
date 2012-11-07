@@ -783,7 +783,7 @@ std::vector<std::set<size_t> > LeBailFit::splitPeaksToGroups()
   // b) Go around
   for (size_t i = 0; i < peakcenterpairs.size(); ++i)
   {
-    if (peakindices.size() > 0)
+    if (!peakindices.empty())
     {
       /// There are peaks in the group already
       size_t leftpeakindex = i-1;
@@ -892,7 +892,7 @@ void LeBailFit::calPeaksIntensities(std::vector<std::pair<int, double> >& peakhe
     // Note: ix is only bounded to peakcenterpairs
     size_t ipk = peakcenterpairs[ix].second;
 
-    if (peakindices.size() > 0)
+    if (!peakindices.empty())
     {
       size_t leftpeakindex = peakcenterpairs[ix-1].second;
       double leftpeakcenter = peakcenterpairs[ix-1].first;
@@ -2188,7 +2188,7 @@ API::MatrixWorkspace_sptr LeBailFit::cropWorkspace(API::MatrixWorkspace_sptr inp
     std::vector<double> fitrange = this->getProperty("FitRegion");
 
     double tof_min, tof_max;
-    if (fitrange.size() == 0)
+    if (fitrange.empty())
     {
         tof_min = inpws->readX(wsindex)[0];
         tof_max = inpws->readX(wsindex).back();

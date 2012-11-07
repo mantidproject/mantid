@@ -264,7 +264,7 @@ namespace API
         catch(const std::range_error & re)
         {
             g_log.error(re.what());
-            throw re;
+            throw;
         }
         catch(const std::runtime_error & re)
         {
@@ -288,7 +288,7 @@ namespace API
           if( f.size() > 1 )
             return "Adding a range of files to another file(s) is not currently supported.";
 
-          if( temp.size() == 0 )
+          if( temp.empty() )
             temp.push_back(f[0]);
           else
           {

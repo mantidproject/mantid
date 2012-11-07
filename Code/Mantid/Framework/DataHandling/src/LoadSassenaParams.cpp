@@ -205,7 +205,7 @@ template<class convT> convT XMLInterface::get_value(const char* xpathexp)
 {
   std::vector<XMLElement> elements = get(xpathexp);
   // if elements has more than one entry, then xpathexp is ambigious
-  if (elements.size()==0)
+  if (elements.empty())
   {
     return boost::lexical_cast<convT>("");
   }
