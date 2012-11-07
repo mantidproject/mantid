@@ -197,7 +197,7 @@ int SmoothData::validateSpectrumInGroup(size_t wi)
     const int group = udet2group.at(*it);
     if (group <= 0)
       return -1;
-    it++;
+    ++it;
     for (; it != dets.end(); ++it) // Loop other all other udets
     {
       if (udet2group.at(*it) != group)

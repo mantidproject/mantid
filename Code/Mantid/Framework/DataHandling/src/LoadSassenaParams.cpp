@@ -548,7 +548,7 @@ CartesianCoor3D CartesianVectorBase::project(CartesianCoor3D vec)
 
 SampleParameters::~SampleParameters()
 {
-  for(std::map<std::string,SampleSelectionParameters*>::iterator i=selections.begin();i!=selections.end();i++)
+  for(std::map<std::string,SampleSelectionParameters*>::iterator i=selections.begin();i!=selections.end();++i)
   {
     delete i->second;
   }

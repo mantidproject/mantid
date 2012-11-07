@@ -445,7 +445,7 @@ namespace MantidQt
       // this is a costly opperation and should be done just once for each file
       Mantid::index2detid_map * map =  mws_sptr->getWorkspaceIndexToDetectorIDMap();
       Mantid::index2detid_map::iterator it; 
-      for (it=map->begin(); it!= map->end(); it++)
+      for (it=map->begin(); it!= map->end(); ++it)
       {
         // if detector id inside the range
         if (it->second >= rectDet->getMinimumDetectorId() && it->second <= rectDet->getMaximumDetectorId()){

@@ -81,7 +81,7 @@ namespace DataHandling
       m_stopThread = true;
       try {
       m_thread.join(RECV_TIMEOUT_MS * 2);
-      } catch (Poco::TimeoutException e) {
+      } catch (Poco::TimeoutException &e) {
         // And just what do we do here?!?
         // Log a message, sure, but other than that we can either hang the
         // Mantid process waiting for a thread that will apparently never exit
