@@ -40,15 +40,15 @@ namespace Mantid
     template<typename TYPE>
     double getMedian(const vector<TYPE>& data, const size_t num_data, const bool sorted)
     {
-      double left = 0.0;
-      double right = 0.0;
-
       if (num_data == 1)
         return static_cast<double> (*(data.begin()));
 
       bool is_even = ((num_data % 2) == 0);
       if (is_even)
       {
+        double left = 0.0;
+        double right = 0.0;
+
         if (sorted)
         {
           // Just get the centre two elements.
@@ -134,21 +134,21 @@ namespace Mantid
       typename vector<TYPE>::const_iterator it = data.begin();
       for (; it != data.end(); ++it)
       {
-    	tmp = static_cast<double> (*it);
+        tmp = static_cast<double> (*it);
         MADvec.push_back(fabs(tmp - median));
       }
       double MAD = getMedian(MADvec, num_data, sorted);
       if(MAD == 0.)
       {
-    	  std::vector<double>Zscore(data.size(),0.);
-    	  return Zscore;
+        std::vector<double>Zscore(data.size(),0.);
+        return Zscore;
       }
       MADvec.empty();
       std::vector<double> Zscore;
       it = data.begin();
       for (; it != data.end(); ++it)
       {
-    	tmp = static_cast<double> (*it);
+        tmp = static_cast<double> (*it);
         Zscore.push_back(0.6745*fabs((tmp - median) / MAD));
       }
       return Zscore;

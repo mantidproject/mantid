@@ -176,7 +176,6 @@ bool InterfaceManagerImpl::hasVatesLibraries() const
 
 VatesViewerInterface *InterfaceManagerImpl::createVatesSimpleGui() const
 {
-  VatesViewerInterface *vsg = NULL;
   if(m_vatesGuiFactory == NULL)
   {
     g_log.error() << "InterfaceManagerImpl::createVatesSimpleGui is null. Mantid Vates package is probably not installed." << std::endl;
@@ -184,7 +183,7 @@ VatesViewerInterface *InterfaceManagerImpl::createVatesSimpleGui() const
   }
   else 
   {
-    vsg = this->m_vatesGuiFactory->createUnwrappedInstance();
+    VatesViewerInterface *vsg = this->m_vatesGuiFactory->createUnwrappedInstance();
     if (!vsg)
     {
       g_log.error() << "Error creating Vates Simple GUI" << std::endl;

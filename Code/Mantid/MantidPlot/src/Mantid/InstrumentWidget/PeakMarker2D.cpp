@@ -23,6 +23,10 @@ const int PeakMarker2D::g_defaultMarkerSize = 5;
 PeakMarker2D::PeakMarker2D(PeakOverlay& peakOverlay, double u, double v, Style style):
 m_peakOverlay(peakOverlay),
 m_symbol(style.symbol),
+m_h(-99.0),
+m_k(-99.0),
+m_l(-99.0),
+m_detID(-99),
 m_row(-1)
 {
   setColor(style.color);

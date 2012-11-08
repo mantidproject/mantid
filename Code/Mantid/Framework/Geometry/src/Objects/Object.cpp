@@ -771,7 +771,6 @@ namespace Mantid
           if (hCnt >= 0 && Ln[hCnt] == '#')
           {
             RuleList[compUnit] = procComp(RuleList[compUnit]);
-            std::ostringstream px;
             Ln.erase(hCnt, lbrack - hCnt);
           }
         }

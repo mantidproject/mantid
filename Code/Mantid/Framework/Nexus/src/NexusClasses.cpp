@@ -136,7 +136,7 @@ void NXObject::getAttributes()
             {
                 short unsigned int value;
                 NXgetattr(m_fileID,pName,&value,&iLength,&iType);
-                sprintf(buff.get(),"%i",value);
+                sprintf(buff.get(),"%u",value);
                 attributes.set(pName,buff.get());
                 break;
             }

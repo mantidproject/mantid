@@ -75,8 +75,6 @@ void LoadPreNexusMonitors::exec()
 
   // Vectors to store monitor parameters
   std::vector < std::string > monitorFilenames;
-  std::vector < std::string > monitorBinMode;
-  std::vector < size_t > monitorDims;
   std::vector <int> monitorIDs;
 
   // Get the Runinfo filename from the property

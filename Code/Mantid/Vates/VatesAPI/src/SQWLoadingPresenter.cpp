@@ -101,7 +101,6 @@ namespace Mantid
       using namespace Mantid::Geometry;
       MDGeometryBuilderXML<NoDimensionPolicy> refresh;
       this->xmlBuilder= refresh; //Reassign.
-      std::vector<MDDimensionExtents> ext = eventWs->getMinimumExtents(5);
       std::vector<IMDDimension_sptr> dimensions;
       size_t nDimensions = eventWs->getNumDims();
       for (size_t d=0; d<nDimensions; d++)

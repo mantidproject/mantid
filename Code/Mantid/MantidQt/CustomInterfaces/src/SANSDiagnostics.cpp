@@ -461,7 +461,6 @@ namespace MantidQt
         g_log.error()<<"Error : The instrument does not have data associated to the RectangularDetector " << rectDet->getDetectorName().toStdString()<<std::endl;
       }
       // as long the spectrum index is the workspace index + 1
-      std::vector<size_t> indices;
       specList.clear();
       // it is not really required, it could stay with the workspace id, just for compatibility
       specList.push_back(mws_sptr->getSpectrum(min_spec_index)->getSpectrumNo());

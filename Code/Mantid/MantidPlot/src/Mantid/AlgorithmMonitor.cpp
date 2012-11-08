@@ -142,8 +142,13 @@ void AlgorithmMonitor::cancel(Mantid::API::AlgorithmID id)
 void AlgorithmMonitor::cancelAll()
 {
   const std::deque<IAlgorithm_sptr>& algs = Mantid::API::AlgorithmManager::Instance().algorithms();
-  for(std::deque<IAlgorithm_sptr>::const_iterator a = algs.begin();a!=algs.end();++a)
-    if ( std::find(m_algorithms.begin(),m_algorithms.end(),(**a).getAlgorithmID()) ) (**a).cancel();
+  for(std::deque<IAlgorithm_sptr>::const_iterator a = algs.begin(); a != algs.end(); ++a)
+  {
+    if ( std::find(m_algorithms.begin(), m_algorithms.end(), (**a).getAlgorithmID()) != m_algorithms.end() )
+    {
+      (**a).cancel();
+    }
+  }
 }
 
  

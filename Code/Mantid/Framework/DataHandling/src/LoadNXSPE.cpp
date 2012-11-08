@@ -90,7 +90,6 @@ namespace DataHandling
     typedef std::map<std::string,std::string> string_map_t;
     try
     {
-      string_map_t::const_iterator it;
       ::NeXus::File file = ::NeXus::File(filePath);
       string_map_t entries = file.getEntries();
       for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)

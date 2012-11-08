@@ -246,10 +246,10 @@ namespace MDAlgorithms
     for (int i=0; i<int(boxes.size()); i++)
     {
       MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(boxes[i]);
-      bool clearBox = box->getOnDisk(); 
       // Perform the binning in this separate method.
       if (box)
       {
+        bool clearBox = box->getOnDisk();
         // An array to hold the rotated/transformed coordinates
         coord_t outCenter[ond];
 

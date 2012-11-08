@@ -1040,7 +1040,6 @@ namespace Mantid
 
       std::vector<BnId> EPI;  // Created Here.
 
-      std::vector<int> EPIvalue;
       // Make zeroed matrix.
       Kernel::Matrix<int> Grid(PIform.size(),DNFobj.size()); 
       std::vector<int> DNFactive(DNFobj.size());       // DNF that active
@@ -1443,7 +1442,6 @@ namespace Mantid
       // U is ste to be 
       std::vector<Acomp> U;
       std::vector<Acomp> V;
-      std::map<int,int>::const_iterator mc;
       // Only have First level components to consider
       std::vector<Acomp>::const_iterator cc;
       int cell;
