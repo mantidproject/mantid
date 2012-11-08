@@ -12,6 +12,8 @@
 #include "MantidCurveFitting/Polynomial.h"
 #include "MantidCurveFitting/BackToBackExponential.h"
 
+using namespace std;
+
 namespace Mantid
 {
 namespace CurveFitting
@@ -129,6 +131,12 @@ namespace CurveFitting
 
     double calculateDspaceValue(std::vector<int> hkl);
 
+    /// Calculate a Bragg peak's centre in TOF from its Miller indices and with instrumental parameters
+    double calculatePeakCentreTOF(int h, int k, int l);
+
+    /// Get parameter value from m_instrumentParameters
+    double getParameter(string parname);
+
     /// Data
     API::MatrixWorkspace_sptr dataWS;
 
@@ -136,7 +144,7 @@ namespace CurveFitting
     std::map<std::vector<int>, CurveFitting::BackToBackExponential_sptr> mPeaks;
 
     /// Map for function (instrument parameter)
-    std::map<std::string, double> mFuncParameters;
+    std::map<std::string, double> m_instrumentParmaeters;
 
     /// Data for each individual peaks. (HKL)^2, vector index, function values
     std::vector<double> mPeakData;
@@ -146,6 +154,9 @@ namespace CurveFitting
 
     /// TOF vector of data workspace to process with
     int workspaceindex;
+
+    /// Flag to use given TOF in input table
+    bool m_useGivenTOFh;
 
   };
 

@@ -28,6 +28,9 @@
 #include <fstream>
 #include <iomanip>
 
+#include <gsl/gsl_sf_erf.h>
+#include <cmath>
+
 /// Factor on FWHM for searching a peak
 #define PEAKRANGEFACTOR 20.0
 /// Factor on FWHM for excluding peak to fit background
@@ -106,6 +109,22 @@ namespace CurveFitting
     declareProperty("MinTOF", EMPTY_DBL(), "Minimum TOF to fit peaks.  ");
     declareProperty("MaxTOF", EMPTY_DBL(), "Maximum TOF to fit peaks.  ");
 
+    // Option to calculate peak position from (HKL) and d-spacing data
+    declareProperty("UseGivenPeakCentreTOF", true, "Use each Bragg peak's centre in TOF given in BraggPeakParameterWorkspace."
+                    "Otherwise, calculate each peak's centre from d-spacing.");
+
+    // Option to denote that peaks are related
+    declareProperty("PeaksCorrelated", false, "Flag for fact that all peaks' corresponding profile parameters "
+                    "are correlated by an analytical function");
+
+    // Option for peak's HKL for minimum d-spacing
+    auto arrayprop = new ArrayProperty<double>("MinimumHKL");
+    declareProperty(arrayprop, "Miller index of the left most peak (peak with minimum d-spacing) to be fitted. ");
+
+    // Number of the peaks to fit left to peak with minimum HKL
+    declareProperty("NumberPeaksToFitBelowLowLimit", 0, "Number of peaks to fit with d-spacing value "
+                    "less than specified minimum. ");
+
     return;
   }
 
@@ -140,12 +159,14 @@ namespace CurveFitting
       tofmax = dataWS->readX(workspaceindex).back();
     }
 
+    m_useGivenTOFh = getProperty("UseGivenPeakCentreTOF");
+
     // 2. Crop input workspace
     cropWorkspace(tofmin, tofmax);
 
     // 3. Parse input table workspace
+    importParametersFromTable(parameterWS, m_instrumentParmaeters);
     genPeaksFromTable(peakWS, mPeaks);
-    importParametersFromTable(parameterWS, mFuncParameters);
 
     // 4. Fit peaks & get peak centers
     std::vector<std::vector<int> > goodfitpeaks;
@@ -162,7 +183,6 @@ namespace CurveFitting
     fitPeaks(workspaceindex, goodfitpeaks, goodfitchi2);
 
     // 5. Create Output
-
     // a) Create a Table workspace for peak profile
     pair<TableWorkspace_sptr, TableWorkspace_sptr> tables = genPeakParametersWorkspace(goodfitpeaks, goodfitchi2);
     TableWorkspace_sptr outputpeaksws = tables.first;
@@ -212,22 +232,23 @@ namespace CurveFitting
     std::sort(poshklvector.begin(), poshklvector.end());
 
     int numpeaks = static_cast<int>(poshklvector.size());
+    /* Disabled
     for (int i = numpeaks-1; i >= 0; --i)
     {
       double tofh = poshklvector[i].first;
       vector<int> hkl = poshklvector[i].second;
       int hkl2 = hkl[0]*hkl[0] + hkl[1]*hkl[1] + hkl[2]*hkl[2];
-      g_log.information() << "Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] <<").  (HKL)^2 = "
-                          << hkl2 << ".  Center = " << tofh << endl;
+      g_log.debug() << "Peak (" << hkl[0] << ", " << hkl[1] << ", " << hkl[2] <<").  (HKL)^2 = "
+                    << hkl2 << ".  Center = " << tofh << endl;
     }
+    */
 
     // 3. Fit all peaks
     BackToBackExponential_sptr peakOnRight;
     BackToBackExponential_sptr peak;
     for (int ipk = numpeaks-1; ipk >= 0; --ipk)
     {
-      /* Fit each single peak BUT NOT completely independently
-        */
+      // Fit each single peak BUT NOT completely independently
 
       // a) Get hold on the peak to fit
       vector<int> hkl = poshklvector[ipk].second;
@@ -294,6 +315,8 @@ namespace CurveFitting
       // f) Book keep the peak (index) with good fit result
       goodfitpeaks.push_back(hkl);
       goodfitchi2.push_back(chi2);
+
+      g_log.information() << "DBx415: Number of good fit peaks = " << goodfitpeaks.size() << endl;
 
       // g) For output
       calculateSinglePeak(peak, background);
@@ -402,7 +425,7 @@ namespace CurveFitting
     }
 
     g_log.information() << "Observe peak max recorded value @ TOF = " << tof_h_obs
-                        << "  +/- " << tof_left << ", " << tof_right
+                        << " +/- " << tof_left << ", " << tof_right
                         << " in [" << dataws->readX(0)[0] << ", " << dataws->readX(0).back() << "]" << std::endl;
 
     // 6. Find local background
@@ -1198,10 +1221,10 @@ namespace CurveFitting
 
     // 2. Create data workspace
     Workspace2D_sptr dataws = boost::dynamic_pointer_cast<Workspace2D>(
-          WorkspaceFactory::Instance().create("Workspace2D", 3, pattern.size(), pattern.size()));
+          WorkspaceFactory::Instance().create("Workspace2D", 5, pattern.size(), pattern.size()));
 
     // 3. Set up
-    for (size_t iw = 0; iw < 3; ++iw)
+    for (size_t iw = 0; iw < 5; ++iw)
     {
       MantidVec& newX = dataws->dataX(iw);
       for (size_t i = 0; i < numpts; ++i)
@@ -1221,7 +1244,7 @@ namespace CurveFitting
     }
 
     // 4. Debug
-    // FIXME Remove this section after unit test is finished.
+    /* FIXME Remove this section after unit test is finished.
     std::ofstream ofile;
     ofile.open("fittedpeaks.dat");
     for (size_t i = 0; i < numpts; ++i)
@@ -1232,13 +1255,14 @@ namespace CurveFitting
             << setw(12) << setprecision(5) << dataws->readY(2)[i] << endl;
     }
     ofile.close();
+    */
 
     return dataws;
   }
 
 
   /** Calcualte the value of a single peak in a given range.
-    * Output is send to global data structure: mPeakData
+    * Output is written to/recorded by global data structure: mPeakData
     */
   void FitPowderDiffPeaks::calculateSinglePeak(
       CurveFitting::BackToBackExponential_sptr peak, CurveFitting::BackgroundFunction_sptr background)
@@ -1273,8 +1297,17 @@ namespace CurveFitting
     compfunction->addFunction(background);
 
     // iv.  Calculate the composite function
+    if (tofs.size() == 0)
+    {
+      g_log.warning() << "[CalculateSinglePeak] Domain Size (number of TOF points) = 0" << endl;
+      return;
+    }
+
     API::FunctionDomain1DVector domain(tofs);
     API::FunctionValues values(domain);
+
+    g_log.information() << "DBx419 [CalcualteSinglePeak]  Domain Size = " << domain.size() << endl;
+
     compfunction->function(domain, values);
 
     // v.   Book keep the result
@@ -1315,6 +1348,7 @@ namespace CurveFitting
     tablews->addColumn("double", "Beta");
     tablews->addColumn("double", "Sigma");
     tablews->addColumn("double", "Chi2");
+    tablews->addColumn("double", "FWHM");
 
     outbuf << setw(10) << "H" << setw(10) << "K" << setw(10) << "L"
            << setw(10) << "d_h" << setw(10) << "X0" << setw(10) << "I"
@@ -1356,6 +1390,7 @@ namespace CurveFitting
       double p_i = peak->getParameter("I");
       double p_x = peak->getParameter("X0");
       double p_s = peak->getParameter("S");
+      double p_fwhm = peak->fwhm();
 
       vectofh.push_back(p_x);
       vecalpha.push_back(p_a);
@@ -1372,8 +1407,9 @@ namespace CurveFitting
 
       // iii. chi2
       double chi2 = goodfitchi2s[i];
-      newrow << chi2;
+      newrow << chi2 << p_fwhm;
       outbuf << setw(10) << setprecision(5) << chi2 << endl;
+
 
     } // FOREACH Peak
 
@@ -1430,8 +1466,8 @@ namespace CurveFitting
  //----------------------------------------------------------------------------------------------
   /** Genearte peaks from input workspace
     */
-  void FitPowderDiffPeaks::genPeaksFromTable(
-      DataObjects::TableWorkspace_sptr peakparamws, std::map<std::vector<int>, CurveFitting::BackToBackExponential_sptr>& peaks)
+  void FitPowderDiffPeaks::genPeaksFromTable(TableWorkspace_sptr peakparamws, std::map<std::vector<int>,
+                                             CurveFitting::BackToBackExponential_sptr>& peaks)
   {
     // 1. Check and clear input and output
     if (!peakparamws)
@@ -1566,6 +1602,13 @@ namespace CurveFitting
 
         peaks.insert(std::make_pair(hkl, newpeakptr));
 
+        // Calculate peak's centre in TOF
+        if (!m_useGivenTOFh)
+        {
+          center = calculatePeakCentreTOF(h, k, l);
+          newpeakptr->setParameter("X0", center);
+        }
+
         g_log.information() << "[GeneratePeaks] Peak " << ir << " Input Center = " << setw(10) << setprecision(6) << center
                             << ".  Allowed Region = ["
                             << tofmin << ", " << tofmax << "].  Number of peaks = " << peaks.size() << endl;
@@ -1655,10 +1698,10 @@ namespace CurveFitting
     */
   double FitPowderDiffPeaks::calculateDspaceValue(std::vector<int> hkl)
   {
-    g_log.information() << "HKL = " << hkl[0] << hkl[1] <<  hkl[2] << std::endl;
+    // g_log.information() << "HKL = " << hkl[0] << hkl[1] <<  hkl[2] << std::endl;
 
     // FIXME  It only works for the assumption that the lattice is cubical
-    double lattice = mFuncParameters["LatticeConstant"];
+    double lattice = m_instrumentParmaeters["LatticeConstant"];
     double h = static_cast<double>(hkl[0]);
     double k = static_cast<double>(hkl[1]);
     double l = static_cast<double>(hkl[2]);
@@ -1666,6 +1709,55 @@ namespace CurveFitting
     double d = lattice/sqrt(h*h+k*k+l*l);
 
     return d;
+  }
+
+  /** Calculate a Bragg peak's centre in TOF from its Miller indices
+    * and with instrumental parameters
+    */
+  double FitPowderDiffPeaks::calculatePeakCentreTOF(int h, int k, int l)
+  {
+    vector<int> hkl(3);
+    hkl[0] = h;
+    hkl[1] = k;
+    hkl[2] = l;
+
+    double dh = calculateDspaceValue(hkl);
+
+    // 2. Get parameter values from instrument parameter map
+    double dtt1 = getParameter("Dtt1");
+    double dtt1t = getParameter("Dtt1t");
+    double dtt2t = getParameter("Dtt2t");
+    double zero = getParameter("Zero");
+    double zerot = getParameter("Zerot");
+    double width = getParameter("Width");
+    double tcross = getParameter("Tcross");
+
+    double n = 0.5*gsl_sf_erfc(width*(tcross-1/dh));
+    double Th_e = zero + dtt1*dh;
+    double Th_t = zerot + dtt1t*dh - dtt2t/dh;
+    double tof_h = n*Th_e + (1-n)*Th_t;
+
+    return tof_h;
+  }
+
+  /** Get parameter value from m_instrumentParameters
+    * Exception: throw runtime error if there is no such parameter
+    */
+  double FitPowderDiffPeaks::getParameter(string parname)
+  {
+    map<string, double>::iterator mapiter;
+    mapiter = m_instrumentParmaeters.find(parname);
+
+    if (mapiter == m_instrumentParmaeters.end())
+    {
+      stringstream errss;
+      errss << "Instrument parameter map (having " << m_instrumentParmaeters.size() << " entries) "
+            << "does not have parameter " << parname << ". ";
+      g_log.error(errss.str());
+      throw runtime_error(errss.str());
+    }
+
+    return mapiter->second;
   }
 
 } // namespace CurveFitting
