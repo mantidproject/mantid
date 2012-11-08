@@ -88,6 +88,11 @@ namespace CurveFitting
     // Implement abstract Algorithm methods
     void exec();
 
+    //--------------  Functions to set up the Le Bail Fit -----------------
+    /// Create LeBailFunction
+    void createLeBailFunction(std::string backgroundtype, std::vector<double>& bkgdorderparams,
+                                         DataObjects::TableWorkspace_sptr bkgdparamws);
+
     /// Import peak parameters
     void importParametersTable();
 
@@ -153,7 +158,7 @@ namespace CurveFitting
     void createOutputDataWorkspace(size_t workspaceindex, FunctionMode functionmode);
 
     /// Create background function
-    CurveFitting::BackgroundFunction_sptr generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws);
+    // CurveFitting::BackgroundFunction_sptr generateBackgroundFunction(std::string backgroundtype, std::vector<double> bkgdparamws);
 
     /// Parse content in a table workspace to vector for background parameters
     void parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr bkgdparamws, std::vector<double>& bkgdorderparams);
