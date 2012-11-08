@@ -95,7 +95,8 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         
         for irow in rownumberlist:
             irow = int(irow)
-            tableWS.setCell(irow, icolumn, value)
+            if irow >= 0: 
+                tableWS.setCell(irow, icolumn, value)
 
         # 4. 
         self.setProperty("InputWorkspace", tableWS)
@@ -115,7 +116,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
          - parametername:  parameter name to change value
          - paramnamedict:  dictionary key = parameter name, value = row number in table workspace
 
-        Return: List of row numbers (integer) 
+        Return: List of row numbers (integer), a negative value might exit to represent a non-existing parameter name 
         """
         rownumbers= []
 
@@ -155,44 +156,20 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 	        corestr = parnametofit.split("?")[0]
 	        if parname_low.startswith(corestr) and len(parname_low) == len(parnametofit):
                     ismatch = True
-            # ENDIFELSE
+                # ENDIFELSE
 
             if ismatch is True:
                 rownumber = paramnamedict[parname]
                 rownumbers.append(rownumber)
         # ENDFOR: 
+
+        # 2. Take in the case that there is no match
+        if len(rownumbers) == 0:
+            # No Match
+            print "Warning! There is no match for parameter %s" % (parnametofit)
+            rownumbers.append(-1000)
+        # ENDIFELSE
         
-        """
-        # 1. Identify incomplete parameter name
-        withstar = parametername.count('*') > 0
-        if withstar is True:
-            terms = parametername.split('*')
-            parametername = ""
-            for term in terms:
-                parametername += term
-            # ENDFOR
-        # ENDIF
-
-        # put to lower case for case insensitive
-        parametername = parametername.lower()
-
-        # 2. Get the row
-        rows = []
-        for irow in sorted(parameterdict.keys()):
-            candidate = parameterdict[irow]
-            if withstar is True and candidate.count(parametername) > 0:
-                rows.append(irow)
-            elif withstar is False and candidate == parametername:
-                rows.append(irow)
-            # ENDIF
-        # ENDFOR
-
-        wbuf = "Input Parameter Name = %s  Converted To Row " % (parametername)
-        for ir in rows:
-            wbuf += "%d, " % (ir)
-        # print wbuf
-        """
-               
         return rownumbers
 
     def parseTableWorkspace(self, tablews):
