@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	#	src/Q1DTOF.cpp
+	# src/CountEventsInPulses.cpp
 	# src/UpdatePeakParameterTable.cpp
 	src/AbsorptionCorrection.cpp
 	src/AddLogDerivative.cpp
@@ -19,6 +20,7 @@ set ( SRC_FILES
 	src/CalculateEfficiency.cpp
 	src/CalculateTransmission.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
+	src/CalculateZscore.cpp
 	src/CaltoDspacemap.cpp
 	src/ChangeBinOffset.cpp
 	src/ChangeLogTime.cpp
@@ -42,7 +44,6 @@ set ( SRC_FILES
 	src/CopySample.cpp
 	src/CorrectKiKf.cpp
 	src/CorrectToFile.cpp
-	# src/CountEventsInPulses.cpp
 	src/CreateCalFileByNames.cpp
 	src/CreateDummyCalFile.cpp
 	src/CreateFlatEventWorkspace.cpp
@@ -202,6 +203,7 @@ set ( SRC_FILES
 
 set ( INC_FILES
 	#	inc/MantidAlgorithms/Q1DTOF.h
+	# inc/MantidAlgorithms/CountEventsInPulses.h
 	# inc/MantidAlgorithms/UpdatePeakParameterTable.h
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddLogDerivative.h
@@ -221,6 +223,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateTransmission.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
+	inc/MantidAlgorithms/CalculateZscore.h
 	inc/MantidAlgorithms/CaltoDspacemap.h
 	inc/MantidAlgorithms/ChangeBinOffset.h
 	inc/MantidAlgorithms/ChangeLogTime.h
@@ -244,7 +247,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CopySample.h
 	inc/MantidAlgorithms/CorrectKiKf.h
 	inc/MantidAlgorithms/CorrectToFile.h
-	# inc/MantidAlgorithms/CountEventsInPulses.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
 	inc/MantidAlgorithms/CreateFlatEventWorkspace.h
@@ -405,6 +407,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#	CalMuonDeadTimeTest.h
+	# CountEventsInPulsesTest.h
 	# UpdatePeakParameterTableTest.h
 	AddLogDerivativeTest.h
 	AddPeakTest.h
@@ -421,6 +424,7 @@ set ( TEST_FILES
 	CalculateEfficiencyTest.h
 	CalculateTransmissionBeamSpreaderTest.h
 	CalculateTransmissionTest.h
+	CalculateZscoreTest.h
 	ChainedOperatorTest.h
 	ChangeBinOffsetTest.h
 	ChangeLogTimeTest.h
@@ -443,7 +447,6 @@ set ( TEST_FILES
 	CopySampleTest.h
 	CorrectKiKfTest.h
 	CorrectToFileTest.h
-	# CountEventsInPulsesTest.h
 	CreateCalFileByNamesTest.h
 	CreateDummyCalFileTest.h
 	CreateFlatEventWorkspaceTest.h
