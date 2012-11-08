@@ -43,20 +43,17 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     ThermalNeutronBk2BkExpConvPV();
     virtual ~ThermalNeutronBk2BkExpConvPV();
 
-    /// overwrite IPeakFunction base class methods
-    virtual double centre()const;
-    virtual double height()const;
-    virtual double fwhm()const;
-
-    virtual void setHeight(const double h);
-
-    /// overwrite IFunction base class methods
+    /// Overwrite IFunction base class methods
     std::string name()const{return "ThermalNeutronBk2BkExpConvPV";}
     virtual const std::string category() const { return "Peak";}
 
-    /// Reset FWHM such that FWHM will be recalculated
-    void resetFWHM();
+    /// Overwrite IPeakFunction base class methods
+    virtual double centre()const;
+    virtual double height()const;
+    virtual double fwhm()const;
+    virtual void setHeight(const double h);
 
+    //------- ThermalNeutron peak function special -----------------------
     /// Set Miller Indicies
     void setMillerIndex(int h, int k, int l);
 
@@ -67,31 +64,25 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     double getPeakParameters(std::string);
 
     /// Calculate peak parameters (alpha, beta, sigma2..)
-    void calculateParameters(double& tof_h, double& eta, double& alpha, double& beta, double& H,
+    void calculateParameters(double& dh, double& tof_h, double& eta, double& alpha, double& beta, double& H,
                              double &sigma2, double& gamma, double &N, bool explicitoutput) const;
 
   protected:
-
+    /// Overwrite IFunction
     virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
     virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);
     virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
 
-    /// overwrite IFunction base class method, which declare function parameters
+    /// Overwrite IFunction base class method, which declare function parameters
     virtual void init();
 
   private:
-
     /// Static reference to the logger class
     static Kernel::Logger& g_log;
 
-    /// Integral for gamma
-    std::complex<double> E1(std::complex<double> z) const;
-
+    //--------  Private Functions -----------------------------------
     /// Calcualte H and Eta
     void calHandEta(double sigma2, double gamma, double& H, double& eta) const;
-
-    /// Calcualte d-spacing value from Miller Indices for cubic
-    double calCubicDSpace(double a, int h, int k, int l) const;
 
     /// Calculate peak center
     double calPeakCenter() const;
@@ -118,6 +109,20 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
 
 /// Shared pointer to ThermalNeutronBk2BkExpConvPV peak/function
 typedef boost::shared_ptr<ThermalNeutronBk2BkExpConvPV> ThermalNeutronBk2BkExpConvPV_sptr;
+
+//--- Public inline function --------------------------------------------------
+/** Calculate d = a/sqrt(h**2+k**2+l**2)
+  */
+inline double calCubicDSpace(double a, int h, int k, int l)
+{
+    // TODO This function will be refactored in future.
+    double d = a/( sqrt(double(h*h)+double(k*k)+double(l*l)) );
+
+    return d;
+}
+
+/// Integral for Gamma
+std::complex<double> E1(std::complex<double> z);
 
 } // namespace CurveFitting
 } // namespace Mantid

@@ -78,10 +78,16 @@ void ThermalNeutronBk2BkExpConvPV::init()
   mParameters.insert(std::make_pair("Gamma", 1.0));
   mParameters.insert(std::make_pair("Sigma2", 1.0));
   mParameters.insert(std::make_pair("FWHM", 1.0));
+  mParameters.insert(make_pair("d_h", 1.0));
 
   return;
 }
 
+//------------- Public Functions (Overwrite) Set/Get ---------------------------------------------
+
+
+
+//------------- Public Functions (New) Set/Get ---------------------------------------------------
 /** Set Miller Indices for this peak
  */
 void ThermalNeutronBk2BkExpConvPV::setMillerIndex(int h, int k, int l)
@@ -102,8 +108,10 @@ void ThermalNeutronBk2BkExpConvPV::setMillerIndex(int h, int k, int l)
 
   if (mH*mH + mK*mK + mL*mL < 1.0E-8)
   {
-    g_log.error() << "H = K = L = 0 is not allowed" << std::endl;
-    throw std::invalid_argument("H=K=L=0 is not allowed for a peak.");
+    stringstream errmsg;
+    errmsg << "H = K = L = 0 is not allowed";
+    g_log.error(errmsg.str());
+    throw std::invalid_argument(errmsg.str());
   }
 
   return;
@@ -120,10 +128,36 @@ void ThermalNeutronBk2BkExpConvPV::getMillerIndex(int& h, int &k, int &l)
   return;
 }
 
+
+/** Get peak parameters stored locally
+ * Get some internal parameters values including
+ * (a) Alpha, (b) Beta, (c) Gamma, (d) Sigma2
+ * Exception: if the peak profile parameter is not in this peak, then
+ *            return an Empty_DBL
+ */
+double ThermalNeutronBk2BkExpConvPV::getPeakParameters(std::string paramname)
+{
+  std::map<std::string, double>::iterator mit;
+  mit = mParameters.find(paramname);
+  double paramvalue;
+  if (mit == mParameters.end())
+  {
+    g_log.warning() << "Parameter " << paramname << " does not exist in peak profile. " << std::endl;
+    paramvalue = Mantid::EMPTY_DBL();
+  }
+  else
+  {
+    paramvalue = mit->second;
+  }
+
+  return paramvalue;
+}
+
+//------------- Public Functions (Overwrite) Calculation ---------------------------------------------
 /** Calculate peak parameters (fundamential Back-to-back PV),including
   * alpha, beta, sigma^2, eta, H
   */
-void ThermalNeutronBk2BkExpConvPV::calculateParameters(double& tof_h, double& eta, double& alpha, double& beta,
+void ThermalNeutronBk2BkExpConvPV::calculateParameters(double& dh, double& tof_h, double& eta, double& alpha, double& beta,
                                                        double& H, double &sigma2, double &gamma, double& N, bool explicitoutput) const
 {
   // 1. Get parameters (class)
@@ -151,7 +185,7 @@ void ThermalNeutronBk2BkExpConvPV::calculateParameters(double& tof_h, double& et
   double latticeconstant = getParameter("LatticeConstant");
 
   // 2. Calcualte Peak Position d-spacing and TOF
-  double dh = calCubicDSpace(latticeconstant, mH, mK, mL);
+  dh = calCubicDSpace(latticeconstant, mH, mK, mL);
 
   // 3. Calculate all the parameters
   // i. Start to calculate alpha, beta, sigma2, gamma,
@@ -183,6 +217,7 @@ void ThermalNeutronBk2BkExpConvPV::calculateParameters(double& tof_h, double& et
   mParameters["Sigma2"] = sigma2;
   mParameters["Gamma"] = gamma;
   mParameters["FWHM"] = H;
+  mParameters["d_h"] = dh;
 
   // 5. Debug output
   if (explicitoutput)
@@ -199,6 +234,8 @@ void ThermalNeutronBk2BkExpConvPV::calculateParameters(double& tof_h, double& et
   return;
 }
 
+//------------- Private Functions (Overwrite) Calculation ---------------------------------------------
+
 /** Override function1D
  */
 void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xValues, size_t nData) const
@@ -206,8 +243,8 @@ void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xVal
   // 1. Calculate peak parameters
   double height = getParameter("Height");
 
-  double tof_h, alpha, beta, H, sigma2, eta, N, gamma;
-  this->calculateParameters(tof_h, eta, alpha, beta, H, sigma2, gamma, N, false);
+  double d_h, tof_h, alpha, beta, H, sigma2, eta, N, gamma;
+  this->calculateParameters(d_h, tof_h, eta, alpha, beta, H, sigma2, gamma, N, false);
 
   // cout << "DBx212:  eta = " << eta << ", gamma = " << gamma << endl;
 
@@ -224,7 +261,7 @@ void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xVal
       // Output with error
       g_log.error() << "Calcuate Peak " << mH << ", " << mK << ", " << mL << " wrong!" << std::endl;
       bool explicitoutput = true;
-      calculateParameters(tof_h, eta, alpha, beta, H, sigma2, gamma, N, explicitoutput);
+      calculateParameters(d_h, tof_h, eta, alpha, beta, H, sigma2, gamma, N, explicitoutput);
       calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma, explicitoutput);
 
       out[id] = DBL_MAX;
@@ -234,46 +271,6 @@ void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xVal
       out[id] = height*omega;
     }
   } // ENDFOR data points
-
-  return;
-}
-
-/** Calculate d = a/sqrt(h**2+k**2+l**2)
- */
-double ThermalNeutronBk2BkExpConvPV::calCubicDSpace(double a, int h, int k, int l) const
-{
-    // TODO This function will be refactored in future.
-    double hklfactor = sqrt(double(h*h)+double(k*k)+double(l*l));
-    double d = a/hklfactor;
-    // g_log.debug() << "DB143 a = " << a << " (HKL) = " << h << ", " << k << ", " << l << ": d = " << d << std::endl;
-
-    return d;
-}
-
-/** Calcualte H and eta for the peak
- */
-void ThermalNeutronBk2BkExpConvPV::calHandEta(double sigma2, double gamma, double& H, double& eta) const
-{
-  // 1. Calculate H
-  // FIXME
-  // LOOK@ WHY NO CHANGE IN PLOT WITH DIFFERENT H AND SIMGA?
-
-  double H_G = sqrt(8.0 * sigma2 * log(2.0));
-  double H_L = gamma;
-
-  double temp1 = std::pow(H_L, 5) + 0.07842*H_G*std::pow(H_L, 4) + 4.47163*std::pow(H_G, 2)*std::pow(H_L, 3) +
-      2.42843*std::pow(H_G, 3)*std::pow(H_L, 2) + 2.69269*std::pow(H_G, 4)*H_L + std::pow(H_G, 5);
-
-  H = std::pow(temp1, 0.2);
-
-  // 2. Calculate eta
-  double gam_pv = H_L/H;
-  eta = 1.36603 * gam_pv - 0.47719 * std::pow(gam_pv, 2) + 0.11116 * std::pow(gam_pv, 3);
-
-  if (eta > 1 || eta < 0)
-  {
-    g_log.error() << "Calculated eta = " << eta << " is out of range [0, 1]." << std::endl;
-  }
 
   return;
 }
@@ -296,8 +293,13 @@ void ThermalNeutronBk2BkExpConvPV::functionDeriv(const API::FunctionDomain& doma
  */
 double ThermalNeutronBk2BkExpConvPV::centre()const
 {
-  double tof_h = calPeakCenter();
+  double dh, tof_h, eta, alpha, beta, H, sigma, gamma, N;
+  calculateParameters(dh, tof_h, eta, alpha, beta, H, sigma, gamma, N, false);
+
   return tof_h;
+
+  // double tof_h = calPeakCenter();
+  // return tof_h;
 }
 
 /** Set peak center.  Not allowed
@@ -328,6 +330,13 @@ double ThermalNeutronBk2BkExpConvPV::height() const
  */
 double ThermalNeutronBk2BkExpConvPV::fwhm() const
 {
+  double dh, tof_h, eta, alpha, beta, H, sigma, gamma, N;
+
+  calculateParameters(dh, tof_h, eta, alpha, beta, H, sigma, gamma, N, false);
+
+  return H;
+
+  /*
   // 1. Get peak parameter
   double sig0 = getParameter("Sig0");
   double sig1 = getParameter("Sig1");
@@ -348,6 +357,7 @@ double ThermalNeutronBk2BkExpConvPV::fwhm() const
   calHandEta(sigma2, gamma, H, eta);
 
   return H;
+  */
 }
 
 /** Set peak's FWHM
@@ -359,9 +369,9 @@ void ThermalNeutronBk2BkExpConvPV::setFwhm(const double w)
 }
 
 /** Calculate peak's center
- */
 double ThermalNeutronBk2BkExpConvPV::calPeakCenter() const
 {
+
   // 1. Get parameters
   double latticeconstant = getParameter("LatticeConstant");
   double wcross = getParameter("Width");
@@ -393,6 +403,34 @@ double ThermalNeutronBk2BkExpConvPV::calPeakCenter() const
   }
 
   return tof_h;
+}
+*/
+
+
+//-------------  Private Function To Calculate Peak Profile --------------------------------------------
+/** Calcualte H and eta for the peak
+ */
+void ThermalNeutronBk2BkExpConvPV::calHandEta(double sigma2, double gamma, double& H, double& eta) const
+{
+  // 1. Calculate H
+  double H_G = sqrt(8.0 * sigma2 * log(2.0));
+  double H_L = gamma;
+
+  double temp1 = std::pow(H_L, 5) + 0.07842*H_G*std::pow(H_L, 4) + 4.47163*std::pow(H_G, 2)*std::pow(H_L, 3) +
+      2.42843*std::pow(H_G, 3)*std::pow(H_L, 2) + 2.69269*std::pow(H_G, 4)*H_L + std::pow(H_G, 5);
+
+  H = std::pow(temp1, 0.2);
+
+  // 2. Calculate eta
+  double gam_pv = H_L/H;
+  eta = 1.36603 * gam_pv - 0.47719 * std::pow(gam_pv, 2) + 0.11116 * std::pow(gam_pv, 3);
+
+  if (eta > 1 || eta < 0)
+  {
+    g_log.warning() << "Calculated eta = " << eta << " is out of range [0, 1]." << std::endl;
+  }
+
+  return;
 }
 
 
@@ -469,9 +507,10 @@ double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, do
   return omega;
 }
 
+//-------------------------  External Functions ---------------------------------------------------
 /** Implementation of complex integral E_1
  */
-std::complex<double> ThermalNeutronBk2BkExpConvPV::E1(std::complex<double> z) const
+std::complex<double> E1(std::complex<double> z)
 {
   std::complex<double> e1;
 
@@ -525,30 +564,6 @@ std::complex<double> ThermalNeutronBk2BkExpConvPV::E1(std::complex<double> z) co
   }
 
   return e1;
-}
-
-
-/*
- * Get peak parameters stored locally
- * Get some internal parameters values including
- * (a) Alpha, (b) Beta, (c) Gamma, (d) Sigma2
- */
-double ThermalNeutronBk2BkExpConvPV::getPeakParameters(std::string paramname)
-{
-    std::map<std::string, double>::iterator mit;
-    mit = mParameters.find(paramname);
-    double paramvalue;
-    if (mit == mParameters.end())
-    {
-        g_log.error() << "Parameter " << paramname << " does not exist in peak profile. " << std::endl;
-        paramvalue = Mantid::EMPTY_DBL();
-    }
-    else
-    {
-        paramvalue = mit->second;
-    }
-
-    return paramvalue;
 }
 
 } // namespace CurveFitting
