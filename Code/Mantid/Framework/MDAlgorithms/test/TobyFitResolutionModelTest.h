@@ -65,7 +65,7 @@ class TobyFitResolutionModelTest : public CxxTest::TestSuite
       TobyFitResolutionModel mdconvolution;
       mdconvolution.initialize();
 
-      TS_ASSERT_EQUALS(mdconvolution.nAttributes(), 13);
+      TS_ASSERT_EQUALS(mdconvolution.nAttributes(), 14);
     }
 
     void test_crossSection_Returns_Expected_Value_For_Specific_Parameters()
