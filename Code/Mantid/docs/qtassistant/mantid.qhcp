@@ -7,7 +7,7 @@
          <enableFilterFunctionality>false</enableFilterFunctionality>
          <enableDocumentationManager>true</enableDocumentationManager>
          <enableAddressBar visible="true">false</enableAddressBar>
-         <cacheDirectory>mantidproject/mantid</cacheDirectory>
+         <cacheDirectory>mantidproject</cacheDirectory>
          <aboutMenuText>
              <text>About Mantid</text>
          </aboutMenuText>
@@ -23,7 +23,7 @@
                  <output>mantidgeneral.qch</output>
              </file>
              <file>
-                 <input>src/algorithms.qhp</input>
+                 <input>generated/algorithms.qhp</input>
                  <output>algorithms.qch</output>
              </file>
          </generate>
