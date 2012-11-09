@@ -3,7 +3,8 @@
 """
 from _api import (FrameworkManagerImpl, AnalysisDataServiceImpl, 
                   AlgorithmFactoryImpl, AlgorithmManagerImpl,
-                  FileFinderImpl, WorkspaceFactoryImpl, 
+                  FileFinderImpl, FunctionFactoryImpl,
+                  WorkspaceFactoryImpl, 
                   PropertyManagerDataServiceImpl)
 
 ###############################################################################
@@ -20,6 +21,8 @@ AlgorithmFactory = AlgorithmFactoryImpl.Instance()
 AlgorithmManager = AlgorithmManagerImpl.Instance()
 
 FileFinder = FileFinderImpl.Instance()
+
+FunctionFactory = FunctionFactoryImpl.Instance()
 
 WorkspaceFactory = WorkspaceFactoryImpl.Instance()
 

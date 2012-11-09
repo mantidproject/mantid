@@ -48,6 +48,7 @@ set ( EXPORT_FILES
   src/Exports/Run.cpp
   src/Exports/WorkspaceFactory.cpp
   src/Exports/PropertyManagerDataService.cpp
+  src/Exports/FunctionFactory.cpp
 )  
 
 # Files containing additional helper code that are not related to exporting class/functions
