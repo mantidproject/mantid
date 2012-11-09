@@ -121,7 +121,6 @@ Workspace_sptr EQSANSReduce::postProcess(Workspace_sptr workspace)
 {
   // Construct the script's output workspace name
   const std::string outputIq = workspace->name() + "_Iq";
-  const std::string outputWSName = getPropertyValue("OutputWorkspace");
 
   // Write the Reducer python script to be executed
   std::string script = "import reduction.instruments.sans.sns_command_interface as cmd\n";

@@ -501,7 +501,7 @@ namespace Mantid
       Kernel::DateAndTime start_time = Kernel::DateAndTime(start);
       std::string time_units;
       file.getAttr("units", time_units);
-      if( time_units.find("second") != 0 && time_units != "s"
+      if( time_units.compare("second") < 0 && time_units != "s"
           && time_units != "minutes" ) //Can be s/second/seconds/minutes
       {
         file.closeData();

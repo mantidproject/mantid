@@ -1297,7 +1297,7 @@ namespace CurveFitting
     compfunction->addFunction(background);
 
     // iv.  Calculate the composite function
-    if (tofs.size() == 0)
+    if (tofs.empty())
     {
       g_log.warning() << "[CalculateSinglePeak] Domain Size (number of TOF points) = 0" << endl;
       return;

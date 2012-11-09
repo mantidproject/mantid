@@ -32,6 +32,7 @@ typedef struct
 	int pad[1];
 	// cppcheck-suppress unusedStructMember
 	char user[32];
+	// cppcheck-suppress unusedStructMember
 	char host[64];
 }  isisds_open_t;
 

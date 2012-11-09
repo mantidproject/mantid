@@ -63,7 +63,6 @@ QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
   {
     for(int i = 0; i < m_wsNames.size(); i++)
     {
-      std::set<int> intSet = m_spectraIdChoice.getIntSet();
       // Convert the spectra choices of the user into workspace indices for us to use.
       Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(m_wsNames[i].toStdString()));
       if ( NULL == ws ) continue;

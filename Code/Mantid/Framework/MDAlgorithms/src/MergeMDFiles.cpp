@@ -336,7 +336,6 @@ namespace MDAlgorithms
       for (size_t i=0; i<files.size(); i++)
         files[i]->close();
       throw;
-      return;
     }
 
     // This is how many boxes are in all the files.

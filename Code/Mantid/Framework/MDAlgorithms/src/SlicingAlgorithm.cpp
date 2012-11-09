@@ -789,9 +789,8 @@ namespace MDAlgorithms
     { z = x.cross_prod(y); z.normalize(); }
 
     // Point that is sure to be inside the volume of interest
-    VMD insidePoint = (o1 + o2) / 2.0;      VMD normal = bases[0];
-
-    std::vector<VMD> points;
+    VMD insidePoint = (o1 + o2) / 2.0;
+    VMD normal = bases[0];
 
     if (boxDim == 1)
     {

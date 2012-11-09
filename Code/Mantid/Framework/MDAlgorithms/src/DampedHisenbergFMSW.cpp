@@ -68,7 +68,6 @@ namespace Mantid
       const double qh = qhkl[0]; //
       const double qk = qhkl[1];
       const double ql = qhkl[2];
-      const double t2mev = 1.0/11.6045;
 
       const double amp = params[0];
       const double gap = params[1];
@@ -96,7 +95,10 @@ namespace Mantid
       if ( ! m_lovesey )
         gamma = gam;
       else
+      {
+        const double t2mev = 1.0/11.6045;
         gamma = dampingScale*gam * js1*gamFM ((wdisp-gap)/js1, t2mev*temp/js1, spin);
+      }
 
       //    Calculate the weight:
       double weight;
@@ -138,13 +140,19 @@ namespace Mantid
       //     gamFM   gam / 2JS
       //
       double zi,gamFm;
-      const double clo=8.0*2.153733998748905e-4, chi=8.0*1.497758900089e-4, zi0=5.009958e-2;
+      const double zi0=5.009958e-2;
 
       zi = e/t;
       if (fabs(zi) > zi0)
+      {
+        const double chi=8.0*1.497758900089e-4;
         gamFm = (chi/pow(s,2)) * pow(t,4) * sqrt(pow(fabs(zi),3));
+      }
       else
+      {
+        const double clo=8.0*2.153733998748905e-4;
         gamFm = (clo/pow(s,2)) * pow(t,4) * (pow(zi,2))*( pow(log(fabs(zi)),2)/6.0 - log(fabs(zi))/1.8 - 0.05 );
+      }
 
       return gamFm;
     }

@@ -217,6 +217,8 @@ namespace MDEvents
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
     signal_t thresholdDensity = 0.0;
     thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor * densityScalingFactor;
+    // cppcheck get confused by NaN check
+    // cppcheck-suppress duplicateExpression
     if ((thresholdDensity != thresholdDensity) || (thresholdDensity == std::numeric_limits<double>::infinity())
         || (thresholdDensity == -std::numeric_limits<double>::infinity()))
     {

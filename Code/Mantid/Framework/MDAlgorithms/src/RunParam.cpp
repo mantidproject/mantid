@@ -601,7 +601,7 @@ namespace Mantid
                         c13= 1.0598968932302265636e-08;
 
            const double ax=x/tauF;
-           double funAx, funGx;
+           double funAx;
            if(fabs(ax)<=0.1)
            {
              funAx = c3+ax*(c4+ax*(c5+ax*(c6+ax*(c7+ax*(c8+ax*(c9+ax*(c10+ax*(c11+ax*(c12+ax*c13)))))))));
@@ -610,6 +610,7 @@ namespace Mantid
              funAx = (1.0 - exp(-(ax))*(1.0+(ax)+0.5*(ax*ax))) / (ax*ax*ax);
            if(tauS!=0. && r!=0.)
            {
+             double funGx;
              const double gx=x*(1.0/tauF - 1.0/tauS);
              if(gx<0.1)
                funGx = c3+gx*(c4+gx*(c5+gx*(c6+gx*(c7+gx*(c8+gx*(c9+gx*(c10+gx*(c11+gx*(c12+gx*c13)))))))));

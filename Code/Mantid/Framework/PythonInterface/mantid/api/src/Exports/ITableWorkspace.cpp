@@ -87,6 +87,8 @@ namespace
     }
     // -- Use the boost preprocessor to generate a list of else if clause to cut out copy
     // and pasted code.
+    // I think cppcheck is getting confused by the define
+    // cppcheck-suppress unreadVariable
     const std::type_info & typeID = column->get_type_info();
     if(false){} // So that it always falls through to the list checking
     BOOST_PP_LIST_FOR_EACH(SET_CELL, _ , BUILTIN_TYPES)

@@ -731,7 +731,7 @@ void File::getData(vector<NumT>& data) {
   // determine the number of elements
   int length=1;
   for (vector<int>::const_iterator it = info.dims.begin();
-       it != info.dims.end(); it++) {
+       it != info.dims.end(); ++it) {
     length *= *it;
   }
 

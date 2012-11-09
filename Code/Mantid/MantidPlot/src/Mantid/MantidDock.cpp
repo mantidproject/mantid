@@ -818,9 +818,9 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
 {
   //This will only ever be of size zero or one
   QList<QTreeWidgetItem *> name_matches = m_tree->findItems(ws_name,Qt::MatchFixedString);
-  QTreeWidgetItem *parent_item(NULL);
   if( name_matches.isEmpty() )
-  {	 
+  {
+    QTreeWidgetItem *parent_item(NULL);
     //   if there are  no toplevel items in three matching the workspace name ,loop through
     //  all child elements 
     int topitemCounts = m_tree->topLevelItemCount();
@@ -843,8 +843,7 @@ void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
         if(!ws_name.compare(childItem->text(0)))
         {
           topItem->takeChild(chIndex);
-		  parent_item = topItem;
-		 
+          parent_item = topItem;
         }
       }
     }
@@ -1844,18 +1843,12 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other)const
           return false;
         }
       }
-      else if (childCount() == 0 && other.childCount() > 0)
-      {
-        return false;
-      }
-      else
-      {
-        return false;
-      }
-    } catch (Mantid::Kernel::Exception::NotFoundError&)
-    {
-      return false;
     }
+    catch (Mantid::Kernel::Exception::NotFoundError&)
+    {
+      ;
+    }
+    return false;
   }
 }
 

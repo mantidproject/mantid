@@ -422,7 +422,6 @@ void CompAssembly::testIntersectionWithChildren(Track & testRay, std::deque<ICom
  */
 void CompAssembly::printChildren(std::ostream& os) const
 {
-  std::vector<IComponent*>::const_iterator it;
   for (int i=0;i<nelements();i++)
   {
       boost::shared_ptr<IComponent> it = (*this)[i];
@@ -439,7 +438,6 @@ void CompAssembly::printChildren(std::ostream& os) const
  */
 void CompAssembly::printTree(std::ostream& os) const
 {
-  std::vector<IComponent*>::const_iterator it;
   for (int i=0;i<nelements();i++)
   {
     boost::shared_ptr<IComponent> it = (*this)[i];

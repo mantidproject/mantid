@@ -89,7 +89,6 @@ MatrixWorkspace_sptr SANSBeamFinder::loadBeamFinderFile(const std::string& beamC
       loadAlg->setProperty("ReductionProperties", reductionManagerName);
       loadAlg->executeAsSubAlg();
       finderWS = loadAlg->getProperty("OutputWorkspace");
-      const std::string outMsg = loadAlg->getProperty("OutputMessage");
       m_output_message += "   |Loaded " + beamCenterFile + "\n";
       std::string msg = loadAlg->getPropertyValue("OutputMessage");
       m_output_message += "   |" + Poco::replace(msg, "\n", "\n   |") + "\n";

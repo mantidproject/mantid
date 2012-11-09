@@ -326,7 +326,6 @@ namespace MDEvents
 
     // Extract data from the file, excluding comment lines.
     std::string line;
-    std::vector<std::string> myLines;
     while (std::getline(file, line))
     {
       if(std::string::npos == line.find_first_of(CommentLineStartFlag()))
