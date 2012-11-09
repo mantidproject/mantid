@@ -142,8 +142,10 @@ namespace Mantid
       int m_mcType;
       /// Tolerance for relative error. Loop breaks out when this is reached
       double m_mcRelErrorTol;
+      /// Flags whether we should only include the foreground model
+      bool m_foregroundOnly;
       /// Flag for including crystal mosaic
-      int m_mosaicActive;
+      bool m_mosaicActive;
 
       /// A pre-sized matrix for the resolution coefficients
       mutable std::vector<TobyFitBMatrix> m_bmatrix;

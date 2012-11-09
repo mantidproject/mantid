@@ -29,11 +29,12 @@ namespace Mantid
     namespace // anonymous
     {
       /// Map strings to attributes names
+      const char * CRYSTAL_MOSAIC = "CrystalMosaic";
       const char * MC_MIN_NAME = "MCLoopMin";
       const char * MC_MAX_NAME = "MCLoopMax";
       const char * MC_LOOP_TOL = "MCTolerance";
       const char * MC_TYPE = "MCType";
-      const char * CRYSTAL_MOSAIC = "CrystalMosaic";
+      const char * FOREGROUNDONLY_NAME = "ForegroundOnly";
     }
 
     /*
@@ -41,9 +42,8 @@ namespace Mantid
      */
     TobyFitResolutionModel::TobyFitResolutionModel()
       : MDResolutionConvolution(), m_randomNumbers(),
-        m_activeAttrValue(1),
         m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4),m_mcRelErrorTol(1e-5),
-        m_mosaicActive(1),
+        m_foregroundOnly(false), m_mosaicActive(true),
         m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
         m_exptCache()
     {
@@ -57,8 +57,8 @@ namespace Mantid
     TobyFitResolutionModel::TobyFitResolutionModel(const API::IFunctionMD & fittedFunction,
                                                                      const std::string & fgModel)
       : MDResolutionConvolution(fittedFunction, fgModel), m_randomNumbers(),
-        m_activeAttrValue(1),
-        m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4), m_mcRelErrorTol(1e-5), m_mosaicActive(1),
+        m_mcLoopMin(100), m_mcLoopMax(1000),  m_mcType(4), m_mcRelErrorTol(1e-5),
+        m_foregroundOnly(false), m_mosaicActive(true),
         m_bmatrix(), m_yvector(), m_etaInPlane(), m_etaOutPlane(), m_deltaQE(),
         m_exptCache()
     {
@@ -92,6 +92,18 @@ namespace Mantid
       auto iter = m_exptCache.find(std::make_pair(innerRunIndex, box.getInnerDetectorID(eventIndex))); // Guaranteed to exist
       const CachedExperimentInfo & detCachedExperimentInfo = *(iter->second);
       QOmegaPoint qOmega(box, eventIndex);
+
+      if(m_foregroundOnly)
+      {
+        std::vector<double> & nominalQ = m_deltaQE[PARALLEL_THREAD_NUMBER];
+        nominalQ[0] = qOmega.qx;
+        nominalQ[1] = qOmega.qy;
+        nominalQ[2] = qOmega.qz;
+        nominalQ[3] = qOmega.deltaE;
+        return foregroundModel().scatteringIntensity(detCachedExperimentInfo.experimentInfo(), nominalQ);
+      }
+
+      // -- Add in perturbations to nominal Q from instrument resolution --
 
       // Calculate the matrix of coefficients that contribute to the resolution function (the B matrix in TobyFit).
       calculateResolutionCoefficients(detCachedExperimentInfo, qOmega);
@@ -136,14 +148,14 @@ namespace Mantid
       // Resolution attributes, all on by default
       TobyFitYVector resolutionVector;
       resolutionVector.addAttributes(*this);
-
       // Crystal mosaic
-      declareAttribute(CRYSTAL_MOSAIC, IFunction::Attribute(m_activeAttrValue));
+      declareAttribute(CRYSTAL_MOSAIC, IFunction::Attribute(m_mosaicActive ? 1 : 0));
 
       declareAttribute(MC_MIN_NAME, API::IFunction::Attribute(m_mcLoopMin));
       declareAttribute(MC_MAX_NAME, API::IFunction::Attribute(m_mcLoopMax));
       declareAttribute(MC_TYPE, API::IFunction::Attribute(m_mcType));
       declareAttribute(MC_LOOP_TOL, API::IFunction::Attribute(m_mcRelErrorTol));
+      declareAttribute(FOREGROUNDONLY_NAME, API::IFunction::Attribute(m_foregroundOnly ? 1 : 0));
     }
 
     /**
@@ -174,7 +186,14 @@ namespace Mantid
                                        + boost::lexical_cast<std::string>(m_mcType));
         }
       }
-      else if(name == CRYSTAL_MOSAIC) m_mosaicActive = value.asInt();
+      else if(name == CRYSTAL_MOSAIC)
+      {
+        m_mosaicActive = (value.asInt() != 0);
+      }
+      else if(name == FOREGROUNDONLY_NAME)
+      {
+        m_foregroundOnly = (value.asInt() != 0);
+      }
       else
       {
         for(auto iter = m_yvector.begin(); iter != m_yvector.end(); ++iter)
