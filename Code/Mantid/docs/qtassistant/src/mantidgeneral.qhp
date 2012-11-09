@@ -7,7 +7,7 @@
              <section title="Mantid overview" ref="index.html"/>
              <section title="MantidPlot" ref="./mantidplot.html">
 	       <section title="User Interfaces" ref="./userui.html"/>
-	       <section title="Algorithms" ref="./algorithms.html"/>
+	       <section title="Algorithms" ref="algorithms_index.html"/>
 	       <section title="Fitting Functions" ref="./fitfunctions.html"/>
 	     </section>
              <section title="Mantid Python" ref="./mantidpython.html"/>
