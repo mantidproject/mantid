@@ -581,6 +581,14 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
   QString analysisMode = algDlg.getAnalysisMode();
   QString otherDimensions = algDlg.getOtherDimensions();
   QString preProcessedDetectors = algDlg.getPreprocessedDetectors();
+  if (preProcessedDetectors.toInt()==0) // no you do not need to preprocess detectors
+  {
+    preProcessedDetectors = QString("-");
+  }
+  else  // one wants to preprocess detectors.
+  {
+     preProcessedDetectors = QString("_PreprocDetectors");
+  }
   
   //2) Run ConvertToMDEvents on each workspace.
   QString fileNames;
@@ -594,7 +602,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
     if(keepWorkspaceInADS)
     {
       command = "try:\n"
-        "    ConvertToMD(InputWorkspace='%1',OutputWorkspace='%1_md',MaxRecursionDepth=1,MinRecursionDepth=1,OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',PreprocDetectorsWS='_PreprocDetectors')\n"
+        "    ConvertToMD(InputWorkspace='%1',OutputWorkspace='%1_md',MaxRecursionDepth=1,MinRecursionDepth=1,OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',PreprocDetectorsWS='%7')\n"
         "    SaveMD(InputWorkspace='%1_md', Filename=r'%8/%1_md.nxs',MakeFileBacked='1')\n"
         "except:\n"
         "    print 'FAIL'\n"
@@ -603,7 +611,7 @@ void CreateMDWorkspace::createMDWorkspaceClicked()
     else
     {
       command = "try:\n"
-        "    ConvertToMD(InputWorkspace='%1',OutputWorkspace='%1_md',MaxRecursionDepth=1,MinRecursionDepth=1,OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',PreprocDetectorsWS='_PreprocDetectors')\n"
+        "    ConvertToMD(InputWorkspace='%1',OutputWorkspace='%1_md',MaxRecursionDepth=1,MinRecursionDepth=1,OtherDimensions='%2',dEAnalysisMode='%3',QDimensions='%4',MinValues='%5',MaxValues='%6',PreprocDetectorsWS='%7')\n"
         "    SaveMD(InputWorkspace='%1_md', Filename=r'%8/%1_md.nxs',MakeFileBacked='1')\n"
         "    DeleteWorkspace(Workspace='%1_md')\n"
         "except:\n"
