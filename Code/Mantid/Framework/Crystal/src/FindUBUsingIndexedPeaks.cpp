@@ -116,7 +116,6 @@ namespace Crystal
     std::cout << "Error = " << error << std::endl;
     std::cout << "UB = " << UB << std::endl;
 
-    char logInfo[200];
     if ( ! IndexingUtils::CheckUB( UB ) ) // UB not found correctly
     {
       g_log.notice( std::string(
@@ -135,6 +134,7 @@ namespace Crystal
       double tolerance = 0.1;
       int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
 
+      char logInfo[200];
       sprintf( logInfo,
                std::string("New UB will index %1d Peaks out of %1d with tolerance %5.3f").c_str(),
                num_indexed, n_peaks, tolerance);

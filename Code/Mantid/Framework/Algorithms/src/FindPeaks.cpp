@@ -1049,7 +1049,6 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
   std::string fitStatus = fit->getProperty("OutputStatus");
   //std::vector<double> params = fit->getProperty("Parameters");
   m_backgroundFunction = fit->getProperty("Function");
-  std::vector<std::string> paramnames = m_backgroundFunction->getParameterNames();//fit->getProperty("ParameterNames");
 
   double a0(0.0), a1(0.0), a2(0.0);
 
@@ -1179,7 +1178,6 @@ void FindPeaks::fitPeakHighBackground(const API::MatrixWorkspace_sptr &input, co
     //std::vector<double> params = gfit->getProperty("Parameters");
     std::string fitpeakstatus = gfit->getProperty("OutputStatus");
     m_peakFunction = gfit->getProperty("Function");
-    std::vector<std::string> paramnames = m_peakFunction->getParameterNames();//gfit->getProperty("ParameterNames");
 
     g_log.information() << "Fit (Pure) Peak Status = " << fitpeakstatus << std::endl;
 

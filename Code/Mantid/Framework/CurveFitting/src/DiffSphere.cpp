@@ -216,7 +216,6 @@ void InelasticDiffSphere::calNumericalDeriv2(const API::FunctionDomain& domain, 
 
   FunctionValues minusStep(domain);
   FunctionValues plusStep(domain);
-  std::vector<double> params(nParam);
 
   //PARALLEL_CRITICAL(numeric_deriv)
   {

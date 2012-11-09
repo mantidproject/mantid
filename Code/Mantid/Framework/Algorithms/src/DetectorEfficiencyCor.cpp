@@ -361,8 +361,8 @@ void DetectorEfficiencyCor::getDetectorGeometry(boost::shared_ptr<const Geometry
   else
   {
     std::pair<double, V3D> geometry = it->second;
-    detRadius = it->second.first;
-    detAxis = it->second.second;
+    detRadius = geometry.first;
+    detAxis = geometry.second;
   }
 }
 

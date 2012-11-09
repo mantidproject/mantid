@@ -207,8 +207,6 @@ namespace Mantid
             logValue = logp->lastValue();
           }
 
-          std::string resFun = fun;
-          //std::vector<double> errors;
           double chi2;
 
           try
@@ -320,7 +318,6 @@ namespace Mantid
                 API::WorkspaceGroup_sptr gws = boost::dynamic_pointer_cast<API::WorkspaceGroup>(rws);
                 if (gws)
                 {
-                  std::vector<std::string> wsNames = gws->getNames();
                   std::string propName = "OUTPUTWORKSPACE_" + boost::lexical_cast<std::string>(data.period);
                   if (load->existsProperty(propName))
                   {

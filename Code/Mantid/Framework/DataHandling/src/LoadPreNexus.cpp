@@ -99,7 +99,6 @@ namespace DataHandling
     UNUSED_ARG(nread);
     UNUSED_ARG(header);
 
-    std::string ext = extension(filePath);
     return (filePath.compare(filePath.size()-12,12,"_runinfo.xml") == 0);
   }
 

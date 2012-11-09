@@ -312,7 +312,6 @@ public:
 
     //------------ Compress Events (or set sort order) ------------------
     // Do it on all the detector IDs we touched
-    std::set<size_t>::iterator it;
     for (detid_t pixID = 0; pixID <= alg->eventid_max; pixID++)
     {
       if (usedDetIds[pixID])
@@ -849,7 +848,6 @@ int LoadEventNexus::fileCheck(const std::string& filePath)
   typedef std::map<std::string,std::string> string_map_t; 
   try
   {
-    string_map_t::const_iterator it;
     ::NeXus::File file = ::NeXus::File(filePath);
     string_map_t entries = file.getEntries();
     for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)

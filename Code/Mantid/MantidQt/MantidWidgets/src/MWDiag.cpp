@@ -519,7 +519,6 @@ QString MWDiag::run(const QString &, const bool)
   // close any result window that is still there from a previous run, there might be nothing
   closeDialog();
   // prepare to remove any intermediate workspaces used only during the calculations
-  std::vector<std::string> tempOutputWS;
   QString prob1;
 
   if( !isInputValid() )

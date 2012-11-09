@@ -20,12 +20,17 @@ typedef enum { ISISDSUnknown = 0, ISISDSInt32 = 1, ISISDSReal32 = 2, ISISDSReal6
 typedef struct
 {
 	int len;
+	// cppcheck-suppress unusedStructMember
 	int ver_major;
+	// cppcheck-suppress unusedStructMember
 	int ver_minor;
+	// cppcheck-suppress unusedStructMember
 	int pid;
+	// cppcheck-suppress unusedStructMember
 	int access_type; /* 0 =dae, 1 = crpt */
   // cppcheck-suppress unusedStructMember
 	int pad[1];
+	// cppcheck-suppress unusedStructMember
 	char user[32];
 	char host[64];
 }  isisds_open_t;

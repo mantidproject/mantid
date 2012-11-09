@@ -164,7 +164,7 @@ void WorkspaceHistory::printSelf(std::ostream& os, const int indent)const
 void WorkspaceHistory::saveNexus(::NeXus::File * file) const
 {
   file->makeGroup("process", "NXprocess", true);
-  std::stringstream output,algorithmNumber;
+  std::stringstream output;
 
   // Environment history
   EnvironmentHistory envHist;
@@ -187,7 +187,7 @@ void WorkspaceHistory::saveNexus(::NeXus::File * file) const
   orderedHistMap ordMap;
   for(std::size_t i=0;i<this->size();i++)
   {
-    std::stringstream algNumber,algData;
+    std::stringstream algData;
     const API::AlgorithmHistory & entry = this->getAlgorithmHistory(i);
     entry.printSelf(algData);
 

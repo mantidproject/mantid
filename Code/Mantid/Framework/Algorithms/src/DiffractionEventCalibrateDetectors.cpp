@@ -409,9 +409,7 @@ namespace Algorithms
       outfile << "# Base and up give directions of unit vectors for a local\n";
       outfile << "# x,y coordinate system on the face of the detector.\n";
       outfile << "#\n";
-      std::time_t current_t = DateAndTime::getCurrentTime().to_time_t() ;
-      std::tm * current = gmtime( &current_t );
-      outfile << "# "<<asctime (current) <<"\n";
+      outfile << "# "<< DateAndTime::getCurrentTime().toFormattedString("%c") <<"\n";
       outfile << "#\n";
       outfile << "6         L1     T0_SHIFT\n";
       IObjComponent_const_sptr source = inst->getSource();

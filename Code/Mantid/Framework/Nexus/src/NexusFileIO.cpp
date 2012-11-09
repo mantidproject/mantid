@@ -673,10 +673,10 @@ using namespace DataObjects;
   void NexusFileIO::writeEventListData( std::vector<T> events, bool writeTOF, bool writePulsetime, bool writeWeight, bool writeError) const
   {
     // Do nothing if there are no events.
-    size_t num = events.size();
-    if (num <= 0)
+    if (events.empty())
       return;
 
+    size_t num = events.size();
     double * tofs = new double[num];
     double * weights = new double[num];
     double * errorSquareds = new double[num];

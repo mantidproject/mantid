@@ -99,7 +99,6 @@ namespace Mantid
      */
     void CreateDummyCalFile::exec()
     {
-      std::ostringstream mess;
       // Get the input workspace
       MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
       if (!inputW)

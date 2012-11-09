@@ -251,7 +251,6 @@ namespace Mantid
           fit_alg->setProperty("CreateOutput", true);
           fit_alg->setProperty("Output", "fit");
           fit_alg->executeAsSubAlg();
-          std::string wsname("fit_Workspace");
           MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
       
           /*double chisq = fit_alg->getProperty("OutputChi2overDoF");

@@ -92,7 +92,6 @@ namespace Mantid
  
       // Loop over peaks
       const std::vector<Peak> & peaks = peaksW->getPeaks();
-      std::vector <std::pair<double, int> >::iterator Iter1;
       for ( auto peak = peaks.begin(); peak != peaks.end(); ++peak )
       {
         // get the peak location on the detector

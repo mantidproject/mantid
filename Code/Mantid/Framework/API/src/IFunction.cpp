@@ -652,7 +652,6 @@ void IFunction::calNumericalDeriv(const FunctionDomain& domain, Jacobian& jacobi
 
   FunctionValues minusStep(domain);
   FunctionValues plusStep(domain);
-  std::vector<double> params(nParam);
 
   //PARALLEL_CRITICAL(numeric_deriv)
   {

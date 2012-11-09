@@ -472,7 +472,6 @@ namespace MantidQt
     {
       //get selected file name to download
       std::vector<std::string> fileNames;
-      std::vector<std::string> fileLocs;
       //get selected file from the Mantid-ICat interface to download
       getSelectedFileNames(fileNames);
       if(fileNames.empty())

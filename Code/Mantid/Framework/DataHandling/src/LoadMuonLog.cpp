@@ -94,7 +94,6 @@ void LoadMuonLog::exec()
     std::string logName=nxload.getLogName(i);
     TimeSeriesProperty<double> *l_PropertyDouble = new TimeSeriesProperty<double>(logName);
     TimeSeriesProperty<std::string> *l_PropertyString = new TimeSeriesProperty<std::string>(logName);
-    std::vector<double> logTimes;
 
     // Read log file into Property which is then stored in Sample object
     if(!nxload.logTypeNumeric(i))

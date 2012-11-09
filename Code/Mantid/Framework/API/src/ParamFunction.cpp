@@ -39,6 +39,8 @@ ParamFunction::~ParamFunction()
  */
 void ParamFunction::setParameter(size_t i, const double& value, bool explicitlySet)
 {
+  // Cppcheck confused by the check for NaN
+  // cppcheck-suppress duplicateExpression
   if (value != value || !(value > -DBL_MAX && value < DBL_MAX))
   {
     std::stringstream errmsg;

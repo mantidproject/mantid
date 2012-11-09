@@ -334,8 +334,8 @@ void He3TubeEfficiency::getDetectorGeometry(\
   else
   {
     std::pair<double, Kernel::V3D> geometry = it->second;
-    detRadius = it->second.first;
-    detAxis = it->second.second;
+    detRadius = geometry.first;
+    detAxis = geometry.second;
   }
 }
 

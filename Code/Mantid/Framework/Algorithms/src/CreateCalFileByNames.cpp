@@ -97,7 +97,6 @@ namespace Mantid
 
     void CreateCalFileByNames::exec()
     {
-      std::ostringstream mess;
       MatrixWorkspace_const_sptr ws = getProperty("InstrumentWorkspace");
 
       // Get the instrument.

@@ -267,7 +267,6 @@ namespace Algorithms
   void GenerateEventsFilter::setFilterByTimeOnly()
   {
     double timeinterval = this->getProperty("TimeInterval");
-    int wsindex = 0;
 
     // Progress
     int64_t totaltime = mStopTime.totalNanoseconds()-mStartTime.totalNanoseconds();
@@ -275,6 +274,7 @@ namespace Algorithms
 
     if (timeinterval <= 0.0)
     {
+      int wsindex = 0;
       // 1. Default and thus just one interval
       Kernel::SplittingInterval ti(mStartTime, mStopTime, 0);
       mSplitters->addSplitter(ti);

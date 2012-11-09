@@ -116,7 +116,6 @@ namespace Algorithms
 
     // 1. Get property
     eventWS = this->getProperty("InputEventWorkspace");
-    const std::string outputdir = this->getProperty("OutputDirectory");
 
     const std::string calfilename = this->getProperty("InputCalFile");
     double tempoffset = this->getProperty("SensorToSampleOffset");

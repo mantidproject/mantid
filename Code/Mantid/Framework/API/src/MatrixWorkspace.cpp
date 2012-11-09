@@ -589,7 +589,6 @@ namespace Mantid
       // We should expect that there is only one workspace index per detector ID.
       int numHistos = int(this->getNumberHistograms());
 
-      std::string error("");
       for (int i=0; i < numHistos; i++)
       {
         size_t workspaceIndex = size_t(i);

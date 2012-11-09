@@ -1478,7 +1478,6 @@ namespace MantidQt
       try
       {
         unsigned int startVal=values.at(0);
-        std::vector<unsigned int>::const_iterator citr;
         for(size_t i=1;i<values.size();++i)
         {
           if(values.at(i)==startVal+1)

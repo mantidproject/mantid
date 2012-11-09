@@ -926,8 +926,6 @@ namespace Crystal
     boost::shared_ptr<const ParameterMap> pmapOld = instrument->getParameterMap();
     boost::shared_ptr<const Instrument> NewInstrument( new Instrument( instrument->baseInstrument(), pmap));
 
-    string instName = instrument->getName();
-
     i = -1;
     std::cout<<"Ere set new values into instrument"<<std::endl;
     for( vector<vector< string > >::iterator itv = Groups.begin(); itv != Groups.end(); ++itv )

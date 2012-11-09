@@ -173,10 +173,6 @@ namespace DataHandling
       // Get the source (moderator)
       Geometry::IObjComponent_const_sptr source = instrument->getSource();
 
-
-      // Get a list of the NXdetectors in the NeXus file
-      std::vector<std::string> nxdetectors;
-
       // Open the NeXus file
       ::NeXus::File nxfile(m_filename, NXACC_RDWR);
 
