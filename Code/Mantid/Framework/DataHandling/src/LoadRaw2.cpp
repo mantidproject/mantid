@@ -114,7 +114,6 @@ namespace Mantid
 
       // Call private method to validate the optional parameters, if set
       checkOptionalProperties();
-           std::vector<Kernel::Property*> period1logProp;
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
       specid_t total_specs;

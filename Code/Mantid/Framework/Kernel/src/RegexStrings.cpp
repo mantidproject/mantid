@@ -227,15 +227,14 @@ int StrRemove(std::string& Sdx,std::string& Extract,const boost::regex& Re)
 
   boost::cmatch ans;
   if (boost::regex_search(Sdx.c_str(),ans,Re,boost::match_default))
-    {
-      if (!ans[0].matched)       // no match
-	return 0;
-      std::string xout(ans[0].first,ans[0].second);
-      Extract=std::string(ans[0].first,ans[0].second);
-      Sdx= std::string(Sdx.c_str(),ans[0].first)+
-	std::string(ans[0].second);
-      return 1;
-    }
+  {
+    if (!ans[0].matched)       // no match
+      return 0;
+    Extract=std::string(ans[0].first,ans[0].second);
+    Sdx= std::string(Sdx.c_str(),ans[0].first)+
+        std::string(ans[0].second);
+    return 1;
+  }
   return 0;
 }
 

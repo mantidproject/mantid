@@ -452,10 +452,9 @@ void GroupDetectors2::processXMLFile(std::string fname,
     {
       detid_t detid = detids[i];
       detid2index_map::iterator ind =detIdToWiMap->find(detid);
-      size_t wsid;
       if ( ind != detIdToWiMap->end() )
       {
-        wsid = ind->second;
+        size_t wsid = ind->second;
         wsindexes.push_back(wsid);
         if ( unUsedSpec[wsid] != ( 1000 - INT_MAX ) )
         {
@@ -487,10 +486,9 @@ void GroupDetectors2::processXMLFile(std::string fname,
     {
       int specid = spectra[i];
       spec2index_map::iterator ind = specs2index.find(specid);
-      size_t wsid;
       if ( ind != specs2index.end() )
       {
-        wsid = ind->second;
+        size_t wsid = ind->second;
         wsindexes.push_back(wsid);
         if ( unUsedSpec[wsid] != ( 1000 - INT_MAX ) )
         {

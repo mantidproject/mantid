@@ -97,7 +97,6 @@ static int getdat(idc_handle_t fh, int ifsn, int nos, int** value, int dims_arra
 	int spec_nos[2] = { ifsn, nos };
 	int spec_nos_dims[1] = { 2 };
 	char* command = NULL;
-	char comm_buffer[256];
 	if (isisds_send_command(fh->s, "GETDAT", spec_nos, ISISDSInt32, spec_nos_dims, 1) <= 0)
 	{
 		IDCreport(0, 0, "error sending command (getdat)");
@@ -110,6 +109,7 @@ static int getdat(idc_handle_t fh, int ifsn, int nos, int** value, int dims_arra
 	}
 	else
 	{
+	  char comm_buffer[256];
 		comm_buff_size = sizeof(comm_buffer);
 		stat = isisds_recv_command(fh->s, comm_buffer, &comm_buff_size, *value, &ret_type, dims_array, ndims);
 	}

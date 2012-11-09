@@ -169,9 +169,6 @@ namespace DataHandling
       dspace.push_back(read);
     }
 
-    // Selects (empty, will default to true)
-    std::map<detid_t, bool> selects;
-
     detid2det_map::const_iterator it;
     for (it = allDetectors.begin(); it != allDetectors.end(); ++it)
     {
@@ -217,9 +214,6 @@ namespace DataHandling
     // To get all the detector ID's
     detid2det_map allDetectors;
     instrument->getDetectors(allDetectors);
-
-    // Selects (empty, will default to true)
-    std::map<detid_t, bool> selects;
 
     detid2det_map::const_iterator it;
     int numfinds = 0;

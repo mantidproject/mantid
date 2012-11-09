@@ -341,8 +341,6 @@ API::Workspace_sptr LoadNexusProcessed::loadTableEntry(NXEntry & entry)
 
   NXData nx_tw = entry.openNXData("table_workspace");
 
-  std::vector<double> values;
-
   bool hasNumberOfRowBeenSet = false;
   //int numberOfRows = 0;
 

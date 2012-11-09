@@ -98,9 +98,6 @@ void LoadRawSpectrum0::initDocs()
 			std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec =
 				getTimeChannels(m_noTimeRegimes, m_lengthIn);
 
-			// Need to extract the user-defined output workspace name
-			const std::string localWSName = getPropertyValue("OutputWorkspace");
-
 			double histTotal = static_cast<double>(total_specs * m_numberOfPeriods);
 			int64_t histCurrent = -1;
 

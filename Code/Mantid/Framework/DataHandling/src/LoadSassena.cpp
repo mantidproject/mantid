@@ -313,7 +313,6 @@ void LoadSassena::init()
  */
 void LoadSassena::exec()
 {
-  const std::string gwsName = this->getPropertyValue("OutputWorkspace");
   API::WorkspaceGroup_sptr gws(new API::WorkspaceGroup);
 
   //populate m_validSets
@@ -337,7 +336,7 @@ void LoadSassena::exec()
     this->g_log.error("Unable to read version string:"+m_filename);
     //throw Kernel::Exception::FileError("Unable to read version string:" , m_filename);
   }
-  const std::string version(cversion);
+  //const std::string version(cversion);
   //determine which loader protocol to use based on the version
   //to be done at a later time, maybe implement a Version class
 

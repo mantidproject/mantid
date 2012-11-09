@@ -1207,6 +1207,7 @@ std::string ConfigServiceImpl::getPathToExecutable() const
 {
   std::string execpath("");
   const size_t LEN(1024);
+  // cppcheck-suppress variableScope
   char pBuf[LEN];
   
 #ifdef _WIN32

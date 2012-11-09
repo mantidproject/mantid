@@ -567,7 +567,7 @@ void LeBailFit::calBackground(size_t workspaceindex)
     } // FOR 1 Peak in PeaksGroup
 
     /// Background (Polynomial)
-    std::string backgroundtype = getProperty("BackgroundType");
+    //std::string backgroundtype = getProperty("BackgroundType");
     std::vector<double> orderparm;
     for (size_t iod = 0; iod <= size_t(bkgdfuncorder); ++iod)
     {

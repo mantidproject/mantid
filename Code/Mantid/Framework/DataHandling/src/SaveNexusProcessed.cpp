@@ -358,8 +358,7 @@ namespace DataHandling
   void SaveNexusProcessed::appendEventListData( std::vector<T> events, size_t offset, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes)
   {
     // Do nothing if there are no events.
-    size_t num = events.size();
-    if (num <= 0)
+    if (events.empty())
       return;
 
     typename std::vector<T>::const_iterator it;

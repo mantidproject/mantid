@@ -88,7 +88,6 @@ std::vector<ConventionalCell> ScalarUtils::GetCells(
                                                         bool        best_only )
 {
   std::vector<ConventionalCell> result;
-  std::vector<ConventionalCell> temp;
 
   size_t num_lattices = 15;
   for ( size_t i = 0; i < num_lattices; i++ )

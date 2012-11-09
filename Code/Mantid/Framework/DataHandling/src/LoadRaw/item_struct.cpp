@@ -42,8 +42,6 @@ template <typename T>
 int item_struct<T>::getItem(const std::string& item_name, long* spec_array, int nspec, T* lVal)
 {
 	int i, j, n;
-	std::string sitem_name;
-	std::string tmp_item;
 	const T* pVal = NULL;
 	const item_t* item;
 	item = findItem(item_name, false);
@@ -142,7 +140,6 @@ int item_struct<T>::getArrayItemSize(const std::string& item_name, int* dims_arr
 template <typename T>
 int item_struct<T>::getArrayItem(const std::string& item_name, long* spec_array, int nspec, T* larray)
 {
-	int i, j, k, n;
 	const item_t* item;
 	item = findItem(item_name, false);
 	if (item == NULL)
@@ -151,6 +148,7 @@ int item_struct<T>::getArrayItem(const std::string& item_name, long* spec_array,
 	}
 	if (item != NULL)
 	{
+	  int n;
 		if (item->dim1 == 0)
 		{
 			n = *(item->dim0);
@@ -159,9 +157,9 @@ int item_struct<T>::getArrayItem(const std::string& item_name, long* spec_array,
 		{
 			n = *(item->dim0) * *(item->dim1);
 		}
-		for(k=0; k<nspec; k++)
+		for(int k=0; k<nspec; k++)
 		{
-			for(j=0; j<n; j++)
+			for(int j=0; j<n; j++)
 			{
 				larray[j + k * n] = item->value[j];
 			}

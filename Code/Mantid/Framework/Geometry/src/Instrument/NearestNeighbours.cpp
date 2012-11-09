@@ -107,7 +107,6 @@ namespace Mantid
       m_radius = radius;
     
       std::map<detid_t, V3D> nearest = defaultNeighbours(spectrum);
-      std::map<specid_t, V3D>::const_iterator cend;
       for(std::map<specid_t, V3D>::const_iterator cit = nearest.begin();
           cit != nearest.end(); ++cit )
       {

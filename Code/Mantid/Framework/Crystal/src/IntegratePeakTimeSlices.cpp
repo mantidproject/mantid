@@ -861,7 +861,6 @@ namespace Mantid
               std::vector<double> params;
               std::vector<double> errs;
               std::vector<std::string> names;
-              vector<pair<double, double> > Bounds;
 
               if (AttributeValues->IsEnoughData( ParameterValues, g_log) && ParameterValues[ITINTENS] > 0)
               {

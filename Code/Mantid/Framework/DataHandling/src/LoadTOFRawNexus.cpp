@@ -104,7 +104,6 @@ int LoadTOFRawNexus::fileCheck(const std::string& filePath)
   bool hasData = false;
   try
   {
-    string_map_t::const_iterator it;
     ::NeXus::File file = ::NeXus::File(filePath);
     string_map_t entries = file.getEntries();
     for(string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it)

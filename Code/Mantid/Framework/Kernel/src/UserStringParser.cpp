@@ -58,7 +58,6 @@ namespace Mantid
 
       //look for  separators
       std::string separators("-+:");
-      std::vector<unsigned int>value;
       //if input contains no separator string 
       if(userString.find_first_of(separators)==std::string::npos)
       { 
@@ -178,7 +177,6 @@ namespace Mantid
       typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
       
       boost::char_separator<char> seps(delimiter.c_str());
-      std::vector<unsigned int> separatedValues;
       std::vector<std::string> temp;
       tokenizer tokens(input,seps);
       for(tokenizer::const_iterator tokItr=tokens.begin();tokItr!=tokens.end();++tokItr)

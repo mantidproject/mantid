@@ -339,7 +339,6 @@ static int isisds_recv_command_helper(SOCKET s, char** command, void** data, ISI
 /* return > 0 on success */
 int isisds_recv_command(SOCKET s, char* command, int* len_command, void* data, ISISDSDataType* type, int dims_array[], int* ndims)
 {
-    int t_dims[8] = { 1, 0, 0, 0, 0, 0, 0, 0 };
 	int t_ndims = 1;
 	int istat;
 	char* command_temp = NULL;
@@ -349,6 +348,7 @@ int isisds_recv_command(SOCKET s, char* command, int* len_command, void* data, I
 	}
 	if ( dims_array == NULL || ndims == NULL || (*ndims <= 1 && dims_array[0] <= 1) )
 	{
+	  int t_dims[8] = { 1, 0, 0, 0, 0, 0, 0, 0 };
 		/* assume single simple value */
 		istat = isisds_recv_command_helper(s, &command_temp, &data, type, t_dims, &t_ndims, 0);
 		if ( (t_ndims != 1) || (t_dims[0] != 1) )

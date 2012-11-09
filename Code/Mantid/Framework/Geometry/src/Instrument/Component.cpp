@@ -161,28 +161,14 @@ namespace Geometry
   {
     std::vector<boost::shared_ptr<const IComponent> > ancs;
 
-    if (m_isParametrized)
+    boost::shared_ptr<const IComponent> current = this->getParent();
+    while (current)
     {
-      boost::shared_ptr<const IComponent> current = this->getParent();
-      while (current)
-      {
-        ancs.push_back( current );
-        current = current->getParent();
-      }
+      ancs.push_back( current );
+      current = current->getParent();
     }
-    else
-    {
-      boost::shared_ptr<const IComponent> current = this->getParent();
-      while (current)
-      {
-        ancs.push_back( current );
-        current = current->getParent();
-      }
-    }
-
     return ancs;
   }
-
 
   //--------------------------------------------------------------------------------------------
   /** Set the name of the Component (currently does nothing)

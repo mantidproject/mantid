@@ -474,7 +474,7 @@ namespace Mantid
             UNUSED_ARG(detTimeBin);
             UNUSED_ARG(detWidth);
 
-            const double rt6 = 2.449489742783178098; // sqrt(6)
+
             int imc(0);
 
             // this may need to be optimised
@@ -510,7 +510,8 @@ namespace Mantid
                 yVec[4] = 0.0;
 
             if (m_mcOptVec[mcChopperJitter]) {
-                yVec[4] += + m_tjit_sig * rt6 * tridev(ranvec[imc++]);
+              const double rt6 = 2.449489742783178098; // sqrt(6)
+              yVec[4] += + m_tjit_sig * rt6 * tridev(ranvec[imc++]);
             }
 
             // Sample over crystal volume:

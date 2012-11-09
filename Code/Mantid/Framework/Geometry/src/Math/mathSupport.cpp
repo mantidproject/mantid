@@ -73,8 +73,8 @@ solveCubic(const CInputIter Coef,std::complex<double>& AnsA,
 {
   typedef std::complex<double> Cpair;
   double q,r;        /* solution parameters */
-  double s,t,termR,termI,discrim;
-  double q3,r13;
+  double termR,discrim;
+  double r13;
   std::pair<std::complex<double>,std::complex<double> > SQ;
 
   if ((*Coef)==0)
@@ -109,14 +109,14 @@ solveCubic(const CInputIter Coef,std::complex<double>& AnsA,
 
   if (discrim > 1e-13)  /* one root real, two are complex */
     { 
-      s = r + sqrt(discrim);
+      double s = r + sqrt(discrim);
       s = ((s < 0) ? -pow(-s, (1.0/3.0)) : pow(s, (1.0/3.0)));
-      t = r - sqrt(discrim);
+      double t = r - sqrt(discrim);
       t = ((t < 0) ? -pow(-t, (1.0/3.0)) : pow(t, (1.0/3.0)));
       AnsA=Cpair(-termR+s+t,0.0);
       // second real point.
       termR += (s + t)/2.0;
-      termI = sqrt(3.0)*(-t + s)/2;
+      double termI = sqrt(3.0)*(-t + s)/2;
       AnsB=Cpair(-termR,termI);
       AnsC=Cpair(-termR,-termI);
       return 3;
@@ -127,7 +127,7 @@ solveCubic(const CInputIter Coef,std::complex<double>& AnsA,
   if (discrim<1e-13) // All roots real 
     {
       q = -q;
-      q3 = q*q*q;
+      double q3 = q*q*q;
       q3 = acos(-r/sqrt(q3));
       r13 = -2.0*sqrt(q);
       AnsA=Cpair(-termR + r13*cos(q3/3.0),0.0);

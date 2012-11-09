@@ -142,7 +142,6 @@ namespace DataHandling
   int SaveToSNSHistogramNexus::copy_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access)
   {
     int nx_is_definition = 0;
-    char* tstr;
     links_count = 0;
     current_path[0] = '\0';
     NXlink link;
@@ -183,7 +182,7 @@ namespace DataHandling
         if (NXgetdataID(outId, &link) == NX_OK  || NXgetgroupID(outId, &link) == NX_OK)
         {
           if (NXopenpath(outId, links_to_make[i].from) != NX_OK) return NX_ERROR;
-          tstr = strrchr(links_to_make[i].to, '/');
+          char* tstr = strrchr(links_to_make[i].to, '/');
           if (!strcmp(links_to_make[i].name, tstr+1))
           {
             if (NXmakelink(outId, &link) != NX_OK) return NX_ERROR;

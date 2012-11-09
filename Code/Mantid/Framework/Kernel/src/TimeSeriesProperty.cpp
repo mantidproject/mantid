@@ -344,12 +344,12 @@ namespace Mantid
       // 0. Sort if necessary
       sort();
 
-      size_t numOutputs = outputs.size();
-      if (numOutputs <= 0)
+      if (outputs.empty())
         return;
 
       std::vector< TimeSeriesProperty<TYPE> *> outputs_tsp;
 
+      size_t numOutputs = outputs.size();
       // 1. Clear the outputs before you start
       for (size_t i=0; i < numOutputs; i++)
       {

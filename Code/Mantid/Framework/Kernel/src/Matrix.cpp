@@ -1580,7 +1580,6 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
         {
           // Make OUTPUT -- D + A
           // sort Output::
-          std::vector<int> index;
           for(size_t ix=0;ix<nx;ix++)
             DiagMatrix.V[ix][ix]=static_cast<T>(Diag[ix]);
           return 1;

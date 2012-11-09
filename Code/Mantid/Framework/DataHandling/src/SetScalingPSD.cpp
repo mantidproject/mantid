@@ -145,7 +145,6 @@ namespace DataHandling
       // which may be necessary for each pixel if in a tube.
       // movePos is used to updated positions
       std::map<int,Kernel::V3D> posMap;
-      std::map<int,Kernel::V3D>::iterator it;
       std::map<int,double> scaleMap;
       std::map<int,double>::iterator its;
 

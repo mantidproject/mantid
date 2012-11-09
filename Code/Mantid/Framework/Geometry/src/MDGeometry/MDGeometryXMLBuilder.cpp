@@ -205,7 +205,6 @@ template <typename CheckDimensionPolicy>
 const std::string& MDGeometryBuilderXML<CheckDimensionPolicy>::create() const
 {
   using namespace Poco::XML;
-  std::string formattedXMLString;
   if(true == m_changed)
   {
     //Create the root element for this fragment.
