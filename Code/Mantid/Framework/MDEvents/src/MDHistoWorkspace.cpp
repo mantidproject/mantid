@@ -47,8 +47,8 @@ namespace MDEvents
    */
   MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions)
   : IMDHistoWorkspace(),
-    m_numEvents(NULL),
     numDimensions(0),
+    m_numEvents(NULL),
     m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN())
   {
     this->init(dimensions);
@@ -60,8 +60,8 @@ namespace MDEvents
    */
   MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::IMDDimension_sptr> & dimensions)
   : IMDHistoWorkspace(),
-    m_numEvents(NULL),
     numDimensions(0),
+    m_numEvents(NULL),
     m_nEventsContributed(std::numeric_limits<uint64_t>::quiet_NaN())
   {
     this->init(dimensions);
