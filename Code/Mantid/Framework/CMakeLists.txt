@@ -37,6 +37,15 @@ if ( OPENMP_FOUND )
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
 endif ()
 
+check_include_files ( stdint.h stdint )
+if ( stdint )
+  add_definitions ( -DHAVE_STDINT_H )
+endif ()
+check_include_files ( cstdint.hpp boost_stdint)
+if ( boost_stdint )
+  add_definitions ( -DBOOST_CSTDINT_HPP )
+endif ()
+
 ###########################################################################
 # MPI-enable build setup
 ###########################################################################

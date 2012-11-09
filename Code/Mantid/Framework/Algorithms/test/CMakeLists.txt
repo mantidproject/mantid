@@ -1,5 +1,14 @@
 if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  check_include_files ( stdint.h stdint )
+  if ( stdint )
+     add_definitions ( -DHAVE_STDINT_H )
+   endif ()
+  check_include_files ( cstdint.hpp boost_stdint)
+  if ( boost_stdint )
+    add_definitions ( -DBOOST_CSTDINT_HPP )
+  endif ()
+
 
   # Generate the MultiplyTest.h and DivideTest.h
   set ( MULTIPLYDIVIDETEST_CLASS MultiplyTest )
