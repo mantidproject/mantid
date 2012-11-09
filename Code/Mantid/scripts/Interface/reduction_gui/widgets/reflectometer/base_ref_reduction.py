@@ -1015,7 +1015,7 @@ class BaseRefWidget(BaseWidget):
         
         try:
             f = FileFinder.findRuns("%s%s" % (self.instrument_name, str(file_ctrl.text())))[0]  
-            
+        
             range_min = int(min_ctrl.text())
             range_max = int(max_ctrl.text())
             

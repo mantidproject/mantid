@@ -114,6 +114,8 @@ class DataReflWidget(BaseWidget):
         self.connect(self._summary.angle_list, QtCore.SIGNAL("itemSelectionChanged()"), self._angle_changed)
         self.connect(self._summary.remove_btn, QtCore.SIGNAL("clicked()"), self._remove_item)
         
+        self.connect(self._summary.plot_data_count_vs_tof_2d_btn, QtCore.SIGNAL("clicked()"), self._plot_data_count_vs_tof_2d)
+        
         # Catch edited controls
         call_back = partial(self._edit_event, ctrl=self._summary.data_peak_from_pixel)
         self.connect(self._summary.data_peak_from_pixel, QtCore.SIGNAL("textChanged(QString)"), call_back)
@@ -894,3 +896,82 @@ class DataReflWidget(BaseWidget):
             m.direct_pixel = util._check_and_get_float_line_edit(self._summary.direct_pixel_edit)
 
         return m
+    
+    def _plot_data_count_vs_tof_2d(self):
+        #Bring to life the RefDetectorViewer and display counts(X) vs TOF 
+        #integrated over Y
+        
+         #retrieve name of workspace first
+        run_number =  self._summary.data_run_number_edit.text()
+        file_path = FileFinder.findRuns("%s%s" % (self.instrument_name, str(run_number)))[0]  
+
+        basename = os.path.basename(file_path)
+        ws_base = "__%s" % basename
+    
+        ws_output_base_ff = "Counts vs X pixel - " + basename + " Off_Off" 
+        if mtd.workspaceExists(ws_output_base_ff):
+            mtd.deleteWorkspace(ws_output_base_ff)
+            ws_output_base_1 = ws_output_base_ff + "_2D"
+            mtd.deleteWorkspace(ws_output_base_1)            
+            ws_output_base_2 = ws_base + " - Off_Off"
+            mtd.deleteWorkspace(ws_output_base_2)
+        
+        ws_output_base_nf = "Counts vs X pixel - " + basename + " On_Off" 
+        if mtd.workspaceExists(ws_output_base_nf):
+            mtd.deleteWorkspace(ws_output_base_nf)
+            ws_output_base_1 = ws_output_base_nf + "_2D"
+            mtd.deleteWorkspace(ws_output_base_1)            
+            ws_output_base_2 = ws_base + " - On_Off"
+            mtd.deleteWorkspace(ws_output_base_2)
+        
+        ws_output_base_fn = "Counts vs X pixel - " + basename + " Off_On" 
+        if mtd.workspaceExists(ws_output_base_fn):
+            mtd.deleteWorkspace(ws_output_base_fn)
+            ws_output_base_1 = ws_output_base_fn + "_2D"
+            mtd.deleteWorkspace(ws_output_base_1)            
+            ws_output_base_2 = ws_base + " - Off_On"
+            mtd.deleteWorkspace(ws_output_base_2)
+
+        ws_output_base_nn = "Counts vs X pixel - " + basename + " On_On" 
+        if mtd.workspaceExists(ws_output_base_nn):
+            mtd.deleteWorkspace(ws_output_base_nn)
+            ws_output_base_1 = ws_output_base_nn + "_2D"
+            mtd.deleteWorkspace(ws_output_base_1)            
+            ws_output_base_2 = ws_base + " - On_On"
+            mtd.deleteWorkspace(ws_output_base_2)
+
+        ws_output_base_all = ws_base + '_all' 
+        if mtd.workspaceExists(ws_output_base_all):
+            mtd.deleteWorkspace(ws_output_base_all)
+
+        data_manipulation.counts_vs_pixel_distribution(file_path, 
+                                                       is_pixel_y=False, 
+                                                       callback=None,
+                                                       instrument='REFM')
+
+#        def call_back(peakmin, peakmax, backmin, backmax, tofmin, tofmax):
+#            print 'Inside the call_back on the python side'
+#            self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
+#            self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
+#            self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
+#            self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
+#            self._summary.x_min_edit.setText("%-d" % int(tofmin))
+#            self._summary.x_max_edit.setText("%-d" % int(tofmax))
+         
+        # mantidplot.app should be used instead of _qti.app (it's just an alias)
+        #mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+        #mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+        
+        import mantidqtpython 
+        self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base_ff+'_2D')
+        #QtCore.QObject.connect(self.ref_det_view.getConnections(), QtCore.SIGNAL("python_peak_back_tof_range_update(double,double, double,double,double,double)"), self.call_back)
+
+
+        
+        
+        
+        
+    
+    
+    
+    
