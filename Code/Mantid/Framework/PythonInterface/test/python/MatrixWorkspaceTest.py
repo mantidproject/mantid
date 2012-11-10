@@ -234,6 +234,15 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ads.remove('B')
         ads.remove('C')
         
+    def test_complex_binary_ops_do_not_leave_temporary_workspaces_behind(self):
+        run_algorithm('CreateWorkspace', OutputWorkspace='ca', DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        ads = AnalysisDataService
+        w1=(ads['ca']*0.0)+1.0
+
+        self.assertTrue('w1' in ads)
+        self.assertTrue('ca' in ads)
+        self.assertTrue('__python_op_tmp0' not in ads)
+        
     def test_history_access(self):
         run_algorithm('CreateWorkspace', OutputWorkspace='raw',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
         run_algorithm('Rebin', InputWorkspace='raw', Params=[1.,0.5,3.],OutputWorkspace='raw')

@@ -4,7 +4,8 @@
     
     It is intended for internal use.
 """
-from mantid.api import Workspace, AnalysisDataService, FrameworkManager, ITableWorkspace
+from mantid.api import (AnalysisDataService, FrameworkManager, ITableWorkspace, 
+                        Workspace, WorkspaceGroup)
 from mantid.api import performBinaryOp as _performBinaryOp
 from mantid.kernel.funcreturns import lhs_info
 
@@ -62,7 +63,7 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
         
     """
     global _workspace_op_tmps
-#
+    #
     if lhs_vars[0] > 0:
         # Assume the first and clear the temporaries as this
         # must be the final assignment
@@ -75,17 +76,25 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
         # Give it a temporary name and keep track of it
         clear_tmps = False
         output_name = _workspace_op_prefix + str(len(_workspace_op_tmps))
-        _workspace_op_tmps.append(output_name)
 
     # Do the operation
     resultws = _performBinaryOp(self,rhs, op, output_name, inplace, reverse)
-
+    
+    # Do we need to clean up
     if clear_tmps:
         for name in _workspace_op_tmps:
             if name in AnalysisDataService and output_name != name:
                 del AnalysisDataService[name]
         _workspace_op_tmps = []
-        
+    else:
+        if type(resultws) == WorkspaceGroup: 
+            # Ensure the members are removed aswell
+            members = resultws.getNames()
+            for member in members:
+                _workspace_op_tmps.append(member)
+        else:
+            _workspace_op_tmps.append(output_name)
+
     return resultws # For self-assignment this will be set to the same workspace
 
 #------------------------------------------------------------------------------

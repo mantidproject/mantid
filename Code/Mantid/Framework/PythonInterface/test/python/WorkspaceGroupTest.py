@@ -43,8 +43,12 @@ class WorkspaceGroupTest(unittest.TestCase):
             self.assertTrue(isinstance(member, MatrixWorkspace))
 
     def test_SimpleAlgorithm_Accepts_Group_Handle(self):
-        from mantid.simpleapi import Load, Scale
-        group = Load("CSP79590.raw")
+        from mantid.simpleapi import Scale
+        
+        run_algorithm('CreateWorkspace', OutputWorkspace='First',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('CreateWorkspace', OutputWorkspace='Second',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('GroupWorkspaces',InputWorkspaces='First,Second',OutputWorkspace='group')
+        group = mtd['group']
         self.assertEquals(group.getName(), "group")
         self.assertEquals(type(group), WorkspaceGroup)
         try:
@@ -53,3 +57,26 @@ class WorkspaceGroupTest(unittest.TestCase):
         except Exception, exc:
             self.fail("Algorithm raised an exception with input as WorkspaceGroup: '" + str(exc) + "'")
         mtd.remove(str(group))
+
+    def test_complex_binary_operations_with_group_do_not_leave_temporary_workspaces_in_ADS(self):
+        run_algorithm('CreateWorkspace', OutputWorkspace='grouped_1',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('CreateWorkspace', OutputWorkspace='grouped_2',DataX=[1.,2.,3.], DataY=[2.,3.], DataE=[2.,3.],UnitX='TOF')
+        run_algorithm('GroupWorkspaces',InputWorkspaces='grouped_1,grouped_2',OutputWorkspace='grouped')
+        
+        w1=(mtd['grouped']*0.0)+1.0
+        
+        self.assertTrue('w1' in mtd)
+        self.assertTrue('grouped' in mtd)
+        self.assertTrue('grouped_1' in mtd)
+        self.assertTrue('grouped_2' in mtd)
+        self.assertTrue('__python_op_tmp0' not in mtd)
+        self.assertTrue('__python_op_tmp0_1' not in mtd)
+        self.assertTrue('__python_op_tmp0_2' not in mtd)
+
+        mtd.remove('w1')
+        mtd.remove('grouped')
+        mtd.remove('grouped_1')
+        mtd.remove('grouped_2')
+
+if __name__ == '__main__':
+    unittest.main()
