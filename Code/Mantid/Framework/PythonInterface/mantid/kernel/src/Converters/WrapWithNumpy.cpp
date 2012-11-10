@@ -46,17 +46,17 @@ namespace Mantid { namespace PythonInterface
       //-----------------------------------------------------------------------
       // Explicit instantiations
       //-----------------------------------------------------------------------
-      #define INSTANTIATE(ElementType) \
+      #define INSTANTIATE_WRAPNUMPY(ElementType) \
         template DLLExport PyObject *wrapWithNDArray<ElementType>(const ElementType*, const int ndims, Py_intptr_t *dims, const NumpyWrapMode);
 
-      INSTANTIATE(int);
-      INSTANTIATE(long);
-      INSTANTIATE(long long);
-      INSTANTIATE(unsigned int);
-      INSTANTIATE(unsigned long);
-      INSTANTIATE(unsigned long long);
-      INSTANTIATE(double);
-      INSTANTIATE(float);
+      INSTANTIATE_WRAPNUMPY(int);
+      INSTANTIATE_WRAPNUMPY(long);
+      INSTANTIATE_WRAPNUMPY(long long);
+      INSTANTIATE_WRAPNUMPY(unsigned int);
+      INSTANTIATE_WRAPNUMPY(unsigned long);
+      INSTANTIATE_WRAPNUMPY(unsigned long long);
+      INSTANTIATE_WRAPNUMPY(double);
+      INSTANTIATE_WRAPNUMPY(float);
     }
   }
 }}

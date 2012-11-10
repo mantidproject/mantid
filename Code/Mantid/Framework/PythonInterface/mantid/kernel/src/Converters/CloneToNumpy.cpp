@@ -79,17 +79,17 @@ namespace Mantid { namespace PythonInterface
       //-----------------------------------------------------------------------
       // Explicit instantiations
       //-----------------------------------------------------------------------
-      #define INSTANTIATE(ElementType) \
+      #define INSTANTIATE_CLONE(ElementType) \
         template DLLExport PyObject *cloneToNDArray<ElementType>(const ElementType *, const int ndims, Py_intptr_t *dims);
 
-      INSTANTIATE(int);
-      INSTANTIATE(long);
-      INSTANTIATE(long long);
-      INSTANTIATE(unsigned int);
-      INSTANTIATE(unsigned long);
-      INSTANTIATE(unsigned long long);
-      INSTANTIATE(double);
-      INSTANTIATE(float);
+      INSTANTIATE_CLONE(int);
+      INSTANTIATE_CLONE(long);
+      INSTANTIATE_CLONE(long long);
+      INSTANTIATE_CLONE(unsigned int);
+      INSTANTIATE_CLONE(unsigned long);
+      INSTANTIATE_CLONE(unsigned long long);
+      INSTANTIATE_CLONE(double);
+      INSTANTIATE_CLONE(float);
     }
   }
 }}

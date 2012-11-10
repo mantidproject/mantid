@@ -159,18 +159,18 @@ namespace Mantid
       //------------------------------------------------------------------------
       // Explicit instantiations
       //------------------------------------------------------------------------
-      #define INSTANTIATE(ElementType)\
+      #define INSTANTIATE_TOVECTOR(ElementType)\
         template DLLExport struct NDArrayToVector<ElementType>;
 
-      INSTANTIATE(int);
-      INSTANTIATE(long);
-      INSTANTIATE(long long);
-      INSTANTIATE(unsigned int);
-      INSTANTIATE(unsigned long);
-      INSTANTIATE(unsigned long long);
-      INSTANTIATE(double);
-      INSTANTIATE(bool);
-      INSTANTIATE(std::string);
+      INSTANTIATE_TOVECTOR(int);
+      INSTANTIATE_TOVECTOR(long);
+      INSTANTIATE_TOVECTOR(long long);
+      INSTANTIATE_TOVECTOR(unsigned int);
+      INSTANTIATE_TOVECTOR(unsigned long);
+      INSTANTIATE_TOVECTOR(unsigned long long);
+      INSTANTIATE_TOVECTOR(double);
+      INSTANTIATE_TOVECTOR(bool);
+      INSTANTIATE_TOVECTOR(std::string);
 
     }
   }

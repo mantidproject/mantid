@@ -39,12 +39,12 @@ namespace Mantid { namespace PythonInterface
       //-----------------------------------------------------------------------
       // Explicit instantiations
       //-----------------------------------------------------------------------
-      #define INSTANTIATE(ElementType) \
+      #define INSTANTIATE_MATRIX_WRAP(ElementType) \
         template DLLExport PyObject * wrapWithNDArray<Kernel::Matrix<ElementType> >(const Kernel::Matrix<ElementType> &, const NumpyWrapMode);
 
-      INSTANTIATE(int);
-      INSTANTIATE(float);
-      INSTANTIATE(double);
+      INSTANTIATE_MATRIX_WRAP(int);
+      INSTANTIATE_MATRIX_WRAP(float);
+      INSTANTIATE_MATRIX_WRAP(double);
 
     }
   }

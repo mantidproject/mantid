@@ -86,17 +86,17 @@ namespace Mantid { namespace PythonInterface
       //-----------------------------------------------------------------------
       // Explicit instantiations
       //-----------------------------------------------------------------------
-      #define INSTANTIATE(ElementType) \
+      #define INSTANTIATE_TONDARRAY(ElementType) \
         template DLLExport PyObject * wrapWithNDArray<std::vector<ElementType> >(const std::vector<ElementType> &, const NumpyWrapMode);\
         template DLLExport PyObject * cloneToNDArray<std::vector<ElementType> >(const std::vector<ElementType> &);
 
-      INSTANTIATE(int);
-      INSTANTIATE(long);
-      INSTANTIATE(long long);
-      INSTANTIATE(unsigned int);
-      INSTANTIATE(unsigned long);
-      INSTANTIATE(unsigned long long);
-      INSTANTIATE(double);
+      INSTANTIATE_TONDARRAY(int);
+      INSTANTIATE_TONDARRAY(long);
+      INSTANTIATE_TONDARRAY(long long);
+      INSTANTIATE_TONDARRAY(unsigned int);
+      INSTANTIATE_TONDARRAY(unsigned long);
+      INSTANTIATE_TONDARRAY(unsigned long long);
+      INSTANTIATE_TONDARRAY(double);
       // std::string already has clone instantiated as it is specialized
       template DLLExport PyObject * wrapWithNDArray<std::vector<std::string> >(const std::vector<std::string> &, const NumpyWrapMode);
     }
