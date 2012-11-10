@@ -170,8 +170,9 @@ namespace Mantid
       INSTANTIATE_TOVECTOR(unsigned long long);
       INSTANTIATE_TOVECTOR(double);
       INSTANTIATE_TOVECTOR(bool);
-      INSTANTIATE_TOVECTOR(std::string);
-
+      ///@cond Doxygen doesn't seem to like this...
+      INSTANTIATE_TOVECTOR(std::string); 
+      ///@endcond
     }
   }
 }

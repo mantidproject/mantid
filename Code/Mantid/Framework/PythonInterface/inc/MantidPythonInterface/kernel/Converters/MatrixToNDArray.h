@@ -45,6 +45,11 @@ namespace Mantid
       template<typename ElementType, typename ConversionPolicy>
       struct DLLExport MatrixToNDArray
       {
+        /**
+         * Operator to convert a matrix to a numpy array
+         * @param cmatrix :: A reference to matrix
+         * @returns A new PyObject* that points to a numpy array
+         */
         inline PyObject * operator()(const Kernel::Matrix<ElementType> & cmatrix) const
         {
           const std::pair<size_t,size_t> matrixDims = cmatrix.size();

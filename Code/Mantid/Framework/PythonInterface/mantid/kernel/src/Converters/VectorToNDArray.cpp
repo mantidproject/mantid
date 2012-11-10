@@ -21,16 +21,16 @@ namespace Mantid { namespace PythonInterface
        * Defines the wrapWithNDArray specialization for vector container types
        *
        * Wraps a vector in a numpy array structure without copying the data
-       * @param cvector :: A reference to the std::vector to wrap
+       * @param cdata :: A reference to the std::vector to wrap
        * @param mode :: A mode switch to define whether the final array is read only/read-write
        * @return A pointer to a numpy ndarray object
        */
       template<typename ContainerType>
-      PyObject *wrapWithNDArray(const ContainerType & cvector, const NumpyWrapMode mode)
+      PyObject *wrapWithNDArray(const ContainerType & cdata, const NumpyWrapMode mode)
       {
-        npy_intp dims[1] = { cvector.size() };
+        npy_intp dims[1] = { cdata.size() };
         int datatype = NDArrayTypeIndex<typename ContainerType::value_type>::typenum;
-        PyObject *nparray = PyArray_SimpleNewFromData(1, dims, datatype,(void*)&(cvector[0]));
+        PyObject *nparray = PyArray_SimpleNewFromData(1, dims, datatype,(void*)&(cdata[0]));
         if( mode == ReadOnly )
         {
           PyArrayObject * np = (PyArrayObject *)nparray;
@@ -42,13 +42,13 @@ namespace Mantid { namespace PythonInterface
       /**
        * Returns a new numpy array with the a copy of the data from cvector. A specialization
        * exists for strings so that they simply create a standard python list.
-       * @param cvector :: A reference to a std::vector
+       * @param cdata :: A reference to a std::vector
        * @return
        */
       template<typename ContainerType>
-      PyObject *cloneToNDArray(const ContainerType & cvector)
+      PyObject *cloneToNDArray(const ContainerType & cdata)
       {
-        npy_intp dims[1] = { cvector.size() };
+        npy_intp dims[1] = { cdata.size() };
         int datatype = NDArrayTypeIndex<typename ContainerType::value_type>::typenum;
         PyObject *nparray =
           PyArray_NewFromDescr(&PyArray_Type,
@@ -59,7 +59,7 @@ namespace Mantid { namespace PythonInterface
                                0, NULL);
 
         void *arrayData = PyArray_DATA(nparray);
-        const void *data = cvector.data();
+        const void *data = cdata.data();
         std::memcpy(arrayData, data, PyArray_ITEMSIZE(nparray) * dims[0]);
         return (PyObject*)nparray;
       }
@@ -67,14 +67,14 @@ namespace Mantid { namespace PythonInterface
       /**
        * Returns a new python list of strings from the given vector
        * exists for strings so that they simply create a standard python list.
-       * @param cvector :: A reference to a std::vector
+       * @param cdata :: A reference to a std::vector
        * @return
        */
       template<>
-      PyObject *cloneToNDArray(const std::vector<std::string> & cvector)
+      PyObject *cloneToNDArray(const std::vector<std::string> & cdata)
       {
         boost::python::list pystrs;
-        for(auto iter = cvector.begin(); iter != cvector.end(); ++iter)
+        for(auto iter = cdata.begin(); iter != cdata.end(); ++iter)
         {
           pystrs.append(iter->c_str());
         }

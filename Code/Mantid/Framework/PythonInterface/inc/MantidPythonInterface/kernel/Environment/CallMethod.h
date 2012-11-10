@@ -50,10 +50,10 @@ namespace Mantid { namespace PythonInterface {
       /**
        * Dispatch a call to the method on the given object. If the method does not exist
        * then return the defaultValue
-       * @param self The object containing the method definition
-       * @param funcName The method name
-       * @param defaultValue A default value if the method does not exist
-       * @return
+       * @param self :: The object containing the method definition
+       * @param funcName :: The method name
+       * @param defaultValue :: A default value if the method does not exist
+       * @return The value of the function or the default value if it does not exist
        */
       static ResultType dispatchWithDefaultReturn(PyObject *self, const char * funcName, const ResultType & defaultValue)
       {
@@ -75,10 +75,10 @@ namespace Mantid { namespace PythonInterface {
       /**
        * Dispatch a call to the method on the given object. If the method does not exist
        * then raise a std::runtime_error exception
-       * @param self The object containing the method definition
-       * @param funcName The method name
-       * @param errorMsg An error message to pass to the generated exception
-       * @return
+       * @param self :: The object containing the method definition
+       * @param funcName :: The method name
+       * @param errorMsg :: An error message to pass to the generated exception
+       * @return The value of the function or the default value if it does not exist
        */
       static ResultType dispatchWithException(PyObject *self, const char * funcName, const char * errorMsg)
       {
@@ -109,10 +109,9 @@ namespace Mantid { namespace PythonInterface {
       /**
        * Dispatch a call to the method on the given object. If the method does not exist
        * then do nothing
-       * @param self The object containing the method definition
-       * @param funcName The method name
-       * @param defaultValue A default value if the method does not exist
-       * @return
+       * @param self :: The object containing the method definition
+       * @param funcName :: The method name
+       * @return The value of the function or the default value if it does not exist
        */
       static void dispatchWithDefaultReturn(PyObject *self, const char * funcName)
       {
@@ -132,10 +131,10 @@ namespace Mantid { namespace PythonInterface {
       /**
        * Dispatch a call to the method on the given object. If the method does not exist
        * then raise a runtime_error
-       * @param self The object containing the method definition
-       * @param funcName The method name
-       * @param errorMsg An error message if the method does not exist
-       * @return
+       * @param self :: The object containing the method definition
+       * @param funcName :: The method name
+       * @param errorMsg :: An error message if the method does not exist
+       * @return The value of the function or the default value if it does not exist
        */
       static void dispatchWithException(PyObject *self, const char * funcName, const char * errorMsg)
       {

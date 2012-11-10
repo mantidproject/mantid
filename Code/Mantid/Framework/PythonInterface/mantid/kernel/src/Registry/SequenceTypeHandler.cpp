@@ -62,6 +62,7 @@ namespace Mantid
       //-----------------------------------------------------------------------
       // Concrete instantiations
       //-----------------------------------------------------------------------
+      ///@cond
       #define INSTANTIATE(ElementType)\
         template DLLExport struct SequenceTypeHandler<std::vector<ElementType> >;
 
@@ -74,7 +75,7 @@ namespace Mantid
       INSTANTIATE(double);
       INSTANTIATE(std::string);
       INSTANTIATE(bool);
-
+      ///@endcond
     }
   }
 }

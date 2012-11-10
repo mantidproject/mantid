@@ -34,7 +34,7 @@ namespace Mantid
 
     File change history is stored at: <https://github.com/mantidproject/mantid>    
     */
-
+    
     /// Handle a Python error state
     void handlePythonError(const bool with_trace=true);
     /// A structure t handle default returns for template functions
@@ -209,7 +209,6 @@ namespace Mantid
 
     }
     //@}
-    //@endcond
 
   }
 }

@@ -54,11 +54,11 @@ namespace Mantid
        * @returns A pointer to a new Property object
        */
       Kernel::Property *
-      PropertyWithValueFactory::create(const std::string & name , const boost::python::object & value,
+      PropertyWithValueFactory::create(const std::string & name , const boost::python::object & defaultValue,
           const boost::python::object & validator, const unsigned int direction)
       {
-        Registry::PropertyValueHandler *propHandle = lookup(value.ptr()->ob_type);
-        return propHandle->create(name, value, validator, direction);
+        Registry::PropertyValueHandler *propHandle = lookup(defaultValue.ptr()->ob_type);
+        return propHandle->create(name, defaultValue, validator, direction);
       }
 
       /**
@@ -70,11 +70,11 @@ namespace Mantid
        * @returns A pointer to a new Property object
        */
       Kernel::Property *
-      PropertyWithValueFactory::create(const std::string & name , const boost::python::object & value,
+      PropertyWithValueFactory::create(const std::string & name , const boost::python::object & defaultValue,
           const unsigned int direction)
       {
         boost::python::object validator; // Default construction gives None object
-        return create(name, value, validator, direction);
+        return create(name, defaultValue, validator, direction);
       }
 
 

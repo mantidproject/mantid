@@ -18,17 +18,17 @@ namespace Mantid { namespace PythonInterface
        * Defines the wrapWithNDArray specialization for Matrix container types
        *
        * Wraps a vector in a numpy array structure without copying the data
-       * @param cmatrix :: A reference to the Matrix wrap
+       * @param cdata :: A reference to the Matrix wrap
        * @param mode :: A mode switch to define whether the final array is read only/read-write
        * @return A pointer to a numpy ndarray object
        */
       template<typename ContainerType>
-      PyObject *wrapWithNDArray(const ContainerType & cmatrix, const NumpyWrapMode mode)
+      PyObject *wrapWithNDArray(const ContainerType & cdata, const NumpyWrapMode mode)
       {
-        std::pair<size_t,size_t> matrixDims = cmatrix.size();
+        std::pair<size_t,size_t> matrixDims = cdata.size();
         npy_intp dims[2] =  {matrixDims.first, matrixDims.second};
         int datatype = NDArrayTypeIndex<typename ContainerType::value_type>::typenum;
-        PyObject * ndarray = PyArray_SimpleNewFromData(2, dims, datatype,(void*)&(cmatrix[0][0]));
+        PyObject * ndarray = PyArray_SimpleNewFromData(2, dims, datatype,(void*)&(cdata[0][0]));
         if( mode == ReadOnly )
         {
           PyArrayObject * np = (PyArrayObject *)ndarray;

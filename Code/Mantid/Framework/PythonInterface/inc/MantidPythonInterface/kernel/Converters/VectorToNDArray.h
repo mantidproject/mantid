@@ -44,11 +44,16 @@ namespace Mantid
       template<typename ElementType, typename ConversionPolicy>
       struct VectorToNDArray
       {
-        inline PyObject * operator()(const std::vector<ElementType> & cvector) const
+        /**
+         * Converts a cvector to a numpy array
+         * @param cdata :: A const reference to a vector
+         * @returns A new PyObject that wraps the vector in a numpy array
+         */
+        inline PyObject * operator()(const std::vector<ElementType> & cdata) const
         {
           // Hand off the work to the conversion policy
           typedef typename ConversionPolicy::template apply<ElementType> policy;
-          return policy::create1D(cvector);
+          return policy::create1D(cdata);
         }
       };
 

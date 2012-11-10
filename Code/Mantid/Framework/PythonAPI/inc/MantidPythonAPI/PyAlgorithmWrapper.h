@@ -139,12 +139,13 @@ public:
     this->IAlgorithm::declareProperty(prop_name, Conversions::toStdVector<TYPE>(values), doc, direction);
   }
 
-  /**
+    /**
      * Declare a generic Workspace property
      * @param prop_name :: The name of the property
      * @param default_wsname :: A default name to use for the workspace name
      * @param description :: A string describing the property
      * @param direction :: The direction
+     * @param optional :: If true the property is optional, else it is mandatory (Default=false)
      */
     void _declareWorkspace(const std::string & prop_name, const std::string & default_wsname,
                            const std::string & description, const unsigned int direction,
@@ -162,6 +163,7 @@ public:
      * @param validator :: A pointer to a validator object
      * @param description :: A string describing the property
      * @param direction :: The direction
+     * @param optional :: If true the property is optional, else it is mandatory (Default=false)
      */
     void _declareWorkspace(const std::string & prop_name, const std::string & default_wsname,
         Kernel::IValidator & validator,
@@ -178,6 +180,7 @@ public:
    * @param default_wsname :: A default name to use for the workspace name
    * @param description :: A string describing the property
    * @param direction :: The direction
+   * @param optional :: If true the property is optional, else it is mandatory (Default=false)
    */
   void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname, 
                                const std::string & description, const unsigned int direction,
@@ -195,6 +198,7 @@ public:
    * @param validator :: A pointer to a validator object
    * @param description :: A string describing the property
    * @param direction :: The direction
+   * @param optional :: If true the property is optional, else it is mandatory (Default=false)
    */
   void _declareMatrixWorkspace(const std::string & prop_name, const std::string & default_wsname,
 			       Kernel::IValidator & validator,
@@ -223,6 +227,7 @@ public:
    * @param default_wsname :: A default name to use for the workspace name
    * @param description :: A string describing the property
    * @param direction :: The direction
+   * @param optional :: If true the property is optional, else it is mandatory (Default=false)
    */
   void _declareTableWorkspace(const std::string & prop_name, const std::string & default_wsname, 
 			      const std::string & description, const unsigned int direction, bool optional=false)

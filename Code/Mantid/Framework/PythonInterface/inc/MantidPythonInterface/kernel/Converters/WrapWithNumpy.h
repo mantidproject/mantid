@@ -93,7 +93,7 @@ namespace Mantid
 
           /**
            * Returns a read-write Numpy array wrapped around an existing vector
-           * @param cvector
+           * @param cdata :: A reference to vector
            * @return
            */
           static PyObject * create1D(const std::vector<ElementType> & cdata)
