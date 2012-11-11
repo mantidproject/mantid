@@ -143,7 +143,7 @@ namespace Mantid
         std::vector<double>Zscore(data.size(),0.);
         return Zscore;
       }
-      MADvec.empty();
+      MADvec.clear();
       std::vector<double> Zscore;
       it = data.begin();
       for (; it != data.end(); ++it)
