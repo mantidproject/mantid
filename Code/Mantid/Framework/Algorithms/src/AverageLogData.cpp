@@ -1,5 +1,9 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+The algorithm will calculate a proton_charge weighted averaf=ge and standard deviation of any log value of numeric series type.
+All proton charges earlier than the first data are ignored. Any proton pulse is counted for the log value on the right. This
+means that if all proton pulses happen before the first value, and FixZero is false, the average and standard deviations are NANs.
+If all the proton pulses occur after the last value, and FixZero is false, the average is equal to the last value, and the
+standard deviation is zero.
 *WIKI*/
 
 #include "MantidAlgorithms/AverageLogData.h"
@@ -57,7 +61,7 @@ namespace Algorithms
   {
     declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input), "An input workspace that contains a Sample log property, and a proton charge property.");
     declareProperty("LogName", "", "Name of the log to be averaged");
-    declareProperty("FixZero", true, "If checked, the proton charge and the log value time series are assumed to start at the same moment.");
+    declareProperty("FixZero", true, "If true, the proton charge and the log value time series are assumed to start at the same moment.");
     declareProperty("Average", EMPTY_DBL(),"", Direction::Output);
     declareProperty("Error", EMPTY_DBL(),"", Direction::Output);
   }
