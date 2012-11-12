@@ -21,6 +21,7 @@ set ( SRC_FILES
 	src/RefReduction.cpp
 	src/RefRoi.cpp
 	src/SANSBeamFinder.cpp
+	src/SANSBeamFluxCorrection.cpp
 	src/SANSSensitivityCorrection.cpp
 	src/SANSSolidAngleCorrection.cpp
 	src/SetupEQSANSReduction.cpp
@@ -54,6 +55,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/RefReduction.h
 	inc/MantidWorkflowAlgorithms/RefRoi.h
 	inc/MantidWorkflowAlgorithms/SANSBeamFinder.h
+	inc/MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSensitivityCorrection.h
 	inc/MantidWorkflowAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidWorkflowAlgorithms/SetupEQSANSReduction.h
@@ -63,7 +65,7 @@ set ( INC_FILES
               
 set ( TEST_FILES SANSSolidAngleCorrectionTest.h )
 
-set ( TEST_PY_FILES EQSANSQ2DTest.py )
+set ( TEST_PY_FILES EQSANSQ2DTest.py SANSBeamFluxCorrectionTest.py )
 
 if(UNITY_BUILD)
   include(UnityBuild)
