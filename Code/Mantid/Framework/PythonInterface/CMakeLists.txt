@@ -97,6 +97,7 @@ set ( TEST_PY_FILES
   test/python/FilteredTimeSeriesPropertyTest.py
   test/python/FindReflectometryLinesTest.py
   test/python/FrameworkManagerTest.py
+  test/python/FunctionFactoryTest.py
   test/python/IComponentTest.py
   test/python/IEventWorkspaceTest.py
   test/python/ImportModuleTest.py
