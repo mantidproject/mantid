@@ -46,6 +46,8 @@ void export_FunctionFactory()
   class_<FunctionFactoryImpl,boost::noncopyable>("FunctionFactoryImpl", no_init)
       .def("getFunctionNames", &getFunctionNames,
            "Returns a list of the currently available functions")
+      .def("createFunction", &FunctionFactoryImpl::createFunction,
+           "Return a pointer to the requested function")
       .def("Instance", &FunctionFactory::Instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the FunctionFactory singleton")
       .staticmethod("Instance")

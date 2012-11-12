@@ -47,6 +47,7 @@ set ( EXPORT_FILES
   src/Exports/Sample.cpp
   src/Exports/Run.cpp
   src/Exports/WorkspaceFactory.cpp
+  src/Exports/IFunction.cpp
   src/Exports/PropertyManagerDataService.cpp
   src/Exports/FunctionFactory.cpp
 )  
