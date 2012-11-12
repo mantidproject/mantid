@@ -11,8 +11,7 @@ class IngestNexus():
     def __init__(self, infilename):
         self._infilename = infilename
         config = ConfigParser.RawConfigParser()
-        #config.read('/etc/autoreduce/icatclient.properties')
-        config.read('icatclient.properties')
+        config.read('/etc/autoreduce/icatclient.properties')
         hostAndPort = config.get('icat41', 'hostAndPort')
         password = config.get('icat41', 'password')
         plugin = "db"
@@ -101,13 +100,14 @@ class IngestNexus():
         file.opendata('name')
         for attr,value in file.attrs():
             if attr == 'short_name':
+                instrumentName = value
                 instrument = self._factory.create("instrument")
                 instrument.id = config.get('Instrument', value.lower())
         file.closedata()
         file.closegroup()
     
         print "Search investigation: ", str(datetime.now()) 
-        investigations = self._service.search(self._sessionId, "Investigation INCLUDE Sample [name = '" + name + "']")
+        investigations = self._service.search(self._sessionId, "Investigation INCLUDE Sample [name = '" + name + "'] <-> Instrument [name = '" + instrumentName + "']")
     
         if len(investigations) == 0:
             investigation = self._factory.create("investigation")
@@ -307,7 +307,7 @@ class IngestNexus():
         else:
             #Found investigation, may create new sample or add new dataset
             print "Searching investigation and dataset ", str(datetime.now()) 
-            investigations = self._service.search(self._sessionId, "Investigation [name = '" + investigation.name + "'] <-> Dataset [name = '" + dataset.name + "']")
+            investigations = self._service.search(self._sessionId, "Investigation [name = '" + investigation.name + "']  <-> Instrument [name = '" + instrumentName + "']<-> Dataset [name = '" + dataset.name + "']")
             if len(investigations) == 0:
                 createSample = True 
                 for invSample in investigation.samples:

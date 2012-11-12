@@ -26,7 +26,7 @@ def ingestReduced(facilityName, instrumentName, investigationName, runNumber, se
     print "reduction output directory: " + directory
 
     print "Search investigation: ", str(datetime.now()) 
-    investigations = service.search(sessionId, "Investigation INCLUDE Sample [name = '" + investigationName + "'] <-> Dataset [name = '" + runNumber + "']")
+    investigations = service.search(sessionId, "Investigation INCLUDE Sample [name = '" + investigationName + "'] <-> Dataset [name = '" + runNumber + "'] <-> Instrument [name = '" + instrumentName + "']")
 
     if len(investigations) == 1:
         investigation = investigations[0]

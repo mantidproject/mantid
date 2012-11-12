@@ -14,8 +14,7 @@ class IngestReduced():
         self._investigationName = investigationName
         self._runNumber = runNumber
         config = ConfigParser.RawConfigParser()
-        #config.read('/etc/autoreduce/icatclient.properties')
-        config.read('icatclient.properties')
+        config.read('/etc/autoreduce/icatclient.properties')
         hostAndPort = config.get('icat41', 'hostAndPort')
         password = config.get('icat41', 'password')
         plugin = "db"

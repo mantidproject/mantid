@@ -1,8 +1,10 @@
-import time, sys, stomp, json
 post_processing_bin = sys.path.append("/usr/bin") 
+os.environ['NEXUSLIB'] = "/usr/lib64/libNeXus.so"
+
+import time, sys, stomp, json, os, imp
 from ingestNexus_mq import IngestNexus
 from ingestReduced_mq import IngestReduced
-from reduce_HYSA import AutoReduction
+
 import logging
 logging.getLogger().setLevel(logging.INFO)
 
@@ -38,11 +40,13 @@ class QueueListener(stomp.ConnectionListener):
                     instrument = param[2]
                     proposal = param[3]
                     out_dir = "/"+facility+"/"+instrument+"/"+proposal+"/shared/autoreduce"
-                    reduce_script="/"+facility+"/"+instrument+"/shared/autoreduce"+"reduce_" + instrument + ".py"
-                    print "reduce_script: %s" % reduce_script
+                    reduce_script="reduce_" + instrument
+                    reduce_script_path="/"+facility+"/"+instrument+"/shared/autoreduce"+reduce_script+".py"
+                    print "reduce_script_path: %s" % reduce_script_path
                     print "Auto reducing: %s %s" % (path, out_dir)
                     self.send('/queue/REDUCTION.STARTED', message, persistent='true')
-                    reduction = AutoReduction(path, out_dir)
+                    m = imp.load_source(reduce_script, reduce_script_path)
+                    reduction = m.AutoReduction(path, out_dir)
                     reduction.execute()
                     self.send('/queue/REDUCTION.COMPLETE', message, persistent='true')
                 else:

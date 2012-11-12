@@ -84,7 +84,7 @@ def ingestNexus(infilename, sessionId, service, factory):
     file.closegroup()
 
     print "Search investigation: ", str(datetime.now()) 
-    investigations = service.search(sessionId, "Investigation INCLUDE Sample [name = '" + name + "' AND visitId = '" + visitId + "']")
+    investigations = service.search(sessionId, "Investigation INCLUDE Sample [name = '" + name + "' AND visitId = '" + visitId + "'] <-> Instrument [name = '" + instrumentName + "']")
 
     if len(investigations) == 0:
         investigation = factory.create("investigation")
@@ -281,7 +281,7 @@ def ingestNexus(infilename, sessionId, service, factory):
     else:
         #Found investigation, may create new sample or add new dataset
         print "Searching investigation and dataset ", str(datetime.now()) 
-        investigations = service.search(sessionId, "Investigation [name = '" + investigation.name + "'] <-> Dataset [name = '" + dataset.name + "']")
+        investigations = service.search(sessionId, "Investigation [name = '" + investigation.name + "'] <-> Instrument [name = '" + instrumentName + "'] <-> Dataset [name = '" + dataset.name + "']")
         if len(investigations) == 0:
             createSample = True 
             for invSample in investigation.samples:
