@@ -14,6 +14,7 @@ set ( SRC_FILES
 	src/ApplyDeadTimeCorr.cpp
 	src/ApplyDetailedBalance.cpp
 	src/ApplyTransmissionCorrection.cpp
+	src/AverageLogData.cpp
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
@@ -217,6 +218,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyDeadTimeCorr.h
 	inc/MantidAlgorithms/ApplyDetailedBalance.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
+	inc/MantidAlgorithms/AverageLogData.h
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
@@ -419,6 +421,7 @@ set ( TEST_FILES
 	ApplyDeadTimeCorrTest.h
 	ApplyDetailedBalanceTest.h
 	ApplyTransmissionCorrectionTest.h
+	AverageLogDataTest.h
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
 	CalculateEfficiencyTest.h
