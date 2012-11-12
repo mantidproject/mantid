@@ -32,7 +32,7 @@ namespace
     {
       PyObject *value = PyString_FromString(name->c_str());
       if (PyList_Append(registered, value))
-        throw std::runtime_error("Stuff went wrong");
+        throw std::runtime_error("Failed to insert value into PyList");
     }
 
     return registered;
