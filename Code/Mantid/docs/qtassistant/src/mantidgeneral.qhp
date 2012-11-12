@@ -8,7 +8,7 @@
              <section title="MantidPlot" ref="./mantidplot.html">
 	       <section title="User Interfaces" ref="./userui.html"/>
 	       <section title="Algorithms" ref="algorithms_index.html"/>
-	       <section title="Fitting Functions" ref="./fitfunctions.html"/>
+	       <section title="Fitting Functions" ref="fitfunctions_index.html"/>
 	     </section>
              <section title="Mantid Python" ref="./mantidpython.html"/>
 	     <section title="Developer information" ref="./developers.html"/>
@@ -32,8 +32,8 @@
          </keywords>
 	 -->
          <files>
-	   <file>fitfunctions.html</file>
            <!--
+	   <file>fitfunctions.html</file>
            <file>browse.html</file>
            <file>filedialog.html</file>
            <file>findfile.html</file>
