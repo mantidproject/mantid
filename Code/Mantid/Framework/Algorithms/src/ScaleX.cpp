@@ -129,6 +129,14 @@ namespace Mantid
         //Copy y and e data
         outputW->dataY(i) = inputW->dataY(i);
         outputW->dataE(i) = inputW->dataE(i);
+
+        if( (i >= wi_min) && (i <= wi_max) && factor<0 )
+        {
+          std::reverse( outputW->dataX(i).begin(), outputW->dataX(i).end() );
+          std::reverse( outputW->dataY(i).begin(), outputW->dataY(i).end() );
+          std::reverse( outputW->dataE(i).begin(), outputW->dataE(i).end() );
+        }
+
         m_progress->report("Scaling X");
         PARALLEL_END_INTERUPT_REGION
       }
@@ -197,7 +205,14 @@ namespace Mantid
       {
         PARALLEL_START_INTERUPT_REGION
         //Do the offsetting
-        if ((i >= wi_min) && (i <= wi_max)) outputWS->getEventList(i).scaleTof(factor);
+        if ((i >= wi_min) && (i <= wi_max))
+        {
+          outputWS->getEventList(i).scaleTof(factor);
+          if( factor < 0 )
+          {
+            outputWS->getEventList(i).reverse();
+          }
+        }
         m_progress->report("Scaling X");
         PARALLEL_END_INTERUPT_REGION
       }
