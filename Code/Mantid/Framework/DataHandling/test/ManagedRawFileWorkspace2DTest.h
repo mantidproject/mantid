@@ -4,7 +4,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/IAlgorithm.h"
-#include "MantidDataHandling/LoadRaw2.h"
+#include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -99,7 +99,7 @@ public:
   }
 
   // Test is taken from LoadRawTest
-  void testLoadRaw2()
+  void testLoadRaw3()
   {
     // Make sure we go managed
     ConfigServiceImpl& conf = ConfigService::Instance();
@@ -110,7 +110,7 @@ public:
     const std::string oldValue2 = conf.getString(managed2);
     conf.setString(managed2,"0");
 
-    LoadRaw2 loader;
+    LoadRaw3 loader;
     if ( !loader.isInitialized() ) loader.initialize();
 
     // Should fail because mandatory parameter has not been set
