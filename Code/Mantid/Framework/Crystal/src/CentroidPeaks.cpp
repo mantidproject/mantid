@@ -79,9 +79,6 @@ namespace Crystal
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
 
-    //To get the workspace index from the detector ID
-    detid2index_map * pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
-
     /// Radius to use around peaks
     int PeakRadius = getProperty("PeakRadius");
 
@@ -95,9 +92,9 @@ namespace Crystal
       int pixelID = peak.getDetectorID();
 
       // Find the workspace index for this detector ID
-      if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
+      if (wi_to_detid_map->find(pixelID) != wi_to_detid_map->end())
       {
-         size_t wi = (*pixel_to_wi)[pixelID];
+         size_t wi = (*wi_to_detid_map)[pixelID];
          if(MinPeaks == -1 && peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MinPeaks = i;
          if(peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MaxPeaks = i;
       }
@@ -238,9 +235,6 @@ namespace Crystal
     if (peakWS != inPeakWS)
       peakWS = inPeakWS->clone();
 
-    //To get the workspace index from the detector ID
-    detid2index_map * pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
-
     /// Radius to use around peaks
     int PeakRadius = getProperty("PeakRadius");
 
@@ -254,9 +248,9 @@ namespace Crystal
       int pixelID = peak.getDetectorID();
 
       // Find the workspace index for this detector ID
-      if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
+      if (wi_to_detid_map->find(pixelID) != wi_to_detid_map->end())
       {
-         size_t wi = (*pixel_to_wi)[pixelID];
+         size_t wi = (*wi_to_detid_map)[pixelID];
          if(MinPeaks == -1 && peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MinPeaks = i;
          if(peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MaxPeaks = i;
       }
@@ -385,7 +379,7 @@ namespace Crystal
     inWS = getProperty("InputWorkspace");
     
     // For quickly looking up workspace index from det id
-    wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap(true);
+    wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap(false);
 
     eventW = boost::dynamic_pointer_cast<EventWorkspace>( inWS );
     if(eventW)
