@@ -47,8 +47,8 @@ namespace Crystal
 
 
     /// Input 2D Workspace
-    API::MatrixWorkspace_sptr inWS;
-    DataObjects::EventWorkspace_sptr eventW;
+    API::MatrixWorkspace_const_sptr inWS;
+    DataObjects::EventWorkspace_const_sptr eventW;
     Mantid::detid2index_map * wi_to_detid_map;
 
 

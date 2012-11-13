@@ -508,8 +508,7 @@ namespace Mantid
     *  @param throwIfMultipleDets :: set to true to make the algorithm throw an error
     *         if there is more than one detector for a specific workspace index.
     *  @throw runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
-    *  @return Index to Index Map object
-
+    *  @return Index to Index Map object. THE CALLER TAKES OWNERSHIP OF THE MAP AND IS RESPONSIBLE FOR ITS DELETION.
     */
     detid2index_map * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
     {

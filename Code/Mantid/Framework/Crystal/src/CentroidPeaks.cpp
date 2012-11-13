@@ -24,7 +24,7 @@ namespace Crystal
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  CentroidPeaks::CentroidPeaks()
+  CentroidPeaks::CentroidPeaks() : wi_to_detid_map(NULL)
   {
   }
 
@@ -33,6 +33,7 @@ namespace Crystal
    */
   CentroidPeaks::~CentroidPeaks()
   {
+    delete wi_to_detid_map;
   }
 
 
@@ -120,16 +121,14 @@ namespace Crystal
       double intensity = 0.0;
       double chancentroid = 0.0;
       boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
-      Mantid::detid2index_map::iterator it;
-      it = wi_to_detid_map->find(pixel->getID());
-      if (it == (*wi_to_detid_map).end())
+      detid2index_map::const_iterator it = wi_to_detid_map->find(pixel->getID());
+      if ( it == wi_to_detid_map->end() )
       {
         continue;
       }
       size_t workspaceIndex = it->second;
 
-      Mantid::MantidVec X = inWS->readX(workspaceIndex);
-      Mantid::MantidVec histogram = inWS->readY(workspaceIndex);
+      const MantidVec & X = inWS->readX(workspaceIndex);
 
       int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
       int chanstart = std::max(0,chan-PeakRadius);
@@ -147,13 +146,11 @@ namespace Crystal
           for (int icol=colstart; icol<=colend; ++icol)
           {
             boost::shared_ptr<Detector> pixel = RDet->getAtXY(icol, irow);
-            Mantid::detid2index_map::iterator it;
-            it = wi_to_detid_map->find(pixel->getID());
-            if (it == (*wi_to_detid_map).end())continue;
+            detid2index_map::const_iterator it = wi_to_detid_map->find(pixel->getID());
+            if ( it == wi_to_detid_map->end() ) continue;
             size_t workspaceIndex = (it->second);
     
-            Mantid::MantidVec X = inWS->readX(workspaceIndex);
-            Mantid::MantidVec histogram = inWS->readY(workspaceIndex);
+            const MantidVec & histogram = inWS->readY(workspaceIndex);
     
             intensity += histogram[ichan];
             rowcentroid += irow*histogram[ichan];
@@ -170,18 +167,15 @@ namespace Crystal
       pixel = RDet->getAtXY(col, row);
       peak.setDetectorID(pixel->getID());
     // Set wavelength to change tof for peak object
-      it = (*wi_to_detid_map).find(pixel->getID());
+      it = wi_to_detid_map->find(pixel->getID());
       workspaceIndex = (it->second);
-
-      X = inWS->readX(workspaceIndex);
-      histogram = inWS->readY(workspaceIndex);
 
       chan = int(chancentroid/intensity);
       chan = std::max(0,chan);
-      chan = std::min(static_cast<int>(X.size()),chan);
+      chan = std::min(static_cast<int>(inWS->blocksize()),chan);
       Mantid::Kernel::Units::Wavelength wl;
       std::vector<double> timeflight;
-      timeflight.push_back(X[chan]);
+      timeflight.push_back(inWS->readX(workspaceIndex)[chan]);
       double scattering = peak.getScattering();
       double L1 = peak.getL1();
       double L2 = peak.getL2();
@@ -190,7 +184,7 @@ namespace Crystal
       timeflight.clear();
 
       peak.setWavelength(lambda);
-      peak.setBinCount(histogram[chan]);
+      peak.setBinCount(inWS->readY(workspaceIndex)[chan]);
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
@@ -381,7 +375,7 @@ namespace Crystal
     // For quickly looking up workspace index from det id
     wi_to_detid_map = inWS->getDetectorIDToWorkspaceIndexMap(false);
 
-    eventW = boost::dynamic_pointer_cast<EventWorkspace>( inWS );
+    eventW = boost::dynamic_pointer_cast<const EventWorkspace>( inWS );
     if(eventW)
     {
       eventW->sortAll(TOF_SORT, NULL);
