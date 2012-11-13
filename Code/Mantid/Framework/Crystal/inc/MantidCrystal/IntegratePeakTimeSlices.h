@@ -315,7 +315,7 @@ private:
   int NCOLS;
 
   void SetUpData( API::MatrixWorkspace_sptr          & Data,
-                  API::MatrixWorkspace_sptr    const & inpWkSpace,
+                  API::MatrixWorkspace_const_sptr    const & inpWkSpace,
                   boost::shared_ptr< Geometry::IComponent> comp,
                   const int                       chanMin,
                   const int                       chanMax,
@@ -348,7 +348,7 @@ private:
 
 
   void SetUpData1( API::MatrixWorkspace_sptr      &Data,
-                   API::MatrixWorkspace_sptr     const &inpWkSpace,
+                   API::MatrixWorkspace_const_sptr     const &inpWkSpace,
                    const int                       chanMin,
                    const int                       chanMax,
                    double                         Radius,

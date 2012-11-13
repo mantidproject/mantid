@@ -612,7 +612,7 @@ namespace Mantid
       }
 
 
-      MatrixWorkspace_sptr inpWkSpace = getProperty("InputWorkspace");
+      MatrixWorkspace_const_sptr inpWkSpace = getProperty("InputWorkspace");
       if (!inpWkSpace)
       {
         g_log.error("Improper Input Workspace");
@@ -678,8 +678,7 @@ namespace Mantid
       {
 
         // Find the workspace index for this detector ID
-        Mantid::detid2index_map::iterator it;
-        it = (*wi_to_detid_map).find(detID);
+        detid2index_map::const_iterator it = wi_to_detid_map->find(detID);
         size_t wsIndx = (it->second);
 
         double R      = CalculatePositionSpan( peak, dQ )/2;
@@ -689,7 +688,7 @@ namespace Mantid
         R=1.4*R;//Gets a few more background cells.
         int Chan;
 
-        Mantid::MantidVec X = inpWkSpace->dataX(wsIndx);
+        const MantidVec & X = inpWkSpace->dataX(wsIndx);
         int dChan = CalculateTimeChannelSpan(peak, dQ, X, int(wsIndx), Chan);
 
         dChan = max<int> (dChan, 3);
@@ -1404,7 +1403,7 @@ namespace Mantid
     }
     //Data is the slice subdate, inpWkSpace is ALl the data,
     void IntegratePeakTimeSlices::SetUpData( MatrixWorkspace_sptr          & Data,
-                                             MatrixWorkspace_sptr    const & inpWkSpace,
+                                             MatrixWorkspace_const_sptr    const & inpWkSpace,
                                              boost::shared_ptr< Geometry::IComponent> comp,
                                              const int                       chanMin,
                                              const int                       chanMax,
@@ -1481,7 +1480,7 @@ namespace Mantid
 
 
     void  IntegratePeakTimeSlices:: SetUpData1(API::MatrixWorkspace_sptr              &Data,
-                                               API::MatrixWorkspace_sptr        const &inpWkSpace,
+                                               API::MatrixWorkspace_const_sptr        const &inpWkSpace,
                                                const int                               chanMin,
                                                const int                               chanMax,
                                                double                      Radius,
