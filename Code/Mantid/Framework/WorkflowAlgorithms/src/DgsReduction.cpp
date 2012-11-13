@@ -419,6 +419,33 @@ namespace Mantid
       this->setPropertyGroup("AbsUnitsMedianTestLow", absUnitsCorr);
       this->setPropertyGroup("AbsUnitsErrorBarCriterion", absUnitsCorr);
 
+      // Powder data conversion
+      std::string powder = "Powder Data Conversion";
+      this->declareProperty("DoPowderDataConversion", false,
+          "Flag to switch on converting DeltaE to SQW.");
+      this->declareProperty(new ArrayProperty<double>("PowderMomTransferRange",
+                boost::make_shared<RebinParamsValidator>(true)),
+                "A comma separated list of first bin boundary, width, last bin boundary.\n"
+                "Negative width value indicates logarithmic binning.");
+      this->setPropertySettings("PowderMomTransferRange",
+          new VisibleWhenProperty("DoPowderDataConversion", IS_EQUAL_TO, "1"));
+      this->declareProperty("SavePowderNexusFile", true,
+          "Flag to use to save a processed NeXus file for powder data.");
+      this->setPropertySettings("SavePowderNexusFile",
+          new VisibleWhenProperty("DoPowderDataConversion", IS_EQUAL_TO, "1"));
+      this->declareProperty(new FileProperty("SavePowderNexusFilename", "",
+                FileProperty::OptionalSave, ".nxs"),
+                "Provide a filename for saving the processed powder data.");
+      this->setPropertySettings("SavePowderNexusFilename",
+          new VisibleWhenProperty("DoPowderDataConversion", IS_EQUAL_TO, "1"));
+
+      this->setPropertyGroup("DoPowderDataConversion", powder);
+      this->setPropertyGroup("PowderMomTransferRange", powder);
+      this->setPropertyGroup("SavePowderNexusFile", powder);
+      this->setPropertyGroup("SavePowderNexusFilename", powder);
+
+      // Common to PD and SC
+
       this->declareProperty(new WorkspaceProperty<>("OutputWorkspace", "",
           Direction::Output), "Provide a name for the output workspace.");
       this->declareProperty("ReductionProperties", "__dgs_reduction_properties",
@@ -794,6 +821,42 @@ namespace Mantid
           this->declareProperty(new WorkspaceProperty<>("AbsUnitsDiagMask",
               outputWsName+"_absunits_diagmask", Direction::Output));
           this->setProperty("AbsUnitsDiagMask", absMaskWS);
+        }
+      }
+
+      // Convert from DeltaE to powder S(Q,W)
+      const bool doPowderConvert = this->getProperty("DoPowderDataConversion");
+      if (doPowderConvert)
+      {
+        // Collect information
+        std::string sqwWsName = outputWsName + "_pd_sqw";
+        std::vector<double> qBinning = this->getProperty("PowderMomTransferRange");
+        const double initialEnergy = boost::lexical_cast<double>(outputWS->run().getProperty("Ei")->value());
+
+        IAlgorithm_sptr sofqw = this->createSubAlgorithm("SofQW3");
+        sofqw->setProperty("InputWorkspace", outputWS);
+        sofqw->setProperty("OutputWorkspace", sqwWsName);
+        sofqw->setProperty("QAxisBinning", qBinning);
+        sofqw->setProperty("EMode", "Direct");
+        sofqw->setProperty("EFixed", initialEnergy);
+        sofqw->executeAsSubAlg();
+        MatrixWorkspace_sptr sqwWS = sofqw->getProperty("OutputWorkspace");
+        this->declareProperty(new WorkspaceProperty<>("PowderSqwWorkspace",
+            sqwWsName, Direction::Output));
+        this->setProperty("PowderSqwWorkspace", sqwWS);
+
+        const bool saveProcNexus = this->getProperty("SavePowderNexusFile");
+        if (saveProcNexus)
+        {
+          std::string saveProcNexusFilename = this->getProperty("SavePowderNexusFilename");
+          if (saveProcNexusFilename.empty())
+          {
+            saveProcNexusFilename = sqwWsName + ".nxs";
+          }
+          IAlgorithm_sptr saveNxs = this->createSubAlgorithm("SaveNexus");
+          saveNxs->setProperty("InputWorkspace", sqwWS);
+          saveNxs->setProperty("Filename", saveProcNexusFilename);
+          saveNxs->executeAsSubAlg();
         }
       }
 
