@@ -121,7 +121,7 @@ namespace Crystal
       double chancentroid = 0.0;
       boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
       Mantid::detid2index_map::iterator it;
-      it = (*wi_to_detid_map).find(pixel->getID());
+      it = wi_to_detid_map->find(pixel->getID());
       if (it == (*wi_to_detid_map).end())
       {
         continue;
@@ -148,7 +148,7 @@ namespace Crystal
           {
             boost::shared_ptr<Detector> pixel = RDet->getAtXY(icol, irow);
             Mantid::detid2index_map::iterator it;
-            it = (*wi_to_detid_map).find(pixel->getID());
+            it = wi_to_detid_map->find(pixel->getID());
             if (it == (*wi_to_detid_map).end())continue;
             size_t workspaceIndex = (it->second);
     
@@ -295,7 +295,7 @@ namespace Crystal
         {
           boost::shared_ptr<Detector> pixel = RDet->getAtXY(icol, irow);
           Mantid::detid2index_map::iterator it;
-          it = (*wi_to_detid_map).find(pixel->getID());
+          it = wi_to_detid_map->find(pixel->getID());
           size_t workspaceIndex = (it->second);
           EventList el = eventW->getEventList(workspaceIndex);
           el.switchTo(WEIGHTED_NOTIME);
