@@ -97,8 +97,8 @@ def new_proxy(classType, callable, *args, **kwargs):
         
         @param classType :: A new proxy class for the return type
         @param callable :: A python callable object, i.e. a function/method
-        @param *args :: The positional arguments passed on as given
-        @param *kwargs :: The keyword arguments passed on as given
+        @param \*args :: The positional arguments passed on as given
+        @param \*kwargs :: The keyword arguments passed on as given
     """
     obj = threadsafe_call(callable, *args, **kwargs)
     if obj is None:
