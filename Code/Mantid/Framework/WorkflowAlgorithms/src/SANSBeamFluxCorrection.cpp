@@ -78,6 +78,7 @@ void SANSBeamFluxCorrection::exec()
 
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr monitorWS = getProperty("InputMonitorWorkspace");
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   // Load reference
   progress.report("Loading reference data");
@@ -95,7 +96,6 @@ void SANSBeamFluxCorrection::exec()
   rebinAlg = createSubAlgorithm("RebinToWorkspace");
   rebinAlg->setProperty("WorkspaceToRebin", monitorWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
-  //rebinAlg->setProperty("OutputWorkspace", monitorWS);
   rebinAlg->executeAsSubAlg();
   monitorWS = rebinAlg->getProperty("OutputWorkspace");
 
@@ -106,14 +106,16 @@ void SANSBeamFluxCorrection::exec()
   IAlgorithm_sptr divideAlg = createSubAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", inputWS);
   divideAlg->setProperty("RHSWorkspace", monitorWS);
+  divideAlg->setProperty("OutputWorkspace", outputWS);
   divideAlg->executeAsSubAlg();
-  MatrixWorkspace_sptr tmpWS = divideAlg->getProperty("OutputWorkspace");
+  outputWS = divideAlg->getProperty("OutputWorkspace");
 
   divideAlg = createSubAlgorithm("Divide");
-  divideAlg->setProperty("LHSWorkspace", tmpWS);
+  divideAlg->setProperty("LHSWorkspace", outputWS);
   divideAlg->setProperty("RHSWorkspace", scaledfluxRefWS);
+  divideAlg->setProperty("OutputWorkspace", outputWS);
   divideAlg->executeAsSubAlg();
-  MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
+  outputWS = divideAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWS);
   setProperty("OutputMessage", "Flux correction applied\n"+m_output_message);
 }

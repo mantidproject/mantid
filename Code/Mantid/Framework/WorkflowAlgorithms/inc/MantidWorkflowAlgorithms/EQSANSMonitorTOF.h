@@ -70,9 +70,6 @@ private:
 
   /// Compute TOF offset
   double getTofOffset(API::MatrixWorkspace_const_sptr inputWS, bool frame_skipping, double source_to_monitor);
-  double low_tof_cut;
-  double high_tof_cut;
-
 };
 
 } // namespace Algorithms

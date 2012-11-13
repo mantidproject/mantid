@@ -74,6 +74,7 @@ class EQSANSNormalise(PythonAlgorithm):
                              Description="Beam spectrum to be used for normalisation [takes precedence over default]")
         self.declareProperty("NormaliseToMonitor", False,
                              Description="If true, the algorithm will look for a monitor workspace to use")
+        self.declareProperty("ReductionProperties","__sans_reduction_properties", Direction=Direction.Input)
         self.declareProperty("OutputMessage", "", Direction=Direction.Output)
 
     def PyExec(self):
@@ -117,15 +118,23 @@ class EQSANSNormalise(PythonAlgorithm):
         self.setProperty("OutputMessage", "Data [%s] normalized to accelerator current\n  Beam flux file: %s" % (workspace, str(flux_data_path))) 
 
     def _normalise_to_monitor(self, workspace):
-        if mtd.workspaceExists(workspace+'_monitors'):
-            ConvertUnits(InputWorkspace=workspace+'_monitors',
-                         OutputWorkspace=workspace+'_monitors_wl', Target="Wavelength")
-            RebinToWorkspace(WorkspaceToRebin=workspace+'_monitors_wl',
-                             WorkspaceToMatch=workspace,
-                             OutputWorkspace=workspace+'_monitors_wl')
-            Divide(workspace, workspace+'_monitors_wl', OutputWorkspace=workspace)
+        """
+        """
+        prop_mng = self.getPropertyValue("ReductionProperties")
+        reference_flux = self.getProperty("BeamSpectrumFile").strip()
+        monitor_ws = workspace+'_monitors'
+        if mtd.workspaceExists(monitor_ws):
+            EQSANSMonitorTOF(InputWorkspace=monitor_ws, OutputWorkspace=monitor_ws+'_tof')
+            ConvertUnits(InputWorkspace=monitor_ws+'_tof',
+                         OutputWorkspace=monitor_ws+'_wl', Target="Wavelength")
+            
+            SANSBeamFluxCorrection(InputWorkspace=workspace,
+                                   InputMonitorWorkspace=monitor_ws+'_wl',
+                                   ReferenceFluxFilename=reference_flux,
+                                   ReductionProperties=prop_mng,
+                                   OutputWorkspace=workspace)
             self.setProperty("OutputMessage", "Data [%s] normalized to monitor" % (workspace)) 
         else:
-            self.setProperty("OutputMessage", "Data [%s] NOT normalized to monitor" % (workspace)) 
+            self.setProperty("OutputMessage", "Monitor not available. Data [%s] NOT normalized to monitor" % (workspace)) 
 
 mtd.registerPyAlgorithm(EQSANSNormalise())

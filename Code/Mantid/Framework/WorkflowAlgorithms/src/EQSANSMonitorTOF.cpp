@@ -44,9 +44,6 @@ void EQSANSMonitorTOF::init()
                                           boost::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Workspace to apply the TOF correction to");
 
-  declareProperty("LowTOFCut", 0.0, Kernel::Direction::Input);
-  declareProperty("HighTOFCut", 0.0, Kernel::Direction::Input);
-
   // Output parameters
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
       "Workspace to store the corrected data in");
@@ -64,9 +61,6 @@ void EQSANSMonitorTOF::exec()
     outputWS = WorkspaceFactory::Instance().create(inputWS);
     setProperty("OutputWorkspace",outputWS);
   }
-
-  low_tof_cut = getProperty("LowTOFCut");
-  high_tof_cut = getProperty("HighTOFCut");
 
   // Get the nominal sample-to-detector distance (in mm)
   // const double MD = MONITORPOS/1000.0;

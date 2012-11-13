@@ -209,7 +209,8 @@ void SANSSensitivityCorrection::exec()
         if (!isEmpty(center_x) && loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", center_x);
         if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
         loadAlg->executeAsSubAlg();
-        rawFloodWS = loadAlg->getProperty("OutputWorkspace");
+        Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
+        rawFloodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
         m_output_message += "   | Loaded " + fileName + " (Load algorithm)\n";
       } else {
         // Get load algorithm as a string so that we can create a completely
