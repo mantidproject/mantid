@@ -77,7 +77,6 @@ set ( SRC_FILES
 	src/LoadRaw/isisraw2.cpp
 	src/LoadRaw/item_struct.cpp
 	src/LoadRaw/vms_convert.cpp
-	src/LoadRaw2.cpp
 	src/LoadRaw3.cpp
 	src/LoadRawBin0.cpp
 	src/LoadRawHelper.cpp
@@ -210,7 +209,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadQKK.h
 	inc/MantidDataHandling/LoadRKH.h
 	inc/MantidDataHandling/LoadRaw.h
-	inc/MantidDataHandling/LoadRaw2.h
 	inc/MantidDataHandling/LoadRaw3.h
 	inc/MantidDataHandling/LoadRawBin0.h
 	inc/MantidDataHandling/LoadRawHelper.h
@@ -337,7 +335,6 @@ set ( TEST_FILES
 	LoadQKKTest.h
 	LoadRKHTest.h
 	LoadRSaveNLoadNcspTest.h
-	LoadRaw2Test.h
 	LoadRaw3Test.h
 	LoadRawBin0Test.h
 	LoadRawSpectrum0Test.h
@@ -385,7 +382,6 @@ set ( TEST_FILES
 	SetScalingPSDTest.h
 	StartLiveDataTest.h
 	UpdateInstrumentFromFileTest.h
-	XMLlogfileTest.h
 )
 
 
