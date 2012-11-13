@@ -34,6 +34,7 @@ class ReductionOptions(BaseOptions):
     
     # Normalize to beam monitor
     use_beam_monitor = False
+    beam_monitor_reference = ''
 
     def __init__(self):
         super(ReductionOptions, self).__init__()
@@ -61,6 +62,7 @@ class ReductionOptions(BaseOptions):
         
         self.perform_TOF_correction = True
         self.use_beam_monitor = False
+        self.beam_monitor_reference = ''
 
     def options(self):
         """
@@ -95,6 +97,7 @@ class ReductionOptions(BaseOptions):
         if self.dark_current_corr:
             script += "  DarkCurrentFile='%s',\n" % self.dark_current_data
             
+        #TODO: add monitor options
         return script
 
     def _normalization_options(self):
@@ -105,7 +108,7 @@ class ReductionOptions(BaseOptions):
             return "NoNormalization()\n"
         elif self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
             if self.use_beam_monitor:
-                return "BeamMonitorNormalization()\n"
+                return "BeamMonitorNormalization(\"%s\")\n" % self.beam_monitor_reference
             else:
                 return "TotalChargeNormalization()\n"
         return ""        
@@ -165,6 +168,7 @@ class ReductionOptions(BaseOptions):
         xml += "<PerformTOFCorrection>%s</PerformTOFCorrection>\n" % self.perform_TOF_correction
         # Normalization option
         xml += "<UseBeamMonitor>%s</UseBeamMonitor>\n" % self.use_beam_monitor
+        xml += "<BeamMonitorRef>%s</BeamMonitorRef>\n" % self.beam_monitor_reference
         
         return xml
     
@@ -208,3 +212,5 @@ class ReductionOptions(BaseOptions):
         # Normalization option
         self.use_beam_monitor = BaseScriptElement.getBoolElement(dom, "UseBeamMonitor",
                                                                  default = ReductionOptions.use_beam_monitor)
+        self.beam_monitor_reference = BaseScriptElement.getStringElement(dom, "BeamMonitorRef",
+                                                                         default = ReductionOptions.beam_monitor_reference)

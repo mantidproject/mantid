@@ -185,9 +185,21 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_6">
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <layout class="QHBoxLayout" name="monitor_layout">
             <item>
              <widget class="QCheckBox" name="beam_monitor_chk">
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>150</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="toolTip">
                <string>Select to normalize to the beam monitor data</string>
               </property>
@@ -195,9 +207,48 @@
                <string>Select to normalize to the beam monitor data</string>
               </property>
               <property name="text">
-               <string>Normalize to beam monitor</string>
+               <string>Monitor reference</string>
               </property>
              </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="beam_monitor_edit">
+              <property name="toolTip">
+               <string>Enter a valid path for the beam monitor reference file.</string>
+              </property>
+              <property name="statusTip">
+               <string>Enter a valid path for the beam monitor reference file.</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="beam_monitor_browse_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Browse</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_9">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>

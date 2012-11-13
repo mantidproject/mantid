@@ -128,12 +128,14 @@ class EQSANSNormalise(PythonAlgorithm):
             ConvertUnits(InputWorkspace=monitor_ws+'_tof',
                          OutputWorkspace=monitor_ws+'_wl', Target="Wavelength")
             
-            SANSBeamFluxCorrection(InputWorkspace=workspace,
-                                   InputMonitorWorkspace=monitor_ws+'_wl',
-                                   ReferenceFluxFilename=reference_flux,
-                                   ReductionProperties=prop_mng,
-                                   OutputWorkspace=workspace)
-            self.setProperty("OutputMessage", "Data [%s] normalized to monitor" % (workspace)) 
+            proxy = SANSBeamFluxCorrection(InputWorkspace=workspace,
+                                           InputMonitorWorkspace=monitor_ws+'_wl',
+                                           ReferenceFluxFilename=reference_flux,
+                                           ReductionProperties=prop_mng,
+                                           OutputWorkspace=workspace)
+            output_msg = proxy.getPropertyValue("OutputMessage")
+            self.setProperty("OutputMessage", 
+                             "Data [%s] normalized to monitor\n  %s" % (workspace, output_msg)) 
         else:
             self.setProperty("OutputMessage", "Monitor not available. Data [%s] NOT normalized to monitor" % (workspace)) 
 

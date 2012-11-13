@@ -147,6 +147,10 @@ class SANSInstrumentWidget(BaseWidget):
         # TOF connections
         self.connect(self._summary.tof_cut_chk, QtCore.SIGNAL("clicked(bool)"), self._tof_clicked)
         
+        # Monitor normalization
+        self.connect(self._summary.beam_monitor_chk, QtCore.SIGNAL("clicked(bool)"), self._beam_monitor_clicked)
+        self.connect(self._summary.beam_monitor_browse_button, QtCore.SIGNAL("clicked()"), self._beam_monitor_reference_browse)
+        
         # Resolution validator
         self._summary.sample_apert_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_apert_edit))
         self.connect(self._summary.resolution_chk, QtCore.SIGNAL("clicked(bool)"), self._resolution_clicked)
@@ -156,6 +160,7 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.config_options_layout.deleteLater()
             self._summary.abs_scale_options_layout.deleteLater()
             self._summary.abs_scale_direct_beam_layout.deleteLater()
+            self._summary.monitor_layout.deleteLater()
             self._summary.direct_beam_label.hide()
             self._summary.att_trans_label.hide()
             self._summary.beamstop_chk.hide()
@@ -167,6 +172,8 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.scale_chk.hide()
             self._summary.beam_monitor_chk.hide()
             self._summary.tof_correction_chk.hide()
+            self._summary.beam_monitor_edit.hide()
+            self._summary.beam_monitor_browse_button.hide()
             
             # Same thing for sample-detector distance and offset: not yet hooked in
             self._summary.geometry_options_groupbox.hide()
@@ -244,6 +251,15 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.low_tof_label.setEnabled(not is_checked)
         self._summary.high_tof_label.setEnabled(not is_checked)
                         
+    def _beam_monitor_clicked(self, is_checked):
+        self._summary.beam_monitor_edit.setEnabled(is_checked)
+        self._summary.beam_monitor_browse_button.setEnabled(is_checked)
+        
+    def _beam_monitor_reference_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._summary.beam_monitor_edit.setText(fname)              
+
     def _beamstop_clicked(self, is_checked):
         self._summary.scale_beam_radius_edit.setEnabled(is_checked and self._summary.scale_chk.isChecked())
         
@@ -387,7 +403,9 @@ class SANSInstrumentWidget(BaseWidget):
         
         self._summary.tof_correction_chk.setChecked(state.perform_TOF_correction)
         self._summary.beam_monitor_chk.setChecked(state.use_beam_monitor)
-        
+        self._summary.beam_monitor_edit.setText(QtCore.QString(str(state.beam_monitor_reference)))
+        self._beam_monitor_clicked(self._summary.beam_monitor_chk.isChecked())
+
         # Output directory
         self._summary.select_output_dir_radio.setChecked(not state.use_data_directory)
         self._summary.use_data_dir_radio.setChecked(state.use_data_directory)
@@ -465,6 +483,7 @@ class SANSInstrumentWidget(BaseWidget):
 
         m.perform_TOF_correction = self._summary.tof_correction_chk.isChecked()
         m.use_beam_monitor = self._summary.beam_monitor_chk.isChecked()
+        m.beam_monitor_reference = unicode(self._summary.beam_monitor_edit.text())
 
         # Output directory
         m.use_data_directory = self._summary.use_data_dir_radio.isChecked()
