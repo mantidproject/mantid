@@ -66,9 +66,10 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
 					group = masking_flag
 				else:
 					group = not_masking_flag
-				if type(det) == DetectorGroup:
+				detIDs = []
+				try:
 					detIDs = det.getDetectorIDs()
-				else:
+				except:
 					detIDs = [det.getID()]
 				for id in detIDs:
 					calFile.write(self.FormatLine(i,id,0.0,group,group))
