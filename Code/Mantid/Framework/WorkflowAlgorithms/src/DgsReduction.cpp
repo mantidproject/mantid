@@ -828,6 +828,7 @@ namespace Mantid
       const bool doPowderConvert = this->getProperty("DoPowderDataConversion");
       if (doPowderConvert)
       {
+        g_log.notice() << "Converting to powder S(Q,W)" << std::endl;
         // Collect information
         std::string sqwWsName = outputWsName + "_pd_sqw";
         std::vector<double> qBinning = this->getProperty("PowderMomTransferRange");
