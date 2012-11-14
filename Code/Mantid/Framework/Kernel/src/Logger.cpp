@@ -472,7 +472,7 @@ namespace Kernel
     catch(std::exception& e)
     {
       // Failures in logging are not allowed to throw exceptions out of the logging class
-      std::cerr << e.what();
+      std::cerr << "Error in logging framework: " << e.what();
     }
   }
   
