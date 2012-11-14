@@ -64,6 +64,10 @@ namespace DataHandling
     bool runLoadInstrument(const std::string &idf_filename,
                            API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg);
 
+    /// Load logs from the NeXus file
+    static bool runLoadNexusLogs(const std::string &nexusFileName,
+                                 API::MatrixWorkspace_sptr localWorkspaceName, Algorithm * alg);
+
     /// Are we going to make a copy of the NeXus file to operate on ?
     bool m_makeNexusCopy;
 

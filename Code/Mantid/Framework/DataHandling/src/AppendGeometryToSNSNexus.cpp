@@ -164,15 +164,22 @@ namespace DataHandling
 
       // Modified to call LoadInstrument directly as a sub-algorithm
       ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
+
+      // Load NeXus logs for HYSPEC, HYSPECA(testing), and SNAP
+      if(m_instrument == "HYSPEC" || m_instrument == "HYSPECA" || m_instrument == "SNAP")
+      {
+          g_log.debug() << "Run LoadNexusLogs sub-algorithm." << std::endl;
+          logs_loaded_correctly = runLoadNexusLogs(m_filename, ws, this);
+
+          if(!logs_loaded_correctly)
+              throw std::runtime_error("Failed to run LoadNexusLogs sub-algorithm.");
+      }
+
       g_log.debug() << "Run LoadInstrument sub-algorithm." << std::endl;
       instrument_loaded_correctly = runLoadInstrument(m_idf_filename, ws, this);
 
-      if(!this->instrument_loaded_correctly)
+      if(!instrument_loaded_correctly)
           throw std::runtime_error("Failed to run LoadInstrument sub-algorithm.");
-
-      // Load NeXus logs as needed
-
-      //logs_loaded_correctly
 
       // Get the number of detectors (just for progress reporting)
       // Get the number of histograms/detectors
@@ -384,7 +391,7 @@ namespace DataHandling
    */
 
   bool AppendGeometryToSNSNexus::runLoadInstrument(const std::string &idf_filename,
-       API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
+                                                   API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
   {
     IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument",0,1,true);
 
@@ -416,5 +423,39 @@ namespace DataHandling
     return executionSuccessful;
   }
 
+  //-----------------------------------------------------------------------------
+  /** Load the logs from the input NeXus file.
+   *
+   * @param nexusFileName :: Name of the NeXus file to load logs from.
+   * @param localWorkspace :: MatrixWorkspace in which to put the logs.
+   * @param alg :: Handle of an algorithm for logging access.
+   * @return true if successful.
+   */
+   bool AppendGeometryToSNSNexus::runLoadNexusLogs(const std::string &nexusFileName,
+                                                   API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
+   {
+       IAlgorithm_sptr loadLogs = alg->createSubAlgorithm("LoadNexusLogs",0,1,true);
+
+       // Execute the sub-algorithm, catching errors without stopping.
+       bool executionSuccessful(true);
+       try
+       {
+         alg->getLogger().information() << "Loading logs from the NeXus file..." << std::endl;
+         loadLogs->setPropertyValue("Filename", nexusFileName);
+         loadLogs->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
+         loadLogs->executeAsSubAlg();
+       } catch (std::invalid_argument& e)
+       {
+         alg->getLogger().information("Invalid argument to LoadNexusLogs sub-algorithm");
+         alg->getLogger().information(e.what());
+         executionSuccessful = false;
+       } catch (std::runtime_error& )
+       {
+         alg->getLogger().information("Unable to successfully run runLoadNexusLogs sub-algorithm./n");
+         executionSuccessful = false;
+       }
+
+       return executionSuccessful;
+   }
 } // namespace Mantid
 } // namespace DataHandling
