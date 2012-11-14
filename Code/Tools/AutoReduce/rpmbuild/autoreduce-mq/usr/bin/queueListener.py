@@ -1,7 +1,7 @@
+import time, sys, stomp, json, os, imp
 post_processing_bin = sys.path.append("/usr/bin") 
 os.environ['NEXUSLIB'] = "/usr/lib64/libNeXus.so"
 
-import time, sys, stomp, json, os, imp
 from ingestNexus_mq import IngestNexus
 from ingestReduced_mq import IngestReduced
 
@@ -39,21 +39,27 @@ class QueueListener(stomp.ConnectionListener):
                     facility = param[1]
                     instrument = param[2]
                     proposal = param[3]
-                    out_dir = "/"+facility+"/"+instrument+"/"+proposal+"/shared/autoreduce"
+                    out_dir = "/"+facility+"/"+instrument+"/"+proposal+"/shared/autoreduce/"
                     reduce_script="reduce_" + instrument
-                    reduce_script_path="/"+facility+"/"+instrument+"/shared/autoreduce"+reduce_script+".py"
+                    reduce_script_path="/"+facility+"/"+instrument+"/shared/autoreduce/"+reduce_script+".py"
+                    print "reduce_script: %s" % reduce_script
                     print "reduce_script_path: %s" % reduce_script_path
+                    print "out_dir: %s" % out_dir 
                     print "Auto reducing: %s %s" % (path, out_dir)
+                    print "Calling /queue/REDUCTION.STARTED with message %s" % message 
                     self.send('/queue/REDUCTION.STARTED', message, persistent='true')
                     m = imp.load_source(reduce_script, reduce_script_path)
                     reduction = m.AutoReduction(path, out_dir)
                     reduction.execute()
+                    print "Calling /queue/REDUCTION.COMPLETE with message %s" % message 
                     self.send('/queue/REDUCTION.COMPLETE', message, persistent='true')
                 else:
                     errorMsg = "faied to parse data_file " + path
+                    print "Calling /queue/REDUCTION.ERROR with message %s" % message 
                     self.send('/queue/REDUCTION.ERROR', message, persistent='true')
             else: 
                 errorMsg = "data_file is missing"
+                print "Calling /queue/REDUCTION.ERROR with message %s" % message 
                 self.send('/queue/REDUCTION.ERROR', errorMsg, persistent='true')
             gotit = True
         elif destination=='/queue/CATALOG.DATA_READY':

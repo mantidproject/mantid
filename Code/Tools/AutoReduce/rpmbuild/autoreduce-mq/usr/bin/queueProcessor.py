@@ -16,7 +16,7 @@ class StreamToLogger(object):
     def write(self, buf):
         for line in buf.rstrip().splitlines():
             self.logger.log(self.log_level, line.rstrip())
- 
+
 config = ConfigParser.RawConfigParser()
 configFile="/etc/autoreduce/mq.properties"
 if path.exists(configFile) and path.isfile(configFile) and access(configFile, R_OK):
