@@ -60,6 +60,10 @@ namespace DataHandling
     /// Get the instrument name from the NeXus file
     std::string getInstrumentName(const std::string & nxfilename);
 
+    /// Run LoadInstrument as a sub-algorithm
+    bool runLoadInstrument(const std::string &idf_filename,
+                           API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg);
+
     /// Are we going to make a copy of the NeXus file to operate on ?
     bool m_makeNexusCopy;
 
@@ -67,7 +71,7 @@ namespace DataHandling
     API::Progress *progress;
 
     /// The workspace to load instrument and logs
-    MatrixWorkspace_sptr ws;
+    API::MatrixWorkspace_sptr ws;
 
     /// Was the instrument loaded?
     bool instrument_loaded_correctly;

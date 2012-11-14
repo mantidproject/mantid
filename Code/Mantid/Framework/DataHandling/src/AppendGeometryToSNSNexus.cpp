@@ -280,7 +280,7 @@ namespace DataHandling
                               }
                               else
                               {
-                                  throw std::runtime_error("Could not find any detectors for the bank named" + bankName +
+                                  throw std::runtime_error("Could not find any detectors for the bank named " + bankName +
                                                            " that is listed in the NeXus file."
                                                            "Check that it exists in the Instrument Definition File.");
                               }
@@ -384,9 +384,9 @@ namespace DataHandling
    */
 
   bool AppendGeometryToSNSNexus::runLoadInstrument(const std::string &idf_filename,
-       MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
+       API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
   {
-    IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument",0,1);
+    IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument",0,1,true);
 
     // Execute the sub-algorithm.
     bool executionSuccessful(true);
@@ -398,20 +398,20 @@ namespace DataHandling
       loadInst->execute();
     } catch (std::invalid_argument& e)
     {
-      alg->getLogger().information()("Invalid argument to LoadInstrument sub-algorithm");
-      alg->getLogger().information()(e.what());
+      alg->getLogger().information("Invalid argument to LoadInstrument sub-algorithm");
+      alg->getLogger().information(e.what());
       executionSuccessful = false;
     } catch (std::runtime_error& e)
     {
-      alg->getLogger().information()("Failed to run LoadInstrument sub-algorithm");
-      alg->getLogger().information()(e.what());
+      alg->getLogger().information("Failed to run LoadInstrument sub-algorithm");
+      alg->getLogger().information(e.what());
       executionSuccessful = false;
     }
 
     // Throwing an error if failed
     if (!executionSuccessful)
     {
-        alg->getLogger().error() << "Error loading instrument\n";
+      alg->getLogger().error("Error loading instrument\n");
     }
     return executionSuccessful;
   }
