@@ -66,6 +66,14 @@ namespace DataHandling
     /// Algorithm progress keeper
     API::Progress *progress;
 
+    /// The workspace to load instrument and logs
+    MatrixWorkspace_sptr ws;
+
+    /// Was the instrument loaded?
+    bool instrument_loaded_correctly;
+
+    /// Were the logs loaded?
+    bool logs_loaded_correctly;
   };
 
 

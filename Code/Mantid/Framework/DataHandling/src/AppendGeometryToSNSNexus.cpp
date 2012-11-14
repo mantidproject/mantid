@@ -145,22 +145,34 @@ namespace DataHandling
       }
 
       // Temp workspace name to load the instrument into
-      std::string workspaceName = "__" + m_instrument + "_geometry_ws";
+      //std::string workspaceName = "__" + m_instrument + "_geometry_ws";
 
       // Now what is the instrument definition filename ?
+      // TODO: Modify to use /entry/instrument/instrument_xml/data after establishing a way to maintain ADARA Geometry Packet
       m_idf_filename = ExperimentInfo::getInstrumentFilename(m_instrument);
       g_log.debug() << "Loading instrument definition from " << m_idf_filename << "." << std::endl;
 
       // Let's load the empty instrument
-      IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
-      alg->initialize();
-      alg->setPropertyValue("Filename", m_idf_filename);
-      alg->setPropertyValue("OutputWorkspace", workspaceName);
-      alg->execute();
+      //IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+      //alg->initialize();
+      //alg->setPropertyValue("Filename", m_idf_filename);
+      //alg->setPropertyValue("OutputWorkspace", workspaceName);
+      //alg->execute();
 
-      MatrixWorkspace_sptr ws;
-      ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
+      //MatrixWorkspace_sptr ws;
+      //ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 
+      // Modified to call LoadInstrument directly as a sub-algorithm
+      ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
+      g_log.debug() << "Run LoadInstrument sub-algorithm." << std::endl;
+      instrument_loaded_correctly = runLoadInstrument(m_idf_filename, ws, this);
+
+      if(!this->instrument_loaded_correctly)
+          throw std::runtime_error("Failed to run LoadInstrument sub-algorithm.");
+
+      // Load NeXus logs as needed
+
+      //logs_loaded_correctly
 
       // Get the number of detectors (just for progress reporting)
       // Get the number of histograms/detectors
@@ -326,10 +338,11 @@ namespace DataHandling
 
 
   //----------------------------------------------------------------------------------------------
-
-
-
-  //----------------------------------------------------------------------------------------------
+  /** Get the instrument name from the input NeXus file.
+   *
+   * @param nxfilename :: Input NeXus file.
+   * @param the instrument name, empty string if failed.
+   */
  std::string AppendGeometryToSNSNexus::getInstrumentName(const std::string &nxfilename)
  {
      std::string instrument;
@@ -360,6 +373,48 @@ namespace DataHandling
 
      return instrument;
  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Load the instrument using the input instrument definition file.
+   *
+   * @param idf_filename :: Input instrument definition file.
+   * @param localWorkspace :: MatrixWorkspace in which to put the instrument geometry
+   * @param alg :: Handle of an algorithm for logging access
+   * @return true if successful
+   */
+
+  bool AppendGeometryToSNSNexus::runLoadInstrument(const std::string &idf_filename,
+       MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
+  {
+    IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument",0,1);
+
+    // Execute the sub-algorithm.
+    bool executionSuccessful(true);
+    try
+    {
+      loadInst->setPropertyValue("Filename", idf_filename);
+      loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
+      loadInst->setProperty("RewriteSpectraMap", false);
+      loadInst->execute();
+    } catch (std::invalid_argument& e)
+    {
+      alg->getLogger().information()("Invalid argument to LoadInstrument sub-algorithm");
+      alg->getLogger().information()(e.what());
+      executionSuccessful = false;
+    } catch (std::runtime_error& e)
+    {
+      alg->getLogger().information()("Failed to run LoadInstrument sub-algorithm");
+      alg->getLogger().information()(e.what());
+      executionSuccessful = false;
+    }
+
+    // Throwing an error if failed
+    if (!executionSuccessful)
+    {
+        alg->getLogger().error() << "Error loading instrument\n";
+    }
+    return executionSuccessful;
+  }
 
 } // namespace Mantid
 } // namespace DataHandling
