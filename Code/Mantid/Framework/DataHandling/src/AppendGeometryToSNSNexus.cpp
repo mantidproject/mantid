@@ -30,11 +30,8 @@ namespace DataHandling
 {
 
   // Register the algorithm into the AlgorithmFactory
-  // TODO: Uncomment this when we want it visible in Mantid.
   DECLARE_ALGORITHM(AppendGeometryToSNSNexus)
   
-
-
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
@@ -47,15 +44,15 @@ namespace DataHandling
    */
   AppendGeometryToSNSNexus::~AppendGeometryToSNSNexus()
   {
+    //delete workspace
   }
   
-
   //----------------------------------------------------------------------------------------------
   /// Algorithm's name for identification. @see Algorithm::name
-  const std::string AppendGeometryToSNSNexus::name() const { return "AppendGeometryToSNSNexus";};
+  const std::string AppendGeometryToSNSNexus::name() const { return "AppendGeometryToSNSNexus";}
   
   /// Algorithm's version for identification. @see Algorithm::version
-  int AppendGeometryToSNSNexus::version() const { return 1;};
+  int AppendGeometryToSNSNexus::version() const { return 1;}
   
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string AppendGeometryToSNSNexus::category() const { return "DataHandling\\DataAcquisition";}
@@ -64,8 +61,8 @@ namespace DataHandling
   /// Sets documentation strings for this algorithm
   void AppendGeometryToSNSNexus::initDocs()
   {
-    this->setWikiSummary("Appends the resolved instrument geometry to a NeXus file.");
-    this->setOptionalMessage("Appends the resolved instrument geometry to a NeXus file.");
+    this->setWikiSummary("Appends the resolved instrument geometry (detectors and monitors for now) to a SNS ADARA NeXus file.");
+    this->setOptionalMessage("Appends the resolved instrument geometry (detectors and monitors for now) to a SNS ADARA NeXus file.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -81,6 +78,7 @@ namespace DataHandling
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, extensions),
                       "The name of the NeXus file to append geometry to.");
 
+      // TODO: change MakeCopy default to False when comfortable. Otherwise need to remove the extra copy once in production.
       declareProperty(new PropertyWithValue<bool>("MakeCopy", true, Direction::Input),
                       "Copy the NeXus file first before appending (optional, default True).");
 
@@ -91,7 +89,7 @@ namespace DataHandling
    */
   void AppendGeometryToSNSNexus::exec()
   {          
-
+      // TODO: rename the created arrays before moving to production
       g_log.warning() << "This is intended as a proof of principle and not a long term implementation." << std::endl;
       g_log.warning() << "(the created arrays in the NeXus file will have the '_new' suffix)" << std::endl;
 
@@ -139,6 +137,12 @@ namespace DataHandling
 
       // Let's look for the instrument name
       m_instrument = getInstrumentName(m_filename);
+
+      if (m_instrument.length() == 0)
+      {
+
+          throw std::runtime_error("Failed to get instrument name from " + m_filename + ". Can't identify instrument definition file.");
+      }
 
       // Temp workspace name to load the instrument into
       std::string workspaceName = "__" + m_instrument + "_geometry_ws";
@@ -348,6 +352,7 @@ namespace DataHandling
      catch (::NeXus::Exception &)
      {
          // TODO: try and get the instrument name from the filename instead.
+         // Note in filename we have instrument short name yet ExperimentiInfo.getInstrumentFilename() expects instrument long name
          instrument = "";
      }
 
