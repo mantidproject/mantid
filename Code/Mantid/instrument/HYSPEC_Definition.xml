@@ -64,31 +64,31 @@
     </location>
   </component>
   <type name="Tank">
-    <component type="bank01">
+    <component type="bank1">
       <location/>
     </component>
-    <component type="bank02">
+    <component type="bank2">
       <location/>
     </component>
-    <component type="bank03">
+    <component type="bank3">
       <location/>
     </component>
-    <component type="bank04">
+    <component type="bank4">
       <location/>
     </component>
-    <component type="bank05">
+    <component type="bank5">
       <location/>
     </component>
-    <component type="bank06">
+    <component type="bank6">
       <location/>
     </component>
-    <component type="bank07">
+    <component type="bank7">
       <location/>
     </component>
-    <component type="bank08">
+    <component type="bank8">
       <location/>
     </component>
-    <component type="bank09">
+    <component type="bank9">
       <location/>
     </component>
     <component type="bank10">
@@ -125,7 +125,7 @@
       <location/>
     </component>
   </type>
-  <type name="bank01">
+  <type name="bank1">
     <component type="eightpack">
       <location y="0.0" x="2.15969004222" z="3.98993854442">
         <rot axis-z="0" axis-x="0" axis-y="1" val="202.5">
@@ -136,7 +136,7 @@
       </location>
     </component>
   </type>
-  <type name="bank02">
+  <type name="bank2">
     <component type="eightpack">
       <location y="0.0" x="1.94353496898" z="4.07947282333">
         <rot axis-z="0" axis-x="0" axis-y="1" val="202.5">
@@ -147,7 +147,7 @@
       </location>
     </component>
   </type>
-  <type name="bank03">
+  <type name="bank3">
     <component type="eightpack">
       <location y="0.0" x="1.72693414232" z="4.16919173919">
         <rot axis-z="0" axis-x="0" axis-y="1" val="202.5">
@@ -158,7 +158,7 @@
       </location>
     </component>
   </type>
-  <type name="bank04">
+  <type name="bank4">
     <component type="eightpack">
       <location y="0.0" x="1.51055630944" z="4.2588315684">
         <rot axis-z="0" axis-x="0" axis-y="1" val="202.5">
@@ -169,7 +169,7 @@
       </location>
     </component>
   </type>
-  <type name="bank05">
+  <type name="bank5">
     <component type="eightpack">
       <location y="0.0" x="1.29417824242" z="4.34844493395">
         <rot axis-z="0" axis-x="0" axis-y="1" val="202.5">
@@ -180,7 +180,7 @@
       </location>
     </component>
   </type>
-  <type name="bank06">
+  <type name="bank6">
     <component type="eightpack">
       <location y="0.0" x="1.05342928032" z="4.41295336686">
         <rot axis-z="0" axis-x="0" axis-y="1" val="187.5">
@@ -191,7 +191,7 @@
       </location>
     </component>
   </type>
-  <type name="bank07">
+  <type name="bank7">
     <component type="eightpack">
       <location y="0.0" x="0.821233681158" z="4.44353484659">
         <rot axis-z="0" axis-x="0" axis-y="1" val="187.5">
@@ -202,7 +202,7 @@
       </location>
     </component>
   </type>
-  <type name="bank08">
+  <type name="bank8">
     <component type="eightpack">
       <location y="0.0" x="0.589025052948" z="4.47409329105">
         <rot axis-z="0" axis-x="0" axis-y="1" val="187.5">
@@ -213,7 +213,7 @@
       </location>
     </component>
   </type>
-  <type name="bank09">
+  <type name="bank9">
     <component type="eightpack">
       <location y="0.0" x="0.356819627696" z="4.50467606441">
         <rot axis-z="0" axis-x="0" axis-y="1" val="187.5">
