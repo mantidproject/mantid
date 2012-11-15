@@ -190,13 +190,13 @@
              <widget class="QCheckBox" name="beam_monitor_chk">
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -264,13 +264,13 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -355,13 +355,13 @@
              <widget class="QLabel" name="direct_beam_label">
               <property name="minimumSize">
                <size>
-                <width>120</width>
+                <width>150</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>120</width>
+                <width>150</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -558,13 +558,13 @@
              <widget class="QCheckBox" name="dark_current_check">
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -711,13 +711,13 @@
              <widget class="QCheckBox" name="resolution_chk">
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -794,7 +794,7 @@
              <widget class="QLabel" name="low_tof_label">
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>0</height>
                </size>
               </property>
@@ -951,13 +951,13 @@
               </property>
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>16777215</height>
                </size>
               </property>
@@ -1100,7 +1100,7 @@
              <widget class="QLabel" name="label_5">
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>0</height>
                </size>
               </property>
@@ -1386,7 +1386,7 @@ The mask information is saved separately so that your data file will NOT be modi
              <widget class="QCheckBox" name="mask_check">
               <property name="minimumSize">
                <size>
-                <width>150</width>
+                <width>180</width>
                 <height>0</height>
                </size>
               </property>
