@@ -606,24 +606,27 @@ namespace Mantid
       return out;
     }
 
-    /**
-     * Add a value to the map
-     *  @param time :: The time as a boost::posix_time::ptime value
-     *  @param value :: The associated value
-     *  @return True if insertion successful (i.e. identical time not already in map
+    /** Add a value to the series.
+     *  Added values need not be sequential in time.
+     *  @param time   The time
+     *  @param value  The associated value
      */
     template<typename TYPE>
     void TimeSeriesProperty<TYPE>::addValue(const Kernel::DateAndTime &time, const TYPE value)
     {
-
       TimeValueUnit<TYPE> newvalue(time, value);
+      // Add the value to the back of the vector
       m_values.push_back(newvalue);
-
+      // Increment the separate record of the property's size
       m_size ++;
-      if (m_size == 1 || ( m_propSortedFlag && !(*m_values.rbegin() < *(m_values.rbegin()+1)) ) )
+
+      // Toggle the sorted flag if necessary
+      // (i.e. if the flag says we're sorted and the added time is before the prior last time)
+      if ( m_propSortedFlag && *m_values.rbegin() < *(m_values.rbegin()+1) )
+      {
         m_propSortedFlag = false;
-      else
-        m_propSortedFlag = false;
+      }
+
       m_filterApplied = false;
 
       return;

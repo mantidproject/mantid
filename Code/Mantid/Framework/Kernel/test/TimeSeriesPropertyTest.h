@@ -87,6 +87,17 @@ public:
     TS_ASSERT_EQUALS( iString.substr(0,24), "2007-Nov-30 16:17:00  1\n" );
     const std::string sString = sProp->value();
     TS_ASSERT_EQUALS( sString.substr(0,27), "2007-Nov-30 16:17:00  test\n" );
+
+    // Test the internal toggling of the 'sorted' flag works
+    auto twoVals = dProp->valuesAsVector();
+    double newVal = 2.22;
+    dProp->addValue("2007-11-30T16:17:05",newVal);
+    // Calling this method sorts the vector by time, so long as the internal flag says it isn't sorted
+    auto threeVals = dProp->valuesAsVector();
+    TS_ASSERT_EQUALS( threeVals.size(), 3 );
+    TS_ASSERT_EQUALS( twoVals[0], threeVals[0] );
+    TS_ASSERT_EQUALS( twoVals[1], threeVals[2] );
+    TS_ASSERT_EQUALS( newVal, threeVals[1] );
   }
 
   void test_timesAsVector()
