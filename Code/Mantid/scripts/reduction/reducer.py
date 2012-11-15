@@ -329,11 +329,15 @@ class Reducer(object):
         
     def __init__(self):
         self.UID = ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for x in range(5))
+        self.property_manager = "__reduction_parameters_"+self.UID
         self._data_files = {}
         self._reduction_steps = []
         
     def get_reduction_table_name(self):
-        return "__reduction_parameters_"+self.UID
+        return self.property_manager
+    
+    def set_reduction_table_name(self, name):
+        self.property_manager = str(name)
     
     def set_instrument(self, configuration):
         if issubclass(configuration.__class__, Instrument):

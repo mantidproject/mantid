@@ -168,7 +168,9 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
             qmin, qstep, qmax = self._get_binning(reducer, workspace, min(wl_min_f1, wl_min_f2), max(wl_max_f1, wl_max_f2))
             self._binning = "%g, %g, %g" % (qmin, qstep, qmax)
         # Average second frame
-        Rebin(workspace, workspace+'_frame2', "%4.2f,%4.2f,%4.2f" % (wl_min_f2, 0.1, wl_max_f2), False)
+        Rebin(InputWorkspace=workspace, OutputWorkspace=workspace+'_frame2', 
+              Params="%4.2f,%4.2f,%4.2f" % (wl_min_f2, 0.1, wl_max_f2), 
+              PreserveEvents=False)
         ReplaceSpecialValues(workspace+'_frame2', workspace+'_frame2', NaNValue=0.0,NaNError=0.0)
         
         super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame2')
@@ -183,7 +185,9 @@ class AzimuthalAverageByFrame(WeightedAzimuthalAverage):
         # Average first frame
         if self._independent_binning:
             self._binning = None
-        Rebin(workspace, workspace+'_frame1', "%4.2f,%4.2f,%4.2f" % (wl_min_f1, 0.1, wl_max_f1), False)
+        Rebin(InputWorkspace=workspace, OutputWorkspace=workspace+'_frame1',
+              Params="%4.2f,%4.2f,%4.2f" % (wl_min_f1, 0.1, wl_max_f1),
+              PreserveEvents=False)
         ReplaceSpecialValues(workspace+'_frame1', workspace+'_frame1', NaNValue=0.0,NaNError=0.0)
         
         super(AzimuthalAverageByFrame, self).execute(reducer, workspace+'_frame1')
@@ -314,9 +318,15 @@ class DirectBeamTransmission(SingleFrameDirectBeamTransmission):
                 else:
                     raise RuntimeError, "DirectBeamTransmission could not retrieve the %s property" % wl_max_prop
                 
-                Rebin(workspace, workspace+suffix, "%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max), False)
-                Rebin(sample_mon_ws, sample_mon_ws+suffix, "%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max), False)
-                Rebin(empty_mon_ws, empty_mon_ws+suffix, "%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max), False)
+                Rebin(InputWorkspace=workspace, OutputWorkspace=workspace+suffix,
+                      Params="%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max),
+                      PreserveEvents=False)
+                Rebin(InputWorkspace=sample_mon_ws, OutputWorkspace=sample_mon_ws+suffix,
+                      Params="%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max),
+                      PreserveEvents=False)
+                Rebin(InputWorkspace=empty_mon_ws, OutputWorkspace=empty_mon_ws+suffix,
+                      Params="%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max),
+                      PreserveEvents=False)
                 self._calculate_transmission(sample_mon_ws+suffix, empty_mon_ws+suffix, first_det, self._transmission_ws+suffix)
                 RebinToWorkspace(self._transmission_ws+suffix, workspace, OutputWorkspace=self._transmission_ws+suffix)
                 RebinToWorkspace(self._transmission_ws+suffix+'_unfitted', workspace, OutputWorkspace=self._transmission_ws+suffix+'_unfitted')

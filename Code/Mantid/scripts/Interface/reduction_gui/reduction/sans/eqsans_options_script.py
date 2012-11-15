@@ -97,7 +97,13 @@ class ReductionOptions(BaseOptions):
         if self.dark_current_corr:
             script += "  DarkCurrentFile='%s',\n" % self.dark_current_data
             
-        #TODO: add monitor options
+        if self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
+            if self.use_beam_monitor:
+                script += "  NormaliseToMonitor=1,\n"
+                script += "  MonitorReferenceFile='%s',\n" % self.beam_monitor_reference
+            else:
+                script += "  NormaliseToMonitor=0,\n"
+
         return script
 
     def _normalization_options(self):

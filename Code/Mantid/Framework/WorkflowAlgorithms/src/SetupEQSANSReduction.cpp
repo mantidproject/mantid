@@ -50,7 +50,12 @@ void SetupEQSANSReduction::init()
 
   declareProperty("SkipTOFCorrection", false, "IF true, the EQSANS TOF correction will be skipped");
   declareProperty("PreserveEvents", true, "If true, the output workspace will be an event workspace");
+
   declareProperty("LoadMonitors", false, "If true, the monitor workspace will be loaded");
+  declareProperty("NormaliseToBeam", true, "If true, the data will be normalised to the total charge and divided by the beam profile");
+  declareProperty("NormaliseToMonitor", false, "If true, the data will be normalised to the monitor, otherwise the total charge will be used");
+  declareProperty(new API::FileProperty("MonitorReferenceFile", "", API::FileProperty::OptionalLoad, "_event.nxs"),
+      "The name of the beam monitor reference file used for normalisation");
 
   declareProperty("SolidAngleCorrection", true, "If true, the solide angle correction will be applied to the data");
 
@@ -66,6 +71,10 @@ void SetupEQSANSReduction::init()
   setPropertyGroup("SkipTOFCorrection", load_grp);
   setPropertyGroup("PreserveEvents", load_grp);
   setPropertyGroup("LoadMonitors", load_grp);
+
+  setPropertyGroup("NormaliseToBeam", load_grp);
+  setPropertyGroup("NormaliseToMonitor", load_grp);
+  setPropertyGroup("MonitorReferenceFile", load_grp);
 
   setPropertyGroup("SolidAngleCorrection", load_grp);
 
@@ -134,14 +143,14 @@ void SetupEQSANSReduction::init()
   declareProperty(new API::FileProperty("TransmissionDirectBeam", "",
       API::FileProperty::OptionalLoad, "_event.nxs"),
       "Direct beam data file used to compute transmission");
-
   declareProperty(new API::FileProperty("TransmissionEmptyBeam", "",
       API::FileProperty::OptionalLoad, "_event.nxs"),
       "Empty beam data file used to compute transmission");
+  declareProperty("ThetaDependentTransmission",true, "If true, a theta-dependent transmission correction will be used");
   setPropertySettings("TransmissionValue", new EnabledWhenProperty("SetupReducer", IS_EQUAL_TO, "1") );
   setPropertySettings("TransmissionDirectBeam", new EnabledWhenProperty("SetupReducer", IS_EQUAL_TO, "1") );
   setPropertySettings("TransmissionEmptyBeam", new EnabledWhenProperty("SetupReducer", IS_EQUAL_TO, "1") );
-
+  setPropertySettings("ThetaDependentTransmission", new EnabledWhenProperty("SetupReducer", IS_EQUAL_TO, "1") );
 
   // Outputs
   declareProperty("OutputMessage","",Direction::Output);
@@ -162,6 +171,30 @@ void SetupEQSANSReduction::exec()
 
   // Store name of the instrument
   reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "EQSANS") );
+
+  // Store normalization algorithm
+  bool loadMonitors = getProperty("LoadMonitors");
+  const bool normalizeToBeam = getProperty("NormaliseToBeam");
+  const bool normalizeToMonitor = getProperty("NormaliseToMonitor");
+  const std::string monitorRefFile = getPropertyValue("MonitorReferenceFile");
+  // If we normalize to monitor, force the loading of monitor data
+  IAlgorithm_sptr normAlg = createSubAlgorithm("EQSANSNormalise");
+  if (normalizeToMonitor)
+  {
+    loadMonitors = true;
+    if (monitorRefFile.size()==0)
+    {
+      g_log.error() << "ERROR: normalize-to-monitor was turned ON but no reference data was selected" << std::endl;
+      return;
+    }
+    normAlg->setProperty("NormaliseToMonitor", true);
+    normAlg->setProperty("BeamSpectrumFile", monitorRefFile);
+  } else {
+    normAlg->setProperty("NormaliseToBeam", normalizeToBeam);
+  }
+  normAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+  reductionManager->declareProperty(new AlgorithmProperty("NormaliseAlgorithm"));
+  reductionManager->setProperty("NormaliseAlgorithm", normAlg);
 
   // Load algorithm
   IAlgorithm_sptr loadAlg = createSubAlgorithm("EQSANSLoad");
@@ -185,7 +218,6 @@ void SetupEQSANSReduction::exec()
 
   const bool preserveEvents = getProperty("PreserveEvents");
   loadAlg->setProperty("PreserveEvents", preserveEvents);
-  const bool loadMonitors = getProperty("LoadMonitors");
   loadAlg->setProperty("LoadMonitors", loadMonitors);
 
   const double sdd = getProperty("SampleDetectorDistance");
@@ -295,7 +327,8 @@ void SetupEQSANSReduction::initializeReduction(boost::shared_ptr<PropertyManager
 {
   // Write the Reducer python script to be executed
   std::string script = "import reduction.instruments.sans.sns_command_interface as cmd\n";
-
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+  const bool preserveEvents = getProperty("PreserveEvents");
 
   //  - beam center
   double center_x = 0.0;
@@ -309,7 +342,10 @@ void SetupEQSANSReduction::initializeReduction(boost::shared_ptr<PropertyManager
   else
     throw std::runtime_error("EQSANSReduce not yet compatible with beam finder: enter beam center coordinates");
 
-  script += "cmd.EQSANS()\n";
+  if (preserveEvents)
+    script += "cmd.EQSANS(True, \"" + reductionManagerName + "\")\n";
+  else
+    script += "cmd.EQSANS(False, \"" + reductionManagerName + "\")\n";
   script += "cmd.SetBeamCenter(" + Poco::NumberFormatter::format(center_x, 2)
     + ", " + Poco::NumberFormatter::format(center_y, 2) + ")\n";
 
@@ -323,6 +359,12 @@ void SetupEQSANSReduction::initializeReduction(boost::shared_ptr<PropertyManager
   }
 
   //  - load options
+  const bool useConfig = getProperty("UseConfig");
+  if (useConfig)
+    script += "cmd.UseConfig(True)\n";
+  else
+    script += "cmd.UseConfig(False)\n";
+
   if (reductionManager->existsProperty("LoadAlgorithm"))
   {
     IAlgorithm_sptr loadAlg = reductionManager->getProperty("LoadAlgorithm");
@@ -356,8 +398,41 @@ void SetupEQSANSReduction::initializeReduction(boost::shared_ptr<PropertyManager
       script += "cmd.UseConfigMask(use_config=False)\n";
   }
 
+  //  - Solid angle correction
+  const bool solidAngle = getProperty("SolidAngleCorrection");
+  if (solidAngle)
+    script += "cmd.SolidAngle()\n";
+  else
+    script += "cmd.NoSolidAngle()\n";
+
+  //  - Dark current
+  const std::string darkCurrentFile = getPropertyValue("DarkCurrentFile");
+  if (darkCurrentFile.size() > 0)
+  {
+    script += "cmd.DarkCurrent(\"" + darkCurrentFile + "\")\n";
+  }
+
+  //  - Normalization options
+  if (reductionManager->existsProperty("NormaliseAlgorithm"))
+  {
+    IAlgorithm_sptr normAlg = reductionManager->getProperty("NormaliseAlgorithm");
+    const bool normaliseToBeam = normAlg->getProperty("NormaliseToBeam");
+    const bool normaliseToMonitor = normAlg->getProperty("NormaliseToMonitor");
+    const std::string fileName = normAlg->getPropertyValue("BeamSpectrumFile");
+    if (normaliseToMonitor)
+    {
+      script += "cmd.BeamMonitorNormalization(\"" + fileName + "\")\n";
+    } else {
+      if (normaliseToBeam)
+        script += "cmd.TotalChargeNormalization(normalize_to_beam=True)\n";
+      else
+        script += "cmd.TotalChargeNormalization(normalize_to_beam=False)\n";
+    }
+  }
+
   //  - Transmission
   const double trans = getProperty("TransmissionValue");
+  const bool thetaDependent = getProperty("ThetaDependentTransmission");
   if (isEmpty(trans))
   {
     const std::string directBeam = getPropertyValue("TransmissionDirectBeam");
@@ -365,11 +440,17 @@ void SetupEQSANSReduction::initializeReduction(boost::shared_ptr<PropertyManager
 
     script += "cmd.DirectBeamTransmission(\"" + directBeam
         + "\", \"" + emptyBeam + "\")\n";
-    script += "cmd.ThetaDependentTransmission(False)\n";
+    if (thetaDependent)
+      script += "cmd.ThetaDependentTransmission(True)\n";
+    else
+      script += "cmd.ThetaDependentTransmission(False)\n";
   }
   else
   {
-    script += "cmd.SetTransmission(" + Poco::NumberFormatter::format(trans, 2) + ", 0.0)\n";
+    if (thetaDependent)
+      script += "cmd.SetTransmission(" + Poco::NumberFormatter::format(trans, 2) + ", 0.0, True)\n";
+    else
+      script += "cmd.SetTransmission(" + Poco::NumberFormatter::format(trans, 2) + ", 0.0, False)\n";
   }
   script += "cmd.ReductionSingleton().set_azimuthal_averager(None)\n";
 
