@@ -2,14 +2,14 @@
 #include "MantidQtImageViewer/MatrixWSImageView.h"
 #include "MantidQtImageViewer/MatrixWSDataSource.h"
 
-using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::MatrixWorkspace_const_sptr;
 using namespace MantidQt;
 using namespace ImageView;
 
 /**
  * Construct an ImageView for the specified matrix workspace
  */
-MatrixWSImageView::MatrixWSImageView( MatrixWorkspace_sptr mat_ws )
+MatrixWSImageView::MatrixWSImageView( MatrixWorkspace_const_sptr mat_ws )
 {
   MatrixWSDataSource* source = new MatrixWSDataSource( mat_ws );
 
@@ -17,6 +17,14 @@ MatrixWSImageView::MatrixWSImageView( MatrixWorkspace_sptr mat_ws )
                                          // for the viewer.  It is
                                          // deleted when the window
                                          // is closed
+
+  std::string title = std::string("ImageView ( ") + 
+                                   mat_ws->getTitle() + 
+                      std::string(" )");
+
+  QString qtitle = QString::fromStdString(title);
+
+  image_view->setCaption( qtitle );
 }
 
 MatrixWSImageView::~MatrixWSImageView()

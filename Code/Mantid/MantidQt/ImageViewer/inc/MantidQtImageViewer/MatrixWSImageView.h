@@ -46,7 +46,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSImageView
   public:
 
     /// Construct an image viewer for the specifed MatrixWorkspace
-    MatrixWSImageView( Mantid::API::MatrixWorkspace_sptr mat_ws );
+    MatrixWSImageView( Mantid::API::MatrixWorkspace_const_sptr mat_ws );
 
    ~MatrixWSImageView();
 

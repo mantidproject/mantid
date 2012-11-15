@@ -50,7 +50,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSDataSource: public ImageDataSource
   public:
 
     /// Construct a DataSource object around the specifed MatrixWorkspace
-    MatrixWSDataSource( Mantid::API::MatrixWorkspace_sptr mat_ws );
+    MatrixWSDataSource( Mantid::API::MatrixWorkspace_const_sptr mat_ws );
 
    ~MatrixWSDataSource();
 
@@ -88,7 +88,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER MatrixWSDataSource: public ImageDataSource
 
 
   private:
-    Mantid::API::MatrixWorkspace_sptr  mat_ws;
+    Mantid::API::MatrixWorkspace_const_sptr  mat_ws;
     EModeHandler* saved_emode_handler;
 };
 

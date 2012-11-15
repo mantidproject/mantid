@@ -32,7 +32,7 @@ namespace ImageView
  *
  * @param mat_ws  Shared pointer to the matrix workspace being "wrapped"
  */
-MatrixWSDataSource::MatrixWSDataSource( MatrixWorkspace_sptr mat_ws )
+MatrixWSDataSource::MatrixWSDataSource( MatrixWorkspace_const_sptr mat_ws )
                  :ImageDataSource( 0.0, 1.0, 0.0, 1.0, 0, 0 )  // some defaults
 {
   this->mat_ws = mat_ws;
@@ -116,7 +116,7 @@ size_t MatrixWSDataSource::GetNRows()
  * @param n_cols    The specrum data will be rebinned using the specified
  *                  number of colums.
  * @param is_log_x  Flag indicating whether or not the data should be
- *                  binned logarithmically.  (NOT USED YET)
+ *                  binned logarithmically. 
  */
 DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
                                              double ymin,   double  ymax,
@@ -202,7 +202,7 @@ DataArray* MatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
  * Get a data array covering the full range of data.
  *
  * @param is_log_x  Flag indicating whether or not the data should be
- *                  binned logarithmically.  (NOT USED YET)
+ *                  binned logarithmically.
  */
 DataArray * MatrixWSDataSource::GetDataArray( bool is_log_x )
 {
@@ -243,7 +243,7 @@ void MatrixWSDataSource::GetInfoList( double x,
   int row = (int)y;
   RestrictRow( row );
 
-  ISpectrum* spec = mat_ws->getSpectrum( row );
+  const ISpectrum* spec = mat_ws->getSpectrum( row );
 
   double spec_num = spec->getSpectrumNo();
   IVUtils::PushNameValue( "Spec Num", 8, 0, spec_num, list );
