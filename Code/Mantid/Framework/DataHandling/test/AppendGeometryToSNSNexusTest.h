@@ -39,7 +39,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     // TODO: Get a better test file.
     // Changed to use HYS_11088_event.nxs to test motors
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "/SNS/HYS/IPTS-7928/0/11088/NeXus/HYS_11088_event.nxs") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "HYS_11092_event.nxs") );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeCopy", true) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
