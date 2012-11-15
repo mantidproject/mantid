@@ -56,13 +56,15 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh  "#!/bin/sh\n"
 #                                                    "echo $MANTIDPATH\n"
 #                                                    "PV_PLUGIN_PATH=$scriptpath/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\n"
                                                     "PATH=$PATH:$MANTIDPATH\n"
-                                                    "export MANTIDPATH PV_PLUGIN_PATH PATH\n"
+						    "PYTHONPATH=$MANTIDPATH:$PYTHONPATH\n"
+                                                    "export MANTIDPATH PV_PLUGIN_PATH PATH PYTHONPATH\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
                                                     "setenv MANTIDPATH \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
                                                     "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}/${PVPLUGINS_DIR}\"\n"
                                                     "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
+						    "setenv PYTHONPATH \"\${MANTIDPATH}:\${PYTHONPATH}\"\n"
 )
 
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/rpm_make_all_links.sh "#!/bin/sh\n"
