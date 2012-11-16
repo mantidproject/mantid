@@ -286,13 +286,17 @@ public:
         if (detId <= alg->eventid_max)
         {
           // We have cached the vector of events for this detector ID
+          std::vector<Mantid::DataObjects::TofEvent> *eventVector = alg->eventVectors[detId];
+          // NULL eventVector indicates a bad spectrum lookup
+          if(eventVector)
+          {
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
       // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
-          alg->eventVectors[detId]->emplace_back( tof, pulsetime );
+            eventVector->emplace_back( tof, pulsetime );
 #else
-          alg->eventVectors[detId]->push_back( TofEvent(tof, pulsetime) );
+            eventVector->push_back( TofEvent(tof, pulsetime) );
 #endif
-
+          }
           //Local tof limits
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
           // Skip any events that are the cause of bad DAS data (e.g. a negative number in uint32 -> 2.4 billion * 100 nanosec = 2.4e8 microsec)
@@ -1115,13 +1119,27 @@ void LoadEventNexus::makeMapToEventLists()
 {
   if( this->event_id_is_spec )
   {
-    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.back()) - pixelID_to_wi_offset;
-    eventVectors.resize(eventid_max+1, &WS->getEventList(0).getEvents() );
-    for (size_t j=0; j<pixelID_to_wi_vector.size(); j++)
+    // Find max spectrum no
+    Axis *ax1 = WS->getAxis(1);
+    specid_t maxSpecNo = -std::numeric_limits<specid_t>::max(); // So that any number will be greater than this
+    for (size_t i=0; i < ax1->length(); i++)
     {
-      size_t wi = pixelID_to_wi_vector[j];
-      // Save a POINTER to the vector<tofEvent>
-      eventVectors[j-pixelID_to_wi_offset] = &WS->getEventList(wi).getEvents();
+      specid_t spec = ax1->spectraNo(i);
+      if (spec > maxSpecNo) maxSpecNo = spec;
+    }
+
+    // These are used by the bank loader to figure out where to put the events
+    // The index of eventVectors is a spectrum number so it is simply resized to the maximum
+    // possible spectrum number
+    eventid_max = maxSpecNo;
+    eventVectors.resize(maxSpecNo+1, NULL);
+    for(size_t i = 0; i < WS->getNumberHistograms(); ++i)
+    {
+      const ISpectrum * spec = WS->getSpectrum(i);
+      if(spec)
+      {
+        eventVectors[spec->getSpectrumNo()] = &WS->getEventList(i).getEvents();
+      }
     }
   }
   else
