@@ -51,6 +51,8 @@ void export_IPropertyManager()
     .def("setPropertyValue", &IPropertyManager::setPropertyValue, 
          "Set the value of the named property via a string")
     .def("setProperty", &setProperty, "Set the value of the named property")
+    .def("existsProperty", &IPropertyManager::existsProperty,
+        "Returns whether a property exists")
     // Special methods so that IPropertyManager acts like a dictionary
     .def("__len__", &IPropertyManager::propertyCount)
     .def("__contains__", &IPropertyManager::existsProperty)
