@@ -447,12 +447,12 @@ public:
     // This kind of IDF should lead to 2 instrument definitions - the physical and the neutronic
     // But only 1 goes into the IDS (the neutronic instrument holds the physical instrument within itself)
     TS_ASSERT_EQUALS( IDS.size(), 1 );
-    if (IDS.size() != 1) return;
-    TS_ASSERT_EQUALS( IDS.getObjects()[0]->getName(), "INDIRECT");
-    
+    std::string name("INDIRECT_Definition.xml2011-08-25T12:00:00");
+    TS_ASSERT( IDS.doesExist(name) );
+    if (!IDS.doesExist(name)) return;
 
     // Retrieve the neutronic instrument from the InstrumentDataService
-    Instrument_const_sptr neutronicInst = IDS.getObjects()[0];
+    Instrument_const_sptr neutronicInst = IDS.retrieve(name);
     // And pull out a handle to the physical instrument from within the neutronic one
     Instrument_const_sptr physicalInst = neutronicInst->getPhysicalInstrument();
     // They should not be the same object
@@ -525,15 +525,14 @@ public:
         "</instrument>";
 
     LoadInstrument instLoader;
-    instLoader.setRethrows(true);
     instLoader.initialize();
     instLoader.setProperty("Workspace",WorkspaceFactory::Instance().create("EventWorkspace",1,1,1));
     instLoader.setProperty("InstrumentXML",instrumentXML);
     instLoader.setProperty("InstrumentName", "Nonsense"); // Want to make sure it doesn't matter what we call it
 
-    instLoader.execute();
+    TS_ASSERT( instLoader.execute() )
 
-    TS_ASSERT_EQUALS(1, IDS.size())
+    TS_ASSERT( IDS.doesExist("Nonsense2010-10-06T16:21:30") )
   }
 
   void test_failure_if_InstrumentXML_property_set_but_not_InstrumentName()
