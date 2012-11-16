@@ -1,4 +1,5 @@
 #include "MantidGeometry/Instrument/IDFObject.h"
+#include <Poco/DateTimeFormatter.h>
 
 namespace Mantid
 {
@@ -84,6 +85,24 @@ namespace Mantid
     Poco::Timestamp  IDFObject::getLastModified() const
     {
       return m_defFile.getLastModified();
+    }
+
+    /**
+    Gets a formatted string of the last modified timestamp.
+    @return timestamp as a formatted string.
+    */
+    std::string IDFObject::getFormattedLastModified() const
+    {
+      return Poco::DateTimeFormatter::format(this->getLastModified(), "%Y-%d-%mT%H:%M:%S");
+    }
+
+    /**
+    Gets the idf file as a mangled name.
+    @return the idf file as a mangled name.
+    */
+    std::string IDFObject::getMangledName() const
+    {
+      return this->getFileNameOnly() + this->getFormattedLastModified();
     }
 
     /**

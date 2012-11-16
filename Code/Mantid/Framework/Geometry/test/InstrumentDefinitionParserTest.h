@@ -16,7 +16,7 @@
 #include "MantidTestHelpers/ScopedFileHelper.h"
 
 #include <gmock/gmock.h>
-#include "boost/tuple/tuple.hpp"
+#include <boost/tuple/tuple.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -156,9 +156,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( parser.initialize(filename, "For Unit Testing", xmlText); );
     TS_ASSERT_THROWS_NOTHING( i = parser.parseXML(NULL); );
 
-    // Check the mangled name
-    TS_ASSERT_EQUALS( parser.getMangledName(), "IDF_for_UNIT_TESTING.xmlHello!");
-    // Remove it for clean test
     try
     {
       Poco::File vtpFile(vtpFilename);
@@ -762,8 +759,6 @@ void testLoadingAndParsing()
     TS_ASSERT_THROWS_NOTHING( parser.initialize(filename, "For Unit Testing", xmlText); );
     TS_ASSERT_THROWS_NOTHING( i = parser.parseXML(NULL); );
 
-    // Check the mangled name
-    TS_ASSERT_EQUALS( parser.getMangledName(), "IDF_for_UNIT_TESTING.xmlHello!");
     // Remove it for clean test
     try
     {
