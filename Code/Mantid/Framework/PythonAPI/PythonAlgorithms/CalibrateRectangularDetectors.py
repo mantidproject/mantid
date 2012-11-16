@@ -124,7 +124,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
         wksp = alg.workspace()
         # For NOMAD data before Aug 2012, use the updated geometry
-        if str(wksp.getInstrument().getValidFromDate()) == "1900-01-31T23:59:59":
+        if str(wksp.getInstrument().getValidFromDate()) == "1900-01-31T23:59:59" and str(self._instrument) == "NOMAD":
             path=config["instrumentDefinition.directory"]
             LoadInstrument(Workspace=wksp, Filename=path+'/'+"NOMAD_Definition_20120701-20120731.xml",RewriteSpectraMap=False)
         return wksp
