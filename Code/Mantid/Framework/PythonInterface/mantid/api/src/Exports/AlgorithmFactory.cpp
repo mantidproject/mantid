@@ -5,6 +5,7 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/def.hpp>
+#include <Poco/ScopedLock.h>
 
 // Python frameobject. This is under the boost includes so that boost will have done the
 // include of Python.h which it ensures is done correctly
@@ -73,14 +74,24 @@ void export_AlgorithmFactory()
 
 namespace
 {
-  // A function to register an algorithm from Python
-  void registerAlgorithm(boost::python::object obj)
-  {
     using Mantid::PythonInterface::PythonObjectInstantiator;
     using Mantid::Kernel::AbstractInstantiator;
     using Mantid::PythonInterface::AlgorithmWrapper;
     using Mantid::API::Algorithm;
     using Mantid::API::IAlgorithm_sptr;
+
+  /// Python algorithm registration mutex in anonymous namespace (aka static)
+  Poco::Mutex PYALG_REGISTER_MUTEX;
+
+  /**
+   * A free function to register an algorithm from Python
+   * @param obj :: A Python object that should either be a class type derived from PythonAlgorithm
+   *              or an instance of a class type derived from PythonAlgorithm
+   */
+  void registerAlgorithm(boost::python::object obj)
+  {
+    Poco::ScopedLock<Poco::Mutex> lock(PYALG_REGISTER_MUTEX);
+
     static PyObject * const pyAlgClass = (PyObject*)converter::registered<AlgorithmWrapper>::converters.to_python_target_type();
     // obj could be or instance/class, check instance first
     PyObject *classObject(NULL);

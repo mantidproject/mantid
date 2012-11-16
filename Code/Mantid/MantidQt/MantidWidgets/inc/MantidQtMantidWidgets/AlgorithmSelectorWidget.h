@@ -47,7 +47,8 @@ namespace MantidWidgets
     void findAlgTextChanged(const QString& text);
     void treeSelectionChanged();
 
-  signals:
+signals:
+    void algorithmFactoryUpdateReceived();
     void executeAlgorithm(const QString &, int);
     void algorithmSelectionChanged(const QString &, int);
 

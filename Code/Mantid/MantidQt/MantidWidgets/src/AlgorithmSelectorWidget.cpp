@@ -50,7 +50,11 @@ namespace MantidWidgets
     layout->addLayout(buttonLayout);
     layout->addWidget(m_tree);
 
+    // The poco notification will be dispacted from the callers thread but we need to
+    // make sure the updates to the widgets happen on the GUI thread. Dispatching
+    // through a Qt signal will make sure it is in the correct thread.
     AlgorithmFactory::Instance().notificationCenter.addObserver(m_updateObserver);
+    connect(this, SIGNAL(algorithmFactoryUpdateReceived()), this, SLOT(update()));
   }
     
   //----------------------------------------------------------------------------------------------
@@ -178,10 +182,7 @@ namespace MantidWidgets
   void AlgorithmSelectorWidget::
   handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)
   {
-    if(!m_updateInProgress)
-    {
-      this->update();
-    }
+    emit algorithmFactoryUpdateReceived();
   }
 
   //============================================================================
