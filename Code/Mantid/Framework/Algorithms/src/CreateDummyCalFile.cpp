@@ -29,6 +29,7 @@ Detectors will be assigned to group one when using AlignDetector or DiffractionF
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/InstrumentDataService.h"
+#include "MantidGeometry/Instrument/IDFObject.h"
 
 #include <queue>
 #include <fstream>
@@ -139,13 +140,18 @@ namespace Mantid
       // Handle used in the singleton constructor for instrument file should append the value
       // of the last-modified tag inside the file to determine if it is already in memory so that
       // changes to the instrument file will cause file to be reloaded.
-      instshort = instshort + pRootElem->getAttribute("last-modified");
+      auto temp = instshort + pRootElem->getAttribute("last-modified");// Generate the mangled name by hand (old-style)
 
       // If instrument not in store, insult the user
-      if (!API::InstrumentDataService::Instance().doesExist(instshort))
+      if (!API::InstrumentDataService::Instance().doesExist(temp))
       {
-        g_log.error("Instrument "+instshort+" is not present in data store.");
-        throw std::runtime_error("Instrument "+instshort+" is not present in data store.");
+        Mantid::Geometry::IDFObject idf(directoryName+instshort);
+        temp = idf.getMangledName(); // new style.
+        if (!API::InstrumentDataService::Instance().doesExist(temp))
+        {
+          g_log.error("Instrument "+instshort+" is not present in data store.");
+          throw std::runtime_error("Instrument "+instshort+" is not present in data store.");
+        }
       }
 
       // Get the names of groups

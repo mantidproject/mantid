@@ -71,8 +71,8 @@ namespace ScopedFileHelper
     }
 
     /**
-    Getter for the filename
-    @return File name only.
+    Getter for the filename with path.
+    @return File name and path.
     */
     std::string ScopedFile::getFileName() const
     {
