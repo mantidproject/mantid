@@ -113,15 +113,15 @@ public:
     const std::string fileContents = "some_idf_contents_that_donesn't_matter";
     // Create a file.
     ScopedFileHelper::ScopedFile file(fileContents, fileName);
-    IDFObject IDF(file.getFileName());
+    IDFObject IDFCreate(file.getFileName());
     // Record the modification timestamp
-    Poco::Timestamp timeOfCreation = IDF.getLastModified(); 
+    Poco::Timestamp timeOfCreation = IDFCreate.getLastModified(); 
     // Delay
     const int delay = 10;
     Poco::Thread::sleep(delay);
     // Modify the file.
     std::ofstream modIDF;
-    modIDF.open(IDF.getFileFullPathStr(), std::ios::out | std::ios::app);
+    modIDF.open(IDFCreate.getFileFullPathStr(), std::ios::out | std::ios::app);
     if (!modIDF.is_open())
     {
       throw std::runtime_error("Cannot run test since file cannot be opened.");
@@ -129,8 +129,9 @@ public:
     modIDF << "\nchange" << std::endl;
     modIDF.close();
     // Record the modification timestamp.
-    Poco::Timestamp timeOfModification = IDF.getLastModified(); 
-    
+    IDFObject IDFMod(file.getFileName());
+    Poco::Timestamp timeOfModification = IDFMod.getLastModified();
+
     // Compare the modification dates.
     TSM_ASSERT_LESS_THAN("The file modification dates do not reflect the fact that the file has been modified.", timeOfCreation.epochMicroseconds(), timeOfModification.epochMicroseconds());
   }
