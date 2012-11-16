@@ -3,7 +3,7 @@ import sys
 import math
 from testhelpers import run_algorithm, can_be_instantiated
 from mantid.api import (MatrixWorkspace, WorkspaceProperty, Workspace,
-                        ExperimentInfo, AnalysisDataService)
+                        ExperimentInfo, AnalysisDataService, WorkspaceFactory)
 from mantid.geometry import Detector
 from mantid.kernel import V3D
 
@@ -105,6 +105,61 @@ class MatrixWorkspaceTest(unittest.TestCase):
         
         for attr in [x,y,e,dx]:
             do_numpy_test(attr)
+
+    def test_setting_spectra_from_array_of_incorrect_length_raises_error(self):
+        nvectors = 2
+        xlength = 11
+        ylength = 10
+        test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
+        
+        values = np.arange(xlength + 1)
+        self.assertRaises(ValueError, test_ws.setX, 0, values)
+        self.assertRaises(ValueError, test_ws.setY, 0, values)
+        self.assertRaises(ValueError, test_ws.setE, 0, values)
+
+    def test_setting_spectra_from_array_of_incorrect_shape_raises_error(self):
+        nvectors = 2
+        xlength = 11
+        ylength = 10
+        test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
+        
+        values = np.linspace(0,1,num=xlength-1)
+        values = values.reshape(5,2)
+        self.assertRaises(ValueError, test_ws.setX, 0, values)
+        self.assertRaises(ValueError, test_ws.setY, 0, values)
+        self.assertRaises(ValueError, test_ws.setE, 0, values)
+
+    def test_setting_spectra_from_array_using_incorrect_index_raises_error(self):
+        nvectors = 2
+        xlength = 11
+        ylength = 10
+
+        test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
+        xvalues = np.arange(xlength)
+        self.assertRaises(RuntimeError, test_ws.setX, 3, xvalues)
+        
+    def test_setting_spectra_from_array_sets_expected_values(self):
+        nvectors = 2
+        xlength = 11
+        ylength = 10
+
+        test_ws = WorkspaceFactory.create("Workspace2D", nvectors, xlength, ylength)
+        ws_index = 1
+
+        values = np.linspace(0,1,xlength)
+        test_ws.setX(ws_index, values)
+        ws_values = test_ws.readX(ws_index)
+        self.assertTrue(np.array_equal(values, ws_values))
+
+        values = np.ones(ylength)
+        test_ws.setY(ws_index, values)
+        ws_values = test_ws.readY(ws_index)
+        self.assertTrue(np.array_equal(values, ws_values))
+        
+        values = np.sqrt(values)
+        test_ws.setE(ws_index, values)
+        ws_values = test_ws.readE(ws_index)
+        self.assertTrue(np.array_equal(values, ws_values))
 
     def test_data_can_be_extracted_to_numpy_successfully(self):
         x = self._test_ws.extractX()
