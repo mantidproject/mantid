@@ -106,36 +106,6 @@ public:
     TS_ASSERT_EQUALS(head+tail, obj.getMangledName());
   }
 
-  // Test that the last modified date fetched on each platform does actually make sense!
-  void testGetModifiedTimestampAfterChange()
-  {
-    const std::string fileName = "check_last_modified_date.xml";
-    const std::string fileContents = "some_idf_contents_that_donesn't_matter";
-    // Create a file.
-    ScopedFileHelper::ScopedFile file(fileContents, fileName);
-    IDFObject IDFCreate(file.getFileName());
-    // Record the modification timestamp
-    Poco::Timestamp timeOfCreation = IDFCreate.getLastModified(); 
-    // Delay
-    const int delay = 10;
-    Poco::Thread::sleep(delay);
-    // Modify the file.
-    std::ofstream modIDF;
-    modIDF.open(IDFCreate.getFileFullPathStr(), std::ios::out | std::ios::app);
-    if (!modIDF.is_open())
-    {
-      throw std::runtime_error("Cannot run test since file cannot be opened.");
-    }
-    modIDF << "\nchange" << std::endl;
-    modIDF.close();
-    // Record the modification timestamp.
-    IDFObject IDFMod(file.getFileName());
-    Poco::Timestamp timeOfModification = IDFMod.getLastModified();
-
-    // Compare the modification dates.
-    TSM_ASSERT_LESS_THAN("The file modification dates do not reflect the fact that the file has been modified.", timeOfCreation.epochMicroseconds(), timeOfModification.epochMicroseconds());
-  }
-
   void testGetFileFullPathStr()
   {
     const std::string filename = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
