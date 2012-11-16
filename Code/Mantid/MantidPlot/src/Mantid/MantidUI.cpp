@@ -79,7 +79,6 @@ m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
   m_replaceObserver(*this,&MantidUI::handleReplaceWorkspace),
   m_deleteObserver(*this,&MantidUI::handleDeleteWorkspace),
   m_clearADSObserver(*this,&MantidUI::handleClearADS),
-  m_algUpdatesObserver(*this, &MantidUI::handleAlgorithmFactoryUpdates),
   m_renameObserver(*this,&MantidUI::handleRenameWorkspace),
   m_groupworkspacesObserver(*this,&MantidUI::handleGroupWorkspaces),
   m_ungroupworkspaceObserver(*this,&MantidUI::handleUnGroupWorkspace),
@@ -194,10 +193,6 @@ void MantidUI::init()
     showCritical("The curve fitting plugin is missing");
   }
 
-  //connect the signal from the algorithm factory to monitor updates
-  connect(this, SIGNAL(algorithms_updated()), m_exploreAlgorithms, SLOT(update()));
-  Mantid::API::AlgorithmFactory::Instance().notificationCenter.addObserver(m_algUpdatesObserver);
-
 }
 
 /// Slot: Receives a new X range from a FitPropertyBrowser and re-emits it.
@@ -293,7 +288,6 @@ MantidUI::~MantidUI()
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
   Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearADSObserver);
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_algUpdatesObserver);
 }
 
 void MantidUI::saveSettings() const
@@ -1779,10 +1773,6 @@ void MantidUI::handleClearADS(Mantid::API::ClearADSNotification_ptr)
   emit workspaces_cleared();
 }
 
-void MantidUI::handleAlgorithmFactoryUpdates(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)
-{
-  emit algorithms_updated();
-}
 void MantidUI::handleRenameWorkspace(Mantid::API::WorkspaceRenameNotification_ptr pNf)
 {
   emit workspace_renamed(QString::fromStdString(pNf->object_name()), QString::fromStdString(pNf->new_objectname()));

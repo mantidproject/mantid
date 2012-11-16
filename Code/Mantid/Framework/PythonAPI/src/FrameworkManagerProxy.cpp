@@ -21,6 +21,7 @@
 #include <vector>
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include <Poco/ScopedLock.h>
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::IPeaksWorkspace;
@@ -534,6 +535,11 @@ bool FrameworkManagerProxy::workspaceExists(const std::string & name) const
   return API::AnalysisDataService::Instance().doesExist(name);
 }
 
+namespace
+{
+  Poco::Mutex PYALG_REGISTER_MUTEX;
+}
+
 /**
  * Add a python algorithm to the algorithm factory
  * @param pyobj :: The python algorithm object wrapped in a boost object
@@ -546,6 +552,9 @@ void FrameworkManagerProxy::registerPyAlgorithm(boost::python::object pyobj)
   using boost::python::object;
   using boost::python::handle;
   using boost::python::borrowed;
+
+  // Serialize write access to the factory
+  Poco::ScopedLock<Poco::Mutex> lock(PYALG_REGISTER_MUTEX);
 
   PyObject *classObject = PyObject_GetAttrString(pyobj.ptr(), "__class__");
   object classType(handle<>(borrowed(classObject)));

@@ -4,10 +4,9 @@ Creates a cal file from a mask workspace: the masked out detectors (Y == 0 in ma
 
 *WIKI*"""
 import sys
-from MantidFramework import *
-from mantid.simpleapi import *
+from mantid.kernel import *
 from mantid.api import *
-#from mantid.kernel import *
+from mantid.simpleapi import *
 
 class QueryFlag:
         def isMasked(self, detector, yValue):
