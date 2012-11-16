@@ -53,6 +53,8 @@ public:
   virtual std::string getFileNameOnly() const = 0;
   virtual std::string getExtension() const = 0;
   virtual Poco::Timestamp  getLastModified() const = 0;
+  virtual std::string getFormattedLastModified() const = 0;
+  virtual std::string getMangledName() const = 0;
   virtual bool exists() const = 0;
   virtual ~AbstractIDFObject(){};
 private:
@@ -74,6 +76,8 @@ private:
     virtual std::string getFileNameOnly() const;
     virtual std::string getExtension() const;
     virtual Poco::Timestamp  getLastModified() const;
+    virtual std::string getFormattedLastModified() const;
+    virtual std::string getMangledName() const;
     virtual bool exists() const;
     virtual ~IDFObject();
 
@@ -102,6 +106,8 @@ private:
     virtual std::string getFileNameOnly() const { return m_emptyResponse;}
     virtual std::string getExtension() const { return m_emptyResponse;}
     virtual Poco::Timestamp  getLastModified() const { throw std::runtime_error("Not implemented on NullIDFObject");}
+    virtual std::string getFormattedLastModified() const { throw std::runtime_error("Not implemented on NullIDFObject");}
+    virtual std::string getMangledName() const { throw std::runtime_error("Not implemented on NullIDFObject");}
     virtual bool exists() const { return false;}
     virtual ~NullIDFObject(){};
   };
