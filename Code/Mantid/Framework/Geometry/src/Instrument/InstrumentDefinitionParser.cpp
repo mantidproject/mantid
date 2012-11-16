@@ -30,7 +30,6 @@
 #include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/DateTimeFormatter.h>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <sstream>
@@ -165,14 +164,15 @@ namespace Geometry
    * */
   std::string InstrumentDefinitionParser::getMangledName()
   {
-    if(!this->m_xmlFile->exists())
-    {
+    if (!pDoc)
       throw std::runtime_error("Call InstrumentDefinitionParser::initialize() before getMangledName.");
+    std::string lastModified = pRootElem->getAttribute("last-modified");
+    if (lastModified.length() == 0)
+    {
+        g_log.warning() << "The IDF that you are using doesn't contain a 'last-modified' field. ";
+        g_log.warning() << "You may not get the correct definition file loaded." << std::endl ;
     }
-
-    auto timeString = Poco::DateTimeFormatter::format(m_xmlFile->getLastModified(), "%Y: %dd %H:%M:%S.%i");
-
-    return m_xmlFile->getFileNameOnly() + timeString;
+    return m_xmlFile->getFileNameOnly() + lastModified;
   }
 
   //----------------------------------------------------------------------------------------------
