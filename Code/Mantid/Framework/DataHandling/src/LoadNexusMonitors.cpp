@@ -259,6 +259,8 @@ void LoadNexusMonitors::exec()
           if (pulse_index > (numPulses+1))
             break;
         }
+        if (pulse_index > (numPulses+1))
+          pulse_index = numPulses - 1; // fix it
         pulsetime = pulsetime_offset + seconds[pulse_index];
         if (pulsetime < lastpulsetime)
           pulsetimesincreasing = false;
