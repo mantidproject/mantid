@@ -744,6 +744,23 @@ void ConfigDialog::initMantidOptionsTab()
   if( apiVersion == 2 ) m_defaultToNewPython->setChecked(true);
   else m_defaultToNewPython->setChecked(false);
   grid->addWidget(m_defaultToNewPython, 2,0);
+
+  // create a checkbox for the instrument view OpenGL option
+  m_useOpenGL = new QCheckBox("Use OpenGL in Instrument View");
+  m_useOpenGL->setChecked(true);
+  grid->addWidget(m_useOpenGL,3,0);
+
+  setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().
+    getString("MantidOptions.InstrumentView.UseOpenGL")).toUpper();
+  if( setting == "ON")
+  {
+    m_useOpenGL->setChecked(true);
+  }
+  else
+  {
+    m_useOpenGL->setChecked(false);
+  }
+
 }
 
 
@@ -2232,6 +2249,10 @@ void ConfigDialog::updateMantidOptionsTab()
     showinvisible_ws="0";
   }
   mantid_config.setString("MantidOptions.InvisibleWorkspaces",showinvisible_ws.toStdString());
+
+  //OpenGL option
+  QString setting = m_useOpenGL->isChecked() ? "On" : "Off";
+  mantid_config.setString("MantidOptions.InstrumentView.UseOpenGL",setting.toStdString());
 
   //Hidden categories
   QString hiddenCategories = buildHiddenCategoryString().join(";");

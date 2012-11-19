@@ -93,6 +93,10 @@ void ProjectionSurface::clear()
   m_zoomStack.clear();
 }
 
+/**
+ * Draw the surface on an OpenGL widget
+ * @param widget :: A widget to draw on.
+ */
 void ProjectionSurface::draw(MantidGLWidget *widget)const
 {
   if (getInteractionMode() == MoveMode)
@@ -106,7 +110,6 @@ void ProjectionSurface::draw(MantidGLWidget *widget)const
   }
   else
   {
-    //std::cerr << "picking\n";
     bool changed = m_viewChanged;
     draw(widget,true);
     m_viewChanged = changed;
@@ -114,6 +117,11 @@ void ProjectionSurface::draw(MantidGLWidget *widget)const
   }
 }
 
+/**
+ * Draw the surface on an OpenGL widget.
+ * @param widget :: A widget to draw on.
+ * @param picking :: Picking / normal drawing switch.
+ */
 void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
 {
   QImage **image = picking ? &m_pickImage : &m_viewImage;

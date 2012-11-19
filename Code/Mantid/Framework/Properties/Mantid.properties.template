@@ -137,6 +137,10 @@ curvefitting.findPeaksTolerance=4
 # Do not show 'invisible' workspaces
 MantidOptions.InvisibleWorkspaces=0
 
+# This flag controls the way the "unwrapped" instrument view is rendered.
+# Change to Off to disable OpenGL and use normal windows graphics.
+MantidOptions.InstrumentView.UseOpenGL = On
+
 #Uncommenting the line below will enable algorithm chain re-running whenever a
 #workspace is replaced. Uncommenting and setting it to 0 will also turn it off 
 #enabling this is currently discouraged as it could cause race conditions with python scripts
@@ -193,4 +197,3 @@ loading.multifile=On
 # set to a very high number to disbale
 # however this limit is in place to protect you and your computer from simple formatting mistakes
 loading.multifilelimit=100
-
