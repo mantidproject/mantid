@@ -51,7 +51,6 @@ Load('event_ws', Filename='INSTR_1000_event.nxs',Precount=True)
 #include "MantidAPI/IMDEventWorkspace.h"
 #include <cstdio>
 
-
 namespace
 {
   /**
@@ -147,6 +146,9 @@ namespace Mantid
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(Load);
     
+    // The mutex
+    Poco::Mutex Load::m_mutex;
+
     /// Sets documentation strings for this algorithm
     void Load::initDocs()
     {
@@ -272,6 +274,8 @@ namespace Mantid
       {
         throw std::runtime_error("Error while closing file \"" + filePath + "\"");
       } 
+
+      Poco::Mutex::ScopedLock lock( m_mutex );
 
       // Iterate through all loaders and attempt to find the best qualified for the job.
       // Each algorithm has a quick and long file check. The long version returns an integer

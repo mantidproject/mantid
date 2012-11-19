@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDataFileChecker.h"
+#include <Poco/Mutex.h>
+
 #include <list>
 
 namespace Mantid
@@ -104,6 +106,8 @@ namespace Mantid
       std::set<std::string> m_baseProps;
       /// The actual loader
       API::IDataFileChecker_sptr m_loader;
+      /// Mutex for temporary fix for #5963
+      static Poco::Mutex m_mutex;
      };
 
   } // namespace DataHandling
