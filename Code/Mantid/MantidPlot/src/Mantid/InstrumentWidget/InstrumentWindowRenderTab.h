@@ -77,6 +77,8 @@ private:
   QAction *m_wireframe;
   QAction *m_lighting;
   QAction *m_GLView; ///< toggle between OpenGL and simple view
+
+  friend class InstrumentWindow;
   
 };
 

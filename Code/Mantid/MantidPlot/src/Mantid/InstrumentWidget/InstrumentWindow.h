@@ -90,6 +90,8 @@ public:
   void setSurface(ProjectionSurface* surface);
   /// True if the GL instrument display is currently on
   bool isGLEnabled() const;
+  /// Toggle between the GL and simple instrument display widgets
+  void enableOpenGL( bool on );
   /// Redraw the instrument view
   void updateInstrumentView();
   /// Recalculate the detector data and redraw the instrument view
@@ -159,7 +161,7 @@ public slots:
   void clearPeakOverlays();
   void setPeakLabelPrecision(int n);
   void setShowPeakRowFlag(bool on);
-  /// Toggle between the GL and simple instrument display widgets
+  /// Enable OpenGL. Slot called from render tab only - doesn't update the checkbox.
   void enableGL( bool on );
 
 signals:
@@ -196,42 +198,59 @@ private:
   QTabWidget*  mControlsTab;
   // Actions for the pick menu
   QAction *mInfoAction, *mPlotAction, *mDetTableAction, *mGroupDetsAction, *mMaskDetsAction;
-  QAction *m_ExtractDetsToWorkspaceAction;  ///< Extract selected detector ids to a new workspace
-  QAction *m_SumDetsToWorkspaceAction;      ///< Sum selected detectors to a new workspace
-  QAction *m_createIncludeGroupingFileAction; ///< Create grouping xml file which includes selected detectors
-  QAction *m_createExcludeGroupingFileAction; ///< Create grouping xml file which excludes selected detectors
+  /// Extract selected detector ids to a new workspace
+  QAction *m_ExtractDetsToWorkspaceAction;  
+  /// Sum selected detectors to a new workspace
+  QAction *m_SumDetsToWorkspaceAction;      
+  /// Create grouping xml file which includes selected detectors
+  QAction *m_createIncludeGroupingFileAction; 
+  /// Create grouping xml file which excludes selected detectors
+  QAction *m_createExcludeGroupingFileAction; 
   // Context menu actions
   QAction *m_clearPeakOverlays;
 
   /// The name of workspace that this window is associated with. The InstrumentActor holds a pointer to the workspace itself.
   const QString m_workspaceName;
+  /// The OpenGL widget to display the instrument
   MantidGLWidget* m_InstrumentDisplay;
+  /// The simple widget to display the instrument
   SimpleWidget* m_simpleDisplay;
+  /// Option to use or not OpenGL display for "unwrapped" view, 3D is always in OpenGL
+  bool m_useOpenGL;
+  /// Instrument actor
   InstrumentActor* m_instrumentActor;
-  SurfaceType m_surfaceType;       ///< 3D view or unwrapped
+  /// 3D view or unwrapped
+  SurfaceType m_surfaceType;       
+  /// Stacked layout managing m_InstrumentDisplay and m_simpleDisplay
   QStackedLayout* m_instrumentDisplayLayout;
-
-  int          mSpectraIDSelected; ///< spectra index id
-  int          mDetectorIDSelected; ///< detector id
+  /// spectra index id
+  int mSpectraIDSelected; 
+  /// detector id
+  int mDetectorIDSelected; 
   std::set<int> mSpectraIDSelectedList;
   std::vector<int> mDetectorIDSelectedList;
-  InstrumentTreeWidget* mInstrumentTree; ///< Widget to display instrument tree
+  /// Widget to display instrument tree
+  InstrumentTreeWidget* mInstrumentTree; 
 
-  QString mDefaultColorMap; ///< The full path of the default color map
-  QString m_savedialog_dir; /// The last used dialog directory
+  /// The full path of the default color map
+  QString mDefaultColorMap; 
+  /// The last used dialog directory
+  QString m_savedialog_dir; 
 
   InstrumentWindowRenderTab * m_renderTab;
   InstrumentWindowPickTab * m_pickTab;
   InstrumentWindowMaskTab * m_maskTab;
   XIntegrationControl * m_xIntegration;
 
-  bool mViewChanged;                ///< stores whether the user changed the view (so don't automatically change it)
-
-  bool m_blocked;     ///< Set to true to block access to instrument during algorithm executions
+  /// stores whether the user changed the view (so don't automatically change it)
+  bool mViewChanged;
+  /// Set to true to block access to instrument during algorithm executions
+  bool m_blocked;     
   QList<int> m_selectedDetectors;
   bool m_instrumentDisplayContextMenuOn;
 
 private:
+  /// ADS notification handlers
   virtual void preDeleteHandle(const std::string & ws_name, const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr);
   virtual void clearADSHandle();

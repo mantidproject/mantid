@@ -398,11 +398,15 @@ void InstrumentWindow::setSurfaceType(int type)
       showPeakRow = settings.value("Mantid/InstrumentWindow/ShowPeakRows",true).toBool();
     }
 
+    // which display to use?
+    bool useOpenGL = isGLEnabled();
     if (m_surfaceType == FULL3D)
     {
       Projection3D* p3d = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
       p3d->set3DAxesState(m_renderTab->areAxesOn());
       surface = p3d;
+      // always OpenGL in 3D
+      useOpenGL = true;
     }
     else if (m_surfaceType <= CYLINDRICAL_Z)
     {
@@ -414,7 +418,10 @@ void InstrumentWindow::setSurfaceType(int type)
     }
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowFlag(showPeakRow);
+    // set new surface
     setSurface(surface);
+    // make sure to switch to the right instrument display
+    selectOpenGLDisplay( useOpenGL );
     m_renderTab->init();
     m_pickTab->init();
     m_maskTab->init();
@@ -1471,22 +1478,47 @@ void InstrumentWindow::updateInstrumentDetectors()
   }
 }
 
-/// Toggle between the GL and simple instrument display widgets
+/**
+ * Choose which widget to use.
+ * @param yes :: True to use the OpenGL one or false to use the Simple
+ */
+void InstrumentWindow::selectOpenGLDisplay(bool yes)
+{
+  int widgetIndex = yes ? 0 : 1;
+  const int oldIndex = m_instrumentDisplayLayout->currentIndex();
+  if ( oldIndex == widgetIndex ) return;
+  m_instrumentDisplayLayout->setCurrentIndex( widgetIndex );
+  ProjectionSurface* surface = getSurface();
+  if ( surface )
+  {
+    surface->updateView();
+  }
+}
+
+/// Public slot to toggle between the GL and simple instrument display widgets
+void InstrumentWindow::enableOpenGL( bool on )
+{
+  m_renderTab->m_GLView->setChecked( on );
+}
+
+/// Private slot to toggle between the GL and simple instrument display widgets
 void InstrumentWindow::enableGL( bool on )
 {
-  if ( on )
+  m_useOpenGL = on;
+  if ( m_surfaceType == FULL3D )
   {
-    m_instrumentDisplayLayout->setCurrentIndex( 0 );
+    // always OpenGL in 3D
+    selectOpenGLDisplay( true );
   }
   else
   {
-    m_instrumentDisplayLayout->setCurrentIndex( 1 );
+    // select the display
+    selectOpenGLDisplay( on );
   }
-  getSurface()->updateView();
 }
 
 /// True if the GL instrument display is currently on
 bool InstrumentWindow::isGLEnabled() const
 {
-  return m_instrumentDisplayLayout->currentIndex() == 0;
+  return m_useOpenGL;
 }
