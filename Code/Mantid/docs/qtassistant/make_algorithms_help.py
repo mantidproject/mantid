@@ -78,12 +78,13 @@ def processCategories(categories, qhp, outputdir):
         handle.write(le.tostring(root, pretty_print=True, xml_declaration=False))
 
 def process(algos, qhp, outputdir):
-    from MantidFramework import mtd
+    import mantid
 
     # sort algorithms into categories
     categories = {}
-    for (name, versions) in algos:
-        alg = mtd.createAlgorithm(name, versions[-1])
+    for name in algos.keys():
+        versions = algos[name]
+        alg = mantid.FrameworkManager.createAlgorithm(name, versions[-1])
         for category in alg.categories():
             category = category.replace('\\', '/')
             if not categories.has_key(category):
@@ -94,7 +95,8 @@ def process(algos, qhp, outputdir):
 
     # sort algorithms into letter based groups
     letter_groups = {}
-    for (name, versions) in algos:
+    for name in algos.keys():
+        versions = algos[name]
         letter = str(name)[0].upper()
         if not letter_groups.has_key(letter):
             letter_groups[letter] = []
@@ -172,9 +174,11 @@ if __name__ == "__main__":
     addWikiDir(helpsrcdir)
 
     # initialize mantid
-    import wiki_tools
-    wiki_tools.initialize_Mantid(args.mantidpath)
-    algos = wiki_tools.get_all_algorithms(True)
+    if not args.mantidpath.endswith("bin"):
+        args.mantidpath = os.path.join(args.mantidpath, "bin")
+    sys.path.append(args.mantidpath)
+    import mantid.api
+    algos = mantid.api.AlgorithmFactory.getRegisteredAlgorithms(True)
 
     # setup the qhp file
     qhp = QHPFile("org.mantidproject.algorithms")
