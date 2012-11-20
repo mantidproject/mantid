@@ -31,8 +31,10 @@ from kernel._aliases import *
 from api._aliases import *
 
 #------------------------ Specialized function calls --------------------------
-
+# List of specialized algorithms
 __SPECIALIZED_FUNCTIONS__ = ["Load", "Fit"]
+# The "magic" keyword to enable/disable logging
+__LOGGING_KEYWORD__ = "EnableLogging"
 
 def specialization_exists(name):
     """
@@ -82,6 +84,7 @@ def Load(*args, **kwargs):
     
     # Create and execute
     algm = _framework.createAlgorithm('Load')
+    _set_logging_option(algm, kwargs)
     algm.setProperty('Filename', filename) # Must be set first
     # Remove from keywords so it is not set twice
     try:
@@ -178,6 +181,7 @@ def Fit(*args, **kwargs):
         raise ValueError("Fit API has changed. The function must now come first in the argument list and the workspace second.")
     # Create and execute
     algm = _framework.createAlgorithm('Fit')
+    _set_logging_option(algm, kwargs)
     algm.setProperty('Function', Function) # Must be set first
     algm.setProperty('InputWorkspace', InputWorkspace)
     # Remove from keywords so it is not set twice
@@ -414,6 +418,20 @@ def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
     else:
         return None
 
+def _set_logging_option(algm_obj, kwargs):
+    """
+        Checks the keyword arguments for the _LOGGING keyword, sets the state of the
+        algorithm logging accordingly and removes the value from the dictionary. If the keyword 
+        does not exist then it does nothing.
+
+        @param alg_object An initialised algorithm object
+        @param **kwargs A dictionary of the keyword arguments passed to the simple function 
+        call
+    """
+    if __LOGGING_KEYWORD__ in kwargs:
+        algm_obj.setLogging(kwargs[__LOGGING_KEYWORD__])
+        del kwargs[__LOGGING_KEYWORD__]
+
 def _set_properties(alg_object, *args, **kwargs):
     """
         Set all of the properties of the algorithm
@@ -433,6 +451,10 @@ def _set_properties(alg_object, *args, **kwargs):
         # if it is not a child algorithm. 
         if (not alg_object.isChild()) and isinstance(value, _kernel.DataItem):
             alg_object.setPropertyValue(key, value.name())
+        elif type(value) == str:
+            # If a string is passed force using string value method. 
+            # Allows more complex input for arrays for example, i.e. 3-5 --> [3,4,5]
+            alg_object.setPropertyValue(key, value)
         else:
             alg_object.setProperty(key, value)
 
@@ -454,6 +476,7 @@ def create_algorithm(algorithm, version, _algm_object):
             _version = kwargs["Version"]
             del kwargs["Version"]
         algm = _framework.createAlgorithm(algorithm, _version)
+        _set_logging_option(algm, kwargs)
         lhs = _funcreturns.lhs_info(use_object_names=True)
         lhs_args = get_args_from_lhs(lhs, algm)
         final_keywords = merge_keywords_with_lhs(kwargs, lhs_args)
