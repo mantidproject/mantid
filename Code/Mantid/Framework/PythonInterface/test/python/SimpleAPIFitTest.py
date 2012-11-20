@@ -59,8 +59,15 @@ class SimpleAPIFitTest(unittest.TestCase):
         if  platform.system() == 'Darwin': # crashes
             return
         output_name = "otherargs_fitWS"
-        retvals = Fit("name=FlatBackground", self._raw_ws, MaxIterations=10, Output=output_name)
+        retvals = Fit("name=FlatBackground", self._raw_ws, MaxIterations=2, Output=output_name)
         self._check_returns_are_correct_type_with_workspaces(retvals)
+        self.assertTrue(output_name + '_Workspace' in mtd)
+
+    def test_Fit_accepts_EnableLogging_keyword(self):
+        if  platform.system() == 'Darwin': # crashes
+            return
+        output_name = "otherargs_fitWS"
+        retvals = Fit("name=FlatBackground", self._raw_ws, MaxIterations=2, Output=output_name,EnableLogging=False)
         self.assertTrue(output_name + '_Workspace' in mtd)
         
     def _check_returns_are_correct_type_with_workspaces(self, retvals):
