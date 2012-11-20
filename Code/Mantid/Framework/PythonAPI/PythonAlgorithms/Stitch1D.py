@@ -71,6 +71,7 @@ class Stitch1D(PythonAlgorithm):
                     ManualScaleFactor=ManualScaleFactor,
                     OutScaleFactor=OutScaleFactor)
         
+       
         outMDWS = mtd['out_md_workspace']
             
         # Create a Workspace2D from the MDHistoWorkspace output
@@ -78,14 +79,23 @@ class Stitch1D(PythonAlgorithm):
         e = np.sqrt(outMDWS.getErrorSquaredArray())
         dim = self.__get_first_non_integrated_dimension(outMDWS)
         nbins = dim.getNBins()
-        units = dim.getUnits()
         q_low = dim.getMinimum()
         q_high = dim.getMaximum()
         step = (q_high - q_low)/nbins
-        x = np.arange(q_low, q_high, step)
-        api.CreateWorkspace(OutputWorkspace='outWS', DataX=x,DataY=y,DataE=e,UnitX=units)
+        x = np.arange(q_low, q_high, step) 
         
-        self.setProperty('OutputWorkspace', mtd['outWS'])
+        factory = api.WorkspaceFactoryImpl.Instance()
+        outws = factory.create("Workspace2D", 1, len(x), len(y))
+        outws.setX(0, x)
+        outws.setY(0, y)
+        outws.setE(0, e)
+        outws.getAxis(0).setUnit("MomentumTransfer")
+        
+        api.DeleteWorkspace(Workspace=md_lhs_workspace)
+        api.DeleteWorkspace(Workspace=md_rhs_workspace)
+        api.DeleteWorkspace(Workspace=outMDWS)
+        
+        self.setProperty('OutputWorkspace', outws)
         self.setProperty('OutScaleFactor', out_properties[1])
         return None
         
