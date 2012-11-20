@@ -165,8 +165,21 @@ namespace Mantid
       /// Pulse times for ALL banks, taken from proton_charge log.
       BankPulseTimes* m_allBanksPulseTimes;
 
+      /// Flag for dealing with a simulated file
+      bool m_haveWeights;
+
+      /// Pointer to the vector of weighted events
+      typedef std::vector<Mantid::DataObjects::WeightedEvent> * WeightedEventVector_pt;
+
+      /// Vector where index = event_id; value = ptr to std::vector<WeightedEvent> in the event list.
+      std::vector<WeightedEventVector_pt> weightedEventVectors;
+
       DataObjects::EventWorkspace_sptr createEmptyEventWorkspace();
-      void makeMapToEventLists();
+
+      /// Map detector IDs to event lists.
+      template <class T>
+      void makeMapToEventLists(std::vector<T> & vectors);
+
       void loadEvents(API::Progress * const prog, const bool monitors);
       void createSpectraMapping(const std::string &nxsfile, API::MatrixWorkspace_sptr workspace,
                                 const bool monitorsOnly, const std::string & bankName = "");
@@ -196,6 +209,14 @@ namespace Mantid
 
       static void loadTimeOfFlightData(::NeXus::File& file, DataObjects::EventWorkspace_sptr WS, 
         const std::string& binsName,size_t start_wi = 0, size_t end_wi = 0);
+
+      /// Resize from TofEvents
+      void resizeFrom(std::vector<EventVector_pt> &vec,
+          const int32_t &size, DataObjects::EventList &el);
+
+      /// Resize from WeightedEvents
+      void resizeFrom(std::vector<WeightedEventVector_pt> &vec,
+          const int32_t &size, DataObjects::EventList &el);
 
     public:
       /// name of top level NXentry to use
