@@ -1,6 +1,6 @@
 """*WIKI* 
 
-Stitches matrix workspaces together. Wrapper over [[Stitch1DMD]]
+Stitches single histogram [[MatrixWorkspace|Matrix Workspaces]] together outputing a stitched Matrix Workspace. This algorithm is a wrapper over [[Stitch1DMD]].
 
 *WIKI*"""
 import mantid.simpleapi as api
@@ -25,7 +25,7 @@ class Stitch1D(PythonAlgorithm):
         overlap_validator = CompositeValidator()
         overlap_validator.add(FloatBoundedValidator(lower=0.0, upper=1.0))
         overlap_validator.add(FloatMandatoryValidator())    
-        
+
         self.declareProperty(name="StartOverlap", defaultValue=0.0, validator=overlap_validator, doc="Fraction along axis to start overlap. 0 to 1.");
         self.declareProperty(name="EndOverlap", defaultValue=0.1, validator=overlap_validator, doc="Fraction along axis to end overlap. 0 to 1.");
         self.declareProperty(name="ScaleRHSWorkspace", defaultValue=True, doc="Scaling either with respect to workspace 1 or workspace 2.")
