@@ -138,6 +138,7 @@ set ( TEST_PY_FILES
   test/python/WorkspaceGroupTest.py
   test/python/WorkspacePropertiesTest.py
   test/python/WorkspaceValidatorsTest.py
+  PythonAlgorithms/test/LoadVesuvioTest.py
 )
 
 set ( PYTEST_HELPERS test/python/testhelpers.py )

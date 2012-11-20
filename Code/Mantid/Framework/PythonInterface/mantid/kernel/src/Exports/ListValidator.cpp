@@ -42,5 +42,6 @@ namespace
 void export_ListValidator()
 {
   EXPORT_LISTVALIDATOR(std::string, String);
+  EXPORT_LISTVALIDATOR(long, Int);
 }
 
