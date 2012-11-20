@@ -18,7 +18,7 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-  /** StitchGroup1D : TODO: DESCRIPTION
+  /** Stitch1DMD : Stitches together two MDWorkspaces in Q-space.
     
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -40,11 +40,11 @@ namespace MDAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport Stitch1D  : public API::MultiPeriodGroupAlgorithm
+  class DLLExport Stitch1DMD  : public API::MultiPeriodGroupAlgorithm
   {
   public:
-    Stitch1D();
-    virtual ~Stitch1D();
+    Stitch1DMD();
+    virtual ~Stitch1DMD();
     
     virtual const std::string name() const;
     virtual int version() const;

@@ -3,18 +3,18 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDAlgorithms/Stitch1D.h"
+#include "MantidMDAlgorithms/Stitch1DMD.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include <boost/assign.hpp>
 #include <boost/make_shared.hpp>
 
-using Mantid::MDAlgorithms::Stitch1D;
-using namespace Mantid::MDEvents;
+using Mantid::MDAlgorithms::Stitch1DMD;
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-class Stitch1DTest : public CxxTest::TestSuite
+class Stitch1DMDTest : public CxxTest::TestSuite
 {
 
 private:
@@ -37,7 +37,7 @@ private:
   // Helper method to make the stitch group 1D algorithm
   IAlgorithm_sptr make_algorithm(Workspace_sptr lhsWorkspace, Workspace_sptr rhsWorkspace, const std::string& outputWorkspaceName, const double& startOverlap, const double& endOverlap, const bool scaleRHSWS = true)
   {
-      IAlgorithm_sptr alg = boost::make_shared<Stitch1D>();
+      IAlgorithm_sptr alg = boost::make_shared<Stitch1DMD>();
       alg->setRethrows(true);
       alg->initialize();
 
@@ -62,8 +62,8 @@ private:
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static Stitch1DTest *createSuite() { return new Stitch1DTest(); }
-  static void destroySuite( Stitch1DTest *suite ) { delete suite; }
+  static Stitch1DMDTest *createSuite() { return new Stitch1DMDTest(); }
+  static void destroySuite( Stitch1DMDTest *suite ) { delete suite; }
 
     std::string __good_workspace_name;
     std::string __bad_type_of_workspace_name;
@@ -71,46 +71,46 @@ public:
     std::string __integrated_two_dim_workspace_name;
     std::string __unintegrated_two_dim_workspace_name;
 
-    Stitch1DTest()
+    Stitch1DMDTest()
     {
       Mantid::API::FrameworkManagerImpl& frameworkManager = Mantid::API::FrameworkManager::Instance();
 
       // Create a workspace of the wrong type
-      Mantid::API::IAlgorithm* bad_md_workspace_alg = frameworkManager.exec("CreateMDWorkspace", "Extents=0,1;Names=A;Units=U;OutputWorkspace=Stitch1D_test_workspace_1");
+      Mantid::API::IAlgorithm* bad_md_workspace_alg = frameworkManager.exec("CreateMDWorkspace", "Extents=0,1;Names=A;Units=U;OutputWorkspace=Stitch1DMD_test_workspace_1");
       this->__bad_type_of_workspace_name = bad_md_workspace_alg->getPropertyValue("OutputWorkspace");
 
       // Create a workspace that is of the right type and shape
-      Mantid::API::IAlgorithm* good_workspace_alg = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2;ErrorInput=1,2;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=2,1;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1D_test_workspace_2");
+      Mantid::API::IAlgorithm* good_workspace_alg = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2;ErrorInput=1,2;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=2,1;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1DMD_test_workspace_2");
       this->__good_workspace_name = good_workspace_alg->getPropertyValue("OutputWorkspace");
 
       // Create a workspace that is of the right type, but the wrong shape
-      Mantid::API::IAlgorithm* three_dim_alg = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=1;ErrorInput=1;Dimensionality=3;Extents=-1,1,-1,1,-1,1;NumberOfBins=1,1,1;Names=A,B,C;Units=U1,U2,U3;OutputWorkspace=Stitch1D_test_workspace_3");
+      Mantid::API::IAlgorithm* three_dim_alg = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=1;ErrorInput=1;Dimensionality=3;Extents=-1,1,-1,1,-1,1;NumberOfBins=1,1,1;Names=A,B,C;Units=U1,U2,U3;OutputWorkspace=Stitch1DMD_test_workspace_3");
       this->__three_dim_workspace_name = three_dim_alg->getPropertyValue("OutputWorkspace");
 
       // Create a workspace that is of the right type and shape, but wrong size, with 1 bin in each dimension (completely integrated).
-      Mantid::API::IAlgorithm* integrated_two_dim_alg = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=1;ErrorInput=1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=1,1;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1D_test_workspace_4");
+      Mantid::API::IAlgorithm* integrated_two_dim_alg = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=1;ErrorInput=1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=1,1;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1DMD_test_workspace_4");
       this->__integrated_two_dim_workspace_name = integrated_two_dim_alg->getPropertyValue("OutputWorkspace");
 
       // Create a workspace that is of the right type and shape, but wrong size, with more than one bin in both dimensions (completely unintegrated).
-      Mantid::API::IAlgorithm* unintegrated_two_dim_alg = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=1,1,1,1;ErrorInput=1,1,1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=2,2;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1D_test_workspace_5");
+      Mantid::API::IAlgorithm* unintegrated_two_dim_alg = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=1,1,1,1;ErrorInput=1,1,1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=2,2;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1DMD_test_workspace_5");
       this->__unintegrated_two_dim_workspace_name = unintegrated_two_dim_alg->getPropertyValue("OutputWorkspace");
     }
 
-    virtual ~Stitch1DTest()
+    virtual ~Stitch1DMDTest()
     {
       Mantid::API::AnalysisDataService::Instance().clear();
     }
 
     void test_Init()
     {
-      Stitch1D alg;
+      Stitch1DMD alg;
       TS_ASSERT_THROWS_NOTHING( alg.initialize() )
       TS_ASSERT( alg.isInitialized() )
     }
 
     void test_does_not_accept_mdeventworkspaces_for_lhsworkspace()
     {
-      Stitch1D alg;
+      Stitch1DMD alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -119,7 +119,7 @@ public:
 
     void test_does_not_accept_mdeventworkspaces_for_rhsworkspace()
     {
-      Stitch1D alg;
+      Stitch1DMD alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -172,8 +172,8 @@ public:
     {
       Mantid::API::FrameworkManagerImpl& frameworkManager = Mantid::API::FrameworkManager::Instance();
 
-      Mantid::API::IAlgorithm* algA = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2;ErrorInput=1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=2,1;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1D_test_workspace_A");
-      Mantid::API::IAlgorithm* algB = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2,3;ErrorInput=1,1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=3,1;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1D_test_workspace_B");
+      Mantid::API::IAlgorithm* algA = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2;ErrorInput=1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=2,1;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1DMD_test_workspace_A");
+      Mantid::API::IAlgorithm* algB = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2,3;ErrorInput=1,1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=3,1;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1DMD_test_workspace_B");
 
       IMDHistoWorkspace_sptr lhsWorkspace = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr rhsWorkspace = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
@@ -198,9 +198,9 @@ public:
       Mantid::API::FrameworkManagerImpl& frameworkManager = Mantid::API::FrameworkManager::Instance();
 
       // Create a one-d input workspace with 3 bins
-      auto algA = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2,3,4,5,6,7,8,9,10;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=1;Extents=-1,1;NumberOfBins=10;Names=A;Units=U1;OutputWorkspace=Stitch1D_test_workspace_A");
+      auto algA = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2,3,4,5,6,7,8,9,10;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=1;Extents=-1,1;NumberOfBins=10;Names=A;Units=U1;OutputWorkspace=Stitch1DMD_test_workspace_A");
       // Create a two-d input workspace with 3 * 1 bins.
-      auto algB = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2,3,4,5,6,7,8,9,10;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=10,1;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1D_test_workspace_B");
+      auto algB = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2,3,4,5,6,7,8,9,10;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=10,1;Names=A,B;Units=U1,U2;OutputWorkspace=Stitch1DMD_test_workspace_B");
 
       IMDHistoWorkspace_sptr lhsWorkspace = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr rhsWorkspace = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
@@ -220,9 +220,9 @@ public:
       Mantid::API::FrameworkManagerImpl& frameworkManager = Mantid::API::FrameworkManager::Instance();
 
       // Create a one-d input workspace with 3 bins
-      auto algA = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2,3,4,5,6,7,8,9,10;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=1;Extents=-1,1;NumberOfBins=10;Names=A;Units=U1;OutputWorkspace=Stitch1D_test_workspace_A");
+      auto algA = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2,3,4,5,6,7,8,9,10;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=1;Extents=-1,1;NumberOfBins=10;Names=A;Units=U1;OutputWorkspace=Stitch1DMD_test_workspace_A");
       // Create a two-d input workspace with 3 * 1 bins.
-      auto algB = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2,3,4,5,6,7,8,9,10;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=1;Extents=-1,1;NumberOfBins=10;Names=A;Units=U1;OutputWorkspace=Stitch1D_test_workspace_B");
+      auto algB = frameworkManager.exec("CreateMDHistoWorkspace", "SignalInput=1,2,3,4,5,6,7,8,9,10;ErrorInput=1,1,1,1,1,1,1,1,1,1;Dimensionality=1;Extents=-1,1;NumberOfBins=10;Names=A;Units=U1;OutputWorkspace=Stitch1DMD_test_workspace_B");
 
       IMDHistoWorkspace_sptr lhsWorkspace = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr rhsWorkspace = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
@@ -242,9 +242,9 @@ public:
       Mantid::API::FrameworkManagerImpl& frameworkManager = Mantid::API::FrameworkManager::Instance();
 
       // Create Workspace with dim names in ws1_dim_names
-      auto algA = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=1,1;ErrorInput=1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=2,1;Names=" + ws1_dim_names + ";Units=U1,U2;OutputWorkspace=Stitch1D_test_workspace_C");
+      auto algA = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=1,1;ErrorInput=1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=2,1;Names=" + ws1_dim_names + ";Units=U1,U2;OutputWorkspace=Stitch1DMD_test_workspace_C");
       // Create Workspace with dim names in ws2_dim_names
-      auto algB = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=1,1;ErrorInput=1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=2,1;Names=" + ws2_dim_names + ";Units=U1,U2;OutputWorkspace=Stitch1D_test_workspace_D");
+      auto algB = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=1,1;ErrorInput=1,1;Dimensionality=2;Extents=-1,1,-1,1;NumberOfBins=2,1;Names=" + ws2_dim_names + ";Units=U1,U2;OutputWorkspace=Stitch1DMD_test_workspace_D");
 
       IMDHistoWorkspace_sptr a = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr b = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
@@ -269,7 +269,7 @@ public:
 
     void test_start_overlap_too_low()
     {
-      Stitch1D alg;
+      Stitch1DMD alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -278,7 +278,7 @@ public:
 
     void test_start_overlap_too_high()
     {
-      Stitch1D alg;
+      Stitch1DMD alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -287,7 +287,7 @@ public:
 
     void test_end_overlap_too_low()
     {
-      Stitch1D alg;
+      Stitch1DMD alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -296,7 +296,7 @@ public:
 
     void test_end_overlap_too_high()
     {
-      Stitch1D alg;
+      Stitch1DMD alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -375,7 +375,7 @@ public:
 
       auto a = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(this->__good_workspace_name);
 
-      Stitch1D alg;
+      Stitch1DMD alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -432,7 +432,7 @@ public:
       IMDHistoWorkspace_sptr a = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
       IMDHistoWorkspace_sptr b = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algB->getPropertyValue("OutputWorkspace"));
 
-      Stitch1D alg;
+      Stitch1DMD alg;
       alg.setRethrows(true);
       alg.initialize();
 
@@ -464,7 +464,7 @@ public:
       auto algA = frameworkManager.exec("CreateMDHistoWorkspace","SignalInput=0,0;ErrorInput=1,1;Dimensionality=1;Extents=-1,1;NumberOfBins=2;Names=A;Units=U1;OutputWorkspace=mdhw");
       IMDHistoWorkspace_sptr mdhw = AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(algA->getPropertyValue("OutputWorkspace"));
 
-      IAlgorithm_sptr alg = boost::make_shared<Stitch1D>();
+      IAlgorithm_sptr alg = boost::make_shared<Stitch1DMD>();
       alg->setRethrows(true);
       alg->initialize();
 
@@ -504,7 +504,7 @@ public:
       AnalysisDataService::Instance().addOrReplace("lhs", lhs);
       AnalysisDataService::Instance().addOrReplace("rhs", rhs);
 
-      IAlgorithm_sptr alg = boost::make_shared<Stitch1D>();
+      IAlgorithm_sptr alg = boost::make_shared<Stitch1DMD>();
       alg->setRethrows(true);
       alg->initialize();
 
