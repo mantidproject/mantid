@@ -31,7 +31,7 @@ def genCatElement(category):
     return lxml.html.fragment_fromstring(text)
 
 def genAlgoElement(name, versions):
-    text = '<li><a href="%s">%s' % (WEB_BASE+name, name)
+    text = '<li><a href="Algo_%s.html">%s' % (name, name)
     text += ' v%d</a>' % versions[-1]
 
     if len(versions) > 1:
@@ -84,8 +84,9 @@ def process(algos, qhp, outputdir):
     categories = {}
     for name in algos.keys():
         versions = algos[name]
+
         alg = mantid.FrameworkManager.createAlgorithm(name, versions[-1])
-        for category in alg.categories():
+        for category in alg.categories().split(';'):
             category = category.replace('\\', '/')
             if not categories.has_key(category):
                 categories[category] = []
@@ -156,6 +157,12 @@ def process(algos, qhp, outputdir):
 
     # create all of the category pages
     processCategories(categories, qhp, outputdir)
+
+    # create individual html pages
+    from algorithm_help import process_algorithm
+    for name in algos.keys():
+        versions = algos[name]
+        process_algorithm(name, versions, qhp, helpoutdir)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate qtassistant docs " \
