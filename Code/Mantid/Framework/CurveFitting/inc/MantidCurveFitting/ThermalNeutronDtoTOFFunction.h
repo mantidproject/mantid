@@ -9,6 +9,11 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/Jacobian.h"
 
+#include <gsl/gsl_sf_erf.h>
+#include <cmath>
+
+using namespace std;
+
 namespace Mantid
 {
 namespace CurveFitting
@@ -75,6 +80,18 @@ namespace CurveFitting
   };
 
   typedef boost::shared_ptr<ThermalNeutronDtoTOFFunction> ThermalNeutronDtoTOFFunction_sptr;
+
+  /// Calcualte TOF from d-spacing value for thermal neutron
+  inline double calThermalNeutronTOF(double dh, double dtt1, double dtt1t, double dtt2t,
+                                     double zero, double zerot, double width, double tcross)
+  {
+    double n = 0.5*gsl_sf_erfc(width*(tcross-1/dh));
+    double Th_e = zero + dtt1*dh;
+    double Th_t = zerot + dtt1t*dh - dtt2t/dh;
+    double tof_h = n*Th_e + (1-n)*Th_t;
+
+    return tof_h;
+  }
 
 } // namespace CurveFitting
 } // namespace Mantid

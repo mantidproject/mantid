@@ -1,11 +1,15 @@
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <gsl/gsl_sf_erf.h>
 
 #define PI 3.14159265358979323846264338327950288419716939937510582
 
 using namespace std;
+using namespace Mantid;
+using namespace Mantid::API;
 
 
 namespace Mantid
@@ -22,8 +26,9 @@ Mantid::Kernel::Logger& ThermalNeutronBk2BkExpConvPV::g_log = Kernel::Logger::ge
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ThermalNeutronBk2BkExpConvPV::ThermalNeutronBk2BkExpConvPV():mHKLSet(false)
+ThermalNeutronBk2BkExpConvPV::ThermalNeutronBk2BkExpConvPV():mHKLSet(false),m_cancel(false),m_parallelException(false)
 {
+
 }
     
 //----------------------------------------------------------------------------------------------
@@ -135,7 +140,7 @@ void ThermalNeutronBk2BkExpConvPV::getMillerIndex(int& h, int &k, int &l)
  * Exception: if the peak profile parameter is not in this peak, then
  *            return an Empty_DBL
  */
-double ThermalNeutronBk2BkExpConvPV::getPeakParameters(std::string paramname)
+double ThermalNeutronBk2BkExpConvPV::getPeakParameter(std::string paramname)
 {
   std::map<std::string, double>::iterator mit;
   mit = mParameters.find(paramname);
@@ -250,12 +255,21 @@ void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xVal
 
   double invert_sqrt2sigma = 1.0/sqrt(2.0*sigma2);
 
+  // PRAGMA_OMP(parallel for schedule(dynamic, 10))
+
+  // PARALLEL_SET_NUM_THREADS(8);
+  // PARALLEL_FOR_NO_WSP_CHECK()
   for (size_t id = 0; id < nData; ++id)
   {
+    // PARALLEL_START_INTERUPT_REGION
+
     // a) Caclualte peak intensity
     double dT = xValues[id]-tof_h;
     double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
 
+    out[id] = height*omega;
+
+    /*  Disabled for parallel checking
     if (!(omega > -DBL_MAX && omega < DBL_MAX))
     {
       // Output with error
@@ -270,7 +284,11 @@ void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xVal
     {
       out[id] = height*omega;
     }
+    */
+
+    // PARALLEL_END_INTERUPT_REGION
   } // ENDFOR data points
+  // PARALLEL_CHECK_INTERUPT_REGION
 
   return;
 }
@@ -505,6 +523,18 @@ double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, do
   */
 
   return omega;
+}
+
+/** This is called during long-running operations,
+ * and check if the algorithm has requested that it be cancelled.
+ */
+void ThermalNeutronBk2BkExpConvPV::interruption_point() const
+{
+  // only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
+  // that defines that all loops must complete, and no exception can leave an OpenMP section
+  // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim
+  IF_NOT_PARALLEL
+      if (m_cancel) throw Algorithm::CancelException();
 }
 
 //-------------------------  External Functions ---------------------------------------------------

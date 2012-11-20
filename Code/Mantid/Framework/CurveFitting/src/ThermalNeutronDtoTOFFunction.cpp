@@ -63,7 +63,8 @@ void ThermalNeutronDtoTOFFunction::function1D(double* out, const double* xValues
 
     for (size_t i = 0; i < nData; ++i)
     {
-        out[i] = corefunction(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
+      // out[i] = corefunction(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
+      out[i] = calThermalNeutronTOF(xValues[i], dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
     }
 
     return;
@@ -71,17 +72,17 @@ void ThermalNeutronDtoTOFFunction::function1D(double* out, const double* xValues
 
 
 /** Core function
-  */
 inline double ThermalNeutronDtoTOFFunction::corefunction(double dh, double dtt1, double dtt1t, double dtt2t,
-                                                       double zero, double zerot, double width, double tcross) const
+                                                         double zero, double zerot, double width, double tcross) const
 {
-    double n = 0.5*gsl_sf_erfc(width*(tcross-1/dh));
-    double Th_e = zero + dtt1*dh;
-    double Th_t = zerot + dtt1t*dh - dtt2t/dh;
-    double tof_h = n*Th_e + (1-n)*Th_t;
+  double n = 0.5*gsl_sf_erfc(width*(tcross-1/dh));
+  double Th_e = zero + dtt1*dh;
+  double Th_t = zerot + dtt1t*dh - dtt2t/dh;
+  double tof_h = n*Th_e + (1-n)*Th_t;
 
-    return tof_h;
+  return tof_h;
 }
+*/
 
 /** Calculate derivative of this peak function
 
