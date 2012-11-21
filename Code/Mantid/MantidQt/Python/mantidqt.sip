@@ -1173,7 +1173,7 @@ public:
   RefMatrixWSImageView(QString wsname);
   
   MantidQt::RefDetectorViewer::RefIVConnections * getConnections();
-  %Docstring
+%Docstring
 MantidQt::RefDetectorViewer::RefIVConnections* RefMatrixWSImageView::getConnections()
 -------------------------------------------------------------------------------------
     Get the connections widget inside the image view. This object is responsible for
