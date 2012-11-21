@@ -184,6 +184,7 @@ set ( SRC_FILES
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
 	src/StripVanadiumPeaks2.cpp
+	src/SumEventsByLogValue.cpp
 	src/SumNeighbours.cpp
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
@@ -387,6 +388,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks2.h
+	inc/MantidAlgorithms/SumEventsByLogValue.h
 	inc/MantidAlgorithms/SumNeighbours.h
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
@@ -566,6 +568,7 @@ set ( TEST_FILES
 	StripPeaksTest.h
 	StripVanadiumPeaks2Test.h
 	StripVanadiumPeaksTest.h
+	SumEventsByLogValueTest.h
 	SumNeighboursTest.h
 	SumRowColumnTest.h
 	SumSpectraTest.h

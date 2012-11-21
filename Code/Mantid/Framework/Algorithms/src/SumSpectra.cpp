@@ -51,8 +51,6 @@ void SumSpectra::init()
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex",0, mustBePositive,
     "The first Workspace index to be included in the summing (default 0)" );
-  // As the property takes ownership of the validator pointer, have to take care to pass in a unique
-  // pointer to each property.
   declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive,
     "The last Workspace index to be included in the summing (default\n"
     "highest index)" );
