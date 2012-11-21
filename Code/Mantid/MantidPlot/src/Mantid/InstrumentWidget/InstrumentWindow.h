@@ -80,7 +80,7 @@ public:
 
   explicit InstrumentWindow(const QString& wsName, const QString& label = QString(), ApplicationWindow *app = 0, const QString& name = QString(), Qt::WFlags f = 0);
   ~InstrumentWindow();
-  void init(bool resetGeometry = true, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
+  void init(bool resetGeometry = true, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0, bool setDefaultView = true);
   QString getWorkspaceName() const { return m_workspaceName; }
 
   SurfaceType getSurfaceType()const{return m_surfaceType;}
