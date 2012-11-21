@@ -13,6 +13,7 @@
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IAlgorithm.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/algorithm/string.hpp>
