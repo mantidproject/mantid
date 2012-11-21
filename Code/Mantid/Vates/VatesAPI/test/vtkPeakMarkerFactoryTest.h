@@ -144,16 +144,69 @@ public:
   void testCreateWithoutInitializeThrows()
   {
     FakeProgressAction progressUpdate;
-    using namespace Mantid::VATES;
     vtkPeakMarkerFactory factory("signal");
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
 
   void testTypeName()
   {
-    using namespace Mantid::VATES;
     vtkPeakMarkerFactory factory ("signal");
     TS_ASSERT_EQUALS("vtkPeakMarkerFactory", factory.getFactoryTypeName());
+  }
+
+  void testGetPeakRadiusDefault()
+  {
+    vtkPeakMarkerFactory factory("signal");
+    TS_ASSERT_EQUALS(-1, factory.getIntegrationRadius());
+  }
+
+  void testIsPeaksWorkspaceIntegratedDefault()
+  {
+    vtkPeakMarkerFactory factory("signal");
+    TS_ASSERT_EQUALS(false, factory.isPeaksWorkspaceIntegrated());
+  }
+
+  void testGetPeakRadiusWhenNotIntegrated()
+  {
+    IPeaksWorkspace* mockWorkspace = new MockPeaksWorkspace;
+    const double expectedRadius =-1; // The default
+    // Note that no PeaksRadius property has been set.
+
+    vtkPeakMarkerFactory factory("signal");
+    factory.initialize(Mantid::API::IPeaksWorkspace_sptr(mockWorkspace));
+    TS_ASSERT_EQUALS(expectedRadius, factory.getIntegrationRadius());
+  }
+
+  void testIsPeaksWorkspaceIntegratedWhenNotIntegrated()
+  {
+    IPeaksWorkspace* mockWorkspace = new MockPeaksWorkspace;
+    // Note that no PeaksRadius property has been set.
+
+    vtkPeakMarkerFactory factory("signal");
+    factory.initialize(Mantid::API::IPeaksWorkspace_sptr(mockWorkspace));
+    TS_ASSERT_EQUALS(false, factory.isPeaksWorkspaceIntegrated()); // false is the default
+  }
+
+  void testGetPeakRadiusWhenIntegrated()
+  {
+    IPeaksWorkspace* mockWorkspace = new MockPeaksWorkspace;
+    const double expectedRadius = 4;
+    mockWorkspace->mutableRun().addProperty("PeakRadius", expectedRadius, true); // Has a PeaksRadius so must have been processed via IntegratePeaksMD
+
+    vtkPeakMarkerFactory factory("signal");
+    factory.initialize(Mantid::API::IPeaksWorkspace_sptr(mockWorkspace));
+    TS_ASSERT_EQUALS(expectedRadius, factory.getIntegrationRadius());
+  }
+
+  void testIsPeaksWorkspaceIntegratedWhenIntegrated()
+  {
+    IPeaksWorkspace* mockWorkspace = new MockPeaksWorkspace;
+    const double expectedRadius = 4;
+    mockWorkspace->mutableRun().addProperty("PeakRadius", expectedRadius, true); // Has a PeaksRadius so must have been processed via IntegratePeaksMD
+
+    vtkPeakMarkerFactory factory("signal");
+    factory.initialize(Mantid::API::IPeaksWorkspace_sptr(mockWorkspace));
+    TS_ASSERT_EQUALS(true, factory.isPeaksWorkspaceIntegrated()); 
   }
 
 };
