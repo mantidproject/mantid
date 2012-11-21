@@ -25,14 +25,14 @@ namespace Mantid
     /// Default constructor
     Instrument::Instrument() : CompAssembly(),
       m_detectorCache(),m_sourceCache(0), m_chopperPoints(new std::vector<const ObjComponent*>), m_sampleCache(0),
-      m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame)
+      m_defaultView("3D"), m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame)
     {
     }
 
     /// Constructor with name
     Instrument::Instrument(const std::string& name) : CompAssembly(name),
       m_detectorCache(),m_sourceCache(0), m_chopperPoints(new std::vector<const ObjComponent*>),m_sampleCache(0),
-      m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame)
+      m_defaultView("3D"), m_defaultViewAxis("Z+"), m_referenceFrame(new ReferenceFrame)
     {
     }
 
@@ -43,6 +43,7 @@ namespace Mantid
     Instrument::Instrument(const boost::shared_ptr<const Instrument> instr, boost::shared_ptr<ParameterMap> map)
       : CompAssembly(instr.get(), map.get() ),
       m_sourceCache(instr->m_sourceCache), m_chopperPoints(instr->m_chopperPoints), m_sampleCache(instr->m_sampleCache),
+      m_defaultView(instr->m_defaultView),
       m_defaultViewAxis(instr->m_defaultViewAxis),
       m_instr(instr), m_map_nonconst(map),
       m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame)
@@ -56,7 +57,7 @@ namespace Mantid
     Instrument::Instrument(const Instrument& instr) : CompAssembly(instr),
         m_sourceCache(NULL), m_chopperPoints(new std::vector<const ObjComponent*>), m_sampleCache(NULL), /* Should only be temporarily null */
         m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit),
-        m_monitorCache(instr.m_monitorCache), m_defaultViewAxis(instr.m_defaultViewAxis),
+        m_monitorCache(instr.m_monitorCache), m_defaultView(instr.m_defaultView), m_defaultViewAxis(instr.m_defaultViewAxis),
         m_instr(), m_map_nonconst(), /* Should not be parameterized */
         m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame)
     {
@@ -1123,6 +1124,27 @@ namespace Mantid
       }
     }
 
+    /**
+     * Set the default type of the instrument view.
+     * @param type :: A string with one of the values:
+     *    3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z
+     *    Caseless. If a wrong value is given logs a warning and sets the view to "3D"
+     */
+    void Instrument::setDefaultView(const std::string& type)
+    {
+      std::string typeUC(type);
+      std::transform(typeUC.begin(),typeUC.end(),typeUC.begin(),toupper);
+      if ( typeUC == "3D" || typeUC == "CYLINDRICAL_X" || typeUC == "CYLINDRICAL_Y" || typeUC == "CYLINDRICAL_Z" 
+        || typeUC == "SPHERICAL_X" || typeUC == "SPHERICAL_Y" || typeUC == "SPHERICAL_Z" )
+      {
+        m_defaultView = typeUC;
+      }
+      else
+      {
+        m_defaultView = "3D";
+        g_log.warning() << type << " is not allowed as an instrument view type. Default to \"3D\"" << std::endl;
+      }
+    }
 
   } // namespace Geometry
 } // Namespace Mantid

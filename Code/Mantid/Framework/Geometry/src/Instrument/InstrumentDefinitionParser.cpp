@@ -774,6 +774,10 @@ namespace Geometry
     if (defaultView)
     {
       m_instrument->setDefaultViewAxis(defaultView->getAttribute("axis-view"));
+      if ( defaultView->hasAttribute("view") )
+      {
+        m_instrument->setDefaultView( defaultView->getAttribute("view") );
+      }
     }
 
     // check if angle=radian has been set
