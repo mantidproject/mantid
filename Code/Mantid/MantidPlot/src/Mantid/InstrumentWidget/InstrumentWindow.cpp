@@ -327,6 +327,14 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMi
     surface->resetInstrumentActor( m_instrumentActor );
   }
   mInstrumentTree->setInstrumentActor(m_instrumentActor);
+  // set the view type to the instrument's default view
+  QString defaultView = QString::fromStdString(m_instrumentActor->getInstrument()->getDefaultView());
+  if ( defaultView == "3D" && Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InstrumentView.UseOpenGL") != "On" )
+  {
+    // if OpenGL is switched off don't open the 3D view at start up
+    defaultView = "CYLINDRICAL_Y";
+  }
+  setSurfaceType( defaultView );
   setInfoText( getSurfaceInfoText() );
 }
 
@@ -419,6 +427,48 @@ void InstrumentWindow::setSurfaceType(int type)
     QApplication::restoreOverrideCursor();
   }
   update();
+}
+
+/**
+ * Set the surface type from a string.
+ * @param typeStr :: Symbolic name of the surface type: same as the names in SurfaceType enum. Caseless.
+ */
+void InstrumentWindow::setSurfaceType(const QString& typeStr)
+{
+  int typeIndex = 0;
+  QString upperCaseStr = typeStr.toUpper();
+  if ( upperCaseStr == "FULL3D" || upperCaseStr == "3D" )
+  {
+    typeIndex = 0;
+  }
+  else if ( upperCaseStr == "CYLINDRICAL_X" )
+  {
+    typeIndex = 1;
+  }
+  else if ( upperCaseStr == "CYLINDRICAL_Y" )
+  {
+    typeIndex = 2;
+  }
+  else if ( upperCaseStr == "CYLINDRICAL_Z" )
+  {
+    typeIndex = 3;
+  }
+  else if ( upperCaseStr == "SPHERICAL_X" )
+  {
+    typeIndex = 4;
+  }
+  else if ( upperCaseStr == "SPHERICAL_Y" )
+  {
+    typeIndex = 5;
+  }
+  else if ( upperCaseStr == "SPHERICAL_Z" )
+  {
+    typeIndex = 6;
+  }
+  setSurfaceType( typeIndex );
+  m_renderTab->m_renderMode->blockSignals(true);
+  m_renderTab->m_renderMode->setCurrentIndex( typeIndex );
+  m_renderTab->m_renderMode->blockSignals(false);
 }
 
 /**

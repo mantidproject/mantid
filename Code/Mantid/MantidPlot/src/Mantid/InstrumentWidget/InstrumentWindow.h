@@ -191,6 +191,8 @@ private:
   int getInstrumentDisplayHeight() const;
   /// Select the OpenGL or simple widget for instrument display
   void selectOpenGLDisplay(bool yes);
+  /// Set the surface type.
+  void setSurfaceType(const QString& typeStr);
 
   QLabel*      mInteractionInfo;
   QTabWidget*  mControlsTab;

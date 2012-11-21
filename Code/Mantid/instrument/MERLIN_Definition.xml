@@ -15,6 +15,7 @@
       <pointing-up axis="y"/>
       <handedness val="right"/>
     </reference-frame>
+    <default-view view="cylindrical_y"/>
   </defaults>
 
   
