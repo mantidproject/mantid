@@ -554,22 +554,11 @@ bool LeBailFit::unitLeBailFit(size_t workspaceindex, std::map<std::string, Param
 
   // TODO (1) Calculate Rwp, Chi^2, .... for the fitted pattern.
 
-<<<<<<< HEAD
-    /// Background (Polynomial)
-    //std::string backgroundtype = getProperty("BackgroundType");
-    std::vector<double> orderparm;
-    for (size_t iod = 0; iod <= size_t(bkgdfuncorder); ++iod)
-    {
-      orderparm.push_back(0.0);
-    }
-    // CurveFitting::BackgroundFunction_sptr backgroundfunc = this->generateBackgroundFunction(backgroundtype, orderparm);
-=======
   // 5. Do calculation again and set the output
   // FIXME Move this part our of UnitLeBailFit
   calpeakintensity = true;
   API::FunctionValues newvalues(domain);
   this->calculateDiffractionPattern(m_dataWS, workspaceindex, domain, newvalues, parammap, calpeakintensity);
->>>>>>> Add Monte Carlo minimzer.  Refs #5837.
 
   // Add final calculated value to output workspace
   mWSIndexToWrite = 1;
