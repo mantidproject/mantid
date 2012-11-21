@@ -1119,10 +1119,6 @@ WidgetFactory::WidgetFactory()
 }; // end namespace
 }; // end namespace
 
-
-
-
-
 namespace MantidQt
 {
 namespace RefDetectorViewer
@@ -1132,50 +1128,67 @@ namespace RefDetectorViewer
 //*WIKI* == Classes ==
 //*WIKI* Here follows a list of the classes exposed to python and the methods you can execute on them.
 
-
-
 /***************************************************************************/
-/***************************************************************************/
-/***************************************************************************/
-
-/*
 
 class RefIVConnections: QWidget
 {
 %TypeHeaderCode
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"
-%end
+%End
+
+%Docstring
+
+RefIVConnections
+================
+    A RefIVConnections object is responsible for emitting signals about 
+    changes in the state of the image view.
+%End
 
 private:
-	RefIVConnections();
-
+  RefIVConnections();
 };
 
+/***************************************************************************/
 
-*/
-
-/***************************************************************************/
-/***************************************************************************/
-/***************************************************************************/
 class RefMatrixWSImageView
 {
 %TypeHeaderCode
 #include "MantidQtRefDetectorViewer/RefMatrixWSImageView.h"
 %End
 
+%Docstring
+
+RefMatrixWSImageView
+====================
+
+    A RefMatrixWSImageView is the gateway to the image view display. To
+    bring up an image display simply construct an object of this type, i.e.
+        image_view = RefMatrixWSImageView("test_ws")
+        
+    See the methods for RefMatrixWSImageView, below.
+%End
+
+
 public:
-	RefMatrixWSImageView (QString wps_name);
-/*	MantidQt::RefDetectorViewer::RefIVConnections* getConnections(); */
+  RefMatrixWSImageView(QString wsname);
+  
+  MantidQt::RefDetectorViewer::RefIVConnections * getConnections();
+  %Docstring
+MantidQt::RefDetectorViewer::RefIVConnections* RefMatrixWSImageView::getConnections()
+-------------------------------------------------------------------------------------
+    Get the connections widget inside the image view. This object is responsible for
+    emitting signals about changes in the state of the image view.
+   
+    Returns:
+        a pointer to the RefIVConnections object.
+   
+%End
+  
 
 };
 
 }; // end namespace
 }; // end namespace
-
-
-
-
-
 
 
 namespace MantidQt
