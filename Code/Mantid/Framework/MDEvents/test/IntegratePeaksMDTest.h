@@ -275,6 +275,26 @@ public:
 
   }
 
+  void test_writes_out_selected_algorithm_parameters()
+  {
+    createMDEW();
+    const double peakRadius = 2;
+    const double backgroundOutterRadius = 3;
+    const double backgroundInnerRadius = 2.5;
+
+    doRun(peakRadius, backgroundOutterRadius, "OutWS", backgroundInnerRadius);
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<PeaksWorkspace>("OutWS");
+
+    double actualPeakRadius = atof(outWS->mutableRun().getProperty("PeakRadius")->value().c_str());
+    double actualBackgroundOutterRadius= atof(outWS->mutableRun().getProperty("BackgroundOuterRadius")->value().c_str());
+    double actualBackgroundInnerRadius = atof(outWS->mutableRun().getProperty("BackgroundInnerRadius")->value().c_str());
+
+    TS_ASSERT_EQUALS(peakRadius, actualPeakRadius);
+    TS_ASSERT_EQUALS(backgroundOutterRadius, actualBackgroundOutterRadius);
+    TS_ASSERT_EQUALS(backgroundInnerRadius, actualBackgroundInnerRadius);
+  }
+
 };
 
 
@@ -376,7 +396,6 @@ public:
       IntegratePeaksMDTest::doRun(0.02, 0.03);
     }
   }
-
 };
 
 

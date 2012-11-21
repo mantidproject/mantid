@@ -308,6 +308,10 @@ namespace MDEvents
           << std::endl;
     }
 
+    peakWS->mutableRun().addProperty("PeakRadius", PeakRadius, true);
+    peakWS->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadius, true);
+    peakWS->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadius, true);
+
     // Save the output
     setProperty("OutputWorkspace", peakWS);
 
