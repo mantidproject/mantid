@@ -448,32 +448,33 @@ namespace Mantid
      * @param centre :: Whether the log value time is considered centred or at the beginning.
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance, bool centre)
+    void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance, bool centre) const
     {
+      // Make sure the splitter starts out empty
+      split.clear();
+
       //Do nothing if the log is empty.
-      if (m_values.size() == 0)
-        return;
+      if ( m_values.empty() ) return;
 
       // 1. Sort
       sort();
 
       // 2. Do the rest
-      bool lastGood = false;
-      bool isGood;
+      bool lastGood(false);
       time_duration tol = DateAndTime::durationFromSeconds( TimeTolerance );
       int numgood = 0;
-      DateAndTime lastTime, t;
+      DateAndTime t;
       DateAndTime start, stop;
 
-      for (size_t i = 0; i < m_values.size(); i ++)
+      for (size_t i = 0; i < m_values.size(); ++i)
       {
-        lastTime = t;
+        const DateAndTime lastTime = t;
         //The new entry
         t =m_values[i].time();
         TYPE val = m_values[i].value();
 
         //A good value?
-        isGood = ((val >= min) && (val < max));
+        const bool isGood = ((val >= min) && (val < max));
         if (isGood)
           numgood++;
 
@@ -492,18 +493,18 @@ namespace Mantid
           else
           {
             //End of the good section
-            if (numgood == 1)
+            if (numgood == 1 || centre )
             {
-              //There was only one point with the value. Use the last time, + the tolerance, as the end time
+              // If there was only one point with the value, or values represent bin centres,
+              // use the last good time, + the tolerance, as the end time
               stop = lastTime + tol;
-              split.push_back( SplittingInterval(start, stop, 0) );
             }
             else
             {
-              //At least 2 good values. Save the end time
-              stop = lastTime + tol;
-              split.push_back( SplittingInterval(start, stop, 0) );
+              // At least 2 good values for left boundary aligned logs. Save the end time.
+              stop = t;
             }
+            split.push_back( SplittingInterval(start, stop, 0) );
             //Reset the number of good ones, for next time
             numgood = 0;
           }
@@ -516,7 +517,6 @@ namespace Mantid
         //The log ended on "good" so we need to close it using the last time we found
         stop = t + tol;
         split.push_back( SplittingInterval(start, stop, 0) );
-        numgood = 0;
       }
 
       return;

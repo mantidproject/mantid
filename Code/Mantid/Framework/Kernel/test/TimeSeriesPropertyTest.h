@@ -344,6 +344,7 @@ public:
 
     TS_ASSERT_EQUALS( log->realSize(), 6);
 
+    // Test centred log value boundaries
     TimeSplitterType splitter;
     log->makeFilterByValue(splitter, 1.8, 2.2, 1.0);
 
@@ -361,6 +362,24 @@ public:
     t = DateAndTime("2007-11-30T16:17:29");
     TS_ASSERT_DELTA( s.start(), t, 1e-3);
     t = DateAndTime("2007-11-30T16:17:41");
+    TS_ASSERT_DELTA( s.stop(), t, 1e-3);
+
+
+    // Now test with left-aligned log value boundaries
+    log->makeFilterByValue(splitter, 1.8, 2.2, 1.0, false);
+
+    TS_ASSERT_EQUALS( splitter.size(), 2);
+
+    s = splitter[0];
+    t = DateAndTime("2007-11-30T16:17:10");
+    TS_ASSERT_DELTA( s.start(), t, 1e-3);
+    t = DateAndTime("2007-11-30T16:17:11");
+    TS_ASSERT_DELTA( s.stop(), t, 1e-3);
+
+    s = splitter[1];
+    t = DateAndTime("2007-11-30T16:17:30");
+    TS_ASSERT_DELTA( s.start(), t, 1e-3);
+    t = DateAndTime("2007-11-30T16:17:50");
     TS_ASSERT_DELTA( s.stop(), t, 1e-3);
 
     delete log;
