@@ -71,9 +71,9 @@ public:
 
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1 );
-    TS_ASSERT_EQUALS( outWS->readX(0)[0], 1 );
-    TS_ASSERT_EQUALS( outWS->readY(0)[0], 300 );
-    TS_ASSERT_EQUALS( outWS->readE(0)[0], std::sqrt(300) );
+    TS_ASSERT_EQUALS( outWS->readX(0)[0], 1.0 );
+    TS_ASSERT_EQUALS( outWS->readY(0)[0], 300.0 );
+    TS_ASSERT_EQUALS( outWS->readE(0)[0], std::sqrt(300.0) );
   }
 
 private:
