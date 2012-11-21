@@ -10,7 +10,9 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/algorithm/string.hpp>
@@ -296,6 +298,10 @@ double InstrumentActor::getIntegratedCounts(Mantid::detid_t id)const
   }
 }
 
+/**
+ * Recalculate the detector colors based on the integrated values in m_specIntegrs and
+ * the masking information in ....
+ */
 void InstrumentActor::resetColors()
 {
   QwtDoubleInterval qwtInterval(m_DataMinScaleValue,m_DataMaxScaleValue);
@@ -502,6 +508,31 @@ void InstrumentActor::setAutoscaling(bool on)
     m_DataMaxScaleValue = m_DataMaxValue;
     //setIntegrationRange(m_DataMinValue,m_DataMaxValue);
     resetColors();
+  }
+}
+
+/**
+ * Initialize the helper mask workspace with the mask from the data workspace.
+ */
+void InstrumentActor::initMaskHelper()
+{
+  if ( m_maskWorkspace ) return;
+  // extract the mask (if any) from the data to the mask workspace
+  const std::string maskName = "__InstrumentActor_MaskWorkspace";
+  Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",-1);
+  alg->setPropertyValue( "InputWorkspace", getWorkspace()->name() );
+  alg->setPropertyValue( "OutputWorkspace", maskName );
+  alg->execute();
+
+  try
+  {
+    m_maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
+    Mantid::API::AnalysisDataService::Instance().remove( maskName );
+  }
+  catch( ... )
+  {
+    // don't know what to do here yet ...
+    QMessageBox::warning(NULL,"MantidPlot - Warning","An error accured when extracting the mask.","OK");
   }
 }
 

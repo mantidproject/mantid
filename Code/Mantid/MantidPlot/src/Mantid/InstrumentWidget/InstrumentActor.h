@@ -25,6 +25,7 @@ namespace Mantid
   namespace API
   {
     class MatrixWorkspace;
+    class IMaskWorkspace;
   }
   namespace Geometry
   {
@@ -71,8 +72,10 @@ public:
   InstrumentActor(const QString &wsName, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
   ~InstrumentActor();    ///< Destructor
   virtual std::string type()const {return "InstrumentActor";} ///< Type of the GL object
+  /// Draw the instrument in 3D
   void draw(bool picking = false)const;
   void getBoundingBox(Mantid::Kernel::V3D& minBound,Mantid::Kernel::V3D& maxBound)const{m_scene.getBoundingBox(minBound,maxBound);}
+  /// Run visitors callback on each component
   bool accept(const GLActorVisitor& visitor);
 
   boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
@@ -117,6 +120,10 @@ public:
                   Mantid::Kernel::Quat& R,
                   bool out = false
                   );
+
+  /* Masking */
+
+  void initMaskHelper();
 signals:
   void colorMapChanged();
 protected:
@@ -127,7 +134,11 @@ protected:
 
   size_t push_back_detid(Mantid::detid_t)const;
 
+  /// The workspace whose data are shown
   const boost::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
+  /// The helper masking workspace keeping the mask build in the mask tab but not applied to the data workspace.
+  boost::shared_ptr<Mantid::API::IMaskWorkspace> m_maskWorkspace;
+  /// The colormap
   MantidColorMap m_colorMap;
   /// integrated spectra
   std::vector<double> m_specIntegrs;
@@ -136,10 +147,10 @@ protected:
   double m_WkspBinMin, m_WkspBinMax;                         ///< min and max over whole workspace
   /// The user requested data and bin ranges
   double m_DataMinValue, m_DataMaxValue;                     ///< min and max for current bin (x integration) range
-  double m_DataMinScaleValue, m_DataMaxScaleValue;           ///< min and max of the color map scale
+  double m_DataMinScaleValue, m_DataMaxScaleValue;           /// min and max of the color map scale
   double m_BinMinValue, m_BinMaxValue;
+  /// Flag to rescale the colormap axis automatically when the data or integration range change
   bool m_autoscaling;
-  //boost::shared_ptr<const std::vector<boost::shared_ptr<const Mantid::Geometry::IObjComponent> > > m_plottables;
 
   /// Vector where INDEX = (detector id + m_id2wi_offset); VALUE = workspace index.
   std::vector<size_t> m_id2wi_vector;
@@ -156,8 +167,10 @@ protected:
   /// Colors in order of workspace indexes
   mutable std::vector<GLColor> m_colors;
   QString m_currentColorMap;
-  GLColor m_maskedColor; ///< Colour of a masked detector
-  GLColor m_failedColor; ///< Colour of a "failed" detector
+  /// Colour of a masked detector
+  GLColor m_maskedColor;
+  /// Colour of a "failed" detector
+  GLColor m_failedColor;
 
   GLActorCollection m_scene;
   SampleActor* m_sampleActor;

@@ -173,6 +173,7 @@ void InstrumentWindowMaskTab::init()
   connect(m_instrumentDisplay->getSurface(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
   connect(m_instrumentDisplay->getSurface(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
   connect(m_instrumentDisplay->getSurface(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
+  m_instrumentWindow->getInstrumentActor()->initMaskHelper();
 }
 
 void InstrumentWindowMaskTab::setActivity()
