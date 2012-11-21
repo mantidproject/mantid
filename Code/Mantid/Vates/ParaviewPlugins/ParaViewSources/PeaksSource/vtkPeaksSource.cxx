@@ -1,6 +1,6 @@
 #include "vtkPeaksSource.h"
 
-#include "vtkCubeSource.h"
+#include "vtkSphereSource.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -46,9 +46,9 @@ void vtkPeaksSource::SetWsName(std::string name)
   }
 }
 
-void vtkPeaksSource::SetWidth(double width)
+void vtkPeaksSource::SetRadius(double radius)
 {
-  m_width = width;
+  m_radius = radius;
   this->Modified();
 }
 
@@ -60,7 +60,6 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-    //FilterUpdateProgressAction<vtkPeaksSource> loadingProgressUpdate(this, "Loading...");
     FilterUpdateProgressAction<vtkPeaksSource> drawingProgressUpdate(this, "Drawing...");
 
     vtkPolyData *output = vtkPolyData::SafeDownCast(
@@ -72,14 +71,19 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
     p_peakFactory->initialize(m_PeakWS);
     vtkDataSet *structuredMesh = p_peakFactory->create(drawingProgressUpdate);
 
-    vtkCubeSource *cube = vtkCubeSource::New();
-    cube->SetXLength(m_width);
-    cube->SetYLength(m_width);
-    cube->SetZLength(m_width);
+    // Pick the radius up from the factory if possible, otherwise use the user-provided value.
+    double peakRadius = m_radius;
+    if(p_peakFactory->isPeaksWorkspaceIntegrated())
+    {
+      peakRadius = p_peakFactory->getIntegrationRadius();
+    }
+
+    vtkSphereSource *sphere = vtkSphereSource::New();
+    sphere->SetRadius(peakRadius);
 
     vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
     glyphFilter->SetInput(structuredMesh);
-    glyphFilter->SetSource(cube->GetOutput());
+    glyphFilter->SetSource(sphere->GetOutput());
     glyphFilter->Update();
     vtkPolyData *glyphed = glyphFilter->GetOutput();
 

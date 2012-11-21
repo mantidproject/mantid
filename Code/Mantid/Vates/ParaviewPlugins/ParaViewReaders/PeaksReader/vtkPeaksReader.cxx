@@ -8,7 +8,7 @@
 #include "vtkPointData.h"
 #include "vtkTransform.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
-#include <vtkCubeSource.h>
+#include <vtkSphereSource.h>
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
@@ -41,9 +41,9 @@ vtkPeaksReader::~vtkPeaksReader()
 }
 
 
-void vtkPeaksReader::SetWidth(double width)
+void vtkPeaksReader::SetRadius(double radius)
 {
-  m_width = width;
+  m_radius = radius;
   this->Modified();
 }
 
@@ -78,18 +78,24 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
   FilterUpdateProgressAction<vtkPeaksReader> drawingProgressUpdate(this, "Drawing...");
   vtkDataSet * structuredMesh = p_peakFactory->create(drawingProgressUpdate);
 
-  vtkCubeSource* cube = vtkCubeSource::New();
-  cube->SetXLength(m_width);
-  cube->SetYLength(m_width);
-  cube->SetZLength(m_width);
+  // Pick the radius up from the factory if possible, otherwise use the user-provided value.
+  double peakRadius = m_radius;
+  if(p_peakFactory->isPeaksWorkspaceIntegrated())
+  {
+    peakRadius = p_peakFactory->getIntegrationRadius();
+  }
 
-  vtkPVGlyphFilter* glyphFilter = vtkPVGlyphFilter::New();
+  vtkSphereSource *sphere = vtkSphereSource::New();
+  sphere->SetRadius(peakRadius);
+
+  vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
   glyphFilter->SetInput(structuredMesh);
-  glyphFilter->SetSource(cube->GetOutput());
+  glyphFilter->SetSource(sphere->GetOutput());
   glyphFilter->Update();
-  vtkPolyData* glyphed = glyphFilter->GetOutput();
+  vtkPolyData *glyphed = glyphFilter->GetOutput();
 
   output->ShallowCopy(glyphed);
+
   glyphFilter->Delete();
 
   return 1;
