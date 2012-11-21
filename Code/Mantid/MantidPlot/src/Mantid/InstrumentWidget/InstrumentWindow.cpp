@@ -309,8 +309,9 @@ InstrumentWindow::~InstrumentWindow()
  * @param autoscaling :: True to start with autoscaling option on.
  * @param scaleMin :: Minimum value of the colormap scale. Ignored if autoscaling == true.
  * @param scaleMax :: Maximum value of the colormap scale. Ignored if autoscaling == true.
+ * @param setDefaultView :: Set the default surface type
  */
-void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax)
+void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax, bool setDefaultView)
 {
   // Previously in (now removed) setWorkspaceName method
   m_instrumentActor = new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax);
@@ -327,14 +328,18 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMi
     surface->resetInstrumentActor( m_instrumentActor );
   }
   mInstrumentTree->setInstrumentActor(m_instrumentActor);
-  // set the view type to the instrument's default view
-  QString defaultView = QString::fromStdString(m_instrumentActor->getInstrument()->getDefaultView());
-  if ( defaultView == "3D" && Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InstrumentView.UseOpenGL") != "On" )
+
+  if ( setDefaultView )
   {
-    // if OpenGL is switched off don't open the 3D view at start up
-    defaultView = "CYLINDRICAL_Y";
+    // set the view type to the instrument's default view
+    QString defaultView = QString::fromStdString(m_instrumentActor->getInstrument()->getDefaultView());
+    if ( defaultView == "3D" && Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InstrumentView.UseOpenGL") != "On" )
+    {
+      // if OpenGL is switched off don't open the 3D view at start up
+      defaultView = "CYLINDRICAL_Y";
+    }
+    setSurfaceType( defaultView );
   }
-  setSurfaceType( defaultView );
   setInfoText( getSurfaceInfoText() );
 }
 
@@ -898,7 +903,7 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
       m_instrumentActor = NULL;
     }
 
-    init( resetGeometry, autoscaling, scaleMin, scaleMax );
+    init( resetGeometry, autoscaling, scaleMin, scaleMax, false );
     updateInstrumentDetectors();
   }
 }
