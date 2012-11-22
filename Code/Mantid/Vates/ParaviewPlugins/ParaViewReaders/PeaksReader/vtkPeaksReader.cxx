@@ -18,6 +18,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include <vtkPVGlyphFilter.h>
 
+#include <boost/algorithm/string.hpp>    
+
 vtkCxxRevisionMacro(vtkPeaksReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkPeaksReader);
 
@@ -137,9 +139,26 @@ void vtkPeaksReader::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os,indent);
 }
 
-int vtkPeaksReader::CanReadFile(const char* vtkNotUsed(fname))
+int vtkPeaksReader::CanReadFile(const char* fname)
 {
-  return 1; //TODO: Apply checks here.
+  const std::string fileString(fname);
+  const int startExtension = fileString.find_last_of('.');
+  const int endExtension = fileString.length();
+  if(startExtension >= endExtension)
+  {
+    throw std::runtime_error("File has no extension.");
+  }
+  std::string extension = fileString.substr(startExtension, endExtension - startExtension);
+  boost::algorithm::to_lower(extension);
+  boost::algorithm::trim(extension);
+  if(extension == ".peaks")
+  {
+    return 1;
+  }
+  else
+  {
+    return 0; 
+  }
 }
 
 unsigned long vtkPeaksReader::GetMTime()

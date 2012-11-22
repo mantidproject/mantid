@@ -8,7 +8,6 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidAPI/AlgorithmManager.h"
-
 #include <vtkUnstructuredGrid.h>
 
 namespace Mantid
@@ -42,6 +41,12 @@ namespace Mantid
     */
     bool MDEWEventNexusLoadingPresenter::canReadFile() const
     {
+      // Quick check based on extension.
+      if(!canLoadFileBasedOnExtension(m_filename, ".nxs"))
+      {
+        return 0;
+      }
+
       ::NeXus::File * file = NULL;
 
       file = new ::NeXus::File(this->m_filename);

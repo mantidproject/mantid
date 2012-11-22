@@ -11,7 +11,6 @@
 
 #include <vtkUnstructuredGrid.h>
 
-
 namespace Mantid
 {
   namespace VATES
@@ -42,6 +41,11 @@ namespace Mantid
     */
     bool EventNexusLoadingPresenter::canReadFile() const
     {
+      if(!canLoadFileBasedOnExtension(m_filename, ".nxs"))
+      {
+        return 0;
+      }
+
       ::NeXus::File * file = NULL;
       try
       {
