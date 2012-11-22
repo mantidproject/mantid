@@ -91,14 +91,14 @@ include_directories ( inc )
 copy_python_files_to_dir( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} PYTHON_INSTALL_FILES )
 
 # Python algorithms
-add_compile_py_target( PythonAlgorithms ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
+add_compile_py_target( PythonAlgorithmsOld ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
 
 ###########################################################################
 # Create the target for this directory
 ###########################################################################
 
 add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${BOOST_SRC} ${PYTHON_INSTALL_FILES} )
-add_dependencies( PythonAPI PythonAlgorithms )
+add_dependencies( PythonAPI PythonAlgorithmsOld )
 if ( UNIX )
   set ( DLOPEN_SRC src/dlopen.c )
   add_library ( dlopen ${DLOPEN_SRC} )

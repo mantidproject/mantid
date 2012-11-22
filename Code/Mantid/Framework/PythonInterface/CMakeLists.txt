@@ -53,6 +53,12 @@ endif ()
 add_subdirectory ( mantid )
 
 ###########################################################################
+# Python algorithms
+###########################################################################
+add_compile_py_target( PythonAlgorithms ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
+add_dependencies( PythonAPIModule PythonAlgorithms )
+
+###########################################################################
 # tests 
 ###########################################################################
 # C++ unit tests
@@ -176,3 +182,7 @@ endif ()
 install ( DIRECTORY mantid DESTINATION ${BIN_DIR} 
           FILES_MATCHING REGEX ".*.pyc?$"
           PATTERN "src" EXCLUDE )
+
+# Python algorithms
+install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
+                                      PATTERN ".svn" EXCLUDE )
