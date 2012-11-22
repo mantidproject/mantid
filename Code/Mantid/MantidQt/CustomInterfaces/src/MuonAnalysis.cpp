@@ -2419,6 +2419,10 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
       m_optionTab->noDataAvailable();
       return false;
     }
+    {
+      if (!m_uiForm.frontPlotButton->isEnabled() )
+        m_optionTab->nowDataAvailable();
+    }
 
     saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
     return applyGroupingToWS(inputWS, outputWS, m_groupingTempFilename);
