@@ -37,12 +37,6 @@ if ( stdint )
 endif ( stdint )
 
 ###########################################################################
-# Include the file that contains the minor (iteration) version number
-###########################################################################
-
-include ( VersionNumber )
-
-###########################################################################
 # Look for dependencies - bail out if any not found
 ###########################################################################
 
@@ -128,12 +122,6 @@ if ( GIT_FOUND )
                                                                    ${GIT_TOP_LEVEL}/.git/hooks/commit-msg )
     endif ()
 
-    ###########################################################################
-    # Create the file containing the patch version number for use by cpack
-    ###########################################################################
-    configure_file ( ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake.in
-                     ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake
-    )
   endif()
 
 else()
@@ -142,6 +130,24 @@ else()
 endif()
 
 mark_as_advanced( MtdVersion_WC_LAST_CHANGED_REV MtdVersion_WC_LAST_CHANGED_DATE )
+
+###########################################################################
+# Include the file that contains the version number
+# This must come after the git describe business above because it can be
+# used to override the patch version number (MtdVersion_WC_LAST_CHANGED_REV)
+###########################################################################
+
+include ( VersionNumber )
+
+if ( NOT NOT_GIT_REPO ) # i.e This is a git repository!
+  ###########################################################################
+  # Create the file containing the patch version number for use by cpack
+  # The patch number make have been overridden by VerisonNumber so create
+  # the file used by cpack here
+  ###########################################################################
+  configure_file ( ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake.in
+                   ${GIT_TOP_LEVEL}/Code/Mantid/Build/CMake/PatchVersionNumber.cmake )
+endif()
 
 ###########################################################################
 # Look for OpenMP and set compiler flags if found
