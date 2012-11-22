@@ -106,6 +106,9 @@ namespace MDEvents
 
     void refreshCentroid(Kernel::ThreadScheduler * ts = NULL);
 
+    // Set the box controller overrriden.
+    virtual void setBoxController(Mantid::API::BoxController_sptr controller);
+
     // ======================= Testing/Debugging Methods =================
     /** For testing: get (a reference to) the vector of boxes */
     std::vector<MDBoxBase<MDE, nd>*> & getBoxes()

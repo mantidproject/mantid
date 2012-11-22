@@ -225,7 +225,7 @@ namespace MDEvents
     /** Set the box controller used.
      * @param controller :: Mantid::API::BoxController_sptr
      */
-    void setBoxController(Mantid::API::BoxController_sptr controller)
+    virtual void setBoxController(Mantid::API::BoxController_sptr controller)
     { m_BoxController = controller; }
 
     //-----------------------------------------------------------------------------------------------

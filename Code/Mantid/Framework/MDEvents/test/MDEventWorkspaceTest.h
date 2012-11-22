@@ -25,6 +25,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <typeinfo>
 #include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid;
@@ -95,21 +96,50 @@ public:
   void test_copy_constructor()
   {
     MDEventWorkspace<MDLeanEvent<3>, 3> ew3;
+    
     for (size_t i=0; i<3; i++)
       ew3.addDimension( MDHistoDimension_sptr(new MDHistoDimension("x","x","m",-1,1,0)) );
     ew3.initialize();
-    ew3.addEvent( MDLeanEvent<3>(1.23, 4.56) );
+    ew3.getBoxController()->setSplitThreshold(1);
+    ew3.addEvent( MDLeanEvent<3>(1.0, 1.0) );
+    ew3.addEvent( MDLeanEvent<3>(2.0, 2.0) );
+    ew3.addEvent( MDLeanEvent<3>(3.0, 3.0) );
+    ew3.splitBox();
+
     ExperimentInfo_sptr ei(new ExperimentInfo);
     TS_ASSERT_EQUALS( ew3.addExperimentInfo(ei), 0);
 
     MDEventWorkspace<MDLeanEvent<3>, 3> copy(ew3);
-    TS_ASSERT( !copy.isGridBox());
     TS_ASSERT_EQUALS( copy.getNumDims(), 3);
     TS_ASSERT_EQUALS( copy.getDimension(0)->getName(), "x");
     TS_ASSERT_EQUALS( copy.getNumExperimentInfo(), 1);
-    TSM_ASSERT_DIFFERS( "ExperimentInfo's were deep-copied", copy.getExperimentInfo(0), ew3.getExperimentInfo(0));
-    TSM_ASSERT_DIFFERS( "BoxController was deep-copied", copy.getBoxController(), ew3.getBoxController());
-    TSM_ASSERT_DIFFERS( "Dimensions were deep-copied", copy.getDimension(0), ew3.getDimension(0));
+    TSM_ASSERT_DIFFERS( "ExperimentInfo's were not deep-copied", copy.getExperimentInfo(0), ew3.getExperimentInfo(0));
+    TSM_ASSERT_DIFFERS( "BoxController was not deep-copied", copy.getBoxController(), ew3.getBoxController());
+    TSM_ASSERT_DIFFERS( "Dimensions were not deep-copied", copy.getDimension(0), ew3.getDimension(0));
+
+    /*Test that the boxes were deep copied and that their BoxController pointers have been updated too.*/
+    typedef MDBoxBase<MDLeanEvent<3>, 3> MDBoxBaseType;
+    std::vector<MDBoxBaseType *> originalBoxes;
+    ew3.getBox()->getBoxes(originalBoxes, 10000, false);
+
+    std::vector<MDBoxBaseType *> copiedBoxes;
+    copy.getBox()->getBoxes(copiedBoxes, 10000, false);
+
+    // Quick check.
+    TSM_ASSERT_EQUALS("Number of boxes should be the same before and after the copy.", originalBoxes.size(), copiedBoxes.size());
+    for(size_t i = 0; i < originalBoxes.size(); ++i)
+    {
+       MDBoxBaseType* originalMDBox = originalBoxes[i];
+       MDBoxBaseType* copiedMDBox = copiedBoxes[i];
+
+       auto originalBoxTypeName = std::string(typeid(*originalMDBox).name());
+       auto copiedBoxTypeName = std::string(typeid(*copiedMDBox).name());
+
+       // Check the types
+       TS_ASSERT("Box types are not the same", originalBoxTypeName.compare(copiedBoxTypeName)==0); // Comparing them this way will at least produce a useful error if type matching fails.
+       TSM_ASSERT_DIFFERS( "BoxController should be different between original and copied boxes", originalMDBox->getBoxController(), copiedMDBox->getBoxController());
+       TSM_ASSERT_EQUALS("BoxController on copied box does not match that in copied workspace", copy.getBoxController(), copiedMDBox->getBoxController());
+    }
   }
 
   void test_initialize_throws()

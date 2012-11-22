@@ -347,6 +347,22 @@ namespace MDEvents
     numBoxes = boxes.size();
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Setter for the box controller. Sets the box controller on all children.
+   *
+   * @param controller: BoxController to set.
+   */
+  TMDE(
+  void MDGridBox)::setBoxController(Mantid::API::BoxController_sptr controller)
+  {
+    MDBoxBase::setBoxController(controller);
+    // Set on all childern.
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      boxes[i]->setBoxController(controller);
+    }
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Helper function to get the index into the linear array given
