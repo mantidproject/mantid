@@ -355,7 +355,7 @@ namespace MDEvents
   TMDE(
   void MDGridBox)::setBoxController(Mantid::API::BoxController_sptr controller)
   {
-    MDBoxBase::setBoxController(controller);
+    MDBoxBase<MDE,nd>::setBoxController(controller);
     // Set on all childern.
     for (size_t i=0; i<boxes.size(); i++)
     {
