@@ -87,7 +87,6 @@ namespace Mantid
         alg->setPropertyValue("Filename", this->m_filename);
         alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
         alg->setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
-        alg->setPropertyValue("Memory", "0");
         alg->addObserver(observer);
         alg->execute();
         alg->removeObserver(observer);
@@ -123,7 +122,7 @@ namespace Mantid
       alg->setPropertyValue("Filename", this->m_filename);
       alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
       alg->setProperty("MetadataOnly", true); //Don't load the events.
-      alg->setProperty("FileBackEnd", true); //Only require metadata, so do it in memory.
+      alg->setProperty("FileBackEnd", false); //Only require metadata, so do it in memory.
       alg->execute();
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
