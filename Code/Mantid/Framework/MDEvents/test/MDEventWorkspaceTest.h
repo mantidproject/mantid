@@ -136,7 +136,7 @@ public:
        auto copiedBoxTypeName = std::string(typeid(*copiedMDBox).name());
 
        // Check the types
-       TS_ASSERT("Box types are not the same", originalBoxTypeName.compare(copiedBoxTypeName)==0); // Comparing them this way will at least produce a useful error if type matching fails.
+       TSM_ASSERT("Box types are not the same", originalBoxTypeName.compare(copiedBoxTypeName)==0); // Comparing them this way will at least produce a useful error if type matching fails.
        TSM_ASSERT_DIFFERS( "BoxController should be different between original and copied boxes", originalMDBox->getBoxController(), copiedMDBox->getBoxController());
        TSM_ASSERT_EQUALS("BoxController on copied box does not match that in copied workspace", copy.getBoxController(), copiedMDBox->getBoxController());
     }
