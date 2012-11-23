@@ -293,6 +293,7 @@ public:
     TS_ASSERT_EQUALS(peakRadius, actualPeakRadius);
     TS_ASSERT_EQUALS(backgroundOutterRadius, actualBackgroundOutterRadius);
     TS_ASSERT_EQUALS(backgroundInnerRadius, actualBackgroundInnerRadius);
+    TS_ASSERT(outWS->hasIntegratedPeaks());
   }
 
 };

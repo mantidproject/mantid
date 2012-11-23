@@ -269,6 +269,28 @@ public:
        TSM_ASSERT_THROWS_NOTHING("should clearly delete pw",delete pw);
    }
 
+   void test_hasIntegratedPeaks_without_property()
+   {
+     PeaksWorkspace ws;
+     TSM_ASSERT("Should not indicate that there are integrated peaks without property.", !ws.hasIntegratedPeaks());
+   }
+
+   void test_hasIntegratedPeaks_with_property_when_false()
+   {
+     PeaksWorkspace ws;
+     bool hasIntegratedPeaks = false;
+     ws.mutableRun().addProperty("PeaksIntegrated", hasIntegratedPeaks);
+     TS_ASSERT_EQUALS(hasIntegratedPeaks, ws.hasIntegratedPeaks());
+   }
+
+   void test_hasIntegratedPeaks_with_property_when_true()
+   {
+     PeaksWorkspace ws;
+     bool hasIntegratedPeaks = true;
+     ws.mutableRun().addProperty("PeaksIntegrated", hasIntegratedPeaks);
+     TS_ASSERT_EQUALS(hasIntegratedPeaks, ws.hasIntegratedPeaks());
+   }
+
    PeaksWorkspaceTest()
    {
       FrameworkManager::Instance();

@@ -308,6 +308,9 @@ namespace MDEvents
           << std::endl;
     }
 
+    // This flag is used by the PeaksWorkspace to evaluate whether it has been integrated.
+    peakWS->mutableRun().addProperty("PeaksIntegrated", true, true); 
+    // These flags are specific to the algorithm.
     peakWS->mutableRun().addProperty("PeakRadius", PeakRadius, true);
     peakWS->mutableRun().addProperty("BackgroundInnerRadius", BackgroundInnerRadius, true);
     peakWS->mutableRun().addProperty("BackgroundOuterRadius", BackgroundOuterRadius, true);

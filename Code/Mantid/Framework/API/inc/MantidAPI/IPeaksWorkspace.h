@@ -108,6 +108,12 @@ namespace API
      */
     virtual IPeak* createPeak(Mantid::Kernel::V3D QLabFrame, double detectorDistance=1.0) const = 0;
 
+    //---------------------------------------------------------------------------------------------
+    /** Determine if the workspace has been integrated using a peaks integration algorithm.
+     * @return TRUE if the workspace has been integrated. 
+     */
+    virtual bool hasIntegratedPeaks() const = 0;
+
   };
 
 

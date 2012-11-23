@@ -265,6 +265,20 @@ namespace DataObjects
     return peaks;
   }
 
+  /** Getter for the integration status.
+  @return TRUE if it has been integrated using a peak integration algorithm.
+  */
+  bool PeaksWorkspace::hasIntegratedPeaks() const
+  {
+    bool ret = false;
+    const std::string peaksIntegrated = "PeaksIntegrated";
+    if(this->run().hasProperty(peaksIntegrated))
+    {
+      ret = boost::lexical_cast<bool>(this->run().getProperty(peaksIntegrated)->value());
+    }
+    return ret;
+  }
+
   //---------------------------------------------------------------------------------------------
   /// Return the memory used in bytes
   size_t PeaksWorkspace::getMemorySize() const

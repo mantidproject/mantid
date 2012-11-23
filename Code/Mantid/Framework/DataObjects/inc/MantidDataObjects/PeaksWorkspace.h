@@ -107,7 +107,7 @@ namespace DataObjects
     API::IPeak* createPeak(Kernel::V3D QLabFrame, double detectorDistance=1.0) const;
     std::vector<Peak> & getPeaks();
     const std::vector<Peak> & getPeaks() const;
-
+    virtual bool hasIntegratedPeaks() const;
     virtual size_t getMemorySize() const;
 
     // ====================================== ITableWorkspace Methods ==================================
