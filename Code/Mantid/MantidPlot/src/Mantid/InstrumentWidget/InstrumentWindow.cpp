@@ -1468,6 +1468,7 @@ void InstrumentWindow::updateInstrumentView()
 /// Recalculate the colours and redraw the instrument view
 void InstrumentWindow::updateInstrumentDetectors()
 {
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   if ( isGLEnabled() )
   {
     m_InstrumentDisplay->updateDetectors();
@@ -1476,6 +1477,7 @@ void InstrumentWindow::updateInstrumentDetectors()
   {
     m_simpleDisplay->updateDetectors();
   }
+  QApplication::restoreOverrideCursor();
 }
 
 /**

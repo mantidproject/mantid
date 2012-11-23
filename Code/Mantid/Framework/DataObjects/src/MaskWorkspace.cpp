@@ -55,7 +55,18 @@ namespace DataObjects
     MaskWorkspace::MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument, const bool includeMonitors)
       : SpecialWorkspace2D(instrument, includeMonitors), m_hasInstrument(true)
     {
-      this->clearMask();
+        this->clearMask();
+    }
+
+    /**
+     * Constructor - using a MatrixWorkspace.
+     * @param[in] A matrix workspace that is the base for this workspace. It must have an instrument.
+     * @return MaskWorkspace
+     */
+    MaskWorkspace::MaskWorkspace(const API::MatrixWorkspace_const_sptr parent)
+        : SpecialWorkspace2D(parent), m_hasInstrument(true)
+    {
+        this->clearMask();
     }
 
     //--------------------------------------------------------------------------

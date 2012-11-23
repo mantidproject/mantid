@@ -58,7 +58,9 @@ protected slots:
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
+  void clearShapes();
   void applyMask();
+  void storeMask();
   void clearMask();
   void saveInvertedMaskToWorkspace();
   void saveInvertedMaskToFile();
@@ -71,14 +73,20 @@ protected:
 
   void clearProperties();
   void setProperties();
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> createMaskWorkspace(bool invertMask = false);
+  boost::shared_ptr<Mantid::API::MatrixWorkspace> createMaskWorkspace(bool invertMask, bool temp = false);
   void saveMaskingToWorkspace(bool invertMask = false);
   void saveMaskingToFile(bool invertMask = false);
+  std::string generateMaskWorkspaceName(bool temp = false) const;
+  void enableApply(bool on);
+  void setSelectActivity();
 
+  /// The parent InstrumentWindow
   InstrumentWindow* m_instrumentWindow;
-  MantidGLWidget *m_instrumentDisplay;
 
+  /// Is it used?
   Activity m_activity;
+  /// True if there is a mask not applied to the data workspace
+  bool m_hasMaskToApply;
 
   // buttons
   QPushButton* m_move;
@@ -90,6 +98,7 @@ protected:
 
   QPushButton* m_apply;
   QPushButton* m_clear_all;
+  QPushButton* m_saveButton;
 
   QAction* m_save_as_workspace_include;
   QAction* m_save_as_workspace_exclude;

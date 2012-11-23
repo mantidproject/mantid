@@ -6,7 +6,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMaskWorkspace.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 
 #include "qttreepropertybrowser.h"
 #include "qtpropertymanager.h"
@@ -49,9 +51,9 @@ InstrumentWindowMaskTab::InstrumentWindowMaskTab(InstrumentWindow* instrWindow):
 QFrame(instrWindow),
 m_instrumentWindow(instrWindow),
 m_activity(Select),
+m_hasMaskToApply(false),
 m_userEditing(true)
 {
-  m_instrumentDisplay = m_instrumentWindow->getInstrumentDisplay();
 
   // main layout
   QVBoxLayout* layout=new QVBoxLayout(this);
@@ -151,29 +153,30 @@ m_userEditing(true)
   m_save_as_file_include = new QAction("As ROI to file",this);
   connect(m_save_as_file_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToFile()));
 
-  QPushButton* saveButton = new QPushButton("Save");
+  m_saveButton = new QPushButton("Save");
   QMenu* saveMenu = new QMenu(this);
   saveMenu->addAction(m_save_as_workspace_include);
   saveMenu->addAction(m_save_as_workspace_exclude);
   saveMenu->addAction(m_save_as_file_include);
   saveMenu->addAction(m_save_as_file_exclude);
-  saveButton->setMenu(saveMenu);
+  m_saveButton->setMenu(saveMenu);
 
   QGridLayout* buttons = new QGridLayout();
   buttons->addWidget(m_apply,0,0);
   buttons->addWidget(m_clear_all,0,1);
-  buttons->addWidget(saveButton,1,0,1,2);
+  buttons->addWidget(m_saveButton,1,0,1,2);
   
   layout->addLayout(buttons);
+
 }
 
 void InstrumentWindowMaskTab::init()
 {
-  connect(m_instrumentDisplay->getSurface(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
-  connect(m_instrumentDisplay->getSurface(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
-  connect(m_instrumentDisplay->getSurface(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
-  connect(m_instrumentDisplay->getSurface(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
-  m_instrumentWindow->getInstrumentActor()->initMaskHelper();
+  connect(m_instrumentWindow->getSurface(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
+  connect(m_instrumentWindow->getSurface(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
+  connect(m_instrumentWindow->getSurface(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
+  connect(m_instrumentWindow->getSurface(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
+  enableApply( m_instrumentWindow->getSurface()->hasMasks() );
 }
 
 void InstrumentWindowMaskTab::setActivity()
@@ -183,42 +186,43 @@ void InstrumentWindowMaskTab::setActivity()
   if (m_move->isChecked())
   {
     m_activity = Move;
-    m_instrumentDisplay->getSurface()->setInteractionModeMove();
+    m_instrumentWindow->getSurface()->setInteractionModeMove();
   }
   else if (m_pointer->isChecked())
   {
     m_activity = Select;
-    m_instrumentDisplay->getSurface()->setInteractionModeDraw();
+    m_instrumentWindow->getSurface()->setInteractionModeDraw();
   }
   else if (m_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
-    m_instrumentDisplay->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
-    m_instrumentDisplay->getSurface()->setInteractionModeDraw();
+    m_instrumentWindow->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
+    m_instrumentWindow->getSurface()->setInteractionModeDraw();
   }
   else if (m_rectangle->isChecked())
   {
     m_activity = DrawEllipse;
-    m_instrumentDisplay->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
-    m_instrumentDisplay->getSurface()->setInteractionModeDraw();
+    m_instrumentWindow->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
+    m_instrumentWindow->getSurface()->setInteractionModeDraw();
   }
   else if (m_ring_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
-    m_instrumentDisplay->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
-    m_instrumentDisplay->getSurface()->setInteractionModeDraw();
+    m_instrumentWindow->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
+    m_instrumentWindow->getSurface()->setInteractionModeDraw();
   }
   else if (m_ring_rectangle->isChecked())
   {
     m_activity = DrawEllipse;
-    m_instrumentDisplay->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
-    m_instrumentDisplay->getSurface()->setInteractionModeDraw();
+    m_instrumentWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
+    m_instrumentWindow->getSurface()->setInteractionModeDraw();
   }
 }
 
 void InstrumentWindowMaskTab::shapeCreated()
 {
-  m_pointer->setChecked(true);
+  setSelectActivity();
+  enableApply(true);
 }
 
 void InstrumentWindowMaskTab::shapeSelected()
@@ -235,31 +239,39 @@ void InstrumentWindowMaskTab::shapeChanged()
 {
   if (!m_left) return; // check that everything is ok
   m_userEditing = false; // this prevents resetting shape proeprties by doubleChanged(...)
-  QRectF rect = m_instrumentDisplay->getSurface()->getCurrentBoundingRect();
+  QRectF rect = m_instrumentWindow->getSurface()->getCurrentBoundingRect();
   m_doubleManager->setValue(m_left,rect.left());
   m_doubleManager->setValue(m_top,rect.top());
   m_doubleManager->setValue(m_right,rect.right());
   m_doubleManager->setValue(m_bottom,rect.bottom());
   for(QMap<QtProperty *,QString>::iterator it = m_doublePropertyMap.begin(); it != m_doublePropertyMap.end(); ++it)
   {
-    m_doubleManager->setValue(it.key(),m_instrumentDisplay->getSurface()->getCurrentDouble(it.value()));
+    m_doubleManager->setValue(it.key(),m_instrumentWindow->getSurface()->getCurrentDouble(it.value()));
   }
   for(QMap<QString,QtProperty *>::iterator it = m_pointPropertyMap.begin(); it != m_pointPropertyMap.end(); ++it)
   {
     QtProperty* prop = it.value();
     QList<QtProperty*> subs = prop->subProperties();
     if (subs.size() != 2) continue;
-    QPointF p = m_instrumentDisplay->getSurface()->getCurrentPoint(it.key());
+    QPointF p = m_instrumentWindow->getSurface()->getCurrentPoint(it.key());
     m_doubleManager->setValue(subs[0],p.x());
     m_doubleManager->setValue(subs[1],p.y());
   }
   m_userEditing = true;
 }
 
+/**
+  * Removes the mask shapes from the screen.
+  */
+void InstrumentWindowMaskTab::clearShapes()
+{
+    m_instrumentWindow->getSurface()->clearMask();
+}
+
 void InstrumentWindowMaskTab::showEvent (QShowEvent *)
 {
   setActivity();
-  m_instrumentDisplay->setMouseTracking(true);
+  m_instrumentWindow->setMouseTracking(true);
 }
 
 void InstrumentWindowMaskTab::clearProperties()
@@ -292,7 +304,7 @@ void InstrumentWindowMaskTab::setProperties()
   boundingRectGroup->addSubProperty(m_bottom);
 
   // point properties
-  QStringList pointProperties = m_instrumentDisplay->getSurface()->getCurrentPointNames();
+  QStringList pointProperties = m_instrumentWindow->getSurface()->getCurrentPointNames();
   foreach(QString name,pointProperties)
   {
     QtProperty* point = m_groupManager->addProperty(name);
@@ -307,7 +319,7 @@ void InstrumentWindowMaskTab::setProperties()
   }
 
   // double properties
-  QStringList doubleProperties = m_instrumentDisplay->getSurface()->getCurrentDoubleNames();
+  QStringList doubleProperties = m_instrumentWindow->getSurface()->getCurrentDoubleNames();
   foreach(QString name,doubleProperties)
   {
     QtProperty* prop = m_doubleManager->addProperty(name);
@@ -325,14 +337,14 @@ void InstrumentWindowMaskTab::doubleChanged(QtProperty* prop)
   {
     QRectF rect(QPointF(m_doubleManager->value(m_left),m_doubleManager->value(m_top)),
                 QPointF(m_doubleManager->value(m_right),m_doubleManager->value(m_bottom)));
-    m_instrumentDisplay->getSurface()->setCurrentBoundingRect(rect);
+    m_instrumentWindow->getSurface()->setCurrentBoundingRect(rect);
   }
   else
   {
     QString name = m_doublePropertyMap[prop];
     if (!name.isEmpty())
     {
-      m_instrumentDisplay->getSurface()->setCurrentDouble(name,m_doubleManager->value(prop));
+      m_instrumentWindow->getSurface()->setCurrentDouble(name,m_doubleManager->value(prop));
     }
     else
     {
@@ -343,74 +355,60 @@ void InstrumentWindowMaskTab::doubleChanged(QtProperty* prop)
         QList<QtProperty*> subs = point_prop->subProperties();
         if (subs.size() != 2) return;
         QPointF p(m_doubleManager->value(subs[0]),m_doubleManager->value(subs[1]));
-        m_instrumentDisplay->getSurface()->setCurrentPoint(name,p);
+        m_instrumentWindow->getSurface()->setCurrentPoint(name,p);
       }
     }
   }
-  m_instrumentDisplay->update();
+  m_instrumentWindow->update();
 }
 
+/**
+  * Apply the constructed mask to the data workspace. This operation cannot be reverted.
+  */
 void InstrumentWindowMaskTab::applyMask()
 {
+  storeMask();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  m_pointer->setChecked(true);
-  setActivity();
-  m_instrumentDisplay->repaint(); // to refresh the pick image
-
-  QList<int> dets;
-  m_instrumentDisplay->getSurface()->getMaskedDetectors(dets);
-  if (!dets.isEmpty())
-  {
-    QStringList detList;
-    foreach(int id,dets)
-    {
-      try {
-        detList << QString::number(m_instrumentWindow->getInstrumentActor()->getWorkspaceIndex(id));
-      } catch (Mantid::Kernel::Exception::NotFoundError &) {
-        continue; // Detector doesn't have a workspace index relating to it
-      }
-    }
-    if ( !detList.empty() )
-    {
-      QString param_list = "Workspace=%1;WorkspaceIndexList=%2";
-      param_list = param_list.arg(m_instrumentWindow->getWorkspaceName(),detList.join(","));
-      emit executeAlgorithm("MaskDetectors",param_list);
-    }
-  }
-  clearMask();
+  m_instrumentWindow->getInstrumentActor()->applyMaskWorkspace();
+  enableApply(false);
   QApplication::restoreOverrideCursor();
 }
 
+/**
+  * Remove all masking that has not been applied to the data workspace.
+  */
 void InstrumentWindowMaskTab::clearMask()
 {
-  m_instrumentDisplay->getSurface()->clearMask();
-  m_instrumentDisplay->update();
+  clearShapes();
+  m_instrumentWindow->getInstrumentActor()->clearMaskWorkspace();
+  m_instrumentWindow->updateInstrumentView();
+  enableApply(false);
 }
 
-/*
- * parameters
- * @invertMask:  if true, the selected mask will be inverted
- *               if false, the mask will be used as is
+/**
+ * Create a MaskWorkspace from the mask defined in this tab.
+ * @param invertMask ::  if true, the selected mask will be inverted; if false, the mask will be used as is
+ * @param temp :: Set true to create a temporary workspace with a fixed name. If false the name will be unique.
  */
-Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(bool invertMask)
+Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(bool invertMask, bool temp)
 {
-  m_instrumentDisplay->repaint(); // to refresh the pick image
-  Mantid::API::MatrixWorkspace_const_sptr inputWS = m_instrumentWindow->getInstrumentActor()->getWorkspace();
+  m_instrumentWindow->updateInstrumentView(); // to refresh the pick image
+  Mantid::API::MatrixWorkspace_sptr inputWS = m_instrumentWindow->getInstrumentActor()->getMaskMatrixWorkspace();
   Mantid::API::MatrixWorkspace_sptr outputWS;
-
+  const std::string outputWorkspaceName = generateMaskWorkspaceName(temp);
 
   Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("ExtractMask",-1);
-  alg->setPropertyValue("InputWorkspace", inputWS->name());
-  alg->setPropertyValue("OutputWorkspace","MaskWorkspace");
+  alg->setProperty("InputWorkspace", inputWS);
+  alg->setPropertyValue("OutputWorkspace",outputWorkspaceName);
   alg->execute();
 
-  outputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve("MaskWorkspace"));
+  outputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve( outputWorkspaceName ));
 
   if (invertMask)
   {
       Mantid::API::IAlgorithm * invertAlg = Mantid::API::FrameworkManager::Instance().createAlgorithm("BinaryOperateMasks",-1);
-      invertAlg->setPropertyValue("InputWorkspace1", "MaskWorkspace");
-      invertAlg->setPropertyValue("OutputWorkspace", "MaskWorkspace");
+      invertAlg->setPropertyValue("InputWorkspace1", outputWorkspaceName);
+      invertAlg->setPropertyValue("OutputWorkspace", outputWorkspaceName);
       invertAlg->setPropertyValue("OperationType", "NOT");
       invertAlg->execute();
 
@@ -444,38 +442,41 @@ void InstrumentWindowMaskTab::saveMaskToFile()
   saveMaskingToFile(false);
 }
 
+/**
+  * Save the constructed mask to a workspace with unique name of type "MaskWorkspace_#".
+  * The mask is not applied to the data workspace being displayed.
+  * @param invertMask ::  if true, the selected mask will be inverted; if false, the mask will be used as is
+  */
 void InstrumentWindowMaskTab::saveMaskingToWorkspace(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  // Make sure we have applied the Mask
-  applyMask();
+  // Make sure we have stored the Mask in the helper MaskWorkspace
+  storeMask();
 
-  m_pointer->setChecked(true);
-  setActivity();
-  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(invertMask);
+  setSelectActivity();
+  createMaskWorkspace(invertMask, false);
 
-  if (outputWS)
-  {
-    clearMask();
-    Mantid::API::AnalysisDataService::Instance().addOrReplace("MaskWorkspace",outputWS);
-  }
   QApplication::restoreOverrideCursor();
 }
 
+/**
+  * Save the constructed mask to a file.
+  * The mask is not applied to the data workspace being displayed.
+  * @param invertMask ::  if true, the selected mask will be inverted; if false, the mask will be used as is
+  */
 void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
-  // Make sure we have applied the Mask
-  applyMask();
+  // Make sure we have stored the Mask in the helper MaskWorkspace
+  storeMask();
 
-  m_pointer->setChecked(true);
-  setActivity();
-  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(invertMask);
+  setSelectActivity();
+  Mantid::API::MatrixWorkspace_sptr outputWS = createMaskWorkspace(invertMask,true);
   if (outputWS)
   {
-    clearMask();
+    clearShapes();
     QString saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
     QString fileName = QFileDialog::getSaveFileName(m_instrumentWindow,"Select location for the mas file",saveDir);
 
@@ -484,8 +485,87 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
       Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("SaveMask",-1);
       alg->setProperty("InputWorkspace",boost::dynamic_pointer_cast<Mantid::API::Workspace>(outputWS));
       alg->setPropertyValue("OutputFile",fileName.toStdString());
+      alg->setProperty("GroupedDetectors",true);
       alg->execute();
     }
-}
+    Mantid::API::AnalysisDataService::Instance().remove( outputWS->name() );
+  }
   QApplication::restoreOverrideCursor();
+}
+
+/**
+  * Generate a unique name for the mask worspace which will be saved in the ADS.
+  * It will have a form MaskWorkspace[_#]
+  */
+std::string InstrumentWindowMaskTab::generateMaskWorkspaceName(bool temp) const
+{
+    if ( temp ) return "__MaskTab_MaskWorkspace";
+    std::set<std::string> wsNames = Mantid::API::AnalysisDataService::Instance().getObjectNames();
+    int maxIndex = 0;
+    const std::string baseName = "MaskWorkspace";
+    for(auto name = wsNames.begin(); name != wsNames.end(); ++name)
+    {
+        if ( name->find(baseName) == 0 )
+        {
+            int index = Mantid::Kernel::Strings::endsWithInt(*name);
+            if ( index > 0 && index > maxIndex ) maxIndex = index;
+            else
+                maxIndex = 1;
+        }
+    }
+    if ( maxIndex > 0 )
+    {
+        return baseName + "_" + Mantid::Kernel::Strings::toString(maxIndex + 1);
+    }
+    return baseName;
+}
+
+/**
+  * Sets the m_hasMaskToApply flag and
+  * enables/disables the Apply and ClearAll buttons.
+  */
+void InstrumentWindowMaskTab::enableApply(bool on)
+{
+    m_hasMaskToApply = on;
+    m_apply->setEnabled(on);
+    m_clear_all->setEnabled(on);
+}
+
+/**
+  * Sets tab activity to Select: select and modify shapes.
+  */
+void InstrumentWindowMaskTab::setSelectActivity()
+{
+    m_pointer->setChecked(true);
+    setActivity();
+}
+
+/**
+ * Store the mask defined by the shape tools to the helper m_maskWorkspace.
+ */
+void InstrumentWindowMaskTab::storeMask()
+{
+    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+    m_pointer->setChecked(true);
+    setActivity();
+    m_instrumentWindow->updateInstrumentView(); // to refresh the pick image
+
+    QList<int> dets;
+    m_instrumentWindow->getSurface()->getMaskedDetectors(dets);
+    if (!dets.isEmpty())
+    {
+      std::set<Mantid::detid_t> detList;
+      foreach(int id,dets)
+      {
+        detList.insert( id );
+      }
+      if ( !detList.empty() )
+      {
+        m_instrumentWindow->getInstrumentActor()->getMaskWorkspace()->setMasked( detList );
+        m_instrumentWindow->getInstrumentActor()->update();
+        m_instrumentWindow->updateInstrumentDetectors();
+      }
+    }
+    clearShapes();
+    QApplication::restoreOverrideCursor();
 }

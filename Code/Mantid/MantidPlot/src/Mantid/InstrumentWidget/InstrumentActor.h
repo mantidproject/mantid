@@ -80,6 +80,10 @@ public:
 
   boost::shared_ptr<const Mantid::Geometry::Instrument> getInstrument() const;
   boost::shared_ptr<const Mantid::API::MatrixWorkspace> getWorkspace() const;
+  boost::shared_ptr<Mantid::API::MatrixWorkspace> getMaskMatrixWorkspace() const;
+  boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspace() const;
+  void applyMaskWorkspace();
+  void clearMaskWorkspace();
 
   const MantidColorMap & getColorMap() const;
   void loadColorMap(const QString& ,bool reset_colors = true);
@@ -123,7 +127,7 @@ public:
 
   /* Masking */
 
-  void initMaskHelper();
+  void initMaskHelper() const;
 signals:
   void colorMapChanged();
 protected:
@@ -133,11 +137,12 @@ protected:
   void saveSettings();
 
   size_t push_back_detid(Mantid::detid_t)const;
+  boost::shared_ptr<Mantid::API::IMaskWorkspace> getMaskWorkspaceIfExists() const;
 
   /// The workspace whose data are shown
   const boost::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
   /// The helper masking workspace keeping the mask build in the mask tab but not applied to the data workspace.
-  boost::shared_ptr<Mantid::API::IMaskWorkspace> m_maskWorkspace;
+  mutable boost::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
   /// The colormap
   MantidColorMap m_colorMap;
   /// integrated spectra

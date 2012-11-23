@@ -168,6 +168,69 @@ MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const
   return shared_workspace;
 }
 
+/** Returns the mask workspace relating to this instrument view as a MatrixWorkspace
+ */
+MatrixWorkspace_sptr InstrumentActor::getMaskMatrixWorkspace() const
+{
+    if ( !m_maskWorkspace )
+    {
+        initMaskHelper();
+    }
+    return m_maskWorkspace;
+}
+
+/**
+  * Returns the mask workspace relating to this instrument view as a IMaskWorkspace.
+  * Guarantees to return a valid pointer
+  */
+IMaskWorkspace_sptr InstrumentActor::getMaskWorkspace() const
+{
+    if ( !m_maskWorkspace )
+    {
+        initMaskHelper();
+    }
+    return boost::dynamic_pointer_cast<IMaskWorkspace>( m_maskWorkspace );
+}
+
+/**
+  * Returns the mask workspace relating to this instrument view as a IMaskWorkspace
+  * if it exists or empty pointer if it doesn't.
+  */
+IMaskWorkspace_sptr InstrumentActor::getMaskWorkspaceIfExists() const
+{
+    if ( !m_maskWorkspace ) return IMaskWorkspace_sptr();
+    return boost::dynamic_pointer_cast<IMaskWorkspace>( m_maskWorkspace );
+}
+
+/**
+  * Apply mask stored in the helper mask workspace to the data workspace.
+  */
+void InstrumentActor::applyMaskWorkspace()
+{
+    if ( !m_maskWorkspace ) return;
+    Mantid::API::IAlgorithm * alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("MaskDetectors",-1);
+    alg->setPropertyValue( "Workspace", getWorkspace()->name() );
+    alg->setProperty( "MaskedWorkspace", m_maskWorkspace );
+    alg->execute();
+}
+
+/**
+  * Removes the mask workspace.
+  */
+void InstrumentActor::clearMaskWorkspace()
+{
+    bool needColorRecalc = false;
+    if ( m_maskWorkspace )
+    {
+        needColorRecalc = getMaskWorkspace()->getNumberMasked() > 0;
+    }
+    m_maskWorkspace.reset();
+    if ( needColorRecalc )
+    {
+        resetColors();
+    }
+}
+
 Instrument_const_sptr InstrumentActor::getInstrument() const
 {
     Instrument_const_sptr retval;
@@ -311,6 +374,7 @@ void InstrumentActor::resetColors()
   auto shared_workspace = getWorkspace();
 
   Instrument_const_sptr inst = getInstrument();
+  IMaskWorkspace_sptr mask = getMaskWorkspaceIfExists();
 
   //PARALLEL_FOR1(m_workspace)
   for (int iwi=0; iwi < int(m_specIntegrs.size()); iwi++)
@@ -321,7 +385,16 @@ void InstrumentActor::resetColors()
     {
       // Find if the detector is masked
       const std::set<detid_t>& dets = shared_workspace->getSpectrum(wi)->getDetectorIDs();
-      bool masked = inst->isDetectorMasked(dets);
+      bool masked = false;
+
+      if ( mask )
+      {
+        masked = mask->isMasked( dets );
+      }
+      else
+      {
+        masked = inst->isDetectorMasked(dets);
+      }
 
       if (masked)
       {
@@ -515,7 +588,7 @@ void InstrumentActor::setAutoscaling(bool on)
 /**
  * Initialize the helper mask workspace with the mask from the data workspace.
  */
-void InstrumentActor::initMaskHelper()
+void InstrumentActor::initMaskHelper() const
 {
   if ( m_maskWorkspace ) return;
   // extract the mask (if any) from the data to the mask workspace
@@ -527,7 +600,7 @@ void InstrumentActor::initMaskHelper()
 
   try
   {
-    m_maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::IMaskWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
+    m_maskWorkspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(maskName));
     Mantid::API::AnalysisDataService::Instance().remove( maskName );
   }
   catch( ... )

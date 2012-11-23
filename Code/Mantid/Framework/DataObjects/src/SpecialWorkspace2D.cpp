@@ -4,6 +4,8 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/SpectraAxis.h"
 
+#include <fstream>
+
 using Mantid::API::SpectraAxis;
 using Mantid::API::SpectraDetectorMap;
 using std::set;
@@ -53,6 +55,28 @@ namespace DataObjects
         detID_to_WI[*det] = wi;
       }
     }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor, building from a MatrixWorkspace
+   *
+   * @param parent :: input workspace that is the base for this workspace
+   * @return created SpecialWorkspace2D
+   */
+  SpecialWorkspace2D::SpecialWorkspace2D(API::MatrixWorkspace_const_sptr parent)
+  {
+      this->init(parent->getNumberHistograms(), 1, 1);
+      API::WorkspaceFactory::Instance().initializeFromParent(parent, API::MatrixWorkspace_sptr(this,Mantid::NoDeleting()), false);
+      // Make the mapping, which will be used for speed later.
+      detID_to_WI.clear();
+      for (size_t wi=0; wi<m_noVectors; wi++)
+      {
+        set<detid_t> dets = getSpectrum(wi)->getDetectorIDs();
+        for (auto det = dets.begin(); det != dets.end(); ++det)
+        {
+          detID_to_WI[*det] = wi;
+        }
+      }
   }
 
 

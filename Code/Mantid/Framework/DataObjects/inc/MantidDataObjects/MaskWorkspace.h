@@ -19,6 +19,7 @@ namespace DataObjects
         MaskWorkspace(std::size_t numvectors);
         MaskWorkspace(Mantid::Geometry::Instrument_const_sptr instrument,
                       const bool includeMonitors=false);
+        MaskWorkspace(const API::MatrixWorkspace_const_sptr parent);
         ~MaskWorkspace();
 
         bool isMasked(const detid_t detectorID) const;
