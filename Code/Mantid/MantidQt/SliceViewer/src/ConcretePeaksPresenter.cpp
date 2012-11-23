@@ -9,11 +9,29 @@ namespace MantidQt
 namespace SliceViewer
 {
 
+  /**
+  Constructor.
+
+  1) First check that the arguments provided are valid.
+  2) Then iterate over the MODEL and use it to construct VIEWs via the factory.
+  3) A collection of views is stored internally 
+
+  @param factory : View factory (THE VIEW via factory)
+  @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
+  */
   ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory* factory, Mantid::API::IPeaksWorkspace_sptr peaksWS) : m_viewPeaks(peaksWS->getNumberPeaks())
   {
     if(factory == NULL)
     {
       throw std::invalid_argument("PeakOverlayViewFactory is null");
+    }
+    if(peaksWS == NULL)
+    {
+      throw std::invalid_argument("PeaksWorkspace is null");
+    }
+    if(!peaksWS->hasIntegratedPeaks())
+    {
+      throw std::invalid_argument("PeaksWorkspace does not contain integrated peaks."); // We might consider drawing these in the future anyway.
     }
 
     // Create views for every peak in the workspace.
@@ -31,9 +49,11 @@ namespace SliceViewer
     {
       (*it)->setNormalisation(maxIntensity);
     }
-
   }
 
+  /**
+  Force each view to re-paint.
+  */
   void ConcretePeaksPresenter::update()
   {
     for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
@@ -42,6 +62,10 @@ namespace SliceViewer
     }
   }
 
+  /**
+  Allow all view to redraw themselfs following an update to the slice point intersecting plane.
+  @param slicePoint : The new slice position (z) against the x-y plot of data.
+  */
   void ConcretePeaksPresenter::updateWithSlicePoint(const double& slicePoint)
   {
     for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
@@ -50,6 +74,9 @@ namespace SliceViewer
     }
   }
 
+  /**
+  Destructor. Hide all owned views.
+  */
   ConcretePeaksPresenter::~ConcretePeaksPresenter()
   {
     for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)

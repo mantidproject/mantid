@@ -51,7 +51,6 @@ namespace MantidQt
     private:
       QwtPlot * m_plot;
       QWidget * m_parent;
-      PeakDimensions m_peakDims;
     public:
       PeakOverlayFactory(QwtPlot * plot, QWidget * parent, const FirstExperimentInfoQuery& query);
       virtual ~PeakOverlayFactory();

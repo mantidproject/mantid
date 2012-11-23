@@ -44,6 +44,15 @@ private:
     MOCK_METHOD0(updateView, void());
   };
 
+  /// Helper method to create a good 'Integrated' peaks workspace
+  Mantid::API::IPeaksWorkspace_sptr createPeaksWorkspace(const int nPeaks, const double radius=1)
+  {
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(nPeaks);
+    peaksWS->mutableRun().addProperty("PeaksIntegrated", true);
+    peaksWS->mutableRun().addProperty("PeakRadius", radius);
+    return peaksWS;
+  }
+
 public:
 
   void test_constructor_throws_if_factory_null()
@@ -52,6 +61,14 @@ public:
     Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
 
     TS_ASSERT_THROWS(ConcretePeaksPresenter(nullFactory, peaksWS), std::invalid_argument);
+  }
+
+  void test_constructor_throws_if_peaks_workspace_null()
+  {
+  }
+
+  void test_constructor_throws_if_peaks_workspace_not_integrated()
+  {
   }
 
   void test_construction()
@@ -69,7 +86,7 @@ public:
 
     
     EXPECT_CALL(*mockViewFactory, createView(_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));;
-    Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(expectedNumberPeaks);
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
     ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
@@ -92,7 +109,7 @@ public:
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
     
     EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
-    Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(expectedNumberPeaks);
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
     ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
@@ -117,7 +134,7 @@ public:
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
     EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
-    Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(expectedNumberPeaks);
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
     ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
@@ -141,7 +158,7 @@ public:
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
     EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
-    Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(expectedNumberPeaks);
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
     {
       ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);

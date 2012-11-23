@@ -23,7 +23,11 @@ namespace SliceViewer
   class PeakOverlayView;
 
   /*---------------------------------------------------------
-  Abstract PeaksPresenter
+  Abstract PeaksPresenter.
+
+  This is abstract to allow usage of the NULL object pattern. This allows the ConcreteViewPresenter to be conctructed in an atomic sense after the constrution of the owning object,
+  whithout having to perform fragile null checks.
+
   ----------------------------------------------------------*/
   class DLLExport PeaksPresenter
   {

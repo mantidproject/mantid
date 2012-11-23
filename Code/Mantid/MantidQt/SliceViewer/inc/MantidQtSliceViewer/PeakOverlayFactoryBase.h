@@ -23,10 +23,8 @@ namespace MantidQt
       PeakOverlayFactoryBase(const FirstExperimentInfoQuery& query);
       ~PeakOverlayFactoryBase();
       virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::API::IPeak&) const;
-      PeakDimensions getPeakDimensionality() const; 
     protected:
       virtual boost::shared_ptr<PeakOverlayView> createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius, const bool hasIntensity) const = 0;
-      PeakDimensions m_peakDims;
     };
   }
 }

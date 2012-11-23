@@ -9,14 +9,9 @@ namespace MantidQt
 
     PeakOverlayFactoryBase::PeakOverlayFactoryBase(const FirstExperimentInfoQuery& query)
     {
-      m_peakDims = LabView;
-      if(query.hasRotatedGoniometer())
+      if(!query.hasOrientedLattice())
       {
-        m_peakDims = SampleView;
-      }
-      if(query.hasOrientedLattice())
-      {
-        m_peakDims = HKLView;
+        throw std::invalid_argument("Input MDWorkspace must be in QSpace HKL and must have an oriented lattice.");
       }
     }
 
@@ -24,28 +19,9 @@ namespace MantidQt
     {
     }
 
-    PeakDimensions PeakOverlayFactoryBase::getPeakDimensionality() const 
-    {
-      return m_peakDims;
-    }
-
     boost::shared_ptr<PeakOverlayView> PeakOverlayFactoryBase::createView(const Mantid::API::IPeak& peak) const
     {
-      Mantid::Kernel::V3D position;
-      switch(m_peakDims)
-      {
-      case LabView:
-        position = peak.getQLabFrame();
-        break;
-      case SampleView:
-        position = peak.getQSampleFrame();
-        break;
-      case HKLView:
-        position = peak.getHKL();
-        break;
-      default:
-        throw std::runtime_error("Unknown PeakDimension type");
-      }
+      Mantid::Kernel::V3D position = peak.getHKL();
 
       double intensity = peak.getIntensity(); 
 

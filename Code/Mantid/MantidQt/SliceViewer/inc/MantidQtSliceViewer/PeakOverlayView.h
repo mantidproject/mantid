@@ -9,8 +9,6 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
-    /// Enum describing types of peak dimensions.
-    enum PeakDimensions{LabView, SampleView, HKLView};
 
     /** Abstract view in MVP model representing a PeakOverlay.
     
