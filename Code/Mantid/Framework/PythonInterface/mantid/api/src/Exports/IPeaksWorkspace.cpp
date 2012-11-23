@@ -25,6 +25,7 @@ void export_IPeaksWorkspace()
     .def("removePeak", &IPeaksWorkspace::removePeak, "Remove a peak from the workspace")
     .def("getPeak", &IPeaksWorkspace::getPeakPtr, return_internal_reference<>(), "Returns a peak at the given index" )
     .def("createPeak", &IPeaksWorkspace::createPeak, return_internal_reference<>(), "Create a Peak and return it")
+    .def("hasIntegratedPeaks", &IPeaksWorkspace::hasIntegratedPeaks, "Determine if the peaks have been integrated")
       ;
 
   REGISTER_SINGLEVALUE_HANDLER(IPeaksWorkspace_sptr);
