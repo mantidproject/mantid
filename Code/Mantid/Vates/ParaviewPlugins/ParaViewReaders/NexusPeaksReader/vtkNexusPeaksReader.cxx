@@ -161,23 +161,35 @@ int vtkNexusPeaksReader::CanReadFile(const char* fname)
   file = new ::NeXus::File(fileString);
   try
   {
-    std::map<std::string, std::string> entries = file->getEntries();
-    auto topEntryName = entries.begin()->first;
-    file->openGroup(topEntryName, "NXentry");
-    entries = file->getEntries();
-    for (auto it = entries.begin(); it != entries.end(); ++it)
+    try
     {
-      if ((it->first == "peaks_workspace") && (it->second == "NXentry"))
+      std::map<std::string, std::string> entries = file->getEntries();
+      auto topEntryName = entries.begin()->first;
+      file->openGroup(topEntryName, "NXentry");
+      entries = file->getEntries();
+      for (auto it = entries.begin(); it != entries.end(); ++it)
       {
-        return 1;
+        if ((it->first == "peaks_workspace") && (it->second == "NXentry"))
+        {
+          file->close();
+          return 1;
+        }
       }
     }
+    catch(::NeXus::Exception &)
+    {
+      file->close();
+      return 0;
+    }
   }
-  catch(::NeXus::Exception &)
+  catch(std::exception& ex)
   {
-    file->close();
-    return 0;
+    std::cerr << "Could not open " << fileString << " as an PeaksWorkspace nexus file because of exception: " << ex.what() << std::endl;
+    // Clean up, if possible
+    if (file)
+      file->close();
   }
+  file->close();
   return 0;
 }
 
