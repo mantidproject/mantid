@@ -64,10 +64,10 @@ private:
       return BaseClass::shouldLoad();
     }
 
-    virtual bool canLoadFileBasedOnExtension(const std::string& filename, const std::string& extension)
+    virtual bool canLoadFileBasedOnExtension(const std::string& filename, const std::string& expectedExtension) const
     {
       //Forwarding method.
-      return BaseClass::canLoadFileBasedOnExtension(filename, extension);
+      return BaseClass::canLoadFileBasedOnExtension(filename, expectedExtension);
     }
 
     ~ConcreteMDEWLoadingPresenter(){}
