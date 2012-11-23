@@ -517,6 +517,8 @@ namespace DataObjects
     file->putAttr("units","Not known");  // Units may need changing when known
     file->closeData();
 
+    // QLab & QSample are calculated and do not need to be saved
+
     file->closeGroup(); // end of peaks workpace
 
   }

@@ -32,6 +32,12 @@ class PeaksWorkspaceTest : public CxxTest::TestSuite
 {
 public:
 
+  PeaksWorkspaceTest()
+  {
+     FrameworkManager::Instance();
+     AlgorithmManager::Instance();
+  }
+
   /** Build a test PeaksWorkspace
    *
    * @return PeaksWorkspace
@@ -131,143 +137,88 @@ public:
 
   }
 
-  void test_saveNexus()
+  void test_Save_Unmodified_PeaksWorkspace_Nexus()
   {
-    // Ensure the plugin libraries are loaded so that we can use LoadNexusProcessed
-    Mantid::API::FrameworkManager::Instance();
+    const std::string inputWS("peaksWS_test_saveNexus");
+    auto pw = createSaveTestPeaksWorkspace(inputWS);
 
-    // get an instrument which we load into a dummy workspace and get it from that workspace
-    const std::string inst_filename = "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING5.xml"; 
-    IAlgorithm_sptr inst_loader = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
-    inst_loader->initialize(); 
-    inst_loader->setPropertyValue("Filename", inst_filename);
-    std::string inst_output_ws("DummyWorkspaceToGetIDF");
-    inst_loader->setPropertyValue("OutputWorkspace", inst_output_ws);
-    TS_ASSERT_THROWS_NOTHING(inst_loader->execute());
+    const V3D sampleFrameQ = pw->getPeak(0).getQSampleFrame();
+    const V3D labFrameQ = pw->getPeak(0).getQLabFrame();
 
-    MatrixWorkspace_sptr dummyWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inst_output_ws);
-    Instrument_const_sptr inst = dummyWS->getInstrument();
+    const std::string filename = "test_Save_Unmodified_PeaksWorkspace_Nexus.nxs";
+    auto lpw = saveAndReloadPeaksWorkspace(pw, filename);
 
-
-    // Create peak workspace
-    PeaksWorkspace_sptr pw(new PeaksWorkspace()); //(buildPW());
-
-    // Populate peak workspace with instrument from dummy workspace
-    pw->setInstrument(inst);
-
-    // Populate peak workspace with peaks
-    Peak p1(inst, 1300, 4.0);
-    Peak p2(inst, 1300, 5.0);
-    Peak p3(inst, 1350, 3.0);
-    Peak p4(inst, 1400, 3.0);
-    pw->addPeak(p1);
-    pw->addPeak(p2);
-    pw->addPeak(p3);
-    pw->addPeak(p4);
-
-
-     // Save it to Nexus
-    std::string input_ws("peaksWS_test_saveNexus");
-
-    AnalysisDataService::Instance().add( input_ws, pw );
-
-    const std::string filename = "PeaksWorkspaceTest_test_saveNexus.nxs";
-    IAlgorithm_sptr saver = AlgorithmManager::Instance().createUnmanaged("SaveNexusProcessed");
-    saver->initialize();
-
-    saver->setPropertyValue("InputWorkspace", input_ws);
-    saver->setPropertyValue("Filename", filename);
-    TS_ASSERT_THROWS_NOTHING(saver->execute());
-
-    std::string absFilename=saver->getPropertyValue("Filename");//absolute path
-
-    // Load the nexus file
-    IAlgorithm_sptr loader = AlgorithmManager::Instance().createUnmanaged("LoadNexusProcessed"); 
-    loader->initialize();
-
-    std::string output_ws("loaded_peaks");
-
-    loader->setPropertyValue("Filename", filename);
-    loader->setPropertyValue("OutputWorkspace", output_ws);
-    TS_ASSERT_THROWS_NOTHING(loader->execute());
-
-    //Test some aspects of the peaks loaded from the file
-    Workspace_sptr workspace;
-    TS_ASSERT_THROWS_NOTHING( workspace = AnalysisDataService::Instance().retrieve(output_ws) );
-
-    PeaksWorkspace_sptr lpw = boost::dynamic_pointer_cast<PeaksWorkspace>(workspace);
-
+    TS_ASSERT_EQUALS(17, lpw->columnCount());
     // Check that the peaks are what we saved
     TS_ASSERT_EQUALS( lpw->getPeak(0).getDetectorID(), 1300);
-    TS_ASSERT_DELTA(  lpw->getPeak(0).getWavelength(), 4.0, 1e-5);
+    TS_ASSERT_DELTA( lpw->getPeak(0).getWavelength(), 4.0, 1e-5);
+    TS_ASSERT_EQUALS( lpw->getPeak(0).getQSampleFrame(), sampleFrameQ);
+    TS_ASSERT_EQUALS( lpw->getPeak(0).getQLabFrame(), labFrameQ);
+
     TS_ASSERT_EQUALS( lpw->getPeak(1).getDetectorID(), 1300);
     TS_ASSERT_DELTA(  lpw->getPeak(1).getWavelength(), 5.0, 1e-5);
     TS_ASSERT_EQUALS( lpw->getPeak(2).getDetectorID(), 1350);
     TS_ASSERT_DELTA(  lpw->getPeak(2).getWavelength(), 3.0, 1e-5);
     TS_ASSERT_EQUALS( lpw->getPeak(3).getDetectorID(), 1400);
-    TS_ASSERT_DELTA(  lpw->getPeak(3).getWavelength(), 3.0, 1e-5);
-
-    //Remove file
-    if (Poco::File(absFilename).exists())
-      Poco::File(absFilename).remove();
+    TS_ASSERT_DELTA( lpw->getPeak(3).getWavelength(), 3.0, 1e-5);
   }
 
 
-   void test_getSetLogAccess()
-   {
-       bool trueSwitch(true);
-       PeaksWorkspace * pw = buildPW();
+  void test_getSetLogAccess()
+  {
+    bool trueSwitch(true);
+    PeaksWorkspace * pw = buildPW();
 
-       LogManager_const_sptr props = pw->getLogs();
-       std::string existingVal;
+    LogManager_const_sptr props = pw->getLogs();
+    std::string existingVal;
 
-       TS_ASSERT_THROWS_NOTHING(existingVal=props->getPropertyValueAsType<std::string>("TestProp"));
-       TS_ASSERT_EQUALS("value",existingVal);
+    TS_ASSERT_THROWS_NOTHING(existingVal=props->getPropertyValueAsType<std::string>("TestProp"));
+    TS_ASSERT_EQUALS("value",existingVal);
 
-       // define local scope;
-       if(trueSwitch)
-       {
-          // get mutable pointer to existing values;
-          LogManager_sptr mprops = pw->logs();
+    // define local scope;
+    if(trueSwitch)
+    {
+      // get mutable pointer to existing values;
+      LogManager_sptr mprops = pw->logs();
 
-          TS_ASSERT_THROWS_NOTHING(mprops->addProperty<std::string>("TestProp2","value2"));
-          
-          TS_ASSERT(mprops->hasProperty("TestProp2"));
-          TS_ASSERT(!props->hasProperty("TestProp2"));
-          TS_ASSERT(pw->run().hasProperty("TestProp2"));
-       }
-       // nothing terrible happened and workspace still have this property
-       TS_ASSERT(pw->run().hasProperty("TestProp2"));
+      TS_ASSERT_THROWS_NOTHING(mprops->addProperty<std::string>("TestProp2","value2"));
 
-       auto pw1 = pw->clone();
-       if(trueSwitch)
-       {
-          // get mutable pointer to existing values, which would be taken from the cash
-          LogManager_sptr mprops1 = pw->logs();
-          // and in ideal world this should cause CowPtr to diverge but it does not
-          TS_ASSERT_THROWS_NOTHING(mprops1->addProperty<std::string>("TestProp1-3","value1-3"));
-          TS_ASSERT(mprops1->hasProperty("TestProp1-3"));
-          //THE CHANGES TO PW ARE APPLIED TO the COPY (PW1 too!!!!)
-          TS_ASSERT(pw->run().hasProperty("TestProp1-3"));
-          TS_ASSERT(pw1->run().hasProperty("TestProp1-3"));
-       }
-       TS_ASSERT(pw1->run().hasProperty("TestProp1-3"));
-       if(trueSwitch)
-       {
-          // but this will cause it to diverge
-          LogManager_sptr mprops2 = pw1->logs();
-          // and this  causes CowPtr to diverge
-          TS_ASSERT_THROWS_NOTHING(mprops2->addProperty<std::string>("TestProp2-3","value2-3"));
-          TS_ASSERT(mprops2->hasProperty("TestProp2-3"));
-          TS_ASSERT(!pw->run().hasProperty("TestProp2-3"));
-          TS_ASSERT(pw1->run().hasProperty("TestProp2-3"));
-       }
+      TS_ASSERT(mprops->hasProperty("TestProp2"));
+      TS_ASSERT(!props->hasProperty("TestProp2"));
+      TS_ASSERT(pw->run().hasProperty("TestProp2"));
+    }
+    // nothing terrible happened and workspace still have this property
+    TS_ASSERT(pw->run().hasProperty("TestProp2"));
+
+    auto pw1 = pw->clone();
+    if(trueSwitch)
+    {
+      // get mutable pointer to existing values, which would be taken from the cash
+      LogManager_sptr mprops1 = pw->logs();
+      // and in ideal world this should cause CowPtr to diverge but it does not
+      TS_ASSERT_THROWS_NOTHING(mprops1->addProperty<std::string>("TestProp1-3","value1-3"));
+      TS_ASSERT(mprops1->hasProperty("TestProp1-3"));
+      //THE CHANGES TO PW ARE APPLIED TO the COPY (PW1 too!!!!)
+      TS_ASSERT(pw->run().hasProperty("TestProp1-3"));
+      TS_ASSERT(pw1->run().hasProperty("TestProp1-3"));
+    }
+    TS_ASSERT(pw1->run().hasProperty("TestProp1-3"));
+    if(trueSwitch)
+    {
+      // but this will cause it to diverge
+      LogManager_sptr mprops2 = pw1->logs();
+      // and this  causes CowPtr to diverge
+      TS_ASSERT_THROWS_NOTHING(mprops2->addProperty<std::string>("TestProp2-3","value2-3"));
+      TS_ASSERT(mprops2->hasProperty("TestProp2-3"));
+      TS_ASSERT(!pw->run().hasProperty("TestProp2-3"));
+      TS_ASSERT(pw1->run().hasProperty("TestProp2-3"));
+    }
 
 
-       TSM_ASSERT_THROWS_NOTHING("should clearly delete pw1",pw1.reset());
+    TSM_ASSERT_THROWS_NOTHING("should clearly delete pw1",pw1.reset());
 
-       TSM_ASSERT_THROWS_NOTHING("should clearly delete pw",delete pw);
-   }
+    TSM_ASSERT_THROWS_NOTHING("should clearly delete pw",delete pw);
+  }
 
    void test_hasIntegratedPeaks_without_property()
    {
@@ -291,10 +242,71 @@ public:
      TS_ASSERT_EQUALS(hasIntegratedPeaks, ws.hasIntegratedPeaks());
    }
 
-   PeaksWorkspaceTest()
+private:
+
+   PeaksWorkspace_sptr createSaveTestPeaksWorkspace(const std::string & adsName)
    {
-      FrameworkManager::Instance();
-      AlgorithmManager::Instance();
+     // get an instrument which we load into a dummy workspace and get it from that workspace
+     const std::string inst_filename = "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING5.xml";
+     IAlgorithm_sptr inst_loader = AlgorithmManager::Instance().createUnmanaged("LoadEmptyInstrument");
+     inst_loader->initialize();
+     inst_loader->setPropertyValue("Filename", inst_filename);
+     std::string inst_output_ws("DummyWorkspaceToGetIDF");
+     inst_loader->setPropertyValue("OutputWorkspace", inst_output_ws);
+     TS_ASSERT_THROWS_NOTHING(inst_loader->execute());
+
+     MatrixWorkspace_sptr dummyWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inst_output_ws);
+     Instrument_const_sptr inst = dummyWS->getInstrument();
+
+
+     // Create peak workspace
+     auto pw = boost::make_shared<PeaksWorkspace>();
+     // Populate peak workspace with instrument from dummy workspace
+     pw->setInstrument(inst);
+
+     // Populate peak workspace with peaks
+     Peak p1(inst, 1300, 4.0);
+     Peak p2(inst, 1300, 5.0);
+     Peak p3(inst, 1350, 3.0);
+     Peak p4(inst, 1400, 3.0);
+     pw->addPeak(p1);
+     pw->addPeak(p2);
+     pw->addPeak(p3);
+     pw->addPeak(p4);
+
+     AnalysisDataService::Instance().add(adsName, pw);
+     return pw;
+   }
+
+   PeaksWorkspace_sptr saveAndReloadPeaksWorkspace(const PeaksWorkspace_sptr & pws, const std::string & filename)
+   {
+
+     IAlgorithm_sptr saver = AlgorithmManager::Instance().createUnmanaged("SaveNexus");
+     saver->setChild(true);
+     saver->initialize();
+     saver->setProperty<Workspace_sptr>("InputWorkspace", pws);
+     saver->setPropertyValue("Filename", filename);
+     TS_ASSERT_THROWS_NOTHING(saver->execute());
+     TS_ASSERT(saver->isExecuted());
+
+     // Load the nexus file
+     IAlgorithm_sptr loader = AlgorithmManager::Instance().createUnmanaged("LoadNexus");
+     loader->setChild(true);
+     loader->initialize();
+     const std::string absFilename = saver->getPropertyValue("Filename");
+     loader->setPropertyValue("Filename", absFilename); // absolute path
+     loader->setPropertyValue("OutputWorkspace", "__anonymous_output");
+     TS_ASSERT_THROWS_NOTHING(loader->execute());
+     TS_ASSERT(loader->isExecuted());
+
+     // Remove file
+     if (Poco::File(absFilename).exists())
+       Poco::File(absFilename).remove();
+
+     Workspace_sptr ws = loader->getProperty("OutputWorkspace");
+     PeaksWorkspace_sptr lpw = boost::dynamic_pointer_cast<PeaksWorkspace>(ws);
+     TS_ASSERT(lpw);
+     return lpw;
    }
 
 };
