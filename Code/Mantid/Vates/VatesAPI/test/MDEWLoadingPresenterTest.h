@@ -64,7 +64,7 @@ private:
       return BaseClass::shouldLoad();
     }
 
-    bool canLoadFileBasedOnExtension(const std::string& filename, const std::string& extension)
+    virtual bool canLoadFileBasedOnExtension(const std::string& filename, const std::string& extension)
     {
       //Forwarding method.
       return BaseClass::canLoadFileBasedOnExtension(filename, extension);

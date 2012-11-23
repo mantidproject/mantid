@@ -142,8 +142,8 @@ void vtkPeaksReader::PrintSelf(ostream& os, vtkIndent indent)
 int vtkPeaksReader::CanReadFile(const char* fname)
 {
   const std::string fileString(fname);
-  const int startExtension = fileString.find_last_of('.');
-  const int endExtension = fileString.length();
+  const size_t startExtension = fileString.find_last_of('.');
+  const size_t endExtension = fileString.length();
   if(startExtension >= endExtension)
   {
     throw std::runtime_error("File has no extension.");

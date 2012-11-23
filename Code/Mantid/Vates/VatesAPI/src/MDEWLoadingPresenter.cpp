@@ -126,8 +126,8 @@ namespace Mantid
     bool MDEWLoadingPresenter::canLoadFileBasedOnExtension(const std::string& filename, const std::string& expectedExtension) const
     {
        // Quick check based on extension.
-      const int startExtension = filename.find_last_of('.');
-      const int endExtension = filename.length();
+      const size_t startExtension = filename.find_last_of('.');
+      const size_t endExtension = filename.length();
       std::string extension = filename.substr(startExtension, endExtension - startExtension);
       boost::algorithm::to_lower(extension);
       boost::algorithm::trim(extension);
