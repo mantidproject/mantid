@@ -55,6 +55,7 @@ add_subdirectory ( mantid )
 ###########################################################################
 # Python algorithms
 ###########################################################################
+clean_orphaned_pyc_files ( ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
 add_compile_py_target( PythonAlgorithms ${CMAKE_CURRENT_SOURCE_DIR}/PythonAlgorithms )
 add_dependencies( PythonAPIModule PythonAlgorithms )
 
@@ -146,27 +147,16 @@ set ( TEST_PY_FILES
   test/python/WorkspaceValidatorsTest.py
 )
 
-set ( PYTEST_HELPERS test/python/testhelpers.py )
 
 # python unit tests
 if (PYUNITTEST_FOUND)
+  # pyunittest_add_test macro understands the TESTHELPER_PY_FILES variable. It is scoped to this file
+  # so does not need to be cleared
+  set ( TESTHELPER_PY_FILES test/python/testhelpers.py )
   pyunittest_add_test ( VanillaPythonInterfaceTest.py ${TEST_PY_FILES} )
-  # Helpers
-  set ( VANILLA_TEST_DIR ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/VanillaPythonInterfaceTest )
-  set ( PYTEST_HELPER_INSTALLS "" )
-  foreach( PYTEST_HELPER ${PYTEST_HELPERS} )
-    get_filename_component(helper_file ${PYTEST_HELPER} NAME)
-    add_custom_command ( OUTPUT ${VANILLA_TEST_DIR}/${helper_file}
-                         DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYTEST_HELPER} 
-                         COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-                         ${CMAKE_CURRENT_SOURCE_DIR}/${PYTEST_HELPER}
-                         ${VANILLA_TEST_DIR}/${helper_file} )
-    set ( PYTEST_HELPER_INSTALLS ${PYTEST_HELPER_INSTALLS} ${VANILLA_TEST_DIR}/${helper_file} )
-  endforeach( PYTEST_HELPER ${PYTEST_HELPERS} )
-  add_custom_target ( PythonTestHelpers DEPENDS ${PYTEST_HELPER_INSTALLS} )
                       
   # Test Dependencies  
-  add_dependencies ( VanillaPythonInterfaceTest.py PythonInterface Algorithms PythonTestHelpers )
+  add_dependencies ( VanillaPythonInterfaceTest.py PythonInterface Algorithms )
   add_dependencies ( FrameworkTests VanillaPythonInterfaceTest.py )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VanillaPythonInterfaceTest.py PROPERTY FOLDER "UnitTests" )
