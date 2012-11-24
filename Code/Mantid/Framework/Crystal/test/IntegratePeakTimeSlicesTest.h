@@ -194,9 +194,9 @@ public:
        TableWorkspace_sptr Twk = algP.getProperty("OutputWorkspace");
   
 
-       TS_ASSERT_LESS_THAN(fabs(intensity -60000), 1500.0);
+       TS_ASSERT_LESS_THAN(fabs(intensity -60300), 1500.0);
       //Not sure why this reduced the error so much in the test
-      TS_ASSERT_LESS_THAN(fabs(sigma -502), 21.0);
+      TS_ASSERT_LESS_THAN(fabs(sigma -541.0), 21.0);
 
 
       TS_ASSERT_EQUALS( Twk->rowCount(), 7);
@@ -206,18 +206,18 @@ public:
 
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Time"), 0) - 19200), 20);
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) -  1.2619  ), .5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) -  1.3619  ), .5);
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) -  11514 ), 120);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) -  11247 ), 120);
       
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  885), 5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  439), 5);
     
 
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   35.3), 3.5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   77.3), 3.5);
 
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) -  6228 ), 10);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) -  4979 ), 10);
       
   
 

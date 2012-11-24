@@ -34,7 +34,6 @@ This Algorithm is also used by the [[PeakIntegration]] algorithm when the Fit ta
  *
  *
  */
-
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -44,8 +43,14 @@ This Algorithm is also used by the [[PeakIntegration]] algorithm when the Fit ta
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/FuncMinimizerFactory.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -117,7 +122,7 @@ namespace Mantid
 #define NParameters  7
 
 
-
+    //   # std sigs  0    .25     .5     .75    1     1.25   1.5    2      2.5
     double probs[9]={.5f,.5987f,.6915f,.7734f,.8413f,.8944f,.9322f,.9599f,.9772f};
     IntegratePeakTimeSlices::IntegratePeakTimeSlices() :
       Algorithm(), wi_to_detid_map(NULL), R0(-1)
@@ -247,6 +252,7 @@ namespace Mantid
       this->Vxy_calc = handler.Vxy_calc;
       this->case4 = handler.case4;
     }
+
     void DataModeHandler::CalcVariancesFromData( double background, double meanx, double meany,
                                                         double &Varxx, double &Varxy, double &Varyy,
                                                         std::vector<double>&ParameterValues)
@@ -275,7 +281,7 @@ namespace Mantid
         Varyy = std::max<double>(Varyy, .79*getInitVary());
       }
 
-    };
+    }
 
     std::string DataModeHandler::CalcConstraints( std::vector< std::pair<double,double> > & Bounds,
            bool CalcVariances)
@@ -304,15 +310,17 @@ namespace Mantid
       if( back_calc >0)
          NSigs = std::max<double>( 2,7-5*back_calc/back);//background too high
       ostringstream str;
+
+      NSigs *=max<double>(1.0, Intensity_calc/(TotIntensity -ncells*back_calc));
       str<< max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar))<<"<Background<"<<(back+NSigs*(1+relError)*sqrt(backVar))
          <<","<< max<double>(0.0, Intensity_calc-NSigs*(1+relError)*sqrt(IntensVar))<<
-         "<Intensity<"<<TotIntensity-ncells*back+NSigs*(1+relError)*sqrt(IntensVar);
+         "<Intensity<"<<Intensity_calc+NSigs*(1+relError)*sqrt(IntensVar);
 
       double min =max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar));
       double maxx =back+NSigs*(1+relError)*sqrt(backVar);
       Bounds.push_back( pair<double,double>(min,maxx ));
       Bounds.push_back( pair<double,double>(max<double>(0.0, Intensity_calc-NSigs*(1+relError)*sqrt(IntensVar)),
-                     TotIntensity-ncells*back+NSigs*(1+relError)*sqrt(IntensVar)));
+                                       Intensity_calc+NSigs*(1+relError)*sqrt(IntensVar)));
      /* for( int i=2; i<N; i++ )
       {
         if( i>0)
@@ -341,13 +349,33 @@ namespace Mantid
       Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
 
       if( N >=5)
-      {val = Vx_calc;
-      str<<","<<(1-relErr1)*val <<"<"<<"SScol"<<"<"<<(1+relErr1)*val;
-      Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+      {
+        val = Vx_calc;
+        double valmin= val;
+        double valmax = val;
+        if( VarxHW>0)
+        {
+          valmin = std::min<double>(val, VarxHW);
+          valmax = std::max<double>(val, VarxHW);
 
-      val = Vy_calc;
-      str<<","<<(1-relErr1)*val <<"<"<<"SSrow"<<"<"<<(1+relErr1)*val;
-      Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+        }
+
+
+        relErr1 *=.6;//Edge peaks: need to restrict sigmas.
+        str<<","<<(1-relErr1)*valmin <<"<"<<"SScol"<<"<"<<(1+relErr1)*valmax;
+        Bounds.push_back(pair<double,double>((1-relErr1)*valmin,(1+relErr1)*valmax));
+
+        val = Vy_calc;
+        valmin= val;
+        valmax = val;
+        if( VaryHW>0)
+        {
+          valmin = std::min<double>(val, VaryHW);
+          valmax = std::max<double>(val, VaryHW);
+
+        }
+        str<<","<<(1-relErr1)*valmin <<"<"<<"SSrow"<<"<"<<(1+relErr1)*valmax;
+        Bounds.push_back(pair<double,double>((1-relErr1)*valmin,(1+relErr1)*valmax));
 
 
      // val = Vxy_calc;
@@ -464,107 +492,173 @@ namespace Mantid
 
    }
    void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,double &chisqOverDOF,
+           bool &done,       std::vector<string>&names, std::vector<double>&params,
+           std::vector<double>&errs
+           ,double lastRow,double lastCol,double neighborRadius)
+       {
+
+          bool CalcVars = AttributeValues->CalcVariances();
+          std::vector<std::pair<double, double> > Bounds;
+          std::string Constraints = AttributeValues->CalcConstraints(Bounds, CalcVars);
+          IAlgorithm_sptr fit_alg;
+          fit_alg = createSubAlgorithm("Fit");
+          std::string fun_str = CalculateFunctionProperty_Fit();
+
+          std::string SSS("   Fit string ");
+          SSS += fun_str;
+          g_log.debug(SSS);
+          g_log.debug()<<"      TotCount=" << AttributeValues->StatBase[IIntensities] << std::endl;
+
+          fit_alg->setPropertyValue("Function", fun_str);
+
+          fit_alg->setProperty("InputWorkspace", Data);
+          fit_alg->setProperty("WorkspaceIndex", 0);
+          fit_alg->setProperty("StartX", 0.0);
+          fit_alg->setProperty("EndX", 0.0 + (double) NeighborIDs[1]);
+          fit_alg->setProperty("MaxIterations", 5000);
+          fit_alg->setProperty("CreateOutput", true);
+
+          fit_alg->setProperty("Output", "out");
+
+          fit_alg->setProperty("MaxIterations", 50);
+
+          std::string tie = getProperty("Ties");
+          if (tie.length() > (size_t) 0)
+            fit_alg->setProperty("Ties", tie);
+          if (Constraints.length() > (size_t) 0)
+            fit_alg->setProperty("Constraints", Constraints);
+          try
+          {
+            fit_alg->executeAsSubAlg();
+
+            chisqOverDOF = fit_alg->getProperty("OutputChi2overDoF");
+            std::string outputStatus = fit_alg->getProperty( "OutputStatus" );
+            g_log.debug()<<"Chisq/OutputStatus="<< chisqOverDOF<< "/"<< outputStatus<< std::endl;
+
+            names.clear(); params.clear();errs.clear();
+            ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
+            for( int prm = 0; prm < (int)RRes->rowCount()-1; prm++ )
+            {
+              names.push_back( RRes->getRef< string >( "Name", prm ) );
+              params.push_back( RRes->getRef< double >( "Value", prm ));
+              double error = RRes->getRef< double >( "Error",prm);
+              errs.push_back( error );
+            }
+            if( names.size()< 5)
+            {
+              names.push_back( ParameterNames[IVXX] );
+              names.push_back( ParameterNames[IVYY] );
+              names.push_back( ParameterNames[IVXY] );
+              double Varxx, Varxy,Varyy;
+              AttributeValues->CalcVariancesFromData( params[IBACK], params[IXMEAN], params[IYMEAN],
+                  Varxx, Varxy, Varyy, params);
+              params.push_back( Varxx );
+              params.push_back( Varyy );
+              params.push_back( Varxy );
+              errs.push_back( 0 );
+              errs.push_back( 0 );
+              errs.push_back( 0 );
+
+            }
+
+          } catch (std::exception &Ex1)//ties or something else went wrong in BivariateNormal
+          {
+            done = true;
+            g_log.error()<<"Bivariate Error for PeakNum="<<(int)getProperty("PeakIndex")<<":" << std::string(Ex1.what())
+                 <<std::endl;
+          }catch(...)
+          {
+            done = true;
+            g_log.error()<<"Bivariate Error A for peakNum="<<(int)getProperty("PeakIndex")<<std::endl;
+          }
+          if (!done)//Bivariate error happened
+          {
+
+           g_log.debug() << "   Thru Algorithm: chiSq=" << setw(7) << chisqOverDOF << endl;
+           g_log.debug() << "  Row,Col Radius=" << lastRow << "," << lastCol << "," << neighborRadius << std::endl;
+
+            double sqrtChisq = -1;
+            if (chisqOverDOF >= 0)
+              sqrtChisq = (chisqOverDOF);
+
+            sqrtChisq = max<double> (sqrtChisq, AttributeValues->StatBaseVals(IIntensities)
+                / AttributeValues->StatBaseVals(ISS1));
+            sqrtChisq = SQRT(sqrtChisq);
+
+            for (size_t kk = 0; kk < params.size(); kk++)
+            {
+              g_log.debug() << "   Parameter " << setw(8) << names[kk] << " " << setw(8) << params[kk];
+              // if (names[kk].substr(0, 2) != string("SS"))
+              g_log.debug() << "(" << setw(8) << (errs[kk] * sqrtChisq) << ")";
+              if (Bounds.size() > kk)
+              {
+                pair<double, double> upLow = Bounds[kk];
+                g_log.debug() << " Bounds(" << upLow.first << "," << upLow.second << ")";
+              }
+              g_log.debug() << endl;
+            }
+
+
+          }
+
+       }
+
+   // Smallest chi-sq value was not always best.
+   //TODO?:Smallest chi-sq with small errors on background, Intensity, row and
+   //        col.
+  void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data,double &chisqOverDOF,
        bool &done,       std::vector<string>&names, std::vector<double>&params,
        std::vector<double>&errs,double lastRow,double lastCol,double neighborRadius)
    {
 
-     std::vector<std::pair<double, double> > Bounds;
-      IAlgorithm_sptr fit_alg;
-      fit_alg = createSubAlgorithm("Fit");
-      std::string fun_str = CalculateFunctionProperty_Fit();
+    double background = ParameterValues[IBACK];
+    int N = 3;
+    if( background <=0)
+    {
+      background =0;
+      N=1;
+    }
+    bool CalcVars = AttributeValues->CalcVariances();
+    int NParams =4;
+    if( !CalcVars )NParams+=3;
 
-      std::string SSS("   Fit string ");
-      SSS += fun_str;
-      g_log.debug(SSS);
-
-      bool CalcVars = AttributeValues->CalcVariances();
-      std::string Constraints = AttributeValues->CalcConstraints(Bounds, CalcVars);
-      fit_alg->setPropertyValue("Function", fun_str);
-
-      fit_alg->setProperty("InputWorkspace", Data);
-      fit_alg->setProperty("WorkspaceIndex", 0);
-      fit_alg->setProperty("StartX", 0.0);
-      fit_alg->setProperty("EndX", 0.0 + (double) NeighborIDs[1]);
-      fit_alg->setProperty("MaxIterations", 5000);
-      fit_alg->setProperty("CreateOutput", true);
-
-      fit_alg->setProperty("Output", "out");
-
-      fit_alg->setProperty("MaxIterations", 50);
-
-      std::string tie = getProperty("Ties");
-      if (tie.length() > (size_t) 0)
-        fit_alg->setProperty("Ties", tie);
-      if (Constraints.length() > (size_t) 0)
-        fit_alg->setProperty("Constraints", Constraints);
-      try
+    double minChiSqOverDOF = -1;
+    double Bestparams[7];
+    std::string Bestnames[7];
+    for( int i=0; i < N;i++)
+    {
+      Fit(Data,chisqOverDOF,done,names, params,errs,lastRow,lastCol,neighborRadius);
+      g_log.debug()<<"-----------------------"<<i<<"--------------------------"<<std::endl;
+      if(( minChiSqOverDOF < 0 || chisqOverDOF <  minChiSqOverDOF )&& (chisqOverDOF > 0) && !done)
       {
-        fit_alg->executeAsSubAlg();
-
-        chisqOverDOF = fit_alg->getProperty("OutputChi2overDoF");
-        std::string outputStatus = fit_alg->getProperty( "OutputStatus" );
-        g_log.debug()<<"Chisq/OutputStatus="<< chisqOverDOF<< "/"<< outputStatus<< std::endl;
-
-        names.clear(); params.clear();errs.clear();
-        ITableWorkspace_sptr RRes = fit_alg->getProperty( "OutputParameters");
-        for( int prm = 0; prm < (int)RRes->rowCount()-1; prm++ )
-        {
-          names.push_back( RRes->getRef< string >( "Name", prm ) );
-          params.push_back( RRes->getRef< double >( "Value", prm ));
-          double error = RRes->getRef< double >( "Error",prm);
-          errs.push_back( error );
-        }
-        if( names.size()< 5)
-        {
-          names.push_back( ParameterNames[IVXX] );
-          names.push_back( ParameterNames[IVYY] );
-          names.push_back( ParameterNames[IVXY] );
-          double Varxx, Varxy,Varyy;
-          AttributeValues->CalcVariancesFromData( params[IBACK], params[IXMEAN], params[IYMEAN],
-              Varxx, Varxy, Varyy, params);
-          params.push_back( Varxx );
-          params.push_back( Varyy );
-          params.push_back( Varxy );
-          errs.push_back( 0 );
-          errs.push_back( 0 );
-          errs.push_back( 0 );
-
-        }
-
-      } catch (std::exception &Ex1)//ties or something else went wrong in BivariateNormal
-      {
-        done = true;
-        g_log.debug("Bivariate Error :" + std::string(Ex1.what()));
-      }
-      if (!done)//Bivariate error happened
-      {
-
-       g_log.debug() << "   Thru Algorithm: chiSq=" << setw(7) << chisqOverDOF << endl;
-       g_log.debug() << "  Row,Col Radius=" << lastRow << "," << lastCol << "," << neighborRadius << std::endl;
-
-        double sqrtChisq = -1;
-        if (chisqOverDOF >= 0)
-          sqrtChisq = (chisqOverDOF);
-
-        sqrtChisq = max<double> (sqrtChisq, AttributeValues->StatBaseVals(IIntensities)
-            / AttributeValues->StatBaseVals(ISS1));
-        sqrtChisq = SQRT(sqrtChisq);
-
-        for (size_t kk = 0; kk < params.size(); kk++)
-        {
-          g_log.debug() << "   Parameter " << setw(8) << names[kk] << " " << setw(8) << params[kk];
-          // if (names[kk].substr(0, 2) != string("SS"))
-          g_log.debug() << "(" << setw(8) << (errs[kk] * sqrtChisq) << ")";
-          if (Bounds.size() > kk)
+        for(int j=0;j<NParams;j++)
           {
-            pair<double, double> upLow = Bounds[kk];
-            g_log.debug() << " Bounds(" << upLow.first << "," << upLow.second << ")";
+           Bestparams[j] = ParameterValues[j];
+           Bestnames[j] = ParameterNames[j];
           }
-          g_log.debug() << endl;
-        }
-
-
+        minChiSqOverDOF = chisqOverDOF;
       }
+
+      //Next round, reduce background
+      background = background/2;
+      if( i+1 == N-1)
+        background =0;
+
+      std::vector<double> prms= AttributeValues->GetParams( background);
+
+      for( int j=0; j< NParams ; j++)
+        ParameterValues[j] = prms[j];
+    }
+    vector<std::string> ParNames( ParameterNames, ParameterNames +NParams);
+    for( int i=0; i < NParams; i++)
+    {
+      int k= find( Bestnames[i] , ParNames);
+      if( k >=0 && k < NParams)
+        ParameterValues[k] = Bestparams[k];
+
+    }
+
+    Fit(Data,chisqOverDOF,done,names, params,errs,lastRow,lastCol,neighborRadius);
 
    }
 
@@ -594,6 +688,7 @@ namespace Mantid
 
        return changed;
    }
+
     void IntegratePeakTimeSlices::exec()
     {
       time_t seconds1;
@@ -672,8 +767,6 @@ namespace Mantid
 
       TableWorkspace_sptr TabWS = boost::shared_ptr<TableWorkspace>(new TableWorkspace(0));
 
-
-
       try
       {
 
@@ -685,7 +778,7 @@ namespace Mantid
 
         R = min<double> (36*max<double>(CellWidth,CellHeight), R);
         R = max<double> (6*max<double>(CellWidth,CellHeight), R);
-        R=1.4*R;//Gets a few more background cells.
+        R=2*R;//Gets a few more background cells.
         int Chan;
 
         const MantidVec & X = inpWkSpace->dataX(wsIndx);
@@ -747,7 +840,7 @@ namespace Mantid
 
               Kernel::V3D CentPos = center+yvec*(Centy-ROW)*CellHeight + xvec*(Centx-COL)*CellWidth;
 
-              boost::shared_ptr<DataModeHandler> XXX( new DataModeHandler(R,R,Centx,Centy,CellWidth,CellHeight,
+              boost::shared_ptr<DataModeHandler> XXX( new DataModeHandler(R,R,Centy,Centx,CellWidth,CellHeight,
                                                    getProperty("CalculateVariances")));
               AttributeValues = XXX;
 
@@ -832,7 +925,7 @@ namespace Mantid
 
               time = (X[xchan] + X[topIndex]) / 2.0;
 
-              double Radius = 2*R;
+              double Radius = R;
 
               if( R0 >0)
                  Radius = R0;
@@ -851,8 +944,8 @@ namespace Mantid
 
               AttributeValues->setTime( time);
 
-              if( dir==1 && chan ==0)
-                origAttributeList= AttributeValues;
+             // if( dir==1 && chan ==0)
+            //    origAttributeList= AttributeValues;
 
 
               ncells = (int) (AttributeValues->StatBaseVals(ISS1));
@@ -861,7 +954,9 @@ namespace Mantid
               std::vector<double> errs;
               std::vector<std::string> names;
 
-              if (AttributeValues->IsEnoughData( ParameterValues, g_log) && ParameterValues[ITINTENS] > 0)
+              if (AttributeValues->StatBaseVals(ISSIxx) > 0 &&
+                  AttributeValues->IsEnoughData( ParameterValues, g_log) &&
+                  ParameterValues[ITINTENS] > 0)
               {
                 double chisqOverDOF;
 
@@ -945,7 +1040,8 @@ namespace Mantid
                     double chisqOverDOF;
 
                     g_log.debug("Try Merge 2 time slices");
-                    if( AttributeValues->IsEnoughData(ParameterValues, g_log))
+                    if( AttributeValues->StatBaseVals(ISSIxx)>=0 &&
+                        AttributeValues->IsEnoughData(ParameterValues, g_log))
 
                        Fit(Data,chisqOverDOF,done, names, params,
                              errs, lastRow, lastCol, neighborRadius);
@@ -963,7 +1059,7 @@ namespace Mantid
                       LastTableRow =UpdateOutputWS(TabWS, dir, (chanMin+chanMax)/2.0, params, errs,
                                       names, chisqOverDOF,  AttributeValues->time, spec_idList);
 
-                      if( lastAttributeList->lastISAWVariance > 0 )
+                      if( lastAttributeList->lastISAWVariance > 0  && lastAttributeList->CellHeight >0 )
                       {
                         TotIntensity -=lastAttributeList->lastISAWIntensity;
                         TotVariance -= lastAttributeList->lastISAWVariance;
@@ -1231,9 +1327,103 @@ namespace Mantid
 
     }
 
+   std::vector<double>  DataModeHandler::InitValues( double Varx,double Vary,double b)
+    {
+       std::vector<double> Res(7);
+      // vector<double>StatBase = AttributeValues->StatBase;
+       Res[IVXX]= Varx;
+       Res[IVYY] = Vary;
+       Res[IVXY] =0;
+       int nCells = (int)StatBase[ISS1];
+       double Den = StatBase[IIntensities] - b * nCells;
+       Res[IXMEAN] = ( StatBase[ISSIx] - b * StatBase[ISSx] )/Den;
+       Res[IYMEAN] = ( StatBase[ISSIy] - b * StatBase[ISSy] )/Den;
+       Res[IBACK] = b;
+       Res[ITINTENS] =StatBase[IIntensities] - b * nCells;
+       //double currentRadius= AttributeValues->getCurrentRadius();
+       //double CellWidth =AttributeValues->CellWidth;
+       //double CellHeight = AttributeValues->CellHeight;
+       //double EdgeX = AttributeValues->EdgeX;
+      // double EdgeY = AttributeValues->EdgeY;
+       double  NstdX = 4*( currentRadius*CellWidth - EdgeX )/sqrt( Varx );
+       double  NstdY = 4*( currentRadius*CellHeight - EdgeY )/sqrt( Vary );
+       if( NstdX < 0) NstdX =.5;
+       if( NstdY < 0) NstdY =.5;
 
+       double  x = 1;
+       if( NstdY < 7 && NstdY > 0)
+       {
+         x =probs[ (int)(NstdY +.5) ];
 
-    void DataModeHandler::setStatBase(std::vector<double> const &StatBase)
+         double  My2= StatBase[IStartRow];
+         if( Res[IYMEAN] -My2 > My2+StatBase[INRows] -Res[IYMEAN] )
+           My2 +=StatBase[INRows];
+         Res[IYMEAN] = Res[IYMEAN]*x +(1-x)*My2;
+
+       }
+       double  x1 = 1;
+       if( NstdX < 7 && NstdX > 0)
+       {
+         x1 =probs[ (int)(NstdX +.5) ];
+         double  Mx2= StatBase[IStartCol];
+         if( Res[IXMEAN] -Mx2 > Mx2+StatBase[INCol] -Res[IXMEAN] )
+             Mx2 +=StatBase[INCol];
+         Res[IXMEAN] = Res[IXMEAN]*x1 +(1-x1)*Mx2;
+
+        }
+       Res[ITINTENS] /=x*x1;
+
+       return  Res;
+     }
+
+   std::vector<double> DataModeHandler::GetParams( double b )
+   {
+
+     int nCells = (int) (StatBase[ISS1]);
+     double Den = StatBase[IIntensities] - b * nCells;
+     double Varx,Vary;
+
+     Varx =VarxHW;
+     Vary =VaryHW;
+
+     if(Varx <=0)
+        Varx=HalfWidthAtHalfHeightRadius * HalfWidthAtHalfHeightRadius ;
+
+     if( Vary <=0)
+       Vary =HalfWidthAtHalfHeightRadius * HalfWidthAtHalfHeightRadius ;
+          //Use
+     if( EdgeX*EdgeX > 4*Varx || EdgeY*EdgeY > 4*Vary )
+     {
+       return InitValues(  Varx, Vary, b);
+     }
+     if( Den < 0)
+       return std::vector<double>();
+
+     double Mx = StatBase[ISSIx] - b * StatBase[ISSx];
+     double My = StatBase[ISSIy] - b * StatBase[ISSy];
+
+     double Sxx = (StatBase[ISSIxx] - b * StatBase[ISSxx] - Mx * Mx / Den) / Den;
+     double Syy = (StatBase[ISSIyy] - b * StatBase[ISSyy] - My * My / Den) / Den;
+     double Sxy = (StatBase[ISSIxy] - b * StatBase[ISSxy] - Mx * My / Den) / Den;
+
+     double Intensity= StatBase[IIntensities] - b * nCells;
+     double    col = Mx / Den;
+     double    row = My / Den;
+     std::vector<double> Result(7);
+     Result[IBACK] = b;
+     Result[ITINTENS] = Intensity;
+     Result[IXMEAN] = col;
+     Result[IYMEAN] = row;
+     Result[IVXX] = Sxx;
+     Result[IVYY] = Syy;
+     Result[IVXY] = Sxy;
+
+     return Result;
+
+   }
+
+   //Returns isEdgePeak value
+    bool DataModeHandler::setStatBase(std::vector<double> const &StatBase)
 
     {
       double   TotBoundaryIntensities =StatBase[ITotBoundary ] ;
@@ -1258,6 +1448,50 @@ namespace Mantid
 
       }
 
+      double Varx,Vary;
+      Varx = Vary = HalfWidthAtHalfHeightRadius * HalfWidthAtHalfHeightRadius ;
+
+      if( CellWidth >0 && currentRadius >0 && lastCol >0 && lastRow > 0)
+      if( EdgeX*EdgeX > 4*std::max<double>(Varx,VarxHW) ||
+                 EdgeY*EdgeY > 4*std::max<double>(Vary,VaryHW) )// Edge peak so cannot use samples
+      {
+        Vx_calc= VarxHW;
+        Vy_calc = VaryHW;
+        Vxy_calc =0;
+        col_calc = lastCol;
+        row_calc = lastRow;
+        back_calc = b;
+        Intensity_calc =StatBase[IIntensities] - b * nCells;
+        double  NstdX = 4*( currentRadius*CellWidth - EdgeX )/sqrt( Varx );
+        double  NstdY = 4*( currentRadius*CellHeight - EdgeY )/sqrt( Vary );
+        if( NstdX < 0) NstdX =.5;
+        if( NstdY < 0) NstdY =.5;
+
+        double  x = 1;
+        if( NstdY < 7 && NstdY > 0)
+        {
+          x =probs[ (int)(NstdY +.5) ];
+
+         // double  My2= StatBase[IStartRow];
+         // if( row_calc -My2 > My2+StatBase[INRows] -row_calc )
+        //    My2 +=StatBase[INRows];
+        //  row_calc = row_calc*x +(1-x)*My2;
+
+        }
+        double  x1 = 1;
+        if( NstdX < 7 && NstdX > 0)
+        {
+          x1 =probs[ (int)(NstdX +.5) ];
+         // double  Mx2= StatBase[IStartCol];
+         // if( row_calc -Mx2 > Mx2+StatBase[INCol] -col_calc )
+         //     Mx2 +=StatBase[INCol];
+         // col_calc = col_calc*x1 +(1-x1)*Mx2;
+
+         }
+        Intensity_calc /=x*x1;
+
+        return  true;
+      }
       if( Den <=0)
         Den = 1;
 
@@ -1268,6 +1502,10 @@ namespace Mantid
 
       double RangeX= StatBase[INCol]/2;
       double RangeY = StatBase[INRows]/2;
+
+
+
+      //TODO
       while (!done && ntimes < 29)
       {
         Mx = StatBase[ISSIx] - b * StatBase[ISSx];
@@ -1278,7 +1516,7 @@ namespace Mantid
         ntimes++;
         done = false;
 
-        if (Sxx <= RangeX/12 || Syy <= RangeY/12 || Sxy * Sxy / Sxx / Syy > .8)
+        if (Sxx <= RangeX/12 || Syy <= RangeY/12 || Sxy * Sxy / Sxx / Syy > .9)
         {
           b = b*.95;
 
@@ -1301,7 +1539,7 @@ namespace Mantid
      Vx_calc = Sxx;
      Vy_calc = Syy;
      Vxy_calc = Sxy;
-
+     return false;
 
 
     }
@@ -1310,18 +1548,22 @@ namespace Mantid
     {
       double Vx,Vy;
       Vx = Vy =HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
-
-      if( EdgeX < .5*Vx )
-      Vx = std::max<double>(HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius,
+      double mult =1;
+      if( EdgeX*EdgeX < 4*Vx )
+          Vx = std::max<double>(HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius,
                                       Vx_calc);
+      else
+        mult = 1.2;
 
-      if( EdgeY < .5*Vy)
+      if( EdgeY*EdgeY < 4*Vy)
         Vy =std::max<double>(HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius,
                                      Vy_calc);
+      else
+        mult *=1.2;
 
       double  DD = max<double>( sqrt(Vy)*CellHeight, sqrt(Vx)*CellWidth);
       double NewRadius= 1.4* max<double>( 5*max<double>(CellWidth,CellHeight), 4.5*DD);
-      NewRadius = min<double>(baseRCRadius, NewRadius);
+      NewRadius = mult*min<double>(baseRCRadius, NewRadius);
                //1.4 is needed to get more background cells. In rectangle the corners were background
 
        NewRadius = min<double>(35*max<double>(CellWidth,CellHeight),NewRadius);
@@ -1340,9 +1582,12 @@ namespace Mantid
       MantidVec X = xvals.access();
       MantidVec Y = yvals.access();
       MantidVec C = counts.access();
+      VarxHW = -1;
+      VaryHW = -1;
       int N = (int)X.size();
 
-      HalfWidthAtHalfHeightRadius = -1;
+      HalfWidthAtHalfHeightRadius = -2;
+
       if( N <= 2 )
         return;
 
@@ -1356,34 +1601,46 @@ namespace Mantid
       if( minCount == maxCount)
         return;
 
-      int N2Av = std::min<int>( 10,std::max(10, N/10 ) );
+      //int N2Av = std::min<int>( 10,std::max(10, N/10 ) );
       int nMax = 0;
       int nMin = 0;
       double TotMax = 0;
       double TotMin = 0;
       double offset = std::max<double>(1, (maxCount - minCount) / 20);
-
-      for (int i = 0; i < N && (nMax < N2Av || nMin < N2Av); i++)
+      double TotR_max =0;
+      double TotR_min =0;
+      for (int i = 0; i < N ; i++)
       {
-        if (nMax < N2Av && C[i] > maxCount - offset)
+        if ( C[i] > maxCount - offset)
         {
           TotMax += C[i];
           nMax++;
+          TotR_max+= sqrt( (X[i]-COL)*(X[i]-COL)+ (Y[i]-ROW)*(Y[i]-ROW));
 
         }
-        if (nMin < N2Av && C[i] < minCount + offset)
+        if (C[i] < minCount + offset)
 
         {
           TotMin += C[i];
           nMin++;
+
+          TotR_min+= sqrt( (X[i]-COL)*(X[i]-COL)+ (Y[i]-ROW)*(Y[i]-ROW));
         }
       }
 
-      if( nMax + nMin == N)
+      if( nMax + nMin == N)      // all data are on two  levels essentially
+      {
+        double AvR = .5*(TotR_max/TotMax + TotR_min/TotMin);
+        HalfWidthAtHalfHeightRadius = AvR/.8326;
         return;
+      }
 
       double TotR = 0;
       int nR = 0;
+      double TotRx=0;
+      double TotRy=0;
+      int nRx=0;
+      int nRy=0;
       double MidVal = ( TotMax/nMax + TotMin/nMin )/2.0;
 
       while( nR <= 0 )
@@ -1395,11 +1652,31 @@ namespace Mantid
           double Y1 = Y[i] - ROW;
           TotR += sqrt( X1*X1 + Y1*Y1 );
           nR++;
+          if(X1>=-1 && X1<=1)
+          {
+            nRy++;
+            TotRy += abs(Y1);
+          }
+          if( Y1>=-1 && Y1 <= 1)
+          {
+            nRx++;
+            TotRx=fabs(X1);
+          }
         }
         offset *= 1.1;
       }
+
       double AvR = TotR/nR;
       HalfWidthAtHalfHeightRadius = AvR/.8326;
+      if( nRx > 0)
+        VarxHW= (TotRx/nRx)*(TotRx/nRx)/.8326/.8326;
+      else
+        VarxHW = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
+      if( nRy > 0)
+        VaryHW= (TotRy/nRy)*(TotRy/nRy)/.8326/.8326;
+      else
+        VaryHW = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
+
     }
     //Data is the slice subdate, inpWkSpace is ALl the data,
     void IntegratePeakTimeSlices::SetUpData( MatrixWorkspace_sptr          & Data,
@@ -1418,10 +1695,12 @@ namespace Mantid
       Kernel::V3D CentPos1 = center + xvec*(CentX-COL)*CellWidth
                                    + yvec*(CentY-ROW)*CellHeight;
 
-      boost::shared_ptr<DataModeHandler> X(new DataModeHandler(Radius,Radius,CentX,CentY,
+      boost::shared_ptr<DataModeHandler> X(new DataModeHandler(Radius,Radius,CentY,CentX,
           CellWidth,CellHeight,getProperty("CalculateVariances")));
 
       AttributeValues = X;
+      AttributeValues->setCurrentRadius( Radius );
+      AttributeValues->setCurrentCenter( CentPos1);
 
       SetUpData1(Data             , inpWkSpace, chanMin, chanMax,
                  Radius            , CentPos1, spec_idList);
@@ -1466,7 +1745,7 @@ namespace Mantid
             neighborRadius -= DD;
 
       //if( changed) CentNghbr = CentPos.
-      boost::shared_ptr<DataModeHandler> X1(new DataModeHandler(Radius,NewRadius,CentX,CentY,
+      boost::shared_ptr<DataModeHandler> X1(new DataModeHandler(Radius,NewRadius,CentY,CentX,
           CellWidth,CellHeight, getProperty("CalculateVariances")));
 
       AttributeValues = X1;
@@ -1568,65 +1847,66 @@ namespace Mantid
           double col = COL + C1a;//(pixPos - center).scalar_prod(xvec) / CellWidth;
 
          // std::cout<<R1<<","<<R1a<<","<<ROW<<","<<row<<","<<C1<<","<<C1a<<","<<COL<<","<<col<<std::endl;
-          if( row >NBadEdges && col >NBadEdges &&
-              (NROWS<0 || row<NROWS-NBadEdges) &&
-              ( NCOLS <0 || col<NCOLS-NBadEdges))
+          if (row > NBadEdges && col > NBadEdges && (NROWS < 0 || row < NROWS - NBadEdges) && (NCOLS < 0
+              || col < NCOLS - NBadEdges))
           {
-          Mantid::MantidVec histogram = inpWkSpace->readY(workspaceIndex);
+            Mantid::MantidVec histogram = inpWkSpace->readY(workspaceIndex);
 
-          Mantid::MantidVec histoerrs = inpWkSpace->readE(workspaceIndex);
+            Mantid::MantidVec histoerrs = inpWkSpace->readE(workspaceIndex);
+            double intensity = 0;
+            double variance = 0;
+            for (int chan = chanMin; chan <= chanMax; chan++)
+            {
+              intensity += histogram[chan];
+              variance += histoerrs[chan] * histoerrs[chan];
+            }
 
-          double intensity = 0;
-          double variance =0;
-          for(int chan=chanMin;chan <= chanMax;chan++)
-          {
-            intensity +=histogram[chan];
-            variance +=histoerrs[chan] * histoerrs[chan];
-          }
+            N++;
+            yvalB.push_back(intensity);
+            double sigma = 1;
 
-          N++;
-          yvalB.push_back(intensity);
-          double sigma = 1;
+            errB.push_back(sigma);
+            xvalB.push_back((double) col);
+            YvalB.push_back((double) row);
 
+            xRef.push_back((double) jj);
+            jj++;
 
-          errB.push_back(sigma);
-          xvalB.push_back((double) col);
-          YvalB.push_back((double) row);
+            updateStats(intensity, variance, row, col, StatBase);
 
-          xRef.push_back((double)jj);jj++;
+            if ((pixPos - CentPos).norm() > BoundaryRadius)
+            {
+              TotBoundaryIntensities += intensity;
+              nBoundaryCells++;
 
-          updateStats(intensity, variance, row, col, StatBase);
+              TotBoundaryVariances += variance;
 
+            }
 
-          if ((pixPos - CentPos).norm() > BoundaryRadius)
-          {
-            TotBoundaryIntensities += intensity;
-            nBoundaryCells++;
-
-            TotBoundaryVariances += variance;
-
-          }
-
-          if (row < minRow)
-            minRow = row;
-          if (col < minCol)
-            minCol = col;
-          if (row > maxRow)
-            maxRow = row;
-          if (col > maxCol)
-            maxCol = col;
+            if (row < minRow)
+              minRow = row;
+            if (col < minCol)
+              minCol = col;
+            if (row > maxRow)
+              maxRow = row;
+            if (col > maxCol)
+              maxCol = col;
 
           }//if not bad edge
-          else
-          {
 
-            AttributeValues->updateEdgeYsize(abs(ROW-row));
-            AttributeValues->updateEdgeXsize(abs(COL-col));
-            AttributeValues->updateEdgeYsize(abs(row));
-            AttributeValues->updateEdgeXsize(abs(col));
-          }
-        }
-        }
+
+        }//peak within radius
+        }//for each neighbor
+
+
+      AttributeValues->EdgeY = max<double>(0.0,max<double>(-ROW+minRow+Radius/CellHeight,-maxRow + ROW + Radius/CellHeight));
+      AttributeValues->EdgeX =max<double>(0.0, max<double>(-COL+minCol+Radius/CellWidth, -maxCol+COL+Radius/CellWidth));
+      if( AttributeValues->EdgeY <=1)
+        AttributeValues->EdgeY=0;
+      if( AttributeValues->EdgeX <=1)
+        AttributeValues->EdgeX=0;
+
+
 
       Data->setX(0, pX);
       Data->setX(1, pX);
@@ -1647,7 +1927,7 @@ namespace Mantid
       StatBase[ITotBoundary ] = TotBoundaryIntensities;
       StatBase[INBoundary] = nBoundaryCells;
       StatBase[IVarBoundary]= TotBoundaryVariances;
-      AttributeValues->setStatBase( StatBase );
+      EdgePeak = AttributeValues->setStatBase( StatBase );
 
       ParameterValues[IBACK] = AttributeValues->getInitBackground();
       ParameterValues[ITINTENS] = AttributeValues->getInitIntensity();
@@ -1656,6 +1936,23 @@ namespace Mantid
       ParameterValues[IVXX] = AttributeValues->getInitVarx();
       ParameterValues[IVYY] = AttributeValues->getInitVary();
       ParameterValues[IVXY] = AttributeValues->getInitVarxy();
+    }
+
+    bool DataModeHandler::isEdgePeak( double* params, int nparams)
+    {
+      double Varx = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
+      double Vary = Varx;
+      if( nparams > 4)
+      {
+        Varx =params[IVXX];
+        Vary = params[IVYY];
+      }
+
+      if( EdgeX*EdgeX > 4*std::max<double>(Varx,VarxHW) ||
+              EdgeY*EdgeY > 4*std::max<double>(Vary, VaryHW) )
+        return true;
+
+      return false;
     }
 
     std::string IntegratePeakTimeSlices::CalculateFunctionProperty_Fit()
@@ -1708,14 +2005,19 @@ namespace Mantid
       int Ibk = find("Background", names);
       int IIntensity = find("Intensity", names);
 
-
-
       if (chisqOverDOF < 0)
-      {
+          {
 
-          g_log.debug()<<"   Bad Slice- negative chiSq= "<<chisqOverDOF<<std::endl;;
-         return false;
-      }
+              g_log.debug()<<"   Bad Slice- negative chiSq= "<<chisqOverDOF<<std::endl;;
+             return false;
+          }
+
+      int NBadEdgeCells = getProperty("NBadEdgePixels");
+      if( params[IXMEAN] < NBadEdgeCells || params[IYMEAN] < NBadEdgeCells ||
+          params[IXMEAN]> NCOLS-NBadEdgeCells || params[IYMEAN] > NROWS-NBadEdgeCells)
+        return false;
+
+
 
       int ncells = (int) (AttributeValues->StatBaseVals(ISS1));
 
@@ -1740,7 +2042,7 @@ namespace Mantid
 
       bool GoodNums = true;
       bool paramBad=false;
-      size_t BadParamNum = 0;
+      size_t BadParamNum = -1;
       for (size_t i = 0; i < errs.size(); i++)
         if (errs[i] != errs[i])
         {
@@ -1775,33 +2077,33 @@ namespace Mantid
 
       GoodNums = true;
 
-
-      if (params[Ibk] < -.001)
+      std::string Err("back ground is negative");
+      if (params[Ibk] < -.002)
         GoodNums = false;
 
+      if( GoodNums)Err ="Intensity is negative";
       if (params[IIntensity] < 0)
         GoodNums = false;
 
 
       double IsawIntensity= AttributeValues->CalcISAWIntensity( params.data());
       double IsawVariance = AttributeValues->CalcISAWIntensityVariance(params.data(), errs.data(),chisqOverDOF);
-
+       if(GoodNums) Err ="Isaw Variance is negative";
       if (IsawVariance > 0)
         {
+         if( GoodNums)Err= "I/sigI >3";
          if (IsawIntensity*IsawIntensity/IsawVariance < 9)
            GoodNums = false;
         }
       else
         GoodNums = false;
 
-//TODO limit rel errors on row and col's. Weak peaks have row.col values migrate a lot
+//TODO limit rel errors on row and col's. Weak peaks have row.col values that migrate a lot
 
 
       if (!GoodNums)
 
-      {   g_log.debug()<<
-            "   Bad Slice.Background or Intensity params or errs are out of bounds or relative errors are too high"
-           <<std::endl;
+      {   g_log.debug()<<  Err <<std::endl;
 
           return false;
       }
@@ -1951,12 +2253,13 @@ namespace Mantid
     {
       UNUSED_ARG( TotSliceIntensity);
       UNUSED_ARG( TotSliceVariance );
+      UNUSED_ARG( names );
       UNUSED_ARG( ncells);
      // int Ibk = find("Background", names);
       double err =0;
       double intensity=0;
 
-      if( !EdgePeak  )
+     // if( !EdgePeak  )
       {
         err = AttributeValues->CalcISAWIntensityVariance(params.data(),errs.data(), chisqdivDOF);
             //CalculateIsawIntegrateError(params[Ibk], errs[Ibk], chisqdivDOF, TotSliceVariance, ncells);
@@ -1965,8 +2268,10 @@ namespace Mantid
             //TotSliceIntensity - params[IBACK] * ncells;
 
         TotVariance += err ;
+        g_log.debug()<<"TotIntensity/TotVariance="<<TotIntensity<<"/"<<TotVariance<<std::endl;
+      }
 
-      }else
+      /*else
       {
        int IInt = find("Intensity", names);
        intensity = params[IInt];
@@ -1976,6 +2281,7 @@ namespace Mantid
 
       }
      g_log.debug()<<"Slice/Tot intensity;Var="<<intensity<<";"<<err*err<<"/"<<TotIntensity<<";"<<TotVariance<<std::endl;
+     */
     }
 
     bool DataModeHandler::CalcVariances( )
@@ -1984,13 +2290,14 @@ namespace Mantid
         return false;
 
       double param[7]={back_calc,Intensity_calc,col_calc,row_calc,Vx_calc,Vy_calc, Vxy_calc};
+      return !isEdgePeak( param,7);
+     /* double r = CalcSampleIntensityMultiplier(param);
 
-      double r = CalcSampleIntensityMultiplier(param);
-
-      if( r <= 1.0)
+      if( r <= 1.2)
         return CalcVariance;
       else
         return false;
+     */
     }
 
    bool DataModeHandler::IsEnoughData( const double *ParameterValues, Kernel::Logger&  )
@@ -2071,13 +2378,13 @@ namespace Mantid
      double ExperimentalIntensity  = StatBase[IIntensities]-
                                          params[IBACK]*StatBase[ISS1];
 
-     double FitIntensity =  params[ITINTENS];
+    // double FitIntensity =  params[ITINTENS];
      double r= CalcSampleIntensityMultiplier( params );
 
      double alpha =(float)( 0+.5*( r-1 ) );
      alpha = std::min<double>( 1.0f , alpha );
 
-     lastISAWIntensity = ExperimentalIntensity*r*( 1-alpha )+ alpha * FitIntensity;
+     lastISAWIntensity = ExperimentalIntensity*r;//*( 1-alpha )+ alpha * FitIntensity;
      return lastISAWIntensity;
 
    }
@@ -2096,13 +2403,13 @@ namespace Mantid
 
      ExperimVar += IntensityBackError * IntensityBackError * ncells*ncells + params[IBACK]*ncells;
 
-     double FitVar= errs[ITINTENS]* errs[ITINTENS]* B;
+    // double FitVar= errs[ITINTENS]* errs[ITINTENS]* B;
 
      double r= CalcSampleIntensityMultiplier( params );
      double alpha =(float)( 0+.5*( r - 1 ));
       alpha = std::min<double>( 1.0f , alpha );
 
-     lastISAWVariance =  ExperimVar*r*r*( 1 - alpha ) + alpha * FitVar;
+     lastISAWVariance =  ExperimVar*r*r;//*( 1 - alpha ) + alpha * FitVar;
      return lastISAWVariance;
    }
 
