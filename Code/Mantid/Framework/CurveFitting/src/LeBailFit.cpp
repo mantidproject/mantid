@@ -158,6 +158,13 @@ void LeBailFit::init()
 
   declareProperty("FitGeometryParameter", false, "Option to choose to fit geometry-related parameters.");
 
+  declareProperty("RandomSeed", 1, "Randum number seed.");
+
+  declareProperty("AnnealingTemperature", 1.0, "Temperature used Monte Carlo.  "
+                  "Negative temperature is for simulated annealing. ");
+
+  declareProperty("UseAnnealing", true, "Allow annealing temperature adjusted automatically.");
+
   return;
 }
 
@@ -315,7 +322,7 @@ void LeBailFit::exec()
     case MONTECARLO:
       // Monte carlo Le Bail refinement
       g_log.notice("Function: Do LeBail Fit By Monte Carlo Random Walk.");
-      randomWalkMinimzer(m_numMinimizeSteps, m_wsIndex, m_funcParameters);
+      execRandomWalkMinimizer(m_numMinimizeSteps, m_wsIndex, m_funcParameters);
 
       break;
 
@@ -1570,20 +1577,25 @@ void LeBailFit::setPeakParameters(ThermalNeutronBk2BkExpConvPV_sptr peak, map<st
  * (a) Assign peaks into groups; each group contains either (1) one peak or (2) peaks overlapped
  * (b) Calculate peak intensities for every peak per group
  */
-void LeBailFit::calculatePeaksIntensities(MatrixWorkspace_sptr dataws, size_t workspaceindex)
+bool LeBailFit::calculatePeaksIntensities(MatrixWorkspace_sptr dataws, size_t workspaceindex)
 {
   // 1. Group the peak
   vector<vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > > peakgroupvec;
   groupPeaks(peakgroupvec);
 
   // 2. Calculate each peak's intensity and set
+  bool peakheightsphysical = true;
   for (size_t ig = 0; ig < peakgroupvec.size(); ++ig)
   {
     g_log.information() << "[DBx351] Peak group " << ig << " : number of peaks = " << peakgroupvec[ig].size() << endl;
-    calculateGroupPeakIntensities(peakgroupvec[ig], dataws, workspaceindex);
+    bool localphysical = calculateGroupPeakIntensities(peakgroupvec[ig], dataws, workspaceindex);
+    if (!localphysical)
+    {
+      peakheightsphysical = false;
+    }
   }
 
-  return;
+  return peakheightsphysical;
 }
 
 //----------------------------------------------------------------------------
@@ -1656,7 +1668,7 @@ void LeBailFit::groupPeaks(vector<vector<pair<double, ThermalNeutronBk2BkExpConv
 /** Calculate peak's intensities in a group and set the calculated peak height
   * to the corresponding peak function.
   */
-void LeBailFit::calculateGroupPeakIntensities(vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peakgroup,
+bool LeBailFit::calculateGroupPeakIntensities(vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peakgroup,
                                               MatrixWorkspace_sptr dataws, size_t wsindex)
 {
   // 1. Sort by d-spacing
@@ -1711,7 +1723,23 @@ void LeBailFit::calculateGroupPeakIntensities(vector<pair<double, ThermalNeutron
   size_t ndata = iright-ileft;
   if (ndata == 0 || ndata > iright)
   {
-    throw runtime_error("Peak group range is unphysical!");
+    stringstream errss;
+    errss << "[Calcualte Peak Intensity] Group range is unphysical.  iLeft = " << ileft << ", iRight = "
+          << iright << "; Number of peaks = " << peakgroup.size();
+    for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
+    {
+      ThermalNeutronBk2BkExpConvPV_sptr thispeak = peakgroup[ipk].second;
+      errss << "Peak " << ipk << ":  d_h = " << peakgroup[ipk].first << ", TOF_h = " << thispeak->centre()
+            << ", FWHM = " << thispeak->fwhm() << endl;
+      vector<string> peakparamnames = thispeak->getParameterNames();
+      for (size_t ipar = 0; ipar < peakparamnames.size(); ++ipar)
+      {
+        errss << "\t" << peakparamnames[ipar] << " = " << thispeak->getParameter(peakparamnames[ipar]) << endl;
+      }
+    }
+
+    g_log.error(errss.str());
+    throw runtime_error(errss.str());
   }
 
   //   Partial data range
@@ -1783,6 +1811,7 @@ void LeBailFit::calculateGroupPeakIntensities(vector<pair<double, ThermalNeutron
     pureobspeaksintensity[i] = datay[i] - bkgdvalue[i];
   }
 
+  bool peakheightsphysical = true;
   for (size_t ipk = 0; ipk < peakgroup.size(); ++ipk)
   {
     ThermalNeutronBk2BkExpConvPV_sptr peak = peakgroup[ipk].second;
@@ -1810,17 +1839,30 @@ void LeBailFit::calculateGroupPeakIntensities(vector<pair<double, ThermalNeutron
       intensity += temp * deltax;
     } // for data points
 
-    if (intensity < 0.0)
+    if (intensity != intensity)
     {
-      // No negative intensity
+      // Unphysical intensity: NaN
       intensity = 0.0;
-    }
-    else if (intensity != intensity)
-    {
-      // Unphysical intensity
+      peakheightsphysical = false;
+
       int h, k, l;
       peak->getMillerIndex(h, k, l);
-      g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity!" <<endl;
+      g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = NaN!" <<endl;
+
+    }
+    else if (intensity <= -DBL_MAX || intensity >= DBL_MAX)
+    {
+      // Unphysical intensity: NaN
+      intensity = 0.0;
+      peakheightsphysical = false;
+
+      int h, k, l;
+      peak->getMillerIndex(h, k, l);
+      g_log.warning() << "Peak (" << h << ", " << k << ", " << l <<") has unphysical intensity = Infty!" <<endl;
+    }
+    else if (intensity < 0.0)
+    {
+      // No negative intensity
       intensity = 0.0;
     }
 
@@ -1828,7 +1870,7 @@ void LeBailFit::calculateGroupPeakIntensities(vector<pair<double, ThermalNeutron
     peak->setHeight(intensity);
   }
 
-  return;
+  return peakheightsphysical;
 }
 
 
@@ -2156,6 +2198,85 @@ void LeBailFit::parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr b
   return;
 }
 
+//-----------------------------------------------------------------------------
+/** Parse TableWorkspace for Monte Carlo simulation related parameters' value
+  */
+void LeBailFit::parseMonteCarloParameterTable(TableWorkspace_sptr mctablews)
+{
+  //
+  bool checkname;
+
+  // Search for key word as Name, A0, A1, Refine, Nonnegative,
+  vector<string> tablecolnames = mctablews->getColumnNames();
+  vector<string>::iterator nameiter;
+
+  // Parameters
+  nameiter = find(tablecolnames.begin(), tablecolnames.end(), "Name");
+  if (nameiter == tablecolnames.end())
+  {
+    throw runtime_error("TableWorkspace does not have column Name (for parameter).");
+  }
+  size_t nameindex = size_t(nameiter-tablecolnames.begin());
+
+
+
+
+}
+
+/*================== This section should not belong to this algorithm ======================*/
+
+/** Convert a Table to space to some vectors of maps
+  */
+void convertTableWorkspaceToMaps(TableWorkspace_sptr tablews, vector<map<string, int> > intmaps,
+                                 vector<map<string, string> > strmaps, vector<map<string, double> > dblmaps)
+{
+  // 1. Initialize
+  intmaps.clear();
+  strmaps.clear();
+  dblmaps.clear();
+
+  size_t numrows = tablews->rowCount();
+  size_t numcols = tablews->columnCount();
+
+  for (size_t i = 0; i < numrows; ++i)
+  {
+    map<string, int> intmap;
+    intmaps.push_back(intmap);
+
+    map<string, string> strmap;
+    strmaps.push_back(strmap);
+
+    map<string, double> dblmap;
+    dblmaps.push_back(dblmap);
+  }
+
+  // 2. Parse
+  for (size_t i = 0; i < numcols; ++i)
+  {
+    Column_sptr column = tablews->getColumn(i);
+    string coltype = column->type();
+    string colname = column->name();
+
+    for (size_t ir = 0; ir < numrows; ++ir)
+    {
+
+
+
+
+    }
+
+  }
+
+
+  return;
+}
+
+
+
+
+
+
+/*=================================================================================*/
 
 //-----------------------------------------------------------------------------
 /** Make output workspace valid if there is some error.
@@ -2561,7 +2682,7 @@ void LeBailFit::createOutputDataWorkspace(size_t workspaceindex, FunctionMode fu
       ;
     case MONTECARLO:
       // Monte carlo mode, same as FIT
-      tAxis = new API::TextAxis(8);
+      tAxis = new API::TextAxis(nspec);
       tAxis->setLabel(0, "Data");
       tAxis->setLabel(1, "Calc");
       tAxis->setLabel(2, "Diff");
@@ -2592,7 +2713,7 @@ void LeBailFit::createOutputDataWorkspace(size_t workspaceindex, FunctionMode fu
 
     case BACKGROUNDPROCESS:
       // Background mode
-      tAxis = new API::TextAxis(3);
+      tAxis = new API::TextAxis(nspec);
       tAxis->setLabel(0, "Data");
       tAxis->setLabel(1, "Background");
       tAxis->setLabel(2, "DataNoBackground");
@@ -2662,35 +2783,69 @@ void LeBailFit::setupRandomWalkStrategy()
   m_numMCGroups = m_MCGroups.size();
 
   // 2. Dictionary for each parameter for non-negative, mcX0, mcX1
+  // a) Sig0, Sig1, Sig2
   for (size_t i = 0; i < sigs.size(); ++i)
   {
     string parname = sigs[i];
-    m_funcParameters[parname].mcX0 = 2.0;
-    m_funcParameters[parname].mcX1 = 1.0;
+    m_funcParameters[parname].mcA0 = 2.0;
+    m_funcParameters[parname].mcA1 = 1.0;
+    m_funcParameters[parname].nonnegative = true;
   }
 
+  // b) Alpha
   for (size_t i = 0; i < alphs.size(); ++i)
   {
     string parname = alphs[i];
-    m_funcParameters[parname].mcX0 = 0.05;
-    m_funcParameters[parname].mcX1 = 1.0;
+    m_funcParameters[parname].mcA1 = 1.0;
+    m_funcParameters[parname].nonnegative = false;
   }
+  m_funcParameters["Alpha0"].mcA0 = 0.05;
+  m_funcParameters["Alpha1"].mcA0 = 0.02;
+  m_funcParameters["Alpha0t"].mcA0 = 0.1;
+  m_funcParameters["Alpha1t"].mcA0 = 0.05;
 
+  // c) Beta
   for (size_t i = 0; i < betas.size(); ++i)
   {
     string parname = betas[i];
-    m_funcParameters[parname].mcX0 = 0.05;
-    m_funcParameters[parname].mcX1 = 1.0;
+    m_funcParameters[parname].mcA1 = 1.0;
+    m_funcParameters[parname].nonnegative = false;
   }
+  m_funcParameters["Beta0"].mcA0 = 0.5;
+  m_funcParameters["Beta1"].mcA0 = 0.05;
+  m_funcParameters["Beta0t"].mcA0 = 0.5;
+  m_funcParameters["Beta1t"].mcA0 = 0.05;
 
-  for (size_t i = 0; i < geomparams.size(); ++i)
-  {
-    string parname = geomparams[i];
-    m_funcParameters[parname].mcX0 = 5.0;
-    m_funcParameters[parname].mcX1 = 0.0;
-  }
+  // d) Geometry might be more complicated
+  m_funcParameters["Width"].mcA0 = 0.0;
+  m_funcParameters["Width"].mcA1 = 1.0;
+  m_funcParameters["Width"].nonnegative = true;
 
-  // 3. Reset
+  m_funcParameters["Tcross"].mcA0 = 0.0;
+  m_funcParameters["Tcross"].mcA1 = 1.0;
+  m_funcParameters["Tcross"].nonnegative = true;
+
+  m_funcParameters["Zero"].mcA0 = 5.0;
+  m_funcParameters["Zero"].mcA1 = 0.0;
+  m_funcParameters["Zero"].nonnegative = false;
+
+  m_funcParameters["Zerot"].mcA0 = 5.0;
+  m_funcParameters["Zerot"].mcA1 = 0.0;
+  m_funcParameters["Zerot"].nonnegative = false;
+
+  m_funcParameters["Dtt1"].mcA0 = 5.0;
+  m_funcParameters["Dtt1"].mcA1 = 0.0;
+  m_funcParameters["Dtt1"].nonnegative = true;
+
+  m_funcParameters["Dtt1t"].mcA0 = 5.0;
+  m_funcParameters["Dtt1t"].mcA1 = 0.0;
+  m_funcParameters["Dtt1t"].nonnegative = true;
+
+  m_funcParameters["Dtt2t"].mcA0 = 0.1;
+  m_funcParameters["Dtt2t"].mcA1 = 1.0;
+  m_funcParameters["Dtt2t"].nonnegative = false;
+
+  // 4. Reset
   map<string, Parameter>::iterator mapiter;
   for (mapiter = m_funcParameters.begin(); mapiter != m_funcParameters.end(); ++mapiter)
   {
@@ -2708,8 +2863,8 @@ void LeBailFit::setupRandomWalkStrategy()
   *
   * @param wsindex  :  workspace index of the diffraction data (observed)
   */
-void LeBailFit::randomWalkMinimzer(size_t maxcycles, size_t wsindex,
-                                   map<string, Parameter>& parammap)
+void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
+                                        map<string, Parameter>& parammap)
 {
   // 1. Initialization
   const MantidVec& vecX = m_dataWS->readX(wsindex);
@@ -2723,7 +2878,18 @@ void LeBailFit::randomWalkMinimzer(size_t maxcycles, size_t wsindex,
   setupRandomWalkStrategy();
   map<string, Parameter> newparammap = parammap;
 
+  //    Random seed
+  int randomseed = getProperty("RandomSeed");
+  srand(randomseed);
+
   double startrwp, currwp, startrp, currp;
+
+  // Annealing temperature
+  m_Temperature = getProperty("AnnealingTemperature");
+  if (m_Temperature < 0)
+    m_Temperature = fabs(m_Temperature);
+
+  m_useAnnealing = getProperty("UseAnnealing");
 
   // 2. Process background.
   // a) Calculate background
@@ -2758,6 +2924,7 @@ void LeBailFit::randomWalkMinimzer(size_t maxcycles, size_t wsindex,
   }
 
   currwp = startrwp;
+  currp = startrp;
   m_bestRwp = currwp + 1.0;
   bookKeepBestMCResult(parammap, background, currwp, 0);
 
@@ -2768,6 +2935,11 @@ void LeBailFit::randomWalkMinimzer(size_t maxcycles, size_t wsindex,
   vector<double> vecIndex(maxcycles);
   vector<double> vecRwp(maxcycles);
   size_t numinvalidmoves = 0;
+  size_t numacceptance = 0;
+
+  //    Annealing record
+  int numRecentAcceptance = 0;
+  int numRecentSteps = 0;
 
   // Loop start
   for (size_t icycle = 1; icycle <= maxcycles; ++icycle)
@@ -2781,7 +2953,8 @@ void LeBailFit::randomWalkMinimzer(size_t maxcycles, size_t wsindex,
     for (size_t igroup = 0; igroup < m_numMCGroups; ++igroup)
     {
       // i.   Propose the value
-      proposeNewValues(m_MCGroups[igroup], currwp, parammap, newparammap);
+      // proposeNewValues(m_MCGroups[igroup], currwp, parammap, newparammap);
+      proposeNewValues(m_MCGroups[igroup], currp, parammap, newparammap);
 
       // ii.  Evaluate
       double newrwp, newrp;
@@ -2808,14 +2981,43 @@ void LeBailFit::randomWalkMinimzer(size_t maxcycles, size_t wsindex,
       // iv. Apply change and book keeping
       if (acceptchange)
       {
-        if (newrwp < m_bestRwp)
-        {
-          // Book keep the best
-          bookKeepBestMCResult(newparammap, background, newrwp, icycle);
-        }
-        // Apply the changes
+        // Apply the change to current
         applyParameterValues(newparammap, parammap);
         currwp = newrwp;
+        currp = newrp;
+
+        // All tim ebest
+        if (currwp < m_bestRwp)
+        {
+          // Book keep the best
+          bookKeepBestMCResult(parammap, background, currwp, icycle);
+        }
+
+        // Statistic
+        ++ numacceptance;
+        ++ numRecentAcceptance;
+      }
+      ++ numRecentSteps;
+
+      // e) Annealing
+      if (m_useAnnealing)
+      {
+        // FIXME : Here are some magic numbers
+        if (numRecentSteps == 10)
+        {
+          // i. Change temperature
+          if (numRecentAcceptance < 2)
+          {
+            m_Temperature *= 2.0;
+          }
+          else if (numRecentAcceptance >= 8)
+          {
+            m_Temperature /= 2.0;
+          }
+          // ii  Reset counters
+          numRecentAcceptance = 0.0;
+          numRecentSteps = 0;
+        }
       }
 
       // e) Debug output
@@ -2846,7 +3048,9 @@ void LeBailFit::randomWalkMinimzer(size_t maxcycles, size_t wsindex,
   // 5. Sum up
   // a) Summary output
   g_log.notice() << "[SUMMARY] Random-walk Rwp:  Starting = " << startrwp << ", Best = " << m_bestRwp
-                 << " @ Step = " << m_bestMCStep << ", Final Rwp = " << currwp << endl;
+                 << " @ Step = " << m_bestMCStep << ", Final Rwp = " << currwp
+                 << ", Rp = " << currp
+                 << ", Acceptance ratio = " << double(numacceptance)/double(maxcycles*m_numMCGroups) << endl;
 
   map<string,Parameter>::iterator mapiter;
   for (mapiter = parammap.begin(); mapiter != parammap.end(); ++mapiter)
@@ -2854,8 +3058,8 @@ void LeBailFit::randomWalkMinimzer(size_t maxcycles, size_t wsindex,
     Parameter& param = mapiter->second;
     g_log.notice() << setw(10) << param.name << "\t: Average Stepsize = " << setw(10) << setprecision(5) << param.sumstepsize/double(maxcycles)
                    << ", Max Step Size = " << setw(10) << setprecision(5) << param.maxabsstepsize
-                   << ", Number of Positive Move = " << setw(10) << param.numpositivemove
-                   << ", Number of Negative Move = " << setw(10) << param.numnegativemove << endl;
+                   << ", Number of Positive Move = " << setw(4) << param.numpositivemove
+                   << ", Number of Negative Move = " << setw(4) << param.numnegativemove << endl;
 
   }
   g_log.notice() << "Number of invalid proposed moves = " << numinvalidmoves << endl;
@@ -2915,7 +3119,12 @@ bool LeBailFit::calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws, size_
   if (paramsvalid)
   {
     // 3. Calculate
-    calculatePeaksIntensities(dataws, wsindex);
+    bool heightphysical = calculatePeaksIntensities(dataws, wsindex);
+    if (!heightphysical)
+    {
+      // If peak heights have some unphyiscal value
+      paramsvalid = false;
+    }
 
     /* Debug output
     double dtt1 = m_lebailFunction->getFunction(1)->getParameter("Dtt1");
@@ -2929,12 +3138,14 @@ bool LeBailFit::calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws, size_
     // 5. Calculate Rwp
     calculatePowderPatternStatistic(values, background, rwp, rp);
   }
-  else
+
+  if (!paramsvalid)
   {
     // If the propose instrument parameters have some unphysical parameter
     g_log.information() << "Proposed new instrument profile values cause peak(s) to have "
                         << "unphysical parameter values." << endl;
     rwp = 1.0E100;
+    rp = 1.0E100;
   }
 
   return paramsvalid;
@@ -2972,7 +3183,7 @@ void LeBailFit::calculatePowderPatternStatistic(FunctionValues& values, vector<d
     sumwgtobsdatasq += obsdata[i]*obsdata[i]*stderrs[i];
     sumwgtobsdatnobkgdsq += (obsdata[i] - background[i])*(obsdata[i] - background[i])*stderrs[i];
 
-    double tmp1 = obsdata[i] - caldata[i]; // Rp
+    double tmp1 = fabs(obsdata[i] - caldata[i]); // Rp
     double tmp2 = stderrs[i]*tmp1*tmp1;    // Mp
     // double tmp3 = fabs( tmp1*(obsdata[i] - bkgddata[i])/obsdata[i] );
     // double tmp4 = stderrs[i]*tmp3*tmp3;
@@ -2987,6 +3198,7 @@ void LeBailFit::calculatePowderPatternStatistic(FunctionValues& values, vector<d
   rwp = sqrt(rwp/sumwgtobsdatasq);
 
   // 3. Calculate peak related Rwp
+  /* Disabled
   // a) Highest peak
   double maxheight = 0.0;
   for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
@@ -3016,6 +3228,7 @@ void LeBailFit::calculatePowderPatternStatistic(FunctionValues& values, vector<d
 
   g_log.information() << "Complete Rwp = " << rwp << "; Peak only Rwp = " << peakrwp
                       << " Number of points included = " << numcovered << " out of " << numdata << endl;
+  */
 
   return;
 }
@@ -3033,7 +3246,7 @@ void LeBailFit::proposeNewValues(vector<string> mcgroup, double m_totRwp, map<st
     // parameter information
     string paramname = mcgroup[i];
     Parameter param = curparammap[paramname];
-    double stepsize = m_dampingFactor * m_totRwp * (param.value * param.mcX1 + param.mcX0) * randomnumber;
+    double stepsize = m_dampingFactor * m_totRwp * (param.value * param.mcA1 + param.mcA0) * randomnumber;
     double newvalue = param.value + stepsize;
 
     // restriction
@@ -3080,8 +3293,8 @@ bool LeBailFit::acceptOrDeny(double currwp, double newrwp)
   {
     // Higher Rwp. Take a chance to accept
     double dice = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
-    // double bar = exp(-(newrwp-currwp)/(currwp*m_Temperature));
-    double bar = exp(-(newrwp-currwp));
+    double bar = exp(-(newrwp-currwp)/(currwp*m_Temperature));
+    // double bar = exp(-(newrwp-currwp)/m_bestRwp);
     // g_log.notice() << "[DBx329] Bar = " << bar << ", Dice = " << dice << endl;
     if (dice < bar)
     {

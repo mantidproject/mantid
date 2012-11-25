@@ -64,8 +64,8 @@ namespace CurveFitting
     double error;
     // Monte Carlo
     bool nonnegative;
-    double mcX0;
-    double mcX1;
+    double mcA0;
+    double mcA1;
     // Monte Carlo record
     double sumstepsize;
     double maxabsstepsize;
@@ -156,13 +156,13 @@ namespace CurveFitting
 
     //--------------  Le Bail Formular: Calculate Peak Intensities ------------
     /// Calcualte peak heights from model to data
-    void calculatePeaksIntensities(MatrixWorkspace_sptr dataws, size_t workspaceindex);
+    bool calculatePeaksIntensities(MatrixWorkspace_sptr dataws, size_t workspaceindex);
 
     /// Group peaks together
     void groupPeaks(vector<vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > > &peakgroupvec);
 
     /// Calcualate the peak heights of a group of overlapped peaks
-    void calculateGroupPeakIntensities(vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peakgroup,
+    bool calculateGroupPeakIntensities(vector<pair<double, ThermalNeutronBk2BkExpConvPV_sptr> > peakgroup,
                                        MatrixWorkspace_sptr dataws, size_t wsindex);
 
     //--------------  Import and Export ---------------------------------------
@@ -174,6 +174,9 @@ namespace CurveFitting
 
     /// Parse content in a table workspace to vector for background parameters
     void parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws, vector<double>& bkgdorderparams);
+
+    /// Parse TableWorkspace for Monte Carlo simulation related parameters' value
+    void parseMonteCarloParameterTable(TableWorkspace_sptr mctablews);
 
     /// Create and set up output table workspace for peaks
     void exportBraggPeakParameterToTable();
@@ -198,7 +201,7 @@ namespace CurveFitting
     void setupRandomWalkStrategy();
 
     /// Main for random walk process
-    void randomWalkMinimzer(size_t maxcycles, size_t wsindex, map<string, Parameter> &parammap);
+    void execRandomWalkMinimizer(size_t maxcycles, size_t wsindex, map<string, Parameter> &parammap);
 
     /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
     bool calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws,
@@ -315,6 +318,12 @@ namespace CurveFitting
     /// Number of minimization steps.  For both MC and regular
     size_t m_numMinimizeSteps;
 
+    /// Monte Carlo temperature
+    double m_Temperature;
+
+    /// Flag to use Annealing Simulation (i.e., use automatic adjusted temperature)
+    bool m_useAnnealing;
+
   };
 
   /// Auxiliary.  Split composite function name to function index and parameter name
@@ -325,6 +334,10 @@ namespace CurveFitting
 
   /// Write a set of (XY) data to a column file
   void exportXYDataToFile(vector<double> vecX, vector<double> vecY, string filename);
+
+  /// Convert a Table to space to some vectors of maps
+  void convertTableWorkspaceToMaps(TableWorkspace_sptr tablews, vector<map<string, int> > intmaps,
+                                   vector<map<string, string> > strmaps, vector<map<string, double> > dblmaps);
 
 } // namespace CurveFitting
 } // namespace Mantid
