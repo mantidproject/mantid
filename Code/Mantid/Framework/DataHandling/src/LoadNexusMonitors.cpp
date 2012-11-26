@@ -265,7 +265,7 @@ void LoadNexusMonitors::exec()
         if (pulsetime < lastpulsetime)
           pulsetimesincreasing = false;
         lastpulsetime = pulsetime;
-        event_list.addEventQuickly(DataObjects::TofEvent(time_of_flight[i], pulsetime));
+        event_list.addEventQuickly(DataObjects::TofEvent(time_of_flight[j], pulsetime));
       }
       if (pulsetimesincreasing)
         event_list.setSortOrder(DataObjects::PULSETIME_SORT);
