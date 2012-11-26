@@ -1681,6 +1681,19 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
   }
   file.closeData();
 
+  // get the notes
+  try {
+    file.openData("notes");
+    if (file.getInfo().type == ::NeXus::CHAR) {
+      string notes = file.getStrData();
+      if (!notes.empty())
+        WS->mutableRun().addProperty("file_notes", notes);
+    }
+    file.closeData();
+  } catch (::NeXus::Exception &e) {
+    // let it drop on floor
+  }
+
   // Get the run number
   file.openData("run_number");
   string run("");
