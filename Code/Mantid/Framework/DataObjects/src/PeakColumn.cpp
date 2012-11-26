@@ -25,24 +25,30 @@ namespace DataObjects
       static std::map<std::string, std::string> index;
       if(index.empty())
       {
-        // Assume double if not in this map
-        index.insert(std::make_pair("DetID", "int"));
-        index.insert(std::make_pair("RunNumber", "int"));
-        index.insert(std::make_pair("h", "double"));
-        index.insert(std::make_pair("k", "double"));
-        index.insert(std::make_pair("l", "double"));
-        index.insert(std::make_pair("Wavelength", "double"));
-        index.insert(std::make_pair("Energy", "double"));
-        index.insert(std::make_pair("TOF", "double"));
-        index.insert(std::make_pair("DSpacing", "double"));
-        index.insert(std::make_pair("Intens", "double"));
-        index.insert(std::make_pair("SigInt", "double"));
-        index.insert(std::make_pair("BinCount", "double"));
-        index.insert(std::make_pair("BankName", "str"));
-        index.insert(std::make_pair("Row", "double"));
-        index.insert(std::make_pair("Col", "double"));
-        index.insert(std::make_pair("QLab", "V3D"));
-        index.insert(std::make_pair("QSample", "V3D"));
+        PARALLEL_CRITICAL(fill_column_index_map)
+        {
+          if (index.empty()) // check again inside the critical block
+          {
+            // Assume double if not in this map
+            index.insert(std::make_pair("DetID", "int"));
+            index.insert(std::make_pair("RunNumber", "int"));
+            index.insert(std::make_pair("h", "double"));
+            index.insert(std::make_pair("k", "double"));
+            index.insert(std::make_pair("l", "double"));
+            index.insert(std::make_pair("Wavelength", "double"));
+            index.insert(std::make_pair("Energy", "double"));
+            index.insert(std::make_pair("TOF", "double"));
+            index.insert(std::make_pair("DSpacing", "double"));
+            index.insert(std::make_pair("Intens", "double"));
+            index.insert(std::make_pair("SigInt", "double"));
+            index.insert(std::make_pair("BinCount", "double"));
+            index.insert(std::make_pair("BankName", "str"));
+            index.insert(std::make_pair("Row", "double"));
+            index.insert(std::make_pair("Col", "double"));
+            index.insert(std::make_pair("QLab", "V3D"));
+            index.insert(std::make_pair("QSample", "V3D"));
+          }
+        }
       }
       auto iter = index.find(name);
       if(iter != index.end())
