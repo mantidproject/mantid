@@ -300,7 +300,7 @@ namespace DataObjects
   void PeaksWorkspace::addPeakColumn(const std::string& name)
   {
     // Create the PeakColumn.
-    columns.push_back(boost::make_shared<DataObjects::PeakColumn>(this->peaks, name));
+    columns.push_back(boost::shared_ptr<DataObjects::PeakColumn>(new DataObjects::PeakColumn(this->peaks, name)));
     // Cache the names
     columnNames.push_back(name);
   }
