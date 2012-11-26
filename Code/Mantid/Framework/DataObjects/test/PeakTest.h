@@ -34,6 +34,7 @@ public:
     TS_ASSERT_EQUALS(p.getDetectorID(), 10000)
     TS_ASSERT_EQUALS(p.getDetector()->getID(), 10000)
     TS_ASSERT_EQUALS(p.getInstrument(), inst)
+    check_Contributing_Detectors(p, std::vector<int>(1, 10000));
   }
 
   void test_constructorHKL()
@@ -46,6 +47,7 @@ public:
     TS_ASSERT_EQUALS(p.getDetectorID(), 10000)
     TS_ASSERT_EQUALS(p.getDetector()->getID(), 10000)
     TS_ASSERT_EQUALS(p.getInstrument(), inst)
+    check_Contributing_Detectors(p, std::vector<int>(1, 10000));
   }
 
   void test_constructorHKLGon()
@@ -67,6 +69,7 @@ public:
     TS_ASSERT_EQUALS(p.getDetector()->getID(), 10000)
     TS_ASSERT_EQUALS(p.getInstrument(), inst)
     TS_ASSERT_EQUALS( p.getGoniometerMatrix(), mat);
+    check_Contributing_Detectors(p, std::vector<int>(1, 10000));
   }
 
   void test_copyConstructor()
@@ -85,6 +88,8 @@ public:
     TS_ASSERT_EQUALS(p.getRunNumber(), p2.getRunNumber());
     TS_ASSERT_EQUALS(p.getDetector(), p2.getDetector())
     TS_ASSERT_EQUALS(p.getInstrument(), p2.getInstrument())
+
+    check_Contributing_Detectors(p2, std::vector<int>(1, 10102));
   }
 
   void test_getValueByColName()
@@ -125,6 +130,15 @@ public:
   {
     Peak p(inst, 10000, 2.0);
     TS_ASSERT_THROWS_ANYTHING( p.setDetectorID(7) );
+  }
+
+  void test_setDetector_Adds_ID_To_Contributing_List_And_Does_Not_Remove_Old_From_Contrib_List()
+  {
+    int expectedIDs[2] = {10000, 10001};
+    Peak peak(inst, expectedIDs[0], 2.0);
+    peak.setDetectorID(expectedIDs[1]);
+
+    check_Contributing_Detectors(peak, std::vector<int>(expectedIDs,expectedIDs+2));
   }
 
   void test_runNumber()
@@ -292,7 +306,16 @@ public:
     TS_ASSERT_EQUALS( p2.getDetectorID(), 19999);
   }
 
-
+private:
+  void check_Contributing_Detectors(const Peak & peak, const std::vector<int> & expected)
+  {
+    auto peakIDs = peak.getContributingDetIDs();
+    for(auto it = expected.begin(); it != expected.end(); ++it)
+    {
+      const int id = *it;
+      TSM_ASSERT_EQUALS("Expected " + boost::lexical_cast<std::string>(id) + " in contribution list", 1, peakIDs.count(id))
+    }
+  }
 };
 
 

@@ -33,15 +33,17 @@ namespace DataObjects
     Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Kernel::V3D HKL, Mantid::Kernel::Matrix<double> goniometer);
     Peak(Geometry::Instrument_const_sptr m_inst, double scattering, double m_Wavelength);
 
-    // Copy constructor is compiler-provided.
-    Peak(const Peak & other);
+    // Construct a peak from a reference to the interface
     Peak(const API::IPeak & ipeak);
     virtual ~Peak();
 
-    void setInstrument(Geometry::Instrument_const_sptr inst);
-
+    void setDetectorID(int id);
     int getDetectorID() const;
-    void setDetectorID(int m_DetectorID);
+    void addContributingDetID(const int id);
+    void removeContributingDetector(const int id);
+    const std::set<int> & getContributingDetIDs() const;
+
+    void setInstrument(Geometry::Instrument_const_sptr inst);
     Geometry::IDetector_const_sptr getDetector() const;
     Geometry::Instrument_const_sptr getInstrument() const;
 
@@ -104,7 +106,7 @@ namespace DataObjects
 
     double getValueByColName(const std::string & name) const;
 
-  protected:
+  private:
     /// Shared pointer to the instrument (for calculating some values )
     Geometry::Instrument_const_sptr m_inst;
 
@@ -171,6 +173,8 @@ namespace DataObjects
     double orig_K;
     double orig_L;
 
+    /// List of contributing detectors IDs
+    std::set<int> m_detIDs;
   };
 
 

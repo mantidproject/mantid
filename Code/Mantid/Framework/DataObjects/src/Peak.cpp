@@ -159,60 +159,25 @@ namespace DataObjects
     detPos=V3D(sin(scattering),0.0,cos(scattering));
   }
 
-
-  //----------------------------------------------------------------------------------------------
-  /** Constructor making a Peak from IPeak interface
-   *
-   * @param peak :: const reference to an IPeak object
-   * @return
-   */
-  Peak::Peak(const Peak & peak):
-    m_inst(peak.m_inst),
-    m_det(peak.m_det),
-    m_BankName(peak.m_BankName),
-    m_DetectorID(peak.m_DetectorID),
-    m_H(peak.m_H),
-    m_K(peak.m_K),
-    m_L(peak.m_L),
-    m_Intensity(peak.m_Intensity),
-    m_SigmaIntensity(peak.m_SigmaIntensity),
-    m_BinCount(peak.m_BinCount),
-    m_InitialEnergy(peak.m_InitialEnergy),
-    m_FinalEnergy(peak.m_FinalEnergy),
-    m_GoniometerMatrix(peak.m_GoniometerMatrix),
-    m_InverseGoniometerMatrix(peak.m_InverseGoniometerMatrix),
-    m_RunNumber(peak.m_RunNumber),
-    m_MonitorCount(peak.m_MonitorCount),
-    m_Row(peak.m_Row),
-    m_Col(peak.m_Col),
-    sourcePos(peak.sourcePos),
-    samplePos(peak.samplePos),
-    detPos(peak.detPos),
-    orig_H(peak.orig_H),
-    orig_K(peak.orig_K),
-    orig_L(peak.orig_L)
-  {
-  }
-
   //----------------------------------------------------------------------------------------------
   /** Constructor making a Peak from IPeak interface
    *
    * @param ipeak :: const reference to an IPeak object
    * @return
    */
-  Peak::Peak(const API::IPeak & ipeak):
-  m_H(ipeak.getH()),
-  m_K(ipeak.getK()),
-  m_L(ipeak.getL()),
-  m_Intensity(ipeak.getIntensity()),
-  m_SigmaIntensity(ipeak.getSigmaIntensity()),
-  m_BinCount(ipeak.getBinCount()),
-  m_InitialEnergy(ipeak.getInitialEnergy()),
-  m_FinalEnergy(ipeak.getFinalEnergy()),
-  m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
-  m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
-  m_RunNumber(ipeak.getRunNumber()),
-  m_MonitorCount(ipeak.getMonitorCount())
+  Peak::Peak(const API::IPeak & ipeak): IPeak(ipeak),
+    m_H(ipeak.getH()),
+    m_K(ipeak.getK()),
+    m_L(ipeak.getL()),
+    m_Intensity(ipeak.getIntensity()),
+    m_SigmaIntensity(ipeak.getSigmaIntensity()),
+    m_BinCount(ipeak.getBinCount()),
+    m_InitialEnergy(ipeak.getInitialEnergy()),
+    m_FinalEnergy(ipeak.getFinalEnergy()),
+    m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
+    m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
+    m_RunNumber(ipeak.getRunNumber()),
+    m_MonitorCount(ipeak.getMonitorCount())
   {
     if(fabs(m_InverseGoniometerMatrix.Invert())<1e-8) throw std::invalid_argument("Peak::ctor(): Goniometer matrix must non-singular.");
     setInstrument(ipeak.getInstrument());
@@ -250,39 +215,19 @@ namespace DataObjects
 
 
   //----------------------------------------------------------------------------------------------
-  /** Set the instrument (and save the source/sample pos).
-   * Call setDetectorID AFTER this call.
-   *
-   * @param inst :: Instrument sptr to use
+  /** Set the detector ID of the pixel at the centre of the peak and look up and cache
+   *  values related to it. It also adds it to the list of contributing detectors for this peak but
+   *  does NOT remove the old centre.
+   * @param id :: ID of detector at the centre of the peak.
    */
-  void Peak::setInstrument(Geometry::Instrument_const_sptr inst)
+  void Peak::setDetectorID(int id)
   {
-    m_inst = inst;
-    if (!inst) throw std::runtime_error("Peak::setInstrument(): No instrument is set!");
-
-    // Cache some positions
-    const Geometry::IObjComponent_const_sptr sourceObj = m_inst->getSource();
-    if (sourceObj == NULL)
-      throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get source component from instrument");
-    const Geometry::IObjComponent_const_sptr sampleObj = m_inst->getSample();
-    if (sampleObj == NULL)
-      throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get sample component from instrument");
-
-    sourcePos = sourceObj->getPos();
-    samplePos = sampleObj->getPos();
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Set the detector ID and look up and cache values related to it.
-   *
-   * @param m_DetectorID :: ID of detector at the center of the peak
-   */
-  void Peak::setDetectorID(int m_DetectorID)
-  {
-    this->m_DetectorID = m_DetectorID;
     if (!m_inst) throw std::runtime_error("Peak::setInstrument(): No instrument is set!");
-    this->m_det = m_inst->getDetector(this->m_DetectorID);
+    this->m_det = m_inst->getDetector(id);
     if (!m_det) throw std::runtime_error("Peak::setInstrument(): No detector was found!");
+
+    this->m_DetectorID = id;
+    addContributingDetID(id);
 
     detPos = m_det->getPos();
 
@@ -320,6 +265,73 @@ namespace DataObjects
     m_Col = xy.first;
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Get the ID of the detector at the center of the peak  */
+  int Peak::getDetectorID() const
+  {
+    return m_DetectorID;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Add a detector ID that contributed to this peak
+   * @param id :: The ID of a detector that contributed to this peak
+   */
+  void Peak::addContributingDetID(const int id)
+  {
+    m_detIDs.insert(id);
+  }
+
+  //-------------------------------------------------------------------------------------
+  /**
+   * Removes an ID from the list of contributing detectors
+   * @param id :: This ID is removed from the list.
+   */
+  void Peak::removeContributingDetector(const int id)
+  {
+    m_detIDs.erase(id);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /**
+   * Return the set of detector IDs that contribute to this peak
+   * @returns A set of unique detector IDs that form this peak
+   */
+  const std::set<int> & Peak::getContributingDetIDs() const
+  {
+    return m_detIDs;
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Set the instrument (and save the source/sample pos).
+   * Call setDetectorID AFTER this call.
+   *
+   * @param inst :: Instrument sptr to use
+   */
+  void Peak::setInstrument(Geometry::Instrument_const_sptr inst)
+  {
+    m_inst = inst;
+    if (!inst) throw std::runtime_error("Peak::setInstrument(): No instrument is set!");
+
+    // Cache some positions
+    const Geometry::IObjComponent_const_sptr sourceObj = m_inst->getSource();
+    if (sourceObj == NULL)
+      throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get source component from instrument");
+    const Geometry::IObjComponent_const_sptr sampleObj = m_inst->getSample();
+    if (sampleObj == NULL)
+      throw Exception::InstrumentDefinitionError("Peak::setInstrument(): Failed to get sample component from instrument");
+
+    sourcePos = sourceObj->getPos();
+    samplePos = sampleObj->getPos();
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Return a shared ptr to the detector at center of peak. */
+  Geometry::IDetector_const_sptr Peak::getDetector() const { return m_det; }
+
+  /** Return a shared ptr to the instrument for this peak. */
+  Geometry::Instrument_const_sptr Peak::getInstrument() const { return m_inst; }
 
   // -------------------------------------------------------------------------------------
   /** Calculate the neutron wavelength (in angstroms) at the peak
@@ -532,15 +544,6 @@ namespace DataObjects
     return false;
   }
 
-
-
-  //----------------------------------------------------------------------------------------------
-  /** Return a shared ptr to the detector at center of peak. */
-  Geometry::IDetector_const_sptr Peak::getDetector() const { return m_det; }
-
-  /** Return a shared ptr to the instrument for this peak. */
-  Geometry::Instrument_const_sptr Peak::getInstrument() const { return m_inst; }
-
   //----------------------------------------------------------------------------------------------
   /** Return the run number this peak was measured at. */
   int Peak::getRunNumber() const
@@ -561,10 +564,6 @@ namespace DataObjects
   void Peak::setMonitorCount(double m_MonitorCount)
   {    this->m_MonitorCount = m_MonitorCount;  }
 
-  //----------------------------------------------------------------------------------------------
-  /** Get the ID of the detector at the center of the peak  */
-  int Peak::getDetectorID() const
-  {    return m_DetectorID;  }
 
   //----------------------------------------------------------------------------------------------
   /** Get the final neutron energy */
@@ -800,6 +799,7 @@ namespace DataObjects
     else
       throw std::runtime_error("Peak::getValueByColName() unknown column or column is not a number: " + name);
   }
+
 
 
 } // namespace Mantid
