@@ -76,6 +76,10 @@ public:
   virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const = 0;
   /// Gets the value at the specified index. Just calls operator() but is easier to use with Axis pointers
   double getValue(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
+  /// returns min value defined on axis
+  virtual double getMin()const = 0; 
+  /// returns max value defined on axis
+  virtual double getMax()const = 0; 
   /// Sets the value at the specified index
   /// @param index :: The index
   /// @param value :: The new value

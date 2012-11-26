@@ -65,6 +65,10 @@ public:
   /// Create bin boundaries from the point values
   std::vector<double> createBinBoundaries() const;
   const std::vector<double> & getValues() const;
+   /// returns min value defined on axis
+  double getMin()const{return m_values.front() ; }
+   /// returns max value defined on axis
+  double getMax()const{return m_values.back(); }
 private:
   /// Private, undefined copy assignment operator
   const NumericAxis& operator=(const NumericAxis&);

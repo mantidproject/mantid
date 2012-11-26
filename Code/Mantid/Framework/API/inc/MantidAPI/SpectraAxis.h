@@ -78,7 +78,10 @@ public:
   void getIndexSpectraMap(index2spec_map& map) const;
 
   void populateOneToOne(int64_t start, int64_t end);
-
+  /// returns min value defined on axis
+  double getMin()const{return double(m_values.front()) ; }
+   /// returns max value defined on axis
+  double getMax()const{return double(m_values.back()); }
 private:
   /// Default constructor
   SpectraAxis();
