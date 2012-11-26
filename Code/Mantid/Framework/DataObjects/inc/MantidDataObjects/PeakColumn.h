@@ -5,6 +5,7 @@
 #include "MantidAPI/Column.h"
 #include "MantidDataObjects/Peak.h"
 
+#include <boost/variant.hpp>
 
 namespace Mantid
 {
@@ -24,13 +25,14 @@ namespace DataObjects
   {
 
   public:
-    PeakColumn(std::vector<Peak> & peaks, std::string name);
+    /// Construct a column with a reference to the peaks list, a name & type
+    PeakColumn(std::vector<Peak> & peaks, const std::string & name);
     virtual ~PeakColumn();
     
 
     /// Number of individual elements in the column.
     virtual size_t size() const
-    { return peaks.size(); }
+    { return m_peaks.size(); }
 
     /// Returns typeid for the data in the column
     virtual const std::type_info& get_type_info()const;
@@ -74,7 +76,12 @@ namespace DataObjects
 
   private:
     /// Reference to the peaks object saved in the PeaksWorkspace.
-    std::vector<Peak> & peaks;
+    std::vector<Peak> & m_peaks;
+
+    /// Type of the row cache value
+    typedef boost::variant<double,int,std::string,Kernel::V3D> CacheValueType;
+    ///
+    mutable std::list<CacheValueType> m_oldRows;
   };
 
 

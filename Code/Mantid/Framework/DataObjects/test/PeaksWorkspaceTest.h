@@ -139,8 +139,7 @@ public:
 
   void test_Save_Unmodified_PeaksWorkspace_Nexus()
   {
-    const std::string inputWS("peaksWS_test_saveNexus");
-    auto pw = createSaveTestPeaksWorkspace(inputWS);
+    auto pw = createSaveTestPeaksWorkspace();
 
     const V3D sampleFrameQ = pw->getPeak(0).getQSampleFrame();
     const V3D labFrameQ = pw->getPeak(0).getQLabFrame();
@@ -162,7 +161,6 @@ public:
     TS_ASSERT_EQUALS( lpw->getPeak(3).getDetectorID(), 1400);
     TS_ASSERT_DELTA( lpw->getPeak(3).getWavelength(), 3.0, 1e-5);
   }
-
 
   void test_getSetLogAccess()
   {
@@ -244,7 +242,7 @@ public:
 
 private:
 
-   PeaksWorkspace_sptr createSaveTestPeaksWorkspace(const std::string & adsName)
+   PeaksWorkspace_sptr createSaveTestPeaksWorkspace()
    {
      // get an instrument which we load into a dummy workspace and get it from that workspace
      const std::string inst_filename = "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING5.xml";
@@ -274,7 +272,6 @@ private:
      pw->addPeak(p3);
      pw->addPeak(p4);
 
-     AnalysisDataService::Instance().add(adsName, pw);
      return pw;
    }
 

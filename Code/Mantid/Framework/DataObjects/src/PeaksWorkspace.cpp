@@ -89,30 +89,6 @@ namespace DataObjects
     return boost::shared_ptr<PeaksWorkspace>(new PeaksWorkspace(*this));
   }
 
-  //---------------------------------------------------------------------------------------------
-  /** Initialize all columns */
-  void PeaksWorkspace::initColumns()
-  {
-    // Note: These column names must match what PeakColumn expects!
-    addColumn( "int", "RunNumber");
-    addColumn( "int", "DetID");
-    addColumn( "double", "h");
-    addColumn( "double", "k");
-    addColumn( "double", "l");
-    addColumn( "double", "Wavelength");
-    addColumn( "double", "Energy");
-    addColumn( "double", "TOF");
-    addColumn( "double", "DSpacing");
-    addColumn( "double", "Intens");
-    addColumn( "double", "SigInt");
-    addColumn( "double", "BinCount");
-    addColumn( "str", "BankName");
-    addColumn( "double", "Row");
-    addColumn( "double", "Col");
-    addColumn( "V3D", "QLab");
-    addColumn( "V3D", "QSample");
-  }
-
   //=====================================================================================
   //=====================================================================================
   /** Comparator class for sorting peaks by one or more criteria
@@ -290,21 +266,43 @@ namespace DataObjects
   /** Destructor */
   PeaksWorkspace::~PeaksWorkspace()
   {
-//    ClearDeleteCalibrationData();
   }
 
   //---------------------------------------------------------------------------------------------
+  /** Initialize all columns */
+  void PeaksWorkspace::initColumns()
+  {
+    // Note: The column types are controlled in PeakColumn.cpp
+    addPeakColumn("RunNumber");
+    addPeakColumn("DetID");
+    addPeakColumn("h");
+    addPeakColumn("k");
+    addPeakColumn("l");
+    addPeakColumn("Wavelength");
+    addPeakColumn("Energy");
+    addPeakColumn("TOF");
+    addPeakColumn("DSpacing");
+    addPeakColumn("Intens");
+    addPeakColumn("SigInt");
+    addPeakColumn("BinCount");
+    addPeakColumn("BankName");
+    addPeakColumn("Row");
+    addPeakColumn("Col");
+    addPeakColumn("QLab");
+    addPeakColumn("QSample");
+  }
 
   //---------------------------------------------------------------------------------------------
-  /** Add a column (used by constructor). */
-  bool PeaksWorkspace::addColumn(const std::string& type, const std::string& name)
+  /**
+   * Add a PeakColumn
+   * @param name :: The name of the column
+   **/
+  void PeaksWorkspace::addPeakColumn(const std::string& name)
   {
-    UNUSED_ARG(type)
     // Create the PeakColumn.
-    columns.push_back( boost::shared_ptr<Mantid::DataObjects::PeakColumn>(new Mantid::DataObjects::PeakColumn( this->peaks, name) ) );
+    columns.push_back(boost::make_shared<DataObjects::PeakColumn>(this->peaks, name));
     // Cache the names
     columnNames.push_back(name);
-    return true;
   }
 
   //---------------------------------------------------------------------------------------------
