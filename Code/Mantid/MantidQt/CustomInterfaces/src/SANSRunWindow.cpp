@@ -809,12 +809,22 @@ bool SANSRunWindow::loadUserFile()
   m_uiForm.smpl_offset->setText(QString::number(dbl_param*unit_conv));
 
   //Centre coordinates
+  // from the ticket #5942 both detectors have center coordinates
   dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton()._beam_finder.get_beam_center()[0]").toDouble();
-  m_uiForm.beam_x->setText(QString::number(dbl_param*1000.0));
+    "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
+  m_uiForm.rear_beam_x->setText(QString::number(dbl_param*1000.0));
   dbl_param = runReduceScriptFunction(
-    "print i.ReductionSingleton()._beam_finder.get_beam_center()[1]").toDouble();
-  m_uiForm.beam_y->setText(QString::number(dbl_param*1000.0));
+    "print i.ReductionSingleton().get_beam_center('rear')[1]").toDouble();
+  m_uiForm.rear_beam_y->setText(QString::number(dbl_param*1000.0));
+  // front
+  dbl_param = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center('front')[0]").toDouble();
+  m_uiForm.front_beam_x->setText(QString::number(dbl_param*1000.0));
+  dbl_param = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center('front')[1]").toDouble();
+  m_uiForm.front_beam_y->setText(QString::number(dbl_param*1000.0));
+
+
 
   //Gravity switch
   QString param = runReduceScriptFunction(
@@ -1909,6 +1919,13 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   if ( m_uiForm.detbank_sel->currentIndex() < 2 )
     exec_reduce = "i.ReductionSingleton().instrument.setDetector('" +
                             m_uiForm.detbank_sel->currentText() + "')\n";
+  else
+    // currently, if currentIndex has MAIN,HAB,BOTH,MERGED options. If the user
+    // selects BOTH or MERGED the reduction will start by the DefaultDetector
+    // that is the low-angle detector(MAIN). This is important, because, when loading
+    // the data, the reducer needs to know what is the bank detector selected in order
+    // to correctly answer the question: get_beam_center. Added for #5942
+    exec_reduce = "i.ReductionSingleton().instrument.setDefaultDetector()\n";
 
   const QString outType(type == OneD ? "1D" : "2D");
   exec_reduce += "i.ReductionSingleton().to_Q.output_type='"+outType+"'\n";
@@ -2020,6 +2037,17 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   exec_reduce += "i.SetTransSpectrum('" + m_uiForm.trans_monitor->text().trimmed() + "',";
   exec_reduce += m_uiForm.trans_interp->isChecked() ? "True" : "False";
   exec_reduce += ")\n";
+
+  // set the user defined center (Geometry Tab)
+  // this information is used just after loading the data in order to move to the center
+  // Introduced for #5942
+  QString set_centre = QString("i.SetCentre('%1','%2','rear') \ni.SetCentre('%3','%4','front')\n")
+    .arg( m_uiForm.rear_beam_x->text())
+    .arg( m_uiForm.rear_beam_y->text())
+    .arg( m_uiForm.front_beam_x->text())
+    .arg( m_uiForm.front_beam_y->text());
+  exec_reduce += set_centre;
+
   //mask strings that the user has entered manually on to the GUI
   addUserMaskStrings(exec_reduce,"i.Mask",DefaultMask);
   return exec_reduce;
@@ -2320,16 +2348,49 @@ QString SANSRunWindow::getInstrumentClass() const
 }
 void SANSRunWindow::handleRunFindCentre()
 {
+  QLineEdit * beam_x;
+  QLineEdit * beam_y;
+
   // this function looks for and reports any errors to the user
   if ( ! entriesAreValid() )
   {
     return;
   }
 
-  if( m_uiForm.beamstart_box->currentIndex() == 1 && (m_uiForm.beam_x->text().isEmpty() || m_uiForm.beam_y->text().isEmpty()) )
-  {
-    showInformationBox("Current centre postion is invalid, please check input.");
-    return;
+  if (m_uiForm.beamstart_box->currentIndex() == 1){
+    // Index == Start looking the position from the current one
+    // check if the user provided the current position:
+    // see wich radio is selected (REAR or FRONT) and confirm 
+    // that the position x and y are given.
+    if ((m_uiForm.rear_radio->isChecked() && (m_uiForm.rear_beam_x->text().isEmpty() || 
+                                              m_uiForm.rear_beam_y->text().isEmpty()) )
+         ||
+         (m_uiForm.front_radio->isChecked() && (m_uiForm.front_beam_x->text().isEmpty() ||
+                                                m_uiForm.front_beam_y->text().isEmpty())))
+      {
+        showInformationBox("Current centre postion is invalid, please check input.");
+        return;    
+      }
+  }
+  
+  /*
+    A hidden feature. The handleLoadButtonClick method, set the detector 
+    based on the m_uiForm.detbank_sel, wich will influentiate the loading 
+    algorithm and the movement of the detector bank. So, we have to 
+    set the detector bank according to the selected Center.     
+   */
+  QString coordinates_python_code;
+  if( m_uiForm.rear_radio->isChecked()){ // REAR selected -> detbank_sel <- REAR
+    m_uiForm.detbank_sel->setCurrentIndex(0); 
+    beam_x = m_uiForm.rear_beam_x;
+    beam_y = m_uiForm.rear_beam_y;
+    coordinates_python_code = "print i.ReductionSingleton().get_beam_center('rear')[0];print i.ReductionSingleton().get_beam_center('rear')[1]";
+  }
+  else{
+    coordinates_python_code = "print i.ReductionSingleton().get_beam_center('front')[0];print i.ReductionSingleton().get_beam_center('front')[1]" ;   
+    m_uiForm.detbank_sel->setCurrentIndex(1); // FRONT selected -> detbank_sel <- FRONT
+    beam_x = m_uiForm.front_beam_x;
+    beam_y = m_uiForm.front_beam_y;
   }
 
   // Start iteration
@@ -2370,6 +2431,11 @@ void SANSRunWindow::handleRunFindCentre()
     m_uiForm.beam_iter->setText("15");
   }
 
+  // FIXME: disable the flood file for the front detector. #6061
+  if (m_uiForm.front_radio->isChecked())
+    py_code += "i.SetDetectorFloodFile('')\n";
+
+
   //Find centre function
   py_code += "i.FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() + ",rupp=" + m_uiForm.beam_rmax->text() +
       ",MaxIter=" + m_uiForm.beam_iter->text() + ",";
@@ -2381,7 +2447,7 @@ void SANSRunWindow::handleRunFindCentre()
   }
   else
   {
-    py_code += "xstart=float(" + m_uiForm.beam_x->text() + ")/1000.,ystart=float(" + m_uiForm.beam_y->text() + ")/1000.)";
+    py_code += "xstart=float(" + beam_x->text() + ")/1000.,ystart=float(" + beam_y->text() + ")/1000.)";
   }
 
   updateCentreFindingStatus("::SANS::Iteration 1");
@@ -2399,7 +2465,7 @@ void SANSRunWindow::handleRunFindCentre()
 	     SLOT(updateCentreFindingStatus(const QString&)));
   connect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
 
-  QString coordstr = runReduceScriptFunction("print i.ReductionSingleton()._beam_finder.get_beam_center()[0];print i.ReductionSingleton()._beam_finder.get_beam_center()[1]");
+  QString coordstr = runReduceScriptFunction(coordinates_python_code); 
   
   QString result("");
   if( coordstr.isEmpty() )
@@ -2414,9 +2480,9 @@ void SANSRunWindow::handleRunFindCentre()
     if( xycoords.count() == 2 )
     {
       double coord = xycoords[0].toDouble();
-      m_uiForm.beam_x->setText(QString::number(coord*1000.));
+      beam_x->setText(QString::number(coord*1000.));
       coord = xycoords[1].toDouble();
-      m_uiForm.beam_y->setText(QString::number(coord*1000.));
+      beam_y->setText(QString::number(coord*1000.));
       result = "::SANS::Coordinates updated";
     }
     else
@@ -2618,6 +2684,24 @@ void SANSRunWindow::handleInstrumentChange()
   }
   // flag that the user settings file needs to be loaded for this instrument
   m_cfg_loaded = false;
+
+  // disable the Geometry -> Set Centre widgets that can not be edited
+  // for SANS2D experiments.
+  QWidget * front_center_widgets [] = {m_uiForm.front_beam_x, m_uiForm.front_beam_y, m_uiForm.front_radio};
+  bool loq_selected = (instClass == "LOQ()"); 
+  for (int i=0; i<3; i++)
+    front_center_widgets[i]->setEnabled(loq_selected);
+  // Set the label of the radio buttons according to the 
+  // beamline usage: 
+  // REAR/FRONT -> SANS2D
+  // MAIN/HAB -> LOQ
+  if (loq_selected){
+    m_uiForm.front_radio->setText("&HAB");
+    m_uiForm.rear_radio->setText("&Main"); 
+  }else{
+  m_uiForm.front_radio->setText("&Front");
+    m_uiForm.rear_radio->setText("&Rear"); 
+  }
 }
 /** Record if the user has changed the default filename, because then we don't
 *  change it
@@ -2976,8 +3060,8 @@ bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const 
   assignCom.append(", period = " + QString::number(period)+")");
 
   //assign the workspace name to a Python variable and read back some details
-  QString run_info = "i.SetCentre('" + m_uiForm.beam_x->text();
-  run_info += "','"+m_uiForm.beam_y->text()+"')\n";
+
+  QString run_info;
   run_info += "SCATTER_SAMPLE, logvalues = " + assignCom+";print '"+PYTHON_SEP+"',SCATTER_SAMPLE,'"+PYTHON_SEP+"',logvalues";
   run_info = runReduceScriptFunction(run_info);
   if (run_info.startsWith("error", Qt::CaseInsensitive))

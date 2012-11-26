@@ -281,11 +281,21 @@ def AssignSample(sample_run, reload = True, period = isis_reduction_steps.LoadRu
     return ReductionSingleton().get_sample().wksp_name, \
         ReductionSingleton().get_sample().log
 
-def SetCentre(xcoord, ycoord):
+def SetCentre(xcoord, ycoord, bank = 'rear'):
+    """
+    Configure the Beam Center position. It support the configuration of the centre for 
+    the both detectors bank (low-angle bank and high-angle bank detectors)
+
+    It allows defining the position for both detector banks. 
+    :param xcoord: X position of beam center in the user coordinate system. 
+    :param ycoord: Y position of beam center in the user coordinate system. 
+    :param bank: The selected bank ('rear' - low angle or 'front' - high angle)
+    Introduced #5942
+    """
     _printMessage('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
 
     ReductionSingleton().set_beam_finder(sans_reduction_steps.BaseBeamFinder(
-                                float(xcoord)/1000.0, float(ycoord)/1000.0))
+                                float(xcoord)/1000.0, float(ycoord)/1000.0), bank)
 
 def GetMismatchedDetList():
     """
@@ -393,8 +403,30 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     if reduce_front_flag:
         # it is necessary to replace the Singleton if a reduction was done before
         if (reduce_rear_flag):
+            # In this case, it is necessary to reload the files, in order to move the components to the
+            # correct position defined by its get_beam_center. (ticket #5942)
+
+            # first copy the settings
             ReductionSingleton.replace(ReductionSingleton().settings())
-        
+
+            # for the LOQ instrument, if the beam centers are different, we have to reload the data.
+            if (ReductionSingleton().instrument._NAME == 'LOQ' and 
+               (ReductionSingleton().get_beam_center('rear') != ReductionSingleton().get_beam_center('front'))):
+                
+                # It is necessary to reload sample, transmission and can files.
+                #reload sample
+                issueWarning('Trying to reload workspaces')
+                ReductionSingleton().instrument.setDetector('front')
+                ReductionSingleton()._sample_run.reload(ReductionSingleton())
+                #reassign can
+                if ReductionSingleton().background_subtracter:
+                    ReductionSingleton().background_subtracter.assign_can(ReductionSingleton())
+                if ReductionSingleton().samp_trans_load:
+                    #refresh Transmission
+                    ReductionSingleton().samp_trans_load.execute(ReductionSingleton(), None)
+                if ReductionSingleton().can_trans_load:
+                    ReductionSingleton().can_trans_load.execute(ReductionSingleton(),None)
+                        
         ReductionSingleton().instrument.setDetector('front')
         SetDetectorFloodFile('') #FIXME: now the FloodFile does not refer to FRONT/HAB detectors. But, in the future, this line must be erased.
         retWSname_front = _WavRangeReduction(name_suffix)
@@ -732,7 +764,7 @@ def displayMaskFile():
     displayUserFile()
 
 def displayGeometry():
-    [x, y] = ReductionSingleton()._beam_finder.get_beam_center()
+    [x, y] = ReductionSingleton().get_beam_center()
     print 'Beam centre: [' + str(x) + ',' + str(y) + ']'
     print ReductionSingleton().get_sample().geometry
 
@@ -982,13 +1014,19 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     XSTEP = ReductionSingleton().inst.cen_find_step
     YSTEP = ReductionSingleton().inst.cen_find_step
 
-    original = ReductionSingleton()._beam_finder.get_beam_center()
+    original = ReductionSingleton().get_beam_center()
+
+    if ReductionSingleton().instrument.lowAngDetSet:
+        det_bank = 'rear'
+    else:
+        det_bank = 'front'
+
     if xstart or ystart:
         ReductionSingleton().set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(
-            float(xstart), float(ystart)))
+            float(xstart), float(ystart)),det_bank)
 
-    beamcoords = ReductionSingleton()._beam_finder.get_beam_center()
+    beamcoords = ReductionSingleton().get_beam_center()
     XNEW = beamcoords[0]
     YNEW = beamcoords[1]
     xstart = beamcoords[0]
@@ -1017,7 +1055,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         it = i
         
         centre_reduction.set_beam_finder(
-            sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
+            sans_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
 
         resX, resY = centre.SeekCentre(centre_reduction, [XNEW, YNEW])
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
@@ -1057,7 +1095,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         YNEW -= YSTEP
     
     ReductionSingleton().set_beam_finder(
-        sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
+        sans_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
     _printMessage("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
     
     return XNEW, YNEW
