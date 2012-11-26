@@ -923,6 +923,33 @@ bool SANSRunWindow::loadCSVFile()
   {
     showInformationBox("Warning: " + QString::number(errors) + " malformed lines detected in \"" + filename + "\". Lines skipped.");
   }
+ 
+  // In order to allow the user to populate the single mode Widgets from a csv file, 
+  // this code takes the first line of a valid csv batch file and insert inside the
+  // single mode widgets. It is usefull for testing.
+  QTableWidgetItem * batch_items [] ={
+    m_uiForm.batch_table->item(0,0), 
+    m_uiForm.batch_table->item(0,1),
+    m_uiForm.batch_table->item(0,2),
+    m_uiForm.batch_table->item(0,3),
+    m_uiForm.batch_table->item(0,4),
+    m_uiForm.batch_table->item(0,5)
+  };
+  MWRunFiles * run_files [] = {
+    m_uiForm.scatterSample,
+    m_uiForm.transmis,
+    m_uiForm.direct,
+    m_uiForm.scatCan, 
+    m_uiForm.transCan,
+    m_uiForm.dirCan};
+  // if the cell is not empty, set the text to the single mode file
+  for (unsigned short i=0; i<6; i++){
+    if (batch_items[i])
+      run_files[i]->setUserInput(batch_items[i]->text());
+    else
+      run_files[i]->setUserInput("");
+  }
+  
   return true;
 }
 
