@@ -1057,7 +1057,7 @@ namespace Geometry
 
 
     // do stuff a bit differently depending on which category the type belong to
-    if ( category.compare("rectangular_detector") == 0  || category.compare("rectangularDetector") == 0  || category.compare("rectangulardetector") == 0 || category.compare("RectangularDetector") == 0 )
+    if ( category.compare("RectangularDetector") == 0 || category.compare("rectangularDetector") == 0  || category.compare("rectangulardetector") == 0 || category.compare("rectangular_detector") == 0 )
     {
       //-------------- Create a RectangularDetector ------------------------------------------------
       std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem);
@@ -1135,7 +1135,7 @@ namespace Geometry
             "Duplicate detector ID found when adding RectangularDetector " + name + " in XML instrument file" + filename);
       }
     }
-    else if ( category.compare("detector") == 0 )
+    else if ( category.compare("Detector") == 0 || category.compare("detector") == 0 )
     {
       //-------------- Create a Detector ------------------------------------------------
       std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem);
@@ -1210,15 +1210,15 @@ namespace Geometry
       parent->add(comp);
 
       // check if special Source or SamplePos Component
-      if ( category.compare("Source") == 0 )
+      if ( category.compare("Source") == 0 || category.compare("source") == 0 )
       {
         m_instrument->markAsSource(comp);
       }
-      if ( category.compare("SamplePos") == 0 )
+      if ( category.compare("SamplePos") == 0 || category.compare("samplePos") == 0 )
       {
         m_instrument->markAsSamplePos(comp);
       }
-      if ( category.compare("ChopperPos") == 0 )
+      if ( category.compare("ChopperPos") == 0 || category.compare("chopperPos") == 0 )
       {
         m_instrument->markAsChopperPoint(comp);
       }
