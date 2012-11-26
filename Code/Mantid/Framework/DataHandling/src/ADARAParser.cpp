@@ -41,14 +41,29 @@ bool Parser::read(int fd, unsigned int max_read)
 	while (!max_read || bytes_read < max_read) {
 		rc = ::read(fd, m_buffer + m_len, m_size - m_len);
 		if (rc < 0) {
-			if (errno == EINTR || errno == EAGAIN ||
-						errno == EWOULDBLOCK)
+			switch (errno) {
+			case EINTR:
+			case EAGAIN:
+				/* We didn't get any data, but we're OK */
 				return true;
-
-			int err = errno;
-			std::string msg("Parser::read(): ");
-			msg += strerror(err);
-			throw std::runtime_error(msg);
+			case EPIPE:
+			case ECONNRESET:
+			case ETIMEDOUT:
+			case EHOSTUNREACH:
+			case ENETUNREACH:
+				/* The host went away, but this shouldn't
+				 * be fatal.
+				 */
+				return false;
+			default:
+				/* TODO consider if we should throw an
+				 * exception at all.
+				 */
+				int err = errno;
+				std::string msg("Parser::read(): ");
+				msg += strerror(err);
+				throw std::runtime_error(msg);
+			}
 		}
 
 		if (rc == 0)
@@ -122,7 +137,7 @@ bool Parser::parseBuffer(void)
 		p += chunk_len;
 	}
 
-	while (!stopped && m_len > PacketHeader::header_length()) {
+	while (!stopped && m_len >= PacketHeader::header_length()) {
 		PacketHeader hdr(p);
 
 		if (hdr.payload_length() % 4)
@@ -148,11 +163,11 @@ bool Parser::parseBuffer(void)
 			 * resized, return to our caller as we obviously
 			 * don't have the full packet yet.
 			 */
-			unsigned int new_size = m_size * 2;
+			unsigned int new_size = m_size;
 			uint8_t *new_buffer;
 
 			do {
-				new_size = m_size * 2;
+				new_size *= 2;
 			} while (new_size < hdr.packet_length());
 
 			if (new_size > m_max_size)
@@ -201,6 +216,7 @@ bool Parser::rxPacket(const Packet &pkt)
 	switch (pkt.type()) {
 		MAP_TYPE(PacketType::RAW_EVENT_V0, RawDataPkt);
 		MAP_TYPE(PacketType::RTDL_V0, RTDLPkt);
+		MAP_TYPE(PacketType::SOURCE_LIST_V0, SourceListPkt);
 		MAP_TYPE(PacketType::BANKED_EVENT_V0, BankedEventPkt);
 		MAP_TYPE(PacketType::BEAM_MONITOR_EVENT_V0, BeamMonitorPkt);
 		MAP_TYPE(PacketType::PIXEL_MAPPING_V0, PixelMappingPkt);
@@ -208,7 +224,7 @@ bool Parser::rxPacket(const Packet &pkt)
 		MAP_TYPE(PacketType::RUN_INFO_V0, RunInfoPkt);
 		MAP_TYPE(PacketType::TRANS_COMPLETE_V0, TransCompletePkt);
 		MAP_TYPE(PacketType::CLIENT_HELLO_V0, ClientHelloPkt);
-		MAP_TYPE(PacketType::STATS_RESET_V0, StatsResetPkt);
+		MAP_TYPE(PacketType::STREAM_ANNOTATION_V0, AnnotationPkt);
 		MAP_TYPE(PacketType::SYNC_V0, SyncPkt);
 		MAP_TYPE(PacketType::HEARTBEAT_V0, HeartbeatPkt);
 		MAP_TYPE(PacketType::GEOMETRY_V0, GeometryPkt);
@@ -245,6 +261,7 @@ bool Parser::rxPacket(const type &) { return false; }
 
 EXPAND_HANDLER(RawDataPkt)
 EXPAND_HANDLER(RTDLPkt)
+EXPAND_HANDLER(SourceListPkt)
 EXPAND_HANDLER(BankedEventPkt)
 EXPAND_HANDLER(BeamMonitorPkt)
 EXPAND_HANDLER(PixelMappingPkt)
@@ -252,7 +269,7 @@ EXPAND_HANDLER(RunStatusPkt)
 EXPAND_HANDLER(RunInfoPkt)
 EXPAND_HANDLER(TransCompletePkt)
 EXPAND_HANDLER(ClientHelloPkt)
-EXPAND_HANDLER(StatsResetPkt)
+EXPAND_HANDLER(AnnotationPkt)
 EXPAND_HANDLER(SyncPkt)
 EXPAND_HANDLER(HeartbeatPkt)
 EXPAND_HANDLER(GeometryPkt)

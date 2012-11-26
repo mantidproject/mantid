@@ -11,6 +11,7 @@ namespace PacketType {
 	enum Enum {
 		RAW_EVENT_V0		= ADARA_PKT_TYPE(0x0000, 0),
 		RTDL_V0			= ADARA_PKT_TYPE(0x0001, 0),
+		SOURCE_LIST_V0		= ADARA_PKT_TYPE(0x0002, 0),
 		BANKED_EVENT_V0		= ADARA_PKT_TYPE(0x4000, 0),
 		BEAM_MONITOR_EVENT_V0	= ADARA_PKT_TYPE(0x4001, 0),
 		PIXEL_MAPPING_V0	= ADARA_PKT_TYPE(0x4002, 0),
@@ -18,7 +19,7 @@ namespace PacketType {
 		RUN_INFO_V0		= ADARA_PKT_TYPE(0x4004, 0),
 		TRANS_COMPLETE_V0	= ADARA_PKT_TYPE(0x4005, 0),
 		CLIENT_HELLO_V0		= ADARA_PKT_TYPE(0x4006, 0),
-		STATS_RESET_V0		= ADARA_PKT_TYPE(0x4007, 0),
+		STREAM_ANNOTATION_V0	= ADARA_PKT_TYPE(0x4007, 0),
 		SYNC_V0			= ADARA_PKT_TYPE(0x4008, 0),
 		HEARTBEAT_V0		= ADARA_PKT_TYPE(0x4009, 0),
 		GEOMETRY_V0		= ADARA_PKT_TYPE(0x400A, 0),
@@ -96,14 +97,21 @@ namespace VariableSeverity {
 	};
 }
 
+namespace MarkerType {
+	enum Enum {
+		GENERIC,
+		SCAN_START,
+		SCAN_STOP,
+		PAUSE,
+		RESUME,
+		OVERALL_RUN_COMMENT,
+	};
+}
+
 struct Event {
 	uint32_t tof;
 	uint32_t pixel;
 };
-
-typedef uint32_t EventBank;
-
-typedef uint32_t SourceSection;
 
 struct Header {
 	uint32_t payload_len;

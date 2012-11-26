@@ -15,21 +15,29 @@ public:
 		m_payload_len = field[0];
 		m_type = (PacketType::Enum) field[1];
 
-                m_pulseId = ((uint64_t) field[2]) << 32;
-                m_pulseId |= field[3];
+		/* Convert EPICS epoch to Unix epoch,
+		 * Jan 1, 1990 ==> Jan 1, 1970
+		 */
+		m_timestamp.tv_sec = field[2] + EPICS_EPOCH_OFFSET;
+		m_timestamp.tv_nsec = field[3];
+
+		m_pulseId = ((uint64_t) field[2]) << 32;
+		m_pulseId |= field[3];
 	}
 
 	PacketType::Enum type(void) const { return m_type; }
 	uint32_t payload_length(void) const { return m_payload_len; }
-        uint64_t pulseId(void) const { return m_pulseId; }
-        uint32_t packet_length(void) const { return m_payload_len + 16; }
+	const struct timespec &timestamp(void) const { return m_timestamp; }
+	uint64_t pulseId(void) const { return m_pulseId; }
+	uint32_t packet_length(void) const { return m_payload_len + 16; }
 
 	static uint32_t header_length(void) { return 16; }
 
 protected:
 	uint32_t m_payload_len;
 	PacketType::Enum m_type;
-        uint64_t m_pulseId;
+	struct timespec m_timestamp;
+	uint64_t m_pulseId;
 
 	/* Don't allow the default constructor */
 	PacketHeader();
@@ -83,13 +91,13 @@ public:
 	uint32_t tofOffset(void) const { return m_fields[5] & 0x7fffffff; }
 	uint32_t tofField(void) const { return m_fields[5]; }
 
-        const Event *events(void) const { return (const Event *) &m_fields[6]; }
+	const Event *events(void) const { return (const Event *) &m_fields[6]; }
 	uint32_t num_events(void) const {
 		return (m_payload_len - 24) / (2 * sizeof (uint32_t));
 	}
 
 private:
-        const uint32_t *m_fields;
+	const uint32_t *m_fields;
 
 	RawDataPkt(const uint8_t *data, uint32_t len);
 
@@ -115,14 +123,29 @@ public:
 	uint32_t intraPulseTime(void) const { return m_fields[2]; }
 	bool tofCorrected(void) const { return !!(m_fields[3] & 0x80000000); }
 	uint32_t tofOffset(void) const { return m_fields[3] & 0x7fffffff; }
-	uint32_t ringPeriod(void) const { return m_fields[4]; }
+	uint32_t ringPeriod(void) const { return m_fields[4] & 0xffffff; }
 
 	// TODO implement accessor for optional fields
 
 private:
-        const uint32_t *m_fields;
+	const uint32_t *m_fields;
 
 	RTDLPkt(const uint8_t *data, uint32_t len);
+
+	friend class Parser;
+};
+
+class SourceListPkt : public Packet {
+public:
+	SourceListPkt(const SourceListPkt &pkt);
+
+	const uint32_t *ids(void) const { return (const uint32_t *) payload(); }
+	uint32_t num_ids(void) const {
+		return payload_length() / sizeof (uint32_t);
+	}
+
+private:
+	SourceListPkt(const uint8_t *data, uint32_t len);
 
 	friend class Parser;
 };
@@ -199,7 +222,7 @@ public:
 	// TODO implment monitor/event accessors
 
 private:
-        const uint32_t *m_fields;
+	const uint32_t *m_fields;
 
 	BeamMonitorPkt(const uint8_t *data, uint32_t len);
 
@@ -229,7 +252,7 @@ public:
 	}
 
 private:
-        const uint32_t *m_fields;
+	const uint32_t *m_fields;
 
 	RunStatusPkt(const uint8_t *data, uint32_t len);
 
@@ -280,12 +303,30 @@ private:
 	friend class Parser;
 };
 
-class StatsResetPkt : public Packet {
+class AnnotationPkt : public Packet {
 public:
-	StatsResetPkt(const StatsResetPkt &pkt);
+	AnnotationPkt(const AnnotationPkt &pkt);
+
+	bool resetHint(void) const { return !!(m_fields[0] & 0x80000000); }
+	MarkerType::Enum type(void) const {
+		uint16_t type = (m_fields[0] >> 16) & 0x7fff;
+		return static_cast<MarkerType::Enum>(type);
+	}
+	uint32_t scanIndex(void) const { return m_fields[1]; }
+	const std::string &comment(void) const {
+		if (!m_comment.length() && (m_fields[0] & 0xffff)) {
+			m_comment.assign((const char *) &m_fields[2],
+					 m_fields[0] & 0xffff);
+		}
+
+		return m_comment;
+	}
 
 private:
-	StatsResetPkt(const uint8_t *data, uint32_t len);
+	const uint32_t *m_fields;
+	mutable std::string m_comment;
+
+	AnnotationPkt(const uint8_t *data, uint32_t len);
 
 	friend class Parser;
 };
@@ -375,7 +416,7 @@ public:
 	uint32_t value(void) const { return m_fields[3]; }
 
 private:
-        const uint32_t *m_fields;
+	const uint32_t *m_fields;
 
 	VariableU32Pkt(const uint8_t *data, uint32_t len);
 
@@ -395,10 +436,10 @@ public:
 		return static_cast<VariableSeverity::Enum>
 							(m_fields[2] & 0xffff);
 	}
-        double value(void) const { return *(const double *) &m_fields[3]; }
+	double value(void) const { return *(const double *) &m_fields[3]; }
 
 private:
-        const uint32_t *m_fields;
+	const uint32_t *m_fields;
 
 	VariableDoublePkt(const uint8_t *data, uint32_t len);
 
@@ -421,7 +462,7 @@ public:
 	const std::string &value(void) const { return m_val; }
 
 private:
-        const uint32_t *m_fields;
+	const uint32_t *m_fields;
 	std::string m_val;
 
 	VariableStringPkt(const uint8_t *data, uint32_t len);
