@@ -300,7 +300,7 @@ public:
           if (have_weight)
           {
             double weight = static_cast<double>(event_weight[i]);
-            double errorSq = 1.0 / weight;
+            double errorSq = weight * weight;
             std::vector<Mantid::DataObjects::WeightedEvent> *eventVector = alg->weightedEventVectors[detId];
             // NULL eventVector indicates a bad spectrum lookup
             if(eventVector)
