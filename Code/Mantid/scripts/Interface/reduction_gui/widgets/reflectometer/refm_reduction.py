@@ -949,6 +949,7 @@ class DataReflWidget(BaseWidget):
                                                        callback=None,
                                                        instrument='REFM')
 
+        
 #        def call_back(peakmin, peakmax, backmin, backmax, tofmin, tofmax):
 #            print 'Inside the call_back on the python side'
 #            self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
