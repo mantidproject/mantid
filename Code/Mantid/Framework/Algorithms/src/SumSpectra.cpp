@@ -286,6 +286,9 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
 
   // Loop over spectra
   std::set<int>::iterator it;
+  size_t numSpectra(0); // total number of processed spectra
+  size_t numMasked(0);  // total number of the masked and skipped spectra
+  size_t numZeros(0);   // number of spectra which have 0 value in the first column (used in special cases of evaluating how good Puasonian statistics is)
   //for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   for (it = indices.begin(); it != indices.end(); ++it)
   {
@@ -297,6 +300,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
       break;
     }
 
+    numSpectra++;
     try
     {
       // Get the detector object for this spectrum
@@ -304,7 +308,11 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
       // Skip monitors, if the property is set to do so
       if ( !keepMonitors && det->isMonitor() ) continue;
       // Skip masked detectors
-      if ( det->isMasked() ) continue;
+      if ( det->isMasked() )
+      {
+        numMasked++;
+        continue;
+      }
     }
     catch(...)
     {
@@ -322,12 +330,18 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
       YError[k] += YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
       FracSum[k] += FracArea[k];
     }
+    if(YValues[0]==0)numZeros++;
 
     // Map all the detectors onto the spectrum of the output
     outSpec->addDetectorIDs(localworkspace->getSpectrum(i)->getDetectorIDs());
 
     progress.report();
   }
+
+  outWS->mutableRun().addProperty("NumAllSpectra",numSpectra,"",true);
+  outWS->mutableRun().addProperty("NumMaskSpectra",numMasked,"",true);
+  outWS->mutableRun().addProperty("NumZeroSpectra",numZeros,"",true);
+
   // Create the correct representation
   outWS->finalize();
 }
@@ -353,6 +367,10 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
 
   // Loop over spectra
   std::set<int>::iterator it;
+  size_t numSpectra(0); // total number of processed spectra
+  size_t numMasked(0);  // total number of the masked and skipped spectra
+  size_t numZeros(0);   // number of fully empty spectra with no events (used in special cases of evaluating how good Puasonian statistics is)
+
   //for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   for (it = indices.begin(); it != indices.end(); ++it)
   {
@@ -364,6 +382,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
       break;
     }
 
+    numSpectra++;
     try
     {
       // Get the detector object for this spectrum
@@ -371,14 +390,22 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
       // Skip monitors, if the property is set to do so
       if ( !keepMonitors && det->isMonitor() ) continue;
       // Skip masked detectors
-      if ( det->isMasked() ) continue;
+      if ( det->isMasked() )
+      {
+        numMasked++;
+        continue;
+      }
     }
     catch(...)
     {
       // if the detector not found just carry on
     }
     //Add the event lists with the operator
-    outEL += localworkspace->getEventList(i);
+    const EventList & tOutEL = localworkspace->getEventList(i);
+    if(tOutEL.empty())
+      numZeros++;
+    else
+      outEL += tOutEL;
 
     progress.report();
   }
@@ -390,6 +417,10 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
   cow_ptr<MantidVec> XValues;
   XValues.access() = localworkspace->readX(0);
   outputWorkspace->setAllX(XValues);
+
+  outputWorkspace->mutableRun().addProperty("NumAllSpectra",numSpectra,"",true);
+  outputWorkspace->mutableRun().addProperty("NumMaskSpectra",numMasked,"",true);
+  outputWorkspace->mutableRun().addProperty("NumZeroSpectra",numZeros,"",true);
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));

@@ -358,10 +358,16 @@ class DirectEnergyConversion(object):
                 if self.relocate_dets: self.log('Moving detectors to positions specified in RAW file.')
             	LoadDetectorInfo(result_ws, result_ws.getRun()['Filename'].value, self.relocate_dets)
             else:
-                self.log('Loading detector info from file ' + self.det_cal_file)
+
                 self.log('Raw file detector header is superceeded') 
-                if self.relocate_dets: self.log('Moving detectors to positions specified in cal file.')
-                LoadDetectorInfo(result_ws, self.det_cal_file, self.relocate_dets)
+                if self.relocate_dets: 
+                    self.log('Moving detectors to positions specified in cal file.')
+                    if self.det_cal_file_ws == None :
+                        self.log('Loading detector info from file ' + self.det_cal_file)                    
+                        LoadDetectorInfo(result_ws, self.det_cal_file, self.relocate_dets)
+                    else:
+                        self.log('Copying detectors positions from det_cal_file workspace: '+self.det_cal_file_ws.getName())                    
+                        CopyInstrumentParameters (self.det_cal_file_ws,result_ws)
 
         if self.background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
@@ -760,6 +766,8 @@ class DirectEnergyConversion(object):
     	
     	# Detector calibration file
     	self.det_cal_file = None
+        # the workspace which contains already loaded detector calibration file and used to save time on multiple det_cal_file loadings
+        self.det_cal_file_ws = None
         # Option to move detector positions based on the information
         self.relocate_dets = False
      
