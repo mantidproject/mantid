@@ -110,6 +110,8 @@ namespace CurveFitting
 
     mutable std::map<std::string, double> mParameters;
 
+    mutable double m_fwhm;
+
     //-----------  For Parallelization -----------------------------------------
     ///
     void interruption_point() const;
