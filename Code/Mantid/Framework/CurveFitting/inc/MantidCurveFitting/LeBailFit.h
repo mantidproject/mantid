@@ -71,6 +71,8 @@ namespace CurveFitting
     double maxabsstepsize;
     size_t numpositivemove;
     size_t numnegativemove;
+    size_t numnomove;
+    int movedirection;
   };
 
   class DLLExport LeBailFit : public API::Algorithm
@@ -175,9 +177,6 @@ namespace CurveFitting
     /// Parse content in a table workspace to vector for background parameters
     void parseBackgroundTableWorkspace(TableWorkspace_sptr bkgdparamws, vector<double>& bkgdorderparams);
 
-    /// Parse TableWorkspace for Monte Carlo simulation related parameters' value
-    void parseMonteCarloParameterTable(TableWorkspace_sptr mctablews);
-
     /// Create and set up output table workspace for peaks
     void exportBraggPeakParameterToTable();
 
@@ -197,11 +196,14 @@ namespace CurveFitting
     void writeInputDataNDiff(size_t workspaceindex, API::FunctionDomain1DVector domain);
 
     //--------------  Random Walk Suite ----------------------------------------
+    /// Main for random walk process
+    void execRandomWalkMinimizer(size_t maxcycles, size_t wsindex, map<string, Parameter> &parammap);
+
     /// Set up Monte Carlo random walk strategy
     void setupRandomWalkStrategy();
 
-    /// Main for random walk process
-    void execRandomWalkMinimizer(size_t maxcycles, size_t wsindex, map<string, Parameter> &parammap);
+    /// Add parameter (to a vector of string/name) for MC random walk
+    void addParameterToMCMinimize(vector<string>& parnamesforMC, string parname);
 
     /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
     bool calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws,
@@ -220,7 +222,7 @@ namespace CurveFitting
 
     /// Propose new parameters
     void proposeNewValues(vector<string> mcgroup, double m_totRwp,
-                          map<string, Parameter> &curparammap, map<string, Parameter> &newparammap);
+                          map<string, Parameter> &curparammap, map<string, Parameter> &newparammap, bool prevBetterRwp);
 
     /// Book keep the (sopposed) best MC result
     void bookKeepBestMCResult(map<string, Parameter> parammap,
@@ -228,11 +230,16 @@ namespace CurveFitting
 
     /// Apply the value of parameters in the source to target
     void applyParameterValues(map<string, Parameter> &srcparammap,
-                              map<string, Parameter> &tgtparammap);
+                              map<string, Parameter> &tgtparammap);    
 
+    //--------------  Background function Suite ----------------------------------------
     /// Re-fit background according to the new values
     void fitBackground(size_t wsindex, FunctionDomain1DVector domain,
                         FunctionValues values, vector<double>& background);
+
+    /// Smooth background by exponential smoothing algorithm
+    void smoothBackgroundExponential(size_t wsindex, FunctionDomain1DVector domain,
+                                     FunctionValues peakdata, vector<double>& background);
 
     //--------------------------------------------------------------------------
 
@@ -323,6 +330,9 @@ namespace CurveFitting
 
     /// Flag to use Annealing Simulation (i.e., use automatic adjusted temperature)
     bool m_useAnnealing;
+
+    ///
+    enum {RANDOMWALK, DRUNKENWALK} m_walkStyle;
 
   };
 

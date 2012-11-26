@@ -165,6 +165,9 @@ void LeBailFit::init()
 
   declareProperty("UseAnnealing", true, "Allow annealing temperature adjusted automatically.");
 
+  declareProperty("DrunkenWalk", false, "Flag to use drunken walk algorithm. "
+                  "Otherwise, random walk algorithm is used. ");
+
   return;
 }
 
@@ -2199,86 +2202,6 @@ void LeBailFit::parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr b
 }
 
 //-----------------------------------------------------------------------------
-/** Parse TableWorkspace for Monte Carlo simulation related parameters' value
-  */
-void LeBailFit::parseMonteCarloParameterTable(TableWorkspace_sptr mctablews)
-{
-  //
-  bool checkname;
-
-  // Search for key word as Name, A0, A1, Refine, Nonnegative,
-  vector<string> tablecolnames = mctablews->getColumnNames();
-  vector<string>::iterator nameiter;
-
-  // Parameters
-  nameiter = find(tablecolnames.begin(), tablecolnames.end(), "Name");
-  if (nameiter == tablecolnames.end())
-  {
-    throw runtime_error("TableWorkspace does not have column Name (for parameter).");
-  }
-  size_t nameindex = size_t(nameiter-tablecolnames.begin());
-
-
-
-
-}
-
-/*================== This section should not belong to this algorithm ======================*/
-
-/** Convert a Table to space to some vectors of maps
-  */
-void convertTableWorkspaceToMaps(TableWorkspace_sptr tablews, vector<map<string, int> > intmaps,
-                                 vector<map<string, string> > strmaps, vector<map<string, double> > dblmaps)
-{
-  // 1. Initialize
-  intmaps.clear();
-  strmaps.clear();
-  dblmaps.clear();
-
-  size_t numrows = tablews->rowCount();
-  size_t numcols = tablews->columnCount();
-
-  for (size_t i = 0; i < numrows; ++i)
-  {
-    map<string, int> intmap;
-    intmaps.push_back(intmap);
-
-    map<string, string> strmap;
-    strmaps.push_back(strmap);
-
-    map<string, double> dblmap;
-    dblmaps.push_back(dblmap);
-  }
-
-  // 2. Parse
-  for (size_t i = 0; i < numcols; ++i)
-  {
-    Column_sptr column = tablews->getColumn(i);
-    string coltype = column->type();
-    string colname = column->name();
-
-    for (size_t ir = 0; ir < numrows; ++ir)
-    {
-
-
-
-
-    }
-
-  }
-
-
-  return;
-}
-
-
-
-
-
-
-/*=================================================================================*/
-
-//-----------------------------------------------------------------------------
 /** Make output workspace valid if there is some error.
   */
 void LeBailFit::writeFakedDataToOutputWS(size_t workspaceindex, int functionmode)
@@ -2737,127 +2660,6 @@ void LeBailFit::createOutputDataWorkspace(size_t workspaceindex, FunctionMode fu
 
 
 // ============================ Random Walk Suite ==============================
-
-//-----------------------------------------------------------------------------
-/** Set up Monte Carlo random walk strategy
-  */
-void LeBailFit::setupRandomWalkStrategy()
-{
-  bool fitgeometry = getProperty("FitGeometryParameter");
-
-  // 1. Monte Carlo groups
-  // a. Instrument gemetry
-  vector<string> geomparams;
-  geomparams.push_back("Dtt1");
-  geomparams.push_back("Dtt1t");
-  geomparams.push_back("Dtt2t");
-  geomparams.push_back("Width");
-  geomparams.push_back("Tcross");
-  geomparams.push_back("Zero");
-  geomparams.push_back("Zerot");
-  if (fitgeometry)
-    m_MCGroups.push_back(geomparams);
-
-  // b. Alphas
-  vector<string> alphs;
-  alphs.push_back("Alph0");
-  alphs.push_back("Alph1");
-  alphs.push_back("Alph0t");
-  alphs.push_back("Alph1t");
-  m_MCGroups.push_back(alphs);
-
-  // c. Beta
-  vector<string> betas;
-  betas.push_back("Beta0");
-  betas.push_back("Beta1");
-  betas.push_back("Beta0t");
-  betas.push_back("Beta1t");
-  m_MCGroups.push_back(betas);
-
-  // d. Sig
-  vector<string> sigs;
-  sigs.push_back("Sig0");
-  sigs.push_back("Sig1");
-  sigs.push_back("Sig2");
-
-  m_numMCGroups = m_MCGroups.size();
-
-  // 2. Dictionary for each parameter for non-negative, mcX0, mcX1
-  // a) Sig0, Sig1, Sig2
-  for (size_t i = 0; i < sigs.size(); ++i)
-  {
-    string parname = sigs[i];
-    m_funcParameters[parname].mcA0 = 2.0;
-    m_funcParameters[parname].mcA1 = 1.0;
-    m_funcParameters[parname].nonnegative = true;
-  }
-
-  // b) Alpha
-  for (size_t i = 0; i < alphs.size(); ++i)
-  {
-    string parname = alphs[i];
-    m_funcParameters[parname].mcA1 = 1.0;
-    m_funcParameters[parname].nonnegative = false;
-  }
-  m_funcParameters["Alpha0"].mcA0 = 0.05;
-  m_funcParameters["Alpha1"].mcA0 = 0.02;
-  m_funcParameters["Alpha0t"].mcA0 = 0.1;
-  m_funcParameters["Alpha1t"].mcA0 = 0.05;
-
-  // c) Beta
-  for (size_t i = 0; i < betas.size(); ++i)
-  {
-    string parname = betas[i];
-    m_funcParameters[parname].mcA1 = 1.0;
-    m_funcParameters[parname].nonnegative = false;
-  }
-  m_funcParameters["Beta0"].mcA0 = 0.5;
-  m_funcParameters["Beta1"].mcA0 = 0.05;
-  m_funcParameters["Beta0t"].mcA0 = 0.5;
-  m_funcParameters["Beta1t"].mcA0 = 0.05;
-
-  // d) Geometry might be more complicated
-  m_funcParameters["Width"].mcA0 = 0.0;
-  m_funcParameters["Width"].mcA1 = 1.0;
-  m_funcParameters["Width"].nonnegative = true;
-
-  m_funcParameters["Tcross"].mcA0 = 0.0;
-  m_funcParameters["Tcross"].mcA1 = 1.0;
-  m_funcParameters["Tcross"].nonnegative = true;
-
-  m_funcParameters["Zero"].mcA0 = 5.0;
-  m_funcParameters["Zero"].mcA1 = 0.0;
-  m_funcParameters["Zero"].nonnegative = false;
-
-  m_funcParameters["Zerot"].mcA0 = 5.0;
-  m_funcParameters["Zerot"].mcA1 = 0.0;
-  m_funcParameters["Zerot"].nonnegative = false;
-
-  m_funcParameters["Dtt1"].mcA0 = 5.0;
-  m_funcParameters["Dtt1"].mcA1 = 0.0;
-  m_funcParameters["Dtt1"].nonnegative = true;
-
-  m_funcParameters["Dtt1t"].mcA0 = 5.0;
-  m_funcParameters["Dtt1t"].mcA1 = 0.0;
-  m_funcParameters["Dtt1t"].nonnegative = true;
-
-  m_funcParameters["Dtt2t"].mcA0 = 0.1;
-  m_funcParameters["Dtt2t"].mcA1 = 1.0;
-  m_funcParameters["Dtt2t"].nonnegative = false;
-
-  // 4. Reset
-  map<string, Parameter>::iterator mapiter;
-  for (mapiter = m_funcParameters.begin(); mapiter != m_funcParameters.end(); ++mapiter)
-  {
-    mapiter->second.sumstepsize = 0.0;
-    mapiter->second.numpositivemove = 0;
-    mapiter->second.numnegativemove = 0;
-    mapiter->second.maxabsstepsize = -0.0;
-  }
-
-  return;
-}
-
 //-----------------------------------------------------------------------------
 /** Refine instrument parameters by random walk algorithm (MC)
   *
@@ -2868,9 +2670,9 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
 {
   // 1. Initialization
   const MantidVec& vecX = m_dataWS->readX(wsindex);
-  const MantidVec& inpVecY = m_dataWS->readY(wsindex);
+  const MantidVec& vecInY = m_dataWS->readY(wsindex);
   const MantidVec& vecE = m_dataWS->readE(wsindex);
-  size_t numpts = inpVecY.size();
+  size_t numpts = vecInY.size();
 
   FunctionDomain1DVector domain(vecX);
   FunctionValues values(domain);
@@ -2891,6 +2693,13 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
 
   m_useAnnealing = getProperty("UseAnnealing");
 
+  // Walking style
+  bool usedrunkenwalk = getProperty("DrunkenWalk");
+  if (usedrunkenwalk)
+    m_walkStyle = DRUNKENWALK;
+  else
+    m_walkStyle = RANDOMWALK;
+
   // 2. Process background.
   // a) Calculate background
   m_backgroundFunction->function(domain, values);
@@ -2901,7 +2710,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
   for (size_t i = 0; i < numpts; ++i)
   {
     background[i] = values[i];
-    purepeakdata[i] = inpVecY[i] - background[i];
+    purepeakdata[i] = vecInY[i] - background[i];
     purepeakerror[i] = vecE[i];
   }
 
@@ -2936,6 +2745,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
   vector<double> vecRwp(maxcycles);
   size_t numinvalidmoves = 0;
   size_t numacceptance = 0;
+  bool prevcyclebetterrwp = true;
 
   //    Annealing record
   int numRecentAcceptance = 0;
@@ -2947,14 +2757,14 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
     // a) Remove background as background is in the fitting process too
     MantidVec& pVecY = m_outputWS->dataY(PUREPEAKINDEX);
     for (size_t i = 0; i < numpts; ++i)
-      pVecY[i] = inpVecY[i] - background[i];
+      pVecY[i] = vecInY[i] - background[i];
 
     // b) Refine parameters (for all parameters in turn) to data with background removed
     for (size_t igroup = 0; igroup < m_numMCGroups; ++igroup)
     {
       // i.   Propose the value
       // proposeNewValues(m_MCGroups[igroup], currwp, parammap, newparammap);
-      proposeNewValues(m_MCGroups[igroup], currp, parammap, newparammap);
+      proposeNewValues(m_MCGroups[igroup], currp, parammap, newparammap, prevcyclebetterrwp);
 
       // ii.  Evaluate
       double newrwp, newrp;
@@ -2967,10 +2777,15 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
       {
         ++ numinvalidmoves;
         acceptchange = false;
+        prevcyclebetterrwp = false;
       }
       else
       {
         acceptchange = acceptOrDeny(currwp, newrwp);
+        if (newrwp < currwp)
+          prevcyclebetterrwp = true;
+        else
+          prevcyclebetterrwp = false;
       }
 
       g_log.debug() << "[DBx317] Step " << icycle << ": New Rwp = " << setprecision(10)
@@ -3059,7 +2874,8 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
     g_log.notice() << setw(10) << param.name << "\t: Average Stepsize = " << setw(10) << setprecision(5) << param.sumstepsize/double(maxcycles)
                    << ", Max Step Size = " << setw(10) << setprecision(5) << param.maxabsstepsize
                    << ", Number of Positive Move = " << setw(4) << param.numpositivemove
-                   << ", Number of Negative Move = " << setw(4) << param.numnegativemove << endl;
+                   << ", Number of Negative Move = " << setw(4) << param.numnegativemove
+                   << ", Number of No Move = " << setw(4) << param.numnomove << endl;
 
   }
   g_log.notice() << "Number of invalid proposed moves = " << numinvalidmoves << endl;
@@ -3071,18 +2887,196 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
   MantidVec& vecModel = m_outputWS->dataY(1);
   MantidVec& vecDiff = m_outputWS->dataY(2);
   MantidVec& vecModelNoBkgd = m_outputWS->dataY(FITTEDPUREPEAKINDEX);
+  MantidVec& vecBkgd = m_outputWS->dataY(FITTEDBACKGROUNDINDEX);
   for (size_t i = 0; i < numpts; ++i)
   {
     // Fitted data
     vecModel[i] = values[i] + background[i];
     // Diff
-    vecDiff[i] = inpVecY[i] - vecModel[i];
+    vecDiff[i] = vecInY[i] - vecModel[i];
     // Model no background
     vecModelNoBkgd[i] = values[i];
+    // Different between calculated peaks and raw data
+    vecBkgd[i] = vecInY[i] - values[i];
   }
 
   return;
 }
+
+//-----------------------------------------------------------------------------
+/** Set up Monte Carlo random walk strategy
+  */
+void LeBailFit::setupRandomWalkStrategy()
+{
+  bool fitgeometry = getProperty("FitGeometryParameter");
+
+  stringstream dboutss;
+  dboutss << "Monte Carlo minimizer refines: ";
+
+  // 1. Monte Carlo groups
+  // a. Instrument gemetry
+  vector<string> geomparams;
+  addParameterToMCMinimize(geomparams, "Dtt1");
+  addParameterToMCMinimize(geomparams, "Dtt1t");
+  addParameterToMCMinimize(geomparams, "Dtt2t");
+  addParameterToMCMinimize(geomparams, "Zero");
+  addParameterToMCMinimize(geomparams, "Zerot");
+  addParameterToMCMinimize(geomparams, "Width");
+  addParameterToMCMinimize(geomparams, "Tcross");
+  if (fitgeometry)
+    m_MCGroups.push_back(geomparams);
+
+  dboutss << "Geometry parameters: ";
+  for (size_t i = 0; i < geomparams.size(); ++i)
+    dboutss << geomparams[i] << "\t\t";
+  dboutss << endl;
+
+  // b. Alphas
+  vector<string> alphs;
+  addParameterToMCMinimize(alphs, "Alph0");
+  addParameterToMCMinimize(alphs, "Alph1");
+  addParameterToMCMinimize(alphs, "Alph0t");
+  addParameterToMCMinimize(alphs, "Alph1t");
+  m_MCGroups.push_back(alphs);
+
+  dboutss << "Alpha parameters";
+  for (size_t i = 0; i < alphs.size(); ++i)
+    dboutss << alphs[i] << "\t\t";
+  dboutss << endl;
+
+  // c. Beta
+  vector<string> betas;
+  addParameterToMCMinimize(betas, "Beta0");
+  addParameterToMCMinimize(betas, "Beta1");
+  addParameterToMCMinimize(betas, "Beta0t");
+  addParameterToMCMinimize(betas, "Beta1t");
+  m_MCGroups.push_back(betas);
+
+  dboutss << "Beta parameters";
+  for (size_t i = 0; i < betas.size(); ++i)
+    dboutss << betas[i] << "\t\t";
+  dboutss << endl;
+
+  // d. Sig
+  vector<string> sigs;
+  addParameterToMCMinimize(sigs, "Sig0");
+  addParameterToMCMinimize(sigs, "Sig1");
+  addParameterToMCMinimize(sigs, "Sig2");
+  m_MCGroups.push_back(sigs);
+
+  dboutss << "Sig parameters";
+  for (size_t i = 0; i < sigs.size(); ++i)
+    dboutss << sigs[i] << "\t\t";
+  dboutss << endl;
+
+  g_log.notice(dboutss.str());
+
+  m_numMCGroups = m_MCGroups.size();
+
+  // 2. Dictionary for each parameter for non-negative, mcX0, mcX1
+  // a) Sig0, Sig1, Sig2
+  for (size_t i = 0; i < sigs.size(); ++i)
+  {
+    string parname = sigs[i];
+    m_funcParameters[parname].mcA0 = 2.0;
+    m_funcParameters[parname].mcA1 = 1.0;
+    m_funcParameters[parname].nonnegative = true;
+  }
+
+  // b) Alpha
+  for (size_t i = 0; i < alphs.size(); ++i)
+  {
+    string parname = alphs[i];
+    m_funcParameters[parname].mcA1 = 1.0;
+    m_funcParameters[parname].nonnegative = false;
+  }
+  m_funcParameters["Alpha0"].mcA0 = 0.05;
+  m_funcParameters["Alpha1"].mcA0 = 0.02;
+  m_funcParameters["Alpha0t"].mcA0 = 0.1;
+  m_funcParameters["Alpha1t"].mcA0 = 0.05;
+
+  // c) Beta
+  for (size_t i = 0; i < betas.size(); ++i)
+  {
+    string parname = betas[i];
+    m_funcParameters[parname].mcA1 = 1.0;
+    m_funcParameters[parname].nonnegative = false;
+  }
+  m_funcParameters["Beta0"].mcA0 = 0.5;
+  m_funcParameters["Beta1"].mcA0 = 0.05;
+  m_funcParameters["Beta0t"].mcA0 = 0.5;
+  m_funcParameters["Beta1t"].mcA0 = 0.05;
+
+  // d) Geometry might be more complicated
+  m_funcParameters["Width"].mcA0 = 0.0;
+  m_funcParameters["Width"].mcA1 = 1.0;
+  m_funcParameters["Width"].nonnegative = true;
+
+  m_funcParameters["Tcross"].mcA0 = 0.0;
+  m_funcParameters["Tcross"].mcA1 = 1.0;
+  m_funcParameters["Tcross"].nonnegative = true;
+
+  m_funcParameters["Zero"].mcA0 = 5.0;
+  m_funcParameters["Zero"].mcA1 = 0.0;
+  m_funcParameters["Zero"].nonnegative = false;
+
+  m_funcParameters["Zerot"].mcA0 = 5.0;
+  m_funcParameters["Zerot"].mcA1 = 0.0;
+  m_funcParameters["Zerot"].nonnegative = false;
+
+  m_funcParameters["Dtt1"].mcA0 = 5.0;
+  m_funcParameters["Dtt1"].mcA1 = 0.0;
+  m_funcParameters["Dtt1"].nonnegative = true;
+
+  m_funcParameters["Dtt1t"].mcA0 = 5.0;
+  m_funcParameters["Dtt1t"].mcA1 = 0.0;
+  m_funcParameters["Dtt1t"].nonnegative = true;
+
+  m_funcParameters["Dtt2t"].mcA0 = 0.1;
+  m_funcParameters["Dtt2t"].mcA1 = 1.0;
+  m_funcParameters["Dtt2t"].nonnegative = false;
+
+  // 4. Reset
+  map<string, Parameter>::iterator mapiter;
+  for (mapiter = m_funcParameters.begin(); mapiter != m_funcParameters.end(); ++mapiter)
+  {
+    mapiter->second.movedirection = 1;
+    mapiter->second.sumstepsize = 0.0;
+    mapiter->second.numpositivemove = 0;
+    mapiter->second.numnegativemove = 0;
+    mapiter->second.numnomove = 0;
+    mapiter->second.maxabsstepsize = -0.0;
+  }
+
+  return;
+}
+
+
+//-----------------------------------------------------------------------------
+/** Add parameter (to a vector of string/name) for MC random walk
+  * according to Fit in Parameter
+  *
+  * @param parnamesforMC: vector of parameter for MC minimizer
+  * @param parname: name of parameter to check whether to put into refinement list
+  */
+void LeBailFit::addParameterToMCMinimize(vector<string>& parnamesforMC, string parname)
+{
+  map<string, Parameter>::iterator pariter;
+  pariter = m_funcParameters.find(parname);
+  if (pariter == m_funcParameters.end())
+  {
+    stringstream errss;
+    errss << "Parameter " << parname << " does not exisit Le Bail function parameters. ";
+    g_log.error(errss.str());
+    throw runtime_error(errss.str());
+  }
+
+  if (pariter->second.fit)
+    parnamesforMC.push_back(parname);
+
+  return;
+}
+
 
 //-----------------------------------------------------------------------------
 /** Calculate diffraction pattern in Le Bail algorithm for MC Random walk
@@ -3236,7 +3230,7 @@ void LeBailFit::calculatePowderPatternStatistic(FunctionValues& values, vector<d
 /** Propose new parameters
   */
 void LeBailFit::proposeNewValues(vector<string> mcgroup, double m_totRwp, map<string, Parameter>& curparammap,
-                                 map<string, Parameter>& newparammap)
+                                 map<string, Parameter>& newparammap, bool prevBetterRwp)
 {
   for (size_t i = 0; i < mcgroup.size(); ++i)
   {
@@ -3247,7 +3241,49 @@ void LeBailFit::proposeNewValues(vector<string> mcgroup, double m_totRwp, map<st
     string paramname = mcgroup[i];
     Parameter param = curparammap[paramname];
     double stepsize = m_dampingFactor * m_totRwp * (param.value * param.mcA1 + param.mcA0) * randomnumber;
-    double newvalue = param.value + stepsize;
+
+    // drunk walk or random walk
+    double newvalue;
+    if (m_walkStyle == RANDOMWALK)
+    {
+      // Random walk.  No preference on direction
+      newvalue = param.value + stepsize;
+    }
+    else if (m_walkStyle == DRUNKENWALK)
+    {
+      // Drunken walk.  Prefer to previous successful move direction
+      int prevRightDirection;
+      if (prevBetterRwp)
+        prevRightDirection = 1;
+      else
+        prevRightDirection = -1;
+
+      double randirint = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+
+      // FIXME Here are some MAGIC numbers
+      if (randirint < 0.1)
+      {
+        // Negative direction to previous direction
+        stepsize = -1.0*fabs(stepsize)*static_cast<double>(param.movedirection*prevRightDirection);
+      }
+      else if (randirint < 0.4)
+      {
+        // No preferance
+        stepsize = stepsize;
+      }
+      else
+      {
+        // Positive direction to previous direction
+        stepsize = fabs(stepsize)*static_cast<double>(param.movedirection*prevRightDirection);
+      }
+
+      newvalue = param.value + stepsize;
+    }
+    else
+    {
+      newvalue = DBL_MAX;
+      throw runtime_error("Unrecoganized walk style. ");
+    }
 
     // restriction
     if (param.nonnegative && newvalue < 0)
@@ -3262,9 +3298,20 @@ void LeBailFit::proposeNewValues(vector<string> mcgroup, double m_totRwp, map<st
     // record some trace
     Parameter& p = curparammap[paramname];
     if (stepsize > 0)
+    {
+      p.movedirection = 1;
       ++ p.numpositivemove;
+    }
     else if (stepsize < 0)
+    {
+      p.movedirection = -1;
       ++ p.numnegativemove;
+    }
+    else
+    {
+      p.movedirection = -1;
+      ++p.numnomove;
+    }
     p.sumstepsize += fabs(stepsize);
     if (fabs(stepsize) > p.maxabsstepsize)
       p.maxabsstepsize = fabs(stepsize);
@@ -3370,7 +3417,9 @@ void LeBailFit::applyParameterValues(map<string, Parameter>& srcparammap, map<st
   return;
 }
 
-//-----------------------------------------------------------------------------
+//===============  Background Functions ========================================
+
+//------------------------------------------------------------------------------
 /** Re-fit background according to the new values
   */
 void LeBailFit::fitBackground(size_t wsindex, FunctionDomain1DVector domain,
@@ -3385,6 +3434,42 @@ void LeBailFit::fitBackground(size_t wsindex, FunctionDomain1DVector domain,
 
   return;
 }
+
+//-----------------------------------------------------------------------------
+/** Smooth background by exponential smoothing algorithm
+  */
+void LeBailFit::smoothBackgroundExponential(size_t wsindex, FunctionDomain1DVector domain,
+                                            FunctionValues peakdata, vector<double>& background)
+{
+  const MantidVec& vecRawX = m_dataWS->readX(wsindex);
+  const MantidVec& vecRawY = m_dataWS->readY(wsindex);
+
+  throw runtime_error("It is a fake for bk_prm2 and peak density.");
+  double bk_prm2 = 1.0;
+  vector<double> peakdensity(vecRawX.size(), 1.0);
+
+  if (vecRawX.size() != domain.size() || vecRawY.size() != peakdata.size() ||
+      background.size() != peakdata.size())
+    throw runtime_error("Vector sizes cannot be matched.");
+
+  // 1. Get starting and end points value
+  size_t numdata = peakdata.size();
+
+  background[0] = vecRawY[0] - peakdata[0];
+  background.back() = vecRawY.back() - peakdata[numdata-1];
+
+  // 2.
+  for (size_t i = numdata-2; i >0; --i)
+  {
+    double bk_prm1 = (bk_prm2 * (7480.0/vecRawX[i])) / sqrt(peakdensity[i] + 1.0);
+    background[i] = bk_prm1*(vecRawY[i]-peakdata[i]) + (1.0-bk_prm1)*background[i+1];
+    if (background[i] < 0)
+      background[i] = 0.0;
+  }
+
+  return;
+}
+
 
 // ============================ External Auxiliary Functions   =================
 //------------------------------------------------------------------------------
@@ -3440,6 +3525,7 @@ void exportDomainValueToFile(FunctionDomain1DVector domain, FunctionValues value
   return;
 }
 
+//-----------------------------------------------------------------------------
 /** Write a set of (XY) data to a column file
   */
 void exportXYDataToFile(vector<double> vecX, vector<double> vecY, string filename)
@@ -3455,6 +3541,55 @@ void exportXYDataToFile(vector<double> vecX, vector<double> vecY, string filenam
 
   return;
 }
+
+//-----------------------------------------------------------------------------
+/** Convert a Table to space to some vectors of maps
+  */
+void convertTableWorkspaceToMaps(TableWorkspace_sptr tablews, vector<map<string, int> > intmaps,
+                                 vector<map<string, string> > strmaps, vector<map<string, double> > dblmaps)
+{
+  // 1. Initialize
+  intmaps.clear();
+  strmaps.clear();
+  dblmaps.clear();
+
+  size_t numrows = tablews->rowCount();
+  size_t numcols = tablews->columnCount();
+
+  for (size_t i = 0; i < numrows; ++i)
+  {
+    map<string, int> intmap;
+    intmaps.push_back(intmap);
+
+    map<string, string> strmap;
+    strmaps.push_back(strmap);
+
+    map<string, double> dblmap;
+    dblmaps.push_back(dblmap);
+  }
+
+  // 2. Parse
+  for (size_t i = 0; i < numcols; ++i)
+  {
+    Column_sptr column = tablews->getColumn(i);
+    string coltype = column->type();
+    string colname = column->name();
+
+    for (size_t ir = 0; ir < numrows; ++ir)
+    {
+
+
+
+
+    }
+
+  }
+
+
+  return;
+}
+
+
 
 } // namespace CurveFitting
 } // namespace Mantid
