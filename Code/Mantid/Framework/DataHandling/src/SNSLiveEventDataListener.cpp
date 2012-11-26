@@ -36,6 +36,10 @@ using namespace Mantid::API;
 // Also used when shutting down the thread so we know how long to wait there
 #define RECV_TIMEOUT_MS 100
 
+
+// Names for a couple of time series properties
+#define PAUSE_PROPERTY "pause"
+#define SCAN_PROPERTY "scan_index"
 namespace Mantid
 {
 namespace DataHandling
@@ -53,7 +57,8 @@ namespace DataHandling
     : ILiveListener(), ADARA::Parser(),
       m_status(NoRun),
       m_workspaceInitialized( false), m_socket(),
-      m_isConnected( false), m_pauseNetRead(false), m_stopThread( false)
+      m_isConnected( false), m_pauseNetRead(false), m_stopThread( false),
+      m_runPaused( false)
     // ADARA::Parser() will accept values for buffer size and max packet size, but the
     // defaults will work fine
   {
@@ -243,6 +248,16 @@ namespace DataHandling
                     << "because we have not received an RTDL packet for that pulse!"
                     << std::endl;
       return false;
+    }
+
+    // Next - check to see if the run has been paused (we don't have to process
+    // the events if we're paused)
+    // TODO: There's been some talk about a property that the user could set that
+    // would tell us to process all events, even if the run is paused.  Need to
+    // check on that!
+    if ( m_pauseNetRead)
+    {
+      return true;
     }
 
     // TODO: Create a log with the pulse time and charge!!  (TimeSeriesProperties)
@@ -626,6 +641,52 @@ namespace DataHandling
     return true;
   }
 
+  bool SNSLiveEventDataListener::rxPacket( const ADARA::AnnotationPkt &pkt)
+  {
+
+    switch (pkt.type())
+    {
+    case ADARA::MarkerType::GENERIC:
+      // Do nothing.  We log the comment field below for all types
+      break;
+
+    case ADARA::MarkerType::SCAN_START:
+      m_buffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( pkt.pulseId(), pkt.scanIndex());
+      g_log.information() << "Scan Start: " << pkt.scanIndex() << std::endl;
+      break;
+
+    case ADARA::MarkerType::SCAN_STOP:
+      m_buffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( pkt.pulseId(), 0);
+      g_log.information() << "Scan Stop:  " << pkt.scanIndex() << std::endl;
+      break;
+
+    case ADARA::MarkerType::PAUSE:
+      m_buffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( pkt.pulseId(), 1);
+      g_log.information() << "Run paused" << std::endl;
+      m_runPaused = true;
+      break;
+
+    case ADARA::MarkerType::RESUME:
+      m_buffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( pkt.pulseId(), 0);
+      g_log.information() << "Run resumed" << std::endl;
+      m_runPaused = false;
+      break;
+
+    case ADARA::MarkerType::OVERALL_RUN_COMMENT:
+      // Do nothing.  We log the comment field below for all types
+      break;
+    }
+
+    // if there's a comment in the packet, log it at the info level
+    std::string comment = pkt.comment();
+    if (comment.size() > 0)
+    {
+      g_log.information() << "Annotation: " << comment << std::endl;
+    }
+
+    return true;
+  }
+
 
   void SNSLiveEventDataListener::initWorkspace()
   {
@@ -647,6 +708,12 @@ namespace DataHandling
     m_buffer->setYUnit( "Counts");
 
     m_indexMap = m_buffer->getDetectorIDToWorkspaceIndexMap( true /* bool throwIfMultipleDets */ );
+
+    // initialize time series properties for pause/resume and scan_index
+    Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
+    m_buffer->mutableRun().addLogData(prop);
+    prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
+    m_buffer->mutableRun().addLogData(prop);
 
     m_workspaceInitialized = true;
   }

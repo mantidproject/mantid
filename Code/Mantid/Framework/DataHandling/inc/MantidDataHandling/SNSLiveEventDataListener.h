@@ -80,6 +80,7 @@ namespace Mantid
       virtual bool rxPacket( const ADARA::VariableDoublePkt &pkt);
       virtual bool rxPacket( const ADARA::VariableStringPkt &pkt);
       virtual bool rxPacket( const ADARA::DeviceDescriptorPkt &pkt);
+      virtual bool rxPacket( const ADARA::AnnotationPkt &pkt);
       //virtual bool rxPacket( const ADARA::RunInfoPkt &pkt);
 
     private:
@@ -127,6 +128,9 @@ namespace Mantid
                                         // packet.  SMS is supposed to send these out
                                         // periodicaly.  If we don't get them, there's a
                                         // problem somewhere.
+
+      bool m_runPaused; // Set to true or false when we receive a pause/resume marker in an
+                        // annotation packet. (See rxPacket( const ADARA::AnnotationPkt &pkt))
 
       // --- Data structures necessary for handling all the process variable info ---
 
