@@ -63,18 +63,18 @@ public:
     size_t num_sample_logs = WS->run().getProperties().size();
     TS_ASSERT_EQUALS( num_events, 112266 );
     //Do the filtering now.
-    FilterByLogValue * alg = new FilterByLogValue();
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inputWS);
-    alg->setPropertyValue("OutputWorkspace", outputWS);
-    alg->setPropertyValue("LogName", "proton_charge");
+    FilterByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", inputWS);
+    alg.setPropertyValue("OutputWorkspace", outputWS);
+    alg.setPropertyValue("LogName", "proton_charge");
     //We set the minimum high enough to cut out some real charge too, not just zeros.
-    alg->setPropertyValue("MinimumValue", "1.e7");
-    alg->setPropertyValue("MaximumValue", "1e20");
-    alg->setPropertyValue("TimeTolerance", "4e-12");
+    alg.setPropertyValue("MinimumValue", "1.e7");
+    alg.setPropertyValue("MaximumValue", "1e20");
+    alg.setPropertyValue("TimeTolerance", "4e-12");
 
-    alg->execute();
-    TS_ASSERT( alg->isExecuted() );
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
 
     //Retrieve Workspace changed
     EventWorkspace_sptr outWS;
@@ -199,22 +199,22 @@ public:
 
 
     //Do the filtering now.
-    FilterByLogValue * alg = new FilterByLogValue();
-    alg->initialize();
-    alg->setPropertyValue("InputWorkspace", inputName);
+    FilterByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", inputName);
 
     std::string outputWS = "output_filtering";
     if (do_in_place) outputWS = inputName;
 
-    alg->setPropertyValue("OutputWorkspace", outputWS);
-    alg->setPropertyValue("LogName", log_name);
+    alg.setPropertyValue("OutputWorkspace", outputWS);
+    alg.setPropertyValue("LogName", log_name);
     //We set the minimum high enough to cut out some real charge too, not just zeros.
-    alg->setProperty("MinimumValue", min);
-    alg->setProperty("MaximumValue", max);
-    alg->setPropertyValue("TimeTolerance", "3e-3");
-    alg->setProperty("PulseFilter", PulseFilter);
-    alg->execute();
-    TS_ASSERT( alg->isExecuted() );
+    alg.setProperty("MinimumValue", min);
+    alg.setProperty("MaximumValue", max);
+    alg.setPropertyValue("TimeTolerance", "3e-3");
+    alg.setProperty("PulseFilter", PulseFilter);
+    alg.execute();
+    TS_ASSERT( alg.isExecuted() );
 
     //Retrieve Workspace changed
     EventWorkspace_sptr outWS;
