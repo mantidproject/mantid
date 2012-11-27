@@ -56,6 +56,16 @@ class HFIRSANSReduction(PythonAlgorithm):
         output_msg += self.process_data_file(output_ws)
         
         # Sample data transmission correction
+        if "TransmissionAlgorithm" in property_list:
+            p=property_manager.getProperty("TransmissionAlgorithm")
+            alg=Algorithm.fromString(p.valueAsStr)
+            alg.setProperty("InputWorkspace", output_ws)
+            alg.setProperty("OutputWorkspace", output_ws)
+            if alg.existsProperty("ReductionProperties"):
+                alg.setProperty("ReductionProperties", property_manager_name)
+            alg.execute()
+            if alg.existsProperty("OutputMessage"):
+                output_msg += alg.getProperty("OutputMessage").value+'\n'
         
         # Process background data
         if "BackgroundFiles" in property_list:
@@ -78,8 +88,6 @@ class HFIRSANSReduction(PythonAlgorithm):
         # Absolute scale correction
         
         # Compute I(q)
-        print "----------------------\n\n\n\n"
-        print property_list
         if "IQAlgorithm" in property_list:
             iq_output = output_ws+'_Iq'
             p=property_manager.getProperty("IQAlgorithm")

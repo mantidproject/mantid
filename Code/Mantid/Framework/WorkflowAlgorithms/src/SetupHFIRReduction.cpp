@@ -128,6 +128,18 @@ void SetupHFIRReduction::init()
   setPropertyGroup("SensitivityBeamCenterY", eff_grp);
   setPropertyGroup("OutputSensitivityWorkspace", eff_grp);
 
+  // Transmission
+  std::string trans_grp = "Transmission";
+  declareProperty("TransmissionValue", EMPTY_DBL(), positiveDouble,
+      "Transmission value.");
+  declareProperty("TransmissionError", EMPTY_DBL(), positiveDouble,
+      "Transmission error.");
+  declareProperty("ThetaDependentTransmission", true, "If true, a theta-dependent transmission correction will be applied.");
+
+  setPropertyGroup("TransmissionValue", trans_grp);
+  setPropertyGroup("TransmissionError", trans_grp);
+  setPropertyGroup("ThetaDependentTransmission", trans_grp);
+
   // I(Q) calculation
   std::string iq1d_grp = "I(q) calculation";
   declareProperty("DoAzimuthalAverage", true);
@@ -288,6 +300,23 @@ void SetupHFIRReduction::exec()
 
     algProp = new AlgorithmProperty("SensitivityAlgorithm");
     algProp->setValue(effAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
+
+  // Transmission
+  const double transValue = getProperty("TransmissionValue");
+  const double transError = getProperty("TransmissionError");
+  const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");
+
+  //TODO: add a ComputeTransmission flag
+  if (!isEmpty(transValue) && !isEmpty(transError))
+  {
+    IAlgorithm_sptr transAlg = createSubAlgorithm("ApplyTransmissionCorrection");
+    transAlg->setProperty("TransmissionValue", transValue);
+    transAlg->setProperty("TransmissionError", transError);
+    transAlg->setProperty("ThetaDependent", thetaDependentTrans);
+    algProp = new AlgorithmProperty("TransmissionAlgorithm");
+    algProp->setValue(transAlg->toString());
     reductionManager->declareProperty(algProp);
   }
 

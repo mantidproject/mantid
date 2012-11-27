@@ -18,7 +18,6 @@ namespace WorkflowAlgorithms
 
 using namespace Kernel;
 using namespace API;
-using namespace Geometry;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HFIRSANSNormalise)
@@ -26,8 +25,8 @@ DECLARE_ALGORITHM(HFIRSANSNormalise)
 /// Sets documentation strings for this algorithm
 void HFIRSANSNormalise::initDocs()
 {
-  this->setWikiSummary("Performs beam flux correction on TOF SANS data.");
-  this->setOptionalMessage("Performs beam flux correction on TOF SANS data.");
+  this->setWikiSummary("Apply normalisation correction to HFIR SANS data.");
+  this->setOptionalMessage("Apply normalisation correction to HFIR SANS data.");
 }
 
 void HFIRSANSNormalise::init()
