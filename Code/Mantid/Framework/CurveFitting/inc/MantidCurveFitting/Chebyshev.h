@@ -73,6 +73,9 @@ namespace Mantid
 
     };
 
+
+    typedef boost::shared_ptr<Chebyshev> Chebyshev_sptr;
+
   } // namespace CurveFitting
 } // namespace Mantid
 
