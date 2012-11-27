@@ -22,15 +22,13 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, bool hasIntensity)
+  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius)
   : QWidget( parent ),
     m_plot(plot),
     m_origin(origin),
-    m_intensity(radius),
-    m_normalisation(1),
-    m_opacityMax(0.6),
-    m_opacityMin(0.1),
-    m_hasIntensity(hasIntensity)
+    m_radius(radius),
+    m_opacityMax(0.8),
+    m_opacityMin(0.0)
   {
     setAttribute(Qt::WA_NoMousePropagation, false);
     this->setVisible(true);
@@ -43,22 +41,13 @@ namespace SliceViewer
   {
   }
 
-   //----------------------------------------------------------------------------------------------
-  /** Setter for the normalisation denominator.
-  @param normalisation : normalisation denominator to use.
-   */
-  void PeakOverlay::setNormalisation(const double& normalisation)
-  {
-    m_normalisation = normalisation;
-  }
-
   //----------------------------------------------------------------------------------------------
   /** Set the distance between the plane and the center of the peak in md coordinates
 
   ASCII diagram below to demonstrate how dz (distance in z) is used to determine the radius of the sphere-plane intersection at that point,
   resloves both rx and ry. Also uses the distance to calculate the opacity to apply.
 
-  @param atPoint : distance from the peak cetner in the md coordinates of the z-axis.
+  @param atPoint : distance from the peak center in the md coordinates of the z-axis.
 
        /---------\
       /           \
@@ -75,8 +64,7 @@ namespace SliceViewer
   {
     const double distanceSQ = (z - m_origin.Z()) * (z - m_origin.Z());
     const double distance = std::sqrt(distanceSQ);
-    const double radius = getRadius();
-    const double radSQ = radius * radius;
+    const double radSQ = m_radius * m_radius;
 
     if(distanceSQ < radSQ)
     {
@@ -93,7 +81,7 @@ namespace SliceViewer
     m_scale = height()/(yMax - yMin);
     
     // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
-    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/radius) * distance  + m_opacityMax;
+    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius) * distance  + m_opacityMax;
     m_opacityAtDistance = m_opacityAtDistance >= m_opacityMin ? m_opacityAtDistance : m_opacityMin;
 
     this->update(); //repaint
@@ -104,11 +92,7 @@ namespace SliceViewer
 
   double PeakOverlay::getRadius() const
   { 
-    if(m_hasIntensity)
-    {
-      return m_intensity / m_normalisation;
-    }
-    return 1;
+    return m_radius;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -127,8 +111,6 @@ namespace SliceViewer
   { return m_plot->canvas()->height(); }
   int PeakOverlay::width() const
   { return m_plot->canvas()->width(); }
-
-
 
   //----------------------------------------------------------------------------------------------
   /// Paint the overlay
@@ -149,7 +131,7 @@ namespace SliceViewer
     
     // Draw Outer circle
     QPen pen( Qt::green );
-    pen.setWidth(static_cast<int>(lineWidth));
+    pen.setWidth(static_cast<int>(std::abs(lineWidth)));
     painter.setPen( pen );
     pen.setStyle(Qt::SolidLine);
     painter.setOpacity(m_opacityAtDistance); //Set the pre-calculated opacity

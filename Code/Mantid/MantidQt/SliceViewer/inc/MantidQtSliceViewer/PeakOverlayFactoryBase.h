@@ -22,9 +22,15 @@ namespace MantidQt
     public:
       PeakOverlayFactoryBase(const FirstExperimentInfoQuery& query);
       ~PeakOverlayFactoryBase();
+      void setRadius(const double& radius);
       virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::API::IPeak&) const;
+
     protected:
-      virtual boost::shared_ptr<PeakOverlayView> createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius, const bool hasIntensity) const = 0;
+      virtual boost::shared_ptr<PeakOverlayView> createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius) const = 0;
+
+    private:
+      /// The actual peak radius to use for all peaks created via the factory.
+      double m_peakRadius;
     };
   }
 }

@@ -43,8 +43,6 @@ namespace MantidQt
       virtual void updateView() = 0;
       /// Hide the view.
       virtual void hideView() = 0;
-      /// Setter for the normalisation value.
-      virtual void setNormalisation(const double& normalisation) = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

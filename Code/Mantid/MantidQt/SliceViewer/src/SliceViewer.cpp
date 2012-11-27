@@ -155,15 +155,6 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_overlayWSOutline->setShowLine(false);
   m_overlayWSOutline->setShown(false);
 
-  ui.btnPeakOverlay->hide();
-  // -------- Peak Overlay ----------------
-  //PeakOverlay* m_peakOverlay = new PeakOverlay(m_plot, m_plot->canvas(), QPointF(0.5,0.5), QPointF(0.1, 0.2)); //TODO use the peak overlay
-  //m_peakOverlay->setPlaneDistance(0);
-
-  //IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>("loadedpeaks2");
-  //    PeakOverlayFactory* factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), PeakDimensions::HKLView);
-  //    m_peaksPresenter = boost::make_shared<PeaksPresenter>(factory, peaksWS);
-
   ui.btnPeakOverlay->setEnabled(true);
 }
 
@@ -310,12 +301,12 @@ void SliceViewer::initMenus()
 
   m_menuView->addSeparator();
 
-  //action = new QAction(QPixmap(), "Peak Overlay", this);
-  //m_syncPeakOverlay = new SyncedCheckboxes(action, ui.btnPeakOverlay, false);
-  //connect(action, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
-  //m_menuView->addAction(action);
+  action = new QAction(QPixmap(), "Peak Overlay", this);
+  m_syncPeakOverlay = new SyncedCheckboxes(action, ui.btnPeakOverlay, false);
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
+  m_menuView->addAction(action);
 
-  //m_menuView->addSeparator();
+  m_menuView->addSeparator();
 
   QActionGroup* group = new QActionGroup( this );
 

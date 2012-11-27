@@ -7,7 +7,7 @@ namespace MantidQt
   namespace SliceViewer
   {
 
-    PeakOverlayFactoryBase::PeakOverlayFactoryBase(const FirstExperimentInfoQuery& query)
+    PeakOverlayFactoryBase::PeakOverlayFactoryBase(const FirstExperimentInfoQuery& query) : m_peakRadius(1)
     {
       if(!query.hasOrientedLattice())
       {
@@ -17,6 +17,15 @@ namespace MantidQt
 
     PeakOverlayFactoryBase::~PeakOverlayFactoryBase()
     {
+    }
+
+    /*
+    Setter for the actual peak radius. The radius used for drawing will depend on the plane instesection.
+    @param peakRadius : Global value for the peak radius to apply to all peaks manufactured through this factory.
+    */
+    void PeakOverlayFactoryBase::setRadius(const double& peakRadius)
+    {
+      m_peakRadius = peakRadius;
     }
 
     boost::shared_ptr<PeakOverlayView> PeakOverlayFactoryBase::createView(const Mantid::API::IPeak& peak) const
@@ -36,7 +45,7 @@ namespace MantidQt
       3) Create the origin x, y based on these hkl values.
       */
 
-      return this->createViewAtPoint(position, intensity, intensity != 0);
+      return this->createViewAtPoint(position, m_peakRadius);
     }
 
   }

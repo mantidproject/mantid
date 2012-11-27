@@ -33,21 +33,17 @@ namespace SliceViewer
     {
       throw std::invalid_argument("PeaksWorkspace does not contain integrated peaks."); // We might consider drawing these in the future anyway.
     }
+    // Extract the integration radius from the workspace.
+    const double peakIntegrationRadius = boost::lexical_cast<double>(peaksWS->run().getProperty("PeakRadius")->value());
 
     // Create views for every peak in the workspace.
     boost::scoped_ptr<PeakOverlayViewFactory> factory_scptr(factory);
-    double maxIntensity = peaksWS->getPeak(0).getIntensity();
+    factory->setRadius(peakIntegrationRadius);
+
     for(int i = 0; i < peaksWS->getNumberPeaks(); ++i)
     {
       const Mantid::API::IPeak& peak = peaksWS->getPeak(i);
-      maxIntensity = peak.getIntensity() > maxIntensity ? peak.getIntensity() : maxIntensity;
       m_viewPeaks[i] = boost::shared_ptr<PeakOverlayView>( factory_scptr->createView(peak) );
-    }
-
-    // Set the normalisation. Applies to all peaks with intensity.
-    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-    {
-      (*it)->setNormalisation(maxIntensity);
     }
   }
 

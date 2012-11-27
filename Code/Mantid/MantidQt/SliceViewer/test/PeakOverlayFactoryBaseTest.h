@@ -23,7 +23,7 @@ private:
   {
   public:
     MockPeakOverlayFactory(const FirstExperimentInfoQuery& query) :  PeakOverlayFactoryBase(query){}
-    MOCK_CONST_METHOD3(createViewAtPoint, boost::shared_ptr<PeakOverlayView>(const Mantid::Kernel::V3D&, const double&, const bool));
+    MOCK_CONST_METHOD2(createViewAtPoint, boost::shared_ptr<PeakOverlayView>(const Mantid::Kernel::V3D&, const double&));
     ~MockPeakOverlayFactory(){}
   };
 
@@ -48,7 +48,6 @@ private:
     MOCK_METHOD0(updateView, void());
     MOCK_METHOD1(setSlicePoint, void(const double&));
     MOCK_METHOD0(hideView, void());
-    MOCK_METHOD1(setNormalisation, void(const double&));
     ~MockPeakOverlayView(){}
   };
 

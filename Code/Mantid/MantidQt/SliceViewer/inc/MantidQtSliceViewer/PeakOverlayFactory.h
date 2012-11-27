@@ -54,7 +54,7 @@ namespace MantidQt
     public:
       PeakOverlayFactory(QwtPlot * plot, QWidget * parent, const FirstExperimentInfoQuery& query);
       virtual ~PeakOverlayFactory();
-      virtual boost::shared_ptr<PeakOverlayView> createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius, const bool hasIntensity) const;
+      virtual boost::shared_ptr<PeakOverlayView> createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius) const;
     };
   }
 }

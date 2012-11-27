@@ -30,7 +30,6 @@ private:
     MOCK_METHOD0(updateView, void());
     MOCK_METHOD1(setSlicePoint, void(const double&));
     MOCK_METHOD0(hideView, void());
-    MOCK_METHOD1(setNormalisation, void(const double&));
     ~MockPeakOverlayView(){}
   };
 
@@ -41,6 +40,7 @@ private:
   {
   public:
     MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(const Mantid::API::IPeak&));
+    MOCK_METHOD1(setRadius, void(const double&));
     MOCK_METHOD0(updateView, void());
   };
 
@@ -81,10 +81,9 @@ public:
     
     // Create a mock view object that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
-    EXPECT_CALL(*pMockView, setNormalisation(_)).Times(expectedNumberPeaks);
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
-    
+    EXPECT_CALL(*mockViewFactory, setRadius(_)).Times(1);
     EXPECT_CALL(*mockViewFactory, createView(_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));;
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
@@ -108,6 +107,7 @@ public:
     EXPECT_CALL(*pMockView, updateView()).Times(expectedNumberPeaks);
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
     
+    EXPECT_CALL(*mockViewFactory, setRadius(_)).Times(1);
     EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
@@ -133,6 +133,7 @@ public:
     EXPECT_CALL(*pMockView, setSlicePoint(slicePoint)).Times(expectedNumberPeaks);
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
+    EXPECT_CALL(*mockViewFactory, setRadius(_)).Times(1);
     EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
@@ -157,6 +158,7 @@ public:
     EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberPeaks);
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
+    EXPECT_CALL(*mockViewFactory, setRadius(_)).Times(1);
     EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 

@@ -47,6 +47,8 @@ namespace MantidQt
     public:
       /// Create a peak view from the peak object.
       virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::API::IPeak&) const = 0;
+      /// Setter for the radius to use for all peaks.
+      virtual void setRadius(const double& radius) = 0;
       /// Destructor
       virtual ~PeakOverlayViewFactory()
       {

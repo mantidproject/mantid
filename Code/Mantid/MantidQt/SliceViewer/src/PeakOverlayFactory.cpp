@@ -22,10 +22,9 @@ namespace MantidQt
         throw std::invalid_argument("PeakOverlayFactory parent widget is null");
     }
 
-    
-    boost::shared_ptr<PeakOverlayView> PeakOverlayFactory::createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius, const bool hasIntensity) const
+    boost::shared_ptr<PeakOverlayView> PeakOverlayFactory::createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius) const
     {
-      return boost::make_shared<PeakOverlay>(m_plot, m_parent, position, radius, hasIntensity);
+      return boost::make_shared<PeakOverlay>(m_plot, m_parent, position, radius);
     }
 
     PeakOverlayFactory::~PeakOverlayFactory()
