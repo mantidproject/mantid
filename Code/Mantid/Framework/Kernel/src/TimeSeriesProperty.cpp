@@ -622,7 +622,7 @@ namespace Mantid
 
       // Toggle the sorted flag if necessary
       // (i.e. if the flag says we're sorted and the added time is before the prior last time)
-      if ( m_propSortedFlag && *m_values.rbegin() < *(m_values.rbegin()+1) )
+      if ( m_propSortedFlag && m_size > 1 && *m_values.rbegin() < *(m_values.rbegin()+1) )
       {
         m_propSortedFlag = false;
       }
