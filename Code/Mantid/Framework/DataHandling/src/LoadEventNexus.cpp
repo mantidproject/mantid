@@ -296,7 +296,7 @@ public:
         detid_t detId = event_id[i];
         if (detId <= alg->eventid_max)
         {
-          // Handle simlated data if present
+          // Handle simulated data if present
           if (have_weight)
           {
             double weight = static_cast<double>(event_weight[i]);
