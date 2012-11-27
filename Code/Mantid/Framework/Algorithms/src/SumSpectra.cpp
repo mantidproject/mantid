@@ -169,9 +169,9 @@ void SumSpectra::exec()
 
     outputWorkspace->generateSpectraMap();
     // set up the summing statistics
-    outputWorkspace->mutableRun().addProperty("NumAllSpectra",numSpectra,"",true);
-    outputWorkspace->mutableRun().addProperty("NumMaskSpectra",numMasked,"",true);
-    outputWorkspace->mutableRun().addProperty("NumZeroSpectra",numZeros,"",true);
+    outputWorkspace->mutableRun().addProperty("NumAllSpectra",int(numSpectra),"",true);
+    outputWorkspace->mutableRun().addProperty("NumMaskSpectra",int(numMasked),"",true);
+    outputWorkspace->mutableRun().addProperty("NumZeroSpectra",int(numZeros),"",true);
 
 
     // Assign it to the output workspace property
@@ -222,8 +222,16 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
   MantidVec& YSum = outSpec->dataY();
   MantidVec& YError = outSpec->dataE();
 
-  MantidVec Weight; 
-  if(m_CalculateWeightedSum)Weight.assign(YSum.size(),0);
+  MantidVec Weight;
+  std::vector<size_t> nZeros;
+  if(m_CalculateWeightedSum)
+  {
+    Weight.assign(YSum.size(),0);
+    nZeros.assign(YSum.size(),0);
+  }
+  numSpectra=0;
+  numMasked =0;
+  numZeros  =0;
 
 
   // Loop over spectra
@@ -274,9 +282,9 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
         }  
         else
         {
-          YSum[k]  =std::numeric_limits<double>::quiet_NaN();
-          Weight[k]=std::numeric_limits<double>::quiet_NaN();
+          nZeros[k]++;
         }
+   
       }
     }
     else
@@ -290,14 +298,19 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
 
     // Map all the detectors onto the spectrum of the output
     outSpec->addDetectorIDs( localworkspace->getSpectrum(i)->getDetectorIDs() );
-    if(YSum[0]==0)numZeros++;
 
     progress.report();
   }
   if(m_CalculateWeightedSum)
   {
+    numZeros=0;
     for(size_t i=0;i<Weight.size();i++)
-      YSum[i]/=Weight[i];
+    {
+      if(nZeros[i]==0)
+        YSum[i]/=Weight[i];
+      else
+        numZeros+=nZeros[i];
+    }
   }
 
 }
@@ -338,7 +351,17 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   MantidVec& YError = outSpec->dataE();
   MantidVec& FracSum = outWS->dataF(0);
   MantidVec Weight; 
-  if(m_CalculateWeightedSum)Weight.assign(YSum.size(),0);
+  std::vector<size_t> nZeros;
+  if(m_CalculateWeightedSum)
+  {
+    Weight.assign(YSum.size(),0);
+    nZeros.assign(YSum.size(),0);
+  }
+  numSpectra=0;
+  numMasked =0;
+  numZeros  =0;
+  bool foundZeros(false);
+
 
   // Loop over spectra
   std::set<int>::iterator it;
@@ -391,8 +414,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
         }  
         else
         {
-          YSum[k]  =std::numeric_limits<double>::quiet_NaN();
-          Weight[k]=std::numeric_limits<double>::quiet_NaN();
+          nZeros[k]++;
           FracSum[k] += FracArea[k];
         }
       }
@@ -406,10 +428,21 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
         FracSum[k] += FracArea[k];
       }
     }
-    if(YSum[0]==0)numZeros++;
 
     // Map all the detectors onto the spectrum of the output
     outSpec->addDetectorIDs(localworkspace->getSpectrum(i)->getDetectorIDs());
+
+    if(m_CalculateWeightedSum)
+    {
+      numZeros=0;
+      for(size_t i=0;i<Weight.size();i++)
+      {
+      if(nZeros[i]==0)
+        YSum[i]/=Weight[i];
+      else
+        numZeros+=nZeros[i];
+      }
+    }
 
     progress.report();
   }
@@ -490,9 +523,9 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
   XValues.access() = localworkspace->readX(0);
   outputWorkspace->setAllX(XValues);
 
-  outputWorkspace->mutableRun().addProperty("NumAllSpectra",numSpectra,"",true);
-  outputWorkspace->mutableRun().addProperty("NumMaskSpectra",numMasked,"",true);
-  outputWorkspace->mutableRun().addProperty("NumZeroSpectra",numZeros,"",true);
+  outputWorkspace->mutableRun().addProperty("NumAllSpectra",int(numSpectra),"",true);
+  outputWorkspace->mutableRun().addProperty("NumMaskSpectra",int(numMasked),"",true);
+  outputWorkspace->mutableRun().addProperty("NumZeroSpectra",int(numZeros),"",true);
 
   // Assign it to the output workspace property
   setProperty("OutputWorkspace",boost::dynamic_pointer_cast<MatrixWorkspace>(outputWorkspace));

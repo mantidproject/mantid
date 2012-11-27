@@ -258,7 +258,7 @@ public:
 
     TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nHist),output->run().getLogData("NumAllSpectra")->value())
     TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),output->run().getLogData("NumMaskSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(3),output->run().getLogData("NumZeroSpectra")->value())
+    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),output->run().getLogData("NumZeroSpectra")->value())
 
   }
   void testExecNoLimitsWeighted()
@@ -327,9 +327,6 @@ public:
     TS_ASSERT( spec->hasDetectorID(5) );
     TS_ASSERT( spec->hasDetectorID(6) );
     TS_ASSERT( spec->hasDetectorID(7) );
-
-
-
 
   }
 
