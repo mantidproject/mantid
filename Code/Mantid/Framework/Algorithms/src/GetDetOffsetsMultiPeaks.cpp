@@ -406,6 +406,42 @@ namespace Mantid
 
     }
 
+    //-----------------------------------------------------------------------------------------
+    namespace { // anonymous namespace to keep the function here
+    /**
+     * @brief deletePeaks Delete the banned peaks
+     *
+     * @param banned The indexes of peaks to delete.
+     * @param peakPosToFit   Delete elements of this array.
+     * @param peakPosFitted  Delete elements of this array.
+     * @param peakWidFitted  Delete elements of this array.
+     * @param peakHighFitted Delete elements of this array.
+     * @param peakBackground Delete elements of this array.
+     * @param chisq          Delete elements of this array.
+     */
+    void deletePeaks(std::vector<size_t> &banned,
+                    std::vector<double>&peakPosToFit,
+                    std::vector<double>&peakPosFitted,
+                    std::vector<double> &peakWidFitted,
+                    std::vector<double> &peakHighFitted,
+                    std::vector<double> &peakBackground,
+                    std::vector<double> &chisq)
+    {
+      if (banned.empty())
+        return;
+
+      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
+      {
+          peakPosToFit.erase(peakPosToFit.begin() + (*it));
+          peakPosFitted.erase(peakPosFitted.begin() + (*it));
+          peakWidFitted.erase(peakWidFitted.begin() + (*it));
+          peakHighFitted.erase(peakHighFitted.begin() + (*it));
+          peakBackground.erase(peakBackground.begin() + (*it));
+          chisq.erase(chisq.begin() + (*it));
+      }
+      banned.clear();
+    }
+    }
 
     //-----------------------------------------------------------------------------------------
    /** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
@@ -508,16 +544,11 @@ namespace Mantid
         }
       }
       // delete banned peaks
-      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
-      {
-          peakPosToFit.erase(peakPosToFit.begin() + (*it));
-          peakPosFitted.erase(peakPosFitted.begin() + (*it));
-          peakWidFitted.erase(peakWidFitted.begin() + (*it));
-          peakHighFitted.erase(peakHighFitted.begin() + (*it));
-          peakBackground.erase(peakBackground.begin() + (*it));
-          chisq.erase(chisq.begin() + (*it));
-      }
-      banned.clear();
+      g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
+                    << " peaks in wkspindex = " << s << "\n";
+      deletePeaks(banned, peakPosToFit, peakPosFitted,
+                  peakWidFitted, peakHighFitted, peakBackground,
+                  chisq);
 
       // ban peaks that are low intensity compared to their widths
       for (size_t i = 0; i < peakWidFitted.size(); ++i)
@@ -531,16 +562,11 @@ namespace Mantid
         }
       }
       // delete banned peaks
-      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
-      {
-          peakPosToFit.erase(peakPosToFit.begin() + (*it));
-          peakPosFitted.erase(peakPosFitted.begin() + (*it));
-          peakWidFitted.erase(peakWidFitted.begin() + (*it));
-          peakHighFitted.erase(peakHighFitted.begin() + (*it));
-          peakBackground.erase(peakBackground.begin() + (*it));
-          chisq.erase(chisq.begin() + (*it));
-      }
-      banned.clear();
+      g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
+                    << " peaks in wkspindex = " << s << "\n";
+      deletePeaks(banned, peakPosToFit, peakPosFitted,
+                  peakWidFitted, peakHighFitted, peakBackground,
+                  chisq);
 
       // determine the (z-value) for constant "width" - (delta d)/d
       std::vector<double> widthDivPos(peakWidFitted.size(), 0.); // DELETEME
@@ -560,22 +586,18 @@ namespace Mantid
         }
       }
       // delete banned peaks
-      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
-      {
-          peakPosToFit.erase(peakPosToFit.begin() + (*it));
-          peakPosFitted.erase(peakPosFitted.begin() + (*it));
-          peakWidFitted.erase(peakWidFitted.begin() + (*it));
-          peakHighFitted.erase(peakHighFitted.begin() + (*it));
-          peakBackground.erase(peakBackground.begin() + (*it));
-          chisq.erase(chisq.begin() + (*it));
-      }
+      g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
+                    << " peaks in wkspindex = " << s << "\n";
+      deletePeaks(banned, peakPosToFit, peakPosFitted,
+                  peakWidFitted, peakHighFitted, peakBackground,
+                  chisq);
 
       // ban peaks that are not outside of error bars for the background
       for (size_t i = 0; i < peakWidFitted.size(); ++i)
       {
         if (peakHighFitted[i] < 0.5 * std::sqrt(peakHighFitted[i] + peakBackground[i]))
         {
-          g_log.notice() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << s
+          g_log.debug() << "Banning peak at " << peakPosFitted[i] << " in wkspindex = " << s
                          << " " << peakHighFitted[i] << " < "
                          << 0.5 * std::sqrt(peakHighFitted[i] + peakBackground[i]) << "\n";
           banned.push_back(i);
@@ -583,15 +605,11 @@ namespace Mantid
         }
       }
       // delete banned peaks
-      for (std::vector<size_t>::const_reverse_iterator it = banned.rbegin(); it != banned.rend(); ++it)
-      {
-          peakPosToFit.erase(peakPosToFit.begin() + (*it));
-          peakPosFitted.erase(peakPosFitted.begin() + (*it));
-          peakWidFitted.erase(peakWidFitted.begin() + (*it));
-          peakHighFitted.erase(peakHighFitted.begin() + (*it));
-          peakBackground.erase(peakBackground.begin() + (*it));
-          chisq.erase(chisq.begin() + (*it));
-      }
+      g_log.debug() << "Deleting " << banned.size() << " of " << peakPosFitted.size()
+                    << " peaks in wkspindex = " << s << "\n";
+      deletePeaks(banned, peakPosToFit, peakPosFitted,
+                  peakWidFitted, peakHighFitted, peakBackground,
+                  chisq);
 
       nparams = peakPosFitted.size();
       return;
