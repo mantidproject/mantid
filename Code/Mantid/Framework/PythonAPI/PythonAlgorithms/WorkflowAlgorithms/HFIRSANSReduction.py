@@ -81,7 +81,6 @@ class HFIRSANSReduction(PythonAlgorithm):
         print "----------------------\n\n\n\n"
         print property_list
         if "IQAlgorithm" in property_list:
-            print "TEST"
             iq_output = output_ws+'_Iq'
             p=property_manager.getProperty("IQAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)

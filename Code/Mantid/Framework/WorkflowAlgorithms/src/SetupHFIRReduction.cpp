@@ -95,7 +95,7 @@ void SetupHFIRReduction::init()
   std::vector<std::string> incidentBeamNormOptions;
   incidentBeamNormOptions.push_back("None");
   incidentBeamNormOptions.push_back("Monitor");
-  incidentBeamNormOptions.push_back("Time");
+  incidentBeamNormOptions.push_back("Timer");
   this->declareProperty("Normalisation", "Monitor",
       boost::make_shared<StringListValidator>(incidentBeamNormOptions),
       "Options for data normalisation");
