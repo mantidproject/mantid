@@ -33,17 +33,20 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
 
     IEventWorkspace_sptr ws;
     ws = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(wps_name.toStdString());
-    
+
     const double total_ymin = 0.0;
     const double total_ymax = 255.0;
     const size_t total_rows = 256;
-
+//    const double total_ymax = 303;
+//    const size_t total_rows = 304;
+    
+    
     std::vector<double> xaxis = ws->readX(0);
-    const size_t sz = xaxis.size();
-    const size_t total_cols = sz-1;
+    const size_t sz = xaxis.size()-1;
+    const size_t total_cols = sz;
     
     double total_xmin = xaxis[0];
-    double total_xmax = xaxis[sz-1];
+    double total_xmax = xaxis[sz];
     
     float *data = new float[static_cast<size_t>(total_ymax) * sz];
     
@@ -56,7 +59,7 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
     {
         //retrieve data now
         yaxis = ws->readY(px);
-        for (size_t tof=0; tof<sz-1; tof++)
+        for (size_t tof=0; tof<sz; tof++)
         {
             data[px*sz + tof] = static_cast<float>(yaxis[tof]);
         }

@@ -43,7 +43,7 @@ public:
     instrument.add(det3);
     instrument.markAsMonitor(det3);
 
-    instrument.setDefaultViewAxis("X-");
+    //instrument.setDefaultViewAxis("X-");
     instrument.getLogfileCache().insert(std::make_pair("apple",boost::shared_ptr<XMLlogfile>()));
     instrument.getLogfileUnit()["banana"] = "yellow";
   }
@@ -76,6 +76,7 @@ public:
     TS_ASSERT_EQUALS( i.getLogfileCache(), instrument.getLogfileCache() );
     TS_ASSERT_EQUALS( i.getLogfileUnit(), instrument.getLogfileUnit() );
     TS_ASSERT_EQUALS( i.getMonitors(), instrument.getMonitors() );
+    TS_ASSERT_EQUALS( i.getDefaultView(), instrument.getDefaultView() );
     TS_ASSERT_EQUALS( i.getDefaultAxis(), instrument.getDefaultAxis() );
     // Should not be parameterized - there's a different constructor for that
     TS_ASSERT_THROWS( i.baseInstrument(), std::runtime_error );
@@ -118,6 +119,7 @@ public:
     TS_ASSERT_EQUALS( copy->getName(), inst->getName() );
     Instrument* copyI = dynamic_cast<Instrument*>(copy);
     TS_ASSERT( copyI );
+    TS_ASSERT_EQUALS( instr->getDefaultView(), copyI->getDefaultView() );
     TS_ASSERT_EQUALS( instr->getDefaultAxis(), copyI->getDefaultAxis() );
     delete instr;
     delete copy;
@@ -457,6 +459,20 @@ public:
     TS_ASSERT_THROWS_NOTHING( instrument.getMinMaxDetectorIDs(min,max) );
     TS_ASSERT_EQUALS( min, 1);
     TS_ASSERT_EQUALS( max, 11);
+  }
+
+  void test_default_view()
+  {
+    Instrument i;
+    TS_ASSERT_EQUALS( i.getDefaultView(), "3D" );
+    TS_ASSERT_EQUALS( i.getDefaultAxis(), "Z+" );
+
+    i.setDefaultView( "CYLINDRICAL_Y" );
+    TS_ASSERT_EQUALS( i.getDefaultView(), "CYLINDRICAL_Y" );
+    i.setDefaultView( "spherical_y" );
+    TS_ASSERT_EQUALS( i.getDefaultView(), "SPHERICAL_Y" );
+    i.setDefaultView( "inside-out" );
+    TS_ASSERT_EQUALS( i.getDefaultView(), "3D" );
   }
 
 private:

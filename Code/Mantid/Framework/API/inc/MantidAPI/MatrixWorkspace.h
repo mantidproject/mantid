@@ -269,39 +269,51 @@ namespace Mantid
       // Causes the nearest neighbours map to be rebuilt.
       void rebuildNearestNeighbours();
 
+      void saveInstrumentNexus(::NeXus::File * file) const;
+      void loadInstrumentNexus(::NeXus::File * file);
+       void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
+          const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
 
-      // ---------------------------------- MDGeometry methods -------------------------------
+      //=====================================================================================
+      // MD Geometry methods
+      //=====================================================================================
       virtual size_t getNumDims() const;
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(size_t index) const;
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimensionWithId(std::string id) const;
+      //=====================================================================================
+      // End MD Geometry methods
+      //=====================================================================================
 
+      //=====================================================================================
+      // IMDWorkspace methods
+      //=====================================================================================
 
-      // ---------------- IMDWorkspace Methods --------------------------------
       /// Gets the number of points available on the workspace.
       virtual uint64_t getNPoints() const;
+      /// Get the number of points available on the workspace.
       virtual uint64_t getNEvents() const{return this->getNPoints();}
       /// Dimension id for x-dimension.
       static const std::string xDimensionId;
       /// Dimensin id for y-dimension.
       static const std::string yDimensionId;
-
+      /// Generate a line plot through the matrix workspace.
       virtual void getLinePlot(const Mantid::Kernel::VMD & start, const Mantid::Kernel::VMD & end,
           Mantid::API::MDNormalization normalize, std::vector<coord_t> & x, std::vector<signal_t> & y, std::vector<signal_t> & e) const;
+      /// Get the signal at a coordinate in the workspace.
       virtual signal_t getSignalAtCoord(const coord_t * coords, const Mantid::API::MDNormalization & normalization) const;
-      void saveSpectraMapNexus(::NeXus::File * file, const std::vector<int>& spec,
-          const ::NeXus::NXcompression compression = ::NeXus::LZW) const;
-
+      /// Create iterators. Partitions the iterators according to the number of cores.
       virtual std::vector<IMDIterator*> createIterators(size_t suggestedNumCores = 1,
           Mantid::Geometry::MDImplicitFunction * function = NULL) const;
 
-      void saveInstrumentNexus(::NeXus::File * file) const;
-      void loadInstrumentNexus(::NeXus::File * file);
-
-       //Apply masking.
+       /// Apply masking.
        void setMDMasking(Mantid::Geometry::MDImplicitFunction* maskingRegion);
 
-       //Clear exsting masking.
+       /// Clear exsting masking.
        void clearMDMasking();
+
+      //=====================================================================================
+      // End IMDWorkspace methods
+      //=====================================================================================
 
     protected:
       MatrixWorkspace(Mantid::Geometry::INearestNeighboursFactory* factory = NULL);
@@ -348,6 +360,7 @@ namespace Mantid
       /// Static reference to the logger class
       static Kernel::Logger& g_log;
 
+      /// Getter for the dimension id based on the axis.
       std::string getDimensionIdFromAxis(const int& axisIndex) const;
 
     };

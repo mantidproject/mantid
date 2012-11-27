@@ -38,6 +38,14 @@ namespace API
     virtual const std::string id() const { return "IMaskWorkspace"; }
     /// Total number of masked pixels
     virtual std::size_t getNumberMasked() const = 0;
+    /// Check if a detector is masked
+    virtual bool isMasked(const detid_t detectorID) const = 0;
+    /// Check if all detectors in a set are masked
+    virtual bool isMasked(const std::set<detid_t> &detectorIDs) const = 0;
+    /// Set / remove mask of a detector
+    virtual void setMasked(const detid_t detectorID, const bool mask=true) = 0;
+      /// Set / remove masks of all detectors in a set
+    virtual void setMasked(const std::set<detid_t> &detectorIDs, const bool mask=true) = 0;
   };
 
   ///shared pointer to the matrix workspace base class

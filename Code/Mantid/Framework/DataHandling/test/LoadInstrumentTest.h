@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Strings.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -555,6 +556,71 @@ public:
     instLoader.setProperty("InstrumentName", "Nonsense");
 
     TS_ASSERT( ! instLoader.execute() )
+  }
+
+  void test_loading_default_view()
+  {
+    // Make sure the IDS is empty
+    InstrumentDataServiceImpl& IDS = InstrumentDataService::Instance();
+    IDS.clear();
+
+    // Minimal XML instrument
+    const std::string instrumentXML =
+        "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"
+        "<instrument name=\"xmlInst\" valid-from=\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 23:59:59\" last-modified=\"2010-10-06T16:21:30\">"
+        "<defaults>"
+        "<!-- view -->"
+        "</defaults>"
+       
+        "<component type=\"panel\" idlist=\"idlist_for_bank1\">"
+            "<location r=\"0\" t=\"0\" rot=\"0\" axis-x=\"0\" axis-y=\"1\" axis-z=\"0\" name=\"bank1\" xpixels=\"3\" ypixels=\"2\" />"
+        "</component>"
+        "<type is=\"detector\" name=\"panel\">"
+          "<properties/>"
+          "<component type=\"pixel\">"
+            "<location y=\"1\" x=\"1\"/>"
+          "</component>"
+        "</type>"
+        "<type is=\"detector\" name=\"pixel\">"
+          "<cuboid id=\"pixel-shape\" />"
+          "<algebra val=\"pixel-shape\"/>"
+        "</type>"
+        "<idlist idname=\"idlist_for_bank1\">"
+          "<id start=\"1005\" end=\"1005\" />"
+        "</idlist>"
+        "</instrument>";
+
+    LoadInstrument instLoader;
+    instLoader.setRethrows(true);
+    instLoader.initialize();
+    instLoader.setProperty("Workspace",WorkspaceFactory::Instance().create("EventWorkspace",1,1,1));
+    instLoader.setProperty("InstrumentXML",instrumentXML);
+    instLoader.setProperty("InstrumentName", "Nonsense"); // Want to make sure it doesn't matter what we call it
+
+    instLoader.execute();
+
+    TS_ASSERT_EQUALS(1, IDS.size());
+    // test that the default default view is "3D"
+    auto instr = IDS.getObjects().front();
+    TS_ASSERT_EQUALS( instr->getDefaultView(), "3D" );
+    IDS.clear();
+
+    // explicitely set the default instrument view
+    const std::string instrumentXMLwithView = Mantid::Kernel::Strings::replace(instrumentXML,
+    "<!-- view -->", "<default-view view=\"cylindrical_y\"/>");
+
+    instLoader.setProperty("Workspace",WorkspaceFactory::Instance().create("EventWorkspace",1,1,1));
+    instLoader.setProperty("InstrumentXML",instrumentXMLwithView);
+    instLoader.setProperty("InstrumentName", "Nonsense"); // Want to make sure it doesn't matter what we call it
+
+    instLoader.execute();
+
+    TS_ASSERT_EQUALS(1, IDS.size());
+    // test that the default view is cylindrical_y
+    instr = IDS.getObjects().front();
+    TS_ASSERT_EQUALS( instr->getDefaultView(), "CYLINDRICAL_Y" );
+    IDS.clear();
+
   }
 
 private:

@@ -89,6 +89,13 @@ If false, then the workspace gets converted to a Workspace2D histogram.
         wavelength = simpleapi.CreateWorkspace(data,data,NSpec=3,UnitX='Wavelength')
         simpleapi.MaskDetectors(wavelength,WorkspaceIndexList=[1,2])
         
+    def test_function_accepts_EnableLogging_keyword(self):
+        # The test here is that the algorithm runs without falling over about the EnableLogging keyword being a property
+        wsname = 'test_function_call_executes_correct_algorithm_when_passed_correct_args'
+        data = [1.0,2.0,3.0,4.0,5.0]
+        simpleapi.CreateWorkspace(data,data,OutputWorkspace=wsname,NSpec=1,UnitX='Wavelength',EnableLogging=False)
+        self.assertTrue( wsname in mtd )
+    
     def test_function_call_raises_ValueError_when_passed_args_with_invalid_values(self):
         # lhs code bug means we can't do this "self.assertRaises(simpleapi.LoadNexus, 'DoesNotExist')" --> ticket #4186
         try:

@@ -456,7 +456,7 @@ namespace MantidQt
             min_spec_index = aux;
         }
       }
-
+	delete map; // release memory allocated by getWorkspaceIndexToDetectorIDMap.
       if ( min_spec_index == ULONG_MAX || max_spec_index == 0){
         g_log.error()<<"Error : The instrument does not have data associated to the RectangularDetector " << rectDet->getDetectorName().toStdString()<<std::endl;
       }

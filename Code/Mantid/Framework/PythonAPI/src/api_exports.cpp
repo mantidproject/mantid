@@ -496,6 +496,7 @@ void export_dataitem()
             .def("removePeak", &IPeaksWorkspace::removePeak)
             .def("getPeak", &IPeaksWorkspace::getPeakPtr, return_internal_reference<>() )
             .def("createPeak", &IPeaksWorkspace::createPeak, return_internal_reference<>() )
+            .def("hasIntegratedPeaks", &IPeaksWorkspace::hasIntegratedPeaks)
         ;
   }
 

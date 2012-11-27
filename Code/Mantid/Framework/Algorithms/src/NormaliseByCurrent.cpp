@@ -71,7 +71,7 @@ double NormaliseByCurrent::extractCharge(MatrixWorkspace_sptr inputWS) const
   }
   catch(Exception::NotFoundError &)
   {
-    g_log.warning() << "No nperiods property. If this is multi-period data, then you will be normalising against the wrong current.\n";
+    g_log.information() << "No nperiods property. If this is multi-period data, then you will be normalising against the wrong current.\n";
   } 
   // Handle multiperiod data.
   if(nPeriods > 1)

@@ -99,10 +99,10 @@
   <parameter name="mistake"> </parameter> 
 </component>
 
-<type name="undulator" is="Source">
+<type name="undulator" is="source">
   <properties />
 </type>
-<type name="nickel-holder" is="SamplePos">
+<type name="nickel-holder" is="samplePos">
   <properties />
 </type>
 
@@ -227,7 +227,7 @@
 </component>
 </type>
 
-<type name="monitor-cylinder-ring-shape" is="detector">
+<type name="monitor-cylinder-ring-shape" is="Detector">
 
   <cylinder id="inner-cylinder">
     <centre-of-bottom-base x="-0.0621" y="0.0" z="0.0" />

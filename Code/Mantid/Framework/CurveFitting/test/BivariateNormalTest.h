@@ -107,7 +107,7 @@ public:
 
       Mantid::MantidVecPtr xvals, yvals, data;
       int sgn1 = 1;
-      int sgn2 =1;std::cout<<"-------------------------------------"<<std::endl;
+      int sgn2 =1;//std::cout<<"-------------------------------------"<<std::endl;
       for( int i= 0; i< nCells; i++)
         {
           double x = 195 + sgn1;
@@ -118,11 +118,11 @@ public:
           yvals.access().push_back( y );
           double val = NormVal(background,intensity,Mcol,
               Mrow,Vx,Vy, Vxy, y, x);
-          std::cout<<"("<<y<<","<<x<<","<<val<<")";
+        //  std::cout<<"("<<y<<","<<x<<","<<val<<")";
           data.access().push_back( val );
 
         }
-   std::cout<<std::endl;std::cout<<"-------------------------------------"<<std::endl;
+  // std::cout<<std::endl;//std::cout<<"-------------------------------------"<<std::endl;
 
       Mantid::MantidVecPtr x_vec_ptr;
       double xx[nCells];
@@ -131,7 +131,6 @@ public:
             xx[i] = i;
             x_vec_ptr.access().push_back((double) i );
          }
-
       NormalFit.setAttributeValue("CalcVariances",CalcVariances);
 
       ws->setX(0,x_vec_ptr);
@@ -146,6 +145,7 @@ public:
       NormalFit.setParameter("Intensity", 562.95, true);
       NormalFit.setParameter("Mcol",195.698196998, true);
       NormalFit.setParameter("Mrow", 44.252065014, true);
+
       if( !CalcVariances )
       {
         NormalFit.setParameter("SScol", 5.2438470, true);
@@ -155,10 +155,16 @@ public:
 
 
 
-
       std::vector<double> out(nCells);
+
+      boost::shared_ptr<Jacob> Jac(new Jacob(7, nCells));
+
+      NormalFit.functionDeriv1D(Jac.get(), xx, nCells);
+
       NormalFit.function1D(out.data(), xx, nCells);
-      std::cout<<"-------------------------------------"<<std::endl;
+
+
+    //  std::cout<<"-------------------------------------"<<std::endl;
       for( int i=0; i< nCells; i++)
       {
 
@@ -169,7 +175,7 @@ public:
 
          TS_ASSERT_DELTA( d, out[i],.001);
       }
-      std::cout<<"\n-------------------------------------"<<std::endl;
+     // std::cout<<"\n-------------------------------------"<<std::endl;
 
     double Res[5][7]={{1,0.0410131,-1.21055,5.93517,-3.04761,-4.03279,3.79245},
                       { 1,0.00388945,-2.25613,2.63994,0.870333,1.13668,-2.33103},
@@ -180,9 +186,6 @@ public:
 
 
 
-      boost::shared_ptr<Jacob> Jac(new Jacob(7, nCells));
-
-     NormalFit.functionDeriv1D(Jac.get(), xx, nCells);
 
 
  /*     for( int i=0; i< nCells; i+=6)//points
@@ -317,9 +320,9 @@ public:
             NormalFit.applyTies();
 
             NormalFit.function1D(out2, xx, nCells);
-            std::cout<<"param "<<param<<"=";
-            for( int i=0; i< nCells;i++)
-               std::cout<<"["<<(out2[i]-out1[i])/.001<<","<< Jac.get(i,param)<<"]";
+           // std::cout<<"param "<<param<<"=";
+          //  for( int i=0; i< nCells;i++)
+           //    std::cout<<"["<<(out2[i]-out1[i])/.001<<","<< Jac.get(i,param)<<"]";
             std::cout<<std::endl;
             NormalFit.setParameter( param, opV);
           }

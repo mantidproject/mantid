@@ -34,17 +34,15 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
-#include <vtkCellData.h>
-#include <vtkFloatArray.h>
-#include <vtkHexahedron.h>
-#include <vtkUnstructuredGrid.h>
 
 namespace Mantid
 {
 namespace VATES
 {
+// Forward dec.
+class ProgressAction; 
 
-class DLLExport vtkPeakMarkerFactory: public vtkDataSetFactory
+class DLLExport vtkPeakMarkerFactory
 {
 public:
 
@@ -79,6 +77,12 @@ public:
     return "vtkPeakMarkerFactory";
   }
 
+  /// Getter for the peak workspace integration radius
+  double getIntegrationRadius() const;
+
+  /// Was the peaks workspace integrated?
+  bool isPeaksWorkspaceIntegrated() const;
+
 protected:
 
   virtual void validate() const;
@@ -98,6 +102,8 @@ private:
   /// Which peak dimension to use
   ePeakDimensions m_dimensionToShow;
 
+  /// peak radius value.
+  double m_peakRadius; 
 
 };
 

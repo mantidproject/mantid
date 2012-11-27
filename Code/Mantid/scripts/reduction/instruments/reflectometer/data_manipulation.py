@@ -121,6 +121,7 @@ def counts_vs_pixel_distribution(file_path, is_pixel_y=True, callback=None,
                 
             # 2D plot
             output_2d = ws_output+'_2D'
+            print output_2d
             Rebin(InputWorkspace=ws,OutputWorkspace=output_2d,Params="%d,200,%d" % (tof_min, tof_max))
             if is_pixel_y:
                 grouping_file = os.path.join(instr_dir, "Grouping",

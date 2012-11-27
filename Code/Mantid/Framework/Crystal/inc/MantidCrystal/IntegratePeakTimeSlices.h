@@ -88,7 +88,11 @@ namespace Crystal
           this->time=time;
      }
 
-     void setStatBase(std::vector<double> const &StatBase );
+     //Returns true if "Edge Peak" otherwise returns false
+     bool setStatBase(std::vector<double> const &StatBase );
+
+     bool isEdgePeak( double* params, int nparams);
+
 
      void setHeighHalfWidthInfo( Mantid::MantidVecPtr &xvals,
          Mantid::MantidVecPtr &yvals,Mantid::MantidVecPtr &counts,
@@ -186,10 +190,12 @@ namespace Crystal
 
      bool CalcVariances( );
 
-
+     std::vector<double>GetParams( double background);
 
      double StatBaseVals( int index)
      {
+       if( index < 0 || index >= (int)StatBase.size() )
+         return 0.0;
        return StatBase[index];
      }
 
@@ -199,7 +205,7 @@ namespace Crystal
 
      double CalcSampleIntensityMultiplier( const double* params) const;
 
-
+     std::vector<double> InitValues( double Varx,double Vary,double b);
      double baseRCRadius;
      double lastRCRadius;
      double HalfWidthAtHalfHeightRadius;
@@ -211,6 +217,7 @@ namespace Crystal
      double CellWidth;
      double CellHeight;
 
+     double VarxHW, VaryHW;
      double currentRadius;
      Kernel::V3D   currentPosition;
      std::vector<double> StatBase;
@@ -247,6 +254,8 @@ namespace Crystal
         HalfWidthAtHalfHeightRadius = -1;
         case4 = false;
 
+        VarxHW = -1;
+        VaryHW = -1;
         back_calc = Intensity_calc = row_calc =
             col_calc = Vx_calc = Vy_calc = Vxy_calc = -1;
       }
@@ -356,9 +365,19 @@ private:
                    std::string                    &spec_idList
 
                    ) ;
-  void Fit(API::MatrixWorkspace_sptr &Data,double &chisq, bool &done,
+
+  /**
+   *  Tests several starting points in the Marquardt algorithm then calls Fit.
+   */
+  void PreFit(API::MatrixWorkspace_sptr &Data,double &chisq, bool &done,
         std::vector<std::string>&names, std::vector<double>&params,
         std::vector<double>&errs,double lastRow,double lastCol,double neighborRadius);
+
+
+  void Fit(API::MatrixWorkspace_sptr &Data,double &chisq, bool &done,
+        std::vector<std::string>&names, std::vector<double>&params,
+        std::vector<double>&errs,
+        double lastRow,double lastCol,double neighborRadius);
 
   std::string CalculateFunctionProperty_Fit(  ) ;
 

@@ -116,27 +116,63 @@ public:
   void requestRedraw();
 
   //-----------------------------------
-  //    Shape2D manipulation
+  //    Mask methods
   //-----------------------------------
 
+  /// Return bounding rect of the currently selected shape in the "original" coord system.
+  /// It doesn't depend on the zooming of the surface
   QRectF getCurrentBoundingRect()const{return m_maskShapes.getCurrentBoundingRect();}
+
+  /// Set new bounding rect of the currently selected shape in the "original" coord system.
+  /// This method resizes the shape to fit into the new rectangle.
   void setCurrentBoundingRect(const QRectF& rect){m_maskShapes.setCurrentBoundingRect(rect);}
 
+  /// Initialize interactive shape creation.
+  /// @param type :: Type of the shape. For available types see code of Shape2DCollection::createShape(const QString& type,int x,int y) const
+  /// @param borderColor :: The color of the shape outline.
+  /// @param fillColor :: The fill color.
   void startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor = QColor());
-  // double properties
+
+  // Properties methods which allow the mask shapes to be modified with a property browser.
+
+  /// Return a list of all properties of type double of the currently selected shape.
   QStringList getCurrentDoubleNames()const{return m_maskShapes.getCurrentDoubleNames();}
+
+  /// Get value of a "double" property of the currently selected shape.
+  /// @param prop :: Name of the property
   double getCurrentDouble(const QString& prop) const{return m_maskShapes.getCurrentDouble(prop);}
+
+  /// Set value of a "double" property of the currently selected shape.
+  /// @param prop :: Name of the property
+  /// @param value :: New value
   void setCurrentDouble(const QString& prop, double value){m_maskShapes.setCurrentDouble(prop, value);}
-  // QPointF properties
+
+  /// Return a list of all properties of type QPointF of the currently selected shape.
   QStringList getCurrentPointNames()const{return m_maskShapes.getCurrentPointNames();}
+
+  /// Get value of a "QPointF" property of the currently selected shape.
+  /// @param prop :: Name of the property
   QPointF getCurrentPoint(const QString& prop) const{return m_maskShapes.getCurrentPoint(prop);}
+
+  /// Set value of a "QPointF" property of the currently selected shape.
+  /// @param prop :: Name of the property
+  /// @param value :: New value
   void setCurrentPoint(const QString& prop, const QPointF& value){m_maskShapes.setCurrentPoint(prop,value);}
 
+  /// Check if a point on the scren is under any of the mask shapes
   bool isMasked(double x,double y)const{return m_maskShapes.isMasked(x,y);}
+
+  /// Check if there are any masks defined
+  bool hasMasks() const {return m_maskShapes.size() > 0;}
+
+  /// Remove all mask shapes.
   void clearMask(){m_maskShapes.clear();}
 
+  //-----------------------------------
+  //    Peaks overaly methods
+  //-----------------------------------
+
   QList<PeakMarker2D*> getMarkersWithID(int detID)const;
-  //PeakOverlay& getPeakOverlay(){return m_peakShapes;}
   void peaksWorkspaceDeleted(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
   void clearPeakOverlays();
   bool hasPeakOverlays() const {return !m_peakShapes.isEmpty();}

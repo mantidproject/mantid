@@ -7,7 +7,7 @@
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 
-
+#include <boost/algorithm/string.hpp>
 #include <vtkFieldData.h>
 #include <vtkDataSet.h>
 
@@ -115,6 +115,23 @@ namespace Mantid
       m_firstLoad = false;
       //Return decision.
       return bExecute;
+    }
+
+    /**
+    Determines wheter the file can be loaded based on it's extension.
+    @param filename containing the extension
+    @param expectedExtension expected extension for the file to have
+    @return TRUE, only if the extension is approved.
+    */
+    bool MDEWLoadingPresenter::canLoadFileBasedOnExtension(const std::string& filename, const std::string& expectedExtension) const
+    {
+       // Quick check based on extension.
+      const size_t startExtension = filename.find_last_of('.');
+      const size_t endExtension = filename.length();
+      std::string extension = filename.substr(startExtension, endExtension - startExtension);
+      boost::algorithm::to_lower(extension);
+      boost::algorithm::trim(extension);
+      return extension == expectedExtension;
     }
     
     /*

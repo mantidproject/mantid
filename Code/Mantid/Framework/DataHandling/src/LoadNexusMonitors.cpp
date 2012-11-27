@@ -21,6 +21,9 @@ This algorithm loads all monitors found in a NeXus file into a single [[Workspac
 #include <map>
 #include <vector>
 
+using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::EventWorkspace_sptr;
+
 namespace Mantid
 {
 namespace DataHandling
@@ -91,6 +94,8 @@ void LoadNexusMonitors::exec()
   //Now we want to go through and find the monitors
   entries = file.getEntries();
   std::vector<std::string> monitorNames;
+  size_t numHistMon = 0;
+  size_t numEventMon = 0;
   prog1.report();
 
   API::Progress prog2(this, 0.2, 0.6, entries.size());
@@ -103,14 +108,71 @@ void LoadNexusMonitors::exec()
     if ((entry_class == "NXmonitor"))
     {
       monitorNames.push_back( entry_name );
+
+      // check for event/histogram monitor
+      // -> This will prefer event monitors over histogram
+      //    if they are found in the same group.
+      file.openGroup(entry_name, "NXmonitor");
+      int numEventThings = 0; // number of things that are eventish - should be 3
+      string_map_t inner_entries = file.getEntries(); // get list of entries
+      for (auto inner = inner_entries.begin(); inner != inner_entries.end(); ++inner)
+      {
+        if (inner->first == "event_index")
+        {
+          numEventThings += 1;
+          continue;
+        }
+        else if (inner->first == "event_time_offset")
+        {
+          numEventThings += 1;
+          continue;
+        }
+        else if (inner->first == "event_time_zero")
+        {
+          numEventThings += 1;
+          continue;
+        }
+      }
+      file.closeGroup(); // close NXmonitor
+
+      if (numEventThings == 3)
+        numEventMon += 1;
+      else
+        numHistMon += 1;
     }
     prog2.report();
   }
   this->nMonitors = monitorNames.size();
 
+  // only use if using event monitors
+  EventWorkspace_sptr eventWS;
+
   // Create the output workspace
-  this->WS = API::WorkspaceFactory::Instance().create("Workspace2D",
-      this->nMonitors, 1, 1);
+  bool useEventMon;
+  if (numHistMon == this->nMonitors)
+  {
+    useEventMon = false;
+    this->WS = API::WorkspaceFactory::Instance().create("Workspace2D",
+                                                        this->nMonitors, 1, 1);
+  }
+  else if (numEventMon == this->nMonitors)
+  {
+    eventWS = EventWorkspace_sptr(new EventWorkspace());
+    useEventMon = true;
+    eventWS->initialize(this->nMonitors,1,1);
+
+    // Set the units
+    eventWS->getAxis(0)->unit()
+        = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    eventWS->setYUnit("Counts");
+    this->WS = eventWS;
+  }
+  else
+  {
+    g_log.error() << "Found " << numEventMon << " event monitors and " << numHistMon
+                        << " histogram monitors (" << this->nMonitors << " total)\n";
+    throw std::runtime_error("All monitors must be either event or histogram based");
+  }
 
   // a temporary place to put the spectra/detector numbers
   boost::scoped_array<specid_t> spectra_numbers(new specid_t[this->nMonitors]);
@@ -153,33 +215,108 @@ void LoadNexusMonitors::exec()
 
     spectra_numbers[i] = spectrumNo;
     detector_numbers[i] = monIndex;
+
+    if (useEventMon)
+    {
+      // setup local variables
+      std::vector<uint64_t> event_index;
+      MantidVec time_of_flight;
+      std::string tof_units;
+      MantidVec seconds;
+
+      // read in the data
+      file.openData("event_index");
+      file.getData(event_index);
+      file.closeData();
+      file.openData("event_time_offset");
+      file.getDataCoerce(time_of_flight);
+      file.getAttr("units", tof_units);
+      file.closeData();
+      file.openData("event_time_zero");
+      file.getDataCoerce(seconds);
+      Mantid::Kernel::DateAndTime pulsetime_offset;
+      {
+        std::string startTime;
+        file.getAttr("offset", startTime);
+        pulsetime_offset = Mantid::Kernel::DateAndTime(startTime);
+      }
+      file.closeData();
+
+      // load up the event list
+      DataObjects::EventList& event_list = eventWS->getEventList(i);
+
+      Mantid::Kernel::DateAndTime pulsetime(0);
+      Mantid::Kernel::DateAndTime lastpulsetime(0);
+      std::size_t numEvents = time_of_flight.size();
+      bool pulsetimesincreasing = true;
+      size_t pulse_index(0);
+      size_t numPulses = seconds.size();
+      for (std::size_t j = 0; j < numEvents; ++j)
+      {
+        while (!((j >= event_index[pulse_index]) && (j < event_index[pulse_index + 1])) )
+        {
+          pulse_index += 1;
+          if (pulse_index > (numPulses+1))
+            break;
+        }
+        if (pulse_index > (numPulses+1))
+          pulse_index = numPulses - 1; // fix it
+        pulsetime = pulsetime_offset + seconds[pulse_index];
+        if (pulsetime < lastpulsetime)
+          pulsetimesincreasing = false;
+        lastpulsetime = pulsetime;
+        event_list.addEventQuickly(DataObjects::TofEvent(time_of_flight[i], pulsetime));
+      }
+      if (pulsetimesincreasing)
+        event_list.setSortOrder(DataObjects::PULSETIME_SORT);
+    }
+    else // is a histogram monitor
+    {
+      // Now, actually retrieve the necessary data
+      file.openData("data");
+      MantidVec data;
+      file.getDataCoerce(data);
+      file.closeData();
+      MantidVec error(data.size()); // create vector of correct size
+
+      // Transform errors via square root
+      std::transform(data.begin(), data.end(), error.begin(),
+                     (double(*)(double)) sqrt);
+
+      // Get the TOF axis
+      file.openData("time_of_flight");
+      MantidVec tof;
+      file.getDataCoerce(tof);
+      file.closeData();
+
+      this->WS->dataX(i) = tof;
+      this->WS->dataY(i) = data;
+      this->WS->dataE(i) = error;
+    }
+
+    file.closeGroup(); // NXmonitor
+
     // Default values, might change later.
     this->WS->getSpectrum(i)->setSpectrumNo(spectrumNo);
     this->WS->getSpectrum(i)->setDetectorID(monIndex);
 
-    // Now, actually retrieve the necessary data
-    file.openData("data");
-    MantidVec data;
-    MantidVec error;
-    file.getDataCoerce(data);
-    file.getDataCoerce(error);
-    file.closeData();
-
-    // Transform errors via square root
-    std::transform(error.begin(), error.end(), error.begin(),
-        (double(*)(double)) sqrt);
-
-    // Get the TOF axis
-    file.openData("time_of_flight");
-    MantidVec tof;
-    file.getDataCoerce(tof);
-    file.closeData();
-    file.closeGroup();
-
-    this->WS->dataX(i) = tof;
-    this->WS->dataY(i) = data;
-    this->WS->dataE(i) = error;
     prog3.report();
+  }
+
+  if (useEventMon) // set the x-range to be the range for min/max events
+  {
+    double xmin, xmax;
+    eventWS->getEventXMinMax(xmin, xmax);
+
+    Kernel::cow_ptr<MantidVec> axis;
+    MantidVec& xRef = axis.access();
+    xRef.resize(2,0.0);
+    if ( eventWS->getNumberEvents() > 0)
+    {
+      xRef[0] = xmin - 1; //Just to make sure the bins hold it all
+      xRef[1] = xmax + 1;
+    }
+    eventWS->setAllX(axis); //Set the binning axis using this.
   }
 
   // Fix the detector numbers if the defaults above are not correct

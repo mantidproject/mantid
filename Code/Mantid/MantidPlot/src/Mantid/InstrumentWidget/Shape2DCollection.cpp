@@ -204,11 +204,15 @@ void Shape2DCollection::mouseMoveEvent(QMouseEvent* e)
   }
   else if (selectControlPointAt(e->x(),e->y()) || isOverCurrentAt(e->x(),e->y()))
   {
-    m_overridingCursor = true;
-    QApplication::setOverrideCursor(Qt::SizeAllCursor);
+    if ( !m_overridingCursor )
+    {
+      m_overridingCursor = true;
+      QApplication::setOverrideCursor(Qt::SizeAllCursor);
+    }
   }
   else if (m_overridingCursor)
   {
+    m_overridingCursor = false;
     QApplication::restoreOverrideCursor();
   }
 }

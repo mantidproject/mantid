@@ -199,6 +199,7 @@ private:
   QWidget*  mantidOptionsPage;
   QWidget*  mantidSendToPage;
   QCheckBox *m_invisibleWorkspaces;
+  QCheckBox *m_useOpenGL;
   QCheckBox *m_sendToPrograms;
   QTreeWidget *treeCategories;
   QTreeWidget *treePrograms;

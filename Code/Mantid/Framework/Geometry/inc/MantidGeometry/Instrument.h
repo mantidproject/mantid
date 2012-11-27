@@ -159,6 +159,12 @@ namespace Mantid
       /// Get information about the units used for parameters described in the IDF and associated parameter files
       std::map<std::string, std::string>& getLogfileUnit() {return m_logfileUnit;}
 
+      /// Get the default type of the instrument view. The possible values are:
+      /// 3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z
+      std::string getDefaultView() const {return m_defaultView;}
+      /// Set the default type of the instrument view. The possible values are:
+      /// 3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y, SPHERICAL_Z
+      void setDefaultView(const std::string& type);
       /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
       std::string getDefaultAxis() const {return m_defaultViewAxis;}
       /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
@@ -256,6 +262,8 @@ namespace Mantid
       /// a vector holding detector ids of monitor s
       std::vector<detid_t> m_monitorCache;
 
+      /// Stores the default type of the instrument view: 3D or one of the "unwrapped"
+      std::string m_defaultView;
       /// Stores from which side the instrument will be viewed from, initially in the instrument viewer, possiblities are "Z+, Z-, X+, ..."
       std::string m_defaultViewAxis;
 

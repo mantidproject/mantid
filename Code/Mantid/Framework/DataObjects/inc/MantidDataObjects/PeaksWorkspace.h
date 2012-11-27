@@ -107,7 +107,7 @@ namespace DataObjects
     API::IPeak* createPeak(Kernel::V3D QLabFrame, double detectorDistance=1.0) const;
     std::vector<Peak> & getPeaks();
     const std::vector<Peak> & getPeaks() const;
-
+    virtual bool hasIntegratedPeaks() const;
     virtual size_t getMemorySize() const;
 
     // ====================================== ITableWorkspace Methods ==================================
@@ -144,10 +144,12 @@ namespace DataObjects
     {
       return this->columnNames;
     }
-
-
+    /// This is always threadsafe
     virtual bool threadSafe() const { return true;}
 
+    // --- Nexus Methods ---
+    // Save to Nexus
+    void saveNexus(::NeXus::File * file ) const;
 
   private:
     /** Vector of Peak contained within. */
@@ -159,19 +161,19 @@ namespace DataObjects
     /** Column names */
     std::vector<std::string> columnNames;
 
+    /// Initialize the table structure
     void initColumns();
-
-
-  public:
+    /// Adds a new PeakColumn of the given type
+    void addPeakColumn(const std::string& name);
 
     // ====================================== ITableWorkspace Methods ==================================
 
-    virtual bool addColumn(const std::string& /*type*/, const std::string& /*name*/);
-
     // ===== Methods that are not implemented (read-only table) ==========
+    virtual bool addColumn(const std::string& /*type*/, const std::string& /*name*/)
+    { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot add column."); }
 
     virtual bool addColumns(const std::string& /*type*/, const std::string& /*name*/, size_t /*n*/)
-    { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot add column."); }
+    { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot add columns."); }
 
     virtual void removeColumn( const std::string& /*name*/)
     { throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace structure is read-only. Cannot remove column."); }
@@ -206,9 +208,6 @@ namespace DataObjects
 
     // ====================================== End ITableWorkspace Methods ==================================
 
-  // --- Nexus Methods ---
-    // Save to Nexus
-    void saveNexus(::NeXus::File * file ) const;
     // adapter for logs() function, which create reference to this class itself and does not allow to delete the shared pointers,
     // returned by logs() function when they go out of scope
     API::LogManager_sptr m_logCash;
@@ -222,11 +221,7 @@ namespace DataObjects
   typedef boost::shared_ptr<const PeaksWorkspace> PeaksWorkspace_const_sptr;
 
 
-
 }
 }
 #endif
-
-
-
 

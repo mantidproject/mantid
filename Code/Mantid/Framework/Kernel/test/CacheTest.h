@@ -105,4 +105,42 @@ public:
 // Remove the define here
 #undef USE_CACHE_STATS
 
+
+class CacheTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  void setUp()
+  {
+    m_nelements = 250000;
+    for(int i = 0; i < m_nelements; ++i)
+    {
+      m_cacheGet.setCache(i, 1.5);
+    }
+
+  }
+
+  void test_get_performance()
+  {
+    double value(0.0);
+    for(int i = 0; i < m_nelements; ++i)
+    {
+       m_cacheGet.getCache(i, value);
+    }
+  }
+
+  void test_set_performance()
+  {
+    for(int i = 0; i < m_nelements; ++i)
+    {
+      m_cacheSet.setCache(i, 1.5);
+    }
+  }
+
+  int m_nelements;
+  Cache<int,double> m_cacheGet;
+  Cache<int,double> m_cacheSet;
+
+};
+
 #endif /*CACHETEST_H_*/

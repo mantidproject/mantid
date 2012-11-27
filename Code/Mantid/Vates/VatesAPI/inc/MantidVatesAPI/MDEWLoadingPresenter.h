@@ -56,6 +56,7 @@ namespace Mantid
       Mantid::Geometry::IMDDimension_sptr tDimension;
       virtual void appendMetadata(vtkDataSet* visualDataSet, const std::string& wsName) ;
       virtual void extractMetadata(Mantid::API::IMDEventWorkspace_sptr eventWs);
+      virtual bool canLoadFileBasedOnExtension(const std::string& filename, const std::string& expectedExtension) const;
       virtual bool shouldLoad();
       bool m_isSetup;
       double m_time;
@@ -63,6 +64,8 @@ namespace Mantid
       bool m_loadInMemory;
       bool m_firstLoad;
     };
+
+    
 
   }
 }

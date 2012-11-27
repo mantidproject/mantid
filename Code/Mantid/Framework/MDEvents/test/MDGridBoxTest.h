@@ -205,6 +205,20 @@ public:
     check_MDGridBox(g2);
   }
 
+  void test_setBoxController()
+  {
+    MDGridBox<MDLeanEvent<1>,1> * box = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
+    BoxController_sptr originalBoxController = box->getBoxController();
+    BoxController_sptr newBoxController = BoxController_sptr(new BoxController(*originalBoxController));
+
+    box->setBoxController(newBoxController);
+    auto boxes = box->getBoxes();
+    for(size_t i = 0; i < boxes.size(); ++i)
+    {
+      TSM_ASSERT_EQUALS("All child boxes should have the same box controller as the parent.", newBoxController, boxes[i]->getBoxController()); 
+    }
+  }
+
 
 
   //-----------------------------------------------------------------------------------------

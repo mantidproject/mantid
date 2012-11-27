@@ -18,7 +18,10 @@ using namespace boost::python;
 void export_algorithm()
 {
   REGISTER_SHARED_PTR_TO_PYTHON(Algorithm);
-  class_<Algorithm, bases<IAlgorithm>, boost::noncopyable>("Algorithm", "Base-class for C algorithms", no_init);
+  class_<Algorithm, bases<IAlgorithm>, boost::noncopyable>("Algorithm", "Base-class for C algorithms", no_init)
+    .def("fromString", &Algorithm::fromString, "Initializes the algorithm")
+    .staticmethod("fromString")
+    ;
 
   REGISTER_SHARED_PTR_TO_PYTHON(AlgorithmProxy);
   class_<AlgorithmProxy, bases<IAlgorithm>, boost::noncopyable>("AlgorithmProxy", "Proxy class returned by managed algorithms", no_init);

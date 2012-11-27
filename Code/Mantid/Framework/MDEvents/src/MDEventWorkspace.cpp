@@ -55,11 +55,18 @@ namespace MDEvents
     const MDBox<MDE,nd> * mdbox = dynamic_cast<const MDBox<MDE,nd> *>(other.data);
     const MDGridBox<MDE,nd> * mdgridbox = dynamic_cast<const MDGridBox<MDE,nd> *>(other.data);
     if (mdbox)
+    {
       data = new MDBox<MDE, nd>(*mdbox);
+    }
     else if (mdgridbox)
+    {
       data = new MDGridBox<MDE, nd>(*mdgridbox);
+    }
     else
+    {
       throw std::runtime_error("MDEventWorkspace::copy_ctor(): unexpected data box type found.");
+    }
+    data->setBoxController(m_BoxController);
   }
 
   //-----------------------------------------------------------------------------------------------

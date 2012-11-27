@@ -371,7 +371,7 @@ class LoadTransmissions(ReductionStep):
         reducer.instrument.load_transmission_inst(self.direct.wksp_name)
         
         if reducer.instrument.name() == 'SANS2D':        
-            beamcoords = reducer._beam_finder.get_beam_center()
+            beamcoords = reducer.get_beam_center()
             reducer.instrument.move_components(self.trans.wksp_name, beamcoords[0], beamcoords[1]) 
             if  self.trans.wksp_name != self.direct.wksp_name:
               reducer.instrument.move_components(self.direct.wksp_name, beamcoords[0], beamcoords[1])                
@@ -418,7 +418,7 @@ class CanSubtraction(ReductionStep):
         
         if not self.workspace._reload:
             raise NotImplementedError('Moving components needs to be made compatible with not reloading the sample')
-        beamcoords = reducer._beam_finder.get_beam_center()
+        beamcoords = reducer.get_beam_center()
         reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
 
         return logs
@@ -1010,7 +1010,7 @@ class LoadSample(LoadRun, ReductionStep):
 
         if not self._reload:
             raise NotImplementedError('Moving components needs to be made compatible with not reloading the sample')
-        beamcoords = reducer._beam_finder.get_beam_center()
+        beamcoords = reducer.get_beam_center()
         reducer.instrument.move_components(self.wksp_name, beamcoords[0], beamcoords[1])
 
         return logs
@@ -1630,8 +1630,32 @@ class UserFile(ReductionStep):
                 reducer.mask.parse_instruction(reducer.instrument.name(), upper_line)
         
         elif upper_line.startswith('SET CENTRE'):
-            values = upper_line.split()
-            reducer.set_beam_finder(sans_reduction_steps.BaseBeamFinder(float(values[2])/1000.0, float(values[3])/1000.0))
+            # SET CENTRE accepts the following properties:
+            # SET CENTRE X Y
+            # SET CENTRE/MAIN X Y
+            # SET CENTRE/HAB X Y
+            main_str_pos = upper_line.find('MAIN')
+            hab_str_pos = upper_line.find('HAB')
+            x_pos = 0.0;
+            y_pos = 0.0;
+            if (main_str_pos > 0):
+              values = upper_line[main_str_pos+5:].split() #remov the SET CENTRE/MAIN
+              x_pos = float(values[0])/1000.0
+              y_pos = float(values[1])/1000.0
+            elif (hab_str_pos > 0):
+              values = upper_line[hab_str_pos+4:].split() # remove the SET CENTRE/HAB 
+              print ' convert values ',values
+              x_pos = float(values[0])/1000.0
+              y_pos = float(values[1])/1000.0
+            else:
+              values = upper_line.split()
+              x_pos = float(values[2])/1000.0
+              y_pos = float(values[3])/1000.0
+            if (hab_str_pos > 0):
+              print 'Front values = ',x_pos,y_pos
+              reducer.set_beam_finder(sans_reduction_steps.BaseBeamFinder(x_pos, y_pos),'front')
+            else:
+              reducer.set_beam_finder(sans_reduction_steps.BaseBeamFinder(x_pos, y_pos))
         
         elif upper_line.startswith('SET SCALES'):
             values = upper_line.split()

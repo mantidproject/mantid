@@ -6,6 +6,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include <boost/shared_ptr.hpp>
 
@@ -54,6 +55,27 @@ public:
     TS_ASSERT_DELTA( mon->getDistance(*sample), 1.426, 1e-6 );
     //Check if filename is saved
     TS_ASSERT_EQUALS(ld.getPropertyValue("Filename"),WS->run().getProperty("Filename")->value());
+  }
+
+  void testExecEvent()
+  {
+    Mantid::API::FrameworkManager::Instance();
+    LoadNexusMonitors ld;
+    std::string outws_name = "hyspec";
+    ld.initialize();
+    ld.setPropertyValue("Filename", "HYSA_2411_monitors.nxs.h5");
+    ld.setPropertyValue("OutputWorkspace", outws_name);
+
+    ld.execute();
+    TS_ASSERT( ld.isExecuted() );
+    EventWorkspace_sptr WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name);
+    //Valid WS and it is an MatrixWorkspace
+    TS_ASSERT( WS );
+    //Correct number of monitors found
+    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 2 );
+    // Verify number of events loaded
+    TS_ASSERT_EQUALS( WS->getEventList(0).getNumberEvents(), 15000);
+    TS_ASSERT_EQUALS( WS->getEventList(1).getNumberEvents(), 15000);
   }
 };
 

@@ -157,19 +157,22 @@ public:
    * @param startAt :: index of the first event from event_index
    * @param event_index_ptr :: ptr to a vector of event index (length of # of pulses)
    * @param thisBankPulseTimes :: ptr to the pulse times for this particular bank.
+   * @param have_weight :: flag for handling simulated files
+   * @param event_weight :: array with weights for events
    * @return
    */
   ProcessBankData(LoadEventNexus * alg, std::string entry_name,
       Progress * prog, ThreadScheduler * scheduler,
       uint32_t * event_id, float * event_time_of_flight,
       size_t numEvents, size_t startAt, std::vector<uint64_t> * event_index_ptr,
-      BankPulseTimes * thisBankPulseTimes)
+      BankPulseTimes * thisBankPulseTimes, bool have_weight, float * event_weight)
   : Task(),
     alg(alg), entry_name(entry_name), pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
     prog(prog), scheduler(scheduler),
     event_id(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents), startAt(startAt),
     event_index_ptr(event_index_ptr), event_index(*event_index_ptr),
-    thisBankPulseTimes(thisBankPulseTimes)
+    thisBankPulseTimes(thisBankPulseTimes), have_weight(have_weight),
+    event_weight(event_weight)
   {
     // Cost is approximately proportional to the number of events to process.
     m_cost = static_cast<double>(numEvents);
@@ -217,7 +220,15 @@ public:
 
     // Check for cancelled algorithm
     if (alg->getCancel())
-    {  delete [] event_id;  delete [] event_time_of_flight; return;  }
+    {
+      delete [] event_id;
+      delete [] event_time_of_flight;
+      if (have_weight)
+      {
+        delete [] event_weight;
+      }
+      return;
+    }
 
     //Default pulse time (if none are found)
     Mantid::Kernel::DateAndTime pulsetime;
@@ -285,19 +296,39 @@ public:
         detid_t detId = event_id[i];
         if (detId <= alg->eventid_max)
         {
-          // We have cached the vector of events for this detector ID
-          std::vector<Mantid::DataObjects::TofEvent> *eventVector = alg->eventVectors[detId];
-          // NULL eventVector indicates a bad spectrum lookup
-          if(eventVector)
+          // Handle simulated data if present
+          if (have_weight)
           {
+            double weight = static_cast<double>(event_weight[i]);
+            double errorSq = weight * weight;
+            std::vector<Mantid::DataObjects::WeightedEvent> *eventVector = alg->weightedEventVectors[detId];
+            // NULL eventVector indicates a bad spectrum lookup
+            if(eventVector)
+            {
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-      // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
-            eventVector->emplace_back( tof, pulsetime );
+              // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
+              eventVector->emplace_back( tof, pulsetime, weight, errorSq );
 #else
-            eventVector->push_back( TofEvent(tof, pulsetime) );
+              eventVector->push_back( WeightedEvent(tof, pulsetime, weight, errorSq) );
 #endif
+            }
           }
-          //Local tof limits
+          else
+          {
+            // We have cached the vector of events for this detector ID
+            std::vector<Mantid::DataObjects::TofEvent> *eventVector = alg->eventVectors[detId];
+            // NULL eventVector indicates a bad spectrum lookup
+            if(eventVector)
+            {
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+              // This avoids a copy constructor call but is only available with GCC (requires variadic templates)
+              eventVector->emplace_back( tof, pulsetime );
+#else
+              eventVector->push_back( TofEvent(tof, pulsetime) );
+#endif
+            }
+            }
+            //Local tof limits
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
           // Skip any events that are the cause of bad DAS data (e.g. a negative number in uint32 -> 2.4 billion * 100 nanosec = 2.4e8 microsec)
           if (tof < 2e8)
@@ -385,6 +416,10 @@ private:
   std::vector<uint64_t> & event_index;
   /// Pulse times for this bank
   BankPulseTimes * thisBankPulseTimes;
+  /// Flag for simulated data
+  bool have_weight;
+  /// event weights array
+  float * event_weight;
 };
 
 
@@ -415,7 +450,8 @@ public:
     alg(alg), entry_name(entry_name), entry_type(entry_type),
     pixelID_to_wi_vector(alg->pixelID_to_wi_vector), pixelID_to_wi_offset(alg->pixelID_to_wi_offset),
     prog(prog), scheduler(scheduler), thisBankPulseTimes(NULL), m_loadError(false),
-    m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(), m_event_id(NULL), m_event_time_of_flight(NULL)
+    m_oldNexusFileNames(oldNeXusFileNames), m_loadStart(), m_loadSize(), m_event_id(NULL),
+    m_event_time_of_flight(NULL), m_have_weight(false), m_event_weight(NULL)
   {
     setMutex(ioMutex);
     m_cost = static_cast<double>(numEvents);
@@ -643,6 +679,49 @@ public:
     } //no error
   }
 
+  void loadEventWeights(::NeXus::File &file)
+  {
+    try
+    {
+      // First, get info about the event_weight field in this bank
+      file.openData("event_weight");
+    }
+    catch (::NeXus::Exception&)
+    {
+      // Field not found error is most likely.
+      m_have_weight = false;
+      return;
+    }
+    // OK, we've got them
+    m_have_weight = true;
+
+    // Allocate the array
+    float* temp = new float[m_loadSize[0]];
+    delete [] m_event_weight;
+    m_event_weight = temp;
+
+    ::NeXus::Info weight_info = file.getInfo();
+    int64_t weight_dim0 = recalculateDataSize(weight_info.dims[0]);
+    if (weight_dim0 < m_loadSize[0]+m_loadStart[0])
+    {
+      alg->getLogger().warning() << "Entry " << entry_name << "'s event_weight field is too small to load the desired data.\n";
+      m_loadError = true;
+    }
+
+    // Check that the type is what it is supposed to be
+    if (weight_info.type == ::NeXus::FLOAT32)
+      file.getSlab(m_event_weight, m_loadStart, m_loadSize);
+    else
+    {
+      alg->getLogger().warning() << "Entry " << entry_name << "'s event_weight field is not FLOAT32! It will be skipped.\n";
+      m_loadError = true;
+    }
+
+    if (!m_loadError)
+    {
+      file.closeData();
+    }
+  }
 
   //---------------------------------------------------------------------------------------------------
   void run()
@@ -658,8 +737,10 @@ public:
     // Data arrays
     m_event_id = NULL;
     m_event_time_of_flight = NULL;
+    m_event_weight = NULL;
 
     m_loadError = false;
+    m_have_weight = alg->m_haveWeights;
 
     prog->report(entry_name + ": load from disk");
 
@@ -701,7 +782,13 @@ public:
 
           // And TOF.
           if (!m_loadError)
+          {
             this->loadTof(file);
+            if (m_have_weight)
+            {
+              this->loadEventWeights(file);
+            }
+          }
         } // Size is at least 1
         else
         {
@@ -734,6 +821,10 @@ public:
       prog->reportIncrement(2, entry_name + ": skipping");
       delete [] m_event_id;
       delete [] m_event_time_of_flight;
+      if (m_have_weight)
+      {
+        delete [] m_event_weight;
+      }
       delete event_index_ptr;
       return;
     }
@@ -743,7 +834,7 @@ public:
     size_t startAt = m_loadStart[0];
     ProcessBankData * newTask = new ProcessBankData(alg, entry_name, prog,scheduler,
         m_event_id, m_event_time_of_flight, numEvents, startAt, event_index_ptr,
-        thisBankPulseTimes);
+        thisBankPulseTimes, m_have_weight, m_event_weight);
     scheduler->push(newTask);
   }
 
@@ -792,7 +883,10 @@ private:
   uint32_t * m_event_id;
   /// TOF data
   float * m_event_time_of_flight;
-
+  /// Flag for simulated data
+  bool m_have_weight;
+  /// Event weights
+  float * m_event_weight;
 };
 
 
@@ -1114,8 +1208,10 @@ void LoadEventNexus::exec()
 //-----------------------------------------------------------------------------
 /** Generate a look-up table where the index = the pixel ID of an event
  * and the value = a pointer to the EventList in the workspace
+ * @param vectors :: the array to create the map on
  */
-void LoadEventNexus::makeMapToEventLists()
+template <class T>
+void LoadEventNexus::makeMapToEventLists(std::vector<T> & vectors)
 {
   if( this->event_id_is_spec )
   {
@@ -1132,13 +1228,13 @@ void LoadEventNexus::makeMapToEventLists()
     // The index of eventVectors is a spectrum number so it is simply resized to the maximum
     // possible spectrum number
     eventid_max = maxSpecNo;
-    eventVectors.resize(maxSpecNo+1, NULL);
+    vectors.resize(maxSpecNo+1, NULL);
     for(size_t i = 0; i < WS->getNumberHistograms(); ++i)
     {
       const ISpectrum * spec = WS->getSpectrum(i);
       if(spec)
       {
-        eventVectors[spec->getSpectrumNo()] = &WS->getEventList(i).getEvents();
+        getEventsFrom(WS->getEventList(i), vectors[spec->getSpectrumNo()]);
       }
     }
   }
@@ -1149,17 +1245,46 @@ void LoadEventNexus::makeMapToEventLists()
     
     // Make an array where index = pixel ID
     // Set the value to the 0th workspace index by default
-    eventVectors.resize(eventid_max+1, &WS->getEventList(0).getEvents() );
-    
+    resizeFrom(vectors, eventid_max+1, WS->getEventList(0));
+
     for (size_t j=size_t(pixelID_to_wi_offset); j<pixelID_to_wi_vector.size(); j++)
     {
       size_t wi = pixelID_to_wi_vector[j];
-      // Save a POINTER to the vector<tofEvent>
-      eventVectors[j-pixelID_to_wi_offset] = &WS->getEventList(wi).getEvents();
+      // Save a POINTER to the vector
+      getEventsFrom(WS->getEventList(wi), vectors[j-pixelID_to_wi_offset]);
     }
   }
 }
 
+//-----------------------------------------------------------------------------
+/**
+ * This function takes the given vector of pointers for the TofEvents and
+ * resizes it according to the specified length using the events in the
+ * EventList to provide overfill information.
+ * @param vec :: The vector to resize
+ * @param size :: The length to resize the incoming vector to
+ * @param el :: The event list to use as fill values
+ */
+void LoadEventNexus::resizeFrom(std::vector<EventVector_pt> &vec,
+    const int32_t &size, EventList &el)
+{
+  vec.resize(size, &el.getEvents());
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * This function takes the given vector of pointers for the WeightedEvents and
+ * resizes it according to the specified length using the events in the
+ * EventList to provide overfill information.
+ * @param vec :: The vector to resize
+ * @param size :: The length to resize the incoming vector to
+ * @param el :: The event list to use as fill values
+ */
+void LoadEventNexus::resizeFrom(std::vector<WeightedEventVector_pt> &vec,
+    const int32_t &size, EventList &el)
+{
+  vec.resize(size, &el.getWeightedEvents());
+}
 
 //-----------------------------------------------------------------------------
 /**
@@ -1221,6 +1346,7 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
   ::NeXus::Info info;
   bool oldNeXusFileNames(false);
+  m_haveWeights = false;
   for (; it != entries.end(); ++it)
   {
     std::string entry_name(it->first);
@@ -1251,10 +1377,25 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
           bankNumEvents.push_back(0);
           continue;
         }
+
       }
+
       bankNumEvents.push_back(static_cast<std::size_t>(file.getInfo().dims[0]));
       total_events +=static_cast<std::size_t>(file.getInfo().dims[0]);
       file.closeData();
+
+      // Look for weights in simulated file
+      try
+      {
+        file.openData("event_weight");
+        m_haveWeights = true;
+        file.closeData();
+      }
+      catch (::NeXus::Exception &)
+      {
+        // Swallow exception since flag is already false;
+      }
+
       file.closeGroup();
     }
   }
@@ -1378,7 +1519,19 @@ void LoadEventNexus::loadEvents(API::Progress * const prog, const bool monitors)
     WS->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector, pixelID_to_wi_offset, true);
 
   // Cache a map for speed.
-  this->makeMapToEventLists();
+  if (!m_haveWeights)
+  {
+    this->makeMapToEventLists<EventVector_pt>(eventVectors);
+  }
+  else
+  {
+    // Convert to weighted events
+    for (size_t i=0; i < WS->getNumberHistograms(); i++)
+    {
+      WS->getEventList(i).switchTo(API::WEIGHTED);
+    }
+    this->makeMapToEventLists<WeightedEventVector_pt>(weightedEventVectors);
+  }
 
   // Set all (empty) event lists as sorted by pulse time. That way, calling SortEvents will not try to sort these empty lists.
   for (size_t i=0; i < WS->getNumberHistograms(); i++)

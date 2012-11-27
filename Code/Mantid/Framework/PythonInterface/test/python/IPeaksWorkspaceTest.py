@@ -53,6 +53,9 @@ class IPeaksWorkspaceTest(unittest.TestCase):
         p = pws.getPeak(0)
         self.assertAlmostEquals( p.getQLabFrame().X(), 1.0, 3)
         
+        # Peaks workspace will not be integrated by default.
+        self.assertTrue(not pws.hasIntegratedPeaks())
+        
         mtd.remove('cncs')
         mtd.remove('peaks')
         

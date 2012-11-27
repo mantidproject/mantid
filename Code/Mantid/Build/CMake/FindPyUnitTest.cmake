@@ -3,14 +3,17 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   get_filename_component ( _pyunit_testname ${_pyunit_testname_file} NAME_WE )
   set ( _pyunit_outputdir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname} )
 
-  # setup the output directory
-  add_custom_command ( OUTPUT ${_pyunit_outputdir}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${_pyunit_outputdir})
-  add_custom_command ( OUTPUT ${_pyunit_outputdir}/__init__.py
-                       DEPENDS ${_pyunit_outputdir}
-                       COMMAND ${CMAKE_COMMAND} ARGS -E touch ${_pyunit_outputdir}/__init__.py )
+  # Add a special target to prepare the output directory. It needs to be run everytime the
+  # main target is run so we can flush out any algorithms that may have been removed from the source tree but
+  # still reside in the build
+  add_custom_target ( Prepare${_pyunit_testname_file}
+                      COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
+                      COMMAND ${CMAKE_COMMAND} -E remove_directory ${_pyunit_outputdir}
+                      COMMAND ${CMAKE_COMMAND} -E make_directory ${_pyunit_outputdir}
+                      COMMAND ${CMAKE_COMMAND} -E touch ${_pyunit_outputdir}/__init__.py
+                    )
 
-  # copy the unit tests
+  # Copy the unit test files
   set ( _pyunit_testfiles "" )
   foreach (part ${ARGN})
     get_filename_component(_pyunit_file ${part} NAME)
@@ -22,15 +25,29 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
     set ( _pyunit_testfiles ${_pyunit_testfiles} ${_pyunit_outputdir}/${_pyunit_file} )
   endforeach (part ${ARGN})
 
+  # The TESTHELPER_PY_FILES variable can be used outside of this macro
+  # to include any helper classes that are not run through the python unittest generator
+  set ( _testhelper_files "" )
+  foreach (part ${TESTHELPER_PY_FILES})
+    get_filename_component(_testhelper_file ${part} NAME)
+    add_custom_command ( OUTPUT ${_pyunit_outputdir}/${_testhelper_file}
+                     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${part}
+                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+                         ${CMAKE_CURRENT_SOURCE_DIR}/${part}
+                         ${_pyunit_outputdir}/${_testhelper_file} )
+    set ( _testhelper_files ${_testhelper_files} ${_pyunit_outputdir}/${_testhelper_file} )
+  endforeach (part ${ARGN})
+
+  # Main test target
   add_custom_target ( ${_pyunit_testname_file}
-                      DEPENDS ${_pyunit_outputdir}/__init__.py ${_pyunit_testfiles}
-                      COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
-                      COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_outputdir}
+                      DEPENDS  ${_pyunit_testfiles} ${_testhelper_files}
                       COMMAND ${PYTHON_EXECUTABLE} ${PYUNITTEST_GEN_EXEC}
                               -o ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
                               -d ${_pyunit_outputdir}
                               --xmlrunner=${PYUNITTEST_XMLRUNNER}
                               --python="${PYTHON_EXECUTABLE}" )
+  # Make sure the directory is flushed each time before it is rebuilt
+  add_dependencies( ${_pyunit_testname_file} Prepare${_pyunit_testname_file} )
   set_source_files_properties( ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
                                PROPERTIES GENERATED true)
 

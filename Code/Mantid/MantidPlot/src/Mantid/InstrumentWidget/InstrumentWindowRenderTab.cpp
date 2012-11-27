@@ -63,10 +63,17 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_wireframe->setCheckable(true);
   m_wireframe->setChecked(false);
   connect(m_wireframe, SIGNAL(toggled(bool)), m_instrWindow, SLOT(setWireframe(bool)));
+  
+  // Create "Use OpenGL" action
   m_GLView = new QAction("Use OpenGL",this);
   m_GLView->setCheckable(true);
-  m_GLView->setChecked( m_instrWindow->isGLEnabled() );
+  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().
+  getString("MantidOptions.InstrumentView.UseOpenGL")).toUpper();
+  bool useOpenGL = setting == "ON";
+  m_instrWindow->enableGL( useOpenGL );
+  m_GLView->setChecked( useOpenGL );
   connect(m_GLView, SIGNAL( toggled(bool) ), m_instrWindow, SLOT( enableGL(bool) ));
+
   displaySettingsMenu->addAction(m_colorMap);
   displaySettingsMenu->addAction(m_backgroundColor);
   displaySettingsMenu->addSeparator();
@@ -369,16 +376,6 @@ void InstrumentWindowRenderTab::displaySettingsAboutToshow()
  */
 void InstrumentWindowRenderTab::setSurfaceType(int index)
 {
-  // don't allow the simple viewer with 3D mode
-  if ( index == InstrumentWindow::FULL3D && !m_instrWindow->isGLEnabled() )
-  {
-    m_renderMode->blockSignals( true );
-    m_renderMode->setCurrentIndex( m_instrWindow->getSurfaceType() );
-    m_renderMode->blockSignals( false );
-    QMessageBox::warning(this,"MantidPlot - Warning","OpenGL must be enabled to view the instrument in 3D.\n"
-      "Check \"Use OpenGL\" in Display Settings.");
-    return;
-  }
   m_instrWindow->setSurfaceType( index );
   showResetView( index );
   showFlipControl( index );

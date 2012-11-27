@@ -64,6 +64,12 @@ private:
       return BaseClass::shouldLoad();
     }
 
+    virtual bool canLoadFileBasedOnExtension(const std::string& filename, const std::string& expectedExtension) const
+    {
+      //Forwarding method.
+      return BaseClass::canLoadFileBasedOnExtension(filename, expectedExtension);
+    }
+
     ~ConcreteMDEWLoadingPresenter(){}
   };
 
@@ -162,6 +168,22 @@ void testDepthChanged()
     presenter.extractMetadata(boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
 
     TSM_ASSERT("This is a 4D workspace with an integrated T dimension", presenter.hasTDimensionAvailable());
+  }
+
+  void testCanLoadFileBasedOnExtension()
+  {
+    MockMDLoadingView* view = new MockMDLoadingView;
+
+    ConcreteMDEWLoadingPresenter presenter(view);
+
+    // constructive tests
+    TSM_ASSERT("Should be an exact match", presenter.canLoadFileBasedOnExtension("somefile.nxs", ".nxs"));
+    TSM_ASSERT("Should lowercase uppercase extension", presenter.canLoadFileBasedOnExtension("somefile.NXS", ".nxs"));
+    TSM_ASSERT("Should strip off whitespace", presenter.canLoadFileBasedOnExtension("somefile.nxs ", ".nxs"));
+    // destructive tests
+    TSM_ASSERT("Extensions do not match, should return false.", !presenter.canLoadFileBasedOnExtension("somefile.nx", ".nxs"));
+
+    delete view;
   }
 
 

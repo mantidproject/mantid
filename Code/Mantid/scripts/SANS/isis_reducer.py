@@ -37,6 +37,20 @@ class Sample(object):
         self.log = None
         #geometry that comes from the run and can be overridden by user settings
         self.geometry = sans_reduction_steps.GetSampleGeom()
+        #record options for the set_run
+        self.run_option = None
+        self.reload_option = None
+        self.period_option = None
+
+    def reload(self, reducer):
+        """ When changing the detector bank for LOQ, it may be necessary to reload the 
+        data file, so to move te detector bank to the center of the scattering beam pattern. 
+        The reload method, allows to reload the data, moving to the correct center, 
+        and applying the same inputs used in the creation of the `Sample` object.
+        """
+        if self.run_option is None:
+            raise RuntimeError('Trying to reload without set_run is impossible!')
+        self.set_run(self.run_option,self.reload_option,self.period_option, reducer)
 
     def set_run(self, run, reload, period, reducer):
         """
@@ -44,7 +58,11 @@ class Sample(object):
             @param run: the run in a number.raw|nxs format
             @param reload: if this sample should be reloaded before the first reduction  
             @param period: the period within the sample to be analysed
-        """        
+        """
+        self.run_option = run
+        self.reload_option = reload
+        self.period_option = period
+
         self.loader = isis_reduction_steps.LoadSample(run, reload, period)
         self.log = self.loader.execute(reducer, None)
         
@@ -58,9 +76,18 @@ class Sample(object):
 class ISISReducer(SANSReducer):
     """
         ISIS Reducer
+
+        Inside ISIS there are two detector banks (low-angle and high-angle) and this particularity is responsible for 
+        requiring a special class to deal with SANS data reduction inside ISIS. 
+        
+        For example, it requires the knowledge of the beam center inside the low-angle detector and the high-angle detector 
+        as well, and this cause to extend the method get_beam_center and set_beam_center to support both.
+
         TODO: need documentation for all the data member
         TODO: need to see whether all those data members really belong here
     """    
+    _front_beam_finder = None
+
     QXY2 = None
     DQY = None
 
@@ -382,6 +409,49 @@ class ISISReducer(SANSReducer):
 
     CENT_FIND_RMIN = None
     CENT_FIND_RMAX = None
+
+
+    # override some functions from the Base Reduction
+    
+    # set_beam_finder: override to accept the front detector
+    def set_beam_finder(self, finder, det_bank='rear'):
+        """
+            Extends teh SANS_reducer in order to support 2 bank detectors
+            Set the ReductionStep object that finds the beam center
+            @param finder: BaseBeamFinder object
+            @param det_bank: two valid options: 'rear', 'front'
+        """
+        if issubclass(finder.__class__, sans_reduction_steps.BaseBeamFinder) or finder is None:
+            if det_bank == 'front':
+              self._front_beam_finder = finder
+            else:
+              self._beam_finder = finder
+        else:
+            raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
+
+    def get_beam_center(self, bank = None):
+        """
+        Return the beam center position according to the 
+        bank detector current selected.
+        
+        From its instrument, this class is able to find what 
+        is the current selected detector, and them return the 
+        beam center according to this bank. 
+
+        Another possibility is to direct ask for the beam_center 
+        related to a specified detector bank.
+        @param bank: Optional : front 
+        """
+        if bank is None:
+            if self.instrument.lowAngDetSet or not self._front_beam_finder:
+                return self._beam_finder.get_beam_center()
+            else:
+                return self._front_beam_finder.get_beam_center()
+        else:
+            if bank in ['front','FRONT','hab','HAB'] and self._front_beam_finder:
+                return self._front_beam_finder.get_beam_center()
+            else:
+                return self._beam_finder.get_beam_center()
     
 def deleteWorkspaces(workspaces):
     """

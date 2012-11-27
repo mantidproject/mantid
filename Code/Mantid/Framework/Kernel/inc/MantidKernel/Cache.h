@@ -54,9 +54,12 @@ namespace Mantid
       ///Clears the cache
       void clear()
       {
-        m_cacheHit = 0;
-        m_cacheMiss = 0;
-        m_cacheMap.clear();
+        PARALLEL_CRITICAL(Cache_clear)
+        {
+          m_cacheHit = 0;
+          m_cacheMiss = 0;
+          m_cacheMap.clear();
+        }
       }
 
       ///The number of cache entries
@@ -80,7 +83,10 @@ namespace Mantid
       ///Sets a cached value on the rotation cache
       void setCache(const KEYTYPE& key, const VALUETYPE& value)
       {
-        m_cacheMap[key] = value;
+        PARALLEL_CRITICAL(Cache_setCache)
+        {
+          m_cacheMap[key] = value;
+        }
       }
 
       ///Attempts to retreive a value from the cache
@@ -107,7 +113,10 @@ namespace Mantid
       ///removes the value associated with a key
       void removeCache(const KEYTYPE& key)
       {
-        m_cacheMap.erase(key);
+        PARALLEL_CRITICAL(Cache_setCache)
+        {
+          m_cacheMap.erase(key);
+        }
       }
 
     private:

@@ -71,7 +71,7 @@ set ( SRC_FILES
 #end TMP
 	src/SaveMD.cpp	
 	src/SlicingAlgorithm.cpp
-	src/Stitch1D.cpp
+	src/Stitch1DMD.cpp
 )
 
 #set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
@@ -161,7 +161,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDEventsWSBase.h	
 # END TMP	
 	inc/MantidMDAlgorithms/SlicingAlgorithm.h
-    inc/MantidMDAlgorithms/Stitch1D.h
+        inc/MantidMDAlgorithms/Stitch1DMD.h
 )
 
 # Test files. Other source files required.
@@ -230,8 +230,8 @@ set ( TEST_FILES
 	UnaryOperationMDTest.h
 	WeightedMeanMDTest.h
 	XorMDTest.h
-    SlicingAlgorithmTest.h	
-    Stitch1DTest.h
+        SlicingAlgorithmTest.h	
+        Stitch1DMDTest.h
 # Old TMD convertToMD code prepared for deprication:
 #    ConvertToMDEventsUnitsConvTest.h 
 )

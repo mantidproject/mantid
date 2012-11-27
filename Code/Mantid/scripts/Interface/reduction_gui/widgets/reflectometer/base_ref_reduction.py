@@ -891,8 +891,9 @@ class BaseRefWidget(BaseWidget):
             mtd.deleteWorkspace(ws_output_base_3)
 
         data_manipulation.counts_vs_pixel_distribution(file_path, 
-                                                       True, 
-                                                       None)
+                                                       is_pixel_y=True, 
+                                                       callback=None,
+                                                       instrument='REFL')
 
 #        def call_back(peakmin, peakmax, backmin, backmax, tofmin, tofmax):
 #            print 'Inside the call_back on the python side'
@@ -909,7 +910,8 @@ class BaseRefWidget(BaseWidget):
         
         import mantidqtpython 
         self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base)
-        #QtCore.QObject.connect(self.ref_det_view.getConnections(), QtCore.SIGNAL("python_peak_back_tof_range_update(double,double, double,double,double,double)"), self.call_back)
+        QtCore.QObject.connect(self.ref_det_view.getConnections(), 
+                               QtCore.SIGNAL("python_peak_back_tof_range_update(double,double, double,double,double,double)"), self.call_back)
 
 
     def call_back(self, peakmin, peakmax, backmin, backmax, tofmin, tofmax):

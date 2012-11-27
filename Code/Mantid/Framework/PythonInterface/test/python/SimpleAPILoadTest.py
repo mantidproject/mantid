@@ -68,8 +68,13 @@ class SimpleAPILoadTest(unittest.TestCase):
         
     def test_Load_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided(self):
         wsname = 'test_Load_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided'
-        data = [1.0,2.0,3.0,4.0,5.0]
         wkspace = Load('IRS21360.raw',OutputWorkspace=wsname)
+        self.assertTrue( wsname in mtd )
+
+    def test_Load_accepts_EnableLogging_keyword(self):
+        # The test here is that the algorithm runs without falling over about the EnableLogging keyword being a property
+        wsname = 'test_Load_accepts_EnableLogging_keyword'
+        Load('IRS21360.raw',OutputWorkspace=wsname, EnableLogging=False)
         self.assertTrue( wsname in mtd )
 
     def test_that_dialog_call_raises_runtime_error(self):

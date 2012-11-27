@@ -377,7 +377,7 @@ set ( PLUGINS "." )
 set ( PV_PLUGINS "./pvplugins" )
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
-set ( PYTHONALGS ${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms )
+set ( PYTHONALGS "${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms;${MANTID_ROOT}/Framework/PythonInterface/PythonAlgorithms" )
 set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/instrument )
 set ( COLORMAPS_FOLDER ${MANTID_ROOT}/Installers/colormaps/ )
 

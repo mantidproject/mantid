@@ -2,12 +2,65 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
 
+#include <boost/variant/get.hpp>
+
 using namespace Mantid::Kernel;
 
 namespace Mantid
 {
 namespace DataObjects
 {
+  namespace
+  {
+    /// Number of items to keep around in the cell cache (see void_pointer())
+    size_t NCELL_ITEM_CACHED = 100;
+
+    /**
+     * Returns a string type identifier from the given name
+     * @param name :: The name of the column
+     * @returns A string identifier for the column type
+     */
+    const std::string typeFromName(const std::string & name)
+    {
+      static std::map<std::string, std::string> index;
+      if(index.empty())
+      {
+        PARALLEL_CRITICAL(fill_column_index_map)
+        {
+          if (index.empty()) // check again inside the critical block
+          {
+            // Assume double if not in this map
+            index.insert(std::make_pair("DetID", "int"));
+            index.insert(std::make_pair("RunNumber", "int"));
+            index.insert(std::make_pair("h", "double"));
+            index.insert(std::make_pair("k", "double"));
+            index.insert(std::make_pair("l", "double"));
+            index.insert(std::make_pair("Wavelength", "double"));
+            index.insert(std::make_pair("Energy", "double"));
+            index.insert(std::make_pair("TOF", "double"));
+            index.insert(std::make_pair("DSpacing", "double"));
+            index.insert(std::make_pair("Intens", "double"));
+            index.insert(std::make_pair("SigInt", "double"));
+            index.insert(std::make_pair("BinCount", "double"));
+            index.insert(std::make_pair("BankName", "str"));
+            index.insert(std::make_pair("Row", "double"));
+            index.insert(std::make_pair("Col", "double"));
+            index.insert(std::make_pair("QLab", "V3D"));
+            index.insert(std::make_pair("QSample", "V3D"));
+          }
+        }
+      }
+      auto iter = index.find(name);
+      if(iter != index.end())
+      {
+        return iter->second;
+      }
+      else
+      {
+        throw std::runtime_error("PeakColumn - Unknown column name. Peak column names/types must be explicitly marked in PeakColumn.cpp");
+      }
+    };
+  }
 
 
   //----------------------------------------------------------------------------------------------
@@ -15,10 +68,11 @@ namespace DataObjects
    * @param peaks :: vector of peaks
    * @param name :: name for the column
    */
-  PeakColumn::PeakColumn(std::vector<Peak> & peaks, std::string name) :
-      peaks(peaks)
+  PeakColumn::PeakColumn(std::vector<Peak> & peaks, const std::string & name) :
+      m_peaks(peaks), m_oldRows()
   {
-    setName(name);
+    this->m_name = name;
+    this->m_type = typeFromName(name); // Throws if the name is unknown
   }
     
   //----------------------------------------------------------------------------------------------
@@ -32,13 +86,55 @@ namespace DataObjects
   /// Returns typeid for the data in the column
   const std::type_info& PeakColumn::get_type_info()const
   {
-    return typeid(double);
+    // This is horrible copy-and-paste with the method below. The whole thing
+    // around columns could be much better implemented using templates & traits to avoid this
+    // type of thing!
+
+    if(type() == "double")
+    {
+      return typeid(double);
+    }
+    else if(type() == "int")
+    {
+      return typeid(int);
+    }
+    else if(type() == "str")
+    {
+      return typeid(std::string);
+    }
+    else if(type() == "V3D")
+    {
+      return typeid(V3D);
+    }
+    else
+    {
+      throw std::runtime_error("PeakColumn::get_type_info() - Unknown column type: " + m_name);
+    }
   }
 
   /// Returns typeid for the pointer type to the data element in the column
   const std::type_info& PeakColumn::get_pointer_type_info()const
   {
-    return typeid(double*);
+    if(type() == "double")
+    {
+      return typeid(double*);
+    }
+    else if(type() == "int")
+    {
+      return typeid(int*);
+    }
+    else if(type() == "str")
+    {
+      return typeid(std::string*);
+    }
+    else if(type() == "V3D")
+    {
+      return typeid(V3D*);
+    }
+    else
+    {
+      throw std::runtime_error("PeakColumn::get_pointer_type_info() -: " + m_name);
+    }
   }
 
   //-------------------------------------------------------------------------------------
@@ -49,7 +145,7 @@ namespace DataObjects
    */
   void PeakColumn::print(size_t index, std::ostream& s) const
   {
-    Peak & peak = peaks[index];
+    Peak & peak = m_peaks[index];
 
     if (m_name == "RunNumber")
       s << peak.getRunNumber();
@@ -78,11 +174,11 @@ namespace DataObjects
       return;
 
     // Avoid going out of bounds
-    if (size_t(index) >= peaks.size())
+    if (size_t(index) >= m_peaks.size())
       return;
 
     // Reference to the peak in the workspace
-    Peak & peak = peaks[index];
+    Peak & peak = m_peaks[index];
 
     // Convert to a double
     double val = 0;
@@ -95,7 +191,7 @@ namespace DataObjects
       return;
     }
 
-    if      (m_name == "h")
+    if (m_name == "h")
       peak.setH(val);
     else if (m_name == "k")
       peak.setK(val);
@@ -130,57 +226,129 @@ namespace DataObjects
     return false;
   }
 
-  /// Must return overall memory size taken by the column.
+  /// @returns overall memory size taken by the column.
   long int PeakColumn::sizeOfData()const
   {
-    return sizeof(double) * static_cast<long int>(peaks.size());
+    return sizeof(double) * static_cast<long int>(m_peaks.size());
   }
 
 
-  /// Sets the new column size.
-  void PeakColumn::resize(size_t /*count*/)
+  /**
+   * Sets a new size for the column. Not implemented as this is controlled
+   * by the PeaksWorkspace
+   * @param count :: Count of new column size (unused)
+   * @throw Exception::NotImplementedError
+   */
+  void PeakColumn::resize(size_t count)
   {
-    throw std::runtime_error("Not implemented.");
+    UNUSED_ARG(count);
+    throw Exception::NotImplementedError("PeakColumn::resize - Peaks must be added through the PeaksWorkspace interface.");
   }
 
-  /// Inserts an item.
-  void PeakColumn::insert(size_t /*index*/)
+  /**
+   * Inserts an item into the column. Not implemented as this is controlled by the PeaksWorkspace
+   * @param index :: The new index position (unused)
+   * @throw Exception::NotImplementedError
+   */
+  void PeakColumn::insert(size_t index)
   {
-    throw std::runtime_error("Not implemented.");
+    UNUSED_ARG(index);
+    throw Exception::NotImplementedError("PeakColumn::insert - Peaks must be inserted through the PeaksWorkspace interface.");
   }
 
-  /// Removes an item.
-  void PeakColumn::remove(size_t /*index*/)
+  /**
+   * Removes an item from the column. Not implemented as this is controlled by the PeaksWorkspace
+   * @param index :: The index position removed(unused)
+   * @throw Exception::NotImplementedError
+   */
+  void PeakColumn::remove(size_t index)
   {
-    throw std::runtime_error("Not implemented.");
+    UNUSED_ARG(index);
+    throw Exception::NotImplementedError("PeakColumn::remove - Peaks must be remove through the PeaksWorkspace interface.");
   }
 
-  /// Pointer to a data element
-  void* PeakColumn::void_pointer(size_t /*index*/)
+  /**
+   * Pointer to a data element in the PeaksWorkspace (non-const version)
+   * @param index :: A row index pointing to the PeaksWorkspace
+   * @returns A pointer to the data element at that index from this column
+   */
+  void* PeakColumn::void_pointer(size_t index)
   {
-    throw std::runtime_error("void_pointer() not implemented. Looks to be unused?");
+    const PeakColumn * constThis = const_cast<const PeakColumn*>(this);
+    return const_cast<void*>(constThis->void_pointer(index));
   }
 
-  /// Pointer to a data element
-  const void* PeakColumn::void_pointer(size_t /*index*/) const
+  /**
+   * Pointer to a data element in the PeaksWorkspace (const version)
+   * @param index :: A row index pointing to the PeaksWorkspace
+   * @returns A pointer to the data element at that index from this column
+   */
+  const void* PeakColumn::void_pointer(size_t index) const
   {
-    throw std::runtime_error("const version of void_pointer() not implemented. Looks to be unused?");
+    const Peak & peak = m_peaks[index];
+
+    // The cell() api requires that the value exist somewhere in memory, however,
+    // some of the values from a Peak are calculated on the fly so a reference
+    // cannot be returned. Instead we cache a value for the last NCELL_ITEM_CACHED
+    // accesses and return a reference to this
+
+    m_oldRows.push_front(CacheValueType());
+    if(m_oldRows.size() > NCELL_ITEM_CACHED)
+    {
+      m_oldRows.pop_back();
+    }
+    auto &value  = m_oldRows.front(); // A reference to the actual stored variant
+
+    if( type() == "double" )
+    {
+      value = peak.getValueByColName(m_name); // Assign the value to the store
+      return boost::get<double>(&value); // Given a pointer it will return a pointer
+    }
+    else if(m_name == "RunNumber")
+    {
+      value = peak.getRunNumber();
+      return boost::get<int>(&value);
+    }
+    else if(m_name == "DetID")
+    {
+      value = peak.getDetectorID();
+      return boost::get<int>(&value);
+    }
+    else if(m_name == "BankName")
+    {
+      value = peak.getBankName();
+      return boost::get<std::string>(&value);
+    }
+    else if(m_name == "QLab")
+    {
+      value = peak.getQLabFrame();
+      return boost::get<Kernel::V3D>(&value);
+    }
+    else if(m_name == "QSample")
+    {
+      value = peak.getQSampleFrame();
+      return boost::get<Kernel::V3D>(&value);
+    }
+    else
+    {
+      throw std::runtime_error("void_pointer() - Unknown peak column name or type: " + m_name);
+    }
   }
 
   PeakColumn* PeakColumn::clone() const
   {
-    PeakColumn* temp = new PeakColumn(this->peaks, this->m_name);
+    PeakColumn* temp = new PeakColumn(this->m_peaks, this->m_name);
     return temp;
   }
 
   double PeakColumn::toDouble(size_t /*index*/)const
   {
-    throw std::runtime_error("toDouble() not implemented.");
+    throw std::runtime_error("PeakColumn::toDouble() not implemented, PeakColumn is has no general write access");
   }
 
   void PeakColumn::fromDouble(size_t /*index*/, double /*value*/)
   {
-    throw std::runtime_error("fromDouble() not implemented.");
+    throw std::runtime_error("fromDouble() not implemented, PeakColumn is has no general write access");
   }
 
 } // namespace Mantid

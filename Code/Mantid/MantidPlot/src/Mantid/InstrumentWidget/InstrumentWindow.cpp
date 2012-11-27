@@ -309,8 +309,9 @@ InstrumentWindow::~InstrumentWindow()
  * @param autoscaling :: True to start with autoscaling option on.
  * @param scaleMin :: Minimum value of the colormap scale. Ignored if autoscaling == true.
  * @param scaleMax :: Maximum value of the colormap scale. Ignored if autoscaling == true.
+ * @param setDefaultView :: Set the default surface type
  */
-void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax)
+void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax, bool setDefaultView)
 {
   // Previously in (now removed) setWorkspaceName method
   m_instrumentActor = new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax);
@@ -327,6 +328,18 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMi
     surface->resetInstrumentActor( m_instrumentActor );
   }
   mInstrumentTree->setInstrumentActor(m_instrumentActor);
+
+  if ( setDefaultView )
+  {
+    // set the view type to the instrument's default view
+    QString defaultView = QString::fromStdString(m_instrumentActor->getInstrument()->getDefaultView());
+    if ( defaultView == "3D" && Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InstrumentView.UseOpenGL") != "On" )
+    {
+      // if OpenGL is switched off don't open the 3D view at start up
+      defaultView = "CYLINDRICAL_Y";
+    }
+    setSurfaceType( defaultView );
+  }
   setInfoText( getSurfaceInfoText() );
 }
 
@@ -385,11 +398,15 @@ void InstrumentWindow::setSurfaceType(int type)
       showPeakRow = settings.value("Mantid/InstrumentWindow/ShowPeakRows",true).toBool();
     }
 
+    // which display to use?
+    bool useOpenGL = isGLEnabled();
     if (m_surfaceType == FULL3D)
     {
       Projection3D* p3d = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
       p3d->set3DAxesState(m_renderTab->areAxesOn());
       surface = p3d;
+      // always OpenGL in 3D
+      useOpenGL = true;
     }
     else if (m_surfaceType <= CYLINDRICAL_Z)
     {
@@ -401,7 +418,10 @@ void InstrumentWindow::setSurfaceType(int type)
     }
     surface->setPeakLabelPrecision(peakLabelPrecision);
     surface->setShowPeakRowFlag(showPeakRow);
+    // set new surface
     setSurface(surface);
+    // make sure to switch to the right instrument display
+    selectOpenGLDisplay( useOpenGL );
     m_renderTab->init();
     m_pickTab->init();
     m_maskTab->init();
@@ -412,6 +432,48 @@ void InstrumentWindow::setSurfaceType(int type)
     QApplication::restoreOverrideCursor();
   }
   update();
+}
+
+/**
+ * Set the surface type from a string.
+ * @param typeStr :: Symbolic name of the surface type: same as the names in SurfaceType enum. Caseless.
+ */
+void InstrumentWindow::setSurfaceType(const QString& typeStr)
+{
+  int typeIndex = 0;
+  QString upperCaseStr = typeStr.toUpper();
+  if ( upperCaseStr == "FULL3D" || upperCaseStr == "3D" )
+  {
+    typeIndex = 0;
+  }
+  else if ( upperCaseStr == "CYLINDRICAL_X" )
+  {
+    typeIndex = 1;
+  }
+  else if ( upperCaseStr == "CYLINDRICAL_Y" )
+  {
+    typeIndex = 2;
+  }
+  else if ( upperCaseStr == "CYLINDRICAL_Z" )
+  {
+    typeIndex = 3;
+  }
+  else if ( upperCaseStr == "SPHERICAL_X" )
+  {
+    typeIndex = 4;
+  }
+  else if ( upperCaseStr == "SPHERICAL_Y" )
+  {
+    typeIndex = 5;
+  }
+  else if ( upperCaseStr == "SPHERICAL_Z" )
+  {
+    typeIndex = 6;
+  }
+  setSurfaceType( typeIndex );
+  m_renderTab->m_renderMode->blockSignals(true);
+  m_renderTab->m_renderMode->setCurrentIndex( typeIndex );
+  m_renderTab->m_renderMode->blockSignals(false);
 }
 
 /**
@@ -848,7 +910,7 @@ void InstrumentWindow::afterReplaceHandle(const std::string& wsName,
       m_instrumentActor = NULL;
     }
 
-    init( resetGeometry, autoscaling, scaleMin, scaleMax );
+    init( resetGeometry, autoscaling, scaleMin, scaleMax, false );
     updateInstrumentDetectors();
   }
 }
@@ -1406,6 +1468,7 @@ void InstrumentWindow::updateInstrumentView()
 /// Recalculate the colours and redraw the instrument view
 void InstrumentWindow::updateInstrumentDetectors()
 {
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   if ( isGLEnabled() )
   {
     m_InstrumentDisplay->updateDetectors();
@@ -1414,24 +1477,50 @@ void InstrumentWindow::updateInstrumentDetectors()
   {
     m_simpleDisplay->updateDetectors();
   }
+  QApplication::restoreOverrideCursor();
 }
 
-/// Toggle between the GL and simple instrument display widgets
+/**
+ * Choose which widget to use.
+ * @param yes :: True to use the OpenGL one or false to use the Simple
+ */
+void InstrumentWindow::selectOpenGLDisplay(bool yes)
+{
+  int widgetIndex = yes ? 0 : 1;
+  const int oldIndex = m_instrumentDisplayLayout->currentIndex();
+  if ( oldIndex == widgetIndex ) return;
+  m_instrumentDisplayLayout->setCurrentIndex( widgetIndex );
+  ProjectionSurface* surface = getSurface();
+  if ( surface )
+  {
+    surface->updateView();
+  }
+}
+
+/// Public slot to toggle between the GL and simple instrument display widgets
+void InstrumentWindow::enableOpenGL( bool on )
+{
+  m_renderTab->m_GLView->setChecked( on );
+}
+
+/// Private slot to toggle between the GL and simple instrument display widgets
 void InstrumentWindow::enableGL( bool on )
 {
-  if ( on )
+  m_useOpenGL = on;
+  if ( m_surfaceType == FULL3D )
   {
-    m_instrumentDisplayLayout->setCurrentIndex( 0 );
+    // always OpenGL in 3D
+    selectOpenGLDisplay( true );
   }
   else
   {
-    m_instrumentDisplayLayout->setCurrentIndex( 1 );
+    // select the display
+    selectOpenGLDisplay( on );
   }
-  getSurface()->updateView();
 }
 
 /// True if the GL instrument display is currently on
 bool InstrumentWindow::isGLEnabled() const
 {
-  return m_instrumentDisplayLayout->currentIndex() == 0;
+  return m_useOpenGL;
 }

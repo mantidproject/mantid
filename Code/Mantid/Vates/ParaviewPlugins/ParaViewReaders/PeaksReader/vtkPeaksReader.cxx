@@ -8,7 +8,7 @@
 #include "vtkPointData.h"
 #include "vtkTransform.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
-#include <vtkCubeSource.h>
+#include <vtkSphereSource.h>
 
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
@@ -17,6 +17,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include <vtkPVGlyphFilter.h>
+
+#include <boost/algorithm/string.hpp>    
 
 vtkCxxRevisionMacro(vtkPeaksReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkPeaksReader);
@@ -41,9 +43,9 @@ vtkPeaksReader::~vtkPeaksReader()
 }
 
 
-void vtkPeaksReader::SetWidth(double width)
+void vtkPeaksReader::SetRadius(double radius)
 {
-  m_width = width;
+  m_radius = radius;
   this->Modified();
 }
 
@@ -78,18 +80,24 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
   FilterUpdateProgressAction<vtkPeaksReader> drawingProgressUpdate(this, "Drawing...");
   vtkDataSet * structuredMesh = p_peakFactory->create(drawingProgressUpdate);
 
-  vtkCubeSource* cube = vtkCubeSource::New();
-  cube->SetXLength(m_width);
-  cube->SetYLength(m_width);
-  cube->SetZLength(m_width);
+  // Pick the radius up from the factory if possible, otherwise use the user-provided value.
+  double peakRadius = m_radius;
+  if(p_peakFactory->isPeaksWorkspaceIntegrated())
+  {
+    peakRadius = p_peakFactory->getIntegrationRadius();
+  }
 
-  vtkPVGlyphFilter* glyphFilter = vtkPVGlyphFilter::New();
+  vtkSphereSource *sphere = vtkSphereSource::New();
+  sphere->SetRadius(peakRadius);
+
+  vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
   glyphFilter->SetInput(structuredMesh);
-  glyphFilter->SetSource(cube->GetOutput());
+  glyphFilter->SetSource(sphere->GetOutput());
   glyphFilter->Update();
-  vtkPolyData* glyphed = glyphFilter->GetOutput();
+  vtkPolyData *glyphed = glyphFilter->GetOutput();
 
   output->ShallowCopy(glyphed);
+
   glyphFilter->Delete();
 
   return 1;
@@ -131,9 +139,26 @@ void vtkPeaksReader::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os,indent);
 }
 
-int vtkPeaksReader::CanReadFile(const char* vtkNotUsed(fname))
+int vtkPeaksReader::CanReadFile(const char* fname)
 {
-  return 1; //TODO: Apply checks here.
+  const std::string fileString(fname);
+  const size_t startExtension = fileString.find_last_of('.');
+  const size_t endExtension = fileString.length();
+  if(startExtension >= endExtension)
+  {
+    throw std::runtime_error("File has no extension.");
+  }
+  std::string extension = fileString.substr(startExtension, endExtension - startExtension);
+  boost::algorithm::to_lower(extension);
+  boost::algorithm::trim(extension);
+  if(extension == ".peaks")
+  {
+    return 1;
+  }
+  else
+  {
+    return 0; 
+  }
 }
 
 unsigned long vtkPeaksReader::GetMTime()

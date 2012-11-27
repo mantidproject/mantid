@@ -87,8 +87,8 @@ void export_PropertyManager()
   REGISTER_SHARED_PTR_TO_PYTHON(PropertyManager);
   class_<PropertyManager, bases<IPropertyManager>, boost::noncopyable>("PropertyManager")
           .def("propertyCount", &PropertyManager::propertyCount, "Returns the number of properties being managed")
-    	  .def("getProperty", &PropertyManager::getProperty, return_value_policy<return_by_value>(),
-    	  		"Returns the property of the given name. Use .value to give the value")
+          //.def("getProperty", &PropertyManager::getProperty, return_value_policy<return_by_value>(),
+    	  	//	"Returns the property of the given name. Use .value to give the value")
     	  .def("getPropertyValue", &PropertyManager::getPropertyValue,
     	  		"Returns a string representation of the named property's value")
     	  .def("getProperties", &PropertyManager::getProperties, return_value_policy<copy_const_reference>(),
@@ -100,7 +100,7 @@ void export_PropertyManager()
     	  // Special methods to act like a dictionary
     	  .def("__len__", &PropertyManager::propertyCount)
     	  .def("__contains__", &PropertyManager::existsProperty)
-    	  .def("__getitem__", &PropertyManager::getProperty)
+    	  //.def("__getitem__", &PropertyManager::getProperty)
     	  .def("__setitem__", &declareOrSetProperty)
     	  ;
 }

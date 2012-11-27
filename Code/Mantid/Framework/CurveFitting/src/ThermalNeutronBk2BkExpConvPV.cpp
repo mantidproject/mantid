@@ -1,11 +1,16 @@
 #include "MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <gsl/gsl_sf_erf.h>
 
 #define PI 3.14159265358979323846264338327950288419716939937510582
+#define PEAKRANGE 5.0
 
 using namespace std;
+using namespace Mantid;
+using namespace Mantid::API;
 
 
 namespace Mantid
@@ -22,8 +27,9 @@ Mantid::Kernel::Logger& ThermalNeutronBk2BkExpConvPV::g_log = Kernel::Logger::ge
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ThermalNeutronBk2BkExpConvPV::ThermalNeutronBk2BkExpConvPV():mHKLSet(false)
+ThermalNeutronBk2BkExpConvPV::ThermalNeutronBk2BkExpConvPV():mHKLSet(false),m_cancel(false),m_parallelException(false)
 {
+
 }
     
 //----------------------------------------------------------------------------------------------
@@ -135,7 +141,7 @@ void ThermalNeutronBk2BkExpConvPV::getMillerIndex(int& h, int &k, int &l)
  * Exception: if the peak profile parameter is not in this peak, then
  *            return an Empty_DBL
  */
-double ThermalNeutronBk2BkExpConvPV::getPeakParameters(std::string paramname)
+double ThermalNeutronBk2BkExpConvPV::getPeakParameter(std::string paramname)
 {
   std::map<std::string, double>::iterator mit;
   mit = mParameters.find(paramname);
@@ -222,13 +228,15 @@ void ThermalNeutronBk2BkExpConvPV::calculateParameters(double& dh, double& tof_h
   // 5. Debug output
   if (explicitoutput)
   {
-    std::cout << "alpha = " << alpha << ", beta = " << beta
-              << ", N = " << N << std::endl;
-    std::cout << "  n = " << n << ", alpha_e = " << alpha_e << ", alpha_t = " << alpha_t << std::endl;
-    std::cout << " dh = " << dh << ", alph0t = " << alph0t << ", alph1t = " << alph1t
-              << ", alph0 = " << alph0 << ", alph1 = " << alph1 << std::endl;
-    std::cout << "  n = " << n << ", beta_e = " << beta_e << ", beta_t = " << beta_t << std::endl;
-    std::cout << " dh = " << dh << ", beta0t = " << beta0t << ", beta1t = " << beta1t << std::endl;
+    stringstream errss;
+    errss << "alpha = " << alpha << ", beta = " << beta
+          << ", N = " << N << std::endl;
+    errss << "  n = " << n << ", alpha_e = " << alpha_e << ", alpha_t = " << alpha_t << std::endl;
+    errss << " dh = " << dh << ", alph0t = " << alph0t << ", alph1t = " << alph1t
+          << ", alph0 = " << alph0 << ", alph1 = " << alph1 << std::endl;
+    errss << "  n = " << n << ", beta_e = " << beta_e << ", beta_t = " << beta_t << std::endl;
+    errss << " dh = " << dh << ", beta0t = " << beta0t << ", beta1t = " << beta1t << std::endl;
+    g_log.error(errss.str());
   }
 
   return;
@@ -245,17 +253,26 @@ void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xVal
 
   double d_h, tof_h, alpha, beta, H, sigma2, eta, N, gamma;
   this->calculateParameters(d_h, tof_h, eta, alpha, beta, H, sigma2, gamma, N, false);
+  m_fwhm = fwhm();
 
   // cout << "DBx212:  eta = " << eta << ", gamma = " << gamma << endl;
 
   double invert_sqrt2sigma = 1.0/sqrt(2.0*sigma2);
 
+  // PRAGMA_OMP(parallel for schedule(dynamic, 10))
+
+  // PARALLEL_SET_NUM_THREADS(8);
+  // PARALLEL_FOR_NO_WSP_CHECK()
   for (size_t id = 0; id < nData; ++id)
   {
+    // PARALLEL_START_INTERUPT_REGION
+
     // a) Caclualte peak intensity
     double dT = xValues[id]-tof_h;
     double omega = calOmega(dT, eta, N, alpha, beta, H, sigma2, invert_sqrt2sigma);
+    out[id] = height*omega;
 
+    /*  Disabled for parallel checking
     if (!(omega > -DBL_MAX && omega < DBL_MAX))
     {
       // Output with error
@@ -270,7 +287,11 @@ void ThermalNeutronBk2BkExpConvPV::functionLocal(double* out, const double* xVal
     {
       out[id] = height*omega;
     }
+    */
+
+    // PARALLEL_END_INTERUPT_REGION
   } // ENDFOR data points
+  // PARALLEL_CHECK_INTERUPT_REGION
 
   return;
 }
@@ -440,6 +461,14 @@ void ThermalNeutronBk2BkExpConvPV::calHandEta(double sigma2, double gamma, doubl
 double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, double alpha, double beta, double H,
                                               double sigma2, double invert_sqrt2sigma, bool explicitoutput) const
 {
+  // 0. X range check
+  if (fabs(x) > m_fwhm*PEAKRANGE)
+  {
+    // Return 0 if x is too far away from 0
+    return 0.0;
+  }
+
+
   // 1. Prepare
   std::complex<double> p(alpha*x, alpha*sqrt(H)*0.5);
   std::complex<double> q(-beta*x, beta*sqrt(H)*0.5);
@@ -484,27 +513,28 @@ double ThermalNeutronBk2BkExpConvPV::calOmega(double x, double eta, double N, do
 
   if (explicitoutput && !(omega > -DBL_MAX && omega < DBL_MAX))
   {
-    std::cout << "Find omega = " << omega << " is infinity! omega1 = " << omega1 << ", omega2 = " << omega2 << std::endl;
-    std::cout << "  u = " << u << ", v = " << v << ", erfc(y) = " << gsl_sf_erfc(y)
-                  << ", erfc(z) = " << gsl_sf_erfc(z) << std::endl;
-    std::cout << "  alpha = " << alpha << ", x = " << x << " sigma2 = " << sigma2
-                  << ", N = " << N << std::endl;
+    stringstream errss;
+    errss << "Find omega = " << omega << " is infinity! omega1 = " << omega1 << ", omega2 = " << omega2 << std::endl;
+    errss << "  u = " << u << ", v = " << v << ", erfc(y) = " << gsl_sf_erfc(y)
+          << ", erfc(z) = " << gsl_sf_erfc(z) << std::endl;
+    errss << "  alpha = " << alpha << ", x = " << x << " sigma2 = " << sigma2
+          << ", N = " << N << std::endl;
+    g_log.warning(errss.str());
   }
 
-  /* Debug output to understand E1()
-  cout << setw(15) << p.real() << setw(15) << p.imag() << "\t\t" << omega2a << endl;
-  cout << setw(15) << p.real() << setw(15) << p.imag() << setw(15) << exp(p).real() << setw(15) << exp(p).imag()
-       << setw(15) << E1(p).real() << setw(15) << E1(p).imag() << endl;
-
-  cout << q.real() << "\t\t" << q.imag() << "\t\t" << omega2b << endl;
-  cout << setw(15) << q.real() << setw(15) << q.imag() << setw(15) << exp(q).real() << setw(15) << exp(q).imag()
-       << setw(15) << E1(q).real() << setw(15) << E1(q).imag() << endl;
-  cout << p.real() << "\t\t" << p.imag() << "\t\t" << E1(p).real() << "\t\t" << E1(p).imag() << endl;
-  cout << exp(p) << "\t\t" << exp(q) << endl;
-  cout << q.real() << "\t\t" << q.imag() << "\t\t" << E1(q).real() << "\t\t" << E1(q).imag() << endl;
-  */
-
   return omega;
+}
+
+/** This is called during long-running operations,
+ * and check if the algorithm has requested that it be cancelled.
+ */
+void ThermalNeutronBk2BkExpConvPV::interruption_point() const
+{
+  // only throw exceptions if the code is not multi threaded otherwise you contravene the OpenMP standard
+  // that defines that all loops must complete, and no exception can leave an OpenMP section
+  // openmp cancel handling is performed using the ??, ?? and ?? macros in each algrothim
+  IF_NOT_PARALLEL
+      if (m_cancel) throw Algorithm::CancelException();
 }
 
 //-------------------------  External Functions ---------------------------------------------------

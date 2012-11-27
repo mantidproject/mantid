@@ -158,10 +158,10 @@ namespace Mantid
       
       bool CalcVariances;///< from experimental data versus fit the (Co)Variances
 
-      void initCommon();///<Check for changes in parameters, etc. Calculates common values
+      double initCommon();///<Check for changes in parameters, etc. Calculates common values
 
-
-      void initCoeff( const MantidVec &D,
+      //Returns penalty.
+      double initCoeff( const MantidVec &D,
                       const MantidVec &X,
                       const MantidVec &Y,
                        double &coefNorm,

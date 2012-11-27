@@ -37,8 +37,9 @@ namespace CurveFitting
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction, virtual public API::IFunctionMW
-{
+
+  class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction, virtual public API::IFunctionMW
+  {
   public:
     ThermalNeutronBk2BkExpConvPV();
     virtual ~ThermalNeutronBk2BkExpConvPV();
@@ -61,16 +62,20 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     void getMillerIndex(int& h, int &k, int &l);
 
     /// Get peak parameters
-    double getPeakParameters(std::string);
+    double getPeakParameter(std::string);
 
     /// Calculate peak parameters (alpha, beta, sigma2..)
-    void calculateParameters(double& dh, double& tof_h, double& eta, double& alpha, double& beta, double& H,
-                             double &sigma2, double& gamma, double &N, bool explicitoutput) const;
+    void calculateParameters(double& dh, double& tof_h, double& eta, double& alpha,
+                             double& beta, double& H, double &sigma2, double& gamma,
+                             double &N, bool explicitoutput) const;
 
   protected:
-    /// Overwrite IFunction
+    //----- Overwrite IFunction ------------------------------------------------
+    /// Fuction local
     virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
+    /// Derivative
     virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);
+    /// Derivative
     virtual void functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian);
 
     /// Overwrite IFunction base class method, which declare function parameters
@@ -104,6 +109,17 @@ class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction
     bool mHKLSet;
 
     mutable std::map<std::string, double> mParameters;
+
+    mutable double m_fwhm;
+
+    //-----------  For Parallelization -----------------------------------------
+    ///
+    void interruption_point() const;
+    /// Set to true to stop execution
+    mutable bool m_cancel;
+    /// Set if an exception is thrown, and not caught, within a parallel region
+    mutable bool m_parallelException;
+    /// Reference to the logger class
     
 };
 

@@ -6,6 +6,11 @@
 #include "MantidAPI/IPeak.h"
 #include "MantidKernel/V3D.h"
 #include <vtkVertex.h>
+#include <vtkGlyph3D.h>
+#include <vtkSphereSource.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkFloatArray.h>
+#include <vtkCellData.h>
 #include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IPeaksWorkspace;
@@ -18,7 +23,7 @@ namespace VATES
 {
 
   vtkPeakMarkerFactory::vtkPeakMarkerFactory(const std::string& scalarName, ePeakDimensions dimensions) :
-  m_scalarName(scalarName), m_dimensionToShow(dimensions)
+  m_scalarName(scalarName), m_dimensionToShow(dimensions), m_peakRadius(-1)
   {
   }
 
@@ -53,6 +58,24 @@ namespace VATES
   {
     m_workspace = boost::dynamic_pointer_cast<IPeaksWorkspace>(workspace);
     validateWsNotNull();
+
+    try
+    {
+      m_peakRadius = atof(m_workspace->run().getProperty("PeakRadius")->value().c_str());
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError&)
+    {
+    }
+  }
+
+  double vtkPeakMarkerFactory::getIntegrationRadius() const
+  {
+    return m_peakRadius;
+  }
+
+  bool vtkPeakMarkerFactory::isPeaksWorkspaceIntegrated() const
+  {
+    return (m_peakRadius > 0);
   }
 
   void vtkPeakMarkerFactory::validateWsNotNull() const
@@ -70,7 +93,7 @@ namespace VATES
   /**
   Create the vtkStructuredGrid from the provided workspace
   @param progressUpdating: Reporting object to pass progress information up the stack.
-  @return vtkUnStructuredGrid with a bunch of points.
+  @return vtkPolyData glyph.
   */
   vtkDataSet* vtkPeakMarkerFactory::create(ProgressAction& progressUpdating) const
   {
@@ -138,6 +161,7 @@ namespace VATES
 
     points->Squeeze();
     visualDataSet->Squeeze();
+
     return visualDataSet;
   }
 

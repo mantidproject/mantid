@@ -8,7 +8,6 @@
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
 #include "MantidAPI/AlgorithmManager.h"
-
 #include <vtkUnstructuredGrid.h>
 
 namespace Mantid
@@ -42,6 +41,12 @@ namespace Mantid
     */
     bool MDEWEventNexusLoadingPresenter::canReadFile() const
     {
+      // Quick check based on extension.
+      if(!canLoadFileBasedOnExtension(m_filename, ".nxs"))
+      {
+        return 0;
+      }
+
       ::NeXus::File * file = NULL;
 
       file = new ::NeXus::File(this->m_filename);
@@ -82,7 +87,6 @@ namespace Mantid
         alg->setPropertyValue("Filename", this->m_filename);
         alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
         alg->setProperty("FileBackEnd", !this->m_view->getLoadInMemory()); //Load from file by default.
-        alg->setPropertyValue("Memory", "0");
         alg->addObserver(observer);
         alg->execute();
         alg->removeObserver(observer);
@@ -118,7 +122,7 @@ namespace Mantid
       alg->setPropertyValue("Filename", this->m_filename);
       alg->setPropertyValue("OutputWorkspace", "MD_EVENT_WS_ID");
       alg->setProperty("MetadataOnly", true); //Don't load the events.
-      alg->setProperty("FileBackEnd", true); //Only require metadata, so do it in memory.
+      alg->setProperty("FileBackEnd", false); //Only require metadata, so do it in memory.
       alg->execute();
 
       Workspace_sptr result=AnalysisDataService::Instance().retrieve("MD_EVENT_WS_ID");
