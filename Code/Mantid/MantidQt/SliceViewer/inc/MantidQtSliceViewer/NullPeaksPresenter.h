@@ -19,6 +19,7 @@ namespace MantidQt
       virtual void updateWithSlicePoint(const double&)
       {
       }
+      virtual void changeShownDim(){}
     };
 
   }

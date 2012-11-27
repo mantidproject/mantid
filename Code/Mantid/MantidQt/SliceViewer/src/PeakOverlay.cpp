@@ -25,6 +25,7 @@ namespace SliceViewer
   PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius)
   : QWidget( parent ),
     m_plot(plot),
+    m_originalOrigin(origin),
     m_origin(origin),
     m_radius(radius),
     m_opacityMax(0.8),
@@ -148,6 +149,12 @@ namespace SliceViewer
   void PeakOverlay::hideView()
   {
     this->hide();
+  }
+
+  void PeakOverlay::movePosition(const PeakTransform& transform)
+  {
+    // Will have the plots x, y, and z aligned to the correct h, k, l value.
+    m_origin = transform.transform(this->m_originalOrigin);
   }
 
 } // namespace Mantid

@@ -30,6 +30,7 @@ private:
     MOCK_METHOD0(updateView, void());
     MOCK_METHOD1(setSlicePoint, void(const double&));
     MOCK_METHOD0(hideView, void());
+    MOCK_METHOD1(movePosition, void(const PeakTransform&));
     ~MockPeakOverlayView(){}
   };
 
@@ -39,8 +40,10 @@ private:
   class MockPeakOverlayFactory : public PeakOverlayViewFactory
   {
   public:
-    MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(const Mantid::API::IPeak&));
+    MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(const Mantid::Kernel::V3D&));
     MOCK_METHOD1(setRadius, void(const double&));
+    MOCK_CONST_METHOD0(getPlotXLabel, std::string());
+    MOCK_CONST_METHOD0(getPlotYLabel, std::string());
     MOCK_METHOD0(updateView, void());
   };
 
@@ -84,7 +87,10 @@ public:
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
     EXPECT_CALL(*mockViewFactory, setRadius(_)).Times(1);
-    EXPECT_CALL(*mockViewFactory, createView(_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));;
+    EXPECT_CALL(*mockViewFactory, createView(_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
+    EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
+
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
@@ -109,6 +115,8 @@ public:
     
     EXPECT_CALL(*mockViewFactory, setRadius(_)).Times(1);
     EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
+    EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
@@ -135,6 +143,8 @@ public:
 
     EXPECT_CALL(*mockViewFactory, setRadius(_)).Times(1);
     EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
+    EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
@@ -160,6 +170,8 @@ public:
 
     EXPECT_CALL(*mockViewFactory, setRadius(_)).Times(1);
     EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
+    EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
     {
@@ -168,6 +180,8 @@ public:
 
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
   }
+
+  // TODO Test all 6 possible transformations in configureMappingTransform.
   
 };
 

@@ -2,6 +2,7 @@
 #define MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_
 
 #include "MantidKernel/System.h"
+#include "MantidQtSliceViewer/PeakTransform.h"
 #include <QPointF>
 #include <boost/shared_ptr.hpp>
 
@@ -43,6 +44,8 @@ namespace MantidQt
       virtual void updateView() = 0;
       /// Hide the view.
       virtual void hideView() = 0;
+      /// Move the peak overlay to a new position.
+      virtual void movePosition(const PeakTransform& peakTransform) = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

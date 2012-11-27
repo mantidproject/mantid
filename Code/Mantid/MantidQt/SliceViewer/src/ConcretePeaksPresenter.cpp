@@ -3,6 +3,7 @@
 #include "MantidAPI/IPeak.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include <boost/scoped_ptr.hpp>
+#include <boost/regex.hpp>
 
 namespace MantidQt
 {
@@ -20,6 +21,7 @@ namespace SliceViewer
   @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
   */
   ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory* factory, Mantid::API::IPeaksWorkspace_sptr peaksWS) : m_viewPeaks(peaksWS->getNumberPeaks())
+    , m_factory(factory), m_transform("H", "K")
   {
     if(factory == NULL)
     {
@@ -33,17 +35,18 @@ namespace SliceViewer
     {
       throw std::invalid_argument("PeaksWorkspace does not contain integrated peaks."); // We might consider drawing these in the future anyway.
     }
+    
+    this->configureMappingTransform();
     // Extract the integration radius from the workspace.
     const double peakIntegrationRadius = boost::lexical_cast<double>(peaksWS->run().getProperty("PeakRadius")->value());
-
-    // Create views for every peak in the workspace.
-    boost::scoped_ptr<PeakOverlayViewFactory> factory_scptr(factory);
     factory->setRadius(peakIntegrationRadius);
-
     for(int i = 0; i < peaksWS->getNumberPeaks(); ++i)
     {
       const Mantid::API::IPeak& peak = peaksWS->getPeak(i);
-      m_viewPeaks[i] = boost::shared_ptr<PeakOverlayView>( factory_scptr->createView(peak) );
+      auto position = peak.getHKL();
+      
+      PeakOverlayView_sptr view = boost::shared_ptr<PeakOverlayView>( m_factory->createView(m_transform.transform(position)) );
+      m_viewPeaks[i] = view;
     }
   }
 
@@ -80,5 +83,35 @@ namespace SliceViewer
       (*it)->hideView();
     }
   }
+
+  /**
+  Respond to changes in the shown dimension.
+  */
+  void ConcretePeaksPresenter::changeShownDim()
+  {
+    // Reconfigure the mapping tranform.
+    this->configureMappingTransform();
+    // Apply the mapping tranform to move each peak overlay object.
+
+    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+    {
+      (*it)->movePosition(m_transform);
+    }
+  }
+
+  /**
+
+  This method looks at the plotted dimensions (XY) , and work out what indexes into the vector HKL, these XYZ dimensions correpond to.
+
+  The indexes can then be used for any future transformation, where the user changes the chosen dimensions to plot.
+  */
+  void ConcretePeaksPresenter::configureMappingTransform()
+  {
+    std::string xLabel = m_factory->getPlotXLabel();
+    std::string yLabel = m_factory->getPlotYLabel();
+
+    
+  }
+
 }
 }

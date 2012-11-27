@@ -51,10 +51,13 @@ namespace MantidQt
     private:
       QwtPlot * m_plot;
       QWidget * m_parent;
+      
     public:
-      PeakOverlayFactory(QwtPlot * plot, QWidget * parent, const FirstExperimentInfoQuery& query);
+      PeakOverlayFactory(QwtPlot * plot, QWidget * parent);
       virtual ~PeakOverlayFactory();
       virtual boost::shared_ptr<PeakOverlayView> createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius) const;
+      virtual std::string getPlotXLabel() const;
+      virtual std::string getPlotYLabel() const;
     };
   }
 }

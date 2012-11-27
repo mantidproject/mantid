@@ -58,7 +58,10 @@ namespace SliceViewer
     virtual void updateView();
     /// Get the origin. md x, md y
     const Mantid::Kernel::V3D & getOrigin() const;
+    /// Get the radius.
     double getRadius() const;
+    /// Move the position of the peak, by using a different configuration of the existing origin indexes.
+    void movePosition(const PeakTransform& peakTransform);
 
   private:
 
@@ -72,6 +75,8 @@ namespace SliceViewer
 
     /// QwtPlot containing this
     QwtPlot * m_plot;
+    /// Original origin x=h, y=k, z=l
+    const Mantid::Kernel::V3D m_originalOrigin;
     /// Origin md-x, md-y, and md-z
     Mantid::Kernel::V3D m_origin;
     /// actual peak radius

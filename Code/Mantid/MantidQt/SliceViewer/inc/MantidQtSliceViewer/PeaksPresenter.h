@@ -34,6 +34,7 @@ namespace SliceViewer
   public:
     virtual void update() = 0;
     virtual void updateWithSlicePoint(const double&) = 0;
+    virtual void changeShownDim() = 0;
   };
 
 

@@ -1370,13 +1370,24 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_dimX = 0;
   m_dimY = 1;
   std::vector<coord_t> slicePoint;
+
+  std::vector<DimensionSliceWidget*> sliderWidgets;
+  //DimensionSliceWidget * widget
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
     DimensionSliceWidget * widget = m_dimWidgets[d];
     if (widget->getShownDim() == 0)
+    {
       m_dimX = d;
-    if (widget->getShownDim() == 1)
+    }
+    else if (widget->getShownDim() == 1)
+    {
       m_dimY = d;
+    }
+    else
+    {
+      sliderWidgets.push_back(widget);
+    }
     slicePoint.push_back(VMD_t(widget->getSlicePoint()));
   }
   // Avoid going out of range
@@ -1415,12 +1426,17 @@ void SliceViewer::updateDisplay(bool resetAxes)
     m_overlayWSOutline->setShown(overlayInSlice);
   }
 
+  if (sliderWidgets.size() > 0 ) // Temporary fix for crash when displaying Workspace2D (where m_dimWidgets only has 2 elements)
+  {
+    DimensionSliceWidget* slider = sliderWidgets.front(); // TODO, we need a better way of filtering the slider widgets to find the missing lattice unit.
+    m_peaksPresenter->updateWithSlicePoint(slider->getSlicePoint());
+  } 
+  
   // Notify the graph that the underlying data changed
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
-  if ( m_dimWidgets.size() > 2 ) // Temporary fix for crash when displaying Workspace2D (where m_dimWidgets only has 2 elements)
-    m_peaksPresenter->updateWithSlicePoint(m_dimWidgets[2]->getSlicePoint());
+
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
@@ -1465,6 +1481,8 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
+  // Transform the peak overlays according to the new plotting.
+  m_peaksPresenter->changeShownDim();
   // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();
   // Send out a signal
@@ -2078,17 +2096,7 @@ void SliceViewer::peakOverlay_toggled(bool checked)
       if(!list.isEmpty())
       {
         IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
-        PeakOverlayFactory* factory = NULL;
-        try
-        {
-          FirstExperimentInfoQueryAdapter<Mantid::API::IMDHistoWorkspace> query(m_ws);
-          factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), query);
-        }
-        catch(std::invalid_argument&)
-        {
-          FirstExperimentInfoQueryAdapter<Mantid::API::IMDEventWorkspace> query(m_ws);
-          factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), query);
-        }
+        PeakOverlayFactory* factory  = new PeakOverlayFactory(m_plot, m_plot->canvas());
         m_peaksPresenter = PeaksPresenter_sptr(new ConcretePeaksPresenter(factory, peaksWS));
       }
     }

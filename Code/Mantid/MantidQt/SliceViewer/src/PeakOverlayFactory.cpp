@@ -14,7 +14,7 @@ namespace MantidQt
   namespace SliceViewer
   {
 
-    PeakOverlayFactory::PeakOverlayFactory(QwtPlot * plot, QWidget * parent, const FirstExperimentInfoQuery& query) : PeakOverlayFactoryBase(query), m_plot(plot), m_parent(parent)
+    PeakOverlayFactory::PeakOverlayFactory(QwtPlot * plot, QWidget * parent) : PeakOverlayFactoryBase(), m_plot(plot), m_parent(parent)
     {
       if(!plot)
         throw std::invalid_argument("PeakOverlayFactory plot is null");
@@ -25,6 +25,18 @@ namespace MantidQt
     boost::shared_ptr<PeakOverlayView> PeakOverlayFactory::createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius) const
     {
       return boost::make_shared<PeakOverlay>(m_plot, m_parent, position, radius);
+    }
+
+    std::string PeakOverlayFactory::getPlotXLabel() const
+    {
+      QwtText xDim = m_plot->axisTitle(QwtPlot::xBottom);
+      return xDim.text().toStdString();
+    }
+
+    std::string PeakOverlayFactory::getPlotYLabel() const
+    {
+      QwtText yDim = m_plot->axisTitle(QwtPlot::yLeft);
+      return yDim.text().toStdString();
     }
 
     PeakOverlayFactory::~PeakOverlayFactory()
