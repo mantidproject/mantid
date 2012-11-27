@@ -8,6 +8,7 @@
       <pointing-up axis="y"/>
       <handedness axis="right"/>
     </reference-frame>
+    <default-view view="cylindrical_y"/>
   </defaults>
   <!--SOURCE AND SAMPLE POSITION-->
   <component type="moderator">
