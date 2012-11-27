@@ -89,6 +89,9 @@ namespace Mantid
         "If present, will overide any specified choice given to Separator.");
 
       setPropertySettings("CustomSeparator", new VisibleWhenProperty("Separator", IS_EQUAL_TO, "UserDefined") );
+
+      declareProperty("ColumnHeader", true, "If true, write the column headers.");
+
     }
 
     /** 
@@ -105,6 +108,7 @@ namespace Mantid
         std::vector<int> spec_list = getProperty("SpectrumList");
         int spec_min = getProperty("WorkspaceIndexMin");
         int spec_max = getProperty("WorkspaceIndexMax");
+        bool writeHeader = getProperty("ColumnHeader");
 
         // Check whether we need to write the fourth column
         bool write_dx = getProperty("WriteXError");
@@ -163,20 +167,22 @@ namespace Mantid
         }
 
         // Write the column captions
-        file << comment << "X";
-        if (idx.empty())
+        if( writeHeader) {
+          file << comment << "X";
+          if (idx.empty())
             for(int spec=0;spec<nSpectra;spec++)
             {
-                file << " , Y" << spec << " , E" << spec;
-                if (write_dx) file << " , DX" << spec;
+              file << " , Y" << spec << " , E" << spec;
+              if (write_dx) file << " , DX" << spec;
             }
-        else
+          else
             for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();++spec)
             {
-                file << " , Y" << *spec << " , E" << *spec;
-                if (write_dx) file << " , DX" << *spec;
+              file << " , Y" << *spec << " , E" << *spec;
+              if (write_dx) file << " , DX" << *spec;
             }
-        file << std::endl;
+            file << std::endl;
+        }
 
         bool isHistogram = ws->isHistogramData();
 
