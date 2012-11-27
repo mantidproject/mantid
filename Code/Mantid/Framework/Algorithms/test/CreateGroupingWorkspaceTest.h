@@ -35,7 +35,14 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
 
-    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 24794);
+    if (outWSName.compare("Grouping_2012-11-27") != 0)
+    {
+      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 24794);
+    }
+    else
+    {
+      TS_ASSERT_EQUALS( ws->getNumberHistograms(), 25872);
+    }
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     // All zero.
     TS_ASSERT_EQUALS( ws->dataY(0)[0], 0.0);
@@ -50,7 +57,7 @@ public:
   void test_exec_withInstrumentName()
   {
     // Name of the output workspace.
-    std::string outWSName("CreateGroupingWorkspaceTest_OutputWS");
+    std::string outWSName("Grouping_2012-11-27");
     CreateGroupingWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
