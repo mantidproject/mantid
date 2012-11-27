@@ -250,7 +250,7 @@ namespace DataObjects
     const std::string peaksIntegrated = "PeaksIntegrated";
     if(this->run().hasProperty(peaksIntegrated))
     {
-      ret = boost::lexical_cast<bool>(this->run().getProperty(peaksIntegrated)->value());
+      ret = bool(boost::lexical_cast<int>(this->run().getProperty(peaksIntegrated)->value()));
     }
     return ret;
   }

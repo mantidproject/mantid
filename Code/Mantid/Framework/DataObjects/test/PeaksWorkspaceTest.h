@@ -227,7 +227,7 @@ public:
    void test_hasIntegratedPeaks_with_property_when_false()
    {
      PeaksWorkspace ws;
-     bool hasIntegratedPeaks = false;
+     int hasIntegratedPeaks = 0; // false
      ws.mutableRun().addProperty("PeaksIntegrated", hasIntegratedPeaks);
      TS_ASSERT_EQUALS(hasIntegratedPeaks, ws.hasIntegratedPeaks());
    }
@@ -235,7 +235,7 @@ public:
    void test_hasIntegratedPeaks_with_property_when_true()
    {
      PeaksWorkspace ws;
-     bool hasIntegratedPeaks = true;
+     int hasIntegratedPeaks = 1; // true
      ws.mutableRun().addProperty("PeaksIntegrated", hasIntegratedPeaks);
      TS_ASSERT_EQUALS(hasIntegratedPeaks, ws.hasIntegratedPeaks());
    }
