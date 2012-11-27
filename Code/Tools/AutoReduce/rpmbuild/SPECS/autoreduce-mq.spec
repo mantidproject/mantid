@@ -1,7 +1,7 @@
 Summary: autoreduce-mq
 Name: autoreduce-mq
 Version: 1.0
-Release: 9 
+Release: 10 
 Group: Applications/Engineering
 prefix: /usr
 BuildRoot: %{_tmppath}/%{name}
