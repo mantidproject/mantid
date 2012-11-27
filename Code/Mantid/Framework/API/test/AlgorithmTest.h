@@ -11,6 +11,8 @@
 #include "MantidKernel/WriteLock.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include <map>
 
 using namespace Mantid::Kernel; 
@@ -29,7 +31,7 @@ public:
   void init()
   { 
     declareProperty("prop1","value");
-    declareProperty("prop2",1);   
+    declareProperty("prop2",1);
   }
   void exec() {}
   
@@ -59,6 +61,12 @@ public:
     declareProperty("prop1","value");
     declareProperty("prop2",1);   
     declareProperty("prop3",10.5);   
+    std::vector<double> binning;
+    binning.push_back(1.0);
+    binning.push_back(0.1);
+    binning.push_back(2.0);
+    declareProperty(new ArrayProperty<double>("Binning", binning,
+        boost::make_shared<RebinParamsValidator>()));
   }
   void exec() {}
 };
@@ -262,7 +270,7 @@ public:
     TS_ASSERT( myAlg.isExecuted() );
   }
 
-	
+
   void testSetPropertyValue()
   {
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("prop1","val") )
@@ -355,7 +363,7 @@ public:
 
   void test_Construction_Via_Valid_String_With_Set_Properties_And_Version()
   {
-    IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm.2(prop1=val1,prop2=8,prop3=10.0)");
+    IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm.2(prop1=val1,prop2=8,prop3=10.0,Binning=0.2,0.2,1.4)");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
     
@@ -390,6 +398,59 @@ public:
     {
       TS_FAIL("Cannot retrieve property 'prop3'");
     }
+    try
+    {
+      std::vector<double> prop3 = testAlg->getProperty("Binning");
+      TS_ASSERT_EQUALS(prop3.size(), 3);
+    }
+    catch(...)
+    {
+       TS_FAIL("Cannot retrieve property 'Binning'");
+    }
+  }
+
+  void test_Construction_Via_Valid_String_With_Single_Property_And_Version()
+  {
+    IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm.2(prop3=10.0)");
+    TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(testAlg->version(), 2);
+
+    try
+    {
+      double prop3 = testAlg->getProperty("prop3");
+      TS_ASSERT_EQUALS(prop3, 10.0);
+    }
+    catch(...)
+    {
+      TS_FAIL("Cannot retrieve property 'prop3'");
+    }
+    try
+    {
+      std::vector<double> prop3 = testAlg->getProperty("Binning");
+      TS_ASSERT_EQUALS(prop3.size(), 3);
+    }
+    catch(...)
+    {
+       TS_FAIL("Cannot retrieve property 'Binning'");
+    }
+  }
+
+  void test_Construction_Via_Valid_String_With_Single_Property_Array()
+  {
+    IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm.2(Binning=0.2,0.2,1.4)");
+    TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(testAlg->version(), 2);
+
+    try
+    {
+      std::vector<double> prop3 = testAlg->getProperty("Binning");
+      TS_ASSERT_EQUALS(prop3.size(), 3);
+      TS_ASSERT_EQUALS(prop3[2], 1.4);
+    }
+    catch(...)
+    {
+       TS_FAIL("Cannot retrieve property 'Binning'");
+    }
   }
 
   void test_Construction_Via_Valid_String_With_Empty_Properties()
@@ -397,7 +458,6 @@ public:
     IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm()");
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
-    
      try
     {
       std::string prop1 = testAlg->getProperty("prop1");
@@ -415,6 +475,15 @@ public:
     catch(...)
     {
        TS_FAIL("Cannot retrieve property 'prop2'");
+    }
+    try
+    {
+      std::vector<double> prop3 = testAlg->getProperty("Binning");
+      TS_ASSERT_EQUALS(prop3.size(), 3);
+    }
+    catch(...)
+    {
+       TS_FAIL("Cannot retrieve property 'Binning'");
     }
 
   }

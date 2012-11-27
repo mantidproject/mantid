@@ -816,8 +816,8 @@ namespace Mantid
       static const boost::regex propNameExp(".*,([[:word:]]*)");
       // Empty dividers
        static const boost::regex emptyExp(",[ ,]*,");
-      // Trailing comas
-      static const boost::regex endingComaExp(",$");
+      // Trailing commas
+      static const boost::regex trailingCommaExp(",$");
 
       boost::match_results<std::string::const_iterator> what;
       if( boost::regex_search(input, what, nameExp, boost::match_not_null) )
@@ -837,12 +837,12 @@ namespace Mantid
         IAlgorithm_sptr alg = AlgorithmManager::Instance().create(algName, version);
         if(  boost::regex_search(input, what, propExp, boost::match_not_null) )
         {
-          // Remove empty dividers
           std::string _propStr = what[1];
 
-          // use the version of regex_replace() that operates on strings
+          // Cleanup: Remove empty dividers (multiple commas)
           std::string __propStr = regex_replace(_propStr, emptyExp, "," );
-          std::string propStr = regex_replace(__propStr, endingComaExp, "" );
+          // Cleanup: We might still be left with a trailing comma, remove it
+          std::string propStr = regex_replace(__propStr, trailingCommaExp, "" );
 
           boost::match_flag_type flags = boost::match_not_null;
           std::string::const_iterator start, end;
