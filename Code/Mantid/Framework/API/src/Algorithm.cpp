@@ -815,7 +815,9 @@ namespace Mantid
       // Property name regex
       static const boost::regex propNameExp(".*,([[:word:]]*)");
       // Empty dividers
-      static const boost::regex emptyExp(",[ ]*,");
+       static const boost::regex emptyExp(",[ ,]*,");
+      // Trailing comas
+      static const boost::regex endingComaExp(",$");
 
       boost::match_results<std::string::const_iterator> what;
       if( boost::regex_search(input, what, nameExp, boost::match_not_null) )
@@ -837,10 +839,10 @@ namespace Mantid
         {
           // Remove empty dividers
           std::string _propStr = what[1];
-          std::string format(",");
 
           // use the version of regex_replace() that operates on strings
-          std::string propStr = regex_replace(_propStr, emptyExp, format );
+          std::string __propStr = regex_replace(_propStr, emptyExp, "," );
+          std::string propStr = regex_replace(__propStr, endingComaExp, "" );
 
           boost::match_flag_type flags = boost::match_not_null;
           std::string::const_iterator start, end;
