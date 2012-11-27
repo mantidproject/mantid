@@ -812,6 +812,10 @@ namespace Mantid
       static const boost::regex propExp("\\((.*)\\)");
       // Name=Value regex
       static const boost::regex nameValExp("(.*)=(.*)");
+      // Property name regex
+      static const boost::regex propNameExp(".*,([[:word:]]*)");
+      // Empty dividers
+      static const boost::regex emptyExp(",[ ]*,");
 
       boost::match_results<std::string::const_iterator> what;
       if( boost::regex_search(input, what, nameExp, boost::match_not_null) )
@@ -831,17 +835,36 @@ namespace Mantid
         IAlgorithm_sptr alg = AlgorithmManager::Instance().create(algName, version);
         if(  boost::regex_search(input, what, propExp, boost::match_not_null) )
         {
-          std::string propStr = what[1];
-          std::list<std::string> props;
-          boost::algorithm::split(props, propStr, std::bind2nd(std::equal_to<char>(), ','));
-          for( std::list<std::string>::const_iterator itr = props.begin();
-               itr != props.end(); ++itr )
+          // Remove empty dividers
+          std::string _propStr = what[1];
+          std::string format(",");
+
+          // use the version of regex_replace() that operates on strings
+          std::string propStr = regex_replace(_propStr, emptyExp, format );
+
+          boost::match_flag_type flags = boost::match_not_null;
+          std::string::const_iterator start, end;
+          start = propStr.begin();
+          end = propStr.end();
+          while(boost::regex_search(start, end, what, nameValExp, flags))
           {
-            std::string nameValue = *itr;
-            if( boost::regex_search(nameValue, what, nameValExp,  boost::match_not_null) )
+            std::string nameValue = what.str(1);
+            std::string value = what.str(2);
+
+            if(  boost::regex_search(what[1].first, what[1].second,
+                 what, propNameExp, boost::match_not_null) )
             {
-              alg->setPropertyValue(what.str(1), what.str(2));
+              const std::string name = what.str(1);
+              alg->setPropertyValue(name, value);
+              end = what[1].first-1;
+            } else {
+              // The last property-value pair
+              alg->setPropertyValue(nameValue, value);
+              break;
             }
+            // update flags:
+            flags |= boost::match_prev_avail;
+            flags |= boost::match_not_bob;
           }
         }
         return alg;
