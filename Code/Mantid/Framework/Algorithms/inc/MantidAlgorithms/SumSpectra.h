@@ -69,10 +69,12 @@ public:
 private:
   /// Handle logic for RebinnedOutput workspaces
   void doRebinnedOutput(API::MatrixWorkspace_sptr outputWorkspace,
-                        API::Progress &progress);
+                        API::Progress &progress,
+                        size_t &numSpectra,size_t &numMasked,size_t &numZeros);
   /// Handle logic for Workspace2D workspaces
   void doWorkspace2D(API::MatrixWorkspace_const_sptr localworkspace,
-                     API::ISpectrum *outSpec, API::Progress &progress);
+                     API::ISpectrum *outSpec, API::Progress &progress,
+                     size_t &numSpectra,size_t &numMasked,size_t &numZeros);
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Overridden Algorithm methods
@@ -95,6 +97,9 @@ private:
   int yLength;
   /// Set of indicies to sum
   std::set<int> indices;
+
+  // if calculateing additional workspace with specially weighted averages is necessary
+  bool m_CalculateWeightedSum;
 };
 
 } // namespace Algorithm

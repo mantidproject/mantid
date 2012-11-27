@@ -60,6 +60,10 @@ void SumSpectra::init()
     "Can be specified instead of in addition to StartWorkspaceIndex and EndWorkspaceIndex.");
 
   declareProperty("IncludeMonitors",true,"Whether to include monitor spectra in the sum (default: yes)");
+
+  declareProperty("WeightedSum",false,"Instead of the usual spectra sum, calculate the weighted sum in the form: \n"
+    "<math>\\Sigma(Signal_i/Error_i^2)/\\Sigma(1/Error_i^2)</math> This property is ignored for event workspace.\n"
+    "The sums are defined for <math>Error_i != 0</math> only, so the values are NaN if error for some value is equal to 0.");
 }
 
 /** Executes the algorithm
@@ -115,9 +119,13 @@ void SumSpectra::exec()
   g_log.information() << "Spectra remapping gives single spectra with spectra number: "
                       << m_outSpecId << "\n";
 
+  m_CalculateWeightedSum = getProperty("WeightedSum");
+
+ 
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (eventW)
   {
+    m_CalculateWeightedSum = false;
     this->execEvent(eventW, this->indices);
   }
   else
@@ -127,7 +135,10 @@ void SumSpectra::exec()
     // Create the 2D workspace for the output
     MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,
                                                            1,localworkspace->readX(0).size(),this->yLength);
-
+    size_t numSpectra(0); // total number of processed spectra
+    size_t numMasked(0);  // total number of the masked and skipped spectra
+    size_t numZeros(0);   // number of spectra which have 0 value in the first column (used in special cases of evaluating how good Puasonian statistics is)
+  
     Progress progress(this, 0, 1, this->indices.size());
 
     // This is the (only) output spectrum
@@ -142,11 +153,11 @@ void SumSpectra::exec()
 
     if (localworkspace->id() == "RebinnedOutput")
     {
-      this->doRebinnedOutput(outputWorkspace, progress);
+      this->doRebinnedOutput(outputWorkspace, progress,numSpectra,numMasked,numZeros);
     }
     else
     {
-      this->doWorkspace2D(localworkspace, outSpec, progress);
+      this->doWorkspace2D(localworkspace, outSpec, progress,numSpectra,numMasked,numZeros);
     }
 
     // Pointer to sqrt function
@@ -157,6 +168,11 @@ void SumSpectra::exec()
     std::transform(YError.begin(), YError.end(), YError.begin(), rs);
 
     outputWorkspace->generateSpectraMap();
+    // set up the summing statistics
+    outputWorkspace->mutableRun().addProperty("NumAllSpectra",numSpectra,"",true);
+    outputWorkspace->mutableRun().addProperty("NumMaskSpectra",numMasked,"",true);
+    outputWorkspace->mutableRun().addProperty("NumZeroSpectra",numZeros,"",true);
+
 
     // Assign it to the output workspace property
     setProperty("OutputWorkspace", outputWorkspace);
@@ -199,11 +215,16 @@ specid_t SumSpectra::getOutputSpecId(MatrixWorkspace_const_sptr localworkspace)
  * @param progress the progress indicator
  */
 void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
-                               ISpectrum *outSpec, Progress &progress)
+                               ISpectrum *outSpec, Progress &progress,
+                               size_t &numSpectra,size_t &numMasked,size_t &numZeros)
 {
   // Get references to the output workspaces's data vectors
   MantidVec& YSum = outSpec->dataY();
   MantidVec& YError = outSpec->dataE();
+
+  MantidVec Weight; 
+  if(m_CalculateWeightedSum)Weight.assign(YSum.size(),0);
+
 
   // Loop over spectra
   std::set<int>::iterator it;
@@ -225,28 +246,60 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
       // Skip monitors, if the property is set to do so
       if ( !keepMonitors && det->isMonitor() ) continue;
       // Skip masked detectors
-      if ( det->isMasked() ) continue;
+      if ( det->isMasked() )
+      {
+        numMasked++;
+        continue;
+      }
     }
     catch(...)
     {
       // if the detector not found just carry on
     }
+    numSpectra++;
 
     // Retrieve the spectrum into a vector
     const MantidVec& YValues = localworkspace->readY(i);
     const MantidVec& YErrors = localworkspace->readE(i);
-
-    for (int k = 0; k < this->yLength; ++k)
+    if(m_CalculateWeightedSum)
     {
-      YSum[k] += YValues[k];
-      YError[k] += YErrors[k]*YErrors[k];
+      for (int k = 0; k < this->yLength; ++k)
+      {
+        if(YErrors[k]!=0)
+        {
+          double errsq = YErrors[k]*YErrors[k];
+          YError[k] +=errsq;
+          Weight[k] +=1./errsq;
+          YSum[k] += YValues[k]/errsq;
+        }  
+        else
+        {
+          YSum[k]  =std::numeric_limits<double>::quiet_NaN();
+          Weight[k]=std::numeric_limits<double>::quiet_NaN();
+        }
+      }
+    }
+    else
+    {
+      for (int k = 0; k < this->yLength; ++k)
+      {
+        YSum[k] += YValues[k];
+        YError[k] += YErrors[k]*YErrors[k];
+      }
     }
 
     // Map all the detectors onto the spectrum of the output
     outSpec->addDetectorIDs( localworkspace->getSpectrum(i)->getDetectorIDs() );
+    if(YSum[0]==0)numZeros++;
 
     progress.report();
   }
+  if(m_CalculateWeightedSum)
+  {
+    for(size_t i=0;i<Weight.size();i++)
+      YSum[i]/=Weight[i];
+  }
+
 }
 
 /**
@@ -255,7 +308,8 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
  * @param progress the progress indicator
  */
 void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
-                                  Progress &progress)
+                                  Progress &progress,
+                                  size_t &numSpectra,size_t &numMasked,size_t &numZeros)
 {
   // Get a copy of the input workspace
   MatrixWorkspace_sptr temp = getProperty("InputWorkspace");
@@ -283,12 +337,11 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   MantidVec& YSum = outSpec->dataY();
   MantidVec& YError = outSpec->dataE();
   MantidVec& FracSum = outWS->dataF(0);
+  MantidVec Weight; 
+  if(m_CalculateWeightedSum)Weight.assign(YSum.size(),0);
 
   // Loop over spectra
   std::set<int>::iterator it;
-  size_t numSpectra(0); // total number of processed spectra
-  size_t numMasked(0);  // total number of the masked and skipped spectra
-  size_t numZeros(0);   // number of spectra which have 0 value in the first column (used in special cases of evaluating how good Puasonian statistics is)
   //for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   for (it = indices.begin(); it != indices.end(); ++it)
   {
@@ -300,7 +353,6 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
       break;
     }
 
-    numSpectra++;
     try
     {
       // Get the detector object for this spectrum
@@ -318,19 +370,43 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
     {
       // if the detector not found just carry on
     }
+    numSpectra++;
 
     // Retrieve the spectrum into a vector
     const MantidVec& YValues = localworkspace->readY(i);
     const MantidVec& YErrors = localworkspace->readE(i);
     const MantidVec& FracArea = inWS->readF(i);
 
-    for (int k = 0; k < this->yLength; ++k)
+    if(m_CalculateWeightedSum)
     {
-      YSum[k] += YValues[k] * FracArea[k];
-      YError[k] += YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
-      FracSum[k] += FracArea[k];
+      for (int k = 0; k < this->yLength; ++k)
+      {
+        if(YErrors[k]!=0)
+        {
+          double errsq = YErrors[k]*YErrors[k]*FracArea[k]*FracArea[k];
+          YError[k] +=errsq;
+          Weight[k] +=1./errsq;
+          YSum[k] += YValues[k]*FracArea[k]/errsq;
+          FracSum[k] += FracArea[k];
+        }  
+        else
+        {
+          YSum[k]  =std::numeric_limits<double>::quiet_NaN();
+          Weight[k]=std::numeric_limits<double>::quiet_NaN();
+          FracSum[k] += FracArea[k];
+        }
+      }
     }
-    if(YValues[0]==0)numZeros++;
+    else
+    {
+      for (int k = 0; k < this->yLength; ++k)
+      {
+        YSum[k] += YValues[k] * FracArea[k];
+        YError[k] += YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
+        FracSum[k] += FracArea[k];
+      }
+    }
+    if(YSum[0]==0)numZeros++;
 
     // Map all the detectors onto the spectrum of the output
     outSpec->addDetectorIDs(localworkspace->getSpectrum(i)->getDetectorIDs());
@@ -338,11 +414,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
     progress.report();
   }
 
-  outWS->mutableRun().addProperty("NumAllSpectra",numSpectra,"",true);
-  outWS->mutableRun().addProperty("NumMaskSpectra",numMasked,"",true);
-  outWS->mutableRun().addProperty("NumZeroSpectra",numZeros,"",true);
-
-  // Create the correct representation
+   // Create the correct representation
   outWS->finalize();
 }
 
@@ -367,10 +439,9 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
 
   // Loop over spectra
   std::set<int>::iterator it;
-  size_t numSpectra(0); // total number of processed spectra
-  size_t numMasked(0);  // total number of the masked and skipped spectra
-  size_t numZeros(0);   // number of fully empty spectra with no events (used in special cases of evaluating how good Puasonian statistics is)
-
+  size_t numSpectra(0);
+  size_t numMasked(0);
+  size_t numZeros(0);
   //for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
   for (it = indices.begin(); it != indices.end(); ++it)
   {
@@ -382,7 +453,6 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
       break;
     }
 
-    numSpectra++;
     try
     {
       // Get the detector object for this spectrum
@@ -400,6 +470,8 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
     {
       // if the detector not found just carry on
     }
+    numSpectra++;
+
     //Add the event lists with the operator
     const EventList & tOutEL = localworkspace->getEventList(i);
     if(tOutEL.empty())

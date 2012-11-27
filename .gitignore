@@ -163,3 +163,4 @@ Desktop.ini
 
 # Mac OS X Finder
 .DS_Store
+/Code\Mantid\Framework\API\test/*.cpp
