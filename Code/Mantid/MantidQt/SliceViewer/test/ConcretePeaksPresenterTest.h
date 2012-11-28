@@ -30,6 +30,7 @@ private:
     MOCK_METHOD0(updateView, void());
     MOCK_METHOD1(setSlicePoint, void(const double&));
     MOCK_METHOD0(hideView, void());
+    MOCK_METHOD0(showView, void());
     MOCK_METHOD1(movePosition, void(const PeakTransform&));
     ~MockPeakOverlayView(){}
   };
@@ -180,6 +181,30 @@ public:
 
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
   }
+
+  void test_handle_non_hkl_xy_mappings()
+  {
+    // Create a widget factory mock
+    auto mockViewFactory = new MockPeakOverlayFactory;
+
+    const int expectedNumberPeaks = 1;
+
+    // Create a mock view object that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberPeaks); // This will be called automatically because the presenter won't be able to map Qx (below).
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
+
+    EXPECT_CALL(*mockViewFactory, setRadius(_)).Times(1);
+    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("Qx")); // Not either H, K or L
+    EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
+
+    ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
+    TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
+  }
+
+
   
 };
 

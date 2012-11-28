@@ -154,8 +154,6 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_overlayWSOutline->setShowHandles(false);
   m_overlayWSOutline->setShowLine(false);
   m_overlayWSOutline->setShown(false);
-
-  ui.btnPeakOverlay->setEnabled(true);
 }
 
 //------------------------------------------------------------------------------------
@@ -602,9 +600,11 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
     }
   }
 
+  // Enable peaks overlays according to the dimensionality and the displayed dimensions.
+  enablePeakOverlaysIfAppropriate();
+
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
-
 }
 
 
@@ -1472,8 +1472,11 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
     }
   }
 
+ 
   // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();  
+  // The dimensionality has changed. It might no longer be possible to plot peaks. We need updateDisplay called first, because we read axis off the plot.
+  enablePeakOverlaysIfAppropriate(); 
   // Transform the peak overlays according to the new plotting.
   m_peaksPresenter->changeShownDim();
   // Send out a signal
@@ -2073,6 +2076,12 @@ void SliceViewer::dynamicRebinComplete(bool error)
 
 /**
 Event handler for selection/de-selection of peak overlays.
+
+Allow user to choose a suitable input peaks workspace
+Create a factory for fabricating new views 'PeakOverlays'
+Create a proper peaks presenter to manage the views and bind them against the PeaksWorkspace and the SliceViewer
+Update the views with the current slice point. to ensure they are shown.
+
 @param checked : True if peak overlay option is checked.
 */
 void SliceViewer::peakOverlay_toggled(bool checked)
@@ -2095,7 +2104,7 @@ void SliceViewer::peakOverlay_toggled(bool checked)
   }
   else
   {
-    m_peaksPresenter = PeaksPresenter_sptr(new NullPeaksPresenter);
+    m_peaksPresenter = boost::make_shared<NullPeaksPresenter>(); 
   }
 }
 
@@ -2115,6 +2124,37 @@ void SliceViewer::updatePeaksWithSlicePoint()
         m_peaksPresenter->updateWithSlicePoint(widget->getSlicePoint()); 
       }
     }
+  }
+}
+
+/**
+Decide whether to enable peak overlays, then reflect the ui controls to indicate this.
+
+1) Check the dimensionality of the workspace.
+2) Check that the currently displayed plot x and y correspond to a valid peak transform (H, K, L) etc.
+
+*/
+void SliceViewer::enablePeakOverlaysIfAppropriate()
+{
+  bool enablePeakOverlays = false;
+  if(m_ws->getNumDims() >= 2)
+  {
+    try
+    { 
+      const std::string xDim = m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
+      const std::string yDim = m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
+      PeakTransform(xDim, yDim); // This will throw if the mapped dimensions are not hkl.
+      enablePeakOverlays = true;
+    }
+    catch(PeakTransformException&)
+    {
+    }
+  }
+  m_syncPeakOverlay->setEnabled(enablePeakOverlays);
+  if(! enablePeakOverlays)
+  {
+    ui.btnPeakOverlay->setChecked(false); // Don't leave the button depressed.
+    m_peaksPresenter = boost::make_shared<NullPeaksPresenter>(); // Reset the presenter
   }
 }
 

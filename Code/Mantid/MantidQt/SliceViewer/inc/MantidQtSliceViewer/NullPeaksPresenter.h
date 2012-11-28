@@ -17,7 +17,7 @@ namespace MantidQt
     public:
       virtual void update(){}
       virtual void updateWithSlicePoint(const double&){}
-      virtual void changeShownDim(){}
+      virtual bool changeShownDim(){return false;}
       virtual bool isLabelOfFreeAxis(const std::string&) const {return false;}
     };
 

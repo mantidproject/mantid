@@ -61,7 +61,7 @@ namespace MantidQt
     }
     else
     {
-      throw std::runtime_error("Could not process mapped dimensions.");
+      throw PeakTransformException("Could not process mapped dimensions");
     }
   }
 
@@ -105,7 +105,7 @@ namespace MantidQt
       return m_HRegex;
     case 1:
       return m_KRegex;
-    case 2:
+    default:
       return m_LRegex;
     }
   }

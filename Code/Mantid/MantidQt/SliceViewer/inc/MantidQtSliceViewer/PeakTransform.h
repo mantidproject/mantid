@@ -8,6 +8,10 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+    /**
+    @class PeakTransform
+    Used to remap coordinates into a form consistent with an axis reordering.
+    */
     class DLLExport PeakTransform 
     {
     public:
@@ -26,6 +30,18 @@ namespace MantidQt
       boost::regex m_HRegex;
       boost::regex m_KRegex;
       boost::regex m_LRegex;
+    };
+    
+    /**
+    @class PeakTransformException
+    Exceptions occuring when PeakTransformations cannot be formed.
+    */
+    class PeakTransformException : public std::exception
+    {
+    public:
+      PeakTransformException(const std::string& msg) : std::exception(msg.c_str())
+      {
+      }
     };
 
   }

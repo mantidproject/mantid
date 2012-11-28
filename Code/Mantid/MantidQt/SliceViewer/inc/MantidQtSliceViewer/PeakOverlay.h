@@ -54,6 +54,8 @@ namespace SliceViewer
     virtual void setSlicePoint(const double& point); 
     /// Hide the view.
     virtual void hideView();
+    /// Show the view.
+    virtual void showView();
     /// Update the view.
     virtual void updateView();
     /// Get the origin. md x, md y

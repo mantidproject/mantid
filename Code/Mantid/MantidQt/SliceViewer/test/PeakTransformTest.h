@@ -15,12 +15,12 @@ public:
 
   void test_throws_with_unknown_xLabel()
   {
-    TS_ASSERT_THROWS(PeakTransform("?", "K (Lattice)"), std::runtime_error);
+    TS_ASSERT_THROWS(PeakTransform("?", "K (Lattice)"), PeakTransformException);
   }
 
   void test_throws_with_unknown_yLabel()
   {
-    TS_ASSERT_THROWS(PeakTransform("H (Lattice)", "?"), std::runtime_error);
+    TS_ASSERT_THROWS(PeakTransform("H (Lattice)", "?"), PeakTransformException);
   }
 
 void test_transformHKL()

@@ -36,7 +36,7 @@ namespace SliceViewer
       throw std::invalid_argument("PeaksWorkspace does not contain integrated peaks."); // We might consider drawing these in the future anyway.
     }
     
-    this->configureMappingTransform();
+    const bool transformSucceeded = this->configureMappingTransform();
     // Extract the integration radius from the workspace.
     const double peakIntegrationRadius = boost::lexical_cast<double>(peaksWS->run().getProperty("PeakRadius")->value());
     factory->setRadius(peakIntegrationRadius);
@@ -47,6 +47,10 @@ namespace SliceViewer
       
       PeakOverlayView_sptr view = boost::shared_ptr<PeakOverlayView>( m_factory->createView(m_transform.transform(position)) );
       m_viewPeaks[i] = view;
+    }
+    if(!transformSucceeded)
+    {
+      hideAll();
     }
   }
 
@@ -78,37 +82,50 @@ namespace SliceViewer
   */
   ConcretePeaksPresenter::~ConcretePeaksPresenter()
   {
-    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
-    {
-      (*it)->hideView();
-    }
+    hideAll();
   }
 
   /**
   Respond to changes in the shown dimension.
+  @ return True only if this succeeds. 
   */
-  void ConcretePeaksPresenter::changeShownDim()
+  bool ConcretePeaksPresenter::changeShownDim()
   {
     // Reconfigure the mapping tranform.
-    this->configureMappingTransform();
+    const bool transformSucceeded = this->configureMappingTransform();
     // Apply the mapping tranform to move each peak overlay object.
 
-    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+    if(transformSucceeded)
     {
-      (*it)->movePosition(m_transform);
+      for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      {
+        (*it)->movePosition(m_transform);
+      }
     }
+    return transformSucceeded;
   }
 
   /**
   This method looks at the plotted dimensions (XY) , and work out what indexes into the vector HKL, these XYZ dimensions correpond to.
-
   The indexes can then be used for any future transformation, where the user changes the chosen dimensions to plot.
+  @return True if the mapping has succeeded.
   */
-  void ConcretePeaksPresenter::configureMappingTransform()
+  bool ConcretePeaksPresenter::configureMappingTransform()
   {
-    std::string xLabel = m_factory->getPlotXLabel();
-    std::string yLabel = m_factory->getPlotYLabel();
-    m_transform = PeakTransform(xLabel, yLabel);
+    bool transformSucceeded = false;
+    try
+    {
+      std::string xLabel = m_factory->getPlotXLabel();
+      std::string yLabel = m_factory->getPlotYLabel();
+      m_transform = PeakTransform(xLabel, yLabel);
+      showAll();
+      transformSucceeded = true;
+    }
+    catch(PeakTransformException&)
+    {
+      hideAll();
+    }
+    return transformSucceeded;
   }
 
   /**
@@ -119,6 +136,36 @@ namespace SliceViewer
   bool ConcretePeaksPresenter::isLabelOfFreeAxis(const std::string& label) const
   {
     return boost::regex_match(label, m_transform.getFreePeakAxisRegex());
+  }
+
+  /**
+  Request that each owned view makes iteself visible.
+  */
+  void ConcretePeaksPresenter::showAll()
+  {
+    // Show all views.
+    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+    {
+      if((*it) != NULL)
+      {
+        (*it)->showView();
+      }
+    }
+  }
+
+  /**
+  Request that each owned view makes iteself  NOT visible.
+  */
+  void ConcretePeaksPresenter::hideAll()
+  {
+    // Hide all views.
+    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+    {
+      if((*it) != NULL)
+      {
+        (*it)->hideView();
+      }
+    }
   }
 
 }

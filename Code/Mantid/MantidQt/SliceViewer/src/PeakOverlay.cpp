@@ -162,6 +162,11 @@ namespace SliceViewer
     this->hide();
   }
 
+  void PeakOverlay::showView()
+  {
+    this->show();
+  }
+
   void PeakOverlay::movePosition(const PeakTransform& transform)
   {
     // Will have the plots x, y, and z aligned to the correct h, k, l value.

@@ -162,7 +162,10 @@ private:
 
   void findRangeFull();
   void findRangeSlice();
+
+  // Peak overlay methods.
   void updatePeaksWithSlicePoint();
+  void enablePeakOverlaysIfAppropriate();
 
 
 private:

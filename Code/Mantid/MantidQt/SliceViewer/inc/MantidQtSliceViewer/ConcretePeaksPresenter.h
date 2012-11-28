@@ -27,7 +27,7 @@ namespace MantidQt
       virtual ~ConcretePeaksPresenter();
       virtual void update();
       virtual void updateWithSlicePoint(const double& slicePoint);
-      virtual void changeShownDim();
+      virtual bool changeShownDim();
       virtual bool isLabelOfFreeAxis(const std::string& label) const;
     private:
       /// Peak overlay views.
@@ -37,7 +37,11 @@ namespace MantidQt
       /// Peak transformer
       PeakTransform m_transform;
       /// Configurre peak transformations
-      void configureMappingTransform();
+      bool configureMappingTransform();
+      /// Hide all views
+      void hideAll();
+      /// Show all views
+      void showAll();
     };
 
   }
