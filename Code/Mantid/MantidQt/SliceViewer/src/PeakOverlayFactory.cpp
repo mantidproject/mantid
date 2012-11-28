@@ -14,12 +14,17 @@ namespace MantidQt
   namespace SliceViewer
   {
 
-    PeakOverlayFactory::PeakOverlayFactory(QwtPlot * plot, QWidget * parent) : PeakOverlayFactoryBase(), m_plot(plot), m_parent(parent)
+    PeakOverlayFactory::PeakOverlayFactory(QwtPlot * plot, QWidget * parent) : PeakOverlayViewFactory(), m_plot(plot), m_parent(parent)
     {
       if(!plot)
         throw std::invalid_argument("PeakOverlayFactory plot is null");
       if(!parent)
         throw std::invalid_argument("PeakOverlayFactory parent widget is null");
+    }
+
+    boost::shared_ptr<PeakOverlayView> PeakOverlayFactory::createView(const Mantid::Kernel::V3D& position) const
+    {
+      return this->createViewAtPoint(position, m_peakRadius);
     }
 
     boost::shared_ptr<PeakOverlayView> PeakOverlayFactory::createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius) const
@@ -41,6 +46,15 @@ namespace MantidQt
 
     PeakOverlayFactory::~PeakOverlayFactory()
     {
+    }
+
+   /*
+    Setter for the actual peak radius. The radius used for drawing will depend on the plane instesection.
+    @param peakRadius : Global value for the peak radius to apply to all peaks manufactured through this factory.
+    */
+    void PeakOverlayFactory::setRadius(const double& peakRadius)
+    {
+      m_peakRadius = peakRadius;
     }
   }
 }

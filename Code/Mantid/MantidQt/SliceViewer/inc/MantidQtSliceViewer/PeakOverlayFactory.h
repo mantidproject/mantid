@@ -3,7 +3,7 @@
 #define MANTID_SLICEVIEWER_PEAKOVERLAY_FACTORY_H_
 
 #include "DllOption.h"
-#include "MantidQtSliceViewer/PeakOverlayFactoryBase.h"
+#include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
 #include <boost/shared_ptr.hpp>
@@ -46,18 +46,21 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    class DLLExport PeakOverlayFactory : public PeakOverlayFactoryBase
+    class DLLExport PeakOverlayFactory : public PeakOverlayViewFactory
     {
     private:
       QwtPlot * m_plot;
       QWidget * m_parent;
+      double m_peakRadius;
+      boost::shared_ptr<PeakOverlayView> createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius) const;
       
     public:
       PeakOverlayFactory(QwtPlot * plot, QWidget * parent);
       virtual ~PeakOverlayFactory();
-      virtual boost::shared_ptr<PeakOverlayView> createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius) const;
+      boost::shared_ptr<PeakOverlayView> createView(const Mantid::Kernel::V3D& position) const;
       virtual std::string getPlotXLabel() const;
       virtual std::string getPlotYLabel() const;
+      virtual void setRadius(const double& peakRadius);
     };
   }
 }

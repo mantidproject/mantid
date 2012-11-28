@@ -7,7 +7,6 @@ set ( SRC_FILES
 	src/LineViewer.cpp
 	src/PeakOverlay.cpp
 	src/PeakOverlayFactory.cpp
-	src/PeakOverlayFactoryBase.cpp
     src/PeakTransform.cpp
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
@@ -33,7 +32,6 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakOverlayView.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayFactory.h
-	inc/MantidQtSliceViewer/PeakOverlayFactoryBase.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
     inc/MantidQtSliceViewer/PeakTransform.h	
     inc/MantidQtSliceViewer/QScienceSpinBox.h
@@ -71,8 +69,8 @@ set ( UI_FILES
 
 set ( TEST_FILES
     test/ConcretePeaksPresenterTest.h
-    test/PeakOverlayFactoryBaseTest.h
     test/PeakTransformTest.h
+    test/NullPeaksPresenterTest.h
 )
 
 # Python unit tests
