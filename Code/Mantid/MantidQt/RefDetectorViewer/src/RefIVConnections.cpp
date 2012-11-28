@@ -342,28 +342,25 @@ void RefIVConnections::graph_range_changed()
 
 void RefIVConnections::peak_back_tof_range_update()
 {
-  std::cout << "Inside RefImageView::peak_back_tof_range_update: ";
-
     QLineEdit * peak_left_control = iv_ui->lineEdit_peakLeft;
-    std::cout << peak_left_control->text().toStdString() << std::endl;
-    
-//    double peakmin = iv_ui->lineEdit_peakLeft->text()->toDouble();
-//    double peakmax = iv_ui->lineEdit_peakRight->text()->toDouble();
-//    double backmin = iv_ui->lineEdit_backLeft->text()->toDouble();
-//    double backmax = iv_ui->lineEdit_backright->text()->toDouble();
-//    double tofmin = iv_ui->lineEdit_TOFmin->text()->toDouble();
-//    double tofmax = iv_ui->lineEdit_TOFmax->text()->toDouble();
-//    std::cout << "peakmin: " << peakmin << std::endl;
+    double peakmin = peak_left_control->text().toDouble();
 
+    QLineEdit * peak_right_control = iv_ui->lineEdit_peakRight;
+    double peakmax = peak_right_control->text().toDouble();
     
-    double peakmin = 1;
-    double peakmax = 1;
-    double backmin = 1;
-    double backmax = 1;
-    double tofmin = 1;
-    double tofmax = 1;
+    QLineEdit * back_left_control = iv_ui->lineEdit_backLeft;
+    double backmin = back_left_control->text().toDouble();
     
-    emit python_peak_back_tof_range_update(peakmin, peakmax, backmin, backmax, tofmin, tofmax);
+    QLineEdit * back_right_control = iv_ui->lineEdit_backRight;
+    double backmax = back_right_control->text().toDouble();
+    
+    QLineEdit * tof_min_control = iv_ui->lineEdit_TOFmin;
+    double tofmin = tof_min_control->text().toDouble();
+    
+    QLineEdit * tof_max_control = iv_ui->lineEdit_TOFmax;
+    double tofmax = tof_max_control->text().toDouble();
+    
+    emit peak_back_tof_range_update(peakmin, peakmax, backmin, backmax, tofmin, tofmax);
 }
 
 void RefIVConnections::edit_manual_input()
@@ -436,6 +433,7 @@ void RefIVConnections::edit_manual_input()
     }
     
     image_display->UpdateImage();
+    peak_back_tof_range_update();
 
 }
     
@@ -485,6 +483,8 @@ void RefIVConnections::imagePicker2_moved()
         int index = selected_points.size() - 1;
         int mouseClick = 1; 
         image_display->SetPointedAtPoint( selected_points[index], mouseClick );
+        peak_back_tof_range_update();
+
     }
 }
 
