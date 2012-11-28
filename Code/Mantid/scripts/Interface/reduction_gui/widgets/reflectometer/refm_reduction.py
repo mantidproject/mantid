@@ -965,9 +965,15 @@ class DataReflWidget(BaseWidget):
         
         import mantidqtpython 
         self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base_ff+'_2D')
-        #QtCore.QObject.connect(self.ref_det_view.getConnections(), QtCore.SIGNAL("python_peak_back_tof_range_update(double,double, double,double,double,double)"), self.call_back)
+        QtCore.QObject.connect(self.ref_det_view.getConnections(), QtCore.SIGNAL("peak_back_tof_range_update(double,double, double,double,double,double)"), self.call_back)
 
-
+    def call_back(self, peakmin, peakmax, backmin, backmax, tofmin, tofmax):
+        self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
+        self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
+        self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
+        self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
+        self._summary.data_from_tof.setText("%-d" % int(tofmin))
+        self._summary.data_to_tof.setText("%-d" % int(tofmax))
         
         
         

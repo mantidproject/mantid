@@ -922,7 +922,6 @@ class BaseRefWidget(BaseWidget):
             self._summary.data_from_tof.setText("%-d" % int(tofmin))
             self._summary.data_to_tof.setText("%-d" % int(tofmax))
 
-
     def _norm_count_vs_y(self):
         
 #        run_number = self._summary.norm_run_number_edit.text()
