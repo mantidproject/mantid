@@ -4,6 +4,7 @@
 #include "CollapsiblePanel.h"
 #include "InstrumentActor.h"
 #include "ProjectionSurface.h"
+#include "UnwrappedSurface.h"
 #include "PeakMarker2D.h"
 
 #include "MantidKernel/ConfigService.h"
@@ -715,6 +716,11 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
       tw->setInstrument(instr);
       Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
+      UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>( m_instrWindow->getSurface() );
+      if ( surface )
+      {
+          surface->setPeaksWorkspace(boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
+      }
     }
     else
     {

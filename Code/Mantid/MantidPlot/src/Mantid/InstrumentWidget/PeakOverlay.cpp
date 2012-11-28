@@ -1,7 +1,7 @@
 #include "PeakOverlay.h"
 #include "UnwrappedSurface.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include <QPainter>
 #include <QList>
@@ -128,29 +128,20 @@ m_showRows(true)
  */
 void PeakOverlay::removeShapes(const QList<Shape2D*>& shapeList)
 {
-  std::cerr <<"ws " << m_peaksWorkspace->name() << std::endl;
-  std::cerr << "deleting:" << std::endl;
   // vectors of rows to delete from the peaks workspace.
   std::vector<size_t> rows;
   foreach(Shape2D* shape, shapeList)
   {
     PeakMarker2D* marker = dynamic_cast<PeakMarker2D*>(shape);
     if ( !marker ) throw std::logic_error("Wrong shape type found.");
-    int row = marker->getRow();
-    std::cerr << "     " << row << std::endl;
-    rows.push_back( static_cast<size_t>( row ) );
-    if ( shape == m_currentShape )
-    {
-      m_currentShape = NULL;
-    }
-    removeShape( shape );
+    rows.push_back( static_cast<size_t>( marker->getRow() ) );
   }
 
   // Run the DeleteTableRows algorithm to delete the peak.
-  auto alg = Mantid::API::FrameworkManager::Instance().createAlgorithm("DeleteTableRows");
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows",-1);
   alg->setPropertyValue("TableWorkspace", m_peaksWorkspace->name());
   alg->setProperty("Rows",rows);
-  alg->executeAsync();
+  emit executeAlgorithm(alg);
 }
 
 /**---------------------------------------------------------------------
@@ -181,6 +172,7 @@ void PeakOverlay::addMarker(PeakMarker2D* m)
 void PeakOverlay::createMarkers(const PeakMarker2D::Style& style)
 {
   int nPeaks = getNumberPeaks();
+  this->clear();
   for(int i = 0; i < nPeaks; ++i)
   {
     Mantid::API::IPeak& peak = getPeak(i);
@@ -205,6 +197,7 @@ void PeakOverlay::draw(QPainter& painter) const
 {
   // Draw symbols
   Shape2DCollection::draw(painter);
+
   // Sort the labels to avoid overlapping
   QColor color(Qt::red);
   if ( !m_shapes.isEmpty() )
@@ -233,6 +226,7 @@ void PeakOverlay::draw(QPainter& painter) const
     {
       PeakHKL& hkl = m_labels[i];
       overlap = hkl.add(marker,rect);
+      if ( overlap ) break;
     }
     
     if (!overlap)

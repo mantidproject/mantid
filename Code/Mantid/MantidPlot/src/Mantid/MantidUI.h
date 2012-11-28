@@ -7,6 +7,7 @@
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
 #include "MantidLog.h"
+#include "MantidAlgorithmMetatype.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
@@ -380,6 +381,8 @@ public slots:
   void executeAlgorithm(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs = NULL);
   //Execute an algorithm with the given parameter list
   void executeAlgorithmDlg(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs = NULL);
+  // Execute an algorithm
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg);
   // Find the name of the first input workspace for an algorithm
   QString findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
   // Show Qt critical error message box

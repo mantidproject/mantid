@@ -83,17 +83,19 @@ private:
     TubeXUnits getTubeXUnits(const QString& name) const;
     QString getTubeXUnitsName(TubeXUnits unit) const;
 
-
+  /// The parent InstrumentWindow
   InstrumentWindow* m_instrWindow;
   MantidGLWidget *mInstrumentDisplay;
+
   /* Pick tab controls */
-  OneCurvePlot* m_plot;
+  OneCurvePlot* m_plot; ///< Miniplot to display data in the detectors
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
-  QPushButton *m_one; ///< Button switching on single detector selection mode
-  QPushButton *m_tube; ///< Button switching on detector's parent selection mode
-  QPushButton *m_box; ///< Button switching on box selection mode
-  QPushButton *m_peak; ///< Button switching on box selection mode
+  QPushButton *m_one;   ///< Button switching on single detector selection mode
+  QPushButton *m_tube;  ///< Button switching on detector's parent selection mode
+  QPushButton *m_box;   ///< Button switching on box selection mode
+  QPushButton *m_peak;  ///< Button switching on box selection mode
   bool m_plotSum; 
+
   // Actions to set integration option for the detector's parent selection mode
   QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
   QAction *m_integrateTimeBins; ///< Sets integration over time bins (m_plotSum = false)
@@ -104,6 +106,7 @@ private:
   QActionGroup* m_unitsGroup;
   QAction *m_detidUnits,*m_lengthUnits,*m_phiUnits;
   QSignalMapper *m_unitsMapper;
+
   // Instrument display context menu actions
   QAction *m_storeCurve; ///< add the current curve to the list of permanently displayed curves
   QAction *m_savePlotToWorkspace; ///< Save data plotted on the miniplot into a MatrixWorkspace

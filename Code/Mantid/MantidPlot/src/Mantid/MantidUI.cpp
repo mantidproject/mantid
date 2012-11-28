@@ -1392,6 +1392,15 @@ void MantidUI::executeAlgorithmDlg(QString algName, QMap<QString,QString> paramL
 }
 
 /**
+  * Slot for executing an algorithm.
+  * @param alg :: Shared pointer to an algorithm to execute with all properties already set.
+  */
+void MantidUI::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg)
+{
+    executeAlgorithmAsync(alg);
+}
+
+/**
 * Find the first input workspace for an algorithm
 * @param algorithm :: A pointer to the algorithm instance
 */
@@ -1888,6 +1897,8 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName, int tab)
     SLOT(createDetectorTable(const QString&,const std::vector<int>&,bool)));
   connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*)), this,
     SLOT(executeAlgorithm(const QString&, const QString&,Mantid::API::AlgorithmObserver*)));
+  connect(insWin, SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)), this,
+    SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
 
   QApplication::restoreOverrideCursor();
   return insWin;

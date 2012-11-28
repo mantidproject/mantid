@@ -59,7 +59,6 @@ public:
   bool isEmpty()const{return m_shapes.isEmpty();}
   size_t size()const {return static_cast<size_t>(m_shapes.size());}
   void select(int i);
-  QList<Shape2D*> getSelectedShapes() const;
 
   QRectF getCurrentBoundingRect()const;
   void setCurrentBoundingRect(const QRectF& rect);
@@ -102,6 +101,7 @@ protected:
   bool selectControlPointAt(int x,int y);
   bool isOverCurrentAt(int x,int y);
   void select(Shape2D* shape);
+  QList<Shape2D*> getSelectedShapes() const;
 
   QList<Shape2D*> m_shapes;
   mutable QRectF m_windowRect; // original surface window in "real" coordinates

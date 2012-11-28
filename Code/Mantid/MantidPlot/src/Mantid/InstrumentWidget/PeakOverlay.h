@@ -3,6 +3,7 @@
 
 #include "Shape2DCollection.h"
 #include "PeakMarker2D.h"
+#include "../MantidAlgorithmMetatype.h"
 
 #include "MantidQtAPI/WorkspaceObserver.h"
 
@@ -70,6 +71,9 @@ public:
   void setPrecision(int prec) const {m_precision = prec;}
   void setShowRowsFlag(bool yes) {m_showRows = yes;}
   static PeakMarker2D::Style getDefaultStyle(int index);
+
+signals:
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
 private:
   /// A WorkspaceObserver handle implemented.

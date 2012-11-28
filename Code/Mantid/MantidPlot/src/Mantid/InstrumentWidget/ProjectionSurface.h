@@ -8,6 +8,7 @@
 #include "InstrumentActor.h"
 #include "Shape2DCollection.h"
 #include "PeakOverlay.h"
+#include "../MantidAlgorithmMetatype.h"
 
 #include <QImage>
 #include <QList>
@@ -191,8 +192,9 @@ signals:
   void shapeSelected();
   void shapesDeselected();
   void shapeChanged();
-
   void redrawRequired();
+
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
 protected slots:
 

@@ -141,7 +141,6 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
       delete (*image);
     }
     (*image) = new QImage(widget->grabFrameBuffer());
-    checkImage( *image );
 
     if (!picking)
     {
@@ -163,7 +162,6 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
   {
     QPainter painter(widget);
     painter.drawImage(0,0,**image);
-    checkImage( *image );
 
     QRectF windowRect = getSurfaceBounds();
     m_maskShapes.setWindow(windowRect,painter.viewport());
