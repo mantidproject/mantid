@@ -276,7 +276,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
         if(YErrors[k]!=0)
         {
           double errsq = YErrors[k]*YErrors[k];
-          YError[k] +=errsq;
+          YError[k]  +=errsq;
           Weight[k] +=1./errsq;
           YSum[k] += YValues[k]/errsq;
         }  
@@ -301,13 +301,14 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
 
     progress.report();
   }
+
   if(m_CalculateWeightedSum)
   {
     numZeros=0;
     for(size_t i=0;i<Weight.size();i++)
     {
       if(nZeros[i]==0)
-        YSum[i]/=Weight[i];
+        YSum[i]*=double(numSpectra)/Weight[i];
       else
         numZeros+=nZeros[i];
     }
@@ -432,20 +433,21 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
     // Map all the detectors onto the spectrum of the output
     outSpec->addDetectorIDs(localworkspace->getSpectrum(i)->getDetectorIDs());
 
-    if(m_CalculateWeightedSum)
-    {
+    progress.report();
+  }
+
+  if(m_CalculateWeightedSum)
+  {
       numZeros=0;
       for(size_t i=0;i<Weight.size();i++)
       {
       if(nZeros[i]==0)
-        YSum[i]/=Weight[i];
+        YSum[i]*=double(numSpectra)/Weight[i];
       else
         numZeros+=nZeros[i];
       }
-    }
+   }
 
-    progress.report();
-  }
 
    // Create the correct representation
   outWS->finalize();
