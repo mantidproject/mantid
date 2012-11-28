@@ -216,7 +216,6 @@ namespace Mantid
 
       //Load instrument and other data once then copy it later
       m_progress->report("Loading instrument");
-      local_workspace->setdefaultNexusInstrumentVersionNumber(1);
       loadRunDetails(local_workspace, entry);
       m_cppFile->openPath(entry.path());
       std::string parameterString;
