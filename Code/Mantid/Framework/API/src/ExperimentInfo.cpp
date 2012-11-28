@@ -744,11 +744,13 @@ namespace API
   std::string ExperimentInfo::getWorkspaceStartDate()
   {
     std::string date;
-    if ( m_run->hasProperty("run_start") )
-      date = m_run->getProperty("run_start")->value();
-    else
+    try
     {
-      g_log.information("run_start not stored in workspace. Default to current date.");
+      date = m_run->startTime().toISO8601String();
+    }
+    catch (std::runtime_error &)
+    {
+      g_log.information("run_start/start_time not stored in workspace. Default to current date.");
       date = Kernel::DateAndTime::getCurrentTime().toISO8601String();
     }
     return date;
