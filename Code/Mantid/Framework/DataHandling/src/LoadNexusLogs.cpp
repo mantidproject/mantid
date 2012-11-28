@@ -517,7 +517,7 @@ namespace Mantid
       }
       catch (::NeXus::Exception &e)
       {
-        g_log.warning() << "Log entry 's time field could not be loaded: '" << e.what() << "'.\n";
+        g_log.warning() << "Log entry's time field could not be loaded: '" << e.what() << "'.\n";
         file.closeData();
         throw;
       }
