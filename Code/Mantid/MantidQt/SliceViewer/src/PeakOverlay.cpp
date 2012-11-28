@@ -33,6 +33,7 @@ namespace SliceViewer
   {
     setAttribute(Qt::WA_NoMousePropagation, false);
     this->setVisible(true);
+    setUpdatesEnabled(true);
   }
     
   //----------------------------------------------------------------------------------------------
@@ -75,11 +76,6 @@ namespace SliceViewer
     {
       m_radiusAtDistance = 0;
     }
-
-    const QwtDoubleInterval interval = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();
-    const double yMin = interval.minValue();
-    const double yMax = interval.maxValue();
-    m_scale = height()/(yMax - yMin);
     
     // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
     m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius) * distance  + m_opacityMax;
@@ -122,28 +118,43 @@ namespace SliceViewer
     const int yOrigin = m_plot->transform( QwtPlot::yLeft, m_origin.Y() );
     const QPointF originWindows(xOrigin, yOrigin);
 
-    const double innerRadius = m_scale * m_radiusAtDistance;
-    double outerRadius = m_scale * getRadius();
-    double lineWidth = outerRadius - innerRadius;
-    outerRadius -= lineWidth/2;
+    const QwtDoubleInterval intervalY = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();
+    const QwtDoubleInterval intervalX = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval();
+    
+    const double scaleY = height()/(intervalY.width());
+    const double scaleX = width()/(intervalX.width());
+
+    const double innerRadiusX = scaleX * m_radiusAtDistance;
+    const double innerRadiusY = scaleY * m_radiusAtDistance;
+
+    double outerRadiusX = scaleX * getRadius();
+    double outerRadiusY = scaleY * getRadius();
+
+    const double lineWidthX = outerRadiusX - innerRadiusX;
+    const double lineWidthY = outerRadiusY - innerRadiusY;
+    outerRadiusX -= lineWidthX/2;
+    outerRadiusY -= lineWidthY/2;
 
     QPainter painter(this);
     painter.setRenderHint( QPainter::Antialiasing );
     
     // Draw Outer circle
     QPen pen( Qt::green );
-    pen.setWidth(static_cast<int>(std::abs(lineWidth)));
-    painter.setPen( pen );
+    /* Note we are creating an ellipse here and generating a filled effect by controlling the line thickness.
+       Since the linewidth takes a single scalar value, we choose to use x as the scale value.
+    */
+    pen.setWidth(static_cast<int>(std::abs(lineWidthX)));
+    painter.setPen( pen );  
+    
     pen.setStyle(Qt::SolidLine);
     painter.setOpacity(m_opacityAtDistance); //Set the pre-calculated opacity
-    painter.drawEllipse( originWindows, outerRadius, outerRadius );
+    painter.drawEllipse( originWindows, outerRadiusX, outerRadiusY );
     
   }
 
   void PeakOverlay::updateView()
   {
     this->update();
-    this->repaint();
   }
 
   void PeakOverlay::hideView()

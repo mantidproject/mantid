@@ -1,5 +1,4 @@
 #include "MantidQtSliceViewer/PeakTransform.h"
-#include <boost/regex.hpp>
 
 namespace MantidQt
 {
@@ -11,51 +10,50 @@ namespace MantidQt
     m_yPlotLabel(yPlotLabel),
     m_indexOfPlotX(0),
     m_indexOfPlotY(1),
-    m_indexOfPlotZ(2)
+    m_indexOfPlotZ(2),
+    m_HRegex("^H.*$"),
+    m_KRegex("^K.*$"),
+    m_LRegex("^L.*$")
   {
     const std::string& xLabel = m_xPlotLabel;
     const std::string& yLabel = m_yPlotLabel;
-
-    const boost::regex HRegex = boost::regex("^H.*$");
-    const boost::regex KRegex = boost::regex("^K.*$");
-    const boost::regex LRegex = boost::regex("^L.*$");
 
     const int H = 0;
     const int K = 1;
     const int L = 2;
 
     Mantid::Kernel::V3D positionInCoordinateSystem;
-    if(boost::regex_match(xLabel, HRegex) && boost::regex_match(yLabel, KRegex)) //HKL
+    if(boost::regex_match(xLabel, m_HRegex) && boost::regex_match(yLabel, m_KRegex)) //HKL
     {
       m_indexOfPlotX = H;
       m_indexOfPlotY = K; 
       m_indexOfPlotZ = L; 
     }
-    else if(boost::regex_match(xLabel, HRegex) && boost::regex_match(yLabel, LRegex)) //HLK
+    else if(boost::regex_match(xLabel, m_HRegex) && boost::regex_match(yLabel, m_LRegex)) //HLK
     {
       m_indexOfPlotX = H;
       m_indexOfPlotY = L; 
       m_indexOfPlotZ = K; 
     }
-    else if(boost::regex_match(xLabel, LRegex) && boost::regex_match(yLabel, HRegex)) //LHK
+    else if(boost::regex_match(xLabel, m_LRegex) && boost::regex_match(yLabel, m_HRegex)) //LHK
     {
       m_indexOfPlotX = L;
       m_indexOfPlotY = H; 
       m_indexOfPlotZ = K; 
     }
-    else if(boost::regex_match(xLabel, LRegex) && boost::regex_match(yLabel, KRegex)) //LKH
+    else if(boost::regex_match(xLabel, m_LRegex) && boost::regex_match(yLabel, m_KRegex)) //LKH
     {
       m_indexOfPlotX = L;
       m_indexOfPlotY = K; 
       m_indexOfPlotZ = H; 
     }
-    else if(boost::regex_match(xLabel, KRegex) && boost::regex_match(yLabel, LRegex)) //KLH
+    else if(boost::regex_match(xLabel, m_KRegex) && boost::regex_match(yLabel, m_LRegex)) //KLH
     {
       m_indexOfPlotX = K;
       m_indexOfPlotY = L; 
       m_indexOfPlotZ = H; 
     }
-    else if(boost::regex_match(xLabel, KRegex) && boost::regex_match(yLabel, HRegex)) //KHL
+    else if(boost::regex_match(xLabel, m_KRegex) && boost::regex_match(yLabel, m_HRegex)) //KHL
     {
       m_indexOfPlotX = K;
       m_indexOfPlotY = H; 
@@ -68,11 +66,14 @@ namespace MantidQt
   }
 
   PeakTransform::PeakTransform(const PeakTransform& other):
+    m_xPlotLabel(other.m_xPlotLabel),
+    m_yPlotLabel(other.m_yPlotLabel),
     m_indexOfPlotX(other.m_indexOfPlotX),
     m_indexOfPlotY(other.m_indexOfPlotY),
     m_indexOfPlotZ(other.m_indexOfPlotZ),
-    m_xPlotLabel(other.m_xPlotLabel),
-    m_yPlotLabel(other.m_yPlotLabel)
+    m_HRegex(other.m_HRegex),
+    m_KRegex(other.m_KRegex),
+    m_LRegex(other.m_LRegex)
   {
   }
 
@@ -80,17 +81,33 @@ namespace MantidQt
   {
     if(this != &other)
     {
+      m_xPlotLabel = other.m_xPlotLabel;
+      m_yPlotLabel = other.m_yPlotLabel;
       m_indexOfPlotX = other.m_indexOfPlotX;
       m_indexOfPlotY = other.m_indexOfPlotY;
       m_indexOfPlotZ = other.m_indexOfPlotZ;
-      m_xPlotLabel = other.m_xPlotLabel;
-      m_yPlotLabel = other.m_yPlotLabel;
+      m_HRegex = other.m_HRegex;
+      m_KRegex = other.m_KRegex;
+      m_LRegex = other.m_LRegex;
     }
     return *this;
   }
 
   PeakTransform::~PeakTransform()
   {
+  }
+
+  boost::regex PeakTransform::getFreePeakAxisRegex() const
+  {
+    switch(m_indexOfPlotZ)
+    {
+    case 0:
+      return m_HRegex;
+    case 1:
+      return m_KRegex;
+    case 2:
+      return m_LRegex;
+    }
   }
 
   Mantid::Kernel::V3D PeakTransform::transform(const Mantid::Kernel::V3D& original) const

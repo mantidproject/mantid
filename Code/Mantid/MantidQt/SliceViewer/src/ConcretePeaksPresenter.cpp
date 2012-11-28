@@ -100,7 +100,6 @@ namespace SliceViewer
   }
 
   /**
-
   This method looks at the plotted dimensions (XY) , and work out what indexes into the vector HKL, these XYZ dimensions correpond to.
 
   The indexes can then be used for any future transformation, where the user changes the chosen dimensions to plot.
@@ -109,8 +108,17 @@ namespace SliceViewer
   {
     std::string xLabel = m_factory->getPlotXLabel();
     std::string yLabel = m_factory->getPlotYLabel();
+    m_transform = PeakTransform(xLabel, yLabel);
+  }
 
-    
+  /**
+  Determine whether the candidate label is the label of the free axis.
+  @param label: The candidate axis label to consider.
+  @return True if it matches the label of the free axis accoring to the current peaks transform.
+  */
+  bool ConcretePeaksPresenter::isLabelOfFreeAxis(const std::string& label) const
+  {
+    return boost::regex_match(label, m_transform.getFreePeakAxisRegex());
   }
 
 }

@@ -1371,7 +1371,6 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_dimY = 1;
   std::vector<coord_t> slicePoint;
 
-  std::vector<DimensionSliceWidget*> sliderWidgets;
   //DimensionSliceWidget * widget
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
@@ -1383,10 +1382,6 @@ void SliceViewer::updateDisplay(bool resetAxes)
     else if (widget->getShownDim() == 1)
     {
       m_dimY = d;
-    }
-    else
-    {
-      sliderWidgets.push_back(widget);
     }
     slicePoint.push_back(VMD_t(widget->getSlicePoint()));
   }
@@ -1426,22 +1421,17 @@ void SliceViewer::updateDisplay(bool resetAxes)
     m_overlayWSOutline->setShown(overlayInSlice);
   }
 
-  if (sliderWidgets.size() > 0 ) // Temporary fix for crash when displaying Workspace2D (where m_dimWidgets only has 2 elements)
-  {
-    DimensionSliceWidget* slider = sliderWidgets.front(); // TODO, we need a better way of filtering the slider widgets to find the missing lattice unit.
-    m_peaksPresenter->updateWithSlicePoint(slider->getSlicePoint());
-  } 
-  
   // Notify the graph that the underlying data changed
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
 
+  /// Update the peak positions.
+  this->updatePeaksWithSlicePoint();
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
 }
-
 
 
 //------------------------------------------------------------------------------------
@@ -1481,10 +1471,11 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
+
+  // Show the new slice. This finds m_dimX and m_dimY
+  this->updateDisplay();  
   // Transform the peak overlays according to the new plotting.
   m_peaksPresenter->changeShownDim();
-  // Show the new slice. This finds m_dimX and m_dimY
-  this->updateDisplay();
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
@@ -2098,12 +2089,32 @@ void SliceViewer::peakOverlay_toggled(bool checked)
         IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
         PeakOverlayFactory* factory  = new PeakOverlayFactory(m_plot, m_plot->canvas());
         m_peaksPresenter = PeaksPresenter_sptr(new ConcretePeaksPresenter(factory, peaksWS));
+        updatePeaksWithSlicePoint();
       }
     }
   }
   else
   {
     m_peaksPresenter = PeaksPresenter_sptr(new NullPeaksPresenter);
+  }
+}
+
+/**
+Update the peaks overlay with a slice point.
+Find the relevant dimension slider and then use the slice point from that slider.
+*/
+void SliceViewer::updatePeaksWithSlicePoint()
+{
+  for (size_t d=0; d< m_ws->getNumDims(); d++)
+  {
+    DimensionSliceWidget * widget = m_dimWidgets[d];
+    if (widget->getShownDim() < 0)
+    {
+      if(m_peaksPresenter->isLabelOfFreeAxis(widget->getDimName()))
+      {
+        m_peaksPresenter->updateWithSlicePoint(widget->getSlicePoint()); 
+      }
+    }
   }
 }
 

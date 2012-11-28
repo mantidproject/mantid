@@ -162,6 +162,7 @@ private:
 
   void findRangeFull();
   void findRangeSlice();
+  void updatePeaksWithSlicePoint();
 
 
 private:

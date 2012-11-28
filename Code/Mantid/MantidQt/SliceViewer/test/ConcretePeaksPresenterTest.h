@@ -180,8 +180,6 @@ public:
 
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
   }
-
-  // TODO Test all 6 possible transformations in configureMappingTransform.
   
 };
 

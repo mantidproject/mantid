@@ -28,9 +28,11 @@ void test_transformHKL()
   PeakTransform transform("H (Lattice)", "K (Lattice)");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
-  TS_ASSERT_EQUALS(original.X(), original.X());
-  TS_ASSERT_EQUALS(original.Y(), original.Y());
-  TS_ASSERT_EQUALS(original.Z(), original.Z());
+  TS_ASSERT_EQUALS(transformed.X(), original.X());
+  TS_ASSERT_EQUALS(transformed.Y(), original.Y());
+  TS_ASSERT_EQUALS(transformed.Z(), original.Z());
+
+  boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
 }
 
 void test_transformHLK()
@@ -41,17 +43,20 @@ void test_transformHLK()
   TS_ASSERT_EQUALS(transformed.X(), original.X()); // X -> H
   TS_ASSERT_EQUALS(transformed.Y(), original.Z()); // Y -> L
   TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> K
+
+  boost::regex_match("K (Lattice)", transform.getFreePeakAxisRegex());
 }
 
 void test_transformLKH()
 {
-
   PeakTransform transform("L (Lattice)", "K (Lattice)");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> L
   TS_ASSERT_EQUALS(transformed.Y(), original.Y()); // Y -> K
   TS_ASSERT_EQUALS(transformed.Z(), original.X()); // Z -> H
+
+  boost::regex_match("H (Lattice)", transform.getFreePeakAxisRegex());
 }
 
 void test_transformLHK()
@@ -62,6 +67,8 @@ void test_transformLHK()
   TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> L
   TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> H
   TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> K
+
+  boost::regex_match("K (Lattice)", transform.getFreePeakAxisRegex());
 }
 
 void test_transformKLH()
@@ -72,6 +79,8 @@ void test_transformKLH()
   TS_ASSERT_EQUALS(transformed.X(), original.Y()); // X -> K
   TS_ASSERT_EQUALS(transformed.Y(), original.Z()); // Y -> L
   TS_ASSERT_EQUALS(transformed.Z(), original.X()); // Z -> H
+
+  boost::regex_match("H (Lattice)", transform.getFreePeakAxisRegex());
 }
 
 void test_transformKHL()
@@ -82,6 +91,8 @@ void test_transformKHL()
   TS_ASSERT_EQUALS(transformed.X(), original.Y()); // X -> K
   TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> H
   TS_ASSERT_EQUALS(transformed.Z(), original.Z()); // Z -> L
+
+  boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
 }
 
 void test_copy_construction()
@@ -92,11 +103,28 @@ void test_copy_construction()
   // Test indirectly via what the transformations produce.
   V3D productA = A.transform(V3D(0, 1, 2));
   V3D productB = B.transform(V3D(0, 1, 2));
-  TS_ASSERT_EQUALS(productA, productB);
+  TS_ASSERT_EQUALS(productA, productB);  
+  // Test indirectly via the free regex.
+  boost::regex regexA = A.getFreePeakAxisRegex();
+  boost::regex regexB = B.getFreePeakAxisRegex();
+  TS_ASSERT_EQUALS(regexA, regexB);
+ 
 }
 
 void test_assigment()
 {
+  PeakTransform A("H", "L");
+  PeakTransform B("K", "H");
+  A = B;
+
+  // Test indirectly via what the transformations produce.
+  V3D productA = A.transform(V3D(0, 1, 2));
+  V3D productB = B.transform(V3D(0, 1, 2));
+  TS_ASSERT_EQUALS(productA, productB);  
+  // Test indirectly via the free regex.
+  boost::regex regexA = A.getFreePeakAxisRegex();
+  boost::regex regexB = B.getFreePeakAxisRegex();
+  TS_ASSERT_EQUALS(regexA, regexB);
 }
 
 private:

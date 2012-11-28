@@ -35,6 +35,7 @@ namespace SliceViewer
     virtual void update() = 0;
     virtual void updateWithSlicePoint(const double&) = 0;
     virtual void changeShownDim() = 0;
+    virtual bool isLabelOfFreeAxis(const std::string& label) const = 0;
   };
 
 

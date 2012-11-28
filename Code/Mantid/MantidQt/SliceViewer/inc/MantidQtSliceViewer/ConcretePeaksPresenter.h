@@ -28,6 +28,7 @@ namespace MantidQt
       virtual void update();
       virtual void updateWithSlicePoint(const double& slicePoint);
       virtual void changeShownDim();
+      virtual bool isLabelOfFreeAxis(const std::string& label) const;
     private:
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;
