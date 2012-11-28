@@ -24,7 +24,7 @@
     <location/>
   </component>
   <type name="monitors">
-    <component mark-as="monitor" type="monitor">
+    <component type="monitor">
       <location z="-29.949" name="monitor1"/>
       <location z="-28.706" name="monitor2"/>
       <location z="-1.426" name="monitor3"/>
@@ -695,7 +695,7 @@
   </type>
   <!--MONITOR SHAPE-->
   <!--FIXME: Do something real here.-->
-  <type is="detector" name="monitor">
+  <type is="monitor" name="monitor">
     <cylinder id="cyl-approx">
       <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
       <axis y="0.0" x="0.0" z="1.0"/>

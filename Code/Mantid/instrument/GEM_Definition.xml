@@ -93,7 +93,7 @@
   <!-- Detectors types -->
 
   <type name="monitors">
-    <component type="monitor" mark-as="monitor">
+    <component type="monitor">
       <location r="10.78" t="180.0" p="0.0" name="back_monitor1_det" />
       <location r="10.78" t="180.0" p="0.0" name="back_monitor2_det" />
       <location r="10.78" t="180.0" p="0.0" name="scint_monitor_det" />
@@ -2545,7 +2545,7 @@
   </type>
   
   
-  <type name="monitor" is="detector">
+  <type name="monitor" is="monitor">
     <properties>
       Copied from monitor.dat:
 

@@ -40,14 +40,14 @@
 
 <!-- Monitor locations are approximate guesses for now! -->
 <component type="monitor1" idlist="Monitor1">
-  <location z="-49.0" mark-as="monitor" />
+  <location z="-49.0" />
 </component>
 <component type="monitor2" idlist="Monitor2">
-  <location z="-1.0" mark-as="monitor" />
+  <location z="-1.0" />
 </component>
 
-<type name="monitor1" is="detector" />
-<type name="monitor2" is="detector" />
+<type name="monitor1" is="monitor" />
+<type name="monitor2" is="monitor" />
  
 
 <!-- There are two banks, North and South. 

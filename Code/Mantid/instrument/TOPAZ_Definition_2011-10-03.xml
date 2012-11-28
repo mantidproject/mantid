@@ -35,7 +35,7 @@
     <location/>
   </component>
   <type name="monitors">
-    <component type="monitor" mark-as="monitor">
+    <component type="monitor">
       <location z="-4.45" name="monitor1"/>
     </component>
   </type>
@@ -180,7 +180,7 @@ bank17,bank18,bank26,bank27,bank33,bank36,bank37,bank38,bank39,bank46,bank47,ban
 
   <!-- Shape for Monitors-->
   <!-- TODO: Update to real shape -->
-  <type is="detector" name="monitor">
+  <type is="monitor" name="monitor">
     <cylinder id="some-shape">
       <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
       <axis y="0.0" x="0.0" z="1.0"/>

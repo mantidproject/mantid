@@ -133,7 +133,7 @@
 </component>
 
 <type name="roty-testing">
-<component type="monitor-cylinder-ring-shape" mark-as="monitor">
+<component type="monitor-cylinder-ring-shape">
   <location  x="1" name="param rot-test"/>  
 </component>
 </type>
@@ -156,7 +156,7 @@
 </component>
 
 <type name="monitors">
-<component type="monitor-cylinder-ring-shape" mark-as="monitor">
+<component type="monitor-cylinder-ring-shape">
   <location name="upstream_monitor_det"/>
   <location  r="1.74" t="0" p="0" name="downstream_monitor_det"/>  
   
@@ -227,7 +227,7 @@
 </component>
 </type>
 
-<type name="monitor-cylinder-ring-shape" is="Detector">
+<type name="monitor-cylinder-ring-shape" is="Monitor">
 
   <cylinder id="inner-cylinder">
     <centre-of-bottom-base x="-0.0621" y="0.0" z="0.0" />

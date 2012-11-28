@@ -42,11 +42,11 @@
   </type>
   
   <!-- MONITORS -->
-  <component type="monitor1" mark-as="monitor" idlist="monitor1">
+  <component type="monitor1" idlist="monitor1">
     <location z="-1.206" />
   </component>
 
-  <type name="monitor1" is="detector">
+  <type name="monitor1" is="monitor">
    <cuboid id="shape">
       <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
       <left-front-top-point  x="0.0025" y="-0.1" z="0.02"  />

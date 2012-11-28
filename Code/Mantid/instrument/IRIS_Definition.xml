@@ -47,11 +47,11 @@
 
 <!-- monitor components -->
 
-  <component type="monitor1" mark-as="monitor" idlist="monitor1">
+  <component type="monitor1" idlist="monitor1">
     <location z="-0.335" />
   </component>
 
-  <type name="monitor1" is="detector">
+  <type name="monitor1" is="monitor">
     <percent-transparency val="99.9" />
     <cuboid id="shape">
       <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
@@ -66,11 +66,11 @@
     <id val="1" />  
   </idlist>
   
-  <component type="monitor2" mark-as="monitor" idlist="monitor2">
+  <component type="monitor2" idlist="monitor2">
     <location z="2.35" />
   </component>
   
-  <type name="monitor2" is="detector">
+  <type name="monitor2" is="monitor">
     <percent-transparency val="99.9" />
     <cuboid id="shape">
       <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />

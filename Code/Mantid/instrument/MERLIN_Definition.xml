@@ -107,7 +107,7 @@
   </component>
   
   <type name="monitors">
-    <component type="monitor" mark-as="monitor">
+    <component type="monitor">
       <location r="3.25800" t="180.0" p="0.0" />
       <location r="1.50400" t="180.0" p="0.0" />
       <location r="1.50400" t="180.0" p="0.0" />
@@ -2549,7 +2549,7 @@
     <algebra val="shape" />
   </type>
 
-  <type name="monitor" is="detector">
+  <type name="monitor" is="monitor">
     <cylinder id="some-shape">
       <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
       <axis x="0.0" y="0.0" z="1.0" /> 

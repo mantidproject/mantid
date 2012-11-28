@@ -37,7 +37,7 @@ calibration/geometry/ code. -->
     <location/>
   </component>
   <type name="monitors">
-    <component type="monitor" mark-as="monitor">
+    <component type="monitor">
       <location z="-4.45" name="monitor1"/>
     </component>
   </type>
@@ -182,7 +182,7 @@ bank1,bank2,bank3,bank4,bank5,bank6,bank7,bank8,bank9,bank10,bank11,bank12,bank1
 
   <!-- Shape for Monitors-->
   <!-- TODO: Update to real shape -->
-  <type is="detector" name="monitor">
+  <type is="monitor" name="monitor">
     <cylinder id="some-shape">
       <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
       <axis y="0.0" x="0.0" z="1.0"/>

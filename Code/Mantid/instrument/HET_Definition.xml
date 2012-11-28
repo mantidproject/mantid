@@ -35,6 +35,15 @@
     <location />
   </component>
 
+  <!-- monitors -->  
+  
+  <component type="monitor" idlist="monitor-id-list">
+    <location r="-3.51" t="180" p="0" />
+    <location r="-1.615" t="180" p="0" />
+    <location r="5.694" t="0" p="0" />
+    <location r="2" t="0" p="0" />
+  </component>
+  
   <!-- source and sample-position components -->
 
   <component type="undulator">
@@ -59,7 +68,7 @@
   <type name="nickel-holder" is="SamplePos">
     <properties />
   </type>  
-
+  
   <!-- Detectors types -->
 
   <type name="bank">
@@ -321,10 +330,6 @@
 	<location r="2.512" t="27.44" p="-135" />
 	<location r="2.512" t="28.06" p="-135" />
 	<location r="2.512" t="28.69" p="-135" />
-	<location r="-3.51" t="180" p="0" mark-as="monitor" />
-	<location r="-1.615" t="180" p="0" mark-as="monitor" />
-	<location r="5.694" t="0" p="0" mark-as="monitor" />
-	<location r="2" t="0" p="0" mark-as="monitor" />
 	<location r="4.038" t="110.39" p="-93.05" />
 	<location r="4.038" t="110.82" p="-93.06" />
 	<location r="4.038" t="111.25" p="-93.07" />
@@ -25044,13 +25049,26 @@
   </cuboid>
   <algebra val="app-shape" />
   </type>
+  
+  <type name="monitor" is="monitor">
+    <cuboid id="app-shape">
+      <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.1" z="0.0002"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
+    </cuboid>
+    <algebra val="app-shape" />
+  </type>  
 
   
   <!-- DETECTOR ID LISTS -->
-
+  
+  <idlist idname="monitor-id-list">
+    <id start="601" end="604" />  
+  </idlist>
+    
   <idlist idname="fdb">
     <id start="1" end="256" />
-    <id start="601" end="604" />
     <id start="4103" end="4124" />
     <id start="4203" end="4224" />
     <id start="5111" end="5132" />

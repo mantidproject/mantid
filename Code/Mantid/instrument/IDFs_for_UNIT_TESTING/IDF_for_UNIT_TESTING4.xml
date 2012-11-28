@@ -48,7 +48,7 @@
 </component>
 
 <type name="monitors">
-<component type="monitor-cylinder-ring-shape" mark-as="monitor">
+<component type="monitor-cylinder-ring-shape">
   
   <location name="combined translationA">
   </location>
@@ -109,7 +109,7 @@
 </component>
 </type>
 
-<type name="monitor-cylinder-ring-shape" is="detector">
+<type name="monitor-cylinder-ring-shape" is="monitor">
 </type>
 
 

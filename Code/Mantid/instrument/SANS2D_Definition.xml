@@ -58,16 +58,16 @@
   </component>
   
   <type name="monitors">
-    <component type="monitor-tbd" mark-as="monitor">
+    <component type="monitor-tbd">
       <!-- better positions and shapes will be defined later -->
       <location z="7.217" name="monitor1"/>
       <location z="17.937" name="monitor2"/>
     </component>
-    <component type="Moderator-Monitor3" mark-as="monitor">
+    <component type="Moderator-Monitor3">
       <!-- transmisssion detector, either in or out of beam -->
       <location z="19.497" name="monitor3"/>
     </component>
-    <component type="monitor-tbd" mark-as="monitor">
+    <component type="monitor-tbd">
       <!-- better positions and shapes will be defined later -->
       <location z="30.0" name="monitor4"/>
     </component>    
@@ -76,7 +76,7 @@
          files, and have detector IDs, but currently not physically present 
          on the instrument. Defined with no geometric shape, as they do not 
          physically exist, and with a dummy position -->
-    <component type="no shape monitor" mark-as="monitor">
+    <component type="no shape monitor">
       <location z="0" name="placeholder monitor"/>
       <location z="0" name="placeholder monitor"/>
       <location z="0" name="placeholder monitor"/>
@@ -85,7 +85,7 @@
     
   </type>
   
-  <type name="monitor-tbd" is="detector">
+  <type name="monitor-tbd" is="monitor">
     <cylinder id="some-shape">
       <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />
       <axis x="0.0" y="0.0" z="1.0" /> 
@@ -94,7 +94,7 @@
     </cylinder>   
   </type>
   
-  <type name="Moderator-Monitor3" is="detector">
+  <type name="Moderator-Monitor3" is="monitor">
     <percent-transparency val="99.9" />
     <cuboid id="shape">
       <left-front-bottom-point x="0.0125" y="-0.0125" z="0.0"  />
@@ -105,7 +105,7 @@
     <algebra val="shape" />
   </type>  
 
-  <type name="no shape monitor" is="detector" />   
+  <type name="no shape monitor" is="monitor" />   
 
   <component type="detector-bank" idstart="2000000" idfillbyfirst="y" idstep="1000" idstepbyrow="1">
     <location x="1.1" z="23.281" name="front-detector"/>

@@ -23,14 +23,14 @@
   <type is="SamplePos" name="sample-position"/>
   <!--MONITORS-->
   <component type="monitor1" idlist="monitor1">
-    <location z="-10.5" mark-as="monitor" />
+    <location z="-10.5" />
   </component>
-  <type name="monitor1" is="detector" />
+  <type name="monitor1" is="monitor" />
  
   <component type="timer1" idlist="timer1">
-    <location z="-10.5" mark-as="monitor" />
+    <location z="-10.5" />
   </component>
-  <type name="timer1" is="detector" />
+  <type name="timer1" is="monitor" />
   
   <component type="detector1" name="detector1" idlist="detector1">
     <location/>
