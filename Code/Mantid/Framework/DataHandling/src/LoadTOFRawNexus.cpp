@@ -206,12 +206,27 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
                   // That's the right signal!
                   m_dataField = it->first;
                   // Find the corresponding X axis
-                  if (!file->hasAttr("axes"))
-                    throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
-                        m_dataField + "' has no 'axes' attribute specifying.");
-
                   std::string axes;
-                  file->getAttr("axes", axes);
+                  m_assumeOldFile = false;
+                  if (!file->hasAttr("axes"))
+                  {
+                    if (1 != m_signal)
+                    {
+                      throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
+                          m_dataField + "' has no 'axes' attribute specifying.");
+                    }
+                    else
+                    {
+                      m_assumeOldFile = true;
+                      axes = "x_pixel_offset,y_pixel_offset,time_of_flight";
+                    }
+                  }
+
+                  if (!m_assumeOldFile)
+                  {
+                    file->getAttr("axes", axes);
+                  }
+
                   std::vector<std::string> allAxes;
                   boost::split( allAxes, axes, boost::algorithm::detail::is_any_ofF<char>(","));
                   if (allAxes.size() != 3)
@@ -265,6 +280,24 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
             numPixels += newPixels;
           }
         }
+        else
+        {
+          bankNames.push_back(name);
+
+          // Get the number of pixels from the offsets arrays
+          file->openData("x_pixel_offset");
+          std::vector<int> xdim = file->getInfo().dims;
+          file->closeData();
+
+          file->openData("y_pixel_offset");
+          std::vector<int> ydim = file->getInfo().dims;
+          file->closeData();
+
+          if (!xdim.empty() && !ydim.empty())
+          {
+            numPixels += (xdim[0] * ydim[0]);
+          }
+        }
 
         if (entries.find(m_axisField) != entries.end())
         {
@@ -311,12 +344,63 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   file->openGroup("instrument", "NXinstrument");
   file->openGroup(bankName, "NXdetector");
 
-  // Load the pixel IDs
+  size_t numPixels = 0;
   std::vector<uint32_t> pixel_id;
-  file->readData("pixel_id", pixel_id);
-  size_t numPixels = pixel_id.size();
-  if (numPixels == 0)
-  { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid pixel_id data in " << bankName << std::endl; return; }
+
+  if (!m_assumeOldFile)
+  {
+    // Load the pixel IDs
+    file->readData("pixel_id", pixel_id);
+    numPixels = pixel_id.size();
+    if (numPixels == 0)
+    { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid pixel_id data in " << bankName << std::endl; return; }
+  }
+  else
+  {
+    // Load the x and y pixel offsets
+    std::vector<float> xoffsets;
+    std::vector<float> yoffsets;
+    file->readData("x_pixel_offset", xoffsets);
+    file->readData("y_pixel_offset", yoffsets);
+
+    numPixels = xoffsets.size() * yoffsets.size();
+    if (0 == numPixels)
+    {
+      file->close();
+      m_fileMutex.unlock();
+      g_log.warning() << "Invalid (x,y) offsets in " << bankName << std::endl;
+      return;
+    }
+
+    size_t bankNum = 0;
+    if (bankName.size() > 4)
+    {
+      if (bankName.substr(0, 4) == "bank")
+      {
+        bankNum = boost::lexical_cast<size_t>(bankName.substr(4));
+        bankNum--;
+      }
+      else
+      {
+        file->close();
+        m_fileMutex.unlock();
+        g_log.warning() << "Invalid bank number for " << bankName << std::endl;
+        return;
+      }
+    }
+
+    // All good, so construct the pixel ID listing
+    size_t numX = xoffsets.size();
+    size_t numY = yoffsets.size();
+
+    for (size_t i = 0; i < numX; i++)
+    {
+      for (size_t j = 0; j < numY; j++)
+      {
+        pixel_id.push_back(static_cast<uint32_t>(j + numY * (i + numX * bankNum)));
+      }
+    }
+  }
 
   // Load the TOF vector
   std::vector<float> tof;

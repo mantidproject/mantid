@@ -115,6 +115,9 @@ protected:
 
   /// Mutex to avoid simultaneous file access
   Kernel::Mutex m_fileMutex;
+
+  /// Flag for whether or not to assume the data is old SNS raw files;
+  bool m_assumeOldFile;
 };
 
 } // namespace DataHandling
