@@ -42,11 +42,11 @@ public:
    *
    * @return PeaksWorkspace
    */
-  PeaksWorkspace * buildPW()
+  PeaksWorkspace_sptr buildPW()
   {
     Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
     inst->setName("SillyInstrument");
-    PeaksWorkspace * pw = new PeaksWorkspace();
+    auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
     pw->setInstrument(inst);
     std::string val = "value";
     pw->mutableRun().addProperty("TestProp", val);
@@ -56,46 +56,43 @@ public:
   }
 
   /** Check that the PeaksWorkspace build by buildPW() is correct */
-  void checkPW(PeaksWorkspace * pw)
+  void checkPW(const PeaksWorkspace & pw)
   {
-    TS_ASSERT_EQUALS( pw->columnCount(), 17);
-    TS_ASSERT_EQUALS( pw->rowCount(), 1);
-    TS_ASSERT_EQUALS( pw->getNumberPeaks(), 1);
-    if (pw->getNumberPeaks() != 1) return;
-    TS_ASSERT_DELTA( pw->getPeak(0).getWavelength(), 3.0, 1e-4);
+    TS_ASSERT_EQUALS( pw.columnCount(), 17);
+    TS_ASSERT_EQUALS( pw.rowCount(), 1);
+    TS_ASSERT_EQUALS( pw.getNumberPeaks(), 1);
+    if (pw.getNumberPeaks() != 1) return;
+    TS_ASSERT_DELTA( pw.getPeak(0).getWavelength(), 3.0, 1e-4);
     // Experiment info stuff got copied
-    TS_ASSERT_EQUALS( pw->getInstrument()->getName(), "SillyInstrument");
-    TS_ASSERT( pw->run().hasProperty("TestProp") );
+    TS_ASSERT_EQUALS( pw.getInstrument()->getName(), "SillyInstrument");
+    TS_ASSERT( pw.run().hasProperty("TestProp") );
   }
 
   void test_defaultConstructor()
   {
-    PeaksWorkspace * pw = buildPW();
-    checkPW(pw);
-    delete pw;
+    auto pw = buildPW();
+    checkPW(*pw);
   }
 
   void test_copyConstructor()
   {
-    PeaksWorkspace * pw = buildPW();
-    PeaksWorkspace * pw2 = new PeaksWorkspace(*pw);
-    checkPW(pw2);
-    delete pw;
-    delete pw2;
+    auto pw = buildPW();
+    auto pw2 = PeaksWorkspace_sptr(new PeaksWorkspace(*pw));
+    checkPW(*pw2);
   }
 
   void test_clone()
   {
-    PeaksWorkspace_sptr pw(buildPW());
-    PeaksWorkspace_sptr pw2 = pw->clone();
-    checkPW(pw2.get());
+    auto pw = buildPW();
+    auto pw2 = pw->clone();
+    checkPW(*pw2);
   }
 
   void test_sort()
   {
-    PeaksWorkspace_sptr pw(buildPW());
+    auto pw = buildPW();
     Instrument_const_sptr inst = pw->getInstrument();
-    Peak p0 = pw->getPeak(0); //Peak(inst, 1, 3.0)
+    Peak p0 = Peak(pw->getPeak(0)); //Peak(inst, 1, 3.0)
     Peak p1(inst, 1, 4.0);
     Peak p2(inst, 1, 5.0);
     Peak p3(inst, 2, 3.0);
@@ -165,7 +162,7 @@ public:
   void test_getSetLogAccess()
   {
     bool trueSwitch(true);
-    PeaksWorkspace * pw = buildPW();
+    auto pw = buildPW();
 
     LogManager_const_sptr props = pw->getLogs();
     std::string existingVal;
@@ -212,10 +209,6 @@ public:
       TS_ASSERT(pw1->run().hasProperty("TestProp2-3"));
     }
 
-
-    TSM_ASSERT_THROWS_NOTHING("should clearly delete pw1",pw1.reset());
-
-    TSM_ASSERT_THROWS_NOTHING("should clearly delete pw",delete pw);
   }
 
    void test_hasIntegratedPeaks_without_property()
@@ -238,6 +231,90 @@ public:
      int hasIntegratedPeaks = 1; // true
      ws.mutableRun().addProperty("PeaksIntegrated", hasIntegratedPeaks);
      TS_ASSERT_EQUALS(hasIntegratedPeaks, ws.hasIntegratedPeaks());
+   }
+
+   void test_createDetectorTable_With_SinglePeak_And_Centre_Det_Has_Single_Row()
+   {
+     auto pw = buildPW(); // single peak with single detector
+     auto detTable = pw->createDetectorTable();
+     TSM_ASSERT("No table has been created",detTable);
+     if(!detTable) return;
+     check_Detector_Table_Metadata(*detTable, 1);
+
+     auto column0 = detTable->getColumn(0);
+     auto column1 = detTable->getColumn(1);
+     // Contents
+     TS_ASSERT_EQUALS(0, column0->cell<int>(0));
+     TS_ASSERT_EQUALS(1, column1->cell<int>(0));
+   }
+
+   void test_createDetectorTable_With_SinglePeak_And_Multiple_Det_Has_Same_Num_Rows_As_Dets()
+   {
+     auto pw = buildPW(); // 1 peaks each with single detector
+     // Add a detector to the peak
+     Mantid::API::IPeak & ipeak = pw->getPeak(0);
+     auto & peak = static_cast<Peak&>(ipeak);
+     peak.addContributingDetID(2);
+     peak.addContributingDetID(3);
+
+     auto detTable = pw->createDetectorTable();
+     TSM_ASSERT("No table has been created",detTable);
+     if(!detTable) return;
+     check_Detector_Table_Metadata(*detTable, 3);
+
+     auto column0 = detTable->getColumn(0);
+     auto column1 = detTable->getColumn(1);
+     // Contents
+     // Peak 1
+     TS_ASSERT_EQUALS(0, column0->cell<int>(0)); // Index 0
+     TS_ASSERT_EQUALS(1, column1->cell<int>(0)); // Id 1
+     TS_ASSERT_EQUALS(0, column0->cell<int>(1)); // Index 0
+     TS_ASSERT_EQUALS(2, column1->cell<int>(1)); // Id 2
+     TS_ASSERT_EQUALS(0, column0->cell<int>(2)); // Index 0
+     TS_ASSERT_EQUALS(3, column1->cell<int>(2)); // Id 3
+   }
+
+   void test_createDetectorTable_With_Many_Peaks_And_Multiple_Dets()
+   {
+     auto pw = createSaveTestPeaksWorkspace(); // 4 peaks each with single detector
+     // Add some detectors
+     Mantid::API::IPeak & ipeak2 = pw->getPeak(1);
+     auto & peak2 = static_cast<Peak&>(ipeak2);
+     peak2.addContributingDetID(1301);
+     Mantid::API::IPeak & ipeak4 = pw->getPeak(3);
+     auto & peak4 = static_cast<Peak&>(ipeak4);
+     peak4.addContributingDetID(1401);
+     peak4.addContributingDetID(1402);
+
+     auto detTable = pw->createDetectorTable();
+     TSM_ASSERT("No table has been created",detTable);
+     if(!detTable) return;
+     check_Detector_Table_Metadata(*detTable, 7);
+
+     auto column0 = detTable->getColumn(0);
+     auto column1 = detTable->getColumn(1);
+     // Contents -- Be verbose, it's easier to understand
+     // Peak 1
+     TS_ASSERT_EQUALS(0, column0->cell<int>(0)); // Index 0
+     TS_ASSERT_EQUALS(1300, column1->cell<int>(0)); // Id 1300
+
+     // Peak 2
+     TS_ASSERT_EQUALS(1, column0->cell<int>(1)); // Index 1
+     TS_ASSERT_EQUALS(1300, column1->cell<int>(1)); // Id 1300
+     TS_ASSERT_EQUALS(1, column0->cell<int>(2)); // Index 1
+     TS_ASSERT_EQUALS(1301, column1->cell<int>(2)); // Id 1301
+
+     // Peak 3
+     TS_ASSERT_EQUALS(2, column0->cell<int>(3)); // Index 2
+     TS_ASSERT_EQUALS(1350, column1->cell<int>(3)); // Id 1350
+
+     // Peak 4
+     TS_ASSERT_EQUALS(3, column0->cell<int>(4)); // Index 3
+     TS_ASSERT_EQUALS(1400, column1->cell<int>(4)); // Id 1400
+     TS_ASSERT_EQUALS(3, column0->cell<int>(5)); // Index 3
+     TS_ASSERT_EQUALS(1401, column1->cell<int>(5)); // Id 1401
+     TS_ASSERT_EQUALS(3, column0->cell<int>(6)); // Index 3
+     TS_ASSERT_EQUALS(1402, column1->cell<int>(6)); // Id 1402
    }
 
 private:
@@ -306,6 +383,17 @@ private:
      return lpw;
    }
 
+   void check_Detector_Table_Metadata(const Mantid::API::ITableWorkspace & detTable, const size_t expectedNRows)
+   {
+     TS_ASSERT_EQUALS(expectedNRows, detTable.rowCount());
+     TS_ASSERT_EQUALS(2, detTable.columnCount());
+     if(detTable.columnCount() != 2) return;
+
+     auto column0 = detTable.getColumn(0);
+     auto column1 = detTable.getColumn(1);
+     TS_ASSERT_EQUALS("Index", column0->name());
+     TS_ASSERT_EQUALS("DetectorID", column1->name());
+   }
 };
 
 

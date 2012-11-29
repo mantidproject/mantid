@@ -186,6 +186,10 @@ namespace DataObjects
     {
       setDetectorID(id);
     }
+    if(const Peak *peak = dynamic_cast<const Peak*>(&ipeak))
+    {
+      this->m_detIDs = peak->m_detIDs;
+    }
   }
 
   //----------------------------------------------------------------------------------------------

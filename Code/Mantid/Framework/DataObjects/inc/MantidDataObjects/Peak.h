@@ -34,7 +34,7 @@ namespace DataObjects
     Peak(Geometry::Instrument_const_sptr m_inst, double scattering, double m_Wavelength);
 
     // Construct a peak from a reference to the interface
-    Peak(const API::IPeak & ipeak);
+    explicit Peak(const API::IPeak & ipeak);
     virtual ~Peak();
 
     void setDetectorID(int id);

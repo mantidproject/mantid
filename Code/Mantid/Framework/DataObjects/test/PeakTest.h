@@ -72,6 +72,30 @@ public:
     check_Contributing_Detectors(p, std::vector<int>(1, 10000));
   }
 
+  void test_ConstructorFromIPeakInterface()
+  {
+    Peak p(inst, 10102, 2.0);
+    p.setHKL(1,2,3);
+    p.setRunNumber(1234);
+    p.addContributingDetID(10103);
+
+    const Mantid::API::IPeak & ipeak = p;
+    Peak p2(ipeak);
+    TS_ASSERT_EQUALS(p.getRow(), p2.getRow());
+    TS_ASSERT_EQUALS(p.getCol(), p2.getCol());
+    TS_ASSERT_EQUALS(p.getH(), p2.getH());
+    TS_ASSERT_EQUALS(p.getK(), p2.getK());
+    TS_ASSERT_EQUALS(p.getL(), p2.getL());
+    TS_ASSERT_EQUALS(p.getGoniometerMatrix(), p2.getGoniometerMatrix());
+    TS_ASSERT_EQUALS(p.getRunNumber(), p2.getRunNumber());
+    TS_ASSERT_EQUALS(p.getDetector(), p2.getDetector())
+    TS_ASSERT_EQUALS(p.getInstrument(), p2.getInstrument())
+    auto expectedIDs = std::vector<int>(2, 10102);
+    expectedIDs[1] = 10103;
+    check_Contributing_Detectors(p2, expectedIDs);
+  }
+
+
   void test_copyConstructor()
   {
     Peak p(inst, 10102, 2.0);
