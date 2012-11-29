@@ -353,11 +353,19 @@ void LoadNexusMonitors::exec()
   // Load the logs
   this->runLoadLogs(this->filename, this->WS);
 
-  // The run_start will be loaded from the pulse times.
-  Kernel::DateAndTime run_start(0,0);
-  run_start = this->WS->getFirstPulseTime();
-  this->WS->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
-
+  // Old SNS files don't have this
+  try
+  {
+    // The run_start will be loaded from the pulse times.
+    Kernel::DateAndTime run_start(0,0);
+    run_start = this->WS->getFirstPulseTime();
+    this->WS->mutableRun().addProperty("run_start", run_start.toISO8601String(), true );
+  }
+  catch (...)
+  {
+    // Old files have the start_time defined, so all SHOULD be good.
+    // The start_time, however, has been known to be wrong in old files.
+  }
   // Load the instrument
   this->runLoadInstrument(instrumentName, this->WS);
 
