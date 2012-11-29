@@ -61,7 +61,7 @@ namespace MantidQt
     }
     else
     {
-      throw PeakTransformException("Could not process mapped dimensions");
+      throw PeakTransformException();
     }
   }
 

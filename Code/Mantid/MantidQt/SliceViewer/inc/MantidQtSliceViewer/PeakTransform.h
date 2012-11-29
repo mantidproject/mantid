@@ -39,7 +39,7 @@ namespace MantidQt
     class PeakTransformException : public std::exception
     {
     public:
-      PeakTransformException(const std::string& msg) : std::exception(msg.c_str())
+      PeakTransformException() : std::exception()
       {
       }
     };
