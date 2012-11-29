@@ -57,7 +57,8 @@ namespace DataObjects
       }
       else
       {
-        throw std::runtime_error("PeakColumn - Unknown column name. Peak column names/types must be explicitly marked in PeakColumn.cpp");
+        throw std::runtime_error("PeakColumn - Unknown column name: \"" + name + "\""
+                                 "Peak column names/types must be explicitly marked in PeakColumn.cpp");
       }
     };
   }
