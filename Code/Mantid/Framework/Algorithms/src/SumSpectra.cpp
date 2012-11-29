@@ -62,8 +62,8 @@ void SumSpectra::init()
   declareProperty("IncludeMonitors",true,"Whether to include monitor spectra in the sum (default: yes)");
 
   declareProperty("WeightedSum",false,"Instead of the usual spectra sum, calculate the weighted sum in the form: \n"
-    "<math>\\Sigma(Signal_i/Error_i^2)/\\Sigma(1/Error_i^2)</math> This property is ignored for event workspace.\n"
-    "The sums are defined for <math>Error_i != 0</math> only, so the values are NaN if error for some value is equal to 0.");
+    "<math>nSpectra*\\Sigma(Signal_i/Error_i^2)/\\Sigma(1/Error_i^2)</math> This property is ignored for event workspace.\n"
+    "The sums are defined for <math>Error_i != 0</math> only, so the values with zero error are dropped from the summation.");
 }
 
 /** Executes the algorithm
