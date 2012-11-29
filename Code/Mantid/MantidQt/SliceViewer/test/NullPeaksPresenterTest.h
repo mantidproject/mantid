@@ -21,6 +21,7 @@ public:
   {
     NullPeaksPresenter presenter;
     PeaksPresenter& base = presenter; // compile-time test for the is-a relationship
+    UNUSED_ARG(base);
   }
 
   /* Test individual methods on the interface */
