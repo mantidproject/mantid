@@ -96,7 +96,10 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_dimX(0), m_dimY(1),
       m_logColor(false),
       m_fastRender(true),
-      m_rebinMode(false), m_rebinLocked(true), m_peaksPresenter(PeaksPresenter_sptr(new NullPeaksPresenter))
+      m_rebinMode(false), 
+      m_rebinLocked(true), 
+      m_peaksPresenter(PeaksPresenter_sptr(new NullPeaksPresenter)),
+      m_peaksSliderWidget(NULL)
 {
 	ui.setupUi(this);
 
@@ -1371,7 +1374,6 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_dimY = 1;
   std::vector<coord_t> slicePoint;
 
-  //DimensionSliceWidget * widget
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
     DimensionSliceWidget * widget = m_dimWidgets[d];
@@ -1399,6 +1401,12 @@ void SliceViewer::updateDisplay(bool resetAxes)
   {
     this->resetAxis(m_spect->xAxis(), m_X );
     this->resetAxis(m_spect->yAxis(), m_Y );
+
+    // The dimensionality has changed. It might no longer be possible to plot peaks.
+    enablePeakOverlaysIfAppropriate(); 
+
+    // Transform the peak overlays according to the new plotting.
+    m_peaksPresenter->changeShownDim();
   }
 
   // Set the color range
@@ -1426,8 +1434,11 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->itemChanged();
   m_plot->replot();
 
-  /// Update the peak positions.
-  this->updatePeaksWithSlicePoint();
+  /// Update the peak positions if peak relevant slider has changed.
+  if(m_peaksSliderWidget != NULL)
+  {
+    m_peaksPresenter->updateWithSlicePoint(m_peaksSliderWidget->getSlicePoint()); 
+  }
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
@@ -1471,14 +1482,8 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
       }
     }
   }
-
- 
   // Show the new slice. This finds m_dimX and m_dimY
   this->updateDisplay();  
-  // The dimensionality has changed. It might no longer be possible to plot peaks. We need updateDisplay called first, because we read axis off the plot.
-  enablePeakOverlaysIfAppropriate(); 
-  // Transform the peak overlays according to the new plotting.
-  m_peaksPresenter->changeShownDim();
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
@@ -2098,7 +2103,7 @@ void SliceViewer::peakOverlay_toggled(bool checked)
         IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
         PeakOverlayFactory* factory  = new PeakOverlayFactory(m_plot, m_plot->canvas());
         m_peaksPresenter = PeaksPresenter_sptr(new ConcretePeaksPresenter(factory, peaksWS));
-        updatePeaksWithSlicePoint();
+        updatePeakOverlaySliderWidget();
       }
     }
   }
@@ -2109,10 +2114,9 @@ void SliceViewer::peakOverlay_toggled(bool checked)
 }
 
 /**
-Update the peaks overlay with a slice point.
-Find the relevant dimension slider and then use the slice point from that slider.
+Obtain the reference to a new PeakOverlay slider widget if necessary.
 */
-void SliceViewer::updatePeaksWithSlicePoint()
+void SliceViewer::updatePeakOverlaySliderWidget()
 {
   for (size_t d=0; d< m_ws->getNumDims(); d++)
   {
@@ -2121,7 +2125,8 @@ void SliceViewer::updatePeaksWithSlicePoint()
     {
       if(m_peaksPresenter->isLabelOfFreeAxis(widget->getDimName()))
       {
-        m_peaksPresenter->updateWithSlicePoint(widget->getSlicePoint()); 
+        m_peaksSliderWidget = widget; // Cache the widget being used for this.
+        m_peaksPresenter->updateWithSlicePoint(m_peaksSliderWidget->getSlicePoint()); // Ensure that the presenter is up-to-date with the change
       }
     }
   }

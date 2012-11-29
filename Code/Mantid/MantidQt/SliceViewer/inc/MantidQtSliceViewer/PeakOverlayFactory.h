@@ -52,8 +52,6 @@ namespace MantidQt
       QwtPlot * m_plot;
       QWidget * m_parent;
       double m_peakRadius;
-      boost::shared_ptr<PeakOverlayView> createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius) const;
-      
     public:
       PeakOverlayFactory(QwtPlot * plot, QWidget * parent);
       virtual ~PeakOverlayFactory();

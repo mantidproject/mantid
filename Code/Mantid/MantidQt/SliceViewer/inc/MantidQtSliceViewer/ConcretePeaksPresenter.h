@@ -36,6 +36,8 @@ namespace MantidQt
       boost::shared_ptr<PeakOverlayViewFactory> m_factory;
       /// Peak transformer
       PeakTransform m_transform;
+      /// current slicing point.
+      double m_slicePoint;
       /// Configurre peak transformations
       bool configureMappingTransform();
       /// Hide all views

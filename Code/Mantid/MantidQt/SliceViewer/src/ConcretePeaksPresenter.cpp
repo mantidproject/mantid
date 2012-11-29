@@ -21,7 +21,7 @@ namespace SliceViewer
   @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
   */
   ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory* factory, Mantid::API::IPeaksWorkspace_sptr peaksWS) : m_viewPeaks(peaksWS->getNumberPeaks())
-    , m_factory(factory), m_transform("H", "K")
+    , m_factory(factory), m_transform("H", "K"), m_slicePoint(0)
   {
     if(factory == NULL)
     {
@@ -71,9 +71,13 @@ namespace SliceViewer
   */
   void ConcretePeaksPresenter::updateWithSlicePoint(const double& slicePoint)
   {
-    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+    if(m_slicePoint != slicePoint) // only update if required.
     {
-      (*it)->setSlicePoint(slicePoint);
+      for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+      {
+        (*it)->setSlicePoint(slicePoint);
+      }
+      m_slicePoint = slicePoint;
     }
   }
 

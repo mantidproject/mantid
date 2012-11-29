@@ -24,12 +24,7 @@ namespace MantidQt
 
     boost::shared_ptr<PeakOverlayView> PeakOverlayFactory::createView(const Mantid::Kernel::V3D& position) const
     {
-      return this->createViewAtPoint(position, m_peakRadius);
-    }
-
-    boost::shared_ptr<PeakOverlayView> PeakOverlayFactory::createViewAtPoint(const Mantid::Kernel::V3D& position, const double& radius) const
-    {
-      return boost::make_shared<PeakOverlay>(m_plot, m_parent, position, radius);
+      return boost::make_shared<PeakOverlay>(m_plot, m_parent, position, this->m_peakRadius);
     }
 
     std::string PeakOverlayFactory::getPlotXLabel() const

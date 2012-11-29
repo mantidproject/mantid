@@ -164,7 +164,7 @@ private:
   void findRangeSlice();
 
   // Peak overlay methods.
-  void updatePeaksWithSlicePoint();
+  void updatePeakOverlaySliderWidget();
   void enablePeakOverlaysIfAppropriate();
 
 
@@ -275,6 +275,9 @@ private:
 
   // -------------------------- Controllers ------------------------
   boost::shared_ptr<PeaksPresenter>  m_peaksPresenter;
+
+  /// Pointer to widget used for peaks sliding.
+  DimensionSliceWidget* m_peaksSliderWidget;
 };
 
 } // namespace SliceViewer
