@@ -21,7 +21,7 @@
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
-#include "MantidQtSliceViewer/NullPeaksPresenter.h"
+#include "MantidQtSliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayFactory.h"
 #include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
@@ -98,7 +98,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_fastRender(true),
       m_rebinMode(false), 
       m_rebinLocked(true), 
-      m_peaksPresenter(PeaksPresenter_sptr(new NullPeaksPresenter)),
+      m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>()),
       m_peaksSliderWidget(NULL)
 {
 	ui.setupUi(this);
@@ -1407,6 +1407,9 @@ void SliceViewer::updateDisplay(bool resetAxes)
 
     // Transform the peak overlays according to the new plotting.
     m_peaksPresenter->changeShownDim();
+
+    // Update the pointer to the slider widget.
+    updatePeakOverlaySliderWidget();
   }
 
   // Set the color range
@@ -2102,14 +2105,14 @@ void SliceViewer::peakOverlay_toggled(bool checked)
       {
         IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
         PeakOverlayFactory* factory  = new PeakOverlayFactory(m_plot, m_plot->canvas());
-        m_peaksPresenter = PeaksPresenter_sptr(new ConcretePeaksPresenter(factory, peaksWS));
+        m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(factory, peaksWS));
         updatePeakOverlaySliderWidget();
       }
     }
   }
   else
   {
-    m_peaksPresenter = boost::make_shared<NullPeaksPresenter>(); 
+    m_peaksPresenter->clear();
   }
 }
 
@@ -2159,7 +2162,7 @@ void SliceViewer::enablePeakOverlaysIfAppropriate()
   if(! enablePeakOverlays)
   {
     ui.btnPeakOverlay->setChecked(false); // Don't leave the button depressed.
-    m_peaksPresenter = boost::make_shared<NullPeaksPresenter>(); // Reset the presenter
+    m_peaksPresenter->clear(); // Reset the presenter
   }
 }
 
