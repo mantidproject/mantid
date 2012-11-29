@@ -185,7 +185,9 @@ namespace Mantid
 
             std::string loadAlgName("");
             std::string fileProp("");
-            if (boost::ends_with(runFileName, "_event.nxs") || boost::ends_with(runFileName, ".nxs.h5"))
+            if (boost::ends_with(runFileName, "_event.nxs") ||
+                boost::ends_with(runFileName, ".nxs.h5") ||
+                boost::ends_with(runFileName, ".nxs"))
             {
               g_log.notice() << "Loading NeXus monitors" << std::endl;
               loadAlgName = "LoadNexusMonitors";
