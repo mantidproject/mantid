@@ -524,7 +524,7 @@ namespace Mantid
       this->m_fileStream.read(&data_buffer[0], 4);
       unsigned int file_title = *((uint32_t*) (&data_buffer[0]));     
 
-      //skip main header file path
+      //skip ws titile
       m_fileStream.seekg(file_title, std::ios_base::cur);          
 
       // indentify number of file headers, contributed into the dataset
@@ -542,9 +542,7 @@ namespace Mantid
       }
     }
 
-
-    std::streamoff 
-      LoadSQW::parse_component_header(std::streamoff start_location)
+    std::streamoff LoadSQW::parse_component_header(std::streamoff start_location)
     { // we do not need this header  at the moment -> just calculating its length; or may be we do soon?
       std::vector<char> data_buffer(8);
 
@@ -602,8 +600,7 @@ namespace Mantid
 
     }
     
-    std::streamoff
-      LoadSQW::parse_sqw_detpar(std::streamoff start_location)
+    std::streamoff LoadSQW::parse_sqw_detpar(std::streamoff start_location)
     { //
       std::vector<char> data_buffer(8);
 
@@ -634,8 +631,8 @@ namespace Mantid
 
 
     }
-    void
-      LoadSQW::parse_data_locations(std::streamoff data_start)
+    
+    void LoadSQW::parse_data_locations(std::streamoff data_start)
     {
       std::vector<char> data_buffer(12);
 
