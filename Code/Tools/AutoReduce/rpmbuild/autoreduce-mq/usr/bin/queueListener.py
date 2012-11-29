@@ -33,10 +33,10 @@ class QueueListener(stomp.ConnectionListener):
         if data.has_key('data_file'):
             path = str(data['data_file'])
         else: 
-            errorMsg = "data_file is missing"
-            data["error"] = errorMsg
-            print "Calling /queue/POSTPROCESS.ERROR with message %s" % message 
-            self.send('/queue/POSTPROCESS.ERROR', json.dumps(data), persistent='true')
+            data["error"] = "data_file is missing"
+            queue = '/queue/POSTPROCESS.ERROR'
+            print "Calling %s with message %s " % (queue, json.dumps(data))
+            self.send(queue, json.dumps(data), persistent='true')
             return
         if destination == '/queue/REDUCTION.DATA_READY':
             param = path.split("/")
@@ -49,44 +49,44 @@ class QueueListener(stomp.ConnectionListener):
                 reduce_script_path = "/" + facility + "/" + instrument + "/shared/autoreduce/" + reduce_script + ".py"
                 print "reduce_script: %s" % reduce_script
                 print "reduce_script_path: %s" % reduce_script_path
-                print "out_dir: %s" % out_dir 
-                print "Auto reducing: %s %s" % (path, out_dir)
-                print "Calling /queue/REDUCTION.STARTED with message %s" % message 
-                self.send('/queue/REDUCTION.STARTED', message, persistent='true')
+                print "input file: %s: out directory: %s" % (path, out_dir)
                 try:
+                    print "Calling /queue/REDUCTION.STARTED with message %s" % message 
+                    self.send('/queue/REDUCTION.STARTED', message, persistent='true')
                     m = imp.load_source(reduce_script, reduce_script_path)
                     reduction = m.AutoReduction(path, out_dir)
                     reduction.execute()
-                    print "Calling /queue/REDUCTION.COMPLETE with message %s" % message 
-                    self.send('/queue/REDUCTION.COMPLETE', message, persistent='true')
+                    queue = '/queue/REDUCTION.COMPLETE'
                 except RuntimeError, e:
-                    errorMsg = "REDUCTION RuntimeError: " + e.message
-                    data["error"] = errorMsg
-                    print "Calling /queue/POSTPROCESS.ERROR with message %s" % e.message 
-                    self.send('/queue/POSTPROCESS.ERROR', json.dumps(data), persistent='true')
+                    data["error"] = "REDUCTION RuntimeError: " + ''.join(e) 
+                    queue = '/queue/POSTPROCESS.ERROR'
+                except KeyError, e:
+                    data["error"] = "REDUCTION KeyError: " + ''.join(e)
+                    queue = '/queue/POSTPROCESS.ERROR'
                 except Exception, e:
-                    errorMsg = "REDUCTION Error: " + e.message
-                    data["error"] = errorMsg
-                    print "Calling /queue/POSTPROCESS.ERROR with message %s" % errorMsg 
-                    self.send('/queue/POSTPROCESS.ERROR', json.dumps(data), persistent='true')
+                    data["error"] = "REDUCTION Error: " + ''.join(e)
+                    queue = '/queue/POSTPROCESS.ERROR'
+                finally:
+                    print "Calling %s with message %s " % (queue, json.dumps(data))
+                    self.send(queue, json.dumps(data), persistent='true')
             else:
-                errorMsg = "REDUCTION Error: failed to parse data_file " + path
-                data["error"] = errorMsg
-                print "Calling /queue/POSTPROCESS.ERROR with message %s" % errorMsg 
+                data["error"] = "REDUCTION Error: failed to parse data_file " + path
+                print "Calling /queue/POSTPROCESS.ERROR with message %s" % json.dumps(data) 
                 self.send('/queue/POSTPROCESS.ERROR', json.dumps(data), persistent='true')
 
         elif destination == '/queue/CATALOG.DATA_READY':
-            self.send('/queue/CATALOG.STARTED', message, persistent='true')
             try:
+                self.send('/queue/CATALOG.STARTED', message, persistent='true')
                 ingestNexus = IngestNexus(path)
                 ingestNexus.execute()
                 ingestNexus.logout()
-                self.send('/queue/CATALOG.COMPLETE', message, persistent='true')
+                queue = '/queue/CATALOG.COMPLETE'
             except Exception, e:
-                    errorMsg = "CATALOG Error: " + e.message
-                    data["error"] = errorMsg
-                    print "Calling /queue/POSTPROCESS.ERROR with message %s" % errorMsg 
-                    self.send('/queue/POSTPROCESS.ERROR', json.dumps(data), persistent='true')
+                    data["error"] = "CATALOG Error: " + ''.join(e)
+                    queue = '/queue/POSTPROCESS.ERROR'
+            finally:
+                    print "Calling %s with message %s " % (queue, json.dumps(data))
+                    self.send(queue, json.dumps(data), persistent='true')
 
         elif destination == '/queue/REDUCTION_CATALOG.DATA_READY':
             param = path.split("/")
@@ -107,17 +107,18 @@ class QueueListener(stomp.ConnectionListener):
                             ingestReduced = IngestReduced(facility, instrument, ipts, run_number)
                             ingestReduced.execute()
                             ingestReduced.logout()
-                            self.send('/queue/REDUCTION_CATALOG.COMPLETE', message, persistent='true')
+                            queue = '/queue/REDUCTION_CATALOG.COMPLETE'
                         except Exception, e:
-                            errorMsg = "REDUCTION_CATALOG Catalog Error: " + e.message
-                            data["error"] = errorMsg
-                            print "Calling /queue/POSTPROCESS.ERROR with message %s" % errorMsg 
-                            self.send('/queue/POSTPROCESS.ERROR', json.dumps(data), persistent='true')
+                            data["error"] = "REDUCTION_CATALOG Catalog Error: " + ''.join(e)
+                            queue = '/queue/POSTPROCESS.ERROR'
+                        finally:
+                            print "Calling %s with message %s " % (queue, json.dumps(data))
+                            self.send(queue, json.dumps(data), persistent='true')
             else:
-                errorMsg = "REDUCTION_CATALOG Error: failed to parse data_file " + path
-                data["error"] = errorMsg
-                print "Calling /queue/POSTPROCESS.ERROR with message %s" % errorMsg 
-                self.send('/queue/POSTPROCESS.ERROR', json.dumps(data), persistent='true')
+                data["error"] = "REDUCTION_CATALOG Error: failed to parse data_file " + path
+                queue = '/queue/POSTPROCESS.ERROR'
+                print "Calling %s with message %s " % (queue, json.dumps(data))
+                self.send(queue, json.dumps(data), persistent='true')
 
     def connect(self):
         # Do a clean disconnect first
