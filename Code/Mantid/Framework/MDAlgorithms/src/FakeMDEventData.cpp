@@ -14,6 +14,7 @@ or generate regular events placed in boxes, or fills peaks around given points w
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDEventInserter.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -46,7 +47,7 @@ namespace MDAlgorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  FakeMDEventData::FakeMDEventData()
+  FakeMDEventData::FakeMDEventData() : m_randGen(1), m_uniformDist()
   {
   }
     
@@ -127,6 +128,9 @@ namespace MDAlgorithms
     int randomSeed = getProperty("RandomSeed");
     rng.seed((unsigned int)(randomSeed));
 
+    // Inserter to help choose the correct event type
+    auto eventHelper = MDEvents::MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr>(ws);
+
     for (size_t i=0; i<num; ++i)
     {
       // Algorithm to generate points along a random n-sphere (sphere with not necessarily 3 dimensions)
@@ -167,7 +171,7 @@ namespace MDAlgorithms
       }
 
       // Create and add the event.
-      ws->addEvent( MDE( signal, errorSquared, centers) );
+      eventHelper.insertMDEvent(signal,errorSquared, 1, pickDetectorID(), centers);// 1 = run number
       // Progress report
       if ((i % progIncrement) == 0) prog.report();
     }
@@ -266,6 +270,9 @@ namespace MDAlgorithms
     // Make a random generator for each dimensions
     typedef boost::variate_generator<boost::mt19937&, boost::uniform_real<double> >   gen_t;
 
+    // Inserter to help choose the correct event type
+    auto eventHelper = MDEvents::MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr>(ws);
+
     gen_t * gens[nd];
     for (size_t d=0; d<nd; ++d)
     {
@@ -299,7 +306,7 @@ namespace MDAlgorithms
       }
 
       // Create and add the event.
-      ws->addEvent( MDE( signal, errorSquared, centers) );
+      eventHelper.insertMDEvent(signal,errorSquared, 1, pickDetectorID(), centers);// 1 = run number
       // Progress report
       if ((i % progIncrement) == 0) prog.report();
     }
@@ -327,6 +334,9 @@ namespace MDAlgorithms
 
     Progress prog(this, 0.0, 1.0, 100);
     size_t progIncrement = num / 100; if (progIncrement == 0) progIncrement = 1;
+
+    // Inserter to help choose the correct event type
+    auto eventHelper = MDEvents::MDEventInserter<typename MDEventWorkspace<MDE, nd>::sptr>(ws);
 
     gridSize=1;
     for (size_t d=0; d<nd; ++d)
@@ -380,7 +390,7 @@ namespace MDAlgorithms
       //}
 
       // Create and add the event.
-      ws->addEvent( MDE( signal, errorSquared, centers) );
+      eventHelper.insertMDEvent(signal,errorSquared, 1, pickDetectorID(), centers);// 1 = run number
       // Progress report
       if ((i % progIncrement) == 0) prog.report();
     }
@@ -398,12 +408,55 @@ namespace MDAlgorithms
     if (getPropertyValue("UniformParams")=="" && getPropertyValue("PeakParams")=="")
       throw std::invalid_argument("You must specify at least one of PeakParams or UniformParams.");
 
+    setupDetectorCache(*in_ws);
+
     CALL_MDEVENT_FUNCTION(this->addFakePeak, in_ws)
     CALL_MDEVENT_FUNCTION(this->addFakeUniformData, in_ws)
 
     // Mark that events were added, so the file back end (if any) needs updating
     in_ws->setFileNeedsUpdating(true);
   }
+
+  /**
+   * Setup a detector cache for randomly picking IDs from the first
+   * instrument in the ExperimentInfo list.
+   * @param ws :: The input workspace
+   */
+  void FakeMDEventData::setupDetectorCache(const API::IMDEventWorkspace & ws)
+  {
+    try
+    {
+      Geometry::Instrument_const_sptr inst = ws.getExperimentInfo(0)->getInstrument();
+      m_detIDs = inst->getDetectorIDs(true); // true=skip monitors
+      size_t max = m_detIDs.size() - 1;
+      m_uniformDist = boost::uniform_int<size_t>(0, max); // Includes max
+    }
+    catch(std::invalid_argument&)
+    {
+      g_log.information("Cannot retrieve instrument from input workspace, detector information will be garbage.");
+    }
+  }
+
+  /**
+   *  Pick a detector ID for a particular event
+   *  @returns A detector ID randomly selected from the instrument
+   */
+  detid_t FakeMDEventData::pickDetectorID()
+  {
+    if(m_detIDs.empty())
+    {
+      return -1;
+    }
+    else
+    {
+      /// A variate generator to combine a random number generator with a distribution
+      typedef boost::variate_generator<boost::mt19937&, boost::uniform_int<size_t> > uniform_generator;
+      uniform_generator uniformRand(m_randGen, m_uniformDist);
+      const size_t randIndex = uniformRand();
+      return m_detIDs[randIndex];
+    }
+  }
+
 
 
 

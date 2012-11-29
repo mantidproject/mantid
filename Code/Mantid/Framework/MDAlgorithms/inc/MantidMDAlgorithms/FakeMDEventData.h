@@ -8,6 +8,10 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
 
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/variate_generator.hpp>
+
 namespace Mantid
 {
 namespace MDAlgorithms
@@ -40,6 +44,11 @@ namespace MDAlgorithms
     /// Run the algorithm
     void exec();
 
+    /// Setup a detector cache for randomly picking IDs from the given workspace's instrument
+    void setupDetectorCache(const API::IMDEventWorkspace & ws);
+    /// Pick a detector ID for a particular event
+    detid_t pickDetectorID();
+
     template<typename MDE, size_t nd>
     void addFakePeak(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
     template<typename MDE, size_t nd>
@@ -49,6 +58,13 @@ namespace MDAlgorithms
    void addFakeRandomData(const std::vector<double> &params,typename  MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
    template<typename MDE, size_t nd>
    void addFakeRegularData(const std::vector<double> &params,typename  MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+
+   /// All detector IDs for this instrument
+   std::vector<detid_t> m_detIDs;
+   /// Random number generator
+   boost::mt19937 m_randGen;
+   /// Uniform distribution
+   boost::uniform_int<size_t> m_uniformDist;
 
   };
 

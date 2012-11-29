@@ -5,9 +5,11 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDAlgorithms/BinMD.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -154,7 +156,43 @@ public:
     AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 
+  void test_Creating_Full_MDEvents_Adds_DetectorIDs_To_Workspace()
+  {
+    FakeMDEventData alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
 
+    auto inWS = MDEventsTestHelper::makeAnyMDEW<MDEvent<3>,3>(10, 0.0, 10.0, 0);
+    // Give it an instrument
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 16);
+    ExperimentInfo_sptr ei(new ExperimentInfo());
+    ei->setInstrument(inst);
+    // Give it a run number
+    ei->mutableRun().addProperty(new PropertyWithValue<std::string>("run_number", "12345"), true);
+    inWS->addExperimentInfo(ei);
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty<IMDEventWorkspace_sptr>("InputWorkspace", inWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakParams", ""));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UniformParams", "-1000"));
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    TS_ASSERT_EQUALS(1000, inWS->getNEvents());
+
+    Mantid::detid_t expectedIDs[10] = {106,255,184,238,0,32,77,255,37,60};
+    auto it = inWS->createIterator();
+    size_t counter(0);
+    while(counter < 10)
+    {
+      int32_t id = it->getInnerDetectorID(0);
+      TS_ASSERT_EQUALS(expectedIDs[counter],id);
+      it->next();
+      ++counter;
+    }
+
+    delete it;
+  }
 
 };
 
