@@ -125,6 +125,8 @@ BankedEventPkt::BankedEventPkt(const uint8_t *data, uint32_t len) :
 {
 	if (m_payload_len < (4 * sizeof(uint32_t)))
 		throw invalid_packet("BankedEvent packet is too short");
+
+        m_lastFieldIndex = (payload_length() / 4) - 1;
 }
 
 BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt) :
