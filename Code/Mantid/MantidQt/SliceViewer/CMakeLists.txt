@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/ColorBarWidget.cpp
+    src/CompositePeaksPresenter.cpp
     src/ConcretePeaksPresenter.cpp
 	src/CustomTools.cpp
 	src/DimensionSliceWidget.cpp
@@ -20,6 +21,7 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	inc/MantidQtSliceViewer/ColorBarWidget.h
+    inc/MantidQtSliceViewer/CompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
@@ -68,6 +70,7 @@ set ( UI_FILES
 )
 
 set ( TEST_FILES
+    test/CompositePeaksPresenterTest.h
     test/ConcretePeaksPresenterTest.h
     test/PeakTransformTest.h
     test/NullPeaksPresenterTest.h
