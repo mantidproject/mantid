@@ -457,7 +457,7 @@ namespace Mantid
            return b;
      }
 
-    double IntegratePeakTimeSlices::CalculatePositionSpan(  DataObjects::Peak const &peak,
+    double IntegratePeakTimeSlices::CalculatePositionSpan(  API::IPeak const &peak,
                                                       const double                   dQ)
    {
 
@@ -1186,7 +1186,7 @@ namespace Mantid
     }
 
 
-    int IntegratePeakTimeSlices::CalculateTimeChannelSpan( DataObjects::Peak     const & peak,
+    int IntegratePeakTimeSlices::CalculateTimeChannelSpan( API::IPeak     const & peak,
                                                           const double                  dQ,
                                                           Mantid::MantidVec      const& X,
                                                           const int                     specNum,
@@ -2449,7 +2449,7 @@ namespace Mantid
     void IntegratePeakTimeSlices::FindPlane( V3D & center, V3D & xvec, V3D& yvec,
                                              double &ROW, double &COL,int &NROWS,
                                              int & NCOLS,double &pixWidthx, double&pixHeighty,
-                                             DataObjects::Peak const &peak) const
+                                             API::IPeak const &peak) const
     {
 
       NROWS= NCOLS = -1;

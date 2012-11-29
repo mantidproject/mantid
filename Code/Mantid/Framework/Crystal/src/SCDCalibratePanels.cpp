@@ -1015,7 +1015,7 @@ namespace Crystal
     for (size_t q = 0; q < nData; q += 3)
     {
       int pk = (int) xVals[q];
-      Peak peak = peaksWs->getPeak(pk);
+      const API::IPeak & peak = peaksWs->getPeak(pk);
 
       string bankName =peak.getBankName();
       size_t pos = bankName.find_last_not_of("0123456789");

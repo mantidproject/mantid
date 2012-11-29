@@ -12,7 +12,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -21,11 +20,6 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/IAlgorithm.h"
-
-using Mantid::API::IAlgorithm_sptr;
-using Mantid::Kernel::V3D;
-
-
 
 namespace Mantid
 {
@@ -344,13 +338,13 @@ private:
                           double                                  &Radius,
                           int*                                    &ArryofID);
 
-  int  CalculateTimeChannelSpan( DataObjects::Peak     const & peak,
+  int  CalculateTimeChannelSpan( API::IPeak     const & peak,
                                  const double                  dQ,
                                  Mantid::MantidVec      const& X,
                                  const int                     specNum,
                                  int                         & Centerchan);
 
-  double CalculatePositionSpan(  DataObjects::Peak const &peak,
+  double CalculatePositionSpan(  API::IPeak const &peak,
                                  const double             dQ );
 
   void InitializeColumnNamesInTableWorkspace( DataObjects::TableWorkspace_sptr &TabWS) ;
@@ -427,10 +421,10 @@ private:
                                      const double TotIntensity,
                                      const int ncells);
 
-  void FindPlane( Kernel::V3D & center,  Kernel:: V3D & xvec,    Kernel::V3D& yvec,
+  void FindPlane( Kernel::V3D & center,  Kernel::V3D & xvec,    Kernel::V3D& yvec,
                   double &ROW,          double &COL,    int &NROWS,
                   int & NCOLS,        double &pixWidthx,
-                  double&pixHeighty,   DataObjects::Peak const &peak) const;
+                  double&pixHeighty,   API::IPeak const &peak) const;
 
   int find( Mantid::MantidVec const & X,
             const double              time);
