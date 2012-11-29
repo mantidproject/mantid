@@ -31,7 +31,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         """ Property definition
         """
         tableprop = mantid.api.ITableWorkspaceProperty("InputWorkspace", "", mantid.kernel.Direction.InOut)
-	self.declareProperty(tableprop, "Name of Calibration Table Workspace")
+        self.declareProperty(tableprop, "Name of Calibration Table Workspace")
 
         colchoices = ["Value", "FitOrTie", "Min", "Max", "StepSize"]
         self.declareProperty("Column", "Value", mantid.kernel.StringListValidator(colchoices), "Column to have value changed")
@@ -110,7 +110,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
         (2) *partialname
         (3) partialname*
         (4) *partialname*
-	(5) partialname?
+        (5) partialname?
 
         Argument:
          - parametername:  parameter name to change value
@@ -151,10 +151,10 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
                 if parname_low.startswith(corestr):
                     ismatch = True
 
-	    elif parnametofit.endswith("?"):
-	        # NNNNN?
-	        corestr = parnametofit.split("?")[0]
-	        if parname_low.startswith(corestr) and len(parname_low) == len(parnametofit):
+            elif parnametofit.endswith("?"):
+                # NNNNN?
+                corestr = parnametofit.split("?")[0]
+                if parname_low.startswith(corestr) and len(parname_low) == len(parnametofit):
                     ismatch = True
                 # ENDIFELSE
 
@@ -199,7 +199,7 @@ class UpdatePeakParameterTableValue(mantid.api.PythonAlgorithm):
 
         numrows = tablews.rowCount()
         for irow in xrange(numrows):
-    	    parname = tablews.cell(irow, 0)
+            parname = tablews.cell(irow, 0)
             parname = parname.lower()
             parnamedict[parname] = irow
             self.parameternames.append(parname)

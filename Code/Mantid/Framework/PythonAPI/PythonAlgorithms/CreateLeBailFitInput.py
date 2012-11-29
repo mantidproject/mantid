@@ -32,10 +32,10 @@ class CreateLeBailFitInput(PythonAlgorithm):
 
         self.declareProperty("LatticeConstant", 10.0, "Lattice constant for cubic lattice in nm.")
 
-	self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output), 
+        self.declareProperty(ITableWorkspaceProperty("InstrumentParameterWorkspace", "", Direction.Output), 
                 "Name of Table Workspace Containing Peak Parameters From .irf File.")
  
-	self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Output), 
+        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Output), 
                 "Name of Table Workspace Containing Peaks' Miller Indices From .prf File.")
 
         return
@@ -44,11 +44,11 @@ class CreateLeBailFitInput(PythonAlgorithm):
         """ Main Execution Body
         """
         # 1. Setup output workspaces
-	paramWS = WorkspaceFactory.createTable()
-	self.setProperty("InstrumentParameterWorkspace", paramWS)
+        paramWS = WorkspaceFactory.createTable()
+        self.setProperty("InstrumentParameterWorkspace", paramWS)
 
-	hklWS = WorkspaceFactory.createTable()
-	self.setProperty("BraggPeakParameterWorkspace", hklWS)
+        hklWS = WorkspaceFactory.createTable()
+        self.setProperty("BraggPeakParameterWorkspace", hklWS)
 
         # 2. Get Other Properties
         instrument = self.getProperty("Instrument")

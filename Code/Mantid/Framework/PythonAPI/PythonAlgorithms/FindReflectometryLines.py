@@ -101,6 +101,6 @@ class FindReflectometryLines(PythonAlgorithm):
 			DeleteWorkspace(Workspace=cropped_ws)
 			DeleteWorkspace(Workspace=summed_ws)
 		
-	        self.setProperty("OutputWorkspace", output_ws)
+			self.setProperty("OutputWorkspace", output_ws)
 		
 registerAlgorithm(FindReflectometryLines())

@@ -25,13 +25,13 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-	self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Input), 
+        self.declareProperty(ITableWorkspaceProperty("BraggPeakParameterWorkspace", "", Direction.Input), 
                 "Name of Table Workspace containing peak parameters.")
 
-	self.declareProperty(ITableWorkspaceProperty("ZscoreWorkspace", "", Direction.Input), 
+        self.declareProperty(ITableWorkspaceProperty("ZscoreWorkspace", "", Direction.Input), 
                 "Name of Table Workspace containing z-score for the peak parametrs.")
 
-	self.declareProperty(ITableWorkspaceProperty("OutputBraggPeakParameterWorkspace", "", Direction.Output), 
+        self.declareProperty(ITableWorkspaceProperty("OutputBraggPeakParameterWorkspace", "", Direction.Output), 
                 "Name of Table Workspace containing the filtered peaks' parameters.")
 
         self.declareProperty("MinimumPeakHeight", 0.0, "Minimum peak height allowed for the peaks to fit. ")
@@ -64,13 +64,13 @@ class SelectPowderDiffPeaks(PythonAlgorithm):
         self.filterByPeakHeight(minpeakheight)
 
         # 5. Filter by zscore
-	zscorefilterdict = self.parseZscoreFilter(zscorefilterstr)
+        zscorefilterdict = self.parseZscoreFilter(zscorefilterstr)
         self.filterByZscore(zscoredict, zscorefilterdict)
 
         # 6. Generate the output
-	paramWS = WorkspaceFactory.createTable()
+        paramWS = WorkspaceFactory.createTable()
         self.genBraggPeakParameterWorkspace(paramWS)
-	self.setProperty("OutputBraggPeakParameterWorkspace", paramWS)
+        self.setProperty("OutputBraggPeakParameterWorkspace", paramWS)
 
         return
 
