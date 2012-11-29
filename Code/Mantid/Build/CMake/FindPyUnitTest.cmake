@@ -4,13 +4,13 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   set ( _pyunit_outputdir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname} )
 
   # Add a special target to prepare the output directory. It needs to be run everytime the
-  # main target is run so we can flush out any algorithms that may have been removed from the source tree but
+  # main target is run so we can flush out any tests that may have been removed from the source tree but
   # still reside in the build
   add_custom_target ( Prepare${_pyunit_testname_file}
                       COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
                       COMMAND ${CMAKE_COMMAND} -E remove_directory ${_pyunit_outputdir}
                       COMMAND ${CMAKE_COMMAND} -E make_directory ${_pyunit_outputdir}
-                      COMMAND ${CMAKE_COMMAND} -E touch ${_pyunit_outputdir}/__init__.py
+                      COMMAND ${CMAKE_COMMAND} -E touch ${_pyunit_outputdir}/__init__.py 
                     )
 
   # Copy the unit test files
@@ -30,7 +30,7 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   set ( _testhelper_files "" )
   foreach (part ${TESTHELPER_PY_FILES})
     get_filename_component(_testhelper_file ${part} NAME)
-    add_custom_command ( OUTPUT ${_pyunit_outputdir}/${_testhelper_file}
+    add_custom_command ( OUTPUT ${_pyunit_outputdir}/${_testhelper_file} ${_pyunit_outputdir}/__init__.py
                      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${part}
                      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
                          ${CMAKE_CURRENT_SOURCE_DIR}/${part}

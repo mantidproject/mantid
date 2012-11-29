@@ -18,6 +18,7 @@ if (PYUNITTEST_FOUND)
   add_dependencies ( VanillaPythonTest.py PythonAPI Algorithms )
   add_dependencies ( FrameworkTests VanillaPythonTest.py )
   # Add to the 'UnitTests' group in VS
-  set_property ( TARGET VanillaPythonTest.py PROPERTY FOLDER "UnitTests" )
+  set_property ( TARGET PrepareVanillaPythonTest.py PROPERTY FOLDER "UnitTests/Python" )
+  set_property ( TARGET VanillaPythonTest.py PROPERTY FOLDER "UnitTests/Python" )
 endif ()
 

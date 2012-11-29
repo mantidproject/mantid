@@ -159,7 +159,8 @@ if (PYUNITTEST_FOUND)
   add_dependencies ( VanillaPythonInterfaceTest.py PythonInterface Algorithms )
   add_dependencies ( FrameworkTests VanillaPythonInterfaceTest.py )
   # Add to the 'UnitTests' group in VS
-  set_property ( TARGET VanillaPythonInterfaceTest.py PROPERTY FOLDER "UnitTests" )
+  set_property ( TARGET PrepareVanillaPythonInterfaceTest.py PROPERTY FOLDER "UnitTests/Python" )
+  set_property ( TARGET VanillaPythonInterfaceTest.py PROPERTY FOLDER "UnitTests/Python" )
 endif ()
 
 ###########################################################################
