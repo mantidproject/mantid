@@ -336,7 +336,7 @@ set ( TEST_FILES
 	LoadPreNexusTest.h
 	LoadQKKTest.h
 	LoadRKHTest.h
-	LoadRSaveNLoadNcspTest.h
+	LoadRawSaveNxsLoadNxsTest.h
 	LoadRaw2Test.h
 	LoadRaw3Test.h
 	LoadRawBin0Test.h

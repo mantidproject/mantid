@@ -22,6 +22,13 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using Mantid::detid_t;
 
+// Note that this suite tests an old version of Nexus processed files that we continue to support.
+// LoadRawSaveNxsLoadNxs tests the current version of Nexus processed by loading 
+// a newly created Nexus processed file. 
+//
+// LoadRawSaveNxsLoadNxs should be run when making any changes to LoadNexusProcessed
+// in addition to this test.
+
 class LoadNexusProcessedTest : public CxxTest::TestSuite
 {
 public:

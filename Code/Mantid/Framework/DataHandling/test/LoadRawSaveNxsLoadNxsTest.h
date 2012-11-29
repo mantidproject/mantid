@@ -1,5 +1,5 @@
-#ifndef LOADRSAVENLOADNTEST_H_
-#define LOADRSAVENLOADNTEST_H_
+#ifndef LOADRAWSAVENXSLOADNXSTEST_H_
+#define LOADRAWSAVENXSLOADNXSTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -26,7 +26,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
 
-class LoadRSaveNLoadNcspTest : public CxxTest::TestSuite
+class LoadRawSaveNxsLoadNxsTest : public CxxTest::TestSuite
 {
 public:
 
@@ -100,7 +100,8 @@ void testExecOnLoadraw()
     TS_ASSERT_THROWS_NOTHING( res = algToBeTested.getProperty("EntryNumber") );
     TS_ASSERT( res==entryNumber);
 
-    //
+    // Test that nexus precessed file is successfully loaded 
+    // The loading of the current version of nexus processed is tested here.
     TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
     TS_ASSERT( algToBeTested.isExecuted() );
 
@@ -211,4 +212,4 @@ private:
   std::string outputFile;
 };
 
-#endif /*LOADRSAVENLOADNTEST_H_*/
+#endif /* LOADRAWSAVENXSLOADNXSTEST_H_ */
