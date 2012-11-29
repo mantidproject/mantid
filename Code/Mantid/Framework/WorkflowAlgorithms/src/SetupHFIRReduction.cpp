@@ -62,8 +62,6 @@ void SetupHFIRReduction::init()
   setPropertyGroup("Wavelength", load_grp);
   setPropertyGroup("WavelengthSpread", load_grp);
 
-  declareProperty("BackgroundFiles", "", "Background data files");
-
   // Beam center
   std::string center_grp = "Beam Center";
   declareProperty("FindBeamCenter", false, "If True, the beam center will be calculated");
@@ -130,15 +128,89 @@ void SetupHFIRReduction::init()
 
   // Transmission
   std::string trans_grp = "Transmission";
+  std::vector<std::string> transOptions;
+  transOptions.push_back("Value");
+  transOptions.push_back("DirectBeam");
+  //transOptions.push_back("BeamSpreader");
+  this->declareProperty("TransmissionMethod", "Value",
+      boost::make_shared<StringListValidator>(transOptions),
+      "Transmission determination method");
+
+  // - Transmission value entered by hand
   declareProperty("TransmissionValue", EMPTY_DBL(), positiveDouble,
       "Transmission value.");
   declareProperty("TransmissionError", EMPTY_DBL(), positiveDouble,
       "Transmission error.");
+
+  // - Direct beam method transmission calculation
+  declareProperty("TransmissionBeamRadius", 3.0,
+      "Radius of the beam area used to compute the transmission [pixels]");
+  declareProperty(new API::FileProperty("TransmissionSampleDataFile", "",
+      API::FileProperty::OptionalLoad, ".xml"),
+      "Sample data file for transmission calculation");
+  declareProperty(new API::FileProperty("TransmissionEmptyDataFile", "",
+      API::FileProperty::OptionalLoad, ".xml"),
+      "Empty data file for transmission calculation");
+
+  declareProperty("TransmissionBeamCenterX", EMPTY_DBL(),
+      "Transmission beam center location in X [pixels]");
+  declareProperty("TransmissionBeamCenterY", EMPTY_DBL(),
+      "Transmission beam center location in Y [pixels]");
   declareProperty("ThetaDependentTransmission", true, "If true, a theta-dependent transmission correction will be applied.");
 
+  setPropertyGroup("TransmissionMethod", trans_grp);
   setPropertyGroup("TransmissionValue", trans_grp);
   setPropertyGroup("TransmissionError", trans_grp);
+  setPropertyGroup("TransmissionBeamRadius", trans_grp);
+  setPropertyGroup("TransmissionSampleDataFile", trans_grp);
+  setPropertyGroup("TransmissionEmptyDataFile", trans_grp);
+  setPropertyGroup("TransmissionBeamCenterX", trans_grp);
+  setPropertyGroup("TransmissionBeamCenterY", trans_grp);
   setPropertyGroup("ThetaDependentTransmission", trans_grp);
+
+  // Background options
+  std::string bck_grp = "Background";
+  declareProperty("BackgroundFiles", "", "Background data files");
+  this->declareProperty("BckTransmissionMethod", "Value",
+      boost::make_shared<StringListValidator>(transOptions),
+      "Transmission determination method");
+
+  // - Transmission value entered by hand
+  declareProperty("BckTransmissionValue", EMPTY_DBL(), positiveDouble,
+      "Transmission value.");
+  declareProperty("BckTransmissionError", EMPTY_DBL(), positiveDouble,
+      "Transmission error.");
+
+  // - Direct beam method transmission calculation
+  declareProperty("BckTransmissionBeamRadius", 3.0,
+      "Radius of the beam area used to compute the transmission [pixels]");
+  declareProperty(new API::FileProperty("BckTransmissionSampleDataFile", "",
+      API::FileProperty::OptionalLoad, ".xml"),
+      "Sample data file for transmission calculation");
+  declareProperty(new API::FileProperty("BckTransmissionEmptyDataFile", "",
+      API::FileProperty::OptionalLoad, ".xml"),
+      "Empty data file for transmission calculation");
+
+  declareProperty("BckTransmissionBeamCenterX", EMPTY_DBL(),
+      "Transmission beam center location in X [pixels]");
+  declareProperty("BckTransmissionBeamCenterY", EMPTY_DBL(),
+      "Transmission beam center location in Y [pixels]");
+  declareProperty("BckThetaDependentTransmission", true, "If true, a theta-dependent transmission correction will be applied.");
+
+  setPropertyGroup("BackgroundFiles", bck_grp);
+  setPropertyGroup("BckTransmissionMethod", bck_grp);
+  setPropertyGroup("BckTransmissionValue", bck_grp);
+  setPropertyGroup("BckTransmissionError", bck_grp);
+  setPropertyGroup("BckTransmissionBeamRadius", bck_grp);
+  setPropertyGroup("BckTransmissionSampleDataFile", bck_grp);
+  setPropertyGroup("BckTransmissionEmptyDataFile", bck_grp);
+  setPropertyGroup("BckTransmissionBeamCenterX", bck_grp);
+  setPropertyGroup("BckTransmissionBeamCenterY", bck_grp);
+  setPropertyGroup("BckThetaDependentTransmission", bck_grp);
+
+  // Geometry correction
+  std::string geo_grp = "Geometry";
+  declareProperty("SampleThickness", EMPTY_DBL(), "Sample thickness [cm]");
 
   // I(Q) calculation
   std::string iq1d_grp = "I(q) calculation";
@@ -273,7 +345,10 @@ void SetupHFIRReduction::exec()
     algProp = new AlgorithmProperty("NormaliseAlgorithm");
     algProp->setValue(normAlg->toString());
     reductionManager->declareProperty(algProp);
-  }
+    reductionManager->declareProperty(new PropertyWithValue<std::string>("TransmissionNormalisation", normalization) );
+  } else
+    reductionManager->declareProperty(new PropertyWithValue<std::string>("TransmissionNormalisation", "Timer") );
+
 
   // Sensitivity correction
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
@@ -304,16 +379,43 @@ void SetupHFIRReduction::exec()
   }
 
   // Transmission
-  const double transValue = getProperty("TransmissionValue");
-  const double transError = getProperty("TransmissionError");
   const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");
-
-  //TODO: add a ComputeTransmission flag
-  if (!isEmpty(transValue) && !isEmpty(transError))
+  const std::string transMethod = getProperty("TransmissionMethod");
+  if (boost::iequals(transMethod, "Value"))
   {
-    IAlgorithm_sptr transAlg = createSubAlgorithm("ApplyTransmissionCorrection");
-    transAlg->setProperty("TransmissionValue", transValue);
-    transAlg->setProperty("TransmissionError", transError);
+    const double transValue = getProperty("TransmissionValue");
+    const double transError = getProperty("TransmissionError");
+    if (!isEmpty(transValue) && !isEmpty(transError))
+    {
+      IAlgorithm_sptr transAlg = createSubAlgorithm("ApplyTransmissionCorrection");
+      transAlg->setProperty("TransmissionValue", transValue);
+      transAlg->setProperty("TransmissionError", transError);
+      transAlg->setProperty("ThetaDependent", thetaDependentTrans);
+
+      algProp = new AlgorithmProperty("TransmissionAlgorithm");
+      algProp->setValue(transAlg->toString());
+      reductionManager->declareProperty(algProp);
+    } else {
+      g_log.error("SetupHFIRReduction expected transmission/error values and got empty values");
+    }
+  }
+  else if (boost::iequals(transMethod, "DirectBeam"))
+  {
+    const std::string sampleFilename = getPropertyValue("TransmissionSampleDataFile");
+    const std::string emptyFilename = getPropertyValue("TransmissionEmptyDataFile");
+    const double beamRadius = getProperty("TransmissionBeamRadius");
+    const double beamX = getProperty("TransmissionBeamCenterX");
+    const double beamY = getProperty("TransmissionBeamCenterY");
+
+    IAlgorithm_sptr transAlg = createSubAlgorithm("SANSDirectBeamTransmission");
+    transAlg->setProperty("SampleDataFilename", sampleFilename);
+    transAlg->setProperty("EmptyDataFilename", emptyFilename);
+    transAlg->setProperty("BeamRadius", beamRadius);
+    if (!isEmpty(beamX) && !isEmpty(beamY))
+    {
+      transAlg->setProperty("BeamCenterX", beamX);
+      transAlg->setProperty("BeamCenterY", beamY);
+    }
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
     algProp = new AlgorithmProperty("TransmissionAlgorithm");
     algProp->setValue(transAlg->toString());
@@ -321,9 +423,41 @@ void SetupHFIRReduction::exec()
   }
 
   // Background
-  const std::string backgroundFile = getProperty("BackgroundFiles");
+  const std::string backgroundFile = getPropertyValue("BackgroundFiles");
   if (backgroundFile.size() > 0)
     reductionManager->declareProperty(new PropertyWithValue<std::string>("BackgroundFiles", backgroundFile) );
+  const bool bckThetaDependentTrans = getProperty("BckThetaDependentTransmission");
+  const std::string bckTransMethod = getProperty("BckTransmissionMethod");
+  if (boost::iequals(bckTransMethod, "Value"))
+  {
+    const double transValue = getProperty("BckTransmissionValue");
+    const double transError = getProperty("BckTransmissionError");
+    if (!isEmpty(transValue) && !isEmpty(transError))
+    {
+      IAlgorithm_sptr transAlg = createSubAlgorithm("ApplyTransmissionCorrection");
+      transAlg->setProperty("TransmissionValue", transValue);
+      transAlg->setProperty("TransmissionError", transError);
+      transAlg->setProperty("ThetaDependent", bckThetaDependentTrans);
+
+      algProp = new AlgorithmProperty("BckTransmissionAlgorithm");
+      algProp->setValue(transAlg->toString());
+      reductionManager->declareProperty(algProp);
+    } else {
+      g_log.error("SetupHFIRReduction expected transmission/error values and got empty values");
+    }
+  }
+
+  // Geometry correction
+  const double thickness = getProperty("SampleThickness");
+  if (!isEmpty(thickness))
+  {
+    IAlgorithm_sptr thickAlg = createSubAlgorithm("NormaliseByThickness");
+    thickAlg->setProperty("SampleThickness", thickness);
+
+    algProp = new AlgorithmProperty("GeometryAlgorithm");
+    algProp->setValue(thickAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
 
   // Azimuthal averaging
   const bool doAveraging = getProperty("DoAzimuthalAverage");

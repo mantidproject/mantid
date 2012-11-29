@@ -8,6 +8,24 @@ from mantid.api import AlgorithmManager
 import mantid.simpleapi as simpleapi
 
 ## List of user commands ######################################################
+def BIOSANS():
+    Clear()
+    ReductionSingleton().set_instrument("BIOSANS",
+                                        "SetupHFIRReduction",
+                                        "HFIRSANSReduction")
+    TimeNormalization()
+    SolidAngle()
+    AzimuthalAverage()
+
+def GPSANS():
+    Clear()
+    ReductionSingleton().set_instrument("GPSANS", 
+                                        "SetupHFIRReduction",
+                                        "HFIRSANSReduction")
+    TimeNormalization()
+    SolidAngle()
+    AzimuthalAverage()
+
 def DirectBeamCenter(datafile):
     find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["FindBeamCenter"]=True
@@ -95,7 +113,20 @@ def AzimuthalAverage(binning=None, suffix="_Iq", error_weighting=False,
     ReductionSingleton().reduction_properties["ErrorWeighting"]=error_weighting
 
 def NoTransmission():
-    ReductionSingleton().set_transmission(None)
+    if ReductionSingleton().reduction_properties.has_key("TransmissionValue"):
+        del ReductionSingleton().reduction_properties["TransmissionValue"]
+    if ReductionSingleton().reduction_properties.has_key("TransmissionError"):
+        del ReductionSingleton().reduction_properties["TransmissionError"]
+    if ReductionSingleton().reduction_properties.has_key("TransmissionMethod"):
+        del ReductionSingleton().reduction_properties["TransmissionMethod"]
+    if ReductionSingleton().reduction_properties.has_key("TransmissionBeamRadius"):
+        del ReductionSingleton().reduction_properties["TransmissionBeamRadius"]
+    if ReductionSingleton().reduction_properties.has_key("TransmissionSampleDataFile"):
+        del ReductionSingleton().reduction_properties["TransmissionSampleDataFile"]
+    if ReductionSingleton().reduction_properties.has_key("TransmissionEmptyDataFile"):
+        del ReductionSingleton().reduction_properties["TransmissionEmptyDataFile"]
+    if ReductionSingleton().reduction_properties.has_key("ThetaDependentTransmission"):
+        del ReductionSingleton().reduction_properties["ThetaDependentTransmission"]
     
 def SetTransmission(trans, error, theta_dependent=True):
     ReductionSingleton().reduction_properties["TransmissionValue"] = trans
@@ -103,21 +134,20 @@ def SetTransmission(trans, error, theta_dependent=True):
     ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
 
 def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
-    find_data(sample_file, instrument=ReductionSingleton().instrument.name())
-    find_data(empty_file, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_transmission(sans_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
-                                                                                    empty_file=empty_file,
-                                                                                    beam_radius=beam_radius,
-                                                                                    theta_dependent=theta_dependent))
+    find_data(sample_file, instrument=ReductionSingleton().get_instrument())
+    find_data(empty_file, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["TransmissionMethod"] = "DirectBeam"
+    ReductionSingleton().reduction_properties["TransmissionBeamRadius"] = beam_radius
+    ReductionSingleton().reduction_properties["TransmissionSampleDataFile"] = sample_file
+    ReductionSingleton().reduction_properties["TransmissionEmptyDataFile"] = empty_file
+    ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
 
 def TransmissionDarkCurrent(dark_current=None):
     dark_current=find_data(dark_current, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_transmission().set_dark_current(dark_current)
 
 def ThetaDependentTransmission(theta_dependence=True):
-    if ReductionSingleton().get_transmission() is None:
-        raise RuntimeError, "A transmission algorithm must be selected before setting the theta-dependence of the correction."
-    ReductionSingleton().get_transmission().set_theta_dependence(theta_dependence)
+    ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependence
 
 def BeamSpreaderTransmission(sample_spreader, direct_spreader,
                              sample_scattering, direct_scattering,
@@ -136,9 +166,8 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
                                                                                       theta_dependent=theta_dependent))
 
 def SetTransmissionBeamCenter(x, y):
-    if ReductionSingleton().get_transmission() is None:
-        raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
-    ReductionSingleton().get_transmission().set_beam_finder(sans_reduction_steps.BaseBeamFinder(x,y))
+    ReductionSingleton().reduction_properties["TransmissionBeamCenterX"] = x
+    ReductionSingleton().reduction_properties["TransmissionBeamCenterY"] = y
 
 def TransmissionDirectBeamCenter(datafile):
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
@@ -158,10 +187,8 @@ def MaskDetectors(det_list):
 def Background(datafile):
     if type(datafile)==list:
         datafile=','.join(datafile)
-        
-    datafile = find_data(datafile, instrument=ReductionSingleton().instrument.name(), allow_multiple=True)
-    datafile_list = '.'.join(datafile)
-    ReductionSingleton().reduction_properties["BackgroundFiles"] = datafile_list 
+    find_data(datafile, instrument=ReductionSingleton().get_instrument(), allow_multiple=True)
+    ReductionSingleton().reduction_properties["BackgroundFiles"] = datafile
 
 def NoBackground():
     ReductionSingleton().reduction_properties["BackgroundFiles"] = ""
@@ -174,28 +201,26 @@ def SaveIqAscii(reducer=None, process=None):
 def NoSaveIq():
     ReductionSingleton().set_save_Iq(None)
         
-def BIOSANS():
-    Clear()
-    ReductionSingleton().set_instrument("BIOSANS",
-                                        "SetupHFIRReduction",
-                                        "HFIRSANSReduction")
-    TimeNormalization()
-    SolidAngle()
-    AzimuthalAverage()
-
-def GPSANS():
-    Clear()
-    ReductionSingleton().set_instrument("GPSANS", 
-                                        "SetupHFIRReduction",
-                                        "HFIRSANSReduction")
-    TimeNormalization()
-    SolidAngle()
-    AzimuthalAverage()
+def NoBckTransmission():
+    if ReductionSingleton().reduction_properties.has_key("BckTransmissionValue"):
+        del ReductionSingleton().reduction_properties["BckTransmissionValue"]
+    if ReductionSingleton().reduction_properties.has_key("BckTransmissionError"):
+        del ReductionSingleton().reduction_properties["BckTransmissionError"]
+    if ReductionSingleton().reduction_properties.has_key("BckTransmissionMethod"):
+        del ReductionSingleton().reduction_properties["BckTransmissionMethod"]
+    if ReductionSingleton().reduction_properties.has_key("BckTransmissionBeamRadius"):
+        del ReductionSingleton().reduction_properties["BckTransmissionBeamRadius"]
+    if ReductionSingleton().reduction_properties.has_key("BckTransmissionSampleDataFile"):
+        del ReductionSingleton().reduction_properties["BckTransmissionSampleDataFile"]
+    if ReductionSingleton().reduction_properties.has_key("BckTransmissionEmptyDataFile"):
+        del ReductionSingleton().reduction_properties["BckTransmissionEmptyDataFile"]
+    if ReductionSingleton().reduction_properties.has_key("BckThetaDependentTransmission"):
+        del ReductionSingleton().reduction_properties["BckThetaDependentTransmission"]
     
 def SetBckTransmission(trans, error, theta_dependent=True):
-    if ReductionSingleton().get_background() is None:
-        raise RuntimeError, "A background hasn't been defined."
-    ReductionSingleton().get_background().set_transmission(sans_reduction_steps.BaseTransmission(trans, error, theta_dependent=theta_dependent))
+    ReductionSingleton().reduction_properties["BckTransmissionValue"] = trans
+    ReductionSingleton().reduction_properties["BckTransmissionError"] = error
+    ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependent
 
 def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
     if ReductionSingleton().get_background() is None:
@@ -248,16 +273,13 @@ def BckTransmissionDarkCurrent(dark_current=None):
     ReductionSingleton().get_background().set_trans_dark_current(dark_current)
 
 def BckThetaDependentTransmission(theta_dependence=True):
-    if ReductionSingleton().get_background() is None:
-        raise RuntimeError, "A background hasn't been defined."
-    ReductionSingleton().get_background().set_trans_theta_dependence(theta_dependence)
+    ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependence
     
 def SetSampleDetectorOffset(distance):
-    ReductionSingleton().get_data_loader().set_sample_detector_offset(distance)
-    
+    ReductionSingleton().reduction_properties["SampleDetectorDistanceOffset"] = distance
 
 def SetSampleDetectorDistance(distance):
-    ReductionSingleton().get_data_loader().set_sample_detector_distance(distance)
+    ReductionSingleton().reduction_properties["SampleDetectorDistance"] = distance
     
 def SetWavelength(wavelength, spread):
     ReductionSingleton().reduction_properties["Wavelength"] = wavelength
@@ -298,9 +320,10 @@ def SetDirectBeamAbsoluteScale(direct_beam, beamstop_diameter=None, attenuator_t
    
 def DivideByThickness(thickness=1.0):
     if thickness is None or thickness == 1.0:
-        ReductionSingleton().set_geometry_correcter(None)
+        if ReductionSingleton().reduction_properties.has_key("SampleThickness"):
+            del ReductionSingleton().reduction_properties["SampleThickness"]
     else:
-        ReductionSingleton().set_geometry_correcter(mantidsimple.NormaliseByThickness, InputWorkspace=None, OutputWorkspace=None, SampleThickness=thickness)
+        ReductionSingleton().reduction_properties["SampleThickness"] = thickness
         
 def Stitch(data_list=[], q_min=None, q_max=None, scale=None, save_output=False):
     from LargeScaleStructures.data_stitching import stitch

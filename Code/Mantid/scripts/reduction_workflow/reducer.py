@@ -167,8 +167,11 @@ class Reducer(object):
             
             # Check whether the data is already available or needs to be loaded
             if self._data_files[ws] is not None:
+                datafile = self._data_files[ws]
+                if type(datafile)==list:
+                    datafile=','.join(datafile)
                 if "Filename" in props:
-                    alg.setPropertyValue("Filename", self._data_files[ws])
+                    alg.setPropertyValue("Filename", datafile)
                 else:
                     msg = "Can't set the Filename property on %s" % self.reduction_algorithm
                     Logger.get("Reducer").error(msg)

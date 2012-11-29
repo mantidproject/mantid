@@ -3,6 +3,7 @@
 *WIKI*"""
 from mantid.api import *
 from mantid.kernel import *
+import math
 
 class SANSAzimuthalAverage1D(PythonAlgorithm):
 
@@ -45,8 +46,6 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             Logger.get("SANSAzimuthalAverage").warning(msg)
         
         # Q binning options
-        n_bins = self.getProperty("NumberOfBins").value
-        log_binning = self.getProperty("LogBinning").value
         binning = self.getProperty("Binning").value
                 
         input_ws_name = self.getPropertyValue("InputWorkspace")
@@ -61,7 +60,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
         pixel_size_y = workspace.getInstrument().getNumberParameter("y-pixel-size")[0]
         
-        if binning[0]==0 and binning[1]==0 and binning[2]==0:
+        if len(binning)==0 or (binning[0]==0 and binning[1]==0 and binning[2]==0):
             # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
             x = workspace.dataX(1)
             x_length = len(x)
@@ -71,7 +70,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             wavelength_min = (x[0]+x[1])/2.0
             if wavelength_min==0 or wavelength_max==0:
                 raise RuntimeError, "Azimuthal averaging needs positive wavelengths"
-            qmin, qstep, qmax = self._get_binning(reducer, workspace, wavelength_min, wavelength_max)
+            qmin, qstep, qmax = self._get_binning(workspace, wavelength_min, wavelength_max)
             binning = [qmin, qstep, qmax]
         else:
             qmin = binning[0]
@@ -123,8 +122,9 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         self.setPropertyValue("OutputWorkspace", output_ws_name)
 
 
-    def _get_binning(self, reducer, workspace, wavelength_min, wavelength_max):
-        
+    def _get_binning(self, workspace, wavelength_min, wavelength_max):    
+        log_binning = self.getProperty("LogBinning").value
+        nbins = self.getProperty("NumberOfBins").value
         beam_ctr_x = workspace.getRun().getProperty("beam_center_x").value
         beam_ctr_y = workspace.getRun().getProperty("beam_center_y").value
         sample_detector_distance = workspace.getRun().getProperty("sample_detector_distance").value
@@ -145,8 +145,8 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
         qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
         
-        if not self._log_binning:
-            qstep = (qmax-qmin)/self._nbins
+        if not log_binning:
+            qstep = (qmax-qmin)/nbins
             f_step = (qmax-qmin)/qstep
             n_step = math.floor(f_step)
             if f_step-n_step>10e-10:
@@ -154,7 +154,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             return qmin, qstep, qmax
         else:
             # Note: the log binning in Mantid is x_i+1 = x_i * ( 1 + dx )
-            qstep = (math.log10(qmax)-math.log10(qmin))/self._nbins
+            qstep = (math.log10(qmax)-math.log10(qmin))/nbins
             f_step = (math.log10(qmax)-math.log10(qmin))/qstep
             n_step = math.floor(f_step)
             if f_step-n_step>10e-10:
