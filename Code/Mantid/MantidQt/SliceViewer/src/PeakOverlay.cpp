@@ -22,14 +22,15 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius)
+  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, const QColor& peakColour)
   : QWidget( parent ),
     m_plot(plot),
     m_originalOrigin(origin),
     m_origin(origin),
     m_radius(radius),
     m_opacityMax(0.8),
-    m_opacityMin(0.0)
+    m_opacityMin(0.0),
+    m_peakColour(peakColour)
   {
     setAttribute(Qt::WA_NoMousePropagation, false);
     this->setVisible(true);
@@ -139,7 +140,7 @@ namespace SliceViewer
     painter.setRenderHint( QPainter::Antialiasing );
     
     // Draw Outer circle
-    QPen pen( Qt::green );
+    QPen pen(m_peakColour);
     /* Note we are creating an ellipse here and generating a filled effect by controlling the line thickness.
        Since the linewidth takes a single scalar value, we choose to use x as the scale value.
     */

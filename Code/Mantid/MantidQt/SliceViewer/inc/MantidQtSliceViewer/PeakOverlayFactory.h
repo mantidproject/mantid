@@ -6,6 +6,7 @@
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
+#include <qcolor.h>
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -52,8 +53,9 @@ namespace MantidQt
       QwtPlot * m_plot;
       QWidget * m_parent;
       double m_peakRadius;
+      QColor m_peakColour;
     public:
-      PeakOverlayFactory(QwtPlot * plot, QWidget * parent);
+      PeakOverlayFactory(QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
       virtual ~PeakOverlayFactory();
       boost::shared_ptr<PeakOverlayView> createView(const Mantid::Kernel::V3D& position) const;
       virtual std::string getPlotXLabel() const;

@@ -9,6 +9,7 @@
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
 #include <qpainter.h>
+#include <qcolor.h>
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 
 
@@ -47,7 +48,7 @@ namespace SliceViewer
 
   public:
     /// Constructor
-    PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius);
+    PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, const QColor& peakColour);
     /// Destructor
     virtual ~PeakOverlay();
     /// Set the slice point at position.
@@ -89,6 +90,8 @@ namespace SliceViewer
     const double m_opacityMax;
     /// Min opacity
     const double m_opacityMin;
+    /// Peak colour
+    QColor m_peakColour;
     /// Cached opacity at the distance z from origin
     double m_opacityAtDistance;
     /// Cached radius at the distance z from origin
