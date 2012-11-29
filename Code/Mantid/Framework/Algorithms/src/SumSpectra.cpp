@@ -361,8 +361,6 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   numSpectra=0;
   numMasked =0;
   numZeros  =0;
-  bool foundZeros(false);
-
 
   // Loop over spectra
   std::set<int>::iterator it;

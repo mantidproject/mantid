@@ -308,9 +308,9 @@ public:
     TS_ASSERT_EQUALS( x[0], inputSpace->readX(0)[0] );
     TS_ASSERT_EQUALS( x[50], inputSpace->readX(0)[50] );
     TS_ASSERT_EQUALS( x[100], inputSpace->readX(0)[100] );
-    TS_ASSERT_DELTA( y[7], nSignals*y0[7] ,1.e-6);
-    TS_ASSERT_DELTA( y[38],nSignals*y0[38],1.e-6 );
-    TS_ASSERT_DELTA( y[72],nSignals*y0[72],1.e-6);
+    TS_ASSERT_DELTA( y[7], double(nSignals)*y0[7] ,1.e-6);
+    TS_ASSERT_DELTA( y[38],double(nSignals)*y0[38],1.e-6 );
+    TS_ASSERT_DELTA( y[72],double(nSignals)*y0[72],1.e-6);
     TS_ASSERT_DELTA( e[28], std::sqrt(double(nSignals))*e0[28], 0.00001 );
     TS_ASSERT_DELTA( e[47], std::sqrt(double(nSignals))*e0[47], 0.00001 );
     TS_ASSERT_DELTA( e[99], std::sqrt(double(nSignals))*e0[99], 0.00001 );
