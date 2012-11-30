@@ -90,7 +90,7 @@ namespace Mantid
       // packets will arrive in, I've put the necessary code in this function.
       // Both rxPacket() functions will check to see if all the data is available
       // and call this function if it is.
-      void initWorkspace();
+      void initWorkspace(const ADARA::Packet &pkt);
 
       void appendEvent( uint32_t pixelId, double tof, const Mantid::Kernel::DateAndTime pulseTime);
       // tof is "Time Of Flight" and is in units of microsecondss relative to the start of the pulse
