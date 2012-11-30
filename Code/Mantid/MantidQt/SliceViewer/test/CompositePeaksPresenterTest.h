@@ -245,6 +245,20 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(B));
   }
 
+  void test_maximum_allowed_peaks()
+  {
+    CompositePeaksPresenter presenter;
+    const size_t initialSize = presenter.size();
+    // Add peaksWS
+    const int limit = 10;
+    for(int i = 0; i < limit; ++i)
+    {
+     TS_ASSERT_THROWS_NOTHING(presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>()));
+    }
+    // Add a peaksWS beyond the limit of allowed number of peaksWS.
+    TS_ASSERT_THROWS(presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>()), std::invalid_argument);
+  }
+
 };
 
 #endif

@@ -2103,9 +2103,13 @@ void SliceViewer::peakOverlay_toggled(bool checked)
       QStringList list = dlg.getSelectedNames();
       if(!list.isEmpty())
       {
-        IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
-        PeakOverlayFactory* factory  = new PeakOverlayFactory(m_plot, m_plot->canvas());
-        m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(factory, peaksWS));
+        // Loop through each of those peaks workspaces and display them.
+        for(int i = 0; i < list.size(); ++i)
+        {
+          IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list[i].toStdString());
+          PeakOverlayFactory* factory  = new PeakOverlayFactory(m_plot, m_plot->canvas(), m_peaksPresenter->size());
+          m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(factory, peaksWS));
+        }
         updatePeakOverlaySliderWidget();
       }
     }
