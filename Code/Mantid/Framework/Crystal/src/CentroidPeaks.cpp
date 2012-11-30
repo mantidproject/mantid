@@ -3,6 +3,8 @@
 #include "MantidCrystal/CentroidPeaks.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidAPI/MemoryManager.h"
 
 using Mantid::DataObjects::PeaksWorkspace;
 
@@ -100,6 +102,7 @@ namespace Crystal
          if(peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MaxPeaks = i;
       }
     }
+    Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
     Progress prog(this, MinPeaks, 1.0, MaxPeaks);
     PARALLEL_FOR2(inWS,peakWS)
     for (int i = MinPeaks; i<= MaxPeaks; i++)
@@ -109,28 +112,101 @@ namespace Crystal
       IPeak & peak = peakWS->getPeak(i);
       int col = peak.getCol();
       int row = peak.getRow();
-      double TOFPeakd = peak.getTOF();
-      Geometry::Instrument_const_sptr Iptr = peak.getInstrument();
-      std::string bankName = peak.getBankName();
-
-      boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
-      if (!parent) continue;
-      if (parent->type().compare("RectangularDetector") != 0) continue;
-      boost::shared_ptr<const RectangularDetector> RDet = boost::shared_dynamic_cast<
-                const RectangularDetector>(parent);
-      double intensity = 0.0;
-      double chancentroid = 0.0;
-      boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
-      detid2index_map::const_iterator it = wi_to_detid_map->find(pixel->getID());
+      int pixelID = peak.getDetectorID();
+      detid2index_map::const_iterator it = wi_to_detid_map->find(pixelID);
       if ( it == wi_to_detid_map->end() )
       {
         continue;
       }
       size_t workspaceIndex = it->second;
+      double TOFPeakd = peak.getTOF();
+      const MantidVec & X = inWS->readX(workspaceIndex);
+      int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
+      std::string bankName = peak.getBankName();
+
+      boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
+      if (!parent) continue;
+      if (parent->type().compare("RectangularDetector") != 0)
+      {
+          int nPixels = std::max<int>(0, getProperty("EdgePixels"));
+          std::vector<Geometry::IComponent_const_sptr> children;
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+          asmb->getChildren(children, false);
+          boost::shared_ptr<const Geometry::ICompAssembly> asmb2 = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+          std::vector<Geometry::IComponent_const_sptr> grandchildren;
+          asmb2->getChildren(grandchildren,false);
+          int NROWS = static_cast<int>(grandchildren.size());
+          int NCOLS = static_cast<int>(children.size());
+    	  if (row < nPixels || col < nPixels || NROWS-row < nPixels || NCOLS-col < nPixels) continue;
+    	  //Only works for WISH for non-RectangularDetector  TODO-make more general
+    	  //if (bankName.compare("WISH") != 0)continue;
+          IAlgorithm_sptr slice_alg = createSubAlgorithm("IntegratePeakTimeSlices");
+          slice_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inWS);
+          std::ostringstream tab_str;
+          tab_str << "LogTable" << i;
+
+          slice_alg->setPropertyValue("OutputWorkspace", tab_str.str());
+          slice_alg->setProperty<PeaksWorkspace_sptr>("Peaks", peakWS);
+          slice_alg->setProperty("PeakIndex", i);
+          double qspan = 0.12;
+		  if (peakWS->mutableSample().hasOrientedLattice())
+		  {
+		    OrientedLattice latt = peakWS->mutableSample().getOrientedLattice();
+		    qspan = 1./std::max(latt.a(), std::max(latt.b(),latt.c()));//1/6*2Pi about 1
+		  }
+          slice_alg->setProperty("PeakQspan", qspan);
+
+
+          slice_alg->setProperty("NBadEdgePixels", nPixels);
+          try
+          {
+          slice_alg->executeAsSubAlg();
+          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+
+          TableWorkspace_sptr logtable = slice_alg->getProperty("OutputWorkspace");
+
+          double Imax = 0;
+          for (int iTOF=0; iTOF < static_cast<int>(logtable->rowCount()); iTOF++)
+          {
+              double intensity = logtable->getRef<double>(std::string("Intensity"), iTOF);
+              if (intensity > Imax)
+              {
+				  int irow = static_cast<int>(logtable->getRef<double>(std::string("Mrow"), iTOF));
+				  int icol = static_cast<int>(logtable->getRef<double>(std::string("Mcol"), iTOF));
+				  std::string bankName0 = bankName;
+				  bankName0.erase(0,4);
+				  std::ostringstream pixelString;
+				  pixelString << Iptr->getName() << "/" << bankName0 << "/"
+				      << bankName << "/tube" << std::setw(3) << std::setfill('0')<< icol << "/pixel" << std::setw(4) << std::setfill('0')<< irow;
+				  Geometry::IComponent_const_sptr component = Iptr->getComponentByName(pixelString.str());
+                                  boost::shared_ptr<const Detector> pixel = boost::dynamic_pointer_cast<const Detector>(component);
+				  if (pixel) pixelID = pixel->getID();
+				  chan = static_cast<int>(logtable->getRef<double>(std::string("Channel"), iTOF));
+              }
+          }
+          } catch (...)
+          {
+
+             g_log.debug("Error in IntegratePeakTimeSlices");
+          }
+      }
+	  else
+      {
+      boost::shared_ptr<const RectangularDetector> RDet = boost::shared_dynamic_cast<
+                const RectangularDetector>(parent);
+      double intensity = 0.0;
+      double chancentroid = 0.0;
+      boost::shared_ptr<Detector> pixel = RDet->getAtXY(col, row);
+      it = wi_to_detid_map->find(pixel->getID());
+      if ( it == wi_to_detid_map->end() )
+      {
+        continue;
+      }
+      workspaceIndex = it->second;
 
       const MantidVec & X = inWS->readX(workspaceIndex);
 
-      int chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
+      chan = Kernel::VectorHelper::getBinIndex(X, TOFPeakd);
       int chanstart = std::max(0,chan-PeakRadius);
       int chanend = std::min(static_cast<int>(X.size()),chan+PeakRadius);
       double rowcentroid = 0.0;
@@ -165,14 +241,15 @@ namespace Crystal
       col = std::min(RDet->xpixels()-1,int(colcentroid/intensity));
       col = std::max(0,col);
       pixel = RDet->getAtXY(col, row);
-      peak.setDetectorID(pixel->getID());
-    // Set wavelength to change tof for peak object
-      it = wi_to_detid_map->find(pixel->getID());
-      workspaceIndex = (it->second);
-
+      pixelID = pixel->getID();
       chan = int(chancentroid/intensity);
       chan = std::max(0,chan);
       chan = std::min(static_cast<int>(inWS->blocksize()),chan);
+      }
+      peak.setDetectorID(pixelID);
+    // Set wavelength to change tof for peak object
+      it = wi_to_detid_map->find(pixelID);
+      workspaceIndex = (it->second);
       Mantid::Kernel::Units::Wavelength wl;
       std::vector<double> timeflight;
       timeflight.push_back(inWS->readX(workspaceIndex)[chan]);
@@ -195,7 +272,6 @@ namespace Crystal
       IPeak & peak = peakWS->getPeak(i);
       int col = peak.getCol();
       int row = peak.getRow();
-      Geometry::Instrument_const_sptr Iptr = peak.getInstrument();
       std::string bankName = peak.getBankName();
 
       boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
@@ -249,6 +325,7 @@ namespace Crystal
          if(peak.getRunNumber() == inWS->getRunNumber() && wi < Numberwi) MaxPeaks = i;
       }
     }
+    Geometry::Instrument_const_sptr Iptr = inWS->getInstrument();
     Progress prog(this, MinPeaks, 1.0, MaxPeaks);
     PARALLEL_FOR2(inWS,peakWS)
     for (int i = MinPeaks; i<= MaxPeaks; i++)
@@ -259,7 +336,6 @@ namespace Crystal
       int col = peak.getCol();
       int row = peak.getRow();
       double TOFPeakd = peak.getTOF();
-      Geometry::Instrument_const_sptr Iptr = peak.getInstrument();
       std::string bankName = peak.getBankName();
 
       boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);
@@ -345,7 +421,6 @@ namespace Crystal
       IPeak & peak = peakWS->getPeak(i);
       int col = peak.getCol();
       int row = peak.getRow();
-      Geometry::Instrument_const_sptr Iptr = peak.getInstrument();
       std::string bankName = peak.getBankName();
 
       boost::shared_ptr<const IComponent> parent = Iptr->getComponentByName(bankName);

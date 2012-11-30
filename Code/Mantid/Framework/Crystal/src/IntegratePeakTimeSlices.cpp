@@ -1008,7 +1008,8 @@ namespace Mantid
                         chanMax++;
                       boost::shared_ptr<DataModeHandler>XXX(new DataModeHandler(*AttributeValues));
                       AttributeValues = XXX;
-                      AttributeValues->setTime((X[chanMax]+ X[chanMin])/2.0);
+                      if( X.size() > 0)
+                        AttributeValues->setTime((X[chanMax]+ X[chanMin])/2.0);
 
                     }else//lastAttributeList exists
 
@@ -2308,6 +2309,8 @@ namespace Mantid
     double Varx,Vary, Cov;
 
       std::vector<double>PP(ParameterValues, ParameterValues+IVXY);
+      if( StatBase.size() <=0)
+        return false;
       double ncells = (int)StatBase[IIntensities];
       if( ncells <=0)
         return false;
