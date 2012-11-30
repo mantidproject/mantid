@@ -478,6 +478,36 @@ public:
     do_test_filtering_start_and_end_filtered_loading(metadataonly);
   }
 
+  void testSimulatedFile()
+  {
+    Mantid::API::FrameworkManager::Instance();
+    LoadEventNexus ld;
+    std::string wsname = "ARCS_sim";
+    ld.initialize();
+    ld.setPropertyValue("Filename", "ARCS_sim_event.nxs");
+    ld.setPropertyValue("OutputWorkspace", wsname);
+    ld.execute();
+    TS_ASSERT( ld.isExecuted() );
+
+    EventWorkspace_sptr WS;
+    TS_ASSERT_THROWS_NOTHING(
+        WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname) );
+    //Valid WS and it is an EventWorkspace
+    TS_ASSERT( WS );
+    if (!WS) return;
+    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 117760);
+    TS_ASSERT_EQUALS( WS->getNumberEvents(), 128);
+    for (size_t wi = 0; wi <  WS->getNumberHistograms(); wi++)
+    {
+      // All events should be weighted events for simulated data
+      TS_ASSERT_EQUALS( WS->getEventList(wi).getEventType(), WEIGHTED);
+    }
+    // Check one event
+    TS_ASSERT_DELTA(WS->getEventList(26798).getWeightedEvents()[0].weight(),
+        1.8124e-11, 1.0e-4);
+    TS_ASSERT_EQUALS(WS->getEventList(26798).getWeightedEvents()[0].tof(), 1476.0);
+  }
+
 };
 
 //------------------------------------------------------------------------------
