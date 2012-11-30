@@ -2,6 +2,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtSliceViewer/PeakTransformFactory.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/regex.hpp>
 
@@ -9,7 +10,6 @@ namespace MantidQt
 {
 namespace SliceViewer
 {
-
   /**
   Constructor.
 
@@ -17,13 +17,14 @@ namespace SliceViewer
   2) Then iterate over the MODEL and use it to construct VIEWs via the factory.
   3) A collection of views is stored internally 
 
-  @param factory : View factory (THE VIEW via factory)
+  @param viewFactory : View Factory (THE VIEW via factory)
   @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
+  @param peaksTransform : Peak Transformation Factory. This is about interpreting the MODEL.
   */
-  ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory* factory, Mantid::API::IPeaksWorkspace_sptr peaksWS) : m_viewPeaks(peaksWS->getNumberPeaks())
-    , m_factory(factory), m_transform("H", "K"), m_slicePoint(0)
+  ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, Mantid::API::IPeaksWorkspace_sptr peaksWS, PeakTransformFactory_sptr transformFactory) : m_viewPeaks(peaksWS->getNumberPeaks())
+    , m_viewFactory(viewFactory), m_transformFactory(transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0)
   {
-    if(factory == NULL)
+    if(viewFactory == NULL)
     {
       throw std::invalid_argument("PeakOverlayViewFactory is null");
     }
@@ -39,13 +40,13 @@ namespace SliceViewer
     const bool transformSucceeded = this->configureMappingTransform();
     // Extract the integration radius from the workspace.
     const double peakIntegrationRadius = boost::lexical_cast<double>(peaksWS->run().getProperty("PeakRadius")->value());
-    factory->setRadius(peakIntegrationRadius);
+    viewFactory->setRadius(peakIntegrationRadius);
     for(int i = 0; i < peaksWS->getNumberPeaks(); ++i)
     {
       const Mantid::API::IPeak& peak = peaksWS->getPeak(i);
       auto position = peak.getHKL();
       
-      PeakOverlayView_sptr view = boost::shared_ptr<PeakOverlayView>( m_factory->createView(m_transform.transform(position)) );
+      PeakOverlayView_sptr view = boost::shared_ptr<PeakOverlayView>( m_viewFactory->createView(m_transform->transform(position)) );
       m_viewPeaks[i] = view;
     }
     if(!transformSucceeded)
@@ -119,9 +120,9 @@ namespace SliceViewer
     bool transformSucceeded = false;
     try
     {
-      std::string xLabel = m_factory->getPlotXLabel();
-      std::string yLabel = m_factory->getPlotYLabel();
-      m_transform = PeakTransformHKL(xLabel, yLabel);
+      std::string xLabel = m_viewFactory->getPlotXLabel();
+      std::string yLabel = m_viewFactory->getPlotYLabel();
+      m_transform = m_transformFactory->createTransform(xLabel, yLabel);
       showAll();
       transformSucceeded = true;
     }
@@ -139,7 +140,7 @@ namespace SliceViewer
   */
   bool ConcretePeaksPresenter::isLabelOfFreeAxis(const std::string& label) const
   {
-    return boost::regex_match(label, m_transform.getFreePeakAxisRegex());
+    return boost::regex_match(label, m_transform->getFreePeakAxisRegex());
   }
 
   /**

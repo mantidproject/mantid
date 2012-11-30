@@ -24,6 +24,18 @@ public:
     TS_ASSERT_THROWS(PeakTransformHKL("H (Lattice)", "?"), PeakTransformException);
   }
 
+  void test_default_transform()
+  {
+    PeakTransformHKL transform; // Should be equivalent to constructing transform("H (Lattice)", "K (Lattice)")
+    V3D original(0, 1, 2);
+    V3D transformed = transform.transform(original);
+    TS_ASSERT_EQUALS(transformed.X(), original.X());
+    TS_ASSERT_EQUALS(transformed.Y(), original.Y());
+    TS_ASSERT_EQUALS(transformed.Z(), original.Z());
+
+    boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
+  }
+
 void test_transformHKL()
 {
   PeakTransformHKL transform("H (Lattice)", "K (Lattice)");
@@ -153,7 +165,7 @@ void test_factory()
 
   // Use the factory to create a product.
   PeakTransformHKLFactory factory;
-  PeakTransform_sptr product = factory.createTransform("H", "K");
+  PeakTransform_sptr product = factory.createDefaultTransform();
 
   // Check the type of the output product object.
   TSM_ASSERT("Factory product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformHKL>(product) != NULL);

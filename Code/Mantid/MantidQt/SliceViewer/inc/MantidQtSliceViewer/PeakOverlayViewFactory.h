@@ -59,6 +59,9 @@ namespace MantidQt
       /// Get the plot y-axis label
       virtual std::string getPlotYLabel() const = 0;
     };
+
+    /// Factory Shared Pointer typedef.
+    typedef boost::shared_ptr<PeakOverlayViewFactory> PeakOverlayViewFactory_sptr;
   }
 }
 

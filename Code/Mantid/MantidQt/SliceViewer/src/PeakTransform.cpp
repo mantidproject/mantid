@@ -4,7 +4,6 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
-
    PeakTransform::PeakTransform(const std::string& xPlotLabel, const std::string& yPlotLabel, const boost::regex& regexOne, const boost::regex& regexTwo, const boost::regex& regexThree) : 
     m_xPlotLabel(xPlotLabel),
     m_yPlotLabel(yPlotLabel),

@@ -64,7 +64,7 @@ namespace SliceViewer
     /// Get the radius.
     double getRadius() const;
     /// Move the position of the peak, by using a different configuration of the existing origin indexes.
-    void movePosition(const PeakTransformHKL& peakTransform);
+    void movePosition(PeakTransform_sptr peakTransform);
 
   private:
 

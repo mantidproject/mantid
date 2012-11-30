@@ -15,6 +15,7 @@ namespace MantidQt
     class DLLExport PeakTransformHKL : public PeakTransform
     {
     public:
+      PeakTransformHKL();
       PeakTransformHKL(const std::string& xPlotLabel, const std::string& yPlotLabel);
       virtual ~PeakTransformHKL();
       PeakTransformHKL(const PeakTransformHKL& other);

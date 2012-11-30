@@ -13,6 +13,7 @@ namespace MantidQt
   {
     // Forward declaration.
     class PeakOverlayViewFactory;
+    class PeakTransformFactory;
 
     typedef std::vector< boost::shared_ptr<PeakOverlayView> > VecPeakOverlayView;
     /*---------------------------------------------------------
@@ -23,7 +24,7 @@ namespace MantidQt
     class DLLExport ConcretePeaksPresenter : public PeaksPresenter
     {
     public:
-      ConcretePeaksPresenter(PeakOverlayViewFactory* factory, boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS);
+      ConcretePeaksPresenter(boost::shared_ptr<PeakOverlayViewFactory> viewFactory, boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS, boost::shared_ptr<PeakTransformFactory> transformFactory);
       virtual ~ConcretePeaksPresenter();
       virtual void update();
       virtual void updateWithSlicePoint(const double& slicePoint);
@@ -33,9 +34,11 @@ namespace MantidQt
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;
       /// View factory
-      boost::shared_ptr<PeakOverlayViewFactory> m_factory;
+      boost::shared_ptr<PeakOverlayViewFactory> m_viewFactory;
+      /// Transform factory
+      boost::shared_ptr<PeakTransformFactory> m_transformFactory;
       /// Peak transformer
-      PeakTransformHKL m_transform;
+      PeakTransform_sptr m_transform;
       /// current slicing point.
       double m_slicePoint;
       /// Configurre peak transformations

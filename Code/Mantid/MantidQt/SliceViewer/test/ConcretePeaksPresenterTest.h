@@ -10,15 +10,43 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
+#include <string>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace testing;
+using boost::regex;
 
 class ConcretePeaksPresenterTest : public CxxTest::TestSuite
 {
 private:
+
+  /*------------------------------------------------------------
+  Mock Peak Transform
+  ------------------------------------------------------------*/
+  class MockPeakTransform : public PeakTransform 
+  {
+  public:
+    MockPeakTransform()
+      :PeakTransform("H (Lattice)", "K (Lattice)", regex("^H.*$"), regex("^K.*$"), regex("^L.*$"))
+    {
+    }
+    ~MockPeakTransform()
+    {
+    }
+    MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
+  };
+
+  /*------------------------------------------------------------
+  Mock Peak Transform Factory
+  ------------------------------------------------------------*/
+class MockPeakTransformFactory : public PeakTransformFactory 
+{
+ public:
+  MOCK_CONST_METHOD0(createDefaultTransform, PeakTransform_sptr());
+  MOCK_CONST_METHOD2(createTransform, PeakTransform_sptr(const std::string&, const std::string&));
+};
 
   /*------------------------------------------------------------
   Mock Peak Overlay View
@@ -31,7 +59,7 @@ private:
     MOCK_METHOD1(setSlicePoint, void(const double&));
     MOCK_METHOD0(hideView, void());
     MOCK_METHOD0(showView, void());
-    MOCK_METHOD1(movePosition, void(const PeakTransformHKL&));
+    MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
     ~MockPeakOverlayView(){}
   };
 
@@ -59,12 +87,17 @@ private:
 
 public:
 
-  void test_constructor_throws_if_factory_null()
+  void test_constructor_throws_if_view_factory_null()
   {
-    PeakOverlayViewFactory* nullFactory = NULL;
-    Mantid::API::IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(1);
+    PeakOverlayViewFactory* nullViewFactory = NULL;
+    PeakOverlayViewFactory_sptr viewFactory(nullViewFactory);
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(1);
+    
+    auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
+    PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
 
-    TS_ASSERT_THROWS(ConcretePeaksPresenter(nullFactory, peaksWS), std::invalid_argument);
+    TS_ASSERT_THROWS(ConcretePeaksPresenter(viewFactory, peaksWS, peakTransformFactory), std::invalid_argument);
   }
 
   void test_constructor_throws_if_peaks_workspace_null()
@@ -94,11 +127,17 @@ public:
 
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
+    auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
+    PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+
     // Construction should cause the widget factory to be used to generate peak overlay objects.
-    ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
+    ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, peakTransformFactory);
 
     TSM_ASSERT("MockViewFactory not used as expected.", Mock::VerifyAndClearExpectations(mockViewFactory));
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
+    TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
   }
 
   void test_update()
@@ -120,13 +159,19 @@ public:
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
+    auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
+    PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+
     // Construction should cause the widget factory to be used to generate peak overlay objects.
-    ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
+    ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, peakTransformFactory);
 
     // Updating should cause all of the held views to be updated too.
     presenter.update();
     
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
+    TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
   }
 
   void test_set_slice_point()
@@ -148,13 +193,19 @@ public:
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
+    auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
+    PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+
     // Construction should cause the widget factory to be used to generate peak overlay objects.
-    ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
+    ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, peakTransformFactory);
 
     // Updating should cause all of the held views to be updated too.
     presenter.updateWithSlicePoint(slicePoint);
 
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
+    TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
   }
 
   void test_hide_owned_views_on_death()
@@ -175,11 +226,17 @@ public:
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
+    auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
+    PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+
     {
-      ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
+      ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, peakTransformFactory);
     } // Guaranteed destruction at this point. Destructor should trigger hide on all owned views.
 
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
+    TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
   }
 
   void test_handle_non_hkl_xy_mappings()
@@ -200,12 +257,15 @@ public:
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
-    ConcretePeaksPresenter presenter(mockViewFactory, peaksWS);
+    auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
+    PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillRepeatedly(Throw(PeakTransformException())); // The actual transform will throw if a mix of Qx and Qy were used.
+
+    ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, peakTransformFactory);
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
+    TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
   }
-
-
-  
 };
 
 
