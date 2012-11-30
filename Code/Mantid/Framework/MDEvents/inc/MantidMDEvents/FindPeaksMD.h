@@ -43,15 +43,20 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
-    void readExperimentInfo(Mantid::API::ExperimentInfo_sptr ei, Mantid::API::IMDWorkspace_sptr ws);
+    /// Read member variables from experiment info
+    void readExperimentInfo(const Mantid::API::ExperimentInfo_sptr & ei, const Mantid::API::IMDWorkspace_sptr & ws);
 
-    void addPeak(Mantid::Kernel::V3D Q, double binCount);
+    /// Adds a peak based on Q, bin count & a set of detector IDs
+    void addPeak(const Mantid::Kernel::V3D & Q, const double binCount);
 
+    /// Adds a peak based on Q, bin count
+    boost::shared_ptr<DataObjects::Peak> createPeak(const Mantid::Kernel::V3D & Q, const double binCount);
+
+    /// Run find peaks on an MDEventWorkspace
     template<typename MDE, size_t nd>
     void findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws);
-
+    /// Run find peaks on a histo workspace
     void findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
-
 
     /// Output PeaksWorkspace
     Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
@@ -64,6 +69,12 @@ namespace MDEvents
 
     /// Max # of peaks
     int64_t MaxPeaks;
+
+    /// Flag to include the detectors within the peak
+    bool m_addDetectors;
+
+    /// Arbitrary scaling factor for density to make more manageable numbers, especially for older file formats.
+    signal_t m_densityScaleFactor;
 
     /// Progress reporter.
     Mantid::API::Progress * prog;

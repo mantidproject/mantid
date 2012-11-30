@@ -25,9 +25,12 @@ It may give better results on [[Workspace2D]]'s that were converted to [[MDWorks
 #include "MantidMDEvents/FindPeaksMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidKernel/VMD.h"
+
+#include <boost/type_traits/integral_constant.hpp>
+
 #include <map>
 #include <vector>
-#include "MantidKernel/VMD.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -37,16 +40,105 @@ namespace Mantid
 {
 namespace MDEvents
 {
+  namespace
+  {
+    // ---------- Template deduction of the event type --------------------------------
+    // See boost::type_traits documentation
+
+    /// Type trait to indicate that a general type is not a full MDEvent
+    template <typename MDE, size_t nd>
+    struct IsFullEvent : boost::false_type
+    {};
+
+    /// Specialization of type trait to indicate that a MDEvent is a full event
+    template <size_t nd>
+    struct IsFullEvent<MDEvent<nd>, nd> : boost::true_type
+    {};
+
+    /**
+     * Specialization if isFullEvent for MDEvents
+     * to return true
+     */
+    template<typename MDE, size_t nd>
+    bool isFullMDEvent(const boost::true_type &)
+    {
+      return true;
+    }
+
+    /**
+     * Specialization if isFullEvent for MDEvents
+     * to return false
+     */
+    template<typename MDE, size_t nd>
+    bool isFullMDEvent(const boost::false_type &)
+    {
+      return false;
+    }
+
+    /**
+     * Returns true if the templated type is a full MDEvent
+     */
+    template<typename MDE, size_t nd>
+    bool isFullMDEvent()
+    {
+      return isFullMDEvent<MDE,nd>(IsFullEvent<MDE,nd>());
+    }
+
+    /**
+     * Add the detectors from the given box as contributing detectors to the peak
+     * @param peak :: The peak that relates to the box
+     * @param box :: A reference to the box containing the peak
+     */
+    template<typename MDE, size_t nd>
+    void addDetectors(DataObjects::Peak & peak, MDBoxBase<MDE,nd> & box, const boost::true_type &)
+    {
+      if(box.getNumChildren() > 0)
+      {
+        std::cerr << "Box has children\n";
+        addDetectors(peak, box, boost::true_type());
+      }
+      MDBox<MDE,nd> * mdBox = dynamic_cast<MDBox<MDE,nd>*>(&box);
+      if(!mdBox)
+      {
+        throw std::invalid_argument("FindPeaksMD::addDetectors - Unexpected Box type, cannot retrieve events");
+      }
+      const auto & events = mdBox->getConstEvents();
+      auto itend = events.end();
+      for(auto it = events.begin(); it != itend; ++it)
+      {
+       peak.addContributingDetID(it->getDetectorID());
+      }
+    }
+
+    /// Add detectors based on lean events. Always throws as they do not know their IDs
+    template<typename MDE, size_t nd>
+    void addDetectors(DataObjects::Peak & , MDBoxBase<MDE,nd> & , const boost::false_type &)
+    {
+      throw std::runtime_error("FindPeaksMD - Workspace contains lean events, cannot include detector information");
+    }
+
+    /**
+     * Add the detectors from the given box as contributing detectors to the peak
+     * @param peak :: The peak that relates to the box
+     * @param box :: A reference to the box containing the peak
+     */
+    template<typename MDE, size_t nd>
+    void addDetectors(DataObjects::Peak & peak, MDBoxBase<MDE,nd> & box)
+    {
+      // Compile time deduction of the correct function call
+      addDetectors(peak, box, IsFullEvent<MDE,nd>());
+    }
+
+  }
+
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(FindPeaksMD)
   
-
-
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  FindPeaksMD::FindPeaksMD()
+  FindPeaksMD::FindPeaksMD() : m_addDetectors(true), m_densityScaleFactor(1e-6)
   {
   }
     
@@ -95,12 +187,11 @@ namespace MDEvents
     declareProperty("AppendPeaks", false,
         "If checked, then append the peaks in the output workspace if it exists. \n"
         "If unchecked, the output workspace is replaced (Default)."  );
-
   }
 
   //----------------------------------------------------------------------------------------------
   /** Extract needed data from the workspace's experiment info */
-  void FindPeaksMD::readExperimentInfo(ExperimentInfo_sptr ei, IMDWorkspace_sptr ws)
+  void FindPeaksMD::readExperimentInfo(const ExperimentInfo_sptr & ei, const IMDWorkspace_sptr & ws)
   {
     // Instrument associated with workspace
     inst = ei->getInstrument();
@@ -143,47 +234,51 @@ namespace MDEvents
    * @param Q :: Q_lab or Q_sample, depending on workspace
    * @param binCount :: bin count to give to the peak.
    */
-  void FindPeaksMD::addPeak(V3D Q, double binCount)
+  void FindPeaksMD::addPeak(const V3D & Q, const double binCount)
   {
-    // Create a peak and add it
-    // Empty starting peak.
-    Peak p;
     try
     {
-      if (dimType == QLAB)
-      {
-        // Build using the Q-lab-frame constructor
-        p = Peak(inst, Q);
-        // Save gonio matrix for later
-        p.setGoniometerMatrix(goniometer);
-      }
-      else if (dimType == QSAMPLE)
-      {
-        // Build using the Q-sample-frame constructor
-        p = Peak(inst, Q, goniometer);
-      }
+      auto p = this->createPeak(Q, binCount);
+      peakWS->addPeak(*p);
     }
     catch (std::exception &e)
     {
       g_log.notice() << "Error creating peak at " << Q << " because of '" << e.what() << "'. Peak will be skipped." << std::endl;
-      return;
     }
+  }
+
+  /**
+   * Creates a Peak object from Q & bin count
+   * */
+  boost::shared_ptr<DataObjects::Peak> FindPeaksMD::createPeak(const Mantid::Kernel::V3D & Q, const double binCount)
+  {
+    boost::shared_ptr<DataObjects::Peak> p;
+    if (dimType == QLAB)
+    {
+      // Build using the Q-lab-frame constructor
+      p = boost::shared_ptr<DataObjects::Peak>(new Peak(inst, Q));
+      // Save gonio matrix for later
+      p->setGoniometerMatrix(goniometer);
+    }
+    else if (dimType == QSAMPLE)
+    {
+      // Build using the Q-sample-frame constructor
+      p = boost::shared_ptr<DataObjects::Peak>(new Peak(inst, Q, goniometer));
+    }
+
 
     try
     { // Look for a detector
-      p.findDetector();
+      p->findDetector();
     }
     catch (...)
     { /* Ignore errors in ray-tracer */ }
 
-    p.setBinCount( binCount );
-
+    p->setBinCount( binCount );
     // Save the run number found before.
-    p.setRunNumber(runNumber);
-
-    peakWS->addPeak(p);
+    p->setRunNumber(runNumber);
+    return p;
   }
-
 
   //----------------------------------------------------------------------------------------------
   /** Integrate the peaks of the workspace using parameters saved in the algorithm class
@@ -195,13 +290,21 @@ namespace MDEvents
     if (nd < 3)
       throw std::invalid_argument("Workspace must have at least 3 dimensions.");
 
+    if(isFullMDEvent<MDE,nd>())
+    {
+      m_addDetectors = true;
+    }
+    else
+    {
+      m_addDetectors = false;
+      g_log.warning("Workspace contains only lean events. Resultant PeaksWorkspaces will not contain full detector information.");
+    }
+
     progress(0.01, "Refreshing Centroids");
 
     // TODO: This might be slow, progress report?
     // Make sure all centroids are fresh
     ws->getBox()->refreshCentroid();
-
-    typedef MDBoxBase<MDE,nd>* boxPtr;
 
     if (ws->getNumExperimentInfo() == 0)
       throw std::runtime_error("No instrument was found in the MDEventWorkspace. Cannot find peaks.");
@@ -211,12 +314,9 @@ namespace MDEvents
     // Copy the instrument, sample, run to the peaks workspace.
     peakWS->copyExperimentInfoFrom(ei.get());
 
-    /// Arbitrary scaling factor for density to make more manageable numbers, especially for older file formats.
-    signal_t densityScalingFactor = 1e-6;
-
     // Calculate a threshold below which a box is too diffuse to be considered a peak.
     signal_t thresholdDensity = 0.0;
-    thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor * densityScalingFactor;
+    thresholdDensity = ws->getBox()->getSignalNormalized() * DensityThresholdFactor * m_densityScaleFactor;
     // cppcheck get confused by NaN check
     // cppcheck-suppress duplicateExpression
     if ((thresholdDensity != thresholdDensity) || (thresholdDensity == std::numeric_limits<double>::infinity())
@@ -227,7 +327,7 @@ namespace MDEvents
     }
     g_log.notice() << "Threshold signal density: " << thresholdDensity << std::endl;
 
-
+    typedef MDBoxBase<MDE,nd> * boxPtr;
     // We will fill this vector with pointers to all the boxes (up to a given depth)
     typename std::vector<boxPtr> boxes;
 
@@ -249,7 +349,7 @@ namespace MDEvents
     for (it1 = boxes.begin(); it1 != it1_end; it1++)
     {
       boxPtr box = *it1;
-      double density = box->getSignalNormalized() * densityScalingFactor;
+      double density = box->getSignalNormalized() * m_densityScaleFactor;
       // Skip any boxes with too small a signal density.
       if (density > thresholdDensity)
         sortedBoxes.insert(dens_box(density,box));
@@ -342,12 +442,20 @@ namespace MDEvents
       V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
 
       // The "bin count" used will be the box density.
-      double binCount = box->getSignalNormalized() * densityScalingFactor;
+      double binCount = box->getSignalNormalized() * m_densityScaleFactor;
 
-      // Create the peak
-      addPeak(Q, binCount);
+      try
+      {
+        auto p = this->createPeak(Q, binCount);
+        if(m_addDetectors) addDetectors(*p,*box);
+        peakWS->addPeak(*p);
+      }
+      catch (std::exception &e)
+      {
+        g_log.notice() << "Error creating peak at " << Q << " because of '" << e.what() << "'. Peak will be skipped." << std::endl;
+      }
 
-      // Report progres for each box found.
+      // Report progress for each box found.
       prog->report("Adding Peaks");
 
     } // for each box found
@@ -368,6 +476,8 @@ namespace MDEvents
     if (nd < 3)
       throw std::invalid_argument("Workspace must have at least 3 dimensions.");
 
+    g_log.warning("Workspace is an MDHistoWorkspace. Resultant PeaksWorkspaces will not contain full detector information.");
+
     if (ws->getNumExperimentInfo() == 0)
       throw std::runtime_error("No instrument was found in the workspace. Cannot find peaks.");
     ExperimentInfo_sptr ei = ws->getExperimentInfo(0);
@@ -382,9 +492,6 @@ namespace MDEvents
     // Map that will sort the boxes by increasing density. The key = density; value = box index.
     std::multimap<double, size_t> sortedBoxes;
 
-    /// Arbitrary scaling factor for density to make more manageable numbers, especially for older file formats.
-    signal_t densityScalingFactor = 1e-6;
-
     size_t numBoxes = ws->getNPoints();
 
     // --------- Count the overall signal density -----------------------------
@@ -394,7 +501,7 @@ namespace MDEvents
       totalSignal += ws->getSignalAt(i);
     // Calculate the threshold density
     double thresholdDensity = (totalSignal * ws->getInverseVolume() / double(numBoxes))
-                              * DensityThresholdFactor * densityScalingFactor;
+                              * DensityThresholdFactor * m_densityScaleFactor;
     if ((thresholdDensity != thresholdDensity) || (thresholdDensity == std::numeric_limits<double>::infinity())
         || (thresholdDensity == -std::numeric_limits<double>::infinity()))
     {
@@ -407,7 +514,7 @@ namespace MDEvents
     progress(0.20, "Sorting Boxes by Density");
     for (size_t i=0; i<numBoxes; i++)
     {
-      double density = ws->getSignalNormalizedAt(i) * densityScalingFactor;
+      double density = ws->getSignalNormalizedAt(i) * m_densityScaleFactor;
       // Skip any boxes with too small a signal density.
       if (density > thresholdDensity)
         sortedBoxes.insert(dens_box(density,i));
@@ -481,7 +588,7 @@ namespace MDEvents
       V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
 
       // The "bin count" used will be the box density.
-      double binCount = ws->getSignalNormalizedAt(index) * densityScalingFactor;
+      double binCount = ws->getSignalNormalizedAt(index) * m_densityScaleFactor;
 
       // Create the peak
       addPeak(Q, binCount);
