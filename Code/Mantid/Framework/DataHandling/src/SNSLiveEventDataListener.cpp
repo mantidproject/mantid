@@ -4,6 +4,7 @@
 #include "MantidDataHandling/ADARAParser.h"
 #include "MantidDataHandling/SNSLiveEventDataListener.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WriteLock.h"
@@ -40,6 +41,18 @@ using namespace Mantid::API;
 // Names for a couple of time series properties
 #define PAUSE_PROPERTY "pause"
 #define SCAN_PROPERTY "scan_index"
+
+
+// Helper function to get a DateAndTime value from an ADARA packet
+Mantid::Kernel::DateAndTime timeFromPacket( const ADARA::PacketHeader &pkt)
+{
+  struct timespec timestamp = pkt.timestamp();
+  timestamp.tv_sec -= ADARA::EPICS_EPOCH_OFFSET;  // Convert back to Jan 1, 1990 epoch
+
+  return Mantid::Kernel::DateAndTime( timestamp.tv_sec, timestamp.tv_nsec);
+}
+
+
 namespace Mantid
 {
 namespace DataHandling
@@ -73,6 +86,15 @@ namespace DataHandling
     // Initialize the heartbeat time to the current time so we don't get a bunch of
     // timeout errors when the background thread starts.
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
+
+    // Initialize m_keepPausedEvents from the config file.
+    // NOTE: To the best of my knowledge, the existence of this property is not documented
+    // anywhere and this lack of documentation is deliberate.
+    if ( ! ConfigService::Instance().getValue("livelistener.keeppausedevents", m_keepPausedEvents) )
+    {
+      // If the property hasn't been set, assume false
+      m_keepPausedEvents = 0;
+    }
   }
     
   /// Destructor
@@ -250,12 +272,10 @@ namespace DataHandling
       return false;
     }
 
-    // Next - check to see if the run has been paused (we don't have to process
-    // the events if we're paused)
-    // TODO: There's been some talk about a property that the user could set that
-    // would tell us to process all events, even if the run is paused.  Need to
-    // check on that!
-    if ( m_pauseNetRead)
+    // Next - check to see if the run has been paused.  We don't process
+    // the events if we're paused unless the user has specifically overridden
+    // this behavior with the livelistener.keeppausedevents property.
+    if (m_runPaused &&  m_keepPausedEvents == false)
     {
       return true;
     }
@@ -456,7 +476,7 @@ namespace DataHandling
     }
     else
     {
-      m_buffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( pkt.pulseId(), pkt.value());
+      m_buffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
     }
 
     return true;
@@ -478,7 +498,7 @@ namespace DataHandling
     }
     else
     {
-      m_buffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( pkt.pulseId(), pkt.value());
+      m_buffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
     }
 
     return true;
@@ -500,7 +520,7 @@ namespace DataHandling
     }
     else
     {
-      m_buffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( pkt.pulseId(), pkt.value());
+      m_buffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
     }
 
     return true;
@@ -651,23 +671,23 @@ namespace DataHandling
       break;
 
     case ADARA::MarkerType::SCAN_START:
-      m_buffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( pkt.pulseId(), pkt.scanIndex());
+      m_buffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), pkt.scanIndex());
       g_log.information() << "Scan Start: " << pkt.scanIndex() << std::endl;
       break;
 
     case ADARA::MarkerType::SCAN_STOP:
-      m_buffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( pkt.pulseId(), 0);
+      m_buffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), 0);
       g_log.information() << "Scan Stop:  " << pkt.scanIndex() << std::endl;
       break;
 
     case ADARA::MarkerType::PAUSE:
-      m_buffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( pkt.pulseId(), 1);
+      m_buffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 1);
       g_log.information() << "Run paused" << std::endl;
       m_runPaused = true;
       break;
 
     case ADARA::MarkerType::RESUME:
-      m_buffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( pkt.pulseId(), 0);
+      m_buffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 0);
       g_log.information() << "Run resumed" << std::endl;
       m_runPaused = false;
       break;
