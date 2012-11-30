@@ -1,5 +1,5 @@
-#ifndef SLICE_VIEWER_PEAKTRANSFORM_TEST_H_
-#define SLICE_VIEWER_PEAKTRANSFORM_TEST_H_
+#ifndef SLICE_VIEWER_PEAKTRANSFORMHKL_TEST_H_
+#define SLICE_VIEWER_PEAKTRANSFORMHKL_TEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include "MantidQtSliceViewer/PeakTransformHKL.h"
@@ -127,8 +127,25 @@ void test_assigment()
   TS_ASSERT_EQUALS(regexA, regexB);
 }
 
+void test_clone()
+{
+  PeakTransformHKL A("H", "L");
+  PeakTransform_sptr clone = A.clone();
+
+  TSM_ASSERT("Clone product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformHKL>(clone) != NULL)
+
+  // Test indirectly via what the transformations produce.
+  V3D productA = A.transform(V3D(0, 1, 2));
+  V3D productB = clone->transform(V3D(0, 1, 2));
+  TS_ASSERT_EQUALS(productA, productB);  
+  // Test indirectly via the free regex.
+  boost::regex regexA = A.getFreePeakAxisRegex();
+  boost::regex regexB = clone->getFreePeakAxisRegex();
+  TS_ASSERT_EQUALS(regexA, regexB);
+}
+
 private:
 };
 #endif
 
-//end SLICE_VIEWER_PEAKTRANSFORM_TEST_H_
+//end SLICE_VIEWER_PEAKTRANSFORMHKL_TEST_H_
