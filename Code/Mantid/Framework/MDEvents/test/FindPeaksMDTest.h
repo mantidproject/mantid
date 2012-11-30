@@ -204,11 +204,5 @@ public:
 
 };
 
-//=================================== Performance Test ====================================
-class FindPeaksMDTestPerformance : public CxxTest::TestSuite
-{
-
-};
-
 #endif /* MANTID_MDEVENTS_MDEWFINDPEAKSTEST_H_ */
 
