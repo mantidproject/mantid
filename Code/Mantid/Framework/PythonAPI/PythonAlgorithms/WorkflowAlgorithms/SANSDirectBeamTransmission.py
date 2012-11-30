@@ -98,23 +98,6 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         if beam_center_x_input > 0 and beam_center_y_input > 0:
             beam_center_x = beam_center_x_input
             beam_center_y = beam_center_y_input  
-        #elif property_manager.existsProperty("TransmissionBeamCenterAlgorithm"):
-        #    p=property_manager.getProperty("TransmissionBeamCenterAlgorithm")
-        #    alg=Algorithm.fromString(p.valueAsStr)
-        #    if alg.existsProperty("ReductionProperties"):
-        #        alg.setProperty("ReductionProperties", property_manager_name)
-        #    alg.execute()
-        #    if alg.existsProperty("OutputMessage"):
-        #        output_str += "   %s\n" % alg.getProperty("OutputMessage").value
-        #    beam_center_x = alg.getProperty("FoundBeamCenterX")
-        #    beam_center_y = alg.getProperty("FoundBeamCenterX")
-        #else:
-        #    if property_manager.existsProperty("LatestBeamCenterX") \
-        #        and property_manager.existsProperty("LatestBeamCenterY"):
-        #        beam_center_x = property_manager.getProperty("LatestBeamCenterX").value
-        #        beam_center_y = property_manager.getProperty("LatestBeamCenterY").value
-        #    else:
-        #        Logger.get("SANSDirectBeamTransmission").notice("No beam center for transmission determination")
         
         # Get instrument to use with FileFinder
         instrument = ''
@@ -162,43 +145,12 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         # Subtract dark current
         use_sample_dc = self.getProperty("UseSampleDarkCurrent").value
         dark_current_data = self.getPropertyValue("DarkCurrentFilename")
-        if use_sample_dc is True:
-        # Dark current subtraction
-            if property_manager.existsProperty("DarkCurrentAlgorithm"):
-                def _dark(workspace):
-                    p=property_manager.getProperty("DarkCurrentAlgorithm")
-                    # Dark current subtraction for sample data
-                    alg=Algorithm.fromString(p.valueAsStr)
-                    alg.setProperty("InputWorkspace", workspace)
-                    alg.setProperty("OutputWorkspace", workspace)
-                    if alg.existsProperty("ReductionProperties"):
-                        alg.setProperty("ReductionProperties", property_manager_name)
-                    alg.execute()
-                    msg = "Dark current subtracted"
-                    if alg.existsProperty("OutputMessage"):
-                        msg += alg.getProperty("OutputMessage").value
-                    return msg
-                        
-                partial_out1 = _dark(sample_ws_name)
-                partial_out2 = _dark(empty_ws_name)
-                partial_out = "\n   Sample: %s\n   Empty: %s" % (partial_out1, partial_out2)
-                partial_out.replace('\n', '   \n')
-                output_str += partial_out
         
-        elif len(dark_current_data.strip())>0:
-            Logger.get("SANSDirectBeamTransmission").error("SANSDirectBeamTransmission dark current not implemented")
-            return
-            dark_current = find_data(dark_current_data, instrument=instrument)
-            #self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
-            #                                  InputWorkspace=None, Filename=dark_current,
-            #                                  OutputWorkspace=None,
-            #                                  PersistentCorrection=False,
-            #                                  ReductionProperties=reducer.get_reduction_table_name())
-            #partial_out = self._dark_current_subtracter.execute(reducer, sample_ws)
-            #partial_out2 = self._dark_current_subtracter.execute(reducer, empty_ws)
-            #partial_out = "\n%s\n%s" % (partial_out, partial_out2)
-            #partial_out.replace('\n', '   \n')
-            #output_str += partial_out
+        partial_out1 = self._subtract_dark_current(sample_ws_name, property_manager)
+        partial_out2 = self._subtract_dark_current(empty_ws_name, property_manager)
+        partial_out = "\n   Sample: %s\n   Empty: %s" % (partial_out1, partial_out2)
+        partial_out.replace('\n', '   \n')
+        output_str += partial_out
             
         # Find which pixels to sum up as our "monitor". At this point we have moved the detector
         # so that the beam is at (0,0), so all we need is to sum the area around that point.
@@ -315,7 +267,43 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         if AnalysisDataService.doesExist(trans_workspace+'_rebin'):
             AnalysisDataService.remove(trans_workspace+'_rebin')          
        
+    def _subtract_dark_current(self, workspace_name, property_manager):
+        """
+            Subtract the dark current
+            @param workspace_name: name of the workspace to subtract from
+            @param property_manager: property manager object 
+        """
+        # Subtract dark current
+        use_sample_dc = self.getProperty("UseSampleDarkCurrent").value
+        dark_current_data = self.getPropertyValue("DarkCurrentFilename")
+        property_manager_name = self.getProperty("ReductionProperties").value
+        # Get instrument to use with FileFinder
+        instrument = ''
+        if property_manager.existsProperty("InstrumentName"):
+            instrument = property_manager.getProperty("InstrumentName").value
         
+        dark_current_property = "DefaultDarkCurrentAlgorithm"
+        def _dark(workspace, dark_current_property):
+            if property_manager.existsProperty(dark_current_property):
+                p=property_manager.getProperty(dark_current_property)
+                # Dark current subtraction for sample data
+                alg=Algorithm.fromString(p.valueAsStr)
+                alg.setProperty("InputWorkspace", workspace)
+                alg.setProperty("OutputWorkspace", workspace)
+                if alg.existsProperty("PersistentCorrection"):
+                    alg.setProperty("PersistentCorrection", False)
+                if alg.existsProperty("ReductionProperties"):
+                    alg.setProperty("ReductionProperties", property_manager_name)
+                alg.execute()
+                msg = "Dark current subtracted"
+                if alg.existsProperty("OutputMessage"):
+                    msg += alg.getProperty("OutputMessage").value
+                return msg
+
+        if use_sample_dc is True:
+            _dark(workspace_name, "DarkCurrentAlgorithm")
+        elif len(dark_current_data.strip())>0:
+            _dark(workspace_name, "DefaultDarkCurrentAlgorithm")        
 
 #############################################################################################
 

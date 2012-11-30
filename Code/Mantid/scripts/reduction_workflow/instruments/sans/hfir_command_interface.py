@@ -141,6 +141,7 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_depen
     ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
 
 def TransmissionDarkCurrent(dark_current=None):
+    #TODO
     dark_current=find_data(dark_current, instrument=ReductionSingleton().instrument.name())
     ReductionSingleton().get_transmission().set_dark_current(dark_current)
 
@@ -151,17 +152,19 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
                              sample_scattering, direct_scattering,
                              spreader_transmission=1.0, spreader_transmission_err=0.0,
                              theta_dependent=True ):
-    find_data(sample_spreader, instrument=ReductionSingleton().instrument.name())
-    find_data(direct_spreader, instrument=ReductionSingleton().instrument.name())
-    find_data(sample_scattering, instrument=ReductionSingleton().instrument.name())
-    find_data(direct_scattering, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_transmission(sans_reduction_steps.BeamSpreaderTransmission(sample_spreader=sample_spreader, 
-                                                                                      direct_spreader=direct_spreader,
-                                                                                      sample_scattering=sample_scattering, 
-                                                                                      direct_scattering=direct_scattering,
-                                                                                      spreader_transmission=spreader_transmission, 
-                                                                                      spreader_transmission_err=spreader_transmission_err,
-                                                                                      theta_dependent=theta_dependent))
+    find_data(sample_spreader, instrument=ReductionSingleton().get_instrument())
+    find_data(direct_spreader, instrument=ReductionSingleton().get_instrument())
+    find_data(sample_scattering, instrument=ReductionSingleton().get_instrument())
+    find_data(direct_scattering, instrument=ReductionSingleton().get_instrument())
+    
+    ReductionSingleton().reduction_properties["TransmissionMethod"] = "BeamSpreader"
+    ReductionSingleton().reduction_properties["TransSampleSpreaderFilename"] = sample_spreader
+    ReductionSingleton().reduction_properties["TransDirectSpreaderFilename"] = direct_spreader
+    ReductionSingleton().reduction_properties["TransSampleScatteringFilename"] = sample_scattering
+    ReductionSingleton().reduction_properties["TransDirectScatteringFilename"] = direct_scattering
+    ReductionSingleton().reduction_properties["SpreaderTransmissionValue"] = spreader_transmission
+    ReductionSingleton().reduction_properties["SpreaderTransmissionError"] = spreader_transmission_err
+    ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
 
 def SetTransmissionBeamCenter(x, y):
     ReductionSingleton().reduction_properties["TransmissionBeamCenterMethod"] = "Value"
@@ -169,18 +172,22 @@ def SetTransmissionBeamCenter(x, y):
     ReductionSingleton().reduction_properties["TransmissionBeamCenterY"] = y
 
 def TransmissionDirectBeamCenter(datafile):
+    #TODO
     find_data(datafile, instrument=ReductionSingleton().instrument.name())
     if ReductionSingleton().get_transmission() is None:
         raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
     ReductionSingleton().get_transmission().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_persistent(False))
 
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
+    #TODO
     ReductionSingleton().get_mask().mask_edges(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high)
 
 def MaskRectangle(x_min, x_max, y_min, y_max):
+    #TODO
     ReductionSingleton().get_mask().add_pixel_rectangle(x_min, x_max, y_min, y_max)
     
 def MaskDetectors(det_list):
+    #TODO
     ReductionSingleton().get_mask().add_detector_list(det_list)
 
 def Background(datafile):
@@ -193,11 +200,13 @@ def NoBackground():
     ReductionSingleton().reduction_properties["BackgroundFiles"] = ""
 
 def SaveIqAscii(reducer=None, process=None):
+    #TODO
     if reducer is None:
         reducer = ReductionSingleton()
     reducer.set_save_Iq(sans_reduction_steps.SaveIqAscii(process=process))
 
 def NoSaveIq():
+    #TODO
     ReductionSingleton().set_save_Iq(None)
         
 def NoBckTransmission():

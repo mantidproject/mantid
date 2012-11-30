@@ -137,7 +137,7 @@ void SetupHFIRReduction::init()
   std::vector<std::string> transOptions;
   transOptions.push_back("Value");
   transOptions.push_back("DirectBeam");
-  //transOptions.push_back("BeamSpreader");
+  transOptions.push_back("BeamSpreader");
   declareProperty("TransmissionMethod", "Value",
       boost::make_shared<StringListValidator>(transOptions),
       "Transmission determination method");
@@ -176,6 +176,20 @@ void SetupHFIRReduction::init()
   declareProperty("ThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
 
+  // - Beam spreader transmission method
+  declareProperty(new API::FileProperty("TransSampleSpreaderFilename", "",
+      API::FileProperty::OptionalLoad, ".xml"));
+  declareProperty(new API::FileProperty("TransDirectSpreaderFilename", "",
+      API::FileProperty::OptionalLoad, ".xml"));
+  declareProperty(new API::FileProperty("TransSampleScatteringFilename", "",
+      API::FileProperty::OptionalLoad, ".xml"));
+  declareProperty(new API::FileProperty("TransDirectScatteringFilename", "",
+      API::FileProperty::OptionalLoad, ".xml"));
+  declareProperty("SpreaderTransmissionValue", 1.0,
+      "Beam spreader transmission value");
+  declareProperty("SpreaderTransmissionError", 0.0,
+      "Beam spreader transmission error");
+
   setPropertyGroup("TransmissionMethod", trans_grp);
   setPropertyGroup("TransmissionValue", trans_grp);
   setPropertyGroup("TransmissionError", trans_grp);
@@ -187,6 +201,13 @@ void SetupHFIRReduction::init()
   setPropertyGroup("TransmissionBeamCenterY", trans_grp);
   setPropertyGroup("TransmissionBeamCenterFile", trans_grp);
   setPropertyGroup("ThetaDependentTransmission", trans_grp);
+
+  setPropertyGroup("ThetaDependentTransmission", trans_grp);
+  setPropertyGroup("TransDirectSpreaderFilename", trans_grp);
+  setPropertyGroup("TransSampleScatteringFilename", trans_grp);
+  setPropertyGroup("TransDirectScatteringFilename", trans_grp);
+  setPropertyGroup("SpreaderTransmissionValue", trans_grp);
+  setPropertyGroup("SpreaderTransmissionError", trans_grp);
 
   // Background options
   std::string bck_grp = "Background";
@@ -227,6 +248,20 @@ void SetupHFIRReduction::init()
   declareProperty("BckThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
 
+  // - Beam spreader transmission method
+  declareProperty(new API::FileProperty("BckTransSampleSpreaderFilename", "",
+      API::FileProperty::OptionalLoad, ".xml"));
+  declareProperty(new API::FileProperty("BckTransDirectSpreaderFilename", "",
+      API::FileProperty::OptionalLoad, ".xml"));
+  declareProperty(new API::FileProperty("BckTransSampleScatteringFilename", "",
+      API::FileProperty::OptionalLoad, ".xml"));
+  declareProperty(new API::FileProperty("BckTransDirectScatteringFilename", "",
+      API::FileProperty::OptionalLoad, ".xml"));
+  declareProperty("BckSpreaderTransmissionValue", 1.0,
+      "Beam spreader transmission value");
+  declareProperty("BckSpreaderTransmissionError", 0.0,
+      "Beam spreader transmission error");
+
   setPropertyGroup("BackgroundFiles", bck_grp);
   setPropertyGroup("BckTransmissionMethod", bck_grp);
   setPropertyGroup("BckTransmissionValue", bck_grp);
@@ -234,10 +269,16 @@ void SetupHFIRReduction::init()
   setPropertyGroup("BckTransmissionBeamRadius", bck_grp);
   setPropertyGroup("BckTransmissionSampleDataFile", bck_grp);
   setPropertyGroup("BckTransmissionEmptyDataFile", bck_grp);
-  setPropertyGroup("BckTransmissionBeamCenterMethod", trans_grp);
+  setPropertyGroup("BckTransmissionBeamCenterMethod", bck_grp);
   setPropertyGroup("BckTransmissionBeamCenterX", bck_grp);
   setPropertyGroup("BckTransmissionBeamCenterY", bck_grp);
-  setPropertyGroup("BckTransmissionBeamCenterFile", trans_grp);
+  setPropertyGroup("BckTransmissionBeamCenterFile", bck_grp);
+
+  setPropertyGroup("BckTransDirectSpreaderFilename", bck_grp);
+  setPropertyGroup("BckTransSampleScatteringFilename", bck_grp);
+  setPropertyGroup("BckTransDirectScatteringFilename", bck_grp);
+  setPropertyGroup("BckSpreaderTransmissionValue", bck_grp);
+  setPropertyGroup("BckSpreaderTransmissionError", bck_grp);
   setPropertyGroup("BckThetaDependentTransmission", bck_grp);
 
   // Geometry correction
@@ -463,6 +504,9 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");
   if (backgroundFile.size() > 0)
     reductionManager->declareProperty(new PropertyWithValue<std::string>("BackgroundFiles", backgroundFile) );
+  else
+    return;
+
   const bool bckThetaDependentTrans = getProperty("BckThetaDependentTransmission");
   const std::string bckTransMethod = getProperty("BckTransmissionMethod");
   if (boost::iequals(bckTransMethod, "Value"))
@@ -480,7 +524,8 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
       algProp->setValue(transAlg->toString());
       reductionManager->declareProperty(algProp);
     } else {
-      g_log.error("SetupHFIRReduction expected transmission/error values and got empty values");
+      g_log.information("SetupHFIRReduction [BckTransmissionAlgorithm]: "
+          "expected transmission/error values and got empty values");
     }
   }
   else if (boost::iequals(bckTransMethod, "DirectBeam"))
@@ -528,6 +573,30 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
     algProp->setValue(transAlg->toString());
     reductionManager->declareProperty(algProp);
   }
+  // Direct beam method for transmission determination
+  else if (boost::iequals(bckTransMethod, "BeamSpreader"))
+  {
+    const std::string sampleSpread = getPropertyValue("BckTransSampleSpreaderFilename");
+    const std::string directSpread = getPropertyValue("BckTransDirectSpreaderFilename");
+    const std::string sampleScatt = getPropertyValue("BckTransSampleScatteringFilename");
+    const std::string directScatt = getPropertyValue("BckTransDirectScatteringFilename");
+    const double spreaderTrValue = getProperty("BckSpreaderTransmissionValue");
+    const double spreaderTrError = getProperty("BckSpreaderTransmissionError");
+    const bool thetaDependentTrans = getProperty("BckThetaDependentTransmission");
+
+    IAlgorithm_sptr transAlg = createSubAlgorithm("SANSBeamSpreaderTransmission");
+    transAlg->setProperty("SampleSpreaderFilename", sampleSpread);
+    transAlg->setProperty("DirectSpreaderFilename", directSpread);
+    transAlg->setProperty("SampleScatteringFilename", sampleScatt);
+    transAlg->setProperty("DirectScatteringFilename", directScatt);
+    transAlg->setProperty("SpreaderTransmissionValue", spreaderTrValue);
+    transAlg->setProperty("SpreaderTransmissionError", spreaderTrError);
+    transAlg->setProperty("ThetaDependent", thetaDependentTrans);
+    AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
+    algProp->setValue(transAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
+
 }
 
 void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> reductionManager)
@@ -553,7 +622,8 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
       algProp->setValue(transAlg->toString());
       reductionManager->declareProperty(algProp);
     } else {
-      g_log.error("SetupHFIRReduction expected transmission/error values and got empty values");
+      g_log.information("SetupHFIRReduction [TransmissionAlgorithm]:"
+          "expected transmission/error values and got empty values");
     }
   }
   // Direct beam method for transmission determination
@@ -596,6 +666,28 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
              " but no file was provided" << std::endl;
        }
     }
+    transAlg->setProperty("ThetaDependent", thetaDependentTrans);
+    AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
+    algProp->setValue(transAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
+  // Direct beam method for transmission determination
+  else if (boost::iequals(transMethod, "BeamSpreader"))
+  {
+    const std::string sampleSpread = getPropertyValue("TransSampleSpreaderFilename");
+    const std::string directSpread = getPropertyValue("TransDirectSpreaderFilename");
+    const std::string sampleScatt = getPropertyValue("TransSampleScatteringFilename");
+    const std::string directScatt = getPropertyValue("TransDirectScatteringFilename");
+    const double spreaderTrValue = getProperty("SpreaderTransmissionValue");
+    const double spreaderTrError = getProperty("SpreaderTransmissionError");
+
+    IAlgorithm_sptr transAlg = createSubAlgorithm("SANSBeamSpreaderTransmission");
+    transAlg->setProperty("SampleSpreaderFilename", sampleSpread);
+    transAlg->setProperty("DirectSpreaderFilename", directSpread);
+    transAlg->setProperty("SampleScatteringFilename", sampleScatt);
+    transAlg->setProperty("DirectScatteringFilename", directScatt);
+    transAlg->setProperty("SpreaderTransmissionValue", spreaderTrValue);
+    transAlg->setProperty("SpreaderTransmissionError", spreaderTrError);
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
     AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
     algProp->setValue(transAlg->toString());

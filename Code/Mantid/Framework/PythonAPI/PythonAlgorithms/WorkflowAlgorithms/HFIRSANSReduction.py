@@ -90,6 +90,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)
         
         property_list = [p.name for p in property_manager.getProperties()]
+        print property_list
         
         output_msg = ""
         # Find the beam center
