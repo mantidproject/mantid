@@ -20,18 +20,18 @@ class HFIRSetup(ReductionStep):
     def execute(self, reducer, workspace=None):
         beam_ctr_x = None
         beam_ctr_y = None
-        find_beam = True
+        find_beam = "None"
         
         if reducer._beam_finder is not None and \
             type(reducer._beam_finder)==BaseBeamFinder:
             [beam_ctr_x, beam_ctr_y] = reducer._beam_finder.get_beam_center()
-            find_beam = False
+            find_beam = "Value"
 
         SetupHFIRReduction(SampleDetectorDistance=reducer._data_loader._sample_det_dist,
                            SampleDetectorDistanceOffset=reducer._data_loader._sample_det_offset,
                            Wavelength=reducer._data_loader._wavelength,
                            WavelengthSpread=reducer._data_loader._wavelength_spread,
-                           FindBeamCenter=find_beam,
+                           BeamCenterMethod=find_beam,
                            BeamCenterX=beam_ctr_x,
                            BeamCenterY=beam_ctr_y,                           
                            ReductionProperties=reducer.get_reduction_table_name())

@@ -28,21 +28,19 @@ def GPSANS():
 
 def DirectBeamCenter(datafile):
     find_data(datafile, instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().reduction_properties["FindBeamCenter"]=True
+    ReductionSingleton().reduction_properties["BeamCenterMethod"]="DirectBeam"
     ReductionSingleton().reduction_properties["BeamCenterFile"]=datafile
-    ReductionSingleton().reduction_properties["UseDirectBeamMethod"]=True
     ReductionSingleton().reduction_properties["BeamCenterPersistent"]=True
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
     find_data(datafile, instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().reduction_properties["FindBeamCenter"]=True
+    ReductionSingleton().reduction_properties["BeamCenterMethod"]="Scattering"
     ReductionSingleton().reduction_properties["BeamRadius"]=beam_radius
     ReductionSingleton().reduction_properties["BeamCenterFile"]=datafile
-    ReductionSingleton().reduction_properties["UseDirectBeamMethod"]=False
     ReductionSingleton().reduction_properties["BeamCenterPersistent"]=True
 
 def SetBeamCenter(x,y):
-    ReductionSingleton().reduction_properties["FindBeamCenter"]=False
+    ReductionSingleton().reduction_properties["BeamCenterMethod"]="Value"
     ReductionSingleton().reduction_properties["BeamCenterX"]=x
     ReductionSingleton().reduction_properties["BeamCenterY"]=y
     
@@ -166,6 +164,7 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
                                                                                       theta_dependent=theta_dependent))
 
 def SetTransmissionBeamCenter(x, y):
+    ReductionSingleton().reduction_properties["TransmissionBeamCenterMethod"] = "Value"
     ReductionSingleton().reduction_properties["TransmissionBeamCenterX"] = x
     ReductionSingleton().reduction_properties["TransmissionBeamCenterY"] = y
 
@@ -223,14 +222,13 @@ def SetBckTransmission(trans, error, theta_dependent=True):
     ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependent
 
 def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
-    if ReductionSingleton().get_background() is None:
-        raise RuntimeError, "A background hasn't been defined."
-    find_data(sample_file, instrument=ReductionSingleton().instrument.name())
-    find_data(empty_file, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().get_background().set_transmission(sans_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
-                                                                                        empty_file=empty_file,
-                                                                                        beam_radius=beam_radius,
-                                                                                        theta_dependent=theta_dependent))
+    find_data(sample_file, instrument=ReductionSingleton().get_instrument())
+    find_data(empty_file, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["BckTransmissionMethod"] = "DirectBeam"
+    ReductionSingleton().reduction_properties["BckTransmissionBeamRadius"] = beam_radius
+    ReductionSingleton().reduction_properties["BckTransmissionSampleDataFile"] = sample_file
+    ReductionSingleton().reduction_properties["BckTransmissionEmptyDataFile"] = empty_file
+    ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependent
 
 def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
                              sample_scattering, direct_scattering,
@@ -251,20 +249,13 @@ def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
                                                                                           theta_dependent=theta_dependent))
 
 def SetBckTransmissionBeamCenter(x, y):
-    if ReductionSingleton().get_background() is None:
-        raise RuntimeError, "A background hasn't been defined."
-    if ReductionSingleton().get_background().get_transmission_calculator() is None:
-        raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
-    ReductionSingleton().get_background().get_transmission_calculator().set_beam_finder(sans_reduction_steps.BaseBeamFinder(x,y))
+    ReductionSingleton().reduction_properties["BckTransmissionBeamCenterMethod"] = "Value"
+    ReductionSingleton().reduction_properties["BckTransmissionBeamCenterX"] = x
+    ReductionSingleton().reduction_properties["BckTransmissionBeamCenterY"] = y
 
 def BckTransmissionDirectBeamCenter(datafile):
-    find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    if ReductionSingleton().get_background() is None:
-        raise RuntimeError, "A background hasn't been defined."
-    if ReductionSingleton().get_background().get_transmission_calculator() is None:
-        raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
-    ReductionSingleton().get_background().get_transmission_calculator().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_persistent(False))
-
+    ReductionSingleton().reduction_properties["BckTransmissionBeamCenterMethod"] = "DirectBeam"
+    ReductionSingleton().reduction_properties["BckTransmissionBeamCenterFile"]=datafile
 
 def BckTransmissionDarkCurrent(dark_current=None):
     if ReductionSingleton().get_background() is None:

@@ -143,17 +143,39 @@ class HFIRSANSReduction(PythonAlgorithm):
             # Process background like we processed the sample data
             bck_msg += self.process_data_file(background_ws)
             
+            trans_beam_center_x = None
+            trans_beam_center_y = None
+            if "BckTransmissionBeamCenterAlgorithm" in property_list:
+                # Execute the beam finding algorithm and set the beam
+                # center for the transmission calculation
+                p=property_manager.getProperty("BckTransmissionBeamCenterAlgorithm")
+                alg=Algorithm.fromString(p.valueAsStr)
+                if alg.existsProperty("ReductionProperties"):
+                    alg.setProperty("ReductionProperties", property_manager_name)
+                alg.execute()
+                trans_beam_center_x = alg.getProperty("FoundBeamCenterX").value
+                trans_beam_center_y = alg.getProperty("FoundBeamCenterY").value
+            
             # Background transmission correction
             if "BckTransmissionAlgorithm" in property_list:
                 p=property_manager.getProperty("BckTransmissionAlgorithm")
                 alg=Algorithm.fromString(p.valueAsStr)
                 alg.setProperty("InputWorkspace", background_ws)
-                alg.setProperty("OutputWorkspace", background_ws)
+                alg.setProperty("OutputWorkspace", '__'+background_ws+"_reduced")
+                
+                if alg.existsProperty("BeamCenterX") \
+                    and alg.existsProperty("BeamCenterY") \
+                    and trans_beam_center_x is not None \
+                    and trans_beam_center_y is not None:
+                    alg.setProperty("BeamCenterX", trans_beam_center_x)
+                    alg.setProperty("BeamCenterY", trans_beam_center_y)
+                    
                 if alg.existsProperty("ReductionProperties"):
                     alg.setProperty("ReductionProperties", property_manager_name)
                 alg.execute()
                 if alg.existsProperty("OutputMessage"):
                     output_msg += alg.getProperty("OutputMessage").value+'\n'
+                background_ws = '__'+background_ws+'_reduced'
         
             # Subtract background
             api.Minus(LHSWorkspace=output_ws,

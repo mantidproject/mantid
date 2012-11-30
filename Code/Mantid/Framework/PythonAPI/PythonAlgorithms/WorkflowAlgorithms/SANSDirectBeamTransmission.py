@@ -66,7 +66,7 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         # 2- Apply correction (Note: Apply2DTransCorr)
         input_ws_name = self.getPropertyValue("InputWorkspace")
         if not AnalysisDataService.doesExist(input_ws_name):
-            Logger.get("SANSAzimuthalAverage").error("Could not find input workspace")
+            Logger.get("SANSDirectBeamTransmission").error("Could not find input workspace")
         workspace = AnalysisDataService.retrieve(input_ws_name).getName()
         api.CloneWorkspace(InputWorkspace=workspace, OutputWorkspace='__'+workspace)
         
@@ -98,16 +98,23 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         if beam_center_x_input > 0 and beam_center_y_input > 0:
             beam_center_x = beam_center_x_input
             beam_center_y = beam_center_y_input  
-        elif property_manager.existsProperty("TransmissionBeamCenterAlgorithm"):
-            p=property_manager.getProperty("TransmissionBeamCenterAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
-            alg.execute()
-            if alg.existsProperty("OutputMessage"):
-                output_str += "   %s\n" % alg.getProperty("OutputMessage").value
-            beam_center_x = alg.getProperty("FoundBeamCenterX")
-            beam_center_y = alg.getProperty("FoundBeamCenterX")
+        #elif property_manager.existsProperty("TransmissionBeamCenterAlgorithm"):
+        #    p=property_manager.getProperty("TransmissionBeamCenterAlgorithm")
+        #    alg=Algorithm.fromString(p.valueAsStr)
+        #    if alg.existsProperty("ReductionProperties"):
+        #        alg.setProperty("ReductionProperties", property_manager_name)
+        #    alg.execute()
+        #    if alg.existsProperty("OutputMessage"):
+        #        output_str += "   %s\n" % alg.getProperty("OutputMessage").value
+        #    beam_center_x = alg.getProperty("FoundBeamCenterX")
+        #    beam_center_y = alg.getProperty("FoundBeamCenterX")
+        #else:
+        #    if property_manager.existsProperty("LatestBeamCenterX") \
+        #        and property_manager.existsProperty("LatestBeamCenterY"):
+        #        beam_center_x = property_manager.getProperty("LatestBeamCenterX").value
+        #        beam_center_y = property_manager.getProperty("LatestBeamCenterY").value
+        #    else:
+        #        Logger.get("SANSDirectBeamTransmission").notice("No beam center for transmission determination")
         
         # Get instrument to use with FileFinder
         instrument = ''
@@ -117,6 +124,7 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         # Get the data loader
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
+                Logger.get("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
                 raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
             p=property_manager.getProperty("LoadAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
@@ -152,9 +160,9 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         output_str += "   %s\n" % l_text
         
         # Subtract dark current
-        use_sample_dc = self.getProperty("UseSampleDarkCurrent")
+        use_sample_dc = self.getProperty("UseSampleDarkCurrent").value
         dark_current_data = self.getPropertyValue("DarkCurrentFilename")
-        if use_sample_dc:
+        if use_sample_dc is True:
         # Dark current subtraction
             if property_manager.existsProperty("DarkCurrentAlgorithm"):
                 def _dark(workspace):
@@ -178,7 +186,8 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
                 output_str += partial_out
         
         elif len(dark_current_data.strip())>0:
-            raise RuntimeError, "SANSDirectBeamTransmission dark current not implemented"
+            Logger.get("SANSDirectBeamTransmission").error("SANSDirectBeamTransmission dark current not implemented")
+            return
             dark_current = find_data(dark_current_data, instrument=instrument)
             #self.set_dark_current_subtracter(reducer._dark_current_subtracter_class, 
             #                                  InputWorkspace=None, Filename=dark_current,
