@@ -9,16 +9,16 @@ namespace MantidQt
   namespace SliceViewer
   {
     /**
-    @class PeakTransform
+    @class PeakTransformHKL
     Used to remap coordinates into a form consistent with an axis reordering.
     */
-    class DLLExport PeakTransform 
+    class DLLExport PeakTransformHKL 
     {
     public:
-      PeakTransform(const std::string& xPlotLabel, const std::string& yPlotLabel);
-      virtual ~PeakTransform();
-      PeakTransform(const PeakTransform& other);
-      PeakTransform & operator=(const PeakTransform & other);
+      PeakTransformHKL(const std::string& xPlotLabel, const std::string& yPlotLabel);
+      virtual ~PeakTransformHKL();
+      PeakTransformHKL(const PeakTransformHKL& other);
+      PeakTransformHKL & operator=(const PeakTransformHKL & other);
       Mantid::Kernel::V3D transform(const Mantid::Kernel::V3D& original) const;
       boost::regex getFreePeakAxisRegex() const;
     private:

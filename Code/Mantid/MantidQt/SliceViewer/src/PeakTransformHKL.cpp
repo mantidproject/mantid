@@ -1,12 +1,12 @@
-#include "MantidQtSliceViewer/PeakTransform.h"
+#include "MantidQtSliceViewer/PeakTransformHKL.h"
 
 namespace MantidQt
 {
   namespace SliceViewer
   {
 
-   PeakTransform::PeakTransform(const std::string& xPlotLabel, const std::string& yPlotLabel) : 
-  m_xPlotLabel(xPlotLabel),
+   PeakTransformHKL::PeakTransformHKL(const std::string& xPlotLabel, const std::string& yPlotLabel) : 
+    m_xPlotLabel(xPlotLabel),
     m_yPlotLabel(yPlotLabel),
     m_indexOfPlotX(0),
     m_indexOfPlotY(1),
@@ -65,7 +65,7 @@ namespace MantidQt
     }
   }
 
-  PeakTransform::PeakTransform(const PeakTransform& other):
+  PeakTransformHKL::PeakTransformHKL(const PeakTransformHKL& other):
     m_xPlotLabel(other.m_xPlotLabel),
     m_yPlotLabel(other.m_yPlotLabel),
     m_indexOfPlotX(other.m_indexOfPlotX),
@@ -77,7 +77,7 @@ namespace MantidQt
   {
   }
 
-  PeakTransform& PeakTransform::operator=(const PeakTransform & other)
+  PeakTransformHKL& PeakTransformHKL::operator=(const PeakTransformHKL & other)
   {
     if(this != &other)
     {
@@ -93,11 +93,11 @@ namespace MantidQt
     return *this;
   }
 
-  PeakTransform::~PeakTransform()
+  PeakTransformHKL::~PeakTransformHKL()
   {
   }
 
-  boost::regex PeakTransform::getFreePeakAxisRegex() const
+  boost::regex PeakTransformHKL::getFreePeakAxisRegex() const
   {
     switch(m_indexOfPlotZ)
     {
@@ -110,7 +110,7 @@ namespace MantidQt
     }
   }
 
-  Mantid::Kernel::V3D PeakTransform::transform(const Mantid::Kernel::V3D& original) const
+  Mantid::Kernel::V3D PeakTransformHKL::transform(const Mantid::Kernel::V3D& original) const
   {
     // Will have the plots x, y, and z aligned to the correct h, k, l value.
     Mantid::Kernel::V3D transformedPeakPosition;

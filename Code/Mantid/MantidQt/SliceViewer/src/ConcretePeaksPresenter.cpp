@@ -121,7 +121,7 @@ namespace SliceViewer
     {
       std::string xLabel = m_factory->getPlotXLabel();
       std::string yLabel = m_factory->getPlotYLabel();
-      m_transform = PeakTransform(xLabel, yLabel);
+      m_transform = PeakTransformHKL(xLabel, yLabel);
       showAll();
       transformSucceeded = true;
     }

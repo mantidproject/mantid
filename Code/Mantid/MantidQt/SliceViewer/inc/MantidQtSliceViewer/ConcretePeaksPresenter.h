@@ -2,7 +2,7 @@
 #define MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
 
 #include "MantidQtSliceViewer/PeaksPresenter.h"
-#include "MantidQtSliceViewer/PeakTransform.h"
+#include "MantidQtSliceViewer/PeakTransformHKL.h"
 #include "MantidKernel/V3D.h"
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -35,7 +35,7 @@ namespace MantidQt
       /// View factory
       boost::shared_ptr<PeakOverlayViewFactory> m_factory;
       /// Peak transformer
-      PeakTransform m_transform;
+      PeakTransformHKL m_transform;
       /// current slicing point.
       double m_slicePoint;
       /// Configurre peak transformations

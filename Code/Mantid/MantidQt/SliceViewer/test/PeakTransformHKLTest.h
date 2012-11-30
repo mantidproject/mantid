@@ -2,30 +2,30 @@
 #define SLICE_VIEWER_PEAKTRANSFORM_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidQtSliceViewer/PeakTransform.h"
+#include "MantidQtSliceViewer/PeakTransformHKL.h"
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid;
 using Mantid::Kernel::V3D;
 //using namespace testing;
 
-class PeakTransformTest : public CxxTest::TestSuite
+class PeakTransformHKLTest : public CxxTest::TestSuite
 {
 public:
 
   void test_throws_with_unknown_xLabel()
   {
-    TS_ASSERT_THROWS(PeakTransform("?", "K (Lattice)"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformHKL("?", "K (Lattice)"), PeakTransformException);
   }
 
   void test_throws_with_unknown_yLabel()
   {
-    TS_ASSERT_THROWS(PeakTransform("H (Lattice)", "?"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformHKL("H (Lattice)", "?"), PeakTransformException);
   }
 
 void test_transformHKL()
 {
-  PeakTransform transform("H (Lattice)", "K (Lattice)");
+  PeakTransformHKL transform("H (Lattice)", "K (Lattice)");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.X());
@@ -37,7 +37,7 @@ void test_transformHKL()
 
 void test_transformHLK()
 {
-  PeakTransform transform("H (Lattice)", "L (Lattice)");
+  PeakTransformHKL transform("H (Lattice)", "L (Lattice)");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.X()); // X -> H
@@ -49,7 +49,7 @@ void test_transformHLK()
 
 void test_transformLKH()
 {
-  PeakTransform transform("L (Lattice)", "K (Lattice)");
+  PeakTransformHKL transform("L (Lattice)", "K (Lattice)");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> L
@@ -61,7 +61,7 @@ void test_transformLKH()
 
 void test_transformLHK()
 {
-  PeakTransform transform("L (Lattice)", "H (Lattice)");
+  PeakTransformHKL transform("L (Lattice)", "H (Lattice)");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> L
@@ -73,7 +73,7 @@ void test_transformLHK()
 
 void test_transformKLH()
 {
-  PeakTransform transform("K (Lattice)", "L (Lattice)");
+  PeakTransformHKL transform("K (Lattice)", "L (Lattice)");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.Y()); // X -> K
@@ -85,7 +85,7 @@ void test_transformKLH()
 
 void test_transformKHL()
 {
-  PeakTransform transform("K (Lattice)", "H (Lattice)");
+  PeakTransformHKL transform("K (Lattice)", "H (Lattice)");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.Y()); // X -> K
@@ -97,8 +97,8 @@ void test_transformKHL()
 
 void test_copy_construction()
 {
-  PeakTransform A("H", "L");
-  PeakTransform B(A);
+  PeakTransformHKL A("H", "L");
+  PeakTransformHKL B(A);
 
   // Test indirectly via what the transformations produce.
   V3D productA = A.transform(V3D(0, 1, 2));
@@ -113,8 +113,8 @@ void test_copy_construction()
 
 void test_assigment()
 {
-  PeakTransform A("H", "L");
-  PeakTransform B("K", "H");
+  PeakTransformHKL A("H", "L");
+  PeakTransformHKL B("K", "H");
   A = B;
 
   // Test indirectly via what the transformations produce.

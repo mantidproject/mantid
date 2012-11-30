@@ -2155,7 +2155,7 @@ void SliceViewer::enablePeakOverlaysIfAppropriate()
     { 
       const std::string xDim = m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
       const std::string yDim = m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
-      PeakTransform(xDim, yDim); // This will throw if the mapped dimensions are not hkl.
+      PeakTransformHKL(xDim, yDim); // This will throw if the mapped dimensions are not hkl.
       enablePeakOverlays = true;
     }
     catch(PeakTransformException&)

@@ -31,7 +31,7 @@ private:
     MOCK_METHOD1(setSlicePoint, void(const double&));
     MOCK_METHOD0(hideView, void());
     MOCK_METHOD0(showView, void());
-    MOCK_METHOD1(movePosition, void(const PeakTransform&));
+    MOCK_METHOD1(movePosition, void(const PeakTransformHKL&));
     ~MockPeakOverlayView(){}
   };
 
