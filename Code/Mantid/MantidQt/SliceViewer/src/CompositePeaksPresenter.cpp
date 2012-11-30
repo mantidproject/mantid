@@ -1,4 +1,5 @@
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
+#include <stdexcept>
 
 namespace MantidQt
 {
