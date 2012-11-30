@@ -2,74 +2,77 @@
 things like sub-algorithm calls
 """
 import unittest
-import inspect
-import os
-import shutil
+from testhelpers import run_algorithm
 
+from mantid import mtd
+import mantid.simpleapi as api
+from mantid.api import *
+from mantid.kernel import *
 
-#import mantid.simpleapi as simpleapi
+__PARENTALG__ = \
+"""
+import mantid.simpleapi as api
+from mantid.api import *
+from mantid.kernel import *
+
+class PythonAlgorithmSubAlgCallTestAlg(PythonAlgorithm):
+
+    def PyInit(self):
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
+                                                     direction=Direction.Input))
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
+                                                     direction = Direction.Output))
+
+    def PyExec(self):
+        inputWS = self.getPropertyValue("InputWorkspace")
+        outputWS = api.Scale(InputWorkspace=inputWS, Factor=2.0)
+        self.setProperty("OutputWorkspace", outputWS)
+
+registerAlgorithm(PythonAlgorithmSubAlgCallTestAlg)
+"""
 
 
 class PythonAlgorithmSubAlgCallTest(unittest.TestCase):
     
-    _testdir = os.path.join(os.getcwd(), 'PythonAlgorithmSimpleAPITest_TmpDir')
-    _parentalg = None
-    _childalg = None
-    
-    def test_subalg_call_of_one_python_call_from_other_suceeds(self):
-         
+    _alg_reg = False
+    _ws_name = "test_ws"
+    _ws_name2 = "test_ws_1"
     
     def setUp(self):
-        __PARENTALG__ = \
-        """from mantid.api import PythonAlgorithm, registerAlgorithm
-        
-        class ParentAlgorithm(PythonAlgorithm):
-        
-            def PyInit(self):
-                pass
-            
-            def PyExec(self):
-                ChildAlgorithm() # If not setup correct this will raise a RuntimeError
-                
-        registerAlgorithm(ParentAlgorithm)
-        """
-        
-        __CHILDALG__ = \
-        """from mantid.api import PythonAlgorithm, registerAlgorithm
-        
-        class ChildAlgorithm(PythonAlgorithm):
-        
-            def PyInit(self):
-                pass
-            
-            def PyExec(self):
-                pass
-                
-        registerAlgorithm(ChildAlgorithm)
-        """
-        try:
-            os.mkdir(self._testdir)
-        except OSError:
-            pass # Already exists, maybe it was not removed when a test failed?
-        _parentalg = os.path.join(self._testdir, 'ParentAlgorithm.py')
-        if not os.path.exists(_parentalg):
-            plugin = file(_parentalg, 'w')
-            plugin.write(__PARENTALG__)
-            plugin.close()
-        _childalg = os.path.join(self._testdir, 'ChildAlgorithm.py')
-        if not os.path.exists(_parentalg):
-            plugin = file(_parentalg, 'w')
-            plugin.write(__CHILDALG__)
-            plugin.close()
-        
-        __import__
-    
+        if not self._alg_reg:
+            # Register algorithm
+            exec(__PARENTALG__)
+            self.__class__._alg_reg = True
 
     def tearDown(self):
+        if self._ws_name in mtd:
+            mtd.remove(self._ws_name)
+        if self._ws_name2 in mtd:
+            mtd.remove(self._ws_name2)
+    
+    def test_subalg_call_with_output_and_input_ws_the_same_succeeds(self):
+        data = [1.0]
+        api.CreateWorkspace(DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', OutputWorkspace=self._ws_name)
         try:
-            shutil.rmtree(self._testdir)
-        except shutil.Error:
-            pass
+            run_algorithm('PythonAlgorithmSubAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name)
+        except Exception,exc:
+            self.fail("Algorithm call failed: %s" % str(exc))
+
+        self.assertTrue(self._ws_name in mtd)
+        self.assertAlmostEqual(mtd[self._ws_name].readY(0)[0],2.0, places=10)
+
+    def test_subalg_call_with_output_and_input_ws_different_succeeds(self):
+        data = [1.0]
+        api.CreateWorkspace(DataX=data,DataY=data,NSpec=1,UnitX='Wavelength', OutputWorkspace=self._ws_name)
+        
+        try:
+            run_algorithm('PythonAlgorithmSubAlgCallTestAlg', InputWorkspace=self._ws_name, OutputWorkspace=self._ws_name2)
+        except Exception,exc:
+            self.fail("Algorithm call failed: %s" % str(exc))
+
+        self.assertTrue(self._ws_name2 in mtd)
+        self.assertAlmostEqual(mtd[self._ws_name2].readY(0)[0],2.0, places=10)
+
 
 if __name__ == '__main__':
     unittest.main()

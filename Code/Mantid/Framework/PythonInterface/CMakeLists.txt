@@ -125,6 +125,7 @@ set ( TEST_PY_FILES
   test/python/PythonPluginsTest.py
   test/python/PropertyWithValueTest.py
   test/python/PythonAlgorithmPropertiesTest.py
+  test/python/PythonAlgorithmSubAlgCallTest.py
   test/python/PythonAlgorithmTraitsTest.py
   test/python/PythonAlgorithmWorkspacePropertyTest.py
   test/python/ReferenceFrameTest.py

@@ -47,7 +47,6 @@ namespace Environment
     PyErr_Clear();
     PyObject *str_repr = PyObject_Str(value);
     stringstream msg;
-    msg << "Python error: ";
     if( value && str_repr )
     {
       msg << PyString_AsString(str_repr);

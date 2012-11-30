@@ -77,6 +77,7 @@ class FindReflectometryLinesTest(unittest.TestCase):
         
     def test_switch_intermediate_workspaces_on(self):
         alg = run_algorithm('FindReflectometryLines', InputWorkspace=self.__class__._two_peak_ws , OutputWorkspace='spectrum_numbers', KeepIntermediateWorkspaces=True)
+        self.assertTrue(mtd.doesExist('spectrum_numbers'))
         self.assertTrue(mtd.doesExist('cropped_ws'))
         self.assertTrue(mtd.doesExist('summed_ws'))
         #clean-up

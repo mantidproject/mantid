@@ -388,21 +388,27 @@ def gather_returns(func_name, lhs, algm_obj, ignore_regex=[]):
             continue
         prop = algm_obj.getProperty(name)
         # Parent algorithms store their workspaces in the ADS
-        # Child algorithms store their workspaces in the property
-        if not algm_obj.isChild() and _is_workspace_property(prop):
-            value = prop.valueAsStr
-            if value == '':
+        # Child algorithms should store their workspaces in the property 
+        # but they don't at the moment while the issues with history recording Python sub algs
+        # is resolved: ticket #5157
+        if _is_workspace_property(prop):
+            value_str = prop.valueAsStr
+            if value_str == "":
                 if not prop.isOptional():
                     raise RuntimeError("Logical error. Output workspace property '%s' on '%s' is mandatory but has no value."
                                        "Please contact development team." % (name,  algm_obj.name()))
             else:
-                retvals.append(_ads[value])
+                try:
+                    retvals.append(_ads[value_str])
+                except KeyError:
+                    raise RuntimeError("Internal error: WorkspaceProperty does not have its output in the ADS. Please contact development team.")
         else:
-            if not hasattr(prop, 'value'):
-                print ('Unknown property type encountered. "%s" on "%s" is not understood by '
-                       'Python. Return value skipped. Please contact development team' % (name, algm_obj.name()))
-            else:
+            if hasattr(prop, 'value'):
                 retvals.append(prop.value)
+            else:
+                raise RuntimeError('Unknown property type encountered. "%s" on "%s" is not understood by '
+                       'Python. Please contact development team' % (name, algm_obj.name()))
+                
 
     nvals = len(retvals)
     nlhs = lhs[0]
@@ -447,14 +453,13 @@ def _set_properties(alg_object, *args, **kwargs):
     # Set the properties of the algorithm.
     for key in kwargs.keys():
         value = kwargs[key]
-        # Anything stored in the ADS must be set by string value
-        # if it is not a child algorithm. 
-        if (not alg_object.isChild()) and isinstance(value, _kernel.DataItem):
+        
+        # The correct parent/child relationship is not quite set up yet: #5157
+        # Subalgorithms in Python are marked as children but their output is in the
+        # ADS meaning we cannot just set DataItem properties by value. At the moment
+        # they are just set with strings 
+        if isinstance(value, _kernel.DataItem):
             alg_object.setPropertyValue(key, value.name())
-        elif type(value) == str:
-            # If a string is passed force using string value method. 
-            # Allows more complex input for arrays for example, i.e. 3-5 --> [3,4,5]
-            alg_object.setPropertyValue(key, value)
         else:
             alg_object.setProperty(key, value)
 
