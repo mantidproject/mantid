@@ -2,6 +2,7 @@
 #define MANTID_SLICEVIEWER_PEAKTRANSFORMHKL_H_
 
 #include "MantidQtSliceViewer/PeakTransform.h"
+#include "MantidQtSliceViewer/ConcretePeakTransformFactory.h"
 
 namespace MantidQt
 {
@@ -21,6 +22,9 @@ namespace MantidQt
       /// Virtual constructor
       PeakTransform_sptr clone() const;
     };
+
+    /// Typedef a factory for type of PeaksTransform.
+    typedef ConcretePeakTransformFactory<PeakTransformHKL> PeakTransformHKLFactory;
 
   }
 }

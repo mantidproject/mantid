@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidQtSliceViewer/PeakTransformHKL.h"
+#include <boost/make_shared.hpp>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid;
@@ -132,7 +133,7 @@ void test_clone()
   PeakTransformHKL A("H", "L");
   PeakTransform_sptr clone = A.clone();
 
-  TSM_ASSERT("Clone product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformHKL>(clone) != NULL)
+  TSM_ASSERT("Clone product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformHKL>(clone) != NULL);
 
   // Test indirectly via what the transformations produce.
   V3D productA = A.transform(V3D(0, 1, 2));
@@ -141,6 +142,30 @@ void test_clone()
   // Test indirectly via the free regex.
   boost::regex regexA = A.getFreePeakAxisRegex();
   boost::regex regexB = clone->getFreePeakAxisRegex();
+  TS_ASSERT_EQUALS(regexA, regexB);
+}
+
+// Test the factory generated about this type.
+void test_factory()
+{
+  // Create the benchmark.
+  PeakTransform_sptr expectedProduct = boost::make_shared<PeakTransformHKL>("H", "K");
+
+  // Use the factory to create a product.
+  PeakTransformHKLFactory factory;
+  PeakTransform_sptr product = factory.createTransform("H", "K");
+
+  // Check the type of the output product object.
+  TSM_ASSERT("Factory product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformHKL>(product) != NULL);
+
+  // Now test that the benchmark and the factory product are equivalent.
+  // Test indirectly via what the transformations produce.
+  V3D productA = expectedProduct->transform(V3D(0, 1, 2));
+  V3D productB = product->transform(V3D(0, 1, 2));
+  TS_ASSERT_EQUALS(productA, productB);  
+  // Test indirectly via the free regex.
+  boost::regex regexA = expectedProduct->getFreePeakAxisRegex();
+  boost::regex regexB = product->getFreePeakAxisRegex();
   TS_ASSERT_EQUALS(regexA, regexB);
 }
 

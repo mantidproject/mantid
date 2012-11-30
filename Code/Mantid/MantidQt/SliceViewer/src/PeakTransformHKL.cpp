@@ -25,9 +25,9 @@ namespace MantidQt
       m_indexOfPlotX = other.m_indexOfPlotX;
       m_indexOfPlotY = other.m_indexOfPlotY;
       m_indexOfPlotZ = other.m_indexOfPlotZ;
-      m_HRegex = other.m_HRegex;
-      m_KRegex = other.m_KRegex;
-      m_LRegex = other.m_LRegex;
+      m_FirstRegex = other.m_FirstRegex;
+      m_SecondRegex = other.m_SecondRegex;
+      m_ThirdRegex = other.m_ThirdRegex;
     }
     return *this;
   }

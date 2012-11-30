@@ -24,6 +24,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/ColorBarWidget.h
 	inc/MantidQtSliceViewer/CompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
+	inc/MantidQtSliceViewer/ConcretePeakTransformFactory.h
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/FirstExperimentInfoQuery.h
@@ -37,7 +38,8 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakOverlayFactory.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
 	inc/MantidQtSliceViewer/PeakTransformHKL.h	
-	inc/MantidQtSliceViewer/PeakTransform.h    
+	inc/MantidQtSliceViewer/PeakTransform.h
+	inc/MantidQtSliceViewer/PeakTransformFactory.h 
 	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
