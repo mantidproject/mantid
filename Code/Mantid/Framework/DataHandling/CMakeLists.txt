@@ -362,6 +362,7 @@ set ( TEST_FILES
 	RemoveLogsTest.h
 	RenameLogTest.h
 	SNSDataArchiveTest.h
+        SaveAsciiTest.h
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h
