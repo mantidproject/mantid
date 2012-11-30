@@ -129,8 +129,13 @@ namespace Mantid
                                         // periodicaly.  If we don't get them, there's a
                                         // problem somewhere.
 
+      // These 2 determine whether or not we filter out events that arrive when
+      // the run is paused.
       bool m_runPaused; // Set to true or false when we receive a pause/resume marker in an
                         // annotation packet. (See rxPacket( const ADARA::AnnotationPkt &pkt))
+      int m_keepPausedEvents; // Set from a configuration property. (Should be a bool, but
+                              // appearantly, we can't read bools from the config file?!?)
+
 
       // --- Data structures necessary for handling all the process variable info ---
 
