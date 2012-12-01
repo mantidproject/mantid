@@ -65,7 +65,7 @@ namespace Crystal
      DataModeHandler( const DataModeHandler &handler);
      DataModeHandler(double baseRCRadius, double lastRCRadius,
             double lastRow, double lastCol, double CellWidth, double CellHeight,
-            bool CalcVariance)
+            bool CalcVariance, int MinCol,int MaxCol, int MinRow,int MaxRow)
      {
        init();
        this->baseRCRadius=baseRCRadius;
@@ -75,6 +75,10 @@ namespace Crystal
        this->CellWidth = CellWidth;
        this->CellHeight = CellHeight;
        this->CalcVariance = CalcVariance;
+       this->MaxCol = MaxCol;
+       this->MaxRow = MaxRow;
+       this->MinCol = MinCol;
+       this->MinRow = MinRow;
      }
 
      void setTime( double time )
@@ -85,7 +89,7 @@ namespace Crystal
      //Returns true if "Edge Peak" otherwise returns false
      bool setStatBase(std::vector<double> const &StatBase );
 
-     bool isEdgePeak( double* params, int nparams);
+     bool isEdgePeak( const double* params, int nparams);
 
 
      void setHeighHalfWidthInfo( Mantid::MantidVecPtr &xvals,
@@ -206,7 +210,9 @@ namespace Crystal
      double calcNewRCRadius;
 
      double lastRow;
+     int MinRow,MaxRow;
      double lastCol;
+     int MinCol,MaxCol;
      double time;
      double CellWidth;
      double CellHeight;
@@ -237,7 +243,10 @@ namespace Crystal
         lastCol = -1;
         EdgeX = EdgeY = -1;
         calcNewRCRadius = -1;
-
+        MaxRow = -1;
+        MaxCol = -1;
+        MinRow = -1;
+        MinCol = -1;
         time = -1;
         CalcVariance = true;
         CellWidth = CellHeight = 0;

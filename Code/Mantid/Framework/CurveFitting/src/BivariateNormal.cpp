@@ -59,6 +59,7 @@ BivariateNormal::BivariateNormal() :
     expVals(NULL)
 {
   LastParams[IVXX] = -1;
+  Varx0 = -1;
 }
 
 BivariateNormal::~BivariateNormal()
@@ -75,6 +76,14 @@ BivariateNormal::~BivariateNormal()
    UNUSED_ARG(nData);
    if( nData ==0)
      return;
+
+
+
+   if( Varx0 < 0)
+   {
+     for ( size_t i=0; i<nData;i++)  out[i]=0.0;
+     return;
+   }
    double coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, Varxx,Varxy,Varyy;
    int NCells;
    bool isNaNs;
@@ -85,14 +94,21 @@ BivariateNormal::~BivariateNormal()
    const MantidVec & X = ws->dataY(1);
    const MantidVec & Y = ws->dataY(2);
    int K=1;
-   if( nParams()>4) K=3;
 
+   if( nParams()>4) K=3;
 
    getConstraint(IBACK)->setPenaltyFactor(K*3000);
 
 
    double badParams =initCoeff(D, X, Y, coefNorm, expCoeffx2, expCoeffy2, expCoeffxy, NCells, Varxx,Varxy,Varyy);
 
+   std::ostringstream inf;
+   inf << "F Parameters=";
+   for (size_t k = 0; k < nParams(); k++)
+       inf << "," << getParameter(k);
+   if( nParams() < 6)
+       inf<<","<<Varxx<<","<<Varyy<<","<<Varxy;
+   inf << std::endl;
 
    NCells = std::min<int>((int)nData, NCells);
 
@@ -100,18 +116,12 @@ BivariateNormal::~BivariateNormal()
    double Intensity = getParameter(ITINTENS);
    double Xmean = getParameter(IXMEAN);
    double Ymean = getParameter(IYMEAN);
-   std::ostringstream inf;
 
    double DDD = std::min<double>(10, 10*std::max<double>(0,-Background));
    int x = 0;
    isNaNs = false;
    double chiSq = 0;
-   inf << "F Parameters=";
-   for (size_t k = 0; k < nParams(); k++)
-     inf << "," << getParameter(k);
-    if( nParams() < 6)
-      inf<<","<<Varxx<<","<<Varyy<<","<<Varxy;
-   inf << std::endl;
+
 
   // double penalty =0;
 

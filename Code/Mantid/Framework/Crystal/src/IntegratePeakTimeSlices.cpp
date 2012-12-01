@@ -118,7 +118,9 @@ namespace Mantid
 #define IVXX  4
 #define IVYY  5
 #define IVXY  6
-
+//TODO: Edge Peaks-Return NoPeak(Intensity=0,variance=0) if any center on any slice is out of bounds
+//TODO: Calc ratio for edge peaks, should use the slant of bivariate normal instead of assuming
+//        distribution axes are lined up with the row and col vectors
 #define NParameters  7
 
 
@@ -240,7 +242,12 @@ namespace Mantid
       this->EdgeX = handler.EdgeX;
       this->EdgeY = handler.EdgeY;
       this->CalcVariance = handler.CalcVariance;
-
+      this->VarxHW = handler.VarxHW;
+      this->VaryHW = handler.VaryHW;
+      this->MaxRow = handler.MaxRow;
+      this->MaxCol = handler.MaxCol;
+      this->MinRow = handler.MinRow;
+      this->MinCol = handler.MinCol;
       this->lastISAWIntensity=handler.lastISAWIntensity;
       this->lastISAWVariance = handler.lastISAWIntensity;
       this->back_calc = handler.back_calc;
@@ -294,7 +301,7 @@ namespace Mantid
 
       double nBoundaryCells=   StatBase[INBoundary];
       double back = TotBoundaryIntensities/nBoundaryCells;
-      double backVar= TotBoundaryVariances/nBoundaryCells/nBoundaryCells;
+      double backVar= std::max<double>(nBoundaryCells/50.0,TotBoundaryVariances)/nBoundaryCells/nBoundaryCells;
       double IntensVar = Variance +ncells*ncells*backVar;
 
       double relError = .25;
@@ -312,41 +319,29 @@ namespace Mantid
       ostringstream str;
 
       NSigs *=max<double>(1.0, Intensity_calc/(TotIntensity -ncells*back_calc));
-      str<< max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar))<<"<Background<"<<(back+NSigs*(1+relError)*sqrt(backVar))
+      str<< max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar))<<"<Background<"<<(back+NSigs*(1.8+relError)*sqrt(backVar))
          <<","<< max<double>(0.0, Intensity_calc-NSigs*(1+relError)*sqrt(IntensVar))<<
          "<Intensity<"<<Intensity_calc+NSigs*(1+relError)*sqrt(IntensVar);
 
       double min =max<double>(0.0, back_calc-NSigs*(1+relError)*sqrt(backVar));
-      double maxx =back+NSigs*(1+relError)*sqrt(backVar);
+      double maxx =back+NSigs*(1.8+relError)*sqrt(backVar);
       Bounds.push_back( pair<double,double>(min,maxx ));
       Bounds.push_back( pair<double,double>(max<double>(0.0, Intensity_calc-NSigs*(1+relError)*sqrt(IntensVar)),
-                                       Intensity_calc+NSigs*(1+relError)*sqrt(IntensVar)));
-     /* for( int i=2; i<N; i++ )
-      {
-        if( i>0)
-          str<<",";
-
-
-        double val = ParameterValues[i];
-
-        double relErr1=.75*relError;
-
-
-        str<<(1-relErr1)*val <<"<"<<ParameterNames[i]<<"<"<<(1+relErr1)*val;
-        Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
-      }
-     */
-      double val =col_calc;
-
+                                        Intensity_calc+NSigs*(1+relError)*sqrt(IntensVar)));
       double relErr1= relError*.75;
+      double val =col_calc;
+      double minn= std::max<double>(MinCol-.5, (1-relErr1)*val);
+      maxx =std::min<double>((1+relErr1)*val, MaxCol+.5);
 
-
-      str<<","<<(1-relErr1)*val <<"<"<<"Mcol"<<"<"<<(1+relErr1)*val;
-      Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+      str<<","<<minn <<"<"<<"Mcol"<<"<"<<maxx;
+      Bounds.push_back(pair<double,double>(minn,maxx));
 
       val = row_calc;
-      str<<","<<(1-relErr1)*val <<"<"<<"Mrow"<<"<"<<(1+relErr1)*val;
-      Bounds.push_back(pair<double,double>((1-relErr1)*val,(1+relErr1)*val));
+
+      minn= std::max<double>(MinRow-.5, (1-relErr1)*val);
+      maxx =std::min<double>((1+relErr1)*val, MaxRow+.5);
+      str<<","<<minn <<"<"<<"Mrow"<<"<"<<maxx;
+      Bounds.push_back(pair<double,double>(minn,maxx));
 
       if( N >=5)
       {
@@ -598,7 +593,8 @@ namespace Mantid
               g_log.debug() << endl;
             }
 
-
+            double intensity = AttributeValues->CalcISAWIntensity( params.data());
+            g_log.debug() << "IsawIntensity= "<< intensity << std::endl;
           }
 
        }
@@ -816,7 +812,7 @@ namespace Mantid
           g_log.error("Not enough neighboring pixels to fit ");
           throw std::runtime_error("Not enough neighboring pixels to fit ");
         }
-
+        int NBadEdgeCells = getProperty("NBadEdgePixels");
         int MaxChan = -1;
         double MaxCounts = -1;
 
@@ -841,7 +837,8 @@ namespace Mantid
               Kernel::V3D CentPos = center+yvec*(Centy-ROW)*CellHeight + xvec*(Centx-COL)*CellWidth;
 
               boost::shared_ptr<DataModeHandler> XXX( new DataModeHandler(R,R,Centy,Centx,CellWidth,CellHeight,
-                                                   getProperty("CalculateVariances")));
+                                                   getProperty("CalculateVariances"),NBadEdgeCells,NCOLS-NBadEdgeCells,
+                                                   NBadEdgeCells,NROWS-NBadEdgeCells));
               AttributeValues = XXX;
 
               SetUpData1(Data, inpWkSpace,  Chan+dir*t, Chan+dir*t,  R ,CenterDet->getPos(), spec_idList);
@@ -1327,7 +1324,7 @@ namespace Mantid
       StatBase[ISS1] +=1;
 
     }
-
+//!!!!!!  do  testing.
    std::vector<double>  DataModeHandler::InitValues( double Varx,double Vary,double b)
     {
        std::vector<double> Res(7);
@@ -1341,21 +1338,19 @@ namespace Mantid
        Res[IYMEAN] = ( StatBase[ISSIy] - b * StatBase[ISSy] )/Den;
        Res[IBACK] = b;
        Res[ITINTENS] =StatBase[IIntensities] - b * nCells;
-       //double currentRadius= AttributeValues->getCurrentRadius();
-       //double CellWidth =AttributeValues->CellWidth;
-       //double CellHeight = AttributeValues->CellHeight;
-       //double EdgeX = AttributeValues->EdgeX;
-      // double EdgeY = AttributeValues->EdgeY;
-       double  NstdX = 4*( currentRadius*CellWidth - EdgeX )/sqrt( Varx );
-       double  NstdY = 4*( currentRadius*CellHeight - EdgeY )/sqrt( Vary );
-       if( NstdX < 0) NstdX =.5;
-       if( NstdY < 0) NstdY =.5;
+
+       double  NstdX = 4*( currentRadius/CellWidth - EdgeX )/sqrt( Varx );
+       double  NstdY = 4*( currentRadius/CellHeight - EdgeY )/sqrt( Vary );
+       double sigx=1;
+       double sigy=1;
+       if( NstdX < 0) sigx=-1;
+       if( NstdY < 0) sigy=-1;
 
        double  x = 1;
-       if( NstdY < 7 && NstdY > 0)
+       if( sigy*NstdY < 7 && sigy*NstdY >= 0)
        {
-         x =probs[ (int)(NstdY +.5) ];
-
+         x =probs[ (int)(sigy*NstdY +.5) ];
+         if( sigy < 0) x=1-x;
          double  My2= StatBase[IStartRow];
          if( Res[IYMEAN] -My2 > My2+StatBase[INRows] -Res[IYMEAN] )
            My2 +=StatBase[INRows];
@@ -1363,9 +1358,10 @@ namespace Mantid
 
        }
        double  x1 = 1;
-       if( NstdX < 7 && NstdX > 0)
+       if( sigx*NstdX < 7 && sigx*NstdX > 0)
        {
-         x1 =probs[ (int)(NstdX +.5) ];
+         x1 =probs[ (int)(sigx*NstdX +.5) ];
+         if( sigx < 0) x1=1-x1;
          double  Mx2= StatBase[IStartCol];
          if( Res[IXMEAN] -Mx2 > Mx2+StatBase[INCol] -Res[IXMEAN] )
              Mx2 +=StatBase[INCol];
@@ -1387,13 +1383,15 @@ namespace Mantid
      Varx =VarxHW;
      Vary =VaryHW;
 
+     double Rx = lastRCRadius/CellWidth - EdgeX;
+     double Ry = lastRCRadius/CellHeight - EdgeY;
      if(Varx <=0)
         Varx=HalfWidthAtHalfHeightRadius * HalfWidthAtHalfHeightRadius ;
 
      if( Vary <=0)
        Vary =HalfWidthAtHalfHeightRadius * HalfWidthAtHalfHeightRadius ;
           //Use
-     if( EdgeX*EdgeX > 4*Varx || EdgeY*EdgeY > 4*Vary )
+     if(Rx*Rx < 4*Varx || Ry*Ry < 4*Vary )
      {
        return InitValues(  Varx, Vary, b);
      }
@@ -1452,9 +1450,11 @@ namespace Mantid
       double Varx,Vary;
       Varx = Vary = HalfWidthAtHalfHeightRadius * HalfWidthAtHalfHeightRadius ;
 
+      double Rx = lastRCRadius/CellWidth - EdgeX;
+      double Ry = lastRCRadius/CellHeight - EdgeY;
       if( CellWidth >0 && currentRadius >0 && lastCol >0 && lastRow > 0)
-      if( EdgeX*EdgeX > 4*std::max<double>(Varx,VarxHW) ||
-                 EdgeY*EdgeY > 4*std::max<double>(Vary,VaryHW) )// Edge peak so cannot use samples
+      if( Rx*Rx < 4*std::max<double>(Varx,VarxHW) ||
+                 Ry*Ry < 4*std::max<double>(Vary,VaryHW) )// Edge peak so cannot use samples
       {
         Vx_calc= VarxHW;
         Vy_calc = VaryHW;
@@ -1463,30 +1463,26 @@ namespace Mantid
         row_calc = lastRow;
         back_calc = b;
         Intensity_calc =StatBase[IIntensities] - b * nCells;
-        double  NstdX = 4*( currentRadius*CellWidth - EdgeX )/sqrt( Varx );
-        double  NstdY = 4*( currentRadius*CellHeight - EdgeY )/sqrt( Vary );
-        if( NstdX < 0) NstdX =.5;
-        if( NstdY < 0) NstdY =.5;
+        double  NstdX = 4*( currentRadius/CellWidth - EdgeX )/sqrt( Varx );
+        double  NstdY = 4*( currentRadius/CellHeight - EdgeY )/sqrt( Vary );
+        double P1=0.0;
+        double P2=0;
+        if( NstdX < 0){ NstdX = -NstdX; P1 =-.5;}
+        if( NstdY < 0){ NstdY =-.5; P2=-.5;}
 
         double  x = 1;
         if( NstdY < 7 && NstdY > 0)
         {
           x =probs[ (int)(NstdY +.5) ];
 
-         // double  My2= StatBase[IStartRow];
-         // if( row_calc -My2 > My2+StatBase[INRows] -row_calc )
-        //    My2 +=StatBase[INRows];
-        //  row_calc = row_calc*x +(1-x)*My2;
+          if( P1 < 0) x =1-x;
 
         }
         double  x1 = 1;
         if( NstdX < 7 && NstdX > 0)
         {
           x1 =probs[ (int)(NstdX +.5) ];
-         // double  Mx2= StatBase[IStartCol];
-         // if( row_calc -Mx2 > Mx2+StatBase[INCol] -col_calc )
-         //     Mx2 +=StatBase[INCol];
-         // col_calc = col_calc*x1 +(1-x1)*Mx2;
+          if( P2 < 0) x1=1-x1;
 
          }
         Intensity_calc /=x*x1;
@@ -1549,14 +1545,17 @@ namespace Mantid
     {
       double Vx,Vy;
       Vx = Vy =HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
+
+      double Rx = lastRCRadius/CellWidth - EdgeX;
+      double Ry = lastRCRadius/CellHeight - EdgeY;
       double mult =1;
-      if( EdgeX*EdgeX < 4*Vx )
+      if( Rx*Rx > 4*Vx )
           Vx = std::max<double>(HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius,
                                       Vx_calc);
       else
         mult = 1.2;
 
-      if( EdgeY*EdgeY < 4*Vy)
+      if( Ry*Ry > 4*Vy)
         Vy =std::max<double>(HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius,
                                      Vy_calc);
       else
@@ -1578,6 +1577,8 @@ namespace Mantid
                                                  double ROW,
                                                  double COL)
     {
+      UNUSED_ARG( ROW );
+      UNUSED_ARG( COL );
       double minCount,
              maxCount;
       MantidVec X = xvals.access();
@@ -1593,9 +1594,15 @@ namespace Mantid
         return;
 
       minCount = maxCount = C[0];
+      double MaxX = -1;
+      double MaxY = -1;
       for( int i = 1; i < N; i++ )
         if( C[i] > maxCount )
+        {
           maxCount = C[i];
+          MaxX = X[i];
+          MaxY = Y[i];
+        }
         else if( C[i] < minCount )
           minCount = C[i];
 
@@ -1607,7 +1614,7 @@ namespace Mantid
       int nMin = 0;
       double TotMax = 0;
       double TotMin = 0;
-      double offset = std::max<double>(1, (maxCount - minCount) / 20);
+      double offset = std::max<double>(.2, (maxCount - minCount) / 20);
       double TotR_max =0;
       double TotR_min =0;
       for (int i = 0; i < N ; i++)
@@ -1616,7 +1623,7 @@ namespace Mantid
         {
           TotMax += C[i];
           nMax++;
-          TotR_max+= sqrt( (X[i]-COL)*(X[i]-COL)+ (Y[i]-ROW)*(Y[i]-ROW));
+          TotR_max+= sqrt( (X[i]-MaxX)*(X[i]-MaxX)+ (Y[i]-MaxY)*(Y[i]-MaxY));
 
         }
         if (C[i] < minCount + offset)
@@ -1625,43 +1632,47 @@ namespace Mantid
           TotMin += C[i];
           nMin++;
 
-          TotR_min+= sqrt( (X[i]-COL)*(X[i]-COL)+ (Y[i]-ROW)*(Y[i]-ROW));
+          TotR_min+= sqrt( (X[i]-MaxX)*(X[i]-MaxX)+ (Y[i]-MaxY)*(Y[i]-MaxY));
         }
       }
 
       if( nMax + nMin == N)      // all data are on two  levels essentially
       {
-        double AvR = .5*(TotR_max/TotMax + TotR_min/TotMin);
+        double AvR = .5*(TotR_max/nMax + TotR_min/nMin);
         HalfWidthAtHalfHeightRadius = AvR/.8326;
+        VarxHW = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
+        VaryHW = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
         return;
       }
-
-      double TotR = 0;
-      int nR = 0;
-      double TotRx=0;
-      double TotRy=0;
-      int nRx=0;
-      int nRy=0;
+      double TotR ,nR , TotRx,TotRy=0, nRx=0, nRy;
+      nR = nRy= nRx = -1;
       double MidVal = ( TotMax/nMax + TotMin/nMin )/2.0;
 
-      while( nR <= 0 )
+      while( (nR <= 0 || nRy <=0 || nRx <=0) && offset < MidVal )
       {
+         TotR = 0;
+         nR = 0;
+         TotRx=0;
+         TotRy=0;
+         nRx=0;
+         nRy=0;
+
         for( int i = 0; i < N; i++ )
         if( C[i] < MidVal + offset && C[i] > MidVal - offset )
         {
-          double X1 = X[i] - COL;
-          double Y1 = Y[i] - ROW;
+          double X1 = X[i] - MaxX;
+          double Y1 = Y[i] - MaxY;
           TotR += sqrt( X1*X1 + Y1*Y1 );
           nR++;
-          if(X1>=-1 && X1<=1)
+          if((X1>=-1.2 && X1<=1.2)&& fabs(Y1)>1.2)
           {
             nRy++;
             TotRy += abs(Y1);
           }
-          if( Y1>=-1 && Y1 <= 1)
+          if( (Y1>=-1.2 && Y1 <= 1.2)&& fabs(X1)>1.2)
           {
             nRx++;
-            TotRx=fabs(X1);
+            TotRx += fabs(X1);
           }
         }
         offset *= 1.1;
@@ -1669,6 +1680,7 @@ namespace Mantid
 
       double AvR = TotR/nR;
       HalfWidthAtHalfHeightRadius = AvR/.8326;
+
       if( nRx > 0)
         VarxHW= (TotRx/nRx)*(TotRx/nRx)/.8326/.8326;
       else
@@ -1696,8 +1708,10 @@ namespace Mantid
       Kernel::V3D CentPos1 = center + xvec*(CentX-COL)*CellWidth
                                    + yvec*(CentY-ROW)*CellHeight;
 
+      int NBadEdgeCells = getProperty("NBadEdgePixels");
       boost::shared_ptr<DataModeHandler> X(new DataModeHandler(Radius,Radius,CentY,CentX,
-          CellWidth,CellHeight,getProperty("CalculateVariances")));
+          CellWidth,CellHeight,getProperty("CalculateVariances"),NBadEdgeCells,NCOLS-NBadEdgeCells,
+          NBadEdgeCells,NROWS-NBadEdgeCells));
 
       AttributeValues = X;
       AttributeValues->setCurrentRadius( Radius );
@@ -1747,7 +1761,8 @@ namespace Mantid
 
       //if( changed) CentNghbr = CentPos.
       boost::shared_ptr<DataModeHandler> X1(new DataModeHandler(Radius,NewRadius,CentY,CentX,
-          CellWidth,CellHeight, getProperty("CalculateVariances")));
+          CellWidth,CellHeight, getProperty("CalculateVariances"),NBadEdgeCells,NCOLS-NBadEdgeCells,
+          NBadEdgeCells,NROWS-NBadEdgeCells));
 
       AttributeValues = X1;
       AttributeValues->setCurrentRadius( NewRadius);
@@ -1824,7 +1839,8 @@ namespace Mantid
 
 
         IDetector_const_sptr Det = inpWkSpace->getDetector(workspaceIndex);
-
+        boost::shared_ptr<const RectangularDetector> Panel = boost::dynamic_pointer_cast<const RectangularDetector>
+                   (Det->getParent()->getParent());
         V3D pixPos = Det->getPos();
 
 
@@ -1840,14 +1856,13 @@ namespace Mantid
           double R1 = dist.scalar_prod(yvec);
           double R1a = R1/CellHeight;
 
-          double row = ROW + R1a;//(pixPos - center).scalar_prod(yvec) / CellHeight;
+          double row = ROW + R1a;
 
           double C1 = dist.scalar_prod(xvec);
           double C1a = C1/CellWidth;
 
-          double col = COL + C1a;//(pixPos - center).scalar_prod(xvec) / CellWidth;
+          double col = COL + C1a;
 
-         // std::cout<<R1<<","<<R1a<<","<<ROW<<","<<row<<","<<C1<<","<<C1a<<","<<COL<<","<<col<<std::endl;
           if (row > NBadEdges && col > NBadEdges && (NROWS < 0 || row < NROWS - NBadEdges) && (NCOLS < 0
               || col < NCOLS - NBadEdges))
           {
@@ -1939,7 +1954,7 @@ namespace Mantid
       ParameterValues[IVXY] = AttributeValues->getInitVarxy();
     }
 
-    bool DataModeHandler::isEdgePeak( double* params, int nparams)
+    bool DataModeHandler::isEdgePeak( const double* params, int nparams)
     {
       double Varx = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
       double Vary = Varx;
@@ -1949,8 +1964,11 @@ namespace Mantid
         Vary = params[IVYY];
       }
 
-      if( EdgeX*EdgeX > 4*std::max<double>(Varx,VarxHW) ||
-              EdgeY*EdgeY > 4*std::max<double>(Vary, VaryHW) )
+      double Rx = lastRCRadius/CellWidth - EdgeX;
+      double Ry = lastRCRadius/CellHeight - EdgeY;
+
+      if( Rx*Rx < 4*std::max<double>(Varx,VarxHW) ||
+              Ry*Ry < 4*std::max<double>(Vary, VaryHW) )
         return true;
 
       return false;
@@ -2317,7 +2335,15 @@ namespace Mantid
       double meanx = StatBase[ISSIx]/ncells;
       double meany= StatBase[ISSIy]/ncells;
 
-      CalcVariancesFromData( 0, meanx,meany, Varx,Cov,Vary, PP);
+      if(   !CalcVariances() )
+      {
+        meanx = ParameterValues[IXMEAN];
+        meany = ParameterValues[IYMEAN];
+        Varx =ParameterValues[IVXX];
+        Vary = ParameterValues[IVYY];
+        Cov  =ParameterValues[IVXY];
+      }else
+         CalcVariancesFromData( 0, meanx,meany, Varx,Cov,Vary, PP);
 
       if( Varx <.6 || Vary <.6)  //All data essentially the same.
          return false;
@@ -2432,6 +2458,7 @@ namespace Mantid
 
            double NstdY = 4*min<double>(  params[ IYMEAN ] - MinRow , MaxRow-params[ IYMEAN ] )
                          /sqrt(params[IVYY]);
+
            double sgn = 1;
            if( NstdX < 0 ){ sgn = -1; }
 
@@ -2441,8 +2468,8 @@ namespace Mantid
 
           if( NstdY < 0 ){ sgn = -1; }
 
-           if( NstdY >= 7.5 )r *= 1.0;
-           else if( sgn >0)r *= 1/probs[(int)( NstdY+.5 )];
+          if( NstdY >= 7.5 )r *= 1.0;
+          else if( sgn >0)r *= 1/probs[(int)( NstdY+.5 )];
            else  r *= 1/(1-probs[(int)(-NstdY+.5) ]);
 
            r = std::max<double>( r , 1.0 );
