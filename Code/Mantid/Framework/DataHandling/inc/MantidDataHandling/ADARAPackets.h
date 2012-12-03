@@ -9,6 +9,15 @@ namespace ADARA {
 
 class PacketHeader {
 public:
+  	/// Small struct to define timestamp as timespec is a unix only structure (replicates timespec from time.h)
+        struct Timespec
+        {
+          /// Microseconds
+          time_t tv_sec;
+          /// Nanosecond
+          long tv_nsec;
+        };
+          
 	PacketHeader(const uint8_t *data) {
 		const uint32_t *field = (const uint32_t *) data;
 
@@ -27,7 +36,7 @@ public:
 
 	PacketType::Enum type(void) const { return m_type; }
 	uint32_t payload_length(void) const { return m_payload_len; }
-	const struct timespec &timestamp(void) const { return m_timestamp; }
+	const Timespec &timestamp(void) const { return m_timestamp; }
 	uint64_t pulseId(void) const { return m_pulseId; }
 	uint32_t packet_length(void) const { return m_payload_len + 16; }
 
@@ -36,7 +45,7 @@ public:
 protected:
 	uint32_t m_payload_len;
 	PacketType::Enum m_type;
-	struct timespec m_timestamp;
+	Timespec m_timestamp;
 	uint64_t m_pulseId;
 
 	/* Don't allow the default constructor */
