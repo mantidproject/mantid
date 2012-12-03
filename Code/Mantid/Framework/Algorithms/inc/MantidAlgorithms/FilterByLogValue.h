@@ -10,20 +10,11 @@
 
 namespace Mantid
 {
-using DataObjects::EventList;
-using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
-using DataObjects::EventWorkspace_const_sptr;
-
 namespace Algorithms
 {
-
-
 /** Filters events in an EventWorkspace using values in a SampleLog.
 
-    @date September 15th, 2010
-
-    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2010-2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -63,15 +54,10 @@ private:
   void init();
   void exec();
 
-  /// Pointer for an event workspace
-  EventWorkspace_const_sptr eventW;
 };
-
-
 
 } // namespace Algorithms
 } // namespace Mantid
-
 
 #endif /* MANTID_ALGORITHMS_FILTERBYLOGVALUE_H_ */
 
