@@ -14,10 +14,10 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
-
 #include <Poco/NObserver.h>
 
 #include <QDockWidget>
@@ -234,6 +234,13 @@ public slots:
 
   /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
+  /// Create the instrument detector table from a MatrixWorkspace
+  Table* createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws, 
+                             const std::vector<int>& indices, bool include_data = false);
+  /// Create a table of detectors from a PeaksWorkspace
+  Table* createDetectorTable(const QString & wsName, const Mantid::API::IPeaksWorkspace_sptr & ws);
+
+
   //  *****                            *****  //
   void renameWorkspace(QString = "");
 

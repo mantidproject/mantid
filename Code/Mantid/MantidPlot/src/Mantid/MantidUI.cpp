@@ -969,19 +969,42 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
   return createDetectorTable(m->workspaceName(), indices);
 }
 
+/**
+ * Create the relevant detector table for the given workspace
+ * @param wsName :: The name of the workspace
+ * @param indices :: Limit the table to these workspace indices (MatrixWorkspace only)
+ * @param include_data :: If true then the data matrix is displayed also (MatrixWorkspace only)
+ */
 Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data)
 {
-  MatrixWorkspace_sptr ws;
   if( AnalysisDataService::Instance().doesExist(wsName.toStdString()) )
   {
-    ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
+    auto ws = AnalysisDataService::Instance().retrieve(wsName.toStdString());
+    // Standard MatrixWorkspace
+    auto matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    if(matrix) 
+    {
+      return createDetectorTable(wsName, matrix, indices, include_data);
+    }
+    auto peaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(ws);
+    if(peaks) 
+    {
+      return createDetectorTable(wsName, peaks);
+    }
   }
+  return NULL;
+}	
 
-  if( !ws ) 
-  {
-    return NULL;
-  }
-
+/**
+ * Create the instrument detector table from a MatrixWorkspace
+ * @param wsName :: The name of the workspace
+ * @param ws :: A pointer to a MatrixWorkspace
+ * @param indices :: Limit the table to these workspace indices
+ * @param include_data :: If true then the data matrix is displayed also
+ */
+Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws, 
+                                     const std::vector<int>& indices, bool include_data)
+{
   const size_t nrows = indices.empty()? ws->getNumberHistograms() : indices.size();
   // We have ncols columns all of which all have doubles as values except the last ncharcols columns which are strings.
   int ncols = 7;
@@ -1087,7 +1110,28 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
 
   t->showNormal();
   return t;
-}	
+}
+
+/**
+ * Creates a table showing the detectors contributing to the peaks within a PeaksWorkspace
+ * @param wsName :: The name of the workspace
+ * @param ws :: A pointer to an IPeaksWorkspace object
+ */
+Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::IPeaksWorkspace_sptr & ws)
+{
+  // Import the peaks table too for reference
+  bool dialog(false), visible(true);
+  importTableWorkspace(wsName,dialog,visible);
+
+  auto idtable = ws->createDetectorTable();
+  bool transpose = false;
+  QString tableName = wsName + "-Detectors";
+  Table* t = new MantidTable(appWindow()->scriptingEnv(), idtable, tableName, appWindow(), transpose);
+  if(!t) return NULL;
+  t->showNormal();
+  return t;
+}
+
 
 bool MantidUI::drop(QDropEvent* e)
 {
