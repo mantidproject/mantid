@@ -484,26 +484,14 @@ namespace Mantid
 
           if (isGood)
           {
-            //Start of a good section
-            if (centre)
-              start = t - tol;
-            else
-              start = t;
+            // Start of a good section. Subtract tolerance from the time if boundaries are centred.
+            start = centre ? t - tol : t;
           }
           else
           {
-            //End of the good section
-            if (numgood == 1 || centre )
-            {
-              // If there was only one point with the value, or values represent bin centres,
-              // use the last good time, + the tolerance, as the end time
-              stop = lastTime + tol;
-            }
-            else
-            {
-              // At least 2 good values for left boundary aligned logs. Save the end time.
-              stop = t;
-            }
+            // End of the good section. Add tolerance to the LAST GOOD time if boundaries are centred.
+            // Otherwise, use the first 'bad' time.
+            stop = centre ? lastTime + tol : t;
             split.push_back( SplittingInterval(start, stop, 0) );
             //Reset the number of good ones, for next time
             numgood = 0;

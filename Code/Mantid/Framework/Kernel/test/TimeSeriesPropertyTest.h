@@ -373,7 +373,7 @@ public:
     s = splitter[0];
     t = DateAndTime("2007-11-30T16:17:10");
     TS_ASSERT_DELTA( s.start(), t, 1e-3);
-    t = DateAndTime("2007-11-30T16:17:11");
+    t = DateAndTime("2007-11-30T16:17:20");
     TS_ASSERT_DELTA( s.stop(), t, 1e-3);
 
     s = splitter[1];
