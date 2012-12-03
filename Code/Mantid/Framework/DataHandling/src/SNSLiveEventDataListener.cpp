@@ -49,7 +49,9 @@ Mantid::Kernel::DateAndTime timeFromPacket( const ADARA::PacketHeader &pkt)
   struct timespec timestamp = pkt.timestamp();
   timestamp.tv_sec -= ADARA::EPICS_EPOCH_OFFSET;  // Convert back to Jan 1, 1990 epoch
 
-  return Mantid::Kernel::DateAndTime( timestamp.tv_sec, timestamp.tv_nsec);
+  // Make sure we pick the correct constructor (the Mac gets an ambiguous error)
+  return DateAndTime( static_cast<int64_t>(timestamp.tv_sec), 
+                      static_cast<int64_t>(timestamp.tv_nsec));
 }
 
 
