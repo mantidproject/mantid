@@ -28,7 +28,7 @@ namespace MantidQt
       /// Virtual constructor.
       virtual boost::shared_ptr<PeakTransform> clone() const = 0;
     protected:
-      PeakTransform::PeakTransform(const PeakTransform& other);
+      PeakTransform(const PeakTransform& other);
       std::string m_xPlotLabel;
       std::string m_yPlotLabel;
       int m_indexOfPlotX;
