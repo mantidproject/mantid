@@ -48,5 +48,14 @@ namespace MantidQt
     return boost::make_shared<PeakTransformHKL>(*this);
   }
 
+  /** Transform peak.
+  @param peak : peak to transform according to internal mapping.
+  @return re-mapped coordinates.
+  */
+  Mantid::Kernel::V3D PeakTransformHKL::transformPeak(const Mantid::API::IPeak& peak) const
+  {
+    return PeakTransform::transform(peak.getHKL());
+  }
+
 }
 }

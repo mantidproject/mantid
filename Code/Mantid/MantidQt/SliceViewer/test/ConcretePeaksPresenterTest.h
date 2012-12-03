@@ -7,6 +7,7 @@
 #include "MantidAPI/IPeak.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
+#include "MantidQtSliceViewer/PeakTransformFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
@@ -36,6 +37,7 @@ private:
     {
     }
     MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
+    MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&)); 
   };
 
   /*------------------------------------------------------------
@@ -119,18 +121,24 @@ public:
     // Create a mock view object that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
-
     EXPECT_CALL(*mockViewFactory, setRadius(_)).Times(1);
     EXPECT_CALL(*mockViewFactory, createView(_)).Times(expectedNumberPeaks).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
+    // Create an input workspace.
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
+    // Create a mock transform object.
+    auto pMockTransform = new NiceMock<MockPeakTransform>;
+    PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, transformPeak(_)).Times(peaksWS->rowCount()).WillRepeatedly(Return(V3D()));
+
+    // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
     PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
-    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
-    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(mockTransform));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(mockTransform));
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
     ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, peakTransformFactory);
@@ -138,6 +146,7 @@ public:
     TSM_ASSERT("MockViewFactory not used as expected.", Mock::VerifyAndClearExpectations(mockViewFactory));
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
     TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
+    TSM_ASSERT("MockTransform not used as expected", Mock::VerifyAndClearExpectations(pMockTransform));
   }
 
   void test_update()
@@ -159,10 +168,16 @@ public:
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
+    // Create a mock transform object.
+    auto pMockTransform = new NiceMock<MockPeakTransform>;
+    PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
+
+    // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
     PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
-    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
-    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(mockTransform));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(mockTransform));
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
     ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, peakTransformFactory);
@@ -193,10 +208,16 @@ public:
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
+    // Create a mock transform object.
+    auto pMockTransform = new NiceMock<MockPeakTransform>;
+    PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
+
+    // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
     PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
-    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
-    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(mockTransform));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(mockTransform));
 
     // Construction should cause the widget factory to be used to generate peak overlay objects.
     ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, peakTransformFactory);
@@ -226,10 +247,16 @@ public:
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
+     // Create a mock transform object.
+    auto pMockTransform = new NiceMock<MockPeakTransform>;
+    PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
+
+    // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
     PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
-    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
-    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(mockTransform));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(mockTransform));
 
     {
       ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, peakTransformFactory);
@@ -257,9 +284,15 @@ public:
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
 
+     // Create a mock transform object.
+    auto pMockTransform = new NiceMock<MockPeakTransform>;
+    PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
+
+    // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
     PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
-    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(mockTransform));
     EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillRepeatedly(Throw(PeakTransformException())); // The actual transform will throw if a mix of Qx and Qy were used.
 
     ConcretePeaksPresenter presenter(PeakOverlayViewFactory_sptr(mockViewFactory), peaksWS, peakTransformFactory);

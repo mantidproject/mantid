@@ -2,7 +2,7 @@
 #define MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
 
 #include "MantidQtSliceViewer/PeaksPresenter.h"
-#include "MantidQtSliceViewer/PeakTransformHKL.h"
+#include "MantidQtSliceViewer/PeakTransform.h"
 #include "MantidKernel/V3D.h"
 #include <vector>
 #include <boost/shared_ptr.hpp>

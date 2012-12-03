@@ -1,8 +1,8 @@
-#ifndef SLICE_VIEWER_PEAKTRANSFORMHKL_TEST_H_
-#define SLICE_VIEWER_PEAKTRANSFORMHKL_TEST_H_
+#ifndef SLICE_VIEWER_PEAKTRANSFORMQSAMPLE_TEST_H_
+#define SLICE_VIEWER_PEAKTRANSFORMQSAMPLE_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidQtSliceViewer/PeakTransformHKL.h"
+#include "MantidQtSliceViewer/PeakTransformQSample.h"
 #include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
 
@@ -11,12 +11,12 @@ using namespace Mantid;
 using Mantid::Kernel::V3D;
 using namespace testing;
 
-class PeakTransformHKLTest : public CxxTest::TestSuite
+class PeakTransformQSampleTest : public CxxTest::TestSuite
 {
 
 private:
 
-  /*------------------------------------------------------------
+    /*------------------------------------------------------------
   Mock Peak
   ------------------------------------------------------------*/
   class MockIPeak : public Mantid::API::IPeak 
@@ -120,116 +120,116 @@ public:
 
   void test_throws_with_unknown_xLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformHKL("?", "K (Lattice)"), PeakTransformException);
+    TS_ASSERT_THROWS(PeakTransformQSample("?", "Q_sample_y"), PeakTransformException);
   }
 
   void test_throws_with_unknown_yLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformHKL("H (Lattice)", "?"), PeakTransformException);
-  }
-
-  void test_maps_to_hkl_on_ipeak()
-  {
-    // Create a peak.
-    MockIPeak mockPeak;
-    EXPECT_CALL(mockPeak, getHKL()).WillOnce(Return(V3D())); // Should RUN getHKL!
-
-    // Use the transform on the peak.
-    PeakTransformHKL transform("H", "K");
-    transform.transformPeak(mockPeak);
-
-    // Check that the transform read the right coordinates off the peak object.
-    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPeak));
+    TS_ASSERT_THROWS(PeakTransformQSample("Q_sample_x", "?"), PeakTransformException);
   }
 
   void test_default_transform()
   {
-    PeakTransformHKL transform; // Should be equivalent to constructing transform("H (Lattice)", "K (Lattice)")
+    PeakTransformQSample transform; // Should be equivalent to constructing transform("Q_sample_x", "Q_sample_y")
     V3D original(0, 1, 2);
     V3D transformed = transform.transform(original);
     TS_ASSERT_EQUALS(transformed.X(), original.X());
     TS_ASSERT_EQUALS(transformed.Y(), original.Y());
     TS_ASSERT_EQUALS(transformed.Z(), original.Z());
 
-    boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
+    TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_z", transform.getFreePeakAxisRegex()));
   }
 
-void test_transformHKL()
+  void test_maps_to_q_sample_on_ipeak()
+  {
+    // Create a peak.
+    MockIPeak mockPeak;
+    EXPECT_CALL(mockPeak, getQSampleFrame()).WillOnce(Return(V3D())); // Should RUN getQSampleFrame!
+
+    // Use the transform on the peak.
+    PeakTransformQSample transform("Q_sample_x", "Q_sample_y");
+    transform.transformPeak(mockPeak);
+
+    // Check that the transform read the right coordinates off the peak object.
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPeak));
+  }
+
+  void test_transformQxQyQz()
+  {
+    PeakTransformQSample transform("Q_sample_x", "Q_sample_y");
+    V3D original(0, 1, 2);
+    V3D transformed = transform.transform(original);
+    TS_ASSERT_EQUALS(transformed.X(), original.X());
+    TS_ASSERT_EQUALS(transformed.Y(), original.Y());
+    TS_ASSERT_EQUALS(transformed.Z(), original.Z());
+
+    TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_z", transform.getFreePeakAxisRegex()));
+  }
+
+  void test_transformQxQzQy()
+  {
+    PeakTransformQSample transform("Q_sample_x", "Q_sample_z");
+    V3D original(0, 1, 2);
+    V3D transformed = transform.transform(original);
+    TS_ASSERT_EQUALS(transformed.X(), original.X()); // X -> Q_sample_x
+    TS_ASSERT_EQUALS(transformed.Y(), original.Z()); // Y -> Q_sample_z
+    TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> Q_sample_y
+
+   TSM_ASSERT("Wrong free peak axis.",  boost::regex_match("Q_sample_y", transform.getFreePeakAxisRegex()));
+  }
+
+  void test_transformQzQyQx()
+  {
+    PeakTransformQSample transform("Q_sample_z", "Q_sample_y");
+    V3D original(0, 1, 2);
+    V3D transformed = transform.transform(original);
+    TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> Q_sample_z
+    TS_ASSERT_EQUALS(transformed.Y(), original.Y()); // Y -> Q_sample_y
+    TS_ASSERT_EQUALS(transformed.Z(), original.X()); // Z -> Q_sample_x
+
+    TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_x", transform.getFreePeakAxisRegex()));
+  }
+
+void test_transformQzQxQy()
 {
-  PeakTransformHKL transform("H (Lattice)", "K (Lattice)");
+  PeakTransformQSample transform("Q_sample_z", "Q_sample_x");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
-  TS_ASSERT_EQUALS(transformed.X(), original.X());
-  TS_ASSERT_EQUALS(transformed.Y(), original.Y());
-  TS_ASSERT_EQUALS(transformed.Z(), original.Z());
+  TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> Q_sample_z
+  TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> Q_sample_x
+  TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> Q_sample_y
 
-  boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
+  TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_y", transform.getFreePeakAxisRegex()));
 }
 
-void test_transformHLK()
+void test_transformQyQzQx()
 {
-  PeakTransformHKL transform("H (Lattice)", "L (Lattice)");
-  V3D original(0, 1, 2);
-  V3D transformed = transform.transform(original);
-  TS_ASSERT_EQUALS(transformed.X(), original.X()); // X -> H
-  TS_ASSERT_EQUALS(transformed.Y(), original.Z()); // Y -> L
-  TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> K
-
-  boost::regex_match("K (Lattice)", transform.getFreePeakAxisRegex());
-}
-
-void test_transformLKH()
-{
-  PeakTransformHKL transform("L (Lattice)", "K (Lattice)");
-  V3D original(0, 1, 2);
-  V3D transformed = transform.transform(original);
-  TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> L
-  TS_ASSERT_EQUALS(transformed.Y(), original.Y()); // Y -> K
-  TS_ASSERT_EQUALS(transformed.Z(), original.X()); // Z -> H
-
-  boost::regex_match("H (Lattice)", transform.getFreePeakAxisRegex());
-}
-
-void test_transformLHK()
-{
-  PeakTransformHKL transform("L (Lattice)", "H (Lattice)");
-  V3D original(0, 1, 2);
-  V3D transformed = transform.transform(original);
-  TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> L
-  TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> H
-  TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> K
-
-  boost::regex_match("K (Lattice)", transform.getFreePeakAxisRegex());
-}
-
-void test_transformKLH()
-{
-  PeakTransformHKL transform("K (Lattice)", "L (Lattice)");
+  PeakTransformQSample transform("Q_sample_y", "Q_sample_z");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.Y()); // X -> K
   TS_ASSERT_EQUALS(transformed.Y(), original.Z()); // Y -> L
   TS_ASSERT_EQUALS(transformed.Z(), original.X()); // Z -> H
 
-  boost::regex_match("H (Lattice)", transform.getFreePeakAxisRegex());
+  TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_x", transform.getFreePeakAxisRegex()));
 }
 
-void test_transformKHL()
+void test_transformQyQxQz()
 {
-  PeakTransformHKL transform("K (Lattice)", "H (Lattice)");
+  PeakTransformQSample transform("Q_sample_y", "Q_sample_x");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.Y()); // X -> K
   TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> H
   TS_ASSERT_EQUALS(transformed.Z(), original.Z()); // Z -> L
 
-  boost::regex_match("L (Lattice)", transform.getFreePeakAxisRegex());
+  TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_z", transform.getFreePeakAxisRegex()));
 }
 
 void test_copy_construction()
 {
-  PeakTransformHKL A("H", "L");
-  PeakTransformHKL B(A);
+  PeakTransformQSample A("Q_sample_x", "Q_sample_z");
+  PeakTransformQSample B(A);
 
   // Test indirectly via what the transformations produce.
   V3D productA = A.transform(V3D(0, 1, 2));
@@ -239,13 +239,13 @@ void test_copy_construction()
   boost::regex regexA = A.getFreePeakAxisRegex();
   boost::regex regexB = B.getFreePeakAxisRegex();
   TS_ASSERT_EQUALS(regexA, regexB);
- 
 }
+
 
 void test_assigment()
 {
-  PeakTransformHKL A("H", "L");
-  PeakTransformHKL B("K", "H");
+  PeakTransformQSample A("Q_sample_x", "Q_sample_z");
+  PeakTransformQSample B("Q_sample_y", "Q_sample_x");
   A = B;
 
   // Test indirectly via what the transformations produce.
@@ -260,10 +260,10 @@ void test_assigment()
 
 void test_clone()
 {
-  PeakTransformHKL A("H", "L");
+  PeakTransformQSample A("Q_sample_x", "Q_sample_z");
   PeakTransform_sptr clone = A.clone();
 
-  TSM_ASSERT("Clone product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformHKL>(clone) != NULL);
+  TSM_ASSERT("Clone product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformQSample>(clone) != NULL);
 
   // Test indirectly via what the transformations produce.
   V3D productA = A.transform(V3D(0, 1, 2));
@@ -279,14 +279,14 @@ void test_clone()
 void test_factory()
 {
   // Create the benchmark.
-  PeakTransform_sptr expectedProduct = boost::make_shared<PeakTransformHKL>("H", "K");
+  PeakTransform_sptr expectedProduct = boost::make_shared<PeakTransformQSample>("Q_sample_x", "Q_sample_y");
 
   // Use the factory to create a product.
-  PeakTransformHKLFactory factory;
+  PeakTransformQSampleFactory factory;
   PeakTransform_sptr product = factory.createDefaultTransform();
 
   // Check the type of the output product object.
-  TSM_ASSERT("Factory product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformHKL>(product) != NULL);
+  TSM_ASSERT("Factory product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformQSample>(product) != NULL);
 
   // Now test that the benchmark and the factory product are equivalent.
   // Test indirectly via what the transformations produce.
@@ -299,8 +299,8 @@ void test_factory()
   TS_ASSERT_EQUALS(regexA, regexB);
 }
 
-private:
+
 };
 #endif
 
-//end SLICE_VIEWER_PEAKTRANSFORMHKL_TEST_H_
+//end SLICE_VIEWER_PEAKTRANSFORMQSAMPLE_TEST_H_

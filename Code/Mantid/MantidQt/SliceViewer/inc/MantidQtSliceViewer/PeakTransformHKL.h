@@ -22,6 +22,8 @@ namespace MantidQt
       PeakTransformHKL & operator=(const PeakTransformHKL & other);
       /// Virtual constructor
       PeakTransform_sptr clone() const;
+      /// Transform peak.
+      Mantid::Kernel::V3D transformPeak(const Mantid::API::IPeak& peak) const;
     };
 
     /// Typedef a factory for type of PeaksTransform.

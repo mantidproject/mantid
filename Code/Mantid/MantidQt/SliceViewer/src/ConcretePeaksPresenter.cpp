@@ -44,9 +44,7 @@ namespace SliceViewer
     for(int i = 0; i < peaksWS->getNumberPeaks(); ++i)
     {
       const Mantid::API::IPeak& peak = peaksWS->getPeak(i);
-      auto position = peak.getHKL();
-      
-      PeakOverlayView_sptr view = boost::shared_ptr<PeakOverlayView>( m_viewFactory->createView(m_transform->transform(position)) );
+      PeakOverlayView_sptr view = boost::shared_ptr<PeakOverlayView>( m_viewFactory->createView(m_transform->transformPeak(peak)) );
       m_viewPeaks[i] = view;
     }
     if(!transformSucceeded)

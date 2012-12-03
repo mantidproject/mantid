@@ -23,6 +23,8 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayFactory.h"
+#include "MantidQtSliceViewer/PeakTransformHKL.h"
+#include "MantidQtSliceViewer/PeakTransformQSample.h"
 #include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "qmainwindow.h"
@@ -160,6 +162,7 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   // -------- Peak Overlay ----------------
   m_peakTransformSelector.registerCandidate(boost::make_shared<PeakTransformHKLFactory>());
+  m_peakTransformSelector.registerCandidate(boost::make_shared<PeakTransformQSampleFactory>());
 }
 
 //------------------------------------------------------------------------------------
