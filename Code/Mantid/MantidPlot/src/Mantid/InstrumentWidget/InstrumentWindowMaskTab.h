@@ -1,8 +1,8 @@
 #ifndef INSTRUMENTWINDOWMASKTAB_H_
 #define INSTRUMENTWINDOWMASKTAB_H_
 
+#include "InstrumentWindowTab.h"
 #include "MantidGLWidget.h"
-#include "DetSelector.h"
 
 #include <QFrame>
 #include <QMap>
@@ -43,13 +43,13 @@ namespace Mantid
 /**
   * Implements the Mask tab in InstrumentWindow
   */
-class InstrumentWindowMaskTab: public QFrame
+class InstrumentWindowMaskTab: public InstrumentWindowTab
 {
   Q_OBJECT
 public:
   enum Activity {Move = 0, Select = 1, DrawEllipse};
   InstrumentWindowMaskTab(InstrumentWindow* instrWindow);
-  void init();
+  void initOnShow();
 signals:
   void executeAlgorithm(const QString&, const QString&);
 protected slots:

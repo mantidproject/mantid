@@ -441,9 +441,11 @@ void InstrumentWindow::setSurfaceType(int type)
     setSurface(surface);
     // make sure to switch to the right instrument display
     selectOpenGLDisplay( useOpenGL );
-    m_renderTab->init();
-    m_pickTab->init();
-    m_maskTab->init();
+//    m_renderTab->init();
+//    m_pickTab->init();
+//    m_maskTab->init();
+    InstrumentWindowTab* tab = dynamic_cast<InstrumentWindowTab*>(mControlsTab->currentWidget());
+    if ( tab ) tab->initOnShow();
 
     connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
     connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
@@ -526,6 +528,8 @@ void InstrumentWindow::tabChanged(int i)
     m_instrumentActor->accept(SetAllVisibleVisitor());
   }
   setInfoText(surface->getInfoText());
+  InstrumentWindowTab* tab = dynamic_cast<InstrumentWindowTab*>(mControlsTab->widget(i));
+  if ( tab ) tab->initOnShow();
   updateInstrumentView();
 }
 
@@ -971,7 +975,7 @@ void InstrumentWindow::showEvent(QShowEvent* e)
 
 QWidget * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
 {
-  QWidget* instrumentTree=new QWidget(ControlsTab);
+  InstrumentWindowTab* instrumentTree=new InstrumentWindowTab(ControlsTab);
   QVBoxLayout* instrumentTreeLayout=new QVBoxLayout(instrumentTree);
   //Tree Controls
   mInstrumentTree = new InstrumentTreeWidget(0);

@@ -292,6 +292,7 @@ void ProjectionSurface::wheelEvent(QWheelEvent* e)
 
 void ProjectionSurface::keyPressEvent(QKeyEvent* e)
 {
+    std::cerr << "interaction " << m_interactionMode << std::endl;
   switch(m_interactionMode)
   {
   case MoveMode: break;
@@ -544,21 +545,21 @@ void ProjectionSurface::colorMapChanged()
   updateView();
 }
 
-void ProjectionSurface::setInteractionModePick()
+/**
+  * Set an interaction mode for the surface.
+  * @param mode :: A new mode.
+  */
+void ProjectionSurface::setInteractionMode(ProjectionSurface::InteractionMode mode)
 {
-  m_interactionMode = PickMode;
-  m_maskShapes.deselectAll();
-}
-
-void ProjectionSurface::setInteractionModeMove()
-{
-  m_interactionMode = MoveMode;
-  m_maskShapes.deselectAll();
-}
-
-void ProjectionSurface::setInteractionModeDraw()
-{
-  m_interactionMode = DrawMode;
+    m_interactionMode = mode;
+    if ( mode != DrawMode )
+    {
+        m_maskShapes.deselectAll();
+        foreach(PeakOverlay* po, m_peakShapes)
+        {
+            po->deselectAll();
+        }
+    }
 }
 
 /**
@@ -597,7 +598,7 @@ Mantid::Kernel::V3D ProjectionSurface::getDetectorPos(int x, int y) const
   if ( index >= 0 )
     return m_instrActor->getDetPos(index);
   else
-    return V3D();
+      return V3D();
 }
 
 //------------------------------------------------------------------------------

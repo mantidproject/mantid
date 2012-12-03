@@ -104,9 +104,7 @@ public:
 
   Mantid::Kernel::V3D getDetectorPos(int x, int y) const;
   /// Change the interaction mode
-  void setInteractionModeMove();
-  void setInteractionModePick();
-  void setInteractionModeDraw();
+  void setInteractionMode(InteractionMode mode);
   InteractionMode getInteractionMode()const{return m_interactionMode;}
 
   /// Set background colour

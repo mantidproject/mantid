@@ -53,82 +53,11 @@ struct Sqrt
 };
 
 /**
- * Dialog for converting x-values to time of flight needed for peak selection.
- */
-class InputConvertUnitsParametersDialog : public QDialog
-{
-public:
-  InputConvertUnitsParametersDialog(QWidget* parent);
-  int getEMode()const;
-  double getEFixed()const;
-  double getDelta()const;
-private:
-  QComboBox* m_emode;
-  QLineEdit* m_efixed;
-  QLineEdit* m_delta;
-};
-
-InputConvertUnitsParametersDialog::InputConvertUnitsParametersDialog(QWidget* parent):QDialog(parent)
-{
-  QGridLayout* input_layout = new QGridLayout();
-  QLabel* label = new QLabel("Units have to be converted to TOF.\nPlease specify additional information.");
-  m_emode = new QComboBox();
-  QStringList emodeOptions;
-  emodeOptions << "Elastic" << "Direct" << "Indirect";
-  m_emode->insertItems(0,emodeOptions);
-  QLabel* emode_label = new QLabel("EMode");
-  
-  m_efixed = new QLineEdit();
-  m_efixed->setText("0.0");
-  QLabel* efixed_label = new QLabel("EFixed");
-
-  m_delta = new QLineEdit();
-  m_delta->setText("0.0");
-  QLabel* delta_label = new QLabel("Delta");
-
-  input_layout->addWidget(label,0,0,1,2);
-  input_layout->addWidget(emode_label,1,0);
-  input_layout->addWidget(m_emode,1,1);
-  input_layout->addWidget(efixed_label,2,0);
-  input_layout->addWidget(m_efixed,2,1);
-  input_layout->addWidget(delta_label,3,0);
-  input_layout->addWidget(m_delta,3,1);
-
-  QHBoxLayout* button_layout = new QHBoxLayout();
-  QPushButton* ok_button = new QPushButton("OK");
-  button_layout->addStretch();
-  button_layout->addWidget(ok_button);
-  connect(ok_button,SIGNAL(clicked()),this,SLOT(close()));
-
-  QVBoxLayout* main_layout = new QVBoxLayout(this);
-  main_layout->addLayout(input_layout);
-  main_layout->addStretch();
-  main_layout->addLayout(button_layout);
-}
-
-int InputConvertUnitsParametersDialog::getEMode()const
-{
-  return m_emode->currentIndex();
-}
-
-double InputConvertUnitsParametersDialog::getEFixed()const
-{
-  return m_efixed->text().toDouble();
-}
-
-double InputConvertUnitsParametersDialog::getDelta()const
-{
-  return m_delta->text().toDouble();
-}
-
-// --- InstrumentWindowPickTab --- //
-
-/**
  * Constructor.
  * @param instrWindow :: Parent InstrumentWindow.
  */
 InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
-QFrame(instrWindow),
+InstrumentWindowTab(instrWindow),
 m_instrWindow(instrWindow),
 m_currentDetID(-1),
 m_tubeXUnits(DETECTOR_ID),
@@ -214,11 +143,6 @@ m_freezePlot(false)
   m_one->setToolTip("Select single pixel");
   m_one->setIcon(QIcon(":/PickTools/selection-pointer.png"));
 
-  m_box = new QPushButton();
-  m_box->setCheckable(true);
-  m_box->setAutoExclusive(true);
-  m_box->setIcon(QIcon(":/PickTools/selection-box.png"));
-
   m_tube = new QPushButton();
   m_tube->setCheckable(true);
   m_tube->setAutoExclusive(true);
@@ -229,20 +153,25 @@ m_freezePlot(false)
   m_peak->setCheckable(true);
   m_peak->setAutoExclusive(true);
   m_peak->setIcon(QIcon(":/PickTools/selection-peak.png"));
-  m_peak->setToolTip("Select single crystal peak");
+  m_peak->setToolTip("Add single crystal peak");
+
+  m_peakSelect = new QPushButton();
+  m_peakSelect->setCheckable(true);
+  m_peakSelect->setAutoExclusive(true);
+  m_peakSelect->setIcon(QIcon(":/PickTools/selection-peaks.png"));
+  m_peakSelect->setToolTip("Select single crystal peak(s)");
 
   QHBoxLayout* toolBox = new QHBoxLayout();
   toolBox->addWidget(m_one);
-  toolBox->addWidget(m_box); 
-  m_box->setVisible(false); //Hidden by Owen Arnold 14/02/2011 because box picking doesn't exhibit correct behaviour and is not necessary for current release 
   toolBox->addWidget(m_tube);
   toolBox->addWidget(m_peak);
+  toolBox->addWidget(m_peakSelect);
   toolBox->addStretch();
   toolBox->setSpacing(2);
   connect(m_one,SIGNAL(clicked()),this,SLOT(setSelectionType()));
-  connect(m_box,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_tube,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_peak,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_peakSelect,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   setSelectionType();
 
   // lay out the widgets
@@ -256,9 +185,10 @@ m_freezePlot(false)
 /**
  * Initialise the tab.
  */
-void InstrumentWindowPickTab::init()
+void InstrumentWindowPickTab::initOnShow()
 {
-  m_emode = -1;
+    // Make the state of the display view consistent with the current selection type
+    setSelectionType();
 }
 
 /**
@@ -664,15 +594,11 @@ void InstrumentWindowPickTab::plotTubeIntegrals(int detid)
  */
 void InstrumentWindowPickTab::setSelectionType()
 {
+  ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickMode;
   if (m_one->isChecked())
   {
     m_selectionType = Single;
     m_activeTool->setText("Tool: Pixel selection");
-  }
-  else if (m_box->isChecked())
-  {
-    m_selectionType = BoxType;
-    m_activeTool->setText("Tool: Box selection");
   }
   else if (m_tube->isChecked())
   {
@@ -681,12 +607,21 @@ void InstrumentWindowPickTab::setSelectionType()
   }
   else if (m_peak->isChecked())
   {
-    m_selectionType = Peak;
-    m_activeTool->setText("Tool: Single crystal peak selection");
+    m_selectionType = AddPeak;
+    m_activeTool->setText("Tool: Add a single crystal peak");
   }
+  else if (m_peakSelect->isChecked())
+  {
+    m_selectionType = SelectPeak;
+    m_activeTool->setText("Tool: Select crystal peak(s)");
+    surfaceMode = ProjectionSurface::DrawMode;
+  }
+  ProjectionSurface* surface = m_instrWindow->getSurface();
+  if ( surface ) surface->setInteractionMode( surfaceMode );
   m_plot->clearAll();
   m_plot->replot();
   setPlotCaption();
+  m_instrWindow->updateInstrumentView();
 }
 
 /**
@@ -763,7 +698,7 @@ void InstrumentWindowPickTab::showEvent (QShowEvent *)
   ProjectionSurface* surface = mInstrumentDisplay->getSurface();
   if (surface)
   {
-    surface->setInteractionModePick();
+    surface->setInteractionMode(ProjectionSurface::PickMode);
   }
   mInstrumentDisplay->setMouseTracking(true);
 }
@@ -1206,7 +1141,7 @@ void InstrumentWindowPickTab::changedIntegrationRange(double,double)
  */
 void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
 {
-  if (m_selectionType != Peak)
+  if (m_selectionType < SelectPeak)
   {
     updatePick(-1);
   }
