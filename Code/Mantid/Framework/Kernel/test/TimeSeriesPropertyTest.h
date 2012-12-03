@@ -385,6 +385,12 @@ public:
     delete log;
   }
 
+  void test_makeFilterByValue_throws_for_string_property()
+  {
+    TimeSeriesProperty<std::string> log("StringTSP");
+    TimeSplitterType splitter;
+    TS_ASSERT_THROWS(log.makeFilterByValue(splitter,0.0,0.0,0.0,true), Exception::NotImplementedError);
+  }
 
   //----------------------------------------------------------------------------
   void test_splitByTime_and_getTotalValue()

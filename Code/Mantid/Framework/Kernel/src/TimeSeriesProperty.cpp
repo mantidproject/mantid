@@ -438,7 +438,7 @@ namespace Mantid
 
     /**
      * Fill a TimeSplitterType that will filter the events by matching
-     * log values >= min and < max. Creates SplittingInterval's where
+     * log values >= min and <= max. Creates SplittingInterval's where
      * times match the log values, and going to index==0.
      *
      * @param split :: Splitter that will be filled.
@@ -448,7 +448,7 @@ namespace Mantid
      * @param centre :: Whether the log value time is considered centred or at the beginning.
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance, bool centre) const
+    void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre) const
     {
       // Make sure the splitter starts out empty
       split.clear();
@@ -508,6 +508,15 @@ namespace Mantid
       }
 
       return;
+    }
+
+    /** Function specialization for TimeSeriesProperty<std::string>
+     *  @throws Kernel::Exception::NotImplementedError always
+     */
+    template<>
+    void TimeSeriesProperty<std::string>::makeFilterByValue(TimeSplitterType&, double, double, double, bool) const
+    {
+      throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
     }
 
     /**
