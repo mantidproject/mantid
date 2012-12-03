@@ -11,6 +11,7 @@ set ( SRC_FILES
     src/PeakTransform.cpp
     src/PeakTransformHKL.cpp
     src/PeakTransformQSample.cpp
+    src/PeakTransformQLab.cpp
 	src/PeakTransformSelector.cpp 
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
@@ -41,6 +42,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeaksPresenter.h
 	inc/MantidQtSliceViewer/PeakTransformHKL.h	
     inc/MantidQtSliceViewer/PeakTransformQSample.h
+    inc/MantidQtSliceViewer/PeakTransformQLab.h
 	inc/MantidQtSliceViewer/PeakTransform.h
 	inc/MantidQtSliceViewer/PeakTransformFactory.h 
 	inc/MantidQtSliceViewer/PeakTransformSelector.h    
@@ -82,6 +84,7 @@ set ( TEST_FILES
     test/ConcretePeaksPresenterTest.h
     test/PeakTransformHKLTest.h
     test/PeakTransformQSampleTest.h
+    test/PeakTransformQLabTest.h
 	test/PeakTransformSelectorTest.h
     test/NullPeaksPresenterTest.h
 )
