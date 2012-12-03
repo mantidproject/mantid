@@ -73,6 +73,12 @@ using MantidQt::SliceViewer::SliceViewerWindow;
 
 namespace MantidException = Mantid::Kernel::Exception;
 
+namespace
+{
+  /// The number of detectors to show within a group before eliding
+  size_t DET_TABLE_NDETS_GROUP = 10;
+}
+
 MantidUI::MantidUI(ApplicationWindow *aw):
 m_finishedLoadDAEObserver(*this, &MantidUI::handleLoadDAEFinishedNotification),
   m_addObserver(*this,&MantidUI::handleAddWorkspace),
@@ -973,7 +979,7 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
  * Create the relevant detector table for the given workspace
  * @param wsName :: The name of the workspace
  * @param indices :: Limit the table to these workspace indices (MatrixWorkspace only)
- * @param include_data :: If true then the data matrix is displayed also (MatrixWorkspace only)
+ * @param include_data :: If true then first value from the each spectrum is displayed (MatrixWorkspace only)
  */
 Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data)
 {
@@ -1000,112 +1006,122 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
  * @param wsName :: The name of the workspace
  * @param ws :: A pointer to a MatrixWorkspace
  * @param indices :: Limit the table to these workspace indices
- * @param include_data :: If true then the data matrix is displayed also
+ * @param include_data :: If true then first value from the each spectrum is displayed
  */
 Table* MantidUI::createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws, 
                                      const std::vector<int>& indices, bool include_data)
 {
-  const size_t nrows = indices.empty()? ws->getNumberHistograms() : indices.size();
-  // We have ncols columns all of which all have doubles as values except the last ncharcols columns which are strings.
-  int ncols = 7;
-  int ncharcols = 1;
-  // Prepare column names
-  QStringList col_names;
-  col_names << "Index" << "Spectrum No" << "Detector ID";
+  using namespace Mantid::Geometry;
+  // Prepare column names. Types will be determined from QVariant
+  QStringList colNames;
+  colNames << "Index" << "Spectrum No" << "Detector ID(s)";
   if( include_data )
   {
-    ncols += 2;
-    col_names << "Data Value" << "Data Error";  
+    colNames << "Data Value" << "Data Error";  
   }
-  col_names << "R" << "Theta" << "Phi" << "Monitor";
-
-  Table* t = new Table(appWindow()->scriptingEnv(), static_cast<int>(nrows), ncols, "", appWindow(), 0);
+  colNames << "R" << "Theta" << "Phi" << "Monitor";
+  
+  const int ncols = static_cast<int>(colNames.size());
+  const int nrows = indices.empty()? static_cast<int>(ws->getNumberHistograms()) : static_cast<int>(indices.size());
+  Table* t = new Table(appWindow()->scriptingEnv(), nrows, ncols, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
-  //Set the column names
+  // Set the column names
   for( int col = 0; col < ncols; ++col )
   {
-    t->setColName(col, col_names[col]);
+    t->setColName(col, colNames[col]);
     t->setColPlotDesignation(col, Table::None);
   }
   t->setHeaderColType();
 
-  //Mantid::API::Axis *spectraAxis = ws->getAxis(1);
-  Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
-  QList<double> col_values; // List of double valued data for one row
-  bool b_showSignedTwoThetaVersion = false; //Flag indicating that a signedVersion of the two theta value should be displayed
-  for( size_t row = 0; row < nrows; ++row )
+  // Cache some frequently used values
+  IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
+  bool signedThetaParamRetrieved(false), showSignedTwoTheta(false); //If true,  signedVersion of the two theta value should be displayed
+  for( int row = 0; row < nrows; ++row )
   {
-    size_t ws_index = indices.empty() ? row : indices[row];
+    size_t wsIndex = indices.empty() ? static_cast<size_t>(row) : indices[row];
+    QList<QVariant> colValues;
+    colValues << QVariant(static_cast<double>(wsIndex));
+    const double dataY0(ws->readY(wsIndex)[0]), dataE0(ws->readE(wsIndex)[0]);
 
-    Mantid::specid_t currentSpec;
     try
     {
-      currentSpec = ws->getSpectrum(ws_index)->getSpectrumNo();
-    }
-    catch(std::range_error&)
-    {//if there is no spectra number information in the workspace display the spectra numbers as -1
-      currentSpec = -1;
-    }
-
-    int detID = 0;
-    bool isMon = false;
-    double R(0.0), Theta(0.0), Phi(0.0);
-    try
-    {
-      Mantid::Geometry::IDetector_const_sptr det = ws->getDetector(ws_index);
-
-      detID = det->getID();
-      // We want to know whether the detector is a monitor
-      isMon = det->isMonitor();
-      // We want the position of the detector relative to the sample
-      Mantid::Kernel::V3D pos = det->getPos() - sample->getPos();
-      pos.getSpherical(R,Theta,Phi);
-      // Need to get R & Theta through these methods to be correct for grouped detectors
-      R = det->getDistance(*sample);
-
-      // Lazy evaluation of the instrument parameter map.
-      if(row == 0)
+      ISpectrum *spectrum = ws->getSpectrum(wsIndex);
+      Mantid::specid_t specNo = spectrum->getSpectrumNo();
+      QString detIds("");
+      const auto & ids  = spectrum->getDetectorIDs();
+      size_t ndets = ids.size();
+      auto iter = ids.begin();
+      auto itEnd = ids.end();
+      if(ndets > DET_TABLE_NDETS_GROUP)
       {
-        std::vector<std::string> parameters = det->getStringParameter("show-signed-theta", true);
-        b_showSignedTwoThetaVersion = !parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
-      }
-      if(b_showSignedTwoThetaVersion)
-      {
-        Theta = ws->detectorSignedTwoTheta(det)*180.0/M_PI;
+        detIds = QString("%1,%2...(%3 more)...%4,%5");
+        //post-fix increments and returns last value
+        detIds = detIds.arg(*iter++).arg(*iter++).arg(ndets-4); // First two + n extra
+        auto revIter = ids.rbegin(); // Set iterators are unidirectional ... so no operator-()
+        Mantid::specid_t last(*revIter++), lastm1(*revIter++);
+        detIds = detIds.arg(lastm1).arg(last);
       }
       else
       {
-        Theta = ws->detectorTwoTheta(det)*180.0/M_PI;
+        for(; iter != itEnd; ++iter)
+        {
+          detIds += QString::number(*iter) + ",";
+        }
+        detIds.chop(1); //Drop last comma
       }
-      
+
+      // Geometry
+      IDetector_const_sptr det = ws->getDetector(wsIndex);
+      if(!signedThetaParamRetrieved)
+      {
+        std::vector<std::string> parameters = det->getStringParameter("show-signed-theta", true); //recursive
+        showSignedTwoTheta = (!parameters.empty() && find(parameters.begin(), parameters.end(), "Always") != parameters.end());
+        signedThetaParamRetrieved = true;
+      }
+      // We want the position of the detector relative to the sample
+      Mantid::Kernel::V3D pos = det->getPos() - sample->getPos();
+      double R(0.0), theta(0.0), phi(0.0);
+      pos.getSpherical(R,theta,phi);
+      // Need to get R, theta through these methods to be correct for grouped detectors
+      R = det->getDistance(*sample);
+      theta = showSignedTwoTheta ? ws->detectorSignedTwoTheta(det) : ws->detectorTwoTheta(det);
+      theta *= 180.0/M_PI; //To degrees
+      QString isMonitor = det->isMonitor() ? "yes" : "no";
+
+      colValues << QVariant(specNo) << QVariant(detIds);
+      // Y/E
+      if(include_data)
+      {
+        colValues << QVariant(dataY0) << QVariant(dataE0); // data
+      }
+      colValues << QVariant(R) << QVariant(theta) << QVariant(phi) // rtp
+                << QVariant(isMonitor);         // monitor
     }
     catch(...)
     {
-      detID = 0;
-    }
-    // Prepare double valued data for current row
-    if (!col_values.isEmpty()) col_values.clear();
-    col_values << static_cast<double>(ws_index) <<  static_cast<double>(currentSpec) << static_cast<double>(detID);
-    if( include_data )
+      // spectrumNo=-1, detID=0
+      colValues << QVariant(-1) << QVariant("0");
+      // Y/E
+      if(include_data)
+      {
+        colValues << QVariant(dataY0) << QVariant(dataE0); // data
+      }
+      colValues << QVariant("0") << QVariant("0") << QVariant("0") // rtp
+                << QVariant("n/a");         // monitor
+    }// End catch for no spectrum
+    
+    for(int col = 0; col < ncols; ++col)
     {
-      col_values << ws->readY(ws_index)[0] << ws->readE(ws_index)[0];
+      const QVariant colValue = colValues[col];
+      if(QMetaType::QString == colValue.userType()) // Avoid a compiler warning with type() about comparing different enums...
+      {
+        t->setText(row, col, colValue.toString());
+      }
+      else
+      {
+        t->setCell(row, col, colValue.toDouble());
+      }
     }
-    col_values << R << Theta << Phi;
-    // Set column values for current row
-    for(int col = 0; col < ncols-ncharcols; ++col)
-    {
-      t->setCell(static_cast<int>(row), col, col_values[col]);
-    }
-    // Set Monitor Flag - yes if monitor, no if not monitor and also detector ID is non-zero, else not applicable
-    if( detID==0 && !isMon ) 
-    {
-      t->setText(static_cast<int>(row), ncols-ncharcols, "n/a");
-    }
-    else
-    {
-      t->setText(static_cast<int>(row), ncols-ncharcols, isMon? "  yes": "  no" );
-    }
-
   }
 
   t->showNormal();
