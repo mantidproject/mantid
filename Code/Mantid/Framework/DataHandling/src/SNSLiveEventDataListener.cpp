@@ -44,12 +44,15 @@ using namespace Mantid::API;
 
 
 // Helper function to get a DateAndTime value from an ADARA packet
-Mantid::Kernel::DateAndTime timeFromPacket( const ADARA::PacketHeader &pkt)
+Mantid::Kernel::DateAndTime timeFromPacket( const ADARA::Packet &pkt)
 {
-  struct timespec timestamp = pkt.timestamp();
-  timestamp.tv_sec -= ADARA::EPICS_EPOCH_OFFSET;  // Convert back to Jan 1, 1990 epoch
+  const uint32_t *field = (const uint32_t *)pkt.packet();
+  uint32_t seconds = field[2];
+  uint32_t nanoseconds = field[3];
 
-  return Mantid::Kernel::DateAndTime( timestamp.tv_sec, timestamp.tv_nsec);
+  // Make sure we pick the correct constructor (the Mac gets an ambiguous error)
+  return DateAndTime( static_cast<int64_t>(seconds),
+                      static_cast<int64_t>(nanoseconds));
 }
 
 
