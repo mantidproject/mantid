@@ -90,16 +90,15 @@ FilterByLogValue::~FilterByLogValue()
 //-----------------------------------------------------------------------
 void FilterByLogValue::init()
 {
-  using namespace Mantid::Kernel;
   declareProperty(
-    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::InOut),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
     "An input event workspace" );
 
   declareProperty(
     new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
 
-  declareProperty("LogName", "ProtonCharge, "
+  declareProperty("LogName", "",
       "Name of the sample log to use to filter.\n"
       "For example, the pulse charge is recorded in 'ProtonCharge'.");
 
@@ -115,9 +114,9 @@ void FilterByLogValue::init()
     "If there are several consecutive log values matching the filter, events between T1-Tolerance and T2+Tolerance are kept.");
 
   std::vector<std::string> types(2);
-  types.push_back("Centre");
-  types.push_back("Left");
-  declareProperty("LogBoundary", "Centre", boost::make_shared<StringListValidator>(types),
+  types[0] = "Centre";
+  types[1] = "Left";
+  declareProperty("LogBoundary", types[1], boost::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of the time, or beginning (left) boundary");
 
 
