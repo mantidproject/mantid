@@ -1,29 +1,3 @@
-#
-# PYUNITTEST_ADD_TEST_TWO (public macro to add unit tests)
-#   Adds a set of python tests based upon the unittest module
-#   Parameters:
-#       _test_src_dir :: The directory where the src files reside
-#       _testname_prefix :: A prefix for each test that is added to ctest, the name will be
-#                           ${_testname_prefix}_TestName
-#       ${ARGN} :: List of test files
-macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
-  # The working directory when running
-  set ( _running_dir "${CMAKE_BINARY_DIR}/bin" )
-  # Add all of the individual tests so that they can be run in parallel
-  foreach ( part ${ARGN} )
-    get_filename_component( _filename ${part} NAME )
-    get_filename_component( _suitename ${part} NAME_WE )
-    set ( _pyunit_separate_name "${_testname_prefix}_${_suitename}" )
-    add_test ( NAME ${_pyunit_separate_name}
-               COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin"
-               ${PYTHON_EXECUTABLE} -m unittest discover
-                                    --start-directory=${_test_src_dir}
-                                    --pattern=${_filename} )
-  endforeach ( part ${ARGN} )
-
-endmacro ( PYUNITTEST_ADD_TEST_TWO )
-
-
 macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   # decide where to copy the unit tests
   get_filename_component ( _pyunit_testname ${_pyunit_testname_file} NAME_WE )
