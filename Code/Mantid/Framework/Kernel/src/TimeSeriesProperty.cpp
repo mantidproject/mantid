@@ -474,7 +474,7 @@ namespace Mantid
         TYPE val = m_values[i].value();
 
         //A good value?
-        const bool isGood = ((val >= min) && (val < max));
+        const bool isGood = ((val >= min) && (val <= max));
         if (isGood)
           numgood++;
 
