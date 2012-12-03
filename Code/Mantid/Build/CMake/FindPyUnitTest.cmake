@@ -23,7 +23,7 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
     set ( _pyunit_separate_name "${_testname_prefix}_${_suitename}" )
     if ( MSVC )
       # Debug builds need to call the debug executable
-      add_test ( NAME ${_pyunit_separate_name}_Debug
+      add_test ( NAME ${_pyunit_separate_name}_Debug CONFIGURATIONS Debug
                  COMMAND ${PYTHON_EXECUTABLE_DEBUG} -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_property ( TEST ${_pyunit_separate_name}_Debug 
@@ -32,7 +32,7 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
         PROPERTY WORKING_DIRECTORY ${_module_dir_debug} )
 
       # Release
-      add_test ( NAME ${_pyunit_separate_name}
+      add_test ( NAME ${_pyunit_separate_name} CONFIGURATIONS Release
                  COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_property ( TEST ${_pyunit_separate_name}
