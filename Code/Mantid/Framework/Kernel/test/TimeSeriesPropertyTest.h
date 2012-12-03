@@ -346,7 +346,7 @@ public:
 
     // Test centred log value boundaries
     TimeSplitterType splitter;
-    log->makeFilterByValue(splitter, 1.8, 2.2, 1.0);
+    log->makeFilterByValue(splitter, 1.8, 2.2, 1.0, true);
 
     TS_ASSERT_EQUALS( splitter.size(), 2);
     SplittingInterval s;
