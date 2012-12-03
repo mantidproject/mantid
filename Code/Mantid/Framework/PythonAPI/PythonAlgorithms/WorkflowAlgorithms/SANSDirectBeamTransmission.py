@@ -10,6 +10,12 @@ from reduction_workflow.find_data import find_data
 
 class SANSDirectBeamTransmission(PythonAlgorithm):
 
+    def category(self):
+        return "Workflow\\SANS;PythonAlgorithms"
+
+    def name(self):
+        return "SANSDirectBeamTransmission"
+    
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))

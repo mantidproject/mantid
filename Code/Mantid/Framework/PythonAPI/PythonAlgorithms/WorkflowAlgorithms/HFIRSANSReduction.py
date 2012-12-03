@@ -8,6 +8,12 @@ from reduction_workflow.find_data import find_data
 
 class HFIRSANSReduction(PythonAlgorithm):
 
+    def category(self):
+        return "Workflow\\SANS;PythonAlgorithms"
+
+    def name(self):
+        return "HFIRSANSReduction"
+    
     def PyInit(self):
         #TODO: allow for multiple files to be summed 
         #TODO: allow for input workspace instead of file

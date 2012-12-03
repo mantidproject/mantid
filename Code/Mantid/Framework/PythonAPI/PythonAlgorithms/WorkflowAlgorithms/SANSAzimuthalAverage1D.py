@@ -7,6 +7,12 @@ import math
 
 class SANSAzimuthalAverage1D(PythonAlgorithm):
 
+    def category(self):
+        return "Workflow\\SANS;PythonAlgorithms"
+
+    def name(self):
+        return "SANSAzimuthalAverage1D"
+    
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))

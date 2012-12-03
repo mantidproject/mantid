@@ -10,6 +10,12 @@ from reduction_workflow.find_data import find_data
 
 class SANSBeamSpreaderTransmission(PythonAlgorithm):
 
+    def category(self):
+        return "Workflow\\SANS;PythonAlgorithms"
+
+    def name(self):
+        return "SANSBeamSpreaderTransmission"
+    
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
                                                      direction=Direction.Input))
