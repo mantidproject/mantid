@@ -116,7 +116,7 @@ void FilterByLogValue::init()
   std::vector<std::string> types(2);
   types[0] = "Centre";
   types[1] = "Left";
-  declareProperty("LogBoundary", types[1], boost::make_shared<StringListValidator>(types),
+  declareProperty("LogBoundary", types[0], boost::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of the time, or beginning (left) boundary");
 
 
