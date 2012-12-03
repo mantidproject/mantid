@@ -201,7 +201,6 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindow.cpp
-                   src/Mantid/InstrumentWidget/InstrumentWindowTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.cpp
@@ -220,6 +219,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/PeakOverlay.cpp
                    src/Mantid/InstrumentWidget/OneCurvePlot.cpp
                    src/Mantid/InstrumentWidget/CollapsiblePanel.cpp
+                   src/Mantid/InstrumentWidget/DetSelector.cpp
                    src/Mantid/InstrumentWidget/XIntegrationControl.cpp
                    src/Mantid/InstrumentWidget/Shape2D.cpp
                    src/Mantid/InstrumentWidget/Shape2DCollection.cpp				  
@@ -425,7 +425,6 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
                    src/Mantid/InstrumentWidget/InstrumentWindow.h
-                   src/Mantid/InstrumentWidget/InstrumentWindowTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h
@@ -444,6 +443,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/Projection3D.h
                    src/Mantid/InstrumentWidget/OneCurvePlot.h
                    src/Mantid/InstrumentWidget/CollapsiblePanel.h
+                   src/Mantid/InstrumentWidget/DetSelector.h
                    src/Mantid/InstrumentWidget/XIntegrationControl.h
                    src/Mantid/InstrumentWidget/Shape2D.h
                    src/Mantid/InstrumentWidget/Shape2DCollection.h
@@ -672,7 +672,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                        src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
-                       src/Mantid/InstrumentWidget/InstrumentWindowTab.h
                        src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                        src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
                        src/Mantid/InstrumentWidget/InstrumentWindowMaskTab.h

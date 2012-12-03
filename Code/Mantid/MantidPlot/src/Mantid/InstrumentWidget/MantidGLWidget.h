@@ -65,6 +65,7 @@ private:
 
   //// Surface stuff
   ProjectionSurface* m_surface;
+  //boost::scoped_ptr<DetSelector> m_detSelector;    ///< draws the selection region
 
 };
 

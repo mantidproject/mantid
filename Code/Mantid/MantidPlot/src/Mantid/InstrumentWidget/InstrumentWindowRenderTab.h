@@ -1,13 +1,13 @@
 #ifndef INSTRUMENTWINDOWRENDERTAB_H_
 #define INSTRUMENTWINDOWRENDERTAB_H_
-
-#include "InstrumentWindowTab.h"
-
 #include "MantidQtAPI/GraphOptions.h"
+
+#include <QFrame>
 
 class InstrumentWindow;
 class MantidGLWidget;
 class BinDialog;
+//class QwtScaleWidget;
 class ColorMapWidget;
 class MantidColorMap;
 
@@ -21,7 +21,7 @@ class QMenu;
 /**
   * Implements the Render tab in InstrumentWindow
   */
-class InstrumentWindowRenderTab: public InstrumentWindowTab
+class InstrumentWindowRenderTab: public QFrame
 {
   Q_OBJECT
 public:
@@ -36,7 +36,7 @@ public:
   void setScaleType(GraphOptions::ScaleType type);
   void setAxis(const QString& axisName);
   bool areAxesOn()const;
-  void initOnShow();
+  void init();
   void updateSurfaceTypeControl(int);
   void setupColorBar(const MantidColorMap&,double,double,double,bool);
 signals:

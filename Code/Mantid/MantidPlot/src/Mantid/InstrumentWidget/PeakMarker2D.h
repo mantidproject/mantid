@@ -22,6 +22,7 @@ public:
     QColor color;
     int size;
   };
+  //PeakMarker2D(PeakOverlay& peakOverlay, const QPointF& centre,Style style = Style());
   PeakMarker2D(PeakOverlay& peakOverlay, double u, double v, const Style& style = Style());
   /* --- Implemented Shape2D virtual methods --- */
   virtual Shape2D* clone()const{return new PeakMarker2D(*this);}
