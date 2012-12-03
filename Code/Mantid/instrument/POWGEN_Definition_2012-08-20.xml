@@ -2,8 +2,8 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument name="POWGEN" valid-from   ="2012-08-20 00:00:00"
-                          valid-to     ="2100-01-31 23:59:59"
-		          last-modified="2012-08-08 11:00:00">
+                          valid-to     ="2012-10-31 23:59:59"
+		          last-modified="2012-11-27 11:00:00">
   <!--Data taken from /SNS/PG3/2010_2_11A_CAL/calibrations/PG3_geom_2010_09_08.xml-->
   <!--Created by Stuart Campbell-->
   <!-- Modified by Janik Zikovsky, October 29th, 2010 -->
@@ -35,7 +35,7 @@
     <location/>
   </component>
   <type name="monitors">
-    <component type="monitor" mark-as="monitor">
+    <component type="monitor">
       <location z="-1.0" name="monitor1"/>
     </component>
   </type>
@@ -235,7 +235,7 @@
 
   <!-- Shape for Monitors-->
   <!-- TODO: Update to real shape -->
-  <type is="detector" name="monitor">
+  <type is="monitor" name="monitor">
     <cylinder id="some-shape">
       <centre-of-bottom-base p="0.0" r="0.0" t="0.0"/>
       <axis y="0.0" x="0.0" z="1.0"/>

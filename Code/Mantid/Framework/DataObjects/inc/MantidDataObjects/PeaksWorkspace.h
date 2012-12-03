@@ -110,6 +110,10 @@ namespace DataObjects
     virtual bool hasIntegratedPeaks() const;
     virtual size_t getMemorySize() const;
 
+    /// Creates a new TableWorkspace giving the IDs of the detectors that contribute to the
+    /// peaks within the workspace
+    API::ITableWorkspace_sptr createDetectorTable() const;
+
     // ====================================== ITableWorkspace Methods ==================================
     /// Number of columns in the workspace.
     virtual size_t columnCount() const

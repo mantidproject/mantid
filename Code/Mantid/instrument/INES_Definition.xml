@@ -54,7 +54,7 @@
   <location  r="1" t="11.565" p="0" name="bank9I"> <facing val="none"/> </location>
 </component>
 <type name="monitors">
-<component type="monitor" mark-as="monitor">
+<component type="monitor" >
 <location r="1.155" t="180" p="0" name="monitor_det"/>
 <location r="1.215" t="0" p="0" name="monitor_transmission"/>
 </component>
@@ -80,7 +80,7 @@
   <location  r="0" t="0" p="0" name="Det16"/>
 </component>
 </type>
-<type name="monitor" is="detector">
+<type name="monitor" is="monitor">
 <properties/>
   <cylinder id="some-shape">
     <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />

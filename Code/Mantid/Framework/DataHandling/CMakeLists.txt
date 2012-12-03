@@ -336,7 +336,7 @@ set ( TEST_FILES
 	LoadPreNexusTest.h
 	LoadQKKTest.h
 	LoadRKHTest.h
-	LoadRSaveNLoadNcspTest.h
+	LoadRawSaveNxsLoadNxsTest.h
 	LoadRaw2Test.h
 	LoadRaw3Test.h
 	LoadRawBin0Test.h
@@ -362,6 +362,7 @@ set ( TEST_FILES
 	RemoveLogsTest.h
 	RenameLogTest.h
 	SNSDataArchiveTest.h
+        SaveAsciiTest.h
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h

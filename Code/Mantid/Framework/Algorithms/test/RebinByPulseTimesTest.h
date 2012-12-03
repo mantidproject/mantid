@@ -20,7 +20,7 @@ using namespace Mantid::DataObjects;
 /**
 Helper method to create an event workspace with a set number of distributed events between pulseTimeMax and pulseTimeMin.
 */
-IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMinSecs, const int pulseTimeMaxSecs, const DateAndTime runStart=DateAndTime(int(0)))
+IEventWorkspace_sptr createEventWorkspace(const int numberspectra, const int nDistrubutedEvents, const int pulseTimeMinSecs, const int pulseTimeMaxSecs, const DateAndTime runStart=DateAndTime(int(1)))
 {
   uint64_t pulseTimeMin = uint64_t(1e9) * pulseTimeMinSecs;
   uint64_t pulseTimeMax = uint64_t(1e9) * pulseTimeMaxSecs;
@@ -334,8 +334,9 @@ public:
 
     // Check that xmin and xmax have been caclulated correctly.
     TS_ASSERT_EQUALS(nBinsToBinTo, X.size());
-    TS_ASSERT_EQUALS(pulseTimeMin + double(step)/2, X.front());
-    TS_ASSERT_EQUALS(pulseTimeMax - double(step)/2, X.back());
+    // Added 1 nanosecond to start time
+    TS_ASSERT_EQUALS(pulseTimeMin + double(step)/2 - 1.e-9, X.front());
+    TS_ASSERT_EQUALS(pulseTimeMax - double(step)/2 - 1.e-9, X.back());
   }
 
 

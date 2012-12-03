@@ -79,7 +79,7 @@
  
    <!-- Detectors types -->
    <type name="monitors">
-     <component type="monitor" mark-as="monitor">
+     <component type="monitor">
        <location r="32.70" t="180.0" p="0.0" name="monitor1" />
        <location r="30.964" t="180.0" p="0.0" name="monitor2" />
        <location r="9.95" t="180.0" p="0.0" name="monitor3" />
@@ -1306,7 +1306,7 @@
  </component>
  </type>
  
- <type name="monitor" is="detector">
+ <type name="monitor" is="monitor">
   <properties/>
   <cylinder id="some-shape">
  <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />

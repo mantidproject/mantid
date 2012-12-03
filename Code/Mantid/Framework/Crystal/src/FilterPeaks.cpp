@@ -8,22 +8,22 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace {
-  double HKLSum(const Mantid::DataObjects::Peak & p)
+  double HKLSum(const Mantid::API::IPeak & p)
   {
     return p.getH() + p.getK() + p.getL();
   }
 
-  double HKL2(const Mantid::DataObjects::Peak & p)
+  double HKL2(const Mantid::API::IPeak & p)
   {
     return p.getH()*p.getH() + p.getK()*p.getK() + p.getL()*p.getL();
   }
 
-  double intensity(const Mantid::DataObjects::Peak & p)
+  double intensity(const Mantid::API::IPeak & p)
   {
     return p.getIntensity();
   }
 
-  double SN(const Mantid::DataObjects::Peak & p)
+  double SN(const Mantid::API::IPeak & p)
   {
     return p.getIntensity()/p.getSigmaIntensity();
   }
@@ -108,15 +108,15 @@ namespace Crystal
     // TODO: Refactor to avoid all the else-ifs and multiple edits required on adding new variables
 
     const std::string FilterVariable = getProperty("FilterVariable");
-    double (*variable)(const Mantid::DataObjects::Peak &) = 0;
+    double (*filterFunction)(const Mantid::API::IPeak &) = 0;
     if ( FilterVariable == "h+k+l" )
-      variable = &HKLSum;
+      filterFunction = &HKLSum;
     else if ( FilterVariable == "h^2+k^2+l^2" )
-      variable = &HKL2;
+      filterFunction = &HKL2;
     else if ( FilterVariable == "Intensity" )
-      variable = &intensity;
+      filterFunction = &intensity;
     else if ( FilterVariable == "Signal/Noise" )
-      variable = &SN;
+      filterFunction = &SN;
 
     const double FilterValue = getProperty("FilterValue");
     const std::string Operator = getProperty("Operator");
@@ -124,8 +124,8 @@ namespace Crystal
     for ( int i = 0; i < inputWS->getNumberPeaks(); ++i )
     {
       bool pass(false);
-      const Peak& currentPeak = inputWS->getPeak(i);
-      const double currentValue = variable(currentPeak);
+      const API::IPeak& currentPeak = inputWS->getPeak(i);
+      const double currentValue = filterFunction(currentPeak); // filterFunction pointer set above
 
       if ( Operator == "<" ) pass = (currentValue < FilterValue);
       else if ( Operator == ">" ) pass = (currentValue > FilterValue);

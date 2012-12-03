@@ -6,7 +6,8 @@ if (PYUNITTEST_FOUND)
   add_dependencies ( PythonReductionTest.py PythonAPI )
   add_dependencies ( FrameworkTests PythonReductionTest.py )
   # Add to the 'UnitTests' group in VS
-  set_property ( TARGET PythonReductionTest.py PROPERTY FOLDER "UnitTests" )
+  set_property ( TARGET PreparePythonReductionTest.py PROPERTY FOLDER "UnitTests/Python" )
+  set_property ( TARGET PythonReductionTest.py PROPERTY FOLDER "UnitTests/Python" )
 endif ()
 
 # Ensure we don't get stale pyc files around

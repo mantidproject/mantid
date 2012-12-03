@@ -9,6 +9,7 @@
 #include <QtGui/qwidget.h>
 #include <qwt_plot.h>
 #include <qpainter.h>
+#include <qcolor.h>
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 
 
@@ -47,20 +48,23 @@ namespace SliceViewer
 
   public:
     /// Constructor
-    PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& intensity, const bool hasIntensity);
+    PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, const QColor& peakColour);
     /// Destructor
     virtual ~PeakOverlay();
     /// Set the slice point at position.
     virtual void setSlicePoint(const double& point); 
     /// Hide the view.
     virtual void hideView();
+    /// Show the view.
+    virtual void showView();
     /// Update the view.
     virtual void updateView();
     /// Get the origin. md x, md y
     const Mantid::Kernel::V3D & getOrigin() const;
+    /// Get the radius.
     double getRadius() const;
-    /// Setter for the normalisation.
-    void setNormalisation(const double& normalisation);
+    /// Move the position of the peak, by using a different configuration of the existing origin indexes.
+    void movePosition(const PeakTransform& peakTransform);
 
   private:
 
@@ -74,24 +78,26 @@ namespace SliceViewer
 
     /// QwtPlot containing this
     QwtPlot * m_plot;
+    /// Original origin x=h, y=k, z=l
+    const Mantid::Kernel::V3D m_originalOrigin;
     /// Origin md-x, md-y, and md-z
     Mantid::Kernel::V3D m_origin;
-    /// intensity
-    double m_intensity;
+    /// actual peak radius
+    const double m_radius;
     /// normalisation value.
     double m_normalisation;
     /// Max opacity
     const double m_opacityMax;
     /// Min opacity
     const double m_opacityMin;
+    /// Peak colour
+    QColor m_peakColour;
     /// Cached opacity at the distance z from origin
     double m_opacityAtDistance;
     /// Cached radius at the distance z from origin
     double m_radiusAtDistance;
     /// Cached scale
     double m_scale;
-    /// hasIntensity flag
-    const bool m_hasIntensity;
   };
 
 

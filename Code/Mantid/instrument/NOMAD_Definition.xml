@@ -26,7 +26,7 @@
     <location/>
   </component>
   <type name="monitors">
-    <component mark-as="monitor" type="monitor">
+    <component type="monitor">
       <location name="monitor1">
         <parameter name="z">
           <logfile id="-0.879475"/>
@@ -983,7 +983,7 @@
   </type>
   <!--Shape for monitors-->
   <!--TODO: Update to real shape-->
-  <type is="detector" name="monitor">
+  <type is="monitor" name="monitor">
     <cylinder id="cyl-approx">
       <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
       <axis y="0.0" x="0.0" z="1.0"/>

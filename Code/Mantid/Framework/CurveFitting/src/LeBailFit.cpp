@@ -12,6 +12,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidCurveFitting/Chebyshev.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -23,6 +24,7 @@
 #define PUREPEAKINDEX         7   // Output workspace pure peak (data with background removed)
 #define FITTEDBACKGROUNDINDEX 4   // Output workspace background at ws index 4
 #define INPUTBACKGROUNDINDEX  6   // Input background
+#define SMOOTHEDBACKGROUND    8   // Smoothed background
 
 using namespace Mantid;
 using namespace Mantid::CurveFitting;
@@ -168,6 +170,9 @@ void LeBailFit::init()
   declareProperty("DrunkenWalk", false, "Flag to use drunken walk algorithm. "
                   "Otherwise, random walk algorithm is used. ");
 
+  declareProperty("MinimumPeakHeight", 0.01, "Minimum height of a peak to be counted "
+                  "during smoothing background by exponential smooth algorithm. ");
+
   return;
 }
 
@@ -248,6 +253,8 @@ void LeBailFit::exec()
     g_log.error(errss.str());
     throw invalid_argument(errss.str());
   }
+
+  m_minimumHeight = getProperty("MinimumPeakHeight");
 
   // 2. Import parameters from table workspace
   this->parseInstrumentParametersTable();
@@ -2547,7 +2554,7 @@ void LeBailFit::createOutputDataWorkspace(size_t workspaceindex, FunctionMode fu
 
     case MONTECARLO:
       // Monte Carlo fit mode.  Same as LebailFit mode
-      nspec = 8;
+      nspec = 9;
 
       break;
 
@@ -2614,6 +2621,7 @@ void LeBailFit::createOutputDataWorkspace(size_t workspaceindex, FunctionMode fu
       tAxis->setLabel(5, "InpCalc");
       tAxis->setLabel(6, "InBkgd");
       tAxis->setLabel(7, "DataNoBkgd");
+      tAxis->setLabel(8, "SmoothedBkgd");
 
       break;
 
@@ -2840,7 +2848,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
     } // END FOR Group
 
     // v. Improve the background
-    if (currwp < m_bestRwp)
+    if (currwp <= m_bestRwp)
     {
       fitBackground(wsindex, domain, values, background);
     }
@@ -3421,22 +3429,26 @@ void LeBailFit::applyParameterValues(map<string, Parameter>& srcparammap, map<st
 
 //------------------------------------------------------------------------------
 /** Re-fit background according to the new values
+  *
+  * @param wsindex   raw data's workspace index
   */
 void LeBailFit::fitBackground(size_t wsindex, FunctionDomain1DVector domain,
                               FunctionValues values, vector<double>& background)
 {
-  UNUSED_ARG(wsindex);
-  UNUSED_ARG(domain);
-  UNUSED_ARG(values);
   UNUSED_ARG(background);
 
-  g_log.information() << "fitBackground() has not been implemented yet!" << endl;
+  MantidVec& vecSmoothBkgd = m_outputWS->dataY(SMOOTHEDBACKGROUND);
+
+  smoothBackgroundAnalytical(wsindex, domain, values, vecSmoothBkgd);
+  // smoothBackgroundExponential(wsindex, domain, values, vecSmoothBkgd);
 
   return;
 }
 
 //-----------------------------------------------------------------------------
 /** Smooth background by exponential smoothing algorithm
+  *
+  * @param wsindex  :  raw data's workspace index
   */
 void LeBailFit::smoothBackgroundExponential(size_t wsindex, FunctionDomain1DVector domain,
                                             FunctionValues peakdata, vector<double>& background)
@@ -3444,21 +3456,52 @@ void LeBailFit::smoothBackgroundExponential(size_t wsindex, FunctionDomain1DVect
   const MantidVec& vecRawX = m_dataWS->readX(wsindex);
   const MantidVec& vecRawY = m_dataWS->readY(wsindex);
 
-  throw runtime_error("It is a fake for bk_prm2 and peak density.");
-  double bk_prm2 = 1.0;
-  vector<double> peakdensity(vecRawX.size(), 1.0);
-
+  // 1. Check input
   if (vecRawX.size() != domain.size() || vecRawY.size() != peakdata.size() ||
       background.size() != peakdata.size())
     throw runtime_error("Vector sizes cannot be matched.");
 
-  // 1. Get starting and end points value
+  // 2. Set up peak density
+  vector<double> peakdensity(vecRawX.size(), 1.0);
+  for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
+  {
+    ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
+    double height = thispeak->height();
+    if (height > m_minimumHeight)
+    {
+      // a) Calculate boundary
+      double fwhm = thispeak->fwhm();
+      double centre = thispeak->centre();
+      double leftbound = centre-3*fwhm;
+      double rightbound = centre+3*fwhm;
+
+      // b) Locate boundary positions
+      vector<double>::const_iterator viter;
+      viter = find(vecRawX.begin(), vecRawX.end(), leftbound);
+      int ileft = static_cast<int>(viter-vecRawX.begin());
+      viter = find(vecRawX.begin(), vecRawX.end(), rightbound);
+      int iright = static_cast<int>(viter-vecRawX.begin());
+      if (iright >= static_cast<int>(vecRawX.size()))
+        -- iright;
+
+      // c) Update peak density
+      for (int i = ileft; i <= iright; ++i)
+      {
+        peakdensity[i] += 1.0;
+      }
+    }
+  }
+
+  // FIXME : What is bk_prm2???
+  double bk_prm2 = 1.0;
+
+  // 3. Get starting and end points value
   size_t numdata = peakdata.size();
 
   background[0] = vecRawY[0] - peakdata[0];
   background.back() = vecRawY.back() - peakdata[numdata-1];
 
-  // 2.
+  // 4. Calculate the backgrouind points
   for (size_t i = numdata-2; i >0; --i)
   {
     double bk_prm1 = (bk_prm2 * (7480.0/vecRawX[i])) / sqrt(peakdensity[i] + 1.0);
@@ -3466,6 +3509,66 @@ void LeBailFit::smoothBackgroundExponential(size_t wsindex, FunctionDomain1DVect
     if (background[i] < 0)
       background[i] = 0.0;
   }
+
+  return;
+}
+
+//-----------------------------------------------------------------------------
+/** Smooth background by fitting the background to specified background function
+  */
+void LeBailFit::smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVector domain,
+                                           FunctionValues peakdata, vector<double>& background)
+{
+  // 1. Make data ready
+  MantidVec& vecData = m_dataWS->dataY(wsindex);
+  MantidVec& vecFitBkgd = m_outputWS->dataY(FITTEDBACKGROUNDINDEX);
+  MantidVec& vecFitBkgdErr = m_outputWS->dataE(FITTEDBACKGROUNDINDEX);
+  size_t numpts = vecFitBkgd.size();
+  for (size_t i = 0; i < numpts; ++i)
+  {
+    vecFitBkgd[i] = vecData[i] - peakdata[i];
+    if (vecFitBkgd[i] > 1.0)
+      vecFitBkgdErr[i] = sqrt(vecFitBkgd[i]);
+    else
+      vecFitBkgdErr[i] = 1.0;
+  }
+
+  // 2. Fit
+  Chebyshev_sptr bkgdfunc(new Chebyshev);
+  bkgdfunc->setAttributeValue("n", 6);
+
+  API::IAlgorithm_sptr calalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
+  calalg->initialize();
+  calalg->setProperty("Function", boost::shared_ptr<API::IFunction>(bkgdfunc));
+  calalg->setProperty("InputWorkspace", m_outputWS);
+  calalg->setProperty("WorkspaceIndex", FITTEDBACKGROUNDINDEX);
+  calalg->setProperty("StartX", domain[0]);
+  calalg->setProperty("EndX", domain[numpts-1]);
+  calalg->setProperty("Minimizer", "Levenberg-MarquardtMD");
+  calalg->setProperty("CostFunction", "Least squares");
+  calalg->setProperty("MaxIterations", 1000);
+  calalg->setProperty("CreateOutput", false);
+
+  // 3. Result
+  bool successfulfit = calalg->execute();
+  if (!calalg->isExecuted() || ! successfulfit)
+  {
+    // Early return due to bad fit
+    stringstream errss;
+    errss << "Fit to Chebyshev background failed in smoothBackgroundAnalytical.";
+    g_log.error(errss.str());
+    throw runtime_error(errss.str());
+  }
+
+  double chi2 = calalg->getProperty("OutputChi2overDoF");
+  g_log.information() << "Fit to chebysheve background successful with chi^2 = " << chi2 << endl;
+
+  // 4. Output
+  FunctionValues values(domain);
+  bkgdfunc->function(domain, values);
+
+  for (size_t i = 0; i < numpts; ++i)
+    background[i] = values[i];
 
   return;
 }

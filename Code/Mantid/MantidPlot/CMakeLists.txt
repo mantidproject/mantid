@@ -400,6 +400,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/MantidMDCurveDialog.h
                    src/Mantid/MantidMatrixDialog.h
                    src/Mantid/MantidMatrix.h
+                   src/Mantid/MantidAlgorithmMetatype.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidUI.h
                    src/Mantid/MantidWSIndexDialog.h

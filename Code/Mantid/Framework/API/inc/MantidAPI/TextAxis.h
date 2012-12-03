@@ -9,6 +9,7 @@
 #include "MantidAPI/Axis.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 #include <string>
 #include <vector>
 
@@ -65,6 +66,11 @@ public:
   std::string label(const std::size_t& index)const;
   /// Set the label at the given index
   void setLabel(const std::size_t& index, const std::string& lbl);
+
+ /// returns min value defined on axis
+  double getMin()const{return boost::lexical_cast<double>(m_values.front()) ; }
+   /// returns max value defined on axis
+  double getMax()const{return boost::lexical_cast<double>(m_values.back()); }
 private:
   /// Private, undefined copy assignment operator
   const TextAxis& operator=(const TextAxis&);

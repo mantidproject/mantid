@@ -34,7 +34,7 @@ namespace SliceViewer
 {
 
 // Forward dec
-class PeaksPresenter;
+class CompositePeaksPresenter;
 
 /** GUI for viewing a 2D slice out of a multi-dimensional workspace.
  * You can select which dimension to plot as X,Y, and the cut point
@@ -163,6 +163,10 @@ private:
   void findRangeFull();
   void findRangeSlice();
 
+  // Peak overlay methods.
+  void updatePeakOverlaySliderWidget();
+  void enablePeakOverlaysIfAppropriate();
+
 
 private:
 
@@ -270,7 +274,10 @@ private:
   bool m_rebinLocked;
 
   // -------------------------- Controllers ------------------------
-  boost::shared_ptr<PeaksPresenter>  m_peaksPresenter;
+  boost::shared_ptr<CompositePeaksPresenter>  m_peaksPresenter;
+
+  /// Pointer to widget used for peaks sliding.
+  DimensionSliceWidget* m_peaksSliderWidget;
 };
 
 } // namespace SliceViewer

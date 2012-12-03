@@ -345,6 +345,8 @@ namespace Mantid
                                   const std::string & entry_class,
                                   boost::shared_ptr<API::MatrixWorkspace> workspace) const
     {
+      g_log.debug() << "processing " << entry_name << ":" << entry_class << "\n";
+
       file.openGroup(entry_name, entry_class);
       // Validate the NX log class.
       std::map<std::string, std::string> entries = file.getEntries();
@@ -515,11 +517,13 @@ namespace Mantid
       }
       catch (::NeXus::Exception &e)
       {
-        g_log.warning() << "Log entry 's time field could not be loaded: '" << e.what() << "'.\n";
+        g_log.warning() << "Log entry's time field could not be loaded: '" << e.what() << "'.\n";
         file.closeData();
         throw;
       }
       file.closeData(); // Close time data
+      g_log.debug() << "   done reading \"time\" array\n";
+
       // Convert to seconds if needed
       if( time_units == "minutes" )
       {
@@ -565,6 +569,7 @@ namespace Mantid
         TimeSeriesProperty<int> * tsp = new TimeSeriesProperty<int>(prop_name);
         tsp->create(start_time, time_double, values);
         tsp->setUnits(value_units);
+        g_log.debug() << "   done reading \"value\" array\n";
         return tsp;
       }
       else if( info.type == ::NeXus::CHAR )
@@ -597,6 +602,7 @@ namespace Mantid
           tsp->addValue(times[i], value_i);
         }
         tsp->setUnits(value_units);
+        g_log.debug() << "   done reading \"value\" array\n";
         return tsp;
       }
       else if( info.type == ::NeXus::FLOAT32 || info.type == ::NeXus::FLOAT64 )
@@ -615,6 +621,7 @@ namespace Mantid
         TimeSeriesProperty<double> * tsp = new TimeSeriesProperty<double>(prop_name);
         tsp->create(start_time, time_double, values);
         tsp->setUnits(value_units);
+        g_log.debug() << "   done reading \"value\" array\n";
         return tsp;
       }
       else

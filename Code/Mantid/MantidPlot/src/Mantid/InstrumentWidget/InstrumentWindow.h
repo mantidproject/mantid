@@ -1,20 +1,23 @@
 #ifndef INSTRUMENTWINDOW_H_
 #define INSTRUMENTWINDOW_H_
 
+#include "../../MdiSubWindow.h"
+#include "../MantidAlgorithmMetatype.h"
+
 #include "MantidGLWidget.h"
 #include "InstrumentTreeWidget.h"
-#include "../../MdiSubWindow.h"
-#include "MantidQtAPI/GraphOptions.h"
 #include "BinDialog.h"
+
+#include "MantidQtAPI/GraphOptions.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AlgorithmObserver.h"
 
 #include <string>
 #include <vector>
 
 #include "qwt_scale_widget.h"
 #include <Poco/NObserver.h>
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/AlgorithmObserver.h"
 
 class InstrumentActor;
 class OneCurvePlot;
@@ -134,6 +137,7 @@ public slots:
   void groupDetectors();
   void maskDetectors();
   void executeAlgorithm(const QString&, const QString&);
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
   void extractDetsToWorkspace();
   void sumDetsToWorkspace();
@@ -168,6 +172,7 @@ signals:
   void plotSpectra(const QString&,const std::set<int>&);
   void createDetectorTable(const QString&,const std::vector<int>&,bool);
   void execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*);
+  void execMantidAlgorithm(Mantid::API::IAlgorithm_sptr);
   void needSetIntegrationRange(double,double);
 
 private slots:

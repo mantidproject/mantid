@@ -35,12 +35,12 @@
 
   <!-- MONITORS -->
   
-  <component type="monitor" mark-as="monitor" idlist="monitors">
+  <component type="monitor" idlist="monitors">
     <location z="-2.46" name="Monitor 1"/>
     <location z="2.38" name="Monitor 2"/>    
   </component>
 
-  <type name="monitor" is="detector">
+  <type name="monitor" is="monitor">
    <cuboid id="shape">
       <left-front-bottom-point x="0.01" y="-0.01" z="0.0"  />
       <left-front-top-point  x="0.01" y="-0.01" z="0.02"  />

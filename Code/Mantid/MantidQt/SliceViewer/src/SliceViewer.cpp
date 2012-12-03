@@ -21,7 +21,7 @@
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
-#include "MantidQtSliceViewer/NullPeaksPresenter.h"
+#include "MantidQtSliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayFactory.h"
 #include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
@@ -96,7 +96,10 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_dimX(0), m_dimY(1),
       m_logColor(false),
       m_fastRender(true),
-      m_rebinMode(false), m_rebinLocked(true), m_peaksPresenter(PeaksPresenter_sptr(new NullPeaksPresenter))
+      m_rebinMode(false), 
+      m_rebinLocked(true), 
+      m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>()),
+      m_peaksSliderWidget(NULL)
 {
 	ui.setupUi(this);
 
@@ -154,17 +157,6 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_overlayWSOutline->setShowHandles(false);
   m_overlayWSOutline->setShowLine(false);
   m_overlayWSOutline->setShown(false);
-
-  ui.btnPeakOverlay->hide();
-  // -------- Peak Overlay ----------------
-  //PeakOverlay* m_peakOverlay = new PeakOverlay(m_plot, m_plot->canvas(), QPointF(0.5,0.5), QPointF(0.1, 0.2)); //TODO use the peak overlay
-  //m_peakOverlay->setPlaneDistance(0);
-
-  //IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>("loadedpeaks2");
-  //    PeakOverlayFactory* factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), PeakDimensions::HKLView);
-  //    m_peaksPresenter = boost::make_shared<PeaksPresenter>(factory, peaksWS);
-
-  ui.btnPeakOverlay->setEnabled(true);
 }
 
 //------------------------------------------------------------------------------------
@@ -310,12 +302,12 @@ void SliceViewer::initMenus()
 
   m_menuView->addSeparator();
 
-  //action = new QAction(QPixmap(), "Peak Overlay", this);
-  //m_syncPeakOverlay = new SyncedCheckboxes(action, ui.btnPeakOverlay, false);
-  //connect(action, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
-  //m_menuView->addAction(action);
+  action = new QAction(QPixmap(), "Peak Overlay", this);
+  m_syncPeakOverlay = new SyncedCheckboxes(action, ui.btnPeakOverlay, false);
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
+  m_menuView->addAction(action);
 
-  //m_menuView->addSeparator();
+  m_menuView->addSeparator();
 
   QActionGroup* group = new QActionGroup( this );
 
@@ -611,9 +603,11 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
     }
   }
 
+  // Enable peaks overlays according to the dimensionality and the displayed dimensions.
+  enablePeakOverlaysIfAppropriate();
+
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
-
 }
 
 
@@ -1379,13 +1373,18 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_dimX = 0;
   m_dimY = 1;
   std::vector<coord_t> slicePoint;
+
   for (size_t d=0; d<m_ws->getNumDims(); d++)
   {
     DimensionSliceWidget * widget = m_dimWidgets[d];
     if (widget->getShownDim() == 0)
+    {
       m_dimX = d;
-    if (widget->getShownDim() == 1)
+    }
+    else if (widget->getShownDim() == 1)
+    {
       m_dimY = d;
+    }
     slicePoint.push_back(VMD_t(widget->getSlicePoint()));
   }
   // Avoid going out of range
@@ -1402,6 +1401,15 @@ void SliceViewer::updateDisplay(bool resetAxes)
   {
     this->resetAxis(m_spect->xAxis(), m_X );
     this->resetAxis(m_spect->yAxis(), m_Y );
+
+    // The dimensionality has changed. It might no longer be possible to plot peaks.
+    enablePeakOverlaysIfAppropriate(); 
+
+    // Transform the peak overlays according to the new plotting.
+    m_peaksPresenter->changeShownDim();
+
+    // Update the pointer to the slider widget.
+    updatePeakOverlaySliderWidget();
   }
 
   // Set the color range
@@ -1428,13 +1436,16 @@ void SliceViewer::updateDisplay(bool resetAxes)
   m_spect->setData(*m_data);
   m_spect->itemChanged();
   m_plot->replot();
-  if ( m_dimWidgets.size() > 2 ) // Temporary fix for crash when displaying Workspace2D (where m_dimWidgets only has 2 elements)
-    m_peaksPresenter->updateWithSlicePoint(m_dimWidgets[2]->getSlicePoint());
+
+  /// Update the peak positions if peak relevant slider has changed.
+  if(m_peaksSliderWidget != NULL)
+  {
+    m_peaksPresenter->updateWithSlicePoint(m_peaksSliderWidget->getSlicePoint()); 
+  }
 
   // Send out a signal
   emit changedSlicePoint(m_slicePoint);
 }
-
 
 
 //------------------------------------------------------------------------------------
@@ -1475,7 +1486,7 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim)
     }
   }
   // Show the new slice. This finds m_dimX and m_dimY
-  this->updateDisplay();
+  this->updateDisplay();  
   // Send out a signal
   emit changedShownDim(m_dimX, m_dimY);
 }
@@ -2073,6 +2084,12 @@ void SliceViewer::dynamicRebinComplete(bool error)
 
 /**
 Event handler for selection/de-selection of peak overlays.
+
+Allow user to choose a suitable input peaks workspace
+Create a factory for fabricating new views 'PeakOverlays'
+Create a proper peaks presenter to manage the views and bind them against the PeaksWorkspace and the SliceViewer
+Update the views with the current slice point. to ensure they are shown.
+
 @param checked : True if peak overlay option is checked.
 */
 void SliceViewer::peakOverlay_toggled(bool checked)
@@ -2086,25 +2103,70 @@ void SliceViewer::peakOverlay_toggled(bool checked)
       QStringList list = dlg.getSelectedNames();
       if(!list.isEmpty())
       {
-        IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list.front().toStdString());
-        PeakOverlayFactory* factory = NULL;
-        try
+        // Loop through each of those peaks workspaces and display them.
+        for(int i = 0; i < list.size(); ++i)
         {
-          FirstExperimentInfoQueryAdapter<Mantid::API::IMDHistoWorkspace> query(m_ws);
-          factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), query);
+          IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list[i].toStdString());
+          PeakOverlayFactory* factory  = new PeakOverlayFactory(m_plot, m_plot->canvas(), m_peaksPresenter->size());
+          m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(factory, peaksWS));
         }
-        catch(std::invalid_argument&)
-        {
-          FirstExperimentInfoQueryAdapter<Mantid::API::IMDEventWorkspace> query(m_ws);
-          factory = new PeakOverlayFactory(m_plot, m_plot->canvas(), query);
-        }
-        m_peaksPresenter = PeaksPresenter_sptr(new ConcretePeaksPresenter(factory, peaksWS));
+        updatePeakOverlaySliderWidget();
       }
     }
   }
   else
   {
-    m_peaksPresenter = PeaksPresenter_sptr(new NullPeaksPresenter);
+    m_peaksPresenter->clear();
+  }
+}
+
+/**
+Obtain the reference to a new PeakOverlay slider widget if necessary.
+*/
+void SliceViewer::updatePeakOverlaySliderWidget()
+{
+  for (size_t d=0; d< m_ws->getNumDims(); d++)
+  {
+    DimensionSliceWidget * widget = m_dimWidgets[d];
+    if (widget->getShownDim() < 0)
+    {
+      if(m_peaksPresenter->isLabelOfFreeAxis(widget->getDimName()))
+      {
+        m_peaksSliderWidget = widget; // Cache the widget being used for this.
+        m_peaksPresenter->updateWithSlicePoint(m_peaksSliderWidget->getSlicePoint()); // Ensure that the presenter is up-to-date with the change
+      }
+    }
+  }
+}
+
+/**
+Decide whether to enable peak overlays, then reflect the ui controls to indicate this.
+
+1) Check the dimensionality of the workspace.
+2) Check that the currently displayed plot x and y correspond to a valid peak transform (H, K, L) etc.
+
+*/
+void SliceViewer::enablePeakOverlaysIfAppropriate()
+{
+  bool enablePeakOverlays = false;
+  if(m_ws->getNumDims() >= 2)
+  {
+    try
+    { 
+      const std::string xDim = m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
+      const std::string yDim = m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
+      PeakTransform(xDim, yDim); // This will throw if the mapped dimensions are not hkl.
+      enablePeakOverlays = true;
+    }
+    catch(PeakTransformException&)
+    {
+    }
+  }
+  m_syncPeakOverlay->setEnabled(enablePeakOverlays);
+  if(! enablePeakOverlays)
+  {
+    ui.btnPeakOverlay->setChecked(false); // Don't leave the button depressed.
+    m_peaksPresenter->clear(); // Reset the presenter
   }
 }
 

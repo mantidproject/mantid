@@ -40,14 +40,14 @@
   <!-- detector components (including monitors) -->
   
   <component type="monitor1" idlist="monitor1">
-    <location z="-0.5" mark-as="monitor" />
+    <location z="-0.5" />
   </component>
-  <type name="monitor1" is="detector" />
+  <type name="monitor1" is="monitor" />
  
   <component type="timer1" idlist="timer1">
-    <location z="-0.5" mark-as="monitor" />
+    <location z="-0.5" />
   </component>
-  <type name="timer1" is="detector" />
+  <type name="timer1" is="monitor" />
  
   <component type="sample_aperture">
     <location z="0.0"/>

@@ -36,10 +36,11 @@ namespace
     if( Mantid::PythonInterface::Environment::isInCallStack("PyExec") )
     {
       alg = AlgorithmManager::Instance().createUnmanaged(name, version);
-      alg->initialize();
+      alg->setChild(true); // Ensures locking behaves correctly
       alg->setLogging(true);
       alg->setAlwaysStoreInADS(true);
       alg->enableHistoryRecordingForChild(true);
+      alg->initialize();
     }
     else
     {

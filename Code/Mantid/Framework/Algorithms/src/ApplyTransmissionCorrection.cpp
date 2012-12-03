@@ -55,10 +55,21 @@ void ApplyTransmissionCorrection::init()
   declareProperty("TransmissionError", 0.0, mustBePositive,
     "The error on the transmission value (default 0.0)" );
 
+  declareProperty("ThetaDependent", true,
+      "If true, a theta-dependent transmission correction will be applied.");
 }
 
 void ApplyTransmissionCorrection::exec()
 {
+  // Check whether we only need to divided the workspace by
+  // the transmission.
+  const bool thetaDependent = getProperty("ThetaDependent");
+  if (!thetaDependent)
+  {
+    simpleCorrection();
+    return;
+  }
+
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const double trans_value = getProperty("TransmissionValue");
   const double trans_error = getProperty("TransmissionError");
@@ -134,6 +145,23 @@ void ApplyTransmissionCorrection::exec()
   outputWS = inputWS*corrWS;
   setProperty("OutputWorkspace",outputWS);
 }
+
+void ApplyTransmissionCorrection::simpleCorrection()
+{
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  const double trans_value = getProperty("TransmissionValue");
+  const double trans_error = getProperty("TransmissionError");
+
+  MatrixWorkspace_sptr singleValued = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
+
+  singleValued->dataX(0)[0] = 0.0;
+  singleValued->dataY(0)[0] = trans_value;
+  singleValued->dataE(0)[0] = trans_error;
+
+  MatrixWorkspace_sptr outputWS = inputWS/singleValued;
+  setProperty("OutputWorkspace",outputWS);
+}
+
 } // namespace Algorithms
 } // namespace Mantid
 

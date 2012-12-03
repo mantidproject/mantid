@@ -63,7 +63,7 @@
   <location  r="4" t="0" p="0" />
 </component>
 <type name="monitors">
-<component type="monitor" mark-as="monitor">
+<component type="monitor">
   <location  r="0.6" t="180" p="0" name="upstream_monitor_det"/>
   <location  r="1.74" t="0" p="0" name="downstream_monitor_det"/>
 </component>
@@ -83,7 +83,7 @@
   <location  r="0" t="0" p="0" rot="135" name="mod7" />
 </component>
 </type>
-<type name="monitor" is="detector">
+<type name="monitor" is="monitor">
 <properties />
   <cylinder id="some-shape">
     <centre-of-bottom-base r="0.0" t="0.0" p="0.0" />

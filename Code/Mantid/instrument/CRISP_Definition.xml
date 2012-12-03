@@ -124,10 +124,10 @@
   <!-- detector components (including monitors) -->
   
   <component type="monitor1" idlist="monitor1">
-    <location z="7.2055" mark-as="monitor" />
+    <location z="7.2055" />
   </component>
   
-  <type name="monitor1" is="detector">
+  <type name="monitor1" is="monitor">
     <!-- Shape specified at least big enough to cover the beam which
          is 10mm high and 40mm wide. Note it is described as tube, hence
 	 the choice of a cylinder shape.
@@ -143,10 +143,10 @@
   </type>  
   
   <component type="monitor2" idlist="monitor2">
-    <location z="9.92" mark-as="monitor" />
+    <location z="9.92" />
   </component>  
   
-  <type name="monitor2" is="detector">
+  <type name="monitor2" is="monitor">
     <!-- Shape specified as a minimum needs to cover the beam which
          is 10mm high and 40mm wide. The 'top' shape is included to
 	 more easily recognise this monitor when visualised in MantidPlot.

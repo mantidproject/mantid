@@ -156,7 +156,16 @@ public:
     TS_ASSERT( !alg->isExecuted() );
   }
 
-
+  void test_old_file()
+  {
+    // Just need to make sure that it runs
+    Mantid::DataHandling::LoadTOFRawNexus ld;
+    ld.initialize();
+    ld.setProperty("Filename", "REF_L_7139.nxs");
+    ld.setProperty("OutputWorkspace", "REF_L_7139");
+    TS_ASSERT_THROWS_NOTHING(ld.execute());
+    TS_ASSERT(ld.isExecuted());
+  }
 
   /** Refs #3716: Different signals (binned in q-space, d-space, tof)
    * File is rather large (and slow to load) so not in SVN.

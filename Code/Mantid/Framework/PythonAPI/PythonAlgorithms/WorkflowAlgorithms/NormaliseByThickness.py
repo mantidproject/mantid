@@ -4,8 +4,9 @@ Normalise detector counts by the sample thickness
 
 *WIKI*"""
 
-from MantidFramework import *
-from mantidsimple import *
+import mantid.simpleapi as api
+from mantid.api import *
+from mantid.kernel import *
 
 class NormaliseByThickness(PythonAlgorithm):
     """
@@ -19,31 +20,38 @@ class NormaliseByThickness(PythonAlgorithm):
         return "NormaliseByThickness"
 
     def PyInit(self):
-        # Input workspace
-        self.declareWorkspaceProperty("InputWorkspace", "", Direction=Direction.Input, Description="Workspace to be normalised")
-        self.declareWorkspaceProperty("OutputWorkspace", "", Direction=Direction.Output, Description="Name of the workspace that will contain the normalised data")
-        self.declareProperty("SampleThickness", 0.0, Direction=Direction.Input, Description="Optional sample thickness value. If not provided the sample-thickness run property will be used.")
-        self.declareProperty("OutputMessage", "", Direction=Direction.Output)
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
+                                                     direction=Direction.Input))
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
+                                                     direction = Direction.Output),
+                             "Name of the workspace that will contain the normalised data")
+        self.declareProperty("SampleThickness", 0.0,
+                             "Optional sample thickness value. If not provided the sample-thickness run property will be used.")
+        self.declareProperty("OutputMessage", "", 
+                             direction=Direction.Output, doc = "Output message")
 
     def PyExec(self):
-        input_ws_name = self.getPropertyValue("InputWorkspace")
-        if mtd[input_ws_name].getAxis(0).getUnit().name() != "Wavelength":
-            raise RuntimeError, "NormaliseByThickness expects an input workspace with units of Wavelength"        
+        input_ws = self.getProperty("InputWorkspace").value
         
-        # Determine whether we should use the input thickess or try to read it from the run properties
-        thickness = self.getProperty("SampleThickness")
+        # Determine whether we should use the input thickness or try 
+        # to read it from the run properties
+        thickness = self.getProperty("SampleThickness").value
         if thickness <= 0:
-            if mtd[input_ws_name].getRun().hasProperty("sample-thickness"):
-                thickness = mtd[input_ws_name].getRun().getProperty("sample-thickness").value
+            if input_ws.getRun().hasProperty("sample-thickness"):
+                thickness = input_ws.getRun().getProperty("sample-thickness").value
                 if thickness <= 0:
-                    raise RuntimeError, "NormaliseByThickness could not get the sample thickness"
+                    Logger.get("NormaliseByThickness").error("NormaliseByThickness could not get the sample thickness")
+                    return
             else:
-                raise RuntimeError, "NormaliseByThickness could not get the sample thickness"
+                Logger.get("NormaliseByThickness").error("NormaliseByThickness could not get the sample thickness")
+                return
 
-        output_ws_name = self.getPropertyValue("OutputWorkspace")              
-        a = self.executeSubAlg(Scale, input_ws_name, OutputWorkspace=output_ws_name, Factor=1.0/thickness, Operation="Multiply")
-        self._setWorkspaceProperty("OutputWorkspace", a._getWorkspaceProperty("OutputWorkspace"))
+        output_ws_name = self.getPropertyValue("OutputWorkspace")
+        api.Scale(InputWorkspace=input_ws,
+                  OutputWorkspace=output_ws_name,
+                  Factor=1.0/thickness, Operation="Multiply")
         
+        self.setProperty("OutputWorkspace", output_ws_name)
         self.setProperty("OutputMessage", "Normalised by thickness [%g cm]" % thickness)
 
-mtd.registerPyAlgorithm(NormaliseByThickness())
+registerAlgorithm(NormaliseByThickness())

@@ -40,9 +40,10 @@ public:
   virtual void draw(QPainter& painter) const;
   virtual void addShape(Shape2D*,bool slct = false);
   virtual void removeShape(Shape2D*);
+  virtual void removeShapes(const QList<Shape2D*>&);
   virtual void clear();
   
-  void mousePressEvent(QMouseEvent*);
+  bool mousePressEvent(QMouseEvent*);
   void mouseMoveEvent(QMouseEvent*);
   void mouseReleaseEvent(QMouseEvent*);
   void wheelEvent(QWheelEvent*);
@@ -52,7 +53,9 @@ public:
   void startCreatingShape2D(const QString& type,const QColor& borderColor = Qt::red,const QColor& fillColor = QColor());
   void deselectAll();
   bool selectAtXY(int x,int y);
+  bool selectIn(const QRect& rect);
   void removeCurrentShape();
+  void removeSelectedShapes();
   bool isEmpty()const{return m_shapes.isEmpty();}
   size_t size()const {return static_cast<size_t>(m_shapes.size());}
   void select(int i);
@@ -98,6 +101,7 @@ protected:
   bool selectControlPointAt(int x,int y);
   bool isOverCurrentAt(int x,int y);
   void select(Shape2D* shape);
+  QList<Shape2D*> getSelectedShapes() const;
 
   QList<Shape2D*> m_shapes;
   mutable QRectF m_windowRect; // original surface window in "real" coordinates

@@ -1,13 +1,14 @@
 set ( SRC_FILES
 	src/ColorBarWidget.cpp
-        src/ConcretePeaksPresenter.cpp
+    src/CompositePeaksPresenter.cpp
+    src/ConcretePeaksPresenter.cpp
 	src/CustomTools.cpp
 	src/DimensionSliceWidget.cpp
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
 	src/PeakOverlay.cpp
 	src/PeakOverlayFactory.cpp
-	src/PeakOverlayFactoryBase.cpp
+    src/PeakTransform.cpp
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
@@ -20,6 +21,7 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	inc/MantidQtSliceViewer/ColorBarWidget.h
+    inc/MantidQtSliceViewer/CompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
@@ -32,9 +34,9 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakOverlayView.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayFactory.h
-	inc/MantidQtSliceViewer/PeakOverlayFactoryBase.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
-	inc/MantidQtSliceViewer/QScienceSpinBox.h
+    inc/MantidQtSliceViewer/PeakTransform.h	
+    inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
@@ -68,8 +70,10 @@ set ( UI_FILES
 )
 
 set ( TEST_FILES
+    test/CompositePeaksPresenterTest.h
     test/ConcretePeaksPresenterTest.h
-    test/PeakOverlayFactoryBaseTest.h
+    test/PeakTransformTest.h
+    test/NullPeaksPresenterTest.h
 )
 
 # Python unit tests

@@ -71,11 +71,9 @@ namespace DataObjects
    * @return
    */
   PeaksWorkspace::PeaksWorkspace(const PeaksWorkspace & other)
-  : IPeaksWorkspace(other),
-    peaks(other.peaks)
+  : IPeaksWorkspace(other), peaks(other.peaks)
   {
     initColumns();
-    this->peaks = other.peaks;
   }
 
   //---------------------------------------------------------------------------------------------
@@ -250,7 +248,7 @@ namespace DataObjects
     const std::string peaksIntegrated = "PeaksIntegrated";
     if(this->run().hasProperty(peaksIntegrated))
     {
-      ret = boost::lexical_cast<bool>(this->run().getProperty(peaksIntegrated)->value());
+      ret = bool(boost::lexical_cast<int>(this->run().getProperty(peaksIntegrated)->value()));
     }
     return ret;
   }
@@ -260,6 +258,37 @@ namespace DataObjects
   size_t PeaksWorkspace::getMemorySize() const
   {
     return getNumberPeaks() * sizeof(Peak);
+  }
+
+  //---------------------------------------------------------------------------------------------
+  /**
+   *  Creates a new TableWorkspace with detailing the contributing Detector IDs. The table
+   *  will have 2 columns: Index &  DetectorID, where Index maps into the current index
+   *  within the PeaksWorkspace of the peak
+   */
+  API::ITableWorkspace_sptr PeaksWorkspace::createDetectorTable() const
+  {
+    auto table =  API::WorkspaceFactory::Instance().createTable("TableWorkspace");
+    table->addColumn("int", "Index");
+    table->addColumn("int", "DetectorID");
+
+    const int npeaks(static_cast<int>(this->rowCount()));
+    int nrows(0);
+    for(int i = 0; i < npeaks; ++i)
+    {
+      const Peak & peak = this->peaks[i];
+      auto detIDs = peak.getContributingDetIDs();
+      auto itEnd = detIDs.end();
+      for(auto it = detIDs.begin(); it != itEnd; ++it)
+      {
+        table->appendRow();
+        table->cell<int>(nrows,0) = i;
+        table->cell<int>(nrows,1) = *it;
+        ++nrows;
+      }
+    }
+
+    return table;
   }
 
   //---------------------------------------------------------------------------------------------

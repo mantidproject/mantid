@@ -7,16 +7,17 @@
 #include "../ApplicationWindow.h"
 #include "../Graph.h"
 #include "MantidLog.h"
+#include "MantidAlgorithmMetatype.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
-
 #include <Poco/NObserver.h>
 
 #include <QDockWidget>
@@ -233,6 +234,13 @@ public slots:
 
   /// Create a table showing detector information for the given workspace and indices and optionally the data for that detector
   Table* createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data = false);
+  /// Create the instrument detector table from a MatrixWorkspace
+  Table* createDetectorTable(const QString & wsName, const Mantid::API::MatrixWorkspace_sptr & ws, 
+                             const std::vector<int>& indices, bool include_data = false);
+  /// Create a table of detectors from a PeaksWorkspace
+  Table* createDetectorTable(const QString & wsName, const Mantid::API::IPeaksWorkspace_sptr & ws);
+
+
   //  *****                            *****  //
   void renameWorkspace(QString = "");
 
@@ -380,6 +388,8 @@ public slots:
   void executeAlgorithm(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs = NULL);
   //Execute an algorithm with the given parameter list
   void executeAlgorithmDlg(QString algName, QMap<QString,QString> paramList,Mantid::API::AlgorithmObserver* obs = NULL);
+  // Execute an algorithm
+  void executeAlgorithm(Mantid::API::IAlgorithm_sptr alg);
   // Find the name of the first input workspace for an algorithm
   QString findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
   // Show Qt critical error message box

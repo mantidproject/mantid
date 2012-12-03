@@ -300,7 +300,7 @@ namespace Crystal
      *
      * @return A new instrument with the parameters applied.
      */
-    Geometry::Instrument_sptr getNewInstrument( const DataObjects::Peak & peak)const;
+    Geometry::Instrument_sptr getNewInstrument( const API::IPeak & peak)const;
 
     /**
      * Creates a new peak, matching the old peak except for a different instrument. The Time offset
@@ -309,7 +309,7 @@ namespace Crystal
      * @param instrNew -The new instrument
      * @return The new peak with the new instrument( adjusted with the parameters) and time adjusted.
      */
-    DataObjects::Peak  createNewPeak( const DataObjects::Peak & peak_old, Geometry::Instrument_sptr  instrNew)const;
+    DataObjects::Peak  createNewPeak( const API::IPeak & peak_old, Geometry::Instrument_sptr  instrNew)const;
 
     /**
      * Even though constrains are used. Often very illogical parameters have to be processed.

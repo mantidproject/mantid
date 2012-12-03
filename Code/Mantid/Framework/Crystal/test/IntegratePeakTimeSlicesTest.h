@@ -196,7 +196,7 @@ public:
 
        TS_ASSERT_LESS_THAN(fabs(intensity -60300), 1500.0);
       //Not sure why this reduced the error so much in the test
-      TS_ASSERT_LESS_THAN(fabs(sigma -541.0), 21.0);
+      TS_ASSERT_LESS_THAN(fabs(sigma -457.0), 21.0);
 
 
       TS_ASSERT_EQUALS( Twk->rowCount(), 7);
@@ -206,15 +206,15 @@ public:
 
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Time"), 0) - 19200), 20);
     
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) -  1.3619  ), .5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> (std::string("Background"), 1) -   1.08824   ), .5);
    
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) -  11247 ), 120);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("Intensity", 2) -  11460 ), 120);
       
    
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("NCells", 3) -  439), 5);
     
 
-      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   77.3), 3.5);
+      TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("ChiSqrOverDOF", 4) -   72), 3.5);
 
     
       TS_ASSERT_LESS_THAN(fabs(Twk->getRef<double> ("TotIntensity", 0) -  4979 ), 10);
@@ -222,6 +222,7 @@ public:
   
 
       /*
+
           std::vector<std::string> names = Twk->getColumnNames();
 
       std::cout<<"Intensitty="<<intensity<<"   sigma="<<sigma<<
@@ -246,7 +247,6 @@ public:
        std::cout<<std::endl;
 
        }
-
 
 
 Intensity=58989.5   sigma=539.266  Theoret intensity=60000

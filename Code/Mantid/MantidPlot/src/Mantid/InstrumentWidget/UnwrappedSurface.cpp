@@ -831,6 +831,7 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
   po->setShowRowsFlag(m_showPeakRow);
   m_peakShapes.append(po);
   m_startPeakShapes = true;
+  connect(po,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),this,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
 }
 
 //-----------------------------------------------------------------------------

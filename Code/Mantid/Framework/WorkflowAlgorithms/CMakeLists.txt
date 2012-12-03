@@ -16,6 +16,7 @@ set ( SRC_FILES
 	src/EQSANSQ2D.cpp
 	src/EQSANSReduce.cpp
 	src/HFIRDarkCurrentSubtraction.cpp
+	src/HFIRSANSNormalise.cpp
 	src/HFIRInstrument.cpp
 	src/HFIRLoad.cpp
 	src/RefReduction.cpp
@@ -50,6 +51,7 @@ set ( INC_FILES
 	inc/MantidWorkflowAlgorithms/EQSANSQ2D.h
 	inc/MantidWorkflowAlgorithms/EQSANSReduce.h
 	inc/MantidWorkflowAlgorithms/HFIRDarkCurrentSubtraction.h
+	inc/MantidWorkflowAlgorithms/HFIRSANSNormalise.h
 	inc/MantidWorkflowAlgorithms/HFIRInstrument.h
 	inc/MantidWorkflowAlgorithms/HFIRLoad.h
 	inc/MantidWorkflowAlgorithms/RefReduction.h

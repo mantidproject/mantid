@@ -33,6 +33,14 @@
     <location />
   </component>
 
+  <!-- monitor components -->
+  
+  <component type="monitor" name="Monitors" idlist="monitor-id-list">
+    <location r="-2.242" t="180" p="0" />
+    <location r="4.679" t="0.01" p="0" />
+    <location r="-2.242" t="180" p="0" />
+  </component>  
+  
   <!-- source and sample-position components -->
 
   <component type="undulator">
@@ -66,14 +74,24 @@
     <algebra val="some-test-shape" />
   </type>  
 
+  
+  <!-- monitor type -->  
+  
+  <type name="monitor" is="monitor">
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.005" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.005" y="-0.1" z="0.0001"  />
+      <left-back-bottom-point  x="-0.005" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.005" y="0.1" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>  
+  
   <!-- Detectors types -->
 
   <type name="bank">
     <properties />
     <component type="pixel">
-      <location r="-2.242" t="180" p="0" mark-as="monitor" />
-      <location r="4.679" t="0.01" p="0" mark-as="monitor" />
-      <location r="-2.242" t="180" p="0" mark-as="monitor" />
 <!--  These do exist in the ISIS raw file for this instrument but do not
       actually physical exist on the instrument
       <location r="2.6" t="15" p="0" />
@@ -790,8 +808,11 @@
   
   <!-- DETECTOR ID LISTS -->
 
+  <idlist idname="monitor-id-list">
+    <id start="1" end="3" />  
+  </idlist>
+  
   <idlist idname="fdb">
-    <id start="1" end="3" />  <!-- monitors -->
     <id start="101" end="140" />
     <id start="201" end="280" />
     <id start="301" end="380" />

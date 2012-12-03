@@ -74,20 +74,20 @@ namespace Mantid
       // Overridden Algorithm methods
       void init();
       void exec();
-      void execEvent();
+      void loadCalFile(const std::string &calFileName);
       API::MatrixWorkspace_sptr m_inputW;
       API::MatrixWorkspace_sptr m_outputW;
-      DataObjects::EventWorkspace_sptr m_eventW;
-      DataObjects::OffsetsWorkspace_sptr offsetsWS;
-      API::MatrixWorkspace_sptr maskWS;
-      DataObjects::GroupingWorkspace_sptr groupWS;
+      DataObjects::EventWorkspace_sptr m_inputEW;
+      DataObjects::EventWorkspace_sptr m_outputEW;
+      DataObjects::OffsetsWorkspace_sptr m_offsetsWS;
+      API::MatrixWorkspace_sptr m_maskWS;
+      DataObjects::GroupingWorkspace_sptr m_groupWS;
       double l1;
       std::vector<int32_t> specids;
       std::vector<double> l2s;
       std::vector<double> tths;
       std::vector<double> phis;
-      std::string instName;
-      std::string calFileName;
+      std::string m_instName;
       std::vector<double> params;
       bool dspace;
       double xmin;
@@ -97,6 +97,7 @@ namespace Mantid
       double minwl;
       double tmin;
       double tmax;
+      bool m_preserveEvents;
       void doSortEvents(Mantid::API::Workspace_sptr ws);
 
     };

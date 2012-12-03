@@ -2,6 +2,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Strings.h"
 
+#include <Poco/Mutex.h>
+
 #include <boost/variant/get.hpp>
 
 using namespace Mantid::Kernel;
@@ -14,6 +16,9 @@ namespace DataObjects
   {
     /// Number of items to keep around in the cell cache (see void_pointer())
     size_t NCELL_ITEM_CACHED = 100;
+    /// Type lookup: key=name,value=type. Moved here from static inside typeFromName
+    /// to avoid the need for locks with the initialisation problem across multiple threads
+    std::map<std::string, std::string> TYPE_INDEX;
 
     /**
      * Returns a string type identifier from the given name
@@ -22,42 +27,42 @@ namespace DataObjects
      */
     const std::string typeFromName(const std::string & name)
     {
-      static std::map<std::string, std::string> index;
-      if(index.empty())
+      if(TYPE_INDEX.empty())
       {
         PARALLEL_CRITICAL(fill_column_index_map)
         {
-          if (index.empty()) // check again inside the critical block
+          if (TYPE_INDEX.empty()) // check again inside the critical block
           {
             // Assume double if not in this map
-            index.insert(std::make_pair("DetID", "int"));
-            index.insert(std::make_pair("RunNumber", "int"));
-            index.insert(std::make_pair("h", "double"));
-            index.insert(std::make_pair("k", "double"));
-            index.insert(std::make_pair("l", "double"));
-            index.insert(std::make_pair("Wavelength", "double"));
-            index.insert(std::make_pair("Energy", "double"));
-            index.insert(std::make_pair("TOF", "double"));
-            index.insert(std::make_pair("DSpacing", "double"));
-            index.insert(std::make_pair("Intens", "double"));
-            index.insert(std::make_pair("SigInt", "double"));
-            index.insert(std::make_pair("BinCount", "double"));
-            index.insert(std::make_pair("BankName", "str"));
-            index.insert(std::make_pair("Row", "double"));
-            index.insert(std::make_pair("Col", "double"));
-            index.insert(std::make_pair("QLab", "V3D"));
-            index.insert(std::make_pair("QSample", "V3D"));
+            TYPE_INDEX.insert(std::make_pair("DetID", "int"));
+            TYPE_INDEX.insert(std::make_pair("RunNumber", "int"));
+            TYPE_INDEX.insert(std::make_pair("h", "double"));
+            TYPE_INDEX.insert(std::make_pair("k", "double"));
+            TYPE_INDEX.insert(std::make_pair("l", "double"));
+            TYPE_INDEX.insert(std::make_pair("Wavelength", "double"));
+            TYPE_INDEX.insert(std::make_pair("Energy", "double"));
+            TYPE_INDEX.insert(std::make_pair("TOF", "double"));
+            TYPE_INDEX.insert(std::make_pair("DSpacing", "double"));
+            TYPE_INDEX.insert(std::make_pair("Intens", "double"));
+            TYPE_INDEX.insert(std::make_pair("SigInt", "double"));
+            TYPE_INDEX.insert(std::make_pair("BinCount", "double"));
+            TYPE_INDEX.insert(std::make_pair("BankName", "str"));
+            TYPE_INDEX.insert(std::make_pair("Row", "double"));
+            TYPE_INDEX.insert(std::make_pair("Col", "double"));
+            TYPE_INDEX.insert(std::make_pair("QLab", "V3D"));
+            TYPE_INDEX.insert(std::make_pair("QSample", "V3D"));
           }
         }
       }
-      auto iter = index.find(name);
-      if(iter != index.end())
+      auto iter = TYPE_INDEX.find(name);
+      if(iter != TYPE_INDEX.end())
       {
         return iter->second;
       }
       else
       {
-        throw std::runtime_error("PeakColumn - Unknown column name. Peak column names/types must be explicitly marked in PeakColumn.cpp");
+        throw std::runtime_error("PeakColumn - Unknown column name: \"" + name + "\""
+                                 "Peak column names/types must be explicitly marked in PeakColumn.cpp");
       }
     };
   }

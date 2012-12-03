@@ -60,13 +60,13 @@
   <location  r="2.178" t="13.455" p="0" />
 </component>
 <type name="monitors">
-<component type="monitor" mark-as="monitor">
+<component type="monitor" >
   <location  r="4.25" t="180" p="0" name="prechopper_monitor_det"/>
   <location  r="3.5" t="180" p="0" name="postchopper_monitor_det"/>
   <location  r="2.53" t="0" p="0" name="transmitted_monitor_det"/>
 </component>
 </type>
-<type name="monitor" is="detector">
+<type name="monitor" is="monitor">
 <properties />
 </type>
 <type name="bank_back">

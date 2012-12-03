@@ -68,12 +68,12 @@
 
 <!-- monitor -->
 <component type="monitor" idlist="monitor">
-  <location z="-1" mark-as="monitor">
+  <location z="-1">
     <neutronic z="-1" /> <!-- Even if the neutronic is in the same place, you have to specify it again (for detectors/monitor) -->
   </location>
 </component>
 
-<type name="monitor" is="detector" />
+<type name="monitor" is="monitor" />
 
 <!-- detector and monitor IDs -->
 

@@ -56,6 +56,7 @@ private:
   void init();
   /// Execution code
   void exec();
+  void simpleCorrection();
 };
 
 } // namespace Algorithms

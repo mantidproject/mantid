@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/PropertyManager.h"
 
 namespace Mantid
 {
@@ -59,6 +60,8 @@ private:
   void init();
   /// Execution code
   void exec();
+  void setupTransmission(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
+  void setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
 
 };
 

@@ -231,7 +231,7 @@ namespace Mantid
 
 
 
-    Instrument_sptr SCDPanelErrors::getNewInstrument(const DataObjects::Peak & peak) const
+    Instrument_sptr SCDPanelErrors::getNewInstrument(const API::IPeak & peak) const
     {
 
       Geometry::Instrument_const_sptr instSave = peak.getInstrument();
@@ -312,7 +312,7 @@ namespace Mantid
 
 
 
-    Peak SCDPanelErrors::createNewPeak(const Peak & peak_old, Geometry::Instrument_sptr  instrNew) const
+    Peak SCDPanelErrors::createNewPeak(const API::IPeak & peak_old, Geometry::Instrument_sptr  instrNew) const
     {
       Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
       if (inst->getComponentID() != instrNew->getComponentID())

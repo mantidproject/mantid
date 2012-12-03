@@ -1,16 +1,70 @@
+#
+# PYUNITTEST_ADD_TEST_TWO (public macro to add unit tests)
+#   Adds a set of python tests based upon the unittest module
+#   Parameters:
+#       _test_src_dir :: The directory where the src files reside
+#       _testname_prefix :: A prefix for each test that is added to ctest, the name will be
+#                           ${_testname_prefix}_TestName
+#       ${ARGN} :: List of test files
+macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
+  # Property for the module directory
+  if ( MSVC )
+    set ( _module_dir ${CMAKE_BINARY_DIR}/bin/Release )
+    set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin/Debug )
+  else()
+    set ( _module_dir ${CMAKE_BINARY_DIR}/bin )
+    set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin )
+  endif()
+
+  # Add all of the individual tests so that they can be run in parallel
+  foreach ( part ${ARGN} )
+    get_filename_component( _filename ${part} NAME )
+    get_filename_component( _suitename ${part} NAME_WE )
+    set ( _pyunit_separate_name "${_testname_prefix}_${_suitename}" )
+    if ( MSVC )
+      # Debug builds need to call the debug executable
+      add_test ( NAME ${_pyunit_separate_name}_Debug CONFIGURATIONS Debug
+                 COMMAND ${PYTHON_EXECUTABLE_DEBUG} -B ${_test_src_dir}/${_filename} )
+      # Set the PYTHONPATH so that the built modules can be found
+      set_property ( TEST ${_pyunit_separate_name}_Debug 
+        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir_debug}" APPEND )
+      set_property ( TEST ${_pyunit_separate_name}_Debug 
+        PROPERTY WORKING_DIRECTORY ${_module_dir_debug} )
+
+      # Release
+      add_test ( NAME ${_pyunit_separate_name} CONFIGURATIONS Release
+                 COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
+      # Set the PYTHONPATH so that the built modules can be found
+      set_property ( TEST ${_pyunit_separate_name}
+        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" APPEND )
+      set_property ( TEST ${_pyunit_separate_name} 
+        PROPERTY WORKING_DIRECTORY ${_module_dir} )
+    else()
+      add_test ( NAME ${_pyunit_separate_name}
+                 COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
+      # Set the PYTHONPATH so that the built modules can be found
+      set_property ( TEST ${_pyunit_separate_name} 
+        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" APPEND )
+      set_property ( TEST ${_pyunit_separate_name} 
+        PROPERTY WORKING_DIRECTORY ${_module_dir} )
+    endif()
+  endforeach ( part ${ARGN} )
+endmacro ( PYUNITTEST_ADD_TEST_TWO )
+
+
 macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   # decide where to copy the unit tests
   get_filename_component ( _pyunit_testname ${_pyunit_testname_file} NAME_WE )
   set ( _pyunit_outputdir ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname} )
 
   # Add a special target to prepare the output directory. It needs to be run everytime the
-  # main target is run so we can flush out any algorithms that may have been removed from the source tree but
+  # main target is run so we can flush out any tests that may have been removed from the source tree but
   # still reside in the build
   add_custom_target ( Prepare${_pyunit_testname_file}
                       COMMAND ${CMAKE_COMMAND} -E remove -f ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${_pyunit_testname_file}
                       COMMAND ${CMAKE_COMMAND} -E remove_directory ${_pyunit_outputdir}
                       COMMAND ${CMAKE_COMMAND} -E make_directory ${_pyunit_outputdir}
-                      COMMAND ${CMAKE_COMMAND} -E touch ${_pyunit_outputdir}/__init__.py
+                      COMMAND ${CMAKE_COMMAND} -E touch ${_pyunit_outputdir}/__init__.py 
                     )
 
   # Copy the unit test files
@@ -30,7 +84,7 @@ macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   set ( _testhelper_files "" )
   foreach (part ${TESTHELPER_PY_FILES})
     get_filename_component(_testhelper_file ${part} NAME)
-    add_custom_command ( OUTPUT ${_pyunit_outputdir}/${_testhelper_file}
+    add_custom_command ( OUTPUT ${_pyunit_outputdir}/${_testhelper_file} ${_pyunit_outputdir}/__init__.py
                      DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${part}
                      COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
                          ${CMAKE_CURRENT_SOURCE_DIR}/${part}

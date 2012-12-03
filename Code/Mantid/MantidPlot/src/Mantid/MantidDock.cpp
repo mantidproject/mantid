@@ -1085,18 +1085,16 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, Mantid::API::IM
 void MantidDockWidget::addPeaksWorkspaceMenuItems(QMenu *menu, Mantid::API::IPeaksWorkspace_const_sptr WS) const
 {
   (void) WS;
-  //menu->addAction(m_showData); // Show data
-  //menu->addAction(m_showInst); // Show instrument
-  menu->addAction(m_showLogs); // Sample logs
   menu->addAction(m_showVatesGui); // Show the Vates simple interface
   if (!MantidQt::API::InterfaceManager::Instance().hasVatesLibraries())
   {
     m_showVatesGui->setEnabled(false);
   }
+  menu->addSeparator();
+  menu->addAction(m_showLogs); // Sample logs
+  menu->addAction(m_showDetectors);
   menu->addAction(m_showHist);
 }
-
-
 
 /**
  * Add the actions that are appropriate for a MatrixWorkspace

@@ -241,6 +241,10 @@ namespace CurveFitting
     void smoothBackgroundExponential(size_t wsindex, FunctionDomain1DVector domain,
                                      FunctionValues peakdata, vector<double>& background);
 
+    /// Smooth background by fitting the background to specified background function
+    void smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVector domain,
+                                    FunctionValues peakdata, vector<double>& background);
+
     //--------------------------------------------------------------------------
 
     /// Instance data
@@ -331,8 +335,11 @@ namespace CurveFitting
     /// Flag to use Annealing Simulation (i.e., use automatic adjusted temperature)
     bool m_useAnnealing;
 
-    ///
+    /// Monte Carlo algorithm
     enum {RANDOMWALK, DRUNKENWALK} m_walkStyle;
+
+    /// Minimum height of a peak to be counted in smoothing background
+    double m_minimumHeight;
 
   };
 

@@ -77,6 +77,19 @@ public:
     TS_ASSERT_EQUALS( WS->getEventList(0).getNumberEvents(), 15000);
     TS_ASSERT_EQUALS( WS->getEventList(1).getNumberEvents(), 15000);
   }
+
+  void testOldFile()
+  {
+    // Just need to make sure it runs.
+    Mantid::API::FrameworkManager::Instance();
+    LoadNexusMonitors ld;
+    std::string outws_name = "ARCS_2963_monitors";
+    ld.initialize();
+    ld.setPropertyValue("Filename", "ARCS_2963.nxs");
+    ld.setPropertyValue("OutputWorkspace", outws_name);
+    TS_ASSERT_THROWS_NOTHING( ld.execute() );
+    TS_ASSERT( ld.isExecuted() );
+  }
 };
 
 #endif /*LOADNEXUSMONITORSTEST_H_*/

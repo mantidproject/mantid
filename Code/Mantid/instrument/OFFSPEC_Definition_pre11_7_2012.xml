@@ -34,11 +34,11 @@
   <!-- detector components (including monitors) -->
   
   <component type="monitor1" idlist="monitor1">
-  <!--  <location r="11.387" t="180.0" mark-as="monitor" /> -->
-    <location r="11.38" t="180.0" mark-as="monitor" />
+  <!--  <location r="11.387" t="180.0" /> -->
+    <location r="11.38" t="180.0" />
   </component>
   
-  <type name="monitor1" is="detector">
+  <type name="monitor1" is="monitor">
     <percent-transparency val="95" />
     <cylinder id="shape">
       <centre-of-bottom-base x="0.0" y="-0.02" z="0.0" />
@@ -50,11 +50,11 @@
   </type>  
   
   <component type="monitor2" idlist="monitor2">
-  <!--  <location r="5.65" t="180.0" mark-as="monitor" />  -->
-    <location r="5.62" t="180.0" mark-as="monitor" />
+  <!--  <location r="5.65" t="180.0" />  -->
+    <location r="5.62" t="180.0" />
   </component>  
   
-  <type name="monitor2" is="detector">
+  <type name="monitor2" is="monitor">
     <percent-transparency val="95" />
     <cylinder id="shape">
       <centre-of-bottom-base x="-0.02" y="0.0" z="0.0" />
@@ -66,11 +66,11 @@
   </type>  
   
   <component type="monitor3" idlist="monitor3">
-  <!--  <location r="0.4" t="180.0" mark-as="monitor" /> -->
-    <location r="0.55" t="180.0" mark-as="monitor" />
+  <!--  <location r="0.4" t="180.0" /> -->
+    <location r="0.55" t="180.0" />
   </component>  
   
-  <type name="monitor3" is="detector">
+  <type name="monitor3" is="monitor">
     <percent-transparency val="95" />
 	<cylinder id="top">
       <centre-of-bottom-base x="0.0" y="-0.05" z="0.0" />

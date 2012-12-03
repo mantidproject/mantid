@@ -20,7 +20,7 @@ const int PeakMarker2D::g_defaultMarkerSize = 5;
  * @param centre :: Centre of the marker. Represents the peak position.
  * @param style :: marker symbol style
  */
-PeakMarker2D::PeakMarker2D(PeakOverlay& peakOverlay, double u, double v, Style style):
+PeakMarker2D::PeakMarker2D(PeakOverlay& peakOverlay, double u, double v, const Style& style):
 m_peakOverlay(peakOverlay),
 m_symbol(style.symbol),
 m_h(-99.0),

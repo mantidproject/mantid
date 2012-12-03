@@ -23,13 +23,19 @@ namespace SliceViewer
   class PeakOverlayView;
 
   /*---------------------------------------------------------
-  Abstract PeaksPresenter
+  Abstract PeaksPresenter.
+
+  This is abstract to allow usage of the NULL object pattern. This allows the ConcreteViewPresenter to be conctructed in an atomic sense after the constrution of the owning object,
+  whithout having to perform fragile null checks.
+
   ----------------------------------------------------------*/
   class DLLExport PeaksPresenter
   {
   public:
     virtual void update() = 0;
     virtual void updateWithSlicePoint(const double&) = 0;
+    virtual bool changeShownDim() = 0;
+    virtual bool isLabelOfFreeAxis(const std::string& label) const = 0;
   };
 
 

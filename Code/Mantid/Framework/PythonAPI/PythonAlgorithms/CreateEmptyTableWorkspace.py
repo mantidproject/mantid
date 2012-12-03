@@ -6,12 +6,12 @@ class CreateEmptyTableWorkspace(PythonAlgorithm):
  
     def PyInit(self):
         # Declare properties
-	self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Name of Calibration Table Workspace")
+        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Name of Calibration Table Workspace")
  
     def PyExec(self):
-	tableWS = WorkspaceFactory.createTable()
-	
-	self.setProperty("OutputWorkspace", tableWS)
+        tableWS = WorkspaceFactory.createTable()
+
+        self.setProperty("OutputWorkspace", tableWS)
  
 # Register algorithm with Mantid
 registerAlgorithm(CreateEmptyTableWorkspace)

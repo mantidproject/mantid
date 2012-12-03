@@ -2,6 +2,7 @@
 #define MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_H_
 
 #include "MantidKernel/System.h"
+#include "MantidQtSliceViewer/PeakTransform.h"
 #include <QPointF>
 #include <boost/shared_ptr.hpp>
 
@@ -9,8 +10,6 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
-    /// Enum describing types of peak dimensions.
-    enum PeakDimensions{LabView, SampleView, HKLView};
 
     /** Abstract view in MVP model representing a PeakOverlay.
     
@@ -45,8 +44,10 @@ namespace MantidQt
       virtual void updateView() = 0;
       /// Hide the view.
       virtual void hideView() = 0;
-      /// Setter for the normalisation value.
-      virtual void setNormalisation(const double& normalisation) = 0;
+      /// Show the view.
+      virtual void showView() = 0;
+      /// Move the peak overlay to a new position.
+      virtual void movePosition(const PeakTransform& peakTransform) = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

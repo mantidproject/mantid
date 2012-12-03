@@ -2,6 +2,7 @@
 #define MANTID_SLICEVIEWER_PEAKOVERLAY_VIEW_FACTORY_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/V3D.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include <boost/shared_ptr.hpp>
 
@@ -46,11 +47,17 @@ namespace MantidQt
     {
     public:
       /// Create a peak view from the peak object.
-      virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::API::IPeak&) const = 0;
+      virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::Kernel::V3D&) const = 0;
+      /// Setter for the radius to use for all peaks.
+      virtual void setRadius(const double& radius) = 0;
       /// Destructor
       virtual ~PeakOverlayViewFactory()
       {
       }
+      /// Get the plot x-axis label
+      virtual std::string getPlotXLabel() const = 0;
+      /// Get the plot y-axis label
+      virtual std::string getPlotYLabel() const = 0;
     };
   }
 }

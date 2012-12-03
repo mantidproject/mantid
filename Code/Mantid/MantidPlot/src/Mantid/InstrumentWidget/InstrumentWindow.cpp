@@ -38,6 +38,7 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QStackedLayout>
+#include <QKeyEvent>
 
 #include <numeric>
 #include <fstream>
@@ -58,9 +59,15 @@ public:
   {
     // Receive mouse move events
     setMouseTracking( true );
+    // Receive keyboard events
+    setFocusPolicy(Qt::StrongFocus);
   }
   /// Assign a surface to draw on
-  void setSurface(ProjectionSurface* surface){m_surface = surface;}
+  void setSurface(ProjectionSurface* surface)
+  {
+    m_surface = surface;
+    connect(m_surface,SIGNAL(redrawRequired()),this,SLOT(repaint()),Qt::QueuedConnection);
+  }
   /// Return the surface 
   ProjectionSurface* getSurface(){return m_surface;}
   /// Redraw the view
@@ -138,6 +145,18 @@ protected:
     if (m_surface)
     {
       m_surface->wheelEvent(event);
+    }
+    update();
+  }
+  /**
+  * Key press event
+  * @param event :: This is the event variable which has the status of the keyboard
+  */
+  void keyPressEvent(QKeyEvent *event)
+  {
+    if (m_surface)
+    {
+      m_surface->keyPressEvent(event);
     }
     update();
   }
@@ -283,7 +302,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
 
   tabChanged(0);
 
-  connect(this,SIGNAL(needSetIntegrationRange(double,double)),this,SLOT(setIntegrationRange(double,double)));
+  connect(this,SIGNAL(needSetIntegrationRange(double,double)),this,SLOT(setIntegrationRange(double,double)),Qt::QueuedConnection);
   setAcceptDrops(true);
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
@@ -429,6 +448,7 @@ void InstrumentWindow::setSurfaceType(int type)
     connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
     connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
     connect(surface,SIGNAL(multipleDetectorsSelected(QList<int>&)),this,SLOT(multipleDetectorsSelected(QList<int>&)));
+    connect(surface,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),this,SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)));
     QApplication::restoreOverrideCursor();
   }
   update();
@@ -474,6 +494,8 @@ void InstrumentWindow::setSurfaceType(const QString& typeStr)
   m_renderTab->m_renderMode->blockSignals(true);
   m_renderTab->m_renderMode->setCurrentIndex( typeIndex );
   m_renderTab->m_renderMode->blockSignals(false);
+  m_renderTab->showResetView( typeIndex );
+  m_renderTab->showFlipControl( typeIndex );
 }
 
 /**
@@ -1233,7 +1255,12 @@ void InstrumentWindow::createExcludeGroupingFile()
 
 void InstrumentWindow::executeAlgorithm(const QString& alg_name, const QString& param_list)
 {
-  emit execMantidAlgorithm(alg_name,param_list,this);
+    emit execMantidAlgorithm(alg_name,param_list,this);
+}
+
+void InstrumentWindow::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg)
+{
+    emit execMantidAlgorithm( alg );
 }
 
 /**
@@ -1381,7 +1408,7 @@ void InstrumentWindow::mouseLeftInstrumentDisplay()
 void InstrumentWindow::clearPeakOverlays()
 {
   getSurface()->clearPeakOverlays();
-  m_InstrumentDisplay->repaint();
+  updateInstrumentView();
 }
 
 /**
@@ -1391,7 +1418,7 @@ void InstrumentWindow::clearPeakOverlays()
 void InstrumentWindow::setPeakLabelPrecision(int n)
 {
   getSurface()->setPeakLabelPrecision(n);
-  m_InstrumentDisplay->repaint();
+  updateInstrumentView();
 }
 
 /**
@@ -1400,7 +1427,7 @@ void InstrumentWindow::setPeakLabelPrecision(int n)
 void InstrumentWindow::setShowPeakRowFlag(bool on)
 {
   getSurface()->setShowPeakRowFlag(on);
-  m_InstrumentDisplay->repaint();
+  updateInstrumentView();
 }
 
 /**

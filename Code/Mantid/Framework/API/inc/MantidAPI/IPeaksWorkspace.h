@@ -114,6 +114,13 @@ namespace API
      */
     virtual bool hasIntegratedPeaks() const = 0;
 
+    //---------------------------------------------------------------------------------------------
+    /**
+     * Creates a new TableWorkspace giving the IDs of the detectors that contribute to the
+     * peak.
+     * @returns A shared pointer to a TableWorkspace containing the information
+     */
+    virtual API::ITableWorkspace_sptr createDetectorTable() const = 0;
   };
 
 

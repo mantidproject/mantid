@@ -1,11 +1,13 @@
 #include "PeakOverlay.h"
 #include "UnwrappedSurface.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 #include <QPainter>
 #include <QList>
 #include <cmath>
 #include <algorithm>
+#include <stdexcept>
 
 QList<PeakMarker2D::Style> PeakOverlay::g_defaultStyles;
 
@@ -119,11 +121,27 @@ m_showRows(true)
   observeAfterReplace();
 }
 
-/**
- * Not implemented yet.
+/**---------------------------------------------------------------------
+ * Overridden virtual function to remove peaks from the workspace along with 
+ * the shapes.
+ * @param shapeList :: Shapes to remove.
  */
-void PeakOverlay::removeShape(Shape2D*)
+void PeakOverlay::removeShapes(const QList<Shape2D*>& shapeList)
 {
+  // vectors of rows to delete from the peaks workspace.
+  std::vector<size_t> rows;
+  foreach(Shape2D* shape, shapeList)
+  {
+    PeakMarker2D* marker = dynamic_cast<PeakMarker2D*>(shape);
+    if ( !marker ) throw std::logic_error("Wrong shape type found.");
+    rows.push_back( static_cast<size_t>( marker->getRow() ) );
+  }
+
+  // Run the DeleteTableRows algorithm to delete the peak.
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows",-1);
+  alg->setPropertyValue("TableWorkspace", m_peaksWorkspace->name());
+  alg->setProperty("Rows",rows);
+  emit executeAlgorithm(alg);
 }
 
 /**---------------------------------------------------------------------
@@ -154,6 +172,7 @@ void PeakOverlay::addMarker(PeakMarker2D* m)
 void PeakOverlay::createMarkers(const PeakMarker2D::Style& style)
 {
   int nPeaks = getNumberPeaks();
+  this->clear();
   for(int i = 0; i < nPeaks; ++i)
   {
     Mantid::API::IPeak& peak = getPeak(i);
@@ -178,8 +197,13 @@ void PeakOverlay::draw(QPainter& painter) const
 {
   // Draw symbols
   Shape2DCollection::draw(painter);
+
   // Sort the labels to avoid overlapping
-  QColor color;
+  QColor color(Qt::red);
+  if ( !m_shapes.isEmpty() )
+  {
+    color = m_shapes[0]->getColor();
+  }
   QRectF clipRect(painter.viewport());
   m_labels.clear();
   foreach(Shape2D* shape,m_shapes)
@@ -187,16 +211,13 @@ void PeakOverlay::draw(QPainter& painter) const
     if (!clipRect.contains(m_transform.map(shape->origin()))) continue;
     PeakMarker2D* marker = dynamic_cast<PeakMarker2D*>(shape);
     if (!marker) continue;
-    color = marker->getColor();
+
     QPointF p0 = marker->origin();
     QPointF p1 = m_transform.map(p0);
     QRectF rect = marker->getLabelRect();
     QPointF dp = rect.topLeft() - p0;
     p1 += dp;
     rect.moveTo(p1);
-
-    //painter.setPen(color);
-    //painter.drawRect(rect);
 
     bool overlap = false;
     // if current label overlaps with another
@@ -205,6 +226,7 @@ void PeakOverlay::draw(QPainter& painter) const
     {
       PeakHKL& hkl = m_labels[i];
       overlap = hkl.add(marker,rect);
+      if ( overlap ) break;
     }
     
     if (!overlap)
@@ -213,7 +235,7 @@ void PeakOverlay::draw(QPainter& painter) const
       m_labels.append(hkl);
     }
   }
-  //std::cerr << m_labels.size() << " labels\n";
+  //std::cerr << m_labels.size() << " labels " << color.red() << ' ' << color.green() << ' ' << color.blue() << "\n";
   painter.setPen(color);
   for(int i = 0; i < m_labels.size(); ++i)
   {

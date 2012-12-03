@@ -1135,7 +1135,7 @@ namespace Geometry
             "Duplicate detector ID found when adding RectangularDetector " + name + " in XML instrument file" + filename);
       }
     }
-    else if ( category.compare("Detector") == 0 || category.compare("detector") == 0 )
+    else if ( category.compare("Detector") == 0 || category.compare("detector") == 0 || category.compare("Monitor") == 0 || category.compare("monitor") == 0 )
     {
       //-------------- Create a Detector ------------------------------------------------
       std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem);
@@ -1181,12 +1181,29 @@ namespace Geometry
         m_neutronicPos[detector] = pLocElem->getChildElement("neutronic");
       }
 
+      // mark-as is a depricated attribute used before is="monitor" was introduced
+      if ( pCompElem->hasAttribute("mark-as") || pLocElem->hasAttribute("mark-as") )
+      {
+        g_log.warning() << "Attribute 'mark-as' is a depricated attribute in Instrument Definition File."
+                      << " For example instead of mark-as=\"monitor\" use instead is=\"monitor\"."
+                      << " See www.mantidproject.org/IDF for more details\n";
+      }
+
       try
       {
-        if ( pCompElem->hasAttribute("mark-as") || pLocElem->hasAttribute("mark-as") )
+        if ( category.compare("Monitor") == 0 || category.compare("monitor") == 0 )
           m_instrument->markAsMonitor(detector);
         else
-          m_instrument->markAsDetector(detector);
+        {
+          // for backwards compatebility look for mark-as="monitor"
+          if ( (pCompElem->hasAttribute("mark-as") && pCompElem->getAttribute("mark-as").compare("monitor") == 0) || 
+               (pLocElem->hasAttribute("mark-as") && pLocElem->getAttribute("mark-as").compare("monitor") == 0) )
+          {
+            m_instrument->markAsMonitor(detector);
+          }
+          else
+            m_instrument->markAsDetector(detector);
+        }
 
       }
       catch(Kernel::Exception::ExistsError&)

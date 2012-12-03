@@ -54,13 +54,7 @@ brokers = [("workflowdb1.sns.gov", 61613), ("workflowdb2.sns.gov", 61613)]
 
 queues = ['/queue/CATALOG.DATA_READY',
           '/queue/REDUCTION.DATA_READY',
-          '/queue/REDUCTION_CATALOG.DATA_READY',
-          '/queue/CATALOG.STARTED',
-          '/queue/REDUCTION.STARTED',
-          '/queue/REDUCTION_CATALOG.STARTED',
-          '/queue/CATALOG.COMPLETE',
-          '/queue/REDUCTION.COMPLETE',
-          '/queue/REDUCTION_CATALOG.COMPLETE']
+          '/queue/REDUCTION_CATALOG.DATA_READY']
      
 print "%s: %s" % ("brokers", brokers)
 

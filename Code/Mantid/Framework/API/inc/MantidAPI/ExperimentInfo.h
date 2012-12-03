@@ -154,8 +154,6 @@ namespace API
     /// Detector grouping information
     det2group_map m_detgroups;
 
-    /// Default of the Nexus File Instrument section version number
-    int m_defaultNexusInstrumentVersionNumber;
   };
 
   /// Shared pointer to ExperimentInfo

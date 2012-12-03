@@ -55,6 +55,9 @@ public:
   double getSlicePoint() const
   { return m_slicePoint; }
 
+  std::string getDimName() const
+  { return m_dim->getName(); }
+
   /// @return the shown dimension, 0=X, 1=Y, -1=None
   int getShownDim() const
   { return m_shownDim; }

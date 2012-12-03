@@ -1960,7 +1960,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName,
 /**
  * Used by plotGroup and plotPair. 
  */
-void MuonAnalysis::handlePeriodChoice(const QString wsName, const QStringList& periodLabel, const QString& groupName)
+void MuonAnalysis::handlePeriodChoice(const QString wsName, const QStringList& periodLabel, const QString& /*groupName*/)
 {
   if ( periodLabel.size() == 2 )
   {

@@ -8,6 +8,7 @@
       <pointing-up axis="y"/>
       <handedness axis="right"/>
     </reference-frame>
+    <default-view view="cylindrical_y"/>
   </defaults>
   <!--SOURCE AND SAMPLE POSITION-->
   <component type="moderator">
@@ -27,7 +28,7 @@
     <location/>
   </component>
   <type name="monitors">
-    <component mark-as="monitor" type="monitor">
+    <component type="monitor">
       <location name="monitor1" z="-5.1382225">
         <parameter name="z">
           <logfile eq="-0.001*value-3.340" id="msd"/>
@@ -504,7 +505,7 @@
     <algebra val="cyl-approx"/>
   </type>
   <!--MONITOR SHAPE-->
-  <type is="detector" name="monitor">
+  <type is="monitor" name="monitor">
     <cuboid id="shape">
       <left-front-bottom-point y="-0.08255" x="-0.0254" z="-0.01905"/>
       <left-front-top-point y="0.08255" x="-0.0254" z="-0.01905"/>

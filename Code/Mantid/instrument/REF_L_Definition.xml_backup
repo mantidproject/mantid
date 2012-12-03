@@ -25,7 +25,7 @@
     <location/>
   </component>
   <type name="monitors">
-    <component mark-as="monitor" type="monitor">
+    <component type="monitor">
       <location z="-10.000" name="monitor1"/>
     </component>
   </type>
@@ -4563,7 +4563,7 @@
   <idlist idname="detector1">
     <id start="0" end="77823"/>
   </idlist>
-  <type is="detector" name="monitor">
+  <type is="monitor" name="monitor">
     <cylinder id="cyl-approx">
       <centre-of-bottom-base y="0.0" x="0.0" z="0.0"/>
       <axis y="0.0" x="0.0" z="1.0"/>
