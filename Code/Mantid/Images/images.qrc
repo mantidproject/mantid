@@ -22,6 +22,7 @@
         <file>selection-text.png</file>
         <file>selection-peak.png</file>
         <file>selection-peaks.png</file>
+        <file>shape-pointer.png</file>
     </qresource>
     <qresource prefix="/MaskTools">
         <file>selection-pointer.png</file>
