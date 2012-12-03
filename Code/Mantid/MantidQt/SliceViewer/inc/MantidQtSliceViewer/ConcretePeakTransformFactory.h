@@ -2,6 +2,7 @@
 #define MANTID_SLICEVIEWER_CONCRETEPEAKTRANSFORMFACTORY_H_
 
 #include "MantidQtSliceViewer/PeakTransformFactory.h"
+#include <boost/make_shared.hpp>
 
 namespace MantidQt
 {
