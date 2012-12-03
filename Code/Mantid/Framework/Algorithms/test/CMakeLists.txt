@@ -45,10 +45,6 @@ endif ()
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( AlgorithmPythonUnitTests.py ${TEST_PY_FILES} )
-  add_dependencies ( AlgorithmPythonUnitTests.py PythonAPI )
-  add_dependencies ( FrameworkTests AlgorithmPythonUnitTests.py )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET AlgorithmPythonUnitTests.py PROPERTY FOLDER "UnitTests" )
+  pyunittest_add_test_two ( ${CMAKE_CURRENT_SOURCE_DIR} AlgorithmsPythonTest ${TEST_PY_FILES} )
 endif ()
 

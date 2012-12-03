@@ -67,7 +67,10 @@ set ( INC_FILES
               
 set ( TEST_FILES SANSSolidAngleCorrectionTest.h )
 
-set ( TEST_PY_FILES EQSANSQ2DTest.py SANSBeamFluxCorrectionTest.py )
+set ( TEST_PY_FILES 
+  EQSANSQ2DTest.py 
+  SANSBeamFluxCorrectionTest.py 
+)
 
 if(UNITY_BUILD)
   include(UnityBuild)

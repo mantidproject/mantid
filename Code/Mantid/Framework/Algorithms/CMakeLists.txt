@@ -409,6 +409,18 @@ set ( INC_FILES
 	inc/MantidAlgorithms/XDataConverter.h
 )
 
+set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
+    src/FFTSmooth.cpp 
+    src/FFTSmooth2.cpp
+    src/FilterBadPulses.cpp
+    src/SetUncertainties.cpp
+    )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
+endif(UNITY_BUILD)
+
 set ( TEST_FILES
 	#	CalMuonDeadTimeTest.h
 	# CountEventsInPulsesTest.h
@@ -590,21 +602,7 @@ set ( TEST_FILES
 	WorkspaceGroupTest.h
 )
 
-set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
-    src/FFTSmooth.cpp 
-    src/FFTSmooth2.cpp
-    src/FilterBadPulses.cpp
-    src/SetUncertainties.cpp
-    )
-
-# Python unit tests
-set ( TEST_PY_FILES NormaliseToUnityTest.py
-)
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
+set ( TEST_PY_FILES NormaliseToUnityTest.py )
 
 # Add a precompiled header where they are supported
 ADD_PRECOMPILED_HEADER( inc/MantidAlgorithms/PrecompiledHeader.h MantidAlgorithms src/PrecompiledHeader.cpp SRC_FILES INC_FILES )

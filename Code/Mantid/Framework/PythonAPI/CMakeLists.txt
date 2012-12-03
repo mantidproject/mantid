@@ -37,12 +37,11 @@ set ( INC_FILES
 # Python files that need copying across
 set ( PY_FILES MantidFramework.py __init__.py setup.py mantidsimple.py)
 
-# cxxtest unit tests
-set ( TEST_FILES
-	PythonFrameworkTests.h
-)
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(PythonAPI SRC_FILES SRC_UNITY_IGNORE_FILES 10)
+endif(UNITY_BUILD)
 
-# Python unit tests
 set ( TEST_PY_FILES 
   GoniometerTest.py
   ImportTest.py
@@ -63,10 +62,7 @@ set ( TEST_PY_FILES
   WorkspaceHistoryTest.py
 )
 
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(PythonAPI SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
+
 
 ###########################################################################
 # Clear stale pyc files

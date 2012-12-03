@@ -12,10 +12,6 @@ endif ()
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test ( PythonWorkflowAlgorithmsTest.py ${TEST_PY_FILES} )
-  add_dependencies ( PythonWorkflowAlgorithmsTest.py PythonAPI )
-  add_dependencies ( FrameworkTests PythonWorkflowAlgorithmsTest.py )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET PythonWorkflowAlgorithmsTest.py PROPERTY FOLDER "UnitTests" )
+  pyunittest_add_test_two ( ${CMAKE_CURRENT_SOURCE_DIR} PythonWorkflowAlgorithmsTest ${TEST_PY_FILES} )
 endif ()
 
