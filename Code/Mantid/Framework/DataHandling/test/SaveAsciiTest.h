@@ -45,7 +45,7 @@ public:
       std::vector<double>& E = wsToSave->dataE(i);
       for (int j = 0; j < 3; j++)
       {
-        X[j] = 1. * j / 0.9;
+        X[j] = 1.5 * j / 0.9;
         Y[j] = (i + 1) * (2. + 4. * X[j]);
         E[j] = 1.;
       }
@@ -69,8 +69,16 @@ public:
 
     // Now make some checks on the content of the file
     std::ifstream in(filename.c_str()); 
+    std::string header1, header2, header3, header4;
+    std::string separator;
 
-    // Currently we just test that the first few column headers are as expected
+    // Currently we just test that the first few column headers and a separator are as expected
+    in >> header1 >> separator >> header2 >> separator >> header3 >> separator >> header4;
+    TS_ASSERT_EQUALS(separator,"," );
+    TS_ASSERT_EQUALS(header1,"X" );
+    TS_ASSERT_EQUALS(header2,"Y0" );
+    TS_ASSERT_EQUALS(header3,"E0" );
+    TS_ASSERT_EQUALS(header4,"Y1" );
     in.close();
 
 
@@ -84,6 +92,17 @@ public:
     // has the algorithm written a file to disk?
     TS_ASSERT( Poco::File(filename_nohead).exists() );
 
+    // Now we check that the first line of the file without header matches the second line of the file with header
+    std::ifstream in1(filename.c_str());
+    std::string line2header;
+    std::ifstream in2(filename_nohead.c_str());
+    std::string line1noheader;
+    getline(in1,line2header);
+    getline(in1,line2header); // 2nd line of file with header
+    getline(in2,line1noheader); // 1st line of file without header
+    TS_ASSERT_EQUALS(line1noheader,line2header);
+    in1.close();
+    in2.close();
 
     // Remove files
     Poco::File(filename).remove();
