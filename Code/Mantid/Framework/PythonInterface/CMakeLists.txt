@@ -84,84 +84,75 @@ endif ()
 
 # python unit tests
 set ( TEST_PY_FILES
-  test/python/AlgorithmTest.py
-  test/python/AlgorithmFactoryTest.py
-  test/python/AlgorithmManagerTest.py
-  test/python/AnalysisDataServiceTest.py
-  test/python/ArrayPropertyTest.py
-  test/python/ArrayBoundedValidatorTest.py
-  test/python/ArrayLengthValidatorTest.py
-  test/python/AxisTest.py
-  test/python/BoundedValidatorTest.py
-  test/python/CompositeValidatorTest.py
-  test/python/ConfigServiceTest.py
-  test/python/CreateWorkspaceTest.py
-  test/python/DeltaEModeTest.py
-  test/python/ExperimentInfoTest.py
-  test/python/FacilityInfoTest.py
-  test/python/FilePropertyTest.py
-  test/python/FileFinderTest.py
-  test/python/FilteredTimeSeriesPropertyTest.py
-  test/python/FindReflectometryLinesTest.py
-  test/python/FrameworkManagerTest.py
-  test/python/FunctionFactoryTest.py
-  test/python/IComponentTest.py
-  test/python/IEventWorkspaceTest.py
-  test/python/ImportModuleTest.py
-  test/python/IPeaksWorkspaceTest.py
-  test/python/InstrumentInfoTest.py
-  test/python/InstrumentTest.py
-  test/python/ITableWorkspaceTest.py
-  test/python/ListValidatorTest.py
-  test/python/LogFilterTest.py
-  test/python/LoggerTest.py
-  test/python/MatrixWorkspaceTest.py
-  test/python/MandatoryValidatorTest.py
-  test/python/MaskWorkspaceToCalFileTest.py
-  test/python/MDHistoWorkspaceTest.py
-  test/python/MultipleFilePropertyTest.py
-  test/python/NullValidatorTest.py
-  test/python/OrientedLatticeTest.py
-  test/python/PythonPluginsTest.py
-  test/python/PropertyWithValueTest.py
-  test/python/PythonAlgorithmPropertiesTest.py
-  test/python/PythonAlgorithmSubAlgCallTest.py
-  test/python/PythonAlgorithmTraitsTest.py
-  test/python/PythonAlgorithmWorkspacePropertyTest.py
-  test/python/ReferenceFrameTest.py
-  test/python/RetrieveRunInfoTest.py
-  test/python/RunTest.py
-  test/python/SimpleAPITest.py
-  test/python/SimpleAPILoadTest.py
-  test/python/SimpleAPIFitTest.py
-  test/python/Stitch1DTest.py
-  test/python/TimeSeriesPropertyTest.py
-  test/python/QuatTest.py
-  test/python/V3DTest.py
-  test/python/UnitCellTest.py
-  test/python/UnitConversionTest.py
-  test/python/UnitFactoryTest.py
-  test/python/WorkspaceFactoryTest.py
-  test/python/WorkspaceTest.py
-  test/python/WorkspaceGroupTest.py
-  test/python/WorkspacePropertiesTest.py
-  test/python/WorkspaceValidatorsTest.py
+  AlgorithmTest.py
+  AlgorithmFactoryTest.py
+  AlgorithmManagerTest.py
+  AnalysisDataServiceTest.py
+  ArrayPropertyTest.py
+  ArrayBoundedValidatorTest.py
+  ArrayLengthValidatorTest.py
+  AxisTest.py
+  BoundedValidatorTest.py
+  CompositeValidatorTest.py
+  ConfigServiceTest.py
+  CreateWorkspaceTest.py
+  DeltaEModeTest.py
+  ExperimentInfoTest.py
+  FacilityInfoTest.py
+  FilePropertyTest.py
+  FileFinderTest.py
+  FilteredTimeSeriesPropertyTest.py
+  FindReflectometryLinesTest.py
+  FrameworkManagerTest.py
+  FunctionFactoryTest.py
+  IComponentTest.py
+  IEventWorkspaceTest.py
+  ImportModuleTest.py
+  IPeaksWorkspaceTest.py
+  InstrumentInfoTest.py
+  InstrumentTest.py
+  ITableWorkspaceTest.py
+  ListValidatorTest.py
+  LogFilterTest.py
+  LoggerTest.py
+  MatrixWorkspaceTest.py
+  MandatoryValidatorTest.py
+  MaskWorkspaceToCalFileTest.py
+  MDHistoWorkspaceTest.py
+  MultipleFilePropertyTest.py
+  NullValidatorTest.py
+  OrientedLatticeTest.py
+  PythonPluginsTest.py
+  PropertyWithValueTest.py
+  PythonAlgorithmPropertiesTest.py
+  PythonAlgorithmSubAlgCallTest.py
+  PythonAlgorithmTraitsTest.py
+  PythonAlgorithmWorkspacePropertyTest.py
+  ReferenceFrameTest.py
+  RetrieveRunInfoTest.py
+  RunTest.py
+  SimpleAPITest.py
+  SimpleAPILoadTest.py
+  SimpleAPIFitTest.py
+  Stitch1DTest.py
+  TimeSeriesPropertyTest.py
+  QuatTest.py
+  V3DTest.py
+  UnitCellTest.py
+  UnitConversionTest.py
+  UnitFactoryTest.py
+  WorkspaceFactoryTest.py
+  WorkspaceTest.py
+  WorkspaceGroupTest.py
+  WorkspacePropertiesTest.py
+  WorkspaceValidatorsTest.py
 )
 
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  # pyunittest_add_test macro understands the TESTHELPER_PY_FILES variable. It is scoped to this file
-  # so does not need to be cleared
-  set ( TESTHELPER_PY_FILES test/python/testhelpers.py )
-  pyunittest_add_test ( VanillaPythonInterfaceTest.py ${TEST_PY_FILES} )
-                      
-  # Test Dependencies  
-  add_dependencies ( VanillaPythonInterfaceTest.py PythonInterface Algorithms )
-  add_dependencies ( FrameworkTests VanillaPythonInterfaceTest.py )
-  # Add to the 'UnitTests' group in VS
-  set_property ( TARGET PrepareVanillaPythonInterfaceTest.py PROPERTY FOLDER "UnitTests/Python" )
-  set_property ( TARGET VanillaPythonInterfaceTest.py PROPERTY FOLDER "UnitTests/Python" )
+  # Migrating tests in parts to test on each platform
+  pyunittest_add_test_two ( ${CMAKE_CURRENT_SOURCE_DIR}/test/python PythonInterface ${TEST_PY_FILES} )
 endif ()
 
 ###########################################################################

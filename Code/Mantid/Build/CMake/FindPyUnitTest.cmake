@@ -1,3 +1,57 @@
+#
+# PYUNITTEST_ADD_TEST_TWO (public macro to add unit tests)
+#   Adds a set of python tests based upon the unittest module
+#   Parameters:
+#       _test_src_dir :: The directory where the src files reside
+#       _testname_prefix :: A prefix for each test that is added to ctest, the name will be
+#                           ${_testname_prefix}_TestName
+#       ${ARGN} :: List of test files
+macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
+  # Property for the module directory
+  if ( MSVC )
+    set ( _module_dir ${CMAKE_BINARY_DIR}/bin/Release )
+    set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin/Debug )
+  else()
+    set ( _module_dir ${CMAKE_BINARY_DIR}/bin )
+    set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin )
+  endif()
+
+  # Add all of the individual tests so that they can be run in parallel
+  foreach ( part ${ARGN} )
+    get_filename_component( _filename ${part} NAME )
+    get_filename_component( _suitename ${part} NAME_WE )
+    set ( _pyunit_separate_name "${_testname_prefix}_${_suitename}" )
+    if ( MSVC )
+      # Debug builds need to call the debug executable
+      add_test ( NAME ${_pyunit_separate_name}_Debug
+                 COMMAND ${PYTHON_EXECUTABLE_DEBUG} -B ${_test_src_dir}/${_filename} )
+      # Set the PYTHONPATH so that the built modules can be found
+      set_property ( TEST ${_pyunit_separate_name}_Debug 
+        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir_debug}" APPEND )
+      set_property ( TEST ${_pyunit_separate_name}_Debug 
+        PROPERTY WORKING_DIRECTORY ${_module_dir_debug} )
+
+      # Release
+      add_test ( NAME ${_pyunit_separate_name}
+                 COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
+      # Set the PYTHONPATH so that the built modules can be found
+      set_property ( TEST ${_pyunit_separate_name}
+        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" APPEND )
+      set_property ( TEST ${_pyunit_separate_name} 
+        PROPERTY WORKING_DIRECTORY ${_module_dir} )
+    else()
+      add_test ( NAME ${_pyunit_separate_name}
+                 COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
+      # Set the PYTHONPATH so that the built modules can be found
+      set_property ( TEST ${_pyunit_separate_name} 
+        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" APPEND )
+      set_property ( TEST ${_pyunit_separate_name} 
+        PROPERTY WORKING_DIRECTORY ${_module_dir} )
+    endif()
+  endforeach ( part ${ARGN} )
+endmacro ( PYUNITTEST_ADD_TEST_TWO )
+
+
 macro ( PYUNITTEST_ADD_TEST _pyunit_testname_file )
   # decide where to copy the unit tests
   get_filename_component ( _pyunit_testname ${_pyunit_testname_file} NAME_WE )
