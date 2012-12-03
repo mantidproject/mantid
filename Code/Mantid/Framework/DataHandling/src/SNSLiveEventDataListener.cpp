@@ -352,7 +352,7 @@ namespace DataHandling
       // then we can initialize our workspace.  Otherwise, we'll just wait.
       if (m_instrumentName.size() > 0)
       {
-        initWorkspace();
+        initWorkspace( pkt);
       }
     }
 
@@ -373,7 +373,7 @@ namespace DataHandling
       // we can create our workspace.  Otherwise, we'll just wait
       if (m_instrumentXML.size() > 0)
       {
-        initWorkspace();
+        initWorkspace( pkt);
       }
     }
 
@@ -711,7 +711,7 @@ namespace DataHandling
   }
 
 
-  void SNSLiveEventDataListener::initWorkspace()
+  void SNSLiveEventDataListener::initWorkspace(const ADARA::Packet &pkt)
   {
     // Use the LoadEmptyInstrument algorithm to create a proper workspace
     // for whatever beamline we're on
@@ -737,6 +737,17 @@ namespace DataHandling
     m_buffer->mutableRun().addLogData(prop);
     prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
     m_buffer->mutableRun().addLogData(prop);
+
+    // We must always have a run_start property or the LogManager throws an
+    // exception.  The "real" value will come from a RunStatus packet saying that
+    // a new run is starting.  Until we get one of those packets, we'll just use
+    // the time from the packet.  (In a truely "live" stream, current time would
+    // also work, but if we're replaying old data, then current time would be
+    // newer than the timestamps in the data, and that would cause strange time
+    // values in the sample log.
+    Kernel::DateAndTime now = timeFromPacket(pkt);
+    // addProperty() wants the time as an ISO 8601 string
+    m_buffer->mutableRun().addProperty("run_start", now.toISO8601String());
 
     m_workspaceInitialized = true;
   }
