@@ -67,10 +67,8 @@ class ExposedLoadSQW : public LoadSQW
     virtual void setup()
     {
       std::string filename = getProperty("Filename");
-      m_fileStream.open(filename.c_str(), std::ios::binary);
-
       // Parse Extract metadata. Including data locations.
-      parseMetadata();
+      parseMetadata(filename);
     }
 
     // test if the metadata correspond to what is expected
@@ -82,9 +80,21 @@ class ExposedLoadSQW : public LoadSQW
                                                               boost::lexical_cast<std::string>(int(m_nDataPoints))));
     }
     virtual void readEvents(MDEventWorkspace4* ws) { LoadSQW::readEvents(ws); };
-    virtual void readDNDDimensions(MDEventWorkspace4* ws) { LoadSQW::readDNDDimensions(ws); };
-    virtual void readSQWDimensions(MDEventWorkspace4* ws) { LoadSQW::readSQWDimensions(ws); };
-    virtual void addLattice(MDEventWorkspace4* ws) { LoadSQW::addLattice(ws); };
+    void readDNDDimensions(MDEventWorkspace4* ws) 
+    {
+      std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVector;
+      LoadSQW::readDNDDimensions(DimVector); 
+      this->addDimsToWs(ws,DimVector);
+    }
+    void readSQWDimensions(MDEventWorkspace4* ws)
+    {      
+      std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVector;
+      LoadSQW::readSQWDimensions(DimVector); 
+      this->addDimsToWs(ws,DimVector);
+    }
+    virtual void addLattice(MDEventWorkspace4* ws) { LoadSQW::addLattice(ws); }
+    void readBoxSizes(){LoadSQW::readBoxSizes();}
+//    void readBoxSizes(){LoadSQW::readBoxSizes();}
 };
 //=====================================================================================
 // Functional Tests
@@ -229,22 +239,84 @@ public:
     TS_ASSERT_DELTA(2.8699, lattice.a3(), 0.0001);
     TS_ASSERT_DELTA(0.3484, lattice.b1(), 0.0001);
     TS_ASSERT_DELTA(0.3484, lattice.b2(), 0.0001);
-    TS_ASSERT_DELTA(0.3484, lattice.b3(), 0.0001);
+    TS_ASSERT_DELTA(0.3484, lattice.b3(), 0.0001);  
   }
-
-  void testRead2DSlice()
+  void testReadDNDvsSQWDim()
   {
     ExposedLoadSQW alg;
     alg.initialize();
-    alg.setPropertyValue("Filename","slice2D.sqw");
+    alg.setPropertyValue("Filename","test_horace_reader.sqw");
     alg.setPropertyValue("OutputWorkspace", "testAddDimension");
     alg.setup();
 
     MDEventWorkspace4 ws1;
     alg.readDNDDimensions(&ws1);
+    Mantid::Geometry::IMDDimension_const_sptr a = ws1.getDimension(0);
+    Mantid::Geometry::IMDDimension_const_sptr b = ws1.getDimension(1);
+    Mantid::Geometry::IMDDimension_const_sptr c = ws1.getDimension(2);
+    Mantid::Geometry::IMDDimension_const_sptr d = ws1.getDimension(3);
+
+    //Check dimension ids
+    TS_ASSERT_EQUALS("qx", a->getDimensionId());
+    TS_ASSERT_EQUALS("qy", b->getDimensionId());
+    TS_ASSERT_EQUALS("qz", c->getDimensionId());
+    TS_ASSERT_EQUALS("en", d->getDimensionId());
+
 
     MDEventWorkspace4 ws2;
     alg.readSQWDimensions(&ws2);
+    a = ws2.getDimension(0);
+    b = ws2.getDimension(1);
+    c = ws2.getDimension(2);
+    d = ws2.getDimension(3);
+
+    //Check dimension ids
+    TS_ASSERT_EQUALS("qx", a->getDimensionId());
+    TS_ASSERT_EQUALS("qy", b->getDimensionId());
+    TS_ASSERT_EQUALS("qz", c->getDimensionId());
+    TS_ASSERT_EQUALS("en", d->getDimensionId());
+
+
+    alg.setPropertyValue("Filename","slice2D.sqw");
+    alg.setup();
+    MDEventWorkspace4 ws3;
+    alg.readDNDDimensions(&ws3);
+    a = ws3.getDimension(0);
+    b = ws3.getDimension(1);
+    c = ws3.getDimension(2);
+    d = ws3.getDimension(3);
+
+    TS_ASSERT_EQUALS("qy", a->getDimensionId());
+    TS_ASSERT_EQUALS("en", b->getDimensionId());
+    TS_ASSERT_EQUALS("qx", c->getDimensionId());
+    TS_ASSERT_EQUALS("qz", d->getDimensionId());
+
+
+    MDEventWorkspace4 ws4;
+    alg.readSQWDimensions(&ws4);
+    a = ws4.getDimension(0);
+    b = ws4.getDimension(1);
+    c = ws4.getDimension(2);
+    d = ws4.getDimension(3);
+
+    //Check dimension ids
+    TS_ASSERT_EQUALS("qx", a->getDimensionId());
+    TS_ASSERT_EQUALS("qy", b->getDimensionId());
+    TS_ASSERT_EQUALS("qz", c->getDimensionId());
+    TS_ASSERT_EQUALS("en", d->getDimensionId());
+
+  }
+
+  void testRead2DSlice()
+  {
+    LoadSQW alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename","slice2D.sqw");
+    alg.setPropertyValue("OutputWorkspace", "testRead2D");
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() );
+ 
 
   }
 };

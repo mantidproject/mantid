@@ -214,22 +214,31 @@ namespace Mantid
     /// Execute the algorithm
     void LoadSQW::exec()
     {
-      std::string filename = getProperty("Filename");
-      m_fileStream.open(filename.c_str(), std::ios::binary);
-
+      m_fileName  = getProperty("Filename");
       // Parse Extract metadata. Including data locations.
-      parseMetadata();
+      parseMetadata(m_fileName);
 
       // Create a new output workspace.
       MDEventWorkspace<MDEvent<4>,4>* pWs = new MDEventWorkspace<MDEvent<4>,4>;
       Mantid::API::IMDEventWorkspace_sptr ws(pWs);
 
       // Add dimensions onto workspace.
-      readSQWDimensions(pWs);
-      
+      std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVector;
+      readDNDDimensions(DimVector,false);
+      this->m_nBins.resize(4);
+      for(size_t i=0;i<4;i++)
+      {
+        m_nBins[i] = DimVector[i].getNumBins();
+        if(m_nBins[i]<1)m_nBins[i]=1;
+      }
+      readSQWDimensions(DimVector);
+      addDimsToWs(pWs,DimVector);     
       // Set some reasonable values for the box controller
       BoxController_sptr bc = pWs->getBoxController();
-      bc->setSplitInto(3);
+      for(size_t i=0;i<4;i++)
+      {
+        bc->setSplitInto(i,m_nBins[i]);
+      }
       bc->setSplitThreshold(3000);
 
       // Initialize the workspace.
@@ -241,6 +250,7 @@ namespace Mantid
       // Start with a MDGridBox.
       pWs->splitBox();
 
+      readBoxSizes();
       // Save the empty WS and turn it into a file-backed MDEventWorkspace (on option)
       m_outputFile = getPropertyValue("OutputFilename");
 
@@ -301,7 +311,7 @@ namespace Mantid
       size_t maxNPix = ~size_t(0);
       if(m_nDataPoints > maxNPix)
       {
-        throw new std::runtime_error("Not possible to fit all datapoints into memory");
+        throw new std::runtime_error("Not possible to address all datapoints in memory using this architecture ");
       }
 
       const size_t ncolumns = 9; //qx, qy, qz, en, s, err, irunid, idetid, ien
@@ -460,25 +470,36 @@ namespace Mantid
       double cc = (double)cast<float>(buf,20);
       
       ExperimentInfo_sptr info(new ExperimentInfo());
+      // set up the goniometer. All mdEvents (pixels) in Horace sqw file are in lab frame, 
+      // Q units so general goniometer should provide unit rotation matrix
+      info->mutableRun().mutableGoniometer().makeUniversalGoniometer();
+      //
       info->mutableSample().setOrientedLattice(new OrientedLattice(a,b,c,aa,bb,cc));
       ws->addExperimentInfo(info);
     }
 
-    /// Add a dimension after reading info from file.
-    void LoadSQW::readDNDDimensions(Mantid::MDEvents::MDEventWorkspace<MDEvent<4>,4>* ws)
+    void LoadSQW::buildMDDimsBase(std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector)
     {
-      using Mantid::Geometry::MDHistoDimensionBuilder;
-      Mantid::Geometry::Vec_MDHistoDimensionBuilder dimensionVec(4);
       std::vector<std::string> dimID(4,"qx");
       std::vector<std::string> dimUnit(4,"A^-1");
       dimID[1]="qy";dimID[2]="qz";dimID[3]="en";
       dimUnit[3]="mEv";
+      DimVector.resize(4);
       for(size_t i=0;i<4;i++)
       {
-        dimensionVec[i].setId(dimID[i]);
-        dimensionVec[i].setUnits(dimUnit[i]);
+        DimVector[i].setId(dimID[i]);
+        DimVector[i].setUnits(dimUnit[i]);
+        DimVector[i].setName(dimID[i]);
       }
-  
+
+    }
+
+    /// Add a dimension after reading info from file.
+    void LoadSQW::readDNDDimensions(std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut,bool arrangeByMDImage)
+    {
+      //using Mantid::Geometry::MDHistoDimensionBuilder;
+      std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVectorIn;
+      this->buildMDDimsBase(DimVectorIn);
 
       std::vector<char> buf(4*(3+3+4+16+4+2));
       this->m_fileStream.seekg(this->m_dataPositions.geom_start, std::ios::beg);
@@ -492,7 +513,7 @@ namespace Mantid
         //dscrptn.pDimDescription(i)->data_shift = val;
       //}
 
-      //TODO: how to use it in our framework?
+      //TODO: how to use it in our framework? -> it is B^-1 matrix possibly re-scaled
       std::vector<double> u_to_Rlu(4*4); // the matrix transforming from lab to crystal frame with scaling
       i0 += 4*4;
       // [data.u_to_rlu, count, ok, mess] = fread_catch(fid,[4,4],'float32'); if ~all(ok); return; end;
@@ -541,7 +562,7 @@ namespace Mantid
         std::string sName(name);
         boost::erase_all(sName, " ");
 
-        dimensionVec[i].setName(sName);
+        DimVectorIn[i].setName(sName);
       }
 
       // resize for iax and npax;
@@ -576,9 +597,9 @@ namespace Mantid
           float min   = cast<float>(buf,4*(niax+i*2  ));
           float max   = cast<float>(buf,4*(niax+i*2+1))*(1+FLT_EPSILON);
 
-          dimensionVec[ic].setNumBins(1);
-          dimensionVec[ic].setMax(max);
-          dimensionVec[ic].setMin(min);
+          DimVectorIn[ic].setNumBins(1);
+          DimVectorIn[ic].setMax(max);
+          DimVectorIn[ic].setMin(min);
           ic++;
         }
       }
@@ -627,9 +648,9 @@ namespace Mantid
           float min = cast<float>(axis_buffer,0);
           float max = cast<float>(axis_buffer,4*(nAxisPoints-1))*(1+FLT_EPSILON);
 
-          dimensionVec[ic].setNumBins(nAxisPoints-1);
-          dimensionVec[ic].setMax(max);
-          dimensionVec[ic].setMin(min);
+          DimVectorIn[ic].setNumBins(nAxisPoints-1);
+          DimVectorIn[ic].setMax(max);
+          DimVectorIn[ic].setMin(min);
           ic++;
         }
         //[data.dax, count, ok, mess] = fread_catch(fid,[1,npax],'int32'); if ~all(ok); return; end;
@@ -638,39 +659,54 @@ namespace Mantid
             dax[i]=cast<uint32_t>(buf,4*i)-1;
 
       }
+      if(arrangeByMDImage)
+      {
 
-     //Add dimensions to the workspace by invoking the dimension builders.
-      for(size_t i=0;i<npax;i++)
-         ws->addDimension(dimensionVec[pax[dax[i]]].create());
+       //Place dimensions to output vector in the correct dimensions order;
+        size_t ic=0;
+        DimVectorOut.resize(4);
+        for(size_t i=0;i<npax;i++)
+        {
+          DimVectorOut[ic] = DimVectorIn[pax[dax[i]]];
+          ic++;
+        }
 
-      for(size_t i=0;i<niax;i++)
-         ws->addDimension(dimensionVec[iax[i]].create());
+        for(size_t i=0;i<niax;i++)
+        {
+           DimVectorOut[ic] = DimVectorIn[iax[i]];
+          ic++;
+        }
+      }else // arrange according to sqw
+      {
+        DimVectorOut.assign(DimVectorIn.begin(),DimVectorIn.end());
+      }
+
 
     }
+    /// add range of dimensions to the workspace;
+    void LoadSQW::addDimsToWs(Mantid::MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>,4>* ws,std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector)
+    {
+      for(size_t i=0;i<4;i++)
+      {
+            ws->addDimension(DimVector[i].create());
+      }
+      //Add dimensions to the workspace by invoking the dimension builders.
+     // ws->addDimension(qx.create());
+    //  ws->addDimension(qy.create());
+    //  ws->addDimension(qz.create());
+     // ws->addDimension(en.create());
+
+    }
+
     
     /// Add a dimension after reading info from file.
-    void LoadSQW::readSQWDimensions(Mantid::MDEvents::MDEventWorkspace<MDEvent<4>,4>* ws)
+    void LoadSQW::readSQWDimensions(std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVectorOut)
     {
       using Mantid::Geometry::MDHistoDimensionBuilder;
-      Mantid::Geometry::Vec_MDHistoDimensionBuilder dimensionVec(4);
-      MDHistoDimensionBuilder& qx = dimensionVec[0];
-      MDHistoDimensionBuilder& qy = dimensionVec[1];
-      MDHistoDimensionBuilder& qz = dimensionVec[2];
-      MDHistoDimensionBuilder& en = dimensionVec[3];
 
-      //Horace Tags.
-      qx.setId("qx");
-      qx.setName("qx");
-      qx.setUnits("A^(-1)");
-      qy.setId("qy");
-      qy.setName("qy");
-      qy.setUnits("A^(-1)");
-      qz.setId("qz");
-      qz.setName("qz");
-      qz.setUnits("A^(-1)");
-      en.setId("en");
-      en.setName("E");
-      en.setUnits("MeV");
+
+      this->buildMDDimsBase(DimVectorOut);
+
 
       std::vector<char> buf(4*(4+4));
       this->m_fileStream.seekg(this->m_dataPositions.min_max_start, std::ios::beg);
@@ -681,16 +717,11 @@ namespace Mantid
       {
         float min =  cast<float>(buf,4*i*2);
         float max =  cast<float>(buf,4*(i*2+1))*(1+FLT_EPSILON);
-        dimensionVec[i].setNumBins(10);
-        dimensionVec[i].setMax(max);
-        dimensionVec[i].setMin(min);
+        DimVectorOut[i].setNumBins(10);
+        DimVectorOut[i].setMax(max);
+        DimVectorOut[i].setMin(min);
 
       }
-      //Add dimensions to the workspace by invoking the dimension builders.
-      ws->addDimension(qx.create());
-      ws->addDimension(qy.create());
-      ws->addDimension(qz.create());
-      ws->addDimension(en.create());
 
 //      std::cout << qx.create()->getNBins() << " bins in x\n";
 //      std::cout << qy.create()->getNBins() << " bins in y\n";
@@ -707,8 +738,14 @@ namespace Mantid
     /** Function provides seam on to access auxillary functions ported from MD_FileHoraceReader.
        
     */
-    void LoadSQW::parseMetadata()
+    void LoadSQW::parseMetadata(const std::string &fileName)
     {
+      if(m_fileStream.is_open())m_fileStream.close();
+      m_fileStream.open(fileName.c_str(), std::ios::binary);
+
+      if(!m_fileStream.is_open())
+        throw(Kernel::Exception::FileError("Can not open inout sqw file",fileName));
+
       std::vector<char> data_buffer;
       m_fileStream.seekg(m_dataPositions.if_sqw_start);
       data_buffer.resize(3*4);
@@ -729,7 +766,17 @@ namespace Mantid
       // get detectors
       m_dataPositions.data_start      = m_dataPositions.parse_sqw_detpar(m_fileStream,m_dataPositions.detectors_start);
       // calculate all other data fields locations;
-      m_dataPositions.parse_data_locations(m_fileStream,m_dataPositions.data_start,m_nBins,m_nDims,m_mdImageSize,m_nDataPoints);
+      m_dataPositions.parse_data_locations(m_fileStream,m_dataPositions.data_start,m_nBins,m_nDims,m_nDataPoints);
+    }
+
+
+    void LoadSQW::readBoxSizes()
+    {
+      
+       m_boxSizes.resize(m_dataPositions.mdImageSize);
+       m_fileStream.seekg(m_dataPositions.n_cell_pix_start, std::ios::beg);
+       m_fileStream.read((char *)(&m_boxSizes[0]),m_dataPositions.mdImageSize*sizeof(uint64_t));
+       
     }
 
 namespace LoadSQWHelper
@@ -771,6 +818,7 @@ namespace LoadSQWHelper
       this->component_headers_starts.assign(nFiles, 0);
 
       std::streamoff last_location = dataStream.tellg();
+      if(last_location<0)throw("IO error for input  file at start of component headers; Can not seek to last location");
       if (nFiles > 0)
       {
         this->component_headers_starts[0] = last_location;
@@ -875,11 +923,10 @@ namespace LoadSQWHelper
      
      @returns:   nBins     -- the vector of bin sizes for MD image
      @returns:   nDims     -- numner of non-integrated dimensions in the MD image
-     @returns:  mdImageSize-- total MD image size
      @returns:  nDataPoints-- number of pixels (MD events) contributing to the image
    */
     void dataPositions::parse_data_locations(std::ifstream &dataStream,std::streamoff data_start,
-                                                      std::vector<size_t> &nBins,size_t &nDims,size_t &mdImageSize,uint64_t &nDataPoints)
+                                                      std::vector<size_t> &nBins,size_t &nDims,uint64_t &nDataPoints)
     {
       std::vector<char> data_buffer(12);
 
