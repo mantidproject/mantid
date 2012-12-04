@@ -10,4 +10,4 @@ set ( TEST_PY_FILES
 )
 
 # Prefix for test=PythonInterfaceGeometry
-pyunittest_add_test_two ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterfaceGeometry ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterfaceGeometry ${TEST_PY_FILES} )

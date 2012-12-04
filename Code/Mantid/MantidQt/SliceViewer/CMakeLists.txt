@@ -113,12 +113,8 @@ target_link_libraries ( MantidQtSliceViewer MantidQtAPI MantidWidgets ${QT_LIBRA
 ###########################################################################
 
 if ( PYUNITTEST_FOUND )
-	pyunittest_add_test ( SliceViewerMantidPlotTest.py ${TEST_PY_FILES} "" )
-	add_dependencies ( SliceViewerMantidPlotTest.py MantidQtAPI MantidWidgets CustomDialogs 
-	                   CustomInterfaces MantidQtSliceViewer Algorithms )
-	add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
-	# Add to the 'UnitTests' group in VS
-	set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )
+  
+  pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}/test SliceViewerMantidPlotTest ${TEST_PY_FILES} )
 endif ()
 
 if ( CXXTEST_FOUND )

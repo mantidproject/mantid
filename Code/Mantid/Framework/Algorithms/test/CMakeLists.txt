@@ -45,6 +45,6 @@ endif ()
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test_two ( ${CMAKE_CURRENT_SOURCE_DIR} AlgorithmsPythonTest ${TEST_PY_FILES} )
+  pyunittest_add_test( ${CMAKE_CURRENT_SOURCE_DIR} AlgorithmsPythonTest ${TEST_PY_FILES} )
 endif ()
 

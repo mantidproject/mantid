@@ -31,4 +31,4 @@ set ( TEST_PY_FILES
 )
 
 # Prefix for test=PythonInterfaceAPI
-pyunittest_add_test_two ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterfaceAPI ${TEST_PY_FILES} )
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterfaceAPI ${TEST_PY_FILES} )
