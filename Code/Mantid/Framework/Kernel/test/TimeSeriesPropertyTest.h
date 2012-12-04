@@ -382,6 +382,9 @@ public:
     t = DateAndTime("2007-11-30T16:17:50");
     TS_ASSERT_DELTA( s.stop(), t, 1e-3);
 
+    // Check throws if min > max
+    TS_ASSERT_THROWS( log->makeFilterByValue(splitter, 2.0, 1.0, 0.0, true), std::invalid_argument);
+
     delete log;
   }
 
@@ -390,6 +393,71 @@ public:
     TimeSeriesProperty<std::string> log("StringTSP");
     TimeSplitterType splitter;
     TS_ASSERT_THROWS(log.makeFilterByValue(splitter,0.0,0.0,0.0,true), Exception::NotImplementedError);
+  }
+
+  void test_expandFilterToRange()
+  {
+    TimeSeriesProperty<int> log("MyIntLog");
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:40",6) );
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:50",2) );
+
+    // Create a TimeInterval that's wider than this log
+    TimeInterval interval(DateAndTime("2007-11-30T16:16:00"),DateAndTime("2007-11-30T16:18:50"));
+
+    TimeSplitterType splitter;
+    // Test good at both ends
+    log.makeFilterByValue(splitter, 1.0, 2.2, 1.0, false);
+    log.expandFilterToRange(splitter, 1.0, 2.2, interval);
+    TS_ASSERT_EQUALS( splitter.size(), 2 );
+    TS_ASSERT_DELTA( splitter[0].start(), DateAndTime("2007-11-30T16:16:00"), 1e-3);
+    TS_ASSERT_DELTA( splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA( splitter[1].start(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA( splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"), 1e-3);
+
+    // Test bad at both ends
+    log.makeFilterByValue(splitter, 2.5, 10.0, 0.0, false);
+    log.expandFilterToRange(splitter, 2.5, 10.0, interval);
+    TS_ASSERT_EQUALS( splitter.size(), 1 );
+    TS_ASSERT_DELTA( splitter[0].start(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA( splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+
+    // Test good at start, bad at end
+    log.makeFilterByValue(splitter, -1.0, 1.5, 0.0, false);
+    log.expandFilterToRange(splitter, -1.0, 1.5, interval);
+    TS_ASSERT_EQUALS( splitter.size(), 1 );
+    TS_ASSERT_DELTA( splitter[0].start(), DateAndTime("2007-11-30T16:16:00"), 1e-3);
+    TS_ASSERT_DELTA( splitter[0].stop(), DateAndTime("2007-11-30T16:17:10"), 1e-3);
+
+    // Test good at end, bad at start
+    log.makeFilterByValue(splitter, 1.99, 2.5, 1.0, false);
+    log.expandFilterToRange(splitter, 1.99, 2.5, interval);
+    TS_ASSERT_EQUALS( splitter.size(), 2 );
+    TS_ASSERT_DELTA( splitter[0].start(), DateAndTime("2007-11-30T16:17:10"), 1e-3);
+    TS_ASSERT_DELTA( splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA( splitter[1].start(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA( splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"), 1e-3);
+
+    // Check throws if min > max
+    TS_ASSERT_THROWS( log.expandFilterToRange(splitter, 2.0, 1.0, interval), std::invalid_argument);
+
+    // Test good at both ends, but interval narrower than log range
+    TimeInterval narrowinterval(DateAndTime("2007-11-30T16:17:15"),DateAndTime("2007-11-30T16:17:41"));
+    log.makeFilterByValue(splitter, 0.0, 10.0, 0.0, false);
+    log.expandFilterToRange(splitter, 0.0, 10.0, narrowinterval);
+    TS_ASSERT_EQUALS( splitter.size(), 1 );
+    TS_ASSERT_DELTA( splitter[0].start(), DateAndTime("2007-11-30T16:17:00"), 1e-3);
+    TS_ASSERT_DELTA( splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+  }
+
+  void test_expandFilterToRange_throws_for_string_property()
+  {
+    TimeSeriesProperty<std::string> log("StringTSP");
+    TimeSplitterType splitter;
+    TS_ASSERT_THROWS(log.expandFilterToRange(splitter,0.0,0.0,TimeInterval()), Exception::NotImplementedError);
   }
 
   //----------------------------------------------------------------------------

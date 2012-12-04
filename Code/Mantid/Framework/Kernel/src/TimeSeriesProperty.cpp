@@ -450,6 +450,14 @@ namespace Mantid
     template<typename TYPE>
     void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre) const
     {
+      if ( max < min )
+      {
+        std::stringstream ss;
+        ss << "TimeSeriesProperty::makeFilterByValue: 'max' argument must be greater than 'min'"
+           << "(got min=" << min << " max=" << max;
+        throw std::invalid_argument(ss.str());
+      }
+
       // Make sure the splitter starts out empty
       split.clear();
 
@@ -515,6 +523,56 @@ namespace Mantid
      */
     template<>
     void TimeSeriesProperty<std::string>::makeFilterByValue(TimeSplitterType&, double, double, double, bool) const
+    {
+      throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
+    }
+
+    /** If the first and/or last values in a log are between min & max, expand and existing TimeSplitter
+     *  (created by makeFilterByValue) if necessary to cover the full TimeInterval given.
+     *  @param split The splitter to modify if necessary
+     *  @param min   The minimum 'good' value
+     *  @param max   The maximum 'good' value
+     *  @param TimeInterval The full time range that we want this splitter to cover
+     */
+    template<typename TYPE>
+    void TimeSeriesProperty<TYPE>::expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const
+    {
+      if ( max < min )
+      {
+        std::stringstream ss;
+        ss << "TimeSeriesProperty::expandFilterToRange: 'max' argument must be greater than 'min'"
+           << "(got min=" << min << " max=" << max;
+        throw std::invalid_argument(ss.str());
+      }
+
+      // Assume everything before the 1st value is constant
+      double val = firstValue();
+      if ((val >= min) && (val <= max))
+      {
+        TimeSplitterType extraFilter;
+        extraFilter.push_back( SplittingInterval(range.begin(), firstTime(), 0));
+        // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
+        split = split | extraFilter;
+      }
+
+      // Assume everything after the LAST value is constant
+      val = lastValue();
+      if ((val >= min) && (val <= max))
+      {
+        TimeSplitterType extraFilter;
+        extraFilter.push_back( SplittingInterval(lastTime(), range.end(), 0) );
+        // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
+        split = split | extraFilter;
+      }
+
+      return;
+    }
+
+    /** Function specialization for TimeSeriesProperty<std::string>
+     *  @throws Kernel::Exception::NotImplementedError always
+     */
+    template<>
+    void TimeSeriesProperty<std::string>::expandFilterToRange(TimeSplitterType&, double, double, const TimeInterval&) const
     {
       throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
     }

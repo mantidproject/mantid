@@ -74,6 +74,8 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
 
+std::string CENTRE("Centre");
+std::string LEFT("Left");
 
 //========================================================================
 //========================================================================
@@ -114,8 +116,8 @@ void FilterByLogValue::init()
     "If there are several consecutive log values matching the filter, events between T1-Tolerance and T2+Tolerance are kept.");
 
   std::vector<std::string> types(2);
-  types[0] = "Centre";
-  types[1] = "Left";
+  types[0] = CENTRE;
+  types[1] = LEFT;
   declareProperty("LogBoundary", types[0], boost::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of the time, or beginning (left) boundary");
 
@@ -161,7 +163,7 @@ void FilterByLogValue::exec()
   // Now make the splitter vector
   TimeSplitterType splitter;
   //This'll throw an exception if the log doesn't exist. That is good.
-  Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( inputWS->run().getLogData(logname) );
+  Kernel::ITimeSeriesProperty * log = dynamic_cast<Kernel::ITimeSeriesProperty*>( inputWS->run().getLogData(logname) );
   if (log)
   {
     if (PulseFilter)
@@ -188,32 +190,12 @@ void FilterByLogValue::exec()
         throw std::invalid_argument("MaximumValue should be > MinimumValue. Aborting.");
 
       //This function creates the splitter vector we will use to filter out stuff.
-      std::string logBoundary(this->getPropertyValue("LogBoundary"));
-      std::transform(logBoundary.begin(), logBoundary.end(), logBoundary.begin(), tolower);
-      log->makeFilterByValue(splitter, min, max, tolerance, (logBoundary.compare("centre") == 0));
+      const std::string logBoundary(this->getPropertyValue("LogBoundary"));
+      log->makeFilterByValue(splitter, min, max, tolerance, (logBoundary == CENTRE));
 
       if (log->realSize() >= 1 && handle_edge_values)
       {
-        double val;
-        // Assume everything before the 1st value is constant
-        val = log->firstValue();
-        if ((val >= min) && (val <= max))
-        {
-          TimeSplitterType extraFilter;
-          extraFilter.push_back( SplittingInterval(run_start, log->firstTime(), 0));
-          // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
-          splitter = splitter | extraFilter;
-        }
-
-        // Assume everything after the LAST value is constant
-        val = log->lastValue();
-        if ((val >= min) && (val <= max))
-        {
-          TimeSplitterType extraFilter;
-          extraFilter.push_back( SplittingInterval(log->lastTime(), run_stop, 0) );
-          // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
-          splitter = splitter | extraFilter;
-        }
+        log->expandFilterToRange(splitter, min, max, TimeInterval(run_start,run_stop));
       }
     } // (filter by value)
 

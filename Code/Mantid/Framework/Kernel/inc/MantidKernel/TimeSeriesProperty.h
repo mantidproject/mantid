@@ -167,6 +167,8 @@ namespace Mantid
       void splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const;
       /// Fill a TimeSplitterType that will filter the events by matching
       void makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre) const;
+      /// Make sure an existing filter covers the full time range given
+      void expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const;
 
       ///  Return the time series as a correct C++ map<DateAndTime, TYPE>. All values
       std::map<DateAndTime, TYPE> valueAsCorrectMap() const;

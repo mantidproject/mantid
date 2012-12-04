@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/TimeSplitter.h"
 
 namespace Mantid
 {
@@ -31,8 +32,17 @@ namespace Kernel
 class ITimeSeriesProperty
 {
 public:
+  /// Fill a TimeSplitterType that will filter the events by matching
+  virtual void makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre=true) const = 0;
+  /// Make sure an existing filter covers the full time range given
+  virtual void expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const = 0;
+  /// Return the time series's times as a vector<DateAndTime>
+  virtual std::vector<DateAndTime> timesAsVector() const = 0;
+  /// Returns the real size of the time series property map:
+  virtual int realSize() const = 0;
   /// Deletes the series of values in the property
   virtual void clear() = 0;
+
   /// Virtual destructor
   virtual ~ITimeSeriesProperty() {}
 };
