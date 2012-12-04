@@ -30,6 +30,7 @@ private:
     {
     }
     MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
+    MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&));
   };
 
   /*------------------------------------------------------------
