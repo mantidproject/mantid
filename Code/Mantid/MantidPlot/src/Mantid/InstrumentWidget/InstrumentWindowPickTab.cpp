@@ -617,11 +617,14 @@ void InstrumentWindowPickTab::setSelectionType()
     surfaceMode = ProjectionSurface::DrawMode;
   }
   ProjectionSurface* surface = m_instrWindow->getSurface();
-  if ( surface ) surface->setInteractionMode( surfaceMode );
+  if ( surface ) 
+  {
+    surface->setInteractionMode( surfaceMode );
+    m_instrWindow->updateInstrumentView();
+  }
   m_plot->clearAll();
   m_plot->replot();
   setPlotCaption();
-  m_instrWindow->updateInstrumentView();
 }
 
 /**
