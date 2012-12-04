@@ -59,7 +59,7 @@ namespace MDAlgorithms
       std::streamoff parse_sqw_detpar(std::ifstream &stream,std::streamoff start_location); //Legacy - candidate for removal
       ///Block 4: Data: parse positions of the data fields
       void parse_data_locations(std::ifstream &stream,std::streamoff data_start,
-           std::vector<size_t> &nBins,size_t &nDims,uint64_t &nDataPoints); //Legacy - candidate for removal
+           std::vector<size_t> &nBins,uint64_t &nDataPoints); //Legacy - candidate for removal
 
     };
   }

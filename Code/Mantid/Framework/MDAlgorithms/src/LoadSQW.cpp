@@ -377,9 +377,9 @@ namespace Mantid
           ws->addEvent(MDEvent<4>( 
             cast<float>(Buffer,current_pix + column_size_7),         // Signal
             error*error,                                              // Error sq 
-            (int32_t)cast<float>(Buffer,current_pix + column_size_6),  // run Index
-            (uint16_t)cast<float>(Buffer,current_pix + column_size_4),  // Detector Id
-            centers));
+             int32_t(cast<float>(Buffer,current_pix + column_size_6)),  // run Index
+             uint16_t(cast<float>(Buffer,current_pix + column_size_4)),  // Detector Id
+             centers));
         }
 
 
@@ -751,7 +751,7 @@ namespace Mantid
       data_buffer.resize(3*4);
 
       m_fileStream.read(&data_buffer[0],2*4);
-      this->m_nDims = *((uint32_t*)(&data_buffer[4]));
+      this->m_nDims = cast<uint32_t>(data_buffer);
 
       m_dataPositions.parse_sqw_main_header(m_fileStream);
 
@@ -766,7 +766,7 @@ namespace Mantid
       // get detectors
       m_dataPositions.data_start      = m_dataPositions.parse_sqw_detpar(m_fileStream,m_dataPositions.detectors_start);
       // calculate all other data fields locations;
-      m_dataPositions.parse_data_locations(m_fileStream,m_dataPositions.data_start,m_nBins,m_nDims,m_nDataPoints);
+      m_dataPositions.parse_data_locations(m_fileStream,m_dataPositions.data_start,m_nBins,m_nDataPoints);
     }
 
 
@@ -926,7 +926,7 @@ namespace LoadSQWHelper
      @returns:  nDataPoints-- number of pixels (MD events) contributing to the image
    */
     void dataPositions::parse_data_locations(std::ifstream &dataStream,std::streamoff data_start,
-                                                      std::vector<size_t> &nBins,size_t &nDims,uint64_t &nDataPoints)
+                                                      std::vector<size_t> &nBins,uint64_t &nDataPoints)
     {
       std::vector<char> data_buffer(12);
 
@@ -978,7 +978,8 @@ namespace LoadSQWHelper
         dataStream.seekg(3*niax*4,std::ios_base::cur);
 
       }
-      if(npax!=0){
+      if(npax!=0)
+{
         nBins.resize(npax);
 
         // skip projection axis
