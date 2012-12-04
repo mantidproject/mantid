@@ -11,9 +11,16 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
   if ( MSVC )
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin/Release )
     set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin/Debug )
+    set ( _working_dir ${_module_dir} )
+    set ( _working_dir_debug ${_module_dir_debug} )
+    # Add test helper directory
+    set ( _module_dir "${_module_dir};${TESTHELPER_SRC_DIR}" )
+    set ( _module_dir_debug "${_module_dir_debug};${TESTHELPER_SRC_DIR}" )
   else()
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin )
-    set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin )
+    set ( _working_dir ${_module_dir} )
+    # Add test helper directory
+    set ( _module_dir "${_module_dir}:${TESTHELPER_SRC_DIR}" )
   endif()
 
   # Add all of the individual tests so that they can be run in parallel
@@ -21,6 +28,7 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
     get_filename_component( _filename ${part} NAME )
     get_filename_component( _suitename ${part} NAME_WE )
     set ( _pyunit_separate_name "${_testname_prefix}_${_suitename}" )
+
     if ( MSVC )
       # Debug builds need to call the debug executable
       add_test ( NAME ${_pyunit_separate_name}_Debug CONFIGURATIONS Debug
@@ -29,7 +37,7 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
       set_property ( TEST ${_pyunit_separate_name}_Debug 
         PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir_debug}" APPEND )
       set_property ( TEST ${_pyunit_separate_name}_Debug 
-        PROPERTY WORKING_DIRECTORY ${_module_dir_debug} )
+        PROPERTY WORKING_DIRECTORY ${_working_dir_debug} )
 
       # Release
       add_test ( NAME ${_pyunit_separate_name} CONFIGURATIONS Release
@@ -38,7 +46,7 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
       set_property ( TEST ${_pyunit_separate_name}
         PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" APPEND )
       set_property ( TEST ${_pyunit_separate_name} 
-        PROPERTY WORKING_DIRECTORY ${_module_dir} )
+        PROPERTY WORKING_DIRECTORY ${_working_dir} )
     else()
       add_test ( NAME ${_pyunit_separate_name}
                  COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
@@ -46,7 +54,7 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
       set_property ( TEST ${_pyunit_separate_name} 
         PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" APPEND )
       set_property ( TEST ${_pyunit_separate_name} 
-        PROPERTY WORKING_DIRECTORY ${_module_dir} )
+        PROPERTY WORKING_DIRECTORY ${_working_dir} )
     endif()
   endforeach ( part ${ARGN} )
 endmacro ( PYUNITTEST_ADD_TEST_TWO )
