@@ -13,9 +13,9 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
     set ( _module_dir_debug ${CMAKE_BINARY_DIR}/bin/Debug )
     set ( _working_dir ${_module_dir} )
     set ( _working_dir_debug ${_module_dir_debug} )
-    # Add test helper directory
-    set ( _module_dir "${_module_dir}:${TESTHELPER_SRC_DIR}" )
-    set ( _module_dir_debug "${_module_dir_debug}:${TESTHELPER_SRC_DIR}" )
+    # Add test helper directory (semi colons must be escaped)
+    set ( _module_dir "${_module_dir}\;${TESTHELPER_SRC_DIR}" )
+    set ( _module_dir_debug "${_module_dir_debug}\;${TESTHELPER_SRC_DIR}" )
   else()
     set ( _module_dir ${CMAKE_BINARY_DIR}/bin )
     set ( _working_dir ${_module_dir} )
@@ -35,7 +35,7 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
                  COMMAND ${PYTHON_EXECUTABLE_DEBUG} -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_property ( TEST ${_pyunit_separate_name}_Debug 
-        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir_debug}" APPEND )
+        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir_debug}" )
       set_property ( TEST ${_pyunit_separate_name}_Debug 
         PROPERTY WORKING_DIRECTORY ${_working_dir_debug} )
 
@@ -44,7 +44,7 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
                  COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_property ( TEST ${_pyunit_separate_name}
-        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" APPEND )
+        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" )
       set_property ( TEST ${_pyunit_separate_name} 
         PROPERTY WORKING_DIRECTORY ${_working_dir} )
     else()
@@ -52,7 +52,7 @@ macro ( PYUNITTEST_ADD_TEST_TWO _test_src_dir _testname_prefix )
                  COMMAND ${PYTHON_EXECUTABLE} -B ${_test_src_dir}/${_filename} )
       # Set the PYTHONPATH so that the built modules can be found
       set_property ( TEST ${_pyunit_separate_name} 
-        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" APPEND )
+        PROPERTY ENVIRONMENT "PYTHONPATH=${_module_dir}" )
       set_property ( TEST ${_pyunit_separate_name} 
         PROPERTY WORKING_DIRECTORY ${_working_dir} )
     endif()
