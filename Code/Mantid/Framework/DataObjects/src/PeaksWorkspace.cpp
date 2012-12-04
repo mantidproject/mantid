@@ -173,7 +173,10 @@ namespace DataObjects
    */
   void PeaksWorkspace::removePeak(const int peakNum)
   {
-    if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 ) throw std::invalid_argument("PeaksWorkspace::removePeak(): peakNum is out of range.");
+    if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 )
+    {
+      throw std::invalid_argument("PeaksWorkspace::removePeak(): peakNum is out of range.");
+    }
     peaks.erase(peaks.begin()+peakNum);
   }
 
@@ -200,7 +203,10 @@ namespace DataObjects
    */
   API::IPeak & PeaksWorkspace::getPeak(const int peakNum)
   {
-    if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 ) throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
+    if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 )
+    {
+      throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
+    }
     return peaks[peakNum];
   }
 
@@ -211,7 +217,10 @@ namespace DataObjects
    */
   const API::IPeak & PeaksWorkspace::getPeak(const int peakNum) const
   {
-    if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 ) throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
+    if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 )
+    {
+      throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
+    }
     return peaks[peakNum];
   }
 

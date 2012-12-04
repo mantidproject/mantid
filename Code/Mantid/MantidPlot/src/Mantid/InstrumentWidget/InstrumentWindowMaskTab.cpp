@@ -48,7 +48,7 @@
 #include <algorithm>
 
 InstrumentWindowMaskTab::InstrumentWindowMaskTab(InstrumentWindow* instrWindow):
-QFrame(instrWindow),
+InstrumentWindowTab(instrWindow),
 m_instrumentWindow(instrWindow),
 m_activity(Select),
 m_hasMaskToApply(false),
@@ -170,7 +170,7 @@ m_userEditing(true)
 
 }
 
-void InstrumentWindowMaskTab::init()
+void InstrumentWindowMaskTab::initOnShow()
 {
   connect(m_instrumentWindow->getSurface(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
   connect(m_instrumentWindow->getSurface(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
@@ -186,36 +186,36 @@ void InstrumentWindowMaskTab::setActivity()
   if (m_move->isChecked())
   {
     m_activity = Move;
-    m_instrumentWindow->getSurface()->setInteractionModeMove();
+    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
   }
   else if (m_pointer->isChecked())
   {
     m_activity = Select;
-    m_instrumentWindow->getSurface()->setInteractionModeDraw();
+    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
   else if (m_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
     m_instrumentWindow->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
-    m_instrumentWindow->getSurface()->setInteractionModeDraw();
+    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
   else if (m_rectangle->isChecked())
   {
     m_activity = DrawEllipse;
     m_instrumentWindow->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
-    m_instrumentWindow->getSurface()->setInteractionModeDraw();
+    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
   else if (m_ring_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
     m_instrumentWindow->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
-    m_instrumentWindow->getSurface()->setInteractionModeDraw();
+    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
   else if (m_ring_rectangle->isChecked())
   {
     m_activity = DrawEllipse;
     m_instrumentWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
-    m_instrumentWindow->getSurface()->setInteractionModeDraw();
+    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
 }
 

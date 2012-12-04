@@ -26,7 +26,7 @@
 
 
 InstrumentWindowRenderTab::InstrumentWindowRenderTab(InstrumentWindow* instrWindow):
-QFrame(instrWindow),m_instrWindow(instrWindow)
+InstrumentWindowTab(instrWindow),m_instrWindow(instrWindow)
 {
   m_InstrumentDisplay = m_instrWindow->getInstrumentDisplay();
   QVBoxLayout* renderControlsLayout=new QVBoxLayout(this);
@@ -150,7 +150,7 @@ QFrame * InstrumentWindowRenderTab::setupAxisFrame()
   loadSettings("Mantid/InstrumentWindow");
   return m_resetViewFrame;
 }
-void InstrumentWindowRenderTab::init()
+void InstrumentWindowRenderTab::initOnShow()
 {
   setAxis(QString::fromStdString(m_instrWindow->getInstrumentActor()->getInstrument()->getDefaultAxis()));
 }
@@ -259,7 +259,7 @@ void InstrumentWindowRenderTab::showEvent (QShowEvent *)
   ProjectionSurface* surface = m_InstrumentDisplay->getSurface();
   if (surface)
   {
-    surface->setInteractionModeMove();
+    surface->setInteractionMode(ProjectionSurface::MoveMode);
   }
 }
 

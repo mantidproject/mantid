@@ -1,13 +1,11 @@
 #ifndef INSTRUMENTWINDOWPICKTAB_H_
 #define INSTRUMENTWINDOWPICKTAB_H_
 
+#include "InstrumentWindowTab.h"
 #include "MantidGLWidget.h"
-#include "DetSelector.h"
 
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
-#include <QFrame>
 
 class InstrumentWindow;
 class Instrument3DWidget;
@@ -24,20 +22,33 @@ class QActionGroup;
 class QSignalMapper;
 class QMenu;
 
-
 /**
-  * Implements the Pick tab in InstrumentWindow. Allows to pick a detector
-  * or a tube and display the data in it and some info.
+  * Implements the Pick tab in InstrumentWindow.
+  * Contains a set of tools which allow one to:
+  *
+  *  - pick a detector or a tube and display the data in it and some info
+  *  - add a peak to a peaks workspace and display an overlay of markers
+  *  - select and remove peaks
+  *
   */
-class InstrumentWindowPickTab: public QFrame
+class InstrumentWindowPickTab: public InstrumentWindowTab
 {
   Q_OBJECT
 public:
+  /// Activity type the tab can be in:
+  ///   Single:  select and display info for a single detector when pointed by the mouse
+  ///   Tube:    select and display info for a tube of detectors. The immediate parent
+  ///            of a detector is considered a tube
+  ///   AddPeak: Click on a detector and then on the miniplot to add a peak marker and
+  ///            a peak to the attached peaks workspace
+  ///   SelectPeak: click on a peak marker or draw a rubber-band selector to select peak
+  ///               markers. Selected peaks can be deleted by pressing the Delete key.
+  enum SelectionType {Single=0,AddPeak,SelectPeak,SingleDetectorSelection,Tube};
   enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,NUMBER_OF_UNITS};
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
-  void init();
+  void initOnShow();
   void setInstrumentDisplayContextMenu(QMenu& context);
   TubeXUnits getTubeXUnits() const {return m_tubeXUnits;}
   void mouseLeftInstrmentDisplay();
@@ -59,7 +70,6 @@ private:
   void updatePlot(int detid);
   void updateSelectionInfo(int detid);
   void plotSingle(int detid);
-  //void plotBox(const Instrument3DWidget::DetInfo & cursorPos);
   void plotTube(int detid);
   /// Calc indexes for min and max bin values defined in the instrument Actor
   void getBinMinMaxIndex(size_t wi,size_t& imin, size_t& imax);
@@ -92,9 +102,9 @@ private:
   QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_one;   ///< Button switching on single detector selection mode
   QPushButton *m_tube;  ///< Button switching on detector's parent selection mode
-  QPushButton *m_box;   ///< Button switching on box selection mode
-  QPushButton *m_peak;  ///< Button switching on box selection mode
-  bool m_plotSum; 
+  QPushButton *m_peak;  ///< Button switching on peak creation mode
+  QPushButton *m_peakSelect;   ///< Button switching on peak selection mode
+  bool m_plotSum;
 
   // Actions to set integration option for the detector's parent selection mode
   QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
@@ -114,11 +124,8 @@ private:
   CollapsiblePanel* m_plotPanel;
   QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information
   CollapsiblePanel* m_infoPanel;
-  DetSelectionType m_selectionType;
+  SelectionType m_selectionType;
   int m_currentDetID;
-  int m_emode;
-  double m_efixed;
-  double m_delta;
   TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
   bool m_freezePlot;
 };
