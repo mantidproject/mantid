@@ -82,6 +82,7 @@ namespace MantidQt
       }
 
       PeakTransformFactory_sptr selected;
+      bool found = false;
       for(auto it = m_candidateFactories.begin(); it != m_candidateFactories.end(); ++it)
       {
         try
@@ -89,15 +90,19 @@ namespace MantidQt
           PeakTransformFactory_sptr temp = (*it);
           temp->createTransform(labelX, labelY);
           selected = temp;
-          return selected;
+          found = true;
         }
         catch(PeakTransformException&)
         {
         }
       }
-      std::stringstream ss;
-      ss << "PeakTransformSelector could not find a suitable transform for labelX " << labelX << " labelY " << labelY; 
-      throw std::invalid_argument(ss.str());
+      if(!found)
+      {
+        std::stringstream ss;
+        ss << "PeakTransformSelector could not find a suitable transform for labelX " << labelX << " labelY " << labelY; 
+        throw std::invalid_argument(ss.str());
+      }
+      return selected;
     }
 
     /**
