@@ -22,9 +22,9 @@ set ( SRC_FILES
 	src/ImportMDHistoWorkspaceBase.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
-	src/MDBoxToChange.cpp
 	src/MDBoxBase.cpp
 	src/MDBoxIterator.cpp
+	src/MDBoxToChange.cpp
 	src/MDEventFactory.cpp
 	src/MDEventWSWrapper.cpp
 	src/MDEventWorkspace.cpp
@@ -39,13 +39,14 @@ set ( SRC_FILES
 	src/MDTransfNoQ.cpp
 	src/MDTransfQ3D.cpp
 	src/MDWSDescription.cpp
-	src/MDWSDescriptionDepricated.cpp	
+	src/MDWSDescriptionDepricated.cpp
 	src/MDWSTransform.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
+	src/SaveIsawQvector.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
 )
@@ -83,10 +84,9 @@ set ( INC_FILES
 	inc/MantidMDEvents/ImportMDHistoWorkspaceBase.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
-	inc/MantidMDEvents/MDBoxToChange.h	
-	inc/MantidMDEvents/BoxCtrlChangesList.h	
 	inc/MantidMDEvents/MDBoxBase.h
 	inc/MantidMDEvents/MDBoxIterator.h
+	inc/MantidMDEvents/MDBoxToChange.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
@@ -113,6 +113,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/ReflectometryTransformKiKf.h
 	inc/MantidMDEvents/ReflectometryTransformP.h
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
+	inc/MantidMDEvents/SaveIsawQvector.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/UnitsConversionHelper.h
 	inc/MantidMDEvents/UserFunctionMD.h
@@ -125,9 +126,6 @@ set ( TEST_FILES
 	BoxControllerSettingsAlgorithmTest.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToReflectometryQTest.h
-	ConvToMDBaseTest.h
-	ConvToMDEventsVSHistoTest.h		
-	UnitsConversionHelperTest.h	
 	CoordTransformAffineParserTest.h
 	CoordTransformAffineTest.h
 	CoordTransformAlignedTest.h
@@ -152,14 +150,16 @@ set ( TEST_FILES
 	MDHistoWorkspaceTest.h
 	MDLeanEventTest.h
 	MDTransfAxisNamesTest.h
-	MDWSTransfTest.h
-	MDTransfFactoryTest.h		
+	MDTransfFactoryTest.h
 	MDTransfQ3DTest.h
-	MDWSDescriptionTest.h	
+	MDWSDescriptionTest.h
+	MDWSTransfTest.h
 	OneStepMDEWTest.h
 	QueryMDWorkspaceTest.h
 	ReflectometryTransformQxQzTest.h
+	SaveIsawQvectorTest.h
 	SkippingPolicyTest.h
+	UnitsConversionHelperTest.h
 )
 
 

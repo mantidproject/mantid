@@ -87,7 +87,9 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, con
 
 
   // get detectors positions and other data needed for units conversion:
-  m_pTwoThetas =  &(targetWSDescr.m_PreprDetTable->getColVector<double>("TwoTheta"));      
+  if(!(targetWSDescr.m_PreprDetTable))
+    throw std::runtime_error("MDWSDescription does not have a detector table");
+  m_pTwoThetas =  &(targetWSDescr.m_PreprDetTable->getColVector<double>("TwoTheta"));
   m_pL2s       =  &(targetWSDescr.m_PreprDetTable->getColVector<double>("L2"));
 
   m_L1        =  targetWSDescr.m_PreprDetTable->getLogs()->getPropertyValueAsType<double>("L1");
