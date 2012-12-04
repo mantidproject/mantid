@@ -225,20 +225,34 @@ namespace Mantid
       // Remove the path from the filename
       const std::string::size_type stripPath = m_filename.find_last_of("\\/");
       std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
-      // the ID is the bit in front of _Definition
-      const std::string::size_type getID(instrumentFile.find("_Definition"));
-      std::string instrumentID = instrumentFile.substr(0,getID);
 
-      // force ID to upper case
-      std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-      std::string fullPathIDF = directoryName + "/" + instrumentID + "_Parameters.xml";
+      // First check whether there is a parameter file whose name is the same as the IDF file,
+      // but with 'Parameters' instead of 'Definition'.
+      std::string definitionPart("_Definition");
+      const std::string::size_type prefix_end(instrumentFile.find(definitionPart));
+      const std::string::size_type suffix_start = prefix_end + definitionPart.length();
+      // Make prefix and force it to be upper case
+      std::string prefix = instrumentFile.substr(0, prefix_end);
+      std::transform(prefix.begin(), prefix.end(), prefix.begin(), toupper); 
+      // Make suffix ensuring it has positive length
+      std::string suffix = ".xml";
+      if( suffix_start < instrumentFile.length() )
+      {
+        suffix = instrumentFile.substr(suffix_start, std::string::npos );
+      } 
+      // Assemble parameter file name
+      std::string fullPathParamIDF = directoryName + "/" + prefix + "_Parameters" + suffix;
+      if( Poco::File(fullPathParamIDF).exists() == false) 
+      { // No such file exists, so look for file based on instrument ID given by the prefix
+        fullPathParamIDF = directoryName + "/" + prefix + "_Parameters.xml";
+      }
 
-      g_log.debug() << "Parameter file: " << fullPathIDF << std::endl;
+      g_log.debug() << "Parameter file: " << fullPathParamIDF << std::endl;
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       try
       {
         // To allow the use of ExperimentInfo instead of workspace, we call it manually
-        LoadParameterFile::execManually(fullPathIDF, m_workspace);
+        LoadParameterFile::execManually(fullPathParamIDF, m_workspace);
         g_log.debug("Parameters loaded successfully.");
       } catch (std::invalid_argument& e)
       {
