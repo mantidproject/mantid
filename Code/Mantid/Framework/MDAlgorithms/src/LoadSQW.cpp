@@ -214,7 +214,7 @@ namespace Mantid
     /// Execute the algorithm
     void LoadSQW::exec()
     {
-      m_fileName  = getProperty("Filename");
+      m_fileName  = std::string(getProperty("Filename"));
       // Parse Extract metadata. Including data locations.
       parseMetadata(m_fileName);
 
