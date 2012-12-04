@@ -39,6 +39,7 @@ namespace MantidQt
       }
 
       PeakTransformFactory_sptr selected;
+      bool found = false;
       for(auto it = m_candidateFactories.begin(); it != m_candidateFactories.end(); ++it)
       {
         try
@@ -46,13 +47,17 @@ namespace MantidQt
           PeakTransformFactory_sptr temp = (*it);
           temp->createDefaultTransform();
           selected = temp;
-          return selected;
+          found = true;
         }
         catch(PeakTransformException&)
         {
         }
       }
-      throw std::invalid_argument("PeakTransformSelector could not find a suitable transform");
+      if(!found)
+      {
+        throw std::invalid_argument("PeakTransformSelector could not find a suitable transform");
+      }
+      return selected;
     }
 
     /**
