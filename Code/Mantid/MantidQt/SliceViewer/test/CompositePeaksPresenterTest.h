@@ -248,7 +248,6 @@ public:
   void test_maximum_allowed_peaks()
   {
     CompositePeaksPresenter presenter;
-    const size_t initialSize = presenter.size();
     // Add peaksWS
     const int limit = 10;
     for(int i = 0; i < limit; ++i)
