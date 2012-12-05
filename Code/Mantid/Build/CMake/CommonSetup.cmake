@@ -217,6 +217,8 @@ if ( CPPCHECK_EXECUTABLE )
       )
 
   set ( CPPCHECK_EXCLUDES
+        Framework/DataHandling/src/LoadDAE/
+        Framework/DataHandling/src/LoadRaw/
         Framework/ICat/inc/MantidICat/GSoapGenerated/
         Framework/ICat/src/GSoapGenerated/
         Framework/ICat/src/GSoapGenerated.cpp
@@ -225,7 +227,7 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/Kernel/src/ANN/
         Framework/Kernel/src/ANN_complete.cpp
         Framework/PythonAPI/src/
-        Framework/PythonAPI/src/boostpython.cpp 
+        MantidPlot/src/nrutil.cpp
         MantidPlot/src/origin/OPJFile.cpp
       )
 
