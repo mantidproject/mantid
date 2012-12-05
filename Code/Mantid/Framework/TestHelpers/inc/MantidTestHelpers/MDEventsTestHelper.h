@@ -177,7 +177,10 @@ namespace MDEventsTestHelper
     // Set the size to 10.0 in all directions
     MDBox<MDLeanEvent<nd>,nd> * box = new MDBox<MDLeanEvent<nd>,nd>(splitter);
     for (size_t d=0; d<nd; d++)
+      // carefull! function with the side effects!
       box->setExtents(d, dimensionMin, dimensionMax);
+    // calc volume necessary
+    box->calcVolume();
 
     // Split
     MDGridBox<MDLeanEvent<nd>,nd> * out = new MDGridBox<MDLeanEvent<nd>,nd>(box);

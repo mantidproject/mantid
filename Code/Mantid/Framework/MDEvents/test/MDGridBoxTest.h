@@ -748,8 +748,8 @@ public:
     TS_ASSERT_EQUALS( b->getNPoints(), 100);
     TS_ASSERT_EQUALS( b->getSignal(), 100*2.0);
     TS_ASSERT_EQUALS( b->getErrorSquared(), 100*2.0);
-   // TS_ASSERT_DELTA( b->getSignalNormalized(), 100*2.0 / 100.0, 1e-5);
-    //TS_ASSERT_DELTA( b->getErrorSquaredNormalized(), 100*2.0 / 100.0, 1e-5);
+    TS_ASSERT_DELTA( b->getSignalNormalized(), 100*2.0 / 100.0, 1e-5);
+    TS_ASSERT_DELTA( b->getErrorSquaredNormalized(), 100*2.0 / 100.0, 1e-5);
 
     // Get all the boxes contained
     std::vector<MDBoxBase<MDLeanEvent<2>,2>*> boxes = b->getBoxes();
@@ -759,8 +759,8 @@ public:
       TS_ASSERT_EQUALS( boxes[i]->getNPoints(), 1);
       TS_ASSERT_EQUALS( boxes[i]->getSignal(), 2.0);
       TS_ASSERT_EQUALS( boxes[i]->getErrorSquared(), 2.0);
-      //TS_ASSERT_EQUALS( boxes[i]->getSignalNormalized(), 2.0);
-      //TS_ASSERT_EQUALS( boxes[i]->getErrorSquaredNormalized(), 2.0);
+      TS_ASSERT_EQUALS( boxes[i]->getSignalNormalized(), 2.0);
+      TS_ASSERT_EQUALS( boxes[i]->getErrorSquaredNormalized(), 2.0);
     }
 
     // Now try to add bad events (outside bounds)
