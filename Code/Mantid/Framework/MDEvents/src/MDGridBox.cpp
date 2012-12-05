@@ -148,7 +148,7 @@ namespace MDEvents
         // Set the extents of this box.
        for (size_t d=0; d<nd; d++)
        {
-          double min = double(this->extents[d].getMin())+indices[d]*m_SubBoxSize[d];
+          double min = double(this->extents[d].getMin())+double(indices[d])*m_SubBoxSize[d];
           double max =min + m_SubBoxSize[d];
           splitBox->setExtents(d, min, max);
        }
@@ -591,7 +591,7 @@ namespace MDEvents
         // Coordinates of this vertex
         coord_t vertexCoord[nd];
         for (size_t d=0; d<nd; ++d)
-          vertexCoord[d] = this->extents[d].getMin()+ coord_t(vertexIndex[d] * m_SubBoxSize[d]);
+          vertexCoord[d] = this->extents[d].getMin()+ coord_t(double(vertexIndex[d]) * m_SubBoxSize[d]);
 
         // Now check each plane to see if the vertex is bounded by it
         for (size_t p=0; p<numPlanes; p++)
@@ -1323,7 +1323,7 @@ namespace MDEvents
       // Coordinates of this vertex
       coord_t vertexCoord[nd];
       for (size_t d=0; d<nd; ++d)
-        vertexCoord[d] = this->extents[d].getMin() + this->extents[d].getSize()*vertexIndex[d];
+        vertexCoord[d] = this->extents[d].getMin() + this->extents[d].getSize()*coord_t(vertexIndex[d]);
 
       // Is this vertex contained?
       coord_t out[nd];

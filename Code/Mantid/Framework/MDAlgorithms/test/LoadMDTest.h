@@ -103,7 +103,7 @@ public:
         TS_ASSERT_DELTA( box1->getExtents(d).getMin(), box2->getExtents(d).getMin(), 1e-5);
         TS_ASSERT_DELTA( box1->getExtents(d).getMax(), box2->getExtents(d).getMax(), 1e-5);
       }
-//      TS_ASSERT_DELTA( box1->getVolume(), box2->getVolume(), 1e-3);
+ //     TS_ASSERT_DELTA( box1->getVolume(), box2->getVolume(), 1e-3);
       if (!BoxStructureOnly)
       {
         TS_ASSERT_DELTA( box1->getSignal(), box2->getSignal(), 1e-3);
