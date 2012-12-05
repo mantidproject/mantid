@@ -308,15 +308,15 @@ namespace MDEvents
     std::vector<MDBoxBase<MDE,nd>*> boxes;
     // Get all the end (leaf) boxes
     this->data->getBoxes(boxes, depth, true);
-    typename std::vector<MDBoxBase<MDE,nd>*>::iterator it;
-    typename std::vector<MDBoxBase<MDE,nd>*>::iterator it_end = boxes.end();
-    for (it = boxes.begin(); it != it_end; ++it)
+    auto  it = boxes.begin();
+    auto  it_end = boxes.end();
+    for (; it != it_end; ++it)
     {
       MDBoxBase<MDE,nd>* box = *it;
       if (box->getNPoints() > 0)
       {
         for (size_t d=0; d<nd; d++)
-          box->getExtents(d).expand(out[nd]);
+          box->getExtents(d).expand(out[d]);
       }
     }
 

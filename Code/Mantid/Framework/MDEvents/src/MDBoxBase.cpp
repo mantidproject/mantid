@@ -78,9 +78,7 @@ namespace MDEvents
     for (size_t d=0; d<nd; d++)
       m_centroid[d] = 0;
 #endif
-    // Re-calculate the volume of the box
-  //  this->calcVolume(); //TODO: Is this necessary or should we copy the volume --> we shoult trust the constructor?
-
+ 
   }
 
   //-----------------------------------------------------------------------------------------------

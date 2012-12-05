@@ -365,13 +365,13 @@ public:
     b->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
   }
 
-  void xest_getMinimumExtents()
+  void test_getMinimumExtents()
   {
     MDEventWorkspace2Lean::sptr ws = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
-    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > ext;
+    
 
     // If nothing in the workspace, the extents given are the dimensions in the workspace
-    ext = ws->getMinimumExtents(2);
+    auto ext = ws->getMinimumExtents(2);
     TS_ASSERT_DELTA( ext[0].getMin(), 0.0, 1e-5 );
     TS_ASSERT_DELTA( ext[0].getMax(), 10.0, 1e-5 );
     TS_ASSERT_DELTA( ext[1].getMin(), 0.0, 1e-5 );

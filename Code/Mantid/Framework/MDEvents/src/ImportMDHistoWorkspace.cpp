@@ -134,7 +134,7 @@ namespace MDEvents
     catch (std::ifstream::failure &e)
     {
       g_log.error() << "Cannot open file: " << filename;
-      throw;
+      throw(e);
     }
 
     // Copy each string present in the file stream into a deque.
