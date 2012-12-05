@@ -83,7 +83,9 @@ def SensitivityDirectBeamCenter(datafile):
 
 def SensitivityScatteringBeamCenter(datafile, beam_radius=3.0):
     find_data(datafile, instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.ScatteringBeamCenter(datafile, beam_radius=beam_radius).set_persistent(False))
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterMethod"]="Scattering"
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterRadius"]=beam_radius
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterFile"]=datafile
     
 def NoSensitivityCorrection():
     ReductionSingleton().reduction_properties["SensitivityFile"] = None

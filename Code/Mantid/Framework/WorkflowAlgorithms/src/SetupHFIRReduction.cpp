@@ -156,6 +156,12 @@ void SetupHFIRReduction::init()
   setPropertySettings("SensitivityBeamCenterFile",
             new VisibleWhenProperty("SensitivityBeamCenterMethod", IS_NOT_EQUAL_TO, "None"));
 
+  declareProperty("SensitivityBeamCenterRadius", EMPTY_DBL(),
+      "Radius of the beam area used the exclude the beam when calculating "
+      "the center of mass of the scattering pattern [pixels]. Default=3.0");
+  setPropertySettings("SensitivityBeamCenterRadius",
+            new VisibleWhenProperty("BeamCenterMethod", IS_EQUAL_TO, "Scattering"));
+
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputSensitivityWorkspace","", Direction::Output, PropertyMode::Optional));
 
   setPropertyGroup("SensitivityFile", eff_grp);
@@ -167,6 +173,7 @@ void SetupHFIRReduction::init()
   setPropertyGroup("SensitivityBeamCenterX", eff_grp);
   setPropertyGroup("SensitivityBeamCenterY", eff_grp);
   setPropertyGroup("SensitivityBeamCenterFile", eff_grp);
+  setPropertyGroup("SensitivityBeamCenterRadius", eff_grp);
   setPropertyGroup("OutputSensitivityWorkspace", eff_grp);
 
   // Transmission
@@ -524,67 +531,9 @@ void SetupHFIRReduction::exec()
   } else
     reductionManager->declareProperty(new PropertyWithValue<std::string>("TransmissionNormalisation", "Timer") );
 
-
-  // Sensitivity correction
-  const std::string sensitivityFile = getPropertyValue("SensitivityFile");
-  if (sensitivityFile.size() > 0)
-  {
-    const bool useSampleDC = getProperty("UseDefaultDC");
-    const std::string sensitivityDarkCurrentFile = getPropertyValue("SensitivityDarkCurrentFile");
-    const std::string outputSensitivityWS = getPropertyValue("OutputSensitivityWorkspace");
-    const double minEff = getProperty("MinEfficiency");
-    const double maxEff = getProperty("MaxEfficiency");
-    const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
-    const double sensitivityBeamCenterY = getProperty("SensitivityBeamCenterY");
-
-    IAlgorithm_sptr effAlg = createSubAlgorithm("SANSSensitivityCorrection");
-    effAlg->setProperty("Filename", sensitivityFile);
-    effAlg->setProperty("UseSampleDC", useSampleDC);
-    effAlg->setProperty("DarkCurrentFile", sensitivityDarkCurrentFile);
-    effAlg->setProperty("MinEfficiency", minEff);
-    effAlg->setProperty("MaxEfficiency", maxEff);
-
-    // Beam center option for sensitivity data
-    const std::string centerMethod = getPropertyValue("SensitivityBeamCenterMethod");
-    if (boost::iequals(centerMethod, "Value") &&
-        !isEmpty(sensitivityBeamCenterX) &&
-        !isEmpty(sensitivityBeamCenterY))
-    {
-      effAlg->setProperty("BeamCenterX", sensitivityBeamCenterX);
-      effAlg->setProperty("BeamCenterY", sensitivityBeamCenterY);
-    }
-    else if (boost::iequals(centerMethod, "DirectBeam"))
-    {
-      const std::string beamCenterFile = getProperty("SensitivityBeamCenterFile");
-      if (beamCenterFile.size()>0)
-       {
-         IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
-         ctrAlg->setProperty("Filename", beamCenterFile);
-         ctrAlg->setProperty("UseDirectBeamMethod", true);
-         ctrAlg->setProperty("PersistentCorrection", false);
-         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-
-         AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityBeamCenterAlgorithm");
-         algProp->setValue(ctrAlg->toString());
-         reductionManager->declareProperty(algProp);
-       } else {
-         g_log.error() << "ERROR: Beam center determination was required"
-             " but no file was provided" << std::endl;
-       }
-    }
-
-    effAlg->setProperty("OutputSensitivityWorkspace", outputSensitivityWS);
-    effAlg->setPropertyValue("ReductionProperties", reductionManagerName);
-
-    algProp = new AlgorithmProperty("SensitivityAlgorithm");
-    algProp->setValue(effAlg->toString());
-    reductionManager->declareProperty(algProp);
-
-
-  }
-
+  // Sensitivity correction, transmission and background
+  setupSensitivity(reductionManager);
   setupTransmission(reductionManager);
-
   setupBackground(reductionManager);
 
   // Geometry correction
@@ -624,6 +573,71 @@ void SetupHFIRReduction::exec()
   }
 
   setPropertyValue("OutputMessage", "HFIR reduction options set");
+}
+
+void SetupHFIRReduction::setupSensitivity(boost::shared_ptr<PropertyManager> reductionManager)
+{
+  const std::string reductionManagerName = getProperty("ReductionProperties");
+
+  const std::string sensitivityFile = getPropertyValue("SensitivityFile");
+  if (sensitivityFile.size() > 0)
+  {
+    const bool useSampleDC = getProperty("UseDefaultDC");
+    const std::string sensitivityDarkCurrentFile = getPropertyValue("SensitivityDarkCurrentFile");
+    const std::string outputSensitivityWS = getPropertyValue("OutputSensitivityWorkspace");
+    const double minEff = getProperty("MinEfficiency");
+    const double maxEff = getProperty("MaxEfficiency");
+    const double sensitivityBeamCenterX = getProperty("SensitivityBeamCenterX");
+    const double sensitivityBeamCenterY = getProperty("SensitivityBeamCenterY");
+
+    IAlgorithm_sptr effAlg = createSubAlgorithm("SANSSensitivityCorrection");
+    effAlg->setProperty("Filename", sensitivityFile);
+    effAlg->setProperty("UseSampleDC", useSampleDC);
+    effAlg->setProperty("DarkCurrentFile", sensitivityDarkCurrentFile);
+    effAlg->setProperty("MinEfficiency", minEff);
+    effAlg->setProperty("MaxEfficiency", maxEff);
+
+    // Beam center option for sensitivity data
+    const std::string centerMethod = getPropertyValue("SensitivityBeamCenterMethod");
+    if (boost::iequals(centerMethod, "Value") &&
+        !isEmpty(sensitivityBeamCenterX) &&
+        !isEmpty(sensitivityBeamCenterY))
+    {
+      effAlg->setProperty("BeamCenterX", sensitivityBeamCenterX);
+      effAlg->setProperty("BeamCenterY", sensitivityBeamCenterY);
+    }
+    else if (boost::iequals(centerMethod, "DirectBeam") ||
+        boost::iequals(centerMethod, "Scattering"))
+    {
+      const std::string beamCenterFile = getProperty("SensitivityBeamCenterFile");
+      const double sensitivityBeamRadius = getProperty("SensitivityBeamCenterRadius");
+      bool useDirectBeam = boost::iequals(centerMethod, "DirectBeam");
+      if (beamCenterFile.size()>0)
+       {
+         IAlgorithm_sptr ctrAlg = createSubAlgorithm("SANSBeamFinder");
+         ctrAlg->setProperty("Filename", beamCenterFile);
+         ctrAlg->setProperty("UseDirectBeamMethod", useDirectBeam);
+         ctrAlg->setProperty("PersistentCorrection", false);
+         if (useDirectBeam && !isEmpty(sensitivityBeamRadius))
+           ctrAlg->setProperty("BeamRadius", sensitivityBeamRadius);
+         ctrAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+
+         AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityBeamCenterAlgorithm");
+         algProp->setValue(ctrAlg->toString());
+         reductionManager->declareProperty(algProp);
+       } else {
+         g_log.error() << "ERROR: Beam center determination was required"
+             " but no file was provided" << std::endl;
+       }
+    }
+
+    effAlg->setProperty("OutputSensitivityWorkspace", outputSensitivityWS);
+    effAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+
+    AlgorithmProperty *algProp = new AlgorithmProperty("SensitivityAlgorithm");
+    algProp->setValue(effAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
 }
 
 void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> reductionManager)
