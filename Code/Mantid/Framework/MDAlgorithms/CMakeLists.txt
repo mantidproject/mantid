@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/EqualToMD.cpp
 	src/ExponentialMD.cpp
 	src/FakeMDEventData.cpp    
+	src/FindPeaksMD.cpp    
 	src/GreaterThanMD.cpp
 	src/IDynamicRebinning.cpp
 	src/IntegratePeaksMD.cpp        
@@ -100,6 +101,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/EqualToMD.h
 	inc/MantidMDAlgorithms/ExponentialMD.h
 	inc/MantidMDAlgorithms/FakeMDEventData.h    
+	inc/MantidMDAlgorithms/FindPeaksMD.h    
 	inc/MantidMDAlgorithms/GreaterThanMD.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h    
@@ -193,7 +195,8 @@ set ( TEST_FILES
 	DivideMDTest.h
 	EqualToMDTest.h
 	ExponentialMDTest.h
-	FakeMDEventDataTest.h    
+	FakeMDEventDataTest.h
+	FindPeaksMDTest.h    
 	FitResolutionConvolvedModelTest.h
 	ForegroundModelTest.h
 	GreaterThanMDTest.h

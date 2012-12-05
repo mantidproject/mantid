@@ -22,7 +22,7 @@ It may give better results on [[Workspace2D]]'s that were converted to [[MDWorks
 
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/FindPeaksMD.h"
+#include "MantidMDAlgorithms/FindPeaksMD.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/VMD.h"
@@ -35,10 +35,11 @@ It may give better results on [[Workspace2D]]'s that were converted to [[MDWorks
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::MDEvents;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
   namespace
   {

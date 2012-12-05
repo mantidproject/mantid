@@ -16,7 +16,6 @@ set ( SRC_FILES
 	src/CoordTransformAligned.cpp
 	src/CoordTransformDistance.cpp
 	src/CoordTransformDistanceParser.cpp
-	src/FindPeaksMD.cpp
 	src/FitMD.cpp
 	src/ImportMDEventWorkspace.cpp
 	src/ImportMDHistoWorkspace.cpp
@@ -78,7 +77,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/CoordTransformAligned.h
 	inc/MantidMDEvents/CoordTransformDistance.h
 	inc/MantidMDEvents/CoordTransformDistanceParser.h
-	inc/MantidMDEvents/FindPeaksMD.h
 	inc/MantidMDEvents/FitMD.h
 	inc/MantidMDEvents/ImportMDEventWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspace.h
@@ -135,7 +133,6 @@ set ( TEST_FILES
 	CoordTransformAlignedTest.h
 	CoordTransformDistanceParserTest.h
 	CoordTransformDistanceTest.h
-	FindPeaksMDTest.h
 	FitMDTest.h
 	ImportMDEventWorkspaceTest.h
 	ImportMDHistoWorkspaceTest.h

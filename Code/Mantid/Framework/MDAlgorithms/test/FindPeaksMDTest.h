@@ -4,7 +4,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidMDEvents/FindPeaksMD.h"
+#include "MantidMDAlgorithms/FindPeaksMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -14,6 +14,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::Instrument_sptr;

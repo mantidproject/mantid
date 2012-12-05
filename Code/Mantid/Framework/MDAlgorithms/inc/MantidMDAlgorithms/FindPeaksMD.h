@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_FINDPEAKSMD_H_
-#define MANTID_MDEVENTS_FINDPEAKSMD_H_
+#ifndef MANTID_MDALGORITHMS_FINDPEAKSMD_H_
+#define MANTID_MDALGORITHMS_FINDPEAKSMD_H_
     
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -14,7 +14,7 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   /** FindPeaksMD : TODO: DESCRIPTION
@@ -54,7 +54,7 @@ namespace MDEvents
 
     /// Run find peaks on an MDEventWorkspace
     template<typename MDE, size_t nd>
-    void findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void findPeaks(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
     /// Run find peaks on a histo workspace
     void findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
 
