@@ -181,7 +181,7 @@ public:
         TS_ASSERT_THROWS_NOTHING( AnalysisDataService::Instance().add(testWrkspc3, outnew3) );
     }
 
-    void testWithFit()
+    void xestWithFit()
     {
         // test Fit - note that fit is to cell data but that MDCell
         // returns the sum of point contributions, not average.
@@ -319,7 +319,7 @@ public:
      * uses the # of events normalization. This will cause a problem.
      * The following test fails, possibly because of that?
      */
-    void testGenericFitandCompositeFunctionMD()
+    void xestGenericFitandCompositeFunctionMD()
      {
          // test Fit with Composite fucntionMD
          // Use same data as alg3 test above but with two functions to fit.

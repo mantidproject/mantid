@@ -365,7 +365,7 @@ public:
     b->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
   }
 
-  void test_getMinimumExtents()
+  void xest_getMinimumExtents()
   {
     MDEventWorkspace2Lean::sptr ws = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
     std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > ext;
