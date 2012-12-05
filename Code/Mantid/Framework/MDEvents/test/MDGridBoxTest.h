@@ -147,7 +147,7 @@ public:
       // Its depth level should be 1 (deeper than parent)
       TS_ASSERT_EQUALS(box->getDepth(), 1);
       // The volume was set correctly
-    //  TS_ASSERT_DELTA(box->getVolume(), 1.0, 1e-5);
+      TS_ASSERT_DELTA(box->getVolume(), 1.0, 1e-5);
       // The parent of the MDBox is the grid box
       TS_ASSERT_EQUALS(box->getParent(), g);
     }

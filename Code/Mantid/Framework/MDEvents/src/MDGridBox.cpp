@@ -90,11 +90,12 @@ namespace MDEvents
     if (tot == 0)
       throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
 
-    coord_t inverseVolume = this->MDBoxBase<MDE,nd>::getInverseVolume();
-
-  
+   double ChildVol(1);
+   for(size_t d=0;d<nd;d++)
+     ChildVol*=m_SubBoxSize[d];
+     
     // Splitting an input MDBox requires creating a bunch of children
-    fillBoxShell(tot,inverseVolume);
+    fillBoxShell(tot,coord_t(1./ChildVol));
 
 
     // Prepare to distribute the events that were in the box before
@@ -120,7 +121,7 @@ namespace MDEvents
   }
   /**Internal function to do main job of filling in a GridBox contents  (part of the constructor) */
   template<typename MDE,size_t nd>
-  void MDGridBox<MDE,nd>::fillBoxShell(const size_t tot,const coord_t inverseVolume)
+  void MDGridBox<MDE,nd>::fillBoxShell(const size_t tot,const coord_t ChildInverseVolume)
   {
   // Create the array of MDBox contents.
     this->boxes.clear();
@@ -151,7 +152,7 @@ namespace MDEvents
           double max =min + m_SubBoxSize[d];
           splitBox->setExtents(d, min, max);
        }
-       splitBox->setInverseVolume(inverseVolume); // Set the cached inverse volume
+       splitBox->setInverseVolume(ChildInverseVolume); // Set the cached inverse volume
        boxes.push_back(splitBox);
 
        // Increment the indices, rolling back as needed
