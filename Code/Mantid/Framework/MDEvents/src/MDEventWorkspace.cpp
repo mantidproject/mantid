@@ -91,8 +91,13 @@ namespace MDEvents
       throw std::runtime_error("MDEventWorkspace::initialize() called with an incorrect number of m_dimensions set. Use addDimension() first to add the right number of dimension info objects.");
     if (isGridBox())
         throw std::runtime_error("MDEventWorkspace::initialize() called on a MDEventWorkspace containing a MDGridBox. You should call initialize() before adding any events!");
+    double minSize[nd],maxSize[nd];
     for (size_t d=0; d<nd; d++)
-      data->setExtents(d, m_dimensions[d]->getMinimum(), m_dimensions[d]->getMaximum());
+    {
+      minSize[d]=m_dimensions[d]->getMinimum();
+      maxSize[d]=m_dimensions[d]->getMaximum();
+    }
+    data->setExtents(minSize,maxSize);
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -263,8 +268,7 @@ namespace MDEvents
     for (size_t d=0; d<nd; d++)
     {
       coord_t x = coords[d];
-      MDDimensionExtents & extents = data->getExtents(d);
-      if (x < extents.min || x >= extents.max)
+      if (data->getExtents(d).outside(x))
         return std::numeric_limits<signal_t>::quiet_NaN();
     }
     // If you got here, then the point is in the workspace.
@@ -298,9 +302,9 @@ namespace MDEvents
    *         If the workspace is empty, then this will be the size of the overall workspace
    */
   TMDE(
-  std::vector<Mantid::Geometry::MDDimensionExtents> MDEventWorkspace)::getMinimumExtents(size_t depth)
+  std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > MDEventWorkspace)::getMinimumExtents(size_t depth)
   {
-    std::vector<Mantid::Geometry::MDDimensionExtents> out(nd);
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > out(nd);
     std::vector<MDBoxBase<MDE,nd>*> boxes;
     // Get all the end (leaf) boxes
     this->data->getBoxes(boxes, depth, true);
@@ -312,22 +316,15 @@ namespace MDEvents
       if (box->getNPoints() > 0)
       {
         for (size_t d=0; d<nd; d++)
-        {
-          Mantid::Geometry::MDDimensionExtents & x = box->getExtents(d);
-          if (x.max > out[d].max) out[d].max = x.max;
-          if (x.min < out[d].min) out[d].min = x.min;
-        }
+          box->getExtents(d).expand(out[nd]);
       }
     }
 
     // Fix any missing dimensions (for empty workspaces)
     for (size_t d=0; d<nd; d++)
     {
-      if (out[d].min > out[d].max)
-      {
-        out[d].min = this->getDimension(d)->getMinimum();
-        out[d].max = this->getDimension(d)->getMaximum();
-      }
+      if (out[d].isUndefined())
+        out[d].setExtents(this->getDimension(d)->getMinimum(),this->getDimension(d)->getMaximum());
     }
     return out;
   }
@@ -730,10 +727,11 @@ namespace MDEvents
       bool outOfBounds = false;
       for (size_t d=0; d<nd; d++)
       {
-        coord_t x = static_cast<coord_t>(coord[d]);
-        MDDimensionExtents & extents = data->getExtents(d);
-        if (x < extents.min || x >= extents.max)
+        if (data->getExtents(d).outside(coord[d]))
+        {
           outOfBounds = true;
+          break;
+        }
       }
 
       

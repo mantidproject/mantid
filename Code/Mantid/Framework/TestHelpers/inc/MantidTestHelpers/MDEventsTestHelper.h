@@ -288,8 +288,8 @@ namespace MDEventsTestHelper
   template<typename MDBOX>
   static void extents_match(MDBOX box, size_t dim, double min, double max)
   {
-    TSM_ASSERT_DELTA(dim, box->getExtents(dim).min, min, 1e-6);
-    TSM_ASSERT_DELTA(dim, box->getExtents(dim).max, max, 1e-6);
+    TSM_ASSERT_DELTA(dim, box->getExtents(dim).getMin(), min, 1e-6);
+    TSM_ASSERT_DELTA(dim, box->getExtents(dim).getMax(), max, 1e-6);
   }
 
 

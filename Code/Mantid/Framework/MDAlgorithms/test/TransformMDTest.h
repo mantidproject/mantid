@@ -78,7 +78,7 @@ public:
     for (size_t i=0; i<boxes.size(); i++)
     {
       MDBoxBase3Lean* box = boxes[i];
-      TSM_ASSERT_LESS_THAN( "Box extents was offset", 20.0, box->getExtents(0).min );
+      TSM_ASSERT_LESS_THAN( "Box extents was offset", 20.0, box->getExtents(0).getMin() );
       // More detailed tests are in MDBox, MDBoxBase and MDGridBox.
     }
 

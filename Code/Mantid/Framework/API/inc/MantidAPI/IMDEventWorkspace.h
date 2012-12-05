@@ -40,7 +40,7 @@ namespace API
     virtual void initialize() = 0;
 
     /// Get the minimum extents that hold the data
-    virtual std::vector<Mantid::Geometry::MDDimensionExtents> getMinimumExtents(size_t depth=2) = 0;
+    virtual std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > getMinimumExtents(size_t depth=2) = 0;
 
     /// Returns some information about the box controller, to be displayed in the GUI, for example
     virtual std::vector<std::string> getBoxControllerStats() const = 0;

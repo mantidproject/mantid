@@ -335,8 +335,8 @@ namespace MDAlgorithms
         for (size_t d=0; d<nd; d++)
         {
           size_t newIndex = id*(nd*2) + d*2;
-          extents[newIndex] = box->getExtents(d).min;
-          extents[newIndex+1] = box->getExtents(d).max;
+          extents[newIndex]   = box->getExtents(d).getMin();
+          extents[newIndex+1] = box->getExtents(d).getMax();
         }
 
         // Move on to the next box

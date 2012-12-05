@@ -49,7 +49,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     MDBoxBase();
 
-    MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
+    MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
 
     MDBoxBase(const MDBoxBase<MDE,nd> & box);
 
@@ -233,18 +233,36 @@ namespace MDEvents
      * @param dim :: index of dimension
      * @param min :: min edge of the dimension
      * @param max :: max edge of the dimension
+
+     * Dangerous function with side effects as volume and possibly other box statistics has to be recalculated after this excecuted.
+     * has not done so because of productivity reasons;
      */
-    void setExtents(size_t dim, coord_t min, coord_t max)
+    void setExtents(size_t dim, double min, double max)
     {
       if (dim >= nd)
         throw std::invalid_argument("Invalid dimension passed to MDBox::setExtents");
-      extents[dim].min = min;
-      extents[dim].max = max;
+
+      extents[dim].setExtents(min,max);
+      // volume has to be recalculated as extents have changed;
+      //this->calcVolume();
     }
+    /** Set the extents of this box.
+       * @param min :: min edge of the dimension
+     * @param max :: max edge of the dimension
+     */
+    void setExtents(double min[nd], double max[nd])
+    {
+      for(size_t dim=0;dim<nd;dim++)
+      {
+          this->extents[dim].setExtents(min[dim],max[dim]);
+      }
+      this->calcVolume();
+    }
+
 
     //-----------------------------------------------------------------------------------------------
     /** Get the extents for this box */
-    Mantid::Geometry::MDDimensionExtents & getExtents(size_t dim)
+    Mantid::Geometry::MDDimensionExtents<coord_t>  & getExtents(size_t dim)
     {
       return extents[dim];
     }
@@ -253,13 +271,18 @@ namespace MDEvents
     /** Returns the extents as a string, for convenience */
     std::string getExtentsStr() const
     {
-      std::stringstream mess;
-      for (size_t d=0; d<nd; ++d)
-      {
-        mess << extents[d].min << "-"<< extents[d].max;
-        if (d+1 < nd) mess << ",";
-      }
-      return mess.str();
+      std::string mess;
+      for (size_t d=0; d<nd-1; ++d)
+        mess += extents[d].extentsStr()+",";
+
+      mess += extents[nd-1].extentsStr();
+      return mess;
+    }
+
+  /** For testing: return the internal-stored size of each box in each dimension */
+    coord_t getBoxSize(size_t d)
+    { 
+      return extents[d].getSize();
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -269,7 +292,7 @@ namespace MDEvents
     void getCenter(coord_t * center) const
     {
       for (size_t d=0; d<nd; ++d)
-        center[d] = (extents[d].max + extents[d].min) / 2.0f;
+        center[d] = extents[d].getCentre();
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -278,13 +301,13 @@ namespace MDEvents
      * This is saved for getSignalNormalized() */
     inline void calcVolume()
     {
-      coord_t volume = 1;
+      double volume(1);
       for (size_t d=0; d<nd; d++)
       {
-        volume *= (extents[d].max - extents[d].min);
+        volume *= double(extents[d].getSize());
       }
       /// Floating point multiplication is much faster than division, so cache 1/volume.
-      m_inverseVolume = 1.0f / volume;
+      m_inverseVolume =coord_t(1. / volume);
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -425,7 +448,7 @@ namespace MDEvents
     /** Array of MDDimensionStats giving the extents and
      * other stats on the box dimensions.
      */
-    Mantid::Geometry::MDDimensionExtents extents[nd];
+    Mantid::Geometry::MDDimensionExtents<coord_t> extents[nd];
 
     /** Cached total signal from all points within.
      * Set when refreshCache() is called. */

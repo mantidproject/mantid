@@ -138,7 +138,8 @@ namespace MDAlgorithms
    * @param message :: message for result
    * @throw CompareFailsException if the two DONT match
    */
-  void CompareMDWorkspaces::compareTol(double a, double b, const std::string & message)
+  template<class T> 
+  void CompareMDWorkspaces::compareTol(T a, T b, const std::string & message)
   {
     double diff = fabs(a-b);
     if (diff > m_tolerance)
@@ -221,10 +222,10 @@ namespace MDAlgorithms
 
       for (size_t d=0; d<nd; d++)
       {
-        this->compareTol( box1->getExtents(d).min, box2->getExtents(d).min, "Extents of box do not match");
-        this->compareTol( box1->getExtents(d).max, box2->getExtents(d).max, "Extents of box do not match");
+        this->compareTol( box1->getExtents(d).getMin(), box2->getExtents(d).getMin(), "Extents of box do not match");
+        this->compareTol( box1->getExtents(d).getMax(), box2->getExtents(d).getMax(), "Extents of box do not match");
       }
-      this->compareTol( box1->getVolume(), box2->getVolume(), "Box volume does not match");
+      this->compareTol( box1->getInverseVolume(), box2->getInverseVolume(), "Box inverse volume does not match");
       this->compareTol( box1->getSignal(), box2->getSignal(), "Box signal does not match");
       this->compareTol( box1->getErrorSquared(), box2->getErrorSquared(), "Box error squared does not match");
       if (m_CheckEvents)

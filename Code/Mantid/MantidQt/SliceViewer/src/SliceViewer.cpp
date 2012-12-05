@@ -578,11 +578,11 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   // Adjust the range to that of visible data
   if (mdew)
   {
-    std::vector<Mantid::Geometry::MDDimensionExtents> ext = mdew->getMinimumExtents();
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > ext = mdew->getMinimumExtents();
     for (size_t d=0; d < mdew->getNumDims(); d++)
     {
-      size_t newNumBins = size_t((ext[d].max-ext[d].min) / m_dimensions[d]->getBinWidth() + 1);
-      m_dimensions[d]->setRange(newNumBins,  ext[d].min, ext[d].max);
+      size_t newNumBins = size_t(ext[d].getSize()/m_dimensions[d]->getBinWidth() + 1);
+      m_dimensions[d]->setRange(newNumBins,  ext[d].getMin(), ext[d].getMax());
     }
   }
 

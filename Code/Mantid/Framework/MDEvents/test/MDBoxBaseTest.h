@@ -30,7 +30,7 @@ public:
   : MDBoxBase<MDE,nd>(), m_filePos(filePos)
   { }
 
-  MDBoxBaseTester(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+  MDBoxBaseTester(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
   : MDBoxBase<MDE,nd>(extentsVector)
   { }
 
@@ -123,33 +123,32 @@ public:
   void test_extents_constructor()
   {
     typedef MDBoxBaseTester<MDLeanEvent<3>,3> ibox3;
-    std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector;
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector;
     TS_ASSERT_THROWS_ANYTHING( ibox3 box(extentsVector) );
     extentsVector.resize(3);
     for (size_t d=0; d<3; d++)
     {
-      extentsVector[d].min = static_cast<coord_t>(d) + 0.1f;
-      extentsVector[d].max = static_cast<coord_t>(d + 1);
+      extentsVector[d].setExtents(static_cast<double>(d) + 0.1,static_cast<double>(d + 1));
+
     }
     MDBoxBaseTester<MDLeanEvent<3>,3> box(extentsVector);
-    TS_ASSERT_DELTA( box.getExtents(0).min, 0.1, 1e-4 );
-    TS_ASSERT_DELTA( box.getExtents(0).max, 1.0, 1e-4 );
-    TS_ASSERT_DELTA( box.getExtents(1).min, 1.1, 1e-4 );
-    TS_ASSERT_DELTA( box.getExtents(1).max, 2.0, 1e-4 );
-    TS_ASSERT_DELTA( box.getExtents(2).min, 2.1, 1e-4 );
-    TS_ASSERT_DELTA( box.getExtents(2).max, 3.0, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(0).getMin(), 0.1, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(0).getMax(), 1.0, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(1).getMin(), 1.1, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(1).getMax(), 2.0, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(2).getMin(), 2.1, 1e-4 );
+    TS_ASSERT_DELTA( box.getExtents(2).getMax(), 3.0, 1e-4 );
   }
 
   void test_transformDimensions()
   {
     typedef MDBoxBaseTester<MDLeanEvent<2>,2> ibox3;
-    std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector;
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector;
     TS_ASSERT_THROWS_ANYTHING( ibox3 box(extentsVector) );
     extentsVector.resize(2);
     for (size_t d=0; d<2; d++)
     {
-      extentsVector[d].min = 1.0;
-      extentsVector[d].max = 2.0;
+      extentsVector[d].setExtents(1,2);
     }
     MDBoxBaseTester<MDLeanEvent<2>,2> box(extentsVector);
     // Now transform
@@ -158,8 +157,8 @@ public:
     box.transformDimensions(scaling, offset);
     for (size_t d=0; d<2; d++)
     {
-      TS_ASSERT_DELTA( box.getExtents(d).min, 4.0, 1e-4 );
-      TS_ASSERT_DELTA( box.getExtents(d).max, 7.0, 1e-4 );
+      TS_ASSERT_DELTA( box.getExtents(d).getMin(), 4.0, 1e-4 );
+      TS_ASSERT_DELTA( box.getExtents(d).getMax(), 7.0, 1e-4 );
     }
     TS_ASSERT_DELTA( box.getVolume(), 9.0, 1e-4);
 
@@ -218,12 +217,12 @@ public:
   {
     MDBoxBaseTester<MDLeanEvent<2>,2> b;
     b.setExtents(0, -8.0, 10.0);
-    TS_ASSERT_DELTA(b.getExtents(0).min, -8.0, 1e-6);
-    TS_ASSERT_DELTA(b.getExtents(0).max, +10.0, 1e-6);
+    TS_ASSERT_DELTA(b.getExtents(0).getMin(), -8.0, 1e-6);
+    TS_ASSERT_DELTA(b.getExtents(0).getMax(), +10.0, 1e-6);
 
     b.setExtents(1, -4.0, 12.0);
-    TS_ASSERT_DELTA(b.getExtents(1).min, -4.0, 1e-6);
-    TS_ASSERT_DELTA(b.getExtents(1).max, +12.0, 1e-6);
+    TS_ASSERT_DELTA(b.getExtents(1).getMin(), -4.0, 1e-6);
+    TS_ASSERT_DELTA(b.getExtents(1).getMax(), +12.0, 1e-6);
 
     TS_ASSERT_THROWS( b.setExtents(2, 0, 1.0), std::invalid_argument);
 
@@ -246,10 +245,10 @@ public:
 
     // Perform the copy
     MDBoxBaseTester<MDLeanEvent<2>,2> box(b);
-    TS_ASSERT_DELTA(box.getExtents(0).min, -10.0, 1e-6);
-    TS_ASSERT_DELTA(box.getExtents(0).max, +10.0, 1e-6);
-    TS_ASSERT_DELTA(box.getExtents(1).min, -4.0, 1e-6);
-    TS_ASSERT_DELTA(box.getExtents(1).max, +6.0, 1e-6);
+    TS_ASSERT_DELTA(box.getExtents(0).getMin(), -10.0, 1e-6);
+    TS_ASSERT_DELTA(box.getExtents(0).getMax(), +10.0, 1e-6);
+    TS_ASSERT_DELTA(box.getExtents(1).getMin(), -4.0, 1e-6);
+    TS_ASSERT_DELTA(box.getExtents(1).getMax(), +6.0, 1e-6);
     TS_ASSERT_DELTA( box.getSignal(), b.getSignal(), 1e-6);
     TS_ASSERT_DELTA( box.getErrorSquared(), b.getErrorSquared(), 1e-6);
     TS_ASSERT_DELTA( box.getInverseVolume(), b.getInverseVolume(), 1e-6);

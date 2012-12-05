@@ -53,7 +53,7 @@ namespace MDEvents
    * @param depth :: splitting depth of the new box.
    * @param extentsVector :: vector defining the extents
    */
-  TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector,int64_t boxSize,int64_t boxID)
+  TMDE(MDBox)::MDBox(BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector,int64_t boxSize,int64_t boxID)
       : MDBoxBase<MDE, nd>(extentsVector),
         m_dataBusy(false), m_dataModified(false), m_dataAdded(false),
         m_fileIndexStart(0), m_fileNumEvents(0),

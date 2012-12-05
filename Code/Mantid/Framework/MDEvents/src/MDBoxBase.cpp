@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidKernel/VMD.h"
+#include <limits>
 
 using NeXus::File;
 
@@ -17,7 +18,7 @@ namespace MDEvents
   TMDE(
   MDBoxBase)::MDBoxBase()
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
-      m_inverseVolume(1.0),
+      m_inverseVolume(std::numeric_limits<coord_t>::quiet_NaN()),
       m_depth(0),
       m_parent(NULL)
   {
@@ -33,7 +34,7 @@ namespace MDEvents
   /** Constructor with extents
    */
   TMDE(
-  MDBoxBase)::MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+  MDBoxBase)::MDBoxBase(const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
     : m_signal(0.0), m_errorSquared(0.0), m_totalWeight(0.0),
       m_inverseVolume(1.0),
       m_depth(0),
@@ -48,6 +49,8 @@ namespace MDEvents
     if (extentsVector.size() != nd) throw std::invalid_argument("MDBoxBase::ctor(): extentsVector.size() must be == nd.");
     for (size_t d=0; d<nd; d++)
       this->extents[d] = extentsVector[d];
+
+    this->calcVolume();
   }
 
 
@@ -76,7 +79,7 @@ namespace MDEvents
       m_centroid[d] = 0;
 #endif
     // Re-calculate the volume of the box
-    this->calcVolume(); //TODO: Is this necessary or should we copy the volume?
+  //  this->calcVolume(); //TODO: Is this necessary or should we copy the volume --> we shoult trust the constructor?
 
   }
 
@@ -106,7 +109,7 @@ namespace MDEvents
       for (size_t d=0; d<nd; d++)
       {
         coord_t x = it->getCenter(d);
-        if ((x < this->extents[d].min) || (x >= this->extents[d].max))
+        if (extents[d].outside(x))
         {
           badEvent = true;
           break;
@@ -193,8 +196,7 @@ namespace MDEvents
   {
     for (size_t d=0; d<nd; d++)
     {
-      extents[d].min = (extents[d].min * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
-      extents[d].max = (extents[d].max * static_cast<coord_t>(scaling[d])) + static_cast<coord_t>(offset[d]);
+      extents[d].scaleExtents(scaling[d],offset[d]);
     }
     // Re-calculate the volume of the box
     this->calcVolume();
@@ -228,12 +230,12 @@ namespace MDEvents
         if ((i & mask) > 0)
         {
           // Bit is 1, use the max of the dimension
-          coords[d] = extents[d].max;
+          coords[d] = extents[d].getMax();
         }
         else
         {
           // Bit is 0, use the min of the dimension
-          coords[d] = extents[d].min;
+          coords[d] = extents[d].getMin();
         }
       } // (for each dimension)
 
@@ -275,12 +277,12 @@ namespace MDEvents
         if ((i & mask) > 0)
         {
           // Bit is 1, use the max of the dimension
-          out[outIndex + d] = extents[d].max;
+          out[outIndex + d] = extents[d].getMax();
         }
         else
         {
           // Bit is 0, use the min of the dimension
-          out[outIndex + d] = extents[d].min;
+          out[outIndex + d] = extents[d].getMin();
         }
       } // (for each dimension)
     }
@@ -334,12 +336,12 @@ namespace MDEvents
           if ((i & mask) > 0)
           {
             // Bit is 1, use the max of the dimension
-            out[outIndex + outd] = extents[ind].max;
+            out[outIndex + outd] = extents[ind].getMax();
           }
           else
           {
             // Bit is 0, use the min of the dimension
-            out[outIndex + outd] = extents[ind].min;
+            out[outIndex + outd] = extents[ind].getMin();
           }
           outd++;
         } // the dimensions is used in the output.

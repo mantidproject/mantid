@@ -60,7 +60,8 @@ namespace MDAlgorithms
     template<typename T>
     void compare(T a, T b, const std::string & message);
 
-    inline void compareTol(double a, double b, const std::string & message);
+    template<typename T>
+    inline void compareTol(T a, T b, const std::string & message);
 
     Mantid::API::IMDWorkspace_sptr inWS2;
 
