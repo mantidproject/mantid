@@ -96,7 +96,6 @@ class HFIRSANSReduction(PythonAlgorithm):
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)
         
         property_list = [p.name for p in property_manager.getProperties()]
-        print property_list
         
         output_msg = ""
         # Find the beam center
@@ -273,10 +272,32 @@ class HFIRSANSReduction(PythonAlgorithm):
         
         # Sensitivity correction
         if "SensitivityAlgorithm" in property_list:
+            # Beam center for the sensitivity correction
+            beam_center_x = None
+            beam_center_y = None
+            if "SensitivityBeamCenterAlgorithm" in property_list:
+                # Execute the beam finding algorithm and set the beam
+                # center for the transmission calculation
+                p=property_manager.getProperty("SensitivityBeamCenterAlgorithm")
+                alg=Algorithm.fromString(p.valueAsStr)
+                if alg.existsProperty("ReductionProperties"):
+                    alg.setProperty("ReductionProperties", property_manager_name)
+                alg.execute()
+                beam_center_x = alg.getProperty("FoundBeamCenterX").value
+                beam_center_y = alg.getProperty("FoundBeamCenterY").value
+            
             p=property_manager.getProperty("SensitivityAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("InputWorkspace", workspace)
             alg.setProperty("OutputWorkspace", workspace)
+            
+            if alg.existsProperty("BeamCenterX") \
+                and alg.existsProperty("BeamCenterY") \
+                and beam_center_x is not None \
+                and beam_center_y is not None:
+                alg.setProperty("BeamCenterX", beam_center_x)
+                alg.setProperty("BeamCenterY", beam_center_y)
+            
             if alg.existsProperty("ReductionProperties"):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()

@@ -72,12 +72,14 @@ def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5, 
     ReductionSingleton().reduction_properties["UseDefaultDC"] = use_sample_dc
         
 def SetSensitivityBeamCenter(x,y):
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterMethod"]="Value"
     ReductionSingleton().reduction_properties["SensitivityBeamCenterX"] = x
     ReductionSingleton().reduction_properties["SensitivityBeamCenterY"] = y
     
 def SensitivityDirectBeamCenter(datafile):
     find_data(datafile, instrument=ReductionSingleton().get_instrument())
-    ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.DirectBeamCenter(datafile).set_persistent(False))
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterMethod"]="DirectBeam"
+    ReductionSingleton().reduction_properties["SensitivityBeamCenterFile"]=datafile
 
 def SensitivityScatteringBeamCenter(datafile, beam_radius=3.0):
     find_data(datafile, instrument=ReductionSingleton().get_instrument())
