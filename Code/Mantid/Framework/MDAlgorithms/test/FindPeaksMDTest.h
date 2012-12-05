@@ -148,32 +148,32 @@ public:
   }
 
   /** Running the algo twice with same output workspace = replace the output, don't append */
-  void xest_exec_twice_replaces_workspace()
+  void test_exec_twice_replaces_workspace()
   {
     do_test(false, 100, 3);
     do_test(true, 100, 3);
   }
 
   /** Run normally */
-  void xest_exec()
+  void test_exec()
   {
     do_test(true, 100, 3);
   }
 
   /** Run normally, but limit to 1 peak */
-  void xest_exec_withMaxPeaks()
+  void test_exec_withMaxPeaks()
   {
     do_test(true, 1, 1);
   }
 
   /** Run twice and append to the peaks workspace*/
-  void xest_exec_AppendPeaks()
+  void test_exec_AppendPeaks()
   {
     do_test(false, 100, 3);
     do_test(true, 100, 6, true /* Append */);
   }
 
-  void xest_exec_gives_PeaksWorkspace_Containing_DetectorIDs_That_Form_Part_Of_Peak()
+  void test_exec_gives_PeaksWorkspace_Containing_DetectorIDs_That_Form_Part_Of_Peak()
   {
     do_test(false, 100, 3);
 
@@ -192,13 +192,13 @@ public:
   }
 
   /** Run on MDHistoWorkspace */
-  void xest_exec_histo()
+  void test_exec_histo()
   {
     do_test(true, 100, 3, false, true /*histo conversion*/);
   }
 
   /** Run on MDHistoWorkspace, but limit to 1 peak */
-  void xest_exec_histo_withMaxPeaks()
+  void test_exec_histo_withMaxPeaks()
   {
     do_test(true, 1, 1, false, true /*histo conversion*/);
   }
