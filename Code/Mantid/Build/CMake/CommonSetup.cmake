@@ -224,6 +224,7 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/ICat/src/GSoap.cpp
         Framework/Kernel/src/ANN/
         Framework/Kernel/src/ANN_complete.cpp
+        Framework/PythonAPI/src/
         Framework/PythonAPI/src/boostpython.cpp 
         MantidPlot/src/origin/OPJFile.cpp
       )
