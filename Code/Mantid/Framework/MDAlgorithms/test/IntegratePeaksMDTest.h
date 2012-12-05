@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_MDEWPEAKINTEGRATIONTEST_H_
-#define MANTID_MDEVENTS_MDEWPEAKINTEGRATIONTEST_H_
+#ifndef MANTID_MDAGORITHMS_MDEWPEAKINTEGRATIONTEST_H_
+#define MANTID_MDAGORITHMS_MDEWPEAKINTEGRATIONTEST_H_
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -9,7 +9,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/IntegratePeaksMD.h"
+#include "MantidMDAlgorithms/IntegratePeaksMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -29,6 +29,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using Mantid::Kernel::V3D;
 
 

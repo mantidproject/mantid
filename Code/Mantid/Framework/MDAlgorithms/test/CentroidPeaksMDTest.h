@@ -1,7 +1,7 @@
 #ifndef MANTID_MDEVENTS_MDCENTROIDPEAKSTEST_H_
 #define MANTID_MDEVENTS_MDCENTROIDPEAKSTEST_H_
 
-#include "MantidMDEvents/CentroidPeaksMD.h"
+#include "MantidMDAlgorithms/CentroidPeaksMD.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -10,7 +10,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/CentroidPeaksMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -30,6 +29,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using Mantid::Kernel::V3D;
 
 

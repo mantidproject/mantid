@@ -69,13 +69,13 @@ IntegratePeaksMD(InputWorkspace='TOPAZ_3131_md', PeaksWorkspace='peaks',
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/IntegratePeaksMD.h"
+#include "MantidMDAlgorithms/IntegratePeaksMD.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
@@ -217,7 +217,7 @@ namespace MDEvents
       // Do not integrate if sphere is off edge of detector
       if (BackgroundOuterRadius > PeakRadius)
       {
-    	  if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius))
+        if (!detectorQ(p.getQLabFrame(), BackgroundOuterRadius))
           {
              g_log.warning() << "Warning: sphere for integration is off edge of detector for peak " << i << std::endl;
              if (!integrateEdge)continue;
@@ -225,7 +225,7 @@ namespace MDEvents
       }
       else
       {
-    	  if (!detectorQ(p.getQLabFrame(), PeakRadius))
+        if (!detectorQ(p.getQLabFrame(), PeakRadius))
           {
              g_log.warning() << "Warning: sphere for integration is off edge of detector for peak " << i << std::endl;
              if (!integrateEdge)continue;
@@ -334,19 +334,19 @@ namespace MDEvents
       double theta = 6.28318531/dAngles * i;
       for (int j=0; j < nAngles; ++j)
       {
-    	 double phi = 6.28318531/dAngles * j;
+       double phi = 6.28318531/dAngles * j;
          V3D edge = V3D(QLabFrame.X()+r*std::cos(theta)*std::sin(phi),
            QLabFrame.Y()+r*std::sin(theta)*std::sin(phi), QLabFrame.Z()+r*std::cos(phi));
          // Create the peak using the Q in the lab frame with all its info:
          try
          {
-			 Peak p(inst, edge);
-			 in = (in && p.findDetector());
-			 if (!in) return in;
+       Peak p(inst, edge);
+       in = (in && p.findDetector());
+       if (!in) return in;
          }
          catch (...)
          {
-        	 return false;
+           return false;
          }
       }
     }

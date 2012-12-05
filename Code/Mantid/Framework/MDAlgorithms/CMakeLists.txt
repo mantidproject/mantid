@@ -5,8 +5,9 @@ set ( SRC_FILES
 	src/BinaryOperationMD.cpp
 	src/BinMD.cpp		
 	src/BinToMDHistoWorkspace.cpp	
-	src/CloneMDWorkspace.cpp	
 	src/BooleanBinaryOperationMD.cpp
+	src/CentroidPeaksMD.cpp    
+	src/CloneMDWorkspace.cpp	
 	src/CobaltSpinWaveDSHO.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvertToDetectorFaceMD.cpp
@@ -20,6 +21,7 @@ set ( SRC_FILES
 	src/FakeMDEventData.cpp    
 	src/GreaterThanMD.cpp
 	src/IDynamicRebinning.cpp
+	src/IntegratePeaksMD.cpp        
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
 	src/LessThanMD.cpp
@@ -84,6 +86,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BinMD.h	
 	inc/MantidMDAlgorithms/BinToMDHistoWorkspace.h	
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
+	inc/MantidMDAlgorithms/CentroidPeaksMD.h    
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h	
 	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
@@ -99,6 +102,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/FakeMDEventData.h    
 	inc/MantidMDAlgorithms/GreaterThanMD.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
+	inc/MantidMDAlgorithms/IntegratePeaksMD.h    
 	inc/MantidMDAlgorithms/InvalidParameter.h
 	inc/MantidMDAlgorithms/InvalidParameterParser.h
 	inc/MantidMDAlgorithms/LessThanMD.h
@@ -174,6 +178,7 @@ set ( TEST_FILES
 	BinToMDHistoWorkspaceTest.h	
 	BooleanBinaryOperationMDTest.h
 	CachedExperimentInfoTest.h
+	CentroidPeaksMDTest.h    
 	CloneMDWorkspaceTest.h	
 	CobaltSWDTest.h
 	CompareMDWorkspacesTest.h
@@ -192,6 +197,7 @@ set ( TEST_FILES
 	FitResolutionConvolvedModelTest.h
 	ForegroundModelTest.h
 	GreaterThanMDTest.h
+	IntegratePeaksMDTest.h    
 	InvalidParameterParserTest.h
 	InvalidParameterTest.h
 	LessThanMDTest.h

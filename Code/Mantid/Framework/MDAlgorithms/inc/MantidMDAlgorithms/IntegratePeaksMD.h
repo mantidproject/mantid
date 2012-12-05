@@ -1,7 +1,7 @@
-#ifndef MANTID_MDEVENTS_CENTROIDPEAKSMD_H_
-#define MANTID_MDEVENTS_CENTROIDPEAKSMD_H_
+#ifndef MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
+#define MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
     
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/Algorithm.h" 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
@@ -9,22 +9,22 @@
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
-  /** Find the centroid of single-crystal peaks in a MDEventWorkspace, in order to refine their positions.
+  /** Integrate single-crystal peaks in reciprocal-space.
    * 
    * @author Janik Zikovsky
-   * @date 2011-06-01
+   * @date 2011-04-13 18:11:53.496539
    */
-  class DLLExport CentroidPeaksMD  : public API::Algorithm
+  class DLLExport IntegratePeaksMD  : public API::Algorithm
   {
   public:
-    CentroidPeaksMD();
-    ~CentroidPeaksMD();
+    IntegratePeaksMD();
+    ~IntegratePeaksMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "CentroidPeaksMD";};
+    virtual const std::string name() const { return "IntegratePeaksMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -39,12 +39,16 @@ namespace MDEvents
     void exec();
 
     template<typename MDE, size_t nd>
-    void integrate(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void integrate(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     /// Input MDEventWorkspace
     Mantid::API::IMDEventWorkspace_sptr inWS;
 
+    /// Calculate if this Q is on a detector
+    bool detectorQ(Mantid::Kernel::V3D QLabFrame, double PeakRadius);
 
+    /// Instrument reference
+    Geometry::Instrument_const_sptr inst;
 
   };
 
@@ -52,4 +56,4 @@ namespace MDEvents
 } // namespace Mantid
 } // namespace MDEvents
 
-#endif  /* MANTID_MDEVENTS_CENTROIDPEAKSMD_H_ */
+#endif  /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_ */

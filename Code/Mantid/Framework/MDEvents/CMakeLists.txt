@@ -4,7 +4,6 @@ set ( SRC_FILES
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
-	src/CentroidPeaksMD.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
@@ -22,7 +21,6 @@ set ( SRC_FILES
 	src/ImportMDEventWorkspace.cpp
 	src/ImportMDHistoWorkspace.cpp
 	src/ImportMDHistoWorkspaceBase.cpp
-	src/IntegratePeaksMD.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
 	src/MDBoxToChange.cpp
@@ -68,7 +66,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
-	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h
@@ -86,7 +83,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/ImportMDEventWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspaceBase.h
-	inc/MantidMDEvents/IntegratePeaksMD.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
 	inc/MantidMDEvents/MDBoxToChange.h	
@@ -129,7 +125,6 @@ set ( TEST_FILES
 	AffineMatrixParameterParserTest.h
 	AffineMatrixParameterTest.h
 	BoxControllerSettingsAlgorithmTest.h
-	CentroidPeaksMDTest.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToReflectometryQTest.h
 	ConvToMDBaseTest.h
@@ -144,7 +139,6 @@ set ( TEST_FILES
 	FitMDTest.h
 	ImportMDEventWorkspaceTest.h
 	ImportMDHistoWorkspaceTest.h
-	IntegratePeaksMDTest.h
 	MDBinTest.h
 	MDBoxBaseTest.h
 	MDBoxIteratorTest.h

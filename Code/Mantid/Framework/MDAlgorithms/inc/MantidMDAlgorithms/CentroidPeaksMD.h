@@ -1,30 +1,30 @@
-#ifndef MANTID_MDEVENTS_INTEGRATEPEAKSMD_H_
-#define MANTID_MDEVENTS_INTEGRATEPEAKSMD_H_
-    
-#include "MantidAPI/Algorithm.h" 
+#ifndef MANTID_MDALGORITHMS_CENTROIDPEAKSMD_H_
+#define MANTID_MDALGORITHMS_CENTROIDPEAKSMD_H_
+
+#include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
-namespace MDEvents
+namespace MDAlgorithms
 {
 
-  /** Integrate single-crystal peaks in reciprocal-space.
+  /** Find the centroid of single-crystal peaks in a MDEventWorkspace, in order to refine their positions.
    * 
    * @author Janik Zikovsky
-   * @date 2011-04-13 18:11:53.496539
+   * @date 2011-06-01
    */
-  class DLLExport IntegratePeaksMD  : public API::Algorithm
+  class DLLExport CentroidPeaksMD  : public API::Algorithm
   {
   public:
-    IntegratePeaksMD();
-    ~IntegratePeaksMD();
+    CentroidPeaksMD();
+    ~CentroidPeaksMD();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "IntegratePeaksMD";};
+    virtual const std::string name() const { return "CentroidPeaksMD";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
@@ -39,16 +39,12 @@ namespace MDEvents
     void exec();
 
     template<typename MDE, size_t nd>
-    void integrate(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    void integrate(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
 
     /// Input MDEventWorkspace
     Mantid::API::IMDEventWorkspace_sptr inWS;
 
-    /// Calculate if this Q is on a detector
-    bool detectorQ(Mantid::Kernel::V3D QLabFrame, double PeakRadius);
 
-    /// Instrument reference
-    Geometry::Instrument_const_sptr inst;
 
   };
 
@@ -56,4 +52,4 @@ namespace MDEvents
 } // namespace Mantid
 } // namespace MDEvents
 
-#endif  /* MANTID_MDEVENTS_INTEGRATEPEAKSMD_H_ */
+#endif  /* MANTID_MDEVENTS_CENTROIDPEAKSMD_H_ */
