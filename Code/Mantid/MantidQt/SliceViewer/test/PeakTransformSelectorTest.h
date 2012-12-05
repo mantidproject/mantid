@@ -2,10 +2,9 @@
 #define SLICE_VIEWER_PEAKTRANSFORMSELECTOR_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
-#include <boost/regex.hpp>
 #include "MantidQtSliceViewer/PeakTransform.h"
 #include "MantidQtSliceViewer/PeakTransformSelector.h"
+#include "MockObjects.h"
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid;
@@ -15,23 +14,6 @@ using boost::regex;
 class PeakTransformSelectorTest : public CxxTest::TestSuite
 {
 private:
-
-  /*------------------------------------------------------------
-  Mock Peak Transform
-  ------------------------------------------------------------*/
-  class MockPeakTransform : public PeakTransform 
-  {
-  public:
-    MockPeakTransform()
-      :PeakTransform("H (Lattice)", "K (Lattice)", regex("^H.*$"), regex("^K.*$"), regex("^L.*$"))
-    {
-    }
-    ~MockPeakTransform()
-    {
-    }
-    MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
-    MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&));
-  };
 
   /*------------------------------------------------------------
   Mock Peak Transform Factory

@@ -2,7 +2,6 @@
 #define SLICE_VIEWER_PEAKS_PRESENTER_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
@@ -10,6 +9,7 @@
 #include "MantidQtSliceViewer/PeakTransformFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MockObjects.h"
 #include <boost/make_shared.hpp>
 #include <string>
 
@@ -21,62 +21,6 @@ using boost::regex;
 
 class ConcretePeaksPresenterTest : public CxxTest::TestSuite
 {
-private:
-
-  /*------------------------------------------------------------
-  Mock Peak Transform
-  ------------------------------------------------------------*/
-  class MockPeakTransform : public PeakTransform 
-  {
-  public:
-    MockPeakTransform()
-      :PeakTransform("H (Lattice)", "K (Lattice)", regex("^H.*$"), regex("^K.*$"), regex("^L.*$"))
-    {
-    }
-    ~MockPeakTransform()
-    {
-    }
-    MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
-    MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&)); 
-  };
-
-  /*------------------------------------------------------------
-  Mock Peak Transform Factory
-  ------------------------------------------------------------*/
-class MockPeakTransformFactory : public PeakTransformFactory 
-{
- public:
-  MOCK_CONST_METHOD0(createDefaultTransform, PeakTransform_sptr());
-  MOCK_CONST_METHOD2(createTransform, PeakTransform_sptr(const std::string&, const std::string&));
-};
-
-  /*------------------------------------------------------------
-  Mock Peak Overlay View
-  ------------------------------------------------------------*/
-  class MockPeakOverlayView : public PeakOverlayView
-  {
-  public:
-    MOCK_METHOD1(setPlaneDistance, void(const double&));
-    MOCK_METHOD0(updateView, void());
-    MOCK_METHOD1(setSlicePoint, void(const double&));
-    MOCK_METHOD0(hideView, void());
-    MOCK_METHOD0(showView, void());
-    MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
-    ~MockPeakOverlayView(){}
-  };
-
-  /*------------------------------------------------------------
-  Mock Widget Factory.
-  ------------------------------------------------------------*/
-  class MockPeakOverlayFactory : public PeakOverlayViewFactory
-  {
-  public:
-    MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(const Mantid::Kernel::V3D&));
-    MOCK_METHOD1(setRadius, void(const double&));
-    MOCK_CONST_METHOD0(getPlotXLabel, std::string());
-    MOCK_CONST_METHOD0(getPlotYLabel, std::string());
-    MOCK_METHOD0(updateView, void());
-  };
 
   /// Helper method to create a good 'Integrated' peaks workspace
   Mantid::API::IPeaksWorkspace_sptr createPeaksWorkspace(const int nPeaks, const double radius=1)
