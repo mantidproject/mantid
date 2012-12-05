@@ -91,23 +91,33 @@ public:
 
   void test_constructor_throws_if_view_factory_null()
   {
-    PeakOverlayViewFactory* nullViewFactory = NULL;
+    PeakOverlayViewFactory* nullViewFactory = NULL; // View factory is null
     PeakOverlayViewFactory_sptr viewFactory(nullViewFactory);
-    Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(1);
-    
+    IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(1);
+  
+    PeakTransform_sptr mockTransform(new MockPeakTransform);  
+ 
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
     PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
-    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform)));
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillRepeatedly(Return(mockTransform));
 
     TS_ASSERT_THROWS(ConcretePeaksPresenter(viewFactory, peaksWS, peakTransformFactory), std::invalid_argument);
   }
 
-  void test_constructor_throws_if_peaks_workspace_null()
-  {
-  }
-
   void test_constructor_throws_if_peaks_workspace_not_integrated()
   {
+    auto mockViewFactory = new NiceMock<MockPeakOverlayFactory>;
+    PeakOverlayViewFactory_sptr viewFactory(mockViewFactory);
+
+    IPeaksWorkspace_sptr peaksWS = WorkspaceCreationHelper::createPeaksWorkspace(1); // Peaks workspace is not integrated.
+  
+    PeakTransform_sptr mockTransform(new MockPeakTransform);  
+ 
+    auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
+    PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillRepeatedly(Return(mockTransform));
+
+    TS_ASSERT_THROWS(ConcretePeaksPresenter(viewFactory, peaksWS, peakTransformFactory), std::invalid_argument);
   }
 
   void test_construction()
@@ -132,7 +142,8 @@ public:
     // Create a mock transform object.
     auto pMockTransform = new NiceMock<MockPeakTransform>;
     PeakTransform_sptr mockTransform(pMockTransform);
-    EXPECT_CALL(*pMockTransform, transformPeak(_)).Times(peaksWS->rowCount()).WillRepeatedly(Return(V3D()));
+    const int numberOfTimesCalled = static_cast<int>(peaksWS->rowCount());// Should be called for every peak i.e. row.
+    EXPECT_CALL(*pMockTransform, transformPeak(_)).Times(numberOfTimesCalled).WillRepeatedly(Return(V3D()));
 
     // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;

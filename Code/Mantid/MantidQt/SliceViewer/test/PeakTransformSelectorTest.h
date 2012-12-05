@@ -115,7 +115,8 @@ public:
     // Create a Factory that Can handle the transform. 
     MockPeakTransformFactoryA* pRightFactory = new MockPeakTransformFactoryA;
     PeakTransformFactory_sptr rightFactory(pRightFactory);
-    EXPECT_CALL(*pRightFactory, createTransform(_, _)).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform))); // Will return a PeakTransform without throwing.
+    PeakTransform_sptr product(new MockPeakTransform); // Product to return
+    EXPECT_CALL(*pRightFactory, createTransform(_, _)).WillOnce(Return(product)); // Will return a PeakTransform without throwing.
 
     // Set up the selector with candidates.
     PeakTransformSelector selector;
@@ -139,11 +140,12 @@ public:
     MockPeakTransformFactoryB* pWrongFactory = new MockPeakTransformFactoryB;
     PeakTransformFactory_sptr wrongFactory(pWrongFactory);
     EXPECT_CALL(*pWrongFactory, createDefaultTransform()).WillOnce(Throw(PeakTransformException())); // Will throw when invoked
-    
+
     // Create a Factory that Can handle the transform. 
     MockPeakTransformFactoryA* pRightFactory = new MockPeakTransformFactoryA;
     PeakTransformFactory_sptr rightFactory(pRightFactory);
-    EXPECT_CALL(*pRightFactory, createDefaultTransform()).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform))); // Will return a PeakTransform without throwing.
+    PeakTransform_sptr product(new MockPeakTransform); // Product to return
+    EXPECT_CALL(*pRightFactory, createDefaultTransform()).WillOnce(Return(product)); // Will return a PeakTransform without throwing.
 
     // Set up the selector with candidates.
     PeakTransformSelector selector;
@@ -180,7 +182,8 @@ public:
      // Create a Factory that Can handle the transform. 
     MockPeakTransformFactoryA* pRightFactory = new MockPeakTransformFactoryA;
     PeakTransformFactory_sptr rightFactory(pRightFactory);
-    EXPECT_CALL(*pRightFactory, createTransform(_, _)).WillOnce(Return(PeakTransform_sptr(new MockPeakTransform))); // Will return a PeakTransform without throwing.
+    PeakTransform_sptr product(new MockPeakTransform); // Product to return
+    EXPECT_CALL(*pRightFactory, createTransform(_, _)).WillOnce(Return(product)); // Will return a PeakTransform without throwing.
 
     // Set up the selector with candidate.
     PeakTransformSelector selector;
