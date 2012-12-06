@@ -20,7 +20,7 @@ endif()
 # Find the C libraries
 find_library ( NEXUS_C_LIBRARIES NAMES NeXus libNeXus-0 )
 # Find the C++ libraries
-find_library ( NEXUS_CPP_LIBRARIES NAMES NeXusCPP )
+find_library ( NEXUS_CPP_LIBRARIES NAMES NeXusCPP libNeXusCPP-0)
 set ( NEXUS_LIBRARIES ${NEXUS_C_LIBRARIES} ${NEXUS_CPP_LIBRARIES} )
 
 # Set a version string by examining the napi.h header
