@@ -78,6 +78,7 @@ def ingestNexus(infilename, sessionId, service, factory):
     file.opendata('name')
     for attr,value in file.attrs():
         if attr == 'short_name':
+            instrumentName = value 
             instrument = factory.create("instrument")
             instrument.id = config.get('Instrument', value.lower())
     file.closedata()
