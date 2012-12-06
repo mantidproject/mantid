@@ -24,7 +24,7 @@ namespace MantidQt
     class DLLExport ConcretePeaksPresenter : public PeaksPresenter
     {
     public:
-      ConcretePeaksPresenter(boost::shared_ptr<PeakOverlayViewFactory> viewFactory, boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS, boost::shared_ptr<PeakTransformFactory> transformFactory);
+      ConcretePeaksPresenter(boost::shared_ptr<PeakOverlayViewFactory> nonIntegratedViewFactory, boost::shared_ptr<PeakOverlayViewFactory> integratedViewFactory, boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS, boost::shared_ptr<PeakTransformFactory> transformFactory);
       virtual ~ConcretePeaksPresenter();
       virtual void update();
       virtual void updateWithSlicePoint(const double& slicePoint);

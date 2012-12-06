@@ -17,30 +17,42 @@ namespace SliceViewer
   2) Then iterate over the MODEL and use it to construct VIEWs via the factory.
   3) A collection of views is stored internally 
 
-  @param viewFactory : View Factory (THE VIEW via factory)
+  @param nonIntegratedViewFactory : View Factory (THE VIEW via factory)
+  @param integratedViewFactory : View Factory (THE VIEW via factory)
   @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
   @param peaksTransform : Peak Transformation Factory. This is about interpreting the MODEL.
   */
-  ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr viewFactory, Mantid::API::IPeaksWorkspace_sptr peaksWS, PeakTransformFactory_sptr transformFactory) : m_viewPeaks(peaksWS->getNumberPeaks())
-    , m_viewFactory(viewFactory), m_transformFactory(transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0)
+  ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory, PeakOverlayViewFactory_sptr integratedViewFactory, Mantid::API::IPeaksWorkspace_sptr peaksWS, PeakTransformFactory_sptr transformFactory) : m_viewPeaks(peaksWS->getNumberPeaks())
+    , m_viewFactory(integratedViewFactory), m_transformFactory(transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0)
   {
-    if(viewFactory == NULL)
+    if(integratedViewFactory == NULL)
     {
-      throw std::invalid_argument("PeakOverlayViewFactory is null");
+      throw std::invalid_argument("Integrated PeakOverlayViewFactory is null");
+    }
+    if(nonIntegratedViewFactory == NULL)
+    {
+      throw std::invalid_argument("NonIntegrated PeakOverlayViewFactory is null");
     }
     if(peaksWS == NULL)
     {
       throw std::invalid_argument("PeaksWorkspace is null");
     }
-    if(!peaksWS->hasIntegratedPeaks())
+
+    double peakIntegrationRadius = 0;
+    if(peaksWS->hasIntegratedPeaks())
     {
-      throw std::invalid_argument("PeaksWorkspace does not contain integrated peaks."); // We might consider drawing these in the future anyway.
+      peakIntegrationRadius = boost::lexical_cast<double>(peaksWS->run().getProperty("PeakRadius")->value());
     }
+    else
+    {
+      // Swap the view factory. We are not plotting integrated peaks now.
+      m_viewFactory.swap(nonIntegratedViewFactory);
+    }
+    m_viewFactory->setRadius(peakIntegrationRadius);
     
     const bool transformSucceeded = this->configureMappingTransform();
-    // Extract the integration radius from the workspace.
-    const double peakIntegrationRadius = boost::lexical_cast<double>(peaksWS->run().getProperty("PeakRadius")->value());
-    viewFactory->setRadius(peakIntegrationRadius);
+    
+    // Make and register each peak widget.
     for(int i = 0; i < peaksWS->getNumberPeaks(); ++i)
     {
       const Mantid::API::IPeak& peak = peaksWS->getPeak(i);
