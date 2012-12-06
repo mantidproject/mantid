@@ -220,8 +220,60 @@ namespace Mantid
         // This is the assumed deployment directory for parameter files, where we need to be 
         // relative to the directory of the executable, not the current working directory.
         directoryName = Poco::Path(configService.getPropertiesDir()).resolve("../instrument").toString();
-      }
+        // Remove the path from the filename
+        const std::string::size_type stripPath = m_filename.find_last_of("\\/");
+        std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
 
+        // First check whether there is a parameter file whose name is the same as the IDF file,
+        // but with 'Parameters' instead of 'Definition'.
+        //std::string definitionPart("_Definition");
+        //const std::string::size_type prefix_end(instrumentFile.find(definitionPart));
+        //const std::string::size_type suffix_start = prefix_end + definitionPart.length();
+        // Make prefix and force it to be upper case
+        //std::string prefix = instrumentFile.substr(0, prefix_end);
+        //std::transform(prefix.begin(), prefix.end(), prefix.begin(), toupper); 
+        // Make suffix ensuring it has positive length
+        //std::string suffix = ".xml";
+        //if( suffix_start < instrumentFile.length() )
+        //{
+        //  suffix = instrumentFile.substr(suffix_start, std::string::npos );
+        //} 
+        // Assemble parameter file name
+        //std::string fullPathParamIDF = directoryName + "/" + prefix + "_Parameters" + suffix;
+        //if( Poco::File(fullPathParamIDF).exists() == false) 
+        // { // No such file exists, so look for file based on instrument ID given by the prefix
+        //  fullPathParamIDF = directoryName + "/" + prefix + "_Parameters.xml";
+        // }
+      }
+      std::string fullPathParamIDF = getfullPathParamIDF( directoryName );
+
+      if(!fullPathParamIDF.empty()) {
+
+        g_log.debug() << "Parameter file: " << fullPathParamIDF << std::endl;
+        // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+        try
+        {
+          // To allow the use of ExperimentInfo instead of workspace, we call it manually
+          LoadParameterFile::execManually(fullPathParamIDF, m_workspace);
+          g_log.debug("Parameters loaded successfully.");
+        } catch (std::invalid_argument& e)
+        {
+          g_log.information("LoadParameterFile: No parameter file found for this instrument");
+          g_log.information(e.what());
+        } catch (std::runtime_error& e)
+        {
+          g_log.information("Unable to successfully run LoadParameterFile sub-algorithm");
+          g_log.information(e.what());
+        }
+      } else {
+        g_log.information("No parameter file found for this instrument");
+      }
+    }
+
+    //-----------------------------------------------------------------------------------------------------------------------
+    /// Search the directory for the Parameter IDF file and return full path name if found, else return "".
+    std::string LoadInstrument::getfullPathParamIDF( std::string directoryName )
+    {
       // Remove the path from the filename
       const std::string::size_type stripPath = m_filename.find_last_of("\\/");
       std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
@@ -240,6 +292,7 @@ namespace Mantid
       {
         suffix = instrumentFile.substr(suffix_start, std::string::npos );
       } 
+
       // Assemble parameter file name
       std::string fullPathParamIDF = directoryName + "/" + prefix + "_Parameters" + suffix;
       if( Poco::File(fullPathParamIDF).exists() == false) 
@@ -247,22 +300,12 @@ namespace Mantid
         fullPathParamIDF = directoryName + "/" + prefix + "_Parameters.xml";
       }
 
-      g_log.debug() << "Parameter file: " << fullPathParamIDF << std::endl;
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-      try
-      {
-        // To allow the use of ExperimentInfo instead of workspace, we call it manually
-        LoadParameterFile::execManually(fullPathParamIDF, m_workspace);
-        g_log.debug("Parameters loaded successfully.");
-      } catch (std::invalid_argument& e)
-      {
-        g_log.information("LoadParameterFile: No parameter file found for this instrument");
-        g_log.information(e.what());
-      } catch (std::runtime_error& e)
-      {
-        g_log.information("Unable to successfully run LoadParameterFile sub-algorithm");
-        g_log.information(e.what());
+      if( Poco::File(fullPathParamIDF).exists() == false) 
+      { // No such file exists, indicate none found in this directory.
+        fullPathParamIDF="";
       }
+
+      return fullPathParamIDF;
     }
 
   } // namespace DataHandling
