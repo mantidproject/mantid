@@ -188,8 +188,21 @@ namespace Mantid
       const double inverseSlitSpeed = 0.5/omega/m_slitRadius;
       const double inverseNeutronSpeed = 1.0/std::sqrt(ei*mevToSpeedSq);
       const double gamma = 2.0*m_chopperRadius/deltaT*std::fabs(inverseSlitSpeed - inverseNeutronSpeed);
+      double regime(0.0);
+      try
+      {
+        regime = regimeFactor(gamma);
+      }
+      catch(std::invalid_argument& exc)
+      {
+        std::string msg = exc.what();
+        std::ostringstream os;
+        os << "\nComponent values: chopper radius=" << m_chopperRadius << ",deltaT=" << deltaT
+           << ",slitRadius=" << m_slitRadius << ",Ei=" << ei << ",omega=" << omega << ",slitThickness=" << m_slitThickness;
+        throw std::invalid_argument(msg + os.str());
+      }
 
-      return deltaT*deltaT*regimeFactor(gamma)/6.0;
+      return deltaT*deltaT*regime/6.0;
     }
 
     /**
