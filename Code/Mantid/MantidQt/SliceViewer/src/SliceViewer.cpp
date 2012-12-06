@@ -2182,9 +2182,23 @@ void SliceViewer::peakOverlay_toggled(bool checked)
         {
           IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list[i].toStdString());
           PeakOverlayViewFactory_sptr viewFactory  = boost::make_shared<PeakOverlayFactory>(m_plot, m_plot->canvas(), m_peaksPresenter->size());
-          m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(viewFactory, peaksWS, transformFactory));
+          try
+          {
+            m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(viewFactory, peaksWS, transformFactory));
+          }
+          catch(std::invalid_argument& e)
+          {
+            // Uncheck the button for consistency.
+            ui.btnPeakOverlay->setChecked(false);
+            throw e;
+          }
         }
         updatePeakOverlaySliderWidget();
+      }
+      else
+      {
+        // Uncheck the button for consistency.
+        ui.btnPeakOverlay->setChecked(false);
       }
     }
   }
