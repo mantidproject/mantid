@@ -161,6 +161,22 @@ namespace Mantid
   namespace MDAlgorithms
   {
 
+    namespace
+    {
+      //------------------------------------------------------------------------------------------------
+      /** Helper function allowing to typecast sequence of bytes into proper expected type.
+       * The input buffer is interpreted as the template type
+       *
+       * @param Buf -- the vector of characters, representing data to cast
+       * @param ind -- the starting position of first byte of data within the data buffer
+       * @returns the data type produced by type-casing proper sequence of bytes
+      */
+      template<typename T> T interpretAs(std::vector<char> &Buf, size_t ind=0)
+      {
+        return *((reinterpret_cast<T*>(&Buf[ind])));
+      }
+    }
+
     DECLARE_ALGORITHM(LoadSQW)
 
     /// Constructor
@@ -197,18 +213,6 @@ namespace Mantid
       declareProperty(new API::FileProperty("OutputFilename","", API::FileProperty::OptionalSave, fileExtensions2),
           "If the input SQW file is too large to fit in memory, specify an output NXS file.\n"
           "The MDEventWorkspace will be create with this file as its back-end.");
-    }
-
-    //------------------------------------------------------------------------------------------------
-    /** helper function allowing to typecast sequence of bytes into proper type. 
-      @param Buf -- the vector of characters, representing data to cast
-      @param ind -- the starting position of first byte of data within the data buffer
-
-      @returns the data type produced by type-casing proper sequence of bytes
-    */
-    template<typename T> T cast(std::vector<char> &Buf, size_t ind=0)
-    {
-      return *((reinterpret_cast<T*>(&Buf[ind])));
     }
 
     /// Execute the algorithm
@@ -365,21 +369,20 @@ namespace Mantid
         for (int i=0; i < currentNumPixels; i++)
         {
           size_t current_pix = size_t(i*pixel_width);
-          coord_t centers[4] =        //for(size_t current_pix = 0; current_pix < currentBlockSize; current_pix += pixel_width)
-
+          coord_t centers[4] =
           {
-              cast<float>(Buffer,current_pix),
-              cast<float>(Buffer,current_pix + column_size),
-              cast<float>(Buffer,current_pix + column_size_2),
-              cast<float>(Buffer,current_pix + column_size_3)
+              interpretAs<float>(Buffer,current_pix),
+              interpretAs<float>(Buffer,current_pix + column_size),
+              interpretAs<float>(Buffer,current_pix + column_size_2),
+              interpretAs<float>(Buffer,current_pix + column_size_3)
           };
-          float error = cast<float>(Buffer,current_pix + column_size_8);
+          float error = interpretAs<float>(Buffer,current_pix + column_size_8);
           ws->addEvent(MDEvent<4>( 
-            cast<float>(Buffer,current_pix + column_size_7),         // Signal
-            error*error,                                              // Error sq 
-             int32_t(cast<float>(Buffer,current_pix + column_size_6)),  // run Index
-             uint16_t(cast<float>(Buffer,current_pix + column_size_4)),  // Detector Id
-             centers));
+              interpretAs<float>(Buffer,current_pix + column_size_7),  // Signal
+              error*error,                                               // Error sq
+              static_cast<uint16_t>(interpretAs<float>(Buffer,current_pix + column_size_6)),  // run Index
+              static_cast<int32_t>(interpretAs<float>(Buffer,current_pix + column_size_4)),  // Detector Id
+              centers));
         }
 
 
@@ -462,12 +465,12 @@ namespace Mantid
       this->m_fileStream.seekg(this->m_dataPositions.geom_start, std::ios::beg);
       this->m_fileStream.read(&buf[0],buf.size());
 
-      double a = (double)cast<float>(buf,0);
-      double b = (double)cast<float>(buf,4);
-      double c = (double)cast<float>(buf,8);
-      double aa = (double)cast<float>(buf,12);
-      double bb = (double)cast<float>(buf,16);
-      double cc = (double)cast<float>(buf,20);
+      double a = static_cast<double>(interpretAs<float>(buf,0));
+      double b = static_cast<double>(interpretAs<float>(buf,4));
+      double c = static_cast<double>(interpretAs<float>(buf,8));
+      double aa = static_cast<double>(interpretAs<float>(buf,12));
+      double bb = static_cast<double>(interpretAs<float>(buf,16));
+      double cc = static_cast<double>(interpretAs<float>(buf,20));
       
       ExperimentInfo_sptr info(new ExperimentInfo());
       // set up the goniometer. All mdEvents (pixels) in Horace sqw file are in lab frame, 
@@ -520,8 +523,7 @@ namespace Mantid
       size_t ic = 0;
       for(size_t i=0;i<4;i++){
         for(size_t j=0;j<4;j++){
-          //u_to_Rlu[ic]=(double)*((float*)(&buf[i0+4*(i*4+j)]));
-          u_to_Rlu[ic]=(double)cast<float>(buf,i0+4*(i*4+j));
+          u_to_Rlu[ic]=static_cast<double>(interpretAs<float>(buf,i0+4*(i*4+j)));
           ic++;
         }
       }
@@ -537,8 +539,8 @@ namespace Mantid
 
       // axis labels size 
       i0 += 4*4;
-      unsigned int nRows =cast<uint32_t>(buf,i0);
-      unsigned int nCols =cast<uint32_t>(buf,i0+4);
+      unsigned int nRows = interpretAs<uint32_t>(buf,i0);
+      unsigned int nCols = interpretAs<uint32_t>(buf,i0+4);
 
 
       // read axis labelsg
@@ -569,7 +571,7 @@ namespace Mantid
       buf.resize(4*4*3);
       this->m_fileStream.read(&buf[0],4);
 
-      unsigned int npax =  cast<uint32_t>(buf);
+      unsigned int npax = interpretAs<uint32_t>(buf);
       unsigned int niax = 4-npax;
 
     /*
@@ -593,9 +595,9 @@ namespace Mantid
         this->m_fileStream.read(&buf[0],buf.size());
 
         for(unsigned int i=0;i<niax;i++){
-          iax[i] =cast<uint32_t>(buf,i*4)-1;
-          float min   = cast<float>(buf,4*(niax+i*2  ));
-          float max   = cast<float>(buf,4*(niax+i*2+1))*(1+FLT_EPSILON);
+          iax[i] = interpretAs<uint32_t>(buf,i*4)-1;
+          float min   = interpretAs<float>(buf,4*(niax+i*2  ));
+          float max   = interpretAs<float>(buf,4*(niax+i*2+1))*(1+FLT_EPSILON);
 
           DimVectorIn[ic].setNumBins(1);
           DimVectorIn[ic].setMax(max);
@@ -636,17 +638,17 @@ namespace Mantid
         for(unsigned int i=0;i<npax;i++)
         {
           // projection axis indexes
-          pax[i] = cast<uint32_t>(buf,4*i)-1;
+          pax[i] = interpretAs<uint32_t>(buf,4*i)-1;
 
           std::vector<char> axis_buffer(101*4);
           this->m_fileStream.read(&axis_buffer[0],4);
-          unsigned int  nAxisPoints =cast<uint32_t>(axis_buffer);
+          unsigned int  nAxisPoints =interpretAs<uint32_t>(axis_buffer);
           if(axis_buffer.size()<nAxisPoints*4)axis_buffer.resize(nAxisPoints*4);
 
           this->m_fileStream.read(&axis_buffer[0],4*nAxisPoints);
 
-          float min = cast<float>(axis_buffer,0);
-          float max = cast<float>(axis_buffer,4*(nAxisPoints-1))*(1+FLT_EPSILON);
+          float min = interpretAs<float>(axis_buffer,0);
+          float max = interpretAs<float>(axis_buffer,4*(nAxisPoints-1))*(1+FLT_EPSILON);
 
           DimVectorIn[ic].setNumBins(nAxisPoints-1);
           DimVectorIn[ic].setMax(max);
@@ -656,7 +658,7 @@ namespace Mantid
         //[data.dax, count, ok, mess] = fread_catch(fid,[1,npax],'int32'); if ~all(ok); return; end;
         this->m_fileStream.read(&buf[0],4*npax);
         for(unsigned int i=0;i<npax;i++)
-            dax[i]=cast<uint32_t>(buf,4*i)-1;
+            dax[i]=interpretAs<uint32_t>(buf,4*i)-1;
 
       }
       if(arrangeByMDImage)
@@ -715,8 +717,8 @@ namespace Mantid
 
       for(unsigned int i=0;i<4;i++)
       {
-        float min =  cast<float>(buf,4*i*2);
-        float max =  cast<float>(buf,4*(i*2+1))*(1+FLT_EPSILON);
+        float min =  interpretAs<float>(buf,4*i*2);
+        float max =  interpretAs<float>(buf,4*(i*2+1))*(1+FLT_EPSILON);
         DimVectorOut[i].setNumBins(10);
         DimVectorOut[i].setMax(max);
         DimVectorOut[i].setMin(min);
@@ -751,7 +753,7 @@ namespace Mantid
       data_buffer.resize(3*4);
 
       m_fileStream.read(&data_buffer[0],2*4);
-      this->m_nDims = cast<uint32_t>(data_buffer);
+      this->m_nDims = interpretAs<uint32_t>(data_buffer);
 
       m_dataPositions.parse_sqw_main_header(m_fileStream);
 
@@ -974,12 +976,12 @@ namespace LoadSQWHelper
 
       unsigned int npax = *((uint32_t*)(&data_buffer[0])); 
       unsigned int niax = 4-npax;
-      if(niax!=0){
+      if(niax!=0)
+      {
         dataStream.seekg(3*niax*4,std::ios_base::cur);
-
       }
       if(npax!=0)
-{
+      {
         nBins.resize(npax);
 
         // skip projection axis
