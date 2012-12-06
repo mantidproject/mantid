@@ -1,5 +1,5 @@
-#ifndef MANTID_SLICEVIEWER_PEAKOVERLAY_H_
-#define MANTID_SLICEVIEWER_PEAKOVERLAY_H_
+#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYSPHERE_H_
+#define MANTID_SLICEVIEWER_PEAKOVERLAYSPHERE_H_
 
 #include "DllOption.h"
 #include "MantidKernel/System.h"
@@ -18,7 +18,7 @@ namespace MantidQt
 namespace SliceViewer
 {
 
-  /** Widget representing a peak ellipse on the plot.
+  /** Widget representing a peak sphere on the plot. Used for representing spherically integrated peaks.
     
     @date 2012-08-22
 
@@ -42,15 +42,15 @@ namespace SliceViewer
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlay : public QWidget, public PeakOverlayView
+  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlaySphere : public QWidget, public PeakOverlayView
   {
     Q_OBJECT
 
   public:
     /// Constructor
-    PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, const QColor& peakColour);
+    PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, const QColor& peakColour);
     /// Destructor
-    virtual ~PeakOverlay();
+    virtual ~PeakOverlaySphere();
     /// Set the slice point at position.
     virtual void setSlicePoint(const double& point); 
     /// Hide the view.

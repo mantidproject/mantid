@@ -1,5 +1,5 @@
 #include "MantidQtSliceViewer/PeakOverlayFactory.h"
-#include "MantidQtSliceViewer/PeakOverlay.h"
+#include "MantidQtSliceViewer/PeakOverlaySphere.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -61,7 +61,7 @@ namespace MantidQt
 
     boost::shared_ptr<PeakOverlayView> PeakOverlayFactory::createView(const Mantid::Kernel::V3D& position) const
     {
-      return boost::make_shared<PeakOverlay>(m_plot, m_parent, position, this->m_peakRadius, this->m_peakColour);
+      return boost::make_shared<PeakOverlaySphere>(m_plot, m_parent, position, this->m_peakRadius, this->m_peakColour);
     }
 
     std::string PeakOverlayFactory::getPlotXLabel() const

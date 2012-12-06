@@ -6,7 +6,7 @@ set ( SRC_FILES
 	src/DimensionSliceWidget.cpp
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
-	src/PeakOverlay.cpp
+	src/PeakOverlaySphere.cpp
 	src/PeakOverlayFactory.cpp
     src/PeakTransform.cpp
     src/PeakTransformHKL.cpp
@@ -35,7 +35,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/NullPeaksPresenter.h
-	inc/MantidQtSliceViewer/PeakOverlay.h
+	inc/MantidQtSliceViewer/PeakOverlaySphere.h
 	inc/MantidQtSliceViewer/PeakOverlayView.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayFactory.h
@@ -60,7 +60,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
-	inc/MantidQtSliceViewer/PeakOverlay.h
+	inc/MantidQtSliceViewer/PeakOverlaySphere.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h

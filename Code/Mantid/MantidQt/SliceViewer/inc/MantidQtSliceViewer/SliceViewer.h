@@ -12,7 +12,6 @@
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
-#include "MantidQtSliceViewer/PeakOverlay.h"
 #include "MantidQtSliceViewer/PeakTransformSelector.h"
 #include "QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"

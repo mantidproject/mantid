@@ -1,4 +1,4 @@
-#include "MantidQtSliceViewer/PeakOverlay.h"
+#include "MantidQtSliceViewer/PeakOverlaySphere.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
@@ -22,7 +22,7 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  PeakOverlay::PeakOverlay(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, const QColor& peakColour)
+  PeakOverlaySphere::PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, const QColor& peakColour)
   : QWidget( parent ),
     m_plot(plot),
     m_originalOrigin(origin),
@@ -40,7 +40,7 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  PeakOverlay::~PeakOverlay()
+  PeakOverlaySphere::~PeakOverlaySphere()
   {
   }
 
@@ -63,7 +63,7 @@ namespace SliceViewer
       \           /
        \---------/
   */
-  void PeakOverlay::setSlicePoint(const double& z)
+  void PeakOverlaySphere::setSlicePoint(const double& z)
   {
     const double distanceSQ = (z - m_origin.Z()) * (z - m_origin.Z());
     const double distance = std::sqrt(distanceSQ);
@@ -85,17 +85,17 @@ namespace SliceViewer
     this->update(); //repaint
   }
 
-  const Mantid::Kernel::V3D & PeakOverlay::getOrigin() const
+  const Mantid::Kernel::V3D & PeakOverlaySphere::getOrigin() const
   { return m_origin; }
 
-  double PeakOverlay::getRadius() const
+  double PeakOverlaySphere::getRadius() const
   { 
     return m_radius;
   }
 
   //----------------------------------------------------------------------------------------------
   /// Return the recommended size of the widget
-  QSize PeakOverlay::sizeHint() const
+  QSize PeakOverlaySphere::sizeHint() const
   {
     //TODO: Is there a smarter way to find the right size?
     return QSize(20000, 20000);
@@ -103,16 +103,16 @@ namespace SliceViewer
     //return m_plot->canvas()->size();
   }
 
-  QSize PeakOverlay::size() const
+  QSize PeakOverlaySphere::size() const
   { return m_plot->canvas()->size(); }
-  int PeakOverlay::height() const
+  int PeakOverlaySphere::height() const
   { return m_plot->canvas()->height(); }
-  int PeakOverlay::width() const
+  int PeakOverlaySphere::width() const
   { return m_plot->canvas()->width(); }
 
   //----------------------------------------------------------------------------------------------
   /// Paint the overlay
-  void PeakOverlay::paintEvent(QPaintEvent * /*event*/)
+  void PeakOverlaySphere::paintEvent(QPaintEvent * /*event*/)
   {
     // Linear Transform from MD coordinates into Windows/Qt coordinates for ellipse rendering. TODO: This can be done outside of paintEvent.
     const int xOrigin = m_plot->transform( QwtPlot::xBottom, m_origin.X() );
@@ -153,22 +153,22 @@ namespace SliceViewer
     
   }
 
-  void PeakOverlay::updateView()
+  void PeakOverlaySphere::updateView()
   {
     this->update();
   }
 
-  void PeakOverlay::hideView()
+  void PeakOverlaySphere::hideView()
   {
     this->hide();
   }
 
-  void PeakOverlay::showView()
+  void PeakOverlaySphere::showView()
   {
     this->show();
   }
 
-  void PeakOverlay::movePosition(PeakTransform_sptr transform)
+  void PeakOverlaySphere::movePosition(PeakTransform_sptr transform)
   {
     // Will have the plots x, y, and z aligned to the correct h, k, l value.
     m_origin = transform->transform(this->m_originalOrigin);
