@@ -11,32 +11,90 @@
 #include <Poco/Net/NameValueCollection.h>
 #include <Poco/URI.h>
 
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/Text.h>
+
 #include <ostream>
 #include <sstream>
 using namespace std;
 
 
 // Get a reference to the logger
-Mantid::Kernel::Logger& MwsRemoteJobManager::g_log = Mantid::Kernel::Logger::get("MwsRemoteJobManager");
+Mantid::Kernel::Logger& RemoteJobManager::g_log = Mantid::Kernel::Logger::get("RemoteJobManager");
 
 
-void RemoteJobManager::saveProperties( int itemNum)
+RemoteJobManager::RemoteJobManager( const Poco::XML::Element* elem)
 {
-    Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
-    ostringstream tempStr;
-    string prefix("Cluster.");
-    tempStr << itemNum;
-    prefix += tempStr.str() + string(".");
+  m_displayName = elem->getAttribute("name");
+  if (m_displayName.length() == 0)
+  {
+    g_log.error("Compute Resources must have a name attribute");
+    throw std::runtime_error("Compute Resources must have a name attribute");
+  }
 
-    config.setString( prefix + string( "DisplayName"), m_displayName);
-    config.setString( prefix + string( "ConfigFileUrl"), m_configFileUrl);
+  Poco::XML::NodeList* pNL_configFileUrl = elem->getElementsByTagName("configFileURL");
+  if (pNL_configFileUrl->length() != 1)
+  {
+    g_log.error("Compute Resources must have exactly one configFileURL tag");
+    throw std::runtime_error("Compute Resources must have exactly one configFileURL tag");
+  }
+  else
+  {
+    Poco::XML::NodeList* pNL = pNL_configFileUrl->item(0)->childNodes();
+    if (pNL->length() > 0)
+    {
+      Poco::XML::Text* txt = dynamic_cast<Poco::XML::Text*>(pNL->item(0));
+      if (txt)
+      {
+        m_configFileUrl = txt->getData();
+      }
+    }
+  }
+}
+
+/* ************* HTTPRemoteJobManagaer member functions ****************** */
+
+HttpRemoteJobManager::HttpRemoteJobManager( const Poco::XML::Element* elem)
+  : RemoteJobManager( elem)
+{
+  Poco::XML::NodeList* pNL_baseUrl = elem->getElementsByTagName("baseURL");
+  if (pNL_baseUrl->length() != 1)
+  {
+    g_log.error("HTTP Compute Resources must have exactly one baseURL tag");
+    throw std::runtime_error("HTTP Compute Resources must have exactly one baseURL tag");
+  }
+  else
+  {
+    Poco::XML::NodeList* pNL = pNL_baseUrl->item(0)->childNodes();
+    if (pNL->length() > 0)
+    {
+      Poco::XML::Text* txt = dynamic_cast<Poco::XML::Text*>(pNL->item(0));
+      if (txt)
+      {
+        m_serviceBaseUrl = txt->getData();
+      }
+    }
+  }
 }
 
 
 
-/* ************* HTTPRemoteJobManagaer member functions ****************** */
+// If the user name member has been set, save that in the properties file
+// so the user won't have to enter it next time.
+void HttpRemoteJobManager::saveProperties()
+{
+  if (m_userName.length() > 0)
+  {
+    Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
+    string key("Cluster." + m_displayName + ".UserName");
+    config.setString( key, m_userName);
+  }
+}
 
-// Notifiy the cluster that we want to start a new transaction
+
+
+// Notify the cluster that we want to start a new transaction
 // On success, transId and directory will contain the transaction ID and the name
 // of the directory that's been created for this transaction
 // If we get an error message back from the server, it will be returned in the
@@ -248,12 +306,9 @@ Poco::Net::NameValueCollection HttpRemoteJobManager::getCookies()
 
 /* ************* MWSRemoteJobManagaer member functions ****************** */
 
-MwsRemoteJobManager::MwsRemoteJobManager( std::string displayName, std::string configFileUrl,
-                                          std::string serviceBaseUrl, std::string userName) :
-    HttpRemoteJobManager( displayName, configFileUrl, serviceBaseUrl, userName)
-
+MwsRemoteJobManager::MwsRemoteJobManager(const Poco::XML::Element *elem)
+  : HttpRemoteJobManager( elem)
 {
-
   // MWS rather annoyingly uses its own format for date/time strings.  One of the main
   // differences between MWS strings and ISO 8601 is the use of a timzezone abbreviation
   // instead of an offset from UTC.
@@ -271,21 +326,6 @@ MwsRemoteJobManager::MwsRemoteJobManager( std::string displayName, std::string c
   m_tzOffset["PST"] = "-8";
   m_tzOffset["PDT"] = "-9";
   m_tzOffset["UTC"] = "+0";
-}
-
-void MwsRemoteJobManager::saveProperties( int itemNum)
-{
-    HttpRemoteJobManager::saveProperties( itemNum);
-
-    Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
-    ostringstream tempStr;
-    string prefix("Cluster.");
-    tempStr << itemNum;
-    prefix += tempStr.str() + string(".");
-
-    config.setString( prefix + string( "Type"), getType());
-    config.setString( prefix + string( "ServiceBaseUrl"), m_serviceBaseUrl);
-    config.setString( prefix + string( "UserName"), m_userName);
 }
 
 
@@ -334,7 +374,7 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
 
     // Open an HTTP connection to the cluster
     Poco::URI uri(m_serviceBaseUrl);
-    
+
     if (uri.getScheme() != "https")
     {
       // Disallow unencrypted channels (because we're sending the password in the
@@ -342,7 +382,7 @@ bool MwsRemoteJobManager::submitJob( const RemoteTask &remoteTask, string &retSt
       retString = "Refusing to initiate unencrypted channel.  Only HTTPS URL's are allowed.";
       return false;
     }
-    
+
     Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
     Poco::Net::HTTPSClientSession session( uri.getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
 
@@ -460,7 +500,7 @@ bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
 
   // Open an HTTP connection to the cluster
   Poco::URI uri(m_serviceBaseUrl);
-  
+
   if (uri.getScheme() != "https")
   {
     // Disallow unencrypted channels (because we're sending the password in the
@@ -468,7 +508,7 @@ bool MwsRemoteJobManager::jobStatus( const std::string &jobId,
     errMsg = "Refusing to initiate unencrypted channel.  Only HTTPS URL's are allowed.";
     return false;
   }
-  
+
   Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
   Poco::Net::HTTPSClientSession session( uri.getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
 
@@ -602,7 +642,7 @@ bool MwsRemoteJobManager::jobStatusAll( std::vector<RemoteJob> &jobList,
 
   // Open an HTTP connection to the cluster
   Poco::URI uri(m_serviceBaseUrl);
-  
+
   if (uri.getScheme() != "https")
   {
     // Disallow unencrypted channels (because we're sending the password in the
@@ -767,7 +807,7 @@ bool MwsRemoteJobManager::jobOutputReady( const std::string &jobId)
 
   // Open an HTTP connection to the cluster
   Poco::URI uri(m_serviceBaseUrl);
-  
+
   Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
   Poco::Net::HTTPSClientSession session( uri.getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
 
@@ -836,7 +876,7 @@ bool MwsRemoteJobManager::getJobOutput( const std::string &jobId, std::ostream &
 
   // Open an HTTP connection to the cluster
   Poco::URI uri(m_serviceBaseUrl);
-  
+
   Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "", "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
   Poco::Net::HTTPSClientSession session( uri.getHost(), Poco::Net::HTTPSClientSession::HTTPS_PORT, context);
 
@@ -865,7 +905,7 @@ bool MwsRemoteJobManager::getJobOutput( const std::string &jobId, std::ostream &
   req.setCredentials( "Basic", encodedAuth.str());
 
   // Attach any cookies we've got from previous responses
-  req.setCookies( getCookies());   
+  req.setCookies( getCookies());
 
   session.sendRequest( req);
 
@@ -955,86 +995,3 @@ std::string MwsRemoteJobManager::escapeQuoteChars( const std::string & str)
 
   return out;
 }
-
-
-// On success, creates a new object and returns pointer to it.  On failure,
-// returns NULL
-RemoteJobManager *RemoteJobManagerFactory::createFromProperties( int itemNum)
-{
-    // All the properties should start with the key "Cluster", followed by a key for their
-    // item number, followed by the keys remaining keys they need.  ie: Cluster.0.DisplayName
-
-    Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
-    ostringstream tempStr;
-    string prefix("Cluster.");
-    tempStr << itemNum;
-    prefix += tempStr.str();
-
-    std::vector< std::string> keys = config.getKeys( prefix);
-
-    if (keys.size() == 0)
-        return NULL;
-
-    // Need a key for Type and it must have a value we recognize
-    if (find( keys.begin(), keys.end(), std::string( "Type")) == keys.end())
-        return NULL;
-
-    std::string managerType;
-    config.getValue( prefix + std::string(".Type"), managerType);
-
-    if ( managerType == "MWS") return RemoteJobManagerFactory::createQtMwsManager( itemNum);
-    // else if.....
-    // else if.....
-
-
-    // Type not recognized
-    return NULL;
-
-}
-
-
-MwsRemoteJobManager *RemoteJobManagerFactory::createQtMwsManager( int itemNum)
-{
-    // There's 4 values that we need:  ConfigFileUrl, DisplayName, ServiceBaseUrl and UserName
-
-    Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
-    ostringstream tempStr;
-    string prefix("Cluster.");
-    tempStr << itemNum;
-    prefix += tempStr.str();
-
-    std::vector< std::string> keys = config.getKeys( prefix);
-
-    if (keys.size() == 0)
-        return NULL;
-
-    if (find( keys.begin(), keys.end(), std::string( "ConfigFileUrl")) == keys.end())
-        return NULL;
-    if (find( keys.begin(), keys.end(), std::string( "DisplayName")) == keys.end())
-        return NULL;
-    if (find( keys.begin(), keys.end(), std::string( "ServiceBaseUrl")) == keys.end())
-        return NULL;
-    if (find( keys.begin(), keys.end(), std::string( "UserName")) == keys.end())
-        return NULL;
-
-
-    std::string configFileUrl, displayName, serviceBaseUrl, userName;
-    config.getValue( prefix + std::string(".ConfigFileUrl"), configFileUrl);
-    config.getValue( prefix + std::string(".DisplayName"), displayName);
-    config.getValue( prefix + std::string(".ServiceBaseUrl"), serviceBaseUrl);
-    config.getValue( prefix + std::string(".UserName"), userName);
-
-    // Do some quick sanity checks on the values...
-    if (configFileUrl.length() == 0)
-        return NULL;
-    if (displayName.length() == 0)
-        return NULL;
-    if (serviceBaseUrl.length() == 0)
-        return NULL;
-    if (userName.length() == 0)
-        return NULL;
-
-    // Validation checks passed.  Create the object
-    return new QtMwsRemoteJobManager( displayName, configFileUrl, serviceBaseUrl, userName);
-}
-

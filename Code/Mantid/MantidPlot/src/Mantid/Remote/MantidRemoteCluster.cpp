@@ -1,4 +1,5 @@
 #include "MantidRemoteCluster.h"
+#include "QtMwsRemoteJobManager.h"
 #include "JobStatusDialog.h"
 #include "../MantidDock.h"
 #include "NewClusterDialog.h"
@@ -72,6 +73,10 @@ RemoteClusterDockWidget::RemoteClusterDockWidget(MantidUI *mui, ApplicationWindo
     QObject::connect( showJobs, SIGNAL( clicked()), this, SLOT( showJobs()));
     QObject::connect( m_clusterCombo, SIGNAL( currentIndexChanged(int)), this, SLOT( clusterChoiceChanged(int)));
 
+    /****************************
+      Commented out as we move RemoteJobManager creation over to Facilities.xml
+      (and probably do away with the DockWidget altogether)
+
     // Load the cluster info from the properties files
     Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
     int numClusters;
@@ -87,10 +92,12 @@ RemoteClusterDockWidget::RemoteClusterDockWidget(MantidUI *mui, ApplicationWindo
             }
         }
     }
+
     std::ostringstream tempStr;
     tempStr << m_clusterList.size();
     config.setString( std::string("Cluster.NumClusters"), tempStr.str());
 
+    *************************/
     setWidget(f);
 }
 
@@ -98,6 +105,10 @@ RemoteClusterDockWidget::~RemoteClusterDockWidget()
 {
     // save the cluster info in the combo box to the user config file
     // (Replace the values in the config file with what's in the combo box.)
+
+  /*************************
+    commenting this out because we don't do things this way anymore
+
     Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
 
     std::ostringstream tempStr;
@@ -108,6 +119,7 @@ RemoteClusterDockWidget::~RemoteClusterDockWidget()
         m_clusterList[i]->saveProperties( i);
     }
     config.saveConfig( config.getUserFilename());
+**************************/
 
     // The cluster list only contains pointers.  We have to delete the objects they point to manually
     RemoteJobManagerList::Iterator it = m_clusterList.begin();
@@ -192,6 +204,9 @@ void RemoteClusterDockWidget::addNewCluster()
     // Grab the values the user entered
     // ToDo:  This will need to change if we ever implement any other type of job manager!
     // (Will probably want to use the job manager factory class....)
+    /***************************************************
+      commenting this bit out since it's not what we want to do anymore...
+
     QtMwsRemoteJobManager *manager = new  QtMwsRemoteJobManager( theDialog->getDisplayName().toStdString(),
                                                                  theDialog->getConfigFileURL().toString().toStdString(),
                                                                  theDialog->getServiceBaseURL().toString().toStdString(),
@@ -200,6 +215,7 @@ void RemoteClusterDockWidget::addNewCluster()
     
     // Add the Display name to the combo box
     m_clusterCombo->addItem( theDialog->getDisplayName());
+    **************************/
   }
   
 }

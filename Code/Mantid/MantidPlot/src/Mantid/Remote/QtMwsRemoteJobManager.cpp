@@ -2,17 +2,21 @@
 // since everything else is handled by the MwsRemoteJobManager class).
 // This is a separate class just to keep the Qt stuff isolated.
 
-
 #include "RemoteJobManager.h"
+#include "QtMwsRemoteJobManager.h"
 
+#include <MantidKernel/RemoteJobManagerFactory.h>
 #include <QString>
 #include <QInputDialog>
 #include <QUrl>
 
-bool QtMwsRemoteJobManager::getPassword()
-{
-  bool isOk;
+// Register with the job manager factory class
+DECLARE_RJM( QtMwsRemoteJobManager, "MWS")
 
+// NOTE: This function will likely change since we may have to ask for a username, too!
+bool QtMwsRemoteJobManager::getPassword()
+{ 
+  bool isOk;
 
   QString msg = QObject::tr("Enter password for ") + QString::fromStdString(m_userName) + QString("@") + QUrl(QString::fromStdString(m_serviceBaseUrl)).encodedHost();
   QString text = QInputDialog::getText( NULL,
