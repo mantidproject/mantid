@@ -1,5 +1,7 @@
 # Algorithm to start Bayes programs
 from MantidFramework import *
+from mantid.simpleapi import *
+from mantid import config, logger, mtd
 from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
 if is_supported_f2py_platform():
@@ -29,6 +31,7 @@ class QLines(PythonAlgorithm):
 		self.declareProperty(Name='EnergyMax', DefaultValue=0.5,Description = 'Maximum energy for fit. Default=0.5')
 		self.declareProperty(Name='SamBinning', DefaultValue=1,Description = 'Binning value (integer) for sample. Default=1')
 		self.declareProperty(Name='ResBinning', DefaultValue=1,Description = 'Binning value (integer) for resolution - QLd only. Default=1')
+		self.declareProperty(Name='Sequence',DefaultValue=True,Description = 'Switch Sequence Off/On')
 		self.declareProperty(Name='Plot',DefaultValue='None',Validator=ListValidator(['None','ProbBeta','Intensity','FwHm','Fit','All']),Description = 'Plot options')
 		self.declareProperty(Name='Verbose',DefaultValue=True,Description = 'Switch Verbose Off/On')
 		self.declareProperty(Name='Save',DefaultValue=False,Description = 'Switch Save result to nxs file Off/On')
@@ -57,9 +60,13 @@ class QLines(PythonAlgorithm):
 		nrbin = self.getPropertyValue('ResBinning')
 		nbins = [nbin, nrbin]
 
-		sname = prefix+sam+'_'+ana
-		rname = prefix+res+'_'+ana
-		rsname = prefix+resn+'_'+ana
+		if rtype == 'Res':
+			rext = 'res'
+		if rtype == 'Data':
+			rext = 'red'
+		sname = prefix+sam+'_'+ana + '_red'
+		rname = prefix+res+'_'+ana + '_' + rext
+		rsname = prefix+resn+'_'+ana + '_ResNorm_Paras'
 		erange = [float(emin), float(emax)]
 		if elastic:
 			o_el = 1
@@ -80,10 +87,30 @@ class QLines(PythonAlgorithm):
 		else:
 			o_res = 0
 		fitOp = [o_el, o_bgd, o_w1, o_res]
+		loopOp = self.getProperty('Sequence')
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getPropertyValue('Plot')
 		saveOp = self.getProperty('Save')
-		Main.QLStart(prog,inType,sname,rinType,rname,rtype,rsname,erange,nbins,fitOp,wfile,verbOp,plotOp,saveOp)
-#def QLStart(program,ana,samWS,resWS,rtype,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save):
+
+		workdir = config['defaultsave.directory']
+		if inType == 'File':
+			spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
+			LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+			Smessage = 'Sample from File : '+spath
+		else:
+			Smessage = 'Sample from Workspace : '+sname
+		if rinType == 'File':
+			rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
+			LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+			Rmessage = 'Resolution from File : '+rpath
+		else:
+			Rmessage = 'Resolution from Workspace : '+rname
+		if verbOp:
+			logger.notice(Smessage)
+			logger.notice(Rmessage)
+		if fitOp[3] == 1:
+			path = os.path.join(workdir, rsname+'.nxs')	# path name for resnnrm nxs file
+			LoadNexusProcessed(Filename=path, OutputWorkspace='ResNorm')
+		Main.QLRun(prog,sname,rname,rsname,erange,nbins,fitOp,wfile,loopOp,verbOp,plotOp,saveOp)
 
 mantid.registerPyAlgorithm(QLines())         # Register algorithm with Mantid
