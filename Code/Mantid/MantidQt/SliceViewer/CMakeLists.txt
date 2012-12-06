@@ -7,7 +7,9 @@ set ( SRC_FILES
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
 	src/PeakOverlaySphere.cpp
-	src/PeakOverlayFactory.cpp
+	src/PeakOverlaySphereFactory.cpp
+	src/PeakOverlayCrossFactory.cpp
+	src/PeakOverlayViewFactoryBase.cpp
     src/PeakTransform.cpp
     src/PeakTransformHKL.cpp
     src/PeakTransformQSample.cpp
@@ -38,7 +40,9 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakOverlaySphere.h
 	inc/MantidQtSliceViewer/PeakOverlayView.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactory.h
-	inc/MantidQtSliceViewer/PeakOverlayFactory.h
+	inc/MantidQtSliceViewer/PeakOverlayViewFactoryBase.h
+	inc/MantidQtSliceViewer/PeakOverlaySphereFactory.h
+	inc/MantidQtSliceViewer/PeakOverlayCrossFactory.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
 	inc/MantidQtSliceViewer/PeakTransformHKL.h	
     inc/MantidQtSliceViewer/PeakTransformQSample.h

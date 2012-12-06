@@ -21,7 +21,8 @@
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
-#include "MantidQtSliceViewer/PeakOverlayFactory.h"
+#include "MantidQtSliceViewer/PeakOverlaySphereFactory.h"
+#include "MantidQtSliceViewer/PeakOverlayCrossFactory.h"
 #include "MantidQtSliceViewer/PeakTransformHKL.h"
 #include "MantidQtSliceViewer/PeakTransformQSample.h"
 #include "MantidQtSliceViewer/PeakTransformQLab.h"
@@ -2181,8 +2182,8 @@ void SliceViewer::peakOverlay_toggled(bool checked)
         {
           IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list[i].toStdString());
           const int numberOfChildPresenters = m_peaksPresenter->size();
-          PeakOverlayViewFactory_sptr viewFactoryIntegratedPeaks  = boost::make_shared<PeakOverlayFactory>(m_plot, m_plot->canvas(), numberOfChildPresenters);
-          PeakOverlayViewFactory_sptr viewFactoryNonIntegratedPeaks  = boost::make_shared<PeakOverlayFactory>(m_plot, m_plot->canvas(), numberOfChildPresenters);
+          PeakOverlayViewFactory_sptr viewFactoryIntegratedPeaks  = boost::make_shared<PeakOverlaySphereFactory>(m_plot, m_plot->canvas(), numberOfChildPresenters);
+          PeakOverlayViewFactory_sptr viewFactoryNonIntegratedPeaks  = boost::make_shared<PeakOverlayCrossFactory>(m_plot, m_plot->canvas(), numberOfChildPresenters);
           try
           {
             m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(viewFactoryNonIntegratedPeaks, viewFactoryIntegratedPeaks,  peaksWS, transformFactory));
