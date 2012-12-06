@@ -1,6 +1,7 @@
 #include "InstrumentWindowRenderTab.h"
 #include "ProjectionSurface.h"
 #include "UnwrappedSurface.h"
+#include "Projection3D.h"
 
 #include <QMenu>
 #include <QVBoxLayout>
@@ -26,10 +27,18 @@
 
 
 InstrumentWindowRenderTab::InstrumentWindowRenderTab(InstrumentWindow* instrWindow):
-InstrumentWindowTab(instrWindow),m_instrWindow(instrWindow)
+InstrumentWindowTab(instrWindow)
 {
-  m_InstrumentDisplay = m_instrWindow->getInstrumentDisplay();
   QVBoxLayout* renderControlsLayout=new QVBoxLayout(this);
+
+  // Connect to InstrumentWindow signals
+  connect(m_instrWindow,SIGNAL(surfaceTypeChanged(int)),this,SLOT(surfaceTypeChanged(int)));
+  connect(m_instrWindow,SIGNAL(colorMapChanged()),this,SLOT(colorMapChanged()));
+  connect(m_instrWindow,SIGNAL(colorMapMaxValueChanged(double)),this,SLOT(setMaxValue(double)));
+  connect(m_instrWindow,SIGNAL(colorMapMinValueChanged(double)),this,SLOT(setMinValue(double)));
+  connect(m_instrWindow,SIGNAL(colorMapRangeChanged(double,double)),this,SLOT(setRange(double,double)));
+  connect(m_instrWindow,SIGNAL(scaleTypeChanged(int)),this,SLOT(scaleTypeChanged(int)));
+  connect(m_instrWindow,SIGNAL(glOptionChanged(bool)),this,SLOT(glOptionChanged(bool)));
 
   // Render Mode control
   m_renderMode = new QComboBox(this);
@@ -54,7 +63,7 @@ InstrumentWindowTab(instrWindow),m_instrWindow(instrWindow)
   m_lighting = new QAction("Lighting",this);
   m_lighting->setCheckable(true);
   m_lighting->setChecked(false);
-  connect(m_lighting,SIGNAL(toggled(bool)),m_instrWindow->getInstrumentDisplay(),SLOT(enableLighting(bool)));
+  connect(m_lighting,SIGNAL(toggled(bool)),m_instrWindow,SIGNAL(enableLighting(bool)));
   m_displayAxes = new QAction("Display Axes",this);
   m_displayAxes->setCheckable(true);
   m_displayAxes->setChecked(true);
@@ -121,7 +130,6 @@ InstrumentWindowTab(instrWindow),m_instrWindow(instrWindow)
 
 InstrumentWindowRenderTab::~InstrumentWindowRenderTab()
 {
-  saveSettings("Mantid/InstrumentWindow");
 }
 
 /** Sets up the controls and surrounding layout that allows uses to view the instrument
@@ -147,12 +155,16 @@ QFrame * InstrumentWindowRenderTab::setupAxisFrame()
 
   connect(mAxisCombo,SIGNAL(currentIndexChanged(const QString&)),m_instrWindow,SLOT(setViewDirection(const QString&)));
 
-  loadSettings("Mantid/InstrumentWindow");
   return m_resetViewFrame;
 }
-void InstrumentWindowRenderTab::initOnShow()
+void InstrumentWindowRenderTab::initSurface()
 {
   setAxis(QString::fromStdString(m_instrWindow->getInstrumentActor()->getInstrument()->getDefaultAxis()));
+  Projection3D *p3d = dynamic_cast<Projection3D*>(getSurface());
+  if ( p3d )
+  {
+      p3d->set3DAxesState(areAxesOn());
+  }
 }
 
 /**
@@ -172,27 +184,26 @@ void InstrumentWindowRenderTab::changeColormap(const QString &filename)
   m_instrWindow->changeColormap(filename);
 }
 
-void InstrumentWindowRenderTab::loadSettings(const QString& section)
+void InstrumentWindowRenderTab::loadSettings(const QSettings& settings)
 {
-  QSettings settings;
-  settings.beginGroup(section);
   int show3daxes = settings.value("3DAxesShown", 1 ).toInt();
   m_instrWindow->set3DAxesState(show3daxes != 0);
   m_displayAxes->blockSignals(true);
   m_displayAxes->setChecked(show3daxes != 0);
   m_displayAxes->blockSignals(false);
-  settings.endGroup();
 }
 
-void InstrumentWindowRenderTab::saveSettings(const QString& section)
+void InstrumentWindowRenderTab::saveSettings(QSettings& settings) const
 {
-  QSettings settings;
-  settings.beginGroup(section);
   int val = 0;  if (m_displayAxes->isChecked()) val = 1;
   settings.setValue("3DAxesShown", QVariant(val));
-  settings.endGroup();
 }
 
+/**
+  * Set minimum value on the colormap scale.
+  * @param value :: New value to set.
+  * @param apply ::
+  */
 void InstrumentWindowRenderTab::setMinValue(double value, bool apply)
 {
   if (!apply) m_colorMapWidget->blockSignals(true);
@@ -200,11 +211,30 @@ void InstrumentWindowRenderTab::setMinValue(double value, bool apply)
   if (!apply) m_colorMapWidget->blockSignals(false);
 }
 
+/**
+  * Set maximum value on the colormap scale.
+  * @param value :: New value to set.
+  * @param apply ::
+  */
 void InstrumentWindowRenderTab::setMaxValue(double value, bool apply)
 {
   if (!apply) m_colorMapWidget->blockSignals(true);
   m_colorMapWidget->setMaxValue(value);
   if (!apply) m_colorMapWidget->blockSignals(false);
+}
+
+/**
+  * Set minimum and maximum values on the colormap scale.
+  * @param minValue :: New min value to set.
+  * @param maxValue :: New max value to set.
+  * @param apply ::
+  */
+void InstrumentWindowRenderTab::setRange(double minValue, double maxValue, bool apply)
+{
+    if (!apply) m_colorMapWidget->blockSignals(true);
+    m_colorMapWidget->setMinValue(minValue);
+    m_colorMapWidget->setMaxValue(maxValue);
+    if (!apply) m_colorMapWidget->blockSignals(false);
 }
 
 GraphOptions::ScaleType InstrumentWindowRenderTab::getScaleType()const
@@ -256,22 +286,11 @@ void InstrumentWindowRenderTab::showAxes(bool on)
 
 void InstrumentWindowRenderTab::showEvent (QShowEvent *)
 {
-  ProjectionSurface* surface = m_InstrumentDisplay->getSurface();
+  ProjectionSurface* surface = getSurface();
   if (surface)
   {
     surface->setInteractionMode(ProjectionSurface::MoveMode);
   }
-}
-
-/**
- * Update the surface type control to show type without emiting the signal.
- * @param type :: InstrumentWindow::SurfaceType.
- */
-void InstrumentWindowRenderTab::updateSurfaceTypeControl(int type)
-{
-  m_renderMode->blockSignals(true);
-  m_renderMode->setCurrentIndex(type);
-  m_renderMode->blockSignals(false);
 }
 
 void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
@@ -379,4 +398,49 @@ void InstrumentWindowRenderTab::setSurfaceType(int index)
   m_instrWindow->setSurfaceType( index );
   showResetView( index );
   showFlipControl( index );
+}
+
+/**
+  * Respond to surface change from script.
+  * @param typeIndex :: Index selected in the surface type combo box.
+  */
+void InstrumentWindowRenderTab::surfaceTypeChanged(int typeIndex)
+{
+    m_renderMode->blockSignals(true);
+    m_renderMode->setCurrentIndex( typeIndex );
+    m_renderMode->blockSignals(false);
+    showResetView( typeIndex );
+    showFlipControl( typeIndex );
+}
+
+/**
+  * Respond to external change of the colormap.
+  */
+void InstrumentWindowRenderTab::colorMapChanged()
+{
+    InstrumentActor *instrumentActor = m_instrWindow->getInstrumentActor();
+    setupColorBar(
+      instrumentActor->getColorMap(),
+      instrumentActor->minValue(),
+      instrumentActor->maxValue(),
+      instrumentActor->minPositiveValue(),
+      instrumentActor->autoscaling()
+                );
+}
+
+void InstrumentWindowRenderTab::scaleTypeChanged(int type)
+{
+    setScaleType((GraphOptions::ScaleType)type);
+}
+
+/**
+  * Update the GUI element after the "Use OpenGL" option has been changed
+  * programmatically.
+  * @param on :: True for enabling OpenGL, false for disabling.
+  */
+void InstrumentWindowRenderTab::glOptionChanged(bool on)
+{
+    m_GLView->blockSignals(true);
+    m_GLView->setChecked(on);
+    m_GLView->blockSignals(false);
 }

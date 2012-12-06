@@ -7,7 +7,6 @@
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-class InstrumentWindow;
 class Instrument3DWidget;
 class InstrumentActor;
 class CollapsiblePanel;
@@ -48,10 +47,13 @@ public:
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(int detid);
   bool canUpdateTouchedDetector()const;
-  void initOnShow();
-  void setInstrumentDisplayContextMenu(QMenu& context);
   TubeXUnits getTubeXUnits() const {return m_tubeXUnits;}
   void mouseLeftInstrmentDisplay();
+  void initSurface();
+  void saveSettings(QSettings& settings) const;
+  void loadSettings(const QSettings& settings);
+  bool addToDisplayContextMenu(QMenu&) const;
+
 public slots:
   void setTubeXUnits(int units);
   void changedIntegrationRange(double,double);
@@ -65,6 +67,8 @@ private slots:
   void storeCurve();
   void removeCurve(const QString &);
   void savePlotToWorkspace();
+  void singleDetectorTouched(int detid);
+  void singleDetectorPicked(int detid);
 private:
   void showEvent (QShowEvent *);
   void updatePlot(int detid);
@@ -92,10 +96,6 @@ private:
     std::vector<double>* err = NULL);
     TubeXUnits getTubeXUnits(const QString& name) const;
     QString getTubeXUnitsName(TubeXUnits unit) const;
-
-  /// The parent InstrumentWindow
-  InstrumentWindow* m_instrWindow;
-  MantidGLWidget *mInstrumentDisplay;
 
   /* Pick tab controls */
   OneCurvePlot* m_plot; ///< Miniplot to display data in the detectors
@@ -127,7 +127,7 @@ private:
   SelectionType m_selectionType;
   int m_currentDetID;
   TubeXUnits m_tubeXUnits; ///< quantity the time bin integrals to be plotted against
-  bool m_freezePlot;
+  mutable bool m_freezePlot;
 };
 
 

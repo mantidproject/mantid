@@ -5,7 +5,6 @@
 #include "../MantidAlgorithmMetatype.h"
 
 #include "MantidGLWidget.h"
-#include "InstrumentTreeWidget.h"
 #include "BinDialog.h"
 
 #include "MantidQtAPI/GraphOptions.h"
@@ -22,9 +21,7 @@
 class InstrumentActor;
 class OneCurvePlot;
 class CollapsiblePanel;
-class InstrumentWindowRenderTab;
-class InstrumentWindowPickTab;
-class InstrumentWindowMaskTab;
+class InstrumentWindowTab;
 class XIntegrationControl;
 class SimpleWidget;
 class ProjectionSurface;
@@ -44,6 +41,7 @@ class QShowEvent;
 class QDragEnterEvent;
 class QDropEvent;
 class QStackedLayout;
+class QSettings;
 
 /**
   \class  InstrumentWindow
@@ -53,25 +51,6 @@ class QStackedLayout;
   \version 1.0
 
   This is a QT widget for the controls and display of instrument geometry
-
-  Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
  */
 class InstrumentWindow : public MdiSubWindow, public MantidQt::API::WorkspaceObserver, public Mantid::API::AlgorithmObserver
 {
@@ -89,8 +68,6 @@ public:
   SurfaceType getSurfaceType()const{return m_surfaceType;}
   /// Get pointer to the projection surface
   ProjectionSurface* getSurface() const;
-  /// Set newly created projection surface
-  void setSurface(ProjectionSurface* surface);
   /// True if the GL instrument display is currently on
   bool isGLEnabled() const;
   /// Toggle between the GL and simple instrument display widgets
@@ -109,12 +86,28 @@ public:
   void setViewType(const QString& type);
   /// for saving the instrument window  to mantid project
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
-  MantidGLWidget* getInstrumentDisplay(){return m_InstrumentDisplay;}
+  //MantidGLWidget* getInstrumentDisplay(){return m_InstrumentDisplay;}
   InstrumentActor* getInstrumentActor(){return m_instrumentActor;}
   bool blocked()const{return m_blocked;}
   void selectTab(int tab);
   void selectTab(Tab tab){selectTab(int(tab));}
-  Tab getTab()const;
+  InstrumentWindowTab *getTab()const;
+
+signals:
+  void enableLighting(bool);
+  void plotSpectra(const QString&,const std::set<int>&);
+  void createDetectorTable(const QString&,const std::vector<int>&,bool);
+  void execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*);
+  void execMantidAlgorithm(Mantid::API::IAlgorithm_sptr);
+  void needSetIntegrationRange(double,double);
+  void surfaceTypeChanged(int);
+  void colorMapChanged();
+  void colorMapMinValueChanged(double);
+  void colorMapMaxValueChanged(double);
+  void colorMapRangeChanged(double,double);
+  void scaleTypeChanged(int);
+  void integrationRangeChanged(double,double);
+  void glOptionChanged(bool);
 
 protected:
   /// Called just before a show event
@@ -126,9 +119,7 @@ protected:
   bool eventFilter(QObject *obj, QEvent *ev);
 
 public slots:
-  void tabChanged(int i);
-  void singleDetectorPicked(int);
-  void singleDetectorTouched(int);
+  void tabChanged(int);
   void multipleDetectorsSelected(QList<int>&);
   void showPickOptions();
   void spectraInfoDialog();
@@ -168,20 +159,16 @@ public slots:
   /// Enable OpenGL. Slot called from render tab only - doesn't update the checkbox.
   void enableGL( bool on );
 
-signals:
-  void plotSpectra(const QString&,const std::set<int>&);
-  void createDetectorTable(const QString&,const std::vector<int>&,bool);
-  void execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*);
-  void execMantidAlgorithm(Mantid::API::IAlgorithm_sptr);
-  void needSetIntegrationRange(double,double);
-
 private slots:
   void block();
   void unblock();
   void mouseLeftInstrumentDisplay();
 
 private:
+  /// Set newly created projection surface
+  void setSurface(ProjectionSurface* surface);
   QWidget * createInstrumentTreeTab(QTabWidget* ControlsTab);
+  void createTabs(QSettings& settings);
   void saveSettings();
 
   QString asString(const std::vector<int>& numbers) const;
@@ -199,8 +186,17 @@ private:
   /// Set the surface type.
   void setSurfaceType(const QString& typeStr);
 
+  // GUI elements
   QLabel*      mInteractionInfo;
   QTabWidget*  mControlsTab;
+  /// Control tabs
+  QList<InstrumentWindowTab *> m_tabs;
+  XIntegrationControl * m_xIntegration;
+  /// The OpenGL widget to display the instrument
+  MantidGLWidget* m_InstrumentDisplay;
+  /// The simple widget to display the instrument
+  SimpleWidget* m_simpleDisplay;
+
   // Actions for the pick menu
   QAction *mInfoAction, *mPlotAction, *mDetTableAction, *mGroupDetsAction, *mMaskDetsAction;
   /// Extract selected detector ids to a new workspace
@@ -216,14 +212,10 @@ private:
 
   /// The name of workspace that this window is associated with. The InstrumentActor holds a pointer to the workspace itself.
   const QString m_workspaceName;
-  /// The OpenGL widget to display the instrument
-  MantidGLWidget* m_InstrumentDisplay;
-  /// The simple widget to display the instrument
-  SimpleWidget* m_simpleDisplay;
+  /// Instrument actor is an interface to the instrument
+  InstrumentActor* m_instrumentActor;
   /// Option to use or not OpenGL display for "unwrapped" view, 3D is always in OpenGL
   bool m_useOpenGL;
-  /// Instrument actor
-  InstrumentActor* m_instrumentActor;
   /// 3D view or unwrapped
   SurfaceType m_surfaceType;       
   /// Stacked layout managing m_InstrumentDisplay and m_simpleDisplay
@@ -234,18 +226,11 @@ private:
   int mDetectorIDSelected; 
   std::set<int> mSpectraIDSelectedList;
   std::vector<int> mDetectorIDSelectedList;
-  /// Widget to display instrument tree
-  InstrumentTreeWidget* mInstrumentTree; 
 
   /// The full path of the default color map
   QString mDefaultColorMap; 
   /// The last used dialog directory
   QString m_savedialog_dir; 
-
-  InstrumentWindowRenderTab * m_renderTab;
-  InstrumentWindowPickTab * m_pickTab;
-  InstrumentWindowMaskTab * m_maskTab;
-  XIntegrationControl * m_xIntegration;
 
   /// stores whether the user changed the view (so don't automatically change it)
   bool mViewChanged;

@@ -49,7 +49,6 @@
 
 InstrumentWindowMaskTab::InstrumentWindowMaskTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow),
-m_instrumentWindow(instrWindow),
 m_activity(Select),
 m_hasMaskToApply(false),
 m_userEditing(true)
@@ -170,13 +169,13 @@ m_userEditing(true)
 
 }
 
-void InstrumentWindowMaskTab::initOnShow()
+void InstrumentWindowMaskTab::initSurface()
 {
-  connect(m_instrumentWindow->getSurface(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
-  connect(m_instrumentWindow->getSurface(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
-  connect(m_instrumentWindow->getSurface(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
-  connect(m_instrumentWindow->getSurface(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
-  enableApply( m_instrumentWindow->getSurface()->hasMasks() );
+  connect(m_instrWindow->getSurface(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
+  connect(m_instrWindow->getSurface(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
+  connect(m_instrWindow->getSurface(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
+  connect(m_instrWindow->getSurface(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
+  enableApply( m_instrWindow->getSurface()->hasMasks() );
 }
 
 void InstrumentWindowMaskTab::setActivity()
@@ -186,36 +185,36 @@ void InstrumentWindowMaskTab::setActivity()
   if (m_move->isChecked())
   {
     m_activity = Move;
-    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
   }
   else if (m_pointer->isChecked())
   {
     m_activity = Select;
-    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
   else if (m_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
-    m_instrumentWindow->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
-    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_instrWindow->getSurface()->startCreatingShape2D("ellipse",borderColor,fillColor);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
   else if (m_rectangle->isChecked())
   {
     m_activity = DrawEllipse;
-    m_instrumentWindow->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
-    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_instrWindow->getSurface()->startCreatingShape2D("rectangle",borderColor,fillColor);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
   else if (m_ring_ellipse->isChecked())
   {
     m_activity = DrawEllipse;
-    m_instrumentWindow->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
-    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_instrWindow->getSurface()->startCreatingShape2D("ring ellipse",borderColor,fillColor);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
   else if (m_ring_rectangle->isChecked())
   {
     m_activity = DrawEllipse;
-    m_instrumentWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
-    m_instrumentWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
+    m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
+    m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
 }
 
@@ -239,21 +238,21 @@ void InstrumentWindowMaskTab::shapeChanged()
 {
   if (!m_left) return; // check that everything is ok
   m_userEditing = false; // this prevents resetting shape proeprties by doubleChanged(...)
-  QRectF rect = m_instrumentWindow->getSurface()->getCurrentBoundingRect();
+  QRectF rect = m_instrWindow->getSurface()->getCurrentBoundingRect();
   m_doubleManager->setValue(m_left,rect.left());
   m_doubleManager->setValue(m_top,rect.top());
   m_doubleManager->setValue(m_right,rect.right());
   m_doubleManager->setValue(m_bottom,rect.bottom());
   for(QMap<QtProperty *,QString>::iterator it = m_doublePropertyMap.begin(); it != m_doublePropertyMap.end(); ++it)
   {
-    m_doubleManager->setValue(it.key(),m_instrumentWindow->getSurface()->getCurrentDouble(it.value()));
+    m_doubleManager->setValue(it.key(),m_instrWindow->getSurface()->getCurrentDouble(it.value()));
   }
   for(QMap<QString,QtProperty *>::iterator it = m_pointPropertyMap.begin(); it != m_pointPropertyMap.end(); ++it)
   {
     QtProperty* prop = it.value();
     QList<QtProperty*> subs = prop->subProperties();
     if (subs.size() != 2) continue;
-    QPointF p = m_instrumentWindow->getSurface()->getCurrentPoint(it.key());
+    QPointF p = m_instrWindow->getSurface()->getCurrentPoint(it.key());
     m_doubleManager->setValue(subs[0],p.x());
     m_doubleManager->setValue(subs[1],p.y());
   }
@@ -265,13 +264,14 @@ void InstrumentWindowMaskTab::shapeChanged()
   */
 void InstrumentWindowMaskTab::clearShapes()
 {
-    m_instrumentWindow->getSurface()->clearMask();
+    m_instrWindow->getSurface()->clearMask();
 }
 
 void InstrumentWindowMaskTab::showEvent (QShowEvent *)
 {
   setActivity();
-  m_instrumentWindow->setMouseTracking(true);
+  m_instrWindow->setMouseTracking(true);
+  enableApply( m_instrWindow->getSurface()->hasMasks() );
 }
 
 void InstrumentWindowMaskTab::clearProperties()
@@ -304,7 +304,7 @@ void InstrumentWindowMaskTab::setProperties()
   boundingRectGroup->addSubProperty(m_bottom);
 
   // point properties
-  QStringList pointProperties = m_instrumentWindow->getSurface()->getCurrentPointNames();
+  QStringList pointProperties = m_instrWindow->getSurface()->getCurrentPointNames();
   foreach(QString name,pointProperties)
   {
     QtProperty* point = m_groupManager->addProperty(name);
@@ -319,7 +319,7 @@ void InstrumentWindowMaskTab::setProperties()
   }
 
   // double properties
-  QStringList doubleProperties = m_instrumentWindow->getSurface()->getCurrentDoubleNames();
+  QStringList doubleProperties = m_instrWindow->getSurface()->getCurrentDoubleNames();
   foreach(QString name,doubleProperties)
   {
     QtProperty* prop = m_doubleManager->addProperty(name);
@@ -337,14 +337,14 @@ void InstrumentWindowMaskTab::doubleChanged(QtProperty* prop)
   {
     QRectF rect(QPointF(m_doubleManager->value(m_left),m_doubleManager->value(m_top)),
                 QPointF(m_doubleManager->value(m_right),m_doubleManager->value(m_bottom)));
-    m_instrumentWindow->getSurface()->setCurrentBoundingRect(rect);
+    m_instrWindow->getSurface()->setCurrentBoundingRect(rect);
   }
   else
   {
     QString name = m_doublePropertyMap[prop];
     if (!name.isEmpty())
     {
-      m_instrumentWindow->getSurface()->setCurrentDouble(name,m_doubleManager->value(prop));
+      m_instrWindow->getSurface()->setCurrentDouble(name,m_doubleManager->value(prop));
     }
     else
     {
@@ -355,11 +355,11 @@ void InstrumentWindowMaskTab::doubleChanged(QtProperty* prop)
         QList<QtProperty*> subs = point_prop->subProperties();
         if (subs.size() != 2) return;
         QPointF p(m_doubleManager->value(subs[0]),m_doubleManager->value(subs[1]));
-        m_instrumentWindow->getSurface()->setCurrentPoint(name,p);
+        m_instrWindow->getSurface()->setCurrentPoint(name,p);
       }
     }
   }
-  m_instrumentWindow->update();
+  m_instrWindow->update();
 }
 
 /**
@@ -369,7 +369,7 @@ void InstrumentWindowMaskTab::applyMask()
 {
   storeMask();
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  m_instrumentWindow->getInstrumentActor()->applyMaskWorkspace();
+  m_instrWindow->getInstrumentActor()->applyMaskWorkspace();
   enableApply(false);
   QApplication::restoreOverrideCursor();
 }
@@ -380,8 +380,8 @@ void InstrumentWindowMaskTab::applyMask()
 void InstrumentWindowMaskTab::clearMask()
 {
   clearShapes();
-  m_instrumentWindow->getInstrumentActor()->clearMaskWorkspace();
-  m_instrumentWindow->updateInstrumentView();
+  m_instrWindow->getInstrumentActor()->clearMaskWorkspace();
+  m_instrWindow->updateInstrumentView();
   enableApply(false);
 }
 
@@ -392,8 +392,8 @@ void InstrumentWindowMaskTab::clearMask()
  */
 Mantid::API::MatrixWorkspace_sptr InstrumentWindowMaskTab::createMaskWorkspace(bool invertMask, bool temp)
 {
-  m_instrumentWindow->updateInstrumentView(); // to refresh the pick image
-  Mantid::API::MatrixWorkspace_sptr inputWS = m_instrumentWindow->getInstrumentActor()->getMaskMatrixWorkspace();
+  m_instrWindow->updateInstrumentView(); // to refresh the pick image
+  Mantid::API::MatrixWorkspace_sptr inputWS = m_instrWindow->getInstrumentActor()->getMaskMatrixWorkspace();
   Mantid::API::MatrixWorkspace_sptr outputWS;
   const std::string outputWorkspaceName = generateMaskWorkspaceName(temp);
 
@@ -478,7 +478,7 @@ void InstrumentWindowMaskTab::saveMaskingToFile(bool invertMask)
   {
     clearShapes();
     QString saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-    QString fileName = QFileDialog::getSaveFileName(m_instrumentWindow,"Select location for the mas file",saveDir);
+    QString fileName = QFileDialog::getSaveFileName(m_instrWindow,"Select location for the mas file",saveDir);
 
     if (!fileName.isEmpty())
     {
@@ -548,10 +548,10 @@ void InstrumentWindowMaskTab::storeMask()
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     m_pointer->setChecked(true);
     setActivity();
-    m_instrumentWindow->updateInstrumentView(); // to refresh the pick image
+    m_instrWindow->updateInstrumentView(); // to refresh the pick image
 
     QList<int> dets;
-    m_instrumentWindow->getSurface()->getMaskedDetectors(dets);
+    m_instrWindow->getSurface()->getMaskedDetectors(dets);
     if (!dets.isEmpty())
     {
       std::set<Mantid::detid_t> detList;
@@ -561,9 +561,9 @@ void InstrumentWindowMaskTab::storeMask()
       }
       if ( !detList.empty() )
       {
-        m_instrumentWindow->getInstrumentActor()->getMaskWorkspace()->setMasked( detList );
-        m_instrumentWindow->getInstrumentActor()->update();
-        m_instrumentWindow->updateInstrumentDetectors();
+        m_instrWindow->getInstrumentActor()->getMaskWorkspace()->setMasked( detList );
+        m_instrWindow->getInstrumentActor()->update();
+        m_instrWindow->updateInstrumentDetectors();
       }
     }
     clearShapes();

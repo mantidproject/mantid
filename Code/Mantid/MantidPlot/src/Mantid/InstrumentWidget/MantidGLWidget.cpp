@@ -47,6 +47,7 @@ MantidGLWidget::MantidGLWidget(QWidget* parent):
   setAutoFillBackground(false);
   //Enable right-click in pick mode
   setContextMenuPolicy(Qt::DefaultContextMenu);
+  setMouseTracking(true);
 }
 
 MantidGLWidget::~MantidGLWidget()

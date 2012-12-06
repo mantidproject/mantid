@@ -5,8 +5,6 @@
 
 #include "MantidQtAPI/GraphOptions.h"
 
-class InstrumentWindow;
-class MantidGLWidget;
 class BinDialog;
 class ColorMapWidget;
 class MantidColorMap;
@@ -27,22 +25,22 @@ class InstrumentWindowRenderTab: public InstrumentWindowTab
 public:
   InstrumentWindowRenderTab(InstrumentWindow* instrWindow);
   ~InstrumentWindowRenderTab();
+  void initSurface();
+  void saveSettings(QSettings&)const;
+  void loadSettings(const QSettings&);
   void setupColorBarScaling(const MantidColorMap&,double);
-  void loadSettings(const QString& section);
-  void saveSettings(const QString& section);
-  void setMinValue(double value, bool apply = true);
-  void setMaxValue(double value, bool apply = true);
   GraphOptions::ScaleType getScaleType()const;
   void setScaleType(GraphOptions::ScaleType type);
   void setAxis(const QString& axisName);
   bool areAxesOn()const;
-  void initOnShow();
-  void updateSurfaceTypeControl(int);
   void setupColorBar(const MantidColorMap&,double,double,double,bool);
 signals:
   void rescaleColorMap();
   void setAutoscaling(bool);
 public slots:
+  void setMinValue(double value, bool apply = true);
+  void setMaxValue(double value, bool apply = true);
+  void setRange(double minValue, double maxValue, bool apply = true);
   void showAxes(bool on);
   void setColorMapAutoscaling(bool);
 private slots:
@@ -54,14 +52,16 @@ private slots:
   void displaySettingsAboutToshow();
   /// Change the type of the surface
   void setSurfaceType(int);
+  void surfaceTypeChanged(int);
+  void colorMapChanged();
+  void scaleTypeChanged(int);
+  void glOptionChanged(bool);
 private:
   void showEvent (QShowEvent *);
   QMenu* createPeaksMenu();
 
   QFrame * setupAxisFrame();
 
-  InstrumentWindow* m_instrWindow;
-  MantidGLWidget *m_InstrumentDisplay;
   QComboBox* m_renderMode;
   QPushButton *mSaveImage;
   ColorMapWidget* m_colorMapWidget;

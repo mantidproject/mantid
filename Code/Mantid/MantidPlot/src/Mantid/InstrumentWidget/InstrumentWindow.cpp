@@ -2,11 +2,13 @@
 #include "InstrumentWindowRenderTab.h"
 #include "InstrumentWindowPickTab.h"
 #include "InstrumentWindowMaskTab.h"
+#include "InstrumentWindowTreeTab.h"
 #include "XIntegrationControl.h"
 #include "InstrumentActor.h"
 #include "UnwrappedCylinder.h"
 #include "UnwrappedSphere.h"
 #include "Projection3D.h"
+#include "SimpleWidget.h"
 #include "../MantidUI.h"
 #include "../AlgorithmMonitor.h"
 
@@ -49,124 +51,6 @@ using namespace Mantid::Geometry;
 using namespace MantidQt::API;
 
 /**
- * A simple widget for drawing unwrapped instrument images.
- */
-class SimpleWidget : public QWidget
-{
-public:
-  /// Constructor
-  SimpleWidget(QWidget* parent=0):QWidget(parent),m_surface(NULL)
-  {
-    // Receive mouse move events
-    setMouseTracking( true );
-    // Receive keyboard events
-    setFocusPolicy(Qt::StrongFocus);
-  }
-  /// Assign a surface to draw on
-  void setSurface(ProjectionSurface* surface)
-  {
-    m_surface = surface;
-    connect(m_surface,SIGNAL(redrawRequired()),this,SLOT(repaint()),Qt::QueuedConnection);
-  }
-  /// Return the surface 
-  ProjectionSurface* getSurface(){return m_surface;}
-  /// Redraw the view
-  void updateView()
-  {
-    if(m_surface)
-    {
-      m_surface->updateView();
-      update();
-    }
-  }
-  /// Update the detector information (count values) and redraw
-  void updateDetectors()
-  {
-    if(m_surface)
-    {
-      m_surface->updateDetectors();
-      update();
-    }
-  }
-protected:
-  void paintEvent(QPaintEvent*)
-  {
-    if(m_surface)
-    {
-      m_surface->drawSimple(this);
-    }
-  }
-  /**
-  * Mouse press callback method, It implements mouse button press initialize methods.
-  * @param event :: This is the event variable which has the position and button states
-  */
-  void mousePressEvent(QMouseEvent* event)
-  {
-    if (m_surface)
-    {
-      m_surface->mousePressEvent(event);
-    }
-    update();
-  }
-
-  /**
-  * This is mouse move callback method. It implements the actions to be taken when the mouse is
-  * moved with a particular button is pressed.
-  * @param event :: This is the event variable which has the position and button states
-  */
-  void mouseMoveEvent(QMouseEvent* event)
-  {
-    if (m_surface)
-    {
-      m_surface->mouseMoveEvent(event);
-    }
-    repaint();
-  }
-
-  /**
-  * This is mouse button release callback method. This resets the cursor to pointing hand cursor
-  * @param event :: This is the event variable which has the position and button states
-  */
-  void mouseReleaseEvent(QMouseEvent* event)
-  {
-    if (m_surface)
-    {
-      m_surface->mouseReleaseEvent(event);
-    }
-    repaint();
-  }
-
-  /**
-  * Mouse wheel event to set the zooming in and out
-  * @param event :: This is the event variable which has the status of the wheel
-  */
-  void wheelEvent(QWheelEvent* event)
-  {
-    if (m_surface)
-    {
-      m_surface->wheelEvent(event);
-    }
-    update();
-  }
-  /**
-  * Key press event
-  * @param event :: This is the event variable which has the status of the keyboard
-  */
-  void keyPressEvent(QKeyEvent *event)
-  {
-    if (m_surface)
-    {
-      m_surface->keyPressEvent(event);
-    }
-    update();
-  }
-  //-------------------------------------
-  //    Class data
-  //-------------------------------------
-  ProjectionSurface* m_surface; ///< The projection surface
-};
-
-/**
  * Constructor.
  */
 InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ):
@@ -194,6 +78,7 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_InstrumentDisplay = new MantidGLWidget(this);
   m_InstrumentDisplay->installEventFilter(this);
   connect(m_InstrumentDisplay,SIGNAL(mouseOut()),this,SLOT(mouseLeftInstrumentDisplay()));
+  connect(this,SIGNAL(enableLighting(bool)),m_InstrumentDisplay,SLOT(enableLighting(bool)));
 
   // Create simple display widget
   m_simpleDisplay = new SimpleWidget(this);
@@ -221,31 +106,11 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   
   // Background colour
   setBackgroundColor(settings.value("BackgroundColor",QColor(0,0,0,1.0)).value<QColor>());
-  
-  //Render Controls
-  m_renderTab = new InstrumentWindowRenderTab(this);
-  connect(m_renderTab,SIGNAL(setAutoscaling(bool)),this,SLOT(setColorMapAutoscaling(bool)));
-  connect(m_renderTab,SIGNAL(rescaleColorMap()),this,SLOT(setupColorMap()));
-  mControlsTab->addTab( m_renderTab, QString("Render"));
-  
-  // Pick controls
-  m_pickTab = new InstrumentWindowPickTab(this);
-  mControlsTab->addTab( m_pickTab, QString("Pick"));
-  // Miniplot tube x units
-  m_pickTab->setTubeXUnits(settings.value("TubeXUnits",0).toInt());
 
+  // Create the b=tabs
+  createTabs(settings);
+  
   settings.endGroup();
-
-  // Mask controls
-  m_maskTab = new InstrumentWindowMaskTab(this);
-  mControlsTab->addTab( m_maskTab, QString("Mask"));
-  connect(m_maskTab,SIGNAL(executeAlgorithm(const QString&, const QString&)),this,SLOT(executeAlgorithm(const QString&, const QString&)));
-
-  // Instrument tree controls
-  QWidget* instrumentTree=createInstrumentTreeTab(mControlsTab);
-  mControlsTab->addTab( instrumentTree, QString("Instrument Tree"));
-
-  connect(mControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
 
   // Init actions
   mInfoAction = new QAction(tr("&Details"), this);
@@ -346,7 +211,6 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMi
   {
     surface->resetInstrumentActor( m_instrumentActor );
   }
-  mInstrumentTree->setInstrumentActor(m_instrumentActor);
 
   if ( setDefaultView )
   {
@@ -373,9 +237,9 @@ void InstrumentWindow::selectTab(int tab)
 /**
  * Return the currently displayed tab.
  */
-InstrumentWindow::Tab InstrumentWindow::getTab()const
+InstrumentWindowTab *InstrumentWindow::getTab()const
 {
-  return (Tab)mControlsTab->currentIndex();
+  return static_cast<InstrumentWindowTab*>(mControlsTab->currentWidget());
 }
 
 void InstrumentWindow::setSurfaceType(int type)
@@ -422,7 +286,6 @@ void InstrumentWindow::setSurfaceType(int type)
     if (m_surfaceType == FULL3D)
     {
       Projection3D* p3d = new Projection3D(m_instrumentActor,getInstrumentDisplayWidth(),getInstrumentDisplayHeight());
-      p3d->set3DAxesState(m_renderTab->areAxesOn());
       surface = p3d;
       // always OpenGL in 3D
       useOpenGL = true;
@@ -441,14 +304,13 @@ void InstrumentWindow::setSurfaceType(int type)
     setSurface(surface);
     // make sure to switch to the right instrument display
     selectOpenGLDisplay( useOpenGL );
-//    m_renderTab->init();
-//    m_pickTab->init();
-//    m_maskTab->init();
-    InstrumentWindowTab* tab = dynamic_cast<InstrumentWindowTab*>(mControlsTab->currentWidget());
-    if ( tab ) tab->initOnShow();
 
-    connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
-    connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
+    // init tabs with new surface
+    foreach (InstrumentWindowTab* tab, m_tabs)
+    {
+        tab->initSurface();
+    }
+
     connect(surface,SIGNAL(multipleDetectorsSelected(QList<int>&)),this,SLOT(multipleDetectorsSelected(QList<int>&)));
     connect(surface,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),this,SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)));
     QApplication::restoreOverrideCursor();
@@ -493,11 +355,7 @@ void InstrumentWindow::setSurfaceType(const QString& typeStr)
     typeIndex = 6;
   }
   setSurfaceType( typeIndex );
-  m_renderTab->m_renderMode->blockSignals(true);
-  m_renderTab->m_renderMode->setCurrentIndex( typeIndex );
-  m_renderTab->m_renderMode->blockSignals(false);
-  m_renderTab->showResetView( typeIndex );
-  m_renderTab->showFlipControl( typeIndex );
+  emit surfaceTypeChanged( typeIndex );
 }
 
 /**
@@ -505,31 +363,17 @@ void InstrumentWindow::setSurfaceType(const QString& typeStr)
  */
 void InstrumentWindow::setupColorMap()
 {
-  m_renderTab->setupColorBar(
-    m_instrumentActor->getColorMap(),
-    m_instrumentActor->minValue(),
-    m_instrumentActor->maxValue(),
-    m_instrumentActor->minPositiveValue(),
-    m_instrumentActor->autoscaling()
-  );
+    emit colorMapChanged();
 }
 
 /**
   * Connected to QTabWidget::currentChanged signal
   */
-void InstrumentWindow::tabChanged(int i)
+void InstrumentWindow::tabChanged(int)
 {
   ProjectionSurface* surface = getSurface();
   if ( !surface ) return;
-  if (i == 0)
-  {
-    // if we changed from the instrument tree tab we may have some
-    // actors hidden, restore their visibility
-    m_instrumentActor->accept(SetAllVisibleVisitor());
-  }
   setInfoText(surface->getInfoText());
-  InstrumentWindowTab* tab = dynamic_cast<InstrumentWindowTab*>(mControlsTab->widget(i));
-  if ( tab ) tab->initOnShow();
   updateInstrumentView();
 }
 
@@ -564,25 +408,25 @@ void InstrumentWindow::changeColormap(const QString &filename)
 
 void InstrumentWindow::showPickOptions()
 {
-  if (m_pickTab->canUpdateTouchedDetector() && !m_selectedDetectors.empty())
-  {
-    QMenu context(m_InstrumentDisplay);
+//  if (m_pickTab->canUpdateTouchedDetector() && !m_selectedDetectors.empty())
+//  {
+//    QMenu context(m_InstrumentDisplay);
 
-    context.addAction(mInfoAction);
-    context.addAction(mPlotAction);
-    context.addAction(mDetTableAction);
+//    context.addAction(mInfoAction);
+//    context.addAction(mPlotAction);
+//    context.addAction(mDetTableAction);
 
-    context.insertSeparator();
-    context.addAction(mGroupDetsAction);
-    context.addAction(mMaskDetsAction);
-    context.addAction(m_ExtractDetsToWorkspaceAction);
-    context.addAction(m_SumDetsToWorkspaceAction);
-    QMenu *gfileMenu = context.addMenu("Create grouping file");
-    gfileMenu->addAction(m_createIncludeGroupingFileAction);
-    gfileMenu->addAction(m_createExcludeGroupingFileAction);
+//    context.insertSeparator();
+//    context.addAction(mGroupDetsAction);
+//    context.addAction(mMaskDetsAction);
+//    context.addAction(m_ExtractDetsToWorkspaceAction);
+//    context.addAction(m_SumDetsToWorkspaceAction);
+//    QMenu *gfileMenu = context.addMenu("Create grouping file");
+//    gfileMenu->addAction(m_createIncludeGroupingFileAction);
+//    gfileMenu->addAction(m_createExcludeGroupingFileAction);
 
-    context.exec(QCursor::pos());
-  }
+//    context.exec(QCursor::pos());
+//  }
 }
 
 /**
@@ -752,22 +596,21 @@ QString InstrumentWindow::asString(const std::vector<int>& numbers) const
 /// Set a maximum and minimum for the colour map range
 void InstrumentWindow::setColorMapRange(double minValue, double maxValue)
 {
-  m_renderTab->setMinValue(minValue);
-  m_renderTab->setMaxValue(maxValue);
+  emit colorMapRangeChanged(minValue, maxValue);
   update();
 }
 
 /// Set the minimum value of the colour map
 void InstrumentWindow::setColorMapMinValue(double minValue)
 {
-  m_renderTab->setMinValue(minValue);
+  emit colorMapMinValueChanged(minValue);
   update();
 }
 
 /// Set the maximumu value of the colour map
 void InstrumentWindow::setColorMapMaxValue(double maxValue)
 {
-  m_renderTab->setMaxValue(maxValue);
+  emit colorMapMaxValueChanged(maxValue);
   update();
 }
 
@@ -791,16 +634,16 @@ void InstrumentWindow::setViewDirection(const QString& input)
  */
 void InstrumentWindow::selectComponent(const QString & name)
 {
-  QModelIndex component = mInstrumentTree->findComponentByName(name);
-  if( !component.isValid() )
-  {
-    throw std::invalid_argument("No component named \'"+name.toStdString()+"\' found");
-  }
+//  QModelIndex component = m_treeTab->findComponentByName(name);
+//  if( !component.isValid() )
+//  {
+//    throw std::invalid_argument("No component named \'"+name.toStdString()+"\' found");
+//  }
 
-  mInstrumentTree->clearSelection();
-  mInstrumentTree->scrollTo(component, QAbstractItemView::EnsureVisible );
-  mInstrumentTree->selectionModel()->select(component, QItemSelectionModel::Select);
-  mInstrumentTree->sendComponentSelectedSignal(component);
+//  mInstrumentTree->clearSelection();
+//  mInstrumentTree->scrollTo(component, QAbstractItemView::EnsureVisible );
+//  mInstrumentTree->selectionModel()->select(component, QItemSelectionModel::Select);
+//  mInstrumentTree->sendComponentSelectedSignal(component);
 }
 
 /**
@@ -809,7 +652,7 @@ void InstrumentWindow::selectComponent(const QString & name)
  */
 void InstrumentWindow::setScaleType(GraphOptions::ScaleType type)
 {
-  m_renderTab->setScaleType(type);
+    emit scaleTypeChanged(type);
 }
 
 /**
@@ -880,9 +723,12 @@ void InstrumentWindow::saveSettings()
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWindow");
   settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
-  settings.setValue("TubeXUnits",m_pickTab->getTubeXUnits());
   settings.setValue("PeakLabelPrecision",getSurface()->getPeakLabelPrecision());
   settings.setValue("ShowPeakRows",getSurface()->getShowPeakRowFlag());
+  foreach(InstrumentWindowTab* tab, m_tabs)
+  {
+      tab->saveSettings(settings);
+  }
   settings.endGroup();
 }
 
@@ -971,20 +817,6 @@ void InstrumentWindow::showEvent(QShowEvent* e)
   //updateWindow();
 }
 
-
-
-QWidget * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
-{
-  InstrumentWindowTab* instrumentTree=new InstrumentWindowTab(ControlsTab);
-  QVBoxLayout* instrumentTreeLayout=new QVBoxLayout(instrumentTree);
-  //Tree Controls
-  mInstrumentTree = new InstrumentTreeWidget(0);
-  instrumentTreeLayout->addWidget(mInstrumentTree);
-  connect(mInstrumentTree,SIGNAL(componentSelected(Mantid::Geometry::ComponentID)),
-          m_InstrumentDisplay,SLOT(componentSelected(Mantid::Geometry::ComponentID)));
-  return instrumentTree;
-}
-
 void InstrumentWindow::block()
 {
   m_blocked = true;
@@ -1062,10 +894,7 @@ void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
   m_instrumentActor->setIntegrationRange(xmin,xmax);
   setupColorMap();
   updateInstrumentDetectors();
-  if (getTab() == PICK)
-  {
-    m_pickTab->changedIntegrationRange(xmin,xmax);
-  }
+  emit integrationRangeChanged(xmin,xmax);
 }
 
 /**
@@ -1074,20 +903,6 @@ void InstrumentWindow::setIntegrationRange(double xmin,double xmax)
 void InstrumentWindow::setBinRange(double xmin,double xmax)
 {
   m_xIntegration->setRange(xmin,xmax);
-}
-
-void InstrumentWindow::singleDetectorTouched(int detid)
-{
-  if (m_pickTab->canUpdateTouchedDetector())
-  {
-    //mInteractionInfo->setText(cursorPos.display());
-    m_pickTab->updatePick(detid);
-  }
-}
-
-void InstrumentWindow::singleDetectorPicked(int detid)
-{
-  m_pickTab->updatePick(detid);
 }
 
 void InstrumentWindow::multipleDetectorsSelected(QList<int>& detlist)
@@ -1305,7 +1120,6 @@ void InstrumentWindow::setViewType(const QString& type)
     itype = SPHERICAL_Z;
   }
   setSurfaceType(itype);
-  m_renderTab->updateSurfaceTypeControl(itype);
 }
 
 void InstrumentWindow::dragEnterEvent( QDragEnterEvent* e )
@@ -1353,25 +1167,20 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
 bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
 {
   if ((dynamic_cast<MantidGLWidget*>(obj) == m_InstrumentDisplay ||
-       dynamic_cast<SimpleWidget*>(obj) == m_simpleDisplay) && 
+       dynamic_cast<SimpleWidget*>(obj) == m_simpleDisplay) &&
        ev->type() == QEvent::ContextMenu)
   {
-    // an ugly way of preventing the curve in the pick tab's miniplot disappearing when 
+    // an ugly way of preventing the curve in the pick tab's miniplot disappearing when
     // cursor enters the context menu
-    m_instrumentDisplayContextMenuOn = true; 
+    m_instrumentDisplayContextMenuOn = true;
     QMenu context(this);
     // add tab specific actions
-    switch(getTab())
+    InstrumentWindowTab *tab = getTab();
+    tab->addToDisplayContextMenu(context);
+    if ( getSurface()->hasPeakOverlays() )
     {
-    case PICK:  m_pickTab->setInstrumentDisplayContextMenu(context); 
-                if ( getSurface()->hasPeakOverlays() )
-                {
-                  context.addSeparator();
-                  context.addAction(m_clearPeakOverlays);
-                }
-                break;
-    default:
-      break;
+      context.addSeparator();
+      context.addAction(m_clearPeakOverlays);
     }
     if ( !context.isEmpty() )
     {
@@ -1399,11 +1208,11 @@ void InstrumentWindow::setColorMapAutoscaling(bool on)
  */
 void InstrumentWindow::mouseLeftInstrumentDisplay()
 {
-  if (getTab() == PICK && !m_instrumentDisplayContextMenuOn)
-  {
-    // remove the curve from the miniplot
-    m_pickTab->mouseLeftInstrmentDisplay();
-  }
+//  if (getTab() == PICK && !m_instrumentDisplayContextMenuOn)
+//  {
+//    // remove the curve from the miniplot
+//    //m_pickTab->mouseLeftInstrmentDisplay();
+//  }
 }
 
 /**
@@ -1531,7 +1340,8 @@ void InstrumentWindow::selectOpenGLDisplay(bool yes)
 /// Public slot to toggle between the GL and simple instrument display widgets
 void InstrumentWindow::enableOpenGL( bool on )
 {
-  m_renderTab->m_GLView->setChecked( on );
+    enableGL(on);
+    emit glOptionChanged(on);
 }
 
 /// Private slot to toggle between the GL and simple instrument display widgets
@@ -1553,5 +1363,39 @@ void InstrumentWindow::enableGL( bool on )
 /// True if the GL instrument display is currently on
 bool InstrumentWindow::isGLEnabled() const
 {
-  return m_useOpenGL;
+    return m_useOpenGL;
+}
+
+/**
+  * Create and add the tab widgets.
+  */
+void InstrumentWindow::createTabs(QSettings& settings)
+{
+    //Render Controls
+    InstrumentWindowRenderTab *renderTab = new InstrumentWindowRenderTab(this);
+    connect(renderTab,SIGNAL(setAutoscaling(bool)),this,SLOT(setColorMapAutoscaling(bool)));
+    connect(renderTab,SIGNAL(rescaleColorMap()),this,SLOT(setupColorMap()));
+    mControlsTab->addTab( renderTab, QString("Render"));
+    renderTab->loadSettings(settings);
+
+    // Pick controls
+    InstrumentWindowPickTab *pickTab = new InstrumentWindowPickTab(this);
+    mControlsTab->addTab( pickTab, QString("Pick"));
+    pickTab->loadSettings(settings);
+
+    // Mask controls
+    InstrumentWindowMaskTab *maskTab = new InstrumentWindowMaskTab(this);
+    mControlsTab->addTab( maskTab, QString("Mask"));
+    connect(maskTab,SIGNAL(executeAlgorithm(const QString&, const QString&)),this,SLOT(executeAlgorithm(const QString&, const QString&)));
+    maskTab->loadSettings(settings);
+
+    // Instrument tree controls
+    InstrumentWindowTreeTab *treeTab = new InstrumentWindowTreeTab(this);
+    mControlsTab->addTab( treeTab, QString("Instrument Tree"));
+    treeTab->loadSettings(settings);
+
+    connect(mControlsTab,SIGNAL(currentChanged(int)),this,SLOT(tabChanged(int)));
+
+    m_tabs << renderTab << pickTab << maskTab << treeTab;
+
 }

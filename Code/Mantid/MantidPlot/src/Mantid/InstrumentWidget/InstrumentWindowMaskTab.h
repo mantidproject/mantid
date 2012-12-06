@@ -9,7 +9,6 @@
 
 #include <boost/shared_ptr.hpp>
 
-class InstrumentWindow;
 class Instrument3DWidget;
 class CollapsiblePanel;
 class OneCurvePlot;
@@ -49,7 +48,7 @@ class InstrumentWindowMaskTab: public InstrumentWindowTab
 public:
   enum Activity {Move = 0, Select = 1, DrawEllipse};
   InstrumentWindowMaskTab(InstrumentWindow* instrWindow);
-  void initOnShow();
+  void initSurface();
 signals:
   void executeAlgorithm(const QString&, const QString&);
 protected slots:
@@ -79,9 +78,6 @@ protected:
   std::string generateMaskWorkspaceName(bool temp = false) const;
   void enableApply(bool on);
   void setSelectActivity();
-
-  /// The parent InstrumentWindow
-  InstrumentWindow* m_instrumentWindow;
 
   /// Is it used?
   Activity m_activity;

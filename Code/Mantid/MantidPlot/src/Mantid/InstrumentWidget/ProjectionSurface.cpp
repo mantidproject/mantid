@@ -292,7 +292,6 @@ void ProjectionSurface::wheelEvent(QWheelEvent* e)
 
 void ProjectionSurface::keyPressEvent(QKeyEvent* e)
 {
-    std::cerr << "interaction " << m_interactionMode << std::endl;
   switch(m_interactionMode)
   {
   case MoveMode: break;

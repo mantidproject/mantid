@@ -37,6 +37,7 @@
 #include <QLineEdit>
 #include <QSignalMapper>
 #include <QPixmap>
+#include <QSettings>
 
 #include <numeric>
 #include <cfloat>
@@ -58,12 +59,14 @@ struct Sqrt
  */
 InstrumentWindowPickTab::InstrumentWindowPickTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow),
-m_instrWindow(instrWindow),
 m_currentDetID(-1),
 m_tubeXUnits(DETECTOR_ID),
 m_freezePlot(false)
 {
-  mInstrumentDisplay = m_instrWindow->getInstrumentDisplay();
+
+  // connect to InstrumentWindow signals
+  connect(m_instrWindow,SIGNAL(integrationRangeChanged(double,double)),this,SLOT(changedIntegrationRange(double,double)));
+
   m_plotSum = true;
 
   QVBoxLayout* layout=new QVBoxLayout(this);
@@ -180,15 +183,6 @@ m_freezePlot(false)
   layout->addWidget(panelStack);
 
   setPlotCaption();
-}
-
-/**
- * Initialise the tab.
- */
-void InstrumentWindowPickTab::initOnShow()
-{
-    // Make the state of the display view consistent with the current selection type
-    setSelectionType();
 }
 
 /**
@@ -500,7 +494,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
   m_plot->setLabel("Detector " + QString::number(detid));
 
   // find any markers
-  ProjectionSurface* surface = mInstrumentDisplay->getSurface();
+  ProjectionSurface* surface = getSurface();
   if (surface)
   {
     QList<PeakMarker2D*> markers = surface->getMarkersWithID(detid);
@@ -698,28 +692,14 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
  */
 void InstrumentWindowPickTab::showEvent (QShowEvent *)
 {
-  ProjectionSurface* surface = mInstrumentDisplay->getSurface();
+  ProjectionSurface* surface = getSurface();
   if (surface)
   {
     surface->setInteractionMode(ProjectionSurface::PickMode);
   }
-  mInstrumentDisplay->setMouseTracking(true);
-}
-
-/**
- * Add pick tab specific actions to mInstrumentDisplay context menu.
- */
-void InstrumentWindowPickTab::setInstrumentDisplayContextMenu(QMenu& context)
-{
-  m_freezePlot = true;
-  if (m_plot->hasCurve())
-  {
-    context.addAction(m_storeCurve);
-  }
-  if (m_plot->hasStored() || m_plot->hasCurve())
-  {
-    context.addAction(m_savePlotToWorkspace);
-  }
+  //mInstrumentDisplay->setMouseTracking(true);
+  // Make the state of the display view consistent with the current selection type
+  setSelectionType();
 }
 
 /**
@@ -1148,5 +1128,62 @@ void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
   {
     updatePick(-1);
   }
+}
+
+void InstrumentWindowPickTab::initSurface()
+{
+    ProjectionSurface *surface = getSurface();
+    connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
+    connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
+}
+
+/**
+  * Save tab's persistent settings to the provided QSettings instance
+  */
+void InstrumentWindowPickTab::saveSettings(QSettings &settings) const
+{
+    settings.setValue("TubeXUnits",getTubeXUnits());
+}
+
+/**
+ * Restore (read and apply) tab's persistent settings from the provided QSettings instance
+ */
+void InstrumentWindowPickTab::loadSettings(const QSettings &settings)
+{
+}
+
+/**
+  * Fill in the context menu.
+  * @param context :: A menu to fill.
+  */
+bool InstrumentWindowPickTab::addToDisplayContextMenu(QMenu &context) const
+{
+    m_freezePlot = true;
+    bool res = false;
+    if (m_plot->hasCurve())
+    {
+      context.addAction(m_storeCurve);
+      res = true;
+    }
+    if (m_plot->hasStored() || m_plot->hasCurve())
+    {
+      context.addAction(m_savePlotToWorkspace);
+      res = true;
+    }
+    return res;
+}
+
+void InstrumentWindowPickTab::singleDetectorTouched(int detid)
+{
+  if (canUpdateTouchedDetector())
+  {
+    //mInteractionInfo->setText(cursorPos.display());
+    updatePick(detid);
+  }
+}
+
+void InstrumentWindowPickTab::singleDetectorPicked(int detid)
+{
+  updatePick(detid);
 }
 
