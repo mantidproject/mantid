@@ -266,6 +266,11 @@
       <archiveSearch plugin="SNSDataSearchICAT2" />
    </archive>
 
+   <computeResource name="Fermi" type="MWS">
+      <baseURL>http://fermi.ornl.gov/moab</baseURL>
+      <configFileURL>http://fermi.ornl.gov/moab/config.xml</configFileURL>
+   </computeResource>
+
    <instrument name="DAS"> 
       <technique>technique</technique>
    </instrument> 
