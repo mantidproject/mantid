@@ -271,11 +271,14 @@ namespace MDEvents
     /** Returns the extents as a string, for convenience */
     std::string getExtentsStr() const
     {
-      std::string mess;
-      for (size_t d=0; d<nd-1; ++d)
+      std::string mess("");
+      size_t ndm1 = nd-1;
+      if(ndm1>32)return mess;
+
+      for (size_t d=0; d<ndm1; ++d)
         mess += extents[d].extentsStr()+",";
 
-      mess += extents[nd-1].extentsStr();
+      mess += extents[ndm1].extentsStr();
       return mess;
     }
 
