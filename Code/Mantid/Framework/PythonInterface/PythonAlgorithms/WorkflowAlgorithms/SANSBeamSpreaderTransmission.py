@@ -230,6 +230,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
                 alg=Algorithm.fromString(p.valueAsStr)
                 alg.setProperty("InputWorkspace", workspace)
                 alg.setProperty("OutputWorkspace", workspace)
+                alg.setProperty("Filename", dark_current_data)
                 if alg.existsProperty("PersistentCorrection"):
                     alg.setProperty("PersistentCorrection", False)
                 if alg.existsProperty("ReductionProperties"):

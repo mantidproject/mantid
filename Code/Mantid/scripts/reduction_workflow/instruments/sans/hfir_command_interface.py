@@ -145,9 +145,10 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_depen
     ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
 
 def TransmissionDarkCurrent(dark_current=None):
-    #TODO
-    dark_current=find_data(dark_current, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().get_transmission().set_dark_current(dark_current)
+    if dark_current is not None:
+        ReductionSingleton().reduction_properties["TransmissionDarkCurrentFile"] = dark_current
+    elif ReductionSingleton().reduction_properties.has_key("TransmissionDarkCurrentFile"):
+        del ReductionSingleton().reduction_properties["TransmissionDarkCurrentFile"]
 
 def ThetaDependentTransmission(theta_dependence=True):
     ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependence
@@ -176,11 +177,9 @@ def SetTransmissionBeamCenter(x, y):
     ReductionSingleton().reduction_properties["TransmissionBeamCenterY"] = y
 
 def TransmissionDirectBeamCenter(datafile):
-    #TODO
-    find_data(datafile, instrument=ReductionSingleton().instrument.name())
-    if ReductionSingleton().get_transmission() is None:
-        raise RuntimeError, "A transmission algorithm must be selected before setting the transmission beam center."
-    ReductionSingleton().get_transmission().set_beam_finder(sans_reduction_steps.DirectBeamCenter(datafile).set_persistent(False))
+    find_data(datafile, instrument=ReductionSingleton().get_instrument())
+    ReductionSingleton().reduction_properties["TransmissionBeamCenterMethod"] = "DirectBeam"
+    ReductionSingleton().reduction_properties["TransmissionBeamCenterFile"] = datafile
 
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
     #TODO

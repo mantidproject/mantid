@@ -125,11 +125,32 @@ class HFIRSANSReduction(PythonAlgorithm):
         output_msg += self.process_data_file(output_ws)
         
         # Sample data transmission correction
+        beam_center_x = None
+        beam_center_y = None
+        if "TransmissionBeamCenterAlgorithm" in property_list:
+            # Execute the beam finding algorithm and set the beam
+            # center for the transmission calculation
+            p=property_manager.getProperty("TransmissionBeamCenterAlgorithm")
+            alg=Algorithm.fromString(p.valueAsStr)
+            if alg.existsProperty("ReductionProperties"):
+                alg.setProperty("ReductionProperties", property_manager_name)
+            alg.execute()
+            beam_center_x = alg.getProperty("FoundBeamCenterX").value
+            beam_center_y = alg.getProperty("FoundBeamCenterY").value
+
         if "TransmissionAlgorithm" in property_list:
             p=property_manager.getProperty("TransmissionAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("InputWorkspace", output_ws)
             alg.setProperty("OutputWorkspace", '__'+output_ws+"_reduced")
+            
+            if alg.existsProperty("BeamCenterX") \
+                and alg.existsProperty("BeamCenterY") \
+                and beam_center_x is not None \
+                and beam_center_y is not None:
+                alg.setProperty("BeamCenterX", beam_center_x)
+                alg.setProperty("BeamCenterY", beam_center_y)            
+            
             if alg.existsProperty("ReductionProperties"):
                 alg.setProperty("ReductionProperties", property_manager_name)
             alg.execute()

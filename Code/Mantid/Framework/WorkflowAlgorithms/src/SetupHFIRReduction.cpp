@@ -262,6 +262,11 @@ void SetupHFIRReduction::init()
   setPropertySettings("SpreaderTransmissionError",
             new VisibleWhenProperty("TransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
 
+  declareProperty(new API::FileProperty("TransmissionDarkCurrentFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load as transmission dark current.");
+  setPropertySettings("TransmissionDarkCurrentFile",
+            new VisibleWhenProperty("TransmissionMethod", IS_NOT_EQUAL_TO, "Value"));
+
   declareProperty("ThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
 
@@ -282,6 +287,7 @@ void SetupHFIRReduction::init()
   setPropertyGroup("TransDirectScatteringFilename", trans_grp);
   setPropertyGroup("SpreaderTransmissionValue", trans_grp);
   setPropertyGroup("SpreaderTransmissionError", trans_grp);
+  setPropertyGroup("TransmissionDarkCurrentFile", trans_grp);
   setPropertyGroup("ThetaDependentTransmission", trans_grp);
 
   // Background options
@@ -748,6 +754,7 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
   // Transmission options
   const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");
   const std::string transMethod = getProperty("TransmissionMethod");
+  const std::string darkCurrent = getPropertyValue("TransmissionDarkCurrentFile");
 
   // Transmission is entered by hand
   if (boost::iequals(transMethod, "Value"))
@@ -783,6 +790,7 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
     transAlg->setProperty("SampleDataFilename", sampleFilename);
     transAlg->setProperty("EmptyDataFilename", emptyFilename);
     transAlg->setProperty("BeamRadius", beamRadius);
+    transAlg->setProperty("DarkCurrentFilename", darkCurrent);
 
     // Beam center option for transmission data
     if (boost::iequals(centerMethod, "Value") && !isEmpty(beamX) && !isEmpty(beamY))
@@ -831,6 +839,7 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
     transAlg->setProperty("DirectScatteringFilename", directScatt);
     transAlg->setProperty("SpreaderTransmissionValue", spreaderTrValue);
     transAlg->setProperty("SpreaderTransmissionError", spreaderTrError);
+    transAlg->setProperty("DarkCurrentFilename", darkCurrent);
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
     AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
     algProp->setValue(transAlg->toString());
