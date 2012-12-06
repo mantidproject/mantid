@@ -137,35 +137,7 @@ def CheckBinning(nbins):
 
 # QLines programs
 	
-def QLStart(program,inType,sam,rinType,res,rtype,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save):
-	if rtype == 'Res':
-		rext = 'res'
-	if rtype == 'Data':
-		rext = 'red'
-	workdir = config['defaultsave.directory']
-	sname = sam + '_red'
-	if inType == 'File':
-		spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
-		LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
-		Smessage = 'Sample from File : '+spath
-	else:
-		Smessage = 'Sample from Workspace : '+sname
-	rname = res + '_' + rext
-	if rinType == 'File':
-		rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
-		LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-		Rmessage = 'Resolution from File : '+rpath
-	else:
-		Rmessage = 'Resolution from Workspace : '+rname
-	if Verbose:
-		logger.notice(Smessage)
-		logger.notice(Rmessage)
-	if fitOp[3] == 1:
-		path = os.path.join(workdir, rsname+'_ResNorm_Paras.nxs')	# path name for resnnrm nxs file
-		LoadNexusProcessed(Filename=path, OutputWorkspace='ResNorm')
-	QLRun(program,sname,rname,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save)
-
-def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save):
+def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Loop,Verbose,Plot,Save):
 	StartTime(program)
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
@@ -176,6 +148,8 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save)
 		logger.notice('Resolution is ' + resWS)
 	CheckAnalysers(samWS,resWS,Verbose)
 	nsam,ntc = CheckHistZero(samWS)
+	if Loop != True:
+		nsam = 1
 	efix = getEfixed(samWS)
 	theta,Q = GetThetaQ(samWS)
 	nres,ntr = CheckHistZero(resWS)
@@ -213,7 +187,7 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save)
 		res2WS = fname + '_Res2'
 	wrks=workdir + samWS[:-4]
 	if Verbose:
-		logger.notice(' lptfile : ' + wrks + '.lpt')
+		logger.notice(' lptfile : '+wrks+'_'+prog+'.lpt')
 	lwrk=len(wrks)
 	wrks.ljust(140,' ')
 	wrkr=resWS
@@ -319,11 +293,11 @@ def QLRun(program,samWS,resWS,rsname,erange,nbins,fitOp,wfile,Verbose,Plot,Save)
 	if program == 'QL':
 		C2Fw(samWS[:-4],fname)
 		if (Plot != 'None'):
-			QLPlotQL(fname,Plot)
+			QLPlotQL(fname,Plot,Loop)
 	if program == 'QSe':
 		C2Se(fname)
 		if (Plot != 'None'):
-			QLPlotQSe(fname,Plot)
+			QLPlotQSe(fname,Plot,Loop)
 	if Save:
 		fit_path = os.path.join(workdir,fitWS+'.nxs')
 		SaveNexusProcessed(InputWorkspace=fitWS, Filename=fit_path)
@@ -573,27 +547,29 @@ def C2Se(sname):
 	opath = os.path.join(workdir,fname+'_Parameters.nxs')
 	SaveNexusProcessed(InputWorkspace=fname+'_Parameters', Filename=opath)
 
-def QLPlotQL(inputWS,Plot):
-	if (Plot == 'Prob' or Plot == 'All'):
-		pWS = inputWS+'_Prob'
-		p_plot=mp.plotSpectrum(pWS,[1,2],False)
-	if (Plot == 'Intensity' or Plot == 'All'):
-		iWS = [inputWS+'_IT11', inputWS+'_IT21', inputWS+'_IT22']
-		i_plot=mp.plotSpectrum(iWS,0,True)
-	if (Plot == 'FwHm' or Plot == 'All'):
-		wWS = [inputWS+'_FW11', inputWS+'_FW21', inputWS+'_FW22']
-		w_plot=mp.plotSpectrum(wWS,0,True)
+def QLPlotQL(inputWS,Plot,Loop):
+	if Loop:
+		if (Plot == 'Prob' or Plot == 'All'):
+			pWS = inputWS+'_Prob'
+			p_plot=mp.plotSpectrum(pWS,[1,2],False)
+		if (Plot == 'Intensity' or Plot == 'All'):
+			iWS = [inputWS+'_IT11', inputWS+'_IT21', inputWS+'_IT22']
+			i_plot=mp.plotSpectrum(iWS,0,True)
+		if (Plot == 'FwHm' or Plot == 'All'):
+			wWS = [inputWS+'_FW11', inputWS+'_FW21', inputWS+'_FW22']
+			w_plot=mp.plotSpectrum(wWS,0,True)
 	if (Plot == 'Fit' or Plot == 'All'):
 		fWS = [inputWS+'_Data', inputWS+'_Fit1', inputWS+'_Res1', inputWS+'_Res2']
 		f_plot=mp.plotSpectrum(fWS,0,False)
 
-def QLPlotQSe(inputWS,Plot):
-	if (Plot == 'Intensity' or Plot == 'All'):
-		i_plot=mp.plotSpectrum(inputWS+'_Inty',0,True)
-	if (Plot == 'FwHm' or Plot == 'All'):
-		w_plot=mp.plotSpectrum(inputWS+'_FwHm',0,True)
-	if (Plot == 'Beta' or Plot == 'All'):
-		s_plot=mp.plotSpectrum(inputWS+'_Beta',0,True)
+def QLPlotQSe(inputWS,Plot,Loop):
+	if Loop:
+		if (Plot == 'Intensity' or Plot == 'All'):
+			i_plot=mp.plotSpectrum(inputWS+'_Inty',0,True)
+		if (Plot == 'FwHm' or Plot == 'All'):
+			w_plot=mp.plotSpectrum(inputWS+'_FwHm',0,True)
+		if (Plot == 'Beta' or Plot == 'All'):
+			s_plot=mp.plotSpectrum(inputWS+'_Beta',0,True)
 	if (Plot == 'Fit' or Plot == 'All'):
 		fWS = [inputWS+'_Data', inputWS+'_Fit1', inputWS+'_Res1']
 		f_plot=mp.plotSpectrum(fWS,0,False)
@@ -621,30 +597,7 @@ def CheckBetSig(nbs):
 		sys.exit(error)
 	return Nbet,Nsig
 
-def QuestStart(inType,sam,rinType,res,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
-	StartTime('Quest')
-	workdir = config['defaultsave.directory']
-	sname = sam + '_red'
-	if inType == 'File':
-		spath = os.path.join(workdir, sname+'.nxs')		# path name for sample nxs file
-		LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
-		Smessage = 'Sample from File : '+spath
-	else:
-		Smessage = 'Sample from Workspace : '+sname
-	nsam = mtd[sname].getNumberHistograms()                      # no. of hist/groups in sam
-	rname = res + '_res'
-	if rinType == 'File':
-		rpath = os.path.join(workdir, rname+'.nxs')		# path name for res nxs file
-		LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-		Rmessage = 'Resolution from File : '+rpath
-	else:
-		Rmessage = 'Resolution from Workspace : '+rname
-	if Verbose:
-		logger.notice(Smessage)
-		logger.notice(Rmessage)
-	QuestRun(sname,rname,nbs,erange,nbins,fitOp,Verbose,Plot,Save)
-
-def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
+def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Loop,Verbose,Plot,Save):
 	StartTime('Quest')
 	workdir = config['defaultsave.directory']
 	array_len = 4096                           # length of array in Fortran
@@ -655,6 +608,8 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
 		logger.notice('Resolution is ' + resWS)
 	CheckAnalysers(samWS,resWS,Verbose)
 	nsam,ntc = CheckHistZero(samWS)
+	if Loop != True:
+		nsam = 1
 	efix = getEfixed(samWS)
 	theta,Q = GetThetaQ(samWS)
 	nres,ntr = CheckHistZero(resWS)
@@ -734,8 +689,9 @@ def QuestRun(samWS,resWS,nbs,erange,nbins,fitOp,Verbose,Plot,Save):
 	CreateWorkspace(OutputWorkspace=fname+'_Beta', DataX=xBet, DataY=yBet, DataE=eBet,
 		Nspec=nsam, UnitX='', VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=Qaxis)
 	group = fname + '_Sigma,'+ fname + '_Beta'
-	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_Fit')
-	GroupWorkspaces(InputWorkspaces=groupZ,OutputWorkspace=fname+'_Contour')
+	GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fname+'_Fit')	
+	if Loop:
+		GroupWorkspaces(InputWorkspaces=groupZ,OutputWorkspace=fname+'_Contour')
 	if Save:
 		fpath = os.path.join(workdir,fname+'_Fit.nxs')
 		SaveNexusProcessed(InputWorkspace=fname+'_Fit', Filename=fpath)
@@ -758,37 +714,12 @@ def QuestPlot(inputWS,Plot):
 
 # ResNorm programs
 
-def ResNormStart(inType,van,rinType,res,erange,nbins,Verbose,Plot,Save):
-	workdir = config['defaultsave.directory']
-	vname = van + '_red'
-	if inType == 'File':
-		vpath = os.path.join(workdir, vname+'.nxs')		           # path name for van nxs file
-		LoadNexusProcessed(Filename=vpath, OutputWorkspace=vname)
-		Vmessage = 'Vanadium from File : '+vpath
-	else:
-		Vmessage = 'Vanadium from Workspace : '+vname
-	rname = res + '_res'
-	if rinType == 'File':
-		rpath = os.path.join(workdir, rname+'.nxs')                # path name for res nxs file
-		LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
-		Rmessage = 'Resolution from File : '+rpath
-	else:
-		Rmessage = 'Resolution from Workspace : '+rname
-	if Verbose:
-		logger.notice(Vmessage)
-		logger.notice(Rmessage)
-	ResNormRun(vname,rname,erange,nbins,Verbose,Plot,Save)
-
 def ResNormRun(vname,rname,erange,nbins,Verbose,Plot,Save):
 	StartTime('ResNorm')
 	workdir = config['defaultsave.directory']
 	array_len = 4096                                    # length of Fortran array
 	CheckXrange(erange,'Energy')
 	nbin,nrbin = CheckBinning(nbins)
-#	nbin = nbins[0]
-	if Verbose:
-		logger.notice('Vanadium is ' + vname)
-		logger.notice('Resolution is ' + rname)
 	CheckAnalysers(vname,rname,Verbose)
 	nvan,ntc = CheckHistZero(vname)
 	theta,Q = GetThetaQ(vname)
@@ -875,19 +806,7 @@ def ResNormPlot(inputWS,Plot):
 
 # Jump programs
 
-def JumpStart(inType,sname,jump,prog,fw,Verbose,Plot,Save):
-	workdir = config['defaultsave.directory']
-	if inType == 'File':
-		path = os.path.join(workdir, sname+'_Parameters.nxs')					# path name for nxs file
-		LoadNexusProcessed(Filename=path, OutputWorkspace=sname+'_Parameters')
-		message = 'Input from File : '+path
-	else:
-		message = 'Input from Workspace : '+sname
-	if Verbose:
-		logger.notice(message)
-	JumpRun(sname,jump,prog,fw,Verbose,Plot,Save)
-
-def JumpRun(sname,jump,prog,fw,Verbose,Plot,Save):
+def JumpRun(sname,jump,prog,fw,Crop,qrange,Verbose,Plot,Save):
 	StartTime('Jump fit : '+jump+' ; ')
 	workdir = config['defaultsave.directory']
 	array_len = 1000                                    # length of Fortran array
@@ -901,7 +820,13 @@ def JumpRun(sname,jump,prog,fw,Verbose,Plot,Save):
 	if Verbose:
 		logger.notice('Parameters in ' + pname + ' ; number ' +fwn)
 	samWS = pname +'_'+ fwn
-	nd,X,Y,E = GetXYE(samWS,0,array_len)
+	CloneWorkspace(InputWorkspace=samWS, OutputWorkspace='__crop')
+	if Crop:
+		CropWorkspace(InputWorkspace=samWS, OutputWorkspace='__crop',
+			XMin=qrange[0], XMax=qrange[1])
+		if Verbose:
+			logger.notice('Cropping from Q= ' + qrange[0] +' to '+ qrange[1])
+	nd,X,Y,E = GetXYE('__crop',0,array_len)
 	if nd == 0:
 		error = 'No points in parameter file'			
 		logger.notice('ERROR *** ' + error)
@@ -937,6 +862,7 @@ def JumpRun(sname,jump,prog,fw,Verbose,Plot,Save):
 			logger.notice('Fit file is ' + fit_path)
 	if Plot:
 		JumpPlot(ftWS)
+	DeleteWorkspace('__crop')
 	EndTime('Jump fit : '+jump+' ; ')
 
 def JumpPlot(inputWS):

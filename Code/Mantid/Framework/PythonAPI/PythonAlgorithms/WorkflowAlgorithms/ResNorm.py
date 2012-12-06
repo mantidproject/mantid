@@ -1,5 +1,7 @@
 # Algorithm to start Bayes programs
 from MantidFramework import *
+from mantid.simpleapi import *
+from mantid import config, logger, mtd
 from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 
 if is_supported_f2py_platform():
@@ -38,12 +40,29 @@ class ResNorm(PythonAlgorithm):
 		emax = self.getPropertyValue('EnergyMax')
 		nbin = self.getPropertyValue('VanBinning')
 
-		vname = prefix+van+'_'+ana
-		rname = prefix+res+'_'+ana
+		vname = prefix+van+'_'+ana+ '_red'
+		rname = prefix+res+'_'+ana+ '_res'
 		erange = [float(emin), float(emax)]
 		verbOp = self.getProperty('Verbose')
 		plotOp = self.getPropertyValue('Plot')
 		saveOp = self.getProperty('Save')
-		Main.ResNormStart(inType,vname,rinType,rname,erange,nbin,verbOp,plotOp,saveOp)
+
+		workdir = config['defaultsave.directory']
+		if inType == 'File':
+			vpath = os.path.join(workdir, vname+'.nxs')		           # path name for van nxs file
+			LoadNexusProcessed(Filename=vpath, OutputWorkspace=vname)
+			Vmessage = 'Vanadium from File : '+vpath
+		else:
+			Vmessage = 'Vanadium from Workspace : '+vname
+		if rinType == 'File':
+			rpath = os.path.join(workdir, rname+'.nxs')                # path name for res nxs file
+			LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+			Rmessage = 'Resolution from File : '+rpath
+		else:
+			Rmessage = 'Resolution from Workspace : '+rname
+		if verbOp:
+			logger.notice(Vmessage)
+			logger.notice(Rmessage)
+		Main.ResNormRun(vname,rname,erange,nbin,verbOp,plotOp,saveOp)
 
 mantid.registerPyAlgorithm(ResNorm())         # Register algorithm with Mantid
