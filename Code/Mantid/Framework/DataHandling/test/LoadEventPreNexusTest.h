@@ -234,7 +234,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( p = outputWS->mutableRun().getProperty("run_start"); )
     if (p)
     {
-      TS_ASSERT_EQUALS( p->value(), "2010-03-25T16:08:37") ;
+      TS_ASSERT_EQUALS( p->value(), "2010-03-25T16:08:37.457381666") ;
     }
   }
 

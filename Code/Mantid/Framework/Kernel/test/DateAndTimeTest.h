@@ -146,7 +146,7 @@ public:
     TS_ASSERT_EQUALS( s.substr(0,20), "1990-Jan-02 03:04:05");
     TS_ASSERT_EQUALS( a.toFormattedString(), "1990-Jan-02 03:04:05");
     TS_ASSERT_EQUALS( a.toFormattedString("%Y-%m-%d"), "1990-01-02");
-    TS_ASSERT_EQUALS( a.toISO8601String(), "1990-01-02T03:04:05");
+    TS_ASSERT_EQUALS( a.toISO8601String(), "1990-01-02T03:04:05.678000000");
   }
 
   void test_to_int64()
