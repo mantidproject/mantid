@@ -42,6 +42,15 @@ namespace SliceViewer
     end();
   }
 
+  void CustomMagnifier::rescale(double factor)
+  {
+    if ( factor != 0.0 )
+    {
+      QwtPlotMagnifier::rescale(1 / factor);
+      emit rescaled(factor);
+    }
+  }
+
 }
 }
 

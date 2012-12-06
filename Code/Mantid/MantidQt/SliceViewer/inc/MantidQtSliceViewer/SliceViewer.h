@@ -119,6 +119,8 @@ public slots:
   void zoomInSlot();
   void zoomOutSlot();
   void zoomRectSlot(const QwtDoubleRect & rect);
+  void panned(int, int);
+  void magnifierRescaled(double);
 
   // Color scale slots
   void setColorScaleAutoFull();
@@ -141,6 +143,7 @@ public slots:
   void SnapToGrid_toggled(bool);
   void RebinMode_toggled(bool);
   void RebinLock_toggled(bool);
+  void autoRebin_toggled(bool);
 
   // Dynamic rebinning
   void rebinParamsChanged();
@@ -168,6 +171,9 @@ private:
   void updatePeakOverlaySliderWidget();
   void enablePeakOverlaysIfAppropriate();
 
+  // Autorebin methods.
+  bool isAutoRebinSet() const;
+  void autoRebinIfRequired();
 
 private:
 
@@ -254,7 +260,7 @@ private:
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
-    *m_syncRebinMode, *m_syncRebinLock, *m_syncPeakOverlay;
+    *m_syncRebinMode, *m_syncRebinLock, *m_syncPeakOverlay, *m_syncAutoRebin;
 
   /// Cached double for infinity
   double m_inf;

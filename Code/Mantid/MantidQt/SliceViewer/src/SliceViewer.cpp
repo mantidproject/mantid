@@ -138,6 +138,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(setColorScaleAutoFull()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(setColorScaleAutoSlice()));
   QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this, SLOT(rebinParamsChanged()));
+  QObject::connect(ui.btnAutoRebin, SIGNAL(toggled(bool)), this, SLOT(autoRebin_toggled(bool)));
   QObject::connect(ui.btnPeakOverlay, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
 
   // ----------- Other signals ----------------
@@ -308,6 +309,12 @@ void SliceViewer::initMenus()
   m_menuView->addAction(action);
   m_actionRefreshRebin = action;
 
+  action = new QAction(QPixmap(), "Auto Rebin", this);
+  m_syncAutoRebin = new SyncedCheckboxes(action, ui.btnAutoRebin, false);
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(autoRebin_toggled(bool)));
+  m_syncAutoRebin->setEnabled(false); // Cannot auto rebin by default.
+  m_menuView->addAction(action);
+
   m_menuView->addSeparator();
 
   action = new QAction(QPixmap(), "Peak Overlay", this);
@@ -428,25 +435,26 @@ void SliceViewer::initZoomer()
       this, SLOT(zoomRectSlot(const QwtDoubleRect &)));
 
   // Zoom in/out using middle-click+drag or the mouse wheel
-  QwtPlotMagnifier * magnif = new CustomMagnifier(m_plot->canvas());
+  CustomMagnifier * magnif = new CustomMagnifier(m_plot->canvas());
   magnif->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
   magnif->setWheelFactor(0.9);
   magnif->setMouseButton(Qt::MidButton);
   // Have to flip the keys to match our flipped mouse wheel
   magnif->setZoomInKey(Qt::Key_Minus, Qt::NoModifier);
   magnif->setZoomOutKey(Qt::Key_Equal, Qt::NoModifier);
+  // Hook-up listener to rescaled event
+  QObject::connect(magnif, SIGNAL(rescaled(double)), this, SLOT(magnifierRescaled(double)));
 
   // Pan using the right mouse button + drag
   QwtPlotPanner *panner = new QwtPlotPanner(m_plot->canvas());
   panner->setMouseButton(Qt::RightButton);
   panner->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
+  QObject::connect(panner, SIGNAL(panned(int, int)), this, SLOT(panned(int, int))); // Handle panning.
 
   // Custom picker for showing the current coordinates
   CustomPicker * picker = new CustomPicker(m_spect->xAxis(), m_spect->yAxis(), m_plot->canvas());
   QObject::connect(picker, SIGNAL(mouseMoved(double,double)), this, SLOT(showInfoAt(double, double)));
-
 }
-
 
 //------------------------------------------------------------------------------------
 /** Programmatically show/hide the controls (sliders etc)
@@ -904,11 +912,14 @@ void SliceViewer::RebinMode_toggled(bool checked)
     m_dimWidgets[d]->showRebinControls(checked);
   ui.btnRebinRefresh->setEnabled(checked);
   ui.btnRebinLock->setEnabled(checked);
+  m_syncAutoRebin->setEnabled(checked);
   m_actionRefreshRebin->setEnabled(checked);
   m_rebinMode = checked;
 
   if (!m_rebinMode)
   {
+    // uncheck auto-rebin
+    ui.btnAutoRebin->setChecked(false);
     // Remove the overlay WS
     this->m_overlayWS.reset();
     this->m_data->setOverlayWorkspace(m_overlayWS);
@@ -956,8 +967,8 @@ void SliceViewer::zoomRectSlot(const QwtDoubleRect & rect)
   if ((rect.width() == 0) || (rect.height() == 0))
     return;
   this->setXYLimits(rect.left(), rect.right(), rect.top(), rect.bottom());
+  autoRebinIfRequired();
 }
-
 
 /// Slot for opening help page
 void SliceViewer::helpSliceViewer()
@@ -986,6 +997,7 @@ void SliceViewer::resetZoom()
   resetAxis(m_spect->yAxis(), m_Y );
   // Make sure the view updates
   m_plot->replot();
+  autoRebinIfRequired();
   m_peaksPresenter->update();
 }
 
@@ -1122,6 +1134,7 @@ void SliceViewer::zoomBy(double factor)
   double y_max = middle + newHalfWidth;
   // Perform the move
   this->setXYLimits(x_min, x_max, y_min, y_max);
+  autoRebinIfRequired();
 }
 
 //------------------------------------------------------------------------------------
@@ -2088,6 +2101,55 @@ void SliceViewer::dynamicRebinComplete(bool error)
   else
     m_overlayWSOutline->setShown(false);
   this->updateDisplay();
+}
+
+
+/**
+Event handler for plot panning. 
+*/
+void SliceViewer::panned(int, int)
+{
+  autoRebinIfRequired();
+}
+
+/**
+Event handler for changing magnification.
+*/
+void SliceViewer::magnifierRescaled(double)
+{
+  autoRebinIfRequired();
+}
+
+/**
+Event handler for the auto rebin toggle event. 
+*/
+void SliceViewer::autoRebin_toggled(bool checked)
+{
+  if(checked)
+  {
+    // Generate the rebin overlay assuming it isn't up to date.
+    this->rebinParamsChanged();
+  }
+}
+
+
+/**
+@return True only when Auto-Rebinning should be considered.
+*/
+bool SliceViewer::isAutoRebinSet() const
+{
+  return ui.btnAutoRebin->isEnabled() && ui.btnAutoRebin->isChecked();
+}
+
+/**
+Auto rebin the workspace according the the current-view + rebin parameters if that option has been set.
+*/
+void SliceViewer::autoRebinIfRequired()
+{
+  if(isAutoRebinSet())
+  {
+    rebinParamsChanged();
+  }
 }
 
 /**

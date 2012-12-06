@@ -36,6 +36,24 @@ public:
   }
 };
 
+//========================================================================
+/** Customized QwtPlotMagnifier for zooming in on the view */
+class CustomMagnifier : public QwtPlotMagnifier
+{
+  Q_OBJECT
+public:
+  CustomMagnifier(QwtPlotCanvas* canvas): QwtPlotMagnifier(canvas)
+  {
+  }
+signals:
+  /// Signal to emitted upon scaling.
+  void rescaled(double factor) const;  
+protected:
+  /** Method to flip the way the wheel operates */
+  virtual void rescale(double factor);
+};
+
+
 /** Picker for looking at the data under the mouse */
 class CustomPicker : public QwtPlotPicker
 {
@@ -85,23 +103,6 @@ protected:
   }
 };
 
-//========================================================================
-/** Customized QwtPlotMagnifier for zooming in on the view */
-class CustomMagnifier : public QwtPlotMagnifier
-{
-public:
-  CustomMagnifier(QwtPlotCanvas* canvas): QwtPlotMagnifier(canvas)
-  {
-  }
-
-protected:
-  /** Method to flip the way the wheel operates */
-  virtual void rescale(double factor)
-  {
-    if ( factor != 0.0 )
-      QwtPlotMagnifier::rescale(1 / factor);
-  }
-};
 
 
 } // namespace SliceViewer
