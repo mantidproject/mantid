@@ -11,6 +11,10 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
+class Logger;
+}
   namespace DataHandling
   {
 
@@ -43,9 +47,12 @@ namespace Mantid
     class DLLExport ISISDataArchive: public API::IArchiveSearch
     {
     public:
+      std::string getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts)const;
+    private:
+      // static reference to the logger class
+      static Mantid::Kernel::Logger & g_log;
       std::string getPath(const std::string& fName)const;
     };
-
   }
 }
 

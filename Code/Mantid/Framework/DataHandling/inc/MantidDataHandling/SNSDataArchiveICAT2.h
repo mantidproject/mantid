@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_ORBITERDATAARCHIVE_H_
-#define MANTID_DATAHANDLING_ORBITERDATAARCHIVE_H_
+#ifndef MANTID_DATAHANDLING_SNSDATAARCHIVEICAT2_H_
+#define MANTID_DATAHANDLING_SNSDATAARCHIVEICAT2_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -22,10 +22,10 @@ class Logger;
   namespace DataHandling
   {
   /**
-   This class is for searching the Orbiter data archive
+   This class is for searching the SNS data archive
 
-   @author Stuart Campbell, ORNL
-   @date 18/03/2010
+   @author Shelly Ren, ORNL
+   @date 02/22/2012
 
    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -48,16 +48,17 @@ class Logger;
    Code Documentation is available at: <http://doxygen.mantidproject.org>
    */
 
-    class  DLLExport OrbiterDataArchive: public API::IArchiveSearch
+    class  DLLExport SNSDataArchiveICAT2: public API::IArchiveSearch
     {
     public:
-        std::string getPath(const std::string& fName) const;
+        std::string getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts) const;
     private:
         // static reference to the logger class
+        std::string getPath(const std::string& fName) const;
         static Mantid::Kernel::Logger & g_log;
     };
 
   }
 }
 
-#endif /* MANTID_DATAHANDLING_ORBITERDATAARCHIVE_H_ */
+#endif /* MANTID_DATAHANDLING_SNSDATAARCHIVEICAT2_H_ */

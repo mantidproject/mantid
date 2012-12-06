@@ -265,7 +265,7 @@
 
   <archive>
     <archiveSearch plugin="SNSDataSearch" />
-    <archiveSearch plugin="OrbiterDataSearch" />
+    <archiveSearch plugin="SNSDataSearchICAT2" />
   </archive>
   
    <catalog name="ICat3Catalog">

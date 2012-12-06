@@ -17,10 +17,17 @@ public:
   void xtestSearch()
   {
     ISISDataArchive arch;
-    std::string path = arch.getPath("hrpd273");
-    std::cout << "(hrp273)= " << path << std::endl;
+
+    std::set<std::string> filename;
+    filename.insert("hrpd273");
+    std::vector<std::string> extension = std::vector<std::string>(1,"");
+    std::string path = arch.getArchivePath(filename, extension);
+    std::cout << "(hrpd273)= " << path << std::endl;
     TS_ASSERT_EQUALS(path.substr(path.size()-18,10),"cycle_98_0");
-    path = arch.getPath("hrpds70");
+
+    filename.clear();
+    filename.insert("hrpds70");
+    path = arch.getArchivePath(filename, extension);
     TS_ASSERT(path.empty());
   }
 
