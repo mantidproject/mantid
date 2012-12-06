@@ -12,6 +12,10 @@ namespace MDEvents
 {
 /** Interface to set of sub-classes used by ConvertToMD algorithm and responsible for conversion of input workspace 
   * data into MD events.
+  *
+  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation for detailed description of this
+  * class place in the algorithms hierarchy. 
+  *
 * The inferface provide information for two tasks. 
 * 1) Definition of target MD workspace properties and 
 * 2) Calculation of MD coordinates for single measurement 

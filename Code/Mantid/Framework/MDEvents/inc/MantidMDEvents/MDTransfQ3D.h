@@ -14,6 +14,9 @@ namespace MDEvents
     
 /** Class responsible for conversion of input workspace 
   * data into proper number of output dimensions for Q3D case
+  *
+  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation for detailed description of this
+  * class place in the algorithms hierarchy. 
   * 
   * Currently contains Elastic and Inelastic transformations
   *

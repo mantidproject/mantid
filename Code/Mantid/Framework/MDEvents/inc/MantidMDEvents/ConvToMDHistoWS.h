@@ -20,8 +20,12 @@ namespace Mantid
 namespace MDEvents
 {
 /** The class to transform matrix workspace into MDEvent workspace when matrix workspace is ragged 2D workspace
-   *
-   * @date 11-10-2011
+  *
+  *
+  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation for detailed description of this
+  * class place in the algorithms hierarchy. 
+  *
+  * @date 11-10-2011
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

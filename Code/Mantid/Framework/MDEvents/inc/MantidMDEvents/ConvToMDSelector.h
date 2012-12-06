@@ -10,9 +10,13 @@ namespace Mantid
 namespace MDEvents
 {
 /** small class to select proper solver as function of the workspace kind and (possibly, in a future) other workspace parameters. 
-   * may be replaced by usual mantid factory in a future; 
-   *
-   * @date 25-05-2012
+  * may be replaced by usual mantid factory in a future; 
+  *
+  *
+  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation for detailed description of this
+  * class place in the algorithms hierarchy. 
+  *
+  * @date 25-05-2012
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

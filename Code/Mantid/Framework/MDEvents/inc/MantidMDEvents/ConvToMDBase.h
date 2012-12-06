@@ -26,8 +26,12 @@ namespace Mantid
 namespace MDEvents
 {
 /** class describes the inteface to the methods, which perform conversion from usual workspaces to MDEventWorkspace 
-   *
-   * @date 07-01-2012
+  *
+  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation for detailed description of this
+  * class place in the algorithms hierarchy. 
+  *
+  *
+  * @date 07-01-2012
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
