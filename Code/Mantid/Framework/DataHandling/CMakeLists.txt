@@ -98,13 +98,13 @@ set ( SRC_FILES
 	src/MonitorLiveData.cpp
 	src/MoveInstrumentComponent.cpp
 	src/NexusTester.cpp
-	src/OrbiterDataArchive.cpp
 	src/ProcessDasNexusLog.cpp
 	src/RawFileInfo.cpp
 	src/RemoveLogs.cpp
 	src/RenameLog.cpp
 	src/RotateInstrumentComponent.cpp
 	src/SNSDataArchive.cpp
+    src/SNSDataArchiveICAT2.cpp
 	src/SNSLiveEventDataListener.cpp
 	src/SaveAscii.cpp
 	src/SaveCSV.cpp
@@ -231,13 +231,13 @@ set ( INC_FILES
 	inc/MantidDataHandling/MonitorLiveData.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/NexusTester.h
-	inc/MantidDataHandling/OrbiterDataArchive.h
 	inc/MantidDataHandling/ProcessDasNexusLog.h
 	inc/MantidDataHandling/RawFileInfo.h
 	inc/MantidDataHandling/RemoveLogs.h
 	inc/MantidDataHandling/RenameLog.h
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/SNSDataArchive.h
+    inc/MantidDataHandling/SNSDataArchiveICAT2.h
 	inc/MantidDataHandling/SNSLiveEventDataListener.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveCSV.h
@@ -356,12 +356,13 @@ set ( TEST_FILES
 	MonitorLiveDataTest.h
 	MoveInstrumentComponentTest.h
 	NexusTesterTest.h
-	OrbiterDataArchiveTest.h
 	ProcessDasNexusLogTest.h
 	RawFileInfoTest.h
 	RemoveLogsTest.h
 	RenameLogTest.h
 	SNSDataArchiveTest.h
+    SNSDataArchiveICAT2Test.h
+    SaveAsciiTest.h
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h
