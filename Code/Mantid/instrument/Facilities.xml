@@ -392,19 +392,19 @@
 
 </facility>
 
-<facility name="ILL" FileExtensions=".nxs,.xml">
+<facility name="ILL" FileExtensions=".nxs,.dat">
 
-- <instrument name="IN5">
+  <instrument name="IN5">
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Indirect Geometry Spectroscopy</technique> 
   </instrument>
 
-- <instrument name="IN10">
+  <instrument name="IN10">
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Indirect Geometry Spectroscopy</technique> 
   </instrument>
 
-- <instrument name="IN16">
+  <instrument name="IN16">
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Indirect Geometry Spectroscopy</technique> 
   </instrument>
