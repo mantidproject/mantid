@@ -12,7 +12,7 @@ namespace CurveFitting
 {
   namespace
   {
-    const int PEAKRADIUS = 8.0;
+    const int PEAKRADIUS = 8;
   }
 
 //  DECLARE_FUNCTION(LeBailFunction)
