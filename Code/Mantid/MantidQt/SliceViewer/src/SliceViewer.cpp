@@ -2181,7 +2181,7 @@ void SliceViewer::peakOverlay_toggled(bool checked)
         for(int i = 0; i < list.size(); ++i)
         {
           IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list[i].toStdString());
-          const int numberOfChildPresenters = m_peaksPresenter->size();
+          const size_t numberOfChildPresenters = m_peaksPresenter->size();
           PeakOverlayViewFactory_sptr viewFactoryIntegratedPeaks  = boost::make_shared<PeakOverlaySphereFactory>(m_plot, m_plot->canvas(), numberOfChildPresenters);
           PeakOverlayViewFactory_sptr viewFactoryNonIntegratedPeaks  = boost::make_shared<PeakOverlayCrossFactory>(m_plot, m_plot->canvas(), numberOfChildPresenters);
           try
