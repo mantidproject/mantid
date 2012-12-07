@@ -27,7 +27,7 @@ namespace RefDetectorViewer
  *
  *  @param data_source  The source of the data that will be displayed. 
  */
-RefImageView::RefImageView( RefImageDataSource* data_source, double peak_min, double peak_max, double back_min, double back_max, double tof_min, double tof_max)
+    RefImageView::RefImageView( RefImageDataSource* data_source, double peak_min, double peak_max, double back_min, double back_max, double tof_min, double tof_max)
 {
   Ui_RefImageViewer* ui = new Ui_RefImageViewer();
   saved_ui          = ui; 
@@ -71,7 +71,52 @@ RefImageView::RefImageView( RefImageDataSource* data_source, double peak_min, do
                                                   ui->lineEdit_backRight,
                                                   ui->lineEdit_TOFmin,
                                                   ui->lineEdit_TOFmax);
-  saved_image_display = image_display;
+
+    std::string s1;
+    std::stringstream ss1;
+    ss1 << peak_min;
+    ss1 >> s1;
+    QString s_peak_min = QString::fromStdString(s1);
+    ui->lineEdit_peakLeft->setText(s_peak_min);
+    
+    std::string s2;
+    std::stringstream ss2;
+    ss2 << peak_max;
+    ss2 >> s2;
+    QString s_peak_max = QString::fromStdString(s2);
+    ui->lineEdit_peakRight->setText(s_peak_max);
+
+    std::string s3;
+    std::stringstream ss3;
+    ss3 << back_min;
+    ss3 >> s3;
+    QString s_back_min = QString::fromStdString(s3);
+    ui->lineEdit_backLeft->setText(s_back_min);
+
+    std::string s4;
+    std::stringstream ss4;
+    ss4 << back_max;
+    ss4 >> s4;
+    QString s_back_max = QString::fromStdString(s4);
+    ui->lineEdit_backRight->setText(s_back_max);
+    
+    std::string s5;
+    std::stringstream ss5;
+    ss5 << tof_min;
+    ss5 >> s5;
+    QString s_tof_min = QString::fromStdString(s5);
+    ui->lineEdit_TOFmin->setText(s_tof_min);
+
+    std::string s6;
+    std::stringstream ss6;
+    ss6 << tof_max;
+    ss6 >> s6;
+    QString s_tof_max = QString::fromStdString(s6);
+    ui->lineEdit_TOFmax->setText(s_tof_max);
+
+//    image_display->UpdateImage();
+    
+    saved_image_display = image_display;
 
   RefIVConnections * iv_connections = new RefIVConnections( ui, this, 
                                                      image_display, 
@@ -129,13 +174,25 @@ RefImageView::RefImageView( RefImageDataSource* data_source, double peak_min, do
     
 //  ui->lineEdit_peakLeft.
     
-  saved_iv_connections = iv_connections;
+
+    image_display->setPeakLeft(static_cast<int>(peak_min));
+    image_display->setPeakRight(static_cast<int>(peak_max));
+    image_display->setBackLeft(static_cast<int>(back_min));
+    image_display->setBackRight(static_cast<int>(back_max));
+    image_display->setTOFmin(static_cast<int>(tof_min));
+    image_display->setTOFmax(static_cast<int>(tof_max));
+    
+    saved_iv_connections = iv_connections;
 
     image_display->UpdateImage();
     iv_connections->peak_back_tof_range_update();
 
     
   image_display->SetDataSource( data_source );
+
+    image_display->UpdateImage();
+    iv_connections->peak_back_tof_range_update();
+    
 }
     
   RefIVConnections* RefImageView::getIVConnections()
