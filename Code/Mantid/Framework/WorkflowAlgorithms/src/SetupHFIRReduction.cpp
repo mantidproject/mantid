@@ -464,10 +464,13 @@ void SetupHFIRReduction::exec()
   const std::string centerMethod = getPropertyValue("BeamCenterMethod");
 
   // Beam center option for transmission data
-  if (boost::iequals(centerMethod, "Value") && !isEmpty(beamCenterX) && !isEmpty(beamCenterY))
+  if (boost::iequals(centerMethod, "Value"))
   {
-    reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", beamCenterX) );
-    reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", beamCenterY) );
+    if(!isEmpty(beamCenterX) && !isEmpty(beamCenterY))
+    {
+      reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterX", beamCenterX) );
+      reductionManager->declareProperty(new PropertyWithValue<double>("LatestBeamCenterY", beamCenterY) );
+    }
   }
   else if (!boost::iequals(centerMethod, "None"))
   {
@@ -605,12 +608,14 @@ void SetupHFIRReduction::setupSensitivity(boost::shared_ptr<PropertyManager> red
 
     // Beam center option for sensitivity data
     const std::string centerMethod = getPropertyValue("SensitivityBeamCenterMethod");
-    if (boost::iequals(centerMethod, "Value") &&
-        !isEmpty(sensitivityBeamCenterX) &&
-        !isEmpty(sensitivityBeamCenterY))
+    if (boost::iequals(centerMethod, "Value"))
     {
-      effAlg->setProperty("BeamCenterX", sensitivityBeamCenterX);
-      effAlg->setProperty("BeamCenterY", sensitivityBeamCenterY);
+      if (!isEmpty(sensitivityBeamCenterX) &&
+          !isEmpty(sensitivityBeamCenterY))
+      {
+        effAlg->setProperty("BeamCenterX", sensitivityBeamCenterX);
+        effAlg->setProperty("BeamCenterY", sensitivityBeamCenterY);
+      }
     }
     else if (boost::iequals(centerMethod, "DirectBeam") ||
         boost::iequals(centerMethod, "Scattering"))
@@ -632,7 +637,7 @@ void SetupHFIRReduction::setupSensitivity(boost::shared_ptr<PropertyManager> red
          algProp->setValue(ctrAlg->toString());
          reductionManager->declareProperty(algProp);
        } else {
-         g_log.error() << "ERROR: Beam center determination was required"
+         g_log.error() << "ERROR: Sensitivity beam center determination was required"
              " but no file was provided" << std::endl;
        }
     }
@@ -813,7 +818,7 @@ void SetupHFIRReduction::setupTransmission(boost::shared_ptr<PropertyManager> re
          algProp->setValue(ctrAlg->toString());
          reductionManager->declareProperty(algProp);
        } else {
-         g_log.error() << "ERROR: Beam center determination was required"
+         g_log.error() << "ERROR: Transmission beam center determination was required"
              " but no file was provided" << std::endl;
        }
     }

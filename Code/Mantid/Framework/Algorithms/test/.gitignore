@@ -1,8 +1,5 @@
-*.cpp
-test_header.h 
 DivideTest.h
 MinusTest.h
 MultiplyTest.h
 PlusTest.h
-/*.properties
-/test_header.h
+

@@ -131,6 +131,7 @@ def NoTransmission():
         del ReductionSingleton().reduction_properties["ThetaDependentTransmission"]
     
 def SetTransmission(trans, error, theta_dependent=True):
+    ReductionSingleton().reduction_properties["TransmissionMethod"] = "Value"
     ReductionSingleton().reduction_properties["TransmissionValue"] = trans
     ReductionSingleton().reduction_properties["TransmissionError"] = error
     ReductionSingleton().reduction_properties["ThetaDependentTransmission"] = theta_dependent
@@ -229,6 +230,7 @@ def NoBckTransmission():
         del ReductionSingleton().reduction_properties["BckThetaDependentTransmission"]
     
 def SetBckTransmission(trans, error, theta_dependent=True):
+    ReductionSingleton().reduction_properties["BckTransmissionMethod"] = "Value"
     ReductionSingleton().reduction_properties["BckTransmissionValue"] = trans
     ReductionSingleton().reduction_properties["BckTransmissionError"] = error
     ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependent
