@@ -35,20 +35,12 @@ pulses:
 
 *WIKI*/
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAlgorithms/FilterByLogValue.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidAPI/FileProperty.h"
-
-#include <fstream>
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid
@@ -186,8 +178,8 @@ void FilterByLogValue::exec()
     else
     {
       // ----- Filter by value ------
-      if (max <= min)
-        throw std::invalid_argument("MaximumValue should be > MinimumValue. Aborting.");
+      if (max < min)
+        throw std::invalid_argument("MaximumValue should be >= MinimumValue. Aborting.");
 
       //This function creates the splitter vector we will use to filter out stuff.
       const std::string logBoundary(this->getPropertyValue("LogBoundary"));

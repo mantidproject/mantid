@@ -453,8 +453,8 @@ namespace Mantid
       if ( max < min )
       {
         std::stringstream ss;
-        ss << "TimeSeriesProperty::makeFilterByValue: 'max' argument must be greater than 'min'"
-           << "(got min=" << min << " max=" << max;
+        ss << "TimeSeriesProperty::makeFilterByValue: 'max' argument must be greater than 'min' "
+           << "(got min=" << min << " max=" << max << ")";
         throw std::invalid_argument(ss.str());
       }
 
@@ -540,8 +540,8 @@ namespace Mantid
       if ( max < min )
       {
         std::stringstream ss;
-        ss << "TimeSeriesProperty::expandFilterToRange: 'max' argument must be greater than 'min'"
-           << "(got min=" << min << " max=" << max;
+        ss << "TimeSeriesProperty::expandFilterToRange: 'max' argument must be greater than 'min' "
+           << "(got min=" << min << " max=" << max << ")";
         throw std::invalid_argument(ss.str());
       }
 
