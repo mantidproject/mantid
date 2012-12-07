@@ -108,6 +108,7 @@ signals:
   void scaleTypeChanged(int);
   void integrationRangeChanged(double,double);
   void glOptionChanged(bool);
+  void requestSelectComponent(const QString&);
 
 protected:
   /// Called just before a show event

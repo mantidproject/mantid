@@ -16,7 +16,8 @@ class InstrumentWindowTreeTab: public InstrumentWindowTab
 public:
   InstrumentWindowTreeTab(InstrumentWindow* instrWindow);
   void initSurface();
-  QModelIndex findComponentByName(const QString& name);
+public slots:
+  void selectComponentByName(const QString& name);
 private:
   void hideEvent(QHideEvent *);
   /// Widget to display instrument tree
