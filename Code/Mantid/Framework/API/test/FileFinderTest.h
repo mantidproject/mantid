@@ -80,6 +80,11 @@ public:
       "      <technique>Reflectometer</technique>"
       "    </instrument>"
       "  </facility>"
+      "  <facility name=\"ILL\" delimiter=\"_\" FileExtensions=\".nxs,.dat\">"
+	  "    <instrument name=\"IN5\" shortname=\"IN5\">"
+      "      <technique>Inelastic Spectroscopy</technique>"
+      "    </instrument>"
+	  "  </facility>"
       "</facilities>";
 
     std::ofstream fil(m_facFile.path().c_str());
