@@ -42,6 +42,10 @@ namespace MantidQt
       virtual ~PeakOverlaySphereFactory();
       boost::shared_ptr<PeakOverlayView> createView(const Mantid::Kernel::V3D& position) const;
       virtual void setRadius(const double& peakRadius);
+      virtual void setZRange(const double& max, const double& min)
+      {
+        // Do nothing.
+      }
     };
   }
 }

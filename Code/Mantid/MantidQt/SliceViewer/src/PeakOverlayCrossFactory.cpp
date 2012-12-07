@@ -1,5 +1,5 @@
 #include "MantidQtSliceViewer/PeakOverlayCrossFactory.h"
-#include "MantidQtSliceViewer/PeakOverlaySphere.h"
+#include "MantidQtSliceViewer/PeakOverlayCross.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -20,7 +20,13 @@ namespace MantidQt
 
     boost::shared_ptr<PeakOverlayView> PeakOverlayCrossFactory::createView(const Mantid::Kernel::V3D& position) const
     {
-      return boost::make_shared<PeakOverlaySphere>(m_plot, m_parent, position, 0, this->m_peakColour);
+      return boost::make_shared<PeakOverlayCross>(m_plot, m_parent, position, m_zMax, m_zMin, this->m_peakColour);
+    }
+
+    void PeakOverlayCrossFactory::setZRange(const double& max, const double& min)
+    {
+      m_zMax = max;
+      m_zMin = min;
     }
 
     PeakOverlayCrossFactory::~PeakOverlayCrossFactory()

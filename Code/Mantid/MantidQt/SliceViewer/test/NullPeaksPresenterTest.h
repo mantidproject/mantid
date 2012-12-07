@@ -5,7 +5,6 @@
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
 
 using namespace MantidQt::SliceViewer;
-using namespace Mantid;
 
 class NullPeaksPresenterTest : public CxxTest::TestSuite
 {

@@ -2,13 +2,8 @@
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
-#include <iostream>
 #include <qpainter.h>
-#include <QRect>
 #include <QPen>
-#include <QBrush>
-#include <QShowEvent>
-#include "MantidKernel/Utils.h"
 
 using namespace Mantid::Kernel;
 
@@ -50,7 +45,7 @@ namespace SliceViewer
   ASCII diagram below to demonstrate how dz (distance in z) is used to determine the radius of the sphere-plane intersection at that point,
   resloves both rx and ry. Also uses the distance to calculate the opacity to apply.
 
-  @param atPoint : distance from the peak center in the md coordinates of the z-axis.
+  @param z : position of the plane slice in the z dimension.
 
        /---------\
       /           \

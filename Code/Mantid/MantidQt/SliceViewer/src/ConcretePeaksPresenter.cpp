@@ -1,10 +1,15 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/PeakTransformFactory.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/regex.hpp>
+
+using namespace Mantid::API;
+using Mantid::Geometry::IMDDimension_const_sptr;
 
 namespace MantidQt
 {
@@ -20,9 +25,10 @@ namespace SliceViewer
   @param nonIntegratedViewFactory : View Factory (THE VIEW via factory)
   @param integratedViewFactory : View Factory (THE VIEW via factory)
   @param peaksWS : IPeaksWorkspace to visualise (THE MODEL)
+  @param mdWS : IMDWorkspace also being visualised (THE MODEL)
   @param peaksTransform : Peak Transformation Factory. This is about interpreting the MODEL.
   */
-  ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory, PeakOverlayViewFactory_sptr integratedViewFactory, Mantid::API::IPeaksWorkspace_sptr peaksWS, PeakTransformFactory_sptr transformFactory) : m_viewPeaks(peaksWS->getNumberPeaks())
+  ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory, PeakOverlayViewFactory_sptr integratedViewFactory, IPeaksWorkspace_sptr peaksWS, boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) : m_viewPeaks(peaksWS->getNumberPeaks())
     , m_viewFactory(integratedViewFactory), m_transformFactory(transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0)
   {
     if(integratedViewFactory == NULL)
@@ -39,6 +45,8 @@ namespace SliceViewer
     }
 
     double peakIntegrationRadius = 0;
+    double maxZ = 0;
+    double minZ = 0;
     if(peaksWS->hasIntegratedPeaks())
     {
       peakIntegrationRadius = boost::lexical_cast<double>(peaksWS->run().getProperty("PeakRadius")->value());
@@ -47,15 +55,26 @@ namespace SliceViewer
     {
       // Swap the view factory. We are not plotting integrated peaks now.
       m_viewFactory.swap(nonIntegratedViewFactory);
+      // Find the range for the z slider axis.
+      for(size_t dimIndex = 0; dimIndex < mdWS->getNumDims(); ++dimIndex)
+      {
+        IMDDimension_const_sptr dimensionMappedToZ = mdWS->getDimension(dimIndex);
+        if(this->isDimensionNameOfFreeAxis(dimensionMappedToZ->getName()))
+        {
+          maxZ = dimensionMappedToZ->getMaximum();
+          minZ = dimensionMappedToZ->getMinimum();
+        }
+      } 
     }
     m_viewFactory->setRadius(peakIntegrationRadius);
+    m_viewFactory->setZRange(maxZ, minZ);
     
     const bool transformSucceeded = this->configureMappingTransform();
     
     // Make and register each peak widget.
     for(int i = 0; i < peaksWS->getNumberPeaks(); ++i)
     {
-      const Mantid::API::IPeak& peak = peaksWS->getPeak(i);
+      const IPeak& peak = peaksWS->getPeak(i);
       PeakOverlayView_sptr view = boost::shared_ptr<PeakOverlayView>( m_viewFactory->createView(m_transform->transformPeak(peak)) );
       m_viewPeaks[i] = view;
     }
@@ -150,7 +169,17 @@ namespace SliceViewer
   */
   bool ConcretePeaksPresenter::isLabelOfFreeAxis(const std::string& label) const
   {
-    return boost::regex_match(label, m_transform->getFreePeakAxisRegex());
+    return isDimensionNameOfFreeAxis(label);
+  }
+
+  /**
+  Determine whether the candidate dimension name is the name of the free axis.
+  @param name: The candidate dimension name to consider.
+  @return True if it matches the label of the free axis accoring to the current peaks transform.
+  */
+  bool ConcretePeaksPresenter::isDimensionNameOfFreeAxis(const std::string& name) const
+  {
+    return boost::regex_match(name, m_transform->getFreePeakAxisRegex());
   }
 
   /**

@@ -50,6 +50,8 @@ namespace MantidQt
       virtual boost::shared_ptr<PeakOverlayView> createView(const Mantid::Kernel::V3D&) const = 0;
       /// Setter for the radius to use for all peaks.
       virtual void setRadius(const double& radius) = 0;
+      /// Setter for the z range.
+      virtual void setZRange(const double& max, const double& min) = 0;
       /// Destructor
       virtual ~PeakOverlayViewFactory()
       {

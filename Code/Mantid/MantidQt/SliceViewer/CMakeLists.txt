@@ -7,6 +7,7 @@ set ( SRC_FILES
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
 	src/PeakOverlaySphere.cpp
+	src/PeakOverlayCross.cpp
 	src/PeakOverlaySphereFactory.cpp
 	src/PeakOverlayCrossFactory.cpp
 	src/PeakOverlayViewFactoryBase.cpp
@@ -38,6 +39,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/NullPeaksPresenter.h
 	inc/MantidQtSliceViewer/PeakOverlaySphere.h
+	inc/MantidQtSliceViewer/PeakOverlayCross.h
 	inc/MantidQtSliceViewer/PeakOverlayView.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactoryBase.h
@@ -64,6 +66,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
+ 	inc/MantidQtSliceViewer/PeakOverlayCross.h
 	inc/MantidQtSliceViewer/PeakOverlaySphere.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
@@ -140,7 +143,7 @@ if ( CXXTEST_FOUND )
   include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc )
 
   set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp 
-  ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp   
+  ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
   )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )

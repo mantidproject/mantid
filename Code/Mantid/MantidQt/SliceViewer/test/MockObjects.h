@@ -1,6 +1,8 @@
 #ifndef SLICE_VIEWER_MOCKOBJECTS_H_
 #define SLICE_VIEWER_MOCKOBJECTS_H_
 
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakTransform.h"
 #include "MantidQtSliceViewer/PeakTransformFactory.h"
@@ -80,6 +82,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
   public:
     MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(const Mantid::Kernel::V3D&));
     MOCK_METHOD1(setRadius, void(const double&));
+    MOCK_METHOD2(setZRange, void(const double&, const double&));
     MOCK_CONST_METHOD0(getPlotXLabel, std::string());
     MOCK_CONST_METHOD0(getPlotYLabel, std::string());
     MOCK_METHOD0(updateView, void());
@@ -184,6 +187,45 @@ class MockPeakTransformFactory : public PeakTransformFactory
       double());
     MOCK_CONST_METHOD0(getL2,
       double());
+  };
+
+  /*------------------------------------------------------------
+  Mock MDGeometry
+  ------------------------------------------------------------*/
+  class MockMDGeometry : public Mantid::API::MDGeometry
+  {
+  public:
+    MOCK_CONST_METHOD0(getNumDims, size_t());
+    MOCK_CONST_METHOD1(getDimension, boost::shared_ptr<const Mantid::Geometry::IMDDimension>(size_t));
+    virtual ~MockMDGeometry() {}
+  };
+
+  /*------------------------------------------------------------
+  Mock IMDDimension
+  ------------------------------------------------------------*/
+  class MockIMDDimension : public Mantid::Geometry::IMDDimension 
+  {
+  public:
+    MOCK_CONST_METHOD0(getName,
+      std::string());
+    MOCK_CONST_METHOD0(getUnits,
+      std::string());
+    MOCK_CONST_METHOD0(getDimensionId,
+      std::string());
+    MOCK_CONST_METHOD0(getMaximum,
+      coord_t());
+    MOCK_CONST_METHOD0(getMinimum,
+      coord_t());
+    MOCK_CONST_METHOD0(getNBins,
+      size_t());
+    MOCK_CONST_METHOD0(toXMLString,
+      std::string());
+    MOCK_CONST_METHOD0(getIsIntegrated,
+      bool());
+    MOCK_CONST_METHOD1(getX,
+      coord_t(size_t ind));
+    MOCK_METHOD3(setRange,
+      void(size_t nBins, coord_t min, coord_t max));
   };
 
 }
