@@ -394,6 +394,11 @@
 
 <facility name="ILL" FileExtensions=".nxs,.xml">
 
+- <instrument name="IN5">
+    <technique>Neutron Spectroscopy</technique> 
+    <technique>Reactor Indirect Geometry Spectroscopy</technique> 
+  </instrument>
+
 - <instrument name="IN10">
     <technique>Neutron Spectroscopy</technique> 
     <technique>Reactor Indirect Geometry Spectroscopy</technique> 
