@@ -121,6 +121,7 @@ protected:
 public slots:
   void tabChanged(int);
   void multipleDetectorsSelected(QList<int>&);
+  void componentSelected(Mantid::Geometry::ComponentID id);
   void showPickOptions();
   void spectraInfoDialog();
   void plotSelectedSpectra();

@@ -1,6 +1,7 @@
 #include "InstrumentWindow.h"
 #include "InstrumentWindowTreeTab.h"
 #include "InstrumentTreeWidget.h"
+#include "InstrumentActor.h"
 
 InstrumentWindowTreeTab::InstrumentWindowTreeTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow)
@@ -9,8 +10,8 @@ InstrumentWindowTab(instrWindow)
     //Tree Controls
     m_instrumentTree = new InstrumentTreeWidget(0);
     layout->addWidget(m_instrumentTree);
-//    connect(m_instrumentTree,SIGNAL(componentSelected(Mantid::Geometry::ComponentID)),
-    //            m_InstrumentDisplay,SLOT(componentSelected(Mantid::Geometry::ComponentID)));
+    connect(m_instrumentTree,SIGNAL(componentSelected(Mantid::Geometry::ComponentID)),
+                m_instrWindow,SLOT(componentSelected(Mantid::Geometry::ComponentID)));
 }
 
 void InstrumentWindowTreeTab::initSurface()
@@ -32,6 +33,6 @@ QModelIndex InstrumentWindowTreeTab::findComponentByName(const QString &name)
   */
 void InstrumentWindowTreeTab::hideEvent(QHideEvent *)
 {
-    //m_instrumentActor->accept(SetAllVisibleVisitor());
+    m_instrWindow->getInstrumentActor()->accept(SetAllVisibleVisitor());
 }
 

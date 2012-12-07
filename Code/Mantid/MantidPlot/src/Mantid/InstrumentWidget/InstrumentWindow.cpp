@@ -911,6 +911,22 @@ void InstrumentWindow::multipleDetectorsSelected(QList<int>& detlist)
   showPickOptions();
 }
 
+/**
+  * Update the display to view a selected component. The selected component
+  * is visible the rest of the instrument is hidden.
+  * @param id :: The component id.
+  */
+void InstrumentWindow::componentSelected(ComponentID id)
+{
+    ProjectionSurface *surface = getSurface();
+    if (surface)
+    {
+      surface->componentSelected(id);
+      surface->updateView();
+      updateInstrumentView();
+    }
+}
+
 /** A class for creating grouping xml files
   */
 class DetXMLFile
@@ -1295,7 +1311,7 @@ int InstrumentWindow::getInstrumentDisplayHeight() const
 /// Redraw the instrument view
 void InstrumentWindow::updateInstrumentView()
 {
-  if ( isGLEnabled() )
+  if ( m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget*>(m_InstrumentDisplay) )
   {
     m_InstrumentDisplay->updateView();
   }
@@ -1309,7 +1325,7 @@ void InstrumentWindow::updateInstrumentView()
 void InstrumentWindow::updateInstrumentDetectors()
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  if ( isGLEnabled() )
+  if ( m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget*>(m_InstrumentDisplay) )
   {
     m_InstrumentDisplay->updateDetectors();
   }
