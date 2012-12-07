@@ -239,23 +239,32 @@ namespace Mantid
         int32_t detOrSpec(0);
         is >> detOrSpec;
         Geometry::IDetector_const_sptr det;
-        if(isSpectrum)
+        try
         {
-          auto it = specToIndex->find(detOrSpec);
-          if(it != specToIndex->end())
+          if(isSpectrum)
           {
-            det = m_workspace->getDetector((*specToIndex)[detOrSpec]);
+            auto it = specToIndex->find(detOrSpec);
+            if(it != specToIndex->end())
+            {
+              det = m_workspace->getDetector((*specToIndex)[detOrSpec]);
+            }
+            else
+            {
+              g_log.debug() << "Skipping \"" << line << "\". Spectrum is not in workspace.";
+              continue;
+            }
           }
           else
           {
-            g_log.notice() << "Skipping \"" << line << "\". Cannot find associated detector.";
-            continue;
+            det = inst->getDetector(detOrSpec);
           }
         }
-        else
+        catch(Kernel::Exception::NotFoundError&)
         {
-          det = inst->getDetector(detOrSpec);
+          g_log.debug() << "Skipping \"" << line << "\". Spectrum in workspace but cannot find associated detector.";
+          continue;
         }
+
 
         // Special cases for detector r,t,p. Everything else is
         // attached as an detector parameter
@@ -364,11 +373,21 @@ namespace Mantid
 
         for (int i = 0; i < numDetector; ++i)
         {
-          Geometry::IDetector_const_sptr det = inst->getDetector(detID[i]);
-          setDetectorPosition(det, l2[i], theta[i], phi[i]);
+          try
+          {
+            Geometry::IDetector_const_sptr det = inst->getDetector(detID[i]);
+            if( m_ignoreMonitors && det->isMonitor() )
+            {
+              continue;
+            }
+            setDetectorPosition(det, l2[i], theta[i], phi[i]);
+          }
+          catch (Kernel::Exception::NotFoundError&)
+          {
+            continue;
+          }
           progress(static_cast<double>(i)/numDetector,"Updating Detector Positions from File");
         }  
-
       }
 
     /**
@@ -382,32 +401,25 @@ namespace Mantid
                                                        const float theta, const float phi)
     {
       Geometry::ParameterMap & pmap = m_workspace->instrumentParameters();
-      try
+      V3D parentPos;
+      if( det->getParent() ) parentPos = det->getParent()->getPos();
+      Kernel::V3D pos;
+      if (!m_ignorePhi)
       {
-        if( m_ignoreMonitors && det->isMonitor() ) return;
-        V3D parentPos;
-        if( det->getParent() ) parentPos = det->getParent()->getPos();
-        Kernel::V3D pos;
-        if (!m_ignorePhi)
-        {
-          pos.spherical(l2, theta, phi);
-        }
-        else
-        {
-          double r,t,p;
-          det->getPos().getSpherical(r,t,p);
-          pos.spherical(l2, theta, p);
-        }
-        // Set new relative position
-        Kernel::V3D r = pos-parentPos;
-        Kernel::Quat q = det->getParent()->getRotation();
-        q.inverse();
-        q.rotate(r);
-        pmap.addV3D(det.get(), "pos", r);
+        pos.spherical(l2, theta, phi);
       }
-      catch (Kernel::Exception::NotFoundError&)
+      else
       {
+        double r,t,p;
+        det->getPos().getSpherical(r,t,p);
+        pos.spherical(l2, theta, p);
       }
+      // Set new relative position
+      Kernel::V3D r = pos-parentPos;
+      Kernel::Quat q = det->getParent()->getRotation();
+      q.inverse();
+      q.rotate(r);
+      pmap.addV3D(det.get(), "pos", r);
     }
 
   } // namespace DataHandling
