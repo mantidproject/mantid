@@ -1644,8 +1644,7 @@ namespace Mantid
         VaryHW = HalfWidthAtHalfHeightRadius*HalfWidthAtHalfHeightRadius;
         return;
       }
-      double TotR ,nR , TotRx,TotRy=0, nRx=0, nRy;
-      nR = nRy= nRx = -1;
+      double TotR=0,nR=-1,TotRx=0,TotRy=0,nRx=-1,nRy=-1;
       double MidVal = ( TotMax/nMax + TotMin/nMin )/2.0;
 
       while( (nR <= 0 || nRy <=0 || nRx <=0) && offset < MidVal )
