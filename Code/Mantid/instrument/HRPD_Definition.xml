@@ -14,6 +14,7 @@
     <handedness val="right" />
   </reference-frame>
   <offsets spherical="delta" />
+  <default-view view="cylindrical_y"/>
 </defaults>
 
 
