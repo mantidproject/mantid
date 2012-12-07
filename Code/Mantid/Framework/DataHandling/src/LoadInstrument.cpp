@@ -212,40 +212,28 @@ namespace Mantid
     void LoadInstrument::runLoadParameterFile()
     {
       g_log.debug("Loading the parameter definition...");
-      // Determine the search directory for XML parameter definition files
-      Kernel::ConfigServiceImpl & configService = Kernel::ConfigService::Instance();
-      std::string directoryName = configService.getString("parameterDefinition.directory");
-      if (directoryName.empty())
-      {
-        // This is the assumed deployment directory for parameter files, where we need to be 
-        // relative to the directory of the executable, not the current working directory.
-        directoryName = Poco::Path(configService.getPropertiesDir()).resolve("../instrument").toString();
-        // Remove the path from the filename
-        const std::string::size_type stripPath = m_filename.find_last_of("\\/");
-        std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
 
-        // First check whether there is a parameter file whose name is the same as the IDF file,
-        // but with 'Parameters' instead of 'Definition'.
-        //std::string definitionPart("_Definition");
-        //const std::string::size_type prefix_end(instrumentFile.find(definitionPart));
-        //const std::string::size_type suffix_start = prefix_end + definitionPart.length();
-        // Make prefix and force it to be upper case
-        //std::string prefix = instrumentFile.substr(0, prefix_end);
-        //std::transform(prefix.begin(), prefix.end(), prefix.begin(), toupper); 
-        // Make suffix ensuring it has positive length
-        //std::string suffix = ".xml";
-        //if( suffix_start < instrumentFile.length() )
-        //{
-        //  suffix = instrumentFile.substr(suffix_start, std::string::npos );
-        //} 
-        // Assemble parameter file name
-        //std::string fullPathParamIDF = directoryName + "/" + prefix + "_Parameters" + suffix;
-        //if( Poco::File(fullPathParamIDF).exists() == false) 
-        // { // No such file exists, so look for file based on instrument ID given by the prefix
-        //  fullPathParamIDF = directoryName + "/" + prefix + "_Parameters.xml";
-        // }
+      // First search for XML parameter file in same folder as IDF file
+      const std::string::size_type dir_end = m_filename.find_last_of("\\/");
+      std::string directoryName = m_filename.substr(0,dir_end+1); // include final '/'.
+      std::string fullPathParamIDF = getFullPathParamIDF( directoryName );
+
+      if( fullPathParamIDF.empty() )
+      {
+        // Not found, so search the other places were it may occur
+        Kernel::ConfigServiceImpl & configService = Kernel::ConfigService::Instance();
+        std::string directoryName = configService.getString("parameterDefinition.directory");
+        if (directoryName.empty())
+        {
+          // This is the assumed deployment directory for parameter files, where we need to be 
+          // relative to the directory of the executable, not the current working directory.
+          directoryName = Poco::Path(configService.getPropertiesDir()).resolve("../instrument").toString();
+          // Remove the path from the filename
+          std::string instrumentFile = m_filename.substr(dir_end+1,m_filename.size());
+
+        }
+        fullPathParamIDF = getFullPathParamIDF( directoryName );
       }
-      std::string fullPathParamIDF = getfullPathParamIDF( directoryName );
 
       if(!fullPathParamIDF.empty()) {
 
@@ -272,7 +260,8 @@ namespace Mantid
 
     //-----------------------------------------------------------------------------------------------------------------------
     /// Search the directory for the Parameter IDF file and return full path name if found, else return "".
-    std::string LoadInstrument::getfullPathParamIDF( std::string directoryName )
+    //  directoryName must include a final '/'.
+    std::string LoadInstrument::getFullPathParamIDF( std::string directoryName )
     {
       // Remove the path from the filename
       const std::string::size_type stripPath = m_filename.find_last_of("\\/");
@@ -294,7 +283,7 @@ namespace Mantid
       } 
 
       // Assemble parameter file name
-      std::string fullPathParamIDF = directoryName + "/" + prefix + "_Parameters" + suffix;
+      std::string fullPathParamIDF = directoryName + prefix + "_Parameters" + suffix;
       if( Poco::File(fullPathParamIDF).exists() == false) 
       { // No such file exists, so look for file based on instrument ID given by the prefix
         fullPathParamIDF = directoryName + "/" + prefix + "_Parameters.xml";
