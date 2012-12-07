@@ -10,15 +10,22 @@ It is assumed that the positions specified in the raw file are all with respect 
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
+#include "MantidDataHandling/LoadAscii.h"
+#include "MantidDataHandling/LoadISISNexus2.h"
 #include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "LoadRaw/isisraw2.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
+#include "LoadRaw/isisraw2.h"
+
 #include <boost/scoped_ptr.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+#include <Poco/StringTokenizer.h>
+
+#include <fstream>
 
 namespace Mantid
 {
@@ -43,6 +50,7 @@ namespace Mantid
 
     /// Empty default constructor
     UpdateInstrumentFromFile::UpdateInstrumentFromFile()
+      : m_workspace(), m_ignorePhi(false), m_ignoreMonitors(true)
     {}
 
     /// Initialisation method.
@@ -58,13 +66,21 @@ namespace Mantid
       exts.push_back(".s*");
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The filename of the input file.\n"
-        "Currently supports RAW and ISIS NeXus."
+        "Currently supports RAW, ISIS NeXus & multi-column (at least 2) ascii file"
         );
-      declareProperty("MoveMonitors", false, 
+      declareProperty("MoveMonitors", (!m_ignoreMonitors),
                       "If true the positions of any detectors marked as monitors "
                       "in the IDF will be moved also");
-      declareProperty("IgnorePhi", false, 
+      declareProperty("IgnorePhi", m_ignorePhi,
                       "If true the phi values form the file will be ignored ");
+      declareProperty("AsciiHeader", "",
+                      "If the file is a simple text file, then this property is used to"
+                      "define the values in each column of the file. For example: spectrum,theta,t0,-,R"
+                      "Keywords=spectrum,ID,R,theta,phi. A dash means skip column. Keywords are recognised"
+                      "as identifying components to move to new positions. Any other names in the list"
+                      "are added as instrument parameters.");
+
+
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -82,18 +98,31 @@ namespace Mantid
         throw std::runtime_error("Input workspace has no defined instrument");
       }
 
+      m_ignorePhi = getProperty("IgnorePhi");
+      const bool moveMonitors = getProperty("MoveMonitors");
+      m_ignoreMonitors = (!moveMonitors);
+
       // Check the file type
-      boost::scoped_ptr<LoadRawHelper> rawCheck(new LoadRawHelper()); 
-      if( rawCheck->fileCheck(filename) > 0 )
+      LoadRawHelper isisRAW;
+      LoadAscii ascii;
+      LoadISISNexus2 isisNexus;
+      if( isisRAW.fileCheck(filename) > 0 )
       {
         updateFromRaw(filename);
       }
-      // Assume it is a NeXus file for now 
-      // @todo: When Nexus is merged use the file checker also
-      else
+      else if(ascii.fileCheck(filename) > 0)
+      {
+        updateFromAscii(filename);
+      }
+      else if(isisNexus.fileCheck(filename) > 0)
       {
         updateFromNeXus(filename);
       }
+      else
+      {
+        throw std::invalid_argument("Unknown filetype for \"" + filename + "\"");
+      }
+
     }
 
     /**
@@ -179,6 +208,146 @@ namespace Mantid
       setDetectorPositions(detID, l2, theta, phi);
     }
 
+    namespace
+    {
+      ///@cond
+      ///@endcond
+    }
+
+    /**
+     * Updates from a more generic ascii file
+     * @param filename :: The input filename
+     */
+    void UpdateInstrumentFromFile::updateFromAscii(const std::string & filename)
+    {
+      AsciiFileHeader header;
+      const bool isSpectrum = parseAsciiHeader(header);
+
+      Geometry::ParameterMap & pmap = m_workspace->instrumentParameters();
+      Geometry::Instrument_const_sptr inst = m_workspace->getInstrument();
+      // Throws for multiple detectors
+      boost::scoped_ptr<spec2index_map> specToIndex(m_workspace->getSpectrumToWorkspaceIndexMap());
+
+      std::ifstream datfile(filename.c_str(), std::ios_base::in);
+      std::string line;
+      std::vector<double> colValues(header.colCount - 1, 0.0);
+      while(std::getline(datfile,line))
+      {
+        std::istringstream is(line);
+
+        // Column 0 should be ID/spectrum number
+        int32_t detOrSpec(0);
+        is >> detOrSpec;
+        Geometry::IDetector_const_sptr det;
+        if(isSpectrum)
+        {
+          auto it = specToIndex->find(detOrSpec);
+          if(it != specToIndex->end())
+          {
+            det = m_workspace->getDetector((*specToIndex)[detOrSpec]);
+          }
+          else
+          {
+            g_log.notice() << "Skipping \"" << line << "\". Cannot find associated detector.";
+            continue;
+          }
+        }
+        else
+        {
+          det = inst->getDetector(detOrSpec);
+        }
+
+        // Special cases for detector r,t,p. Everything else is
+        // attached as an detector parameter
+        double R(0.0),theta(0.0), phi(0.0);
+        for(size_t i = 1; i < header.colCount; ++i)
+        {
+          double value(0.0);
+          is >> value;
+          if(i < header.colCount - 1 && is.eof())
+          {
+            //If stringstream is at EOF & we are not at the last column then
+            // there aren't enought columns in the file
+            throw std::runtime_error("UpdateInstrumentFromFile::updateFromAscii - "
+                          "File contains fewer than expected number of columns, check AsciiHeader property.");
+          }
+
+          if(i == header.rColIdx) R = value;
+          else if(i == header.thetaColIdx) theta = value;
+          else if(i == header.phiColIdx) phi = value;
+          else if(header.detParCols.count(i) == 1)
+          {
+            pmap.addDouble(det.get(), header.colToName[i],value);
+          }
+        }
+        // Check stream state. stringstream::EOF should have been reached, if not then there is still more to
+        // read and the file has more columns than the header indicated
+        if(!is.eof())
+        {
+          throw std::runtime_error("UpdateInstrumentFromFile::updateFromAscii - "
+              "File contains more than expected number of columns, check AsciiHeader property.");
+        }
+
+        // If not supplied use current values
+        double r,t,p;
+        det->getPos().getSpherical(r,t,p);
+        if(header.rColIdx == 0) R = r;
+        if(header.thetaColIdx == 0) theta = t;
+        if(header.phiColIdx == 0) phi = p;
+
+        setDetectorPosition(det, static_cast<float>(R), static_cast<float>(theta), static_cast<float>(phi));
+      }
+    }
+
+    /**
+     * Parse the header and fill the headerInfo struct and returns a boolean
+     * indicating if the table is spectrum or detector ID based
+     * @param headerInfo[Out] :: Fills the given struct with details about the header
+     * @returns True if the header is spectrum based, false otherwise
+     */
+    bool UpdateInstrumentFromFile::parseAsciiHeader(UpdateInstrumentFromFile::AsciiFileHeader & headerInfo)
+    {
+      const std::string header = getProperty("AsciiHeader");
+      if(header.empty())
+      {
+        throw std::invalid_argument("Ascii file provided but the AsciiHeader property is empty, cannot interpret columns");
+      }
+
+      Poco::StringTokenizer splitter(header, ",",Poco::StringTokenizer::TOK_TRIM);
+      headerInfo.colCount = splitter.count();
+      auto it = splitter.begin(); // First column must be spectrum number or detector ID
+      const std::string & col0 = *it;
+      bool isSpectrum(false);
+      if(boost::iequals("spectrum",col0)) isSpectrum = true;
+      if(!isSpectrum && !boost::iequals("id",col0))
+      {
+        throw std::invalid_argument("Invalid AsciiHeader, first column name must be either 'spectrum' or 'id'");
+      }
+
+      ++it;
+      size_t counter(1);
+      for(; it != splitter.end(); ++it)
+      {
+        const std::string & colName = *it;
+        if(boost::iequals("R",colName)) headerInfo.rColIdx = counter;
+        else if(boost::iequals("theta",colName)) headerInfo.thetaColIdx = counter;
+        else if(boost::iequals("phi",colName)) headerInfo.phiColIdx = counter;
+        else if(boost::iequals("-",colName)) // Skip dashed
+        {
+          ++counter;
+          continue;
+        }
+        else
+        {
+          headerInfo.detParCols.insert(counter);
+          headerInfo.colToName.insert(std::make_pair(counter, colName));
+        }
+        ++counter;
+      }
+
+      return isSpectrum;
+    }
+
     /**
      * Set the detector positions given the r,theta and phi.
      * @param detID :: A vector of detector IDs
@@ -189,46 +358,57 @@ namespace Mantid
     void UpdateInstrumentFromFile::setDetectorPositions(const std::vector<int32_t> & detID, const std::vector<float> & l2,
                                                         const std::vector<float> & theta, const std::vector<float> & phi)
       {
-        const bool ignorePhi = getProperty("IgnorePhi");
-        const bool moveMonitors = getProperty("MoveMonitors");
-        const bool ignoreMonitors(!moveMonitors);
+        Geometry::Instrument_const_sptr inst = m_workspace->getInstrument();
         const int numDetector = static_cast<int>(detID.size());
-        Geometry::ParameterMap & pmap = m_workspace->instrumentParameters();
-        Geometry::Instrument_const_sptr instrument = m_workspace->getInstrument();
         g_log.information() << "Setting new positions for " << numDetector << " detectors\n";
+
         for (int i = 0; i < numDetector; ++i)
         {
-          try
-          {
-            Geometry::IDetector_const_sptr det = instrument->getDetector(detID[i]);
-            if( ignoreMonitors && det->isMonitor() ) continue;
-            V3D parentPos;
-            if( det->getParent() ) parentPos = det->getParent()->getPos();
-            Kernel::V3D pos;
-            if (!ignorePhi)
-            {
-              pos.spherical(l2[i], theta[i], phi[i]);
-            }
-            else
-            {
-              double r,t,p;
-              det->getPos().getSpherical(r,t,p);
-              pos.spherical(l2[i], theta[i], p);
-            }
-            // Set new relative position
-            Kernel::V3D r = pos-parentPos;
-            Kernel::Quat q = det->getParent()->getRotation();
-            q.inverse();
-            q.rotate(r);
-            pmap.addV3D(det.get(), "pos", r);
-          }
-          catch (Kernel::Exception::NotFoundError&)
-          {
-          }
+          Geometry::IDetector_const_sptr det = inst->getDetector(detID[i]);
+          setDetectorPosition(det, l2[i], theta[i], phi[i]);
           progress(static_cast<double>(i)/numDetector,"Updating Detector Positions from File");
         }  
 
       }
+
+    /**
+     * Set the new detector position given the r,theta and phi.
+     * @param det :: A pointer to the detector
+     * @param l2 :: A single l2
+     * @param theta :: A single theta
+     * @param phi :: A single phi
+     */
+    void UpdateInstrumentFromFile::setDetectorPosition(const Geometry::IDetector_const_sptr & det, const float l2,
+                                                       const float theta, const float phi)
+    {
+      Geometry::ParameterMap & pmap = m_workspace->instrumentParameters();
+      try
+      {
+        if( m_ignoreMonitors && det->isMonitor() ) return;
+        V3D parentPos;
+        if( det->getParent() ) parentPos = det->getParent()->getPos();
+        Kernel::V3D pos;
+        if (!m_ignorePhi)
+        {
+          pos.spherical(l2, theta, phi);
+        }
+        else
+        {
+          double r,t,p;
+          det->getPos().getSpherical(r,t,p);
+          pos.spherical(l2, theta, p);
+        }
+        // Set new relative position
+        Kernel::V3D r = pos-parentPos;
+        Kernel::Quat q = det->getParent()->getRotation();
+        q.inverse();
+        q.rotate(r);
+        pmap.addV3D(det.get(), "pos", r);
+      }
+      catch (Kernel::Exception::NotFoundError&)
+      {
+      }
+    }
 
   } // namespace DataHandling
 } // namespace Mantid

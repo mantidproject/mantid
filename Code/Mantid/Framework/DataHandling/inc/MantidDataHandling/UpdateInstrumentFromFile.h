@@ -86,12 +86,39 @@ namespace Mantid
       void updateFromRaw(const std::string & filename);
       /// Assumes the file is an ISIS NeXus file
       void updateFromNeXus(const std::string & filename);
+      /// Updates from a more generic ascii file
+      void updateFromAscii(const std::string & filename);
+
+      /**
+       * Simple structure to store information about the ASCII file header
+       */
+      struct AsciiFileHeader
+      {
+        AsciiFileHeader() : colCount(0),
+            rColIdx(0),thetaColIdx(0), phiColIdx(0) {} // Zero is invalid as this is reserved for detID
+
+        size_t colCount;
+        size_t rColIdx,thetaColIdx, phiColIdx;
+        std::set<size_t> detParCols;
+        std::map<size_t, std::string> colToName;
+      };
+
+      /// Parse the header and fill the headerInfo struct
+      bool parseAsciiHeader(AsciiFileHeader & headerInfo);
       /// Set the new detector positions
       void setDetectorPositions(const std::vector<int32_t> & detID, const std::vector<float> & l2,
                                 const std::vector<float> & theta, const std::vector<float> & phi);
+      /// Set the new detector position for a single det ID
+      void setDetectorPosition(const Geometry::IDetector_const_sptr & det, const float l2,
+                               const float theta, const float phi);
 
       /// The input workspace to modify
       API::MatrixWorkspace_sptr m_workspace;
+
+      /// Cached ignore phi
+      bool m_ignorePhi;
+      /// Cached ignore Monitors
+      bool m_ignoreMonitors;
     };
 
   } // namespace DataHandling
