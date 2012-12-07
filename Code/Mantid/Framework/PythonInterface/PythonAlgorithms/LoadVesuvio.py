@@ -18,6 +18,7 @@ WKSP_PROP = "OutputWorkspace"
 DIFF_PROP = "DifferenceType"
 DIFF_PROP_MAP = {"Single":1, "Double":2, "Thick":3}
 SPECTRA_PROP = "SpectrumList"
+INST_PAR_PROP = "InstrumentParFile"
 
 # Raw workspace names which are necessary at the moment
 SUMMED_WS, SUMMED_MON = "__loadraw_evs", "__loadraw_evs_monitors"
@@ -28,6 +29,10 @@ ITHICK = 2
 # Enumerate the detector types
 BACKWARD = 0
 FORWARD = 1
+
+# Instrument parameter header
+IP_HEADER = "spectrum,theta,t0,-,R"
+
 
 # Sub algorithm logging
 _LOGGING_ = False
@@ -44,12 +49,17 @@ class LoadVesuvio(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty(WKSP_PROP, "", Direction.Output), 
                              doc="The name of the output workspace.")
         
-        self.declareProperty(DIFF_PROP, "Double", StringListValidator(DIFF_PROP_MAP.keys()),
-                             doc="The difference option. Valid values: Single, Double, Thick")
-        
         self.declareProperty(IntArrayProperty(SPECTRA_PROP, IntArrayMandatoryValidator(),
                                               Direction.Input), 
                              doc="The spectrum numbers to load")
+
+        self.declareProperty(DIFF_PROP, "Double", StringListValidator(DIFF_PROP_MAP.keys()),
+                             doc="The difference option. Valid values: Single, Double, Thick")
+
+        self.declareProperty(FileProperty(INST_PAR_PROP,"",action=FileAction.OptionalLoad,
+                                          extensions=["dat"]), 
+                             doc="An optional IP file. If provided the values are used to correct "
+                                  "the default instrument values and attach the t0 values to each detector") 
 
 #----------------------------------------------------------------------------------------
     def PyExec(self):
@@ -71,6 +81,7 @@ class LoadVesuvio(PythonAlgorithm):
                 self._normalise_to_foil_out()
                 self._calculate_diffs()
     
+            self._load_ip_file()
             self._store_results()
         finally: # Ensures it happens whether there was an error or not
             self._cleanup_raw()
@@ -531,6 +542,30 @@ class LoadVesuvio(PythonAlgorithm):
         eout = self.foil_out.dataE(ws_index)
         ethick = self.foil_thick.readE(ws_index)
         np.sqrt((eout**2 + ethick**2), eout) # The second argument makes it happen in place
+
+#----------------------------------------------------------------------------------------
+    def _load_ip_file(self):
+        """
+            If provided, load the instrument parameter file into the result
+            workspace
+        """
+        ip_file = self.getProperty(INST_PAR_PROP).value
+        if ip_file == "":
+            return
+        
+        # More verbose until the sub algorithm stuff is sorted
+        update_inst = AlgorithmManager.Instance().createUnmanaged("UpdateInstrumentFromFile")
+        update_inst.initialize()
+        update_inst.setChild(True)
+        update_inst.setLogging(_LOGGING_)
+        update_inst.setProperty("Workspace", self.foil_out)
+        update_inst.setProperty("Filename", ip_file)
+        update_inst.setProperty("MoveMonitors", False)
+        update_inst.setProperty("IgnorePhi", True)
+        update_inst.setProperty("AsciiHeader", IP_HEADER)
+        update_inst.execute()
+        
+        self.foil_out = update_inst.getProperty("Workspace").value
 
 #----------------------------------------------------------------------------------------
     def _store_results(self):
