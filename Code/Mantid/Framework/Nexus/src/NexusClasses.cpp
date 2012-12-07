@@ -719,5 +719,6 @@ Kernel::Property* NXLog::createTimeSeries(const std::string& start_time,const st
 }
 
 
+
 } // namespace DataHandling
 } // namespace Mantid
