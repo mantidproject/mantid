@@ -69,6 +69,15 @@ public:
   /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
   int fileCheck(const std::string& filePath);
 
+  void countPixels(const std::string &nexusfilename, const std::string & entry_name,
+       std::vector<std::string> & bankNames);
+
+  /// Number of pixels
+  size_t numPixels;
+
+  /// Signal # to load. Default 1
+  int signalNo;
+
 protected:
   void init();
   void initDocs();
@@ -86,20 +95,11 @@ protected:
   void loadBank(const std::string &nexusfilename, const std::string & entry_name,
       const std::string &bankName, Mantid::API::MatrixWorkspace_sptr WS);
 
-  void countPixels(const std::string &nexusfilename, const std::string & entry_name,
-       std::vector<std::string> & bankNames);
-
   /// List of the absolute time of each pulse
   std::vector<Kernel::DateAndTime> pulseTimes;
 
   /// Map where key = detector ID, value = workspace index
   detid2index_map * id_to_wi;
-
-  /// Signal # to load. Default 1
-  int m_signal;
-
-  /// Number of pixels
-  size_t numPixels;
 
   /// Number of bins
   size_t numBins;

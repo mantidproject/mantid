@@ -18,6 +18,7 @@ Workflow algorithm to determine chunking strategy.
 #include "MantidDataHandling/DetermineChunking.h"
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "LoadRaw/isisraw.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadRawHelper.h"
@@ -129,7 +130,7 @@ namespace DataHandling
 		strategy->addColumn("int","ChunkNumber");
 		strategy->addColumn("int","TotalChunks");
     }
-    else if( ext.compare("raw") == 0)
+    else if( ext.compare("raw") == 0|| runinfo.compare(runinfo.size()-10,10,"_histo.nxs") == 0)
     {
     	strategy->addColumn("int","SpectrumMin");
     	strategy->addColumn("int","SpectrumMax");
@@ -151,7 +152,7 @@ namespace DataHandling
       lp.parseRuninfo(runinfo, dataDir, eventFilenames);
       for (size_t i = 0; i < eventFilenames.size(); i++) {
         Mantid::Kernel::BinaryFile<DasEvent> * eventfile = new BinaryFile<DasEvent>(dataDir + eventFilenames[i]);
-        // Factor fo 2 for compression
+        // Factor of 2 for compression
         filesize += static_cast<double>(eventfile->getNumElements()) * 48.0 / (1024.0*1024.0*1024.0);
       }
     }
@@ -232,6 +233,21 @@ namespace DataHandling
         m_numberOfSpectra = iraw.t_nsp1;
         g_log.notice() << "Spectra size is " << m_numberOfSpectra << " spectra" << std::endl;
     }
+    else if( runinfo.compare(runinfo.size()-10,10,"_histo.nxs") == 0)
+    {
+        // Check the size of the file loaded
+        Poco::File info(runinfo);
+        filesize = double(info.getSize())/(1024.*1024.*1024.0);
+        g_log.notice() << "File size is " << filesize << " GB" << std::endl;
+        LoadTOFRawNexus lp;
+        lp.signalNo = 1;
+	    // Find the entry name we want.
+	    std::string entry_name = LoadTOFRawNexus::getEntryName(runinfo);
+	    std::vector<std::string> bankNames;
+	    lp.countPixels(runinfo, entry_name, bankNames);
+	    m_numberOfSpectra = static_cast<int>(lp.numPixels);
+        g_log.notice() << "Spectra size is " << m_numberOfSpectra << " spectra" << std::endl;
+    }
     else
     {
     	return;
@@ -263,7 +279,7 @@ namespace DataHandling
       {
     	  row << i << numChunks;
       }
-      else if( ext.compare("raw") == 0)
+      else if( ext.compare("raw") == 0 || runinfo.compare(runinfo.size()-10,10,"_histo.nxs") == 0)
       {
     	  int spectraPerChunk = m_numberOfSpectra/numChunks;
     	  int first = (i-1) * spectraPerChunk;

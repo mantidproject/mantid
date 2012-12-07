@@ -201,7 +201,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
               {
                 int signal = 0;
                 file->getAttr("signal", signal);
-                if (signal == m_signal)
+                if (signal == signalNo)
                 {
                   // That's the right signal!
                   m_dataField = it->first;
@@ -210,9 +210,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
                   m_assumeOldFile = false;
                   if (!file->hasAttr("axes"))
                   {
-                    if (1 != m_signal)
+                    if (1 != signalNo)
                     {
-                      throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
+                      throw std::runtime_error("Your chosen signal number, " + Strings::toString(signalNo) + ", corresponds to the data field '" +
                           m_dataField + "' has no 'axes' attribute specifying.");
                     }
                     else
@@ -230,11 +230,11 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
                   std::vector<std::string> allAxes;
                   boost::split( allAxes, axes, boost::algorithm::detail::is_any_ofF<char>(","));
                   if (allAxes.size() != 3)
-                    throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
+                    throw std::runtime_error("Your chosen signal number, " + Strings::toString(signalNo) + ", corresponds to the data field '" +
                         m_dataField + "' which has only " + Strings::toString(allAxes.size()) + " dimension. Expected 3 dimensions.");
 
                   m_axisField = allAxes.back();
-                  g_log.information() << "Loading signal " << m_signal << ", " << m_dataField << " with axis " << m_axisField << std::endl;
+                  g_log.information() << "Loading signal " << signalNo << ", " << m_dataField << " with axis " << m_axisField << std::endl;
                   file->closeData();
                   break;
                 } // Data has a 'signal' attribute
@@ -249,7 +249,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
   } // each entry
 
   if (m_dataField.empty())
-    throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", was not found in any of the data fields of any 'bankX' group. Cannot load file.");
+    throw std::runtime_error("Your chosen signal number, " + Strings::toString(signalNo) + ", was not found in any of the data fields of any 'bankX' group. Cannot load file.");
 
 
   for (it = entries.begin(); it != entries.end(); ++it)
@@ -524,7 +524,7 @@ void LoadTOFRawNexus::exec()
 {
   // The input properties
   std::string filename = getPropertyValue("Filename");
-  m_signal = getProperty("Signal");
+  signalNo = getProperty("Signal");
 
   // Find the entry name we want.
   std::string entry_name = LoadTOFRawNexus::getEntryName(filename);
