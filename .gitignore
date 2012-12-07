@@ -2,6 +2,9 @@
 
 # **** 'Personal' entries don't belong in here - put them in your .git/info/exclude file ****
 
+# Ignore gitatrributes file
+.gitattributes
+
 # Ignore text editor (e.g. emacs) autosave files
 *~
 

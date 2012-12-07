@@ -146,23 +146,25 @@ test -n "$size_max_KiB" || size_max_KiB=1024
 size_too_large_once=""
 size_too_large_once() {
 	test -z "$size_too_large_once" || return ; size_too_large_once=done
-	echo 'At least one file is staged for commit with size larger than its limit.
+	echo 'At least one file is staged for commit with size larger than the limit.
 We prefer to keep large files out of the main source tree, especially
-binary files that do not compress well.  This hook disallows large files
-by default but can be configured.  A limit for specific files or patterns
-may be set in ".gitattributes" with the "hooks.MaxObjectKiB" attribute.
-For example, the line
+binary files that do not compress well.  This hook disallows large files.
 
-  *.c              hooks.MaxObjectKiB=2048
-
-sets a limit of 2048 KiB for C source files.  See "git help attributes"
-for details on the .gitattributes format.  If no attribute has been set
-for a given file then its size is limited by the local default.  Run
-
-  git config hooks.MaxObjectKiB $KiB
-
-to set the local default limit (0 to disable).
+If it is vital that this file enters the repository, speak to a dev lead.
+Remember that unit tests should typically not require loading files (see
+http://www.mantidproject.org/Unit_Test_Good_Practice#Using_files_in_Unit_tests).
 '
+# Instructions for allowing ESSENTIAL files only:
+#   A limit for specific files or patterns may be set in ".gitattributes" with
+#   the "hooks.MaxObjectKiBYYMMDD" attribute (where YYMMDD is the current date).
+#   For example, the line
+#
+#     *.c              hooks.MaxObjectKiB121207=2048
+#
+#   sets a limit of 2048 KiB for C source files, but WILL ONLY WORK on the date
+#   matching the entry. This avoids the previous behaviour that once set the
+#   hook was forever disabled if the entry was not removed afterwards.
+#   See "git help attributes" for details on the .gitattributes format.
 }
 size_too_large() {
 	size_too_large_once
@@ -175,8 +177,10 @@ size_validate_max_KiB() {
 }
 check_size() {
 	test "$dst_obj" != "$zero" || return
-	max_KiB=$(git check-attr hooks.MaxObjectKiB -- "$file" |
-		  sed 's/^[^:]*: hooks.MaxObjectKiB: //')
+	datesuffix=`date +%y%m%d`
+	hookname='hooks.MaxObjectKiB'$datesuffix
+	max_KiB=$(git check-attr $hookname -- "$file" |
+		  sed "s/^[^:]*: ${hookname}: //")
 	case "$max_KiB" in
 		'unset')       return ;; # No maximum for this object.
 		'set')         max_KiB="$size_max_KiB" ;; # Use local default.
