@@ -332,14 +332,20 @@ void MantidGLWidget::componentSelected(Mantid::Geometry::ComponentID id)
 
 void MantidGLWidget::updateView()
 {
-  m_surface->updateView();
-  update();
+  if ( m_surface )
+  {
+    m_surface->updateView();
+    update();
+  }
 }
 
 void MantidGLWidget::updateDetectors()
 {
-  m_surface->updateDetectors();
-  update();
+  if ( m_surface )
+  {
+    m_surface->updateDetectors();
+    update();
+  }
 }
 
 void MantidGLWidget::leaveEvent (QEvent* ev)
