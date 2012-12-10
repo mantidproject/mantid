@@ -1322,8 +1322,9 @@ namespace MDEvents
     {
       // Coordinates of this vertex
       coord_t vertexCoord[nd];
-      for (size_t d=0; d<nd; ++d)
-        vertexCoord[d] = this->extents[d].getMin()+coord_t(m_SubBoxSize[d]*vertexIndex[d]);
+      for (size_t d=0; d<nd; ++d)      
+        vertexCoord[d] = coord_t(m_SubBoxSize[d]*vertexIndex[d])+this->extents[d].getMin();
+                        //static_cast<coord_t>(vertexIndex[d]) * boxSize[d] + this->extents[d].min
 
       // Is this vertex contained?
       coord_t out[nd];
