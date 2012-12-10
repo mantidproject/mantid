@@ -450,7 +450,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     loaderHRP2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/HRPD_Definition.xml");
-    // loaderHRP2.setPropertyValue("Filename", "HRPD_Definition.xml");
     inputFile = loaderHRP2.getPropertyValue("Filename");
 
     loaderHRP2.setPropertyValue("Workspace", wsName);
@@ -458,6 +457,53 @@ public:
     TS_ASSERT_THROWS_NOTHING(loaderHRP2.execute());
 
     TS_ASSERT( loaderHRP2.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
+
+    // test if a dummy parameter has been read in
+    boost::shared_ptr<const IComponent> comp = i->getComponentByName("bank_90degnew");
+    TS_ASSERT_EQUALS( comp->getName(), "bank_90degnew");
+
+    ParameterMap& paramMap = output->instrumentParameters();
+
+    Parameter_sptr param = paramMap.getRecursive(&(*comp), "S", "fitting");
+    const FitParameter& fitParam4 = param->value<FitParameter>();
+    TS_ASSERT( fitParam4.getTie().compare("") == 0 );
+    TS_ASSERT( fitParam4.getFunction().compare("BackToBackExponential") == 0 );
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+    void testExecHRP3()
+  {
+    // Test Parameter file in instrument folder is used by an IDF file not in the instrument folder and
+    // with an extension of its name after the 'Defintion' not present in a parameter file.
+    InstrumentDataService::Instance().clear();
+
+    LoadInstrument loaderHRP3;
+
+    TS_ASSERT_THROWS_NOTHING(loaderHRP3.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTestHRPD3";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    loaderHRP3.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/HRPD_Definition_Test3.xml");
+    inputFile = loaderHRP3.getPropertyValue("Filename");
+
+    loaderHRP3.setPropertyValue("Workspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loaderHRP3.execute());
+
+    TS_ASSERT( loaderHRP3.isExecuted() );
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
