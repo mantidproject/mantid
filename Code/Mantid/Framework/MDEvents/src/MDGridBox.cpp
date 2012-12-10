@@ -1307,10 +1307,19 @@ namespace MDEvents
     // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
     size_t maxVertices = 1 << nd;
 
+    // set up caches for box sizes and min box values
+    coord_t boxSize[nd];
+    coord_t minBoxVal[nd];
+
     // The number of vertices in each dimension is the # split[d] + 1
     size_t vertices_max[nd]; Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
     for (size_t d=0; d<nd; ++d)
+    {
       vertices_max[d] = split[d]+1;
+      // cache box sizes and min box valyes for performance
+      boxSizes[d]     = static_cast<coord_t>(m_SubBoxSize[d]);
+      minBoxVal[d]    = static_cast<coord_t>(this->extents[d].getMin());
+    }
 
     // The index to the vertex in each dimension
     size_t vertexIndex[nd]; Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
@@ -1323,7 +1332,7 @@ namespace MDEvents
       // Coordinates of this vertex
       coord_t vertexCoord[nd];
       for (size_t d=0; d<nd; ++d)      
-        vertexCoord[d] = coord_t(m_SubBoxSize[d]*vertexIndex[d])+this->extents[d].getMin();
+        vertexCoord[d] = static_cast<coord_t>(vertexIndex[d])*boxSize[d] +minBoxVal[d];
                         //static_cast<coord_t>(vertexIndex[d]) * boxSize[d] + this->extents[d].min
 
       // Is this vertex contained?
