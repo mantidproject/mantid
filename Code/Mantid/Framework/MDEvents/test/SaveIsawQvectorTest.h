@@ -38,16 +38,6 @@ public:
     Mantid::DataObjects::EventWorkspace_sptr inputW = Mantid::MDEvents::MDEventsTestHelper::createDiffractionEventWorkspace(numEventsPer);
     AnalysisDataService::Instance().addOrReplace(inWSName, inputW);
     size_t nevents = inputW->getNumberEvents();
-    // Register the workspace in the data service
-
-    // Create the peaks workspace
-//    Mantid::DataObjects::PeaksWorkspace_sptr pkws(new Mantid::DataObjects::PeaksWorkspace());
-//    pkws->setName("TOPAZ");
-
-//    // This loads (appends) the peaks
-//    Mantid::DataObjects::Peak PeakObj(inputW->getInstrument(),1000,100.);
-//    pkws->addPeak( PeakObj);
-//    AnalysisDataService::Instance().add("TOPAZ", inWSName);
 
     // run the actual algorithm
     SaveIsawQvector alg;
