@@ -3,8 +3,10 @@
      see http://www.mantidproject.org/IDF -->
 <instrument name="GPSANS" valid-from   ="1900-01-31 23:59:59"
                            valid-to     ="2100-01-31 23:59:59"
-		           last-modified="2011-03-01 15:45:16">
+		           last-modified="2012-10-12 15:45:16">
 
+  <!-- 2012-10-12: removed dummy source position -->
+		           
   <!-- TEST DEFINITION: NOT READY FOR SHOW TIME -->
   
   <defaults>
@@ -22,13 +24,8 @@
   
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
   
-  <!-- source and sample-position components 
-  		Place the beam along the z-axis, the sample holder at (0,0,0) -->
-
-  <component type="source">
-    <location x="0.0" y="0.0" z="-1.0"/>
-  </component>
-  <type name="source" is="Source" />
+  <!-- sample-position components 
+       Place the beam along the z-axis, the sample holder at (0,0,0) -->
   
   <component type="some-sample-holder">
     <location x="0.0" y="0.0" z="0.0"/>

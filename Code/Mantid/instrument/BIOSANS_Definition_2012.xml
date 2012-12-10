@@ -1,8 +1,10 @@
 <?xml version='1.0' encoding='ASCII'?>
 <instrument name="BioSANS" valid-from   ="2012-02-01 00:00:00"
                            valid-to     ="2100-01-31 23:59:59"
-		          last-modified="2012-03-23 15:02:05">
-  <!---->
+		          last-modified="2012-10-12 15:02:05">
+
+  <!-- 2012-10-12: removed dummy source position -->		          
+		          
   <defaults>
     <length unit="metre"/>
     <angle unit="degree"/>
@@ -12,11 +14,7 @@
       <handedness axis="right"/>
     </reference-frame>
   </defaults>
-  <!--SOURCE AND SAMPLE POSITION-->
-  <component type="moderator">
-    <location z="-13.601"/>
-  </component>
-  <type is="Source" name="moderator"/>
+  <!--SAMPLE POSITION-->
   <component type="sample-position">
     <location y="0.0" x="0.0" z="0.0"/>
   </component>
