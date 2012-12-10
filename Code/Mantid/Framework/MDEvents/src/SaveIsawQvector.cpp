@@ -108,7 +108,7 @@ namespace MDEvents
 
     // open the output file
     std::string filename = getPropertyValue("Filename");
-    std::ofstream handle(filename, std::ios::out | std::ios::binary);
+    std::ofstream handle(filename.c_str(), std::ios::out | std::ios::binary);
     if (!handle.is_open())
       throw std::runtime_error("Failed to open file for writing");
     // set up a descripter of where we are going
