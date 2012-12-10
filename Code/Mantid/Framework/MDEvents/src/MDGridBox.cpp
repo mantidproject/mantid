@@ -1317,8 +1317,8 @@ namespace MDEvents
     {
       vertices_max[d] = split[d]+1;
       // cache box sizes and min box valyes for performance
-      boxSizes[d]     = static_cast<coord_t>(m_SubBoxSize[d]);
-      minBoxVal[d]    = static_cast<coord_t>(this->extents[d].getMin());
+      boxSize[d]     = static_cast<coord_t>(m_SubBoxSize[d]);
+      minBoxVal[d]   = static_cast<coord_t>(this->extents[d].getMin());
     }
 
     // The index to the vertex in each dimension
