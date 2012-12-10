@@ -55,6 +55,8 @@ namespace Geometry
     }
     T getMin()const{return min;}
     T getMax()const{return max;}
+    /// return the vertice in the grid, based on this extent's size
+    T getGridVertex(const size_t ind)const{return min+m_Size*ind;}
 
     void scaleExtents(double scaling,double offset)
     {

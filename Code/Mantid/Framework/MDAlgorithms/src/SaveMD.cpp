@@ -269,14 +269,14 @@ namespace MDAlgorithms
         size_t numChildren = box->getNumChildren();
         if (numChildren > 0)
         {
-          // Make sure that all children are ordered. TODO: This might not be needed if the IDs are rigorously done
-          size_t lastId = box->getChild(0)->getId();
-          for (size_t i = 1; i < numChildren; i++)
-          {
-            if (box->getChild(i)->getId() != lastId+1)
-              throw std::runtime_error("Non-sequential child ID encountered!");
-            lastId = box->getChild(i)->getId();
-          }
+          //// Make sure that all children are ordered. TODO: This might not be needed if the IDs are rigorously done
+          //size_t lastId = box->getChild(0)->getId();
+          //for (size_t i = 1; i < numChildren; i++)
+          //{
+          //  if (box->getChild(i)->getId() != lastId+1)
+          //    throw std::runtime_error("Non-sequential child ID encountered!");
+          //  lastId = box->getChild(i)->getId();
+          //}
 
           box_children[id*2] = int(box->getChild(0)->getId());
           box_children[id*2+1] = int(box->getChild(numChildren-1)->getId());
