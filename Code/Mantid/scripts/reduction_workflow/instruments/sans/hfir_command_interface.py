@@ -147,6 +147,7 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_depen
 
 def TransmissionDarkCurrent(dark_current=None):
     if dark_current is not None:
+        find_data(dark_current, instrument=ReductionSingleton().get_instrument())
         ReductionSingleton().reduction_properties["TransmissionDarkCurrentFile"] = dark_current
     elif ReductionSingleton().reduction_properties.has_key("TransmissionDarkCurrentFile"):
         del ReductionSingleton().reduction_properties["TransmissionDarkCurrentFile"]
@@ -182,18 +183,6 @@ def TransmissionDirectBeamCenter(datafile):
     ReductionSingleton().reduction_properties["TransmissionBeamCenterMethod"] = "DirectBeam"
     ReductionSingleton().reduction_properties["TransmissionBeamCenterFile"] = datafile
 
-def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
-    #TODO
-    ReductionSingleton().get_mask().mask_edges(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high)
-
-def MaskRectangle(x_min, x_max, y_min, y_max):
-    #TODO
-    ReductionSingleton().get_mask().add_pixel_rectangle(x_min, x_max, y_min, y_max)
-    
-def MaskDetectors(det_list):
-    #TODO
-    ReductionSingleton().get_mask().add_detector_list(det_list)
-
 def Background(datafile):
     if type(datafile)==list:
         datafile=','.join(datafile)
@@ -203,16 +192,6 @@ def Background(datafile):
 def NoBackground():
     ReductionSingleton().reduction_properties["BackgroundFiles"] = ""
 
-def SaveIqAscii(reducer=None, process=None):
-    #TODO
-    if reducer is None:
-        reducer = ReductionSingleton()
-    reducer.set_save_Iq(sans_reduction_steps.SaveIqAscii(process=process))
-
-def NoSaveIq():
-    #TODO
-    ReductionSingleton().set_save_Iq(None)
-        
 def NoBckTransmission():
     if ReductionSingleton().reduction_properties.has_key("BckTransmissionValue"):
         del ReductionSingleton().reduction_properties["BckTransmissionValue"]
@@ -248,19 +227,19 @@ def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
                              sample_scattering, direct_scattering,
                              spreader_transmission=1.0, spreader_transmission_err=0.0,
                              theta_dependent=True ):
-    if ReductionSingleton().get_background() is None:
-        raise RuntimeError, "A background hasn't been defined."
-    find_data(sample_spreader, instrument=ReductionSingleton().instrument.name())
-    find_data(direct_spreader, instrument=ReductionSingleton().instrument.name())
-    find_data(sample_scattering, instrument=ReductionSingleton().instrument.name())
-    find_data(direct_scattering, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().get_background().set_transmission(sans_reduction_steps.BeamSpreaderTransmission(sample_spreader=sample_spreader, 
-                                                                                          direct_spreader=direct_spreader,
-                                                                                          sample_scattering=sample_scattering, 
-                                                                                          direct_scattering=direct_scattering,
-                                                                                          spreader_transmission=spreader_transmission, 
-                                                                                          spreader_transmission_err=spreader_transmission_err,
-                                                                                          theta_dependent=theta_dependent))
+    find_data(sample_spreader, instrument=ReductionSingleton().get_instrument())
+    find_data(direct_spreader, instrument=ReductionSingleton().get_instrument())
+    find_data(sample_scattering, instrument=ReductionSingleton().get_instrument())
+    find_data(direct_scattering, instrument=ReductionSingleton().get_instrument())
+    
+    ReductionSingleton().reduction_properties["BckTransmissionMethod"] = "BeamSpreader"
+    ReductionSingleton().reduction_properties["BckTransSampleSpreaderFilename"] = sample_spreader
+    ReductionSingleton().reduction_properties["BckTransDirectSpreaderFilename"] = direct_spreader
+    ReductionSingleton().reduction_properties["BckTransSampleScatteringFilename"] = sample_scattering
+    ReductionSingleton().reduction_properties["BckTransDirectScatteringFilename"] = direct_scattering
+    ReductionSingleton().reduction_properties["BckSpreaderTransmissionValue"] = spreader_transmission
+    ReductionSingleton().reduction_properties["BckSpreaderTransmissionError"] = spreader_transmission_err
+    ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependent
 
 def SetBckTransmissionBeamCenter(x, y):
     ReductionSingleton().reduction_properties["BckTransmissionBeamCenterMethod"] = "Value"
@@ -272,10 +251,11 @@ def BckTransmissionDirectBeamCenter(datafile):
     ReductionSingleton().reduction_properties["BckTransmissionBeamCenterFile"]=datafile
 
 def BckTransmissionDarkCurrent(dark_current=None):
-    if ReductionSingleton().get_background() is None:
-        raise RuntimeError, "A background hasn't been defined."
-    dark_current=find_data(dark_current, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().get_background().set_trans_dark_current(dark_current)
+    if dark_current is not None:
+        find_data(dark_current, instrument=ReductionSingleton().get_instrument())
+        ReductionSingleton().reduction_properties["BckTransmissionDarkCurrentFile"] = dark_current
+    elif ReductionSingleton().reduction_properties.has_key("BckTransmissionDarkCurrentFile"):
+        del ReductionSingleton().reduction_properties["BckTransmissionDarkCurrentFile"]
 
 def BckThetaDependentTransmission(theta_dependence=True):
     ReductionSingleton().reduction_properties["BckThetaDependentTransmission"] = theta_dependence
@@ -290,6 +270,40 @@ def SetWavelength(wavelength, spread):
     ReductionSingleton().reduction_properties["Wavelength"] = wavelength
     ReductionSingleton().reduction_properties["WavelengthSpread"] = spread
     
+def ResetWavelength():
+    """ Resets the wavelength to the data file default """
+    ReductionSingleton().reduction_properties["Wavelength"] = None
+    ReductionSingleton().reduction_properties["WavelengthSpread"] = None
+    
+def SaveIqAscii(reducer=None, process=None):
+    #TODO
+    if reducer is None:
+        reducer = ReductionSingleton()
+    reducer.set_save_Iq(sans_reduction_steps.SaveIqAscii(process=process))
+
+def NoSaveIq():
+    #TODO
+    ReductionSingleton().set_save_Iq(None)
+            
+def IQxQy(nbins=100):
+    ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, InputWorkspace=None, 
+                                   NumberOfBins=nbins)
+    
+def NoIQxQy(nbins=100):
+    ReductionSingleton().set_IQxQy(None)
+    
+def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
+    #TODO
+    ReductionSingleton().get_mask().mask_edges(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high)
+
+def MaskRectangle(x_min, x_max, y_min, y_max):
+    #TODO
+    ReductionSingleton().get_mask().add_pixel_rectangle(x_min, x_max, y_min, y_max)
+    
+def MaskDetectors(det_list):
+    #TODO
+    ReductionSingleton().get_mask().add_detector_list(det_list)
+    
 def MaskDetectorSide(side_to_mask=None):
     if not isinstance(ReductionSingleton().get_data_loader(), hfir_load.LoadRun):
         raise RuntimeError, "MaskDetectorSide was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
@@ -298,18 +312,6 @@ def MaskDetectorSide(side_to_mask=None):
     elif side_to_mask.lower() == "back":
         side_to_mask = 1
     ReductionSingleton().get_data_loader().mask_detector_side(side_to_mask)
-    
-def ResetWavelength():
-    """ Resets the wavelength to the data file default """
-    ReductionSingleton().reduction_properties["Wavelength"] = None
-    ReductionSingleton().reduction_properties["WavelengthSpread"] = None
-    
-def IQxQy(nbins=100):
-    ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, InputWorkspace=None, 
-                                   NumberOfBins=nbins)
-    
-def NoIQxQy(nbins=100):
-    ReductionSingleton().set_IQxQy(None)
     
 def SetAbsoluteScale(factor):
     ReductionSingleton().set_absolute_scale(absolute_scale.BaseAbsoluteScale(factor))

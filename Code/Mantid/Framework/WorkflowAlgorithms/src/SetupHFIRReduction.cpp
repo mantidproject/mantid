@@ -371,6 +371,12 @@ void SetupHFIRReduction::init()
       "Beam spreader transmission error");
   setPropertySettings("BckSpreaderTransmissionError",
             new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
+
+  declareProperty(new API::FileProperty("BckTransmissionDarkCurrentFile", "", API::FileProperty::OptionalLoad, ".xml"),
+      "The name of the input data file to load as background transmission dark current.");
+  setPropertySettings("BckTransmissionDarkCurrentFile",
+            new VisibleWhenProperty("BckTransmissionMethod", IS_EQUAL_TO, "BeamSpreader"));
+
   declareProperty("BckThetaDependentTransmission", true,
       "If true, a theta-dependent transmission correction will be applied.");
 
@@ -391,6 +397,7 @@ void SetupHFIRReduction::init()
   setPropertyGroup("BckTransDirectScatteringFilename", bck_grp);
   setPropertyGroup("BckSpreaderTransmissionValue", bck_grp);
   setPropertyGroup("BckSpreaderTransmissionError", bck_grp);
+  setPropertyGroup("BckTransmissionDarkCurrentFile", trans_grp);
   setPropertyGroup("BckThetaDependentTransmission", bck_grp);
 
   // Geometry correction
@@ -661,6 +668,7 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
   else
     return;
 
+  const std::string darkCurrent = getPropertyValue("BckTransmissionDarkCurrentFile");
   const bool bckThetaDependentTrans = getProperty("BckThetaDependentTransmission");
   const std::string bckTransMethod = getProperty("BckTransmissionMethod");
   if (boost::iequals(bckTransMethod, "Value"))
@@ -722,6 +730,7 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
              " but no file was provided" << std::endl;
        }
     }
+    transAlg->setProperty("DarkCurrentFilename", darkCurrent);
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
     AlgorithmProperty *algProp = new AlgorithmProperty("BckTransmissionAlgorithm");
     algProp->setValue(transAlg->toString());
@@ -745,8 +754,9 @@ void SetupHFIRReduction::setupBackground(boost::shared_ptr<PropertyManager> redu
     transAlg->setProperty("DirectScatteringFilename", directScatt);
     transAlg->setProperty("SpreaderTransmissionValue", spreaderTrValue);
     transAlg->setProperty("SpreaderTransmissionError", spreaderTrError);
+    transAlg->setProperty("DarkCurrentFilename", darkCurrent);
     transAlg->setProperty("ThetaDependent", thetaDependentTrans);
-    AlgorithmProperty *algProp = new AlgorithmProperty("TransmissionAlgorithm");
+    AlgorithmProperty *algProp = new AlgorithmProperty("BckTransmissionAlgorithm");
     algProp->setValue(transAlg->toString());
     reductionManager->declareProperty(algProp);
   }
