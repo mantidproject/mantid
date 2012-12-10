@@ -8,6 +8,9 @@
 #include "MantidQtRefDetectorViewer/SliderHandler.h"
 #include "MantidQtRefDetectorViewer/RangeHandler.h"
 
+#include <sstream>
+#include <string>
+
 namespace MantidQt
 {
 namespace RefDetectorViewer
@@ -24,7 +27,7 @@ namespace RefDetectorViewer
  *
  *  @param data_source  The source of the data that will be displayed. 
  */
-RefImageView::RefImageView( RefImageDataSource* data_source )
+RefImageView::RefImageView( RefImageDataSource* data_source, double peak_min, double peak_max, double back_min, double back_max, double tof_min, double tof_max)
 {
   Ui_RefImageViewer* ui = new Ui_RefImageViewer();
   saved_ui          = ui; 
@@ -73,6 +76,21 @@ RefImageView::RefImageView( RefImageDataSource* data_source )
   RefIVConnections * iv_connections = new RefIVConnections( ui, this, 
                                                      image_display, 
                                                      h_graph, v_graph );
+  
+  //populate widgets with peak, back and tof values
+    std::string s_peak_min;
+    std::stringstream ss_peak_min;
+    ss_peak_min << peak_min;
+    ss_peak_min >> s_peak_min;
+    image_display->setPeakLeft(static_cast<int>(peak_min));
+    QString peak_min_value = QString::fromStdString(s_peak_min);
+    ui->lineEdit_peakLeft->setText(peak_min_value);
+    
+    
+    
+    
+    
+//  ui->lineEdit_peakLeft.
     
   saved_iv_connections = iv_connections;
 

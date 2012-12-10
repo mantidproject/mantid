@@ -21,14 +21,15 @@ using namespace Mantid::API;
  */
 RefMatrixWSImageView::RefMatrixWSImageView( MatrixWorkspace_sptr mat_ws )
 {
-  RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );
-  image_view = new RefImageView( source );  // this is the QMainWindow
-                                         // for the viewer.  It is
-                                         // deleted when the window
-                                         // is closed
+    return;
+    //  RefMatrixWSDataSource* source = new RefMatrixWSDataSource( mat_ws );
+//  image_view = new RefImageView( source );  // this is the QMainWindow
+//                                         // for the viewer.  It is
+//                                         // deleted when the window
+//                                         // is closed
 }
 
-RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
+RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name, double peak_min, double peak_max, double back_min, double back_max, double tof_min, double tof_max)
 {
 
     IEventWorkspace_sptr ws;
@@ -70,8 +71,14 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name)
                                                         total_rows, total_cols,
                                                         data);
     
-    //    std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
-    image_view = new RefImageView( source );
+//    std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
+
+    
+    
+    image_view = new RefImageView( source,
+                                  peak_min, peak_max,
+                                  back_min, back_max,
+                                  tof_min, tof_max);
 
 }
 
