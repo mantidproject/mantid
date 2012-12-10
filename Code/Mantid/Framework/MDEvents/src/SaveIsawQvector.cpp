@@ -155,7 +155,7 @@ namespace MDEvents
         q_converter->calcMatrixCoord(val,locCoord,signal,errorSq);
         for (size_t dim = 0; dim < DIMS; ++dim)
         {
-          buffer[dim] = static_cast<float>(locCoord[dim]);
+          buffer[dim] = static_cast<float>(-1.*locCoord[dim]); // invert through the origin
         }
         handle.write(reinterpret_cast<char*>(buffer), BUFF_SIZE);
       } // end of loop over events in list
