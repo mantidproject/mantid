@@ -43,6 +43,10 @@ void InstrumentWindowTreeTab::selectComponentByName(const QString &name)
   */
 void InstrumentWindowTreeTab::hideEvent(QHideEvent *)
 {
-    m_instrWindow->getInstrumentActor()->accept(SetAllVisibleVisitor());
+  InstrumentActor* actor = m_instrWindow->getInstrumentActor();
+  if ( actor )
+  {
+    actor->accept(SetAllVisibleVisitor());
+  }
 }
 
