@@ -1323,7 +1323,7 @@ namespace MDEvents
       // Coordinates of this vertex
       coord_t vertexCoord[nd];
       for (size_t d=0; d<nd; ++d)
-        vertexCoord[d] = this->extents[d].getGridVertex(vertexIndex[d]);
+        vertexCoord[d] = this->extents[d].getMin()+coord_t(m_SubBoxSize[d]*vertexIndex[d]);
 
       // Is this vertex contained?
       coord_t out[nd];
