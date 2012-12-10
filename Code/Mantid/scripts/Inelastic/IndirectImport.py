@@ -59,12 +59,8 @@ def is_supported_f2py_platform():
     @returns True if we are currently on a platform that supports the F2Py
     libraries, else False.
     '''
-    if _os_env() == "Windows32bit" and \
-       _numpy_ver() == "1.6.2":
+    if _os_env().startswith("Windows") and _numpy_ver() == "1.6.2":
         return True
-    #if _os_env() == "Windows64bit" and \
-    #   _numpy_ver() == "1.6.2":
-    #    return True
     #if _os_env() == "Linux64bit" and \
     #   _linux_distro_name()[0:24] == "Red Hat Enterprise Linux" and \
     #   _linux_distro_version() == "6.2" and \

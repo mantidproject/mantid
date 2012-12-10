@@ -145,6 +145,8 @@ if( WIN32 )
   set ( PYDIR_NATIVE )
   
   # Now the binary files
+  # The mingw libs are required by the compiled fortran files to import correctly
+  file ( GLOB MINGW_DLLS "${CMAKE_LIBRARY_PATH}/mingw/*.dll" )
   if ( MSVC_IDE )
     foreach ( TYPE DLL EXE EXEW )
       add_custom_command( TARGET PythonAPI POST_BUILD 
@@ -156,6 +158,11 @@ if( WIN32 )
                           ${PY_${TYPE}_PREFIX}%PY_${TYPE}_SUFFIX_${CMAKE_CFG_INTDIR}% ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
                         )
     endforeach ( TYPE )
+    foreach ( DLL_FILE ${MINGW_DLLS} )
+      add_custom_command( TARGET PythonAPI POST_BUILD
+                          COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                          ${DLL_FILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
+    endforeach( DLL_FILE )
   else () # Need to do things slightly differently for nmake
     foreach ( TYPE DLL EXE EXEW )
       add_custom_command( TARGET PythonAPI POST_BUILD 
@@ -167,9 +174,13 @@ if( WIN32 )
                           ${PY_${TYPE}_PREFIX}%PY_${TYPE}_SUFFIX_${CMAKE_BUILD_TYPE}% ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
                         )
     endforeach ( TYPE )
+    foreach ( DLL_FILE MINGW_DLLS )
+      add_custom_command( TARGET PythonAPI POST_BUILD
+                          COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                          ${DLL_FILE} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} )
+    endforeach( DLL_FILE )
   endif ()
 endif( WIN32 )
-
 
 ###########################################################################
 # Platform and compiler-dependent parts
