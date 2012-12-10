@@ -20,7 +20,7 @@
 
   <!--SOURCE-->
   <component type="moderator">
-    <location z="-11.0"/>
+    <location z="-30.0"/>
   </component>
   <type name="moderator" is="Source"/>
 
@@ -36,13 +36,13 @@
   </component>
   <type name="monitors">
     <component type="monitor" mark-as="monitor">
-      <location z="16.065" name="monitor1"/>
+      <location z="-2.935" name="monitor1"/>
     </component>
     <component type="monitor" mark-as="monitor">
-      <location z="18.102" name="monitor2"/>
+      <location z="-0.898" name="monitor2"/>
     </component>
     <component type="monitor" mark-as="monitor">
-      <location z="20.00" name="monitor3"/>
+      <location z="1.00" name="monitor3"/>
     </component>
   </type>
 
