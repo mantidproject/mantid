@@ -104,6 +104,9 @@ protected:
   /// Number of bins
   size_t numBins;
 
+  /// Interval of chunk
+  specid_t m_spec_min, m_spec_max;
+
   /// Name of the 'data' field to load (depending on Signal)
   std::string m_dataField;
 

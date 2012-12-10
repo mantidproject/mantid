@@ -243,7 +243,10 @@ class SNSPowderReduction(PythonAlgorithm):
         filename = name + extension
         # EMPTY_INT() from C++
         if chunk:
-            name += "_%d" % (int(chunk["ChunkNumber"]))        
+            if "ChunkNumber" in chunk:
+                name += "_%d" % (int(chunk["ChunkNumber"]))        
+            elif "SpectrumMin" in chunk:
+                name += "_%d" % (1 + int(chunk["SpectrumMin"])/(int(chunk["SpectrumMax"])-int(chunk["SpectrumMin"])))        
         else:
             name += "_%d" % 0
 
@@ -254,8 +257,6 @@ class SNSPowderReduction(PythonAlgorithm):
                     chunk["FilterByTimeStart"] = filterWall[0]
                 if filterWall[1] > 0.:
                     chunk["FilterByTimeStop"] = filterWall[1]
-        elif extension.endswith("_histo.nxs"):
-            chunk = {}
             
         wksp = api.Load(Filename=filename, OutputWorkspace=name, **chunk)
         if HAVE_MPI:
@@ -282,6 +283,8 @@ class SNSPowderReduction(PythonAlgorithm):
         for chunk in strategy:
             if "ChunkNumber" in chunk:
                 self.log().information("Working on chunk %d of %d" % (chunk["ChunkNumber"], chunk["TotalChunks"]))
+            elif "SpectrumMin" in chunk:
+                self.log().information("Working on spectrums %d through %d" % (chunk["SpectrumMin"], chunk["SpectrumMax"]))
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
             if self._info is None:
                 self._info = self._getinfo(temp)

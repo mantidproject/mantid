@@ -102,6 +102,7 @@ namespace DataHandling
     exts.push_back("_runinfo.xml");
     exts.push_back("_event.nxs");
     exts.push_back(".nxs");
+    exts.push_back(".raw");
     this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the runinfo file to read, including its full or relative path. \n"
         "Or the name of the Event NeXus file to read, including its full or relative path. \n"
@@ -213,7 +214,7 @@ namespace DataHandling
       //Close up the file
       file.closeGroup();
       file.close();
-      // Factor fo 2 for compression
+      // Factor of 2 for compression
       filesize = static_cast<double>(total_events) * 48.0 / (1024.0*1024.0*1024.0);
     }
     //Histo Nexus
@@ -221,8 +222,8 @@ namespace DataHandling
     {
         // Check the size of the file loaded
         Poco::File info(runinfo);
-        filesize = double(info.getSize())/(1024.*1024.*1024.0);
-        g_log.notice() << "File size is " << filesize << " GB" << std::endl;
+        filesize = double(info.getSize()) * 24.0 / (1024.0*1024.0*1024.0);
+        g_log.notice() << "Wksp size is " << filesize << " GB" << std::endl;
 
         LoadRawHelper *helper = new LoadRawHelper;
         FILE* file = helper->openRawFile(runinfo);
@@ -237,8 +238,8 @@ namespace DataHandling
     {
         // Check the size of the file loaded
         Poco::File info(runinfo);
-        filesize = double(info.getSize())/(1024.*1024.*1024.0);
-        g_log.notice() << "File size is " << filesize << " GB" << std::endl;
+        filesize = double(info.getSize()) * 144.0 / (1024.0*1024.0*1024.0);
+        g_log.notice() << "Wksp size is " << filesize << " GB" << std::endl;
         LoadTOFRawNexus lp;
         lp.signalNo = 1;
 	    // Find the entry name we want.
@@ -282,7 +283,7 @@ namespace DataHandling
       else if( ext.compare("raw") == 0 || runinfo.compare(runinfo.size()-10,10,"_histo.nxs") == 0)
       {
     	  int spectraPerChunk = m_numberOfSpectra/numChunks;
-    	  int first = (i-1) * spectraPerChunk;
+    	  int first = (i-1) * spectraPerChunk + 1;
     	  int last = first + spectraPerChunk - 1;
     	  if (i == numChunks) last = m_numberOfSpectra;
     	  row << first << last;
