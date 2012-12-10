@@ -1150,6 +1150,8 @@ void InstrumentWindowPickTab::saveSettings(QSettings &settings) const
  */
 void InstrumentWindowPickTab::loadSettings(const QSettings &settings)
 {
+    int unitsNum = settings.value("TubeXUnits",0).toInt();
+    m_tubeXUnits = TubeXUnits( unitsNum );
 }
 
 /**

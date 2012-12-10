@@ -302,13 +302,30 @@ void UnwrappedSurface::cacheAllAssemblies()
   */
 void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
 {
+  // dimensions of the screen to draw on
+  int widget_width = widget->width();
+  int widget_height = widget->height();
 
-  int vwidth = widget->width();
-  int vheight = widget->height();
-  const double dw = fabs(m_viewRect.width() / vwidth);
-  const double dh = fabs(m_viewRect.height()/ vheight);
+  // view rectangle in the OpenGL coordinates
+  double view_left = m_viewRect.left();
+  double view_top  = m_viewRect.top();
+  double view_right  = m_viewRect.right();
+  double view_bottom = m_viewRect.bottom();
 
-  //std::cerr << m_viewRect.left() << ' ' << m_viewRect.right() << " : " <<  m_viewRect.bottom() << ' ' << m_viewRect.top() << std::endl;
+  // make sure the view rectangle has a finite area
+  if (view_left == view_right)
+  {
+      view_left  -= m_width_max / 2;
+      view_right += m_width_max / 2;
+  }
+  if (view_top == view_bottom)
+  {
+      view_top    += m_height_max / 2;
+      view_bottom -= m_height_max / 2;
+  }
+
+  const double dw = fabs((view_right - view_left) / widget_width);
+  const double dh = fabs((view_top - view_bottom) / widget_height);
 
   if (m_startPeakShapes)
   {
@@ -316,13 +333,11 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   }
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  //glDisable(GL_DEPTH_TEST);
-  glViewport(0, 0, vwidth, vheight);
+  glViewport(0, 0, widget_width, widget_height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glOrtho(m_viewRect.left(),m_viewRect.right(),
-    m_viewRect.bottom(),m_viewRect.top(),
-    -10,10);
+  glOrtho( view_left, view_right, view_bottom, view_top, -10,10 );
+
   if (OpenGLError::hasError("UnwrappedSurface::drawSurface"))
   {
     OpenGLError::log() << "glOrtho arguments:\n";
@@ -357,10 +372,15 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
     double w = (iw == 0)?  dw : udet.width/2;
     double h = (ih == 0)?  dh : udet.height/2;
 
-    if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
+    // check that the detector is visible in the current view
+    //if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
+    QRectF detectorRect(udet.u-w,udet.v+h,w*2,h*2);
+    if ( !m_viewRect.intersects(detectorRect) ) continue;
 
+    // apply the detector's colour
     setColor(int(i),picking);
 
+    // if the detector is too small to see its shape draw a rectangle
     if (iw < 6 || ih < 6)
     {
       glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
@@ -371,6 +391,7 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
         glRectd(udet.u-w,udet.v-h,udet.u+w,udet.v+h);
       }
     }
+    // else draw the correct shape
     else
     {
       glPushMatrix();
