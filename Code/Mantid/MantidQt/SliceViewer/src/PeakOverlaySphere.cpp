@@ -4,6 +4,7 @@
 #include <qwt_scale_div.h>
 #include <qpainter.h>
 #include <QPen>
+#include <QMouseEvent>
 
 using namespace Mantid::Kernel;
 
@@ -30,6 +31,8 @@ namespace SliceViewer
     setAttribute(Qt::WA_NoMousePropagation, false);
     this->setVisible(true);
     setUpdatesEnabled(true);
+
+    setAttribute(Qt::WA_TransparentForMouseEvents);
   }
     
   //----------------------------------------------------------------------------------------------
