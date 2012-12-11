@@ -4,11 +4,15 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidQtSliceViewer/PhysicalSphericalPeak.h"
 #include "MockObjects.h"
+#include <vector>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::Kernel;
 using namespace testing;
 
+//=====================================================================================
+// Functional Tests
+//=====================================================================================
 class PhysicalSphericalPeakTest : public CxxTest::TestSuite
 {
 public:
@@ -74,6 +78,76 @@ public:
     physicalPeak.movePosition(transform); // Should invoke the mock method.
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockTransform));
+  }
+};
+
+//=====================================================================================
+// Performance Tests
+//=====================================================================================
+class PhysicalSphericalPeakTestPerformance : public CxxTest::TestSuite
+{
+private:
+
+  /// Collection to store a large number of physicalPeaks.
+  std::vector<PhysicalSphericalPeak> m_physicalPeaks;
+
+public:
+
+  /**
+  Here we create a distribution of Peaks. Peaks are dispersed. This is to give a measurable peformance.
+  */
+  PhysicalSphericalPeakTestPerformance()
+  {
+    const int sizeInAxis = 110;
+    const double radius = 5;
+    m_physicalPeaks.reserve(sizeInAxis*sizeInAxis*sizeInAxis);
+    for(int x = 0; x < sizeInAxis; ++x)
+    {
+      for(int y =0; y < sizeInAxis; ++y)
+      {
+        for(int z = 0; z < sizeInAxis; ++z)
+        {
+          V3D peakOrigin(x, y, z);
+          m_physicalPeaks.push_back(PhysicalSphericalPeak(peakOrigin, radius));
+        }
+      }
+    }
+  }
+
+  /// Test the performance of just setting the slice point.
+  void test_setSlicePoint_performance()
+  {
+    std::vector<PhysicalSphericalPeak>::iterator it = m_physicalPeaks.begin();
+    const double z = 10;
+    while(it != m_physicalPeaks.end())
+    {
+      (*it).setSlicePoint(z);
+      ++it;
+    }
+  }
+
+  /// Test the performance of just drawing.
+  void test_draw_performance()
+  {
+    auto it = m_physicalPeaks.begin();
+    while(it != m_physicalPeaks.end())
+    {
+      (*it).draw(1, 1, 1, 1);
+      ++it;
+    }
+  }
+
+  /// Test the performance of both setting the slice point and drawing..
+  void test_whole_performance()
+  {
+    auto it = m_physicalPeaks.begin();
+    const double z = 10;
+    while(it != m_physicalPeaks.end())
+    {
+      (*it).setSlicePoint(z);
+      (*it).draw(1, 1, 1, 1);
+      ++it;
+    }
   }
 
 };
