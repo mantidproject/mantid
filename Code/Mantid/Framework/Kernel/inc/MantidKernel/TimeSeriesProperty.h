@@ -105,6 +105,10 @@ namespace Mantid
         return mvalue;
       }
 
+      static bool valueCmp(const TimeValueUnit& lhs, const TimeValueUnit& rhs)
+      {
+        return ( lhs.mvalue < rhs.mvalue );
+      }
     };
 
     //================================================================================================
@@ -198,6 +202,11 @@ namespace Mantid
       DateAndTime firstTime() const;
       /// Returns the last value
       TYPE lastValue() const;
+
+      /// Returns the minimum value found in the series
+      TYPE minValue() const;
+      /// Returns the maximum value found in the series
+      TYPE maxValue() const;
 
       /// Returns the number of values at UNIQUE time intervals in the time series
       int size() const;

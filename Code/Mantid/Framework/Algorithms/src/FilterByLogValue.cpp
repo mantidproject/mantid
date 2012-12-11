@@ -165,9 +165,9 @@ void FilterByLogValue::exec()
   // Get the properties.
   double min = getProperty("MinimumValue");
   double max = getProperty("MaximumValue");
-  double tolerance = getProperty("TimeTolerance");
-  std::string logname = getPropertyValue("LogName");
-  bool PulseFilter = getProperty("PulseFilter");
+  const double tolerance = getProperty("TimeTolerance");
+  const std::string logname = getPropertyValue("LogName");
+  const bool PulseFilter = getProperty("PulseFilter");
 
   // Find the start and stop times of the run, but handle it if they are not found.
   DateAndTime run_start(0), run_stop("2100-01-01");
@@ -208,8 +208,6 @@ void FilterByLogValue::exec()
     else
     {
       // ----- Filter by value ------
-      if (max < min)
-        throw std::invalid_argument("MaximumValue should be >= MinimumValue. Aborting.");
 
       //This function creates the splitter vector we will use to filter out stuff.
       const std::string logBoundary(this->getPropertyValue("LogBoundary"));

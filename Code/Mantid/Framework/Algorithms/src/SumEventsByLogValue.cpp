@@ -64,9 +64,8 @@ namespace Algorithms
       // This is the int log version that ignores binning parameters and has a data point per log value
       // TODO: add the ability to specify binning for integer logs
       
-      const auto values = intLog->valuesAsVector();
-      const int minVal = *std::min_element(values.begin(),values.end());
-      const int maxVal = *std::max_element(values.begin(),values.end());
+      const int minVal = intLog->minValue();
+      const int maxVal = intLog->maxValue();
       const int xLength = maxVal - minVal + 1;
       // Create a point-like workspace to hold the sum. The factory will give back a Workspace2Ds
       MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,1,xLength,xLength);
@@ -116,13 +115,9 @@ namespace Algorithms
       // If only the number of bins was given, add the min & max values of the log
       if ( binningParams.size() == 1 )
       {
-        // TODO: Move determination of min/max into property itself
-        const auto values = dblLog->valuesAsVector();
-        const double minVal = *std::min_element(values.begin(),values.end());
-        const double maxVal = *std::max_element(values.begin(),values.end());
         // TODO: What if min & max are the same (for example if there's only one entry in the property)
-        binningParams.insert(binningParams.begin(),minVal);
-        binningParams.push_back(maxVal*1.000001); // Make it a tiny bit larger to cover full range
+        binningParams.insert( binningParams.begin(), dblLog->minValue() );
+        binningParams.push_back(dblLog->maxValue()*1.000001); // Make it a tiny bit larger to cover full range
       }
       MantidVec XValues;
       const int XLength = VectorHelper::createAxisFromRebinParams(binningParams, XValues);
