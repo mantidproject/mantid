@@ -141,11 +141,8 @@ protected:
   bool m_autoscaling;
   //boost::shared_ptr<const std::vector<boost::shared_ptr<const Mantid::Geometry::IObjComponent> > > m_plottables;
 
-  /// Vector where INDEX = (detector id + m_id2wi_offset); VALUE = workspace index.
-  std::vector<size_t> m_id2wi_vector;
-
-  /// Offset into m_id2wi_map above.
-  Mantid::detid_t m_id2wi_offset;
+  /// Pointer to the workspace's detector ID to workspace index map
+  Mantid::detid2index_map *m_detid2index_map;
 
   /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<Mantid::detid_t> m_detIDs;
