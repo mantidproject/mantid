@@ -428,6 +428,8 @@ void SetupHFIRReduction::init()
   setPropertyGroup("NumberOfSubpixels", iq1d_grp);
   setPropertyGroup("ErrorWeighting", iq1d_grp);
 
+  declareProperty("ProcessInfo","", "Additional process information");
+  declareProperty("OutputDirectory", "", "Directory to put the output files in");
   declareProperty("OutputMessage","",Direction::Output);
   declareProperty("ReductionProperties","__sans_reduction_properties", Direction::Input);
 }
@@ -445,7 +447,15 @@ void SetupHFIRReduction::exec()
   PropertyManagerDataService::Instance().addOrReplace(reductionManagerName, reductionManager);
 
   // Store name of the instrument
-  reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "HFIRSANS") );
+  reductionManager->declareProperty(new PropertyWithValue<std::string>("InstrumentName", "HFIRSANS"));
+
+  // Store additional (and optional) process information
+  const std::string processInfo = getProperty("ProcessInfo");
+  reductionManager->declareProperty(new PropertyWithValue<std::string>("ProcessInfo", processInfo));
+
+  // Store the output directory
+  const std::string outputDirectory = getProperty("OutputDirectory");
+  reductionManager->declareProperty(new PropertyWithValue<std::string>("OutputDirectory", outputDirectory));
 
   // Load algorithm
   const double sdd = getProperty("SampleDetectorDistance");

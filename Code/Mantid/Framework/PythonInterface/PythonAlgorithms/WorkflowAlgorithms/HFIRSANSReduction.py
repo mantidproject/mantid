@@ -5,6 +5,7 @@ import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
 from reduction_workflow.find_data import find_data
+import os
 
 class HFIRSANSReduction(PythonAlgorithm):
 
@@ -227,6 +228,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
         
         # Compute I(q)
+        iq_output = None
         if "IQAlgorithm" in property_list:
             iq_output = self.getPropertyValue("OutputWorkspace")
             iq_output = iq_output+'_Iq'
@@ -240,9 +242,17 @@ class HFIRSANSReduction(PythonAlgorithm):
                 output_msg += alg.getProperty("OutputMessage").value            
 
         # Compute I(qx,qy)
-        
-        # Save data
-        
+        iqxy_output = None
+       
+        # Verify output directory and save data
+        if "OutputDirectory" in property_list:
+            output_dir = property_manager.getProperty("OutputDirectory").value
+            if os.path.isdir(output_dir):
+                output_msg += self._save_output(iq_output, iqxy_output, 
+                                                output_dir, property_manager)
+            else:
+                msg = "Output directory doesn't exist: %s\n" % output_dir
+                Logger.get("HFIRSANSReduction").error(msg)    
     
         self.setPropertyValue("OutputWorkspace", output_ws)
         self.setProperty("OutputMessage", output_msg)
@@ -326,8 +336,50 @@ class HFIRSANSReduction(PythonAlgorithm):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
 
         return output_msg
+    
+    def _save_output(self, iq_output, iqxy_output, output_dir, property_manager):
+        """
+            Save the I(Q) and I(QxQy) output to file.
+            
+            @param iq_output: name of the I(Q) workspace
+            @param iqxy_output: name of the I(QxQy) workspace
+            @param output_dir: output director path
+            @param property_manager: property manager object
+        """
+        output_msg = ""
+        # Save I(Q)
+        if iq_output is not None:
+            if AnalysisDataService.doesExist(iq_output):
+                proc_xml = ""
+                if property_manager.existsProperty("ProcessInfo"):
+                    process_file = property_manager.getProperty("ProcessInfo").value
+                    if os.path.isfile(process_file):
+                        proc = open(process_file, 'r')
+                        proc_xml = proc.read()
+                    elif len(process_file)>0:
+                        Logger.get("HFIRSANSReduction").error("Could not read %s\n" % process_file)               
+                
+                filename = os.path.join(output_dir, iq_output+'.txt')
+                api.SaveAscii(Filename=filename, InputWorkspace=iq_output,
+                              Separator="Tab", CommentIndicator="# ",
+                              WriteXError=True)
+                filename = os.path.join(output_dir, iq_output+'.xml')
+                api.SaveCanSAS1D(Filename=filename, InputWorkspace=iq_output,
+                                 Process=proc_xml)
+                output_msg += "I(Q) saved in %s\n" % (filename)
+            else:
+                Logger.get("HFIRSANSReduction").error("No I(Q) output found")
         
+        # Save I(Qx,Qy)
+        if iqxy_output is not None:
+            if AnalysisDataService.doesExist(iqxy_output):
+                filename = os.path.join(output_dir, iqxy_output+'.dat')
+                api.SaveNISTDAT(InputWorkspace=iqxy_output, Filename=filename)  
+                output_msg += "I(Qx,Qy) saved in %s\n" % (filename)
+            else:
+                Logger.get("HFIRSANSReduction").error("No I(Qx,Qy) output found")
 
+        return output_msg
 #############################################################################################
 
 registerAlgorithm(HFIRSANSReduction)

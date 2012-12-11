@@ -275,15 +275,13 @@ def ResetWavelength():
     ReductionSingleton().reduction_properties["Wavelength"] = None
     ReductionSingleton().reduction_properties["WavelengthSpread"] = None
     
-def SaveIqAscii(reducer=None, process=None):
-    #TODO
-    if reducer is None:
-        reducer = ReductionSingleton()
-    reducer.set_save_Iq(sans_reduction_steps.SaveIqAscii(process=process))
+def SaveIq(output_dir='', process=''):
+    ReductionSingleton().reduction_properties["OutputDirectory"] = output_dir
+    ReductionSingleton().reduction_properties["ProcessInfo"] = process
 
 def NoSaveIq():
-    #TODO
-    ReductionSingleton().set_save_Iq(None)
+        if ReductionSingleton().reduction_properties.has_key("OutputDirectory"):
+            del ReductionSingleton().reduction_properties["OutputDirectory"]
             
 def IQxQy(nbins=100):
     ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, InputWorkspace=None, 
