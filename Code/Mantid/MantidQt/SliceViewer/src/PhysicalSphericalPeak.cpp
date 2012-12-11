@@ -20,6 +20,25 @@ namespace MantidQt
       {
       }
 
+        //----------------------------------------------------------------------------------------------
+        /** Set the distance between the plane and the center of the peak in md coordinates
+
+        ASCII diagram below to demonstrate how dz (distance in z) is used to determine the radius of the sphere-plane intersection at that point,
+        resloves both rx and ry. Also uses the distance to calculate the opacity to apply.
+
+        @param z : position of the plane slice in the z dimension.
+
+             /---------\
+            /           \
+        ---/---------rx--\---------------- plane
+           |    dz|     /| peak
+           |      |   /  |
+           |      . /    |
+           |             |
+           \             /
+            \           /
+             \---------/
+        */
       void PhysicalSphericalPeak::setSlicePoint(const double& z)
       {
         const double distanceSQ = (z - m_origin.Z()) * (z - m_origin.Z());
@@ -65,10 +84,11 @@ namespace MantidQt
 
         // Create the return object.
         SphericalPeakPrimitives drawingObjects;
-        drawingObjects.outerRadiusX = outerRadiusX;
-        drawingObjects.outerRadiusY = outerRadiusY;
-        drawingObjects.lineWidth = lineWidthX;
-        drawingObjects.opacityAtDistance = m_opacityAtDistance;
+        drawingObjects.peakOuterRadiusX = outerRadiusX;
+        drawingObjects.peakOuterRadiusY = outerRadiusY;
+        drawingObjects.peakLineWidth = lineWidthX;
+        drawingObjects.peakOpacityAtDistance = m_opacityAtDistance;
+        drawingObjects.peakOrigin = m_origin;
         return drawingObjects;
       }
   }

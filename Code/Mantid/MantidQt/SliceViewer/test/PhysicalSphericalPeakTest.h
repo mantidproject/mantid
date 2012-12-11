@@ -28,10 +28,10 @@ public:
     auto drawObject = physicalPeak.draw(windowHeight, windowWidth, viewHeight, viewWidth);
 
     // Quick white-box calculations of the outputs to expect.
-    TS_ASSERT_EQUALS(0, drawObject.opacityAtDistance);
-    TS_ASSERT_EQUALS(0.5, drawObject.outerRadiusX);
-    TS_ASSERT_EQUALS(0.5, drawObject.outerRadiusY);
-    TS_ASSERT_EQUALS(1, drawObject.lineWidth);
+    TS_ASSERT_EQUALS(0, drawObject.peakOpacityAtDistance);
+    TS_ASSERT_EQUALS(0.5, drawObject.peakOuterRadiusX);
+    TS_ASSERT_EQUALS(0.5, drawObject.peakOuterRadiusY);
+    TS_ASSERT_EQUALS(1, drawObject.peakLineWidth);
   }
 
   void test_setSlicePoint_to_intersect()
@@ -56,10 +56,10 @@ public:
     const double expectedLineWidth = radius - std::sqrt( std::pow(radius, 2) - std::pow(radius/2, 2));
     const double expectedRadius = radius - (expectedLineWidth/2);
 
-    TS_ASSERT_EQUALS( expectedOpacityAtDistance, drawObject.opacityAtDistance);
-    TS_ASSERT_EQUALS( expectedRadius, drawObject.outerRadiusX);
-    TS_ASSERT_EQUALS( expectedRadius, drawObject.outerRadiusY);
-    TS_ASSERT_EQUALS( expectedLineWidth, drawObject.lineWidth);
+    TS_ASSERT_EQUALS( expectedOpacityAtDistance, drawObject.peakOpacityAtDistance);
+    TS_ASSERT_EQUALS( expectedRadius, drawObject.peakOuterRadiusX);
+    TS_ASSERT_EQUALS( expectedRadius, drawObject.peakOuterRadiusY);
+    TS_ASSERT_EQUALS( expectedLineWidth, drawObject.peakLineWidth);
   }
 
   void test_movePosition(PeakTransform_sptr peakTransform)

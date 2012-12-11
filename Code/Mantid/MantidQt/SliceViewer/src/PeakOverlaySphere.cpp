@@ -14,18 +14,13 @@ namespace MantidQt
 namespace SliceViewer
 {
 
-
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
   PeakOverlaySphere::PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, const QColor& peakColour)
   : QWidget( parent ),
     m_plot(plot),
-    m_originalOrigin(origin),
-    m_origin(origin),
-    m_radius(radius),
-    m_opacityMax(0.8),
-    m_opacityMin(0.0),
+    m_physicalPeak(origin, radius),
     m_peakColour(peakColour)
   {
     setAttribute(Qt::WA_NoMousePropagation, false);
@@ -42,53 +37,12 @@ namespace SliceViewer
   {
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Set the distance between the plane and the center of the peak in md coordinates
-
-  ASCII diagram below to demonstrate how dz (distance in z) is used to determine the radius of the sphere-plane intersection at that point,
-  resloves both rx and ry. Also uses the distance to calculate the opacity to apply.
-
-  @param z : position of the plane slice in the z dimension.
-
-       /---------\
-      /           \
-  ---/---------rx--\---------------- plane
-     |    dz|     /| peak
-     |      |   /  |
-     |      . /    |
-     |             |
-     \             /
-      \           /
-       \---------/
-  */
+  
   void PeakOverlaySphere::setSlicePoint(const double& z)
   {
-    const double distanceSQ = (z - m_origin.Z()) * (z - m_origin.Z());
-    const double distance = std::sqrt(distanceSQ);
-    const double radSQ = m_radius * m_radius;
-
-    if(distanceSQ < radSQ)
-    {
-      m_radiusAtDistance = std::sqrt( radSQ - distanceSQ );
-    }
-    else
-    {
-      m_radiusAtDistance = 0;
-    }
-    
-    // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
-    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_radius) * distance  + m_opacityMax;
-    m_opacityAtDistance = m_opacityAtDistance >= m_opacityMin ? m_opacityAtDistance : m_opacityMin;
+    m_physicalPeak.setSlicePoint(z);
 
     this->update(); //repaint
-  }
-
-  const Mantid::Kernel::V3D & PeakOverlaySphere::getOrigin() const
-  { return m_origin; }
-
-  double PeakOverlaySphere::getRadius() const
-  { 
-    return m_radius;
   }
 
   //----------------------------------------------------------------------------------------------
@@ -112,27 +66,20 @@ namespace SliceViewer
   /// Paint the overlay
   void PeakOverlaySphere::paintEvent(QPaintEvent * /*event*/)
   {
-    // Linear Transform from MD coordinates into Windows/Qt coordinates for ellipse rendering. TODO: This can be done outside of paintEvent.
-    const int xOrigin = m_plot->transform( QwtPlot::xBottom, m_origin.X() );
-    const int yOrigin = m_plot->transform( QwtPlot::yLeft, m_origin.Y() );
-    const QPointF originWindows(xOrigin, yOrigin);
-
     const QwtDoubleInterval intervalY = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();
     const QwtDoubleInterval intervalX = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval();
     
     const double scaleY = height()/(intervalY.width());
     const double scaleX = width()/(intervalX.width());
 
-    const double innerRadiusX = scaleX * m_radiusAtDistance;
-    const double innerRadiusY = scaleY * m_radiusAtDistance;
+    // Calculate the physical drawing aspects using the Physical Peak.
+    auto drawObject = m_physicalPeak.draw(height(), width(), intervalY.width(), intervalX.width());
 
-    double outerRadiusX = scaleX * getRadius();
-    double outerRadiusY = scaleY * getRadius();
+    // Linear Transform from MD coordinates into Windows/Qt coordinates for ellipse rendering. TODO: This can be done outside of paintEvent.
+    const int xOrigin = m_plot->transform( QwtPlot::xBottom, drawObject.peakOrigin.X() );
+    const int yOrigin = m_plot->transform( QwtPlot::yLeft, drawObject.peakOrigin.Y() );
+    const QPointF originWindows(xOrigin, yOrigin);
 
-    const double lineWidthX = outerRadiusX - innerRadiusX;
-    const double lineWidthY = outerRadiusY - innerRadiusY;
-    outerRadiusX -= lineWidthX/2;
-    outerRadiusY -= lineWidthY/2;
 
     QPainter painter(this);
     painter.setRenderHint( QPainter::Antialiasing );
@@ -142,12 +89,12 @@ namespace SliceViewer
     /* Note we are creating an ellipse here and generating a filled effect by controlling the line thickness.
        Since the linewidth takes a single scalar value, we choose to use x as the scale value.
     */
-    pen.setWidth(static_cast<int>(std::abs(lineWidthX)));
+    pen.setWidth(static_cast<int>(std::abs(drawObject.peakLineWidth)));
     painter.setPen( pen );  
     
     pen.setStyle(Qt::SolidLine);
-    painter.setOpacity(m_opacityAtDistance); //Set the pre-calculated opacity
-    painter.drawEllipse( originWindows, outerRadiusX, outerRadiusY );
+    painter.setOpacity(drawObject.peakOpacityAtDistance); //Set the pre-calculated opacity
+    painter.drawEllipse( originWindows, drawObject.peakOuterRadiusX, drawObject.peakOuterRadiusY );
     
   }
 
@@ -168,8 +115,7 @@ namespace SliceViewer
 
   void PeakOverlaySphere::movePosition(PeakTransform_sptr transform)
   {
-    // Will have the plots x, y, and z aligned to the correct h, k, l value.
-    m_origin = transform->transform(this->m_originalOrigin);
+    m_physicalPeak.movePosition(transform);
   }
 
 } // namespace Mantid

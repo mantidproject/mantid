@@ -14,10 +14,11 @@ namespace MantidQt
     */
     struct SphericalPeakPrimitives 
     {
-      double outerRadiusX;
-      double outerRadiusY;
-      double lineWidth;
-      double opacityAtDistance;
+      double peakOuterRadiusX;
+      double peakOuterRadiusY;
+      double peakLineWidth;
+      double peakOpacityAtDistance;
+      Mantid::Kernel::V3D peakOrigin;
     };
 
     /**
