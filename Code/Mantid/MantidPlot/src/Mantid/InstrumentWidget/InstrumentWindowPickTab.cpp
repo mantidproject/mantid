@@ -161,7 +161,7 @@ m_freezePlot(false)
   m_peakSelect = new QPushButton();
   m_peakSelect->setCheckable(true);
   m_peakSelect->setAutoExclusive(true);
-  m_peakSelect->setIcon(QIcon(":/PickTools/selection-peaks.png"));
+  m_peakSelect->setIcon(QIcon(":/PickTools/eraser.png"));
   m_peakSelect->setToolTip("Select single crystal peak(s)");
 
   QHBoxLayout* toolBox = new QHBoxLayout();
