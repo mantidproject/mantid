@@ -84,8 +84,6 @@ namespace SliceViewer
     Mantid::Kernel::V3D m_origin;
     /// actual peak radius
     const double m_radius;
-    /// normalisation value.
-    double m_normalisation;
     /// Max opacity
     const double m_opacityMax;
     /// Min opacity
@@ -96,8 +94,6 @@ namespace SliceViewer
     double m_opacityAtDistance;
     /// Cached radius at the distance z from origin
     double m_radiusAtDistance;
-    /// Cached scale
-    double m_scale;
   };
 
 
