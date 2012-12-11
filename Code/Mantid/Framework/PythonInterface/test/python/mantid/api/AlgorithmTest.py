@@ -46,6 +46,22 @@ class AlgorithmTest(unittest.TestCase):
         as_str = str(alg)
         self.assertEquals(as_str, "CreateWorkspace.1(OutputWorkspace=UNUSED_NAME_FOR_CHILD,DataX=1,2,3,DataY=1,2,3,UnitX=Wavelength)")
         
+    def test_createSubAlgorithm_creates_new_algorithm_that_is_set_as_child(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        child_alg = parent_alg.createSubAlgorithm('Rebin')
+        
+        self.assertTrue(child_alg.isChild())
+
+    def test_createSubAlgorithm_respects_keyword_arguments(self):
+        parent_alg = AlgorithmManager.createUnmanaged('Load')
+        try:
+            child_alg = parent_alg.createSubAlgorithm(name='Rebin',version=1,startProgress=0.5,endProgress=0.9,enableLogging=True)
+        except Exception,exc:
+            self.fail("Expected createSubAlgorithm not to throw but it did: %s" % (str(exc)))
+            
+        # Unknown keyword
+        self.assertRaises(Exception, parent_alg.createSubAlgorithm, name='Rebin',version=1,startProgress=0.5,endProgress=0.9,enableLogging=True, unknownKW=1)
+        
 if __name__ == '__main__':
     unittest.main()
     
