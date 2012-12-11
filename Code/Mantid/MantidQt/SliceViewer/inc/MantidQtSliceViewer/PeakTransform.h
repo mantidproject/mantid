@@ -20,7 +20,7 @@ namespace MantidQt
       PeakTransform(const std::string& xPlotLabel, const std::string& yPlotLabel, const boost::regex& regexOne, const boost::regex& regexTwo, const boost::regex& regexThree);
       virtual ~PeakTransform();
       /// Perform Transform
-      Mantid::Kernel::V3D transform(const Mantid::Kernel::V3D& original) const;
+      virtual Mantid::Kernel::V3D transform(const Mantid::Kernel::V3D& original) const;
       /// Perform Transform
       virtual Mantid::Kernel::V3D transformPeak(const Mantid::API::IPeak& peak) const = 0;
       /// Get a regex to find the axis of the free peak.

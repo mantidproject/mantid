@@ -46,6 +46,7 @@ namespace
     {
     }
     MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
+    MOCK_CONST_METHOD1(transform, Mantid::Kernel::V3D(const Mantid::Kernel::V3D&));
     MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&)); 
   };
 
