@@ -440,12 +440,16 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
     }
   }
 
+  size_t iPart = 0;
   if ( m_spec_max != Mantid::EMPTY_INT())
   {
+    uint32_t ifirst = pixel_id[0];
     range_check out_range(m_spec_min, m_spec_max, *id_to_wi);
     std::vector<uint32_t>::iterator newEnd =
 	std::remove_if (pixel_id.begin(), pixel_id.end(), out_range);
     pixel_id.erase(newEnd, pixel_id.end());
+    // check if beginning or end of array was erased
+    if(ifirst != pixel_id[0]) iPart = numPixels - pixel_id.size();
     numPixels = pixel_id.size();
     if (numPixels == 0) { file->close(); m_fileMutex.unlock(); g_log.warning() << "No pixels from " << bankName << std::endl; return; } ;
   }
@@ -498,16 +502,16 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   m_fileMutex.unlock();
   file->close();
 
-  for (size_t i=0; i<numPixels; i++)
+  for (size_t i=iPart; i<iPart + numPixels; i++)
   {
     // Find the workspace index for this detector
-    detid_t pixelID = pixel_id[i];
+    detid_t pixelID = pixel_id[i-iPart];
     size_t wi = (*id_to_wi)[pixelID];
 
     // Set the basic info of that spectrum
     ISpectrum * spec = WS->getSpectrum(wi);
     spec->setSpectrumNo( specid_t(wi+1) );
-    spec->setDetectorID( pixel_id[i] );
+    spec->setDetectorID( pixel_id[i-iPart] );
     // Set the shared X pointer
     spec->setX(X);
 
