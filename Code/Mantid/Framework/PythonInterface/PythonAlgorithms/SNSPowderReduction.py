@@ -358,7 +358,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if "pdfgetn" in self._outTypes:
                 pdfwksp = str(wksp)+"_norm"
                 pdfwksp = api.SetUncertainties(InputWorkspace=wksp, OutputWorkspace=pdfwksp, SetError="sqrt")
-                pdfwksp = api.SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles="False", Append=False,
+                api.SaveGSS(InputWorkspace=pdfwksp, Filename=filename+".getn", SplitFiles="False", Append=False,
                         MultiplyByBinWidth=False, Bank=info.bank, Format="SLOG", ExtendedHeader=True)
                 api.DeleteWorkspace(pdfwksp)
             return # don't do the other bits of saving
