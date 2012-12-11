@@ -481,7 +481,11 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked() {
     }
   }
 
-  // Swap data with empty to safely clear it outside mutex
+#if WIN32
+  untyped_expectations_.clear();
+#else
+
+// Swap data with empty to safely clear it outside mutex
   UntypedExpectations tmp_untyped_expectations;
   tmp_untyped_expectations.swap(untyped_expectations_);
 
@@ -490,6 +494,7 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked() {
   tmp_untyped_expectations.clear();
   g_gmock_mutex.Lock();
 
+#endif
   return expectations_met;
 }
 
