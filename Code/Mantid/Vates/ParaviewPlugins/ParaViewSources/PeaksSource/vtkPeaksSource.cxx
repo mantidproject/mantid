@@ -78,8 +78,11 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
       peakRadius = p_peakFactory->getIntegrationRadius();
     }
 
+    const int resolution = 6;
     vtkSphereSource *sphere = vtkSphereSource::New();
     sphere->SetRadius(peakRadius);
+    sphere->SetPhiResolution(resolution);
+    sphere->SetThetaResolution(resolution);
 
     vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
     glyphFilter->SetInput(structuredMesh);
