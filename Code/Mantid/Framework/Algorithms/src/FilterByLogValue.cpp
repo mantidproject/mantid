@@ -42,6 +42,7 @@ pulses:
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -92,13 +93,13 @@ void FilterByLogValue::init()
     new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
 
-  declareProperty("LogName", "",
+  declareProperty("LogName", "", boost::make_shared<MandatoryValidator<std::string>>(),
       "Name of the sample log to use to filter.\n"
       "For example, the pulse charge is recorded in 'ProtonCharge'.");
 
-  declareProperty("MinimumValue", 0.0, "Minimum log value for which to keep events.");
+  declareProperty("MinimumValue", Mantid::EMPTY_DBL(), "Minimum log value for which to keep events.");
 
-  declareProperty("MaximumValue", 0.0, "Maximum log value for which to keep events.");
+  declareProperty("MaximumValue", Mantid::EMPTY_DBL(), "Maximum log value for which to keep events.");
 
   auto min = boost::make_shared<BoundedValidator<double> >();
   min->setLower(0.0);
@@ -122,6 +123,35 @@ void FilterByLogValue::init()
 
 }
 
+std::map<std::string, std::string> FilterByLogValue::validateInputs()
+{
+  std::map<std::string, std::string> errors;
+
+  // Check that the log exists for the given input workspace
+  EventWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+  std::string logname = getPropertyValue("LogName");
+  try {
+    ITimeSeriesProperty * log = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData(logname) );
+    if ( log == NULL )
+    {
+      errors["LogName"] = "'" + logname + "' is not a time-series log.";
+      return errors;
+    }
+  } catch ( Exception::NotFoundError& ) {
+    errors["LogName"] = "The log '" + logname + "' does not exist in the workspace '" + inputWS->name() + "'.";
+    return errors;
+  }
+
+  const double min = getProperty("MinimumValue");
+  const double max = getProperty("MaximumValue");
+  if ( !isEmpty(min) && !isEmpty(max) && (max < min) )
+  {
+    errors["MinimumValue"] = "MinimumValue must not be larger than MaximumValue";
+    errors["MaximumValue"] = "MinimumValue must not be larger than MaximumValue";
+  }
+
+  return errors;
+}
 
 //-----------------------------------------------------------------------
 /** Executes the algorithm
@@ -155,7 +185,7 @@ void FilterByLogValue::exec()
   // Now make the splitter vector
   TimeSplitterType splitter;
   //This'll throw an exception if the log doesn't exist. That is good.
-  Kernel::ITimeSeriesProperty * log = dynamic_cast<Kernel::ITimeSeriesProperty*>( inputWS->run().getLogData(logname) );
+  ITimeSeriesProperty * log = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData(logname) );
   if (log)
   {
     if (PulseFilter)

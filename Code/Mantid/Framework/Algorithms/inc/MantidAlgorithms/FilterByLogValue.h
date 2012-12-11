@@ -47,13 +47,14 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Events\\EventFiltering";}
 
+  std::map<std::string, std::string> validateInputs();
+
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Implement abstract Algorithm methods
   void init();
   void exec();
-
 };
 
 } // namespace Algorithms

@@ -32,9 +32,8 @@ public:
   static FilterByLogValueTest *createSuite() { return new FilterByLogValueTest(); }
   static void destroySuite( FilterByLogValueTest *suite ) { delete suite; }
 
-  FilterByLogValueTest()
+  FilterByLogValueTest() : inputWS("eventWS")
   {
-    inputWS = "eventWS";
   }
 
 
@@ -113,7 +112,71 @@ public:
     AnalysisDataService::Instance().remove(inputWS);
   }
 
+  void test_validators()
+  {
+    FilterByLogValue alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
 
+    // InputWorkspace has to be an EventWorkspace
+    TS_ASSERT_THROWS( alg.setProperty("InputWorkspace", WorkspaceCreationHelper::Create2DWorkspace(1,1)), std::invalid_argument );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", WorkspaceCreationHelper::CreateEventWorkspace()) );
+
+    // LogName must not be empty
+    TS_ASSERT_THROWS( alg.setProperty("LogName",""), std::invalid_argument );
+
+    // TimeTolerance cannot be negative
+    TS_ASSERT_THROWS( alg.setProperty("TimeTolerance", -0.1), std::invalid_argument );
+    // ... but it can be zero
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("TimeTolerance", 0.0) );
+
+    // LogBoundary must be one of "Centre" and "Left"
+    TS_ASSERT_THROWS( alg.setProperty("LogBoundary", ""), std::invalid_argument );
+    TS_ASSERT_THROWS( alg.setProperty("LogBoundary", "Middle"), std::invalid_argument );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogBoundary", "Left") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogBoundary", "Centre") );
+  }
+
+  void test_validateInputs()
+  {
+    // Create and event workspace. We don't care what data is in it.
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace();
+    // Add a single-number log
+    ws->mutableRun().addProperty("SingleValue",5);
+    // Add a time-series property
+    auto tsp = new TimeSeriesProperty<double>("TSP");
+    tsp->addValue(DateAndTime::getCurrentTime(),9.9);
+    ws->mutableRun().addLogData(tsp);
+
+    FilterByLogValue alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace",ws) );
+
+    // Check protest when non-existent log is set
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogName", "NotThere") );
+    auto errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS( errorMap.size(), 1);
+    TS_ASSERT_EQUALS( errorMap.begin()->first, "LogName" );
+
+    // Check protest when single-value log is set
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogName", "SingleValue") );
+    errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS( errorMap.size(), 1);
+    TS_ASSERT_EQUALS( errorMap.begin()->first, "LogName" );
+
+    // Check protest when tsp log given, but min value greate than max
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogName", "TSP") );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MinimumValue", 2.0) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MaximumValue", 1.0) );
+    errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS( errorMap.size(), 2);
+    TS_ASSERT_EQUALS( errorMap.begin()->first, "MaximumValue" );
+    TS_ASSERT_EQUALS( errorMap.rbegin()->first, "MinimumValue" );
+
+    // Check it's happy when that's been remedied
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MaximumValue", 3.0) );
+    errorMap = alg.validateInputs();
+    TS_ASSERT( errorMap.empty() );
+  }
 
   /** Create a workspace with:
    * events at times 0,1,2,...99
