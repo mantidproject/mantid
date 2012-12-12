@@ -17,7 +17,7 @@ namespace MantidQt
     {
       int peakHalfCrossWidth;
       int peakHalfCrossHeight;
-      double peakLineWidth;
+      int peakLineWidth;
       double peakOpacityAtDistance;
       Mantid::Kernel::V3D peakOrigin;
     };
