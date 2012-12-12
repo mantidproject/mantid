@@ -442,163 +442,35 @@ public:
   void testExecHRP2()
   {
     // Test Parameter file in instrument folder is used by an IDF file not in the instrument folder
-    InstrumentDataService::Instance().clear();
-
-    LoadInstrument loaderHRP2;
-
-    TS_ASSERT_THROWS_NOTHING(loaderHRP2.initialize());
-
-    //create a workspace with some sample data
-    wsName = "LoadInstrumentTestHRPD2";
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    loaderHRP2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/HRPD_Definition.xml");
-    inputFile = loaderHRP2.getPropertyValue("Filename");
-
-    loaderHRP2.setPropertyValue("Workspace", wsName);
-
-    TS_ASSERT_THROWS_NOTHING(loaderHRP2.execute());
-
-    TS_ASSERT( loaderHRP2.isExecuted() );
-
-    // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
-
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
-
-    // test if a dummy parameter has been read in
-    boost::shared_ptr<const IComponent> comp = i->getComponentByName("bank_90degnew");
-    TS_ASSERT_EQUALS( comp->getName(), "bank_90degnew");
-
-    ParameterMap& paramMap = output->instrumentParameters();
-
-    Parameter_sptr param = paramMap.getRecursive(&(*comp), "S", "fitting");
-    TS_ASSERT( param );
-    if( param != 0) {
-       const FitParameter& fitParam4 = param->value<FitParameter>();
-       TS_ASSERT( fitParam4.getTie().compare("") == 0 );
-       TS_ASSERT( fitParam4.getFunction().compare("BackToBackExponential") == 0 );
-    }
-    else
-    {
-      TS_FAIL( "Did not find HRPD_Parameter.xml for IDFs_for_UNIT_TESTING/HRPD_Definition.xml");
-    }
-
-    AnalysisDataService::Instance().remove(wsName);
+    doTestParameterFileSelection("IDFs_for_UNIT_TESTING/HRPD_Definition.xml","HRPD_Parameters.xml","S"); 
   }
 
   void testExecHRP3()
   {
     // Test Parameter file in instrument folder is used by an IDF file not in the instrument folder and
-    // with an extension of its name after the 'Defintion' not present in a parameter file.
-    InstrumentDataService::Instance().clear();
-
-    LoadInstrument loaderHRP3;
-
-    TS_ASSERT_THROWS_NOTHING(loaderHRP3.initialize());
-
-    //create a workspace with some sample data
-    wsName = "LoadInstrumentTestHRPD3";
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    loaderHRP3.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/HRPD_Definition_Test3.xml");
-    inputFile = loaderHRP3.getPropertyValue("Filename");
-
-    loaderHRP3.setPropertyValue("Workspace", wsName);
-
-    TS_ASSERT_THROWS_NOTHING(loaderHRP3.execute());
-
-    TS_ASSERT( loaderHRP3.isExecuted() );
-
-    // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
-
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
-
-    // test if a dummy parameter has been read in
-    boost::shared_ptr<const IComponent> comp = i->getComponentByName("bank_90degnew");
-    TS_ASSERT_EQUALS( comp->getName(), "bank_90degnew");
-
-    ParameterMap& paramMap = output->instrumentParameters();
-
-    Parameter_sptr param = paramMap.getRecursive(&(*comp), "S", "fitting");
-    TS_ASSERT( param );
-    if( param != 0) {
-       const FitParameter& fitParam4 = param->value<FitParameter>();
-       TS_ASSERT( fitParam4.getTie().compare("") == 0 );
-       TS_ASSERT( fitParam4.getFunction().compare("BackToBackExponential") == 0 );
-    }
-    else
-    {
-      TS_FAIL( "Did not find HRPD_Parameter.xml for IDFs_for_UNIT_TESTING/HRPD_Definition_Test3.xml");
-    }
-
-    AnalysisDataService::Instance().remove(wsName);
+    // with an extension of its name after the 'Definition' not present in a parameter file.
+    doTestParameterFileSelection("IDFs_for_UNIT_TESTING/HRPD_Definition_Test3.xml","HRPD_Parameters.xml","S"); 
   }
 
   void testExecHRP4()
   {
     // Test Parameter file outside of instrument folder is used by an IDF file in the same folder and
-    // with the seame extension ('_Test4') of its name after the 'Defintion' or 'Parameter'.
-    InstrumentDataService::Instance().clear();
+    // with the same extension ('_Test4') of its name after the 'Definition' or 'Parameter'.
+    doTestParameterFileSelection("IDFs_for_UNIT_TESTING/HRPD_Definition_Test4.xml","IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml","T"); 
+  }
 
-    LoadInstrument loaderHRP4;
+  void testExecHRP5()
+  {
+    // Test Parameter file outside instrument folder is used by an IDF file in the same folder
+    doTestParameterFileSelection("IDFs_for_UNIT_TESTING/HRPDTEST_Definition.xml","IDFs_for_UNIT_TESTING/HRPDTEST_Parameters.xml","U"); 
+  }
 
-    TS_ASSERT_THROWS_NOTHING(loaderHRP4.initialize());
-
-    //create a workspace with some sample data
-    wsName = "LoadInstrumentTestHRPD3";
-    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
-
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
-    loaderHRP4.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/HRPD_Definition_Test4.xml");
-    inputFile = loaderHRP4.getPropertyValue("Filename");
-
-    loaderHRP4.setPropertyValue("Workspace", wsName);
-
-    TS_ASSERT_THROWS_NOTHING(loaderHRP4.execute());
-
-    TS_ASSERT( loaderHRP4.isExecuted() );
-
-    // Get back the saved workspace
-    MatrixWorkspace_sptr output;
-    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
-
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
-
-    // test if a dummy parameter has been read in
-    boost::shared_ptr<const IComponent> comp = i->getComponentByName("bank_90degnew");
-    TS_ASSERT_EQUALS( comp->getName(), "bank_90degnew");
-
-    ParameterMap& paramMap = output->instrumentParameters();
-
-    // It's "X0" in parameter file IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml
-    Parameter_sptr param = paramMap.getRecursive(&(*comp), "X0", "fitting");
-    TS_ASSERT( param );
-    if( param != 0) {
-       const FitParameter& fitParam4 = param->value<FitParameter>();
-       TS_ASSERT( fitParam4.getTie().compare("") == 0 );
-       TS_ASSERT( fitParam4.getFunction().compare("BackToBackExponential") == 0 );
-    }
-    else
-    {
-      TS_FAIL( "Did not find IDFs_for_UNIT_TESTING/HRPD_Parameter_Test4.xml for IDFs_for_UNIT_TESTING/HRPD_Definition_Test4.xml");
-    }
-
-    AnalysisDataService::Instance().remove(wsName);
+  void testExecHRP6()
+  {
+    // Test Parameter file outside of instrument folder is used by an IDF file in the same folder and
+    // with the same extension ('_Test6') of its name after the 'Definition' or 'Parameter' 
+    // even though there is a definition file without an extension in the same folder.
+    doTestParameterFileSelection("IDFs_for_UNIT_TESTING/HRPDTEST_Definition_Test6.xml","IDFs_for_UNIT_TESTING/HRPDTEST_Parameters_Test6.xml","V"); 
   }
 
   void testNeutronicPositions()
@@ -793,6 +665,60 @@ public:
   }
 
 private:
+  void doTestParameterFileSelection(std::string filename, std::string paramFilename, std::string par )
+  {
+    InstrumentDataService::Instance().clear();
+
+    LoadInstrument loader;
+
+    TS_ASSERT_THROWS_NOTHING(loader.initialize());
+
+    //create a workspace with some sample data
+    wsName = "LoadInstrumentTestForParameterFileSelection";
+    Workspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",1,1,1);
+    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+
+    //put this workspace in the data service
+    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
+
+    loader.setPropertyValue("Filename", filename);
+    inputFile = loader.getPropertyValue("Filename");
+
+    loader.setPropertyValue("Workspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    TS_ASSERT( loader.isExecuted() );
+
+    // Get back the saved workspace
+    MatrixWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+
+    boost::shared_ptr<const Instrument> i = output->getInstrument();
+
+    // test if a dummy parameter has been read in
+    boost::shared_ptr<const IComponent> comp = i->getComponentByName("bank_90degnew");
+    TS_ASSERT_EQUALS( comp->getName(), "bank_90degnew");
+
+    ParameterMap& paramMap = output->instrumentParameters();
+
+    // It's "X0" in parameter file IDFs_for_UNIT_TESTING/HRPD_Parameters_Test4.xml
+    Parameter_sptr param = paramMap.getRecursive(&(*comp), par, "fitting");
+    TS_ASSERT( param );
+    if( param != 0) {
+       const FitParameter& fitParam4 = param->value<FitParameter>();
+       TS_ASSERT( fitParam4.getTie().compare("") == 0 );
+       TS_ASSERT( fitParam4.getFunction().compare("BackToBackExponential") == 0 );
+    }
+    else
+    {
+      TS_FAIL( "Did not select "+paramFilename+" for "+filename); 
+    }
+
+    AnalysisDataService::Instance().remove(wsName);
+
+  }
+
   LoadInstrument loader;
   std::string inputFile;
   std::string wsName;

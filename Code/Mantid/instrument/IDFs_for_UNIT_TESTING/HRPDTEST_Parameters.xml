@@ -14,7 +14,7 @@
 </component-link>
 
 <component-link name="bank_90degnew" >
-  <parameter name="BackToBackExponential:T" type="fitting">
+  <parameter name="BackToBackExponential:U" type="fitting">
     <formula eq="sqrt(158.011*centre^4+4166.279*centre^2)" unit="dSpacing" result-unit="TOF" />
   </parameter>   
   <parameter name="BackToBackExponential:A" type="fitting">
