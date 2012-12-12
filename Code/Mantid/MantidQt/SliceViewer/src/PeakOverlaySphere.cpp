@@ -68,9 +68,6 @@ namespace SliceViewer
   {
     const QwtDoubleInterval intervalY = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();
     const QwtDoubleInterval intervalX = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval();
-    
-    const double scaleY = height()/(intervalY.width());
-    const double scaleX = width()/(intervalX.width());
 
     // Calculate the physical drawing aspects using the Physical Peak.
     auto drawObject = m_physicalPeak.draw(height(), width(), intervalY.width(), intervalX.width());

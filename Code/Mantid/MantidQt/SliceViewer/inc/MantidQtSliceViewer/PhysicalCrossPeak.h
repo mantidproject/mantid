@@ -15,8 +15,8 @@ namespace MantidQt
     */
     struct CrossPeakPrimitives 
     {
-      double peakHalfCrossWidth;
-      double peakHalfCrossHeight;
+      int peakHalfCrossWidth;
+      int peakHalfCrossHeight;
       double peakLineWidth;
       double peakOpacityAtDistance;
       Mantid::Kernel::V3D peakOrigin;

@@ -78,9 +78,8 @@ namespace SliceViewer
 
     auto drawObject = m_physicalPeak.draw(height(), width());
 
-    const int xOrigin = m_plot->transform( QwtPlot::xBottom, drawObject.peakOrigin.X() );
-    const int yOrigin = m_plot->transform( QwtPlot::yLeft, drawObject.peakOrigin.Y() );
-    const QPointF originWindows(xOrigin, yOrigin);
+    const int xOriginWindows = m_plot->transform( QwtPlot::xBottom, drawObject.peakOrigin.X() );
+    const int yOriginWindows = m_plot->transform( QwtPlot::yLeft, drawObject.peakOrigin.Y() );
     
     QPen pen(m_peakColour);
     pen.setWidth(drawObject.peakLineWidth); 
@@ -92,10 +91,10 @@ namespace SliceViewer
     const int halfCrossHeight = drawObject.peakHalfCrossHeight;
     const int halfCrossWidth = drawObject.peakHalfCrossWidth;
 
-    QPoint bottomL(originWindows.x() - halfCrossWidth, originWindows.y() - halfCrossHeight);
-    QPoint bottomR(originWindows.x() + halfCrossWidth, originWindows.y() - halfCrossHeight);
-    QPoint topL(originWindows.x() - halfCrossWidth, originWindows.y() + halfCrossHeight);
-    QPoint topR(originWindows.x() + halfCrossWidth, originWindows.y() + halfCrossHeight);
+    QPoint bottomL(xOriginWindows - halfCrossWidth, yOriginWindows - halfCrossHeight);
+    QPoint bottomR(xOriginWindows + halfCrossWidth, yOriginWindows - halfCrossHeight);
+    QPoint topL(xOriginWindows - halfCrossWidth, yOriginWindows + halfCrossHeight);
+    QPoint topR(xOriginWindows + halfCrossWidth, yOriginWindows + halfCrossHeight);
 
     painter.drawLine(bottomL, topR);
     painter.drawLine(bottomR, topL);
