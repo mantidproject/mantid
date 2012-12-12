@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/ClassMacros.h"
 #include "MantidQtSliceViewer/PeakTransform.h"
 
 namespace MantidQt
@@ -53,6 +54,8 @@ namespace MantidQt
       const double m_crossViewFraction;
       /// Cached opacity at the distance z from origin
       double m_opacityAtDistance;
+
+      DISABLE_COPY_AND_ASSIGN(PhysicalCrossPeak)
     };
 
   }

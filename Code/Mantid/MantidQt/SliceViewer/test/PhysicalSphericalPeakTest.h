@@ -5,6 +5,8 @@
 #include "MantidQtSliceViewer/PhysicalSphericalPeak.h"
 #include "MockObjects.h"
 #include <vector>
+#include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::Kernel;
@@ -66,10 +68,10 @@ public:
     TS_ASSERT_EQUALS( expectedLineWidth, drawObject.peakLineWidth);
   }
 
-  void test_movePosition(PeakTransform_sptr peakTransform)
+  void test_movePosition()
   {
     MockPeakTransform* pMockTransform = new MockPeakTransform;
-    EXPECT_CALL(*pMockTransform, transform(_)).Times(1);
+    EXPECT_CALL(*pMockTransform, transform(_)).Times(1).WillOnce(Return(V3D(0,0,0)));
     PeakTransform_sptr transform(pMockTransform);
 
     V3D origin(0, 0, 0);
@@ -88,8 +90,10 @@ class PhysicalSphericalPeakTestPerformance : public CxxTest::TestSuite
 {
 private:
 
+  typedef std::vector<boost::shared_ptr<PhysicalSphericalPeak> > VecPhysicalSphericalPeak;
+
   /// Collection to store a large number of physicalPeaks.
-  std::vector<PhysicalSphericalPeak> m_physicalPeaks;
+  VecPhysicalSphericalPeak m_physicalPeaks;
 
 public:
 
@@ -108,7 +112,7 @@ public:
         for(int z = 0; z < sizeInAxis; ++z)
         {
           V3D peakOrigin(x, y, z);
-          m_physicalPeaks.push_back(PhysicalSphericalPeak(peakOrigin, radius));
+          m_physicalPeaks.push_back(boost::make_shared<PhysicalSphericalPeak>(peakOrigin, radius));
         }
       }
     }
@@ -117,11 +121,11 @@ public:
   /// Test the performance of just setting the slice point.
   void test_setSlicePoint_performance()
   {
-    std::vector<PhysicalSphericalPeak>::iterator it = m_physicalPeaks.begin();
+    VecPhysicalSphericalPeak::iterator it = m_physicalPeaks.begin();
     const double z = 10;
     while(it != m_physicalPeaks.end())
     {
-      (*it).setSlicePoint(z);
+      (*it)->setSlicePoint(z);
       ++it;
     }
   }
@@ -132,7 +136,7 @@ public:
     auto it = m_physicalPeaks.begin();
     while(it != m_physicalPeaks.end())
     {
-      (*it).draw(1, 1, 1, 1);
+      (*it)->draw(1, 1, 1, 1);
       ++it;
     }
   }
@@ -144,8 +148,8 @@ public:
     const double z = 10;
     while(it != m_physicalPeaks.end())
     {
-      (*it).setSlicePoint(z);
-      (*it).draw(1, 1, 1, 1);
+      (*it)->setSlicePoint(z);
+      (*it)->draw(1, 1, 1, 1);
       ++it;
     }
   }

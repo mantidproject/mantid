@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/ClassMacros.h"
 #include "MantidQtSliceViewer/PeakTransform.h"
 
 namespace MantidQt
@@ -53,6 +54,8 @@ namespace MantidQt
       double m_opacityAtDistance;
       /// Cached radius at the distance z from origin
       double m_radiusAtDistance;
+
+      DISABLE_COPY_AND_ASSIGN(PhysicalSphericalPeak)
     };
 
   }
