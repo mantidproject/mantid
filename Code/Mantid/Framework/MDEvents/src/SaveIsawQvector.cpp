@@ -85,7 +85,10 @@ namespace MDEvents
     exts.push_back(".bin");
 
     declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
-        "Path to an hkl file to save.");  }
+        "Path to an hkl file to save.");
+    declareProperty("RightHanded", true, "Save the Q-vector as k_f - k_i");
+    declareProperty("ISAWcoords", true, "Save the Q-vector with y gravitationally up and x pointing downstream");
+  }
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
@@ -113,6 +116,25 @@ namespace MDEvents
       throw std::runtime_error("Failed to open file for writing");
     // set up a descripter of where we are going
     this->initTargetWSDescr(wksp);
+
+    size_t coord_map[DIMS] = {0,1,2}; // x->x, y->y, z->z
+    double coord_signs[DIMS] = {1.,1.,1.}; // signs are unchanged
+    if (this->getProperty("ISAWcoords"))
+    {
+      // x -> -z
+      coord_map[0] = 2;
+      coord_signs[0] *= -1.;
+
+      // y -> y
+
+      // z -> x
+      coord_map[2] = 0;
+    }
+    if (this->getProperty("RightHanded"))
+    {
+      for (size_t dim = 0; dim<DIMS; ++dim)
+        coord_signs[dim] *= -1.; // everything changes sign
+    }
 
     // units conersion helper
     UnitsConversionHelper unitConv;
@@ -155,7 +177,7 @@ namespace MDEvents
         q_converter->calcMatrixCoord(val,locCoord,signal,errorSq);
         for (size_t dim = 0; dim < DIMS; ++dim)
         {
-          buffer[dim] = static_cast<float>(-1.*locCoord[dim]); // invert through the origin
+          buffer[dim] = static_cast<float>(coord_signs[dim] * locCoord[coord_map[dim]]);
         }
         handle.write(reinterpret_cast<char*>(buffer), BUFF_SIZE);
       } // end of loop over events in list
