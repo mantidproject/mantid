@@ -473,6 +473,13 @@ public:
     doTestParameterFileSelection("IDFs_for_UNIT_TESTING/HRPDTEST_Definition_Test6.xml","IDFs_for_UNIT_TESTING/HRPDTEST_Parameters_Test6.xml","V"); 
   }
 
+  void testExecHRP7()
+  {
+    // Test Parameter file outside instrument folder is used by an IDF file in same instrument folder and
+    // with an extension of its name after the 'Definition' not present in a parameter file.
+    doTestParameterFileSelection("IDFs_for_UNIT_TESTING/HRPDTEST_Definition_Test7.xml","HRPDTEST_Parameters.xml","U"); 
+  }
+
   void testNeutronicPositions()
   {
     // Make sure the IDS is empty
