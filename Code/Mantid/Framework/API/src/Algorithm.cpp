@@ -477,7 +477,7 @@ namespace Mantid
       {
         // Log each issue
         for (auto it = errors.begin(); it != errors.end(); it++)
-          g_log.error() << "Invalid value for " << it->first << ": " << it->second;
+          g_log.error() << "Invalid value for " << it->first << ": " << it->second << std::endl;
         // Throw because something was invalid
         m_notificationCenter.postNotification(new ErrorNotification(this,"Some invalid Properties found"));
         throw std::runtime_error("Some invalid Properties found");
