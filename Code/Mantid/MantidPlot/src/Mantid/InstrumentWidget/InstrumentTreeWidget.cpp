@@ -22,7 +22,7 @@ InstrumentTreeWidget::InstrumentTreeWidget(QWidget *w):QTreeView(w), m_treeModel
 void InstrumentTreeWidget::setInstrumentActor(InstrumentActor* instrActor)
 {
   m_instrActor = instrActor;
-  m_treeModel=new InstrumentTreeModel(instrActor->getInstrument());
+  m_treeModel=new InstrumentTreeModel(instrActor,this);
   setModel(m_treeModel);
   setSelectionMode(SingleSelection);
   setSelectionBehavior(SelectRows);
