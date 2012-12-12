@@ -99,8 +99,8 @@ public:
   */
   PhysicalCrossPeakTestPerformance()
   {
-    const int sizeInAxis = 110;
-    const double maxZ = 110;
+    const int sizeInAxis = 50;
+    const double maxZ = 50;
     const double minZ = 0;
     m_physicalPeaks.reserve(sizeInAxis*sizeInAxis*sizeInAxis);
     for(int x = 0; x < sizeInAxis; ++x)
@@ -119,23 +119,31 @@ public:
   /// Test the performance of just setting the slice point.
   void test_setSlicePoint_performance()
   {
-    VecPhysicalCrossPeak::iterator it = m_physicalPeaks.begin();
-    const double z = 10;
-    while(it != m_physicalPeaks.end())
+    for(double z = 0; z < 50; z+=5)
     {
-      (*it)->setSlicePoint(z);
-      ++it;
+      VecPhysicalCrossPeak::iterator it = m_physicalPeaks.begin();
+      while(it != m_physicalPeaks.end())
+      {
+        (*it)->setSlicePoint(z);
+        ++it;
+      }
     }
   }
 
   /// Test the performance of just drawing.
   void test_draw_performance()
   {
-    auto it = m_physicalPeaks.begin();
-    while(it != m_physicalPeaks.end())
+    const int nTimesRedrawAll = 10;
+    int timesDrawn = 0;
+    while(timesDrawn < nTimesRedrawAll)
     {
-      (*it)->draw(1, 1);
-      ++it;
+      auto it = m_physicalPeaks.begin();
+      while(it != m_physicalPeaks.end())
+      {
+        (*it)->draw(1, 1);
+        ++it;
+      }
+      ++timesDrawn;
     }
   }
 
