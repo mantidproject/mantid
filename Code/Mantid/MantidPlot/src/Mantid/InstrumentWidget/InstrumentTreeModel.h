@@ -6,13 +6,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace Mantid
-{
-  namespace Geometry
-  {
-    class Instrument;
-  }
-}
+class InstrumentActor;
 
 /**
  * The InstrumentTreeModel is a class used by a QTreeView
@@ -28,7 +22,7 @@ class InstrumentTreeModel:public QAbstractItemModel
 {
   Q_OBJECT
 public:
-  InstrumentTreeModel(boost::shared_ptr<const Mantid::Geometry::Instrument>, QObject *parent=0);
+  InstrumentTreeModel(const InstrumentActor*, QObject *parent);
   ~InstrumentTreeModel();
 
   QVariant data(const QModelIndex &index, int role) const;
@@ -40,7 +34,7 @@ public:
   int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
-  const boost::shared_ptr<const Mantid::Geometry::Instrument> m_instrument; ///< instrument to which the model corresponds
+  const InstrumentActor *m_instrumentActor; ///< actor of instrument to which the model corresponds
 };
 
 #endif
