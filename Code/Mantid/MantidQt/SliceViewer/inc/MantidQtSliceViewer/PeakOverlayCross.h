@@ -82,8 +82,6 @@ namespace SliceViewer
     Mantid::Kernel::V3D m_origin;
     /// Effective radius of the widget. This is so that the widget can be effectively brought in and out of focus as a result of slicing.
     const double m_effectiveRadius;
-    /// normalisation value.
-    double m_normalisation;
     /// Max opacity
     const double m_opacityMax;
     /// Min opacity
