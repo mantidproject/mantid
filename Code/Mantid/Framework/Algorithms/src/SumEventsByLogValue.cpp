@@ -48,6 +48,32 @@ namespace Algorithms
                               "Binning parameters for the output workspace (optional for integer typed logs)" );
   }
 
+  std::map<std::string, std::string> SumEventsByLogValue::validateInputs()
+  {
+    std::map<std::string, std::string> errors;
+
+    // Check that the log exists for the given input workspace
+    DataObjects::EventWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+    const std::string logname = getPropertyValue("LogName");
+    try {
+      ITimeSeriesProperty * log = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData(logname) );
+      if ( log == NULL )
+      {
+        errors["LogName"] = "'" + logname + "' is not a time-series log.";
+        return errors;
+      }
+      if ( log->realSize() == 0 )
+      {
+        errors["LogName"] = "'" + logname + "' is empty.";
+      }
+    } catch ( Exception::NotFoundError& ) {
+      errors["LogName"] = "The log '" + logname + "' does not exist in the workspace '" + inputWS->name() + "'.";
+      return errors;
+    }
+
+    return errors;
+  }
+
   void SumEventsByLogValue::exec()
   {
     DataObjects::EventWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");

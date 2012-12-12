@@ -45,6 +45,8 @@ namespace Algorithms
     /// Algorithm's category for identification overriding a virtual method
     virtual const std::string category() const { return "Events";}
 
+    std::map<std::string, std::string> validateInputs();
+
   private:
     void initDocs();
     void init();
