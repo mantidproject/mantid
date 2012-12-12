@@ -10,7 +10,7 @@ namespace MantidQt
   namespace SliceViewer
   {
     /**
-    @class Spherical peak drawing primitive information.
+    @class Cross peak drawing primitive information.
     */
     struct CrossPeakPrimitives 
     {

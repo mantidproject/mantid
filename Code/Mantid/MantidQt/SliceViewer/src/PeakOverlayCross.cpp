@@ -21,12 +21,7 @@ namespace SliceViewer
   PeakOverlayCross::PeakOverlayCross(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& maxZ, const double& minZ, const QColor& peakColour)
   : QWidget( parent ),
     m_plot(plot),
-    m_originalOrigin(origin),
-    m_origin(origin),
-    m_effectiveRadius((maxZ - minZ)*0.015),
-    m_opacityMax(0.8),
-    m_opacityMin(0.0),
-    m_crossViewFraction(0.015),
+    m_physicalPeak(origin, maxZ, minZ),
     m_peakColour(peakColour)
   {
     setAttribute(Qt::WA_NoMousePropagation, false);
@@ -51,17 +46,11 @@ namespace SliceViewer
   */
   void PeakOverlayCross::setSlicePoint(const double& z)
   {
-    const double distanceAbs = std::abs(z - m_origin.Z());
-
-    // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
-    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_effectiveRadius) * distanceAbs  + m_opacityMax;
-    m_opacityAtDistance = m_opacityAtDistance >= m_opacityMin ? m_opacityAtDistance : m_opacityMin;
+    m_physicalPeak.setSlicePoint(z);
 
     this->update(); //repaint
   }
 
-  const Mantid::Kernel::V3D & PeakOverlayCross::getOrigin() const
-  { return m_origin; }
 
   //----------------------------------------------------------------------------------------------
   /// Return the recommended size of the widget
@@ -87,19 +76,21 @@ namespace SliceViewer
     QPainter painter(this);
     painter.setRenderHint( QPainter::Antialiasing );
 
-    const int xOrigin = m_plot->transform( QwtPlot::xBottom, m_origin.X() );
-    const int yOrigin = m_plot->transform( QwtPlot::yLeft, m_origin.Y() );
+    auto drawObject = m_physicalPeak.draw(height(), width());
+
+    const int xOrigin = m_plot->transform( QwtPlot::xBottom, drawObject.peakOrigin.X() );
+    const int yOrigin = m_plot->transform( QwtPlot::yLeft, drawObject.peakOrigin.Y() );
     const QPointF originWindows(xOrigin, yOrigin);
     
     QPen pen(m_peakColour);
-    pen.setWidth(2); 
+    pen.setWidth(drawObject.peakLineWidth); 
     painter.setPen( pen );  
     
     pen.setStyle(Qt::SolidLine);
-    painter.setOpacity(m_opacityAtDistance); //Set the pre-calculated opacity
+    painter.setOpacity(drawObject.peakOpacityAtDistance); //Set the pre-calculated opacity
 
-    const int halfCrossHeight = int(double(height()) * m_crossViewFraction);
-    const int halfCrossWidth = halfCrossHeight;
+    const int halfCrossHeight = drawObject.peakHalfCrossHeight;
+    const int halfCrossWidth = drawObject.peakHalfCrossWidth;
 
     QPoint bottomL(originWindows.x() - halfCrossWidth, originWindows.y() - halfCrossHeight);
     QPoint bottomR(originWindows.x() + halfCrossWidth, originWindows.y() - halfCrossHeight);
@@ -127,8 +118,7 @@ namespace SliceViewer
 
   void PeakOverlayCross::movePosition(PeakTransform_sptr transform)
   {
-    // Will have the plots x, y, and z aligned to the correct h, k, l value.
-    m_origin = transform->transform(this->m_originalOrigin);
+    m_physicalPeak.movePosition(transform);
   }
 
 } // namespace Mantid

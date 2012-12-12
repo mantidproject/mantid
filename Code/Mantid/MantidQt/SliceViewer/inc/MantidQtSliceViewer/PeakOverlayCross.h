@@ -11,6 +11,7 @@
 #include <qpainter.h>
 #include <qcolor.h>
 #include "MantidQtSliceViewer/PeakOverlayView.h"
+#include "MantidQtSliceViewer/PhysicalCrossPeak.h"
 
 
 namespace MantidQt
@@ -59,8 +60,6 @@ namespace SliceViewer
     virtual void showView();
     /// Update the view.
     virtual void updateView();
-    /// Get the origin. md x, md y
-    const Mantid::Kernel::V3D & getOrigin() const;
     /// Move the position of the peak, by using a different configuration of the existing origin indexes.
     void movePosition(PeakTransform_sptr peakTransform);
 
@@ -76,22 +75,10 @@ namespace SliceViewer
 
     /// QwtPlot containing this
     QwtPlot * m_plot;
-    /// Original origin x=h, y=k, z=l
-    const Mantid::Kernel::V3D m_originalOrigin;
-    /// Origin md-x, md-y, and md-z
-    Mantid::Kernel::V3D m_origin;
-    /// Effective radius of the widget. This is so that the widget can be effectively brought in and out of focus as a result of slicing.
-    const double m_effectiveRadius;
-    /// Max opacity
-    const double m_opacityMax;
-    /// Min opacity
-    const double m_opacityMin;
-    /// Cross size percentage in y a fraction of the current screen height.
-    const double m_crossViewFraction;
+    /// Physical model of the spacial cross peak
+    PhysicalCrossPeak m_physicalPeak;
     /// Peak colour
     QColor m_peakColour;
-    /// Cached opacity at the distance z from origin
-    double m_opacityAtDistance;
   };
 
 
