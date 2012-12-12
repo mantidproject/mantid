@@ -7,7 +7,7 @@ class VTK_EXPORT vtkSQWReader : public vtkStructuredGridAlgorithm
 {
 public:
   static vtkSQWReader *New();
-  vtkTypeRevisionMacro(vtkSQWReader,vtkStructuredGridAlgorithm);
+  vtkTypeMacro(vtkSQWReader, vtkStructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);

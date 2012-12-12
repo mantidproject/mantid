@@ -13,7 +13,7 @@ class VTK_EXPORT vtkMDEWNexusReader : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkMDEWNexusReader *New();
-  vtkTypeRevisionMacro(vtkMDEWNexusReader,vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkMDEWNexusReader, vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);

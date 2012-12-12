@@ -44,7 +44,7 @@ class VTK_EXPORT vtkMDEWSource : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkMDEWSource *New();
-  vtkTypeRevisionMacro(vtkMDEWSource,vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   
   void SetWsName(std::string wsName);

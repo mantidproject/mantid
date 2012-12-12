@@ -8,7 +8,7 @@ class VTK_EXPORT vtkPeaksReader : public vtkPolyDataAlgorithm
 {
 public:
   static vtkPeaksReader *New();
-  vtkTypeRevisionMacro(vtkPeaksReader,vtkPolyDataAlgorithm);
+  vtkTypeMacro(vtkPeaksReader, vtkPolyDataAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);

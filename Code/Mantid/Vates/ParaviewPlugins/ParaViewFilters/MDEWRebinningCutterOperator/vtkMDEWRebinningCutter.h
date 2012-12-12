@@ -57,7 +57,7 @@ class VTK_EXPORT vtkMDEWRebinningCutter : public vtkUnstructuredGridAlgorithm//,
 {
 public:
   static vtkMDEWRebinningCutter *New();
-  vtkTypeRevisionMacro(vtkMDEWRebinningCutter,vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkMDEWRebinningCutter, vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------

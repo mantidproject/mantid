@@ -61,7 +61,7 @@ class VTK_EXPORT vtkRebinningTransformOperator : public vtkUnstructuredGridAlgor
 {
 public:
   static vtkRebinningTransformOperator *New();
-  vtkTypeRevisionMacro(vtkRebinningTransformOperator,vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkRebinningTransformOperator, vtkUnstructuredGridAlgorithm);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
