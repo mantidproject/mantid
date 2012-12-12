@@ -20,7 +20,6 @@
 
 #include <boost/algorithm/string.hpp>    
 
-vtkCxxRevisionMacro(vtkPeaksReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkPeaksReader);
 
 using namespace Mantid::VATES;

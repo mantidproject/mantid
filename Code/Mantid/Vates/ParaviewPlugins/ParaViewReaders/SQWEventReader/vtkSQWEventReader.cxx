@@ -20,7 +20,6 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
-vtkCxxRevisionMacro(vtkSQWEventReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkSQWEventReader);
 
 using namespace Mantid::VATES;

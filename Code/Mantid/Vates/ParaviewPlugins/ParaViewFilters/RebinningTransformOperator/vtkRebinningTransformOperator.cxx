@@ -186,10 +186,7 @@ bool vtkRebinningTransformOperator::getOutputHistogramWS() const
   return m_bOutputHistogramWS;
 }
 
-vtkCxxRevisionMacro(vtkRebinningTransformOperator, "$Revision: 1.0 $")
-  ;
-vtkStandardNewMacro(vtkRebinningTransformOperator)
-  ;
+vtkStandardNewMacro(vtkRebinningTransformOperator);
 
 using namespace Mantid::VATES;
 

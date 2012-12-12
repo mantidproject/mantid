@@ -5,7 +5,6 @@
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
 
-vtkCxxRevisionMacro(vtkScaleWorkspace, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkScaleWorkspace);
 
 vtkScaleWorkspace::vtkScaleWorkspace()

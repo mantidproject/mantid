@@ -186,11 +186,7 @@ void vtkMDEWRebinningCutter::updateAlgorithmProgress(double progress, const std:
   progressMutex.unlock();
 }
 
-
-vtkCxxRevisionMacro(vtkMDEWRebinningCutter, "$Revision: 1.0 $")
-  ;
-vtkStandardNewMacro(vtkMDEWRebinningCutter)
-  ;
+vtkStandardNewMacro(vtkMDEWRebinningCutter);
 
 using namespace Mantid::VATES;
 

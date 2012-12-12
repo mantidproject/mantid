@@ -12,7 +12,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
-vtkCxxRevisionMacro(vtkPeaksSource, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkPeaksSource);
 
 using namespace Mantid::VATES;

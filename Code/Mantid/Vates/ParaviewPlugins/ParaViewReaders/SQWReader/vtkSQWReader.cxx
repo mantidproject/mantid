@@ -15,7 +15,6 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
 
-vtkCxxRevisionMacro(vtkSQWReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkSQWReader);
 
 vtkSQWReader::vtkSQWReader() : m_presenter()

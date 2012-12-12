@@ -19,7 +19,6 @@
 
 using namespace Mantid::VATES;
 
-vtkCxxRevisionMacro(vtkMDHWSource, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkMDHWSource);
 
 /// Constructor

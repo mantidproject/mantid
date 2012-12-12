@@ -21,7 +21,6 @@
 #include "MantidNexusCPP/NeXusException.hpp"
 #include <boost/algorithm/string.hpp>    
 
-vtkCxxRevisionMacro(vtkNexusPeaksReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkNexusPeaksReader);
 
 using namespace Mantid::VATES;

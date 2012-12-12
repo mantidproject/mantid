@@ -20,7 +20,6 @@
 using namespace Mantid::API;
 using namespace Mantid::VATES;
 
-vtkCxxRevisionMacro(vtkSplatterPlot, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkSplatterPlot);
 
 vtkSplatterPlot::vtkSplatterPlot()
