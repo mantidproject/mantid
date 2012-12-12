@@ -109,10 +109,10 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
+  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
   {
     // usually only one actual step requested
-    m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
+    m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
   }
 
   FilterUpdateProgressAction<vtkEventNexusReader> loadingProgressUpdate(this, "Loading...");
@@ -133,7 +133,7 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   vtkBox* box = vtkBox::New();
   box->SetBounds(product->GetBounds());
   vtkPVClipDataSet* clipper = vtkPVClipDataSet::New();
-  clipper->SetInput(product);
+  clipper->SetInputData(product);
   clipper->SetClipFunction(box);
   clipper->SetInsideOut(true);
   clipper->Update();

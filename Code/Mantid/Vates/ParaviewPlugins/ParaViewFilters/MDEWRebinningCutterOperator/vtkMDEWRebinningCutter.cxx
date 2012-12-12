@@ -59,7 +59,7 @@ public:
 
   void SetInput(vtkDataSet* input)
   {
-    m_clipper->SetInput(input);
+    m_clipper->SetInputData(input);
   }
 
   void SetClipFunction(vtkImplicitFunction* func)
@@ -253,10 +253,10 @@ int vtkMDEWRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtk
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(
       vtkDataObject::DATA_OBJECT()));
 
-    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
+    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {
       // usually only one actual step requested
-      m_timestep =  outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
+      m_timestep =  outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
     }
 
     std::string scalarName = XMLDefinitions::signalName();

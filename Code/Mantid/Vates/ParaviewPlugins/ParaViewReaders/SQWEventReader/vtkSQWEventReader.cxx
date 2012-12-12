@@ -112,10 +112,10 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   FilterUpdateProgressAction<vtkSQWEventReader> loadingProgressUpdate(this, "Loading...");
   FilterUpdateProgressAction<vtkSQWEventReader> drawingProgressUpdate(this, "Drawing...");
 
-  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
+  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
   {
     // usually only one actual step requested
-    m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
+    m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
   }
 
   ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
@@ -133,7 +133,7 @@ int vtkSQWEventReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInfo
   vtkBox* box = vtkBox::New();
   box->SetBounds(product->GetBounds());
   vtkPVClipDataSet* clipper = vtkPVClipDataSet::New();
-  clipper->SetInput(product);
+  clipper->SetInputData(product);
   clipper->SetClipFunction(box);
   clipper->SetInsideOut(true);
   clipper->Update();

@@ -76,10 +76,10 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     //get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
+    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {
       // Extracts the actual time.
-      m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
+      m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
     }
 
     FilterUpdateProgressAction<vtkMDHWSource> loadingProgressUpdate(this, "Loading...");
@@ -100,7 +100,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     vtkBox* box = vtkBox::New();
     box->SetBounds(product->GetBounds());
     vtkPVClipDataSet* clipper = vtkPVClipDataSet::New();
-    clipper->SetInput(product);
+    clipper->SetInputData(product);
     clipper->SetClipFunction(box);
     clipper->SetInsideOut(true);
     clipper->Update();
