@@ -152,14 +152,12 @@ if ( CXXTEST_FOUND )
   ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
   )
 
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( SliceViewerTest MantidQtSliceViewer DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
+  target_link_libraries( SliceViewerTest MantidQtSliceViewer DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
 
-    add_dependencies( GUITests SliceViewerTest )
-    # Add to the 'UnitTests' group in VS
-    set_property( TARGET SliceViewerTest PROPERTY FOLDER "UnitTests" )
-  endif ()
+  add_dependencies( GUITests SliceViewerTest )
+  # Add to the 'UnitTests' group in VS
+  set_property( TARGET SliceViewerTest PROPERTY FOLDER "UnitTests" )
 
 endif ()
 
