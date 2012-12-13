@@ -39,6 +39,11 @@ namespace MantidQt
       void movePosition(PeakTransform_sptr peakTransform);
       /// Draw
       CrossPeakPrimitives draw(const double& windowHeight, const double& windowWidth) const;
+      /// Determine wheter the peak is viewable given the current slice position
+      inline bool isViewable() const
+      {
+        return (m_opacityAtDistance != m_opacityMin);
+      }
     private:
       /// Original origin x=h, y=k, z=l
       const Mantid::Kernel::V3D m_originalOrigin;

@@ -4,6 +4,12 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+    /**
+    Constructor
+    @param peak origin (natural coordinates)
+    @param z-axis max (natural coordinates)
+    @param z-axis min (natural coordinates)
+    */
     PhysicalCrossPeak::PhysicalCrossPeak(const Mantid::Kernel::V3D& origin, const double& maxZ, const double& minZ):
     m_originalOrigin(origin),
     m_origin(origin),
@@ -16,6 +22,7 @@ namespace MantidQt
   {
   }
 
+  /// Destructor
   PhysicalCrossPeak::~PhysicalCrossPeak()
   {
   }
@@ -40,23 +47,37 @@ namespace MantidQt
     }
   }
 
+  /**
+  Move the peak position according the the transform.
+  @param peakTransform : Tranform to use.
+  */
   void PhysicalCrossPeak::movePosition(PeakTransform_sptr peakTransform)
   {
     m_origin = peakTransform->transform(m_originalOrigin);
   }
 
+  /**
+  Peform calculations to draw the peak.
+  @param windowHeight : Height of the window (pixels)
+  @param windowWidth : Width of the window (pixels)
+  @return structure of primitive information for drawing.
+  */
   MantidQt::SliceViewer::CrossPeakPrimitives PhysicalCrossPeak::draw(const double& windowHeight, const double& windowWidth) const
   {
-    const int halfCrossHeight = int(windowHeight * m_crossViewFraction);
-    const int halfCrossWidth = int(windowWidth * m_crossViewFraction);
+    CrossPeakPrimitives drawingObjects = {};
+    if(isViewable())
+    {
+      const int halfCrossHeight = int(windowHeight * m_crossViewFraction);
+      const int halfCrossWidth = int(windowWidth * m_crossViewFraction);
 
-    // Create the return object.
-    CrossPeakPrimitives drawingObjects;
-    drawingObjects.peakHalfCrossHeight = halfCrossHeight;
-    drawingObjects.peakHalfCrossWidth = halfCrossWidth;
-    drawingObjects.peakLineWidth = 2;
-    drawingObjects.peakOpacityAtDistance = m_opacityAtDistance;
-    drawingObjects.peakOrigin = m_origin;
+      // Create the return object.
+
+      drawingObjects.peakHalfCrossHeight = halfCrossHeight;
+      drawingObjects.peakHalfCrossWidth = halfCrossWidth;
+      drawingObjects.peakLineWidth = 2;
+      drawingObjects.peakOpacityAtDistance = m_opacityAtDistance;
+      drawingObjects.peakOrigin = m_origin;
+    }
     return drawingObjects;
   }
   }

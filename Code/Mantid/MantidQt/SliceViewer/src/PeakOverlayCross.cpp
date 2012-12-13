@@ -73,31 +73,34 @@ namespace SliceViewer
   /// Paint the overlay
   void PeakOverlayCross::paintEvent(QPaintEvent * /*event*/)
   {
-    QPainter painter(this);
-    painter.setRenderHint( QPainter::Antialiasing );
+    if(m_physicalPeak.isViewable())
+    {
+      QPainter painter(this);
+      painter.setRenderHint( QPainter::Antialiasing );
 
-    auto drawObject = m_physicalPeak.draw(height(), width());
+      auto drawObject = m_physicalPeak.draw(height(), width());
 
-    const int xOriginWindows = m_plot->transform( QwtPlot::xBottom, drawObject.peakOrigin.X() );
-    const int yOriginWindows = m_plot->transform( QwtPlot::yLeft, drawObject.peakOrigin.Y() );
-    
-    QPen pen(m_peakColour);
-    pen.setWidth(drawObject.peakLineWidth); 
-    painter.setPen( pen );  
-    
-    pen.setStyle(Qt::SolidLine);
-    painter.setOpacity(drawObject.peakOpacityAtDistance); //Set the pre-calculated opacity
+      const int xOriginWindows = m_plot->transform( QwtPlot::xBottom, drawObject.peakOrigin.X() );
+      const int yOriginWindows = m_plot->transform( QwtPlot::yLeft, drawObject.peakOrigin.Y() );
 
-    const int halfCrossHeight = drawObject.peakHalfCrossHeight;
-    const int halfCrossWidth = drawObject.peakHalfCrossWidth;
+      QPen pen(m_peakColour);
+      pen.setWidth(drawObject.peakLineWidth); 
+      painter.setPen( pen );  
 
-    QPoint bottomL(xOriginWindows - halfCrossWidth, yOriginWindows - halfCrossHeight);
-    QPoint bottomR(xOriginWindows + halfCrossWidth, yOriginWindows - halfCrossHeight);
-    QPoint topL(xOriginWindows - halfCrossWidth, yOriginWindows + halfCrossHeight);
-    QPoint topR(xOriginWindows + halfCrossWidth, yOriginWindows + halfCrossHeight);
+      pen.setStyle(Qt::SolidLine);
+      painter.setOpacity(drawObject.peakOpacityAtDistance); //Set the pre-calculated opacity
 
-    painter.drawLine(bottomL, topR);
-    painter.drawLine(bottomR, topL);
+      const int halfCrossHeight = drawObject.peakHalfCrossHeight;
+      const int halfCrossWidth = drawObject.peakHalfCrossWidth;
+
+      QPoint bottomL(xOriginWindows - halfCrossWidth, yOriginWindows - halfCrossHeight);
+      QPoint bottomR(xOriginWindows + halfCrossWidth, yOriginWindows - halfCrossHeight);
+      QPoint topL(xOriginWindows - halfCrossWidth, yOriginWindows + halfCrossHeight);
+      QPoint topR(xOriginWindows + halfCrossWidth, yOriginWindows + halfCrossHeight);
+
+      painter.drawLine(bottomL, topR);
+      painter.drawLine(bottomR, topL);
+    }
   }
 
   void PeakOverlayCross::updateView()
