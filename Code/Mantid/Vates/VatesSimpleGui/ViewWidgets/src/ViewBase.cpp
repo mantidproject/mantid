@@ -184,7 +184,8 @@ void ViewBase::setPluginSource(QString pluginName, QString wsName)
   vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
   srcProxy->UpdateVTKObjects();
   srcProxy->Modified();
-  srcProxy->UpdatePipelineInformation();;
+  srcProxy->UpdatePipelineInformation();
+  src->updatePipeline();
 }
 
 /**

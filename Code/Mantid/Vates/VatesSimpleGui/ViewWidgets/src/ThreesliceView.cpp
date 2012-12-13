@@ -102,6 +102,7 @@ void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
                                           "CutFunction").GetAsProxy();
 
   repr->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  repr->getProxy()->UpdateVTKObjects();
 
   double orient[3] = {0.0, 0.0, 0.0};
   double up[3] = {0.0, 0.0, 0.0};
@@ -133,7 +134,7 @@ void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
     break;
   }
   vtkSMPropertyHelper(plane, "Normal").Set(orient, 3);
-  repr->getProxy()->UpdateVTKObjects();
+  plane->UpdateVTKObjects();
 
   view->resetViewDirection(orient[0], orient[1], orient[2],
                            up[0], up[1], up[2]);
@@ -167,6 +168,7 @@ void ThreeSliceView::makeThreeSlice()
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
   this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  this->origRep->getProxy()->UpdateVTKObjects();
 
   // Have to create the cuts and cut representations up here to keep
   // them around

@@ -394,7 +394,7 @@ void MdViewerWidget::setParaViewComponentsForView()
  */
 void MdViewerWidget::onDataLoaded(pqPipelineSource* source)
 {
-  UNUSED_ARG(source);
+  source->updatePipeline();
   this->renderAndFinalSetup();
 }
 

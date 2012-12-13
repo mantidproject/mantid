@@ -298,7 +298,7 @@ void MultiSliceView::makeCut(double origin[], double orient[])
 
   vtkSMPropertyHelper(plane, "Origin").Set(origin, 3);
   vtkSMPropertyHelper(plane, "Normal").Set(orient, 3);
-  trepr->getProxy()->UpdateVTKObjects();
+  repr->getProxy()->UpdateVTKObjects();
 }
 
 void MultiSliceView::selectIndicator()
@@ -351,9 +351,9 @@ void MultiSliceView::indicatorSelected(const QString &name)
 void MultiSliceView::updateCutPosition(double position)
 {
   vtkSMProxySelectionModel *selection = pqActiveObjects::instance().activeSourcesSelectionModel();
-  pqServerManagerModel* pqModel = pqApplicationCore::instance()->getServerManagerModel();
+  //pqServerManagerModel* pqModel = pqApplicationCore::instance()->getServerManagerModel();
   vtkSMProxy* smProxy = selection->GetSelectedProxy(0);
-  pqPipelineSource *cut = pqModel->findItem<pqPipelineSource*>(smProxy);
+  //pqPipelineSource *cut = pqModel->findItem<pqPipelineSource*>(smProxy);
 
   vtkSMProxy *plane = vtkSMPropertyHelper(smProxy, "CutFunction").GetAsProxy();
   double origin[3] = {0.0, 0.0, 0.0};
@@ -370,7 +370,7 @@ void MultiSliceView::updateCutPosition(double position)
     origin[2] = position;
   }
   vtkSMPropertyHelper(plane, "Origin").Set(origin, 3);
-  cut->getProxy()->UpdateVTKObjects();
+  plane->UpdateVTKObjects();
 }
 
 void MultiSliceView::deleteCut(const QString &name)
