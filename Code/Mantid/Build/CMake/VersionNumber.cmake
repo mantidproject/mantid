@@ -7,5 +7,5 @@ set ( VERSION_MINOR 3 )
 
 # UNCOMMENT the next 'set' line to 'force' the patch version number to
 # a value (instead of using the count coming out of 'git describe')
-set ( MtdVersion_WC_LAST_CHANGED_REV 1 )
+set ( MtdVersion_WC_LAST_CHANGED_REV 2 )
 
