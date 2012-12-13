@@ -121,14 +121,14 @@ namespace MDEvents
     double coord_signs[DIMS] = {1.,1.,1.}; // signs are unchanged
     if (this->getProperty("ISAWcoords"))
     {
-      // x -> -z
+      // x -> z
       coord_map[0] = 2;
-      coord_signs[0] *= -1.;
 
-      // y -> y
+      // y -> x
+      coord_map[1] = 0;
 
-      // z -> x
-      coord_map[2] = 0;
+      // z -> y
+      coord_map[2] = 1;
     }
     if (this->getProperty("RightHanded"))
     {
