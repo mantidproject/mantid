@@ -183,7 +183,7 @@ namespace MDEvents
       TotalSignal[d] += box->getSignal();
       TotalErrorSquared[d] += box->getErrorSquared();
       for (size_t dim=0; dim<nd; dim++)
-        Dims[d][dim] = double(box->getExtents(dim).max - box->getExtents(dim).min);
+        Dims[d][dim] = double(box->getExtents(dim).getSize());
     }
 
     int rowCounter = 0;

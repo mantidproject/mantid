@@ -45,7 +45,7 @@ namespace MDEvents
    * @param depth :: recursive split depth
    * @param extentsVector :: size of the box
    */
-  TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector)
+  TMDE(MDGridBox)::MDGridBox(BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector)
    : MDBoxBase<MDE, nd>(extentsVector),
      numBoxes(0), nPoints(0)
   {
@@ -58,7 +58,7 @@ namespace MDEvents
     for (size_t d=0; d<nd; d++)
       split[d] = this->m_BoxController->getSplitInto(d);
 
-    // Compute sizes etc.
+    // Compute sizes etc. 
     size_t tot = computeSizesFromSplit();
     if (tot == 0)
       throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
@@ -85,20 +85,17 @@ namespace MDEvents
     for (size_t d=0; d<nd; d++)
       split[d] = bc->getSplitInto(d);
 
-    // Compute sizes etc.
+    // Compute sizes etc.   
     size_t tot = computeSizesFromSplit();
     if (tot == 0)
       throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
 
-    // Calculate the volume
-    coord_t volume = 1;
-    for (size_t d=0; d<nd; d++)
-      volume *= boxSize[d];
-    coord_t inverseVolume = 1.0f / volume;
-
-  
+   double ChildVol(1);
+   for(size_t d=0;d<nd;d++)
+     ChildVol*=m_SubBoxSize[d];
+     
     // Splitting an input MDBox requires creating a bunch of children
-    fillBoxShell(tot,inverseVolume);
+    fillBoxShell(tot,coord_t(1./ChildVol));
 
 
     // Prepare to distribute the events that were in the box before
@@ -122,9 +119,9 @@ namespace MDEvents
     box->clear();
     box->setDataBusy(false);
   }
-  /**Internal function to do main job of filling in a GridBox contents  (par of the constructor) */
+  /**Internal function to do main job of filling in a GridBox contents  (part of the constructor) */
   template<typename MDE,size_t nd>
-  void MDGridBox<MDE,nd>::fillBoxShell(const size_t tot,const coord_t inverseVolume)
+  void MDGridBox<MDE,nd>::fillBoxShell(const size_t tot,const coord_t ChildInverseVolume)
   {
   // Create the array of MDBox contents.
     this->boxes.clear();
@@ -136,25 +133,27 @@ namespace MDEvents
     
    // get inital free ID for the boxes, which would be created by this command
    // Splitting an input MDBox requires creating a bunch of children
-   // But the IDs of these children MUST be sequential. Hence the critical block within claimIDRange
+   // But the IDs of these children MUST be sequential. Hence the critical block within claimIDRange, 
+   // which would produce sequental ranges in multithreaded environment
     size_t ID0 = this->m_BoxController->claimIDRange(tot);
 
     for (size_t i=0; i<tot; i++)
     {
       // Create the box
       // (Increase the depth of this box to one more than the parent (this))
-       MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(this->m_BoxController, this->m_depth + 1,-1,int64_t(ID0+i));
+       MDBox<MDE,nd> * splitBox = new MDBox<MDE,nd>(this->m_BoxController, this->m_depth + 1,-1,int64_t(ID0+i));
       // This MDGridBox is the parent of the new child.
-       myBox->setParent(this);
+       splitBox->setParent(this);
 
         // Set the extents of this box.
        for (size_t d=0; d<nd; d++)
        {
-          coord_t min = this->extents[d].min + boxSize[d] * static_cast<coord_t>(indices[d]);
-          myBox->setExtents(d, min, min + boxSize[d]);
+          double min = double(this->extents[d].getMin())+double(indices[d])*m_SubBoxSize[d];
+          double max =min + m_SubBoxSize[d];
+          splitBox->setExtents(d, min, max);
        }
-       myBox->setInverseVolume(inverseVolume); // Set the cached inverse volume
-       boxes.push_back(myBox);
+       splitBox->setInverseVolume(ChildInverseVolume); // Set the cached inverse volume
+       boxes.push_back(splitBox);
 
        // Increment the indices, rolling back as needed
        indices[0]++;
@@ -182,7 +181,7 @@ namespace MDEvents
     {
       split[d] = other.split[d];
       splitCumul[d] = other.splitCumul[d];
-      boxSize[d] = other.boxSize[d];
+      m_SubBoxSize[d] = other.m_SubBoxSize[d];
     }
     // Copy all the boxes
     boxes.clear();
@@ -221,7 +220,7 @@ namespace MDEvents
   TMDE(
   void MDGridBox)::transformDimensions(std::vector<double> & scaling, std::vector<double> & offset)
   {
-    MDBoxBase<MDE,nd>::transformDimensions(scaling, offset);
+    MDBoxBase<MDE,nd>::transformDimensions(scaling, offset); 
     this->computeSizesFromSplit();
   }
 
@@ -234,17 +233,18 @@ namespace MDEvents
   {
     // Do some computation based on how many splits per each dim.
     size_t tot = 1;
-    diagonalSquared = 0;
+    double diagSum(0);
     for (size_t d=0; d<nd; d++)
     {
       // Cumulative multiplier, for indexing
       splitCumul[d] = tot;
       tot *= split[d];
       // Length of the side of a box in this dimension
-      boxSize[d] = (this->extents[d].max - this->extents[d].min) / static_cast<coord_t>(split[d]);
+      m_SubBoxSize[d] = double(this->extents[d].getSize()) / static_cast<double>(split[d]);
       // Accumulate the squared diagonal length.
-      diagonalSquared += boxSize[d] * boxSize[d];
+      diagSum += m_SubBoxSize[d]* m_SubBoxSize[d];
     }
+    diagonalSquared = static_cast<coord_t>(diagSum);
 
     return tot;
 
@@ -591,7 +591,7 @@ namespace MDEvents
         // Coordinates of this vertex
         coord_t vertexCoord[nd];
         for (size_t d=0; d<nd; ++d)
-          vertexCoord[d] = static_cast<coord_t>(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
+          vertexCoord[d] = this->extents[d].getMin()+ coord_t(double(vertexIndex[d]) * m_SubBoxSize[d]);
 
         // Now check each plane to see if the vertex is bounded by it
         for (size_t p=0; p<numPlanes; p++)
@@ -730,12 +730,12 @@ namespace MDEvents
   {
     size_t index = 0;
     for (size_t d=0; d<nd; d++)
-    {
+    { 
       coord_t x = coords[d];
-      int i = int((x - this->extents[d].min) / boxSize[d]);
+      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
       // NOTE: No bounds checking is done (for performance).
       // Accumulate the index
-      index += (i * splitCumul[d]);
+      index += (i * splitCumul[d]);  
     }
 
     // Add it to the contained box
@@ -895,13 +895,13 @@ namespace MDEvents
    * @param event :: reference to a MDLeanEvent to add.
    * */
   TMDE(
-  inline void MDGridBox)::addEvent( const MDE & event)
+  inline void MDGridBox)::addEvent( const MDE & ev)
   {
     size_t index = 0;
     for (size_t d=0; d<nd; d++)
     {
-      coord_t x = event.getCenter(d);
-      int i = int((x - this->extents[d].min) / boxSize[d]);
+      coord_t x = ev.getCenter(d);
+      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
       // NOTE: No bounds checking is done (for performance).
       //if (i < 0 || i >= int(split[d])) return;
 
@@ -911,7 +911,7 @@ namespace MDEvents
 
     // Add it to the contained box
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      boxes[index]->addEvent(event);
+      boxes[index]->addEvent(ev);
   }
   /** Add a single MDLeanEvent to the grid box. If the boxes
    * contained within are also gridded, this will recursively push the event
@@ -937,7 +937,7 @@ namespace MDEvents
     for (size_t d=0; d<nd; d++)
     {
       coord_t x = point.getCenter(d);
-      int i = int((x - this->extents[d].min) / boxSize[d]);
+      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
 
       // Accumulate the index
       index += (i * splitCumul[d]);
@@ -966,20 +966,21 @@ namespace MDEvents
    * @param event :: reference to a MDEvent to add.
    * */
   TMDE(
-  inline void MDGridBox)::addEventUnsafe(const MDE & event)
+  inline void MDGridBox)::addEventUnsafe(const MDE & ev)
   {
     size_t index = 0;
     for (size_t d=0; d<nd; d++)
     {
-      coord_t x = event.getCenter(d);
-      int i = int((x - this->extents[d].min) / boxSize[d]);
+
+      coord_t x = ev.getCenter(d);
+      int i = int((x - this->extents[d].getMin()) /m_SubBoxSize[d]);
       // Accumulate the index
       index += (i * splitCumul[d]);
     }
 
     // Add it to the contained box
     if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-      boxes[index]->addEventUnsafe(event);
+      boxes[index]->addEventUnsafe(ev);
   }
 
 
@@ -1008,9 +1009,9 @@ namespace MDEvents
       int min,max;
 
       // The min index in this dimension (we round down - we'll include this edge)
-      if (bin.m_min[d] >= this->extents[d].min)
+      if (bin.m_min[d] >= this->extents[d].getMin())
       {
-        min = int((bin.m_min[d] - this->extents[d].min) / boxSize[d]);
+        min = int((bin.m_min[d] - this->extents[d].getMin()) /m_SubBoxSize[d]);
         counters_min[d] = min;
       }
       else
@@ -1026,9 +1027,9 @@ namespace MDEvents
       index_min[d] = min;
 
       // The max index in this dimension (we round UP, but when we iterate we'll NOT include this edge)
-      if (bin.m_max[d] < this->extents[d].max)
+      if (bin.m_max[d] < this->extents[d].getMax())
       {
-        max = int(ceil((bin.m_max[d] - this->extents[d].min) / boxSize[d])) - 1;
+        max = int(ceil((bin.m_max[d] - this->extents[d].getMin()) /m_SubBoxSize[d])) - 1;
         counters_max[d] = max+1; // (the counter looping will NOT include counters_max[d])
       }
       else
@@ -1107,9 +1108,9 @@ namespace MDEvents
 //      int min,max;
 //
 //      // The min index in this dimension (we round down - we'll include this edge)
-//      if (bin.m_min[d] >= this->extents[d].min)
+//      if (bin.m_min[d] >= this->extents[d].getMin())
 //      {
-//        min = int((bin.m_min[d] - this->extents[d].min) / boxSize[d]);
+//        min = int((bin.m_min[d] - this->extents[d].getMin()) / boxSize[d]);
 //        counters_min[d] = min;
 //      }
 //      else
@@ -1127,7 +1128,7 @@ namespace MDEvents
 //      // The max index in this dimension (we round UP, but when we iterate we'll NOT include this edge)
 //      if (bin.m_max[d] < this->extents[d].max)
 //      {
-//        max = int(ceil((bin.m_max[d] - this->extents[d].min) / boxSize[d])) - 1;
+//        max = int(ceil((bin.m_max[d] - this->extents[d].getMin()) / boxSize[d])) - 1;
 //        counters_max[d] = max+1; // (the counter looping will NOT include counters_max[d])
 //      }
 //      else
@@ -1188,7 +1189,7 @@ namespace MDEvents
 //      bool masks[nd];
 //      for (size_t d=0; d<nd; ++d)
 //      {
-//        vertexCoord[d] = double(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
+//        vertexCoord[d] = double(vertexIndex[d]) * boxSize[d] + this->extents[d].getMin();
 //        masks[d] = false; //HACK ... assumes that all vertexes are used.
 //      }
 //      // Is this vertex contained?
@@ -1306,10 +1307,19 @@ namespace MDEvents
     // How many vertices does one box have? 2^nd, or bitwise shift left 1 by nd bits
     size_t maxVertices = 1 << nd;
 
+    // set up caches for box sizes and min box values
+    coord_t boxSize[nd];
+    coord_t minBoxVal[nd];
+
     // The number of vertices in each dimension is the # split[d] + 1
     size_t vertices_max[nd]; Utils::NestedForLoop::SetUp(nd, vertices_max, 0);
     for (size_t d=0; d<nd; ++d)
+    {
       vertices_max[d] = split[d]+1;
+      // cache box sizes and min box valyes for performance
+      boxSize[d]     = static_cast<coord_t>(m_SubBoxSize[d]);
+      minBoxVal[d]   = static_cast<coord_t>(this->extents[d].getMin());
+    }
 
     // The index to the vertex in each dimension
     size_t vertexIndex[nd]; Utils::NestedForLoop::SetUp(nd, vertexIndex, 0);
@@ -1321,8 +1331,9 @@ namespace MDEvents
     {
       // Coordinates of this vertex
       coord_t vertexCoord[nd];
-      for (size_t d=0; d<nd; ++d)
-        vertexCoord[d] = static_cast<coord_t>(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
+      for (size_t d=0; d<nd; ++d)      
+        vertexCoord[d] = static_cast<coord_t>(vertexIndex[d])*boxSize[d] +minBoxVal[d];
+                        //static_cast<coord_t>(vertexIndex[d]) * boxSize[d] + this->extents[d].min
 
       // Is this vertex contained?
       coord_t out[nd];

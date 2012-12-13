@@ -8,6 +8,9 @@
 
 #include <boost/shared_ptr.hpp>
 #include <string>
+#include <vector>
+#include <set>
+
 
 #define DECLARE_ARCHIVESEARCH(classname,facility) \
 namespace { \
@@ -56,11 +59,11 @@ namespace Mantid
         * Return the full path to a data file in an archive
         * @param fName :: The file name
         */
-      virtual std::string getPath(const std::string& fName)const = 0;
+      virtual std::string getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts)const = 0;
     };
 
-                ///Typedef for a shared pointer to an IArchiveSearch
-                typedef boost::shared_ptr<IArchiveSearch> IArchiveSearch_sptr;
+    ///Typedef for a shared pointer to an IArchiveSearch
+    typedef boost::shared_ptr<IArchiveSearch> IArchiveSearch_sptr;
 
   }
 }

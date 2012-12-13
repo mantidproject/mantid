@@ -1,0 +1,30 @@
+##
+## mantid.kernel tests
+##
+set ( TEST_PY_FILES 
+  ArrayPropertyTest.py
+  ArrayBoundedValidatorTest.py
+  ArrayLengthValidatorTest.py
+  BoundedValidatorTest.py
+  CompositeValidatorTest.py
+  ConfigServiceTest.py
+  DeltaEModeTest.py
+  FacilityInfoTest.py
+  FilteredTimeSeriesPropertyTest.py
+  InstrumentInfoTest.py
+  ListValidatorTest.py
+  LogFilterTest.py
+  LoggerTest.py
+  MandatoryValidatorTest.py
+  NullValidatorTest.py
+  PropertyWithValueTest.py
+  PythonPluginsTest.py
+  TimeSeriesPropertyTest.py
+  QuatTest.py
+  UnitConversionTest.py
+  UnitFactoryTest.py
+  V3DTest.py
+)
+
+# Prefix for test=PythonInterfaceKernel
+pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonInterfaceKernel ${TEST_PY_FILES} )

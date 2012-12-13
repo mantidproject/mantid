@@ -80,6 +80,11 @@ public:
       "      <technique>Reflectometer</technique>"
       "    </instrument>"
       "  </facility>"
+      "  <facility name=\"ILL\" delimiter=\"_\" FileExtensions=\".nxs,.dat\">"
+	  "    <instrument name=\"IN5\" shortname=\"IN5\">"
+      "      <technique>Inelastic Spectroscopy</technique>"
+      "    </instrument>"
+	  "  </facility>"
       "</facilities>";
 
     std::ofstream fil(m_facFile.path().c_str());
@@ -242,8 +247,13 @@ public:
     TS_ASSERT(file.exists());
 
     path = FileFinder::Instance().findRun("OFFSPEC4622.log");
-    TS_ASSERT(path.size() > 3);
-    TS_ASSERT_EQUALS(path.substr(path.size() - 3), "log");
+    // Per discussion with Martyn on Dec 6, 2012: we decided to update this test case.
+    // *.log is not a valid extension for ISIS instruments. Since we modified the FileFinder to strip
+    // the extension using the facility extension list rather than to strip the extension after the last dot,
+    // the returned path should be empty now.
+    TS_ASSERT(path.empty() == true);
+//    TS_ASSERT(path.size() > 3);
+//    TS_ASSERT_EQUALS(path.substr(path.size() - 3), "log");
   }
 
   void testFindRunsDefaultInst()

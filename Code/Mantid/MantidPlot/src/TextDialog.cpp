@@ -253,7 +253,7 @@ void TextDialog::apply()
 			d_graph->replot();
 		}
 	} else if (textType == TextMarker && d_legend){
-		QColor tc = colorBtn->color();
+		//QColor tc = colorBtn->color();
 		QColor c = backgroundBtn->color();
 		c.setAlpha(boxBackgroundTransparency->value());
 

@@ -535,23 +535,13 @@ std::string DateAndTime::toFormattedString(const std::string format) const
 }
 
 //------------------------------------------------------------------------------------------------
-/** Return the date and time as an ISO8601-formatted string without fractional seconds.
- * @return string
+/** Return the date and time as an ISO8601-formatted string
+ *  @return The ISO8601 string
  */
 std::string DateAndTime::toISO8601String() const
 {
-  return this->toFormattedString("%Y-%m-%dT%H:%M:%S");
+  return boost::posix_time::to_iso_extended_string(to_ptime());
 }
-
-
-////------------------------------------------------------------------------------------------------
-///** Stream operator
-// */
-//std::ostream& DateAndTime::operator<< (std::ostream& stream, const DateAndTime & obj)
-//{
-//  stream << obj->toSimpleString();
-//  return stream;
-//}
 
 //------------------------------------------------------------------------------------------------
 /** Get the year of this date.

@@ -6,6 +6,8 @@
 #include <QGLWidget>
 #include <QString>
 
+#include <boost/shared_ptr.hpp>
+
 class ProjectionSurface;
 
 /**
@@ -20,8 +22,8 @@ public:
   //enum PolygonMode{ SOLID, WIREFRAME };
   MantidGLWidget(QWidget* parent=0); ///< Constructor
   virtual ~MantidGLWidget();         ///< Destructor
-  void setSurface(ProjectionSurface* surface);
-  ProjectionSurface* getSurface(){return m_surface;}
+  void setSurface(boost::shared_ptr<ProjectionSurface> surface);
+  boost::shared_ptr<ProjectionSurface> getSurface(){return m_surface;}
   
   void setBackgroundColor(QColor);
   QColor currentBackgroundColor() const;
@@ -64,8 +66,7 @@ private:
   bool m_firstFrame;
 
   //// Surface stuff
-  ProjectionSurface* m_surface;
-  //boost::scoped_ptr<DetSelector> m_detSelector;    ///< draws the selection region
+  boost::shared_ptr<ProjectionSurface> m_surface;
 
 };
 

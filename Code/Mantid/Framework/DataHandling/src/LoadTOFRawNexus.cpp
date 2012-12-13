@@ -68,6 +68,14 @@ void LoadTOFRawNexus::init()
       "Number of the signal to load from the file. Default is 1 = time_of_flight.\n"
       "Some NXS files have multiple data fields giving binning in other units (e.g. d-spacing or momentum).\n"
       "Enter the right signal number for your desired field.");
+  auto mustBePositive = boost::make_shared<BoundedValidator<int> >();
+  mustBePositive->setLower(1);
+  declareProperty(new PropertyWithValue<specid_t>("SpectrumMin", 1, mustBePositive),
+    "The index number of the first spectrum to read.  Only used if\n"
+    "spectrum_max is set.");
+  declareProperty(new PropertyWithValue<specid_t>("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive),
+    "The number of the last spectrum to read. Only used if explicitly\n"
+    "set.");
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -201,7 +209,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
               {
                 int signal = 0;
                 file->getAttr("signal", signal);
-                if (signal == m_signal)
+                if (signal == signalNo)
                 {
                   // That's the right signal!
                   m_dataField = it->first;
@@ -210,9 +218,9 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
                   m_assumeOldFile = false;
                   if (!file->hasAttr("axes"))
                   {
-                    if (1 != m_signal)
+                    if (1 != signalNo)
                     {
-                      throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
+                      throw std::runtime_error("Your chosen signal number, " + Strings::toString(signalNo) + ", corresponds to the data field '" +
                           m_dataField + "' has no 'axes' attribute specifying.");
                     }
                     else
@@ -230,11 +238,11 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
                   std::vector<std::string> allAxes;
                   boost::split( allAxes, axes, boost::algorithm::detail::is_any_ofF<char>(","));
                   if (allAxes.size() != 3)
-                    throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", corresponds to the data field '" +
+                    throw std::runtime_error("Your chosen signal number, " + Strings::toString(signalNo) + ", corresponds to the data field '" +
                         m_dataField + "' which has only " + Strings::toString(allAxes.size()) + " dimension. Expected 3 dimensions.");
 
                   m_axisField = allAxes.back();
-                  g_log.information() << "Loading signal " << m_signal << ", " << m_dataField << " with axis " << m_axisField << std::endl;
+                  g_log.information() << "Loading signal " << signalNo << ", " << m_dataField << " with axis " << m_axisField << std::endl;
                   file->closeData();
                   break;
                 } // Data has a 'signal' attribute
@@ -249,7 +257,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
   } // each entry
 
   if (m_dataField.empty())
-    throw std::runtime_error("Your chosen signal number, " + Strings::toString(m_signal) + ", was not found in any of the data fields of any 'bankX' group. Cannot load file.");
+    throw std::runtime_error("Your chosen signal number, " + Strings::toString(signalNo) + ", was not found in any of the data fields of any 'bankX' group. Cannot load file.");
 
 
   for (it = entries.begin(); it != entries.end(); ++it)
@@ -322,6 +330,36 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
 
   delete file;
 }
+
+    /*for (std::vector<uint32_t>::iterator it = pixel_id.begin(); it != pixel_id.end();)
+    {
+      detid_t pixelID = *it;
+      specid_t wi = static_cast<specid_t>((*id_to_wi)[pixelID]);
+      // spectrum is just wi+1
+      if (wi+1 < m_spec_min || wi+1 > m_spec_max) pixel_id.erase(it);
+      else ++it;
+    }*/
+  // Function object for remove_if STL algorithm
+  namespace
+  {
+      //Check the numbers supplied are not in the range and erase the ones that are
+      struct range_check
+      {
+        range_check(specid_t min, specid_t max, detid2index_map id_to_wi) : m_min(min), m_max(max), m_id_to_wi(id_to_wi) {}
+
+        bool operator()(specid_t x)
+        {
+          specid_t wi = static_cast<specid_t>((m_id_to_wi)[x]);
+          return (wi+1 < m_min || wi+1 > m_max);
+        }
+
+      private:
+        specid_t m_min;
+        specid_t m_max;
+        detid2index_map m_id_to_wi;
+      };
+
+    }
 
 
 /** Load a single bank into the workspace
@@ -402,6 +440,19 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
     }
   }
 
+  size_t iPart = 0;
+  if ( m_spec_max != Mantid::EMPTY_INT())
+  {
+    uint32_t ifirst = pixel_id[0];
+    range_check out_range(m_spec_min, m_spec_max, *id_to_wi);
+    std::vector<uint32_t>::iterator newEnd =
+	std::remove_if (pixel_id.begin(), pixel_id.end(), out_range);
+    pixel_id.erase(newEnd, pixel_id.end());
+    // check if beginning or end of array was erased
+    if(ifirst != pixel_id[0]) iPart = numPixels - pixel_id.size();
+    numPixels = pixel_id.size();
+    if (numPixels == 0) { file->close(); m_fileMutex.unlock(); g_log.warning() << "No pixels from " << bankName << std::endl; return; } ;
+  }
   // Load the TOF vector
   std::vector<float> tof;
   file->readData(m_axisField, tof);
@@ -442,25 +493,25 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
     }
   }
 
-  if (data.size() != numBins * numPixels)
+  /*if (data.size() != numBins * numPixels)
   { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid size of '" << m_dataField << "' data in " << bankName << std::endl; return; }
   if (hasErrors && (errors.size() != numBins * numPixels))
   { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid size of '" << errorsField << "' errors in " << bankName << std::endl; return; }
-
+*/
   // Have all the data I need
   m_fileMutex.unlock();
   file->close();
 
-  for (size_t i=0; i<numPixels; i++)
+  for (size_t i=iPart; i<iPart + numPixels; i++)
   {
     // Find the workspace index for this detector
-    detid_t pixelID = pixel_id[i];
+    detid_t pixelID = pixel_id[i-iPart];
     size_t wi = (*id_to_wi)[pixelID];
 
     // Set the basic info of that spectrum
     ISpectrum * spec = WS->getSpectrum(wi);
     spec->setSpectrumNo( specid_t(wi+1) );
-    spec->setDetectorID( pixel_id[i] );
+    spec->setDetectorID( pixel_id[i-iPart] );
     // Set the shared X pointer
     spec->setX(X);
 
@@ -485,7 +536,6 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
 
   // Done!
 }
-
 
 //-------------------------------------------------------------------------------------------------
 /** @return the name of the entry that we will load */
@@ -524,7 +574,9 @@ void LoadTOFRawNexus::exec()
 {
   // The input properties
   std::string filename = getPropertyValue("Filename");
-  m_signal = getProperty("Signal");
+  signalNo = getProperty("Signal");
+  m_spec_min = getProperty("SpectrumMin");
+  m_spec_max = getProperty("SpectrumMax");
 
   // Find the entry name we want.
   std::string entry_name = LoadTOFRawNexus::getEntryName(filename);

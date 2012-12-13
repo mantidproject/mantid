@@ -71,8 +71,8 @@ public:
     MDBox<MDLeanEvent<1>,1> * b = MDEventsTestHelper::makeMDBox1();
     TS_ASSERT_EQUALS( b->getNumDims(), 1);
     TS_ASSERT_EQUALS( b->getNPoints(), 0);
-    TS_ASSERT_DELTA( b->getExtents(0).min, 0.0,  1e-5);
-    TS_ASSERT_DELTA( b->getExtents(0).max, 10.0, 1e-5);
+    TS_ASSERT_DELTA( b->getExtents(0).getMin(), 0.0,  1e-5);
+    TS_ASSERT_DELTA( b->getExtents(0).getMax(), 10.0, 1e-5);
     TS_ASSERT_DELTA( b->getVolume(), 10.0, 1e-5);
     // Start at ID 0.
     TS_ASSERT_EQUALS( b->getId(), 0);
@@ -138,8 +138,8 @@ public:
       // Sequential ID, starting at 1 since 0 was used by the parent.
       TS_ASSERT_EQUALS( box->getId(), i+1);
       // At the right place?
-      TS_ASSERT_DELTA(box->getExtents(0).min, double(i)*1.0, 1e-6);
-      TS_ASSERT_DELTA(box->getExtents(0).max, double(i+1)*1.0, 1e-6);
+      TS_ASSERT_DELTA(box->getExtents(0).getMin(), double(i)*1.0, 1e-6);
+      TS_ASSERT_DELTA(box->getExtents(0).getMax(), double(i+1)*1.0, 1e-6);
       // Look at the single event in there
       TS_ASSERT_EQUALS(box->getNPoints(), 1);
       MDLeanEvent<1> ev = box->getEvents()[0];
@@ -529,7 +529,7 @@ public:
     // The boxes extents make sense
     for (size_t i=0; i<boxes.size(); i++)
     {
-      TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
+      TS_ASSERT( boxes[i]->getExtents(0).getMax() >= 1.51);
     }
 
     // --- Now leaf-only ---
@@ -539,7 +539,7 @@ public:
     // The boxes extents make sense
     for (size_t i=0; i<boxes.size(); i++)
     {
-      TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
+      TS_ASSERT( boxes[i]->getExtents(0).getMax() >= 1.51);
     }
 
     // Limit by another plane
@@ -551,8 +551,8 @@ public:
     TS_ASSERT_EQUALS( boxes.size(), 33);
     for (size_t i=0; i<boxes.size(); i++)
     {
-      TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
-      TS_ASSERT( boxes[i]->getExtents(0).min <= 2.99);
+      TS_ASSERT( boxes[i]->getExtents(0).getMax() >= 1.51);
+      TS_ASSERT( boxes[i]->getExtents(0).getMin() <= 2.99);
     }
 
     // Same, leaf only
@@ -561,8 +561,8 @@ public:
     TS_ASSERT_EQUALS( boxes.size(), 24);
     for (size_t i=0; i<boxes.size(); i++)
     {
-      TS_ASSERT( boxes[i]->getExtents(0).max >= 1.51);
-      TS_ASSERT( boxes[i]->getExtents(0).min <= 2.99);
+      TS_ASSERT( boxes[i]->getExtents(0).getMax() >= 1.51);
+      TS_ASSERT( boxes[i]->getExtents(0).getMin() <= 2.99);
     }
 
     // ----- Infinitely thin plane for an implicit function ------------
@@ -601,10 +601,10 @@ public:
     for (size_t i=0; i<boxes.size(); i++)
     {
       //std::cout << boxes[i]->getExtentsStr() << std::endl;
-      TS_ASSERT( boxes[i]->getExtents(0).max >= 2.00);
-      TS_ASSERT( boxes[i]->getExtents(0).min <= 3.00);
-      TS_ASSERT( boxes[i]->getExtents(1).max >= 2.00);
-      TS_ASSERT( boxes[i]->getExtents(1).min <= 3.00);
+      TS_ASSERT( boxes[i]->getExtents(0).getMax() >= 2.00);
+      TS_ASSERT( boxes[i]->getExtents(0).getMin() <= 3.00);
+      TS_ASSERT( boxes[i]->getExtents(1).getMax() >= 2.00);
+      TS_ASSERT( boxes[i]->getExtents(1).getMin() <= 3.00);
     }
 
     // -- Leaf only ---
@@ -615,10 +615,10 @@ public:
     for (size_t i=0; i<boxes.size(); i++)
     {
       //std::cout << boxes[i]->getExtentsStr() << std::endl;
-      TS_ASSERT( boxes[i]->getExtents(0).max >= 2.00);
-      TS_ASSERT( boxes[i]->getExtents(0).min <= 3.00);
-      TS_ASSERT( boxes[i]->getExtents(1).max >= 2.00);
-      TS_ASSERT( boxes[i]->getExtents(1).min <= 3.00);
+      TS_ASSERT( boxes[i]->getExtents(0).getMax() >= 2.00);
+      TS_ASSERT( boxes[i]->getExtents(0).getMin() <= 3.00);
+      TS_ASSERT( boxes[i]->getExtents(1).getMax() >= 2.00);
+      TS_ASSERT( boxes[i]->getExtents(1).getMin() <= 3.00);
     }
 
   }
@@ -648,8 +648,8 @@ public:
     boxes.clear();
     parent->getBoxes(boxes, 3, true, function);
     TS_ASSERT_EQUALS( boxes.size(), 1);
-    TS_ASSERT_DELTA( boxes[0]->getExtents(0).min, 1.75, 1e-4);
-    TS_ASSERT_DELTA( boxes[0]->getExtents(0).max, 2.00, 1e-4);
+    TS_ASSERT_DELTA( boxes[0]->getExtents(0).getMin(), 1.75, 1e-4);
+    TS_ASSERT_DELTA( boxes[0]->getExtents(0).getMax(), 2.00, 1e-4);
   }
 
   //-------------------------------------------------------------------------------------
@@ -675,8 +675,8 @@ public:
     boxes.clear();
     parent->getBoxes(boxes, 3, true, function);
     TS_ASSERT_EQUALS( boxes.size(), 1);
-    TS_ASSERT_DELTA( boxes[0]->getExtents(0).min, 1.75, 1e-4);
-    TS_ASSERT_DELTA( boxes[0]->getExtents(0).max, 2.00, 1e-4);
+    TS_ASSERT_DELTA( boxes[0]->getExtents(0).getMin(), 1.75, 1e-4);
+    TS_ASSERT_DELTA( boxes[0]->getExtents(0).getMax(), 2.00, 1e-4);
   }
 
 

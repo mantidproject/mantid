@@ -150,6 +150,7 @@ void PeakOverlay::removeShapes(const QList<Shape2D*>& shapeList)
 void PeakOverlay::clear()
 {
   Shape2DCollection::clear();
+  m_det2marker.clear();
 }
 
 /**---------------------------------------------------------------------

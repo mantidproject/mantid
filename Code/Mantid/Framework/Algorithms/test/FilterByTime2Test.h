@@ -100,8 +100,8 @@ public:
     outputWS = "eventWS_relative";
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outputWS));
     //Get 1 minute worth
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("StartTime", "60.46"));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("StopTime", "120.46"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("StartTime", "60"));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("StopTime", "120"));
 
     alg->execute();
     TS_ASSERT( alg->isExecuted() );

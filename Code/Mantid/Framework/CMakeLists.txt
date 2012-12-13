@@ -173,12 +173,12 @@ if ( WIN32 ) # General windows environment
     install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win32.pyd" EXCLUDE )
   else ()
     # Excludes so files & _win64 binaries
-    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN ".so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE )
+    install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN "*.so" EXCLUDE PATTERN "*_win64.pyd" EXCLUDE )
+  endif ()
     # Also ship mingw libraries for Inelastic fortran code. We need to do a better job here and build things
     file ( GLOB MINGW_DLLS "${CMAKE_LIBRARY_PATH}/mingw/*.dll" )
     install ( FILES ${MINGW_DLLS} DESTINATION ${INBUNDLE}scripts/Inelastic )
-  endif ()
-else ()
+  else ()
   # These don't work correctly and the linux ones are in no way general. They really need to be part of the build
   install ( DIRECTORY ../scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE PATTERN "*_win*.pyd" EXCLUDE PATTERN "*_lnx64.so" EXCLUDE )
 endif ()

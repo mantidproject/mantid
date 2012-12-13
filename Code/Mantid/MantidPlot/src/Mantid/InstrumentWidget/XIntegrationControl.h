@@ -1,8 +1,6 @@
 #ifndef XINTEGRATIONCONTROL_H_
 #define XINTEGRATIONCONTROL_H_
 
-#include "MantidGLWidget.h"
-
 #include <QFrame>
 #include <QScrollBar>
 
@@ -70,7 +68,6 @@ private slots:
 private:
   void updateTextBoxes();
   InstrumentWindow* m_instrWindow;
-  MantidGLWidget *mInstrumentDisplay;
   XIntegrationScrollBar* m_scrollBar;
   QLineEdit* m_minText;
   QLineEdit* m_maxText;

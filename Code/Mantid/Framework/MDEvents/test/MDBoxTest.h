@@ -50,25 +50,23 @@ public:
   void test_constructorWithExtents()
   {
     BoxController_sptr sc( new BoxController(1));
-    std::vector<MDDimensionExtents> extents(1);
-    extents[0].min=123;
-    extents[0].max=234;
+    std::vector<MDDimensionExtents<coord_t> > extents(1);
+    extents[0].setExtents(123,234);
     MDBox<MDLeanEvent<1>,1> box(sc, 2, extents);
     TS_ASSERT_EQUALS( box.getNumDims(), 1);
     TS_ASSERT_EQUALS( box.getBoxController(), sc);
     TS_ASSERT_EQUALS( box.getNPoints(), 0);
     TS_ASSERT_EQUALS( box.getDepth(), 2);
     TS_ASSERT_EQUALS( box.getNumMDBoxes(), 1);
-    TS_ASSERT_DELTA( box.getExtents(0).min, 123, 1e-5);
-    TS_ASSERT_DELTA( box.getExtents(0).max, 234, 1e-5);
+    TS_ASSERT_DELTA( box.getExtents(0).getMin(), 123, 1e-5);
+    TS_ASSERT_DELTA( box.getExtents(0).getMax(), 234, 1e-5);
   }
 
   void test_copy_constructor()
   {
     BoxController_sptr sc( new BoxController(1));
-    std::vector<MDDimensionExtents> extents(1);
-    extents[0].min=123;
-    extents[0].max=234;
+    std::vector<MDDimensionExtents<coord_t> > extents(1);
+    extents[0].setExtents(123,234);
     MDBox<MDLeanEvent<1>,1> box1(sc, 2, extents);
     MDLeanEvent<1> ev(1.23, 2.34);
     for (size_t i=0; i<15; i++)
@@ -87,8 +85,8 @@ public:
     TS_ASSERT_DELTA( events[7].getCenter(0), 7.0, 1e-4);
     TS_ASSERT_EQUALS( box2.getDepth(), 2);
     TS_ASSERT_EQUALS( box2.getNumMDBoxes(), 1);
-    TS_ASSERT_DELTA( box2.getExtents(0).min, 123, 1e-5);
-    TS_ASSERT_DELTA( box2.getExtents(0).max, 234, 1e-5);
+    TS_ASSERT_DELTA( box2.getExtents(0).getMin(), 123, 1e-5);
+    TS_ASSERT_DELTA( box2.getExtents(0).getMax(), 234, 1e-5);
   }
 
 

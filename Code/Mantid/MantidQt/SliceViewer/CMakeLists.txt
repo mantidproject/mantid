@@ -1,14 +1,23 @@
 set ( SRC_FILES
 	src/ColorBarWidget.cpp
-    src/CompositePeaksPresenter.cpp
-    src/ConcretePeaksPresenter.cpp
+	src/CompositePeaksPresenter.cpp
+	src/ConcretePeaksPresenter.cpp
 	src/CustomTools.cpp
 	src/DimensionSliceWidget.cpp
 	src/LineOverlay.cpp
 	src/LineViewer.cpp
-	src/PeakOverlay.cpp
-	src/PeakOverlayFactory.cpp
-    src/PeakTransform.cpp
+	src/PeakOverlaySphere.cpp
+	src/PeakOverlayCross.cpp
+	src/PeakOverlaySphereFactory.cpp
+	src/PeakOverlayCrossFactory.cpp
+	src/PeakOverlayViewFactoryBase.cpp
+	src/PeakTransform.cpp
+	src/PeakTransformHKL.cpp
+	src/PeakTransformQSample.cpp
+	src/PeakTransformQLab.cpp
+	src/PeakTransformSelector.cpp
+	src/PhysicalCrossPeak.cpp
+	src/PhysicalSphericalPeak.cpp
 	src/QScienceSpinBox.cpp
 	src/QwtRasterDataMD.cpp
 	src/SliceViewer.cpp
@@ -21,8 +30,9 @@ set ( SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	inc/MantidQtSliceViewer/ColorBarWidget.h
-    inc/MantidQtSliceViewer/CompositePeaksPresenter.h
+	inc/MantidQtSliceViewer/CompositePeaksPresenter.h
 	inc/MantidQtSliceViewer/ConcretePeaksPresenter.h
+	inc/MantidQtSliceViewer/ConcretePeakTransformFactory.h
 	inc/MantidQtSliceViewer/CustomTools.h
 	inc/MantidQtSliceViewer/DimensionSliceWidget.h
 	inc/MantidQtSliceViewer/FirstExperimentInfoQuery.h
@@ -30,13 +40,23 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/NullPeaksPresenter.h
-	inc/MantidQtSliceViewer/PeakOverlay.h
+	inc/MantidQtSliceViewer/PeakOverlaySphere.h
+	inc/MantidQtSliceViewer/PeakOverlayCross.h
 	inc/MantidQtSliceViewer/PeakOverlayView.h
 	inc/MantidQtSliceViewer/PeakOverlayViewFactory.h
-	inc/MantidQtSliceViewer/PeakOverlayFactory.h
+	inc/MantidQtSliceViewer/PeakOverlayViewFactoryBase.h
+	inc/MantidQtSliceViewer/PeakOverlaySphereFactory.h
+	inc/MantidQtSliceViewer/PeakOverlayCrossFactory.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
-    inc/MantidQtSliceViewer/PeakTransform.h	
-    inc/MantidQtSliceViewer/QScienceSpinBox.h
+	inc/MantidQtSliceViewer/PeakTransformHKL.h
+	inc/MantidQtSliceViewer/PeakTransformQSample.h
+	inc/MantidQtSliceViewer/PeakTransformQLab.h
+	inc/MantidQtSliceViewer/PeakTransform.h
+	inc/MantidQtSliceViewer/PeakTransformFactory.h 
+	inc/MantidQtSliceViewer/PeakTransformSelector.h
+	inc/MantidQtSliceViewer/PhysicalCrossPeak.h
+	inc/MantidQtSliceViewer/PhysicalSphericalPeak.h
+	inc/MantidQtSliceViewer/QScienceSpinBox.h
 	inc/MantidQtSliceViewer/QwtRasterDataMD.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
@@ -50,7 +70,8 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
-	inc/MantidQtSliceViewer/PeakOverlay.h
+ 	inc/MantidQtSliceViewer/PeakOverlayCross.h
+	inc/MantidQtSliceViewer/PeakOverlaySphere.h
 	inc/MantidQtSliceViewer/SliceViewer.h
 	inc/MantidQtSliceViewer/SliceViewerWindow.h
 	inc/MantidQtSliceViewer/ColorBarWidget.h
@@ -72,7 +93,12 @@ set ( UI_FILES
 set ( TEST_FILES
     test/CompositePeaksPresenterTest.h
     test/ConcretePeaksPresenterTest.h
-    test/PeakTransformTest.h
+    test/PeakTransformHKLTest.h
+    test/PeakTransformQSampleTest.h
+    test/PeakTransformQLabTest.h
+    test/PeakTransformSelectorTest.h
+    test/PhysicalCrossPeakTest.h
+    test/PhysicalSphericalPeakTest.h
     test/NullPeaksPresenterTest.h
 )
 
@@ -113,12 +139,8 @@ target_link_libraries ( MantidQtSliceViewer MantidQtAPI MantidWidgets ${QT_LIBRA
 ###########################################################################
 
 if ( PYUNITTEST_FOUND )
-	pyunittest_add_test ( SliceViewerMantidPlotTest.py ${TEST_PY_FILES} "" )
-	add_dependencies ( SliceViewerMantidPlotTest.py MantidQtAPI MantidWidgets CustomDialogs 
-	                   CustomInterfaces MantidQtSliceViewer Algorithms )
-	add_dependencies ( GUITests SliceViewerMantidPlotTest.py )
-	# Add to the 'UnitTests' group in VS
-	set_property ( TARGET SliceViewerMantidPlotTest.py PROPERTY FOLDER "UnitTests" )
+  
+  pyunittest_add_test (${CMAKE_CURRENT_SOURCE_DIR}/test SliceViewerMantidPlotTest ${TEST_PY_FILES} )
 endif ()
 
 if ( CXXTEST_FOUND )
@@ -127,17 +149,15 @@ if ( CXXTEST_FOUND )
   include_directories( ../../Framework/TestHelpers/inc ../../Framework/DataObjects/inc ../../Framework/Crystal/inc )
 
   set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp 
-  ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp   
+  ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
   )
 
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( SliceViewerTest MantidQtSliceViewer DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
+  target_link_libraries( SliceViewerTest MantidQtSliceViewer DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
 
-    add_dependencies( GUITests SliceViewerTest )
-    # Add to the 'UnitTests' group in VS
-    set_property( TARGET SliceViewerTest PROPERTY FOLDER "UnitTests" )
-  endif ()
+  add_dependencies( GUITests SliceViewerTest )
+  # Add to the 'UnitTests' group in VS
+  set_property( TARGET SliceViewerTest PROPERTY FOLDER "UnitTests" )
 
 endif ()
 

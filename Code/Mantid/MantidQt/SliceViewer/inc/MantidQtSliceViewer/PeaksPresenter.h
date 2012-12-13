@@ -5,15 +5,6 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/System.h"
 
-namespace Mantid
-{
-  namespace API
-  {
-    // Forward dec.
-    class IPeaksWorkspace;
-  }
-}
-
 namespace MantidQt
 {
 namespace SliceViewer

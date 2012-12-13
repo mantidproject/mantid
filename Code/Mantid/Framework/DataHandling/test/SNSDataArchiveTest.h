@@ -16,14 +16,32 @@ public:
   void xtestSearch()
   {
       SNSDataArchive arch;
-      std::string path = arch.getPath("PG3_7390_event.nxs");
-      TS_ASSERT_EQUALS(path, "/SNS/PG3/IPTS-2767/0/7390/NeXus/PG3_7390_histo.nxs");
 
       // PG3 Test case
-      TS_ASSERT_EQUALS(arch.getPath("BSS_18339_event.nxs"), "/SNS/BSS/IPTS-6817/0/18339/NeXus/BSS_18339_event.nxs");
+      std::set<std::string> filename;
+      filename.insert("PG3_7390");
+      std::vector<std::string> extension = std::vector<std::string>(1,"_event.nxs");
+      std::string path = arch.getArchivePath(filename, extension);
+      TS_ASSERT_EQUALS(path, "/SNS/PG3/IPTS-2767/0/7390/NeXus/PG3_7390_histo.nxs");
+
+      // BSS Test case
+      filename.clear();
+      filename.insert("BSS_18339");
+      path = arch.getArchivePath(filename, extension);
+      TS_ASSERT_EQUALS(path, "/SNS/BSS/IPTS-6817/0/18339/NeXus/BSS_18339_event.nxs");
+
+      // HYSA Test case
+      filename.clear();
+      filename.insert("HYSA_2411");
+      extension = std::vector<std::string>(1,".nxs.h5");
+      path = arch.getArchivePath(filename, extension);
+      TS_ASSERT_EQUALS(path, "/SNS/HYSA/IPTS-8004/nexus/HYSA_2411.nxs.h5");
 
       // Test a non-existent file
-      path = arch.getPath("mybeamline_666.nxs");
+      filename.clear();
+      filename.insert("mybeamline_666");
+      extension = std::vector<std::string>(1,".nxs");
+      path = arch.getArchivePath(filename, extension);
       TS_ASSERT(path.empty());
   }
 

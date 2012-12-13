@@ -4,7 +4,6 @@ set ( SRC_FILES
 	src/AffineMatrixParameter.cpp
 	src/AffineMatrixParameterParser.cpp
 	src/BoxControllerSettingsAlgorithm.cpp
-	src/CentroidPeaksMD.cpp
 	src/ConvToMDBase.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
@@ -17,17 +16,15 @@ set ( SRC_FILES
 	src/CoordTransformAligned.cpp
 	src/CoordTransformDistance.cpp
 	src/CoordTransformDistanceParser.cpp
-	src/FindPeaksMD.cpp
 	src/FitMD.cpp
 	src/ImportMDEventWorkspace.cpp
 	src/ImportMDHistoWorkspace.cpp
 	src/ImportMDHistoWorkspaceBase.cpp
-	src/IntegratePeaksMD.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
-	src/MDBoxToChange.cpp
 	src/MDBoxBase.cpp
 	src/MDBoxIterator.cpp
+	src/MDBoxToChange.cpp
 	src/MDEventFactory.cpp
 	src/MDEventWSWrapper.cpp
 	src/MDEventWorkspace.cpp
@@ -42,13 +39,14 @@ set ( SRC_FILES
 	src/MDTransfNoQ.cpp
 	src/MDTransfQ3D.cpp
 	src/MDWSDescription.cpp
-	src/MDWSDescriptionDepricated.cpp	
+	src/MDWSDescriptionDepricated.cpp
 	src/MDWSTransform.cpp
 	src/OneStepMDEW.cpp
 	src/QueryMDWorkspace.cpp
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
+	src/SaveIsawQvector.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
 )
@@ -68,7 +66,6 @@ set ( INC_FILES
 	inc/MantidMDEvents/AffineMatrixParameter.h
 	inc/MantidMDEvents/AffineMatrixParameterParser.h
 	inc/MantidMDEvents/BoxControllerSettingsAlgorithm.h
-	inc/MantidMDEvents/CentroidPeaksMD.h
 	inc/MantidMDEvents/ConvToMDBase.h
 	inc/MantidMDEvents/ConvToMDEventsWS.h
 	inc/MantidMDEvents/ConvToMDHistoWS.h
@@ -81,18 +78,15 @@ set ( INC_FILES
 	inc/MantidMDEvents/CoordTransformAligned.h
 	inc/MantidMDEvents/CoordTransformDistance.h
 	inc/MantidMDEvents/CoordTransformDistanceParser.h
-	inc/MantidMDEvents/FindPeaksMD.h
 	inc/MantidMDEvents/FitMD.h
 	inc/MantidMDEvents/ImportMDEventWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspace.h
 	inc/MantidMDEvents/ImportMDHistoWorkspaceBase.h
-	inc/MantidMDEvents/IntegratePeaksMD.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
-	inc/MantidMDEvents/MDBoxToChange.h	
-	inc/MantidMDEvents/BoxCtrlChangesList.h	
 	inc/MantidMDEvents/MDBoxBase.h
 	inc/MantidMDEvents/MDBoxIterator.h
+	inc/MantidMDEvents/MDBoxToChange.h
 	inc/MantidMDEvents/MDDimensionStats.h
 	inc/MantidMDEvents/MDEvent.h
 	inc/MantidMDEvents/MDEventFactory.h
@@ -119,6 +113,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/ReflectometryTransformKiKf.h
 	inc/MantidMDEvents/ReflectometryTransformP.h
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
+	inc/MantidMDEvents/SaveIsawQvector.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/UnitsConversionHelper.h
 	inc/MantidMDEvents/UserFunctionMD.h
@@ -129,22 +124,16 @@ set ( TEST_FILES
 	AffineMatrixParameterParserTest.h
 	AffineMatrixParameterTest.h
 	BoxControllerSettingsAlgorithmTest.h
-	CentroidPeaksMDTest.h
 	ConvertToDiffractionMDWorkspaceTest.h
 	ConvertToReflectometryQTest.h
-	ConvToMDBaseTest.h
-	ConvToMDEventsVSHistoTest.h		
-	UnitsConversionHelperTest.h	
 	CoordTransformAffineParserTest.h
 	CoordTransformAffineTest.h
 	CoordTransformAlignedTest.h
 	CoordTransformDistanceParserTest.h
 	CoordTransformDistanceTest.h
-	FindPeaksMDTest.h
 	FitMDTest.h
 	ImportMDEventWorkspaceTest.h
 	ImportMDHistoWorkspaceTest.h
-	IntegratePeaksMDTest.h
 	MDBinTest.h
 	MDBoxBaseTest.h
 	MDBoxIteratorTest.h
@@ -161,14 +150,16 @@ set ( TEST_FILES
 	MDHistoWorkspaceTest.h
 	MDLeanEventTest.h
 	MDTransfAxisNamesTest.h
-	MDWSTransfTest.h
-	MDTransfFactoryTest.h		
+	MDTransfFactoryTest.h
 	MDTransfQ3DTest.h
-	MDWSDescriptionTest.h	
+	MDWSDescriptionTest.h
+	MDWSTransfTest.h
 	OneStepMDEWTest.h
 	QueryMDWorkspaceTest.h
 	ReflectometryTransformQxQzTest.h
+	SaveIsawQvectorTest.h
 	SkippingPolicyTest.h
+	UnitsConversionHelperTest.h
 )
 
 

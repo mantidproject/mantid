@@ -157,11 +157,8 @@ protected:
   /// Flag to rescale the colormap axis automatically when the data or integration range change
   bool m_autoscaling;
 
-  /// Vector where INDEX = (detector id + m_id2wi_offset); VALUE = workspace index.
-  std::vector<size_t> m_id2wi_vector;
-
-  /// Offset into m_id2wi_map above.
-  Mantid::detid_t m_id2wi_offset;
+  /// Pointer to the workspace's detector ID to workspace index map
+  Mantid::detid2index_map *m_detid2index_map;
 
   /// All det ids in the instrument in order of pickIDs, populated by Obj..Actor constructors
   mutable std::vector<Mantid::detid_t> m_detIDs;

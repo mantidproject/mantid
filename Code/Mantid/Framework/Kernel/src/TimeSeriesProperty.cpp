@@ -1,4 +1,5 @@
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 
 #include <sstream>
@@ -438,8 +439,9 @@ namespace Mantid
 
     /**
      * Fill a TimeSplitterType that will filter the events by matching
-     * log values >= min and < max. Creates SplittingInterval's where
+     * log values >= min and <= max. Creates SplittingInterval's where
      * times match the log values, and going to index==0.
+     * This method is used by the FilterByLogValue algorithm.
      *
      * @param split :: Splitter that will be filled.
      * @param min :: min value
@@ -448,8 +450,23 @@ namespace Mantid
      * @param centre :: Whether the log value time is considered centred or at the beginning.
      */
     template<typename TYPE>
-    void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance, bool centre) const
+    void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre) const
     {
+      const bool emptyMin = (min == EMPTY_DBL());
+      const bool emptyMax = (max == EMPTY_DBL());
+
+      if ( !emptyMin && !emptyMax && max < min )
+      {
+        std::stringstream ss;
+        ss << "TimeSeriesProperty::makeFilterByValue: 'max' argument must be greater than 'min' "
+           << "(got min=" << min << " max=" << max << ")";
+        throw std::invalid_argument(ss.str());
+      }
+
+      // If min or max were unset ("empty") in the algorithm, set to the min or max value of the log
+      if ( emptyMin ) min = minValue();
+      if ( emptyMax ) max = maxValue();
+
       // Make sure the splitter starts out empty
       split.clear();
 
@@ -474,7 +491,7 @@ namespace Mantid
         TYPE val = m_values[i].value();
 
         //A good value?
-        const bool isGood = ((val >= min) && (val < max));
+        const bool isGood = ((val >= min) && (val <= max));
         if (isGood)
           numgood++;
 
@@ -484,26 +501,14 @@ namespace Mantid
 
           if (isGood)
           {
-            //Start of a good section
-            if (centre)
-              start = t - tol;
-            else
-              start = t;
+            // Start of a good section. Subtract tolerance from the time if boundaries are centred.
+            start = centre ? t - tol : t;
           }
           else
           {
-            //End of the good section
-            if (numgood == 1 || centre )
-            {
-              // If there was only one point with the value, or values represent bin centres,
-              // use the last good time, + the tolerance, as the end time
-              stop = lastTime + tol;
-            }
-            else
-            {
-              // At least 2 good values for left boundary aligned logs. Save the end time.
-              stop = t;
-            }
+            // End of the good section. Add tolerance to the LAST GOOD time if boundaries are centred.
+            // Otherwise, use the first 'bad' time.
+            stop = centre ? lastTime + tol : t;
             split.push_back( SplittingInterval(start, stop, 0) );
             //Reset the number of good ones, for next time
             numgood = 0;
@@ -520,6 +525,73 @@ namespace Mantid
       }
 
       return;
+    }
+
+    /** Function specialization for TimeSeriesProperty<std::string>
+     *  @throws Kernel::Exception::NotImplementedError always
+     */
+    template<>
+    void TimeSeriesProperty<std::string>::makeFilterByValue(TimeSplitterType&, double, double, double, bool) const
+    {
+      throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
+    }
+
+    /** If the first and/or last values in a log are between min & max, expand and existing TimeSplitter
+     *  (created by makeFilterByValue) if necessary to cover the full TimeInterval given.
+     *  This method is used by the FilterByLogValue algorithm.
+     *  @param split The splitter to modify if necessary
+     *  @param min   The minimum 'good' value
+     *  @param max   The maximum 'good' value
+     *  @param TimeInterval The full time range that we want this splitter to cover
+     */
+    template<typename TYPE>
+    void TimeSeriesProperty<TYPE>::expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const
+    {
+      const bool emptyMin = (min == EMPTY_DBL());
+      const bool emptyMax = (max == EMPTY_DBL());
+
+      if ( !emptyMin && !emptyMax && max < min )
+      {
+        std::stringstream ss;
+        ss << "TimeSeriesProperty::expandFilterToRange: 'max' argument must be greater than 'min' "
+           << "(got min=" << min << " max=" << max << ")";
+        throw std::invalid_argument(ss.str());
+      }
+
+      // If min or max were unset ("empty") in the algorithm, set to the min or max value of the log
+      if ( emptyMin ) min = minValue();
+      if ( emptyMax ) max = maxValue();
+
+      // Assume everything before the 1st value is constant
+      double val = firstValue();
+      if ((val >= min) && (val <= max))
+      {
+        TimeSplitterType extraFilter;
+        extraFilter.push_back( SplittingInterval(range.begin(), firstTime(), 0));
+        // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
+        split = split | extraFilter;
+      }
+
+      // Assume everything after the LAST value is constant
+      val = lastValue();
+      if ((val >= min) && (val <= max))
+      {
+        TimeSplitterType extraFilter;
+        extraFilter.push_back( SplittingInterval(lastTime(), range.end(), 0) );
+        // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
+        split = split | extraFilter;
+      }
+
+      return;
+    }
+
+    /** Function specialization for TimeSeriesProperty<std::string>
+     *  @throws Kernel::Exception::NotImplementedError always
+     */
+    template<>
+    void TimeSeriesProperty<std::string>::expandFilterToRange(TimeSplitterType&, double, double, const TimeInterval&) const
+    {
+      throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
     }
 
     /**
@@ -740,6 +812,17 @@ namespace Mantid
       return m_values.rbegin()->value();
     }
 
+    template<typename TYPE>
+    TYPE TimeSeriesProperty<TYPE>::minValue() const
+    {
+      return std::min_element(m_values.begin(),m_values.end(),TimeValueUnit<TYPE>::valueCmp)->value();
+    }
+
+    template<typename TYPE>
+    TYPE TimeSeriesProperty<TYPE>::maxValue() const
+    {
+      return std::max_element(m_values.begin(),m_values.end(),TimeValueUnit<TYPE>::valueCmp)->value();
+    }
 
     /// Returns the number of values at UNIQUE time intervals in the time series
     /// @returns The number of unique time interfaces

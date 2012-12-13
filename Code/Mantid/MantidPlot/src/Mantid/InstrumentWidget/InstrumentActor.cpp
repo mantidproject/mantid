@@ -100,8 +100,8 @@ m_sampleActor(NULL)
   setIntegrationRange(m_WkspBinMin,m_WkspBinMax);
   blockSignals(false);
 
-  /// Cache a map (actually a vector) to workspace indexes.
-  shared_workspace->getDetectorIDToWorkspaceIndexVector(m_id2wi_vector, m_id2wi_offset, false);
+  /// Keep the pointer to the detid2index map
+  m_detid2index_map = shared_workspace->getDetectorIDToWorkspaceIndexMap(false);
 
   Instrument_const_sptr instrument = getInstrument();
 
@@ -132,6 +132,7 @@ m_sampleActor(NULL)
 InstrumentActor::~InstrumentActor()
 {
   saveSettings();
+  delete m_detid2index_map;
 }
 
 /** Used to set visibility of an actor corresponding to a particular component
@@ -288,10 +289,7 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
  */
 size_t InstrumentActor::getWorkspaceIndex(Mantid::detid_t id) const
 {
-  size_t index = size_t(id + this->m_id2wi_offset);
-  if (index > m_id2wi_vector.size())
-    throw NotFoundError("No workspace index for detector",id);
-  return m_id2wi_vector[index];
+    return (*m_detid2index_map)[id];
 }
 
 void InstrumentActor::setIntegrationRange(const double& xmin,const double& xmax)

@@ -89,9 +89,14 @@ namespace Mantid
       double  qy  =  -m_ey*k0;
       double  qz  = (1-m_ez)*k0;
 
-      Coord[0]  = (coord_t)(m_RotMat[0]*qx+m_RotMat[1]*qy+m_RotMat[2]*qz);  if(Coord[0]<m_DimMin[0]||Coord[0]>=m_DimMax[0])return false;
-      Coord[1]  = (coord_t)(m_RotMat[3]*qx+m_RotMat[4]*qy+m_RotMat[5]*qz);  if(Coord[1]<m_DimMin[1]||Coord[1]>=m_DimMax[1])return false;
-      Coord[2]  = (coord_t)(m_RotMat[6]*qx+m_RotMat[7]*qy+m_RotMat[8]*qz);  if(Coord[2]<m_DimMin[2]||Coord[2]>=m_DimMax[2])return false;
+      Coord[0]  = (coord_t)(m_RotMat[0]*qx+m_RotMat[1]*qy+m_RotMat[2]*qz);
+      if(Coord[0]<m_DimMin[0]||Coord[0]>=m_DimMax[0])return false;
+
+      Coord[1]  = (coord_t)(m_RotMat[3]*qx+m_RotMat[4]*qy+m_RotMat[5]*qz);
+      if(Coord[1]<m_DimMin[1]||Coord[1]>=m_DimMax[1])return false;
+
+      Coord[2]  = (coord_t)(m_RotMat[6]*qx+m_RotMat[7]*qy+m_RotMat[8]*qz);
+      if(Coord[2]<m_DimMin[2]||Coord[2]>=m_DimMax[2])return false;
 
       /*Apply Lorentz corrections if necessary */ 
       if(m_isLorentzCorrected)

@@ -113,7 +113,7 @@ public:
   }
   
   /// Creates a new instance of the class with the given name.
-  /// The class must have been registered with registerClass.
+  /// The class must have been registered with subscribe() (typically done via a macro).
   /// If the class name is unknown, a NotFoundException is thrown.
   /// @param className :: the name of the class you wish to create
   /// @return a shared pointer ot the base class
@@ -128,8 +128,8 @@ public:
 
   /// Creates a new instance of the class with the given name, which
   /// is not wrapped in a boost shared_ptr. This should be used with
-  /// extreme care.
-  /// The class must have been registered with registerClass.
+  /// extreme care (or, better, not used)! The caller owns the returned instance.
+  /// The class must have been registered with subscribe() (typically done via a macro).
   /// If the class name is unknown, a NotFoundException is thrown.
   /// @param className :: the name of the class you wish to create
   /// @return a pointer to the base class

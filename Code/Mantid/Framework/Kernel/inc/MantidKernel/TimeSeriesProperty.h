@@ -105,6 +105,10 @@ namespace Mantid
         return mvalue;
       }
 
+      static bool valueCmp(const TimeValueUnit& lhs, const TimeValueUnit& rhs)
+      {
+        return ( lhs.mvalue < rhs.mvalue );
+      }
     };
 
     //================================================================================================
@@ -166,7 +170,9 @@ namespace Mantid
       /// Split out a time series property by time intervals.
       void splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const;
       /// Fill a TimeSplitterType that will filter the events by matching
-      void makeFilterByValue(TimeSplitterType& split, TYPE min, TYPE max, double TimeTolerance, bool centre=true) const;
+      void makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre) const;
+      /// Make sure an existing filter covers the full time range given
+      void expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const;
 
       ///  Return the time series as a correct C++ map<DateAndTime, TYPE>. All values
       std::map<DateAndTime, TYPE> valueAsCorrectMap() const;
@@ -196,6 +202,11 @@ namespace Mantid
       DateAndTime firstTime() const;
       /// Returns the last value
       TYPE lastValue() const;
+
+      /// Returns the minimum value found in the series
+      TYPE minValue() const;
+      /// Returns the maximum value found in the series
+      TYPE maxValue() const;
 
       /// Returns the number of values at UNIQUE time intervals in the time series
       int size() const;

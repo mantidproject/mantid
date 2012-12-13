@@ -6,6 +6,7 @@
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  *
+
  * The second operation that this macro performs is to provide the definition
  * of the unitID method for the concrete unit.
 
@@ -44,6 +45,10 @@ namespace MDEvents
 {
 
 /** Creates instances of concrete transformations into multidimensional (MD) coordinates.
+  *
+  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation for detailed description of this
+  * class place in the algorithms hierarchy. 
+  *
 
     The factory is a singleton that hands out shared pointers to the base MDTransfornation class.
     It overrides the base class DynamicFactory::create method so that only a single

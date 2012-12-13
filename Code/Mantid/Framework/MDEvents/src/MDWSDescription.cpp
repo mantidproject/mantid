@@ -187,7 +187,7 @@ void  MDWSDescription::checkWSCorresponsMDWorkspace(MDEvents::MDWSDescription &N
 /// empty constructor
 MDWSDescription::MDWSDescription(unsigned int nDimensions):
   m_Wtransf(3,3,true),
-  m_RotMatrix(9,0),       // set transformation matrix to 0 to certainly see rubbish if error later
+  m_RotMatrix(9,0),
   m_Emode(CnvrtToMD::Undef),
   m_LorentzCorr(false)
 {
@@ -196,6 +196,10 @@ MDWSDescription::MDWSDescription(unsigned int nDimensions):
   m_DimMin.assign(m_NDims,std::numeric_limits<double>::quiet_NaN());
   m_DimMax.assign(m_NDims,std::numeric_limits<double>::quiet_NaN());
 
+  // set transformation matrix to identity - aka do nothing
+  m_RotMatrix[0] = 1.;
+  m_RotMatrix[4] = 1.;
+  m_RotMatrix[8] = 1.;
 }
 void MDWSDescription::resizeDimDescriptions(unsigned int nDimensions, size_t nBins)
 {

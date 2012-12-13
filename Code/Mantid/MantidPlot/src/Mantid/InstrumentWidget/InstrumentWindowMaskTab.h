@@ -1,15 +1,14 @@
 #ifndef INSTRUMENTWINDOWMASKTAB_H_
 #define INSTRUMENTWINDOWMASKTAB_H_
 
+#include "InstrumentWindowTab.h"
 #include "MantidGLWidget.h"
-#include "DetSelector.h"
 
 #include <QFrame>
 #include <QMap>
 
 #include <boost/shared_ptr.hpp>
 
-class InstrumentWindow;
 class Instrument3DWidget;
 class CollapsiblePanel;
 class OneCurvePlot;
@@ -43,13 +42,13 @@ namespace Mantid
 /**
   * Implements the Mask tab in InstrumentWindow
   */
-class InstrumentWindowMaskTab: public QFrame
+class InstrumentWindowMaskTab: public InstrumentWindowTab
 {
   Q_OBJECT
 public:
   enum Activity {Move = 0, Select = 1, DrawEllipse};
   InstrumentWindowMaskTab(InstrumentWindow* instrWindow);
-  void init();
+  void initSurface();
 signals:
   void executeAlgorithm(const QString&, const QString&);
 protected slots:
@@ -79,9 +78,6 @@ protected:
   std::string generateMaskWorkspaceName(bool temp = false) const;
   void enableApply(bool on);
   void setSelectActivity();
-
-  /// The parent InstrumentWindow
-  InstrumentWindow* m_instrumentWindow;
 
   /// Is it used?
   Activity m_activity;

@@ -217,6 +217,8 @@ if ( CPPCHECK_EXECUTABLE )
       )
 
   set ( CPPCHECK_EXCLUDES
+        Framework/DataHandling/src/LoadDAE/
+        Framework/DataHandling/src/LoadRaw/
         Framework/ICat/inc/MantidICat/GSoapGenerated/
         Framework/ICat/src/GSoapGenerated/
         Framework/ICat/src/GSoapGenerated.cpp
@@ -224,9 +226,14 @@ if ( CPPCHECK_EXECUTABLE )
         Framework/ICat/src/GSoap.cpp
         Framework/Kernel/src/ANN/
         Framework/Kernel/src/ANN_complete.cpp
-        Framework/PythonAPI/src/boostpython.cpp
-        MantidPlot/src/origin/OPJFile.h
+        Framework/PythonAPI/src/
+        MantidPlot/src/nrutil.cpp
         MantidPlot/src/origin/OPJFile.cpp
+      )
+
+  # Header files to be ignored require different handling
+  set ( CPPCHECK_HEADER_EXCLUDES
+        MantidPlot/src/origin/OPJFile.h
       )
 
   # setup the standard arguments
@@ -265,6 +272,16 @@ if ( CPPCHECK_EXECUTABLE )
   endforeach()
   list ( APPEND _cppcheck_args ${_cppcheck_excludes} )
 
+  # Handle header files in the required manner
+  set (_cppcheck_header_excludes)
+  foreach( _file ${CPPCHECK_HEADER_EXCLUDES} )
+    set ( _tmp "${CMAKE_SOURCE_DIR}/${_file}" )
+    if ( EXISTS ${_tmp} )
+      list ( APPEND _cppcheck_header_excludes --suppress=*:${_tmp} )
+    endif()
+  endforeach()
+  list ( APPEND _cppcheck_args ${_cppcheck_header_excludes} )
+
   # put the finishing bits on the final command call
   set (_cppcheck_xml_args)
   if (CPPCHECK_GENERATE_XML)
@@ -276,7 +293,7 @@ if ( CPPCHECK_EXECUTABLE )
   # generate the target
   if (NOT TARGET cppcheck)
     add_custom_target ( cppcheck
-                        COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} ${_cppcheck_xml_args}
+                        COMMAND ${CPPCHECK_EXECUTABLE} ${_cppcheck_args} ${_cppcheck_header_excludes} ${_cppcheck_xml_args}
                         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
                         COMMENT "Running cppcheck"
                       )

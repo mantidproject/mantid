@@ -11,17 +11,52 @@ using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
 using Mantid::Geometry::OrientedLattice;
 
-//=====================================================================================
-// Functional Tests
-//=====================================================================================
-class LoadSQWTest : public CxxTest::TestSuite
-{
-private:
+//Test helper LoadSQWHelper 
+class LoadSQWTestHelper
+{   
+
+    LoadSQWHelper::dataPositions cdp;
+    // helper function
+     std::string conv2str(std::streamoff val){return boost::lexical_cast<std::string>(int(val));}
+  public: 
+    // Constructor with fills in the data corresponding to the test file
+    LoadSQWTestHelper()
+    {
+      // proper field should start from: 
+      cdp.if_sqw_start = 18;
+      cdp.n_dims_start = 22;
+      cdp.sqw_header_start=26;
+      //cdp.component_headers_starts //= 106; 2 contributing files
+      cdp.detectors_start = 902;
+      cdp.data_start      = 676815;
+      cdp.n_cell_pix_start= 677439;
+      cdp.pix_start       = 677771;
+    }
+ 
+    void checkPosCorrect(const LoadSQWHelper::dataPositions &pos)
+    {
+      if(cdp.if_sqw_start != pos.if_sqw_start){throw(std::invalid_argument(" pixels location differs from expected"+conv2str(pos.if_sqw_start)+
+                                                                          " expected: "+conv2str(cdp.if_sqw_start)));}
+      if(cdp.n_dims_start != pos.n_dims_start){throw(std::invalid_argument(" n_dims location differs from expected"+conv2str(pos.n_dims_start)+
+                                                                           " expected: "+conv2str(cdp.n_dims_start)));}
+      if(cdp.sqw_header_start != pos.sqw_header_start){throw(std::invalid_argument(" sqw_header location differs from expected"+conv2str(pos.sqw_header_start)+
+                                                                                   " expected: "+conv2str(cdp.sqw_header_start)));}
+      if(cdp.detectors_start != pos.detectors_start){throw(std::invalid_argument(" detectors location differs from expected"+conv2str(pos.detectors_start)+
+                                                                                 " expected: "+conv2str(cdp.detectors_start)));} 
+      if(cdp.data_start != pos.data_start){throw(std::invalid_argument(" data location differs from expected"+conv2str(pos.data_start)+
+                                                                       " expected: "+conv2str(cdp.data_start)));}      
+      if(cdp.n_cell_pix_start != pos.n_cell_pix_start){throw(std::invalid_argument(" cells pixels location differs from expected"+conv2str(pos.n_cell_pix_start)+
+                                                                                   " expected: "+conv2str(cdp.n_cell_pix_start)));}   
+      if(cdp.pix_start != pos.pix_start) {throw(std::invalid_argument(" pixels location differs from expected"+conv2str(pos.pix_start)+
+                                                                     " expected: "+conv2str(cdp.pix_start)));} 
+    }
+   
+};
 
   /* Helper type provides public access to methods for testing. 
   */
-  class ExposedLoadSQW : public LoadSQW
-  {
+class ExposedLoadSQW : public LoadSQW
+{
   public:
     ExposedLoadSQW() : LoadSQW() {}
     void exec()
@@ -32,15 +67,42 @@ private:
     virtual void setup()
     {
       std::string filename = getProperty("Filename");
-      m_fileStream.open(filename.c_str(), std::ios::binary);
-
       // Parse Extract metadata. Including data locations.
-      parseMetadata();
+      parseMetadata(filename);
     }
-    virtual void addEvents(MDEventWorkspace4* ws) { LoadSQW::addEvents(ws); };
-    virtual void addDimensions(MDEventWorkspace4* ws) { LoadSQW::addDimensions(ws); };
-    virtual void addLattice(MDEventWorkspace4* ws) { LoadSQW::addLattice(ws); };
-  };
+
+    // test if the metadata correspond to what is expected
+    void testMetadata()
+    {
+      LoadSQWTestHelper tester;
+      tester.checkPosCorrect(this->m_dataPositions);
+      if(this->m_nDataPoints!=580)throw(std::invalid_argument("incorrect number of data points in the file, expected 580, got "+
+                                                              boost::lexical_cast<std::string>(int(m_nDataPoints))));
+    }
+    virtual void readEvents(MDEventWorkspace4* ws) { LoadSQW::readEvents(ws); };
+    void readDNDDimensions(MDEventWorkspace4* ws) 
+    {
+      std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVector;
+      LoadSQW::readDNDDimensions(DimVector); 
+      this->addDimsToWs(ws,DimVector);
+    }
+    void readSQWDimensions(MDEventWorkspace4* ws)
+    {      
+      std::vector<Mantid::Geometry::MDHistoDimensionBuilder> DimVector;
+      LoadSQW::readSQWDimensions(DimVector); 
+      this->addDimsToWs(ws,DimVector);
+    }
+    virtual void addLattice(MDEventWorkspace4* ws) { LoadSQW::addLattice(ws); }
+    void readBoxSizes(){LoadSQW::readBoxSizes();}
+//    void readBoxSizes(){LoadSQW::readBoxSizes();}
+};
+//=====================================================================================
+// Functional Tests
+//=====================================================================================
+class LoadSQWTest : public CxxTest::TestSuite
+{
+private:
+
 
 public:
 
@@ -61,8 +123,10 @@ public:
     alg.setPropertyValue("OutputWorkspace", "testAddDimension");
     alg.setup();
 
+    TS_ASSERT_THROWS_NOTHING(alg.testMetadata());
+
     MDEventWorkspace4 ws;
-    alg.addDimensions(&ws);
+    alg.readDNDDimensions(&ws);
 
     TSM_ASSERT_EQUALS("Wrong number of dimensions", 4, ws.getNumDims());
 
@@ -78,10 +142,10 @@ public:
     TS_ASSERT_EQUALS("en", d->getDimensionId());
 
     //Check Units
-    TS_ASSERT_EQUALS("A^(-1)", a->getUnits());
-    TS_ASSERT_EQUALS("A^(-1)", b->getUnits());
-    TS_ASSERT_EQUALS("A^(-1)", c->getUnits());
-    TS_ASSERT_EQUALS("MeV", d->getUnits());
+    TS_ASSERT_EQUALS("A^-1", a->getUnits());
+    TS_ASSERT_EQUALS("A^-1", b->getUnits());
+    TS_ASSERT_EQUALS("A^-1", c->getUnits());
+    TS_ASSERT_EQUALS("mEv", d->getUnits());
 
     //Check Nbins
     TS_ASSERT_EQUALS(3, a->getNBins());
@@ -112,9 +176,9 @@ public:
     alg.setup();
 
     MDEventWorkspace4 ws;
-    alg.addDimensions(&ws);
+    alg.readDNDDimensions(&ws);
     ws.initialize();
-    alg.addEvents(&ws);
+    alg.readEvents(&ws);
 
     TSM_ASSERT_EQUALS("Wrong number of events in workspace", 580, ws.getNPoints());
   }
@@ -175,7 +239,85 @@ public:
     TS_ASSERT_DELTA(2.8699, lattice.a3(), 0.0001);
     TS_ASSERT_DELTA(0.3484, lattice.b1(), 0.0001);
     TS_ASSERT_DELTA(0.3484, lattice.b2(), 0.0001);
-    TS_ASSERT_DELTA(0.3484, lattice.b3(), 0.0001);
+    TS_ASSERT_DELTA(0.3484, lattice.b3(), 0.0001);  
+  }
+  void testReadDNDvsSQWDim()
+  {
+    ExposedLoadSQW alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename","test_horace_reader.sqw");
+    alg.setPropertyValue("OutputWorkspace", "testAddDimension");
+    alg.setup();
+
+    MDEventWorkspace4 ws1;
+    alg.readDNDDimensions(&ws1);
+    Mantid::Geometry::IMDDimension_const_sptr a = ws1.getDimension(0);
+    Mantid::Geometry::IMDDimension_const_sptr b = ws1.getDimension(1);
+    Mantid::Geometry::IMDDimension_const_sptr c = ws1.getDimension(2);
+    Mantid::Geometry::IMDDimension_const_sptr d = ws1.getDimension(3);
+
+    //Check dimension ids
+    TS_ASSERT_EQUALS("qx", a->getDimensionId());
+    TS_ASSERT_EQUALS("qy", b->getDimensionId());
+    TS_ASSERT_EQUALS("qz", c->getDimensionId());
+    TS_ASSERT_EQUALS("en", d->getDimensionId());
+
+
+    MDEventWorkspace4 ws2;
+    alg.readSQWDimensions(&ws2);
+    a = ws2.getDimension(0);
+    b = ws2.getDimension(1);
+    c = ws2.getDimension(2);
+    d = ws2.getDimension(3);
+
+    //Check dimension ids
+    TS_ASSERT_EQUALS("qx", a->getDimensionId());
+    TS_ASSERT_EQUALS("qy", b->getDimensionId());
+    TS_ASSERT_EQUALS("qz", c->getDimensionId());
+    TS_ASSERT_EQUALS("en", d->getDimensionId());
+
+
+    alg.setPropertyValue("Filename","slice2D.sqw");
+    alg.setup();
+    MDEventWorkspace4 ws3;
+    alg.readDNDDimensions(&ws3);
+    a = ws3.getDimension(0);
+    b = ws3.getDimension(1);
+    c = ws3.getDimension(2);
+    d = ws3.getDimension(3);
+
+    TS_ASSERT_EQUALS("qy", a->getDimensionId());
+    TS_ASSERT_EQUALS("en", b->getDimensionId());
+    TS_ASSERT_EQUALS("qx", c->getDimensionId());
+    TS_ASSERT_EQUALS("qz", d->getDimensionId());
+
+
+    MDEventWorkspace4 ws4;
+    alg.readSQWDimensions(&ws4);
+    a = ws4.getDimension(0);
+    b = ws4.getDimension(1);
+    c = ws4.getDimension(2);
+    d = ws4.getDimension(3);
+
+    //Check dimension ids
+    TS_ASSERT_EQUALS("qx", a->getDimensionId());
+    TS_ASSERT_EQUALS("qy", b->getDimensionId());
+    TS_ASSERT_EQUALS("qz", c->getDimensionId());
+    TS_ASSERT_EQUALS("en", d->getDimensionId());
+
+  }
+
+  void testRead2DSlice()
+  {
+    LoadSQW alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename","slice2D.sqw");
+    alg.setPropertyValue("OutputWorkspace", "testRead2D");
+
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() );
+ 
+
   }
 };
 

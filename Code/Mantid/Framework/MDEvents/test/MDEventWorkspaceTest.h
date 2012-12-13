@@ -351,12 +351,12 @@ public:
   }
 
 
-  void checkExtents( std::vector<Mantid::Geometry::MDDimensionExtents> & ext, coord_t xmin, coord_t xmax, coord_t ymin, coord_t ymax)
+  void checkExtents( std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & ext, coord_t xmin, coord_t xmax, coord_t ymin, coord_t ymax)
   {
-    TS_ASSERT_DELTA( ext[0].min, xmin, 1e-4);
-    TS_ASSERT_DELTA( ext[0].max, xmax, 1e-4);
-    TS_ASSERT_DELTA( ext[1].min, ymin, 1e-4);
-    TS_ASSERT_DELTA( ext[1].max, ymax, 1e-4);
+    TS_ASSERT_DELTA( ext[0].getMin(), xmin, 1e-4);
+    TS_ASSERT_DELTA( ext[0].getMax(), xmax, 1e-4);
+    TS_ASSERT_DELTA( ext[1].getMin(), ymin, 1e-4);
+    TS_ASSERT_DELTA( ext[1].getMax(), ymax, 1e-4);
   }
 
   void addEvent(MDEventWorkspace2Lean::sptr b, double x, double y)
@@ -368,14 +368,14 @@ public:
   void test_getMinimumExtents()
   {
     MDEventWorkspace2Lean::sptr ws = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
-    std::vector<Mantid::Geometry::MDDimensionExtents> ext;
+    
 
     // If nothing in the workspace, the extents given are the dimensions in the workspace
-    ext = ws->getMinimumExtents(2);
-    TS_ASSERT_DELTA( ext[0].min, 0.0, 1e-5 );
-    TS_ASSERT_DELTA( ext[0].max, 10.0, 1e-5 );
-    TS_ASSERT_DELTA( ext[1].min, 0.0, 1e-5 );
-    TS_ASSERT_DELTA( ext[1].max, 10.0, 1e-5 );
+    auto ext = ws->getMinimumExtents(2);
+    TS_ASSERT_DELTA( ext[0].getMin(), 0.0, 1e-5 );
+    TS_ASSERT_DELTA( ext[0].getMax(), 10.0, 1e-5 );
+    TS_ASSERT_DELTA( ext[1].getMin(), 0.0, 1e-5 );
+    TS_ASSERT_DELTA( ext[1].getMax(), 10.0, 1e-5 );
 
     std::vector< MDLeanEvent<2> > events;
     // Make an event in the middle of each box

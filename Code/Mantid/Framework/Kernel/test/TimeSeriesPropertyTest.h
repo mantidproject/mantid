@@ -15,6 +15,30 @@ using namespace Mantid::Kernel;
 
 class TimeSeriesPropertyTest : public CxxTest::TestSuite
 {
+  // Create a small TSP<double>. Callee owns the returned object.
+  TimeSeriesProperty<double> * createDoubleTSP()
+  {
+    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",9.99) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",7.55) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",5.55) );
+    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",10.55) );
+    return p;
+  }
+
+  // Create a small TSP<int>. Callee owns the returned object.
+  TimeSeriesProperty<int> * createIntegerTSP(int numberOfValues)
+  {
+    TimeSeriesProperty<int> * log = new TimeSeriesProperty<int>("intProp");
+    DateAndTime startTime("2007-11-30T16:17:00");
+    for ( int value = 0; value < numberOfValues; ++value)
+    {
+      DateAndTime time = startTime + value*10.0;
+      TS_ASSERT_THROWS_NOTHING( log->addValue(time,value+1) );
+    }
+    return log;
+  }
+
 public:
   void setUp()
   {
@@ -185,9 +209,7 @@ public:
   /// Ticket 2097: This caused an infinite loop
   void test_AdditionOperatorOnYourself()
   {
-    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:10",2) );
+    TimeSeriesProperty<int> * log  = createIntegerTSP(2);
 
     (*log) += log;
     // There is now a check and trying to do this does nothing.
@@ -199,14 +221,7 @@ public:
   //----------------------------------------------------------------------------
   void test_filterByTime()
   {
-    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:10",2) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:20",3) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:30",4) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:40",5) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:50",6) );
-
+    TimeSeriesProperty<int> * log  = createIntegerTSP(6);
     TS_ASSERT_EQUALS( log->realSize(), 6);
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
     DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
@@ -223,20 +238,7 @@ public:
   //-------------------------------------------------------------------------------
   void test_filterByTimes1()
   {
-    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:10",2) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:20",3) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:30",4) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:40",5) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:50",6) );
-    /*
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:00",7) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:10",8) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:20",9) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:30",10) );
-    */
-
+    TimeSeriesProperty<int> * log  = createIntegerTSP(6);
     TS_ASSERT_EQUALS( log->realSize(), 6);
 
     Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"),
@@ -257,18 +259,7 @@ public:
 
   void test_filterByTimesN()
   {
-    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:10",2) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:20",3) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:30",4) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:40",5) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:50",6) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:00",7) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:10",8) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:20",9) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:30",10) );
-
+    TimeSeriesProperty<int> * log  = createIntegerTSP(10);
     TS_ASSERT_EQUALS( log->realSize(), 10);
 
     Mantid::Kernel::SplittingInterval interval0(DateAndTime("2007-11-30T16:17:10"),
@@ -296,8 +287,7 @@ public:
   /// Ticket #2591
   void test_filterByTime_ifOnlyOneValue_assumes_constant_instead()
   {
-    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
+    TimeSeriesProperty<int> * log  = createIntegerTSP(1);
     TS_ASSERT_EQUALS( log->realSize(), 1);
 
     DateAndTime start = DateAndTime("2007-11-30T16:17:10");
@@ -346,7 +336,7 @@ public:
 
     // Test centred log value boundaries
     TimeSplitterType splitter;
-    log->makeFilterByValue(splitter, 1.8, 2.2, 1.0);
+    log->makeFilterByValue(splitter, 1.8, 2.2, 1.0, true);
 
     TS_ASSERT_EQUALS( splitter.size(), 2);
     SplittingInterval s;
@@ -373,7 +363,7 @@ public:
     s = splitter[0];
     t = DateAndTime("2007-11-30T16:17:10");
     TS_ASSERT_DELTA( s.start(), t, 1e-3);
-    t = DateAndTime("2007-11-30T16:17:11");
+    t = DateAndTime("2007-11-30T16:17:20");
     TS_ASSERT_DELTA( s.stop(), t, 1e-3);
 
     s = splitter[1];
@@ -382,36 +372,94 @@ public:
     t = DateAndTime("2007-11-30T16:17:50");
     TS_ASSERT_DELTA( s.stop(), t, 1e-3);
 
+    // Check throws if min > max
+    TS_ASSERT_THROWS( log->makeFilterByValue(splitter, 2.0, 1.0, 0.0, true), std::invalid_argument);
+
     delete log;
   }
 
+  void test_makeFilterByValue_throws_for_string_property()
+  {
+    TimeSeriesProperty<std::string> log("StringTSP");
+    TimeSplitterType splitter;
+    TS_ASSERT_THROWS(log.makeFilterByValue(splitter,0.0,0.0,0.0,true), Exception::NotImplementedError);
+  }
+
+  void test_expandFilterToRange()
+  {
+    TimeSeriesProperty<int> log("MyIntLog");
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:10",2) );
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:20",3) );
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:30",4) );
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:40",6) );
+    TS_ASSERT_THROWS_NOTHING( log.addValue("2007-11-30T16:17:50",2) );
+
+    // Create a TimeInterval that's wider than this log
+    TimeInterval interval(DateAndTime("2007-11-30T16:16:00"),DateAndTime("2007-11-30T16:18:50"));
+
+    TimeSplitterType splitter;
+    // Test good at both ends
+    log.makeFilterByValue(splitter, 1.0, 2.2, 1.0, false);
+    log.expandFilterToRange(splitter, 1.0, 2.2, interval);
+    TS_ASSERT_EQUALS( splitter.size(), 2 );
+    TS_ASSERT_DELTA( splitter[0].start(), DateAndTime("2007-11-30T16:16:00"), 1e-3);
+    TS_ASSERT_DELTA( splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA( splitter[1].start(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA( splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"), 1e-3);
+
+    // Test bad at both ends
+    log.makeFilterByValue(splitter, 2.5, 10.0, 0.0, false);
+    log.expandFilterToRange(splitter, 2.5, 10.0, interval);
+    TS_ASSERT_EQUALS( splitter.size(), 1 );
+    TS_ASSERT_DELTA( splitter[0].start(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA( splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+
+    // Test good at start, bad at end
+    log.makeFilterByValue(splitter, -1.0, 1.5, 0.0, false);
+    log.expandFilterToRange(splitter, -1.0, 1.5, interval);
+    TS_ASSERT_EQUALS( splitter.size(), 1 );
+    TS_ASSERT_DELTA( splitter[0].start(), DateAndTime("2007-11-30T16:16:00"), 1e-3);
+    TS_ASSERT_DELTA( splitter[0].stop(), DateAndTime("2007-11-30T16:17:10"), 1e-3);
+
+    // Test good at end, bad at start
+    log.makeFilterByValue(splitter, 1.99, 2.5, 1.0, false);
+    log.expandFilterToRange(splitter, 1.99, 2.5, interval);
+    TS_ASSERT_EQUALS( splitter.size(), 2 );
+    TS_ASSERT_DELTA( splitter[0].start(), DateAndTime("2007-11-30T16:17:10"), 1e-3);
+    TS_ASSERT_DELTA( splitter[0].stop(), DateAndTime("2007-11-30T16:17:20"), 1e-3);
+    TS_ASSERT_DELTA( splitter[1].start(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+    TS_ASSERT_DELTA( splitter[1].stop(), DateAndTime("2007-11-30T16:18:50"), 1e-3);
+
+    // Check throws if min > max
+    TS_ASSERT_THROWS( log.expandFilterToRange(splitter, 2.0, 1.0, interval), std::invalid_argument);
+
+    // Test good at both ends, but interval narrower than log range
+    TimeInterval narrowinterval(DateAndTime("2007-11-30T16:17:15"),DateAndTime("2007-11-30T16:17:41"));
+    log.makeFilterByValue(splitter, 0.0, 10.0, 0.0, false);
+    log.expandFilterToRange(splitter, 0.0, 10.0, narrowinterval);
+    TS_ASSERT_EQUALS( splitter.size(), 1 );
+    TS_ASSERT_DELTA( splitter[0].start(), DateAndTime("2007-11-30T16:17:00"), 1e-3);
+    TS_ASSERT_DELTA( splitter[0].stop(), DateAndTime("2007-11-30T16:17:50"), 1e-3);
+  }
+
+  void test_expandFilterToRange_throws_for_string_property()
+  {
+    TimeSeriesProperty<std::string> log("StringTSP");
+    TimeSplitterType splitter;
+    TS_ASSERT_THROWS(log.expandFilterToRange(splitter,0.0,0.0,TimeInterval()), Exception::NotImplementedError);
+  }
 
   //----------------------------------------------------------------------------
   void test_splitByTime_and_getTotalValue()
   {
-    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:10",2) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:20",3) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:30",4) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:40",5) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:50",6) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:00",7) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:10",8) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:20",9) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:30",10) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:40",11) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:50",12) );
-    TS_ASSERT_EQUALS( log->realSize(), 12);
-
+    TimeSeriesProperty<int> * log  = createIntegerTSP(12);
     //Make the outputs
-    //    std::vector< TimeSeriesProperty<int> * > outputs2;
     std::vector< Property * > outputs;
     for (std::size_t i=0; i<5; i++)
     {
       TimeSeriesProperty<int> * newlog  = new TimeSeriesProperty<int>("MyIntLog");
       outputs.push_back(newlog);
-      //outputs2.push_back(newlog);
     }
 
     //Make a splitter
@@ -457,23 +505,9 @@ public:
   //----------------------------------------------------------------------------
   void test_splitByTime_withOverlap()
   {
-    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:10",2) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:20",3) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:30",4) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:40",5) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:50",6) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:00",7) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:10",8) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:20",9) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:30",10) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:40",11) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:18:50",12) );
-    TS_ASSERT_EQUALS( log->realSize(), 12);
+    TimeSeriesProperty<int> * log  = createIntegerTSP(12);
 
     //Make the outputs
-    //    std::vector< TimeSeriesProperty<int> * > outputs2;
     std::vector< Property * > outputs;
     for (std::size_t i=0; i<1; i++)
     {
@@ -590,11 +624,7 @@ public:
    */
   void test_getSingleValue()
   {
-    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",9.99) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",7.55) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",5.55) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",10.55) );
+    TimeSeriesProperty<double> * p = createDoubleTSP();
 
     DateAndTime time1("2007-11-30T16:17:23");
     double v1 = p->getSingleValue(time1);
@@ -624,11 +654,7 @@ public:
    */
   void test_firstLastTimeValue()
   {
-    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",9.99) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",7.55) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",5.55) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",10.55) );
+    TimeSeriesProperty<double> * p = createDoubleTSP();
 
     Mantid::Kernel::DateAndTime t0 = p->firstTime();
     Mantid::Kernel::DateAndTime tf = p->lastTime();
@@ -650,20 +676,34 @@ public:
     return;
   }
 
+  void test_min_max_value()
+  {
+    // Test a double property
+    const TimeSeriesProperty<double> * p = createDoubleTSP();
+    TS_ASSERT_EQUALS( p->minValue(), 5.55 );
+    TS_ASSERT_EQUALS( p->maxValue(), 10.55 );
+
+    // Test an integer property
+    const TimeSeriesProperty<int> * i = createIntegerTSP(8);
+    TS_ASSERT_EQUALS( i->minValue(), 1 );
+    TS_ASSERT_EQUALS( i->maxValue(), 8 );
+
+    // Test a string property
+    sProp->addValue("2007-11-30T16:17:05","White");
+    sProp->addValue("2007-12-30T16:17:15","Black");
+    sProp->addValue("2008-11-30T16:18:05","Grey");
+    TS_ASSERT_EQUALS( sProp->minValue(), "Black" );
+    TS_ASSERT_EQUALS( sProp->maxValue(), "White" );
+  }
 
   /*
    * Test merge()
    */
   void test_Merge()
   {
-    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("doubleProp1");
-    TimeSeriesProperty<double> *p2 = new TimeSeriesProperty<double>("doubleProp2");
-
     // 1. Construct p1 and p2
-    TS_ASSERT_THROWS_NOTHING( p1->addValue("2007-11-30T16:17:00",9.99) );
-    TS_ASSERT_THROWS_NOTHING( p1->addValue("2007-11-30T16:17:10",7.55) );
-    TS_ASSERT_THROWS_NOTHING( p1->addValue("2007-11-30T16:17:20",5.55) );
-    TS_ASSERT_THROWS_NOTHING( p1->addValue("2007-11-30T16:17:30",10.55) );
+    TimeSeriesProperty<double> *p1 = createDoubleTSP();
+    TimeSeriesProperty<double> *p2 = new TimeSeriesProperty<double>("doubleProp2");
 
     TS_ASSERT_THROWS_NOTHING( p2->addValue("2007-11-30T16:17:05",19.99) );
     TS_ASSERT_THROWS_NOTHING( p2->addValue("2007-11-30T16:17:15",17.55) );
@@ -698,10 +738,6 @@ public:
   void test_Name()
   {
     TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",9.99) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",7.55) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",5.55) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",10.55) );
 
     std::string propertyname("UnitTest");
 
@@ -717,11 +753,7 @@ public:
    */
   void test_Value()
   {
-    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("doubleProp");
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:00",9.99) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:10",7.55) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:20",5.55) );
-    TS_ASSERT_THROWS_NOTHING( p->addValue("2007-11-30T16:17:30",10.55) );
+    TimeSeriesProperty<double> * p = createDoubleTSP();
 
     std::string pvalue = p->value();
     std::string svalue("2007-Nov-30 16:17:00  9.99\n2007-Nov-30 16:17:10  7.55\n2007-Nov-30 16:17:20  5.55\n2007-Nov-30 16:17:30  10.55\n");
@@ -1609,14 +1641,7 @@ public:
     */
   void test_filterByTime_out_of_range_filters_nothing()
   {
-    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
-
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:00",1) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:10",2) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:20",3) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:30",4) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:40",5) );
-    TS_ASSERT_THROWS_NOTHING( log->addValue("2007-11-30T16:17:50",6) );
+    TimeSeriesProperty<int> * log  = createIntegerTSP(6);
 
     size_t original_size = log->realSize();
 

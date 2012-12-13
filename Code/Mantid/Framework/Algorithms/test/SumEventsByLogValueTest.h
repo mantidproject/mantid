@@ -20,16 +20,59 @@ public:
   static SumEventsByLogValueTest *createSuite() { return new SumEventsByLogValueTest(); }
   static void destroySuite( SumEventsByLogValueTest *suite ) { delete suite; }
 
-  void test_init()
+  void test_validators()
   {
     SumEventsByLogValue alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+
+    // InputWorkspace has to be an EventWorkspace
+    TS_ASSERT_THROWS( alg.setProperty("InputWorkspace", WorkspaceCreationHelper::Create2DWorkspace(1,1)), std::invalid_argument );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", WorkspaceCreationHelper::CreateEventWorkspace()) );
+
+    // LogName must not be empty
+    TS_ASSERT_THROWS( alg.setProperty("LogName",""), std::invalid_argument );
   }
 
-  void test_non_existent_log_fails()
+  void test_validateInputs()
   {
-    auto alg = setupAlg("notthere");
-    TS_ASSERT( ! alg->execute() );
+    // Create and event workspace. We don't care what data is in it.
+    EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace();
+    // Add a single-number log
+    ws->mutableRun().addProperty("SingleValue",5);
+    // Add a time-series property
+    auto tsp = new TimeSeriesProperty<double>("TSP");
+    tsp->addValue(DateAndTime::getCurrentTime(),9.9);
+    ws->mutableRun().addLogData(tsp);
+    // Add an EMPTY time-series property
+    auto emptyTSP = new TimeSeriesProperty<int>("EmptyTSP");
+    ws->mutableRun().addLogData(emptyTSP);
+
+    SumEventsByLogValue alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace",ws) );
+
+    // Check protest when non-existent log is set
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogName", "NotThere") );
+    auto errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS( errorMap.size(), 1);
+    TS_ASSERT_EQUALS( errorMap.begin()->first, "LogName" );
+
+    // Check protest when single-value log is set
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogName", "SingleValue") );
+    errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS( errorMap.size(), 1);
+    TS_ASSERT_EQUALS( errorMap.begin()->first, "LogName" );
+
+    // Check protest when empty tsp log given
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogName", "emptyTSP") );
+    errorMap = alg.validateInputs();
+    TS_ASSERT_EQUALS( errorMap.size(), 1);
+    TS_ASSERT_EQUALS( errorMap.begin()->first, "LogName" );
+
+    // Check it's happy when a non-empty tsp is given
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LogName", "TSP") );
+    errorMap = alg.validateInputs();
+    TS_ASSERT( errorMap.empty() );
   }
 
   void test_text_property()

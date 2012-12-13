@@ -43,7 +43,7 @@ namespace MDEvents
 
     MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth = 0,int64_t boxSize=-1,int64_t boxID=-1);
 
-    MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector, int64_t boxSize=-1,int64_t boxID=-1);
+    MDBox(Mantid::API::BoxController_sptr splitter, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector, int64_t boxSize=-1,int64_t boxID=-1);
 
     MDBox(const MDBox & other);
 
@@ -104,7 +104,15 @@ namespace MDEvents
     uint64_t getFileNumEvents() const { return m_fileNumEvents; }
 
     void setFileIndex(uint64_t start, uint64_t numEvents);
-
+   // // safety net:
+   //void setExtents(size_t dim, double min, double max)
+   //{  
+   //  MDBoxBase::setExtents(dim,min,max);
+   //}
+   //void setExtents(double min[nd], double max[nd])
+   //{
+   //    MDBoxBase::setExtents(min,max);
+   //}
 
     /** Set whether the box is cached on disk (true) or in memory (false)
      * @param onDisk :: true if it is on disk  */

@@ -72,6 +72,8 @@ namespace Mantid
       operator bool(){return stat == NX_OK;} ///< returns success of an operation
     };
 
+
+
     /** 
     * LoadNexusProcessed and SaveNexusProcessed need to share some attributes, put them at
     * namespace level here
@@ -819,6 +821,23 @@ namespace Mantid
       NXFloat openPolarAngle(){return openNXFloat("polar_angle");}
     };
 
+    /**  Implements NXdisk_chopper Nexus class.
+    */
+    class DLLExport NXDiskChopper:public NXMainClass
+    {
+    public:
+      /**  Constructor.
+      *   @param parent :: The parent Nexus class. In terms of HDF it is the group containing the NXClass.
+      *   @param name :: The name of the NXClass relative to its parent
+      */
+      NXDiskChopper(const NXClass& parent,const std::string& name):NXMainClass(parent,name){}
+      /// Nexus class id
+      std::string NX_class()const{return "NXdisk_chopper";}
+      /// Opens the dataset containing pixel distances
+      NXFloat openRotationSpeed(){return openNXFloat("rotation_speed");}
+
+    };
+
     /**  Implements NXinstrument Nexus class.
     */
     class DLLExport NXInstrument:public NXMainClass
@@ -836,6 +855,13 @@ namespace Mantid
       *   @return The detector
       */
       NXDetector openNXDetector(const std::string& name){return openNXClass<NXDetector>(name);}
+
+      /**  Opens a NXDetector
+      *   @param name :: The name of the class
+      *   @return The detector
+      */
+	  NXDiskChopper openNXDiskChopper(const std::string& name){return openNXClass<NXDiskChopper>(name);}
+
     };
 
     /**  Implements NXentry Nexus class.

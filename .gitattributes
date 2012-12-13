@@ -1,0 +1,4 @@
+# Set default behaviour, in case users don't have core.autocrlf set.
+# See https://help.github.com/articles/dealing-with-line-endings#platform-all for more info
+# N.B. Only works with git client 1.7.2+
+* text=auto

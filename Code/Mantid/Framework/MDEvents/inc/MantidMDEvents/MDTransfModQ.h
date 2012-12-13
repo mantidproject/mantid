@@ -13,11 +13,14 @@ namespace MDEvents
 /** Class responsible for conversion of input workspace 
   * data into proper number of output dimensions for ModQ case
   * 
+  * See http://www.mantidproject.org/Writing_custom_ConvertTo_MD_transformation for detailed description of this
+  * class place in the algorithms hierarchy. 
+  *
   * Currently contains Elastic and Inelastic transformations
   *
   * This particular file defines  specializations of generic coordinate transformation to the ModQ case
-   *
-   * @date 16-05-2012
+  *
+  * @date 16-05-2012
 
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

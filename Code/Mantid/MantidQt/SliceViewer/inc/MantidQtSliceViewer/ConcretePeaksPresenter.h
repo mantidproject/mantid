@@ -3,6 +3,8 @@
 
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakTransform.h"
+#include "MantidAPI/MDGeometry.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/V3D.h"
 #include <vector>
 #include <boost/shared_ptr.hpp>
@@ -11,10 +13,13 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
-    // Forward declaration.
+    // Forward declarations.
     class PeakOverlayViewFactory;
+    class PeakTransformFactory;
 
+    /// Alias for Vector of Peak Overlay Views
     typedef std::vector< boost::shared_ptr<PeakOverlayView> > VecPeakOverlayView;
+
     /*---------------------------------------------------------
     ConcretePeaksPresenter
 
@@ -23,7 +28,7 @@ namespace MantidQt
     class DLLExport ConcretePeaksPresenter : public PeaksPresenter
     {
     public:
-      ConcretePeaksPresenter(PeakOverlayViewFactory* factory, boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS);
+      ConcretePeaksPresenter(boost::shared_ptr<PeakOverlayViewFactory> nonIntegratedViewFactory, boost::shared_ptr<PeakOverlayViewFactory> integratedViewFactory, boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS, boost::shared_ptr<Mantid::API::MDGeometry> mdWS, boost::shared_ptr<PeakTransformFactory> transformFactory);
       virtual ~ConcretePeaksPresenter();
       virtual void update();
       virtual void updateWithSlicePoint(const double& slicePoint);
@@ -33,9 +38,11 @@ namespace MantidQt
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;
       /// View factory
-      boost::shared_ptr<PeakOverlayViewFactory> m_factory;
+      boost::shared_ptr<PeakOverlayViewFactory> m_viewFactory;
+      /// Transform factory
+      boost::shared_ptr<PeakTransformFactory> m_transformFactory;
       /// Peak transformer
-      PeakTransform m_transform;
+      PeakTransform_sptr m_transform;
       /// current slicing point.
       double m_slicePoint;
       /// Configurre peak transformations
@@ -44,6 +51,8 @@ namespace MantidQt
       void hideAll();
       /// Show all views
       void showAll();
+      /// determine wheter a dimension name corresponds to the free axis for the peaks workspace.
+      bool isDimensionNameOfFreeAxis(const std::string& name) const;
     };
 
   }

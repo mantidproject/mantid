@@ -1690,7 +1690,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, Mantid:
         WS->mutableRun().addProperty("file_notes", notes);
     }
     file.closeData();
-  } catch (::NeXus::Exception &e) {
+  } catch (::NeXus::Exception &) {
     // let it drop on floor
   }
 

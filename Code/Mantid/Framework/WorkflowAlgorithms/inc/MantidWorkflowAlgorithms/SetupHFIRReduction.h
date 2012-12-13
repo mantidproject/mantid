@@ -62,7 +62,7 @@ private:
   void exec();
   void setupTransmission(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
   void setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
-
+  void setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
 };
 
 } // namespace Algorithms

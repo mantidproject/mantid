@@ -2,10 +2,10 @@
 #define SLICE_VIEWER_COMPOSITEPEAKSPRESENTER_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
 #include <boost/make_shared.hpp>
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
+#include "MockObjects.h"
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid;
@@ -13,17 +13,6 @@ using namespace testing;
 
 class CompositePeaksPresenterTest : public CxxTest::TestSuite
 {
-private:
-
-  class MockPeaksPresenter : public PeaksPresenter
-  {
-  public:
-    MOCK_METHOD0(update, void());
-    MOCK_METHOD1(updateWithSlicePoint, void(const double&));
-    MOCK_METHOD0(changeShownDim, bool());
-    MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string&));
-    ~MockPeaksPresenter(){}
-  };
 
 public:
 
@@ -248,7 +237,6 @@ public:
   void test_maximum_allowed_peaks()
   {
     CompositePeaksPresenter presenter;
-    const size_t initialSize = presenter.size();
     // Add peaksWS
     const int limit = 10;
     for(int i = 0; i < limit; ++i)

@@ -172,10 +172,10 @@ namespace Mantid
     }
 
     /**
-     * Calculate the variance of a the time pulse through this chopper in seconds^2
-     * \f$\tau^2 = \frac(\DeltaT)^2\f$
+     * Calculate the variance of a the time pulse through this chopper in \f$s^2\f$
+     * \f[\tau^2 = \frac{\Delta_T^2 R_f}{6.0}\f] where \f$R_f\f$ is defined by FermiChopperModel::regimerFactor"("const double")const"
      * @return The value of the variance of the time pulse after passing through the chopper
-     * in seconds^2
+     * in \f$s^2\f$^2
      */
     double FermiChopperModel::calculatePulseTimeVariance() const
     {
@@ -188,15 +188,28 @@ namespace Mantid
       const double inverseSlitSpeed = 0.5/omega/m_slitRadius;
       const double inverseNeutronSpeed = 1.0/std::sqrt(ei*mevToSpeedSq);
       const double gamma = 2.0*m_chopperRadius/deltaT*std::fabs(inverseSlitSpeed - inverseNeutronSpeed);
+      double regime(0.0);
+      try
+      {
+        regime = regimeFactor(gamma);
+      }
+      catch(std::invalid_argument& exc)
+      {
+        std::string msg = exc.what();
+        std::ostringstream os;
+        os << "\nComponent values: chopper radius=" << m_chopperRadius << ",deltaT=" << deltaT
+           << ",slitRadius=" << m_slitRadius << ",Ei=" << ei << ",omega=" << omega << ",slitThickness=" << m_slitThickness;
+        throw std::invalid_argument(msg + os.str());
+      }
 
-      return deltaT*deltaT*regimeFactor(gamma)/6.0;
+      return deltaT*deltaT*regime/6.0;
     }
 
     /**
      * Computes the value of
-     *    \f$[\frac{(1-\gamma^4/10)}{(1-\gamma^2/6)}]\f$  if \f$0\leq \gamma \lt 1\f$
-     *    \f$[\frac{3}{5}\frac{\gamma(\sqrt{\gamma}-2)^2(\sqrt{\gamma}+8)}{(\sqrt{\gamma}+4)}\f$  if \f$1\leq \gamma \lt 4\f$
-     *    raises an error for \f$4 \leq \gamma\f$
+     *    \f[\frac{(1-\gamma^4/10)}{(1-\gamma^2/6)}\f]  if \f$ 0 \leq \gamma < 1\f$
+     *    \f[\frac{3}{5}\frac{\gamma(\sqrt{\gamma}-2)^2(\sqrt{\gamma}+8)}{(\sqrt{\gamma}+4)}\f]  if \f$ 1 \leq \gamma < 4 \f$
+     *    raises an error for \f$ 4 \leq \gamma\f$
      *
      * @returns A single unit-less value
      */

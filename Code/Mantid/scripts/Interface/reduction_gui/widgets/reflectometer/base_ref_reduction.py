@@ -907,9 +907,16 @@ class BaseRefWidget(BaseWidget):
         # mantidplot.app should be used instead of _qti.app (it's just an alias)
         #mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
         #mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+
+        peak_min = int(self._summary.data_peak_from_pixel.text());
+        peak_max = int(self._summary.data_peak_to_pixel.text());
+        back_min = int(self._summary.data_background_from_pixel1.text());
+        back_max = int(self._summary.data_background_to_pixel1.text());
+        tof_min = int(self._summary.data_from_tof.text());
+        tof_max = int(self._summary.data_to_tof.text());
         
         import mantidqtpython 
-        self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base)
+        self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base, peak_min, peak_max, back_min, back_max, tof_min, tof_max)
         QtCore.QObject.connect(self.ref_det_view.getConnections(), 
                                QtCore.SIGNAL("peak_back_tof_range_update(double,double, double,double,double,double)"), self.call_back)
 

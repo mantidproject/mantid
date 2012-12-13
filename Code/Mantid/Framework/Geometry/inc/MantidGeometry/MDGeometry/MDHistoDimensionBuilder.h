@@ -29,6 +29,8 @@ namespace Mantid
       void setMin(double min);
       void setMax(double max);
       void setNumBins(size_t nbins);
+
+      size_t getNumBins()const{return m_nbins;}
       MDHistoDimension* createRaw();
       IMDDimension_sptr create();
       MDHistoDimensionBuilder(const MDHistoDimensionBuilder&);

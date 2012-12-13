@@ -41,14 +41,14 @@ namespace Mantid
       using namespace Mantid::Geometry;
       MDGeometryBuilderXML<NoDimensionPolicy> refresh;
       xmlBuilder= refresh; //Reassign.
-      std::vector<MDDimensionExtents> ext = eventWs->getMinimumExtents(5);
+      std::vector<MDDimensionExtents<coord_t> > ext = eventWs->getMinimumExtents(5);
       std::vector<IMDDimension_sptr> dimensions;
       size_t nDimensions = eventWs->getNumDims();
       for (size_t d=0; d<nDimensions; d++)
       {
         IMDDimension_const_sptr inDim = eventWs->getDimension(d);
-        coord_t min = (ext[d].min);
-        coord_t max = (ext[d].max);
+        coord_t min = ext[d].getMin();
+        coord_t max = ext[d].getMax();
         if (min > max)
         {
           min = 0.0;

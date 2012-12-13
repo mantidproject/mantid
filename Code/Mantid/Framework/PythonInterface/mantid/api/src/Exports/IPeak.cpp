@@ -27,6 +27,8 @@ void export_IPeak()
     .def("getQLabFrame", &IPeak::getQLabFrame, "Return the Q change (of the lattice, k_i - k_f) for this peak.\n"
          "The Q is in the Lab frame: the goniometer rotation was NOT taken out.\n"
          "Note: There is no 2*pi factor used, so \\|Q| = 1/wavelength.")
+    .def("findDetector", &IPeak::findDetector,
+         "Using the instrument set in the peak, perform ray tracing to find the exact detector.")
     .def("getQSampleFrame", &IPeak::getQSampleFrame, "Return the Q change (of the lattice, k_i - k_f) for this peak."
          "The Q is in the Sample frame: the goniometer rotation WAS taken out. ")
     .def("setQLabFrame", &IPeak::setQLabFrame, "Set the peak using the peak's position in reciprocal space, in the lab frame.")

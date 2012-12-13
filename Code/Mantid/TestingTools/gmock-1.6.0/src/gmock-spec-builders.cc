@@ -480,7 +480,21 @@ bool UntypedFunctionMockerBase::VerifyAndClearExpectationsLocked() {
              untyped_expectation->line(), ss.str());
     }
   }
+
+#if WIN32
   untyped_expectations_.clear();
+#else
+
+// Swap data with empty to safely clear it outside mutex
+  UntypedExpectations tmp_untyped_expectations;
+  tmp_untyped_expectations.swap(untyped_expectations_);
+
+  // Unlock global mutex to avoid deadlock in nested destructors
+  g_gmock_mutex.Unlock();
+  tmp_untyped_expectations.clear();
+  g_gmock_mutex.Lock();
+
+#endif
   return expectations_met;
 }
 

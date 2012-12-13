@@ -2838,7 +2838,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
             m_Temperature /= 2.0;
           }
           // ii  Reset counters
-          numRecentAcceptance = 0.0;
+          numRecentAcceptance = 0;
           numRecentSteps = 0;
         }
       }

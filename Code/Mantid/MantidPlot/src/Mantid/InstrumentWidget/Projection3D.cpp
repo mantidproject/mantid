@@ -8,7 +8,6 @@
 #include "UnwrappedCylinder.h"
 #include "UnwrappedSphere.h"
 #include "OpenGLError.h"
-#include "DetSelector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidAPI/MatrixWorkspace.h"

@@ -1,4 +1,5 @@
 #include "InstrumentTreeModel.h"
+#include "InstrumentActor.h"
 #ifdef WIN32
 #include <windows.h>
 #endif
@@ -15,10 +16,10 @@ using Mantid::Geometry::IObjComponent;
 /**
  * Constructor for tree model to display instrument tree
  */
-InstrumentTreeModel::InstrumentTreeModel(boost::shared_ptr<const Instrument> instrument,
+InstrumentTreeModel::InstrumentTreeModel(const InstrumentActor *actor,
                                          QObject *parent) :
   QAbstractItemModel(parent),
-  m_instrument(instrument)
+  m_instrumentActor(actor)
 {
 }
 
@@ -40,7 +41,8 @@ int InstrumentTreeModel::columnCount(const QModelIndex &parent) const
 	{
 		if (parent.isValid())
 		{
-			boost::shared_ptr<const IComponent> comp=m_instrument->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(parent.internalPointer()));
+      auto instr = m_instrumentActor->getInstrument();
+			boost::shared_ptr<const IComponent> comp=instr->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(parent.internalPointer()));
 			boost::shared_ptr<const ICompAssembly> objcomp=boost::dynamic_pointer_cast<const ICompAssembly>(comp);
 			if(objcomp)
 				return 1;
@@ -66,10 +68,12 @@ QVariant InstrumentTreeModel::data(const QModelIndex &index, int role) const
 		if(role != Qt::DisplayRole)
 			return QVariant();
 
-		if(!index.isValid()) // not valid has to return the root node
-			return QString(m_instrument->getName().c_str());
+    auto instr = m_instrumentActor->getInstrument();
 
-		boost::shared_ptr<const IComponent> ins= m_instrument->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()));
+		if(!index.isValid()) // not valid has to return the root node
+			return QString(instr->getName().c_str());
+
+		boost::shared_ptr<const IComponent> ins= instr->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()));
 		if(ins)
     {
 			return QString(ins->getName().c_str());
@@ -112,17 +116,18 @@ QModelIndex InstrumentTreeModel::index(int row, int column, const QModelIndex &p
 	try
 	{
 		boost::shared_ptr<const ICompAssembly> parentItem;
+    auto instr = m_instrumentActor->getInstrument();
 		if(!parent.isValid()) //invalid parent, has to be the root node i.e instrument
-			return createIndex(row,column,m_instrument->getComponentID());
+			return createIndex(row,column,instr->getComponentID());
 
-		boost::shared_ptr<const IComponent> comp=m_instrument->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(parent.internalPointer()));
+		boost::shared_ptr<const IComponent> comp=instr->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(parent.internalPointer()));
 		parentItem = boost::dynamic_pointer_cast<const ICompAssembly>(comp);
 		if(!parentItem)
 		{
 			boost::shared_ptr<const IObjComponent> objcomp=boost::dynamic_pointer_cast<const IObjComponent>(comp);
 			if(objcomp) return QModelIndex();
 			//Not an instrument so check for Component Assembly
-			parentItem = boost::dynamic_pointer_cast<const ICompAssembly>(m_instrument);
+			parentItem = boost::dynamic_pointer_cast<const ICompAssembly>(instr);
 		}
 		//If component assembly pick the Component at the row index. if row index is higher than number
 		// of components in assembly return empty model index
@@ -153,14 +158,16 @@ QModelIndex InstrumentTreeModel::parent(const QModelIndex &index) const
 		if(!index.isValid()) // the index corresponds to root so there is no parent for root return empty.
 			return QModelIndex();
 
-		if(m_instrument->getComponentID()==static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()))
+    auto instr = m_instrumentActor->getInstrument();
+
+		if(instr->getComponentID()==static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()))
 			return QModelIndex();
 
-		boost::shared_ptr<const IComponent> child= m_instrument->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()));		
-		if(child->getParent()->getComponentID()==m_instrument->getComponentID())
-			return createIndex(0,0,m_instrument->getComponentID());
-		boost::shared_ptr<const IComponent> parent=m_instrument->getComponentByID(child->getParent()->getComponentID());
-		boost::shared_ptr<const IComponent> greatParent=m_instrument->getComponentByID(parent->getParent()->getComponentID());
+		boost::shared_ptr<const IComponent> child= instr->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(index.internalPointer()));		
+		if(child->getParent()->getComponentID()==instr->getComponentID())
+			return createIndex(0,0,instr->getComponentID());
+		boost::shared_ptr<const IComponent> parent=instr->getComponentByID(child->getParent()->getComponentID());
+		boost::shared_ptr<const IComponent> greatParent=instr->getComponentByID(parent->getParent()->getComponentID());
 		boost::shared_ptr<const ICompAssembly> greatParentAssembly=boost::dynamic_pointer_cast<const ICompAssembly>(greatParent);
 		int iindex=0;
 		for(int i=0;i<greatParentAssembly->nelements();i++)
@@ -190,11 +197,12 @@ int InstrumentTreeModel::rowCount(const QModelIndex &parent) const
 		}
 		else
 		{
-			if(m_instrument->getComponentID()==static_cast<Mantid::Geometry::ComponentID>(parent.internalPointer()))
+      auto instr = m_instrumentActor->getInstrument();
+			if(instr->getComponentID()==static_cast<Mantid::Geometry::ComponentID>(parent.internalPointer()))
       {
-				return m_instrument->nelements();
+				return instr->nelements();
       }
-			boost::shared_ptr<const IComponent> comp=m_instrument->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(parent.internalPointer()));//static_cast<IComponent*>(parent.internalPointer());
+			boost::shared_ptr<const IComponent> comp=instr->getComponentByID(static_cast<Mantid::Geometry::ComponentID>(parent.internalPointer()));//static_cast<IComponent*>(parent.internalPointer());
 			boost::shared_ptr<const ICompAssembly> assembly=boost::dynamic_pointer_cast<const ICompAssembly>(comp);
 			if(assembly)
 			{

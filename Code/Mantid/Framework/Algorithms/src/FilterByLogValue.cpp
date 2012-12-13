@@ -35,21 +35,14 @@ pulses:
 
 *WIKI*/
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAlgorithms/FilterByLogValue.h"
-#include "MantidDataObjects/EventList.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidAPI/FileProperty.h"
-
-#include <fstream>
-#include "MantidKernel/TimeSplitter.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ITimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/MandatoryValidator.h"
 
 namespace Mantid
 {
@@ -74,6 +67,8 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
 using DataObjects::EventWorkspace_const_sptr;
 
+std::string CENTRE("Centre");
+std::string LEFT("Left");
 
 //========================================================================
 //========================================================================
@@ -90,22 +85,21 @@ FilterByLogValue::~FilterByLogValue()
 //-----------------------------------------------------------------------
 void FilterByLogValue::init()
 {
-  using namespace Mantid::Kernel;
   declareProperty(
-    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::InOut),
+    new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input),
     "An input event workspace" );
 
   declareProperty(
     new WorkspaceProperty<EventWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
 
-  declareProperty("LogName", "ProtonCharge, "
+  declareProperty("LogName", "", boost::make_shared<MandatoryValidator<std::string>>(),
       "Name of the sample log to use to filter.\n"
       "For example, the pulse charge is recorded in 'ProtonCharge'.");
 
-  declareProperty("MinimumValue", 0.0, "Minimum log value for which to keep events.");
+  declareProperty("MinimumValue", Mantid::EMPTY_DBL(), "Minimum log value for which to keep events.");
 
-  declareProperty("MaximumValue", 0.0, "Maximum log value for which to keep events.");
+  declareProperty("MaximumValue", Mantid::EMPTY_DBL(), "Maximum log value for which to keep events.");
 
   auto min = boost::make_shared<BoundedValidator<double> >();
   min->setLower(0.0);
@@ -115,9 +109,9 @@ void FilterByLogValue::init()
     "If there are several consecutive log values matching the filter, events between T1-Tolerance and T2+Tolerance are kept.");
 
   std::vector<std::string> types(2);
-  types.push_back("Centre");
-  types.push_back("Left");
-  declareProperty("LogBoundary", "Centre", boost::make_shared<StringListValidator>(types),
+  types[0] = CENTRE;
+  types[1] = LEFT;
+  declareProperty("LogBoundary", types[0], boost::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of the time, or beginning (left) boundary");
 
 
@@ -129,6 +123,35 @@ void FilterByLogValue::init()
 
 }
 
+std::map<std::string, std::string> FilterByLogValue::validateInputs()
+{
+  std::map<std::string, std::string> errors;
+
+  // Check that the log exists for the given input workspace
+  EventWorkspace_const_sptr inputWS = this->getProperty("InputWorkspace");
+  std::string logname = getPropertyValue("LogName");
+  try {
+    ITimeSeriesProperty * log = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData(logname) );
+    if ( log == NULL )
+    {
+      errors["LogName"] = "'" + logname + "' is not a time-series log.";
+      return errors;
+    }
+  } catch ( Exception::NotFoundError& ) {
+    errors["LogName"] = "The log '" + logname + "' does not exist in the workspace '" + inputWS->name() + "'.";
+    return errors;
+  }
+
+  const double min = getProperty("MinimumValue");
+  const double max = getProperty("MaximumValue");
+  if ( !isEmpty(min) && !isEmpty(max) && (max < min) )
+  {
+    errors["MinimumValue"] = "MinimumValue must not be larger than MaximumValue";
+    errors["MaximumValue"] = "MinimumValue must not be larger than MaximumValue";
+  }
+
+  return errors;
+}
 
 //-----------------------------------------------------------------------
 /** Executes the algorithm
@@ -142,9 +165,9 @@ void FilterByLogValue::exec()
   // Get the properties.
   double min = getProperty("MinimumValue");
   double max = getProperty("MaximumValue");
-  double tolerance = getProperty("TimeTolerance");
-  std::string logname = getPropertyValue("LogName");
-  bool PulseFilter = getProperty("PulseFilter");
+  const double tolerance = getProperty("TimeTolerance");
+  const std::string logname = getPropertyValue("LogName");
+  const bool PulseFilter = getProperty("PulseFilter");
 
   // Find the start and stop times of the run, but handle it if they are not found.
   DateAndTime run_start(0), run_stop("2100-01-01");
@@ -162,7 +185,7 @@ void FilterByLogValue::exec()
   // Now make the splitter vector
   TimeSplitterType splitter;
   //This'll throw an exception if the log doesn't exist. That is good.
-  Kernel::TimeSeriesProperty<double> * log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>( inputWS->run().getLogData(logname) );
+  ITimeSeriesProperty * log = dynamic_cast<ITimeSeriesProperty*>( inputWS->run().getLogData(logname) );
   if (log)
   {
     if (PulseFilter)
@@ -185,36 +208,14 @@ void FilterByLogValue::exec()
     else
     {
       // ----- Filter by value ------
-      if (max <= min)
-        throw std::invalid_argument("MaximumValue should be > MinimumValue. Aborting.");
 
       //This function creates the splitter vector we will use to filter out stuff.
-      std::string logBoundary(this->getPropertyValue("LogBoundary"));
-      std::transform(logBoundary.begin(), logBoundary.end(), logBoundary.begin(), tolower);
-      log->makeFilterByValue(splitter, min, max, tolerance, (logBoundary.compare("centre") == 0));
+      const std::string logBoundary(this->getPropertyValue("LogBoundary"));
+      log->makeFilterByValue(splitter, min, max, tolerance, (logBoundary == CENTRE));
 
       if (log->realSize() >= 1 && handle_edge_values)
       {
-        double val;
-        // Assume everything before the 1st value is constant
-        val = log->firstValue();
-        if ((val >= min) && (val <= max))
-        {
-          TimeSplitterType extraFilter;
-          extraFilter.push_back( SplittingInterval(run_start, log->firstTime(), 0));
-          // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
-          splitter = splitter | extraFilter;
-        }
-
-        // Assume everything after the LAST value is constant
-        val = log->lastValue();
-        if ((val >= min) && (val <= max))
-        {
-          TimeSplitterType extraFilter;
-          extraFilter.push_back( SplittingInterval(log->lastTime(), run_stop, 0) );
-          // Include everything from the start of the run to the first time measured (which may be a null time interval; this'll be ignored)
-          splitter = splitter | extraFilter;
-        }
+        log->expandFilterToRange(splitter, min, max, TimeInterval(run_start,run_stop));
       }
     } // (filter by value)
 

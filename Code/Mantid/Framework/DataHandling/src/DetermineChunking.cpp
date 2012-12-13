@@ -18,6 +18,10 @@ Workflow algorithm to determine chunking strategy.
 #include "MantidDataHandling/DetermineChunking.h"
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/LoadTOFRawNexus.h"
+#include "LoadRaw/isisraw.h"
+#include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidAPI/TableRow.h"
@@ -98,6 +102,7 @@ namespace DataHandling
     exts.push_back("_runinfo.xml");
     exts.push_back("_event.nxs");
     exts.push_back(".nxs");
+    exts.push_back(".raw");
     this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
         "The name of the runinfo file to read, including its full or relative path. \n"
         "Or the name of the Event NeXus file to read, including its full or relative path. \n"
@@ -117,11 +122,20 @@ namespace DataHandling
   {
     double maxChunk = this->getProperty("MaxChunkSize");
     double filesize = 0;
+    int m_numberOfSpectra = 0;
     string runinfo = this->getPropertyValue("Filename");
     std::string ext = extension(runinfo);
     Mantid::API::ITableWorkspace_sptr strategy = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
-    strategy->addColumn("int","ChunkNumber");
-    strategy->addColumn("int","TotalChunks");
+    if( ext.compare("xml") == 0 || runinfo.compare(runinfo.size()-10,10,"_event.nxs") == 0)
+    {
+		strategy->addColumn("int","ChunkNumber");
+		strategy->addColumn("int","TotalChunks");
+    }
+    else if( ext.compare("raw") == 0|| runinfo.compare(runinfo.size()-10,10,"_histo.nxs") == 0)
+    {
+    	strategy->addColumn("int","SpectrumMin");
+    	strategy->addColumn("int","SpectrumMax");
+    }
     this->setProperty("OutputWorkspace", strategy);
 #ifndef MPI_BUILD
     // mpi needs work for every core, so don't do this
@@ -139,13 +153,14 @@ namespace DataHandling
       lp.parseRuninfo(runinfo, dataDir, eventFilenames);
       for (size_t i = 0; i < eventFilenames.size(); i++) {
         Mantid::Kernel::BinaryFile<DasEvent> * eventfile = new BinaryFile<DasEvent>(dataDir + eventFilenames[i]);
-        // Factor fo 2 for compression
+        // Factor of 2 for compression
         filesize += static_cast<double>(eventfile->getNumElements()) * 48.0 / (1024.0*1024.0*1024.0);
       }
     }
     //Event Nexus
     else if( runinfo.compare(runinfo.size()-10,10,"_event.nxs") == 0)
     {
+
       // top level file information
       ::NeXus::File file(runinfo);
       std::string m_top_entry_name = setTopEntryName(runinfo);
@@ -199,13 +214,44 @@ namespace DataHandling
       //Close up the file
       file.closeGroup();
       file.close();
-      // Factor fo 2 for compression
+      // Factor of 2 for compression
       filesize = static_cast<double>(total_events) * 48.0 / (1024.0*1024.0*1024.0);
     }
     //Histo Nexus
+    else if( ext.compare("raw") == 0)
+    {
+        // Check the size of the file loaded
+        Poco::File info(runinfo);
+        filesize = double(info.getSize()) * 24.0 / (1024.0*1024.0*1024.0);
+        g_log.notice() << "Wksp size is " << filesize << " GB" << std::endl;
+
+        LoadRawHelper *helper = new LoadRawHelper;
+        FILE* file = helper->openRawFile(runinfo);
+        ISISRAW iraw;
+        iraw.ioRAW(file, true);
+
+        // Read in the number of spectra in the RAW file
+        m_numberOfSpectra = iraw.t_nsp1;
+        g_log.notice() << "Spectra size is " << m_numberOfSpectra << " spectra" << std::endl;
+    }
+    else if( runinfo.compare(runinfo.size()-10,10,"_histo.nxs") == 0)
+    {
+        // Check the size of the file loaded
+        Poco::File info(runinfo);
+        filesize = double(info.getSize()) * 144.0 / (1024.0*1024.0*1024.0);
+        g_log.notice() << "Wksp size is " << filesize << " GB" << std::endl;
+        LoadTOFRawNexus lp;
+        lp.signalNo = 1;
+	    // Find the entry name we want.
+	    std::string entry_name = LoadTOFRawNexus::getEntryName(runinfo);
+	    std::vector<std::string> bankNames;
+	    lp.countPixels(runinfo, entry_name, bankNames);
+	    m_numberOfSpectra = static_cast<int>(lp.numPixels);
+        g_log.notice() << "Spectra size is " << m_numberOfSpectra << " spectra" << std::endl;
+    }
     else
     {
-      return;
+    	return;
     }
 
     int numChunks = static_cast<int>(filesize/maxChunk);
@@ -230,7 +276,18 @@ namespace DataHandling
 	}
 #endif
       Mantid::API::TableRow row = strategy->appendRow();
-      row << i << numChunks;
+      if( ext.compare("xml") == 0 || runinfo.compare(runinfo.size()-10,10,"_event.nxs") == 0)
+      {
+    	  row << i << numChunks;
+      }
+      else if( ext.compare("raw") == 0 || runinfo.compare(runinfo.size()-10,10,"_histo.nxs") == 0)
+      {
+    	  int spectraPerChunk = m_numberOfSpectra/numChunks;
+    	  int first = (i-1) * spectraPerChunk + 1;
+    	  int last = first + spectraPerChunk - 1;
+    	  if (i == numChunks) last = m_numberOfSpectra;
+    	  row << first << last;
+      }
     }
   }
   /// set the name of the top level NXentry m_top_entry_name

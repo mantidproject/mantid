@@ -142,6 +142,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
 	inc/MantidGeometry/MDGeometry/MDBoxImplicitFunction.h
+    inc/MantidGeometry/MDGeometry/MDDimensionExtents.h 
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLParser.h

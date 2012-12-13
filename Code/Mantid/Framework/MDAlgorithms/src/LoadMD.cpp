@@ -506,12 +506,10 @@ namespace Mantid
             MDBox<MDE,nd> * box;
 
             // Extents of the box, as a vector
-            std::vector<Mantid::Geometry::MDDimensionExtents> extentsVector(nd);
+            std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > extentsVector(nd);
             for (size_t d=0; d<nd; d++)
-            {
-              extentsVector[d].min = static_cast<coord_t>(extents[i*nd*2 + d*2]);
-              extentsVector[d].max = static_cast<coord_t>(extents[i*nd*2 + d*2 + 1]);
-            }
+              extentsVector[d].setExtents(static_cast<double>(extents[i*nd*2 + d*2]),static_cast<double>(extents[i*nd*2 + d*2 + 1]));
+
 
             if (box_type == 1)
             {

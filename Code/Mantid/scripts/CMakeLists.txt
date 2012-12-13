@@ -2,7 +2,7 @@ set ( TEST_PY_FILES test/ReducerTest.py )
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  pyunittest_add_test_two ( ${CMAKE_CURRENT_SOURCE_DIR}/test PythonScriptsTest ${TEST_PY_FILES} )
+  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}/test PythonScriptsTest ${TEST_PY_FILES} )
 endif ()
 
 # Ensure we don't get stale pyc files around

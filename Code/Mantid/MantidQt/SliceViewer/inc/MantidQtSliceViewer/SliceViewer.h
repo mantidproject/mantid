@@ -12,7 +12,7 @@
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
-#include "MantidQtSliceViewer/PeakOverlay.h"
+#include "MantidQtSliceViewer/PeakTransformSelector.h"
 #include "QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <QtCore/QtCore>
@@ -118,6 +118,8 @@ public slots:
   void zoomInSlot();
   void zoomOutSlot();
   void zoomRectSlot(const QwtDoubleRect & rect);
+  void panned(int, int);
+  void magnifierRescaled(double);
 
   // Color scale slots
   void setColorScaleAutoFull();
@@ -140,6 +142,7 @@ public slots:
   void SnapToGrid_toggled(bool);
   void RebinMode_toggled(bool);
   void RebinLock_toggled(bool);
+  void autoRebin_toggled(bool);
 
   // Dynamic rebinning
   void rebinParamsChanged();
@@ -167,6 +170,9 @@ private:
   void updatePeakOverlaySliderWidget();
   void enablePeakOverlaysIfAppropriate();
 
+  // Autorebin methods.
+  bool isAutoRebinSet() const;
+  void autoRebinIfRequired();
 
 private:
 
@@ -253,7 +259,7 @@ private:
 
   /// Synced menu/buttons
   MantidQt::API::SyncedCheckboxes *m_syncLineMode, *m_syncSnapToGrid,
-    *m_syncRebinMode, *m_syncRebinLock, *m_syncPeakOverlay;
+    *m_syncRebinMode, *m_syncRebinLock, *m_syncPeakOverlay, *m_syncAutoRebin;
 
   /// Cached double for infinity
   double m_inf;
@@ -278,6 +284,9 @@ private:
 
   /// Pointer to widget used for peaks sliding.
   DimensionSliceWidget* m_peaksSliderWidget;
+
+  /// Object for choosing a PeakTransformFactory based on the workspace type.
+  PeakTransformSelector m_peakTransformSelector;
 };
 
 } // namespace SliceViewer

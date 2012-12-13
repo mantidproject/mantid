@@ -1170,7 +1170,7 @@ RefMatrixWSImageView
 
 
 public:
-  RefMatrixWSImageView(QString wsname);
+  RefMatrixWSImageView(QString wsname, double peak_min, double peak_max, double back_min, double back_max, double tof_min, double tof_max);
   
   MantidQt::RefDetectorViewer::RefIVConnections * getConnections();
 %Docstring

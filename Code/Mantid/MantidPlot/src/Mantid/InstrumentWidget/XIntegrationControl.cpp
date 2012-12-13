@@ -226,7 +226,6 @@ m_totalMaximum(1),
 m_minimum(0),
 m_maximum(1)
 {
-  mInstrumentDisplay = m_instrWindow->getInstrumentDisplay();
   m_scrollBar = new XIntegrationScrollBar(this);
   QHBoxLayout* layout = new QHBoxLayout();
   m_minText = new QLineEdit(this);

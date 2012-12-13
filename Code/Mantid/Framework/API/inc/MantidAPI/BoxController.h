@@ -434,8 +434,8 @@ namespace API
       // Now calculate the max # of boxes
       m_maxNumMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
       m_maxNumMDBoxes[0] = 1;
-      for (size_t d=1; d<m_maxNumMDBoxes.size(); d++)
-        m_maxNumMDBoxes[d] = m_maxNumMDBoxes[d-1] * double(m_numSplit);
+      for (size_t depth=1; depth<m_maxNumMDBoxes.size(); depth++)
+        m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth-1] * double(m_numSplit);
     }
 
 

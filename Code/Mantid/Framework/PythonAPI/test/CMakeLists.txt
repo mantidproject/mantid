@@ -19,6 +19,6 @@ endif ()
 # Python unit tests
 if (PYUNITTEST_FOUND)
   # Add test targets
-  pyunittest_add_test_two ( ${CMAKE_CURRENT_SOURCE_DIR} PythonAPI ${TEST_PY_FILES} )
+  pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR} PythonAPI ${TEST_PY_FILES} )
 endif ()
 

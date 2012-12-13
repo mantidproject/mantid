@@ -80,7 +80,7 @@ int main( int argc, char **argv )
   ArrayDataSource* source = 
                    new ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data );
 
-  MantidQt::RefDetectorViewer::RefImageView image_view( source );
+  MantidQt::RefDetectorViewer::RefImageView image_view( source, 10, 110, 220, 320, 200, 500 );
 
                        // Don't delete on close in this case, since image_view
                        // will be deleted when the application ends

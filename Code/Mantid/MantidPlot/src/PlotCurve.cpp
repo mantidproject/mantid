@@ -439,9 +439,9 @@ void DataCurve::loadData()
 
   QStringList xLabels, yLabels;// store text labels
 
-  int xAxis = QwtPlot::xBottom;
-  if (d_type == Graph::HorizontalBars)
-    xAxis = QwtPlot::yLeft;
+//  int xAxis = QwtPlot::xBottom;
+//  if (d_type == Graph::HorizontalBars)
+//    xAxis = QwtPlot::yLeft;
 
   QTime time0;
   QDateTime date0;

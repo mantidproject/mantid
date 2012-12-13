@@ -6,89 +6,109 @@
 #include "MantidAPI/ArchiveSearchFactory.h"
 
 #include <Poco/File.h>
-#include <Poco/Net/HTTPSClientSession.h>
+#include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/Context.h>
 #include <Poco/Net/NetException.h>
 #include <Poco/URI.h>
 #include <boost/algorithm/string.hpp>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include "Poco/SAX/InputSource.h"
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include <iostream>
 
-using Poco::Net::HTTPSClientSession;
-using Poco::Net::HTTPRequest;
-using Poco::Net::HTTPResponse;
-using Poco::Net::HTTPMessage;
 using Poco::Net::ConnectionRefusedException;
 using Poco::URI;
 
 namespace Mantid
 {
-  namespace DataHandling
+namespace DataHandling
+{
+
+// Get a reference to the logger
+Mantid::Kernel::Logger & SNSDataArchive::g_log = Mantid::Kernel::Logger::get("SNSDataArchive");
+
+DECLARE_ARCHIVESEARCH(SNSDataArchive,SNSDataSearch);
+
+std::string SNSDataArchive::getArchivePath(const std::set<std::string>& filenames, const std::vector<std::string>& exts) const
+{
+  std::set<std::string>::const_iterator iter = filenames.begin();
+  std::string filename = *iter;
+
+  //ICAT4 web service take upper case filename such as HYSA_2662
+  std::transform(filename.begin(),filename.end(),filename.begin(),toupper);
+
+  std::vector<std::string>::const_iterator iter2 = exts.begin();
+  for(; iter2!=exts.end(); ++iter2)
   {
+    g_log.debug() << *iter2 << ";";
+  }
+  g_log.debug()  << "\n";
 
-  // Get a reference to the logger
-  Mantid::Kernel::Logger & SNSDataArchive::g_log = Mantid::Kernel::Logger::get("SNSDataArchive");
+  std::string baseURL("http://icat.sns.gov:8080/icat-rest-ws/datafile/filename/");
 
-    DECLARE_ARCHIVESEARCH(SNSDataArchive,SNSDataSearch);
+  std::string URL(baseURL + filename);
+  g_log.debug() << "URL: " << URL << "\n";
 
-    /**
-     * Calls a web service to get a full path to a file
-     * @param fName :: The file name.
-     * @return The path to the file or empty string in case of error.
-     */
-    std::string SNSDataArchive::getPath(const std::string& fName) const
+  Poco::URI uri(URL);
+  std::string path(uri.getPathAndQuery());
+
+  Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
+  Poco::Net::HTTPRequest req(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
+  session.sendRequest(req);
+
+  Poco::Net::HTTPResponse res;
+  std::istream& rs = session.receiveResponse(res);
+  g_log.debug() << "res.getStatus(): " << res.getStatus() << "\n";
+
+  // Create a DOM document from the response.
+  Poco::XML::DOMParser parser;
+  Poco::XML::InputSource source(rs);
+  Poco::XML::Document* pDoc = parser.parse(&source);
+
+  std::vector<std::string> locations;
+
+  // If everything went fine, return the XML document.
+  // Otherwise look for an error message in the XML document.
+  if (res.getStatus() == Poco::Net::HTTPResponse::HTTP_OK)
+  {
+    std::string location;
+    Poco::XML::NodeList* pList = pDoc->getElementsByTagName("location");
+    for(unsigned long i = 0 ; i < pList->length(); i++)
     {
-      std::string baseURL(
-          "https://prod.sns.gov/sns-icat-ws/icat-location/fileName/");
-      std::string URL(baseURL + fName);
-      g_log.debug() << "SNSDataArchive URL = \'" << URL << "\'\n";
-
-      std::string wsResult = "";
-
-      //#ifdef _WIN32
-      //	// Return an empty string
-      //#else
-      //
-      //#endif
-
-      Poco::URI uri(URL);
-      std::string path(uri.getPathAndQuery());
-
-      Poco::Net::Context::Ptr context = new Poco::Net::Context(Poco::Net::Context::CLIENT_USE, "", "",
-          "", Poco::Net::Context::VERIFY_NONE, 9, false, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-
-      try { // workaround for ubuntu 11.04
-        Poco::Net::HTTPSClientSession session(uri.getHost(), uri.getPort(), context); // this line is broken
-        HTTPRequest req(HTTPRequest::HTTP_GET, path, HTTPMessage::HTTP_1_1);
-        session.sendRequest(req);
-
-        HTTPResponse res;
-        std::istream& rs = session.receiveResponse(res);
-
-        char buff[300];
-        std::streamsize n;
-
-        do
-        {
-          rs.read(&buff[0], 300);
-          n = rs.gcount();
-          wsResult.append(&buff[0], n);
-        } while (n == 300);
-      } catch (ConnectionRefusedException &) {
-        g_log.information() << "Connection refused by prod.sns.gov\n";
-        throw;
-      } catch(Poco::IOException &e) {
-        g_log.debug() << e.name() << " thrown.\n";
-        g_log.information() << e.message() << "\n";
-        throw;
-      }
-
-      g_log.debug() << "SNSDataArchive Returning Filename = \'" << wsResult << "\'\n";
-
-      return wsResult;
+      location = pList->item(i)->innerText();
+      g_log.debug() << "location: " << location << "\n";
+      locations.push_back(location);
     }
+  }
+  else
+  {
+    std::string error(res.getReason());
+    throw Poco::ApplicationException("HTTPRequest Error", error);
+  }
 
-  } // namespace DataHandling
+  std::vector<std::string>::const_iterator ext = exts.begin();
+  for (; ext != exts.end(); ++ext)
+  {
+    std::string datafile = filename + *ext;
+    std::vector<std::string>::const_iterator iter = locations.begin();
+    for(; iter!=locations.end(); ++iter)
+    {
+      if (boost::algorithm::ends_with((*iter), datafile))
+      {
+        return *iter;
+      } // end if
+    } // end for iter
+
+  }  // end for ext
+  return "";
+}
+
+} // namespace DataHandling
 } // namespace Mantid

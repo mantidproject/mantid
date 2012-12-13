@@ -15,14 +15,17 @@
 #include "MantidQtSliceViewer/CustomTools.h"
 #include "MantidQtSliceViewer/DimensionSliceWidget.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
-#include "MantidQtSliceViewer/PeakOverlay.h"
 #include "MantidQtSliceViewer/QwtRasterDataMD.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
 #include "MantidQtSliceViewer/SnapToGridDialog.h"
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
-#include "MantidQtSliceViewer/PeakOverlayFactory.h"
+#include "MantidQtSliceViewer/PeakOverlaySphereFactory.h"
+#include "MantidQtSliceViewer/PeakOverlayCrossFactory.h"
+#include "MantidQtSliceViewer/PeakTransformHKL.h"
+#include "MantidQtSliceViewer/PeakTransformQSample.h"
+#include "MantidQtSliceViewer/PeakTransformQLab.h"
 #include "MantidQtSliceViewer/FirstExperimentInfoQuery.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
 #include "qmainwindow.h"
@@ -135,6 +138,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   QObject::connect(ui.btnRangeFull, SIGNAL(clicked()), this, SLOT(setColorScaleAutoFull()));
   QObject::connect(ui.btnRangeSlice, SIGNAL(clicked()), this, SLOT(setColorScaleAutoSlice()));
   QObject::connect(ui.btnRebinRefresh, SIGNAL(clicked()), this, SLOT(rebinParamsChanged()));
+  QObject::connect(ui.btnAutoRebin, SIGNAL(toggled(bool)), this, SLOT(autoRebin_toggled(bool)));
   QObject::connect(ui.btnPeakOverlay, SIGNAL(toggled(bool)), this, SLOT(peakOverlay_toggled(bool)));
 
   // ----------- Other signals ----------------
@@ -157,6 +161,11 @@ SliceViewer::SliceViewer(QWidget *parent)
   m_overlayWSOutline->setShowHandles(false);
   m_overlayWSOutline->setShowLine(false);
   m_overlayWSOutline->setShown(false);
+
+  // -------- Peak Overlay ----------------
+  m_peakTransformSelector.registerCandidate(boost::make_shared<PeakTransformHKLFactory>());
+  m_peakTransformSelector.registerCandidate(boost::make_shared<PeakTransformQSampleFactory>());
+  m_peakTransformSelector.registerCandidate(boost::make_shared<PeakTransformQLabFactory>());
 }
 
 //------------------------------------------------------------------------------------
@@ -300,6 +309,12 @@ void SliceViewer::initMenus()
   m_menuView->addAction(action);
   m_actionRefreshRebin = action;
 
+  action = new QAction(QPixmap(), "Auto Rebin", this);
+  m_syncAutoRebin = new SyncedCheckboxes(action, ui.btnAutoRebin, false);
+  connect(action, SIGNAL(toggled(bool)), this, SLOT(autoRebin_toggled(bool)));
+  m_syncAutoRebin->setEnabled(false); // Cannot auto rebin by default.
+  m_menuView->addAction(action);
+
   m_menuView->addSeparator();
 
   action = new QAction(QPixmap(), "Peak Overlay", this);
@@ -420,25 +435,26 @@ void SliceViewer::initZoomer()
       this, SLOT(zoomRectSlot(const QwtDoubleRect &)));
 
   // Zoom in/out using middle-click+drag or the mouse wheel
-  QwtPlotMagnifier * magnif = new CustomMagnifier(m_plot->canvas());
+  CustomMagnifier * magnif = new CustomMagnifier(m_plot->canvas());
   magnif->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
   magnif->setWheelFactor(0.9);
   magnif->setMouseButton(Qt::MidButton);
   // Have to flip the keys to match our flipped mouse wheel
   magnif->setZoomInKey(Qt::Key_Minus, Qt::NoModifier);
   magnif->setZoomOutKey(Qt::Key_Equal, Qt::NoModifier);
+  // Hook-up listener to rescaled event
+  QObject::connect(magnif, SIGNAL(rescaled(double)), this, SLOT(magnifierRescaled(double)));
 
   // Pan using the right mouse button + drag
   QwtPlotPanner *panner = new QwtPlotPanner(m_plot->canvas());
   panner->setMouseButton(Qt::RightButton);
   panner->setAxisEnabled(QwtPlot::yRight, false); // Don't do the colorbar axis
+  QObject::connect(panner, SIGNAL(panned(int, int)), this, SLOT(panned(int, int))); // Handle panning.
 
   // Custom picker for showing the current coordinates
   CustomPicker * picker = new CustomPicker(m_spect->xAxis(), m_spect->yAxis(), m_plot->canvas());
   QObject::connect(picker, SIGNAL(mouseMoved(double,double)), this, SLOT(showInfoAt(double, double)));
-
 }
-
 
 //------------------------------------------------------------------------------------
 /** Programmatically show/hide the controls (sliders etc)
@@ -570,11 +586,11 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws)
   // Adjust the range to that of visible data
   if (mdew)
   {
-    std::vector<Mantid::Geometry::MDDimensionExtents> ext = mdew->getMinimumExtents();
+    std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > ext = mdew->getMinimumExtents();
     for (size_t d=0; d < mdew->getNumDims(); d++)
     {
-      size_t newNumBins = size_t((ext[d].max-ext[d].min) / m_dimensions[d]->getBinWidth() + 1);
-      m_dimensions[d]->setRange(newNumBins,  ext[d].min, ext[d].max);
+      size_t newNumBins = size_t(ext[d].getSize()/m_dimensions[d]->getBinWidth() + 1);
+      m_dimensions[d]->setRange(newNumBins,  ext[d].getMin(), ext[d].getMax());
     }
   }
 
@@ -896,11 +912,14 @@ void SliceViewer::RebinMode_toggled(bool checked)
     m_dimWidgets[d]->showRebinControls(checked);
   ui.btnRebinRefresh->setEnabled(checked);
   ui.btnRebinLock->setEnabled(checked);
+  m_syncAutoRebin->setEnabled(checked);
   m_actionRefreshRebin->setEnabled(checked);
   m_rebinMode = checked;
 
   if (!m_rebinMode)
   {
+    // uncheck auto-rebin
+    ui.btnAutoRebin->setChecked(false);
     // Remove the overlay WS
     this->m_overlayWS.reset();
     this->m_data->setOverlayWorkspace(m_overlayWS);
@@ -948,8 +967,8 @@ void SliceViewer::zoomRectSlot(const QwtDoubleRect & rect)
   if ((rect.width() == 0) || (rect.height() == 0))
     return;
   this->setXYLimits(rect.left(), rect.right(), rect.top(), rect.bottom());
+  autoRebinIfRequired();
 }
-
 
 /// Slot for opening help page
 void SliceViewer::helpSliceViewer()
@@ -978,6 +997,7 @@ void SliceViewer::resetZoom()
   resetAxis(m_spect->yAxis(), m_Y );
   // Make sure the view updates
   m_plot->replot();
+  autoRebinIfRequired();
   m_peaksPresenter->update();
 }
 
@@ -1114,6 +1134,7 @@ void SliceViewer::zoomBy(double factor)
   double y_max = middle + newHalfWidth;
   // Perform the move
   this->setXYLimits(x_min, x_max, y_min, y_max);
+  autoRebinIfRequired();
 }
 
 //------------------------------------------------------------------------------------
@@ -2082,6 +2103,55 @@ void SliceViewer::dynamicRebinComplete(bool error)
   this->updateDisplay();
 }
 
+
+/**
+Event handler for plot panning. 
+*/
+void SliceViewer::panned(int, int)
+{
+  autoRebinIfRequired();
+}
+
+/**
+Event handler for changing magnification.
+*/
+void SliceViewer::magnifierRescaled(double)
+{
+  autoRebinIfRequired();
+}
+
+/**
+Event handler for the auto rebin toggle event. 
+*/
+void SliceViewer::autoRebin_toggled(bool checked)
+{
+  if(checked)
+  {
+    // Generate the rebin overlay assuming it isn't up to date.
+    this->rebinParamsChanged();
+  }
+}
+
+
+/**
+@return True only when Auto-Rebinning should be considered.
+*/
+bool SliceViewer::isAutoRebinSet() const
+{
+  return ui.btnAutoRebin->isEnabled() && ui.btnAutoRebin->isChecked();
+}
+
+/**
+Auto rebin the workspace according the the current-view + rebin parameters if that option has been set.
+*/
+void SliceViewer::autoRebinIfRequired()
+{
+  if(isAutoRebinSet())
+  {
+    rebinParamsChanged();
+  }
+}
+
 /**
 Event handler for selection/de-selection of peak overlays.
 
@@ -2103,14 +2173,34 @@ void SliceViewer::peakOverlay_toggled(bool checked)
       QStringList list = dlg.getSelectedNames();
       if(!list.isEmpty())
       {
+        // Fetch the correct Peak Overlay Transform Factory;
+        const std::string xDim = m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
+        const std::string yDim = m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
+        PeakTransformFactory_sptr transformFactory = m_peakTransformSelector.makeChoice(xDim, yDim);
         // Loop through each of those peaks workspaces and display them.
         for(int i = 0; i < list.size(); ++i)
         {
           IPeaksWorkspace_sptr peaksWS = AnalysisDataService::Instance().retrieveWS<IPeaksWorkspace>(list[i].toStdString());
-          PeakOverlayFactory* factory  = new PeakOverlayFactory(m_plot, m_plot->canvas(), m_peaksPresenter->size());
-          m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(factory, peaksWS));
+          const size_t numberOfChildPresenters = m_peaksPresenter->size();
+          PeakOverlayViewFactory_sptr viewFactoryIntegratedPeaks  = boost::make_shared<PeakOverlaySphereFactory>(m_plot, m_plot->canvas(), numberOfChildPresenters);
+          PeakOverlayViewFactory_sptr viewFactoryNonIntegratedPeaks  = boost::make_shared<PeakOverlayCrossFactory>(m_plot, m_plot->canvas(), numberOfChildPresenters);
+          try
+          {
+            m_peaksPresenter->addPeaksPresenter(boost::make_shared<ConcretePeaksPresenter>(viewFactoryNonIntegratedPeaks, viewFactoryIntegratedPeaks, peaksWS, m_ws, transformFactory));
+          }
+          catch(std::invalid_argument& e)
+          {
+            // Uncheck the button for consistency.
+            ui.btnPeakOverlay->setChecked(false);
+            throw e;
+          }
         }
         updatePeakOverlaySliderWidget();
+      }
+      else
+      {
+        // Uncheck the button for consistency.
+        ui.btnPeakOverlay->setChecked(false);
       }
     }
   }
@@ -2151,16 +2241,9 @@ void SliceViewer::enablePeakOverlaysIfAppropriate()
   bool enablePeakOverlays = false;
   if(m_ws->getNumDims() >= 2)
   {
-    try
-    { 
-      const std::string xDim = m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
-      const std::string yDim = m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
-      PeakTransform(xDim, yDim); // This will throw if the mapped dimensions are not hkl.
-      enablePeakOverlays = true;
-    }
-    catch(PeakTransformException&)
-    {
-    }
+    const std::string xDim = m_plot->axisTitle(QwtPlot::xBottom).text().toStdString();
+    const std::string yDim = m_plot->axisTitle(QwtPlot::yLeft).text().toStdString();
+    enablePeakOverlays = m_peakTransformSelector.hasFactoryForTransform(xDim, yDim);
   }
   m_syncPeakOverlay->setEnabled(enablePeakOverlays);
   if(! enablePeakOverlays)

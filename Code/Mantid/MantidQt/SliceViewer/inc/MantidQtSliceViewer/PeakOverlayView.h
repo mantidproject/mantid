@@ -47,7 +47,7 @@ namespace MantidQt
       /// Show the view.
       virtual void showView() = 0;
       /// Move the peak overlay to a new position.
-      virtual void movePosition(const PeakTransform& peakTransform) = 0;
+      virtual void movePosition(PeakTransform_sptr peakTransform) = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

@@ -101,6 +101,9 @@ namespace Mantid
       /// Run the sub-algorithm LoadParameters
       void runLoadParameterFile();
 
+      /// Search directory for Parameter file, return full path name if found, else "".
+      std::string getFullPathParamIDF( std::string directory );
+
       /// The name and path of the input file
       std::string m_filename;
 

@@ -40,7 +40,7 @@ namespace MDEvents
   public:
     MDGridBox();
 
-    MDGridBox(Mantid::API::BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents> & extentsVector);
+    MDGridBox(Mantid::API::BoxController_sptr bc, const size_t depth, const std::vector<Mantid::Geometry::MDDimensionExtents<coord_t> > & extentsVector);
 
     MDGridBox(MDBox<MDE, nd> * box, bool splitRecursively=false);
 
@@ -114,10 +114,7 @@ namespace MDEvents
     std::vector<MDBoxBase<MDE, nd>*> & getBoxes()
     { return boxes; }
 
-    /** For testing: return the internal-stored size of each box in each dimension */
-    coord_t getBoxSize(size_t d)
-    { return boxSize[d]; }
-
+  
     virtual bool getIsMasked() const;
 
     ///Setter for masking the box
@@ -135,11 +132,10 @@ namespace MDEvents
 
 
   private:
-
-    size_t computeSizesFromSplit();
-
     /// Each dimension is split into this many equally-sized boxes
     size_t split[nd];
+    /// size of each sub-box (the one this GridBox can be split into) in correspondent direction
+    double m_SubBoxSize[nd];
 
     /** Cumulative dimension splitting: split[n] = 1*split[0]*split[..]*split[n-1]
      */
@@ -153,10 +149,7 @@ namespace MDEvents
     /// How many boxes in the boxes vector? This is just to avoid boxes.size() calls.
     size_t numBoxes;
 
-    /// Size of each box size in the i^th dimension
-    coord_t boxSize[nd];
-
-    /** Length (squared) of the diagonal through every dimension = sum( boxSize[i]^2 )
+   /** Length (squared) of the diagonal through every dimension = sum( boxSize[i]^2 )
      * Used in some calculations like peak integration */
     coord_t diagonalSquared;
 
@@ -173,6 +166,7 @@ namespace MDEvents
 
 
 
+    size_t computeSizesFromSplit();
     void fillBoxShell(const size_t tot,const coord_t inverseVolume);
   public:
 
