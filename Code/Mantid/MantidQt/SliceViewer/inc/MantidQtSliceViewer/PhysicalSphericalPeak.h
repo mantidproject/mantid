@@ -39,6 +39,17 @@ namespace MantidQt
       void movePosition(PeakTransform_sptr peakTransform);
       /// Draw
       SphericalPeakPrimitives draw(const double& windowHeight, const double& windowWidth, const double& viewWidth, const double& viewHeight) const;
+
+      /**
+      Determine whether the physical peak is visible. This means that the intesecting plane penetrates the sphere somehow. If the absolute
+      distance between the plane and the origin is greater than the peak radius, then the peak is not visible.
+      @return True if the peak is visible in the current configuration.
+      */
+      inline bool isViewable() const
+      {
+        return (m_cachedOpacityAtDistance != m_opacityMin);
+      }
+
     private:
       /// Original origin x=h, y=k, z=l
       const Mantid::Kernel::V3D m_originalOrigin;
@@ -51,9 +62,13 @@ namespace MantidQt
       /// Min opacity
       const double m_opacityMin;
       /// Cached opacity at the distance z from origin
-      double m_opacityAtDistance;
+      double m_cachedOpacityAtDistance;
       /// Cached radius at the distance z from origin
-      double m_radiusAtDistance;
+      double m_cachedRadiusAtDistance;
+      /// Cached opacity gradient.
+      const double m_cachedOpacityGradient;
+      /// Cached radius squared.
+      const double m_cachedRadiusSQ;
 
       DISABLE_COPY_AND_ASSIGN(PhysicalSphericalPeak)
     };

@@ -19,7 +19,42 @@ class PhysicalSphericalPeakTest : public CxxTest::TestSuite
 {
 public:
 
-  void test_constructor_defaults()
+  void test_not_isViewable_after_construction()
+  {
+    V3D origin(0, 0, 0);
+    const double radius = 1;
+    PhysicalSphericalPeak physicalPeak(origin, radius);
+
+    TSM_ASSERT("Should NOT be viewable until a slice point < r is set.", !physicalPeak.isViewable());
+  }
+
+  void test_isViewable_after_setSlicePoint_to_intersect()
+  {
+    V3D origin(0, 0, 0);
+    const double radius = 1;
+    PhysicalSphericalPeak physicalPeak(origin, radius);
+
+    const double delta = 0.01;
+    const double slicePoint = radius - delta;
+    physicalPeak.setSlicePoint(slicePoint);
+
+    TSM_ASSERT("Should be viewable since slice point < r.", physicalPeak.isViewable());
+  }
+
+  void test_not_isViewable_after_setSlicePoint_beyond_range()
+  {
+    V3D origin(0, 0, 0);
+    const double radius = 1;
+    PhysicalSphericalPeak physicalPeak(origin, radius);
+
+    const double delta = 0.01;
+    const double slicePoint = radius + delta;
+    physicalPeak.setSlicePoint(slicePoint);
+
+    TSM_ASSERT("Should NOT be viewable until a slice point > r is set.", !physicalPeak.isViewable());
+  }
+
+  void test_draw_defaults()
   {
     V3D origin(0, 0, 0);
     const double radius = 1;
@@ -31,16 +66,17 @@ public:
     const double viewHeight = 1;
     const double viewWidth = 1;
 
+    TSM_ASSERT("Should NOT be viewable until a slice point < r is set.", !physicalPeak.isViewable());
     auto drawObject = physicalPeak.draw(windowHeight, windowWidth, viewHeight, viewWidth);
 
-    // Quick white-box calculations of the outputs to expect.
+    // The Return object should be initialized to zero in every field.
     TS_ASSERT_EQUALS(0, drawObject.peakOpacityAtDistance);
-    TS_ASSERT_EQUALS(0.5, drawObject.peakOuterRadiusX);
-    TS_ASSERT_EQUALS(0.5, drawObject.peakOuterRadiusY);
-    TS_ASSERT_EQUALS(1, drawObject.peakLineWidth);
+    TS_ASSERT_EQUALS(0, drawObject.peakOuterRadiusX);
+    TS_ASSERT_EQUALS(0, drawObject.peakOuterRadiusY);
+    TS_ASSERT_EQUALS(0, drawObject.peakLineWidth);
   }
 
-  void test_setSlicePoint_to_intersect()
+  void test_setSlicePoint_to_intersect_and_draw()
   {
     V3D origin(0, 0, 0);
     const double radius = 1;
@@ -55,6 +91,7 @@ public:
     const double viewHeight = 1;
     const double viewWidth = 1;
 
+    TSM_ASSERT("Should be viewable since slice point < r is set.", physicalPeak.isViewable());
     auto drawObject = physicalPeak.draw(windowHeight, windowWidth, viewHeight, viewWidth);
 
     // Quick white-box calculations of the outputs to expect.
@@ -81,6 +118,7 @@ public:
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockTransform));
   }
+
 };
 
 //=====================================================================================
