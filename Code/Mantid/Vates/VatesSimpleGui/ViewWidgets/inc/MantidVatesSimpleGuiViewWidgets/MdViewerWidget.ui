@@ -179,7 +179,7 @@
         <enum>QFrame::Raised</enum>
        </property>
       </widget>
-      <widget class="pqProxyTabWidget" name="proxyTabWidget">
+      <widget class="pqObjectInspectorWidget" name="proxyTabWidget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -218,12 +218,6 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>pqProxyTabWidget</class>
-   <extends>QTabWidget</extends>
-   <header>pqProxyTabWidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>pqPipelineBrowserWidget</class>
    <extends>QFrame</extends>
    <header>pqPipelineBrowserWidget.h</header>
@@ -257,6 +251,12 @@
    <class>Mantid::Vates::SimpleGui::ColorSelectionWidget</class>
    <extends>QWidget</extends>
    <header>MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>pqObjectInspectorWidget</class>
+   <extends>QWidget</extends>
+   <header>pqObjectInspectorWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

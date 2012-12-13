@@ -22,13 +22,13 @@
 #include <pqRenderView.h>
 #include <pqScalarsToColors.h>
 #include <pqServerManagerModel.h>
-#include <pqServerManagerSelectionModel.h>
 #include <pqSMAdaptor.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
 #include <vtkSMProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
+#include <vtkSMProxySelectionModel.h>
 #include <vtkSMViewProxy.h>
 
 #include <vtkSMPropertyIterator.h>
@@ -303,8 +303,10 @@ void MultiSliceView::makeCut(double origin[], double orient[])
 
 void MultiSliceView::selectIndicator()
 {
-  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
-  pqPipelineSource *source = qobject_cast<pqPipelineSource *>(smsModel->currentItem());
+  vtkSMProxySelectionModel *selection = pqActiveObjects::instance().activeSourcesSelectionModel();
+  pqServerManagerModel* pqModel = pqApplicationCore::instance()->getServerManagerModel();
+  vtkSMProxy* smProxy = selection->GetSelectedProxy(0);
+  pqPipelineSource *source = pqModel->findItem<pqPipelineSource*>(smProxy);
   QString name = source->getSMName();
   this->ui.xAxisWidget->selectIndicator(name);
   this->ui.yAxisWidget->selectIndicator(name);
@@ -313,12 +315,13 @@ void MultiSliceView::selectIndicator()
 
 void MultiSliceView::updateSelectedIndicator()
 {
-  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
-  pqPipelineSource *cut = qobject_cast<pqPipelineSource *>(smsModel->currentItem());
+  vtkSMProxySelectionModel *selection = pqActiveObjects::instance().activeSourcesSelectionModel();
+  pqServerManagerModel* pqModel = pqApplicationCore::instance()->getServerManagerModel();
+  vtkSMProxy* smProxy = selection->GetSelectedProxy(0);
+  pqPipelineSource *cut = pqModel->findItem<pqPipelineSource*>(smProxy);
   if (cut->getSMName().contains("Slice"))
   {
-    vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
-                                            "CutFunction").GetAsProxy();
+    vtkSMProxy *plane = vtkSMPropertyHelper(smProxy, "CutFunction").GetAsProxy();
     double origin[3];
     vtkSMPropertyHelper(plane, "Origin").Get(origin, 3);
     if (this->ui.xAxisWidget->hasIndicator())
@@ -340,18 +343,19 @@ void MultiSliceView::indicatorSelected(const QString &name)
 {
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   pqPipelineSource *cut = smModel->findItem<pqPipelineSource *>(name);
-  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
-  smsModel->setCurrentItem(cut, pqServerManagerSelectionModel::ClearAndSelect);
+  pqProxySelection new_selection = pqActiveObjects::instance().selection();
+  new_selection.clear();
+  pqActiveObjects::instance().setSelection(new_selection, cut);
 }
 
 void MultiSliceView::updateCutPosition(double position)
 {
-  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
-  const pqServerManagerSelection *list = smsModel->selectedItems();
-  pqPipelineSource *cut = qobject_cast<pqPipelineSource *>(list->at(0));
+  vtkSMProxySelectionModel *selection = pqActiveObjects::instance().activeSourcesSelectionModel();
+  pqServerManagerModel* pqModel = pqApplicationCore::instance()->getServerManagerModel();
+  vtkSMProxy* smProxy = selection->GetSelectedProxy(0);
+  pqPipelineSource *cut = pqModel->findItem<pqPipelineSource*>(smProxy);
 
-  vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
-                                          "CutFunction").GetAsProxy();
+  vtkSMProxy *plane = vtkSMPropertyHelper(smProxy, "CutFunction").GetAsProxy();
   double origin[3] = {0.0, 0.0, 0.0};
   if (this->ui.xAxisWidget->hasIndicator())
   {

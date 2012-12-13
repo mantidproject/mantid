@@ -9,12 +9,10 @@
 #include <pqPipelineBrowserWidget.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
-#include <pqProxyTabWidget.h>
 #include <pqRenderView.h>
 #include <pqScalarsToColors.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
-#include <pqServerManagerSelectionModel.h>
 #include <pqSMAdaptor.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
@@ -210,14 +208,14 @@ void ThreeSliceView::resetDisplay()
 
 void ThreeSliceView::correctVisibility(pqPipelineBrowserWidget *pbw)
 {
-  pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
-  smsModel->setCurrentItem(this->xCut, pqServerManagerSelectionModel::ClearAndSelect);
-  smsModel->setCurrentItem(this->yCut, pqServerManagerSelectionModel::Select);
-  smsModel->setCurrentItem(this->zCut, pqServerManagerSelectionModel::Select);
+  //pqServerManagerSelectionModel *smsModel = pqApplicationCore::instance()->getSelectionModel();
+  //smsModel->setCurrentItem(this->xCut, pqServerManagerSelectionModel::ClearAndSelect);
+  //smsModel->setCurrentItem(this->yCut, pqServerManagerSelectionModel::Select);
+  //smsModel->setCurrentItem(this->zCut, pqServerManagerSelectionModel::Select);
   pbw->setSelectionVisibility(true);
-  smsModel->setCurrentItem(this->xCut, pqServerManagerSelectionModel::Clear);
-  smsModel->setCurrentItem(this->yCut, pqServerManagerSelectionModel::Clear);
-  smsModel->setCurrentItem(this->zCut, pqServerManagerSelectionModel::Clear);
+  //smsModel->setCurrentItem(this->xCut, pqServerManagerSelectionModel::Clear);
+  //smsModel->setCurrentItem(this->yCut, pqServerManagerSelectionModel::Clear);
+  //smsModel->setCurrentItem(this->zCut, pqServerManagerSelectionModel::Clear);
   this->origRep->setVisible(false);
   this->correctColorScaleRange();
 }

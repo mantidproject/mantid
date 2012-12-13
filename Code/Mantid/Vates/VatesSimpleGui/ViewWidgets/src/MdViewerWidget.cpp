@@ -43,12 +43,12 @@
 #include <pqDefaultViewBehavior.h>
 #include <pqDeleteBehavior.h>
 #include <pqFixPathsInStateFilesBehavior.h>
+#include <pqInterfaceTracker.h>
 #include <pqObjectPickingBehavior.h>
 //#include <pqPersistentMainWindowStateBehavior.h>
 #include <pqPipelineContextMenuBehavior.h>
 //#include <pqPluginActionGroupBehavior.h>
 //#include <pqPluginDockWidgetsBehavior.h>
-#include <pqPluginManager.h>
 #include <pqPVNewSourceBehavior.h>
 #include <pqQtMessageHandlerBehavior.h>
 #include <pqSpreadSheetVisibilityBehavior.h>
@@ -232,7 +232,7 @@ void MdViewerWidget::createAppCoreForPlugin()
 void MdViewerWidget::setupParaViewBehaviors()
 {
   // Register ParaView interfaces.
-  pqPluginManager* pgm = pqApplicationCore::instance()->getPluginManager();
+  pqInterfaceTracker* pgm = pqApplicationCore::instance()->interfaceTracker();
 
   // * adds support for standard paraview views.
   pgm->addInterface(new pqStandardViewModules(pgm));
@@ -332,10 +332,11 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
 void MdViewerWidget::setParaViewComponentsForView()
 {
   // Extra setup stuff to hook up view to other items
-  this->ui.proxyTabWidget->setupDefaultConnections();
+  //this->ui.proxyTabWidget->setupDefaultConnections();
   this->ui.proxyTabWidget->setView(this->currentView->getView());
   this->ui.proxyTabWidget->setShowOnAccept(true);
   this->ui.pipelineBrowser->setActiveView(this->currentView->getView());
+  /*
   QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
                    SIGNAL(postaccept()),
                    this, SLOT(checkForUpdates()));
@@ -353,7 +354,7 @@ void MdViewerWidget::setParaViewComponentsForView()
                      static_cast<MultiSliceView *>(this->currentView),
                      SLOT(updateSelectedIndicator()));
   }
-
+  */
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
                    this->ui.modeControlWidget, SLOT(enableViewButtons(bool)));
   QObject::connect(this->currentView,
