@@ -34,11 +34,14 @@ namespace MantidQt
       virtual void updateWithSlicePoint(const double& slicePoint);
       virtual bool changeShownDim();
       virtual bool isLabelOfFreeAxis(const std::string& label) const;
+      SetPeaksWorkspaces presentedWorkspaces() const;
     private:
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;
       /// View factory
       boost::shared_ptr<PeakOverlayViewFactory> m_viewFactory;
+      /// Peaks workspace.
+      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
       /// Transform factory
       boost::shared_ptr<PeakTransformFactory> m_transformFactory;
       /// Peak transformer

@@ -4,6 +4,16 @@
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/System.h"
+#include <set>
+
+namespace Mantid
+{
+  namespace API
+  {
+    // Forward dec.
+    class IPeaksWorkspace;
+  }
+}
 
 namespace MantidQt
 {
@@ -12,6 +22,9 @@ namespace SliceViewer
   // Forward dec.
   class PeakOverlayViewFactory;
   class PeakOverlayView;
+
+  // Alias
+  typedef std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace> > SetPeaksWorkspaces;
 
   /*---------------------------------------------------------
   Abstract PeaksPresenter.
@@ -27,6 +40,7 @@ namespace SliceViewer
     virtual void updateWithSlicePoint(const double&) = 0;
     virtual bool changeShownDim() = 0;
     virtual bool isLabelOfFreeAxis(const std::string& label) const = 0;
+    virtual SetPeaksWorkspaces presentedWorkspaces() const = 0;
   };
 
 

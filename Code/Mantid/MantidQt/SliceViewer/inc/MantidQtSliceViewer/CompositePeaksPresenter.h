@@ -4,6 +4,7 @@
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
 #include <set>
+#include <boost/shared_ptr.hpp>
 
 namespace MantidQt
 {
@@ -35,7 +36,8 @@ namespace MantidQt
       size_t size() const;
       /// Clear the owned presenters.
       void clear();
-
+      /// Get references to all presented workspaces.
+      SetPeaksWorkspaces presentedWorkspaces() const;
     private:
       /// Default behaviour 
       PeaksPresenter_sptr m_default;

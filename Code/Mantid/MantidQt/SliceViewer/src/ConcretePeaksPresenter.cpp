@@ -29,7 +29,7 @@ namespace SliceViewer
   @param peaksTransform : Peak Transformation Factory. This is about interpreting the MODEL.
   */
   ConcretePeaksPresenter::ConcretePeaksPresenter(PeakOverlayViewFactory_sptr nonIntegratedViewFactory, PeakOverlayViewFactory_sptr integratedViewFactory, IPeaksWorkspace_sptr peaksWS, boost::shared_ptr<MDGeometry> mdWS, PeakTransformFactory_sptr transformFactory) : m_viewPeaks(peaksWS->getNumberPeaks())
-    , m_viewFactory(integratedViewFactory), m_transformFactory(transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0)
+    , m_viewFactory(integratedViewFactory), m_peaksWS(peaksWS), m_transformFactory(transformFactory), m_transform(transformFactory->createDefaultTransform()), m_slicePoint(0)
   {
     if(integratedViewFactory == NULL)
     {
@@ -210,6 +210,17 @@ namespace SliceViewer
         (*it)->hideView();
       }
     }
+  }
+
+  /**
+  @return a reference to the held peaks workspace.
+  */
+  SetPeaksWorkspaces ConcretePeaksPresenter::presentedWorkspaces() const
+  {
+    // There is only one workspace to return.
+    SetPeaksWorkspaces workspaces;
+    workspaces.insert(m_peaksWS);
+    return workspaces;
   }
 
 }

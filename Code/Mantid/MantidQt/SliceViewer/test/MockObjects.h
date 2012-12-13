@@ -29,6 +29,7 @@ namespace
     MOCK_METHOD1(updateWithSlicePoint, void(const double&));
     MOCK_METHOD0(changeShownDim, bool());
     MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string&));
+    MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
     ~MockPeaksPresenter(){}
   };
 

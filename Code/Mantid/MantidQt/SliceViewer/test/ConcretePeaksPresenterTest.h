@@ -136,6 +136,9 @@ public:
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
     TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
     TSM_ASSERT("MockTransform not used as expected", Mock::VerifyAndClearExpectations(pMockTransform));
+
+    auto ownedPeaksWorkspace = presenter.presentedWorkspaces();
+    TS_ASSERT_EQUALS(1, ownedPeaksWorkspace.size());
   }
 
   void test_constructor_swaps_view_factory_if_peaks_workspace_not_integrated()

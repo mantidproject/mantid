@@ -19,6 +19,7 @@ namespace MantidQt
       virtual void updateWithSlicePoint(const double&){}
       virtual bool changeShownDim(){return false;}
       virtual bool isLabelOfFreeAxis(const std::string&) const {return false;}
+      SetPeaksWorkspaces presentedWorkspaces() const{SetPeaksWorkspaces empty; return empty;}
     };
 
   }

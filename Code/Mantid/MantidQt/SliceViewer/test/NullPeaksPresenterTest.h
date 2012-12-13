@@ -49,6 +49,13 @@ public:
     TS_ASSERT(!presenter.isLabelOfFreeAxis(""));
   }
 
+  void test_presentedWorkspaces_is_empty()
+  {
+    NullPeaksPresenter presenter;
+    SetPeaksWorkspaces workspaces = presenter.presentedWorkspaces();
+    TS_ASSERT_EQUALS(0, workspaces.size());
+  }
+
 };
 
 #endif

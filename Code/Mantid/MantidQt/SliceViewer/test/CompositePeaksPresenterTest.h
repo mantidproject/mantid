@@ -138,6 +138,30 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockPresenter));
   }
 
+  void test_presentedWorkspaces()
+  {
+    SetPeaksWorkspaces setA;
+    MockPeaksPresenter* pA = new MockPeaksPresenter;
+    PeaksPresenter_sptr A(pA);
+    EXPECT_CALL(*pA, presentedWorkspaces()).WillOnce(Return(setA)); 
+
+    SetPeaksWorkspaces setB;
+    MockPeaksPresenter* pB = new MockPeaksPresenter;
+    PeaksPresenter_sptr B(pB);
+    EXPECT_CALL(*pB, presentedWorkspaces()).WillOnce(Return(setB)); 
+
+    // Create the composite.
+    CompositePeaksPresenter composite;
+    // add the subject presenter.
+    composite.addPeaksPresenter(A);
+    composite.addPeaksPresenter(B);
+    // Call the method on the composite.
+    composite.presentedWorkspaces();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pA));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pB));
+  }
+
   void test_changeShownDimension()
   {
     const bool PASS = true;

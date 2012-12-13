@@ -115,5 +115,19 @@ namespace MantidQt
     {
       return m_subjects.size();
     }
-}
+
+    /**
+    Return a collection of all referenced workspaces on demand.
+    */
+    SetPeaksWorkspaces CompositePeaksPresenter::presentedWorkspaces() const
+    {
+      SetPeaksWorkspaces allWorkspaces;
+      for(auto it = m_subjects.begin(); it != m_subjects.end(); ++it)
+      {
+        auto workspacesToAppend = (*it)->presentedWorkspaces();
+        allWorkspaces.insert(workspacesToAppend.begin(), workspacesToAppend.end());
+      }
+      return allWorkspaces;
+    }
+  }
 }
