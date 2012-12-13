@@ -2,7 +2,7 @@
 #include "ProjectionSurface.h"
 
 /// Constructor
-SimpleWidget::SimpleWidget(QWidget* parent):QWidget(parent),m_surface(NULL)
+SimpleWidget::SimpleWidget(QWidget* parent):QWidget(parent)
 {
     // Receive mouse move events
     setMouseTracking( true );
@@ -10,11 +10,15 @@ SimpleWidget::SimpleWidget(QWidget* parent):QWidget(parent),m_surface(NULL)
     setFocusPolicy(Qt::StrongFocus);
 }
 
+SimpleWidget::~SimpleWidget()
+{
+}
+
 /// Assign a surface to draw on
-void SimpleWidget::setSurface(ProjectionSurface* surface)
+void SimpleWidget::setSurface(boost::shared_ptr<ProjectionSurface> surface)
 {
     m_surface = surface;
-    connect(m_surface,SIGNAL(redrawRequired()),this,SLOT(repaint()),Qt::QueuedConnection);
+    connect(m_surface.get(),SIGNAL(redrawRequired()),this,SLOT(repaint()),Qt::QueuedConnection);
 }
 
 /// Redraw the view

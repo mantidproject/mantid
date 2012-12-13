@@ -55,6 +55,8 @@ using namespace MantidQt::API;
  */
 InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ):
   MdiSubWindow(app, label, name, f), WorkspaceObserver(),
+  m_InstrumentDisplay(NULL),
+  m_simpleDisplay(NULL),
   m_workspaceName(wsName),
   m_instrumentActor(NULL),
   mViewChanged(false), 
@@ -183,7 +185,6 @@ InstrumentWindow::~InstrumentWindow()
     saveSettings();
     delete m_instrumentActor;
   }
-  delete m_InstrumentDisplay;
 }
 
 /**
@@ -201,10 +202,24 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMi
   m_instrumentActor = new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax);
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),m_instrumentActor->maxBinValue());
   m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
-  ProjectionSurface* surface = getSurface();
+  auto surface = getSurface();
   if ( resetGeometry || !surface )
   {
-    setSurfaceType(m_surfaceType); // This call must come after the InstrumentActor is created
+    if ( setDefaultView )
+    {
+      // set the view type to the instrument's default view
+      QString defaultView = QString::fromStdString(m_instrumentActor->getInstrument()->getDefaultView());
+      if ( defaultView == "3D" && Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InstrumentView.UseOpenGL") != "On" )
+      {
+        // if OpenGL is switched off don't open the 3D view at start up
+        defaultView = "CYLINDRICAL_Y";
+      }
+      setSurfaceType( defaultView );
+    }
+    else
+    {
+      setSurfaceType(m_surfaceType); // This call must come after the InstrumentActor is created
+    }
     setupColorMap();
   }
   else
@@ -212,17 +227,6 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMi
     surface->resetInstrumentActor( m_instrumentActor );
   }
 
-  if ( setDefaultView )
-  {
-    // set the view type to the instrument's default view
-    QString defaultView = QString::fromStdString(m_instrumentActor->getInstrument()->getDefaultView());
-    if ( defaultView == "3D" && Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InstrumentView.UseOpenGL") != "On" )
-    {
-      // if OpenGL is switched off don't open the 3D view at start up
-      defaultView = "CYLINDRICAL_Y";
-    }
-    setSurfaceType( defaultView );
-  }
   setInfoText( getSurfaceInfoText() );
 }
 
@@ -266,7 +270,7 @@ void InstrumentWindow::setSurfaceType(int type)
       axis = Mantid::Kernel::V3D(1,0,0);
     }
 
-    ProjectionSurface* surface = getSurface();
+    ProjectionSurface* surface = getSurface().get();
     int peakLabelPrecision = 6;
     bool showPeakRow = true;
     if ( surface )
@@ -371,7 +375,7 @@ void InstrumentWindow::setupColorMap()
   */
 void InstrumentWindow::tabChanged(int)
 {
-  ProjectionSurface* surface = getSurface();
+  auto surface = getSurface();
   if ( !surface ) return;
   setInfoText(surface->getInfoText());
   updateInstrumentView();
@@ -619,7 +623,7 @@ void InstrumentWindow::setColorMapMaxValue(double maxValue)
  */
 void InstrumentWindow::setViewDirection(const QString& input)
 {
-  Projection3D* p3d = dynamic_cast<Projection3D*>( getSurface() );
+  auto p3d = boost::dynamic_pointer_cast<Projection3D>( getSurface() );
   if (p3d)
   {
     p3d->setViewDirection(input);
@@ -695,7 +699,8 @@ void InstrumentWindow::saveImage()
     }
   }
   
-  m_InstrumentDisplay->saveToFile(filename);
+  if ( m_InstrumentDisplay )
+    m_InstrumentDisplay->saveToFile(filename);
 }
 
 ///**
@@ -713,7 +718,8 @@ void InstrumentWindow::saveSettings()
 {
   QSettings settings;
   settings.beginGroup("Mantid/InstrumentWindow");
-  settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
+  if ( m_InstrumentDisplay )
+    settings.setValue("BackgroundColor", m_InstrumentDisplay->currentBackgroundColor());
   settings.setValue("PeakLabelPrecision",getSurface()->getPeakLabelPrecision());
   settings.setValue("ShowPeakRows",getSurface()->getShowPeakRowFlag());
   foreach(InstrumentWindowTab* tab, m_tabs)
@@ -740,7 +746,7 @@ void InstrumentWindow::preDeleteHandle(const std::string & ws_name, const boost:
   if (pws)
   {
     getSurface()->peaksWorkspaceDeleted(pws);
-    m_InstrumentDisplay->repaint();
+    updateInstrumentView();
     return;
   }
 }
@@ -820,7 +826,7 @@ void InstrumentWindow::unblock()
 
 void InstrumentWindow::set3DAxesState(bool on)
 {
-  Projection3D* p3d = dynamic_cast<Projection3D*>( getSurface() );
+  auto p3d = boost::dynamic_pointer_cast<Projection3D>( getSurface() );
   if (p3d)
   {
     p3d->set3DAxesState(on);
@@ -869,7 +875,7 @@ void InstrumentWindow::changeColorMapRange(double minValue, double maxValue)
 
 void InstrumentWindow::setWireframe(bool on)
 {
-  Projection3D* p3d = dynamic_cast<Projection3D*>( getSurface() );
+  auto p3d = boost::dynamic_pointer_cast<Projection3D>( getSurface() );
   if (p3d)
   {
     p3d->setWireframe(on);
@@ -909,7 +915,7 @@ void InstrumentWindow::multipleDetectorsSelected(QList<int>& detlist)
   */
 void InstrumentWindow::componentSelected(ComponentID id)
 {
-    ProjectionSurface *surface = getSurface();
+    auto surface = getSurface();
     if (surface)
     {
       surface->componentSelected(id);
@@ -1150,7 +1156,7 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
     QStringList wsName = text.split("::");
     Mantid::API::IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName[1].toStdString()));
-    UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>( getSurface() );
+    auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( getSurface() );
     if (pws && surface)
     {
       surface->setPeaksWorkspace(pws);
@@ -1256,7 +1262,8 @@ void InstrumentWindow::setShowPeakRowFlag(bool on)
  */
 void InstrumentWindow::setBackgroundColor(const QColor& color)
 {
-  m_InstrumentDisplay->setBackgroundColor(color);
+  if ( m_InstrumentDisplay )
+    m_InstrumentDisplay->setBackgroundColor(color);
 }
 
 /**
@@ -1264,15 +1271,23 @@ void InstrumentWindow::setBackgroundColor(const QColor& color)
  */
 QString InstrumentWindow::getSurfaceInfoText() const
 {
-  return m_InstrumentDisplay->getSurface()->getInfoText();
+  return getSurface()->getInfoText();
 }
 
 /**
  * Get pointer to the projection surface
  */
-ProjectionSurface* InstrumentWindow::getSurface() const
+ProjectionSurface_sptr InstrumentWindow::getSurface() const
 {
-  return m_InstrumentDisplay->getSurface();
+  if ( m_InstrumentDisplay )
+  {
+    return m_InstrumentDisplay->getSurface();
+  }
+  else if ( m_simpleDisplay )
+  {
+    return m_simpleDisplay->getSurface();
+  }
+  return ProjectionSurface_sptr();
 }
 
 /**
@@ -1281,28 +1296,51 @@ ProjectionSurface* InstrumentWindow::getSurface() const
  */
 void InstrumentWindow::setSurface(ProjectionSurface* surface)
 {
-  m_InstrumentDisplay->setSurface(surface);
-  m_InstrumentDisplay->update();
-  m_simpleDisplay->setSurface(surface);
-  m_simpleDisplay->update();
+  ProjectionSurface_sptr sharedSurface( surface );
+  if ( m_InstrumentDisplay )
+  {
+    m_InstrumentDisplay->setSurface(sharedSurface);
+    m_InstrumentDisplay->update();
+  }
+  if ( m_simpleDisplay )
+  {
+    m_simpleDisplay->setSurface(sharedSurface);
+    m_simpleDisplay->update();
+  }
 }
 
 /// Return the width of the instrunemt display
 int InstrumentWindow::getInstrumentDisplayWidth() const
 {
-  return m_InstrumentDisplay->width();
+  if ( m_InstrumentDisplay )
+  {
+    return m_InstrumentDisplay->width();
+  }
+  else if ( m_simpleDisplay )
+  {
+    return m_simpleDisplay->width();
+  }
+  return 0;
 }
 
 /// Return the height of the instrunemt display
 int InstrumentWindow::getInstrumentDisplayHeight() const
 {
-  return m_InstrumentDisplay->height();
+  if ( m_InstrumentDisplay )
+  {
+    return m_InstrumentDisplay->height();
+  }
+  else if ( m_simpleDisplay )
+  {
+    return m_simpleDisplay->height();
+  }
+  return 0;
 }
 
 /// Redraw the instrument view
 void InstrumentWindow::updateInstrumentView()
 {
-  if ( m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget*>(m_InstrumentDisplay) )
+  if ( m_InstrumentDisplay && m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget*>(m_InstrumentDisplay) )
   {
     m_InstrumentDisplay->updateView();
   }
@@ -1316,7 +1354,7 @@ void InstrumentWindow::updateInstrumentView()
 void InstrumentWindow::updateInstrumentDetectors()
 {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  if ( m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget*>(m_InstrumentDisplay) )
+  if ( m_InstrumentDisplay && m_instrumentDisplayLayout->currentWidget() == dynamic_cast<QWidget*>(m_InstrumentDisplay) )
   {
     m_InstrumentDisplay->updateDetectors();
   }
@@ -1337,7 +1375,7 @@ void InstrumentWindow::selectOpenGLDisplay(bool yes)
   const int oldIndex = m_instrumentDisplayLayout->currentIndex();
   if ( oldIndex == widgetIndex ) return;
   m_instrumentDisplayLayout->setCurrentIndex( widgetIndex );
-  ProjectionSurface* surface = getSurface();
+  auto surface = getSurface();
   if ( surface )
   {
     surface->updateView();

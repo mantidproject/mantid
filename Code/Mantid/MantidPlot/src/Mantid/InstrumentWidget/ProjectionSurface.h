@@ -15,6 +15,8 @@
 #include <QStack>
 #include <QColor>
 
+#include <boost/shared_ptr.hpp>
+
 namespace Mantid{
   namespace Geometry{
     class IDetector;
@@ -267,5 +269,7 @@ protected:
   mutable int m_peakShapesStyle;     ///< index of a default PeakMarker2D style to use with a new PeakOverlay.
 
 };
+
+typedef boost::shared_ptr<ProjectionSurface> ProjectionSurface_sptr;
 
 #endif // PROJECTIONSURFACE_H

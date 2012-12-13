@@ -9,7 +9,7 @@ InstrumentWindowTab::InstrumentWindowTab(InstrumentWindow *parent) :
 /**
   * Return a pointer to the projection surface.
   */
-ProjectionSurface *InstrumentWindowTab::getSurface() const
+boost::shared_ptr<ProjectionSurface> InstrumentWindowTab::getSurface() const
 {
     return m_instrWindow->getSurface();
 }

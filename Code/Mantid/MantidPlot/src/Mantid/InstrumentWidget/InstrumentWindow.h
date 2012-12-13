@@ -17,6 +17,7 @@
 
 #include "qwt_scale_widget.h"
 #include <Poco/NObserver.h>
+#include <boost/shared_ptr.hpp>
 
 class InstrumentActor;
 class OneCurvePlot;
@@ -67,7 +68,7 @@ public:
 
   SurfaceType getSurfaceType()const{return m_surfaceType;}
   /// Get pointer to the projection surface
-  ProjectionSurface* getSurface() const;
+  boost::shared_ptr<ProjectionSurface> getSurface() const;
   /// True if the GL instrument display is currently on
   bool isGLEnabled() const;
   /// Toggle between the GL and simple instrument display widgets

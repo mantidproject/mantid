@@ -160,7 +160,7 @@ QFrame * InstrumentWindowRenderTab::setupAxisFrame()
 void InstrumentWindowRenderTab::initSurface()
 {
   setAxis(QString::fromStdString(m_instrWindow->getInstrumentActor()->getInstrument()->getDefaultAxis()));
-  Projection3D *p3d = dynamic_cast<Projection3D*>(getSurface());
+  auto p3d = boost::dynamic_pointer_cast<Projection3D>(getSurface());
   if ( p3d )
   {
       p3d->set3DAxesState(areAxesOn());
@@ -286,7 +286,7 @@ void InstrumentWindowRenderTab::showAxes(bool on)
 
 void InstrumentWindowRenderTab::showEvent (QShowEvent *)
 {
-  ProjectionSurface* surface = getSurface();
+  auto surface = getSurface();
   if (surface)
   {
     surface->setInteractionMode(ProjectionSurface::MoveMode);
@@ -295,7 +295,7 @@ void InstrumentWindowRenderTab::showEvent (QShowEvent *)
 
 void InstrumentWindowRenderTab::flipUnwrappedView(bool on)
 {
-  UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>(m_instrWindow->getSurface());
+  auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>(m_instrWindow->getSurface());
   if (!surface) return;
   surface->setFlippedView(on);
   m_instrWindow->updateInstrumentView();

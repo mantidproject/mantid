@@ -171,10 +171,10 @@ m_userEditing(true)
 
 void InstrumentWindowMaskTab::initSurface()
 {
-  connect(m_instrWindow->getSurface(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
-  connect(m_instrWindow->getSurface(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
-  connect(m_instrWindow->getSurface(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
-  connect(m_instrWindow->getSurface(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
+  connect(m_instrWindow->getSurface().get(),SIGNAL(shapeCreated()),this,SLOT(shapeCreated()));
+  connect(m_instrWindow->getSurface().get(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
+  connect(m_instrWindow->getSurface().get(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
+  connect(m_instrWindow->getSurface().get(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
   enableApply( m_instrWindow->getSurface()->hasMasks() );
 }
 

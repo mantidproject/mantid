@@ -34,8 +34,7 @@ MantidGLWidget::MantidGLWidget(QWidget* parent):
   //m_polygonMode(SOLID),
   m_lightingState(0),
   m_isKeyPressed(false),
-  m_firstFrame(true),
-  m_surface(NULL)
+  m_firstFrame(true)
 {
 
   if (!this->format().depth())
@@ -52,16 +51,12 @@ MantidGLWidget::MantidGLWidget(QWidget* parent):
 
 MantidGLWidget::~MantidGLWidget()
 {
-  if (m_surface)
-    delete m_surface;
 }
 
-void MantidGLWidget::setSurface(ProjectionSurface* surface)
+void MantidGLWidget::setSurface(boost::shared_ptr<ProjectionSurface> surface)
 {
-  if (m_surface)
-    delete m_surface;
   m_surface = surface;
-  connect(m_surface,SIGNAL(redrawRequired()),this,SLOT(repaint()),Qt::QueuedConnection);
+  connect(m_surface.get(),SIGNAL(redrawRequired()),this,SLOT(repaint()),Qt::QueuedConnection);
   m_firstFrame = true;
   initializeGL();
 }
@@ -144,18 +139,6 @@ void MantidGLWidget::resizeGL(int width, int height)
 void MantidGLWidget::contextMenuEvent(QContextMenuEvent * event)
 {
   UNUSED_ARG(event) //avoid compiler warning
-  //if( m_interactionMode == MantidGLWidget::PickMode )
-  //{
-    //mPickBox->mousePressed(Qt::RightButton, QCursor::pos());
-    //mPickBox->mouseReleased(Qt::RightButton, QCursor::pos());
-    //std::set<QRgb> result=mPickBox->getListOfColorsPicked();
-    //if(!result.empty())
-    //{
-    //  emit actorsPicked(result);
-    //}
-
-  //}
-  std::cerr << "Context menu\n";
 }
 
 /**
@@ -300,7 +283,7 @@ void MantidGLWidget::resetWidget()
   */
 void MantidGLWidget::enableLighting(bool on)
 {
-  auto surface3D = dynamic_cast<Projection3D*>(m_surface);
+  auto surface3D = boost::dynamic_pointer_cast<Projection3D>(m_surface);
 
   if (surface3D)
   {

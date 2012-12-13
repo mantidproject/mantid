@@ -494,7 +494,7 @@ void InstrumentWindowPickTab::plotSingle(int detid)
   m_plot->setLabel("Detector " + QString::number(detid));
 
   // find any markers
-  ProjectionSurface* surface = getSurface();
+  auto surface = getSurface();
   if (surface)
   {
     QList<PeakMarker2D*> markers = surface->getMarkersWithID(detid);
@@ -610,7 +610,7 @@ void InstrumentWindowPickTab::setSelectionType()
     m_activeTool->setText("Tool: Select crystal peak(s)");
     surfaceMode = ProjectionSurface::DrawMode;
   }
-  ProjectionSurface* surface = m_instrWindow->getSurface();
+  auto surface = m_instrWindow->getSurface();
   if ( surface ) 
   {
     surface->setInteractionMode( surfaceMode );
@@ -648,7 +648,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
       tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
       tw->setInstrument(instr);
       Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
-      UnwrappedSurface* surface = dynamic_cast<UnwrappedSurface*>( m_instrWindow->getSurface() );
+      auto surface = boost::dynamic_pointer_cast<UnwrappedSurface>( m_instrWindow->getSurface() );
       if ( surface )
       {
           surface->setPeaksWorkspace(boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
@@ -692,7 +692,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
  */
 void InstrumentWindowPickTab::showEvent (QShowEvent *)
 {
-  ProjectionSurface* surface = getSurface();
+  auto surface = getSurface();
   if (surface)
   {
     surface->setInteractionMode(ProjectionSurface::PickMode);
@@ -1132,7 +1132,7 @@ void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
 
 void InstrumentWindowPickTab::initSurface()
 {
-    ProjectionSurface *surface = getSurface();
+    auto surface = getSurface().get();
     connect(surface,SIGNAL(singleDetectorTouched(int)),this,SLOT(singleDetectorTouched(int)));
     connect(surface,SIGNAL(singleDetectorPicked(int)),this,SLOT(singleDetectorPicked(int)));
 }

@@ -2,6 +2,7 @@
 #define INSTRUMENTWINDOWTAB_H
 
 #include <QFrame>
+#include <boost/shared_ptr.hpp>
 
 //--------------------------------------------------
 //  Forward declarations
@@ -29,7 +30,7 @@ public:
     virtual bool addToDisplayContextMenu(QMenu&) const {return false;}
 protected:
     /// Get the projection surface
-    ProjectionSurface *getSurface() const;
+    boost::shared_ptr<ProjectionSurface> getSurface() const;
     /// The parent InstrumentWindow
     InstrumentWindow* m_instrWindow;
 
