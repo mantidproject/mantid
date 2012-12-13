@@ -10,6 +10,7 @@ namespace MantidQt
     m_effectiveRadius((maxZ - minZ)*0.015),
     m_opacityMax(0.8),
     m_opacityMin(0.0),
+    m_opacityGradient((m_opacityMin - m_opacityMax)/m_effectiveRadius),
     m_crossViewFraction(0.015),
     m_opacityAtDistance(0.0)
   {
@@ -27,10 +28,16 @@ namespace MantidQt
   void PhysicalCrossPeak::setSlicePoint(const double& z)
   {
     const double distanceAbs = std::abs(z - m_origin.Z());
-
-    // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
-    m_opacityAtDistance = ((m_opacityMin - m_opacityMax)/m_effectiveRadius) * distanceAbs  + m_opacityMax;
-    m_opacityAtDistance = m_opacityAtDistance >= m_opacityMin ? m_opacityAtDistance : m_opacityMin;
+    
+    if(distanceAbs < m_effectiveRadius)
+    {
+      // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
+      m_opacityAtDistance = (m_opacityGradient * distanceAbs)  + m_opacityMax;
+    }
+    else
+    {
+      m_opacityAtDistance =  m_opacityMin;
+    }
   }
 
   void PhysicalCrossPeak::movePosition(PeakTransform_sptr peakTransform)

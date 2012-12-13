@@ -50,6 +50,8 @@ namespace MantidQt
       const double m_opacityMax;
       /// Min opacity
       const double m_opacityMin;
+      /// Cached opacity gradient
+      const double m_opacityGradient;
       /// Cross size percentage in y a fraction of the current screen height.
       const double m_crossViewFraction;
       /// Cached opacity at the distance z from origin
