@@ -78,11 +78,11 @@ namespace DataHandling
     // ADARA::Parser() will accept values for buffer size and max packet size, but the
     // defaults will work fine
   {
-    m_buffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
+    m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
         (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     // The numbers in the create() function don't matter - they'll get overwritten
     // down in initWorkspace() when we load the instrument definition.
-    // We need m_buffer created now, though, so we can add properties to it from
+    // We need m_eventBuffer created now, though, so we can add properties to it from
     // all of the variable value packets that may arrive before we can call
     // initWorkspace().
 
@@ -204,7 +204,7 @@ namespace DataHandling
         Poco::Thread::sleep( 100);  // 100 milliseconds
       }
 
-      // Read the packets, accumulate events in m_buffer...
+      // Read the packets, accumulate events in m_eventBuffer...
       read( m_socket);
 
       // Check the heartbeat
@@ -398,9 +398,9 @@ namespace DataHandling
       m_status = BeginRun;
 
       // Add the run_start property
-      if ( m_buffer->mutableRun().hasProperty("run_start") )
+      if ( m_eventBuffer->mutableRun().hasProperty("run_start") )
       {
-        m_buffer->mutableRun().removeProperty( "run_start"); // remove to old run_start value
+        m_eventBuffer->mutableRun().removeProperty( "run_start"); // remove to old run_start value
       }
 
       // runStart() is in the EPICS epoch - ie Jan 1, 1990.  Convert to Unix epoch
@@ -411,18 +411,18 @@ namespace DataHandling
       strftime( timeString, 64, "%FT%H:%M:%SZ", gmtime( &runStartTime));
       // addProperty() wants the time as an ISO 8601 string
 
-      m_buffer->mutableRun().addProperty("run_start", std::string( timeString) );
+      m_eventBuffer->mutableRun().addProperty("run_start", std::string( timeString) );
 
       // Add the run_number property
-      if ( m_buffer->mutableRun().hasProperty("run_number") )
+      if ( m_eventBuffer->mutableRun().hasProperty("run_number") )
       {
-        m_buffer->mutableRun().removeProperty( "run_number"); // remove to old run_start value
+        m_eventBuffer->mutableRun().removeProperty( "run_number"); // remove to old run_start value
       }
 
       // Oddly, the run number property needs to be a string....
       std::ostringstream runNum;
       runNum << pkt.runNumber();
-      m_buffer->mutableRun().addProperty( "run_number", runNum.str());
+      m_eventBuffer->mutableRun().addProperty( "run_number", runNum.str());
 
     }
     else if (pkt.status() == ADARA::RunStatus::END_RUN)
@@ -479,7 +479,7 @@ namespace DataHandling
     }
     else
     {
-      m_buffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
     }
 
     return true;
@@ -501,7 +501,7 @@ namespace DataHandling
     }
     else
     {
-      m_buffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
     }
 
     return true;
@@ -523,7 +523,7 @@ namespace DataHandling
     }
     else
     {
-      m_buffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
     }
 
     return true;
@@ -623,6 +623,7 @@ namespace DataHandling
             }
             else if ( (pvType == "integer") ||
                       (pvType == "unsigned") ||
+                      (pvType == "unsigned integer") ||
                       (pvType.find("enum_") == 0) )
             // Note: Mantid doesn't currently support unsigned int properties
             // Note: We're treating enums as ints (at least for now)
@@ -648,7 +649,7 @@ namespace DataHandling
                   prop->setUnits( pvUnits);
               }
 
-              m_buffer->mutableRun().addLogData(prop);
+              m_eventBuffer->mutableRun().addLogData(prop);
 
               // Add the pv id, device id and pv name to the name map so we can find the
               // name when we process the variable value packets
@@ -674,23 +675,23 @@ namespace DataHandling
       break;
 
     case ADARA::MarkerType::SCAN_START:
-      m_buffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), pkt.scanIndex());
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), pkt.scanIndex());
       g_log.information() << "Scan Start: " << pkt.scanIndex() << std::endl;
       break;
 
     case ADARA::MarkerType::SCAN_STOP:
-      m_buffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), 0);
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( SCAN_PROPERTY)->addValue( timeFromPacket( pkt), 0);
       g_log.information() << "Scan Stop:  " << pkt.scanIndex() << std::endl;
       break;
 
     case ADARA::MarkerType::PAUSE:
-      m_buffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 1);
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 1);
       g_log.information() << "Run paused" << std::endl;
       m_runPaused = true;
       break;
 
     case ADARA::MarkerType::RESUME:
-      m_buffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 0);
+      m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( PAUSE_PROPERTY)->addValue( timeFromPacket( pkt), 0);
       g_log.information() << "Run resumed" << std::endl;
       m_runPaused = false;
       break;
@@ -720,23 +721,23 @@ namespace DataHandling
     loadInst->setChild( true);  // keep the workspace out of the ADS
     loadInst->setProperty("InstrumentXML", m_instrumentXML);
     loadInst->setProperty("InstrumentName", m_instrumentName);
-    loadInst->setProperty("Workspace", m_buffer);
+    loadInst->setProperty("Workspace", m_eventBuffer);
 
     loadInst->execute();
 
-    m_buffer->padSpectra();  // expands the workspace to the size of the just loaded instrument
+    m_eventBuffer->padSpectra();  // expands the workspace to the size of the just loaded instrument
 
     // Set the units
-    m_buffer->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-    m_buffer->setYUnit( "Counts");
+    m_eventBuffer->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    m_eventBuffer->setYUnit( "Counts");
 
-    m_indexMap = m_buffer->getDetectorIDToWorkspaceIndexMap( true /* bool throwIfMultipleDets */ );
+    m_indexMap = m_eventBuffer->getDetectorIDToWorkspaceIndexMap( true /* bool throwIfMultipleDets */ );
 
     // initialize time series properties for pause/resume and scan_index
     Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
-    m_buffer->mutableRun().addLogData(prop);
+    m_eventBuffer->mutableRun().addLogData(prop);
     prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
-    m_buffer->mutableRun().addLogData(prop);
+    m_eventBuffer->mutableRun().addLogData(prop);
 
     // We must always have a run_start property or the LogManager throws an
     // exception.  The "real" value will come from a RunStatus packet saying that
@@ -747,7 +748,7 @@ namespace DataHandling
     // values in the sample log.
     Kernel::DateAndTime now = timeFromPacket(pkt);
     // addProperty() wants the time as an ISO 8601 string
-    m_buffer->mutableRun().addProperty("run_start", now.toISO8601String());
+    m_eventBuffer->mutableRun().addProperty("run_start", now.toISO8601String());
 
     m_workspaceInitialized = true;
   }
@@ -764,7 +765,7 @@ namespace DataHandling
     {
       std::size_t workspaceIndex = it->second;
       Mantid::DataObjects::TofEvent event( tof, pulseTime);
-      m_buffer->getEventList( workspaceIndex).addEventQuickly( event);
+      m_eventBuffer->getEventList( workspaceIndex).addEventQuickly( event);
     }
     else
     {
@@ -791,17 +792,17 @@ namespace DataHandling
 
     //Make a brand new EventWorkspace
     EventWorkspace_sptr temp = boost::dynamic_pointer_cast<EventWorkspace>(
-        API::WorkspaceFactory::Instance().create("EventWorkspace", m_buffer->getNumberHistograms(), 2, 1));
+        API::WorkspaceFactory::Instance().create("EventWorkspace", m_eventBuffer->getNumberHistograms(), 2, 1));
 
     //Copy geometry over.
-    API::WorkspaceFactory::Instance().initializeFromParent(m_buffer, temp, false);
+    API::WorkspaceFactory::Instance().initializeFromParent(m_eventBuffer, temp, false);
 
     // Clear out the old logs
     temp->mutableRun().clearTimeSeriesLogs();
 
     // Get an exclusive lock
     m_mutex.lock();
-    std::swap(m_buffer, temp);
+    std::swap(m_eventBuffer, temp);
     m_mutex.unlock();
 
     return temp;
@@ -838,7 +839,7 @@ namespace DataHandling
       // background thread is still paused.
       m_workspaceInitialized = false;
       m_nameMap.clear();
-      m_buffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
+      m_eventBuffer = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>
           (WorkspaceFactory::Instance().create("EventWorkspace", 1, 1, 1));
     }
 

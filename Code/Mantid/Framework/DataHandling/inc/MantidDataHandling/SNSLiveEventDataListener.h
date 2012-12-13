@@ -100,7 +100,7 @@ namespace Mantid
       // Both values are designed to be passed straight into the TofEvent constructor.
 
       ILiveListener::RunStatus m_status;
-      DataObjects::EventWorkspace_sptr m_buffer; ///< Used to buffer events between calls to extractData()
+      DataObjects::EventWorkspace_sptr m_eventBuffer; ///< Used to buffer events between calls to extractData()
 
       bool m_workspaceInitialized;
       std::string m_wsName;
