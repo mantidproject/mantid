@@ -553,10 +553,8 @@ class LoadVesuvio(PythonAlgorithm):
         if ip_file == "":
             return
         
-        # More verbose until the Child Algorithm stuff is sorted
-        update_inst = AlgorithmManager.Instance().createUnmanaged("UpdateInstrumentFromFile")
-        update_inst.initialize()
-        update_inst.setChild(True)
+        # More verbose until the sub algorithm stuff is sorted
+        update_inst = self.createChildAlgorithm("UpdateInstrumentFromFile")
         update_inst.setLogging(_LOGGING_)
         update_inst.setProperty("Workspace", self.foil_out)
         update_inst.setProperty("Filename", ip_file)

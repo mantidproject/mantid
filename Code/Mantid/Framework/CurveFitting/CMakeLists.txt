@@ -47,6 +47,7 @@ set ( SRC_FILES
 	src/Lorentzian1D.cpp
 	src/MultiDomainCreator.cpp
 	src/MuonFInteraction.cpp
+	src/NCSCountRate.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
 	src/PlotPeakByLogValue.cpp
@@ -69,8 +70,8 @@ set ( SRC_FILES
 	src/TabulatedFunction.cpp
 	src/ThermalNeutronBk2BkExpAlpha.cpp
 	src/ThermalNeutronBk2BkExpBeta.cpp
-	src/ThermalNeutronBk2BkExpSigma.cpp
 	src/ThermalNeutronBk2BkExpConvPV.cpp
+	src/ThermalNeutronBk2BkExpSigma.cpp
 	src/ThermalNeutronDtoTOFFunction.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
@@ -134,6 +135,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Lorentzian1D.h
 	inc/MantidCurveFitting/MultiDomainCreator.h
 	inc/MantidCurveFitting/MuonFInteraction.h
+	inc/MantidCurveFitting/NCSCountRate.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
@@ -156,8 +158,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/TabulatedFunction.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpAlpha.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpBeta.h
-	inc/MantidCurveFitting/ThermalNeutronBk2BkExpSigma.h
 	inc/MantidCurveFitting/ThermalNeutronBk2BkExpConvPV.h
+	inc/MantidCurveFitting/ThermalNeutronBk2BkExpSigma.h
 	inc/MantidCurveFitting/ThermalNeutronDtoTOFFunction.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
@@ -166,6 +168,7 @@ set ( INC_FILES
               
 set ( TEST_FILES
 	# ChebyshevPolynomialBackgroundTest.h
+	#DiffSphereTest.h
 	#SCDPanelErrorsTest.h
 	AbragamTest.h
 	BFGSTest.h
@@ -177,7 +180,6 @@ set ( TEST_FILES
 	ConvolutionTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
-	#DiffSphereTest.h
 	EndErfcTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
@@ -207,6 +209,7 @@ set ( TEST_FILES
 	MultiDomainCreatorTest.h
 	MultiDomainFunctionTest.h
 	MuonFInteractionTest.h
+	NCSCountRateTest.h
 	PRConjugateGradientTest.h
 	PlotPeakByLogValueTest.h
 	PolynomialTest.h
@@ -226,8 +229,8 @@ set ( TEST_FILES
 	TabulatedFunctionTest.h
 	ThermalNeutronBk2BkExpAlphaTest.h
 	ThermalNeutronBk2BkExpBetaTest.h
-	ThermalNeutronBk2BkExpSigmaTest.h
 	ThermalNeutronBk2BkExpConvPVTest.h
+	ThermalNeutronBk2BkExpSigmaTest.h
 	ThermalNeutronDtoTOFFunctionTest.h
 	UserFunction1DTest.h
 	UserFunctionTest.h

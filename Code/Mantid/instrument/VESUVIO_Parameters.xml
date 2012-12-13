@@ -68,6 +68,7 @@
 <parameter name="backward_foil_out_norm" type="string">
   <value val="410-430"/>
 </parameter>
+
 <!-- ====================================================== -->
 
 <!-- Forward Scattering -->
@@ -91,7 +92,44 @@
   <value val="400-450"/>
 </parameter>
 
+<!-- ======== Fitting parameters ========
+  These are currently at the instrument level but some may need
+  move to the component level
+-->
 
+<!-- Standard deviation of source-sample distribution (metres) -->
+<parameter name="sigma_l1">
+  <value val="0.021"/>
+</parameter>
+
+<!-- Standard deviation of sample-detector distribution (metres) -->
+<parameter name="sigma_l2">
+  <value val="0.023"/>
+</parameter>
+
+<!-- Standard deviation of detector theta distribution (radians) -->
+<parameter name="sigma_theta">
+  <value val="0.0023"/>
+</parameter>
+
+<!-- Final energy of neutrons (meV) (Currently common but should it be?) -->
+<parameter name="efixed">
+  <value val="4908"/>
+</parameter>
+
+<!-- Lorentzian HWHM of the foil analyser energy (efixed) (meV) -->
+<parameter name="hwhm_energy_lorentz">
+  <value val="24"/>
+</parameter>
+
+<!-- Gaussian standard deviation of the foil analyser energy (efixed) (meV) 
+     Note that this is not the HWHM but the standard deviation unlike the
+     Lorentzian parameter -->
+<parameter name="sigma_energy_gauss">
+  <value val="73"/>
+</parameter>
+
+<!-- ====================================================== -->
 
 </component-link>
 

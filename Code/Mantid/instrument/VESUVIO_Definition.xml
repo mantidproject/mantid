@@ -36,7 +36,7 @@
   <!-- MONITORS -->
   
   <component type="monitor" idlist="monitors">
-    <location z="-2.46" name="Monitor 1"/>
+    <location z="-2.4594" name="Monitor 1"/>
     <location z="2.38" name="Monitor 2"/>    
   </component>
 
