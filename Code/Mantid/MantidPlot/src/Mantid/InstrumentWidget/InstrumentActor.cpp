@@ -132,6 +132,7 @@ m_sampleActor(NULL)
 InstrumentActor::~InstrumentActor()
 {
   saveSettings();
+  delete m_detid2index_map;
 }
 
 /** Used to set visibility of an actor corresponding to a particular component
