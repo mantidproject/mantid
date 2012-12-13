@@ -67,10 +67,13 @@ def resolution(files, iconOpt, rebinParam, bground,
     iconWS = reducer.get_result_workspaces()[0]
     if Res:
         name = getWSprefix(iconWS) + 'res'
-        FlatBackground(InputWorkspace=iconWS, OutputWorkspace=name, StartX=bground[0], EndX=bground[1], 
-            Mode='Mean', OutputMode='Subtract Background')
-        Rebin(InputWorkspace=name, OutputWorkspace=name, Params=rebinParam)
+        FlatBackground(InputWorkspace=iconWS, OutputWorkspace='__background', StartX=bground[0], EndX=bground[1], 
+            Mode='Mean', OutputMode='Return Background')
+        Rebin(InputWorkspace=iconWS, OutputWorkspace=iconWS, Params=rebinParam)
+        RebinToWorkspace(WorkspaceToRebin='__background', WorkspaceToMatch=iconWS, OutputWorkspace='__background')
+        Minus(LHSWorkspace=iconWS, RHSWorkspace='__background', OutputWorkspace=name)
         DeleteWorkspace(iconWS)
+        DeleteWorkspace('__background')
         SaveNexusProcessed(InputWorkspace=name, Filename=name+'.nxs')
         if plotOpt:
             graph = mp.plotSpectrum(name, 0)
