@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QtGui>
 
-#include "MantidQtRefDetectorViewer/GraphDisplay.h"
+#include "MantidQtImageViewer/GraphDisplay.h"
 #include "MantidQtImageViewer/ImageDataSource.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
 
@@ -57,8 +57,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageView : public QMainWindow
     RefIVConnections* getIVConnections();
 
   private:
-    GraphDisplay*    h_graph;
-    GraphDisplay*    v_graph;
+    ImageView::GraphDisplay*    h_graph;
+    ImageView::GraphDisplay*    v_graph;
                                  
     // keep void pointers to the following objects, to avoid having to 
     // include ui_ImageView.h, which disappears by the time MantidPlot is

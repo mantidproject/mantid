@@ -8,7 +8,7 @@
 #include <qwt_plot.h>
 
 #include "MantidQtImageViewer/ImageDataSource.h"
-#include "MantidQtRefDetectorViewer/GraphDisplay.h"
+#include "MantidQtImageViewer/GraphDisplay.h"
 #include "MantidQtRefDetectorViewer/RefImagePlotItem.h"
 #include "MantidQtRefDetectorViewer/SliderHandler.h"
 #include "MantidQtRefDetectorViewer/RangeHandler.h"
@@ -58,8 +58,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageDisplay
      RefImageDisplay( QwtPlot*       image_plot, 
                    SliderHandler* slider_handler,
                    RangeHandler*  range_handler,
-                   GraphDisplay*  h_graph,
-                   GraphDisplay*  v_graph,
+                   ImageView::GraphDisplay*  h_graph,
+                   ImageView::GraphDisplay*  v_graph,
                    QTableWidget*  table_widget,
                    QRadioButton*  radioButtonPeakLeft,
                    QRadioButton* radioButtonPeakRight,
@@ -143,8 +143,8 @@ private:
      SliderHandler*       slider_handler;
      RangeHandler*        range_handler;
 
-     GraphDisplay*        h_graph_display;
-     GraphDisplay*        v_graph_display;
+     ImageView::GraphDisplay*        h_graph_display;
+     ImageView::GraphDisplay*        v_graph_display;
 
      double               pointed_at_x;
      double               pointed_at_y;

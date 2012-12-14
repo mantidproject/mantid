@@ -48,11 +48,8 @@ RefImageView::RefImageView( ImageView::ImageDataSource* data_source, double peak
   RangeHandler* range_handler = new RangeHandler( ui );
   saved_range_handler = range_handler;
 
-//  h_graph = new GraphDisplay( ui->h_graphPlot, ui->h_graph_table, false );
-//  v_graph = new GraphDisplay( ui->v_graphPlot, ui->v_graph_table, true );
-
-  h_graph = new GraphDisplay( ui->h_graphPlot, false );
-  v_graph = new GraphDisplay( ui->v_graphPlot, true );
+  h_graph = new ImageView::GraphDisplay( ui->h_graphPlot, NULL, false );
+  v_graph = new ImageView::GraphDisplay( ui->v_graphPlot, NULL, true );
 
   RefImageDisplay* image_display = new RefImageDisplay( ui->imagePlot,
                                                   slider_handler,

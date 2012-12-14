@@ -9,7 +9,7 @@
 #include "MantidQtRefDetectorViewer/RefImageView.h"
 #include "MantidQtImageViewer/TrackingPicker.h"
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
-#include "MantidQtRefDetectorViewer/GraphDisplay.h"
+#include "MantidQtImageViewer/GraphDisplay.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
 
 
@@ -63,8 +63,8 @@ public:
   RefIVConnections( Ui_RefImageViewer* ui, 
                  RefImageView*     image_view,
                  RefImageDisplay*  image_display,
-                 GraphDisplay*  h_graph_display,
-                 GraphDisplay*  v_graph_display );
+                 ImageView::GraphDisplay*  h_graph_display,
+                 ImageView::GraphDisplay*  v_graph_display );
 
   ~RefIVConnections();
 
@@ -109,8 +109,8 @@ private:
   Ui_RefImageViewer*   iv_ui;
   RefImageView*       iv_main_window;
   RefImageDisplay*    image_display;
-  GraphDisplay*    h_graph_display;
-  GraphDisplay*    v_graph_display;
+  ImageView::GraphDisplay*    h_graph_display;
+  ImageView::GraphDisplay*    v_graph_display;
   ImageView::TrackingPicker*  image_picker;
   ImageView::TrackingPicker*  image_picker2;
   ImageView::TrackingPicker*  h_graph_picker;

@@ -1,7 +1,6 @@
 set ( SRC_FILES
        src/RefImageDisplay.cpp   
        src/RefImagePlotItem.cpp  
-       src/GraphDisplay.cpp     
        src/RefImageView.cpp      
        src/SliderHandler.cpp
        src/RangeHandler.cpp
@@ -15,7 +14,6 @@ set ( INC_FILES
        inc/MantidQtRefDetectorViewer/RefImageDisplay.h
        inc/MantidQtRefDetectorViewer/RefIVConnections.h
        inc/MantidQtRefDetectorViewer/RefImagePlotItem.h
-       inc/MantidQtRefDetectorViewer/GraphDisplay.h
        inc/MantidQtRefDetectorViewer/RefImageView.h
        inc/MantidQtRefDetectorViewer/SliderHandler.h
        inc/MantidQtRefDetectorViewer/RangeHandler.h
