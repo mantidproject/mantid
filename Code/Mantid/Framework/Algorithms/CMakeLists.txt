@@ -155,6 +155,7 @@ set ( SRC_FILES
 	src/Rebin.cpp
 	src/Rebin2D.cpp
 	src/RebinByPulseTimes.cpp
+	src/RebinRagged.cpp
 	src/RebinToWorkspace.cpp
 	src/Rebunch.cpp
 	src/RecordPythonScript.cpp
@@ -361,6 +362,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Rebin.h
 	inc/MantidAlgorithms/Rebin2D.h
 	inc/MantidAlgorithms/RebinByPulseTimes.h
+	inc/MantidAlgorithms/RebinRagged.h
 	inc/MantidAlgorithms/RebinToWorkspace.h
 	inc/MantidAlgorithms/Rebunch.h
 	inc/MantidAlgorithms/RecordPythonScript.h
@@ -558,6 +560,7 @@ set ( TEST_FILES
 	RealFFTTest.h
 	Rebin2DTest.h
 	RebinByPulseTimesTest.h
+	RebinRaggedTest.h
 	RebinTest.h
 	RebinToWorkspaceTest.h
 	RebunchTest.h
