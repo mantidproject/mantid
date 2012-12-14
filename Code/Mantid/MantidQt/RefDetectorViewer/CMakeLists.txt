@@ -15,7 +15,6 @@ set ( SRC_FILES
        src/RefMatrixWSDataSource.cpp
        src/RefMatrixWSImageView.cpp
        src/ArrayDataSource.cpp
-       src/RefArrayDataSource.cpp
        src/ErrorHandler.cpp
 )
 
@@ -37,7 +36,6 @@ set ( INC_FILES
        inc/MantidQtRefDetectorViewer/RefMatrixWSDataSource.h
        inc/MantidQtRefDetectorViewer/RefMatrixWSImageView.h
        inc/MantidQtRefDetectorViewer/ArrayDataSource.h
-       inc/MantidQtRefDetectorViewer/RefArrayDataSource.h
        inc/MantidQtRefDetectorViewer/ErrorHandler.h
 )
 

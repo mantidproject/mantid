@@ -1,7 +1,7 @@
 #include <iostream>
 #include "MantidQtRefDetectorViewer/RefMatrixWSImageView.h"
 #include "MantidQtRefDetectorViewer/RefMatrixWSDataSource.h"
-#include "MantidQtRefDetectorViewer/RefArrayDataSource.h"
+#include "MantidQtRefDetectorViewer/ArrayDataSource.h"
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/Algorithm.h"
@@ -66,7 +66,7 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name, double peak_min, d
         }
     }
     
-    RefArrayDataSource* source = new RefArrayDataSource(total_xmin, total_xmax,
+    ArrayDataSource* source = new ArrayDataSource(total_xmin, total_xmax,
                                                         total_ymin, total_ymax,
                                                         total_rows, total_cols,
                                                         data);
