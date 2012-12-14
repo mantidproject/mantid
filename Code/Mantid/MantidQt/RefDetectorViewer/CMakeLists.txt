@@ -73,7 +73,7 @@ target_link_libraries ( MantidQtRefDetectorViewer
 ###########################################################################
 
 add_executable ( RefDetectorViewDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/RefDetectorViewDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
-target_link_libraries ( RefDetectorViewDemo MantidQtAPI QtPropertyBrowser
+target_link_libraries ( RefDetectorViewDemo MantidQtAPI QtPropertyBrowser MantidQtImageViewer
                         ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 # add_executable ( ImageViewNxEventFile EXCLUDE_FROM_ALL ${ALL_SRC}

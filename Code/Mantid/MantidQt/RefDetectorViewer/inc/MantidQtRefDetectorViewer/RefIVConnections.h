@@ -111,10 +111,10 @@ private:
   RefImageDisplay*    image_display;
   GraphDisplay*    h_graph_display;
   GraphDisplay*    v_graph_display;
-  TrackingPicker*  image_picker;
-  TrackingPicker*  image_picker2;
-  TrackingPicker*  h_graph_picker;
-  TrackingPicker*  v_graph_picker;
+  ImageView::TrackingPicker*  image_picker;
+  ImageView::TrackingPicker*  image_picker2;
+  ImageView::TrackingPicker*  h_graph_picker;
+  ImageView::TrackingPicker*  v_graph_picker;
   QActionGroup*    color_group;
 
 };

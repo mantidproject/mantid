@@ -27,6 +27,7 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
+  using namespace ImageView;
 
 /**
  * Construct a DataSource object around the specifed MatrixWorkspace.
@@ -116,7 +117,7 @@ size_t RefMatrixWSDataSource::GetNRows()
  * @param is_log_x  Flag indicating whether or not the data should be
  *                  binned logarithmically.  (NOT USED YET)
  */
-DataArray* RefMatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
+ImageView::DataArray* RefMatrixWSDataSource::GetDataArray( double xmin,   double  xmax,
                                              double ymin,   double  ymax,
                                              size_t n_rows, size_t  n_cols,
                                              bool   is_log_x )

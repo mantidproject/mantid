@@ -167,7 +167,7 @@ void RefImageDataSource::RestrictCol( int & col )
 /**
  *  Convenience method to get all the data at the maximum resolution.
  */
-DataArray* RefImageDataSource::GetDataArray( bool is_log_x )
+ImageView::DataArray* RefImageDataSource::GetDataArray( bool is_log_x )
 {
   return GetDataArray( total_xmin, total_xmax, total_ymin, total_ymax,
                        total_rows, total_cols, is_log_x );

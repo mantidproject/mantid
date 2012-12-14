@@ -12,6 +12,7 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
+  using namespace ImageView;
 
 /**
  * Construct the object that links the GUI components to the other specifed

@@ -20,6 +20,7 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
+  using namespace ImageView;
 
 /**
  * Make an RefImageDisplay to display with the given widgets and controls.

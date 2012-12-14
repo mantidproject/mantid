@@ -57,7 +57,7 @@ public:
   ~RefImagePlotItem();
   
   /// Specify the data to be plotted and the color table to use
-  void SetData( DataArray* data_array, 
+  void SetData( ImageView::DataArray* data_array,
                 std::vector<QRgb>* positive_color_table,
                 std::vector<QRgb>* negative_color_table );
 
@@ -73,8 +73,8 @@ public:
 private:
 
   int                   buffer_ID;        // set to 0 or 1 to select buffer 
-  DataArray*            data_array_0;     // these provide double buffers
-  DataArray*            data_array_1;     // for the float data.
+  ImageView::DataArray*            data_array_0;     // these provide double buffers
+  ImageView::DataArray*            data_array_1;     // for the float data.
 
                                           // This class just uses the following
                                           // but they are created and deleted

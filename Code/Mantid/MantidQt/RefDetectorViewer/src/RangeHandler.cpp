@@ -11,6 +11,7 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
+  using namespace ImageView;
 
 /**
  *  Construct a RangeHandler object to manage min, max and step controls 

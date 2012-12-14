@@ -135,7 +135,7 @@ private:
      std::vector<double>  intensity_table;
 
      RefImageDataSource*     data_source;
-     DataArray*           data_array;
+     ImageView::DataArray*           data_array;
 
      QwtPlot*             image_plot;
      RefImagePlotItem*       image_plot_item;

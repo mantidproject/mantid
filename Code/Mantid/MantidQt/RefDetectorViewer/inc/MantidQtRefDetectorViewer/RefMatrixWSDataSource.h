@@ -66,10 +66,10 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSDataSource: public RefImageData
     virtual size_t GetNRows();
 
     /// Get DataArray covering full range of data in x, and y directions
-    DataArray * GetDataArray( bool is_log_x );
+    ImageView::DataArray * GetDataArray( bool is_log_x );
     
     /// Get DataArray covering restricted range of data 
-    DataArray * GetDataArray( double  xmin,
+    ImageView::DataArray * GetDataArray( double  xmin,
                               double  xmax,
                               double  ymin,
                               double  ymax,

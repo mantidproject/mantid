@@ -87,7 +87,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageDataSource
     /// Get a DataArray roughly spaning the specified rectangle.  NOTE: The
     /// actual size and number of steps returned in the DataArray will be  
     /// adjusted to match the underlying data.
-    virtual DataArray* GetDataArray( double  xmin,
+    virtual ImageView::DataArray* GetDataArray( double  xmin,
                                      double  xmax,
                                      double  ymin,
                                      double  ymax,
@@ -96,7 +96,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageDataSource
                                      bool    is_log_x ) = 0;
 
     /// Convenience method to get data covering the full range at max resolution
-    virtual DataArray* GetDataArray( bool is_log_x );
+    virtual ImageView::DataArray* GetDataArray( bool is_log_x );
 
     /// Get list of pairs of strings with info about the data at location x, y
     virtual void GetInfoList( double x, 

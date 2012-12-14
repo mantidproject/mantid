@@ -51,7 +51,7 @@ RefImagePlotItem::~RefImagePlotItem()
  *                              must have the same number of entries as the
  *                              positive color table.
  */
-void RefImagePlotItem::SetData( DataArray*         data_array, 
+void RefImagePlotItem::SetData( ImageView::DataArray*         data_array,
                              std::vector<QRgb>* positive_color_table,
                              std::vector<QRgb>* negative_color_table )
 {
@@ -121,7 +121,7 @@ void RefImagePlotItem::draw(       QPainter    * painter,
     return;
   }
 
-  DataArray* data_array;
+  ImageView::DataArray* data_array;
   if ( buffer_ID == 0 )
   {
     data_array = data_array_0;

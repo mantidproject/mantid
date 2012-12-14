@@ -9,6 +9,7 @@ namespace MantidQt
 {
 namespace RefDetectorViewer
 {
+  using namespace ImageView;
 
 /**
  * Construct a DataSource object to to display data from the specified
