@@ -6,6 +6,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/PropertyManagerDataService.h"
+#include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/PropertyManager.h"
 #include <stdexcept>
 #include "Poco/Path.h"
