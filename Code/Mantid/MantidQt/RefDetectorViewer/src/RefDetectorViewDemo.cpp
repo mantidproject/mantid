@@ -7,7 +7,7 @@
 
 #include "MantidQtImageViewer/IVUtils.h"
 #include "MantidQtRefDetectorViewer/RefImageView.h"
-#include "MantidQtRefDetectorViewer/ArrayDataSource.h"
+#include "MantidQtImageViewer/ArrayDataSource.h"
 
 using namespace MantidQt;
 using namespace RefDetectorViewer;

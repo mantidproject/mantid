@@ -15,7 +15,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Run.h"
 #include "MantidQtImageViewer/ErrorHandler.h"
-#include "MantidQtRefDetectorViewer/ArrayDataSource.h"
+#include "MantidQtImageViewer/ArrayDataSource.h"
 #include "MantidQtImageViewer/IVUtils.h"
 
 using namespace Mantid;
