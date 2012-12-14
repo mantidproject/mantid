@@ -77,7 +77,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageDisplay
      ~RefImageDisplay();
 
      /// Set the source of the image data and information for the table
-     void SetDataSource( ImageDataSource* data_source );
+     void SetDataSource( ImageView::ImageDataSource* data_source );
 
      /// Rebuild the scroll bars and image due to change of xmin, xmax, step
      void UpdateRange();
@@ -134,7 +134,7 @@ private:
      std::vector<QRgb>    negative_color_table;
      std::vector<double>  intensity_table;
 
-     ImageDataSource*     data_source;
+     ImageView::ImageDataSource*     data_source;
      ImageView::DataArray*           data_array;
 
      QwtPlot*             image_plot;

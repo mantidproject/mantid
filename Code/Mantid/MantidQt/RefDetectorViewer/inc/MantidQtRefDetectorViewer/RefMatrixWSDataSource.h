@@ -44,7 +44,7 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSDataSource: public ImageDataSource
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSDataSource: public ImageView::ImageDataSource
 {
   public:
 

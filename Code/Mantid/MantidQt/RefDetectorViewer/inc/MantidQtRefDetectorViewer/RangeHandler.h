@@ -49,7 +49,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RangeHandler
     RangeHandler( Ui_RefImageViewer* iv_ui );
 
     /// Configure min, max and step controls for the specified data source
-    void ConfigureRangeControls( ImageDataSource* data_source );
+    void ConfigureRangeControls( ImageView::ImageDataSource* data_source );
 
     /// Get the range of data to display in the image, from GUI controls
     void GetRange( double &min, double &max, double &step );
