@@ -446,7 +446,6 @@ namespace Mantid
   #pragma warning(disable: 4804) // This one comes about for TYPE=bool - again the method is never called for this type
 #endif
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-  #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wconversion"
 #endif
 
@@ -611,7 +610,7 @@ namespace Mantid
   #pragma warning(pop)
 #endif
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-  #pragma GCC diagnostic pop
+  #pragma GCC diagnostic warning "-Wconversion"
 #endif
 
     /**
