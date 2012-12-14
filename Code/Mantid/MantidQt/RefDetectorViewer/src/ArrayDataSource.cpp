@@ -35,7 +35,7 @@ ArrayDataSource::ArrayDataSource( double total_xmin, double total_xmax,
                                   double total_ymin, double total_ymax,
                                   size_t total_rows, size_t total_cols,
                                   float* data )
-                :RefImageDataSource( total_xmin, total_xmax,
+                : ImageDataSource( total_xmin, total_xmax,
                                   total_ymin, total_ymax,
                                   total_rows, total_cols )
 {

@@ -4,7 +4,7 @@
 #include <cstddef>
 
 #include "MantidQtImageViewer/DataArray.h"
-#include "MantidQtRefDetectorViewer/RefImageDataSource.h"
+#include "MantidQtImageViewer/ImageDataSource.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -44,7 +44,7 @@ namespace MantidQt
 namespace RefDetectorViewer
 {
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSDataSource: public RefImageDataSource
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefMatrixWSDataSource: public ImageDataSource
 {
   public:
 

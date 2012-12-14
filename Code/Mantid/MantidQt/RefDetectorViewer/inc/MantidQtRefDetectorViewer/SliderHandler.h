@@ -4,7 +4,7 @@
 #include <QRect>
 
 #include "ui_RefImageView.h"
-#include "MantidQtRefDetectorViewer/RefImageDataSource.h"
+#include "MantidQtImageViewer/ImageDataSource.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
@@ -52,7 +52,7 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler
 
     /// Configure the image scrollbars for the specified data and drawing area
     void ConfigureSliders( QRect            draw_area, 
-                           RefImageDataSource* data_source );
+                           ImageDataSource* data_source );
 
     /// Configure the horizontal scrollbar to cover the specified range
     void ConfigureHSlider( int         n_data_steps, 

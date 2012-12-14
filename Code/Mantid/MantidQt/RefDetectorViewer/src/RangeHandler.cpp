@@ -28,7 +28,7 @@ RangeHandler::RangeHandler( Ui_RefImageViewer* iv_ui )
  *
  * @param data_source  ImageDataSource that provides the data to be drawn
  */
-void RangeHandler::ConfigureRangeControls( RefImageDataSource* data_source )
+void RangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
 {
   
     //x axis
