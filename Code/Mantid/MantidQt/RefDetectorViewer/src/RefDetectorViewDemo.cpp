@@ -77,8 +77,8 @@ int main( int argc, char **argv )
 
   float * data = MakeTestData( 10, 110, 220, 320, 2000, 2000 );
 
-  ArrayDataSource* source = 
-                   new ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data );
+  ImageView::ArrayDataSource* source =
+                   new ImageView::ArrayDataSource( 10, 110, 220, 320, 2000, 2000, data );
 
   MantidQt::RefDetectorViewer::RefImageView image_view( source, 10, 110, 220, 320, 200, 500 );
 

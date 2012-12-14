@@ -66,7 +66,7 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name, double peak_min, d
         }
     }
     
-    ArrayDataSource* source = new ArrayDataSource(total_xmin, total_xmax,
+    ImageView::ArrayDataSource* source = new ImageView::ArrayDataSource(total_xmin, total_xmax,
                                                         total_ymin, total_ymax,
                                                         total_rows, total_cols,
                                                         data);
