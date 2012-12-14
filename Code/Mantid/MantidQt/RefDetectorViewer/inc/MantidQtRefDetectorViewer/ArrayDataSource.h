@@ -2,7 +2,7 @@
 #define ARRAY_DATA_SOURCE_H
 
 #include <cstddef>
-#include "MantidQtRefDetectorViewer/DataArray.h"
+#include "MantidQtImageViewer/DataArray.h"
 #include "MantidQtRefDetectorViewer/RefImageDataSource.h"
 
 /**

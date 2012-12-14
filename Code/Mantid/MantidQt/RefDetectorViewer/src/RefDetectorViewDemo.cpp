@@ -5,7 +5,7 @@
 #include <QMainWindow>
 #include <QtGui>
 
-#include "MantidQtRefDetectorViewer/IVUtils.h"
+#include "MantidQtImageViewer/IVUtils.h"
 #include "MantidQtRefDetectorViewer/RefImageView.h"
 #include "MantidQtRefDetectorViewer/ArrayDataSource.h"
 

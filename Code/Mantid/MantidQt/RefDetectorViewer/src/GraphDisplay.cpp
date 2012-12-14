@@ -6,8 +6,8 @@
 #include <qwt_scale_engine.h>
 
 #include "MantidQtRefDetectorViewer/GraphDisplay.h"
-#include "MantidQtRefDetectorViewer/QtUtils.h"
-#include "MantidQtRefDetectorViewer/IVUtils.h"
+#include "MantidQtImageViewer/QtUtils.h"
+#include "MantidQtImageViewer/IVUtils.h"
 
 namespace MantidQt
 {

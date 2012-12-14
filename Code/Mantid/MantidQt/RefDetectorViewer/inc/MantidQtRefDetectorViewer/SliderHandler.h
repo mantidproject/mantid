@@ -5,7 +5,7 @@
 
 #include "ui_RefImageView.h"
 #include "MantidQtRefDetectorViewer/RefImageDataSource.h"
-#include "MantidQtRefDetectorViewer/DllOptionIV.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class SliderHandler 

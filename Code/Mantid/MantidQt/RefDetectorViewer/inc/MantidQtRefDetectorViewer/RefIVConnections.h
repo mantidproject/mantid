@@ -7,10 +7,10 @@
 
 #include "ui_RefImageView.h"
 #include "MantidQtRefDetectorViewer/RefImageView.h"
-#include "MantidQtRefDetectorViewer/TrackingPicker.h"
+#include "MantidQtImageViewer/TrackingPicker.h"
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
 #include "MantidQtRefDetectorViewer/GraphDisplay.h"
-#include "MantidQtRefDetectorViewer/DllOptionIV.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 
 /**

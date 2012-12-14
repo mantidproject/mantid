@@ -1,11 +1,6 @@
 set ( SRC_FILES
-       src/ColorMaps.cpp        
        src/RefImageDisplay.cpp   
-       src/IVUtils.cpp        
-       src/TrackingPicker.cpp
-       src/DataArray.cpp        
        src/RefImagePlotItem.cpp  
-       src/QtUtils.cpp
        src/GraphDisplay.cpp     
        src/RefImageView.cpp      
        src/SliderHandler.cpp
@@ -15,33 +10,25 @@ set ( SRC_FILES
        src/RefMatrixWSDataSource.cpp
        src/RefMatrixWSImageView.cpp
        src/ArrayDataSource.cpp
-       src/ErrorHandler.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
-       inc/MantidQtRefDetectorViewer/ColorMaps.h
        inc/MantidQtRefDetectorViewer/RefImageDisplay.h
        inc/MantidQtRefDetectorViewer/RefIVConnections.h
-       inc/MantidQtRefDetectorViewer/DataArray.h
        inc/MantidQtRefDetectorViewer/RefImagePlotItem.h
-       inc/MantidQtRefDetectorViewer/IVUtils.h
-       inc/MantidQtRefDetectorViewer/TrackingPicker.h
        inc/MantidQtRefDetectorViewer/GraphDisplay.h
        inc/MantidQtRefDetectorViewer/RefImageView.h
-       inc/MantidQtRefDetectorViewer/QtUtils.h
        inc/MantidQtRefDetectorViewer/RefImageDataSource.h
        inc/MantidQtRefDetectorViewer/SliderHandler.h
        inc/MantidQtRefDetectorViewer/RangeHandler.h
        inc/MantidQtRefDetectorViewer/RefMatrixWSDataSource.h
        inc/MantidQtRefDetectorViewer/RefMatrixWSImageView.h
        inc/MantidQtRefDetectorViewer/ArrayDataSource.h
-       inc/MantidQtRefDetectorViewer/ErrorHandler.h
 )
 
 set ( MOC_FILES 
        inc/MantidQtRefDetectorViewer/RefIVConnections.h
-       inc/MantidQtRefDetectorViewer/TrackingPicker.h
 )
 
 set ( UI_FILES 
@@ -53,7 +40,7 @@ set ( TEST_PY_FILES
 )
 
 include_directories ( inc )
-include_directories ( ../../Framework/API/inc )
+include_directories ( ../ImageViewer/inc )
 
 
 ###########################################################################

@@ -3,9 +3,9 @@
 
 #include <cstddef>
 
-#include "MantidQtRefDetectorViewer/DataArray.h"
+#include "MantidQtImageViewer/DataArray.h"
 #include "MantidQtRefDetectorViewer/RefImageDataSource.h"
-#include "MantidQtRefDetectorViewer/DllOptionIV.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 

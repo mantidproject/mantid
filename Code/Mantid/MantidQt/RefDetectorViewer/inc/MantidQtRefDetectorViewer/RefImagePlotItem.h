@@ -7,8 +7,8 @@
 #include <qwt_plot_item.h>
 #include <qwt_scale_map.h>
 
-#include "MantidQtRefDetectorViewer/DataArray.h"
-#include "MantidQtRefDetectorViewer/DllOptionIV.h"
+#include "MantidQtImageViewer/DataArray.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class ImagePlotItem 

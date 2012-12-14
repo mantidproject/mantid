@@ -1,7 +1,7 @@
 #ifndef REF_MATRIX_WS_IMAGE_VIEW_H
 #define REF_MATRIX_WS_IMAGE_VIEW_H
 
-#include "MantidQtRefDetectorViewer/DllOptionIV.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtRefDetectorViewer/RefImageView.h"

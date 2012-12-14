@@ -3,9 +3,9 @@
 #include <QLineEdit>
 
 #include "MantidQtRefDetectorViewer/RangeHandler.h"
-#include "MantidQtRefDetectorViewer/QtUtils.h"
-#include "MantidQtRefDetectorViewer/IVUtils.h"
-#include "MantidQtRefDetectorViewer/ErrorHandler.h"
+#include "MantidQtImageViewer/QtUtils.h"
+#include "MantidQtImageViewer/IVUtils.h"
+#include "MantidQtImageViewer/ErrorHandler.h"
 
 namespace MantidQt
 {

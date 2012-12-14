@@ -10,10 +10,10 @@
 
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
 #include "MantidQtRefDetectorViewer/RefImageDataSource.h"
-#include "MantidQtRefDetectorViewer/DataArray.h"
-#include "MantidQtRefDetectorViewer/ColorMaps.h"
-#include "MantidQtRefDetectorViewer/QtUtils.h"
-#include "MantidQtRefDetectorViewer/IVUtils.h"
+#include "MantidQtImageViewer/DataArray.h"
+#include "MantidQtImageViewer/ColorMaps.h"
+#include "MantidQtImageViewer/QtUtils.h"
+#include "MantidQtImageViewer/IVUtils.h"
 #include "MantidQtRefDetectorViewer/RefImagePlotItem.h"
 
 namespace MantidQt

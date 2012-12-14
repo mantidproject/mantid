@@ -8,15 +8,15 @@
 #include <QThread>
 
 #include "MantidQtRefDetectorViewer/RefMatrixWSDataSource.h"
-#include "MantidQtRefDetectorViewer/IVUtils.h"
+#include "MantidQtImageViewer/IVUtils.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidAPI/Run.h"
-#include "MantidQtRefDetectorViewer/ErrorHandler.h"
+#include "MantidQtImageViewer/ErrorHandler.h"
 #include "MantidQtRefDetectorViewer/ArrayDataSource.h"
-#include "MantidQtRefDetectorViewer/IVUtils.h"
+#include "MantidQtImageViewer/IVUtils.h"
 
 using namespace Mantid;
 using namespace Kernel;

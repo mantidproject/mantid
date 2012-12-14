@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "MantidQtRefDetectorViewer/ArrayDataSource.h"
-#include "MantidQtRefDetectorViewer/IVUtils.h"
+#include "MantidQtImageViewer/IVUtils.h"
 
 namespace MantidQt
 {

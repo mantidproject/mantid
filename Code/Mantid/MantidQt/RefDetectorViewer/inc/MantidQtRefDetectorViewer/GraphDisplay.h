@@ -6,7 +6,7 @@
 #include <qwt_plot_curve.h>
 
 #include "MantidQtRefDetectorViewer/RefImageDataSource.h"
-#include "MantidQtRefDetectorViewer/DllOptionIV.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class GraphDisplay 

@@ -12,7 +12,7 @@
 #include "MantidQtRefDetectorViewer/RefImagePlotItem.h"
 #include "MantidQtRefDetectorViewer/SliderHandler.h"
 #include "MantidQtRefDetectorViewer/RangeHandler.h"
-#include "MantidQtRefDetectorViewer/DllOptionIV.h"
+#include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
     @class RefImageDisplay 
