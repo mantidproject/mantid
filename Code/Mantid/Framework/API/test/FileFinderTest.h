@@ -5,6 +5,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
 
 #include <Poco/Path.h>
 #include <Poco/File.h>
@@ -105,26 +106,27 @@ public:
   {
     // Set the facility
     const FacilityInfo& facility = ConfigService::Instance().getFacility("ISIS");
+    const InstrumentInfo& instrument = facility.instrument("HRPD");
 
     // Set the default instrument
-    ConfigService::Instance().setString("default.instrument", "HRPD");
+    ConfigService::Instance().setString("default.instrument", instrument.shortName());
 
-    std::string fName = FileFinder::Instance().makeFileName("123", facility);
+    std::string fName = FileFinder::Instance().makeFileName("123", instrument);
     TS_ASSERT_EQUALS(fName, "HRP00123");
 
-    fName = FileFinder::Instance().makeFileName("ABC0123", facility);
+    fName = FileFinder::Instance().makeFileName("ABC0123", instrument);
     TS_ASSERT_EQUALS(fName, "ABC00000123");
 
-    fName = FileFinder::Instance().makeFileName("ABCD123", facility);
+    fName = FileFinder::Instance().makeFileName("ABCD123", instrument);
     TS_ASSERT_EQUALS(fName, "ABC00000123");
 
-    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("ABCD", facility), std::invalid_argument);
-    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("123456", facility), std::invalid_argument);
+    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("ABCD", instrument), std::invalid_argument);
+    TS_ASSERT_THROWS(fName = FileFinder::Instance().makeFileName("123456", instrument), std::invalid_argument);
 
-    fName = FileFinder::Instance().makeFileName("0", facility);
+    fName = FileFinder::Instance().makeFileName("0", instrument);
     TS_ASSERT_EQUALS(fName, "HRP00000");
 
-    TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName("EFG2H123", facility));
+    TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName("EFG2H123", instrument));
 
   }
 
@@ -132,30 +134,37 @@ public:
   {
     // Set the facility
     const FacilityInfo& facility = ConfigService::Instance().getFacility("SNS");
+    const InstrumentInfo& instrument = facility.instrument("CNCS");
 
     // Set the default instrument
-    ConfigService::Instance().setString("default.instrument", "CNCS");
+    ConfigService::Instance().setString("default.instrument", instrument.shortName());
 
     // Check that we remove any leading zeros
-    TS_ASSERT_EQUALS("CNCS_123", FileFinder::Instance().makeFileName("0123", facility));
+    TS_ASSERT_EQUALS("CNCS_123", FileFinder::Instance().makeFileName("0123", instrument));
 
     // Test using long and short name
-    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQUOIA21", facility));
-    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQ21", facility));
+    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQUOIA21", instrument));
+    TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQ21", instrument));
 
     // Test for REF_L (to check that the extra _ doesn't upset anything)
-    TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName("REF_L666", facility));
+    TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName("REF_L666", instrument));
 
   }
 
-  void testGetFacility()
+  void testGetInstrument()
   {
     std::string name; // place to put results
     ConfigService::Instance().setFacility("ISIS");
+    ConfigService::Instance().setString("default.instrument", "HRPD");
 
-    TS_ASSERT_EQUALS(FileFinder::Instance().getFacility("").name(), "ISIS");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getFacility("PG3_1234_event.nxs").name(), "SNS");
-    TS_ASSERT_EQUALS(FileFinder::Instance().getFacility("/home/user123/CNCS_234_neutron_event.dat").name(), "SNS");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("").name(), "HRPD");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG31234").name(), "POWGEN");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG3_1234").name(), "POWGEN");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("PG3_1234_event.nxs").name(), "POWGEN");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("/home/user123/CNCS_234_neutron_event.dat").name(), "CNCS");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L1234").name(), "REF_L");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234").name(), "REF_L");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234.nxs.h5").name(), "REF_L");
   }
 
   void testFindRunForSNS()
