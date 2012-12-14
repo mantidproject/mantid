@@ -21,6 +21,7 @@ namespace ImageView
  *  @param graph_plot    The QwtPlot where the graph will be displayed.
  *  @param graph_table   The QTableWidget where information about a 
  *                       pointed at location will be displayed.
+ *                       Can be NULL (e.g. the RefDetectorViewer doesn't use it).
  *  @param is_vertical   Flag indicating whether this graph displays the
  *                       vertical or horizontal cut through the image.
  */
@@ -210,59 +211,65 @@ void GraphDisplay::SetPointedAtPoint( QPoint point )
  *  are x and the image_y that generated the graph.  If this is the "vertical"
  *  graph, the relevant coordinates are y and the image_x that generated 
  *  the graph.
+ *  The method is a no-op if the table is not being used (e.g. as in the
+ *  case of the RefDetectorViewer).
  *
  *  @param x  The x coordinate of the pointed at location on the graph.
  *  @param y  The y coordinate of the pointed at location on the graph.
  */
 void GraphDisplay::ShowInfoList( double x, double y )
 {
-  int n_infos = 0;
-  int n_rows  = 1;
-  std::vector<std::string> info_list;
-  if ( data_source != 0 )
+  // This whole method is a no-op if no table object was injected on construction
+  if ( graph_table != NULL )
   {
-    if ( is_vertical )
+    int n_infos = 0;
+    int n_rows  = 1;
+    std::vector<std::string> info_list;
+    if ( data_source != 0 )
     {
-      data_source->GetInfoList( image_x, y, info_list );
+      if ( is_vertical )
+      {
+        data_source->GetInfoList( image_x, y, info_list );
+      }
+      else
+      {
+        data_source->GetInfoList( x, image_y, info_list );
+      }
     }
     else
     {
-      data_source->GetInfoList( x, image_y, info_list );
+      return;
     }
-  }
-  else
-  {
-    return;
-  }
-  n_infos = (int)info_list.size()/2;
-  n_rows += n_infos; 
+    n_infos = (int)info_list.size()/2;
+    n_rows += n_infos;
 
-  graph_table->setRowCount(n_rows);
-  graph_table->setColumnCount(2);
-  graph_table->verticalHeader()->hide();
-  graph_table->horizontalHeader()->hide();
+    graph_table->setRowCount(n_rows);
+    graph_table->setColumnCount(2);
+    graph_table->verticalHeader()->hide();
+    graph_table->horizontalHeader()->hide();
 
-  int width = 9;
-  int prec  = 3;
+    int width = 9;
+    int prec  = 3;
 
-  if ( is_vertical )
-  {
-    QtUtils::SetTableEntry( 0, 0, "Value", graph_table );
-    QtUtils::SetTableEntry( 0, 1, width, prec, x, graph_table );
+    if ( is_vertical )
+    {
+      QtUtils::SetTableEntry( 0, 0, "Value", graph_table );
+      QtUtils::SetTableEntry( 0, 1, width, prec, x, graph_table );
+    }
+    else
+    {
+      QtUtils::SetTableEntry( 0, 0, "Value", graph_table );
+      QtUtils::SetTableEntry( 0, 1, width, prec, y, graph_table );
+    }
+
+    for ( int i = 0; i < n_infos; i++ )
+    {
+      QtUtils::SetTableEntry( i+1, 0, info_list[2*i], graph_table );
+      QtUtils::SetTableEntry( i+1, 1, info_list[2*i+1], graph_table );
+    }
+
+    graph_table->resizeColumnsToContents();
   }
-  else
-  {
-    QtUtils::SetTableEntry( 0, 0, "Value", graph_table );
-    QtUtils::SetTableEntry( 0, 1, width, prec, y, graph_table );
-  }
-
-  for ( int i = 0; i < n_infos; i++ )
-  {
-    QtUtils::SetTableEntry( i+1, 0, info_list[2*i], graph_table );
-    QtUtils::SetTableEntry( i+1, 1, info_list[2*i+1], graph_table );
-  }
-
-  graph_table->resizeColumnsToContents();
 }
 
 } // namespace MantidQt 
