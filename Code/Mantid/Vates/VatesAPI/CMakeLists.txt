@@ -169,6 +169,8 @@ set_property( TARGET VatesAPI PROPERTY FOLDER "MantidVates" )
 
 target_link_libraries( VatesAPI
 ${MANTID_SUBPROJECT_LIBS} 
+vtkCommonCore
+vtkCommonDataModel
 )
 
 # Create test file projects
