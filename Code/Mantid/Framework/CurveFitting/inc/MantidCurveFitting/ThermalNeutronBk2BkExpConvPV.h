@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/Logger.h"
 #include <complex>
 
@@ -94,7 +95,7 @@ namespace CurveFitting
 
     /// Calculate peak profile I(TOF) = Omega(TOF)
     double calOmega(double x, double eta, double N, double alpha, double beta, double H,
-        double sigma2, double invert_sqrt2sigma, bool explicitoutput=true) const;
+                    double sigma2, double invert_sqrt2sigma, bool explicitoutput=true) const;
 
     /*
      * Set 2 functions to be hidden from client
@@ -111,6 +112,8 @@ namespace CurveFitting
     mutable std::map<std::string, double> mParameters;
 
     mutable double m_fwhm;
+
+    mutable Geometry::UnitCell m_unitCell;
 
     //-----------  For Parallelization -----------------------------------------
     ///

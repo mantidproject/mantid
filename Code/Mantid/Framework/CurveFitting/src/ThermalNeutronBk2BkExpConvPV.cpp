@@ -108,9 +108,9 @@ void ThermalNeutronBk2BkExpConvPV::setMillerIndex(int h, int k, int l)
     mHKLSet = true;
   }
 
-  mH = h;
-  mK = k;
-  mL = l;
+  mH = static_cast<int>(h);
+  mK = static_cast<int>(k);
+  mL = static_cast<int>(l);
 
   if (mH*mH + mK*mK + mL*mL < 1.0E-8)
   {
@@ -127,9 +127,9 @@ void ThermalNeutronBk2BkExpConvPV::setMillerIndex(int h, int k, int l)
  */
 void ThermalNeutronBk2BkExpConvPV::getMillerIndex(int& h, int &k, int &l)
 {
-  h = mH;
-  k = mK;
-  l = mL;
+  h = static_cast<int>(mH);
+  k = static_cast<int>(mK);
+  l = static_cast<int>(mL);
 
   return;
 }
@@ -191,7 +191,9 @@ void ThermalNeutronBk2BkExpConvPV::calculateParameters(double& dh, double& tof_h
   double latticeconstant = getParameter("LatticeConstant");
 
   // 2. Calcualte Peak Position d-spacing and TOF
-  dh = calCubicDSpace(latticeconstant, mH, mK, mL);
+  m_unitCell.set(latticeconstant, latticeconstant, latticeconstant, 90.0, 90.0, 90.0);
+  // dh = calCubicDSpace(latticeconstant, mH, mK, mL);
+  dh = m_unitCell.d(mH, mK, mL);
 
   // 3. Calculate all the parameters
   // i. Start to calculate alpha, beta, sigma2, gamma,
@@ -356,29 +358,6 @@ double ThermalNeutronBk2BkExpConvPV::fwhm() const
   calculateParameters(dh, tof_h, eta, alpha, beta, H, sigma, gamma, N, false);
 
   return H;
-
-  /*
-  // 1. Get peak parameter
-  double sig0 = getParameter("Sig0");
-  double sig1 = getParameter("Sig1");
-  double sig2 = getParameter("Sig2");
-  double gam0 = getParameter("Gam0");
-  double gam1 = getParameter("Gam1");
-  double gam2 = getParameter("Gam2");
-  double latticeconstant = getParameter("LatticeConstant");
-
-  // 2. Calcualte d-space of the peak center
-  double dh = calCubicDSpace(latticeconstant, mH, mK, mL);
-
-  // 3. Calculate Sigma2 and Gamma and thus H & Eta
-  double H, eta;
-  double sigma2 = sig0*sig0 + sig1*sig1*std::pow(dh, 2) + sig2*sig2*std::pow(dh, 4);
-  double gamma = gam0 + gam1*dh + gam2*std::pow(dh, 2);
-
-  calHandEta(sigma2, gamma, H, eta);
-
-  return H;
-  */
 }
 
 /** Set peak's FWHM
