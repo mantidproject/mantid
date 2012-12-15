@@ -40,7 +40,7 @@ public:
 
   /** Fit the parameters for PG3's bank 1 with quite-off starting peak parameters.
     */
-  void test_RobustFitPG3Bank1()
+  void Ptest_RobustFitPG3Bank1()
   {
     // 1. Generate testing workspace
     std::map<std::string, double> newparamvalues;
@@ -97,19 +97,118 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // 3. Check result
-    DataObjects::TableWorkspace_sptr newgeomparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
-        (AnalysisDataService::Instance().retrieve("InstrumentParameters"));
+    DataObjects::Workspace2D_sptr peakdataws =
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (AnalysisDataService::Instance().retrieve("FittedPeaks"));
+    TS_ASSERT(peakdataws);
+    if (!peakdataws)
+    {
+      return;
+    }
 
-    std::map<std::string, double> fitparamvalues;
-    parseParameterTableWorkspace(newgeomparamws, fitparamvalues);
-    double zero = fitparamvalues["Zero"];
+    TS_ASSERT_EQUALS(peakdataws->getNumberHistograms(), 5);
+    /*
+    ofstream datafile;
+    datafile.open("peakdata.dat");
+    for (size_t i = 0; i < peakdataws->readX(0).size(); ++i)
+      datafile << peakdataws->readX(0)[i] << "\t\t" << peakdataws->readY(0)[i] << "\t\t"
+               << peakdataws->readY(1)[i] << "\t\t" << peakdataws->readY(2)[i] << endl;
+    datafile.close();
+    */
 
-    TS_ASSERT_DELTA(zero, 0.0, 1.0);
+    AnalysisDataService::Instance().remove("DataWorkspace");
+    AnalysisDataService::Instance().remove("PeakParameters");
+    AnalysisDataService::Instance().remove("InstrumentParameters");
+    AnalysisDataService::Instance().remove("FittedPeaks");
+    AnalysisDataService::Instance().remove("PeaksParameterTable");
 
     return;
   }
 
+
+  //----------------------------------------------------------------------------------------------
+  /** Fut overlapped peaks for PG3's bank 1
+    * Development Strategy:  Test driven, Print data -> Fit in MantidPlot manually -> Write code.
+    */
+  void test_FitOverlappedPeaksPG3Banks()
+  {
+    // 1. Generate testing workspace
+    std::map<std::string, double> newparamvalues;
+
+    API::MatrixWorkspace_sptr dataws = createInputDataWorkspace(2);
+
+    // std::string peakfilename("/home/wzz/Mantid/Code/debug/MyTestData/PG3_10808-1.hkl");
+    string peakfilename("PG3_10808-1.hkl");
+    std::vector<std::vector<int> > hkls;
+    std::vector<std::vector<double> > peakparameters;
+    importPeakParametersFile(peakfilename, hkls, peakparameters);
+    DataObjects::TableWorkspace_sptr peakparamws = createReflectionWorkspace(hkls, peakparameters);
+
+    // std::string insfilename("/home/wzz/Mantid/Code/debug/MyTestData/Bank1InstrumentParameters.txt");
+    string insfilename("PG3_Bank1Parameters.txt");
+    std::map<std::string, double> instrparameters;
+    importInstrumentTxtFile(insfilename, instrparameters);
+    DataObjects::TableWorkspace_sptr geomparamws = createInstrumentParameterWorkspace(instrparameters, newparamvalues);
+
+    AnalysisDataService::Instance().addOrReplace("DataWorkspace", dataws);
+    AnalysisDataService::Instance().addOrReplace("PeakParameters", peakparamws);
+    AnalysisDataService::Instance().addOrReplace("InstrumentParameters", geomparamws);
+
+    // 2. Fit
+    FitPowderDiffPeaks2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+
+    alg.setProperty("InputWorkspace", dataws);
+    alg.setProperty("OutputWorkspace", "FittedPeaks");
+    alg.setProperty("BraggPeakParameterWorkspace", peakparamws);
+    alg.setProperty("InstrumentParameterWorkspace", geomparamws);
+    alg.setProperty("OutputBraggPeakParameterWorkspace", "PeaksParameterTable");
+    alg.setProperty("OutputZscoreWorkspace", "ZscoreTable");
+    alg.setProperty("WorkspaceIndex", 0);
+
+    alg.setProperty("MinTOF", 7500.0);
+    alg.setProperty("MaxTOF", 49000.0);
+
+    alg.setProperty("PeakParametersStartingValueFrom", "From Bragg Peak Table");
+
+    vector<int32_t> minhkl(3); // HKL = (331)
+    minhkl[0] = 11; minhkl[1] = 5; minhkl[2] = 1;
+    alg.setProperty("MinimumHKL", minhkl);
+    alg.setProperty("NumberPeaksToFitBelowLowLimit", 2);
+
+    alg.setProperty("FittingMode", "Confident");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // 3. Check result
+    DataObjects::Workspace2D_sptr peakdataws =
+        boost::dynamic_pointer_cast<DataObjects::Workspace2D>
+        (AnalysisDataService::Instance().retrieve("FittedPeaks"));
+    TS_ASSERT(peakdataws);
+    if (!peakdataws)
+    {
+      return;
+    }
+
+    TS_ASSERT_EQUALS(peakdataws->getNumberHistograms(), 5);
+    /*
+    ofstream datafile;
+    datafile.open("peakdata.dat");
+    for (size_t i = 0; i < peakdataws->readX(0).size(); ++i)
+      datafile << peakdataws->readX(0)[i] << "\t\t" << peakdataws->readY(0)[i] << "\t\t"
+               << peakdataws->readY(1)[i] << "\t\t" << peakdataws->readY(2)[i] << endl;
+    datafile.close();
+    */
+
+    AnalysisDataService::Instance().remove("DataWorkspace");
+    AnalysisDataService::Instance().remove("PeakParameters");
+    AnalysisDataService::Instance().remove("InstrumentParameters");
+    AnalysisDataService::Instance().remove("FittedPeaks");
+    AnalysisDataService::Instance().remove("PeaksParameterTable");
+
+  }
 
   //------------------------------   Diffraction Data [From File] ----------------------------
 
@@ -132,7 +231,8 @@ public:
         break;
 
       case 2:
-        importDataFromColumnFile("/home/wzz/Mantid/Code/debug/MyTestData/PG3_10808-1.dat", vecX, vecY, vecE);
+        // importDataFromColumnFile("/home/wzz/Mantid/Code/debug/MyTestData/PG3_10808-1.dat", vecX, vecY, vecE);
+        importDataFromColumnFile("PG3_10808-1.dat", vecX, vecY, vecE);
         std::cout << "Option 2:  PG3_10808-1.dat.  Vector Size = " << vecX.size() << std::endl;
         break;
 
@@ -183,15 +283,19 @@ public:
     {
       if (line[0] != '#')
       {
-        double x, y;
+        double x, y, e;
         std::stringstream ss;
         ss.str(line);
-        ss >> x >> y;
+        ss >> x >> y >> e;
         vecX.push_back(x);
         vecY.push_back(y);
-        double e = 1.0;
-        if (y > 1.0E-5)
-          e = std::sqrt(y);
+        if (e < 0.00001)
+        {
+          if (y > 1.0)
+            e = std::sqrt(y);
+          else
+            e = 1.0;
+        }
         vecE.push_back(e);
       }
     }
@@ -239,8 +343,8 @@ public:
   }
 
   /** Import text file containing reflection (HKL) and peak parameters
-   * Input:  a text based file
-   * Output: a vector for (H, K, L) and a vector for (Height, TOF_H, ALPHA, BETA, ...
+   *  Input:  a text based file
+   *  Output: a vector for (H, K, L) and a vector for (Height, TOF_H, ALPHA, BETA, ...
    */
   void importPeakParametersFile(std::string filename, std::vector<std::vector<int> >& hkls,
                                 std::vector<std::vector<double> >& peakparameters)
