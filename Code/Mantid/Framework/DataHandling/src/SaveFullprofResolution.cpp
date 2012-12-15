@@ -6,6 +6,7 @@
 #include <fstream>
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace std;
@@ -44,7 +45,7 @@ namespace DataHandling
     */
   void SaveFullprofResolution::init()
   {
-    this->declareProperty(new API::WorkspaceProperty<DataObjects::TableWorkspace>("InputWorkspace", "Anonymous", Direction::Input),
+    this->declareProperty(new WorkspaceProperty<TableWorkspace>("InputWorkspace", "Anonymous", Direction::Input),
                           "Input TableWorkspace containing the parameters for .irf file.");
 
     std::vector<std::string> exts;
@@ -166,25 +167,53 @@ namespace DataHandling
     content << "! ----------------------------------------------  Bank " << bankid << "  CWL =   0.5330A" << std::endl;
     content << "!  Type of profile function: back-to-back exponentials * pseudo-Voigt" << std::endl;
     content << "NPROF " << profindex << std::endl;
+
     content << "!       Tof-min(us)    step      Tof-max(us)" << std::endl;
-    content << "TOFRG   " << setw(10) << tofmin << setw(10) << tofstep << setw(10) << tofmax << std::endl;
+    content << "TOFRG   "
+            << setw(16) << setprecision(10) << tofmin
+            << setw(16) << setprecision(10) << tofstep
+            << setw(16) << setprecision(10) << tofmax << std::endl;
+
     content << "!       Zero   Dtt1" << std::endl;
-    content << "ZD2TOF     " << setw(10) << zero << setw(10) << dtt1 << std::endl;
+    content << "ZD2TOF     "
+            << setw(16) << setprecision(10) << zero
+            << setw(16) << setprecision(10) << dtt1 << std::endl;
+
     content << "!       Zerot    Dtt1t       Dtt2t    x-cross    Width" << std::endl;
-    content << "ZD2TOT    " << setw(10) << zerot << setw(10) << dtt1t << setw(10) << dtt2t << setw(10) << xcross
-            << setw(10) << width << std::endl;
+    content << "ZD2TOT    "
+            << setw(16) << setprecision(10) << zerot
+            << setw(16) << setprecision(10) << dtt1t
+            << setw(16) << setprecision(10) << dtt2t
+            << setw(16) << setprecision(10) << xcross
+            << setw(16) << setprecision(10) << width << std::endl;
+
     content << "!     TOF-TWOTH of the bank" << std::endl;
     content << "TWOTH    " << twotheta << std::endl;
-    content << "!       Sig-2     Sig-1     Sig-0" << std::endl;
+
     // Note that sig0, sig1 and sig2 used in LeBail/Mantid framework are of the definition in manual.
     // In .irf file, Sig-0, Sig-1 and Sig-2 are the squared values;
-    content << "SIGMA  " << setw(10) << sig2*sig2 << setw(10) << sig1*sig1 << setw(10) << sig0*sig0 << std::endl;
+    content << "!       Sig-2     Sig-1     Sig-0" << std::endl;
+    content << "SIGMA  "
+            << setw(16) << setprecision(10) << sig2*sig2
+            << setw(16) << setprecision(10) << sig1*sig1
+            << setw(16) << setprecision(10) << sig0*sig0 << std::endl;
+
     content << "!       Gam-2     Gam-1     Gam-0" << std::endl;
-    content << "GAMMA  " << setw(10) << gam2 << setw(10) << gam1 << setw(10) << gam0 << std::endl;
+    content << "GAMMA  " << setw(16) << gam2 << setw(16) << gam1 << setw(16) << gam0 << std::endl;
+
     content << "!          alph0       beta0       alph1       beta1" << std::endl;
-    content << "ALFBE        " << setw(10) << alph0 << setw(10) << beta0 << setw(10) << alph1 << setw(10) << beta1 << std::endl;
+    content << "ALFBE        "
+            << setw(16) << setprecision(8) << alph0 <<
+               setw(16) << setprecision(8) << beta0 <<
+               setw(16) << setprecision(8) << alph1 <<
+               setw(16) << setprecision(8) << beta1 << std::endl;
+
     content << "!         alph0t      beta0t      alph1t      beta1t" << std::endl;
-    content << "ALFBT       " << setw(10) << alph0t << setw(10) << beta0t << setw(10) << alph1t << setw(10) << beta1t << std::endl;
+    content << "ALFBT       "
+            << setw(16) << setprecision(8) << alph0t
+            << setw(16) << setprecision(8) << beta0t
+            << setw(16) << setprecision(8) << alph1t
+            << setw(16) << setprecision(8) << beta1t << std::endl;
     content << "END" << std::endl;
 
     return content.str();
