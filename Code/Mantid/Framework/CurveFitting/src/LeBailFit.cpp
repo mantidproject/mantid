@@ -2755,7 +2755,7 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
   size_t numacceptance = 0;
   bool prevcyclebetterrwp = true;
 
-  //    Annealing record
+  // Annealing record
   int numRecentAcceptance = 0;
   int numRecentSteps = 0;
 
@@ -2879,7 +2879,8 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
   for (mapiter = parammap.begin(); mapiter != parammap.end(); ++mapiter)
   {
     Parameter& param = mapiter->second;
-    g_log.notice() << setw(10) << param.name << "\t: Average Stepsize = " << setw(10) << setprecision(5) << param.sumstepsize/double(maxcycles)
+    g_log.notice() << setw(10) << param.name << "\t: Average Stepsize = " << setw(10) << setprecision(5)
+                   << param.sumstepsize/double(maxcycles)
                    << ", Max Step Size = " << setw(10) << setprecision(5) << param.maxabsstepsize
                    << ", Number of Positive Move = " << setw(4) << param.numpositivemove
                    << ", Number of Negative Move = " << setw(4) << param.numnegativemove
@@ -2907,6 +2908,9 @@ void LeBailFit::execRandomWalkMinimizer(size_t maxcycles, size_t wsindex,
     // Different between calculated peaks and raw data
     vecBkgd[i] = vecInY[i] - values[i];
   }
+
+  // c) Apply the best parameters to param
+  applyParameterValues(m_bestParameters, parammap);
 
   return;
 }
