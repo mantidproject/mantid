@@ -142,6 +142,8 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
   const std::string dataRun = getPropertyValue("DataRun");
   IEventWorkspace_sptr evtWS = loadData(dataRun, polarization);
   MatrixWorkspace_sptr dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(evtWS);
+  MatrixWorkspace_sptr dataWSTof = boost::dynamic_pointer_cast<MatrixWorkspace>(evtWS);
+    
 
   // If we have no events, stop here
   if (evtWS->getNumberEvents()==0) return dataWS;
@@ -159,7 +161,7 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     }
     low_res_min = lowResRange[0];
     low_res_max = lowResRange[1];
-    m_output_message + "    |Cropping low-res axis: ["
+    m_output_message += "    |Cropping low-res axis: ["
         + Poco::NumberFormatter::format(low_res_min) + ", "
         + Poco::NumberFormatter::format(low_res_max) + "]\n";
   }
@@ -250,7 +252,21 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     m_output_message += "Normalization completed\n";
   }
 
-  IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.85, 0.95);
+    // Convert back to TOF
+    IAlgorithm_sptr convAlgToTof = createSubAlgorithm("ConvertUnits", 0.85, 0.90);
+    convAlgToTof->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
+    convAlgToTof->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWSTof);
+    convAlgToTof->setProperty("Target", "TOF");
+    convAlgToTof->executeAsSubAlg();
+
+    MatrixWorkspace_sptr outputWS2 = convAlgToTof->getProperty("OutputWorkspace");
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace_jc_" + polarization, "TOF_"+polarization, Direction::Output));
+    setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
+
+    
+    
+    // Conversion to Q
+  IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.90, 0.95);
   refAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
   refAlg->setProperty("NXPixel", NX_PIXELS);
   refAlg->setProperty("NYPixel", NY_PIXELS);
