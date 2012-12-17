@@ -89,6 +89,8 @@ private slots:
 
   /// called when spectra or workspace index change
   void spectraChanged(int row,int col);
+  /// called when selection in the workspace table changes
+  void selectionChanged();
 
   void plotAgainstLog(bool);
 

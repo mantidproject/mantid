@@ -25,6 +25,16 @@ namespace CurveFitting
 
   /** FitPowderDiffPeaks2 : Fit peaks in powder diffraction pattern.
 
+    Mode Confident:
+    * In this mode, the starting values of parameters except height will be given in input
+      table workspace;
+    * Use case 1: user has some pre-knowledge of the peak shape parameters, i.e, the analytical
+                  function to describe all peaks.
+    * Use case 2: user has no pre-knowledge of the peak shape parameters, but have some
+                  single peaks fitted;  The best starting value/estimation is from its right peak
+                  with proper fit
+    Solution: Let them compete!
+
     Its application is to serve as the first step for refining powder diffractomer instrument
     parameters. Its output will be used by RefinePowderInstrumentParameters().
     
@@ -71,6 +81,9 @@ namespace CurveFitting
     /// Implement abstract Algorithm methods
     void exec();
 
+    /// Process input properties
+    void processInputProperties();
+
     /// Generate peaks from input table workspace
     void genPeaksFromTable(DataObjects::TableWorkspace_sptr peakparamws);
 
@@ -82,14 +95,14 @@ namespace CurveFitting
     bool getHKLFromMap(map<string, int> intmap, vector<int>& hkl);
 
     /// Import instrument parameters from (input) table workspace
-    void importInstrumentParameterFromTable(DataObjects::TableWorkspace_sptr parameterWS);
+    void importInstrumentParameterFromTable(DataObjects::TableWorkspace_sptr m_profileTable);
 
     /// Import Bragg peak table workspace
     void parseBraggPeakTable(DataObjects::TableWorkspace_sptr peakws, vector<map<string, double> >& parammaps,
                              vector<map<string, int> >& hklmaps);
 
     /// Fit peaks
-    void fitPeaksTrustInput();
+    void fitPeaksWithGoodStartingValues();
 
     /// Fit peaks in robust algorithm
     void fitPeaksRobust();
@@ -112,17 +125,67 @@ namespace CurveFitting
 
 
     /// Fit peak with confidence of the centre
-    bool fitSinglePeakConfident(BackToBackExponential_sptr peak);
+    bool fitSinglePeakConfidentX(BackToBackExponential_sptr peak);
 
     /// Fit peak with trustful peak parameters
-    bool fitPeakConfident(DataObjects::Workspace2D_sptr dataws, BackToBackExponential_sptr peak,
-                          BackgroundFunction_sptr backgroundfunction);
+    bool fitSinglePeakConfident(BackToBackExponential_sptr peak, BackgroundFunction_sptr backgroundfunction,
+                                double leftbound, double rightbound, double &chi2, bool &annhilatedpeak);
 
     /// Fit peak with confident parameters
-    bool fitPeakConfident(Workspace2D_sptr dataws, BackToBackExponential_sptr peak, double dampingfactor);
+    bool fitSinglePeakConfidentY(Workspace2D_sptr dataws, BackToBackExponential_sptr peak, double dampingfactor);
 
     /// Fit peaks with confidence in fwhm and etc.
-    bool fitOverlappedPeaks(vector<BackToBackExponential_sptr> peaks, double gfwhm);
+    bool fitOverlappedPeaks(vector<BackToBackExponential_sptr> peaks,
+                            BackgroundFunction_sptr backgroundfunction,
+                            double gfwhm);
+
+    /// Fit multiple (overlapped) peaks
+    bool doFitMultiplePeaks(Workspace2D_sptr dataws, size_t wsindex,
+                            CompositeFunction_sptr peaksfunc,
+                            vector<BackToBackExponential_sptr> peakfuncs,
+                            vector<bool>& vecfitgood, vector<double>& vecchi2s);
+
+    /// Use Le Bail method to estimate and set the peak heights
+    void estimatePeakHeightsLeBail(Workspace2D_sptr dataws, size_t wsindex,
+                                   vector<BackToBackExponential_sptr> peaks);
+
+    /// Set constraints on a group of overlapped peaks for fitting
+    void setOverlappedPeaksConstraints(vector<BackToBackExponential_sptr> peaks);
+
+
+    /// Fit 1 peak by 1 minimizer of 1 call of minimzer (simple version)
+    bool doFit1PeakSimple(Workspace2D_sptr dataws, size_t workspaceindex,
+                          BackToBackExponential_sptr peakfunction,
+                          string minimzername,
+                          size_t maxiteration, double &chi2);
+
+    /// Fit 1 peak and background
+    bool doFit1PeakBackgroundSimple(Workspace2D_sptr dataws, size_t workspaceindex,
+                                    BackToBackExponential_sptr peakfunction,
+                                    BackgroundFunction_sptr backgroundfunction,
+                                    string minimzername, size_t maxiteration, double &chi2);
+
+    /// Fit 1 peak by using a sequential of minimizer
+    bool doFit1PeakSequential(Workspace2D_sptr dataws, size_t workspaceindex,
+                              BackToBackExponential_sptr peakfunction,
+                              vector<string> minimzernames, vector<size_t> maxiterations,
+                              vector<double> dampfactors, double& chi2);
+
+    /// Fit N overlapped peaks in a simple manner
+    bool doFitNPeaksSimple(Workspace2D_sptr dataws, size_t wsindex,
+                           CompositeFunction_sptr peaksfunc, vector<BackToBackExponential_sptr> peakfuncs,
+                           string minimizername, size_t maxiteration, double &chi2);
+
+    /// Store the function's parameter values to a map
+    void storeFunctionParameters(IFunction_sptr function,
+                                 std::map<string, double>& parammaps);
+
+    /// Restore the function's parameter values from a map
+    void restoreFunctionParameters(IFunction_sptr function, std::map<string, double> parammap);
+
+    /// Calculate the range to fit peak/peaks group
+    void calculatePeakFitBoundary(size_t ileftpeak, size_t irightpeak,
+                                  double &peakleftboundary, double &peakrightboundary);
 
     //---------------------------------------------------------------------------
 
@@ -130,9 +193,11 @@ namespace CurveFitting
     bool findMaxHeight(API::MatrixWorkspace_sptr dataws, size_t wsindex,
                        double xmin, double xmax, double& center, double& centerleftbound, double& centerrightbound, int &errordirection);
 
+    /// Create data workspace for X0, A, B and S of peak with good fit
+    Workspace2D_sptr genPeakParameterDataWorkspace();
+
     /// Generate output peak parameters workspace
-    std::pair<DataObjects::TableWorkspace_sptr, DataObjects::TableWorkspace_sptr> genPeakParametersWorkspace(
-        std::vector<size_t> goodfitpeaks, std::vector<double> goodfitchi2s);
+    std::pair<DataObjects::TableWorkspace_sptr, DataObjects::TableWorkspace_sptr> genPeakParametersWorkspace();
 
     /// Crop data workspace
     void cropWorkspace(double tofmin, double tofmax);
@@ -163,7 +228,10 @@ namespace CurveFitting
                          double leftpeakbound, double rightpeakbound);
 
     /// Fit single peak without background
-    std::pair<bool, double> doFitPeak(Workspace2D_sptr dataws, BackToBackExponential_sptr peak,
+    std::pair<bool, double> doFitPeak_Old(Workspace2D_sptr dataws, BackToBackExponential_sptr peak,
+                                      double guessedfwhm, bool calchi2);
+
+    std::pair<bool, double> doFitPeak(Workspace2D_sptr dataws,BackToBackExponential_sptr peakfunction,
                                       double guessedfwhm);
 
     /// Fit background-removed peak by Gaussian
@@ -177,7 +245,7 @@ namespace CurveFitting
     void calculate1PeakGroup(vector<size_t> peakindexes, BackgroundFunction_sptr background);
 
     /// Parse the fitting result
-    std::string parseFitResult(API::IAlgorithm_sptr fitalg, double& chi2);
+    std::string parseFitResult(API::IAlgorithm_sptr fitalg, double& chi2, bool &fitsuccess);
 
     /// Calculate a Bragg peak's centre in TOF from its Miller indices
     double calculatePeakCentreTOF(int h, int k, int l);
@@ -188,14 +256,36 @@ namespace CurveFitting
     /// Fit peaks in the same group (i.e., single peak or overlapped peaks)
     void fitPeaksGroup(vector<size_t> peakindexes);
 
+    /// Build partial workspace for fitting
+    Workspace2D_sptr buildPartialWorkspace(MatrixWorkspace_sptr sourcews, size_t workspaceindex,
+                                           double leftbound, double rightbound);
+
+    /// Plot a single peak to output vector
+    void plotFunction(IFunction_sptr peakfunction, BackgroundFunction_sptr background,
+                      FunctionDomain1DVector domain);
+
+    //-----------------------------------------------------------------------------------------------
+
     /// Data
     API::MatrixWorkspace_sptr m_dataWS;
+
+    /// Bragg peak parameter
+    DataObjects::TableWorkspace_sptr m_peakParamTable;
+
+    /// Instrument profile parameter table workspace
+    DataObjects::TableWorkspace_sptr m_profileTable;
 
     // Map for all peaks to fit individually
     // Disabled std::map<std::vector<int>, CurveFitting::BackToBackExponential_sptr> m_peaksmap;
 
     /// Sorted vector for peaks.  double = d_h, vector = (HKL), peak
     vector<pair<double, pair<vector<int>, BackToBackExponential_sptr> > > m_peaks;
+
+    /// Peak fitting information
+    vector<double> m_peakFitChi2;
+
+    /// Peak fitting status
+    vector<bool> m_goodFit;
 
     /// Map for function (instrument parameter)
     std::map<std::string, double> m_instrumentParmaeters;
@@ -208,6 +298,10 @@ namespace CurveFitting
 
     /// TOF vector of data workspace to process with
     int m_wsIndex;
+
+    /// TOF Min and TOF Max
+    double m_tofMin;
+    double m_tofMax;
 
     /// Flag to use given Bragg peaks' centre in TOF
     bool m_useGivenTOFh;
@@ -239,8 +333,8 @@ namespace CurveFitting
     /// Right most peak's right boundary
     double m_rightmostPeakRightBound;
 
-    /// Centres of peaks from input
-    vector<double> m_inputPeakCentres;
+    /// Minimum peak height for peak to be refined
+    double m_minPeakHeight;
 
   };
 
@@ -259,9 +353,6 @@ namespace CurveFitting
     double y = ((xf*y0-x0*yf) + x*(yf-y0))/(xf-x0);
     return y;
   }
-
-  Workspace2D_sptr buildPartialWorkspace(MatrixWorkspace_sptr sourcews, size_t workspaceindex,
-                                         double leftbound, double rightbound);
 
   /// Estimate background for a pattern in a coarse mode
   void estimateBackgroundCoarse(Workspace2D_sptr dataws, BackgroundFunction_sptr background,

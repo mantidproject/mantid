@@ -181,12 +181,12 @@ namespace Mantid
     }
 
     /**
-     * Return the name of the facility as determined from the hint.
+     * Return the InstrumentInfo as determined from the hint.
      *
      * @param hint :: The name hint.
-     * @return This will return the default facility if it cannot be determined.
+     * @return This will return the default instrument if it cannot be determined.
      */
-    const Kernel::FacilityInfo FileFinderImpl::getFacility(const string& hint) const
+    const Kernel::InstrumentInfo FileFinderImpl::getInstrument(const string& hint) const
     {
       if ((!hint.empty()) && (!isdigit(hint[0])))
       {
@@ -218,12 +218,12 @@ namespace Mantid
         }
         try {
           const Kernel::InstrumentInfo instrument = Kernel::ConfigService::Instance().getInstrument(instrName);
-          return instrument.facility();
+          return instrument;
         } catch (Kernel::Exception::NotFoundError &e) {
           g_log.debug() << e.what() << "\n";
         }
       }
-      return Kernel::ConfigService::Instance().getFacility();
+      return Kernel::ConfigService::Instance().getInstrument();
     }
 
     /**
@@ -233,6 +233,7 @@ namespace Mantid
      */
     std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const std::string& hint) const
     {
+      //g_log.debug() << "toInstrumentAndNumber(" << hint << ")\n";
       std::string instrPart;
       std::string runPart;
 
@@ -253,15 +254,7 @@ namespace Mantid
         }
         std::string::size_type nChars = std::distance(it, hint.rend());
 
-        // PG3 is a special case (name ends in a number)- don't trust them
-        if ((hint.find("PG3") == 0) || (hint.find("pg3") == 0)) {
-          instrPart = "PG3";
-          if (nChars < 3)
-            nChars++;
-        }
-        else {
-          instrPart = hint.substr(0, nChars);
-        }
+        instrPart = hint.substr(0, nChars);
         runPart = hint.substr(nChars);
       }
 
@@ -289,21 +282,33 @@ namespace Mantid
      * a run number prefixed with an instrument name/short name. If the instrument
      * name is absent the default one is used.
      * @param hint :: The name hint
-     * @param facility :: The current facility object
+     * @param instrument :: The current instrument object
      * @return The file name
      * @throw NotFoundError if a required default is not set
      * @throw std::invalid_argument if the argument is malformed or run number is too long
      */
-    std::string FileFinderImpl::makeFileName(const std::string& hint, const Kernel::FacilityInfo& facility) const
+    std::string FileFinderImpl::makeFileName(const std::string& hint, const Kernel::InstrumentInfo& instrument) const
     {
+      //g_log.debug() << "makeFileName(" << hint << ", " << instrument.shortName() << ")\n";
       if (hint.empty())
         return "";
 
       std::string filename(hint);
       const std::string suffix = extractAllowedSuffix(filename);
+      const std::string shortName = instrument.shortName();
+      std::string delimiter = instrument.delimiter();
+
+      // see if starts with the provided instrument name
+      if (filename.substr(0, shortName.size()) == shortName)
+      {
+        filename = filename.substr(shortName.size());
+        if ((!delimiter.empty()) && (filename.substr(0, delimiter.size()) == delimiter))
+          filename = filename.substr(delimiter.size());
+
+        filename = shortName + filename;
+      }
 
       std::pair < std::string, std::string > p = toInstrumentAndNumber(filename);
-      std::string delimiter = facility.delimiter();
 
       filename = p.first;
       if (!delimiter.empty())
@@ -373,8 +378,9 @@ namespace Mantid
         }
       }
 
-      // get facility from the FacilityInfo
-      const Kernel::FacilityInfo facility = this->getFacility(hint);
+      // get instrument and facility
+      const Kernel::InstrumentInfo instrument = this->getInstrument(hint);
+      const Kernel::FacilityInfo facility = instrument.facility();
       // get facility extensions
       const std::vector<std::string> facility_extensions = facility.extensions();
       // select allowed extensions
@@ -416,7 +422,7 @@ namespace Mantid
         }
         try
         {
-          filename = makeFileName(filename, facility);
+          filename = makeFileName(filename, instrument);
         }
         catch(std::invalid_argument&)
         {

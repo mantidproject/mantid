@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IArchiveSearch.h"
@@ -49,14 +49,15 @@ namespace Mantid
     public:
       std::string getFullPath(const std::string& fName)const;
       std::string getPath(const std::vector<IArchiveSearch_sptr>& archs, const std::set<std::string>& filename, const std::vector<std::string>& extensions)const;
-      std::string makeFileName(const std::string& hint, const Kernel::FacilityInfo& facility)const;
+      /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
+      std::string makeFileName(const std::string& hint, const Kernel::InstrumentInfo& instrument)const;
       void setCaseSensitive(const bool cs);
       int getCaseSensitive();
       std::string findRun(const std::string& hint,const std::set<std::string> *exts)const;
       std::string findRun(const std::string& hint,const std::vector<std::string> &exts  = std::vector<std::string>())const;
       std::vector<std::string> findRuns(const std::string& hint)const;
       /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
-      const Kernel::FacilityInfo getFacility(const std::string& hint) const;
+      const Kernel::InstrumentInfo getInstrument(const std::string& hint) const;
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;

@@ -4,9 +4,7 @@
 
 #include "MantidQtMantidWidgets/SequentialFitDialog.h"
 #include "MantidQtMantidWidgets/FitPropertyBrowser.h"
-//#include "MantidUI.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
-//#include "../ApplicationWindow.h"
 #include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -58,12 +56,15 @@ QDialog(fitBrowser),m_fitBrowser(fitBrowser)
   connect(this,SIGNAL(needShowPlot(Ui::SequentialFitDialog*, MantidQt::MantidWidgets::FitPropertyBrowser*)),
           mantidui,SLOT(showSequentialPlot(Ui::SequentialFitDialog*, MantidQt::MantidWidgets::FitPropertyBrowser*)));
   connect(ui.tWorkspaces,SIGNAL(cellChanged(int,int)),this,SLOT(spectraChanged(int,int)));
+  connect(ui.tWorkspaces,SIGNAL(itemSelectionChanged()),this,SLOT(selectionChanged()));
+
+  selectionChanged();
 
 }
 
 void SequentialFitDialog::addWorkspace()
 {
-  SelectWorkspacesDialog* dlg = new SelectWorkspacesDialog(this);
+  SelectWorkspacesDialog* dlg = new SelectWorkspacesDialog(this,"MatrixWorkspace");
   if (dlg->exec() == QDialog::Accepted)
   {
     addWorkspaces(dlg->getSelectedNames());
@@ -525,6 +526,14 @@ void SequentialFitDialog::plotAgainstLog(bool yes)
   //    setRange(0,(*y)(0),(*y)(y->length()-1));
   //  }
   //}
+}
+
+/**
+ * Update the dialog's controls apropriately.
+ */
+void SequentialFitDialog::selectionChanged()
+{
+  ui.btnDelete->setEnabled( ui.tWorkspaces->selectionModel()->hasSelection() );
 }
 
 }

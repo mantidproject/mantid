@@ -74,18 +74,10 @@ void AlignAndFocusPowder::init()
   declareProperty("TMax", 0.0, "Maximum for TOF or dspace axis. (Default 0.) ");
   declareProperty("PreserveEvents", true,
     "If the InputWorkspace is an EventWorkspace, this will preserve the full event list (warning: this will use much more memory!).");
-  declareProperty("FilterBadPulses", true,
-    "If the InputWorkspace is an EventWorkspace, filter bad pulses.");
   declareProperty("RemovePromptPulseWidth", 0.,
     "Width of events (in microseconds) near the prompt pulse to remove. 0 disables");
   declareProperty("CompressTolerance", 0.01,
     "Compress events (in microseconds) within this tolerance. (Default 0.01) ");
-  declareProperty("FilterLogName", "",
-    "Name of log used for filtering. (Default None) ");
-  declareProperty("FilterLogMinimumValue", 0.0,
-    "Events with log larger that this value will be included. (Default 0.0) ");
-  declareProperty("FilterLogMaximumValue", 0.0,
-    "Events with log smaller that this value will be included. (Default 0.0) ");
   declareProperty("UnwrapRef", 0., "Reference total flight path for frame unwrapping. Zero skips the correction");
   declareProperty("LowResRef", 0., "Reference DIFC for resolution removal. Zero skips the correction");
   declareProperty("CropWavelengthMin", 0., "Crop the data at this minimum wavelength. Overrides LowResRef.");
@@ -217,18 +209,6 @@ void AlignAndFocusPowder::exec()
   // filter the input events if appropriate
   if (m_inputEW)
   {
-    bool filterBadPulses = getProperty("FilterBadPulses");
-    if (filterBadPulses)
-    {
-      g_log.information() << "running FilterBadPulses\n";
-      API::IAlgorithm_sptr filterBAlg = createSubAlgorithm("FilterBadPulses");
-      filterBAlg->setProperty("InputWorkspace", m_outputEW);
-      filterBAlg->setProperty("OutputWorkspace", m_outputEW);
-      filterBAlg->executeAsSubAlg();
-      m_outputEW = filterBAlg->getProperty("OutputWorkspace");
-      m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
-    }
-
     double removePromptPulseWidth = getProperty("RemovePromptPulseWidth");
     if (removePromptPulseWidth > 0.)
     {
@@ -241,31 +221,6 @@ void AlignAndFocusPowder::exec()
       filterPAlg->executeAsSubAlg();
       m_outputW = filterPAlg->getProperty("OutputWorkspace");
       m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
-    }
-
-    std::string filterName = getProperty("FilterLogName");
-    if (!filterName.empty())
-    {
-      if (m_outputW->mutableRun().getLogData(filterName))
-      {
-        g_log.information() << "running FilterByLogValue(LogName=\""
-                            << filterName << "\"n";
-        double filterMin = getProperty("FilterLogMinimumValue");
-        double filterMax = getProperty("FilterLogMaximumValue");
-        API::IAlgorithm_sptr filterLogsAlg = createSubAlgorithm("FilterByLogValue");
-        filterLogsAlg->setProperty("InputWorkspace", m_outputEW);
-        filterLogsAlg->setProperty("OutputWorkspace", m_outputEW);
-        filterLogsAlg->setProperty("LogName", filterName);
-        filterLogsAlg->setProperty("MinimumValue", filterMin);
-        filterLogsAlg->setProperty("MaximumValue", filterMax);
-        filterLogsAlg->executeAsSubAlg();
-        m_outputEW = filterLogsAlg->getProperty("OutputWorkspace");
-        m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
-      }
-      else
-      {
-        g_log.warning() << "run does not contain log named\"" << filterName << "\"\n";
-      }
     }
 
     double tolerance = getProperty("CompressTolerance");

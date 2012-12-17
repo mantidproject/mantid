@@ -437,6 +437,18 @@ namespace Mantid
       }
     }
 
+// The makeFilterByValue & expandFilterToRange methods generate a bunch of warnings when the template type is the wider integer types
+// (when it's being assigned back to a double such as in a call to minValue or firstValue)
+// However, in reality these methods are only used for TYPE=int or double (they are only called from FilterByLogValue) so suppress the warnings
+#ifdef _WIN32
+  #pragma warning(push)
+  #pragma warning(disable: 4244)
+  #pragma warning(disable: 4804) // This one comes about for TYPE=bool - again the method is never called for this type
+#endif
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+  #pragma GCC diagnostic ignored "-Wconversion"
+#endif
+
     /**
      * Fill a TimeSplitterType that will filter the events by matching
      * log values >= min and <= max. Creates SplittingInterval's where
@@ -593,6 +605,13 @@ namespace Mantid
     {
       throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
     }
+
+#ifdef _WIN32
+  #pragma warning(pop)
+#endif
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+  #pragma GCC diagnostic warning "-Wconversion"
+#endif
 
     /**
      *  Return the time series as a correct C++ map<DateAndTime, TYPE>. All values
