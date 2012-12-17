@@ -265,7 +265,7 @@ class DirectEnergyConversion(object):
             self.fix_ei = True
             ei_value = ei_guess
             if (self.instr_name == "HYSPEC"):
-                Tzero=25.0 + 85.0 / (1+math.pow((ei_value/27.0),4.0))
+                Tzero=4.0 + 107.0 / (1+math.pow((ei_value/31.0),3.0))
                 self.log("Determined T0 of %s for HYSPEC" % str(Tzero))
             if (Tzero is None):
                 tzero = (0.1982*(1+ei_value)**(-0.84098))*1000.0
