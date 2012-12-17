@@ -218,12 +218,33 @@ namespace DataHandling
       }
     }
 
+    // If we've gotten here, it's because the thread has thrown an otherwise
+    // uncaught exception.  In such a case, the thread will exit and there's
+    // nothing we can do about that.  The only thing we can do is log an error
+    // so hopefully the user will notice (instead of wondering why all the
+    // incoming data has just stopped...)
+    } catch ( ADARA::invalid_packet e) {  // exception handler for invalid packets
+      // For now, log it and let the thread exit.  In the future, we might
+      // try to recover from this.  (A bad event packet could probably just
+      // be ignored, for example)
+      g_log.fatal() << "Caught an invalid packet exception in SNSLiveEventDataListener"
+                    << " network read thread." << std::endl;
+      g_log.fatal() << "Exception message is: " << e.what() << std::endl;
+      g_log.fatal() << "Thread is exiting." << std::endl;
+
+      m_isConnected = false;
+      m_workspaceInitialized = true;  // see the comments in the default exception
+                                      // handler for why we set this value.
+
+    } catch (std::runtime_error e) {  // exception handler for generic runtime exceptions
+      g_log.fatal() << "Caught a runtime exception." << std::endl
+                    << "Exception message: " << e.what() << std::endl
+                    << "Thread will exit." << std::endl;
+      m_isConnected = false;
+      m_workspaceInitialized = true;  // see the comments in the default exception
+                                      // handler for why we set this value.
+
     } catch (...) {  // Default exception handler
-      // If we've gotten here, it's because the thread has thrown an otherwise
-      // uncaught exception.  In such a case, the thread will exit and there's
-      // nothing we can do about that.  The only thing we can do is log an error
-      // so hopefully the user will notice (instead of wonder why all the
-      // incoming data has just stopped...)
       g_log.fatal() << "Uncaught exception in SNSLiveEventDataListener network read thread."
                     << "  Thread is exiting." << std::endl;
       m_isConnected = false;
@@ -247,7 +268,7 @@ namespace DataHandling
     // At the moment, all we need from the RTDL packets is the pulse
     // time (and its questionable whether we even need that).
     m_rtdlPulseId = pkt.pulseId();
-    return true;
+    return false;
   }
 
   // Note:  Before we can process a particular BankedEventPkt, we must have
@@ -280,7 +301,7 @@ namespace DataHandling
     // this behavior with the livelistener.keeppausedevents property.
     if (m_runPaused &&  m_keepPausedEvents == false)
     {
-      return true;
+      return false;
     }
 
     // TODO: Create a log with the pulse time and charge!!  (TimeSeriesProperties)
@@ -326,7 +347,7 @@ namespace DataHandling
     g_log.information() << "Total Events: " << totalEvents << std::endl;
     g_log.information() << "-------------------------------" << std::endl;
 
-    return true;
+    return false;
   }
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::HeartbeatPkt &)
@@ -334,7 +355,7 @@ namespace DataHandling
     // We don't actually need anything out of the heartbeat packet - we just
     // need to know that it arrived (and thus the SMS is still online)
     m_heartbeat = Kernel::DateAndTime::getCurrentTime();
-    return true;
+    return false;
   }
 
 
@@ -356,7 +377,7 @@ namespace DataHandling
       }
     }
 
-    return true;
+    return false;
   }
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::BeamlineInfoPkt &pkt)
@@ -377,7 +398,7 @@ namespace DataHandling
       }
     }
 
-    return true;
+    return false;
   }
 
 
@@ -460,7 +481,7 @@ namespace DataHandling
     }
 
     // Note: all other possibilities for pkt.status() can be ignored
-    return true;
+    return false;
   }
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableU32Pkt &pkt)
@@ -482,7 +503,7 @@ namespace DataHandling
       m_eventBuffer->mutableRun().getTimeSeriesProperty<int>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
     }
 
-    return true;
+    return false;
   }
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableDoublePkt &pkt)
@@ -504,7 +525,7 @@ namespace DataHandling
       m_eventBuffer->mutableRun().getTimeSeriesProperty<double>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
     }
 
-    return true;
+    return false;
   }
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableStringPkt &pkt)
@@ -526,7 +547,7 @@ namespace DataHandling
       m_eventBuffer->mutableRun().getTimeSeriesProperty<std::string>( (*it).second)->addValue( timeFromPacket( pkt), pkt.value());
     }
 
-    return true;
+    return false;
   }
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &pkt)
@@ -562,7 +583,7 @@ namespace DataHandling
     if (node == NULL)
     {
       g_log.warning() << "Device descriptor packet did not contain a a process_variables element." << std::endl;
-      return true;  // Returning true because this is not actually an error - or at least not a Mantid error.
+      return false;
     }
 
     node = node->firstChild();
@@ -662,7 +683,7 @@ namespace DataHandling
       node = node->nextSibling();
     }
 
-    return true;
+    return false;
   }
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::AnnotationPkt &pkt)
@@ -708,7 +729,7 @@ namespace DataHandling
       g_log.information() << "Annotation: " << comment << std::endl;
     }
 
-    return true;
+    return false;
   }
 
 
@@ -741,14 +762,18 @@ namespace DataHandling
 
     // We must always have a run_start property or the LogManager throws an
     // exception.  The "real" value will come from a RunStatus packet saying that
-    // a new run is starting.  Until we get one of those packets, we'll just use
-    // the time from the packet.  (In a truely "live" stream, current time would
-    // also work, but if we're replaying old data, then current time would be
-    // newer than the timestamps in the data, and that would cause strange time
-    // values in the sample log.
-    Kernel::DateAndTime now = timeFromPacket(pkt);
-    // addProperty() wants the time as an ISO 8601 string
-    m_eventBuffer->mutableRun().addProperty("run_start", now.toISO8601String());
+    // a new run is starting.  By the time we get here, we may already have
+    // received one of these packets.  If not, we'll just use the time from the
+    // packet passed in to this function..  (In a truely "live" stream, current
+    // time would also work, but if we're replaying old data, then current time
+    // would be newer than the timestamps in the data, and that would cause strange
+    // time values in the sample log.
+    if ( ! m_eventBuffer->mutableRun().hasProperty("run_start") )
+    {
+      Kernel::DateAndTime now = timeFromPacket(pkt);
+      // addProperty() wants the time as an ISO 8601 string
+      m_eventBuffer->mutableRun().addProperty("run_start", now.toISO8601String());
+    }
 
     m_workspaceInitialized = true;
   }
