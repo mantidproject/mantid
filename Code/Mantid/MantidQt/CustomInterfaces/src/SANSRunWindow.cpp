@@ -2248,7 +2248,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
   //py_code = "i._refresh_singleton()";
   if (runMode == SingleMode) // TODO: test if it is really necessary to reload the file settings.
   {
-  py_code = "\ni.ReductionSingleton().set_instrument(isis_instrument."+getInstrumentClass()+")";
+  py_code = "\ni.ReductionSingleton.clean(isis_reducer.ISISReducer)";
+  py_code += "\ni.ReductionSingleton().set_instrument(isis_instrument."+getInstrumentClass()+")";
   //restore the settings from the user file
   py_code += "\ni.ReductionSingleton().user_file_path='"+
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'";
