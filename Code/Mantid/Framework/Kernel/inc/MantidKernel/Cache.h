@@ -47,19 +47,41 @@ namespace Mantid
     public:
 
       /// No-arg Constructor
-      Cache():m_cacheHit(0),m_cacheMiss(0)
+      Cache():m_cacheHit(0),m_cacheMiss(0),m_cacheMap(), m_mutex()
       {
       }
 
-      ///Clears the cache
+      /**
+       * Copy constructor (mutex cannot be copied)
+       * @param src The object that this object shall be constructed from.
+       */
+      Cache(const Cache<KEYTYPE,VALUETYPE> & src) :
+        m_cacheHit(src.m_cacheHit), m_cacheMiss(src.m_cacheMiss),
+        m_cacheMap(src.m_cacheMap), m_mutex() // New mutex which is unlocked
+      {
+      }
+
+      /**
+       * Copy-assignment operator as we have a non-default copy constructor
+       * @param src The object that is on the RHS of the assignment
+       */
+      Cache<KEYTYPE,VALUETYPE> & operator=(const Cache<KEYTYPE,VALUETYPE> & rhs)
+      {
+        if(this == &rhs) return this; // handle self-assignment
+        m_cacheHit = rhs.m_cacheHit;
+        m_cacheMiss = rhs.m_cacheMiss;
+        m_cacheMap = rhs.m_cacheMap;
+        // mutex is untouched
+        return *this;
+      }
+
+      /// Clears the cache
       void clear()
       {
-        PARALLEL_CRITICAL(Cache_clear)
-        {
-          m_cacheHit = 0;
-          m_cacheMiss = 0;
-          m_cacheMap.clear();
-        }
+        MutexLocker lock(m_mutex);
+        m_cacheHit = 0;
+        m_cacheMiss = 0;
+        m_cacheMap.clear();
       }
 
       ///The number of cache entries
@@ -80,16 +102,23 @@ namespace Mantid
         return hitRatio; 
       }
 
-      ///Sets a cached value on the rotation cache
+      /**
+       * Inserts/updates a cached value with the given key
+       * @param key The key
+       * @param value The new value for the key
+       */
       void setCache(const KEYTYPE& key, const VALUETYPE& value)
       {
-        PARALLEL_CRITICAL(Cache_setCache)
-        {
-          m_cacheMap[key] = value;
-        }
+        MutexLocker lock(m_mutex);
+        m_cacheMap[key] = value;
       }
 
-      ///Attempts to retreive a value from the cache
+      /**
+       * Attempts to retrieve a value from the cache, with optional cache stats tracking @see USE_CACHE_STATS compiler define
+       * @param key The key for the requested value
+       * @param value An output reference for the value, set to the curretn value if found, otherwise it is untouched
+       * @returns True if the value was found, false otherwise
+       */
       bool getCache(const KEYTYPE& key, VALUETYPE& value) const
       {
       #ifdef USE_CACHE_STATS
@@ -110,19 +139,26 @@ namespace Mantid
        #endif
       }
 
-      ///removes the value associated with a key
+      /**
+       * Attempts to remove a value from the cache. If the key does not exist, it does nothing
+       * @param key The key whose value should be removed
+       */
       void removeCache(const KEYTYPE& key)
       {
-        PARALLEL_CRITICAL(Cache_setCache)
-        {
-          m_cacheMap.erase(key);
-        }
+        MutexLocker lock(m_mutex);
+        m_cacheMap.erase(key);
       }
 
     private:
-      ///Attempts to retreive a value from the cache
+      /**
+       * Attempts to retrieve a value from the cache
+       * @param key The key for the requested value
+       * @param value An output reference for the value, set to the curretn value if found, otherwise it is untouched
+       * @returns True if the value was found, false otherwise
+       */
       bool getCacheNoStats(const KEYTYPE key, VALUETYPE& value) const
       {
+        MutexLocker lock(m_mutex);
         CacheMapConstIterator it_found = m_cacheMap.find(key);
         if (it_found == m_cacheMap.end()) 
         {
@@ -139,6 +175,10 @@ namespace Mantid
       mutable int m_cacheMiss;
       /// internal cache map
       std::map<const KEYTYPE,VALUETYPE > m_cacheMap;
+      /// internal mutex
+      mutable Poco::FastMutex m_mutex;
+      /// typedef for Scoped Lock
+      typedef Poco::FastMutex::ScopedLock MutexLocker;
       /// iterator typedef 
       typedef typename std::map<const KEYTYPE,VALUETYPE >::iterator CacheMapIterator;
       /// const_iterator typedef 
