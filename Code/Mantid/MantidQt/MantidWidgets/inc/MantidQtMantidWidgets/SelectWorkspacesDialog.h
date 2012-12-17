@@ -54,10 +54,17 @@ public:
   /// Return the selected names
   QStringList getSelectedNames()const;
 
+private slots:
+
+  /// Slot to monitor the workspace selection status
+  void selectionChanged();
+
 private:
 
   /// Displays available workspace names
   QListWidget* m_wsList;
+  /// The OK button
+  QPushButton* m_okButton;
 
 };
 

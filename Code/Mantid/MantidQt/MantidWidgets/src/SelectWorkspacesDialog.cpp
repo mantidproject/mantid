@@ -10,6 +10,7 @@
 #include <QDialogButtonBox>
 #include <set>
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt
 {
@@ -17,18 +18,26 @@ namespace MantidWidgets
 {
 
   /**
-  Helper comparitor class used to determine if a workspace is of a given type.
+  Helper comparitor class used to determine if a workspace is not of a given type.
   */
-  class WorkspaceIsOfType
+  class WorkspaceIsNotOfType
   {
   private:
     const std::string m_type;
+    const bool m_isMatrixWorkspace;
   public:
-    WorkspaceIsOfType(const std::string &type) : m_type(type)
+    WorkspaceIsNotOfType(const std::string &type) : 
+    m_type(type),
+    m_isMatrixWorkspace(type == "MatrixWorkspace")
     {
     }
     bool operator()(Mantid::API::Workspace_sptr ws) const
     {
+      if ( m_type.empty() ) return false;
+      if ( m_isMatrixWorkspace )
+      {
+        return dynamic_cast<Mantid::API::MatrixWorkspace*>( ws.get() ) == NULL;
+      }
       return ws->id() != m_type;
     }
   };
@@ -51,7 +60,7 @@ QDialog(parent)
   Mantid::API::AnalysisDataServiceImpl& ADS = Mantid::API::AnalysisDataService::Instance();
   typedef std::vector<Mantid::API::Workspace_sptr> VecWorkspaces;
   VecWorkspaces workspaces = ADS.getObjects();
-  WorkspaceIsOfType comparitor(typeFilter);
+  WorkspaceIsNotOfType comparitor(typeFilter);
   workspaces.erase(std::remove_if(workspaces.begin(), workspaces.end(), comparitor), workspaces.end() );
   QStringList tmp;
   for (VecWorkspaces::const_iterator it = workspaces.begin(); it != workspaces.end(); ++it)
@@ -63,10 +72,10 @@ QDialog(parent)
   m_wsList->addItems(tmp);
   m_wsList->setSelectionMode(QAbstractItemView::MultiSelection);
 
-  QPushButton* okButton = new QPushButton("Select");
+  m_okButton = new QPushButton("Select");
   QPushButton* cancelButton = new QPushButton("Cancel");
   QDialogButtonBox* btnBox = new QDialogButtonBox(Qt::Horizontal);
-  btnBox->addButton(okButton,QDialogButtonBox::AcceptRole);
+  btnBox->addButton(m_okButton,QDialogButtonBox::AcceptRole);
   btnBox->addButton(cancelButton,QDialogButtonBox::RejectRole);
   connect(btnBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(btnBox, SIGNAL(rejected()), this, SLOT(reject()));
@@ -76,6 +85,10 @@ QDialog(parent)
   vLayout->addWidget(btnBox);
 
   setLayout(vLayout);
+
+  connect(m_wsList,SIGNAL(itemSelectionChanged()),this,SLOT(selectionChanged()));
+
+  selectionChanged();
 
 }
 
@@ -88,6 +101,12 @@ QStringList SelectWorkspacesDialog::getSelectedNames()const
     res << item->text();
   }
   return res;
+}
+
+/// Slot to monitor the workspace selection status
+void SelectWorkspacesDialog::selectionChanged()
+{
+  m_okButton->setEnabled( m_wsList->selectionModel()->hasSelection() );
 }
 
 }
