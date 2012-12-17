@@ -134,6 +134,8 @@ def elwin(inputFiles, eRange, Save=False, Verbose=True, Plot=False):
     Verbose = True
     workdir = config['defaultsave.directory']
     CheckXrange(eRange,'Energy')
+    eq1 = [] # output workspaces with units in Q
+    eq2 = [] # output workspaces with units in Q^2
     tempWS = '__temp'
     if Verbose:
         range1 = str(eRange[0])+' to '+str(eRange[1])
@@ -142,11 +144,10 @@ def elwin(inputFiles, eRange, Save=False, Verbose=True, Plot=False):
             logger.notice('Using 2 energy ranges from '+range1+' & '+range2)
         elif ( len(eRange) == 2 ):
             logger.notice('Using 1 energy range from '+range1)
-    nr = 0
-    inputRuns = sorted(inputFiles)
-    for file in inputRuns:
+    for file in inputFiles:
         (direct, file_name) = os.path.split(file)
         (root, ext) = os.path.splitext(file_name)
+        savefile = root[:-3]
         LoadNexus(Filename=file, OutputWorkspace=tempWS)
         if Verbose:
             logger.notice('Reading file : '+file)
@@ -154,90 +155,35 @@ def elwin(inputFiles, eRange, Save=False, Verbose=True, Plot=False):
         if ( len(eRange) == 4 ):
             ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1], 
                 Range2Start=eRange[2], Range2End=eRange[3],
-	            OutputInQ='__eq1', OutputInQSquared='__eq2')
+	            OutputInQ=savefile+'eq1', OutputInQSquared=savefile+'eq2')
         elif ( len(eRange) == 2 ):
             ElasticWindow(InputWorkspace=tempWS, Range1Start=eRange[0], Range1End=eRange[1],
-	            OutputInQ='__eq1', OutputInQSquared='__eq2')
-        (instr, last) = getInstrRun(root)
-        q1 = np.array(mtd['__eq1'].readX(0))
-        i1 = np.array(mtd['__eq1'].readY(0))
-        e1 = np.array(mtd['__eq1'].readE(0))
-        q2 = np.array(mtd['__eq2'].readX(0))
-        inY = mtd['__eq2'].readY(0)
-        inE = mtd['__eq2'].readE(0)
-        logy = []
-        loge = []
-        for i in range(0, len(inY)):
-            if(inY[i] == 0):
-                ly = math.log(0.000000000001)
-            else:
-                ly = math.log(inY[i])
-            logy.append(ly)
-            if( inY[i]+inE[i] == 0 ):
-                le = math.log(0.000000000001)-ly
-            else:
-                le = math.log(inY[i]+inE[i])-ly
-            loge.append(le)
-        i2 = np.array(logy)
-        e2 = np.array(loge)
-        if (nr == 0):
-            first = getWSprefix(root)
-            datX1 = q1
-            datY1 = i1
-            datE1 = e1
-            datX2 = q2
-            datY2 = i2
-            datE2 = e2
-            Vaxis = last
-        else:
-            datX1 = np.append(datX1,q1)
-            datY1 = np.append(datY1,i1)
-            datE1 = np.append(datE1,e1)
-            datX2 = np.append(datX2,q2)
-            datY2 = np.append(datY2,i2)
-            datE2 = np.append(datE2,e2)
-            Vaxis += ','+last
-        nr += 1
-    DeleteWorkspace(tempWS)
-    DeleteWorkspace('__eq1')
-    DeleteWorkspace('__eq2')
-    if (nr == 1):
-        ename = first[:-1]
-    else:
-        ename = first+'to_'+last
-    e1WS = ename+'_eq1'
-    e2WS = ename+'_eq2'
-    CreateWorkspace(OutputWorkspace=e1WS, DataX=datX1, DataY=datY1, DataE=datE1,
-        Nspec=nr, UnitX='MomentumTransfer', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis)
-    CreateWorkspace(OutputWorkspace=e2WS, DataX=datX2, DataY=datY2, DataE=datE2,
-        Nspec=nr, UnitX='QSquared', VerticalAxisUnit='Text', VerticalAxisValues=Vaxis)
-    if Save:
-        e1_path = os.path.join(workdir, e1WS+'.nxs')					# path name for nxs file
-        e2_path = os.path.join(workdir, e2WS+'.nxs')					# path name for nxs file
-        if Verbose:
-            logger.notice('Creating file : '+e1_path)
-            logger.notice('Creating file : '+e2_path)
-        SaveNexusProcessed(InputWorkspace=e1WS, Filename=e1_path)
-        SaveNexusProcessed(InputWorkspace=e2WS, Filename=e2_path)
+                OutputInQ=savefile+'eq1', OutputInQSquared=savefile+'eq2')
+        if Save:
+            q1_path = os.path.join(workdir, savefile+'eq1.nxs')					# path name for nxs file
+            SaveNexusProcessed(InputWorkspace=savefile+'eq1', Filename=q1_path)
+            q2_path = os.path.join(workdir, savefile+'eq2.nxs')					# path name for nxs file
+            SaveNexusProcessed(InputWorkspace=savefile+'eq2', Filename=q2_path)
+            if Verbose:
+                logger.notice('Creating file : '+q1_path)
+                logger.notice('Creating file : '+q2_path)
+        eq1.append(savefile+'eq1')
+        eq2.append(savefile+'eq2')
+        DeleteWorkspace(tempWS)
     if Plot:
-        elwinPlot(e1WS,e2WS)
+        elwinPlot(eq1,eq2)
     EndTime('Elwin')
-    return e1WS,e2WS
+    return eq1, eq2
 
 def elwinPlot(eq1,eq2):
-    nhist = mtd[eq1].getNumberHistograms()                      # no. of hist/groups in sam
-    nBins = mtd[eq1].blocksize()
-    lastXeq1 = mtd[eq1].readX(0)[nBins-1]
-    graph1 = mp.plotSpectrum(eq1, range(0,nhist))
-    layer1 = graph1.activeLayer()
-    layer1.setScale(mp.Layer.Bottom, 0.0, lastXeq1)
-    layer1.setAxisTitle(mp.Layer.Left,'Elastic Intensity')
-    nBins = mtd[eq2].blocksize()
-    lastXeq2 = mtd[eq2].readX(0)[nBins-1]
-    graph2 = mp.plotSpectrum(eq2, range(0,nhist))
-    layer2 = graph2.activeLayer()
-    layer2.setScale(mp.Layer.Bottom, 0.0, lastXeq2)
-    layer2.setAxisTitle(mp.Layer.Left,'log(Elastic Intensity)')
+    lastXeq1 = mtd[eq1[0]].readX(0)[-1]
+    graph1 = mp.plotSpectrum(eq1, 0)
+    layer = graph1.activeLayer()
+    layer.setScale(mp.Layer.Bottom, 0.0, lastXeq1)
+    lastXeq2 = mtd[eq2[0]].readX(0)[-1]
+    graph2 = mp.plotSpectrum(eq2, 0)
+    layer = graph2.activeLayer()
+    layer.setScale(mp.Layer.Bottom, 0.0, lastXeq2)
 
 ##############################################################################
 # Fury
@@ -350,20 +296,16 @@ def furyfitParsToWS(Table, Data, option):
     Iy1 = ws.column(5)      #intensity1 value
     Ie1 = ws.column(2)      #intensity1 error = bgd
     dataX = Qa
-    dataY = np.array(A0v)
-    dataE = np.array(A0e)
-    names = cName[1]
-    dataX = np.append(dataX,Qa)
-    dataY = np.append(dataY,np.array(Iy1))
-    dataE = np.append(dataE,np.array(Ie1))
-    names += ","+cName[5]
+    dataY = np.array(Iy1)
+    dataE = np.array(Ie1)
+    names = cName[5]
     Ty1 = ws.column(7)      #tau1 value
     Te1 = ws.column(8)      #tau1 error
     dataX = np.append(dataX,Qa)
     dataY = np.append(dataY,np.array(Ty1))
     dataE = np.append(dataE,np.array(Te1))
     names += ","+cName[7]
-    nSpec = 3
+    nSpec = 2
     logger.notice(' Option : '+str(npeak)+' '+type)
     if npeak == 1:
         By1 = ws.column(9)  #beta1 value
@@ -462,6 +404,7 @@ def furyfitMultParsToWS(Table, Data):
         ierr = 6                   #intensity error
         tval = 7                   #tau value
         terr = 8                   #tau error
+        rowb = 4                        #beta
         bval = 9                   #beta value
         bval = 10                   #beta error
         dataX.append(spec)
@@ -568,8 +511,6 @@ def msdfitPlotSeq(inputWS, xlabel):
 
 def msdfitPlotFits(lniWS, fitWS, n):
     mfit_plot = mp.plotSpectrum(lniWS,n,True)
-    mfit_layer = mfit_plot.activeLayer()
-    mfit_layer.setAxisTitle(mp.Layer.Left,'log(Elastic Intensity)')
     mp.mergePlots(mfit_plot,mp.plotSpectrum(fitWS+'_line',n,False))
 
 def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
@@ -577,31 +518,47 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
     StartTime('msdFit')
     workdir = config['defaultsave.directory']
     log_type = 'sample'
-    file = inputs[0]
-    (direct, filename) = os.path.split(file)
-    (root, ext) = os.path.splitext(filename)
-    (instr, first) = getInstrRun(filename)
-    if Verbose:
-        logger.notice('Reading Run : '+file)
-    LoadNexusProcessed(FileName=file, OutputWorkspace=root)
-    nHist = mtd[root].getNumberHistograms()
-    nfirst = int(first)
+    runs = sorted(inputs)
     file_list = []
-    run_list = []
     x_list = []
-    for nr in range(0, nHist):
+    np = 0
+    for file in runs:
+        (direct, filename) = os.path.split(file)
+        (root, ext) = os.path.splitext(filename)
+        file_list.append(root)
+        if Verbose:
+            logger.notice('Reading Run : '+file)
+        LoadNexusProcessed(FileName=file, OutputWorkspace=root)
+        eiq = root[:-1]+'1'
+        LoadNexusProcessed(FileName=eiq+'.nxs', OutputWorkspace='__eiq')
+        (instr, run) = getInstrRun(root)
+        run_name = instr + run
         nsam,ntc = CheckHistZero(root)
-        run_name = mtd[root].getAxis(1).label(nr)
-        lnWS = run_name+'_lnI'
-        file_list.append(lnWS)
-        ExtractSingleSpectrum(InputWorkspace=root, OutputWorkspace=lnWS,
-            WorkspaceIndex=nr)
+        inX = mtd[root].readX(0)
+        inY = mtd[root].readY(0)
+        inE = mtd[root].readE(0)
+        logy = []
+        loge = []
+        for i in range(0, len(inY)):
+            if(inY[i] == 0):
+                ly = math.log(0.000000000001)
+            else:
+                ly = math.log(inY[i])
+            logy.append(ly)
+            if( inY[i]+inE[i] == 0 ):
+                le = math.log(0.000000000001)-ly
+            else:
+                le = math.log(inY[i]+inE[i])-ly
+            loge.append(le)
+        lnWS = root[:-3] + 'lnI'
+        CreateWorkspace(OutputWorkspace=lnWS, DataX=inX, DataY=logy, DataE=loge,
+            Nspec=1)
         log_name = run_name+'_'+log_type
         log_file = log_name+'.txt'
         log_path = FileFinder.getFullPath(log_file)
         if (log_path == ''):
             logger.notice(' Run : '+run_name +' ; Temperature file not found')
-            xval = int(run_name[-3:])
+            xval = int(run[-3:])
             xlabel = 'Run'
         else:			
             logger.notice('Found '+log_path)
@@ -612,15 +569,19 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
             logger.notice(' Run : '+run_name+' ; Temperature = '+str(temp))
             xval = temp
             xlabel = 'Temp'
-        last = str(nr)
-        if (nr == 0):
+        if (np == 0):
+            RenameWorkspace(InputWorkspace='__eiq',OutputWorkspace='eiq')
             first = run_name
+            last = run
             run_list = lnWS
         else:
+            ConjoinWorkspaces(InputWorkspace1='eiq', InputWorkspace2='__eiq', CheckOverlapping=False)
+            last = run
             run_list += ';'+lnWS
         x_list.append(xval)
-        nr += 1
-    mname = root[:-4]
+        DeleteWorkspace(root)
+        np += 1
+    mname = first+'_to_'+last
     msdWS = mname+'_msd'
     if Verbose:
        logger.notice('Fitting Runs '+mname)
@@ -629,13 +590,14 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
     PlotPeakByLogValue(Input=run_list, OutputWorkspace=msdWS+'_Table', Function=function,
         StartX=startX, EndX=endX, FitType = 'Sequential')
     msdfitParsToWS(msdWS, x_list)
-    nr = 0
+    np = 0
+    eiqWS = mname+'_eiq'
     lniWS = mname+'_lnI'
     fitWS = mname+'_Fit'
     a0 = mtd[msdWS+'_a0'].readY(0)
     a1 = mtd[msdWS+'_a1'].readY(0)
-    for nr in range(0, nHist):
-        inWS = file_list[nr]
+    for ws in file_list:
+        inWS = ws[:-3] + 'lnI'
         CropWorkspace(InputWorkspace=inWS,OutputWorkspace='__data',XMin=0.95*startX,XMax=1.05*endX)
         xin = mtd['__data'].readX(0)
         nxd = len(xin)-1
@@ -643,30 +605,38 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=True, Plot=True):
         yd = []
         ed = []
         for n in range(0,nxd):
-            line = a0[nr] - a1[nr]*xin[n]
+            line = a0[np] - a1[np]*xin[n]
             xd.append(xin[n])
             yd.append(line)
             ed.append(0.0)
         xd.append(xin[nxd])
         CreateWorkspace(OutputWorkspace='__line', DataX=xd, DataY=yd, DataE=ed,
 		    Nspec=1)
-        if (nr == 0):
+        if (np == 0):
+            RenameWorkspace(InputWorkspace=inWS,OutputWorkspace=lniWS)
             RenameWorkspace(InputWorkspace='__data',OutputWorkspace=fitWS+'_data')
             RenameWorkspace(InputWorkspace='__line',OutputWorkspace=fitWS+'_line')
         else:
+            ConjoinWorkspaces(InputWorkspace1=lniWS, InputWorkspace2=inWS, CheckOverlapping=False)
             ConjoinWorkspaces(InputWorkspace1=fitWS+'_data', InputWorkspace2='__data', CheckOverlapping=False)
             ConjoinWorkspaces(InputWorkspace1=fitWS+'_line', InputWorkspace2='__line', CheckOverlapping=False)
-        nr += 1
+        np += 1
         group = fitWS+'_data,'+ fitWS+'_line'
         GroupWorkspaces(InputWorkspaces=group,OutputWorkspace=fitWS)
-        DeleteWorkspace(inWS)
+    RenameWorkspace(InputWorkspace='eiq',OutputWorkspace=eiqWS)
     if Plot:
         msdfitPlotSeq(msdWS, xlabel)
-        msdfitPlotFits(root, fitWS, 0)
+        msdfitPlotFits(lniWS, fitWS, 0)
     if Save:
+        eiq_path = os.path.join(workdir, eiqWS+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=eiqWS, Filename=eiq_path, Title=eiqWS)
+        lni_path = os.path.join(workdir, lniWS+'.nxs')					# path name for nxs file
+        SaveNexusProcessed(InputWorkspace=lniWS, Filename=lni_path, Title=lniWS)
         msd_path = os.path.join(workdir, msdWS+'.nxs')					# path name for nxs file
         SaveNexusProcessed(InputWorkspace=msdWS, Filename=msd_path, Title=msdWS)
         if Verbose:
+            logger.notice('Output eiq file : '+eiq_path)  
+            logger.notice('Output lnI file : '+lni_path)  
             logger.notice('Output msd file : '+msd_path)  
     EndTime('msdFit')
     return msdWS
@@ -850,14 +820,14 @@ def abscorFeeder(sample, container, geom, useCor):
 def plotCorrResult(inWS,PlotResult):
     nHist = mtd[inWS].getNumberHistograms()
     if (PlotResult == 'Spectrum' or PlotResult == 'Both'):
-        if nHist >= 10:                       #only plot up to 10 hists
+        if nHist >= 10:
             nHist = 10
         plot_list = []
         for i in range(0, nHist):
             plot_list.append(i)
         res_plot=mp.plotSpectrum(inWS,plot_list)
     if (PlotResult == 'Contour' or PlotResult == 'Both'):
-        if nHist >= 5:                        #needs at least 5 hists for a contour
+        if nHist >= 5:
             mp.importMatrixWorkspace(inWS).plotGraph2D()
 
 def plotCorrContrib(plot_list,n):
@@ -869,4 +839,5 @@ def replace_workspace_axis(wsName, new_values):
     for i in range(len(new_values)):
         ax1.setValue(i, new_values[i])
     ax1.setUnit('MomentumTransfer')
-    mtd[wsName].replaceAxis(1, ax1)      #axis=1 is vertical
+    ws = mtd[wsName]
+    ws.replaceAxis(1, ax1)
