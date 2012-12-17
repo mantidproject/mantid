@@ -185,7 +185,7 @@ namespace DataHandling
     helloPkt[4] = (uint32_t)(m_startTime.totalNanoseconds() / 1000000000);  // divide by a billion to get time in seconds
 
     if ( m_socket.sendBytes(helloPkt, sizeof(helloPkt)) != sizeof(helloPkt))
-    // Yes, I know a send isn't guarenteed to send the whole buffer in one call.
+    // Yes, I know a send isn't guaranteed to send the whole buffer in one call.
     // I'm treating such a case as an error anyway.
     {
       g_log.error()
@@ -205,7 +205,14 @@ namespace DataHandling
       }
 
       // Read the packets, accumulate events in m_eventBuffer...
+      Kernel::DateAndTime lastHeartbeat = m_heartbeat;
       read( m_socket);
+      if (lastHeartbeat == m_heartbeat)
+      {
+        // No packets were parsed.  Sleep a little to let some data accumulate
+        // before calling read again.  (Keeps us from spinlocking the cpu...)
+        Poco::Thread::sleep( 10);  // 10 milliseconds
+      }
 
       // Check the heartbeat
 #define HEARTBEAT_TIMEOUT (60 * 5)  // 5 minutes
@@ -404,6 +411,8 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::RunStatusPkt &pkt)
   {
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
+
     // Exactly what we have to do depends on the status field
     if (pkt.status() == ADARA::RunStatus::NEW_RUN)
     {
@@ -486,6 +495,7 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableU32Pkt &pkt)
   {
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
@@ -508,6 +518,7 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableDoublePkt &pkt)
   {
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
@@ -530,6 +541,7 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::VariableStringPkt &pkt)
   {
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     unsigned devId = pkt.devId();
     unsigned pvId = pkt.varId();
 
@@ -552,6 +564,7 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::DeviceDescriptorPkt &pkt)
   {
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
     std::istringstream input( pkt.description());
     Poco::XML::InputSource src(input);
     Poco::XML::DOMParser parser;
@@ -688,6 +701,7 @@ namespace DataHandling
 
   bool SNSLiveEventDataListener::rxPacket( const ADARA::AnnotationPkt &pkt)
   {
+    m_heartbeat = Kernel::DateAndTime::getCurrentTime();
 
     switch (pkt.type())
     {

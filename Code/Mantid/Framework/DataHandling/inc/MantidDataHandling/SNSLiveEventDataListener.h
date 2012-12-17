@@ -148,7 +148,7 @@ namespace Mantid
 
       // ----------------------------------------------------------------------------
 
-      static Kernel::Logger& g_log;   ///< reference to the logger clas
+      static Kernel::Logger& g_log;   ///< reference to the logger class
      
     };
 
