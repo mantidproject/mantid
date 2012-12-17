@@ -67,7 +67,7 @@ namespace Mantid
        */
       Cache<KEYTYPE,VALUETYPE> & operator=(const Cache<KEYTYPE,VALUETYPE> & rhs)
       {
-        if(this == &rhs) return this; // handle self-assignment
+        if(this == &rhs) return *this; // handle self-assignment
         m_cacheHit = rhs.m_cacheHit;
         m_cacheMiss = rhs.m_cacheMiss;
         m_cacheMap = rhs.m_cacheMap;
