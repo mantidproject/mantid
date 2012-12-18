@@ -1,8 +1,8 @@
 /*WIKI*
- * This Algorithm creates a PeaksWorkspace with peaks occurring at specific fractional h,k,or l values.
+ * This Algorithm creates a PeaksWorkspace with peaks occurring at specific fractional offsets from  h,k,or l values.
  *
  * There are options to create Peaks offset from peaks from the input PeaksWorkspace, or to create peaks offset
- * from h,k, and l values in a range.  There is an option to include offsets=0 in this new PeakWorkspace
+ * from h,k, and l values in a range.  Zero offsets are allowed if some or all integer h,k, or l values are desired
  *
  * The input PeaksWorkspace must contain an orientation matrix and have been INDEXED by THIS MATRIX if the new
  * peaks are not created from a range of h ,k, and l values
@@ -24,6 +24,7 @@
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
 #include <math.h>
+#include "MantidKernel/IPropertySettings.h"
 //#include "MantidKernel/Strings.h"
 namespace Mantid
 {
@@ -55,7 +56,7 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
     void CreateFractionalPeaks::initDocs()
     {
       this->setWikiSummary("creates a PeaksWorkspace with peaks occurring at specific fractional h,k,or l values");
-      this->setOptionalMessage("The offsets can be from peaks in a range or peaks in the input PeaksWorkspace");
+      this->setOptionalMessage("The offsets can be from hkl values in a range of hkl values or from peaks in the input PeaksWorkspace");
     }
 
     /// Initialise the properties
@@ -67,39 +68,39 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
       declareProperty(new WorkspaceProperty<PeaksWorkspace> ("FracPeaks", "", Direction::Output),
                 "Workspace of Peaks with peaks with fractional h,k, and/or l values");
 
-      declareProperty("hFracDenom", 0,"Denominator of fraction in h direction");
+      declareProperty(new Kernel::ArrayProperty<double>(string("HOffset"),string("-.5,0, .5")),"Offset in the h direction");
 
-      declareProperty("kFracDenom", 0,"Denominator of fraction in k direction");
+      declareProperty(new Kernel::ArrayProperty<double>(string("KOffset"),string("0")),"Offset in the h direction");
 
-      declareProperty("lFracDenom", 0,"Denominator of fraction in l direction");
+      declareProperty(new Kernel::ArrayProperty<double>(string("LOffset"),string("-.5,.5")),"Offset in the h direction");
 
-      declareProperty("IncludeIntHKLPeaks", false,"Include the peaks with integer h,k,l values");
 
       declareProperty("IncludeAllPeaksInRange", false,"If false only offsets from peaks from Peaks are used");
 
-      declareProperty(new Kernel::ArrayProperty<double>(string("HRange"),string("-8,8"),
-             boost::shared_ptr<Kernel::ArrayLengthValidator<double> >
-                       ( new Kernel::ArrayLengthValidator<double>(2,2))),
-            "H range min,max");
+      declareProperty(new PropertyWithValue<double>("Hmin", -8.0 , Direction::Input) ,"Minimum H value to use" );
+      declareProperty(new PropertyWithValue<double>("Hmax", 8.0  , Direction::Input), "Maximum H value to use" );
+      declareProperty(new PropertyWithValue<double>("Kmin", -8.0 , Direction::Input), "Minimum K value to use" );
+      declareProperty(new PropertyWithValue<double>("Kmax", 8.0  , Direction::Input), "Maximum K value to use" );
+      declareProperty(new PropertyWithValue<double>("Lmin", -8.0 , Direction::Input), "Minimum L value to use" );
+      declareProperty(new PropertyWithValue<double>("Lmax", 8.0  , Direction::Input), "Maximum L value to use" );
 
-      declareProperty(new Kernel::ArrayProperty<double>(string("KRange"),string("-8,8"),
-          boost::shared_ptr<Kernel::ArrayLengthValidator<double> >(
-                 new Kernel::ArrayLengthValidator<double>(2,2)))
-          ,"K range min,max");
 
-      declareProperty(new Kernel::ArrayProperty<double>(string("LRange"),string("-8,8"),
-          boost::shared_ptr<Kernel::ArrayLengthValidator<double> >(
-              new Kernel::ArrayLengthValidator<double>(2,2)))
-          ,"L range min,max");
 
-      setPropertySettings("HRange", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                Kernel::IS_NOT_EQUAL_TO, "0"));
+      setPropertySettings("Hmin",new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
+                                                         Kernel::IS_EQUAL_TO, "1"));
 
-      setPropertySettings("KRange", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                Kernel::IS_NOT_EQUAL_TO, "0"));
+      setPropertySettings("Hmax",new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
+                                                           Kernel::IS_EQUAL_TO, "1"));
+      setPropertySettings("Kmin",new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
+                                                             Kernel::IS_EQUAL_TO, "1"));
 
-      setPropertySettings("LRange", new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
-                Kernel::IS_NOT_EQUAL_TO,"0"));
+       setPropertySettings("Kmax",new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
+                                                            Kernel::IS_EQUAL_TO, "1"));
+      setPropertySettings("Lmin",new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
+                                                                 Kernel::IS_EQUAL_TO, "1"));
+
+      setPropertySettings("Lmax",new Kernel::EnabledWhenProperty(string("IncludeAllPeaksInRange"),
+                                                                   Kernel::IS_EQUAL_TO, "1"));
 
 
     }
@@ -109,18 +110,22 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
     {
        PeaksWorkspace_sptr Peaks=getProperty("Peaks");
 
-       int hFracDenom= getProperty("hFracDenom");
-       int kFracDenom= getProperty("kFracDenom");
-       int lFracDenom= getProperty("lFracDenom");
+       vector<double> hOffsets = getProperty("HOffset");
+       vector<double> kOffsets = getProperty("KOffset");
+       vector<double> lOffsets = getProperty("LOffset");
+       if ( hOffsets.empty())hOffsets.push_back(0.0);
+       if ( kOffsets.empty())kOffsets.push_back(0.0);
+       if ( lOffsets.empty())lOffsets.push_back(0.0);
 
-       bool includeIntPeaks= getProperty("IncludeIntHKLPeaks");
+;
        bool includePeaksInRange= getProperty("IncludeAllPeaksInRange");
 
-       if( includeIntPeaks && Peaks->getNumberPeaks()<=0)
+       if(  Peaks->getNumberPeaks()<=0)
        {
          g_log.error()<<"There are No peaks in the input PeaksWorkspace\n";
          return;
        }
+
        API::Sample samp= Peaks->sample();
 
        Geometry::OrientedLattice &ol = samp.getOrientedLattice();
@@ -130,18 +135,24 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
        boost::shared_ptr<IPeaksWorkspace> OutPeaks=WorkspaceFactory::Instance().createPeaks();
        OutPeaks->setInstrument(Instr);
       // AnalysisDataService::Instance().addOrReplace(getPropertyValue("FracPeaks"),OutPeaks);
+
        V3D hkl;
        int peakNum =0;
        int NPeaks = Peaks->getNumberPeaks();
        Kernel::Matrix<double> Gon;
        Gon.identityMatrix();
-       vector<double>v1 = getProperty("HRange");
-       vector<double>v2 = getProperty("KRange");
-       vector<double>v3 = getProperty("LRange");
+
+       double Hmin= getProperty("Hmin");
+       double Hmax= getProperty("Hmax");
+       double Kmin= getProperty("Kmin");
+       double Kmax= getProperty("Kmax");
+       double Lmin= getProperty("Lmin");
+       double Lmax= getProperty("Lmax");
+
        int N=NPeaks;
        if( includePeaksInRange)
        {
-         N=(int)((v1[1]-v1[0]+1)*(v2[1]-v2[0]+1)*(v3[1]-v3[0]+1)+.5);
+         N=(int)((Hmax-Hmin+1)*(Kmax-Kmin+1)*(Lmax-Lmin+1)+.5);
          N=max<int>(100,N);
        }
        IPeak& peak0 =Peaks->getPeak(0);
@@ -152,9 +163,9 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
        {
 
 
-         hkl[0]=v1[0];
-         hkl[1]=v2[0];
-         hkl[2]=v3[0];
+         hkl[0]=Hmin;
+         hkl[1]=Kmin;
+         hkl[2]=Lmin;
        }else
        {
          hkl[0]=peak0.getH();
@@ -163,45 +174,57 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
 
 
        }
-       Kernel::DblMatrix UB= ol.getUB();
 
-       bool done = false;;
+       Kernel::DblMatrix UB= ol.getUB();
+       vector< vector<int> > AlreadyDonePeaks;
+
+       bool done = false;
        while( !done)
        {
-         if(hkl[0] != 0 || hkl[1] !=0 || hkl[2] !=0)
-         for( int hoffset=-1;hoffset<=1;hoffset++)
-           for(int  koffset=-1;koffset<=1;koffset++)
-             for( int loffset=-1;loffset<=1;loffset++)
-               if (includeIntPeaks || hoffset!=0 || koffset!=0 || loffset!=0 )
-                 if ((hFracDenom != 0 || hoffset == 0) && (kFracDenom != 0 || koffset == 0)
-                    && (lFracDenom != 0 || loffset == 0))
+         for( size_t hoffset=0;hoffset<hOffsets.size();hoffset++)
+           for(size_t  koffset=0;koffset<kOffsets.size();koffset++)
+             for( size_t loffset=0;loffset<lOffsets.size();loffset++)
                 try
                 {
                   V3D hkl1(hkl);
 
-                  hkl1[0] += hoffset / max<double> (1.0, (double) hFracDenom);
-                  hkl1[1] += koffset / max<double> (1.0, (double) kFracDenom);
-                  hkl1[2] += loffset / max<double> (1.0, (double) lFracDenom);
-                  //TODO check for duplicates with set of already set hkl &[hoffset,koffset,loffset values
+
+                  hkl1[0] += hOffsets[hoffset] ;
+                  hkl1[1] += kOffsets[koffset] ;
+                  hkl1[2] += lOffsets[loffset] ;
+
                   Kernel::V3D Qs = UB * hkl1 ;
                   Qs*= 2.0;
                   Qs*=M_PI;
+
                   if( Qs[2] <=0)
                     continue;
 
-                  //IPeak* peak = Peaks->createPeak(Qs, 1);
+
                   boost::shared_ptr<IPeak> peak(Peaks->createPeak(Qs, 1));
                   peak->setGoniometerMatrix(Gon);
                   peak->setQSampleFrame(Qs);
+
                   if (Qs[2]>0 && peak->findDetector())
                   {
+                    vector<int> SavPk;
+                    SavPk.push_back(RunNumber);
+                    SavPk.push_back((int)floor(1000*hkl1[0]+.5));
+                    SavPk.push_back((int)floor(1000*hkl1[1]+.5));
+                    SavPk.push_back((int)floor(1000*hkl1[2]+.5));
+
+                  //TODO keep list sorted so searching is good
+                    vector<vector<int> >::iterator it = find(AlreadyDonePeaks.begin(),AlreadyDonePeaks.end(),SavPk);
+
+                    if( it == AlreadyDonePeaks.end())
+                      AlreadyDonePeaks.push_back(SavPk);
+                    else
+                      continue;
+
+
                     peak->setHKL(hkl1);
                     peak->setRunNumber(RunNumber);
                     OutPeaks->addPeak(*peak);
-                    //Has to be filled in with data
-                    //peak.setInitialEnergy(peak0.getInitialEnergy());
-                    // peak.setIntensity(peak0.getIntensity());
-                    //peak.setSigmaIntensity(peak0.getSigmaIntensity());
                   }
                 }catch(...)
                 {
@@ -210,16 +233,16 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
          if( includePeaksInRange)
          {
            hkl[0]++;
-           if( hkl[0]>v1[1])
+           if( hkl[0]>Hmax)
            {
-             hkl[0]=v1[0];
+             hkl[0]=Hmin;
              hkl[1]++;
-             if( hkl[1]> v2[1])
+             if( hkl[1]> Kmax)
              {
 
-               hkl[1]=v2[0];
+               hkl[1]=Kmin;
                hkl[2]++;
-               if( hkl[2]> v3[1])
+               if( hkl[2]> Lmax)
                  done = true;
              }
            }
