@@ -433,5 +433,27 @@ namespace Mantid
              }
         }
     }
+
+    std::string DetectorGroup::getName() const
+    {
+      std::string result = "";
+      DetCollection::const_iterator it;
+      for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+      {
+        result += (*it).second->getName() + this->getNameSeparator();
+      }
+      return result;
+    }
+
+    std::string DetectorGroup::getFullName() const
+    {
+      std::string result = "";
+      DetCollection::const_iterator it;
+      for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
+      {
+        result += (*it).second->getFullName() + this->getNameSeparator();
+      }
+      return result;
+    }
 } // namespace Geometry
 } // namespace Mantid

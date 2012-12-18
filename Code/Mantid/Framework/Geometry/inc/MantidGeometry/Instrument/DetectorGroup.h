@@ -134,6 +134,8 @@ namespace Mantid
       mutable det_topology group_topology;
       /// group centre is the geometrical centre of the detectors group calculated when the calculate group topology is invoked
       mutable Kernel::V3D  groupCentre; 
+      /// Return separator for list of names of detectors
+      std::string getNameSeparator() const { return ";"; }
    
       // functions inherited from IComponent
       Component* clone() const{ return NULL; }
@@ -147,8 +149,8 @@ namespace Mantid
       {
         return std::vector<boost::shared_ptr<const IComponent> >();
       }
-      std::string getName() const{return "";}
-      std::string getFullName() const{return "";}
+      std::string getName() const;
+      std::string getFullName() const;
       void setParent(IComponent*){}
       void setName(const std::string&){}
 
