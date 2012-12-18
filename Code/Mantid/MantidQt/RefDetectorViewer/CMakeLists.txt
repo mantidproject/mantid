@@ -61,22 +61,14 @@ add_definitions ( -DIN_MANTIDQT_IMAGEVIEWER )
 add_library ( MantidQtRefDetectorViewer ${ALL_SRC} ${INC_FILES} ${UI_HDRS} )
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtRefDetectorViewer
-                        MantidQtAPI MantidWidgets QtPropertyBrowser ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( MantidQtRefDetectorViewer MantidQtImageViewer )
 
 ###########################################################################
 # DEMO/GUI TESTING APPLICATIONS
 ###########################################################################
 
-add_executable ( RefDetectorViewDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/RefDetectorViewDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
-target_link_libraries ( RefDetectorViewDemo MantidQtAPI QtPropertyBrowser MantidQtImageViewer
-                        ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
-
-# add_executable ( ImageViewNxEventFile EXCLUDE_FROM_ALL ${ALL_SRC}
-# src/ImageViewNxEventFile.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
-# target_link_libraries ( ImageViewNxEventFile 
-                       # MantidQtAPI QtPropertyBrowser ${CORE_MANTIDLIBS}
-# ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+add_executable ( RefDetectorViewDemo EXCLUDE_FROM_ALL src/RefDetectorViewDemo.cpp )
+target_link_libraries ( RefDetectorViewDemo MantidQtRefDetectorViewer )
 
 ###########################################################################
 # Unit tests setup

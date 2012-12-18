@@ -88,15 +88,11 @@ target_link_libraries ( MantidQtImageViewer
 ###########################################################################
 
 if ( NOT WIN32 )
-add_executable ( ImageViewDemo EXCLUDE_FROM_ALL ${ALL_SRC} src/ImageViewDemo.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
-target_link_libraries ( ImageViewDemo MantidQtAPI
-                        ${CORE_MANTIDLIBS} ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+add_executable ( ImageViewDemo EXCLUDE_FROM_ALL src/ImageViewDemo.cpp )
+target_link_libraries ( ImageViewDemo MantidQtImageViewer )
 
-add_executable ( ImageViewNxEventFile EXCLUDE_FROM_ALL ${ALL_SRC}
-                 src/ImageViewNxEventFile.cpp ${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS})
-target_link_libraries ( ImageViewNxEventFile 
-                        MantidQtAPI QtPropertyBrowser ${CORE_MANTIDLIBS}
-                        ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+add_executable ( ImageViewNxEventFile EXCLUDE_FROM_ALL src/ImageViewNxEventFile.cpp )
+target_link_libraries ( ImageViewNxEventFile MantidQtImageViewer )
 endif ()
 
 ###########################################################################
