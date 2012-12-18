@@ -5,7 +5,6 @@ set ( SRC_FILES
        src/RefSliderHandler.cpp
        src/RefRangeHandler.cpp
        src/RefIVConnections.cpp 
-       src/RefMatrixWSDataSource.cpp
        src/RefMatrixWSImageView.cpp
        src/RefLimitsHandler.cpp
 )
@@ -18,7 +17,6 @@ set ( INC_FILES
        inc/MantidQtRefDetectorViewer/RefImageView.h
        inc/MantidQtRefDetectorViewer/RefSliderHandler.h
        inc/MantidQtRefDetectorViewer/RefRangeHandler.h
-       inc/MantidQtRefDetectorViewer/RefMatrixWSDataSource.h
        inc/MantidQtRefDetectorViewer/RefMatrixWSImageView.h
        inc/MantidQtRefDetectorViewer/RefLimitsHandler.h
 )
