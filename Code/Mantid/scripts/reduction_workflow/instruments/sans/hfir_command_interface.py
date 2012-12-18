@@ -31,14 +31,12 @@ def DirectBeamCenter(datafile):
     find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["BeamCenterMethod"]="DirectBeam"
     ReductionSingleton().reduction_properties["BeamCenterFile"]=datafile
-    ReductionSingleton().reduction_properties["BeamCenterPersistent"]=True
 
 def ScatteringBeamCenter(datafile, beam_radius=3.0):
     find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["BeamCenterMethod"]="Scattering"
     ReductionSingleton().reduction_properties["BeamRadius"]=beam_radius
     ReductionSingleton().reduction_properties["BeamCenterFile"]=datafile
-    ReductionSingleton().reduction_properties["BeamCenterPersistent"]=True
 
 def SetBeamCenter(x,y):
     ReductionSingleton().reduction_properties["BeamCenterMethod"]="Value"
@@ -89,14 +87,16 @@ def SensitivityScatteringBeamCenter(datafile, beam_radius=3.0):
     ReductionSingleton().reduction_properties["SensitivityBeamCenterFile"]=datafile
     
 def NoSensitivityCorrection():
-    ReductionSingleton().reduction_properties["SensitivityFile"] = None
+    if ReductionSingleton().reduction_properties.has_key("SensitivityFile"):
+        del ReductionSingleton().reduction_properties["SensitivityFile"]
     
 def DarkCurrent(datafile):
     datafile = find_data(datafile, instrument=ReductionSingleton().get_instrument())
     ReductionSingleton().reduction_properties["DarkCurrentFile"] = datafile
     
 def NoDarkCurrent():
-    ReductionSingleton().reduction_properties["DarkCurrentFile"] = None
+    if ReductionSingleton().reduction_properties.has_key("DarkCurrentFile"):
+        del ReductionSingleton().reduction_properties["DarkCurrentFile"]
     
 def SolidAngle(detector_tubes=False):
     ReductionSingleton().reduction_properties["SolidAngleCorrection"]=True
@@ -276,24 +276,25 @@ def SetWavelength(wavelength, spread):
     
 def ResetWavelength():
     """ Resets the wavelength to the data file default """
-    ReductionSingleton().reduction_properties["Wavelength"] = None
-    ReductionSingleton().reduction_properties["WavelengthSpread"] = None
+    if ReductionSingleton().reduction_properties.has_key("Wavelength"):
+        del ReductionSingleton().reduction_properties["Wavelength"]
+    if ReductionSingleton().reduction_properties.has_key("WavelengthSpread"):
+        del ReductionSingleton().reduction_properties["WavelengthSpread"]
     
 def SaveIq(output_dir='', process=''):
     ReductionSingleton().reduction_properties["OutputDirectory"] = output_dir
     ReductionSingleton().reduction_properties["ProcessInfo"] = process
 
 def NoSaveIq():
-        if ReductionSingleton().reduction_properties.has_key("OutputDirectory"):
-            del ReductionSingleton().reduction_properties["OutputDirectory"]
+    if ReductionSingleton().reduction_properties.has_key("OutputDirectory"):
+        del ReductionSingleton().reduction_properties["OutputDirectory"]
             
 def IQxQy(nbins=100):
-    print "I(QxQy)"
-    #ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, InputWorkspace=None, 
-    #                               NumberOfBins=nbins)
+    ReductionSingleton().reduction_properties["Do2DReduction"] = True
+    ReductionSingleton().reduction_properties["IQ2DNumberOfBins"] = nbins
     
-def NoIQxQy(nbins=100):
-    ReductionSingleton().set_IQxQy(None)
+def NoIQxQy():
+    ReductionSingleton().reduction_properties["Do2DReduction"] = False
     
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
     ReductionSingleton().reduction_properties["MaskedEdges"] = [nx_low, nx_high, 

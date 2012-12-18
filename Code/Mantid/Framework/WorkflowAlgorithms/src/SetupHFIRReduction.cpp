@@ -480,6 +480,11 @@ void SetupHFIRReduction::init()
                   "The total number of sub-pixels will be NPixelDivision*NPixelDivision.");
   declareProperty("ErrorWeighting", false,
                   "Choose whether each pixel contribution will be weighted by 1/error^2.");
+
+  declareProperty("Do2DReduction", true);
+  declareProperty("IQ2DNumberOfBins", 100, positiveInt,
+                  "Number of I(qx,qy) bins.");
+
   setPropertyGroup("DoAzimuthalAverage", iq1d_grp);
   setPropertyGroup("IQBinning", iq1d_grp);
   setPropertyGroup("IQNumberOfBins", iq1d_grp);
@@ -702,7 +707,18 @@ void SetupHFIRReduction::exec()
 
     algProp = new AlgorithmProperty("IQAlgorithm");
     algProp->setValue(iqAlg->toString());
-    g_log.information() << iqAlg->toString() << std::endl;
+    reductionManager->declareProperty(algProp);
+  }
+
+  // 2D reduction
+  const bool do2DReduction = getProperty("Do2DReduction");
+  if (do2DReduction)
+  {
+    const std::string n_bins = getPropertyValue("IQ2DNumberOfBins");
+    IAlgorithm_sptr iqAlg = createSubAlgorithm("EQSANSQ2D");
+    iqAlg->setPropertyValue("NumberOfBins", n_bins);
+    algProp = new AlgorithmProperty("IQXYAlgorithm");
+    algProp->setValue(iqAlg->toString());
     reductionManager->declareProperty(algProp);
   }
 

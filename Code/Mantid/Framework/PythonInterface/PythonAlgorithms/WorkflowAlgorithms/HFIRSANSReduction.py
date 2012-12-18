@@ -25,9 +25,8 @@ class HFIRSANSReduction(PythonAlgorithm):
         self.declareProperty("ReductionProperties", "__sans_reduction_properties", 
                              validator=StringMandatoryValidator(),
                              doc="Property manager name for the reduction")
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
-                                                     direction = Direction.Output),
-                             "Reduced workspace")
+        self.declareProperty("OutputWorkspace", "",
+                             doc="Reduced workspace")
         self.declareProperty("OutputMessage", "", 
                              direction=Direction.Output, doc = "Output message")
         
@@ -95,7 +94,7 @@ class HFIRSANSReduction(PythonAlgorithm):
     def PyExec(self):
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")
-        output_ws = '__'+output_ws+'_reduced'
+        #output_ws = '__'+output_ws+'_reduced'
         property_manager_name = self.getProperty("ReductionProperties").value
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)
         
@@ -230,19 +229,32 @@ class HFIRSANSReduction(PythonAlgorithm):
 
         # Compute I(qx,qy)
         iqxy_output = None
+        if "IQXYAlgorithm" in property_list:
+            iq_output_name = self.getPropertyValue("OutputWorkspace")
+            iqxy_output = iq_output_name+'_Iqxy'
+            p=property_manager.getProperty("IQXYAlgorithm")
+            alg=Algorithm.fromString(p.valueAsStr)
+            alg.setProperty("InputWorkspace", output_ws)
+            alg.setProperty("OutputWorkspace", iq_output_name)
+            if alg.existsProperty("ReductionProperties"):
+                alg.setProperty("ReductionProperties", property_manager_name)
+            alg.execute()
+            if alg.existsProperty("OutputMessage"):
+                output_msg += alg.getProperty("OutputMessage").value            
        
         # Verify output directory and save data
         if "OutputDirectory" in property_list:
             output_dir = property_manager.getProperty("OutputDirectory").value
+            if len(output_dir)==0:
+                output_dir = os.path.dirname(filename)
             if os.path.isdir(output_dir):
                 output_msg += self._save_output(iq_output, iqxy_output, 
                                                 output_dir, property_manager)
+                Logger.get("HFIRSANSReduction").notice("Output saved in %s" % output_dir)
             elif len(output_dir)>0:
                 msg = "Output directory doesn't exist: %s\n" % output_dir
-                Logger.get("HFIRSANSReduction").error(msg)    
+                Logger.get("HFIRSANSReduction").error(msg)
     
-        ws = AnalysisDataService.retrieve(output_ws)
-        self.setProperty("OutputWorkspace", ws)
         self.setProperty("OutputMessage", output_msg)
         
     def process_data_file(self, workspace):
@@ -376,7 +388,13 @@ class HFIRSANSReduction(PythonAlgorithm):
         if iqxy_output is not None:
             if AnalysisDataService.doesExist(iqxy_output):
                 filename = os.path.join(output_dir, iqxy_output+'.dat')
-                api.SaveNISTDAT(InputWorkspace=iqxy_output, Filename=filename)  
+                alg = AlgorithmManager.create("SaveNISTDAT")
+                alg.initialize()
+                alg.setChild(True)
+                alg.setProperty("Filename", filename)
+                alg.setProperty("InputWorkspace", iqxy_output)
+                alg.execute()
+                #api.SaveNISTDAT(InputWorkspace=iqxy_output, Filename=filename)  
                 output_msg += "I(Qx,Qy) saved in %s\n" % (filename)
             else:
                 Logger.get("HFIRSANSReduction").error("No I(Qx,Qy) output found")
