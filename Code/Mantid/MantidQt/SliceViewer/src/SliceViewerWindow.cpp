@@ -31,7 +31,8 @@ namespace SliceViewer
 SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label, Qt::WFlags f)
  : QMainWindow(NULL, f),
    WorkspaceObserver(),
-   m_lastLinerWidth(0)
+   m_lastLinerWidth(0),
+   m_lastPeaksViewerWidth(0)
 {
   // Set the window icon
   QIcon icon;
@@ -74,11 +75,14 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
   m_slicer = new SliceViewer(m_splitter);
   m_liner = new LineViewer(m_splitter);
   m_liner->setVisible(false);
+  m_peaksViewer = new PeaksViewer(m_splitter);
+  m_peaksViewer->setVisible(false);
 
   this->setCentralWidget(m_splitter);
 
   m_splitter->addWidget(m_slicer);
   m_splitter->addWidget(m_liner);
+  m_splitter->addWidget(m_peaksViewer);
 
   // Connect WorkspaceObserver signals
   connect(this,SIGNAL(needToClose()),this,SLOT(closeWindow()));
@@ -95,6 +99,9 @@ SliceViewerWindow::SliceViewerWindow(const QString& wsName, const QString& label
             m_liner, SLOT(setFreeDimensions(size_t, size_t)) );
   QObject::connect( m_slicer, SIGNAL(changedSlicePoint(Mantid::Kernel::VMD)),
             this, SLOT(changedSlicePoint(Mantid::Kernel::VMD)) );
+
+  // Connect the SliceViewer and the PeaksViewer together
+  QObject::connect( m_slicer, SIGNAL(showPeaksViewer(bool)), this, SLOT(showPeaksViewer(bool)));
 
   // Drag-dropping the line around
   QObject::connect( m_slicer->getLineOverlay(), SIGNAL(lineChanging(QPointF, QPointF, double)),
@@ -256,6 +263,61 @@ void SliceViewerWindow::showLineViewer(bool visible)
   {
     // Toggle the visibility of the liner
     m_liner->setVisible(visible);
+  }
+  this->setUpdatesEnabled(true);
+
+}
+
+//------------------------------------------------------------------------------------------------
+/** Show or hide the LineViewer widget (on the right of the SliceViewer)
+ *
+ * @param visible :: True to show the LineViewer widget.
+ */
+void SliceViewerWindow::showPeaksViewer(bool visible)
+{
+  int peaksViewerWidth = m_peaksViewer->width();
+  if (peaksViewerWidth <= 0) peaksViewerWidth = m_lastPeaksViewerWidth;
+  if (peaksViewerWidth <= 0) peaksViewerWidth = m_peaksViewer->sizeHint().width();
+  // Account for the splitter handle
+  peaksViewerWidth += m_splitter->handleWidth() - 3;
+
+  this->setUpdatesEnabled(false);
+  if (visible && !m_peaksViewer->isVisible())
+  {
+    // Expand the window to include the peaks viewer.
+    int w = this->width() + peaksViewerWidth + 2;
+    m_peaksViewer->setVisible(true);
+    // Give the peaksviewer the workspaces it needs.
+    m_peaksViewer->setPeaksWorkspaces(m_slicer->getPeaksWorkspaces());
+
+    // If the right splitter was hidden, show it
+    QList<int> sizes = m_splitter->sizes();
+    if (m_lastPeaksViewerWidth > 0)
+    {
+      sizes[2] = m_lastPeaksViewerWidth;
+      m_splitter->setSizes(sizes);
+    }
+    this->resize(w, this->height());
+  }
+  else if (!visible && m_peaksViewer->isVisible())
+  {
+    // Shrink the window to exclude the liner
+    int w = this->width() - (m_peaksViewer->width() + m_splitter->handleWidth());
+    if (m_peaksViewer->width() > 0)
+      m_lastPeaksViewerWidth = m_peaksViewer->width();
+    m_peaksViewer->setVisible(false);
+
+    // Save this value for resizing with the single shot timer
+    m_desiredWidth = w;
+    // This call is necessary to allow resizing smaller than would be allowed if both left/right widgets were visible.
+    // This needs 2 calls ro resizeWindow() to really work!
+    QTimer::singleShot(0, this, SLOT(resizeWindow()));
+    QTimer::singleShot(0, this, SLOT(resizeWindow()));
+  }
+  else
+  {
+    // Toggle the visibility of the liner
+    m_peaksViewer->setVisible(visible);
   }
   this->setUpdatesEnabled(true);
 

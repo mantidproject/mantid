@@ -2192,21 +2192,31 @@ void SliceViewer::peakOverlay_toggled(bool checked)
           {
             // Uncheck the button for consistency.
             ui.btnPeakOverlay->setChecked(false);
+            emit showPeaksViewer(false);
             throw e;
           }
         }
         updatePeakOverlaySliderWidget();
+        emit showPeaksViewer(true);
       }
       else
       {
         // Uncheck the button for consistency.
         ui.btnPeakOverlay->setChecked(false);
+        emit showPeaksViewer(false);
       }
+    }
+    else
+    {
+      // Uncheck the button for consistency.
+      ui.btnPeakOverlay->setChecked(false);
+      emit showPeaksViewer(false);
     }
   }
   else
   {
     m_peaksPresenter->clear();
+    emit showPeaksViewer(false);
   }
 }
 
@@ -2251,6 +2261,12 @@ void SliceViewer::enablePeakOverlaysIfAppropriate()
     ui.btnPeakOverlay->setChecked(false); // Don't leave the button depressed.
     m_peaksPresenter->clear(); // Reset the presenter
   }
+}
+
+
+SetPeaksWorkspaces SliceViewer::getPeaksWorkspaces() const
+{
+  return m_peaksPresenter->presentedWorkspaces();
 }
 
 } //namespace

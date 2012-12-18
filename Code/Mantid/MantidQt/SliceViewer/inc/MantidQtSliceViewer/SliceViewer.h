@@ -13,6 +13,7 @@
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
 #include "MantidQtSliceViewer/PeakTransformSelector.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "QwtRasterDataMD.h"
 #include "ui_SliceViewer.h"
 #include <QtCore/QtCore>
@@ -94,6 +95,9 @@ public:
   void setRebinMode(bool mode, bool locked);
   void refreshRebin();
 
+  /// Methods relating to peaks overlays.
+  SetPeaksWorkspaces getPeaksWorkspaces() const;
+
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
   void changedShownDim(size_t dimX, size_t dimY);
@@ -101,6 +105,8 @@ signals:
   void changedSlicePoint(Mantid::Kernel::VMD slicePoint);
   /// Signal emitted when the LineViewer should be shown/hidden.
   void showLineViewer(bool);
+  /// Signal emitted when the PeaksViewer should be shown/hidden.
+  void showPeaksViewer(bool);
   /// Signal emitted when someone uses setWorkspace() on SliceViewer
   void workspaceChanged();
 

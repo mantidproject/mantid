@@ -5,6 +5,7 @@
 #include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidQtSliceViewer/LineViewer.h"
 #include "MantidQtSliceViewer/SliceViewer.h"
+#include "MantidQtSliceViewer/PeaksViewer.h"
 #include <QtGui/QMainWindow>
 #include <QtGui/QSplitter>
 #include <QtGui/qdialog.h>
@@ -57,6 +58,7 @@ protected slots:
   void resizeWindow();
   void lineViewer_changedFixedBinWidth(bool fixed, double binWidth);
   void showLineViewer(bool);
+  void showPeaksViewer(bool);
 
 protected:
   void preDeleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
@@ -68,6 +70,9 @@ protected:
 
   /// The LineViewer
   MantidQt::SliceViewer::LineViewer * m_liner;
+  
+  /// The PeaksViewer
+  MantidQt::SliceViewer::PeaksViewer * m_peaksViewer;
 
   /// Horizontal splitter between slice viewer and LineViewer
   QSplitter * m_splitter;
@@ -82,6 +87,9 @@ protected:
 
   /// Width of the LineViewer last time it was open
   int m_lastLinerWidth;
+
+  /// Width of the PeaksViewer last tiem it was open
+  int m_lastPeaksViewerWidth;
 
   /// Window width
   int m_desiredWidth;

@@ -140,11 +140,13 @@ public:
 
   void test_presentedWorkspaces()
   {
+    //One nested presenter
     SetPeaksWorkspaces setA;
     MockPeaksPresenter* pA = new MockPeaksPresenter;
     PeaksPresenter_sptr A(pA);
     EXPECT_CALL(*pA, presentedWorkspaces()).WillOnce(Return(setA)); 
-
+    
+    //Another nested presenter
     SetPeaksWorkspaces setB;
     MockPeaksPresenter* pB = new MockPeaksPresenter;
     PeaksPresenter_sptr B(pB);
