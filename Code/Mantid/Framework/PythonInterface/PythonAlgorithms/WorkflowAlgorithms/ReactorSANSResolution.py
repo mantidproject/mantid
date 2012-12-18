@@ -5,10 +5,10 @@ Compute the resolution in Q according to Mildner-Carpenter.
 See [http://www.mantidproject.org/Reduction_for_HFIR_SANS SANS Reduction] documentation for details.
 
 *WIKI*"""
-
-from MantidFramework import *
-from mantidsimple import *
-import math  
+import mantid.simpleapi as api
+from mantid.api import *
+from mantid.kernel import *
+import math
 
 class ReactorSANSResolution(PythonAlgorithm):
     """
@@ -23,23 +23,18 @@ class ReactorSANSResolution(PythonAlgorithm):
 
     def PyInit(self):
         # Input workspace
-        self.declareWorkspaceProperty("InputWorkspace", "", Direction.Input, Description="Name the workspace to calculate the resolution for")
-        # Output workspace to put the transmission histo into
-        self.declareProperty("OutputWorkspace", "", Description="Name of the workspace that will contain the resolution histogram")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", 
+                                                     direction=Direction.Input))
+        
+        # Dummy property for temporary backward compatibility
+        # The output workspace property is not used and the resolution is
+        # added to the input workspace
+        self.declareProperty("OutputWorkspace", "",
+                             doc="Obsolete: not used")
 
     def PyExec(self):
-        input_ws = self.getProperty("InputWorkspace")
-        if input_ws.getAxis(0).getUnit().name() != "MomentumTransfer":
-            raise RuntimeError, "ReactorSANSResolution expects an input workspace with units of Q"
-
-        output_ws_name = self.getProperty("OutputWorkspace")
-
-        if input_ws.getName() != output_ws_name:
-            CloneWorkspace(input_ws, output_ws_name)
-            output_ws = mtd[output_ws_name]
-        else:
-            output_ws = input_ws
-
+        input_ws = self.getProperty("InputWorkspace").value
+        
         # Q resolution calculation
         # All distances in mm
         wvl = None
@@ -76,9 +71,10 @@ class ReactorSANSResolution(PythonAlgorithm):
             res_factor += (math.pow(k*sample_apert_radius*(source_sample_distance+sample_detector_distance)/(source_sample_distance*sample_detector_distance), 2)/4.0)
             res_factor += math.pow(k*pixel_size_x/sample_detector_distance, 2)/12.0
             
-            for i in range(len(output_ws.readX(0))):
-                 output_ws.dataDx(0)[i] = math.sqrt(res_factor+math.pow((output_ws.readX(0)[i]*d_wvl), 2)/6.0)       
+            for i in range(len(input_ws.readX(0))):
+                 input_ws.dataDx(0)[i] = math.sqrt(res_factor+math.pow((input_ws.readX(0)[i]*d_wvl), 2)/6.0)       
         else:
             raise RuntimeError, "ReactorSANSResolution could not find all the run parameters needed to compute the resolution."
 
-mtd.registerPyAlgorithm(ReactorSANSResolution())
+
+registerAlgorithm(ReactorSANSResolution)

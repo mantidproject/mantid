@@ -117,13 +117,12 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
 
-        # Q resolution
-        #if reducer._resolution_calculator is not None:
-        #    reducer._resolution_calculator(InputWorkspace=output_ws, 
-        #                                   OutputWorkspace=output_ws)
-            
-        # Add output workspace to the list of important output workspaces
-        #reducer.output_workspaces.append(output_ws)
+        # Q resolution 
+        alg = AlgorithmManager.create("ReactorSANSResolution")
+        alg.initialize()
+        alg.setChild(True)
+        alg.setProperty("InputWorkspace", output_ws)
+        alg.execute()
         
         msg = "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
         self.setProperty("OutputMessage", msg)        
