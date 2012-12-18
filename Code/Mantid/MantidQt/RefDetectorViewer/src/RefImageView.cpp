@@ -86,10 +86,8 @@ RefImageView::RefImageView( ImageView::ImageDataSource* data_source, double peak
     
   saved_iv_connections = iv_connections;
 
-    image_display->UpdateImage();
-    iv_connections->peak_back_tof_range_update();
+  image_display->UpdateImage();
 
-    
   image_display->SetDataSource( data_source );
 }
     

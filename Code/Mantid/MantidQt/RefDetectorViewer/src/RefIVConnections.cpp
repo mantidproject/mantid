@@ -341,34 +341,9 @@ void RefIVConnections::graph_range_changed()
 //  v_graph_display->SetRangeScale( range_scale );
 }
 
-void RefIVConnections::peak_back_tof_range_update()
-{
-    QLineEdit * peak_left_control = iv_ui->lineEdit_peakLeft;
-    double peakmin = peak_left_control->text().toDouble();
-
-    QLineEdit * peak_right_control = iv_ui->lineEdit_peakRight;
-    double peakmax = peak_right_control->text().toDouble();
-    
-    QLineEdit * back_left_control = iv_ui->lineEdit_backLeft;
-    double backmin = back_left_control->text().toDouble();
-    
-    QLineEdit * back_right_control = iv_ui->lineEdit_backRight;
-    double backmax = back_right_control->text().toDouble();
-    
-    QLineEdit * tof_min_control = iv_ui->lineEdit_TOFmin;
-    double tofmin = tof_min_control->text().toDouble();
-    
-    QLineEdit * tof_max_control = iv_ui->lineEdit_TOFmax;
-    double tofmax = tof_max_control->text().toDouble();
-    
-    emit peak_back_tof_range_update(peakmin, peakmax, backmin, backmax, tofmin, tofmax);
-}
-
 void RefIVConnections::edit_manual_input()
 {
     image_display->UpdateImage();
-    peak_back_tof_range_update();
-
 }
     
     
@@ -411,15 +386,12 @@ void RefIVConnections::imagePicker_moved()
 void RefIVConnections::imagePicker2_moved()
 {
   QwtPolygon selected_points = image_picker2->selection();
-    if ( selected_points.size() >= 1 )
-    {
-      peak_back_tof_range_update();
-        int index = selected_points.size() - 1;
-        int mouseClick = 1; 
-        image_display->SetPointedAtPoint( selected_points[index], mouseClick );
-        peak_back_tof_range_update();
-
-    }
+  if ( selected_points.size() >= 1 )
+  {
+    int index = selected_points.size() - 1;
+    int mouseClick = 1;
+    image_display->SetPointedAtPoint( selected_points[index], mouseClick );
+  }
 }
 
 

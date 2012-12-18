@@ -95,11 +95,6 @@ public slots:
   void multi_color_scale();
   void spectrum_color_scale();
   void edit_manual_input();
-  void peak_back_tof_range_update();
-    
-public:
-    signals:
-    void peak_back_tof_range_update(double, double, double, double, double, double);
 
  private:
     RefIVConnections() {}
