@@ -1,16 +1,13 @@
-#ifndef REF_IMAGE_PLOT_ITEM_H
-#define REF_IMAGE_PLOT_ITEM_H
+#ifndef REF_LIMITS_HANDLER_H
+#define REF_LIMITS_HANDLER_H
 
-#include "MantidQtImageViewer/ImagePlotItem.h"
-#include "MantidQtImageViewer/DllOptionIV.h"
-#include "MantidQtRefDetectorViewer/RefLimitsHandler.h"
+#include "ui_RefImageView.h"
 
 namespace MantidQt
 {
 namespace RefDetectorViewer
 {
-/** This class is responsible for actually drawing the image data onto
-    a QwtPlot for the ImageView data viewer.
+/** Retrieves the states of the peak/background/TOF limit settings from the gui
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -31,27 +28,34 @@ namespace RefDetectorViewer
 
     Code Documentation is available at <http://doxygen.mantidproject.org>
  */
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImagePlotItem : public ImageView::ImagePlotItem
+class RefLimitsHandler
 {
-
 public:
-  /// Construct basic plot item with NO data to plot.
-  RefImagePlotItem(const RefLimitsHandler * const limitsHandler);
+  /// Construct object to manage range (peak/back/TOF) controls in the UI
+  RefLimitsHandler( Ui_RefImageViewer* iv_ui );
 
-  ~RefImagePlotItem();
-  
-  /// Draw the image (this is called by QWT and must not be called directly.)
-  virtual void draw(      QPainter    * painter,
-                    const QwtScaleMap & xMap, 
-                    const QwtScaleMap & yMap,
-                    const QRect       & canvasRect) const;
+  /// get peak, back and tof values
+  int getPeakLeft() const;
+  int getPeakRight() const;
+  int getBackLeft() const;
+  int getBackRight() const;
+  int getTOFmin() const;
+  int getTOFmax() const;
+
+  void setPeakLeft(const int value);
+  void setPeakRight(const int value);
+  void setBackLeft(const int value);
+  void setBackRight(const int value);
+  void setTOFmin(const int value);
+  void setTOFmax(const int value);
+
+  void setActiveValue(const double x, const double y);
 
 private:
-  const RefLimitsHandler * const m_limitsHandler;
+  const Ui_RefImageViewer* const m_ui;
 };
 
 } // namespace RefDetectorViewer
-} // namespace MantidQt 
+} // namespace MantidQt
 
-
-#endif  // REF_IMAGE_PLOT_ITEM_H 
+#endif // REF_LIMITS_HANDLER_H

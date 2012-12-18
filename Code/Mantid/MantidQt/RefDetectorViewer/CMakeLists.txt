@@ -7,6 +7,7 @@ set ( SRC_FILES
        src/RefIVConnections.cpp 
        src/RefMatrixWSDataSource.cpp
        src/RefMatrixWSImageView.cpp
+       src/RefLimitsHandler.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -19,6 +20,7 @@ set ( INC_FILES
        inc/MantidQtRefDetectorViewer/RefRangeHandler.h
        inc/MantidQtRefDetectorViewer/RefMatrixWSDataSource.h
        inc/MantidQtRefDetectorViewer/RefMatrixWSImageView.h
+       inc/MantidQtRefDetectorViewer/RefLimitsHandler.h
 )
 
 set ( MOC_FILES 

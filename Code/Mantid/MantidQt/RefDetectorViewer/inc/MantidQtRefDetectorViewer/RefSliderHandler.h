@@ -1,6 +1,7 @@
-#ifndef SLIDER_HANDLER_H
-#define SLIDER_HANDLER_H
+#ifndef REF_SLIDER_HANDLER_H
+#define REF_SLIDER_HANDLER_H
 
+#include "MantidQtImageViewer/ISliderHandler.h"
 #include <QRect>
 
 #include "ui_RefImageView.h"
@@ -43,7 +44,7 @@ namespace RefDetectorViewer
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefSliderHandler
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefSliderHandler : public ImageView::ISliderHandler
 {
   public:
 
@@ -83,4 +84,4 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefSliderHandler
 } // namespace MantidQt 
 } // namespace ImageView
 
-#endif // SLIDER_HANDLER_H
+#endif // REF_SLIDER_HANDLER_H
