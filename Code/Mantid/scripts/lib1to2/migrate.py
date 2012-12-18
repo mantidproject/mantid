@@ -27,6 +27,7 @@ def run(files, backup=True):
         try:
             msg = script.migrate()
         except Exception, exc:
+            raise
             msg = str(exc)
             script.restore_backup()
             msg += "\nBackup restored."

@@ -3,6 +3,7 @@ Defines the grammar translation from version 1 to version 2 of Mantid's Python A
 """
 import messages 
 import rules
+import astbuilder
         
 class Grammar(object):
     """
@@ -12,18 +13,25 @@ class Grammar(object):
     def __init__(self):
         pass
     
-    def translate(self, input):
+    def translate(self, orig_code):
         """
         Translates the input string, assuming it contains code written in
         version 1 of Mantid's Python API, to version 2 of the PythonAPI
-        """
-        string_replace = rules.SimpleStringReplace()
-        translated = string_replace.apply(input)
 
-        if 'PythonAlgorithm' in input:
-            raise RuntimeError("Migration process cannot handle python algorithms yet.")
+        @param orig_code The original code string
+        @returns The translated string
+        """
+        if "PythonAlgorithm" in orig_code:
+            raise ValueError("Cannot handle Python algorithms")
+        
+        # Simple string replacements
+        string_replace = rules.SimpleStringReplace()
+        translated = string_replace.apply(orig_code)
        
         api_call_replace = rules.SimpleAPIFunctionCallReplace()
-        translated = api_call_replace.apply(translated)
+        # Convert to an abstract syntax tree 
+        # (uses the lib2to3 libraries that can convert AST back to source code)
+        tree = astbuilder.parse(translated)
+        tree = api_call_replace.apply_to_ast(tree)
 
-        return translated
+        return astbuilder.regenerate(tree)

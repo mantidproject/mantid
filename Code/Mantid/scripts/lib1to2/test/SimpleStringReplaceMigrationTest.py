@@ -1,4 +1,4 @@
-"""Tests for the migration with simple string replacements
+"""Tests for the migration with simple one-line string replacements
 """
 import unittest
 import os

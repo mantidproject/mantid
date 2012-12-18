@@ -35,9 +35,10 @@ class SimpleAPIFunctionCallReplaceMigrationTest(MigrationTest):
         self.do_migration(inputstring)
         self.check_outcome(inputstring, expected)
 
-    def test_arg_return_on_input_raises_error(self):
-        inputstring = """alg = LoadRaw("test-file.raw",'testWS',SpectrumMax=1)"""
-        expected = """alg = LoadRaw("test-file.raw",'testWS',SpectrumMax=1)"""
+    def test_function_call_split_over_multiple_lines_is_replaced_correctly(self):
+        inputstring = """alg = LoadRaw("test-file.raw",'testWS',
+                                        SpectrumMax=1)"""
+        expected = """testWS = LoadRaw("test-file.raw", SpectrumMax=1)"""
         self.do_migration(inputstring)
         self.check_outcome(inputstring, expected)
             
