@@ -10,8 +10,8 @@
 #include "MantidQtImageViewer/ImageDataSource.h"
 #include "MantidQtImageViewer/GraphDisplay.h"
 #include "MantidQtRefDetectorViewer/RefImagePlotItem.h"
-#include "MantidQtRefDetectorViewer/SliderHandler.h"
-#include "MantidQtRefDetectorViewer/RangeHandler.h"
+#include "MantidQtRefDetectorViewer/RefSliderHandler.h"
+#include "MantidQtRefDetectorViewer/RefRangeHandler.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
@@ -56,8 +56,8 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefImageDisplay
 
      /// Make an ImageDisplay to display with the given widgets and controls 
      RefImageDisplay( QwtPlot*       image_plot, 
-                   SliderHandler* slider_handler,
-                   RangeHandler*  range_handler,
+                   RefSliderHandler* slider_handler,
+                   RefRangeHandler*  range_handler,
                    ImageView::GraphDisplay*  h_graph,
                    ImageView::GraphDisplay*  v_graph,
                    QTableWidget*  table_widget,
@@ -140,8 +140,8 @@ private:
      QwtPlot*             image_plot;
      RefImagePlotItem*       image_plot_item;
 
-     SliderHandler*       slider_handler;
-     RangeHandler*        range_handler;
+     RefSliderHandler*       slider_handler;
+     RefRangeHandler*        range_handler;
 
      ImageView::GraphDisplay*        h_graph_display;
      ImageView::GraphDisplay*        v_graph_display;

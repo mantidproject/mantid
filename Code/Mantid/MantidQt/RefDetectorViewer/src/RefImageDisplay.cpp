@@ -36,8 +36,8 @@ namespace RefDetectorViewer
  *                        at location will be displayed.
  */
 RefImageDisplay::RefImageDisplay(  QwtPlot*       image_plot,
-                             SliderHandler* slider_handler,
-                             RangeHandler*  range_handler,
+                             RefSliderHandler* slider_handler,
+                             RefRangeHandler*  range_handler,
                              GraphDisplay*  h_graph,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget,

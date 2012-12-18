@@ -43,12 +43,12 @@ namespace RefDetectorViewer
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER SliderHandler 
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefSliderHandler
 {
   public:
 
     /// Construct object to manage image scrollbars from the specified UI
-    SliderHandler( Ui_RefImageViewer* iv_ui );
+  RefSliderHandler( Ui_RefImageViewer* iv_ui );
 
     /// Configure the image scrollbars for the specified data and drawing area
     void ConfigureSliders( QRect            draw_area, 

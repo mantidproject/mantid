@@ -2,7 +2,7 @@
 #include <iostream>
 #include <QLineEdit>
 
-#include "MantidQtRefDetectorViewer/RangeHandler.h"
+#include "MantidQtRefDetectorViewer/RefRangeHandler.h"
 #include "MantidQtImageViewer/QtUtils.h"
 #include "MantidQtImageViewer/IVUtils.h"
 #include "MantidQtImageViewer/ErrorHandler.h"
@@ -14,10 +14,10 @@ namespace RefDetectorViewer
   using namespace ImageView;
 
 /**
- *  Construct a RangeHandler object to manage min, max and step controls 
+ *  Construct a RefRangeHandler object to manage min, max and step controls
  *  in the specified UI
  */
-RangeHandler::RangeHandler( Ui_RefImageViewer* iv_ui )
+RefRangeHandler::RefRangeHandler( Ui_RefImageViewer* iv_ui )
 {
   this->iv_ui = iv_ui;
 }
@@ -28,7 +28,7 @@ RangeHandler::RangeHandler( Ui_RefImageViewer* iv_ui )
  *
  * @param data_source  ImageDataSource that provides the data to be drawn
  */
-void RangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
+void RefRangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
 {
   
     //x axis
@@ -86,7 +86,7 @@ void RangeHandler::ConfigureRangeControls( ImageDataSource* data_source )
  *                min and max.  If it is less than zero, a log scale 
  *                is requested.
  */
-void RangeHandler::GetRange( double &min, double &max, double &step )
+void RefRangeHandler::GetRange( double &min, double &max, double &step )
 { 
    double original_min  = min;
   double original_max  = max;
@@ -156,7 +156,7 @@ void RangeHandler::GetRange( double &min, double &max, double &step )
  * @param step    This is size of the step to use between min and max. 
  *                If it is less than zero, a log scale is requested.
  */
-void RangeHandler::SetRange( double min, double max, double step, char type )
+void RefRangeHandler::SetRange( double min, double max, double step, char type )
 {
     if (type == 'x') {  
     

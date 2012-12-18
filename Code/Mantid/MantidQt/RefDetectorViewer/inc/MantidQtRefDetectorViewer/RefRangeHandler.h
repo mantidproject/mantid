@@ -41,12 +41,12 @@ namespace RefDetectorViewer
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RangeHandler 
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RefRangeHandler
 {
   public:
 
     /// Construct object to manage min, max and step controls in the UI
-    RangeHandler( Ui_RefImageViewer* iv_ui );
+    RefRangeHandler( Ui_RefImageViewer* iv_ui );
 
     /// Configure min, max and step controls for the specified data source
     void ConfigureRangeControls( ImageView::ImageDataSource* data_source );

@@ -2,7 +2,7 @@
 #include <iostream>
 
 #include <QScrollBar>
-#include "MantidQtRefDetectorViewer/SliderHandler.h"
+#include "MantidQtRefDetectorViewer/RefSliderHandler.h"
 
 namespace MantidQt
 {
@@ -10,10 +10,10 @@ namespace RefDetectorViewer
 {
 
 /**
- *  Construct a SliderHandler object to manage the image scrollbars from the 
+ *  Construct a RefSliderHandler object to manage the image scrollbars from the
  *  specified UI.
  */
-SliderHandler::SliderHandler( Ui_RefImageViewer* iv_ui )
+RefSliderHandler::RefSliderHandler( Ui_RefImageViewer* iv_ui )
 {
   this->iv_ui = iv_ui;
 }
@@ -26,7 +26,7 @@ SliderHandler::SliderHandler( Ui_RefImageViewer* iv_ui )
  *                     be drawn
  * @param data_source  ImageDataSource that provides the data to be drawn
  */
-void SliderHandler::ConfigureSliders( QRect            draw_area, 
+void RefSliderHandler::ConfigureSliders( QRect            draw_area,
                                       ImageView::ImageDataSource* data_source )
 {
   QScrollBar* v_scroll = iv_ui->imageVerticalScrollBar;
@@ -46,7 +46,7 @@ void SliderHandler::ConfigureSliders( QRect            draw_area,
  *                       displayed
  *  @param n_pixels      The number of pixels avaliable to show the data
  */
-void SliderHandler::ConfigureHSlider( int         n_data_steps,
+void RefSliderHandler::ConfigureHSlider( int         n_data_steps,
                                       int         n_pixels )
 {
   QScrollBar* h_scroll = iv_ui->imageHorizontalScrollBar;
@@ -65,7 +65,7 @@ void SliderHandler::ConfigureHSlider( int         n_data_steps,
  *  @param val           The initial position of the scrollbar, between 0 and
  *                       n_data_steps.
  */
-void SliderHandler::ConfigureSlider( QScrollBar* scroll_bar, 
+void RefSliderHandler::ConfigureSlider( QScrollBar* scroll_bar,
                                      int         n_data_steps, 
                                      int         n_pixels, 
                                      int         val )
@@ -106,7 +106,7 @@ void SliderHandler::ConfigureSlider( QScrollBar* scroll_bar,
 /**
  * Return true if the image horizontal scrollbar is enabled.
  */
-bool SliderHandler::HSliderOn()
+bool RefSliderHandler::HSliderOn()
 {
   return iv_ui->imageHorizontalScrollBar->isEnabled();
 }
@@ -115,7 +115,7 @@ bool SliderHandler::HSliderOn()
 /**
  * Return true if the image vertical scrollbar is enabled.
  */
-bool SliderHandler::VSliderOn()
+bool RefSliderHandler::VSliderOn()
 {
   return iv_ui->imageVerticalScrollBar->isEnabled();
 }
@@ -131,7 +131,7 @@ bool SliderHandler::VSliderOn()
  * @param x_max   This will be set to the last bin number to display in the
  *                x direction
  */
-void SliderHandler::GetHSliderInterval( int &x_min, int &x_max )
+void RefSliderHandler::GetHSliderInterval( int &x_min, int &x_max )
 {
   QScrollBar* h_scroll = iv_ui->imageHorizontalScrollBar;
   int step  = h_scroll->pageStep();
@@ -152,7 +152,7 @@ void SliderHandler::GetHSliderInterval( int &x_min, int &x_max )
  * @param y_max   This will be set to the last bin number to display in the
  *                y direction
  */
-void SliderHandler::GetVSliderInterval( int &y_min, int &y_max )
+void RefSliderHandler::GetVSliderInterval( int &y_min, int &y_max )
 {
   QScrollBar* v_scroll = iv_ui->imageVerticalScrollBar;
   int max   = v_scroll->maximum();

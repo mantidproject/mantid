@@ -5,8 +5,8 @@
 #include "ui_RefImageView.h"
 #include "MantidQtRefDetectorViewer/RefIVConnections.h"
 #include "MantidQtRefDetectorViewer/RefImageDisplay.h"
-#include "MantidQtRefDetectorViewer/SliderHandler.h"
-#include "MantidQtRefDetectorViewer/RangeHandler.h"
+#include "MantidQtRefDetectorViewer/RefSliderHandler.h"
+#include "MantidQtRefDetectorViewer/RefRangeHandler.h"
 
 #include <sstream>
 #include <string>
@@ -42,10 +42,10 @@ RefImageView::RefImageView( ImageView::ImageDataSource* data_source, double peak
                                                // destructor and clean up
   window->setWindowTitle(QString::fromUtf8("Reflector Detector Viewer"));
 
-  SliderHandler* slider_handler = new SliderHandler( ui );
+  RefSliderHandler* slider_handler = new RefSliderHandler( ui );
   saved_slider_handler = slider_handler;
 
-  RangeHandler* range_handler = new RangeHandler( ui );
+  RefRangeHandler* range_handler = new RefRangeHandler( ui );
   saved_range_handler = range_handler;
 
   h_graph = new ImageView::GraphDisplay( ui->h_graphPlot, NULL, false );
@@ -150,12 +150,12 @@ RefImageView::~RefImageView()
   RefImageDisplay* image_display = static_cast<RefImageDisplay*>(saved_image_display);
   delete  image_display;
 
-  SliderHandler* slider_handler = 
-                             static_cast<SliderHandler*>(saved_slider_handler);
+  RefSliderHandler* slider_handler =
+                             static_cast<RefSliderHandler*>(saved_slider_handler);
   delete  slider_handler;
 
-  RangeHandler* range_handler = 
-                             static_cast<RangeHandler*>(saved_range_handler);
+  RefRangeHandler* range_handler =
+                             static_cast<RefRangeHandler*>(saved_range_handler);
   delete  range_handler;
 
   RefIVConnections* iv_connections = 
