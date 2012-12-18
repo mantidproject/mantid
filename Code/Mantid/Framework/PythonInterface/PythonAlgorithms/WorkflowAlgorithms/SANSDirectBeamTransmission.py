@@ -108,7 +108,7 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         # Get instrument to use with FileFinder
         instrument = ''
         if property_manager.existsProperty("InstrumentName"):
-            instrument = property_manager.getProperty("InstrumentName")
+            instrument = property_manager.getProperty("InstrumentName").value
 
         # Get the data loader
         def _load_data(filename, output_ws):

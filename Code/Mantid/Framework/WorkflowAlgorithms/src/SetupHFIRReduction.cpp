@@ -46,7 +46,8 @@ void SetupHFIRReduction::init()
 
   declareProperty("SampleDetectorDistance", EMPTY_DBL(), "Sample to detector distance to use (overrides meta data), in mm");
   declareProperty("SampleDetectorDistanceOffset", EMPTY_DBL(), "Offset to the sample to detector distance (use only when using the distance found in the meta data), in mm");
-  declareProperty("SolidAngleCorrection", true, "If true, the solide angle correction will be applied to the data");
+  declareProperty("SolidAngleCorrection", true, "If true, the solid angle correction will be applied to the data");
+  declareProperty("DetectorTubes", false, "If true, the solid angle correction for tube detectors will be applied");
 
   // Optionally, we can specify the wavelength and wavelength spread and overwrite
   // the value in the data file (used when the data file is not populated)
@@ -60,6 +61,7 @@ void SetupHFIRReduction::init()
   setPropertyGroup("SampleDetectorDistance", load_grp);
   setPropertyGroup("SampleDetectorDistanceOffset", load_grp);
   setPropertyGroup("SolidAngleCorrection", load_grp);
+  setPropertyGroup("DetectorTubes", load_grp);
   setPropertyGroup("Wavelength", load_grp);
   setPropertyGroup("WavelengthSpread", load_grp);
 
@@ -397,15 +399,72 @@ void SetupHFIRReduction::init()
   setPropertyGroup("BckTransDirectScatteringFilename", bck_grp);
   setPropertyGroup("BckSpreaderTransmissionValue", bck_grp);
   setPropertyGroup("BckSpreaderTransmissionError", bck_grp);
-  setPropertyGroup("BckTransmissionDarkCurrentFile", trans_grp);
+  setPropertyGroup("BckTransmissionDarkCurrentFile", bck_grp);
   setPropertyGroup("BckThetaDependentTransmission", bck_grp);
 
   // Geometry correction
   std::string geo_grp = "Geometry";
   declareProperty("SampleThickness", EMPTY_DBL(), "Sample thickness [cm]");
 
+  // Masking
+  std::string mask_grp = "Mask";
+  declareProperty(new ArrayProperty<int>("MaskedDetectorList"),
+      "List of detector IDs to be masked");
+  declareProperty(new ArrayProperty<int>("MaskedEdges"),
+      "Number of pixels to mask on the edges: X-low, X-high, Y-low, Y-high");
+  std::vector<std::string> maskOptions;
+  maskOptions.push_back("None");
+  maskOptions.push_back("Front");
+  maskOptions.push_back("Back");
+  declareProperty("MaskedSide", "None",
+      boost::make_shared<StringListValidator>(maskOptions),
+      "Mask one side of the detector");
+
+  setPropertyGroup("MaskedDetectorList", mask_grp);
+  setPropertyGroup("MaskedEdges", mask_grp);
+  setPropertyGroup("MaskedSide", mask_grp);
+
+  // Absolute scale
+  std::string abs_scale_grp = "Absolute Scale";
+  std::vector<std::string> scaleOptions;
+  scaleOptions.push_back("None");
+  scaleOptions.push_back("Value");
+  scaleOptions.push_back("ReferenceData");
+  declareProperty("AbsoluteScaleMethod", "None",
+      boost::make_shared<StringListValidator>(scaleOptions),
+      "Absolute scale correction method");
+  declareProperty("AbsoluteScalingFactor", 1.0, "Absolute scaling factor");
+  setPropertySettings("AbsoluteScalingFactor",
+      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "Value"));
+
+  declareProperty(new API::FileProperty("AbsoluteScalingReferenceFilename", "",
+      API::FileProperty::OptionalLoad, ".xml"));
+  setPropertySettings("AbsoluteScalingReferenceFilename",
+            new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+  declareProperty("AbsoluteScalingBeamDiameter", 0.0,
+      "Beamstop diameter for computing the absolute scale factor [mm]. "
+      "Read from file if not supplied.");
+  setPropertySettings("AbsoluteScalingBeamDiameter",
+      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+  declareProperty("AbsoluteScalingAttenuatorTrans", 1.0,
+      "Attenuator transmission value for computing the absolute scale factor");
+  setPropertySettings("AbsoluteScalingAttenuatorTrans",
+      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+  declareProperty("AbsoluteScalingApplySensitivity", false,
+      "Apply sensitivity correction to the reference data "
+      "when computing the absolute scale factor");
+  setPropertySettings("AbsoluteScalingApplySensitivity",
+      new VisibleWhenProperty("AbsoluteScaleMethod", IS_EQUAL_TO, "ReferenceData"));
+
+  setPropertyGroup("AbsoluteScaleMethod", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingFactor", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingReferenceFilename", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingBeamDiameter", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingAttenuatorTrans", abs_scale_grp);
+  setPropertyGroup("AbsoluteScalingApplySensitivity", abs_scale_grp);
+
   // I(Q) calculation
-  std::string iq1d_grp = "I(q) calculation";
+  std::string iq1d_grp = "I(q) Calculation";
   declareProperty("DoAzimuthalAverage", true);
   declareProperty(new ArrayProperty<double>("IQBinning", boost::make_shared<RebinParamsValidator>(true)));
 
@@ -536,9 +595,11 @@ void SetupHFIRReduction::exec()
 
   // Solid angle correction
   const bool solidAngleCorrection = getProperty("SolidAngleCorrection");
+  const bool isTubeDetector = getProperty("DetectorTubes");
   if (solidAngleCorrection)
   {
     IAlgorithm_sptr solidAlg = createSubAlgorithm("SANSSolidAngleCorrection");
+    solidAlg->setProperty("DetectorTubes", isTubeDetector);
     algProp = new AlgorithmProperty("SANSSolidAngleCorrection");
     algProp->setValue(solidAlg->toString());
     reductionManager->declareProperty(algProp);
@@ -571,6 +632,53 @@ void SetupHFIRReduction::exec()
 
     algProp = new AlgorithmProperty("GeometryAlgorithm");
     algProp->setValue(thickAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
+
+  // Mask
+  const std::string maskDetList = getPropertyValue("MaskedDetectorList");
+  const std::string maskEdges = getPropertyValue("MaskedEdges");
+  const std::string maskSide = getProperty("MaskedSide");
+
+  IAlgorithm_sptr maskAlg = createSubAlgorithm("HFIRSANSMask");
+  // The following is broken, try PropertyValue
+  maskAlg->setPropertyValue("MaskedDetectorList", maskDetList);
+  maskAlg->setPropertyValue("MaskedEdges", maskEdges);
+  maskAlg->setProperty("MaskedSide", maskSide);
+  algProp = new AlgorithmProperty("MaskAlgorithm");
+  algProp->setValue(maskAlg->toString());
+  reductionManager->declareProperty(algProp);
+
+  // Absolute scaling
+  const std::string absScaleMethod = getProperty("AbsoluteScaleMethod");
+  if (boost::iequals(absScaleMethod, "Value"))
+  {
+    const double absScaleFactor = getProperty("AbsoluteScalingFactor");
+
+    IAlgorithm_sptr absAlg = createSubAlgorithm("SANSAbsoluteScale");
+    absAlg->setProperty("Method", absScaleMethod);
+    absAlg->setProperty("ScalingFactor", absScaleFactor);
+    absAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    algProp = new AlgorithmProperty("AbsoluteScaleAlgorithm");
+    algProp->setValue(absAlg->toString());
+    reductionManager->declareProperty(algProp);
+  }
+  else if (boost::iequals(absScaleMethod, "ReferenceData"))
+  {
+    const std::string absRefFile = getPropertyValue("AbsoluteScalingReferenceFilename");
+    const double beamDiam = getProperty("AbsoluteScalingBeamDiameter");
+    const double attTrans = getProperty("AbsoluteScalingAttenuatorTrans");
+    const bool applySensitivity = getProperty("AbsoluteScalingApplySensitivity");
+
+    IAlgorithm_sptr absAlg = createSubAlgorithm("SANSAbsoluteScale");
+    absAlg->setProperty("Method", absScaleMethod);
+    absAlg->setProperty("ReferenceDataFilename", absRefFile);
+    absAlg->setProperty("BeamstopDiameter", beamDiam);
+    absAlg->setProperty("AttenuatorTransmission", attTrans);
+    absAlg->setProperty("ApplySensitivity", applySensitivity);
+    absAlg->setPropertyValue("ReductionProperties", reductionManagerName);
+    algProp = new AlgorithmProperty("AbsoluteScaleAlgorithm");
+    algProp->setValue(absAlg->toString());
     reductionManager->declareProperty(algProp);
   }
 

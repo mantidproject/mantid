@@ -55,12 +55,11 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         binning = self.getProperty("Binning").value
                 
         input_ws_name = self.getPropertyValue("InputWorkspace")
+        workspace = self.getProperty("InputWorkspace").value
         output_ws_name = self.getPropertyValue("OutputWorkspace")
 
         if not AnalysisDataService.doesExist(input_ws_name):
             Logger.get("SANSAzimuthalAverage").error("Could not find input workspace")
-        workspace = AnalysisDataService.retrieve(input_ws_name)
-        
             
         # Q range                        
         pixel_size_x = workspace.getInstrument().getNumberParameter("x-pixel-size")[0]
@@ -82,20 +81,20 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             qmin = binning[0]
             qmax = binning[2]
             
-        #output_ws_name = "%_Iq" % output_ws_name
-
         # If we kept the events this far, we need to convert the input workspace
         # to a histogram here
         if workspace.id()=="EventWorkspace":
             input_workspace = '__'+input_ws_name
             alg = AlgorithmManager.create("ConvertToMatrixWorkspace")
             alg.initialize()
+            alg.setChild(True)
             alg.setPropertyValue("InputWorkspace", input_ws_name)
             alg.setPropertyValue("OutputWorkspace", input_ws_name) 
             alg.execute()
             
         alg = AlgorithmManager.create("Q1DWeighted")
         alg.initialize()
+        alg.setChild(True)
         alg.setPropertyValue("InputWorkspace", input_ws_name)
         alg.setProperty("OutputBinning", binning)
         alg.setProperty("NPixelDivision", n_subpix) 
@@ -104,16 +103,19 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         alg.setProperty("ErrorWeighting", error_weighting) 
         alg.setPropertyValue("OutputWorkspace", output_ws_name) 
         alg.execute()
+        output_ws = alg.getProperty("OutputWorkspace").value
         
         alg = AlgorithmManager.create("ReplaceSpecialValues")
         alg.initialize()
-        alg.setPropertyValue("InputWorkspace", output_ws_name)
+        alg.setChild(True)
+        alg.setProperty("InputWorkspace", output_ws)
         alg.setPropertyValue("OutputWorkspace", output_ws_name)
         alg.setProperty("NaNValue", 0.0)
         alg.setProperty("NaNError", 0.0)
         alg.setProperty("InfinityValue", 0.0)
         alg.setProperty("InfinityError", 0.0)
         alg.execute()
+        output_ws = alg.getProperty("OutputWorkspace").value
 
         # Q resolution
         #if reducer._resolution_calculator is not None:
@@ -125,7 +127,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         
         msg = "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
         self.setProperty("OutputMessage", msg)        
-        self.setPropertyValue("OutputWorkspace", output_ws_name)
+        self.setProperty("OutputWorkspace", output_ws)
 
 
     def _get_binning(self, workspace, wavelength_min, wavelength_max):    

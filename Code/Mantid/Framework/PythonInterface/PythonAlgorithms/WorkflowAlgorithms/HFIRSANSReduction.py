@@ -1,5 +1,7 @@
 """*WIKI* 
 
+    HFIR SANS reduction workflow
+    
 *WIKI*"""
 import mantid.simpleapi as api
 from mantid.api import *
@@ -51,7 +53,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         # Get instrument to use with FileFinder
         instrument = ''
         if property_manager.existsProperty("InstrumentName"):
-            instrument = property_manager.getProperty("InstrumentName")
+            instrument = property_manager.getProperty("InstrumentName").value
 
         output_str = ''
         if type(data_file)==str:
@@ -93,6 +95,7 @@ class HFIRSANSReduction(PythonAlgorithm):
     def PyExec(self):
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")
+        output_ws = '__'+output_ws+'_reduced'
         property_manager_name = self.getProperty("ReductionProperties").value
         property_manager = PropertyManagerDataService.retrieve(property_manager_name)
         
@@ -110,17 +113,10 @@ class HFIRSANSReduction(PythonAlgorithm):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
         
         # Load the sample data
-        if "LoadAlgorithm" not in property_list:
-            raise RuntimeError, "HFIR SANS reduction not set up properly: missing load algorithm"
-        p=property_manager.getProperty("LoadAlgorithm")
-        alg=Algorithm.fromString(p.valueAsStr)
-        alg.setProperty("Filename", filename)
-        alg.setProperty("OutputWorkspace", output_ws)
-        alg.setProperty("ReductionProperties", property_manager_name)
-        alg.execute()
+        msg = self._multiple_load(filename, output_ws, 
+                                  property_manager, property_manager_name)
         output_msg += "Loaded %s\n" % filename
-        if alg.existsProperty("OutputMessage"):
-            output_msg += alg.getProperty("OutputMessage").value
+        output_msg += msg
 
         # Perform the main corrections on the sample data
         output_msg += self.process_data_file(output_ws)
@@ -143,7 +139,7 @@ class HFIRSANSReduction(PythonAlgorithm):
             p=property_manager.getProperty("TransmissionAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("InputWorkspace", output_ws)
-            alg.setProperty("OutputWorkspace", '__'+output_ws+"_reduced")
+            alg.setProperty("OutputWorkspace", output_ws)
             
             if alg.existsProperty("BeamCenterX") \
                 and alg.existsProperty("BeamCenterY") \
@@ -157,7 +153,6 @@ class HFIRSANSReduction(PythonAlgorithm):
             alg.execute()
             if alg.existsProperty("OutputMessage"):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
-            output_ws = '__'+output_ws+'_reduced'
         
         # Process background data
         if "BackgroundFiles" in property_list:
@@ -214,18 +209,10 @@ class HFIRSANSReduction(PythonAlgorithm):
             output_msg += "Background subtracted [%s]%s\n" % (background_ws, bck_msg)
         
         # Absolute scale correction
+        output_msg += self._simple_execution("AbsoluteScaleAlgorithm", output_ws)
         
         # Geometry correction
-        if "GeometryAlgorithm" in property_list:
-            p=property_manager.getProperty("GeometryAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
-            alg.setProperty("InputWorkspace", background_ws)
-            alg.setProperty("OutputWorkspace", background_ws)
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
-            alg.execute()
-            if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+        output_msg += self._simple_execution("GeometryAlgorithm", output_ws)
         
         # Compute I(q)
         iq_output = None
@@ -250,11 +237,12 @@ class HFIRSANSReduction(PythonAlgorithm):
             if os.path.isdir(output_dir):
                 output_msg += self._save_output(iq_output, iqxy_output, 
                                                 output_dir, property_manager)
-            else:
+            elif len(output_dir)>0:
                 msg = "Output directory doesn't exist: %s\n" % output_dir
                 Logger.get("HFIRSANSReduction").error(msg)    
     
-        self.setPropertyValue("OutputWorkspace", output_ws)
+        ws = AnalysisDataService.retrieve(output_ws)
+        self.setProperty("OutputWorkspace", ws)
         self.setProperty("OutputMessage", output_msg)
         
     def process_data_file(self, workspace):
@@ -264,42 +252,16 @@ class HFIRSANSReduction(PythonAlgorithm):
         property_list = [p.name for p in property_manager.getProperties()]
 
         # Dark current subtraction
-        if "DarkCurrentAlgorithm" in property_list:
-            p=property_manager.getProperty("DarkCurrentAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
-            alg.setProperty("InputWorkspace", workspace)
-            alg.setProperty("OutputWorkspace", workspace)
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
-            alg.execute()
-            if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+        output_msg += self._simple_execution("DarkCurrentAlgorithm", workspace)
 
         # Normalize
-        if "NormaliseAlgorithm" in property_list:
-            p=property_manager.getProperty("NormaliseAlgorithm")
-            alg=Algorithm.fromString(p.valueAsStr)
-            alg.setProperty("InputWorkspace", workspace)
-            alg.setProperty("OutputWorkspace", workspace)
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
-            alg.execute()
-            if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+        output_msg += self._simple_execution("NormaliseAlgorithm", workspace)
         
         # Mask
+        output_msg += self._simple_execution("MaskAlgorithm", workspace)
         
         # Solid angle correction
-        if "SANSSolidAngleCorrection" in property_list:
-            p=property_manager.getProperty("SANSSolidAngleCorrection")
-            alg=Algorithm.fromString(p.valueAsStr)
-            alg.setProperty("InputWorkspace", workspace)
-            alg.setProperty("OutputWorkspace", workspace)
-            if alg.existsProperty("ReductionProperties"):
-                alg.setProperty("ReductionProperties", property_manager_name)
-            alg.execute()
-            if alg.existsProperty("OutputMessage"):
-                output_msg += alg.getProperty("OutputMessage").value+'\n'
+        output_msg += self._simple_execution("SANSSolidAngleCorrection", workspace)
         
         # Sensitivity correction
         if "SensitivityAlgorithm" in property_list:
@@ -337,6 +299,32 @@ class HFIRSANSReduction(PythonAlgorithm):
 
         return output_msg
     
+    def _simple_execution(self, algorithm_name, workspace, output_workspace=None):
+        """
+            Simple execution of an algorithm on the given workspace
+        """
+        property_manager_name = self.getProperty("ReductionProperties").value
+        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+        
+        output_msg = ""
+        if output_workspace is None:
+            output_workspace = workspace
+            
+        if property_manager.existsProperty(algorithm_name):
+            p=property_manager.getProperty(algorithm_name)
+            alg=Algorithm.fromString(p.valueAsStr)
+            if alg.existsProperty("InputWorkspace"):
+                alg.setProperty("InputWorkspace", workspace)
+                alg.setProperty("OutputWorkspace", output_workspace)
+            else:
+                alg.setProperty("Workspace", workspace)
+            if alg.existsProperty("ReductionProperties"):
+                alg.setProperty("ReductionProperties", property_manager_name)
+            alg.execute()
+            if alg.existsProperty("OutputMessage"):
+                output_msg = alg.getProperty("OutputMessage").value+'\n'
+        return output_msg
+        
     def _save_output(self, iq_output, iqxy_output, output_dir, property_manager):
         """
             Save the I(Q) and I(QxQy) output to file.
@@ -360,12 +348,26 @@ class HFIRSANSReduction(PythonAlgorithm):
                         Logger.get("HFIRSANSReduction").error("Could not read %s\n" % process_file)               
                 
                 filename = os.path.join(output_dir, iq_output+'.txt')
-                api.SaveAscii(Filename=filename, InputWorkspace=iq_output,
-                              Separator="Tab", CommentIndicator="# ",
-                              WriteXError=True)
+                
+                alg = AlgorithmManager.create("SaveAscii")
+                alg.initialize()
+                alg.setChild(True)
+                alg.setProperty("Filename", filename)
+                alg.setProperty("InputWorkspace", iq_output)
+                alg.setProperty("Separator", "Tab")
+                alg.setProperty("CommentIndicator", "# ")
+                alg.setProperty("WriteXError", True)
+                alg.execute()
+                
                 filename = os.path.join(output_dir, iq_output+'.xml')
-                api.SaveCanSAS1D(Filename=filename, InputWorkspace=iq_output,
-                                 Process=proc_xml)
+                alg = AlgorithmManager.create("SaveCanSAS1D")
+                alg.initialize()
+                alg.setChild(True)
+                alg.setProperty("Filename", filename)
+                alg.setProperty("InputWorkspace", iq_output)
+                alg.setProperty("Process", proc_xml)
+                alg.execute()
+
                 output_msg += "I(Q) saved in %s\n" % (filename)
             else:
                 Logger.get("HFIRSANSReduction").error("No I(Q) output found")

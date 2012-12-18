@@ -3,6 +3,7 @@
 """
 from reduction_workflow.command_interface import *
 from reduction_workflow.find_data import *
+from reduction_workflow.instruments.sans import hfir_instrument
 from mantid.api import AlgorithmManager
     
 import mantid.simpleapi as simpleapi
@@ -108,7 +109,10 @@ def AzimuthalAverage(binning=None, suffix="_Iq", error_weighting=False,
                      n_bins=100, n_subpix=1, log_binning=False):
     # Suffix is no longer used but kept for backward compatibility 
     ReductionSingleton().reduction_properties["DoAzimuthalAverage"]=True
-    ReductionSingleton().reduction_properties["IQBinning"]=binning
+    if binning is not None:
+        ReductionSingleton().reduction_properties["IQBinning"]=binning
+    elif ReductionSingleton().reduction_properties.has_key("IQBinning"):
+        del ReductionSingleton().reduction_properties["IQBinning"]
     ReductionSingleton().reduction_properties["IQNumberOfBins"]=n_bins
     ReductionSingleton().reduction_properties["IQLogBinning"]=log_binning
     ReductionSingleton().reduction_properties["NumberOfSubpixels"]=n_subpix
@@ -284,44 +288,48 @@ def NoSaveIq():
             del ReductionSingleton().reduction_properties["OutputDirectory"]
             
 def IQxQy(nbins=100):
-    ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, InputWorkspace=None, 
-                                   NumberOfBins=nbins)
+    print "I(QxQy)"
+    #ReductionSingleton().set_IQxQy(mantidsimple.EQSANSQ2D, InputWorkspace=None, 
+    #                               NumberOfBins=nbins)
     
 def NoIQxQy(nbins=100):
     ReductionSingleton().set_IQxQy(None)
     
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
-    #TODO
-    ReductionSingleton().get_mask().mask_edges(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high)
+    ReductionSingleton().reduction_properties["MaskedEdges"] = [nx_low, nx_high, 
+                                                                ny_low, ny_high]
 
 def MaskRectangle(x_min, x_max, y_min, y_max):
-    #TODO
-    ReductionSingleton().get_mask().add_pixel_rectangle(x_min, x_max, y_min, y_max)
+    masked_pixels = []
+    for ix in range(x_min, x_max+1):
+        for iy in range(y_min, y_max+1):
+            masked_pixels.append([ix, iy])
+    det_list = hfir_instrument.get_detector_from_pixel(masked_pixels)
+    MaskDetectors(det_list)
     
 def MaskDetectors(det_list):
-    #TODO
-    ReductionSingleton().get_mask().add_detector_list(det_list)
+    if ReductionSingleton().reduction_properties.has_key("MaskedDetectorList"):
+        ReductionSingleton().reduction_properties["MaskedDetectorList"].extend(det_list)
+    else:
+        ReductionSingleton().reduction_properties["MaskedDetectorList"] = det_list
     
 def MaskDetectorSide(side_to_mask=None):
-    if not isinstance(ReductionSingleton().get_data_loader(), hfir_load.LoadRun):
-        raise RuntimeError, "MaskDetectorSide was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
-    if side_to_mask.lower() == "front":
-        side_to_mask = 0
-    elif side_to_mask.lower() == "back":
-        side_to_mask = 1
-    ReductionSingleton().get_data_loader().mask_detector_side(side_to_mask)
+    if side_to_mask is None:
+        if ReductionSingleton().reduction_properties.has_key("MaskedSide"):
+            del ReductionSingleton().reduction_properties["MaskedSide"]
+    else:
+        ReductionSingleton().reduction_properties["MaskedSide"] = side_to_mask
     
 def SetAbsoluteScale(factor):
-    ReductionSingleton().set_absolute_scale(absolute_scale.BaseAbsoluteScale(factor))
+    ReductionSingleton().reduction_properties["AbsoluteScaleMethod"] = "Value"
+    ReductionSingleton().reduction_properties["AbsoluteScalingFactor"] = factor
     
-def SetDirectBeamAbsoluteScale(direct_beam, beamstop_diameter=None, attenuator_trans=1.0, sample_thickness=None, apply_sensitivity=False):
-    if sample_thickness is not None:
-        print "sample_thickness is no longer used with SetDirectBeamAbsoluteScale: use DivideByThickness"
-    find_data(direct_beam, instrument=ReductionSingleton().instrument.name())
-    ReductionSingleton().set_absolute_scale(absolute_scale.AbsoluteScale(data_file=direct_beam, 
-                                                                         beamstop_diameter=beamstop_diameter, 
-                                                                         attenuator_trans=attenuator_trans, 
-                                                                         apply_sensitivity=apply_sensitivity))
+def SetDirectBeamAbsoluteScale(direct_beam, beamstop_diameter=0.0, attenuator_trans=1.0, apply_sensitivity=False):
+    ReductionSingleton().reduction_properties["AbsoluteScaleMethod"] = "ReferenceData"
+    ReductionSingleton().reduction_properties["AbsoluteScalingReferenceFilename"] = direct_beam
+    ReductionSingleton().reduction_properties["AbsoluteScalingBeamDiameter"] = beamstop_diameter
+    ReductionSingleton().reduction_properties["AbsoluteScalingAttenuatorTrans"] = attenuator_trans
+    ReductionSingleton().reduction_properties["AbsoluteScalingApplySensitivity"] = apply_sensitivity
    
 def DivideByThickness(thickness=1.0):
     if thickness is None or thickness == 1.0:
