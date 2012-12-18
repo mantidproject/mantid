@@ -252,18 +252,46 @@ MatrixWorkspace_sptr RefReduction::processData(const std::string polarization)
     m_output_message += "Normalization completed\n";
   }
 
-    // Convert back to TOF
-    IAlgorithm_sptr convAlgToTof = createSubAlgorithm("ConvertUnits", 0.85, 0.90);
-    convAlgToTof->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
-    convAlgToTof->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWSTof);
-    convAlgToTof->setProperty("Target", "TOF");
-    convAlgToTof->executeAsSubAlg();
+//    // Integrate over Y
+//    IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.90, 0.95);
+//    refAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
+//    refAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
+//    refAlg->setProperty("NXPixel", NX_PIXELS);
+//    refAlg->setProperty("NYPixel", NY_PIXELS);
+//    refAlg->setProperty("YPixelMin", ymin);
+//    refAlg->setProperty("YPixelMax", ymax);
+//    refAlg->setProperty("XPixelMin", xmin);
+//    refAlg->setProperty("XPixelMax", xmax);
+//    refAlg->setProperty("IntegrateY", integrateY);
+//    refAlg->setProperty("ScatteringAngle", theta);
+//    refAlg->executeAsSubAlg();
+//    
+//    // Convert back to TOF
+//    IAlgorithm_sptr convAlgToTof = createSubAlgorithm("ConvertUnits", 0.85, 0.90);
+//    convAlgToTof->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
+//    convAlgToTof->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", dataWSTof);
+//    convAlgToTof->setProperty("Target", "TOF");
+//    convAlgToTof->executeAsSubAlg();
+//
+//    MatrixWorkspace_sptr outputWS2 = convAlgToTof->getProperty("OutputWorkspace");
+//    declareProperty(new WorkspaceProperty<>("OutputWorkspace_jc_" + polarization, "TOF_"+polarization, Direction::Output));
+//    setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
 
-    MatrixWorkspace_sptr outputWS2 = convAlgToTof->getProperty("OutputWorkspace");
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace_jc_" + polarization, "TOF_"+polarization, Direction::Output));
+    //integrated over Y and keep in lambda scale
+    IAlgorithm_sptr refAlg1 = createSubAlgorithm("RefRoi", 0.90, 0.95);
+    refAlg1->setProperty<MatrixWorkspace_sptr>("InputWorkspace", dataWS);
+    refAlg1->setProperty("NXPixel", NX_PIXELS);
+    refAlg1->setProperty("NYPixel", NY_PIXELS);
+    refAlg1->setProperty("YPixelMin", ymin);
+    refAlg1->setProperty("YPixelMax", ymax);
+    refAlg1->setProperty("XPixelMin", xmin);
+    refAlg1->setProperty("XPixelMax", xmax);
+    refAlg1->setProperty("IntegrateY", integrateY);
+    refAlg1->setProperty("ScatteringAngle", theta);
+    refAlg1->executeAsSubAlg();
+    MatrixWorkspace_sptr outputWS2 = refAlg1->getProperty("OutputWorkspace");
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace_jc_" + polarization, "Lambda_"+polarization, Direction::Output));
     setProperty("OutputWorkspace_jc_" + polarization, outputWS2);
-
-    
     
     // Conversion to Q
   IAlgorithm_sptr refAlg = createSubAlgorithm("RefRoi", 0.90, 0.95);
