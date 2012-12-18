@@ -1,6 +1,7 @@
 #ifndef RANGE_HANDLER_H
 #define RANGE_HANDLER_H
 
+#include "MantidQtImageViewer/IRangeHandler.h"
 #include "ui_ImageView.h"
 #include "MantidQtImageViewer/ImageDataSource.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
@@ -41,7 +42,7 @@ namespace ImageView
 {
 
 
-class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RangeHandler 
+class EXPORT_OPT_MANTIDQT_IMAGEVIEWER RangeHandler : public IRangeHandler
 {
   public:
 

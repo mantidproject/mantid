@@ -32,6 +32,8 @@ set ( INC_FILES
        inc/MantidQtImageViewer/ImageView.h
        inc/MantidQtImageViewer/QtUtils.h
        inc/MantidQtImageViewer/ImageDataSource.h
+       inc/MantidQtImageViewer/ISliderHandler.h
+       inc/MantidQtImageViewer/IRangeHandler.h
        inc/MantidQtImageViewer/SliderHandler.h
        inc/MantidQtImageViewer/RangeHandler.h
        inc/MantidQtImageViewer/EModeHandler.h

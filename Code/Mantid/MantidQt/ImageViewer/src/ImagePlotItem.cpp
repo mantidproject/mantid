@@ -139,20 +139,20 @@ void ImagePlotItem::draw(       QPainter    * painter,
     return;                                 // can't draw degenerate image
   }
 
-  double min    = data_array->GetDataMin();
-  double max    = data_array->GetDataMax();
-  double x_min  = data_array->GetXMin();
-  double x_max  = data_array->GetXMax();
-  double y_min  = data_array->GetYMin();
-  double y_max  = data_array->GetYMax();
+  const double min    = data_array->GetDataMin();
+  const double max    = data_array->GetDataMax();
+  const double x_min  = data_array->GetXMin();
+  const double x_max  = data_array->GetXMax();
+  const double y_min  = data_array->GetYMin();
+  const double y_max  = data_array->GetYMax();
 
   float *data   = data_array->GetData();
                                             // find the actual plot region
                                             // using the scale maps. 
-  int pix_x_min = (int)xMap.transform( x_min );
-  int pix_x_max = (int)xMap.transform( x_max );
-  int pix_y_min = (int)yMap.transform( y_min );
-  int pix_y_max = (int)yMap.transform( y_max );
+  const int pix_x_min = (int)xMap.transform( x_min );
+  const int pix_x_max = (int)xMap.transform( x_max );
+  const int pix_y_min = (int)yMap.transform( y_min );
+  const int pix_y_max = (int)yMap.transform( y_max );
 
                                             // set up zero centered scale range
                                             // symmetrical around zero

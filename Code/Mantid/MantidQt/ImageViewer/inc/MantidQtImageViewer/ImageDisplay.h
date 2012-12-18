@@ -10,8 +10,8 @@
 #include "MantidQtImageViewer/ImageDataSource.h"
 #include "MantidQtImageViewer/GraphDisplay.h"
 #include "MantidQtImageViewer/ImagePlotItem.h"
-#include "MantidQtImageViewer/SliderHandler.h"
-#include "MantidQtImageViewer/RangeHandler.h"
+#include "MantidQtImageViewer/ISliderHandler.h"
+#include "MantidQtImageViewer/IRangeHandler.h"
 #include "MantidQtImageViewer/DllOptionIV.h"
 
 /**
@@ -56,13 +56,16 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
 
      /// Make an ImageDisplay to display with the given widgets and controls 
      ImageDisplay( QwtPlot*       image_plot, 
-                   SliderHandler* slider_handler,
-                   RangeHandler*  range_handler,
+                   ISliderHandler* slider_handler,
+                   IRangeHandler*  range_handler,
                    GraphDisplay*  h_graph,
                    GraphDisplay*  v_graph,
                    QTableWidget*  table_widget );
 
-     ~ImageDisplay();
+     virtual ~ImageDisplay();
+
+     /// Set some properties of the ImagePlotItem object
+     void setupImagePlotItem();
 
      /// Set the source of the image data and information for the table
      void SetDataSource( ImageDataSource* data_source );
@@ -81,13 +84,16 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      void SetIntensity( double control_parameter );
    
      /// Record the point that the user is currently pointing at with the mouse
-     void SetPointedAtPoint( QPoint point );
+     virtual QPair<double,double> SetPointedAtPoint( QPoint point, int mouseClick = 2 );
 
      /// Set horizontal graph wit data from the array at the specified y value
      void SetHGraph( double y );
 
      /// Set vertical graph with data from the array at the specified x value
      void SetVGraph( double x );
+
+  protected:
+     ImagePlotItem*       image_plot_item;
 
   private:
      /// Check if the DataSource has been changed under us
@@ -107,10 +113,9 @@ class EXPORT_OPT_MANTIDQT_IMAGEVIEWER ImageDisplay
      DataArray*           data_array;
 
      QwtPlot*             image_plot;
-     ImagePlotItem*       image_plot_item;
 
-     SliderHandler*       slider_handler;
-     RangeHandler*        range_handler;
+     ISliderHandler*       slider_handler;
+     IRangeHandler*        range_handler;
 
      GraphDisplay*        h_graph_display;
      GraphDisplay*        v_graph_display;

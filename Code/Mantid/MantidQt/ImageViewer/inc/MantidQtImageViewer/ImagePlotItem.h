@@ -54,7 +54,7 @@ public:
   /// Construct basic plot item with NO data to plot.
   ImagePlotItem();
 
-  ~ImagePlotItem();
+  virtual ~ImagePlotItem();
   
   /// Specify the data to be plotted and the color table to use
   void SetData( DataArray* data_array, 
@@ -70,12 +70,12 @@ public:
                     const QwtScaleMap & yMap,
                     const QRect       & canvasRect) const;
 
-private:
-
+protected:
   int                   buffer_ID;        // set to 0 or 1 to select buffer 
   DataArray*            data_array_0;     // these provide double buffers
   DataArray*            data_array_1;     // for the float data.
 
+private:
                                           // This class just uses the following
                                           // but they are created and deleted
                                           // in the upper level classes

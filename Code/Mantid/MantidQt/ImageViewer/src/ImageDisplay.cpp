@@ -34,11 +34,14 @@ namespace ImageView
  *                        at location will be displayed.
  */
 ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
-                             SliderHandler* slider_handler,
-                             RangeHandler*  range_handler,
+                             ISliderHandler* slider_handler,
+                             IRangeHandler*  range_handler,
                              GraphDisplay*  h_graph,
                              GraphDisplay*  v_graph,
                              QTableWidget*  table_widget )
+  : data_source(0), image_plot(image_plot), slider_handler(slider_handler),
+    range_handler(range_handler), h_graph_display(h_graph), v_graph_display(v_graph),
+    image_table(table_widget)
 {
   ColorMaps::GetColorMap( ColorMaps::HEAT,
                           256,
@@ -47,24 +50,8 @@ ImageDisplay::ImageDisplay(  QwtPlot*       image_plot,
                           256,
                           negative_color_table );
 
-  this->image_plot     = image_plot;
-  this->slider_handler = slider_handler;
-  this->range_handler  = range_handler;
-
   image_plot_item = new ImagePlotItem;
-  image_plot_item->setXAxis( QwtPlot::xBottom );
-  image_plot_item->setYAxis( QwtPlot::yLeft );
-
-  image_plot_item->attach( image_plot ); 
-
-  h_graph_display  = h_graph;
-  v_graph_display  = v_graph;
-  image_table      = table_widget;
-
-  data_source     = 0;
-
-  double DEFAULT_INTENSITY = 30;
-  SetIntensity( DEFAULT_INTENSITY );
+  setupImagePlotItem();
 }
 
 
@@ -74,6 +61,17 @@ ImageDisplay::~ImageDisplay()
   delete image_plot_item;
 }
 
+/// Set some properties of the ImagePlotItem object
+void ImageDisplay::setupImagePlotItem()
+{
+  image_plot_item->setXAxis( QwtPlot::xBottom );
+  image_plot_item->setYAxis( QwtPlot::yLeft );
+
+  image_plot_item->attach( image_plot );
+
+  double DEFAULT_INTENSITY = 30;
+  SetIntensity( DEFAULT_INTENSITY );
+}
 
 /**
  * Set the data source from which the image and data table information will
@@ -355,12 +353,14 @@ void ImageDisplay::SetIntensity( double control_parameter )
  *
  * @param point  The point that the user is currently pointing at with 
  *               the mouse.
+ * @param mouseClick Which mouse button was clicked (used by derived class)
+ * @return A pair containing the (x,y) values in the graph of the point
  */
-void ImageDisplay::SetPointedAtPoint( QPoint point )
+QPair<double,double> ImageDisplay::SetPointedAtPoint( QPoint point, int /*mouseClick*/ )
 {
   if ( data_source == 0 || data_array == 0 )
   { 
-    return;
+    return qMakePair(0.0,0.0);
   }
 
   double x = image_plot->invTransform( QwtPlot::xBottom, point.x() );
@@ -370,6 +370,8 @@ void ImageDisplay::SetPointedAtPoint( QPoint point )
   SetVGraph( x );
 
   ShowInfoList( x, y );
+
+  return qMakePair(x,y);
 }
 
 /*
