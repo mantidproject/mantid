@@ -129,5 +129,43 @@ namespace MantidQt
       }
       return allWorkspaces;
     }
+
+    /**
+    Set the foreground colour of the peaks.
+    @ workspace containing the peaks to re-colour
+    @ colour to use for re-colouring
+    */
+    void CompositePeaksPresenter::setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Colour colour)
+    {
+      for(auto it = m_subjects.begin(); it != m_subjects.end(); ++it)
+      {
+        auto workspacesOfSubject = (*it)->presentedWorkspaces();
+        auto iteratorFound =  workspacesOfSubject.find(ws);
+        if(iteratorFound != workspacesOfSubject.end())
+        {
+          (*it)->setForegroundColour(colour);
+          break;
+        }
+      }
+    }
+
+    /**
+    Set the background colour of the peaks.
+    @ workspace containing the peaks to re-colour
+    @ colour to use for re-colouring
+    */
+    void CompositePeaksPresenter::setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Colour colour)
+    {
+      for(auto it = m_subjects.begin(); it != m_subjects.end(); ++it)
+      {
+        auto workspacesOfSubject = (*it)->presentedWorkspaces();
+        auto iteratorFound =  workspacesOfSubject.find(ws);
+        if(iteratorFound != workspacesOfSubject.end())
+        {
+          (*it)->setBackgroundColour(colour);
+          break;
+        }
+      }
+    }
   }
 }

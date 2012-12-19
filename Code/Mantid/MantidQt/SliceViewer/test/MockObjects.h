@@ -30,6 +30,8 @@ namespace
     MOCK_METHOD0(changeShownDim, bool());
     MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string&));
     MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
+    MOCK_METHOD1(setForegroundColour, void(const Colour));
+    MOCK_METHOD1(setBackgroundColour, void(const Colour));
     ~MockPeaksPresenter(){}
   };
 

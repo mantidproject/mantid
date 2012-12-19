@@ -183,7 +183,7 @@ namespace SliceViewer
   }
 
   /**
-  Request that each owned view makes iteself visible.
+  Request that each owned view makes its self visible.
   */
   void ConcretePeaksPresenter::showAll()
   {
@@ -198,7 +198,7 @@ namespace SliceViewer
   }
 
   /**
-  Request that each owned view makes iteself  NOT visible.
+  Request that each owned view makes its self  NOT visible.
   */
   void ConcretePeaksPresenter::hideAll()
   {

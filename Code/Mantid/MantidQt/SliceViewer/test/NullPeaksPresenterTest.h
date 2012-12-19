@@ -56,6 +56,18 @@ public:
     TS_ASSERT_EQUALS(0, workspaces.size());
   }
 
+  void test_setForegroundColour_does_nothing()
+  {
+    NullPeaksPresenter presenter;
+    TS_ASSERT_THROWS_NOTHING(presenter.setForegroundColour(Colour::Black));
+  }
+
+  void test_setBackgroundColour_does_nothing()
+  {
+    NullPeaksPresenter presenter;
+    TS_ASSERT_THROWS_NOTHING(presenter.setBackgroundColour(Colour::Black));
+  }
+
 };
 
 #endif

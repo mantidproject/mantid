@@ -273,6 +273,8 @@ public:
     TS_ASSERT_THROWS(presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>()), std::invalid_argument);
   }
 
+  
+
 };
 
 #endif
