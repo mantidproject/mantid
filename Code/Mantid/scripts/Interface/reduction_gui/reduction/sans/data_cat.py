@@ -10,15 +10,6 @@ import time
 import sys
 import traceback
 
-# Check whether Mantid is available
-try:
-    from MantidFramework import *
-    mtd.initialise(False)
-    import mantidsimple
-    HAS_MANTID = True
-except:
-    HAS_MANTID = False    
-
 class DataType(object):
     TABLE_NAME = "datatype"
     
@@ -61,13 +52,15 @@ class DataSet(object):
     TABLE_NAME = "dataset"
     data_type_cls = DataType
     
-    def __init__(self, run_number, title, run_start, duration, sdd, id=None):
+    def __init__(self, run_number, title, run_start, duration, 
+                 sdd, id=None, python_api=1):
         self.run_number = run_number
         self.title = title
         self.run_start = run_start
         self.duration = duration
         self.sdd = sdd
         self.id = id
+        self.python_api = python_api
         
     @classmethod
     def header(cls):
@@ -136,7 +129,7 @@ class DataSet(object):
         rows = cursor.fetchall()
 
         if len(rows) == 0:
-            if HAS_MANTID and process_files:
+            if process_files:
                 log_ws = "__log"                
                 if cls.load_meta_data(file_path, outputWorkspace=log_ws):
                     return cls.read_properties(log_ws, run, cursor)
@@ -183,10 +176,7 @@ class DataCatalog(object):
         try:
              self._create_db(db_path, replace_db)
         except:
-            if HAS_MANTID:
-                mtd.sendLogMessage("DataCatalog: Could not access local data catalog\n%s" % sys.exc_value)
-            else:
-                raise
+            print "DataCatalog: Could not access local data catalog\n%s" % sys.exc_value
         
     def _create_db(self, db_path, replace_db):
         """
@@ -239,8 +229,7 @@ class DataCatalog(object):
     
     def add_type(self, run, type):
         if self.db is None:
-            if HAS_MANTID:
-                mtd.sendLogMessage("DataCatalog: Could not access local data catalog")
+            print "DataCatalog: Could not access local data catalog"
             return
         
         c = self.db.cursor()
@@ -258,20 +247,26 @@ class DataCatalog(object):
         self.catalog = []
         
         if self.db is None:
-            if HAS_MANTID:
-                mtd.sendLogMessage("DataCatalog: Could not access local data catalog")
+            print "DataCatalog: Could not access local data catalog"
             return
         
         c = self.db.cursor()
         
         if not os.path.isdir(data_dir):
+            print "Data path not a valid directory:", data_dir
             return
         
         try:
             for f in os.listdir(data_dir):
                 if f.endswith(self.extension):
-                    path = os.path.join(data_dir, f)
-                    d = self.data_set_cls.find(path, c, process_files=process_files)
+                    file_path = os.path.join(data_dir, f)
+                    
+                    if hasattr(self.data_set_cls, "find_with_api"):
+                        d = self.data_set_cls.find_with_api(file_path, c, 
+                                                            process_files=process_files)
+                    else:
+                        d = self.data_set_cls.find(file_path, c, 
+                                                   process_files=process_files)
                     if d is not None:
                         if call_back is not None:
                             attr_list = d.as_string_list()
@@ -283,7 +278,5 @@ class DataCatalog(object):
             self.db.commit()
             c.close()
         except:
-            if HAS_MANTID:
-                mtd.sendLogMessage("DataCatalog: Error working with the local data catalog\n%s" % str(traceback.format_exc()))
-            else:
-                raise
+            print "DataCatalog: Error working with the local data catalog\n%s" % str(traceback.format_exc())
+            
