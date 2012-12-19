@@ -216,7 +216,10 @@ class BaseRefWidget(BaseWidget):
         #s1h, s2h, s1w and s2w
         s1h = mt_run.getProperty('S1VHeight').value[0]
         s2h = mt_run.getProperty('S2VHeight').value[0]
-        s1w = mt_run.getProperty('S1HWidth').value[0]
+        try:
+            s1w = mt_run.getProperty('S1HWidth').value[0]
+        except:
+            s1w = 'N/A'
         s2w = mt_run.getProperty('S2HWidth').value[0]
         
         return [tthd,ths, lambda_requested, s1h, s2h, s1w, s2w]
@@ -261,7 +264,10 @@ class BaseRefWidget(BaseWidget):
             self._summary.s2h.setText(s2h_value_string)
 
             s1w_value = metadata[5]
-            s1w_value_string = '{0:.2f}'.format(s1w_value)
+            try:
+                s1w_value_string = '{0:.2f}'.format(s1w_value)
+            except:
+                s1w_value_string = 'N/A'
             self._summary.s1w.setText(s1w_value_string)
 
             s2w_value = metadata[6]
