@@ -254,7 +254,9 @@ class BackgroundWidget(BaseWidget):
         
         fname = str(self._content.background_edit.text())
         if len(str(fname).strip())>0:
-            dataproxy = self._data_proxy(fname, "__background_raw")
+            api = 2 if self._settings.api2 else 1
+            dataproxy = self._data_proxy(fname, "__background_raw",
+                                         python_api=api)
             if len(dataproxy.errors)>0:
                 #QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return
