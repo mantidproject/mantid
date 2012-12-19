@@ -40,6 +40,10 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
                              doc="Property manager name for the reduction")
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", 
                                                      direction = Direction.Output))
+        self.declareProperty("MeasuredTransmission", 0.0, 
+                             direction=Direction.Output)
+        self.declareProperty("MeasuredError", 0.0, 
+                             direction=Direction.Output)
         self.declareProperty("OutputMessage", "", 
                              direction=Direction.Output, doc = "Output message")
         
@@ -82,6 +86,8 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         self._error = trans_ws.dataE(0)[0]
         
         if len(trans_ws.dataY(0))==1:
+            self.setProperty("MeasuredTransmission", self._trans)
+            self.setProperty("MeasuredError", self._error)
             output_str = "%s   T = %6.2g += %6.2g\n" % (output_str, self._trans, self._error)
         output_msg = "Transmission correction applied [%s]\n%s\n" % (trans_ws_name, output_str)
         
