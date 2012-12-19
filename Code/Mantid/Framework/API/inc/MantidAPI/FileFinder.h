@@ -58,6 +58,8 @@ namespace Mantid
       std::vector<std::string> findRuns(const std::string& hint)const;
       /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
       const Kernel::InstrumentInfo getInstrument(const std::string& hint) const;
+      /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
+      std::string getExtension(const std::string& filename, const std::vector<std::string> &exts) const;
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;

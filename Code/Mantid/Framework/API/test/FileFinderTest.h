@@ -170,6 +170,28 @@ public:
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L1234").name(), "REF_L");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234").name(), "REF_L");
     TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("REF_L_1234.nxs.h5").name(), "REF_L");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.n001").name(), "LOQ");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getInstrument("LOQ16613.s01").name(), "LOQ");
+  }
+
+  void testGetExtension()
+  {
+    std::vector<std::string> exts;
+    exts.push_back("_event.nxs");
+    exts.push_back(".nxs.h5");
+    exts.push_back(".n*");
+
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("", exts), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("PG31234", exts), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("PG3_1234", exts), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("PG3_1234_event.nxs", exts), "_event.nxs");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("/home/user123/CNCS_234_neutron_event.dat", exts),
+                     ".dat"); // doesn't know about full extension
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("REF_L1234", exts), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("REF_L_1234", exts), "");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("REF_L_1234.nxs.h5", exts), ".nxs.h5");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("LOQ16613.n001", exts), ".n001");
+    TS_ASSERT_EQUALS(FileFinder::Instance().getExtension("LOQ16613.s01", exts), ".s01");
   }
 
   void testFindRunForSNS()
@@ -260,9 +282,9 @@ public:
     // *.log is not a valid extension for ISIS instruments. Since we modified the FileFinder to strip
     // the extension using the facility extension list rather than to strip the extension after the last dot,
     // the returned path should be empty now.
-    TS_ASSERT(path.empty() == true);
-//    TS_ASSERT(path.size() > 3);
-//    TS_ASSERT_EQUALS(path.substr(path.size() - 3), "log");
+//    TS_ASSERT(path.empty() == true);
+    TS_ASSERT(path.size() > 3);
+    TS_ASSERT_EQUALS(path.substr(path.size() - 3), "log");
   }
 
   void testFindRunsDefaultInst()

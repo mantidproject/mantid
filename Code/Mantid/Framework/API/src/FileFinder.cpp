@@ -346,6 +346,48 @@ namespace Mantid
       return this->findRun(hint, exts_v);
     }
 
+    /**
+     * Determine the extension from a filename.
+     *
+     * @param filename The filename to get the extension from.
+     * @param exts The list of extensions to try before giving up and
+     * using the default: whatever happens after the '.'.
+     *
+     * @return The extension. If one isn't determined it is an empty string.
+     */
+    std::string FileFinderImpl::getExtension(const std::string& filename, const std::vector<std::string> &exts) const
+    {
+      g_log.debug() << "getExtension(" << filename << ", exts[" << exts.size() << "])\n";
+
+      // go through the list of supplied extensions
+      for (auto it = exts.begin() ; it != exts.end(); ++it)
+      {
+        std::string extension = toUpper(*it);
+        if (extension.rfind('*') == extension.size() - 1) // there is a wildcard at play
+        {
+          extension = extension.substr(0, extension.rfind('*'));
+        }
+
+        std::size_t found = toUpper(filename).rfind(extension);
+        if (found != std::string::npos)
+        {
+          g_log.debug() << "matched extension \"" << extension << "\" based on \"" << (*it) << "\"\n";
+          return filename.substr(found); // grab the actual extensions found
+        }
+      }
+
+
+      g_log.debug() << "Failed to find extension. Just using last \'.\'\n";
+      std::size_t pos = filename.find_last_of('.');
+      if (pos != std::string::npos)
+      {
+        return filename.substr(pos);
+      }
+
+      // couldn't find an extension
+      return "";
+    }
+
     std::string FileFinderImpl::findRun(const std::string& hint,const std::vector<std::string> &exts)const
     {
       g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
@@ -407,19 +449,11 @@ namespace Mantid
 
       // Do we need to try and form a filename from our preset rules
       std::string filename(hint);
-      std::string extension;
+      std::string extension = getExtension(hint, extensions);
+      if (!extensions.empty())
+        filename = hint.substr(0, hint.rfind(extension));
       if (hintPath.depth() == 0)
       {
-        for (std::vector<std::string>::iterator it = extensions.begin() ; it != extensions.end(); ++it)
-        {
-          std::size_t found = toUpper(filename).rfind(toUpper(*it));
-          if (found != std::string::npos)
-          {
-            extension = filename.substr(found);
-            filename.erase(found);
-            break;
-          }
-        }
         try
         {
           filename = makeFileName(filename, instrument);
