@@ -61,6 +61,9 @@ namespace Mantid
         "If this option is selected for other instrument types, the value of eFixed is taken from workspace property ""Ei"" or ""eFixed"" if ""Ei""\n"
         "is missing and is set to NaN if no such properties are defined on the input workspace.");
 
+     declareProperty(new Kernel::PropertyWithValue<bool>("GetMaskState",true,Kernel::Direction::Input),
+        "Returns addiitonal column with information if the detector is masked.");
+
       //declareProperty(new PropertyWithValue<bool>("FakeDetectors",false,Kernel::Direction::Input),
       //  "If selected, generates table workspace with fake detectors, all allocated in a monitor position.\n"
       //  "Number of detectors is equal to number of spectra and real detectors, if present are ignored ");
@@ -105,6 +108,10 @@ namespace Mantid
       if(!targWS->addColumn("size_t","detIDMap"))throw(std::runtime_error("Can not add column detIDMap"));
       // stores detector index which corresponds to the workspace index;
       if(!targWS->addColumn("size_t","spec2detMap"))throw(std::runtime_error("Can not add column spec2detMap"));
+
+      m_getIsMasked = this->getProperty("GetMaskState");
+      if(m_getIsMasked)
+        if(!targWS->addColumn("bool","detMask"))throw(std::runtime_error("Can not add column containing for detector masks"));
 
       // check if one wants to obtain detector's efixed"    
       m_getEFixed = this->getProperty("GetEFixed");
@@ -164,6 +171,7 @@ namespace Mantid
       auto &TwoTheta   = targWS->getColVector<double>("TwoTheta");
       auto &Azimuthal  = targWS->getColVector<double>("Azimuthal");
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
+//      auto &detMask    = targWS->getColVector<bool>("detMask");
 
       // Efixed; do we need one and does one exist?
       double Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
@@ -187,6 +195,7 @@ namespace Mantid
         L2[i]       =std::numeric_limits<double>::quiet_NaN(); 
         TwoTheta[i] =std::numeric_limits<double>::quiet_NaN(); 
         Azimuthal[i]=std::numeric_limits<double>::quiet_NaN(); 
+   //     detMask[i]  = true;
 
    
         // get detector or detector group which corresponds to the spectra i
@@ -223,6 +232,7 @@ namespace Mantid
         detDir[liveDetectorsCount].setY(ey);
         detDir[liveDetectorsCount].setZ(ez);
 
+  //      detMask[i] = spDet->isMasked();
         //double sinTheta=sin(0.5*polar);
         //this->SinThetaSq[liveDetectorsCount]  = sinTheta*sinTheta;
 
@@ -271,7 +281,7 @@ namespace Mantid
       auto &TwoTheta   = targWS->getColVector<double>("TwoTheta");
       auto &Azimuthal  = targWS->getColVector<double>("Azimuthal");
       auto &detDir     = targWS->getColVector<Kernel::V3D>("DetDirections"); 
-
+  //    auto &detMask    = targWS->getColVector<bool>("detMask");
 
       //// progress messave appearence  
       size_t nHist = targWS->rowCount();
@@ -297,6 +307,7 @@ namespace Mantid
         detDir[i].setX(ex);
         detDir[i].setY(ey);
         detDir[i].setZ(ez);
+//        detMask[i]=false;
 
       }
       // 

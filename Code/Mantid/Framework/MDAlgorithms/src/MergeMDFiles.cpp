@@ -440,7 +440,7 @@ namespace MDAlgorithms
     void run()
     {
       // Vector of each vector of events in each box
-      std::vector<std::vector<MDE> > eventsPerBox(m_blockNumEnd-m_blockNumStart);
+      std::vector<std::vector<MDE> > eventsPerEachBox(m_blockNumEnd-m_blockNumStart);
       // Each of the outputted boxes
       std::vector<MDBoxBase<MDE,nd> *> outputBoxes(m_blockNumEnd-m_blockNumStart);
       // Running total of processed events
@@ -480,7 +480,7 @@ namespace MDAlgorithms
         outputBoxes[blockNum-this->m_blockNumStart] = outBox;
 
         // Vector of events accumulated from ALL files to merge.
-        std::vector<MDE> & events = eventsPerBox[blockNum-this->m_blockNumStart];
+        std::vector<MDE> & events = eventsPerEachBox[blockNum-this->m_blockNumStart];
 
         // Reserve ALL the space you will need for this vector. Should speed up a lot.
         events.reserve(numEvents);
@@ -494,7 +494,7 @@ namespace MDAlgorithms
         for (size_t blockNum = this->m_blockNumStart; blockNum < this->m_blockNumEnd; blockNum++)
         {
           // This is the events vector for this particular block we are adding to
-          std::vector<MDE> & events = eventsPerBox[blockNum-this->m_blockNumStart];
+          std::vector<MDE> & events = eventsPerEachBox[blockNum-this->m_blockNumStart];
 
           // The file and the indexes into that file
           ::NeXus::File * file = this->m_alg->files[iw];
@@ -521,7 +521,7 @@ namespace MDAlgorithms
       for (size_t blockNum = this->m_blockNumStart; blockNum < this->m_blockNumEnd; blockNum++)
       {
         // This is the events vector for this particular block we are adding to
-        std::vector<MDE> & events = eventsPerBox[blockNum-this->m_blockNumStart];
+        std::vector<MDE> & events = eventsPerEachBox[blockNum-this->m_blockNumStart];
 
         if (!events.empty())
         {
@@ -559,11 +559,11 @@ namespace MDAlgorithms
       } // (for each block)
 
       // HDF5 is NOT thread safe (by default) even for accessing DIFFERENT files from different threads.
-      // Hence we need this mutex here :(
-      this->m_alg->fileMutex.lock();
+      // Hence we need this mutex here :( ! BUT ALL WAS MUTEXED INSIDE FLUSH. WHY to lock here?
+  //    this->m_alg->fileMutex.lock();
       // Flush out any items to write.
       bc->getDiskBuffer().flushCache();
-      this->m_alg->fileMutex.unlock();
+  //    this->m_alg->fileMutex.unlock();
 
       // Track the total number of added events
       this->m_alg->statsMutex.lock();
