@@ -6,16 +6,7 @@
 import xml.dom.minidom
 import copy
 import os
-from reduction_gui.reduction.scripter import BaseScriptElement
-
-# Check whether Mantid is available
-try:
-    from MantidFramework import *
-    mtd.initialise(False)
-    from reduction.instruments.sans.hfir_command_interface import *
-    HAS_MANTID = True
-except:
-    HAS_MANTID = False  
+from reduction_gui.reduction.scripter import BaseScriptElement 
 
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False
@@ -202,11 +193,22 @@ class SampleData(BaseScriptElement):
         """
             Update transmission from reduction output
         """
-        if HAS_MANTID and ReductionSingleton()._transmission_calculator is not None:
-            trans = ReductionSingleton()._transmission_calculator.get_transmission()
-            self.transmission = trans[0]
-            self.transmission_spread = trans[1]
-            
+        if IS_IN_MANTIDPLOT:
+            if self.PYTHON_API==1:
+                from reduction.command_interface import ReductionSingleton
+                if ReductionSingleton()._transmission_calculator is not None:
+                    trans = ReductionSingleton()._transmission_calculator.get_transmission()
+                    self.transmission = trans[0]
+                    self.transmission_spread = trans[1]
+            else:
+                from mantid.api import PropertyManagerDataService
+                from reduction_workflow.command_interface import ReductionSingleton
+                property_manager_name = ReductionSingleton().get_reduction_table_name()
+                property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+                if property_manager.existsProperty("MeasuredTransmissionValue"):
+                    self.transmission = property_manager.getProperty("MeasuredTransmissionValue").value
+                if property_manager.existsProperty("MeasuredTransmissionError"):
+                    self.transmission_spread = property_manager.getProperty("MeasuredTransmissionError").value
 
     def to_xml(self):
         """
