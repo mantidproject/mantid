@@ -10,11 +10,7 @@ import ui.sans.ui_hfir_instrument
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
     IS_IN_MANTIDPLOT = True
-    from reduction import extract_workspace_name
 except:
     pass
 
@@ -146,8 +142,9 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
             
-    def _mask_plot_clicked(self):        
-        self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
+    def _mask_plot_clicked(self):
+        ws_name = os.path.basename(str(self._summary.mask_edit.text()))
+        self.mask_ws = "__mask_%s" % ws_name
         self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)
         self._masked_detectors = []
         self.mask_reload = False
@@ -408,10 +405,21 @@ class SANSInstrumentWidget(BaseWidget):
         m.mask_file = unicode(self._summary.mask_edit.text())
         m.detector_ids = self._masked_detectors
         if self._in_mantidplot:
-            if mtd.workspaceExists(self.mask_ws):
-                masked_detectors = ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
-                ids_str = masked_detectors.getPropertyValue("DetectorList")
-                m.detector_ids = map(int, ids_str.split(','))
-        
+            if self._settings.api2:
+                from MantidFramework import mtd
+                mtd.initialise(False)
+                import mantidsimple
+                if mtd.workspaceExists(self.mask_ws):
+                    masked_detectors = mantidsimple.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
+                    ids_str = masked_detectors.getPropertyValue("DetectorList")
+                    m.detector_ids = map(int, ids_str.split(','))
+            else:
+                from mantid.api import AnalysisDataService
+                import mantid.simpleapi as api
+                if AnalysisDataService.doesExist(self.mask_ws):
+                    masked_detectors = api.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
+                    ids_str = masked_detectors.getPropertyValue("DetectorList")
+                    m.detector_ids = map(int, ids_str.split(','))
+
         self._settings.emit_key_value("DARK_CURRENT", QtCore.QString(str(self._summary.dark_file_edit.text())))
         return m

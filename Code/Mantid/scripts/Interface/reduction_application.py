@@ -252,9 +252,18 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         debugAction.setStatusTip(debug_menu_item_str)
         self.connect(debugAction, QtCore.SIGNAL("triggered()"), self._debug_mode)
     
+        api_menu_item_str = "Use Mantid Python API v2"
+        if self.general_settings.api2:
+            api_menu_item_str = "Use old Mantid Python API"
+        apiAction = QtGui.QAction(api_menu_item_str, self)
+        apiAction.setShortcut("Ctrl+A")
+        apiAction.setStatusTip("Select Mantid Python API")
+        self.connect(apiAction, QtCore.SIGNAL("triggered()"), self._change_api)
+    
         self.tools_menu.clear()
         self.tools_menu.addAction(instrAction)
         self.tools_menu.addAction(debugAction)
+        self.tools_menu.addAction(apiAction)
         
         recent_files = []
         for fname in self._recent_files:
@@ -279,6 +288,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.general_settings.debug = mode
         self._new()
         self.setup_layout()
+
+    def _change_api(self):
+        """
+            Toggle the Python API version to use
+        """
+        self.general_settings.api2 = not self.general_settings.api2
+        self._update_file_menu()
 
     def _interface_choice(self, advanced_ui=None):
         if advanced_ui is None:

@@ -70,7 +70,9 @@ class BackgroundWidget(BaseWidget):
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(Background())
+            m = Background()
+            if self._settings.api2: m.PYTHON_API=2
+            self.set_state(m)
             
         self._last_direct_state = None
         self._last_spreader_state = None
@@ -157,7 +159,7 @@ class BackgroundWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         m = Background()
-        
+        if self._settings.api2: m.PYTHON_API=2
         m.background_corr = self._content.background_chk.isChecked()
         m.background_file = str(self._content.background_edit.text())
         

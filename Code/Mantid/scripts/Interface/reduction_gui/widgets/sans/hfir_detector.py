@@ -49,7 +49,9 @@ class DetectorWidget(BaseWidget):
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(Detector())
+            m = Detector()
+            if self._settings.api2: m.PYTHON_API=2
+            self.set_state(m)
     
     def initialize_content(self):
         """
@@ -237,6 +239,7 @@ class DetectorWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         m = Detector()
+        if self._settings.api2: m.PYTHON_API=2
         
         # Mask
         m.x_position = util._check_and_get_float_line_edit(self._content.x_pos_edit)

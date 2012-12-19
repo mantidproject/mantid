@@ -9,15 +9,6 @@ import os
 from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 
-# Check whether Mantid is available
-try:
-    from MantidFramework import *
-    mtd.initialise(False)
-    from reduction.instruments.sans.hfir_command_interface import *
-    HAS_MANTID = True
-except:
-    HAS_MANTID = False  
-
 # Check whether we are running in MantidPlot
 IS_IN_MANTIDPLOT = False
 try:
@@ -125,11 +116,23 @@ class Background(BaseScriptElement):
         """
             Update data member from reduction output
         """
-        if HAS_MANTID and ReductionSingleton()._background_subtracter is not None:
-            trans = ReductionSingleton()._background_subtracter.get_transmission()
-            if trans is not None:
-                self.bck_transmission = trans[0]
-                self.bck_transmission_spread = trans[1]
+        if IS_IN_MANTIDPLOT:
+            if self.PYTHON_API==1:
+                from reduction.command_interface import ReductionSingleton
+                if ReductionSingleton()._background_subtracter is not None:
+                    trans = ReductionSingleton()._background_subtracter.get_transmission()
+                    if trans is not None:
+                        self.bck_transmission = trans[0]
+                        self.bck_transmission_spread = trans[1]
+            else:
+                from mantid.api import PropertyManagerDataService
+                from reduction_workflow.command_interface import ReductionSingleton
+                property_manager_name = ReductionSingleton().get_reduction_table_name()
+                property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+                if property_manager.existsProperty("MeasuredBckTransmissionValue"):
+                    self.bck_transmission = property_manager.getProperty("MeasuredBckTransmissionValue").value
+                if property_manager.existsProperty("MeasuredBckTransmissionError"):
+                    self.bck_transmission_spread = property_manager.getProperty("MeasuredBckTransmissionError").value
             
     def to_xml(self):
         """

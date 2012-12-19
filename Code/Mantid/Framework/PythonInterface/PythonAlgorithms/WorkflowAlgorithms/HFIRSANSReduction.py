@@ -199,10 +199,16 @@ class HFIRSANSReduction(PythonAlgorithm):
                 meas_err = None
                 if alg.existsProperty("MeasuredTransmission"):
                     meas_trans = alg.getProperty("MeasuredTransmission").value
-                    property_manager.declareProperty("MeasuredBckTransmissionValue", meas_trans)
+                    if property_manager.existsProperty("MeasuredBckTransmissionValue"):
+                        property_manager.setProperty("MeasuredBckTransmissionValue", meas_trans)
+                    else:
+                        property_manager.declareProperty("MeasuredBckTransmissionValue", meas_trans)
                 if alg.existsProperty("MeasuredError"):
                     meas_err = alg.getProperty("MeasuredError").value 
-                    property_manager.declareProperty("MeasuredBckTransmissionError", meas_err)               
+                    if property_manager.existsProperty("MeasuredBckTransmissionValue"):
+                        property_manager.setProperty("MeasuredBckTransmissionError", meas_err)
+                    else:               
+                        property_manager.declareProperty("MeasuredBckTransmissionError", meas_err)               
                     
                 if alg.existsProperty("OutputMessage"):
                     output_msg += alg.getProperty("OutputMessage").value+'\n'
@@ -317,6 +323,17 @@ class HFIRSANSReduction(PythonAlgorithm):
             alg.execute()
             if alg.existsProperty("OutputMessage"):
                 output_msg += alg.getProperty("OutputMessage").value+'\n'
+                
+            # Store sensitivity beam center so that we can access it later
+            if beam_center_x is not None and beam_center_y is not None:
+                if property_manager.existsProperty("SensitivityBeamCenterXUsed"):
+                    property_manager.setProperty("SensitivityBeamCenterXUsed", beam_center_x)
+                else:
+                    property_manager.declareProperty("SensitivityBeamCenterXUsed", beam_center_y)
+                if property_manager.existsProperty("SensitivityBeamCenterYUsed"):
+                    property_manager.setProperty("SensitivityBeamCenterYUsed", beam_center_y)
+                else:
+                    property_manager.declareProperty("SensitivityBeamCenterYUsed", beam_center_y)
 
         return output_msg
     

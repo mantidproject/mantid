@@ -152,6 +152,7 @@ class Reducer(object):
         
         # Log text
         self.log_text = "%s reduction - %s\n" % (self.instrument_name, time.ctime())
+        self.log_text += "Mantid Python API v2\n"
 
         # Go through the list of steps that are common to all data files
         self.pre_process()

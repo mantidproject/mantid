@@ -37,7 +37,7 @@ class HFIRInterface(InstrumentInterface):
         self.LAST_REDUCTION_NAME = ".mantid_last_HFIR_reduction.xml"    
         
         # Scripter object to interface with Mantid 
-        self.scripter = HFIRReductionScripter(name=name)        
+        self.scripter = HFIRReductionScripter(name=name, settings = self._settings)        
 
         # Instrument description
         self.attach(SANSInstrumentWidget(settings = self._settings, name=name, data_proxy=DataProxy))

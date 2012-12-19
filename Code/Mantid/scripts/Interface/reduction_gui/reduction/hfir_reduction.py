@@ -13,9 +13,10 @@ class HFIRReductionScripter(BaseReductionScripter):
         will each have their own UI representation.
     """
     
-    def __init__(self, name="BIOSANS"):
+    def __init__(self, name="BIOSANS", settings=None):
         super(HFIRReductionScripter, self).__init__(name=name)        
-    
+        self._settings = settings
+
     def to_script(self, file_name=None):
         """
             Spits out the text of a reduction script with the current state.
@@ -24,23 +25,33 @@ class HFIRReductionScripter(BaseReductionScripter):
         script = "# HFIR reduction script\n"
         script += "# Script automatically generated on %s\n\n" % time.ctime(time.time())
         
-        script += "from MantidFramework import *\n"
-        script += "mtd.initialise(False)\n"
-        script += "from reduction.instruments.sans.hfir_command_interface import *\n"
+        if self._settings.api2:
+            script += "import mantid\n"
+            script += "from mantid.simpleapi import *\n"
+            script += "from reduction_workflow.instruments.sans.hfir_command_interface import *\n"
+        else:
+            script += "from MantidFramework import *\n"
+            script += "mtd.initialise(False)\n"
+            script += "from reduction.instruments.sans.hfir_command_interface import *\n"
+
         script += "\n"
         
         for item in self._observers:
             if item.state() is not None:
                 script += str(item.state())
         
-        xml_process = "None"
+        xml_process = ''
         if file_name is None:
             xml_process = os.path.join(self._output_directory, "HFIRSANS_process.xml")
             xml_process = os.path.normpath(xml_process)
             self.to_xml(xml_process)
             
-        script += "SaveIqAscii(process=%r)\n" % xml_process
-        script += "Reduce1D()\n"
+        if self._settings.api2:
+            script += "SaveIq(process=%r)\n" % xml_process
+        else:
+            script += "SaveIqAscii(process=%r)\n" % xml_process
+
+        script += "Reduce()\n"
         
         if file_name is not None:
             f = open(file_name, 'w')

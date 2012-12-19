@@ -48,4 +48,6 @@ class OutputWidget(BaseWidget):
         """
             Returns an object with the state of the interface
         """
-        return Output()
+        m = Output()
+        if self._settings.api2: m.PYTHON_API=2
+        return m

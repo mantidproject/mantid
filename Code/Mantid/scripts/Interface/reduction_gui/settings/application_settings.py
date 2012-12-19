@@ -13,6 +13,9 @@ class GeneralSettings(QtCore.QObject):
     instrument_name = ''
     facility_name = ''
     
+    # Mantid Python API version
+    api2 = False
+    
     data_updated = QtCore.pyqtSignal('PyQt_PyObject','PyQt_PyObject')
     progress = QtCore.pyqtSignal(int)
     

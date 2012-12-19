@@ -4,17 +4,6 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.ui_data_catalog
 
-IS_IN_MANTIDPLOT = False
-try:
-    import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
-    IS_IN_MANTIDPLOT = True
-    from reduction.find_data import find_data
-except:
-    pass
-
 from reduction_gui.reduction.scripter import BaseScriptElement
 class Catalog(BaseScriptElement):
     def __init__(self):
@@ -95,10 +84,7 @@ class SANSCatalogWidget(BaseWidget):
                     #TODO: At some point we want to tie the type to a given sample run too
                     self._catalog_cls().add_type(run, key)
         except:
-            if IS_IN_MANTIDPLOT:
-                mtd.sendLogMessage("SANSCatalogWidget: Could not access local data catalog")
-            else:
-                print "SANSCatalogWidget: Could not access local data catalog"
+            print "SANSCatalogWidget: Could not access local data catalog"
             
     def copyCells(self):
         indices = self._content.data_set_table.selectedIndexes()
