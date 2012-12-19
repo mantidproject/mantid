@@ -195,6 +195,15 @@ class HFIRSANSReduction(PythonAlgorithm):
                 if alg.existsProperty("ReductionProperties"):
                     alg.setProperty("ReductionProperties", property_manager_name)
                 alg.execute()
+                meas_trans = None
+                meas_err = None
+                if alg.existsProperty("MeasuredTransmission"):
+                    meas_trans = alg.getProperty("MeasuredTransmission").value
+                    property_manager.declareProperty("MeasuredBckTransmissionValue", meas_trans)
+                if alg.existsProperty("MeasuredError"):
+                    meas_err = alg.getProperty("MeasuredError").value 
+                    property_manager.declareProperty("MeasuredBckTransmissionError", meas_err)               
+                    
                 if alg.existsProperty("OutputMessage"):
                     output_msg += alg.getProperty("OutputMessage").value+'\n'
                 background_ws = '__'+background_ws+'_reduced'
@@ -245,8 +254,8 @@ class HFIRSANSReduction(PythonAlgorithm):
         # Verify output directory and save data
         if "OutputDirectory" in property_list:
             output_dir = property_manager.getProperty("OutputDirectory").value
-            if len(output_dir)==0:
-                output_dir = os.path.dirname(filename)
+            #if len(output_dir)==0:
+            #    output_dir = os.path.dirname(filename)
             if os.path.isdir(output_dir):
                 output_msg += self._save_output(iq_output, iqxy_output, 
                                                 output_dir, property_manager)
