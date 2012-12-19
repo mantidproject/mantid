@@ -25,6 +25,8 @@ typedef boost::shared_ptr<Mantid::API::MDGeometry> MDGeometry_sptr;
 
 class ConcretePeaksPresenterTest : public CxxTest::TestSuite
 {
+  /// Alias.
+  typedef boost::shared_ptr<MantidQt::SliceViewer::ConcretePeaksPresenter> ConcretePeaksPresenter_sptr;
 
   /// Helper method to create a good 'Integrated' peaks workspace
   Mantid::API::IPeaksWorkspace_sptr createPeaksWorkspace(const int nPeaks, const double radius=1)
@@ -64,28 +66,145 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
     return boost::shared_ptr<MockMDGeometry>(pGeometry);
   }
 
+  /** Make the tests easier to write and understand by utilising
+  a builder. This means that we can create a standard product in one line of test code, but explicilty override 
+  constructor inputs as the test requires.
+  */
+  class ConcretePeaksPresenterBuilder
+  {
+  private:
+    PeakOverlayViewFactory_sptr m_nonIntegratedViewFactory;
+    PeakOverlayViewFactory_sptr m_integratedViewFactory; 
+    IPeaksWorkspace_sptr m_peaksWS; 
+    boost::shared_ptr<MDGeometry> m_mdWS; 
+    PeakTransformFactory_sptr m_transformFactory;
+    
+  public:
+
+    ConcretePeaksPresenterBuilder()
+    {
+    }
+
+    ConcretePeaksPresenterBuilder(const ConcretePeaksPresenterBuilder& other)
+    {
+      m_nonIntegratedViewFactory = other.m_nonIntegratedViewFactory;
+      m_integratedViewFactory = other.m_integratedViewFactory; 
+      m_peaksWS = other.m_peaksWS;
+      m_mdWS = other.m_mdWS;
+      m_transformFactory = other.m_transformFactory;
+    }
+
+    void withNonIntegratedViewFactory(PeakOverlayViewFactory_sptr val)
+    {
+      m_nonIntegratedViewFactory = val;
+    }
+    void withIntegratedViewFactory(PeakOverlayViewFactory_sptr val)
+    {
+      m_integratedViewFactory = val;
+    }
+    void withPeaksWorkspace(IPeaksWorkspace_sptr val)
+    {
+      m_peaksWS = val;
+    }
+    void withMDWorkspace(boost::shared_ptr<MDGeometry> val)
+    {
+      m_mdWS = val;
+    }
+    void withTransformFactory(PeakTransformFactory_sptr val)
+    {
+      m_transformFactory = val;
+    }
+
+    ConcretePeaksPresenter_sptr create()
+    {
+      return boost::make_shared<ConcretePeaksPresenter>(m_nonIntegratedViewFactory, m_integratedViewFactory, m_peaksWS, m_mdWS, m_transformFactory);
+    }
+
+  };
+
+  /**
+  Helper method that will produce a customisable object (builder) for making ConcretePeaks presenter.
+  1) All constructor parameters can be overriden using methods with....() on the returned builder object
+  2) The default builder has been set up to create a ubiquitious ConcretePeaksPresenter product.
+  */
+  ConcretePeaksPresenterBuilder createStandardBuild(const int expectedNumberPeaks=5)
+  {
+    // Create a mock view object that will be returned by the mock factory.
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(new NiceMock<MockPeakOverlayView>);
+    
+    // Create a widget factory mock
+    auto pMockViewFactory = new MockPeakOverlayFactory;
+    
+    PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+    EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+    EXPECT_CALL(*pMockViewFactory, setRadius(_)).Times(AtLeast(0));
+    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(0));
+
+    // Create an input MODEL Peaks workspace (INTEGRATED)
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(expectedNumberPeaks);
+    // Create an input MODEL IMDWorkspace (Geom)
+    MDGeometry_sptr mdWS = createExpectedMDWorkspace();
+
+    // Create a mock transform object.
+    auto pMockTransform = new NiceMock<MockPeakTransform>;
+    PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
+
+    // Create a mock transform factory.
+    auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
+    PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
+    EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(mockTransform));
+    EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(mockTransform));
+
+    // Create and return a configurable builder.
+    ConcretePeaksPresenterBuilder builder;
+    builder.withNonIntegratedViewFactory(mockViewFactory);
+    builder.withIntegratedViewFactory(mockViewFactory);
+    builder.withPeaksWorkspace(peaksWS);
+    builder.withMDWorkspace(mdWS);
+    builder.withTransformFactory(peakTransformFactory);
+    return builder;
+  }
+
 public:
 
   void test_constructor_throws_if_either_view_factory_null()
   {
+    // Create a Null view Factory
     PeakOverlayViewFactory* pNullViewFactory = NULL; // View factory is null
     PeakOverlayViewFactory_sptr nullViewFactory(pNullViewFactory);
 
+    // Create a view factory
     PeakOverlayViewFactory* pNormalViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr normalViewFactory(pNormalViewFactory);
 
+    // Create a peaks workspace
     IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(1);
   
+    // Create a transform factory and product.
     PeakTransform_sptr mockTransform(new MockPeakTransform);  
- 
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
     PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
     EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillRepeatedly(Return(mockTransform));
 
+    // Create a md workspace
     MDGeometry_sptr mdWS = boost::make_shared<MockMDGeometry>();
 
-    TSM_ASSERT_THROWS("Non integrated view factory is null, should throw.", ConcretePeaksPresenter(nullViewFactory, normalViewFactory, peaksWS, mdWS, peakTransformFactory), std::invalid_argument);
-    TSM_ASSERT_THROWS("Integrated view factory is null, should throw.", ConcretePeaksPresenter(normalViewFactory, nullViewFactory, peaksWS, mdWS, peakTransformFactory), std::invalid_argument);
+    // Use builder to setup construction.
+    ConcretePeaksPresenterBuilder builder;
+    builder.withPeaksWorkspace(peaksWS);
+    builder.withMDWorkspace(mdWS);
+    builder.withTransformFactory(peakTransformFactory);
+
+    builder.withNonIntegratedViewFactory(nullViewFactory);
+    builder.withIntegratedViewFactory(normalViewFactory);
+    TSM_ASSERT_THROWS("Non integrated view factory is null, should throw.", builder.create(), std::invalid_argument);
+
+    builder.withNonIntegratedViewFactory(normalViewFactory);
+    builder.withIntegratedViewFactory(nullViewFactory);
+    TSM_ASSERT_THROWS("Integrated view factory is null, should throw.",builder.create(), std::invalid_argument);
   }
 
   void test_construction()
@@ -238,7 +357,6 @@ public:
     presenter.update();
     
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
-    TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
   }
 
   void test_set_slice_point()
@@ -365,6 +483,65 @@ public:
     TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
     TSM_ASSERT("MockTransformFactory not used as expected", Mock::VerifyAndClearExpectations(pMockTransformFactory));
   }
+
+  void test_setForegroundColour()
+  {
+    const int nPeaks = 2;
+    const Colour colourToChangeTo = Colour::Red;
+
+    // Create a mock view object/product that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView); 
+    EXPECT_CALL(*pMockView, changeForegroundColour(colourToChangeTo)).Times(nPeaks); // Expect that the foreground colour of each widget will be changed.
+    EXPECT_CALL(*pMockView, updateView()).Times(nPeaks); // Expect that the background colour of each widget will be changed.
+    // Create a widget factory mock
+    auto pMockViewFactory = new MockPeakOverlayFactory;
+    PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+    EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+    EXPECT_CALL(*pMockViewFactory, setRadius(_)).Times(AtLeast(1));
+    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(1));
+
+    auto presenterBuilder = createStandardBuild(nPeaks); // Creates a default Concrete presenter product.
+    presenterBuilder.withIntegratedViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
+    presenterBuilder.withNonIntegratedViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object 
+    auto concretePresenter = presenterBuilder.create();
+
+    concretePresenter->setForegroundColour(colourToChangeTo); 
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
+  }
+
+  void test_setBackgroundColour()
+  {
+    const int nPeaks = 2;
+    const Colour colourToChangeTo = Colour::Red;
+
+    // Create a mock view object/product that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
+    EXPECT_CALL(*pMockView, changeBackgroundColour(colourToChangeTo)).Times(nPeaks); // Expect that the background colour on each widget will be changed.
+    EXPECT_CALL(*pMockView, updateView()).Times(nPeaks); // Expect that each widget will be updated.
+    // Create a widget factory mock
+    auto pMockViewFactory = new MockPeakOverlayFactory;
+    PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+    EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+    EXPECT_CALL(*pMockViewFactory, setRadius(_)).Times(AtLeast(1));
+    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(1));
+
+    auto presenterBuilder = createStandardBuild(nPeaks); // Creates a default Concrete presenter product.
+    presenterBuilder.withIntegratedViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
+    presenterBuilder.withNonIntegratedViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object 
+    auto concretePresenter = presenterBuilder.create();
+
+    concretePresenter->setBackgroundColour(colourToChangeTo); 
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
+  }
+
 };
 
 

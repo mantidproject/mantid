@@ -117,5 +117,15 @@ namespace SliceViewer
     m_physicalPeak.movePosition(transform);
   }
 
+  void PeakOverlaySphere::changeForegroundColour(const Colour colour)
+  {
+    this->m_peakColour = QColor(colour);
+  }
+
+  void PeakOverlaySphere::changeBackgroundColour(const Colour)
+  {
+    // Not being drawn at the moment, TODO.
+  }
+
 } // namespace Mantid
 } // namespace SliceViewer

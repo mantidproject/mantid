@@ -223,5 +223,31 @@ namespace SliceViewer
     return workspaces;
   }
 
+  void ConcretePeaksPresenter::setForegroundColour(const Colour colour)
+  {
+    // Change foreground colours
+    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+    {
+      if((*it) != NULL)
+      {
+        (*it)->changeForegroundColour(colour);
+        (*it)->updateView();
+      }
+    }
+  }
+
+  void ConcretePeaksPresenter::setBackgroundColour(const Colour colour) 
+  {
+    // Change background colours
+    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+    {
+      if((*it) != NULL)
+      {
+        (*it)->changeBackgroundColour(colour);
+        (*it)->updateView();
+      }
+    }
+  }
+
 }
 }

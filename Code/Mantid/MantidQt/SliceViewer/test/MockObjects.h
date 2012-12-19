@@ -73,6 +73,8 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_METHOD0(hideView, void());
     MOCK_METHOD0(showView, void());
     MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
+    MOCK_METHOD1(changeForegroundColour, void(const MantidQt::SliceViewer::Colour));
+    MOCK_METHOD1(changeBackgroundColour, void(const MantidQt::SliceViewer::Colour));
     ~MockPeakOverlayView(){}
   };
 

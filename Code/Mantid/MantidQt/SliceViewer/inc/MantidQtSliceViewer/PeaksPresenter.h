@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/System.h"
+#include "MantidQtSliceViewer/PeakPalette.h"
 #include <set>
 
 namespace Mantid
