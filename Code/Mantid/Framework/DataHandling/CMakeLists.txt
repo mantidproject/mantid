@@ -410,7 +410,7 @@ IF (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR ${CMAKE_SYSTEM_NAME} MATCHES "Darw
 	find_package ( HDF5 COMPONENTS HL REQUIRED
 				        CONFIGS hdf5-config.cmake )
 ELSE()
-	find_package ( HDF5 COMPONENTS HL REQUIRED )
+	find_package ( HDF5 COMPONENTS )
 ENDIF()
 
 #message (STATUS "HDF5_INCLUDE_DIRS:" ${HDF5_INCLUDE_DIRS})
