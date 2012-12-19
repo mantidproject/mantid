@@ -877,6 +877,8 @@ class BaseRefWidget(BaseWidget):
 #                ws_output_base = "Counts vs X pixel - %s" % basename
 #                x_title = "X pixel"
         
+        range_min = int(self._summary.data_from_tof.text())
+        range_max = int(self._summary.data_to_tof.text())
 
         ws_output_base = "Peak - " + basename + " - Y pixel _2D"
         if mtd.workspaceExists(ws_output_base):
@@ -893,14 +895,26 @@ class BaseRefWidget(BaseWidget):
                                                        callback=None,
                                                        instrument='REFL')
 
-        #collect peaks, backs and tof values
-        peak_min = int(self._summary.data_peak_from_pixel.text())
-        peak_max = int(self._summary.data_peak_to_pixel.text())
-        back_min = int(self._summary.data_background_from_pixel1.text())
-        back_max = int(self._summary.data_background_to_pixel1.text())
-        tof_min = int(self._summary.data_from_tof.text())
-        tof_max = int(self._summary.data_to_tof.text())
+#        def call_back(peakmin, peakmax, backmin, backmax, tofmin, tofmax):
+#            print 'Inside the call_back on the python side'
+#            self._summary.data_peak_from_pixel.setText("%-d" % int(peakmin))
+#            self._summary.data_peak_to_pixel.setText("%-d" % int(peakmax))
+#            self._summary.data_background_from_pixel1.setText("%-d" % int(backmin))
+#            self._summary.data_background_to_pixel1.setText("%-d" % int(backmax))
+#            self._summary.x_min_edit.setText("%-d" % int(tofmin))
+#            self._summary.x_max_edit.setText("%-d" % int(tofmax))
+         
+        # mantidplot.app should be used instead of _qti.app (it's just an alias)
+        #mantidplot.app.connect(mantidplot.app.mantidUI, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
+        #mantidplot.app.connect(mantidplot.app.RefDetectorViewer, QtCore.SIGNAL("python_peak_back_tof_range_update(double,double,double,double,double,double)"), call_back)
 
+        peak_min = int(self._summary.data_peak_from_pixel.text());
+        peak_max = int(self._summary.data_peak_to_pixel.text());
+        back_min = int(self._summary.data_background_from_pixel1.text());
+        back_max = int(self._summary.data_background_to_pixel1.text());
+        tof_min = int(self._summary.data_from_tof.text());
+        tof_max = int(self._summary.data_to_tof.text());
+        
         import mantidqtpython 
         self.ref_det_view = mantidqtpython.MantidQt.RefDetectorViewer.RefMatrixWSImageView(ws_output_base, peak_min, peak_max, back_min, back_max, tof_min, tof_max)
         QtCore.QObject.connect(self.ref_det_view.getConnections(), 

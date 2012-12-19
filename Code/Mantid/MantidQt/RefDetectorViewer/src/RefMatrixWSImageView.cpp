@@ -71,6 +71,10 @@ RefMatrixWSImageView::RefMatrixWSImageView( QString wps_name, double peak_min, d
                                                         total_rows, total_cols,
                                                         data);
     
+//    std::cout << "ws->readX(0).size(): " << ws->readX(0).size() << std::endl;
+
+    
+    
     image_view = new RefImageView( source,
                                   peak_min, peak_max,
                                   back_min, back_max,
