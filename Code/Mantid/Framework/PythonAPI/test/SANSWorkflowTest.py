@@ -41,9 +41,9 @@ class SANSWorkflowTest(unittest.TestCase):
         alt_ws = "_test_alt_output"
         ReactorSANSResolution(InputWorkspace=self.test_ws, OutputWorkspace=alt_ws)
         
-        self.assertAlmostEqual(mantid[alt_ws].dataDx(0)[0], 0.0052567, 4)
-        self.assertAlmostEqual(mantid[alt_ws].dataDx(0)[1], 0.0088109, 4)
-        self.assertAlmostEqual(mantid[alt_ws].dataDx(0)[2], 0.0126872, 4)
+        self.assertAlmostEqual(mantid[self.test_ws].dataDx(0)[0], 0.0052567, 4)
+        self.assertAlmostEqual(mantid[self.test_ws].dataDx(0)[1], 0.0088109, 4)
+        self.assertAlmostEqual(mantid[self.test_ws].dataDx(0)[2], 0.0126872, 4)
 
         if mtd.workspaceExists(self.test_ws):
             mtd.deleteWorkspace(self.test_ws)
