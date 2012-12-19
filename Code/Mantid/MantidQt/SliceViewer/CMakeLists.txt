@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/PeakOverlaySphereFactory.cpp
 	src/PeakOverlayCrossFactory.cpp
 	src/PeakOverlayViewFactoryBase.cpp
+	src/PeakPalette.cpp
 	src/PeakTransform.cpp
 	src/PeakTransformHKL.cpp
 	src/PeakTransformQSample.cpp
@@ -49,6 +50,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/PeakOverlayViewFactoryBase.h
 	inc/MantidQtSliceViewer/PeakOverlaySphereFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayCrossFactory.h
+	inc/MantidQtSliceViewer/PeakPalette.h
 	inc/MantidQtSliceViewer/PeaksPresenter.h
 	inc/MantidQtSliceViewer/PeakTransformHKL.h
 	inc/MantidQtSliceViewer/PeakTransformQSample.h
@@ -94,13 +96,13 @@ set ( UI_FILES
 	inc/MantidQtSliceViewer/ColorBarWidget.ui
 	inc/MantidQtSliceViewer/SnapToGridDialog.ui
 	inc/MantidQtSliceViewer/PeaksWorkspaceWidget.ui
-	inc/MantidQtSliceViewer/PeaksViewer.ui
 	inc/MantidQtSliceViewer/XYLimitsDialog.ui
 )
 
 set ( TEST_FILES
     test/CompositePeaksPresenterTest.h
     test/ConcretePeaksPresenterTest.h
+    test/PeakPaletteTest.h
     test/PeakTransformHKLTest.h
     test/PeakTransformQSampleTest.h
     test/PeakTransformQLabTest.h
