@@ -94,7 +94,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg->setProperty("OutputBinning","2.5,1,3.5") );
     TS_ASSERT( alg->execute() );
 
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
+    Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
+    MatrixWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const MatrixWorkspace>(out);
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1 );
     TS_ASSERT_EQUALS( outWS->readY(0)[0], 300 );
   }
@@ -112,11 +113,12 @@ public:
     alg->setChild(true);
     TS_ASSERT( alg->execute() );
 
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1 );
-    TS_ASSERT_EQUALS( outWS->readX(0)[0], 1.0 );
-    TS_ASSERT_EQUALS( outWS->readY(0)[0], 300.0 );
-    TS_ASSERT_EQUALS( outWS->readE(0)[0], std::sqrt(300.0) );
+    Workspace_sptr out = alg->getProperty("OutputWorkspace");
+    auto outWS = boost::dynamic_pointer_cast<ITableWorkspace>(out);
+    TS_ASSERT_EQUALS( outWS->rowCount(), 1 );
+    TS_ASSERT_EQUALS( outWS->columnCount(), 2 );
+    TS_ASSERT_EQUALS( outWS->Int(0,0), 1 );
+    TS_ASSERT_EQUALS( outWS->Int(0,1), 300 );
   }
 
 private:

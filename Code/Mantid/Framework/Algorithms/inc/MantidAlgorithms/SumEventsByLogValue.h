@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid
 {
@@ -51,6 +53,15 @@ namespace Algorithms
     void initDocs();
     void init();
     void exec();
+
+    void createTableOutput(const Kernel::TimeSeriesProperty<int> * log);
+
+    template <typename T>
+    void createBinnedOutput(const Kernel::TimeSeriesProperty<T> * log);
+
+    DataObjects::EventWorkspace_const_sptr m_inputWorkspace;
+    std::string m_logName;
+    std::vector<double> m_binningParams;
   };
 
 
