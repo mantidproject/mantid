@@ -192,9 +192,15 @@ def _loadWS(entry, ext, inst, wsName, rawTypes, period=_NO_INDIVIDUAL_PERIODS) :
 
   if period != _NO_INDIVIDUAL_PERIODS:
       #load just a single period
-      props = Load(Filename=filename,OutputWorkspace=wsName, EntryNumber=period)
+      if ext == ".nxs" or ext == ".NXS":
+        props = LoadNexus( Filename=filename,OutputWorkspace=wsName, EntryNumber=period)
+      else:   
+        props = Load(Filename=filename,OutputWorkspace=wsName, EntryNumber=period)
   else:
-      props = Load(Filename=filename,OutputWorkspace=wsName)
+      if ext == ".nxs" or ext == ".NXS":
+        props = LoadNexus(Filename=filename,OutputWorkspace=wsName)
+      else:
+        props = Load(Filename=filename,OutputWorkspace=wsName)
 
   isDataSetEvent = False
   wsDataSet = mtd[wsName]
