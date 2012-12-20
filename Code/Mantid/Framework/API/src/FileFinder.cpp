@@ -254,7 +254,17 @@ namespace Mantid
         }
         std::string::size_type nChars = std::distance(it, hint.rend());
 
-        instrPart = hint.substr(0, nChars);
+        // Add in special test for PG3
+        if (boost::algorithm::istarts_with(hint, "PG3"))
+        {
+            instrPart = "PG3";
+            nChars = instrPart.length();
+        }
+        else
+        {
+            instrPart = hint.substr(0, nChars);
+        }
+
         runPart = hint.substr(nChars);
       }
 
