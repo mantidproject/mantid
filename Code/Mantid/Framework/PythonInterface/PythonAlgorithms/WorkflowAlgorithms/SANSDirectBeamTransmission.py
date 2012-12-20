@@ -82,13 +82,13 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         
         self._apply_transmission('__'+workspace, trans_ws_name)
 
-        self._trans = trans_ws.dataY(0)[0]
-        self._error = trans_ws.dataE(0)[0]
+        trans = trans_ws.dataY(0)[0]
+        error = trans_ws.dataE(0)[0]
         
         if len(trans_ws.dataY(0))==1:
-            self.setProperty("MeasuredTransmission", self._trans)
-            self.setProperty("MeasuredError", self._error)
-            output_str = "%s   T = %6.2g += %6.2g\n" % (output_str, self._trans, self._error)
+            self.setProperty("MeasuredTransmission", trans)
+            self.setProperty("MeasuredError", error)
+            output_str = "%s   T = %6.2g += %6.2g\n" % (output_str, trans, error)
         output_msg = "Transmission correction applied [%s]\n%s\n" % (trans_ws_name, output_str)
         
         output_ws = AnalysisDataService.retrieve('__'+workspace)
