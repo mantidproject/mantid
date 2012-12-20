@@ -54,12 +54,20 @@ namespace MantidQt
       m_compositePresenter->setBackgroundColour(ws, colour);
     }
 
-    /*
+    /**
     Get all the presented workspaces.
     */
     SetPeaksWorkspaces ProxyCompositePeaksPresenter::presentedWorkspaces() const
     {
       return m_compositePresenter->presentedWorkspaces();
+    }
+
+    /**
+    Getter for the transform name.
+    */
+    std::string ProxyCompositePeaksPresenter::getTransformName() const
+    {
+      return m_compositePresenter->getTransformName();
     }
   }
 }

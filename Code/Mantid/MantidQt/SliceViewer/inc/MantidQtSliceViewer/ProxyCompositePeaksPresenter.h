@@ -30,6 +30,8 @@ namespace MantidQt
       void setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor);
       /// Get references to all presented workspaces.
       SetPeaksWorkspaces presentedWorkspaces() const;
+      /// Gets the transform name.
+      std::string getTransformName() const;
 
     private:
       /// Wrapped composite to delegate to.

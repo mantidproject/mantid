@@ -20,6 +20,7 @@ public:
     PeaksViewer(QWidget *parent = 0);
     void setPeaksWorkspaces(const SetPeaksWorkspaces& workspaces);
     void setPresenter(boost::shared_ptr<ProxyCompositePeaksPresenter> presenter);
+    void hide();
     ~PeaksViewer();
 private:
   boost::shared_ptr<ProxyCompositePeaksPresenter> m_presenter;

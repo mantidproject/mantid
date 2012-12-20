@@ -305,8 +305,7 @@ void SliceViewerWindow::showPeaksViewer(bool visible)
     int w = this->width() - (m_peaksViewer->width() + m_splitter->handleWidth());
     if (m_peaksViewer->width() > 0)
       m_lastPeaksViewerWidth = m_peaksViewer->width();
-    m_peaksViewer->setVisible(false);
-
+    m_peaksViewer->hide();
     // Save this value for resizing with the single shot timer
     m_desiredWidth = w;
     // This call is necessary to allow resizing smaller than would be allowed if both left/right widgets were visible.
