@@ -13,6 +13,7 @@ set ( SRC_FILES
 	src/Instrument.cpp
 	src/Instrument/CompAssembly.cpp
 	src/Instrument/Component.cpp
+	src/Instrument/ComponentHelper.cpp
 	src/Instrument/Detector.cpp
 	src/Instrument/DetectorGroup.cpp
 	src/Instrument/FitParameter.cpp
@@ -117,6 +118,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
+	inc/MantidGeometry/Instrument/ComponentHelper.h
 	inc/MantidGeometry/Instrument/Detector.h
 	inc/MantidGeometry/Instrument/DetectorGroup.h
 	inc/MantidGeometry/Instrument/FitParameter.h
@@ -142,7 +144,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/IMDDimension.h
 	inc/MantidGeometry/MDGeometry/IMDDimensionFactory.h
 	inc/MantidGeometry/MDGeometry/MDBoxImplicitFunction.h
-    inc/MantidGeometry/MDGeometry/MDDimensionExtents.h 
+	inc/MantidGeometry/MDGeometry/MDDimensionExtents.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h
 	inc/MantidGeometry/MDGeometry/MDGeometryXMLParser.h
@@ -198,6 +200,7 @@ set ( TEST_FILES
 	BnIdTest.h
 	BoundingBoxTest.h
 	CompAssemblyTest.h
+	ComponentHelperTest.h
 	ComponentParserTest.h
 	ComponentTest.h
 	CompositeImplicitFunctionTest.h
@@ -210,7 +213,7 @@ set ( TEST_FILES
 	FitParameterTest.h
 	GeneralTest.h
 	GoniometerTest.h
-  IDFObjectTest.h
+	IDFObjectTest.h
 	IMDDimensionFactoryTest.h
 	IMDDimensionTest.h
 	IndexingUtilsTest.h
@@ -274,7 +277,7 @@ set ( TEST_FILES
 	UnitCellTest.h
 	Vertex2DListTest.h
 	Vertex2DTest.h
-    XMLlogfileTest.h
+	XMLlogfileTest.h
 )
 
 set ( GMOCK_TEST_FILES
