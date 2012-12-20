@@ -1,8 +1,7 @@
+import sys
 # Check whether Mantid is available
 try:
-    from MantidFramework import *
-    mtd.initialise()
-    from mantidsimple import *
+    import mantid.simpleapi as api
     HAS_MANTID = True
 except:
     HAS_MANTID = False 
@@ -25,10 +24,10 @@ class DataProxy(object):
                 else:
                     self.data_ws = str(workspace_name)
                 try:
-                    LoadEventNexus(Filename=data_file, OutputWorkspace=workspace_name)
+                    api.LoadEventNexus(Filename=data_file, OutputWorkspace=workspace_name)
                 except:
                     self.errors.append("Error loading data file as Nexus event file:\n%s" % sys.exc_value)
-                    LoadNexus(Filename=data_file, OutputWorkspace=workspace_name)
+                    api.Load(Filename=data_file, OutputWorkspace=workspace_name)
                     self.errors = []
             except:
                 self.data_ws = None

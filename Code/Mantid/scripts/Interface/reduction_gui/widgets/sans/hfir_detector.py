@@ -10,11 +10,8 @@ import ui.sans.ui_hfir_detector
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
+    from mantid.api import AnalysisDataService
     IS_IN_MANTIDPLOT = True
-    from reduction import extract_workspace_name
 except:
     pass
 
@@ -147,12 +144,12 @@ class DetectorWidget(BaseWidget):
         if IS_IN_MANTIDPLOT and self.options_callback is not None:
             # Get patch information
             patch_ws = ""
-            if mtd.workspaceExists(self.patch_ws):
+            if AnalysisDataService.doesExist(self.patch_ws):
                 patch_ws = self.patch_ws
             
             try:
                 reduction_table_ws = self.options_callback()
-                patch_output = mtd.workspaceExists(patch_ws)
+                patch_output = AnalysisDataService.doesExist(patch_ws)
                 
                 filename = self._content.sensitivity_file_edit.text()
                 script = "_, msg = ComputeSensitivity(Filename='%s',\n" % filename

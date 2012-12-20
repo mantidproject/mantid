@@ -6,11 +6,9 @@ from reduction_gui.settings.application_settings import GeneralSettings
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
+    from mantid.api import AnalysisDataService
+    import mantid.simpleapi as api
     IS_IN_MANTIDPLOT = True
-    from reduction import find_data
 except:
     pass
 
@@ -154,7 +152,7 @@ class BaseWidget(QtGui.QWidget):
         file_name = str(file_name)
         
         def _show_ws_instrument(ws):
-            if not mtd.workspaceExists(ws):
+            if not AnalysisDataService.doesExist(ws):
                 return
             
             # Do nothing if the instrument view is already displayed
@@ -188,24 +186,23 @@ class BaseWidget(QtGui.QWidget):
         # See if the file is already loaded
         if not reload and _show_ws_instrument(workspace):
             return
-        
-        # Check that the file exists.
-        try:
-            filepath = find_data(file_name, instrument=self._settings.instrument_name)
-        except:
-            QtGui.QMessageBox.warning(self, "File Not Found", "The supplied file can't be found on the file system")
-            return
-        
+                
         if data_proxy is None:
             data_proxy = self._data_proxy
         
         if data_proxy is not None:
-            proxy = data_proxy(filepath, workspace)
+            proxy = data_proxy(file_name, workspace)
             if proxy.data_ws is not None:
                 if mask is not None:
-                    MaskDetectors(proxy.data_ws, DetectorList=mask)
+                    api.MaskDetectors(Workspace=proxy.data_ws, DetectorList=mask)
                 _show_ws_instrument(proxy.data_ws)
             else:
+                if hasattr(proxy, 'errors'):
+                    if type(proxy.errors)==list:
+                        for e in proxy.errors:
+                            print e
+                    else:
+                        print proxy.errors
                 QtGui.QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")
         else:
             QtGui.QMessageBox.warning(self, "Data Error", "Mantid doesn't know how to load this file")

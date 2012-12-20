@@ -6,9 +6,7 @@ import reduction_gui.widgets.util as util
 import ui.ui_stitcher
 
 import mantidplot
-from MantidFramework import *
-mtd.initialise(False)
-from mantidsimple import *
+from mantid.api import AnalysisDataService
 
 from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
 
@@ -152,10 +150,12 @@ class StitcherWidget(BaseWidget):
         self._content.high_q_combo.installEventFilter(eventFilter)
 
     def populate_combobox(self, combo):
-        ws_list = mtd.getWorkspaceNames()
+        ws_list = AnalysisDataService.getObjectNames()
         for ws in ws_list:
+            ws_object = AnalysisDataService.retrieve(ws)
             if not ws.startswith("__") and combo.findText(ws)<0\
-             and hasattr(mtd[ws], "getNumberHistograms") and  mtd[ws].getNumberHistograms()==1:
+             and hasattr(ws_object, "getNumberHistograms")\
+             and  ws_object.getNumberHistograms()==1:
                 combo.addItem(ws)
         
     def _update_low_scale(self):
@@ -245,7 +245,7 @@ class StitcherWidget(BaseWidget):
         file = str(dataset_control.lineEdit().text())
         if len(file.strip())==0:
             data_object = None
-        elif os.path.isfile(file) or mtd.workspaceExists(file):
+        elif os.path.isfile(file) or AnalysisDataService.doesExist(file):
             data_object = DataSet(file)
             try:
                 data_object.load(True)
@@ -309,7 +309,7 @@ class StitcherWidget(BaseWidget):
         file = str(self._content.high_q_combo.lineEdit().text())
         if len(file.strip())==0:
             self._high_q_data = None
-        elif os.path.isfile(file) or mtd.workspaceExists(file):
+        elif os.path.isfile(file) or AnalysisDataService.doesExist(file):
             self._high_q_data = DataSet(file)
             try:
                 self._high_q_data.load(True)
