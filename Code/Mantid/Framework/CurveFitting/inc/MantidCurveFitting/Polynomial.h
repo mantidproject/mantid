@@ -48,6 +48,8 @@ namespace CurveFitting
 
     virtual void functionDeriv1D(API::Jacobian* out, const double* xValues, const size_t nData);
 
+    // virtual void functionLocal(std::vector<double> &out, std::vector<double> xValues) const;
+
     /// Returns the number of attributes associated with the function (polynomial order n)
     size_t nAttributes()const{return 1;}
 
