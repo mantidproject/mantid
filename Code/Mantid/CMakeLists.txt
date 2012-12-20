@@ -1,13 +1,8 @@
 ###########################################################################
 # CMake version check.
-# Windows requires 2.8.3 with a fix with the FindZLib module
-# everywhere else anything from the 2.8 series will do
+# Only versions after 2.8.5 will find the HL component for HDF5
 ###########################################################################
-if ( WIN32 )
-  cmake_minimum_required ( VERSION 2.8.3 )
-else()
-  cmake_minimum_required ( VERSION 2.8 )
-endif ()
+cmake_minimum_required ( VERSION 2.8.5 )
 
 # System package target is important for the windows builds as it allows us to package only the dlls and exes and exclude libs. Defaults to empty for other platforms.
 set ( SYSTEM_PACKAGE_TARGET "")
