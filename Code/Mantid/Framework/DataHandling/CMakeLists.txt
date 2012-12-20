@@ -1,5 +1,4 @@
 set ( SRC_FILES
-	#       src/LoadSassena.cpp
 	src/ADARAPackets.cpp
 	src/ADARAParser.cpp
 	src/AppendGeometryToSNSNexus.cpp
@@ -87,6 +86,7 @@ set ( SRC_FILES
 	src/LoadSNSspec.cpp
 	src/LoadSPE.cpp
 	src/LoadSampleDetailsFromRaw.cpp
+	src/LoadSassena.cpp
 	src/LoadSpec.cpp
 	src/LoadSpice2D.cpp
 	src/LoadTOFRawNexus.cpp
@@ -140,7 +140,6 @@ set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
         src/LoadDAE/isisds_command.cpp)
 
 set ( INC_FILES
-	#	inc/MantidDataHandling/LoadSassena.h
 	inc/MantidDataHandling/ADARA.h
 	inc/MantidDataHandling/ADARAPackets.h
 	inc/MantidDataHandling/ADARAParser.h
@@ -220,6 +219,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadSNSspec.h
 	inc/MantidDataHandling/LoadSPE.h
 	inc/MantidDataHandling/LoadSampleDetailsFromRaw.h
+    inc/MantidDataHandling/LoadSassena.h
 	inc/MantidDataHandling/LoadSpec.h
 	inc/MantidDataHandling/LoadSpice2D.h
 	inc/MantidDataHandling/LoadTOFRawNexus.h
@@ -277,7 +277,6 @@ set ( INC_FILES
 set ( TEST_FILES
 	#LoadDAETest.h
 	#LoadSNSNexusTest.h # TODO has no active tests in it
-	#LoadSassenaTest.h
 	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
 	AppendGeometryToSNSNexusTest.h
 	CompressEventsTest.h
@@ -345,6 +344,7 @@ set ( TEST_FILES
 	LoadSNSEventNexusTest.h
 	LoadSNSspecTest.h
 	LoadSPETest.h
+	LoadSassenaTest.h
 	LoadSaveAsciiTest.h
 	LoadSpice2dTest.h
 	LoadTOFRawNexusTest.h
