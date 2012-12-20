@@ -9,16 +9,16 @@ namespace MantidQt
     PeakPalette::PeakPalette()
     {
       int index = 0;
-      m_foregroundMap.insert(std::make_pair(index++, Colour::Green));
-      m_foregroundMap.insert(std::make_pair(index++, Colour::DarkMagenta));
-      m_foregroundMap.insert(std::make_pair(index++, Colour::Cyan));
-      m_foregroundMap.insert(std::make_pair(index++, Colour::DarkGreen));
-      m_foregroundMap.insert(std::make_pair(index++, Colour::DarkCyan));
-      m_foregroundMap.insert(std::make_pair(index++, Colour::DarkYellow));
-      m_foregroundMap.insert(std::make_pair(index++, Colour::DarkRed));
-      m_foregroundMap.insert(std::make_pair(index++, Colour::Black));
-      m_foregroundMap.insert(std::make_pair(index++, Colour::White));
-      m_foregroundMap.insert(std::make_pair(index++, Colour::DarkGray));
+      m_foregroundMap.insert(std::make_pair(index++, Qt::green));
+      m_foregroundMap.insert(std::make_pair(index++, Qt::darkMagenta));
+      m_foregroundMap.insert(std::make_pair(index++, Qt::cyan));
+      m_foregroundMap.insert(std::make_pair(index++, Qt::darkGreen));
+      m_foregroundMap.insert(std::make_pair(index++, Qt::darkCyan));
+      m_foregroundMap.insert(std::make_pair(index++, Qt::darkYellow));
+      m_foregroundMap.insert(std::make_pair(index++, Qt::darkRed));
+      m_foregroundMap.insert(std::make_pair(index++, Qt::black));
+      m_foregroundMap.insert(std::make_pair(index++, Qt::white));
+      m_foregroundMap.insert(std::make_pair(index++, Qt::darkGray));
       m_backgroundMap = m_foregroundMap;
     }
 
@@ -70,26 +70,26 @@ namespace MantidQt
       return it;
     }
 
-    Colour PeakPalette::foregroundIndexToColour(const int index) const
+    Qt::GlobalColor PeakPalette::foregroundIndexToColour(const int index) const
     {
       auto it = safeFetchPair(m_foregroundMap, index);
       return it->second;
     }
 
-    Colour PeakPalette::backgroundIndexToColour(const int index) const
+    Qt::GlobalColor PeakPalette::backgroundIndexToColour(const int index) const
     {
       auto it = safeFetchPair(m_backgroundMap, index);
       return it->second;
     }
 
-    void PeakPalette::setForegroundColour(const int index, const Colour colour)
+    void PeakPalette::setForegroundColour(const int index, const Qt::GlobalColor colour)
     {
       auto it = safeFetchPair(m_foregroundMap, index);
       // overwrite
       it->second = colour;
     }
 
-    void PeakPalette::setBackgroundColour(const int index, const Colour colour)
+    void PeakPalette::setBackgroundColour(const int index, const Qt::GlobalColor colour)
     {
       auto it = safeFetchPair(m_backgroundMap, index);
       // owverwirte

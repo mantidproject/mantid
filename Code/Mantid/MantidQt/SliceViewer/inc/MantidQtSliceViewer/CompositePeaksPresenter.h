@@ -39,9 +39,9 @@ namespace MantidQt
       /// Get references to all presented workspaces.
       SetPeaksWorkspaces presentedWorkspaces() const;
       /// Change the foreground representation for the peaks of this workspace
-      void setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Colour);
+      void setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor);
       /// Change the background representation for the peaks of this workspace
-      void setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Colour);
+      void setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor);
     private:
       /// Default behaviour 
       PeaksPresenter_sptr m_default;
@@ -49,8 +49,8 @@ namespace MantidQt
       std::set<PeaksPresenter_sptr> m_subjects;
       /// Use default
       bool useDefault() const { return m_subjects.size() == 0; }
-      void setForegroundColour(const Colour){/*Do nothing*/}
-      void setBackgroundColour(const Colour){/*Do nothing*/}
+      void setForegroundColour(const Qt::GlobalColor){/*Do nothing*/}
+      void setBackgroundColour(const Qt::GlobalColor){/*Do nothing*/}
     };
   }
 }

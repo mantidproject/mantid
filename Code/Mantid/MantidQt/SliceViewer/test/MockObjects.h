@@ -11,6 +11,7 @@
 #include "MantidAPI/IPeak.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
+#include <QColor>
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid;
@@ -30,8 +31,8 @@ namespace
     MOCK_METHOD0(changeShownDim, bool());
     MOCK_CONST_METHOD1(isLabelOfFreeAxis, bool(const std::string&));
     MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
-    MOCK_METHOD1(setForegroundColour, void(const Colour));
-    MOCK_METHOD1(setBackgroundColour, void(const Colour));
+    MOCK_METHOD1(setForegroundColour, void(const Qt::GlobalColor));
+    MOCK_METHOD1(setBackgroundColour, void(const Qt::GlobalColor));
     ~MockPeaksPresenter(){}
   };
 
@@ -75,8 +76,8 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_METHOD0(hideView, void());
     MOCK_METHOD0(showView, void());
     MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
-    MOCK_METHOD1(changeForegroundColour, void(const MantidQt::SliceViewer::Colour));
-    MOCK_METHOD1(changeBackgroundColour, void(const MantidQt::SliceViewer::Colour));
+    MOCK_METHOD1(changeForegroundColour, void(const Qt::GlobalColor));
+    MOCK_METHOD1(changeBackgroundColour, void(const Qt::GlobalColor));
     ~MockPeakOverlayView(){}
   };
 

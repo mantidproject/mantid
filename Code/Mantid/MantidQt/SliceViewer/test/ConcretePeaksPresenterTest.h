@@ -487,7 +487,7 @@ public:
   void test_setForegroundColour()
   {
     const int nPeaks = 2;
-    const Colour colourToChangeTo = Colour::Red;
+    const Qt::GlobalColor colourToChangeTo = Qt::red;
 
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;
@@ -516,7 +516,7 @@ public:
   void test_setBackgroundColour()
   {
     const int nPeaks = 2;
-    const Colour colourToChangeTo = Colour::Red;
+    const Qt::GlobalColor colourToChangeTo = Qt::red;
 
     // Create a mock view object/product that will be returned by the mock factory.
     auto pMockView = new NiceMock<MockPeakOverlayView>;

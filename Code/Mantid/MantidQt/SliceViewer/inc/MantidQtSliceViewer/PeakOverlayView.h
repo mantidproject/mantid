@@ -50,9 +50,9 @@ namespace MantidQt
       /// Move the peak overlay to a new position.
       virtual void movePosition(PeakTransform_sptr peakTransform) = 0;
       /// Change foreground colour
-      virtual void changeForegroundColour(const Colour) = 0;
+      virtual void changeForegroundColour(const Qt::GlobalColor) = 0;
       /// Change background colour
-      virtual void changeBackgroundColour(const Colour) = 0;
+      virtual void changeBackgroundColour(const Qt::GlobalColor) = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

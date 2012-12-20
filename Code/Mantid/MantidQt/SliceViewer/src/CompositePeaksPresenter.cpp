@@ -135,7 +135,7 @@ namespace MantidQt
     @ workspace containing the peaks to re-colour
     @ colour to use for re-colouring
     */
-    void CompositePeaksPresenter::setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Colour colour)
+    void CompositePeaksPresenter::setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor colour)
     {
       for(auto it = m_subjects.begin(); it != m_subjects.end(); ++it)
       {
@@ -154,7 +154,7 @@ namespace MantidQt
     @ workspace containing the peaks to re-colour
     @ colour to use for re-colouring
     */
-    void CompositePeaksPresenter::setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Colour colour)
+    void CompositePeaksPresenter::setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor colour)
     {
       for(auto it = m_subjects.begin(); it != m_subjects.end(); ++it)
       {

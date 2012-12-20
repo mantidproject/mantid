@@ -223,7 +223,7 @@ namespace SliceViewer
     return workspaces;
   }
 
-  void ConcretePeaksPresenter::setForegroundColour(const Colour colour)
+  void ConcretePeaksPresenter::setForegroundColour(const Qt::GlobalColor colour)
   {
     // Change foreground colours
     for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
@@ -236,7 +236,7 @@ namespace SliceViewer
     }
   }
 
-  void ConcretePeaksPresenter::setBackgroundColour(const Colour colour) 
+  void ConcretePeaksPresenter::setBackgroundColour(const Qt::GlobalColor colour) 
   {
     // Change background colours
     for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)

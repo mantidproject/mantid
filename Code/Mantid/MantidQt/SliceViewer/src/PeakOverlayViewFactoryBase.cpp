@@ -18,7 +18,7 @@ namespace MantidQt
 
       PeakPalette defaultPalette;
       auto colourEnum = defaultPalette.foregroundIndexToColour(static_cast<int>(workspaceNumber));
-
+      //Qt::GlobalColor qtColourEnum = colourEnum;
       m_peakColour = QColor(colourEnum);
     }
 

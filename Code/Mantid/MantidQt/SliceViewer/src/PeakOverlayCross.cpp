@@ -123,12 +123,12 @@ namespace SliceViewer
     m_physicalPeak.movePosition(transform);
   }
 
-  void PeakOverlayCross::changeForegroundColour(const Colour colour)
+  void PeakOverlayCross::changeForegroundColour(const Qt::GlobalColor colour)
   {
     this->m_peakColour = QColor(colour);
   }
 
-  void PeakOverlayCross::changeBackgroundColour(const Colour)
+  void PeakOverlayCross::changeBackgroundColour(const Qt::GlobalColor)
   {
     // Do nothing with the background colour for a peak widget of this type.
   }

@@ -287,8 +287,8 @@ void SliceViewerWindow::showPeaksViewer(bool visible)
     // Expand the window to include the peaks viewer.
     int w = this->width() + peaksViewerWidth + 2;
     m_peaksViewer->setVisible(true);
-    // Give the peaksviewer the workspaces it needs.
-    m_peaksViewer->setPeaksWorkspaces(m_slicer->getPeaksWorkspaces());
+    // Give the peaksviewer the proxy presenter it needs.
+    m_peaksViewer->setPresenter(m_slicer->getPeaksPresenter());
 
     // If the right splitter was hidden, show it
     QList<int> sizes = m_splitter->sizes();

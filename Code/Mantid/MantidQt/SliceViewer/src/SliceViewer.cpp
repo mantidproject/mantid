@@ -21,6 +21,7 @@
 #include "MantidQtSliceViewer/XYLimitsDialog.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
+#include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlaySphereFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayCrossFactory.h"
 #include "MantidQtSliceViewer/PeakTransformHKL.h"
@@ -2263,10 +2264,12 @@ void SliceViewer::enablePeakOverlaysIfAppropriate()
   }
 }
 
-
-SetPeaksWorkspaces SliceViewer::getPeaksWorkspaces() const
+/**
+Get the peaks proxy presenter.
+*/
+boost::shared_ptr<ProxyCompositePeaksPresenter> SliceViewer::getPeaksPresenter() const
 {
-  return m_peaksPresenter->presentedWorkspaces();
+  return boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter);
 }
 
 } //namespace

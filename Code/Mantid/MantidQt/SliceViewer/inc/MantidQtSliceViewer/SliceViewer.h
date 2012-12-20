@@ -36,6 +36,7 @@ namespace SliceViewer
 
 // Forward dec
 class CompositePeaksPresenter;
+class ProxyCompositePeaksPresenter;
 
 /** GUI for viewing a 2D slice out of a multi-dimensional workspace.
  * You can select which dimension to plot as X,Y, and the cut point
@@ -96,7 +97,7 @@ public:
   void refreshRebin();
 
   /// Methods relating to peaks overlays.
-  SetPeaksWorkspaces getPeaksWorkspaces() const;
+  boost::shared_ptr<ProxyCompositePeaksPresenter> getPeaksPresenter() const;
 
 signals:
   /// Signal emitted when the X/Y index of the shown dimensions is changed
