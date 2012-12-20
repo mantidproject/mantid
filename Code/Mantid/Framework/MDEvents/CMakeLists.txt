@@ -46,6 +46,7 @@ set ( SRC_FILES
 	src/ReflectometryTransformKiKf.cpp
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
+        src/Integrate3DEvents.cpp
 	src/SaveIsawQvector.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
@@ -113,6 +114,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/ReflectometryTransformKiKf.h
 	inc/MantidMDEvents/ReflectometryTransformP.h
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
+        inc/MantidMDEvents/Integrate3DEvents.h
 	inc/MantidMDEvents/SaveIsawQvector.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/UnitsConversionHelper.h
@@ -157,6 +159,7 @@ set ( TEST_FILES
 	OneStepMDEWTest.h
 	QueryMDWorkspaceTest.h
 	ReflectometryTransformQxQzTest.h
+        Integrate3DEventsTest.h
 	SaveIsawQvectorTest.h
 	SkippingPolicyTest.h
 	UnitsConversionHelperTest.h
