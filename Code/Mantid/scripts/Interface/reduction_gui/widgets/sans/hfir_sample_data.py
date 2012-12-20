@@ -218,7 +218,9 @@ class SampleDataWidget(BaseWidget):
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(SampleData())
+            m = SampleData()
+            if self._settings.api2: m.PYTHON_API=2
+            self.set_state(m)
             
         self._last_direct_state = None
         self._last_spreader_state = None
@@ -299,6 +301,7 @@ class SampleDataWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         m = SampleData()
+        if self._settings.api2: m.PYTHON_API=2
 
         m.transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
         m.transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
