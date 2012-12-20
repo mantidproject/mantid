@@ -69,7 +69,6 @@ int LoadSassena::fileCheck(const std::string &filePath)
   else
   {
     this->g_log.error("no version attribute found");
-    confidence = 99;
   }
   return confidence;
 }
