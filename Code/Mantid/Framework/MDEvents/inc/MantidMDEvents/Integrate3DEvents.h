@@ -24,7 +24,7 @@ typedef boost::unordered_map< long, V3D >               PeakQMap;
  *  integrated counts, using ellipsoids with axis lengths determined from the
  *  standard deviations in the directions of the principal axes.
  */
-class Integrate3DEvents
+class DLLExport Integrate3DEvents
 {
   public:
     
