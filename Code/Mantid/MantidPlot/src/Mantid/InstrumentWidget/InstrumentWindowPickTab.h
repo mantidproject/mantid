@@ -42,7 +42,7 @@ public:
   ///            a peak to the attached peaks workspace
   ///   SelectPeak: click on a peak marker or draw a rubber-band selector to select peak
   ///               markers. Selected peaks can be deleted by pressing the Delete key.
-  enum SelectionType {Single=0,AddPeak,SelectPeak,SingleDetectorSelection,Tube};
+  enum SelectionType {Single=0,AddPeak,ErasePeak,SingleDetectorSelection,Tube};
   enum TubeXUnits {DETECTOR_ID = 0,LENGTH,PHI,NUMBER_OF_UNITS};
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(int detid);

@@ -26,11 +26,14 @@ public:
   void updateDetectors();
 protected:
   void paintEvent(QPaintEvent*);
-  void mousePressEvent(QMouseEvent* event);
-  void mouseMoveEvent(QMouseEvent* event);
-  void mouseReleaseEvent(QMouseEvent* event);
-  void wheelEvent(QWheelEvent* event);
-  void keyPressEvent(QKeyEvent *event);
+  void resizeEvent(QResizeEvent*);
+  void mousePressEvent(QMouseEvent*);
+  void mouseMoveEvent(QMouseEvent*);
+  void mouseReleaseEvent(QMouseEvent*);
+  void wheelEvent(QWheelEvent*);
+  void keyPressEvent(QKeyEvent*);
+  void enterEvent(QEvent*);
+  void leaveEvent(QEvent*);
   ///< The projection surface
   boost::shared_ptr<ProjectionSurface> m_surface;
 };

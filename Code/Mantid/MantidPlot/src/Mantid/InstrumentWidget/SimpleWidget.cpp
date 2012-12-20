@@ -1,6 +1,8 @@
 #include "SimpleWidget.h"
 #include "ProjectionSurface.h"
 
+#include <QApplication>
+
 /// Constructor
 SimpleWidget::SimpleWidget(QWidget* parent):QWidget(parent)
 {
@@ -46,6 +48,14 @@ void SimpleWidget::paintEvent(QPaintEvent*)
     if(m_surface)
     {
       m_surface->drawSimple(this);
+    }
+}
+
+void SimpleWidget::resizeEvent(QResizeEvent *)
+{
+    if(m_surface)
+    {
+      m_surface->updateView();
     }
 }
 
@@ -111,6 +121,29 @@ void SimpleWidget::keyPressEvent(QKeyEvent *event)
     if (m_surface)
     {
       m_surface->keyPressEvent(event);
+    }
+    update();
+}
+
+void SimpleWidget::enterEvent(QEvent *event)
+{
+    if (m_surface)
+    {
+      m_surface->enterEvent(event);
+    }
+    update();
+}
+
+void SimpleWidget::leaveEvent(QEvent *event)
+{
+    // Restore possible override cursor
+    while(QApplication::overrideCursor())
+    {
+      QApplication::restoreOverrideCursor();
+    }
+    if (m_surface)
+    {
+      m_surface->leaveEvent(event);
     }
     update();
 }

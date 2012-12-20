@@ -12,6 +12,7 @@
 
 #include <QImage>
 #include <QList>
+#include <QMap>
 #include <QStack>
 #include <QColor>
 
@@ -28,6 +29,7 @@ namespace Mantid{
 
 class GLColor;
 class MantidGLWidget;
+class InputController;
 
 class QMouseEvent;
 class QWheelEvent;
@@ -46,7 +48,7 @@ class ProjectionSurface: public QObject
 {
   Q_OBJECT
 public:
-  enum InteractionMode {MoveMode = 0, PickMode = 1, DrawMode}; ///< Move around or select things
+  enum InteractionMode {MoveMode = 0, PickMode = 1, DrawMode = 2, EraseMode, InteractionModeSize }; ///< Move around or select things
   /// Constructor
   ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
   /// Destructor
@@ -76,13 +78,9 @@ public:
   virtual void mouseReleaseEvent(QMouseEvent*);
   virtual void wheelEvent(QWheelEvent *);
   virtual void keyPressEvent(QKeyEvent*);
+  virtual void enterEvent(QEvent*);
+  virtual void leaveEvent(QEvent*);
 
-  /// start selection at a point on the screen
-  virtual void startSelection(int x,int y);
-  /// expand selection upto a point on the screen
-  virtual void moveSelection(int x,int y);
-  /// end selection at a point on the screen
-  virtual void endSelection(int x,int y);
   /// return true if any of the detectors have been selected
   virtual bool hasSelection()const;
 
@@ -96,18 +94,16 @@ public:
   virtual void getMaskedDetectors(QList<int>& dets)const = 0;
 
   virtual QString getInfoText()const{return "";}
+  /// Change the interaction mode
+  virtual void setInteractionMode(int mode);
 
-  /// Zoom into an area of the screen
-  virtual void zoom(const QRectF& area);
-  virtual void zoom();
-  /// Unzoom view to the previous zoom area or to full view
-  virtual void unzoom();
   //-----------------------------------
 
   Mantid::Kernel::V3D getDetectorPos(int x, int y) const;
-  /// Change the interaction mode
-  void setInteractionMode(InteractionMode mode);
-  InteractionMode getInteractionMode()const{return m_interactionMode;}
+  /// Return the current interaction mode
+  int getInteractionMode()const{return m_interactionMode;}
+  /// Ask current input controller if a context menu is allowed
+  bool canShowContextMenu() const;
 
   /// Set background colour
   void setBackgroundColor(const QColor& color) {m_backgroundColor = color;}
@@ -188,6 +184,7 @@ signals:
   void singleDetectorPicked(int);
   void multipleDetectorsSelected(QList<int>&);
 
+  void signalToStartCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor);
   void shapeCreated();
   void shapeSelected();
   void shapesDeselected();
@@ -197,6 +194,13 @@ signals:
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
 protected slots:
+
+  void setSelectionRect(const QRect& rect);
+  void emptySelectionRect();
+  void selectMultipleDetectors();
+  void pickDetectorAt(int x,int y);
+  void touchDetectorAt(int x,int y);
+  void erasePeaks(const QRect& rect);
 
   void colorMapChanged();
   void catchShapeCreated();
@@ -218,21 +222,6 @@ protected:
   /// Draw the surface onto an image without OpenGL
   virtual void drawSimpleToImage(QImage* image,bool picking = false)const;
 
-  virtual void mousePressEventMove(QMouseEvent*){}
-  virtual void mouseMoveEventMove(QMouseEvent*){}
-  virtual void mouseReleaseEventMove(QMouseEvent*){}
-  virtual void wheelEventMove(QWheelEvent*){}
-
-  virtual void mousePressEventPick(QMouseEvent*);
-  virtual void mouseMoveEventPick(QMouseEvent*);
-  virtual void mouseReleaseEventPick(QMouseEvent*);
-  virtual void wheelEventPick(QWheelEvent*);
-
-  virtual void mousePressEventDraw(QMouseEvent*);
-  virtual void mouseMoveEventDraw(QMouseEvent*);
-  virtual void mouseReleaseEventDraw(QMouseEvent*);
-  virtual void wheelEventDraw(QWheelEvent*);
-  virtual void keyPressEventDraw(QKeyEvent*);
   //-----------------------------------
 
   void draw(MantidGLWidget* widget,bool picking)const;
@@ -242,6 +231,7 @@ protected:
   int getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const;
   int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
   QString getPickInfoText()const;
+  void setInputController(int mode, InputController* controller);
 
   //-----------------------------------
   //     Protected data
@@ -258,9 +248,7 @@ protected:
   QColor m_backgroundColor;          ///< The background colour
   QRectF m_viewRect;                 ///< Keeps the physical dimensions of the surface
   QRect m_selectRect;
-  QStack<QRectF> m_zoomStack;
-  InteractionMode m_interactionMode;
-  bool m_leftButtonDown;
+  int m_interactionMode;             ///< mode of interaction - index in m_inputControllers
 
   Shape2DCollection m_maskShapes;    ///< to draw mask shapes
   mutable QList<PeakOverlay*> m_peakShapes; ///< to draw peak labels
@@ -268,6 +256,10 @@ protected:
   mutable bool m_showPeakRow;        ///< flag to show peak row index
   mutable int m_peakShapesStyle;     ///< index of a default PeakMarker2D style to use with a new PeakOverlay.
 
+private:
+  /// Get the current input controller
+  InputController* getController() const;
+  QMap<int,InputController*> m_inputControllers; ///< controllers for mouse and keyboard input
 };
 
 typedef boost::shared_ptr<ProjectionSurface> ProjectionSurface_sptr;

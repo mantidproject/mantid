@@ -67,11 +67,10 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
   setFocusPolicy(Qt::StrongFocus);
-  //QWidget *frame = new QWidget();
   QVBoxLayout* mainLayout = new QVBoxLayout(this);
   QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
 
-  //Add Tab control panel and Render window
+  //Add Tab control panel
   mControlsTab = new QTabWidget(this,0);
   controlPanelLayout->addWidget(mControlsTab);
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
@@ -79,7 +78,6 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   // Create the display widget
   m_InstrumentDisplay = new MantidGLWidget(this);
   m_InstrumentDisplay->installEventFilter(this);
-  connect(m_InstrumentDisplay,SIGNAL(mouseOut()),this,SLOT(mouseLeftInstrumentDisplay()));
   connect(this,SIGNAL(enableLighting(bool)),m_InstrumentDisplay,SLOT(enableLighting(bool)));
 
   // Create simple display widget
@@ -412,25 +410,25 @@ void InstrumentWindow::changeColormap(const QString &filename)
 
 void InstrumentWindow::showPickOptions()
 {
-//  if (m_pickTab->canUpdateTouchedDetector() && !m_selectedDetectors.empty())
-//  {
-//    QMenu context(m_InstrumentDisplay);
+  if (/*m_pickTab->canUpdateTouchedDetector() &&*/ !m_selectedDetectors.empty())
+  {
+    QMenu context(m_InstrumentDisplay);
 
-//    context.addAction(mInfoAction);
-//    context.addAction(mPlotAction);
-//    context.addAction(mDetTableAction);
+    context.addAction(mInfoAction);
+    context.addAction(mPlotAction);
+    context.addAction(mDetTableAction);
 
-//    context.insertSeparator();
-//    context.addAction(mGroupDetsAction);
-//    context.addAction(mMaskDetsAction);
-//    context.addAction(m_ExtractDetsToWorkspaceAction);
-//    context.addAction(m_SumDetsToWorkspaceAction);
-//    QMenu *gfileMenu = context.addMenu("Create grouping file");
-//    gfileMenu->addAction(m_createIncludeGroupingFileAction);
-//    gfileMenu->addAction(m_createExcludeGroupingFileAction);
+    context.insertSeparator();
+    context.addAction(mGroupDetsAction);
+    context.addAction(mMaskDetsAction);
+    context.addAction(m_ExtractDetsToWorkspaceAction);
+    context.addAction(m_SumDetsToWorkspaceAction);
+    QMenu *gfileMenu = context.addMenu("Create grouping file");
+    gfileMenu->addAction(m_createIncludeGroupingFileAction);
+    gfileMenu->addAction(m_createExcludeGroupingFileAction);
 
-//    context.exec(QCursor::pos());
-//  }
+    context.exec(QCursor::pos());
+  }
 }
 
 /**
@@ -1179,9 +1177,10 @@ void InstrumentWindow::dropEvent( QDropEvent* e )
  */
 bool InstrumentWindow::eventFilter(QObject *obj, QEvent *ev)
 {
-  if ((dynamic_cast<MantidGLWidget*>(obj) == m_InstrumentDisplay ||
-       dynamic_cast<SimpleWidget*>(obj) == m_simpleDisplay) &&
-       ev->type() == QEvent::ContextMenu)
+  if (ev->type() == QEvent::ContextMenu &&
+       (dynamic_cast<MantidGLWidget*>(obj) == m_InstrumentDisplay ||
+        dynamic_cast<SimpleWidget*>(obj) == m_simpleDisplay) &&
+        getSurface() && getSurface()->canShowContextMenu())
   {
     // an ugly way of preventing the curve in the pick tab's miniplot disappearing when
     // cursor enters the context menu
@@ -1214,18 +1213,6 @@ void InstrumentWindow::setColorMapAutoscaling(bool on)
   m_instrumentActor->setAutoscaling(on);
   setupColorMap();
   updateInstrumentView();
-}
-
-/**
- * Respond to mouse leaving the instrument display area.
- */
-void InstrumentWindow::mouseLeftInstrumentDisplay()
-{
-//  if (getTab() == PICK && !m_instrumentDisplayContextMenuOn)
-//  {
-//    // remove the curve from the miniplot
-//    //m_pickTab->mouseLeftInstrmentDisplay();
-//  }
 }
 
 /**

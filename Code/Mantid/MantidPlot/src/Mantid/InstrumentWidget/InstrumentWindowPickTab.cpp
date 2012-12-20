@@ -606,9 +606,9 @@ void InstrumentWindowPickTab::setSelectionType()
   }
   else if (m_peakSelect->isChecked())
   {
-    m_selectionType = SelectPeak;
-    m_activeTool->setText("Tool: Select crystal peak(s)");
-    surfaceMode = ProjectionSurface::DrawMode;
+    m_selectionType = ErasePeak;
+    m_activeTool->setText("Tool: Erase crystal peak(s)");
+    surfaceMode = ProjectionSurface::EraseMode;
   }
   auto surface = m_instrWindow->getSurface();
   if ( surface ) 
@@ -1124,7 +1124,7 @@ void InstrumentWindowPickTab::changedIntegrationRange(double,double)
  */
 void InstrumentWindowPickTab::mouseLeftInstrmentDisplay()
 {
-  if (m_selectionType < SelectPeak)
+  if (m_selectionType < ErasePeak)
   {
     updatePick(-1);
   }

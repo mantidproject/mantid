@@ -43,19 +43,11 @@ public:
   virtual void removeShapes(const QList<Shape2D*>&);
   virtual void clear();
   
-  bool mousePressEvent(QMouseEvent*);
-  void mouseMoveEvent(QMouseEvent*);
-  void mouseReleaseEvent(QMouseEvent*);
-  void wheelEvent(QWheelEvent*);
   void keyPressEvent(QKeyEvent*);
 
-  void addShape(const QString& type,int x,int y);
-  void startCreatingShape2D(const QString& type,const QColor& borderColor = Qt::red,const QColor& fillColor = QColor());
-  void deselectAll();
   bool selectAtXY(int x,int y);
   bool selectIn(const QRect& rect);
   void removeCurrentShape();
-  void removeSelectedShapes();
   bool isEmpty()const{return m_shapes.isEmpty();}
   size_t size()const {return static_cast<size_t>(m_shapes.size());}
   void select(int i);
@@ -91,6 +83,16 @@ signals:
   void shapesDeselected();
   void shapeChanged();
 
+public slots:
+  void addShape(const QString& type,int x,int y,const QColor& borderColor,const QColor& fillColor);
+  void deselectAll();
+  void moveRightBottomTo(int,int);
+  void selectShapeOrControlPointAt(int x,int y);
+  void moveShapeOrControlPointBy(int dx,int dy);
+  void touchShapeOrControlPointAt(int x,int y);
+  void removeSelectedShapes();
+  void restoreOverrideCursor();
+
 protected:
   virtual void drawShape(QPainter& ) const{} // never called
   virtual void addToPath(QPainterPath& ) const{}
@@ -99,6 +101,7 @@ protected:
 
   Shape2D* createShape(const QString& type,int x,int y)const;
   bool selectControlPointAt(int x,int y);
+  void deselectControlPoint();
   bool isOverCurrentAt(int x,int y);
   void select(Shape2D* shape);
   QList<Shape2D*> getSelectedShapes() const;
@@ -110,15 +113,8 @@ protected:
   mutable QRect m_viewport;  // current screen viewport
   mutable QTransform m_transform; // current transform
 
-  bool m_creating; ///< a shape is being created with a mouse
-  bool m_editing;  ///< current shape is being edited with a mouse. CPs are visible
-  bool m_moving;   ///< current shape is being moved with a mouse. 
-  int m_x,m_y;
-  QString m_shapeType;
-  QColor m_borderColor, m_fillColor;
   Shape2D*  m_currentShape;
   size_t m_currentCP;
-  bool m_leftButtonPressed;
   bool m_overridingCursor;
 };
 

@@ -16,14 +16,8 @@ Shape2D(),
 m_wx(0),
 m_wy(0),
 m_h(0),
-m_creating(false),
-m_editing(false),
-m_moving(false),
-m_x(0),
-m_y(0),
 m_currentShape(NULL),
 m_currentCP(0),
-m_leftButtonPressed(false),
 m_overridingCursor(false)
 {
 }
@@ -155,6 +149,18 @@ void Shape2DCollection::setWindow(const QRectF& window,const QRect& viewport) co
     m_transform.translate(dx,dy);
     m_transform.scale(sx,sy);
   }
+//  std::cerr << "Window:" << std::endl;
+//  std::cerr << window.x() << ' ' << window.y() << ' ' << window.width() << ' ' << window.height() << std::endl;
+//  std::cerr << "Viewport:" << std::endl;
+//  std::cerr << viewport.x() << ' ' << viewport.y() << ' ' << viewport.width() << ' ' << viewport.height() << std::endl;
+//  std::cerr << "Transform:" << std::endl;
+//  std::cerr << m_transform.m11() << ' '
+//            << m_transform.m12() << ' '
+//            << m_transform.m22() << ' '
+//            << m_transform.m13() << ' '
+//            << m_transform.m23() << ' '
+//            << m_transform.m33() << ' '
+//            << std::endl;
 }
 
 void Shape2DCollection::refit()
@@ -170,93 +176,6 @@ void Shape2DCollection::resetBoundingRect()
   }
 }
 
-/**
- * Reacts on a mouse press event. 
- * @param e :: Mouse press event object.
- * @return :: True if any shape in the collection ends up selected and false otherwise.
- */
-bool Shape2DCollection::mousePressEvent(QMouseEvent* e)
-{
-  if (e->button() == Qt::LeftButton)
-  {
-    m_leftButtonPressed = true;
-    if (m_creating && !m_shapeType.isEmpty())
-    {
-      deselectAll();
-      addShape(m_shapeType,e->x(),e->y());
-      if (!m_currentShape) return false;
-      m_currentShape->edit(true);
-      m_currentCP = 2;
-      m_editing = true;
-    }
-    else if (selectControlPointAt(e->x(),e->y()))
-    {
-      m_editing = true;
-    }
-    else if (selectAtXY(e->x(),e->y()))
-    {
-      m_x = e->x();
-      m_y = e->y();
-      m_moving = true;
-    }
-    else
-    {
-      deselectAll();
-    }
-  }
-  return m_currentShape != NULL;
-}
-
-void Shape2DCollection::mouseMoveEvent(QMouseEvent* e)
-{
-  if (m_editing)
-  {
-    if (m_leftButtonPressed && m_currentShape && m_currentShape->isEditing() && m_currentCP < m_currentShape->getNControlPoints())
-    {
-      QPointF p = m_transform.inverted().map(QPointF(e->x(),e->y()));
-      m_currentShape->setControlPoint(m_currentCP,p);
-      emit shapeChanged();
-    }
-  }
-  else if (m_moving && m_leftButtonPressed && m_currentShape)
-  {
-    QPointF p1 = m_transform.inverted().map(QPointF( e->x(),e->y() ));
-    QPointF p2 = m_transform.inverted().map(QPointF( m_x, m_y ));
-    m_currentShape->moveBy(p1 - p2);
-    emit shapeChanged();
-    m_x = e->x();
-    m_y = e->y();
-  }
-  else if (selectControlPointAt(e->x(),e->y()) || isOverCurrentAt(e->x(),e->y()))
-  {
-    if ( !m_overridingCursor )
-    {
-      m_overridingCursor = true;
-      QApplication::setOverrideCursor(Qt::SizeAllCursor);
-    }
-  }
-  else if (m_overridingCursor)
-  {
-    m_overridingCursor = false;
-    QApplication::restoreOverrideCursor();
-  }
-}
-
-void Shape2DCollection::mouseReleaseEvent(QMouseEvent* e)
-{
-  if (e->button() == Qt::LeftButton)
-  {
-    m_leftButtonPressed = false;
-  }
-  m_creating = false;
-  m_editing = false;
-  m_moving = false;
-}
-
-void Shape2DCollection::wheelEvent(QWheelEvent*)
-{
-}
-
 void Shape2DCollection::keyPressEvent(QKeyEvent* e)
 {
   switch(e->key())
@@ -266,18 +185,20 @@ void Shape2DCollection::keyPressEvent(QKeyEvent* e)
   }
 }
 
-void Shape2DCollection::addShape(const QString& type,int x,int y)
+void Shape2DCollection::addShape(const QString& type,int x,int y, const QColor &borderColor, const QColor &fillColor)
 {
+  deselectAll();
   m_currentShape = createShape(type,x,y);
   if ( ! m_currentShape )
   {
     emit shapeSelected();
     return;
   }
-  m_currentShape->setColor(m_borderColor);
-  m_currentShape->setFillColor(m_fillColor);
-  m_creating = true;
-  addShape( m_currentShape);
+  m_currentShape->setColor(borderColor);
+  m_currentShape->setFillColor(fillColor);
+  addShape( m_currentShape );
+  m_currentShape->edit(true);
+  m_currentCP = 2;
   emit shapeSelected();
 }
 
@@ -310,14 +231,9 @@ Shape2D* Shape2DCollection::createShape(const QString& type,int x,int y) const
 
 }
 
-void Shape2DCollection::startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor)
-{
-  m_creating = true;
-  m_shapeType = type;
-  m_borderColor = borderColor;
-  m_fillColor = fillColor;
-}
-
+/**
+  * Deselect all selected shapes.
+  */
 void Shape2DCollection::deselectAll()
 {
   foreach(Shape2D* shape,m_shapes)
@@ -325,7 +241,92 @@ void Shape2DCollection::deselectAll()
     shape->edit(false);
   }
   m_currentShape = NULL;
+  if (m_overridingCursor)
+  {
+      m_overridingCursor = false;
+      QApplication::restoreOverrideCursor();
+  }
   emit shapesDeselected();
+}
+
+/**
+  * Resize the current shape by moving the right-bottom control point to a loaction on the screen.
+  */
+void Shape2DCollection::moveRightBottomTo(int x, int y)
+{
+    if ( m_currentShape && m_currentShape->isEditing() )
+    {
+      QPointF p = m_transform.inverted().map(QPointF(x, y));
+      m_currentShape->setControlPoint( 2, p );
+      emit shapeChanged();
+    }
+}
+
+/**
+  * Select a shape or a control point at a location on the screen.
+  * The control points of the currently selected shape are checked first.
+  * If (x,y) doesn't point to anything deselect all currently selected shapes.
+  */
+void Shape2DCollection::selectShapeOrControlPointAt(int x, int y)
+{
+    if ( isOverCurrentAt( x, y ) ) return;
+    bool ret = selectControlPointAt( x, y ) || selectAtXY( x, y );
+    if ( !ret )
+    {
+        deselectAll();
+    }
+}
+
+/**
+  * Move the current control point or entire shape by (dx,dy).
+  * @param dx :: Shift in the x direction in screen pixels.
+  * @param dy :: Shift in the y direction in screen pixels.
+  */
+void Shape2DCollection::moveShapeOrControlPointBy(int dx, int dy)
+{
+    if ( !m_currentShape ) return;
+    if ( m_currentCP < m_currentShape->getNControlPoints() )
+    {
+        QPointF p = m_currentShape->getControlPoint( m_currentCP );
+        QPointF screenP = m_transform.map( p ) + QPointF( dx, dy );
+        p = m_transform.inverted().map( screenP );
+        m_currentShape->setControlPoint( m_currentCP, p );
+    }
+    else
+    {
+        QPointF p0 = m_currentShape->getControlPoint( 0 );
+        QPointF screenP0 = m_transform.map( p0 );
+        QPointF screenP1 = screenP0 + QPointF( dx, dy );
+        QPointF p1 = m_transform.inverted().map( screenP1 );
+        m_currentShape->moveBy( p1 - p0 );
+    }
+    if ( !m_overridingCursor )
+    {
+      m_overridingCursor = true;
+      QApplication::setOverrideCursor(Qt::SizeAllCursor);
+    }
+}
+
+/**
+  * If mouse pointer at (x,y) touches the current shape or its control points
+  * override the cursor image.
+  */
+void Shape2DCollection::touchShapeOrControlPointAt(int x, int y)
+{
+    if (selectControlPointAt( x, y ) || isOverCurrentAt( x, y ))
+    {
+        if ( !m_overridingCursor )
+        {
+          m_overridingCursor = true;
+          QApplication::setOverrideCursor(Qt::SizeAllCursor);
+        }
+    }
+    else if (m_overridingCursor)
+    {
+        deselectControlPoint();
+        m_overridingCursor = false;
+        QApplication::restoreOverrideCursor();
+    }
 }
 
 /**
@@ -390,6 +391,7 @@ void Shape2DCollection::select(Shape2D* shape)
   }
   m_currentShape = shape;
   m_currentShape->edit(true);
+  m_currentCP = m_currentShape->getNControlPoints(); // no current cp until it is selected explicitly
   emit shapeSelected();
 }
 
@@ -419,7 +421,17 @@ bool Shape2DCollection::selectControlPointAt(int x,int y)
       return true;
     }
   }
+  // deselect control points
+  m_currentCP = m_currentShape->getNControlPoints();
   return false;
+}
+
+void Shape2DCollection::deselectControlPoint()
+{
+    if ( m_currentShape )
+    {
+        m_currentCP = m_currentShape->getNControlPoints();
+    }
 }
 
 void Shape2DCollection::removeCurrentShape()
@@ -443,6 +455,18 @@ void Shape2DCollection::removeSelectedShapes()
     removeShapes( shapeList );
     emit shapesDeselected();
   }
+}
+
+/**
+  * Restore the cursor image to default.
+  */
+void Shape2DCollection::restoreOverrideCursor()
+{
+    if (m_overridingCursor)
+    {
+        m_overridingCursor = false;
+        QApplication::restoreOverrideCursor();
+    }
 }
 
 void Shape2DCollection::clear()
@@ -491,7 +515,6 @@ QPointF Shape2DCollection::getCurrentPoint(const QString& prop) const
 {
   if (m_currentShape)
   {
-    //return m_transform.map(m_currentShape->getPoint(prop));
     return m_currentShape->getPoint(prop);
   }
   return QPointF();
@@ -501,7 +524,6 @@ void Shape2DCollection::setCurrentPoint(const QString& prop, const QPointF& valu
 {
   if (m_currentShape)
   {
-    //return m_currentShape->setPoint(prop,m_transform.inverted().map(value));
     return m_currentShape->setPoint(prop,value);
   }
 }
@@ -510,7 +532,6 @@ QRectF Shape2DCollection::getCurrentBoundingRect()const
 {
   if (m_currentShape)
   {
-    //return m_transform.mapRect(m_currentShape->getBoundingRect());
     return m_currentShape->getBoundingRect();
   }
   return QRectF();
@@ -520,7 +541,6 @@ void Shape2DCollection::setCurrentBoundingRect(const QRectF& rect)
 {
   if (m_currentShape)
   {
-    //m_currentShape->setBoundingRect(m_transform.inverted().mapRect(rect));
     m_currentShape->setBoundingRect(rect);
   }
 }
@@ -572,9 +592,6 @@ void Shape2DCollection::setCurrentBoundingRectReal(const QRectF& rect)
   double y = m_h - (rect.bottom() - m_windowRect.y()) * m_wy;
   double width = rect.width() * m_wx;
   double height = rect.height() * m_wy;
-  
-  //QPointF c = QRectF(x,y,width,height).center();
-  //std::cerr << "setCurrentBoundingRectReal: " << c.x() << ' ' << c.y() << std::endl << std::endl;
   m_currentShape->setBoundingRect(QRectF(x,y,width,height));
 }
 
@@ -582,7 +599,6 @@ QPointF Shape2DCollection::realToUntransformed(const QPointF& point)const
 {
   qreal x = (point.x() - m_windowRect.left()) * m_wx;
   qreal y = m_h - (point.y() - m_windowRect.y()) * m_wy;
-  //std::cerr << "realToUntransformed: " << x << ' ' << y << std::endl;
   return QPointF(x,y);
 }
 
@@ -601,3 +617,4 @@ QList<Shape2D*> Shape2DCollection::getSelectedShapes() const
   }
   return res;
 }
+

@@ -2,6 +2,7 @@
 #include "GLColor.h"
 #include "MantidGLWidget.h"
 #include "OpenGLError.h"
+#include "InputController.h"
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -16,6 +17,7 @@
 #include <cfloat>
 #include <limits>
 #include <cmath>
+#include <algorithm>
 #include "MantidKernel/V3D.h"
 
 using Mantid::Kernel::V3D;
@@ -36,7 +38,6 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
     m_viewRect(),
     m_selectRect(),
     m_interactionMode(MoveMode),
-    m_leftButtonDown(false),
     m_peakLabelPrecision(6),
     m_peakShapesStyle(0)
 {
@@ -45,6 +46,33 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
   connect(&m_maskShapes,SIGNAL(shapeSelected()),this,SLOT(catchShapeSelected()));
   connect(&m_maskShapes,SIGNAL(shapesDeselected()),this,SLOT(catchShapesDeselected()));
   connect(&m_maskShapes,SIGNAL(shapeChanged()),this,SLOT(catchShapeChanged()));
+
+  // create and connect the pick input controller
+  InputControllerPick* pickController = new InputControllerPick(this);
+  setInputController(PickMode, pickController);
+  connect(pickController,SIGNAL(pickPointAt(int,int)),this,SLOT(pickDetectorAt(int,int)));
+  connect(pickController,SIGNAL(touchPointAt(int,int)),this,SLOT(touchDetectorAt(int,int)));
+  connect(pickController,SIGNAL(setSelection(QRect)),this,SLOT(setSelectionRect(QRect)));
+  connect(pickController,SIGNAL(finishSelection()),this,SLOT(selectMultipleDetectors()));
+
+  // create and connect the mask drawing input controller
+  InputControllerDrawShape* drawController = new InputControllerDrawShape(this);
+  setInputController(DrawMode, drawController);
+  connect(drawController,SIGNAL(addShape(QString,int,int,QColor,QColor)),&m_maskShapes,SLOT(addShape(QString,int,int,QColor,QColor)));
+  connect(this,SIGNAL(signalToStartCreatingShape2D(QString,QColor,QColor)),drawController,SLOT(startCreatingShape2D(QString,QColor,QColor)));
+  connect(drawController,SIGNAL(moveRightBottomTo(int,int)),&m_maskShapes,SLOT(moveRightBottomTo(int,int)));
+  connect(drawController,SIGNAL(selectAt(int,int)),&m_maskShapes,SLOT(selectShapeOrControlPointAt(int,int)));
+  connect(drawController,SIGNAL(moveBy(int,int)),&m_maskShapes,SLOT(moveShapeOrControlPointBy(int,int)));
+  connect(drawController,SIGNAL(touchPointAt(int,int)),&m_maskShapes,SLOT(touchShapeOrControlPointAt(int,int)));
+  connect(drawController,SIGNAL(disabled()),&m_maskShapes,SLOT(deselectAll()));
+  connect(drawController,SIGNAL(removeSelectedShapes()),&m_maskShapes,SLOT(removeSelectedShapes()));
+  connect(drawController,SIGNAL(deselectAll()),&m_maskShapes,SLOT(deselectAll()));
+  connect(drawController,SIGNAL(restoreOverrideCursor()),&m_maskShapes,SLOT(restoreOverrideCursor()));
+
+  // create and connect the peak eraser controller
+  InputControllerErase* eraseController = new InputControllerErase(this);
+  setInputController(EraseMode, eraseController);
+  connect(eraseController,SIGNAL(erase(QRect)),this,SLOT(erasePeaks(QRect)));
 }
 
 ProjectionSurface::~ProjectionSurface()
@@ -90,7 +118,6 @@ void ProjectionSurface::clear()
   m_viewChanged = true;
   m_viewRect = QRectF();
   m_selectRect = QRect();
-  m_zoomStack.clear();
 }
 
 /**
@@ -99,21 +126,21 @@ void ProjectionSurface::clear()
  */
 void ProjectionSurface::draw(MantidGLWidget *widget)const
 {
-  if (getInteractionMode() == MoveMode)
+  if (getInteractionMode() == PickMode)
   {
-    draw(widget,false);
-    if (m_pickImage)
-    {
-      delete m_pickImage;
-      m_pickImage = NULL;
-    }
+      bool changed = m_viewChanged;
+      draw(widget,true);
+      m_viewChanged = changed;
+      draw(widget,false);
   }
   else
   {
-    bool changed = m_viewChanged;
-    draw(widget,true);
-    m_viewChanged = changed;
-    draw(widget,false);
+      draw(widget,false);
+      if (m_pickImage)
+      {
+        delete m_pickImage;
+        m_pickImage = NULL;
+      }
   }
 }
 
@@ -180,6 +207,7 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
       //painter.setCompositionMode(QPainter::CompositionMode_Xor);
       painter.drawRect(m_selectRect);
     }
+    getController()->onPaint( painter );
     painter.end();
     // Discard any error generated here
     glGetError();
@@ -216,6 +244,7 @@ void ProjectionSurface::drawSimple(QWidget* widget)const
       drawSimpleToImage(m_pickImage,true);
       drawSimpleToImage(m_viewImage,false);
     }
+    m_viewChanged = false;
   }
 
   QPainter painter(widget);
@@ -238,6 +267,7 @@ void ProjectionSurface::drawSimple(QWidget* widget)const
     //painter.setCompositionMode(QPainter::CompositionMode_Xor);
     painter.drawRect(m_selectRect);
   }
+  getController()->onPaint( painter );
   painter.end();
 }
 
@@ -252,215 +282,37 @@ void ProjectionSurface::drawSimpleToImage(QImage*,bool)const
 
 void ProjectionSurface::mousePressEvent(QMouseEvent* e)
 {
-  switch(m_interactionMode)
-  {
-  case MoveMode: this->mousePressEventMove(e); break;
-  case PickMode: this->mousePressEventPick(e); break;
-  case DrawMode: this->mousePressEventDraw(e); break;
-  }
+    getController()->mousePressEvent( e );
 }
 
 void ProjectionSurface::mouseMoveEvent(QMouseEvent* e)
 {
-  switch(m_interactionMode)
-  {
-  case MoveMode: this->mouseMoveEventMove(e); break;
-  case PickMode: this->mouseMoveEventPick(e); break;
-  case DrawMode: this->mouseMoveEventDraw(e); break;
-  }
+    getController()->mouseMoveEvent( e );
 }
 
 void ProjectionSurface::mouseReleaseEvent(QMouseEvent* e)
 {
-  switch(m_interactionMode)
-  {
-  case MoveMode: this->mouseReleaseEventMove(e); break;
-  case PickMode: this->mouseReleaseEventPick(e); break;
-  case DrawMode: this->mouseReleaseEventDraw(e); break;
-  }
+    getController()->mouseReleaseEvent( e );
 }
 
 void ProjectionSurface::wheelEvent(QWheelEvent* e)
 {
-  switch(m_interactionMode)
-  {
-  case MoveMode: this->wheelEventMove(e); break;
-  case PickMode: this->wheelEventPick(e); break;
-  case DrawMode: this->wheelEventDraw(e); break;
-  }
+    getController()->wheelEvent( e );
 }
 
 void ProjectionSurface::keyPressEvent(QKeyEvent* e)
 {
-  switch(m_interactionMode)
-  {
-  case MoveMode: break;
-  case PickMode: break;
-  case DrawMode: this->keyPressEventDraw(e); break;
-  }
+    getController()->keyPressEvent( e );
 }
 
-void ProjectionSurface::mousePressEventPick(QMouseEvent* e)
+void ProjectionSurface::enterEvent(QEvent *e)
 {
-  if (e->button() == Qt::LeftButton)
-  {
-    m_leftButtonDown = true;
-    startSelection(e->x(),e->y());
-    int id = getDetectorID(e->x(),e->y());
-    emit singleDetectorPicked(id);
-  }
+    getController()->enterEvent( e );
 }
 
-void ProjectionSurface::mouseMoveEventPick(QMouseEvent* e)
+void ProjectionSurface::leaveEvent(QEvent *e)
 {
-  if (m_leftButtonDown)
-  {
-    moveSelection(e->x(),e->y());
-  }
-  else
-  {
-    int id = getDetectorID(e->x(),e->y());
-    emit singleDetectorTouched(id);
-  }
-}
-
-void ProjectionSurface::mouseReleaseEventPick(QMouseEvent* e)
-{
-  if (m_leftButtonDown)
-  {
-    QList<int> detList;
-    getSelectedDetectors(detList);
-    emit multipleDetectorsSelected(detList);
-    endSelection(e->x(),e->y());
-  }
-  m_leftButtonDown = false;
-}
-
-void ProjectionSurface::wheelEventPick(QWheelEvent*)
-{
-}
-
-void ProjectionSurface::mousePressEventDraw(QMouseEvent* e)
-{
-  if ( m_maskShapes.mousePressEvent(e) ) return;
-
-  foreach(PeakOverlay* po, m_peakShapes)
-  {
-    if ( po->mousePressEvent(e) ) return;
-  }
-  startSelection( e->x(), e->y() );
-}
-
-void ProjectionSurface::mouseMoveEventDraw(QMouseEvent* e)
-{
-  if ( hasSelection() )
-  {
-    moveSelection( e->x(), e->y() );
-  }
-  else
-  {
-    m_maskShapes.mouseMoveEvent(e);
-  }
-}
-
-void ProjectionSurface::mouseReleaseEventDraw(QMouseEvent* e)
-{
-  if ( hasSelection() )
-  {
-    foreach(PeakOverlay* po, m_peakShapes)
-    {
-      po->selectIn( m_selectRect );
-    }
-    endSelection( e->x(), e->y() );
-  }
-  else
-  {
-    m_maskShapes.mouseReleaseEvent(e);
-  }
-}
-
-void ProjectionSurface::wheelEventDraw(QWheelEvent* e)
-{
-  m_maskShapes.wheelEvent(e);
-}
-
-void ProjectionSurface::keyPressEventDraw(QKeyEvent* e)
-{
-  m_maskShapes.keyPressEvent(e);
-  foreach(PeakOverlay* po, m_peakShapes)
-  {
-    po->keyPressEvent(e);
-  }
-}
-
-
-void ProjectionSurface::startSelection(int x,int y)
-{
-  m_selectRect.setRect(x,y,1,1);
-}
-
-void ProjectionSurface::moveSelection(int x,int y)
-{
-  m_selectRect.setBottomRight(QPoint(x,y));
-}
-
-void ProjectionSurface::endSelection(int x,int y)
-{
-  (void) x; //avoid compiler warning
-  (void) y; //avoid compiler warning
-  m_selectRect = QRect();
-}
-
-void ProjectionSurface::zoom()
-{
-  if (!m_viewImage) return;
-  QRectF newView = selectionRectUV();
-  if (newView.isNull()) return;
-  m_zoomStack.push(m_viewRect);
-  m_viewRect = newView;
-  m_viewChanged = true;
-}
-
-/**
-  * Zooms to the specified area. The previous zoom stack is cleared.
-  */
-void ProjectionSurface::zoom(const QRectF& area)
-{
-  if (!m_zoomStack.isEmpty())
-  {
-    m_viewRect = m_zoomStack.first();
-    m_zoomStack.clear();
-  }
-  m_zoomStack.push(m_viewRect);
-
-  double left = area.left();
-  double top  = area.top();
-  double width = area.width();
-  double height = area.height();
-
-  if (width * m_viewRect.width() < 0)
-  {
-    left += width;
-    width = -width;
-  }
-  if (height * m_viewRect.height() < 0)
-  {
-    top += height;
-    height = -height;
-  }
-  //std::cerr<<"New area:\n";
-  //std::cerr<<left<<','<<top<<' '<<width<<','<<height<<'\n'<<'\n';
-  m_viewRect = QRectF(left,top,width,height);
-  m_viewChanged = true;
-}
-
-void ProjectionSurface::unzoom()
-{
-  if (!m_zoomStack.isEmpty())
-  {
-    m_viewRect = m_zoomStack.pop();
-    m_viewChanged = true;
-  }
+    getController()->leaveEvent( e );
 }
 
 void ProjectionSurface::updateView()
@@ -506,24 +358,27 @@ QRect ProjectionSurface::selectionRect()const
 
 QRectF ProjectionSurface::selectionRectUV()const
 {
-  if (m_selectRect.width() <= 1 || m_selectRect.height() <= 1) return QRectF();
+  double left = static_cast<double>(m_selectRect.left());
+  double right = static_cast<double>(m_selectRect.right());
+  double top = static_cast<double>(m_selectRect.top());
+  double bottom = static_cast<double>(m_selectRect.bottom());
 
-  double x_min  = double(m_selectRect.left())/m_viewImage->width();
-  double x_size = double(m_selectRect.width())/m_viewImage->width();
-  double y_min  = double(m_selectRect.top())/m_viewImage->height();
-  double y_size = double(m_selectRect.height())/m_viewImage->height();
-
-  if (x_size < 0)
+  if ( left > right )
   {
-    x_min += x_size;
-    x_size = fabs(x_size);
+      std::swap( left, right );
   }
 
-  if (y_size < 0)
+  if ( top > bottom )
   {
-    y_min += y_size;
-    y_size = fabs(y_size);
+      std::swap( top, bottom );
   }
+
+  if ( abs(m_selectRect.width()) <= 1 || abs(m_selectRect.height()) <= 1) return QRectF();
+
+  double x_min  = left / m_viewImage->width();
+  double x_size = (right - left) / m_viewImage->width();
+  double y_min  = top / m_viewImage->height();
+  double y_size = (bottom - top)/m_viewImage->height();
 
   x_min = m_viewRect.left() + x_min * m_viewRect.width();
   x_size = x_size * m_viewRect.width();
@@ -548,9 +403,20 @@ void ProjectionSurface::colorMapChanged()
   * Set an interaction mode for the surface.
   * @param mode :: A new mode.
   */
-void ProjectionSurface::setInteractionMode(ProjectionSurface::InteractionMode mode)
+void ProjectionSurface::setInteractionMode(int mode)
 {
+    if ( mode < 0 || mode >= m_inputControllers.size() )
+    {
+        throw std::logic_error("Invalid interaction mode requested.");
+    }
+    if ( mode == m_interactionMode ) return;
+    InputController *controller = m_inputControllers[m_interactionMode];
+    if ( !controller ) throw std::logic_error("Input controller doesn't exist.");
+    controller->onDisabled();
     m_interactionMode = mode;
+    controller = m_inputControllers[m_interactionMode];
+    if ( !controller ) throw std::logic_error("Input controller doesn't exist.");
+    controller->onEnabled();
     if ( mode != DrawMode )
     {
         m_maskShapes.deselectAll();
@@ -600,6 +466,19 @@ Mantid::Kernel::V3D ProjectionSurface::getDetectorPos(int x, int y) const
       return V3D();
 }
 
+/**
+  * Is context menu allowed?
+  */
+bool ProjectionSurface::canShowContextMenu() const
+{
+    InputController *controller = m_inputControllers[m_interactionMode];
+    if ( controller )
+    {
+        return controller->canShowContextMenu();
+    }
+    return false;
+}
+
 //------------------------------------------------------------------------------
 int ProjectionSurface::getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const
 {
@@ -624,14 +503,37 @@ int ProjectionSurface::getDetectorID(unsigned char r,unsigned char g,unsigned ch
 QString ProjectionSurface::getPickInfoText()const
 {
   return "Move cursor over instrument to see detector information.\n"
-    "Left click and drag to select multiple detectors.";
+          "Left click and drag to select multiple detectors.";
+}
+
+/**
+  * Adds an input controller to the controller list.
+  * @param mode :: The interaction mode which is the index of the controller in the list.
+  * @param controller :: A pointer to the controller to be set.
+  */
+void ProjectionSurface::setInputController(int mode, InputController *controller)
+{
+    m_inputControllers[mode] = controller;
+}
+
+/**
+  * Returns the current controller. If the controller doesn't exist throws a logic_error exceotion.
+  */
+InputController *ProjectionSurface::getController() const
+{
+    InputController* controller = m_inputControllers[m_interactionMode];
+    if ( !controller )
+    {
+        throw std::logic_error("Input controller doesn't exist for current interaction mode.");
+    }
+    return controller;
 }
 
   // --- Shape2D manipulation --- //
 
 void ProjectionSurface::startCreatingShape2D(const QString& type,const QColor& borderColor,const QColor& fillColor)
 {
-  m_maskShapes.startCreatingShape2D(type,borderColor,fillColor);
+  emit signalToStartCreatingShape2D(type,borderColor,fillColor);
 }
 
 void ProjectionSurface::catchShapeCreated()
@@ -651,7 +553,7 @@ void ProjectionSurface::catchShapesDeselected()
 
 void ProjectionSurface::catchShapeChanged()
 {
-  emit shapeChanged();
+    emit shapeChanged();
 }
 
 /**
@@ -726,4 +628,57 @@ void ProjectionSurface::setShowPeakRowFlag(bool on)
   {
     m_peakShapes[i]->setShowRowsFlag(on);
   }
+}
+
+/**
+  * Set the selection rect in screen corrds.
+  * @param rect :: New selection rectangle.
+  */
+void ProjectionSurface::setSelectionRect(const QRect &rect)
+{
+    m_selectRect = rect;
+}
+
+/**
+  * Delete selection rectanle.
+  */
+void ProjectionSurface::emptySelectionRect()
+{
+    m_selectRect = QRect();
+}
+
+/**
+  * Send multipleDetectorsSelected signal.
+  */
+void ProjectionSurface::selectMultipleDetectors()
+{
+    QList<int> detList;
+    getSelectedDetectors(detList);
+    emit multipleDetectorsSelected(detList);
+    emptySelectionRect();
+}
+
+/**
+  * Pick a detector at a pointe on the screen.
+  */
+void ProjectionSurface::pickDetectorAt(int x, int y)
+{
+    int id = getDetectorID( x, y );
+    emit singleDetectorPicked(id);
+}
+
+void ProjectionSurface::touchDetectorAt(int x, int y)
+{
+    int id = getDetectorID( x, y );
+    emit singleDetectorTouched(id);
+}
+
+void ProjectionSurface::erasePeaks(const QRect &rect)
+{
+    foreach(PeakOverlay* po, m_peakShapes)
+    {
+        po->selectIn( rect );
+        po->removeSelectedShapes();
+    }
+
 }

@@ -53,7 +53,6 @@ public:
   double uscale; ///< scaling factor in u direction
   double vscale; ///< scaling factor in v direction
   Mantid::Geometry::IDetector_const_sptr detector;
-//  Mantid::Kernel::V3D minPoint,maxPoint;
 };
 
 /**
@@ -66,7 +65,7 @@ public:
 
 class UnwrappedSurface: public ProjectionSurface
 {
-  //Q_OBJECT
+  Q_OBJECT
 public:
   UnwrappedSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
   ~UnwrappedSurface();
@@ -76,23 +75,25 @@ public:
   void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
   virtual QString getInfoText()const;
   virtual QRectF getSurfaceBounds()const;
-  void setFlippedView(bool on);
-  bool isFlippedView() const {return m_flippedView;}
   /// calculate and assign udet.u and udet.v
   virtual void project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const = 0;
+
+  void setFlippedView(bool on);
+  bool isFlippedView() const {return m_flippedView;}
+  /// Zoom into an area of the screen
+  void zoom(const QRectF& area);
+
+protected slots:
+  /// Zoom into the area returned by selectionRectUV()
+  void zoom();
+  /// Unzoom view to the previous zoom area or to full view
+  void unzoom();
 
 protected:
   virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const;
   virtual void drawSimpleToImage(QImage* image,bool picking = false)const;
   virtual void changeColorMap();
-
-  virtual void mousePressEventMove(QMouseEvent*);
-  virtual void mouseMoveEventMove(QMouseEvent*);
-  virtual void mouseReleaseEventMove(QMouseEvent*);
-  virtual void wheelEventMove(QWheelEvent*);
-
   virtual void calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos);
-
   /// calculate rotation R for a udet
   virtual void calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const = 0;
   virtual double uPeriod()const{return 0.0;}
@@ -100,7 +101,6 @@ protected:
   void init();
   void calcSize(UnwrappedDetector& udet,const Mantid::Kernel::V3D& X,
                 const Mantid::Kernel::V3D& Y);
-  //void callback(boost::shared_ptr<const Mantid::Geometry::IDetector> det,const DetectorCallbackData& data);
   void setColor(int index,bool picking)const;
   void showPickedDetector();
   void calcAssemblies(const Mantid::Geometry::IComponent * comp,const QRectF& compRect);
@@ -126,6 +126,8 @@ protected:
   bool m_flippedView; ///< if false the image is seen from the sample. if true the view is looking towards the sample.
   mutable bool m_startPeakShapes; ///< set to true to start creating m_peakShapes from m_peaksWorkspace, return to false after creation
 
+  /// Zoom stack
+  QStack<QRectF> m_zoomStack;
 };
 
 #endif // UNWRAPPEDSURFACE_H

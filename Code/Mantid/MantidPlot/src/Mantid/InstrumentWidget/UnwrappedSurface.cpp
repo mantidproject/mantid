@@ -3,6 +3,7 @@
 #include "MantidGLWidget.h"
 #include "OpenGLError.h"
 #include "PeakMarker2D.h"
+#include "InputController.h"
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
@@ -79,6 +80,12 @@ UnwrappedSurface::UnwrappedSurface(const InstrumentActor* rootActor,const Mantid
     m_flippedView(false),
     m_startPeakShapes(false)
 {
+    // create and set the move input controller
+    InputControllerMoveUnwrapped* moveController = new InputControllerMoveUnwrapped(this);
+    setInputController(MoveMode,moveController);
+    connect(moveController,SIGNAL(setSelectionRect(QRect)),this,SLOT(setSelectionRect(QRect)));
+    connect(moveController,SIGNAL(zoom()),this,SLOT(zoom()));
+    connect(moveController,SIGNAL(unzoom()),this,SLOT(unzoom()));
 }
 
 UnwrappedSurface::~UnwrappedSurface()
@@ -781,47 +788,6 @@ void UnwrappedSurface::changeColorMap()
   }
 }
 
-void UnwrappedSurface::mousePressEventMove(QMouseEvent* e)
-{
-  if (e->button() == Qt::LeftButton)
-  {
-    m_leftButtonDown = true;
-    startSelection(e->x(),e->y());
-  }
-}
-
-void UnwrappedSurface::mouseMoveEventMove(QMouseEvent* e)
-{
-  if (m_leftButtonDown)
-  {
-    moveSelection(e->x(),e->y());
-  }
-}
-
-void UnwrappedSurface::mouseReleaseEventMove(QMouseEvent* e)
-{
-  if (m_leftButtonDown)
-  {
-    if (!m_pickImage) // we are in normal mode
-    {
-      if (!m_selectRect.isNull())
-      {
-        zoom();
-      }
-    }
-    endSelection(e->x(),e->y());
-    m_leftButtonDown = false;
-  }
-  else if (e->button() == Qt::RightButton)
-  {
-    unzoom();
-  }
-}
-
-void UnwrappedSurface::wheelEventMove(QWheelEvent*)
-{
-}
-
 QString UnwrappedSurface::getInfoText()const
 {
   if (m_interactionMode == PickMode)
@@ -957,5 +923,57 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
     paint.fillRect(u - iw/2, v - ih/2, iw, ih, color);
 
   }
+}
+
+/**
+  * Zooms to the specified area. The previous zoom stack is cleared.
+  */
+void UnwrappedSurface::zoom(const QRectF& area)
+{
+  if (!m_zoomStack.isEmpty())
+  {
+    m_viewRect = m_zoomStack.first();
+    m_zoomStack.clear();
+  }
+  m_zoomStack.push(m_viewRect);
+
+  double left = area.left();
+  double top  = area.top();
+  double width = area.width();
+  double height = area.height();
+
+  if (width * m_viewRect.width() < 0)
+  {
+    left += width;
+    width = -width;
+  }
+  if (height * m_viewRect.height() < 0)
+  {
+    top += height;
+    height = -height;
+  }
+  m_viewRect = QRectF(left,top,width,height);
+  m_viewChanged = true;
+
+}
+
+void UnwrappedSurface::unzoom()
+{
+  if (!m_zoomStack.isEmpty())
+  {
+    m_viewRect = m_zoomStack.pop();
+    m_viewChanged = true;
+  }
+}
+
+void UnwrappedSurface::zoom()
+{
+  if (!m_viewImage) return;
+  QRectF newView = selectionRectUV();
+  if (newView.isNull()) return;
+  m_zoomStack.push(m_viewRect);
+  m_viewRect = newView;
+  m_viewChanged = true;
+  emptySelectionRect();
 }
 

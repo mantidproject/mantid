@@ -37,6 +37,7 @@
 */
 class Projection3D : public ProjectionSurface
 {
+    Q_OBJECT
   enum AxisDirection{ XPOSITIVE,YPOSITIVE,ZPOSITIVE,XNEGATIVE,YNEGATIVE,ZNEGATIVE};
 
 public:
@@ -54,14 +55,20 @@ public:
   virtual void getMaskedDetectors(QList<int>& dets)const;
   virtual void resize(int, int);
   virtual QString getInfoText()const;
+
+protected slots:
+  void initTranslation(int x, int y);
+  void translate(int x, int y);
+  void initZoom(int x, int y);
+  void zoom(int x, int y);
+  void wheelZoom(int x, int y, int d);
+  void initRotation(int x, int y);
+  void rotate(int x, int y);
+
 protected:
   virtual void init();
   virtual void drawSurface(MantidGLWidget* widget,bool picking = false)const;
   virtual void changeColorMap();
-  virtual void mousePressEventMove(QMouseEvent* event);
-  virtual void mouseMoveEventMove(QMouseEvent*);
-  virtual void mouseReleaseEventMove(QMouseEvent*);
-  virtual void wheelEventMove(QWheelEvent *);
 
   void drawAxes(double axis_length = 100.0)const;
   void setLightingModel(bool picking)const;
@@ -71,7 +78,6 @@ protected:
   GLViewport* m_viewport;         ///< Opengl View port [World -> Window]
   bool m_drawAxes;
   bool m_wireframe;
-  bool m_isKeyPressed;
   bool m_isLightingOn;            ///< Lighting on/off flag
 
 };

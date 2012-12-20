@@ -197,6 +197,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/GLTrackball.cpp
                    src/Mantid/InstrumentWidget/GLViewport.cpp
                    src/Mantid/InstrumentWidget/ICompAssemblyActor.cpp
+                   src/Mantid/InstrumentWidget/InputController.cpp
                    src/Mantid/InstrumentWidget/InstrumentActor.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp
@@ -423,6 +424,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/GLTrackball.h
                    src/Mantid/InstrumentWidget/GLViewport.h
                    src/Mantid/InstrumentWidget/ICompAssemblyActor.h
+                   src/Mantid/InstrumentWidget/InputController.h
                    src/Mantid/InstrumentWidget/InstrumentActor.h
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
@@ -673,6 +675,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
+                       src/Mantid/InstrumentWidget/InputController.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                        src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
@@ -688,7 +691,9 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/InstrumentWidget/InstrumentActor.h
                        src/Mantid/InstrumentWidget/PeakOverlay.h
                        src/Mantid/InstrumentWidget/ProjectionSurface.h
+                       src/Mantid/InstrumentWidget/Projection3D.h
                        src/Mantid/InstrumentWidget/Shape2DCollection.h
+                       src/Mantid/InstrumentWidget/UnwrappedSurface.h
 )
 
 set ( UI_FILES src/SendToProgramDialog.ui
