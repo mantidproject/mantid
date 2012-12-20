@@ -276,7 +276,6 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	#LoadDAETest.h
-	LoadILLTest.h
 	#LoadSNSNexusTest.h # TODO has no active tests in it
 	#LoadSassenaTest.h
 	#Needs fixing to not rely on network. SNSLiveEventDataListenerTest.h
@@ -312,7 +311,8 @@ set ( TEST_FILES
 	LoadEventNexusTest.h
 	LoadEventPreNexus2Test.h
 	LoadEventPreNexusTest.h
-    LoadGSSTest.h
+	LoadGSSTest.h
+	LoadILLTest.h
 	LoadISISNexusTest.h
 	LoadInstrumentFromRawTest.h
 	LoadInstrumentTest.h
@@ -336,10 +336,10 @@ set ( TEST_FILES
 	LoadPreNexusTest.h
 	LoadQKKTest.h
 	LoadRKHTest.h
-	LoadRawSaveNxsLoadNxsTest.h
 	LoadRaw2Test.h
 	LoadRaw3Test.h
 	LoadRawBin0Test.h
+	LoadRawSaveNxsLoadNxsTest.h
 	LoadRawSpectrum0Test.h
 	LoadRawTest.h
 	LoadSNSEventNexusTest.h
@@ -360,9 +360,10 @@ set ( TEST_FILES
 	RawFileInfoTest.h
 	RemoveLogsTest.h
 	RenameLogTest.h
+    RotateInstrumentComponentTest.h
+	SNSDataArchiveICAT2Test.h
 	SNSDataArchiveTest.h
-        SNSDataArchiveICAT2Test.h
-        SaveAsciiTest.h
+	SaveAsciiTest.h
 	SaveCSVTest.h
 	SaveCalFileTest.h
 	SaveCanSAS1dTest.h
