@@ -159,7 +159,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                     property_manager.declareProperty("MeasuredTransmissionValue", meas_trans)
             if alg.existsProperty("MeasuredError"):
                 meas_err = alg.getProperty("MeasuredError").value 
-                if property_manager.existsProperty("MeasuredTransmissionValue"):
+                if property_manager.existsProperty("MeasuredTransmissionError"):
                     property_manager.setProperty("MeasuredTransmissionError", meas_err)
                 else:               
                     property_manager.declareProperty("MeasuredTransmissionError", meas_err)               
@@ -218,7 +218,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                         property_manager.declareProperty("MeasuredBckTransmissionValue", meas_trans)
                 if alg.existsProperty("MeasuredError"):
                     meas_err = alg.getProperty("MeasuredError").value 
-                    if property_manager.existsProperty("MeasuredBckTransmissionValue"):
+                    if property_manager.existsProperty("MeasuredBckTransmissionError"):
                         property_manager.setProperty("MeasuredBckTransmissionError", meas_err)
                     else:               
                         property_manager.declareProperty("MeasuredBckTransmissionError", meas_err)               

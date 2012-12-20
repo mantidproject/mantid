@@ -270,6 +270,8 @@ class DataSet(object):
             Load(Filename=self._file_path, OutputWorkspace=self._ws_name)
         elif mtd.workspaceExists(self._file_path):
             self._ws_name = self._file_path
+        else:
+            raise RuntimeError, "Specified file doesn't exist: %s" % self._file_path
         
         if mtd.workspaceExists(self._ws_name):
             self._ws_scaled = self._ws_name+"_scaled"
