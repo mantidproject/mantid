@@ -2978,16 +2978,16 @@ void LeBailFit2::calculatePowderPatternStatistic(MantidVec& values, vector<doubl
   {
     double obsy = obsdata[i];
     // double bkgd = background[i];
-    double stderr = stderrs[i];
+    double xstderr = stderrs[i];
     // double tmpx = obsy - bkgd;
 
     sumobsdata += obsy;
     // sumobsdatanobkgd += tmpx;
-    sumwgtobsdatasq += obsy*obsy*stderr;
+    sumwgtobsdatasq += obsy*obsy*xstderr;
     // sumwgtobsdatnobkgdsq += tmpx*tmpx*stderr;
 
     double tmp1 = fabs(obsy - caldata[i]); // Rp
-    double tmp2 = stderr*tmp1*tmp1;    // Mp
+    double tmp2 = xstderr*tmp1*tmp1;    // Mp
     // double tmp3 = fabs( tmp1*(obsdata[i] - bkgddata[i])/obsdata[i] );
     // double tmp4 = stderrs[i]*tmp3*tmp3;
 
