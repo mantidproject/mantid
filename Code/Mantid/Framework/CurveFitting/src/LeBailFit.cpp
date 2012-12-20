@@ -1498,8 +1498,11 @@ bool LeBailFit::examinInstrumentParameterValid(ThermalNeutronBk2BkExpConvPV_sptr
                                                string& errmsg)
 {
   // 1. Calculate peak parameters
-  double eta, alpha, beta, H, sigma2, gamma, N;
-  peak->calculateParameters(d_h, tof_h, eta, alpha, beta, H, sigma2, gamma, N, false);
+  double alpha = peak->getPeakParameter("Alpha");
+  double beta = peak->getPeakParameter("Beta");
+  double sigma2 = peak->getPeakParameter("Sigma2");
+  d_h = peak->getPeakParameter("d_h");
+  tof_h = peak->centre();
 
   // 2. Check peak parameters' validity
   stringstream localerrss; //
@@ -3648,55 +3651,6 @@ void exportXYDataToFile(vector<double> vecX, vector<double> vecY, string filenam
 
   return;
 }
-
-//-----------------------------------------------------------------------------
-/** Convert a Table to space to some vectors of maps
-  */
-void convertTableWorkspaceToMaps(TableWorkspace_sptr tablews, vector<map<string, int> > intmaps,
-                                 vector<map<string, string> > strmaps, vector<map<string, double> > dblmaps)
-{
-  // 1. Initialize
-  intmaps.clear();
-  strmaps.clear();
-  dblmaps.clear();
-
-  size_t numrows = tablews->rowCount();
-  size_t numcols = tablews->columnCount();
-
-  for (size_t i = 0; i < numrows; ++i)
-  {
-    map<string, int> intmap;
-    intmaps.push_back(intmap);
-
-    map<string, string> strmap;
-    strmaps.push_back(strmap);
-
-    map<string, double> dblmap;
-    dblmaps.push_back(dblmap);
-  }
-
-  // 2. Parse
-  for (size_t i = 0; i < numcols; ++i)
-  {
-    Column_sptr column = tablews->getColumn(i);
-    string coltype = column->type();
-    string colname = column->name();
-
-    for (size_t ir = 0; ir < numrows; ++ir)
-    {
-
-
-
-
-    }
-
-  }
-
-
-  return;
-}
-
-
 
 } // namespace CurveFitting
 } // namespace Mantid

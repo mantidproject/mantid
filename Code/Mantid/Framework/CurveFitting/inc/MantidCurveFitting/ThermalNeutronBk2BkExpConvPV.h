@@ -8,6 +8,8 @@
 #include "MantidKernel/Logger.h"
 #include <complex>
 
+using namespace std;
+
 namespace Mantid
 {
 namespace CurveFitting
@@ -39,7 +41,8 @@ namespace CurveFitting
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
 
-  class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction, virtual public API::IFunctionMW
+  class DLLExport ThermalNeutronBk2BkExpConvPV : virtual public API::IPeakFunction,
+      virtual public API::IFunctionMW
   {
   public:
     ThermalNeutronBk2BkExpConvPV();
@@ -55,7 +58,7 @@ namespace CurveFitting
     virtual double fwhm()const;
     virtual void setHeight(const double h);
 
-    //------- ThermalNeutron peak function special -----------------------
+    //--------------- ThermalNeutron peak function special ---------------------------------------
     /// Set Miller Indicies
     void setMillerIndex(int h, int k, int l);
 
@@ -66,9 +69,27 @@ namespace CurveFitting
     double getPeakParameter(std::string);
 
     /// Calculate peak parameters (alpha, beta, sigma2..)
-    void calculateParameters(double& dh, double& tof_h, double& eta, double& alpha,
-                             double& beta, double& H, double &sigma2, double& gamma,
-                             double &N, bool explicitoutput) const;
+    void calculateParameters(bool explicitoutput) const;
+    //  double& dh, double& tof_h, double& eta, double& alpha, double& beta, double &H, double& sigma2,
+    // double &gamma, double &N,
+
+    /// Core function to calcualte peak values for whole region
+    void functionLocal(vector<double>& out, const vector<double> xValues) const;
+
+    /// Calclate the function
+    void functionLocal(vector<double>& out, const vector<double> xValues, int &istart, int &iend) const;
+
+    /// Set up the flag to show whether (from client) cell parameter value changed
+    void setUnitCellParameterValueChangeFlag(bool changed)
+    {
+      m_cellParamValueChanged = changed;
+    }
+
+    /// Override setting a new value to the i-th parameter
+    void setParameter(size_t i, const double& value, bool explicitlySet=true);
+
+    /// Override setting a new value to a parameter by name
+    void setParameter(const std::string& name, const double& value, bool explicitlySe=true);
 
   protected:
     //----- Overwrite IFunction ------------------------------------------------
@@ -97,23 +118,42 @@ namespace CurveFitting
     double calOmega(double x, double eta, double N, double alpha, double beta, double H,
                     double sigma2, double invert_sqrt2sigma, bool explicitoutput=true) const;
 
-    /*
-     * Set 2 functions to be hidden from client
-     */
+    /// Set 2 functions to be hidden from client
     virtual void setCentre(const double c);
     virtual void setFwhm(const double w);
 
+    //------------------------------------------  Variables --------------------------------------
+
+    /// Miller Indices
     int mH;
     int mK;
     int mL;
-
     bool mHKLSet;
 
-    mutable std::map<std::string, double> mParameters;
+    /// BackToBackExponential parameters
+    mutable double m_Alpha;
+    mutable double m_Beta;
+    mutable double m_Sigma2;
+    mutable double m_Gamma;
 
+    /// FWHM
     mutable double m_fwhm;
 
+    /// Centre
+    mutable double m_centre;
+    mutable double m_dcentre;
+
+    /// Thermal/Epithermal neutron related
+    mutable double m_eta;
+    mutable double m_N;
+
+    /// Unit cell
     mutable Geometry::UnitCell m_unitCell;
+
+    /// Unit cell size
+    double m_unitCellSize;
+
+    /// Override setting a new value to the
 
     //-----------  For Parallelization -----------------------------------------
     ///
@@ -123,6 +163,15 @@ namespace CurveFitting
     /// Set if an exception is thrown, and not caught, within a parallel region
     mutable bool m_parallelException;
     /// Reference to the logger class
+
+    /// Flag to show cell parameter value changed.
+    mutable bool m_cellParamValueChanged;
+
+    /// Flag to show whether the unit cell has been calcualted
+    mutable bool m_dspaceCalculated;
+
+    /// Flag to indicate whether there is new parameter value set after calculating parameters
+    mutable bool m_newValueSet;
     
 };
 

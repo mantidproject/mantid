@@ -20,81 +20,107 @@ public:
   static ThermalNeutronBk2BkExpConvPVTest *createSuite() { return new ThermalNeutronBk2BkExpConvPVTest(); }
   static void destroySuite( ThermalNeutronBk2BkExpConvPVTest *suite ) { delete suite; }
 
+  /** Test overriden set parameter value functions
+    */
+  void test_setParameter()
+  {
+    ThermalNeutronBk2BkExpConvPV peak;
+    peak.initialize();
+
+    vector<string> paramnames = peak.getParameterNames();
+    TS_ASSERT_EQUALS(paramnames[0].compare("Height"), 0);
+
+    // Set parameter, get it and compare
+    peak.setParameter(1, 123.4);
+    double parvalue1 = peak.getParameter(1);
+    TS_ASSERT_DELTA(123.4, parvalue1, 0.00001);
+    cout << "Parameter 1: Set To 123.4.  Value got = " << parvalue1 << endl;
+
+    // Set parameter, get it and compare
+    peak.setParameter("Dtt1", 123456.78);
+    double parvalue2 = peak.getParameter("Dtt1");
+    TS_ASSERT_DELTA(123456.78, parvalue2, 0.00001);
+
+    TS_ASSERT_DELTA(123.4, parvalue1, 0.00001);
+    cout << "Parameter Dtt1: Set To 123456.78.  Value got = " << parvalue2 << endl;
+
+  }
+
 
   /** Test on calcualte peak parameters
    */
   void test_CalculatePeakParameters()
   {
-      // 0. Mock data
-      std::vector<double> vecX;
-      std::vector<double> vecY;
-      std::vector<double> vecE;
-      generateData(vecX, vecY, vecE);
+    // 0. Mock data
+    std::vector<double> vecX;
+    std::vector<double> vecY;
+    std::vector<double> vecE;
+    generateData(vecX, vecY, vecE);
 
-      // 1. Create peak
-      ThermalNeutronBk2BkExpConvPV peak;
-      peak.initialize();
+    // 1. Create peak
+    ThermalNeutronBk2BkExpConvPV peak;
+    peak.initialize();
 
-      peak.setMillerIndex(1, 1, 1);
+    peak.setMillerIndex(1, 1, 1);
 
-      // 2. Set up parameters
-      peak.setParameter("Dtt1", 29671.7500);
-      peak.setParameter("Dtt2", 0.0);
-      peak.setParameter("Dtt1t", 29671.750);
-      peak.setParameter("Dtt2t", 0.30);
+    // 2. Set up parameters
+    peak.setParameter("Dtt1", 29671.7500);
+    peak.setParameter("Dtt2", 0.0);
+    peak.setParameter("Dtt1t", 29671.750);
+    peak.setParameter("Dtt2t", 0.30);
 
-      peak.setParameter("Zero", 0.0);
-      peak.setParameter("Zerot", 33.70);
+    peak.setParameter("Zero", 0.0);
+    peak.setParameter("Zerot", 33.70);
 
-      peak.setParameter("Alph0", 4.026);
-      peak.setParameter("Alph1", 7.362);
-      peak.setParameter("Beta0", 3.489);
-      peak.setParameter("Beta1", 19.535);
+    peak.setParameter("Alph0", 4.026);
+    peak.setParameter("Alph1", 7.362);
+    peak.setParameter("Beta0", 3.489);
+    peak.setParameter("Beta1", 19.535);
 
-      peak.setParameter("Alph0t", 60.683);
-      peak.setParameter("Alph1t", 39.730);
-      peak.setParameter("Beta0t", 96.864);
-      peak.setParameter("Beta1t", 96.864);
+    peak.setParameter("Alph0t", 60.683);
+    peak.setParameter("Alph1t", 39.730);
+    peak.setParameter("Beta0t", 96.864);
+    peak.setParameter("Beta1t", 96.864);
 
-      peak.setParameter("Sig2",  sqrt(11.380));
-      peak.setParameter("Sig1",   sqrt(9.901));
-      peak.setParameter("Sig0",  sqrt(17.370));
+    peak.setParameter("Sig2",  sqrt(11.380));
+    peak.setParameter("Sig1",   sqrt(9.901));
+    peak.setParameter("Sig0",  sqrt(17.370));
 
-      peak.setParameter("Width", 1.0055);
-      peak.setParameter("Tcross", 0.4700);
+    peak.setParameter("Width", 1.0055);
+    peak.setParameter("Tcross", 0.4700);
 
-      peak.setParameter("Gam0", 0.0);
-      peak.setParameter("Gam1", 0.0);
-      peak.setParameter("Gam2", 0.0);
+    peak.setParameter("Gam0", 0.0);
+    peak.setParameter("Gam1", 0.0);
+    peak.setParameter("Gam2", 0.0);
 
-      peak.setParameter("LatticeConstant", 4.156890);
+    peak.setParameter("LatticeConstant", 4.156890);
 
-      // double d1 = 2.399981; // 1 1 1
-      double h1 = 1370.0/0.008;
-      peak.setParameter("Height", h1);
+    // double d1 = 2.399981; // 1 1 1
+    double h1 = 1370.0/0.008;
+    peak.setParameter("Height", h1);
 
-      // 3. Parameter check
+    // 3. Parameter check
+    double tof_h = peak.centre();
+    double fwhm = peak.fwhm();
+    TS_ASSERT_DELTA(tof_h, 71229.45, 0.1);
+    TS_ASSERT_DELTA(fwhm, 50.0613, 0.0001);
 
-      double tof_h = peak.centre();
-      double fwhm = peak.fwhm();
-      TS_ASSERT_DELTA(tof_h, 71229.45, 0.1);
-      TS_ASSERT_DELTA(fwhm, 50.0613, 0.0001);
+    cout << "TOF_h = " << tof_h << ", FWHM = " << fwhm << endl;
 
-      // 3. Calculate
-            size_t nData = vecX.size();
-      double* xvalues = new double[nData];
-      double* out = new double[nData];
-      for (size_t i = 0; i < nData; ++i)
-      {
-        xvalues[i] = vecX[i];
-        out[i] = 0.0;
-      }
-      peak.function1D(out, xvalues, nData);
+    // 4. Calculate
+    size_t nData = vecX.size();
+    double* xvalues = new double[nData];
+    double* out = new double[nData];
+    for (size_t i = 0; i < nData; ++i)
+    {
+      xvalues[i] = vecX[i];
+      out[i] = 0.0;
+    }
+    peak.function1D(out, xvalues, nData);
 
-
-      std::stringstream outstring;
-      for (size_t id = 0; id < nData; ++id)
-      {
+    std::stringstream outstring;
+    for (size_t id = 0; id < nData; ++id)
+    {
           outstring << xvalues[id] << "\t\t" << out[id] << std::endl;
       }
       std::ofstream ofile;

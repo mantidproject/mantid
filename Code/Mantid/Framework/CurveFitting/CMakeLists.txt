@@ -36,6 +36,7 @@ set ( SRC_FILES
 	src/GaussianLinearBG1D.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LeBailFit.cpp
+	src/LeBailFit2.cpp
 	src/LeBailFunction.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
 	src/LevenbergMarquardtMinimizer.cpp
@@ -122,6 +123,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LeBailFit.h
+	inc/MantidCurveFitting/LeBailFit2.h
 	inc/MantidCurveFitting/LeBailFunction.h
 	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
 	inc/MantidCurveFitting/LevenbergMarquardtMinimizer.h
@@ -192,6 +194,7 @@ set ( TEST_FILES
 	GaussianTest.h
 	IkedaCarpenterPVTest.h
 	LeBailFitTest.h
+	LeBailFit2Test.h
 	LeBailFunctionTest.h
 	LeastSquaresTest.h
 	LevenbergMarquardtMDTest.h
