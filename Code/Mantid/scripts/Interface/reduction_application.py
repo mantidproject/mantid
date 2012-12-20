@@ -3,14 +3,6 @@ import traceback
 from PyQt4 import QtGui, QtCore, uic
 
 # Check whether Mantid is available
-try:
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
-    HAS_MANTID = True
-except:
-    HAS_MANTID = False    
-
 IS_IN_MANTIDPLOT = False
 try:
     import mantidplot
@@ -21,7 +13,7 @@ except:
 REDUCTION_WARNING = False
 WARNING_MESSAGE = ""
 
-if HAS_MANTID:
+if IS_IN_MANTIDPLOT:
     try:
         import reduction
         if os.path.splitext(os.path.basename(reduction.__file__))[0] == "reduction":
@@ -88,7 +80,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.setupUi(self)
         
         # Event connections
-        if not HAS_MANTID:
+        if not IS_IN_MANTIDPLOT:
             self.reduce_button.hide()
         self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
         self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)  
