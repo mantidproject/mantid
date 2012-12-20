@@ -5,7 +5,7 @@ from reduction_workflow.command_interface import *
 from reduction_workflow.find_data import *
 from reduction_workflow.instruments.sans import hfir_instrument
 from mantid.api import AlgorithmManager
-    
+from mantid.kernel import Logger
 import mantid.simpleapi as simpleapi
 
 ## List of user commands ######################################################
@@ -281,6 +281,16 @@ def ResetWavelength():
     if ReductionSingleton().reduction_properties.has_key("WavelengthSpread"):
         del ReductionSingleton().reduction_properties["WavelengthSpread"]
     
+def SaveIqAscii(reducer=None, process=''):
+    """ Old command for backward compatibility """
+    output_dir = os.path.expanduser('~')
+    msg = "SaveIqAscii is not longer used:\n  "
+    msg += "Please use 'SaveIq' instead\n  "
+    msg += "Your output files are currently in %s" % output_dir
+    Logger.get("CommandInterface").warning(msg)
+    ReductionSingleton().reduction_properties["OutputDirectory"] = output_dir
+    ReductionSingleton().reduction_properties["ProcessInfo"] = str(process)
+    
 def SaveIq(output_dir='', process=''):
     ReductionSingleton().reduction_properties["OutputDirectory"] = output_dir
     ReductionSingleton().reduction_properties["ProcessInfo"] = process
@@ -288,6 +298,8 @@ def SaveIq(output_dir='', process=''):
 def NoSaveIq():
     if ReductionSingleton().reduction_properties.has_key("OutputDirectory"):
         del ReductionSingleton().reduction_properties["OutputDirectory"]
+    if ReductionSingleton().reduction_properties.has_key("ProcessInfo"):
+        del ReductionSingleton().reduction_properties["ProcessInfo"]
             
 def IQxQy(nbins=100):
     ReductionSingleton().reduction_properties["Do2DReduction"] = True
