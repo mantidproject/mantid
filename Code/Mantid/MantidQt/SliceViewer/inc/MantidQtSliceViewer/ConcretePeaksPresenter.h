@@ -37,6 +37,7 @@ namespace MantidQt
       SetPeaksWorkspaces presentedWorkspaces() const;
       void setForegroundColour(const Qt::GlobalColor);
       void setBackgroundColour(const Qt::GlobalColor);
+      std::string getTransformName() const;
     private:
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;

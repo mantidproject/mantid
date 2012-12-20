@@ -33,6 +33,7 @@ namespace
     MOCK_CONST_METHOD0(presentedWorkspaces, SetPeaksWorkspaces());
     MOCK_METHOD1(setForegroundColour, void(const Qt::GlobalColor));
     MOCK_METHOD1(setBackgroundColour, void(const Qt::GlobalColor));
+    MOCK_CONST_METHOD0(getTransformName, std::string());
     ~MockPeaksPresenter(){}
   };
 
@@ -52,6 +53,7 @@ namespace
     MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
     MOCK_CONST_METHOD1(transform, Mantid::Kernel::V3D(const Mantid::Kernel::V3D&));
     MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&)); 
+    MOCK_CONST_METHOD0(getFriendlyName, std::string());
   };
 
   /*------------------------------------------------------------

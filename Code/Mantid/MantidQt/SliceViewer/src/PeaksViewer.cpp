@@ -24,6 +24,9 @@ namespace MantidQt
       
       // Configure the entire control using the managed workspaces.
       auto workspaces = m_presenter->presentedWorkspaces();
+
+     
+
       auto _layout = layout();
       if(_layout)
       {

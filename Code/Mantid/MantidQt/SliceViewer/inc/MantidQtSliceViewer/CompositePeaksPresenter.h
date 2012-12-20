@@ -25,6 +25,10 @@ namespace MantidQt
       virtual void updateWithSlicePoint(const double&);
       virtual bool changeShownDim();
       virtual bool isLabelOfFreeAxis(const std::string& label) const;
+      SetPeaksWorkspaces presentedWorkspaces() const;
+      void setForegroundColour(const Qt::GlobalColor){/*Do nothing*/}
+      void setBackgroundColour(const Qt::GlobalColor){/*Do nothing*/}
+      virtual std::string getTransformName() const;
       
       /// Constructor
       CompositePeaksPresenter(PeaksPresenter_sptr defaultPresenter = PeaksPresenter_sptr(new NullPeaksPresenter));
@@ -36,8 +40,6 @@ namespace MantidQt
       size_t size() const;
       /// Clear the owned presenters.
       void clear();
-      /// Get references to all presented workspaces.
-      SetPeaksWorkspaces presentedWorkspaces() const;
       /// Change the foreground representation for the peaks of this workspace
       void setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor);
       /// Change the background representation for the peaks of this workspace
@@ -49,8 +51,10 @@ namespace MantidQt
       std::set<PeaksPresenter_sptr> m_subjects;
       /// Use default
       bool useDefault() const { return m_subjects.size() == 0; }
-      void setForegroundColour(const Qt::GlobalColor){/*Do nothing*/}
-      void setBackgroundColour(const Qt::GlobalColor){/*Do nothing*/}
+      /// Get the presenter for a given workspace.
+      PeaksPresenter_sptr getPresenterFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws);
+
+      
     };
   }
 }

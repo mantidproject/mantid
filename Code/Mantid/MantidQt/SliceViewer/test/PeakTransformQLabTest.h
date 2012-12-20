@@ -197,6 +197,11 @@ void test_factory()
   TS_ASSERT_EQUALS(regexA, regexB);
 }
 
+void test_getFriendlyName()
+{
+  PeakTransformQLab transform;
+  TS_ASSERT_EQUALS(PeakTransformQLab::name(), transform.getFriendlyName());
+}
 
 };
 #endif

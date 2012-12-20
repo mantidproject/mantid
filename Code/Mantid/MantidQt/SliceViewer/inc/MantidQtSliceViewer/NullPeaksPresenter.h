@@ -22,6 +22,7 @@ namespace MantidQt
       SetPeaksWorkspaces presentedWorkspaces() const{SetPeaksWorkspaces empty; return empty;}
       void setForegroundColour(const Qt::GlobalColor){/*Do nothing*/}
       void setBackgroundColour(const Qt::GlobalColor){/*Do nothing*/}
+      std::string getTransformName() const {return "";}
     };
 
   }

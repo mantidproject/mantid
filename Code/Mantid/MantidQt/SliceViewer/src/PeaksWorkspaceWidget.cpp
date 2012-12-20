@@ -25,10 +25,6 @@ namespace MantidQt
       const QString integratedMsg = "integrated";
 
       ui.lblWorkspaceName->setText(m_ws->hasIntegratedPeaks() ? integratedMsg : unintegratedMsg );
-
-      // Viewing coordinate system.... ? SliceViewer::peakCoordinateSystem() -> PeakTransformSelector -> PeakTransformFactory::productName(instancemethod) -> PeakTransform::name(static) 
-      // Default Background colour .... ?  -- PeakPallette ?
-      // Default Foreground colour .... ?  -- PeakPallette ?
     }
 
     PeaksWorkspaceWidget::~PeaksWorkspaceWidget()

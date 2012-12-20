@@ -196,7 +196,12 @@ void test_factory()
   TS_ASSERT_EQUALS(regexA, regexB);
 }
 
-private:
+void test_getFriendlyName()
+{
+  PeakTransformHKL transform;
+  TS_ASSERT_EQUALS(PeakTransformHKL::name(), transform.getFriendlyName());
+}
+
 };
 #endif
 

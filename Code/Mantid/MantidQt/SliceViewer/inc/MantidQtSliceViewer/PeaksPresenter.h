@@ -23,6 +23,7 @@ namespace SliceViewer
   // Forward dec.
   class PeakOverlayViewFactory;
   class PeakOverlayView;
+  class PeakTransform;
 
   // Alias
   typedef std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace> > SetPeaksWorkspaces;
@@ -44,6 +45,7 @@ namespace SliceViewer
     virtual SetPeaksWorkspaces presentedWorkspaces() const = 0;
     virtual void setForegroundColour(const Qt::GlobalColor) = 0;
     virtual void setBackgroundColour(const Qt::GlobalColor) = 0;
+    virtual std::string getTransformName() const = 0;
   };
 
 

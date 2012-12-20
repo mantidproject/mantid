@@ -104,6 +104,33 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockPresenter));
   }
 
+  void test_getTransformName_default()
+  {
+    MockPeaksPresenter* mockDefault = new MockPeaksPresenter;
+    PeaksPresenter_sptr defaultPresenter(mockDefault);
+    EXPECT_CALL(*mockDefault, getTransformName()).Times(1).WillOnce(Return(""));// Expect the method on the default to be called.
+
+    defaultPresenter->getTransformName();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockDefault));
+  }
+
+  void test_getTransformName()
+  {
+    MockPeaksPresenter* mockPresenter = new MockPeaksPresenter;
+    PeaksPresenter_sptr presenter(mockPresenter);
+    EXPECT_CALL(*mockPresenter, getTransformName()).Times(1).WillOnce(Return("")); 
+
+    // Create the composite.
+    CompositePeaksPresenter composite;
+    // add the subject presenter.
+    composite.addPeaksPresenter(presenter);
+    // Call the method on the composite.
+    composite.getTransformName();
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockPresenter));
+  }
+
   /**
   Check that when no subject presenters have been added, that the composite uses the 'default' for the update method.
   */

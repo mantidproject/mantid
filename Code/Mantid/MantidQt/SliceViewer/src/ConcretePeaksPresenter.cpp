@@ -151,7 +151,8 @@ namespace SliceViewer
     {
       std::string xLabel = m_viewFactory->getPlotXLabel();
       std::string yLabel = m_viewFactory->getPlotYLabel();
-      m_transform = m_transformFactory->createTransform(xLabel, yLabel);
+      auto temp = m_transformFactory->createTransform(xLabel, yLabel);
+      m_transform = temp;
       showAll();
       transformSucceeded = true;
     }
@@ -247,6 +248,11 @@ namespace SliceViewer
         (*it)->updateView();
       }
     }
+  }
+
+  std::string ConcretePeaksPresenter::getTransformName() const
+  {
+    return m_transform->getFriendlyName();
   }
 
 }

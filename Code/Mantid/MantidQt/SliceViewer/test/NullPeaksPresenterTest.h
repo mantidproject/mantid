@@ -13,7 +13,7 @@ public:
 
   void test_construction()
   {
-      TS_ASSERT_THROWS_NOTHING(NullPeaksPresenter p());
+      TS_ASSERT_THROWS_NOTHING(NullPeaksPresenter p);
   }
 
   void test_is_peaks_presenter()

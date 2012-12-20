@@ -131,22 +131,33 @@ namespace MantidQt
     }
 
     /**
+    @param ws : Peaks Workspace to look for on sub-presenters.
+    @return the identified sub-presenter for the workspace, or a NullPeaksPresenter.
+    */
+    PeaksPresenter_sptr CompositePeaksPresenter::getPresenterFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws)
+    {
+      PeaksPresenter_sptr presenterFound = PeaksPresenter_sptr(new NullPeaksPresenter);
+      for(auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end(); ++presenterIterator)
+      {
+        auto workspacesOfSubject = (*presenterIterator)->presentedWorkspaces();
+        SetPeaksWorkspaces::iterator iteratorFound =  workspacesOfSubject.find(ws);
+        if(iteratorFound != workspacesOfSubject.end())
+        {
+          presenterFound = *presenterIterator;
+          break;
+        }
+      }
+      return presenterFound;
+    }
+
+    /**
     Set the foreground colour of the peaks.
     @ workspace containing the peaks to re-colour
     @ colour to use for re-colouring
     */
     void CompositePeaksPresenter::setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor colour)
     {
-      for(auto it = m_subjects.begin(); it != m_subjects.end(); ++it)
-      {
-        auto workspacesOfSubject = (*it)->presentedWorkspaces();
-        auto iteratorFound =  workspacesOfSubject.find(ws);
-        if(iteratorFound != workspacesOfSubject.end())
-        {
-          (*it)->setForegroundColour(colour);
-          break;
-        }
-      }
+      getPresenterFromWorkspace(ws)->setForegroundColour(colour);
     }
 
     /**
@@ -156,16 +167,16 @@ namespace MantidQt
     */
     void CompositePeaksPresenter::setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor colour)
     {
-      for(auto it = m_subjects.begin(); it != m_subjects.end(); ++it)
+      getPresenterFromWorkspace(ws)->setBackgroundColour(colour);
+    }
+
+    std::string CompositePeaksPresenter::getTransformName() const
+    {
+      if(useDefault())
       {
-        auto workspacesOfSubject = (*it)->presentedWorkspaces();
-        auto iteratorFound =  workspacesOfSubject.find(ws);
-        if(iteratorFound != workspacesOfSubject.end())
-        {
-          (*it)->setBackgroundColour(colour);
-          break;
-        }
+        return m_default->getTransformName();
       }
+      return (*m_subjects.begin())->getTransformName();
     }
   }
 }

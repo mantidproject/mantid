@@ -15,15 +15,26 @@ namespace MantidQt
     class DLLExport PeakTransformQLab : public PeakTransform
     {
     public:
+      static std::string name(){ return "QLab"; }
+      /// Constructor
       PeakTransformQLab();
+      /// Constructor
       PeakTransformQLab(const std::string& xPlotLabel, const std::string& yPlotLabel);
+      /// Destructor
       virtual ~PeakTransformQLab();
+      /// Copy constructor
       PeakTransformQLab(const PeakTransformQLab& other);
+      /// Assigment
       PeakTransformQLab & operator=(const PeakTransformQLab & other);
       /// Virtual constructor
       PeakTransform_sptr clone() const;
       /// Transform peak.
       Mantid::Kernel::V3D transformPeak(const Mantid::API::IPeak& peak) const;
+      /// Get the transform friendly name.
+      virtual std::string getFriendlyName() const
+      {
+        return name();
+      }
     };
 
     /// Typedef a factory for type of PeaksTransform.

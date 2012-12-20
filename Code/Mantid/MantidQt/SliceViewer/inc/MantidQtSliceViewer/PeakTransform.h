@@ -27,6 +27,8 @@ namespace MantidQt
       boost::regex getFreePeakAxisRegex() const;
       /// Virtual constructor.
       virtual boost::shared_ptr<PeakTransform> clone() const = 0;
+      /// Getter for a friendly name to describe the transform type.
+      virtual std::string getFriendlyName() const = 0;
     protected:
       PeakTransform(const PeakTransform& other);
       std::string m_xPlotLabel;
