@@ -52,15 +52,13 @@ class DataSet(object):
     TABLE_NAME = "dataset"
     data_type_cls = DataType
     
-    def __init__(self, run_number, title, run_start, duration, 
-                 sdd, id=None, python_api=1):
+    def __init__(self, run_number, title, run_start, duration, sdd, id=None):
         self.run_number = run_number
         self.title = title
         self.run_start = run_start
         self.duration = duration
         self.sdd = sdd
         self.id = id
-        self.python_api = python_api
         
     @classmethod
     def header(cls):

@@ -1,6 +1,8 @@
 import sys
 # Check whether Mantid is available
 try:
+    from mantid.api import AnalysisDataService
+    from mantid.kernel import Logger
     import mantid.simpleapi as api
     HAS_MANTID = True
 except:

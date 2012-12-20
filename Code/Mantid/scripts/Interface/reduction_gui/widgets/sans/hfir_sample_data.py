@@ -408,8 +408,7 @@ class SampleDataWidget(BaseWidget):
             return
         fname = data_files[0]
         if len(str(fname).strip())>0:
-            api = 2 if self._settings.api2 else 1
-            dataproxy = self._data_proxy(fname, python_api=api)
+            dataproxy = self._data_proxy(fname)
             if len(dataproxy.errors)>0:
                 #QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return

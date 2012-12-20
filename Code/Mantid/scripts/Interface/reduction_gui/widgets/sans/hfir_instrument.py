@@ -405,21 +405,11 @@ class SANSInstrumentWidget(BaseWidget):
         m.mask_file = unicode(self._summary.mask_edit.text())
         m.detector_ids = self._masked_detectors
         if self._in_mantidplot:
-            if self._settings.api2:
-                from MantidFramework import mtd
-                mtd.initialise(False)
-                import mantidsimple
-                if mtd.workspaceExists(self.mask_ws):
-                    masked_detectors = mantidsimple.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
-                    ids_str = masked_detectors.getPropertyValue("DetectorList")
-                    m.detector_ids = map(int, ids_str.split(','))
-            else:
-                from mantid.api import AnalysisDataService
-                import mantid.simpleapi as api
-                if AnalysisDataService.doesExist(self.mask_ws):
-                    masked_detectors = api.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
-                    ids_str = masked_detectors.getPropertyValue("DetectorList")
-                    m.detector_ids = map(int, ids_str.split(','))
+            from mantid.api import AnalysisDataService
+            import mantid.simpleapi as api
+            if AnalysisDataService.doesExist(self.mask_ws):
+                ws, masked_detectors = api.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
+                m.detector_ids = [int(i) for i in masked_detectors]
 
         self._settings.emit_key_value("DARK_CURRENT", QtCore.QString(str(self._summary.dark_file_edit.text())))
         return m

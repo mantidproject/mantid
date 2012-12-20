@@ -7,25 +7,28 @@ from data_cat import DataType
 import os
 import time
 
+# Check whether Mantid is available
+try:
+    from mantid.api import AnalysisDataService
+    import mantid.simpleapi as api
+    HAS_MANTID = True
+except:
+    HAS_MANTID = False    
+
 class HFIRDataType(DataType):
     TABLE_NAME="hfir_datatype"
     
 class HFIRDataSet(DataSet):
     TABLE_NAME="hfir_dataset"
     data_type_cls = HFIRDataType
-    python_api = 1
     
-    def __init__(self, run_number, title, run_start, duration, sdd, python_api=1):
+    def __init__(self, run_number, title, run_start, duration, sdd):
         super(HFIRDataSet, self).__init__(run_number, title, run_start, 
-                                          duration, sdd, python_api=1)
+                                          duration, sdd)
 
     @classmethod
-    def load_meta_data(cls, file_path, outputWorkspace, python_api=1):
+    def load_meta_data(cls, file_path, outputWorkspace):
         try:
-            if python_api==1:
-                import mantidsimple as api
-            else:
-                import mantid.simpleapi as api
             api.LoadSpice2D(Filename=file_path, OutputWorkspace=outputWorkspace)
             return True
         except:
@@ -42,57 +45,17 @@ class HFIRDataSet(DataSet):
         return handle
     
     @classmethod
-    def find_with_api(cls, file_path, cursor, process_files=True, python_api=1):
-        """
-            Find an entry in the database, or create on as needed
-        """
-        run = cls.handle(file_path)
-        if run is None:
-            return None
-        
-        t = (run,)
-        cursor.execute('select * from %s where run=?'% cls.TABLE_NAME, t)
-        rows = cursor.fetchall()
-
-        if len(rows) == 0:
-            if process_files:
-                log_ws = "__log"                
-                if cls.load_meta_data(file_path, 
-                                      outputWorkspace=log_ws,
-                                      python_api=python_api):
-                    return cls.read_properties(log_ws, run, cursor, 
-                                               python_api=python_api)
-                else:
-                    return None
-            else:
-                return None
-        else:
-            row = rows[0]
-            return DataSet(row[1], row[2], row[3], row[4], row[5], id=row[0])
-        
-
-    @classmethod
-    def read_properties(cls, ws, run, cursor, python_api=1):
+    def read_properties(cls, ws, run, cursor):
         def read_prop(prop):
             try:
-                if python_api==1:
-                    from MantidFramework import mtd
-                    return str(mtd[ws].getRun().getProperty(prop).value)
-                else:
-                    from mantid.api import AnalysisDataService
-                    ws_object = AnalysisDataService.retrieve(ws) 
-                    return str(ws_object.getRun().getProperty(prop).value)
+                ws_object = AnalysisDataService.retrieve(ws) 
+                return str(ws_object.getRun().getProperty(prop).value)
             except:
                 return ""
         def read_series(prop):
             try:
-                if python_api==1:
-                    from MantidFramework import mtd
-                    return float(mtd[ws].getRun().getProperty(prop).getStatistics().mean)
-                else:
-                    from mantid.api import AnalysisDataService
-                    ws_object = AnalysisDataService.retrieve(ws) 
-                    return str(ws_object.getRun().getProperty(prop).getStatistics().mean)
+                ws_object = AnalysisDataService.retrieve(ws) 
+                return str(ws_object.getRun().getProperty(prop).getStatistics().mean)
             except:
                 return -1
         

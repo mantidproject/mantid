@@ -8,17 +8,6 @@ from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_eqsans_instrument
 import ui.sans.ui_eqsans_info
 
-IS_IN_MANTIDPLOT = False
-try:
-    import mantidplot
-    from MantidFramework import *
-    mtd.initialise(False)
-    from mantidsimple import *
-    IS_IN_MANTIDPLOT = True
-    from reduction import extract_workspace_name
-except:
-    pass
-
 class SANSInstrumentWidget(BaseWidget):    
     """
         Widget that present instrument details to the user
@@ -205,8 +194,9 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.sample_apert_edit.setEnabled(is_checked)
         self._summary.sample_apert_label.setEnabled(is_checked)
 
-    def _mask_plot_clicked(self):        
-        self.mask_ws = "__mask_%s" % extract_workspace_name(str(self._summary.mask_edit.text()))
+    def _mask_plot_clicked(self):
+        ws_name = os.path.basename(str(self._summary.mask_edit.text()))
+        self.mask_ws = "__mask_%s" % ws_name
         self.show_instrument(self._summary.mask_edit.text, workspace=self.mask_ws, tab=2, reload=self.mask_reload, mask=self._masked_detectors)
         self._masked_detectors = []
         self.mask_reload = False
@@ -472,10 +462,11 @@ class SANSInstrumentWidget(BaseWidget):
         m.mask_file = unicode(self._summary.mask_edit.text())
         m.detector_ids = self._masked_detectors
         if self._in_mantidplot:
-            if mtd.workspaceExists(self.mask_ws):
-                masked_detectors = ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
-                ids_str = masked_detectors.getPropertyValue("DetectorList")
-                m.detector_ids = map(int, ids_str.split(','))
+            from mantid.api import AnalysisDataService
+            import mantid.simpleapi as api
+            if AnalysisDataService.doesExist(self.mask_ws):
+                ws, masked_detectors = api.ExtractMask(InputWorkspace=self.mask_ws, OutputWorkspace="__edited_mask")
+                m.detector_ids = [int(i) for i in masked_detectors]
 
         # Resolution parameters
         m.compute_resolution = self._summary.resolution_chk.isChecked()

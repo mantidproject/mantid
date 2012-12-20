@@ -4,8 +4,7 @@
 """
 # Check whether Mantid is available
 try:
-    from MantidFramework import *
-    mtd.initialise(False)
+    from mantid.kernel import ConfigService, Logger, version_str
     HAS_MANTID = True
 except:
     HAS_MANTID = False  
@@ -13,7 +12,7 @@ except:
 try:
     import mantidplot
     HAS_MANTIDPLOT = True
-except ImportError:
+except:
     HAS_MANTIDPLOT = False
 
 import xml.dom.minidom
@@ -272,13 +271,13 @@ class BaseReductionScripter(object):
         self._observers = []
         self._output_directory = os.path.expanduser('~')
         if HAS_MANTID:
+            config = ConfigService.Instance()
             try:
-                head, tail = os.path.split(ConfigService().getUserFilename())
+                head, tail = os.path.split(config.getUserFilename())
                 if os.path.isdir(head):
                     self._output_directory = head
             except:
-                # Doesn't really matter
-                pass
+                Logger.get("scripter").debug("Could not get user filename")
 
     def clear(self):
         """
@@ -349,7 +348,7 @@ class BaseReductionScripter(object):
         xml_str += "  <platform>%s</platform>\n" % platform.system()
         xml_str += "  <architecture>%s</architecture>\n" % str(platform.architecture())
         if HAS_MANTID:
-            xml_str += "  <mantid_version>%s</mantid_version>\n" % mantid_build_version()
+            xml_str += "  <mantid_version>%s</mantid_version>\n" % version_str()
         
         for item in self._observers:
             if item.state() is not None:
