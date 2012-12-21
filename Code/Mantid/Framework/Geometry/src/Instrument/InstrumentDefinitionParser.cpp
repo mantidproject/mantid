@@ -291,7 +291,7 @@ namespace Geometry
       mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
       mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
     }
-    pNL_type->release(); // finished with handling <combine-components-into-one-shape>
+    pNL_type->release();
 
     // create hasParameterElement
     NodeList* pNL_parameter = pRootElem->getElementsByTagName("parameter");
@@ -319,9 +319,7 @@ namespace Geometry
     // See if any parameters set at instrument level
     setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
 
-    //
     // do analysis for each top level compoment element
-    //
     NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
     unsigned long pNL_comp_length = pNL_comp->length();
 
@@ -329,9 +327,9 @@ namespace Geometry
     for (unsigned long i = 0; i < pNL_comp_length; i++)
     {
       if(prog) prog->report("Loading instrument Definition");
-
       // we are only interest in the top level component elements hence
       // the reason for the if statement below
+
       if ( (pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
           ((pNL_comp->item(i))->nodeName()).compare("component") == 0 )
       {
@@ -339,87 +337,63 @@ namespace Geometry
 
         IdList idList; // structure to possibly be populated with detector IDs
 
-        // Get all <location> and <locations> elements contained in component element
-        // just for the purpose of a IDF syntax check
+        // get all location elements contained in component element
         NodeList* pNL_location = pElem->getElementsByTagName("location");
-        NodeList* pNL_locations = pElem->getElementsByTagName("locations");
-        // do a IDF syntax check 
-        if (pNL_location->length() == 0 && pNL_locations->length() == 0)
+        unsigned long pNL_location_length = pNL_location->length();
+        if (pNL_location_length == 0)
         {
-          g_log.error(std::string("A component element must contain at least one <location> or <locations> element") +
+          g_log.error(std::string("A component element must contain at least one location element") +
               " even if it is just an empty location element of the form <location />");
           throw Kernel::Exception::InstrumentDefinitionError(
-              std::string("A component element must contain at least one <location> or <locations> element") +
+              std::string("A component element must contain at least one location element") +
               " even if it is just an empty location element of the form <location />", filename);
         }
-        pNL_location->release();
-        pNL_locations->release();
 
-        // Loop through all <location> and <locations> elements of this component by looping 
-        // all the child nodes and then see if any of these nodes are either <location> or
-        // <locations> elements. Done this way order these locations are processed is the 
-        // order they are listed in the IDF. The latter needed to get detector IDs assigned
-        // as expected
-        NodeList* pNL_childs = pElem->childNodes(); // here get all child nodes
-        unsigned long pNL_childs_length = pNL_childs->length();
-        for (unsigned long iLoc = 0; iLoc < pNL_childs_length; iLoc++)
+
+        if ( isAssembly(pElem->getAttribute("type")) )
         {
-          if ( (pNL_childs->item(iLoc))->nodeType() == Node::ELEMENT_NODE &&
-               ( ((pNL_childs->item(iLoc))->nodeName()).compare("location") == 0 || ((pNL_childs->item(iLoc))->nodeName()).compare("locations") == 0 ) 
-             )
+          for (unsigned long i_loc = 0; i_loc < pNL_location_length; i_loc++)
           {
-            // if a <location> element
-            if ( ((pNL_childs->item(iLoc))->nodeName()).compare("location") == 0 )
-            {
-              Element* pLocElem = static_cast<Element*>(pNL_childs->item(iLoc));
-              // process differently depending on whether component is and assembly or leaf
-              // (Note this if/else could alternative, if this makes more sense later, be moved 
-              // outside the pNL_childs loop since the if/else works on pElem not on the individual childs)
-              if ( isAssembly(pElem->getAttribute("type")) )
-              {
-                appendAssembly(m_instrument.get(), pLocElem, idList);
-              }
-              else  
-              {
-                appendLeaf(m_instrument.get(), pLocElem, idList);
-              }
+            Element* pLocElem = static_cast<Element*>(pNL_location->item(i_loc));
+
+            appendAssembly(m_instrument.get(), pLocElem, idList);
+          }
+
+          // a check
+          if (idList.counted != static_cast<int>(idList.vec.size()) )
+          {
+            std::stringstream ss1, ss2;
+            ss1 << idList.vec.size(); ss2 << idList.counted;
+            if( pElem->getAttribute("idList") == "") {
+              g_log.error("No detector ID list found for detectors of type "
+                + pElem->getAttribute("type"));
             }
-
-            // if a <locations> element
-            if ( ((pNL_childs->item(iLoc))->nodeName()).compare("locations") == 0 )
-            {
-              // create detached <location> elements from <locations> element
-
+            else if( idList.vec.size() == 0) {
+               g_log.error("No detector IDs found for detectors in list "
+                    + pElem->getAttribute("idlist") +
+                    "for detectors of type"
+                    + pElem->getAttribute("type"));
+            } else {
+               g_log.error("The number of detector IDs listed in idlist named "
+                   + pElem->getAttribute("idlist") +
+                   " is larger than the number of detectors listed in type = "
+                   + pElem->getAttribute("type"));
             }
+            throw Kernel::Exception::InstrumentDefinitionError(
+                "Number of IDs listed in idlist (=" + ss1.str() + ") is larger than the number of detectors listed in type = "
+                + pElem->getAttribute("type") + " (=" + ss2.str() + ").", filename);
           }
-        } // finished looping over all childs of this component
-
-        // A check
-        if (idList.counted != static_cast<int>(idList.vec.size()) )
-        {
-          std::stringstream ss1, ss2;
-          ss1 << idList.vec.size(); ss2 << idList.counted;
-          if( pElem->getAttribute("idList") == "") {
-            g_log.error("No detector ID list found for detectors of type "
-              + pElem->getAttribute("type"));
-          }
-          else if( idList.vec.size() == 0) {
-              g_log.error("No detector IDs found for detectors in list "
-                  + pElem->getAttribute("idlist") +
-                  "for detectors of type"
-                  + pElem->getAttribute("type"));
-          } else {
-              g_log.error("The number of detector IDs listed in idlist named "
-                  + pElem->getAttribute("idlist") +
-                  " is larger than the number of detectors listed in type = "
-                  + pElem->getAttribute("type"));
-          }
-          throw Kernel::Exception::InstrumentDefinitionError(
-              "Number of IDs listed in idlist (=" + ss1.str() + ") is larger than the number of detectors listed in type = "
-              + pElem->getAttribute("type") + " (=" + ss2.str() + ").", filename);
         }
+        else
+        {
+
+          for (unsigned long i_loc = 0; i_loc < pNL_location_length; i_loc++)
+          {
+            appendLeaf(m_instrument.get(), static_cast<Element*>(pNL_location->item(i_loc)), idList);
+          }
+        }
+        pNL_location->release();
         idList.reset();
-        pNL_childs->release();
       }
     }
 
@@ -2257,73 +2231,6 @@ namespace Geometry
       pDoc->release();
 
       return retVal;
-  }
-
-  /// Take as input a \<locations\> element. Such an element is a short-hand notation for a sequence of \<location\> elements. 
-  /// This method return this sequence as a xml string
-  /// @param pElem Input \<locations\> element 
-  /// @return XML string
-  /// @throw InstrumentDefinitionError Thrown if issues with the content of XML instrument file
-  std::string InstrumentDefinitionParser::convertLocationsElement(const Poco::XML::Element* pElem)
-  {
-    // first look for the expected attributes of the <locations> element, see www.mantidproject.org/IDF
-    // for what these are
-
-    double R=0.0, theta=0.0, phi=0.0; 
-    double R_end=0.0; 
-    double theta_end=0.0; 
-    double phi_end=0.0; 
-    size_t n_R_elements=0; 
-    size_t n_theta_elements=0; 
-    size_t n_phi_elements=0; 
-    if ( pElem->hasAttribute("R") || pElem->hasAttribute("theta") || pElem->hasAttribute("phi") )
-    {
-      if ( pElem->hasAttribute("R") ) R = atof((pElem->getAttribute("R")).c_str());
-      if ( pElem->hasAttribute("theta") ) theta = atof((pElem->getAttribute("theta")).c_str());
-      if ( pElem->hasAttribute("phi") ) phi = atof((pElem->getAttribute("phi")).c_str());
-
-      if ( pElem->hasAttribute("R-end") ) 
-      {
-        if (  pElem->hasAttribute("theta-end") || pElem->hasAttribute("phi-end") )
-        {
-          throw Exception::InstrumentDefinitionError( std::string("When using <locations> ")
-            + " only allowed one 'end' attribute allowed with the <locations> tag."
-            + " In this case R-end and one other theta-end or phi-end was used."
-            + " You can used used <locations> as a shorthand for definining 2D and 3D"
-            + " array of <location> element, but the systax is different. See www.mantidproject.org/IDF." );
-        }
-        R = atof((pElem->getAttribute("R-end")).c_str());
-      }
-
-      if ( pElem->hasAttribute("theta-end") ) theta = atof((pElem->getAttribute("theta-end")).c_str());
-      if ( pElem->hasAttribute("phi-end") ) phi = atof((pElem->getAttribute("phi-end")).c_str());
-
-    }
-    else if ( pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
-      pElem->hasAttribute("p") )
-    {
-      if ( pElem->hasAttribute("r") )
-        R = atof((pElem->getAttribute("r")).c_str());
-      if ( pElem->hasAttribute("t") )
-        theta = atof((pElem->getAttribute("t")).c_str());
-      if ( pElem->hasAttribute("p") )
-        phi = atof((pElem->getAttribute("p")).c_str());
-    }
-    else
-    {
-      double x=0.0, y=0.0, z=0.0;
-
-      if ( pElem->hasAttribute("x") ) x = atof((pElem->getAttribute("x")).c_str());
-      if ( pElem->hasAttribute("y") ) y = atof((pElem->getAttribute("y")).c_str());
-      if ( pElem->hasAttribute("z") ) z = atof((pElem->getAttribute("z")).c_str());
-    }
-
-    // create output cuboid XML string
-    std::ostringstream obj_str;
-
-
-
-    return obj_str.str();
   }
 
   /** Return a subelement of an XML element, but also checks that there exist exactly one entry

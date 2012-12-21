@@ -962,7 +962,7 @@ public:
     const std::string idfFileContents = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
       "<instrument name=\"" + instrumentName + "\" valid-from   =\"1900-01-31 23:59:59\" valid-to=\"2100-01-31 23:59:59\" last-modified=\"2012-10-05 11:00:00\">"
       "<defaults/>"
-      "<component type=\"cylinder-right\" >" // this component here is no detector and therefore there is no idlist
+      "<component type=\"cylinder-right\"  idlist=\"cylinder-right\" >" 
       "<location/>"
       "</component>"
       "<type name=\"cylinder-right\" >" // is=\"detector\" missing
@@ -973,6 +973,9 @@ public:
       "  <height val=\"0.03\" />"
       "</cylinder>"    
       "</type>"
+      "<idlist idname=\"cylinder-right\">"
+      "<id val=\"1\" />"
+      "</idlist>"
       "</instrument>";
 
     ScopedFile idfFile = createIDFFileObject(idfFilename, idfFileContents);
