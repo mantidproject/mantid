@@ -150,26 +150,37 @@ namespace MDEvents
     }
                                                    // get UBinv and the list of
                                                    // peak Q's for the integrator
-    Geometry::OrientedLattice o_lattice = ws->mutableSample().getOrientedLattice();
-    Matrix<double> UB = o_lattice.getUB();
-
-    if ( ! Geometry::IndexingUtils::CheckUB( UB ) )
-    {
-       throw std::runtime_error(
-             "The stored UB is not a valid orientation matrix");
-    }
-
-    Matrix<double> UBinv( UB );
-    UBinv.Invert();
-
     std::vector<Peak> & peaks = ws->getPeaks();
     size_t n_peaks            = ws->getNumberPeaks();
+    size_t indexed_count      = 0;
     std::vector<V3D> peak_q_list;
-    for ( size_t i = 0; i < n_peaks; i++ )
+    std::vector<V3D> hkl_vectors;
+    for ( size_t i = 0; i < n_peaks; i++ )       // ######### NOTE WE STILL MUST SKIP UNINDEXED PEAKS
     {
-      V3D q_vector( peaks[i].getQLabFrame() );
-      peak_q_list.push_back( q_vector );
+      V3D hkl( peaks[i].getH(), peaks[i].getK(), peaks[i].getL() );  
+      if ( Geometry::IndexingUtils::ValidIndex( hkl, 1.0 ) )    // use tolerance == 1 to 
+                                                                // just check for (0,0,0) 
+      {
+        peak_q_list.push_back( peaks[i].getQLabFrame() );
+        V3D miller_ind( round(hkl[0]), round(hkl[1]), round(hkl[2]) );
+        hkl_vectors.push_back( V3D(miller_ind) );
+        indexed_count++;
+      }
     }
+
+    if ( indexed_count < 3 )
+    {
+      throw std::runtime_error(
+            "At least three linearly independent indexed peaks are needed.");
+    }
+                                             // Get UB using indexed peaks and
+                                             // lab-Q vectors
+    Matrix<double> UB(3,3,false);
+    Geometry::IndexingUtils::Optimize_UB( UB, hkl_vectors, peak_q_list );
+    Matrix<double> UBinv( UB );
+    UBinv.Invert();
+    UBinv *= (1.0/(2.0 * M_PI));
+
 
     double radius = getProperty( "RegionRadius" );
                     
@@ -240,6 +251,7 @@ namespace MDEvents
       prog.report();
     } // end of loop over spectra
 
+
     bool   specify_size      = getProperty( "SpecifySize" );
     double peak_radius       = getProperty( "PeakSize" );
     double back_inner_radius = getProperty( "BackgroundInnerSize" );
@@ -256,6 +268,7 @@ namespace MDEvents
       peaks[i].setIntensity( inti );
       peaks[i].setSigmaIntensity( sigi );
     }
+
   }
 
 
