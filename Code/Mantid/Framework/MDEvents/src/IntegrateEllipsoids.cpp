@@ -4,6 +4,7 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 
 #include <iostream>
 #include <fstream>
+#include <boost/math/special_functions/round.hpp>
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -17,7 +18,6 @@ TODO: Enter a full wiki-markup description of your algorithm here. You can then 
 #include "MantidMDEvents/UnitsConversionHelper.h"
 #include "MantidMDEvents/Integrate3DEvents.h"
 #include "MantidMDEvents/IntegrateEllipsoids.h"
-#include <boost/math/special_functions/round.hpp>
 
 
 using namespace Mantid::API;
@@ -164,9 +164,9 @@ namespace MDEvents
                                                                 // just check for (0,0,0) 
       {
         peak_q_list.push_back( peaks[i].getQLabFrame() );
-        V3D miller_ind( (double)boost::math::iround<double>(round(hkl[0])), 
-                        (double)boost::math::iround<double>(round(hkl[1])),
-                        (double)boost::math::iround<double>(round(hkl[2])) );
+        V3D miller_ind( (double)boost::math::iround<double>(hkl[0]), 
+                        (double)boost::math::iround<double>(hkl[1]),
+                        (double)boost::math::iround<double>(hkl[2]) );
         hkl_vectors.push_back( V3D(miller_ind) );
         indexed_count++;
       }
