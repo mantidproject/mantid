@@ -84,7 +84,7 @@ namespace MantidQt
       */
       MantidQt::SliceViewer::SphericalPeakPrimitives PhysicalSphericalPeak::draw(const double& windowHeight, const double& windowWidth, const double& viewWidth, const double& viewHeight) const
       {
-        SphericalPeakPrimitives drawingObjects = {};
+        SphericalPeakPrimitives drawingObjects = {0.0,0.0,0.0,0.0,{}};
         if(this->isViewable())
         {
           // Scale factor for going from viewX to windowX

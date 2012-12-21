@@ -64,7 +64,7 @@ namespace MantidQt
   */
   MantidQt::SliceViewer::CrossPeakPrimitives PhysicalCrossPeak::draw(const double& windowHeight, const double& windowWidth) const
   {
-    CrossPeakPrimitives drawingObjects = {};
+    CrossPeakPrimitives drawingObjects = {0,0,0,0.0,{}};
     if(isViewable())
     {
       const int halfCrossHeight = int(windowHeight * m_crossViewFraction);
