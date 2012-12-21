@@ -433,7 +433,7 @@ public:
     }
     else
     {
-      TS_FAIL( "Did not find HRPD_Parameter.xml for HRPD_Definition.xml");
+      TS_FAIL( "Did not find HRPD_Parameter.xml for HRPD_Definition.xml or its bank_90degnew component link");
     }
 
     AnalysisDataService::Instance().remove(wsName);
