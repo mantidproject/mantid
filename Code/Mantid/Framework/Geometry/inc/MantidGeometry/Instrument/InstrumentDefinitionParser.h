@@ -154,6 +154,10 @@ namespace Geometry
     void adjust(Poco::XML::Element* pElem, std::map<std::string,bool>& isTypeAssembly,
                 std::map<std::string,Poco::XML::Element*>& getTypeElement);
 
+    /// Take as input a \<locations\> element. Such an element is a short-hand notation for a sequence of \<location\> elements. 
+    /// This method return this sequence as a xml string
+    std::string convertLocationsElement(const Poco::XML::Element* pElem);
+
 public: //for testing
     /// return absolute position of point which is set relative to the
     /// coordinate system of the input component
