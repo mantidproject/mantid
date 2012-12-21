@@ -295,7 +295,7 @@ void CommandLineInterpreter::cut()
 {
   if(indexOfCursorLine() == indexOfLastLine())
   {
-    cut();
+    ScriptEditor::cut();
   }
   else
   {
