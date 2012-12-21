@@ -197,3 +197,12 @@ loading.multifile=On
 # set to a very high number to disbale
 # however this limit is in place to protect you and your computer from simple formatting mistakes
 loading.multifilelimit=100
+
+# ScriptRepository Properties: 
+
+# Url for the WebServer that support the upload of the files that the users want to share
+UploaderWebServer = http://127.0.0.1:8000/upload/
+# Local system path for the script repository.
+ScriptLocalRepository =  @MANTID_ROOT@/scriptsRepository
+# Url for the remote script repository.
+ScriptRepository = git://github.com/mantidproject/scripts.git
