@@ -12,18 +12,49 @@ namespace Mantid
 namespace MDEvents
 {
 
+/**
+    @class Integrate3DEvents 
+  
+    This is a low-level class to construct a map with lists of events near
+    each peak Q-vector, shifted to be centered at (0,0,0).  A method is also 
+    provided to find the principal axes of such a list of events, and to 
+    find the net integrated counts, using ellipsoids with axis lengths 
+    determined from the standard deviations in the directions of the 
+    principal axes.
+  
+    @author Dennis Mikkelson 
+    @date   2012-12-19 
+     
+    Copyright © 2012 ORNL, STFC Rutherford Appleton Laboratories
+  
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+    File change history is stored at: 
+                 <https://github.com/mantidproject/mantid>
+
+    Code Documentation is available at 
+                 <http://doxygen.mantidproject.org>
+ */
+
+
 typedef Mantid::Kernel::V3D                             V3D;
 typedef Mantid::Kernel::Matrix<double>                  DblMatrix;
 typedef boost::unordered_map< long, std::vector<V3D> >  EventListMap;
 typedef boost::unordered_map< long, V3D >               PeakQMap;
 
-/**
- *  Low-level class to construct a map with lists of events near each peak
- *  Q-vector, shifted to be centered at (0,0,0).  A method is also provided
- *  to find the principal axes of such a list of events, and to find the net
- *  integrated counts, using ellipsoids with axis lengths determined from the
- *  standard deviations in the directions of the principal axes.
- */
 class DLLExport Integrate3DEvents
 {
   public:

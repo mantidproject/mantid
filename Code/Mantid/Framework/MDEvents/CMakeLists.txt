@@ -47,6 +47,7 @@ set ( SRC_FILES
 	src/ReflectometryTransformP.cpp
 	src/ReflectometryTransformQxQz.cpp
         src/Integrate3DEvents.cpp
+        src/IntegrateEllipsoids.cpp
 	src/SaveIsawQvector.cpp
 	src/UnitsConversionHelper.cpp
 	src/UserFunctionMD.cpp
@@ -115,6 +116,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/ReflectometryTransformP.h
 	inc/MantidMDEvents/ReflectometryTransformQxQz.h
         inc/MantidMDEvents/Integrate3DEvents.h
+        inc/MantidMDEvents/IntegrateEllipsoids.h
 	inc/MantidMDEvents/SaveIsawQvector.h
 	inc/MantidMDEvents/SkippingPolicy.h
 	inc/MantidMDEvents/UnitsConversionHelper.h
