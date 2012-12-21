@@ -474,11 +474,11 @@ void Projection3D::rotate(int x, int y)
     m_viewChanged = true;
 }
 
-QRectF Projection3D::getSurfaceBounds()const
+RectF Projection3D::getSurfaceBounds()const
 {
   double xmin,xmax,ymin,ymax,zmin,zmax;
   m_viewport->getInstantProjection(xmin,xmax,ymin,ymax,zmin,zmax);
-  return QRectF(QPointF(xmin,ymin),QPointF(xmax,ymax));
+  return RectF( QPointF(xmin, ymin), QPointF(xmax, ymax) );
 }
 
 /**

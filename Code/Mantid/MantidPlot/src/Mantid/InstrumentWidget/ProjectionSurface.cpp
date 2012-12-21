@@ -116,7 +116,7 @@ void ProjectionSurface::clear()
     m_pickImage = NULL;
   }
   m_viewChanged = true;
-  m_viewRect = QRectF();
+  m_viewRect = RectF();
   m_selectRect = QRect();
 }
 
@@ -172,7 +172,7 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
     if (!picking)
     {
       QPainter painter(widget);
-      QRectF windowRect = getSurfaceBounds();
+      RectF windowRect = getSurfaceBounds();
       m_maskShapes.setWindow(windowRect,painter.viewport());
       m_maskShapes.draw(painter);
       for(int i=0;i < m_peakShapes.size(); ++i)
@@ -190,7 +190,7 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
     QPainter painter(widget);
     painter.drawImage(0,0,**image);
 
-    QRectF windowRect = getSurfaceBounds();
+    RectF windowRect = getSurfaceBounds();
     m_maskShapes.setWindow(windowRect,painter.viewport());
     m_maskShapes.draw(painter);
 
@@ -250,7 +250,7 @@ void ProjectionSurface::drawSimple(QWidget* widget)const
   QPainter painter(widget);
   painter.drawImage(0,0,*m_viewImage);
 
-  QRectF windowRect = getSurfaceBounds();
+  RectF windowRect = getSurfaceBounds();
   m_maskShapes.setWindow(windowRect,painter.viewport());
   m_maskShapes.draw(painter);
 
@@ -356,7 +356,7 @@ QRect ProjectionSurface::selectionRect()const
   return QRect(x_min,y_min,x_size,y_size);
 }
 
-QRectF ProjectionSurface::selectionRectUV()const
+RectF ProjectionSurface::selectionRectUV()const
 {
   double left = static_cast<double>(m_selectRect.left());
   double right = static_cast<double>(m_selectRect.right());
@@ -373,19 +373,17 @@ QRectF ProjectionSurface::selectionRectUV()const
       std::swap( top, bottom );
   }
 
-  if ( abs(m_selectRect.width()) <= 1 || abs(m_selectRect.height()) <= 1) return QRectF();
+  if ( abs(m_selectRect.width()) <= 1 || abs(m_selectRect.height()) <= 1) return RectF();
 
-  double x_min  = left / m_viewImage->width();
-  double x_size = (right - left) / m_viewImage->width();
-  double y_min  = top / m_viewImage->height();
-  double y_size = (bottom - top)/m_viewImage->height();
+  double sx = m_viewRect.xSpan() / m_viewImage->width();
+  double sy = m_viewRect.ySpan() / m_viewImage->height();
 
-  x_min = m_viewRect.left() + x_min * m_viewRect.width();
-  x_size = x_size * m_viewRect.width();
-  y_min = m_viewRect.top() + y_min * m_viewRect.height();
-  y_size = y_size * m_viewRect.height();
+  double x_min = left * sx + m_viewRect.x0();
+  double x_max = right * sx + m_viewRect.x0();
+  double y_min = (m_viewImage->height() - bottom) * sy + m_viewRect.y0();
+  double y_max = (m_viewImage->height() - top) * sy + m_viewRect.y0();
 
-  return QRectF(x_min,y_min,x_size,y_size);
+  return RectF( QPointF(x_min, y_min), QPointF(x_max, y_max) );
 }
 
 bool ProjectionSurface::hasSelection()const

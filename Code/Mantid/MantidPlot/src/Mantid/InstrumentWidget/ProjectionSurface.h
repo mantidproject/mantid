@@ -8,6 +8,7 @@
 #include "InstrumentActor.h"
 #include "Shape2DCollection.h"
 #include "PeakOverlay.h"
+#include "RectF.h"
 #include "../MantidAlgorithmMetatype.h"
 
 #include <QImage>
@@ -71,7 +72,7 @@ public:
   /// full update and redraw of the surface
   virtual void updateDetectors();
   /// returns the bounding rectangle in the real coordinates
-  virtual QRectF getSurfaceBounds()const{return m_viewRect;} 
+  virtual RectF getSurfaceBounds()const{return m_viewRect;}
 
   virtual void mousePressEvent(QMouseEvent*);
   virtual void mouseMoveEvent(QMouseEvent*);
@@ -118,11 +119,11 @@ public:
 
   /// Return bounding rect of the currently selected shape in the "original" coord system.
   /// It doesn't depend on the zooming of the surface
-  QRectF getCurrentBoundingRect()const{return m_maskShapes.getCurrentBoundingRect();}
+  RectF getCurrentBoundingRect()const{return m_maskShapes.getCurrentBoundingRect();}
 
   /// Set new bounding rect of the currently selected shape in the "original" coord system.
   /// This method resizes the shape to fit into the new rectangle.
-  void setCurrentBoundingRect(const QRectF& rect){m_maskShapes.setCurrentBoundingRect(rect);}
+  void setCurrentBoundingRect(const RectF& rect){m_maskShapes.setCurrentBoundingRect(rect);}
 
   /// Initialize interactive shape creation.
   /// @param type :: Type of the shape. For available types see code of Shape2DCollection::createShape(const QString& type,int x,int y) const
@@ -227,7 +228,7 @@ protected:
   void draw(MantidGLWidget* widget,bool picking)const;
   void clear();
   QRect selectionRect()const;
-  QRectF selectionRectUV()const;
+  RectF selectionRectUV()const;
   int getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const;
   int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
   QString getPickInfoText()const;
@@ -246,7 +247,7 @@ protected:
   mutable QImage* m_pickImage;       ///< storage for picking image
   mutable bool m_viewChanged;        ///< set when the image must be redrawn
   QColor m_backgroundColor;          ///< The background colour
-  QRectF m_viewRect;                 ///< Keeps the physical dimensions of the surface
+  RectF m_viewRect;                 ///< Keeps the physical dimensions of the surface
   QRect m_selectRect;
   int m_interactionMode;             ///< mode of interaction - index in m_inputControllers
 

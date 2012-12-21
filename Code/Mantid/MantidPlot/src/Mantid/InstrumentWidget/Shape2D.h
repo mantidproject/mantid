@@ -1,9 +1,10 @@
 #ifndef MANTIDPLOT_SHAPE2D_H_
 #define MANTIDPLOT_SHAPE2D_H_
 
+#include "RectF.h"
+
 #include <QColor>
 #include <QPointF>
-#include <QRectF>
 
 class QPainter;
 class QPainterPath;
@@ -35,11 +36,11 @@ public:
   virtual size_t getNControlPoints() const;
   virtual QPointF getControlPoint(size_t i) const;
   virtual void setControlPoint(size_t i,const QPointF& pos);
-  virtual QRectF getBoundingRect() const {return m_boundingRect;}
+  virtual RectF getBoundingRect() const {return m_boundingRect;}
   // move the left, top, right and bottom sides of the bounding rect
   // by dx1, dy1, dx2, and dy2 correspondingly
-  virtual void adjustBoundingRect(qreal dx1,qreal dy1,qreal dx2,qreal dy2);
-  virtual void setBoundingRect(const QRectF& rect);
+  virtual void adjustBoundingRect(double dx1, double dy1, double dx2, double dy2);
+  virtual void setBoundingRect(const RectF& rect);
   // will the shape be selected if clicked at a point
   virtual bool selectAt(const QPointF& )const{return false;}
   // is a point inside the shape (closed line)
@@ -99,7 +100,7 @@ protected:
 
   static const size_t NCommonCP;
   static const qreal sizeCP;
-  QRectF m_boundingRect;
+  RectF m_boundingRect;
   QColor m_color;
   QColor m_fill_color;
   bool m_scalable; ///< shape cann be scaled when zoomed

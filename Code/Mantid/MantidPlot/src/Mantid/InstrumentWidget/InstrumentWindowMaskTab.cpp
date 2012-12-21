@@ -238,11 +238,11 @@ void InstrumentWindowMaskTab::shapeChanged()
 {
   if (!m_left) return; // check that everything is ok
   m_userEditing = false; // this prevents resetting shape proeprties by doubleChanged(...)
-  QRectF rect = m_instrWindow->getSurface()->getCurrentBoundingRect();
-  m_doubleManager->setValue(m_left,rect.left());
-  m_doubleManager->setValue(m_top,rect.top());
-  m_doubleManager->setValue(m_right,rect.right());
-  m_doubleManager->setValue(m_bottom,rect.bottom());
+  RectF rect = m_instrWindow->getSurface()->getCurrentBoundingRect();
+  m_doubleManager->setValue(m_left,rect.x0());
+  m_doubleManager->setValue(m_top,rect.y0());
+  m_doubleManager->setValue(m_right,rect.x1());
+  m_doubleManager->setValue(m_bottom,rect.y1());
   for(QMap<QtProperty *,QString>::iterator it = m_doublePropertyMap.begin(); it != m_doublePropertyMap.end(); ++it)
   {
     m_doubleManager->setValue(it.key(),m_instrWindow->getSurface()->getCurrentDouble(it.value()));

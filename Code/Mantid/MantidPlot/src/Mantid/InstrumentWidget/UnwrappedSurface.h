@@ -74,7 +74,7 @@ public:
   void getMaskedDetectors(QList<int>& dets)const;
   void setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> pws);
   virtual QString getInfoText()const;
-  virtual QRectF getSurfaceBounds()const;
+  virtual RectF getSurfaceBounds()const;
   /// calculate and assign udet.u and udet.v
   virtual void project(double & u, double & v, double & uscale, double & vscale, const Mantid::Kernel::V3D & pos) const = 0;
 
@@ -127,7 +127,7 @@ protected:
   mutable bool m_startPeakShapes; ///< set to true to start creating m_peakShapes from m_peaksWorkspace, return to false after creation
 
   /// Zoom stack
-  QStack<QRectF> m_zoomStack;
+  QStack<RectF> m_zoomStack;
 };
 
 #endif // UNWRAPPEDSURFACE_H

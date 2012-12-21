@@ -2,6 +2,7 @@
 #define MANTIDPLOT_SHAPE2DCOLLECTION_H_
 
 #include "Shape2D.h"
+#include "RectF.h"
 
 #include <QList>
 #include <QTransform>
@@ -36,7 +37,7 @@ public:
   Shape2DCollection();
   ~Shape2DCollection();
   Shape2D* clone()const{return NULL;}
-  void setWindow(const QRectF& window,const QRect& viewport) const;
+  void setWindow(const RectF& surface,const QRect& viewport) const;
   virtual void draw(QPainter& painter) const;
   virtual void addShape(Shape2D*,bool slct = false);
   virtual void removeShape(Shape2D*);
@@ -52,8 +53,8 @@ public:
   size_t size()const {return static_cast<size_t>(m_shapes.size());}
   void select(int i);
 
-  QRectF getCurrentBoundingRect()const;
-  void setCurrentBoundingRect(const QRectF& rect);
+  RectF getCurrentBoundingRect()const;
+  void setCurrentBoundingRect(const RectF &rect);
   // double properties
   QStringList getCurrentDoubleNames()const;
   double getCurrentDouble(const QString& prop) const;
@@ -74,7 +75,7 @@ public:
   // set the bounding rect of the current shape such that its real rect is given by the argument
   void setCurrentBoundingRectReal(const QRectF& rect);
   // convert a real point to the untransformed screen coordinates
-  QPointF realToUntransformed(const QPointF& point)const;
+  //QPointF realToUntransformed(const QPointF& point)const;
 
 signals:
 
@@ -107,7 +108,7 @@ protected:
   QList<Shape2D*> getSelectedShapes() const;
 
   QList<Shape2D*> m_shapes;
-  mutable QRectF m_windowRect; // original surface window in "real" coordinates
+  mutable RectF m_surfaceRect; // original surface window in "real" coordinates
   mutable double m_wx,m_wy;
   mutable int m_h; // original screen viewport height
   mutable QRect m_viewport;  // current screen viewport

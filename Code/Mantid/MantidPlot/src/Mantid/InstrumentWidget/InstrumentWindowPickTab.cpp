@@ -162,7 +162,7 @@ m_freezePlot(false)
   m_peakSelect->setCheckable(true);
   m_peakSelect->setAutoExclusive(true);
   m_peakSelect->setIcon(QIcon(":/PickTools/eraser.png"));
-  m_peakSelect->setToolTip("Select single crystal peak(s)");
+  m_peakSelect->setToolTip("Erase single crystal peak(s)");
 
   QHBoxLayout* toolBox = new QHBoxLayout();
   toolBox->addWidget(m_one);
@@ -630,7 +630,6 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 {
   using namespace Mantid::PhysicalConstants;
 
-  UNUSED_ARG(y)
   if (!m_peak->isChecked() ||  m_currentDetID < 0) return;
   Mantid::API::IPeaksWorkspace_sptr tw;
   std::string peakTableName = "SingleCrystalPeakTable";

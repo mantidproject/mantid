@@ -220,6 +220,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/Projection3D.cpp
                    src/Mantid/InstrumentWidget/PeakMarker2D.cpp
                    src/Mantid/InstrumentWidget/PeakOverlay.cpp
+                   src/Mantid/InstrumentWidget/RectF.cpp
                    src/Mantid/InstrumentWidget/OneCurvePlot.cpp
                    src/Mantid/InstrumentWidget/CollapsiblePanel.cpp
                    src/Mantid/InstrumentWidget/XIntegrationControl.cpp
@@ -447,6 +448,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/PeakOverlay.h
                    src/Mantid/InstrumentWidget/ProjectionSurface.h
                    src/Mantid/InstrumentWidget/Projection3D.h
+                   src/Mantid/InstrumentWidget/RectF.h
                    src/Mantid/InstrumentWidget/OneCurvePlot.h
                    src/Mantid/InstrumentWidget/CollapsiblePanel.h
                    src/Mantid/InstrumentWidget/XIntegrationControl.h

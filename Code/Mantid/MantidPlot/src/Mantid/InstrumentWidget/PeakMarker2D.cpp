@@ -38,10 +38,11 @@ m_row(-1)
   {
     m_markerSize = g_defaultMarkerSize;
   }
-  const QPointF& centre = peakOverlay.realToUntransformed(QPointF(u,v));
-  m_boundingRect = QRectF(centre - QPointF((qreal)m_markerSize/2,(qreal)m_markerSize/2), 
+  const QPointF& centre = QPointF(u,v);
+  m_boundingRect = RectF(centre - QPointF((qreal)m_markerSize/2,(qreal)m_markerSize/2),
                           QSizeF((qreal)m_markerSize,(qreal)m_markerSize));
   setScalable(false);
+  std::cerr << "Centre " << centre.x() << ' ' << centre.y() << std::endl;
 }
 
 /**
@@ -72,12 +73,12 @@ void PeakMarker2D::drawShape(QPainter& painter) const
   QFontMetrics fm(painter.font());
   QRect r = fm.boundingRect(m_label);
   m_labelRect = QRectF(r);
-  m_labelRect.moveTo(m_boundingRect.right() + m_markerSize,m_boundingRect.top() - m_markerSize);
+  m_labelRect.moveTo(m_boundingRect.x1() + m_markerSize,m_boundingRect.y1() - m_markerSize);
 }
 
 void PeakMarker2D::addToPath(QPainterPath& path) const
 {
-  path.addRect(m_boundingRect);
+  path.addRect(m_boundingRect.toQRectF());
 }
 
 /// Set new marker size to s
@@ -93,7 +94,7 @@ void PeakMarker2D::setMarkerSize(const int& s)
 void PeakMarker2D::drawCircle(QPainter& painter)const
 {
   QPainterPath path;
-  path.addEllipse(m_boundingRect);
+  path.addEllipse(m_boundingRect.toQRectF());
   painter.fillPath(path,m_color);
 }
 
@@ -108,7 +109,7 @@ void PeakMarker2D::drawDiamond(QPainter& painter)const
   painter.rotate(45);
   painter.translate(mdp);
   QPainterPath path;
-  path.addRect(m_boundingRect);
+  path.addRect(m_boundingRect.toQRectF());
   painter.fillPath(path,m_color);
   painter.restore();
 }
@@ -117,7 +118,7 @@ void PeakMarker2D::drawDiamond(QPainter& painter)const
 void PeakMarker2D::drawSquare(QPainter& painter)const
 {
   QPainterPath path;
-  path.addRect(m_boundingRect);
+  path.addRect(m_boundingRect.toQRectF());
   painter.fillPath(path,m_color);
 }
 

@@ -43,7 +43,7 @@ class Projection3D : public ProjectionSurface
 public:
   Projection3D(const InstrumentActor* rootActor,int winWidth,int winHeight);
   ~Projection3D();
-  virtual QRectF getSurfaceBounds()const;
+  virtual RectF getSurfaceBounds()const;
 
   void setViewDirection(const QString& vd);
   void set3DAxesState(bool on);

@@ -230,8 +230,7 @@ void UnwrappedSurface::init()
   m_u_max += du;
   m_v_min -= dv;
   m_v_max += dv;
-  m_viewRect = QRectF(QPointF(m_u_min,m_v_max),
-                           QPointF(m_u_max,m_v_min));
+  m_viewRect = RectF( QPointF(m_u_min,m_v_min), QPointF(m_u_max,m_v_max) );
 
 }
 
@@ -314,10 +313,10 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   int widget_height = widget->height();
 
   // view rectangle in the OpenGL coordinates
-  double view_left = m_viewRect.left();
-  double view_top  = m_viewRect.top();
-  double view_right  = m_viewRect.right();
-  double view_bottom = m_viewRect.bottom();
+  double view_left = m_viewRect.x0();
+  double view_top  = m_viewRect.y1();
+  double view_right  = m_viewRect.x1();
+  double view_bottom = m_viewRect.y0();
 
   // make sure the view rectangle has a finite area
   if (view_left == view_right)
@@ -348,9 +347,9 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
   if (OpenGLError::hasError("UnwrappedSurface::drawSurface"))
   {
     OpenGLError::log() << "glOrtho arguments:\n";
-    OpenGLError::log() << m_viewRect.left()<<','<<m_viewRect.right()<<','<<
-      m_viewRect.bottom()<<','<<m_viewRect.top()<<','<<
-      -10<<','<<10<<'\n';
+    OpenGLError::log() << view_left << ',' << view_right << ','
+                       << view_bottom << ',' << view_top << ','
+                       << -10 << ',' << 10 << '\n';
   }
   glMatrixMode(GL_MODELVIEW);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -380,9 +379,9 @@ void UnwrappedSurface::drawSurface(MantidGLWidget *widget,bool picking)const
     double h = (ih == 0)?  dh : udet.height/2;
 
     // check that the detector is visible in the current view
-    //if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
-    QRectF detectorRect(udet.u-w,udet.v+h,w*2,h*2);
-    if ( !m_viewRect.intersects(detectorRect) ) continue;
+    if (!(m_viewRect.contains(udet.u-w, udet.v-h) || m_viewRect.contains(udet.u+w, udet.v+h))) continue;
+    //QRectF detectorRect(udet.u-w,udet.v+h,w*2,h*2);
+    //if ( !m_viewRect.intersects(detectorRect) ) continue;
 
     // apply the detector's colour
     setColor(int(i),picking);
@@ -798,9 +797,9 @@ QString UnwrappedSurface::getInfoText()const
   return text;
 }
 
-QRectF UnwrappedSurface::getSurfaceBounds()const
+RectF UnwrappedSurface::getSurfaceBounds()const
 {
-  return QRectF(m_viewRect.left(),m_viewRect.bottom(),m_viewRect.width(),-m_viewRect.height());
+  return m_viewRect;
 }
 
 /**
@@ -845,10 +844,7 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
 void UnwrappedSurface::setFlippedView(bool on)
 {
   m_flippedView = on;
-  qreal left = m_viewRect.left();
-  qreal right = m_viewRect.right();
-  m_viewRect.setLeft(right);
-  m_viewRect.setRight(left);
+  m_viewRect.xFlip();
 }
 
 /**
@@ -896,14 +892,14 @@ void UnwrappedSurface::drawSimpleToImage(QImage* image,bool picking)const
     int u = 0;
     if ( !isFlippedView() )
     {
-      u = static_cast<int>( ( udet.u - m_viewRect.left() ) / dw );
+      u = static_cast<int>( ( udet.u - m_viewRect.x0() ) / dw );
     }
     else
     {
-      u =  static_cast<int>( vwidth - ( udet.u - m_viewRect.right() ) / dw );
+      u =  static_cast<int>( vwidth - ( udet.u - m_viewRect.x1() ) / dw );
     }
 
-    int v = vheight - static_cast<int>(( udet.v - m_viewRect.bottom() ) / dh );
+    int v = vheight - static_cast<int>(( udet.v - m_viewRect.y0() ) / dh );
 
     QColor color;
     int index = int( i );
@@ -952,7 +948,7 @@ void UnwrappedSurface::zoom(const QRectF& area)
     top += height;
     height = -height;
   }
-  m_viewRect = QRectF(left,top,width,height);
+  m_viewRect = RectF( QPointF(left,top), QPointF(left+width,top+height) );
   m_viewChanged = true;
 
 }
@@ -969,8 +965,8 @@ void UnwrappedSurface::unzoom()
 void UnwrappedSurface::zoom()
 {
   if (!m_viewImage) return;
-  QRectF newView = selectionRectUV();
-  if (newView.isNull()) return;
+  RectF newView = selectionRectUV();
+  if ( newView.isEmpty() ) return;
   m_zoomStack.push(m_viewRect);
   m_viewRect = newView;
   m_viewChanged = true;

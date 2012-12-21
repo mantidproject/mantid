@@ -85,7 +85,7 @@ void Shape2DCollection::draw(QPainter& painter) const
 void Shape2DCollection::addShape(Shape2D* shape,bool slct)
 {
   m_shapes.push_back(shape);
-  m_boundingRect |= shape->getBoundingRect();
+  m_boundingRect.unite( shape->getBoundingRect() );
   if (slct)
   {
     select(shape);
@@ -124,43 +124,24 @@ void Shape2DCollection::removeShapes(const QList<Shape2D*>& shapeList)
 
 /**
  */
-void Shape2DCollection::setWindow(const QRectF& window,const QRect& viewport) const
+void Shape2DCollection::setWindow(const RectF &surface,const QRect& viewport) const
 {
-  m_transform.reset();
   m_viewport = viewport;
-  if ( m_windowRect.isNull() )
-  {
-    m_windowRect = window;
-    m_h = viewport.height();
-    m_wx = viewport.width() / window.width();
-    m_wy = m_h / window.height();
-  }
-  else
-  {
-    double wx = viewport.width() / window.width();
-    double wy = viewport.height() / window.height();
-    double rx = m_windowRect.left() - window.left();
-    double ry = m_windowRect.top() - window.top();
-    qreal sx = wx / m_wx;
-    qreal sy = wy / m_wy;
-    qreal dx = rx * wx;
-    qreal dy = viewport.height() - sy * m_h - ry * wy;
+  m_surfaceRect = surface;
+  m_surfaceRect.findTransform( m_transform, viewport );
 
-    m_transform.translate(dx,dy);
-    m_transform.scale(sx,sy);
-  }
-//  std::cerr << "Window:" << std::endl;
-//  std::cerr << window.x() << ' ' << window.y() << ' ' << window.width() << ' ' << window.height() << std::endl;
-//  std::cerr << "Viewport:" << std::endl;
-//  std::cerr << viewport.x() << ' ' << viewport.y() << ' ' << viewport.width() << ' ' << viewport.height() << std::endl;
-//  std::cerr << "Transform:" << std::endl;
-//  std::cerr << m_transform.m11() << ' '
-//            << m_transform.m12() << ' '
-//            << m_transform.m22() << ' '
-//            << m_transform.m13() << ' '
-//            << m_transform.m23() << ' '
-//            << m_transform.m33() << ' '
-//            << std::endl;
+  std::cerr << "surface:" << std::endl;
+  std::cerr << surface.x0() << ' ' << surface.y0() << ' ' << surface.width() << ' ' << surface.height() << std::endl;
+  std::cerr << "Viewport:" << std::endl;
+  std::cerr << viewport.x() << ' ' << viewport.y() << ' ' << viewport.width() << ' ' << viewport.height() << std::endl;
+  std::cerr << "Transform:" << std::endl;
+  std::cerr << m_transform.m11() << ' '
+            << m_transform.m12() << ' '
+            << m_transform.m22() << ' '
+            << m_transform.m31() << ' '
+            << m_transform.m32() << ' '
+            << m_transform.m33() << ' '
+            << std::endl;
 }
 
 void Shape2DCollection::refit()
@@ -169,10 +150,10 @@ void Shape2DCollection::refit()
 
 void Shape2DCollection::resetBoundingRect() 
 {
-  m_boundingRect = QRectF();
+  m_boundingRect = RectF();
   foreach(const Shape2D* shape,m_shapes)
   {
-    m_boundingRect |= shape->getBoundingRect();
+    m_boundingRect.unite( shape->getBoundingRect() );
   }
 }
 
@@ -254,6 +235,7 @@ void Shape2DCollection::deselectAll()
   */
 void Shape2DCollection::moveRightBottomTo(int x, int y)
 {
+    std::cerr << "move to " << x << ' ' << y << std::endl;
     if ( m_currentShape && m_currentShape->isEditing() )
     {
       QPointF p = m_transform.inverted().map(QPointF(x, y));
@@ -354,7 +336,7 @@ bool Shape2DCollection::selectAtXY(int x,int y)
  */
 bool Shape2DCollection::selectIn(const QRect& rect)
 {
-  QRectF r = m_transform.inverted().mapRect( rect );
+  RectF r( m_transform.inverted().mapRect( rect ) );
   bool selected = false;
   deselectAll();
   foreach(Shape2D* shape,m_shapes)
@@ -528,16 +510,16 @@ void Shape2DCollection::setCurrentPoint(const QString& prop, const QPointF& valu
   }
 }
 
-QRectF Shape2DCollection::getCurrentBoundingRect()const
+RectF Shape2DCollection::getCurrentBoundingRect()const
 {
   if (m_currentShape)
   {
     return m_currentShape->getBoundingRect();
   }
-  return QRectF();
+  return RectF();
 }
 
-void Shape2DCollection::setCurrentBoundingRect(const QRectF& rect)
+void Shape2DCollection::setCurrentBoundingRect(const RectF& rect)
 {
   if (m_currentShape)
   {
@@ -547,9 +529,7 @@ void Shape2DCollection::setCurrentBoundingRect(const QRectF& rect)
 
 bool Shape2DCollection::isMasked(double x,double y)const
 {
-  QPointF p;
-  p.rx() = (x - m_windowRect.left()) * m_wx;
-  p.ry() = m_h - (y - m_windowRect.top()) * m_wy;
+  QPointF p(x,y);
   foreach(Shape2D* shape,m_shapes)
   {
     if (shape->isMasked(p))
@@ -588,19 +568,19 @@ void Shape2DCollection::setCurrentBoundingRectReal(const QRectF& rect)
 {
   if (!m_currentShape) return;
   // convert rect from real to original screen coordinates (unaffected by m_transform)
-  double x = (rect.x() - m_windowRect.left()) * m_wx;
-  double y = m_h - (rect.bottom() - m_windowRect.y()) * m_wy;
-  double width = rect.width() * m_wx;
-  double height = rect.height() * m_wy;
-  m_currentShape->setBoundingRect(QRectF(x,y,width,height));
+//  double x = (rect.x() - m_windowRect.left()) * m_wx;
+//  double y = m_h - (rect.bottom() - m_windowRect.y()) * m_wy;
+//  double width = rect.width() * m_wx;
+//  double height = rect.height() * m_wy;
+  m_currentShape->setBoundingRect(rect);
 }
 
-QPointF Shape2DCollection::realToUntransformed(const QPointF& point)const
-{
-  qreal x = (point.x() - m_windowRect.left()) * m_wx;
-  qreal y = m_h - (point.y() - m_windowRect.y()) * m_wy;
-  return QPointF(x,y);
-}
+//QPointF Shape2DCollection::realToUntransformed(const QPointF& point)const
+//{
+//  qreal x = (point.x() - m_windowRect.left()) * m_wx;
+//  qreal y = m_h - (point.y() - m_windowRect.y()) * m_wy;
+//  return QPointF(x,y);
+//}
 
 /**
  * Return a list of selected shapes.
