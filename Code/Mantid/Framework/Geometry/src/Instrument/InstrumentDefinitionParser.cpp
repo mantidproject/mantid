@@ -1834,7 +1834,17 @@ namespace Geometry
     {
       Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
       std::string name = pLinkElem->getAttribute("name");
-      std::vector<boost::shared_ptr<const Geometry::IComponent> > sharedIComp = instrument->getAllComponentsWithName(name);
+      std::vector<boost::shared_ptr<const Geometry::IComponent> > sharedIComp;
+      if( name.find('/',0) == std::string::npos )
+      { // Simple name, look for all components of that name.
+          sharedIComp = instrument->getAllComponentsWithName(name);
+      } 
+      else
+      { // Pathname given. Assume it is unique.
+        boost::shared_ptr<const Geometry::IComponent> shared = instrument->getComponentByName(name);
+        sharedIComp.push_back( shared );
+      }
+
 
       for (size_t i = 0; i < sharedIComp.size(); i++)
       {
