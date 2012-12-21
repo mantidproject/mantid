@@ -151,6 +151,9 @@ public:
     TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQUOIA21", instrument));
     TS_ASSERT_EQUALS("SEQ_21", FileFinder::Instance().makeFileName("SEQ21", instrument));
 
+    // Test for POWGEN with a trailing number in the instrument name.
+    TS_ASSERT_EQUALS("PG3_333", FileFinder::Instance().makeFileName("PG3333", instrument));
+
     // Test for REF_L (to check that the extra _ doesn't upset anything)
     TS_ASSERT_EQUALS("REF_L_666", FileFinder::Instance().makeFileName("REF_L666", instrument));
 
