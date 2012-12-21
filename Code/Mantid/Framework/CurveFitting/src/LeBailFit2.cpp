@@ -2830,6 +2830,8 @@ bool LeBailFit2::calculateDiffractionPatternMC(MatrixWorkspace_sptr dataws, size
                                               const MantidVec& domain, MantidVec& values,
                                               double &rwp, double& rp)
 {
+    UNUSED_ARG(domain);
+
   // 1. Set the parameters
   // a) Set the parameters to all peaks
   setPeaksParameters(m_dspPeaks, funparammap, 1.0, true);
