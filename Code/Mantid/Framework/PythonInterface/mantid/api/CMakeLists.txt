@@ -45,6 +45,8 @@ set ( EXPORT_FILES
   src/Exports/BoxController.cpp
   src/Exports/FileFinder.cpp
   src/Exports/Sample.cpp
+  src/Exports/ScriptRepository.cpp
+  src/Exports/ScriptRepositoryFactory.cpp
   src/Exports/Run.cpp
   src/Exports/WorkspaceFactory.cpp
   src/Exports/IFunction.cpp
