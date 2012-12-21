@@ -17,6 +17,7 @@ It is assumed that the positions specified in the raw file are all with respect 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidNexusCPP/NeXusFile.hpp"
 #include "MantidNexusCPP/NeXusException.hpp"
 #include "LoadRaw/isisraw2.h"
@@ -401,8 +402,6 @@ namespace Mantid
                                                        const float theta, const float phi)
     {
       Geometry::ParameterMap & pmap = m_workspace->instrumentParameters();
-      V3D parentPos;
-      if( det->getParent() ) parentPos = det->getParent()->getPos();
       Kernel::V3D pos;
       if (!m_ignorePhi)
       {
@@ -414,12 +413,7 @@ namespace Mantid
         det->getPos().getSpherical(r,t,p);
         pos.spherical(l2, theta, p);
       }
-      // Set new relative position
-      Kernel::V3D r = pos-parentPos;
-      Kernel::Quat q = det->getParent()->getRotation();
-      q.inverse();
-      q.rotate(r);
-      pmap.addV3D(det.get(), "pos", r);
+      Geometry::ComponentHelper::moveComponent(*det, pmap, pos, Geometry::ComponentHelper::Absolute);
     }
 
   } // namespace DataHandling
