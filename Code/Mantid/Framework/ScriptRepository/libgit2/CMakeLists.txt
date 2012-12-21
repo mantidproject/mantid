@@ -78,10 +78,10 @@ SET(INCLUDE_INSTALL_DIR include CACHE PATH "Where to install headers to.")
 # Build options
 OPTION (BUILD_SHARED_LIBS "Build Shared Library (OFF for Static)" ON)
 OPTION (THREADSAFE "Build libgit2 as threadsafe" OFF)
-#OPTION (BUILD_CLAR "Build Tests using the Clar suite" ON)
-#OPTION (BUILD_EXAMPLES "Build library usage example apps" OFF)
-#OPTION (TAGS "Generate tags" OFF)
-#OPTION (PROFILE "Generate profiling information" OFF)
+OPTION (BUILD_CLAR "Build Tests using the Clar suite" ON)
+OPTION (BUILD_EXAMPLES "Build library usage example apps" OFF)
+OPTION (TAGS "Generate tags" OFF)
+OPTION (PROFILE "Generate profiling information" OFF)
 
 # Platform specific compilation flags
 IF (MSVC)
