@@ -664,14 +664,13 @@ namespace CurveFitting
     } // FOR-Function Parameters
 
     // 2. Set 'Height' to be fixed
-    string parname("Height");
+    // string parname("Height");
     for (size_t ipk = 0; ipk < m_dspPeaks.size(); ++ipk)
     {
       // a. Get peak height
       ThermalNeutronBk2BkExpConvPV_sptr thispeak = m_dspPeaks[ipk].second;
+      /* Replaced
       double parvalue = thispeak->getParameter(0);
-
-#if 1
       std::stringstream ss1, ss2;
       ss1 << "f" << ipk << "." << parname;
       ss2 << parvalue;
@@ -681,9 +680,8 @@ namespace CurveFitting
       g_log.debug() << "Step 1B: LeBailFit.  Tie / " << tiepart1 << " / " << tievalue << " /" << std::endl;
 
       m_lebailFunction->tie(tiepart1, tievalue);
-#else
+      */
       thispeak->fix(0);
-#endif
     } // For each peak
 
     // 3. Fix all background paramaters to constants/current values
@@ -738,19 +736,11 @@ namespace CurveFitting
     minimizeFunction(m_dataWS, workspaceindex, boost::shared_ptr<API::IFunction>(m_lebailFunction),
                      tof_min, tof_max, mMinimizer, m_dampingFactor, numiterations, fitstatus, m_lebailFitChi2, true);
 
-
     // 3. Get parameters
-#if 0
-    API::IFunction_sptr fitout = fitalg->getProperty("Function");
-#else
-    g_log.warning("Need to check whether this is valid or not!");
     IFunction_sptr fitout = boost::dynamic_pointer_cast<IFunction>(m_lebailFunction);
-#endif
     std::vector<std::string> parnames = fitout->getParameterNames();
 
     std::stringstream rmsg;
-    rmsg << "Fitting Result: " << std::endl;
-
     for (size_t ip = 0; ip < parnames.size(); ++ip)
     {
       // a) Get all that are needed
@@ -798,8 +788,6 @@ namespace CurveFitting
       }
     }
 
-    g_log.notice(rmsg.str());
-
     // 4. Calculate Chi^2 wih all parmeters fixed
     // a) Fit all parameters
     vector<string> lbparnames = m_lebailFunction->getParameterNames();
@@ -810,12 +798,14 @@ namespace CurveFitting
 
     // b) Fit/calculation
     numiterations = 0; //
+    string numfitstatus;
     minimizeFunction(m_dataWS, workspaceindex, boost::shared_ptr<API::IFunction>(m_lebailFunction),
-                     tof_min, tof_max, "Levenberg-MarquardtMD", 0.0, numiterations, fitstatus, m_lebailFitChi2, false);
+                     tof_min, tof_max, "Levenberg-MarquardtMD", 0.0, numiterations, numfitstatus, m_lebailFitChi2, false);
 
     g_log.notice() << "LeBailFit (LeBailFunction) Fit result:  Chi^2 (Fit) = " << m_lebailFitChi2
                    << ", Chi^2 (Cal) = " << m_lebailCalChi2
-                   << ", Fit Status = " << fitstatus << std::endl;
+                   << ", Fit Status = " << fitstatus << " with max number of steps = " << m_numMinimizeSteps
+                   << endl << rmsg.str();
 
     // TODO: Check the covariant matrix to see whether any NaN or Infty.  If so, return false with reason
     // TODO: (continue).  Code should fit again with Simplex and extends MaxIteration if not enough... ...
@@ -841,7 +831,8 @@ namespace CurveFitting
     API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
     fitalg->initialize();
 
-    g_log.debug() << "[DBx534 | Before Fit] Function To Fit: " << function->asString() << std::endl;
+    g_log.debug() << "[DBx534 | Before Fit] Function To Fit: " << function->asString()
+                  << endl << "Number of iteration = " << numiteration << std::endl;
 
     // 2. Set property
     fitalg->setProperty("Function", function);
