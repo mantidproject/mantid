@@ -11,7 +11,6 @@ The relative position will be applied to the current position, so applying this 
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/ComponentHelper.h"
 
 namespace Mantid
 {
@@ -70,7 +69,7 @@ void MoveInstrumentComponent::exec()
   const double X = getProperty("X");
   const double Y = getProperty("Y");
   const double Z = getProperty("Z");
-  const bool relativePosition = getProperty("RelativePosition");
+  const bool RelativePosition = getProperty("RelativePosition");
 
   // Get the ParameterMap reference before the instrument so that
   // we avoid a copy
@@ -107,11 +106,35 @@ void MoveInstrumentComponent::exec()
       throw std::invalid_argument("DetectorID or ComponentName must be given.");
   }
 
-  // Do the move
-  using namespace Geometry::ComponentHelper;
-  TransformType positionType = Absolute;
-  if(relativePosition) positionType = Relative;
-  Geometry::ComponentHelper::moveComponent(*comp, pmap, V3D(X,Y,Z), positionType);
+  V3D Pos;// New relative position
+  // First set it to the new absolute position
+  if (RelativePosition)
+  {
+      Pos = comp->getPos() + V3D(X,Y,Z);
+  }
+  else
+  {
+      Pos = V3D(X,Y,Z);
+  }
+
+  // Then find the corresponding relative position
+  boost::shared_ptr<const IComponent> parent = comp->getParent();
+  if (parent)
+  {
+      Pos -= parent->getPos();
+      Quat rot = parent->getRelativeRot();
+      rot.inverse();
+      rot.rotate(Pos);
+  }
+  boost::shared_ptr<const IComponent>grandparent = parent->getParent();
+  if (grandparent)
+  {
+      Quat rot = grandparent->getRelativeRot();
+      rot.inverse();
+      rot.rotate(Pos);
+  }
+  // Add a parameter for the new position
+  pmap.addV3D(comp.get(), "pos", Pos);
 
   return;
 }
