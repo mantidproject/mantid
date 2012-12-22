@@ -89,7 +89,8 @@ namespace DataHandling
   }
 
   /// Initialise the properties
-  void LoadMask::init(){
+  void LoadMask::init()
+  {
 
     // 1. Declare property
     declareProperty("Instrument", "", "Name of instrument to mask.");
@@ -105,9 +106,11 @@ namespace DataHandling
   }
 
 
-  /// Run the algorithm
-  void LoadMask::exec(){
-
+  //----------------------------------------------------------------------------------------------
+  /** Main execution body of this algorithm
+    */
+  void LoadMask::exec()
+  {
     // 1. Load Instrument and create output Mask workspace
     const std::string instrumentname = getProperty("Instrument");
     mInstrumentName = instrumentname;
@@ -118,7 +121,6 @@ namespace DataHandling
     mDefaultToUse = true;
 
     // 2. Parse Mask File
-
     std::string filename = getProperty("InputFile");
 
     if (boost::ends_with(filename, "l") || boost::ends_with(filename, "L"))
@@ -145,10 +147,9 @@ namespace DataHandling
     std::vector<int32_t> maskdetidpairsL;
     std::vector<int32_t> maskdetidpairsU;
 
-    // this->bankToDetectors(mask_bankid_single, maskdetids, maskdetidpairsL, maskdetidpairsU); use generalized componentToDetectors()
-    this->componentToDetectors(mask_bankid_single, maskdetids);
-    // this->spectrumToDetectors(mask_specid_pair_low, mask_specid_pair_up, maskdetids);
-    this->detectorToDetectors(mask_detid_single, mask_detid_pair_low, mask_detid_pair_up, maskdetids, maskdetidpairsL, maskdetidpairsU);
+    componentToDetectors(mask_bankid_single, maskdetids);
+    detectorToDetectors(mask_detid_single, mask_detid_pair_low, mask_detid_pair_up, maskdetids,
+                        maskdetidpairsL, maskdetidpairsU);
 
     g_log.information() << "To UnMask: " << std::endl;
     std::vector<int32_t> unmaskdetids;
@@ -156,11 +157,10 @@ namespace DataHandling
     std::vector<int32_t> unmaskdetidpairsU;
 
     this->bankToDetectors(unmask_bankid_single, unmaskdetids, unmaskdetidpairsL, unmaskdetidpairsU);
-    // this->spectrumToDetectors(unmask_specid_pair_low, unmask_specid_pair_up, unmaskdetids);
-    this->detectorToDetectors(unmask_detid_single, unmask_detid_pair_low, unmask_detid_pair_up, unmaskdetids, unmaskdetidpairsL, unmaskdetidpairsU);
+    this->detectorToDetectors(unmask_detid_single, unmask_detid_pair_low, unmask_detid_pair_up,
+                              unmaskdetids, unmaskdetidpairsL, unmaskdetidpairsU);
 
     // 4. Apply
-
     this->initDetectors();
     this->processMaskOnDetectors(true, maskdetids, maskdetidpairsL, maskdetidpairsU);
     this->processMaskOnWorkspaceIndex(true, mask_specid_pair_low, mask_specid_pair_up);
@@ -182,37 +182,42 @@ namespace DataHandling
     return;
   }
 
-  /*
-   *  Mask detectors or Unmask detectors
-   *  params:
-   *  @ tomask:  true to mask, false to unmask
+  //----------------------------------------------------------------------------------------------
+  /**  Mask detectors or Unmask detectors
+   *   @param tomask:  true to mask, false to unmask
    */
-  void LoadMask::processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids, std::vector<int32_t> pairdetids_low,
-      std::vector<int32_t> pairdetids_up){
-
+  void LoadMask::processMaskOnDetectors(bool tomask, std::vector<int32_t> singledetids,
+                                        std::vector<int32_t> pairdetids_low,
+                                        std::vector<int32_t> pairdetids_up)
+  {
     // 1. Get index map
     detid2index_map* indexmap = mMaskWS->getDetectorIDToWorkspaceIndexMap(true);
 
     // 2. Mask
     g_log.debug() << "Mask = " << tomask <<  "  Final Single IDs Size = " << singledetids.size() << std::endl;
 
-    for (size_t i = 0; i < singledetids.size(); i ++){
+    for (size_t i = 0; i < singledetids.size(); i ++)
+    {
       detid_t detid = singledetids[i];
       detid2index_map::iterator it;
       it = indexmap->find(detid);
-      if (it != indexmap->end()){
+      if (it != indexmap->end())
+      {
         size_t index = it->second;
         if (tomask)
           mMaskWS->dataY(index)[0] = 1;
         else
           mMaskWS->dataY(index)[0] = 0;
-      } else {
+      }
+      else
+      {
         g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located" << std::endl;
       }
     }
 
     // 3. Mask pairs
-    for (size_t i = 0; i < pairdetids_low.size(); i ++){
+    for (size_t i = 0; i < pairdetids_low.size(); i ++)
+    {
       g_log.error() << "To Be Implemented Soon For Pair (" << pairdetids_low[i] << ", " << pairdetids_up[i] << "!" << std::endl;
     }
 
@@ -223,18 +228,16 @@ namespace DataHandling
   }
 
 
-  /*
-   * Convert a component to detectors.  It is a generalized version of bankToDetectors()
-   * @params
-   *  -
+  //----------------------------------------------------------------------------------------------
+  /** Convert a component to detectors.  It is a generalized version of bankToDetectors()
    */
   void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
-      std::vector<int32_t>& detectors){
-
+                                      std::vector<int32_t>& detectors)
+  {
     Geometry::Instrument_const_sptr minstrument = mMaskWS->getInstrument();
 
-    for (size_t i = 0; i < componentnames.size(); i ++){
-
+    for (size_t i = 0; i < componentnames.size(); i ++)
+    {
       g_log.debug() << "Component name = " << componentnames[i] << std::endl;
 
       // a) get component
@@ -249,7 +252,8 @@ namespace DataHandling
       }
 
       // b) component -> component assembly --> children (more than detectors)
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb = boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
+      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
+          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
       std::vector<Geometry::IComponent_const_sptr> children;
       asmb->getChildren(children, true);
 
@@ -259,12 +263,14 @@ namespace DataHandling
       int32_t id_min = 1000000;
       int32_t  id_max = 0;
 
-      for (size_t ic = 0; ic < children.size(); ic++){
+      for (size_t ic = 0; ic < children.size(); ic++)
+      {
         // c) convert component to detector
         Geometry::IComponent_const_sptr child = children[ic];
         Geometry::IDetector_const_sptr det = boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
 
-        if (det){
+        if (det)
+        {
           int32_t detid = det->getID();
           detectors.push_back(detid);
           numdets ++;
@@ -275,62 +281,71 @@ namespace DataHandling
         }
       }
 
-      g_log.debug() << "Number of Detectors in Children = " << numdets << "  Range = " << id_min << ", " << id_max << std::endl;
+      g_log.debug() << "Number of Detectors in Children = " << numdets << "  Range = " << id_min
+                    << ", " << id_max << std::endl;
     } // for component
 
     return;
   }
 
-  /*
-   * Convert bank to detectors
+  //----------------------------------------------------------------------------------------------
+  /** Convert bank to detectors
    */
-  void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
-      std::vector<int32_t>& detectors,
-      std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup){
-
-    for (size_t i = 0; i < singlebanks.size(); i ++){
-      g_log.information() << "Bank: " << singlebanks[i] << std::endl;
+  void LoadMask::bankToDetectors(std::vector<std::string> singlebanks, std::vector<int32_t>& detectors,
+                                 std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup)
+  {
+    std::stringstream infoss;
+    infoss << "Bank IDs to be converted to detectors: " << endl;
+    for (size_t i = 0; i < singlebanks.size(); i ++)
+    {
+      infoss << "Bank: " << singlebanks[i] << std::endl;
     }
+    g_log.debug(infoss.str());
 
     Geometry::Instrument_const_sptr minstrument = mMaskWS->getInstrument();
 
-    for (size_t ib = 0; ib < singlebanks.size(); ib++){
+    for (size_t ib = 0; ib < singlebanks.size(); ib++)
+    {
+      std::vector<Geometry::IDetector_const_sptr> idetectors;
 
-        std::vector<Geometry::IDetector_const_sptr> idetectors;
+      minstrument->getDetectorsInBank(idetectors, singlebanks[ib]);
+      g_log.debug() << "Bank: " << singlebanks[ib] << " has " << idetectors.size()
+                    << " detectors" << std::endl;
 
-        minstrument->getDetectorsInBank(idetectors, singlebanks[ib]);
-        g_log.debug() << "Bank: " << singlebanks[ib] << " has " << idetectors.size() << " detectors" << std::endl;
+      // a) get information
+      size_t numdets = idetectors.size();
+      detid_t detid_first = idetectors[0]->getID();
+      detid_t detid_last  = idetectors[idetectors.size()-1]->getID();
 
-        // a) get information
-        size_t numdets = idetectors.size();
-        detid_t detid_first = idetectors[0]->getID();
-        detid_t detid_last  = idetectors[idetectors.size()-1]->getID();
+      // b) set detectors
+      if (detid_first+int32_t(numdets) == detid_last+1 && false)
+      {
+        // TODO This save-time method is not used at this stage
+        g_log.information() << "Using Range of Detectors" << std::endl;
 
-        // b) set detectors
-        if (detid_first+int32_t(numdets) == detid_last+1 && false){
-          // TODO This save-time method is not used at this stage
-          g_log.information() << "Using Range of Detectors" << std::endl;
+        detectorpairslow.push_back(detid_first);
+        detectorpairsup.push_back(detid_last);
 
-          detectorpairslow.push_back(detid_first);
-          detectorpairsup.push_back(detid_last);
+      }
+      else
+      {
+        g_log.debug() << "Apply 1 by 1  " << "DetID: " << detid_first << ", " << detid_last << std::endl;
 
-        } else {
-          g_log.debug() << "Apply 1 by 1  " << "DetID: " << detid_first << ", " << detid_last << std::endl;
+        for (size_t i = 0; i < idetectors.size(); i ++)
+        {
+          Geometry::IDetector_const_sptr det = idetectors[i];
+          int32_t detid = det->getID();
+          detectors.push_back(detid);
+        }
 
-          for (size_t i = 0; i < idetectors.size(); i ++){
-            Geometry::IDetector_const_sptr det = idetectors[i];
-            int32_t detid = det->getID();
-            detectors.push_back(detid);
-          }
-
-        } // if-else
+      } // if-else
     } // ENDFOR
 
     return;
   }
 
-  /*
-   * Set the mask on the spectrum IDs
+  //----------------------------------------------------------------------------------------------
+  /** Set the mask on the spectrum IDs
    */
   void LoadMask::processMaskOnWorkspaceIndex(bool mask, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup)
   {
@@ -389,12 +404,13 @@ namespace DataHandling
     return;
   }
 
-  /*
-   * Convert spectrum to detectors
+  //----------------------------------------------------------------------------------------------
+  /** Convert spectrum to detectors
    */
-  void LoadMask::detectorToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow, std::vector<int32_t> pairsup,
-      std::vector<int32_t>& detectors,
-      std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup){
+  void LoadMask::detectorToDetectors(std::vector<int32_t> singles, std::vector<int32_t> pairslow,
+                                     std::vector<int32_t> pairsup, std::vector<int32_t>& detectors,
+                                     std::vector<int32_t>& detectorpairslow, std::vector<int32_t>& detectorpairsup)
+  {
     UNUSED_ARG(detectorpairslow)
     UNUSED_ARG(detectorpairsup)
 
@@ -406,11 +422,14 @@ namespace DataHandling
       g_log.information() << "Detector " << pairslow[i] << "  To " << pairsup[i] << std::endl;
     }
     */
-    for (size_t i = 0; i < singles.size(); i ++){
+    for (size_t i = 0; i < singles.size(); i ++)
+    {
       detectors.push_back(singles[i]);
     }
-    for (size_t i = 0; i < pairslow.size(); i ++){
-      for (int32_t j = 0; j < pairsup[i]-pairslow[i]+1; j ++){
+    for (size_t i = 0; i < pairslow.size(); i ++)
+    {
+      for (int32_t j = 0; j < pairsup[i]-pairslow[i]+1; j ++)
+      {
         int32_t detid = pairslow[i]+j;
         detectors.push_back(detid);
       }
@@ -423,8 +442,8 @@ namespace DataHandling
     return;
   }
 
-  /*
-   * Initalize Poco XML Parser
+  //----------------------------------------------------------------------------------------------
+  /** Initalize Poco XML Parser
    */
   void LoadMask::initializeXMLParser(const std::string & filename)
   {
@@ -456,8 +475,8 @@ namespace DataHandling
     }
   }
 
-  /*
-   * Parse XML file
+  //----------------------------------------------------------------------------------------------
+  /** Parse XML file
    */
   void LoadMask::parseXML()
   {
@@ -474,11 +493,12 @@ namespace DataHandling
 
     bool tomask = true;
     bool ingroup = false;
-    while (pNode){
-
+    while (pNode)
+    {
       const Poco::XML::XMLString value = pNode->innerText();
 
-      if (pNode->nodeName().compare("group") == 0){
+      if (pNode->nodeName().compare("group") == 0)
+      {
         // Node "group"
         ingroup = true;
         tomask = true;
@@ -497,7 +517,9 @@ namespace DataHandling
                 << "(always)"<< std::endl;
         */
 
-      } else if (pNode->nodeName().compare("component") == 0){
+      }
+      else if (pNode->nodeName().compare("component") == 0)
+      {
         // Node "component"
         if (ingroup){
           this->parseComponent(value, tomask);
@@ -506,7 +528,9 @@ namespace DataHandling
         }
         // g_log.information() << "Component: " << value << std::endl;
 
-      } else if (pNode->nodeName().compare("ids") == 0){
+      }
+      else if (pNode->nodeName().compare("ids") == 0)
+      {
         // Node "ids"
         if (ingroup){
           this->parseSpectrumIDs(value, tomask);
@@ -515,7 +539,9 @@ namespace DataHandling
         }
         // g_log.information() << "detids: " << value << std::endl;
 
-      } else if (pNode->nodeName().compare("detids") == 0){
+      }
+      else if (pNode->nodeName().compare("detids") == 0)
+      {
         // Node "detids"
         if (ingroup){
           this->parseDetectorIDs(value, tomask);
@@ -523,7 +549,9 @@ namespace DataHandling
           g_log.error() << "XML File (detids) heirachial error!" << std::endl;
         }
 
-      } else if (pNode->nodeName().compare("detector-masking") == 0){
+      }
+      else if (pNode->nodeName().compare("detector-masking") == 0)
+      {
         // Node "detector-masking".  Check default value
         mDefaultToUse = true;
         /*
@@ -547,13 +575,14 @@ namespace DataHandling
     return;
   }
 
-  /*
-   * Parse bank IDs (string name)
+  //----------------------------------------------------------------------------------------------
+  /** Parse bank IDs (string name)
    * Sample:  bank2
    * params:
    * @valutext:  must be bank name
    */
-  void LoadMask::parseComponent(std::string valuetext, bool tomask){
+  void LoadMask::parseComponent(std::string valuetext, bool tomask)
+  {
 
     // 1. Parse bank out
     /*
@@ -583,10 +612,11 @@ namespace DataHandling
     return;
   }
 
-  /*
-   * Parse input string for spectrum ID
+  //----------------------------------------------------------------------------------------------
+  /** Parse input string for spectrum ID
    */
-  void LoadMask::parseSpectrumIDs(std::string inputstr, bool tomask){
+  void LoadMask::parseSpectrumIDs(std::string inputstr, bool tomask)
+  {
 
     // 1. Parse range out
     std::vector<int32_t> singles;
@@ -594,19 +624,25 @@ namespace DataHandling
     this->parseRangeText(inputstr, singles, pairs);
 
     // 2. Set to data storage
-    if (tomask){
-      for (size_t i = 0; i < singles.size(); i ++){
+    if (tomask)
+    {
+      for (size_t i = 0; i < singles.size(); i ++)
+      {
         mask_specid_single.push_back(singles[i]);
       }
-      for (size_t i = 0; i < pairs.size()/2; i ++){
+      for (size_t i = 0; i < pairs.size()/2; i ++)
+      {
         mask_specid_pair_low.push_back(pairs[2*i]);
         mask_specid_pair_up.push_back(pairs[2*i+1]);
       }
-    } else {
-      for (size_t i = 0; i < singles.size(); i ++){
+    } else
+    {
+      for (size_t i = 0; i < singles.size(); i ++)
+      {
         unmask_specid_single.push_back(singles[i]);
       }
-      for (size_t i = 0; i < pairs.size()/2; i ++){
+      for (size_t i = 0; i < pairs.size()/2; i ++)
+      {
         unmask_specid_pair_low.push_back(pairs[2*i]);
         unmask_specid_pair_up.push_back(pairs[2*i+1]);
       }
@@ -615,11 +651,11 @@ namespace DataHandling
     return;
   }
 
-  /*
-   * Parse input string for spectrum ID
+  //----------------------------------------------------------------------------------------------
+  /** Parse input string for spectrum ID
    */
-  void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask){
-
+  void LoadMask::parseDetectorIDs(std::string inputstr, bool tomask)
+  {
     // g_log.information() << "Detector IDs: " << inputstr << std::endl;
 
     // 1. Parse range out
@@ -849,11 +885,11 @@ namespace DataHandling
     return;
   }
 
-
-  /*
-   * Initialize the Mask Workspace with instrument
+  //----------------------------------------------------------------------------------------------
+  /** Initialize the Mask Workspace with instrument
    */
-  void LoadMask::intializeMaskWorkspace(){
+  void LoadMask::intializeMaskWorkspace()
+  {
 
     // 1. Execute algorithm LoadInstrument() to a temporary Workspace
     API::Algorithm_sptr childAlg =  createSubAlgorithm("LoadInstrument");
