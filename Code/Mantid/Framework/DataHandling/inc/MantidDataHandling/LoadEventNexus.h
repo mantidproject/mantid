@@ -147,6 +147,9 @@ namespace Mantid
       /// Vector where index = event_id; value = ptr to std::vector<TofEvent> in the event list.
       std::vector<EventVector_pt> eventVectors;
 
+      /// Mutex to protect eventVectors from each task
+      Poco::Mutex m_eventVectorMutex;
+
       /// Maximum (inclusive) event ID possible for this instrument
       int32_t eventid_max;
 

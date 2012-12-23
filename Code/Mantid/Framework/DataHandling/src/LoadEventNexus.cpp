@@ -138,6 +138,11 @@ bool BankPulseTimes::equals(size_t otherNumPulse, std::string otherStartTime)
   return ((this->startTime == otherStartTime) && (this->numPulses == otherNumPulse));
 }
 
+namespace
+{
+  Poco::Mutex g_eventVectorMutex;
+}
+  
 //===============================================================================================
 //===============================================================================================
 /** This task does the disk IO from loading the NXS file,
@@ -258,6 +263,7 @@ public:
 
     // Which detector IDs were touched?
     std::vector<bool> usedDetIds(alg->eventid_max+1, false);
+
     //Go through all events in the list
     for (std::size_t i = 0; i < numEvents; i++)
     {
@@ -296,6 +302,7 @@ public:
         detid_t detId = event_id[i];
         if (detId <= alg->eventid_max)
         {
+          alg->m_eventVectorMutex.lock();
           // Handle simulated data if present
           if (have_weight)
           {
@@ -327,8 +334,10 @@ public:
               eventVector->push_back( TofEvent(tof, pulsetime) );
 #endif
             }
-            }
-            //Local tof limits
+          }
+          alg->m_eventVectorMutex.unlock();
+
+          //Local tof limits
           if (tof < my_shortest_tof) { my_shortest_tof = tof;}
           // Skip any events that are the cause of bad DAS data (e.g. a negative number in uint32 -> 2.4 billion * 100 nanosec = 2.4e8 microsec)
           if (tof < 2e8)
@@ -431,6 +440,7 @@ private:
  * and so will be on a disk IO mutex */
 class LoadBankFromDiskTask : public Task
 {
+
 public:
   //---------------------------------------------------------------------------------------------------
   /** Constructor
