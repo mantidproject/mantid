@@ -1,6 +1,7 @@
 #ifndef MANTID_ALGORITHMS_REBINRAGGED_H_
 #define MANTID_ALGORITHMS_REBINRAGGED_H_
 
+#include <map>
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
@@ -45,8 +46,13 @@ namespace Algorithms
     virtual void initDocs();
     void init();
     void exec();
-
-
+    std::map<std::string, std::string> validateInputs();
+    double determineBinning(MantidVec& xValues, const double xmin, const double xmax);
+    bool m_useLogBinning;
+    bool m_preserveEvents;
+    int m_numBins;
+    bool m_isDistribution;
+    bool m_isHistogram;
   };
 
 
