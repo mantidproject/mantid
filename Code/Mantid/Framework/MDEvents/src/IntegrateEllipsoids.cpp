@@ -97,13 +97,11 @@ namespace MDEvents
     // the validator which checks if the workspace has axis and any units
     ws_valid->add<WorkspaceUnitValidator>("TOF");
 
-    declareProperty(new WorkspaceProperty<EventWorkspace>(
-           "InputWorkspace", "", Direction::Input,ws_valid),
-           "An input EventWorkspace with units along X-axis and defined instrument with defined sample");
+    declareProperty(new WorkspaceProperty<EventWorkspace>( "InputWorkspace", "", Direction::Input,ws_valid),
+                    "An input EventWorkspace with units along X-axis and defined instrument with defined sample");
 
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>(
-          "PeaksWorkspace","",Direction::InOut), 
-          "Workspace with Peaks to be integrated, AND UB matrix");
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>( "PeaksWorkspace","",Direction::InOut), 
+                    "Workspace with Peaks to be integrated, AND UB matrix");
 
     boost::shared_ptr<BoundedValidator<double> > mustBePositive(new BoundedValidator<double>());
     mustBePositive->setLower(0.0);
@@ -121,6 +119,10 @@ namespace MDEvents
 
     declareProperty("BackgroundOuterSize", .23, mustBePositive,
                     "Half-length of major axis for outer ellipsoidal surface of background region");
+
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output),
+                   "The output PeaksWorkspace will be a copy of the input PeaksWorkspace "
+                   "with the peaks' integrated intensities.");
   }
 
   //---------------------------------------------------------------------
@@ -142,28 +144,34 @@ namespace MDEvents
       throw std::runtime_error("IntegrateEllipsoids does not work for empty event lists");
     }
 
-    PeaksWorkspace_sptr ws;
-    ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
-         AnalysisDataService::Instance().retrieve(this->getProperty("PeaksWorkspace")) );
+    PeaksWorkspace_sptr in_peak_ws;
+    in_peak_ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+         AnalysisDataService::Instance().retrieve( getProperty("PeaksWorkspace")) );
 
-    if (!ws)
+    if (!in_peak_ws)
     {
       throw std::runtime_error("Could not read the peaks workspace");
     }
+
+    Mantid::DataObjects::PeaksWorkspace_sptr peak_ws = getProperty("OutputWorkspace");
+    if ( peak_ws != in_peak_ws )
+    {
+      peak_ws = in_peak_ws->clone();
+    }
                                                    // get UBinv and the list of
                                                    // peak Q's for the integrator
-    std::vector<Peak> & peaks = ws->getPeaks();
-    size_t n_peaks            = ws->getNumberPeaks();
+    std::vector<Peak> & peaks = peak_ws->getPeaks();
+    size_t n_peaks            = peak_ws->getNumberPeaks();
     size_t indexed_count      = 0;
     std::vector<V3D> peak_q_list;
     std::vector<V3D> hkl_vectors;
-    for ( size_t i = 0; i < n_peaks; i++ )       // ######### NOTE WE STILL MUST SKIP UNINDEXED PEAKS
+    for ( size_t i = 0; i < n_peaks; i++ )         // Note: we skip un-indexed peaks
     {
       V3D hkl( peaks[i].getH(), peaks[i].getK(), peaks[i].getL() );  
       if ( Geometry::IndexingUtils::ValidIndex( hkl, 1.0 ) )    // use tolerance == 1 to 
                                                                 // just check for (0,0,0) 
       {
-        peak_q_list.push_back( peaks[i].getQLabFrame() );
+        peak_q_list.push_back( V3D( peaks[i].getQLabFrame() ) );
         V3D miller_ind( (double)boost::math::iround<double>(hkl[0]), 
                         (double)boost::math::iround<double>(hkl[1]),
                         (double)boost::math::iround<double>(hkl[2]) );
@@ -185,7 +193,6 @@ namespace MDEvents
     UBinv.Invert();
     UBinv *= (1.0/(2.0 * M_PI));
 
-
     double radius = getProperty( "RegionRadius" );
                     
                                                   // make the integrator
@@ -195,10 +202,6 @@ namespace MDEvents
                                                   // them to the inegrator
     // set up a descripter of where we are going
     this->initTargetWSDescr(wksp);
-
-    size_t coord_map[DIMS] = {0,1,2}; // x->x, y->y, z->z
-    double coord_signs[DIMS] = { 1., 1., 1.}; // for left-handed coords
-//  double coord_signs[DIMS] = {-1.,-1.,-1.}; // for right-handed coords
 
     // units conersion helper
     UnitsConversionHelper unitConv;
@@ -244,7 +247,7 @@ namespace MDEvents
         q_converter->calcMatrixCoord( val, locCoord, signal, errorSq );
         for ( size_t dim = 0; dim < DIMS; ++dim )
         {
-          buffer[dim] = coord_signs[dim] * locCoord[coord_map[dim]];
+          buffer[dim] = locCoord[dim];
         }
         V3D q_vec( buffer );
         event_qs.push_back( q_vec );
@@ -264,15 +267,27 @@ namespace MDEvents
     double sigi;
     for ( size_t i = 0; i < n_peaks; i++ )
     {
-      V3D peak_q( peaks[i].getQLabFrame() );
-      integrator.ellipseIntegrateEvents( peak_q, 
-        specify_size, peak_radius, back_inner_radius, back_outer_radius,
-        inti, sigi );
-      std::cout << i << ", " << inti << ", " << sigi << std::endl;
-      peaks[i].setIntensity( inti );
-      peaks[i].setSigmaIntensity( sigi );
+      V3D hkl( peaks[i].getH(), peaks[i].getK(), peaks[i].getL() );
+      if ( Geometry::IndexingUtils::ValidIndex( hkl, 1.0 ) ) 
+      {
+        V3D peak_q( peaks[i].getQLabFrame() );
+        integrator.ellipseIntegrateEvents( peak_q, 
+          specify_size, peak_radius, back_inner_radius, back_outer_radius,
+          inti, sigi );
+        peaks[i].setIntensity( inti );
+        peaks[i].setSigmaIntensity( sigi );
+      }
+      else
+      {
+        peaks[i].setIntensity( 0.0 );
+        peaks[i].setSigmaIntensity( 0.0 );
+      }
+  
     }
 
+    peak_ws->mutableRun().addProperty("PeaksIntegrated", 1, true);
+
+    setProperty("OutputWorkspace", peak_ws);
   }
 
 
