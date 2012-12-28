@@ -59,7 +59,8 @@ namespace Mantid
 namespace CurveFitting
 {
 
-  DECLARE_ALGORITHM(FitPowderDiffPeaks2)
+  // FIXME: Disabled for further test.
+  // DECLARE_ALGORITHM(FitPowderDiffPeaks2)
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -325,6 +326,13 @@ namespace CurveFitting
     }
 
     m_minPeakHeight = getProperty("MinimumPeakHeight");
+
+    // Unit cell
+    double latticesize = getParameter("LatticeConstant");
+    if (latticesize == EMPTY_DBL())
+      throw runtime_error("Input instrument table workspace lacks LatticeConstant. "
+                          "Unable to complete processing.");
+    m_unitCell.set(latticesize, latticesize, latticesize, 90.0, 90.0, 90.0);
 
     return;
   }
@@ -2599,25 +2607,7 @@ namespace CurveFitting
            << endl;
     }
 
-    // 3. Calcualte d-spacing
-    double latticesize = getParameter("LatticeConstant");
-    if (latticesize == EMPTY_DBL())
-    {
-      throw runtime_error("Input instrument table workspace lacks LatticeConstant. "
-                          "Unable to complete processing.");
-    }
-    d_h = calCubicDSpace(latticesize, hkl[0], hkl[1], hkl[2]);
-    if ( (d_h != d_h) || (d_h < -DBL_MAX) || (d_h > DBL_MAX) )
-    {
-      stringstream warnss;
-      warnss << "Peak with Miller Index = " << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
-             << " has unphysical d-spacing value = " << d_h;
-      g_log.warning(warnss.str());
-      good = false;
-      return newpeakptr;
-    }
-
-    // 4. Set the peak parameters from 2 methods
+    // 3. Set the peak parameters from 2 methods
     if (m_genPeakStartingValue == HKLCALCULATION)
     {
       // a) Use Bragg peak table's (HKL) and calculate the peak parameters
@@ -2665,6 +2655,20 @@ namespace CurveFitting
       if (caltofonly)
       {
         // c) Calcualte d->TOF only
+        //    Calcualte d-spacing
+        d_h = m_unitCell.d(hkl[0], hkl[1], hkl[2]);
+        //                  d_h = calCubicDSpace(latticesize, hkl[0], hkl[1], hkl[2]);
+        if ( (d_h != d_h) || (d_h < -DBL_MAX) || (d_h > DBL_MAX) )
+        {
+          stringstream warnss;
+          warnss << "Peak with Miller Index = " << hkl[0] << ", " << hkl[1] << ", " << hkl[2]
+                 << " has unphysical d-spacing value = " << d_h;
+          g_log.warning(warnss.str());
+          good = false;
+          return newpeakptr;
+        }
+
+        //   Calcualte TOF_h
         double tof_h = calThermalNeutronTOF(d_h, dtt1, dtt1t, dtt2t, zero, zerot, width, tcross);
         newpeakptr->setCentre(tof_h);
       }
@@ -2700,8 +2704,12 @@ namespace CurveFitting
         }
 
         // Calculate peak parameters A, B, S, and X0
-        double tof_h, alpha, beta, sigma2, eta, H, gamma, N;
-        tnb2bfunc.calculateParameters(d_h, tof_h, eta, alpha, beta, H, sigma2, gamma, N, false);
+        tnb2bfunc.calculateParameters(false);
+        d_h = tnb2bfunc.getPeakParameter("d_h");
+        double alpha = tnb2bfunc.getPeakParameter("Alpha");
+        double beta = tnb2bfunc.getPeakParameter("Beta");
+        double sigma2 = tnb2bfunc.getPeakParameter("Sigma2");
+        double tof_h = tnb2bfunc.centre();
 
         newpeakptr->setParameter("A", alpha);
         newpeakptr->setParameter("B", beta);
