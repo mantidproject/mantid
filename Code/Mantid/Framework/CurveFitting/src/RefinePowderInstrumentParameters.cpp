@@ -1051,7 +1051,7 @@ namespace CurveFitting
       row >> parname;
       for (size_t ic = 1; ic < colnames.size(); ++ic)
       {
-        double tmpdbl;
+        double tmpdbl = std::numeric_limits<float>::quiet_NaN();
         string tmpstr;
         try
         {
