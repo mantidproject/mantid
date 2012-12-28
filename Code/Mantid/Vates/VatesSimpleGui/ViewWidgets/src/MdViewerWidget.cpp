@@ -37,6 +37,7 @@
 // Used for plugin mode
 #include <pqAlwaysConnectedBehavior.h>
 #include <pqAutoLoadPluginXMLBehavior.h>
+#include <pqCollaborationBehavior.h>
 #include <pqCommandLineOptionsBehavior.h>
 #include <pqCrashRecoveryBehavior.h>
 #include <pqDataTimeStepBehavior.h>
@@ -44,6 +45,7 @@
 #include <pqDeleteBehavior.h>
 #include <pqFixPathsInStateFilesBehavior.h>
 #include <pqInterfaceTracker.h>
+#include <pqMultiServerBehavior.h>
 #include <pqObjectPickingBehavior.h>
 //#include <pqPersistentMainWindowStateBehavior.h>
 #include <pqPipelineContextMenuBehavior.h>
@@ -52,9 +54,11 @@
 #include <pqPVNewSourceBehavior.h>
 #include <pqQtMessageHandlerBehavior.h>
 #include <pqSpreadSheetVisibilityBehavior.h>
+#include <pqStandardPropertyWidgetInterface.h>
 #include <pqStandardViewModules.h>
 #include <pqUndoRedoBehavior.h>
 #include <pqViewFrameActionsBehavior.h>
+#include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 
 #include <QAction>
@@ -237,6 +241,8 @@ void MdViewerWidget::setupParaViewBehaviors()
   // * adds support for standard paraview views.
   pgm->addInterface(new pqStandardViewModules(pgm));
 
+  pgm->addInterface(new pqStandardPropertyWidgetInterface(pgm));
+
   // Load plugins distributed with application.
   pqApplicationCore::instance()->loadDistributedPlugins();
 
@@ -260,6 +266,9 @@ void MdViewerWidget::setupParaViewBehaviors()
   new pqCommandLineOptionsBehavior(this);
   //new pqPersistentMainWindowStateBehavior(mainWindow);
   new pqObjectPickingBehavior(this);
+  new pqCollaborationBehavior(this);
+  new pqMultiServerBehavior(this);
+  new pqViewStreamingBehavior(this);
 }
 
 /**
@@ -282,7 +291,7 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action)
 void MdViewerWidget::removeProxyTabWidgetConnections()
 {
   QObject::disconnect(&pqActiveObjects::instance(), 0,
-                      this->ui.proxyTabWidget, 0);
+                      this->ui.propertiesPanel, 0);
 }
 
 /**
@@ -332,10 +341,18 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
 void MdViewerWidget::setParaViewComponentsForView()
 {
   // Extra setup stuff to hook up view to other items
-  //this->ui.proxyTabWidget->setupDefaultConnections();
-  this->ui.proxyTabWidget->setView(this->currentView->getView());
-  this->ui.proxyTabWidget->setShowOnAccept(true);
+  this->ui.propertiesPanel->setAutoApply(true);
+  this->ui.propertiesPanel->setView(this->currentView->getView());
   this->ui.pipelineBrowser->setActiveView(this->currentView->getView());
+
+  pqActiveObjects *activeObjects = &pqActiveObjects::instance();
+  QObject::connect(activeObjects, SIGNAL(portChanged(pqOutputPort*)),
+                   this->ui.propertiesPanel, SLOT(setOutputPort(pqOutputPort*)));
+  QObject::connect(activeObjects, SIGNAL(representationChanged(pqRepresentation*)),
+                   this->ui.propertiesPanel, SLOT(setRepresentation(pqRepresentation*)));
+  QObject::connect(activeObjects, SIGNAL(viewChanged(pqView*)),
+                   this->ui.propertiesPanel, SLOT(setView(pqView*)));
+
   /*
   QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
                    SIGNAL(postaccept()),
