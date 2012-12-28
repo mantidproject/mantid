@@ -129,7 +129,7 @@ namespace CurveFitting
     /// Parse the fitting result
     std::string parseFitResult(API::IAlgorithm_sptr fitalg, double& chi2);
 
-    double calculateDspaceValue(std::vector<int> hkl);
+    // double calculateDspaceValue(std::vector<int> hkl);
 
     /// Calculate a Bragg peak's centre in TOF from its Miller indices and with instrumental parameters
     double calculatePeakCentreTOF(int h, int k, int l);

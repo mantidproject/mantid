@@ -22,6 +22,8 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Gaussian.h"
 
+#include "MantidGeometry/Crystal/UnitCell.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -1357,10 +1359,15 @@ namespace CurveFitting
     // 2. Calculate d-values for each picked peak
     std::vector<std::pair<double, std::vector<int> > > dhkls;
     std::vector<std::vector<int> >::iterator peakiter;
+
+    double lattice = m_instrumentParmaeters["LatticeConstant"];
+    Geometry::UnitCell unitcell(lattice, lattice, lattice, 90.0, 90.0, 90.0);
+
     for (peakiter = goodfitpeaks.begin(); peakiter != goodfitpeaks.end(); ++peakiter)
     {
       std::vector<int> hkl = *peakiter;
-      double d_h = calculateDspaceValue(hkl);
+      // double d_h = calculateDspaceValue(hkl);
+      double d_h = unitcell.d(hkl[0], hkl[1], hkl[2]);
       dhkls.push_back(std::make_pair(d_h, hkl));
     }
 
@@ -1695,7 +1702,6 @@ namespace CurveFitting
 
   //----------------------------------------------------------------------------------------------
   /** Calculate peak's d-spacing
-    */
   double FitPowderDiffPeaks::calculateDspaceValue(std::vector<int> hkl)
   {
     // g_log.information() << "HKL = " << hkl[0] << hkl[1] <<  hkl[2] << std::endl;
@@ -1710,18 +1716,24 @@ namespace CurveFitting
 
     return d;
   }
+  */
 
   /** Calculate a Bragg peak's centre in TOF from its Miller indices
     * and with instrumental parameters
     */
   double FitPowderDiffPeaks::calculatePeakCentreTOF(int h, int k, int l)
   {
+    /*
     vector<int> hkl(3);
     hkl[0] = h;
     hkl[1] = k;
     hkl[2] = l;
-
     double dh = calculateDspaceValue(hkl);
+    */
+
+    double lattice = m_instrumentParmaeters["LatticeConstant"];
+    Geometry::UnitCell unitcell(lattice, lattice, lattice, 90.0, 90.0, 90.0);
+    double dh = unitcell.d(h, k, l);
 
     // 2. Get parameter values from instrument parameter map
     double dtt1 = getParameter("Dtt1");
