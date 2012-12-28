@@ -20,6 +20,8 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidCurveFitting/Gaussian.h"
 
+#include "MantidGeometry/Crystal/UnitCell.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -1106,7 +1108,6 @@ namespace CurveFitting
 
 
   /** Calculate thermal neutron's d-spacing
-    */
   double RefinePowderInstrumentParameters::calculateDspaceValue(std::vector<int> hkl, double lattice)
   {    
     // FIXME  It only works for the assumption that the lattice is cubical
@@ -1118,6 +1119,7 @@ namespace CurveFitting
 
     return d;
   }
+  */
 
   /** Calcualte value n for thermal neutron peak profile
     */
@@ -1183,6 +1185,8 @@ namespace CurveFitting
     std::map<std::vector<int>, CurveFitting::BackToBackExponential_sptr>::iterator peakiter;
     std::vector<std::pair<double, std::pair<double, double> > > peakcenters; // d_h [TOF_h, CHI2]
 
+    Geometry::UnitCell unitcell(lattice, lattice, lattice, 90.0, 90.0, 90.0);
+
     for (peakiter = mPeaks.begin(); peakiter != mPeaks.end(); ++peakiter)
     {
       vector<int> hkl = peakiter->first;
@@ -1197,7 +1201,10 @@ namespace CurveFitting
         continue;
       }
 
+      /* Replaced by UnitCell
       double dh = calculateDspaceValue(hkl, lattice);
+      */
+      double dh = unitcell.d(hkl[0], hkl[1], hkl[2]);
       double center = peak->centre();
       double height = peak->height();
       double chi2;
