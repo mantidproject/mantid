@@ -1,13 +1,15 @@
 /*WIKI*
- * This Algorithm creates a PeaksWorkspace with peaks occurring at specific fractional offsets from  h,k,or l values.
+ * This Algorithm creates a PeaksWorkspace with peaks occurring at specific fractional offsets from
+ * h,k,or l values.
  *
- * There are options to create Peaks offset from peaks from the input PeaksWorkspace, or to create peaks offset
- * from h,k, and l values in a range.  Zero offsets are allowed if some or all integer h,k, or l values are desired
+ * There are options to create Peaks offset from peaks from the input PeaksWorkspace, or to create peaks
+ * offset from h,k, and l values in a range.  Zero offsets are allowed if some or all integer h,k, or
+ * l values are desired
  *
- * The input PeaksWorkspace must contain an orientation matrix and have been INDEXED by THIS MATRIX if the new
- * peaks are not created from a range of h ,k, and l values
+ * The input PeaksWorkspace must contain an orientation matrix and have been INDEXED by THIS MATRIX
+ * if the new peaks are not created from a range of h ,k, and l values
  *
- * WIKI*/
+ *WIKI*/
 /*
  * CreateFractionalPeaks.cpp
  *
@@ -47,7 +49,7 @@ namespace Mantid
 
 
 
-CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
+    CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
     {
 
 
@@ -55,7 +57,7 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
         /// Sets documentation strings for this algorithm
     void CreateFractionalPeaks::initDocs()
     {
-      this->setWikiSummary("creates a PeaksWorkspace with peaks occurring at specific fractional h,k,or l values");
+      this->setWikiSummary("Creates a PeaksWorkspace with peaks occurring at specific fractional h,k,or l values");
       this->setOptionalMessage("The offsets can be from hkl values in a range of hkl values or from peaks in the input PeaksWorkspace");
     }
 
@@ -177,7 +179,7 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
 
        Kernel::DblMatrix UB= ol.getUB();
        vector< vector<int> > AlreadyDonePeaks;
-
+       int ErrPos=-1;
        bool done = false;
        while( !done)
        {
@@ -186,6 +188,7 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
              for( size_t loffset=0;loffset<lOffsets.size();loffset++)
                 try
                 {
+                  ErrPos=0;
                   V3D hkl1(hkl);
 
 
@@ -196,17 +199,18 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
                   Kernel::V3D Qs = UB * hkl1 ;
                   Qs*= 2.0;
                   Qs*=M_PI;
-
+                  Qs=Gon*Qs;
                   if( Qs[2] <=0)
                     continue;
 
-
+                  ErrPos=1;
                   boost::shared_ptr<IPeak> peak(Peaks->createPeak(Qs, 1));
+
                   peak->setGoniometerMatrix(Gon);
-                  peak->setQSampleFrame(Qs);
 
                   if (Qs[2]>0 && peak->findDetector())
                   {
+                    ErrPos=2;
                     vector<int> SavPk;
                     SavPk.push_back(RunNumber);
                     SavPk.push_back((int)floor(1000*hkl1[0]+.5));
@@ -216,18 +220,21 @@ CreateFractionalPeaks::CreateFractionalPeaks():Algorithm()
                   //TODO keep list sorted so searching is good
                     vector<vector<int> >::iterator it = find(AlreadyDonePeaks.begin(),AlreadyDonePeaks.end(),SavPk);
 
+                    ErrPos=3;
                     if( it == AlreadyDonePeaks.end())
                       AlreadyDonePeaks.push_back(SavPk);
                     else
                       continue;
 
 
+                    ErrPos=4;
                     peak->setHKL(hkl1);
                     peak->setRunNumber(RunNumber);
                     OutPeaks->addPeak(*peak);
                   }
                 }catch(...)
                 {
+
                   //setQLabFrame throws an exception if wl <0
                 }
          if( includePeaksInRange)
