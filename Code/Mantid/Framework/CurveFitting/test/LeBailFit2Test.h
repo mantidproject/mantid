@@ -560,109 +560,6 @@ public:
   }
 
 
-  /// ============================  Background Calculation ====================== ///
-
-  /*
-   * Item to test
-   * (1) Crop workspace
-   * (2) Split peaks to groups
-   * (3) Fit peak intensity
-   * (4) Whatever
-   *
-   * Test Data:
-   * (1) 4862b7
-   */
-  void LocalPassed_test_BackgroundCalculationV2()
-  {
-    // 1. Create data
-    API::MatrixWorkspace_sptr dataws;
-    DataObjects::TableWorkspace_sptr parameterws;
-    DataObjects::TableWorkspace_sptr hklws;
-
-    // a)  Reflections
-    std::vector<std::vector<int> > hkls;
-    importReflectionTxtFile("/home/wzz/Mantid/Code/debug/MyTestData/pg3_4862bank7_reflection.txt", hkls);
-    size_t numpeaks = hkls.size();
-    std::cout << "TEST1009 Number of peaks = " << hkls.size() << std::endl;
-
-    // b) data
-    dataws = createInputDataWorkspace(4);
-    std::cout << "Data Workspace Range: " << dataws->readX(0)[0] << ", " << dataws->readX(0).back() << std::endl;
-
-    // c) Workspaces
-    std::map<std::string, double> parammodifymap;
-    parameterws = createPeakParameterWorkspace(parammodifymap, 2);
-
-    std::vector<double> pkheights(numpeaks, 1.0);
-    hklws = createInputHKLWorkspace(hkls, pkheights);
-    std::cout << "InputHKLWorkspace is created.  Number of reflections =  " << hklws->rowCount() << std::endl;
-
-    AnalysisDataService::Instance().addOrReplace("Data", dataws);
-    AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
-    AnalysisDataService::Instance().addOrReplace("Reflections", hklws);
-
-    std::vector<double> fitregion;
-    fitregion.push_back(58000.0);
-    fitregion.push_back(180000.0);
-
-    // 3. Genearte LeBailFit algorithm and set it up
-    LeBailFit2 lbfit;
-    lbfit.initialize();
-
-    lbfit.setPropertyValue("InputWorkspace", "Data");
-    lbfit.setPropertyValue("InputParameterWorkspace", "PeakParameters");
-    lbfit.setPropertyValue("InputHKLWorkspace", "Reflections");
-    lbfit.setProperty("WorkspaceIndex", 0);
-    lbfit.setProperty("FitRegion", fitregion);
-    lbfit.setProperty("Function", "CalculateBackground");
-    lbfit.setProperty("BackgroundType", "Polynomial");
-    lbfit.setProperty("OutputWorkspace", "CalculatedBackground");
-    lbfit.setProperty("OutputPeaksWorkspace", "CaclulatedPeaks");
-    lbfit.setProperty("PeakRadius", 8);
-
-    TS_ASSERT_THROWS_NOTHING(lbfit.execute());
-    TS_ASSERT(lbfit.isExecuted());
-
-    // 4. Get output
-    DataObjects::Workspace2D_sptr outbkgdws =
-            boost::dynamic_pointer_cast<DataObjects::Workspace2D>
-            (AnalysisDataService::Instance().retrieve("CalculatedBackground"));
-    TS_ASSERT(outbkgdws);
-
-    // a) Range
-    double tofmin = outbkgdws->readX(0)[0];
-    double tofmax = outbkgdws->readX(0).back();
-
-    std::cout << "Background Workspace Range: " << tofmin << ", " << tofmax << std::endl;
-
-    /* --- Write out data file for checking ---
-    std::ofstream purepeakfile, bkgdfile;
-    purepeakfile.open("PeaksOnlyBank7.dat");
-    bkgdfile.open("BackgroundBank7.dat");
-    for (size_t i = 0; i < outbkgdws->readX(0).size(); ++i)
-    {
-        bkgdfile << outbkgdws->readX(1)[i] << "    " << outbkgdws->readY(1)[i] << std::endl;
-        purepeakfile << outbkgdws->readX(2)[i] << "    " << outbkgdws->readY(2)[i] << std::endl;
-    }
-    purepeakfile.close();
-    bkgdfile.close();
-
-    *****************/
-
-    // b) Histograms
-    TS_ASSERT_EQUALS(outbkgdws->getNumberHistograms(), 3);
-
-    // c) Peaks
-    DataObjects::TableWorkspace_sptr peakparamws =
-            boost::dynamic_pointer_cast<DataObjects::TableWorkspace>
-            (AnalysisDataService::Instance().retrieve("CaclulatedPeaks"));
-    TS_ASSERT(peakparamws);
-
-    TS_ASSERT_EQUALS(peakparamws->rowCount(), hklws->rowCount())
-
-  }
-
-
   /// ============================   Data Generation ============================ ///
   /** Create parameter workspace for peak calculation
    */
@@ -966,6 +863,8 @@ public:
     importDataFromColumnFile(filename, vecX, vecY,  vecE);
     */
 
+    string datafilename("PG3_4862_Bank7.dat");
+
     switch (option)
     {
       case 1:
@@ -981,8 +880,8 @@ public:
         break;
 
       case 4:
-        importDataFromColumnFile("PG3_4862_Bank7.dat", vecX, vecY, vecE);
-        std::cout << "[TEST] Data File Option 4: ../MyTestData/4862b7.inp; Number data = "
+        importDataFromColumnFile(datafilename, vecX, vecY, vecE);
+        std::cout << "[TEST] Data File Option 4: " << datafilename << "; Number data = "
                   << vecX.size() << std::endl;
         break;
 
