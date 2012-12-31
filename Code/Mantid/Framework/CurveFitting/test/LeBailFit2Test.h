@@ -445,7 +445,7 @@ public:
     modmap.insert(make_pair("Beta0", 5.0));
     parameterws = createPeakParameterWorkspace(modmap, 2);
     hklws = createInputHKLWorkspace(hkls, pkheights);
-    bkgdws = createBackgroundParameterWorksapce("PG3_4862_Bank7.dat");
+    bkgdws = createBackgroundParameterWorksapce("PG3_4862_Bank7.hkl");
 
     AnalysisDataService::Instance().addOrReplace("Data", dataws);
     AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
