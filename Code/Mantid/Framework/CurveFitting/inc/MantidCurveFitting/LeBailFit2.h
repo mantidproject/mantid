@@ -120,10 +120,10 @@ namespace CurveFitting
                                      map<string, Parameter> parammap, bool recalpeakintesity);
 
     /// LeBailFit
-    void execLeBailFit(size_t workspaceindex);
+    void execLeBailFit();
 
     /// Do 1 iteration in Le Bail fit
-    bool do1StepLeBailFit(size_t workspaceindex, std::map<std::string, Parameter>& parammap);
+    bool do1StepLeBailFit(std::map<std::string, Parameter>& parammap);
 
     /// Set up Lebail
     void setLeBailFitParameters();
@@ -200,7 +200,8 @@ namespace CurveFitting
     void writeFakedDataToOutputWS(size_t workspaceindex, int functionmode);
 
     /// Write out (domain, values) to output workspace
-    void writeToOutputWorkspace(API::FunctionDomain1DVector domain,  API::FunctionValues values);
+    void writeToOutputWorkspace(size_t wsindex, FunctionDomain1DVector domain,  FunctionValues values);
+    // void writeToOutputWorkspace(API::FunctionDomain1DVector domain,  API::FunctionValues values);
 
     /// Write input data and difference to output workspace
     void writeInputDataNDiff(size_t workspaceindex, API::FunctionDomain1DVector domain);
@@ -304,7 +305,7 @@ namespace CurveFitting
     void doResultStatistics();
 
     /// =============================    =========================== ///
-    size_t mWSIndexToWrite;
+    // size_t mWSIndexToWrite;
 
     /// Map to store peak group information: key (int) = (hkl)^2; value = group ID
     std::map<int, size_t> mPeakGroupMap;
