@@ -430,7 +430,7 @@ public:
 
     // a)  Reflections
     std::vector<std::vector<int> > hkls;
-    importReflectionTxtFile("PG3_Bank7_Peaks.txt", hkls);
+    importReflectionTxtFile("PG3_Bank7_Peaks.hkl", hkls);
     size_t numpeaks = hkls.size();
     std::cout << "[TESTx349] Nmber of (file imported) peaks = " << hkls.size() << std::endl;
 
@@ -445,7 +445,7 @@ public:
     modmap.insert(make_pair("Beta0", 5.0));
     parameterws = createPeakParameterWorkspace(modmap, 2);
     hklws = createInputHKLWorkspace(hkls, pkheights);
-    bkgdws = createBackgroundParameterWorksapce("PG3_4862_Bank7.hkl");
+    bkgdws = createBackgroundParameterWorksapce("PG3_4862_Background.dat");
 
     AnalysisDataService::Instance().addOrReplace("Data", dataws);
     AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
