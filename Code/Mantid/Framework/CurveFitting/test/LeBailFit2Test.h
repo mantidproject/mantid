@@ -430,7 +430,23 @@ public:
 
     // a)  Reflections
     std::vector<std::vector<int> > hkls;
-    importReflectionTxtFile("PG3_Bank7_Peaks.hkl", hkls);
+    // importReflectionTxtFile("PG3_Bank7_Peaks.hkl", hkls);
+    // (222)
+    vector<int> r222(3, 2);
+    hkls.push_back(r222);
+    // (311)
+    vector<int> r311(3, 1); r311[0] = 3;
+    hkls.push_back(r311);
+    // (220)
+    vector<int> r220(3, 2); r220[2] = 0;
+    hkls.push_back(r220);
+    // (200)
+    vector<int> r200(3, 0); r200[0] = 2;
+    hkls.push_back(r200);
+    // (111)
+    vector<int> r111(3, 1);
+    hkls.push_back(r111);
+
     size_t numpeaks = hkls.size();
     std::cout << "[TESTx349] Nmber of (file imported) peaks = " << hkls.size() << std::endl;
 
