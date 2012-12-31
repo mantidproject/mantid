@@ -130,7 +130,6 @@ void Integrate3DEvents::ellipseIntegrateEvents(
   long hkl_key = getHklKey( peak_q );
   if ( hkl_key == 0 )
   {
-    std::cout << "HKL KEY IS 0 " << std::endl;
     return;
   }
   
@@ -138,7 +137,6 @@ void Integrate3DEvents::ellipseIntegrateEvents(
 
   if ( some_events.size() < 3 )          // if there are not enough events to 
   {                                      // find covariance matrix, return 
-    std::cout << "TOO FEW EVENTS: " << some_events.size() << std::endl;
     return;
   }
 
@@ -159,31 +157,23 @@ void Integrate3DEvents::ellipseIntegrateEvents(
   {
     if ( (boost::math::isnan)( sigmas[i]) )
     {
-      std::cout << " SIGMA isNaN ";
       invalid_peak = true;
     }
     else if ( sigmas[i] <= 0 )
     {
-      std::cout << " SIGMA <= 0 ";
       invalid_peak = true;
     }
   }
 
   if ( invalid_peak )                 // if data collapses to a line or
   {                                   // to a plane, the volume of the 
-    inti = 0.0;                       // ellipsoids will be zero.
-    sigi = 0.0;
+    return;                           // ellipsoids will be zero.
   }
-  else
-  {
-    ellipseIntegrateEvents(some_events, eigen_vectors, sigmas,
-                           specify_size,   peak_radius, 
-                           back_inner_radius, back_outer_radius,
-                           inti, sigi);
-  }
-
-  if ( invalid_peak )
-    std::cout << "INVALID_PEAK " << inti << ", " << sigi << std::endl;
+ 
+  ellipseIntegrateEvents(some_events, eigen_vectors, sigmas,
+                         specify_size,   peak_radius, 
+                         back_inner_radius, back_outer_radius,
+                         inti, sigi);
 }
 
 
