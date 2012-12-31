@@ -1,5 +1,50 @@
 /*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then use the Build/wiki_maker.py script to generate your full wiki page.
+ * This algorithm will integrate a list of indexed single-crystal diffraction peaks from a 
+ * PeaksWorkspace, using events from an EventWorkspace.  The indexed peaks are first 
+ * used to determine a UB matrix.  The inverse of that UB matrix is then used to collect
+ * lists of events that are close to peaks in reciprocal space.  An event will be added
+ * to the list of events for a peak provided that the fractional h,k,l value of that
+ * event (obtained by applying UB-inverse to the Q-vector) is closer to the h,k,l of that
+ * peak, than to the h,k,l of any other peak AND the Q-vector for that event is within 
+ * the specified radius of the Q-vector for that peak. 
+ *
+ * When the lists of events near the peaks have been built, the three principal axes of  
+ * the "cloud" of events near each peak are found, and the standard deviations of the 
+ * projections of the events on each of the three principal axes are calculated.  The
+ * principal axes and standard deviations for the events around a peak in the directions
+ * of the principal axes are used to determine an ellipsoidal region for the peak and an 
+ * ellipsoidal shell region for the background. The number of events in the peak 
+ * ellipsoid and background ellipsoidal shell are counted and used to determine the net
+ * integrated intensity of the peak. 
+ *
+ * The ellipsoidal regions used for the peak and background can be obtained in two ways.
+ * First, the user may specify the size of the peak ellipsoid and the inner and outer 
+ * size of the background ellipsoid.  If these are specified, the values will be used
+ * for half the length of the major axis of an ellipsoid centered on the peak.  The 
+ * major axis is in the direction of the principal axis for which the standard deviation
+ * in that direction is largest.  The other two axes for the ellipsoid are in the 
+ * direction of the other two principal axes and are scaled relative to the major axes 
+ * in proportion to their standard deviations.  For example of the standard deviations 
+ * in the direction of the other two princial axes are .8 and .7 times the standard 
+ * deviation in the direction of the major axis, then the ellipse will extend only .8 
+ * and .7 times as far in the direction of those axes, as in the direction of the major 
+ * axis.  Overall, the user specified sizes for the PeakSize, BackgroundInnerSize and
+ * BackgroundOuterSize are similar to the PeakRadius, BackgroundInnerRadius and
+ * BackgrounOuterRadius for the IntegratePeaksMD algorithm.  The difference is that
+ * the regions used in this algorithm are not spherical, but are ellipsoidal with axis
+ * directions obtained from the principal axes of the events near a peak and the 
+ * ellipsoid shape (relative axis lengths) determined by the standard deviations in 
+ * the directions of the principal axes.
+ *
+ * Second, if the user does not specifiy the size of the peak and background ellipsoids, 
+ * then the three axes of the peak ellipsoid are again set to the principal axes of the
+ * nearby events and their axis lengths are set to cover a range of plus or minus
+ * three standard deviations in the axis directions.  In this case, the background 
+ * ellipsoidal shell is chosen to have the same volume as the peak ellipsoid and it's
+ * inner surface is the outer surface of the peak ellipsoid.  The outer surface of the 
+ * background ellipsoidal shell is an ellipsoidal surface with the same relative axis 
+ * lengths as the inner surface. 
+ *
 *WIKI*/
 
 #include <iostream>
