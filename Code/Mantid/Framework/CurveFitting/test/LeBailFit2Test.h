@@ -445,7 +445,7 @@ public:
     modmap.insert(make_pair("Beta0", 5.0));
     parameterws = createPeakParameterWorkspace(modmap, 2);
     hklws = createInputHKLWorkspace(hkls, pkheights);
-    bkgdws = createBackgroundParameterWorksapce("/home/wzz/Mantid/Code/debug/MyTestData/pg3_4862bank7_background.dat");
+    bkgdws = createBackgroundParameterWorksapce("PG3_4862_Bank7.dat");
 
     AnalysisDataService::Instance().addOrReplace("Data", dataws);
     AnalysisDataService::Instance().addOrReplace("PeakParameters", parameterws);
@@ -965,7 +965,7 @@ public:
         break;
 
       case 4:
-        importDataFromColumnFile("/home/wzz/Mantid/Code/debug/MyTestData/4862b7.inp", vecX, vecY, vecE);
+        importDataFromColumnFile("PG3_4862_Bank7.dat", vecX, vecY, vecE);
         std::cout << "[TEST] Data File Option 4: ../MyTestData/4862b7.inp; Number data = "
                   << vecX.size() << std::endl;
         break;
