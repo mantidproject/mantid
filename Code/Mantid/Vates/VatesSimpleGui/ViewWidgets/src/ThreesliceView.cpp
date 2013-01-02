@@ -174,18 +174,21 @@ void ThreeSliceView::makeThreeSlice()
   // them around
 
   this->xCut = builder->createFilter("filters", "Cut", this->origSrc);
+  this->xCut->updatePipeline();
   pqDataRepresentation *trepr = builder->createDataRepresentation(\
         this->xCut->getOutputPort(0), this->xView);
   this->xCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
   this->makeSlice(ViewBase::X, this->xView, this->xCut, this->xCutRepr);
 
   this->yCut = builder->createFilter("filters", "Cut", this->origSrc);
+  this->yCut->updatePipeline();
   trepr = builder->createDataRepresentation(this->yCut->getOutputPort(0),
                                             this->yView);
   this->yCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
   this->makeSlice(ViewBase::Y, this->yView, this->yCut, this->yCutRepr);
 
   this->zCut = builder->createFilter("filters", "Cut", this->origSrc);
+  this->zCut->updatePipeline();
   trepr = builder->createDataRepresentation(this->zCut->getOutputPort(0),
                                             this->zView);
   this->zCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);

@@ -287,6 +287,7 @@ void MultiSliceView::makeCut(double origin[], double orient[])
 
   pqPipelineSource *cut = builder->createFilter("filters", "Cut",
                                                 this->origSrc);
+  cut->updatePipeline();
   emit sliceNamed(cut->getSMName());
   pqDataRepresentation *trepr = builder->createDataRepresentation(\
         cut->getOutputPort(0),this->mainView);

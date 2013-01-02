@@ -98,6 +98,7 @@ void SplatterPlotView::render()
   }
 
   // Show the data
+  src->updatePipeline();
   pqDataRepresentation *drep = builder->createDataRepresentation(\
            src->getOutputPort(0), this->view);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(renderType.toStdString().c_str());
