@@ -105,7 +105,12 @@ namespace MantidQt
       {
         throw std::invalid_argument("Maximum number of PeaksWorkspaces that can be simultaneously displayed is 10.");
       }
-      m_subjects.insert(presenter);
+
+      auto result_it = std::find(m_subjects.begin(), m_subjects.end(), presenter);
+      if(result_it == m_subjects.end())
+      {
+        m_subjects.push_back(presenter);
+      }
     }
 
     /**
@@ -134,16 +139,36 @@ namespace MantidQt
     @param ws : Peaks Workspace to look for on sub-presenters.
     @return the identified sub-presenter for the workspace, or a NullPeaksPresenter.
     */
-    PeaksPresenter_sptr CompositePeaksPresenter::getPresenterFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws)
+    CompositePeaksPresenter::SubjectContainer::iterator CompositePeaksPresenter::getPresenterIteratorFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws)
     {
-      PeaksPresenter_sptr presenterFound = PeaksPresenter_sptr(new NullPeaksPresenter);
+      SubjectContainer::iterator presenterFound = m_subjects.end();
       for(auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end(); ++presenterIterator)
       {
         auto workspacesOfSubject = (*presenterIterator)->presentedWorkspaces();
         SetPeaksWorkspaces::iterator iteratorFound =  workspacesOfSubject.find(ws);
         if(iteratorFound != workspacesOfSubject.end())
         {
-          presenterFound = *presenterIterator;
+          presenterFound = presenterIterator;
+          break;
+        }
+      }
+      return presenterFound;
+    }
+
+    /**
+    @param ws : Peaks Workspace to look for on sub-presenters.
+    @return the identified sub-presenter for the workspace, or a NullPeaksPresenter.
+    */
+    CompositePeaksPresenter::SubjectContainer::const_iterator CompositePeaksPresenter::getPresenterIteratorFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const
+    {
+      SubjectContainer::const_iterator presenterFound = m_subjects.end();
+      for(auto presenterIterator = m_subjects.begin(); presenterIterator != m_subjects.end(); ++presenterIterator)
+      {
+        auto workspacesOfSubject = (*presenterIterator)->presentedWorkspaces();
+        SetPeaksWorkspaces::iterator iteratorFound =  workspacesOfSubject.find(ws);
+        if(iteratorFound != workspacesOfSubject.end())
+        {
+          presenterFound = presenterIterator;
           break;
         }
       }
@@ -155,9 +180,16 @@ namespace MantidQt
     @ workspace containing the peaks to re-colour
     @ colour to use for re-colouring
     */
-    void CompositePeaksPresenter::setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor colour)
+    void CompositePeaksPresenter::setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const QColor colour)
     {
-      getPresenterFromWorkspace(ws)->setForegroundColour(colour);
+      SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
+      
+      // Update the palette the foreground colour
+      const int pos = std::distance(m_subjects.begin(), iterator);
+      m_palette.setForegroundColour(pos, colour);
+
+      // Apply the foreground colour
+      (*iterator)->setForegroundColour(colour);
     }
 
     /**
@@ -165,11 +197,22 @@ namespace MantidQt
     @ workspace containing the peaks to re-colour
     @ colour to use for re-colouring
     */
-    void CompositePeaksPresenter::setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor colour)
+    void CompositePeaksPresenter::setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,const  QColor colour)
     {
-      getPresenterFromWorkspace(ws)->setBackgroundColour(colour);
+      SubjectContainer::iterator iterator = getPresenterIteratorFromWorkspace(ws);
+
+      // Update the palette background colour.
+      const int pos = std::distance(m_subjects.begin(), iterator);
+      m_palette.setBackgroundColour(pos, colour);
+
+      // Apply the background colour
+      (*iterator)->setBackgroundColour(colour);
     }
 
+    /**
+    Getter for the name of the transform.
+    @return transform name.
+    */
     std::string CompositePeaksPresenter::getTransformName() const
     {
       if(useDefault())
@@ -177,6 +220,36 @@ namespace MantidQt
         return m_default->getTransformName();
       }
       return (*m_subjects.begin())->getTransformName();
+    }
+
+    /**
+    @return a copy of the peaks palette.
+    */
+    PeakPalette CompositePeaksPresenter::getPalette() const
+    {
+      return this->m_palette;
+    }
+
+    /**
+    @param ws: PeakWorkspace to get the colour for.
+    @return the foreground colour corresponding to the peaks workspace.
+    */
+    QColor CompositePeaksPresenter::getForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const
+    {
+      SubjectContainer::const_iterator iterator = getPresenterIteratorFromWorkspace(ws);
+      const int pos = std::distance(m_subjects.begin(), iterator);
+      return m_palette.foregroundIndexToColour(pos);
+    }
+
+    /**
+    @param ws: PeakWorkspace to get the colour for.
+    @return the background colour corresponding to the peaks workspace.
+    */
+    QColor CompositePeaksPresenter::getBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const
+    {
+      SubjectContainer::const_iterator iterator = getPresenterIteratorFromWorkspace(ws);
+      const int pos = std::distance(m_subjects.begin(), iterator);
+      return m_palette.backgroundIndexToColour(pos);
     }
   }
 }

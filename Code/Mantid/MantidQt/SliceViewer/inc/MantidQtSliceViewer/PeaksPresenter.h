@@ -43,9 +43,11 @@ namespace SliceViewer
     virtual bool changeShownDim() = 0;
     virtual bool isLabelOfFreeAxis(const std::string& label) const = 0;
     virtual SetPeaksWorkspaces presentedWorkspaces() const = 0;
-    virtual void setForegroundColour(const Qt::GlobalColor) = 0;
-    virtual void setBackgroundColour(const Qt::GlobalColor) = 0;
+    virtual void setForegroundColour(const QColor) = 0;
+    virtual void setBackgroundColour(const QColor) = 0;
     virtual std::string getTransformName() const = 0;
+    /*virtual QColor getForegroundColour() const = 0;
+    virtual QColor getBackgroundColour() const = 0;*/
   };
 
 

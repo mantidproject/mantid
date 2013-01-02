@@ -14,7 +14,7 @@ class DLLExport PeakPalette
 {
 private:
 
-  typedef std::map<int, Qt::GlobalColor> ColourMapType;
+  typedef std::map<int, QColor> ColourMapType;
   ColourMapType m_backgroundMap;
   ColourMapType m_foregroundMap;
   ColourMapType::iterator safeFetchPair(ColourMapType& map, const int index);
@@ -24,11 +24,12 @@ public:
     PeakPalette();
     PeakPalette(const PeakPalette& other);
     PeakPalette& operator=(const PeakPalette& other);
-    Qt::GlobalColor foregroundIndexToColour(const int index) const;
-    Qt::GlobalColor backgroundIndexToColour(const int index) const;
-    void setForegroundColour(const int index, const Qt::GlobalColor);
-    void setBackgroundColour(const int index, const Qt::GlobalColor);
+    QColor foregroundIndexToColour(const int index) const;
+    QColor backgroundIndexToColour(const int index) const;
+    void setForegroundColour(const int index, const QColor);
+    void setBackgroundColour(const int index, const QColor);
     int paletteSize() const;
+    bool operator==(const PeakPalette& other) const;
     ~PeakPalette();
 };
 

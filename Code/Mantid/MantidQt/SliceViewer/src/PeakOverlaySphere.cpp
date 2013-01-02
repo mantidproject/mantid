@@ -117,12 +117,12 @@ namespace SliceViewer
     m_physicalPeak.movePosition(transform);
   }
 
-  void PeakOverlaySphere::changeForegroundColour(const Qt::GlobalColor colour)
+  void PeakOverlaySphere::changeForegroundColour(const QColor colour)
   {
     this->m_peakColour = QColor(colour);
   }
 
-  void PeakOverlaySphere::changeBackgroundColour(const Qt::GlobalColor)
+  void PeakOverlaySphere::changeBackgroundColour(const QColor)
   {
     // Not being drawn at the moment, TODO.
   }

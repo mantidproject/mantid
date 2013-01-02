@@ -17,6 +17,9 @@ namespace SliceViewer
   public:
     PeaksWorkspaceWidget(Mantid::API::IPeaksWorkspace_const_sptr ws, const std::string& coordinateSystem, QWidget *parent = 0);
     ~PeaksWorkspaceWidget();
+  signals:
+    void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
+    void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
   private:
     /// Populate the widget with model data.
     void populate();
@@ -27,7 +30,9 @@ namespace SliceViewer
     /// Coordinate system.
     const std::string m_coordinateSystem;
   private slots:
-      void expandChanged(bool);
+      void onExpandChanged(bool);
+      void onBackgroundColourClicked();
+      void onForegroundColourClicked();
   };
 
 } //namespace

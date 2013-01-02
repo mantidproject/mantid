@@ -5,6 +5,7 @@
 #include <boost/make_shared.hpp>
 #include "MantidQtSliceViewer/CompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MockObjects.h"
 
 using namespace MantidQt::SliceViewer;
@@ -298,6 +299,68 @@ public:
     }
     // Add a peaksWS beyond the limit of allowed number of peaksWS.
     TS_ASSERT_THROWS(presenter.addPeaksPresenter( boost::make_shared<MockPeaksPresenter>()), std::invalid_argument);
+  }
+
+  void test_default_palette()
+  {
+    PeakPalette actualDefaultPalette;
+
+    CompositePeaksPresenter presenter;
+    PeakPalette presenterDefaultPalette = presenter.getPalette();
+
+    TSM_ASSERT_EQUALS("CompositePeaksPresenter should be using a default palette until changed.", actualDefaultPalette, presenterDefaultPalette);
+  }
+
+  void test_set_background_colour()
+  {
+    const QColor newColour = Qt::red;
+
+    // Prepare subject objects.
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(); 
+    SetPeaksWorkspaces set;
+    set.insert(peaksWS);
+    MockPeaksPresenter* pSubject = new MockPeaksPresenter;
+    PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, setBackgroundColour(newColour)).Times(1);
+    EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
+
+    // Set a background colour on the composite.
+    CompositePeaksPresenter composite;
+    composite.addPeaksPresenter(subject);
+    composite.setBackgroundColour(peaksWS, newColour);
+
+    // Check that the internal palette has been correctly updated.
+    PeakPalette updatedPalette = composite.getPalette();
+    TS_ASSERT_EQUALS(newColour, updatedPalette.backgroundIndexToColour(0));
+
+    // Check that the colour was correctly set on the subject presenter.
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
+  }
+
+  void test_set_foreground_colour()
+  {
+    const QColor newColour = Qt::red;
+
+    // Prepare subject objects.
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(); 
+    SetPeaksWorkspaces set;
+    set.insert(peaksWS);
+    MockPeaksPresenter* pSubject = new MockPeaksPresenter;
+    PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, setForegroundColour(newColour)).Times(1);
+    EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
+
+    // Set a background colour on the composite.
+    CompositePeaksPresenter composite;
+    composite.addPeaksPresenter(subject);
+    composite.setForegroundColour(peaksWS, newColour);
+
+    // Check that the internal palette has been correctly updated.
+    PeakPalette updatedPalette = composite.getPalette();
+    TS_ASSERT_EQUALS(newColour, updatedPalette.foregroundIndexToColour(0));
+
+    // Check that the colour was correctly set on the subject presenter.
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
   }
 
   

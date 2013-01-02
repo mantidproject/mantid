@@ -63,9 +63,9 @@ namespace SliceViewer
     /// Move the position of the peak, by using a different configuration of the existing origin indexes.
     void movePosition(PeakTransform_sptr peakTransform);
     /// Change foreground colour
-    virtual void changeForegroundColour(const Qt::GlobalColor);
+    virtual void changeForegroundColour(const QColor);
     /// Change background colour
-    virtual void changeBackgroundColour(const Qt::GlobalColor);
+    virtual void changeBackgroundColour(const QColor);
 
   private:
 

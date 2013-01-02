@@ -3,7 +3,8 @@
 
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
-#include <set>
+#include "MantidQtSliceViewer/PeakPalette.h"
+#include <vector>
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt
@@ -26,8 +27,8 @@ namespace MantidQt
       virtual bool changeShownDim();
       virtual bool isLabelOfFreeAxis(const std::string& label) const;
       SetPeaksWorkspaces presentedWorkspaces() const;
-      void setForegroundColour(const Qt::GlobalColor){/*Do nothing*/}
-      void setBackgroundColour(const Qt::GlobalColor){/*Do nothing*/}
+      void setForegroundColour(const QColor){/*Do nothing*/}
+      void setBackgroundColour(const QColor){/*Do nothing*/}
       virtual std::string getTransformName() const;
       
       /// Constructor
@@ -41,20 +42,30 @@ namespace MantidQt
       /// Clear the owned presenters.
       void clear();
       /// Change the foreground representation for the peaks of this workspace
-      void setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor);
+      void setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const QColor);
       /// Change the background representation for the peaks of this workspace
-      void setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, Qt::GlobalColor);
+      void setBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const QColor);
+      /// Get the foreground colour corresponding to the workspace
+      QColor getForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
+      /// Get the background colour corresponding to the workspace
+      QColor getBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
+      /// Get a copy of the palette in its current state.
+      PeakPalette getPalette() const;
     private:
+      /// Alias for container of subjects type.
+      typedef std::vector<PeaksPresenter_sptr> SubjectContainer;
       /// Default behaviour 
       PeaksPresenter_sptr m_default;
       /// Subject presenters.
-      std::set<PeaksPresenter_sptr> m_subjects;
+      SubjectContainer m_subjects;
       /// Use default
       bool useDefault() const { return m_subjects.size() == 0; }
       /// Get the presenter for a given workspace.
-      PeaksPresenter_sptr getPresenterFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws);
-
-      
+      SubjectContainer::iterator getPresenterIteratorFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws);
+      /// Get the presenter for a given workspace.
+      SubjectContainer::const_iterator getPresenterIteratorFromWorkspace(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
+      /// Colour pallette.
+      PeakPalette m_palette;
     };
   }
 }

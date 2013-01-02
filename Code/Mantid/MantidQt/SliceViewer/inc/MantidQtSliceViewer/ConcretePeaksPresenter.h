@@ -35,10 +35,9 @@ namespace MantidQt
       virtual bool changeShownDim();
       virtual bool isLabelOfFreeAxis(const std::string& label) const;
       SetPeaksWorkspaces presentedWorkspaces() const;
-      void setForegroundColour(const Qt::GlobalColor);
-      void setBackgroundColour(const Qt::GlobalColor);
+      void setForegroundColour(const QColor);
+      void setBackgroundColour(const QColor);
       std::string getTransformName() const;
-    private:
       /// Peak overlay views.
       VecPeakOverlayView m_viewPeaks;
       /// View factory

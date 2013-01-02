@@ -1,4 +1,5 @@
 #include "MantidQtSliceViewer/PeaksWorkspaceWidget.h"
+#include <QColorDialog>
 
 namespace MantidQt
 {
@@ -11,7 +12,9 @@ namespace MantidQt
 
       ui.tblPeaks->setHidden(true);
       ui.tblPeaks->setFixedHeight(0);
-      connect(ui.ckExpand, SIGNAL(clicked(bool)), this, SLOT(expandChanged(bool)));
+      connect(ui.ckExpand, SIGNAL(clicked(bool)), this, SLOT(onExpandChanged(bool)));
+      connect(ui.btnBackgroundColor, SIGNAL(clicked()), this, SLOT(onBackgroundColourClicked()));
+      connect(ui.btnPeakColor, SIGNAL(clicked()), this, SLOT(onForegroundColourClicked()));
 
       populate();
     }
@@ -32,10 +35,26 @@ namespace MantidQt
     {
     }
 
-    void PeaksWorkspaceWidget::expandChanged(bool open)
+    void PeaksWorkspaceWidget::onExpandChanged(bool open)
     {
       ui.tblPeaks->setHidden(!open);
       ui.tblPeaks->setFixedHeight(QWIDGETSIZE_MAX);
+    }
+
+    void PeaksWorkspaceWidget::onForegroundColourClicked()
+    {
+      QColorDialog colourDlg;
+      QColor selectedColour = colourDlg.getColor();
+      ui.btnPeakColor->setBackgroundColor(selectedColour);
+      emit peakColourChanged(this->m_ws, selectedColour);
+    }
+
+    void PeaksWorkspaceWidget::onBackgroundColourClicked()
+    {
+      QColorDialog colourDlg;
+      QColor selectedColour = colourDlg.getColor();
+      ui.btnBackgroundColor->setBackgroundColor(selectedColour);
+      emit backgroundColourChanged(this->m_ws, selectedColour);
     }
 
   } // namespace

@@ -9,16 +9,16 @@ namespace MantidQt
     PeakPalette::PeakPalette()
     {
       int index = 0;
-      m_foregroundMap.insert(std::make_pair(index++, Qt::green));
-      m_foregroundMap.insert(std::make_pair(index++, Qt::darkMagenta));
-      m_foregroundMap.insert(std::make_pair(index++, Qt::cyan));
-      m_foregroundMap.insert(std::make_pair(index++, Qt::darkGreen));
-      m_foregroundMap.insert(std::make_pair(index++, Qt::darkCyan));
-      m_foregroundMap.insert(std::make_pair(index++, Qt::darkYellow));
-      m_foregroundMap.insert(std::make_pair(index++, Qt::darkRed));
-      m_foregroundMap.insert(std::make_pair(index++, Qt::black));
-      m_foregroundMap.insert(std::make_pair(index++, Qt::white));
-      m_foregroundMap.insert(std::make_pair(index++, Qt::darkGray));
+      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::green)));
+      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::darkMagenta)));
+      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::cyan)));
+      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::darkGreen)));
+      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::darkCyan)));
+      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::darkYellow)));
+      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::darkRed)));
+      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::black)));
+      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::white)));
+      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::darkGray)));
       m_backgroundMap = m_foregroundMap;
     }
 
@@ -70,26 +70,26 @@ namespace MantidQt
       return it;
     }
 
-    Qt::GlobalColor PeakPalette::foregroundIndexToColour(const int index) const
+    QColor PeakPalette::foregroundIndexToColour(const int index) const
     {
       auto it = safeFetchPair(m_foregroundMap, index);
       return it->second;
     }
 
-    Qt::GlobalColor PeakPalette::backgroundIndexToColour(const int index) const
+    QColor PeakPalette::backgroundIndexToColour(const int index) const
     {
       auto it = safeFetchPair(m_backgroundMap, index);
       return it->second;
     }
 
-    void PeakPalette::setForegroundColour(const int index, const Qt::GlobalColor colour)
+    void PeakPalette::setForegroundColour(const int index, const QColor colour)
     {
       auto it = safeFetchPair(m_foregroundMap, index);
       // overwrite
       it->second = colour;
     }
 
-    void PeakPalette::setBackgroundColour(const int index, const Qt::GlobalColor colour)
+    void PeakPalette::setBackgroundColour(const int index, const QColor colour)
     {
       auto it = safeFetchPair(m_backgroundMap, index);
       // owverwirte
@@ -103,6 +103,32 @@ namespace MantidQt
         throw std::runtime_error("The PeakPalette size is not consistent");
       }
       return m_foregroundMap.size();
+    }
+
+    bool PeakPalette::operator==(const PeakPalette& other) const
+    {
+      bool areEqual = true;
+      if(other.paletteSize() != this->paletteSize())
+      {
+        areEqual = false;
+      }
+      else
+      {
+        for(int i = 0; i < this->paletteSize(); ++i)
+        {
+          if(this->backgroundIndexToColour(i) != other.backgroundIndexToColour(i))
+          {
+            areEqual = false;
+            break;
+          }
+          if(this->foregroundIndexToColour(i) != other.foregroundIndexToColour(i))
+          {
+            areEqual = false;
+            break;
+          }
+        }
+      }
+      return areEqual;
     }
 
   }

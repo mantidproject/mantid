@@ -22,31 +22,31 @@ public:
   void test_default_foregroundIndexToColour()
   {
     PeakPalette palette;
-    TS_ASSERT_EQUALS(Qt::green, palette.foregroundIndexToColour(0));
-    TS_ASSERT_EQUALS(Qt::darkMagenta, palette.foregroundIndexToColour(1));
-    TS_ASSERT_EQUALS(Qt::cyan, palette.foregroundIndexToColour(2));
-    TS_ASSERT_EQUALS(Qt::darkGreen, palette.foregroundIndexToColour(3));
-    TS_ASSERT_EQUALS(Qt::darkCyan, palette.foregroundIndexToColour(4));
-    TS_ASSERT_EQUALS(Qt::darkYellow, palette.foregroundIndexToColour(5));
-    TS_ASSERT_EQUALS(Qt::darkRed, palette.foregroundIndexToColour(6));
-    TS_ASSERT_EQUALS(Qt::black, palette.foregroundIndexToColour(7));
-    TS_ASSERT_EQUALS(Qt::white, palette.foregroundIndexToColour(8));
-    TS_ASSERT_EQUALS(Qt::darkGray, palette.foregroundIndexToColour(9));
+    TS_ASSERT_EQUALS(QColor(Qt::green), palette.foregroundIndexToColour(0));
+    TS_ASSERT_EQUALS(QColor(Qt::darkMagenta), palette.foregroundIndexToColour(1));
+    TS_ASSERT_EQUALS(QColor(Qt::cyan), palette.foregroundIndexToColour(2));
+    TS_ASSERT_EQUALS(QColor(Qt::darkGreen), palette.foregroundIndexToColour(3));
+    TS_ASSERT_EQUALS(QColor(Qt::darkCyan), palette.foregroundIndexToColour(4));
+    TS_ASSERT_EQUALS(QColor(Qt::darkYellow), palette.foregroundIndexToColour(5));
+    TS_ASSERT_EQUALS(QColor(Qt::darkRed), palette.foregroundIndexToColour(6));
+    TS_ASSERT_EQUALS(QColor(Qt::black), palette.foregroundIndexToColour(7));
+    TS_ASSERT_EQUALS(QColor(Qt::white), palette.foregroundIndexToColour(8));
+    TS_ASSERT_EQUALS(QColor(Qt::darkGray), palette.foregroundIndexToColour(9));
   }  
 
   void test_default_backgroundIndexToColour()
   {
     PeakPalette palette;
-    TS_ASSERT_EQUALS(Qt::green, palette.backgroundIndexToColour(0));
-    TS_ASSERT_EQUALS(Qt::darkMagenta, palette.backgroundIndexToColour(1));
-    TS_ASSERT_EQUALS(Qt::cyan, palette.backgroundIndexToColour(2));
-    TS_ASSERT_EQUALS(Qt::darkGreen, palette.backgroundIndexToColour(3));
-    TS_ASSERT_EQUALS(Qt::darkCyan, palette.backgroundIndexToColour(4));
-    TS_ASSERT_EQUALS(Qt::darkYellow, palette.backgroundIndexToColour(5));
-    TS_ASSERT_EQUALS(Qt::darkRed, palette.backgroundIndexToColour(6));
-    TS_ASSERT_EQUALS(Qt::black, palette.backgroundIndexToColour(7));
-    TS_ASSERT_EQUALS(Qt::white, palette.backgroundIndexToColour(8));
-    TS_ASSERT_EQUALS(Qt::darkGray, palette.backgroundIndexToColour(9));
+    TS_ASSERT_EQUALS(QColor(Qt::green), palette.backgroundIndexToColour(0));
+    TS_ASSERT_EQUALS(QColor(Qt::darkMagenta), palette.backgroundIndexToColour(1));
+    TS_ASSERT_EQUALS(QColor(Qt::cyan), palette.backgroundIndexToColour(2));
+    TS_ASSERT_EQUALS(QColor(Qt::darkGreen), palette.backgroundIndexToColour(3));
+    TS_ASSERT_EQUALS(QColor(Qt::darkCyan), palette.backgroundIndexToColour(4));
+    TS_ASSERT_EQUALS(QColor(Qt::darkYellow), palette.backgroundIndexToColour(5));
+    TS_ASSERT_EQUALS(QColor(Qt::darkRed), palette.backgroundIndexToColour(6));
+    TS_ASSERT_EQUALS(QColor(Qt::black), palette.backgroundIndexToColour(7));
+    TS_ASSERT_EQUALS(QColor(Qt::white), palette.backgroundIndexToColour(8));
+    TS_ASSERT_EQUALS(QColor(Qt::darkGray), palette.backgroundIndexToColour(9));
   }
 
   void test_foregroundIndexToColour_throws_if_out_of_range()
@@ -73,12 +73,12 @@ public:
   {
     PeakPalette palette;
     const int indexToChange = 0;
-    const Qt::GlobalColor originalColour = palette.foregroundIndexToColour(indexToChange);
-    const Qt::GlobalColor requestColour = Qt::black;
+    const QColor originalColour = palette.foregroundIndexToColour(indexToChange);
+    const QColor requestColour(Qt::black);
 
     palette.setForegroundColour(indexToChange, requestColour);
 
-    const Qt::GlobalColor finalColour = palette.foregroundIndexToColour(indexToChange);
+    const QColor finalColour = palette.foregroundIndexToColour(indexToChange);
 
     TSM_ASSERT_DIFFERS("\n\nForeground palette colour has not changed at requested index.\n", originalColour, finalColour);
     TSM_ASSERT_EQUALS("\n\nForeground palette colour has not changed to the requested colour.\n", requestColour, finalColour);
@@ -91,12 +91,12 @@ public:
   {
     PeakPalette palette;
     const int indexToChange = 0;
-    const Qt::GlobalColor originalColour = palette.backgroundIndexToColour(indexToChange);
-    const Qt::GlobalColor requestColour = Qt::black;
+    const QColor originalColour = palette.backgroundIndexToColour(indexToChange);
+    const QColor requestColour = Qt::black;
 
     palette.setForegroundColour(indexToChange, requestColour);
 
-    const Qt::GlobalColor finalColour = palette.foregroundIndexToColour(indexToChange);
+    const QColor finalColour = palette.foregroundIndexToColour(indexToChange);
 
     TSM_ASSERT_DIFFERS("\n\nBackground palette colour has not changed at requested index.\n", originalColour, finalColour);
     TSM_ASSERT_EQUALS("\n\nBackground palette colour has not changed to the requested colour.\n", requestColour, finalColour);
@@ -170,9 +170,57 @@ public:
       TSM_ASSERT_EQUALS("\n\nBackground colour different between orignial and copy.\n", B.backgroundIndexToColour(i), A.backgroundIndexToColour(i));
     }
 
+    TS_ASSERT_EQUALS(A, B);
+
     // Specifically check that B has taken A's values using a couple of test cases.
     TSM_ASSERT_EQUALS("\n\nAssignment of foreground colours has not worked.\n", B.foregroundIndexToColour(0), Qt::red);
     TSM_ASSERT_EQUALS("\n\nAssignment of background colours has not worked.\n", B.backgroundIndexToColour(0), Qt::blue);
+  }
+
+  void test_are_equal()
+  {
+    PeakPalette A;
+    PeakPalette B;
+
+    TS_ASSERT_EQUALS(A, B);
+  }
+
+  void test_are_not_equal_after_changing_a_foreground_colour()
+  {
+    PeakPalette A;
+    PeakPalette B;
+
+    const int modifyIndex = 0;
+    QColor originalColourAtIndex = A.backgroundIndexToColour(modifyIndex);
+
+    A.setForegroundColour(modifyIndex, Qt::blue);
+    B.setForegroundColour(modifyIndex, Qt::red);
+
+    TSM_ASSERT_DIFFERS("Foreground colours are not equal, these palettes should not be equal.", A, B);
+
+    //For completeness, reset and check they are the same.
+    A.setForegroundColour(modifyIndex, originalColourAtIndex);
+    B.setForegroundColour(modifyIndex, originalColourAtIndex);
+    TS_ASSERT_EQUALS(A, B);
+  }
+
+  void test_not_not_equal_after_changing_a_backgroundcolour()
+  {
+    PeakPalette A;
+    PeakPalette B;
+
+    const int modifyIndex = 0;
+    QColor originalColourAtIndex = A.backgroundIndexToColour(modifyIndex);
+
+    A.setBackgroundColour(modifyIndex, Qt::blue);
+    B.setBackgroundColour(modifyIndex, Qt::red);
+
+    TSM_ASSERT_DIFFERS("Background colours are not equal, these palettes should not be equal.", A, B);
+
+    //For completeness, reset and check they are the same.
+    A.setBackgroundColour(modifyIndex, originalColourAtIndex);
+    B.setBackgroundColour(modifyIndex, originalColourAtIndex);
+    TS_ASSERT_EQUALS(A, B);
   }
 
 };
