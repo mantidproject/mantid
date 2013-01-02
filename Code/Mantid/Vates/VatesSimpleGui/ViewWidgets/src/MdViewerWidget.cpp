@@ -353,25 +353,21 @@ void MdViewerWidget::setParaViewComponentsForView()
   QObject::connect(activeObjects, SIGNAL(viewChanged(pqView*)),
                    this->ui.propertiesPanel, SLOT(setView(pqView*)));
 
-  /*
-  QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
-                   SIGNAL(postaccept()),
+  QObject::connect(this->ui.propertiesPanel,
+                   SIGNAL(applied()),
                    this, SLOT(checkForUpdates()));
-  QObject::connect(this->currentView, SIGNAL(triggerAccept()),
-                   this->ui.proxyTabWidget->getObjectInspector(),
-                   SLOT(accept()));
+
   if (this->currentView->inherits("MultiSliceView"))
   {
     QObject::connect(this->ui.pipelineBrowser,
                      SIGNAL(clicked(const QModelIndex &)),
                      static_cast<MultiSliceView *>(this->currentView),
                      SLOT(selectIndicator()));
-    QObject::connect(this->ui.proxyTabWidget->getObjectInspector(),
-                     SIGNAL(accepted()),
+    QObject::connect(this->ui.propertiesPanel,
+                     SIGNAL(applied()),
                      static_cast<MultiSliceView *>(this->currentView),
                      SLOT(updateSelectedIndicator()));
   }
-  */
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(bool)),
                    this->ui.modeControlWidget, SLOT(enableViewButtons(bool)));
   QObject::connect(this->currentView,
