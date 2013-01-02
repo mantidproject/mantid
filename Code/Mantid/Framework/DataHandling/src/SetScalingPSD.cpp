@@ -57,6 +57,7 @@ None
 #include "MantidDataHandling/SetScalingPSD.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <cmath>
@@ -326,6 +327,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Kernel::
   *   @param scaleMap :: A map of integer detectorID and corresponding scaling (in Y)
   */
   std::map<int,Kernel::V3D>::iterator iter = posMap.begin();
+  Geometry::ParameterMap& pmap = WS->instrumentParameters();
   boost::shared_ptr<const Instrument> inst = WS->getInstrument();
   boost::shared_ptr<const IComponent> comp;
 
@@ -343,7 +345,6 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Kernel::
   // loop over detector (IComps)
   for(size_t id=0;id<m_vectDet.size();id++)
   {
-      V3D Pos,shift;// New relative position
       comp = m_vectDet[id];
       boost::shared_ptr<const IDetector> det = boost::dynamic_pointer_cast<const IDetector>(comp);
       int idet=0;
@@ -351,23 +352,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Kernel::
 
       iter=posMap.find(idet); // check if we have a shift
       if(iter==posMap.end()) continue;
-      shift=iter->second;
-      // First set it to the new absolute position (code from MoveInstrument)
-      Pos = comp->getPos() + shift;
-    
-      // Then find the corresponding relative position
-      boost::shared_ptr<const IComponent> parent = comp->getParent();
-      if (parent)
-      {
-          Pos -= parent->getPos();
-          Quat rot = parent->getRelativeRot();
-          rot.inverse();
-          rot.rotate(Pos);
-      }
-    
-      //Need to get the address to the base instrument component
-      Geometry::ParameterMap& pmap = WS->instrumentParameters();
-      pmap.addV3D(comp.get(), "pos", Pos);
+      Geometry::ComponentHelper::moveComponent(*det, pmap, iter->second, Geometry::ComponentHelper::Relative);
 
       // Set the "sca" instrument parameter
       std::map<int,double>::iterator it=scaleMap.find(idet);
