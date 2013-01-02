@@ -46,7 +46,7 @@ namespace Algorithms
   /// Algorithm's name for identification. @see Algorithm::name
   const std::string RebinRagged::name() const
   {
-    return "RebinRagged";
+    return "RebinRagged"; // TODO change to ResampleX
   }
   
   /// Algorithm's version for identification. @see Algorithm::version
@@ -168,6 +168,13 @@ namespace Algorithms
     return msg.str(); // empty string means nothing went wrong
   }
 
+  void RebinRagged::setOptions(const int numBins, const bool useLogBins, const bool isDist)
+  {
+    m_numBins = numBins;
+    m_useLogBinning = useLogBins;
+    m_isDistribution = isDist;
+  }
+
   /**
    * Use the binning information to generate a x-axis.
    *
@@ -203,6 +210,8 @@ namespace Algorithms
       for (int numIter = 0; numIter < MAX_ITER; ++numIter)
       {
         params[1] = -1. * delta;
+        if (!m_isDistribution)
+          params[2] = xmax + delta;
         numBoundaries = VectorHelper::createAxisFromRebinParams(params, xValues, true);
 
         if (numBoundaries == expNumBoundaries)
@@ -227,13 +236,17 @@ namespace Algorithms
     else
     {
       params[1] = (xmax - xmin) / static_cast<double>(m_numBins);
+//      if (!m_isDistribution)
+//        params[2] = xmax + params[1];
+//      g_log.debug() << "XMIN: " << params[0] << " DELTA: " << params[1]
+//                          << " XMAX: " << params[2] << " isDist=" << m_isDistribution << "\n";
       numBoundaries = VectorHelper::createAxisFromRebinParams(params, xValues, true);
     }
 
     if (numBoundaries != expNumBoundaries)
     {
       g_log.warning() << "Did not generate the requested number of bins: generated "
-                      << (numBoundaries-1) << " requested " << m_numBins << "\n";
+                      << numBoundaries << " requested " << expNumBoundaries << "\n";
     }
 
     // return the delta value so the caller can do debug printing

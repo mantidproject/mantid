@@ -41,13 +41,16 @@ namespace Algorithms
     virtual const std::string name() const;
     virtual int version() const;
     virtual const std::string category() const;
+    /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
+    double determineBinning(MantidVec& xValues, const double xmin, const double xmax);
+    /// MADE PUBLIC FOR TESTING ONLY - DO NOT USE
+    void setOptions(const int numBins, const bool useLogBins, const bool isDist);
 
   private:
     virtual void initDocs();
     void init();
     void exec();
     std::map<std::string, std::string> validateInputs();
-    double determineBinning(MantidVec& xValues, const double xmin, const double xmax);
     bool m_useLogBinning;
     bool m_preserveEvents;
     int m_numBins;
