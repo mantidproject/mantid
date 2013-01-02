@@ -89,17 +89,27 @@ void SassenaFFT::exec()
   DataObjects::Workspace2D_sptr sqw = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( sqw0 );
   API::AnalysisDataService::Instance().add( sqwName, sqw );
 
+  // Transform the X-axis to appropriate dimensions
+  // We assume the units of the intermediate scattering function are in picoseconds
+  // The resulting frequency unit is in micro-eV
+  const double df = 4136.0;
+  API::IAlgorithm_sptr scaleX = this->createSubAlgorithm("ScaleX");
+  scaleX->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace",sqw);
+  scaleX->setProperty<double>("Factor", df);
+  scaleX->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
+  scaleX->executeAsSubAlg();
+
   //Do we apply the detailed balance condition exp(E/(2*kT)) ?
   if( this->getProperty("DetailedBalance") )
   {
     double T = this->getProperty("Temp");
-    T *= m_T2meV;  // from Kelvin to units of meV
+    T *= m_T2ueV;  // from Kelvin to units of ueV
     //The ExponentialCorrection algorithm assume the form C0*exp(-C1*x). Note the minus in the exponent
     API::IAlgorithm_sptr ec = this->createChildAlgorithm("ExponentialCorrection");
     ec->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", sqw);
     ec->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
     ec->setProperty<double>("C0",1.0);
-    ec->setProperty<double>("C1",-1.0/(2.0*T));
+    ec->setProperty<double>("C1",1.0/(2.0*T));
     ec->setPropertyValue("Operation","Multiply");
     ec->executeAsChildAlg();
   }
