@@ -1,6 +1,7 @@
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include <algorithm>
 #include <sstream>
+#include <stdexcept>
 
 namespace MantidQt
 {
@@ -22,7 +23,7 @@ namespace MantidQt
       m_backgroundMap = m_foregroundMap;
     }
 
-    PeakPalette::PeakPalette(const PeakPalette& other) : m_foregroundMap(other.m_foregroundMap), m_backgroundMap(other.m_backgroundMap)
+    PeakPalette::PeakPalette(const PeakPalette& other) : m_backgroundMap(other.m_backgroundMap), m_foregroundMap(other.m_foregroundMap)
     {
     }
 
@@ -102,7 +103,7 @@ namespace MantidQt
       {
         throw std::runtime_error("The PeakPalette size is not consistent");
       }
-      return m_foregroundMap.size();
+      return static_cast<int>(m_foregroundMap.size());
     }
 
     bool PeakPalette::operator==(const PeakPalette& other) const
