@@ -1838,8 +1838,6 @@ namespace Mantid
 
 
         IDetector_const_sptr Det = inpWkSpace->getDetector(workspaceIndex);
-        boost::shared_ptr<const RectangularDetector> Panel = boost::dynamic_pointer_cast<const RectangularDetector>
-                   (Det->getParent()->getParent());
         V3D pixPos = Det->getPos();
 
 
