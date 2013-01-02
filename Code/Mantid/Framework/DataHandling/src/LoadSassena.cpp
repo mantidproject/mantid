@@ -360,7 +360,7 @@ void LoadSassena::exec()
   }// end of iterate over the valid sets
 
   this->setProperty( "OutputWorkspace", gws ); //register the groupWorkspace in the analysis data service
-
+  H5Fclose(h5file);
 } // end of LoadSassena::exec()
 
 
