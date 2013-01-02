@@ -94,7 +94,7 @@ int vtkPeaksReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInforma
 
   vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
   glyphFilter->SetInputData(structuredMesh);
-  glyphFilter->SetSourceData(sphere->GetOutput());
+  glyphFilter->SetSourceConnection(sphere->GetOutputPort());
   glyphFilter->Update();
   vtkPolyData *glyphed = glyphFilter->GetOutput();
 
