@@ -93,11 +93,11 @@ void SassenaFFT::exec()
   // We assume the units of the intermediate scattering function are in picoseconds
   // The resulting frequency unit is in micro-eV
   const double df = 4136.0;
-  API::IAlgorithm_sptr scaleX = this->createSubAlgorithm("ScaleX");
+  API::IAlgorithm_sptr scaleX = this->createChildAlgorithm("ScaleX");
   scaleX->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace",sqw);
   scaleX->setProperty<double>("Factor", df);
   scaleX->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
-  scaleX->executeAsSubAlg();
+  scaleX->executeAsChildAlg();
 
   //Do we apply the detailed balance condition exp(E/(2*kT)) ?
   if( this->getProperty("DetailedBalance") )
