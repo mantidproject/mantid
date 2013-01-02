@@ -30,7 +30,7 @@ namespace MantidQt
     {
     public:
       /// Constructor
-      PhysicalSphericalPeak(const Mantid::Kernel::V3D& origin, const double& radius);
+      PhysicalSphericalPeak(const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius, const double& backgroundOuterRadius);
       /// Destructor
       ~PhysicalSphericalPeak();
       /// Setter for the slice point.
@@ -47,8 +47,18 @@ namespace MantidQt
       */
       inline bool isViewable() const
       {
-        return (m_cachedOpacityAtDistance != m_opacityMin);
+        if(m_showBackgroundRadius)
+        {
+          return (m_backgroundOuterRadiusAtDistance <= this->m_backgroundOuterRadius);
+        }
+        else
+        {
+          return (m_peakRadiusAtDistance <= this->m_peakRadius);
+        }
       }
+
+      /// Setter to command whether the background radius should also be shown.
+      void showBackgroundRadius(const bool show);
 
     private:
       /// Original origin x=h, y=k, z=l
@@ -56,7 +66,11 @@ namespace MantidQt
       /// Origin md-x, md-y, and md-z
       Mantid::Kernel::V3D m_origin;
       /// actual peak radius
-      const double m_radius;
+      const double m_peakRadius;
+      /// Peak background inner radius
+      const double m_backgroundInnerRadius;
+      /// Peak background outer radius
+      const double m_backgroundOuterRadius;
       /// Max opacity
       const double m_opacityMax;
       /// Min opacity
@@ -64,11 +78,23 @@ namespace MantidQt
       /// Cached opacity at the distance z from origin
       double m_cachedOpacityAtDistance;
       /// Cached radius at the distance z from origin
-      double m_cachedRadiusAtDistance;
+      double m_peakRadiusAtDistance;
       /// Cached opacity gradient.
       const double m_cachedOpacityGradient;
       /// Cached radius squared.
-      const double m_cachedRadiusSQ;
+      const double m_peakRadiusSQ;
+      /// Cached background inner radius sq.
+      const double m_backgroundInnerRadiusSQ;
+      /// Cached background outer radius sq.
+      double m_backgroundOuterRadiusSQ;
+      /// Flag to indicate that the background radius should be drawn.
+      bool m_showBackgroundRadius;
+      /// Inner radius at distance.
+      double m_backgroundInnerRadiusAtDistance;
+      /// Outer radius at distance.
+      double m_backgroundOuterRadiusAtDistance;
+      /// Current slicepoint.
+      double m_currentSlicePoint;
 
       DISABLE_COPY_AND_ASSIGN(PhysicalSphericalPeak)
     };

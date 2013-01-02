@@ -251,5 +251,10 @@ namespace MantidQt
       const int pos = std::distance(m_subjects.begin(), iterator);
       return m_palette.backgroundIndexToColour(pos);
     }
+
+     void CompositePeaksPresenter::setBackgroundRadiusShown(const bool shown)
+     {
+
+     }
   }
 }

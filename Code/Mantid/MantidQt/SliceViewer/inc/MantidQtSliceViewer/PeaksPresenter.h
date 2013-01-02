@@ -46,8 +46,7 @@ namespace SliceViewer
     virtual void setForegroundColour(const QColor) = 0;
     virtual void setBackgroundColour(const QColor) = 0;
     virtual std::string getTransformName() const = 0;
-    /*virtual QColor getForegroundColour() const = 0;
-    virtual QColor getBackgroundColour() const = 0;*/
+    virtual void showBackgroundRadius(const bool shown) = 0;
   };
 
 

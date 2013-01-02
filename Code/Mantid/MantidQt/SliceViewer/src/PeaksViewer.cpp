@@ -14,7 +14,7 @@ namespace MantidQt
       this->setMinimumWidth(500);
     }
 
-    void PeaksViewer::setPeaksWorkspaces(const SetPeaksWorkspaces& workspaces)
+    void PeaksViewer::setPeaksWorkspaces(const SetPeaksWorkspaces&)
     {
     }
 
@@ -47,10 +47,15 @@ namespace MantidQt
       auto it = workspaces.begin();
       while(it != workspaces.end())
       {
-        auto widget = new PeaksWorkspaceWidget(*it, coordinateSystem, this);
+        Mantid::API::IPeaksWorkspace_const_sptr ws = *it;
+        auto backgroundColour = m_presenter->getBackgroundColour(ws);
+        auto foregroundColour = m_presenter->getForegroundColour(ws);
+
+        auto widget = new PeaksWorkspaceWidget(ws, coordinateSystem, foregroundColour, backgroundColour, this);
 
         connect(widget, SIGNAL(peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor)), this, SLOT(onPeakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor)));
         connect(widget, SIGNAL(backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor)), this, SLOT(onBackgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor)));
+        connect(widget, SIGNAL(backgroundRadiusShown(bool)), this, SLOT(onBackgroundRadiusShown(bool)));
         layout()->addWidget(widget);
         ++it;
       }
@@ -84,6 +89,11 @@ namespace MantidQt
     void PeaksViewer::onBackgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, QColor newColour)
     {
       m_presenter->setBackgroundColour(peaksWS, newColour);
+    }
+
+    void PeaksViewer::onBackgroundRadiusShown(bool show)
+    {
+      m_presenter->setBackgroundRadiusShown(show);
     }
 
   } // namespace

@@ -39,7 +39,7 @@ namespace MantidQt
       PeakOverlayCrossFactory(QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
       virtual ~PeakOverlayCrossFactory();
       boost::shared_ptr<PeakOverlayView> createView(const Mantid::Kernel::V3D& position) const;
-      virtual void setRadius(const double&)
+      virtual void setPeakRadius(const double&, const double&, const double&)
       {
         //Do nothing.
       }

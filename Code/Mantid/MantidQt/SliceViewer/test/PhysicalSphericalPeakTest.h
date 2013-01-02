@@ -23,7 +23,9 @@ public:
   {
     V3D origin(0, 0, 0);
     const double radius = 1;
-    PhysicalSphericalPeak physicalPeak(origin, radius);
+    const double innerBackgroundRadius = 2;
+    const double outerBackgroundRadius = 3;
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     TSM_ASSERT("Should NOT be viewable until a slice point < r is set.", !physicalPeak.isViewable());
   }
@@ -32,7 +34,9 @@ public:
   {
     V3D origin(0, 0, 0);
     const double radius = 1;
-    PhysicalSphericalPeak physicalPeak(origin, radius);
+    const double innerBackgroundRadius = 2;
+    const double outerBackgroundRadius = 3;
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     const double delta = 0.01;
     const double slicePoint = radius - delta;
@@ -45,20 +49,24 @@ public:
   {
     V3D origin(0, 0, 0);
     const double radius = 1;
-    PhysicalSphericalPeak physicalPeak(origin, radius);
+    const double innerBackgroundRadius = 2;
+    const double outerBackgroundRadius = 3;
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     const double delta = 0.01;
     const double slicePoint = radius + delta;
     physicalPeak.setSlicePoint(slicePoint);
 
-    TSM_ASSERT("Should NOT be viewable until a slice point > r is set.", !physicalPeak.isViewable());
+    TSM_ASSERT("Should NOT be viewable if a slice point > r is set.", !physicalPeak.isViewable());
   }
 
   void test_draw_defaults()
   {
     V3D origin(0, 0, 0);
     const double radius = 1;
-    PhysicalSphericalPeak physicalPeak(origin, radius);
+    const double innerBackgroundRadius = 2;
+    const double outerBackgroundRadius = 3;
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     // Scale 1:1 on both x and y for simplicity.
     const double windowHeight = 1;
@@ -80,7 +88,9 @@ public:
   {
     V3D origin(0, 0, 0);
     const double radius = 1;
-    PhysicalSphericalPeak physicalPeak(origin, radius);
+    const double innerBackgroundRadius = 2;
+    const double outerBackgroundRadius = 3;
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
 
     const double slicePoint = 0.5;// set to be half way through the radius.
     physicalPeak.setSlicePoint(slicePoint);
@@ -113,10 +123,31 @@ public:
 
     V3D origin(0, 0, 0);
     const double radius = 1;
-    PhysicalSphericalPeak physicalPeak(origin, radius);
+    const double innerBackgroundRadius = 2;
+    const double outerBackgroundRadius = 3;
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
     physicalPeak.movePosition(transform); // Should invoke the mock method.
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockTransform));
+  }
+
+  void test_viewable_when_rendering_background_too()
+  {
+    V3D origin(0, 0, 0);
+    const double radius = 1;
+    const double innerBackgroundRadius = 2;
+    const double outerBackgroundRadius = 3;
+    PhysicalSphericalPeak physicalPeak(origin, radius, innerBackgroundRadius, outerBackgroundRadius);
+    physicalPeak.showBackgroundRadius(true); // show the background radius, now viewability should be limited by the outer background radius.
+    const double delta = 0.01;
+
+    double slicePoint = outerBackgroundRadius - delta;
+    physicalPeak.setSlicePoint(slicePoint);
+    TS_ASSERT(physicalPeak.isViewable());
+
+    slicePoint = outerBackgroundRadius + delta;
+    physicalPeak.setSlicePoint(slicePoint);
+    TS_ASSERT(!physicalPeak.isViewable());
   }
 
 };
@@ -143,6 +174,8 @@ public:
   {
     const int sizeInAxis = 100;
     const double radius = 5;
+    const double innerBackgroundRadius = 6;
+    const double outerBackgroundRadius = 7;
     m_physicalPeaks.reserve(sizeInAxis*sizeInAxis*sizeInAxis);
     for(int x = 0; x < sizeInAxis; ++x)
     {
@@ -151,7 +184,7 @@ public:
         for(int z = 0; z < sizeInAxis; ++z)
         {
           V3D peakOrigin(x, y, z);
-          m_physicalPeaks.push_back(boost::make_shared<PhysicalSphericalPeak>(peakOrigin, radius));
+          m_physicalPeaks.push_back(boost::make_shared<PhysicalSphericalPeak>(peakOrigin, radius, innerBackgroundRadius, outerBackgroundRadius));
         }
       }
     }

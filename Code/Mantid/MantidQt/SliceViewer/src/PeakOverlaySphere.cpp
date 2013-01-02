@@ -17,10 +17,10 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  PeakOverlaySphere::PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, const QColor& peakColour)
+  PeakOverlaySphere::PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius, const double& backgroundOuterRadius, const QColor& peakColour)
   : QWidget( parent ),
     m_plot(plot),
-    m_physicalPeak(origin, radius),
+    m_physicalPeak(origin, peakRadius, backgroundInnerRadius, backgroundOuterRadius),
     m_peakColour(peakColour)
   {
     setAttribute(Qt::WA_NoMousePropagation, false);
@@ -125,6 +125,11 @@ namespace SliceViewer
   void PeakOverlaySphere::changeBackgroundColour(const QColor)
   {
     // Not being drawn at the moment, TODO.
+  }
+
+  void PeakOverlaySphere::showBackgroundRadius(const bool show)
+  {
+    m_physicalPeak.showBackgroundRadius(show);
   }
 
 } // namespace Mantid

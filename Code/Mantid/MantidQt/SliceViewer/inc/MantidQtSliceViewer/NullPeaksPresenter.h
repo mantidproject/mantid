@@ -23,8 +23,7 @@ namespace MantidQt
       void setForegroundColour(const QColor){/*Do nothing*/}
       void setBackgroundColour(const QColor){/*Do nothing*/}
       std::string getTransformName() const {return "";}
-      /*virtual QColor getForegroundColour() const{ throw std::logic_error("NullPeaksPresenter::getForegroundColour not possible.");};
-      virtual QColor getBackgroundColour() const{ throw std::logic_error("NullPeaksPresenter::getBackgroundColour not possible");};*/
+      void showBackgroundRadius(const bool){/*Do nothing*/}
     };
 
   }

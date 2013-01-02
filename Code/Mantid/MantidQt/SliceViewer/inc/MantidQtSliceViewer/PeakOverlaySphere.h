@@ -49,7 +49,7 @@ namespace SliceViewer
 
   public:
     /// Constructor
-    PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& radius, const QColor& peakColour);
+    PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius, const double& backgroundOuterRadius, const QColor& peakColour);
     /// Destructor
     virtual ~PeakOverlaySphere();
     /// Set the slice point at position.
@@ -66,6 +66,8 @@ namespace SliceViewer
     virtual void changeForegroundColour(const QColor);
     /// Change background colour
     virtual void changeBackgroundColour(const QColor);
+    /// Show the background radius
+    virtual void showBackgroundRadius(const bool show);
 
   private:
 

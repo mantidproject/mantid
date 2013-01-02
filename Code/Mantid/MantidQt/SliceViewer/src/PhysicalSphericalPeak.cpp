@@ -8,17 +8,25 @@ namespace MantidQt
       Constructor
       @param origin : peak origin (natural coordinates)
       @param radius : peak radius (natural coordinates)
+      @param backgroundRadius : peak background radius (natural coordinates)
       */
-      PhysicalSphericalPeak::PhysicalSphericalPeak(const Mantid::Kernel::V3D& origin, const double& radius):
+      PhysicalSphericalPeak::PhysicalSphericalPeak(const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius, const double& backgroundOuterRadius):
       m_originalOrigin(origin),
       m_origin(origin),
-      m_radius(radius),
+      m_peakRadius(peakRadius),
+      m_backgroundInnerRadius(backgroundInnerRadius),
+      m_backgroundOuterRadius(backgroundOuterRadius),
       m_opacityMax(0.8),
       m_opacityMin(0.0),
       m_cachedOpacityAtDistance(0.0),
-      m_cachedRadiusAtDistance(0.0),
-      m_cachedOpacityGradient((m_opacityMin - m_opacityMax)/m_radius),
-      m_cachedRadiusSQ(m_radius*m_radius)
+      m_peakRadiusAtDistance(peakRadius+1), // Initialize such that physical peak is not visible
+      m_backgroundInnerRadiusAtDistance(backgroundInnerRadius+1), // Initialize such that physical peak is not visible
+      m_backgroundOuterRadiusAtDistance(backgroundOuterRadius+1), // Initialize such that physical peak is not visible
+      m_cachedOpacityGradient((m_opacityMin - m_opacityMax)/m_peakRadius),
+      m_peakRadiusSQ(m_peakRadius*m_peakRadius),
+      m_backgroundInnerRadiusSQ(backgroundInnerRadius*backgroundInnerRadius),
+      m_backgroundOuterRadiusSQ(backgroundOuterRadius*backgroundOuterRadius),
+      m_showBackgroundRadius(false)
       {
       }
 
@@ -51,16 +59,17 @@ namespace MantidQt
         const double distance = z - m_origin.Z();
         const double distanceSQ = distance * distance;
         
-        if(distanceSQ <= m_cachedRadiusSQ)
+        if(distanceSQ <= m_backgroundOuterRadiusSQ)
         {
           const double distanceAbs = std::sqrt(distanceSQ);
-          m_cachedRadiusAtDistance = std::sqrt( m_cachedRadiusSQ - distanceSQ );
+          m_peakRadiusAtDistance = std::sqrt( m_peakRadiusSQ - distanceSQ );
+          m_backgroundInnerRadiusAtDistance = std::sqrt(m_backgroundInnerRadiusSQ - distanceSQ );
+          m_backgroundOuterRadiusAtDistance = std::sqrt(m_backgroundOuterRadiusSQ - distanceSQ );
           // Apply a linear transform to convert from a distance to an opacity between opacityMin and opacityMax.
           m_cachedOpacityAtDistance = m_cachedOpacityGradient * distanceAbs  + m_opacityMax;
         }
         else
         {
-          m_cachedRadiusAtDistance = 0;
           m_cachedOpacityAtDistance = m_opacityMin;
         }
       }
@@ -92,11 +101,11 @@ namespace MantidQt
           // Scale factor for going from viewY to windowY
           const double scaleX = windowWidth/viewWidth;
 
-          const double innerRadiusX = scaleX * m_cachedRadiusAtDistance;
-          const double innerRadiusY = scaleY * m_cachedRadiusAtDistance;
+          const double innerRadiusX = scaleX * m_peakRadiusAtDistance;
+          const double innerRadiusY = scaleY * m_peakRadiusAtDistance;
 
-          double outerRadiusX = scaleX * m_radius;
-          double outerRadiusY = scaleY * m_radius;
+          double outerRadiusX = scaleX * m_peakRadius;
+          double outerRadiusY = scaleY * m_peakRadius;
 
           const double lineWidthX = outerRadiusX - innerRadiusX;
           const double lineWidthY = outerRadiusY - innerRadiusY;
@@ -111,6 +120,11 @@ namespace MantidQt
           drawingObjects.peakOrigin = m_origin;
         }
         return drawingObjects;
+      }
+
+      void PhysicalSphericalPeak::showBackgroundRadius(const bool show)
+      {
+        m_showBackgroundRadius = show;
       }
   }
 }

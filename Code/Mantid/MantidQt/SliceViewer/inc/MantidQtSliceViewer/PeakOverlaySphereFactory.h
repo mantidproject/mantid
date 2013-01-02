@@ -37,11 +37,13 @@ namespace MantidQt
     {
     private:
       double m_peakRadius;
+      double m_backgroundInnerRadius;
+      double m_backgroundOuterRadius;
     public:
       PeakOverlaySphereFactory(QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
       virtual ~PeakOverlaySphereFactory();
       boost::shared_ptr<PeakOverlayView> createView(const Mantid::Kernel::V3D& position) const;
-      virtual void setRadius(const double& peakRadius);
+      virtual void setPeakRadius(const double& peakRadius, const double& peakInnerRadius, const double& peakOuterRadius);
       virtual void setZRange(const double&, const double&)
       {
         // Do nothing.

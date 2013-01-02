@@ -34,6 +34,7 @@ namespace
     MOCK_METHOD1(setForegroundColour, void(const QColor));
     MOCK_METHOD1(setBackgroundColour, void(const QColor));
     MOCK_CONST_METHOD0(getTransformName, std::string());
+    MOCK_METHOD1(showBackgroundRadius, void(const bool));
     ~MockPeaksPresenter(){}
   };
 
@@ -80,6 +81,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_METHOD1(movePosition, void(PeakTransform_sptr));
     MOCK_METHOD1(changeForegroundColour, void(const QColor));
     MOCK_METHOD1(changeBackgroundColour, void(const QColor));
+    MOCK_METHOD1(showBackgroundRadius, void(const bool));
     ~MockPeakOverlayView(){}
   };
 
@@ -90,7 +92,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
   {
   public:
     MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(const Mantid::Kernel::V3D&));
-    MOCK_METHOD1(setRadius, void(const double&));
+    MOCK_METHOD3(setPeakRadius, void(const double&, const double&, const double&));
     MOCK_METHOD2(setZRange, void(const double&, const double&));
     MOCK_CONST_METHOD0(getPlotXLabel, std::string());
     MOCK_CONST_METHOD0(getPlotYLabel, std::string());

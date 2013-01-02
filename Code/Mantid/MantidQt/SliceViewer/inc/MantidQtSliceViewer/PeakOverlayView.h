@@ -53,6 +53,8 @@ namespace MantidQt
       virtual void changeForegroundColour(const QColor) = 0;
       /// Change background colour
       virtual void changeBackgroundColour(const QColor) = 0;
+      /// Show the background radius
+      virtual void showBackgroundRadius(const bool){}
       /// Destructor
       virtual ~PeakOverlayView()
       {

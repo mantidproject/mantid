@@ -79,5 +79,10 @@ namespace MantidQt
     {
       return m_compositePresenter->getTransformName();
     }
+
+    void ProxyCompositePeaksPresenter::setBackgroundRadiusShown(const bool shown)
+    {
+      m_compositePresenter->setBackgroundRadiusShown(shown);
+    }
   }
 }

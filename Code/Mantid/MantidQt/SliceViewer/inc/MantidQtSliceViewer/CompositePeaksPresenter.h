@@ -5,6 +5,7 @@
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include <vector>
+#include <stdexcept>
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt
@@ -29,6 +30,7 @@ namespace MantidQt
       SetPeaksWorkspaces presentedWorkspaces() const;
       void setForegroundColour(const QColor){/*Do nothing*/}
       void setBackgroundColour(const QColor){/*Do nothing*/}
+      void showBackgroundRadius(const bool show){/*Do nothing*/}
       virtual std::string getTransformName() const;
       
       /// Constructor
@@ -51,6 +53,8 @@ namespace MantidQt
       QColor getBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const;
       /// Get a copy of the palette in its current state.
       PeakPalette getPalette() const;
+      /// Setter for indicating whether the background radius will be shown.
+      void setBackgroundRadiusShown(const bool shown);
     private:
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;

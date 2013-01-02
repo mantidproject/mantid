@@ -45,11 +45,15 @@ namespace SliceViewer
     }
 
     double peakIntegrationRadius = 0;
+    double backgroundInnerRadius = 0;
+    double backgroundOuterRadius = 0;
     double maxZ = 0;
     double minZ = 0;
     if(peaksWS->hasIntegratedPeaks())
     {
       peakIntegrationRadius = boost::lexical_cast<double>(peaksWS->run().getProperty("PeakRadius")->value());
+      backgroundInnerRadius = boost::lexical_cast<double>(peaksWS->run().getProperty("BackgroundInnerRadius")->value());
+      backgroundOuterRadius = boost::lexical_cast<double>(peaksWS->run().getProperty("BackgroundOuterRadius")->value());
     }
     else
     {
@@ -66,7 +70,7 @@ namespace SliceViewer
         }
       } 
     }
-    m_viewFactory->setRadius(peakIntegrationRadius);
+    m_viewFactory->setPeakRadius(peakIntegrationRadius, backgroundInnerRadius, backgroundOuterRadius);
     m_viewFactory->setZRange(maxZ, minZ);
     
     const bool transformSucceeded = this->configureMappingTransform();
@@ -253,6 +257,19 @@ namespace SliceViewer
   std::string ConcretePeaksPresenter::getTransformName() const
   {
     return m_transform->getFriendlyName();
+  }
+
+  void ConcretePeaksPresenter::showBackgroundRadius(const bool show)
+  {
+    // Change background colours
+    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+    {
+      if((*it) != NULL)
+      {
+        (*it)->showBackgroundRadius(show);
+        (*it)->updateView();
+      }
+    }
   }
 
 }

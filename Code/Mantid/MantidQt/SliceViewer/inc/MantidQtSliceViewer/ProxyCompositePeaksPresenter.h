@@ -36,6 +36,8 @@ namespace MantidQt
       SetPeaksWorkspaces presentedWorkspaces() const;
       /// Gets the transform name.
       std::string getTransformName() const;
+      /// Change whether the background radius is shown.
+      void setBackgroundRadiusShown(const bool shown);
 
     private:
       /// Wrapped composite to delegate to.

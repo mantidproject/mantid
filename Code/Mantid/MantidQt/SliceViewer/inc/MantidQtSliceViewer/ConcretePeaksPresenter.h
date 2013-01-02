@@ -56,8 +56,10 @@ namespace MantidQt
       void hideAll();
       /// Show all views
       void showAll();
-      /// determine wheter a dimension name corresponds to the free axis for the peaks workspace.
+      /// Determine wheter a dimension name corresponds to the free axis for the peaks workspace.
       bool isDimensionNameOfFreeAxis(const std::string& name) const;
+      /// Switch between showing background radius or not
+      void showBackgroundRadius(const bool show);
     };
 
   }
