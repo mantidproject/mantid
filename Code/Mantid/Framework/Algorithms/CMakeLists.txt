@@ -569,7 +569,7 @@ set ( TEST_FILES
 	ReplaceSpecialValuesTest.h
 	ResetNegativesTest.h
 	ResizeRectangularDetectorTest.h
-	SassenaFFTTest.h
+	#SassenaFFTTest.h
 	ScaleTest.h
 	ScaleXTest.h
 	ShiftLogTimeTest.h
