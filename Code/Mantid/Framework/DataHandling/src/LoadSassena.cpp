@@ -65,11 +65,15 @@ int LoadSassena::fileCheck(const std::string &filePath)
   int confidence(0);
   hid_t h5file = H5Fopen(filePath.c_str(),H5F_ACC_RDONLY,H5P_DEFAULT);
   if (H5LTfind_attribute(h5file,"sassena_version")==1)
+  {
     confidence = 99;
+  }
   else
   {
-    this->g_log.error("no version attribute found");
+    this->g_log.debug("LoadSassena::fileCheck - no version attribute found");
   }
+  // Be sure to close the file before returning
+  H5Fclose(h5file);
   return confidence;
 }
 
