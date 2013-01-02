@@ -368,11 +368,11 @@ namespace Crystal
 
     if( xml)
     {
-      boost::shared_ptr<Algorithm> loadParFile = createSubAlgorithm("LoadParameterFile");
+      boost::shared_ptr<Algorithm> loadParFile = createChildAlgorithm("LoadParameterFile");
       loadParFile->initialize();
       loadParFile->setProperty("Workspace",ws);
       loadParFile->setProperty("Filename",preprocessFilename);
-      loadParFile->executeAsSubAlg();
+      loadParFile->executeAsChildAlg();
 
       boost::shared_ptr<const Instrument> newInstrument = ws->getInstrument();
       newInstrument->getInstrumentParameters(L0,beamline,norm,samplePos);
@@ -380,7 +380,7 @@ namespace Crystal
 
     }else
     {
-      boost::shared_ptr<Algorithm> LoadDetCal = createSubAlgorithm("LoadIsawDetCal" );
+      boost::shared_ptr<Algorithm> LoadDetCal = createChildAlgorithm("LoadIsawDetCal" );
 
       LoadDetCal->initialize();
      // LoadDetCal->setProperty("InputWorkspace",ws);//Doesn't work
@@ -388,7 +388,7 @@ namespace Crystal
       LoadDetCal->setProperty("Filename",preprocessFilename);
       LoadDetCal->setProperty(string("TimeOffset"),0.0);
       LoadDetCal->setPropertyValue("InputWorkspace","fff");
-      LoadDetCal->executeAsSubAlg();
+      LoadDetCal->executeAsChildAlg();
 
       boost::shared_ptr<const Instrument> newInstrument = ws->getInstrument();
       newInstrument->getInstrumentParameters(L0,beamline,norm,samplePos);
@@ -778,7 +778,7 @@ namespace Crystal
     FunctionArgument = oss.str();
     TiesArgument = oss1.str();
    //--------------------- Set up Fit Algorithm and Execute-------------------
-   boost::shared_ptr< Algorithm > fit_alg = createSubAlgorithm( "Fit", .2, .9, true );
+   boost::shared_ptr< Algorithm > fit_alg = createChildAlgorithm( "Fit", .2, .9, true );
 
    if( ! fit_alg)
    {
@@ -805,7 +805,7 @@ namespace Crystal
 
    fit_alg->setProperty( "Output","out");
 
-   fit_alg->executeAsSubAlg();
+   fit_alg->executeAsChildAlg();
 
    g_log.debug()<<"Finished executing Fit algorithm"<<std::endl;
 
@@ -965,7 +965,7 @@ namespace Crystal
     if( !DetCalFileName.empty() )
     {
 
-     boost::shared_ptr<Algorithm>SaveDetCal = createSubAlgorithm( "SaveIsawDetCal");
+     boost::shared_ptr<Algorithm>SaveDetCal = createChildAlgorithm( "SaveIsawDetCal");
      //clone this
      peaksWs->setInstrument( NewInstrument);
      SaveDetCal->initialize();
@@ -975,7 +975,7 @@ namespace Crystal
      string TT0 = "t0";
      SaveDetCal->setProperty( "TimeOffset",result[ TT0 ]);
 
-     SaveDetCal->executeAsSubAlg();
+     SaveDetCal->executeAsChildAlg();
 
      g_log.notice()<<"Saved DetCal file in "<<DetCalFileName<< std::endl;
     }

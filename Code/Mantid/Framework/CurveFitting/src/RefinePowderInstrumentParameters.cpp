@@ -291,7 +291,7 @@ namespace CurveFitting
       outss << dataWS->readX(0)[i] << "\t\t" << dataWS->readY(0)[i] << "\t\t" << dataWS->readE(0)[i] << endl;
     cout << "Input Peak Position Workspace To Fit: " << endl << outss.str() << endl;
 
-    API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", 0.0, 0.2, true);
+    API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
     fitalg->initialize();
 
     fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(mFunction));
@@ -379,7 +379,7 @@ namespace CurveFitting
     */
   bool RefinePowderInstrumentParameters::fitFunction(IFunction_sptr func, double& gslchi2)
   {
-    API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", 0.0, 0.2, true);
+    API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
     fitalg->initialize();
 
     fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(func));
@@ -422,7 +422,7 @@ namespace CurveFitting
     }
 
     // 2. Call a non fit refine
-    API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", 0.0, 0.2, true);
+    API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", 0.0, 0.2, true);
     fitalg->initialize();
 
     fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(func));

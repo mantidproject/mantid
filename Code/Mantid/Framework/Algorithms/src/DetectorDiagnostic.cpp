@@ -190,7 +190,7 @@ namespace Mantid
       m_rangeLower = this->getProperty("RangeLower");
       m_rangeUpper = this->getProperty("RangeUpper");
 
-      // integrate the data once to pass to subalgorithms
+      // integrate the data once to pass to ChildAlgorithms
       m_fracDone = 0.;
 
       // Get the other workspaces
@@ -228,10 +228,10 @@ namespace Mantid
       MatrixWorkspace_sptr hardMaskWS = this->getProperty("HardMaskWorkspace");
       if (hardMaskWS)
       {
-        IAlgorithm_sptr md = this->createSubAlgorithm("MaskDetectors");
+        IAlgorithm_sptr md = this->createChildAlgorithm("MaskDetectors");
         md->setProperty("Workspace", inputWS);
         md->setProperty("MaskedWorkspace", hardMaskWS);
-        md->executeAsSubAlg();
+        md->executeAsChildAlg();
       }
 
       // Perform FindDetectorsOutsideLimits and MedianDetectorTest on the
@@ -250,8 +250,8 @@ namespace Mantid
         // get the relevant inputs
         double variation = this->getProperty("DetVanRatioVariation");
 
-        // run the subalgorithm
-        IAlgorithm_sptr alg = this->createSubAlgorithm("DetectorEfficiencyVariation",
+        // run the ChildAlgorithm
+        IAlgorithm_sptr alg = this->createChildAlgorithm("DetectorEfficiencyVariation",
             m_fracDone, m_fracDone+m_progStepWidth);
         m_fracDone += m_progStepWidth;
         alg->setProperty("WhiteBeamBase", inputWS);
@@ -261,7 +261,7 @@ namespace Mantid
         alg->setProperty("RangeLower", m_rangeLower);
         alg->setProperty("RangeUpper", m_rangeUpper);
         alg->setProperty("Variation", variation);
-        alg->executeAsSubAlg();
+        alg->executeAsChildAlg();
         MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
         applyMask(inputWS, localMaskWS);
         applyMask(input2WS, localMaskWS);
@@ -275,7 +275,7 @@ namespace Mantid
         // apply mask to what we are going to input
         applyMask(totalCountsWS, maskWS);
 
-        IAlgorithm_sptr zeroChk = this->createSubAlgorithm("FindDetectorsOutsideLimits",
+        IAlgorithm_sptr zeroChk = this->createChildAlgorithm("FindDetectorsOutsideLimits",
             m_fracDone, m_fracDone+m_progStepWidth);
         m_fracDone += m_progStepWidth;
         zeroChk->setProperty("InputWorkspace", totalCountsWS);
@@ -283,7 +283,7 @@ namespace Mantid
         zeroChk->setProperty("EndWorkspaceIndex", m_maxIndex);
         zeroChk->setProperty("LowThreshold", 1.0e-10);
         zeroChk->setProperty("HighThreshold", 1.0e100);
-        zeroChk->executeAsSubAlg();
+        zeroChk->executeAsChildAlg();
         MatrixWorkspace_sptr localMaskWS = zeroChk->getProperty("OutputWorkspace");
         applyMask(inputWS, localMaskWS);
         int localFails = zeroChk->getProperty("NumberOfFailures");
@@ -300,8 +300,8 @@ namespace Mantid
         double lowThreshold = this->getProperty("SampleBkgLowAcceptanceFactor");
         double highThreshold = this->getProperty("SampleBkgHighAcceptanceFactor");
 
-        // run the subalgorithm
-        IAlgorithm_sptr alg = this->createSubAlgorithm("MedianDetectorTest",
+        // run the ChildAlgorithm
+        IAlgorithm_sptr alg = this->createChildAlgorithm("MedianDetectorTest",
             m_fracDone, m_fracDone+m_progStepWidth);
         m_fracDone += m_progStepWidth;
         alg->setProperty("InputWorkspace", bkgWS);
@@ -313,7 +313,7 @@ namespace Mantid
         alg->setProperty("LowOutlier", 0.0);
         alg->setProperty("HighOutlier", 1.0e100);
         alg->setProperty("ExcludeZeroesFromMedian", true);
-        alg->executeAsSubAlg();
+        alg->executeAsChildAlg();
         MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
         applyMask(inputWS, localMaskWS);
         int localFails = alg->getProperty("NumberOfFailures");
@@ -327,14 +327,14 @@ namespace Mantid
         double maxTubeFrameRate = this->getProperty("MaxTubeFramerate");
         int numIgnore = this->getProperty("NIgnoredCentralPixels");
 
-        // run the subalgorithm
-        IAlgorithm_sptr alg = this->createSubAlgorithm("CreatePSDBleedMask",
+        // run the ChildAlgorithm
+        IAlgorithm_sptr alg = this->createChildAlgorithm("CreatePSDBleedMask",
             m_fracDone, m_fracDone+m_progStepWidth);
         m_fracDone += m_progStepWidth;
         alg->setProperty("InputWorkspace", sampleWS);
         alg->setProperty("MaxTubeFramerate", maxTubeFrameRate);
         alg->setProperty("NIgnoredCentralPixels", numIgnore);
-        alg->executeAsSubAlg();
+        alg->executeAsChildAlg();
         MatrixWorkspace_sptr localMaskWS = alg->getProperty("OutputWorkspace");
         applyMask(inputWS, localMaskWS);
         int localFails = alg->getProperty("NumberOfFailures");
@@ -346,11 +346,11 @@ namespace Mantid
 
       // Extract the mask from the vanadium workspace
       std::vector<int> detList;
-      IAlgorithm_sptr extract = this->createSubAlgorithm("ExtractMask");
+      IAlgorithm_sptr extract = this->createChildAlgorithm("ExtractMask");
       extract->setProperty("InputWorkspace", inputWS);
       extract->setProperty("OutputWorkspace", "final_mask");
       extract->setProperty("DetectorList", detList);
-      extract->executeAsSubAlg();
+      extract->executeAsChildAlg();
       maskWS = extract->getProperty("OutputWorkspace");
       maskWS->setName(maskName);
 
@@ -365,12 +365,12 @@ namespace Mantid
     void DetectorDiagnostic::applyMask(API::MatrixWorkspace_sptr inputWS,
         API::MatrixWorkspace_sptr maskWS)
     {
-      IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors"); // should set progress bar
+      IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors"); // should set progress bar
       maskAlg->setProperty("Workspace", inputWS);
       maskAlg->setProperty("MaskedWorkspace", maskWS);
       maskAlg->setProperty("StartWorkspaceIndex", m_minIndex);
       maskAlg->setProperty("EndWorkspaceIndex", m_maxIndex);
-      maskAlg->executeAsSubAlg();
+      maskAlg->executeAsChildAlg();
     }
 
     /**
@@ -388,8 +388,8 @@ namespace Mantid
       // get the relevant inputs
       double lowThreshold = this->getProperty("LowThreshold");
       double highThreshold = this->getProperty("HighThreshold");
-      // run the subalgorithm
-      IAlgorithm_sptr fdol = this->createSubAlgorithm("FindDetectorsOutsideLimits",
+      // run the ChildAlgorithm
+      IAlgorithm_sptr fdol = this->createChildAlgorithm("FindDetectorsOutsideLimits",
           m_fracDone, m_fracDone+m_progStepWidth);
       m_fracDone += m_progStepWidth;
       fdol->setProperty("InputWorkspace", inputWS);
@@ -400,7 +400,7 @@ namespace Mantid
       fdol->setProperty("RangeUpper", m_rangeUpper);
       fdol->setProperty("LowThreshold", lowThreshold);
       fdol->setProperty("HighThreshold", highThreshold);
-      fdol->executeAsSubAlg();
+      fdol->executeAsChildAlg();
       localMask = fdol->getProperty("OutputWorkspace");
       int localFails = fdol->getProperty("NumberOfFailures");
       nFails += localFails;
@@ -418,8 +418,8 @@ namespace Mantid
       // apply mask to what we are going to input
       this->applyMask(inputWS, localMask);
 
-      // run the subalgorithm
-      IAlgorithm_sptr mdt = this->createSubAlgorithm("MedianDetectorTest",
+      // run the ChildAlgorithm
+      IAlgorithm_sptr mdt = this->createChildAlgorithm("MedianDetectorTest",
           m_fracDone, m_fracDone+m_progStepWidth);
       m_fracDone += m_progStepWidth;
       mdt->setProperty("InputWorkspace", inputWS);
@@ -434,7 +434,7 @@ namespace Mantid
       mdt->setProperty("LowOutlier", lowOutlier);
       mdt->setProperty("HighOutlier", highOutlier);
       mdt->setProperty("ExcludeZeroesFromMedian", excludeZeroes);
-      mdt->executeAsSubAlg();
+      mdt->executeAsChildAlg();
       localMask = mdt->getProperty("OutputWorkspace");
       localFails = mdt->getProperty("NumberOfFailures");
       nFails += localFails;
@@ -478,7 +478,7 @@ namespace Mantid
       // actually created to use for further calculations
       // get percentage completed estimates for now, t0 and when we've finished t1
       double t0 = m_fracDone, t1 = advanceProgress(RTGetTotalCounts);
-      IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", t0, t1 );
+      IAlgorithm_sptr childAlg = createChildAlgorithm("Integration", t0, t1 );
       childAlg->setProperty( "InputWorkspace", inputWS );
       childAlg->setProperty( "StartWorkspaceIndex", indexMin );
       childAlg->setProperty( "EndWorkspaceIndex", indexMax );
@@ -486,7 +486,7 @@ namespace Mantid
       childAlg->setProperty("RangeLower",  lower );
       childAlg->setProperty("RangeUpper", upper);
       childAlg->setPropertyValue("IncludePartialBins", "1");
-      childAlg->executeAsSubAlg();
+      childAlg->executeAsChildAlg();
 
       // Convert to 2D if desired, and if the input was an EventWorkspace.
       MatrixWorkspace_sptr outputW = childAlg->getProperty("OutputWorkspace");
@@ -494,9 +494,9 @@ namespace Mantid
       if (outputWorkspace2D && boost::dynamic_pointer_cast<EventWorkspace>(outputW))
       {
         g_log.debug() << "Converting output Event Workspace into a Workspace2D." << std::endl;
-        childAlg = createSubAlgorithm("ConvertToMatrixWorkspace", t0, t1 );
+        childAlg = createChildAlgorithm("ConvertToMatrixWorkspace", t0, t1 );
         childAlg->setProperty("InputWorkspace", outputW);
-        childAlg->executeAsSubAlg();
+        childAlg->executeAsChildAlg();
         finalOutputW = childAlg->getProperty("OutputWorkspace");
       }
 
@@ -697,9 +697,9 @@ namespace Mantid
       g_log.information("Calculating time averaged count rates");
       // get percentage completed estimates for now, t0 and when we've finished t1
       double t0 = m_fracDone, t1 = advanceProgress(RTGetRate);
-      IAlgorithm_sptr childAlg = createSubAlgorithm("ConvertToDistribution", t0, t1);
+      IAlgorithm_sptr childAlg = createChildAlgorithm("ConvertToDistribution", t0, t1);
       childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", workspace); 
-      // Now execute the sub-algorithm but allow any exception to bubble up
+      // Now execute the Child Algorithm but allow any exception to bubble up
       childAlg->execute();
       return childAlg->getProperty("Workspace");
     }

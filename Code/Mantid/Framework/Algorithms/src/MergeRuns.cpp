@@ -25,7 +25,7 @@ merging is conducted such that A_1 + B_1 = C_1 and A_2 + B_2 = C_2.
 ==== Group Workspaces that are not multiperiod ====
 If group workspaces are provided that are not multi-period, this algorithm will merge across all nested workspaces, to give a singe output matrix workspace. 
 
-==== Subalgorithms used ====
+==== ChildAlgorithms used ====
 
 The [[Rebin]] algorithm is used, if neccessary, to put all the input workspaces onto a common binning.
 
@@ -686,7 +686,7 @@ void MergeRuns::inclusionParams(const MantidVec& X1, int64_t& i, const MantidVec
 }
 
 //------------------------------------------------------------------------------------------------
-/** Calls the Rebin algorithm as a subalgorithm.
+/** Calls the Rebin algorithm as a ChildAlgorithm.
  *  @param  workspace The workspace to use as input to the Rebin algorithms
  *  @param  params    The rebin parameters
  *  @return A shared pointer to the output (rebinned) workspace
@@ -695,10 +695,10 @@ void MergeRuns::inclusionParams(const MantidVec& X1, int64_t& i, const MantidVec
 API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr& workspace, const std::vector<double>& params)
 {
   // Create a Rebin child algorithm
-  IAlgorithm_sptr rebin = createSubAlgorithm("Rebin");
+  IAlgorithm_sptr rebin = createChildAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", workspace);
   rebin->setProperty("Params",params);
-  rebin->executeAsSubAlg();
+  rebin->executeAsChildAlg();
   return rebin->getProperty("OutputWorkspace");
 }
 

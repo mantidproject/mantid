@@ -92,7 +92,7 @@ void EQSANSReduce::performReduction(Workspace_sptr workspace)
   const std::string logFile = getPropertyValue("LogDataFile");
   if (!logFile.empty())
   {
-    IAlgorithm_sptr alg = this->createSubAlgorithm("LoadNexusLogs");
+    IAlgorithm_sptr alg = this->createChildAlgorithm("LoadNexusLogs");
     alg->setLogging(false);
     alg->setProperty("Workspace", workspace);
     alg->setPropertyValue("Filename", logFile);
@@ -106,7 +106,7 @@ void EQSANSReduce::performReduction(Workspace_sptr workspace)
   script += "cmd.Reduce1D()\n";
 
   // Run a snippet of python
-  IAlgorithm_sptr alg = this->createSubAlgorithm("RunPythonScript");
+  IAlgorithm_sptr alg = this->createChildAlgorithm("RunPythonScript");
   alg->setLogging(true);
   alg->setPropertyValue("Code", script);
   alg->execute();
@@ -130,7 +130,7 @@ Workspace_sptr EQSANSReduce::postProcess(Workspace_sptr workspace)
   script += "averager.execute(cmd.ReductionSingleton(),\"" + workspace->name() + "\")\n";
 
   // Run a snippet of python
-  IAlgorithm_sptr scriptAlg = this->createSubAlgorithm("RunPythonScript");
+  IAlgorithm_sptr scriptAlg = this->createChildAlgorithm("RunPythonScript");
   scriptAlg->setLogging(true);
   scriptAlg->setPropertyValue("Code", script);
   scriptAlg->setPropertyValue("OutputWorkspace", outputIq);

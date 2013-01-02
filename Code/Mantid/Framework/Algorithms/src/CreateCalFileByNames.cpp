@@ -92,7 +92,7 @@ namespace Mantid
     /** Executes the algorithm
      *
      *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
-     *  @throw runtime_error If unable to run one of the sub-algorithms successfully
+     *  @throw runtime_error If unable to run one of the Child Algorithms successfully
      */
 
     void CreateCalFileByNames::exec()

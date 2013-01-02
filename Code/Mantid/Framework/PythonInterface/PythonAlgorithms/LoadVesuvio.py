@@ -34,7 +34,7 @@ FORWARD = 1
 IP_HEADER = "spectrum,theta,t0,-,R"
 
 
-# Sub algorithm logging
+# Child Algorithm logging
 _LOGGING_ = False
 
 class LoadVesuvio(PythonAlgorithm):
@@ -553,7 +553,7 @@ class LoadVesuvio(PythonAlgorithm):
         if ip_file == "":
             return
         
-        # More verbose until the sub algorithm stuff is sorted
+        # More verbose until the Child Algorithm stuff is sorted
         update_inst = AlgorithmManager.Instance().createUnmanaged("UpdateInstrumentFromFile")
         update_inst.initialize()
         update_inst.setChild(True)

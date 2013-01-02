@@ -92,7 +92,7 @@ namespace Mantid
 
       /// Validates the optional 'spectra to read' properties, if they have been set
       void checkOptionalProperties();
-      ///Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw).
+      ///Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw).
       void runLoadInstrument(DataObjects::Workspace2D_sptr, const char* iName);
 
       /// Populate spectra-detector map

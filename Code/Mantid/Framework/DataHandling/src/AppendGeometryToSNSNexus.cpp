@@ -162,24 +162,24 @@ namespace DataHandling
       //MatrixWorkspace_sptr ws;
       //ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 
-      // Modified to call LoadInstrument directly as a sub-algorithm
+      // Modified to call LoadInstrument directly as a Child Algorithm
       ws = WorkspaceFactory::Instance().create("Workspace2D",1,2,1);
 
       // Load NeXus logs for HYSPEC, HYSPECA(testing), and SNAP
       if(m_instrument == "HYSPEC" || m_instrument == "HYSPECA" || m_instrument == "SNAP")
       {
-          g_log.debug() << "Run LoadNexusLogs sub-algorithm." << std::endl;
+          g_log.debug() << "Run LoadNexusLogs Child Algorithm." << std::endl;
           logs_loaded_correctly = runLoadNexusLogs(m_filename, ws, this);
 
           if(!logs_loaded_correctly)
-              throw std::runtime_error("Failed to run LoadNexusLogs sub-algorithm.");
+              throw std::runtime_error("Failed to run LoadNexusLogs Child Algorithm.");
       }
 
-      g_log.debug() << "Run LoadInstrument sub-algorithm." << std::endl;
+      g_log.debug() << "Run LoadInstrument Child Algorithm." << std::endl;
       instrument_loaded_correctly = runLoadInstrument(m_idf_filename, ws, this);
 
       if(!instrument_loaded_correctly)
-          throw std::runtime_error("Failed to run LoadInstrument sub-algorithm.");
+          throw std::runtime_error("Failed to run LoadInstrument Child Algorithm.");
 
       // Get the number of detectors (just for progress reporting)
       // Get the number of histograms/detectors
@@ -393,9 +393,9 @@ namespace DataHandling
   bool AppendGeometryToSNSNexus::runLoadInstrument(const std::string &idf_filename,
                                                    API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
   {
-    IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument",0,1,true);
+    IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument",0,1,true);
 
-    // Execute the sub-algorithm.
+    // Execute the Child Algorithm.
     bool executionSuccessful(true);
     try
     {
@@ -405,12 +405,12 @@ namespace DataHandling
       loadInst->execute();
     } catch (std::invalid_argument& e)
     {
-      alg->getLogger().information("Invalid argument to LoadInstrument sub-algorithm");
+      alg->getLogger().information("Invalid argument to LoadInstrument Child Algorithm");
       alg->getLogger().information(e.what());
       executionSuccessful = false;
     } catch (std::runtime_error& e)
     {
-      alg->getLogger().information("Failed to run LoadInstrument sub-algorithm");
+      alg->getLogger().information("Failed to run LoadInstrument Child Algorithm");
       alg->getLogger().information(e.what());
       executionSuccessful = false;
     }
@@ -434,24 +434,24 @@ namespace DataHandling
    bool AppendGeometryToSNSNexus::runLoadNexusLogs(const std::string &nexusFileName,
                                                    API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg)
    {
-       IAlgorithm_sptr loadLogs = alg->createSubAlgorithm("LoadNexusLogs",0,1,true);
+       IAlgorithm_sptr loadLogs = alg->createChildAlgorithm("LoadNexusLogs",0,1,true);
 
-       // Execute the sub-algorithm, catching errors without stopping.
+       // Execute the Child Algorithm, catching errors without stopping.
        bool executionSuccessful(true);
        try
        {
          alg->getLogger().information() << "Loading logs from the NeXus file..." << std::endl;
          loadLogs->setPropertyValue("Filename", nexusFileName);
          loadLogs->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
-         loadLogs->executeAsSubAlg();
+         loadLogs->executeAsChildAlg();
        } catch (std::invalid_argument& e)
        {
-         alg->getLogger().information("Invalid argument to LoadNexusLogs sub-algorithm");
+         alg->getLogger().information("Invalid argument to LoadNexusLogs Child Algorithm");
          alg->getLogger().information(e.what());
          executionSuccessful = false;
        } catch (std::runtime_error& )
        {
-         alg->getLogger().information("Unable to successfully run runLoadNexusLogs sub-algorithm./n");
+         alg->getLogger().information("Unable to successfully run runLoadNexusLogs Child Algorithm./n");
          executionSuccessful = false;
        }
 

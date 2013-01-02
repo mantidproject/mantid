@@ -102,10 +102,10 @@ namespace WorkflowAlgorithms
     MatrixWorkspace_sptr maskWS = this->getProperty("MaskWorkspace");
     if (maskWS)
     {
-      IAlgorithm_sptr mask = this->createSubAlgorithm("MaskDetectors");
+      IAlgorithm_sptr mask = this->createChildAlgorithm("MaskDetectors");
       mask->setProperty("Workspace", iWS);
       mask->setProperty("MaskedWorkspace", maskWS);
-      mask->executeAsSubAlg();
+      mask->executeAsChildAlg();
     }
   }
 
@@ -120,7 +120,7 @@ namespace WorkflowAlgorithms
 
     if (groupWS || !oldGroupingFile.empty())
     {
-      IAlgorithm_sptr group = this->createSubAlgorithm("GroupDetectors");
+      IAlgorithm_sptr group = this->createChildAlgorithm("GroupDetectors");
       group->setProperty("InputWorkspace", iWS);
       group->setProperty("OutputWorkspace", iWS);
       if (groupWS)
@@ -136,7 +136,7 @@ namespace WorkflowAlgorithms
         group->setProperty("MapFile", oldGroupingFile);
       }
       group->setProperty("Behaviour", "Average");
-      group->executeAsSubAlg();
+      group->executeAsChildAlg();
       oWS = group->getProperty("OutputWorkspace");
     }
   }

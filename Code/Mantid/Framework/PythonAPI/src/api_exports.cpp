@@ -110,7 +110,7 @@ using namespace boost::python;
    * Function used to define the IAlgorithm.setWorkspaceProperty() method in python.
    * Since getProperty/setProperty only deal with strings, we need a new method if we
    * want to set workspace properties by passing a pointer to an actual workspace.
-   * This is necessary to be able to run sub-algorithm within a PythonAlgorithm.
+   * This is necessary to be able to run Child Algorithm within a PythonAlgorithm.
    * TODO: This can be removed if we properly expose the getProperty/setProperty
    * methods to deal with the type of the properties as opposed to strings.
    */
@@ -129,8 +129,8 @@ using namespace boost::python;
 
   namespace
   {
-    // Overloads for createSubAlgorithm function which has 1 optional argument
-    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PyAlgorithmBase_createSubAlgorithmOverloader, PythonAPI::PyAlgorithmBase::_createSubAlgorithm, 1, 2)
+    // Overloads for createChildAlgorithm function which has 1 optional argument
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PyAlgorithmBase_createChildAlgorithmOverloader, PythonAPI::PyAlgorithmBase::_createChildAlgorithm, 1, 2)
 
     struct AllowCThreads
     {
@@ -256,7 +256,7 @@ using namespace boost::python;
       .def("_setAlgorithmProperty", &PyAlgorithmWrapper::_setAlgorithmProperty)
       .def("_getAlgorithmProperty", &PyAlgorithmWrapper::_getAlgorithmProperty)
       .def("log", &PyAlgorithmWrapper::getLogger, return_internal_reference<>())
-      .def("_createSubAlgorithm", &PyAlgorithmBase::_createSubAlgorithm, PyAlgorithmBase_createSubAlgorithmOverloader()[return_value_policy< return_by_value >()] )
+      .def("_createChildAlgorithm", &PyAlgorithmBase::_createChildAlgorithm, PyAlgorithmBase_createChildAlgorithmOverloader()[return_value_policy< return_by_value >()] )
       EXPORT_DECLAREPROPERTY(int, int)
       EXPORT_DECLAREPROPERTY(double, dbl)
       EXPORT_DECLAREPROPERTY(std::string, str)
@@ -274,7 +274,7 @@ using namespace boost::python;
 #undef EXPORT_GETLISTPROPERTY
   }
 
-  // Overloads for createSubAlgorithm function which has 1 optional argument
+  // Overloads for createChildAlgorithm function which has 1 optional argument
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloader, API::Workspace::isDirty, 0, 1)
 
 void export_dataitem()

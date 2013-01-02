@@ -120,25 +120,25 @@ void EQSANSQ2D::exec()
     // Frame 1
     std::string params = Poco::NumberFormatter::format(wavelength_min, 2)
         + ",0.1," + Poco::NumberFormatter::format(wavelength_max, 2);
-    IAlgorithm_sptr rebinAlg = createSubAlgorithm("Rebin", 0.4, 0.5);
+    IAlgorithm_sptr rebinAlg = createChildAlgorithm("Rebin", 0.4, 0.5);
     rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     rebinAlg->setPropertyValue("Params", params);
     rebinAlg->setProperty("PreserveEvents", false);
-    rebinAlg->executeAsSubAlg();
+    rebinAlg->executeAsChildAlg();
 
-    IAlgorithm_sptr qxyAlg = createSubAlgorithm("Qxy", .5, .65);
+    IAlgorithm_sptr qxyAlg = createChildAlgorithm("Qxy", .5, .65);
     qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", rebinAlg->getProperty("OutputWorkspace"));
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax/nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
-    qxyAlg->executeAsSubAlg();
+    qxyAlg->executeAsChildAlg();
 
     MatrixWorkspace_sptr qxy_output = qxyAlg->getProperty("OutputWorkspace");
-    IAlgorithm_sptr replaceAlg = createSubAlgorithm("ReplaceSpecialValues", .65, 0.7);
+    IAlgorithm_sptr replaceAlg = createChildAlgorithm("ReplaceSpecialValues", .65, 0.7);
     replaceAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", qxy_output);
     replaceAlg->setProperty<double>("NaNValue", 0.0);
     replaceAlg->setProperty<double>("NaNError", 0.0);
-    replaceAlg->executeAsSubAlg();
+    replaceAlg->executeAsChildAlg();
 
     std::string outputWSName_frame = outputWSName+"_frame1_Iqxy";
     declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame1", outputWSName_frame, Direction::Output));
@@ -148,25 +148,25 @@ void EQSANSQ2D::exec()
     // Frame 2
     params = Poco::NumberFormatter::format(wavelength_min_f2, 2)
         + ",0.1," + Poco::NumberFormatter::format(wavelength_max_f2, 2);
-    rebinAlg = createSubAlgorithm("Rebin", 0.7, 0.8);
+    rebinAlg = createChildAlgorithm("Rebin", 0.7, 0.8);
     rebinAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     rebinAlg->setPropertyValue("Params", params);
     rebinAlg->setProperty("PreserveEvents", false);
-    rebinAlg->executeAsSubAlg();
+    rebinAlg->executeAsChildAlg();
 
-    qxyAlg = createSubAlgorithm("Qxy", .8, 0.95);
+    qxyAlg = createChildAlgorithm("Qxy", .8, 0.95);
     qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", rebinAlg->getProperty("OutputWorkspace"));
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax/nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
-    qxyAlg->executeAsSubAlg();
+    qxyAlg->executeAsChildAlg();
 
     qxy_output = qxyAlg->getProperty("OutputWorkspace");
-    replaceAlg = createSubAlgorithm("ReplaceSpecialValues", .95, 1.0);
+    replaceAlg = createChildAlgorithm("ReplaceSpecialValues", .95, 1.0);
     replaceAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", qxy_output);
     replaceAlg->setProperty<double>("NaNValue", 0.0);
     replaceAlg->setProperty<double>("NaNError", 0.0);
-    replaceAlg->executeAsSubAlg();
+    replaceAlg->executeAsChildAlg();
 
     outputWSName_frame = outputWSName+"_frame2_Iqxy";
     declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame2", outputWSName_frame, Direction::Output));
@@ -175,19 +175,19 @@ void EQSANSQ2D::exec()
     setProperty("OutputMessage", "I(Qx,Qy) computed for each frame");
   } else {
     // When not in frame skipping mode, simply run Qxy
-    IAlgorithm_sptr qxyAlg = createSubAlgorithm("Qxy", .3, 0.9);
+    IAlgorithm_sptr qxyAlg = createChildAlgorithm("Qxy", .3, 0.9);
     qxyAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
     qxyAlg->setProperty<double>("MaxQxy", qmax);
     qxyAlg->setProperty<double>("DeltaQ", qmax/nbins);
     qxyAlg->setProperty<bool>("SolidAngleWeighting", false);
-    qxyAlg->executeAsSubAlg();
+    qxyAlg->executeAsChildAlg();
 
     MatrixWorkspace_sptr qxy_output = qxyAlg->getProperty("OutputWorkspace");
-    IAlgorithm_sptr replaceAlg = createSubAlgorithm("ReplaceSpecialValues", .9, 1.0);
+    IAlgorithm_sptr replaceAlg = createChildAlgorithm("ReplaceSpecialValues", .9, 1.0);
     replaceAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", qxy_output);
     replaceAlg->setProperty<double>("NaNValue", 0.0);
     replaceAlg->setProperty<double>("NaNError", 0.0);
-    replaceAlg->executeAsSubAlg();
+    replaceAlg->executeAsChildAlg();
 
     outputWSName += "_Iqxy";
     declareProperty(new WorkspaceProperty<>("OutputWorkspaceFrame1", outputWSName, Direction::Output));

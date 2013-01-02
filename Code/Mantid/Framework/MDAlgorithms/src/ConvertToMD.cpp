@@ -3,7 +3,7 @@
 
 Transforms a workspace into MDEvent workspace with dimensions defined by user. 
    
-Gateway for set of subalgorithms, combined together to convert input 2D matrix workspace or Event workspace with any units along X-axis into  multidimensional event workspace. 
+Gateway for set of ChildAlgorithms, combined together to convert input 2D matrix workspace or Event workspace with any units along X-axis into  multidimensional event workspace. 
 
 Depending on the user input and the data, find in the input workspace, the algorithms transform the input workspace into 1 to 4 dimensional MDEvent workspace and adds to this workspace additional dimensions, which are described by the workspace properties and requested by user.
 
@@ -128,7 +128,7 @@ ConvertToMD::init()
         " These variables had to be logged during experiment and the names of these variables "
         " have to coincide with the log names for the records of these variables in the source workspace");
 
-    // this property is mainly for subalgorithms to set-up as they have to identify if they use the same instrument. 
+    // this property is mainly for ChildAlgorithms to set-up as they have to identify if they use the same instrument. 
     declareProperty(new PropertyWithValue<std::string>("PreprocDetectorsWS","PreprocessedDetectorsWS",Direction::Input), 
       "The name of the table workspace where the part of the detectors transformation into reciprocal space, calculated by [[PreprocessDetectorsToMD]] algorithm stored.\n"
       "If the workspace is not found in analysis data service, [[PreprocessDetectorsToMD]]  used to calculate it. If found, the algorithm uses existing workspace.\n"
@@ -216,7 +216,7 @@ void ConvertToMD::exec()
 
  
     //DO THE JOB:
-     // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
+     // get pointer to appropriate  algorithm, (will throw if logic is wrong and ChildAlgorithm is not found among existing)
      ConvToMDSelector AlgoSelector;
      m_Convertor  = AlgoSelector.convSelector(m_InWS2D,m_Convertor);
 
@@ -411,22 +411,22 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
     }
     // No result found in analysis data service or the result is unsatisfactory. Try to calculate target workspace.  
 
-    // if input workspace does not exist in analysis data service, we have to add it there to work with the sub-algorithm 
+    // if input workspace does not exist in analysis data service, we have to add it there to work with the Child Algorithm 
     std::string InWSName = InWS2D->getName();
     if(!API::AnalysisDataService::Instance().doesExist(InWSName))
     {
        if(InWSName.empty())InWSName = "ImputMatrixWS";
        // wery bad, but what can we do otherwise... -> pool out the class pointer which is not const 
-       // add input matrix ws to the analysis data service in order for subalgorithm to retrieve it. 
+       // add input matrix ws to the analysis data service in order for ChildAlgorithm to retrieve it. 
        API::AnalysisDataService::Instance().addOrReplace(InWSName,m_InWS2D);
     }
 
-    Mantid::API::Algorithm_sptr childAlg = createSubAlgorithm("PreprocessDetectorsToMD",0.,1.);
-    if(!childAlg)throw(std::runtime_error("Can not create child subalgorithm to preprocess detectors"));
+    Mantid::API::Algorithm_sptr childAlg = createChildAlgorithm("PreprocessDetectorsToMD",0.,1.);
+    if(!childAlg)throw(std::runtime_error("Can not create child ChildAlgorithm to preprocess detectors"));
     childAlg->setProperty("InputWorkspace",InWSName);
     childAlg->setProperty("OutputWorkspace",OutWSName);
 
- // check and get energy conversion mode to define additional subalgorithm parameters
+ // check and get energy conversion mode to define additional ChildAlgorithm parameters
     MDTransfDEHelper dEChecker;
     CnvrtToMD::EModes Emode = dEChecker.getEmode(dEModeRequested);
     if(Emode == CnvrtToMD::Indir)  // TODO: redefine this through Kernel::Emodes
@@ -434,10 +434,10 @@ DataObjects::TableWorkspace_const_sptr ConvertToMD::preprocessDetectorsPositions
 
 
     childAlg->execute();
-    if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child subalgorithm to preprocess detectors"));
+    if(!childAlg->isExecuted())throw(std::runtime_error("Can not properly execute child ChildAlgorithm to preprocess detectors"));
 
     TargTableWS = childAlg->getProperty("OutputWorkspace");
-    if(!TargTableWS)throw(std::runtime_error("Can not retrieve results of child subalgorithm to preprocess detectors work"));
+    if(!TargTableWS)throw(std::runtime_error("Can not retrieve results of child ChildAlgorithm to preprocess detectors work"));
 
     if(storeInDataService)
       API::AnalysisDataService::Instance().addOrReplace(OutWSName,TargTableWS);

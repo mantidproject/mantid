@@ -2,7 +2,7 @@
 
 Loads an instrument definition file ([[InstrumentDefinitionFile|IDF]]) into a workspace, which contains information about detector positions, their geometric shape, slit properties, links between values stored in ISIS log-files and components of the instrument and so on. For more on IDFs see: [[InstrumentDefinitionFile]].
 
-By default the algorithm will write a 1:1 map between the spectrum number and detector ID. Any custom loading algorithm that calls this as a sub algorithm will therefore get this 1:1 map be default. If the custom loader is to write its own map then it is advised to set <code>RewriteSpectraMap</code> to false to avoid extra work. 
+By default the algorithm will write a 1:1 map between the spectrum number and detector ID. Any custom loading algorithm that calls this as a Child Algorithm will therefore get this 1:1 map be default. If the custom loader is to write its own map then it is advised to set <code>RewriteSpectraMap</code> to false to avoid extra work. 
 
 
 *WIKI*/
@@ -62,8 +62,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void LoadInstrument::initDocs()
     {
-      this->setWikiSummary(" Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]]. After the IDF has been read this algorithm will attempt to run the sub-algorithm [[LoadParameterFile]]; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory [[Properties_File|Mantid property]]). ");
-      this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace. After the IDF has been read this algorithm will attempt to run the sub-algorithm LoadParameterFile; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory Mantid property).");
+      this->setWikiSummary(" Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]]. After the IDF has been read this algorithm will attempt to run the Child Algorithm [[LoadParameterFile]]; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory [[Properties_File|Mantid property]]). ");
+      this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace. After the IDF has been read this algorithm will attempt to run the Child Algorithm LoadParameterFile; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory Mantid property).");
     }
     
 
@@ -80,7 +80,7 @@ namespace Mantid
     /// Initialisation method.
     void LoadInstrument::init()
     {
-      // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
+      // When used as a Child Algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
       declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),
         "The name of the workspace to load the instrument definition into" );
@@ -208,7 +208,7 @@ namespace Mantid
 
 
     //-----------------------------------------------------------------------------------------------------------------------
-    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+    /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
     void LoadInstrument::runLoadParameterFile()
     {
       g_log.debug("Loading the parameter definition...");
@@ -238,7 +238,7 @@ namespace Mantid
       if(!fullPathParamIDF.empty()) {
 
         g_log.debug() << "Parameter file: " << fullPathParamIDF << std::endl;
-        // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+        // Now execute the Child Algorithm. Catch and log any error, but don't stop.
         try
         {
           // To allow the use of ExperimentInfo instead of workspace, we call it manually
@@ -250,7 +250,7 @@ namespace Mantid
           g_log.information(e.what());
         } catch (std::runtime_error& e)
         {
-          g_log.information("Unable to successfully run LoadParameterFile sub-algorithm");
+          g_log.information("Unable to successfully run LoadParameterFile Child Algorithm");
           g_log.information(e.what());
         }
       } else {

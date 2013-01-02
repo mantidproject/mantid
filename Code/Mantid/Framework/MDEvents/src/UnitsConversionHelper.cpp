@@ -81,7 +81,7 @@ void UnitsConversionHelper::initialize(const MDWSDescription &targetWSDescr, con
   m_UnitCnvrsn = analyzeUnitsConversion(m_SourceWSUnit->unitID(),units_to);
 
 
-  // get units class, requested by subalgorithm
+  // get units class, requested by ChildAlgorithm
   m_TargetUnit = Kernel::UnitFactory::Instance().create(units_to);
   if(!m_TargetUnit)throw(std::logic_error(" can not retrieve target unit from the units factory"));
 

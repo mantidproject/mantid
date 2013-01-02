@@ -236,7 +236,7 @@ namespace Mantid
 
         if (period == 0)
         {
-          // Only run the sub-algorithms once
+          // Only run the Child Algorithms once
           loadRunDetails(localWorkspace);
           runLoadInstrument(localWorkspace );
           localWorkspace->replaceSpectraMap(new SpectraDetectorMap(spectrum_index(),spectrum_index(),m_numberOfSpectra));

@@ -88,7 +88,7 @@ namespace Mantid
       void initialize();
       std::map<std::string, std::string> validateInputs();
       bool execute();
-      void executeAsSubAlg() { throw std::runtime_error("Not implemented."); }
+      void executeAsChildAlg() { throw std::runtime_error("Not implemented."); }
       Poco::ActiveResult<bool> executeAsync();
       bool isInitialized() const;
       bool isExecuted() const;

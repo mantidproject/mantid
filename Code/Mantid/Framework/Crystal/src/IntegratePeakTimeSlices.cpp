@@ -496,7 +496,7 @@ namespace Mantid
           std::vector<std::pair<double, double> > Bounds;
           std::string Constraints = AttributeValues->CalcConstraints(Bounds, CalcVars);
           IAlgorithm_sptr fit_alg;
-          fit_alg = createSubAlgorithm("Fit");
+          fit_alg = createChildAlgorithm("Fit");
           std::string fun_str = CalculateFunctionProperty_Fit();
 
           std::string SSS("   Fit string ");
@@ -524,7 +524,7 @@ namespace Mantid
             fit_alg->setProperty("Constraints", Constraints);
           try
           {
-            fit_alg->executeAsSubAlg();
+            fit_alg->executeAsChildAlg();
 
             chisqOverDOF = fit_alg->getProperty("OutputChi2overDoF");
             std::string outputStatus = fit_alg->getProperty( "OutputStatus" );

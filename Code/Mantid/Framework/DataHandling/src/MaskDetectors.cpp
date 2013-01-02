@@ -203,9 +203,9 @@ void MaskDetectors::exec()
   {
       // If the input was a mask workspace, then extract the mask to ensure
       // we are returning the correct thing.
-      IAlgorithm_sptr alg = createSubAlgorithm("ExtractMask");
+      IAlgorithm_sptr alg = createChildAlgorithm("ExtractMask");
       alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-      alg->executeAsSubAlg();
+      alg->executeAsChildAlg();
       MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
       setProperty("Workspace", ws);
   }

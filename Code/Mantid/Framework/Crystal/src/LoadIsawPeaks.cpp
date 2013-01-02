@@ -266,10 +266,10 @@ namespace Crystal
     MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
     tempWS->mutableRun().addProperty<std::string>("run_start", date);
 
-    IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
+    IAlgorithm_sptr loadInst= createChildAlgorithm("LoadInstrument");
     loadInst->setPropertyValue("InstrumentName", C_Instrument);
     loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", tempWS);
-    loadInst->executeAsSubAlg();
+    loadInst->executeAsChildAlg();
 
     // Populate the instrument parameters in this workspace - this works around a bug
     tempWS->populateInstrumentParameters();

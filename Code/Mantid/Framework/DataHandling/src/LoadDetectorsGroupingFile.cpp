@@ -307,12 +307,12 @@ namespace DataHandling
     if (mUserGiveInstrument)
     {
       // 1. Create Instrument
-      Algorithm_sptr childAlg = this->createSubAlgorithm("LoadInstrument");
+      Algorithm_sptr childAlg = this->createChildAlgorithm("LoadInstrument");
       MatrixWorkspace_sptr tempWS(new DataObjects::Workspace2D());
       childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
       childAlg->setPropertyValue("InstrumentName", mInstrumentName);
       childAlg->setProperty("RewriteSpectraMap", false);
-      childAlg->executeAsSubAlg();
+      childAlg->executeAsChildAlg();
       Geometry::Instrument_const_sptr minstrument = tempWS->getInstrument();
 
       // 2. Create GroupingWorkspace with  instrument

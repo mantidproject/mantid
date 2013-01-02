@@ -222,7 +222,7 @@ namespace Crystal
 
 
       // Run the integrate algo with this background
-      IAlgorithm_sptr alg = this->createSubAlgorithm("IntegratePeaksMD", progStep*double(step), progStep*double(step+1), false);
+      IAlgorithm_sptr alg = this->createChildAlgorithm("IntegratePeaksMD", progStep*double(step), progStep*double(step+1), false);
       alg->setProperty("InputWorkspace", inWS);
       alg->setProperty("PeaksWorkspace", peaksWS);
       alg->setPropertyValue("CoordinatesToUse", this->getPropertyValue("CoordinatesToUse"));

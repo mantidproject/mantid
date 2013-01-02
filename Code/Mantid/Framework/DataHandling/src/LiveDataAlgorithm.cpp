@@ -227,7 +227,7 @@ namespace DataHandling
       std::string props = this->getPropertyValue(prefix+"ProcessingProperties");
 
       // Create the UNMANAGED algorithm
-      IAlgorithm_sptr alg = this->createSubAlgorithm(algoName);
+      IAlgorithm_sptr alg = this->createChildAlgorithm(algoName);
 
       // ...and pass it the properties
       boost::char_separator<char> sep(";");
@@ -276,7 +276,7 @@ namespace DataHandling
     else if (!script.empty())
     {
       // Run a snippet of python
-      IAlgorithm_sptr alg = this->createSubAlgorithm("RunPythonScript");
+      IAlgorithm_sptr alg = this->createChildAlgorithm("RunPythonScript");
       alg->setLogging(false);
       alg->setPropertyValue("Code", script);
       return alg;

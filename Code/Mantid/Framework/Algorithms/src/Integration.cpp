@@ -262,7 +262,7 @@ MatrixWorkspace_const_sptr Integration::getInputWorkspace()
   {
     // Clean the input workspace in the RebinnedOutput case for nan's and
     // inf's in order to treat the data correctly later.
-    IAlgorithm_sptr alg = this->createSubAlgorithm("ReplaceSpecialValues");
+    IAlgorithm_sptr alg = this->createChildAlgorithm("ReplaceSpecialValues");
     alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
     std::string outName = "_"+temp->getName()+"_clean";
     alg->setProperty("OutputWorkspace", outName);
@@ -270,7 +270,7 @@ MatrixWorkspace_const_sptr Integration::getInputWorkspace()
     alg->setProperty("NaNError", 0.0);
     alg->setProperty("InfinityValue", 0.0);
     alg->setProperty("InfinityError", 0.0);
-    alg->executeAsSubAlg();
+    alg->executeAsChildAlg();
     temp = alg->getProperty("OutputWorkspace");
   }
   return temp;

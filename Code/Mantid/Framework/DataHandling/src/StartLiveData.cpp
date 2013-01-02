@@ -157,7 +157,7 @@ namespace DataHandling
     loadAlg.setLiveListener(listener);
 
     // Run the LoadLiveData for the first time.
-    loadAlg.executeAsSubAlg();
+    loadAlg.executeAsChildAlg();
 
     // Copy the output workspace properties from LoadLiveData
     Workspace_sptr outWS = loadAlg.getProperty("OutputWorkspace");

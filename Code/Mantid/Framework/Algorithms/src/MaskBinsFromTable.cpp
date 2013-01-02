@@ -116,7 +116,7 @@ namespace Algorithms
 
       g_log.debug() << "Row " << ib << " XMin = " << xmin << "  XMax = " << xmax << " SpectraList = " << speclist << std::endl;
 
-      API::IAlgorithm_sptr maskbins = this->createSubAlgorithm("MaskBins", 0, 0.3, true);
+      API::IAlgorithm_sptr maskbins = this->createChildAlgorithm("MaskBins", 0, 0.3, true);
       maskbins->initialize();
       if (firstloop)
       {

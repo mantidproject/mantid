@@ -122,29 +122,29 @@ void DspacemaptoCal::exec()
   // Get the input workspace
   MatrixWorkspace_sptr WS = getProperty("InputWorkspace");
 
-  Algorithm_sptr childAlg = createSubAlgorithm("LoadDspacemap");
+  Algorithm_sptr childAlg = createChildAlgorithm("LoadDspacemap");
   childAlg->setProperty("InputWorkspace", WS);
   childAlg->setPropertyValue("FileType", getPropertyValue("FileType"));
   childAlg->setPropertyValue("Filename", getPropertyValue("DspacemapFile"));
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   OffsetsWorkspace_sptr offsetsWS = childAlg->getProperty("OutputWorkspace");
 
-  childAlg = createSubAlgorithm("LoadCalFile");
+  childAlg = createChildAlgorithm("LoadCalFile");
   childAlg->setProperty("InputWorkspace", WS);
   childAlg->setPropertyValue("CalFilename", getPropertyValue("CalibrationFile"));
   childAlg->setProperty<bool>("MakeGroupingWorkspace", true);
   childAlg->setProperty<bool>("MakeOffsetsWorkspace", false);
   childAlg->setProperty<bool>("MakeMaskWorkspace", false);
   childAlg->setPropertyValue("WorkspaceName", "__temp");
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   GroupingWorkspace_sptr groupWS = childAlg->getProperty("OutputGroupingWorkspace");
 
-  childAlg = createSubAlgorithm("SaveCalFile");
+  childAlg = createChildAlgorithm("SaveCalFile");
   childAlg->setProperty<GroupingWorkspace_sptr>("GroupingWorkspace", groupWS);
   childAlg->setProperty<OffsetsWorkspace_sptr>("OffsetsWorkspace", offsetsWS);
   childAlg->setPropertyValue("MaskWorkspace", "");
   childAlg->setPropertyValue("Filename", getPropertyValue("CalibrationFile"));
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
 
 }
 

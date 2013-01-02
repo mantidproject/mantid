@@ -53,11 +53,11 @@ void ExtractSingleSpectrum::exec()
   }
 
   // Let crop do the rest
-  IAlgorithm_sptr cropper = this->createSubAlgorithm("CropWorkspace", 0.0, 1.0);
+  IAlgorithm_sptr cropper = this->createChildAlgorithm("CropWorkspace", 0.0, 1.0);
   cropper->setProperty("InputWorkspace", inputWorkspace);
   cropper->setProperty("StartWorkspaceIndex", indexToExtract);
   cropper->setProperty("EndWorkspaceIndex", indexToExtract);
-  cropper->executeAsSubAlg();
+  cropper->executeAsChildAlg();
 
   setProperty<MatrixWorkspace_sptr>("OutputWorkspace", cropper->getProperty("OutputWorkspace"));
 }

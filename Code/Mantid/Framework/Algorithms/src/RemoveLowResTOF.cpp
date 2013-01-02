@@ -302,11 +302,11 @@ void RemoveLowResTOF::getTminData(const bool isEvent)
 
 void RemoveLowResTOF::runMaskDetectors()
 {
-  IAlgorithm_sptr alg = createSubAlgorithm("MaskDetectors");
+  IAlgorithm_sptr alg = createChildAlgorithm("MaskDetectors");
   alg->setProperty<MatrixWorkspace_sptr>("Workspace", this->getProperty("OutputWorkspace"));
   alg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace", this->getProperty("InputWorkspace"));
   if (!alg->execute())
-    throw std::runtime_error("MaskDetectors sub-algorithm has not executed successfully");
+    throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
 }
 
 } // namespace Algorithm

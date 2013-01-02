@@ -73,7 +73,7 @@ namespace Mantid
         // Pass-through to the same function without "MD"
         std::string matrixAlg = this->name();
         matrixAlg = matrixAlg.substr(0, matrixAlg.size()-2);
-        IAlgorithm_sptr alg = this->createSubAlgorithm(matrixAlg);
+        IAlgorithm_sptr alg = this->createChildAlgorithm(matrixAlg);
         // Copy all properties from THIS to the non-MD version
         std::vector< Property*> props = this->getProperties();
         for (size_t i=0; i<props.size(); i++)
@@ -97,10 +97,10 @@ namespace Mantid
       if (m_out != m_in)
       {
         // B = f(A) -> So first we clone A (lhs) into B
-        IAlgorithm_sptr clone = this->createSubAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
+        IAlgorithm_sptr clone = this->createChildAlgorithm("CloneMDWorkspace", 0.0, 0.5, true);
         clone->setProperty("InputWorkspace", m_in);
         clone->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-        clone->executeAsSubAlg();
+        clone->executeAsChildAlg();
         m_out = clone->getProperty("OutputWorkspace");
       }
 

@@ -80,7 +80,7 @@ namespace Mantid
       childAlg->initialize();
       childAlg->setPropertyValue("Filename", getPropertyValue("Filename"));
       childAlg->setPropertyValue("OutputWorkspace", tempWsName);
-      childAlg->executeAsSubAlg();
+      childAlg->executeAsChildAlg();
 
       //    Workspace_sptr tempWS = childAlg->getProperty<Workspace>("OutputWorkspace");
       //    IEventWorkspace_sptr tempEventWS = AnalysisDataService::Instance().retrieveWS<IEventWorkspace>(tempWsName);
@@ -88,14 +88,14 @@ namespace Mantid
 
 
       // --------- Now Convert -------------------------------
-      //childAlg = createSubAlgorithm("ConvertToDiffractionMDWorkspace");
+      //childAlg = createChildAlgorithm("ConvertToDiffractionMDWorkspace");
       childAlg = AlgorithmFactory::Instance().create("ConvertToDiffractionMDWorkspace", 1);  // new ConvertToDiffractionMDWorkspace();
       childAlg->initialize();
       childAlg->setPropertyValue("InputWorkspace", tempWsName);
       childAlg->setProperty<bool>("ClearInputWorkspace", false);
       childAlg->setProperty<bool>("LorentzCorrection", true);
       childAlg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
-      childAlg->executeAsSubAlg();
+      childAlg->executeAsChildAlg();
 
       //    Workspace_sptr tempWS = childAlg->getProperty("OutputWorkspace");
       //    IMDEventWorkspace_sptr outWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(tempWS);

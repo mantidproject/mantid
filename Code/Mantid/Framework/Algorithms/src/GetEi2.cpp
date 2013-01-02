@@ -111,7 +111,7 @@ void GetEi2::init()
 *  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
 *  @throw invalid_argument if a good peak fit wasn't made or the input workspace does not have common binning
-*  @throw runtime_error if there is a problem with the SpectraDetectorMap or a sub-algorithm falls over
+*  @throw runtime_error if there is a problem with the SpectraDetectorMap or a Child Algorithm falls over
 */
 void GetEi2::exec()
 {
@@ -322,7 +322,7 @@ double GetEi2::calculatePeakPosition(size_t ws_index, double t_min, double t_max
   return t_mean;
 }
 
-/** Calls CropWorkspace as a sub-algorithm and passes to it the InputWorkspace property
+/** Calls CropWorkspace as a Child Algorithm and passes to it the InputWorkspace property
  *  @param ws_index :: the index number of the histogram to extract
  *  @param start :: the number of the first bin to include (starts counting bins at 0)
  *  @param end :: the number of the last bin to include (starts counting bins at 0)
@@ -333,21 +333,21 @@ double GetEi2::calculatePeakPosition(size_t ws_index, double t_min, double t_max
  */
 MatrixWorkspace_sptr GetEi2::extractSpectrum(size_t ws_index, const double start, const double end)
 {
-  IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace");
   childAlg->setProperty("InputWorkspace", m_input_ws);
   childAlg->setProperty<int>("StartWorkspaceIndex", static_cast<int>(ws_index));
   childAlg->setProperty<int>("EndWorkspaceIndex", static_cast<int>(ws_index));
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   MatrixWorkspace_sptr monitors = childAlg->getProperty("OutputWorkspace");
   if( boost::dynamic_pointer_cast<API::IEventWorkspace>(m_input_ws) )
   {
     // Convert to a MatrixWorkspace representation
-    childAlg = createSubAlgorithm("ConvertToMatrixWorkspace");
+    childAlg = createChildAlgorithm("ConvertToMatrixWorkspace");
     childAlg->setProperty("InputWorkspace", monitors);
     childAlg->setProperty("OutputWorkspace", monitors);
-    childAlg->executeAsSubAlg();
+    childAlg->executeAsChildAlg();
     monitors = childAlg->getProperty("OutputWorkspace");
   }
 
@@ -608,12 +608,12 @@ double GetEi2::calculateFirstMoment(API::MatrixWorkspace_sptr monitor_ws, const 
 */
 API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws, const double first, const double width, const double end)
 {
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty("InputWorkspace", monitor_ws);
   std::ostringstream binParams;
   binParams << first << "," << width << "," << end;
   childAlg->setPropertyValue( "Params", binParams.str());
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 

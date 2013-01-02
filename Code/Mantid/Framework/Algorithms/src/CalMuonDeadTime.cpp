@@ -99,12 +99,12 @@ void CalMuonDeadTime::exec()
 
   std::string wsName = "TempForMuonCalDeadTime";
   API::IAlgorithm_sptr cropWS;
-  cropWS = createSubAlgorithm("CropWorkspace", -1, -1);  
+  cropWS = createChildAlgorithm("CropWorkspace", -1, -1);  
   cropWS->setProperty("InputWorkspace", inputWS);
   cropWS->setPropertyValue("OutputWorkspace", "croppedWS"); 
   cropWS->setProperty("XMin", firstgooddata); 
   cropWS->setProperty("XMax", lastgooddata); 
-  cropWS->executeAsSubAlg();
+  cropWS->executeAsChildAlg();
 
   // get cropped input workspace
 
@@ -119,10 +119,10 @@ void CalMuonDeadTime::exec()
   // y-axis with measured counts * exp(t/t_mu)
 
   API::IAlgorithm_sptr convertToPW;
-  convertToPW = createSubAlgorithm("ConvertToPointData", -1, -1);  
+  convertToPW = createChildAlgorithm("ConvertToPointData", -1, -1);  
   convertToPW->setProperty("InputWorkspace", wsCrop);
   convertToPW->setPropertyValue("OutputWorkspace", wsName); 
-  convertToPW->executeAsSubAlg();
+  convertToPW->executeAsChildAlg();
 
   // get pointworkspace
 
@@ -176,7 +176,7 @@ void CalMuonDeadTime::exec()
     const double in_bg1 = 0.0;
 
     API::IAlgorithm_sptr fit;
-    fit = createSubAlgorithm("Fit", -1, -1, true);
+    fit = createChildAlgorithm("Fit", -1, -1, true);
 
     std::stringstream ss;
     ss << "name=LinearBackground,A0=" << in_bg0 << ",A1=" << in_bg1;
@@ -188,7 +188,7 @@ void CalMuonDeadTime::exec()
     fit->setProperty("WorkspaceIndex", wsindex);
     fit->setPropertyValue("Minimizer", "Levenberg-MarquardtMD");
 
-    fit->executeAsSubAlg();
+    fit->executeAsChildAlg();
 
     std::string fitStatus = fit->getProperty("OutputStatus");
     //std::vector<double> params = fit->getProperty("Parameters");

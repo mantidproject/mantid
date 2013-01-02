@@ -59,7 +59,7 @@ namespace MDAlgorithms
     virtual void runConversion(API::Progress *)=0;
     /// virtual destructor
     virtual ~ConvertToMDEventsWSBase(){};
-/**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the subalgorithm */
+/**> helper functions: To assist with units conversion done by separate class and get access to some important internal states of the ChildAlgorithm */
     Kernel::Unit_sptr    getAxisUnits()const;
     double               getEi()const{return TWS.getEi();}
     int                  getEMode()const{return TWS.getEMode();}

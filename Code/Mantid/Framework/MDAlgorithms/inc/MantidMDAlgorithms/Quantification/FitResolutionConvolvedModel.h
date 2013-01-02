@@ -52,7 +52,7 @@ namespace Mantid
       void exec();
 
     private:
-      /// Create the fitting sub algorithm
+      /// Create the fitting Child Algorithm
       API::IAlgorithm_sptr createFittingAlgorithm();
     };
 

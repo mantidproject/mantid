@@ -224,10 +224,10 @@ void CalculateTransmissionBeamSpreader::exec()
  */
 API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(API::MatrixWorkspace_sptr WS)
 {
-  Algorithm_sptr childAlg = createSubAlgorithm("SumSpectra");
+  Algorithm_sptr childAlg = createChildAlgorithm("SumSpectra");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<bool>("IncludeMonitors", false);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 
@@ -244,27 +244,27 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API
     g_log.information("The Incident Beam Monitor UDET provided is not marked as a monitor");
   }
 
-  Algorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.4);
+  Algorithm_sptr childAlg = createChildAlgorithm("ExtractSingleSpectrum",0.0,0.4);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", static_cast<int>(index));
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 
-/** Uses 'Linear' as a subalgorithm to fit the log of the exponential curve expected for the transmission.
+/** Uses 'Linear' as a ChildAlgorithm to fit the log of the exponential curve expected for the transmission.
  *  @param WS :: The single-spectrum workspace to fit
  *  @return A workspace containing the fit
  */
 API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::fitToData(API::MatrixWorkspace_sptr WS)
 {
   g_log.information("Fitting the experimental transmission curve");
-  Algorithm_sptr childAlg = createSubAlgorithm("Linear",0.6,1.0);
+  Algorithm_sptr childAlg = createChildAlgorithm("Linear",0.6,1.0);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   const double lambdaMin = getProperty("MinWavelength");
   const double lambdaMax = getProperty("MaxWavelength");
   childAlg->setProperty<double>("StartX",lambdaMin);
   childAlg->setProperty<double>("EndX",lambdaMax);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
 
   std::string fitStatus = childAlg->getProperty("FitStatus");
   if ( fitStatus != "success" )

@@ -77,7 +77,7 @@ namespace Algorithms
          outputws->copyFrom(inputws1);
     }
 
-    // 3. Call Sub Algorithm
+    // 3. Call Child Algorithm
     if (op == "NOT"){
 
         // Unary operation

@@ -90,7 +90,7 @@ void DiffractionFocussing::init()
 /** Executes the algorithm
  *
  *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
- *  @throw runtime_error If unable to run one of the sub-algorithms successfully
+ *  @throw runtime_error If unable to run one of the Child Algorithms successfully
  */
 void DiffractionFocussing::exec()
 {
@@ -141,10 +141,10 @@ void DiffractionFocussing::exec()
     for(std::multimap<int64_t,int64_t>::const_iterator d = from;d!=to;++d)
       detectorList.push_back(static_cast<detid_t>(d->second));
     // Want version 1 of GroupDetectors here
-    API::IAlgorithm_sptr childAlg = createSubAlgorithm("GroupDetectors",-1.0,-1.0,true,1);
+    API::IAlgorithm_sptr childAlg = createChildAlgorithm("GroupDetectors",-1.0,-1.0,true,1);
     childAlg->setProperty("Workspace", tmpW);
     childAlg->setProperty< std::vector<detid_t> >("DetectorList",detectorList);
-    childAlg->executeAsSubAlg();
+    childAlg->executeAsChildAlg();
     try
     {
       // get the index of the combined spectrum
@@ -156,7 +156,7 @@ void DiffractionFocussing::exec()
     }
     catch(...)
     {
-      throw std::runtime_error("Unable to get Properties from GroupDetectors sub-algorithm");
+      throw std::runtime_error("Unable to get Properties from GroupDetectors Child Algorithm");
     }
   }
 
@@ -208,7 +208,7 @@ void DiffractionFocussing::exec()
   return;
 }
 
-/// Run ConvertUnits as a sub-algorithm to convert to dSpacing
+/// Run ConvertUnits as a Child Algorithm to convert to dSpacing
 MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::MatrixWorkspace_sptr& workspace)
 {
   const std::string CONVERSION_UNIT = "dSpacing";
@@ -217,15 +217,15 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Mat
 
   g_log.information() << "Converting units from "<< xUnit->label() << " to " << CONVERSION_UNIT<<".\n";
 
-  API::IAlgorithm_sptr childAlg = createSubAlgorithm("ConvertUnits", 0.34, 0.66);
+  API::IAlgorithm_sptr childAlg = createChildAlgorithm("ConvertUnits", 0.34, 0.66);
   childAlg->setProperty("InputWorkspace", workspace);
   childAlg->setPropertyValue("Target",CONVERSION_UNIT);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
 
   return childAlg->getProperty("OutputWorkspace");
 }
 
-/// Run Rebin as a sub-algorithm to harmonise the bin boundaries
+/// Run Rebin as a Child Algorithm to harmonise the bin boundaries
 void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
 {
 
@@ -242,10 +242,10 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
   g_log.information() << "Rebinning from "<< min << " to " << max <<
                          " in "<< step <<" logaritmic steps.\n";
 
-  API::IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
+  API::IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setProperty<std::vector<double> >("Params",paramArray);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   workspace = childAlg->getProperty("OutputWorkspace");
 
 }

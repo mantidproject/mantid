@@ -771,7 +771,7 @@ size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API
   if ( bhv == 1 && requireDivide )
   {
     g_log.debug() << "Running Divide algorithm to perform averaging.\n";
-    Mantid::API::IAlgorithm_sptr divide = createSubAlgorithm("Divide");
+    Mantid::API::IAlgorithm_sptr divide = createChildAlgorithm("Divide");
     divide->initialize();
     divide->setProperty<API::MatrixWorkspace_sptr>("LHSWorkspace", outputWS);
     divide->setProperty<API::MatrixWorkspace_sptr>("RHSWorkspace", beh);
@@ -868,7 +868,7 @@ size_t GroupDetectors2::formGroupsEvent( DataObjects::EventWorkspace_const_sptr 
   if ( bhv == 1 && requireDivide )
   {
     g_log.debug() << "Running Divide algorithm to perform averaging.\n";
-    Mantid::API::IAlgorithm_sptr divide = createSubAlgorithm("Divide");
+    Mantid::API::IAlgorithm_sptr divide = createChildAlgorithm("Divide");
     divide->initialize();
     divide->setProperty<API::MatrixWorkspace_sptr>("LHSWorkspace", outputWS);
     divide->setProperty<API::MatrixWorkspace_sptr>("RHSWorkspace", beh);

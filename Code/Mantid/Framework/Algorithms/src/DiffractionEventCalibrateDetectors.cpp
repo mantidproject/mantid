@@ -121,7 +121,7 @@ namespace Algorithms
       std::string detname, MatrixWorkspace_sptr inputW)
   {
 
-    IAlgorithm_sptr alg1 = createSubAlgorithm("MoveInstrumentComponent");
+    IAlgorithm_sptr alg1 = createChildAlgorithm("MoveInstrumentComponent");
     alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
     alg1->setPropertyValue("ComponentName", detname);
     //Move in cm for small shifts
@@ -129,10 +129,10 @@ namespace Algorithms
     alg1->setProperty("Y", y*0.01);
     alg1->setProperty("Z", z*0.01);
     alg1->setPropertyValue("RelativePosition", "1");
-    alg1->executeAsSubAlg();
+    alg1->executeAsChildAlg();
 
 
-    IAlgorithm_sptr algx = createSubAlgorithm("RotateInstrumentComponent");
+    IAlgorithm_sptr algx = createChildAlgorithm("RotateInstrumentComponent");
     algx->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
     algx->setPropertyValue("ComponentName", detname);
     algx->setProperty("X", 1.0);
@@ -140,10 +140,10 @@ namespace Algorithms
     algx->setProperty("Z", 0.0);
     algx->setProperty("Angle", rotx);
     algx->setPropertyValue("RelativeRotation", "1");
-    algx->executeAsSubAlg();
+    algx->executeAsChildAlg();
 
 
-    IAlgorithm_sptr algy = createSubAlgorithm("RotateInstrumentComponent");
+    IAlgorithm_sptr algy = createChildAlgorithm("RotateInstrumentComponent");
     algy->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
     algy->setPropertyValue("ComponentName", detname);
     algy->setProperty("X", 0.0);
@@ -151,9 +151,9 @@ namespace Algorithms
     algy->setProperty("Z", 0.0);
     algy->setProperty("Angle", roty);
     algy->setPropertyValue("RelativeRotation", "1");
-    algy->executeAsSubAlg();
+    algy->executeAsChildAlg();
 
-    IAlgorithm_sptr algz = createSubAlgorithm("RotateInstrumentComponent");
+    IAlgorithm_sptr algz = createChildAlgorithm("RotateInstrumentComponent");
     algz->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
     algz->setPropertyValue("ComponentName", detname);
     algz->setProperty("X", 0.0);
@@ -161,7 +161,7 @@ namespace Algorithms
     algz->setProperty("Z", 1.0);
     algz->setProperty("Angle", rotz);
     algz->setPropertyValue("RelativeRotation", "1");
-    algz->executeAsSubAlg();
+    algz->executeAsChildAlg();
   }
 /**
  * The intensity function calculates the intensity as a function of detector position and angles
@@ -193,31 +193,31 @@ namespace Algorithms
     movedetector(x, y, z, rotx, roty, rotz, detname, inputW);
     if (debug) std::cout << tim << " to movedetector()" << std::endl;
 
-    IAlgorithm_sptr alg3 = createSubAlgorithm("ConvertUnits");
+    IAlgorithm_sptr alg3 = createChildAlgorithm("ConvertUnits");
     alg3->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
     alg3->setPropertyValue("OutputWorkspace", outname);
     alg3->setPropertyValue("Target","dSpacing");
-    alg3->executeAsSubAlg();
+    alg3->executeAsChildAlg();
     MatrixWorkspace_sptr outputW=alg3->getProperty("OutputWorkspace");
 
     if (debug) std::cout << tim << " to ConvertUnits" << std::endl;
 
-    IAlgorithm_sptr alg4 = createSubAlgorithm("DiffractionFocussing");
+    IAlgorithm_sptr alg4 = createChildAlgorithm("DiffractionFocussing");
     alg4->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
     alg4->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputW);
     alg4->setPropertyValue("GroupingFileName", "");
     alg4->setPropertyValue("GroupingWorkspace", groupWSName);
-    alg4->executeAsSubAlg();
+    alg4->executeAsChildAlg();
     outputW=alg4->getProperty("OutputWorkspace");
 
     //Remove file
     if (debug) std::cout << tim << " to DiffractionFocussing" << std::endl;
 
-    IAlgorithm_sptr alg5 = createSubAlgorithm("Rebin");
+    IAlgorithm_sptr alg5 = createChildAlgorithm("Rebin");
     alg5->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
     alg5->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputW);
     alg5->setPropertyValue("Params", rb_param);
-    alg5->executeAsSubAlg();
+    alg5->executeAsChildAlg();
     outputW=alg5->getProperty("OutputWorkspace");
 
     if (debug) std::cout << tim << " to Rebin" << std::endl;
@@ -232,8 +232,8 @@ namespace Algorithms
     IAlgorithm_sptr fit_alg;
     try
     {
-      //set the subalgorithm no to log as this will be run once per spectra
-      fit_alg = createSubAlgorithm("Fit",-1,-1,false);
+      //set the ChildAlgorithm no to log as this will be run once per spectra
+      fit_alg = createChildAlgorithm("Fit",-1,-1,false);
     } catch (Exception::NotFoundError&)
     {
       g_log.error("Can't locate Fit algorithm");
@@ -248,7 +248,7 @@ namespace Algorithms
     fit_alg->setProperty("EndX",outputW->readX(0)[outputW->blocksize()]);
     fit_alg->setProperty("MaxIterations",200);
     fit_alg->setProperty("Output","fit");
-    fit_alg->executeAsSubAlg();
+    fit_alg->executeAsChildAlg();
 
     if (debug) std::cout << tim << " to Fit" << std::endl;
 
@@ -386,10 +386,10 @@ namespace Algorithms
     std::string inname = getProperty("InputWorkspace");
     std::string outname = inname+"2"; //getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr algS = createSubAlgorithm("SortEvents");
+    IAlgorithm_sptr algS = createChildAlgorithm("SortEvents");
     algS->setProperty("InputWorkspace",inputW);
     algS->setPropertyValue("SortBy", "X Value");
-    algS->executeAsSubAlg();
+    algS->executeAsChildAlg();
 
     //Write DetCal File
     double baseX,baseY,baseZ,upX,upY,upZ;
@@ -438,7 +438,7 @@ namespace Algorithms
       alg2->setPropertyValue("GroupNames", detList[det]->getName());
       std::string groupWSName = "group_" + detList[det]->getName();
       alg2->setPropertyValue("OutputWorkspace", groupWSName);
-      alg2->executeAsSubAlg();
+      alg2->executeAsChildAlg();
       par[5] = groupWSName;
       std::cout << tim << " to CreateGroupingWorkspace" << std::endl;
 

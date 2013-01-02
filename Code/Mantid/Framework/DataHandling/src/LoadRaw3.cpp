@@ -139,7 +139,7 @@ namespace Mantid
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(m_total_specs, m_lengthIn,m_lengthIn-1,title);
 
-      // Only run the sub-algorithms once
+      // Only run the Child Algorithms once
       loadRunParameters(localWorkspace);
       runLoadMappingTable(m_filename,localWorkspace);
       runLoadInstrument(m_filename,localWorkspace, 0.0, 0.4);
@@ -156,7 +156,7 @@ namespace Mantid
       setProtonCharge(run);
       setRunNumber(run);
 
-      // Set progress to start of range taking account of subalgorithms
+      // Set progress to start of range taking account of ChildAlgorithms
       setProg(0.0);
 
       // populate instrument parameters
@@ -487,7 +487,7 @@ namespace Mantid
 
     }
 
-    /// This sets the progress taking account of progress time taken up by subalgorithms
+    /// This sets the progress taking account of progress time taken up by ChildAlgorithms
     void LoadRaw3::setProg( double prog )
     {
       m_prog = m_prog_start + (m_prog_end - m_prog_start)*prog;

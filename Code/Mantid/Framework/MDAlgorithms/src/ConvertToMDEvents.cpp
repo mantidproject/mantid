@@ -4,7 +4,7 @@
 
 Transforms a workspace into MDEvent workspace with dimensions defined by user. 
    
-Gateway for set of subalgorithms, combined together to convert input 2D matrix workspace or event workspace with any units along X-axis into  multidimensional event workspace. 
+Gateway for set of ChildAlgorithms, combined together to convert input 2D matrix workspace or event workspace with any units along X-axis into  multidimensional event workspace. 
 
 Depending on the user input and the data, find in the input workspace, the algorithms transform the input workspace into 1 to 4 dimensional MDEvent workspace and adds to this workspace additional dimensions, which are described by the workspace properties and requested by user.
 
@@ -125,7 +125,7 @@ ConvertToMDEvents::init()
         " These variables had to be logged during experiment and the names of these variables "
         " have to coincide with the log names for the records of these variables in the source workspace");
 
-    // this property is mainly for subalgorithms to set-up as they have to identify if they use the same instrument. 
+    // this property is mainly for ChildAlgorithms to set-up as they have to identify if they use the same instrument. 
     declareProperty(new PropertyWithValue<bool>("UsePreprocessedDetectors", true, Direction::Input), 
         "Store the part of the detectors transformation into reciprocal space to save/reuse it later.\n"
         " Useful if one expects to analyse number of different experiments obtained on the same instrument.\n"
@@ -180,8 +180,8 @@ ConvertToMDEvents::init()
 /* Execute the algorithm.   */
 void ConvertToMDEvents::exec()
 {
-    // initiate all availible subalgorithms for further usage (it will do it only once, first time the algorithm is executed);
-    this->subAlgFactory.init(ParamParser);
+    // initiate all availible ChildAlgorithms for further usage (it will do it only once, first time the algorithm is executed);
+    this->ChildAlgFactory.init(ParamParser);
 
   // initiate class which would deal with any dimension workspaces, handling 
   if(!pWSWrapper)pWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
@@ -329,8 +329,8 @@ void ConvertToMDEvents::exec()
 
   //DO THE JOB:
 
-  // get pointer to appropriate  algorithm, (will throw if logic is wrong and subalgorithm is not found among existing)
-  ConvertToMDEventsWSBase * algo =  subAlgFactory.getAlg(algo_id);
+  // get pointer to appropriate  algorithm, (will throw if logic is wrong and ChildAlgorithm is not found among existing)
+  ConvertToMDEventsWSBase * algo =  ChildAlgFactory.getAlg(algo_id);
   // initate conversion and estimate amout of job to dl
   size_t n_steps = algo->setUPConversion(TWSD, pWSWrapper);
   // progress reporter

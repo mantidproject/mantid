@@ -154,11 +154,11 @@ namespace { // anonymous namespace begin
     g_log.notice() << "Filtering tmin=" << left << ", tmax=" << right << " microseconds\n";
 
     // run maskbins to do the work on the first prompt pulse
-    IAlgorithm_sptr algo = this->createSubAlgorithm("MaskBins");
+    IAlgorithm_sptr algo = this->createChildAlgorithm("MaskBins");
     algo->setProperty<MatrixWorkspace_sptr>("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(inputWS));
     algo->setProperty<double>("XMin", left);
     algo->setProperty<double>("XMax", right);
-    algo->executeAsSubAlg();
+    algo->executeAsChildAlg();
 
     // copy over the output workspace
     MatrixWorkspace_sptr outputWS = algo->getProperty("OutputWorkspace");

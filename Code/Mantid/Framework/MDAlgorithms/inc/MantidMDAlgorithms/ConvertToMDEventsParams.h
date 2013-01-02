@@ -15,7 +15,7 @@ namespace ConvertToMD
 {
 /** Helper class describes the possible properties of the algorithm, converting a workspace to a MDEventWorkspace 
   *
-  *  It is used to convert user input and data from the workspace into the key, to the appropriate subalgorithm, 
+  *  It is used to convert user input and data from the workspace into the key, to the appropriate ChildAlgorithm, 
   *  performing the actual conversion.
   *
   * @date 14-03-2012
@@ -115,16 +115,16 @@ class DLLExport ConvertToMDEventsParams
     std::string  native_elastic_unitID; // currently it is Q
     /// the ID of the unit, which is used in the expression to converty to QND. All other related inelastic units should be converted to this one. 
     std::string  native_inelastic_unitID; // currently it is energy transfer (DeltaE)
-   /**  The Units (different for different Q and dE mode), for input workspace, for the selected sub algorihm to work with. 
+   /**  The Units (different for different Q and dE mode), for input workspace, for the selected Child Algorihm to work with. 
       *  Any other input workspace units have to be converted into these, and these have to correspond to actual units, defined in workspace */
     std::string natural_units;
  public:
 
-  /** The main purpose of this class: identifies the ID of the conversion subalgorithm to run on a workspace and fills in ws description */
+  /** The main purpose of this class: identifies the ID of the conversion ChildAlgorithm to run on a workspace and fills in ws description */
   std::string identifyTheAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                                const Strings &other_dim_names,size_t maxNdim,MDEvents::MDWSDescriptionDepricated &TargWSDescription);
-  /** get the identifier of the correspondent algorithm as function of integer ws ID-s. This function is used during subalgorithm instanciation
-    * to generate algorithmID, which will be used later (through funcion identifyTheAlg) to retrive suitable subalgorithm.  */
+  /** get the identifier of the correspondent algorithm as function of integer ws ID-s. This function is used during ChildAlgorithm instanciation
+    * to generate algorithmID, which will be used later (through funcion identifyTheAlg) to retrive suitable ChildAlgorithm.  */
   std::string getAlgoID(QMode Q,AnalMode Mode,CnvrtUnits Conv,InputWSType WS,SampleType Sample)const;
 
   /** auxiliary function working opposite to getAlgoID and returns conversion modes given the algorithm ID */
@@ -166,11 +166,11 @@ class DLLExport ConvertToMDEventsParams
   std::string parseWSType(API::MatrixWorkspace_const_sptr inMatrixWS, MDEvents::MDWSDescriptionDepricated &TargWSDescription)const;
    //<---< Parts of the identifyMatrixAlg;
 
-  /** function parses arguments entered by user, and identifies, which subalgorithm should be deployed on WS  as function of the input artuments and the WS format */
+  /** function parses arguments entered by user, and identifies, which ChildAlgorithm should be deployed on WS  as function of the input artuments and the WS format */
   std::string identifyMatrixAlg(API::MatrixWorkspace_const_sptr inMatrixWS,const std::string &Q_mode_req, const std::string &dE_mode_req,
                                 Strings &out_dim_units,MDEvents::MDWSDescriptionDepricated &TargWSDescription);
 
-  /** function builds list of dimension names, dimension units and dimension ID-s used to describe target MD workspace as the function of MD workspace and selected subalgorithm */
+  /** function builds list of dimension names, dimension units and dimension ID-s used to describe target MD workspace as the function of MD workspace and selected ChildAlgorithm */
   void buildMDDimDescription(API::MatrixWorkspace_const_sptr inWS,const std::string &AlgoID,const Strings &other_dim_names,MDEvents::MDWSDescriptionDepricated &TargWSDescription)const;
 
   /** function returns the list of the property names, which can be treated as additional dimensions present in current matrix workspace */

@@ -85,7 +85,7 @@ namespace DataHandling
       double rel_shift = i_l1 - curr_zpos;
       if( std::abs(rel_shift) / curr_zpos > 1e-08 )
       {
-        g_log.debug("Running MoveInstrumentComponent as a sub algorithm for the sample holder.");
+        g_log.debug("Running MoveInstrumentComponent as a Child Algorithm for the sample holder.");
         // This performs a relative shift in the component along the Z axis
         performMoveComponent(compname, rel_shift, 0.0, 0.5);
       }
@@ -102,7 +102,7 @@ namespace DataHandling
       double rel_shift = i_l1 + sddist - curr_zpos;
       if( std::abs(rel_shift) / curr_zpos > 1e-08 )
       {
-        g_log.debug("Running MoveInstrumentComponent as a sub algorithm for the main-detector-bank");
+        g_log.debug("Running MoveInstrumentComponent as a Child Algorithm for the main-detector-bank");
         // This performs a relative shift in the component along the Z axis
         performMoveComponent(compname, rel_shift, 0.5, 1.0);
       }
@@ -121,12 +121,12 @@ namespace DataHandling
   void LoadLOQDistancesFromRaw::performMoveComponent(const std::string & comp_name, double zshift,
                  double start_progress, double end_progress)
   {
-    IAlgorithm_sptr alg = createSubAlgorithm("MoveInstrumentComponent", start_progress, end_progress);
+    IAlgorithm_sptr alg = createChildAlgorithm("MoveInstrumentComponent", start_progress, end_progress);
     alg->setProperty<MatrixWorkspace_sptr>("Workspace", getProperty("InputWorkspace"));
     alg->setPropertyValue("ComponentName", comp_name);
     alg->setProperty("Z", zshift);
     alg->setPropertyValue("RelativePosition", "1");
-    alg->executeAsSubAlg();
+    alg->executeAsChildAlg();
 
   }
 

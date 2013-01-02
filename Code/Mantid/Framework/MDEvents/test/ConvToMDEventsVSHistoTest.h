@@ -10,7 +10,7 @@
 
 #include "MantidMDEvents/MDBoxIterator.h"
 
-// stuff for convertToEventWorkspace subalgorithm
+// stuff for convertToEventWorkspace ChildAlgorithm
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -231,7 +231,7 @@ logProvider(100)
    detLoc = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2D);
   
 }
-// function repeats convert to events algorithm which for some mysterious reasons do not work here as subalgorithm.
+// function repeats convert to events algorithm which for some mysterious reasons do not work here as ChildAlgorithm.
 EventWorkspace_sptr convertToEvents(DataObjects::Workspace2D_const_sptr inWS)
 {
  

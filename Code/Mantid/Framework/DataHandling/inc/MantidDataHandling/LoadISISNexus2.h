@@ -93,7 +93,7 @@ namespace Mantid
       void exec();
       // Validate the optional input properties
       void checkOptionalProperties();
-      /// Run LoadInstrument as a subalgorithm
+      /// Run LoadInstrument as a ChildAlgorithm
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       /// Load in details about the run
       void loadRunDetails(DataObjects::Workspace2D_sptr local_workspace, Mantid::NeXus::NXEntry & entry);

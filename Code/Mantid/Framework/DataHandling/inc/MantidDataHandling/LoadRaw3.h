@@ -112,7 +112,7 @@ namespace Mantid
       ///sets optional properties
       void setOptionalProperties();
 
-      ///sets progress taking account of progress time taken up by subalgorithms
+      ///sets progress taking account of progress time taken up by ChildAlgorithms
       void setProg( double );
 
       /// The name and path of the input file

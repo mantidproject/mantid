@@ -122,10 +122,10 @@ void HFIRDarkCurrentSubtraction::exec()
     IAlgorithm_sptr loadAlg;
     if (!reductionManager->existsProperty("LoadAlgorithm"))
     {
-      loadAlg = createSubAlgorithm("HFIRLoad", 0.1, 0.3);
+      loadAlg = createChildAlgorithm("HFIRLoad", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
       loadAlg->setProperty("ReductionProperties", reductionManagerName);
-      loadAlg->executeAsSubAlg();
+      loadAlg->executeAsChildAlg();
     } else {
       IAlgorithm_sptr loadAlg0 = reductionManager->getProperty("LoadAlgorithm");
       const std::string loadString = loadAlg0->toString();
@@ -154,11 +154,11 @@ void HFIRDarkCurrentSubtraction::exec()
   // Perform subtraction
   double darkTimer = getCountingTime(darkWS);
   double dataTimer = getCountingTime(inputWS);
-  IAlgorithm_sptr scaleAlg = createSubAlgorithm("Scale", 0.3, 0.5);
+  IAlgorithm_sptr scaleAlg = createChildAlgorithm("Scale", 0.3, 0.5);
   scaleAlg->setProperty("InputWorkspace", darkWS);
   scaleAlg->setProperty("Factor", dataTimer/darkTimer);
   scaleAlg->setProperty("Operation", "Multiply");
-  scaleAlg->executeAsSubAlg();
+  scaleAlg->executeAsChildAlg();
   MatrixWorkspace_sptr scaledDarkWS = scaleAlg->getProperty("OutputWorkspace");
 
   // Zero out timer and monitor so that we don't subtract them out
@@ -169,11 +169,11 @@ void HFIRDarkCurrentSubtraction::exec()
     scaledDarkWS->dataY(DEFAULT_MONITOR_ID)[i]=0.0;
     scaledDarkWS->dataE(DEFAULT_MONITOR_ID)[i]=0.0;
   }
-  IAlgorithm_sptr minusAlg = createSubAlgorithm("Minus", 0.5, 0.7);
+  IAlgorithm_sptr minusAlg = createChildAlgorithm("Minus", 0.5, 0.7);
   minusAlg->setProperty("LHSWorkspace", inputWS);
   minusAlg->setProperty("RHSWorkspace", scaledDarkWS);
   minusAlg->setProperty("OutputWorkspace", outputWS);
-  minusAlg->executeAsSubAlg();
+  minusAlg->executeAsChildAlg();
 
   setProperty("OutputWorkspace", outputWS);
   setProperty("OutputMessage", "Dark current subtracted: "+output_message);

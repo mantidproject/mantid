@@ -11,7 +11,7 @@ namespace Mantid
 {
 namespace Algorithms
 {
-/** This algorithm calls FindPeaks as a subalgorithm and then subtracts
+/** This algorithm calls FindPeaks as a ChildAlgorithm and then subtracts
     all the peaks found from the data, leaving just the 'background'.
 
     *** IT IS ASSUMED THAT THE FITTING FUNCTION WAS A GAUSSIAN ***
@@ -24,8 +24,8 @@ namespace Algorithms
 
     Optional Properties:
     <UL>
-    <LI> fwhm - passed to the FindPeaks subalgorithm</LI>
-    <LI> Tolerance - passed to the FindPeaks subalgorithm</LI>
+    <LI> fwhm - passed to the FindPeaks ChildAlgorithm</LI>
+    <LI> Tolerance - passed to the FindPeaks ChildAlgorithm</LI>
     <LI> WorkspaceIndex - The spectrum from which to remove peaks. Will search all spectra if absent.</LI>
     </UL>
 

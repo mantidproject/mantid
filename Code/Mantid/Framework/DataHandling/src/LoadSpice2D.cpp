@@ -368,7 +368,7 @@ namespace Mantid
       ws->mutableRun().addProperty("run_start", start_time, "", true);
 
       // Move the detector to the right position
-      API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");
+      API::IAlgorithm_sptr mover = createChildAlgorithm("MoveInstrumentComponent");
 
       // Finding the name of the detector object.
       std::string detID = ws->getInstrument()->getStringParameter("detector-name")[0];
@@ -382,11 +382,11 @@ namespace Mantid
         mover->execute();
       } catch (std::invalid_argument& e)
       {
-        g_log.error("Invalid argument to MoveInstrumentComponent sub-algorithm");
+        g_log.error("Invalid argument to MoveInstrumentComponent Child Algorithm");
         g_log.error(e.what());
       } catch (std::runtime_error& e)
       {
-        g_log.error("Unable to successfully run MoveInstrumentComponent sub-algorithm");
+        g_log.error("Unable to successfully run MoveInstrumentComponent Child Algorithm");
         g_log.error(e.what());
       }
 
@@ -394,7 +394,7 @@ namespace Mantid
       pDoc->release();
     }
 
-    /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
+    /** Run the Child Algorithm LoadInstrument (as for LoadRaw)
      * @param inst_name :: The name written in the Nexus file
      * @param localWorkspace :: The workspace to insert the instrument into
      */
@@ -402,9 +402,9 @@ namespace Mantid
         DataObjects::Workspace2D_sptr localWorkspace)
     {
 
-      API::IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
         loadInst->setPropertyValue("InstrumentName", inst_name);
@@ -413,10 +413,10 @@ namespace Mantid
         loadInst->execute();
       } catch (std::invalid_argument&)
       {
-        g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
       } catch (std::runtime_error&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
       }
     }
 

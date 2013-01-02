@@ -37,7 +37,7 @@ Note that since we are dealing with histogrammed data, the cut-off values above 
 ==== Restrictions on the input workspace ====
 The input workspace must contain histogram data where the X unit is time-of-flight and the Y data is raw counts. The [[instrument]] associated with the workspace must be fully defined because detector, source & sample position are needed.
 
-====Subalgorithms used====
+====ChildAlgorithms used====
 If the input workspace contains more than a single spectrum, Unwrap makes use of the [[rebin]] algorithm to set the bins on the output workspace to common values which cover the maximum theoretically accessible wavelength range.
 
 

@@ -6,7 +6,7 @@ This is then used to mark all 'dead' detectors with a 'dead' marker value, while
 
 This algorithm is primarily used to ease identification using the instrument visualization tools.
 
-====Subalgorithms used====
+====ChildAlgorithms used====
 
 Uses the [[Integration]] algorithm to sum the spectra.
 
@@ -153,19 +153,19 @@ namespace Mantid
       return;
     }
 
-    /// Run Integration as a sub-algorithm
+    /// Run Integration as a Child Algorithm
     MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace()
     {
       g_log.information() << "Integrating input workspace" << std::endl;
 
-      API::IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
+      API::IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
       // Now execute integration.
       //pass inputed values straight to Integration, checking must be done there
       childAlg->setProperty<MatrixWorkspace_sptr>( "InputWorkspace", getProperty("InputWorkspace") );
       childAlg->setProperty<MatrixWorkspace_sptr>( "OutputWorkspace", getProperty("OutputWorkspace") );
       childAlg->setProperty<double>( "RangeLower",  getProperty("RangeLower") );
       childAlg->setProperty<double>( "RangeUpper", getProperty("RangeUpper") );
-      childAlg->executeAsSubAlg();
+      childAlg->executeAsChildAlg();
 
       return childAlg->getProperty("OutputWorkspace");
     }

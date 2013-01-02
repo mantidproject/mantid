@@ -94,7 +94,7 @@ public:
      TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
       outputFile = saver->getPropertyValue("Filename");//get absolute path
 
-    // throws file not exist from subalgorithm
+    // throws file not exist from ChildAlgorithm
       saver->setRethrows(true);
       TS_ASSERT_THROWS( saver->execute(),Mantid::Kernel::Exception::FileError);
   

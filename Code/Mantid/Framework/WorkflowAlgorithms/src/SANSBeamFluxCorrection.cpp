@@ -86,35 +86,35 @@ void SANSBeamFluxCorrection::exec()
 
   // Rebin the reference and monitor data to the sample data workspace
   progress.report("Rebinning reference data");
-  IAlgorithm_sptr rebinAlg = createSubAlgorithm("RebinToWorkspace");
+  IAlgorithm_sptr rebinAlg = createChildAlgorithm("RebinToWorkspace");
   rebinAlg->setProperty("WorkspaceToRebin", fluxRefWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
-  rebinAlg->executeAsSubAlg();
+  rebinAlg->executeAsChildAlg();
   MatrixWorkspace_sptr scaledfluxRefWS = rebinAlg->getProperty("OutputWorkspace");
 
   progress.report("Rebinning monitor data");
-  rebinAlg = createSubAlgorithm("RebinToWorkspace");
+  rebinAlg = createChildAlgorithm("RebinToWorkspace");
   rebinAlg->setProperty("WorkspaceToRebin", monitorWS);
   rebinAlg->setProperty("WorkspaceToMatch", inputWS);
-  rebinAlg->executeAsSubAlg();
+  rebinAlg->executeAsChildAlg();
   monitorWS = rebinAlg->getProperty("OutputWorkspace");
 
   progress.report("Correcting input data");
   // I = I_0 / Phi_sample
   // Phi_sample = M_sample * [Phi_ref/M_ref]
   // where [Phi_ref/M_ref] is the fluxRefWS workspace
-  IAlgorithm_sptr divideAlg = createSubAlgorithm("Divide");
+  IAlgorithm_sptr divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", inputWS);
   divideAlg->setProperty("RHSWorkspace", monitorWS);
   divideAlg->setProperty("OutputWorkspace", outputWS);
-  divideAlg->executeAsSubAlg();
+  divideAlg->executeAsChildAlg();
   outputWS = divideAlg->getProperty("OutputWorkspace");
 
-  divideAlg = createSubAlgorithm("Divide");
+  divideAlg = createChildAlgorithm("Divide");
   divideAlg->setProperty("LHSWorkspace", outputWS);
   divideAlg->setProperty("RHSWorkspace", scaledfluxRefWS);
   divideAlg->setProperty("OutputWorkspace", outputWS);
-  divideAlg->executeAsSubAlg();
+  divideAlg->executeAsChildAlg();
   outputWS = divideAlg->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWS);
   setProperty("OutputMessage", "Flux correction applied\n"+m_output_message);
@@ -140,10 +140,10 @@ MatrixWorkspace_sptr SANSBeamFluxCorrection::loadReference()
     fluxRefWSName = m_reductionManager->getPropertyValue(entryName);
     m_output_message += "   | Using flux reference " + referenceFluxFile + "\n";
   } else {
-    IAlgorithm_sptr loadAlg = createSubAlgorithm("Load");
-    loadAlg = createSubAlgorithm("Load");
+    IAlgorithm_sptr loadAlg = createChildAlgorithm("Load");
+    loadAlg = createChildAlgorithm("Load");
     loadAlg->setProperty("Filename", referenceFluxFile);
-    loadAlg->executeAsSubAlg();
+    loadAlg->executeAsChildAlg();
     Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
     fluxRefWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
     m_output_message += "   | Loaded flux reference " + referenceFluxFile + "\n";

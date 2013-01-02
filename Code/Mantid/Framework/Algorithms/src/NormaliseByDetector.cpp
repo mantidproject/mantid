@@ -268,10 +268,10 @@ namespace Mantid
       const size_t progress_items = static_cast<size_t>(double(nHistograms) * 1.2);
       Progress prog(this,0.0,1.0, progress_items);
       // Clone the input workspace to create a template for the denominator workspace.
-      IAlgorithm_sptr cloneAlg = this->createSubAlgorithm("CloneWorkspace", 0.0, 0.1, true);
+      IAlgorithm_sptr cloneAlg = this->createChildAlgorithm("CloneWorkspace", 0.0, 0.1, true);
       cloneAlg->setProperty("InputWorkspace", inWS);
       cloneAlg->setPropertyValue("OutputWorkspace", "temp");
-      cloneAlg->executeAsSubAlg();
+      cloneAlg->executeAsChildAlg();
       Workspace_sptr temp = cloneAlg->getProperty("OutputWorkspace");
       MatrixWorkspace_sptr denominatorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
@@ -309,11 +309,11 @@ namespace Mantid
       MatrixWorkspace_sptr denominatorWS = processHistograms(inWS);
 
       // Perform the normalisation.
-      IAlgorithm_sptr divideAlg = this->createSubAlgorithm("Divide", 0.9, 1.0, true);
+      IAlgorithm_sptr divideAlg = this->createChildAlgorithm("Divide", 0.9, 1.0, true);
       divideAlg->setRethrows(true);
       divideAlg->setProperty("LHSWorkspace", inWS);
       divideAlg->setProperty("RHSWorkspace", denominatorWS);
-      divideAlg->executeAsSubAlg();
+      divideAlg->executeAsChildAlg();
       MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
       setProperty("OutputWorkspace", outputWS); 
     }

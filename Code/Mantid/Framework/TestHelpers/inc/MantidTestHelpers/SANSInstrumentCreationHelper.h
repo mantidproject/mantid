@@ -19,7 +19,7 @@ public:
    * @param workspace: name of the workspace to be created.
    */
   static Mantid::DataObjects::Workspace2D_sptr createSANSInstrumentWorkspace(std::string workspace);
-  /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
+  /** Run the Child Algorithm LoadInstrument (as for LoadRaw)
    * @param inst_name :: The name written in the Nexus file
    * @param workspace :: The workspace to insert the instrument into
    */

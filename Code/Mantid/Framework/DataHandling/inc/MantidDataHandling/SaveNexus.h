@@ -81,7 +81,7 @@ namespace Mantid
       std::string m_filetype;
       /// Pointer to the local workspace
       API::Workspace_sptr m_inputWorkspace;
-      /// Method to execute SNP sub algorithm
+      /// Method to execute SNP Child Algorithm
       void runSaveNexusProcessed();
       /// sets non workspace properties for the algorithm
       void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);

@@ -183,7 +183,7 @@ void IQTransform::subtractBackgroundValue(MantidVec& Y, const double value)
 }
 
 /** Uses the Minus algorithm to subtract the background workspace from the given workspace.
- *  If the subalgorithm fails (e.g. if the background workspace is the wrong size), then this
+ *  If the ChildAlgorithm fails (e.g. if the background workspace is the wrong size), then this
  *  entire algorithm will.
  *  @param ws         The workspace to perform the subtraction on
  *  @param background The workspace containing the background values

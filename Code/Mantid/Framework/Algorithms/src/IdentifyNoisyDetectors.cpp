@@ -68,7 +68,7 @@ void IdentifyNoisyDetectors::exec()
   MatrixWorkspace_sptr stdDevWs;
   stdDevWs = WorkspaceFactory::Instance().create(outputWs);
 
-  IAlgorithm_sptr integ = createSubAlgorithm("Integration");  
+  IAlgorithm_sptr integ = createChildAlgorithm("Integration");  
   integ->initialize();
   integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   integ->setProperty<double>("RangeLower", rangeLower);
@@ -77,7 +77,7 @@ void IdentifyNoisyDetectors::exec()
 
   MatrixWorkspace_sptr int1 = integ->getProperty("OutputWorkspace");
   
-  IAlgorithm_sptr power = createSubAlgorithm("Power");
+  IAlgorithm_sptr power = createChildAlgorithm("Power");
   power->initialize();
   power->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWs);
   power->setProperty<double>("Exponent", 2.0);
@@ -86,7 +86,7 @@ void IdentifyNoisyDetectors::exec()
   MatrixWorkspace_sptr power_tmp = power->getProperty("OutputWorkspace");
   
   // integrate again
-  integ = createSubAlgorithm("Integration");
+  integ = createChildAlgorithm("Integration");
   integ->initialize();
   integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", power_tmp);
   integ->setProperty<double>("RangeLower", rangeLower);
@@ -95,14 +95,14 @@ void IdentifyNoisyDetectors::exec()
 
   MatrixWorkspace_sptr int2 = integ->getProperty("OutputWorkspace");
   
-  IAlgorithm_sptr csvw = createSubAlgorithm("CreateSingleValuedWorkspace");
+  IAlgorithm_sptr csvw = createChildAlgorithm("CreateSingleValuedWorkspace");
   csvw->initialize();
   csvw->setProperty<double>("DataValue", steps);
   csvw->execute();
 
   MatrixWorkspace_sptr stepsWs = csvw->getProperty("OutputWorkspace");
 
-  IAlgorithm_sptr divide = createSubAlgorithm("Divide");
+  IAlgorithm_sptr divide = createChildAlgorithm("Divide");
   divide->initialize();
   divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", int1);
   divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", stepsWs);
@@ -110,7 +110,7 @@ void IdentifyNoisyDetectors::exec()
   
   int1 = divide->getProperty("OutputWorkspace");
 
-  divide = createSubAlgorithm("Divide");
+  divide = createChildAlgorithm("Divide");
   divide->initialize();
   divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", int2);
   divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", stepsWs);

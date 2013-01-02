@@ -78,7 +78,7 @@ public:
     TS_ASSERT_DELTA( output2D->run().getProtonCharge(), 171.0353, 0.0001 )
 
     //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
+    // Tests taken from LoadInstrumentTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
     boost::shared_ptr<const Mantid::Geometry::Instrument> i = output2D->getInstrument();
     boost::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();
@@ -97,7 +97,7 @@ public:
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
 
     //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check sub-algorithm is running properly
+    // Test code copied from LoadLogTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
   //  boost::shared_ptr<Sample> sample = output2D->sample();
     Property *l_property = output2D->run().getLogData( std::string("TEMP1") );

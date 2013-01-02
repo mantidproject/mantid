@@ -44,7 +44,7 @@ class RunPythonScript(PythonAlgorithm):
         wsInputName = self.getPropertyValue("InputWorkspace")
         wsOutputName = self.getPropertyValue("OutputWorkspace")
         
-        # Output workspace properties of sub-algorithms are given the name 'ChildAlgOutput'
+        # Output workspace properties of Child Algorithms are given the name 'ChildAlgOutput'
         # by default. In the case of python algorithms, it means that such a workspace
         # will be put in the ADS if another name is not given. Catch that case here:
         if wsOutputName=="ChildAlgOutput":

@@ -175,7 +175,7 @@ namespace Mantid
         }
         if (period == 0)
         {
-          // Only run the sub-algorithms once
+          // Only run the Child Algorithms once
           runLoadInstrument(localWorkspace );
           loadMappingTable(localWorkspace );
           loadRunDetails(localWorkspace);
@@ -477,13 +477,13 @@ namespace Mantid
       closeNexusData();
     }
 
-    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromNexus)
+    /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromNexus)
     void LoadISISNexus::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
 
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
         loadInst->setPropertyValue("InstrumentName", m_instrument_name);
@@ -493,11 +493,11 @@ namespace Mantid
       }
       catch( std::invalid_argument&)
       {
-        g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
       }
       catch (std::runtime_error&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
       }
 
       // If loading instrument definition file fails, run LoadInstrumentFromNexus instead

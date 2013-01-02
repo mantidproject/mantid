@@ -107,7 +107,7 @@ void RemoveBins::exec()
   const bool recalcRange = ( unitChange || !commonBins);
 
   // If the above evaluates to false, and the range given is at the edge of the workspace, then we can just call
-  // CropWorkspace as a subalgorithm and we're done.
+  // CropWorkspace as a ChildAlgorithm and we're done.
   const MantidVec& X0 = m_inputWorkspace->readX(0);
   if ( !singleSpectrum && !recalcRange && ( m_startX <= X0.front() || m_endX >= X0.back() ) )
   {
@@ -228,14 +228,14 @@ void RemoveBins::checkProperties()
   return;
 }
 
-/// Calls CropWorkspace as a sub-algorithm to remove bins from the start or end of a square workspace
+/// Calls CropWorkspace as a Child Algorithm to remove bins from the start or end of a square workspace
 void RemoveBins::crop(const double& start, const double& end)
 {
-  IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("CropWorkspace");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_inputWorkspace));
   childAlg->setProperty<double>("XMin", start);
   childAlg->setProperty<double>("XMax", end);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
 
   // Only get to here if successful
   // Assign the result to the output workspace property

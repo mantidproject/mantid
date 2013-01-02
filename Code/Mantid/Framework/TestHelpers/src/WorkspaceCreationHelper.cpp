@@ -897,12 +897,12 @@ namespace WorkspaceCreationHelper
       outputWS->mutableRun().addProperty("run_start", runstartstr);
 
       // 4. Instrument
-      Mantid::API::Algorithm_sptr loadInst= alg->createSubAlgorithm("LoadInstrument");
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      Mantid::API::Algorithm_sptr loadInst= alg->createChildAlgorithm("LoadInstrument");
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       loadInst->setPropertyValue("InstrumentName", sourceWS->getInstrument()->getName());
       loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", outputWS);
       loadInst->setProperty("RewriteSpectraMap", true);
-      loadInst->executeAsSubAlg();
+      loadInst->executeAsChildAlg();
       // Populate the instrument parameters in this workspace - this works around a bug
       outputWS->populateInstrumentParameters();
 

@@ -96,13 +96,13 @@ void HFIRLoad::moveToBeamCenter()
   double beam_ctr_y = 0.0;
   HFIRInstrument::getCoordinateFromPixel(m_center_x, m_center_y, dataWS, beam_ctr_x, beam_ctr_y);
 
-  IAlgorithm_sptr mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
+  IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.5, 0.50);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
   mvAlg->setProperty("ComponentName", "detector1");
   mvAlg->setProperty("X", default_ctr_x-beam_ctr_x);
   mvAlg->setProperty("Y", default_ctr_y-beam_ctr_y);
   mvAlg->setProperty("RelativePosition", true);
-  mvAlg->executeAsSubAlg();
+  mvAlg->executeAsChildAlg();
   g_log.information() << "Moving beam center to " << m_center_x << " " << m_center_y << std::endl;
 
 }
@@ -137,7 +137,7 @@ void HFIRLoad::exec()
   const double wavelength_input = getProperty("Wavelength");
   const double wavelength_spread_input = getProperty("WavelengthSpread");
 
-  IAlgorithm_sptr loadAlg = createSubAlgorithm("LoadSpice2D", 0, 0.2);
+  IAlgorithm_sptr loadAlg = createChildAlgorithm("LoadSpice2D", 0, 0.2);
   loadAlg->setProperty("Filename", fileName);
   if ( !isEmpty(wavelength_input) ) {
     loadAlg->setProperty("Wavelength", wavelength_input);
@@ -145,7 +145,7 @@ void HFIRLoad::exec()
   }
   try
   {
-    loadAlg->executeAsSubAlg();
+    loadAlg->executeAsChildAlg();
   }
   catch(...)
   {
@@ -155,9 +155,9 @@ void HFIRLoad::exec()
     // This will cover the special case where the instrument scientist uses a reduced data set
     // as a sensitivity data set.
     g_log.warning() << "Unable to load file as a SPICE file. Trying to load as a Nexus file." << std::endl;
-    loadAlg = createSubAlgorithm("Load", 0, 0.2);
+    loadAlg = createChildAlgorithm("Load", 0, 0.2);
     loadAlg->setProperty("Filename", fileName);
-    loadAlg->executeAsSubAlg();
+    loadAlg->executeAsChildAlg();
     Workspace_sptr dataWS_tmp = loadAlg->getProperty("OutputWorkspace");
     MatrixWorkspace_sptr dataWS = boost::dynamic_pointer_cast<MatrixWorkspace>(dataWS_tmp);
     dataWS->mutableRun().addProperty("is_sensitivity", 1, "", true);
@@ -189,12 +189,12 @@ void HFIRLoad::exec()
   dataWS->mutableRun().addProperty("sample_detector_distance", sdd, "mm", true);
 
   // Move the detector to its correct position
-  IAlgorithm_sptr mvAlg = createSubAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
+  IAlgorithm_sptr mvAlg = createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.4);
   mvAlg->setProperty<MatrixWorkspace_sptr>("Workspace", dataWS);
   mvAlg->setProperty("ComponentName", "detector1");
   mvAlg->setProperty("Z", sdd/1000.0);
   mvAlg->setProperty("RelativePosition", false);
-  mvAlg->executeAsSubAlg();
+  mvAlg->executeAsChildAlg();
   g_log.information() << "Moving detector to " << sdd/1000.0 << std::endl;
   m_output_message += "   Detector position: " + Poco::NumberFormatter::format(sdd/1000.0, 3) + " m\n";
 

@@ -119,7 +119,7 @@ namespace Algorithms
     if (togroupws)
     {
       std::string groupname = outputwsnamebase;
-      API::IAlgorithm_sptr groupws = createSubAlgorithm("GroupWorkspaces", 0.99, 1.00, true);
+      API::IAlgorithm_sptr groupws = createChildAlgorithm("GroupWorkspaces", 0.99, 1.00, true);
       // groupws->initialize();
       groupws->setAlwaysStoreInADS(true);
       groupws->setProperty("InputWorkspaces", mWsNames);

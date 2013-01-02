@@ -363,7 +363,7 @@ DECLARE_ALGORITHM(ProcessBackground)
       API::IAlgorithm_sptr fit;
       try
       {
-          fit = this->createSubAlgorithm("Fit", 0.0, 0.2, true);
+          fit = this->createChildAlgorithm("Fit", 0.0, 0.2, true);
       }
       catch (Exception::NotFoundError &)
       {
@@ -402,7 +402,7 @@ DECLARE_ALGORITHM(ProcessBackground)
       fit->setProperty("Minimizer", "Levenberg-Marquardt");
       fit->setProperty("CostFunction", "Least squares");
 
-      fit->executeAsSubAlg();
+      fit->executeAsChildAlg();
 
       // 4. Get fit result
       // a) Status

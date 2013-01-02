@@ -241,7 +241,7 @@ namespace CurveFitting
     // Process the Function property
     processParameters();
 
-    boost::shared_ptr<GenericFit> fit = boost::dynamic_pointer_cast<GenericFit>(createSubAlgorithm("GenericFit"));
+    boost::shared_ptr<GenericFit> fit = boost::dynamic_pointer_cast<GenericFit>(createChildAlgorithm("GenericFit"));
     fit->setChild(false);
     fit->setLogging(false); // No logging of time to run GenericFit
     fit->initialize();

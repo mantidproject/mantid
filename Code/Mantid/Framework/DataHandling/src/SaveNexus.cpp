@@ -20,7 +20,7 @@ In the future it may be possible to write other Nexus file types than the one su
 TimeSeriesProperty data within the workspace will be saved as NXlog sections in the Nexus file.
 Only floating point logs are stored and loaded at present.
 
-===Subalgorithms used===
+===ChildAlgorithms used===
 
 [[SaveNexusProcessed]]
 
@@ -171,7 +171,7 @@ void SaveNexus::setOtherProperties(IAlgorithm* alg,const std::string& propertyNa
  }
 void SaveNexus::runSaveNexusProcessed()
 {
-  IAlgorithm_sptr saveNexusPro = createSubAlgorithm("SaveNexusProcessed", 0.0, 1.0, true);
+  IAlgorithm_sptr saveNexusPro = createChildAlgorithm("SaveNexusProcessed", 0.0, 1.0, true);
   // Pass through the same output filename
   saveNexusPro->setPropertyValue("Filename", m_filename);
   // Set the workspace property
@@ -195,16 +195,16 @@ void SaveNexus::runSaveNexusProcessed()
   // Pass through the append property
   saveNexusPro->setProperty<bool>("Append",getProperty("Append"));
 
-  // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try
   {
     saveNexusPro->execute();
   } catch (std::runtime_error&)
   {
-    g_log.error("Unable to successfully run SaveNexusprocessed sub-algorithm");
+    g_log.error("Unable to successfully run SaveNexusprocessed Child Algorithm");
   }
   if (!saveNexusPro->isExecuted())
-    g_log.error("Unable to successfully run SaveNexusProcessed sub-algorithm");
+    g_log.error("Unable to successfully run SaveNexusProcessed Child Algorithm");
   //
   progress(1);
 }

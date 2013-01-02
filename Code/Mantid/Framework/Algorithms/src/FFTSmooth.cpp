@@ -102,7 +102,7 @@ void FFTSmooth::exec()
   //setProperty("OutputWorkspace",symmWS); return;
 
   // Forward Fourier transform
-  IAlgorithm_sptr fft = createSubAlgorithm("RealFFT", 0, 0.5 );
+  IAlgorithm_sptr fft = createChildAlgorithm("RealFFT", 0, 0.5 );
   fft->setProperty("InputWorkspace",symmWS);
   fft->setProperty("WorkspaceIndex",0);
   try
@@ -142,7 +142,7 @@ void FFTSmooth::exec()
   }
 
   // Backward transform
-  fft = createSubAlgorithm("RealFFT", 0.5, 1. );
+  fft = createChildAlgorithm("RealFFT", 0.5, 1. );
   fft->setProperty("InputWorkspace",m_filteredWS);
   //fft->setProperty("Real",0);
   //fft->setProperty("Imaginary",1);

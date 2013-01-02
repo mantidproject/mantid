@@ -194,14 +194,14 @@ namespace DataHandling
       else
         temp_wsname = "__" + wsname + "_temp__";
 
-      IAlgorithm_sptr alg = this->createSubAlgorithm("LoadEventPreNexus", prog_start, prog_start+prog_delta);
+      IAlgorithm_sptr alg = this->createChildAlgorithm("LoadEventPreNexus", prog_start, prog_start+prog_delta);
       alg->setProperty("EventFilename", dataDir + eventFilenames[i]);
       alg->setProperty("MappingFilename", mapfile);
       alg->setProperty("ChunkNumber", chunkNumber);
       alg->setProperty("TotalChunks", chunkTotal);
       alg->setProperty("UseParallelProcessing", useParallel);
       alg->setPropertyValue("OutputWorkspace", temp_wsname);
-      alg->executeAsSubAlg();
+      alg->executeAsChildAlg();
       prog_start += prog_delta;
 
       if (i == 0)
@@ -349,11 +349,11 @@ namespace DataHandling
       if (Poco::File(possibilities[i]).exists())
       {
         g_log.information() << "Loading logs from \"" << possibilities[i] << "\"\n";
-        IAlgorithm_sptr alg = this->createSubAlgorithm("LoadNexusLogs", prog_start, prog_stop);
+        IAlgorithm_sptr alg = this->createChildAlgorithm("LoadNexusLogs", prog_start, prog_stop);
         alg->setProperty("Workspace", wksp);
         alg->setProperty("Filename", possibilities[i]);
         alg->setProperty("OverwriteLogs", false);
-        alg->executeAsSubAlg();
+        alg->executeAsChildAlg();
         loadedLogs = true;
         //Reload instrument so SNAP can use log values
         std::string entry_name = LoadTOFRawNexus::getEntryName(possibilities[i]);
@@ -378,10 +378,10 @@ namespace DataHandling
     mon_wsname.append("_monitors");
 
     try{
-    IAlgorithm_sptr alg = this->createSubAlgorithm("LoadPreNexusMonitors", prog_start, prog_stop);
+    IAlgorithm_sptr alg = this->createChildAlgorithm("LoadPreNexusMonitors", prog_start, prog_stop);
     alg->setPropertyValue("RunInfoFilename", this->getProperty(RUNINFO_PARAM));
     alg->setPropertyValue("OutputWorkspace", mon_wsname);
-    alg->executeAsSubAlg();
+    alg->executeAsChildAlg();
     MatrixWorkspace_sptr mons = alg->getProperty("OutputWorkspace");
     this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
         mon_wsname, Direction::Output), "Monitors from the Event NeXus file");

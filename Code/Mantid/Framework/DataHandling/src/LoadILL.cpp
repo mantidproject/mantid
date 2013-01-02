@@ -343,14 +343,14 @@ int LoadILL::fileCheck(const std::string& filePath) {
 }
 
 /**
- * Run the sub-algorithm LoadInstrument.
+ * Run the Child Algorithm LoadInstrument.
  * @param workspace :: The workspace to assign the loaded instrument to.
  */
 void LoadILL::runLoadInstrument(API::MatrixWorkspace_sptr workspace) {
 
-	IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+	IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-	// Now execute the sub-algorithm. Catch and log any error, but don't stop.
+	// Now execute the Child Algorithm. Catch and log any error, but don't stop.
 	try {
 		loadInst->setPropertyValue("InstrumentName", m_instrumentName);
 		loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", workspace);

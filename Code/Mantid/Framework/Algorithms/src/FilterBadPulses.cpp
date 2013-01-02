@@ -120,8 +120,8 @@ void FilterBadPulses::exec()
                             << " to " << max_pcharge << std::endl;
   size_t inputNumEvents = inputWS->getNumberEvents();
 
-  // sub-algorithme does all of the actual work - do not set the output workspace
-  IAlgorithm_sptr filterAlgo = createSubAlgorithm("FilterByLogValue", 0., 1.);
+  // Child Algorithme does all of the actual work - do not set the output workspace
+  IAlgorithm_sptr filterAlgo = createChildAlgorithm("FilterByLogValue", 0., 1.);
   filterAlgo->setProperty("InputWorkspace", inputWS);
   filterAlgo->setProperty("LogName", "proton_charge");
   filterAlgo->setProperty("MinimumValue", min_pcharge);

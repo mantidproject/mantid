@@ -53,14 +53,14 @@ void MuonAsymmetryCalc::exec()
   API::MatrixWorkspace_sptr tmpWS;
   if (forward_list.size() > 1 || backward_list.size() > 1)
   {
-    API::IAlgorithm_sptr group = createSubAlgorithm("GroupDetectors");
+    API::IAlgorithm_sptr group = createChildAlgorithm("GroupDetectors");
     group->setProperty("InputWorkspace", inputWS);
     group->setProperty("SpectraList", backward_list);
     group->setProperty("KeepUngroupedSpectra", true);
     group->execute();
     tmpWS = group->getProperty("OutputWorkspace");
 
-    group = createSubAlgorithm("GroupDetectors");
+    group = createChildAlgorithm("GroupDetectors");
     group->setProperty("InputWorkspace", tmpWS);
     group->setProperty("SpectraList", forward_list);
     group->setProperty("KeepUngroupedSpectra", true);

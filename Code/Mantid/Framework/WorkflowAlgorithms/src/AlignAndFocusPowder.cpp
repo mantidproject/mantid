@@ -93,7 +93,7 @@ void AlignAndFocusPowder::init()
 /** Executes the algorithm
  *
  *  @throw Exception::FileError If the grouping file cannot be opened or read successfully
- *  @throw runtime_error If unable to run one of the sub-algorithms successfully
+ *  @throw runtime_error If unable to run one of the Child Algorithms successfully
  */
 void AlignAndFocusPowder::exec()
 {
@@ -214,11 +214,11 @@ void AlignAndFocusPowder::exec()
     {
       g_log.information() << "running RemovePromptPulse(Width="
                           << removePromptPulseWidth << ")\n";
-      API::IAlgorithm_sptr filterPAlg = createSubAlgorithm("RemovePromptPulse");
+      API::IAlgorithm_sptr filterPAlg = createChildAlgorithm("RemovePromptPulse");
       filterPAlg->setProperty("InputWorkspace", m_outputW);
       filterPAlg->setProperty("OutputWorkspace", m_outputW);
       filterPAlg->setProperty("Width", removePromptPulseWidth);
-      filterPAlg->executeAsSubAlg();
+      filterPAlg->executeAsChildAlg();
       m_outputW = filterPAlg->getProperty("OutputWorkspace");
       m_outputEW = boost::dynamic_pointer_cast<EventWorkspace>(m_outputW);
     }
@@ -227,12 +227,12 @@ void AlignAndFocusPowder::exec()
     if (tolerance > 0.)
     {
       g_log.information() << "running CompressEvents(Tolerance=" << tolerance << ")\n";
-      API::IAlgorithm_sptr compressAlg = createSubAlgorithm("CompressEvents");
+      API::IAlgorithm_sptr compressAlg = createChildAlgorithm("CompressEvents");
       compressAlg->setProperty("InputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
       compressAlg->setProperty("OutputWorkspace", m_outputEW);
       compressAlg->setProperty("Tolerance",tolerance);
-      compressAlg->executeAsSubAlg();
+      compressAlg->executeAsChildAlg();
       m_outputEW = compressAlg->getProperty("OutputWorkspace");
       m_outputW = boost::dynamic_pointer_cast<MatrixWorkspace>(m_outputEW);
     }
@@ -253,50 +253,50 @@ void AlignAndFocusPowder::exec()
     if (doCorrection) {
       g_log.information() << "running CropWorkspace(Xmin=" << xmin
                           << ", Xmax=" << xmax << ")\n" ;
-	  API::IAlgorithm_sptr cropAlg = createSubAlgorithm("CropWorkspace");
+	  API::IAlgorithm_sptr cropAlg = createChildAlgorithm("CropWorkspace");
 	  cropAlg->setProperty("InputWorkspace", m_outputW);
 	  cropAlg->setProperty("OutputWorkspace", m_outputW);
 	  if (xmin > 0.)cropAlg->setProperty("Xmin", xmin);
 	  if (xmax > 0.)cropAlg->setProperty("Xmax", xmax);
-	  cropAlg->executeAsSubAlg();
+	  cropAlg->executeAsChildAlg();
 	  m_outputW = cropAlg->getProperty("OutputWorkspace");
     }
   }
 
   g_log.information() << "running MaskDetectors\n";
-  API::IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors");
+  API::IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors");
   maskAlg->setProperty("Workspace", m_outputW);
   maskAlg->setProperty("MaskedWorkspace", m_maskWS);
-  maskAlg->executeAsSubAlg();
+  maskAlg->executeAsChildAlg();
   m_outputW = maskAlg->getProperty("Workspace");
 
   if(!dspace)
   {
       g_log.information() << "running Rebin\n";
-	  API::IAlgorithm_sptr rebin1Alg = createSubAlgorithm("Rebin");
+	  API::IAlgorithm_sptr rebin1Alg = createChildAlgorithm("Rebin");
 	  rebin1Alg->setProperty("InputWorkspace", m_outputW);
 	  rebin1Alg->setProperty("OutputWorkspace", m_outputW);
 	  rebin1Alg->setProperty("Params",params);
-	  rebin1Alg->executeAsSubAlg();
+	  rebin1Alg->executeAsChildAlg();
 	  m_outputW = rebin1Alg->getProperty("OutputWorkspace");
   }
 
   g_log.information() << "running AlignDetectors\n";
-  API::IAlgorithm_sptr alignAlg = createSubAlgorithm("AlignDetectors");
+  API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
   alignAlg->setProperty("InputWorkspace", m_outputW);
   alignAlg->setProperty("OutputWorkspace", m_outputW);
   alignAlg->setProperty("OffsetsWorkspace", m_offsetsWS);
-  alignAlg->executeAsSubAlg();
+  alignAlg->executeAsChildAlg();
   m_outputW = alignAlg->getProperty("OutputWorkspace");
 
   if(LRef > 0. || minwl > 0. || DIFCref > 0.)
   {
       g_log.information() << "running ConvertUnits(Target=TOF)\n";
-	  API::IAlgorithm_sptr convert1Alg = createSubAlgorithm("ConvertUnits");
+	  API::IAlgorithm_sptr convert1Alg = createChildAlgorithm("ConvertUnits");
 	  convert1Alg->setProperty("InputWorkspace", m_outputW);
 	  convert1Alg->setProperty("OutputWorkspace", m_outputW);
 	  convert1Alg->setProperty("Target","TOF");
-	  convert1Alg->executeAsSubAlg();
+	  convert1Alg->executeAsChildAlg();
 	  m_outputW = convert1Alg->getProperty("OutputWorkspace");
   }
 
@@ -304,13 +304,13 @@ void AlignAndFocusPowder::exec()
   {
       g_log.information() << "running UnwrapSNS(LRef=" << LRef
                           << ",Tmin=" << tmin << ",Tmax=" << tmax <<")\n";
-	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("UnwrapSNS");
+	  API::IAlgorithm_sptr removeAlg = createChildAlgorithm("UnwrapSNS");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("OutputWorkspace", m_outputW);
 	  removeAlg->setProperty("LRef",LRef);
 	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
 	  if(tmax > tmin) removeAlg->setProperty("Tmax",tmax);
-	  removeAlg->executeAsSubAlg();
+	  removeAlg->executeAsChildAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
   }
 
@@ -318,59 +318,59 @@ void AlignAndFocusPowder::exec()
   {
       g_log.information() << "running RemoveLowResTOF(MinWavelength=" << minwl
                           << ",Tmin=" << tmin << ")\n";
-	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("RemoveLowResTOF");
+	  API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("OutputWorkspace", m_outputW);
 	  removeAlg->setProperty("MinWavelength",minwl);
 	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
-	  removeAlg->executeAsSubAlg();
+	  removeAlg->executeAsChildAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
   }
   else if(DIFCref > 0.)
   {
       g_log.information() << "running RemoveLowResTof(RefDIFC=" << DIFCref
                           << ",K=3.22)\n";
-	  API::IAlgorithm_sptr removeAlg = createSubAlgorithm("RemoveLowResTOF");
+	  API::IAlgorithm_sptr removeAlg = createChildAlgorithm("RemoveLowResTOF");
 	  removeAlg->setProperty("InputWorkspace", m_outputW);
 	  removeAlg->setProperty("OutputWorkspace", m_outputW);
 	  removeAlg->setProperty("ReferenceDIFC",DIFCref);
 	  removeAlg->setProperty("K",3.22);
 	  if(tmin > 0.) removeAlg->setProperty("Tmin",tmin);
-	  removeAlg->executeAsSubAlg();
+	  removeAlg->executeAsChildAlg();
 	  m_outputW = removeAlg->getProperty("OutputWorkspace");
   }
 
   if(LRef > 0. || minwl > 0. || DIFCref > 0.)
   {
       g_log.information() << "running ConvertUnits(Target=dSpacing)\n";
-	  API::IAlgorithm_sptr convert2Alg = createSubAlgorithm("ConvertUnits");
+	  API::IAlgorithm_sptr convert2Alg = createChildAlgorithm("ConvertUnits");
 	  convert2Alg->setProperty("InputWorkspace", m_outputW);
 	  convert2Alg->setProperty("OutputWorkspace", m_outputW);
 	  convert2Alg->setProperty("Target","dSpacing");
-	  convert2Alg->executeAsSubAlg();
+	  convert2Alg->executeAsChildAlg();
 	  m_outputW = convert2Alg->getProperty("OutputWorkspace");
   }
 
   if(dspace)
   {
       g_log.information() << "running Rebin\n";
-	  API::IAlgorithm_sptr rebin2Alg = createSubAlgorithm("Rebin");
+	  API::IAlgorithm_sptr rebin2Alg = createChildAlgorithm("Rebin");
 	  rebin2Alg->setProperty("InputWorkspace", m_outputW);
 	  rebin2Alg->setProperty("OutputWorkspace", m_outputW);
 	  rebin2Alg->setProperty("Params",params);
-	  rebin2Alg->executeAsSubAlg();
+	  rebin2Alg->executeAsChildAlg();
 	  m_outputW = rebin2Alg->getProperty("OutputWorkspace");
   }
 
   doSortEvents(m_outputW);
 
   g_log.information() << "running DiffractionFocussing\n";
-  API::IAlgorithm_sptr focusAlg = createSubAlgorithm("DiffractionFocussing");
+  API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
   focusAlg->setProperty("InputWorkspace", m_outputW);
   focusAlg->setProperty("OutputWorkspace", m_outputW);
   focusAlg->setProperty("GroupingWorkspace", m_groupWS);
   focusAlg->setProperty("PreserveEvents", m_preserveEvents);
-  focusAlg->executeAsSubAlg();
+  focusAlg->executeAsChildAlg();
   m_outputW = focusAlg->getProperty("OutputWorkspace");
 
   doSortEvents(m_outputW);
@@ -378,7 +378,7 @@ void AlignAndFocusPowder::exec()
   if (l1 > 0)
   {
     g_log.information() << "running EditInstrumentGeometry\n";
-    API::IAlgorithm_sptr editAlg = createSubAlgorithm("EditInstrumentGeometry");
+    API::IAlgorithm_sptr editAlg = createChildAlgorithm("EditInstrumentGeometry");
     editAlg->setProperty("Workspace", m_outputW);
     editAlg->setProperty("NewInstrument", false);
     editAlg->setProperty("PrimaryFlightPath", l1);
@@ -386,16 +386,16 @@ void AlignAndFocusPowder::exec()
     editAlg->setProperty("SpectrumIDs", specids);
     editAlg->setProperty("L2", l2s);
     editAlg->setProperty("Azimuthal", phis);
-    editAlg->executeAsSubAlg();
+    editAlg->executeAsChildAlg();
     m_outputW = editAlg->getProperty("Workspace");
   }
 
   g_log.information() << "running ConvertUnits\n";
-  API::IAlgorithm_sptr convert3Alg = createSubAlgorithm("ConvertUnits");
+  API::IAlgorithm_sptr convert3Alg = createChildAlgorithm("ConvertUnits");
   convert3Alg->setProperty("InputWorkspace", m_outputW);
   convert3Alg->setProperty("OutputWorkspace", m_outputW);
   convert3Alg->setProperty("Target","TOF");
-  convert3Alg->executeAsSubAlg();
+  convert3Alg->executeAsChildAlg();
   m_outputW = convert3Alg->getProperty("OutputWorkspace");
 
   if (params.size() != 1)
@@ -404,11 +404,11 @@ void AlignAndFocusPowder::exec()
   	params.pop_back();
   }
   g_log.information() << "running Rebin\n";
-  API::IAlgorithm_sptr rebin3Alg = createSubAlgorithm("Rebin");
+  API::IAlgorithm_sptr rebin3Alg = createChildAlgorithm("Rebin");
   rebin3Alg->setProperty("InputWorkspace", m_outputW);
   rebin3Alg->setProperty("OutputWorkspace", m_outputW);
   rebin3Alg->setProperty("Params",params);
-  rebin3Alg->executeAsSubAlg();
+  rebin3Alg->executeAsChildAlg();
   m_outputW = rebin3Alg->getProperty("OutputWorkspace");
 
   // return the output workspace
@@ -459,7 +459,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName)
   bool loadMask     = !m_maskWS;
 
   // Load the .cal file
-  IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile");
+  IAlgorithm_sptr alg = createChildAlgorithm("LoadCalFile");
   alg->setPropertyValue("CalFilename", calFileName);
   alg->setProperty("InputWorkspace", m_inputW);
   alg->setProperty<std::string>("WorkspaceName", m_instName);
@@ -467,7 +467,7 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName)
   alg->setProperty("MakeOffsetsWorkspace",  loadOffsets);
   alg->setProperty("MakeMaskWorkspace",     loadMask);
   alg->setLogging(true);
-  alg->executeAsSubAlg();
+  alg->executeAsChildAlg();
 
   // replace workspaces as appropriate
   if (loadGrouping)
@@ -497,10 +497,10 @@ void AlignAndFocusPowder::loadCalFile(const std::string &calFileName)
     EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
     if (!eventWS)
       return;
-    Algorithm_sptr alg = this->createSubAlgorithm("SortEvents");
+    Algorithm_sptr alg = this->createChildAlgorithm("SortEvents");
     alg->setProperty("InputWorkspace", eventWS);
     alg->setPropertyValue("SortBy", "X Value");
-    alg->executeAsSubAlg();
+    alg->executeAsChildAlg();
   }
 
 

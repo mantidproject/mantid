@@ -78,9 +78,9 @@ void CalculateEfficiency::exec()
   DataObjects::EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
   // Sum up all the wavelength bins
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", 0.0, 0.2);
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Integration", 0.0, 0.2);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   rebinnedWS = childAlg->getProperty("OutputWorkspace");
 
   outputWS = WorkspaceFactory::Instance().create(rebinnedWS);
@@ -224,13 +224,13 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
       // Mask detectors that were found to be outside the acceptable efficiency band
       try
       {
-        IAlgorithm_sptr mask = createSubAlgorithm("MaskDetectors", 0.8, 0.9);
+        IAlgorithm_sptr mask = createChildAlgorithm("MaskDetectors", 0.8, 0.9);
         // First we mask detectors in the output workspace
         mask->setProperty<MatrixWorkspace_sptr>("Workspace", outputWS);
         mask->setProperty< std::vector<size_t> >("WorkspaceIndexList", dets_to_mask);
         mask->execute();
 
-        mask = createSubAlgorithm("MaskDetectors", 0.9, 1.0);
+        mask = createChildAlgorithm("MaskDetectors", 0.9, 1.0);
         // Then we mask the same detectors in the input workspace
         mask->setProperty<MatrixWorkspace_sptr>("Workspace", rebinnedWS);
         mask->setProperty< std::vector<size_t> >("WorkspaceIndexList", dets_to_mask);
@@ -238,12 +238,12 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
       } catch (std::invalid_argument& err)
       {
         std::stringstream e;
-        e << "Invalid argument to MaskDetectors sub-algorithm: " << err.what();
+        e << "Invalid argument to MaskDetectors Child Algorithm: " << err.what();
         g_log.error(e.str());
       } catch (std::runtime_error& err)
       {
         std::stringstream e;
-        e << "Unable to successfully run MaskDetectors sub-algorithm: " << err.what();
+        e << "Unable to successfully run MaskDetectors Child Algorithm: " << err.what();
         g_log.error(e.str());
       }
     }

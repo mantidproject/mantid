@@ -100,7 +100,7 @@ void SumNeighbours::exec()
   
   Mantid::API::MatrixWorkspace_sptr outWS;
 
-  IAlgorithm_sptr smooth = createSubAlgorithm("SmoothNeighbours");
+  IAlgorithm_sptr smooth = createChildAlgorithm("SmoothNeighbours");
   smooth->setProperty("InputWorkspace", inWS);
   if (rect)
   {
@@ -114,7 +114,7 @@ void SumNeighbours::exec()
     smooth->setProperty("NumberOfNeighbours",SumX*SumY*SumX*SumY*4);
     smooth->setProperty("SumNumberOfNeighbours",SumX*SumY);
   }
-  smooth->executeAsSubAlg();
+  smooth->executeAsChildAlg();
   // Get back the result
   outWS = smooth->getProperty("OutputWorkspace");
   //Cast to the matrixOutputWS and save it

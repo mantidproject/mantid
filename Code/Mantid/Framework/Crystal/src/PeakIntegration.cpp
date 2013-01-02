@@ -223,7 +223,7 @@ namespace Mantid
           IAlgorithm_sptr fit_alg;
           try
           {
-            fit_alg = createSubAlgorithm("Fit", -1, -1, false);
+            fit_alg = createChildAlgorithm("Fit", -1, -1, false);
           } catch (Exception::NotFoundError&)
           {
             g_log.error("Can't locate Fit algorithm");
@@ -250,7 +250,7 @@ namespace Mantid
           fit_alg->setProperty("MaxIterations", 5000);
           fit_alg->setProperty("CreateOutput", true);
           fit_alg->setProperty("Output", "fit");
-          fit_alg->executeAsSubAlg();
+          fit_alg->executeAsChildAlg();
           MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
       
           /*double chisq = fit_alg->getProperty("OutputChi2overDoF");
@@ -397,7 +397,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
    // det = detList[i];
    // if (det)
     {
-      IAlgorithm_sptr slice_alg = createSubAlgorithm("IntegratePeakTimeSlices");
+      IAlgorithm_sptr slice_alg = createChildAlgorithm("IntegratePeakTimeSlices");
       slice_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
       std::ostringstream tab_str;
       tab_str << "LogTable" << ipeak;
@@ -410,7 +410,7 @@ int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0, int 
       int nPixels = std::max<int>(0, getProperty("NBadEdgePixels"));
 
       slice_alg->setProperty("NBadEdgePixels", nPixels);
-      slice_alg->executeAsSubAlg();
+      slice_alg->executeAsChildAlg();
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
       MantidVec& Xout=outputW->dataX(idet);

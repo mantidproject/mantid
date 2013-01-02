@@ -165,9 +165,9 @@ void SANSSensitivityCorrection::exec()
     // First, try to determine whether we need to load data or a sensitivity workspace...
     if (!floodWS && fileCheck(fileName))
     {
-      IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0.1, 0.3);
+      IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
       loadAlg->setProperty("Filename", fileName);
-      loadAlg->executeAsSubAlg();
+      loadAlg->executeAsChildAlg();
       Workspace_sptr floodWS_ws = loadAlg->getProperty("OutputWorkspace");
       floodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(floodWS_ws);
 
@@ -204,11 +204,11 @@ void SANSSensitivityCorrection::exec()
       MatrixWorkspace_sptr rawFloodWS;
       if (!reductionManager->existsProperty("LoadAlgorithm"))
       {
-        IAlgorithm_sptr loadAlg = createSubAlgorithm("Load", 0.1, 0.3);
+        IAlgorithm_sptr loadAlg = createChildAlgorithm("Load", 0.1, 0.3);
         loadAlg->setProperty("Filename", fileName);
         if (!isEmpty(center_x) && loadAlg->existsProperty("BeamCenterX")) loadAlg->setProperty("BeamCenterX", center_x);
         if (!isEmpty(center_y) && loadAlg->existsProperty("BeamCenterY")) loadAlg->setProperty("BeamCenterY", center_y);
-        loadAlg->executeAsSubAlg();
+        loadAlg->executeAsChildAlg();
         Workspace_sptr tmpWS = loadAlg->getProperty("OutputWorkspace");
         rawFloodWS = boost::dynamic_pointer_cast<MatrixWorkspace>(tmpWS);
         m_output_message += "   | Loaded " + fileName + " (Load algorithm)\n";
@@ -301,7 +301,7 @@ void SANSSensitivityCorrection::exec()
         }
 
         // Calculate detector sensitivity
-        IAlgorithm_sptr effAlg = createSubAlgorithm("CalculateEfficiency");
+        IAlgorithm_sptr effAlg = createChildAlgorithm("CalculateEfficiency");
         effAlg->setProperty("InputWorkspace", rawFloodWS);
 
         const double minEff = getProperty("MinEfficiency");
@@ -342,17 +342,17 @@ void SANSSensitivityCorrection::exec()
   if ( inputWS )
   {
     // Divide sample data by detector efficiency
-    IAlgorithm_sptr divideAlg = createSubAlgorithm("Divide", 0.6, 0.7);
+    IAlgorithm_sptr divideAlg = createChildAlgorithm("Divide", 0.6, 0.7);
     divideAlg->setProperty("LHSWorkspace", inputWS);
     divideAlg->setProperty("RHSWorkspace", floodWS);
-    divideAlg->executeAsSubAlg();
+    divideAlg->executeAsChildAlg();
     MatrixWorkspace_sptr outputWS = divideAlg->getProperty("OutputWorkspace");
 
     // Copy over the efficiency's masked pixels to the reduced workspace
-    IAlgorithm_sptr maskAlg = createSubAlgorithm("MaskDetectors", 0.75, 0.85);
+    IAlgorithm_sptr maskAlg = createChildAlgorithm("MaskDetectors", 0.75, 0.85);
     maskAlg->setProperty("Workspace", outputWS);
     maskAlg->setProperty("MaskedWorkspace", floodWS);
-    maskAlg->executeAsSubAlg();
+    maskAlg->executeAsChildAlg();
 
     setProperty("OutputWorkspace", outputWS);
   }

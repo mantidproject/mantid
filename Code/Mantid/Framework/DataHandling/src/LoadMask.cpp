@@ -892,12 +892,12 @@ namespace DataHandling
   {
 
     // 1. Execute algorithm LoadInstrument() to a temporary Workspace
-    API::Algorithm_sptr childAlg =  createSubAlgorithm("LoadInstrument");
+    API::Algorithm_sptr childAlg =  createChildAlgorithm("LoadInstrument");
     MatrixWorkspace_sptr tempWS(new DataObjects::Workspace2D());
     childAlg->setProperty<MatrixWorkspace_sptr>("Workspace", tempWS);
     childAlg->setPropertyValue("InstrumentName", mInstrumentName);
     childAlg->setProperty("RewriteSpectraMap", false);
-    childAlg->executeAsSubAlg();
+    childAlg->executeAsChildAlg();
 
     if (!childAlg->isExecuted())
     {

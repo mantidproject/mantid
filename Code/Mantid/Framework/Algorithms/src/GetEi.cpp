@@ -103,7 +103,7 @@ void GetEi::init()
 *  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
 *  @throw invalid_argument if a good peak fit wasn't made or the input workspace does not have common binning
-*  @throw runtime_error if there is a problem with the SpectraDetectorMap or a sub-algorithm falls over
+*  @throw runtime_error if there is a problem with the SpectraDetectorMap or a Child Algorithm falls over
 */
 void GetEi::exec()
 {
@@ -259,14 +259,14 @@ double GetEi::timeToFly(double s, double E_KE) const
 *  @return a time of flight value in the peak in microseconds
 *  @throw invalid_argument if a good peak fit wasn't made or the input workspace does not have common binning
 *  @throw out_of_range if the peak runs off the edge of the histogram
-*  @throw runtime_error a sub-algorithm just falls over
+*  @throw runtime_error a Child Algorithm just falls over
 */
 double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int64_t monitIn, const double peakTime)
 {
   const MantidVec& timesArray = WS->readX(monitIn);
   // we search for the peak only inside some window because there are often more peaks in the monitor histogram
   double halfWin = ( timesArray.back() - timesArray.front() )*HALF_WINDOW;
-  // runs CropWorkspace as a sub-algorithm to and puts the result in a new temporary workspace that will be deleted when this algorithm has finished
+  // runs CropWorkspace as a Child Algorithm to and puts the result in a new temporary workspace that will be deleted when this algorithm has finished
   extractSpec(monitIn, peakTime-halfWin, peakTime+halfWin);
   // converting the workspace to count rate is required by the fitting algorithm if the bin widths are not all the same
   WorkspaceHelpers::makeDistribution(m_tempWS);
@@ -288,7 +288,7 @@ double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int64_t mo
   // the peak centre is defined as the mean of the two half height times 
   return (lHalf + rHalf)/2;
 }
-/** Calls CropWorkspace as a sub-algorithm and passes to it the InputWorkspace property
+/** Calls CropWorkspace as a Child Algorithm and passes to it the InputWorkspace property
 *  @param specInd :: the index number of the histogram to extract
 *  @param start :: the number of the first bin to include (starts counting bins at 0)
 *  @param end :: the number of the last bin to include (starts counting bins at 0)
@@ -299,7 +299,7 @@ double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int64_t mo
 void GetEi::extractSpec(int64_t specInd, double start, double end)
 {
   IAlgorithm_sptr childAlg =
-    createSubAlgorithm("CropWorkspace", 100*m_fracCompl, 100*(m_fracCompl+CROP) );
+    createChildAlgorithm("CropWorkspace", 100*m_fracCompl, 100*(m_fracCompl+CROP) );
   m_fracCompl += CROP;
   
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace",getProperty("InputWorkspace") );
@@ -307,7 +307,7 @@ void GetEi::extractSpec(int64_t specInd, double start, double end)
   childAlg->setProperty( "XMax", end);
   childAlg->setProperty( "StartWorkspaceIndex", specInd);
   childAlg->setProperty( "EndWorkspaceIndex", specInd);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
 
   m_tempWS = childAlg->getProperty("OutputWorkspace");
 

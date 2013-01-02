@@ -886,7 +886,7 @@ namespace CurveFitting
     }
 
     // 3. Fit
-    API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
+    API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
     fitalg->initialize();
 
     g_log.information() << "Function To Fit: " << background->asString() << ".  Number of points  to fit =  "
@@ -1023,7 +1023,7 @@ namespace CurveFitting
           cout << dataws->readX(1)[i] << "  " << dataws->readY(1)[i] << "  " << dataws->readE(1)[i] << endl;
           */
 
-        API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", -1, -1, true);
+        API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
         fitalg->initialize();
 
         fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(peakfunction));
@@ -1100,7 +1100,7 @@ namespace CurveFitting
     gaussianpeak->addConstraint(centerbound);
 
     // 3. Fit
-    API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", -1, -1, true);
+    API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
     fitalg->initialize();
 
     fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
@@ -1674,7 +1674,7 @@ namespace CurveFitting
       */
   void FitPowderDiffPeaks::cropWorkspace(double tofmin, double tofmax)
   {
-    API::IAlgorithm_sptr cropalg = this->createSubAlgorithm("CropWorkspace", -1, -1, true);
+    API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
     cropalg->initialize();
 
     cropalg->setProperty("InputWorkspace", dataWS);
@@ -1694,7 +1694,7 @@ namespace CurveFitting
     dataWS = cropalg->getProperty("OutputWorkspace");
     if (!dataWS)
     {
-      g_log.error() << "Unable to retrieve a Workspace2D object from subalgorithm Crop." << std::endl;
+      g_log.error() << "Unable to retrieve a Workspace2D object from ChildAlgorithm Crop." << std::endl;
     }
 
     return;

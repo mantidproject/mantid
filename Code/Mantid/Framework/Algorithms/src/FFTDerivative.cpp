@@ -86,7 +86,7 @@ void FFTDerivative::execComplexFFT()
     }
 
     // Transform symmetrized spectrum
-    IAlgorithm_sptr fft = createSubAlgorithm("FFT");
+    IAlgorithm_sptr fft = createChildAlgorithm("FFT");
     fft->setProperty("InputWorkspace",copyWS);
     fft->setProperty("Real",0);
     fft->setProperty("Transform","Forward");
@@ -145,7 +145,7 @@ void FFTDerivative::execComplexFFT()
     }
 
     // Inverse transform
-    fft = createSubAlgorithm("FFT");
+    fft = createChildAlgorithm("FFT");
     fft->setProperty("InputWorkspace",transWS);
     fft->setProperty("Real",3);
     fft->setProperty("Imaginary",4);
@@ -232,7 +232,7 @@ void FFTDerivative::execRealFFT()
     }
 
     // Transform symmetrized spectrum
-    IAlgorithm_sptr fft = createSubAlgorithm("RealFFT");
+    IAlgorithm_sptr fft = createChildAlgorithm("RealFFT");
     fft->setProperty("InputWorkspace",copyWS);
     fft->setProperty("WorkspaceIndex",0);
     fft->setProperty("Transform","Forward");
@@ -278,7 +278,7 @@ void FFTDerivative::execRealFFT()
     }
 
     // Inverse transform
-    fft = createSubAlgorithm("RealFFT");
+    fft = createChildAlgorithm("RealFFT");
     fft->setProperty("InputWorkspace",transWS);
     fft->setProperty("Transform","Backward");
     fft->execute();

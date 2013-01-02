@@ -40,7 +40,7 @@ public:
         outputBase("groupdetectorstests_output_basename"),
         inputFile(Poco::Path::current()+"GroupDetectors2Test_mapfile_example")
   {
-    // This is needed to load in the plugin algorithms (specifically Divide, which is a sub-algorithm of GroupDetectors)
+    // This is needed to load in the plugin algorithms (specifically Divide, which is a Child Algorithm of GroupDetectors)
     FrameworkManager::Instance();
     // Set up a small workspace for testing
     MatrixWorkspace_sptr space =

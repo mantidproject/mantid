@@ -86,7 +86,7 @@ protected:
   /// Validate the optional input properties
   void checkOptionalProperties();
 
-  /// Run LoadInstrument as a subalgorithm
+  /// Run LoadInstrument as a ChildAlgorithm
   void runLoadInstrument(DataObjects::Workspace2D_sptr);
 
   /// Load in details about the sample

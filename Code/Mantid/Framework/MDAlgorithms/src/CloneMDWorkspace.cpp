@@ -96,10 +96,10 @@ namespace MDAlgorithms
       {
         // Data was modified! You need to save first.
         g_log.notice() << "InputWorkspace's file-backend being updated. " << std::endl;
-        IAlgorithm_sptr alg = createSubAlgorithm("SaveMD", 0.0, 0.4, false);
+        IAlgorithm_sptr alg = createChildAlgorithm("SaveMD", 0.0, 0.4, false);
         alg->setProperty("InputWorkspace", ws);
         alg->setPropertyValue("UpdateFileBackEnd", "1");
-        alg->executeAsSubAlg();
+        alg->executeAsChildAlg();
       }
 
       // Generate a new filename to copy to
@@ -121,12 +121,12 @@ namespace MDAlgorithms
       g_log.information() << "File copied successfully." << std::endl;
 
       // Now load it back
-      IAlgorithm_sptr alg = createSubAlgorithm("LoadMD", 0.5, 1.0, false);
+      IAlgorithm_sptr alg = createChildAlgorithm("LoadMD", 0.5, 1.0, false);
       alg->setPropertyValue("Filename", outFilename);
       alg->setPropertyValue("FileBackEnd", "1");
       alg->setPropertyValue("Memory", "0"); //TODO: How much memory?
       alg->setPropertyValue("OutputWorkspace", outWSName);
-      alg->executeAsSubAlg();
+      alg->executeAsChildAlg();
 
       // Set the output workspace to this
       IMDWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");

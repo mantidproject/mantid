@@ -6,7 +6,7 @@ The average background count rate is estimated in one of two ways. When Mode is 
 
 The error on the background value is only calculated when 'Mean' is used. It is the errors in all the bins in the background region summed in quadrature divided by the number of bins. This background error value is added in quadrature to the errors in each bin.
 
-====Subalgorithms used====
+====ChildAlgorithms used====
 The [[Linear]] algorithm is used when the Mode = Linear Fit. From the resulting line of best fit a constant value taken as the value of the line at the centre of the fitted range.
 
 
@@ -345,15 +345,15 @@ double FlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, const int 
   // return mean number of counts in each bin, the sum of the number of counts in all the bins divided by the number of bins used in that sum
   return background;
 }
-/// Calls Linear as a sub-algorithm to do the fitting
+/// Calls Linear as a Child Algorithm to do the fitting
 double FlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX)
 {
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Linear");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Linear");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex",spectrum);
   childAlg->setProperty<double>("StartX",startX);
   childAlg->setProperty<double>("EndX",endX);
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
 
   std::string fitStatus = childAlg->getProperty("FitStatus");
   if ( fitStatus != "success" )

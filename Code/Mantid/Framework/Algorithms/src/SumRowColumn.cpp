@@ -8,7 +8,7 @@ between the X values given. Then each row or column is summed between the H/V_Mi
 values, if given, and the result is a single spectrum of row or column number against
 total counts.
 
-==== Subalgorithms used ====
+==== ChildAlgorithms used ====
 
 The [[Integration]] algorithm is used to sum up each spectrum between XMin & XMax.
 
@@ -119,19 +119,19 @@ void SumRowColumn::exec()
   setProperty("OutputWorkspace",outputWS);
 }
 
-/** Call Integration as a sub-algorithm
+/** Call Integration as a Child Algorithm
  *  @return The integrated workspace
  */
 MatrixWorkspace_sptr SumRowColumn::integrateWorkspace()
 {
   g_log.debug() << "Integrating input workspace\n";
 
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
-  //pass inputed values straight to this sub-algorithm, checking must be done there
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Integration");
+  //pass inputed values straight to this Child Algorithm, checking must be done there
   childAlg->setProperty<MatrixWorkspace_sptr>( "InputWorkspace", getProperty("InputWorkspace") );
   childAlg->setProperty<double>( "RangeLower",  getProperty("XMin") );
   childAlg->setProperty<double>( "RangeUpper", getProperty("XMax") );
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 

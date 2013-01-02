@@ -94,7 +94,7 @@ class EQSANSTransmission(PythonAlgorithm):
         
 
         # Sum up all TOF bins
-        a = self.executeSubAlg(Integration, input_ws, OutputWorkspace=input_ws.getName()+'_int')
+        a = self.executeChildAlg(Integration, input_ws, OutputWorkspace=input_ws.getName()+'_int')
         integrated_ws = a._getWorkspaceProperty("OutputWorkspace")
         
         # Find pixel with highest and lowest signal

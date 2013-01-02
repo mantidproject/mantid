@@ -107,7 +107,7 @@ public:
 
     /*
     //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
+    // Tests taken from LoadInstrumentTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
     Instrument_sptr i = output->getInstrument();
     Mantid::Geometry::IObjComponent_sptr source = i->getSource();
@@ -127,7 +127,7 @@ public:
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
     */
     //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check sub-algorithm is running properly
+    // Test code copied from LoadLogTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
     Property *l_property = output->run().getLogData( std::string("temperature_1_log") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
@@ -324,7 +324,7 @@ public:
 
     /*
     //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
+    // Tests taken from LoadInstrumentTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
     Instrument_sptr i = output->getInstrument();
     Mantid::Geometry::IObjComponent_sptr source = i->getSource();
@@ -344,7 +344,7 @@ public:
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
     */
     //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check sub-algorithm is running properly
+    // Test code copied from LoadLogTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
     Property *l_property = output->run().getLogData( std::string("temperature_1_log") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);
@@ -409,7 +409,7 @@ public:
 
     /*
     //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
+    // Tests taken from LoadInstrumentTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
     Instrument_sptr i = output->getInstrument();
     Mantid::Geometry::IObjComponent_sptr source = i->getSource();
@@ -429,7 +429,7 @@ public:
     TS_ASSERT_DELTA( ptrDet103->getPos().Z(), 2.4470,0.01);
     */
     //----------------------------------------------------------------------
-    // Test code copied from LoadLogTest to check sub-algorithm is running properly
+    // Test code copied from LoadLogTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
     Property *l_property = output->run().getLogData( std::string("temperature_1_log") );
     TimeSeriesProperty<double> *l_timeSeriesDouble = dynamic_cast<TimeSeriesProperty<double>*>(l_property);

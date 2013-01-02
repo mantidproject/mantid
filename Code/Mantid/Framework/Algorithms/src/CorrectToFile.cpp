@@ -169,13 +169,13 @@ MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string & corrFile)
 {  
   g_log.information() << "Loading file " << corrFile << std::endl;
   progress(0, "Loading file");
-  IAlgorithm_sptr loadRKH = createSubAlgorithm("LoadRKH", 0, 1.0/*LOAD_TIME*/);
+  IAlgorithm_sptr loadRKH = createChildAlgorithm("LoadRKH", 0, 1.0/*LOAD_TIME*/);
   std::string rkhfile = getProperty("Filename");
   loadRKH->setPropertyValue("Filename", rkhfile);
   loadRKH->setPropertyValue("OutputWorkspace", "rkhout");
   std::string columnValue = getProperty("FirstColumnValue");
   loadRKH->setPropertyValue("FirstColumnValue", columnValue);
-  loadRKH->executeAsSubAlg();
+  loadRKH->executeAsChildAlg();
 
   g_log.debug() << corrFile << " loaded\n";
   return loadRKH->getProperty("OutputWorkspace");
@@ -192,7 +192,7 @@ void CorrectToFile::doWkspAlgebra(API::MatrixWorkspace_sptr lhs, API::MatrixWork
 {
   g_log.information() << "Initalising the algorithm " << algName << std::endl;
   progress(LOAD_TIME, "Applying correction");
-  IAlgorithm_sptr algebra = createSubAlgorithm(algName, LOAD_TIME, 1.0);
+  IAlgorithm_sptr algebra = createChildAlgorithm(algName, LOAD_TIME, 1.0);
   algebra->setProperty("LHSWorkspace", lhs);
   algebra->setProperty("RHSWorkspace", rhs);
   algebra->setProperty("OutputWorkspace", result);

@@ -1413,7 +1413,7 @@ namespace CurveFitting
       peakfunction->setHeight(4.0);
 
     // 2. Create fit
-    Algorithm_sptr fitalg = createSubAlgorithm("Fit", -1, -1, true);
+    Algorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
     fitalg->initialize();
 
     // 3. Set
@@ -1483,7 +1483,7 @@ namespace CurveFitting
     peakbkgdfunction->addFunction(backgroundfunction);
 
     // 3. Create fit
-    Algorithm_sptr fitalg = createSubAlgorithm("Fit", -1, -1, true);
+    Algorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
     fitalg->initialize();
 
     // 4. Set
@@ -1617,7 +1617,7 @@ namespace CurveFitting
     gaussianpeak->addConstraint(centerbound);
 
     // 3. Fit
-    API::IAlgorithm_sptr fitalg = createSubAlgorithm("Fit", -1, -1, true);
+    API::IAlgorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
     fitalg->initialize();
 
     fitalg->setProperty("Function", boost::dynamic_pointer_cast<API::IFunction>(gaussianpeak));
@@ -1980,7 +1980,7 @@ namespace CurveFitting
     g_log.information() << "DBx430 " << dbss0.str() << endl;
 
     // 2. Create fit
-    Algorithm_sptr fitalg = createSubAlgorithm("Fit", -1, -1, true);
+    Algorithm_sptr fitalg = createChildAlgorithm("Fit", -1, -1, true);
     fitalg->initialize();
 
     // 3. Set
@@ -2828,7 +2828,7 @@ namespace CurveFitting
       */
   void FitPowderDiffPeaks2::cropWorkspace(double tofmin, double tofmax)
   {
-    API::IAlgorithm_sptr cropalg = this->createSubAlgorithm("CropWorkspace", -1, -1, true);
+    API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
     cropalg->initialize();
 
     cropalg->setProperty("InputWorkspace", m_dataWS);
@@ -2849,7 +2849,7 @@ namespace CurveFitting
     m_dataWS = cropalg->getProperty("OutputWorkspace");
     if (!m_dataWS)
     {
-	  errmsg << "Unable to retrieve a Workspace2D object from subalgorithm Crop.";
+	  errmsg << "Unable to retrieve a Workspace2D object from ChildAlgorithm Crop.";
 		g_log.error(errmsg.str());
 		throw std::runtime_error(errmsg.str());
     }

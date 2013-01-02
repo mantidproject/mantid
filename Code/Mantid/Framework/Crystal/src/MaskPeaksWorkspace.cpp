@@ -168,7 +168,7 @@ namespace Mantid
 
 
       // Mask bins
-      API::IAlgorithm_sptr maskbinstb = this->createSubAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
+      API::IAlgorithm_sptr maskbinstb = this->createChildAlgorithm("MaskBinsFromTable", 0.5, 1.0, true);
       maskbinstb->initialize();
       maskbinstb->setPropertyValue("InputWorkspace", inputW->getName());
       maskbinstb->setPropertyValue("OutputWorkspace", inputW->getName());

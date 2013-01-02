@@ -185,7 +185,7 @@ namespace DataHandling
 
       if (period == 0)
       {
-        // Only run the sub-algorithms once
+        // Only run the Child Algorithms once
         runLoadInstrument( localWorkspace, getString("NAME") );
         // Set the total proton charge for this run
         localWorkspace->mutableRun().setProtonCharge(protonCharge);
@@ -389,7 +389,7 @@ namespace DataHandling
 
     }
 
-    /** Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw).
+    /** Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw).
      *  @param localWorkspace :: The workspace
      *  @param iName :: The instrument name
      */
@@ -403,15 +403,15 @@ namespace DataHandling
         loadInst->setPropertyValue("InstrumentName", iName);
         loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
         loadInst->setProperty("RewriteSpectraMap", false);
-        loadInst->executeAsSubAlg();
+        loadInst->executeAsChildAlg();
       }
       catch(std::invalid_argument &)
       {
-        g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
       }
       catch (std::runtime_error&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
       }
 
     }

@@ -82,9 +82,9 @@ namespace Algorithms
     MatrixWorkspace_sptr outputWS = this->getProperty("OutputWorkspace");
 
     // get the minimum for each spectrum
-    IAlgorithm_sptr alg = this->createSubAlgorithm("Min", 0., .1);
+    IAlgorithm_sptr alg = this->createChildAlgorithm("Min", 0., .1);
     alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
-    alg->executeAsSubAlg();
+    alg->executeAsChildAlg();
     MatrixWorkspace_const_sptr minWS = alg->getProperty("OutputWorkspace");
 
     // determine if there is anything to do
@@ -105,9 +105,9 @@ namespace Algorithms
       g_log.information() << "No values are negative. Copying InputWorkspace to OutputWorkspace\n";
       if (inputWS != outputWS)
       {
-        IAlgorithm_sptr alg = this->createSubAlgorithm("CloneWorkspace", .1, 1.);
+        IAlgorithm_sptr alg = this->createChildAlgorithm("CloneWorkspace", .1, 1.);
         alg->setProperty<Workspace_sptr>("InputWorkspace", inputWS);
-        alg->executeAsSubAlg();
+        alg->executeAsChildAlg();
 
         Workspace_sptr temp = alg->getProperty("OutputWorkspace");
         setProperty("OutputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(temp));

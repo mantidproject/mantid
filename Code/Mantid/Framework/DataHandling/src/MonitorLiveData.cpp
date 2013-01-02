@@ -87,11 +87,11 @@ namespace DataHandling
         // Give a buffer of 3 times the size of the workspace
         if (size_t(3)*bytesUsed < bytesAvail)
         {
-          Algorithm_sptr cloner = createSubAlgorithm("CloneWorkspace", 0, 0, false);
+          Algorithm_sptr cloner = createChildAlgorithm("CloneWorkspace", 0, 0, false);
           cloner->setPropertyValue("InputWorkspace", originalName);
           cloner->setPropertyValue("OutputWorkspace", newName);
           cloner->setAlwaysStoreInADS(true); // We must force the ADS to be updated
-          cloner->executeAsSubAlg();
+          cloner->executeAsChildAlg();
         }
         else
         {
@@ -147,10 +147,10 @@ namespace DataHandling
         g_log.notice() << "Loading live data chunk " << m_chunkNumber << " at " << now.toFormattedString("%H:%M:%S") << std::endl;
 
         // Time to run LoadLiveData again
-        Algorithm_sptr alg = createSubAlgorithm("LoadLiveData");
+        Algorithm_sptr alg = createChildAlgorithm("LoadLiveData");
         LoadLiveData * loadAlg = dynamic_cast<LoadLiveData*>(alg.get());
         if (!loadAlg)
-          throw std::runtime_error("Error creating LoadLiveData sub-algorithm");
+          throw std::runtime_error("Error creating LoadLiveData Child Algorithm");
 
         loadAlg->setChild(true);
         // So the output gets put into the ADS
@@ -166,7 +166,7 @@ namespace DataHandling
         loadAlg->setPropertyValue("AccumulationMethod", NextAccumulationMethod);
 
         // Run the LoadLiveData
-        loadAlg->executeAsSubAlg();
+        loadAlg->executeAsChildAlg();
 
         NextAccumulationMethod = this->getPropertyValue("AccumulationMethod");
 

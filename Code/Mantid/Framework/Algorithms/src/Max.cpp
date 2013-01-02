@@ -68,8 +68,8 @@ void Max::exec()
   MatrixWorkspace_sptr inworkspace = getProperty("InputWorkspace");
 
 
-  // sub-algorithme does all of the actual work - do not set the output workspace
-  IAlgorithm_sptr maxAlgo = createSubAlgorithm("MaxMin", 0., 1.);
+  // Child Algorithme does all of the actual work - do not set the output workspace
+  IAlgorithm_sptr maxAlgo = createChildAlgorithm("MaxMin", 0., 1.);
   maxAlgo->setProperty("InputWorkspace", inworkspace);
   maxAlgo->setProperty("RangeLower", m_MinRange);
   maxAlgo->setProperty("RangeUpper", m_MaxRange);

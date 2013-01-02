@@ -170,11 +170,11 @@ namespace Mantid
       if (!filename.empty())
       {
         progress(0.9, "Saving .cal file");
-        IAlgorithm_sptr childAlg = createSubAlgorithm("SaveCalFile");
+        IAlgorithm_sptr childAlg = createChildAlgorithm("SaveCalFile");
         childAlg->setProperty("OffsetsWorkspace", outputW);
         childAlg->setProperty("MaskWorkspace", maskWS);
         childAlg->setPropertyValue("Filename", filename);
-        childAlg->executeAsSubAlg();
+        childAlg->executeAsChildAlg();
       }
 
     }
@@ -200,8 +200,8 @@ namespace Mantid
       IAlgorithm_sptr fit_alg;
       try
       {
-        //set the subalgorithm no to log as this will be run once per spectra
-        fit_alg = createSubAlgorithm("Fit",-1,-1,false);
+        //set the ChildAlgorithm no to log as this will be run once per spectra
+        fit_alg = createChildAlgorithm("Fit",-1,-1,false);
       } catch (Exception::NotFoundError&)
       {
         g_log.error("Can't locate Fit algorithm");
@@ -219,7 +219,7 @@ namespace Mantid
       IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
       
       fit_alg->setProperty("Function",fun_ptr);
-      fit_alg->executeAsSubAlg();
+      fit_alg->executeAsChildAlg();
       std::string fitStatus = fit_alg->getProperty("OutputStatus");
       //Pixel with large offset will be masked
       if ( fitStatus.compare("success") ) return (1000.);

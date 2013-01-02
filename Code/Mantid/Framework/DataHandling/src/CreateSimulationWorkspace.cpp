@@ -92,7 +92,7 @@ namespace Mantid
     void CreateSimulationWorkspace::createInstrument()
     {
       const bool enableLogging(false);
-      IAlgorithm_sptr loadInstrument = createSubAlgorithm("LoadInstrument", 0.0, 0.5, enableLogging);
+      IAlgorithm_sptr loadInstrument = createChildAlgorithm("LoadInstrument", 0.0, 0.5, enableLogging);
       MatrixWorkspace_sptr tempWS = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
       loadInstrument->setProperty("Workspace", tempWS);
       const std::string instrProp = getProperty("Instrument");
@@ -104,7 +104,7 @@ namespace Mantid
       {
         loadInstrument->setPropertyValue("InstrumentName", instrProp);
       }
-      loadInstrument->executeAsSubAlg();
+      loadInstrument->executeAsChildAlg();
       tempWS = loadInstrument->getProperty("Workspace");
 
       m_instrument = tempWS->getInstrument();
@@ -332,7 +332,7 @@ namespace Mantid
       std::string value = updateDets->value<std::string>();
       if(value.substr(0,8)  == "datafile" )
       {
-        IAlgorithm_sptr updateInst = createSubAlgorithm("UpdateInstrumentFromFile",0.75,1.0);
+        IAlgorithm_sptr updateInst = createChildAlgorithm("UpdateInstrumentFromFile",0.75,1.0);
         updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_outputWS);
         updateInst->setPropertyValue("Filename", filename);
         if(value  == "datafile-ignore-phi" )

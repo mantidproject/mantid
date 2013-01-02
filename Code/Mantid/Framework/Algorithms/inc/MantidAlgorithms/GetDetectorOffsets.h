@@ -56,7 +56,7 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  /// Call Gaussian as a sub-algorithm to fit the peak in a spectrum
+  /// Call Gaussian as a Child Algorithm to fit the peak in a spectrum
   double fitSpectra(const int64_t s);
   /// Create a function string from the given parameters and the algorithm inputs
   API::IFunction_sptr createFunction(const double peakHeight, const double peakLoc);

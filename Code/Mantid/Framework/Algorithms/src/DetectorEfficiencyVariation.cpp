@@ -10,7 +10,7 @@ where sum1 is the sum of the counts in a histogram in the workspace WhiteBeamBas
 
 The output workspace contains a MaskWorkspace where those spectra that fail the tests are masked and those that pass them are assigned a single positive value. 
 
-====Subalgorithms used====
+====ChildAlgorithms used====
 
 Uses the [[Integration]] algorithm to sum the spectra.
 
@@ -101,7 +101,7 @@ namespace Mantid
     /** Executes the algorithm that includes calls to SolidAngle and Integration
      *
      *  @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
-     *  @throw runtime_error if a sub-algorithm cannot execute
+     *  @throw runtime_error if a Child Algorithm cannot execute
      */
     void DetectorEfficiencyVariation::exec()
     {

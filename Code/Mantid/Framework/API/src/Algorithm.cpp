@@ -226,8 +226,8 @@ namespace Mantid
     /** Initialization method invoked by the framework. This method is responsible
     *  for any bookkeeping of initialization required by the framework itself.
     *  It will in turn invoke the init() method of the derived algorithm,
-    *  and of any sub-algorithms which it creates.
-    *  @throw runtime_error Thrown if algorithm or sub-algorithm cannot be initialised
+    *  and of any Child Algorithms which it creates.
+    *  @throw runtime_error Thrown if algorithm or Child Algorithm cannot be initialised
     *
     */
     void Algorithm::initialize()
@@ -416,10 +416,10 @@ namespace Mantid
     /** The actions to be performed by the algorithm on a dataset. This method is
     *  invoked for top level algorithms by the application manager.
     *  This method invokes exec() method.
-    *  For sub-algorithms either the execute() method or exec() method
+    *  For Child Algorithms either the execute() method or exec() method
     *  must be EXPLICITLY invoked by  the parent algorithm.
     *
-    *  @throw runtime_error Thrown if algorithm or sub-algorithm cannot be executed
+    *  @throw runtime_error Thrown if algorithm or Child Algorithm cannot be executed
     *  @return true if executed successfully.
     */
     bool Algorithm::execute()
@@ -634,11 +634,11 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------------
-    /** Execute as a sub-algorithm.
+    /** Execute as a Child Algorithm.
      * This runs execute() but catches errors so as to log the name
-     * of the failed sub-algorithm, if it fails.
+     * of the failed Child Algorithm, if it fails.
      */
-    void Algorithm::executeAsSubAlg()
+    void Algorithm::executeAsChildAlg()
     {
       bool executed = false;
       try
@@ -647,14 +647,14 @@ namespace Mantid
       }
       catch (std::runtime_error&)
       {
-        g_log.error() << "Unable to successfully run subAlgorithm " << this->name() << std::endl;
+        g_log.error() << "Unable to successfully run ChildAlgorithm " << this->name() << std::endl;
         throw;
       }
 
       if ( ! executed )
       {
-        g_log.error() << "Unable to successfully run subAlgorithm " << this->name() << std::endl;
-        throw std::runtime_error("Unable to successfully run subAlgorithm " + this->name());
+        g_log.error() << "Unable to successfully run ChildAlgorithm " << this->name() << std::endl;
+        throw std::runtime_error("Unable to successfully run ChildAlgorithm " + this->name());
       }
     }
 
@@ -684,19 +684,19 @@ namespace Mantid
     }
 
     //---------------------------------------------------------------------------------------------
-    /** Create a sub algorithm.  A call to this method creates a child algorithm object.
+    /** Create a Child Algorithm.  A call to this method creates a child algorithm object.
     *  Using this mechanism instead of creating daughter
     *  algorithms directly via the new operator is prefered since then
     *  the framework can take care of all of the necessary book-keeping.
     *
-    *  @param name ::           The concrete algorithm class of the sub algorithm
+    *  @param name ::           The concrete algorithm class of the Child Algorithm
     *  @param startProgress ::  The percentage progress value of the overall algorithm where this child algorithm starts
     *  @param endProgress ::    The percentage progress value of the overall algorithm where this child algorithm ends
     *  @param enableLogging ::  Set to false to disable logging from the child algorithm
     *  @param version ::        The version of the child algorithm to create. By default gives the latest version.
     *  @return shared pointer to the newly created algorithm object
     */
-    Algorithm_sptr Algorithm::createSubAlgorithm(const std::string& name, const double startProgress, const double endProgress,
+    Algorithm_sptr Algorithm::createChildAlgorithm(const std::string& name, const double startProgress, const double endProgress,
       const bool enableLogging, const int& version)
     {
       Algorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(name,version);
@@ -704,14 +704,14 @@ namespace Mantid
       alg->setChild(true);
       alg->setLogging(enableLogging);
 
-      // Initialise the sub-algorithm
+      // Initialise the Child Algorithm
       try
       {
         alg->initialize();
       }
       catch (std::runtime_error& exc)
       {
-        g_log.error() << "Unable to initialise sub-algorithm " << name << std::endl;
+        g_log.error() << "Unable to initialise Child Algorithm " << name << std::endl;
         g_log.error() << exc.what() << "\n";
       }
 
@@ -734,7 +734,7 @@ namespace Mantid
 
       // Before we return the shared pointer, use it to create a weak pointer and keep that in a vector.
       // It will be used this to pass on cancellation requests
-      // It must be protected by a critical block so that sub algorithms can run in parallel safely.
+      // It must be protected by a critical block so that Child Algorithms can run in parallel safely.
       IAlgorithm_wptr weakPtr(alg);
       PARALLEL_CRITICAL(Algorithm_StoreWeakPtr)
       {
@@ -1120,8 +1120,8 @@ namespace Mantid
       // Go through each entry in the input group(s)
       for (size_t entry=0; entry<m_groupSize; entry++)
       {
-        // use create sub algorithm that look like this one
-        Algorithm_sptr alg_sptr = this->createSubAlgorithm(this->name(),-1,-1,this->isLogging(),this->version());
+        // use create Child Algorithm that look like this one
+        Algorithm_sptr alg_sptr = this->createChildAlgorithm(this->name(),-1,-1,this->isLogging(),this->version());
         // Don't make the new algorithm a child so that it's workspaces are stored correctly
         alg_sptr->setChild(false);
 

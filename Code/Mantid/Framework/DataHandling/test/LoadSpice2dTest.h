@@ -100,7 +100,7 @@ public:
 
     // Check instrument
     //----------------------------------------------------------------------
-    // Tests taken from LoadInstrumentTest to check sub-algorithm is running properly
+    // Tests taken from LoadInstrumentTest to check Child Algorithm is running properly
     //----------------------------------------------------------------------
     Mantid::Geometry::Instrument_const_sptr i = ws2d->getInstrument();
     boost::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();

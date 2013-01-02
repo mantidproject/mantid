@@ -79,12 +79,12 @@ void SassenaFFT::exec()
 
   // Calculate the FFT for all spectra, retaining only the real part since F(q,-t) = F*(q,t)
   const std::string sqwName = gwsName + "_sqw";
-  API::IAlgorithm_sptr fft = this->createSubAlgorithm("ExtractFFTSpectrum");
+  API::IAlgorithm_sptr fft = this->createChildAlgorithm("ExtractFFTSpectrum");
   fft->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", fqtRe);
   fft->setProperty<DataObjects::Workspace2D_sptr>("InputImagWorkspace", fqtIm);
   fft->setPropertyValue("OutputWorkspace", sqwName );
   fft->setProperty<int>("FFTPart",2); // extract the real part
-  fft->executeAsSubAlg();
+  fft->executeAsChildAlg();
   API::MatrixWorkspace_sptr sqw0 = fft->getProperty("OutputWorkspace");
   DataObjects::Workspace2D_sptr sqw = boost::dynamic_pointer_cast<DataObjects::Workspace2D>( sqw0 );
   API::AnalysisDataService::Instance().add( sqwName, sqw );
@@ -95,13 +95,13 @@ void SassenaFFT::exec()
     double T = this->getProperty("Temp");
     T *= m_T2meV;  // from Kelvin to units of meV
     //The ExponentialCorrection algorithm assume the form C0*exp(-C1*x). Note the minus in the exponent
-    API::IAlgorithm_sptr ec = this->createSubAlgorithm("ExponentialCorrection");
+    API::IAlgorithm_sptr ec = this->createChildAlgorithm("ExponentialCorrection");
     ec->setProperty<DataObjects::Workspace2D_sptr>("InputWorkspace", sqw);
     ec->setProperty<DataObjects::Workspace2D_sptr>("OutputWorkspace", sqw);
     ec->setProperty<double>("C0",1.0);
     ec->setProperty<double>("C1",-1.0/(2.0*T));
     ec->setPropertyValue("Operation","Multiply");
-    ec->executeAsSubAlg();
+    ec->executeAsChildAlg();
   }
 
   // Set the Energy unit for the X-axis

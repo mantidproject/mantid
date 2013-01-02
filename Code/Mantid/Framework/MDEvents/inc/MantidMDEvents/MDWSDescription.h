@@ -59,7 +59,7 @@ namespace MDEvents
 class DLLExport MDWSDescription : public Kernel::PropertyManager
 {
 public:  // for the time being
-    /// the string which describes subalgorithm, used to convert source ws to target MD ws. At the moment, it coinsides with Q-mode
+    /// the string which describes ChildAlgorithm, used to convert source ws to target MD ws. At the moment, it coinsides with Q-mode
     std::string AlgID; 
     // the matrix which describes target coordiante system of the workpsace and connected with convert_to_factor;
     Kernel::DblMatrix m_Wtransf; 

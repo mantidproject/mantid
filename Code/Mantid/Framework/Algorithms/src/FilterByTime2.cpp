@@ -110,7 +110,7 @@ namespace Algorithms
     g_log.debug() << "\nDB441: About to generate Filter.  StartTime = " << starttime <<
         "  StopTime = " << stoptime << std::endl;
 
-    API::Algorithm_sptr genfilter = createSubAlgorithm("GenerateEventsFilter", 0.0, 20.0, true, 1);
+    API::Algorithm_sptr genfilter = createChildAlgorithm("GenerateEventsFilter", 0.0, 20.0, true, 1);
     genfilter->initialize();
     genfilter->setPropertyValue("InputWorkspace", inWS->getName());
     genfilter->setPropertyValue("OutputWorkspace", "FilterWS");
@@ -141,7 +141,7 @@ namespace Algorithms
     // 2. Filter events
     g_log.debug() << "\nAbout to filter events. " << std::endl;
 
-    API::Algorithm_sptr filter = createSubAlgorithm("FilterEvents", 20.0, 100.0, true, 1);
+    API::Algorithm_sptr filter = createChildAlgorithm("FilterEvents", 20.0, 100.0, true, 1);
     filter->initialize();
     filter->setPropertyValue("InputWorkspace", inWS->getName());
     filter->setPropertyValue("OutputWorkspaceBaseName", "ResultWS");

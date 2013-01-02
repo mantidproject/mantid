@@ -129,10 +129,10 @@ void DiffractionFocussing2::exec()
   if (groupingFileName != "")
   {
     progress(0.01, "Reading grouping file");
-    IAlgorithm_sptr childAlg = createSubAlgorithm("CreateGroupingWorkspace");
+    IAlgorithm_sptr childAlg = createChildAlgorithm("CreateGroupingWorkspace");
     childAlg->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
     childAlg->setProperty("OldCalFilename", groupingFileName);
-    childAlg->executeAsSubAlg();
+    childAlg->executeAsChildAlg();
     groupWS = childAlg->getProperty("OutputWorkspace");
   }
 

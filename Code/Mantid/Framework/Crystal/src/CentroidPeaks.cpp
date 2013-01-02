@@ -140,7 +140,7 @@ namespace Crystal
     	  if (row < nPixels || col < nPixels || NROWS-row < nPixels || NCOLS-col < nPixels) continue;
     	  //Only works for WISH for non-RectangularDetector  TODO-make more general
     	  //if (bankName.compare("WISH") != 0)continue;
-          IAlgorithm_sptr slice_alg = createSubAlgorithm("IntegratePeakTimeSlices");
+          IAlgorithm_sptr slice_alg = createChildAlgorithm("IntegratePeakTimeSlices");
           slice_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inWS);
           std::ostringstream tab_str;
           tab_str << "LogTable" << i;
@@ -160,7 +160,7 @@ namespace Crystal
           slice_alg->setProperty("NBadEdgePixels", nPixels);
           try
           {
-          slice_alg->executeAsSubAlg();
+          slice_alg->executeAsChildAlg();
           Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
           TableWorkspace_sptr logtable = slice_alg->getProperty("OutputWorkspace");

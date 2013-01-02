@@ -98,7 +98,7 @@ namespace Mantid
       void init();
       void exec();
 
-      /// Run the sub-algorithm LoadParameters
+      /// Run the Child Algorithm LoadParameters
       void runLoadParameterFile();
 
       /// Search directory for Parameter file, return full path name if found, else "".

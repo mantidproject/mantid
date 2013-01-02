@@ -11,7 +11,7 @@ If the RAW file contains multiple periods of data this will be detected and the 
 Each workspace will share the same [[Instrument]], SpectraToDetectorMap and [[Sample]] objects.
 If the optional 'spectrum' properties are set for a multiperiod dataset, then they will ignored.
 
-===Subalgorithms used===
+===ChildAlgorithms used===
 LoadRaw runs the following algorithms as child algorithms to populate aspects of the output [[Workspace]]:
 * [[LoadInstrument]] - Looks for an instrument definition file named XXX_Definition.xml, where XXX is the 3 letter instrument prefix on the RAW filename, in the directory specified by the "instrumentDefinition.directory" property given in the config file (or, if not provided, in the relative path ../Instrument/). If the instrument definition file is not found then the [[LoadInstrumentFromRaw]] algorithm will be run instead.
 * [[LoadMappingTable]] - To build up the mapping between the spectrum numbers and the Detectors of the attached [[Instrument]].
@@ -205,7 +205,7 @@ namespace Mantid
         std::string outputWorkspace = "OutputWorkspace";
         if (period == 0)
         {
-          // Only run the sub-algorithms once
+          // Only run the Child Algorithms once
           runLoadInstrument(localWorkspace );
           runLoadMappingTable(localWorkspace );
           runLoadLog(localWorkspace );
@@ -373,16 +373,16 @@ namespace Mantid
       //     - no account taken of bin widths/units etc.
     }
 
-    /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
+    /// Run the Child Algorithm LoadInstrument (or LoadInstrumentFromRaw)
     void LoadRaw::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
       // instrument ID
       const std::string::size_type stripPath = m_filename.find_last_of("\\/");
       std::string instrumentID = m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
 
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       bool executionSuccessful(true);
       try
       {
@@ -393,12 +393,12 @@ namespace Mantid
       }
       catch( std::invalid_argument&)
       {
-        g_log.information("Invalid argument to LoadInstrument sub-algorithm");
+        g_log.information("Invalid argument to LoadInstrument Child Algorithm");
         executionSuccessful = false;
       }
       catch (std::runtime_error&)
       {
-        g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
+        g_log.information("Unable to successfully run LoadInstrument Child Algorithm");
         executionSuccessful = false;
       }
 
@@ -412,33 +412,33 @@ namespace Mantid
       }
     }
 
-    /// Run LoadInstrumentFromRaw as a sub-algorithm (only if loading from instrument definition file fails)
+    /// Run LoadInstrumentFromRaw as a Child Algorithm (only if loading from instrument definition file fails)
     void LoadRaw::runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrumentFromRaw");
+      IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrumentFromRaw");
       loadInst->setPropertyValue("Filename", m_filename);
       // Set the workspace property to be the same one filled above
       loadInst->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
         loadInst->execute();
       }
       catch (std::runtime_error&)
       {
-        g_log.error("Unable to successfully run LoadInstrumentFromRaw sub-algorithm");
+        g_log.error("Unable to successfully run LoadInstrumentFromRaw Child Algorithm");
       }
 
       if ( ! loadInst->isExecuted() ) g_log.error("No instrument definition loaded");
     }
 
-    /// Run the LoadMappingTable sub-algorithm to fill the SpectraToDetectorMap
+    /// Run the LoadMappingTable Child Algorithm to fill the SpectraToDetectorMap
     void LoadRaw::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      // Now determine the spectra to detector map calling sub-algorithm LoadMappingTable
+      // Now determine the spectra to detector map calling Child Algorithm LoadMappingTable
       // There is a small penalty in re-opening the raw file but nothing major.
-      IAlgorithm_sptr loadmap= createSubAlgorithm("LoadMappingTable");
+      IAlgorithm_sptr loadmap= createChildAlgorithm("LoadMappingTable");
       loadmap->setPropertyValue("Filename", m_filename);
       loadmap->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
       try
@@ -447,32 +447,32 @@ namespace Mantid
       }
       catch (std::runtime_error&)
       {
-          g_log.error("Unable to successfully execute LoadMappingTable sub-algorithm");
+          g_log.error("Unable to successfully execute LoadMappingTable Child Algorithm");
       }
 
-      if ( ! loadmap->isExecuted() ) g_log.error("LoadMappingTable sub-algorithm is not executed");
+      if ( ! loadmap->isExecuted() ) g_log.error("LoadMappingTable Child Algorithm is not executed");
     }
 
-    /// Run the LoadLog sub-algorithm
+    /// Run the LoadLog Child Algorithm
     void LoadRaw::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace)
     {
-      IAlgorithm_sptr loadLog = createSubAlgorithm("LoadLog");
+      IAlgorithm_sptr loadLog = createChildAlgorithm("LoadLog");
       // Pass through the same input filename
       loadLog->setPropertyValue("Filename",m_filename);
       // Set the workspace property to be the same one filled above
       loadLog->setProperty<MatrixWorkspace_sptr>("Workspace",localWorkspace);
 
-      // Now execute the sub-algorithm. Catch and log any error, but don't stop.
+      // Now execute the Child Algorithm. Catch and log any error, but don't stop.
       try
       {
         loadLog->execute();
       }
       catch (std::runtime_error&)
       {
-        g_log.error("Unable to successfully run LoadLog sub-algorithm");
+        g_log.error("Unable to successfully run LoadLog Child Algorithm");
       }
 
-      if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog sub-algorithm");
+      if ( ! loadLog->isExecuted() ) g_log.error("Unable to successfully run LoadLog Child Algorithm");
     }
 
     double LoadRaw::dblSqrt(double in)

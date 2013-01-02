@@ -60,7 +60,7 @@ namespace DataHandling
     /// Get the instrument name from the NeXus file
     std::string getInstrumentName(const std::string & nxfilename);
 
-    /// Run LoadInstrument as a sub-algorithm
+    /// Run LoadInstrument as a Child Algorithm
     bool runLoadInstrument(const std::string &idf_filename,
                            API::MatrixWorkspace_sptr localWorkspace, Algorithm * alg);
 

@@ -822,7 +822,7 @@ namespace CurveFitting
     std::string fitoutputwsrootname("TempMinimizerOutput");
 
     // 1. Initialize
-    API::IAlgorithm_sptr fitalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
+    API::IAlgorithm_sptr fitalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
     fitalg->initialize();
 
     g_log.debug() << "[DBx534 | Before Fit] Function To Fit: " << function->asString()
@@ -984,7 +984,7 @@ namespace CurveFitting
     }
 
     // 2.Call  CropWorkspace()
-    API::IAlgorithm_sptr cropalg = this->createSubAlgorithm("CropWorkspace", -1, -1, true);
+    API::IAlgorithm_sptr cropalg = this->createChildAlgorithm("CropWorkspace", -1, -1, true);
     cropalg->initialize();
 
     cropalg->setProperty("InputWorkspace", inpws);
@@ -1004,7 +1004,7 @@ namespace CurveFitting
     API::MatrixWorkspace_sptr cropws = cropalg->getProperty("OutputWorkspace");
     if (!cropws)
     {
-      g_log.error() << "Unable to retrieve a Workspace2D object from subalgorithm Crop." << std::endl;
+      g_log.error() << "Unable to retrieve a Workspace2D object from ChildAlgorithm Crop." << std::endl;
     }
     else
     {
@@ -3331,7 +3331,7 @@ void LeBailFit2::smoothBackgroundAnalytical(size_t wsindex, FunctionDomain1DVect
   Chebyshev_sptr bkgdfunc(new Chebyshev);
   bkgdfunc->setAttributeValue("n", 6);
 
-  API::IAlgorithm_sptr calalg = this->createSubAlgorithm("Fit", -1.0, -1.0, true);
+  API::IAlgorithm_sptr calalg = this->createChildAlgorithm("Fit", -1.0, -1.0, true);
   calalg->initialize();
   calalg->setProperty("Function", boost::shared_ptr<API::IFunction>(bkgdfunc));
   calalg->setProperty("InputWorkspace", m_outputWS);

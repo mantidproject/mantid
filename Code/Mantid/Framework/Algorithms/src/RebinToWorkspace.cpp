@@ -60,12 +60,12 @@ void RebinToWorkspace::exec()
   std::vector<double> rb_params;
   createRebinParameters(toMatch, rb_params);
 
-  IAlgorithm_sptr runRebin = createSubAlgorithm("Rebin");
+  IAlgorithm_sptr runRebin = createChildAlgorithm("Rebin");
   runRebin->setProperty<MatrixWorkspace_sptr>("InputWorkspace", toRebin);
   runRebin->setPropertyValue("OutputWorkspace", "rebin_out");
   runRebin->setProperty("params", rb_params);
   runRebin->setProperty("PreserveEvents",PreserveEvents);
-  runRebin->executeAsSubAlg();
+  runRebin->executeAsChildAlg();
   progress(1);
   MatrixWorkspace_sptr ws = runRebin->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", ws);

@@ -212,7 +212,7 @@ namespace Mantid
           try
           {
             // Fit the function
-            API::IAlgorithm_sptr fit = createSubAlgorithm("Fit");
+            API::IAlgorithm_sptr fit = createChildAlgorithm("Fit");
             fit->initialize();
             fit->setPropertyValue("Function",fun);
             fit->setProperty("InputWorkspace",data.ws);
@@ -229,7 +229,7 @@ namespace Mantid
           }
           catch(...)
           {
-            g_log.error("Error in FitMW subalgorithm");
+            g_log.error("Error in FitMW ChildAlgorithm");
             throw;
           }
 
@@ -299,7 +299,7 @@ namespace Mantid
         }
         try
         {
-          API::IAlgorithm_sptr load = createSubAlgorithm("Load");
+          API::IAlgorithm_sptr load = createChildAlgorithm("Load");
           load->initialize();
           load->setPropertyValue("FileName",data.name);
           load->execute();

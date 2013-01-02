@@ -393,7 +393,7 @@ API::MatrixWorkspace_sptr UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr& 
   const double step = (max - min)/numBins;
 
   // Create a Rebin child algorithm
-  IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
+  IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setPropertyValue("OutputWorkspace", "Anonymous");
 
@@ -406,7 +406,7 @@ API::MatrixWorkspace_sptr UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr& 
   g_log.debug() << "Rebinning unwrapped data into " << numBins << " bins of width " << step
                 << " Angstroms, running from " << min << " to " << max << std::endl;
 
-  childAlg->executeAsSubAlg();
+  childAlg->executeAsChildAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 

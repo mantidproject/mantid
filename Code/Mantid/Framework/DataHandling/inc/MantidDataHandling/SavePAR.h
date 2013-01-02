@@ -73,7 +73,7 @@ public:
   /// Algorithm's category for identification
   virtual const std::string category() const
   { return "DataHandling\\SPE;Inelastic";}
-  /** the method used in tests. It requested the subalgorithm, which does the detectors
+  /** the method used in tests. It requested the ChildAlgorithm, which does the detectors
    *  position calculations to produce a target workspace This workspace then can be retrieved 
       from analysis data service and used to check  the results of the save algorithm. */
   void set_resulting_workspace(const std::string &ws_name){
