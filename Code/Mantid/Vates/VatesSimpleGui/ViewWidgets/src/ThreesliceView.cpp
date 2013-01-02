@@ -63,21 +63,6 @@ pqRenderView* ThreeSliceView::create2dRenderView(QWidget* widget)
   pqRenderView *view = this->createRenderView(widget);
   view->setCenterAxesVisibility(false);
   view->setOrientationAxesInteractivity(false);
-  //view->setOrientationAxesVisibility(false);
-  // Remove roll/rotate interactions from 2D view
-  vtkSMPropertyHelper helper(view->getProxy(), "CameraManipulators");
-  for (unsigned int cm = 0; cm < helper.GetNumberOfElements(); cm++)
-  {
-    vtkSMProxy* manip = helper.GetAsProxy(cm);
-    if (manip &&
-        (strcmp(manip->GetXMLName(), "TrackballRotate") == 0 ||
-         strcmp(manip->GetXMLName(), "TrackballRoll") == 0))
-    {
-      helper.Remove(manip);
-      cm--;
-    }
-  }
-
   return view;
 }
 
@@ -98,6 +83,14 @@ void ThreeSliceView::render()
 void ThreeSliceView::makeSlice(ViewBase::Direction i, pqRenderView *view,
                                pqPipelineSource *cut, pqPipelineRepresentation *repr)
 {
+  pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+  cut = builder->createFilter("filters", "Cut", this->origSrc);
+  cut->updatePipeline();
+  view->updateInteractionMode(cut->getOutputPort(0));
+  pqDataRepresentation *trepr = builder->createDataRepresentation(\
+        cut->getOutputPort(0), view);
+  repr = qobject_cast<pqPipelineRepresentation *>(trepr);
+
   vtkSMProxy *plane = vtkSMPropertyHelper(cut->getProxy(),
                                           "CutFunction").GetAsProxy();
 
@@ -172,26 +165,8 @@ void ThreeSliceView::makeThreeSlice()
 
   // Have to create the cuts and cut representations up here to keep
   // them around
-
-  this->xCut = builder->createFilter("filters", "Cut", this->origSrc);
-  this->xCut->updatePipeline();
-  pqDataRepresentation *trepr = builder->createDataRepresentation(\
-        this->xCut->getOutputPort(0), this->xView);
-  this->xCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
   this->makeSlice(ViewBase::X, this->xView, this->xCut, this->xCutRepr);
-
-  this->yCut = builder->createFilter("filters", "Cut", this->origSrc);
-  this->yCut->updatePipeline();
-  trepr = builder->createDataRepresentation(this->yCut->getOutputPort(0),
-                                            this->yView);
-  this->yCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
   this->makeSlice(ViewBase::Y, this->yView, this->yCut, this->yCutRepr);
-
-  this->zCut = builder->createFilter("filters", "Cut", this->origSrc);
-  this->zCut->updatePipeline();
-  trepr = builder->createDataRepresentation(this->zCut->getOutputPort(0),
-                                            this->zView);
-  this->zCutRepr = qobject_cast<pqPipelineRepresentation *>(trepr);
   this->makeSlice(ViewBase::Z, this->zView, this->zCut, this->zCutRepr);
 }
 
