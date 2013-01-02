@@ -308,7 +308,7 @@ void MantidGLWidget::componentSelected(Mantid::Geometry::ComponentID id)
   {
     m_surface->componentSelected(id);
     m_surface->updateView();
-    repaint();
+    update();
   }
 }
 

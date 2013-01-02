@@ -133,8 +133,8 @@ class Shape2DRectangle: public Shape2D
 {
 public:
   Shape2DRectangle();
-  Shape2DRectangle(const QPointF& leftTop,const QPointF& bottomRight);
-  Shape2DRectangle(const QPointF& leftTop,const QSizeF& size);
+  Shape2DRectangle(const QPointF& p0,const QPointF& p1);
+  Shape2DRectangle(const QPointF& p0,const QSizeF& size);
   virtual Shape2D* clone()const{return new Shape2DRectangle(*this);}
   virtual bool selectAt(const QPointF& p)const;
   virtual bool contains(const QPointF& p)const{return m_boundingRect.contains(p);}
@@ -147,7 +147,7 @@ protected:
 class Shape2DRing: public Shape2D
 {
 public:
-  Shape2DRing(Shape2D* shape);
+  Shape2DRing(Shape2D* shape, double xWidth = 0.000001, double yWidth = 0.000001);
   Shape2DRing(const Shape2DRing& ring);
   virtual Shape2D* clone()const{return new Shape2DRing(*this);}
   virtual bool selectAt(const QPointF& p)const;
@@ -170,8 +170,8 @@ protected:
   virtual void setShapeControlPoint(size_t i,const QPointF& pos);
   Shape2D* m_outer_shape;
   Shape2D* m_inner_shape;
-  qreal m_width;
-  qreal m_stored_width;
+  double m_xWidth;
+  double m_yWidth;
 };
 
 

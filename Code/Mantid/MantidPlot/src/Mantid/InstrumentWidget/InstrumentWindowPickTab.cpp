@@ -614,7 +614,7 @@ void InstrumentWindowPickTab::setSelectionType()
   if ( surface ) 
   {
     surface->setInteractionMode( surfaceMode );
-    m_instrWindow->updateInstrumentView();
+    //m_instrWindow->updateInstrumentView();
   }
   m_plot->clearAll();
   m_plot->replot();

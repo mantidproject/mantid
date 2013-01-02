@@ -175,7 +175,9 @@ void InstrumentWindowMaskTab::initSurface()
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapeSelected()),this,SLOT(shapeSelected()));
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapesDeselected()),this,SLOT(shapesDeselected()));
   connect(m_instrWindow->getSurface().get(),SIGNAL(shapeChanged()),this,SLOT(shapeChanged()));
-  enableApply( m_instrWindow->getSurface()->hasMasks() );
+  bool hasMasks = m_instrWindow->getSurface()->hasMasks();
+  enableApply( hasMasks );
+  enableClear( hasMasks || m_instrWindow->getInstrumentActor()->hasMaskWorkspace() );
 }
 
 void InstrumentWindowMaskTab::setActivity()
@@ -222,6 +224,7 @@ void InstrumentWindowMaskTab::shapeCreated()
 {
   setSelectActivity();
   enableApply(true);
+  enableClear(true);
 }
 
 void InstrumentWindowMaskTab::shapeSelected()
@@ -240,9 +243,9 @@ void InstrumentWindowMaskTab::shapeChanged()
   m_userEditing = false; // this prevents resetting shape proeprties by doubleChanged(...)
   RectF rect = m_instrWindow->getSurface()->getCurrentBoundingRect();
   m_doubleManager->setValue(m_left,rect.x0());
-  m_doubleManager->setValue(m_top,rect.y0());
+  m_doubleManager->setValue(m_top,rect.y1());
   m_doubleManager->setValue(m_right,rect.x1());
-  m_doubleManager->setValue(m_bottom,rect.y1());
+  m_doubleManager->setValue(m_bottom,rect.y0());
   for(QMap<QtProperty *,QString>::iterator it = m_doublePropertyMap.begin(); it != m_doublePropertyMap.end(); ++it)
   {
     m_doubleManager->setValue(it.key(),m_instrWindow->getSurface()->getCurrentDouble(it.value()));
@@ -271,7 +274,9 @@ void InstrumentWindowMaskTab::showEvent (QShowEvent *)
 {
   setActivity();
   m_instrWindow->setMouseTracking(true);
-  enableApply( m_instrWindow->getSurface()->hasMasks() );
+  bool hasMasks = m_instrWindow->getSurface()->hasMasks();
+  enableApply( hasMasks );
+  enableClear( hasMasks || m_instrWindow->getInstrumentActor()->hasMaskWorkspace() );
 }
 
 void InstrumentWindowMaskTab::clearProperties()
@@ -371,6 +376,7 @@ void InstrumentWindowMaskTab::applyMask()
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   m_instrWindow->getInstrumentActor()->applyMaskWorkspace();
   enableApply(false);
+  enableClear(false);
   QApplication::restoreOverrideCursor();
 }
 
@@ -383,6 +389,7 @@ void InstrumentWindowMaskTab::clearMask()
   m_instrWindow->getInstrumentActor()->clearMaskWorkspace();
   m_instrWindow->updateInstrumentView();
   enableApply(false);
+  enableClear(false);
 }
 
 /**
@@ -522,12 +529,19 @@ std::string InstrumentWindowMaskTab::generateMaskWorkspaceName(bool temp) const
 
 /**
   * Sets the m_hasMaskToApply flag and
-  * enables/disables the Apply and ClearAll buttons.
+  * enables/disables the Apply button.
   */
 void InstrumentWindowMaskTab::enableApply(bool on)
 {
     m_hasMaskToApply = on;
     m_apply->setEnabled(on);
+}
+
+/**
+  * Enables/disables the ClearAll button.
+  */
+void InstrumentWindowMaskTab::enableClear(bool on)
+{
     m_clear_all->setEnabled(on);
 }
 

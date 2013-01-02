@@ -2,6 +2,7 @@
 #include "InstrumentWindowTreeTab.h"
 #include "InstrumentTreeWidget.h"
 #include "InstrumentActor.h"
+#include "ProjectionSurface.h"
 
 InstrumentWindowTreeTab::InstrumentWindowTreeTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow)
@@ -47,6 +48,8 @@ void InstrumentWindowTreeTab::hideEvent(QHideEvent *)
   if ( actor )
   {
     actor->accept(SetAllVisibleVisitor());
+    getSurface()->updateView();
+    getSurface()->requestRedraw();
   }
 }
 

@@ -949,7 +949,7 @@ void UnwrappedSurface::zoom(const QRectF& area)
     height = -height;
   }
   m_viewRect = RectF( QPointF(left,top), QPointF(left+width,top+height) );
-  m_viewChanged = true;
+  updateView();
 
 }
 
@@ -958,7 +958,7 @@ void UnwrappedSurface::unzoom()
   if (!m_zoomStack.isEmpty())
   {
     m_viewRect = m_zoomStack.pop();
-    m_viewChanged = true;
+    updateView();
   }
 }
 
@@ -969,7 +969,7 @@ void UnwrappedSurface::zoom()
   if ( newView.isEmpty() ) return;
   m_zoomStack.push(m_viewRect);
   m_viewRect = newView;
-  m_viewChanged = true;
+  updateView();
   emptySelectionRect();
 }
 

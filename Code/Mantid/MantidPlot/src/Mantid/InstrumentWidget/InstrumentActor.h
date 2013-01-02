@@ -128,6 +128,7 @@ public:
   /* Masking */
 
   void initMaskHelper() const;
+  bool hasMaskWorkspace() const;
 signals:
   void colorMapChanged();
 protected:

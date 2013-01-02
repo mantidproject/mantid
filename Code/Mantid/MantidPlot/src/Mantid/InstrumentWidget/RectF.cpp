@@ -60,9 +60,8 @@ void RectF::findTransform(QTransform& trans, const QRectF& rect)
     double m11 =  rect.width() / xSpan();
     double m22 = -rect.height() / ySpan();
     trans.reset();
-    trans.translate(rect.left(), rect.bottom());
+    trans.translate(rect.left() - m11 * x0(), rect.bottom() - m22 * y0());
     trans.scale(m11, m22);
-    trans = trans.inverted();
 }
 
 void RectF::include(const QPointF &p)

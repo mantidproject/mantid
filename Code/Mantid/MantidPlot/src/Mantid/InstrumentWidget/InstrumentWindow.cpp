@@ -376,7 +376,7 @@ void InstrumentWindow::tabChanged(int)
   auto surface = getSurface();
   if ( !surface ) return;
   setInfoText(surface->getInfoText());
-  updateInstrumentView();
+  //updateInstrumentView();
 }
 
 /**

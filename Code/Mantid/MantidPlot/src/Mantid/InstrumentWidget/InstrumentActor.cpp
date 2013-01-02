@@ -609,6 +609,14 @@ void InstrumentActor::initMaskHelper() const
 }
 
 /**
+  * Checks if the actor has a mask workspace attached.
+  */
+bool InstrumentActor::hasMaskWorkspace() const
+{
+    return m_maskWorkspace ? true : false;
+}
+
+/**
   * Find a rotation from one orthonormal basis set (Xfrom,Yfrom,Zfrom) to
   * another orthonormal basis set (Xto,Yto,Zto). Both sets must be right-handed
   * (or same-handed, I didn't check). The method doesn't check the sets for orthogonality

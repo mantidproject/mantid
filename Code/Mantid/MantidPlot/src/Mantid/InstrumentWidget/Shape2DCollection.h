@@ -17,16 +17,14 @@ class QKeyEvent;
  * It supports operations on teh shapes such as adding, removing, and aditting either
  * with the mouse via control points (CPs) or via properties.
  *
- * The shapes operate in three coordinate systems:
- * 1. Some 'real' or logical coordinates
- * 2. Current or transformed screen coordinates
- * 3. Untransformed screen coordinates
+ * The shapes operate in two coordinate systems:
+ * 1. 'Real' or logical coordinates
+ * 2. Transformed screen coordinates
  *
  * Shape2DCollection must know the boundaries of the drawing area in logical and transformed screen coords.
  * They are set by calling setWindow(...) method. The first argument is the logical drawing rectangle and 
- * the second one is the corresponding screen viewport in pixels. The first screen viewport set with setWindow
- * defines the Untransformed screen coordinates. The individual shapes draw themselves in the untransformed
- * screen coords and unaware of the logical ones at all. If the size of the screen/widget changes setWindow
+ * the second one is the corresponding screen viewport in pixels. The individual shapes draw themselves in the
+ * logical coords and unaware of the screen ones at all. If the size of the screen/widget changes setWindow
  * must be called again. Changing the logical drawing bounds translates and zooms the picture.
  * The transformation is done by Qt's QTransform object.
  */
@@ -70,12 +68,8 @@ public:
   // collect all screen pixels that are masked by the shapes
   void getMaskedPixels(QList<QPoint>& pixels)const;
 
-  // --- coordinate transformations --- //
-
   // set the bounding rect of the current shape such that its real rect is given by the argument
   void setCurrentBoundingRectReal(const QRectF& rect);
-  // convert a real point to the untransformed screen coordinates
-  //QPointF realToUntransformed(const QPointF& point)const;
 
 signals:
 

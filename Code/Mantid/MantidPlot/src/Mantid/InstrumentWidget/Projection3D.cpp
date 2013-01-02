@@ -126,10 +126,6 @@ void Projection3D::drawSurface(MantidGLWidget*,bool picking)const
   
   QApplication::setOverrideCursor(Qt::WaitCursor);
 
-  if (m_viewChanged)
-  {
-    m_viewChanged = false;
-  }
   m_instrActor->draw(picking);
   OpenGLError::check("GL3DWidget::draw3D()[scene draw] ");
 
@@ -415,7 +411,7 @@ void Projection3D::translate(int x, int y)
 {
     m_trackball->generateTranslationTo( x, y );
     m_trackball->initTranslateFrom( x, y );
-    m_viewChanged = true;
+    updateView();
 }
 
 /**
@@ -437,7 +433,7 @@ void Projection3D::zoom(int x, int y)
 {
     m_trackball->generateZoomTo( x, y );
     m_trackball->initZoomFrom( x, y );
-    m_viewChanged = true;
+    updateView();
 }
 
 /**
@@ -449,7 +445,7 @@ void Projection3D::wheelZoom(int x, int y, int d)
 {
     m_trackball->initZoomFrom( x, y );
     m_trackball->generateZoomTo( x, y - d );
-    m_viewChanged = true;
+    updateView();
 }
 
 /**
@@ -471,7 +467,7 @@ void Projection3D::rotate(int x, int y)
 {
     m_trackball->generateRotationTo( x, y );
     m_trackball->initRotationFrom( x, y );
-    m_viewChanged = true;
+    updateView();
 }
 
 RectF Projection3D::getSurfaceBounds()const

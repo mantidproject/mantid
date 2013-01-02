@@ -217,7 +217,6 @@ void PeakOverlay::draw(QPainter& painter) const
     if (!marker) continue;
 
     QPointF p0 = marker->origin();
-    std::cerr << p0.x() << ' ' << p0.y() << std::endl;
     QPointF p1 = m_transform.map(p0);
     QRectF rect = marker->getLabelRect();
     QPointF dp = rect.topLeft() - p0;
@@ -246,7 +245,7 @@ void PeakOverlay::draw(QPainter& painter) const
   {
     PeakHKL& hkl = m_labels[i];
     hkl.draw(painter,m_precision);
-    hkl.print();
+    //hkl.print();
   }
 }
 

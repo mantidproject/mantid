@@ -71,6 +71,7 @@ void Shape2D::setControlPoint(size_t i,const QPointF& pos)
   if ( i < 4 )
   {
       m_boundingRect.setVertex( i, pos );
+      refit();
       correctBoundingRect();
   }
   // else ?
@@ -264,14 +265,14 @@ Shape2DRectangle::Shape2DRectangle()
   m_boundingRect = RectF();
 }
 
-Shape2DRectangle::Shape2DRectangle(const QPointF& leftTop,const QPointF& bottomRight)
+Shape2DRectangle::Shape2DRectangle(const QPointF& p0,const QPointF& p1)
 {
-  m_boundingRect = RectF(leftTop,bottomRight);
+  m_boundingRect = RectF(p0,p1);
 }
 
-Shape2DRectangle::Shape2DRectangle(const QPointF& leftTop,const QSizeF& size)
+Shape2DRectangle::Shape2DRectangle(const QPointF& p0,const QSizeF& size)
 {
-  m_boundingRect = RectF(leftTop,size);
+  m_boundingRect = RectF(p0,size);
 }
 
 bool Shape2DRectangle::selectAt(const QPointF& p)const
@@ -307,14 +308,14 @@ void Shape2DRectangle::addToPath(QPainterPath& path) const
 
 // --- Shape2DRing --- //
 
-Shape2DRing::Shape2DRing(Shape2D* shape):
+Shape2DRing::Shape2DRing(Shape2D* shape, double xWidth, double yWidth):
 m_outer_shape(shape),
-m_width(10.0),
-m_stored_width(10.0)
+m_xWidth(xWidth),
+m_yWidth(yWidth)
 {
   m_inner_shape = m_outer_shape->clone();
   m_inner_shape->getBoundingRect();
-  m_inner_shape->adjustBoundingRect(m_width,m_width,-m_width,-m_width);
+  m_inner_shape->adjustBoundingRect(m_xWidth,m_yWidth,-m_xWidth,-m_yWidth);
   resetBoundingRect();
   m_outer_shape->setFillColor(QColor());
   m_inner_shape->setFillColor(QColor());
@@ -324,8 +325,8 @@ Shape2DRing::Shape2DRing(const Shape2DRing& ring):
 Shape2D(),
 m_outer_shape(ring.m_outer_shape->clone()),
 m_inner_shape(ring.m_inner_shape->clone()),
-m_width(ring.m_width),
-m_stored_width(ring.m_stored_width)
+m_xWidth(ring.m_xWidth),
+m_yWidth(ring.m_yWidth)
 {
   resetBoundingRect();
 }
@@ -355,13 +356,17 @@ void Shape2DRing::drawShape(QPainter& painter) const
 
 void Shape2DRing::refit()
 {
-  if (m_stored_width <= 0) m_stored_width = 1.0;
-  m_width = m_stored_width;
-  double max_width = std::max(m_boundingRect.width() / 2, m_boundingRect.height() / 2) - 1.0;
-  if (m_width > max_width) m_width = max_width;
+  if (m_xWidth <= 0) m_xWidth = 0.000001;
+  if (m_yWidth <= 0) m_yWidth = 0.000001;
+  double xWidth = m_xWidth;
+  double yWidth = m_yWidth;
+  double max_width = m_boundingRect.width() / 2;
+  if (xWidth > max_width) xWidth = max_width;
+  double max_height = m_boundingRect.height() / 2;
+  if (yWidth > max_height) yWidth = max_height;
   m_outer_shape->setBoundingRect(m_boundingRect);
   m_inner_shape->setBoundingRect(m_boundingRect);
-  m_inner_shape->adjustBoundingRect(m_width,m_width,-m_width,-m_width);
+  m_inner_shape->adjustBoundingRect(xWidth,yWidth,-xWidth,-yWidth);
 }
 
 void Shape2DRing::resetBoundingRect()
@@ -374,8 +379,8 @@ QPointF Shape2DRing::getShapeControlPoint(size_t i) const
   RectF rect = m_inner_shape->getBoundingRect();
   switch(i)
   {
-  case 0: return QPointF(m_boundingRect.center().x(), m_boundingRect.y1());
-  case 1: return QPointF(m_boundingRect.center().x(), m_boundingRect.y0());
+  case 0: return QPointF(rect.center().x(), rect.y1());
+  case 1: return QPointF(rect.center().x(), rect.y0());
   case 2: return QPointF(rect.x0(),rect.center().y());
   case 3: return QPointF(rect.x1(),rect.center().y());
   }
@@ -388,44 +393,51 @@ void Shape2DRing::setShapeControlPoint(size_t i,const QPointF& pos)
 
   switch(i)
   {
-  case 0: Shape2D::adjustBoundingRect(dp.y(),dp.y(),-dp.y(),-dp.y()); break;
-  case 1: Shape2D::adjustBoundingRect(-dp.y(),-dp.y(),dp.y(),dp.y()); break;
-  case 2: m_stored_width += dp.x(); 
-          refit(); break;
-  case 3: m_stored_width -= dp.x(); 
-          refit(); break;
+  case 0: m_yWidth -= dp.y(); break;
+  case 1: m_yWidth += dp.y(); break;
+  case 2: m_xWidth += dp.x(); break;
+  case 3: m_xWidth -= dp.x(); break;
   }
-
+  refit();
 }
 
 QStringList Shape2DRing::getDoubleNames()const
 {
   QStringList res;
-  res << "width";
+  res << "xwidth" << "ywidth";
   return res;
 }
 
 double Shape2DRing::getDouble(const QString& prop) const
 {
-  if (prop == "width")
-  {
-    return m_stored_width;
-  }
+    if (prop == "xwidth")
+    {
+      return m_xWidth;
+    }
+    if (prop == "ywidth")
+    {
+      return m_yWidth;
+    }
   return 0.0;
 }
 
 void Shape2DRing::setDouble(const QString& prop, double value)
 {
-  if (prop == "width")
-  {
-    m_stored_width = value;
-    refit();
-  }
+    if (prop == "xwidth")
+    {
+      m_xWidth = value;
+      refit();
+    }
+    if (prop == "ywidth")
+    {
+      m_yWidth = value;
+      refit();
+    }
 }
 
 QPointF Shape2DRing::getPoint(const QString& prop) const
 {
-  if (prop == "center" || prop == "centre")
+  if (prop == "center")
   {
     return m_boundingRect.center();
   }
@@ -434,7 +446,7 @@ QPointF Shape2DRing::getPoint(const QString& prop) const
 
 void Shape2DRing::setPoint(const QString& prop, const QPointF& value)
 {
-  if (prop == "center" || prop == "centre")
+  if (prop == "center")
   {
     m_boundingRect.moveCenter(value);
   }

@@ -245,7 +245,6 @@ protected:
   Mantid::Kernel::V3D m_yaxis;       ///< The y axis
   mutable QImage* m_viewImage;       ///< storage for view image
   mutable QImage* m_pickImage;       ///< storage for picking image
-  mutable bool m_viewChanged;        ///< set when the image must be redrawn
   QColor m_backgroundColor;          ///< The background colour
   RectF m_viewRect;                 ///< Keeps the physical dimensions of the surface
   QRect m_selectRect;
@@ -260,7 +259,10 @@ protected:
 private:
   /// Get the current input controller
   InputController* getController() const;
+
   QMap<int,InputController*> m_inputControllers; ///< controllers for mouse and keyboard input
+  /// Set when the image must be redrawn
+  mutable bool m_viewChanged;
 };
 
 typedef boost::shared_ptr<ProjectionSurface> ProjectionSurface_sptr;

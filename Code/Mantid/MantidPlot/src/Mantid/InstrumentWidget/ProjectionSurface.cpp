@@ -34,12 +34,12 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
     m_zaxis(axis),
     m_viewImage(NULL),
     m_pickImage(NULL),
-    m_viewChanged(true),
     m_viewRect(),
     m_selectRect(),
     m_interactionMode(MoveMode),
     m_peakLabelPrecision(6),
-    m_peakShapesStyle(0)
+    m_peakShapesStyle(0),
+    m_viewChanged(true)
 {
   connect(rootActor,SIGNAL(colorMapChanged()),this,SLOT(colorMapChanged()));
   connect(&m_maskShapes,SIGNAL(shapeCreated()),this,SLOT(catchShapeCreated()));
@@ -126,21 +126,14 @@ void ProjectionSurface::clear()
  */
 void ProjectionSurface::draw(MantidGLWidget *widget)const
 {
-  if (getInteractionMode() == PickMode)
+  if ( m_viewChanged )
   {
-      bool changed = m_viewChanged;
-      draw(widget,true);
-      m_viewChanged = changed;
-      draw(widget,false);
+    draw(widget,true);
   }
-  else
+  draw(widget,false);
+  if ( m_viewChanged )
   {
-      draw(widget,false);
-      if (m_pickImage)
-      {
-        delete m_pickImage;
-        m_pickImage = NULL;
-      }
+    m_viewChanged = false;
   }
 }
 
@@ -182,8 +175,6 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
       }
       painter.end();
     }
-    m_viewChanged = false;
-
   }
   else if (!picking)
   {
@@ -226,24 +217,12 @@ void ProjectionSurface::drawSimple(QWidget* widget)const
     {
       if ( m_viewImage ) delete m_viewImage;
       m_viewImage = new QImage(widget->width(), widget->height(),QImage::Format_RGB32);
-    }
-
-    if (getInteractionMode() == MoveMode)
-    {
-      drawSimpleToImage(m_viewImage,false);
-      if (m_pickImage)
-      {
-        delete m_pickImage;
-        m_pickImage = NULL;
-      }
-    }
-    else
-    {
       if (m_pickImage) delete m_pickImage;
       m_pickImage = new QImage(widget->width(), widget->height(),QImage::Format_RGB32);
-      drawSimpleToImage(m_pickImage,true);
-      drawSimpleToImage(m_viewImage,false);
     }
+
+    drawSimpleToImage(m_pickImage,true);
+    drawSimpleToImage(m_viewImage,false);
     m_viewChanged = false;
   }
 

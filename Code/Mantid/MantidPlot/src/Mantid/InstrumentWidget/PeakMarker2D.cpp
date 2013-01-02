@@ -42,7 +42,6 @@ m_row(-1)
   m_boundingRect = RectF(centre - QPointF((qreal)m_markerSize/2,(qreal)m_markerSize/2),
                           QSizeF((qreal)m_markerSize,(qreal)m_markerSize));
   setScalable(false);
-  std::cerr << "Centre " << centre.x() << ' ' << centre.y() << std::endl;
 }
 
 /**

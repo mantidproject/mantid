@@ -130,18 +130,18 @@ void Shape2DCollection::setWindow(const RectF &surface,const QRect& viewport) co
   m_surfaceRect = surface;
   m_surfaceRect.findTransform( m_transform, viewport );
 
-  std::cerr << "surface:" << std::endl;
-  std::cerr << surface.x0() << ' ' << surface.y0() << ' ' << surface.width() << ' ' << surface.height() << std::endl;
-  std::cerr << "Viewport:" << std::endl;
-  std::cerr << viewport.x() << ' ' << viewport.y() << ' ' << viewport.width() << ' ' << viewport.height() << std::endl;
-  std::cerr << "Transform:" << std::endl;
-  std::cerr << m_transform.m11() << ' '
-            << m_transform.m12() << ' '
-            << m_transform.m22() << ' '
-            << m_transform.m31() << ' '
-            << m_transform.m32() << ' '
-            << m_transform.m33() << ' '
-            << std::endl;
+//  std::cerr << "surface:" << std::endl;
+//  std::cerr << surface.x0() << ' ' << surface.y0() << ' ' << surface.width() << ' ' << surface.height() << std::endl;
+//  std::cerr << "Viewport:" << std::endl;
+//  std::cerr << viewport.x() << ' ' << viewport.y() << ' ' << viewport.width() << ' ' << viewport.height() << std::endl;
+//  std::cerr << "Transform:" << std::endl;
+//  std::cerr << m_transform.m11() << ' '
+//            << m_transform.m12() << ' '
+//            << m_transform.m22() << ' '
+//            << m_transform.m31() << ' '
+//            << m_transform.m32() << ' '
+//            << m_transform.m33() << ' '
+//            << std::endl;
 }
 
 void Shape2DCollection::refit()
@@ -189,11 +189,11 @@ Shape2D* Shape2DCollection::createShape(const QString& type,int x,int y) const
 
   if (type.toLower() == "ellipse")
   {
-     return new Shape2DEllipse(p,1.0);
+     return new Shape2DEllipse(p,0.0);
   }
   else if (type.toLower() == "rectangle")
   {
-     return new Shape2DRectangle(p,QSizeF(1,1));
+     return new Shape2DRectangle(p,QSizeF(0,0));
   }
 
   QStringList complexType = type.split(' ',QString::SkipEmptyParts);
@@ -204,8 +204,10 @@ Shape2D* Shape2DCollection::createShape(const QString& type,int x,int y) const
 
   if (mainType.toLower() == "ring")
   {
+    double xWidth = 10.0 / fabs(m_transform.m11());
+    double yWidth = 10.0 / fabs(m_transform.m22());
     Shape2D* child = createShape(complexType[1],x,y);
-    return new Shape2DRing(child);
+    return new Shape2DRing(child, xWidth, yWidth);
   }
 
   throw std::invalid_argument("Shape " + type.toStdString() + " cannot be created");
@@ -235,11 +237,10 @@ void Shape2DCollection::deselectAll()
   */
 void Shape2DCollection::moveRightBottomTo(int x, int y)
 {
-    std::cerr << "move to " << x << ' ' << y << std::endl;
     if ( m_currentShape && m_currentShape->isEditing() )
     {
       QPointF p = m_transform.inverted().map(QPointF(x, y));
-      m_currentShape->setControlPoint( 2, p );
+      m_currentShape->setControlPoint( 3, p );
       emit shapeChanged();
     }
 }
@@ -287,6 +288,7 @@ void Shape2DCollection::moveShapeOrControlPointBy(int dx, int dy)
       m_overridingCursor = true;
       QApplication::setOverrideCursor(Qt::SizeAllCursor);
     }
+    emit shapeChanged();
 }
 
 /**
@@ -549,7 +551,7 @@ void Shape2DCollection::getMaskedPixels(QList<QPoint>& pixels)const
     for(int j = m_viewport.top(); j <= m_viewport.bottom(); ++j)
     {
       QPoint p = QPoint(i,j);
-      QPointF p0 = inv.map(p);
+      QPointF p0 = inv.map(QPointF(p));
       foreach(Shape2D* shape,m_shapes)
       {
         if (shape->isMasked(p0))
@@ -567,20 +569,8 @@ void Shape2DCollection::getMaskedPixels(QList<QPoint>& pixels)const
 void Shape2DCollection::setCurrentBoundingRectReal(const QRectF& rect)
 {
   if (!m_currentShape) return;
-  // convert rect from real to original screen coordinates (unaffected by m_transform)
-//  double x = (rect.x() - m_windowRect.left()) * m_wx;
-//  double y = m_h - (rect.bottom() - m_windowRect.y()) * m_wy;
-//  double width = rect.width() * m_wx;
-//  double height = rect.height() * m_wy;
   m_currentShape->setBoundingRect(rect);
 }
-
-//QPointF Shape2DCollection::realToUntransformed(const QPointF& point)const
-//{
-//  qreal x = (point.x() - m_windowRect.left()) * m_wx;
-//  qreal y = m_h - (point.y() - m_windowRect.y()) * m_wy;
-//  return QPointF(x,y);
-//}
 
 /**
  * Return a list of selected shapes.
