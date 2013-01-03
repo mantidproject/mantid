@@ -355,6 +355,11 @@ void MultiSliceView::updateCutPosition(double position)
   //pqServerManagerModel* pqModel = pqApplicationCore::instance()->getServerManagerModel();
   vtkSMProxy* smProxy = selection->GetSelectedProxy(0);
   //pqPipelineSource *cut = pqModel->findItem<pqPipelineSource*>(smProxy);
+  if (NULL == smProxy)
+  {
+    // Something went wrong retrieving the selection
+    return;
+  }
 
   vtkSMProxy *plane = vtkSMPropertyHelper(smProxy, "CutFunction").GetAsProxy();
   double origin[3] = {0.0, 0.0, 0.0};
