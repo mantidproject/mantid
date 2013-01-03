@@ -40,6 +40,14 @@ void InstrumentWindowTreeTab::selectComponentByName(const QString &name)
 }
 
 /**
+  * Update surface when tab becomes visible.
+  */
+void InstrumentWindowTreeTab::showEvent(QShowEvent *)
+{
+    getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
+}
+
+/**
   * Clean up on becoming invisible.
   */
 void InstrumentWindowTreeTab::hideEvent(QHideEvent *)

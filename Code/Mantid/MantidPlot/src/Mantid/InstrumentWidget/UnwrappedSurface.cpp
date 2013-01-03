@@ -247,7 +247,15 @@ void UnwrappedSurface::init()
 void UnwrappedSurface::calcUV(UnwrappedDetector& udet, Mantid::Kernel::V3D & pos )
 {
   this->project(udet.u, udet.v, udet.uscale, udet.vscale, pos);
-  calcSize(udet,Mantid::Kernel::V3D(-1,0,0),Mantid::Kernel::V3D(0,1,0));
+    calcSize(udet,Mantid::Kernel::V3D(-1,0,0),Mantid::Kernel::V3D(0,1,0));
+}
+
+/**
+  * Get information about the dimensions of the surface.
+  */
+QString UnwrappedSurface::getDimInfo() const
+{
+    return QString("U: [%1, %2] V: [%3, %4]").arg(m_viewRect.x0()).arg(m_viewRect.x1()).arg(m_viewRect.y0()).arg(m_viewRect.y1());
 }
 
 
@@ -789,12 +797,12 @@ void UnwrappedSurface::changeColorMap()
 
 QString UnwrappedSurface::getInfoText()const
 {
-  if (m_interactionMode == PickMode)
+  if (m_interactionMode == MoveMode)
   {
-    return getPickInfoText();
+    //return getDimInfo() +
+    return "Left mouse click and drag to zoom in. Right mouse click to zoom out.";
   }
-  QString text = "Left mouse click and drag to zoom in.\nRight mouse click to zoom out.";
-  return text;
+  return ProjectionSurface::getInfoText();
 }
 
 RectF UnwrappedSurface::getSurfaceBounds()const
@@ -828,14 +836,17 @@ void UnwrappedSurface::setPeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWo
  */
 void UnwrappedSurface::createPeakShapes(const QRect& window)const
 {
-  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-  PeakOverlay& peakShapes = *m_peakShapes.last();
-  PeakMarker2D::Style style = peakShapes.getDefaultStyle(m_peakShapesStyle);
-  m_peakShapesStyle++;
-  peakShapes.setWindow(getSurfaceBounds(),window);
-  peakShapes.createMarkers( style );
-  m_startPeakShapes = false;
-  QApplication::restoreOverrideCursor();
+    if ( !m_peakShapes.isEmpty() )
+    {
+        QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+        PeakOverlay& peakShapes = *m_peakShapes.last();
+        PeakMarker2D::Style style = peakShapes.getDefaultStyle(m_peakShapesStyle);
+        m_peakShapesStyle++;
+        peakShapes.setWindow(getSurfaceBounds(),window);
+        peakShapes.createMarkers( style );
+        QApplication::restoreOverrideCursor();
+    }
+    m_startPeakShapes = false;
 }
 
 /**
@@ -843,8 +854,11 @@ void UnwrappedSurface::createPeakShapes(const QRect& window)const
  */
 void UnwrappedSurface::setFlippedView(bool on)
 {
-  m_flippedView = on;
-  m_viewRect.xFlip();
+    if ( m_flippedView != on )
+    {
+        m_flippedView = on;
+        m_viewRect.xFlip();
+    }
 }
 
 /**
@@ -959,6 +973,7 @@ void UnwrappedSurface::unzoom()
   {
     m_viewRect = m_zoomStack.pop();
     updateView();
+    emit updateInfoText();
   }
 }
 
@@ -971,5 +986,6 @@ void UnwrappedSurface::zoom()
   m_viewRect = newView;
   updateView();
   emptySelectionRect();
+  emit updateInfoText();
 }
 

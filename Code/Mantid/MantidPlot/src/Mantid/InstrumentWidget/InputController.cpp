@@ -300,7 +300,7 @@ InputController(parent),
 m_max_size(32),
 m_size(30),
 m_isButtonPressed(false),
-m_isActive(true),
+m_isActive(false),
 m_rect( 0, 0, m_size, m_size )
 {
     m_cursor = new QPixmap(m_max_size,m_max_size);
@@ -319,6 +319,7 @@ InputControllerErase::~InputControllerErase()
   */
 void InputControllerErase::mousePressEvent(QMouseEvent *event)
 {
+    m_isActive = true;
     m_rect.moveTopLeft(QPoint(event->x(),event->y()));
     if (event->button() == Qt::LeftButton)
     {
@@ -332,6 +333,7 @@ void InputControllerErase::mousePressEvent(QMouseEvent *event)
   */
 void InputControllerErase::mouseMoveEvent(QMouseEvent *event)
 {
+    m_isActive = true;
     m_rect.moveTopLeft(QPoint(event->x(),event->y()));
     if ( m_isButtonPressed )
     {

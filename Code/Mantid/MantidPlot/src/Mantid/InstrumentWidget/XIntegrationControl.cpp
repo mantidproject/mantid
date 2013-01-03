@@ -33,6 +33,7 @@ m_maximum(1.0)
   m_slider->setMouseTracking(true);
   m_slider->move(0,0);
   m_slider->installEventFilter(this);
+  m_slider->setToolTip("Resize to change integration range");
 }
 
 void	XIntegrationScrollBar::resizeEvent (QResizeEvent *)
@@ -50,9 +51,7 @@ void	XIntegrationScrollBar::resizeEvent (QResizeEvent *)
 
 void	XIntegrationScrollBar::mouseMoveEvent (QMouseEvent* e)
 {
-  //std::cerr<< "mouse move " << e->x()<< ' ' << e->y() << std::endl;
   QFrame::mouseMoveEvent(e);
-  //QApplication::restoreOverrideCursor();
 }
 
 /**

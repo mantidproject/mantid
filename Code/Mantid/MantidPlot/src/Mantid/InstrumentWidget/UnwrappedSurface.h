@@ -97,6 +97,7 @@ protected:
   /// calculate rotation R for a udet
   virtual void calcRot(const UnwrappedDetector& udet, Mantid::Kernel::Quat& R)const = 0;
   virtual double uPeriod()const{return 0.0;}
+  virtual QString getDimInfo() const;
 
   void init();
   void calcSize(UnwrappedDetector& udet,const Mantid::Kernel::V3D& X,

@@ -588,21 +588,24 @@ void InstrumentWindowPickTab::plotTubeIntegrals(int detid)
  */
 void InstrumentWindowPickTab::setSelectionType()
 {
-  ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickMode;
+  ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickSingleMode;
   if (m_one->isChecked())
   {
     m_selectionType = Single;
     m_activeTool->setText("Tool: Pixel selection");
+    surfaceMode = ProjectionSurface::PickSingleMode;
   }
   else if (m_tube->isChecked())
   {
     m_selectionType = Tube;
     m_activeTool->setText("Tool: Tube/bank selection");
+    surfaceMode = ProjectionSurface::PickTubeMode;
   }
   else if (m_peak->isChecked())
   {
     m_selectionType = AddPeak;
     m_activeTool->setText("Tool: Add a single crystal peak");
+    surfaceMode = ProjectionSurface::AddPeakMode;
   }
   else if (m_peakSelect->isChecked())
   {
@@ -614,11 +617,11 @@ void InstrumentWindowPickTab::setSelectionType()
   if ( surface ) 
   {
     surface->setInteractionMode( surfaceMode );
-    //m_instrWindow->updateInstrumentView();
   }
   m_plot->clearAll();
   m_plot->replot();
   setPlotCaption();
+  m_instrWindow->updateInfoText();
 }
 
 /**
@@ -692,11 +695,6 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 void InstrumentWindowPickTab::showEvent (QShowEvent *)
 {
   auto surface = getSurface();
-  if (surface)
-  {
-    surface->setInteractionMode(ProjectionSurface::PickMode);
-  }
-  //mInstrumentDisplay->setMouseTracking(true);
   // Make the state of the display view consistent with the current selection type
   setSelectionType();
 }

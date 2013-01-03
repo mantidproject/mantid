@@ -49,7 +49,7 @@ class ProjectionSurface: public QObject
 {
   Q_OBJECT
 public:
-  enum InteractionMode {MoveMode = 0, PickMode = 1, DrawMode = 2, EraseMode, InteractionModeSize }; ///< Move around or select things
+  enum InteractionMode {MoveMode = 0, PickSingleMode, PickTubeMode, AddPeakMode, DrawMode, EraseMode, InteractionModeSize };
   /// Constructor
   ProjectionSurface(const InstrumentActor* rootActor,const Mantid::Kernel::V3D& origin,const Mantid::Kernel::V3D& axis);
   /// Destructor
@@ -94,7 +94,7 @@ public:
   /// fill in a list of detector ids which were masked by the mask shapes
   virtual void getMaskedDetectors(QList<int>& dets)const = 0;
 
-  virtual QString getInfoText()const{return "";}
+  virtual QString getInfoText()const;
   /// Change the interaction mode
   virtual void setInteractionMode(int mode);
 
@@ -191,6 +191,7 @@ signals:
   void shapesDeselected();
   void shapeChanged();
   void redrawRequired();
+  void updateInfoText();
 
   void executeAlgorithm(Mantid::API::IAlgorithm_sptr);
 
@@ -231,7 +232,6 @@ protected:
   RectF selectionRectUV()const;
   int getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const;
   int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
-  QString getPickInfoText()const;
   void setInputController(int mode, InputController* controller);
 
   //-----------------------------------

@@ -155,8 +155,8 @@ InstrumentWindow::InstrumentWindow(const QString& wsName, const QString& label, 
   connect(app->mantidUI->getAlgMonitor(),SIGNAL(algorithmStarted(void*)),this,SLOT(block()));
   connect(app->mantidUI->getAlgMonitor(),SIGNAL(allAlgorithmsStopped()),this,SLOT(unblock()));
 
-  const int windowWidth = 600;
-  const int tabsSize = windowWidth / 3;
+  const int windowWidth = 800;
+  const int tabsSize = windowWidth / 4;
   QList<int> sizes;
   sizes << tabsSize << windowWidth - tabsSize;
   controlPanelLayout->setSizes(sizes);
@@ -223,9 +223,9 @@ void InstrumentWindow::init(bool resetGeometry, bool autoscaling, double scaleMi
   else
   {
     surface->resetInstrumentActor( m_instrumentActor );
+    updateInfoText();
   }
 
-  setInfoText( getSurfaceInfoText() );
 }
 
 /**
@@ -241,7 +241,15 @@ void InstrumentWindow::selectTab(int tab)
  */
 InstrumentWindowTab *InstrumentWindow::getTab()const
 {
-  return static_cast<InstrumentWindowTab*>(mControlsTab->currentWidget());
+    return static_cast<InstrumentWindowTab*>(mControlsTab->currentWidget());
+}
+
+/**
+  * Update the info text displayed at the bottom of the window.
+  */
+void InstrumentWindow::updateInfoText()
+{
+    setInfoText( getSurfaceInfoText() );
 }
 
 void InstrumentWindow::setSurfaceType(int type)
@@ -315,8 +323,10 @@ void InstrumentWindow::setSurfaceType(int type)
 
     connect(surface,SIGNAL(multipleDetectorsSelected(QList<int>&)),this,SLOT(multipleDetectorsSelected(QList<int>&)));
     connect(surface,SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),this,SIGNAL(execMantidAlgorithm(Mantid::API::IAlgorithm_sptr)));
+    connect(surface,SIGNAL(updateInfoText()),this,SLOT(updateInfoText()),Qt::QueuedConnection);
     QApplication::restoreOverrideCursor();
   }
+  updateInfoText();
   update();
 }
 
@@ -373,10 +383,7 @@ void InstrumentWindow::setupColorMap()
   */
 void InstrumentWindow::tabChanged(int)
 {
-  auto surface = getSurface();
-  if ( !surface ) return;
-  setInfoText(surface->getInfoText());
-  //updateInstrumentView();
+    updateInfoText();
 }
 
 /**
@@ -1258,7 +1265,8 @@ void InstrumentWindow::setBackgroundColor(const QColor& color)
  */
 QString InstrumentWindow::getSurfaceInfoText() const
 {
-  return getSurface()->getInfoText();
+  ProjectionSurface* surface = getSurface().get();
+  return surface ? surface->getInfoText() : "";
 }
 
 /**

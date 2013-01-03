@@ -381,16 +381,16 @@ void Projection3D::componentSelected(Mantid::Geometry::ComponentID id)
 
 QString Projection3D::getInfoText()const
 {
-  if (m_interactionMode == PickMode)
+  if (m_interactionMode == MoveMode)
   {
-    return getPickInfoText();
+      QString text = "Mouse Buttons: Left -- Rotation, Middle -- Zoom, Right -- Translate.";
+      if( m_drawAxes )
+      {
+        text += " Axes: X = Red; Y = Green; Z = Blue";
+      }
+      return text;
   }
-  QString text = "Mouse Buttons: Left -- Rotation, Middle -- Zoom, Right -- Translate";
-  if( m_drawAxes )
-  {
-    text += "\nAxes: X = Red; Y = Green; Z = Blue";
-  }
-  return text;
+  return ProjectionSurface::getInfoText();
 }
 
 /**

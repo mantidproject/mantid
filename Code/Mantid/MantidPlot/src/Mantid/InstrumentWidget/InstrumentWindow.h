@@ -160,6 +160,7 @@ public slots:
   void setShowPeakRowFlag(bool on);
   /// Enable OpenGL. Slot called from render tab only - doesn't update the checkbox.
   void enableGL( bool on );
+  void updateInfoText();
 
 private slots:
   void block();

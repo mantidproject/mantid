@@ -50,6 +50,7 @@ InstrumentWindowTab(instrWindow)
 
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
+  mSaveImage->setToolTip("Save the instrument image to a file");
   connect(mSaveImage, SIGNAL(clicked()), m_instrWindow, SLOT(saveImage()));
 
   // Setup Display Setting menu
@@ -101,11 +102,13 @@ InstrumentWindowTab(instrWindow)
   connect(m_colorMapWidget,SIGNAL(maxValueChanged(double)),m_instrWindow, SLOT(changeColorMapMaxValue(double)));
 
   m_flipCheckBox = new QCheckBox("Flip view",this);
+  m_flipCheckBox->setToolTip("Flip the instrument view horizontally");
   m_flipCheckBox->setChecked(false);
   m_flipCheckBox->hide();
   connect(m_flipCheckBox,SIGNAL(toggled(bool)),this,SLOT(flipUnwrappedView(bool)));
 
   m_peakOverlaysButton = new QPushButton("Peaks options",this);
+  m_peakOverlaysButton->setToolTip("Set peak overlay options");
   m_peakOverlaysButton->hide();
   m_peakOverlaysButton->setMenu(createPeaksMenu());
 

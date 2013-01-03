@@ -49,7 +49,9 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor,const Mant
 
   // create and connect the pick input controller
   InputControllerPick* pickController = new InputControllerPick(this);
-  setInputController(PickMode, pickController);
+  setInputController(PickSingleMode, pickController);
+  setInputController(PickTubeMode, pickController);
+  setInputController(AddPeakMode, pickController);
   connect(pickController,SIGNAL(pickPointAt(int,int)),this,SLOT(pickDetectorAt(int,int)));
   connect(pickController,SIGNAL(touchPointAt(int,int)),this,SLOT(touchDetectorAt(int,int)));
   connect(pickController,SIGNAL(setSelection(QRect)),this,SLOT(setSelectionRect(QRect)));
@@ -431,6 +433,29 @@ boost::shared_ptr<const Mantid::Geometry::IDetector> ProjectionSurface::getDetec
   return boost::shared_ptr<const Mantid::Geometry::IDetector>();
 }
 
+/**
+  * Return info text for interactions common to all surfaces.
+  */
+QString ProjectionSurface::getInfoText() const
+{
+    switch ( m_interactionMode )
+    {
+    case PickSingleMode:
+    case PickTubeMode:
+        return "Move cursor over instrument to see detector information. "
+                "Left click and drag to select multiple detectors.";
+    case AddPeakMode:
+        return "Click on a detector then click on the mini-plot to add a peak.";
+    case DrawMode:
+        return "Select a tool button to draw a new shape. "
+                "Click on shapes to select. Click and move to edit.";
+    case EraseMode:
+        return "Click and move the mouse to erase peaks. "
+                "Rotate the wheel to resize the cursor.";
+    }
+    return "";
+}
+
 //------------------------------------------------------------------------------
 /** Return the detector position (in real-space) at the pixel coordinates.
  *
@@ -481,12 +506,6 @@ int ProjectionSurface::getDetectorID(unsigned char r,unsigned char g,unsigned ch
   int index = getDetectorIndex(r,g,b);
   if (index < 0) return index;
   return m_instrActor->getDetID(index);
-}
-
-QString ProjectionSurface::getPickInfoText()const
-{
-  return "Move cursor over instrument to see detector information.\n"
-          "Left click and drag to select multiple detectors.";
 }
 
 /**

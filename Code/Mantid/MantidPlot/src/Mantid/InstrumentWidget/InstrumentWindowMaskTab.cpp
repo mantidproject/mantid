@@ -135,9 +135,11 @@ m_userEditing(true)
   // Algorithm buttons
 
   m_apply = new QPushButton("Apply");
+  m_apply->setToolTip("Apply current mask to the data workspace. Cannot be reverted.");
   connect(m_apply,SIGNAL(clicked()),this,SLOT(applyMask()));
 
   m_clear_all = new QPushButton("Clear All");
+  m_clear_all->setToolTip("Clear all masking that have not been applied to the data.");
   connect(m_clear_all,SIGNAL(clicked()),this,SLOT(clearMask()));
 
   m_save_as_workspace_exclude = new QAction("As Mask to workspace",this);
@@ -153,6 +155,7 @@ m_userEditing(true)
   connect(m_save_as_file_include,SIGNAL(activated()),this,SLOT(saveInvertedMaskToFile()));
 
   m_saveButton = new QPushButton("Save");
+  m_saveButton->setToolTip("Save current masking to a file or a workspace.");
   QMenu* saveMenu = new QMenu(this);
   saveMenu->addAction(m_save_as_workspace_include);
   saveMenu->addAction(m_save_as_workspace_exclude);
@@ -218,6 +221,7 @@ void InstrumentWindowMaskTab::setActivity()
     m_instrWindow->getSurface()->startCreatingShape2D("ring rectangle",borderColor,fillColor);
     m_instrWindow->getSurface()->setInteractionMode(ProjectionSurface::DrawMode);
   }
+  m_instrWindow->updateInfoText();
 }
 
 void InstrumentWindowMaskTab::shapeCreated()
