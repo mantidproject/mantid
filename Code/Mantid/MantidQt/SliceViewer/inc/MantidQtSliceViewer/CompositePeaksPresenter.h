@@ -55,6 +55,8 @@ namespace MantidQt
       PeakPalette getPalette() const;
       /// Setter for indicating whether the background radius will be shown.
       void setBackgroundRadiusShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const bool shown);
+      /// Remove the workspace and corresponding presenter.
+      void remove(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
     private:
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;

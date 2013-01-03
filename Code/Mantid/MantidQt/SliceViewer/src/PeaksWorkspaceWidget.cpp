@@ -16,6 +16,7 @@ namespace MantidQt
       connect(ui.ckShowBackground, SIGNAL(clicked(bool)), this, SLOT(onShowBackgroundChanged(bool)));
       connect(ui.btnBackgroundColor, SIGNAL(clicked()), this, SLOT(onBackgroundColourClicked()));
       connect(ui.btnPeakColor, SIGNAL(clicked()), this, SLOT(onForegroundColourClicked()));
+      connect(ui.btnRemove, SIGNAL(clicked()), this, SLOT(onRemoveWorkspaceClicked()));
    
       populate();
     }
@@ -24,14 +25,17 @@ namespace MantidQt
     {
       const QString nameText = "Workspace name: " +  QString(m_ws->name().c_str());
       ui.lblWorkspaceName->setText(nameText);
+      ui.lblWorkspaceName->setToolTip(nameText);
 
       const QString integratedMsg = m_ws->hasIntegratedPeaks() ? "Yes" : "No";
       const QString integratedText = "Peaks Integrated: " + integratedMsg;
 
-      ui.lblWorkspaceName->setText(integratedText);
+      ui.lblWorkspaceState->setText(integratedText);
+      ui.lblWorkspaceState->setToolTip(integratedText);
 
       const QString coordinateText = "Coordinate system: " + QString(m_coordinateSystem.c_str());
       ui.lblWorkspaceCoordinates->setText(coordinateText);
+      ui.lblWorkspaceCoordinates->setToolTip(coordinateText);
 
       ui.btnBackgroundColor->setBackgroundColor(m_backgroundColour);
       ui.btnPeakColor->setBackgroundColor(m_foregroundColour);
@@ -66,6 +70,12 @@ namespace MantidQt
     void PeaksWorkspaceWidget::onShowBackgroundChanged(bool show)
     {
       emit backgroundRadiusShown(this->m_ws, show);
+    }
+
+    void PeaksWorkspaceWidget::onRemoveWorkspaceClicked()
+    {
+      emit removeWorkspace(this->m_ws);
+      this->hide();
     }
 
   } // namespace

@@ -30,6 +30,7 @@ public slots:
       void onPeakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
       void onBackgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
       void onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
+      void onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
 private:
   boost::shared_ptr<ProxyCompositePeaksPresenter> m_presenter;
 };

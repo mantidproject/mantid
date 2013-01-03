@@ -11,6 +11,7 @@
 using namespace MantidQt::SliceViewer;
 using namespace Mantid;
 using namespace testing;
+using Mantid::API::IPeaksWorkspace_sptr;
 
 class CompositePeaksPresenterTest : public CxxTest::TestSuite
 {
@@ -363,7 +364,57 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
   }
 
-  
+  void test_remove()
+  {
+    class DyingMockPeaksPresenter : public MockPeaksPresenter
+    {
+    public:
+      MOCK_METHOD0(die, void());
+      virtual ~DyingMockPeaksPresenter(){die();}
+    };
+
+    // Create a subject presenter that will be deleted.
+    auto A = new NiceMock<DyingMockPeaksPresenter>();
+    // Create a subject presenter that won't be deleted.
+    auto B = new NiceMock<MockPeaksPresenter>();
+
+    {
+      // Create some input peaks workspaces.
+      IPeaksWorkspace_sptr peaksWS_A = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(); 
+      SetPeaksWorkspaces setA;
+      setA.insert(peaksWS_A);
+
+      IPeaksWorkspace_sptr peaksWS_B = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(); 
+      SetPeaksWorkspaces setB;
+      setA.insert(peaksWS_B);
+
+      PeaksPresenter_sptr subjectA(A);
+      EXPECT_CALL(*A, presentedWorkspaces()).WillRepeatedly(Return(setA));
+      EXPECT_CALL(*A, die()).Times(1); // This will be called on destruction, because we will foreably remove this presenter!
+
+      PeaksPresenter_sptr subjectB(B);
+      EXPECT_CALL(*B, presentedWorkspaces()).WillRepeatedly(Return(setB));
+
+      // Set a background colour on the composite.
+      CompositePeaksPresenter composite;
+      composite.addPeaksPresenter(subjectA);
+      composite.addPeaksPresenter(subjectB);
+
+      const size_t preRemovalSize = composite.size(); // benchmark the current size.
+
+      /// Remove one of the presenters via its workspace.
+      composite.remove(peaksWS_A);
+
+      const size_t postRemovalSize = composite.size();
+
+      TSM_ASSERT_EQUALS("A presenter should have been removed.",preRemovalSize, postRemovalSize + 1);
+    }
+    // Check that the correct presenter has been removed.
+    TS_ASSERT(Mock::VerifyAndClearExpectations(A));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(B));
+  }
+
+
 
 };
 

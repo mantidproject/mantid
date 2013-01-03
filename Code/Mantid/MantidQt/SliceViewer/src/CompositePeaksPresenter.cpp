@@ -93,6 +93,8 @@ namespace MantidQt
     void CompositePeaksPresenter::clear()
     {
       m_subjects.clear();
+      PeakPalette temp;
+      m_palette = temp;
     }
 
     /**
@@ -252,10 +254,16 @@ namespace MantidQt
       return m_palette.backgroundIndexToColour(pos);
     }
 
-     void CompositePeaksPresenter::setBackgroundRadiusShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const bool shown)
-     {
-       auto iterator = getPresenterIteratorFromWorkspace(ws);
-       (*iterator)->showBackgroundRadius(shown);
-     }
+    void CompositePeaksPresenter::setBackgroundRadiusShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const bool shown)
+    {
+      auto iterator = getPresenterIteratorFromWorkspace(ws);
+      (*iterator)->showBackgroundRadius(shown);
+    }
+
+    void CompositePeaksPresenter::remove(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
+    {
+      auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+      m_subjects.erase(iterator);
+    }
   }
 }

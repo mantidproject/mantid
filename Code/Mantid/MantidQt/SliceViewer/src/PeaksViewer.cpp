@@ -56,6 +56,8 @@ namespace MantidQt
         connect(widget, SIGNAL(peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor)), this, SLOT(onPeakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor)));
         connect(widget, SIGNAL(backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor)), this, SLOT(onBackgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor)));
         connect(widget, SIGNAL(backgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool)), this, SLOT(onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool)));
+        connect(widget, SIGNAL(removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr)), this, SLOT(onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr)));
+
         layout()->addWidget(widget);
         ++it;
       }
@@ -94,6 +96,11 @@ namespace MantidQt
     void PeaksViewer::onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr peaksWS, bool show)
     {
       m_presenter->setBackgroundRadiusShown(peaksWS, show);
+    }
+
+    void PeaksViewer::onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr peaksWS)
+    {
+      m_presenter->remove(peaksWS);
     }
 
   } // namespace

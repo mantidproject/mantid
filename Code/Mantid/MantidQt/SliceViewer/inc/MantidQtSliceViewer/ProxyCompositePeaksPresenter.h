@@ -38,6 +38,8 @@ namespace MantidQt
       std::string getTransformName() const;
       /// Change whether the background radius is shown.
       void setBackgroundRadiusShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const bool shown);
+      /// Remove the workspace and corresponding presenter.
+      void remove(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
 
     private:
       /// Wrapped composite to delegate to.

@@ -84,5 +84,10 @@ namespace MantidQt
     {
       m_compositePresenter->setBackgroundRadiusShown(ws, shown);
     }
+
+    void ProxyCompositePeaksPresenter::remove(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
+    {
+      m_compositePresenter->remove(peaksWS);
+    }
   }
 }

@@ -21,6 +21,7 @@ namespace SliceViewer
     void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
     void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
     void backgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
+    void removeWorkspace(Mantid::API::IPeaksWorkspace_const_sptr);
   private:
     /// Populate the widget with model data.
     void populate();
@@ -40,6 +41,7 @@ namespace SliceViewer
       void onBackgroundColourClicked();
       void onForegroundColourClicked();
       void onShowBackgroundChanged(bool);
+      void onRemoveWorkspaceClicked();
   };
 
 } //namespace

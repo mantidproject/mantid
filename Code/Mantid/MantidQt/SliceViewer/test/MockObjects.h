@@ -35,7 +35,7 @@ namespace
     MOCK_METHOD1(setBackgroundColour, void(const QColor));
     MOCK_CONST_METHOD0(getTransformName, std::string());
     MOCK_METHOD1(showBackgroundRadius, void(const bool));
-    ~MockPeaksPresenter(){}
+    virtual ~MockPeaksPresenter(){}
   };
 
   /*------------------------------------------------------------
