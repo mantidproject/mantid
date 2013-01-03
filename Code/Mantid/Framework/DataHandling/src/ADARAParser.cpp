@@ -89,7 +89,27 @@ bool Parser::read(Poco::Net::StreamSocket &stream, unsigned int max_read)
         unsigned long bytes_read = 0;
         int rc;
 
-        while (!max_read || bytes_read < max_read) {
+        // If the caller set a timeout on the stream, then presumably they
+        // wanted to ensure that control would return back to them within
+        // a maximum amount of time.  However, the stream won't actually
+        // throw a timeout exception if it's actually reading data.  In
+        // that case, we'll keep looping until we've read max_read bytes
+        // - or forever if max_read is 0.  Since that's probably not what
+        // the caller intended, we'll check the elapsed time and break
+        // out of the while loop below if necessary.
+        Poco::Timespan timeout = stream.getReceiveTimeout();
+        if (timeout == Poco::Timespan())
+        {
+          // if the receive timeout wasn't set, then set it to some enormous
+          // value that we're not likely to ever hit.
+          timeout.assign(365000, 0, 0, 0, 0);  // 365K days - ie, nearly 1000 years
+        }
+
+
+        Poco::Timespan elapsed;
+        Poco::Timestamp startTime;
+        while ( (!max_read || bytes_read < max_read ) &&
+                 (elapsed < timeout) ) {
                 try {
                   rc = stream.receiveBytes(m_buffer + m_len, m_size - m_len);
                 } catch (Poco::TimeoutException &) {
@@ -111,6 +131,10 @@ bool Parser::read(Poco::Net::StreamSocket &stream, unsigned int max_read)
 
                 if (parseBuffer())
                         return false;
+
+                // update the time values
+                elapsed += startTime.elapsed();
+                startTime = Poco::Timestamp();
         }
 
         return true;
