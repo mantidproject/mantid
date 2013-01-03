@@ -17,7 +17,7 @@ namespace SliceViewer
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  PeakOverlaySphere::PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius, const double& backgroundOuterRadius, const QColor& peakColour)
+  PeakOverlaySphere::PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius, const double& backgroundOuterRadius, const QColor& peakColour, const QColor& backColour)
   : QWidget( parent ),
     m_plot(plot),
     m_physicalPeak(origin, peakRadius, backgroundInnerRadius, backgroundOuterRadius),
@@ -66,7 +66,7 @@ namespace SliceViewer
   /// Paint the overlay
   void PeakOverlaySphere::paintEvent(QPaintEvent * /*event*/)
   {
-    if(m_physicalPeak.isViewable())
+    if(m_physicalPeak.isViewablePeak())
     {
       const QwtDoubleInterval intervalY = m_plot->axisScaleDiv(QwtPlot::yLeft)->interval();
       const QwtDoubleInterval intervalX = m_plot->axisScaleDiv(QwtPlot::xBottom)->interval();
@@ -79,21 +79,27 @@ namespace SliceViewer
       const int yOrigin = m_plot->transform( QwtPlot::yLeft, drawObject.peakOrigin.Y() );
       const QPointF originWindows(xOrigin, yOrigin);
 
-
       QPainter painter(this);
       painter.setRenderHint( QPainter::Antialiasing );
-
-      // Draw Outer circle
-      QPen pen(m_peakColour);
-      /* Note we are creating an ellipse here and generating a filled effect by controlling the line thickness.
-      Since the linewidth takes a single scalar value, we choose to use x as the scale value.
-      */
-      pen.setWidth(static_cast<int>(std::abs(drawObject.peakLineWidth)));
-      painter.setPen( pen );  
-
-      pen.setStyle(Qt::SolidLine);
       painter.setOpacity(drawObject.peakOpacityAtDistance); //Set the pre-calculated opacity
-      painter.drawEllipse( originWindows, drawObject.peakOuterRadiusX, drawObject.peakOuterRadiusY );
+      
+      QPainterPath peakRadiusInnerPath;
+      peakRadiusInnerPath.addEllipse(originWindows, drawObject.peakInnerRadiusX, drawObject.peakInnerRadiusY);
+      QPen pen(m_peakColour);
+      pen.setWidth(2);
+      pen.setStyle(Qt::DashLine);
+      painter.strokePath(peakRadiusInnerPath, pen);
+      
+      if(m_physicalPeak.isViewableBackground())
+      {
+        QPainterPath backgroundOuterPath;
+        backgroundOuterPath.setFillRule(Qt::WindingFill);
+        backgroundOuterPath.addEllipse(originWindows, drawObject.backgroundOuterRadiusX, drawObject.backgroundOuterRadiusY);
+        QPainterPath backgroundInnerPath;
+        backgroundInnerPath.addEllipse(originWindows, drawObject.backgroundInnerRadiusX, drawObject.backgroundInnerRadiusY);
+        QPainterPath backgroundRadiusFill = backgroundOuterPath.subtracted(backgroundInnerPath);
+        painter.fillPath(backgroundRadiusFill, m_backColour);
+      }
     }
   }
 
@@ -119,12 +125,12 @@ namespace SliceViewer
 
   void PeakOverlaySphere::changeForegroundColour(const QColor colour)
   {
-    this->m_peakColour = QColor(colour);
+    this->m_peakColour = colour;
   }
 
-  void PeakOverlaySphere::changeBackgroundColour(const QColor)
+  void PeakOverlaySphere::changeBackgroundColour(const QColor colour)
   {
-    // Not being drawn at the moment, TODO.
+    this->m_backColour = colour;
   }
 
   void PeakOverlaySphere::showBackgroundRadius(const bool show)

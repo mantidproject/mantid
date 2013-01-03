@@ -19,8 +19,18 @@ namespace MantidQt
       m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::darkRed)));
       m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::black)));
       m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::white)));
-      m_foregroundMap.insert(std::make_pair(index++, QColor(Qt::darkGray)));
-      m_backgroundMap = m_foregroundMap;
+      m_foregroundMap.insert(std::make_pair(index, QColor(Qt::darkGray)));
+
+      m_backgroundMap.insert(std::make_pair(index--, QColor(Qt::green)));
+      m_backgroundMap.insert(std::make_pair(index--, QColor(Qt::darkMagenta)));
+      m_backgroundMap.insert(std::make_pair(index--, QColor(Qt::cyan)));
+      m_backgroundMap.insert(std::make_pair(index--, QColor(Qt::darkGreen)));
+      m_backgroundMap.insert(std::make_pair(index--, QColor(Qt::darkCyan)));
+      m_backgroundMap.insert(std::make_pair(index--, QColor(Qt::darkYellow)));
+      m_backgroundMap.insert(std::make_pair(index--, QColor(Qt::darkRed)));
+      m_backgroundMap.insert(std::make_pair(index--, QColor(Qt::black)));
+      m_backgroundMap.insert(std::make_pair(index--, QColor(Qt::white)));
+      m_backgroundMap.insert(std::make_pair(index--, QColor(Qt::darkGray)));
     }
 
     PeakPalette::PeakPalette(const PeakPalette& other) : m_backgroundMap(other.m_backgroundMap), m_foregroundMap(other.m_foregroundMap)

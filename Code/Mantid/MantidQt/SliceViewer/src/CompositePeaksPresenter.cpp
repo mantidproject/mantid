@@ -252,9 +252,10 @@ namespace MantidQt
       return m_palette.backgroundIndexToColour(pos);
     }
 
-     void CompositePeaksPresenter::setBackgroundRadiusShown(const bool shown)
+     void CompositePeaksPresenter::setBackgroundRadiusShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const bool shown)
      {
-
+       auto iterator = getPresenterIteratorFromWorkspace(ws);
+       (*iterator)->showBackgroundRadius(shown);
      }
   }
 }

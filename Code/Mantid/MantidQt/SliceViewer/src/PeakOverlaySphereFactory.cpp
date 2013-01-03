@@ -15,7 +15,7 @@ namespace MantidQt
 
     boost::shared_ptr<PeakOverlayView> PeakOverlaySphereFactory::createView(const Mantid::Kernel::V3D& position) const
     {
-      return boost::make_shared<PeakOverlaySphere>(m_plot, m_parent, position, this->m_peakRadius, this->m_backgroundInnerRadius, this->m_backgroundOuterRadius, this->m_peakColour);
+      return boost::make_shared<PeakOverlaySphere>(m_plot, m_parent, position, this->m_peakRadius, this->m_backgroundInnerRadius, this->m_backgroundOuterRadius, this->m_peakColour, this->m_backColour);
     }
 
     PeakOverlaySphereFactory::~PeakOverlaySphereFactory()

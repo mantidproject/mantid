@@ -42,6 +42,7 @@ namespace MantidQt
       QwtPlot * m_plot;
       QWidget * m_parent;
       QColor m_peakColour;
+      QColor m_backColour;
     public:
       PeakOverlayViewFactoryBase(QwtPlot * plot, QWidget * parent, const size_t colourNumber=0);
       virtual ~PeakOverlayViewFactoryBase();

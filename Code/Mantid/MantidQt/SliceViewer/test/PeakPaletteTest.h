@@ -37,16 +37,16 @@ public:
   void test_default_backgroundIndexToColour()
   {
     PeakPalette palette;
-    TS_ASSERT_EQUALS(QColor(Qt::green), palette.backgroundIndexToColour(0));
-    TS_ASSERT_EQUALS(QColor(Qt::darkMagenta), palette.backgroundIndexToColour(1));
-    TS_ASSERT_EQUALS(QColor(Qt::cyan), palette.backgroundIndexToColour(2));
-    TS_ASSERT_EQUALS(QColor(Qt::darkGreen), palette.backgroundIndexToColour(3));
-    TS_ASSERT_EQUALS(QColor(Qt::darkCyan), palette.backgroundIndexToColour(4));
-    TS_ASSERT_EQUALS(QColor(Qt::darkYellow), palette.backgroundIndexToColour(5));
-    TS_ASSERT_EQUALS(QColor(Qt::darkRed), palette.backgroundIndexToColour(6));
-    TS_ASSERT_EQUALS(QColor(Qt::black), palette.backgroundIndexToColour(7));
-    TS_ASSERT_EQUALS(QColor(Qt::white), palette.backgroundIndexToColour(8));
-    TS_ASSERT_EQUALS(QColor(Qt::darkGray), palette.backgroundIndexToColour(9));
+    TS_ASSERT_EQUALS(QColor(Qt::green), palette.backgroundIndexToColour(9));
+    TS_ASSERT_EQUALS(QColor(Qt::darkMagenta), palette.backgroundIndexToColour(8));
+    TS_ASSERT_EQUALS(QColor(Qt::cyan), palette.backgroundIndexToColour(7));
+    TS_ASSERT_EQUALS(QColor(Qt::darkGreen), palette.backgroundIndexToColour(6));
+    TS_ASSERT_EQUALS(QColor(Qt::darkCyan), palette.backgroundIndexToColour(5));
+    TS_ASSERT_EQUALS(QColor(Qt::darkYellow), palette.backgroundIndexToColour(4));
+    TS_ASSERT_EQUALS(QColor(Qt::darkRed), palette.backgroundIndexToColour(3));
+    TS_ASSERT_EQUALS(QColor(Qt::black), palette.backgroundIndexToColour(2));
+    TS_ASSERT_EQUALS(QColor(Qt::white), palette.backgroundIndexToColour(1));
+    TS_ASSERT_EQUALS(QColor(Qt::darkGray), palette.backgroundIndexToColour(0));
   }
 
   void test_foregroundIndexToColour_throws_if_out_of_range()

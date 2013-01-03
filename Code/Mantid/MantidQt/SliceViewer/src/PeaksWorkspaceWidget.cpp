@@ -65,7 +65,7 @@ namespace MantidQt
 
     void PeaksWorkspaceWidget::onShowBackgroundChanged(bool show)
     {
-      emit backgroundRadiusShown(show);
+      emit backgroundRadiusShown(this->m_ws, show);
     }
 
   } // namespace

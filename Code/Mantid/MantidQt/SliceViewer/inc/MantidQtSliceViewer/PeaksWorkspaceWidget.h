@@ -20,7 +20,7 @@ namespace SliceViewer
   signals:
     void peakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
     void backgroundColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);
-    void backgroundRadiusShown(bool);
+    void backgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr, bool);
   private:
     /// Populate the widget with model data.
     void populate();

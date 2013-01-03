@@ -71,6 +71,7 @@ namespace MantidQt
         else
         {
           m_cachedOpacityAtDistance = m_opacityMin;
+          m_backgroundOuterRadiusAtDistance.reset();
         }
       }
 
@@ -93,31 +94,27 @@ namespace MantidQt
       */
       MantidQt::SliceViewer::SphericalPeakPrimitives PhysicalSphericalPeak::draw(const double& windowHeight, const double& windowWidth, const double& viewWidth, const double& viewHeight) const
       {
-          SphericalPeakPrimitives drawingObjects = {0.0,0.0,0.0,0.0,Mantid::Kernel::V3D()};
-        if(this->isViewable())
+        SphericalPeakPrimitives drawingObjects = {};
+
+        // Scale factor for going from viewX to windowX
+        const double scaleY = windowHeight/viewHeight;
+        // Scale factor for going from viewY to windowY
+        const double scaleX = windowWidth/viewWidth;
+        drawingObjects.peakOpacityAtDistance = m_cachedOpacityAtDistance;
+        drawingObjects.peakOrigin = m_origin;
+
+        if(this->isViewablePeak())
         {
-          // Scale factor for going from viewX to windowX
-          const double scaleY = windowHeight/viewHeight;
-          // Scale factor for going from viewY to windowY
-          const double scaleX = windowWidth/viewWidth;
-
-          const double innerRadiusX = scaleX * m_peakRadiusAtDistance;
-          const double innerRadiusY = scaleY * m_peakRadiusAtDistance;
-
-          double outerRadiusX = scaleX * m_peakRadius;
-          double outerRadiusY = scaleY * m_peakRadius;
-
-          const double lineWidthX = outerRadiusX - innerRadiusX;
-          const double lineWidthY = outerRadiusY - innerRadiusY;
-          outerRadiusX -= lineWidthX/2;
-          outerRadiusY -= lineWidthY/2;
-
           // Create the return object.
-          drawingObjects.peakOuterRadiusX = outerRadiusX;
-          drawingObjects.peakOuterRadiusY = outerRadiusY;
-          drawingObjects.peakLineWidth = lineWidthX;
-          drawingObjects.peakOpacityAtDistance = m_cachedOpacityAtDistance;
-          drawingObjects.peakOrigin = m_origin;
+          drawingObjects.peakInnerRadiusX = scaleX * m_peakRadiusAtDistance;
+          drawingObjects.peakInnerRadiusY = scaleY * m_peakRadiusAtDistance;
+        }
+        if(this->isViewableBackground())
+        {
+          drawingObjects.backgroundOuterRadiusX = scaleX * m_backgroundOuterRadiusAtDistance.get();
+          drawingObjects.backgroundOuterRadiusY = scaleY * m_backgroundOuterRadiusAtDistance.get();
+          drawingObjects.backgroundInnerRadiusX = scaleX * m_backgroundInnerRadiusAtDistance;
+          drawingObjects.backgroundInnerRadiusY = scaleY * m_backgroundInnerRadiusAtDistance;
         }
         return drawingObjects;
       }
@@ -125,6 +122,11 @@ namespace MantidQt
       void PhysicalSphericalPeak::showBackgroundRadius(const bool show)
       {
         m_showBackgroundRadius = show;
+      }
+
+      bool PhysicalSphericalPeak::showBackgroundRadius() const
+      {
+        return m_showBackgroundRadius;
       }
   }
 }

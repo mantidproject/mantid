@@ -37,7 +37,7 @@ namespace MantidQt
       /// Gets the transform name.
       std::string getTransformName() const;
       /// Change whether the background radius is shown.
-      void setBackgroundRadiusShown(const bool shown);
+      void setBackgroundRadiusShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const bool shown);
 
     private:
       /// Wrapped composite to delegate to.

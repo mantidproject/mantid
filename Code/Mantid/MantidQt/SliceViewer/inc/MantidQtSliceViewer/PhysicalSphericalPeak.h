@@ -5,6 +5,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidQtSliceViewer/PeakTransform.h"
+#include <boost/optional.hpp>
 
 namespace MantidQt
 {
@@ -15,9 +16,12 @@ namespace MantidQt
     */
     struct SphericalPeakPrimitives 
     {
-      double peakOuterRadiusX;
-      double peakOuterRadiusY;
-      double peakLineWidth;
+      double peakInnerRadiusX;
+      double peakInnerRadiusY;
+      double backgroundOuterRadiusX;
+      double backgroundOuterRadiusY;
+      double backgroundInnerRadiusX;
+      double backgroundInnerRadiusY;
       double peakOpacityAtDistance;
       Mantid::Kernel::V3D peakOrigin;
     };
@@ -45,20 +49,24 @@ namespace MantidQt
       distance between the plane and the origin is greater than the peak radius, then the peak is not visible.
       @return True if the peak is visible in the current configuration.
       */
-      inline bool isViewable() const
+      inline bool isViewablePeak() const
       {
-        if(m_showBackgroundRadius)
+        return (m_peakRadiusAtDistance <= this->m_peakRadius);
+      }
+
+      inline bool isViewableBackground() const
+      {
+        if(m_showBackgroundRadius && m_backgroundOuterRadiusAtDistance.is_initialized())
         {
           return (m_backgroundOuterRadiusAtDistance <= this->m_backgroundOuterRadius);
         }
-        else
-        {
-          return (m_peakRadiusAtDistance <= this->m_peakRadius);
-        }
+        return false;
       }
 
       /// Setter to command whether the background radius should also be shown.
       void showBackgroundRadius(const bool show);
+
+      bool showBackgroundRadius() const;
 
     private:
       /// Original origin x=h, y=k, z=l
@@ -92,7 +100,7 @@ namespace MantidQt
       /// Inner radius at distance.
       double m_backgroundInnerRadiusAtDistance;
       /// Outer radius at distance.
-      double m_backgroundOuterRadiusAtDistance;
+      boost::optional<double> m_backgroundOuterRadiusAtDistance;
       /// Current slicepoint.
       double m_currentSlicePoint;
 

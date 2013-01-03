@@ -49,7 +49,7 @@ namespace SliceViewer
 
   public:
     /// Constructor
-    PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius, const double& backgroundOuterRadius, const QColor& peakColour);
+    PeakOverlaySphere(QwtPlot * plot, QWidget * parent, const Mantid::Kernel::V3D& origin, const double& peakRadius, const double& backgroundInnerRadius, const double& backgroundOuterRadius, const QColor& peakColour, const QColor& backColour);
     /// Destructor
     virtual ~PeakOverlaySphere();
     /// Set the slice point at position.
@@ -85,6 +85,8 @@ namespace SliceViewer
     PhysicalSphericalPeak m_physicalPeak;
     /// Peak colour
     QColor m_peakColour;
+    /// Back colour
+    QColor m_backColour;
   };
 
 
