@@ -20,8 +20,6 @@ namespace MantidQt
       m_opacityMin(0.0),
       m_cachedOpacityAtDistance(0.0),
       m_peakRadiusAtDistance(peakRadius+1), // Initialize such that physical peak is not visible
-      m_backgroundInnerRadiusAtDistance(backgroundInnerRadius+1), // Initialize such that physical peak is not visible
-      m_backgroundOuterRadiusAtDistance(backgroundOuterRadius+1), // Initialize such that physical peak is not visible
       m_cachedOpacityGradient((m_opacityMin - m_opacityMax)/m_peakRadius),
       m_peakRadiusSQ(m_peakRadius*m_peakRadius),
       m_backgroundInnerRadiusSQ(backgroundInnerRadius*backgroundInnerRadius),
@@ -106,15 +104,15 @@ namespace MantidQt
         if(this->isViewablePeak())
         {
           // Create the return object.
-          drawingObjects.peakInnerRadiusX = scaleX * m_peakRadiusAtDistance;
-          drawingObjects.peakInnerRadiusY = scaleY * m_peakRadiusAtDistance;
+          drawingObjects.peakInnerRadiusX = scaleX * m_peakRadiusAtDistance.get();
+          drawingObjects.peakInnerRadiusY = scaleY * m_peakRadiusAtDistance.get();
         }
         if(this->isViewableBackground())
         {
           drawingObjects.backgroundOuterRadiusX = scaleX * m_backgroundOuterRadiusAtDistance.get();
           drawingObjects.backgroundOuterRadiusY = scaleY * m_backgroundOuterRadiusAtDistance.get();
-          drawingObjects.backgroundInnerRadiusX = scaleX * m_backgroundInnerRadiusAtDistance;
-          drawingObjects.backgroundInnerRadiusY = scaleY * m_backgroundInnerRadiusAtDistance;
+          drawingObjects.backgroundInnerRadiusX = scaleX * m_backgroundInnerRadiusAtDistance.get();
+          drawingObjects.backgroundInnerRadiusY = scaleY * m_backgroundInnerRadiusAtDistance.get();
         }
         return drawingObjects;
       }
@@ -122,11 +120,6 @@ namespace MantidQt
       void PhysicalSphericalPeak::showBackgroundRadius(const bool show)
       {
         m_showBackgroundRadius = show;
-      }
-
-      bool PhysicalSphericalPeak::showBackgroundRadius() const
-      {
-        return m_showBackgroundRadius;
       }
   }
 }

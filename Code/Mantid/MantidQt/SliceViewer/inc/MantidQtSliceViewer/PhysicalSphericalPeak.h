@@ -11,6 +11,9 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+    /// Alisas for a boost optional double.
+    typedef boost::optional<double> optional_double;
+
     /**
     @class Spherical peak drawing primitive information.
     */
@@ -45,28 +48,35 @@ namespace MantidQt
       SphericalPeakPrimitives draw(const double& windowHeight, const double& windowWidth, const double& viewWidth, const double& viewHeight) const;
 
       /**
-      Determine whether the physical peak is visible. This means that the intesecting plane penetrates the sphere somehow. If the absolute
+      Determine whether the physical peak is viewable. This means that the intesecting plane penetrates the sphere somehow. If the absolute
       distance between the plane and the origin is greater than the peak radius, then the peak is not visible.
       @return True if the peak is visible in the current configuration.
       */
       inline bool isViewablePeak() const
       {
-        return (m_peakRadiusAtDistance <= this->m_peakRadius);
+        if(m_peakRadiusAtDistance.is_initialized())
+        {
+          return (m_peakRadiusAtDistance.get() <= this->m_peakRadius);
+        }
+        return false;
       }
 
+      /**
+      Determine whether the physical peak background is viewable. This means that the intesecting plane penetrates the sphere somehow. If the absolute
+      distance between the plane and the origin is greater than the peak radius, then the peak is not visible.
+      @return True if the peak is visible in the current configuration.
+      */
       inline bool isViewableBackground() const
       {
         if(m_showBackgroundRadius && m_backgroundOuterRadiusAtDistance.is_initialized())
         {
-          return (m_backgroundOuterRadiusAtDistance <= this->m_backgroundOuterRadius);
+          return (m_backgroundOuterRadiusAtDistance.get() <= this->m_backgroundOuterRadius);
         }
         return false;
       }
 
       /// Setter to command whether the background radius should also be shown.
       void showBackgroundRadius(const bool show);
-
-      bool showBackgroundRadius() const;
 
     private:
       /// Original origin x=h, y=k, z=l
@@ -86,7 +96,7 @@ namespace MantidQt
       /// Cached opacity at the distance z from origin
       double m_cachedOpacityAtDistance;
       /// Cached radius at the distance z from origin
-      double m_peakRadiusAtDistance;
+      optional_double m_peakRadiusAtDistance;
       /// Cached opacity gradient.
       const double m_cachedOpacityGradient;
       /// Cached radius squared.
@@ -94,15 +104,13 @@ namespace MantidQt
       /// Cached background inner radius sq.
       const double m_backgroundInnerRadiusSQ;
       /// Cached background outer radius sq.
-      double m_backgroundOuterRadiusSQ;
+      const double m_backgroundOuterRadiusSQ;
       /// Flag to indicate that the background radius should be drawn.
       bool m_showBackgroundRadius;
       /// Inner radius at distance.
-      double m_backgroundInnerRadiusAtDistance;
+      optional_double m_backgroundInnerRadiusAtDistance;
       /// Outer radius at distance.
-      boost::optional<double> m_backgroundOuterRadiusAtDistance;
-      /// Current slicepoint.
-      double m_currentSlicePoint;
+      optional_double m_backgroundOuterRadiusAtDistance;
 
       DISABLE_COPY_AND_ASSIGN(PhysicalSphericalPeak)
     };

@@ -57,6 +57,9 @@ public:
     const double slicePoint = radius + delta;
     physicalPeak.setSlicePoint(slicePoint);
 
+    int i;
+    std::cin >> i;
+
     TSM_ASSERT("Should NOT be viewable if a slice point > r is set.", !physicalPeak.isViewablePeak());
   }
 
