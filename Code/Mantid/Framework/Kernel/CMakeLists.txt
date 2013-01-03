@@ -42,6 +42,7 @@ set ( SRC_FILES
 	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
 	src/Math/Distributions/BoseEinsteinDistribution.cpp
+	src/Math/Distributions/HermitePolynomials.cpp
 	src/Matrix.cpp
 	src/MatrixProperty.cpp
 	src/Memory.cpp
@@ -51,7 +52,7 @@ set ( SRC_FILES
 	src/NDRandomNumberGenerator.cpp
 	src/NeutronAtom.cpp
 	src/NexusTestHelper.cpp
-    src/ParaViewVersion.cpp
+	src/ParaViewVersion.cpp
 	src/ProgressBase.cpp
 	src/ProgressText.cpp
 	src/Property.cpp
@@ -142,12 +143,12 @@ set ( INC_FILES
 	inc/MantidKernel/Glob.h
 	inc/MantidKernel/IPropertyManager.h
 	inc/MantidKernel/IPropertySettings.h
+	inc/MantidKernel/ISaveable.h
+	inc/MantidKernel/ITimeSeriesProperty.h
+	inc/MantidKernel/IValidator.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/Interpolation.h
-  inc/MantidKernel/ISaveable.h
-  inc/MantidKernel/ITimeSeriesProperty.h
-  inc/MantidKernel/IValidator.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h
@@ -161,6 +162,7 @@ set ( INC_FILES
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Math/Distributions/BoseEinsteinDistribution.h
+	inc/MantidKernel/Math/Distributions/HermitePolynomials.h
 	inc/MantidKernel/Matrix.h
 	inc/MantidKernel/MatrixProperty.h
 	inc/MantidKernel/Memory.h
@@ -173,7 +175,7 @@ set ( INC_FILES
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NexusTestHelper.h
 	inc/MantidKernel/NullValidator.h
-    inc/MantidKernel/ParaViewVersion.h
+	inc/MantidKernel/ParaViewVersion.h
 	inc/MantidKernel/PhysicalConstants.h
 	inc/MantidKernel/ProgressBase.h
 	inc/MantidKernel/ProgressText.h
@@ -252,6 +254,7 @@ set ( TEST_FILES
 	FreeBlockTest.h
 	FunctionTaskTest.h
 	GlobTest.h
+	HermitePolynomialsTest.h
 	IPropertySettingsTest.h
 	ISaveableTest.h
 	IValidatorTest.h
