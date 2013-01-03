@@ -55,7 +55,10 @@ namespace PhysicalConstants
   
   /** Mass of the neutron in kg. Taken from <http://physics.nist.gov/cuu/Constants> on 30/10/2007. */
   static const double NeutronMass = 1.674927211e-27;
-  
+
+  /** Mass of the neutron in AMU. Taken from <http://physics.nist.gov/cuu/Constants> on 02/01/2013. */
+  static const double NeutronMassAMU = 1.008664916;
+
   /** 1 meV in Joules. Taken from <http://physics.nist.gov/cuu/Constants> on 28/03/2008. */
   static const double meV = 1.602176487e-22;
   
