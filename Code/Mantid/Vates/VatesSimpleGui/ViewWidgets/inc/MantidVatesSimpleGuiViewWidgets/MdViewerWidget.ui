@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,0,1,0">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -173,23 +173,46 @@
         </size>
        </property>
       </widget>
-      <widget class="pqPropertiesPanel" name="propertiesPanel" native="true"/>
-      <widget class="QScrollArea" name="scrollArea">
-       <property name="widgetResizable">
-        <bool>true</bool>
+      <widget class="QTabWidget" name="propInfoTabs">
+       <property name="currentIndex">
+        <number>0</number>
        </property>
-       <widget class="QWidget" name="scrollAreaWidgetContents">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>148</width>
-          <height>108</height>
-         </rect>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout">
+       <widget class="QWidget" name="properties">
+        <attribute name="title">
+         <string>Properties</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
-          <widget class="pqProxyInformationWidget" name="informationWidget" native="true"/>
+          <widget class="pqPropertiesPanel" name="propertiesPanel" native="true"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="information">
+        <attribute name="title">
+         <string>Information</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QScrollArea" name="scrollArea">
+           <property name="widgetResizable">
+            <bool>true</bool>
+           </property>
+           <widget class="QWidget" name="scrollAreaWidgetContents">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>126</width>
+              <height>237</height>
+             </rect>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout">
+             <item>
+              <widget class="pqProxyInformationWidget" name="proxyInfo" native="true"/>
+             </item>
+            </layout>
+           </widget>
+          </widget>
          </item>
         </layout>
        </widget>
