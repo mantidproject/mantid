@@ -171,16 +171,21 @@ namespace Crystal
               double intensity = logtable->getRef<double>(std::string("Intensity"), iTOF);
               if (intensity > Imax)
               {
+                                  Imax = intensity;
 				  int irow = static_cast<int>(logtable->getRef<double>(std::string("Mrow"), iTOF));
 				  int icol = static_cast<int>(logtable->getRef<double>(std::string("Mcol"), iTOF));
 				  std::string bankName0 = bankName;
 				  bankName0.erase(0,4);
 				  std::ostringstream pixelString;
-				  pixelString << Iptr->getName() << "/" << bankName0 << "/"
-				      << bankName << "/tube" << std::setw(3) << std::setfill('0')<< icol << "/pixel" << std::setw(4) << std::setfill('0')<< irow;
-				  Geometry::IComponent_const_sptr component = Iptr->getComponentByName(pixelString.str());
+				  pixelString << Iptr->getName() << "/" << bankName0 << "/" <<bankName
+				  << "/tube" << std::setw(3) << std::setfill('0')<< icol
+				  << "/pixel" << std::setw(4) << std::setfill('0')<< irow;
+				  boost::shared_ptr<const Geometry::IComponent> component = Iptr->getComponentByName(pixelString.str());
                                   boost::shared_ptr<const Detector> pixel = boost::dynamic_pointer_cast<const Detector>(component);
-				  if (pixel) pixelID = pixel->getID();
+				  if (pixel)
+                                  {
+                                       pixelID = pixel->getID();
+                                  }
 				  chan = static_cast<int>(logtable->getRef<double>(std::string("Channel"), iTOF));
               }
           }
