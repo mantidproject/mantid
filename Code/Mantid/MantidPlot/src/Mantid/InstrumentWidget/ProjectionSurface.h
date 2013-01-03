@@ -66,7 +66,7 @@ public:
   /// draw the surface onto a normal widget
   virtual void drawSimple(QWidget* widget)const;
   /// called when the gl widget gets resized
-  virtual void resize(int, int){}
+  virtual void resize(int, int);
   /// redraw surface without recalulationg of colours, etc
   virtual void updateView();
   /// full update and redraw of the surface

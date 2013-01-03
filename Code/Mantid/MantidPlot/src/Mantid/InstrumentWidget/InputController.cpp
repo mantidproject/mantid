@@ -299,15 +299,19 @@ InputControllerErase::InputControllerErase(QObject *parent):
 InputController(parent),
 m_max_size(32),
 m_size(30),
-m_isButtonPressed(false)
+m_isButtonPressed(false),
+m_isActive(true),
+m_rect( 0, 0, m_size, m_size )
 {
-    m_pixmap = new QPixmap(m_max_size,m_max_size);
+    m_cursor = new QPixmap(m_max_size,m_max_size);
     drawCursor();
+    m_image = new QPixmap(":/PickTools/eraser.png");
 }
 
 InputControllerErase::~InputControllerErase()
 {
-    delete m_pixmap;
+    delete m_cursor;
+    delete m_image;
 }
 
 /**
@@ -315,12 +319,11 @@ InputControllerErase::~InputControllerErase()
   */
 void InputControllerErase::mousePressEvent(QMouseEvent *event)
 {
+    m_rect.moveTopLeft(QPoint(event->x(),event->y()));
     if (event->button() == Qt::LeftButton)
     {
         m_isButtonPressed = true;
-        QRect rect(m_rect);
-        rect.moveTopLeft(QPoint(event->x(),event->y()));
-        emit erase( rect );
+        emit erase( m_rect );
     }
 }
 
@@ -329,11 +332,10 @@ void InputControllerErase::mousePressEvent(QMouseEvent *event)
   */
 void InputControllerErase::mouseMoveEvent(QMouseEvent *event)
 {
+    m_rect.moveTopLeft(QPoint(event->x(),event->y()));
     if ( m_isButtonPressed )
     {
-        QRect rect(m_rect);
-        rect.moveTopLeft(QPoint(event->x(),event->y()));
-        emit erase( rect );
+        emit erase( m_rect );
     }
 }
 
@@ -353,31 +355,35 @@ void InputControllerErase::wheelEvent(QWheelEvent *event)
         m_size = d;
         drawCursor();
         QApplication::restoreOverrideCursor();
-        QApplication::setOverrideCursor(QCursor( *m_pixmap, 0, 0 ));
+        QApplication::setOverrideCursor(QCursor( *m_cursor, 0, 0 ));
     }
 }
 
-void InputControllerErase::onPaint(QPainter&)
+void InputControllerErase::onPaint(QPainter& painter)
 {
-    //painter.drawEllipse(m_x,m_y,m_size,m_size);
+    if ( m_isActive && !m_isButtonPressed )
+    {
+        painter.drawPixmap(m_rect.bottomRight(),*m_image);
+    }
 }
 
 void InputControllerErase::enterEvent(QEvent *)
 {
-    QApplication::setOverrideCursor(QCursor( *m_pixmap, 0, 0 ));
+    QApplication::setOverrideCursor(QCursor( *m_cursor, 0, 0 ));
+    m_isActive = true;
 }
 
 void InputControllerErase::leaveEvent(QEvent *)
 {
     QApplication::restoreOverrideCursor();
+    m_isActive = false;
 }
 
 void InputControllerErase::drawCursor()
 {
-    m_pixmap->fill(QColor(255,255,255,0));
-    QPainter painter( m_pixmap );
-    //int x = (m_max_size - m_size) / 2;
-    m_rect = QRect( 0, 0, m_size, m_size );
-    painter.fillRect( m_rect, QColor(255,255,255,100) );
+    m_cursor->fill(QColor(255,255,255,0));
+    QPainter painter( m_cursor );
+    painter.fillRect( QRect( 0, 0, m_size, m_size ), QColor(255,255,255,100) );
+    m_rect.setSize( QSize(m_size,m_size) );
 }
 

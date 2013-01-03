@@ -210,8 +210,10 @@ private:
     const int m_max_size;
     int m_size; ///< Size of the eraser
     bool m_isButtonPressed;
+    bool m_isActive;
     QRect m_rect;
-    QPixmap *m_pixmap;
+    QPixmap *m_cursor;
+    QPixmap *m_image;
 };
 
 #endif // INPUTCONTROLLER_H

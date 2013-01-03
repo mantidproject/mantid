@@ -45,7 +45,7 @@ public:
   virtual bool selectAt(const QPointF& )const{return false;}
   // is a point inside the shape (closed line)
   virtual bool contains(const QPointF& )const{return false;}
-  // is a point "masked" by the shape. Only filled regians of a shape mask a point
+  // is a point "masked" by the shape. Only filled regions of a shape mask a point
   virtual bool isMasked(const QPointF& )const;
 
   // --- Public methods --- //

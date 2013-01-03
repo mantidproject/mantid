@@ -203,6 +203,7 @@ void ProjectionSurface::draw(MantidGLWidget *widget,bool picking)const
     // Discard any error generated here
     glGetError();
   }
+
 }
 
 /**
@@ -248,6 +249,11 @@ void ProjectionSurface::drawSimple(QWidget* widget)const
   }
   getController()->onPaint( painter );
   painter.end();
+}
+
+void ProjectionSurface::resize(int, int)
+{
+    updateView();
 }
 
 /**

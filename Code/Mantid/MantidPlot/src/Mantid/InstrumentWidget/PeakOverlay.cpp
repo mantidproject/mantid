@@ -130,15 +130,12 @@ void PeakOverlay::removeShapes(const QList<Shape2D*>& shapeList)
 {
   // vectors of rows to delete from the peaks workspace.
   std::vector<size_t> rows;
-  std::cerr << "Removing ";
   foreach(Shape2D* shape, shapeList)
   {
     PeakMarker2D* marker = dynamic_cast<PeakMarker2D*>(shape);
     if ( !marker ) throw std::logic_error("Wrong shape type found.");
     rows.push_back( static_cast<size_t>( marker->getRow() ) );
-    std::cerr << rows.back() << ' ';
   }
-  std::cerr << std::endl;
 
   // Run the DeleteTableRows algorithm to delete the peak.
   auto alg = Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows",-1);

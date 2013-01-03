@@ -89,6 +89,7 @@ void Projection3D::resize(int w, int h)
   {
     m_viewport->resize(w,h);
     m_viewport->issueGL();
+    updateView();
   }
 }
 

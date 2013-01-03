@@ -338,12 +338,25 @@ bool Shape2DCollection::selectAtXY(int x,int y)
  */
 bool Shape2DCollection::selectIn(const QRect& rect)
 {
-  RectF r( m_transform.inverted().mapRect( rect ) );
+  RectF untransformedRect = QRectF(rect);
+  RectF r( m_transform.inverted().mapRect( QRectF(rect) ) );
   bool selected = false;
   deselectAll();
   foreach(Shape2D* shape,m_shapes)
   {
-    if ( r.contains( shape->getBoundingRect() ) )
+    bool sel = false;
+    if ( shape->isScalable() )
+    {
+        sel = r.contains( shape->getBoundingRect() );
+    }
+    else
+    {
+        QPointF dp = m_transform.map( shape->origin() ) - shape->origin();
+        RectF br = shape->getBoundingRect();
+        br.translate( dp );
+        sel = untransformedRect.contains( br );
+    }
+    if ( sel )
     {
       shape->edit( true );
       selected = true;
