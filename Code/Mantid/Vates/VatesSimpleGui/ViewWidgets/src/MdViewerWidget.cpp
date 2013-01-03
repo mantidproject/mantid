@@ -457,11 +457,12 @@ void MdViewerWidget::renderAndFinalSetup()
 void MdViewerWidget::checkForUpdates()
 {
   pqPipelineSource *src = pqActiveObjects::instance().activeSource();
-  vtkSMProxy *proxy = src->getProxy();
-  if (NULL == proxy)
+  if (NULL == src)
   {
     return;
   }
+  vtkSMProxy *proxy = src->getProxy();
+
   if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
   {
     this->currentView->resetDisplay();
