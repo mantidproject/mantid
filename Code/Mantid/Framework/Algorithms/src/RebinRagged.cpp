@@ -201,6 +201,11 @@ namespace Algorithms
     // constant binning is easy
     if (m_useLogBinning)
     {
+      if (xmin == 0)
+        throw std::invalid_argument("Cannot calculate log of xmin=0");
+      if (xmax == 0)
+        throw std::invalid_argument("Cannot calculate log of xmax=0");
+
       const int MAX_ITER(100); // things went wrong if we get this far
 
       // starting delta value assuming everything happens exactly
@@ -215,9 +220,18 @@ namespace Algorithms
         numBoundaries = VectorHelper::createAxisFromRebinParams(params, xValues, true);
 
         if (numBoundaries == expNumBoundaries)
-          break; // happy ending
-
-        if (numBoundaries > expNumBoundaries) // too few points
+        {
+          double diff = (xmax-xValues.back());
+          if (diff != 0.)
+          {
+            g_log.debug() << "Didn't get the exact xmax value: [xmax - xValues.back()=" << diff
+                            << "] [relative diff = " << fabs(100.*diff/xmax) << "%]\n";
+            g_log.debug() << "Resetting final x-value to xmax\n";
+            *(xValues.rbegin()) = xmax;
+          }
+          break;
+        }
+        else if (numBoundaries > expNumBoundaries) // too few points
         {
           delta *= (1. + shift);
           if (sign < 0)
