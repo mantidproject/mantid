@@ -71,7 +71,7 @@ public:
     TS_ASSERT_EQUALS(300., xValues[2999]);
   }
 
-  void test_log_binning()
+  void test_log_binning_histogram()
   {
     RebinRagged alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
@@ -96,6 +96,34 @@ public:
     TS_ASSERT_EQUALS(numBins, xValues.size()-1);
     TS_ASSERT_EQUALS(0.1, xValues[0]);
     TS_ASSERT_EQUALS(1., xValues[3000]);
+    TS_ASSERT_DELTA(-.00077, delta, .00001);
+  }
+
+  void test_log_binning_density()
+  {
+    RebinRagged alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+    //
+    int numBins(3000);
+    MantidVec xValues;
+    double delta;
+
+    alg.setOptions(numBins, true, true);
+
+    // first check that using zero for a border doesn't work
+    TS_ASSERT_THROWS_ANYTHING(delta = alg.determineBinning(xValues, 0, 300));
+    TS_ASSERT_THROWS_ANYTHING(delta = alg.determineBinning(xValues, -300, 0));
+
+    // do an actual run
+    delta = alg.determineBinning(xValues, 0.1, 1.0);
+//    std::cout << "**** " << numBins << " **** " << xValues.front() << ", " << delta << ", " << xValues.back() << " ****" << std::endl;
+//    std::cout << "000> " << xValues.size() << std::endl;
+//    std::cout << "001> " << xValues[0] << ", " << xValues[1] << ", ..., " << xValues.back() << std::endl;
+    TS_ASSERT_EQUALS(numBins, xValues.size());
+    TS_ASSERT_EQUALS(0.1, xValues[0]);
+    TS_ASSERT_EQUALS(1., xValues[2999]);
     TS_ASSERT_DELTA(-.00077, delta, .00001);
   }
 
