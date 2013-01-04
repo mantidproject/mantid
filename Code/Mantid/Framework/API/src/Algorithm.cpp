@@ -1316,7 +1316,14 @@ namespace Mantid
     void Algorithm::handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf)
     {
       double p = m_startChildProgress + (m_endChildProgress - m_startChildProgress)*pNf->progress;
-      progress(p,pNf->message);
+      if(m_endChildProgress >= 1.0) 
+      {
+         progress(p,pNf->message,pNf->estimatedTime);
+      } 
+      else 
+      {
+         progress(p,pNf->message);
+      }
     }
 
     //--------------------------------------------------------------------------------------------
