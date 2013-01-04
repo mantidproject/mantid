@@ -92,6 +92,8 @@ namespace Algorithms
         "If false, then the workspace gets converted to a Workspace2D histogram.");
   }
 
+  /** More complicated checks of parameters and their relations. @see Algorithm::validateInputs
+   */
   map<string, string> RebinRagged::validateInputs()
   {
     map<string, string> errors;
@@ -168,6 +170,13 @@ namespace Algorithms
     return msg.str(); // empty string means nothing went wrong
   }
 
+  /**
+   * Set the instance variables before running a test of @link RebinRagged::determineBinning.
+   *
+   * @param numBins The number of bins that will be used.
+   * @param useLogBins True if you want log binning.
+   * @param isDist True if you want binning for a histogram.
+   */
   void RebinRagged::setOptions(const int numBins, const bool useLogBins, const bool isDist)
   {
     m_numBins = numBins;
@@ -253,10 +262,6 @@ namespace Algorithms
     else
     {
       params[1] = (xmax - xmin) / static_cast<double>(reqNumBoundaries);
-//      if (!m_isDistribution)
-//        params[2] = xmax + params[1];
-//      g_log.debug() << "XMIN: " << params[0] << " DELTA: " << params[1]
-//                          << " XMAX: " << params[2] << " isDist=" << m_isDistribution << "\n";
       numBoundaries = VectorHelper::createAxisFromRebinParams(params, xValues, true);
     }
 
