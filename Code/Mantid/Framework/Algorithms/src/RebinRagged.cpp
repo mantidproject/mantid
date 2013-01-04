@@ -189,8 +189,11 @@ namespace Algorithms
     xValues.clear(); // clear out the x-values
 
     int numBoundaries(0);
+    int reqNumBoundaries(m_numBins);
     int expNumBoundaries(m_numBins);
-    if (!m_isDistribution)
+    if (m_isDistribution)
+      reqNumBoundaries -= 1; // to get the VectorHelper to do the right thing
+    else
       expNumBoundaries += 1; // should be one more bin boundary for histograms
 
     vector<double> params; // xmin, delta, xmax
@@ -249,7 +252,7 @@ namespace Algorithms
     }
     else
     {
-      params[1] = (xmax - xmin) / static_cast<double>(m_numBins);
+      params[1] = (xmax - xmin) / static_cast<double>(reqNumBoundaries);
 //      if (!m_isDistribution)
 //        params[2] = xmax + params[1];
 //      g_log.debug() << "XMIN: " << params[0] << " DELTA: " << params[1]

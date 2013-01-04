@@ -25,27 +25,50 @@ public:
     TS_ASSERT( alg.isInitialized() );
   }
   
-  void test_linear_binning()
+  void test_linear_binning_histogram()
   {
     RebinRagged alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() );
     TS_ASSERT( alg.isInitialized() );
 
-    //
     int numBins(3000);
     MantidVec xValues;
     double delta;
 
+    // testing linear binning for histogram
     alg.setOptions(numBins, false, false);
-    delta = alg.determineBinning(xValues, 0, 300);
+    delta = alg.determineBinning(xValues, 0., 300.);
 //    std::cout << "**** " << numBins << " **** " << xValues.front() << ", " << delta << ", " << xValues.back() << " ****" << std::endl;
 //    std::cout << "000> " << xValues.size() << std::endl;
 //    std::cout << "001> " << xValues[0] << ", " << xValues[1] << ", ..., " << xValues.back() << std::endl;
     TS_ASSERT_EQUALS(numBins, xValues.size()-1);
-    TS_ASSERT_EQUALS(.1, delta);
-    TS_ASSERT_EQUALS(0., xValues[0]);
+    TS_ASSERT_DELTA(0.1, delta,.001);
+    TS_ASSERT_EQUALS(0.0, xValues[0]);
     TS_ASSERT_EQUALS(0.1, xValues[1]);
     TS_ASSERT_EQUALS(300., xValues[3000]);
+  }
+
+  void test_linear_binning_density()
+  {
+    RebinRagged alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+    int numBins(3000);
+    MantidVec xValues;
+    double delta;
+
+    // testing linear binning for density
+    alg.setOptions(numBins, false, true);
+    delta = alg.determineBinning(xValues, 0.1, 300);
+//    std::cout << "**** " << numBins << " **** " << xValues.front() << ", " << delta << ", " << xValues.back() << " ****" << std::endl;
+//    std::cout << "000> " << xValues.size() << std::endl;
+//    std::cout << "001> " << xValues[0] << ", " << xValues[1] << ", ..., " << xValues.back() << std::endl;
+    TS_ASSERT_EQUALS(numBins, xValues.size());
+    TS_ASSERT_DELTA(0.1, delta,.001);
+    TS_ASSERT_EQUALS(0.1, xValues[0]);
+    TS_ASSERT_EQUALS(0.2, xValues[1]);
+    TS_ASSERT_EQUALS(300., xValues[2999]);
   }
 
   void test_log_binning()
@@ -70,7 +93,7 @@ public:
 //    std::cout << "**** " << numBins << " **** " << xValues.front() << ", " << delta << ", " << xValues.back() << " ****" << std::endl;
 //    std::cout << "000> " << xValues.size() << std::endl;
 //    std::cout << "001> " << xValues[0] << ", " << xValues[1] << ", ..., " << xValues.back() << std::endl;
-//    TS_ASSERT_EQUALS(numBins, xValues.size()-1);
+    TS_ASSERT_EQUALS(numBins, xValues.size()-1);
     TS_ASSERT_EQUALS(0.1, xValues[0]);
     TS_ASSERT_EQUALS(1., xValues[3000]);
     TS_ASSERT_DELTA(-.00077, delta, .00001);
