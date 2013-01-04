@@ -100,33 +100,34 @@ void RebinningCutterObjectPanel::constructThresholdRanges(QGridLayout* gLayout)
     {
       m_thresholdWidget = new ThresholdRangeWidget(inputMinThreshold, inputMaxThreshold);
       gLayout->addWidget(m_thresholdWidget, gLayout->rowCount() + 1, 0, Qt::AlignCenter);
+
+      // Property used as setter
+      vtkSMProperty * minThreshold = this->proxy()->GetProperty("MinThreshold");
+
+      // Property used as setter
+      vtkSMProperty * maxThreshold = this->proxy()->GetProperty("MaxThreshold");
+
+      // Property used as setter
+      vtkSMProperty * rangeStrategy = this->proxy()->GetProperty("ThresholdRangeStrategyIndex");
+
+      // Hook-up events to PV properties.
+      this->propertyManager()->registerLink(m_thresholdWidget, "MinSignal",
+        SIGNAL(minChanged()), this->proxy(), minThreshold);
+
+      // Hook-up events to PV properties.
+      this->propertyManager()->registerLink(m_thresholdWidget, "MaxSignal",
+        SIGNAL(maxChanged()), this->proxy(), maxThreshold);
+
+      // Hook-up events to PV properties.
+      this->propertyManager()->registerLink(m_thresholdWidget, "ChosenStrategy",
+        SIGNAL(chosenStrategyChanged()), this->proxy(), rangeStrategy);
+
     }
     else
     {
       m_thresholdWidget->setMaximum(inputMaxThreshold);
       m_thresholdWidget->setMinimum(inputMinThreshold);
     }
-
-    // Property used as setter
-    vtkSMProperty * minThreshold = this->proxy()->GetProperty("MinThreshold");
-
-    // Property used as setter
-    vtkSMProperty * maxThreshold = this->proxy()->GetProperty("MaxThreshold");
-
-    // Property used as setter
-    vtkSMProperty * rangeStrategy = this->proxy()->GetProperty("ThresholdRangeStrategyIndex");
-
-    // Hook-up events to PV properties.
-    this->propertyManager()->registerLink(m_thresholdWidget, "MinSignal",
-      SIGNAL(minChanged()), this->proxy(), minThreshold);
-
-    // Hook-up events to PV properties.
-    this->propertyManager()->registerLink(m_thresholdWidget, "MaxSignal",
-      SIGNAL(maxChanged()), this->proxy(), maxThreshold);
-
-    // Hook-up events to PV properties.
-    this->propertyManager()->registerLink(m_thresholdWidget, "ChosenStrategy",
-      SIGNAL(chosenStrategyChanged()), this->proxy(), rangeStrategy);
 
     m_cachedMaxThreshold = inputMaxThreshold;
     m_cachedMinThreshold = inputMinThreshold;
