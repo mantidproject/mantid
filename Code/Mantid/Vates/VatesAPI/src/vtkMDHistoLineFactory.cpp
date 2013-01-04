@@ -160,7 +160,7 @@ namespace Mantid
       m_workspace = this->doInitialize<MDHistoWorkspace, 1>(wspace_sptr);
 
       //Setup range values according to whatever strategy object has been injected.
-      m_thresholdRange->setWorkspace(m_workspace);
+      m_thresholdRange->setWorkspace(wspace_sptr);
       m_thresholdRange->calculate();
     }
 

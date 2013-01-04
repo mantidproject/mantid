@@ -58,7 +58,7 @@ namespace VATES
     m_workspace = doInitialize<MDHistoWorkspace, 3>(workspace);
 
     //Setup range values according to whatever strategy object has been injected.
-    m_thresholdRange->setWorkspace(m_workspace);
+    m_thresholdRange->setWorkspace(workspace);
     m_thresholdRange->calculate();
   }
 

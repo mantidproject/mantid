@@ -285,7 +285,7 @@ namespace Mantid
           using namespace Mantid::Kernel;
 
           V3D b3 = m_b1.cross_prod(m_b2);
-          binningAlg->setPropertyValue("Origin", VMD(m_origin).toString(",") );
+          binningAlg->setPropertyValue("Translation", VMD(m_origin).toString(",") );
           binningAlg->setProperty("AxisAligned", false);
           binningAlg->setProperty("ForceOrthogonal", m_ForceOrthogonal );
           std::vector<int> OutputBins;
@@ -315,6 +315,8 @@ namespace Mantid
           {
             binningAlg->setPropertyValue("BasisVector3", "");
           }
+          binningAlg->setProperty("OutputExtents", OutputExtents);
+          binningAlg->setProperty("OutputBins", OutputBins);
         }
         else
         {
@@ -342,6 +344,7 @@ namespace Mantid
         //Add observer.
         binningAlg->addObserver(observer);
         //Run the rebinning algorithm.
+        binningAlg->setRethrows(true);
         binningAlg->execute();
         //Remove observer
         binningAlg->removeObserver(observer);
