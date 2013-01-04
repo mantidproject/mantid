@@ -30,19 +30,14 @@ namespace Mantid { namespace Kernel
      */
     std::vector<double> hermitePoly(const unsigned int n, const std::vector<double> & xaxis)
     {
-      struct GeneratePoly
-      {
-        GeneratePoly(const unsigned int n, const std::vector<double> & xaxis) :
-          npoly(n), xvalues(xaxis), currentIndex(0) {}
-        double operator()() {return hermitePoly(npoly, xvalues[currentIndex++]);}
-
-        const unsigned int npoly;
-        const std::vector<double> & xvalues;
-        size_t currentIndex;
-      };
-
       std::vector<double> result(xaxis.size());
-      std::generate(result.begin(), result.end(), GeneratePoly(n, xaxis));
+      auto iend = result.end();
+      auto xit = xaxis.begin();
+      for(auto rit = result.begin(); rit != iend; ++rit, ++xit)
+      {
+        *rit = hermitePoly(n, *xit);
+      }
+
       return result;
     }
   }

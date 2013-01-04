@@ -92,6 +92,15 @@ namespace Mantid
 
       /** @name Helpers */
       ///@{
+      /// Computes the convolution of the Gaussian momentum distribution with the instrument resolution
+      void firstMassJ(std::vector<double> & j1, const std::vector<double> & yspace, const std::vector<double> & modQ,
+                      const double amp, const double kfse, const double wg, const double wl, const double wgRes) const;
+      /// Compute Voigt function interpolated around the given values
+      void voigtApproxDiff(std::vector<double> & voigtDiff, const std::vector<double> & yspace, const double lorentzPos, const double lorentzAmp,
+                           const double lorentzWidth, const double gaussWidth) const;
+      /// Compute Voigt function
+      void voigtApprox(std::vector<double> & voigt, const std::vector<double> & yspace, const double lorentzPos, const double lorentzAmp,
+                       const double lorentzWidth, const double gaussWidth) const;
       /// Retrieve a component parameter
       double getComponentParameter(const Geometry::IComponent & comp,const std::string &name) const;
       ///@}
@@ -128,6 +137,9 @@ namespace Mantid
       double m_hwhmGaussE;
       /// Gaussian HWHM of the foil analyser energy
       double m_hwhmLorentzE;
+
+      /// Voigt function
+      API::IFunction1D_sptr m_voigt;
     };
 
 

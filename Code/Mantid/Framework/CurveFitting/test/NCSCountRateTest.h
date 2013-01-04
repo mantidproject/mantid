@@ -4,6 +4,10 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/NCSCountRate.h"
+#include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/FunctionDomain1D.h"
+
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/make_shared.hpp>
@@ -55,8 +59,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(rate->setAttribute("Masses", IFunction::Attribute("1.008 16 33")));
     TS_ASSERT_THROWS_NOTHING(rate->setAttribute("HermiteCoeffs", IFunction::Attribute("1 0 1")));
 
-    static const int npars = 7;
-    const char * expectedNamesArr[npars] = {"C_0", "C_4", "Sigma_1", "Intens_1", "Sigma_2", "Intens_2", "FSECoeff"};
+    static const int npars = 8;
+    const char * expectedNamesArr[npars] = {"Sigma_0", "C_0", "C_4", "Sigma_1", "Intens_1", "Sigma_2", "Intens_2", "FSECoeff"};
 
     TS_ASSERT_EQUALS(npars, rate->nParams());
     std::set<std::string> expectedNamesSet(expectedNamesArr,expectedNamesArr + npars);
@@ -99,12 +103,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(rate->setWorkspace(testWS));
   }
 
-  void test_Function_Gives_Expected_Value_For_Given_Input()
+  void xtest_Function_Gives_Expected_Value_For_Given_Input()
   {
-    using Mantid::API::IFunction;
+    using namespace Mantid::API;
     auto rate = createFunction();
     auto testWS = createTestWorkspace();
 
+    const auto & xdata = testWS->readX(0);
+    const size_t ndata = xdata.size();
+    FunctionDomain1DView domain(xdata.data(),ndata);
+    FunctionValues results(domain);
+    rate->function(domain, results);
+
+    for(size_t i = 0; i < ndata; ++i)
+    {
+      TS_ASSERT_DELTA(results[i], 0.0, 1e-12);
+    }
   }
 
 private:
@@ -118,7 +132,15 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr createTestWorkspace()
   {
-    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,10,false);
+    using namespace Mantid::Geometry;
+    const int nbins(100);
+    auto ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,nbins,false);
+    // Adjust bins to be more realistic values
+    for(int i = 0; i < nbins; ++i)
+    {
+      ws->dataX(0)[i] = 120.0 + 0.5*i;
+    }
+
     // Add the required instrument parameters
     auto inst = ws->getInstrument();
     auto & pmap = ws->instrumentParameters();
@@ -140,23 +162,7 @@ private:
     Mantid::Kernel::V3D pos0;
     pos0.spherical(11.005,66.5993,10.0);
     auto det0 = ws->getDetector(0);
-    auto parent = det0->getParent();
-    if(parent)
-    {
-      pos0 -= parent->getPos();
-      Mantid::Kernel::Quat rot = parent->getRelativeRot();
-      rot.inverse();
-      rot.rotate(pos0);
-    }
-    parent = parent->getParent();
-    if(parent)
-    {
-      Mantid::Kernel::Quat rot = parent->getRelativeRot();
-      rot.inverse();
-      rot.rotate(pos0);
-    }
-    pmap.addV3D(det0->getComponentID(), "pos", pos0);
-
+    ComponentHelper::moveComponent(*det0, pmap, pos0, ComponentHelper::Absolute);
     return ws;
 
   }
