@@ -128,7 +128,7 @@ public:
    * @param name :: The name to assign to the column
    * @return True if the column was successfully added
    */
-  virtual bool addColumn(const std::string& type, const std::string& name) = 0;
+  virtual Column_sptr addColumn(const std::string& type, const std::string& name) = 0;
   /// Creates n new columns of the same type.
   virtual bool addColumns(const std::string& type, const std::string& name, size_t n);
   /**Get access to shared pointer containing workspace porperties */
@@ -146,16 +146,16 @@ public:
   virtual size_t columnCount() const = 0;
 
   /// Gets the shared pointer to a column by name.
-  virtual boost::shared_ptr<Mantid::API::Column> getColumn(const std::string& name) = 0;
+  virtual Column_sptr getColumn(const std::string& name) = 0;
 
   /// Gets the shared pointer to a column by name.
-  virtual boost::shared_ptr<const Mantid::API::Column> getColumn(const std::string& name) const = 0;
+  virtual Column_const_sptr getColumn(const std::string& name) const = 0;
 
   /// Gets the shared pointer to a column by index.
-  virtual boost::shared_ptr<Mantid::API::Column> getColumn(size_t index) = 0;
+  virtual Column_sptr getColumn(size_t index) = 0;
 
   /// Gets the shared pointer to a column by index - return none-modifyable column.
-  virtual boost::shared_ptr<const Mantid::API::Column> getColumn(size_t index) const = 0;
+  virtual Column_const_sptr getColumn(size_t index) const = 0;
 
   /// Returns a vector of all column names.
   virtual std::vector<std::string> getColumnNames() const = 0;

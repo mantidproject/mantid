@@ -99,6 +99,20 @@ namespace
     }
   }
 
+  /** Access a cell and return a corresponding Python type
+   *  @param self A reference to the TableWorkspace python object that we were called on
+   *  @param type The data type of the column to add
+   *  @param name The name of the column to add
+   *  @return A boolean indicating success or failure. Note that this is different to the
+   *          corresponding C++ method, which returns a pointer to the newly-created column
+   *          (as the Column class is not exposed to python).
+   */
+  bool addColumn(ITableWorkspace &self, const std::string& type, const std::string& name)
+  {
+    // The shared pointer will be converted to a boolean automatically
+    return self.addColumn(type,name);
+  }
+
   /**
    * Access a cell and return a corresponding Python type
    * @param self A reference to the TableWorkspace python object that we were called on
@@ -298,7 +312,7 @@ void export_ITableWorkspace()
   class_<ITableWorkspace,bases<Workspace>, boost::noncopyable>("ITableWorkspace",
          iTableWorkspace_docstring.c_str(),
          no_init)
-    .def("addColumn", &ITableWorkspace::addColumn, (arg("type"), arg("name")),
+    .def("addColumn", &addColumn, (arg("type"), arg("name")),
          "Add a named column with the given type. Recognized types are: int,float,double,bool,str,V3D,long64")
 
     .def("removeColumn", &ITableWorkspace::removeColumn, (arg("name")),
