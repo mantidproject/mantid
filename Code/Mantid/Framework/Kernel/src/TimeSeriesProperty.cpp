@@ -458,8 +458,8 @@ namespace Mantid
      * @param split :: Splitter that will be filled.
      * @param min :: min value
      * @param max :: max value
-     * @param TimeTolerance :: offset added to times in seconds.
-     * @param centre :: Whether the log value time is considered centred or at the beginning.
+     * @param TimeTolerance :: offset added to times in seconds (default: 0)
+     * @param centre :: Whether the log value time is considered centred or at the beginning (the default).
      */
     template<typename TYPE>
     void TimeSeriesProperty<TYPE>::makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre) const
@@ -606,12 +606,76 @@ namespace Mantid
       throw Exception::NotImplementedError("TimeSeriesProperty::makeFilterByValue is not implemented for string properties");
     }
 
-#ifdef _WIN32
-  #pragma warning(pop)
-#endif
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-  #pragma GCC diagnostic warning "-Wconversion"
-#endif
+    /** Calculates the time-weighted average of a property in a filtered range.
+     *  This is written for that case of logs whose values start at the times given.
+     *  @param filter The splitter/filter restricting the range of values included
+     *  @return The time-weighted average value of the log in the range within the filter.
+     */
+    template<typename TYPE>
+    double TimeSeriesProperty<TYPE>::averageValueInFilter(const TimeSplitterType& filter) const
+    {
+      // TODO: Consider logs that aren't giving starting values.
+
+      // First of all, if the log or the filter is empty, return NaN
+      if ( realSize() == 0 || filter.empty() )
+      {
+        return std::numeric_limits<double>::quiet_NaN();
+      }
+
+      // If there's just a single value in the log, return that.
+      if ( realSize() == 1 )
+      {
+        return static_cast<double>(m_values.front().value());
+      }
+
+      // Sort, if necessary.
+      sort();
+
+      double numerator(0.0),totalTime(0.0);
+      // Loop through the filter ranges
+      for ( TimeSplitterType::const_iterator it = filter.begin(); it != filter.end(); ++it )
+      {
+        // Calculate the total time duration (in seconds) within by the filter
+        totalTime += it->duration();
+
+        // Get the log value and index at the start time of the filter
+        int index;
+        double value = getSingleValue(it->start(), index);
+        DateAndTime startTime = it->start();
+
+        while ( index < realSize()-1 && m_values[index+1].time() < it->stop() )
+        {
+          ++index;
+          numerator += DateAndTime::secondsFromDuration( m_values[index].time() - startTime )
+                         * value;
+          startTime = m_values[index].time();
+          value = static_cast<double>(m_values[index].value());
+        }
+
+        // Now close off with the end of the current filter range
+        numerator += DateAndTime::secondsFromDuration( it->stop() - startTime ) * value;
+      }
+
+      // 'Normalise' by the total time
+      return numerator/totalTime;
+    }
+
+    /** Function specialization for TimeSeriesProperty<std::string>
+     *  @throws Kernel::Exception::NotImplementedError always
+     */
+    template<>
+    double TimeSeriesProperty<std::string>::averageValueInFilter(const TimeSplitterType&) const
+    {
+      throw Exception::NotImplementedError("TimeSeriesProperty::averageValueInFilter is not implemented for string properties");
+    }
+
+    // Re-enable the warnings disabled before makeFilterByValue
+    #ifdef _WIN32
+      #pragma warning(pop)
+    #endif
+    #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+      #pragma GCC diagnostic warning "-Wconversion"
+    #endif
 
     /**
      *  Return the time series as a correct C++ map<DateAndTime, TYPE>. All values

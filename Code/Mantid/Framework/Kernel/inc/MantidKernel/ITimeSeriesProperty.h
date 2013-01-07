@@ -36,6 +36,8 @@ public:
   virtual void makeFilterByValue(TimeSplitterType& split, double min, double max, double TimeTolerance, bool centre=true) const = 0;
   /// Make sure an existing filter covers the full time range given
   virtual void expandFilterToRange(TimeSplitterType& split, double min, double max, const TimeInterval & range) const = 0;
+  /// Calculate the time-weighted average of a property in a filtered range
+  virtual double averageValueInFilter(const TimeSplitterType& filter) const = 0;
   /// Return the time series's times as a vector<DateAndTime>
   virtual std::vector<DateAndTime> timesAsVector() const = 0;
   /// Returns the real size of the time series property map:
