@@ -115,10 +115,12 @@ public:
 
     Workspace_sptr out = alg->getProperty("OutputWorkspace");
     auto outWS = boost::dynamic_pointer_cast<ITableWorkspace>(out);
-    TS_ASSERT_EQUALS( outWS->rowCount(), 1 );
-    TS_ASSERT_EQUALS( outWS->columnCount(), 2 );
+    TS_ASSERT_EQUALS( outWS->rowCount(), 2 );
+    TS_ASSERT_EQUALS( outWS->columnCount(), 4 );
     TS_ASSERT_EQUALS( outWS->Int(0,0), 1 );
     TS_ASSERT_EQUALS( outWS->Int(0,1), 300 );
+
+    // Save more complex tests for a system test
   }
 
 private:
@@ -138,7 +140,6 @@ private:
     EventWorkspace_sptr ws = WorkspaceCreationHelper::CreateEventWorkspace(3,1);
     Run & run = ws->mutableRun();
 
-    // TODO: Use more complex properties (i.e. more that one value!)
     auto dblTSP = new TimeSeriesProperty<double>("doubleProp");
     dblTSP->addValue("2010-01-01T00:00:00", 3.0);
     run.addProperty(dblTSP);
@@ -149,6 +150,8 @@ private:
     
     auto intTSP = new TimeSeriesProperty<int>("integerProp");
     intTSP->addValue("2010-01-01T00:00:00", 1);
+    intTSP->addValue("2010-01-01T00:00:10", 2);
+    intTSP->addValue("2010-01-01T00:00:20", 1);
     run.addProperty(intTSP);
 
     return ws;
@@ -156,5 +159,60 @@ private:
 
 };
 
+class SumEventsByLogValueTestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SumEventsByLogValueTestPerformance *createSuite() { return new SumEventsByLogValueTestPerformance(); }
+  static void destroySuite( SumEventsByLogValueTestPerformance *suite ) { delete suite; }
+
+  SumEventsByLogValueTestPerformance()
+  {
+    ws = WorkspaceCreationHelper::CreateEventWorkspace(1000,1,1000);
+    // Add a bunch of logs
+    std::vector<DateAndTime> times;
+    std::vector<int> index;
+    std::vector<double> dbl1, dbl2;
+    DateAndTime startTime("2010-01-01T00:00:00");
+    for (int i = 0; i < 10; ++i)
+    {
+      times.push_back(startTime + i*100.0);
+      index.push_back(i);
+      dbl1.push_back(i*0.1);
+      dbl2.push_back(6.0);
+    }
+
+    auto scan_index = new TimeSeriesProperty<int>("scan_index");
+    scan_index->addValues(times,index);
+    ws->mutableRun().addProperty(scan_index);
+    auto dbl_prop1 = new TimeSeriesProperty<double>("some_prop");
+    auto dbl_prop2 = new TimeSeriesProperty<double>("some_other_prop");
+    dbl_prop1->addValues(times,dbl1);
+    dbl_prop2->addValues(times,dbl2);
+    ws->mutableRun().addProperty(dbl_prop1);
+    ws->mutableRun().addProperty(dbl_prop2);
+
+    auto proton_charge = new TimeSeriesProperty<double>("proton_charge");
+    for (int i = 0; i < 1000; ++i)
+    {
+      proton_charge->addValue(startTime+double(i),1.0e6);
+    }
+    ws->mutableRun().addProperty(proton_charge);
+  }
+
+  void test_table_output()
+  {
+    SumEventsByLogValue alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace",ws);
+    alg.setProperty("OutputWorkspace","outws");
+    alg.setProperty("LogName","scan_index");
+    TS_ASSERT( alg.execute() );
+  }
+
+private:
+  EventWorkspace_sptr ws;
+};
 
 #endif /* MANTID_ALGORITHMS_SUMEVENTSBYLOGVALUETEST_H_ */

@@ -5,6 +5,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Column.h"
+#include <numeric>
 
 namespace Mantid
 {
@@ -110,7 +111,7 @@ namespace Algorithms
       }
       //else if ( dynamic_cast<const TimeSeriesProperty<std::string>*>(log) != NULL )
       //{
-      //  TODO: Implement.
+      //  TODO: Implement (if anyone ever asks for it).
       //}
       else
       {
@@ -121,46 +122,26 @@ namespace Algorithms
 
   void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int> * log)
   {
-    // This is the version for integer logs when not binning parameters have been given and has a data point per log value
+    // This is the version for integer logs when no binning parameters have been given and has a data point per log value
     const int minVal = log->minValue();
     const int maxVal = log->maxValue();
     const int xLength = maxVal - minVal + 1;
 
     // Accumulate things in a local vector before transferring to the table
     std::vector<int> Y(xLength);
-    // TODO: Parallelize
+    // TODO: Parallelize & add progress reporting
     for ( std::size_t spec = 0; spec < m_inputWorkspace->getNumberHistograms(); ++spec )
     {
       const IEventList & eventList = m_inputWorkspace->getEventList(spec);
-      // TODO: Handle weighted events and avoid the vector copy below
-      const auto pulseTimes = eventList.getPulseTimes();
-      for ( std::size_t eventIndex = 0; eventIndex < pulseTimes.size(); ++eventIndex )
-      {
-        // Find the value of the log at the time of this event
-        // TODO: If the pulse time is before the first log entry, we get the first value. Check that's what we want.
-        const int logValue = log->getSingleValue( pulseTimes[eventIndex] );
-
-        if ( logValue >= minVal && logValue <= maxVal )
-        {
-          // In this scenario it's easy to know what bin to increment
-          ++Y[logValue-minVal];
-        }
-      }
-
+      filterEventList(eventList, minVal, maxVal, log, Y);
     }
     // For now, no errors. Do we need them?
 
     // Create a table workspace to hold the sum.
     ITableWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().createTable();
-    outputWorkspace->addColumn("int",m_logName);
-    outputWorkspace->addColumn("int","Counts");
-    // TODO: Columns for average value of other time-varying logs
-    // TODO: Columns to enable normalisation
+    auto logValues = outputWorkspace->addColumn("int",m_logName);
+    auto counts = outputWorkspace->addColumn("int","Counts");
     outputWorkspace->setRowCount(xLength); // One row per log value across the full range
-
-    // Get hold of the columns
-    auto logValues = outputWorkspace->getColumn(m_logName);
-    auto counts = outputWorkspace->getColumn("Counts");
     // Set type for benefit of MantidPlot
     logValues->setPlotType(1); // X
     counts->setPlotType(2);    // Y
@@ -172,7 +153,162 @@ namespace Algorithms
       counts->cell<int>(i) = Y[i];
     }
 
+    // Columns for normalisation: monitors (if available), time & proton charge
+    addMonitorCounts(outputWorkspace, log, minVal, maxVal);
+    // Add a column to hold the time duration (in seconds) for which the log had a certain value
+    auto timeCol = outputWorkspace->addColumn("double","Time");
+    // Add a column to hold the proton charge for which the log had a certain value
+    auto protonChgCol = outputWorkspace->addColumn("double","proton_charge");
+    // Get hold of the proton charge log for later
+    const TimeSeriesProperty<double> * protonChargeLog = 0;
+    try {
+      protonChargeLog = m_inputWorkspace->run().getTimeSeriesProperty<double>("proton_charge");
+    } catch (std::exception&) {
+      // Log and carry on if not found. Column will be left empty.
+      g_log.warning("proton_charge log not found in workspace.");
+    }
+
+    // Get a list of the other time-series logs in the input workspace
+    auto otherLogs = getNumberSeriesLogs();
+    // Add a column for each of these 'other' logs
+    for ( auto it = otherLogs.begin(); it != otherLogs.end(); ++it )
+    {
+      auto newColumn = outputWorkspace->addColumn("double",it->first);
+      // For the benefit of MantidPlot, set these columns to be containing X values
+      newColumn->setPlotType(1);
+    }
+
+    // Now to get the average value of other time-varying logs
+    // Loop through the values of the 'main' log
+    for ( int value = minVal; value <= maxVal; ++value )
+    {
+      const int row = value-minVal;
+      // Create a filter giving the times when this log has the current value
+      TimeSplitterType filter;
+      log->makeFilterByValue(filter,value,value); // min & max are the same of course
+      // Calculate the time covered by this log value and add it to the table
+      double duration = 0.0;
+      for ( auto it = filter.begin(); it != filter.end(); ++it )
+      {
+        duration += it->duration();
+      }
+      timeCol->cell<double>(row) = duration;
+
+      // Sum up the proton charge for this log value
+      if ( protonChargeLog ) protonChgCol->cell<double>(row) = sumProtonCharge(protonChargeLog, filter);
+
+      for ( auto log = otherLogs.begin(); log != otherLogs.end(); ++log )
+      {
+        // Calculate the average value of each 'other' log for the current value of the main log
+        // Have to (maybe inefficiently) fetch back column by name - move outside loop if too slow
+        outputWorkspace->getColumn(log->first)->cell<double>(row) = log->second->averageValueInFilter(filter);
+      }
+    }
+
     setProperty("OutputWorkspace",outputWorkspace);
+  }
+
+  void SumEventsByLogValue::filterEventList(const API::IEventList& eventList, const int minVal,
+      const int maxVal, const Kernel::TimeSeriesProperty<int> * log, std::vector<int>& Y)
+  {
+    // TODO: Handle weighted events and avoid the vector copy below
+    const auto pulseTimes = eventList.getPulseTimes();
+    for ( std::size_t eventIndex = 0; eventIndex < pulseTimes.size(); ++eventIndex )
+    {
+      // Find the value of the log at the time of this event
+      // This algorithm is really concerned with 'slow' logs so we don't care about
+      // the time of the event within the pulse.
+      // TODO: If the pulse time is before the first log entry, we get the first value. Check that's what we want.
+      const int logValue = log->getSingleValue( pulseTimes[eventIndex] );
+
+      if ( logValue >= minVal && logValue <= maxVal )
+      {
+        // In this scenario it's easy to know what bin to increment
+        ++Y[logValue-minVal];
+      }
+    }
+  }
+
+  void SumEventsByLogValue::addMonitorCounts(ITableWorkspace_sptr outputWorkspace,
+      const TimeSeriesProperty<int> * log, const int minVal, const int maxVal)
+  {
+    // See if there's a monitor workspace alongside the input one
+    const std::string monitorWorkspaceName = m_inputWorkspace->name() + "_monitors";
+    DataObjects::EventWorkspace_const_sptr monitorWorkspace;
+    try {
+      monitorWorkspace = AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>(monitorWorkspaceName);
+      // Check that we have an EventWorkspace for the monitors. If not, just return.
+      if ( !monitorWorkspace )
+      {
+        g_log.warning() << "A monitor workspace (" << monitorWorkspaceName << ") was found, but "
+            << "it is not an EventWorkspace so cannot be used in this algorithm.\n";
+        return;
+      }
+    } catch (Exception::NotFoundError&) {
+      // The monitors workspace isn't there - just return
+      g_log.information() << "No monitor workspace (" << monitorWorkspaceName << ") found.\n";
+      return;
+    }
+
+    const int xLength = maxVal - minVal + 1;
+    // Loop over the spectra - there will be one per monitor
+    for ( std::size_t spec = 0; spec < monitorWorkspace->getNumberHistograms(); ++spec )
+    {
+      // Create a column for this monitor
+      const std::string monitorName = monitorWorkspace->getDetector(spec)->getName();
+      auto monitorCounts = outputWorkspace->addColumn("int",monitorName);
+      const IEventList & eventList = monitorWorkspace->getEventList(spec);
+      // Accumulate things in a local vector before transferring to the table workspace
+      std::vector<int> Y(xLength);
+      filterEventList(eventList, minVal, maxVal, log, Y);
+      // Transfer the results to the table
+      for ( int i = 0; i < xLength; ++i )
+      {
+        monitorCounts->cell<int>(i) = Y[i];
+      }
+    }
+  }
+
+  std::vector<std::pair<std::string,const Kernel::ITimeSeriesProperty * >>
+  SumEventsByLogValue::getNumberSeriesLogs()
+  {
+    std::vector<std::pair<std::string,const Kernel::ITimeSeriesProperty * >> numberSeriesProps;
+    const auto logs = m_inputWorkspace->run().getLogData();
+    for ( auto log = logs.begin(); log != logs.end(); ++log )
+    {
+      const std::string logName = (*log)->name();
+      // Don't add the log that's the one being summed against
+      if ( logName == m_logName ) continue;
+      // Exclude the proton charge log as we have a separate column for the sum of that
+      if ( logName == "proton_charge") continue;
+      // Try to cast to an ITimeSeriesProperty
+      auto tsp = dynamic_cast<const ITimeSeriesProperty*>(*log);
+      // Move on to the next one if this is not a TSP
+      if ( tsp == NULL ) continue;
+      // Don't keep ones with only one entry
+      if ( tsp->realSize() < 2 ) continue;
+      // Now make sure it's either an int or double tsp, and if so add log to the list
+      if ( dynamic_cast<TimeSeriesProperty<double>* >(*log) || dynamic_cast<TimeSeriesProperty<int>* >(*log))
+      {
+        numberSeriesProps.push_back(std::make_pair(logName,tsp));
+      }
+    }
+
+    return numberSeriesProps;
+  }
+
+  double SumEventsByLogValue::sumProtonCharge(const Kernel::TimeSeriesProperty<double> * protonChargeLog,
+      const Kernel::TimeSplitterType& filter)
+  {
+    // Clone the proton charge log and filter the clone on this log value
+    auto protonChargeLogClone = protonChargeLog->clone();
+    protonChargeLogClone->filterByTimes(filter);
+    // Seems like the only way to sum this is to yank out the values
+    const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
+    // Delete the clone
+    delete protonChargeLogClone;
+
+    return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);
   }
 
   template <typename T>
