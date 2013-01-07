@@ -145,7 +145,6 @@ void delete_file(std::string path){
     TS_ASSERT(f.exists()); 
 
     delete_file("TofConv"); 
-
   }
 
 
@@ -176,20 +175,24 @@ void delete_file(std::string path){
 
 
   void test_must_be_able_to_show_file_is_updated(){
+
     using Mantid::API::BOTH_UNCHANGED; 
     using Mantid::API::LOCAL_CHANGED;
     using Mantid::API::REMOTE_CHANGED;
     std::string file_name = "TofConv/README.txt";
+
     TS_ASSERT_THROWS_NOTHING(repo->download(file_name));
-    
+    Poco::File f(std::string(repo->localRepository()).append("/").append(file_name));
+    TS_ASSERT(f.exists()); 
     TS_ASSERT_THROWS_NOTHING(repo->listFiles());
     
     
     // test update    
     TSM_ASSERT("Must show file is updated given relative path",repo->fileStatus(file_name)==BOTH_UNCHANGED);
 
-    std::string abs_path = std::string(repo->localRepository()).append("/").append(file_name);   
-    TSM_ASSERT("Must show file is updated given absolute path",
+    std::string abs_path = std::string(repo->localRepository()).append("/").append(file_name);
+    
+    TSM_ASSERT( abs_path.c_str(),
                repo->fileStatus(abs_path)==BOTH_UNCHANGED);
     
     // Change the file

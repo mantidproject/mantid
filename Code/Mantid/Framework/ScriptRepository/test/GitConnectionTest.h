@@ -5,6 +5,7 @@
 #include "MantidScriptRepository/GitScriptRepository.h"
 #include <Poco/File.h>
 #include <Poco/FileStream.h>
+#include <Poco/Path.h>
 #include <iostream>
 using namespace std; 
 using Poco::File; 
@@ -30,7 +31,7 @@ class GitConnectionTest : public CxxTest::TestSuite{
   }
 
   void test_UpdateNewRepositoryMustCloneRepository(){
-    const char * newpath = "/tmp/newrep"; 
+    const string newpath = Poco::Path::temp().append("/newrep"); 
     TS_ASSERT_THROWS_NOTHING(repo = new GitScriptRepository(newpath));
     if (repo){
       TS_ASSERT_THROWS_NOTHING(repo->update());

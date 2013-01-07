@@ -372,7 +372,7 @@ namespace API
     // change the path to a path related to the repository.
     bool file_is_local; 
     std::string file_path_adjusted = convertPath(file_path, file_is_local); 
-  
+
     for( std::vector<struct file_entry>::iterator it = repository_list.begin(); 
          it != repository_list.end();
          it++){
@@ -384,7 +384,7 @@ namespace API
     char info[200]; 
     snprintf(info, 200, 
              "The File %s was not found inside the repository. Hint: Check spelling, and list the files again",
-             info); 
+             file_path_adjusted.c_str()); 
            
     throw ScriptRepoException(info, "Exception at GitScriptRepository::fileStatus");
   }
@@ -414,21 +414,19 @@ namespace API
     Path pathFound; 
     // try to find the given path at one of the paths at lookAfter.
     file_is_local = Path::find(lookAfter.begin(), lookAfter.end(), path, pathFound);
-
-    if (!file_is_local){
-      // If the file is not local, than, it is remote, and only path related to 
-      // git can be passed. 
-      /// attention: No test is done to check that the file exists inside the remote repository.
-      return path; 
-    }
-  
-    // the file is local: 
     // get the absolute path: 
-    std::string absolute_path = pathFound.absolute().toString(); 
+    std::string absolute_path;
+    if (file_is_local)
+      absolute_path = pathFound.absolute().toString(); 
+    else
+      absolute_path = path;
+
+
+
 
     //check it the path is inside the repository: 
     size_t pos = absolute_path.find(repo_path); 
-  
+
     if (pos == std::string::npos){
       // the given file is not inside the local repository. It can not be converted. 
       return path; 

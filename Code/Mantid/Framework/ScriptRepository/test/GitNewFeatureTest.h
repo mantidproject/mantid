@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidScriptRepository/GitScriptRepository.h"
 #include <Poco/Path.h>
+#include <Poco/File.h>
 using namespace std; 
 using Mantid::API::GitScriptRepository; 
 using Mantid::API::ScriptRepoException;
@@ -11,11 +12,11 @@ using Mantid::API::ScriptRepoException;
 /**
    These tests requires connection to the internet.
  */
-class GitNewFeature : public CxxTest::TestSuite{
+class GitNewFeatureTest : public CxxTest::TestSuite{
 
  public: 
-  static GitNewFeature * createSuite(){return new GitNewFeature(); }
-  static void destroySuite (GitNewFeature * suite){delete suite; }
+  static GitNewFeatureTest * createSuite(){return new GitNewFeatureTest(); }
+  static void destroySuite (GitNewFeatureTest * suite){delete suite; }
   GitScriptRepository * repo; 
   void setUp(){
 
@@ -27,12 +28,15 @@ class GitNewFeature : public CxxTest::TestSuite{
   void test_clone_git_transport(){
     // WHEN THIS TEST PASS, we will be able to have upload directly. 
     const char * ssh_transport = "git@github.com:mantidproject/scripts.git";
-    std::string local_rep = Poco::Path::temporary().append("/sshgitrepo"); 
+    std::string local_rep = Poco::Path::temp().append("/sshgitrepo"); 
     repo = NULL;
     TS_ASSERT_THROWS_NOTHING(repo = new GitScriptRepository(ssh_transport,
 	                        local_rep));
+    TS_ASSERT_THROWS_NOTHING(repo->update()); 
+
     Poco::File f(local_rep);  
-    f.remove(true); 
+    if (f.exists())
+      f.remove(true); 
   
   delete repo; 
   }
