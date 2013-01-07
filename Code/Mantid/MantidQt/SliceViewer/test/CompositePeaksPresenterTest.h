@@ -414,6 +414,15 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(B));
   }
 
+  void test_remove_default()
+  {
+    CompositePeaksPresenter composite;
+    auto peaksWorkspace = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>();
+
+    //Try to remove a peaks workspace & associated presenter that doesn't exist from a default constructed composite.
+    TS_ASSERT_THROWS_NOTHING(composite.remove(peaksWorkspace));
+  }
+
   void do_test_setShown(bool expectedToShow)
   {
     // Prepare subject objects.
@@ -445,8 +454,51 @@ public:
     do_test_setShown(HIDE); 
   }
 
+  void test_setShown_default()
+  {
+    const bool expectedFlag = true;
 
+    // Create a default.
+    MockPeaksPresenter* mockDefault = new MockPeaksPresenter;
+    PeaksPresenter_sptr defaultPresenter(mockDefault);
+    EXPECT_CALL(*mockDefault, setShown(expectedFlag)).Times(1); // Expect the method on the default to be called.
 
+    // Create the composite.
+    CompositePeaksPresenter composite(defaultPresenter);
+    // Call the method on the composite.
+    composite.setShown(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(), expectedFlag);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockDefault));
+  }
+
+  void test_setBackgroundRadiusShown_default()
+  {
+    const bool expectedFlag = true;
+
+    // Create a default.
+    MockPeaksPresenter* mockDefault = new MockPeaksPresenter;
+    PeaksPresenter_sptr defaultPresenter(mockDefault);
+    EXPECT_CALL(*mockDefault, showBackgroundRadius(expectedFlag)).Times(1); // Expect the method on the default to be called.
+
+     // Create the composite.
+    CompositePeaksPresenter composite(defaultPresenter);
+    // Call the method on the composite.
+    composite.setBackgroundRadiusShown(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(), expectedFlag);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(mockDefault));
+  }
+
+  void test_getBackroundColour_default()
+  {
+    CompositePeaksPresenter composite;
+    TSM_ASSERT_THROWS("Cannot fetch background colours until nested presenters have been added.", composite.getBackgroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error);
+  }
+
+  void test_getForegroundColour_default()
+  {
+    CompositePeaksPresenter composite;
+    TSM_ASSERT_THROWS("Cannot fetch foreground colours until nested presenters have been added.", composite.getForegroundColour(boost::make_shared<Mantid::DataObjects::PeaksWorkspace>()), std::runtime_error);
+  }
 
 };
 
