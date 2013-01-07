@@ -24,6 +24,7 @@ namespace MantidQt
       void setBackgroundColour(const QColor){/*Do nothing*/}
       std::string getTransformName() const {return "";}
       void showBackgroundRadius(const bool){/*Do nothing*/}
+      void setShown(const bool){/*Do nothing*/}
     };
 
   }

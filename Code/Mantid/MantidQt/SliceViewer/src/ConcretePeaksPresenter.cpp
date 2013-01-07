@@ -272,5 +272,26 @@ namespace SliceViewer
     }
   }
 
+  void ConcretePeaksPresenter::setShown(const bool shown)
+  {
+    // Change background colours
+    for(VecPeakOverlayView::iterator it = m_viewPeaks.begin(); it != m_viewPeaks.end(); ++it)
+    {
+      PeakOverlayView_sptr view = (*it);
+      if((*it) != NULL)
+      {
+        if(shown)
+        {
+          view->showView();
+        }
+        else
+        {
+          view->hideView();
+        }
+        view->updateView();
+      }
+    }
+  }
+
 }
 }

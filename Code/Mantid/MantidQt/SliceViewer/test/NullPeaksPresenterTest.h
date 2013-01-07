@@ -68,6 +68,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(presenter.setBackgroundColour(Qt::black));
   }
 
+  void test_setShown_does_nothing()
+  {
+    NullPeaksPresenter presenter;
+    TS_ASSERT_THROWS_NOTHING(presenter.setShown(true));
+    TS_ASSERT_THROWS_NOTHING(presenter.setShown(false));
+  }
+
 };
 
 #endif

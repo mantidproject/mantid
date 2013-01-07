@@ -238,6 +238,7 @@ namespace MantidQt
     */
     QColor CompositePeaksPresenter::getForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const
     {
+      /// TODO Default?
       SubjectContainer::const_iterator iterator = getPresenterIteratorFromWorkspace(ws);
       const int pos = std::distance(m_subjects.begin(), iterator);
       return m_palette.foregroundIndexToColour(pos);
@@ -249,6 +250,7 @@ namespace MantidQt
     */
     QColor CompositePeaksPresenter::getBackgroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws) const
     {
+      /// TODO Default?
       SubjectContainer::const_iterator iterator = getPresenterIteratorFromWorkspace(ws);
       const int pos = std::distance(m_subjects.begin(), iterator);
       return m_palette.backgroundIndexToColour(pos);
@@ -256,14 +258,23 @@ namespace MantidQt
 
     void CompositePeaksPresenter::setBackgroundRadiusShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const bool shown)
     {
+      /// TODO Default?
       auto iterator = getPresenterIteratorFromWorkspace(ws);
       (*iterator)->showBackgroundRadius(shown);
     }
 
     void CompositePeaksPresenter::remove(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
     {
+      /// TODO Default?
       auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
       m_subjects.erase(iterator);
+    }
+
+    void CompositePeaksPresenter::setShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const bool shown)
+    {
+      /// TODO Default?
+      auto iterator = getPresenterIteratorFromWorkspace(peaksWS);
+      (*iterator)->setShown(shown);
     }
   }
 }

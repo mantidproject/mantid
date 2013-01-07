@@ -544,6 +544,36 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
   }
 
+
+  void test_setShown()
+  {
+    const int expectedNumberOfPeaks = 5;
+    auto concreteBuilder = createStandardBuild(expectedNumberOfPeaks);
+
+    // Create a mock view object/product that will be returned by the mock factory.
+    auto pMockView = new NiceMock<MockPeakOverlayView>;
+    auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
+    EXPECT_CALL(*pMockView, showView()).Times(expectedNumberOfPeaks); // Expect that the view will be forced to SHOW.
+    EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberOfPeaks); // Expect that the view will be forced to HIDE.
+    EXPECT_CALL(*pMockView, updateView()).Times(2*expectedNumberOfPeaks); // Expect that each widget will be updated.
+    // Create a widget factory mock
+    auto pMockViewFactory = new MockPeakOverlayFactory;
+    PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+    EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+    EXPECT_CALL(*pMockViewFactory, setPeakRadius(_,_,_)).Times(AtLeast(1));
+    EXPECT_CALL(*pMockViewFactory, setZRange(_,_)).Times(AtLeast(1));
+
+    concreteBuilder.withIntegratedViewFactory(mockViewFactory);
+
+    auto presenter = concreteBuilder.create();
+    presenter->setShown(true);
+    presenter->setShown(false);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
+  }
+
 };
 
 

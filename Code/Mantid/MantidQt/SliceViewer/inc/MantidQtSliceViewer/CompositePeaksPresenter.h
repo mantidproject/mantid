@@ -31,6 +31,7 @@ namespace MantidQt
       void setForegroundColour(const QColor){/*Do nothing*/}
       void setBackgroundColour(const QColor){/*Do nothing*/}
       void showBackgroundRadius(const bool show){/*Do nothing*/}
+      void setShown(const bool show){/*Do nothing*/}
       virtual std::string getTransformName() const;
       
       /// Constructor
@@ -57,6 +58,8 @@ namespace MantidQt
       void setBackgroundRadiusShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const bool shown);
       /// Remove the workspace and corresponding presenter.
       void remove(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
+      /// Hide these peaks in the plot.
+      void CompositePeaksPresenter::setShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const bool shown);
     private:
       /// Alias for container of subjects type.
       typedef std::vector<PeaksPresenter_sptr> SubjectContainer;

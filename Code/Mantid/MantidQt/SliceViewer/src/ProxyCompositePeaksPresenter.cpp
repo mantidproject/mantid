@@ -89,5 +89,10 @@ namespace MantidQt
     {
       m_compositePresenter->remove(peaksWS);
     }
+
+    void ProxyCompositePeaksPresenter::hideInPlot(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const bool hide)
+    {
+      m_compositePresenter->setShown(peaksWS, !hide);
+    }
   }
 }

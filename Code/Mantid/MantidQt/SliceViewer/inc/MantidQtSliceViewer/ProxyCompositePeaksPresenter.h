@@ -40,6 +40,8 @@ namespace MantidQt
       void setBackgroundRadiusShown(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws, const bool shown);
       /// Remove the workspace and corresponding presenter.
       void remove(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);
+      /// Hide these peaks in the plot.
+      void hideInPlot(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS, const bool hide);
 
     private:
       /// Wrapped composite to delegate to.

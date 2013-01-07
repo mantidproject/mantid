@@ -414,6 +414,38 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(B));
   }
 
+  void do_test_setShown(bool expectedToShow)
+  {
+    // Prepare subject objects.
+    Mantid::API::IPeaksWorkspace_sptr peaksWS = boost::make_shared<Mantid::DataObjects::PeaksWorkspace>(); 
+    SetPeaksWorkspaces set;
+    set.insert(peaksWS);
+    MockPeaksPresenter* pSubject = new MockPeaksPresenter;
+    PeaksPresenter_sptr subject(pSubject);
+    EXPECT_CALL(*pSubject, setShown(expectedToShow)).Times(1);
+    EXPECT_CALL(*pSubject, presentedWorkspaces()).WillOnce(Return(set));
+
+    // Create the composite and add the test presenter.
+    CompositePeaksPresenter composite;
+    composite.addPeaksPresenter(subject);
+
+    // execute setshown(...)
+    composite.setShown(peaksWS, expectedToShow);
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(pSubject));
+  }
+
+  void test_setShown()
+  {
+    const bool SHOW = true;
+    const bool HIDE = false;
+    // Test that calling method on composite causes subject presenters to show.
+    do_test_setShown(SHOW); 
+    // Test that calling method on composite causes subject presenters to hide.
+    do_test_setShown(HIDE); 
+  }
+
+
 
 
 };

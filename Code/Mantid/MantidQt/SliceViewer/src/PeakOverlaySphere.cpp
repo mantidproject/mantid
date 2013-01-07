@@ -37,7 +37,6 @@ namespace SliceViewer
   {
   }
 
-  
   void PeakOverlaySphere::setSlicePoint(const double& z)
   {
     m_physicalPeak.setSlicePoint(z);

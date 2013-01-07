@@ -17,6 +17,7 @@ namespace MantidQt
       connect(ui.btnBackgroundColor, SIGNAL(clicked()), this, SLOT(onBackgroundColourClicked()));
       connect(ui.btnPeakColor, SIGNAL(clicked()), this, SLOT(onForegroundColourClicked()));
       connect(ui.btnRemove, SIGNAL(clicked()), this, SLOT(onRemoveWorkspaceClicked()));
+      connect(ui.btnHide, SIGNAL(toggled(bool)), this, SLOT(onToggleHideInPlot(bool)));
    
       populate();
     }
@@ -76,6 +77,11 @@ namespace MantidQt
     {
       emit removeWorkspace(this->m_ws);
       this->hide();
+    }
+
+    void PeaksWorkspaceWidget::onToggleHideInPlot(bool hidden)
+    {
+      emit hideInPlot(this->m_ws, hidden);
     }
 
   } // namespace
